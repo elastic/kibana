@@ -7,9 +7,8 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { RuleResponse } from '../../../../../../../common/api/detection_engine/model/rule_schema';
-import { addEcsToRequiredFields } from '../../../utils/utils';
 import type { PrebuiltRuleAsset } from '../../../../prebuilt_rules';
-import { RULE_DEFAULTS } from '../mergers/apply_rule_defaults';
+import { applyRuleDefaults } from '../mergers/apply_rule_defaults';
 
 export const convertPrebuiltRuleAssetToRuleResponse = (
   prebuiltRuleAsset: PrebuiltRuleAsset
@@ -30,10 +29,10 @@ export const convertPrebuiltRuleAssetToRuleResponse = (
     revision: 1,
   };
 
+  const ruleWithDefaults = applyRuleDefaults(prebuiltRuleAsset);
+
   return RuleResponse.parse({
-    ...RULE_DEFAULTS,
-    ...prebuiltRuleAsset,
-    required_fields: addEcsToRequiredFields(prebuiltRuleAsset.required_fields),
+    ...ruleWithDefaults,
     ...ruleResponseSpecificFields,
   });
 };

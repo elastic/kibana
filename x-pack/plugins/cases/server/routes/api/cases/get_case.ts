@@ -77,6 +77,9 @@ export const getCaseRoute = createCasesRoute({
 export const resolveCaseRoute = createCasesRoute({
   method: 'get',
   path: `${CASE_DETAILS_URL}/resolve`,
+  routerOptions: {
+    access: 'internal',
+  },
   params,
   handler: async ({ context, request, response }) => {
     try {

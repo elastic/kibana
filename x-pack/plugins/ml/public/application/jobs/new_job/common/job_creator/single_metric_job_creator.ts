@@ -15,8 +15,9 @@ import {
   ES_AGGREGATION,
 } from '@kbn/ml-anomaly-utils';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { parseInterval } from '@kbn/ml-parse-interval';
+
 import type { MlApi } from '../../../../services/ml_api_service';
-import { parseInterval } from '../../../../../../common/util/parse_interval';
 import { JobCreator } from './job_creator';
 import type {
   Job,

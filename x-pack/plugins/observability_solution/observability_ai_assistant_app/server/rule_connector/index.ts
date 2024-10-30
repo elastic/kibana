@@ -154,12 +154,13 @@ async function executor(
   }
 
   const resources = await initResources(request);
-  const client = await resources.service.getClient({ request });
+  const client = await resources.service.getClient({ request, scopes: ['observability'] });
   const functionClient = await resources.service.getFunctionClient({
     signal: new AbortController().signal,
     resources,
     client,
     screenContexts: [],
+    scopes: ['observability'],
   });
   const actionsClient = await (
     await resources.plugins.actions.start()

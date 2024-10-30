@@ -8,6 +8,7 @@
  */
 
 import expect from '@kbn/expect';
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -19,6 +20,7 @@ export default function ({ getService }: FtrProviderContext) {
         return await supertest
           .post('/api/console/proxy?method=GET&path=/.kibana/_settings')
           .set('kbn-xsrf', 'true')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .then((response) => {
             expect(response.header).to.have.property('warning');
             const { warning } = response.header as { warning: string };
@@ -28,12 +30,12 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('does not forward x-elastic-product-origin', async () => {
-        // If we pass the header and we still get the warning back, we assume that the header was not forwarded.
         return await supertest
           .post('/api/console/proxy?method=GET&path=/.kibana/_settings')
           .set('kbn-xsrf', 'true')
           .set('x-elastic-product-origin', 'kibana')
           .then((response) => {
+            expect(response.header).to.have.property('connection', 'close');
             expect(response.header).to.have.property('warning');
             const { warning } = response.header as { warning: string };
             expect(warning.startsWith('299')).to.be(true);

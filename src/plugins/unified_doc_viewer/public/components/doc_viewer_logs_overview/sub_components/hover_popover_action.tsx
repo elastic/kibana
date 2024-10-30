@@ -66,9 +66,9 @@ export const HoverActionPopover = ({
         panelStyle={{ minWidth: '24px' }}
         display={display}
       >
-        {title && (
+        {(title as string) && (
           <EuiPopoverTitle className="eui-textBreakWord" css={{ maxWidth: '200px' }}>
-            {title}
+            {title as string}
           </EuiPopoverTitle>
         )}
         <EuiFlexGroup wrap gutterSize="none" alignItems="center" justifyContent="spaceBetween">

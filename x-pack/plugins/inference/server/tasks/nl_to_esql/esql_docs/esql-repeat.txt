@@ -1,8 +1,22 @@
-## REPEAT
+# REPEAT
 
-The `REPEAT` function returns a string constructed by concatenating the input string with itself the specified number of times.
+The REPEAT function generates a string by repeating a specified string a certain number of times.
 
-### Examples
+## Syntax
+
+`REPEAT(string, number)`
+
+### Parameters
+
+#### string
+
+The string that you want to repeat.
+
+#### number
+
+The number of times you want to repeat the string.
+
+## Examples
 
 ```esql
 ROW a = "Hello!"

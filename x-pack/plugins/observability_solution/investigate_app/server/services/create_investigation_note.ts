@@ -20,11 +20,13 @@ export async function createInvestigationNote(
 ): Promise<CreateInvestigationNoteResponse> {
   const investigation = await repository.findById(investigationId);
 
+  const now = Date.now();
   const investigationNote = {
     id: v4(),
     content: params.content,
-    createdBy: user.username,
-    createdAt: Date.now(),
+    createdBy: user.profile_uid!,
+    updatedAt: now,
+    createdAt: now,
   };
   investigation.notes.push(investigationNote);
 

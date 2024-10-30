@@ -187,6 +187,7 @@ describe('Observability AI Assistant client', () => {
       user: {
         name: 'johndoe',
       },
+      scopes: ['all'],
     });
   }
 
@@ -850,6 +851,7 @@ describe('Observability AI Assistant client', () => {
               },
             },
           ],
+          useSimulatedFunctionCalling: false,
         });
       });
 

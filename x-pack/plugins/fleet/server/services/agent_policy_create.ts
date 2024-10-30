@@ -21,12 +21,11 @@ import {
 
 import type { AgentPolicy, NewAgentPolicy } from '../types';
 
-import { agentlessAgentService } from './agents/agentless_agent';
-
 import { agentPolicyService, packagePolicyService } from '.';
 import { incrementPackageName } from './package_policies';
 import { bulkInstallPackages } from './epm/packages';
 import { ensureDefaultEnrollmentAPIKeyForAgentPolicy } from './api_keys';
+import { agentlessAgentService } from './agents/agentless_agent';
 
 const FLEET_SERVER_POLICY_ID = 'fleet-server-policy';
 
@@ -84,7 +83,7 @@ async function createPackagePolicy(
     user: options.user,
     bumpRevision: false,
     authorizationHeader: options.authorizationHeader,
-    force: options.force || agentPolicy.supports_agentless === true,
+    force: options.force,
   });
 }
 

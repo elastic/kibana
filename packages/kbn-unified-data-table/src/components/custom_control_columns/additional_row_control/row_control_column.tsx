@@ -15,8 +15,7 @@ import {
   EuiScreenReaderOnly,
   EuiToolTip,
 } from '@elastic/eui';
-import { DataTableRowControl, Size } from '../../data_table_row_control';
-import type { RowControlColumn, RowControlProps } from '../../../types';
+import { RowControlColumn, RowControlProps } from '@kbn/discover-utils';
 import { DEFAULT_CONTROL_COLUMN_WIDTH } from '../../../constants';
 import { useControlColumn } from '../../../hooks/use_control_column';
 
@@ -26,33 +25,60 @@ export const RowControlCell = ({
 }: EuiDataGridCellValueElementProps & {
   renderControl: RowControlColumn['renderControl'];
 }) => {
-  const rowProps = useControlColumn(props);
+  const { record, rowIndex } = useControlColumn(props);
 
   const Control: React.FC<RowControlProps> = useMemo(
     () =>
-      ({ 'data-test-subj': dataTestSubj, color, disabled, label, iconType, onClick }) => {
-        return (
-          <DataTableRowControl size={Size.normal}>
-            <EuiToolTip content={label} delay="long">
-              <EuiButtonIcon
-                data-test-subj={dataTestSubj ?? `unifiedDataTable_rowControl_${props.columnId}`}
-                disabled={disabled}
-                iconSize="s"
-                iconType={iconType}
-                color={color ?? 'text'}
-                aria-label={label}
-                onClick={() => {
-                  onClick?.(rowProps);
-                }}
-              />
-            </EuiToolTip>
-          </DataTableRowControl>
+      ({
+        'data-test-subj': dataTestSubj,
+        color,
+        disabled,
+        iconType,
+        label,
+        onClick,
+        tooltipContent,
+        ...extraProps
+      }) => {
+        const classNameProp = Boolean(tooltipContent)
+          ? {}
+          : { className: 'unifiedDataTable__rowControl' };
+
+        const control = (
+          <EuiButtonIcon
+            aria-label={label}
+            color={color ?? 'text'}
+            data-test-subj={dataTestSubj ?? `unifiedDataTable_rowControl_${props.columnId}`}
+            disabled={disabled}
+            iconSize="s"
+            iconType={iconType}
+            onClick={() => {
+              if (record && onClick) {
+                onClick({ record, rowIndex });
+              }
+            }}
+            {...classNameProp}
+            {...extraProps}
+          />
         );
+
+        if (tooltipContent) {
+          return (
+            <EuiToolTip
+              anchorClassName="unifiedDataTable__rowControl"
+              content={tooltipContent}
+              delay="long"
+            >
+              {control}
+            </EuiToolTip>
+          );
+        }
+
+        return control;
       },
-    [props.columnId, rowProps]
+    [props.columnId, record, rowIndex]
   );
 
-  return renderControl(Control, rowProps);
+  return record ? renderControl(Control, { record, rowIndex }) : null;
 };
 
 export const getRowControlColumn = (

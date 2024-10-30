@@ -8,7 +8,7 @@
  */
 
 import type { EuiDataGridControlColumn } from '@elastic/eui';
-import type { RowControlColumn } from '../../../types';
+import { RowControlColumn } from '@kbn/discover-utils';
 import { getRowControlColumn } from './row_control_column';
 import { getRowMenuControlColumn } from './row_menu_control_column';
 

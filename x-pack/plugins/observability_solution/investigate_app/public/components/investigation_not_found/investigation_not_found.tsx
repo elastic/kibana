@@ -16,16 +16,16 @@ export function InvestigationNotFound() {
       color="danger"
       title={
         <h2>
-          {i18n.translate('xpack.investigateApp.investigationEditForm.h2.unableToLoadTheLabel', {
-            defaultMessage: 'Unable to load the investigation form',
+          {i18n.translate('xpack.investigateApp.InvestigationNotFound.title', {
+            defaultMessage: 'Unable to load the investigation',
           })}
         </h2>
       }
       body={
         <p>
-          {i18n.translate('xpack.investigateApp.investigationEditForm.p.thereWasAnErrorLabel', {
+          {i18n.translate('xpack.investigateApp.InvestigationNotFound.body', {
             defaultMessage:
-              'There was an error loading the Investigation. Contact your administrator for help.',
+              'There was an error loading the investigation. Contact your administrator for help.',
           })}
         </p>
       }

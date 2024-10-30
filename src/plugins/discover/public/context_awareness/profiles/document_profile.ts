@@ -13,20 +13,44 @@ import { ProfileProvider, ProfileService } from '../profile_service';
 import type { RootContext } from './root_profile';
 import type { DataSourceContext } from './data_source_profile';
 
+/**
+ * Indicates the current document type (e.g. log, alert, etc.)
+ */
 export enum DocumentType {
   Log = 'log',
   Default = 'default',
 }
 
+/**
+ * The document profile interface
+ */
 export type DocumentProfile = Pick<Profile, 'getDocViewer'>;
 
+/**
+ * Parameters for the document profile provider `resolve` method
+ */
 export interface DocumentProfileProviderParams {
+  /**
+   * The current root context
+   */
   rootContext: RootContext;
+  /**
+   * The current data source context
+   */
   dataSourceContext: DataSourceContext;
+  /**
+   * The current data table record
+   */
   record: DataTableRecord;
 }
 
+/**
+ * The resulting context object returned by the document profile provider `resolve` method
+ */
 export interface DocumentContext {
+  /**
+   * The current document type
+   */
   type: DocumentType;
 }
 

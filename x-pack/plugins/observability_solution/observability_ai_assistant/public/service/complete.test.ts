@@ -102,6 +102,7 @@ describe('complete', () => {
         disableFunctions: false,
         signal: new AbortController().signal,
         ...params,
+        scopes: ['all'],
       },
       requestCallback
     );

@@ -50,6 +50,7 @@ export type UnifiedFieldListSidebarCustomizableProps = Pick<
   | 'onAddFilter'
   | 'onAddFieldToWorkspace'
   | 'onRemoveFieldFromWorkspace'
+  | 'additionalFilters'
 > & {
   /**
    * All fields: fields from data view and unmapped fields or columns from text-based search
@@ -168,6 +169,7 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
   onDeleteField,
   onToggleSidebar,
   additionalFieldGroups,
+  additionalFilters,
 }) => {
   const { dataViews, core } = services;
   const useNewFieldsApi = useMemo(
@@ -205,7 +207,7 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
   );
   const onSupportedFieldFilter: GroupedFieldsParams<DataViewField>['onSupportedFieldFilter'] =
     useCallback(
-      (field) => {
+      (field: DataViewField) => {
         return shouldShowField(
           field,
           searchMode,
@@ -285,6 +287,7 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
             groupName === FieldsGroupNames.SelectedFields ||
             Boolean(selectedFieldsState.selectedFieldsMap[field.name])
           }
+          additionalFilters={additionalFilters}
         />
       </li>
     ),
@@ -304,6 +307,7 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
       onDeleteField,
       workspaceSelectedFieldNames,
       selectedFieldsState.selectedFieldsMap,
+      additionalFilters,
     ]
   );
 

@@ -42,8 +42,8 @@ export const SchedulePanel: FC<PropsWithChildren<SchedulePanelProps>> = ({
     <>
       <EuiSplitPanel.Outer>
         <EuiSplitPanel.Inner color="subdued">
-          <EuiTitle>
-            <h2>{title}</h2>
+          <EuiTitle size="s">
+            <h4>{title}</h4>
           </EuiTitle>
         </EuiSplitPanel.Inner>
         <EuiSplitPanel.Inner>
@@ -66,6 +66,7 @@ interface ConnectorContentSchedulingProps {
   hasPlatinumLicense: boolean;
   hasChanges: boolean;
   hasIngestionError: boolean;
+  isDisabled?: boolean;
   setHasChanges: (changes: boolean) => void;
   shouldShowAccessControlSync: boolean;
   shouldShowIncrementalSync: boolean;
@@ -81,6 +82,7 @@ export const ConnectorSchedulingComponent: React.FC<ConnectorContentSchedulingPr
   hasChanges,
   hasIngestionError,
   hasPlatinumLicense,
+  isDisabled,
   setHasChanges,
   shouldShowAccessControlSync,
   shouldShowIncrementalSync,
@@ -115,7 +117,6 @@ export const ConnectorSchedulingComponent: React.FC<ConnectorContentSchedulingPr
   }
   return (
     <>
-      <EuiSpacer size="l" />
       {hasIngestionError ? <ConnectorError /> : <></>}
       {children}
       <EuiFlexGroup>
@@ -141,6 +142,7 @@ export const ConnectorSchedulingComponent: React.FC<ConnectorContentSchedulingPr
                   updateConnectorStatus={updateConnectorStatus}
                   updateScheduling={updateScheduling}
                   dataTelemetryIdPrefix={dataTelemetryIdPrefix}
+                  isDisabled={isDisabled}
                 />
               </EuiFlexItem>
               {shouldShowIncrementalSync && (
@@ -154,6 +156,7 @@ export const ConnectorSchedulingComponent: React.FC<ConnectorContentSchedulingPr
                     updateConnectorStatus={updateConnectorStatus}
                     updateScheduling={updateScheduling}
                     dataTelemetryIdPrefix={dataTelemetryIdPrefix}
+                    isDisabled={isDisabled}
                   />
                 </EuiFlexItem>
               )}
@@ -187,6 +190,7 @@ export const ConnectorSchedulingComponent: React.FC<ConnectorContentSchedulingPr
                     updateConnectorStatus={updateConnectorStatus}
                     updateScheduling={updateScheduling}
                     dataTelemetryIdPrefix={dataTelemetryIdPrefix}
+                    isDisabled={isDisabled}
                   />
                 </SchedulePanel>
               </EuiFlexItem>

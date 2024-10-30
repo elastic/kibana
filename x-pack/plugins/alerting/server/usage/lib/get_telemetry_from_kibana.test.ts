@@ -6,11 +6,97 @@
  */
 
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { getTotalCountAggregations, getTotalCountInUse } from './get_telemetry_from_kibana';
+import {
+  getTotalCountAggregations,
+  getTotalCountInUse,
+  getMWTelemetry,
+} from './get_telemetry_from_kibana';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '../../../common';
+import { ISavedObjectsRepository } from '@kbn/core/server';
 
 const elasticsearch = elasticsearchServiceMock.createStart();
 const esClient = elasticsearch.client.asInternalUser;
 const logger: ReturnType<typeof loggingSystemMock.createLogger> = loggingSystemMock.createLogger();
+const savedObjectsClient = savedObjectsClientMock.create() as unknown as ISavedObjectsRepository;
+const thrownError = new Error('Fail');
+
+const mockedResponse = {
+  saved_objects: [
+    {
+      id: '1',
+      type: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
+      attributes: {
+        title: 'test_rule_1',
+        enabled: true,
+        duration: 1800000,
+        expirationDate: '2025-09-09T13:13:07.824Z',
+        events: [],
+        rRule: {
+          dtstart: '2024-09-09T13:13:02.054Z',
+          tzid: 'Europe/Stockholm',
+          freq: 0,
+          count: 1,
+        },
+        createdBy: null,
+        updatedBy: null,
+        createdAt: '2024-09-09T13:13:07.825Z',
+        updatedAt: '2024-09-09T13:13:07.825Z',
+        scopedQuery: null,
+      },
+    },
+    {
+      id: '2',
+      type: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
+      attributes: {
+        title: 'test_rule_2',
+        enabled: true,
+        duration: 1800000,
+        expirationDate: '2025-09-09T13:13:07.824Z',
+        events: [],
+        rRule: {
+          dtstart: '2024-09-09T13:13:02.054Z',
+          tzid: 'Europe/Stockholm',
+          freq: 3,
+          interval: 1,
+          byweekday: ['SU'],
+        },
+        createdBy: null,
+        updatedBy: null,
+        createdAt: '2024-09-09T13:13:07.825Z',
+        updatedAt: '2024-09-09T13:13:07.825Z',
+        scopedQuery: {
+          filters: [],
+          kql: 'kibana.alert.job_errors_results.job_id : * ',
+          dsl: '{"bool":{"must":[],"filter":[{"bool":{"should":[{"exists":{"field":"kibana.alert.job_errors_results.job_id"}}],"minimum_should_match":1}}],"should":[],"must_not":[]}}',
+        },
+      },
+    },
+    {
+      id: '3',
+      type: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
+      attributes: {
+        title: 'test_rule_3',
+        enabled: true,
+        duration: 1800000,
+        expirationDate: '2025-09-09T13:13:07.824Z',
+        events: [],
+        rRule: {
+          dtstart: '2024-09-09T13:13:02.054Z',
+          tzid: 'Europe/Stockholm',
+          freq: 3,
+          interval: 1,
+          byweekday: ['TU'],
+        },
+        createdBy: null,
+        updatedBy: null,
+        createdAt: '2024-09-09T13:13:07.825Z',
+        updatedAt: '2024-09-09T13:13:07.825Z',
+        scopedQuery: null,
+      },
+    },
+  ],
+};
 
 describe('kibana index telemetry', () => {
   beforeEach(() => {
@@ -418,6 +504,96 @@ describe('kibana index telemetry', () => {
         errorMessage: 'oh no',
         hasErrors: true,
       });
+    });
+  });
+
+  describe('getMWTelemetry', () => {
+    test('should return MW telemetry', async () => {
+      savedObjectsClient.createPointInTimeFinder = jest.fn().mockReturnValue({
+        close: jest.fn(),
+        find: jest.fn().mockImplementation(async function* () {
+          yield mockedResponse;
+        }),
+      });
+      const telemetry = await getMWTelemetry({
+        savedObjectsClient,
+        logger,
+      });
+
+      expect(savedObjectsClient.createPointInTimeFinder).toHaveBeenCalledWith({
+        type: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
+        namespaces: ['*'],
+        perPage: 100,
+        fields: ['rRule', 'scopedQuery'],
+      });
+      expect(telemetry).toStrictEqual({
+        count_mw_total: 3,
+        count_mw_with_repeat_toggle_on: 2,
+        count_mw_with_filter_alert_toggle_on: 1,
+        hasErrors: false,
+      });
+    });
+  });
+
+  test('should throw the error', async () => {
+    savedObjectsClient.createPointInTimeFinder = jest.fn().mockReturnValue({
+      close: jest.fn(),
+      find: jest.fn().mockImplementation(async function* () {
+        throw thrownError;
+      }),
+    });
+
+    const telemetry = await getMWTelemetry({
+      savedObjectsClient,
+      logger,
+    });
+
+    expect(savedObjectsClient.createPointInTimeFinder).toHaveBeenCalledWith({
+      type: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
+      namespaces: ['*'],
+      perPage: 100,
+      fields: ['rRule', 'scopedQuery'],
+    });
+
+    expect(telemetry).toStrictEqual({
+      count_mw_total: 0,
+      count_mw_with_repeat_toggle_on: 0,
+      count_mw_with_filter_alert_toggle_on: 0,
+      hasErrors: true,
+      errorMessage: 'Fail',
+    });
+    expect(logger.warn).toHaveBeenCalled();
+    const loggerCall = logger.warn.mock.calls[0][0];
+    const loggerMeta = logger.warn.mock.calls[0][1];
+    expect(loggerCall).toBe('Error executing alerting telemetry task: getTotalMWCount - {}');
+    expect(loggerMeta?.tags).toEqual(['alerting', 'telemetry-failed']);
+    expect(loggerMeta?.error?.stack_trace).toBeDefined();
+  });
+
+  test('should stop on MW max limit count', async () => {
+    savedObjectsClient.createPointInTimeFinder = jest.fn().mockReturnValue({
+      close: jest.fn(),
+      find: jest.fn().mockImplementation(async function* () {
+        yield mockedResponse;
+      }),
+    });
+    const telemetry = await getMWTelemetry({
+      savedObjectsClient,
+      logger,
+      maxDocuments: 1,
+    });
+
+    expect(savedObjectsClient.createPointInTimeFinder).toHaveBeenCalledWith({
+      type: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
+      namespaces: ['*'],
+      perPage: 100,
+      fields: ['rRule', 'scopedQuery'],
+    });
+    expect(telemetry).toStrictEqual({
+      count_mw_total: 2,
+      count_mw_with_repeat_toggle_on: 1,
+      count_mw_with_filter_alert_toggle_on: 1,
+      hasErrors: false,
     });
   });
 });

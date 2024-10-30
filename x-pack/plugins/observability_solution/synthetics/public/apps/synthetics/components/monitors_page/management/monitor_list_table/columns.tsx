@@ -11,6 +11,7 @@ import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { FETCH_STATUS, TagsList } from '@kbn/observability-shared-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibanaSpace } from '../../../../../../hooks/use_kibana_space';
 import { useEnablement } from '../../../../hooks';
 import { useCanEditSynthetics } from '../../../../../../hooks/use_capabilities';
 import {
@@ -52,6 +53,7 @@ export function useMonitorListColumns({
   const canEditSynthetics = useCanEditSynthetics();
 
   const { isServiceAllowed } = useEnablement();
+  const { space } = useKibanaSpace();
 
   const { alertStatus, updateAlertEnabledState } = useMonitorAlertEnable();
 
@@ -204,6 +206,11 @@ export function useMonitorListColumns({
             isPublicLocationsAllowed(fields) &&
             isServiceAllowed,
           href: (fields) => {
+            if ('spaceId' in fields && space?.id !== fields.spaceId) {
+              return http?.basePath.prepend(
+                `edit-monitor/${fields[ConfigKey.CONFIG_ID]}?spaceId=${fields.spaceId}`
+              )!;
+            }
             return http?.basePath.prepend(`edit-monitor/${fields[ConfigKey.CONFIG_ID]}`)!;
           },
         },

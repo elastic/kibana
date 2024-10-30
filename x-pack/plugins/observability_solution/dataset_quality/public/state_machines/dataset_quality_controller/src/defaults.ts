@@ -55,6 +55,5 @@ export const DEFAULT_CONTEXT: DefaultDatasetQualityControllerState = {
     types: [DEFAULT_DATASET_TYPE],
   },
   datasets: [],
-  isSizeStatsAvailable: true,
   nonAggregatableDatasets: [],
 };

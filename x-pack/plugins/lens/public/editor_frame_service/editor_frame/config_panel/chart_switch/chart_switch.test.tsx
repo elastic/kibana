@@ -264,8 +264,8 @@ describe('chart_switch', () => {
       fireEvent.click(getMenuItem(subType));
     };
 
-    const waitForChartSwitchClosed = () => {
-      waitFor(() => {
+    const waitForChartSwitchClosed = async () => {
+      await waitFor(() => {
         expect(screen.queryByTestId('lnsChartSwitchList')).not.toBeInTheDocument();
       });
     };
@@ -448,14 +448,13 @@ describe('chart_switch', () => {
     await openChartSwitch();
     switchToVis('testVis2');
 
-    // expect(datasourceMap.testDatasource.publicAPIMock.getTableSpec).toHaveBeenCalled();
     expect(visualizationMap.testVis2.getSuggestions).toHaveBeenCalled();
     expect(visualizationMap.testVis2.initialize).toHaveBeenCalledWith(
       expect.any(Function), // generated layerId
       undefined,
       undefined
     );
-    waitForChartSwitchClosed();
+    await waitForChartSwitchClosed();
   });
 
   it('should use initial state if there is no suggestion from the target visualization', async () => {

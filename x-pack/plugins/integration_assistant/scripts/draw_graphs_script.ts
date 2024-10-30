@@ -19,6 +19,7 @@ import { getCategorizationGraph } from '../server/graphs/categorization/graph';
 import { getEcsGraph, getEcsSubGraph } from '../server/graphs/ecs/graph';
 import { getLogFormatDetectionGraph } from '../server/graphs/log_type_detection/graph';
 import { getRelatedGraph } from '../server/graphs/related/graph';
+import { getKVGraph } from '../server/graphs/kv/graph';
 
 // Some mock elements just to get the graph to compile
 const model = new FakeLLM({
@@ -50,9 +51,11 @@ export async function drawGraphs() {
   const categorizationGraph = (await getCategorizationGraph({ client, model })).getGraph();
   const ecsSubGraph = (await getEcsSubGraph({ model })).getGraph();
   const ecsGraph = (await getEcsGraph({ model })).getGraph();
+  const kvGraph = (await getKVGraph({ client, model })).getGraph();
   drawGraph(relatedGraph, 'related_graph');
   drawGraph(logFormatDetectionGraph, 'log_detection_graph');
   drawGraph(categorizationGraph, 'categorization_graph');
   drawGraph(ecsSubGraph, 'ecs_subgraph');
   drawGraph(ecsGraph, 'ecs_graph');
+  drawGraph(kvGraph, 'kv_graph');
 }

@@ -14,11 +14,11 @@ import type {
   AstNodeToVisitorName,
   EnsureFunction,
   ESQLAstExpressionNode,
-  ESQLAstQueryNode,
   UndefinedToVoid,
   VisitorMethods,
 } from './types';
-import { ESQLCommand } from '../types';
+import type { ESQLAstQueryExpression, ESQLCommand, ESQLProperNode } from '../types';
+import { Builder } from '../builder';
 
 export interface VisitorOptions<
   Methods extends VisitorMethods = VisitorMethods,
@@ -32,6 +32,149 @@ export class Visitor<
   Methods extends VisitorMethods = VisitorMethods,
   Data extends SharedData = SharedData
 > {
+  /**
+   * Finds the most specific node immediately after the given position. If the
+   * position is inside a node, it will return the node itself. If no node is
+   * found, it returns `null`.
+   *
+   * @param ast ES|QL AST
+   * @param pos Offset position in the source text
+   * @returns The node at or after the given position
+   */
+  public static readonly findNodeAtOrAfter = (
+    ast: ESQLAstQueryExpression,
+    pos: number
+  ): ESQLProperNode | null => {
+    return new Visitor()
+      .on('visitExpression', (ctx): ESQLProperNode | null => {
+        const node = ctx.node;
+        const location = node.location;
+        if (!location) return null;
+        const isBefore = location.min > pos;
+        let isFirstChild = true;
+        for (const child of ctx.arguments()) {
+          const { location: childLocation } = child;
+          if (!childLocation) continue;
+          if (isFirstChild) {
+            isFirstChild = false;
+            if (isBefore) {
+              const isChildAtOffset =
+                ctx.node.location && ctx.node.location.min < childLocation.min;
+              if (isChildAtOffset) return node;
+              return ctx.visitExpression(child, undefined) || child;
+            }
+          }
+          const isInsideChild = childLocation.min <= pos && childLocation.max >= pos;
+          if (isInsideChild) return ctx.visitExpression(child, undefined);
+          const isBeforeChild = childLocation.min > pos;
+          if (isBeforeChild) {
+            return ctx.visitExpression(child, undefined) || child;
+          }
+        }
+        return null;
+      })
+      .on('visitCommand', (ctx): ESQLProperNode | null => {
+        for (const child of ctx.arguments()) {
+          const { location: childLocation } = child;
+          if (!childLocation) continue;
+          const isInsideChild = childLocation.min <= pos && childLocation.max >= pos;
+          if (isInsideChild) return ctx.visitExpression(child);
+          const isBeforeChild = childLocation.min > pos;
+          if (isBeforeChild) {
+            return ctx.visitExpression(child) || child;
+          }
+        }
+        return null;
+      })
+      .on('visitQuery', (ctx): ESQLProperNode | null => {
+        for (const node of ctx.commands()) {
+          const { location } = node;
+          if (!location) continue;
+          const isInside = location.min <= pos && location.max >= pos;
+          if (isInside) return ctx.visitCommand(node);
+          const isBefore = location.min > pos;
+          if (isBefore) return node;
+        }
+        return null;
+      })
+      .visitQuery(ast);
+  };
+
+  /**
+   * Finds the most specific node immediately before the given position. If the
+   * position is inside a node, it will return the node itself. If no node is
+   * found, it returns `null`.
+   *
+   * @param ast ES|QL AST
+   * @param pos Offset position in the source text
+   * @returns The node at or before the given position
+   */
+  public static readonly findNodeAtOrBefore = (
+    ast: ESQLAstQueryExpression,
+    pos: number
+  ): ESQLProperNode | null => {
+    return new Visitor()
+      .on('visitExpression', (ctx): ESQLProperNode | null => {
+        const nodeLocation = ctx.node.location;
+        const nodes = [...ctx.arguments()];
+
+        if (nodeLocation && nodeLocation.max < pos) {
+          const last = nodes[nodes.length - 1];
+          if (last && last.location && last.location.max === nodeLocation.max) {
+            return ctx.visitExpression(last, undefined) || last;
+          } else {
+            return ctx.node;
+          }
+        }
+
+        for (let i = nodes.length - 1; i >= 0; i--) {
+          const node = nodes[i];
+          const { location } = node;
+          if (!location) continue;
+          const isInside = location.min <= pos && location.max >= pos;
+          if (isInside) return ctx.visitExpression(node, undefined);
+          const isAfter = location.max < pos;
+          if (isAfter) {
+            return ctx.visitExpression(node, undefined) || node;
+          }
+        }
+
+        return null;
+      })
+      .on('visitCommand', (ctx): ESQLProperNode | null => {
+        const nodes = [...ctx.arguments()];
+        for (let i = nodes.length - 1; i >= 0; i--) {
+          const node = nodes[i];
+          const { location } = node;
+          if (!location) continue;
+          const isInside = location.min <= pos && location.max >= pos;
+          if (isInside) return ctx.visitExpression(node);
+          const isAfter = location.max < pos;
+          if (isAfter) {
+            if (ctx.node.location && ctx.node.location.max === location.max) {
+              return ctx.visitExpression(node) || node;
+            }
+            return node;
+          }
+        }
+        return null;
+      })
+      .on('visitQuery', (ctx): ESQLProperNode | null => {
+        const nodes = [...ctx.commands()];
+        for (let i = nodes.length - 1; i >= 0; i--) {
+          const node = nodes[i];
+          const { location } = node;
+          if (!location) continue;
+          const isInside = location.min <= pos && location.max >= pos;
+          if (isInside) return ctx.visitCommand(node);
+          const isAfter = location.max < pos;
+          if (isAfter) return ctx.visitCommand(node) || node;
+        }
+        return null;
+      })
+      .visitQuery(ast);
+  };
+
   public readonly ctx: GlobalVisitorContext<Methods, Data>;
 
   constructor(protected readonly options: VisitorOptions<Methods, Data> = {}) {
@@ -69,17 +212,21 @@ export class Visitor<
   ): ReturnType<EnsureFunction<Methods[AstNodeToVisitorName<Ctx['node']>]>> {
     const node = ctx.node;
     if (node instanceof Array) {
-      this.ctx.assertMethodExists('visitQuery');
-      return this.ctx.methods.visitQuery!(ctx as any, input) as ReturnType<
-        NonNullable<Methods['visitQuery']>
-      >;
+      throw new Error(`Unsupported node type: ${typeof node}`);
     } else if (node && typeof node === 'object') {
       switch (node.type) {
-        case 'command':
+        case 'query': {
+          this.ctx.assertMethodExists('visitQuery');
+          return this.ctx.methods.visitQuery!(ctx as any, input) as ReturnType<
+            NonNullable<Methods['visitQuery']>
+          >;
+        }
+        case 'command': {
           this.ctx.assertMethodExists('visitCommand');
           return this.ctx.methods.visitCommand!(ctx as any, input) as ReturnType<
             NonNullable<Methods['visitCommand']>
           >;
+        }
       }
     }
     throw new Error(`Unsupported node type: ${typeof node}`);
@@ -93,10 +240,14 @@ export class Visitor<
    * @returns The result of the query visitor.
    */
   public visitQuery(
-    node: ESQLAstQueryNode,
+    nodeOrCommands: ESQLAstQueryExpression | ESQLAstQueryExpression['commands'],
     input: UndefinedToVoid<Parameters<NonNullable<Methods['visitQuery']>>[1]>
   ) {
+    const node = Array.isArray(nodeOrCommands)
+      ? Builder.expression.query(nodeOrCommands)
+      : nodeOrCommands;
     const queryContext = new QueryVisitorContext(this.ctx, node, null);
+
     return this.visit(queryContext, input);
   }
 

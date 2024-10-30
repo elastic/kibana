@@ -7,8 +7,9 @@
 import { i18n } from '@kbn/i18n';
 import { noop } from 'lodash';
 import React from 'react';
-import { Observable, of } from 'rxjs';
-import { ChatCompletionChunkEvent, MessageRole } from '.';
+import { BehaviorSubject, Observable, of } from 'rxjs';
+import { AssistantScope } from '@kbn/ai-assistant-common';
+import { ChatCompletionChunkEvent, FunctionDefinition, MessageRole } from '.';
 import type { StreamingChatResponseEventWithoutError } from '../common/conversation_complete';
 import type { ObservabilityAIAssistantAPIClient } from './api';
 import type { ObservabilityAIAssistantChatService, ObservabilityAIAssistantService } from './types';
@@ -36,6 +37,10 @@ export const createStorybookChatService = (): ObservabilityAIAssistantChatServic
       content: 'System',
     },
   }),
+  functions$: new BehaviorSubject<FunctionDefinition[]>(
+    []
+  ) as ObservabilityAIAssistantChatService['functions$'],
+  getScopes: () => ['all'],
 });
 
 export const createStorybookService = (): ObservabilityAIAssistantService => ({
@@ -52,4 +57,9 @@ export const createStorybookService = (): ObservabilityAIAssistantService => ({
     predefinedConversation$: new Observable(),
   },
   navigate: async () => of(),
+  scope$: new BehaviorSubject<AssistantScope[]>([
+    'all',
+  ]) as ObservabilityAIAssistantService['scope$'],
+  getScopes: () => ['all'],
+  setScopes: () => {},
 });

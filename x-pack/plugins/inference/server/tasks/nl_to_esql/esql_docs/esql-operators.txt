@@ -1,204 +1,224 @@
 # ES|QL Operators
 
+This document provides an overview of the operators supported by ES|QL.
+
 ## Binary Operators
 
-### Equality (`==`)
-Check if two fields are equal. If either field is multivalued, the result is null. This is pushed to the underlying search index if one side of the comparison is constant and the other side is a field in the index that has both an index and doc_values.
+### Equality `==`
 
-#### Example:
+The equality operator checks if the values of two operands are equal or not.
+
+Example:
+
 ```esql
 FROM employees
-| WHERE first_name == "John"
-| KEEP first_name, last_name
+| WHERE emp_no == 10001
 ```
 
-### Inequality (`!=`)
-Check if two fields are unequal. If either field is multivalued, the result is null. This is pushed to the underlying search index if one side of the comparison is constant and the other side is a field in the index that has both an index and doc_values.
+### Inequality `!=`
 
-#### Example:
+The inequality operator checks if the values of two operands are equal or not.
+
+Example:
+
 ```esql
 FROM employees
-| WHERE first_name != "John"
-| KEEP first_name, last_name
+| WHERE emp_no != 10001
 ```
 
-### Less than (`<`)
-Check if one field is less than another. If either field is multivalued, the result is null. This is pushed to the underlying search index if one side of the comparison is constant and the other side is a field in the index that has both an index and doc_values.
+### Less Than `<`
 
-#### Example:
+The less than operator checks if the value of the left operand is less than the value of the right operand.
+
+Example:
+
 ```esql
 FROM employees
-| WHERE age < 30
-| KEEP first_name, last_name, age
+| WHERE salary < 50000
 ```
 
-### Less than or equal to (`<=`)
-Check if one field is less than or equal to another. If either field is multivalued, the result is null. This is pushed to the underlying search index if one side of the comparison is constant and the other side is a field in the index that has both an index and doc_values.
+### Less Than or Equal To `<=`
 
-#### Example:
+This operator checks if the value of the left operand is less than or equal to the value of the right operand.
+
+Example:
+
 ```esql
 FROM employees
-| WHERE age <= 30
-| KEEP first_name, last_name, age
+| WHERE salary <= 50000
 ```
 
-### Greater than (`>`)
-Check if one field is greater than another. If either field is multivalued, the result is null. This is pushed to the underlying search index if one side of the comparison is constant and the other side is a field in the index that has both an index and doc_values.
+### Greater Than `>`
 
-#### Example:
+The greater than operator checks if the value of the left operand is greater than the value of the right operand.
+
+Example:
+
 ```esql
 FROM employees
-| WHERE age > 30
-| KEEP first_name, last_name, age
+| WHERE salary > 50000
 ```
 
-### Greater than or equal to (`>=`)
-Check if one field is greater than or equal to another. If either field is multivalued, the result is null. This is pushed to the underlying search index if one side of the comparison is constant and the other side is a field in the index that has both an index and doc_values.
+### Greater Than or Equal To `>=`
 
-#### Example:
+This operator checks if the value of the left operand is greater than or equal to the value of the right operand.
+
+Example:
+
 ```esql
 FROM employees
-| WHERE age >= 30
-| KEEP first_name, last_name, age
+| WHERE salary >= 50000
 ```
 
-### Add (`+`)
-Add two numbers together. If either field is multivalued, the result is null.
+### Add `+`
 
-#### Example:
+The add operator adds the values of the operands.
+
+Example:
+
 ```esql
 FROM employees
-| EVAL total_salary = base_salary + bonus
-| KEEP first_name, last_name, total_salary
+| EVAL total_compensation = salary + bonus
 ```
 
-### Subtract (`-`)
-Subtract one number from another. If either field is multivalued, the result is null.
+### Subtract `-`
 
-#### Example:
+The subtract operator subtracts the right-hand operand from the left-hand operand.
+
+Example:
+
 ```esql
 FROM employees
-| EVAL net_salary = gross_salary - tax
-| KEEP first_name, last_name, net_salary
+| EVAL remaining_salary = salary - tax
 ```
 
-### Multiply (`*`)
-Multiply two numbers together. If either field is multivalued, the result is null.
+### Multiply `*`
 
-#### Example:
+The multiply operator multiplies the values of the operands.
+
+Example:
+
 ```esql
 FROM employees
-| EVAL annual_salary = monthly_salary * 12
-| KEEP first_name, last_name, annual_salary
+| EVAL yearly_salary = salary * 12
 ```
 
-### Divide (`/`)
-Divide one number by another. If either field is multivalued, the result is null. Division of two integer types will yield an integer result, rounding towards 0. If you need floating point division, cast one of the arguments to a `DOUBLE`.
+### Divide `/`
 
-#### Example:
+The divide operator divides the left-hand operand by the right-hand operand.
+
+Example:
+
 ```esql
 FROM employees
-| EVAL average_salary = total_salary / months_worked
-| KEEP first_name, last_name, average_salary
+| EVAL monthly_salary = salary / 12
 ```
 
-### Modulus (`%`)
-Divide one number by another and return the remainder. If either field is multivalued, the result is null.
+### Modulus `%`
 
-#### Example:
+The modulus operator returns the remainder of the division of the left operand by the right operand.
+
+Example:
+
 ```esql
 FROM employees
-| EVAL remainder = total_days % 7
-| KEEP first_name, last_name, remainder
+| EVAL remainder = salary % 12
 ```
 
 ## Unary Operators
 
 ### Negation (`-`)
-The only unary operator is negation.
 
-#### Example:
+Example:
+
 ```esql
 FROM employees
 | EVAL negative_salary = -salary
-| KEEP first_name, last_name, negative_salary
 ```
 
 ## Logical Operators
 
 ### AND
+
 Logical AND operator.
 
-#### Example:
+Example:
+
 ```esql
 FROM employees
-| WHERE age > 30 AND department == "Engineering"
-| KEEP first_name, last_name, age, department
+| WHERE salary > 50000 AND bonus > 10000
 ```
 
 ### OR
+
 Logical OR operator.
 
-#### Example:
+Example:
+
 ```esql
 FROM employees
-| WHERE age > 30 OR department == "Engineering"
-| KEEP first_name, last_name, age, department
+| WHERE salary > 50000 OR bonus > 10000
 ```
 
 ### NOT
+
 Logical NOT operator.
 
-#### Example:
+Example:
+
 ```esql
 FROM employees
-| WHERE NOT (age > 30)
-| KEEP first_name, last_name, age
+| WHERE NOT (salary > 50000)
 ```
 
 ## Other Operators
 
 ### IS NULL and IS NOT NULL
-For NULL comparison, use the `IS NULL` and `IS NOT NULL` predicates.
 
-#### Example:
-```esql
-FROM employees
-| WHERE birth_date IS NULL
-| KEEP first_name, last_name
-| SORT first_name
-| LIMIT 3
-```
+The `IS NULL` operator returns true if the value is null.
+
+Example:
 
 ```esql
 FROM employees
-| WHERE is_rehired IS NOT NULL
-| STATS COUNT(emp_no)
+| WHERE manager IS NULL
 ```
 
-### Cast (`::`)
-The `::` operator provides a convenient alternative syntax to the `TO_<type>` conversion functions.
+The `IS NOT NULL` operator returns true if the value is not null.
 
-#### Example:
+Example:
+
 ```esql
-ROW ver = CONCAT(("0"::INT + 1)::STRING, ".2.3")::VERSION
+FROM employees
+| WHERE manager IS NOT NULL
 ```
 
 ### IN
-The `IN` operator allows testing whether a field or expression equals an element in a list of literals, fields, or expressions.
 
-#### Example:
+The `IN` operator checks if a value is within a set of values (literals, fields or expressions).
+
+Example:
+
+```esql
+FROM employees
+| WHERE department IN ("Sales", "Marketing", "HR")
+```
+
 ```esql
 ROW a = 1, b = 4, c = 3
 | WHERE c-a IN (3, b / 2, a)
 ```
 
 ### LIKE
-Use `LIKE` to filter data based on string patterns using wildcards. The following wildcard characters are supported:
+
+Use `LIKE` to filter data based on string patterns using wildcards.
+
+The following wildcard characters are supported:
 - `*` matches zero or more characters.
 - `?` matches one character.
 
-#### Example:
+Example:
+
 ```esql
 FROM employees
 | WHERE first_name LIKE "?b*"
@@ -206,11 +226,24 @@ FROM employees
 ```
 
 ### RLIKE
+
 Use `RLIKE` to filter data based on string patterns using regular expressions.
 
-#### Example:
+Example:
+
 ```esql
 FROM employees
 | WHERE first_name RLIKE ".leja.*"
 | KEEP first_name, last_name
+```
+
+### Cast `::`
+
+The `::` operator provides a convenient alternative syntax to the `TO_<type>` conversion functions.
+
+Example:
+
+```esql
+FROM employees
+| EVAL salary = salary::double
 ```

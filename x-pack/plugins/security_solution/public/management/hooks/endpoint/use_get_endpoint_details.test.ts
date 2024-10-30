@@ -24,7 +24,8 @@ jest.mock('@tanstack/react-query', () => {
   };
 });
 
-describe('useGetEndpointDetails hook', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/192435
+describe.skip('useGetEndpointDetails hook', () => {
   let renderReactQueryHook: ReactQueryHookRenderer<
     Parameters<typeof useGetEndpointDetails>,
     ReturnType<typeof useGetEndpointDetails>

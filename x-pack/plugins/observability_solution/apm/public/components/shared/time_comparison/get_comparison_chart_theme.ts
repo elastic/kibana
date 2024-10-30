@@ -19,7 +19,7 @@ export function getComparisonChartTheme(): PartialTheme {
         visible: true,
       },
       point: {
-        visible: false,
+        visible: 'never',
       },
     },
   };

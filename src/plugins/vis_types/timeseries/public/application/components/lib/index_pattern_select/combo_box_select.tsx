@@ -39,9 +39,11 @@ export const ComboBoxSelect = ({
   const [availableIndexes, setAvailableIndexes] = useState<IdsWithTitle>([]);
   const [selectedOptions, setSelectedOptions] = useState<SelectedOptions>([]);
 
-  const onComboBoxChange: EuiComboBoxProps<IndexPatternValue>['onChange'] = useCallback(
+  const onComboBoxChange = useCallback<
+    NonNullable<EuiComboBoxProps<IndexPatternValue>['onChange']>
+  >(
     ([selected]) => {
-      onIndexChange(selected ? { id: selected.id } : '');
+      onIndexChange(selected ? { id: selected.id! } : '');
     },
     [onIndexChange]
   );

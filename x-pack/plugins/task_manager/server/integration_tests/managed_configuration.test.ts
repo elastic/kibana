@@ -83,10 +83,11 @@ describe('managed configuration', () => {
         },
         worker_utilization_running_average_window: 5,
         metrics_reset_interval: 3000,
-        claim_strategy: 'default',
+        claim_strategy: 'update_by_query',
         request_timeouts: {
           update_by_query: 1000,
         },
+        auto_calculate_default_ech_capacity: false,
       });
       logger = context.logger.get('taskManager');
 
@@ -205,10 +206,11 @@ describe('managed configuration', () => {
         },
         worker_utilization_running_average_window: 5,
         metrics_reset_interval: 3000,
-        claim_strategy: 'default',
+        claim_strategy: 'update_by_query',
         request_timeouts: {
           update_by_query: 1000,
         },
+        auto_calculate_default_ech_capacity: false,
       });
       logger = context.logger.get('taskManager');
 
@@ -334,6 +336,7 @@ describe('managed configuration', () => {
         request_timeouts: {
           update_by_query: 1000,
         },
+        auto_calculate_default_ech_capacity: false,
       });
       logger = context.logger.get('taskManager');
 

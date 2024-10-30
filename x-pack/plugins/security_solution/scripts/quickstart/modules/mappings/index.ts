@@ -14,7 +14,7 @@ import type {
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
 import { ecsFieldMap } from '@kbn/alerts-as-data-utils';
 
-export const getEcsMapping = () => mappingFromFieldMap(ecsFieldMap);
+export const getEcsMapping = () => mappingFromFieldMap(ecsFieldMap, false);
 
 export interface GenerateLargeMappingPropertiesProps {
   size: number;

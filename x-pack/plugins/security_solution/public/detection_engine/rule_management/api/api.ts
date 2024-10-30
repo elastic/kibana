@@ -150,6 +150,7 @@ export const patchRule = async ({
  */
 export const previewRule = async ({
   rule,
+  enableLoggedRequests,
   signal,
 }: PreviewRulesProps): Promise<RulePreviewResponse> =>
   KibanaServices.get().http.fetch<RulePreviewResponse>(DETECTION_ENGINE_RULES_PREVIEW, {
@@ -157,6 +158,7 @@ export const previewRule = async ({
     version: '2023-10-31',
     body: JSON.stringify(rule),
     signal,
+    query: enableLoggedRequests ? { enable_logged_requests: enableLoggedRequests } : undefined,
   });
 
 /**
@@ -239,12 +241,12 @@ export const fetchRulesSnoozeSettings = async ({
   const response = await KibanaServices.get().http.fetch<RulesSnoozeSettingsBatchResponse>(
     INTERNAL_ALERTING_API_FIND_RULES_PATH,
     {
-      method: 'GET',
-      query: {
+      method: 'POST',
+      body: JSON.stringify({
         filter: ids.map((x) => `alert.id:"alert:${x}"`).join(' or '),
         fields: JSON.stringify(['muteAll', 'activeSnoozes', 'isSnoozedUntil', 'snoozeSchedule']),
         per_page: ids.length,
-      },
+      }),
       signal,
     }
   );

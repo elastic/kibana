@@ -12,4 +12,11 @@ export const plugin = async () => {
   return new ControlsPlugin();
 };
 
-export { initializeControlGroupTelemetry } from './control_group/control_group_telemetry';
+export {
+  controlGroupSerializedStateToSerializableRuntimeState,
+  serializableRuntimeStateToControlGroupSerializedState,
+} from './control_group/control_group_persistence';
+export {
+  type ControlGroupTelemetry,
+  initializeControlGroupTelemetry,
+} from './control_group/control_group_telemetry';

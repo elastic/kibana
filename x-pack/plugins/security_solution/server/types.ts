@@ -34,6 +34,8 @@ import type { RiskEngineDataClient } from './lib/entity_analytics/risk_engine/ri
 import type { RiskScoreDataClient } from './lib/entity_analytics/risk_score/risk_score_data_client';
 import type { AssetCriticalityDataClient } from './lib/entity_analytics/asset_criticality';
 import type { IDetectionRulesClient } from './lib/detection_engine/rule_management/logic/detection_rules_client/detection_rules_client_interface';
+import type { EntityStoreDataClient } from './lib/entity_analytics/entity_store/entity_store_data_client';
+import type { SiemMigrationsClient } from './lib/siem_migrations/types';
 export { AppClient };
 
 export interface SecuritySolutionApiRequestHandlerContext {
@@ -55,6 +57,8 @@ export interface SecuritySolutionApiRequestHandlerContext {
   getRiskEngineDataClient: () => RiskEngineDataClient;
   getRiskScoreDataClient: () => RiskScoreDataClient;
   getAssetCriticalityDataClient: () => AssetCriticalityDataClient;
+  getEntityStoreDataClient: () => EntityStoreDataClient;
+  getSiemMigrationsClient: () => SiemMigrationsClient;
 }
 
 export type SecuritySolutionRequestHandlerContext = CustomRequestHandlerContext<{

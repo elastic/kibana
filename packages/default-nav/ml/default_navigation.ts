@@ -59,6 +59,9 @@ export const defaultNavigation: MlNodeDefinition = {
           link: 'ml:singleMetricViewer',
         },
         {
+          link: 'ml:suppliedConfigurations',
+        },
+        {
           link: 'ml:settings',
         },
       ],

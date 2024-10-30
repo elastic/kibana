@@ -84,7 +84,6 @@ export const getUninstallTokenHandler: FleetRequestHandler<
         body: { message: `Uninstall Token not found with id ${uninstallTokenId}` },
       });
     }
-
     const body: GetUninstallTokenResponse = {
       item: token,
     };

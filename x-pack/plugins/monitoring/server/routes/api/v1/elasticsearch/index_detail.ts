@@ -91,7 +91,7 @@ export function esIndexRoute(server: MonitoringCore) {
             cluster,
             'elasticsearch.cluster.stats.state.state_uuid',
             get(cluster, 'cluster_state.state_uuid')
-          );
+          ) as string;
           const allocationOptions = {
             shardFilter,
             stateUuid,

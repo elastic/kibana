@@ -25,7 +25,7 @@ describe('EditModal', () => {
         onCancel={onCancel}
       />
     );
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.container).toMatchSnapshot();
     expect(wrapper.getByTestId('editModalTitle')).toHaveTextContent('list name');
   });
   it('should call onSave when submitting the form', () => {

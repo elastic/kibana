@@ -8,7 +8,7 @@
  */
 
 import { accessSync, constants, readFileSync, statSync } from 'fs';
-import { safeLoad } from 'js-yaml';
+import { load } from 'js-yaml';
 import { dirname, join } from 'path';
 import { Observable, firstValueFrom } from 'rxjs';
 import { ensureDeepObject } from '@kbn/std';
@@ -55,7 +55,7 @@ export async function readTelemetryFile<T extends object>(
   try {
     if (isFileReadable(configPath)) {
       const yaml = readFileSync(configPath);
-      const data = safeLoad(yaml.toString());
+      const data = load(yaml.toString());
 
       // don't bother returning empty objects
       if (Object.keys(data).length) {

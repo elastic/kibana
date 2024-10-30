@@ -10,7 +10,7 @@ import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import {
   CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
   VULNERABILITIES_SEVERITY,
-} from '../../../common/constants';
+} from '@kbn/cloud-security-posture-common';
 
 export interface VulnerabilitiesStatisticsQueryResult {
   critical: {

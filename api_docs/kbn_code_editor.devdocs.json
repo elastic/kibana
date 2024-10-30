@@ -31,7 +31,7 @@
           "\nRenders a Monaco code editor with EUI color theme.\n"
         ],
         "signature": [
-          "(props: React.PropsWithChildren<",
+          "(props: ",
           {
             "pluginId": "@kbn/code-editor",
             "scope": "common",
@@ -39,7 +39,7 @@
             "section": "def-common.CodeEditorProps",
             "text": "CodeEditorProps"
           },
-          ">) => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "packages/shared-ux/code_editor/impl/index.tsx",
         "deprecated": false,
@@ -48,20 +48,18 @@
           {
             "parentPluginId": "@kbn/code-editor",
             "id": "def-common.CodeEditor.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "props",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<",
               {
                 "pluginId": "@kbn/code-editor",
                 "scope": "common",
                 "docId": "kibKbnCodeEditorPluginApi",
                 "section": "def-common.CodeEditorProps",
                 "text": "CodeEditorProps"
-              },
-              ">"
+              }
             ],
             "path": "packages/shared-ux/code_editor/impl/index.tsx",
             "deprecated": false,
@@ -82,7 +80,7 @@
           "\nRenders a Monaco code editor in the same style as other EUI form fields."
         ],
         "signature": [
-          "(props: React.PropsWithChildren<",
+          "(props: ",
           {
             "pluginId": "@kbn/code-editor",
             "scope": "common",
@@ -90,7 +88,7 @@
             "section": "def-common.CodeEditorProps",
             "text": "CodeEditorProps"
           },
-          ">) => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "packages/shared-ux/code_editor/impl/index.tsx",
         "deprecated": false,
@@ -99,20 +97,18 @@
           {
             "parentPluginId": "@kbn/code-editor",
             "id": "def-common.CodeEditorField.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "props",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<",
               {
                 "pluginId": "@kbn/code-editor",
                 "scope": "common",
                 "docId": "kibKbnCodeEditorPluginApi",
                 "section": "def-common.CodeEditorProps",
                 "text": "CodeEditorProps"
-              },
-              ">"
+              }
             ],
             "path": "packages/shared-ux/code_editor/impl/index.tsx",
             "deprecated": false,

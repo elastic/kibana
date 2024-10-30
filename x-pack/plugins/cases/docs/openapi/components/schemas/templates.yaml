@@ -1,5 +1,5 @@
 type: array
-x-technical-preview: true
+x-state: Technical preview
 items:
   type: object
   properties:
@@ -16,7 +16,7 @@ items:
             $ref: 'case_configure_connector_properties.yaml'
         customFields:
           type: array
-          x-technical-preview: true
+          x-state: Technical preview
           description: Custom field values in the template.
           items:
             type: object

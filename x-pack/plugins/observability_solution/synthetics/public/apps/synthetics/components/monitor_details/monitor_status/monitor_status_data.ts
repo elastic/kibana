@@ -114,9 +114,18 @@ export function createTimeBuckets(intervalMinutes: number, from: number, to: num
 
 export function createStatusTimeBins(
   timeBuckets: MonitorStatusTimeBucket[],
-  heatmapData: MonitorStatusHeatmapBucket[]
+  heatmapData?: MonitorStatusHeatmapBucket[]
 ): MonitorStatusTimeBin[] {
   return timeBuckets.map(({ start, end }) => {
+    if (!Array.isArray(heatmapData)) {
+      return {
+        start,
+        end,
+        ups: 0,
+        downs: 0,
+        value: 0,
+      };
+    }
     const { ups, downs } = heatmapData
       .filter(({ key }) => key >= start && key <= end)
       .reduce(
@@ -163,7 +172,7 @@ export function getBrushData(e: BrushEvent) {
   return { from, to, fromUtc, toUtc };
 }
 
-function getStatusEffectiveValue(ups: number, downs: number): number {
+export function getStatusEffectiveValue(ups: number, downs: number): number {
   if (ups === downs) {
     return -0.1;
   }

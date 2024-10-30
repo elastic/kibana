@@ -8,6 +8,7 @@
  */
 
 import expect from '@kbn/expect';
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const apiUrl = '/api/kibana/management/saved_objects/scroll/counts';
@@ -36,6 +37,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('returns the count for each included types', async () => {
         const res = await supertest
           .post(apiUrl)
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .send({
             typesToInclude: defaultTypes,
           })
@@ -52,6 +54,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('only returns count for types to include', async () => {
         const res = await supertest
           .post(apiUrl)
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .send({
             typesToInclude: ['dashboard', 'search'],
           })
@@ -66,6 +69,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('filters on title when `searchString` is provided', async () => {
         const res = await supertest
           .post(apiUrl)
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .send({
             typesToInclude: defaultTypes,
             searchString: 'Amazing',
@@ -83,6 +87,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('includes all requested types even when none match the search', async () => {
         const res = await supertest
           .post(apiUrl)
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .send({
             typesToInclude: ['dashboard', 'search', 'visualization'],
             searchString: 'nothing-will-match',
@@ -139,6 +144,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('returns the correct count for each included types', async () => {
         const res = await supertest
           .post(apiUrl)
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .send({
             typesToInclude: ['visualization'],
           })

@@ -1,28 +1,43 @@
-## COUNT_DISTINCT
+# COUNT_DISTINCT
 
-The `COUNT_DISTINCT` function returns the approximate number of distinct values in a column or literal. It uses the HyperLogLog++ algorithm to count based on the hashes of the values, providing configurable precision to trade memory for accuracy. This function is particularly useful for high-cardinality sets and large values, as it maintains fixed memory usage regardless of the number of unique values.
+The COUNT_DISTINCT function calculates the approximate number of distinct values in a specified field.
 
-### Examples
+## Syntax
+
+`COUNT_DISTINCT(field, precision)`
+
+### Parameters
+
+#### field
+
+The column or literal for which to count the number of distinct values.
+
+#### precision
+
+(Optional) The precision threshold. The counts are approximate. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.
+
+## Examples
+
+The following example calculates the number of distinct values in the `ip0` and `ip1` fields:
 
 ```esql
 FROM hosts
 | STATS COUNT_DISTINCT(ip0), COUNT_DISTINCT(ip1)
 ```
 
+You can also specify a precision threshold. In the following example, the precision threshold for `ip0` is set to 80000 and for `ip1` to 5:
+
 ```esql
 FROM hosts
 | STATS COUNT_DISTINCT(ip0, 80000), COUNT_DISTINCT(ip1, 5)
 ```
 
+The COUNT_DISTINCT function can also be used with inline functions. This example splits a string into multiple values using the `SPLIT` function and counts the unique values:
+
 ```esql
 ROW words="foo;bar;baz;qux;quux;foo"
 | STATS distinct_word_count = COUNT_DISTINCT(SPLIT(words, ";"))
 ```
-
-### Additional Information
-
-- **Precision Threshold**: The `COUNT_DISTINCT` function takes an optional second parameter to configure the precision threshold. The maximum supported value is 40000, and the default value is 3000. This threshold allows you to trade memory for accuracy, defining a unique count below which counts are expected to be close to accurate. Above this value, counts might become a bit more fuzzy.
-- **Algorithm**: The function is based on the HyperLogLog++ algorithm, which provides excellent accuracy on low-cardinality sets and fixed memory usage. The memory usage depends on the configured precision, requiring about `c * 8` bytes for a precision threshold of `c`.
 
 ### Notes
 

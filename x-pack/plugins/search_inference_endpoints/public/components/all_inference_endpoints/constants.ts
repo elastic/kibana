@@ -14,7 +14,7 @@ import {
 } from './types';
 
 export const DEFAULT_TABLE_ACTIVE_PAGE = 1;
-export const DEFAULT_TABLE_LIMIT = 10;
+export const DEFAULT_TABLE_LIMIT = 25;
 
 export const DEFAULT_QUERY_PARAMS: QueryParams = {
   page: DEFAULT_TABLE_ACTIVE_PAGE,
@@ -31,4 +31,11 @@ export const DEFAULT_FILTER_OPTIONS: FilterOptions = {
 export const DEFAULT_INFERENCE_ENDPOINTS_TABLE_STATE: AllInferenceEndpointsTableState = {
   filterOptions: DEFAULT_FILTER_OPTIONS,
   queryParams: DEFAULT_QUERY_PARAMS,
+};
+
+export const PIPELINE_URL = 'ingest/ingest_pipelines';
+
+export const PRECONFIGURED_ENDPOINTS = {
+  ELSER: '.elser-2-elasticsearch',
+  E5: '.multilingual-e5-small-elasticsearch',
 };

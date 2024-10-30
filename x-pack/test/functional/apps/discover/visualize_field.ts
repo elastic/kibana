@@ -265,14 +265,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       // change the query
       await monacoEditor.setCodeEditorValue('from logstash-* | stats maxB = max(bytes)');
-      await testSubjects.click('TextBasedLangEditor-run-query-button');
+      await testSubjects.click('ESQLEditor-run-query-button');
       await header.waitUntilLoadingHasFinished();
 
       expect((await lens.getMetricVisualizationData()).length).to.be.equal(1);
 
       // change the query to display a datatabler
       await monacoEditor.setCodeEditorValue('from logstash-* | limit 10');
-      await testSubjects.click('TextBasedLangEditor-run-query-button');
+      await testSubjects.click('ESQLEditor-run-query-button');
       await lens.waitForVisualization();
       expect(await testSubjects.exists('lnsDataTable')).to.be(true);
 

@@ -23,19 +23,20 @@ export const SuspendProcessActionResult = memo<
   const actionCreator = useSendSuspendProcessRequest();
 
   const actionRequestBody = useMemo<undefined | SuspendProcessRequestBody>(() => {
-    const endpointId = command.commandDefinition?.meta?.endpointId;
+    const { agentType, endpointId } = command.commandDefinition?.meta ?? {};
     const parameters = parsedKillOrSuspendParameter(command.args.args) as
       | ResponseActionParametersWithPid
       | ResponseActionParametersWithEntityId;
 
     return endpointId
       ? {
+          agent_type: agentType,
           endpoint_ids: [endpointId],
           comment: command.args.args?.comment?.[0],
           parameters,
         }
       : undefined;
-  }, [command.args.args, command.commandDefinition?.meta?.endpointId]);
+  }, [command.args.args, command.commandDefinition?.meta]);
 
   return useConsoleActionSubmitter<SuspendProcessRequestBody, SuspendProcessActionOutputContent>({
     ResultComponent,

@@ -1027,10 +1027,16 @@ const updateExistingDataStream = async ({
     );
 
     settings = simulateResult.template.settings;
-    mappings = fillConstantKeywordValues(
-      currentBackingIndexConfig?.mappings || {},
-      simulateResult.template.mappings
-    );
+
+    try {
+      mappings = fillConstantKeywordValues(
+        currentBackingIndexConfig?.mappings || {},
+        simulateResult.template.mappings || {}
+      );
+    } catch (err) {
+      logger.error(`Error filling constant keyword values: ${err}`);
+      mappings = simulateResult.template.mappings;
+    }
 
     lifecycle = simulateResult.template.lifecycle;
 

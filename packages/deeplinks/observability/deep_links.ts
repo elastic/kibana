@@ -12,6 +12,7 @@ import {
   LOGS_APP_ID,
   METRICS_APP_ID,
   OBSERVABILITY_LOGS_EXPLORER_APP_ID,
+  LAST_USED_LOGS_VIEWER_APP_ID,
   OBSERVABILITY_ONBOARDING_APP_ID,
   OBSERVABILITY_OVERVIEW_APP_ID,
   SYNTHETICS_APP_ID,
@@ -19,10 +20,12 @@ import {
   AI_ASSISTANT_APP_ID,
   OBLT_UX_APP_ID,
   OBLT_PROFILING_APP_ID,
+  INVENTORY_APP_ID,
 } from './constants';
 
 type LogsApp = typeof LOGS_APP_ID;
 type ObservabilityLogsExplorerApp = typeof OBSERVABILITY_LOGS_EXPLORER_APP_ID;
+type LastUsedLogsViewerApp = typeof LAST_USED_LOGS_VIEWER_APP_ID;
 type ObservabilityOverviewApp = typeof OBSERVABILITY_OVERVIEW_APP_ID;
 type MetricsApp = typeof METRICS_APP_ID;
 type ApmApp = typeof APM_APP_ID;
@@ -32,10 +35,12 @@ type SloApp = typeof SLO_APP_ID;
 type AiAssistantApp = typeof AI_ASSISTANT_APP_ID;
 type ObltUxApp = typeof OBLT_UX_APP_ID;
 type ObltProfilingApp = typeof OBLT_PROFILING_APP_ID;
+type InventoryApp = typeof INVENTORY_APP_ID;
 
 export type AppId =
   | LogsApp
   | ObservabilityLogsExplorerApp
+  | LastUsedLogsViewerApp
   | ObservabilityOverviewApp
   | ObservabilityOnboardingApp
   | ApmApp
@@ -44,9 +49,12 @@ export type AppId =
   | SloApp
   | AiAssistantApp
   | ObltUxApp
-  | ObltProfilingApp;
+  | ObltProfilingApp
+  | InventoryApp;
 
 export type LogsLinkId = 'log-categories' | 'settings' | 'anomalies' | 'stream';
+
+export type InventoryLinkId = 'datastreams';
 
 export type ObservabilityOverviewLinkId =
   | 'alerts'
@@ -90,4 +98,5 @@ export type DeepLinkId =
   | `${MetricsApp}:${MetricsLinkId}`
   | `${ApmApp}:${ApmLinkId}`
   | `${SyntheticsApp}:${SyntheticsLinkId}`
-  | `${ObltProfilingApp}:${ProfilingLinkId}`;
+  | `${ObltProfilingApp}:${ProfilingLinkId}`
+  | `${InventoryApp}:${InventoryLinkId}`;

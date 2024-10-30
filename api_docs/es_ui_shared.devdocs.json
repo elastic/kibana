@@ -178,7 +178,7 @@
             "label": "renderForm",
             "description": [],
             "signature": [
-              "() => JSX.Element | undefined"
+              "() => React.JSX.Element | undefined"
             ],
             "path": "src/plugins/es_ui_shared/public/components/cron_editor/cron_editor.tsx",
             "deprecated": false,
@@ -194,7 +194,7 @@
             "label": "render",
             "description": [],
             "signature": [
-              "() => JSX.Element"
+              "() => React.JSX.Element"
             ],
             "path": "src/plugins/es_ui_shared/public/components/cron_editor/cron_editor.tsx",
             "deprecated": false,
@@ -248,7 +248,7 @@
         "label": "AuthorizationProvider",
         "description": [],
         "signature": [
-          "({ privilegesEndpoint, httpClient, children }: Props) => JSX.Element"
+          "({ privilegesEndpoint, httpClient, children }: Props) => React.JSX.Element"
         ],
         "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/authorization_provider.tsx",
         "deprecated": false,
@@ -316,7 +316,7 @@
         "label": "JsonEditor",
         "description": [],
         "signature": [
-          "<T extends object = { [key: string]: any; }>({ label, helpText, onUpdate, value, defaultValue, codeEditorProps, error: propsError, ...rest }: Props<T>) => JSX.Element"
+          "<T extends object = { [key: string]: any; }>({ label, helpText, onUpdate, value, defaultValue, codeEditorProps, error: propsError, ...rest }: Props<T>) => React.JSX.Element"
         ],
         "path": "src/plugins/es_ui_shared/public/components/json_editor/json_editor.tsx",
         "deprecated": false,
@@ -348,7 +348,7 @@
         "label": "NotAuthorizedSection",
         "description": [],
         "signature": [
-          "({ title, message, dataTestSubj }: Props) => JSX.Element"
+          "({ title, message, dataTestSubj }: Props) => React.JSX.Element"
         ],
         "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/not_authorized_section.tsx",
         "deprecated": false,
@@ -381,7 +381,7 @@
         "label": "PageError",
         "description": [],
         "signature": [
-          "({ title, error, actions, isCentered, ...rest }: React.PropsWithChildren<Props>) => JSX.Element"
+          "({ title, error, actions, isCentered, ...rest }: Props) => React.JSX.Element"
         ],
         "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/page_error.tsx",
         "deprecated": false,
@@ -390,12 +390,12 @@
           {
             "parentPluginId": "esUiShared",
             "id": "def-public.PageError.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "{\n  title,\n  error,\n  actions,\n  isCentered,\n  ...rest\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<Props>"
+              "Props"
             ],
             "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/page_error.tsx",
             "deprecated": false,
@@ -414,7 +414,7 @@
         "label": "PageLoading",
         "description": [],
         "signature": [
-          "({ children }: { children?: React.ReactNode; }) => JSX.Element"
+          "({ children }: { children?: React.ReactNode; }) => React.JSX.Element"
         ],
         "path": "src/plugins/es_ui_shared/public/components/page_loading/page_loading.tsx",
         "deprecated": false,
@@ -447,7 +447,7 @@
         "label": "SectionError",
         "description": [],
         "signature": [
-          "({ title, error, actions, ...rest }: React.PropsWithChildren<Props>) => JSX.Element"
+          "({ title, error, actions, ...rest }: Props) => React.JSX.Element"
         ],
         "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/section_error.tsx",
         "deprecated": false,
@@ -456,12 +456,12 @@
           {
             "parentPluginId": "esUiShared",
             "id": "def-public.SectionError.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "{\n  title,\n  error,\n  actions,\n  ...rest\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<Props>"
+              "Props"
             ],
             "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/section_error.tsx",
             "deprecated": false,
@@ -480,7 +480,7 @@
         "label": "SectionLoading",
         "description": [],
         "signature": [
-          "({ inline, \"data-test-subj\": dataTestSubj, children, ...rest }: React.PropsWithChildren<Props>) => JSX.Element"
+          "({ inline, \"data-test-subj\": dataTestSubj, children, ...rest }: Props) => React.JSX.Element"
         ],
         "path": "src/plugins/es_ui_shared/public/components/section_loading/section_loading.tsx",
         "deprecated": false,
@@ -489,12 +489,12 @@
           {
             "parentPluginId": "esUiShared",
             "id": "def-public.SectionLoading.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "{\n  inline,\n  'data-test-subj': dataTestSubj,\n  children,\n  ...rest\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<Props>"
+              "Props"
             ],
             "path": "src/plugins/es_ui_shared/public/components/section_loading/section_loading.tsx",
             "deprecated": false,
@@ -699,7 +699,7 @@
         "label": "ViewApiRequestFlyout",
         "description": [],
         "signature": [
-          "(props: ViewApiRequestFlyoutProps) => JSX.Element"
+          "(props: ViewApiRequestFlyoutProps) => React.JSX.Element"
         ],
         "path": "src/plugins/es_ui_shared/public/components/view_api_request_flyout/view_api_request_flyout.tsx",
         "deprecated": false,

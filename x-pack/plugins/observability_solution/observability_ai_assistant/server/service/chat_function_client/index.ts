@@ -88,7 +88,7 @@ export class ChatFunctionClient {
     if (definition.parameters) {
       this.validators.set(definition.name, ajv.compile(definition.parameters));
     }
-    this.functionRegistry.set(definition.name, { definition, respond });
+    this.functionRegistry.set(definition.name, { handler: { definition, respond } });
   };
 
   registerInstruction: RegisterInstruction = (instruction) => {
@@ -120,7 +120,7 @@ export class ChatFunctionClient {
   }: {
     filter?: string;
   } = {}): FunctionHandler[] {
-    const allFunctions = Array.from(this.functionRegistry.values());
+    const allFunctions = Array.from(this.functionRegistry.values()).map(({ handler }) => handler);
 
     const functionsByName = keyBy(allFunctions, (definition) => definition.definition.name);
 
@@ -147,6 +147,7 @@ export class ChatFunctionClient {
     messages,
     signal,
     connectorId,
+    useSimulatedFunctionCalling,
   }: {
     chat: FunctionCallChatFunction;
     name: string;
@@ -154,6 +155,7 @@ export class ChatFunctionClient {
     messages: Message[];
     signal: AbortSignal;
     connectorId: string;
+    useSimulatedFunctionCalling: boolean;
   }): Promise<FunctionResponse> {
     const fn = this.functionRegistry.get(name);
 
@@ -165,13 +167,14 @@ export class ChatFunctionClient {
 
     this.validate(name, parsedArguments);
 
-    return await fn.respond(
+    return await fn.handler.respond(
       {
         arguments: parsedArguments,
         messages,
         screenContexts: this.screenContexts,
         chat,
         connectorId,
+        useSimulatedFunctionCalling,
       },
       signal
     );

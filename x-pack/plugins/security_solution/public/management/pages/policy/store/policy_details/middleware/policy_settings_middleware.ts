@@ -96,8 +96,8 @@ export const policySettingsMiddlewareRunner: MiddlewareRunner = async (
 
     // Agent summary is secondary data, so its ok for it to come after the details
     // page is populated with the main content
-    if (policyItem.policy_id) {
-      const { results } = await sendGetFleetAgentStatusForPolicy(http, policyItem.policy_id);
+    if (policyItem.policy_ids?.length) {
+      const { results } = await sendGetFleetAgentStatusForPolicy(http, policyItem.policy_ids);
       dispatch({
         type: 'serverReturnedPolicyDetailsAgentSummaryData',
         payload: {

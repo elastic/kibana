@@ -285,7 +285,7 @@
         "label": "ApiKeyBadge",
         "description": [],
         "signature": [
-          "({ type }: React.PropsWithChildren<",
+          "({ type }: ",
           {
             "pluginId": "@kbn/security-api-key-management",
             "scope": "public",
@@ -293,7 +293,7 @@
             "section": "def-public.ApiKeyBadgeProps",
             "text": "ApiKeyBadgeProps"
           },
-          ">) => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "x-pack/packages/security/api_key_management/src/components/api_key_badge.tsx",
         "deprecated": false,
@@ -302,20 +302,18 @@
           {
             "parentPluginId": "@kbn/security-api-key-management",
             "id": "def-public.ApiKeyBadge.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "{ type }",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<",
               {
                 "pluginId": "@kbn/security-api-key-management",
                 "scope": "public",
                 "docId": "kibKbnSecurityApiKeyManagementPluginApi",
                 "section": "def-public.ApiKeyBadgeProps",
                 "text": "ApiKeyBadgeProps"
-              },
-              ">"
+              }
             ],
             "path": "x-pack/packages/security/api_key_management/src/components/api_key_badge.tsx",
             "deprecated": false,
@@ -334,7 +332,7 @@
         "label": "ApiKeyCreatedCallout",
         "description": [],
         "signature": [
-          "({ createdApiKey, }: React.PropsWithChildren<",
+          "({ createdApiKey, }: ",
           {
             "pluginId": "@kbn/security-api-key-management",
             "scope": "public",
@@ -342,7 +340,7 @@
             "section": "def-public.ApiKeyCreatedCalloutProps",
             "text": "ApiKeyCreatedCalloutProps"
           },
-          ">) => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "x-pack/packages/security/api_key_management/src/components/api_key_created_callout.tsx",
         "deprecated": false,
@@ -351,20 +349,18 @@
           {
             "parentPluginId": "@kbn/security-api-key-management",
             "id": "def-public.ApiKeyCreatedCallout.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "{\n  createdApiKey,\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<",
               {
                 "pluginId": "@kbn/security-api-key-management",
                 "scope": "public",
                 "docId": "kibKbnSecurityApiKeyManagementPluginApi",
                 "section": "def-public.ApiKeyCreatedCalloutProps",
                 "text": "ApiKeyCreatedCalloutProps"
-              },
-              ">"
+              }
             ],
             "path": "x-pack/packages/security/api_key_management/src/components/api_key_created_callout.tsx",
             "deprecated": false,
@@ -383,11 +379,11 @@
         "label": "ApiKeyFlyout",
         "description": [],
         "signature": [
-          "({ onSuccess, onCancel, defaultExpiration, defaultMetadata, defaultRoleDescriptors, apiKey, canManageCrossClusterApiKeys, readOnly, currentUser, isLoadingCurrentUser, }: React.PropsWithChildren<(",
+          "({ onSuccess, onCancel, defaultExpiration, defaultMetadata, defaultRoleDescriptors, defaultName, apiKey, canManageCrossClusterApiKeys, readOnly, currentUser, isLoadingCurrentUser, }: (",
           "DisambiguateSet",
           "<CreateApiKeyFlyoutProps, UpdateApiKeyFlyoutProps> & UpdateApiKeyFlyoutProps) | (",
           "DisambiguateSet",
-          "<UpdateApiKeyFlyoutProps, CreateApiKeyFlyoutProps> & CreateApiKeyFlyoutProps)>) => JSX.Element"
+          "<UpdateApiKeyFlyoutProps, CreateApiKeyFlyoutProps> & CreateApiKeyFlyoutProps)) => React.JSX.Element"
         ],
         "path": "x-pack/packages/security/api_key_management/src/components/api_key_flyout.tsx",
         "deprecated": false,
@@ -398,14 +394,14 @@
             "id": "def-public.ApiKeyFlyout.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  onSuccess,\n  onCancel,\n  defaultExpiration,\n  defaultMetadata,\n  defaultRoleDescriptors,\n  apiKey,\n  canManageCrossClusterApiKeys = false,\n  readOnly = false,\n  currentUser,\n  isLoadingCurrentUser,\n}",
+            "label": "{\n  onSuccess,\n  onCancel,\n  defaultExpiration,\n  defaultMetadata,\n  defaultRoleDescriptors,\n  defaultName,\n  apiKey,\n  canManageCrossClusterApiKeys = false,\n  readOnly = false,\n  currentUser,\n  isLoadingCurrentUser,\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<(",
+              "(",
               "DisambiguateSet",
               "<CreateApiKeyFlyoutProps, UpdateApiKeyFlyoutProps> & UpdateApiKeyFlyoutProps) | (",
               "DisambiguateSet",
-              "<UpdateApiKeyFlyoutProps, CreateApiKeyFlyoutProps> & CreateApiKeyFlyoutProps)>"
+              "<UpdateApiKeyFlyoutProps, CreateApiKeyFlyoutProps> & CreateApiKeyFlyoutProps)"
             ],
             "path": "x-pack/packages/security/api_key_management/src/components/api_key_flyout.tsx",
             "deprecated": false,
@@ -424,7 +420,7 @@
         "label": "ApiKeySelectableTokenField",
         "description": [],
         "signature": [
-          "({ createdApiKey, }: React.PropsWithChildren<",
+          "({ createdApiKey, }: ",
           {
             "pluginId": "@kbn/security-api-key-management",
             "scope": "public",
@@ -432,7 +428,7 @@
             "section": "def-public.ApiKeyCreatedCalloutProps",
             "text": "ApiKeyCreatedCalloutProps"
           },
-          ">) => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "x-pack/packages/security/api_key_management/src/components/api_key_created_callout.tsx",
         "deprecated": false,
@@ -441,20 +437,18 @@
           {
             "parentPluginId": "@kbn/security-api-key-management",
             "id": "def-public.ApiKeySelectableTokenField.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "{\n  createdApiKey,\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<",
               {
                 "pluginId": "@kbn/security-api-key-management",
                 "scope": "public",
                 "docId": "kibKbnSecurityApiKeyManagementPluginApi",
                 "section": "def-public.ApiKeyCreatedCalloutProps",
                 "text": "ApiKeyCreatedCalloutProps"
-              },
-              ">"
+              }
             ],
             "path": "x-pack/packages/security/api_key_management/src/components/api_key_created_callout.tsx",
             "deprecated": false,
@@ -473,7 +467,7 @@
         "label": "ApiKeyStatus",
         "description": [],
         "signature": [
-          "({ expiration }: React.PropsWithChildren<",
+          "({ expiration }: ",
           {
             "pluginId": "@kbn/security-api-key-management",
             "scope": "public",
@@ -481,7 +475,7 @@
             "section": "def-public.ApiKeyStatusProps",
             "text": "ApiKeyStatusProps"
           },
-          ">) => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "x-pack/packages/security/api_key_management/src/components/api_key_status.tsx",
         "deprecated": false,
@@ -490,20 +484,18 @@
           {
             "parentPluginId": "@kbn/security-api-key-management",
             "id": "def-public.ApiKeyStatus.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "{ expiration }",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<",
               {
                 "pluginId": "@kbn/security-api-key-management",
                 "scope": "public",
                 "docId": "kibKbnSecurityApiKeyManagementPluginApi",
                 "section": "def-public.ApiKeyStatusProps",
                 "text": "ApiKeyStatusProps"
-              },
-              ">"
+              }
             ],
             "path": "x-pack/packages/security/api_key_management/src/components/api_key_status.tsx",
             "deprecated": false,
@@ -660,7 +652,7 @@
         "label": "TimeToolTip",
         "description": [],
         "signature": [
-          "({ timestamp, children, }: React.PropsWithChildren<React.PropsWithChildren<",
+          "({ timestamp, children, }: React.PropsWithChildren<",
           {
             "pluginId": "@kbn/security-api-key-management",
             "scope": "public",
@@ -668,7 +660,7 @@
             "section": "def-public.TimeToolTipProps",
             "text": "TimeToolTipProps"
           },
-          ">>) => JSX.Element"
+          ">) => React.JSX.Element"
         ],
         "path": "x-pack/packages/security/api_key_management/src/components/time_tool_tip.tsx",
         "deprecated": false,
@@ -682,7 +674,7 @@
             "label": "{\n  timestamp,\n  children,\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<React.PropsWithChildren<",
+              "React.PropsWithChildren<",
               {
                 "pluginId": "@kbn/security-api-key-management",
                 "scope": "public",
@@ -690,7 +682,7 @@
                 "section": "def-public.TimeToolTipProps",
                 "text": "TimeToolTipProps"
               },
-              ">>"
+              ">"
             ],
             "path": "x-pack/packages/security/api_key_management/src/components/time_tool_tip.tsx",
             "deprecated": false,
@@ -976,7 +968,7 @@
             "label": "sort",
             "description": [],
             "signature": [
-              "{ field: \"id\" | \"type\" | \"name\" | \"username\" | \"profile_uid\" | \"metadata\" | \"expired\" | \"creation\" | \"realm\" | \"role_descriptors\" | \"expiration\" | \"invalidated\" | \"realm_type\" | \"limited_by\" | \"_sort\"; direction: \"asc\" | \"desc\"; }"
+              "{ field: \"id\" | \"type\" | \"name\" | \"username\" | \"metadata\" | \"profile_uid\" | \"expired\" | \"creation\" | \"realm\" | \"role_descriptors\" | \"expiration\" | \"invalidated\" | \"realm_type\" | \"limited_by\" | \"_sort\"; direction: \"asc\" | \"desc\"; }"
             ],
             "path": "x-pack/packages/security/api_key_management/src/components/api_keys_api_client.ts",
             "deprecated": false,
@@ -1185,7 +1177,7 @@
         "label": "QueryApiKeySortOptions",
         "description": [],
         "signature": [
-          "{ field: \"id\" | \"type\" | \"name\" | \"username\" | \"profile_uid\" | \"metadata\" | \"expired\" | \"creation\" | \"realm\" | \"role_descriptors\" | \"expiration\" | \"invalidated\" | \"realm_type\" | \"limited_by\" | \"_sort\"; direction: \"asc\" | \"desc\"; }"
+          "{ field: \"id\" | \"type\" | \"name\" | \"username\" | \"metadata\" | \"profile_uid\" | \"expired\" | \"creation\" | \"realm\" | \"role_descriptors\" | \"expiration\" | \"invalidated\" | \"realm_type\" | \"limited_by\" | \"_sort\"; direction: \"asc\" | \"desc\"; }"
         ],
         "path": "x-pack/packages/security/api_key_management/src/components/api_keys_api_client.ts",
         "deprecated": false,

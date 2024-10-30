@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { chunk, groupBy, isEqual, keyBy, omit, pick } from 'lodash';
+import { chunk, groupBy, isEqual, keyBy, omit, pick, uniq } from 'lodash';
 import { v5 as uuidv5 } from 'uuid';
-import { safeDump } from 'js-yaml';
+import { dump } from 'js-yaml';
 import pMap from 'p-map';
 import { lt } from 'semver';
 import type {
@@ -18,6 +18,7 @@ import type {
   SavedObjectsClientContract,
   SavedObject,
   SavedObjectsUpdateResponse,
+  SavedObjectsFindOptions,
 } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
 
@@ -60,6 +61,8 @@ import type {
   PostAgentPolicyCreateCallback,
   PostAgentPolicyUpdateCallback,
   PreconfiguredAgentPolicy,
+  OutputsForAgentPolicy,
+  PostAgentPolicyPostUpdateCallback,
 } from '../types';
 import {
   AGENT_POLICY_INDEX,
@@ -73,6 +76,7 @@ import type {
   FetchAllAgentPoliciesOptions,
   FetchAllAgentPolicyIdsOptions,
   FleetServerPolicy,
+  IntegrationsOutput,
   PackageInfo,
 } from '../../common/types';
 import {
@@ -83,6 +87,8 @@ import {
   FleetUnauthorizedError,
   HostedAgentPolicyRestrictionRelatedError,
   PackagePolicyRestrictionRelatedError,
+  AgentlessPolicyExistsRequestError,
+  OutputNotFoundError,
 } from '../errors';
 
 import type { FullAgentConfigMap } from '../../common/types/models/agent_cm';
@@ -112,6 +118,7 @@ import { createSoFindIterable } from './utils/create_so_find_iterable';
 import { isAgentlessEnabled } from './utils/agentless';
 import { validatePolicyNamespaceForSpace } from './spaces/policy_namespaces';
 import { isSpaceAwarenessEnabled } from './spaces/helpers';
+import { agentlessAgentService } from './agents/agentless_agent';
 import { scheduleDeployAgentPoliciesTask } from './agent_policies/deploy_agent_policies_task';
 
 const KEY_EDITABLE_FOR_MANAGED_POLICIES = ['namespace'];
@@ -303,8 +310,8 @@ class AgentPolicyService {
 
   public async runExternalCallbacks(
     externalCallbackType: ExternalCallback[0],
-    agentPolicy: NewAgentPolicy | Partial<AgentPolicy>
-  ): Promise<NewAgentPolicy | Partial<AgentPolicy>> {
+    agentPolicy: NewAgentPolicy | Partial<AgentPolicy> | AgentPolicy
+  ): Promise<NewAgentPolicy | Partial<AgentPolicy> | AgentPolicy> {
     const logger = appContextService.getLogger();
     logger.debug(`Running external callbacks for ${externalCallbackType}`);
     try {
@@ -324,6 +331,12 @@ class AgentPolicyService {
           if (externalCallbackType === 'agentPolicyUpdate') {
             result = await (callback as PostAgentPolicyUpdateCallback)(
               newAgentPolicy as Partial<AgentPolicy>
+            );
+            updatedNewAgentPolicy = result;
+          }
+          if (externalCallbackType === 'agentPolicyPostUpdate') {
+            result = await (callback as PostAgentPolicyPostUpdateCallback)(
+              newAgentPolicy as AgentPolicy
             );
             updatedNewAgentPolicy = result;
           }
@@ -386,7 +399,7 @@ class AgentPolicyService {
       {
         ...agentPolicy,
         status: 'active',
-        is_managed: (agentPolicy.is_managed || agentPolicy?.supports_agentless) ?? false,
+        is_managed: agentPolicy.is_managed ?? false,
         revision: 1,
         updated_at: new Date().toISOString(),
         updated_by: options?.user?.username || 'system',
@@ -410,7 +423,7 @@ class AgentPolicyService {
 
   public async requireUniqueName(
     soClient: SavedObjectsClientContract,
-    givenPolicy: { id?: string; name: string }
+    givenPolicy: { id?: string; name: string; supports_agentless?: boolean | null }
   ) {
     const savedObjectType = await getAgentPolicySavedObjectType();
 
@@ -422,13 +435,24 @@ class AgentPolicyService {
     const idsWithName = results.total && results.saved_objects.map(({ id }) => id);
     if (Array.isArray(idsWithName)) {
       const isEditingSelf = givenPolicy.id && idsWithName.includes(givenPolicy.id);
-      if (!givenPolicy.id || !isEditingSelf) {
+
+      if (
+        (!givenPolicy?.supports_agentless && !givenPolicy.id) ||
+        (!givenPolicy?.supports_agentless && !isEditingSelf)
+      ) {
         const isSinglePolicy = idsWithName.length === 1;
         const existClause = isSinglePolicy
           ? `Agent Policy '${idsWithName[0]}' already exists`
           : `Agent Policies '${idsWithName.join(',')}' already exist`;
 
         throw new AgentPolicyNameExistsError(`${existClause} with name '${givenPolicy.name}'`);
+      }
+
+      if (givenPolicy?.supports_agentless && !givenPolicy.id) {
+        const integrationName = givenPolicy.name.split(' ').pop();
+        throw new AgentlessPolicyExistsRequestError(
+          `${givenPolicy.name} already exist. Please rename the integration name ${integrationName}.`
+        );
       }
     }
   }
@@ -538,6 +562,7 @@ class AgentPolicyService {
       fields?: string[];
       esClient?: ElasticsearchClient;
       withAgentCount?: boolean;
+      spaceId?: string;
     }
   ): Promise<{
     items: AgentPolicy[];
@@ -555,9 +580,10 @@ class AgentPolicyService {
       kuery,
       withPackagePolicies = false,
       fields,
+      spaceId,
     } = options;
 
-    const baseFindParams = {
+    const baseFindParams: SavedObjectsFindOptions = {
       type: savedObjectType,
       sortField,
       sortOrder,
@@ -565,6 +591,11 @@ class AgentPolicyService {
       perPage,
       ...(fields ? { fields } : {}),
     };
+
+    if (spaceId) {
+      baseFindParams.namespaces = [spaceId];
+    }
+
     const filter = kuery ? normalizeKuery(savedObjectType, kuery) : undefined;
     let agentPoliciesSO;
     try {
@@ -605,7 +636,7 @@ class AgentPolicyService {
               showInactive: true,
               perPage: 0,
               page: 1,
-              kuery: `${AGENTS_PREFIX}.policy_id:${agentPolicy.id}`,
+              kuery: `${AGENTS_PREFIX}.policy_id:"${agentPolicy.id}"`,
             }).then(({ total }) => (agentPolicy.agents = total));
           } else {
             agentPolicy.agents = 0;
@@ -653,6 +684,7 @@ class AgentPolicyService {
       await this.requireUniqueName(soClient, {
         id,
         name: agentPolicy.name,
+        supports_agentless: agentPolicy?.supports_agentless,
       });
     }
     if (agentPolicy.namespace) {
@@ -716,6 +748,11 @@ class AgentPolicyService {
       bumpRevision: true,
       removeProtection: false,
       skipValidation: options?.skipValidation ?? false,
+    }).then((updatedAgentPolicy) => {
+      return this.runExternalCallbacks(
+        'agentPolicyPostUpdate',
+        updatedAgentPolicy
+      ) as unknown as AgentPolicy;
     });
   }
 
@@ -734,6 +771,17 @@ class AgentPolicyService {
     if (!baseAgentPolicy) {
       throw new AgentPolicyNotFoundError('Agent policy not found');
     }
+    if (baseAgentPolicy.package_policies?.length) {
+      const hasManagedPackagePolicies = baseAgentPolicy.package_policies.some(
+        (packagePolicy) => packagePolicy.is_managed
+      );
+      if (hasManagedPackagePolicies) {
+        throw new PackagePolicyRestrictionRelatedError(
+          `Cannot copy an agent policy ${id} that contains managed package policies`
+        );
+      }
+    }
+
     const newAgentPolicy = await this.create(
       soClient,
       esClient,
@@ -751,6 +799,9 @@ class AgentPolicyService {
           'fleet_server_host_id',
           'supports_agentless',
           'global_data_tags',
+          'monitoring_pprof_enabled',
+          'monitoring_http',
+          'monitoring_diagnostics',
         ]),
         ...newAgentPolicyProps,
       },
@@ -839,24 +890,26 @@ class AgentPolicyService {
 
   /**
    * Remove an output from all agent policies that are using it, and replace the output by the default ones.
-   * @param soClient
    * @param esClient
    * @param outputId
    */
   public async removeOutputFromAll(
-    soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
-    outputId: string
+    outputId: string,
+    options?: { force?: boolean }
   ) {
     const savedObjectType = await getAgentPolicySavedObjectType();
     const agentPolicies = (
-      await soClient.find<AgentPolicySOAttributes>({
-        type: savedObjectType,
-        fields: ['revision', 'data_output_id', 'monitoring_output_id'],
-        searchFields: ['data_output_id', 'monitoring_output_id'],
-        search: escapeSearchQueryPhrase(outputId),
-        perPage: SO_SEARCH_LIMIT,
-      })
+      await appContextService
+        .getInternalUserSOClientWithoutSpaceExtension()
+        .find<AgentPolicySOAttributes>({
+          type: savedObjectType,
+          fields: ['revision', 'data_output_id', 'monitoring_output_id'],
+          searchFields: ['data_output_id', 'monitoring_output_id'],
+          search: escapeSearchQueryPhrase(outputId),
+          perPage: SO_SEARCH_LIMIT,
+          namespaces: ['*'],
+        })
     ).saved_objects.map(mapAgentPolicySavedObjectToAgentPolicy);
 
     if (agentPolicies.length > 0) {
@@ -869,6 +922,9 @@ class AgentPolicyService {
       await pMap(
         agentPolicies,
         async (agentPolicy) => {
+          const soClient = appContextService.getInternalUserSOClientForSpaceId(
+            agentPolicy.space_ids?.[0]
+          );
           const existingAgentPolicy = await this.get(soClient, agentPolicy.id, true);
 
           if (!existingAgentPolicy) {
@@ -888,10 +944,15 @@ class AgentPolicyService {
       );
       await pMap(
         agentPolicies,
-        (agentPolicy) =>
-          this.update(soClient, esClient, agentPolicy.id, getAgentPolicy(agentPolicy), {
+        (agentPolicy) => {
+          const soClient = appContextService.getInternalUserSOClientForSpaceId(
+            agentPolicy.space_ids?.[0]
+          );
+          return this.update(soClient, esClient, agentPolicy.id, getAgentPolicy(agentPolicy), {
             skipValidation: true,
-          }),
+            force: options?.force,
+          });
+        },
         {
           concurrency: 50,
         }
@@ -903,28 +964,39 @@ class AgentPolicyService {
    * Remove a Fleet Server from all agent policies that are using it, to use the default one instead.
    */
   public async removeFleetServerHostFromAll(
-    soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
-    fleetServerHostId: string
+    fleetServerHostId: string,
+    options?: { force?: boolean }
   ) {
     const savedObjectType = await getAgentPolicySavedObjectType();
     const agentPolicies = (
-      await soClient.find<AgentPolicySOAttributes>({
-        type: savedObjectType,
-        fields: ['revision', 'fleet_server_host_id'],
-        searchFields: ['fleet_server_host_id'],
-        search: escapeSearchQueryPhrase(fleetServerHostId),
-        perPage: SO_SEARCH_LIMIT,
-      })
+      await appContextService
+        .getInternalUserSOClientWithoutSpaceExtension()
+        .find<AgentPolicySOAttributes>({
+          type: savedObjectType,
+          fields: ['revision', 'fleet_server_host_id'],
+          searchFields: ['fleet_server_host_id'],
+          search: escapeSearchQueryPhrase(fleetServerHostId),
+          perPage: SO_SEARCH_LIMIT,
+          namespaces: ['*'],
+        })
     ).saved_objects.map(mapAgentPolicySavedObjectToAgentPolicy);
 
     if (agentPolicies.length > 0) {
       await pMap(
         agentPolicies,
         (agentPolicy) =>
-          this.update(soClient, esClient, agentPolicy.id, {
-            fleet_server_host_id: null,
-          }),
+          this.update(
+            appContextService.getInternalUserSOClientForSpaceId(agentPolicy.space_ids?.[0]),
+            esClient,
+            agentPolicy.id,
+            {
+              fleet_server_host_id: null,
+            },
+            {
+              force: options?.force,
+            }
+          ),
         {
           concurrency: 50,
         }
@@ -1113,18 +1185,39 @@ class AgentPolicyService {
     if (agentPolicy.is_managed && !options?.force) {
       throw new HostedAgentPolicyRestrictionRelatedError(`Cannot delete hosted agent policy ${id}`);
     }
+
     // Prevent deleting policy when assigned agents are inactive
     const { total } = await getAgentsByKuery(esClient, soClient, {
       showInactive: true,
       perPage: 0,
       page: 1,
-      kuery: `${AGENTS_PREFIX}.policy_id:${id}`,
+      kuery: `${AGENTS_PREFIX}.policy_id:"${id}"`,
     });
 
-    if (total > 0) {
+    if (total > 0 && !agentPolicy?.supports_agentless) {
       throw new FleetError(
         'Cannot delete an agent policy that is assigned to any active or inactive agents'
       );
+    }
+
+    if (agentPolicy?.supports_agentless) {
+      logger.debug(`Starting  unenrolling agent from agentless policy ${id}`);
+      // unenroll  offline agents for agentless policies first to avoid 404 Save Object error
+      await this.triggerAgentPolicyUpdatedEvent(esClient, 'deleted', id, {
+        spaceId: soClient.getCurrentNamespace(),
+      });
+      try {
+        // Deleting agentless deployment
+        await agentlessAgentService.deleteAgentlessAgent(id);
+        logger.debug(
+          `[Agentless API] Successfully deleted agentless deployment for single agent policy id ${id}`
+        );
+      } catch (error) {
+        logger.error(
+          `[Agentless API] Error deleting agentless deployment for single agent policy id ${id}`
+        );
+        logger.error(error);
+      }
     }
 
     const packagePolicies = await packagePolicyService.findAllForAgentPolicy(soClient, id);
@@ -1185,10 +1278,14 @@ class AgentPolicyService {
       });
     }
 
-    await soClient.delete(savedObjectType, id);
-    await this.triggerAgentPolicyUpdatedEvent(esClient, 'deleted', id, {
-      spaceId: soClient.getCurrentNamespace(),
+    await soClient.delete(savedObjectType, id, {
+      force: true, // need to delete through multiple space
     });
+    if (!agentPolicy?.supports_agentless) {
+      await this.triggerAgentPolicyUpdatedEvent(esClient, 'deleted', id, {
+        spaceId: soClient.getCurrentNamespace(),
+      });
+    }
 
     // cleanup .fleet-policies docs on delete
     await this.deleteFleetServerPoliciesForPolicyId(esClient, id);
@@ -1405,7 +1502,7 @@ class AgentPolicyService {
         },
       };
 
-      const configMapYaml = fullAgentConfigMapToYaml(fullAgentConfigMap, safeDump);
+      const configMapYaml = fullAgentConfigMapToYaml(fullAgentConfigMap, dump);
       const updateManifestVersion = elasticAgentStandaloneManifest.replace('VERSION', agentVersion);
       const fixedAgentYML = configMapYaml.replace('agent.yml:', 'agent.yml: |-');
       return [fixedAgentYML, updateManifestVersion].join('\n');
@@ -1445,35 +1542,36 @@ class AgentPolicyService {
    * @param esClient
    * @param downloadSourceId
    */
-  public async removeDefaultSourceFromAll(
-    soClient: SavedObjectsClientContract,
-    esClient: ElasticsearchClient,
-    downloadSourceId: string
-  ) {
+  public async removeDefaultSourceFromAll(esClient: ElasticsearchClient, downloadSourceId: string) {
     const savedObjectType = await getAgentPolicySavedObjectType();
     const agentPolicies = (
-      await soClient.find<AgentPolicySOAttributes>({
-        type: savedObjectType,
-        fields: ['revision', 'download_source_id'],
-        searchFields: ['download_source_id'],
-        search: escapeSearchQueryPhrase(downloadSourceId),
-        perPage: SO_SEARCH_LIMIT,
-      })
-    ).saved_objects.map((so) => ({
-      id: so.id,
-      ...so.attributes,
-    }));
+      await appContextService
+        .getInternalUserSOClientWithoutSpaceExtension()
+        .find<AgentPolicySOAttributes>({
+          type: savedObjectType,
+          fields: ['revision', 'download_source_id'],
+          searchFields: ['download_source_id'],
+          search: escapeSearchQueryPhrase(downloadSourceId),
+          perPage: SO_SEARCH_LIMIT,
+          namespaces: ['*'],
+        })
+    ).saved_objects.map(mapAgentPolicySavedObjectToAgentPolicy);
 
     if (agentPolicies.length > 0) {
       await pMap(
         agentPolicies,
         (agentPolicy) =>
-          this.update(soClient, esClient, agentPolicy.id, {
-            download_source_id:
-              agentPolicy.download_source_id === downloadSourceId
-                ? null
-                : agentPolicy.download_source_id,
-          }),
+          this.update(
+            appContextService.getInternalUserSOClientForSpaceId(agentPolicy.space_ids?.[0]),
+            esClient,
+            agentPolicy.id,
+            {
+              download_source_id:
+                agentPolicy.download_source_id === downloadSourceId
+                  ? null
+                  : agentPolicy.download_source_id,
+            }
+          ),
         {
           concurrency: 50,
         }
@@ -1703,6 +1801,95 @@ class AgentPolicyService {
         });
       },
     });
+  }
+
+  // Get all the outputs per agent policy
+  public async getAllOutputsForPolicy(
+    soClient: SavedObjectsClientContract,
+    agentPolicy: AgentPolicy
+  ) {
+    const logger = appContextService.getLogger();
+
+    const [defaultDataOutputId, defaultMonitoringOutputId] = await Promise.all([
+      outputService.getDefaultDataOutputId(soClient),
+      outputService.getDefaultMonitoringOutputId(soClient),
+    ]);
+
+    if (!defaultDataOutputId) {
+      throw new OutputNotFoundError('Default output is not setup');
+    }
+
+    const dataOutputId = agentPolicy.data_output_id || defaultDataOutputId;
+    const monitoringOutputId =
+      agentPolicy.monitoring_output_id || defaultMonitoringOutputId || dataOutputId;
+
+    const outputIds = uniq([dataOutputId, monitoringOutputId]);
+
+    const fetchedOutputs = await outputService.bulkGet(outputIds, {
+      ignoreNotFound: true,
+    });
+
+    const dataOutput = fetchedOutputs.find((output) => output.id === dataOutputId);
+    const monitoringOutput = fetchedOutputs.find((output) => output.id === monitoringOutputId);
+
+    let integrationsDataOutputs: IntegrationsOutput[] = [];
+    if (agentPolicy?.package_policies) {
+      const integrationsWithOutputs = agentPolicy.package_policies.filter(
+        (pkgPolicy) => !!pkgPolicy?.output_id
+      );
+      integrationsDataOutputs = await pMap(
+        integrationsWithOutputs,
+        async (pkgPolicy) => {
+          if (pkgPolicy?.output_id) {
+            try {
+              const output = await outputService.get(soClient, pkgPolicy.output_id);
+              return { integrationPolicyName: pkgPolicy?.name, id: output.id, name: output.name };
+            } catch (error) {
+              logger.error(
+                `error while retrieving output with id "${pkgPolicy.output_id}": ${error}`
+              );
+            }
+          }
+          return { integrationPolicyName: pkgPolicy?.name, id: pkgPolicy?.output_id ?? '' };
+        },
+        {
+          concurrency: 20,
+        }
+      );
+    }
+    const outputs: OutputsForAgentPolicy = {
+      monitoring: {
+        output: {
+          name: monitoringOutput?.name ?? '',
+          id: monitoringOutput?.id ?? '',
+        },
+      },
+      data: {
+        output: {
+          name: dataOutput?.name ?? '',
+          id: dataOutput?.id ?? '',
+        },
+        integrations: integrationsDataOutputs ?? [],
+      },
+    };
+    return outputs;
+  }
+
+  public async listAllOutputsForPolicies(
+    soClient: SavedObjectsClientContract,
+    agentPolicies: AgentPolicy[]
+  ) {
+    const allOutputs: OutputsForAgentPolicy[] = await pMap(
+      agentPolicies,
+      async (agentPolicy) => {
+        const output = await this.getAllOutputsForPolicy(soClient, agentPolicy);
+        return { agentPolicyId: agentPolicy.id, ...output };
+      },
+      {
+        concurrency: 50,
+      }
+    );
+    return allOutputs;
   }
 
   private checkTamperProtectionLicense(agentPolicy: { is_protected?: boolean }): void {

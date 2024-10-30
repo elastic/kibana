@@ -6,12 +6,12 @@
  */
 import React from 'react';
 import Chance from 'chance';
-import { CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX } from '@kbn/cloud-security-posture-common';
-import { Vulnerabilities } from './vulnerabilities';
 import {
+  CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX,
   CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
-  VULN_MGMT_POLICY_TEMPLATE,
-} from '../../../common/constants';
+} from '@kbn/cloud-security-posture-common';
+import { Vulnerabilities } from './vulnerabilities';
+import { VULN_MGMT_POLICY_TEMPLATE } from '../../../common/constants';
 import { useCspSetupStatusApi } from '@kbn/cloud-security-posture/src/hooks/use_csp_setup_status_api';
 import { useDataView } from '@kbn/cloud-security-posture/src/hooks/use_data_view';
 import { createReactQueryResponse } from '../../test/fixtures/react_query';

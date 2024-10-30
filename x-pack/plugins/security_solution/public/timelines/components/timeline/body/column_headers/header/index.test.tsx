@@ -6,7 +6,7 @@
  */
 
 import { mount, shallow } from 'enzyme';
-import React from 'react';
+import React, { type ReactNode } from 'react';
 
 import { timelineActions } from '../../../../../store';
 import { TestProviders } from '../../../../../../common/mock';
@@ -123,7 +123,7 @@ describe('Header', () => {
     });
 
     test('it falls back to rendering header.id when `display` is not a valid React node', () => {
-      const display = {}; // a plain object is NOT a `ReactNode`
+      const display = {} as unknown as ReactNode; // a plain object is NOT a `ReactNode`
       const headerWithLabel = { ...columnHeader, display };
       const wrapper = mount(
         <TestProviders>

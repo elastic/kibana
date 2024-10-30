@@ -58,7 +58,7 @@ const CorrelationIdField: React.FunctionComponent<
     <EuiFormRow
       fullWidth
       label={i18n.CORRELATION_ID}
-      error={errors['subActionParams.incident.correlation_id']}
+      error={errors['subActionParams.incident.correlation_id'] as string}
       isInvalid={
         errors['subActionParams.incident.correlation_id'] !== undefined &&
         Number(errors['subActionParams.incident.correlation_id'].length) > 0 &&
@@ -422,7 +422,7 @@ const ServiceNowParamsFields: React.FunctionComponent<
             <EuiFlexItem>
               <EuiFormRow
                 fullWidth
-                error={errors['subActionParams.incident.short_description']}
+                error={errors['subActionParams.incident.short_description'] as string[]}
                 isInvalid={
                   errors['subActionParams.incident.short_description'] !== undefined &&
                   Number(errors['subActionParams.incident.short_description'].length) > 0 &&

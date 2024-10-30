@@ -1,0 +1,11 @@
+title: Group by
+description: optional group by field or fields to use to generate an SLO per distinct value
+example:
+    - [ "service.name" ]
+    - service.name
+    - [ "service.name", "service.environment" ]
+oneOf:
+  - type: string
+  - type: array
+    items:
+      type: string

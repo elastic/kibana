@@ -6,6 +6,7 @@
   "include": [
     "**/*.js",
     "**/*.ts",
+    "../../typings/**/*"
   ],
   "exclude": [
     "target/**/*",

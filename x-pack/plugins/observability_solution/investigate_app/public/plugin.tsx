@@ -4,9 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { css } from '@emotion/css';
 import {
-  APP_WRAPPER_CLASS,
   AppMountParameters,
   AppStatus,
   CoreSetup,
@@ -88,11 +86,13 @@ export class InvestigateAppPlugin
         ]);
 
         const services: InvestigateAppServices = {
+          ...coreStart,
           esql: createEsqlService({
             data: pluginsStart.data,
             dataViews: pluginsStart.dataViews,
             lens: pluginsStart.lens,
           }),
+          charts: pluginsStart.charts,
         };
 
         ReactDOM.render(
@@ -106,17 +106,8 @@ export class InvestigateAppPlugin
           appMountParameters.element
         );
 
-        const appWrapperClassName = css`
-          overflow: auto;
-        `;
-
-        const appWrapperElement = document.getElementsByClassName(APP_WRAPPER_CLASS)[1];
-
-        appWrapperElement.classList.add(appWrapperClassName);
-
         return () => {
           ReactDOM.unmountComponentAtNode(appMountParameters.element);
-          appWrapperElement.classList.remove(appWrapperClassName);
         };
       },
     });
@@ -141,6 +132,7 @@ export class InvestigateAppPlugin
             dataViews: pluginsStart.dataViews,
             lens: pluginsStart.lens,
           }),
+          charts: pluginsStart.charts,
         },
       });
     });

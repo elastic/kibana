@@ -28,8 +28,16 @@ import {
   ROW_HEIGHT_OPTION,
   SHOW_MULTIFIELDS,
 } from '@kbn/discover-utils';
-import { DataLoadingState, UnifiedDataTableProps } from '@kbn/unified-data-table';
+import {
+  DataLoadingState,
+  UnifiedDataTableProps,
+  getDataGridDensity,
+  getRowHeight,
+} from '@kbn/unified-data-table';
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import { useQuerySubscriber } from '@kbn/unified-field-list';
+import useObservable from 'react-use/lib/useObservable';
+import { map } from 'rxjs';
 import { DiscoverGrid } from '../../components/discover_grid';
 import { getDefaultRowsPerPage } from '../../../common/constants';
 import { LoadingStatus } from './services/context_query_state';
@@ -41,7 +49,12 @@ import { DocTableContext } from '../../components/doc_table/doc_table_context';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { DiscoverGridFlyout } from '../../components/discover_grid_flyout';
 import { onResizeGridColumn } from '../../utils/on_resize_grid_column';
-import { useProfileAccessor } from '../../context_awareness';
+import {
+  DISCOVER_CELL_ACTIONS_TRIGGER,
+  useAdditionalCellActions,
+  useProfileAccessor,
+} from '../../context_awareness';
+import { createDataSource } from '../../../common/data_sources';
 
 export interface ContextAppContentProps {
   columns: string[];
@@ -132,6 +145,7 @@ export function ContextAppContent({
     },
     [setAppState]
   );
+
   const sort = useMemo(() => {
     return [[dataView.timeFieldName!, SortDirection.desc]];
   }, [dataView]);
@@ -161,11 +175,36 @@ export function ContextAppContent({
     [grid, setAppState]
   );
 
+  const configRowHeight = services.uiSettings.get(ROW_HEIGHT_OPTION);
   const getCellRenderersAccessor = useProfileAccessor('getCellRenderers');
   const cellRenderers = useMemo(() => {
     const getCellRenderers = getCellRenderersAccessor(() => ({}));
-    return getCellRenderers();
-  }, [getCellRenderersAccessor]);
+    return getCellRenderers({
+      actions: { addFilter },
+      dataView,
+      density: getDataGridDensity(services.storage, 'discover'),
+      rowHeight: getRowHeight({
+        storage: services.storage,
+        consumer: 'discover',
+        configRowHeight,
+      }),
+    });
+  }, [addFilter, configRowHeight, dataView, getCellRenderersAccessor, services.storage]);
+
+  const dataSource = useMemo(() => createDataSource({ dataView, query: undefined }), [dataView]);
+  const { filters } = useQuerySubscriber({ data: services.data });
+  const timeRange = useObservable(
+    services.timefilter.getTimeUpdate$().pipe(map(() => services.timefilter.getTime())),
+    services.timefilter.getTime()
+  );
+
+  const cellActionsMetadata = useAdditionalCellActions({
+    dataSource,
+    dataView,
+    query: undefined,
+    filters,
+    timeRange,
+  });
 
   return (
     <Fragment>
@@ -206,6 +245,9 @@ export function ContextAppContent({
           <CellActionsProvider getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}>
             <DiscoverGridMemoized
               ariaLabelledBy="surDocumentsAriaLabel"
+              cellActionsTriggerId={DISCOVER_CELL_ACTIONS_TRIGGER.id}
+              cellActionsMetadata={cellActionsMetadata}
+              cellActionsHandling="append"
               columns={columns}
               rows={rows}
               dataView={dataView}
@@ -222,7 +264,7 @@ export function ContextAppContent({
               setExpandedDoc={setExpandedDoc}
               onFilter={addFilter}
               onSetColumns={onSetColumns}
-              configRowHeight={services.uiSettings.get(ROW_HEIGHT_OPTION)}
+              configRowHeight={configRowHeight}
               showMultiFields={services.uiSettings.get(SHOW_MULTIFIELDS)}
               maxDocFieldsDisplayed={services.uiSettings.get(MAX_DOC_FIELDS_DISPLAYED)}
               renderDocumentView={renderDocumentView}

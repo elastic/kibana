@@ -66,6 +66,7 @@ describe('FormProvider', () => {
         doc_size: 3,
         indices: [],
         prompt: 'You are an assistant for question-answering tasks.',
+        search_query: '',
         source_fields: {},
         summarization_model: undefined,
       });
@@ -171,6 +172,7 @@ describe('FormProvider', () => {
         prompt: 'Loaded prompt',
         doc_size: 3,
         source_fields: {},
+        search_query: '',
         indices: [],
         summarization_model: undefined,
       });

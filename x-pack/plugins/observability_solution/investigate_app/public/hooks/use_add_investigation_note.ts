@@ -6,6 +6,7 @@
  */
 
 import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
 import {
   CreateInvestigationNoteParams,
   CreateInvestigationNoteResponse,
@@ -39,10 +40,26 @@ export function useAddInvestigationNote() {
     },
     {
       onSuccess: (response, {}) => {
-        toasts.addSuccess('Note saved');
+        toasts.addSuccess(
+          i18n.translate('xpack.investigateApp.addInvestigationNote.successMessage', {
+            defaultMessage: 'Note saved',
+          })
+        );
       },
       onError: (error, {}, context) => {
-        toasts.addError(new Error(error.body?.message ?? 'An error occurred'), { title: 'Error' });
+        toasts.addError(
+          new Error(
+            error.body?.message ??
+              i18n.translate('xpack.investigateApp.addInvestigationNote.errorMessage', {
+                defaultMessage: 'an error occurred',
+              })
+          ),
+          {
+            title: i18n.translate('xpack.investigateApp.addInvestigationNote.errorTitle', {
+              defaultMessage: 'Error',
+            }),
+          }
+        );
       },
     }
   );

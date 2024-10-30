@@ -39,11 +39,20 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
   ActionParamsProps<CasesActionParams>
 > = ({ actionParams, editAction, errors, index, producerId, featureId }) => {
   const {
+    cloud,
+    data: { dataViews: dataViewsService },
     http,
     notifications: { toasts },
-    data: { dataViews: dataViewsService },
   } = useKibana().services;
-  const owner = getOwnerFromRuleConsumerProducer(featureId, producerId);
+
+  const owner = getOwnerFromRuleConsumerProducer({
+    consumer: featureId,
+    producer: producerId,
+    // This is a workaround for a very specific bug with the cases action in serverless security
+    // More info here: https://github.com/elastic/kibana/issues/195599
+    isServerlessSecurity:
+      cloud?.isServerlessEnabled && cloud?.serverless.projectType === 'security',
+  });
 
   const { dataView, isLoading: loadingAlertDataViews } = useAlertsDataView({
     http,
@@ -193,7 +202,7 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
       <EuiFormRow
         fullWidth
         id="timeWindow"
-        error={errors.timeWindow}
+        error={errors.timeWindow as string[]}
         isInvalid={
           errors.timeWindow !== undefined &&
           Number(errors.timeWindow.length) > 0 &&

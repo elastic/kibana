@@ -10,6 +10,7 @@
 import { Dictionary, countBy, defaults, uniq } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import { FilterChecked } from '@elastic/eui';
 import {
   TAB_INDEXED_FIELDS,
   TAB_SCRIPTED_FIELDS,
@@ -126,7 +127,11 @@ export function getPath(field: DataViewField, indexPattern: DataView) {
 }
 
 export function convertToEuiFilterOptions(options: string[]) {
-  return uniq(options).map((option) => {
+  return uniq(options).map<{
+    value: string;
+    name: string;
+    checked?: FilterChecked;
+  }>((option) => {
     return {
       value: option,
       name: option,

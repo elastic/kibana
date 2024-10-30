@@ -21,7 +21,7 @@ describe('MetaInfoDetails', () => {
         lastUpdateValue="value"
       />
     );
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.container).toMatchSnapshot();
     expect(wrapper.getByTestId('MetaInfoDetailslastUpdate')).toHaveTextContent('last update');
   });
   it('should render lastUpdate as JSX Element', () => {
@@ -33,7 +33,7 @@ describe('MetaInfoDetails', () => {
         lastUpdateValue="value"
       />
     );
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.container).toMatchSnapshot();
     expect(wrapper.getByTestId('MetaInfoDetailslastUpdate')).toHaveTextContent('Last update value');
   });
 });

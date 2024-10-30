@@ -1,0 +1,5 @@
+{
+  "type": "shared-browser",
+  "id": "@kbn/core-feature-flags-browser-internal",
+  "owner": "@elastic/kibana-core"
+}

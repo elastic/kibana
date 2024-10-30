@@ -7,9 +7,10 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { act } from 'react-dom/test-utils';
 import { EuiComboBox } from '@elastic/eui';
+import userEvent from '@testing-library/user-event';
 import { GenericOperationDefinition } from '../operations';
 import {
   averageOperation,
@@ -28,38 +29,8 @@ import { GenericIndexPatternColumn, FormBasedLayer, FormBasedPrivateState } from
 import { ReferenceBasedIndexPatternColumn } from '../operations/definitions/column_types';
 import { FieldSelect } from './field_select';
 import { IndexPattern, VisualizationDimensionGroupConfig } from '../../../types';
-import userEvent from '@testing-library/user-event';
 
-jest.mock('../operations/layer_helpers', () => {
-  const original = jest.requireActual('../operations/layer_helpers');
-
-  return {
-    ...original,
-    insertOrReplaceColumn: () => {
-      return {} as FormBasedLayer;
-    },
-  };
-});
-
-const defaultProps = {
-  indexPattern: createMockedIndexPattern(),
-  currentFieldIsInvalid: false,
-  incompleteField: null,
-  incompleteOperation: undefined,
-  incompleteParams: {},
-  dimensionGroups: [] as VisualizationDimensionGroupConfig[],
-  groupId: 'any',
-  operationDefinitionMap: {
-    terms: termsOperation,
-    average: averageOperation,
-    count: countOperation,
-    differences: derivativeOperation,
-    staticValue: staticValueOperation,
-    min: minOperation,
-  } as unknown as Record<string, GenericOperationDefinition>,
-};
-
-function getStringBasedOperationColumn(field = 'source'): FieldBasedIndexPatternColumn {
+function getStringBasedOperationColumn(field = 'source') {
   return {
     label: `Top value of ${field}`,
     dataType: 'string',
@@ -109,12 +80,32 @@ function getCountOperationColumn(): GenericIndexPatternColumn {
     operationType: 'count',
   };
 }
-function getLayer(
-  col1: GenericIndexPatternColumn = getStringBasedOperationColumn(),
-  indexPattern?: IndexPattern
-) {
+const defaultDataView = createMockedIndexPattern();
+const defaultProps = {
+  columnId: 'col1',
+  layer: getLayer(),
+  operationSupportMatrix: getDefaultOperationSupportMatrix(getLayer(), 'col1'),
+  indexPattern: defaultDataView,
+  currentFieldIsInvalid: false,
+  incompleteField: null,
+  incompleteOperation: undefined,
+  incompleteParams: {},
+  dimensionGroups: [] as VisualizationDimensionGroupConfig[],
+  groupId: 'any',
+  updateLayer: jest.fn(),
+  operationDefinitionMap: {
+    terms: termsOperation,
+    average: averageOperation,
+    count: countOperation,
+    differences: derivativeOperation,
+    staticValue: staticValueOperation,
+    min: minOperation,
+  } as unknown as Record<string, GenericOperationDefinition>,
+};
+
+function getLayer(col1: GenericIndexPatternColumn = getStringBasedOperationColumn()) {
   return {
-    indexPatternId: defaultProps.indexPattern.id,
+    indexPatternId: defaultDataView.id,
     columnOrder: ['col1', 'col2'],
     columns: {
       col1,
@@ -135,53 +126,28 @@ function getDefaultOperationSupportMatrix(
     filterOperations: () => true,
     columnId,
     indexPatterns: {
-      [defaultProps.indexPattern.id]: indexPattern ?? defaultProps.indexPattern,
+      [defaultDataView.id]: indexPattern ?? defaultDataView,
     },
   });
 }
 
-const mockedReader = {
-  hasFieldData: (dataViewId: string, fieldName: string) => {
-    if (defaultProps.indexPattern.id !== dataViewId) {
-      return false;
-    }
-
-    const map: Record<string, boolean> = {};
-    for (const field of defaultProps.indexPattern.fields) {
-      map[field.name] = true;
-    }
-
-    return map[fieldName];
-  },
-};
-
-jest.mock('@kbn/unified-field-list/src/hooks/use_existing_fields', () => ({
-  useExistingFieldsReader: jest.fn(() => mockedReader),
-}));
-
 const renderFieldInput = (
   overrideProps?: Partial<FieldInputProps<FieldBasedIndexPatternColumn>>
 ) => {
-  const updateLayerSpy = jest.fn();
-  const layer = getLayer();
-  const operationSupportMatrix = getDefaultOperationSupportMatrix(layer, 'col1');
-  return render(
-    <FieldInput
-      {...defaultProps}
-      layer={layer}
-      columnId={'col1'}
-      updateLayer={updateLayerSpy}
-      operationSupportMatrix={operationSupportMatrix}
-      {...overrideProps}
-    />
-  );
+  return render(<FieldInput {...defaultProps} {...overrideProps} />);
 };
+
+const waitForComboboxToClose = async () =>
+  await waitFor(() => expect(screen.queryByRole('listbox')).toBeNull());
 
 const getErrorElement = (container: HTMLElement) => container.querySelector('.euiFormErrorText');
 const getLabelElement = () =>
   screen.getByTestId('indexPattern-field-selection-row').querySelector('label');
 
 describe('FieldInput', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
   it('should render a field select box', () => {
     renderFieldInput();
     expect(screen.getByTestId('indexPattern-dimension-field')).toBeInTheDocument();
@@ -248,6 +214,14 @@ describe('FieldInput', () => {
     );
   });
 
+  it('should update the layer on field selection', async () => {
+    renderFieldInput({ selectedColumn: getStringBasedOperationColumn() });
+    await userEvent.click(screen.getByRole('combobox'));
+    fireEvent.click(screen.getByTestId('lns-fieldOption-bytes'));
+    expect(defaultProps.updateLayer).toHaveBeenCalled();
+    await waitForComboboxToClose();
+  });
+
   it('should prioritize errors over help messages', () => {
     const helpMessage = 'My help message';
     renderFieldInput({ helpMessage, currentFieldIsInvalid: true });
@@ -256,32 +230,16 @@ describe('FieldInput', () => {
     );
   });
 
-  it('should update the layer on field selection', async () => {
-    const updateLayerSpy = jest.fn();
-    renderFieldInput({
-      selectedColumn: getStringBasedOperationColumn(),
-      updateLayer: updateLayerSpy,
-    });
-    await userEvent.click(screen.getByRole('combobox'));
-    fireEvent.click(screen.getByTestId('lns-fieldOption-bytes'));
-    expect(updateLayerSpy).toHaveBeenCalled();
-  });
-
   it('should not trigger when the same selected field is selected again', async () => {
-    const updateLayerSpy = jest.fn();
-    renderFieldInput({
-      selectedColumn: getStringBasedOperationColumn(),
-      updateLayer: updateLayerSpy,
-    });
-
+    renderFieldInput({ selectedColumn: getStringBasedOperationColumn() });
     await userEvent.click(screen.getByRole('combobox'));
     fireEvent.click(screen.getByTestId('lns-fieldOption-source'));
 
-    expect(updateLayerSpy).not.toHaveBeenCalled();
+    await waitForComboboxToClose();
+    expect(defaultProps.updateLayer).not.toHaveBeenCalled();
   });
 
   it('should prioritize incomplete fields over selected column field to display', () => {
-    const updateLayerSpy = jest.fn();
     const layer = getLayer();
     const operationSupportMatrix = getDefaultOperationSupportMatrix(layer, 'col1');
     const instance = mount(
@@ -289,7 +247,7 @@ describe('FieldInput', () => {
         {...defaultProps}
         layer={layer}
         columnId={'col1'}
-        updateLayer={updateLayerSpy}
+        updateLayer={defaultProps.updateLayer}
         operationSupportMatrix={operationSupportMatrix}
         incompleteField={'dest'}
         selectedColumn={getStringBasedOperationColumn()}
@@ -305,7 +263,6 @@ describe('FieldInput', () => {
   });
 
   it('should forward the onDeleteColumn function', () => {
-    const updateLayerSpy = jest.fn();
     const onDeleteColumn = jest.fn();
     const layer = getLayer();
     const operationSupportMatrix = getDefaultOperationSupportMatrix(layer, 'col1');
@@ -314,7 +271,7 @@ describe('FieldInput', () => {
         {...defaultProps}
         layer={layer}
         columnId={'col1'}
-        updateLayer={updateLayerSpy}
+        updateLayer={defaultProps.updateLayer}
         operationSupportMatrix={operationSupportMatrix}
         onDeleteColumn={onDeleteColumn}
       />
@@ -325,7 +282,7 @@ describe('FieldInput', () => {
     });
 
     expect(onDeleteColumn).toHaveBeenCalled();
-    expect(updateLayerSpy).not.toHaveBeenCalled();
+    expect(defaultProps.updateLayer).not.toHaveBeenCalled();
   });
 
   describe('time series group', () => {
@@ -341,7 +298,6 @@ describe('FieldInput', () => {
       return layer;
     }
     it('should not render the time dimension category if it has tsdb metric column but the group is not a breakdown', () => {
-      const updateLayerSpy = jest.fn();
       const layer = getLayerWithTSDBMetric();
       const operationSupportMatrix = getDefaultOperationSupportMatrix(layer, 'col1');
       const instance = mount(
@@ -359,7 +315,7 @@ describe('FieldInput', () => {
           ])}
           layer={layer}
           columnId={'col1'}
-          updateLayer={updateLayerSpy}
+          updateLayer={defaultProps.updateLayer}
           operationSupportMatrix={operationSupportMatrix}
         />
       );
@@ -368,7 +324,6 @@ describe('FieldInput', () => {
     });
 
     it('should render the time dimension category if it has tsdb metric column and the group is a breakdown one', () => {
-      const updateLayerSpy = jest.fn();
       const layer = getLayerWithTSDBMetric();
       const operationSupportMatrix = getDefaultOperationSupportMatrix(layer, 'col1');
       const instance = mount(
@@ -393,7 +348,7 @@ describe('FieldInput', () => {
           groupId="breakdown"
           layer={layer}
           columnId={'col1'}
-          updateLayer={updateLayerSpy}
+          updateLayer={defaultProps.updateLayer}
           operationSupportMatrix={operationSupportMatrix}
         />
       );

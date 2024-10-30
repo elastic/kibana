@@ -20,7 +20,7 @@ describe('OsCondition', () => {
     expect(wrapper.getByTestId('osValue')).toHaveTextContent(
       `${i18n.CONDITION_OPERATOR_TYPE_MATCH} ${OS_LABELS.macos}`
     );
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.container).toMatchSnapshot();
   });
   it('should render two OS_LABELS', () => {
     const wrapper = render(<OsCondition os={['macos', 'windows']} dataTestSubj="OsConditionMac" />);
@@ -28,11 +28,11 @@ describe('OsCondition', () => {
     expect(wrapper.getByTestId('osValue')).toHaveTextContent(
       `${i18n.CONDITION_OPERATOR_TYPE_MATCH} ${OS_LABELS.macos}, ${OS_LABELS.windows}`
     );
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.container).toMatchSnapshot();
   });
   it('should return empty body', () => {
     const wrapper = render(<OsCondition os={[]} dataTestSubj="OsConditionMac" />);
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.container).toMatchSnapshot();
   });
   it('should return any os sent', () => {
     const wrapper = render(<OsCondition os={['MacPro' as any]} dataTestSubj="OsConditionMac" />);
@@ -40,6 +40,6 @@ describe('OsCondition', () => {
     expect(wrapper.getByTestId('osValue')).toHaveTextContent(
       `${i18n.CONDITION_OPERATOR_TYPE_MATCH} MacPro`
     );
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.container).toMatchSnapshot();
   });
 });

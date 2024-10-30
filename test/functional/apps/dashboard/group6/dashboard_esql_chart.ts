@@ -64,7 +64,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.waitForRenderComplete();
 
       await monacoEditor.setCodeEditorValue('from logstash-* | stats maxB = max(bytes)');
-      await testSubjects.click('TextBasedLangEditor-run-query-button');
+      await testSubjects.click('ESQLEditor-run-query-button');
       await header.waitUntilLoadingHasFinished();
 
       await testSubjects.click('applyFlyoutButton');

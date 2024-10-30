@@ -24,6 +24,7 @@ import type { CustomBranding } from '@kbn/core-custom-branding-common';
 import type { InternalUserSettingsServiceSetup } from '@kbn/core-user-settings-server-internal';
 import type { I18nServiceSetup } from '@kbn/core-i18n-server';
 import type { InternalI18nServicePreboot } from '@kbn/core-i18n-server-internal';
+import type { InternalFeatureFlagsSetup } from '@kbn/core-feature-flags-server-internal';
 
 /** @internal */
 export interface RenderingMetadata {
@@ -49,6 +50,7 @@ export interface RenderingPrebootDeps {
 /** @internal */
 export interface RenderingSetupDeps {
   elasticsearch: InternalElasticsearchServiceSetup;
+  featureFlags: InternalFeatureFlagsSetup;
   http: InternalHttpServiceSetup;
   status: InternalStatusServiceSetup;
   uiPlugins: UiPlugins;

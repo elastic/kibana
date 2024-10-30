@@ -1,8 +1,16 @@
-## TAU
+# TAU
 
-The `TAU` function returns the ratio of a circle’s circumference to its radius.
+TAU function returns the mathematical constant τ (tau), which is the ratio of a circle's circumference to its radius.
 
-### Examples
+## Syntax
+
+`TAU()`
+
+### Parameters
+
+This function does not require any parameters.
+
+## Examples
 
 ```esql
 ROW TAU()

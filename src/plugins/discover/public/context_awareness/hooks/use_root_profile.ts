@@ -10,6 +10,11 @@
 import { useEffect, useState } from 'react';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 
+/**
+ * Hook to trigger and wait for root profile resolution
+ * @param options Options object
+ * @returns If the root profile is loading
+ */
 export const useRootProfile = ({ solutionNavId }: { solutionNavId: string | null }) => {
   const { profilesManager } = useDiscoverServices();
   const [rootProfileLoading, setRootProfileLoading] = useState(true);

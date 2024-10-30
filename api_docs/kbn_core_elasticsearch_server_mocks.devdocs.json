@@ -57,7 +57,7 @@
         "label": "MockedElasticSearchServiceStart",
         "description": [],
         "signature": [
-          "{ getCapabilities: jest.MockInstance<",
+          "{ readonly publicBaseUrl?: string | undefined; getCapabilities: jest.MockInstance<",
           {
             "pluginId": "@kbn/core-elasticsearch-server",
             "scope": "server",

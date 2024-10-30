@@ -36,6 +36,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       serverArgs: [
         ...functionalConfig.get('kbnTestServer.serverArgs'),
         '--telemetry.optIn=true',
+        '--server.restrictInternalApis=false',
         `--plugin-path=${path.resolve(__dirname, './plugins/analytics_plugin_a')}`,
         `--plugin-path=${path.resolve(__dirname, './plugins/analytics_ftr_helpers')}`,
       ],

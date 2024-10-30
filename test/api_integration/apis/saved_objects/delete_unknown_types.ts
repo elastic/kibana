@@ -12,6 +12,7 @@ import {
   MAIN_SAVED_OBJECT_INDEX,
   ANALYTICS_SAVED_OBJECT_INDEX,
 } from '@kbn/core-saved-objects-server';
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -72,6 +73,7 @@ export default function ({ getService }: FtrProviderContext) {
         .post(`/internal/saved_objects/deprecations/_delete_unknown_types`)
         .send({})
         .set('kbn-xsrf', 'true')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .expect(200)
         .then((resp) => {
           expect(resp.body).to.eql({ success: true });

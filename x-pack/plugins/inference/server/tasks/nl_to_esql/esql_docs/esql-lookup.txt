@@ -1,10 +1,22 @@
-## LOOKUP
+# LOOKUP
 
-The `LOOKUP` command in ES|QL is highly experimental and only available in SNAPSHOT versions. It matches values from the input against a table provided in the request, adding the other fields from the table to the output. This command is useful for enriching your dataset with additional information from a predefined table. However, it is important to note that if the table’s column names conflict with existing columns, the existing columns will be dropped.
+The LOOKUP command is a highly experimental feature currently only available in SNAPSHOT versions. It matches values from the input against a provided table, appending the other fields from the table to the output.
 
-### Examples
+## Syntax
 
-Here are some example ES|QL queries using the `LOOKUP` command:
+`LOOKUP table ON match_field1[, match_field2, ...]`
+
+### Parameters
+
+#### table
+
+The name of the table provided in the request to match against. If the table’s column names conflict with existing columns, the existing columns will be dropped.
+
+#### match_field
+
+The fields in the input to match against the table.
+
+## Examples
 
 1. **Basic Lookup Example:**
    ```esql

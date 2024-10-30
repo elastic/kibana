@@ -8,13 +8,13 @@
  */
 
 import { readFileSync } from 'fs';
-import { safeLoad } from 'js-yaml';
+import { load } from 'js-yaml';
 import { set } from '@kbn/safer-lodash-set';
 import { isPlainObject } from 'lodash';
 import { ensureValidObjectPath } from '@kbn/std';
 import { splitKey, getUnsplittableKey, replaceEnvVarRefs } from './utils';
 
-const readYaml = (path: string) => safeLoad(readFileSync(path, 'utf8'));
+const readYaml = (path: string) => load(readFileSync(path, 'utf8'));
 
 interface YamlEntry {
   path: string[];
@@ -76,7 +76,7 @@ export const getConfigFromFiles = (configFiles: readonly string[]) => {
 
   for (const configFile of configFiles) {
     const yaml = readYaml(configFile);
-    if (yaml !== null) {
+    if (yaml) {
       yamlEntries.push(...listEntries(yaml));
     }
   }

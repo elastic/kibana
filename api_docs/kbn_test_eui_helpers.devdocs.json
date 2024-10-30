@@ -470,7 +470,7 @@
               "\nOpens the popover for the date picker"
             ],
             "signature": [
-              "() => void"
+              "() => Promise<void>"
             ],
             "path": "packages/kbn-test-eui-helpers/src/rtl_helpers.tsx",
             "deprecated": false,
@@ -522,7 +522,7 @@
               "\nActivates the refresh button"
             ],
             "signature": [
-              "() => void"
+              "() => Promise<void>"
             ],
             "path": "packages/kbn-test-eui-helpers/src/rtl_helpers.tsx",
             "deprecated": false,

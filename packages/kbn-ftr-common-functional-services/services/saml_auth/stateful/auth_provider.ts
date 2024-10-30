@@ -18,12 +18,31 @@ import {
 
 export class StatefulAuthProvider implements AuthProvider {
   private readonly rolesDefinitionPath = resolve(REPO_ROOT, STATEFUL_ROLES_ROOT_PATH, 'roles.yml');
-  getSupportedRoleDescriptors(): Record<string, unknown> {
-    return readRolesDescriptorsFromResource(this.rolesDefinitionPath);
+
+  getSupportedRoleDescriptors() {
+    const roleDescriptors = new Map<string, any>(
+      Object.entries(
+        readRolesDescriptorsFromResource(this.rolesDefinitionPath) as Record<string, unknown>
+      )
+    );
+    // no privileges set by default
+    roleDescriptors.set(this.getCustomRole(), null);
+
+    return roleDescriptors;
   }
+
   getDefaultRole() {
     return 'editor';
   }
+
+  isCustomRoleEnabled() {
+    return true;
+  }
+
+  getCustomRole() {
+    return 'customRole';
+  }
+
   getRolesDefinitionPath() {
     return this.rolesDefinitionPath;
   }

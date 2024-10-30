@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export type { Index } from '@kbn/index-management';
+export type { Index } from '@kbn/index-management-shared-types';
 
 export interface IndexModule {
   number_of_shards: number | string;

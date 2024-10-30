@@ -21,7 +21,7 @@ export function convertMessagesForInference(messages: Message[]): InferenceMessa
       inferenceMessages.push({
         role: InferenceMessageRole.Assistant,
         content: message.message.content ?? null,
-        ...(message.message.function_call
+        ...(message.message.function_call?.name
           ? {
               toolCalls: [
                 {

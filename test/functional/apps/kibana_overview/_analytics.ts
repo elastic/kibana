@@ -17,7 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['common', 'header']);
 
-  // Failing: See https://github.com/elastic/kibana/issues/192509
+  // Fails in chrome 128+: See https://github.com/elastic/kibana/issues/192509
   describe.skip('overview page - Analytics apps', function describeIndexTests() {
     before(async () => {
       await esArchiver.load('test/functional/fixtures/es_archiver/logstash_functional');

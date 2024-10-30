@@ -8,6 +8,7 @@
 import { CLAIM_STRATEGY_MGET, DEFAULT_CAPACITY } from '../config';
 
 interface GetDefaultCapacityOpts {
+  autoCalculateDefaultEchCapacity: boolean;
   claimStrategy?: string;
   heapSizeLimit: number;
   isCloud: boolean;
@@ -19,11 +20,12 @@ interface GetDefaultCapacityOpts {
 const HEAP_TO_CAPACITY_MAP = [
   { minHeap: 0, maxHeap: 1, capacity: 10 },
   { minHeap: 1, maxHeap: 2, capacity: 15 },
-  { minHeap: 2, maxHeap: 4, capacity: 25, backgroundTaskNodeOnly: false },
-  { minHeap: 2, maxHeap: 4, capacity: 50, backgroundTaskNodeOnly: true },
+  { minHeap: 2, maxHeap: 16, capacity: 25, backgroundTaskNodeOnly: false },
+  { minHeap: 2, maxHeap: 16, capacity: 50, backgroundTaskNodeOnly: true },
 ];
 
 export function getDefaultCapacity({
+  autoCalculateDefaultEchCapacity,
   claimStrategy,
   heapSizeLimit: heapSizeLimitInBytes,
   isCloud,
@@ -31,7 +33,12 @@ export function getDefaultCapacity({
   isBackgroundTaskNodeOnly,
 }: GetDefaultCapacityOpts) {
   // perform heap size based calculations only in cloud
-  if (isCloud && !isServerless && claimStrategy === CLAIM_STRATEGY_MGET) {
+  if (
+    autoCalculateDefaultEchCapacity &&
+    isCloud &&
+    !isServerless &&
+    claimStrategy === CLAIM_STRATEGY_MGET
+  ) {
     // convert bytes to GB
     const heapSizeLimitInGB = heapSizeLimitInBytes / 1e9;
 

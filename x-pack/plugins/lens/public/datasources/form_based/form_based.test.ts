@@ -3154,9 +3154,7 @@ describe('IndexPattern Data Source', () => {
                 values={
                   Object {
                     "position": 1,
-                    "wrappedMessage": <React.Fragment>
-                      error 1
-                    </React.Fragment>,
+                    "wrappedMessage": "error 1",
                   }
                 }
               />,
@@ -3177,9 +3175,7 @@ describe('IndexPattern Data Source', () => {
                 values={
                   Object {
                     "position": 1,
-                    "wrappedMessage": <React.Fragment>
-                      error 2
-                    </React.Fragment>,
+                    "wrappedMessage": "error 2",
                   }
                 }
               />,
@@ -3430,7 +3426,7 @@ describe('IndexPattern Data Source', () => {
         return onlyWarnings.map(({ longMessage }) =>
           isFragment(longMessage)
             ? (longMessage as ReactElement).props.children[0].props.id
-            : (longMessage as ReactElement).props.id
+            : (longMessage as unknown as ReactElement).props.id
         );
       };
 

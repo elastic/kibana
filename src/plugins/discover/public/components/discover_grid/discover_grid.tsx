@@ -14,15 +14,25 @@ import {
   type UnifiedDataTableProps,
 } from '@kbn/unified-data-table';
 import { useProfileAccessor } from '../../context_awareness';
+import { DiscoverAppState } from '../../application/main/state_management/discover_app_state_container';
+import { DiscoverStateContainer } from '../../application/main/state_management/discover_state';
+
+export interface DiscoverGridProps extends UnifiedDataTableProps {
+  query?: DiscoverAppState['query'];
+  onUpdateESQLQuery?: DiscoverStateContainer['actions']['updateESQLQuery'];
+}
 
 /**
  * Customized version of the UnifiedDataTable
  * @constructor
  */
-export const DiscoverGrid: React.FC<UnifiedDataTableProps> = ({
+export const DiscoverGrid: React.FC<DiscoverGridProps> = ({
+  onUpdateESQLQuery,
+  query,
   rowAdditionalLeadingControls: customRowAdditionalLeadingControls,
   ...props
 }) => {
+  const { dataView } = props;
   const getRowIndicatorProvider = useProfileAccessor('getRowIndicatorProvider');
   const getRowIndicator = useMemo(() => {
     return getRowIndicatorProvider(() => undefined)({ dataView: props.dataView });
@@ -33,9 +43,17 @@ export const DiscoverGrid: React.FC<UnifiedDataTableProps> = ({
   );
   const rowAdditionalLeadingControls = useMemo(() => {
     return getRowAdditionalLeadingControlsAccessor(() => customRowAdditionalLeadingControls)({
-      dataView: props.dataView,
+      dataView,
+      query,
+      updateESQLQuery: onUpdateESQLQuery,
     });
-  }, [getRowAdditionalLeadingControlsAccessor, props.dataView, customRowAdditionalLeadingControls]);
+  }, [
+    customRowAdditionalLeadingControls,
+    dataView,
+    getRowAdditionalLeadingControlsAccessor,
+    onUpdateESQLQuery,
+    query,
+  ]);
 
   return (
     <UnifiedDataTable

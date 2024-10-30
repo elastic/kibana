@@ -15,7 +15,7 @@ import type {
 import type { InternalElasticsearchServiceStart } from './types';
 
 /**
- * The {@link UiSettingsRequestHandlerContext} implementation.
+ * The {@link ElasticsearchRequestHandlerContext} implementation.
  * @internal
  */
 export class CoreElasticsearchRouteHandlerContext implements ElasticsearchRequestHandlerContext {

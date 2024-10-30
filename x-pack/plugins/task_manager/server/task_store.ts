@@ -46,6 +46,8 @@ import { AdHocTaskCounter } from './lib/adhoc_task_counter';
 import { TaskValidator } from './task_validator';
 import { claimSort } from './queries/mark_available_tasks_as_claimed';
 import { MAX_PARTITIONS } from './lib/task_partitioner';
+import { ErrorOutput } from './lib/bulk_operation_buffer';
+import { MsearchError } from './lib/msearch_error';
 
 export interface StoreOpts {
   esClient: ElasticsearchClient;
@@ -92,15 +94,9 @@ export interface BulkUpdateOpts {
   validate: boolean;
 }
 
-export type BulkUpdateResult = Result<
-  ConcreteTaskInstance,
-  { type: string; id: string; error: SavedObjectError }
->;
+export type BulkUpdateResult = Result<ConcreteTaskInstance, ErrorOutput>;
 
-export type PartialBulkUpdateResult = Result<
-  PartialConcreteTaskInstance,
-  { type: string; id: string; status?: number; error: estypes.ErrorCause }
->;
+export type PartialBulkUpdateResult = Result<PartialConcreteTaskInstance, ErrorOutput>;
 
 export type BulkGetResult = Array<
   Result<ConcreteTaskInstance, { type: string; id: string; error: SavedObjectError }>
@@ -580,7 +576,7 @@ export class TaskStore {
 
     for (const response of responses) {
       if (response.status !== 200) {
-        const err = new Error(`Unexpected status code from taskStore::msearch: ${response.status}`);
+        const err = new MsearchError(response.status);
         this.errors$.next(err);
         throw err;
       }

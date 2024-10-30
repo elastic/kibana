@@ -89,7 +89,7 @@ export type SearchHit<
     ? {
         fields: Partial<Record<ValueTypeOfField<TFields>, unknown[]>>;
       }
-    : {}) &
+    : { fields?: Record<string, unknown[]> }) &
   (TDocValueFields extends DocValueFields
     ? {
         fields: Partial<Record<ValueTypeOfField<TDocValueFields>, unknown[]>>;
@@ -681,6 +681,7 @@ export interface ESQLSearchResponse {
   // while columns only the available ones (non nulls)
   all_columns?: ESQLColumn[];
   values: ESQLRow[];
+  took?: number;
 }
 
 export interface ESQLSearchParams {
@@ -691,6 +692,7 @@ export interface ESQLSearchParams {
   query: string;
   filter?: unknown;
   locale?: string;
+  include_ccs_metadata?: boolean;
   dropNullColumns?: boolean;
   params?: Array<Record<string, string | undefined>>;
 }

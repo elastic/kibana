@@ -10,6 +10,7 @@
 import type { ThemeServiceSetup } from '@kbn/core-theme-browser';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
 import type { ExecutionContextSetup } from '@kbn/core-execution-context-browser';
+import type { FeatureFlagsSetup } from '@kbn/core-feature-flags-browser';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import type { FatalErrorsSetup } from '@kbn/core-fatal-errors-browser';
 import type { IUiSettingsClient, SettingsStart } from '@kbn/core-ui-settings-browser';
@@ -44,6 +45,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
   customBranding: CustomBrandingSetup;
   /** {@link FatalErrorsSetup} */
   fatalErrors: FatalErrorsSetup;
+  /** {@link FeatureFlagsSetup} */
+  featureFlags: FeatureFlagsSetup;
   /** {@link HttpSetup} */
   http: HttpSetup;
   /** {@link NotificationsSetup} */

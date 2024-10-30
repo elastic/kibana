@@ -10,10 +10,19 @@ import { ESProcessorItem } from '../../../common';
 import type { KVState } from '../../types';
 import type { HandleKVNodeParams } from './types';
 import { testPipeline } from '../../util';
-import { onFailure } from './constants';
+import {
+  createGrokProcessor,
+  createPassthroughFailureProcessor,
+  createRemoveProcessor,
+} from '../../util/processors';
 
-interface KVResult {
+interface StructuredLogResult {
   [packageName: string]: { [dataStreamName: string]: unknown };
+}
+
+interface GrokResult {
+  [key: string]: unknown;
+  message: string;
 }
 
 export async function handleKVValidate({
@@ -25,44 +34,88 @@ export async function handleKVValidate({
   const dataStreamName = state.dataStreamName;
 
   // Pick logSamples if there was no header detected.
-  const samples = state.kvLogMessages.length > 0 ? state.kvLogMessages : state.logSamples;
-
-  const { pipelineResults: kvOutputSamples, errors } = (await createJSONInput(
-    kvProcessor,
-    samples,
-    client,
-    state
-  )) as { pipelineResults: KVResult[]; errors: object[] };
-
+  const samples = state.header ? state.kvLogMessages : state.logSamples;
+  const { errors } = await verifyKVProcessor(kvProcessor, samples, client);
   if (errors.length > 0) {
-    return { errors, lastExecutedChain: 'kv_validate' };
+    return { errors, lastExecutedChain: 'kvValidate' };
   }
 
   // Converts JSON Object into a string and parses it as a array of JSON strings
-  const jsonSamples = kvOutputSamples
+  const additionalProcessors = state.additionalProcessors;
+  additionalProcessors.push(kvProcessor[0]);
+  const samplesObject: StructuredLogResult[] = await buildJSONSamples(
+    state.logSamples,
+    additionalProcessors,
+    client
+  );
+
+  const jsonSamples = samplesObject
     .map((log) => log[packageName])
     .map((log) => log[dataStreamName])
     .map((log) => JSON.stringify(log));
-  const additionalProcessors = state.additionalProcessors;
-  additionalProcessors.push(kvProcessor[0]);
 
   return {
     jsonSamples,
     additionalProcessors,
     errors: [],
-    lastExecutedChain: 'kv_validate',
+    lastExecutedChain: 'kvValidate',
   };
 }
 
-async function createJSONInput(
+export async function handleHeaderValidate({
+  state,
+  client,
+}: HandleKVNodeParams): Promise<Partial<KVState>> {
+  const grokPattern = state.grokPattern;
+  const grokProcessor = createGrokProcessor([grokPattern]);
+  const pipeline = { processors: grokProcessor, on_failure: [createPassthroughFailureProcessor()] };
+
+  const { pipelineResults, errors } = (await testPipeline(state.logSamples, pipeline, client)) as {
+    pipelineResults: GrokResult[];
+    errors: object[];
+  };
+
+  if (errors.length > 0) {
+    return { errors, lastExecutedChain: 'kv_header_validate' };
+  }
+
+  const kvLogMessages: string[] = pipelineResults.map((entry) => entry.message);
+  const additionalProcessors = state.additionalProcessors;
+  additionalProcessors.push(grokProcessor[0]);
+
+  return {
+    kvLogMessages,
+    additionalProcessors,
+    errors: [],
+    lastExecutedChain: 'kv_header_validate',
+  };
+}
+
+async function verifyKVProcessor(
   kvProcessor: ESProcessorItem,
-  formattedSamples: string[],
-  client: IScopedClusterClient,
-  state: KVState
-): Promise<{ pipelineResults: object[]; errors: object[] }> {
-  // This processor removes the original message field in the JSON output
-  const removeProcessor = { remove: { field: 'message', ignore_missing: true } };
-  const pipeline = { processors: [kvProcessor[0], removeProcessor], on_failure: [onFailure] };
-  const { pipelineResults, errors } = await testPipeline(formattedSamples, pipeline, client);
-  return { pipelineResults, errors };
+  samples: string[],
+  client: IScopedClusterClient
+): Promise<{ errors: object[] }> {
+  // This processor removes the original message field in the  output
+  const pipeline = {
+    processors: [kvProcessor[0], createRemoveProcessor()],
+    on_failure: [createPassthroughFailureProcessor()],
+  };
+  const { errors } = await testPipeline(samples, pipeline, client);
+  return { errors };
+}
+
+async function buildJSONSamples(
+  samples: string[],
+  processors: object[],
+  client: IScopedClusterClient
+): Promise<StructuredLogResult[]> {
+  const pipeline = {
+    processors: [...processors, createRemoveProcessor()],
+    on_failure: [createPassthroughFailureProcessor()],
+  };
+  const { pipelineResults } = (await testPipeline(samples, pipeline, client)) as {
+    pipelineResults: StructuredLogResult[];
+  };
+  return pipelineResults;
 }

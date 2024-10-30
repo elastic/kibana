@@ -9,7 +9,7 @@
 
 import { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { apiIsPresentationContainer } from '@kbn/presentation-containers';
+import { apiCanAddNewPanel } from '@kbn/presentation-containers';
 import { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { IncompatibleActionError, ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
 import { UiActionsPublicStart } from '@kbn/ui-actions-plugin/public/plugin';
@@ -30,10 +30,10 @@ export const registerCreateSavedBookAction = (uiActions: UiActionsPublicStart, c
     getIconType: () => 'folderClosed',
     grouping: [embeddableExamplesGrouping],
     isCompatible: async ({ embeddable }) => {
-      return apiIsPresentationContainer(embeddable);
+      return apiCanAddNewPanel(embeddable);
     },
     execute: async ({ embeddable }) => {
-      if (!apiIsPresentationContainer(embeddable)) throw new IncompatibleActionError();
+      if (!apiCanAddNewPanel(embeddable)) throw new IncompatibleActionError();
       const newPanelStateManager = stateManagerFromAttributes(defaultBookAttributes);
 
       const { addToLibrary } = await openSavedBookEditor(newPanelStateManager, true, core, {

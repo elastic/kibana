@@ -18,7 +18,7 @@ import type {
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
-import type { Filter, DataViewFieldBase } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
 import type { CompleteRule, ThresholdRuleParams } from '../../rule_schema';
 import { getFilter } from '../utils/get_filter';
 import { bulkCreateThresholdSignals } from './bulk_create_threshold_signals';
@@ -33,6 +33,7 @@ import type {
   SearchAfterAndBulkCreateReturnType,
   WrapHits,
   RunOpts,
+  CreateRuleOptions,
 } from '../types';
 import type { ThresholdAlertState, ThresholdSignalHistory } from './types';
 import {
@@ -64,11 +65,11 @@ export const thresholdExecutor = async ({
   aggregatableTimestampField,
   exceptionFilter,
   unprocessedExceptions,
-  inputIndexFields,
   spaceId,
   runOpts,
   licensing,
   experimentalFeatures,
+  scheduleNotificationResponseActionsService,
 }: {
   inputIndex: string[];
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
@@ -87,11 +88,11 @@ export const thresholdExecutor = async ({
   aggregatableTimestampField: string;
   exceptionFilter: Filter | undefined;
   unprocessedExceptions: ExceptionListItemSchema[];
-  inputIndexFields: DataViewFieldBase[];
   spaceId: string;
   runOpts: RunOpts<ThresholdRuleParams>;
   licensing: LicensingPluginSetup;
   experimentalFeatures: ExperimentalFeatures;
+  scheduleNotificationResponseActionsService: CreateRuleOptions['scheduleNotificationResponseActionsService'];
 }): Promise<SearchAfterAndBulkCreateReturnType & { state: ThresholdAlertState }> => {
   const result = createSearchAfterReturnType();
   const ruleParams = completeRule.ruleParams;
@@ -135,7 +136,7 @@ export const thresholdExecutor = async ({
       services,
       index: inputIndex,
       exceptionFilter,
-      fields: inputIndexFields,
+      loadFields: true,
     });
 
     // Look for new events over threshold
@@ -211,7 +212,11 @@ export const thresholdExecutor = async ({
     result.errors.push(...searchErrors);
     result.warningMessages.push(...warnings);
     result.searchAfterTimes = searchDurations;
-
+    scheduleNotificationResponseActionsService({
+      signals: result.createdSignals,
+      signalsCount: result.createdSignalsCount,
+      responseActions: completeRule.ruleParams.responseActions,
+    });
     return {
       ...result,
       state: {

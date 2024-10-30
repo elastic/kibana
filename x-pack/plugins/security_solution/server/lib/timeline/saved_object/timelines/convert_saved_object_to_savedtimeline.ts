@@ -16,7 +16,7 @@ import {
   SavedObjectTimelineType,
   SavedObjectTimelineStatus,
 } from '../../../../../common/types/timeline/saved_object';
-import type { TimelineSavedObject } from '../../../../../common/api/timeline';
+import type { TimelineResponse } from '../../../../../common/api/timeline';
 import {
   type TimelineType,
   TimelineTypeEnum,
@@ -49,7 +49,7 @@ const getTimelineTypeAndStatus = (
   };
 };
 
-export const convertSavedObjectToSavedTimeline = (savedObject: unknown): TimelineSavedObject =>
+export const convertSavedObjectToSavedTimeline = (savedObject: unknown): TimelineResponse =>
   pipe(
     TimelineSavedObjectWithDraftRuntime.decode(savedObject),
     map((savedTimeline) => {

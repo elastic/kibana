@@ -36,6 +36,9 @@ export function createIndicesRoute(logger: Logger, router: IRouter, baseRoute: s
       validate: {
         body: bodySchema,
       },
+      options: {
+        access: 'internal',
+      },
     },
     handler
   );

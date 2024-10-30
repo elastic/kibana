@@ -212,14 +212,20 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
     docLinks: deps.docLinks,
     elasticsearch: {
       legacy: deps.elasticsearch.legacy,
+      publicBaseUrl: deps.elasticsearch.publicBaseUrl,
       setUnauthorizedErrorHandler: deps.elasticsearch.setUnauthorizedErrorHandler,
     },
     executionContext: {
       withContext: deps.executionContext.withContext,
       getAsLabels: deps.executionContext.getAsLabels,
     },
+    featureFlags: {
+      setProvider: deps.featureFlags.setProvider,
+      appendContext: deps.featureFlags.appendContext,
+    },
     http: {
       createCookieSessionStorageFactory: deps.http.createCookieSessionStorageFactory,
+      getDeprecatedRoutes: deps.http.getDeprecatedRoutes,
       registerRouteHandlerContext: <
         Context extends RequestHandlerContext,
         ContextName extends keyof Omit<Context, 'resolve'>
@@ -278,6 +284,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
     deprecations: deps.deprecations.getRegistry(plugin.name),
     coreUsageData: {
       registerUsageCounter: deps.coreUsageData.registerUsageCounter,
+      registerDeprecatedUsageFetch: deps.coreUsageData.registerDeprecatedUsageFetch,
     },
     plugins: {
       onSetup: (...dependencyNames) => runtimeResolver.onSetup(plugin.name, dependencyNames),
@@ -332,6 +339,15 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>({
       getCapabilities: deps.elasticsearch.getCapabilities,
     },
     executionContext: deps.executionContext,
+    featureFlags: {
+      appendContext: deps.featureFlags.appendContext,
+      getBooleanValue: deps.featureFlags.getBooleanValue,
+      getStringValue: deps.featureFlags.getStringValue,
+      getNumberValue: deps.featureFlags.getNumberValue,
+      getBooleanValue$: deps.featureFlags.getBooleanValue$,
+      getStringValue$: deps.featureFlags.getStringValue$,
+      getNumberValue$: deps.featureFlags.getNumberValue$,
+    },
     http: {
       auth: deps.http.auth,
       basePath: deps.http.basePath,

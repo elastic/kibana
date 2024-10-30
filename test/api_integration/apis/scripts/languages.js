@@ -9,7 +9,10 @@
 
 import expect from '@kbn/expect';
 
-import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import {
+  ELASTIC_HTTP_VERSION_HEADER,
+  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
+} from '@kbn/core-http-common';
 import { SCRIPT_LANGUAGES_ROUTE_LATEST_VERSION } from '@kbn/data-plugin/common/constants';
 
 export default function ({ getService }) {
@@ -20,6 +23,7 @@ export default function ({ getService }) {
       supertest
         .get('/internal/scripts/languages')
         .set(ELASTIC_HTTP_VERSION_HEADER, SCRIPT_LANGUAGES_ROUTE_LATEST_VERSION)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .expect(200)
         .then((response) => {
           expect(response.body).to.be.an('array');
@@ -30,6 +34,7 @@ export default function ({ getService }) {
       supertest
         .get('/internal/scripts/languages')
         .set(ELASTIC_HTTP_VERSION_HEADER, SCRIPT_LANGUAGES_ROUTE_LATEST_VERSION)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .expect(200)
         .then((response) => {
           expect(response.body).to.contain('expression');

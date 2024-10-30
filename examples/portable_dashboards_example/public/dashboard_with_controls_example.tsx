@@ -14,41 +14,29 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { controlGroupStateBuilder } from '@kbn/controls-plugin/public';
 import {
-  AwaitingDashboardAPI,
+  DashboardApi,
   DashboardRenderer,
   DashboardCreationOptions,
 } from '@kbn/dashboard-plugin/public';
-import { apiHasUniqueId } from '@kbn/presentation-publishing';
 import { FILTER_DEBUGGER_EMBEDDABLE_ID } from './constants';
 
 export const DashboardWithControlsExample = ({ dataView }: { dataView: DataView }) => {
-  const [dashboard, setDashboard] = useState<AwaitingDashboardAPI>();
+  const [dashboard, setDashboard] = useState<DashboardApi | undefined>();
 
   // add a filter debugger panel as soon as the dashboard becomes available
   useEffect(() => {
     if (!dashboard) return;
-    (async () => {
-      const api = await dashboard.addNewPanel(
+    dashboard
+      .addNewPanel(
         {
           panelType: FILTER_DEBUGGER_EMBEDDABLE_ID,
           initialState: {},
         },
         true
-      );
-      if (!apiHasUniqueId(api)) {
-        return;
-      }
-      const prevPanelState = dashboard.getExplicitInput().panels[api.uuid];
-      // resize the new panel so that it fills up the entire width of the dashboard
-      dashboard.updateInput({
-        panels: {
-          [api.uuid]: {
-            ...prevPanelState,
-            gridData: { i: api.uuid, x: 0, y: 0, w: 48, h: 12 },
-          },
-        },
+      )
+      .catch(() => {
+        // ignore error - its an example
       });
-    })();
   }, [dashboard]);
 
   return (
@@ -80,7 +68,6 @@ export const DashboardWithControlsExample = ({ dataView }: { dataView: DataView 
             });
 
             return {
-              useControlGroupIntegration: true,
               getInitialInput: () => ({
                 timeRange: { from: 'now-30d', to: 'now' },
                 viewMode: ViewMode.VIEW,
@@ -88,7 +75,7 @@ export const DashboardWithControlsExample = ({ dataView }: { dataView: DataView 
               }),
             };
           }}
-          ref={setDashboard}
+          onApiAvailable={setDashboard}
         />
       </EuiPanel>
     </>

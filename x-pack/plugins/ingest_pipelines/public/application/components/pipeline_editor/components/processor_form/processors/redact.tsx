@@ -146,7 +146,11 @@ export const Redact: FunctionComponent = () => {
           return (
             <InputList
               label={fieldsConfig.patterns.label!}
-              helpText={fieldsConfig.patterns.helpText}
+              helpText={
+                typeof fieldsConfig.patterns.helpText === 'function'
+                  ? fieldsConfig.patterns.helpText()
+                  : fieldsConfig.patterns.helpText
+              }
               error={error}
               value={items}
               onAdd={addItem}

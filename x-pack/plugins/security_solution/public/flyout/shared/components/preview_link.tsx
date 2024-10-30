@@ -13,6 +13,7 @@ import { getEcsField } from '../../document_details/right/components/table_field
 import {
   HOST_NAME_FIELD_NAME,
   USER_NAME_FIELD_NAME,
+  SIGNAL_RULE_NAME_FIELD_NAME,
   IP_FIELD_TYPE,
 } from '../../../timelines/components/timeline/body/renderers/constants';
 import { useKibana } from '../../../common/lib/kibana';
@@ -22,12 +23,13 @@ import { HOST_PREVIEW_BANNER } from '../../document_details/right/components/hos
 import { UserPreviewPanelKey } from '../../entity_details/user_right';
 import { USER_PREVIEW_BANNER } from '../../document_details/right/components/user_entity_overview';
 import { NetworkPanelKey, NETWORK_PREVIEW_BANNER } from '../../network_details';
+import { RulePreviewPanelKey, RULE_PREVIEW_BANNER } from '../../rule_details/right';
+
+const PREVIEW_FIELDS = [HOST_NAME_FIELD_NAME, USER_NAME_FIELD_NAME, SIGNAL_RULE_NAME_FIELD_NAME];
 
 // Helper function to check if the field has a preview link
 export const hasPreview = (field: string) =>
-  field === HOST_NAME_FIELD_NAME ||
-  field === USER_NAME_FIELD_NAME ||
-  getEcsField(field)?.type === IP_FIELD_TYPE;
+  PREVIEW_FIELDS.includes(field) || getEcsField(field)?.type === IP_FIELD_TYPE;
 
 interface PreviewParams {
   id: string;
@@ -35,7 +37,12 @@ interface PreviewParams {
 }
 
 // Helper get function to get the preview parameters
-const getPreviewParams = (value: string, field: string, scopeId: string): PreviewParams | null => {
+const getPreviewParams = (
+  value: string,
+  field: string,
+  scopeId: string,
+  ruleId?: string
+): PreviewParams | null => {
   if (getEcsField(field)?.type === IP_FIELD_TYPE) {
     return {
       id: NetworkPanelKey,
@@ -48,6 +55,9 @@ const getPreviewParams = (value: string, field: string, scopeId: string): Previe
       },
     };
   }
+  if (field === SIGNAL_RULE_NAME_FIELD_NAME && !ruleId) {
+    return null;
+  }
   switch (field) {
     case HOST_NAME_FIELD_NAME:
       return {
@@ -58,6 +68,11 @@ const getPreviewParams = (value: string, field: string, scopeId: string): Previe
       return {
         id: UserPreviewPanelKey,
         params: { userName: value, scopeId, banner: USER_PREVIEW_BANNER },
+      };
+    case SIGNAL_RULE_NAME_FIELD_NAME:
+      return {
+        id: RulePreviewPanelKey,
+        params: { ruleId, banner: RULE_PREVIEW_BANNER, isPreviewMode: true },
       };
     default:
       return null;
@@ -79,6 +94,14 @@ interface PreviewLinkProps {
    */
   scopeId: string;
   /**
+   * Rule id to use for the preview panel
+   */
+  ruleId?: string;
+  /**
+   * Whether the preview link is in preview mode
+   */
+  isPreview?: boolean;
+  /**
    * Optional data-test-subj value
    */
   ['data-test-subj']?: string;
@@ -95,6 +118,8 @@ export const PreviewLink: FC<PreviewLinkProps> = ({
   field,
   value,
   scopeId,
+  ruleId,
+  isPreview,
   children,
   'data-test-subj': dataTestSubj = FLYOUT_PREVIEW_LINK_TEST_ID,
 }) => {
@@ -102,7 +127,7 @@ export const PreviewLink: FC<PreviewLinkProps> = ({
   const { telemetry } = useKibana().services;
 
   const onClick = useCallback(() => {
-    const previewParams = getPreviewParams(value, field, scopeId);
+    const previewParams = getPreviewParams(value, field, scopeId, ruleId);
     if (previewParams) {
       openPreviewPanel({
         id: previewParams.id,
@@ -113,9 +138,15 @@ export const PreviewLink: FC<PreviewLinkProps> = ({
         panel: 'preview',
       });
     }
-  }, [field, scopeId, value, telemetry, openPreviewPanel]);
+  }, [field, scopeId, value, telemetry, openPreviewPanel, ruleId]);
 
+  // If the field is not previewable, do not render link
   if (!hasPreview(field)) {
+    return <>{children ?? value}</>;
+  }
+
+  // If the field is rule.id, and the ruleId is not provided or currently in rule preview, do not render link
+  if (field === SIGNAL_RULE_NAME_FIELD_NAME && (!ruleId || isPreview)) {
     return <>{children ?? value}</>;
   }
 

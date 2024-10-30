@@ -559,7 +559,10 @@
                 "label": "server",
                 "description": [],
                 "signature": [
-                  "Server"
+                  "Server",
+                  "<",
+                  "ServerApplicationState",
+                  ">"
                 ],
                 "path": "packages/core/metrics/core-metrics-collectors-server-internal/src/server.ts",
                 "deprecated": false,

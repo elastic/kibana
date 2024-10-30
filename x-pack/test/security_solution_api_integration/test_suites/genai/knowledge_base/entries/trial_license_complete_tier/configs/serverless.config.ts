@@ -8,7 +8,16 @@
 import { createTestConfig } from '../../../../../../config/serverless/config.base';
 
 export default createTestConfig({
-  kbnTestServerArgs: [],
+  kbnTestServerArgs: [
+    `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+      'assistantKnowledgeBaseByDefault',
+    ])}`,
+    `--xpack.securitySolutionServerless.productTypes=${JSON.stringify([
+      { product_line: 'security', product_tier: 'complete' },
+      { product_line: 'endpoint', product_tier: 'complete' },
+      { product_line: 'cloud', product_tier: 'complete' },
+    ])}`,
+  ],
   testFiles: [require.resolve('..')],
   junit: {
     reportName: 'GenAI - Knowledge Base Entries Tests - Serverless Env - Complete Tier',

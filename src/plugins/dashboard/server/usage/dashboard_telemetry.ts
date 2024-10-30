@@ -9,10 +9,13 @@
 
 import { isEmpty } from 'lodash';
 
-import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import { initializeControlGroupTelemetry } from '@kbn/controls-plugin/server';
+import { CONTROL_GROUP_TYPE } from '@kbn/controls-plugin/common';
+import {
+  initializeControlGroupTelemetry,
+  type ControlGroupTelemetry,
+} from '@kbn/controls-plugin/server';
 import { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common';
-import { type ControlGroupTelemetry, CONTROL_GROUP_TYPE } from '@kbn/controls-plugin/common';
+import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 
 import { DashboardAttributes, SavedDashboardPanel } from '../../common/content_management';
 import { TASK_ID } from './dashboard_telemetry_collection_task';

@@ -392,7 +392,12 @@ export class Table extends PureComponent<TableProps, TableState> {
       <Fragment>
         {activeActionContents}
         <EuiSearchBar
-          box={{ 'data-test-subj': 'savedObjectSearchBar' }}
+          box={{
+            'data-test-subj': 'savedObjectSearchBar',
+            schema: {
+              recognizedFields: ['type', 'tag'],
+            },
+          }}
           filters={filters as any}
           onChange={this.onChange}
           defaultQuery={this.props.initialQuery}

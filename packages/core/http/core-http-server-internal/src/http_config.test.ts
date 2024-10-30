@@ -525,23 +525,27 @@ describe('versioned', () => {
 });
 
 describe('restrictInternalApis', () => {
-  it('is only allowed on serverless', () => {
-    expect(() => config.schema.validate({ restrictInternalApis: false }, {})).toThrow(
-      /a value wasn't expected/
-    );
-    expect(() => config.schema.validate({ restrictInternalApis: true }, {})).toThrow(
-      /a value wasn't expected/
-    );
+  it('is allowed on serverless and traditional', () => {
+    expect(() => config.schema.validate({ restrictInternalApis: false }, {})).not.toThrow();
+    expect(() => config.schema.validate({ restrictInternalApis: true }, {})).not.toThrow();
     expect(
       config.schema.validate({ restrictInternalApis: true }, { serverless: true })
     ).toMatchObject({
       restrictInternalApis: true,
     });
+    expect(
+      config.schema.validate({ restrictInternalApis: true }, { traditional: true })
+    ).toMatchObject({
+      restrictInternalApis: true,
+    });
   });
-  it('defaults to false', () => {
+  it('defaults to true', () => {
     expect(
       config.schema.validate({ restrictInternalApis: undefined }, { serverless: true })
-    ).toMatchObject({ restrictInternalApis: false });
+    ).toMatchObject({ restrictInternalApis: true });
+    expect(
+      config.schema.validate({ restrictInternalApis: undefined }, { traditional: true })
+    ).toMatchObject({ restrictInternalApis: true });
   });
 });
 
@@ -673,7 +677,7 @@ describe('HttpConfig', () => {
     });
   });
 
-  it('defaults restrictInternalApis to false', () => {
+  it('defaults restrictInternalApis to true', () => {
     const rawConfig = config.schema.validate({}, {});
     const rawCspConfig = cspConfig.schema.validate({});
     const rawPermissionsPolicyConfig = permissionsPolicyConfig.schema.validate({});
@@ -683,6 +687,6 @@ describe('HttpConfig', () => {
       ExternalUrlConfig.DEFAULT,
       rawPermissionsPolicyConfig
     );
-    expect(httpConfig.restrictInternalApis).toBe(false);
+    expect(httpConfig.restrictInternalApis).toBe(true);
   });
 });

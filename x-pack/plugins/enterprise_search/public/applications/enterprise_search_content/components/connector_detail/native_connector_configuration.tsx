@@ -105,11 +105,11 @@ export const NativeConnectorConfiguration: React.FC = () => {
                 {connector.is_native
                   ? i18n.translate(
                       'xpack.enterpriseSearch.content.connector_detail.configurationConnector.badgeType.nativeConnector',
-                      { defaultMessage: 'Native connector' }
+                      { defaultMessage: 'Elastic managed connector' }
                     )
                   : i18n.translate(
                       'xpack.enterpriseSearch.content.connector_detail.configurationConnector.badgeType.connectorClient',
-                      { defaultMessage: 'Connector client' }
+                      { defaultMessage: 'Self-managed connector' }
                     )}
               </EuiBadge>
             </EuiFlexItem>
@@ -132,7 +132,7 @@ export const NativeConnectorConfiguration: React.FC = () => {
                     'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.entSearchWarning.text',
                     {
                       defaultMessage:
-                        'Native connectors require a running Enterprise Search instance to sync content from source.',
+                        'Elastic managed connectors require a running Enterprise Search instance.',
                     }
                   )}
                 </p>

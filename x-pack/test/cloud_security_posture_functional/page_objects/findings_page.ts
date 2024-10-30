@@ -113,6 +113,7 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
       return await retry.try(async () => {
         await testSubjects.click(actionTestSubject);
         await PageObjects.header.waitUntilLoadingHasFinished();
+
         const result = await testSubjects.exists('createPackagePolicy_pageTitle');
 
         if (!result) {
@@ -290,6 +291,12 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
 
   const notInstalledVulnerabilities = createNotInstalledObject('cnvm-integration-not-installed');
   const notInstalledCSP = createNotInstalledObject('cloud_posture_page_package_not_installed');
+  const thirdPartyIntegrationsNoVulnerabilitiesFindingsPrompt = createNotInstalledObject(
+    '3p-integrations-no-vulnerabilities-findings-prompt'
+  );
+  const thirdPartyIntegrationsNoMisconfigurationsFindingsPrompt = createNotInstalledObject(
+    '3p-integrations-no-misconfigurations-findings-prompt'
+  );
 
   const vulnerabilityDataGrid = {
     getVulnerabilityTable: async () => testSubjects.find('euiDataGrid'),
@@ -359,8 +366,7 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
   });
   const isLatestFindingsTableThere = async () => {
     const table = await testSubjects.findAll('docTable');
-    const trueOrFalse = table.length > 0 ? true : false;
-    return trueOrFalse;
+    return table.length > 0;
   };
 
   const getUnprivilegedPrompt = async () => {
@@ -375,6 +381,8 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
     latestVulnerabilitiesTable,
     notInstalledVulnerabilities,
     notInstalledCSP,
+    thirdPartyIntegrationsNoMisconfigurationsFindingsPrompt,
+    thirdPartyIntegrationsNoVulnerabilitiesFindingsPrompt,
     index,
     vulnerabilitiesIndex,
     waitForPluginInitialized,

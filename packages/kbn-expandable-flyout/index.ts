@@ -12,7 +12,7 @@ export { ExpandableFlyout } from './src';
 export { useExpandableFlyoutApi } from './src/hooks/use_expandable_flyout_api';
 export { useExpandableFlyoutState } from './src/hooks/use_expandable_flyout_state';
 
-export { type FlyoutState as ExpandableFlyoutState } from './src/state';
+export { type FlyoutPanels as ExpandableFlyoutState } from './src/store/state';
 
 export { ExpandableFlyoutProvider } from './src/provider';
 export { withExpandableFlyoutProvider } from './src/with_provider';

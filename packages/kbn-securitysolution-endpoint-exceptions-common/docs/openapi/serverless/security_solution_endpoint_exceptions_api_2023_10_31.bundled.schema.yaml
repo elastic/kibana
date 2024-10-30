@@ -1,10 +1,10 @@
 openapi: 3.0.3
 info:
   description: Endpoint Exceptions API allow you to manage Endpoint lists.
-  title: Security Solution Endpoint Exceptions API (Elastic Cloud Serverless)
+  title: Security Endpoint Exceptions API (Elastic Cloud Serverless)
   version: '2023-10-31'
 servers:
-  - url: 'http://{kibana_host}:{port}'
+  - url: http://{kibana_host}:{port}
     variables:
       kibana_host:
         default: localhost
@@ -13,7 +13,10 @@ servers:
 paths:
   /api/endpoint_list:
     post:
-      description: Creates an endpoint list or does nothing if the list already exists
+      description: >-
+        Create an endpoint exception list, which groups endpoint exception list
+        items. If an endpoint exception list already exists, an empty response
+        is returned.
       operationId: CreateEndpointList
       responses:
         '200':
@@ -48,9 +51,14 @@ paths:
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error
-      summary: Creates an endpoint list
+      summary: Create an endpoint exception list
+      tags:
+        - Security Endpoint Exceptions API
   /api/endpoint_list/items:
     delete:
+      description: >-
+        Delete an endpoint exception list item using the `id` or `item_id`
+        field.
       operationId: DeleteEndpointListItem
       parameters:
         - description: Either `id` or `item_id` must be specified
@@ -104,8 +112,13 @@ paths:
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error
-      summary: Deletes an endpoint list item
+      summary: Delete an endpoint exception list item
+      tags:
+        - Security Endpoint Exceptions API
     get:
+      description: >-
+        Get the details of an endpoint exception list item using the `id` or
+        `item_id` field.
       operationId: ReadEndpointListItem
       parameters:
         - description: Either `id` or `item_id` must be specified
@@ -161,8 +174,13 @@ paths:
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error
-      summary: Reads an endpoint list item
+      summary: Get an endpoint exception list item
+      tags:
+        - Security Endpoint Exceptions API
     post:
+      description: >-
+        Create an endpoint exception list item, and associate it with the
+        endpoint exception list.
       operationId: CreateEndpointListItem
       requestBody:
         content:
@@ -237,8 +255,13 @@ paths:
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error
-      summary: Creates an endpoint list item
+      summary: Create an endpoint exception list item
+      tags:
+        - Security Endpoint Exceptions API
     put:
+      description: >-
+        Update an endpoint exception list item using the `id` or `item_id`
+        field.
       operationId: UpdateEndpointListItem
       requestBody:
         content:
@@ -318,9 +341,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error
-      summary: Updates an endpoint list item
+      summary: Update an endpoint exception list item
+      tags:
+        - Security Endpoint Exceptions API
   /api/endpoint_list/items/_find:
     get:
+      description: Get a list of all endpoint exception list items.
       operationId: FindEndpointListItems
       parameters:
         - description: >
@@ -353,7 +379,7 @@ paths:
           required: false
           schema:
             $ref: '#/components/schemas/NonEmptyString'
-        - description: 'Determines the sort order, which can be `desc` or `asc`'
+        - description: Determines the sort order, which can be `desc` or `asc`
           in: query
           name: sort_order
           required: false
@@ -422,7 +448,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error
-      summary: Finds endpoint list items
+      summary: Get endpoint exception list items
+      tags:
+        - Security Endpoint Exceptions API
 components:
   schemas:
     EndpointList:
@@ -489,7 +517,7 @@ components:
       type: string
     ExceptionListHumanId:
       $ref: '#/components/schemas/NonEmptyString'
-      description: 'Human readable string identifier, e.g. `trusted-linux-processes`'
+      description: Human readable string identifier, e.g. `trusted-linux-processes`
     ExceptionListId:
       $ref: '#/components/schemas/NonEmptyString'
     ExceptionListItem:
@@ -851,3 +879,10 @@ components:
       type: http
 security:
   - BasicAuth: []
+tags:
+  - description: >-
+      Endpoint Exceptions API allows you to manage detection rule endpoint
+      exceptions to prevent a rule from generating an alert from incoming events
+      even when the rule's other criteria are met.
+    name: Security Endpoint Exceptions API
+    x-displayName: Security endpoint exceptions

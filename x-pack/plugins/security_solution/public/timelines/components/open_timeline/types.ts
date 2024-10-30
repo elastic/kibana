@@ -10,7 +10,7 @@ import type { IconType } from '@elastic/eui';
 import type { TimelineModel } from '../../store/model';
 import type {
   RowRendererId,
-  SingleTimelineResolveResponse,
+  ResolvedTimeline,
   TimelineType,
   TimelineStatus,
   TemplateTimelineType,
@@ -206,13 +206,12 @@ export interface OpenTimelineProps {
   totalSearchResultsCount: number;
   /** Hide action on timeline if needed it */
   hideActions?: ActionTimelineToShow[];
-  tabName?: string;
 }
 
 export interface ResolveTimelineConfig {
-  alias_target_id: SingleTimelineResolveResponse['data']['alias_target_id'];
-  outcome: SingleTimelineResolveResponse['data']['outcome'];
-  alias_purpose: SingleTimelineResolveResponse['data']['alias_purpose'];
+  alias_target_id: ResolvedTimeline['alias_target_id'];
+  outcome: ResolvedTimeline['outcome'];
+  alias_purpose: ResolvedTimeline['alias_purpose'];
 }
 export interface UpdateTimeline {
   duplicate: boolean;

@@ -146,35 +146,12 @@ export async function installKibanaAssets(options: {
 
   await makeManagedIndexPatternsGlobal(savedObjectsClient);
 
-  let installedAssets: SavedObjectsImportSuccess[] = [];
-
-  if (
-    assetsToInstall.length > MAX_ASSETS_TO_INSTALL_IN_PARALLEL &&
-    !hasReferences(assetsToInstall)
-  ) {
-    // If the package size is too large, we need to install in chunks to avoid
-    // memory issues as the SO import creates a lot of objects in memory
-
-    // NOTE: if there are references, we can't chunk the install because
-    // referenced objects might end up in different chunks leading to import
-    // errors.
-    for (const assetChunk of chunk(assetsToInstall, MAX_ASSETS_TO_INSTALL_IN_PARALLEL)) {
-      const result = await installKibanaSavedObjects({
-        logger,
-        savedObjectsImporter,
-        kibanaAssets: assetChunk,
-      });
-      installedAssets = installedAssets.concat(result);
-    }
-  } else {
-    installedAssets = await installKibanaSavedObjects({
-      logger,
-      savedObjectsImporter,
-      kibanaAssets: assetsToInstall,
-    });
-  }
-
-  return installedAssets;
+  return await installKibanaSavedObjects({
+    logger,
+    savedObjectsImporter,
+    kibanaAssets: assetsToInstall,
+    assetsChunkSize: MAX_ASSETS_TO_INSTALL_IN_PARALLEL,
+  });
 }
 
 export async function installKibanaAssetsAndReferencesMultispace({
@@ -413,11 +390,69 @@ async function retryImportOnConflictError(
 export async function installKibanaSavedObjects({
   savedObjectsImporter,
   kibanaAssets,
+  assetsChunkSize,
   logger,
 }: {
   kibanaAssets: ArchiveAsset[];
   savedObjectsImporter: SavedObjectsImporterContract;
   logger: Logger;
+  assetsChunkSize?: number;
+}): Promise<SavedObjectsImportSuccess[]> {
+  if (!assetsChunkSize || kibanaAssets.length <= assetsChunkSize || hasReferences(kibanaAssets)) {
+    return await installKibanaSavedObjectsChunk({
+      logger,
+      savedObjectsImporter,
+      kibanaAssets,
+      refresh: 'wait_for',
+    });
+  }
+
+  const installedAssets: SavedObjectsImportSuccess[] = [];
+
+  // If the package size is too large, we need to install in chunks to avoid
+  // memory issues as the SO import creates a lot of objects in memory
+
+  // NOTE: if there are references, we can't chunk the install because
+  // referenced objects might end up in different chunks leading to import
+  // errors.
+  const assetChunks = chunk(kibanaAssets, assetsChunkSize);
+  const allAssetChunksButLast = assetChunks.slice(0, -1);
+  const lastAssetChunk = assetChunks.slice(-1)[0];
+
+  for (const assetChunk of allAssetChunksButLast) {
+    const result = await installKibanaSavedObjectsChunk({
+      logger,
+      savedObjectsImporter,
+      kibanaAssets: assetChunk,
+      refresh: false,
+    });
+
+    installedAssets.push(...result);
+  }
+
+  const result = await installKibanaSavedObjectsChunk({
+    logger,
+    savedObjectsImporter,
+    kibanaAssets: lastAssetChunk,
+    refresh: 'wait_for',
+  });
+
+  installedAssets.push(...result);
+
+  return installedAssets;
+}
+
+// only exported for testing
+async function installKibanaSavedObjectsChunk({
+  savedObjectsImporter,
+  kibanaAssets,
+  logger,
+  refresh,
+}: {
+  kibanaAssets: ArchiveAsset[];
+  savedObjectsImporter: SavedObjectsImporterContract;
+  logger: Logger;
+  refresh?: boolean | 'wait_for';
 }) {
   if (!kibanaAssets.length) {
     return [];
@@ -437,8 +472,8 @@ export async function installKibanaSavedObjects({
       overwrite: true,
       readStream,
       createNewCopies: false,
-      refresh: false,
       managed: true,
+      refresh,
     });
   });
 

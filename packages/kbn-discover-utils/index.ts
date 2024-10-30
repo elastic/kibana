@@ -34,6 +34,8 @@ export {
   buildDataTableRecord,
   buildDataTableRecordList,
   createLogsContextService,
+  createDegradedDocsControl,
+  createStacktraceControl,
   fieldConstants,
   formatFieldValue,
   formatHit,
@@ -50,10 +52,18 @@ export {
   getLogLevelCoalescedValue,
   getLogLevelCoalescedValueLabel,
   LogLevelCoalescedValue,
-  LogLevelBadge,
   getFieldValue,
+  getVisibleColumns,
+  canPrependTimeFieldColumn,
+  DiscoverFlyouts,
+  AppMenuRegistry,
+  dismissAllFlyoutsExceptFor,
+  dismissFlyouts,
+  LogLevelBadge,
 } from './src';
 
 export type { LogsContextService } from './src';
 
 export * from './src/types';
+
+export * from './src/data_types/logs/constants';

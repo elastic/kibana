@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { HttpFetchOptions } from '@kbn/core/public';
-import { filter, lastValueFrom, Observable } from 'rxjs';
+import { BehaviorSubject, filter, lastValueFrom, Observable } from 'rxjs';
 import { ReadableStream } from 'stream/web';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import {
@@ -17,6 +17,7 @@ import {
 import { concatenateChatCompletionChunks } from '../../common/utils/concatenate_chat_completion_chunks';
 import type { ObservabilityAIAssistantChatService } from '../types';
 import { createChatService } from './create_chat_service';
+import { AssistantScope } from '@kbn/ai-assistant-common';
 
 async function getConcatenatedMessage(
   response$: Observable<StreamingChatResponseEventWithoutError>
@@ -55,7 +56,7 @@ describe('createChatService', () => {
   }
 
   beforeEach(async () => {
-    clientSpy.mockImplementationOnce(async () => {
+    clientSpy.mockImplementation(async () => {
       return {
         functionDefinitions: [],
         contextDefinitions: [],
@@ -70,6 +71,7 @@ describe('createChatService', () => {
       apiClient: clientSpy,
       registrations: [],
       signal: new AbortController().signal,
+      scope$: new BehaviorSubject<AssistantScope[]>(['observability']),
     });
   });
 
@@ -79,7 +81,12 @@ describe('createChatService', () => {
 
   describe('chat', () => {
     function chat({ signal }: { signal: AbortSignal } = { signal: new AbortController().signal }) {
-      return service.chat('my_test', { signal, messages: [], connectorId: '' });
+      return service.chat('my_test', {
+        signal,
+        messages: [],
+        connectorId: '',
+        scopes: ['observability'],
+      });
     }
 
     it('correctly parses a stream of JSON lines', async () => {

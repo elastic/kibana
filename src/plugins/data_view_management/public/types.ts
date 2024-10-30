@@ -29,11 +29,14 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import type { NoDataPagePluginSetup } from '@kbn/no-data-page-plugin/public';
+import { SharePluginStart } from '@kbn/share-plugin/public';
 import type { IndexPatternManagementStart } from '.';
+import type { DataViewMgmtService } from './management_app/data_view_management_service';
 
 export type StartServices = Pick<CoreStart, 'analytics' | 'i18n' | 'theme'>;
 
 export interface IndexPatternManagmentContext extends StartServices {
+  dataViewMgmtService: DataViewMgmtService;
   application: ApplicationStart;
   chrome: ChromeStart;
   uiSettings: IUiSettingsClient;
@@ -51,6 +54,7 @@ export interface IndexPatternManagmentContext extends StartServices {
   fieldFormatEditors: IndexPatternFieldEditorStart['fieldFormatEditors'];
   IndexPatternEditor: DataViewEditorStart['IndexPatternEditorComponent'];
   fieldFormats: FieldFormatsStart;
+  share?: SharePluginStart;
   spaces?: SpacesPluginStart;
   savedObjectsManagement: SavedObjectsManagementPluginStart;
   noDataPage?: NoDataPagePluginSetup;

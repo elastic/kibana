@@ -8,13 +8,13 @@
  */
 
 import React, { useEffect } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiHorizontalRule } from '@elastic/eui';
-import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+
 import { EuiPageBody } from '@elastic/eui';
 import { CardsNavigation } from '@kbn/management-cards-navigation';
 
 import { useAppContext } from '../management_app/management_context';
+import { ClassicEmptyPrompt } from './classic_empty_prompt';
+import { SolutionEmptyPrompt } from './solution_empty_prompt';
 
 interface ManagementLandingPageProps {
   onAppMounted: (id: string) => void;
@@ -25,7 +25,8 @@ export const ManagementLandingPage = ({
   setBreadcrumbs,
   onAppMounted,
 }: ManagementLandingPageProps) => {
-  const { appBasePath, sections, kibanaVersion, cardsNavigationConfig } = useAppContext();
+  const { appBasePath, sections, kibanaVersion, cardsNavigationConfig, chromeStyle, coreStart } =
+    useAppContext();
   setBreadcrumbs();
 
   useEffect(() => {
@@ -45,36 +46,11 @@ export const ManagementLandingPage = ({
     );
   }
 
-  return (
-    <KibanaPageTemplate.EmptyPrompt
-      data-test-subj="managementHome"
-      iconType="managementApp"
-      title={
-        <h1>
-          <FormattedMessage
-            id="management.landing.header"
-            defaultMessage="Welcome to Stack Management {version}"
-            values={{ version: kibanaVersion }}
-          />
-        </h1>
-      }
-      body={
-        <>
-          <p>
-            <FormattedMessage
-              id="management.landing.subhead"
-              defaultMessage="Manage your indices, data views, saved objects, Kibana settings, and more."
-            />
-          </p>
-          <EuiHorizontalRule />
-          <p>
-            <FormattedMessage
-              id="management.landing.text"
-              defaultMessage="A complete list of apps is in the menu on the left."
-            />
-          </p>
-        </>
-      }
-    />
-  );
+  if (!chromeStyle) return null;
+
+  if (chromeStyle === 'project') {
+    return <SolutionEmptyPrompt kibanaVersion={kibanaVersion} coreStart={coreStart} />;
+  }
+
+  return <ClassicEmptyPrompt kibanaVersion={kibanaVersion} />;
 };
