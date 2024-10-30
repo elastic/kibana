@@ -111,7 +111,7 @@ describe('Cases', { tags: ['@ess', '@serverless'] }, () => {
       `${this.mycase.description} ${this.mycase.timeline.title}`
     );
 
-    getFullname('admin').then((username) => {
+    getFullname('platform_engineer').then((username) => {
       cy.get(CASE_DETAILS_USERNAMES).eq(REPORTER).should('contain', username);
       cy.get(CASE_DETAILS_USERNAMES).eq(PARTICIPANTS).should('contain', username);
     });
