@@ -88,6 +88,12 @@ export function registerChatCompleteRoute({
   router.post(
     {
       path: '/internal/inference/chat_complete',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: chatCompleteBodySchema,
       },
