@@ -292,10 +292,8 @@ export class SearchSessionService implements ISearchSessionService {
 
     const requestHash = createRequestHash(searchRequest.params);
 
-    this.logger.error(
-      `SearchSessionService: trackId | sessionId: "${sessionId}" | searchId:"${searchId}" | requestHash: "${requestHash} | ${JSON.stringify(
-        searchRequest.params
-      )}"`
+    this.logger.debug(
+      `SearchSessionService: trackId | sessionId: "${sessionId}" | searchId:"${searchId}" | requestHash: "${requestHash}"`
     );
 
     const searchInfo: SearchSessionRequestInfo = {
@@ -404,7 +402,7 @@ export class SearchSessionService implements ISearchSessionService {
     const session = await this.get(deps, user, sessionId);
     const requestHash = createRequestHash(searchRequest.params);
     if (!Object.hasOwn(session.attributes.idMapping, requestHash)) {
-      this.logger.error(`SearchSessionService: getId | ${sessionId} | ${requestHash} not found`);
+      this.logger.debug(`SearchSessionService: getId | ${sessionId} | ${requestHash} not found`);
       this.logger.error(
         `SearchSessionService: getId not found search with params: ${JSON.stringify(
           searchRequest.params

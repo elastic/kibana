@@ -29,7 +29,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const toasts = getService('toasts');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/195955
   describe('discover async search', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
@@ -127,9 +126,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await searchSessionsManagement.goTo();
       const searchSessionListBeforeRestore = await searchSessionsManagement.getList();
       const searchesCountBeforeRestore = searchSessionListBeforeRestore[0].searchesCount;
+
       // navigate to Discover
+      // there's currently a bug that causes additional requests in Discover (see https://github.com/elastic/kibana/issues/198456)
+      // to work around this, we open the browser directly to the restore URL instead of clicking the restore button
+      // await searchSessionListBeforeRestore[0].view();
       const restoreUrl = new URL(searchSessionListBeforeRestore[0].mainUrl, url).href;
-      await browser.navigateTo(restoreUrl); // await searchSessionListBeforeRestore[0].view();
+      await browser.navigateTo(restoreUrl);
+
       await header.waitUntilLoadingHasFinished();
       await searchSessions.expectState('restored');
       expect(await discover.hasNoResults()).to.be(true);
