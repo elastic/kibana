@@ -29,10 +29,10 @@ jest.mock('react-redux', () => {
     useDispatch: () => mockDispatch,
   };
 });
-const mockOpenFlyout = jest.fn();
 
 jest.mock('../../../utils/route/use_route_spy');
 
+const mockOpenFlyout = jest.fn();
 jest.mock('@kbn/expandable-flyout');
 
 const mockedTelemetry = createTelemetryServiceMock();

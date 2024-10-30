@@ -26,6 +26,7 @@ describe('getFieldMarkdownRenderer', () => {
 
     mockUseExpandableFlyoutApi.mockReturnValue({
       ...createExpandableFlyoutApiMock(),
+      openRightPanel: mockOpenRightPanel,
     });
   });
 
