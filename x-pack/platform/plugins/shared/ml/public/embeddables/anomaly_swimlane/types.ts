@@ -14,7 +14,7 @@ import type {
   PublishingSubject,
   SerializedTitles,
 } from '@kbn/presentation-publishing';
-import { apiIsOfType } from '@kbn/presentation-publishing';
+import { apiIsOfType } from '@kbn/presentation-publishing/interfaces/has_type';
 import type { JobId } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import type { SwimlaneType } from '../../application/explorer/explorer_constants';
 
