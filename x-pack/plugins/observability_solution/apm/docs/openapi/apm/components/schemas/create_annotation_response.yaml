@@ -1,0 +1,33 @@
+type: object
+properties:
+  _id:
+    type: string
+  _index:
+    type: string
+  _source:
+    type: object
+    properties:
+      annotation:
+        type: string
+      tags:
+        type: array
+        items:
+          type: string
+      message:
+        type: string
+      service:
+        type: object
+        properties:
+          name:
+            type: string
+          environment:
+            type: string
+          version:
+            type: string
+      event:
+        type: object
+        properties:
+          created:
+            type: string
+      '@timestamp':
+        type: string

@@ -1,0 +1,11 @@
+type: object
+required:
+  - service
+  - settings
+properties:
+  agent_name:
+    type: string
+  service:
+    $ref: 'service_object.yaml'
+  settings:
+    $ref: 'settings_object.yaml'

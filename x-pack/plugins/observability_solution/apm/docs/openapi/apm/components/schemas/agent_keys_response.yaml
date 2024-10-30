@@ -1,0 +1,13 @@
+type: object
+properties:
+  api_key:
+    type: string
+  expiration:
+    type: integer
+    format: int64
+  id:
+    type: string
+  name:
+    type: string
+  encoded:
+    type: string

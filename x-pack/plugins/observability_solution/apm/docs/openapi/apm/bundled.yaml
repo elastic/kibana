@@ -4,17 +4,16 @@ info:
   version: 1.0.0
 tags:
   - name: APM agent keys
-    description: >
+    description: |
       Configure APM agent keys to authorize requests from APM agents to the APM Server.
   - name: APM agent configuration
-    description: >
+    description: |
       Adjust APM agent configuration without need to redeploy your application.
   - name: APM sourcemaps
     description: Configure APM source maps.
   - name: APM annotations
-    description: >
-      Annotate visualizations in the APM app with significant events.
-      Annotations enable you to easily see how events are impacting the performance of your applications.
+    description: |
+      Annotate visualizations in the APM app with significant events. Annotations enable you to easily see how events are impacting the performance of your applications.
   - name: APM server schema
     description: Create APM fleet server schema.
 paths:
@@ -32,7 +31,7 @@ paths:
             schema:
               $ref: '#/components/schemas/agent_keys_object'
       responses:
-        "200":
+        '200':
           description: Agent key created successfully
           content:
             application/json:
@@ -71,7 +70,7 @@ paths:
           schema:
             type: string
       responses:
-        "200":
+        '200':
           description: Successful response
           content:
             application/json:
@@ -405,7 +404,7 @@ paths:
                   description: Schema object
                   additionalProperties: true
                   example:
-                    foo: "bar"
+                    foo: bar
       responses:
         '200':
           description: Successful response
@@ -422,41 +421,6 @@ paths:
                 $ref: '#/components/schemas/404_response'
 components:
   schemas:
-    404_response:
-      type: object
-      properties:
-        statusCode:
-          type: number
-          example: 404
-        error:
-          type: string
-          example: Not Found
-        message:
-          type: string
-          example: Not Found
-    500_response:
-      type: object
-      properties:
-        statusCode:
-          type: number
-          example: 500
-        error:
-          type: string
-          example: Internal Server Error
-        message:
-          type: string
-    501_response:
-      type: object
-      properties:
-        statusCode:
-          type: number
-          example: 501
-        error:
-          type: string
-          example: Not Implemented
-        message:
-          type: string
-          example: Not Implemented
     agent_keys_object:
       type: object
       properties:
@@ -469,139 +433,6 @@ components:
             enum:
               - event:write
               - config_agent:read
-    create_annotation_object:
-      type: object
-      properties:
-        '@timestamp':
-          type: string
-        service:
-          type: object
-          properties:
-            version:
-              type: string
-            environment:
-              type: string
-        message:
-          type: string
-        tags:
-          type: array
-          items:
-            type: string
-    service_object:
-      type: object
-      properties:
-        name:
-          type: string
-        environment:
-          type: string
-    settings_object:
-      type: object
-      additionalProperties:
-        type: string
-    agent_configuration_object:
-      type: object
-      required:
-        - service
-        - settings
-        - '@timestamp'
-        - etag
-      properties:
-        agent_name:
-          type: string
-        service:
-          $ref: '#/components/schemas/service_object'
-        settings:
-          $ref: '#/components/schemas/settings_object'
-        '@timestamp':
-          type: number
-        applied_by_agent:
-          type: boolean
-        etag:
-          type: string
-    agent_configuration_intake_object:
-      type: object
-      required:
-        - service
-        - settings
-      properties:
-        agent_name:
-          type: string
-        service:
-          $ref: '#/components/schemas/service_object'
-        settings:
-          $ref: '#/components/schemas/settings_object'
-    search_agent_configuration_object:
-      type: object
-      required:
-        - service
-      properties:
-        service:
-          $ref: '#/components/schemas/service_object'
-        etag:
-          type: string
-          description: If etags match then `applied_by_agent` field will be set to `true`
-        mark_as_applied_by_agent:
-          type: boolean
-          description: |
-            `markAsAppliedByAgent=true` means "force setting it to true regardless of etag".
-            This is needed for Jaeger agent that doesn't have etags
-    service_environment_object:
-      type: object
-      properties:
-        name:
-          type: string
-        alreadyConfigured:
-          type: boolean
-    upload_source_map_object:
-      type: object
-      required:
-        - service_name
-        - service_version
-        - bundle_filepath
-        - sourcemap
-      properties:
-        service_name:
-          type: string
-          description: The name of the service that the service map should apply to.
-        service_version:
-          type: string
-          description: The version of the service that the service map should apply to.
-        bundle_filepath:
-          type: string
-          description: The absolute path of the final bundle as used in the web application.
-        sourcemap:
-          type: string
-          format: binary
-          description: |
-            The source map. String or file upload. It must follow the
-            [source map revision 3 proposal](https://docs.google.com/document/d/1U1RGAehQwRypUTovF1KRlpiOFze0b-_2gc6fAH0KY0k).
-    base_source_map_object:
-      type: object
-      properties:
-        type:
-          type: string
-        identifier:
-          type: string
-        relative_url:
-          type: string
-        created:
-          type: string
-        id:
-          type: string
-        compressionAlgorithm:
-          type: string
-        decodedSha256:
-          type: string
-        decodedSize:
-          type: number
-        encodedSha256:
-          type: string
-        encodedSize:
-          type: number
-        encryptionAlgorithm:
-          type: string
-        packageName:
-          type: string
     agent_keys_response:
       type: object
       properties:
@@ -630,10 +461,28 @@ components:
                   - version
               id:
                 type: string
-              "@timestamp":
+              '@timestamp':
                 type: number
               text:
                 type: string
+    create_annotation_object:
+      type: object
+      properties:
+        '@timestamp':
+          type: string
+        service:
+          type: object
+          properties:
+            version:
+              type: string
+            environment:
+              type: string
+        message:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
     create_annotation_response:
       type: object
       properties:
@@ -668,6 +517,37 @@ components:
                   type: string
             '@timestamp':
               type: string
+    service_object:
+      type: object
+      properties:
+        name:
+          type: string
+        environment:
+          type: string
+    settings_object:
+      type: object
+      additionalProperties:
+        type: string
+    agent_configuration_object:
+      type: object
+      required:
+        - service
+        - settings
+        - '@timestamp'
+        - etag
+      properties:
+        agent_name:
+          type: string
+        service:
+          $ref: '#/components/schemas/service_object'
+        settings:
+          $ref: '#/components/schemas/settings_object'
+        '@timestamp':
+          type: number
+        applied_by_agent:
+          type: boolean
+        etag:
+          type: string
     agent_configurations_response:
       type: object
       properties:
@@ -675,6 +555,35 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/agent_configuration_object'
+    404_response:
+      type: object
+      properties:
+        statusCode:
+          type: number
+          example: 404
+        error:
+          type: string
+          example: Not Found
+        message:
+          type: string
+          example: Not Found
+    agent_configuration_intake_object:
+      type: object
+      required:
+        - service
+        - settings
+      properties:
+        agent_name:
+          type: string
+        service:
+          $ref: '#/components/schemas/service_object'
+        settings:
+          $ref: '#/components/schemas/settings_object'
+    delete_agent_configurations_response:
+      type: object
+      properties:
+        result:
+          type: string
     single_agent_configuration_response:
       allOf:
         - type: object
@@ -684,11 +593,21 @@ components:
             id:
               type: string
         - $ref: '#/components/schemas/agent_configuration_object'
-    delete_agent_configurations_response:
+    search_agent_configuration_object:
       type: object
+      required:
+        - service
       properties:
-        result:
+        service:
+          $ref: '#/components/schemas/service_object'
+        etag:
           type: string
+          description: If etags match then `applied_by_agent` field will be set to `true`
+        mark_as_applied_by_agent:
+          type: boolean
+          description: |
+            `markAsAppliedByAgent=true` means "force setting it to true regardless of etag".
+            This is needed for Jaeger agent that doesn't have etags
     search_agent_configuration_response:
       type: object
       properties:
@@ -700,6 +619,13 @@ components:
           type: number
         _source:
           $ref: '#/components/schemas/agent_configuration_object'
+    service_environment_object:
+      type: object
+      properties:
+        name:
+          type: string
+        alreadyConfigured:
+          type: boolean
     service_environments_response:
       type: object
       properties:
@@ -711,6 +637,33 @@ components:
       type: object
       properties:
         agentName:
+          type: string
+    base_source_map_object:
+      type: object
+      properties:
+        type:
+          type: string
+        identifier:
+          type: string
+        relative_url:
+          type: string
+        created:
+          type: string
+        id:
+          type: string
+        compressionAlgorithm:
+          type: string
+        decodedSha256:
+          type: string
+        decodedSize:
+          type: number
+        encodedSha256:
+          type: string
+        encodedSize:
+          type: number
+        encryptionAlgorithm:
+          type: string
+        packageName:
           type: string
     source_maps_response:
       type: object
@@ -741,6 +694,52 @@ components:
                       sourceRoot:
                         type: string
               - $ref: '#/components/schemas/base_source_map_object'
+    500_response:
+      type: object
+      properties:
+        statusCode:
+          type: number
+          example: 500
+        error:
+          type: string
+          example: Internal Server Error
+        message:
+          type: string
+    501_response:
+      type: object
+      properties:
+        statusCode:
+          type: number
+          example: 501
+        error:
+          type: string
+          example: Not Implemented
+        message:
+          type: string
+          example: Not Implemented
+    upload_source_map_object:
+      type: object
+      required:
+        - service_name
+        - service_version
+        - bundle_filepath
+        - sourcemap
+      properties:
+        service_name:
+          type: string
+          description: The name of the service that the service map should apply to.
+        service_version:
+          type: string
+          description: The version of the service that the service map should apply to.
+        bundle_filepath:
+          type: string
+          description: The absolute path of the final bundle as used in the web application.
+        sourcemap:
+          type: string
+          format: binary
+          description: |
+            The source map. String or file upload. It must follow the
+            [source map revision 3 proposal](https://docs.google.com/document/d/1U1RGAehQwRypUTovF1KRlpiOFze0b-_2gc6fAH0KY0k).
     upload_source_maps_response:
       allOf:
         - type: object

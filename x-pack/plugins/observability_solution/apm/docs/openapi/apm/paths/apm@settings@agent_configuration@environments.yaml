@@ -1,0 +1,24 @@
+get:
+  summary: Get environments for service
+  operationId: getEnvironmentsForService
+  tags:
+    - APM agent configuration
+  parameters:
+    - name: serviceName
+      in: query
+      description: The name of the service
+      schema:
+        type: string
+  responses:
+    '200':
+      description: Successful response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/service_environments_response.yaml'
+    '404':
+      description: Not found response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/404_response.yaml'

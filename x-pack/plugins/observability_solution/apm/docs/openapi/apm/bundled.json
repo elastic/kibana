@@ -1,0 +1,1177 @@
+{
+  "openapi": "3.0.2",
+  "info": {
+    "title": "APM UI",
+    "version": "1.0.0"
+  },
+  "tags": [
+    {
+      "name": "APM agent keys",
+      "description": "Configure APM agent keys to authorize requests from APM agents to the APM Server.\n"
+    },
+    {
+      "name": "APM agent configuration",
+      "description": "Adjust APM agent configuration without need to redeploy your application.\n"
+    },
+    {
+      "name": "APM sourcemaps",
+      "description": "Configure APM source maps."
+    },
+    {
+      "name": "APM annotations",
+      "description": "Annotate visualizations in the APM app with significant events. Annotations enable you to easily see how events are impacting the performance of your applications.\n"
+    },
+    {
+      "name": "APM server schema",
+      "description": "Create APM fleet server schema."
+    }
+  ],
+  "paths": {
+    "/api/apm/agent_keys": {
+      "post": {
+        "summary": "Create an APM agent key",
+        "description": "Create a new agent key for APM.",
+        "operationId": "createAgentKey",
+        "tags": [
+          "APM agent keys"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/agent_keys_object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Agent key created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/agent_keys_response"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/apm/services/{serviceName}/annotation/search": {
+      "get": {
+        "summary": "Search for annotations",
+        "description": "Search for annotations related to a specific service.",
+        "operationId": "getAnnotation",
+        "tags": [
+          "APM annotations"
+        ],
+        "parameters": [
+          {
+            "name": "serviceName",
+            "in": "path",
+            "required": true,
+            "description": "The name of the service",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "environment",
+            "in": "query",
+            "required": false,
+            "description": "The environment to filter annotations by",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "start",
+            "in": "query",
+            "required": false,
+            "description": "The start date for the search",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "end",
+            "in": "query",
+            "required": false,
+            "description": "The end date for the search",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/annotation_search_response"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/apm/services/{serviceName}/annotation": {
+      "post": {
+        "summary": "Create a service annotation",
+        "description": "Create a new annotation for a specific service.",
+        "operationId": "createAnnotation",
+        "tags": [
+          "APM annotations"
+        ],
+        "parameters": [
+          {
+            "name": "serviceName",
+            "in": "path",
+            "required": true,
+            "description": "The name of the service",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/create_annotation_object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Annotation created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/create_annotation_response"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/apm/settings/agent-configuration": {
+      "get": {
+        "summary": "List of agent configurations",
+        "description": "Get a list of agent configurations.",
+        "operationId": "getAgentConfigurations",
+        "tags": [
+          "APM agent configuration"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/agent_configurations_response"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/404_response"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete agent configuration",
+        "operationId": "deleteAgentConfiguration",
+        "tags": [
+          "APM agent configuration"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/service_object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/delete_agent_configurations_response"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/404_response"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Create or update agent configuration",
+        "operationId": "createUpdateAgentConfiguration",
+        "tags": [
+          "APM agent configuration"
+        ],
+        "parameters": [
+          {
+            "name": "overwrite",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/agent_configuration_intake_object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/404_response"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/apm/settings/agent-configuration/view": {
+      "get": {
+        "summary": "Get single agent configuration",
+        "operationId": "getSingleAgentConfiguration",
+        "tags": [
+          "APM agent configuration"
+        ],
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "description": "Service name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "environment",
+            "in": "query",
+            "description": "Service environment",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/single_agent_configuration_response"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/404_response"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/apm/settings/agent-configuration/search": {
+      "post": {
+        "summary": "Lookup single agent configuration",
+        "description": "This endpoint allows to search for single agent configuration and update 'applied_by_agent' field.\n",
+        "operationId": "searchSingleConfiguration",
+        "tags": [
+          "APM agent configuration"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/search_agent_configuration_object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/search_agent_configuration_response"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/404_response"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/apm/settings/agent-configuration/environments": {
+      "get": {
+        "summary": "Get environments for service",
+        "operationId": "getEnvironmentsForService",
+        "tags": [
+          "APM agent configuration"
+        ],
+        "parameters": [
+          {
+            "name": "serviceName",
+            "in": "query",
+            "description": "The name of the service",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/service_environments_response"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/404_response"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/apm/settings/agent-configuration/agent_name": {
+      "get": {
+        "summary": "Get agent name for service",
+        "description": "Retrieve `agentName` for a service.",
+        "operationId": "getAgentNameForService",
+        "tags": [
+          "APM agent configuration"
+        ],
+        "parameters": [
+          {
+            "name": "serviceName",
+            "in": "query",
+            "description": "The name of the service",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/service_agent_name_response"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/404_response"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/apm/sourcemaps": {
+      "get": {
+        "summary": "Get source maps",
+        "description": "Returns an array of Fleet artifacts, including source map uploads.",
+        "operationId": "getSourceMaps",
+        "tags": [
+          "APM sourcemaps"
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "perPage",
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/source_maps_response"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/500_response"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Not Implemented response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/501_response"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Upload source map",
+        "description": "Upload a source map for a specific service and version.",
+        "operationId": "uploadSourceMap",
+        "tags": [
+          "APM sourcemaps"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/upload_source_map_object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/upload_source_maps_response"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/500_response"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Not Implemented response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/501_response"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/apm/sourcemaps/{id}": {
+      "delete": {
+        "summary": "Delete source map",
+        "description": "Delete a previously uploaded source map.",
+        "operationId": "deleteSourceMap",
+        "tags": [
+          "APM sourcemaps"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/500_response"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Not Implemented response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/501_response"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/apm/fleet/apm_server_schema": {
+      "post": {
+        "summary": "Save APM server schema",
+        "operationId": "saveApmServerSchema",
+        "tags": [
+          "APM server schema"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "schema": {
+                    "type": "object",
+                    "description": "Schema object",
+                    "additionalProperties": true,
+                    "example": {
+                      "foo": "bar"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/404_response"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "agent_keys_object": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "privileges": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "event:write",
+                "config_agent:read"
+              ]
+            }
+          }
+        }
+      },
+      "agent_keys_response": {
+        "type": "object",
+        "properties": {
+          "api_key": {
+            "type": "string"
+          },
+          "expiration": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "encoded": {
+            "type": "string"
+          }
+        }
+      },
+      "annotation_search_response": {
+        "type": "object",
+        "properties": {
+          "annotations": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "version"
+                  ]
+                },
+                "id": {
+                  "type": "string"
+                },
+                "@timestamp": {
+                  "type": "number"
+                },
+                "text": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "create_annotation_object": {
+        "type": "object",
+        "properties": {
+          "@timestamp": {
+            "type": "string"
+          },
+          "service": {
+            "type": "object",
+            "properties": {
+              "version": {
+                "type": "string"
+              },
+              "environment": {
+                "type": "string"
+              }
+            }
+          },
+          "message": {
+            "type": "string"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "create_annotation_response": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string"
+          },
+          "_index": {
+            "type": "string"
+          },
+          "_source": {
+            "type": "object",
+            "properties": {
+              "annotation": {
+                "type": "string"
+              },
+              "tags": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "message": {
+                "type": "string"
+              },
+              "service": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "environment": {
+                    "type": "string"
+                  },
+                  "version": {
+                    "type": "string"
+                  }
+                }
+              },
+              "event": {
+                "type": "object",
+                "properties": {
+                  "created": {
+                    "type": "string"
+                  }
+                }
+              },
+              "@timestamp": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "service_object": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "environment": {
+            "type": "string"
+          }
+        }
+      },
+      "settings_object": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "string"
+        }
+      },
+      "agent_configuration_object": {
+        "type": "object",
+        "required": [
+          "service",
+          "settings",
+          "@timestamp",
+          "etag"
+        ],
+        "properties": {
+          "agent_name": {
+            "type": "string"
+          },
+          "service": {
+            "$ref": "#/components/schemas/service_object"
+          },
+          "settings": {
+            "$ref": "#/components/schemas/settings_object"
+          },
+          "@timestamp": {
+            "type": "number"
+          },
+          "applied_by_agent": {
+            "type": "boolean"
+          },
+          "etag": {
+            "type": "string"
+          }
+        }
+      },
+      "agent_configurations_response": {
+        "type": "object",
+        "properties": {
+          "configurations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/agent_configuration_object"
+            }
+          }
+        }
+      },
+      "404_response": {
+        "type": "object",
+        "properties": {
+          "statusCode": {
+            "type": "number",
+            "example": 404
+          },
+          "error": {
+            "type": "string",
+            "example": "Not Found"
+          },
+          "message": {
+            "type": "string",
+            "example": "Not Found"
+          }
+        }
+      },
+      "agent_configuration_intake_object": {
+        "type": "object",
+        "required": [
+          "service",
+          "settings"
+        ],
+        "properties": {
+          "agent_name": {
+            "type": "string"
+          },
+          "service": {
+            "$ref": "#/components/schemas/service_object"
+          },
+          "settings": {
+            "$ref": "#/components/schemas/settings_object"
+          }
+        }
+      },
+      "delete_agent_configurations_response": {
+        "type": "object",
+        "properties": {
+          "result": {
+            "type": "string"
+          }
+        }
+      },
+      "single_agent_configuration_response": {
+        "allOf": [
+          {
+            "type": "object",
+            "required": [
+              "id"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "$ref": "#/components/schemas/agent_configuration_object"
+          }
+        ]
+      },
+      "search_agent_configuration_object": {
+        "type": "object",
+        "required": [
+          "service"
+        ],
+        "properties": {
+          "service": {
+            "$ref": "#/components/schemas/service_object"
+          },
+          "etag": {
+            "type": "string",
+            "description": "If etags match then `applied_by_agent` field will be set to `true`"
+          },
+          "mark_as_applied_by_agent": {
+            "type": "boolean",
+            "description": "`markAsAppliedByAgent=true` means \"force setting it to true regardless of etag\".\nThis is needed for Jaeger agent that doesn't have etags\n"
+          }
+        }
+      },
+      "search_agent_configuration_response": {
+        "type": "object",
+        "properties": {
+          "_index": {
+            "type": "string"
+          },
+          "_id": {
+            "type": "string"
+          },
+          "_score": {
+            "type": "number"
+          },
+          "_source": {
+            "$ref": "#/components/schemas/agent_configuration_object"
+          }
+        }
+      },
+      "service_environment_object": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "alreadyConfigured": {
+            "type": "boolean"
+          }
+        }
+      },
+      "service_environments_response": {
+        "type": "object",
+        "properties": {
+          "environments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/service_environment_object"
+            }
+          }
+        }
+      },
+      "service_agent_name_response": {
+        "type": "object",
+        "properties": {
+          "agentName": {
+            "type": "string"
+          }
+        }
+      },
+      "base_source_map_object": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "identifier": {
+            "type": "string"
+          },
+          "relative_url": {
+            "type": "string"
+          },
+          "created": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "compressionAlgorithm": {
+            "type": "string"
+          },
+          "decodedSha256": {
+            "type": "string"
+          },
+          "decodedSize": {
+            "type": "number"
+          },
+          "encodedSha256": {
+            "type": "string"
+          },
+          "encodedSize": {
+            "type": "number"
+          },
+          "encryptionAlgorithm": {
+            "type": "string"
+          },
+          "packageName": {
+            "type": "string"
+          }
+        }
+      },
+      "source_maps_response": {
+        "type": "object",
+        "properties": {
+          "artifacts": {
+            "type": "array",
+            "items": {
+              "allOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "body": {
+                      "type": "object",
+                      "properties": {
+                        "version": {
+                          "type": "number"
+                        },
+                        "file": {
+                          "type": "string"
+                        },
+                        "sources": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "sourcesContent": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "mappings": {
+                          "type": "string"
+                        },
+                        "sourceRoot": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                {
+                  "$ref": "#/components/schemas/base_source_map_object"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "500_response": {
+        "type": "object",
+        "properties": {
+          "statusCode": {
+            "type": "number",
+            "example": 500
+          },
+          "error": {
+            "type": "string",
+            "example": "Internal Server Error"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "501_response": {
+        "type": "object",
+        "properties": {
+          "statusCode": {
+            "type": "number",
+            "example": 501
+          },
+          "error": {
+            "type": "string",
+            "example": "Not Implemented"
+          },
+          "message": {
+            "type": "string",
+            "example": "Not Implemented"
+          }
+        }
+      },
+      "upload_source_map_object": {
+        "type": "object",
+        "required": [
+          "service_name",
+          "service_version",
+          "bundle_filepath",
+          "sourcemap"
+        ],
+        "properties": {
+          "service_name": {
+            "type": "string",
+            "description": "The name of the service that the service map should apply to."
+          },
+          "service_version": {
+            "type": "string",
+            "description": "The version of the service that the service map should apply to."
+          },
+          "bundle_filepath": {
+            "type": "string",
+            "description": "The absolute path of the final bundle as used in the web application."
+          },
+          "sourcemap": {
+            "type": "string",
+            "format": "binary",
+            "description": "The source map. String or file upload. It must follow the\n[source map revision 3 proposal](https://docs.google.com/document/d/1U1RGAehQwRypUTovF1KRlpiOFze0b-_2gc6fAH0KY0k).\n"
+          }
+        }
+      },
+      "upload_source_maps_response": {
+        "allOf": [
+          {
+            "type": "object",
+            "properties": {
+              "body": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "$ref": "#/components/schemas/base_source_map_object"
+          }
+        ]
+      }
+    }
+  }
+}

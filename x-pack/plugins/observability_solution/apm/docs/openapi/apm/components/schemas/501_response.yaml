@@ -1,0 +1,11 @@
+type: object
+properties:
+  statusCode:
+    type: number
+    example: 501
+  error:
+    type: string
+    example: Not Implemented
+  message:
+    type: string
+    example: Not Implemented

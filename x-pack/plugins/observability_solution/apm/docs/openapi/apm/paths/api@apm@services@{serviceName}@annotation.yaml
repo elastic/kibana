@@ -1,0 +1,26 @@
+post:
+  summary: Create a service annotation
+  description: Create a new annotation for a specific service.
+  operationId: createAnnotation
+  tags:
+    - APM annotations
+  parameters:
+    - name: serviceName
+      in: path
+      required: true
+      description: The name of the service
+      schema:
+        type: string
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../components/schemas/create_annotation_object.yaml'
+  responses:
+    '200':
+      description: Annotation created successfully
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/create_annotation_response.yaml'

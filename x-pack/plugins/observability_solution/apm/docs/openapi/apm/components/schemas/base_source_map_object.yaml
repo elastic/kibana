@@ -1,0 +1,26 @@
+type: object
+properties:
+  type:
+    type: string
+  identifier:
+    type: string
+  relative_url:
+    type: string
+  created:
+    type: string
+  id:
+    type: string
+  compressionAlgorithm:
+    type: string
+  decodedSha256:
+    type: string
+  decodedSize:
+    type: number
+  encodedSha256:
+    type: string
+  encodedSize:
+    type: number
+  encryptionAlgorithm:
+    type: string
+  packageName:
+    type: string

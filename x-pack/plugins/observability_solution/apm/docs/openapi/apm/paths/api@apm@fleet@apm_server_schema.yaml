@@ -1,0 +1,32 @@
+post:
+  summary: Save APM server schema
+  operationId: saveApmServerSchema
+  tags:
+    - APM server schema
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            schema:
+              type: object
+              description: Schema object
+              additionalProperties: true
+              example:
+                foo: "bar"
+  responses:
+    '200':
+      description: Successful response
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: false
+    '404':
+      description: Not found response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/404_response.yaml'

@@ -1,0 +1,17 @@
+type: object
+properties:
+  '@timestamp':
+    type: string
+  service:
+    type: object
+    properties:
+      version:
+        type: string
+      environment:
+        type: string
+  message:
+    type: string
+  tags:
+    type: array
+    items:
+      type: string

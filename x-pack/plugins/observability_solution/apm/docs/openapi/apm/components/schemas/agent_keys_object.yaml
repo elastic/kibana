@@ -1,0 +1,11 @@
+type: object
+properties:
+  name:
+    type: string
+  privileges:
+    type: array
+    items:
+      type: string
+      enum:
+        - event:write
+        - config_agent:read

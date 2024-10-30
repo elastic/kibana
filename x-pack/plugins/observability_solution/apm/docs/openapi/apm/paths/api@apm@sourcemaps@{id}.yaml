@@ -1,0 +1,31 @@
+delete:
+  summary: Delete source map
+  description: Delete a previously uploaded source map.
+  operationId: deleteSourceMap
+  tags:
+    - APM sourcemaps
+  parameters:
+    - name: id
+      in: path
+      schema:
+        type: string
+  responses:
+    '200':
+      description: Successful response
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: false
+    '500':
+      description: Internal Server Error response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/500_response.yaml'
+    '501':
+      description: Not Implemented response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/501_response.yaml'

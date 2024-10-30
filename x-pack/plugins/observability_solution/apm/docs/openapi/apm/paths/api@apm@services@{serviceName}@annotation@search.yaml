@@ -1,0 +1,38 @@
+get:
+  summary: Search for annotations
+  description: Search for annotations related to a specific service.
+  operationId: getAnnotation
+  tags:
+    - APM annotations
+  parameters:
+    - name: serviceName
+      in: path
+      required: true
+      description: The name of the service
+      schema:
+        type: string
+    - name: environment
+      in: query
+      required: false
+      description: The environment to filter annotations by
+      schema:
+        type: string
+    - name: start
+      in: query
+      required: false
+      description: The start date for the search
+      schema:
+        type: string
+    - name: end
+      in: query
+      required: false
+      description: The end date for the search
+      schema:
+        type: string
+  responses:
+    "200":
+      description: Successful response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/annotation_search_response.yaml'

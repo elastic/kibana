@@ -1,0 +1,10 @@
+type: object
+properties:
+  _index:
+    type: string
+  _id:
+    type: string
+  _score:
+    type: number
+  _source:
+    $ref: 'agent_configuration_object.yaml'

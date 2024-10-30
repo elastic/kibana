@@ -1,0 +1,10 @@
+type: object
+properties:
+  statusCode:
+    type: number
+    example: 500
+  error:
+    type: string
+    example: Internal Server Error
+  message:
+    type: string

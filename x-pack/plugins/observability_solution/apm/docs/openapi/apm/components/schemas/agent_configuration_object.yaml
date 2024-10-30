@@ -1,0 +1,19 @@
+type: object
+required:
+  - service
+  - settings
+  - '@timestamp'
+  - etag
+properties:
+  agent_name:
+    type: string
+  service:
+    $ref: 'service_object.yaml'
+  settings:
+    $ref: 'settings_object.yaml'
+  '@timestamp':
+    type: number
+  applied_by_agent:
+    type: boolean
+  etag:
+    type: string
