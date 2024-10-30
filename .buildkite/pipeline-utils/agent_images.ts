@@ -14,8 +14,8 @@ type AgentImageConfig = BuildkiteCommandStep['agents'];
 
 const DEFAULT_AGENT_IMAGE_CONFIG: AgentImageConfig = {
   provider: 'gcp',
-  image: 'family/kibana-ubuntu-2004',
-  imageProject: 'elastic-images-prod',
+  image: 'kibana-ubuntu-2004-1730245488',
+  imageProject: 'elastic-images-qa',
 };
 
 const FIPS_AGENT_IMAGE_CONFIG: AgentImageConfig = {
