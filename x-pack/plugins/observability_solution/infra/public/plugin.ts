@@ -21,7 +21,7 @@ import {
   MetricsExplorerLocatorParams,
   ObservabilityTriggerId,
 } from '@kbn/observability-shared-plugin/common';
-import { BehaviorSubject, combineLatest, from } from 'rxjs';
+import { BehaviorSubject, combineLatest, distinctUntilChanged, from, of, switchMap } from 'rxjs';
 import { map } from 'rxjs';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { apiCanAddNewPanel } from '@kbn/presentation-containers';
@@ -132,14 +132,19 @@ export class Plugin implements InfraClientPluginClass {
       messageFields: this.config.sources?.default?.fields?.message,
     });
 
-    const startDep$AndHostViewFlag$ = combineLatest([from(core.getStartServices())]);
+    const startDep$AndHostViewFlag$ = combineLatest([from(core.getStartServices())]).pipe(
+      switchMap(([[{ application }]]) => {
+        const logsExplorerAccessibility$ = getLogsExplorerAccessibility$(application);
+        return combineLatest([logsExplorerAccessibility$, of(application)]);
+      })
+    );
 
     const logRoutes = getLogsAppRoutes({ isLogsStreamEnabled });
 
     /** !! Need to be kept in sync with the deepLinks in x-pack/plugins/observability_solution/infra/public/plugin.ts */
     pluginsSetup.observabilityShared.navigation.registerSections(
       startDep$AndHostViewFlag$.pipe(
-        map(([[{ application }]]) => {
+        map(([isLogsExplorerAccessible, application]) => {
           const { infrastructure, logs } = application.capabilities;
           return [
             ...(logs.show
@@ -148,7 +153,7 @@ export class Plugin implements InfraClientPluginClass {
                     label: logsTitle,
                     sortKey: 200,
                     entries: getLogsNavigationEntries({
-                      application,
+                      isLogsExplorerAccessible: isLogsExplorerAccessible as boolean,
                       config: this.config,
                       routes: logRoutes,
                     }),
@@ -310,16 +315,13 @@ export class Plugin implements InfraClientPluginClass {
         );
       },
     });
-
-    startDep$AndHostViewFlag$.subscribe(
-      ([_startServices]: [[CoreStart, InfraClientStartDeps, InfraClientStartExports]]) => {
-        this.appUpdater$.next(() => ({
-          deepLinks: getInfraDeepLinks({
-            metricsExplorerEnabled: this.config.featureFlags.metricsExplorerEnabled,
-          }),
-        }));
-      }
-    );
+    startDep$AndHostViewFlag$.subscribe(([_isLogsExplorerAccessible, _applicationStart]) => {
+      this.appUpdater$.next(() => ({
+        deepLinks: getInfraDeepLinks({
+          metricsExplorerEnabled: this.config.featureFlags.metricsExplorerEnabled,
+        }),
+      }));
+    });
 
     // Setup telemetry events
     this.telemetry.setup({ analytics: core.analytics });
@@ -382,11 +384,11 @@ export class Plugin implements InfraClientPluginClass {
 }
 
 const getLogsNavigationEntries = ({
-  application,
+  isLogsExplorerAccessible,
   config,
   routes,
 }: {
-  application: CoreStart['application'];
+  isLogsExplorerAccessible: boolean;
   config: InfraPublicConfig;
   routes: LogsAppRoutes;
 }) => {
@@ -394,16 +396,14 @@ const getLogsNavigationEntries = ({
 
   if (!config.featureFlags.logsUIEnabled) return entries;
 
-  getLogsExplorerAccessibility$(application).subscribe((isAccessible) => {
-    if (isAccessible) {
-      entries.push({
-        label: 'Explorer',
-        app: 'observability-logs-explorer',
-        path: '/',
-        isBetaFeature: true,
-      });
-    }
-  });
+  if (isLogsExplorerAccessible) {
+    entries.push({
+      label: 'Explorer',
+      app: 'observability-logs-explorer',
+      path: '/',
+      isBetaFeature: true,
+    });
+  }
 
   // Display Stream nav entry when Logs Stream is enabled
   if (routes.stream) entries.push(createNavEntryFromRoute(routes.stream));
@@ -425,7 +425,8 @@ const getLogsExplorerAccessibility$ = (application: CoreStart['application']) =>
           AppStatus.accessible &&
         capabilities.discover?.show &&
         capabilities.fleet?.read
-    )
+    ),
+    distinctUntilChanged()
   );
 };
 
