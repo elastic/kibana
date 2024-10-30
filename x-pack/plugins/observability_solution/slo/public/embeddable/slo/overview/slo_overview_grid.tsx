@@ -9,7 +9,6 @@ import React from 'react';
 import { ALL_VALUE, HistoricalSummaryResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import {
   Chart,
-  DARK_THEME,
   isMetricElementEvent,
   Metric,
   MetricTrendShape,
@@ -77,7 +76,10 @@ export function SloCardChartList({ sloId }: { sloId: string }) {
   const {
     http: { basePath },
     uiSettings,
+    charts,
   } = useKibana().services;
+
+  const baseTheme = charts.theme.useChartsBaseTheme();
 
   const [selectedSlo, setSelectedSlo] = React.useState<SLOWithSummaryResponse | null>(null);
 
@@ -156,7 +158,7 @@ export function SloCardChartList({ sloId }: { sloId: string }) {
       <div data-shared-item="" style={{ width: '100%' }}>
         <Chart>
           <Settings
-            baseTheme={DARK_THEME}
+            baseTheme={baseTheme}
             onElementClick={([d]) => {
               if (isMetricElementEvent(d)) {
                 const { columnIndex, rowIndex } = d;
