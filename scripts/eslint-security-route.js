@@ -291,9 +291,9 @@ function processChangesByOwners(ownerFilesMap) {
     console.error('Error processing changes:', error);
   } finally {
     console.log('Deleting any created branches:');
-    // runCommand(
-    //   "git branch | sed 's/^[ *]*//' | grep -E '^(temp|authz-migration)/' | xargs -r git branch -D"
-    // );
+    runCommand(
+      "git branch | sed 's/^[ *]*//' | grep -E '^(temp|authz-migration)/' | xargs -r git branch -D"
+    );
   }
 }
 
