@@ -33,13 +33,29 @@ export interface EuiTablePersistProps<T> {
  * Returns the persisting page size and sort and the onTableChange handler that should be passed
  * as props to an Eui table component.
  */
-export const useEuiTablePersist = <T extends object>({
+export function useEuiTablePersist<T extends object>(
+  props: EuiTablePersistProps<T> & { initialSort: PropertySort<T> }
+): {
+  sorting: { sort: PropertySort<T> };
+  pageSize: number;
+  onTableChange: (nextValues: CriteriaWithPagination<T>) => void;
+};
+
+export function useEuiTablePersist<T extends object>(
+  props: EuiTablePersistProps<T> & { initialSort?: undefined }
+): {
+  sorting: true;
+  pageSize: number;
+  onTableChange: (nextValues: CriteriaWithPagination<T>) => void;
+};
+
+export function useEuiTablePersist<T extends object>({
   tableId,
   customOnTableChange,
   initialSort,
   initialPageSize,
   pageSizeOptions,
-}: EuiTablePersistProps<T>) => {
+}: EuiTablePersistProps<T>) {
   const storage = createStorage();
   const storedPersistData = storage.get(tableId, undefined);
 
@@ -92,4 +108,4 @@ export const useEuiTablePersist = <T extends object>({
   );
 
   return { pageSize, sorting, onTableChange };
-};
+}

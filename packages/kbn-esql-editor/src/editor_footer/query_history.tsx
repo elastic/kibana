@@ -221,8 +221,7 @@ export function QueryHistory({
     },
   });
 
-  const sortDirection = typeof sorting === 'boolean' ? 'desc' : sorting.sort.direction;
-  const historyItems: QueryHistoryItem[] = getHistoryItems(sortDirection);
+  const historyItems: QueryHistoryItem[] = getHistoryItems(sorting.sort.direction);
 
   const actions: Array<CustomItemAction<QueryHistoryItem>> = useMemo(() => {
     return [
