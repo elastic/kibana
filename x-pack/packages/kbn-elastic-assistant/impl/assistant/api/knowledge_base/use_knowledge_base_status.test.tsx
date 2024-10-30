@@ -34,6 +34,7 @@ const statusResponse = {
   elser_exists: true,
   index_exists: true,
   pipeline_exists: true,
+  security_labs_exists: true,
 };
 
 const http = {
