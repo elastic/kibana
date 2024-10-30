@@ -115,6 +115,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     it('relative timerange works', async () => {
       await common.navigateToApp('discover');
       await header.waitUntilLoadingHasFinished();
+      const url = await browser.getCurrentUrl();
+
       await searchSessions.save();
       await searchSessions.expectState('backgroundCompleted');
       const searchSessionId = await getSearchSessionId();
@@ -126,7 +128,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const searchSessionListBeforeRestore = await searchSessionsManagement.getList();
       const searchesCountBeforeRestore = searchSessionListBeforeRestore[0].searchesCount;
       // navigate to Discover
-      await browser.navigateTo(searchSessionListBeforeRestore[0].mainUrl); // await searchSessionListBeforeRestore[0].view();
+      const restoreUrl = new URL(searchSessionListBeforeRestore[0].mainUrl, url).href;
+      await browser.navigateTo(restoreUrl); // await searchSessionListBeforeRestore[0].view();
       await header.waitUntilLoadingHasFinished();
       await searchSessions.expectState('restored');
       expect(await discover.hasNoResults()).to.be(true);
