@@ -11,18 +11,15 @@ import moment from 'moment';
 import { metricsExplorerResponseRT } from '@kbn/infra-plugin/common/http_api/metrics_explorer';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
 import { DATES } from './utils/constants';
-import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 const { min, max } = DATES['7.0.0'].hosts;
 
-export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
-  describe('Metrics Explorer API', function () {
-    // Metrics Explorer is not enabled in serverless
-    this.tags('skipSvlOblt');
-
+  describe('Metrics Explorer API', () => {
     describe('with data', () => {
       before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/7.0.0/hosts'));
       after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/7.0.0/hosts'));

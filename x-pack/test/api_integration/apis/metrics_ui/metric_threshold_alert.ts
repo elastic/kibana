@@ -21,13 +21,13 @@ import {
 } from '@kbn/infra-plugin/server/lib/alerting/metric_threshold/lib/evaluate_rule';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import { getElasticsearchMetricQuery } from '@kbn/infra-plugin/server/lib/alerting/metric_threshold/lib/metric_query';
-import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 import { DATES } from './utils/constants';
 import { createFakeLogger } from './utils/create_fake_logger';
 
 const { gauge, rate } = DATES['alert-test-data'];
 
-export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const esClient = getService('es');
   const log = getService('log');
@@ -79,10 +79,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     ],
   };
 
-  describe('Metric Threshold Alerts Executor', function () {
-    // Metric Threshold rule is not enabled in serverless
-    this.tags('skipSvlOblt');
-
+  describe('Metric Threshold Alerts Executor', () => {
     describe('with 10K plus docs', () => {
       before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/ten_thousand_plus'));
       after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/ten_thousand_plus'));

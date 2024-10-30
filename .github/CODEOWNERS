@@ -1023,6 +1023,7 @@ packages/kbn-zod-helpers @elastic/security-detection-rule-management
 # The #CC# prefix delineates Code Coverage,
 # used for the 'team' designator within Kibana Stats
 
+/x-pack/test/api_integration/apis/metrics_ui @elastic/obs-ux-infra_services-team
 x-pack/test_serverless/api_integration/test_suites/common/platform_security @elastic/kibana-security
 
 # Observability Entities Team (@elastic/obs-entities)

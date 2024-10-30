@@ -12,20 +12,18 @@ import type {
   GetInfraAssetCountRequestParamsPayload,
 } from '@kbn/infra-plugin/common/http_api';
 import type { SupertestWithRoleScopeType } from '../../../services';
-import type { FtrProviderContext } from '../../../ftr_provider_context';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 
-import { DATES, ARCHIVE_NAME } from './utils/constants';
+import { DATES } from './utils/constants';
 
 const timeRange = {
-  from: DATES.serverlessTestingHostDateString.min,
-  to: DATES.serverlessTestingHostDateString.max,
+  from: new Date(DATES['8.0.0'].logs_and_metrics.min).toISOString(),
+  to: new Date(DATES['8.0.0'].logs_and_metrics.max).toISOString(),
 };
 
-export default function ({ getService }: FtrProviderContext) {
+export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const roleScopedSupertest = getService('roleScopedSupertest');
-  const svlUserManager = getService('svlUserManager');
-  const svlCommonApi = getService('svlCommonApi');
 
   describe('API /api/infra/{assetType}/count', () => {
     let supertestWithAdminScope: SupertestWithRoleScopeType;
@@ -51,10 +49,12 @@ export default function ({ getService }: FtrProviderContext) {
           supertestWithAdminScope = await roleScopedSupertest.getSupertestWithRoleScope('admin', {
             withInternalHeaders: true,
           });
-          await esArchiver.load(ARCHIVE_NAME);
+          await esArchiver.load('x-pack/test/functional/es_archives/infra/8.0.0/logs_and_metrics');
         });
         after(async () => {
-          await esArchiver.unload(ARCHIVE_NAME);
+          await esArchiver.unload(
+            'x-pack/test/functional/es_archives/infra/8.0.0/logs_and_metrics'
+          );
           await supertestWithAdminScope.destroy();
         });
 
@@ -73,12 +73,11 @@ export default function ({ getService }: FtrProviderContext) {
               from: timeRange.from,
               to: timeRange.to,
             },
-            roleAuthc,
           });
 
           if (infraHosts) {
             const { count, assetType } = infraHosts;
-            expect(count).to.equal(1);
+            expect(count).to.equal(3);
             expect(assetType).to.be('host');
           } else {
             throw new Error('Hosts count response should not be empty');
