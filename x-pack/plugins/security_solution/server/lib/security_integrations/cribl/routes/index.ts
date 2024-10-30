@@ -17,6 +17,12 @@ export const getFleetManagedIndexTemplatesRoute = (router: IRouter) => {
     .addVersion(
       {
         version: '1',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {},
       },
       async (context, _request, response) => {
