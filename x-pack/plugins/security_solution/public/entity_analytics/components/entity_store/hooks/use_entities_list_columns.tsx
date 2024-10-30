@@ -149,7 +149,7 @@ export const useEntitiesListColumns = (): EntitiesListColumns => {
         if (riskScore != null) {
           return (
             <span data-test-subj="risk-score-truncate" title={`${riskScore}`}>
-              {Math.round(riskScore)}
+              {formatRiskScore(riskScore)}
             </span>
           );
         }
