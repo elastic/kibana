@@ -202,7 +202,7 @@ function groupFilesByOwners(files, codeowners) {
       if (regex.test(file)) {
         if (!bestMatch || pattern.length > bestMatch.length) {
           bestMatch = pattern;
-          bestOwner = owners[0];
+          bestOwner = owners;
         }
       }
     }
@@ -369,7 +369,9 @@ function main() {
 
   const ownerFilesMap = groupFilesByOwners(changedFiles, codeowners);
 
-  processChangesByOwners(ownerFilesMap);
+  console.log(ownerFilesMap);
+
+  // processChangesByOwners(ownerFilesMap);
 }
 
 main();
