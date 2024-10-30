@@ -228,3 +228,5 @@ monitoring.ui.enabled: false
 xpack.securitySolution.enableUiSettingsValidations: true
 data.enableUiSettingsValidations: true
 discover.enableUiSettingsValidations: true
+
+
