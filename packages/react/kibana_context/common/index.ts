@@ -8,8 +8,10 @@
  */
 
 export { getColorMode } from './color_mode';
+
 export type { KibanaTheme, ThemeServiceStart } from './types';
 
+import { DEFAULT_THEME_VERSION } from '@kbn/core-ui-settings-common';
 import type { KibanaTheme } from './types';
 
 /**
@@ -18,4 +20,5 @@ import type { KibanaTheme } from './types';
  */
 export const defaultTheme: KibanaTheme = {
   darkMode: false,
+  version: DEFAULT_THEME_VERSION,
 };

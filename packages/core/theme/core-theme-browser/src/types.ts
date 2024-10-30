@@ -8,6 +8,7 @@
  */
 
 import { Observable } from 'rxjs';
+import type { ThemeVersion } from '@kbn/ui-shared-deps-npm';
 
 /**
  * Contains all the required information to apply Kibana's theme at the various levels it can be used.
@@ -17,6 +18,9 @@ import { Observable } from 'rxjs';
 export interface CoreTheme {
   /** is dark mode enabled or not */
   readonly darkMode: boolean;
+
+  /** active theme */
+  readonly version: ThemeVersion;
 }
 
 /**
