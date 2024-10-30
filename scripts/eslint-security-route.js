@@ -13,7 +13,7 @@ const { execSync, execFileSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
-process.env.ROUTE_TYPE = 'unauthorized';
+process.env.ROUTE_TYPE = 'authorized';
 const DRY_RUN = process.env.DRY_RUN === 'true';
 
 console.log('DRY_RUN:', DRY_RUN);
@@ -188,19 +188,28 @@ function groupFilesByOwners(files, codeowners) {
   const ownerFilesMap = {};
 
   files.forEach((file) => {
-    for (const [pattern, owner] of Object.entries(codeowners)) {
+    let bestMatch = null;
+    let bestOwner = null;
+
+    for (const [pattern, owners] of Object.entries(codeowners)) {
       const regexPattern = pattern
         .replace(/\*\*/g, '.*')
         .replace(/\*/g, '[^/]*')
         .replace(/\//g, '\\/');
 
-      const regex = new RegExp(`${regexPattern}`);
+      const regex = new RegExp(`^${regexPattern}$`);
 
       if (regex.test(file)) {
-        if (!ownerFilesMap[owner]) ownerFilesMap[owner] = [];
-        ownerFilesMap[owner].push(file);
-        break;
+        if (!bestMatch || pattern.length > bestMatch.length) {
+          bestMatch = pattern;
+          bestOwner = owners[0];
+        }
       }
+    }
+
+    if (bestOwner) {
+      if (!ownerFilesMap[bestOwner]) ownerFilesMap[bestOwner] = [];
+      ownerFilesMap[bestOwner].push(file);
     }
   });
 
@@ -309,9 +318,9 @@ function processChangesByOwners(ownerFilesMap) {
     console.error('Error processing changes:', error);
   } finally {
     console.log('Deleting any created branches:');
-    runCommand(
-      "git branch | sed 's/^[ *]*//' | grep -E '^(temp|authz-migration)/' | xargs -r git branch -D"
-    );
+    // runCommand(
+    //   "git branch | sed 's/^[ *]*//' | grep -E '^(temp|authz-migration)/' | xargs -r git branch -D"
+    // );
   }
 }
 
