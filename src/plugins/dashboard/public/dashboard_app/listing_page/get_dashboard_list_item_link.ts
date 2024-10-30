@@ -19,6 +19,14 @@ import { DashboardLocatorParams } from '../../dashboard_container';
 import { DASHBOARD_APP_ID, createDashboardEditUrl } from '../../dashboard_constants';
 import { coreServices } from '../../services/kibana_services';
 
+interface SessionStorageDashboardStates {
+  [spaceId: string]: {
+    [dashboardId: string]: {
+      panels: DashboardPanelMap;
+    };
+  };
+}
+
 export const getDashboardListItemLink = (
   id: string,
   spaceId?: string,
@@ -38,8 +46,25 @@ export const getDashboardListItemLink = (
       return;
     }
 
-    const latestPanels = JSON.parse(sessionStorage.getItem(DASHBOARD_STATE_SESSION_KEY) || '{}');
-    const latestPanelsSpaceId = latestPanels?.spaceId ?? {};
+    const sessionDashboard: SessionStorageDashboardStates = JSON.parse(
+      sessionStorage.getItem(DASHBOARD_STATE_SESSION_KEY) || '{}'
+    );
+    let latestPanels: DashboardPanelMap | undefined;
+
+    Object.entries(sessionDashboard).map((value) => {
+      const [unsavedSpaceId, dashboardUnsavedInfo] = value;
+      if (unsavedSpaceId === spaceId) {
+        return Object.entries(dashboardUnsavedInfo).map(([dashboardId, unsavedDashboardInfo]) => {
+          if (dashboardId === id && unsavedDashboardInfo.panels) {
+            return Object.entries(unsavedDashboardInfo).map(([panelId, panels]) => {
+              if (panelId === 'panels') {
+                return (latestPanels = panels);
+              }
+            });
+          }
+        });
+      }
+    });
     const modifiedPanels = panelModifications
       ? Object.entries(panelModifications).reduce((acc, [panelId, unsavedPanel]) => {
           if (unsavedPanel && latestPanels?.[panelId]) {
@@ -57,9 +82,10 @@ export const getDashboardListItemLink = (
       : {};
 
     const allUnsavedPanelsMap = {
-      ...latestPanelsSpaceId,
+      ...latestPanels,
       ...modifiedPanels,
     };
+
     return convertPanelMapToSavedPanels(allUnsavedPanelsMap);
   })();
 
