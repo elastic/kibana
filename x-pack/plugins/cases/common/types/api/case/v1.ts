@@ -521,7 +521,6 @@ export const GetRelatedCasesByAlertResponseRt = rt.array(RelatedCaseRt);
 
 export const SimilarCasesSearchRequestRt = rt.strict({
   case_id: rt.string,
-  observables: rt.record(rt.string, rt.array(rt.string)),
   pageSize: rt.number,
   pageIndex: rt.number,
 });

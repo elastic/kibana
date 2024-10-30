@@ -39,15 +39,6 @@ export const useGetSimilarCases = (params: {
         pageSize: params.pageSize,
         pageIndex: params.pageIndex,
         signal,
-        observables: params.caseData.observables.reduce((acc, curr) => {
-          if (!acc[curr.typeKey]?.length) {
-            acc[curr.typeKey] = [];
-          }
-
-          acc[curr.typeKey].push(curr.value);
-
-          return acc;
-        }, {} as Record<string, string[]>),
       });
     },
     {

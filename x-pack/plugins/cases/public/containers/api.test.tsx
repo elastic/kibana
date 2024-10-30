@@ -1203,7 +1203,6 @@ describe('Cases API', () => {
     it('should be called with correct check url, method, signal', async () => {
       await getSimilarCases({
         caseId: mockCase.id,
-        observables: { '7e19317b-cc65-46df-b416-fb0ae701d4d9': ['test value'] },
         signal: abortCtrl.signal,
         pageSize: 10,
         pageIndex: 0,
@@ -1212,7 +1211,6 @@ describe('Cases API', () => {
         method: 'POST',
         body: JSON.stringify({
           case_id: mockCase.id,
-          observables: { '7e19317b-cc65-46df-b416-fb0ae701d4d9': ['test value'] },
           pageSize: 10,
           pageIndex: 0,
         }),
@@ -1223,7 +1221,6 @@ describe('Cases API', () => {
     it('should return correct response', async () => {
       const resp = await getSimilarCases({
         caseId: mockCase.id,
-        observables: { '7e19317b-cc65-46df-b416-fb0ae701d4d9': ['test value'] },
         signal: abortCtrl.signal,
         pageSize: 10,
         pageIndex: 0,

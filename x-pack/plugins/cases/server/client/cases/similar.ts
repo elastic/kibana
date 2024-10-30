@@ -33,12 +33,21 @@ export const similar = async (
 
   try {
     const paramArgs = decodeWithExcessOrThrow(SimilarCasesSearchRequestRt)(params);
+    const retrievedCase = await caseService.getCase({ id: paramArgs.case_id });
 
     const cases = await caseService.findSimilarCases({
-      caseId: paramArgs.case_id,
+      caseId: retrievedCase.id,
       pageSize: paramArgs.pageSize,
       pageIndex: paramArgs.pageIndex,
-      observables: paramArgs.observables,
+      observables: retrievedCase.attributes.observables.reduce((observableMap, observable) => {
+        if (!observableMap[observable.typeKey]) {
+          observableMap[observable.typeKey] = [];
+        }
+
+        observableMap[observable.typeKey].push(observable.value);
+
+        return observableMap;
+      }, {} as Record<string, string[]>),
     });
 
     const res = {

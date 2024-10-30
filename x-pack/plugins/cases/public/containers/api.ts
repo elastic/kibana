@@ -627,14 +627,12 @@ export const postObservables = async (
 
 export const getSimilarCases = async ({
   caseId,
-  observables,
   signal,
   pageSize,
   pageIndex,
 }: SimilarCasesProps): Promise<CasesFindResponseUI> => {
   const body = {
     case_id: caseId,
-    observables,
   };
 
   const response = await KibanaServices.get().http.fetch<CasesFindResponse>(

@@ -194,7 +194,6 @@ export interface FetchCasesProps extends ApiProps {
 
 export interface SimilarCasesProps extends ApiProps {
   caseId: string;
-  observables: Record<string, string[]>;
   pageSize: number;
   pageIndex: number;
 }
