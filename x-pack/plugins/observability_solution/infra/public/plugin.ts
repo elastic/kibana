@@ -132,19 +132,18 @@ export class Plugin implements InfraClientPluginClass {
       messageFields: this.config.sources?.default?.fields?.message,
     });
 
-    const startDep$AndHostViewFlag$ = combineLatest([from(core.getStartServices())]).pipe(
-      switchMap(([[{ application }]]) => {
-        const logsExplorerAccessibility$ = getLogsExplorerAccessibility$(application);
-        return combineLatest([logsExplorerAccessibility$, of(application)]);
-      })
+    const startDep$AndAccessibilityFlags$ = combineLatest([from(core.getStartServices())]).pipe(
+      switchMap(([[{ application }]]) =>
+        combineLatest([of(application), getLogsExplorerAccessibility$(application)])
+      )
     );
 
     const logRoutes = getLogsAppRoutes({ isLogsStreamEnabled });
 
     /** !! Need to be kept in sync with the deepLinks in x-pack/plugins/observability_solution/infra/public/plugin.ts */
     pluginsSetup.observabilityShared.navigation.registerSections(
-      startDep$AndHostViewFlag$.pipe(
-        map(([isLogsExplorerAccessible, application]) => {
+      startDep$AndAccessibilityFlags$.pipe(
+        map(([application, isLogsExplorerAccessible]) => {
           const { infrastructure, logs } = application.capabilities;
           return [
             ...(logs.show
@@ -315,7 +314,7 @@ export class Plugin implements InfraClientPluginClass {
         );
       },
     });
-    startDep$AndHostViewFlag$.subscribe(([_isLogsExplorerAccessible, _applicationStart]) => {
+    startDep$AndAccessibilityFlags$.subscribe(([_applicationStart, _isLogsExplorerAccessible]) => {
       this.appUpdater$.next(() => ({
         deepLinks: getInfraDeepLinks({
           metricsExplorerEnabled: this.config.featureFlags.metricsExplorerEnabled,
