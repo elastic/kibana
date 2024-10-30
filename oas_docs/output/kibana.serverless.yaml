@@ -82,392 +82,6 @@ servers:
   - description: local
     url: http://localhost:5601
 paths:
-  /api/actions:
-    get:
-      deprecated: true
-      operationId: '%2Fapi%2Factions#0'
-      parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
-      responses: {}
-      summary: Get all connectors
-      tags:
-        - connectors
-  /api/actions/action:
-    post:
-      deprecated: true
-      operationId: '%2Fapi%2Factions%2Faction#0'
-      parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
-        - description: A required header to protect against CSRF attacks
-          in: header
-          name: kbn-xsrf
-          required: true
-          schema:
-            example: 'true'
-            type: string
-      requestBody:
-        content:
-          application/json; Elastic-Api-Version=2023-10-31:
-            schema:
-              additionalProperties: false
-              type: object
-              properties:
-                actionTypeId:
-                  description: The connector type identifier.
-                  type: string
-                config:
-                  additionalProperties: {}
-                  default: {}
-                  type: object
-                name:
-                  description: The display name for the connector.
-                  type: string
-                secrets:
-                  additionalProperties: {}
-                  default: {}
-                  type: object
-              required:
-                - name
-                - actionTypeId
-      responses:
-        '200':
-          content:
-            application/json; Elastic-Api-Version=2023-10-31:
-              schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  config:
-                    additionalProperties: {}
-                    type: object
-                  connector_type_id:
-                    description: The connector type identifier.
-                    type: string
-                  id:
-                    description: The identifier for the connector.
-                    type: string
-                  is_deprecated:
-                    description: Indicates whether the connector is deprecated.
-                    type: boolean
-                  is_missing_secrets:
-                    description: Indicates whether the connector is missing secrets.
-                    type: boolean
-                  is_preconfigured:
-                    description: >-
-                      Indicates whether the connector is preconfigured. If true,
-                      the `config` and `is_missing_secrets` properties are
-                      omitted from the response. 
-                    type: boolean
-                  is_system_action:
-                    description: >-
-                      Indicates whether the connector is used for system
-                      actions.
-                    type: boolean
-                  name:
-                    description: ' The name of the rule.'
-                    type: string
-                required:
-                  - id
-                  - name
-                  - connector_type_id
-                  - is_preconfigured
-                  - is_deprecated
-                  - is_system_action
-          description: Indicates a successful call.
-      summary: Create a connector
-      tags:
-        - connectors
-  /api/actions/action/{id}:
-    delete:
-      deprecated: true
-      description: 'WARNING: When you delete a connector, it cannot be recovered.'
-      operationId: '%2Fapi%2Factions%2Faction%2F%7Bid%7D#0'
-      parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
-        - description: A required header to protect against CSRF attacks
-          in: header
-          name: kbn-xsrf
-          required: true
-          schema:
-            example: 'true'
-            type: string
-        - description: An identifier for the connector.
-          in: path
-          name: id
-          required: true
-          schema:
-            type: string
-      responses:
-        '204':
-          description: Indicates a successful call.
-      summary: Delete a connector
-      tags:
-        - connectors
-    get:
-      deprecated: true
-      operationId: '%2Fapi%2Factions%2Faction%2F%7Bid%7D#1'
-      parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
-        - description: An identifier for the connector.
-          in: path
-          name: id
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          content:
-            application/json; Elastic-Api-Version=2023-10-31:
-              schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  config:
-                    additionalProperties: {}
-                    type: object
-                  connector_type_id:
-                    description: The connector type identifier.
-                    type: string
-                  id:
-                    description: The identifier for the connector.
-                    type: string
-                  is_deprecated:
-                    description: Indicates whether the connector is deprecated.
-                    type: boolean
-                  is_missing_secrets:
-                    description: Indicates whether the connector is missing secrets.
-                    type: boolean
-                  is_preconfigured:
-                    description: >-
-                      Indicates whether the connector is preconfigured. If true,
-                      the `config` and `is_missing_secrets` properties are
-                      omitted from the response. 
-                    type: boolean
-                  is_system_action:
-                    description: >-
-                      Indicates whether the connector is used for system
-                      actions.
-                    type: boolean
-                  name:
-                    description: ' The name of the rule.'
-                    type: string
-                required:
-                  - id
-                  - name
-                  - connector_type_id
-                  - is_preconfigured
-                  - is_deprecated
-                  - is_system_action
-          description: Indicates a successful call.
-      summary: Get connector information
-      tags:
-        - connectors
-    put:
-      deprecated: true
-      operationId: '%2Fapi%2Factions%2Faction%2F%7Bid%7D#2'
-      parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
-        - description: A required header to protect against CSRF attacks
-          in: header
-          name: kbn-xsrf
-          required: true
-          schema:
-            example: 'true'
-            type: string
-        - description: An identifier for the connector.
-          in: path
-          name: id
-          required: true
-          schema:
-            type: string
-      requestBody:
-        content:
-          application/json; Elastic-Api-Version=2023-10-31:
-            schema:
-              additionalProperties: false
-              type: object
-              properties:
-                config:
-                  additionalProperties: {}
-                  default: {}
-                  type: object
-                name:
-                  type: string
-                secrets:
-                  additionalProperties: {}
-                  default: {}
-                  type: object
-              required:
-                - name
-      responses:
-        '200':
-          content:
-            application/json; Elastic-Api-Version=2023-10-31:
-              schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  config:
-                    additionalProperties: {}
-                    type: object
-                  connector_type_id:
-                    description: The connector type identifier.
-                    type: string
-                  id:
-                    description: The identifier for the connector.
-                    type: string
-                  is_deprecated:
-                    description: Indicates whether the connector is deprecated.
-                    type: boolean
-                  is_missing_secrets:
-                    description: Indicates whether the connector is missing secrets.
-                    type: boolean
-                  is_preconfigured:
-                    description: >-
-                      Indicates whether the connector is preconfigured. If true,
-                      the `config` and `is_missing_secrets` properties are
-                      omitted from the response. 
-                    type: boolean
-                  is_system_action:
-                    description: >-
-                      Indicates whether the connector is used for system
-                      actions.
-                    type: boolean
-                  name:
-                    description: ' The name of the rule.'
-                    type: string
-                required:
-                  - id
-                  - name
-                  - connector_type_id
-                  - is_preconfigured
-                  - is_deprecated
-                  - is_system_action
-          description: Indicates a successful call.
-      summary: Update a connector
-      tags:
-        - connectors
-  /api/actions/action/{id}/_execute:
-    post:
-      deprecated: true
-      operationId: '%2Fapi%2Factions%2Faction%2F%7Bid%7D%2F_execute#0'
-      parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
-        - description: A required header to protect against CSRF attacks
-          in: header
-          name: kbn-xsrf
-          required: true
-          schema:
-            example: 'true'
-            type: string
-        - description: An identifier for the connector.
-          in: path
-          name: id
-          required: true
-          schema:
-            type: string
-      requestBody:
-        content:
-          application/json; Elastic-Api-Version=2023-10-31:
-            schema:
-              additionalProperties: false
-              type: object
-              properties:
-                params:
-                  additionalProperties: {}
-                  type: object
-              required:
-                - params
-      responses:
-        '200':
-          content:
-            application/json; Elastic-Api-Version=2023-10-31:
-              schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  config:
-                    additionalProperties: {}
-                    type: object
-                  connector_type_id:
-                    description: The connector type identifier.
-                    type: string
-                  id:
-                    description: The identifier for the connector.
-                    type: string
-                  is_deprecated:
-                    description: Indicates whether the connector is deprecated.
-                    type: boolean
-                  is_missing_secrets:
-                    description: Indicates whether the connector is missing secrets.
-                    type: boolean
-                  is_preconfigured:
-                    description: >-
-                      Indicates whether the connector is preconfigured. If true,
-                      the `config` and `is_missing_secrets` properties are
-                      omitted from the response. 
-                    type: boolean
-                  is_system_action:
-                    description: >-
-                      Indicates whether the connector is used for system
-                      actions.
-                    type: boolean
-                  name:
-                    description: ' The name of the rule.'
-                    type: string
-                required:
-                  - id
-                  - name
-                  - connector_type_id
-                  - is_preconfigured
-                  - is_deprecated
-                  - is_system_action
-          description: Indicates a successful call.
-      summary: Run a connector
-      tags:
-        - connectors
   /api/actions/connector_types:
     get:
       description: You do not need any Kibana feature privileges to run this API.
@@ -880,23 +494,6 @@ paths:
             type: string
       responses: {}
       summary: Get all connectors
-      tags:
-        - connectors
-  /api/actions/list_action_types:
-    get:
-      deprecated: true
-      operationId: '%2Fapi%2Factions%2Flist_action_types#0'
-      parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
-      responses: {}
-      summary: Get connector types
       tags:
         - connectors
   /api/alerting/rule/{id}:
@@ -1395,73 +992,14 @@ paths:
                                   description: Duration of the rule run.
                                   type: number
                                 outcome:
-                                  additionalProperties: false
-                                  type: object
-                                  properties:
-                                    alerts_count:
-                                      additionalProperties: false
-                                      type: object
-                                      properties:
-                                        active:
-                                          description: Number of active alerts during last run.
-                                          nullable: true
-                                          type: number
-                                        ignored:
-                                          description: >-
-                                            Number of ignored alerts during last
-                                            run.
-                                          nullable: true
-                                          type: number
-                                        new:
-                                          description: Number of new alerts during last run.
-                                          nullable: true
-                                          type: number
-                                        recovered:
-                                          description: >-
-                                            Number of recovered alerts during last
-                                            run.
-                                          nullable: true
-                                          type: number
-                                    outcome:
-                                      description: >-
-                                        Outcome of last run of the rule. Value
-                                        could be succeeded, warning or failed.
-                                      enum:
-                                        - succeeded
-                                        - warning
-                                        - failed
-                                      type: string
-                                    outcome_msg:
-                                      items:
-                                        description: >-
-                                          Outcome message generated during last
-                                          rule run.
-                                        type: string
-                                      nullable: true
-                                      type: array
-                                    outcome_order:
-                                      description: Order of the outcome.
-                                      type: number
-                                    warning:
-                                      description: Warning of last rule execution.
-                                      enum:
-                                        - read
-                                        - decrypt
-                                        - execute
-                                        - unknown
-                                        - license
-                                        - timeout
-                                        - disabled
-                                        - validate
-                                        - maxExecutableActions
-                                        - maxAlerts
-                                        - maxQueuedActions
-                                        - ruleExecution
-                                      nullable: true
-                                      type: string
-                                  required:
-                                    - outcome
-                                    - alerts_count
+                                  description: >-
+                                    Outcome of last run of the rule. Value could
+                                    be succeeded, warning or failed.
+                                  enum:
+                                    - succeeded
+                                    - warning
+                                    - failed
+                                  type: string
                                 success:
                                   description: >-
                                     Indicates whether the rule run was
@@ -1609,11 +1147,13 @@ paths:
                               items:
                                 description: Indicates hours of the day to recur.
                                 type: number
+                              nullable: true
                               type: array
                             byminute:
                               items:
                                 description: Indicates minutes of the hour to recur.
                                 type: number
+                              nullable: true
                               type: array
                             bymonth:
                               items:
@@ -1621,16 +1161,19 @@ paths:
                                   Indicates months of the year that this rule
                                   should recur.
                                 type: number
+                              nullable: true
                               type: array
                             bymonthday:
                               items:
                                 description: Indicates the days of the month to recur.
                                 type: number
+                              nullable: true
                               type: array
                             bysecond:
                               items:
                                 description: Indicates seconds of the day to recur.
                                 type: number
+                              nullable: true
                               type: array
                             bysetpos:
                               items:
@@ -1641,6 +1184,7 @@ paths:
                                   of the month. It is recommended to not set
                                   this manually and just use `byweekday`.
                                 type: number
+                              nullable: true
                               type: array
                             byweekday:
                               items:
@@ -1654,11 +1198,13 @@ paths:
                                   Friday of the month, which are internally
                                   converted to a `byweekday/bysetpos`
                                   combination.
+                              nullable: true
                               type: array
                             byweekno:
                               items:
                                 description: Indicates number of the week hours to recur.
                                 type: number
+                              nullable: true
                               type: array
                             byyearday:
                               items:
@@ -1666,6 +1212,7 @@ paths:
                                   Indicates the days of the year that this rule
                                   should recur.
                                 type: number
+                              nullable: true
                               type: array
                             count:
                               description: >-
@@ -2568,73 +2115,14 @@ paths:
                                   description: Duration of the rule run.
                                   type: number
                                 outcome:
-                                  additionalProperties: false
-                                  type: object
-                                  properties:
-                                    alerts_count:
-                                      additionalProperties: false
-                                      type: object
-                                      properties:
-                                        active:
-                                          description: Number of active alerts during last run.
-                                          nullable: true
-                                          type: number
-                                        ignored:
-                                          description: >-
-                                            Number of ignored alerts during last
-                                            run.
-                                          nullable: true
-                                          type: number
-                                        new:
-                                          description: Number of new alerts during last run.
-                                          nullable: true
-                                          type: number
-                                        recovered:
-                                          description: >-
-                                            Number of recovered alerts during last
-                                            run.
-                                          nullable: true
-                                          type: number
-                                    outcome:
-                                      description: >-
-                                        Outcome of last run of the rule. Value
-                                        could be succeeded, warning or failed.
-                                      enum:
-                                        - succeeded
-                                        - warning
-                                        - failed
-                                      type: string
-                                    outcome_msg:
-                                      items:
-                                        description: >-
-                                          Outcome message generated during last
-                                          rule run.
-                                        type: string
-                                      nullable: true
-                                      type: array
-                                    outcome_order:
-                                      description: Order of the outcome.
-                                      type: number
-                                    warning:
-                                      description: Warning of last rule execution.
-                                      enum:
-                                        - read
-                                        - decrypt
-                                        - execute
-                                        - unknown
-                                        - license
-                                        - timeout
-                                        - disabled
-                                        - validate
-                                        - maxExecutableActions
-                                        - maxAlerts
-                                        - maxQueuedActions
-                                        - ruleExecution
-                                      nullable: true
-                                      type: string
-                                  required:
-                                    - outcome
-                                    - alerts_count
+                                  description: >-
+                                    Outcome of last run of the rule. Value could
+                                    be succeeded, warning or failed.
+                                  enum:
+                                    - succeeded
+                                    - warning
+                                    - failed
+                                  type: string
                                 success:
                                   description: >-
                                     Indicates whether the rule run was
@@ -2782,11 +2270,13 @@ paths:
                               items:
                                 description: Indicates hours of the day to recur.
                                 type: number
+                              nullable: true
                               type: array
                             byminute:
                               items:
                                 description: Indicates minutes of the hour to recur.
                                 type: number
+                              nullable: true
                               type: array
                             bymonth:
                               items:
@@ -2794,16 +2284,19 @@ paths:
                                   Indicates months of the year that this rule
                                   should recur.
                                 type: number
+                              nullable: true
                               type: array
                             bymonthday:
                               items:
                                 description: Indicates the days of the month to recur.
                                 type: number
+                              nullable: true
                               type: array
                             bysecond:
                               items:
                                 description: Indicates seconds of the day to recur.
                                 type: number
+                              nullable: true
                               type: array
                             bysetpos:
                               items:
@@ -2814,6 +2307,7 @@ paths:
                                   of the month. It is recommended to not set
                                   this manually and just use `byweekday`.
                                 type: number
+                              nullable: true
                               type: array
                             byweekday:
                               items:
@@ -2827,11 +2321,13 @@ paths:
                                   Friday of the month, which are internally
                                   converted to a `byweekday/bysetpos`
                                   combination.
+                              nullable: true
                               type: array
                             byweekno:
                               items:
                                 description: Indicates number of the week hours to recur.
                                 type: number
+                              nullable: true
                               type: array
                             byyearday:
                               items:
@@ -2839,6 +2335,7 @@ paths:
                                   Indicates the days of the year that this rule
                                   should recur.
                                 type: number
+                              nullable: true
                               type: array
                             count:
                               description: >-
@@ -3712,73 +3209,14 @@ paths:
                                   description: Duration of the rule run.
                                   type: number
                                 outcome:
-                                  additionalProperties: false
-                                  type: object
-                                  properties:
-                                    alerts_count:
-                                      additionalProperties: false
-                                      type: object
-                                      properties:
-                                        active:
-                                          description: Number of active alerts during last run.
-                                          nullable: true
-                                          type: number
-                                        ignored:
-                                          description: >-
-                                            Number of ignored alerts during last
-                                            run.
-                                          nullable: true
-                                          type: number
-                                        new:
-                                          description: Number of new alerts during last run.
-                                          nullable: true
-                                          type: number
-                                        recovered:
-                                          description: >-
-                                            Number of recovered alerts during last
-                                            run.
-                                          nullable: true
-                                          type: number
-                                    outcome:
-                                      description: >-
-                                        Outcome of last run of the rule. Value
-                                        could be succeeded, warning or failed.
-                                      enum:
-                                        - succeeded
-                                        - warning
-                                        - failed
-                                      type: string
-                                    outcome_msg:
-                                      items:
-                                        description: >-
-                                          Outcome message generated during last
-                                          rule run.
-                                        type: string
-                                      nullable: true
-                                      type: array
-                                    outcome_order:
-                                      description: Order of the outcome.
-                                      type: number
-                                    warning:
-                                      description: Warning of last rule execution.
-                                      enum:
-                                        - read
-                                        - decrypt
-                                        - execute
-                                        - unknown
-                                        - license
-                                        - timeout
-                                        - disabled
-                                        - validate
-                                        - maxExecutableActions
-                                        - maxAlerts
-                                        - maxQueuedActions
-                                        - ruleExecution
-                                      nullable: true
-                                      type: string
-                                  required:
-                                    - outcome
-                                    - alerts_count
+                                  description: >-
+                                    Outcome of last run of the rule. Value could
+                                    be succeeded, warning or failed.
+                                  enum:
+                                    - succeeded
+                                    - warning
+                                    - failed
+                                  type: string
                                 success:
                                   description: >-
                                     Indicates whether the rule run was
@@ -3926,11 +3364,13 @@ paths:
                               items:
                                 description: Indicates hours of the day to recur.
                                 type: number
+                              nullable: true
                               type: array
                             byminute:
                               items:
                                 description: Indicates minutes of the hour to recur.
                                 type: number
+                              nullable: true
                               type: array
                             bymonth:
                               items:
@@ -3938,16 +3378,19 @@ paths:
                                   Indicates months of the year that this rule
                                   should recur.
                                 type: number
+                              nullable: true
                               type: array
                             bymonthday:
                               items:
                                 description: Indicates the days of the month to recur.
                                 type: number
+                              nullable: true
                               type: array
                             bysecond:
                               items:
                                 description: Indicates seconds of the day to recur.
                                 type: number
+                              nullable: true
                               type: array
                             bysetpos:
                               items:
@@ -3958,6 +3401,7 @@ paths:
                                   of the month. It is recommended to not set
                                   this manually and just use `byweekday`.
                                 type: number
+                              nullable: true
                               type: array
                             byweekday:
                               items:
@@ -3971,11 +3415,13 @@ paths:
                                   Friday of the month, which are internally
                                   converted to a `byweekday/bysetpos`
                                   combination.
+                              nullable: true
                               type: array
                             byweekno:
                               items:
                                 description: Indicates number of the week hours to recur.
                                 type: number
+                              nullable: true
                               type: array
                             byyearday:
                               items:
@@ -3983,6 +3429,7 @@ paths:
                                   Indicates the days of the year that this rule
                                   should recur.
                                 type: number
+                              nullable: true
                               type: array
                             count:
                               description: >-
@@ -4950,73 +4397,14 @@ paths:
                                   description: Duration of the rule run.
                                   type: number
                                 outcome:
-                                  additionalProperties: false
-                                  type: object
-                                  properties:
-                                    alerts_count:
-                                      additionalProperties: false
-                                      type: object
-                                      properties:
-                                        active:
-                                          description: Number of active alerts during last run.
-                                          nullable: true
-                                          type: number
-                                        ignored:
-                                          description: >-
-                                            Number of ignored alerts during last
-                                            run.
-                                          nullable: true
-                                          type: number
-                                        new:
-                                          description: Number of new alerts during last run.
-                                          nullable: true
-                                          type: number
-                                        recovered:
-                                          description: >-
-                                            Number of recovered alerts during last
-                                            run.
-                                          nullable: true
-                                          type: number
-                                    outcome:
-                                      description: >-
-                                        Outcome of last run of the rule. Value
-                                        could be succeeded, warning or failed.
-                                      enum:
-                                        - succeeded
-                                        - warning
-                                        - failed
-                                      type: string
-                                    outcome_msg:
-                                      items:
-                                        description: >-
-                                          Outcome message generated during last
-                                          rule run.
-                                        type: string
-                                      nullable: true
-                                      type: array
-                                    outcome_order:
-                                      description: Order of the outcome.
-                                      type: number
-                                    warning:
-                                      description: Warning of last rule execution.
-                                      enum:
-                                        - read
-                                        - decrypt
-                                        - execute
-                                        - unknown
-                                        - license
-                                        - timeout
-                                        - disabled
-                                        - validate
-                                        - maxExecutableActions
-                                        - maxAlerts
-                                        - maxQueuedActions
-                                        - ruleExecution
-                                      nullable: true
-                                      type: string
-                                  required:
-                                    - outcome
-                                    - alerts_count
+                                  description: >-
+                                    Outcome of last run of the rule. Value could
+                                    be succeeded, warning or failed.
+                                  enum:
+                                    - succeeded
+                                    - warning
+                                    - failed
+                                  type: string
                                 success:
                                   description: >-
                                     Indicates whether the rule run was
@@ -5164,11 +4552,13 @@ paths:
                               items:
                                 description: Indicates hours of the day to recur.
                                 type: number
+                              nullable: true
                               type: array
                             byminute:
                               items:
                                 description: Indicates minutes of the hour to recur.
                                 type: number
+                              nullable: true
                               type: array
                             bymonth:
                               items:
@@ -5176,16 +4566,19 @@ paths:
                                   Indicates months of the year that this rule
                                   should recur.
                                 type: number
+                              nullable: true
                               type: array
                             bymonthday:
                               items:
                                 description: Indicates the days of the month to recur.
                                 type: number
+                              nullable: true
                               type: array
                             bysecond:
                               items:
                                 description: Indicates seconds of the day to recur.
                                 type: number
+                              nullable: true
                               type: array
                             bysetpos:
                               items:
@@ -5196,6 +4589,7 @@ paths:
                                   of the month. It is recommended to not set
                                   this manually and just use `byweekday`.
                                 type: number
+                              nullable: true
                               type: array
                             byweekday:
                               items:
@@ -5209,11 +4603,13 @@ paths:
                                   Friday of the month, which are internally
                                   converted to a `byweekday/bysetpos`
                                   combination.
+                              nullable: true
                               type: array
                             byweekno:
                               items:
                                 description: Indicates number of the week hours to recur.
                                 type: number
+                              nullable: true
                               type: array
                             byyearday:
                               items:
@@ -5221,6 +4617,7 @@ paths:
                                   Indicates the days of the year that this rule
                                   should recur.
                                 type: number
+                              nullable: true
                               type: array
                             count:
                               description: >-
@@ -10428,12 +9825,21 @@ paths:
           required: false
           schema:
             type: string
-        - in: query
+        - description: use withAgentCount instead
+          in: query
           name: noAgentCount
           required: false
           schema:
+            deprecated: true
             type: boolean
-        - in: query
+        - description: get policies with agent count
+          in: query
+          name: withAgentCount
+          required: false
+          schema:
+            type: boolean
+        - description: get full policies with package policies populated
+          in: query
           name: full
           required: false
           schema:
@@ -14585,6 +13991,110 @@ paths:
       summary: ''
       tags:
         - Elastic Agent policies
+  /api/fleet/agent_policies/{agentPolicyId}/outputs:
+    get:
+      description: Get list of outputs associated with agent policy by policy id
+      operationId: '%2Fapi%2Ffleet%2Fagent_policies%2F%7BagentPolicyId%7D%2Foutputs#0'
+      parameters:
+        - description: The version of the API to use
+          in: header
+          name: elastic-api-version
+          schema:
+            default: '2023-10-31'
+            enum:
+              - '2023-10-31'
+            type: string
+        - in: path
+          name: agentPolicyId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  item:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      agentPolicyId:
+                        type: string
+                      data:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          integrations:
+                            items:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                id:
+                                  type: string
+                                integrationPolicyName:
+                                  type: string
+                                name:
+                                  type: string
+                                pkgName:
+                                  type: string
+                            type: array
+                          output:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              id:
+                                type: string
+                              name:
+                                type: string
+                            required:
+                              - id
+                              - name
+                        required:
+                          - output
+                      monitoring:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          output:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              id:
+                                type: string
+                              name:
+                                type: string
+                            required:
+                              - id
+                              - name
+                        required:
+                          - output
+                    required:
+                      - monitoring
+                      - data
+                required:
+                  - item
+        '400':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  error:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+      summary: ''
+      tags:
+        - Elastic Agent policies
   /api/fleet/agent_policies/delete:
     post:
       description: Delete agent policy by ID
@@ -14636,6 +14146,128 @@ paths:
                 required:
                   - id
                   - name
+        '400':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  error:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+      summary: ''
+      tags:
+        - Elastic Agent policies
+  /api/fleet/agent_policies/outputs:
+    post:
+      description: Get list of outputs associated with agent policies
+      operationId: '%2Fapi%2Ffleet%2Fagent_policies%2Foutputs#0'
+      parameters:
+        - description: The version of the API to use
+          in: header
+          name: elastic-api-version
+          schema:
+            default: '2023-10-31'
+            enum:
+              - '2023-10-31'
+            type: string
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json; Elastic-Api-Version=2023-10-31:
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                ids:
+                  description: list of package policy ids
+                  items:
+                    type: string
+                  type: array
+              required:
+                - ids
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  items:
+                    items:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        agentPolicyId:
+                          type: string
+                        data:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            integrations:
+                              items:
+                                additionalProperties: false
+                                type: object
+                                properties:
+                                  id:
+                                    type: string
+                                  integrationPolicyName:
+                                    type: string
+                                  name:
+                                    type: string
+                                  pkgName:
+                                    type: string
+                              type: array
+                            output:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                id:
+                                  type: string
+                                name:
+                                  type: string
+                              required:
+                                - id
+                                - name
+                          required:
+                            - output
+                        monitoring:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            output:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                id:
+                                  type: string
+                                name:
+                                  type: string
+                              required:
+                                - id
+                                - name
+                          required:
+                            - output
+                      required:
+                        - monitoring
+                        - data
+                    type: array
+                required:
+                  - items
         '400':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
@@ -14831,7 +14463,6 @@ paths:
         - Elastic Agents
   /api/fleet/agent-status:
     get:
-      deprecated: true
       operationId: '%2Fapi%2Ffleet%2Fagent-status#0'
       parameters:
         - description: The version of the API to use
@@ -16534,7 +16165,6 @@ paths:
       tags:
         - Elastic Agent actions
     put:
-      deprecated: true
       operationId: '%2Fapi%2Ffleet%2Fagents%2F%7BagentId%7D%2Freassign#0'
       parameters:
         - description: The version of the API to use
@@ -18387,7 +18017,6 @@ paths:
         - Fleet enrollment API keys
   /api/fleet/enrollment-api-keys:
     get:
-      deprecated: true
       operationId: '%2Fapi%2Ffleet%2Fenrollment-api-keys#0'
       parameters:
         - description: The version of the API to use
@@ -18419,7 +18048,6 @@ paths:
       summary: ''
       tags: []
     post:
-      deprecated: true
       operationId: '%2Fapi%2Ffleet%2Fenrollment-api-keys#1'
       parameters:
         - description: The version of the API to use
@@ -18457,7 +18085,6 @@ paths:
       tags: []
   /api/fleet/enrollment-api-keys/{keyId}:
     delete:
-      deprecated: true
       operationId: '%2Fapi%2Ffleet%2Fenrollment-api-keys%2F%7BkeyId%7D#1'
       parameters:
         - description: The version of the API to use
@@ -18484,7 +18111,6 @@ paths:
       summary: ''
       tags: []
     get:
-      deprecated: true
       operationId: '%2Fapi%2Ffleet%2Fenrollment-api-keys%2F%7BkeyId%7D#0'
       parameters:
         - description: The version of the API to use
@@ -20199,7 +19825,6 @@ paths:
         - Elastic Package Manager (EPM)
   /api/fleet/epm/packages/{pkgkey}:
     delete:
-      deprecated: true
       operationId: '%2Fapi%2Ffleet%2Fepm%2Fpackages%2F%7Bpkgkey%7D#3'
       parameters:
         - description: The version of the API to use
@@ -20238,7 +19863,6 @@ paths:
       summary: ''
       tags: []
     get:
-      deprecated: true
       operationId: '%2Fapi%2Ffleet%2Fepm%2Fpackages%2F%7Bpkgkey%7D#0'
       parameters:
         - description: The version of the API to use
@@ -20279,7 +19903,6 @@ paths:
       summary: ''
       tags: []
     post:
-      deprecated: true
       operationId: '%2Fapi%2Ffleet%2Fepm%2Fpackages%2F%7Bpkgkey%7D#2'
       parameters:
         - description: The version of the API to use
@@ -20335,7 +19958,6 @@ paths:
       summary: ''
       tags: []
     put:
-      deprecated: true
       operationId: '%2Fapi%2Ffleet%2Fepm%2Fpackages%2F%7Bpkgkey%7D#1'
       parameters:
         - description: The version of the API to use
@@ -33298,7 +32920,6 @@ paths:
         - Fleet service tokens
   /api/fleet/service-tokens:
     post:
-      deprecated: true
       description: Create a service token
       operationId: '%2Fapi%2Ffleet%2Fservice-tokens#0'
       parameters:
@@ -35262,7 +34883,7 @@ paths:
             nullable: true
             type: string
         - in: query
-          name: userFilter
+          name: createdByFilter
           schema:
             nullable: true
             type: string
@@ -36556,6 +36177,666 @@ paths:
       tags:
         - Security AI Assistant API
         - Prompts API
+  /api/security/role:
+    get:
+      operationId: '%2Fapi%2Fsecurity%2Frole#0'
+      parameters:
+        - description: The version of the API to use
+          in: header
+          name: elastic-api-version
+          schema:
+            default: '2023-10-31'
+            enum:
+              - '2023-10-31'
+            type: string
+        - description: >-
+            If `true` and the response contains any privileges that are
+            associated with deprecated features, they are omitted in favor of
+            details about the appropriate replacement feature privileges.
+          in: query
+          name: replaceDeprecatedPrivileges
+          required: false
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Indicates a successful call.
+      summary: Get all roles
+      tags:
+        - roles
+  /api/security/role/{name}:
+    delete:
+      operationId: '%2Fapi%2Fsecurity%2Frole%2F%7Bname%7D#1'
+      parameters:
+        - description: The version of the API to use
+          in: header
+          name: elastic-api-version
+          schema:
+            default: '2023-10-31'
+            enum:
+              - '2023-10-31'
+            type: string
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - in: path
+          name: name
+          required: true
+          schema:
+            minLength: 1
+            type: string
+      responses:
+        '204':
+          description: Indicates a successful call.
+      summary: Delete a role
+      tags:
+        - roles
+    get:
+      operationId: '%2Fapi%2Fsecurity%2Frole%2F%7Bname%7D#0'
+      parameters:
+        - description: The version of the API to use
+          in: header
+          name: elastic-api-version
+          schema:
+            default: '2023-10-31'
+            enum:
+              - '2023-10-31'
+            type: string
+        - description: The role name.
+          in: path
+          name: name
+          required: true
+          schema:
+            minLength: 1
+            type: string
+        - description: >-
+            If `true` and the response contains any privileges that are
+            associated with deprecated features, they are omitted in favor of
+            details about the appropriate replacement feature privileges.
+          in: query
+          name: replaceDeprecatedPrivileges
+          required: false
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Indicates a successful call.
+      summary: Get a role
+      tags:
+        - roles
+    put:
+      description: >-
+        Create a new Kibana role or update the attributes of an existing role.
+        Kibana roles are stored in the Elasticsearch native realm.
+      operationId: '%2Fapi%2Fsecurity%2Frole%2F%7Bname%7D#2'
+      parameters:
+        - description: The version of the API to use
+          in: header
+          name: elastic-api-version
+          schema:
+            default: '2023-10-31'
+            enum:
+              - '2023-10-31'
+            type: string
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The role name.
+          in: path
+          name: name
+          required: true
+          schema:
+            maxLength: 1024
+            minLength: 1
+            type: string
+        - description: When true, a role is not overwritten if it already exists.
+          in: query
+          name: createOnly
+          required: false
+          schema:
+            default: false
+            type: boolean
+      requestBody:
+        content:
+          application/json; Elastic-Api-Version=2023-10-31:
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                description:
+                  description: A description for the role.
+                  maxLength: 2048
+                  type: string
+                elasticsearch:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    cluster:
+                      items:
+                        description: >-
+                          Cluster privileges that define the cluster level
+                          actions that users can perform.
+                        type: string
+                      type: array
+                    indices:
+                      items:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          allow_restricted_indices:
+                            description: >-
+                              Restricted indices are a special category of
+                              indices that are used internally to store
+                              configuration data and should not be directly
+                              accessed. Only internal system roles should
+                              normally grant privileges over the restricted
+                              indices. Toggling this flag is very strongly
+                              discouraged because it could effectively grant
+                              unrestricted operations on critical data, making
+                              the entire system unstable or leaking sensitive
+                              information. If for administrative purposes you
+                              need to create a role with privileges covering
+                              restricted indices, however, you can set this
+                              property to true. In that case, the names field
+                              covers the restricted indices too.
+                            type: boolean
+                          field_security:
+                            additionalProperties:
+                              items:
+                                description: >-
+                                  The document fields that the role members have
+                                  read access to.
+                                type: string
+                              type: array
+                            type: object
+                          names:
+                            items:
+                              description: >-
+                                The data streams, indices, and aliases to which
+                                the permissions in this entry apply. It supports
+                                wildcards (*).
+                              type: string
+                            minItems: 1
+                            type: array
+                          privileges:
+                            items:
+                              description: >-
+                                The index level privileges that the role members
+                                have for the data streams and indices.
+                              type: string
+                            minItems: 1
+                            type: array
+                          query:
+                            description: >-
+                              A search query that defines the documents the role
+                              members have read access to. A document within the
+                              specified data streams and indices must match this
+                              query in order for it to be accessible by the role
+                              members.
+                            type: string
+                        required:
+                          - names
+                          - privileges
+                      type: array
+                    remote_cluster:
+                      items:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          clusters:
+                            items:
+                              description: >-
+                                A list of remote cluster aliases. It supports
+                                literal strings as well as wildcards and regular
+                                expressions.
+                              type: string
+                            minItems: 1
+                            type: array
+                          privileges:
+                            items:
+                              description: >-
+                                The cluster level privileges for the remote
+                                cluster. The allowed values are a subset of the
+                                cluster privileges.
+                              type: string
+                            minItems: 1
+                            type: array
+                        required:
+                          - privileges
+                          - clusters
+                      type: array
+                    remote_indices:
+                      items:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          allow_restricted_indices:
+                            description: >-
+                              Restricted indices are a special category of
+                              indices that are used internally to store
+                              configuration data and should not be directly
+                              accessed. Only internal system roles should
+                              normally grant privileges over the restricted
+                              indices. Toggling this flag is very strongly
+                              discouraged because it could effectively grant
+                              unrestricted operations on critical data, making
+                              the entire system unstable or leaking sensitive
+                              information. If for administrative purposes you
+                              need to create a role with privileges covering
+                              restricted indices, however, you can set this
+                              property to true. In that case, the names field
+                              will cover the restricted indices too.
+                            type: boolean
+                          clusters:
+                            items:
+                              description: >-
+                                A list of remote cluster aliases. It supports
+                                literal strings as well as wildcards and regular
+                                expressions.
+                              type: string
+                            minItems: 1
+                            type: array
+                          field_security:
+                            additionalProperties:
+                              items:
+                                description: >-
+                                  The document fields that the role members have
+                                  read access to.
+                                type: string
+                              type: array
+                            type: object
+                          names:
+                            items:
+                              description: >-
+                                A list of remote aliases, data streams, or
+                                indices to which the permissions apply. It
+                                supports wildcards (*).
+                              type: string
+                            minItems: 1
+                            type: array
+                          privileges:
+                            items:
+                              description: >-
+                                The index level privileges that role members
+                                have for the specified indices.
+                              type: string
+                            minItems: 1
+                            type: array
+                          query:
+                            description: >-
+                              A search query that defines the documents the role
+                              members have read access to. A document within the
+                              specified data streams and indices must match this
+                              query in order for it to be accessible by the role
+                              members. 
+                            type: string
+                        required:
+                          - clusters
+                          - names
+                          - privileges
+                      type: array
+                    run_as:
+                      items:
+                        description: A user name that the role member can impersonate.
+                        type: string
+                      type: array
+                kibana:
+                  items:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      base:
+                        anyOf:
+                          - items: {}
+                            type: array
+                          - type: boolean
+                          - type: number
+                          - type: object
+                          - type: string
+                        nullable: true
+                        oneOf:
+                          - items:
+                              description: >-
+                                A base privilege that grants applies to all
+                                spaces.
+                              type: string
+                            type: array
+                          - items:
+                              description: >-
+                                A base privilege that applies to specific
+                                spaces.
+                              type: string
+                            type: array
+                      feature:
+                        additionalProperties:
+                          items:
+                            description: >-
+                              The privileges that the role member has for the
+                              feature.
+                            type: string
+                          type: array
+                        type: object
+                      spaces:
+                        anyOf:
+                          - items:
+                              enum:
+                                - '*'
+                              type: string
+                            maxItems: 1
+                            minItems: 1
+                            type: array
+                          - items:
+                              description: A space that the privilege applies to.
+                              type: string
+                            type: array
+                        default:
+                          - '*'
+                    required:
+                      - base
+                  type: array
+                metadata:
+                  additionalProperties: {}
+                  type: object
+              required:
+                - elasticsearch
+      responses:
+        '204':
+          description: Indicates a successful call.
+      summary: Create or update a role
+      tags:
+        - roles
+  /api/security/roles:
+    post:
+      operationId: '%2Fapi%2Fsecurity%2Froles#0'
+      parameters:
+        - description: The version of the API to use
+          in: header
+          name: elastic-api-version
+          schema:
+            default: '2023-10-31'
+            enum:
+              - '2023-10-31'
+            type: string
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json; Elastic-Api-Version=2023-10-31:
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                roles:
+                  additionalProperties:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      description:
+                        description: A description for the role.
+                        maxLength: 2048
+                        type: string
+                      elasticsearch:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          cluster:
+                            items:
+                              description: >-
+                                Cluster privileges that define the cluster level
+                                actions that users can perform.
+                              type: string
+                            type: array
+                          indices:
+                            items:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                allow_restricted_indices:
+                                  description: >-
+                                    Restricted indices are a special category of
+                                    indices that are used internally to store
+                                    configuration data and should not be
+                                    directly accessed. Only internal system
+                                    roles should normally grant privileges over
+                                    the restricted indices. Toggling this flag
+                                    is very strongly discouraged because it
+                                    could effectively grant unrestricted
+                                    operations on critical data, making the
+                                    entire system unstable or leaking sensitive
+                                    information. If for administrative purposes
+                                    you need to create a role with privileges
+                                    covering restricted indices, however, you
+                                    can set this property to true. In that case,
+                                    the names field covers the restricted
+                                    indices too.
+                                  type: boolean
+                                field_security:
+                                  additionalProperties:
+                                    items:
+                                      description: >-
+                                        The document fields that the role
+                                        members have read access to.
+                                      type: string
+                                    type: array
+                                  type: object
+                                names:
+                                  items:
+                                    description: >-
+                                      The data streams, indices, and aliases to
+                                      which the permissions in this entry apply.
+                                      It supports wildcards (*).
+                                    type: string
+                                  minItems: 1
+                                  type: array
+                                privileges:
+                                  items:
+                                    description: >-
+                                      The index level privileges that the role
+                                      members have for the data streams and
+                                      indices.
+                                    type: string
+                                  minItems: 1
+                                  type: array
+                                query:
+                                  description: >-
+                                    A search query that defines the documents
+                                    the role members have read access to. A
+                                    document within the specified data streams
+                                    and indices must match this query in order
+                                    for it to be accessible by the role members.
+                                  type: string
+                              required:
+                                - names
+                                - privileges
+                            type: array
+                          remote_cluster:
+                            items:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                clusters:
+                                  items:
+                                    description: >-
+                                      A list of remote cluster aliases. It
+                                      supports literal strings as well as
+                                      wildcards and regular expressions.
+                                    type: string
+                                  minItems: 1
+                                  type: array
+                                privileges:
+                                  items:
+                                    description: >-
+                                      The cluster level privileges for the
+                                      remote cluster. The allowed values are a
+                                      subset of the cluster privileges.
+                                    type: string
+                                  minItems: 1
+                                  type: array
+                              required:
+                                - privileges
+                                - clusters
+                            type: array
+                          remote_indices:
+                            items:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                allow_restricted_indices:
+                                  description: >-
+                                    Restricted indices are a special category of
+                                    indices that are used internally to store
+                                    configuration data and should not be
+                                    directly accessed. Only internal system
+                                    roles should normally grant privileges over
+                                    the restricted indices. Toggling this flag
+                                    is very strongly discouraged because it
+                                    could effectively grant unrestricted
+                                    operations on critical data, making the
+                                    entire system unstable or leaking sensitive
+                                    information. If for administrative purposes
+                                    you need to create a role with privileges
+                                    covering restricted indices, however, you
+                                    can set this property to true. In that case,
+                                    the names field will cover the restricted
+                                    indices too.
+                                  type: boolean
+                                clusters:
+                                  items:
+                                    description: >-
+                                      A list of remote cluster aliases. It
+                                      supports literal strings as well as
+                                      wildcards and regular expressions.
+                                    type: string
+                                  minItems: 1
+                                  type: array
+                                field_security:
+                                  additionalProperties:
+                                    items:
+                                      description: >-
+                                        The document fields that the role
+                                        members have read access to.
+                                      type: string
+                                    type: array
+                                  type: object
+                                names:
+                                  items:
+                                    description: >-
+                                      A list of remote aliases, data streams, or
+                                      indices to which the permissions apply. It
+                                      supports wildcards (*).
+                                    type: string
+                                  minItems: 1
+                                  type: array
+                                privileges:
+                                  items:
+                                    description: >-
+                                      The index level privileges that role
+                                      members have for the specified indices.
+                                    type: string
+                                  minItems: 1
+                                  type: array
+                                query:
+                                  description: >-
+                                    A search query that defines the documents
+                                    the role members have read access to. A
+                                    document within the specified data streams
+                                    and indices must match this query in order
+                                    for it to be accessible by the role
+                                    members. 
+                                  type: string
+                              required:
+                                - clusters
+                                - names
+                                - privileges
+                            type: array
+                          run_as:
+                            items:
+                              description: >-
+                                A user name that the role member can
+                                impersonate.
+                              type: string
+                            type: array
+                      kibana:
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            base:
+                              anyOf:
+                                - items: {}
+                                  type: array
+                                - type: boolean
+                                - type: number
+                                - type: object
+                                - type: string
+                              nullable: true
+                              oneOf:
+                                - items:
+                                    description: >-
+                                      A base privilege that grants applies to
+                                      all spaces.
+                                    type: string
+                                  type: array
+                                - items:
+                                    description: >-
+                                      A base privilege that applies to specific
+                                      spaces.
+                                    type: string
+                                  type: array
+                            feature:
+                              additionalProperties:
+                                items:
+                                  description: >-
+                                    The privileges that the role member has for
+                                    the feature.
+                                  type: string
+                                type: array
+                              type: object
+                            spaces:
+                              anyOf:
+                                - items:
+                                    enum:
+                                      - '*'
+                                    type: string
+                                  maxItems: 1
+                                  minItems: 1
+                                  type: array
+                                - items:
+                                    description: A space that the privilege applies to.
+                                    type: string
+                                  type: array
+                              default:
+                                - '*'
+                          required:
+                            - base
+                        type: array
+                      metadata:
+                        additionalProperties: {}
+                        type: object
+                    required:
+                      - elasticsearch
+                  type: object
+              required:
+                - roles
+      responses:
+        '200':
+          description: Indicates a successful call.
+      summary: Create or update roles
+      tags:
+        - roles
   /api/spaces/space:
     get:
       operationId: '%2Fapi%2Fspaces%2Fspace#0'
@@ -48211,9 +48492,7 @@ components:
             name:
               type: string
             source:
-              items:
-                type: string
-              type: array
+              type: string
           required:
             - name
             - source
@@ -48365,9 +48644,7 @@ components:
             name:
               type: string
             source:
-              items:
-                type: string
-              type: array
+              type: string
           required:
             - name
             - source
@@ -51504,6 +51781,7 @@ tags:
   - name: Message Signing Service
   - description: Machine learning
     name: ml
+  - name: roles
   - description: >
       Export sets of saved objects that you want to import into {kib}, resolve
       import errors, and rotate an encryption key for encrypted saved objects

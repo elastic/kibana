@@ -14,7 +14,7 @@
 //   capacity and the cost of each task type to run
 
 import apm, { Logger } from 'elastic-apm-node';
-import { Subject, Observable } from 'rxjs';
+import { Subject } from 'rxjs';
 import { createWrappedLogger } from '../lib/wrapped_logger';
 
 import { TaskTypeDictionary } from '../task_type_dictionary';
@@ -70,24 +70,9 @@ interface OwnershipClaimingOpts {
 
 const SIZE_MULTIPLIER_FOR_TASK_FETCH = 4;
 
-export function claimAvailableTasksMget(opts: TaskClaimerOpts): Observable<ClaimOwnershipResult> {
-  const taskClaimOwnership$ = new Subject<ClaimOwnershipResult>();
-
-  claimAvailableTasksApm(opts)
-    .then((result) => {
-      taskClaimOwnership$.next(result);
-    })
-    .catch((err) => {
-      taskClaimOwnership$.error(err);
-    })
-    .finally(() => {
-      taskClaimOwnership$.complete();
-    });
-
-  return taskClaimOwnership$;
-}
-
-async function claimAvailableTasksApm(opts: TaskClaimerOpts): Promise<ClaimOwnershipResult> {
+export async function claimAvailableTasksMget(
+  opts: TaskClaimerOpts
+): Promise<ClaimOwnershipResult> {
   const apmTrans = apm.startTransaction(
     TASK_MANAGER_MARK_AS_CLAIMED,
     TASK_MANAGER_TRANSACTION_TYPE
@@ -357,7 +342,10 @@ async function searchAvailableTasks({
       // Task must be enabled
       EnabledTask,
       // a task type that's not excluded (may be removed or not)
-      OneOfTaskTypes('task.taskType', claimPartitions.unlimitedTypes),
+      OneOfTaskTypes(
+        'task.taskType',
+        claimPartitions.unlimitedTypes.concat(Array.from(removedTypes))
+      ),
       // Either a task with idle status and runAt <= now or
       // status running or claiming with a retryAt <= now.
       shouldBeOneOf(IdleTaskWithExpiredRunAt, RunningOrClaimingTaskWithExpiredRetryAt),

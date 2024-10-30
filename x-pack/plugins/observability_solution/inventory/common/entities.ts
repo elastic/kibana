@@ -6,12 +6,6 @@
  */
 import { ENTITY_LATEST, entitiesAliasPattern } from '@kbn/entities-schema';
 import {
-  HOST_NAME,
-  SERVICE_ENVIRONMENT,
-  SERVICE_NAME,
-  AGENT_NAME,
-  CLOUD_PROVIDER,
-  CONTAINER_ID,
   ENTITY_DEFINITION_ID,
   ENTITY_DISPLAY_NAME,
   ENTITY_ID,
@@ -19,14 +13,9 @@ import {
   ENTITY_LAST_SEEN,
   ENTITY_TYPE,
 } from '@kbn/observability-shared-plugin/common';
+import { decode, encode } from '@kbn/rison';
 import { isRight } from 'fp-ts/lib/Either';
 import * as t from 'io-ts';
-
-export const entityTypeRt = t.union([
-  t.literal('service'),
-  t.literal('host'),
-  t.literal('container'),
-]);
 
 export const entityColumnIdsRt = t.union([
   t.literal(ENTITY_DISPLAY_NAME),
@@ -37,7 +26,48 @@ export const entityColumnIdsRt = t.union([
 
 export type EntityColumnIds = t.TypeOf<typeof entityColumnIdsRt>;
 
-export type EntityType = t.TypeOf<typeof entityTypeRt>;
+export const entityViewRt = t.union([t.literal('unified'), t.literal('grouped')]);
+
+const paginationRt = t.record(t.string, t.number);
+export const entityPaginationRt = new t.Type<Record<string, number> | undefined, string, unknown>(
+  'entityPaginationRt',
+  paginationRt.is,
+  (input, context) => {
+    switch (typeof input) {
+      case 'string': {
+        try {
+          const decoded = decode(input);
+          const validation = paginationRt.decode(decoded);
+          if (isRight(validation)) {
+            return t.success(validation.right);
+          }
+
+          return t.failure(input, context);
+        } catch (e) {
+          return t.failure(input, context);
+        }
+      }
+
+      case 'undefined':
+        return t.success(input);
+
+      default: {
+        const validation = paginationRt.decode(input);
+
+        if (isRight(validation)) {
+          return t.success(validation.right);
+        }
+
+        return t.failure(input, context);
+      }
+    }
+  },
+  (o) => encode(o)
+);
+
+export type EntityView = t.TypeOf<typeof entityViewRt>;
+
+export type EntityPagination = t.TypeOf<typeof entityPaginationRt>;
 
 export const defaultEntitySortField: EntityColumnIds = 'alertsCount';
 
@@ -48,20 +78,8 @@ export const ENTITIES_LATEST_ALIAS = entitiesAliasPattern({
   dataset: ENTITY_LATEST,
 });
 
-const BUILTIN_SERVICES_FROM_ECS_DATA = 'builtin_services_from_ecs_data';
-const BUILTIN_HOSTS_FROM_ECS_DATA = 'builtin_hosts_from_ecs_data';
-const BUILTIN_CONTAINERS_FROM_ECS_DATA = 'builtin_containers_from_ecs_data';
-
-export const defaultEntityDefinitions = [
-  BUILTIN_SERVICES_FROM_ECS_DATA,
-  BUILTIN_HOSTS_FROM_ECS_DATA,
-  BUILTIN_CONTAINERS_FROM_ECS_DATA,
-];
-
-export const defaultEntityTypes: EntityType[] = ['service', 'host', 'container'];
-
-const entityArrayRt = t.array(entityTypeRt);
-export const entityTypesRt = new t.Type<EntityType[], string, unknown>(
+const entityArrayRt = t.array(t.string);
+export const entityTypesRt = new t.Type<string[], string, unknown>(
   'entityTypesRt',
   entityArrayRt.is,
   (input, context) => {
@@ -83,10 +101,10 @@ export const entityTypesRt = new t.Type<EntityType[], string, unknown>(
   (arr) => arr.join()
 );
 
-interface BaseEntity {
+export interface Entity {
   [ENTITY_LAST_SEEN]: string;
   [ENTITY_ID]: string;
-  [ENTITY_TYPE]: EntityType;
+  [ENTITY_TYPE]: string;
   [ENTITY_DISPLAY_NAME]: string;
   [ENTITY_DEFINITION_ID]: string;
   [ENTITY_IDENTITY_FIELDS]: string | string[];
@@ -94,26 +112,8 @@ interface BaseEntity {
   [key: string]: any;
 }
 
-/**
- * These types are based on service, host and container from the built in definition.
- */
-export interface ServiceEntity extends BaseEntity {
-  [ENTITY_TYPE]: 'service';
-  [SERVICE_NAME]: string;
-  [SERVICE_ENVIRONMENT]?: string | string[] | null;
-  [AGENT_NAME]: string | string[] | null;
-}
-
-export interface HostEntity extends BaseEntity {
-  [ENTITY_TYPE]: 'host';
-  [HOST_NAME]: string;
-  [CLOUD_PROVIDER]: string | string[] | null;
-}
-
-export interface ContainerEntity extends BaseEntity {
-  [ENTITY_TYPE]: 'container';
-  [CONTAINER_ID]: string;
-  [CLOUD_PROVIDER]: string | string[] | null;
-}
-
-export type Entity = ServiceEntity | HostEntity | ContainerEntity;
+export type EntityGroup = {
+  count: number;
+} & {
+  [key: string]: any;
+};

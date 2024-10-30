@@ -908,7 +908,7 @@ describe('utils', () => {
           ...customFieldsConfiguration,
           {
             key: 'fourth_key',
-            type: 'number',
+            type: 'symbol',
             label: 'Number field',
             required: true,
           },
