@@ -488,6 +488,33 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
+      it('should push a closed case', async () => {
+        const { postedCase, connector } = await createCaseWithConnector({
+          supertest,
+          serviceNowSimulatorURL,
+          actionsRemover,
+        });
+        await updateCase({
+          supertest,
+          params: {
+            cases: [
+              {
+                id: postedCase.id,
+                version: postedCase.version,
+                status: CaseStatuses.closed,
+              },
+            ],
+          },
+        });
+
+        await pushCase({
+          supertest,
+          caseId: postedCase.id,
+          connectorId: connector.id,
+          expectedHttpCode: 200,
+        });
+      });
+
       // FLAKY: https://github.com/elastic/kibana/issues/157588
       describe.skip('user profile uid', () => {
         let headers: Record<string, string>;
