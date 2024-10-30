@@ -9,12 +9,14 @@
 
 /* eslint-disable no-restricted-syntax */
 
+require('../src/setup_node_env');
+
 const { execSync, execFileSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 const { getCodeOwnersForFile, getPathsWithOwnersReversed } = require('@kbn/code-owners');
 
-process.env.ROUTE_TYPE = 'authorized';
+process.env.ROUTE_TYPE = 'unauthorized';
 const DRY_RUN = process.env.DRY_RUN === 'true';
 
 console.log('DRY_RUN:', DRY_RUN);
@@ -185,7 +187,7 @@ function getChangedFiles() {
   return diffOutput.split('\n').filter(Boolean);
 }
 
-function groupFilesByOwners(files, codeowners) {
+function groupFilesByOwners(files) {
   const ownerFilesMap = {};
   const reversedCodeowners = getPathsWithOwnersReversed();
 
@@ -321,8 +323,8 @@ function runESLint() {
     // runCommand(
     //   `grep -rEl --include="*.ts" "router\.(get|post|delete|put)|router\.versioned\.(get|post|put|delete)" ./x-pack/plugins/ ./x-pack/packages/ | xargs env ${eslintRuleFlag} npx eslint --fix --rule "@kbn/eslint/no_deprecated_authz_config:error"`
     // );
-    // const directories = ['./x-pack/plugins', './x-pack/packages', './src/plugins'];
-    const directories = ['./x-pack/plugins/security_solution', './x-pack/plugins/spaces']; // For testing purposes
+    const directories = ['./x-pack/plugins', './x-pack/packages', './src/plugins'];
+    // const directories = ['./x-pack/plugins/security_solution', './x-pack/plugins/spaces']; // For testing purposes
 
     for (const directory of directories) {
       console.log(`Running ESLint autofix for ${directory}`);
@@ -342,9 +344,7 @@ function main() {
     process.exit(1);
   }
 
-  const codeowners = parseCodeOwners(codeownersPath);
-
-  // runESLint();
+  runESLint();
 
   const changedFiles = getChangedFiles();
   if (changedFiles.length === 0) {
@@ -352,11 +352,9 @@ function main() {
     return;
   }
 
-  const ownerFilesMap = groupFilesByOwners(changedFiles, codeowners);
+  const ownerFilesMap = groupFilesByOwners(changedFiles);
 
-  console.log(ownerFilesMap);
-
-  // processChangesByOwners(ownerFilesMap);
+  processChangesByOwners(ownerFilesMap);
 }
 
 main();
