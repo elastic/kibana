@@ -143,66 +143,57 @@ export class Plugin implements InfraClientPluginClass {
     /** !! Need to be kept in sync with the deepLinks in x-pack/plugins/observability_solution/infra/public/plugin.ts */
     pluginsSetup.observabilityShared.navigation.registerSections(
       startDep$AndHostViewFlag$.pipe(
-        map(
-          ([
-            [
-              {
-                application,
-              },
-            ],
-            isInfrastructureHostsViewEnabled,
-          ]) => {
-            const { infrastructure, logs } = application.capabilities;
-            return [
-              ...(logs.show
-                ? [
-                    {
-                      label: logsTitle,
-                      sortKey: 200,
-                      entries: getLogsNavigationEntries({
-                        application,
-                        config: this.config,
-                        routes: logRoutes,
-                      }),
-                    },
-                  ]
-                : []),
-              ...(infrastructure.show
-                ? [
-                    {
-                      label: metricsTitle,
-                      sortKey: 300,
-                      entries: [
-                        {
-                          label: inventoryTitle,
-                          app: 'metrics',
-                          path: '/inventory',
-                        },
-                        ...(this.config.featureFlags.metricsExplorerEnabled
-                          ? [
-                              {
-                                label: metricsExplorerTitle,
-                                app: 'metrics',
-                                path: '/explorer',
-                              },
-                            ]
-                          : []),
-                        ...(isInfrastructureHostsViewEnabled
-                          ? [
-                              {
-                                label: hostsTitle,
-                                app: 'metrics',
-                                path: '/hosts',
-                              },
-                            ]
-                          : []),
-                      ],
-                    },
-                  ]
-                : []),
-            ];
-          }
-        )
+        map(([[{ application }], isInfrastructureHostsViewEnabled]) => {
+          const { infrastructure, logs } = application.capabilities;
+          return [
+            ...(logs.show
+              ? [
+                  {
+                    label: logsTitle,
+                    sortKey: 200,
+                    entries: getLogsNavigationEntries({
+                      application,
+                      config: this.config,
+                      routes: logRoutes,
+                    }),
+                  },
+                ]
+              : []),
+            ...(infrastructure.show
+              ? [
+                  {
+                    label: metricsTitle,
+                    sortKey: 300,
+                    entries: [
+                      {
+                        label: inventoryTitle,
+                        app: 'metrics',
+                        path: '/inventory',
+                      },
+                      ...(this.config.featureFlags.metricsExplorerEnabled
+                        ? [
+                            {
+                              label: metricsExplorerTitle,
+                              app: 'metrics',
+                              path: '/explorer',
+                            },
+                          ]
+                        : []),
+                      ...(isInfrastructureHostsViewEnabled
+                        ? [
+                            {
+                              label: hostsTitle,
+                              app: 'metrics',
+                              path: '/hosts',
+                            },
+                          ]
+                        : []),
+                    ],
+                  },
+                ]
+              : []),
+          ];
+        })
       )
     );
 
