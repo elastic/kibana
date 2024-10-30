@@ -69,10 +69,13 @@ export const getKnowledgeBaseStatusRoute = (router: ElasticAssistantPluginRouter
 
           if (indexExists && isModelDeployed) {
             const securityLabsExists = await kbDataClient.isSecurityLabsDocsLoaded();
+            const userDataExists = await kbDataClient.isUserDataExists();
+
             return response.ok({
               body: {
                 ...body,
                 security_labs_exists: securityLabsExists,
+                user_data_exists: userDataExists,
               },
             });
           }

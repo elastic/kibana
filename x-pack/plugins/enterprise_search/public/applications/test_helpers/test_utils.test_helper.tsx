@@ -58,6 +58,7 @@ export const mockKibanaProps: KibanaLogicProps = {
     elasticsearch_host: 'https://your_deployment_url',
   },
   getChromeStyle$: jest.fn().mockReturnValue(of('classic')),
+  getNavLinks: jest.fn().mockReturnValue([]),
   guidedOnboarding: {},
   history: mockHistory,
   indexMappingComponent: () => {

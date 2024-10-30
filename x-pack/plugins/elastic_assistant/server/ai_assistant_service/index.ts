@@ -146,7 +146,9 @@ export class AIAssistantService {
       name: this.resourceNames.indexTemplate[resource],
       componentTemplateRefs: [this.resourceNames.componentTemplate[resource]],
       // Apply `default_pipeline` if pipeline exists for resource
-      ...(resource in this.resourceNames.pipelines
+      ...(resource in this.resourceNames.pipelines &&
+      // Remove this param and initialization when the `assistantKnowledgeBaseByDefault` feature flag is removed
+      !(resource === 'knowledgeBase' && this.v2KnowledgeBaseEnabled)
         ? {
             template: {
               settings: {
@@ -186,9 +188,8 @@ export class AIAssistantService {
         esClient,
         id: this.resourceNames.pipelines.knowledgeBase,
       });
-      // TODO not sure what @spong means here, but shouldn't leaving that check for if the pipeline exists ensure it is recreated?
-      // TODO: When FF is removed, ensure pipeline is re-created for those upgrading
-      if (!pipelineCreated) {
+      // ensure pipeline is re-created for those upgrading
+      if (pipelineCreated) {
         this.options.logger.debug(
           `Installing ingest pipeline - ${this.resourceNames.pipelines.knowledgeBase}`
         );

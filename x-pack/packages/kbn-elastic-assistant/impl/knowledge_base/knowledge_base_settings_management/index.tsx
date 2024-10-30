@@ -157,6 +157,7 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
   } = useKnowledgeBaseEntries({
     http,
     toasts,
+    isRefetching: kbStatus?.is_setup_in_progress,
   });
 
   // Flyout Save/Cancel Actions
@@ -187,13 +188,15 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
         indices.push(entry.index);
       }
     });
-    return dataViews.getExistingIndices(indices);
+
+    return indices.length ? dataViews.getExistingIndices(indices) : Promise.resolve([]);
   }, [entries.data]);
 
   const { getColumns } = useKnowledgeBaseTable();
   const columns = useMemo(
     () =>
       getColumns({
+        isKbSetupInProgress: kbStatus?.is_setup_in_progress ?? false,
         existingIndices,
         isDeleteEnabled: (entry: KnowledgeBaseEntryResponse) => {
           return (
@@ -216,7 +219,14 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
           openFlyout();
         },
       }),
-    [entries.data, existingIndices, getColumns, hasManageGlobalKnowledgeBase, openFlyout]
+    [
+      entries.data,
+      existingIndices,
+      getColumns,
+      hasManageGlobalKnowledgeBase,
+      kbStatus?.is_setup_in_progress,
+      openFlyout,
+    ]
   );
 
   // Refresh button
