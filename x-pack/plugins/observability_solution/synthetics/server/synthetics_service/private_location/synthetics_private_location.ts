@@ -6,7 +6,7 @@
  */
 import { NewPackagePolicy } from '@kbn/fleet-plugin/common';
 import { NewPackagePolicyWithId } from '@kbn/fleet-plugin/server/services/package_policy';
-import { cloneDeep } from 'lodash';
+import { cloneDeep, omit } from 'lodash';
 import { SavedObjectError } from '@kbn/core-saved-objects-common';
 import { DEFAULT_NAMESPACE_STRING } from '../../../common/constants/monitor_defaults';
 import {
@@ -158,9 +158,16 @@ export class SyntheticsPrivateLocation {
               `Unable to find Synthetics private location for agentId ${privateLocation.id}`
             );
           }
-
+          console.log('private configs', config);
+          const newConfig = (
+            config[ConfigKey.SOURCE_INLINE] && config[ConfigKey.SOURCE_PROJECT_CONTENT]
+              ? omit(config, ConfigKey.SOURCE_PROJECT_CONTENT)
+              : config
+          ) as HeartbeatConfig;
+          console.log('new config', newConfig);
           const newPolicy = await this.generateNewPolicy(
-            config,
+            newConfig,
+            // config,
             location,
             newPolicyTemplate,
             spaceId,
@@ -168,6 +175,7 @@ export class SyntheticsPrivateLocation {
             testRunId,
             runOnce
           );
+          console.log('new policy', JSON.stringify(newPolicy, null, 2));
 
           if (!newPolicy) {
             throw new Error(
@@ -366,6 +374,7 @@ export class SyntheticsPrivateLocation {
     const soClient = this.server.coreStart.savedObjects.createInternalRepository();
     const esClient = this.server.coreStart.elasticsearch.client.asInternalUser;
     if (esClient && newPolicies.length > 0) {
+      console.log('the policies we are creating', JSON.stringify(newPolicies, null, 2));
       return await this.server.fleet.packagePolicyService.bulkCreate(
         soClient,
         esClient,

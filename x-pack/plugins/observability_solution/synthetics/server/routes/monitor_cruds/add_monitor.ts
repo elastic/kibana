@@ -78,6 +78,7 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
         request.body as CreateMonitorPayLoad
       );
 
+      console.log('monitorWithDefaults', monitorWithDefaults);
       const validationResult = validateMonitor(monitorWithDefaults);
 
       if (!validationResult.valid || !validationResult.decodedMonitor) {
