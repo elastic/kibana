@@ -67,6 +67,7 @@ const teamLabels = {
   '@elastic/search-kibana': 'Search',
   '@elastic/logstash': 'logstash',
   '@elastic/stack-monitoring': 'Team:Monitoring',
+  '@elastic/security-service-integrations': 'Team:Security-Scalability',
 };
 
 const PR_DESCRIPTION_TEXT_AUTHORIZED = `
@@ -168,23 +169,6 @@ function runCommand(command, silent = false) {
   }
 }
 
-function parseCodeOwners(codeownersPath) {
-  const codeowners = {};
-  const content = fs.readFileSync(codeownersPath, 'utf8').split('\n');
-
-  content.forEach((line) => {
-    const trimmed = line.trim();
-    if (!trimmed || trimmed.startsWith('#')) return;
-
-    const [pattern, owner] = trimmed.split(/\s+/);
-    if (pattern && owner) {
-      codeowners[pattern] = owner;
-    }
-  });
-
-  return codeowners;
-}
-
 function getChangedFiles() {
   const diffOutput = runCommand('git diff --name-only --diff-filter=M');
   return diffOutput.split('\n').filter(Boolean);
@@ -234,17 +218,6 @@ function processChangesByOwners(ownerFilesMap) {
       const tempBranch = `temp/${process.env.ROUTE_TYPE}-eslint-changes-by-${rawOwner}`;
       const targetBranch = `authz-migration/${process.env.ROUTE_TYPE}-routes-by-${rawOwner}`;
 
-      const teamLabel = owner
-        .split(',')
-        .map((o) => teamLabels[`@elastic/${o}`])
-        .filter((o) => o !== undefined);
-
-      if (teamLabel.length === 0) {
-        console.warn(`No team label found for owner: ${owner}`);
-      } else {
-        console.log('Team label:', teamLabel);
-      }
-
       console.log(`Checking out 'main' branch`);
       runCommand(`git checkout main`);
 
@@ -266,7 +239,10 @@ function processChangesByOwners(ownerFilesMap) {
             ? `Authorized route migration for routes owned by ${owner}`
             : `Unauthorized route migration for routes owned by ${owner}`;
         const routeLabel = 'Authz: API migration';
-        const teamLabel = owner.split(',').map((o) => teamLabels[`@elastic/${o}`]);
+        const teamLabel = owner
+          .split(',')
+          .map((o) => teamLabels[`@elastic/${o}`])
+          .filter((o) => o !== undefined);
         console.log(`Pushing the new branch: ${targetBranch} to remote`);
         runCommand(`git push origin ${targetBranch}`);
 
