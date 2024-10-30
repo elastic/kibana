@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { fetch$ } from '@kbn/presentation-publishing';
+import { fetch$ } from '@kbn/presentation-publishing/interfaces/fetch/fetch';
 import { type TimefilterContract } from '@kbn/data-plugin/public';
 import type { TimeRangeBounds } from '@kbn/ml-time-buckets';
 import { combineLatest, BehaviorSubject } from 'rxjs';

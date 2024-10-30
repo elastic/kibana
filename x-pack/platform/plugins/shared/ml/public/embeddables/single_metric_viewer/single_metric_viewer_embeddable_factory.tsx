@@ -12,16 +12,16 @@ import { openLazyFlyout } from '@kbn/presentation-util';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import React from 'react';
 import useUnmount from 'react-use/lib/useUnmount';
-import {
-  apiHasExecutionContext,
-  initializeTimeRangeManager,
-  initializeTitleManager,
-  timeRangeComparators,
-  titleComparators,
-  useStateFromPublishingSubject,
-} from '@kbn/presentation-publishing';
+import { timeRangeComparators } from '@kbn/presentation-publishing/interfaces/fetch/time_range_manager';
 import { BehaviorSubject, Subscription, merge } from 'rxjs';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
+import { apiHasExecutionContext } from '@kbn/presentation-publishing/interfaces/has_execution_context';
+import { useStateFromPublishingSubject } from '@kbn/presentation-publishing/publishing_subject';
+import {
+  initializeTitleManager,
+  titleComparators,
+} from '@kbn/presentation-publishing/interfaces/titles/title_manager';
+import { BehaviorSubject, Subscription } from 'rxjs';
 import { ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE } from '../constants';
 import type { MlPluginStart, MlStartDependencies } from '../../plugin';
 import type { SingleMetricViewerEmbeddableApi } from '../types';
