@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { visualize, lens } = getPageObjects(['visualize', 'lens']);
+  const { visualize, lens, timePicker } = getPageObjects(['visualize', 'lens', 'timePicker']);
   const browser = getService('browser');
   const filterBarService = getService('filterBar');
   const queryBar = getService('queryBar');
@@ -17,6 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('lens share tests', () => {
     before(async () => {
       await visualize.gotoVisualizationLandingPage();
+      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
     });
 
     afterEach(async () => {
@@ -30,7 +31,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should disable the share button if no request is made', async () => {
       await visualize.navigateToNewVisualization();
       await visualize.clickVisType('lens');
-      await lens.goToTimeRange();
 
       expect(await lens.isShareable()).to.eql(false);
     });

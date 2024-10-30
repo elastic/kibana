@@ -9,18 +9,25 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { visualize, lens, header } = getPageObjects(['visualize', 'lens', 'header']);
+  const { visualize, lens, header, timePicker } = getPageObjects([
+    'visualize',
+    'lens',
+    'header',
+    'timePicker',
+  ]);
   const listingTable = getService('listingTable');
   const retry = getService('retry');
   const filterBar = getService('filterBar');
   const testSubjects = getService('testSubjects');
 
   describe('lens legacy metric', () => {
+    before(async () => {
+      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
+    });
     it('should render a numeric metric', async () => {
       await visualize.gotoVisualizationLandingPage();
       await listingTable.searchForItemWithName('Artistpreviouslyknownaslens');
       await lens.clickVisualizeListItemTitle('Artistpreviouslyknownaslens');
-      await lens.goToTimeRange();
       await lens.assertLegacyMetric('Maximum of bytes', '19,986');
     });
 

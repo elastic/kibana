@@ -9,17 +9,24 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { visualize, lens, header } = getPageObjects(['visualize', 'lens', 'header']);
+  const { visualize, lens, header, timePicker } = getPageObjects([
+    'visualize',
+    'lens',
+    'header',
+    'timePicker',
+  ]);
   const filterBar = getService('filterBar');
   const fieldEditor = getService('fieldEditor');
   const retry = getService('retry');
   const dataViews = getService('dataViews');
 
   describe('lens runtime fields', () => {
+    before(async () => {
+      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
+    });
     it('should be able to add runtime field and use it', async () => {
       await visualize.navigateToNewVisualization();
       await visualize.clickVisType('lens');
-      await lens.goToTimeRange();
       await lens.switchToVisualization('lnsDatatable');
       await retry.try(async () => {
         await dataViews.clickAddFieldFromSearchBar();

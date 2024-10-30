@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { visualize, lens } = getPageObjects(['visualize', 'lens']);
+  const { visualize, lens, timePicker } = getPageObjects(['visualize', 'lens', 'timePicker']);
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
 
@@ -19,6 +19,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.load(
         'x-pack/test/functional/fixtures/kbn_archiver/lens/epoch_millis.json'
       );
+      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
     });
 
     after(async () => {
@@ -31,7 +32,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await visualize.navigateToNewVisualization();
       await visualize.clickVisType('lens');
       await lens.switchDataPanelIndexPattern('epoch-millis*');
-      await lens.goToTimeRange();
       await lens.switchToVisualization('lnsDatatable');
       const fieldList = await lens.findAllFields();
       expect(fieldList).to.contain('@timestamp');

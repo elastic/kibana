@@ -11,13 +11,14 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 const OPEN_IN_DISCOVER_DATA_TEST_SUBJ = 'embeddablePanelAction-ACTION_OPEN_IN_DISCOVER';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { visualize, lens, dashboard, header, discover, common } = getPageObjects([
+  const { visualize, lens, dashboard, header, discover, common, timePicker } = getPageObjects([
     'visualize',
     'lens',
     'dashboard',
     'header',
     'discover',
     'common',
+    'timePicker',
   ]);
 
   const listingTable = getService('listingTable');
@@ -30,11 +31,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
 
   describe('lens show underlying data from dashboard', () => {
+    before(async () => {
+      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
+    });
     it('should show the open button for a compatible saved visualization', async () => {
       await visualize.gotoVisualizationLandingPage();
       await listingTable.searchForItemWithName('lnsXYvis');
       await lens.clickVisualizeListItemTitle('lnsXYvis');
-      await lens.goToTimeRange();
       await lens.save('Embedded Visualization', true, false, false, 'new');
 
       await dashboard.saveDashboard(`Open in Discover Testing ${uuidv4()}`, {
