@@ -64,6 +64,9 @@ const teamLabels = {
   '@elastic/kibana-esql': 'Team:ESQL',
   '@elastic/security-scalability': 'Team:Security-Scalability',
   '@elastic/obs-ai-assistant': 'Team:Obs AI Assistant',
+  '@elastic/search-kibana': 'Search',
+  '@elastic/logstash': 'logstash',
+  '@elastic/stack-monitoring': 'Team:Monitoring',
 };
 
 const PR_DESCRIPTION_TEXT_AUTHORIZED = `
@@ -210,7 +213,7 @@ function processChangesByOwners(ownerFilesMap) {
     console.log(`Current branch (PR branch): ${currentBranch}`);
 
     for (const [owner, files] of Object.entries(ownerFilesMap)) {
-      const rawOwner = owner.replaceAll(',', '-');
+      const rawOwner = owner.replaceAll(',', '_');
       const tempBranch = `temp/${process.env.ROUTE_TYPE}-eslint-changes-by-${rawOwner}`;
 
       console.log(`Creating temporary branch for owner ${owner}: ${tempBranch}`);
@@ -227,13 +230,20 @@ function processChangesByOwners(ownerFilesMap) {
     }
 
     for (const [owner] of Object.entries(ownerFilesMap)) {
-      const rawOwner = owner.replaceAll(',', '-');
+      const rawOwner = owner.replaceAll(',', '_');
       const tempBranch = `temp/${process.env.ROUTE_TYPE}-eslint-changes-by-${rawOwner}`;
       const targetBranch = `authz-migration/${process.env.ROUTE_TYPE}-routes-by-${rawOwner}`;
 
-      const teamLabel = owner.split(',').map((o) => teamLabels[`@elastic/${o}`]);
+      const teamLabel = owner
+        .split(',')
+        .map((o) => teamLabels[`@elastic/${o}`])
+        .filter((o) => o !== undefined);
 
-      console.log('Team label:', teamLabel);
+      if (teamLabel.length === 0) {
+        console.warn(`No team label found for owner: ${owner}`);
+      } else {
+        console.log('Team label:', teamLabel);
+      }
 
       console.log(`Checking out 'main' branch`);
       runCommand(`git checkout main`);
