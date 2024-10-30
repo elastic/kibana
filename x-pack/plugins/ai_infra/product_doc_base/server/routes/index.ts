@@ -7,17 +7,14 @@
 
 import type { IRouter } from '@kbn/core/server';
 import { registerInstallationRoutes } from './installation';
-import type { ProductDocInstallClient } from '../services/doc_install_status';
-import type { PackageInstaller } from '../services/package_installer';
+import type { InternalRouteServices } from '../types';
 
 export const registerRoutes = ({
   router,
-  getInstallClient,
-  getInstaller,
+  getServices,
 }: {
   router: IRouter;
-  getInstallClient: () => ProductDocInstallClient;
-  getInstaller: () => PackageInstaller;
+  getServices: () => InternalRouteServices;
 }) => {
-  registerInstallationRoutes({ getInstaller, getInstallClient, router });
+  registerInstallationRoutes({ getServices, router });
 };

@@ -5,5 +5,9 @@
  * 2.0.
  */
 
-export { PackageInstaller } from './package_installer';
-export { checkLicense } from './utils';
+import type { ILicense } from '@kbn/licensing-plugin/server';
+
+export const checkLicense = (license: ILicense): boolean => {
+  const result = license.check('elastic documentation', 'enterprise');
+  return result.state === 'valid';
+};

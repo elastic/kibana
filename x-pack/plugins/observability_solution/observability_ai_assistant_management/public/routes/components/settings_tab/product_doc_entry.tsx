@@ -24,10 +24,7 @@ import { useInstallProductDoc } from '../../../hooks/use_install_product_doc';
 import { useUninstallProductDoc } from '../../../hooks/use_uninstall_product_doc';
 
 export function ProductDocEntry() {
-  const {
-    overlays,
-    notifications: { toasts },
-  } = useKibana().services;
+  const { overlays } = useKibana().services;
 
   const [isInstalled, setInstalled] = useState<boolean>(true);
   const [isInstalling, setInstalling] = useState<boolean>(false);
@@ -43,20 +40,18 @@ export function ProductDocEntry() {
   }, [status]);
 
   const onClickInstall = useCallback(() => {
-    toasts.addSuccess(
-      i18n.translate(
-        'xpack.observabilityAiAssistantManagement.settingsPage.productDocInstallToastText',
-        {
-          defaultMessage: 'Installing Elastic documentation, this can take a few minutes.',
-        }
-      )
-    );
     setInstalling(true);
-    installProductDoc().then(() => {
-      setInstalling(false);
-      setInstalled(true);
-    });
-  }, [installProductDoc, toasts]);
+    installProductDoc().then(
+      () => {
+        setInstalling(false);
+        setInstalled(true);
+      },
+      () => {
+        setInstalling(false);
+        setInstalled(false);
+      }
+    );
+  }, [installProductDoc]);
 
   const onClickUninstall = useCallback(() => {
     overlays

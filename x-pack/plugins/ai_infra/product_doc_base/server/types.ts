@@ -5,17 +5,28 @@
  * 2.0.
  */
 
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { SearchApi } from './services/search';
+import { ProductDocInstallClient } from './services/doc_install_status';
+import { PackageInstaller } from './services/package_installer';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
 export interface ProductDocBaseSetupDependencies {}
 
-export interface ProductDocBaseStartDependencies {}
+export interface ProductDocBaseStartDependencies {
+  licensing: LicensingPluginStart;
+}
 
 export interface ProductDocBaseSetupContract {}
 
 export interface ProductDocBaseStartContract {
   search: SearchApi;
   isInstalled: () => Promise<boolean>;
+}
+
+export interface InternalRouteServices {
+  installClient: ProductDocInstallClient;
+  packageInstaller: PackageInstaller;
+  licensing: LicensingPluginStart;
 }

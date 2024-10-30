@@ -12,11 +12,12 @@ import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kb
 import { SavedObjectsClient } from '@kbn/core/server';
 import { productDocInstallStatusSavedObjectTypeName } from '../common/consts';
 import type { ProductDocBaseConfig } from './config';
-import type {
+import {
   ProductDocBaseSetupContract,
   ProductDocBaseStartContract,
   ProductDocBaseSetupDependencies,
   ProductDocBaseStartDependencies,
+  InternalRouteServices,
 } from './types';
 import { productDocInstallStatusSavedObjectType } from './saved_objects';
 import { PackageInstaller } from './services/package_installer';
@@ -35,8 +36,7 @@ export class ProductDocBasePlugin
     >
 {
   private logger: Logger;
-  private installClient?: ProductDocInstallClient;
-  private packageInstaller?: PackageInstaller;
+  private routeServices?: InternalRouteServices;
 
   constructor(private readonly context: PluginInitializerContext<ProductDocBaseConfig>) {
     this.logger = context.logger.get();
@@ -50,17 +50,11 @@ export class ProductDocBasePlugin
     const router = coreSetup.http.createRouter();
     registerRoutes({
       router,
-      getInstallClient: () => {
-        if (!this.installClient) {
-          throw new Error('getInstallClient called before #start');
+      getServices: () => {
+        if (!this.routeServices) {
+          throw new Error('getServices called before #start');
         }
-        return this.installClient;
-      },
-      getInstaller: () => {
-        if (!this.packageInstaller) {
-          throw new Error('getInstaller called before #start');
-        }
-        return this.packageInstaller;
+        return this.routeServices;
       },
     });
 
@@ -69,20 +63,20 @@ export class ProductDocBasePlugin
 
   start(
     core: CoreStart,
-    pluginsStart: ProductDocBaseStartDependencies
+    { licensing }: ProductDocBaseStartDependencies
   ): ProductDocBaseStartContract {
     const soClient = new SavedObjectsClient(
       core.savedObjects.createInternalRepository([productDocInstallStatusSavedObjectTypeName])
     );
     const productDocClient = new ProductDocInstallClient({ soClient });
-    this.installClient = productDocClient;
+    const installClient = productDocClient;
 
     const endpointManager = new InferenceEndpointManager({
       esClient: core.elasticsearch.client.asInternalUser,
       logger: this.logger.get('endpoint-manager'),
     });
 
-    this.packageInstaller = new PackageInstaller({
+    const packageInstaller = new PackageInstaller({
       esClient: core.elasticsearch.client.asInternalUser,
       productDocClient,
       endpointManager,
@@ -98,9 +92,15 @@ export class ProductDocBasePlugin
     });
 
     // should we use taskManager for this?
-    this.packageInstaller.ensureUpToDate({}).catch((err) => {
+    packageInstaller.ensureUpToDate({}).catch((err) => {
       this.logger.error(`Error checking if product documentation is up to date: ${err.message}`);
     });
+
+    this.routeServices = {
+      packageInstaller,
+      installClient,
+      licensing,
+    };
 
     return {
       isInstalled: async () => {

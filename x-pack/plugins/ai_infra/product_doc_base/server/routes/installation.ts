@@ -15,17 +15,15 @@ import {
   UninstallResponse,
 } from '../../common/http_api/installation';
 import { InstallationStatus } from '../../common/install_status';
-import type { ProductDocInstallClient } from '../services/doc_install_status';
-import type { PackageInstaller } from '../services/package_installer';
+import type { InternalRouteServices } from '../types';
+import { checkLicense } from '../services/package_installer';
 
 export const registerInstallationRoutes = ({
   router,
-  getInstallClient,
-  getInstaller,
+  getServices,
 }: {
   router: IRouter;
-  getInstallClient: () => ProductDocInstallClient;
-  getInstaller: () => PackageInstaller;
+  getServices: () => InternalRouteServices;
 }) => {
   router.get(
     {
@@ -34,7 +32,7 @@ export const registerInstallationRoutes = ({
       options: { access: 'internal', tags: ['access:manage_llm_product_doc'] },
     },
     async (ctx, req, res) => {
-      const installClient = getInstallClient();
+      const { installClient } = getServices();
       const installStatus = await installClient.getInstallationStatus();
       const overallStatus = getOverallStatus(Object.values(installStatus).map((v) => v.status));
 
@@ -58,9 +56,16 @@ export const registerInstallationRoutes = ({
       },
     },
     async (ctx, req, res) => {
-      const installer = getInstaller();
+      const { packageInstaller, licensing } = getServices();
 
-      await installer.installAll({});
+      const license = await licensing.getLicense();
+      if (!checkLicense(license)) {
+        return res.badRequest({
+          body: 'Elastic documentation requires an enterprise license',
+        });
+      }
+
+      await packageInstaller.installAll({});
 
       return res.ok<PerformInstallResponse>({
         body: {
@@ -80,9 +85,9 @@ export const registerInstallationRoutes = ({
       },
     },
     async (ctx, req, res) => {
-      const installer = getInstaller();
+      const { packageInstaller } = getServices();
 
-      await installer.uninstallAll();
+      await packageInstaller.uninstallAll();
 
       return res.ok<UninstallResponse>({
         body: {
