@@ -1,0 +1,18 @@
+title: Add case file request properties
+required:
+  - file
+  - filename
+description: Defines the file that will be attached to the case.
+type: object
+properties:
+  file:
+    description: The file being attached to the case.
+    type: string
+    format: binary
+  filename:
+    description: The name of file being attached to the case.
+    type: string
+  mimeType:
+    description: The MIME type of the file being attached to the case.
+    type: string
+    example: image/jpeg
