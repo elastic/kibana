@@ -143,7 +143,7 @@ export class Plugin implements InfraClientPluginClass {
     /** !! Need to be kept in sync with the deepLinks in x-pack/plugins/observability_solution/infra/public/plugin.ts */
     pluginsSetup.observabilityShared.navigation.registerSections(
       startDep$AndHostViewFlag$.pipe(
-        map(([[{ application }]]) => {
+        map(([[{ application }], isInfrastructureHostsViewEnabled]) => {
           const { infrastructure, logs } = application.capabilities;
           return [
             ...(logs.show
@@ -179,11 +179,15 @@ export class Plugin implements InfraClientPluginClass {
                             },
                           ]
                         : []),
-                      {
-                        label: hostsTitle,
-                        app: 'metrics',
-                        path: '/hosts',
-                      },
+                      ...(isInfrastructureHostsViewEnabled
+                        ? [
+                            {
+                              label: hostsTitle,
+                              app: 'metrics',
+                              path: '/hosts',
+                            },
+                          ]
+                        : []),
                     ],
                   },
                 ]
