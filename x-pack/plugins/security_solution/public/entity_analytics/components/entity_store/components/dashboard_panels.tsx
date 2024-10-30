@@ -55,17 +55,20 @@ const EntityStoreDashboardPanelsComponent = () => {
 
   const { mutate: initRiskEngine } = useInitRiskEngineMutation();
 
-  const callouts = entityStore.errors
-    .filter((_, i) => !hiddenToasts.includes(i))
-    .map((err, i) => (
-      <EuiCallOut
-        title={'An error occurred during entity store resource initialization'}
-        color="danger"
-        iconType="error"
-      >
-        <p>{err?.message}</p>
-      </EuiCallOut>
-    ));
+  const callouts = entityStore.errors.map((err, i) => (
+    <EuiCallOut
+      title={
+        <FormattedMessage
+          id="xpack.securitySolution.entityAnalytics.entityStore.enablement.errors.title"
+          defaultMessage={'An error occurred during entity store resource initialization'}
+        />
+      }
+      color="danger"
+      iconType="error"
+    >
+      <p>{err?.message}</p>
+    </EuiCallOut>
+  ));
 
   const enableEntityStore = (enable: Enablements) => () => {
     setModalState({ visible: false });
@@ -91,7 +94,12 @@ const EntityStoreDashboardPanelsComponent = () => {
     return (
       <>
         <EuiCallOut
-          title={'There was a problem initializing the entity store'}
+          title={
+            <FormattedMessage
+              id="xpack.securitySolution.entityAnalytics.entityStore.enablement.errors.queryErrorTitle"
+              defaultMessage={'There was a problem initializing the entity store'}
+            />
+          }
           color="danger"
           iconType="error"
         >
