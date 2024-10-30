@@ -73,5 +73,12 @@ export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions {
   /** {@link SavedObjectsRawDocParseOptions.migrationVersionCompatibility} */
   migrationVersionCompatibility?: 'compatible' | 'raw';
 
+  /**
+   * Flag allowing consumers of Encrypted Saved Objects to explicilty opt out of
+   * highly random UID requiements. This is useful for consumers who have
+   * specific requirements around the randomness of the UID.
+   *
+   * Is inferred as `true` if not provided.
+   */
   enforceRandomId?: boolean;
 }
