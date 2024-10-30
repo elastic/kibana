@@ -35,6 +35,12 @@ const havePrs = [
   'authz-migration/unauthorized-routes-by-obs-ai-assistant_security-solution',
   'authz-migration/unauthorized-routes-by-response-ops',
   'authz-migration/unauthorized-routes-by-security-threat-hunting-explore',
+  'authz-migration/unauthorized-routes-by-search-kibana',
+  'authz-migration/unauthorized-routes-by-obs-ux-logs-team',
+  'authz-migration/unauthorized-routes-by-kibana-presentation_ml-ui',
+  'authz-migration/unauthorized-routes-by-appex-ai-infra_obs-ai-assistant_security-generative-ai',
+  'authz-migration/unauthorized-routes-by-security-scalability',
+  'authz-migration/unauthorized-routes-by-kibana-cloud-security-posture',
 ];
 
 const teamLabels = {
@@ -53,7 +59,7 @@ const teamLabels = {
   '@elastic/kibana-localization': 'Project:i18n',
   '@elastic/kibana-design': 'Team:Design',
   '@elastic/ml-ui': ':ml',
-  '@elastic/ingest-management': 'logstash',
+  '@elastic/ingest-management': 'Team:Logstash',
   '@elastic/beats': 'Beats',
   '@elastic/security-solution': 'Team: SecuritySolution',
   '@elastic/security-generative-ai': 'Team:Security Generative AI',
@@ -81,7 +87,7 @@ const teamLabels = {
   '@elastic/security-scalability': 'Team:Security-Scalability',
   '@elastic/obs-ai-assistant': 'Team:Obs AI Assistant',
   '@elastic/search-kibana': 'Team:Search',
-  '@elastic/logstash': 'logstash',
+  '@elastic/logstash': 'Team:Logstash',
   '@elastic/stack-monitoring': 'Team:Monitoring',
   '@elastic/security-service-integrations': 'Team:Security-Scalability',
 };
