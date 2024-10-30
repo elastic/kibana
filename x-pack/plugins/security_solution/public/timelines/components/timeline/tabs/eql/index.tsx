@@ -117,8 +117,8 @@ export const EqlTabContentComponent: React.FC<Props> = ({
   });
 
   const { openFlyout } = useExpandableFlyoutApi();
-  const securitySolutionNotesEnabled = useIsExperimentalFeatureEnabled(
-    'securitySolutionNotesEnabled'
+  const securitySolutionNotesDisabled = useIsExperimentalFeatureEnabled(
+    'securitySolutionNotesDisabled'
   );
 
   const {
@@ -139,7 +139,7 @@ export const EqlTabContentComponent: React.FC<Props> = ({
   const onToggleShowNotes = useCallback(
     (eventId?: string) => {
       const indexName = selectedPatterns.join(',');
-      if (eventId && securitySolutionNotesEnabled) {
+      if (eventId && !securitySolutionNotesDisabled) {
         openFlyout({
           right: {
             id: DocumentDetailsRightPanelKey,
@@ -177,7 +177,7 @@ export const EqlTabContentComponent: React.FC<Props> = ({
     },
     [
       openFlyout,
-      securitySolutionNotesEnabled,
+      securitySolutionNotesDisabled,
       selectedPatterns,
       telemetry,
       timelineId,
