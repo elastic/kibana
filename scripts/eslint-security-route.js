@@ -210,7 +210,7 @@ function processChangesByOwners(ownerFilesMap) {
     console.log(`Current branch (PR branch): ${currentBranch}`);
 
     for (const [owner, files] of Object.entries(ownerFilesMap)) {
-      const rawOwner = owner.replace('@elastic/', '');
+      const rawOwner = owner.replaceAll(',', '-');
       const tempBranch = `temp/${process.env.ROUTE_TYPE}-eslint-changes-by-${rawOwner}`;
 
       console.log(`Creating temporary branch for owner ${owner}: ${tempBranch}`);
@@ -227,11 +227,11 @@ function processChangesByOwners(ownerFilesMap) {
     }
 
     for (const [owner] of Object.entries(ownerFilesMap)) {
-      const rawOwner = owner.replace('@elastic/', '');
+      const rawOwner = owner.replaceAll(',', '-');
       const tempBranch = `temp/${process.env.ROUTE_TYPE}-eslint-changes-by-${rawOwner}`;
       const targetBranch = `authz-migration/${process.env.ROUTE_TYPE}-routes-by-${rawOwner}`;
 
-      const teamLabel = teamLabels[owner];
+      const teamLabel = owner.split(',').map((o) => teamLabels[`@elastic/${o}`]);
 
       console.log('Team label:', teamLabel);
 
