@@ -14,3 +14,10 @@ import { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server'
 export type CloudRequestHandlerContext = CustomRequestHandlerContext<{
   licensing: LicensingApiRequestHandlerContext;
 }>;
+
+export interface CloudDataAttributes {
+  onboardingData: {
+    solutionType: 'security' | 'observability' | 'search' | 'elasticsearch';
+    token: string;
+  };
+}

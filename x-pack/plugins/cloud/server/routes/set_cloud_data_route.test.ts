@@ -6,7 +6,7 @@
  */
 
 import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
-import { setDefaultSpaceSolutionType } from './set_default_space_solution';
+import { setDefaultSpaceSolutionType } from './set_cloud_data_route';
 import { ISpacesClient, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import {
   kibanaResponseFactory,

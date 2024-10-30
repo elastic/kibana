@@ -20,7 +20,9 @@ import { decodeCloudId, DecodedCloudId } from '../common/decode_cloud_id';
 import { parseOnboardingSolution } from '../common/parse_onboarding_default_solution';
 import { getFullCloudUrl } from '../common/utils';
 import { readInstanceSizeMb } from './env';
-import { defineRoutes } from './routes/elasticsearch_routes';
+import { defineRoutes } from './routes';
+import { CloudRequestHandlerContext } from './routes/types';
+import { setupSavedObjects } from './saved_objects';
 // import { CloudRequestHandlerContext } from './routes/types';
 // import { defineRoutes as someRoute } from './routes';
 
@@ -211,12 +213,16 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
     if (this.config.id) {
       decodedId = decodeCloudId(this.config.id, this.logger);
     }
-    const router = core.http.createRouter();
-    const elasticsearchUrl = core.elasticsearch.publicBaseUrl || decodedId?.elasticsearchUrl;
-    defineRoutes({ logger: this.logger, router, elasticsearchUrl });
-
     const router = core.http.createRouter<CloudRequestHandlerContext>();
-    defineRoutes({ router, getSpacesService: this.getSpacesService });
+    const elasticsearchUrl = core.elasticsearch.publicBaseUrl || decodedId?.elasticsearchUrl;
+    defineRoutes({
+      logger: this.logger,
+      router,
+      elasticsearchUrl,
+      getSpacesService: this.getSpacesService,
+    });
+
+    setupSavedObjects(core.savedObjects, this.logger);
     return {
       ...this.getCloudUrls(),
       cloudId: this.config.id,

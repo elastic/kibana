@@ -6,17 +6,20 @@
  */
 
 import { IRouter } from '@kbn/core/server';
-import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import { setDefaultSpaceSolutionType } from './set_default_space_solution';
+import { Logger } from '@kbn/logging';
+import { setCloudSolutionDataRoute } from './set_cloud_data_route';
 import { CloudRequestHandlerContext } from './types';
+import { setElasticsearchRoute } from './elasticsearch_route';
 
 export interface RouteOptions {
+  logger: Logger;
   router: IRouter<CloudRequestHandlerContext>;
-  getSpacesService: () => SpacesPluginStart['spacesService'];
+  elasticsearchUrl?: string;
 }
 
 export function defineRoutes(opts: RouteOptions) {
-  const { router, getSpacesService } = opts;
+  const { logger, elasticsearchUrl, router } = opts;
 
-  setDefaultSpaceSolutionType({ router, getSpacesService });
+  setElasticsearchRoute({ logger, elasticsearchUrl, router });
+  setCloudSolutionDataRoute({ logger, router });
 }

@@ -10,7 +10,7 @@ import { Logger } from '@kbn/logging';
 import { ElasticsearchConfigType } from '../../common/types';
 import { ELASTICSEARCH_CONFIG_ROUTE } from '../../common/constants';
 
-export function defineRoutes({
+export function setElasticsearchRoute({
   elasticsearchUrl,
   logger,
   router,
