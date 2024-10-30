@@ -12,6 +12,7 @@
 const { execSync, execFileSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
+const { getCodeOwnersForFile, getPathsWithOwnersReversed } = require('@kbn/code-owners');
 
 process.env.ROUTE_TYPE = 'authorized';
 const DRY_RUN = process.env.DRY_RUN === 'true';
@@ -186,30 +187,14 @@ function getChangedFiles() {
 
 function groupFilesByOwners(files, codeowners) {
   const ownerFilesMap = {};
+  const reversedCodeowners = getPathsWithOwnersReversed();
 
   files.forEach((file) => {
-    let bestMatch = null;
-    let bestOwner = null;
+    let owner = getCodeOwnersForFile(file, reversedCodeowners);
 
-    for (const [pattern, owners] of Object.entries(codeowners)) {
-      const regexPattern = pattern
-        .replace(/\*\*/g, '.*')
-        .replace(/\*/g, '[^/]*')
-        .replace(/\//g, '\\/');
-
-      const regex = new RegExp(`^${regexPattern}`);
-
-      if (regex.test(file)) {
-        if (!bestMatch || pattern.length > bestMatch.length) {
-          bestMatch = pattern;
-          bestOwner = owners;
-        }
-      }
-    }
-
-    if (bestOwner) {
-      if (!ownerFilesMap[bestOwner]) ownerFilesMap[bestOwner] = [];
-      ownerFilesMap[bestOwner].push(file);
+    if (owner) {
+      if (!ownerFilesMap[owner]) ownerFilesMap[owner] = [];
+      ownerFilesMap[owner].push(file);
     }
   });
 
@@ -359,7 +344,7 @@ function main() {
 
   const codeowners = parseCodeOwners(codeownersPath);
 
-  runESLint();
+  // runESLint();
 
   const changedFiles = getChangedFiles();
   if (changedFiles.length === 0) {
