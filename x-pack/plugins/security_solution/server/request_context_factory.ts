@@ -226,6 +226,7 @@ export class RequestContextFactory implements IRequestContextFactory {
           auditLogger: getAuditLogger(),
           kibanaVersion: options.kibanaVersion,
           config: config.entityAnalytics.entityStore,
+          telemetry: core.analytics,
         });
       }),
     };

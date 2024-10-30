@@ -11,12 +11,14 @@ import type {
   SavedObjectsClientContract,
   AuditLogger,
   IScopedClusterClient,
+  AnalyticsServiceSetup,
 } from '@kbn/core/server';
 import { EntityClient } from '@kbn/entityManager-plugin/server/lib/entity_client';
 import type { SortOrder } from '@elastic/elasticsearch/lib/api/types';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import { isEqual } from 'lodash/fp';
+import moment from 'moment';
 import type { AppClient } from '../../..';
 import type {
   Entity,
@@ -54,6 +56,10 @@ import {
   isPromiseRejected,
 } from './utils';
 import type { EntityRecord, EntityStoreConfig } from './types';
+import {
+  ENTITY_ENGINE_INITIALIZATION_EVENT,
+  ENTITY_ENGINE_RESOURCE_INIT_FAILURE_EVENT,
+} from '../../telemetry/event_based/events';
 import { CRITICALITY_VALUES } from '../asset_criticality/constants';
 
 interface EntityStoreClientOpts {
@@ -67,6 +73,7 @@ interface EntityStoreClientOpts {
   dataViewsService: DataViewsService;
   appClient: AppClient;
   config: EntityStoreConfig;
+  telemetry?: AnalyticsServiceSetup;
 }
 
 interface SearchEntitiesParams {
@@ -173,6 +180,7 @@ export class EntityStoreDataClient {
     config: EntityStoreConfig,
     pipelineDebugMode: boolean
   ) {
+    const setupStartTime = moment().utc().toISOString();
     const { logger, namespace, appClient, dataViewsService } = this.options;
     const indexPatterns = await buildIndexPatterns(namespace, appClient, dataViewsService);
 
@@ -254,11 +262,21 @@ export class EntityStoreDataClient {
       });
       logger.info(`Entity store initialized for ${entityType}`);
 
+      const setupEndTime = moment().utc().toISOString();
+      const duration = moment(setupEndTime).diff(moment(setupStartTime), 'seconds');
+      this.options.telemetry?.reportEvent(ENTITY_ENGINE_INITIALIZATION_EVENT.eventType, {
+        duration,
+      });
+
       return updated;
     } catch (err) {
       this.options.logger.error(
         `Error initializing entity store for ${entityType}: ${err.message}`
       );
+
+      this.options.telemetry?.reportEvent(ENTITY_ENGINE_RESOURCE_INIT_FAILURE_EVENT.eventType, {
+        error: err.message,
+      });
 
       await this.engineClient.update(entityType, ENGINE_STATUS.ERROR);
 
