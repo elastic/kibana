@@ -53,3 +53,15 @@ export {
   type InferenceTaskEvent,
   type InferenceTaskEventBase,
 } from './src/inference_task';
+export {
+  InferenceTaskError,
+  InferenceTaskErrorCode,
+  type InferenceTaskErrorEvent,
+  type InferenceTaskInternalError,
+  type InferenceTaskRequestError,
+  createInferenceInternalError,
+  createInferenceRequestError,
+  isInferenceError,
+  isInferenceInternalError,
+  isInferenceRequestError,
+} from './src/errors';

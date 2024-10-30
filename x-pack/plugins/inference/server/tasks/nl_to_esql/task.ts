@@ -7,8 +7,7 @@
 
 import { once } from 'lodash';
 import { Observable, Subject } from 'rxjs';
-import { Message, MessageRole } from '../../../common/chat_complete';
-import type { ToolOptions } from '../../../common/chat_complete/tools';
+import { MessageRole, type Message, type ToolOptions } from '@kbn/inference-common';
 import { EsqlDocumentBase } from './doc_base';
 import {
   type ActionsOptionsBase,

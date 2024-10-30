@@ -7,8 +7,8 @@
 
 import type { Logger } from '@kbn/logging';
 import { Subject } from 'rxjs';
+import type { FunctionCallingMode } from '@kbn/inference-common';
 import type { InferenceClient } from '../../../types';
-import type { FunctionCallingMode } from '../../../../common/chat_complete';
 import { NlToEsqlTaskEvent } from '../types';
 
 export interface ActionsOptionsBase {
@@ -18,11 +18,3 @@ export interface ActionsOptionsBase {
   functionCalling?: FunctionCallingMode;
   output$: Subject<NlToEsqlTaskEvent<any>>;
 }
-
-/*
-      client,
-        connectorId,
-        functionCalling,
-        logger,
-        subject,
- */

@@ -6,8 +6,7 @@
  */
 
 import { lastValueFrom, tap, map } from 'rxjs';
-import { withoutOutputUpdateEvents } from '../../..';
-import { Message, ToolSchema } from '../../../../common';
+import { withoutOutputUpdateEvents, Message, ToolSchema } from '@kbn/inference-common';
 import { EsqlDocumentBase } from '../doc_base';
 import type { ActionsOptionsBase } from './types';
 

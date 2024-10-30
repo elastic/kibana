@@ -11,3 +11,7 @@ export {
 } from './tasks/nl_to_esql/correct_common_esql_mistakes';
 
 export { generateFakeToolCallId } from './utils/generate_fake_tool_call_id';
+
+export { createOutputApi } from './create_output_api';
+
+export type { ChatCompleteRequestBody, GetConnectorsResponseBody } from './http_apis';

@@ -6,9 +6,7 @@
  */
 
 import { lastValueFrom, tap } from 'rxjs';
-import { withoutOutputUpdateEvents } from '../../..';
-import { Message } from '../../../../common';
-import { ToolSchema } from '../../../../common';
+import { Message, ToolSchema, withoutOutputUpdateEvents } from '@kbn/inference-common';
 import type { ActionsOptionsBase } from './types';
 
 const summarizeDiscussionSchema = {

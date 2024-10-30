@@ -5,21 +5,19 @@
  * 2.0.
  */
 
-import { Observable, map, merge, of, switchMap, tap, lastValueFrom } from 'rxjs';
+import { map, tap, lastValueFrom } from 'rxjs';
 import type { Logger } from '@kbn/logging';
-import { ToolCall, ToolOptions } from '../../../../common/chat_complete/tools';
 import {
-  correctCommonEsqlMistakes,
-  generateFakeToolCallId,
+  ToolCall,
+  ToolOptions,
   isChatCompletionMessageEvent,
+  withoutTokenCountEvents,
+  withoutChunkEvents,
   Message,
   MessageRole,
-} from '../../../../common';
-import { InferenceClient, withoutTokenCountEvents, withoutChunkEvents } from '../../..';
-import { OutputCompleteEvent, OutputEventType } from '../../../../common/output';
+} from '@kbn/inference-common';
+import { correctCommonEsqlMistakes, generateFakeToolCallId } from '../../../../common';
 import { INLINE_ESQL_QUERY_REGEX } from '../../../../common/tasks/nl_to_esql/constants';
-import { EsqlDocumentBase } from '../doc_base';
-import type { NlToEsqlTaskEvent } from '../types';
 import type { ActionsOptionsBase } from './types';
 
 export const generateEsqlTaskFn = <TToolOptions extends ToolOptions>({
