@@ -11,7 +11,7 @@ import { checkAAD, getUrlPrefix, ObjectRemover } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
-export default function createActionTests({ getService }: FtrProviderContext) {
+export default function createConnectorTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   describe('create', () => {
@@ -24,7 +24,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
         .set('kbn-xsrf', 'foo')
         .send({
-          name: 'My action',
+          name: 'My connector',
           connector_type_id: 'test.index-record',
           config: {
             unencrypted: `This value shouldn't get encrypted`,
@@ -35,12 +35,12 @@ export default function createActionTests({ getService }: FtrProviderContext) {
         });
 
       expect(response.status).to.eql(200);
-      objectRemover.add(Spaces.space1.id, response.body.id, 'action', 'actions');
+      objectRemover.add(Spaces.space1.id, response.body.id, 'connector', 'actions');
       expect(response.body).to.eql({
         id: response.body.id,
         is_preconfigured: false,
         is_deprecated: false,
-        name: 'My action',
+        name: 'My connector',
         connector_type_id: 'test.index-record',
         is_missing_secrets: false,
         is_system_action: false,
@@ -59,12 +59,12 @@ export default function createActionTests({ getService }: FtrProviderContext) {
       });
     });
 
-    it('should handle create action request appropriately when empty strings are submitted', async () => {
+    it('should handle create connector request appropriately when empty strings are submitted', async () => {
       await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
         .set('kbn-xsrf', 'foo')
         .send({
-          name: 'My action',
+          name: 'My connector',
           connector_type_id: 'test.index-record',
           config: {
             unencrypted: ' ',
@@ -80,12 +80,12 @@ export default function createActionTests({ getService }: FtrProviderContext) {
         });
     });
 
-    it(`shouldn't create a preconfigured action with the same id as an existing one`, async () => {
+    it(`shouldn't create a preconfigured connector with the same id as an existing one`, async () => {
       await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector/custom-system-abc-connector`)
         .set('kbn-xsrf', 'foo')
         .send({
-          name: 'My action',
+          name: 'My connector',
           connector_type_id: 'system-abc-action-type',
           config: {},
           secrets: {},
@@ -114,61 +114,19 @@ export default function createActionTests({ getService }: FtrProviderContext) {
         });
     });
 
-    describe('legacy', () => {
-      it('should handle create action request appropriately', async () => {
-        const response = await supertest
-          .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/action`)
-          .set('kbn-xsrf', 'foo')
-          .send({
-            name: 'My action',
-            actionTypeId: 'test.index-record',
-            config: {
-              unencrypted: `This value shouldn't get encrypted`,
-            },
-            secrets: {
-              encrypted: 'This value should be encrypted',
-            },
-          });
-
-        expect(response.status).to.eql(200);
-        objectRemover.add(Spaces.space1.id, response.body.id, 'action', 'actions');
-        expect(response.body).to.eql({
-          id: response.body.id,
-          isPreconfigured: false,
-          isDeprecated: false,
-          name: 'My action',
-          actionTypeId: 'test.index-record',
-          isMissingSecrets: false,
-          isSystemAction: false,
-          config: {
-            unencrypted: `This value shouldn't get encrypted`,
-          },
-        });
-        expect(typeof response.body.id).to.be('string');
-
-        // Ensure AAD isn't broken
-        await checkAAD({
-          supertest,
-          spaceId: Spaces.space1.id,
-          type: 'action',
-          id: response.body.id,
-        });
-      });
-    });
-
-    it('should notify feature usage when creating a gold action type', async () => {
+    it('should notify feature usage when creating a gold connector type', async () => {
       const testStart = new Date();
       const response = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/action`)
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
         .set('kbn-xsrf', 'foo')
         .send({
-          name: 'Noop action type',
-          actionTypeId: 'test.noop',
+          name: 'Noop connector type',
+          connector_type_id: 'test.noop',
           secrets: {},
           config: {},
         })
         .expect(200);
-      objectRemover.add(Spaces.space1.id, response.body.id, 'action', 'actions');
+      objectRemover.add(Spaces.space1.id, response.body.id, 'connector', 'actions');
 
       const {
         body: { features },
