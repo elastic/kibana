@@ -13,16 +13,17 @@ import {
   DEFAULT_APP_CATEGORIES,
   PluginInitializerContext,
   AppDeepLinkLocations,
+  AppStatus,
 } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { enableInfrastructureHostsView } from '@kbn/observability-plugin/public';
 import { ObservabilityTriggerId } from '@kbn/observability-shared-plugin/common';
-import { BehaviorSubject, combineLatest, from } from 'rxjs';
-import { map } from 'rxjs';
+import { BehaviorSubject, combineLatest, from, map } from 'rxjs';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { apiCanAddNewPanel } from '@kbn/presentation-containers';
 import { IncompatibleActionError, ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
 import { COMMON_EMBEDDABLE_GROUPING } from '@kbn/embeddable-plugin/public';
+import { OBSERVABILITY_LOGS_EXPLORER_APP_ID } from '@kbn/deeplinks-observability/constants';
 import type { InfraPublicConfig } from '../common/plugin_config_types';
 import { createInventoryMetricRuleType } from './alerting/inventory';
 import { createLogThresholdRuleType } from './alerting/log_threshold';
@@ -118,12 +119,12 @@ export class Plugin implements InfraClientPluginClass {
           ([
             [
               {
-                application: { capabilities },
+                application,
               },
             ],
             isInfrastructureHostsViewEnabled,
           ]) => {
-            const { infrastructure, logs, discover, fleet } = capabilities;
+            const { infrastructure, logs } = application.capabilities;
             return [
               ...(logs.show
                 ? [
@@ -131,8 +132,8 @@ export class Plugin implements InfraClientPluginClass {
                       label: 'Logs',
                       sortKey: 200,
                       entries: [
-                        ...(discover?.show && fleet?.read
-                          ? [
+                        ...(getLogsExplorerAccessibility$(application).subscribe((isAccessible) =>
+                          isAccessible ? [
                               {
                                 label: 'Explorer',
                                 app: 'observability-logs-explorer',
@@ -140,7 +141,7 @@ export class Plugin implements InfraClientPluginClass {
                                 isBetaFeature: true,
                               },
                             ]
-                          : []),
+                          : [])),
                         ...(this.config.featureFlags.logsUIEnabled
                           ? [
                               { label: 'Stream', app: 'logs', path: '/stream' },
@@ -450,3 +451,16 @@ export class Plugin implements InfraClientPluginClass {
 
   stop() {}
 }
+
+const getLogsExplorerAccessibility$ = (application: CoreStart['application']) => {
+  const { capabilities, applications$ } = application;
+  return applications$.pipe(
+    map(
+      (apps) =>
+        (apps.get(OBSERVABILITY_LOGS_EXPLORER_APP_ID)?.status ?? AppStatus.inaccessible) ===
+          AppStatus.accessible &&
+        capabilities.discover?.show &&
+        capabilities.fleet?.read
+    )
+  );
+};
