@@ -64,17 +64,23 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
 
     if (!mlCapabilities.canCreateJob) return;
 
-    getStartServices().then((startServices) => {
-      const { managementLocator } = startServices[2];
-      if (!managementLocator) return;
-      managementLocator
-        .getUrl({ page: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB }, 'anomaly_detection')
-        .then(({ url }) => {
-          if (mounted) {
-            setNewJobUrl(url);
-          }
-        });
-    });
+    async function initNewJobUrl() {
+      const startServices = await getStartServices();
+      const { getManagementLocator } = startServices[2];
+
+      if (!getManagementLocator) return;
+
+      const managementLocator = await getManagementLocator();
+      const url = await managementLocator.getUrl(
+        { page: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB },
+        'anomaly_detection'
+      );
+      if (mounted) {
+        setNewJobUrl(url);
+      }
+    }
+
+    initNewJobUrl();
 
     return () => {
       mounted = false;
