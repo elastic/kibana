@@ -24,6 +24,7 @@ export {
   type FunctionCallingMode,
   type ToolChoice,
   type ChatCompleteAPI,
+  type ChatCompleteOptions,
   type ChatCompletionResponse,
   type ChatCompletionTokenCountEvent,
   type ChatCompletionEvent,

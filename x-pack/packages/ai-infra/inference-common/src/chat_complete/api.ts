@@ -10,6 +10,13 @@ import type { ToolOptions } from './tools';
 import type { Message } from './messages';
 import type { ChatCompletionEvent } from './events';
 
+export type ChatCompleteOptions<TToolOptions extends ToolOptions = ToolOptions> = {
+  connectorId: string;
+  system?: string;
+  messages: Message[];
+  functionCalling?: FunctionCallingMode;
+} & TToolOptions;
+
 /**
  * Request a completion from the LLM based on a prompt or conversation.
  *
@@ -20,12 +27,7 @@ import type { ChatCompletionEvent } from './events';
  * @param {Record<string, ToolDefinition>} [options.tools] A map of tools that can be called by the LLM
  */
 export type ChatCompleteAPI = <TToolOptions extends ToolOptions = ToolOptions>(
-  options: {
-    connectorId: string;
-    system?: string;
-    messages: Message[];
-    functionCalling?: FunctionCallingMode;
-  } & TToolOptions
+  options: ChatCompleteOptions<TToolOptions>
 ) => ChatCompletionResponse<TToolOptions>;
 
 export type ChatCompletionResponse<TToolOptions extends ToolOptions = ToolOptions> = Observable<

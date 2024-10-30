@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-export type { ChatCompletionResponse, ChatCompleteAPI, FunctionCallingMode } from './api';
+export type {
+  ChatCompletionResponse,
+  ChatCompleteAPI,
+  ChatCompleteOptions,
+  FunctionCallingMode,
+} from './api';
 export {
   ChatCompletionEventType,
   type ChatCompletionMessageEvent,
