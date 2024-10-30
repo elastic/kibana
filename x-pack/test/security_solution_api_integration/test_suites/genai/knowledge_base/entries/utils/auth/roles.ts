@@ -179,6 +179,26 @@ export const securitySolutionOnlyReadSpacesAll: Role = {
   },
 };
 
+export const securitySolutionOnlyAllSpacesAllAssistantMinimalAll: Role = {
+  name: 'sec_only_all_spaces_all_assistant_minimal_all',
+  privileges: {
+    elasticsearch: {
+      indices: [],
+    },
+    kibana: [
+      {
+        feature: {
+          siem: ['all'],
+          securitySolutionAssistant: ['minimal_all'],
+          securitySolutionAttackDiscovery: ['all'],
+          aiAssistantManagementSelection: ['all'],
+        },
+        spaces: ['*'],
+      },
+    ],
+  },
+};
+
 export const roles = [
   noKibanaPrivileges,
   globalRead,
@@ -193,6 +213,7 @@ export const allRoles = [
   securitySolutionOnlyRead,
   securitySolutionOnlyAllSpacesAll,
   securitySolutionOnlyAllSpacesAllWithReadESIndices,
+  securitySolutionOnlyAllSpacesAllAssistantMinimalAll,
   securitySolutionOnlyReadSpacesAll,
   securitySolutionOnlyAllSpace2,
   securitySolutionOnlyReadSpace2,

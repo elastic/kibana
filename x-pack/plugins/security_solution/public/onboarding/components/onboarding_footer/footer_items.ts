@@ -14,6 +14,7 @@ import demoImage from './images/demo.png';
 import darkDemoImage from './images/demo_dark.png';
 import labsImage from './images/labs.png';
 import darkLabsImage from './images/labs_dark.png';
+import { OnboardingFooterLinkItemId } from './constants';
 
 export const useFooterItems = () => {
   const { colorMode } = useEuiTheme();
@@ -22,7 +23,7 @@ export const useFooterItems = () => {
   const footerItems = [
     {
       icon: isDarkMode ? darkDocumentationImage : documentationImage,
-      key: 'documentation',
+      id: OnboardingFooterLinkItemId.documentation,
       title: i18n.translate('xpack.securitySolution.onboarding.footer.documentation.title', {
         defaultMessage: 'Browse documentation',
       }),
@@ -41,7 +42,7 @@ export const useFooterItems = () => {
     },
     {
       icon: isDarkMode ? darkForumImge : forumImage,
-      key: 'forum',
+      id: OnboardingFooterLinkItemId.forum,
       title: i18n.translate('xpack.securitySolution.onboarding.footer.forum.title', {
         defaultMessage: 'Explore forum',
       }),
@@ -57,7 +58,7 @@ export const useFooterItems = () => {
     },
     {
       icon: isDarkMode ? darkDemoImage : demoImage,
-      key: 'demo',
+      id: OnboardingFooterLinkItemId.demo,
       title: i18n.translate('xpack.securitySolution.onboarding.footer.demo.title', {
         defaultMessage: 'View demo project',
       }),
@@ -73,7 +74,7 @@ export const useFooterItems = () => {
     },
     {
       icon: isDarkMode ? darkLabsImage : labsImage,
-      key: 'labs',
+      id: OnboardingFooterLinkItemId.labs,
       title: i18n.translate('xpack.securitySolution.onboarding.footer.labs.title', {
         defaultMessage: 'Elastic Security Labs',
       }),
