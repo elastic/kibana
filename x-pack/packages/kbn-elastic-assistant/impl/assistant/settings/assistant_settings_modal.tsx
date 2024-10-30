@@ -6,7 +6,6 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { QueryObserverResult, RefetchOptions, RefetchQueryFilters } from '@tanstack/react-query';
 import { DataStreamApis } from '../use_data_stream_apis';
 import { AIConnector } from '../../connectorland/connector_selector';
@@ -14,7 +13,6 @@ import { Conversation } from '../../..';
 import { AssistantSettings } from './assistant_settings';
 import * as i18n from './translations';
 import { useAssistantContext } from '../../assistant_context';
-import { CONVERSATIONS_TAB } from './const';
 
 interface Props {
   defaultConnector?: AIConnector;
@@ -32,12 +30,11 @@ interface Props {
 }
 
 /**
- * Gear button that opens the assistant settings modal
+ * Assistant settings modal
  */
-export const AssistantSettingsButton: React.FC<Props> = React.memo(
+export const AssistantSettingsModal: React.FC<Props> = React.memo(
   ({
     defaultConnector,
-    isDisabled = false,
     isSettingsModalVisible,
     setIsSettingsModalVisible,
     selectedConversationId,
@@ -47,11 +44,7 @@ export const AssistantSettingsButton: React.FC<Props> = React.memo(
     refetchCurrentUserConversations,
     refetchPrompts,
   }) => {
-    const {
-      assistantFeatures: { assistantKnowledgeBaseByDefault },
-      toasts,
-      setSelectedSettingsTab,
-    } = useAssistantContext();
+    const { toasts } = useAssistantContext();
 
     // Modal control functions
     const cleanupAndCloseModal = useCallback(() => {
@@ -79,41 +72,20 @@ export const AssistantSettingsButton: React.FC<Props> = React.memo(
       [cleanupAndCloseModal, refetchCurrentUserConversations, refetchPrompts, toasts]
     );
 
-    const handleShowConversationSettings = useCallback(() => {
-      setSelectedSettingsTab(CONVERSATIONS_TAB);
-      setIsSettingsModalVisible(true);
-    }, [setIsSettingsModalVisible, setSelectedSettingsTab]);
-
     return (
-      <>
-        {!assistantKnowledgeBaseByDefault && (
-          <EuiToolTip position="right" content={i18n.SETTINGS_TOOLTIP}>
-            <EuiButtonIcon
-              aria-label={i18n.SETTINGS}
-              data-test-subj="settings"
-              onClick={handleShowConversationSettings}
-              isDisabled={isDisabled}
-              iconType="gear"
-              size="xs"
-              color="text"
-            />
-          </EuiToolTip>
-        )}
-
-        {isSettingsModalVisible && (
-          <AssistantSettings
-            defaultConnector={defaultConnector}
-            selectedConversationId={selectedConversationId}
-            onConversationSelected={onConversationSelected}
-            onClose={handleCloseModal}
-            onSave={handleSave}
-            conversations={conversations}
-            conversationsLoaded={conversationsLoaded}
-          />
-        )}
-      </>
+      isSettingsModalVisible && (
+        <AssistantSettings
+          defaultConnector={defaultConnector}
+          selectedConversationId={selectedConversationId}
+          onConversationSelected={onConversationSelected}
+          onClose={handleCloseModal}
+          onSave={handleSave}
+          conversations={conversations}
+          conversationsLoaded={conversationsLoaded}
+        />
+      )
     );
   }
 );
 
-AssistantSettingsButton.displayName = 'AssistantSettingsButton';
+AssistantSettingsModal.displayName = 'AssistantSettingsModal';

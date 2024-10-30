@@ -33,7 +33,7 @@ import { omit } from 'lodash/fp';
 import { buildResponse } from '../../lib/build_response';
 import { AssistantDataClients } from '../../lib/langchain/executors/types';
 import { AssistantToolParams, ElasticAssistantRequestHandlerContext, GetElser } from '../../types';
-import { DEFAULT_PLUGIN_NAME, isV2KnowledgeBaseEnabled, performChecks } from '../helpers';
+import { DEFAULT_PLUGIN_NAME, performChecks } from '../helpers';
 import { fetchLangSmithDataset } from './utils';
 import { transformESSearchToAnonymizationFields } from '../../ai_assistant_data_clients/anonymization_fields/helpers';
 import { EsAnonymizationFieldsSchema } from '../../ai_assistant_data_clients/anonymization_fields/types';
@@ -91,7 +91,6 @@ export const postEvaluateRoute = (
         const actions = ctx.elasticAssistant.actions;
         const logger = assistantContext.logger.get('evaluate');
         const abortSignal = getRequestAbortedSignal(request.events.aborted$);
-        const v2KnowledgeBaseEnabled = isV2KnowledgeBaseEnabled({ context: ctx, request });
 
         // Perform license, authenticated user and evaluation FF checks
         const checkResponse = performChecks({
@@ -160,9 +159,7 @@ export const postEvaluateRoute = (
           const conversationsDataClient =
             (await assistantContext.getAIAssistantConversationsDataClient()) ?? undefined;
           const kbDataClient =
-            (await assistantContext.getAIAssistantKnowledgeBaseDataClient({
-              v2KnowledgeBaseEnabled,
-            })) ?? undefined;
+            (await assistantContext.getAIAssistantKnowledgeBaseDataClient({})) ?? undefined;
           const dataClients: AssistantDataClients = {
             anonymizationFieldsDataClient,
             conversationsDataClient,

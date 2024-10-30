@@ -9,9 +9,8 @@ import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
 
-import { AssistantSettingsButton } from './assistant_settings_button';
+import { AssistantSettingsModal } from './assistant_settings_modal';
 import { welcomeConvo } from '../../mock/conversation';
-import { CONVERSATIONS_TAB } from './const';
 
 const setIsSettingsModalVisible = jest.fn();
 const onConversationSelected = jest.fn();
@@ -54,21 +53,14 @@ jest.mock('./assistant_settings', () => ({
   ),
 }));
 
-describe('AssistantSettingsButton', () => {
+describe('AssistantSettingsModal', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('Clicking the settings gear opens the conversations tab', () => {
-    const { getByTestId } = render(<AssistantSettingsButton {...testProps} />);
-    fireEvent.click(getByTestId('settings'));
-    expect(setSelectedSettingsTab).toHaveBeenCalledWith(CONVERSATIONS_TAB);
-    expect(setIsSettingsModalVisible).toHaveBeenCalledWith(true);
-  });
-
   it('Settings modal is visible and calls correct actions per click', () => {
     const { getByTestId } = render(
-      <AssistantSettingsButton {...testProps} isSettingsModalVisible />
+      <AssistantSettingsModal {...testProps} isSettingsModalVisible />
     );
     fireEvent.click(getByTestId('on-close'));
     expect(setIsSettingsModalVisible).toHaveBeenCalledWith(false);

@@ -31,14 +31,10 @@ import {
   createKnowledgeBaseEntry,
   LegacyKnowledgeBaseEntryCreateProps,
   transformToCreateSchema,
-  transformToLegacyCreateSchema,
 } from './create_knowledge_base_entry';
 import { EsDocumentEntry, EsIndexEntry, EsKnowledgeBaseEntrySchema } from './types';
 import { transformESSearchToKnowledgeBaseEntry } from './transforms';
-import {
-  ESQL_DOCS_LOADED_QUERY,
-  SECURITY_LABS_RESOURCE,
-} from '../../routes/knowledge_base/constants';
+import { SECURITY_LABS_RESOURCE } from '../../routes/knowledge_base/constants';
 import {
   getKBVectorSearchQuery,
   getStructuredToolForIndexEntry,
@@ -53,7 +49,6 @@ import { loadSecurityLabs } from '../../lib/langchain/content_loaders/security_l
  */
 export interface GetAIAssistantKnowledgeBaseDataClientParams {
   modelIdOverride?: string;
-  v2KnowledgeBaseEnabled?: boolean;
   manageGlobalKnowledgeBaseAIAssistant?: boolean;
 }
 
@@ -63,7 +58,6 @@ export interface KnowledgeBaseDataClientParams extends AIAssistantDataClientPara
   getIsKBSetupInProgress: () => boolean;
   ingestPipelineResourceName: string;
   setIsKBSetupInProgress: (isInProgress: boolean) => void;
-  v2KnowledgeBaseEnabled: boolean;
   manageGlobalKnowledgeBaseAIAssistant: boolean;
 }
 export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
@@ -74,11 +68,6 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
   public get isSetupInProgress() {
     return this.options.getIsKBSetupInProgress();
   }
-
-  public get isV2KnowledgeBaseEnabled() {
-    return this.options.v2KnowledgeBaseEnabled;
-  }
-
   /**
    * Returns whether setup of the Knowledge Base can be performed (essentially an ML features check)
    *
@@ -207,10 +196,8 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
    */
   public setupKnowledgeBase = async ({
     soClient,
-    v2KnowledgeBaseEnabled = true,
   }: {
     soClient: SavedObjectsClientContract;
-    v2KnowledgeBaseEnabled?: boolean;
   }): Promise<void> => {
     if (this.options.getIsKBSetupInProgress()) {
       this.options.logger.debug('Knowledge Base setup already in progress');
@@ -221,26 +208,24 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     this.options.setIsKBSetupInProgress(true);
     const elserId = await this.options.getElserId();
 
-    if (v2KnowledgeBaseEnabled) {
-      // Delete legacy ESQL knowledge base docs if they exist, and silence the error if they do not
-      try {
-        const esClient = await this.options.elasticsearchClientPromise;
-        const legacyESQL = await esClient.deleteByQuery({
-          index: this.indexTemplateAndPattern.alias,
-          query: {
-            bool: {
-              must: [{ terms: { 'metadata.kbResource': ['esql', 'unknown'] } }],
-            },
+    // Delete legacy ESQL knowledge base docs if they exist, and silence the error if they do not
+    try {
+      const esClient = await this.options.elasticsearchClientPromise;
+      const legacyESQL = await esClient.deleteByQuery({
+        index: this.indexTemplateAndPattern.alias,
+        query: {
+          bool: {
+            must: [{ terms: { 'metadata.kbResource': ['esql', 'unknown'] } }],
           },
-        });
-        if (legacyESQL?.total != null && legacyESQL?.total > 0) {
-          this.options.logger.info(
-            `Removed ${legacyESQL?.total} ESQL knowledge base docs from knowledge base data stream: ${this.indexTemplateAndPattern.alias}.`
-          );
-        }
-      } catch (e) {
-        this.options.logger.info('No legacy ESQL knowledge base docs to delete');
+        },
+      });
+      if (legacyESQL?.total != null && legacyESQL?.total > 0) {
+        this.options.logger.info(
+          `Removed ${legacyESQL?.total} ESQL knowledge base docs from knowledge base data stream: ${this.indexTemplateAndPattern.alias}.`
+        );
       }
+    } catch (e) {
+      this.options.logger.info('No legacy ESQL knowledge base docs to delete');
     }
 
     try {
@@ -276,14 +261,12 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
 
       this.options.logger.debug(`Checking if Knowledge Base docs have been loaded...`);
 
-      if (v2KnowledgeBaseEnabled) {
-        const labsDocsLoaded = await this.isSecurityLabsDocsLoaded();
-        if (!labsDocsLoaded) {
-          this.options.logger.debug(`Loading Security Labs KB docs...`);
-          await loadSecurityLabs(this, this.options.logger);
-        } else {
-          this.options.logger.debug(`Security Labs Knowledge Base docs already loaded!`);
-        }
+      const labsDocsLoaded = await this.isSecurityLabsDocsLoaded();
+      if (!labsDocsLoaded) {
+        this.options.logger.debug(`Loading Security Labs KB docs...`);
+        await loadSecurityLabs(this, this.options.logger);
+      } else {
+        this.options.logger.debug(`Security Labs Knowledge Base docs already loaded!`);
       }
     } catch (e) {
       this.options.setIsKBSetupInProgress(false);
@@ -322,39 +305,20 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     const { errors, docs_created: docsCreated } = await writer.bulk({
       documentsToCreate: documents.map((doc) => {
         // v1 schema has metadata nested in a `metadata` object
-        if (this.options.v2KnowledgeBaseEnabled) {
-          return transformToCreateSchema({
-            createdAt: changedAt,
-            spaceId: this.spaceId,
-            user: authenticatedUser,
-            entry: {
-              type: DocumentEntryType.value,
-              name: 'unknown',
-              text: doc.pageContent,
-              kbResource: doc.metadata.kbResource ?? 'unknown',
-              required: doc.metadata.required ?? false,
-              source: doc.metadata.source ?? 'unknown',
-            },
-            global,
-          });
-        } else {
-          return transformToLegacyCreateSchema({
-            createdAt: changedAt,
-            spaceId: this.spaceId,
-            user: authenticatedUser,
-            entry: {
-              type: DocumentEntryType.value,
-              name: 'unknown',
-              text: doc.pageContent,
-              metadata: {
-                kbResource: doc.metadata.kbResource ?? 'unknown',
-                required: doc.metadata.required ?? false,
-                source: doc.metadata.source ?? 'unknown',
-              },
-            },
-            global,
-          });
-        }
+        return transformToCreateSchema({
+          createdAt: changedAt,
+          spaceId: this.spaceId,
+          user: authenticatedUser,
+          entry: {
+            type: DocumentEntryType.value,
+            name: 'unknown',
+            text: doc.pageContent,
+            kbResource: doc.metadata.kbResource ?? 'unknown',
+            required: doc.metadata.required ?? false,
+            source: doc.metadata.source ?? 'unknown',
+          },
+          global,
+        });
       }),
       authenticatedUser,
     });
@@ -370,18 +334,6 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     this.options.logger.debug(() => `errors: ${JSON.stringify(errors, null, 2)}`);
 
     return created?.data ? transformESSearchToKnowledgeBaseEntry(created?.data) : [];
-  };
-
-  /**
-   * Returns if ES|QL KB docs have been loaded
-   */
-  public isESQLDocsLoaded = async (): Promise<boolean> => {
-    const esqlDocs = await this.getKnowledgeBaseDocumentEntries({
-      query: ESQL_DOCS_LOADED_QUERY,
-      // kbResource, // Note: `8.15` installs have kbResource as `unknown`, so don't filter yet
-      required: true,
-    });
-    return esqlDocs.length > 0;
   };
 
   /**
@@ -427,7 +379,6 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
       query,
       required,
       user,
-      v2KnowledgeBaseEnabled: this.options.v2KnowledgeBaseEnabled,
     });
 
     try {
@@ -438,14 +389,11 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
       });
 
       const results = result.hits.hits.map((hit) => {
-        const metadata = this.options.v2KnowledgeBaseEnabled
-          ? {
-              source: hit?._source?.source,
-              required: hit?._source?.required,
-              kbResource: hit?._source?.kb_resource,
-            }
-          : // @ts-ignore v1 schema has metadata nested in a `metadata` object and kbResource vs kb_resource
-            hit?._source?.metadata ?? {};
+        const metadata = {
+          source: hit?._source?.source,
+          required: hit?._source?.required,
+          kbResource: hit?._source?.kb_resource,
+        };
         return new Document({
           pageContent: hit?._source?.text ?? '',
           metadata,
@@ -551,7 +499,6 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
       user: authenticatedUser,
       knowledgeBaseEntry,
       global,
-      isV2: this.options.v2KnowledgeBaseEnabled,
     });
   };
 

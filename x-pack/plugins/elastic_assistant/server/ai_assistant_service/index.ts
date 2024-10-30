@@ -26,10 +26,7 @@ import { conversationsFieldMap } from '../ai_assistant_data_clients/conversation
 import { assistantPromptsFieldMap } from '../ai_assistant_data_clients/prompts/field_maps_configuration';
 import { assistantAnonymizationFieldsFieldMap } from '../ai_assistant_data_clients/anonymization_fields/field_maps_configuration';
 import { AIAssistantDataClient } from '../ai_assistant_data_clients';
-import {
-  knowledgeBaseFieldMap,
-  knowledgeBaseFieldMapV2,
-} from '../ai_assistant_data_clients/knowledge_base/field_maps_configuration';
+import { knowledgeBaseFieldMap } from '../ai_assistant_data_clients/knowledge_base/field_maps_configuration';
 import {
   AIAssistantKnowledgeBaseDataClient,
   GetAIAssistantKnowledgeBaseDataClientParams,
@@ -82,8 +79,6 @@ export class AIAssistantService {
   private resourceInitializationHelper: ResourceInstallationHelper;
   private initPromise: Promise<InitializationPromise>;
   private isKBSetupInProgress: boolean = false;
-  // Temporary 'feature flag' to determine if we should initialize the new kb mappings, toggled when accessing kbDataClient
-  private v2KnowledgeBaseEnabled: boolean = false;
   private hasInitializedV2KnowledgeBase: boolean = false;
 
   constructor(private readonly options: AIAssistantServiceOpts) {
@@ -97,7 +92,7 @@ export class AIAssistantService {
     this.knowledgeBaseDataStream = this.createDataStream({
       resource: 'knowledgeBase',
       kibanaVersion: options.kibanaVersion,
-      fieldMap: knowledgeBaseFieldMap, // TODO: use V2 if FF is enabled
+      fieldMap: knowledgeBaseFieldMap,
     });
     this.promptsDataStream = this.createDataStream({
       resource: 'prompts',
@@ -180,16 +175,6 @@ export class AIAssistantService {
         pluginStop$: this.options.pluginStop$,
       });
 
-      // If v2 is enabled, re-install data stream resources for new mappings
-      if (this.v2KnowledgeBaseEnabled) {
-        this.options.logger.debug(`Using V2 Knowledge Base Mappings`);
-        this.knowledgeBaseDataStream = this.createDataStream({
-          resource: 'knowledgeBase',
-          kibanaVersion: this.options.kibanaVersion,
-          fieldMap: knowledgeBaseFieldMapV2,
-        });
-      }
-
       await this.knowledgeBaseDataStream.install({
         esClient,
         logger: this.options.logger,
@@ -201,8 +186,9 @@ export class AIAssistantService {
         esClient,
         id: this.resourceNames.pipelines.knowledgeBase,
       });
+      // TODO not sure what @spong means here, but shouldn't leaving that check for if the pipeline exists ensure it is recreated?
       // TODO: When FF is removed, ensure pipeline is re-created for those upgrading
-      if (!pipelineCreated || this.v2KnowledgeBaseEnabled) {
+      if (!pipelineCreated) {
         this.options.logger.debug(
           `Installing ingest pipeline - ${this.resourceNames.pipelines.knowledgeBase}`
         );
@@ -350,25 +336,16 @@ export class AIAssistantService {
     opts: CreateAIAssistantClientParams & GetAIAssistantKnowledgeBaseDataClientParams
   ): Promise<AIAssistantKnowledgeBaseDataClient | null> {
     // If modelIdOverride is set, swap getElserId(), and ensure the pipeline is re-created with the correct model
-    if (opts.modelIdOverride != null) {
+    if (opts?.modelIdOverride != null) {
       const modelIdOverride = opts.modelIdOverride;
       this.getElserId = async () => modelIdOverride;
     }
 
-    // Note: Due to plugin lifecycle and feature flag registration timing, we need to pass in the feature flag here
-    // Remove this param and initialization when the `assistantKnowledgeBaseByDefault` feature flag is removed
-    if (opts.v2KnowledgeBaseEnabled) {
-      this.v2KnowledgeBaseEnabled = true;
-    }
-
-    // If either v2 KB or a modelIdOverride is provided, we need to reinitialize all persistence resources to make sure
+    // If a V2 KnowledgeBase has never been initialized or a modelIdOverride is provided, we need to reinitialize all persistence resources to make sure
     // they're using the correct model/mappings. Technically all existing KB data is stale since it was created
     // with a different model/mappings, but modelIdOverride is only intended for testing purposes at this time
     // Added hasInitializedV2KnowledgeBase to prevent the console noise from re-init on each KB request
-    if (
-      !this.hasInitializedV2KnowledgeBase &&
-      (opts.v2KnowledgeBaseEnabled || opts.modelIdOverride != null)
-    ) {
+    if (!this.hasInitializedV2KnowledgeBase || opts?.modelIdOverride != null) {
       await this.initializeResources();
       this.hasInitializedV2KnowledgeBase = true;
     }
@@ -391,7 +368,6 @@ export class AIAssistantService {
       ml: this.options.ml,
       setIsKBSetupInProgress: this.setIsKBSetupInProgress.bind(this),
       spaceId: opts.spaceId,
-      v2KnowledgeBaseEnabled: opts.v2KnowledgeBaseEnabled ?? false,
       manageGlobalKnowledgeBaseAIAssistant: opts.manageGlobalKnowledgeBaseAIAssistant ?? false,
     });
   }

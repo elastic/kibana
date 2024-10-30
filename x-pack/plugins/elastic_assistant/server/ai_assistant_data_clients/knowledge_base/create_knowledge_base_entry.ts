@@ -37,24 +37,15 @@ export const createKnowledgeBaseEntry = async ({
   knowledgeBaseEntry,
   logger,
   global = false,
-  isV2 = false,
 }: CreateKnowledgeBaseEntryParams): Promise<KnowledgeBaseEntryResponse | null> => {
   const createdAt = new Date().toISOString();
-  const body = isV2
-    ? transformToCreateSchema({
-        createdAt,
-        spaceId,
-        user,
-        entry: knowledgeBaseEntry as unknown as KnowledgeBaseEntryCreateProps,
-        global,
-      })
-    : transformToLegacyCreateSchema({
-        createdAt,
-        spaceId,
-        user,
-        entry: knowledgeBaseEntry as unknown as TransformToLegacyCreateSchemaProps['entry'],
-        global,
-      });
+  const body = transformToCreateSchema({
+    createdAt,
+    spaceId,
+    user,
+    entry: knowledgeBaseEntry as unknown as KnowledgeBaseEntryCreateProps,
+    global,
+  });
   try {
     const response = await esClient.create({
       body,
@@ -256,39 +247,4 @@ export type LegacyKnowledgeBaseEntryCreateProps = Omit<
   'kbResource' | 'source'
 > & {
   metadata: Metadata;
-};
-
-interface TransformToLegacyCreateSchemaProps {
-  createdAt: string;
-  spaceId: string;
-  user: AuthenticatedUser;
-  entry: LegacyKnowledgeBaseEntryCreateProps;
-  global?: boolean;
-}
-
-export const transformToLegacyCreateSchema = ({
-  createdAt,
-  spaceId,
-  user,
-  entry,
-  global = false,
-}: TransformToLegacyCreateSchemaProps): CreateKnowledgeBaseEntrySchema => {
-  return {
-    '@timestamp': createdAt,
-    created_at: createdAt,
-    created_by: user.profile_uid ?? 'unknown',
-    updated_at: createdAt,
-    updated_by: user.profile_uid ?? 'unknown',
-    namespace: spaceId,
-    users: global
-      ? []
-      : [
-          {
-            id: user.profile_uid,
-            name: user.username,
-          },
-        ],
-    ...entry,
-    vector: undefined,
-  };
 };

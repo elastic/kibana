@@ -16,7 +16,6 @@ import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/
 import { IKibanaResponse } from '@kbn/core/server';
 import { buildResponse } from '../../lib/build_response';
 import { ElasticAssistantPluginRouter } from '../../types';
-import { isV2KnowledgeBaseEnabled } from '../helpers';
 
 // Since we're awaiting on ELSER setup, this could take a bit (especially if ML needs to autoscale)
 // Consider just returning if attempt was successful, and switch to client polling
@@ -55,17 +54,11 @@ export const postKnowledgeBaseRoute = (router: ElasticAssistantPluginRouter) => 
         const core = ctx.core;
         const soClient = core.savedObjects.getClient();
 
-        // FF Check for V2 KB
-        const v2KnowledgeBaseEnabled = isV2KnowledgeBaseEnabled({ context: ctx, request });
-        // Only allow modelId override if FF is enabled as this will re-write the ingest pipeline and break any previous KB entries
-        // This is only really needed for API integration tests
-        const modelIdOverride = v2KnowledgeBaseEnabled ? request.query.modelId : undefined;
-
         try {
           const knowledgeBaseDataClient =
             await assistantContext.getAIAssistantKnowledgeBaseDataClient({
-              modelIdOverride,
-              v2KnowledgeBaseEnabled,
+              // TODO why?? not sure I follow
+              modelIdOverride: request.query.modelId,
             });
           if (!knowledgeBaseDataClient) {
             return response.custom({ body: { success: false }, statusCode: 500 });
@@ -73,7 +66,6 @@ export const postKnowledgeBaseRoute = (router: ElasticAssistantPluginRouter) => 
 
           await knowledgeBaseDataClient.setupKnowledgeBase({
             soClient,
-            v2KnowledgeBaseEnabled,
           });
 
           return response.ok({ body: { success: true } });
