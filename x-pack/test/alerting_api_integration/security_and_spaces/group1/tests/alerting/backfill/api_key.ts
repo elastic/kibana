@@ -252,6 +252,13 @@ export default function apiKeyBackfillTests({ getService }: FtrProviderContext) 
         expect(e?.event?.outcome).to.eql('success');
       }
 
+      // wait for all the api_key_pending_invalidation SOs to be deleted
+      await retry.try(async () => {
+        const results = await getApiKeysPendingInvalidation();
+        expect(results.length).to.eql(0);
+        return results;
+      });
+
       // invoke the invalidate task
       await runInvalidateTask();
 
