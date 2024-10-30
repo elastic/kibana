@@ -177,6 +177,7 @@ export class DefaultAlertService {
       const rulesClient = (await this.context.alerting)?.getRulesClient();
       await rulesClient.bulkDeleteRules({
         filter: `alert.attributes.alertTypeId:"${SYNTHETICS_TLS_RULE}" AND alert.attributes.tags:"SYNTHETICS_DEFAULT_ALERT"`,
+        /// use this to create a get command to find all of the rules we care about andf bring up a relevant callout
       });
     }
   }
