@@ -19,7 +19,7 @@ import { appContextService } from '../app_context';
 import { agentPolicyService } from '../agent_policy';
 import { ENROLLMENT_API_KEYS_INDEX } from '../../constants';
 import { packagePolicyService } from '../package_policy';
-import { FleetError } from '../../errors';
+import { FleetError, HostedAgentPolicyRestrictionRelatedError } from '../../errors';
 
 import { isSpaceAwarenessEnabled } from './helpers';
 
@@ -28,11 +28,13 @@ export async function updateAgentPolicySpaces({
   currentSpaceId,
   newSpaceIds,
   authorizedSpaces,
+  options,
 }: {
   agentPolicyId: string;
   currentSpaceId: string;
   newSpaceIds: string[];
   authorizedSpaces: string[];
+  options?: { force?: boolean };
 }) {
   const useSpaceAwareness = await isSpaceAwarenessEnabled();
   if (!useSpaceAwareness || !newSpaceIds || newSpaceIds.length === 0) {
@@ -49,6 +51,16 @@ export async function updateAgentPolicySpaces({
     currentSpaceSoClient,
     agentPolicyId
   );
+
+  if (!existingPolicy) {
+    return;
+  }
+
+  if (existingPolicy.is_managed && !options?.force) {
+    throw new HostedAgentPolicyRestrictionRelatedError(
+      `Cannot update hosted agent policy ${existingPolicy.id} space `
+    );
+  }
 
   if (deepEqual(existingPolicy?.space_ids?.sort() ?? [DEFAULT_SPACE_ID], newSpaceIds.sort())) {
     return;
@@ -103,12 +115,30 @@ export async function updateAgentPolicySpaces({
   // Update fleet server index agents, enrollment api keys
   await esClient.updateByQuery({
     index: ENROLLMENT_API_KEYS_INDEX,
+    query: {
+      bool: {
+        must: {
+          terms: {
+            policy_id: [agentPolicyId],
+          },
+        },
+      },
+    },
     script: `ctx._source.namespaces = [${newSpaceIds.map((spaceId) => `"${spaceId}"`).join(',')}]`,
     ignore_unavailable: true,
     refresh: true,
   });
   await esClient.updateByQuery({
     index: AGENTS_INDEX,
+    query: {
+      bool: {
+        must: {
+          terms: {
+            policy_id: [agentPolicyId],
+          },
+        },
+      },
+    },
     script: `ctx._source.namespaces = [${newSpaceIds.map((spaceId) => `"${spaceId}"`).join(',')}]`,
     ignore_unavailable: true,
     refresh: true,
