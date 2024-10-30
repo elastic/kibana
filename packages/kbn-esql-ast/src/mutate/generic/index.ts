@@ -7,8 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as from from './from';
-import * as limit from './limit';
-import * as sort from './sort';
-
-export { from, limit, sort };
+export * as commands from './commands';
