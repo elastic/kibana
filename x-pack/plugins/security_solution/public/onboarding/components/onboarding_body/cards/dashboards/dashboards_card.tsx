@@ -57,7 +57,7 @@ export const DashboardsCard: OnboardingCardComponent = ({
           <EuiText
             data-test-subj="dashboardsDescription"
             size="s"
-            color={isDarkMode ? '' : 'subdued'}
+            color={isDarkMode ? 'text' : 'subdued'}
           >
             {i18n.DASHBOARDS_CARD_DESCRIPTION}
           </EuiText>

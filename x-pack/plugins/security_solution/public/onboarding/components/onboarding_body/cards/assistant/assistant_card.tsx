@@ -45,11 +45,14 @@ export const AssistantCard: OnboardingCardComponent<AssistantCardMetadata> = ({
 
   return (
     <OnboardingCardContentPanel
-      style={{ paddingTop: 0, backgroundColor: isDarkMode ? euiTheme.colors.lightestShade : '' }}
+      style={{
+        paddingTop: 0,
+        ...(isDarkMode && { backgroundColor: euiTheme.colors.lightestShade }),
+      }}
     >
       <EuiFlexGroup direction="column">
         <EuiFlexItem grow={false}>
-          <EuiText size="s" color={isDarkMode ? '' : 'subdued'}>
+          <EuiText size="s" color={isDarkMode ? 'text' : 'subdued'}>
             {i18n.ASSISTANT_CARD_DESCRIPTION}
           </EuiText>
         </EuiFlexItem>

@@ -14,7 +14,7 @@ export const useCardContentImagePanelStyles = () => {
   const isDarkMode = colorMode === COLOR_MODES_STANDARD.dark;
   return css`
     padding-top: 8px;
-    background-color: ${isDarkMode ? euiTheme.colors.lightestShade : ''};
+    ${isDarkMode ? `background-color: ${euiTheme.colors.lightestShade}` : ''};
     .cardSpacer {
       width: 8%;
     }

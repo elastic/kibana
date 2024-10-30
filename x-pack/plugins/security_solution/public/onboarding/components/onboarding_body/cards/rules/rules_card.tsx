@@ -50,7 +50,7 @@ export const RulesCard: OnboardingCardComponent = ({ isCardComplete, setExpanded
           <EuiText
             data-test-subj="rulesCardDescription"
             size="s"
-            color={isDarkMode ? '' : 'subdued'}
+            color={isDarkMode ? 'text' : 'subdued'}
           >
             {i18n.RULES_CARD_DESCRIPTION}
           </EuiText>
