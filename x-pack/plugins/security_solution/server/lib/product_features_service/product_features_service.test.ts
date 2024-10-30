@@ -395,7 +395,7 @@ describe('ProductFeaturesService', () => {
               expect(toolkit.next).not.toHaveBeenCalled();
             });
 
-            it('should assume non-security privileges as granted and allow', async () => {
+            it('should allow only based on security privileges and ignore non-security', async () => {
               const req = getReq([
                 { allRequired: ['notSecurityPrivilege', 'securitySolution-enabled'] },
               ]);
@@ -408,7 +408,7 @@ describe('ProductFeaturesService', () => {
               expect(toolkit.next).toHaveBeenCalledTimes(1);
             });
 
-            it('should assume non-security privileges as granted and restrict', async () => {
+            it('should restrict only based on security privileges and ignore non-security', async () => {
               const req = getReq([
                 { allRequired: ['notSecurityPrivilege', 'securitySolution-disabled'] },
               ]);
@@ -459,15 +459,15 @@ describe('ProductFeaturesService', () => {
               expect(toolkit.next).not.toHaveBeenCalled();
             });
 
-            it('should assume non-security privileges as granted and allow', async () => {
+            it('should restrict only based on security privileges and allow when non-security privilege is present', async () => {
               const req = getReq([
                 {
-                  anyRequired: ['securitySolution-disabled', 'notSecurityPrivilege'],
+                  anyRequired: ['notSecurityPrivilege', 'securitySolution-disabled'],
                 },
               ]);
               await lastRegisteredFn(req, res, toolkit);
 
-              expect(mockIsActionRegistered).toHaveBeenCalledWith('api:securitySolution-disabled');
+              expect(mockIsActionRegistered).not.toHaveBeenCalled();
 
               expect(res.notFound).not.toHaveBeenCalled();
               expect(toolkit.next).toHaveBeenCalledTimes(1);
