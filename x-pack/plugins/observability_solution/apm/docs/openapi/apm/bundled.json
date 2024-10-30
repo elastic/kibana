@@ -35,6 +35,14 @@
         "tags": [
           "APM agent keys"
         ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/elastic_api_version"
+          },
+          {
+            "$ref": "#/components/parameters/kbn-xsrf"
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -55,6 +63,16 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Bad Request response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/400_response"
+                }
+              }
+            }
           }
         }
       }
@@ -68,6 +86,9 @@
           "APM annotations"
         ],
         "parameters": [
+          {
+            "$ref": "#/components/parameters/elastic_api_version"
+          },
           {
             "name": "serviceName",
             "in": "path",
@@ -115,6 +136,16 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Bad Request response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/400_response"
+                }
+              }
+            }
           }
         }
       }
@@ -128,6 +159,12 @@
           "APM annotations"
         ],
         "parameters": [
+          {
+            "$ref": "#/components/parameters/elastic_api_version"
+          },
+          {
+            "$ref": "#/components/parameters/kbn-xsrf"
+          },
           {
             "name": "serviceName",
             "in": "path",
@@ -158,6 +195,16 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Bad Request response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/400_response"
+                }
+              }
+            }
           }
         }
       }
@@ -170,6 +217,11 @@
         "tags": [
           "APM agent configuration"
         ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/elastic_api_version"
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful response",
@@ -177,6 +229,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/agent_configurations_response"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/400_response"
                 }
               }
             }
@@ -199,6 +261,14 @@
         "tags": [
           "APM agent configuration"
         ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/elastic_api_version"
+          },
+          {
+            "$ref": "#/components/parameters/kbn-xsrf"
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -216,6 +286,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/delete_agent_configurations_response"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/400_response"
                 }
               }
             }
@@ -239,6 +319,12 @@
           "APM agent configuration"
         ],
         "parameters": [
+          {
+            "$ref": "#/components/parameters/elastic_api_version"
+          },
+          {
+            "$ref": "#/components/parameters/kbn-xsrf"
+          },
           {
             "name": "overwrite",
             "in": "query",
@@ -269,6 +355,16 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/400_response"
+                }
+              }
+            }
+          },
           "404": {
             "description": "Not found response",
             "content": {
@@ -290,6 +386,9 @@
           "APM agent configuration"
         ],
         "parameters": [
+          {
+            "$ref": "#/components/parameters/elastic_api_version"
+          },
           {
             "name": "name",
             "in": "query",
@@ -320,6 +419,16 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/400_response"
+                }
+              }
+            }
+          },
           "404": {
             "description": "Not found response",
             "content": {
@@ -341,6 +450,14 @@
         "tags": [
           "APM agent configuration"
         ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/elastic_api_version"
+          },
+          {
+            "$ref": "#/components/parameters/kbn-xsrf"
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -358,6 +475,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/search_agent_configuration_response"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/400_response"
                 }
               }
             }
@@ -384,6 +511,9 @@
         ],
         "parameters": [
           {
+            "$ref": "#/components/parameters/elastic_api_version"
+          },
+          {
             "name": "serviceName",
             "in": "query",
             "description": "The name of the service",
@@ -399,6 +529,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/service_environments_response"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/400_response"
                 }
               }
             }
@@ -426,6 +566,9 @@
         ],
         "parameters": [
           {
+            "$ref": "#/components/parameters/elastic_api_version"
+          },
+          {
             "name": "serviceName",
             "in": "query",
             "description": "The name of the service",
@@ -442,6 +585,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/service_agent_name_response"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/400_response"
                 }
               }
             }
@@ -469,6 +622,9 @@
         ],
         "parameters": [
           {
+            "$ref": "#/components/parameters/elastic_api_version"
+          },
+          {
             "name": "page",
             "in": "query",
             "schema": {
@@ -490,6 +646,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/source_maps_response"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/400_response"
                 }
               }
             }
@@ -523,6 +689,14 @@
         "tags": [
           "APM sourcemaps"
         ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/elastic_api_version"
+          },
+          {
+            "$ref": "#/components/parameters/kbn-xsrf"
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -540,6 +714,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/upload_source_maps_response"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/400_response"
                 }
               }
             }
@@ -577,6 +761,12 @@
         ],
         "parameters": [
           {
+            "$ref": "#/components/parameters/elastic_api_version"
+          },
+          {
+            "$ref": "#/components/parameters/kbn-xsrf"
+          },
+          {
             "name": "id",
             "in": "path",
             "schema": {
@@ -592,6 +782,16 @@
                 "schema": {
                   "type": "object",
                   "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/400_response"
                 }
               }
             }
@@ -626,6 +826,14 @@
         "tags": [
           "APM server schema"
         ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/elastic_api_version"
+          },
+          {
+            "$ref": "#/components/parameters/kbn-xsrf"
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -658,6 +866,16 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/400_response"
+                }
+              }
+            }
+          },
           "404": {
             "description": "Not found response",
             "content": {
@@ -673,6 +891,31 @@
     }
   },
   "components": {
+    "parameters": {
+      "elastic_api_version": {
+        "description": "The version of the API to use",
+        "in": "header",
+        "name": "elastic-api-version",
+        "required": true,
+        "schema": {
+          "default": "2023-10-31",
+          "enum": [
+            "2023-10-31"
+          ],
+          "type": "string"
+        }
+      },
+      "kbn-xsrf": {
+        "description": "A required header to protect against CSRF attacks",
+        "in": "header",
+        "name": "kbn-xsrf",
+        "required": true,
+        "schema": {
+          "example": "true",
+          "type": "string"
+        }
+      }
+    },
     "schemas": {
       "agent_keys_object": {
         "type": "object",
@@ -710,6 +953,23 @@
           },
           "encoded": {
             "type": "string"
+          }
+        }
+      },
+      "400_response": {
+        "type": "object",
+        "properties": {
+          "statusCode": {
+            "type": "number",
+            "example": 400
+          },
+          "error": {
+            "type": "string",
+            "example": "Not Found"
+          },
+          "message": {
+            "type": "string",
+            "example": "Not Found"
           }
         }
       },

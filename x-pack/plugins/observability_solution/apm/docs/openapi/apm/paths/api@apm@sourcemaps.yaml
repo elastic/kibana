@@ -5,6 +5,7 @@ get:
   tags:
     - APM sourcemaps
   parameters:
+    - $ref: '../components/headers/elastic_api_version.yaml'
     - name: page
       in: query
       schema:
@@ -20,6 +21,12 @@ get:
         application/json:
           schema:
             $ref: '../components/schemas/source_maps_response.yaml'
+    '400':
+      description: Bad Request response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/400_response.yaml'
     '500':
       description: Internal Server Error response
       content:
@@ -38,6 +45,9 @@ post:
   operationId: uploadSourceMap
   tags:
     - APM sourcemaps
+  parameters:
+    - $ref: '../components/headers/elastic_api_version.yaml'
+    - $ref: '../components/headers/kbn_xsrf.yaml'
   requestBody:
     required: true
     content:
@@ -51,6 +61,12 @@ post:
         application/json:
           schema:
             $ref: '../components/schemas/upload_source_maps_response.yaml'
+    '400':
+      description: Bad Request response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/400_response.yaml'
     '500':
       description: Internal Server Error response
       content:

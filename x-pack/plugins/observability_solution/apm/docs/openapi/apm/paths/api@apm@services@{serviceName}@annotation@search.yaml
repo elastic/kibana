@@ -5,6 +5,7 @@ get:
   tags:
     - APM annotations
   parameters:
+    - $ref: '../components/headers/elastic_api_version.yaml'
     - name: serviceName
       in: path
       required: true
@@ -36,3 +37,9 @@ get:
         application/json:
           schema:
             $ref: '../components/schemas/annotation_search_response.yaml'
+    '400':
+      description: Bad Request response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/400_response.yaml'

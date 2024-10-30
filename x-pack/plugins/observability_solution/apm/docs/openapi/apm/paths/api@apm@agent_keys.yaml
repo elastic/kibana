@@ -4,6 +4,9 @@ post:
   operationId: createAgentKey
   tags:
     - APM agent keys
+  parameters:
+    - $ref: '../components/headers/elastic_api_version.yaml'
+    - $ref: '../components/headers/kbn_xsrf.yaml'
   requestBody:
     required: true
     content:
@@ -17,3 +20,9 @@ post:
         application/json:
           schema:
             $ref: '../components/schemas/agent_keys_response.yaml'
+    '400':
+      description: Bad Request response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/400_response.yaml'

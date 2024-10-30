@@ -5,6 +5,8 @@ post:
   tags:
     - APM annotations
   parameters:
+    - $ref: '../components/headers/elastic_api_version.yaml'
+    - $ref: '../components/headers/kbn_xsrf.yaml'
     - name: serviceName
       in: path
       required: true
@@ -24,3 +26,9 @@ post:
         application/json:
           schema:
             $ref: '../components/schemas/create_annotation_response.yaml'
+    '400':
+      description: Bad Request response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/400_response.yaml'

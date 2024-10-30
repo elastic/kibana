@@ -3,6 +3,9 @@ post:
   operationId: saveApmServerSchema
   tags:
     - APM server schema
+  parameters:
+    - $ref: '../components/headers/elastic_api_version.yaml'
+    - $ref: '../components/headers/kbn_xsrf.yaml'
   requestBody:
     required: true
     content:
@@ -24,6 +27,12 @@ post:
           schema:
             type: object
             additionalProperties: false
+    '400':
+      description: Bad Request response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/400_response.yaml'
     '404':
       description: Not found response
       content:

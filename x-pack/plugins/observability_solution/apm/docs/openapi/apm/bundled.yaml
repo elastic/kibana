@@ -24,6 +24,9 @@ paths:
       operationId: createAgentKey
       tags:
         - APM agent keys
+      parameters:
+        - $ref: '#/components/parameters/elastic_api_version'
+        - $ref: '#/components/parameters/kbn-xsrf'
       requestBody:
         required: true
         content:
@@ -37,6 +40,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/agent_keys_response'
+        '400':
+          description: Bad Request response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400_response'
   /api/apm/services/{serviceName}/annotation/search:
     get:
       summary: Search for annotations
@@ -45,6 +54,7 @@ paths:
       tags:
         - APM annotations
       parameters:
+        - $ref: '#/components/parameters/elastic_api_version'
         - name: serviceName
           in: path
           required: true
@@ -76,6 +86,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/annotation_search_response'
+        '400':
+          description: Bad Request response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400_response'
   /api/apm/services/{serviceName}/annotation:
     post:
       summary: Create a service annotation
@@ -84,6 +100,8 @@ paths:
       tags:
         - APM annotations
       parameters:
+        - $ref: '#/components/parameters/elastic_api_version'
+        - $ref: '#/components/parameters/kbn-xsrf'
         - name: serviceName
           in: path
           required: true
@@ -103,6 +121,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/create_annotation_response'
+        '400':
+          description: Bad Request response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400_response'
   /api/apm/settings/agent-configuration:
     get:
       summary: List of agent configurations
@@ -110,6 +134,8 @@ paths:
       operationId: getAgentConfigurations
       tags:
         - APM agent configuration
+      parameters:
+        - $ref: '#/components/parameters/elastic_api_version'
       responses:
         '200':
           description: Successful response
@@ -117,6 +143,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/agent_configurations_response'
+        '400':
+          description: Bad Request response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400_response'
         '404':
           description: Not found response
           content:
@@ -128,6 +160,9 @@ paths:
       operationId: deleteAgentConfiguration
       tags:
         - APM agent configuration
+      parameters:
+        - $ref: '#/components/parameters/elastic_api_version'
+        - $ref: '#/components/parameters/kbn-xsrf'
       requestBody:
         required: true
         content:
@@ -141,6 +176,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/delete_agent_configurations_response'
+        '400':
+          description: Bad Request response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400_response'
         '404':
           description: Not found response
           content:
@@ -153,6 +194,8 @@ paths:
       tags:
         - APM agent configuration
       parameters:
+        - $ref: '#/components/parameters/elastic_api_version'
+        - $ref: '#/components/parameters/kbn-xsrf'
         - name: overwrite
           in: query
           schema:
@@ -171,6 +214,12 @@ paths:
               schema:
                 type: object
                 additionalProperties: false
+        '400':
+          description: Bad Request response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400_response'
         '404':
           description: Not found response
           content:
@@ -184,6 +233,7 @@ paths:
       tags:
         - APM agent configuration
       parameters:
+        - $ref: '#/components/parameters/elastic_api_version'
         - name: name
           in: query
           description: Service name
@@ -203,6 +253,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/single_agent_configuration_response'
+        '400':
+          description: Bad Request response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400_response'
         '404':
           description: Not found response
           content:
@@ -217,6 +273,9 @@ paths:
       operationId: searchSingleConfiguration
       tags:
         - APM agent configuration
+      parameters:
+        - $ref: '#/components/parameters/elastic_api_version'
+        - $ref: '#/components/parameters/kbn-xsrf'
       requestBody:
         required: true
         content:
@@ -230,6 +289,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/search_agent_configuration_response'
+        '400':
+          description: Bad Request response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400_response'
         '404':
           description: Not found response
           content:
@@ -243,6 +308,7 @@ paths:
       tags:
         - APM agent configuration
       parameters:
+        - $ref: '#/components/parameters/elastic_api_version'
         - name: serviceName
           in: query
           description: The name of the service
@@ -255,6 +321,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/service_environments_response'
+        '400':
+          description: Bad Request response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400_response'
         '404':
           description: Not found response
           content:
@@ -269,6 +341,7 @@ paths:
       tags:
         - APM agent configuration
       parameters:
+        - $ref: '#/components/parameters/elastic_api_version'
         - name: serviceName
           in: query
           description: The name of the service
@@ -282,6 +355,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/service_agent_name_response'
+        '400':
+          description: Bad Request response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400_response'
         '404':
           description: Not found response
           content:
@@ -296,6 +375,7 @@ paths:
       tags:
         - APM sourcemaps
       parameters:
+        - $ref: '#/components/parameters/elastic_api_version'
         - name: page
           in: query
           schema:
@@ -311,6 +391,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/source_maps_response'
+        '400':
+          description: Bad Request response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400_response'
         '500':
           description: Internal Server Error response
           content:
@@ -329,6 +415,9 @@ paths:
       operationId: uploadSourceMap
       tags:
         - APM sourcemaps
+      parameters:
+        - $ref: '#/components/parameters/elastic_api_version'
+        - $ref: '#/components/parameters/kbn-xsrf'
       requestBody:
         required: true
         content:
@@ -342,6 +431,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/upload_source_maps_response'
+        '400':
+          description: Bad Request response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400_response'
         '500':
           description: Internal Server Error response
           content:
@@ -362,6 +457,8 @@ paths:
       tags:
         - APM sourcemaps
       parameters:
+        - $ref: '#/components/parameters/elastic_api_version'
+        - $ref: '#/components/parameters/kbn-xsrf'
         - name: id
           in: path
           schema:
@@ -374,6 +471,12 @@ paths:
               schema:
                 type: object
                 additionalProperties: false
+        '400':
+          description: Bad Request response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400_response'
         '500':
           description: Internal Server Error response
           content:
@@ -392,6 +495,9 @@ paths:
       operationId: saveApmServerSchema
       tags:
         - APM server schema
+      parameters:
+        - $ref: '#/components/parameters/elastic_api_version'
+        - $ref: '#/components/parameters/kbn-xsrf'
       requestBody:
         required: true
         content:
@@ -413,6 +519,12 @@ paths:
               schema:
                 type: object
                 additionalProperties: false
+        '400':
+          description: Bad Request response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400_response'
         '404':
           description: Not found response
           content:
@@ -420,6 +532,25 @@ paths:
               schema:
                 $ref: '#/components/schemas/404_response'
 components:
+  parameters:
+    elastic_api_version:
+      description: The version of the API to use
+      in: header
+      name: elastic-api-version
+      required: true
+      schema:
+        default: '2023-10-31'
+        enum:
+          - '2023-10-31'
+        type: string
+    kbn-xsrf:
+      description: A required header to protect against CSRF attacks
+      in: header
+      name: kbn-xsrf
+      required: true
+      schema:
+        example: 'true'
+        type: string
   schemas:
     agent_keys_object:
       type: object
@@ -447,6 +578,18 @@ components:
           type: string
         encoded:
           type: string
+    400_response:
+      type: object
+      properties:
+        statusCode:
+          type: number
+          example: 400
+        error:
+          type: string
+          example: Not Found
+        message:
+          type: string
+          example: Not Found
     annotation_search_response:
       type: object
       properties:

@@ -1,0 +1,11 @@
+type: object
+properties:
+  statusCode:
+    type: number
+    example: 400
+  error:
+    type: string
+    example: Not Found
+  message:
+    type: string
+    example: Not Found

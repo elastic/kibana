@@ -4,6 +4,8 @@ get:
   operationId: getAgentConfigurations
   tags:
     - APM agent configuration
+  parameters:
+    - $ref: '../components/headers/elastic_api_version.yaml'
   responses:
     '200':
       description: Successful response
@@ -11,6 +13,12 @@ get:
         application/json:
           schema:
             $ref: '../components/schemas/agent_configurations_response.yaml'
+    '400':
+      description: Bad Request response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/400_response.yaml'
     '404':
       description: Not found response
       content:
@@ -22,6 +30,9 @@ delete:
   operationId: deleteAgentConfiguration
   tags:
     - APM agent configuration
+  parameters:
+    - $ref: '../components/headers/elastic_api_version.yaml'
+    - $ref: '../components/headers/kbn_xsrf.yaml'
   requestBody:
     required: true
     content:
@@ -35,6 +46,12 @@ delete:
         application/json:
           schema:
             $ref: '../components/schemas/delete_agent_configurations_response.yaml'
+    '400':
+      description: Bad Request response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/400_response.yaml'
     '404':
       description: Not found response
       content:
@@ -47,6 +64,8 @@ put:
   tags:
     - APM agent configuration
   parameters:
+    - $ref: '../components/headers/elastic_api_version.yaml'
+    - $ref: '../components/headers/kbn_xsrf.yaml'
     - name: overwrite
       in: query
       schema:
@@ -65,6 +84,12 @@ put:
           schema:
             type: object
             additionalProperties: false
+    '400':
+      description: Bad Request response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/400_response.yaml'
     '404':
       description: Not found response
       content:

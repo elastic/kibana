@@ -5,6 +5,8 @@ delete:
   tags:
     - APM sourcemaps
   parameters:
+    - $ref: '../components/headers/elastic_api_version.yaml'
+    - $ref: '../components/headers/kbn_xsrf.yaml'
     - name: id
       in: path
       schema:
@@ -17,6 +19,12 @@ delete:
           schema:
             type: object
             additionalProperties: false
+    '400':
+      description: Bad Request response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/400_response.yaml'
     '500':
       description: Internal Server Error response
       content:

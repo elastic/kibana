@@ -4,6 +4,7 @@ get:
   tags:
     - APM agent configuration
   parameters:
+    - $ref: '../components/headers/elastic_api_version.yaml'
     - name: serviceName
       in: query
       description: The name of the service
@@ -16,6 +17,12 @@ get:
         application/json:
           schema:
             $ref: '../components/schemas/service_environments_response.yaml'
+    '400':
+      description: Bad Request response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/400_response.yaml'
     '404':
       description: Not found response
       content:
