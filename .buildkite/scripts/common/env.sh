@@ -110,13 +110,13 @@ export TEST_CORS_SERVER_PORT=6105
 if [[ "$(which google-chrome-stable)" || "$(which google-chrome)" ]]; then
   CHROME_HOST=$(uname -om)
   CHROME_VERSION=$(google-chrome-stable --product-version || google-chrome --product-version)
+  export DETECT_CHROMEDRIVER_VERSION=true
   echo "Chrome $CHROME_VERSION detected"
   if [[ $CHROME_HOST == 'x86_64 GNU/Linux' ]] && [[ -f "$HOME/.chromedriver/$CHROME_VERSION/chromedriver-linux64.zip" ]]; then
     echo "Chromedriver cache found, setting CHROMEDRIVER_FILEPATH"
     export CHROMEDRIVER_FILEPATH="$HOME/.chromedriver/$CHROME_VERSION/chromedriver-linux64.zip"
   else
     echo "Chromedriver cache not found, setting DETECT_CHROMEDRIVER_VERSION=true"
-    export DETECT_CHROMEDRIVER_VERSION=true
     export CHROMEDRIVER_FORCE_DOWNLOAD=true
   fi
 else
