@@ -509,10 +509,10 @@
           },
           {
             "parentPluginId": "@kbn/monaco",
-            "id": "def-common.ESQLCallbacks.getFieldsFor",
+            "id": "def-common.ESQLCallbacks.getColumnsFor",
             "type": "Function",
             "tags": [],
-            "label": "getFieldsFor",
+            "label": "getColumnsFor",
             "description": [],
             "signature": [
               "CallbackFn<{ query: string; }, ",
