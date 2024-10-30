@@ -80,8 +80,8 @@ export const useInitEntityEngineMutation = (options?: UseMutationOptions<{}>) =>
         timestamp: new Date().toISOString(),
         action: 'start',
       });
-      return initEntityStore('user').then(
-        (usr) => initEntityStore('host').then((host) => [usr, host])
+      return initEntityStore('user').then((usr) =>
+        initEntityStore('host').then((host) => [usr, host])
       );
     },
     {
@@ -110,8 +110,8 @@ export const useStopEntityEngineMutation = (options?: UseMutationOptions<{}>) =>
         timestamp: new Date().toISOString(),
         action: 'stop',
       });
-      return stopEntityStore('user').then(
-        (usr) => stopEntityStore('host').then((host) => [usr, host])
+      return stopEntityStore('user').then((usr) =>
+        stopEntityStore('host').then((host) => [usr, host])
       );
     },
     {
