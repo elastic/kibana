@@ -432,7 +432,7 @@ describe('useSetupTechnology', () => {
       },
     });
 
-    waitFor(() => {
+    await waitFor(() => {
       expect(setNewAgentPolicy).toHaveBeenCalledWith({
         name: 'Agentless policy for endpoint-2',
         inactivity_timeout: 3600,
@@ -465,7 +465,7 @@ describe('useSetupTechnology', () => {
       result.current.handleSetupTechnologyChange(SetupTechnology.AGENT_BASED);
     });
 
-    waitFor(() => {
+    await waitFor(() => {
       expect(setNewAgentPolicy).toHaveBeenCalledTimes(0);
     });
   });
