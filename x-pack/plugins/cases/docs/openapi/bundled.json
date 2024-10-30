@@ -1905,7 +1905,7 @@
                   "format": "binary"
                 },
                 "filename": {
-                  "description": "The name of file being attached to the case.",
+                  "description": "The name of file being attached to the case. **This should not include the file extension.**",
                   "type": "string"
                 },
                 "mimeType": {
