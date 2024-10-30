@@ -64,4 +64,6 @@ export interface SavedObjectsBulkCreateObject<T = unknown> {
    * make their edits to the copy.
    */
   managed?: boolean;
+
+  enforceRandomId?: boolean;
 }

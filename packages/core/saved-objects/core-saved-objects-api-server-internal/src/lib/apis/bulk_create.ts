@@ -90,7 +90,7 @@ export const performBulkCreate = async <T>(
 
   let preflightCheckIndexCounter = 0;
   const expectedResults = objects.map<ExpectedResult>((object) => {
-    const { type, id: requestId, initialNamespaces, version, managed } = object;
+    const { type, id: requestId, initialNamespaces, version, managed, enforceRandomId } = object;
     let error: DecoratedError | undefined;
     let id: string = ''; // Assign to make TS happy, the ID will be validated (or randomly generated if needed) during getValidId below
     const objectManaged = managed;
@@ -98,7 +98,7 @@ export const performBulkCreate = async <T>(
       error = SavedObjectsErrorHelpers.createUnsupportedTypeError(type);
     } else {
       try {
-        id = commonHelper.getValidId(type, requestId, version, overwrite);
+        id = commonHelper.getValidId(type, requestId, version, overwrite, enforceRandomId);
         validationHelper.validateInitialNamespaces(type, initialNamespaces);
         validationHelper.validateOriginId(type, object);
       } catch (e) {

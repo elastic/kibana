@@ -64,6 +64,7 @@ export const registerBulkCreateRoute = (
               )
             ),
             initialNamespaces: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
+            enforceRandomId: schema.maybe(schema.boolean()),
           })
         ),
       },
