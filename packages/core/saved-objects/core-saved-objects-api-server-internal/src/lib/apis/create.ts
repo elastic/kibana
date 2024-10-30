@@ -66,7 +66,6 @@ export const performCreate = async <T>(
   if (!allowedTypes.includes(type)) {
     throw SavedObjectsErrorHelpers.createUnsupportedTypeError(type);
   }
-
   const id = commonHelper.getValidId(type, options.id, options.version, options.overwrite);
   validationHelper.validateInitialNamespaces(type, initialNamespaces);
   validationHelper.validateOriginId(type, options);
