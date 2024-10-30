@@ -26,7 +26,6 @@ import { TEST_CACHE_EXPIRATION_TIME } from '../../create_test_data';
 // eslint-disable-next-line import/no-default-export
 export default function createAlertsAsDataFlappingTest({ getService }: FtrProviderContext) {
   const es = getService('es');
-  const log = getService('log');
   const retry = getService('retry');
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
@@ -732,24 +731,14 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
           expect(response.status).to.eql(204);
         });
 
-        const eventLogs = await waitForEventLogDocs(
-          ruleId,
-          new Map([['execute', { equal: ++run }]])
-        );
+        await waitForEventLogDocs(ruleId, new Map([['execute', { equal: ++run }]]));
 
         const alertDocs = await queryForAlertDocs<PatternFiringAlert>(ruleId);
         const isFlapping = alertDocs[0]._source![ALERT_FLAPPING];
 
-        log.debug(`Alert docs for run=${run}: ${JSON.stringify(alertDocs)}`);
-        log.debug(`Event log docs for run=${run}: ${JSON.stringify(eventLogs)}`);
-
         if (!runWhichItFlapped && isFlapping) {
           runWhichItFlapped = run;
         }
-
-        log.debug(
-          `runWhichItFlapped for run=${run}, isFlapping=${isFlapping}: ${runWhichItFlapped}`
-        );
       }
 
       // Never flapped, since globl flapping is off
