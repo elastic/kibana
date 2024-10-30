@@ -26,7 +26,6 @@ import { initializeVisualizationContext } from './initializers/initialize_visual
 import { initializeActionApi } from './initializers/initialize_actions';
 import { initializeIntegrations } from './initializers/initialize_integrations';
 import { initializeStateManagement } from './initializers/initialize_state_management';
-import { apiHasLensComponentCallbacks } from './type_guards';
 import { LensEmbeddableComponent } from './renderer/lens_embeddable_component';
 // import { LensEmbeddableComponent } from './renderer/lens_embeddable_component';
 
@@ -168,11 +167,6 @@ export const createLensEmbeddableFactory = (
         services,
         visualizationContextHelper
       );
-
-      // the component is ready to load
-      if (apiHasLensComponentCallbacks(parentApi)) {
-        parentApi.onLoad?.(true);
-      }
 
       const onUnmount = () => {
         editConfig.cleanup();

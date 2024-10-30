@@ -122,6 +122,11 @@ export function loadEmbeddableData(
     // notify about data loading
     internalApi.updateDataLoading(true);
 
+    // the component is ready to load
+    if (apiHasLensComponentCallbacks(parentApi)) {
+      parentApi.onLoad?.(true);
+    }
+
     const currentState = getState();
 
     const { searchSessionId, ...unifiedSearch } = unifiedSearch$.getValue();
