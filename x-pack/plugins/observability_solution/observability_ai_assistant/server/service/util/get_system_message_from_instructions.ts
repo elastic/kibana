@@ -45,7 +45,7 @@ export function getSystemMessageFromInstructions({
 
   const adHocInstructionsWithId = adHocInstructions.map((adHocInstruction) => ({
     ...adHocInstruction,
-    doc_id: adHocInstruction.doc_id ?? v4(),
+    doc_id: adHocInstruction?.doc_id ?? v4(),
   }));
 
   // split ad hoc instructions into user instructions and application instructions

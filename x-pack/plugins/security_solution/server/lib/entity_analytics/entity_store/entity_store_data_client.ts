@@ -148,6 +148,7 @@ export class EntityStoreDataClient {
       );
     }
 
+
     this.log('info', entityType, `Initializing entity store`);
     this.audit(
       EntityEngineActions.INIT,
@@ -161,8 +162,8 @@ export class EntityStoreDataClient {
       fieldHistoryLength,
       indexPattern,
     });
+    this.log('debug', entityType, `Initialized engine saved object`);
 
-    this.log('debug', entityType, `Initialized engine`);
 
     this.asyncSetup(
       entityType,
@@ -265,6 +266,7 @@ export class EntityStoreDataClient {
         logger,
         taskManager,
       });
+
       this.log(`debug`, entityType, `Started entity store field retention enrich task`);
       this.log(`info`, entityType, `Entity store initialized`);
 
@@ -459,6 +461,7 @@ export class EntityStoreDataClient {
         this.log('debug', entityType, `Deleted entity store field retention enrich task`);
       }
 
+      logger.info(`[Entity Store] In namespace ${namespace}: Deleted store for ${entityType}`);
       return { deleted: true };
     } catch (err) {
       this.log(`error`, entityType, `Error deleting entity store: ${err.message}`);
