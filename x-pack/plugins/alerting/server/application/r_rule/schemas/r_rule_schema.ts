@@ -34,13 +34,15 @@ export const rRuleSchema = schema.object({
       schema.literal('SU'),
     ])
   ),
-  byweekday: schema.maybe(schema.arrayOf(schema.oneOf([schema.string(), schema.number()]))),
-  bymonth: schema.maybe(schema.arrayOf(schema.number())),
-  bysetpos: schema.maybe(schema.arrayOf(schema.number())),
-  bymonthday: schema.maybe(schema.arrayOf(schema.number())),
-  byyearday: schema.maybe(schema.arrayOf(schema.number())),
-  byweekno: schema.maybe(schema.arrayOf(schema.number())),
-  byhour: schema.maybe(schema.arrayOf(schema.number())),
-  byminute: schema.maybe(schema.arrayOf(schema.number())),
-  bysecond: schema.maybe(schema.arrayOf(schema.number())),
+  byweekday: schema.maybe(
+    schema.nullable(schema.arrayOf(schema.oneOf([schema.string(), schema.number()])))
+  ),
+  bymonth: schema.maybe(schema.nullable(schema.arrayOf(schema.number()))),
+  bysetpos: schema.maybe(schema.nullable(schema.arrayOf(schema.number()))),
+  bymonthday: schema.maybe(schema.nullable(schema.arrayOf(schema.number()))),
+  byyearday: schema.maybe(schema.nullable(schema.arrayOf(schema.number()))),
+  byweekno: schema.maybe(schema.nullable(schema.arrayOf(schema.number()))),
+  byhour: schema.maybe(schema.nullable(schema.arrayOf(schema.number()))),
+  byminute: schema.maybe(schema.nullable(schema.arrayOf(schema.number()))),
+  bysecond: schema.maybe(schema.nullable(schema.arrayOf(schema.number()))),
 });
