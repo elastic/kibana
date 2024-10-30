@@ -36,6 +36,12 @@ export const registerAlertsRoute = (
     .addVersion(
       {
         version: '1',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           request: {
             query: schema.object({
