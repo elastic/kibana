@@ -94,7 +94,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     await rules.common.cancelRuleCreation();
   }
 
-  describe('create alert', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/196153
+  describe.skip('create alert', function () {
     let apmSynthtraceEsClient: ApmSynthtraceEsClient;
     before(async () => {
       await esArchiver.load(
