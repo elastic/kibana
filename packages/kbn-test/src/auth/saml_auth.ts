@@ -282,6 +282,7 @@ export const finishSAMLHandshake = async ({
   } catch (ex) {
     log.error('Failed to call SAML callback');
     cleanException(url, ex);
+    // Logging the `Cookie: sid=xxxx` header is safe here since it’s an intermediate, non-authenticated cookie that cannot be reused if leaked.
     log.error(`Request sent: ${util.inspect(request)}`);
     throw ex;
   }
