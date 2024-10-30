@@ -77,7 +77,7 @@ export function registerFavoritesRoutes({
   router.post(
     {
       path: '/internal/content_management/favorites/{type}/{id}/favorite',
-      validate: () => ({
+      validate: {
         params: schema.object({
           id: schema.string(),
           type: typeSchema,
@@ -89,7 +89,7 @@ export function registerFavoritesRoutes({
             })
           )
         ),
-      }),
+      },
       // we don't protect the route with any access tags as
       // we only give access to the current user's favorites ids
     },
@@ -118,8 +118,6 @@ export function registerFavoritesRoutes({
       } catch (e) {
         return response.badRequest({ body: { message: e.message } });
       }
-
-      logger.warn('Adding favorite');
 
       const favoritesResult = await favorites.addFavorite({
         id,
