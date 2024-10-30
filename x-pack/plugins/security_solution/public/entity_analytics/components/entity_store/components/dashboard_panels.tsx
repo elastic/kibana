@@ -15,7 +15,6 @@ import {
   EuiLoadingLogo,
   EuiPanel,
   EuiImage,
-  EuiGlobalToastList,
   EuiCallOut,
 } from '@elastic/eui';
 
@@ -48,7 +47,6 @@ import { useRiskEngineStatus } from '../../../api/hooks/use_risk_engine_status';
 const EntityStoreDashboardPanelsComponent = () => {
   const [modal, setModalState] = useState({ visible: false });
   const [riskEngineInitializing, setRiskEngineInitializing] = useState(false);
-  const [hiddenToasts, setHiddenToasts] = useState<number[]>([]);
 
   const entityStore = useEntityEngineStatus();
   const riskEngineStatus = useRiskEngineStatus();
@@ -57,18 +55,17 @@ const EntityStoreDashboardPanelsComponent = () => {
 
   const { mutate: initRiskEngine } = useInitRiskEngineMutation();
 
-  const toasts = entityStore.errors
+  const callouts = entityStore.errors
     .filter((_, i) => !hiddenToasts.includes(i))
-    .map(
-      (err, i) =>
-        ({
-          id: i.toString(),
-          title: 'Error',
-          color: 'danger',
-          iconType: 'alert',
-          text: <p>{err?.message}</p>,
-        } as const)
-    );
+    .map((err, i) => (
+      <EuiCallOut
+        title={'An error occurred during entity store resource initialization'}
+        color="danger"
+        iconType="error"
+      >
+        <p>{err?.message}</p>
+      </EuiCallOut>
+    ));
 
   const enableEntityStore = (enable: Enablements) => () => {
     setModalState({ visible: false });
@@ -92,13 +89,16 @@ const EntityStoreDashboardPanelsComponent = () => {
 
   if (query.error) {
     return (
-      <EuiCallOut
-        title={'There was a problem initializing the entity store'}
-        color="danger"
-        iconType="error"
-      >
-        <p>{(query.error as { body: { message: string } }).body.message}</p>
-      </EuiCallOut>
+      <>
+        <EuiCallOut
+          title={'There was a problem initializing the entity store'}
+          color="danger"
+          iconType="error"
+        >
+          <p>{(query.error as { body: { message: string } }).body.message}</p>
+        </EuiCallOut>
+        {callouts}
+      </>
     );
   }
 
@@ -138,6 +138,29 @@ const EntityStoreDashboardPanelsComponent = () => {
 
   return (
     <EuiFlexGroup direction="column" data-test-subj="entityStorePanelsGroup">
+      {entityStore.status === 'error' && isRiskScoreAvailable && (
+        <>
+          {callouts}
+          <EuiFlexItem>
+            <EntityAnalyticsRiskScores riskEntity={RiskScoreEntity.user} />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EntityAnalyticsRiskScores riskEntity={RiskScoreEntity.host} />
+          </EuiFlexItem>
+        </>
+      )}
+      {entityStore.status === 'error' && !isRiskScoreAvailable && (
+        <>
+          {callouts}
+          <EuiFlexItem>
+            <EnableEntityStore
+              onEnable={() => setModalState({ visible: true })}
+              loadingRiskEngine={riskEngineInitializing}
+              enablements="riskScore"
+            />
+          </EuiFlexItem>
+        </>
+      )}
       {entityStore.status === 'enabled' && isRiskScoreAvailable && (
         <>
           <EuiFlexItem>
@@ -206,11 +229,6 @@ const EntityStoreDashboardPanelsComponent = () => {
           disabled: entityStore.status === 'enabled',
           checked: entityStore.status !== 'enabled',
         }}
-      />
-      <EuiGlobalToastList
-        toasts={toasts}
-        dismissToast={({ id }) => setHiddenToasts((prev) => [...prev, parseInt(id, 10)])}
-        toastLifeTimeMs={10000}
       />
     </EuiFlexGroup>
   );
