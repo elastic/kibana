@@ -198,7 +198,7 @@ export const links: LinkItem = {
       id: SecurityPageName.entityAnalyticsEntityStoreManagement,
       title: ENTITY_STORE,
       description: i18n.translate('xpack.securitySolution.appLinks.entityStoreDescription', {
-        defaultMessage: "Allows comprehensive monitoring of your system's hosts and users.",
+        defaultMessage: 'Store host and user entities observed in events.',
       }),
       landingIcon: IconAssetCriticality,
       path: ENTITY_ANALYTICS_ENTITY_STORE_MANAGEMENT_PATH,
@@ -229,7 +229,8 @@ export const links: LinkItem = {
       path: NOTES_PATH,
       skipUrlState: true,
       hideTimeline: true,
-      experimentalKey: 'securitySolutionNotesEnabled',
+      hideWhenExperimentalKey: 'securitySolutionNotesDisabled',
+      globalSearchDisabled: true,
     },
   ],
 };
