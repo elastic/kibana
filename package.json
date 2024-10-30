@@ -1469,7 +1469,6 @@
     "@kbn/repo-path": "link:packages/kbn-repo-path",
     "@kbn/repo-source-classifier": "link:packages/kbn-repo-source-classifier",
     "@kbn/repo-source-classifier-cli": "link:packages/kbn-repo-source-classifier-cli",
-    "@kbn/saml-provider-plugin": "link:packages/kbn-saml-provider-plugin",
     "@kbn/security-api-integration-helpers": "link:x-pack/test/security_api_integration/packages/helpers",
     "@kbn/serverless-storybook-config": "link:packages/serverless/storybook/config",
     "@kbn/some-dev-log": "link:packages/kbn-some-dev-log",
