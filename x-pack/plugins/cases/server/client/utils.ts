@@ -16,6 +16,8 @@ import type { KueryNode } from '@kbn/es-query';
 import { nodeBuilder, fromKueryExpression, escapeKuery } from '@kbn/es-query';
 import { spaceIdToNamespace } from '@kbn/spaces-plugin/server/lib/utils/namespace';
 
+import type { FileJSON } from '@kbn/shared-ux-file-types';
+import { FILE_SO_TYPE } from '@kbn/files-plugin/common/constants';
 import type {
   CaseCustomField,
   CaseSeverity,
@@ -62,8 +64,6 @@ import type { ExternalReferenceAttachmentTypeRegistry } from '../attachment_fram
 import type { AttachmentRequest, CasesFindRequestSortFields } from '../../common/types/api';
 import type { ICasesCustomField } from '../custom_fields';
 import { casesCustomFields } from '../custom_fields';
-import { FileJSON } from '@kbn/shared-ux-file-types';
-import { FILE_SO_TYPE } from '@kbn/files-plugin/common/constants';
 
 // TODO: I think we can remove most of this function since we're using a different excess
 export const decodeCommentRequest = (
