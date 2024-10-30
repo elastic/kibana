@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Message, MessageRole } from './chat_complete';
+import { Message, MessageRole } from '@kbn/inference-common';
 
 function isUserMessage(message: Message): boolean {
   return message.role !== MessageRole.Assistant;

@@ -31,3 +31,10 @@ export {
   type UnvalidatedToolCall,
   type ToolChoice,
 } from './tools';
+export {
+  isChatCompletionChunkEvent,
+  isChatCompletionEvent,
+  isChatCompletionMessageEvent,
+  withoutChunkEvents,
+  withoutTokenCountEvents,
+} from './event_utils';

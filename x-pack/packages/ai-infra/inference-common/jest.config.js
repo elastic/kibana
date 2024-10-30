@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-export {
-  correctCommonEsqlMistakes,
-  splitIntoCommands,
-} from './tasks/nl_to_esql/correct_common_esql_mistakes';
-
-export { generateFakeToolCallId } from './utils/generate_fake_tool_call_id';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/x-pack/packages/ai-infra/inference-common'],
+};
