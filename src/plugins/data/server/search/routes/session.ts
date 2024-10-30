@@ -40,6 +40,12 @@ export function registerSessionRoutes(router: DataPluginRouter, logger: Logger):
   router.versioned.post({ path: pathPrefix, access, options }).addVersion(
     {
       version,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         request: {
           body: schema.object({
@@ -88,6 +94,12 @@ export function registerSessionRoutes(router: DataPluginRouter, logger: Logger):
   router.versioned.get({ path: `${pathPrefix}/{id}`, access, options }).addVersion(
     {
       version,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         request: {
           params: schema.object({
@@ -120,6 +132,12 @@ export function registerSessionRoutes(router: DataPluginRouter, logger: Logger):
   router.versioned.get({ path: `${pathPrefix}/{id}/status`, access, options }).addVersion(
     {
       version,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         request: {
           params: schema.object({
@@ -153,6 +171,12 @@ export function registerSessionRoutes(router: DataPluginRouter, logger: Logger):
   router.versioned.post({ path: `${pathPrefix}/_find`, access, options }).addVersion(
     {
       version,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         request: {
           body: schema.object({
@@ -203,6 +227,12 @@ export function registerSessionRoutes(router: DataPluginRouter, logger: Logger):
   router.versioned.delete({ path: `${pathPrefix}/{id}`, access, options }).addVersion(
     {
       version,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         request: {
           params: schema.object({
@@ -229,6 +259,12 @@ export function registerSessionRoutes(router: DataPluginRouter, logger: Logger):
   router.versioned.post({ path: `${pathPrefix}/{id}/cancel`, access, options }).addVersion(
     {
       version,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         request: {
           params: schema.object({
@@ -255,6 +291,12 @@ export function registerSessionRoutes(router: DataPluginRouter, logger: Logger):
   router.versioned.put({ path: `${pathPrefix}/{id}`, access, options }).addVersion(
     {
       version,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         request: {
           params: schema.object({
@@ -294,6 +336,12 @@ export function registerSessionRoutes(router: DataPluginRouter, logger: Logger):
   router.versioned.post({ path: `${pathPrefix}/{id}/_extend`, access, options }).addVersion(
     {
       version,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         request: {
           params: schema.object({
