@@ -153,9 +153,14 @@ export class EncryptedSavedObjectsService {
     return this.typeDefinitions.has(type);
   }
 
+  /**
+   * Check whether the ESO has explicitly opted out of enforcing random IDs for the specified type.
+   * @param type Saved object type.
+   * @returns boolean - true unless explicitly opted out by setting enforceRandomId to false
+   */
   public shouldEnforceRandomId(type: string) {
     const typeDefinition = this.typeDefinitions.get(type);
-    return typeDefinition?.enforceRandomId ?? true;
+    return typeDefinition?.enforceRandomId !== false;
   }
 
   /**
