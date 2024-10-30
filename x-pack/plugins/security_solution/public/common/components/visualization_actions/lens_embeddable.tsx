@@ -45,6 +45,10 @@ const LensComponentWrapper = styled.div<{
   height: ${({ $height }) => ($height ? `${$height}px` : 'auto')};
   width: ${({ width }) => width ?? 'auto'};
 
+  .embPanel {
+    outline: none;
+  }
+
   ${({ $addHoverActionsPadding }) =>
     $addHoverActionsPadding ? `.embPanel__header { top: ${HOVER_ACTIONS_PADDING * -1}px; }` : ''}
 
