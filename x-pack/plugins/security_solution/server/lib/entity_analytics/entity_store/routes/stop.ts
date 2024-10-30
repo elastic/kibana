@@ -47,7 +47,7 @@ export const stopEntityEngineRoute = (
 
           return response.ok({ body: { stopped: engine.status === ENGINE_STATUS.STOPPED } });
         } catch (e) {
-          logger.error('Error in StopEntityEngine:', e);
+          logger.error(`Error in StopEntityEngine: ${e.message}`);
           const error = transformError(e);
           return siemResponse.error({
             statusCode: error.statusCode,
