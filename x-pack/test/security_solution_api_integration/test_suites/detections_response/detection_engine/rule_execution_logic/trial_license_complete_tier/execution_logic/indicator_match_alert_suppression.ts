@@ -167,7 +167,8 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     cases.forEach(({ eventsCount, threatsCount, title }) => {
-      describe(`Code execution path: ${title}`, () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/197765
+      describe.skip(`Code execution path: ${title}`, () => {
         it('should suppress an alert on real rule executions', async () => {
           const id = uuidv4();
           const firstTimestamp = new Date().toISOString();
