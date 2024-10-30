@@ -148,7 +148,6 @@ export class EntityStoreDataClient {
       );
     }
 
-
     this.log('info', entityType, `Initializing entity store`);
     this.audit(
       EntityEngineActions.INIT,
@@ -163,7 +162,6 @@ export class EntityStoreDataClient {
       indexPattern,
     });
     this.log('debug', entityType, `Initialized engine saved object`);
-
 
     this.asyncSetup(
       entityType,
