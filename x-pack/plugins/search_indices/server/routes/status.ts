@@ -35,7 +35,7 @@ export function registerStatusRoutes(router: IRouter, logger: Logger) {
 
   router.get(
     {
-      path: `${GET_USER_PRIVILEGES_ROUTE}/{indexName}`,
+      path: GET_USER_PRIVILEGES_ROUTE,
       validate: {
         params: schema.object({
           indexName: schema.string(),

@@ -7,7 +7,6 @@
 
 import { useQuery } from '@tanstack/react-query';
 
-import { GET_USER_PRIVILEGES_ROUTE } from '../../../common/routes';
 import type { UserStartPrivilegesResponse } from '../../../common/types';
 import { QueryKeys } from '../../constants';
 
@@ -18,6 +17,8 @@ export const useUserPrivilegesQuery = (indexName: string) => {
   return useQuery({
     queryKey: [QueryKeys.FetchUserStartPrivileges],
     queryFn: () =>
-      http.get<UserStartPrivilegesResponse>(`${GET_USER_PRIVILEGES_ROUTE}/${indexName}`),
+      http.get<UserStartPrivilegesResponse>(
+        `/internal/search_indices/start_privileges/${indexName}`
+      ),
   });
 };
