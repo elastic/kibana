@@ -6,8 +6,6 @@
   height: 100%;
   min-height: $euiSizeL + 2px; // + 2px to account for border
   position: relative;
-  border: none;
-  outline: $euiBorderThin;
 
   &-isLoading {
     // completely center the loading indicator
@@ -141,7 +139,6 @@
 
 .embPanel--editing {
   transition: all $euiAnimSpeedFast $euiAnimSlightResistance;
-  outline: 1px dashed $euiColorMediumShade;
 
   .embPanel--dragHandle {
     transition: background-color $euiAnimSpeedFast $euiAnimSlightResistance;
@@ -198,6 +195,12 @@
     height: $euiSizeXL;
 
     pointer-events: all; // Re-enable pointer-events for hover actions
+  }
+
+  .embPanel--editing{
+    .embPanel__hoverActions {
+      border-style: dashed;
+    }
   }
 
   .embPanel--dragHandle {

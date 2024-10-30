@@ -128,7 +128,7 @@ Default.args = {
   hideHeader: false,
   loading: false,
   showShadow: false,
-  showBorder: true,
+  showBorder: false,
   title: 'Hello World',
   viewMode: true,
 };

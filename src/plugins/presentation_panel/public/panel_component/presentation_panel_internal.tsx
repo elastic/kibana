@@ -92,7 +92,7 @@ export const PresentationPanelInternal = <
 
   return (
     <PresentationPanelHoverActions
-      {...{ index, api, getActions, actionPredicate, viewMode, showNotifications }}
+      {...{ index, api, getActions, actionPredicate, viewMode, showNotifications, showBorder }}
     >
       <EuiPanel
         role="figure"
@@ -101,7 +101,6 @@ export const PresentationPanelInternal = <
           'embPanel--editing': viewMode === 'edit',
         })}
         hasShadow={showShadow}
-        hasBorder={showBorder}
         aria-labelledby={headerId}
         data-test-subj="embeddablePanel"
         {...contentAttrs}

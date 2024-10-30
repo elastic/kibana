@@ -101,6 +101,7 @@ export const PresentationPanelHoverActions = ({
   className,
   viewMode,
   showNotifications = true,
+  showBorder,
 }: {
   index?: number;
   api: DefaultPresentationPanelApi | null;
@@ -110,6 +111,7 @@ export const PresentationPanelHoverActions = ({
   className?: string;
   viewMode?: ViewMode;
   showNotifications?: boolean;
+  showBorder?: boolean;
 }) => {
   const [quickActions, setQuickActions] = useState<AnyApiAction[]>([]);
   const [contextMenuPanels, setContextMenuPanels] = useState<EuiContextMenuPanelDescriptor[]>([]);
@@ -482,7 +484,7 @@ export const PresentationPanelHoverActions = ({
                 className
               )}
               css={css`
-                ${borderStyles}
+                ${showBorder ? borderStyles : 'outline: none;'}
               `}
             >
               {dragHandle}
@@ -490,72 +492,74 @@ export const PresentationPanelHoverActions = ({
           ) : (
             <div /> // necessary for the right hover actions to align correctly when left hover actions are not present
           )}
-          <div
-            ref={rightHoverActionsRef}
-            data-test-subj="embPanel__hoverActions__right"
-            className={classNames(
-              'embPanel__hoverActions',
-              'embPanel__hoverActionsRight',
-              className
-            )}
-            css={css`
-              ${borderStyles}
-            `}
-          >
-            {viewMode === 'edit' && combineHoverActions && dragHandle}
-            {showNotifications && notificationElements}
-            {showDescription && (
-              <EuiIconTip
-                title={!hideTitle ? title || undefined : undefined}
-                content={description}
-                delay="regular"
-                position="top"
-                anchorClassName="embPanel__descriptionTooltipAnchor"
-                data-test-subj="embeddablePanelDescriptionTooltip"
-                type="iInCircle"
-              />
-            )}
-            {quickActionElements.map(
-              ({ iconType, 'data-test-subj': dataTestSubj, onClick, name }, i) => (
-                <EuiToolTip key={`main_action_${dataTestSubj}_${api?.uuid}`} content={name}>
-                  <EuiButtonIcon
-                    iconType={iconType}
-                    color="text"
-                    onClick={onClick as MouseEventHandler}
-                    data-test-subj={dataTestSubj}
-                    aria-label={name as string}
-                  />
-                </EuiToolTip>
-              )
-            )}
-            {contextMenuPanels.length ? (
-              <EuiPopover
-                repositionOnScroll
-                panelPaddingSize="none"
-                anchorPosition="downRight"
-                button={ContextMenuButton}
-                isOpen={isContextMenuOpen}
-                className={contextMenuClasses}
-                closePopover={onClose}
-                data-test-subj={
-                  isContextMenuOpen
-                    ? 'embeddablePanelContextMenuOpen'
-                    : 'embeddablePanelContextMenuClosed'
-                }
-                focusTrapProps={{
-                  closeOnMouseup: true,
-                  clickOutsideDisables: false,
-                  onClickOutside: onClose,
-                }}
-              >
-                <EuiContextMenu
-                  data-test-subj="presentationPanelContextMenuItems"
-                  initialPanelId={'mainMenu'}
-                  panels={contextMenuPanels}
+          {quickActionElements.length && contextMenuPanels.lastIndexOf.length ? (
+            <div
+              ref={rightHoverActionsRef}
+              data-test-subj="embPanel__hoverActions__right"
+              className={classNames(
+                'embPanel__hoverActions',
+                'embPanel__hoverActionsRight',
+                className
+              )}
+              css={css`
+                ${borderStyles}
+              `}
+            >
+              {viewMode === 'edit' && combineHoverActions && dragHandle}
+              {showNotifications && notificationElements}
+              {showDescription && (
+                <EuiIconTip
+                  title={!hideTitle ? title || undefined : undefined}
+                  content={description}
+                  delay="regular"
+                  position="top"
+                  anchorClassName="embPanel__descriptionTooltipAnchor"
+                  data-test-subj="embeddablePanelDescriptionTooltip"
+                  type="iInCircle"
                 />
-              </EuiPopover>
-            ) : null}
-          </div>
+              )}
+              {quickActionElements.map(
+                ({ iconType, 'data-test-subj': dataTestSubj, onClick, name }, i) => (
+                  <EuiToolTip key={`main_action_${dataTestSubj}_${api?.uuid}`} content={name}>
+                    <EuiButtonIcon
+                      iconType={iconType}
+                      color="text"
+                      onClick={onClick as MouseEventHandler}
+                      data-test-subj={dataTestSubj}
+                      aria-label={name as string}
+                    />
+                  </EuiToolTip>
+                )
+              )}
+              {contextMenuPanels.length ? (
+                <EuiPopover
+                  repositionOnScroll
+                  panelPaddingSize="none"
+                  anchorPosition="downRight"
+                  button={ContextMenuButton}
+                  isOpen={isContextMenuOpen}
+                  className={contextMenuClasses}
+                  closePopover={onClose}
+                  data-test-subj={
+                    isContextMenuOpen
+                      ? 'embeddablePanelContextMenuOpen'
+                      : 'embeddablePanelContextMenuClosed'
+                  }
+                  focusTrapProps={{
+                    closeOnMouseup: true,
+                    clickOutsideDisables: false,
+                    onClickOutside: onClose,
+                  }}
+                >
+                  <EuiContextMenu
+                    data-test-subj="presentationPanelContextMenuItems"
+                    initialPanelId={'mainMenu'}
+                    panels={contextMenuPanels}
+                  />
+                </EuiPopover>
+              ) : null}
+            </div>
+          ) : null}
         </div>
       ) : null}
     </div>
