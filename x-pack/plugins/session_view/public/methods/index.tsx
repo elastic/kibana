@@ -29,7 +29,7 @@ const SUPPORTED_PACKAGES = [
   AUDITBEAT_DATA_SOURCE,
 ];
 const INDEX_REGEX = new RegExp(
-  `([a-z0-9_-]+\:)?[a-z0-9\-.]*(${SUPPORTED_PACKAGES.join('|')})`,
+  `([a-z0-9_-]+\:)?[a-z0-9-.]*(${SUPPORTED_PACKAGES.join('|')})`,
   'i'
 );
 
