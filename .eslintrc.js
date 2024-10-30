@@ -1991,9 +1991,6 @@ module.exports = {
         'src/cli_setup/**', // is importing "@kbn/interactive-setup-plugin" (platform/private)
         'src/dev/build/tasks/install_chromium.ts', // is importing "@kbn/screenshotting-plugin" (platform/private)
 
-        // FIXME Using MAX_FILE_SIZE ui setting which is private (internal to fileUpload plugin)
-        'x-pack/plugins/ingest_pipelines/**',
-
         // @kbn/osquery-plugin could be categorised as Security, but @kbn/infra-plugin (observability) depends on it!
         'x-pack/plugins/osquery/**',
 
