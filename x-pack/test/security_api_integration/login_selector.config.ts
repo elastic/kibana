@@ -9,7 +9,7 @@ import { readFileSync } from 'fs';
 import { resolve } from 'path';
 
 import { CA_CERT_PATH, KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
-import { saml1IdPMetadataPath, saml2IdPMetadataPath } from '@kbn/saml-provider-plugin';
+import { IDP_METADATA_PATHS } from '@kbn/saml-provider-plugin';
 import type { FtrConfigProviderContext } from '@kbn/test';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
@@ -74,7 +74,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         'xpack.security.authc.realms.pki.pki1.delegation.enabled=true',
         `xpack.security.authc.realms.pki.pki1.certificate_authorities=${CA_CERT_PATH}`,
         'xpack.security.authc.realms.saml.saml1.order=3',
-        `xpack.security.authc.realms.saml.saml1.idp.metadata.path=${saml1IdPMetadataPath}`,
+        `xpack.security.authc.realms.saml.saml1.idp.metadata.path=${IDP_METADATA_PATHS.saml1}`,
         'xpack.security.authc.realms.saml.saml1.idp.entity_id=http://www.elastic.co/saml1',
         `xpack.security.authc.realms.saml.saml1.sp.entity_id=http://localhost:${kibanaPort}`,
         `xpack.security.authc.realms.saml.saml1.sp.logout=http://localhost:${kibanaPort}/logout`,
@@ -94,7 +94,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `xpack.security.authc.realms.oidc.oidc1.claims.principal=sub`,
         `xpack.security.authc.realms.oidc.oidc1.ssl.certificate_authorities=${CA_CERT_PATH}`,
         'xpack.security.authc.realms.saml.saml2.order=5',
-        `xpack.security.authc.realms.saml.saml2.idp.metadata.path=${saml2IdPMetadataPath}`,
+        `xpack.security.authc.realms.saml.saml2.idp.metadata.path=${IDP_METADATA_PATHS.saml2}`,
         'xpack.security.authc.realms.saml.saml2.idp.entity_id=http://www.elastic.co/saml2',
         `xpack.security.authc.realms.saml.saml2.sp.entity_id=http://localhost:${kibanaPort}`,
         `xpack.security.authc.realms.saml.saml2.sp.logout=http://localhost:${kibanaPort}/logout`,

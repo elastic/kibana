@@ -10,12 +10,15 @@
 import path from 'path';
 
 const resourcesPath = path.resolve(__dirname, 'resources');
-export const saml1IdPMetadataPath = path.resolve(resourcesPath, 'idp_metadata.xml');
-export const saml2IdPMetadataPath = path.resolve(resourcesPath, 'idp_metadata_2.xml');
-export const idpNeverLoginPath = path.resolve(resourcesPath, 'idp_metadata_never_login.xml');
-export const mockIdPMetadataPath = path.resolve(resourcesPath, 'idp_metadata_mock_idp.xml');
-export const pluginMetadataPath = path.resolve(resourcesPath, 'metadata.xml');
+
+export const IDP_METADATA_PATHS = {
+  default: path.resolve(resourcesPath, 'metadata.xml'),
+  saml1: path.resolve(resourcesPath, 'idp_metadata.xml'),
+  saml2: path.resolve(resourcesPath, 'idp_metadata_2.xml'),
+  neverLogin: path.resolve(resourcesPath, 'idp_metadata_never_login.xml'),
+  mockIdpPlugin: path.resolve(resourcesPath, 'idp_metadata_mock_idp.xml'),
+};
 
 export const pluginPath = path.resolve(__dirname);
 
-export * from './helpers/saml_tools';
+export { getLogoutRequest, getSAMLRequestId, getSAMLResponse } from './helpers/saml_tools';

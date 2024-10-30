@@ -7,7 +7,7 @@
 
 import { resolve } from 'path';
 
-import { saml1IdPMetadataPath as idpPath } from '@kbn/saml-provider-plugin';
+import { IDP_METADATA_PATHS } from '@kbn/saml-provider-plugin';
 import type { FtrConfigProviderContext } from '@kbn/test';
 
 import { services } from './services';
@@ -30,7 +30,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         'xpack.security.authc.token.enabled=true',
         'xpack.security.authc.realms.native.native1.order=0',
         'xpack.security.authc.realms.saml.saml1.order=1',
-        `xpack.security.authc.realms.saml.saml1.idp.metadata.path=${idpPath}`,
+        `xpack.security.authc.realms.saml.saml1.idp.metadata.path=${IDP_METADATA_PATHS.saml1}`,
         'xpack.security.authc.realms.saml.saml1.idp.entity_id=http://www.elastic.co/saml1',
         `xpack.security.authc.realms.saml.saml1.sp.entity_id=http://localhost:${kibanaPort}`,
         `xpack.security.authc.realms.saml.saml1.sp.logout=http://localhost:${kibanaPort}/logout`,
