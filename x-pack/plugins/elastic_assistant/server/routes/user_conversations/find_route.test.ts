@@ -11,10 +11,18 @@ import { serverMock } from '../../__mocks__/server';
 import { requestContextMock } from '../../__mocks__/request_context';
 import { getFindConversationsResultWithSingleHit } from '../../__mocks__/response';
 import { findUserConversationsRoute } from './find_route';
+import { AuthenticatedUser } from '@kbn/core-security-common';
 
 describe('Find user conversations route', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
+  const mockUser1 = {
+    username: 'my_username',
+    authentication_realm: {
+      type: 'my_realm_type',
+      name: 'my_realm_name',
+    },
+  } as AuthenticatedUser;
 
   beforeEach(async () => {
     server = serverMock.create();
@@ -30,7 +38,7 @@ describe('Find user conversations route', () => {
         name: 'my_realm_name',
       },
     });
-
+    context.elasticAssistant.getCurrentUser.mockReturnValue(mockUser1);
     findUserConversationsRoute(server.router);
   });
 
