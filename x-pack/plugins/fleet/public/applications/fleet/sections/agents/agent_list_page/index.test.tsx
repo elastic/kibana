@@ -144,18 +144,27 @@ describe('agent_list_page', () => {
       jest.useRealTimers();
     });
 
-    it('should not send another agents status request if first one takes longer', () => {
-      mockedSendGetAgentStatus.mockImplementation(async () => {
-        const sleep = () => {
-          return new Promise((res) => {
+    it('should not send another call to retrieve inactive agents count if first one takes longer', () => {
+      let calls = 0;
+      mockedSendGetAgents.mockImplementation(async () => {
+        calls++;
+        if (calls === 1) {
+          await new Promise((res) => {
             setTimeout(() => res({}), 35000);
           });
-        };
-        await sleep();
+        }
         return {
           data: {
-            results: {
-              inactive: 0,
+            total: 0,
+          },
+        };
+
+        return {
+          data: {
+            items: mapAgents(['agent1', 'agent2', 'agent3', 'agent4', 'agent5']),
+            total: 6,
+            statusSummary: {
+              online: 6,
             },
           },
         };
@@ -166,7 +175,7 @@ describe('agent_list_page', () => {
         jest.advanceTimersByTime(65000);
       });
 
-      expect(mockedSendGetAgentStatus).toHaveBeenCalledTimes(1);
+      expect(mockedSendGetAgents).toHaveBeenCalledTimes(2);
     });
   });
 
