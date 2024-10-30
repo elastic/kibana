@@ -214,7 +214,7 @@ export function QueryHistory({
   const scrollBarStyles = euiScrollBarStyles(theme);
 
   const { sorting, onTableChange } = useEuiTablePersist<QueryHistoryItem>({
-    tableId: 'obltAlertFields',
+    tableId: 'esqlQueryHistory',
     initialSort: {
       field: 'timeRan',
       direction: 'desc',
