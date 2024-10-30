@@ -146,7 +146,7 @@ export class EntityStoreDataClient {
       );
     }
     logger.info(
-      `In namespace ${this.options.namespace}: Initializing entity store for ${entityType}`
+      `[Entity Store] In namespace ${this.options.namespace}: Initializing entity store for ${entityType}`
     );
 
     const descriptor = await this.engineClient.init(entityType, {
@@ -154,7 +154,7 @@ export class EntityStoreDataClient {
       fieldHistoryLength,
       indexPattern,
     });
-    logger.debug(`Initialized engine for ${entityType}`);
+    logger.debug(`[Entity Store] Initialized saved object for ${entityType}`);
     // first create the entity definition without starting it
     // so that the index template is created which we can add a component template to
 
@@ -167,7 +167,9 @@ export class EntityStoreDataClient {
       config,
       pipelineDebugMode
     ).catch((error) => {
-      logger.error(`There was an error during async setup of the Entity Store: ${error.message}`);
+      logger.error(
+        `[Entity Store] There was an error during async setup of the Entity Store: ${error.message}`
+      );
     });
 
     return descriptor;
@@ -262,7 +264,7 @@ export class EntityStoreDataClient {
         logger,
         taskManager,
       });
-      logger.info(`Entity store initialized for ${entityType}`);
+      debugLog(`Entity store initialized`);
 
       const setupEndTime = moment().utc().toISOString();
       const duration = moment(setupEndTime).diff(moment(setupStartTime), 'seconds');
@@ -273,7 +275,7 @@ export class EntityStoreDataClient {
       return updated;
     } catch (err) {
       this.options.logger.error(
-        `Error initializing entity store for ${entityType}: ${err.message}`
+        `[Entity Store] Error initializing entity store for ${entityType}: ${err.message}`
       );
 
       this.options.telemetry?.reportEvent(ENTITY_ENGINE_RESOURCE_INIT_FAILURE_EVENT.eventType, {
@@ -371,7 +373,9 @@ export class EntityStoreDataClient {
       frequency: `${config.frequency.asSeconds()}s`,
     });
     const { entityManagerDefinition } = unitedDefinition;
-    logger.info(`In namespace ${namespace}: Deleting entity store for ${entityType}`);
+    logger.info(
+      `[Entity Store] In namespace ${namespace}: Deleting entity store for ${entityType}`
+    );
     try {
       try {
         await this.entityClient.deleteEntityDefinition({
@@ -418,6 +422,7 @@ export class EntityStoreDataClient {
         });
       }
 
+      logger.info(`[Entity Store] In namespace ${namespace}: Deleted store for ${entityType}`);
       return { deleted: true };
     } catch (e) {
       logger.error(`Error deleting entity store for ${entityType}: ${e.message}`);
