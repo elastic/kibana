@@ -6,11 +6,13 @@
  */
 
 import { EuiSkeletonRectangle } from '@elastic/eui';
+import { css } from '@emotion/react';
 import React, { lazy, Suspense } from 'react';
 import ReactDOM from 'react-dom';
 
 import type { CoreStart } from '@kbn/core/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { euiThemeVars } from '@kbn/ui-theme';
 
 import { initTour } from './solution_view_tour';
 import type { EventTracker } from '../analytics';
@@ -43,7 +45,9 @@ export function initSpacesNavControl(
           <Suspense
             fallback={
               <EuiSkeletonRectangle
-                css={{ marginInline: 8 }}
+                css={css`
+                  margin-inline: ${euiThemeVars.euiSizeS};
+                `}
                 borderRadius="m"
                 contentAriaLabel="Loading navigation"
               />
