@@ -94,7 +94,7 @@ export const processVersionedRouter = (
       if (route.options.security) {
         const authzDescription = extractAuthzDescription(route.options.security);
 
-        description = `${route.options.description && authzDescription ? '<br/><br/>' : ''}${
+        description += `${route.options.description && authzDescription ? '<br/><br/>' : ''}${
           authzDescription ?? ''
         }`;
       }
