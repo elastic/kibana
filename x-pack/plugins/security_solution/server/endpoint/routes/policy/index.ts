@@ -35,6 +35,12 @@ export function registerPolicyRoutes(
     .addVersion(
       {
         version: '2023-10-31',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           request: GetPolicyResponseSchema,
         },
@@ -60,6 +66,12 @@ export function registerPolicyRoutes(
     .addVersion(
       {
         version: '2023-10-31',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           request: GetAgentPolicySummaryRequestSchema,
         },
