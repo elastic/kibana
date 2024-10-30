@@ -12,6 +12,8 @@ import { parse } from 'hjson';
 import { constructUrl } from '../../../../lib/es';
 import type { MetricsTracker } from '../../../../types';
 import type { DevToolsVariable } from '../../../components';
+// import { useChat } from '../../../../../../../../x-pack/plugins/search_playground/public/hooks/use_chat';
+// import { fetchIndexMappings } from '../../../../../../../../x-pack/plugins/search_playground/public/hooks/use_index_mappings';
 import type { EditorRequest, AdjustedParsedRequest } from '../types';
 import {
   urlVariableTemplateRegex,
@@ -19,6 +21,7 @@ import {
   startsWithMethodRegex,
 } from './constants';
 import { parseLine } from './tokens_utils';
+// import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 /*
  * This function replaces any variables with its values stored in localStorage.
@@ -129,6 +132,16 @@ export const getRequestEndLineNumber = ({
     lineContent = model.getLineContent(endLineNumber).trim();
   }
   return endLineNumber;
+};
+
+export const getGeneratedWithAIRequest = async (
+  requests: AdjustedParsedRequest[],
+  selectedText: string,
+  allText: string
+): Promise<string> => {
+  return Promise.resolve('');
+  // const { messages, append, stop: stopRequest, setMessages, reload } = useChat();
+  // const selectedTextLines = selectedText.split(`\n`);
 };
 
 /**

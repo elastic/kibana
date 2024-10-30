@@ -18,6 +18,7 @@ import { DEFAULT_VARIABLES } from '../../../../common/constants';
 import { getStorage, StorageKeys } from '../../../services';
 import { sendRequest } from '../../hooks';
 import { Actions } from '../../stores/request';
+import { send } from '../../../lib/es/es';
 
 import {
   AutocompleteType,
@@ -46,6 +47,8 @@ import { ContextValue } from '../../contexts';
 import { containsComments, indentData } from './utils/requests_utils';
 
 const AUTO_INDENTATION_ACTION_LABEL = 'Apply indentations';
+const GENERATE_WITH_AI_ACTION_LABEL = 'Generate with AI';
+const FIX_WITH_AI_ACTION_LABEL = 'Fix with AI';
 const TRIGGER_SUGGESTIONS_ACTION_LABEL = 'Trigger suggestions';
 const TRIGGER_SUGGESTIONS_HANDLER_ID = 'editor.action.triggerSuggest';
 const DEBOUNCE_HIGHLIGHT_WAIT_MS = 200;
@@ -577,6 +580,147 @@ export class MonacoEditorActionsProvider {
     }
     // If no range is provided, return all text in the editor
     return model.getValue();
+  }
+
+  public async fixWithAI() {
+    return 'fixin';
+  }
+
+  public async readStreamToString(reader) {
+    const decoder = new TextDecoder();
+    let result = '';
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      const decodedChunk = decoder.decode(value, { stream: true });
+
+      // Filter for lines starting with "0:"
+      const filteredLines = decodedChunk.split('\n').filter((line) => line.startsWith('0:'));
+
+      // Remove "0:" prefix and clean up excessive quotes or backticks
+      result += filteredLines
+        .map((line) =>
+          line
+            .replace(/^0:/, '')
+            .replace(/(?<!\\)"/g, '')
+            .replace(/[`]/g, '')
+            .replace(/\n/g, ' ')
+            .replace(/\\n/g, ' ')
+            .replace(/\\"/g, '"')
+        )
+        .join('');
+    }
+
+    result = result.replace(/<BODY>/g, '\n');
+
+    return result;
+  }
+
+  public async generateWithAI(context: ContextValue) {
+    const parsedRequests = await this.getSelectedParsedRequests();
+    const selectionStartLineNumber = parsedRequests[0].startLineNumber;
+    const selectionEndLineNumber = parsedRequests[parsedRequests.length - 1].endLineNumber;
+    const selectedRange = new monaco.Range(
+      selectionStartLineNumber,
+      1,
+      selectionEndLineNumber,
+      this.editor.getModel()?.getLineMaxColumn(selectionEndLineNumber) ?? 1
+    );
+
+    if (parsedRequests.length < 1) {
+      return;
+    }
+
+    const selectedText = this.getTextInRange(selectedRange);
+    const allText = this.getTextInRange();
+
+    const indexNameResponse = await context.services.http.post('/internal/search_playground/chat', {
+      body: JSON.stringify({
+        data: {
+          connector_id: '2bb607e9-8548-4659-805f-6e0bb19d26de',
+          citations: false,
+          prompt:
+            'Return just ES index name mentioned in the provided text. If you cannot see index name return empty string. Do not use punctuation marks.',
+          summarization_model: 'gpt-4o',
+
+          elasticsearch_query: '{"retriever":{"standard":{"query":{"match_all":{}}}}}',
+          indices: 'hello',
+          source_fields: '{"hello":[]}',
+          doc_size: 5,
+        },
+        messages: [
+          { role: 'human', content: `Find and return index name if present: ${selectedText}` },
+        ],
+      }),
+      rawResponse: true,
+      asResponse: true,
+    });
+
+    const reader = indexNameResponse.response!.body.getReader();
+
+    const indexName = await this.readStreamToString(reader);
+
+    let indexMappings = '';
+
+    if (indexName) {
+      console.log(`Index name: ${indexName}`);
+      try {
+        const { body } = await send({
+          http: context.services.http,
+          method: 'GET',
+          path: `${indexName}/_mappings`,
+          asResponse: true,
+        });
+
+        indexMappings = JSON.stringify(body, null, 2);
+      } catch (e) {}
+    }
+
+    const generatedQuery = await context.services.http.post('/internal/search_playground/chat', {
+      body: JSON.stringify({
+        data: {
+          connector_id: '2bb607e9-8548-4659-805f-6e0bb19d26de',
+          citations: false,
+          prompt:
+            'Given the user promt, generate a valid Elasticsearch request query, if index or mappings not available do your best to guess. Return just query nothing else in form of GET/POST/DELETE path (no host) and separated by a <BODY> token body in new line as raw string not code block',
+          summarization_model: 'gpt-4o',
+
+          elasticsearch_query: '{"retriever":{"standard":{"query":{"match_all":{}}}}}',
+          indices: 'hello',
+          source_fields: '{"hello":[]}',
+          doc_size: 5,
+        },
+        messages: [
+          {
+            role: 'human',
+            content: `User prompt: ${selectedText}, index name: ${
+              indexName ? indexName : 'your-index-name'
+            }, index mappings: ${
+              indexMappings ? indexMappings : '{guess index mappings}'
+            } Return just valid ES query, nothign else`,
+          },
+        ],
+      }),
+      rawResponse: true,
+      asResponse: true,
+    });
+
+    const queryReader = generatedQuery.response!.body.getReader();
+
+    const generatedQueryResult = await this.readStreamToString(queryReader);
+
+    console.log(`Generated query: ${generatedQueryResult}`);
+
+    this.editor.executeEdits(GENERATE_WITH_AI_ACTION_LABEL, [
+      {
+        range: selectedRange,
+        text: generatedQueryResult,
+      },
+    ]);
+
+    this.autoIndent();
   }
 
   /**
