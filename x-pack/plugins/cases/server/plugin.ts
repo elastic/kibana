@@ -122,12 +122,18 @@ export class CasePlugin
     const router = core.http.createRouter<CasesRequestHandlerContext>();
     const telemetryUsageCounter = plugins.usageCollection?.createUsageCounter(APP_ID);
 
+    const isServerless = plugins.cloud?.isServerlessEnabled;
+
     registerRoutes({
       router,
-      routes: [...getExternalRoutes(), ...getInternalRoutes(this.userProfileService)],
+      routes: [
+        ...getExternalRoutes({ isServerless }),
+        ...getInternalRoutes(this.userProfileService),
+      ],
       logger: this.logger,
       kibanaVersion: this.kibanaVersion,
       telemetryUsageCounter,
+      isServerless,
     });
 
     plugins.licensing.featureUsage.register(LICENSING_CASE_ASSIGNMENT_FEATURE, 'platinum');

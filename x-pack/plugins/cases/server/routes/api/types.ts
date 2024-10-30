@@ -27,6 +27,7 @@ export interface RegisterRoutesDeps {
   logger: Logger;
   kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
   telemetryUsageCounter?: TelemetryUsageCounter;
+  isServerless?: boolean;
 }
 
 export interface TotalCommentByCase {
