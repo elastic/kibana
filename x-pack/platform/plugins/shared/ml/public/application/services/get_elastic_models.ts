@@ -6,15 +6,16 @@
  */
 
 import { type HttpStart } from '@kbn/core-http-browser';
+import { ElasticModels } from './elastic_models_service';
 import { HttpService } from './http_service';
-
-export type MlSharedServices = ReturnType<typeof getMlSharedServices>;
+import { trainedModelsApiProvider } from './ml_api_service/trained_models';
 
 /**
- * Provides ML services exposed from the plugin start.
+ * Provides Elastic models services exposed from the plugin start.
  */
-export async function getMlSharedServices(httpStart: HttpStart) {
+export function getElasticModels(httpStart: HttpStart) {
   const httpService = new HttpService(httpStart);
-  const { mlApiProvider } = await import('./ml_api_service');
-  return mlApiProvider(httpService);
+  const trainedModelApi = trainedModelsApiProvider(httpService);
+
+  return new ElasticModels(trainedModelApi);
 }
