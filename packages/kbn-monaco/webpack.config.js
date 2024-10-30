@@ -43,10 +43,6 @@ const workerConfig = (languages) => ({
       // swap default umd import for the esm one provided in vscode-uri package
       'vscode-uri$': require.resolve('vscode-uri').replace(/\/umd\/index.js/, '/esm/index.mjs'),
     },
-    fallback: {
-      assert: require.resolve('assert'),
-      buffer: require.resolve('buffer'),
-    },
   },
   plugins: [new NodeLibsBrowserPlugin()],
   stats: 'errors-only',
