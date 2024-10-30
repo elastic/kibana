@@ -5202,7 +5202,7 @@
         "label": "GetCapabilitiesResponse",
         "description": [],
         "signature": [
-          "Zod.ZodObject<{ assistantModelEvaluation: Zod.ZodBoolean; }, \"strip\", Zod.ZodTypeAny, { assistantModelEvaluation: boolean; }, { assistantKnowledgeBaseByDefault: boolean; assistantModelEvaluation: boolean; }>"
+          "Zod.ZodObject<{ assistantModelEvaluation: Zod.ZodBoolean; }, \"strip\", Zod.ZodTypeAny, { assistantModelEvaluation: boolean; }, { assistantModelEvaluation: boolean; }>"
         ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/capabilities/get_capabilities_route.gen.ts",
         "deprecated": false,
