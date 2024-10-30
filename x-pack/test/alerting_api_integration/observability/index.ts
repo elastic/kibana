@@ -10,7 +10,6 @@ export default function ({ loadTestFile }: any) {
   describe('Observability Rules', () => {
     describe('Rules Endpoints', () => {
       loadTestFile(require.resolve('./metric_threshold_rule'));
-      loadTestFile(require.resolve('./custom_threshold_rule/avg_pct_fired'));
       loadTestFile(require.resolve('./custom_threshold_rule/p99_pct_fired'));
       loadTestFile(require.resolve('./custom_threshold_rule/rate_bytes_fired'));
       loadTestFile(require.resolve('./custom_threshold_rule/avg_pct_no_data'));
@@ -21,7 +20,8 @@ export default function ({ loadTestFile }: any) {
       loadTestFile(require.resolve('./custom_threshold_rule_data_view'));
     });
     describe('Synthetics', () => {
-      loadTestFile(require.resolve('./synthetics_rule'));
+      loadTestFile(require.resolve('./synthetics/synthetics_default_rule'));
+      loadTestFile(require.resolve('./synthetics/custom_status_rule'));
     });
   });
 }

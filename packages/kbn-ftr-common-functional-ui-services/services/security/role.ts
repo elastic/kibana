@@ -14,17 +14,43 @@ import { KbnClient } from '@kbn/test';
 export class Role {
   constructor(private log: ToolingLog, private kibanaServer: KbnClient) {}
 
+  public async get(
+    name: string,
+    { replaceDeprecatedPrivileges = true }: { replaceDeprecatedPrivileges?: boolean } = {}
+  ) {
+    this.log.debug(`retrieving role ${name}`);
+    const { data, status, statusText } = await this.kibanaServer
+      .request({
+        path: `/api/security/role/${name}?replaceDeprecatedPrivileges=${replaceDeprecatedPrivileges}`,
+        method: 'GET',
+      })
+      .catch((e) => {
+        throw new Error(util.inspect(e.axiosError.response, true));
+      });
+    if (status !== 200) {
+      throw new Error(
+        `Expected status code of 200, received ${status} ${statusText}: ${util.inspect(data)}`
+      );
+    }
+
+    return data;
+  }
+
   public async create(name: string, role: any) {
     this.log.debug(`creating role ${name}`);
-    const { data, status, statusText } = await this.kibanaServer.request({
-      path: `/api/security/role/${name}`,
-      method: 'PUT',
-      body: {
-        kibana: role.kibana,
-        elasticsearch: role.elasticsearch,
-      },
-      retries: 0,
-    });
+    const { data, status, statusText } = await this.kibanaServer
+      .request({
+        path: `/api/security/role/${name}`,
+        method: 'PUT',
+        body: {
+          kibana: role.kibana,
+          elasticsearch: role.elasticsearch,
+        },
+        retries: 0,
+      })
+      .catch((e) => {
+        throw new Error(util.inspect(e.axiosError.response, true));
+      });
     if (status !== 204) {
       throw new Error(
         `Expected status code of 204, received ${status} ${statusText}: ${util.inspect(data)}`

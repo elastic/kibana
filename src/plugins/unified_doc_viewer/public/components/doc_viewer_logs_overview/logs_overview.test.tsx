@@ -15,6 +15,7 @@ import { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { setUnifiedDocViewerServices } from '../../plugin';
 import { mockUnifiedDocViewerServices } from '../../__mocks__';
+import { merge } from 'lodash';
 
 const DATASET_NAME = 'logs.overview';
 const NAMESPACE = 'default';
@@ -103,7 +104,30 @@ const fullHit = buildDataTableRecord(
   dataView
 );
 
-setUnifiedDocViewerServices(mockUnifiedDocViewerServices);
+const getCustomUnifedDocViewerServices = (params?: {
+  showApm: boolean;
+  entityCentricExperienceEnabled?: boolean;
+}) => ({
+  core: {
+    application: {
+      capabilities: { apm: { show: params?.showApm || false } },
+    },
+    uiSettings: {
+      get: () => params?.entityCentricExperienceEnabled || false,
+    },
+  },
+  share: {
+    url: {
+      locators: {
+        get: () => ({ getRedirectUrl: jest.fn().mockReturnValue('/apm/foo'), navigate: jest.fn() }),
+      },
+    },
+  },
+});
+
+setUnifiedDocViewerServices(
+  merge(mockUnifiedDocViewerServices, getCustomUnifedDocViewerServices())
+);
 
 const renderLogsOverview = (props: Partial<DocViewRenderProps> = {}) => {
   const { rerender: baseRerender, ...tools } = render(
@@ -197,6 +221,88 @@ describe('LogsOverview', () => {
       expect(
         screen.queryByTestId('unifiedDocViewLogsOverviewDegradedFieldsQualityIssuesTable')
       ).toBeInTheDocument();
+    });
+  });
+});
+
+describe('LogsOverview with APM links', () => {
+  describe('Highlights section', () => {
+    describe('When APM and Entity centric experience are enabled', () => {
+      beforeEach(() => {
+        setUnifiedDocViewerServices(
+          merge(
+            mockUnifiedDocViewerServices,
+            getCustomUnifedDocViewerServices({
+              showApm: true,
+              entityCentricExperienceEnabled: true,
+            })
+          )
+        );
+        renderLogsOverview();
+      });
+      it('should render service name link', () => {
+        expect(
+          screen.queryByTestId('unifiedDocViewLogsOverviewServiceNameHighlightLink')
+        ).toBeInTheDocument();
+      });
+
+      it('should render trace id link', () => {
+        expect(
+          screen.queryByTestId('unifiedDocViewLogsOverviewTraceIdHighlightLink')
+        ).toBeInTheDocument();
+      });
+    });
+
+    describe('When APM is enabled and Entity centric experience is disabled', () => {
+      beforeEach(() => {
+        setUnifiedDocViewerServices(
+          merge(
+            mockUnifiedDocViewerServices,
+            getCustomUnifedDocViewerServices({
+              showApm: true,
+              entityCentricExperienceEnabled: false,
+            })
+          )
+        );
+        renderLogsOverview();
+      });
+      it('should not render service name link', () => {
+        expect(
+          screen.queryByTestId('unifiedDocViewLogsOverviewServiceNameHighlightLink')
+        ).not.toBeInTheDocument();
+      });
+
+      it('should render trace id link', () => {
+        expect(
+          screen.queryByTestId('unifiedDocViewLogsOverviewTraceIdHighlightLink')
+        ).toBeInTheDocument();
+      });
+    });
+
+    describe('When APM is disabled and Entity centric experience is enabled', () => {
+      beforeEach(() => {
+        setUnifiedDocViewerServices(
+          merge(
+            mockUnifiedDocViewerServices,
+            getCustomUnifedDocViewerServices({
+              showApm: false,
+              entityCentricExperienceEnabled: true,
+            })
+          )
+        );
+        renderLogsOverview();
+      });
+      it('should not render service name link', () => {
+        expect(
+          screen.queryByTestId('unifiedDocViewLogsOverviewServiceNameHighlightLink')
+        ).not.toBeInTheDocument();
+      });
+
+      it('should not render trace id link', () => {
+        expect(
+          screen.queryByTestId('unifiedDocViewLogsOverviewTraceIdHighlightLink')
+        ).not.toBeInTheDocument();
+      });
     });
   });
 });

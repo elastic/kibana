@@ -35,7 +35,7 @@ function findNode(nodes: ESQLAstItem[], offset: number): ESQLSingleAstItem | und
         return ret;
       }
     } else {
-      if (node.location.min <= offset && node.location.max >= offset) {
+      if (node && node.location && node.location.min <= offset && node.location.max >= offset) {
         if ('args' in node) {
           const ret = findNode(node.args, offset);
           // if the found node is the marker, then return its parent
@@ -153,7 +153,7 @@ function isBuiltinFunction(node: ESQLFunction) {
 export function getAstContext(queryString: string, ast: ESQLAst, offset: number) {
   const { command, option, setting, node } = findAstPosition(ast, offset);
   if (node) {
-    if (node.type === 'literal' && node.literalType === 'string') {
+    if (node.type === 'literal' && node.literalType === 'keyword') {
       // command ... "<here>"
       return { type: 'value' as const, command, node, option, setting };
     }

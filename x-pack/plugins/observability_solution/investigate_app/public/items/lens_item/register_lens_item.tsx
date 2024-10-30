@@ -178,17 +178,6 @@ export function LensWidget({
 
     const attributesLens = new LensAttributesBuilder({
       visualization: new XYChart({
-        visualOptions: {
-          axisTitlesVisibilitySettings: {
-            x: false,
-            yLeft: false,
-            yRight: false,
-          },
-          legend: {
-            isVisible: false,
-            position: 'right',
-          },
-        },
         layers,
         formulaAPI: formulaAsync.value.formula,
         dataView,
@@ -227,7 +216,11 @@ export function LensWidget({
         query={(searchConfiguration?.query as Query) || defaultQuery}
         disableTriggers={true}
         filters={filters}
-        overrides={{ axisX: { hide: true } }}
+        overrides={{
+          axisX: { hide: true },
+          axisLeft: { style: { axisTitle: { visible: false } } },
+          settings: { showLegend: false },
+        }}
       />
     </div>
   );

@@ -52,6 +52,7 @@ export interface AssistantTelemetry {
     actionTypeId: string;
     model?: string;
     provider?: string;
+    isEnabledKnowledgeBase: boolean;
   }) => void;
   reportAssistantQuickPrompt: (params: { conversationId: string; promptTitle: string }) => void;
   reportAssistantSettingToggled: (params: { assistantStreamingEnabled?: boolean }) => void;
@@ -68,6 +69,8 @@ export interface AssistantAvailability {
   hasConnectorsReadPrivilege: boolean;
   // When true, user has `Edit` privilege for `AnonymizationFields`
   hasUpdateAIAssistantAnonymization: boolean;
+  // When true, user has `Edit` privilege for `Global Knowledge Base`
+  hasManageGlobalKnowledgeBase: boolean;
 }
 
 export type GetAssistantMessages = (commentArgs: {

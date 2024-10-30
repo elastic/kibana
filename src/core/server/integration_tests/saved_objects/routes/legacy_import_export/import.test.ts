@@ -62,6 +62,7 @@ describe('POST /api/dashboards/import', () => {
       maxImportPayloadBytes: 26214400,
       coreUsageData,
       logger: loggerMock.create(),
+      access: 'public',
     });
 
     handlerContext.savedObjects.client.bulkCreate.mockResolvedValueOnce({
@@ -79,6 +80,7 @@ describe('POST /api/dashboards/import', () => {
   it('calls importDashboards and records usage stats', async () => {
     const result = await supertest(httpSetup.server.listener)
       .post('/api/kibana/dashboards/import')
+      .set('x-elastic-internal-origin', 'kibana')
       .send({ version: '7.14.0', objects: importObjects });
 
     expect(result.status).toBe(200);

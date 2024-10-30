@@ -29,6 +29,7 @@ import { customBrandingServiceMock } from '@kbn/core-custom-branding-server-mock
 import { userSettingsServiceMock } from '@kbn/core-user-settings-server-mocks';
 import { securityServiceMock } from '@kbn/core-security-server-mocks';
 import { userProfileServiceMock } from '@kbn/core-user-profile-server-mocks';
+import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-server-mocks';
 
 export function createInternalCoreSetupMock() {
   const setupDeps = {
@@ -37,6 +38,7 @@ export function createInternalCoreSetupMock() {
     context: contextServiceMock.createSetupContract(),
     docLinks: docLinksServiceMock.createSetupContract(),
     elasticsearch: elasticsearchServiceMock.createInternalSetup(),
+    featureFlags: coreFeatureFlagsMock.createInternalSetup(),
     http: httpServiceMock.createInternalSetupContract(),
     savedObjects: savedObjectsServiceMock.createInternalSetupContract(),
     status: statusServiceMock.createInternalSetupContract(),

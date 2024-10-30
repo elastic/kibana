@@ -20,7 +20,7 @@ export default ({ getService }: FtrProviderContext) => {
   /**
    * Specific api integration tests for new terms rule type
    */
-  describe('@serverless @ess create_new_terms', () => {
+  describe('@serverless @ess @serverlessQA create_new_terms', () => {
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
     });

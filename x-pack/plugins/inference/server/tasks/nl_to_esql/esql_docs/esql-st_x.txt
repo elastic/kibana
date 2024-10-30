@@ -1,8 +1,20 @@
-## ST_X
+# ST_X
 
-The `ST_X` function extracts the x coordinate from the supplied point. If the point is of type `geo_point`, this is equivalent to extracting the longitude value.
+The ST_X function extracts the `x` coordinate from a given point.
 
-### Examples
+## Syntax
+
+`ST_X(point)`
+
+### Parameters
+
+#### point
+
+This is an expression of type `geo_point` or `cartesian_point`.
+
+## Examples
+
+Here is an example of how to use the ST_X function:
 
 ```esql
 ROW point = TO_GEOPOINT("POINT(42.97109629958868 14.7552534006536)")

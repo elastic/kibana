@@ -7,9 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { EuiCode, EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { EuiCode } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { euiThemeVars } from '@kbn/ui-theme';
 import {
   RowControlColumn,
   RowControlComponent,
@@ -20,6 +22,7 @@ import { DEGRADED_DOCS_FIELDS } from '../../field_constants';
 
 interface DegradedDocsControlProps extends Partial<RowControlProps> {
   enabled?: boolean;
+  addIgnoredMetadataToQuery?: () => void;
 }
 
 /**
@@ -43,7 +46,7 @@ const degradedDocButtonLabelWhenPresent = i18n.translate(
   'discover.customControl.degradedDocPresent',
   {
     defaultMessage:
-      "This document couldn't be parsed correctly. Not all fields are properly populated",
+      "This document couldn't be parsed correctly. Not all fields are properly populated.",
   }
 );
 
@@ -52,17 +55,28 @@ const degradedDocButtonLabelWhenNotPresent = i18n.translate(
   { defaultMessage: 'All fields in this document were parsed correctly' }
 );
 
-const degradedDocButtonLabelWhenDisabled = i18n.translate(
-  'discover.customControl.degradedDocDisabled',
-  {
-    defaultMessage:
-      'Degraded document field detection is currently disabled for this search. To enable it, include the METADATA directive for the `_ignored` field in your ES|QL query. For example:',
-  }
+const directive = <EuiCode css={{ display: 'inline-block' }}>METADATA _ignored</EuiCode>;
+
+const formattedCTAMessage = (
+  <FormattedMessage
+    id="discover.customControl.degradedDocDisabled"
+    defaultMessage="Degraded document field detection is disabled for this search. Consider adding {directive} to your ES|QL query."
+    values={{ directive }}
+  />
+);
+
+const formattedCTAMessageWithAction = (
+  <FormattedMessage
+    id="discover.customControl.degradedDocDisabled"
+    defaultMessage="Degraded document field detection is disabled for this search. Click to add {directive} to your ES|QL query."
+    values={{ directive }}
+  />
 );
 
 const DegradedDocs = ({
   Control,
   enabled = true,
+  addIgnoredMetadataToQuery,
   rowProps: { record },
   ...props
 }: {
@@ -70,31 +84,35 @@ const DegradedDocs = ({
   rowProps: RowControlRowProps;
 } & DegradedDocsControlProps) => {
   const isDegradedDocumentExists = DEGRADED_DOCS_FIELDS.some(
-    (field) => field in record.raw && record.raw[field] !== null
+    (field) => field in record.raw && record.raw[field] !== null && record.raw[field] !== undefined
   );
 
   if (!enabled) {
-    const codeSample = 'FROM logs-* METADATA _ignored';
-
-    const tooltipContent = (
-      <div>
-        {degradedDocButtonLabelWhenDisabled}
-        <EuiSpacer size="s" />
-        <EuiCode>{codeSample}</EuiCode>
-      </div>
-    );
-
-    return (
-      <Control
-        disabled
-        data-test-subj="docTableDegradedDocDisabled"
-        tooltipContent={tooltipContent}
-        label={`${degradedDocButtonLabelWhenDisabled} ${codeSample}`}
-        iconType="indexClose"
-        onClick={undefined}
-        {...props}
-      />
-    );
+    if (addIgnoredMetadataToQuery) {
+      return (
+        <Control
+          css={{ color: euiThemeVars.euiColorDisabledText }} // Give same color as disabled
+          data-test-subj="docTableDegradedDocDisabled"
+          iconType="indexClose"
+          label={actionsHeaderAriaLabelDegradedAction}
+          tooltipContent={formattedCTAMessageWithAction}
+          onClick={addIgnoredMetadataToQuery}
+        />
+      );
+    } else {
+      // Control without click action for saved searches in dashboards
+      return (
+        <Control
+          disabled
+          data-test-subj="docTableDegradedDocDisabled"
+          tooltipContent={formattedCTAMessage}
+          label={actionsHeaderAriaLabelDegradedAction}
+          iconType="indexClose"
+          onClick={undefined}
+          {...props}
+        />
+      );
+    }
   }
 
   return isDegradedDocumentExists ? (

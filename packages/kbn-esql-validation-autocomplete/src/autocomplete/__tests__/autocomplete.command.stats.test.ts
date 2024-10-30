@@ -259,7 +259,6 @@ describe('autocomplete.suggest', () => {
           ...getFieldNamesByType('integer'),
           ...getFieldNamesByType('double'),
           ...getFieldNamesByType('long'),
-          '`avg(b)`',
           ...getFunctionSignaturesByReturnType('eval', ['integer', 'double', 'long'], {
             scalar: true,
           }),
@@ -284,22 +283,30 @@ describe('autocomplete.suggest', () => {
         const { assertSuggestions } = await setup();
 
         await assertSuggestions('from a | stats avg(b) by doubleField % 2 /', [',', '| ']);
+        await assertSuggestions('from a | stats avg(b) by doubleField % 2 /', [',', '| '], {
+          triggerCharacter: ' ',
+        });
 
         await assertSuggestions(
           'from a | stats var0 = AVG(doubleField) BY var1 = BUCKET(dateField, 1 day)/',
           [',', '| ', '+ $0', '- $0']
         );
+        await assertSuggestions(
+          'from a | stats var0 = AVG(doubleField) BY var1 = BUCKET(dateField, 1 day) /',
+          [',', '| ', '+ $0', '- $0'],
+          { triggerCharacter: ' ' }
+        );
       });
       test('on space within bucket()', async () => {
         const { assertSuggestions } = await setup();
-        await assertSuggestions('from a | stats avg(b) by BUCKET(/, 50, ?t_start, ?t_end)', [
+        await assertSuggestions('from a | stats avg(b) by BUCKET(/, 50, ?_tstart, ?_tend)', [
           // Note there's no space or comma in the suggested field names
           ...getFieldNamesByType(['date', ...ESQL_COMMON_NUMERIC_TYPES]),
           ...getFunctionSignaturesByReturnType('eval', ['date', ...ESQL_COMMON_NUMERIC_TYPES], {
             scalar: true,
           }),
         ]);
-        await assertSuggestions('from a | stats avg(b) by BUCKET(  /  , 50, ?t_start, ?t_end)', [
+        await assertSuggestions('from a | stats avg(b) by BUCKET(  /  , 50, ?_tstart, ?_tend)', [
           // Note there's no space or comma in the suggested field names
           ...getFieldNamesByType(['date', ...ESQL_COMMON_NUMERIC_TYPES]),
           ...getFunctionSignaturesByReturnType('eval', ['date', ...ESQL_COMMON_NUMERIC_TYPES], {
@@ -308,7 +315,7 @@ describe('autocomplete.suggest', () => {
         ]);
 
         await assertSuggestions(
-          'from a | stats avg(b) by BUCKET(dateField, /50, ?t_start, ?t_end)',
+          'from a | stats avg(b) by BUCKET(dateField, /50, ?_tstart, ?_tend)',
           [
             ...getLiteralsByType('time_literal'),
             ...getFunctionSignaturesByReturnType('eval', ['integer', 'date_period'], {

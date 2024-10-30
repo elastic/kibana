@@ -71,6 +71,7 @@ export interface CreateTestEsClusterOptions {
    * `['key.1=val1', 'key.2=val2']`
    */
   esArgs?: string[];
+  esVersion?: string;
   esFrom?: string;
   esServerlessOptions?: Pick<
     ServerlessOptions,
@@ -169,6 +170,7 @@ export function createTestEsCluster<
     log,
     writeLogsToPath,
     basePath = Path.resolve(REPO_ROOT, '.es'),
+    esVersion = esTestConfig.getVersion(),
     esFrom = esTestConfig.getBuildFrom(),
     esServerlessOptions,
     dataArchive,
@@ -189,14 +191,17 @@ export function createTestEsCluster<
     `transport.port=${transportPort ?? esTestConfig.getTransportPort()}`,
     // For multi-node clusters, we make all nodes master-eligible by default.
     ...(nodes.length > 1
-      ? ['discovery.type=zen', `cluster.initial_master_nodes=${nodes.map((n) => n.name).join(',')}`]
+      ? [
+          'discovery.type=multi-node',
+          `cluster.initial_master_nodes=${nodes.map((n) => n.name).join(',')}`,
+        ]
       : ['discovery.type=single-node']),
   ];
 
   const esArgs = assignArgs(defaultEsArgs, customEsArgs);
 
   const config = {
-    version: esTestConfig.getVersion(),
+    version: esVersion,
     installPath: Path.resolve(basePath, clusterName),
     sourcePath: Path.resolve(REPO_ROOT, '../elasticsearch'),
     password,

@@ -455,9 +455,6 @@ export class LensPlugin {
       () => startServices().plugins.data.nowProvider.get()
     );
 
-    const getPresentationUtilContext = () =>
-      startServices().plugins.presentationUtil.ContextProvider;
-
     core.application.register({
       id: APP_ID,
       title: NOT_INTERNATIONALIZED_PRODUCT_NAME,
@@ -490,7 +487,6 @@ export class LensPlugin {
         return mountApp(core, params, {
           createEditorFrame: frameStart.createInstance,
           attributeService: getLensAttributeService(coreStart, deps),
-          getPresentationUtilContext,
           topNavMenuEntryGenerators: this.topNavMenuEntries,
           locator: this.locator,
         });

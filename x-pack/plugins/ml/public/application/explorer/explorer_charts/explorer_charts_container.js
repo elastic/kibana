@@ -91,6 +91,7 @@ function ExplorerChartContainer({
   tooManyBuckets,
   wrapLabel,
   mlLocator,
+  tableData,
   timeBuckets,
   timefilter,
   timeRange,
@@ -331,6 +332,7 @@ function ExplorerChartContainer({
               {(tooltipService) => (
                 <ExplorerChartDistribution
                   id={id}
+                  tableData={tableData}
                   timeBuckets={timeBuckets}
                   tooManyBuckets={tooManyBuckets}
                   seriesConfig={series}
@@ -351,6 +353,7 @@ function ExplorerChartContainer({
               {(tooltipService) => (
                 <ExplorerChartSingleMetric
                   id={id}
+                  tableData={tableData}
                   timeBuckets={timeBuckets}
                   tooManyBuckets={tooManyBuckets}
                   seriesConfig={series}
@@ -380,6 +383,7 @@ export const ExplorerChartsContainerUI = ({
   kibana,
   errorMessages,
   mlLocator,
+  tableData,
   timeBuckets,
   timefilter,
   timeRange,
@@ -444,6 +448,7 @@ export const ExplorerChartsContainerUI = ({
                   tooManyBuckets={tooManyBuckets}
                   wrapLabel={wrapLabel}
                   mlLocator={mlLocator}
+                  tableData={tableData}
                   timeBuckets={timeBuckets}
                   timefilter={timefilter}
                   timeRange={timeRange}

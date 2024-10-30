@@ -7,7 +7,7 @@ paths:
     post:
       summary: Builds Categorization processors based on the samples
       operationId: Categorization
-      x-codegen-enabled: false
+      x-codegen-enabled: true
       description: Perform Categorization for the given ecs mappings.
       tags:
         - Categorization API

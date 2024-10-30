@@ -8,7 +8,13 @@ paths:
       x-labels: [serverless, ess]
       operationId: CreateListItem
       x-codegen-enabled: true
-      summary: Creates a list item
+      summary: Create a list item
+      description: |
+        Create a list item and associate it with the specified list.
+        
+        All list items in the same list must be the same type. For example, each list item in an `ip` list must define a specific IP address.
+        > info
+        > Before creating a list item, you must create a list.
       requestBody:
         description: List item's properties
         required: true

@@ -70,6 +70,8 @@ const defaultCloudInfo: CloudInfo = {
   isCloud: false,
   isCloudTrial: false,
   deploymentId: null,
+  cloudUrl: null,
+  isMlAutoscalingEnabled: false,
 };
 
 export function useCloudCheck() {
@@ -85,6 +87,8 @@ export function useCloudCheck() {
         isCloud: resp.cloudId !== undefined,
         isCloudTrial: resp.isCloudTrial === true,
         deploymentId: !resp.cloudId ? null : extractDeploymentId(resp.cloudId),
+        cloudUrl: resp.cloudUrl ?? null,
+        isMlAutoscalingEnabled: resp.isMlAutoscalingEnabled,
       });
     } catch (error) {
       if (error.statusCode === 403) {

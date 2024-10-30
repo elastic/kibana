@@ -11,9 +11,8 @@ import execa from 'execa';
 import chalk from 'chalk';
 import assert from 'assert';
 import pRetry from 'p-retry';
-import type { AgentPolicy, CreateAgentPolicyResponse, Output } from '@kbn/fleet-plugin/common';
+import type { Output } from '@kbn/fleet-plugin/common';
 import {
-  AGENT_POLICY_API_ROUTES,
   API_VERSIONS,
   FLEET_SERVER_PACKAGE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
@@ -47,18 +46,23 @@ import { createToolingLogger } from '../../../../common/endpoint/data_loaders/ut
 import type { FormattedAxiosError } from '../../../../common/endpoint/format_axios_error';
 import { catchAxiosErrorFormatAndThrow } from '../../../../common/endpoint/format_axios_error';
 import {
+  createAgentPolicy,
+  createIntegrationPolicy,
   ensureFleetSetup,
   fetchFleetOutputs,
   fetchFleetServerHostList,
   fetchFleetServerUrl,
   fetchIntegrationPolicyList,
+  fetchPackageInfo,
   generateFleetServiceToken,
   getAgentVersionMatchingCurrentStack,
   getFleetElasticsearchOutputHost,
+  randomAgentPolicyName,
   waitForHostToEnroll,
 } from '../fleet_services';
 import { getLocalhostRealIp } from '../network_services';
 import { isLocalhost } from '../is_localhost';
+import { fetchActiveSpace } from '../spaces';
 
 export const FLEET_SERVER_CUSTOM_CONFIG = resolve(__dirname, './fleet_server.yml');
 
@@ -195,30 +199,54 @@ const getOrCreateFleetServerAgentPolicyId = async (
 
     log.info(`Creating new Fleet Server policy`);
 
-    const createdFleetServerPolicy: AgentPolicy = await kbnClient
-      .request<CreateAgentPolicyResponse>({
-        method: 'POST',
-        path: AGENT_POLICY_API_ROUTES.CREATE_PATTERN,
-        headers: { 'elastic-api-version': '2023-10-31' },
-        body: {
-          name: `Fleet Server policy (${Math.random().toString(32).substring(2)})`,
-          description: `Created by CLI Tool via: ${__filename}`,
-          namespace: 'default',
-          monitoring_enabled: ['logs', 'metrics'],
-          // This will ensure the Fleet Server integration policy
-          // is also created and added to the agent policy
-          has_fleet_server: true,
+    const [activeSpaceId, fleetServerPackageInfo] = await Promise.all([
+      fetchActiveSpace(kbnClient).then((space) => space.id),
+      fetchPackageInfo(kbnClient, 'fleet_server'),
+    ]);
+
+    const agentPolicy = await createAgentPolicy({
+      kbnClient,
+      policy: {
+        namespace: activeSpaceId,
+        name: randomAgentPolicyName('Fleet server'),
+        monitoring_enabled: ['logs', 'metrics'],
+      },
+    });
+
+    log.verbose(agentPolicy);
+
+    const fleetServerIntegrationPolicy = await createIntegrationPolicy(kbnClient, {
+      name: randomAgentPolicyName('Fleet server integration'),
+      description: `Created from script at [${__filename}]`,
+      namespace: activeSpaceId,
+      policy_ids: [agentPolicy.id],
+      enabled: true,
+      force: false,
+      inputs: [
+        {
+          type: 'fleet-server',
+          policy_template: 'fleet_server',
+          enabled: true,
+          streams: [],
+          vars: {
+            max_agents: { type: 'integer' },
+            max_connections: { type: 'integer' },
+            custom: { value: '', type: 'yaml' },
+          },
         },
-      })
-      .then((response) => response.data.item)
-      .catch(catchAxiosErrorFormatAndThrow);
+      ],
+      package: {
+        name: 'fleet_server',
+        title: fleetServerPackageInfo.title,
+        version: fleetServerPackageInfo.version,
+      },
+    });
 
-    log.info(
-      `Agent Policy created: ${createdFleetServerPolicy.name} (${createdFleetServerPolicy.id})`
-    );
-    log.verbose(createdFleetServerPolicy);
+    log.verbose(fleetServerIntegrationPolicy);
 
-    return createdFleetServerPolicy.id;
+    log.info(`Agent Policy created: ${agentPolicy.name} (${agentPolicy.id})`);
+
+    return agentPolicy.id;
   });
 };
 

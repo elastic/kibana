@@ -8,7 +8,9 @@ import React from 'react';
 import type { Story } from '@storybook/react';
 import { RequiredFieldsReadOnly } from './required_fields';
 import { FieldReadOnly } from '../../field_readonly';
-import type { DiffableAllFields } from '../../../../../../../../../common/api/detection_engine';
+import type { DiffableRule } from '../../../../../../../../../common/api/detection_engine';
+import { mockCustomQueryRule } from '../../storybook/mocks';
+import { ThreeWayDiffStorybookProviders } from '../../storybook/three_way_diff_storybook_providers';
 
 export default {
   component: RequiredFieldsReadOnly,
@@ -16,25 +18,24 @@ export default {
 };
 
 interface TemplateProps {
-  finalDiffableRule: Partial<DiffableAllFields>;
+  finalDiffableRule: DiffableRule;
 }
 
 const Template: Story<TemplateProps> = (args) => {
   return (
-    <FieldReadOnly
-      fieldName="required_fields"
-      finalDiffableRule={args.finalDiffableRule as DiffableAllFields}
-    />
+    <ThreeWayDiffStorybookProviders finalDiffableRule={args.finalDiffableRule}>
+      <FieldReadOnly fieldName="required_fields" />
+    </ThreeWayDiffStorybookProviders>
   );
 };
 
 export const Default = Template.bind({});
 
 Default.args = {
-  finalDiffableRule: {
+  finalDiffableRule: mockCustomQueryRule({
     required_fields: [
       { name: 'event.kind', type: 'keyword', ecs: true },
       { name: 'event.module', type: 'keyword', ecs: true },
     ],
-  },
+  }),
 };

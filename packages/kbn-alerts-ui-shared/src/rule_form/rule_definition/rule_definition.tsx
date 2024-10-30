@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { Suspense, useMemo, useState, useCallback } from 'react';
+import React, { Suspense, useMemo, useState, useCallback, useEffect } from 'react';
 import {
   EuiEmptyPrompt,
   EuiLoadingSpinner,
@@ -22,7 +22,12 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiErrorBoundary,
+  useEuiTheme,
+  COLOR_MODES_STANDARD,
 } from '@elastic/eui';
+import { RuleSpecificFlappingProperties } from '@kbn/alerting-types';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
+import { AlertConsumers } from '@kbn/rule-data-utils';
 import {
   DOC_LINK_TITLE,
   LOADING_RULE_TYPE_PARAMS_TITLE,
@@ -35,13 +40,18 @@ import {
   ADVANCED_OPTIONS_TITLE,
   ALERT_DELAY_DESCRIPTION_TEXT,
   ALERT_DELAY_HELP_TEXT,
+  ALERT_FLAPPING_DETECTION_TITLE,
+  ALERT_FLAPPING_DETECTION_DESCRIPTION,
 } from '../translations';
 import { RuleAlertDelay } from './rule_alert_delay';
 import { RuleConsumerSelection } from './rule_consumer_selection';
 import { RuleSchedule } from './rule_schedule';
 import { useRuleFormState, useRuleFormDispatch } from '../hooks';
-import { MULTI_CONSUMER_RULE_TYPE_IDS } from '../constants';
+import { ALERTING_FEATURE_ID, MULTI_CONSUMER_RULE_TYPE_IDS } from '../constants';
 import { getAuthorizedConsumers } from '../utils';
+import { RuleSettingsFlappingTitleTooltip } from '../../rule_settings/rule_settings_flapping_title_tooltip';
+import { RuleSettingsFlappingForm } from '../../rule_settings/rule_settings_flapping_form';
+import { IS_RULE_SPECIFIC_FLAPPING_ENABLED } from '../../common/constants/rule_flapping';
 
 export const RuleDefinition = () => {
   const {
@@ -52,27 +62,53 @@ export const RuleDefinition = () => {
     metadata,
     selectedRuleType,
     selectedRuleTypeModel,
+    availableRuleTypes,
     validConsumers,
     canShowConsumerSelection = false,
+    flappingSettings,
   } = useRuleFormState();
 
+  const { colorMode } = useEuiTheme();
   const dispatch = useRuleFormDispatch();
 
-  const { charts, data, dataViews, unifiedSearch, docLinks } = plugins;
+  useEffect(() => {
+    // Need to do a dry run validating the params because the Missing Monitor Data rule type
+    // does not properly initialize the params
+    if (selectedRuleType.id === 'monitoring_alert_missing_monitoring_data') {
+      dispatch({ type: 'runValidation' });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  const { params, schedule, notifyWhen } = formData;
+  const { charts, data, dataViews, unifiedSearch, docLinks, application } = plugins;
+
+  const {
+    capabilities: { rulesSettings },
+  } = application;
+
+  const { readFlappingSettingsUI, writeFlappingSettingsUI } = rulesSettings || {};
+
+  const { params, schedule, notifyWhen, flapping, consumer, ruleTypeId } = formData;
 
   const [isAdvancedOptionsVisible, setIsAdvancedOptionsVisible] = useState<boolean>(false);
 
+  const [isFlappingPopoverOpen, setIsFlappingPopoverOpen] = useState<boolean>(false);
+
   const authorizedConsumers = useMemo(() => {
-    if (!validConsumers?.length) {
+    if (consumer !== ALERTING_FEATURE_ID) {
+      return [];
+    }
+    const selectedAvailableRuleType = availableRuleTypes.find((ruleType) => {
+      return ruleType.id === selectedRuleType.id;
+    });
+    if (!selectedAvailableRuleType?.authorizedConsumers) {
       return [];
     }
     return getAuthorizedConsumers({
-      ruleType: selectedRuleType,
+      ruleType: selectedAvailableRuleType,
       validConsumers,
     });
-  }, [selectedRuleType, validConsumers]);
+  }, [consumer, selectedRuleType, availableRuleTypes, validConsumers]);
 
   const shouldShowConsumerSelect = useMemo(() => {
     if (!canShowConsumerSelection) {
@@ -81,10 +117,14 @@ export const RuleDefinition = () => {
     if (!authorizedConsumers.length) {
       return false;
     }
-    return (
-      selectedRuleTypeModel.id && MULTI_CONSUMER_RULE_TYPE_IDS.includes(selectedRuleTypeModel.id)
-    );
-  }, [authorizedConsumers, selectedRuleTypeModel, canShowConsumerSelection]);
+    if (
+      authorizedConsumers.length <= 1 ||
+      authorizedConsumers.includes(AlertConsumers.OBSERVABILITY)
+    ) {
+      return false;
+    }
+    return !!(ruleTypeId && MULTI_CONSUMER_RULE_TYPE_IDS.includes(ruleTypeId));
+  }, [ruleTypeId, authorizedConsumers, canShowConsumerSelection]);
 
   const RuleParamsExpressionComponent = selectedRuleTypeModel.ruleParamsExpression ?? null;
 
@@ -125,6 +165,19 @@ export const RuleDefinition = () => {
         type: 'setRuleProperty',
         payload: {
           property,
+          value,
+        },
+      });
+    },
+    [dispatch]
+  );
+
+  const onSetFlapping = useCallback(
+    (value: RuleSpecificFlappingProperties | null) => {
+      dispatch({
+        type: 'setRuleProperty',
+        payload: {
+          property: 'flapping',
           value,
         },
       });
@@ -174,24 +227,26 @@ export const RuleDefinition = () => {
             <EuiFlexGroup gutterSize="none" direction="column">
               <EuiFlexItem>
                 <EuiErrorBoundary>
-                  <RuleParamsExpressionComponent
-                    id={id}
-                    ruleParams={params}
-                    ruleInterval={schedule.interval}
-                    ruleThrottle={''}
-                    alertNotifyWhen={notifyWhen || 'onActionGroupChange'}
-                    errors={paramsErrors || {}}
-                    setRuleParams={onSetRuleParams}
-                    setRuleProperty={onSetRuleProperty}
-                    defaultActionGroupId={selectedRuleType.defaultActionGroupId}
-                    actionGroups={selectedRuleType.actionGroups}
-                    metadata={metadata}
-                    charts={charts}
-                    data={data}
-                    dataViews={dataViews}
-                    unifiedSearch={unifiedSearch}
-                    onChangeMetaData={onChangeMetaData}
-                  />
+                  <EuiThemeProvider darkMode={colorMode === COLOR_MODES_STANDARD.dark}>
+                    <RuleParamsExpressionComponent
+                      id={id}
+                      ruleParams={params}
+                      ruleInterval={schedule.interval}
+                      ruleThrottle={''}
+                      alertNotifyWhen={notifyWhen || 'onActionGroupChange'}
+                      errors={paramsErrors || {}}
+                      setRuleParams={onSetRuleParams}
+                      setRuleProperty={onSetRuleProperty}
+                      defaultActionGroupId={selectedRuleType.defaultActionGroupId}
+                      actionGroups={selectedRuleType.actionGroups}
+                      metadata={metadata}
+                      charts={charts}
+                      data={data}
+                      dataViews={dataViews}
+                      unifiedSearch={unifiedSearch}
+                      onChangeMetaData={onChangeMetaData}
+                    />
+                  </EuiThemeProvider>
                 </EuiErrorBoundary>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -230,7 +285,10 @@ export const RuleDefinition = () => {
           <EuiAccordion
             id="advancedOptionsAccordion"
             data-test-subj="advancedOptionsAccordion"
-            onToggle={setIsAdvancedOptionsVisible}
+            onToggle={(isOpen) => {
+              setIsAdvancedOptionsVisible(isOpen);
+              setIsFlappingPopoverOpen(false);
+            }}
             initialIsOpen={isAdvancedOptionsVisible}
             buttonProps={{
               'data-test-subj': 'advancedOptionsAccordionButton',
@@ -261,6 +319,32 @@ export const RuleDefinition = () => {
               >
                 <RuleAlertDelay />
               </EuiDescribedFormGroup>
+              {IS_RULE_SPECIFIC_FLAPPING_ENABLED && readFlappingSettingsUI && (
+                <EuiDescribedFormGroup
+                  data-test-subj="ruleDefinitionFlappingFormGroup"
+                  fullWidth
+                  title={<h4>{ALERT_FLAPPING_DETECTION_TITLE}</h4>}
+                  description={
+                    <EuiText size="s">
+                      <p>
+                        {ALERT_FLAPPING_DETECTION_DESCRIPTION}
+                        <RuleSettingsFlappingTitleTooltip
+                          isOpen={isFlappingPopoverOpen}
+                          setIsPopoverOpen={setIsFlappingPopoverOpen}
+                          anchorPosition="downCenter"
+                        />
+                      </p>
+                    </EuiText>
+                  }
+                >
+                  <RuleSettingsFlappingForm
+                    flappingSettings={flapping}
+                    spaceFlappingSettings={flappingSettings}
+                    canWriteFlappingSettingsUI={!!writeFlappingSettingsUI}
+                    onFlappingChange={onSetFlapping}
+                  />
+                </EuiDescribedFormGroup>
+              )}
             </EuiPanel>
           </EuiAccordion>
         </EuiFlexItem>

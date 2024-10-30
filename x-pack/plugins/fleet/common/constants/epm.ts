@@ -27,6 +27,7 @@ export const FLEET_CLOUD_SECURITY_POSTURE_CSPM_POLICY_TEMPLATE = 'cspm';
 export const FLEET_CLOUD_SECURITY_POSTURE_CNVM_POLICY_TEMPLATE = 'vuln_mgmt';
 export const FLEET_CLOUD_DEFEND_PACKAGE = 'cloud_defend';
 export const FLEET_CLOUD_BEAT_PACKAGE = 'cloudbeat';
+export const FLEET_CONNECTORS_PACKAGE = 'elastic_connectors';
 
 export const GLOBAL_DATA_TAG_EXCLUDED_INPUTS = new Set<string>([
   FLEET_APM_PACKAGE,

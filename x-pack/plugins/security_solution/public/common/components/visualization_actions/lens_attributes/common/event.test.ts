@@ -11,7 +11,7 @@ import { wrapper } from '../../mocks';
 
 import { useLensAttributes } from '../../use_lens_attributes';
 
-import { getEventsHistogramLensAttributes } from './events';
+import { getEventsHistogramLensAttributes, stackByFieldAccessorId } from './events';
 
 jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('0039eb0c-9a1a-4687-ae54-0f4e239bec75'),
@@ -22,6 +22,7 @@ jest.mock('../../../../../sourcerer/containers', () => ({
     selectedPatterns: ['auditbeat-mytest-*'],
     dataViewId: 'security-solution-my-test',
     indicesExist: true,
+    sourcererDataView: {},
   }),
 }));
 
@@ -494,6 +495,43 @@ describe('getEventsHistogramLensAttributes', () => {
     expect(result?.current?.state?.visualization).toEqual(
       expect.objectContaining({
         legend: expect.objectContaining({ legendStats: ['currentAndLastValue'] }),
+      })
+    );
+  });
+
+  it('should render the layer for the stackByField when provided', () => {
+    const { result } = renderHook(
+      () =>
+        useLensAttributes({
+          getLensAttributes: getEventsHistogramLensAttributes,
+          stackByField: 'event.dataset',
+        }),
+      { wrapper }
+    );
+
+    expect(result?.current?.state?.visualization).toEqual(
+      expect.objectContaining({
+        layers: expect.arrayContaining([
+          expect.objectContaining({ splitAccessor: stackByFieldAccessorId }),
+        ]),
+      })
+    );
+  });
+
+  it('should not render the layer for the stackByField is undefined', () => {
+    const { result } = renderHook(
+      () =>
+        useLensAttributes({
+          getLensAttributes: getEventsHistogramLensAttributes,
+        }),
+      { wrapper }
+    );
+
+    expect(result?.current?.state?.visualization).toEqual(
+      expect.objectContaining({
+        layers: expect.arrayContaining([
+          expect.not.objectContaining({ splitAccessor: stackByFieldAccessorId }),
+        ]),
       })
     );
   });

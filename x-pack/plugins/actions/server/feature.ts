@@ -7,6 +7,7 @@
 
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { i18n } from '@kbn/i18n';
+import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import {
   ACTION_SAVED_OBJECT_TYPE,
   ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
@@ -28,6 +29,7 @@ export const ACTIONS_FEATURE = {
     defaultMessage: 'Actions and Connectors',
   }),
   category: DEFAULT_APP_CATEGORIES.management,
+  scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
   app: [],
   order: FEATURE_ORDER,
   management: {

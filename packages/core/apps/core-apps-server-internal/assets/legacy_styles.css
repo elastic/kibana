@@ -114,3 +114,9 @@ body, html {
     transform: scaleX(1) translateX(100%);
   }
 }
+
+@media (prefers-reduced-motion) {
+  .kbnProgress {
+    display: none;
+  }
+}

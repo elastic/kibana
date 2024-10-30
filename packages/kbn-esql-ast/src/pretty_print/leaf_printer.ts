@@ -7,7 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ESQLColumn, ESQLLiteral, ESQLSource, ESQLTimeInterval } from '../types';
+import {
+  ESQLAstComment,
+  ESQLAstCommentMultiLine,
+  ESQLColumn,
+  ESQLLiteral,
+  ESQLSource,
+  ESQLTimeInterval,
+} from '../types';
 
 const regexUnquotedIdPattern = /^([a-z\*_\@]{1})[a-z0-9_\*]*$/i;
 
@@ -57,10 +64,10 @@ export const LeafPrinter = {
             return '?';
         }
       }
-      case 'string': {
+      case 'keyword': {
         return String(node.value);
       }
-      case 'decimal': {
+      case 'double': {
         const isRounded = node.value % 1 === 0;
 
         if (isRounded) {
@@ -83,5 +90,28 @@ export const LeafPrinter = {
     } else {
       return `${quantity} ${unit}`;
     }
+  },
+
+  comment: (node: ESQLAstComment): string => {
+    switch (node.subtype) {
+      case 'single-line': {
+        return `//${node.text}`;
+      }
+      case 'multi-line': {
+        return `/*${node.text}*/`;
+      }
+      default: {
+        return '';
+      }
+    }
+  },
+
+  commentList: (comments: ESQLAstCommentMultiLine[]): string => {
+    let text = '';
+    for (const comment of comments) {
+      const commentText = LeafPrinter.comment(comment);
+      if (commentText) text += (text ? ' ' : '') + commentText;
+    }
+    return text;
   },
 };

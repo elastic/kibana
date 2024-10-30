@@ -29,6 +29,7 @@ import type { InternalCustomBrandingSetup } from '@kbn/core-custom-branding-serv
 import type { InternalUserSettingsServiceSetup } from '@kbn/core-user-settings-server-internal';
 import type { InternalSecurityServiceSetup } from '@kbn/core-security-server-internal';
 import type { InternalUserProfileServiceSetup } from '@kbn/core-user-profile-server-internal';
+import type { InternalFeatureFlagsSetup } from '@kbn/core-feature-flags-server-internal';
 
 /** @internal */
 export interface InternalCoreSetup {
@@ -39,6 +40,7 @@ export interface InternalCoreSetup {
   http: InternalHttpServiceSetup;
   elasticsearch: InternalElasticsearchServiceSetup;
   executionContext: InternalExecutionContextSetup;
+  featureFlags: InternalFeatureFlagsSetup;
   i18n: I18nServiceSetup;
   savedObjects: InternalSavedObjectsServiceSetup;
   status: InternalStatusServiceSetup;

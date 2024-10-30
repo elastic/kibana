@@ -86,6 +86,7 @@ export const mlNavCategories: SolutionLinkCategory[] = [
     linkIds: [
       ExternalPageName.mlFileUpload,
       ExternalPageName.mlIndexDataVisualizer,
+      ExternalPageName.mlESQLdataVisualizer,
       ExternalPageName.mlDataDrift,
     ],
   },
@@ -185,6 +186,12 @@ export const mlNavLinks: SolutionNavLink[] = [
     title: i18n.INDEX_DATA_VISUALIZER_TITLE,
     landingIcon: IconDataViewLazy,
     description: i18n.INDEX_DATA_VISUALIZER_DESC,
+  },
+  {
+    id: ExternalPageName.mlESQLdataVisualizer,
+    title: i18n.ESQL_DATA_VISUALIZER_TITLE,
+    landingIcon: 'sqlApp',
+    description: i18n.ESQL_DATA_VISUALIZER_DESC,
   },
   {
     id: ExternalPageName.mlDataDrift,

@@ -40,6 +40,36 @@ export interface PackagePolicyService {
   get asInternalUser(): PackagePolicyClient;
 }
 
+export type RunExternalCallbacksPackagePolicyArgument<A extends ExternalCallback[0]> =
+  A extends 'packagePolicyDelete'
+    ? DeletePackagePoliciesResponse
+    : A extends 'packagePolicyPostDelete'
+    ? PostDeletePackagePoliciesResponse
+    : A extends 'packagePolicyCreate'
+    ? NewPackagePolicy
+    : A extends 'packagePolicyPostCreate'
+    ? PackagePolicy
+    : A extends 'packagePolicyUpdate'
+    ? UpdatePackagePolicy
+    : A extends 'packagePolicyPostUpdate'
+    ? PackagePolicy
+    : never;
+
+export type RunExternalCallbacksPackagePolicyResponse<A extends ExternalCallback[0]> =
+  A extends 'packagePolicyDelete'
+    ? void
+    : A extends 'packagePolicyPostDelete'
+    ? void
+    : A extends 'packagePolicyCreate'
+    ? NewPackagePolicy
+    : A extends 'packagePolicyPostCreate'
+    ? PackagePolicy
+    : A extends 'packagePolicyUpdate'
+    ? UpdatePackagePolicy
+    : A extends 'packagePolicyPostUpdate'
+    ? PackagePolicy
+    : undefined;
+
 export interface PackagePolicyClient {
   create(
     soClient: SavedObjectsClientContract,
@@ -164,35 +194,17 @@ export interface PackagePolicyClient {
   buildPackagePolicyFromPackage(
     soClient: SavedObjectsClientContract,
     pkgName: string,
-    logger?: Logger
+    options?: { logger?: Logger; installMissingPackage?: boolean }
   ): Promise<NewPackagePolicy | undefined>;
 
   runExternalCallbacks<A extends ExternalCallback[0]>(
     externalCallbackType: A,
-    packagePolicy: A extends 'packagePolicyDelete'
-      ? DeletePackagePoliciesResponse
-      : A extends 'packagePolicyPostDelete'
-      ? PostDeletePackagePoliciesResponse
-      : A extends 'packagePolicyPostCreate'
-      ? PackagePolicy
-      : A extends 'packagePolicyUpdate'
-      ? UpdatePackagePolicy
-      : NewPackagePolicy,
+    packagePolicy: RunExternalCallbacksPackagePolicyArgument<A>,
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     context?: RequestHandlerContext,
     request?: KibanaRequest
-  ): Promise<
-    A extends 'packagePolicyDelete'
-      ? void
-      : A extends 'packagePolicyPostDelete'
-      ? void
-      : A extends 'packagePolicyPostCreate'
-      ? PackagePolicy
-      : A extends 'packagePolicyUpdate'
-      ? UpdatePackagePolicy
-      : NewPackagePolicy
-  >;
+  ): Promise<RunExternalCallbacksPackagePolicyResponse<A>>;
 
   runDeleteExternalCallbacks(
     deletedPackagePolicies: DeletePackagePoliciesResponse,
@@ -225,7 +237,11 @@ export interface PackagePolicyClient {
    * @param esClient
    * @param outputId
    */
-  removeOutputFromAll(esClient: ElasticsearchClient, outputId: string): Promise<void>;
+  removeOutputFromAll(
+    esClient: ElasticsearchClient,
+    outputId: string,
+    options?: { force?: boolean }
+  ): Promise<void>;
 
   /**
    * Returns an `AsyncIterable` for retrieving all integration policy IDs

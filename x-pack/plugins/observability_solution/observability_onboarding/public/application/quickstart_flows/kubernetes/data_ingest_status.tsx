@@ -116,7 +116,10 @@ export function DataIngestStatus({ onboardingId }: Props) {
           <EuiSpacer />
 
           <GetStartedPanel
+            onboardingFlowType="kubernetes"
+            dataset="kubernetes"
             integration="kubernetes"
+            onboardingId={onboardingId}
             newTab={false}
             isLoading={false}
             actionLinks={[

@@ -19,6 +19,7 @@ import {
 import { CustomIntegrationsPluginSetup } from '@kbn/custom-integrations-plugin/server';
 import { DataPluginStart } from '@kbn/data-plugin/server/plugin';
 import { ENTERPRISE_SEARCH_APP_ID } from '@kbn/deeplinks-search';
+import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { GlobalSearchPluginSetup } from '@kbn/global-search-plugin/server';
 import type { GuidedOnboardingPluginSetup } from '@kbn/guided-onboarding-plugin/server';
@@ -181,12 +182,7 @@ export class EnterpriseSearchPlugin implements Plugin {
     const isCloud = !!cloud?.cloudId;
 
     if (customIntegrations) {
-      registerEnterpriseSearchIntegrations(
-        config,
-        customIntegrations,
-        isCloud,
-        searchConnectors?.getConnectorTypes() || []
-      );
+      registerEnterpriseSearchIntegrations(config, customIntegrations);
     }
 
     /*
@@ -202,6 +198,7 @@ export class EnterpriseSearchPlugin implements Plugin {
       name: SEARCH_PRODUCT_NAME,
       order: 0,
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
+      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       app: ['kibana', ...PLUGIN_IDS],
       catalogue: PLUGIN_IDS,
       privileges: {

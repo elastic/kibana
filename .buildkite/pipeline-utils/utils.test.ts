@@ -36,9 +36,6 @@ describe('getVersionsFile', () => {
     const versionsFile = getVersionsFile();
 
     expect(versionsFile.prevMajors).to.be.an('array');
-    expect(versionsFile.prevMajors.length).to.eql(1);
-    expect(versionsFile.prevMajors[0].branch).to.eql('7.17');
-
     expect(versionsFile.prevMinors).to.be.an('array');
   });
 

@@ -59,6 +59,8 @@ export const SeriesTypes = {
   BAR_HORIZONTAL_PERCENTAGE_STACKED: 'bar_horizontal_percentage_stacked',
 } as const;
 
+export const defaultSeriesType = SeriesTypes.BAR_STACKED;
+
 export type YAxisMode = $Values<typeof YAxisModes>;
 export type SeriesType = $Values<typeof SeriesTypes>;
 export interface AxesSettingsConfig {
@@ -193,6 +195,18 @@ const areaShared = {
   }),
 };
 
+const lineShared = {
+  id: 'line',
+  icon: IconChartLine,
+  label: i18n.translate('xpack.lens.xyVisualization.lineLabel', {
+    defaultMessage: 'Line',
+  }),
+  sortPriority: 2,
+  description: i18n.translate('xpack.lens.line.visualizationDescription', {
+    defaultMessage: 'Reveal variations in data over time.',
+  }),
+};
+
 export const visualizationSubtypes: VisualizationType[] = [
   {
     id: 'bar',
@@ -278,17 +292,7 @@ export const visualizationSubtypes: VisualizationType[] = [
     }),
     ...areaShared,
   },
-  {
-    id: 'line',
-    icon: IconChartLine,
-    label: i18n.translate('xpack.lens.xyVisualization.lineLabel', {
-      defaultMessage: 'Line',
-    }),
-    sortPriority: 2,
-    description: i18n.translate('xpack.lens.line.visualizationDescription', {
-      defaultMessage: 'Reveal variations in data over time.',
-    }),
-  },
+  lineShared,
 ];
 
 export const visualizationTypes: VisualizationType[] = [
@@ -306,10 +310,7 @@ export const visualizationTypes: VisualizationType[] = [
     label: i18n.translate('xpack.lens.xyVisualization.barLabel', {
       defaultMessage: 'Bar',
     }),
-    sortPriority: 1,
-    description: i18n.translate('xpack.lens.bar.visualizationDescription', {
-      defaultMessage: 'Compare categories or groups of data via bars.',
-    }),
+    ...barShared,
     getCompatibleSubtype: (seriesType?: string) => {
       if (seriesType === 'area') {
         return 'bar';
@@ -342,15 +343,7 @@ export const visualizationTypes: VisualizationType[] = [
     },
   },
   {
-    id: 'line',
-    icon: IconChartLine,
-    label: i18n.translate('xpack.lens.xyVisualization.lineLabel', {
-      defaultMessage: 'Line',
-    }),
-    sortPriority: 2,
-    description: i18n.translate('xpack.lens.line.visualizationDescription', {
-      defaultMessage: 'Reveal variations in data over time or categorically.',
-    }),
+    ...lineShared,
     subtypes: ['line'],
   },
 ];

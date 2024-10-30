@@ -26,7 +26,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'home',
   ]);
 
-  describe('dashboard multiple data views', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/191880
+  describe.skip('dashboard multiple data views', () => {
     before(async () => {
       await kibanaServer.uiSettings.update({ 'courier:ignoreFilterIfFieldNotInIndex': true });
       await common.navigateToApp('home');

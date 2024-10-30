@@ -175,6 +175,13 @@ export const configSchema = schema.object({
         maxBulkRequestBodySizeBytes: schema.number({ defaultValue: 100_000 }), // 100KB
       }),
     }),
+    entityStore: schema.object({
+      syncDelay: schema.duration({ defaultValue: '60s' }),
+      frequency: schema.duration({ defaultValue: '60s' }),
+      developer: schema.object({
+        pipelineDebugMode: schema.boolean({ defaultValue: false }),
+      }),
+    }),
   }),
 });
 

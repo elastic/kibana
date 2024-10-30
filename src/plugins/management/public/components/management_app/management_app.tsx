@@ -10,7 +10,7 @@
 import './management_app.scss';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 
 import { i18n } from '@kbn/i18n';
 import { AppMountParameters, ChromeBreadcrumb, ScopedHistory } from '@kbn/core/public';
@@ -21,6 +21,7 @@ import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaPageTemplate, KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
 import useObservable from 'react-use/lib/useObservable';
+import type { ChromeStyle } from '@kbn/core-chrome-browser';
 import { AppContextProvider } from './management_context';
 import {
   ManagementSection,
@@ -29,7 +30,7 @@ import {
 } from '../../utils';
 import { ManagementRouter } from './management_router';
 import { managementSidebarNav } from '../management_sidebar_nav/management_sidebar_nav';
-import { SectionsServiceStart, NavigationCardsSubject } from '../../types';
+import { SectionsServiceStart, NavigationCardsSubject, AppDependencies } from '../../types';
 
 interface ManagementAppProps {
   appBasePath: string;
@@ -44,14 +45,17 @@ export interface ManagementAppDependencies {
   setBreadcrumbs: (newBreadcrumbs: ChromeBreadcrumb[]) => void;
   isSidebarEnabled$: BehaviorSubject<boolean>;
   cardsNavigationConfig$: BehaviorSubject<NavigationCardsSubject>;
+  chromeStyle$: Observable<ChromeStyle>;
 }
 
 export const ManagementApp = ({ dependencies, history, appBasePath }: ManagementAppProps) => {
-  const { coreStart, setBreadcrumbs, isSidebarEnabled$, cardsNavigationConfig$ } = dependencies;
+  const { coreStart, setBreadcrumbs, isSidebarEnabled$, cardsNavigationConfig$, chromeStyle$ } =
+    dependencies;
   const [selectedId, setSelectedId] = useState<string>('');
   const [sections, setSections] = useState<ManagementSection[]>();
   const isSidebarEnabled = useObservable(isSidebarEnabled$);
   const cardsNavigationConfig = useObservable(cardsNavigationConfig$);
+  const chromeStyle = useObservable(chromeStyle$);
 
   const onAppMounted = useCallback((id: string) => {
     setSelectedId(id);
@@ -102,11 +106,13 @@ export const ManagementApp = ({ dependencies, history, appBasePath }: Management
       }
     : undefined;
 
-  const contextDependencies = {
+  const contextDependencies: AppDependencies = {
     appBasePath,
     sections,
     cardsNavigationConfig,
     kibanaVersion: dependencies.kibanaVersion,
+    coreStart,
+    chromeStyle,
   };
 
   return (

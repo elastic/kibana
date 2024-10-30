@@ -22,6 +22,7 @@ export type CreateDevToolArgs = Omit<DevToolApp, 'enable' | 'disable' | 'isDisab
 
 interface DevToolMountParams extends DevToolsStartServices {
   element: HTMLDivElement;
+  history: RouteComponentProps['history'];
   location: RouteComponentProps['location'];
 }
 

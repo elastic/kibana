@@ -98,7 +98,6 @@ export const ColumnsPopover: React.FC<Props> = ({
       closePopover={closePopover}
       panelPaddingSize="s"
       anchorPosition="leftUp"
-      hasDragDrop
       zIndex={0}
       data-test-subj="column-selection-popover"
       button={
@@ -158,6 +157,7 @@ export const ColumnsPopover: React.FC<Props> = ({
                   css={{ height: euiTheme.size.xl, paddingLeft: euiTheme.size.base }}
                   customDragHandle
                   hasInteractiveChildren
+                  usePortal
                 >
                   {(provided) => (
                     <EuiFlexGroup alignItems="center" gutterSize="m" justifyContent="spaceBetween">

@@ -32,7 +32,11 @@ export interface CreateRulesProps {
 }
 
 export interface PreviewRulesProps {
-  rule: RuleCreateProps & { invocationCount: number; timeframeEnd: string };
+  rule: RuleCreateProps & {
+    invocationCount: number;
+    timeframeEnd: string;
+  };
+  enableLoggedRequests?: boolean;
   signal?: AbortSignal;
 }
 

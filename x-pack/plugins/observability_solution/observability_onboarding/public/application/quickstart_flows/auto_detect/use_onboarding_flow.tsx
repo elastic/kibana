@@ -19,6 +19,15 @@ export const DASHBOARDS = {
   'docker-AV4REOpp5NkDleZmzKkE': { type: 'metrics' },
   'nginx-55a9e6e0-a29e-11e7-928f-5dbe6f6f5519': { type: 'logs' },
   'system-79ffd6e0-faa0-11e6-947f-177f697178b8': { type: 'metrics' },
+  'mysql-Logs-MySQL-Dashboard': { type: 'logs' },
+  'postgresql-158be870-87f4-11e7-ad9c-db80de0bf8d3': { type: 'logs' },
+  'redis-7fea2930-478e-11e7-b1f0-cb29bac6bf8b': { type: 'logs' },
+  'haproxy-3560d580-aa34-11e8-9c06-877f0445e3e0': { type: 'logs' },
+  'rabbitmq-AV4YobKIge1VCbKU_qVo': { type: 'metrics' },
+  'kafka-943caca0-87ee-11e7-ad9c-db80de0bf8d3': { type: 'logs' },
+  'apache_tomcat-8fd54a20-1f0d-11ee-9d6b-bb41d08322c8': { type: 'logs' },
+  'mongodb-abcf35b0-0a82-11e8-bffe-ff7d4f68cf94': { type: 'logs' },
+  'prometheus-c181a040-3d96-11ed-b624-b12467b8df74': { type: 'metrics' },
 };
 
 export function useOnboardingFlow() {

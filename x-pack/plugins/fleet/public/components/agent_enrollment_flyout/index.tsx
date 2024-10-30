@@ -53,6 +53,7 @@ export * from './steps';
 export const AgentEnrollmentFlyout: React.FunctionComponent<FlyOutProps> = ({
   onClose,
   agentPolicy,
+  selectedAgentPolicies,
   defaultMode = 'managed',
   isIntegrationFlow,
   installedPackagePolicy,
@@ -69,16 +70,24 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<FlyOutProps> = ({
   const [selectionType, setSelectionType] = useState<SelectionType>();
 
   const {
-    agentPolicies,
+    agentPolicies: fetchedAgentPolicies,
     isLoadingInitialAgentPolicies,
     isLoadingAgentPolicies,
     refreshAgentPolicies,
   } = useAgentEnrollmentFlyoutData();
 
+  // Have the option to pass agentPolicies from props, otherwise use the fetched ones
+  const agentPolicies = selectedAgentPolicies ? selectedAgentPolicies : fetchedAgentPolicies;
+
   const { agentPolicyWithPackagePolicies } = useAgentPolicyWithPackagePolicies(selectedPolicyId);
 
-  const { fleetServerHost, fleetProxy, downloadSource, isLoadingInitialRequest } =
-    useFleetServerHostsForPolicy(agentPolicyWithPackagePolicies);
+  const {
+    fleetServerHost,
+    fleetProxy,
+    downloadSource,
+    isLoadingInitialRequest,
+    downloadSourceProxy,
+  } = useFleetServerHostsForPolicy(agentPolicyWithPackagePolicies);
 
   const selectedPolicy = agentPolicyWithPackagePolicies
     ? agentPolicyWithPackagePolicies
@@ -196,6 +205,7 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<FlyOutProps> = ({
             fleetServerHost={fleetServerHost}
             fleetProxy={fleetProxy}
             downloadSource={downloadSource}
+            downloadSourceProxy={downloadSourceProxy}
             setSelectedPolicyId={setSelectedPolicyId}
             agentPolicy={agentPolicy}
             selectedPolicy={selectedPolicy}

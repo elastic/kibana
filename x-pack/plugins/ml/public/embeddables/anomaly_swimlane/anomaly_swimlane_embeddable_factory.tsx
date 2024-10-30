@@ -18,6 +18,7 @@ import {
   apiHasExecutionContext,
   apiHasParentApi,
   apiPublishesTimeRange,
+  fetch$,
   initializeTimeRange,
   initializeTitles,
   useBatchedPublishingSubjects,
@@ -26,7 +27,8 @@ import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import React, { useCallback, useState } from 'react';
 import useUnmount from 'react-use/lib/useUnmount';
 import type { Observable } from 'rxjs';
-import { BehaviorSubject, combineLatest, map, of, Subscription } from 'rxjs';
+import { BehaviorSubject, combineLatest, distinctUntilChanged, map, of, Subscription } from 'rxjs';
+import fastIsEqual from 'fast-deep-equal';
 import type { AnomalySwimlaneEmbeddableServices } from '..';
 import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '..';
 import type { MlDependencies } from '../../application/app';
@@ -233,6 +235,21 @@ export const getAnomalySwimLaneEmbeddableFactory = (
         filters$,
         refresh$,
         anomalySwimLaneServices
+      );
+
+      subscriptions.add(
+        fetch$(api)
+          .pipe(
+            map((fetchContext) => ({
+              query: fetchContext.query,
+              filters: fetchContext.filters,
+              timeRange: fetchContext.timeRange,
+            })),
+            distinctUntilChanged(fastIsEqual)
+          )
+          .subscribe(() => {
+            api.updatePagination({ fromPage: 1 });
+          })
       );
 
       const onRenderComplete = () => {};

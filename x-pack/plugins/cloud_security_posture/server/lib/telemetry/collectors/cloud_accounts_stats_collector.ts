@@ -6,7 +6,11 @@
  */
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { ISavedObjectsRepository, Logger } from '@kbn/core/server';
-import { KSPM_POLICY_TEMPLATE, CSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common';
+import {
+  CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
+  KSPM_POLICY_TEMPLATE,
+  CSPM_POLICY_TEMPLATE,
+} from '@kbn/cloud-security-posture-common';
 import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import { getPackagePolicyIdRuntimeMapping } from '../../../../common/runtime_mappings/get_package_policy_id_mapping';
 import { getIdentifierRuntimeMapping } from '../../../../common/runtime_mappings/get_identifier_runtime_mapping';
@@ -19,7 +23,6 @@ import type {
 } from './types';
 import {
   LATEST_FINDINGS_INDEX_DEFAULT_NS,
-  CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
   VULN_MGMT_POLICY_TEMPLATE,
 } from '../../../../common/constants';
 import {

@@ -96,6 +96,10 @@ export const MonitorType = t.intersection([
     status: t.string,
     type: t.string,
     check_group: t.string,
+    timespan: t.type({
+      gte: t.string,
+      lt: t.string,
+    }),
   }),
   t.partial({
     duration: t.type({
@@ -103,10 +107,7 @@ export const MonitorType = t.intersection([
     }),
     ip: t.string,
     name: t.string,
-    timespan: t.type({
-      gte: t.string,
-      lt: t.string,
-    }),
+
     fleet_managed: t.boolean,
     project: t.type({
       id: t.string,
@@ -241,6 +242,7 @@ export const PingType = t.intersection([
       type: t.string,
       dataset: t.string,
     }),
+    labels: t.record(t.string, t.string),
   }),
 ]);
 

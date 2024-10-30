@@ -175,7 +175,7 @@
             "\nSearchHomepage shared component, used to render the search homepage in\nthe Stack search plugin"
           ],
           "signature": [
-            "React.FunctionComponent<{ children?: React.ReactNode; }>"
+            "React.FunctionComponent<{}>"
           ],
           "path": "x-pack/plugins/search_homepage/public/types.ts",
           "deprecated": false,
@@ -185,14 +185,14 @@
             {
               "parentPluginId": "searchHomepage",
               "id": "def-public.SearchHomepagePluginStart.SearchHomepage.$1",
-              "type": "CompoundType",
+              "type": "Uncategorized",
               "tags": [],
               "label": "props",
               "description": [],
               "signature": [
-                "P & { children?: React.ReactNode; }"
+                "P"
               ],
-              "path": "node_modules/@types/react/index.d.ts",
+              "path": "node_modules/@types/react/ts5.0/index.d.ts",
               "deprecated": false,
               "trackAdoption": false
             },
@@ -206,7 +206,7 @@
               "signature": [
                 "any"
               ],
-              "path": "node_modules/@types/react/index.d.ts",
+              "path": "node_modules/@types/react/ts5.0/index.d.ts",
               "deprecated": false,
               "trackAdoption": false
             }

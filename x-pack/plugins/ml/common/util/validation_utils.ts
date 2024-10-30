@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { VALIDATION_STATUS } from '../constants/validation';
+import { VALIDATION_STATUS } from '@kbn/ml-validators';
 
 // get the most severe status level from a list of messages
 const contains = (arr: string[], str: string) => arr.indexOf(str) >= 0;

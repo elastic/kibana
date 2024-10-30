@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import mockAnomaliesTableData from '../../explorer/__mocks__/mock_anomalies_table_data.json';
+import mockAnomaliesTableData from '../../../../common/__mocks__/mock_anomalies_table_data.json';
 import { getColumns } from './anomalies_table_columns';
 
 jest.mock('../../capabilities/check_capabilities', () => ({

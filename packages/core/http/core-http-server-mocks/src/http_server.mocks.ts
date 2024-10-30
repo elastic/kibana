@@ -34,11 +34,13 @@ const createToolkitMock = (): ToolkitMock => {
     render: jest.fn(),
     next: jest.fn(),
     rewriteUrl: jest.fn(),
+    authzResultNext: jest.fn(),
   };
 };
 
 export const httpServerMock = {
   createKibanaRequest: mockRouter.createKibanaRequest,
+  createFakeKibanaRequest: mockRouter.createFakeKibanaRequest,
   createRawRequest: hapiMocks.createRequest,
   createResponseFactory: mockRouter.createResponseFactory,
   createLifecycleResponseFactory: createLifecycleResponseFactoryMock,

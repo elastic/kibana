@@ -19,7 +19,7 @@ describe('HeaderMenu', () => {
       <HeaderMenu iconType="boxesHorizontal" disableActions={false} actions={null} />
     );
 
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.container).toMatchSnapshot();
 
     expect(wrapper.getByTestId('ButtonIcon')).toBeInTheDocument();
     expect(wrapper.queryByTestId('EmptyButton')).not.toBeInTheDocument();
@@ -28,7 +28,7 @@ describe('HeaderMenu', () => {
   it('should not render icon', () => {
     const wrapper = render(<HeaderMenu disableActions={false} actions={null} />);
 
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.container).toMatchSnapshot();
 
     expect(wrapper.getByTestId('ButtonIcon')).toBeInTheDocument();
     expect(wrapper.queryByTestId('EmptyButton')).not.toBeInTheDocument();
@@ -44,7 +44,7 @@ describe('HeaderMenu', () => {
     );
 
     fireEvent.click(wrapper.getByTestId('ButtonIcon'));
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.container).toMatchSnapshot();
     expect(wrapper.getByTestId('ActionItemdelete')).toBeDisabled();
     expect(wrapper.getByTestId('ActionItemedit')).toBeEnabled();
   });
@@ -60,7 +60,7 @@ describe('HeaderMenu', () => {
       />
     );
 
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.container).toMatchSnapshot();
 
     expect(wrapper.getByTestId('EmptyButton')).toBeInTheDocument();
     expect(wrapper.queryByTestId('ButtonIcon')).not.toBeInTheDocument();
@@ -79,7 +79,7 @@ describe('HeaderMenu', () => {
       />
     );
 
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.container).toMatchSnapshot();
 
     expect(wrapper.getByTestId('EmptyButton')).toBeInTheDocument();
     expect(wrapper.queryByTestId('ButtonIcon')).not.toBeInTheDocument();
@@ -99,7 +99,7 @@ describe('HeaderMenu', () => {
       />
     );
 
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.container).toMatchSnapshot();
 
     expect(wrapper.getByTestId('EmptyButton')).toBeInTheDocument();
     expect(wrapper.queryByTestId('ButtonIcon')).not.toBeInTheDocument();
@@ -129,7 +129,7 @@ describe('HeaderMenu', () => {
       />
     );
 
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.container).toMatchSnapshot();
 
     expect(wrapper.getByTestId('EmptyButton')).toBeInTheDocument();
     fireEvent.click(wrapper.getByTestId('EmptyButton'));

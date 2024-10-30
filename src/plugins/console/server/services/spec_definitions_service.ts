@@ -19,6 +19,7 @@ import {
   GENERATED_SUBFOLDER,
   MANUAL_SUBFOLDER,
   OVERRIDES_SUBFOLDER,
+  API_DOCS_LINK,
 } from '../../common/constants';
 import { jsSpecLoaders } from '../lib';
 
@@ -38,7 +39,11 @@ export class SpecDefinitionsService {
     this.globalRules[parentNode] = rules;
   }
 
-  public addEndpointDescription(endpoint: string, description: EndpointDescription = {}) {
+  public addEndpointDescription(
+    endpoint: string,
+    description: EndpointDescription = {},
+    docsLinkToApiReference: boolean = false
+  ) {
     let copiedDescription: EndpointDescription = {};
     if (this.endpoints[endpoint]) {
       copiedDescription = { ...this.endpoints[endpoint] };
@@ -63,6 +68,10 @@ export class SpecDefinitionsService {
     if (urlParamsDef) {
       description.url_params = _.assign(description.url_params || {}, copiedDescription.url_params);
       _.defaults(description.url_params, urlParamsDef);
+    }
+
+    if (docsLinkToApiReference) {
+      description.documentation = API_DOCS_LINK;
     }
 
     _.assign(copiedDescription, description);
@@ -157,7 +166,7 @@ export class SpecDefinitionsService {
         (endpointsAvailability === 'stack' && description.availability.stack) ||
         (endpointsAvailability === 'serverless' && description.availability.serverless);
       if (addEndpoint) {
-        this.addEndpointDescription(endpoint, description);
+        this.addEndpointDescription(endpoint, description, endpointsAvailability === 'serverless');
       }
     });
   }

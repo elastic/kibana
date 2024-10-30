@@ -12,17 +12,13 @@ import { render } from '@testing-library/react';
 
 import { Panel } from './types';
 import { ExpandableFlyout } from '.';
-import {
-  LEFT_SECTION_TEST_ID,
-  PREVIEW_SECTION_TEST_ID,
-  SETTINGS_MENU_BUTTON_TEST_ID,
-  RIGHT_SECTION_TEST_ID,
-} from './components/test_ids';
-import { type State } from './state';
+import { useWindowWidth } from './hooks/use_window_width';
 import { TestProvider } from './test/provider';
 import { REDUX_ID_FOR_MEMORY_STORAGE } from './constants';
+import { initialUiState } from './store/state';
 
-const id = REDUX_ID_FOR_MEMORY_STORAGE;
+jest.mock('./hooks/use_window_width');
+
 const registeredPanels: Panel[] = [
   {
     key: 'key',
@@ -31,13 +27,11 @@ const registeredPanels: Panel[] = [
 ];
 
 describe('ExpandableFlyout', () => {
-  it(`shouldn't render flyout if no panels`, () => {
-    const state: State = {
-      byId: {},
-    };
+  it(`should not render flyout if window width is 0`, () => {
+    (useWindowWidth as jest.Mock).mockReturnValue(0);
 
     const result = render(
-      <TestProvider state={state}>
+      <TestProvider>
         <ExpandableFlyout registeredPanels={registeredPanels} />
       </TestProvider>
     );
@@ -45,116 +39,30 @@ describe('ExpandableFlyout', () => {
     expect(result.asFragment()).toMatchInlineSnapshot(`<DocumentFragment />`);
   });
 
-  it('should render right section', () => {
+  it(`should render flyout`, () => {
+    (useWindowWidth as jest.Mock).mockReturnValue(1000);
+
     const state = {
-      byId: {
-        [id]: {
-          right: {
-            id: 'key',
-          },
-          left: undefined,
-          preview: undefined,
-        },
-      },
-    };
-
-    const { getByTestId } = render(
-      <TestProvider state={state}>
-        <ExpandableFlyout registeredPanels={registeredPanels} />
-      </TestProvider>
-    );
-
-    expect(getByTestId(RIGHT_SECTION_TEST_ID)).toBeInTheDocument();
-  });
-
-  it('should render left section', () => {
-    const state = {
-      byId: {
-        [id]: {
-          right: undefined,
-          left: {
-            id: 'key',
-          },
-          preview: undefined,
-        },
-      },
-    };
-
-    const { getByTestId } = render(
-      <TestProvider state={state}>
-        <ExpandableFlyout registeredPanels={registeredPanels} />
-      </TestProvider>
-    );
-
-    expect(getByTestId(LEFT_SECTION_TEST_ID)).toBeInTheDocument();
-  });
-
-  it('should render preview section', () => {
-    const state = {
-      byId: {
-        [id]: {
-          right: undefined,
-          left: undefined,
-          preview: [
-            {
+      panels: {
+        byId: {
+          [REDUX_ID_FOR_MEMORY_STORAGE]: {
+            right: {
               id: 'key',
             },
-          ],
+            left: undefined,
+            preview: undefined,
+          },
         },
       },
+      ui: initialUiState,
     };
 
     const { getByTestId } = render(
       <TestProvider state={state}>
-        <ExpandableFlyout registeredPanels={registeredPanels} />
+        <ExpandableFlyout registeredPanels={registeredPanels} data-test-subj={'TEST'} />
       </TestProvider>
     );
 
-    expect(getByTestId(PREVIEW_SECTION_TEST_ID)).toBeInTheDocument();
-  });
-
-  it('should not render flyout when right has value but does not matches registered panels', () => {
-    const state = {
-      byId: {
-        [id]: {
-          right: {
-            id: 'key1',
-          },
-          left: undefined,
-          preview: undefined,
-        },
-      },
-    };
-
-    const { queryByTestId } = render(
-      <TestProvider state={state}>
-        <ExpandableFlyout data-test-subj="my-test-flyout" registeredPanels={registeredPanels} />
-      </TestProvider>
-    );
-
-    expect(queryByTestId('my-test-flyout')).toBeNull();
-    expect(queryByTestId(RIGHT_SECTION_TEST_ID)).toBeNull();
-  });
-
-  it('should render the menu to change display options', () => {
-    const state = {
-      byId: {
-        [id]: {
-          right: {
-            id: 'key',
-          },
-          left: undefined,
-          preview: undefined,
-        },
-      },
-    };
-
-    const { getByTestId } = render(
-      <TestProvider state={state}>
-        <ExpandableFlyout registeredPanels={registeredPanels} />
-      </TestProvider>
-    );
-
-    expect(getByTestId(SETTINGS_MENU_BUTTON_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId('TEST')).toBeInTheDocument();
   });
 });

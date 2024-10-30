@@ -17,7 +17,7 @@ import { HoverActionPopover } from './hover_popover_action';
 
 const HighlightFieldDescription = dynamic(() => import('./highlight_field_description'));
 
-interface HighlightFieldProps {
+export interface HighlightFieldProps {
   field: string;
   fieldMetadata?: PartialFieldMetadataPlain;
   formattedValue?: string;
@@ -25,6 +25,7 @@ interface HighlightFieldProps {
   label: string;
   useBadge?: boolean;
   value?: unknown;
+  children?: (props: { content: React.ReactNode }) => React.ReactNode | React.ReactNode;
 }
 
 export function HighlightField({
@@ -35,6 +36,7 @@ export function HighlightField({
   label,
   useBadge = false,
   value,
+  children,
   ...props
 }: HighlightFieldProps) {
   const hasFieldDescription = !!fieldMetadata?.short;
@@ -59,19 +61,25 @@ export function HighlightField({
             <EuiBadge className="eui-textTruncate" color="hollow">
               {formattedValue}
             </EuiBadge>
+          ) : typeof children === 'function' ? (
+            children({ content: <FormattedValue value={formattedValue} /> })
           ) : (
-            <EuiText
-              className="eui-textTruncate"
-              size="s"
-              // Value returned from formatFieldValue is always sanitized
-              dangerouslySetInnerHTML={{ __html: formattedValue }}
-            />
+            <FormattedValue value={formattedValue} />
           )}
         </EuiFlexGroup>
       </HoverActionPopover>
     </div>
   ) : null;
 }
+
+const FormattedValue = ({ value }: { value: string }) => (
+  <EuiText
+    className="eui-textTruncate"
+    size="s"
+    // Value returned from formatFieldValue is always sanitized
+    dangerouslySetInnerHTML={{ __html: value }}
+  />
+);
 
 const fieldNameStyle = css`
   color: ${euiThemeVars.euiColorDarkShade};

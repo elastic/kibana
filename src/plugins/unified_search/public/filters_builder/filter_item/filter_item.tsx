@@ -251,6 +251,7 @@ export function FilterItem({
             hasInteractiveChildren={true}
             disableInteractiveElementBlocking
             className={cx(disabledDraggableCss)}
+            usePortal
           >
             {(provided) => (
               <EuiFlexGroup

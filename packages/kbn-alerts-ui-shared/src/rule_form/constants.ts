@@ -27,15 +27,17 @@ export const DEFAULT_FREQUENCY = {
   summary: false,
 };
 
-export const GET_DEFAULT_FORM_DATA = ({
+export const getDefaultFormData = ({
   ruleTypeId,
   name,
   consumer,
   schedule,
+  actions,
 }: {
   ruleTypeId: RuleFormData['ruleTypeId'];
   name: RuleFormData['name'];
   consumer: RuleFormData['consumer'];
+  actions: RuleFormData['actions'];
   schedule?: RuleFormData['schedule'];
 }) => {
   return {
@@ -47,6 +49,8 @@ export const GET_DEFAULT_FORM_DATA = ({
     consumer,
     ruleTypeId,
     name,
+    actions,
+    alertDelay: { active: 1 },
   };
 };
 

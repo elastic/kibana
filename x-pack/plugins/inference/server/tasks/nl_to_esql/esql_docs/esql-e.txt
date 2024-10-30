@@ -1,8 +1,16 @@
-## E
+# E
 
-The `E` function returns Euler’s number, which is a mathematical constant approximately equal to 2.71828. It is the base of the natural logarithm.
+The E function returns Euler's number.
 
-### Examples
+## Syntax
+
+`E()`
+
+### Parameters
+
+This function does not require any parameters.
+
+## Examples
 
 ```esql
 ROW E()

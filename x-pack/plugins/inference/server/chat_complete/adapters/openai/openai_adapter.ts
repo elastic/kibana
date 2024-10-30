@@ -13,7 +13,7 @@ import type {
   ChatCompletionToolMessageParam,
   ChatCompletionUserMessageParam,
 } from 'openai/resources';
-import { filter, from, map, switchMap, tap, throwError } from 'rxjs';
+import { filter, from, map, switchMap, tap, throwError, identity } from 'rxjs';
 import { Readable, isReadable } from 'stream';
 import {
   ChatCompletionChunkEvent,
@@ -26,18 +26,38 @@ import { createTokenLimitReachedError } from '../../../../common/chat_complete/e
 import { createInferenceInternalError } from '../../../../common/errors';
 import { eventSourceStreamIntoObservable } from '../../../util/event_source_stream_into_observable';
 import type { InferenceConnectorAdapter } from '../../types';
+import {
+  wrapWithSimulatedFunctionCalling,
+  parseInlineFunctionCalls,
+} from '../../simulated_function_calling';
 
 export const openAIAdapter: InferenceConnectorAdapter = {
-  chatComplete: ({ executor, system, messages, toolChoice, tools }) => {
+  chatComplete: ({ executor, system, messages, toolChoice, tools, functionCalling, logger }) => {
     const stream = true;
+    const simulatedFunctionCalling = functionCalling === 'simulated';
 
-    const request: Omit<OpenAI.ChatCompletionCreateParams, 'model'> & { model?: string } = {
-      stream,
-      messages: messagesToOpenAI({ system, messages }),
-      tool_choice: toolChoiceToOpenAI(toolChoice),
-      tools: toolsToOpenAI(tools),
-      temperature: 0,
-    };
+    let request: Omit<OpenAI.ChatCompletionCreateParams, 'model'> & { model?: string };
+    if (simulatedFunctionCalling) {
+      const wrapped = wrapWithSimulatedFunctionCalling({
+        system,
+        messages,
+        toolChoice,
+        tools,
+      });
+      request = {
+        stream,
+        messages: messagesToOpenAI({ system: wrapped.system, messages: wrapped.messages }),
+        temperature: 0,
+      };
+    } else {
+      request = {
+        stream,
+        messages: messagesToOpenAI({ system, messages }),
+        tool_choice: toolChoiceToOpenAI(toolChoice),
+        tools: toolsToOpenAI(tools),
+        temperature: 0,
+      };
+    }
 
     return from(
       executor.invoke({
@@ -74,7 +94,7 @@ export const openAIAdapter: InferenceConnectorAdapter = {
       }),
       filter(
         (line): line is OpenAI.ChatCompletionChunk =>
-          'object' in line && line.object === 'chat.completion.chunk'
+          'object' in line && line.object === 'chat.completion.chunk' && line.choices.length > 0
       ),
       map((chunk): ChatCompletionChunkEvent => {
         const delta = chunk.choices[0].delta;
@@ -94,7 +114,8 @@ export const openAIAdapter: InferenceConnectorAdapter = {
               };
             }) ?? [],
         };
-      })
+      }),
+      simulatedFunctionCalling ? parseInlineFunctionCalls({ logger }) : identity
     );
   },
 };

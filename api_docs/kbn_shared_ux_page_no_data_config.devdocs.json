@@ -13,7 +13,7 @@
         "signature": [
           "(props: ",
           "NoDataConfigPageProps",
-          ") => JSX.Element | null"
+          ") => React.JSX.Element | null"
         ],
         "path": "packages/shared-ux/page/no_data_config/impl/src/no_data_config_page.tsx",
         "deprecated": false,
@@ -48,9 +48,9 @@
           "\nKibana-specific Provider that maps dependencies to services."
         ],
         "signature": [
-          "({ children, ...dependencies }: React.PropsWithChildren<React.PropsWithChildren<",
+          "({ children, ...dependencies }: React.PropsWithChildren<",
           "NoDataCardKibanaDependencies",
-          ">>) => JSX.Element"
+          ">) => React.JSX.Element"
         ],
         "path": "packages/shared-ux/page/no_data_config/impl/src/services.tsx",
         "deprecated": false,
@@ -64,9 +64,9 @@
             "label": "{ children, ...dependencies }",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<React.PropsWithChildren<",
+              "React.PropsWithChildren<",
               "NoDataCardKibanaDependencies",
-              ">>"
+              ">"
             ],
             "path": "packages/shared-ux/page/no_data_config/impl/src/services.tsx",
             "deprecated": false,
@@ -87,9 +87,9 @@
           "\nA Context Provider that provides services to the component and its dependencies."
         ],
         "signature": [
-          "({ children, ...services }: React.PropsWithChildren<React.PropsWithChildren<",
+          "({ children, ...services }: React.PropsWithChildren<",
           "NoDataCardServices",
-          ">>) => JSX.Element"
+          ">) => React.JSX.Element"
         ],
         "path": "packages/shared-ux/page/no_data_config/impl/src/services.tsx",
         "deprecated": false,
@@ -103,9 +103,9 @@
             "label": "{\n  children,\n  ...services\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<React.PropsWithChildren<",
+              "React.PropsWithChildren<",
               "NoDataCardServices",
-              ">>"
+              ">"
             ],
             "path": "packages/shared-ux/page/no_data_config/impl/src/services.tsx",
             "deprecated": false,
@@ -125,22 +125,8 @@
         "description": [],
         "signature": [
           "{ (props: Props<",
-          "_EuiPageOuterProps",
-          " & Omit<any, \"border\" | \"component\"> & ",
-          "_EuiPageRestrictWidth",
-          " & ",
-          "_EuiPageBottomBorder",
-          " & { contentBorder?: any; minHeight?: ",
-          "Property",
-          ".MinHeight<string | number> | undefined; offset?: number | undefined; mainProps?: (",
-          "CommonProps",
-          " & React.HTMLAttributes<HTMLElement>) | undefined; component?: ",
-          "ComponentTypes",
-          " | undefined; } & { noDataConfig?: ",
-          "NoDataPageProps",
-          " | undefined; pageSideBar?: React.ReactNode; pageSideBarProps?: ",
-          "EuiPageSidebarProps",
-          " | undefined; }>): JSX.Element; displayName: string; }"
+          "NoDataConfigPageProps",
+          ">): React.JSX.Element; displayName: string; }"
         ],
         "path": "packages/shared-ux/page/no_data_config/impl/src/no_data_config_page.tsx",
         "deprecated": false,
@@ -204,11 +190,13 @@
         "description": [],
         "signature": [
           "_EuiPageOuterProps",
-          " & Omit<any, \"border\" | \"component\"> & ",
+          " & Omit<",
+          "_EuiPageInnerProps",
+          "<\"main\">, \"border\" | \"component\"> & ",
           "_EuiPageRestrictWidth",
           " & ",
           "_EuiPageBottomBorder",
-          " & { contentBorder?: any; minHeight?: ",
+          " & { contentBorder?: boolean | undefined; minHeight?: ",
           "Property",
           ".MinHeight<string | number> | undefined; offset?: number | undefined; mainProps?: (",
           "CommonProps",

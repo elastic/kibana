@@ -1,6 +1,8 @@
 [[search-sessions]]
 == Run a search session in the background
 
+deprecated::[8.15.0,Search Sessions are deprecated and will be removed in a future version.]
+
 Sometimes you might need to search through large amounts of data, no matter
 how long the search takes.
 Consider a threat hunting scenario, where you need to search through years of data.

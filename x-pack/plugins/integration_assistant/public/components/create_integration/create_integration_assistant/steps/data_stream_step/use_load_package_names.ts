@@ -23,10 +23,10 @@ export const useLoadPackageNames = () => {
         setIsLoading(true);
         const packagesResponse = await getInstalledPackages(deps);
         if (abortController.signal.aborted) return;
-        if (!packagesResponse?.response?.length) {
+        if (!packagesResponse?.items?.length) {
           throw Error('No packages found');
         }
-        setPackageNames(new Set(packagesResponse.response.map((pkg) => pkg.name)));
+        setPackageNames(new Set(packagesResponse.items.map((pkg) => pkg.id)));
       } catch (e) {
         if (!abortController.signal.aborted) {
           notifications?.toasts.addError(e, {

@@ -11,7 +11,8 @@ import type { Story } from '@storybook/react';
 import { RelatedIntegrationsReadOnly } from './related_integrations';
 import { ThreeWayDiffStorybookProviders } from '../../storybook/three_way_diff_storybook_providers';
 import { FieldReadOnly } from '../../field_readonly';
-import type { DiffableAllFields } from '../../../../../../../../../common/api/detection_engine';
+import type { DiffableRule } from '../../../../../../../../../common/api/detection_engine';
+import { mockCustomQueryRule } from '../../storybook/mocks';
 
 export default {
   component: RelatedIntegrationsReadOnly,
@@ -39,17 +40,14 @@ function MockRelatedIntegrationsData({ children }: { children: React.ReactNode }
 }
 
 interface TemplateProps {
-  finalDiffableRule: Partial<DiffableAllFields>;
+  finalDiffableRule: DiffableRule;
 }
 
 const Template: Story<TemplateProps> = (args) => {
   return (
-    <ThreeWayDiffStorybookProviders>
+    <ThreeWayDiffStorybookProviders finalDiffableRule={args.finalDiffableRule}>
       <MockRelatedIntegrationsData>
-        <FieldReadOnly
-          fieldName="related_integrations"
-          finalDiffableRule={args.finalDiffableRule as DiffableAllFields}
-        />
+        <FieldReadOnly fieldName="related_integrations" />
       </MockRelatedIntegrationsData>
     </ThreeWayDiffStorybookProviders>
   );
@@ -58,7 +56,7 @@ const Template: Story<TemplateProps> = (args) => {
 export const Default = Template.bind({});
 
 Default.args = {
-  finalDiffableRule: {
+  finalDiffableRule: mockCustomQueryRule({
     related_integrations: [{ package: 'endpoint', version: '^8.2.0' }],
-  },
+  }),
 };

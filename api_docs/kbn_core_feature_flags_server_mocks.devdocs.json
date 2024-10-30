@@ -1,0 +1,182 @@
+{
+  "id": "@kbn/core-feature-flags-server-mocks",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/core-feature-flags-server-mocks",
+        "id": "def-server.coreFeatureFlagsMock",
+        "type": "Object",
+        "tags": [],
+        "label": "coreFeatureFlagsMock",
+        "description": [
+          "\nMocks for the Feature Flags service (browser-side)"
+        ],
+        "path": "packages/core/feature-flags/core-feature-flags-server-mocks/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-feature-flags-server-mocks",
+            "id": "def-server.coreFeatureFlagsMock.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [
+              "/**\n   * Mocks the entire feature flags service\n   */"
+            ],
+            "signature": [
+              "() => jest.Mocked<",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.PublicMethodsOf",
+                "text": "PublicMethodsOf"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/core-feature-flags-server-internal",
+                "scope": "server",
+                "docId": "kibKbnCoreFeatureFlagsServerInternalPluginApi",
+                "section": "def-server.FeatureFlagsService",
+                "text": "FeatureFlagsService"
+              },
+              ">>"
+            ],
+            "path": "packages/core/feature-flags/core-feature-flags-server-mocks/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-feature-flags-server-mocks",
+            "id": "def-server.coreFeatureFlagsMock.createInternalSetup",
+            "type": "Function",
+            "tags": [],
+            "label": "createInternalSetup",
+            "description": [
+              "/**\n   * Mocks the core-internal setup contract\n   */"
+            ],
+            "signature": [
+              "() => jest.Mocked<",
+              {
+                "pluginId": "@kbn/core-feature-flags-server-internal",
+                "scope": "server",
+                "docId": "kibKbnCoreFeatureFlagsServerInternalPluginApi",
+                "section": "def-server.InternalFeatureFlagsSetup",
+                "text": "InternalFeatureFlagsSetup"
+              },
+              ">"
+            ],
+            "path": "packages/core/feature-flags/core-feature-flags-server-mocks/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-feature-flags-server-mocks",
+            "id": "def-server.coreFeatureFlagsMock.createSetup",
+            "type": "Function",
+            "tags": [],
+            "label": "createSetup",
+            "description": [
+              "/**\n   * Mocks the setup contract\n   */"
+            ],
+            "signature": [
+              "() => jest.Mocked<",
+              {
+                "pluginId": "@kbn/core-feature-flags-server",
+                "scope": "server",
+                "docId": "kibKbnCoreFeatureFlagsServerPluginApi",
+                "section": "def-server.FeatureFlagsSetup",
+                "text": "FeatureFlagsSetup"
+              },
+              ">"
+            ],
+            "path": "packages/core/feature-flags/core-feature-flags-server-mocks/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-feature-flags-server-mocks",
+            "id": "def-server.coreFeatureFlagsMock.createStart",
+            "type": "Function",
+            "tags": [],
+            "label": "createStart",
+            "description": [
+              "/**\n   * Mocks the start contract\n   */"
+            ],
+            "signature": [
+              "() => jest.Mocked<",
+              {
+                "pluginId": "@kbn/core-feature-flags-server",
+                "scope": "server",
+                "docId": "kibKbnCoreFeatureFlagsServerPluginApi",
+                "section": "def-server.FeatureFlagsStart",
+                "text": "FeatureFlagsStart"
+              },
+              ">"
+            ],
+            "path": "packages/core/feature-flags/core-feature-flags-server-mocks/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-feature-flags-server-mocks",
+            "id": "def-server.coreFeatureFlagsMock.createRequestHandlerContext",
+            "type": "Function",
+            "tags": [],
+            "label": "createRequestHandlerContext",
+            "description": [
+              "/**\n   * Mocks the request handler context contract\n   */"
+            ],
+            "signature": [
+              "() => jest.Mocked<",
+              {
+                "pluginId": "@kbn/core-feature-flags-server",
+                "scope": "server",
+                "docId": "kibKbnCoreFeatureFlagsServerPluginApi",
+                "section": "def-server.FeatureFlagsRequestHandlerContext",
+                "text": "FeatureFlagsRequestHandlerContext"
+              },
+              ">"
+            ],
+            "path": "packages/core/feature-flags/core-feature-flags-server-mocks/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

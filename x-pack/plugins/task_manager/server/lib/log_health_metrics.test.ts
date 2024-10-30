@@ -436,7 +436,7 @@ function getMockMonitoredHealth(overrides = {}): MonitoredHealth {
         status: HealthStatus.OK,
         value: {
           capacity: { config: 10, as_cost: 20, as_workers: 10 },
-          claim_strategy: 'default',
+          claim_strategy: 'update_by_query',
           poll_interval: 3000,
           request_capacity: 1000,
           monitored_aggregated_stats_refresh_rate: 5000,

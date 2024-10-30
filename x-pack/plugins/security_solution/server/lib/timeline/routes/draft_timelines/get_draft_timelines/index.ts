@@ -5,19 +5,22 @@
  * 2.0.
  */
 
+import type { IKibanaResponse } from '@kbn/core-http-server';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
-import type { ConfigType } from '../../../../..';
 import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
 
 import { TIMELINE_DRAFT_URL } from '../../../../../../common/constants';
 import { buildFrameworkRequest } from '../../../utils/common';
-import { buildRouteValidationWithExcess } from '../../../../../utils/build_validation/route_validation';
 import { getDraftTimeline, persistTimeline } from '../../../saved_object/timelines';
 import { draftTimelineDefaults } from '../../../utils/default_timeline';
-import { getDraftTimelineSchema } from '../../../../../../common/api/timeline';
+import {
+  GetDraftTimelinesRequestQuery,
+  type GetDraftTimelinesResponse,
+} from '../../../../../../common/api/timeline';
 
-export const getDraftTimelinesRoute = (router: SecuritySolutionPluginRouter, _: ConfigType) => {
+export const getDraftTimelinesRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
     .get({
       path: TIMELINE_DRAFT_URL,
@@ -29,11 +32,11 @@ export const getDraftTimelinesRoute = (router: SecuritySolutionPluginRouter, _: 
     .addVersion(
       {
         validate: {
-          request: { query: buildRouteValidationWithExcess(getDraftTimelineSchema) },
+          request: { query: buildRouteValidationWithZod(GetDraftTimelinesRequestQuery) },
         },
         version: '2023-10-31',
       },
-      async (context, request, response) => {
+      async (context, request, response): Promise<IKibanaResponse<GetDraftTimelinesResponse>> => {
         const frameworkRequest = await buildFrameworkRequest(context, request);
         const siemResponse = buildSiemResponse(response);
 

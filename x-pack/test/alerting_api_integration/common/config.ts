@@ -40,6 +40,7 @@ const enabledActionTypes = [
   '.bedrock',
   '.cases-webhook',
   '.email',
+  '.gemini',
   '.index',
   '.opsgenie',
   '.pagerduty',
@@ -76,6 +77,7 @@ const enabledActionTypes = [
   'test.system-action',
   'test.system-action-kibana-privileges',
   'test.system-action-connector-adapter',
+  'test.connector-with-hooks',
 ];
 
 export function createTestConfig(name: string, options: CreateTestConfigOptions) {
@@ -208,6 +210,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
             { id: 'test.capped', max: '1' },
           ])}`,
           `--xpack.alerting.enableFrameworkAlerts=true`,
+          `--xpack.alerting.rulesSettings.cacheInterval=10000`,
           `--xpack.actions.enabledActionTypes=${JSON.stringify(enabledActionTypes)}`,
           `--xpack.actions.rejectUnauthorized=${rejectUnauthorized}`,
           `--xpack.actions.microsoftGraphApiUrl=${servers.kibana.protocol}://${servers.kibana.hostname}:${servers.kibana.port}/api/_actions-FTS-external-service-simulators/exchange/users/test@/sendMail`,
@@ -353,6 +356,10 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           '--xpack.task_manager.allow_reading_invalid_state=false',
           '--xpack.actions.queued.max=500',
           `--xpack.stack_connectors.enableExperimental=${JSON.stringify(experimentalFeatures)}`,
+          '--xpack.uptime.service.password=test',
+          '--xpack.uptime.service.username=localKibanaIntegrationTestsUser',
+          '--xpack.uptime.service.devUrl=mockDevUrl',
+          '--xpack.uptime.service.manifestUrl=mockDevUrl',
         ],
       },
     };

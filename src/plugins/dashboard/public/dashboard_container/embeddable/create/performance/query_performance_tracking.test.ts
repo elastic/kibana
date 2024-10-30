@@ -7,18 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { CoreStart } from '@kbn/core/public';
 import { PerformanceMetricEvent } from '@kbn/ebt-tools';
 import { PresentationContainer, TracksQueryPerformance } from '@kbn/presentation-containers';
 import { getMockPresentationContainer } from '@kbn/presentation-containers/mocks';
-import { apiPublishesPhaseEvents, PhaseEvent, PhaseEventType } from '@kbn/presentation-publishing';
+import { PhaseEvent, PhaseEventType, apiPublishesPhaseEvents } from '@kbn/presentation-publishing';
 import { waitFor } from '@testing-library/react';
 import { BehaviorSubject } from 'rxjs';
-import { DashboardAnalyticsService } from '../../../../services/analytics/types';
 import { startQueryPerformanceTracking } from './query_performance_tracking';
 
 const mockMetricEvent = jest.fn();
 jest.mock('@kbn/ebt-tools', () => ({
-  reportPerformanceMetricEvent: (_: DashboardAnalyticsService, args: PerformanceMetricEvent) => {
+  reportPerformanceMetricEvent: (_: CoreStart['analytics'], args: PerformanceMetricEvent) => {
     mockMetricEvent(args);
   },
 }));

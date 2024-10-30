@@ -20,6 +20,7 @@ export type {
   ESQLLocation,
   ESQLMessage,
   ESQLSingleAstItem,
+  ESQLAstQueryExpression,
   ESQLSource,
   ESQLColumn,
   ESQLLiteral,
@@ -29,18 +30,31 @@ export type {
   ESQLAstNode,
 } from './src/types';
 
-// Low level functions to parse grammar
-export { getParser, getLexer, ROOT_STATEMENT } from './src/antlr_facade';
+export { Builder, type AstNodeParserFields, type AstNodeTemplate } from './src/builder';
 
-/**
- * ES|QL Query string -> AST data structure
- * this is the foundational building block for any advanced feature
- * a developer wants to build on top of the ESQL language
- **/
-export { getAstAndSyntaxErrors } from './src/ast_parser';
-
-export { ESQLErrorListener } from './src/antlr_error_listener';
+export {
+  getParser,
+  createParser,
+  getLexer,
+  parse,
+  parseErrors,
+  type ParseOptions,
+  type ParseResult,
+  getAstAndSyntaxErrors,
+  ESQLErrorListener,
+} from './src/parser';
 
 export { Walker, type WalkerOptions, walk } from './src/walker';
 
-export { BasicPrettyPrinter } from './src/pretty_print/basic_pretty_printer';
+export {
+  LeafPrinter,
+  BasicPrettyPrinter,
+  type BasicPrettyPrinterMultilineOptions,
+  type BasicPrettyPrinterOptions,
+  WrappingPrettyPrinter,
+  type WrappingPrettyPrinterOptions,
+} from './src/pretty_print';
+
+export { EsqlQuery } from './src/query';
+
+export * as mutate from './src/mutate';

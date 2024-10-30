@@ -1,8 +1,28 @@
-## DATE_DIFF
+# DATE_DIFF
 
-The `DATE_DIFF` function subtracts the `startTimestamp` from the `endTimestamp` and returns the difference in multiples of the specified unit. If `startTimestamp` is later than the `endTimestamp`, negative values are returned. Note that while there is an overlap between the function’s supported units and ES|QL’s supported time span literals, these sets are distinct and not interchangeable. Similarly, the supported abbreviations are conveniently shared with implementations of this function in other established products and not necessarily common with the date-time nomenclature used by Elasticsearch.
+The DATE_DIFF function calculates the difference between two timestamps and returns the difference in multiples of the specified `unit`.
 
-### Examples
+## Syntax
+
+`DATE_DIFF(unit, startTimestamp, endTimestamp)`
+
+### Parameters
+
+#### unit
+
+The unit of time in which the difference will be calculated.
+
+#### startTimestamp
+
+The starting timestamp for the calculation.
+
+#### endTimestamp
+
+The ending timestamp for the calculation.
+
+## Examples
+
+The following example demonstrates how to use the DATE_DIFF function to calculate the difference between two timestamps in microseconds:
 
 ```esql
 ROW date1 = TO_DATETIME("2023-12-02T11:00:00.000Z"), date2 = TO_DATETIME("2023-12-02T11:00:00.001Z")
@@ -13,3 +33,9 @@ ROW date1 = TO_DATETIME("2023-12-02T11:00:00.000Z"), date2 = TO_DATETIME("2023-1
 ROW date1 = TO_DATETIME("2023-01-01T00:00:00.000Z"), date2 = TO_DATETIME("2023-12-31T23:59:59.999Z")
 | EVAL dd_days = DATE_DIFF("days", date1, date2)
 ```
+
+## Notes
+
+- If the `startTimestamp` is later than the `endTimestamp`, the function will return a negative value.
+
+- It's important to note that while there is some overlap between the units supported by this function and ESQL's time span literals, these sets are not interchangeable. Also, the abbreviations supported by this function are shared with other established products and may not align with the date-time nomenclature used by Elasticsearch.

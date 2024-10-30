@@ -1072,7 +1072,7 @@
           "EuiFlyoutProps",
           "<\"div\"> | ",
           "EuiFlyoutResizableProps",
-          ", \"onClose\"> & { onClose?: ((flyout: ",
+          ", \"onResize\" | \"onClose\"> & { onClose?: ((flyout: ",
           {
             "pluginId": "@kbn/core-mount-utils-browser",
             "scope": "public",

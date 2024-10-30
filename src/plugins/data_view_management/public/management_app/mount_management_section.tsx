@@ -17,6 +17,7 @@ import { StartServicesAccessor } from '@kbn/core/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { ManagementAppMountParams } from '@kbn/management-plugin/public';
+import { NoDataViewsPromptKibanaProvider } from '@kbn/shared-ux-prompt-no-data-views';
 import {
   IndexPatternTableWithRouter,
   EditIndexPatternContainer,
@@ -28,6 +29,7 @@ import {
   IndexPatternManagementSetupDependencies,
 } from '../plugin';
 import { IndexPatternManagmentContext } from '../types';
+import { DataViewMgmtService } from './data_view_management_service';
 
 const readOnlyBadge = {
   text: i18n.translate('indexPatternManagement.indexPatterns.badge.readOnly.text', {
@@ -63,11 +65,13 @@ export async function mountManagementSection(
       dataViews,
       fieldFormats,
       unifiedSearch,
+      share,
       spaces,
       savedObjectsManagement,
     },
     indexPatternManagementStart,
   ] = await getStartServices();
+
   const canSave = dataViews.getCanSaveSync();
 
   if (!canSave) {
@@ -75,10 +79,20 @@ export async function mountManagementSection(
   }
 
   const deps: IndexPatternManagmentContext = {
+    dataViewMgmtService: new DataViewMgmtService({
+      services: {
+        dataViews,
+        application,
+        savedObjectsManagement,
+        uiSettings,
+      },
+      initialValues: {},
+    }),
     application,
     chrome,
     uiSettings,
     settings,
+    share,
     notifications,
     overlays,
     unifiedSearch,
@@ -105,23 +119,29 @@ export async function mountManagementSection(
   ReactDOM.render(
     <KibanaRenderContextProvider {...startServices}>
       <KibanaContextProvider services={deps}>
-        <Router history={params.history}>
-          <Routes>
-            <Route path={['/create']}>
-              <IndexPatternTableWithRouter canSave={canSave} showCreateDialog={true} />
-            </Route>
-            <Route path={createEditPath}>
-              <CreateEditFieldContainer />
-            </Route>
-            <Route path={['/dataView/:id']}>
-              <EditIndexPatternContainer />
-            </Route>
-            <Redirect path={'/patterns*'} to={'dataView*'} />
-            <Route path={['/']}>
-              <IndexPatternTableWithRouter canSave={canSave} />
-            </Route>
-          </Routes>
-        </Router>
+        <NoDataViewsPromptKibanaProvider
+          coreStart={{ ...startServices, docLinks, application }}
+          dataViewEditor={dataViewEditor}
+          share={share}
+        >
+          <Router history={params.history}>
+            <Routes>
+              <Route path={['/create']}>
+                <IndexPatternTableWithRouter canSave={canSave} showCreateDialog={true} />
+              </Route>
+              <Route path={createEditPath}>
+                <CreateEditFieldContainer />
+              </Route>
+              <Route path={['/dataView/:id']}>
+                <EditIndexPatternContainer />
+              </Route>
+              <Redirect path={'/patterns*'} to={'dataView*'} />
+              <Route path={['/']}>
+                <IndexPatternTableWithRouter canSave={canSave} />
+              </Route>
+            </Routes>
+          </Router>
+        </NoDataViewsPromptKibanaProvider>
       </KibanaContextProvider>
     </KibanaRenderContextProvider>,
     params.element

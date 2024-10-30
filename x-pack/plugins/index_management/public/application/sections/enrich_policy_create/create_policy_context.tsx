@@ -6,7 +6,7 @@
  */
 
 import React, { createContext, useContext, useState } from 'react';
-import type { SerializedEnrichPolicy } from '@kbn/index-management';
+import type { SerializedEnrichPolicy } from '@kbn/index-management-shared-types';
 
 export type DraftPolicy = Partial<SerializedEnrichPolicy>;
 

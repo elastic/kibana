@@ -19,7 +19,7 @@ import { COLORS } from './constants';
 
 /*
   Finds an element with a text content that exactly matches the passed argument.
-  Handly because React Testing Library's doesn't provide an easy way to search by
+  Handy because React Testing Library's doesn't provide an easy way to search by
   text if the text is split into multiple DOM elements.
 */
 function findChildByTextContent(parent: Element, textContent: string): HTMLElement {
@@ -179,7 +179,7 @@ describe('Rule upgrade workflow: viewing rule changes in JSON diff view', () => 
   });
 
   describe('Technical properties should not be included in preview', () => {
-    it.each(['revision', 'created_at', 'created_by', 'updated_at', 'updated_by'])(
+    it.each(['revision', 'created_at', 'created_by', 'updated_at', 'updated_by', 'rule_source'])(
       'Should not include "%s" in preview',
       (property) => {
         const oldRule: RuleResponse = {
@@ -190,6 +190,7 @@ describe('Rule upgrade workflow: viewing rule changes in JSON diff view', () => 
           created_by: 'mockUserOne',
           updated_at: '01/01/2024T00:00:000z',
           updated_by: 'mockUserTwo',
+          rule_source: { type: 'internal' },
         };
 
         const newRule: RuleResponse = {
@@ -200,6 +201,7 @@ describe('Rule upgrade workflow: viewing rule changes in JSON diff view', () => 
           created_by: 'mockUserOne',
           updated_at: '02/02/2024T00:00:001z',
           updated_by: 'mockUserThree',
+          rule_source: { type: 'external', is_customized: true },
         };
 
         render(<RuleDiffTab oldRule={oldRule} newRule={newRule} />);

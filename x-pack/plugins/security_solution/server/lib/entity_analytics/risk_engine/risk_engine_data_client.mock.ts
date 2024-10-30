@@ -15,6 +15,9 @@ const createRiskEngineDataClientMock = () =>
     getConfiguration: jest.fn(),
     getStatus: jest.fn(),
     init: jest.fn(),
+    tearDown: jest.fn(),
   } as unknown as jest.Mocked<RiskEngineDataClient>);
 
-export const riskEngineDataClientMock = { create: createRiskEngineDataClientMock };
+export const riskEngineDataClientMock = {
+  create: createRiskEngineDataClientMock,
+};

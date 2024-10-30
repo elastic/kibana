@@ -47,7 +47,7 @@ describe('ExceptionListHeader', () => {
         backOptions={{ pageId: '', path: '', onNavigate }}
       />
     );
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.container).toMatchSnapshot();
     fireEvent.click(wrapper.getByTestId('RightSideMenuItemsMenuActionsItems'));
     expect(wrapper.queryByTestId('RightSideMenuItemsMenuActionsButtonIcon')).toBeDisabled();
     expect(wrapper.getByTestId('DescriptionText')).toHaveTextContent(
@@ -80,7 +80,7 @@ describe('ExceptionListHeader', () => {
     );
     expect(wrapper.queryByTestId('RightSideMenuItemsMenuActionsButtonIcon')).toBeEnabled();
     fireEvent.click(wrapper.getByTestId('RightSideMenuItemsMenuActionsButtonIcon'));
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.container).toMatchSnapshot();
 
     expect(wrapper.queryByTestId('RightSideMenuItemsMenuActionsActionItem1')).toBeEnabled();
     expect(wrapper.queryByTestId('RightSideMenuItemsMenuActionsActionItem2')).toBeDisabled();
@@ -103,7 +103,7 @@ describe('ExceptionListHeader', () => {
         backOptions={{ pageId: '', path: '', onNavigate }}
       />
     );
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.container).toMatchSnapshot();
     fireEvent.click(wrapper.getByTestId('RightSideMenuItemsContainer'));
     expect(wrapper.getByTestId('DescriptionText')).toHaveTextContent(
       i18n.EXCEPTION_LIST_HEADER_DESCRIPTION
@@ -134,7 +134,7 @@ describe('ExceptionListHeader', () => {
         backOptions={{ pageId: '', path: '', onNavigate }}
       />
     );
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.container).toMatchSnapshot();
     expect(wrapper.getByTestId('EditModal')).toBeInTheDocument();
   });
   it('should go back the page path when back button is clicked', () => {

@@ -99,12 +99,6 @@ describe('#resolve()', () => {
       }
     `);
 
-    expect(resolver.resolve('ace/lib/dom', FIXTURES_DIR)).toMatchInlineSnapshot(`
-      Object {
-        "type": "ignore",
-      }
-    `);
-
     expect(resolver.resolve('@elastic/eui/src/components/foo', FIXTURES_DIR))
       .toMatchInlineSnapshot(`
       Object {

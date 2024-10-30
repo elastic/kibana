@@ -13,12 +13,21 @@ import { registerRelatedRoutes } from './related_routes';
 import { registerPipelineRoutes } from './pipeline_routes';
 import type { IntegrationAssistantRouteHandlerContext } from '../plugin';
 import { registerAnalyzeLogsRoutes } from './analyze_logs_routes';
+import { registerCelInputRoutes } from './cel_routes';
+import { ExperimentalFeatures } from '../../common/experimental_features';
 
-export function registerRoutes(router: IRouter<IntegrationAssistantRouteHandlerContext>) {
+export function registerRoutes(
+  router: IRouter<IntegrationAssistantRouteHandlerContext>,
+  experimentalFeatures: ExperimentalFeatures
+) {
   registerAnalyzeLogsRoutes(router);
   registerEcsRoutes(router);
   registerIntegrationBuilderRoutes(router);
   registerCategorizationRoutes(router);
   registerRelatedRoutes(router);
   registerPipelineRoutes(router);
+
+  if (experimentalFeatures.generateCel) {
+    registerCelInputRoutes(router);
+  }
 }

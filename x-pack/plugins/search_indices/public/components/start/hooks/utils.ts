@@ -7,11 +7,10 @@
 
 import type { ApplicationStart, HttpSetup } from '@kbn/core/public';
 
-// TODO: we should define a locator for this and use that instead
-const INDEX_DETAILS_PATH = '/app/management/data/index_management/indices/index_details';
+const INDEX_DETAILS_PATH = '/app/elasticsearch/indices/index_details';
 
 function getIndexDetailsPath(http: HttpSetup, indexName: string) {
-  return http.basePath.prepend(`${INDEX_DETAILS_PATH}?indexName=${indexName}`);
+  return http.basePath.prepend(`${INDEX_DETAILS_PATH}/${encodeURIComponent(indexName)}`);
 }
 
 export const navigateToIndexDetails = (

@@ -575,7 +575,7 @@ export class ActionExecutor {
             event.error.message = actionErrorToMessage(result);
             if (result.error) {
               logger.error(result.error, {
-                tags: [actionTypeId, actionId, 'action-run-failed'],
+                tags: [actionTypeId, actionId, 'action-run-failed', `${result.errorSource}-error`],
                 error: { stack_trace: result.error.stack },
               });
             }
@@ -685,6 +685,17 @@ function validateAction(
 
   try {
     validatedParams = validateParams(actionType, params, validatorServices);
+  } catch (err) {
+    throw new ActionExecutionError(err.message, ActionExecutionErrorReason.Validation, {
+      actionId,
+      status: 'error',
+      message: err.message,
+      retry: !!taskInfo,
+      errorSource: TaskErrorSource.USER,
+    });
+  }
+
+  try {
     validatedConfig = validateConfig(actionType, config, validatorServices);
     validatedSecrets = validateSecrets(actionType, secrets, validatorServices);
     if (actionType.validate?.connector) {

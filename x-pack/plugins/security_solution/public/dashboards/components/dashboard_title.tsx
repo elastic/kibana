@@ -5,21 +5,23 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
-import type { DashboardAPI } from '@kbn/dashboard-plugin/public';
+import type { DashboardApi } from '@kbn/dashboard-plugin/public';
+import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { EDIT_DASHBOARD_TITLE } from '../pages/details/translations';
 
 const DashboardTitleComponent = ({
   dashboardContainer,
   onTitleLoaded,
 }: {
-  dashboardContainer: DashboardAPI;
+  dashboardContainer: DashboardApi;
   onTitleLoaded: (title: string) => void;
 }) => {
-  const dashboardTitle = dashboardContainer.select((state) => state.explicitInput.title).trim();
-  const title =
-    dashboardTitle && dashboardTitle.length !== 0 ? dashboardTitle : EDIT_DASHBOARD_TITLE;
+  const dashboardTitle = useStateFromPublishingSubject(dashboardContainer.panelTitle);
+  const title = useMemo(() => {
+    return dashboardTitle && dashboardTitle.length !== 0 ? dashboardTitle : EDIT_DASHBOARD_TITLE;
+  }, [dashboardTitle]);
 
   useEffect(() => {
     onTitleLoaded(title);

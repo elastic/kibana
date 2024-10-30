@@ -11,6 +11,8 @@ import { Routes, Route } from '@kbn/shared-ux-router';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import { EuiEmptyPrompt, EuiLoadingLogo } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
+import { NotesContainer } from './notes';
 import { ManagementEmptyStateWrapper } from '../components/management_empty_state_wrapper';
 import {
   MANAGEMENT_ROUTING_ENDPOINTS_PATH,
@@ -20,6 +22,7 @@ import {
   MANAGEMENT_ROUTING_TRUSTED_APPS_PATH,
   MANAGEMENT_ROUTING_BLOCKLIST_PATH,
   MANAGEMENT_ROUTING_RESPONSE_ACTIONS_HISTORY_PATH,
+  MANAGEMENT_ROUTING_NOTES_PATH,
 } from '../common/constants';
 import { NotFoundPage } from '../../app/404';
 import { EndpointsContainer } from './endpoint_hosts';
@@ -77,7 +80,18 @@ const ResponseActionsTelemetry = () => (
   </TrackApplicationView>
 );
 
+const NotesTelemetry = () => (
+  <TrackApplicationView viewId={SecurityPageName.notes}>
+    <NotesContainer />
+    <SpyRoute pageName={SecurityPageName.notes} />
+  </TrackApplicationView>
+);
+
 export const ManagementContainer = memo(() => {
+  const securitySolutionNotesDisabled = useIsExperimentalFeatureEnabled(
+    'securitySolutionNotesDisabled'
+  );
+
   const {
     loading,
     canReadPolicyManagement,
@@ -147,6 +161,10 @@ export const ManagementContainer = memo(() => {
         component={ResponseActionsTelemetry}
         hasPrivilege={canReadActionsLogManagement}
       />
+
+      {!securitySolutionNotesDisabled && (
+        <Route path={MANAGEMENT_ROUTING_NOTES_PATH} component={NotesTelemetry} />
+      )}
 
       {canReadEndpointList && (
         <Route path={MANAGEMENT_PATH} exact>

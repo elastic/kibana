@@ -16,7 +16,7 @@ describe('APM deep links', () => {
       .type('APM', { force: true, delay: 100 })
       .focus();
     cy.contains('APM');
-    cy.contains('APM / Services');
+    cy.contains('APM / Service Inventory');
     cy.contains('APM / Service groups');
     cy.contains('APM / Traces');
     cy.contains('APM / Service Map');
@@ -33,7 +33,7 @@ describe('APM deep links', () => {
       .should('be.visible')
       .type('APM', { force: true, delay: 100 });
     // navigates to services page
-    cy.contains('APM / Services').click({ force: true });
+    cy.contains('APM / Service Inventory').click({ force: true });
     cy.url().should('include', '/apm/services');
 
     cy.getByTestSubj('nav-search-input')

@@ -7,26 +7,130 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { EuiButton } from '@elastic/eui';
+import React, { useCallback, useMemo, useState } from 'react';
+import { EuiButton, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { v4 as uuidv4 } from 'uuid';
+import { RuleSystemAction } from '@kbn/alerting-types';
 import { ADD_ACTION_TEXT } from '../translations';
+import { RuleActionsConnectorsModal } from './rule_actions_connectors_modal';
+import { useRuleFormDispatch, useRuleFormState } from '../hooks';
+import { ActionConnector, RuleAction, RuleFormParamsErrors } from '../../common/types';
+import { DEFAULT_FREQUENCY, MULTI_CONSUMER_RULE_TYPE_IDS } from '../constants';
+import { RuleActionsItem } from './rule_actions_item';
+import { RuleActionsSystemActionsItem } from './rule_actions_system_actions_item';
+import { getDefaultParams } from '../utils';
 
-export interface RuleActionsProps {
-  onClick: () => void;
-}
+export const RuleActions = () => {
+  const [isConnectorModalOpen, setIsConnectorModalOpen] = useState<boolean>(false);
 
-export const RuleActions = (props: RuleActionsProps) => {
-  const { onClick } = props;
+  const {
+    formData: { actions, consumer },
+    plugins: { actionTypeRegistry },
+    multiConsumerSelection,
+    selectedRuleType,
+    connectorTypes,
+  } = useRuleFormState();
+
+  const dispatch = useRuleFormDispatch();
+
+  const onModalOpen = useCallback(() => {
+    setIsConnectorModalOpen(true);
+  }, []);
+
+  const onModalClose = useCallback(() => {
+    setIsConnectorModalOpen(false);
+  }, []);
+
+  const onSelectConnector = useCallback(
+    async (connector: ActionConnector) => {
+      const { id, actionTypeId } = connector;
+      const uuid = uuidv4();
+      const group = selectedRuleType.defaultActionGroupId;
+      const actionTypeModel = actionTypeRegistry.get(actionTypeId);
+
+      const params =
+        getDefaultParams({
+          group,
+          ruleType: selectedRuleType,
+          actionTypeModel,
+        }) || {};
+
+      dispatch({
+        type: 'addAction',
+        payload: {
+          id,
+          actionTypeId,
+          uuid,
+          params,
+          group,
+          frequency: DEFAULT_FREQUENCY,
+        },
+      });
+
+      const res: { errors: RuleFormParamsErrors } = await actionTypeRegistry
+        .get(actionTypeId)
+        ?.validateParams(params);
+
+      dispatch({
+        type: 'setActionParamsError',
+        payload: {
+          uuid,
+          errors: res.errors,
+        },
+      });
+
+      onModalClose();
+    },
+    [dispatch, onModalClose, selectedRuleType, actionTypeRegistry]
+  );
+
+  const producerId = useMemo(() => {
+    if (MULTI_CONSUMER_RULE_TYPE_IDS.includes(selectedRuleType.id)) {
+      return multiConsumerSelection || consumer;
+    }
+    return selectedRuleType.producer;
+  }, [consumer, multiConsumerSelection, selectedRuleType]);
+
   return (
-    <div data-test-subj="ruleActions">
+    <>
+      <EuiFlexGroup data-test-subj="ruleActions" direction="column">
+        {actions.map((action, index) => {
+          const isSystemAction = connectorTypes.some((connectorType) => {
+            return connectorType.id === action.actionTypeId && connectorType.isSystemActionType;
+          });
+
+          return (
+            <EuiFlexItem key={action.uuid}>
+              {isSystemAction && (
+                <RuleActionsSystemActionsItem
+                  action={action as RuleSystemAction}
+                  index={index}
+                  producerId={producerId}
+                />
+              )}
+              {!isSystemAction && (
+                <RuleActionsItem
+                  action={action as RuleAction}
+                  index={index}
+                  producerId={producerId}
+                />
+              )}
+            </EuiFlexItem>
+          );
+        })}
+      </EuiFlexGroup>
+      <EuiSpacer />
       <EuiButton
+        data-test-subj="ruleActionsAddActionButton"
         iconType="push"
         iconSide="left"
-        onClick={onClick}
-        data-test-subj="ruleActionsAddActionButton"
+        onClick={onModalOpen}
       >
         {ADD_ACTION_TEXT}
       </EuiButton>
-    </div>
+      {isConnectorModalOpen && (
+        <RuleActionsConnectorsModal onClose={onModalClose} onSelectConnector={onSelectConnector} />
+      )}
+    </>
   );
 };

@@ -8,7 +8,8 @@
 import React from 'react';
 import { KqlQueryType } from '../../../../../../../../../common/api/detection_engine';
 import type {
-  DiffableAllFields,
+  DiffableRuleTypes,
+  RuleDataSource,
   RuleKqlQuery,
 } from '../../../../../../../../../common/api/detection_engine';
 import { InlineKqlQueryReadOnly } from './inline_kql_query';
@@ -17,8 +18,8 @@ import { assertUnreachable } from '../../../../../../../../../common/utility_typ
 
 interface KqlQueryReadOnlyProps {
   kqlQuery: RuleKqlQuery;
-  dataSource: DiffableAllFields['data_source'];
-  ruleType: DiffableAllFields['type'];
+  dataSource?: RuleDataSource;
+  ruleType: DiffableRuleTypes;
 }
 
 export function KqlQueryReadOnly({ kqlQuery, dataSource, ruleType }: KqlQueryReadOnlyProps) {

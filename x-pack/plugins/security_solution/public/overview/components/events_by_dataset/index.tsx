@@ -9,9 +9,10 @@ import { Position } from '@elastic/charts';
 import numeral from '@elastic/numeral';
 import React, { useEffect, useMemo, useCallback } from 'react';
 
-import type { DataViewBase, Filter, Query } from '@kbn/es-query';
+import type { Filter, Query } from '@kbn/es-query';
 import styled from 'styled-components';
 import { EuiButton } from '@elastic/eui';
+import type { DataViewSpec } from '@kbn/data-plugin/common';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { DEFAULT_NUMBER_FORMAT, APP_UI_ID } from '../../../../common/constants';
 import { SHOWING, UNIT } from '../../../common/components/events_viewer/translations';
@@ -26,6 +27,7 @@ import { useKibana, useUiSetting$ } from '../../../common/lib/kibana';
 import {
   eventsStackByOptions,
   eventsHistogramConfig,
+  NO_BREAKDOWN_STACK_BY_VALUE,
 } from '../../../common/components/events_tab/histogram_configurations';
 import { HostsTableType } from '../../../explore/hosts/store/model';
 import type { GlobalTimeArgs } from '../../../common/containers/use_global_time';
@@ -36,7 +38,7 @@ import { useFormatUrl } from '../../../common/components/link_to';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 import type { SourcererScopeName } from '../../../sourcerer/store/model';
 
-const DEFAULT_STACK_BY = 'event.dataset';
+const DEFAULT_STACK_BY = NO_BREAKDOWN_STACK_BY_VALUE;
 
 const ID = 'eventsByDatasetOverview';
 const CHART_HEIGHT = 160;
@@ -45,7 +47,7 @@ interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery' | 'se
   filterQuery?: string;
   filters: Filter[];
   headerChildren?: React.ReactNode;
-  indexPattern: DataViewBase;
+  dataViewSpec?: DataViewSpec;
   onlyField?: string;
   paddingSize?: 's' | 'm' | 'l' | 'none';
   query: Query;
@@ -76,7 +78,7 @@ const EventsByDatasetComponent: React.FC<Props> = ({
   filters,
   from,
   headerChildren,
-  indexPattern,
+  dataViewSpec,
   onlyField,
   paddingSize,
   query,
@@ -131,13 +133,13 @@ const EventsByDatasetComponent: React.FC<Props> = ({
     if (filterQueryFromProps == null) {
       return convertToBuildEsQuery({
         config: getEsQueryConfig(kibana.services.uiSettings),
-        indexPattern,
+        dataViewSpec,
         queries: [query],
         filters,
       });
     }
     return [filterQueryFromProps];
-  }, [filterQueryFromProps, kibana, indexPattern, query, filters]);
+  }, [filterQueryFromProps, kibana.services.uiSettings, dataViewSpec, query, filters]);
 
   useInvalidFilterQuery({
     id: uniqueQueryId,
@@ -156,7 +158,7 @@ const EventsByDatasetComponent: React.FC<Props> = ({
       defaultStackByOption:
         onlyField != null
           ? getHistogramOption(onlyField)
-          : eventsStackByOptions.find((o) => o.text === DEFAULT_STACK_BY) ??
+          : eventsStackByOptions.find((o) => o.value === DEFAULT_STACK_BY) ??
             eventsStackByOptions[0],
       legendPosition: Position.Right,
       subtitle: (totalCount: number) =>

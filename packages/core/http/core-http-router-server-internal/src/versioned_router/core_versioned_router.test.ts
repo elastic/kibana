@@ -33,7 +33,11 @@ describe('Versioned router', () => {
 
   it('provides the expected metadata', () => {
     const versionedRouter = CoreVersionedRouter.from({ router });
-    versionedRouter.get({ path: '/test/{id}', access: 'internal', deprecated: true });
+    versionedRouter.get({
+      path: '/test/{id}',
+      access: 'internal',
+      discontinued: 'x.y.z',
+    });
     versionedRouter.post({
       path: '/test',
       access: 'internal',
@@ -45,15 +49,17 @@ describe('Versioned router', () => {
       Array [
         Object {
           "handlers": Array [],
+          "isVersioned": true,
           "method": "get",
           "options": Object {
             "access": "internal",
-            "deprecated": true,
+            "discontinued": "x.y.z",
           },
           "path": "/test/{id}",
         },
         Object {
           "handlers": Array [],
+          "isVersioned": true,
           "method": "post",
           "options": Object {
             "access": "internal",
@@ -64,6 +70,7 @@ describe('Versioned router', () => {
         },
         Object {
           "handlers": Array [],
+          "isVersioned": true,
           "method": "delete",
           "options": Object {
             "access": "internal",

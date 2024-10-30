@@ -43,6 +43,7 @@ export interface TableSearchBar<T> {
   maxCountExceeded: boolean;
   placeholder: string;
   onChangeSearchQuery: (searchQuery: string) => void;
+  techPreview?: boolean;
 }
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50];
@@ -265,6 +266,7 @@ function UnoptimizedManagedTable<T extends object>(props: {
           placeholder={tableSearchBar.placeholder}
           searchQuery={searchQuery}
           onChangeSearchQuery={onChangeSearchQuery}
+          techPreview={tableSearchBar.techPreview}
         />
       ) : null}
 

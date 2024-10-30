@@ -44,7 +44,7 @@ const getSeriesLineStyle = (): RecursivePartial<AreaSeriesStyle> => {
       visible: true,
     },
     point: {
-      visible: false,
+      visible: 'never',
       radius: 0.2,
       strokeWidth: 1,
       opacity: 1,

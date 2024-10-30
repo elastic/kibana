@@ -11,12 +11,25 @@ import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import type {
+  MappingProperty,
+  MappingPropertyBase,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { IndexManagementPluginStart } from '@kbn/index-management-shared-types';
+import type { AppDeepLinkId } from '@kbn/core-chrome-browser';
+import { ServerlessPluginStart } from '@kbn/serverless/public';
 
 export interface SearchIndicesPluginSetup {
   enabled: boolean;
+  startAppId: string;
+  startRoute: string;
 }
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface SearchIndicesPluginStart {}
+
+export interface SearchIndicesPluginStart {
+  enabled: boolean;
+  startAppId: AppDeepLinkId;
+  startRoute: string;
+}
 
 export interface AppPluginStartDependencies {
   navigation: NavigationPublicPluginStart;
@@ -27,6 +40,7 @@ export interface SearchIndicesAppPluginStartDependencies {
   cloud?: CloudStart;
   share: SharePluginStart;
   usageCollection?: UsageCollectionStart;
+  indexManagement: IndexManagementPluginStart;
 }
 
 export interface SearchIndicesServicesContextDeps {
@@ -36,6 +50,8 @@ export interface SearchIndicesServicesContextDeps {
 export type SearchIndicesServicesContext = CoreStart &
   SearchIndicesAppPluginStartDependencies & {
     history: AppMountParameters['history'];
+    indexManagement: IndexManagementPluginStart;
+    serverless: ServerlessPluginStart;
   };
 
 export interface AppUsageTracker {
@@ -44,11 +60,18 @@ export interface AppUsageTracker {
   load: (eventName: string | string[]) => void;
 }
 
+export interface Mappings {
+  mappings: {
+    properties: MappingPropertyBase['properties'];
+  };
+}
+
 export interface CodeSnippetParameters {
   indexName?: string;
   apiKey?: string;
   elasticsearchURL: string;
 }
+
 export type CodeSnippetFunction = (params: CodeSnippetParameters) => string;
 
 export interface CodeLanguage {
@@ -64,13 +87,39 @@ export interface CreateIndexCodeDefinition {
 }
 
 export interface CreateIndexCodeExamples {
+  exampleType: string;
+  installTitle: string;
+  installDescription: string;
+  createIndexTitle: string;
+  createIndexDescription: string;
   sense: CreateIndexCodeDefinition;
   curl: CreateIndexCodeDefinition;
   python: CreateIndexCodeDefinition;
   javascript: CreateIndexCodeDefinition;
 }
 
-export interface CreateIndexLanguageExamples {
-  default: CreateIndexCodeDefinition;
-  dense_vector: CreateIndexCodeDefinition;
+export interface IngestCodeSnippetParameters extends CodeSnippetParameters {
+  indexName: string;
+  sampleDocuments: object[];
+  mappingProperties: Record<string, MappingProperty>;
+}
+
+export type IngestCodeSnippetFunction = (params: IngestCodeSnippetParameters) => string;
+
+export interface IngestDataCodeDefinition {
+  installCommand?: string;
+  ingestCommand: IngestCodeSnippetFunction;
+  updateMappingsCommand: IngestCodeSnippetFunction;
+}
+
+export interface IngestDataCodeExamples {
+  addMappingsTitle: string;
+  addMappingsDescription: string;
+  installTitle: string;
+  installDescription: string;
+  defaultMapping: Record<string, MappingProperty>;
+  sense: IngestDataCodeDefinition;
+  curl: IngestDataCodeDefinition;
+  python: IngestDataCodeDefinition;
+  javascript: IngestDataCodeDefinition;
 }

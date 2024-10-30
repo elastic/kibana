@@ -59,13 +59,7 @@ export const HotPhase: FunctionComponent = () => {
   return (
     <Phase phase="hot">
       <DescribedFormRow
-        title={
-          <h3>
-            {i18n.translate('xpack.indexLifecycleMgmt.hotPhase.rolloverFieldTitle', {
-              defaultMessage: 'Rollover',
-            })}
-          </h3>
-        }
+        title={<h3>{i18nTexts.editPolicy.rolloverLabel}</h3>}
         description={
           <>
             <EuiTextColor color="subdued">

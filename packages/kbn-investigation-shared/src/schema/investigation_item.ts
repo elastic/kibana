@@ -20,6 +20,7 @@ const investigationItemSchema = z.intersection(
     id: z.string(),
     createdAt: z.number(),
     createdBy: z.string(),
+    updatedAt: z.number(),
   }),
   itemSchema
 );

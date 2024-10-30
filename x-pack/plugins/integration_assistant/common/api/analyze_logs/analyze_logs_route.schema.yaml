@@ -7,7 +7,7 @@ paths:
     post:
       summary: Analyzes log samples and processes them.
       operationId: AnalyzeLogs
-      x-codegen-enabled: false
+      x-codegen-enabled: true
       description: Analyzes log samples and processes them
       tags:
         - Analyze Logs API
@@ -22,11 +22,17 @@ paths:
                 - connectorId
                 - packageName
                 - dataStreamName
+                - packageTitle
+                - dataStreamTitle
               properties:
                 packageName:
                   $ref: "../model/common_attributes.schema.yaml#/components/schemas/PackageName"
                 dataStreamName:
                   $ref: "../model/common_attributes.schema.yaml#/components/schemas/DataStreamName"
+                packageTitle:
+                  $ref: "../model/common_attributes.schema.yaml#/components/schemas/PackageTitle"
+                dataStreamTitle:
+                  $ref: "../model/common_attributes.schema.yaml#/components/schemas/DataStreamTitle"
                 logSamples:
                   $ref: "../model/common_attributes.schema.yaml#/components/schemas/LogSamples"
                 connectorId:

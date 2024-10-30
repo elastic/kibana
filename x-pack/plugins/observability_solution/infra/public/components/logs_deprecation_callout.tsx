@@ -9,25 +9,61 @@ import { EuiCallOut } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButton } from '@elastic/eui';
-import { AllDatasetsLocatorParams, ALL_DATASETS_LOCATOR_ID } from '@kbn/deeplinks-observability';
+import {
+  AllDatasetsLocatorParams,
+  ALL_DATASETS_LOCATOR_ID,
+  DatasetLocatorParams,
+} from '@kbn/deeplinks-observability';
 import { getRouterLinkProps } from '@kbn/router-utils';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 
 import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/css';
-import { SharePublicStart } from '@kbn/share-plugin/public/plugin';
+import { LocatorPublic } from '@kbn/share-plugin/common';
 import { useKibanaContextForPlugin } from '../hooks/use_kibana';
 
-const DISMISSAL_STORAGE_KEY = 'log_stream_deprecation_callout_dismissed';
+const pageConfigurations = {
+  stream: {
+    dismissalStorageKey: 'log_stream_deprecation_callout_dismissed',
+    message: i18n.translate('xpack.infra.logsDeprecationCallout.p.theNewLogsExplorerLabel', {
+      defaultMessage:
+        'The new Logs Explorer makes viewing and inspecting your logs easier with more features, better performance, and more intuitive navigation. We recommend switching to Logs Explorer, as it will replace Logs Stream in a future version.',
+    }),
+  },
+  settings: {
+    dismissalStorageKey: 'log_settings_deprecation_callout_dismissed',
+    message: i18n.translate(
+      'xpack.infra.logsSettingsDeprecationCallout.p.theNewLogsExplorerLabel',
+      {
+        defaultMessage:
+          'These settings only apply to the legacy Logs Stream app, and we do not recommend configuring them. Instead, use Logs Explorer which makes viewing and inspecting your logs easier with more features, better performance, and more intuitive navigation.',
+      }
+    ),
+  },
+};
 
-export const LogsDeprecationCallout = () => {
+interface LogsDeprecationCalloutProps {
+  page: keyof typeof pageConfigurations;
+}
+
+export const LogsDeprecationCallout = ({ page }: LogsDeprecationCalloutProps) => {
   const {
-    services: { share },
+    services: {
+      share,
+      application: {
+        capabilities: { discover, fleet },
+      },
+    },
   } = useKibanaContextForPlugin();
 
-  const [isDismissed, setDismissed] = useLocalStorage(DISMISSAL_STORAGE_KEY, false);
+  const { dismissalStorageKey, message } = pageConfigurations[page];
 
-  if (isDismissed) {
+  const [isDismissed, setDismissed] = useLocalStorage(dismissalStorageKey, false);
+
+  const allDatasetLocator =
+    share.url.locators.get<AllDatasetsLocatorParams>(ALL_DATASETS_LOCATOR_ID);
+
+  if (isDismissed || !(allDatasetLocator && discover?.show && fleet?.read)) {
     return null;
   }
 
@@ -42,17 +78,12 @@ export const LogsDeprecationCallout = () => {
       onDismiss={() => setDismissed(true)}
       className={calloutStyle}
     >
-      <p>
-        {i18n.translate('xpack.infra.logsDeprecationCallout.p.theNewLogsExplorerLabel', {
-          defaultMessage:
-            'The new Logs Explorer makes viewing and inspecting your logs easier with more features, better performance, and more intuitive navigation. We recommend switching to Logs Explorer, as it will replace Logs Stream in a future version.',
-        })}
-      </p>
+      <p>{message}</p>
       <EuiButton
         fill
         data-test-subj="infraLogsDeprecationCalloutTryLogsExplorerButton"
         color="warning"
-        {...getLogsExplorerLinkProps(share)}
+        {...getLogsExplorerLinkProps(allDatasetLocator)}
       >
         {i18n.translate('xpack.infra.logsDeprecationCallout.tryLogsExplorerButtonLabel', {
           defaultMessage: 'Try Logs Explorer',
@@ -62,9 +93,7 @@ export const LogsDeprecationCallout = () => {
   );
 };
 
-const getLogsExplorerLinkProps = (share: SharePublicStart) => {
-  const locator = share.url.locators.get<AllDatasetsLocatorParams>(ALL_DATASETS_LOCATOR_ID)!;
-
+const getLogsExplorerLinkProps = (locator: LocatorPublic<DatasetLocatorParams>) => {
   return getRouterLinkProps({
     href: locator.getRedirectUrl({}),
     onClick: () => locator.navigate({}),

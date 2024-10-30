@@ -34,6 +34,7 @@ import {
 } from './endpoint/services';
 import { NLPCleanupTask } from './task_manager/nlp_cleanup_task/nlp_cleanup_task';
 import { telemetryEvents } from './telemetry/event_based_telemetry';
+import { UsageReportingService } from './common/services/usage_reporting_service';
 
 export class SecuritySolutionServerlessPlugin
   implements
@@ -44,15 +45,23 @@ export class SecuritySolutionServerlessPlugin
       SecuritySolutionServerlessPluginStartDeps
     >
 {
+  private kibanaVersion: string;
   private config: ServerlessSecurityConfig;
   private cloudSecurityUsageReportingTask: SecurityUsageReportingTask | undefined;
   private endpointUsageReportingTask: SecurityUsageReportingTask | undefined;
   private nlpCleanupTask: NLPCleanupTask | undefined;
   private readonly logger: Logger;
+  private readonly usageReportingService: UsageReportingService;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
+    this.kibanaVersion = initializerContext.env.packageInfo.version;
     this.config = this.initializerContext.config.get<ServerlessSecurityConfig>();
     this.logger = this.initializerContext.logger.get();
+
+    this.usageReportingService = new UsageReportingService(
+      this.config.usageApi,
+      this.kibanaVersion
+    );
 
     const productTypesStr = JSON.stringify(this.config.productTypes, null, 2);
     this.logger.info(`Security Solution running with product types:\n${productTypesStr}`);
@@ -83,6 +92,7 @@ export class SecuritySolutionServerlessPlugin
       taskTitle: cloudSecurityMetringTaskProperties.taskTitle,
       version: cloudSecurityMetringTaskProperties.version,
       meteringCallback: cloudSecurityMetringTaskProperties.meteringCallback,
+      usageReportingService: this.usageReportingService,
     });
 
     this.endpointUsageReportingTask = new SecurityUsageReportingTask({
@@ -95,6 +105,7 @@ export class SecuritySolutionServerlessPlugin
       meteringCallback: endpointMeteringService.getUsageRecords,
       taskManager: pluginsSetup.taskManager,
       cloudSetup: pluginsSetup.cloud,
+      usageReportingService: this.usageReportingService,
     });
 
     this.nlpCleanupTask = new NLPCleanupTask({

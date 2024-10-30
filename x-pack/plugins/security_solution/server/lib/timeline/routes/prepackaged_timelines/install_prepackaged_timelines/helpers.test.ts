@@ -20,7 +20,6 @@ import {
 import * as helpers from './helpers';
 import { importTimelines } from '../../timelines/import_timelines/helpers';
 import { buildFrameworkRequest } from '../../../utils/common';
-import type { ImportTimelineResultSchema } from '../../../../../../common/api/timeline';
 
 jest.mock('../../timelines/import_timelines/helpers');
 
@@ -231,9 +230,8 @@ describe('installPrepackagedTimelines', () => {
     );
 
     expect(
-      (result as ImportTimelineResultSchema).errors[0].error.message.includes(
-        'read prepackaged timelines error:'
-      )
+      'errors' in result &&
+        result.errors?.[0].error?.message?.includes('read prepackaged timelines error:')
     ).toBeTruthy();
   });
 });

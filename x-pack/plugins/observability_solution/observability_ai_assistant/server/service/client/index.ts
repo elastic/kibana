@@ -30,6 +30,7 @@ import {
 } from 'rxjs';
 import { Readable } from 'stream';
 import { v4 } from 'uuid';
+import type { AssistantScope } from '@kbn/ai-assistant-common';
 import { resourceNames } from '..';
 import { ObservabilityAIAssistantConnectorType } from '../../../common/connectors';
 import {
@@ -46,12 +47,12 @@ import {
 } from '../../../common/conversation_complete';
 import { CompatibleJSONSchema } from '../../../common/functions/types';
 import {
+  AdHocInstruction,
   type Conversation,
   type ConversationCreateRequest,
   type ConversationUpdateRequest,
   type KnowledgeBaseEntry,
   type Message,
-  type AdHocInstruction,
 } from '../../../common/types';
 import { withoutTokenCountEvents } from '../../../common/utils/without_token_count_events';
 import { CONTEXT_FUNCTION_NAME } from '../../functions/context';
@@ -100,6 +101,7 @@ export class ObservabilityAIAssistantClient {
         name: string;
       };
       knowledgeBaseService: KnowledgeBaseService;
+      scopes: AssistantScope[];
     }
   ) {}
 
@@ -162,7 +164,7 @@ export class ObservabilityAIAssistantClient {
   complete = ({
     functionClient,
     connectorId,
-    simulateFunctionCalling,
+    simulateFunctionCalling = false,
     instructions: adHocInstructions = [],
     messages: initialMessages,
     signal,
@@ -208,6 +210,9 @@ export class ObservabilityAIAssistantClient {
 
         const userInstructions$ = from(this.getKnowledgeBaseUserInstructions()).pipe(shareReplay());
 
+        const registeredAdhocInstructions = functionClient.getAdhocInstructions();
+        const allAdHocInstructions = adHocInstructions.concat(registeredAdhocInstructions);
+
         // from the initial messages, override any system message with
         // the one that is based on the instructions (registered, request, kb)
         const messagesWithUpdatedSystemMessage$ = userInstructions$.pipe(
@@ -217,7 +222,7 @@ export class ObservabilityAIAssistantClient {
               getSystemMessageFromInstructions({
                 applicationInstructions: functionClient.getInstructions(),
                 userInstructions,
-                adHocInstructions,
+                adHocInstructions: allAdHocInstructions,
                 availableFunctionNames: functionClient
                   .getFunctions()
                   .map((fn) => fn.definition.name),
@@ -299,6 +304,7 @@ export class ObservabilityAIAssistantClient {
                 disableFunctions,
                 tracer: completeTracer,
                 connectorId,
+                useSimulatedFunctionCalling: simulateFunctionCalling === true,
               })
             );
           }),
@@ -704,14 +710,16 @@ export class ObservabilityAIAssistantClient {
     queries: Array<{ text: string; boost?: number }>;
     categories?: string[];
   }): Promise<{ entries: RecalledEntry[] }> => {
-    return this.dependencies.knowledgeBaseService.recall({
-      namespace: this.dependencies.namespace,
-      user: this.dependencies.user,
-      queries,
-      categories,
-      esClient: this.dependencies.esClient,
-      uiSettingsClient: this.dependencies.uiSettingsClient,
-    });
+    return (
+      this.dependencies.knowledgeBaseService?.recall({
+        namespace: this.dependencies.namespace,
+        user: this.dependencies.user,
+        queries,
+        categories,
+        esClient: this.dependencies.esClient,
+        uiSettingsClient: this.dependencies.uiSettingsClient,
+      }) || { entries: [] }
+    );
   };
 
   getKnowledgeBaseStatus = () => {

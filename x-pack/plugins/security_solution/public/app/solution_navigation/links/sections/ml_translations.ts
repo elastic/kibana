@@ -207,6 +207,18 @@ export const INDEX_DATA_VISUALIZER_DESC = i18n.translate(
     defaultMessage: 'Data view data visualizer page',
   }
 );
+export const ESQL_DATA_VISUALIZER_TITLE = i18n.translate(
+  'xpack.securitySolution.navLinks.ml.esqlDataVisualizer.title',
+  {
+    defaultMessage: 'ES|QL data visualizer',
+  }
+);
+export const ESQL_DATA_VISUALIZER_DESC = i18n.translate(
+  'xpack.securitySolution.navLinks.ml.esqlDataVisualizer.desc',
+  {
+    defaultMessage: 'ES|QL data visualizer page',
+  }
+);
 export const DATA_DRIFT_TITLE = i18n.translate(
   'xpack.securitySolution.navLinks.ml.dataDrift.title',
   {

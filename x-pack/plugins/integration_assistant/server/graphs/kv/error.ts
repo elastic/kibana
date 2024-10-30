@@ -33,7 +33,7 @@ export async function handleKVError({
 
   return {
     kvProcessor,
-    lastExecutedChain: 'kv_error',
+    lastExecutedChain: 'kvError',
   };
 }
 
@@ -46,6 +46,8 @@ export async function handleHeaderError({
   const currentPattern = state.grokPattern;
 
   const pattern = await kvHeaderErrorGraph.invoke({
+    packageName: state.packageName,
+    dataStreamName: state.dataStreamName,
     current_pattern: JSON.stringify(currentPattern, null, 2),
     errors: JSON.stringify(state.errors, null, 2),
     ex_answer: JSON.stringify(KV_HEADER_ERROR_EXAMPLE_ANSWER, null, 2),

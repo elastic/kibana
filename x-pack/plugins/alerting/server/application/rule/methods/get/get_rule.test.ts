@@ -630,6 +630,7 @@ describe('get()', () => {
         id: '1',
         type: RULE_SAVED_OBJECT_TYPE,
         attributes: {
+          name: 'fakeRuleName',
           alertTypeId: '123',
           schedule: { interval: '10s' },
           params: {
@@ -654,7 +655,7 @@ describe('get()', () => {
             action: 'rule_get',
             outcome: 'success',
           }),
-          kibana: { saved_object: { id: '1', type: RULE_SAVED_OBJECT_TYPE } },
+          kibana: { saved_object: { id: '1', type: RULE_SAVED_OBJECT_TYPE, name: 'fakeRuleName' } },
         })
       );
     });
@@ -674,6 +675,7 @@ describe('get()', () => {
             saved_object: {
               id: '1',
               type: RULE_SAVED_OBJECT_TYPE,
+              name: 'fakeRuleName',
             },
           },
           error: {

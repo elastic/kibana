@@ -29,11 +29,14 @@ import {
   TaskStatus,
 } from '@kbn/task-manager-plugin/server';
 import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
+import { maintenanceWindowsServiceMock } from './maintenance_windows/maintenance_windows_service.mock';
+import { KibanaRequest } from '@kbn/core/server';
 
 const alertingEventLogger = alertingEventLoggerMock.create();
 const alertsClient = alertsClientMock.create();
 const dataViews = dataViewPluginMocks.createStartContract();
 const logger = loggingSystemMock.create().get();
+const maintenanceWindowsService = maintenanceWindowsServiceMock.create();
 const publicRuleMonitoringService = publicRuleMonitoringServiceMock.create();
 const publicRuleResultService = publicRuleResultServiceMock.create();
 const ruleRunMetricsStore = ruleRunMetricsStoreMock.create();
@@ -42,6 +45,22 @@ const uiSettingsClient = uiSettingsServiceMock.createClient();
 const wrappedScopedClusterClient = wrappedScopedClusterClientMock.create();
 const getDataViews = jest.fn().mockResolvedValue(dataViews);
 const getWrappedSearchSourceClient = jest.fn();
+
+const fakeRequest = {
+  headers: {},
+  getBasePath: () => '',
+  path: '/',
+  route: { settings: {} },
+  url: {
+    href: '/',
+  },
+  raw: {
+    req: {
+      url: '/',
+    },
+  },
+  getSavedObjectsClient: jest.fn(),
+} as unknown as KibanaRequest;
 
 const timer = new TaskRunnerTimer({ logger });
 const ruleType: jest.Mocked<
@@ -162,8 +181,10 @@ describe('RuleTypeRunner', () => {
       const { state, error, stackTrace } = await ruleTypeRunner.run({
         context: {
           alertingEventLogger,
+          maintenanceWindowsService,
           flappingSettings: DEFAULT_FLAPPING_SETTINGS,
           queryDelaySec: 0,
+          request: fakeRequest,
           ruleId: RULE_ID,
           ruleLogPrefix: `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`,
           ruleRunMetricsStore,
@@ -193,6 +214,7 @@ describe('RuleTypeRunner', () => {
           alertFactory: alertsClient.factory(),
           alertsClient: alertsClient.client(),
           getDataViews: expect.any(Function),
+          getMaintenanceWindowIds: expect.any(Function),
           ruleMonitoringService: publicRuleMonitoringService,
           ruleResultService: publicRuleResultService,
           savedObjectsClient,
@@ -247,14 +269,12 @@ describe('RuleTypeRunner', () => {
       expect(ruleRunMetricsStore.setSearchMetrics).toHaveBeenCalled();
       expect(alertsClient.processAlerts).toHaveBeenCalledWith({
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
-        maintenanceWindowIds: [],
         alertDelay: 0,
         ruleRunMetricsStore,
       });
-      expect(alertsClient.persistAlerts).toHaveBeenCalledWith([]);
+      expect(alertsClient.persistAlerts).toHaveBeenCalled();
       expect(alertingEventLogger.setMaintenanceWindowIds).not.toHaveBeenCalled();
       expect(alertsClient.logAlerts).toHaveBeenCalledWith({
-        eventLogger: alertingEventLogger,
         ruleRunMetricsStore,
         shouldLogAlerts: true,
       });
@@ -269,6 +289,8 @@ describe('RuleTypeRunner', () => {
           alertingEventLogger,
           flappingSettings: DEFAULT_FLAPPING_SETTINGS,
           queryDelaySec: 0,
+          request: fakeRequest,
+          maintenanceWindowsService,
           ruleId: RULE_ID,
           ruleLogPrefix: `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`,
           ruleRunMetricsStore,
@@ -298,6 +320,7 @@ describe('RuleTypeRunner', () => {
           alertFactory: alertsClient.factory(),
           alertsClient: alertsClient.client(),
           getDataViews: expect.any(Function),
+          getMaintenanceWindowIds: expect.any(Function),
           ruleMonitoringService: publicRuleMonitoringService,
           ruleResultService: publicRuleResultService,
           savedObjectsClient,
@@ -352,14 +375,12 @@ describe('RuleTypeRunner', () => {
       expect(ruleRunMetricsStore.setSearchMetrics).toHaveBeenCalled();
       expect(alertsClient.processAlerts).toHaveBeenCalledWith({
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
-        maintenanceWindowIds: [],
         alertDelay: 0,
         ruleRunMetricsStore,
       });
-      expect(alertsClient.persistAlerts).toHaveBeenCalledWith([]);
+      expect(alertsClient.persistAlerts).toHaveBeenCalled();
       expect(alertingEventLogger.setMaintenanceWindowIds).not.toHaveBeenCalled();
       expect(alertsClient.logAlerts).toHaveBeenCalledWith({
-        eventLogger: alertingEventLogger,
         ruleRunMetricsStore,
         shouldLogAlerts: true,
       });
@@ -377,6 +398,8 @@ describe('RuleTypeRunner', () => {
           alertingEventLogger,
           flappingSettings: DEFAULT_FLAPPING_SETTINGS,
           queryDelaySec: 0,
+          maintenanceWindowsService,
+          request: fakeRequest,
           ruleId: RULE_ID,
           ruleLogPrefix: `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`,
           ruleRunMetricsStore,
@@ -413,14 +436,12 @@ describe('RuleTypeRunner', () => {
       expect(ruleRunMetricsStore.setSearchMetrics).toHaveBeenCalled();
       expect(alertsClient.processAlerts).toHaveBeenCalledWith({
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
-        maintenanceWindowIds: [],
         alertDelay: 0,
         ruleRunMetricsStore,
       });
-      expect(alertsClient.persistAlerts).toHaveBeenCalledWith([]);
+      expect(alertsClient.persistAlerts).toHaveBeenCalled();
       expect(alertingEventLogger.setMaintenanceWindowIds).toHaveBeenCalledWith(['abc']);
       expect(alertsClient.logAlerts).toHaveBeenCalledWith({
-        eventLogger: alertingEventLogger,
         ruleRunMetricsStore,
         shouldLogAlerts: true,
       });
@@ -438,6 +459,8 @@ describe('RuleTypeRunner', () => {
           alertingEventLogger,
           flappingSettings: DEFAULT_FLAPPING_SETTINGS,
           queryDelaySec: 0,
+          request: fakeRequest,
+          maintenanceWindowsService,
           ruleId: RULE_ID,
           ruleLogPrefix: `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`,
           ruleRunMetricsStore,
@@ -467,6 +490,7 @@ describe('RuleTypeRunner', () => {
           alertFactory: alertsClient.factory(),
           alertsClient: alertsClient.client(),
           getDataViews: expect.any(Function),
+          getMaintenanceWindowIds: expect.any(Function),
           ruleMonitoringService: publicRuleMonitoringService,
           ruleResultService: publicRuleResultService,
           savedObjectsClient,
@@ -537,6 +561,8 @@ describe('RuleTypeRunner', () => {
           alertingEventLogger,
           flappingSettings: DEFAULT_FLAPPING_SETTINGS,
           queryDelaySec: 0,
+          maintenanceWindowsService,
+          request: fakeRequest,
           ruleId: RULE_ID,
           ruleLogPrefix: `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`,
           ruleRunMetricsStore,
@@ -566,6 +592,7 @@ describe('RuleTypeRunner', () => {
           alertFactory: alertsClient.factory(),
           alertsClient: alertsClient.client(),
           getDataViews: expect.any(Function),
+          getMaintenanceWindowIds: expect.any(Function),
           ruleMonitoringService: publicRuleMonitoringService,
           ruleResultService: publicRuleResultService,
           savedObjectsClient,
@@ -636,6 +663,8 @@ describe('RuleTypeRunner', () => {
           alertingEventLogger,
           flappingSettings: DEFAULT_FLAPPING_SETTINGS,
           queryDelaySec: 0,
+          maintenanceWindowsService,
+          request: fakeRequest,
           ruleId: RULE_ID,
           ruleLogPrefix: `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`,
           ruleRunMetricsStore,
@@ -671,7 +700,9 @@ describe('RuleTypeRunner', () => {
           alertingEventLogger,
           flappingSettings: DEFAULT_FLAPPING_SETTINGS,
           queryDelaySec: 0,
+          request: fakeRequest,
           ruleId: RULE_ID,
+          maintenanceWindowsService,
           ruleLogPrefix: `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`,
           ruleRunMetricsStore,
           spaceId: 'default',
@@ -700,6 +731,7 @@ describe('RuleTypeRunner', () => {
           alertFactory: alertsClient.factory(),
           alertsClient: alertsClient.client(),
           getDataViews: expect.any(Function),
+          getMaintenanceWindowIds: expect.any(Function),
           ruleMonitoringService: publicRuleMonitoringService,
           ruleResultService: publicRuleResultService,
           savedObjectsClient,
@@ -758,13 +790,11 @@ describe('RuleTypeRunner', () => {
       expect(ruleRunMetricsStore.setSearchMetrics).toHaveBeenCalled();
       expect(alertsClient.processAlerts).toHaveBeenCalledWith({
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
-        maintenanceWindowIds: [],
         alertDelay: 0,
         ruleRunMetricsStore,
       });
-      expect(alertsClient.persistAlerts).toHaveBeenCalledWith([]);
+      expect(alertsClient.persistAlerts).toHaveBeenCalled();
       expect(alertsClient.logAlerts).toHaveBeenCalledWith({
-        eventLogger: alertingEventLogger,
         ruleRunMetricsStore,
         shouldLogAlerts: true,
       });
@@ -783,7 +813,9 @@ describe('RuleTypeRunner', () => {
           alertingEventLogger,
           flappingSettings: DEFAULT_FLAPPING_SETTINGS,
           queryDelaySec: 0,
+          request: fakeRequest,
           ruleId: RULE_ID,
+          maintenanceWindowsService,
           ruleLogPrefix: `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`,
           ruleRunMetricsStore,
           spaceId: 'default',
@@ -812,6 +844,7 @@ describe('RuleTypeRunner', () => {
           alertFactory: alertsClient.factory(),
           alertsClient: alertsClient.client(),
           getDataViews: expect.any(Function),
+          getMaintenanceWindowIds: expect.any(Function),
           ruleMonitoringService: publicRuleMonitoringService,
           ruleResultService: publicRuleResultService,
           savedObjectsClient,
@@ -870,13 +903,11 @@ describe('RuleTypeRunner', () => {
       expect(ruleRunMetricsStore.setSearchMetrics).toHaveBeenCalled();
       expect(alertsClient.processAlerts).toHaveBeenCalledWith({
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
-        maintenanceWindowIds: [],
         alertDelay: 0,
         ruleRunMetricsStore,
       });
-      expect(alertsClient.persistAlerts).toHaveBeenCalledWith([]);
+      expect(alertsClient.persistAlerts).toHaveBeenCalled();
       expect(alertsClient.logAlerts).toHaveBeenCalledWith({
-        eventLogger: alertingEventLogger,
         ruleRunMetricsStore,
         shouldLogAlerts: true,
       });
@@ -895,6 +926,8 @@ describe('RuleTypeRunner', () => {
             alertingEventLogger,
             flappingSettings: DEFAULT_FLAPPING_SETTINGS,
             queryDelaySec: 0,
+            request: fakeRequest,
+            maintenanceWindowsService,
             ruleId: RULE_ID,
             ruleLogPrefix: `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`,
             ruleRunMetricsStore,
@@ -925,6 +958,7 @@ describe('RuleTypeRunner', () => {
           alertFactory: alertsClient.factory(),
           alertsClient: alertsClient.client(),
           getDataViews: expect.any(Function),
+          getMaintenanceWindowIds: expect.any(Function),
           ruleMonitoringService: publicRuleMonitoringService,
           ruleResultService: publicRuleResultService,
           savedObjectsClient,
@@ -976,7 +1010,6 @@ describe('RuleTypeRunner', () => {
       expect(ruleRunMetricsStore.setSearchMetrics).toHaveBeenCalled();
       expect(alertsClient.processAlerts).toHaveBeenCalledWith({
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
-        maintenanceWindowIds: [],
         alertDelay: 0,
         ruleRunMetricsStore,
       });
@@ -996,8 +1029,10 @@ describe('RuleTypeRunner', () => {
           context: {
             alertingEventLogger,
             flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+            request: fakeRequest,
             queryDelaySec: 0,
             ruleId: RULE_ID,
+            maintenanceWindowsService,
             ruleLogPrefix: `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`,
             ruleRunMetricsStore,
             spaceId: 'default',
@@ -1027,6 +1062,7 @@ describe('RuleTypeRunner', () => {
           alertFactory: alertsClient.factory(),
           alertsClient: alertsClient.client(),
           getDataViews: expect.any(Function),
+          getMaintenanceWindowIds: expect.any(Function),
           ruleMonitoringService: publicRuleMonitoringService,
           ruleResultService: publicRuleResultService,
           savedObjectsClient,
@@ -1078,11 +1114,10 @@ describe('RuleTypeRunner', () => {
       expect(ruleRunMetricsStore.setSearchMetrics).toHaveBeenCalled();
       expect(alertsClient.processAlerts).toHaveBeenCalledWith({
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
-        maintenanceWindowIds: [],
         alertDelay: 0,
         ruleRunMetricsStore,
       });
-      expect(alertsClient.persistAlerts).toHaveBeenCalledWith([]);
+      expect(alertsClient.persistAlerts).toHaveBeenCalled();
       expect(alertsClient.logAlerts).not.toHaveBeenCalled();
     });
 
@@ -1099,6 +1134,8 @@ describe('RuleTypeRunner', () => {
             alertingEventLogger,
             flappingSettings: DEFAULT_FLAPPING_SETTINGS,
             queryDelaySec: 0,
+            request: fakeRequest,
+            maintenanceWindowsService,
             ruleId: RULE_ID,
             ruleLogPrefix: `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`,
             ruleRunMetricsStore,
@@ -1128,6 +1165,7 @@ describe('RuleTypeRunner', () => {
         services: {
           alertFactory: alertsClient.factory(),
           alertsClient: alertsClient.client(),
+          getMaintenanceWindowIds: expect.any(Function),
           getDataViews: expect.any(Function),
           ruleMonitoringService: publicRuleMonitoringService,
           ruleResultService: publicRuleResultService,
@@ -1180,13 +1218,11 @@ describe('RuleTypeRunner', () => {
       expect(ruleRunMetricsStore.setSearchMetrics).toHaveBeenCalled();
       expect(alertsClient.processAlerts).toHaveBeenCalledWith({
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
-        maintenanceWindowIds: [],
         alertDelay: 0,
         ruleRunMetricsStore,
       });
-      expect(alertsClient.persistAlerts).toHaveBeenCalledWith([]);
+      expect(alertsClient.persistAlerts).toHaveBeenCalled();
       expect(alertsClient.logAlerts).toHaveBeenCalledWith({
-        eventLogger: alertingEventLogger,
         ruleRunMetricsStore,
         shouldLogAlerts: true,
       });

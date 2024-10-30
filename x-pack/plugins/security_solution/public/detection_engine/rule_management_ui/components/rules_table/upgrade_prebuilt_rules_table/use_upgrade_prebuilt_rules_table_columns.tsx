@@ -8,6 +8,7 @@
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiBadge, EuiButtonEmpty, EuiLink, EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import React, { useMemo } from 'react';
+import type { RuleUpgradeState } from '../../../../rule_management/model/prebuilt_rule_upgrade/rule_upgrade_state';
 import { RulesTableEmptyColumnName } from '../rules_table_empty_column_name';
 import { SHOW_RELATED_INTEGRATIONS_SETTING } from '../../../../../../common/constants';
 import type { RuleSignatureId } from '../../../../../../common/api/detection_engine/model/rule_schema';
@@ -22,7 +23,6 @@ import type { Rule } from '../../../../rule_management/logic';
 import { getNormalizedSeverity } from '../helpers';
 import type { UpgradePrebuiltRulesTableActions } from './upgrade_prebuilt_rules_table_context';
 import { useUpgradePrebuiltRulesTableContext } from './upgrade_prebuilt_rules_table_context';
-import type { RuleUpgradeState } from './use_prebuilt_rules_upgrade_state';
 
 export type TableColumn = EuiBasicTableColumn<RuleUpgradeState>;
 
@@ -107,13 +107,16 @@ const INTEGRATIONS_COLUMN: TableColumn = {
 const createUpgradeButtonColumn = (
   upgradeRules: UpgradePrebuiltRulesTableActions['upgradeRules'],
   loadingRules: RuleSignatureId[],
-  isDisabled: boolean
+  isDisabled: boolean,
+  isPrebuiltRulesCustomizationEnabled: boolean
 ): TableColumn => ({
   field: 'rule_id',
   name: <RulesTableEmptyColumnName name={i18n.UPDATE_RULE_BUTTON} />,
   render: (ruleId: RuleSignatureId, record) => {
     const isRuleUpgrading = loadingRules.includes(ruleId);
-    const isUpgradeButtonDisabled = isRuleUpgrading || isDisabled || record.hasUnresolvedConflicts;
+    const isDisabledByConflicts =
+      isPrebuiltRulesCustomizationEnabled && record.hasUnresolvedConflicts;
+    const isUpgradeButtonDisabled = isRuleUpgrading || isDisabled || isDisabledByConflicts;
     const spinner = (
       <EuiLoadingSpinner
         size="s"
@@ -141,7 +144,12 @@ export const useUpgradePrebuiltRulesTableColumns = (): TableColumn[] => {
   const hasCRUDPermissions = hasUserCRUDPermission(canUserCRUD);
   const [showRelatedIntegrations] = useUiSetting$<boolean>(SHOW_RELATED_INTEGRATIONS_SETTING);
   const {
-    state: { loadingRules, isRefetching, isUpgradingSecurityPackages },
+    state: {
+      loadingRules,
+      isRefetching,
+      isUpgradingSecurityPackages,
+      isPrebuiltRulesCustomizationEnabled,
+    },
     actions: { upgradeRules },
   } = useUpgradePrebuiltRulesTableContext();
   const isDisabled = isRefetching || isUpgradingSecurityPackages;
@@ -173,9 +181,23 @@ export const useUpgradePrebuiltRulesTableColumns = (): TableColumn[] => {
         width: '12%',
       },
       ...(hasCRUDPermissions
-        ? [createUpgradeButtonColumn(upgradeRules, loadingRules, isDisabled)]
+        ? [
+            createUpgradeButtonColumn(
+              upgradeRules,
+              loadingRules,
+              isDisabled,
+              isPrebuiltRulesCustomizationEnabled
+            ),
+          ]
         : []),
     ],
-    [hasCRUDPermissions, loadingRules, isDisabled, showRelatedIntegrations, upgradeRules]
+    [
+      hasCRUDPermissions,
+      loadingRules,
+      isDisabled,
+      showRelatedIntegrations,
+      upgradeRules,
+      isPrebuiltRulesCustomizationEnabled,
+    ]
   );
 };

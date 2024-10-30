@@ -32,6 +32,7 @@ import { OtherType } from './other_type';
 import { NestedType } from './nested_type';
 import { JoinType } from './join_type';
 import { HistogramType } from './histogram_type';
+import { PassthroughType } from './passthrough_type';
 import { ConstantKeywordType } from './constant_keyword_type';
 import { RankFeatureType } from './rank_feature_type';
 import { WildcardType } from './wildcard_type';
@@ -62,6 +63,7 @@ const typeToParametersFormMap: { [key in DataType]?: ComponentType<any> } = {
   nested: NestedType,
   join: JoinType,
   histogram: HistogramType,
+  passthrough: PassthroughType,
   constant_keyword: ConstantKeywordType,
   rank_feature: RankFeatureType,
   wildcard: WildcardType,

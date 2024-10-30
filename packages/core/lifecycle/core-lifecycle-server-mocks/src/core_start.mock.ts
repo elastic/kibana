@@ -22,6 +22,7 @@ import { coreUsageDataServiceMock } from '@kbn/core-usage-data-server-mocks';
 import { customBrandingServiceMock } from '@kbn/core-custom-branding-server-mocks';
 import { securityServiceMock } from '@kbn/core-security-server-mocks';
 import { userProfileServiceMock } from '@kbn/core-user-profile-server-mocks';
+import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-server-mocks';
 
 export function createCoreStartMock() {
   const mock: MockedKeys<CoreStart> = {
@@ -29,6 +30,7 @@ export function createCoreStartMock() {
     capabilities: capabilitiesServiceMock.createStartContract(),
     docLinks: docLinksServiceMock.createStartContract(),
     elasticsearch: elasticsearchServiceMock.createStart(),
+    featureFlags: coreFeatureFlagsMock.createStart(),
     http: httpServiceMock.createStartContract(),
     metrics: metricsServiceMock.createStartContract(),
     savedObjects: savedObjectsServiceMock.createStartContract(),

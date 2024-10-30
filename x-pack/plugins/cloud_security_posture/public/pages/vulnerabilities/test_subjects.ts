@@ -9,6 +9,9 @@ export const FINDINGS_VULNERABILITY_FLYOUT_DESCRIPTION_LIST =
   'vulnerability-flyout-description-list';
 export const JSON_TAB_VULNERABILITY_FLYOUT = 'vulnerability_json_tab_flyout';
 export const OVERVIEW_TAB_VULNERABILITY_FLYOUT = 'vulnerability_overview_tab_flyout';
+export const DATA_SOURCE_VULNERABILITY_FLYOUT = 'vulnerability_flyout_data_source_display_box';
+export const PUBLISHED_DATE_VULNERABILITY_FLYOUT = 'vulnerability_flyout_date_display_box';
+export const VULNERABILITY_SCORES_FLYOUT = 'vulnerability_flyout_score';
 export const TAB_ID_VULNERABILITY_FLYOUT = (tabId: string) =>
   `vulnerability-finding-flyout-tab-${tabId}`;
 

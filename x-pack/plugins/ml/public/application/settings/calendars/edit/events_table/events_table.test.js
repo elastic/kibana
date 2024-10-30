@@ -9,6 +9,10 @@ import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { EventsTable } from './events_table';
 
+jest.mock('../../../../capabilities/check_capabilities', () => ({
+  usePermissionCheck: () => [true, true],
+}));
+
 const testProps = {
   canCreateCalendar: true,
   eventsList: [

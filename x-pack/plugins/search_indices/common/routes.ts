@@ -9,3 +9,5 @@ export const GET_STATUS_ROUTE = '/internal/search_indices/status';
 export const GET_USER_PRIVILEGES_ROUTE = '/internal/search_indices/start_privileges';
 
 export const POST_CREATE_INDEX_ROUTE = '/internal/search_indices/indices/create';
+
+export const INDEX_DOCUMENT_ROUTE = '/internal/search_indices/{indexName}/documents/{id}';

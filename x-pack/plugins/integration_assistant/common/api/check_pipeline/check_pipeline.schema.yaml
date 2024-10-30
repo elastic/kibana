@@ -7,7 +7,7 @@ paths:
     post:
       summary: Checks if the pipeline is valid for the given samples
       operationId: CheckPipeline
-      x-codegen-enabled: false
+      x-codegen-enabled: true
       description: Check latest pipeline against the input samples.
       tags:
         - Check Pipeline API

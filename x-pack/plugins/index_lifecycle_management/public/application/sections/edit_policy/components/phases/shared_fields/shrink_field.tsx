@@ -39,14 +39,7 @@ export const ShrinkField: FunctionComponent<Props> = ({ phase }) => {
   const { docLinks } = useKibana().services;
   return (
     <DescribedFormRow
-      title={
-        <h3>
-          <FormattedMessage
-            id="xpack.indexLifecycleMgmt.editPolicy.shrinkText"
-            defaultMessage="Shrink"
-          />
-        </h3>
-      }
+      title={<h3>{i18nTexts.editPolicy.shrinkActionLabel}</h3>}
       description={
         <EuiTextColor color="subdued">
           <FormattedMessage
@@ -59,7 +52,7 @@ export const ShrinkField: FunctionComponent<Props> = ({ phase }) => {
       titleSize="xs"
       switchProps={{
         'data-test-subj': `${phase}-shrinkSwitch`,
-        label: i18nTexts.editPolicy.shrinkLabel,
+        label: i18nTexts.editPolicy.shrinkToggleLabel,
         initialValue: Boolean(policy.phases[phase]?.actions?.shrink),
       }}
       fullWidth

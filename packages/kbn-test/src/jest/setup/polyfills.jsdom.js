@@ -53,22 +53,16 @@ if (!Object.hasOwn(global, 'Worker')) {
   if (!Object.hasOwn(global, 'matchMedia')) {
     Object.defineProperty(global, 'matchMedia', {
       writable: true,
-      // eslint-disable-next-line no-undef
-      value: jest.fn().mockImplementation((query) => ({
+      value: (query) => ({
         matches: false,
         media: query,
         onchange: null,
-        // eslint-disable-next-line no-undef
-        addListener: jest.fn(), // deprecated
-        // eslint-disable-next-line no-undef
-        removeListener: jest.fn(), // deprecated
-        // eslint-disable-next-line no-undef
-        addEventListener: jest.fn(),
-        // eslint-disable-next-line no-undef
-        removeEventListener: jest.fn(),
-        // eslint-disable-next-line no-undef
-        dispatchEvent: jest.fn(),
-      })),
+        addListener: () => {},
+        removeListener: () => {},
+        addEventListener: () => {},
+        removeEventListener: () => {},
+        dispatchEvent: () => {},
+      }),
     });
   }
 }

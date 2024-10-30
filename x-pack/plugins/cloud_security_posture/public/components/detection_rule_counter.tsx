@@ -9,9 +9,15 @@ import React, { useCallback, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink, EuiLoadingSpinner, EuiSkeletonText, EuiText } from '@elastic/eui';
 import type { HttpSetup } from '@kbn/core/public';
+import {
+  CREATE_DETECTION_RULE_FROM_FLYOUT,
+  uiMetricService,
+} from '@kbn/cloud-security-posture-common/utils/ui_metrics';
+import { METRIC_TYPE } from '@kbn/analytics';
 import { useHistory } from 'react-router-dom';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import { useQueryClient } from '@tanstack/react-query';
+import { i18n as kbnI18n } from '@kbn/i18n';
 import { useFetchDetectionRulesAlertsStatus } from '../common/api/use_fetch_detection_rules_alerts_status';
 import { useFetchDetectionRulesByTags } from '../common/api/use_fetch_detection_rules_by_tags';
 import { RuleResponse } from '../common/types';
@@ -63,13 +69,29 @@ export const DetectionRuleCounter = ({ tags, createRuleFn }: DetectionRuleCounte
 
   const createDetectionRuleOnClick = useCallback(async () => {
     const startServices = { analytics, notifications, i18n, theme };
-    setIsCreateRuleLoading(true);
-    const ruleResponse = await createRuleFn(http);
-    setIsCreateRuleLoading(false);
-    showCreateDetectionRuleSuccessToast(startServices, http, ruleResponse);
-    // Triggering a refetch of rules and alerts to update the UI
-    queryClient.invalidateQueries([DETECTION_ENGINE_RULES_KEY]);
-    queryClient.invalidateQueries([DETECTION_ENGINE_ALERTS_KEY]);
+
+    try {
+      setIsCreateRuleLoading(true);
+      uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, CREATE_DETECTION_RULE_FROM_FLYOUT);
+
+      const ruleResponse = await createRuleFn(http);
+
+      setIsCreateRuleLoading(false);
+      showCreateDetectionRuleSuccessToast(startServices, http, ruleResponse);
+
+      // Triggering a refetch of rules and alerts to update the UI
+      queryClient.invalidateQueries([DETECTION_ENGINE_RULES_KEY]);
+      queryClient.invalidateQueries([DETECTION_ENGINE_ALERTS_KEY]);
+    } catch (e) {
+      setIsCreateRuleLoading(false);
+
+      notifications.toasts.addWarning({
+        title: kbnI18n.translate('xpack.csp.detectionRuleCounter.alerts.createRuleErrorTitle', {
+          defaultMessage: 'Coming Soon',
+        }),
+        text: e.message,
+      });
+    }
   }, [createRuleFn, http, analytics, notifications, i18n, theme, queryClient]);
 
   if (alertsIsError) return <>{'-'}</>;

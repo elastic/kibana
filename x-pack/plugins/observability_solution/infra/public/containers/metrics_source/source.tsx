@@ -45,7 +45,7 @@ export const useSourceFetcher = ({ sourceId }: { sourceId: string }) => {
             method: 'GET',
           }
         );
-        telemetry.reportPerformanceMetricEvent(
+        telemetry?.reportPerformanceMetricEvent(
           'infra_source_load',
           performance.now() - start,
           {},

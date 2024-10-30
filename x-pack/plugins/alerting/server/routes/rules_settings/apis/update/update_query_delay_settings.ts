@@ -28,6 +28,7 @@ export const updateQueryDelaySettingsRoute = (
         body: updateQueryDelaySettingsBodySchemaV1,
       },
       options: {
+        access: 'internal',
         tags: [`access:${API_PRIVILEGES.WRITE_QUERY_DELAY_SETTINGS}`],
       },
     },
