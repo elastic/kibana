@@ -123,7 +123,7 @@ export const validationFromCommandTestSuite = (setup: helpers.Setup) => {
                   ', '
                 )}]`,
               ]);
-              await expectErrors(`from index METADATA _id, _source METADATA _id2`, [
+              await expectErrors(`from index metadata _id, _source METADATA _id2`, [
                 "SyntaxError: mismatched input 'METADATA' expecting <EOF>",
               ]);
             });
