@@ -67,7 +67,6 @@ import semver from 'semver';
 import axios from 'axios';
 import { userInfo } from 'os';
 import pRetry from 'p-retry';
-import { AgentPolicyBaseSchema } from '@kbn/fleet-plugin/server/types';
 import { getPolicyDataForUpdate } from '../../../common/endpoint/service/policy';
 import { fetchActiveSpace } from './spaces';
 import { fetchKibanaStatus } from '../../../common/endpoint/utils/kibana_status';
@@ -108,6 +107,42 @@ export const randomAgentPolicyName = (() => {
  * @param version Version string
  */
 const isValidArtifactVersion = (version: string) => !!version.match(/^\d+\.\d+\.\d+(-SNAPSHOT)?$/);
+
+const getAgentPolicyDataForUpdate = (
+  agentPolicy: AgentPolicy
+): UpdateAgentPolicyRequest['body'] => {
+  return pick(currentSavedPolicy, [
+    'id',
+    'name',
+    'namespace',
+    'space_ids',
+    'description',
+    'is_default',
+    'is_default_fleet_server',
+    'has_fleet_server',
+    'is_managed',
+    'monitoring_enabled',
+    'unenroll_timeout',
+    'inactivity_timeout',
+    'is_preconfigured',
+    'data_output_id',
+    'monitoring_output_id',
+    'download_source_id',
+    'fleet_server_host_id',
+    'schema_version',
+    'agent_features',
+    'is_protected',
+    'overrides',
+    'advanced_settings',
+    'keep_monitoring_alive',
+    'supports_agentless',
+    'global_data_tags',
+    'monitoring_pprof_enabled',
+    'monitoring_http',
+    'monitoring_diagnostics',
+    'uploader',
+  ]);
+};
 
 export const checkInFleetAgent = async (
   esClient: Client,
@@ -1452,7 +1487,7 @@ export const updateAgentPolicy = async (
   if (patch) {
     const currentSavedPolicy = await fetchAgentPolicy(kbnClient, id);
 
-    fullPolicyData = pick(currentSavedPolicy, Object.keys(AgentPolicyBaseSchema));
+    fullPolicyData = getAgentPolicyDataForUpdate(currentSavedPolicy);
     delete fullPolicyData.id;
     Object.assign(fullPolicyData, policyData);
   }
