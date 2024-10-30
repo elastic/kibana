@@ -289,7 +289,7 @@ Learn more about how to use ES|QL queries in <<try-esql, Using ES|QL>>.
 
 
 [float]
-[[save-your-search]]
+[[save-discover-search]]
 ==== Save your search for later use
 
 Save your search so you can use it later, generate a CSV report, or use it to create visualizations, dashboards, and Canvas workpads.
