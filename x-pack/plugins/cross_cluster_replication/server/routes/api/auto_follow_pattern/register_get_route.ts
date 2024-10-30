@@ -26,6 +26,12 @@ export const registerGetRoute = ({
   router.get(
     {
       path: addBasePath('/auto_follow_patterns/{id}'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: paramsSchema,
       },

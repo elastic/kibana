@@ -36,7 +36,16 @@ export function registerDetailsRoute({
   lib: { handleEsError },
 }: RouteDependencies) {
   router.get(
-    { path: addBasePath('/nodes/{nodeAttrs}/details'), validate: { params: paramsSchema } },
+    {
+      path: addBasePath('/nodes/{nodeAttrs}/details'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate: { params: paramsSchema },
+    },
     license.guardApiRoute(async (context, request, response) => {
       const params = request.params as typeof paramsSchema.type;
       const { nodeAttrs } = params;

@@ -17,6 +17,12 @@ export const registerStopRoute = ({
   router.post(
     {
       path: addBasePath('/stop'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           jobIds: schema.arrayOf(schema.string()),

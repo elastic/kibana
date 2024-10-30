@@ -20,6 +20,12 @@ export const registerGetRoute = ({
     {
       // this endpoint is used by the data views plugin, see https://github.com/elastic/kibana/issues/152708
       path: addBasePath('/indices'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: false,
     },
     license.guardApiRoute(async (context, request, response) => {

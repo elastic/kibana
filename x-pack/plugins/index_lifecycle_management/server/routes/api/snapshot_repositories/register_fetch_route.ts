@@ -16,7 +16,16 @@ import { handleEsError } from '../../../shared_imports';
 
 export const registerFetchRoute = ({ router, license }: RouteDependencies) => {
   router.get(
-    { path: addBasePath('/snapshot_repositories'), validate: false },
+    {
+      path: addBasePath('/snapshot_repositories'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate: false,
+    },
     async (ctx, request, response) => {
       if (!license.isCurrentLicenseAtLeast(MIN_SEARCHABLE_SNAPSHOT_LICENSE)) {
         return response.forbidden({

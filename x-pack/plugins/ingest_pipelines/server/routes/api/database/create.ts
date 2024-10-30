@@ -41,6 +41,12 @@ export const registerCreateDatabaseRoute = ({
   router.post(
     {
       path: `${API_BASE_PATH}/databases`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: bodySchema,
       },

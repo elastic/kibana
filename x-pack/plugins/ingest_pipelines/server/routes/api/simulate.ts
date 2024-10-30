@@ -24,6 +24,12 @@ export const registerSimulateRoute = ({
   router.post(
     {
       path: `${API_BASE_PATH}/simulate`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: bodySchema,
       },

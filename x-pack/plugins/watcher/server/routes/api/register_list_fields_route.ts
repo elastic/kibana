@@ -35,6 +35,12 @@ export function registerListFieldsRoute({
   router.post(
     {
       path: '/api/watcher/fields',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: bodySchema,
       },

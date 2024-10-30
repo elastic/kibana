@@ -18,6 +18,12 @@ export function registerStartBasicRoute({
   router.post(
     {
       path: addBasePath('/start_basic'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: { query: schema.object({ acknowledge: schema.string() }) },
     },
     async (ctx, req, res) => {

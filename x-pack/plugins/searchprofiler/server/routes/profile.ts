@@ -12,6 +12,12 @@ export const register = ({ router, getLicenseStatus, log }: RouteDependencies) =
   router.post(
     {
       path: '/api/searchprofiler/profile',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           query: schema.object({}, { unknowns: 'allow' }),

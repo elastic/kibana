@@ -26,6 +26,12 @@ export function registerLoadRoute({ router, license, lib: { handleEsError } }: R
   router.get(
     {
       path: '/api/watcher/watch/{id}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: paramsSchema,
       },

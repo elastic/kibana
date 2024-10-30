@@ -51,6 +51,12 @@ export function registerDeleteRoute({ router, license }: RouteDependencies) {
   router.post(
     {
       path: '/api/watcher/watches/delete',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: bodySchema,
       },

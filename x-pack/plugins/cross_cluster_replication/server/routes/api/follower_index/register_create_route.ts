@@ -39,6 +39,12 @@ export const registerCreateRoute = ({
   router.post(
     {
       path: addBasePath('/follower_indices'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: bodySchema,
       },

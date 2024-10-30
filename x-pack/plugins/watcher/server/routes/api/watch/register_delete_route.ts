@@ -27,6 +27,12 @@ export function registerDeleteRoute({
   router.delete(
     {
       path: '/api/watcher/watch/{watchId}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: paramsSchema,
       },

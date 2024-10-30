@@ -32,6 +32,12 @@ export function registerListRoute({ router, license, lib: { handleEsError } }: R
   router.get(
     {
       path: '/api/watcher/watches',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: false,
     },
     license.guardApiRoute(async (ctx, request, response) => {

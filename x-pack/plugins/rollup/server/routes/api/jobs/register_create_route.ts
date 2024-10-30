@@ -17,6 +17,12 @@ export const registerCreateRoute = ({
   router.put(
     {
       path: addBasePath('/create'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           job: schema.object(

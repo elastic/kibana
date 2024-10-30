@@ -30,7 +30,16 @@ const bodySchema = schema.object({
 
 export function registerRetryRoute({ router, license, lib: { handleEsError } }: RouteDependencies) {
   router.post(
-    { path: addBasePath('/index/retry'), validate: { body: bodySchema } },
+    {
+      path: addBasePath('/index/retry'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate: { body: bodySchema },
+    },
     license.guardApiRoute(async (context, request, response) => {
       const body = request.body as typeof bodySchema.type;
       const { indexNames } = body;

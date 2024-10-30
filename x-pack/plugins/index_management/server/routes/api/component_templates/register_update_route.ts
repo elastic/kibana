@@ -23,6 +23,12 @@ export const registerUpdateRoute = ({
   router.put(
     {
       path: addBasePath('/component_templates/{name}'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: componentTemplateSchema,
         params: paramsSchema,

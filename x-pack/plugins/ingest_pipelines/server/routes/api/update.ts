@@ -24,6 +24,12 @@ export const registerUpdateRoute = ({
   router.put(
     {
       path: `${API_BASE_PATH}/{name}`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: bodySchema,
         params: paramsSchema,

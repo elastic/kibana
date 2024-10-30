@@ -18,6 +18,12 @@ export function registerLicenseRoute({
   router.put(
     {
       path: addBasePath(''),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         query: schema.object({ acknowledge: schema.string() }),
         body: schema.object({

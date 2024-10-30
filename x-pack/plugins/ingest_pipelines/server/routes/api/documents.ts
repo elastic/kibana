@@ -22,6 +22,12 @@ export const registerDocumentsRoute = ({
   router.get(
     {
       path: `${API_BASE_PATH}/documents/{index}/{id}`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: paramsSchema,
       },
