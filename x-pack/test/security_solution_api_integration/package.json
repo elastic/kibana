@@ -141,6 +141,16 @@
     "exception_lists:auth:lists:qa:serverless": "npm run run-tests:lists:complete authentication/exceptions/lists serverless qaPeriodicEnv",
     "exception_lists:auth:lists:qa:serverless:release": "npm run run-tests:lists:complete authentication/exceptions/lists serverless qaEnv",
 
+    "exception_lists:auth:common:server:serverless": "npm run initialize-server:lists:complete authentication/exceptions/common serverless",
+    "exception_lists:auth:common:runner:serverless": "npm run run-tests:lists:complete authentication/exceptions/common serverless serverlessEnv",
+    "exception_lists:auth:common:qa:serverless": "npm run run-tests:lists:complete authentication/exceptions/common serverless qaPeriodicEnv",
+    "exception_lists:auth:common:qa:serverless:release": "npm run run-tests:lists:complete authentication/exceptions/common serverless qaEnv",
+
+    "exception_lists:auth:items:server:serverless": "npm run initialize-server:lists:complete authentication/exceptions/items serverless",
+    "exception_lists:auth:items:runner:serverless": "npm run run-tests:lists:complete authentication/exceptions/items serverless serverlessEnv",
+    "exception_lists:auth:items:qa:serverless": "npm run run-tests:lists:complete authentication/exceptions/items serverless qaPeriodicEnv",
+    "exception_lists:auth:items:qa:serverless:release": "npm run run-tests:lists:complete authentication/exceptions/items serverless qaEnv",
+
     "exception_lists_items:server:serverless": "npm run initialize-server:lists:complete exception_lists_items serverless",
     "exception_lists_items:runner:serverless": "npm run run-tests:lists:complete exception_lists_items serverless serverlessEnv",
     "exception_lists_items:qa:serverless": "npm run run-tests:lists:complete exception_lists_items serverless qaPeriodicEnv",
