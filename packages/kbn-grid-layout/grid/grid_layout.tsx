@@ -55,11 +55,7 @@ export const GridLayout = forwardRef<GridLayoutApi, GridLayoutProps>(
         });
 
       const onLayoutChangeSubscription = gridLayoutStateManager.layoutUpdateEvent$
-        .pipe(
-          withLatestFrom(gridLayoutStateManager.gridLayout$),
-          map(([_, layout]) => layout),
-          pairwise()
-        )
+        .pipe(pairwise())
         .subscribe(([layoutBefore, layoutAfter]) => {
           if (!isLayoutEqual(layoutBefore, layoutAfter)) {
             onLayoutChange(layoutAfter);
@@ -96,7 +92,9 @@ export const GridLayout = forwardRef<GridLayoutApi, GridLayoutProps>(
                   setInteractionEvent={(nextInteractionEvent) => {
                     if (!nextInteractionEvent) {
                       gridLayoutStateManager.activePanel$.next(undefined);
-                      gridLayoutStateManager.layoutUpdateEvent$.next('drop');
+                      gridLayoutStateManager.layoutUpdateEvent$.next(
+                        gridLayoutStateManager.gridLayout$.getValue()
+                      );
                     }
                     gridLayoutStateManager.interactionEvent$.next(nextInteractionEvent);
                   }}

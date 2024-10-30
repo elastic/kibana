@@ -71,13 +71,14 @@ export interface ActivePanel {
 }
 
 export interface GridLayoutStateManager {
-  gridDimensions$: BehaviorSubject<ObservedSize>;
   gridLayout$: BehaviorSubject<GridLayoutData>;
+
+  gridDimensions$: BehaviorSubject<ObservedSize>;
   runtimeSettings$: BehaviorSubject<RuntimeGridSettings>;
   activePanel$: BehaviorSubject<ActivePanel | undefined>;
   interactionEvent$: BehaviorSubject<PanelInteractionEvent | undefined>;
 
-  layoutUpdateEvent$: BehaviorSubject<'drop' | 'delete' | 'add' | undefined>;
+  layoutUpdateEvent$: BehaviorSubject<GridLayoutData>;
 
   rowRefs: React.MutableRefObject<Array<HTMLDivElement | null>>;
   panelRefs: React.MutableRefObject<Array<{ [id: string]: HTMLDivElement | null }>>;

@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import ReactDOM from 'react-dom';
 import { v4 as uuidv4 } from 'uuid';
 
 import {
+  EuiBadge,
   EuiButton,
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -22,7 +23,7 @@ import {
 } from '@elastic/eui';
 import { AppMountParameters } from '@kbn/core-application-browser';
 import { CoreStart } from '@kbn/core-lifecycle-browser';
-import { GridLayout, type GridLayoutApi } from '@kbn/grid-layout';
+import { GridLayout, GridLayoutData, isLayoutEqual, type GridLayoutApi } from '@kbn/grid-layout';
 import {
   DASHBOARD_GRID_COLUMN_COUNT,
   DASHBOARD_GRID_HEIGHT,
@@ -38,13 +39,19 @@ import {
 export const GridExample = ({ coreStart }: { coreStart: CoreStart }) => {
   const [layoutKey, setLayoutKey] = useState<string>(uuidv4());
   const [gridLayoutApi, setGridLayoutApi] = useState<GridLayoutApi | null>();
+  const [savedLayout, setSavedLayout] = useState<GridLayoutData>(getSerializedGridLayout());
+  const [currentLayout, setCurrentLayout] = useState<GridLayoutData>(savedLayout);
+
+  const hasUnsavedChanges = useMemo(() => {
+    return !isLayoutEqual(savedLayout, currentLayout);
+  }, [savedLayout, currentLayout]);
 
   return (
     <EuiProvider>
       <EuiPageTemplate grow={false} offset={0} restrictWidth={false}>
         <EuiPageTemplate.Header iconType={'dashboardApp'} pageTitle="Grid Layout Example" />
         <EuiPageTemplate.Section color="subdued">
-          <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
             <EuiFlexItem grow={false}>
               <EuiButton
                 onClick={async () => {
@@ -59,11 +66,17 @@ export const GridExample = ({ coreStart }: { coreStart: CoreStart }) => {
               </EuiButton>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiFlexGroup gutterSize="xs">
+              <EuiFlexGroup gutterSize="xs" alignItems="center">
+                {hasUnsavedChanges && (
+                  <EuiFlexItem grow={false}>
+                    <EuiBadge color="warning">Unsaved changes</EuiBadge>
+                  </EuiFlexItem>
+                )}
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
                     onClick={() => {
                       clearSerializedGridLayout();
+                      setCurrentLayout(savedLayout);
                       setLayoutKey(uuidv4()); // force remount of grid
                     }}
                   >
@@ -74,7 +87,9 @@ export const GridExample = ({ coreStart }: { coreStart: CoreStart }) => {
                   <EuiButton
                     onClick={() => {
                       if (gridLayoutApi) {
-                        setSerializedGridLayout(gridLayoutApi.serializeState());
+                        const layoutToSave = gridLayoutApi.serializeState();
+                        setSerializedGridLayout(layoutToSave);
+                        setSavedLayout(layoutToSave);
                       }
                     }}
                   >
@@ -87,7 +102,7 @@ export const GridExample = ({ coreStart }: { coreStart: CoreStart }) => {
           <EuiSpacer size="m" />
           <GridLayout
             onLayoutChange={(newLayout) => {
-              console.log('NEW LAYOUT', newLayout);
+              setCurrentLayout(newLayout);
             }}
             key={layoutKey}
             ref={setGridLayoutApi}
@@ -117,14 +132,13 @@ export const GridExample = ({ coreStart }: { coreStart: CoreStart }) => {
               );
             }}
             getCreationOptions={() => {
-              const initialLayout = getSerializedGridLayout();
               return {
                 gridSettings: {
                   gutterSize: DASHBOARD_MARGIN_SIZE,
                   rowHeight: DASHBOARD_GRID_HEIGHT,
                   columnCount: DASHBOARD_GRID_COLUMN_COUNT,
                 },
-                initialLayout,
+                initialLayout: savedLayout,
               };
             }}
           />

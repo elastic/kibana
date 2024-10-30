@@ -36,7 +36,7 @@ export const useGridLayoutApi = ({
           placementStrategy
         );
         gridLayoutStateManager.gridLayout$.next([nextRow, ...rest]);
-        gridLayoutStateManager.layoutUpdateEvent$.next('add');
+        gridLayoutStateManager.layoutUpdateEvent$.next([nextRow, ...rest]);
       },
 
       removePanel: (panelId) => {
@@ -62,18 +62,19 @@ export const useGridLayoutApi = ({
             panels: updatedPanels,
           });
           gridLayoutStateManager.gridLayout$.next(newLayout);
-          gridLayoutStateManager.layoutUpdateEvent$.next('delete');
+          gridLayoutStateManager.layoutUpdateEvent$.next(newLayout);
         }
       },
 
       replacePanel: (oldPanelId, newPanelId) => {
         const currentLayout = gridLayoutStateManager.gridLayout$.getValue();
+        debugger;
 
         // find the row where the panel exists and update its ID to trigger a re-render
         let rowIndex = 0;
         let updatedPanels;
         for (rowIndex; rowIndex < currentLayout.length; rowIndex++) {
-          const row = currentLayout[rowIndex];
+          const row = { ...currentLayout[rowIndex] };
           if (Object.keys(row.panels).includes(oldPanelId)) {
             updatedPanels = { ...row.panels };
             const oldPanel = updatedPanels[oldPanelId];
@@ -82,13 +83,14 @@ export const useGridLayoutApi = ({
             break;
           }
         }
+        console.log('UPDATE', currentLayout);
 
         // if the panels were updated (i.e. the panel was successfully found and replaced), update the layout
         if (updatedPanels) {
           const newLayout = [...currentLayout];
           newLayout[rowIndex].panels = updatedPanels;
           gridLayoutStateManager.gridLayout$.next(newLayout);
-          gridLayoutStateManager.layoutUpdateEvent$.next('add');
+          gridLayoutStateManager.layoutUpdateEvent$.next(newLayout);
         }
       },
 

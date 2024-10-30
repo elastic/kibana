@@ -15,3 +15,5 @@ export type {
   GridRowData,
   GridSettings,
 } from './grid/types';
+
+export { isLayoutEqual } from './grid/utils/equality_checks';
