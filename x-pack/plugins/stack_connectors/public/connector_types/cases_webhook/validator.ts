@@ -81,15 +81,17 @@ export const containsCommentsOrEmpty =
   (message: string) =>
   (...args: Parameters<ValidationFunc>): ReturnType<ValidationFunc<any, ERROR_CODE>> => {
     const [{ value, path }] = args;
+
+    if (value === null || value === undefined || value === '') {
+      return undefined;
+    }
+
     if (typeof value !== 'string') {
       return {
         code: 'ERR_FIELD_FORMAT',
         formatType: 'STRING',
         message,
       };
-    }
-    if (value.length === 0) {
-      return undefined;
     }
 
     const comment = templateActionVariable(
@@ -114,11 +116,9 @@ export const isUrlButCanBeEmpty =
       formatType: 'URL',
       message,
     };
-    if (typeof value !== 'string') {
-      return error;
-    }
-    if (value.length === 0) {
+
+    if (value === null || value === undefined || value === '') {
       return undefined;
     }
-    return isUrl(value) ? undefined : error;
+    return typeof value === 'string' && isUrl(value) ? undefined : error;
   };
