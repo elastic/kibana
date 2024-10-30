@@ -9,11 +9,9 @@ import { v4 as uuidv4 } from 'uuid';
 import { AuthenticatedUser, ElasticsearchClient, Logger } from '@kbn/core/server';
 
 import {
-  DocumentEntryCreateFields,
   KnowledgeBaseEntryCreateProps,
   KnowledgeBaseEntryResponse,
   KnowledgeBaseEntryUpdateProps,
-  Metadata,
 } from '@kbn/elastic-assistant-common';
 import { getKnowledgeBaseEntry } from './get_knowledge_base_entry';
 import { CreateKnowledgeBaseEntrySchema, UpdateKnowledgeBaseEntrySchema } from './types';
@@ -24,9 +22,8 @@ export interface CreateKnowledgeBaseEntryParams {
   logger: Logger;
   spaceId: string;
   user: AuthenticatedUser;
-  knowledgeBaseEntry: KnowledgeBaseEntryCreateProps | LegacyKnowledgeBaseEntryCreateProps;
+  knowledgeBaseEntry: KnowledgeBaseEntryCreateProps;
   global?: boolean;
-  isV2?: boolean;
 }
 
 export const createKnowledgeBaseEntry = async ({
@@ -240,11 +237,4 @@ export const transformToCreateSchema = ({
     text: entry.text,
     vector: undefined,
   };
-};
-
-export type LegacyKnowledgeBaseEntryCreateProps = Omit<
-  DocumentEntryCreateFields,
-  'kbResource' | 'source'
-> & {
-  metadata: Metadata;
 };

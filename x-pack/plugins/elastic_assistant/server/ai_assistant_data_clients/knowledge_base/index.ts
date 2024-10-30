@@ -27,11 +27,7 @@ import { StructuredTool } from '@langchain/core/tools';
 import { ElasticsearchClient } from '@kbn/core/server';
 import { AIAssistantDataClient, AIAssistantDataClientParams } from '..';
 import { AssistantToolParams, GetElser } from '../../types';
-import {
-  createKnowledgeBaseEntry,
-  LegacyKnowledgeBaseEntryCreateProps,
-  transformToCreateSchema,
-} from './create_knowledge_base_entry';
+import { createKnowledgeBaseEntry, transformToCreateSchema } from './create_knowledge_base_entry';
 import { EsDocumentEntry, EsIndexEntry, EsKnowledgeBaseEntrySchema } from './types';
 import { transformESSearchToKnowledgeBaseEntry } from './transforms';
 import { SECURITY_LABS_RESOURCE } from '../../routes/knowledge_base/constants';
@@ -471,7 +467,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     knowledgeBaseEntry,
     global = false,
   }: {
-    knowledgeBaseEntry: KnowledgeBaseEntryCreateProps | LegacyKnowledgeBaseEntryCreateProps;
+    knowledgeBaseEntry: KnowledgeBaseEntryCreateProps;
     global?: boolean;
   }): Promise<KnowledgeBaseEntryResponse | null> => {
     const authenticatedUser = this.options.currentUser;
