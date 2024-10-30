@@ -167,7 +167,7 @@ export const useColumns = (
   const { earliest, latest } = useAppSelector((s) => s.logRateAnalysis);
   const timeRangeMs = { from: earliest ?? 0, to: latest ?? 0 };
 
-  const loading = useAppSelector((s) => s.logRateAnalysisStream.isRunning);
+  const loading = useAppSelector((s) => s.stream.isRunning);
   const zeroDocsFallback = useAppSelector((s) => s.logRateAnalysisResults.zeroDocsFallback);
   const {
     documentStats: { documentCountStats },

@@ -76,7 +76,7 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
 
   const dispatch = useAppDispatch();
 
-  const isRunning = useAppSelector((s) => s.logRateAnalysisStream.isRunning);
+  const isRunning = useAppSelector((s) => s.stream.isRunning);
   const significantItems = useAppSelector((s) => s.logRateAnalysisResults.significantItems);
   const significantItemsGroups = useAppSelector(
     (s) => s.logRateAnalysisResults.significantItemsGroups

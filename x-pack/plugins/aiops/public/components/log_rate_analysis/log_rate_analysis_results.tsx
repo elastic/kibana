@@ -114,7 +114,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
     isBrushCleared,
     groupResults,
   } = useAppSelector((s) => s.logRateAnalysis);
-  const { isRunning, errors: streamErrors } = useAppSelector((s) => s.logRateAnalysisStream);
+  const { isRunning, errors: streamErrors } = useAppSelector((s) => s.stream);
   const data = useAppSelector((s) => s.logRateAnalysisResults);
   const fieldCandidates = useAppSelector((s) => s.logRateAnalysisFieldCandidates);
   const { skippedColumns } = useAppSelector((s) => s.logRateAnalysisTable);
@@ -290,12 +290,13 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [shouldStart]);
 
+  // On mount, fetch field candidates first. Once they are populated,
+  // the actual analysis will be triggered.
   useEffect(() => {
     if (startParams) {
       dispatch(fetchFieldCandidates(startParams));
       dispatch(setCurrentAnalysisType(analysisType));
       dispatch(setCurrentAnalysisWindowParameters(chartWindowParameters));
-      dispatch(startStream(startParams));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

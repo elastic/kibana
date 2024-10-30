@@ -35,8 +35,8 @@ const getReduxStore = () =>
       logRateAnalysisFieldCandidates: logRateAnalysisFieldCandidatesSlice.reducer,
       // Analysis results
       logRateAnalysisResults: logRateAnalysisResultsSlice.reducer,
-      // Handles running the analysis
-      logRateAnalysisStream: streamSlice.reducer,
+      // Handles running the analysis, needs to be "stream" for the async thunk to work properly.
+      stream: streamSlice.reducer,
       // Handles hovering and pinning table rows and column selection
       logRateAnalysisTable: logRateAnalysisTableSlice.reducer,
     },

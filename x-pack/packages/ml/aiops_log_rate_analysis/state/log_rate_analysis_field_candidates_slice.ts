@@ -110,7 +110,7 @@ export const fetchFieldCandidates = createAsyncThunk(
         // If the currentFieldFilterSkippedItems is null, we're on the first load,
         // only then we set the current skipped fields to the initial skipped fields.
         currentFieldFilterSkippedItems:
-          currentFieldFilterSkippedItems === null && initialFieldFilterSkippedItems.length > 0
+          currentFieldFilterSkippedItems === null
             ? initialFieldFilterSkippedItems
             : currentFieldFilterSkippedItems,
         keywordFieldCandidates,
