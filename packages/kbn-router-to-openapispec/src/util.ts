@@ -202,5 +202,6 @@ export const getOpId = ({ path, method }: { path: string; method: string }): str
     .replace(/^\//, '')
     .replace(/\/$/, '')
     .replace(/[\{\}\?\*]/g, '')
-    .replace(/[\/_]/g, '-')}`;
+    .replace(/[\/_]/g, '-')
+    .replace(/(--)/g, '-')}`;
 };

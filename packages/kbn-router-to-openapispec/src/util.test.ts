@@ -319,6 +319,13 @@ describe('getOpId', () => {
       },
       output: 'get-my-underscore-resource',
     },
+    {
+      input: {
+        method: 'get',
+        path: '/api/my/_underscore_resource',
+      },
+      output: 'get-my-underscore-resource',
+    },
   ])('$input.method $input.path -> $output', ({ input, output }) => {
     expect(getOpId(input)).toBe(output);
   });
