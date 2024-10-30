@@ -126,7 +126,7 @@ export class RuleMigrationsTaskRunner {
     this.migrationsExecuting.set(migrationId, { abortController, user: currentUser.username });
     const config: RunnableConfig = {
       ...invocationConfig,
-      // signal: abortController.signal, // not working properly
+      // signal: abortController.signal, // not working properly https://github.com/langchain-ai/langgraphjs/issues/319
     };
 
     const abortPromise = abortSignalToPromise(abortController.signal);
