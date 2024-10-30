@@ -106,9 +106,7 @@ export class EntityClient {
     });
 
     if (!definition) {
-      const message = `Unable to find entity definition with [${id}]`;
-      this.options.logger.error(message);
-      throw new EntityDefinitionNotFound(message);
+      throw new EntityDefinitionNotFound(`Unable to find entity definition with [${id}]`);
     }
 
     await uninstallEntityDefinition({
