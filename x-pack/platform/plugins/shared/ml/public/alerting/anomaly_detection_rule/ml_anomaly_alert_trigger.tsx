@@ -64,15 +64,20 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
 
     if (!mlCapabilities.canCreateJob) return;
 
-    getStartServices().then((startServices) => {
-      const locator = startServices[2].locator;
-      if (!locator) return;
-      locator.getUrl({ page: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB }).then((url) => {
-        if (mounted) {
-          setNewJobUrl(url);
-        }
-      });
-    });
+    async function initNewJobUrl() {
+      const startServices = await getStartServices();
+      const { getLocator } = startServices[2];
+
+      if (!getLocator) return;
+
+      const locator = await getLocator();
+      const url = await locator.getUrl({ page: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB });
+      if (mounted) {
+        setNewJobUrl(url);
+      }
+    }
+
+    initNewJobUrl();
 
     return () => {
       mounted = false;
