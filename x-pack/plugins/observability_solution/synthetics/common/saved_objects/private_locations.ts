@@ -8,4 +8,4 @@
 export const legacyPrivateLocationsSavedObjectId = 'synthetics-privates-locations-singleton';
 export const legacyPrivateLocationsSavedObjectName = 'synthetics-privates-locations';
 
-export const privateLocationsSavedObjectName = 'synthetics-privates-locations-multiple';
+export const privateLocationsSavedObjectName = 'synthetics-private-locations-multiple';
