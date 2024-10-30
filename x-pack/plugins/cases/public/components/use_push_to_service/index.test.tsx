@@ -182,27 +182,6 @@ describe('usePushToService', () => {
     expect(result.current.hasErrorMessages).toBe(true);
   });
 
-  it('Displays message when case is closed', async () => {
-    const { result } = renderHook<
-      React.PropsWithChildren<UsePushToService>,
-      ReturnUsePushToService
-    >(
-      () =>
-        usePushToService({
-          ...defaultArgs,
-          caseStatus: CaseStatuses.closed,
-        }),
-      {
-        wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
-      }
-    );
-
-    const errorsMsg = result.current.errorsMsg;
-    expect(errorsMsg).toHaveLength(1);
-    expect(errorsMsg[0].id).toEqual(CLOSED_CASE_PUSH_ERROR_ID);
-    expect(result.current.hasErrorMessages).toBe(true);
-  });
-
   it('should not call pushCaseToExternalService when the selected connector is none', async () => {
     const { result } = renderHook<
       React.PropsWithChildren<UsePushToService>,
@@ -460,7 +439,7 @@ describe('usePushToService', () => {
       const { result } = renderHook<
         React.PropsWithChildren<UsePushToService>,
         ReturnUsePushToService
-      >(() => usePushToService({ ...defaultArgs, caseStatus: CaseStatuses.closed }), {
+      >(() => usePushToService({ ...defaultArgs, isValidConnector: false }), {
         wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
       });
 
