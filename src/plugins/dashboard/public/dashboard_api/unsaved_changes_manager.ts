@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, Subject, combineLatest, skipWhile, switchMap } from 'rxjs';
+import { BehaviorSubject, Subject, combineLatest, debounceTime, skipWhile, switchMap } from 'rxjs';
 import { PublishesSavedObjectId, PublishingSubject } from '@kbn/presentation-publishing';
 import { ControlGroupApi } from '@kbn/controls-plugin/public';
 import { childrenUnsavedChanges$, initializeUnsavedChanges } from '@kbn/presentation-containers';
@@ -73,34 +73,40 @@ export function initializeUnsavedChangesManager({
         return controlGroupApi!.unsavedChanges;
       })
     ),
-  ]).subscribe(([dashboardChanges, unsavedPanelState, controlGroupChanges]) => {
-    // viewMode needs to be stored in session state because
-    // its used to exclude 'view' dashboards on the listing page
-    // However, viewMode should not trigger unsaved changes notification
-    // otherwise, opening a dashboard in edit mode will always show unsaved changes
-    const hasDashboardChanges = Object.keys(omit(dashboardChanges ?? {}, ['viewMode'])).length > 0;
-    const hasUnsavedChanges =
-      hasDashboardChanges || unsavedPanelState !== undefined || controlGroupChanges !== undefined;
-    if (hasUnsavedChanges !== hasUnsavedChanges$.value) {
-      hasUnsavedChanges$.next(hasUnsavedChanges);
-    }
-
-    // backup unsaved changes if configured to do so
-    if (creationOptions?.useSessionStorageIntegration) {
-      // Current behaviour expects time range not to be backed up. Revisit this?
-      const dashboardStateToBackup = omit(dashboardChanges ?? {}, ['timeRange', 'refreshInterval']);
-      const reactEmbeddableChanges = unsavedPanelState ? { ...unsavedPanelState } : {};
-      if (controlGroupChanges) {
-        reactEmbeddableChanges[PANELS_CONTROL_GROUP_KEY] = controlGroupChanges;
+  ])
+    .pipe(debounceTime(0))
+    .subscribe(([dashboardChanges, unsavedPanelState, controlGroupChanges]) => {
+      // viewMode needs to be stored in session state because
+      // its used to exclude 'view' dashboards on the listing page
+      // However, viewMode should not trigger unsaved changes notification
+      // otherwise, opening a dashboard in edit mode will always show unsaved changes
+      const hasDashboardChanges =
+        Object.keys(omit(dashboardChanges ?? {}, ['viewMode'])).length > 0;
+      const hasUnsavedChanges =
+        hasDashboardChanges || unsavedPanelState !== undefined || controlGroupChanges !== undefined;
+      if (hasUnsavedChanges !== hasUnsavedChanges$.value) {
+        hasUnsavedChanges$.next(hasUnsavedChanges);
       }
 
-      getDashboardBackupService().setState(
-        savedObjectId$.value,
-        dashboardStateToBackup,
-        reactEmbeddableChanges
-      );
-    }
-  });
+      // backup unsaved changes if configured to do so
+      if (creationOptions?.useSessionStorageIntegration) {
+        // Current behaviour expects time range not to be backed up. Revisit this?
+        const dashboardStateToBackup = omit(dashboardChanges ?? {}, [
+          'timeRange',
+          'refreshInterval',
+        ]);
+        const reactEmbeddableChanges = unsavedPanelState ? { ...unsavedPanelState } : {};
+        if (controlGroupChanges) {
+          reactEmbeddableChanges[PANELS_CONTROL_GROUP_KEY] = controlGroupChanges;
+        }
+
+        getDashboardBackupService().setState(
+          savedObjectId$.value,
+          dashboardStateToBackup,
+          reactEmbeddableChanges
+        );
+      }
+    });
 
   return {
     api: {
