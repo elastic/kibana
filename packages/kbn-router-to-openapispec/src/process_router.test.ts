@@ -12,6 +12,7 @@ import { Router } from '@kbn/core-http-router-server-internal';
 import { OasConverter } from './oas_converter';
 import { extractResponses, processRouter } from './process_router';
 import { type InternalRouterRoute } from './type';
+import { createOpIdGenerator } from './util';
 
 describe('extractResponses', () => {
   let oasConverter: OasConverter;
@@ -127,20 +128,20 @@ describe('processRouter', () => {
   } as unknown as Router;
 
   it('only provides routes for version 2023-10-31', () => {
-    const result1 = processRouter(testRouter, new OasConverter(), {
+    const result1 = processRouter(testRouter, new OasConverter(), createOpIdGenerator(), {
       version: '2023-10-31',
     });
 
     expect(Object.keys(result1.paths!)).toHaveLength(4);
 
-    const result2 = processRouter(testRouter, new OasConverter(), {
+    const result2 = processRouter(testRouter, new OasConverter(), createOpIdGenerator(), {
       version: '2024-10-31',
     });
     expect(Object.keys(result2.paths!)).toHaveLength(0);
   });
 
   it('updates description with privileges required', () => {
-    const result = processRouter(testRouter, new OasConverter(), {
+    const result = processRouter(testRouter, new OasConverter(), createOpIdGenerator(), {
       version: '2023-10-31',
     });
 

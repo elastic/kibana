@@ -24,7 +24,7 @@ import {
   mergeResponseContent,
   prepareRoutes,
   setXState,
-  getOpId,
+  GetOpId,
 } from './util';
 import type { GenerateOpenApiDocumentOptionsFilters } from './generate_oas';
 import type { CustomOperationObject, InternalRouterRoute } from './type';
@@ -33,6 +33,7 @@ import { extractAuthzDescription } from './extract_authz_description';
 export const processRouter = (
   appRouter: Router,
   converter: OasConverter,
+  getOpId: GetOpId,
   filters?: GenerateOpenApiDocumentOptionsFilters
 ) => {
   const paths: OpenAPIV3.PathsObject = {};

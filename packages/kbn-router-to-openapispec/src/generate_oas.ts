@@ -12,7 +12,7 @@ import type { OpenAPIV3 } from 'openapi-types';
 import { OasConverter } from './oas_converter';
 import { processRouter } from './process_router';
 import { processVersionedRouter } from './process_versioned_router';
-import { buildGlobalTags } from './util';
+import { buildGlobalTags, createOpIdGenerator } from './util';
 
 export const openApiVersion = '3.0.0';
 
@@ -40,12 +40,13 @@ export const generateOpenApiDocument = (
   const { filters } = opts;
   const converter = new OasConverter();
   const paths: OpenAPIV3.PathsObject = {};
+  const getOpId = createOpIdGenerator();
   for (const router of appRouters.routers) {
-    const result = processRouter(router, converter, filters);
+    const result = processRouter(router, converter, getOpId, filters);
     Object.assign(paths, result.paths);
   }
   for (const router of appRouters.versionedRouters) {
-    const result = processVersionedRouter(router, converter, filters);
+    const result = processVersionedRouter(router, converter, getOpId, filters);
     Object.assign(paths, result.paths);
   }
   const tags = buildGlobalTags(paths, opts.tags);

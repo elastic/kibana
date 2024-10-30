@@ -573,7 +573,7 @@ OK response oas-test-version-2",
     "/no-xsrf/{id}/{path*}": Object {
       "post": Object {
         "deprecated": true,
-        "operationId": "post-no-xsrf-id-path",
+        "operationId": "post-no-xsrf-id-path-2",
         "parameters": Array [
           Object {
             "description": "The version of the API to use",

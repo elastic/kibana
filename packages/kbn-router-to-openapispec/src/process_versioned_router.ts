@@ -29,12 +29,13 @@ import {
   mergeResponseContent,
   getXsrfHeaderForMethod,
   setXState,
-  getOpId,
+  GetOpId,
 } from './util';
 
 export const processVersionedRouter = (
   appRouter: CoreVersionedRouter,
   converter: OasConverter,
+  getOpId: GetOpId,
   filters?: GenerateOpenApiDocumentOptionsFilters
 ) => {
   const routes = prepareRoutes(appRouter.getRoutes(), filters);

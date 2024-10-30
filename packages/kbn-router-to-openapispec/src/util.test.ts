@@ -15,7 +15,8 @@ import {
   mergeResponseContent,
   prepareRoutes,
   getPathParameters,
-  getOpId,
+  createOpIdGenerator,
+  GetOpId,
 } from './util';
 import { assignToPaths, extractTags } from './util';
 
@@ -262,11 +263,21 @@ describe('getPathParameters', () => {
   });
 });
 
-describe('getOpId', () => {
+describe('createOpIdGenerator', () => {
+  let getOpId: GetOpId;
+  beforeEach(() => {
+    getOpId = createOpIdGenerator();
+  });
   test('empty', () => {
     expect(() => getOpId({ method: '', path: '/asd' })).toThrow(/Must provide method and path/);
     expect(() => getOpId({ method: 'get', path: '' })).toThrow(/Must provide method and path/);
     expect(() => getOpId({ method: '', path: '' })).toThrow(/Must provide method and path/);
+  });
+  test('disambiguate', () => {
+    expect(getOpId({ method: 'get', path: '/test' })).toBe('get-test');
+    expect(getOpId({ method: 'get', path: '/test' })).toBe('get-test-2');
+    expect(getOpId({ method: 'get', path: '/test' })).toBe('get-test-3');
+    expect(getOpId({ method: 'get', path: '/test' })).toBe('get-test-4');
   });
   test.each([
     { input: { method: 'GET', path: '/api/file' }, output: 'get-file' },

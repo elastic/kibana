@@ -17,6 +17,7 @@ import {
   extractVersionedRequestBodies,
 } from './process_versioned_router';
 import { VersionedRouterRoute } from '@kbn/core-http-server';
+import { createOpIdGenerator } from './util';
 
 let oasConverter: OasConverter;
 beforeEach(() => {
@@ -124,6 +125,7 @@ describe('processVersionedRouter', () => {
     const baseCase = processVersionedRouter(
       { getRoutes: () => [createTestRoute()] } as unknown as CoreVersionedRouter,
       new OasConverter(),
+      createOpIdGenerator(),
       {}
     );
 
@@ -135,6 +137,7 @@ describe('processVersionedRouter', () => {
     const filteredCase = processVersionedRouter(
       { getRoutes: () => [createTestRoute()] } as unknown as CoreVersionedRouter,
       new OasConverter(),
+      createOpIdGenerator(),
       { version: '2023-10-31' }
     );
     expect(Object.keys(get(filteredCase, 'paths["/foo"].get.responses.200.content')!)).toEqual([
@@ -146,6 +149,7 @@ describe('processVersionedRouter', () => {
     const results = processVersionedRouter(
       { getRoutes: () => [createTestRoute()] } as unknown as CoreVersionedRouter,
       new OasConverter(),
+      createOpIdGenerator(),
       {}
     );
     expect(results.paths['/foo']).toBeDefined();
