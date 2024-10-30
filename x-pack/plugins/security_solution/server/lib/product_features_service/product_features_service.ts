@@ -29,6 +29,9 @@ import type { ProductFeaturesConfigurator } from './types';
 import { securityDefaultSavedObjects } from './security_saved_objects';
 import { casesApiTags, casesUiCapabilities } from './cases_privileges';
 
+// The prefix ("securitySolution-") used by all the Security Solution API action privileges.
+export const API_ACTION_PREFIX = `${APP_ID}-`;
+
 export class ProductFeaturesService {
   private securityProductFeatures: ProductFeatures;
   private casesProductFeatures: ProductFeatures;
@@ -126,9 +129,11 @@ export class ProductFeaturesService {
     );
   }
 
-  /** @deprecated: use security.authz.requiredPrivileges instead */
+  public getApiActionName = (apiPrivilege: string) => `api:${API_ACTION_PREFIX}${apiPrivilege}`;
+
+  /** @deprecated Use security.authz.requiredPrivileges instead */
   public isApiPrivilegeEnabled(apiPrivilege: string) {
-    return this.isActionRegistered(`api:${APP_ID}-${apiPrivilege}`);
+    return this.isActionRegistered(this.getApiActionName(apiPrivilege));
   }
 
   public registerApiAccessControl(http: HttpServiceSetup) {
@@ -136,11 +141,8 @@ export class ProductFeaturesService {
     // Should be used only by routes that do not need RBAC, only direct productFeature control.
     const APP_FEATURE_TAG_PREFIX = 'securitySolutionProductFeature:';
 
-    /** @deprecated: use security.authz.requiredPrivileges instead */
+    /** @deprecated Use security.authz.requiredPrivileges instead */
     const API_ACTION_TAG_PREFIX = `access:${APP_ID}-`;
-
-    // The "securitySolution-" prefix is used by all the Security Solution API actions for authz control.
-    const API_ACTION_PREFIX = `${APP_ID}-`;
 
     const isAuthzEnabled = (authz?: RecursiveReadonly<RouteAuthz>): authz is AuthzEnabled => {
       return Boolean((authz as AuthzEnabled)?.requiredPrivileges);
@@ -173,7 +175,7 @@ export class ProductFeaturesService {
         }
       }
 
-      // This check check is performed to ensure the privilege has been registered by the productFeature service,
+      // This control ensures the action privileges have been registered by the productFeature service,
       // preventing full access (`*`) roles, such as superuser, from bypassing productFeature controls.
       const authz = request.route.options.security?.authz;
       if (isAuthzEnabled(authz)) {
