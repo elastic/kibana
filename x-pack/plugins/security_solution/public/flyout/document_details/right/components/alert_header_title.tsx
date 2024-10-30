@@ -40,8 +40,8 @@ export const AlertHeaderTitle = memo(() => {
     refetchFlyoutData,
     getFieldsData,
   } = useDocumentDetailsContext();
-  const securitySolutionNotesEnabled = useIsExperimentalFeatureEnabled(
-    'securitySolutionNotesEnabled'
+  const securitySolutionNotesDisabled = useIsExperimentalFeatureEnabled(
+    'securitySolutionNotesDisabled'
   );
 
   const { isAlert, ruleName, timestamp, ruleId } = useBasicDataFromDetailsData(
@@ -98,7 +98,30 @@ export const AlertHeaderTitle = memo(() => {
         />
       )}
       <EuiSpacer size="m" />
-      {securitySolutionNotesEnabled ? (
+      {securitySolutionNotesDisabled ? (
+        <EuiFlexGroup
+          direction="row"
+          gutterSize="s"
+          responsive={false}
+          wrap
+          data-test-subj={ALERT_SUMMARY_PANEL_TEST_ID}
+        >
+          <EuiFlexItem>
+            <DocumentStatus />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <RiskScore />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <Assignees
+              eventId={eventId}
+              assignedUserIds={alertAssignees}
+              onAssigneesUpdated={onAssigneesUpdated}
+              isPreview={isPreview}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ) : (
         <EuiFlexGroup
           direction="row"
           gutterSize="s"
@@ -130,29 +153,6 @@ export const AlertHeaderTitle = memo(() => {
                 <Notes />
               </EuiFlexItem>
             </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ) : (
-        <EuiFlexGroup
-          direction="row"
-          gutterSize="s"
-          responsive={false}
-          wrap
-          data-test-subj={ALERT_SUMMARY_PANEL_TEST_ID}
-        >
-          <EuiFlexItem>
-            <DocumentStatus />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <RiskScore />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <Assignees
-              eventId={eventId}
-              assignedUserIds={alertAssignees}
-              onAssigneesUpdated={onAssigneesUpdated}
-              isPreview={isPreview}
-            />
           </EuiFlexItem>
         </EuiFlexGroup>
       )}
