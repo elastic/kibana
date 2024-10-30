@@ -50,9 +50,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.try(async () => {
           await (await messageCell.findByTestSubject('exampleDataSourceProfileMessage')).click();
           await testSubjects.existOrFail('exampleRootProfileFlyout');
+          message = await testSubjects.find('exampleRootProfileCurrentMessage');
+          expect(await message.getVisibleText()).to.be('This is an error log');
         });
-        message = await testSubjects.find('exampleRootProfileCurrentMessage');
-        expect(await message.getVisibleText()).to.be('This is an error log');
         await testSubjects.click('euiFlyoutCloseButton');
         await testSubjects.missingOrFail('exampleRootProfileFlyout');
       });
@@ -77,9 +77,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.try(async () => {
           await (await messageCell.findByTestSubject('exampleDataSourceProfileMessage')).click();
           await testSubjects.existOrFail('exampleRootProfileFlyout');
+          message = await testSubjects.find('exampleRootProfileCurrentMessage');
+          expect(await message.getVisibleText()).to.be('This is an error log');
         });
-        message = await testSubjects.find('exampleRootProfileCurrentMessage');
-        expect(await message.getVisibleText()).to.be('This is an error log');
         await testSubjects.click('euiFlyoutCloseButton');
         await testSubjects.missingOrFail('exampleRootProfileFlyout');
 
@@ -102,9 +102,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.try(async () => {
           await (await messageCell.findByTestSubject('exampleDataSourceProfileMessage')).click();
           await testSubjects.existOrFail('exampleRootProfileFlyout');
+          message = await testSubjects.find('exampleRootProfileCurrentMessage');
+          expect(await message.getVisibleText()).to.be('This is an error log');
         });
-        message = await testSubjects.find('exampleRootProfileCurrentMessage');
-        expect(await message.getVisibleText()).to.be('This is an error log');
         await testSubjects.click('euiFlyoutCloseButton');
         await testSubjects.missingOrFail('exampleRootProfileFlyout');
       });
