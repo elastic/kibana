@@ -75,7 +75,6 @@ describe('custom_host_settings', () => {
       preconfiguredAlertHistoryEsIndex: false,
       preconfigured: {},
       proxyRejectUnauthorizedCertificates: true,
-      rejectUnauthorized: true,
       maxResponseContentLength: new ByteSizeValue(1000000),
       responseTimeout: moment.duration(60000),
       enableFooterInEmail: true,
@@ -116,14 +115,12 @@ describe('custom_host_settings', () => {
             url: 'https://elastic.co:443',
             ssl: {
               certificateAuthoritiesData: 'xyz',
-              rejectUnauthorized: false,
             },
           },
           {
             url: 'smtp://mail.elastic.com:25',
             ssl: {
               certificateAuthoritiesData: 'abc',
-              rejectUnauthorized: true,
             },
             smtp: {
               ignoreTLS: true,
@@ -470,15 +467,9 @@ describe('custom_host_settings', () => {
         customHostSettings: [
           {
             url: 'https://almost.purrfect.com/',
-            ssl: {
-              rejectUnauthorized: true,
-            },
           },
           {
             url: 'https://almost.purrfect.com:443',
-            ssl: {
-              rejectUnauthorized: false,
-            },
           },
         ],
       };
@@ -488,9 +479,6 @@ describe('custom_host_settings', () => {
         customHostSettings: [
           {
             url: 'https://almost.purrfect.com:443',
-            ssl: {
-              rejectUnauthorized: true,
-            },
           },
         ],
       };

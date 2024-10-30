@@ -31,7 +31,6 @@ const defaultActionsConfig: ActionsConfig = {
   preconfiguredAlertHistoryEsIndex: false,
   preconfigured: {},
   proxyRejectUnauthorizedCertificates: true, // legacy
-  rejectUnauthorized: true, // legacy
   maxResponseContentLength: new ByteSizeValue(1000000),
   responseTimeout: moment.duration(60000),
   ssl: {

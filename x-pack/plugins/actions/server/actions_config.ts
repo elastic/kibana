@@ -200,8 +200,7 @@ export function getActionsConfigurationUtilities(
     isActionTypeEnabled,
     getProxySettings: () => getProxySettingsFromConfig(config),
     getResponseSettings: () => getResponseSettingsFromConfig(config),
-    getSSLSettings: () =>
-      getSSLSettingsFromConfig(config.ssl?.verificationMode, config.rejectUnauthorized),
+    getSSLSettings: () => getSSLSettingsFromConfig(config.ssl?.verificationMode),
     ensureUriAllowed(uri: string) {
       if (!isUriAllowed(uri)) {
         throw new Error(allowListErrorMessage(AllowListingField.URL, uri));

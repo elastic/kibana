@@ -600,7 +600,6 @@ describe('create()', () => {
       preconfiguredAlertHistoryEsIndex: false,
       preconfigured: {},
       proxyRejectUnauthorizedCertificates: true, // legacy
-      rejectUnauthorized: true, // legacy
       proxyBypassHosts: undefined,
       proxyOnlyHosts: undefined,
       maxResponseContentLength: new ByteSizeValue(1000000),

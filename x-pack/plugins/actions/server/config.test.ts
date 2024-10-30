@@ -36,7 +36,6 @@ describe('config validation', () => {
         "preconfigured": Object {},
         "preconfiguredAlertHistoryEsIndex": false,
         "proxyRejectUnauthorizedCertificates": true,
-        "rejectUnauthorized": true,
         "responseTimeout": "PT1M",
       }
     `);
@@ -54,7 +53,6 @@ describe('config validation', () => {
         },
       },
       proxyRejectUnauthorizedCertificates: false,
-      rejectUnauthorized: false,
     };
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
@@ -83,7 +81,6 @@ describe('config validation', () => {
         },
         "preconfiguredAlertHistoryEsIndex": false,
         "proxyRejectUnauthorizedCertificates": false,
-        "rejectUnauthorized": false,
         "responseTimeout": "PT1M",
       }
     `);
@@ -219,7 +216,6 @@ describe('config validation', () => {
         "preconfigured": Object {},
         "preconfiguredAlertHistoryEsIndex": false,
         "proxyRejectUnauthorizedCertificates": true,
-        "rejectUnauthorized": true,
         "responseTimeout": "PT1M",
         "ssl": Object {
           "proxyVerificationMode": "none",
