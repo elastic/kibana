@@ -281,6 +281,7 @@ describe('createOpIdGenerator', () => {
   });
   test.each([
     { input: { method: 'GET', path: '/api/file' }, output: 'get-file' },
+    { input: { method: 'GET', path: '///api/file///' }, output: 'get-file' },
     { input: { method: 'POST', path: '/internal/api/file' }, output: 'post-file' },
     { input: { method: 'PUT', path: '/internal/file' }, output: 'put-file' },
     { input: { method: 'Put', path: 'fOO/fILe' }, output: 'put-foo-file' },

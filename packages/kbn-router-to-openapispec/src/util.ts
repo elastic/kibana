@@ -194,22 +194,26 @@ export const createOpIdGenerator = (): GetOpId => {
       );
     }
 
-    path = path.trim().toLowerCase();
+    path = path
+      .trim()
+      .replace(/^[\/]+/, '')
+      .replace(/[\/]+$/, '')
+      .toLowerCase();
 
-    const removePrefixes = ['/internal/api/', '/internal/', '/api/']; // longest to shortest
+    const removePrefixes = ['internal/api/', 'internal/', 'api/']; // longest to shortest
     for (const prefix of removePrefixes) {
       if (path.startsWith(prefix)) {
-        path = path.substring(prefix.length - 1);
+        path = path.substring(prefix.length);
         break;
       }
     }
 
-    const opId = `${method.toLowerCase()}-${path
-      .replace(/^\//, '')
-      .replace(/\/$/, '')
-      .replace(/[\{\}\?\*]/g, '')
-      .replace(/[\/_]/g, '-')
-      .replace(/[-]+/g, '-')}`;
+    path = path
+      .replace(/[\{\}\?\*]/g, '') // remove special chars
+      .replace(/[\/_]/g, '-') // everything else to dashes
+      .replace(/[-]+/g, '-'); // single dashes
+
+    const opId = `${method.toLowerCase()}-${path}`;
 
     const cachedCount = idMap.get(opId) ?? 0;
     idMap.set(opId, cachedCount + 1);
