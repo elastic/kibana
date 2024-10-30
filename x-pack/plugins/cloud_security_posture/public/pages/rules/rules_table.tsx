@@ -52,8 +52,8 @@ type GetColumnProps = Pick<RulesTableProps, 'onRuleClick'> & {
 
 export const RulesTable = ({ selectedRuleId, onRuleClick }: RulesTableProps) => {
   const { euiTheme } = useEuiTheme();
-  const { setRulesQuery, setPageSize, page, setSelectedRules, selectedRules } = useRules();
-  const { pageSize, rulesQuery, rulesPageData } = useRules();
+  const { setRulesQuery, page, setSelectedRules, selectedRules, rulesQuery, rulesPageData } =
+    useRules();
   const items = rulesPageData.rules_page;
   const total = rulesPageData.total;
   const error = rulesPageData.error;
@@ -61,15 +61,15 @@ export const RulesTable = ({ selectedRuleId, onRuleClick }: RulesTableProps) => 
 
   const euiPagination: EuiBasicTableProps<CspBenchmarkRulesWithStates>['pagination'] = {
     pageIndex: page,
-    pageSize: pageSize || rulesQuery.perPage,
+    pageSize: rulesQuery.perPage,
     totalItemCount: total,
     pageSizeOptions: [10, 25, 100],
   };
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+
   const sorting: EuiTableSortingType<CspBenchmarkRulesWithStates> = {
     sort: {
       field: 'metadata.benchmark.rule_number' as keyof CspBenchmarkRulesWithStates,
-      direction: sortDirection,
+      direction: rulesQuery.sortOrder,
     },
   };
   const onTableChange = ({
@@ -77,12 +77,13 @@ export const RulesTable = ({ selectedRuleId, onRuleClick }: RulesTableProps) => 
     sort: sortOrder,
   }: Criteria<CspBenchmarkRulesWithStates>) => {
     if (!pagination) return;
-    if (pagination) {
-      setPageSize(pagination.size);
+    if (
+      pagination &&
+      (pagination.index !== rulesQuery.page || pagination.size !== rulesQuery.perPage)
+    ) {
       setRulesQuery({ page: pagination.index, perPage: pagination.size });
     }
-    if (sortOrder) {
-      setSortDirection(sortOrder.direction);
+    if (sortOrder && sortOrder.direction !== rulesQuery.sortOrder) {
       setRulesQuery({ sortOrder: sortOrder.direction });
     }
   };

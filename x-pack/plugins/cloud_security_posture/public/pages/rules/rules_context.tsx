@@ -9,6 +9,7 @@ import { useParams } from 'react-router-dom';
 
 import {
   CspBenchmarkRule,
+  FindCspBenchmarkRuleResponse,
   PageUrlParams,
   RuleStateAttributes,
 } from '@kbn/cloud-security-posture-common/schema/rules/latest';
@@ -42,8 +43,6 @@ interface RulesContextValue {
   rulesQuery: RulesQuery;
   rulesPageData: RulesPageData;
   setRulesQuery: (query: Partial<RulesQuery>) => void;
-  pageSize: number;
-  setPageSize: (pageSize: number) => void;
   page: number;
   setPage: (page: number) => void;
   sectionList: string[] | undefined;
@@ -61,27 +60,6 @@ interface RulesContextValue {
 const RulesContext = createContext<RulesContextValue | undefined>(undefined);
 const MAX_ITEMS_PER_PAGE = 10000;
 
-const getPage = (data: CspBenchmarkRulesWithStates[], { page, perPage }: RulesQuery) =>
-  data.slice(page * perPage, (page + 1) * perPage);
-
-const getRulesPageData = (
-  data: CspBenchmarkRulesWithStates[],
-  status: string,
-  error: unknown,
-  query: RulesQuery
-): RulesPageData => {
-  const page = getPage(data, query);
-
-  return {
-    loading: status === 'loading',
-    error: error ? extractErrorMessage(error) : undefined,
-    all_rules: data,
-    rules_map: new Map(data.map((rule) => [rule.metadata.id, rule])),
-    rules_page: page,
-    total: data?.length || 0,
-  };
-};
-
 export function RulesProvider({ children }: RulesProviderProps) {
   const params = useParams<PageUrlParams>();
   const { pageSize, setPageSize } = usePageSize(LOCAL_STORAGE_PAGE_SIZE_RULES_KEY);
@@ -90,7 +68,7 @@ export function RulesProvider({ children }: RulesProviderProps) {
     section: undefined,
     ruleNumber: undefined,
     search: '',
-    page: 0,
+    page: 1,
     perPage: pageSize || 10,
     sortField: 'metadata.benchmark.rule_number',
     sortOrder: 'asc',
@@ -109,45 +87,15 @@ export function RulesProvider({ children }: RulesProviderProps) {
     params.benchmarkVersion
   );
 
-  // This useEffect is in charge of auto paginating to the correct page of a rule from the url params
-  useEffect(() => {
-    const getPageByRuleId = () => {
-      if (params.ruleId && allRules?.data?.items) {
-        const ruleIndex = allRules?.data?.items.findIndex(
-          (rule) => rule.metadata.id === params.ruleId
-        );
-
-        if (ruleIndex !== -1) {
-          // Calculate the page based on the rule index and page size
-          const rulePage = Math.floor(ruleIndex / pageSize);
-          return rulePage;
-        }
-      }
-      return 0;
-    };
-
-    setRulesQuery({
-      ...rulesQuery,
-      page: getPageByRuleId(),
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [allRules?.data?.items]);
-
   const setRulesQueryCallback = useCallback(
-    () => (query: Partial<RulesQuery>) => {
+    (query: Partial<RulesQuery>) => {
       setRulesQuery({ ...rulesQuery, ...query });
+      if (query.perPage) {
+        // set the local storage page size
+        setPageSize(query.perPage);
+      }
     },
-    [rulesQuery, setRulesQuery]
-  );
-
-  const setPageSizeCallback = useCallback(
-    (value: number) => {
-      if (value === pageSize) return;
-
-      setPageSize(value);
-      setRulesQuery({ ...rulesQuery, ...{ perPage: value } });
-    },
-    [rulesQuery, setPageSize, pageSize]
+    [rulesQuery, setRulesQuery, setPageSize]
   );
 
   const setPageCallback = useCallback(
@@ -190,35 +138,14 @@ export function RulesProvider({ children }: RulesProviderProps) {
 
   const rulesStates = useCspGetRulesStates();
 
-  const rulesWithStates: CspBenchmarkRulesWithStates[] = useMemo(() => {
-    if (!data) return [];
-
-    return data.items
-      .filter((rule: CspBenchmarkRule) => rule.metadata.benchmark.rule_number !== undefined)
-      .map((rule: CspBenchmarkRule) => {
-        const rulesKey = buildRuleKey(
-          rule.metadata.benchmark.id,
-          rule.metadata.benchmark.version,
-          /* Rule number always exists* from 8.7 */
-          rule.metadata.benchmark.rule_number!
-        );
-
-        const match = rulesStates?.data?.[rulesKey];
-        const rulesState = match?.muted ? 'muted' : 'unmuted';
-
-        return { ...rule, state: rulesState || 'unmuted' };
-      });
-  }, [data, rulesStates?.data]);
+  const rulesWithStates = getRulesWithStates(data, rulesStates);
 
   const mutedRulesCount = rulesWithStates.filter((rule) => rule.state === 'muted').length;
 
-  const filteredRulesWithStates: CspBenchmarkRulesWithStates[] = useMemo(() => {
-    if (enabledDisabledItemsFilter === 'disabled')
-      return rulesWithStates?.filter((rule) => rule?.state === 'muted');
-    else if (enabledDisabledItemsFilter === 'enabled')
-      return rulesWithStates?.filter((rule) => rule?.state === 'unmuted');
-    else return rulesWithStates;
-  }, [rulesWithStates, enabledDisabledItemsFilter]);
+  const filteredRulesWithStates = getFilteredRulesWithStates(
+    rulesWithStates,
+    enabledDisabledItemsFilter
+  );
 
   const rulesPageData = useMemo(
     () => getRulesPageData(filteredRulesWithStates, status, error, rulesQuery),
@@ -246,13 +173,35 @@ export function RulesProvider({ children }: RulesProviderProps) {
     };
   }, [rulesStates, params.ruleId, allRules]);
 
-  const contextValue: RulesContextValue = useMemo(
+  // This useEffect is in charge of auto paginating to the correct page of a rule from the url params
+  useEffect(() => {
+    const getPageByRuleId = () => {
+      if (params.ruleId && allRules?.data?.items) {
+        const ruleIndex = allRules?.data?.items.findIndex(
+          (rule) => rule.metadata.id === params.ruleId
+        );
+
+        if (ruleIndex !== -1) {
+          // Calculate the page based on the rule index and page size
+          const rulePage = Math.floor(ruleIndex / pageSize);
+          return rulePage;
+        }
+      }
+      return 0;
+    };
+
+    setRulesQuery({
+      ...rulesQuery,
+      page: getPageByRuleId(),
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allRules?.data?.items]);
+
+  const contextValue = useMemo<RulesContextValue>(
     () => ({
       rulesQuery,
       rulesPageData,
       setRulesQuery: setRulesQueryCallback,
-      pageSize,
-      setPageSize: setPageSizeCallback,
       page,
       setPage: setPageCallback,
       sectionList,
@@ -270,8 +219,6 @@ export function RulesProvider({ children }: RulesProviderProps) {
       rulesQuery,
       rulesPageData,
       setRulesQueryCallback,
-      pageSize,
-      setPageSizeCallback,
       page,
       setPageCallback,
       sectionList,
@@ -290,6 +237,38 @@ export function RulesProvider({ children }: RulesProviderProps) {
   return <RulesContext.Provider value={contextValue}>{children}</RulesContext.Provider>;
 }
 
+const getFilteredRulesWithStates = (
+  rulesWithStates: CspBenchmarkRulesWithStates[],
+  enabledDisabledItemsFilter: string
+) => {
+  if (enabledDisabledItemsFilter === 'disabled')
+    return rulesWithStates?.filter((rule) => rule?.state === 'muted');
+  else if (enabledDisabledItemsFilter === 'enabled')
+    return rulesWithStates?.filter((rule) => rule?.state === 'unmuted');
+  else return rulesWithStates;
+};
+
+const getPage = (data: CspBenchmarkRulesWithStates[], { page, perPage }: RulesQuery) =>
+  data.slice(page * perPage, (page + 1) * perPage);
+
+const getRulesPageData = (
+  data: CspBenchmarkRulesWithStates[],
+  status: string,
+  error: unknown,
+  query: RulesQuery
+): RulesPageData => {
+  const page = getPage(data, query);
+
+  return {
+    loading: status === 'loading',
+    error: error ? extractErrorMessage(error) : undefined,
+    all_rules: data,
+    rules_map: new Map(data.map((rule) => [rule.metadata.id, rule])),
+    rules_page: page,
+    total: data?.length || 0,
+  };
+};
+
 export function useRules() {
   const context = useContext(RulesContext);
   if (context === undefined) {
@@ -297,3 +276,26 @@ export function useRules() {
   }
   return context;
 }
+
+const getRulesWithStates = (
+  data: FindCspBenchmarkRuleResponse | undefined,
+  rulesStates: ReturnType<typeof useCspGetRulesStates>
+): CspBenchmarkRulesWithStates[] => {
+  if (!data) return [];
+
+  return data.items
+    .filter((rule: CspBenchmarkRule) => rule.metadata.benchmark.rule_number !== undefined)
+    .map((rule: CspBenchmarkRule) => {
+      const rulesKey = buildRuleKey(
+        rule.metadata.benchmark.id,
+        rule.metadata.benchmark.version,
+        /* Rule number always exists* from 8.7 */
+        rule.metadata.benchmark.rule_number!
+      );
+
+      const match = rulesStates?.data?.[rulesKey];
+      const rulesState = match?.muted ? 'muted' : 'unmuted';
+
+      return { ...rule, state: rulesState || 'unmuted' };
+    });
+};
