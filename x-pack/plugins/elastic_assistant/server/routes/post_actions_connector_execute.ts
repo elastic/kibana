@@ -76,7 +76,6 @@ export const postActionsConnectorExecuteRoute = (
           if (!checkResponse.isSuccess) {
             return checkResponse.response;
           }
-          const authenticatedUser = checkResponse.currentUser;
 
           let latestReplacements: Replacements = request.body.replacements;
           const onNewReplacements = (newReplacements: Replacements) => {
