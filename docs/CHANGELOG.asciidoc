@@ -411,7 +411,6 @@ Machine Learning::
 * Fixes Anomaly Swim Lane Embeddable not updating properly on query change ({kibana-pull}195090[#195090]).
 * Hides ES|QL based saved searches in ML & Transforms ({kibana-pull}195084[#195084]).
 * Fixes query for pattern analysis and change point analysis ({kibana-pull}194742[#194742]).
-* Various fixes for possible prototype pollution vulnerabilities ({kibana-pull}194529[#194529]).
 * Anomaly explorer: Shows data gaps and connect anomalous points on Single Metric Charts ({kibana-pull}194119[#194119]).
 * Fixes file upload with no ingest pipeline ({kibana-pull}193744[#193744]).
 * Disables field statistics panel in Dashboard if ES|QL is disabled ({kibana-pull}193587[#193587]).
