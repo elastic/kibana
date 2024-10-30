@@ -138,7 +138,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
       fields: timelineQueryFields,
       limit: itemsPerPage,
       filterQuery,
-      runtimeMappings: sourcererDataView?.runtimeFieldMap as RunTimeMappings,
+      runtimeMappings: sourcererDataView.runtimeFieldMap as RunTimeMappings,
       skip: filterQuery === '',
       startDate: '',
       sort: timelineQuerySortField,
@@ -146,8 +146,8 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
     });
 
   const { openFlyout } = useExpandableFlyoutApi();
-  const securitySolutionNotesEnabled = useIsExperimentalFeatureEnabled(
-    'securitySolutionNotesEnabled'
+  const securitySolutionNotesDisabled = useIsExperimentalFeatureEnabled(
+    'securitySolutionNotesDisabled'
   );
 
   const {
@@ -168,7 +168,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
   const onToggleShowNotes = useCallback(
     (eventId?: string) => {
       const indexName = selectedPatterns.join(',');
-      if (eventId && securitySolutionNotesEnabled) {
+      if (eventId && !securitySolutionNotesDisabled) {
         openFlyout({
           right: {
             id: DocumentDetailsRightPanelKey,
@@ -206,7 +206,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
     },
     [
       openFlyout,
-      securitySolutionNotesEnabled,
+      securitySolutionNotesDisabled,
       selectedPatterns,
       telemetry,
       timelineId,
