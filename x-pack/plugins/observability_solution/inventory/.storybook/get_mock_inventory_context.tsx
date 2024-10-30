@@ -15,7 +15,7 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { InventoryKibanaContext } from '../public/hooks/use_kibana';
-import type { ITelemetryClient } from '../public/services/telemetry/types';
+import { ITelemetryClient } from '../public/services/telemetry/types';
 
 export function getMockInventoryContext(): InventoryKibanaContext {
   const coreStart = coreMock.createStart();
