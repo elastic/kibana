@@ -61,7 +61,7 @@ export class SamlSessionManager {
       port: options.hostOptions.port,
     };
     this.kbnHost = Url.format(hostOptionsWithoutAuth);
-    this.isCloud = this.validateCloudSetting(options.isCloud, this.kbnHost);
+    this.isCloud = options.isCloud;
     this.kbnClient = new KbnClient({
       log: this.log,
       url: Url.format({
@@ -73,22 +73,22 @@ export class SamlSessionManager {
     this.sessionCache = new Map<Role, Session>();
     this.roleToUserMap = new Map<Role, User>();
     this.supportedRoles = options.supportedRoles;
+    this.validateCloudSetting();
   }
 
   /**
    * Validates if the 'kbnHost' points to Cloud, even if 'isCloud' was set to false
    */
-  private validateCloudSetting(isCloud: boolean, kbnHost: string): boolean {
-    const cloudIndicator = '.elastic.cloud';
+  private validateCloudSetting(): boolean {
+    const cloudSubDomains = ['elastic.cloud', 'foundit.no', 'cloud.es.io', 'elastic-cloud.com'];
+    const isCloudHost = cloudSubDomains.some((domain) => this.kbnHost.endsWith(domain));
 
-    if (!isCloud && kbnHost.includes(cloudIndicator)) {
+    if (!this.isCloud && isCloudHost) {
       throw new Error(
-        `SamlSessionManager: 'isCloud' was set to false, but 'kbnHost' appears to be a Cloud instance: ${kbnHost}
+        `SamlSessionManager: 'isCloud' was set to false, but 'kbnHost' appears to be a Cloud instance: ${this.kbnHost}
 Set env variable 'TEST_CLOUD=1' to run FTR against your Cloud deployment`
       );
     }
-
-    return isCloud;
   }
 
   /**
