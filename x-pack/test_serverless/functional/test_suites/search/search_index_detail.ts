@@ -242,15 +242,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             my_field: [1, 0, 1],
           },
         });
-
       });
       after(async () => {
         await esDeleteAllIndices(indexName);
       });
-      describe('search index details page', function(){
+      describe('search index details page', function () {
         before(async () => {
           await pageObjects.svlCommonPage.loginAsViewer();
-        })
+        });
         beforeEach(async () => {
           await svlSearchNavigation.navigateToIndexDetailPage(indexName);
         });
@@ -272,7 +271,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await pageObjects.svlSearchIndexDetailPage.expectDeleteIndexButtonExistsInMoreOptions();
           await pageObjects.svlSearchIndexDetailPage.expectDeleteIndexButtonToDisabled();
         });
-      })
+      });
     });
   });
 }

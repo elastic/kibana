@@ -9,15 +9,17 @@ import React from 'react';
 import { useMemo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { useKibana } from '../../hooks/use_kibana';
-import { useUserPrivilegesQuery } from '../../hooks/api/use_user_permissions';
 
 interface SearchIndexDetailsSettingsProps {
   indexName: string;
+  userPrivileges?: UserStartPrivilegesResponse;
 }
-export const SearchIndexDetailsSettings = ({ indexName }: SearchIndexDetailsSettingsProps) => {
+export const SearchIndexDetailsSettings = ({
+  indexName,
+  userPrivileges,
+}: SearchIndexDetailsSettingsProps) => {
   const { indexManagement, history } = useKibana().services;
 
-  const { data: userPrivileges } = useUserPrivilegesQuery();
   const hasUpdateSettingsPrivilege = useMemo(() => {
     return userPrivileges?.privileges.canManageIndex === true;
   }, [userPrivileges]);

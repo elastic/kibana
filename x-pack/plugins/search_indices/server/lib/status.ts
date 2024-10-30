@@ -50,6 +50,7 @@ export async function fetchUserStartPrivileges(
         },
       ],
     });
+
     return {
       privileges: {
         canManageIndex: securityCheck?.index?.[indexName]?.manage ?? false,

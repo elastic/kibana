@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import type { IndicesStatusResponse, UserStartPrivilegesResponse } from '../../../common';
+import type { IndicesStatusResponse } from '../../../common';
 import { docLinks } from '../../../common/doc_links';
 
 import { AnalyticsEvents } from '../../analytics/constants';
@@ -33,6 +33,7 @@ import { CreateIndexForm } from './create_index';
 import { CreateIndexCodeView } from './create_index_code';
 import { CreateIndexFormState } from './types';
 import { useKibana } from '../../hooks/use_kibana';
+import { useUserPrivilegesQuery } from '../../hooks/api/use_user_permissions';
 
 function initCreateIndexState(): CreateIndexFormState {
   const defaultIndexName = generateRandomIndexName();
@@ -51,11 +52,12 @@ enum CreateIndexView {
 }
 export interface ElasticsearchStartProps {
   indicesData?: IndicesStatusResponse;
-  userPrivileges?: UserStartPrivilegesResponse;
 }
 
-export const ElasticsearchStart = ({ userPrivileges }: ElasticsearchStartProps) => {
+export const ElasticsearchStart = () => {
   const { cloud, http } = useKibana().services;
+  const { data: userPrivileges } = useUserPrivilegesQuery(initCreateIndexState().indexName);
+
   const [createIndexView, setCreateIndexView] = useState<CreateIndexView>(
     userPrivileges?.privileges.canManageIndex === false ? CreateIndexView.Code : CreateIndexView.UI
   );

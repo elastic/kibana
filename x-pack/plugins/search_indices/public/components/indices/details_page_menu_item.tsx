@@ -17,20 +17,20 @@ import { i18n } from '@kbn/i18n';
 import React, { ReactElement, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '../../hooks/use_kibana';
-import { useUserPrivilegesQuery } from '../../hooks/api/use_user_permissions';
 
 interface SearchIndexDetailsPageMenuItemPopoverProps {
   handleDeleteIndexModal: () => void;
   showApiReference: boolean;
+  userPrivileges?: UserStartPrivilegesResponse;
 }
 
 export const SearchIndexDetailsPageMenuItemPopover = ({
   showApiReference = false,
   handleDeleteIndexModal,
+  userPrivileges,
 }: SearchIndexDetailsPageMenuItemPopoverProps) => {
   const [showMoreOptions, setShowMoreOptions] = useState<boolean>(false);
   const { docLinks } = useKibana().services;
-  const { data: userPrivileges } = useUserPrivilegesQuery();
   const canManageIndex = useMemo(() => {
     return userPrivileges?.privileges.canManageIndex === true;
   }, [userPrivileges]);

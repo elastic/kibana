@@ -13,10 +13,11 @@ import { QueryKeys } from '../../constants';
 
 import { useKibana } from '../use_kibana';
 
-export const useUserPrivilegesQuery = () => {
+export const useUserPrivilegesQuery = (indexName: string) => {
   const { http } = useKibana().services;
   return useQuery({
     queryKey: [QueryKeys.FetchUserStartPrivileges],
-    queryFn: () => http.get<UserStartPrivilegesResponse>(GET_USER_PRIVILEGES_ROUTE),
+    queryFn: () =>
+      http.get<UserStartPrivilegesResponse>(`${GET_USER_PRIVILEGES_ROUTE}/${indexName}`),
   });
 };

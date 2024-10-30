@@ -37,6 +37,7 @@ import { SearchIndexDetailsPageMenuItemPopover } from './details_page_menu_item'
 import { useIndexDocumentSearch } from '../../hooks/api/use_document_search';
 import { useUsageTracker } from '../../contexts/usage_tracker_context';
 import { AnalyticsEvents } from '../../analytics/constants';
+import { useUserPrivilegesQuery } from '../../hooks/api/use_user_permissions';
 
 export const SearchIndexDetailsPage = () => {
   const indexName = decodeURIComponent(useParams<{ indexName: string }>().indexName);
@@ -66,6 +67,7 @@ export const SearchIndexDetailsPage = () => {
   } = useIndexMapping(indexName);
   const { data: indexDocuments, isInitialLoading: indexDocumentsIsInitialLoading } =
     useIndexDocumentSearch(indexName);
+  const { data: userPrivileges } = useUserPrivilegesQuery(indexName);
 
   const navigateToPlayground = useCallback(async () => {
     const playgroundLocator = share.url.locators.get('PLAYGROUND_LOCATOR_ID');
@@ -114,6 +116,7 @@ export const SearchIndexDetailsPage = () => {
             indexName={indexName}
             indexDocuments={indexDocuments}
             isInitialLoading={indexDocumentsIsInitialLoading}
+            userPrivileges={userPrivileges}
           />
         ),
         'data-test-subj': `${SearchIndexDetailsTabs.DATA}Tab`,
@@ -123,7 +126,7 @@ export const SearchIndexDetailsPage = () => {
         name: i18n.translate('xpack.searchIndices.mappingsTabLabel', {
           defaultMessage: 'Mappings',
         }),
-        content: <SearchIndexDetailsMappings index={index} />,
+        content: <SearchIndexDetailsMappings index={index} userPrivileges={userPrivileges} />,
         'data-test-subj': `${SearchIndexDetailsTabs.MAPPINGS}Tab`,
       },
       {
@@ -131,11 +134,13 @@ export const SearchIndexDetailsPage = () => {
         name: i18n.translate('xpack.searchIndices.settingsTabLabel', {
           defaultMessage: 'Settings',
         }),
-        content: <SearchIndexDetailsSettings indexName={indexName} />,
+        content: (
+          <SearchIndexDetailsSettings indexName={indexName} userPrivileges={userPrivileges} />
+        ),
         'data-test-subj': `${SearchIndexDetailsTabs.SETTINGS}Tab`,
       },
     ];
-  }, [index, indexName, indexDocuments, indexDocumentsIsInitialLoading]);
+  }, [index, indexName, indexDocuments, indexDocumentsIsInitialLoading, userPrivileges]);
   const [selectedTab, setSelectedTab] = useState(detailsPageTabs[0]);
 
   useEffect(() => {
@@ -273,6 +278,7 @@ export const SearchIndexDetailsPage = () => {
                   <SearchIndexDetailsPageMenuItemPopover
                     handleDeleteIndexModal={handleDeleteIndexModal}
                     showApiReference={hasDocuments}
+                    userPrivileges={userPrivileges}
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>,

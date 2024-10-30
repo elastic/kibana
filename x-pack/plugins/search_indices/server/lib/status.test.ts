@@ -12,6 +12,7 @@ import type {
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import { fetchIndicesStatus, fetchUserStartPrivileges } from './status';
+import { generateRandomIndexName } from '../../public/utils/indices';
 
 const mockLogger = {
   warn: jest.fn(),
@@ -116,6 +117,7 @@ describe('status api lib', function () {
   });
 
   describe('fetchUserStartPrivileges', function () {
+    const testIndexName = generateRandomIndexName();
     it('should return privileges true', async () => {
       const result: SecurityHasPrivilegesResponse = {
         application: {},
@@ -124,17 +126,20 @@ describe('status api lib', function () {
         },
         has_all_requested: true,
         index: {
-          'test-index-name': {
-            create_index: true,
+          [testIndexName]: {
+            delete: true,
+            manage: true,
           },
         },
         username: 'unit-test',
       };
+
       mockClient.security.hasPrivileges.mockResolvedValue(result);
 
-      await expect(fetchUserStartPrivileges(client, logger)).resolves.toEqual({
+      await expect(fetchUserStartPrivileges(client, logger, testIndexName)).resolves.toEqual({
         privileges: {
           canManageIndex: true,
+          canDeleteDocuments: true,
           canCreateApiKeys: true,
         },
       });
@@ -144,8 +149,8 @@ describe('status api lib', function () {
         cluster: ['manage_api_key'],
         index: [
           {
-            names: ['test-index-name'],
-            privileges: ['create_index'],
+            names: [testIndexName],
+            privileges: ['manage', 'delete'],
           },
         ],
       });
@@ -158,17 +163,19 @@ describe('status api lib', function () {
         },
         has_all_requested: false,
         index: {
-          'test-index-name': {
-            create_index: false,
+          [testIndexName]: {
+            manage: false,
+            delete: false,
           },
         },
         username: 'unit-test',
       };
       mockClient.security.hasPrivileges.mockResolvedValue(result);
 
-      await expect(fetchUserStartPrivileges(client, logger)).resolves.toEqual({
+      await expect(fetchUserStartPrivileges(client, logger, testIndexName)).resolves.toEqual({
         privileges: {
           canManageIndex: false,
+          canDeleteDocuments: false,
           canCreateApiKeys: false,
         },
       });
@@ -181,17 +188,19 @@ describe('status api lib', function () {
         },
         has_all_requested: false,
         index: {
-          'test-index-name': {
-            create_index: true,
+          [testIndexName]: {
+            manage: true,
+            delete: true,
           },
         },
         username: 'unit-test',
       };
       mockClient.security.hasPrivileges.mockResolvedValue(result);
 
-      await expect(fetchUserStartPrivileges(client, logger)).resolves.toEqual({
+      await expect(fetchUserStartPrivileges(client, logger, testIndexName)).resolves.toEqual({
         privileges: {
           canManageIndex: true,
+          canDeleteDocuments: true,
           canCreateApiKeys: false,
         },
       });
@@ -202,17 +211,19 @@ describe('status api lib', function () {
         cluster: {},
         has_all_requested: true,
         index: {
-          'test-index-name': {
-            create_index: true,
+          [testIndexName]: {
+            manage: true,
+            delete: false,
           },
         },
         username: 'unit-test',
       };
       mockClient.security.hasPrivileges.mockResolvedValue(result);
 
-      await expect(fetchUserStartPrivileges(client, logger)).resolves.toEqual({
+      await expect(fetchUserStartPrivileges(client, logger, testIndexName)).resolves.toEqual({
         privileges: {
           canManageIndex: true,
+          canDeleteDocuments: false,
           canCreateApiKeys: false,
         },
       });
@@ -220,11 +231,43 @@ describe('status api lib', function () {
     it('should default privileges on exceptions', async () => {
       mockClient.security.hasPrivileges.mockRejectedValue(new Error('Boom!!'));
 
-      await expect(fetchUserStartPrivileges(client, logger)).resolves.toEqual({
+      await expect(fetchUserStartPrivileges(client, logger, testIndexName)).resolves.toEqual({
         privileges: {
           canManageIndex: false,
+          canDeleteDocuments: false,
           canCreateApiKeys: false,
         },
+      });
+    });
+    it('should default to default index name when generated index name is not given', async () => {
+      const result: SecurityHasPrivilegesResponse = {
+        application: {},
+        cluster: {},
+        has_all_requested: true,
+        index: {
+          'test-index-name': {
+            manage: true,
+            delete: false,
+          },
+        },
+        username: 'unit-test',
+      };
+      mockClient.security.hasPrivileges.mockResolvedValue(result);
+      await expect(fetchUserStartPrivileges(client, logger)).resolves.toEqual({
+        privileges: {
+          canManageIndex: true,
+          canDeleteDocuments: false,
+          canCreateApiKeys: false,
+        },
+      });
+      expect(mockClient.security.hasPrivileges).toHaveBeenCalledWith({
+        cluster: ['manage_api_key'],
+        index: [
+          {
+            names: ['test-index-name'],
+            privileges: ['manage', 'delete'],
+          },
+        ],
       });
     });
   });
