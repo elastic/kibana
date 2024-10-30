@@ -16,17 +16,20 @@ export const installElser = async ({
   client: ElasticsearchClient;
   log: Logger;
 }) => {
-  await client.inference.put({
-    task_type: 'sparse_embedding',
-    inference_id: inferenceId,
-    inference_config: {
-      service: 'elasticsearch',
-      service_settings: {
-        num_allocations: 1,
-        num_threads: 1,
-        model_id: '.elser_model_2',
+  await client.inference.put(
+    {
+      task_type: 'sparse_embedding',
+      inference_id: inferenceId,
+      inference_config: {
+        service: 'elasticsearch',
+        service_settings: {
+          num_allocations: 1,
+          num_threads: 1,
+          model_id: '.elser_model_2',
+        },
+        task_settings: {},
       },
-      task_settings: {},
     },
-  });
+    { requestTimeout: 5 * 60 * 1000 }
+  );
 };
