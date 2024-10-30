@@ -17,7 +17,17 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
   return {
     ...functionalConfig.getAll(),
+    junit: {
+      reportName: 'Search Solution UI Functional Tests',
+    },
     testFiles: [require.resolve('.')],
+    esTestCluster: {
+      ...functionalConfig.get('esTestCluster'),
+      serverArgs: [
+        ...functionalConfig.get('esTestCluster.serverArgs'),
+        'xpack.security.enabled=true',
+      ],
+    },
     kbnTestServer: {
       ...functionalConfig.get('kbnTestServer'),
       serverArgs: [

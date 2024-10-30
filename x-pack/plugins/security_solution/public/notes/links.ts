@@ -21,5 +21,5 @@ export const links: LinkItem = {
     }),
   ],
   links: [],
-  experimentalKey: 'securitySolutionNotesEnabled',
+  hideWhenExperimentalKey: 'securitySolutionNotesDisabled',
 };
