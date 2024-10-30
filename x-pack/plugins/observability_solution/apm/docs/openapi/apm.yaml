@@ -17,7 +17,6 @@ tags:
       Annotations enable you to easily see how events are impacting the performance of your applications.
   - name: APM server schema
     description: Create APM fleet server schema.
-  - name: APM annotations
 paths:
   /api/apm/agent_keys:
     post:
@@ -31,36 +30,14 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                name:
-                  type: string
-                privileges:
-                  type: array
-                  items:
-                    type: string
-                    enum:
-                      - event:write
-                      - config_agent:read
+              $ref: '#/components/schemas/agent_keys_object'
       responses:
         "200":
           description: Agent key created successfully
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  api_key:
-                    type: string
-                  expiration:
-                    type: integer
-                    format: int64
-                  id:
-                    type: string
-                  name:
-                    type: string
-                  encoded:
-                    type: string
+                $ref: '#/components/schemas/agent_keys_response'
   /api/apm/services/{serviceName}/annotation/search:
     get:
       summary: Search for annotations
@@ -99,23 +76,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  annotations:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        type:
-                          type: string
-                          enum:
-                            - version
-                        id:
-                          type: string
-                        "@timestamp":
-                          type: number
-                        text:
-                          type: string
+                $ref: '#/components/schemas/annotation_search_response'
   /api/apm/services/{serviceName}/annotation:
     post:
       summary: Create a service annotation
@@ -135,64 +96,14 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                '@timestamp':
-                  type: string
-                service:
-                  type: object
-                  properties:
-                    version:
-                      type: string
-                    environment:
-                      type: string
-                message:
-                  type: string
-                tags:
-                  type: array
-                  items:
-                    type: string
-
+              $ref: '#/components/schemas/create_annotation_object'
       responses:
         '200':
           description: Annotation created successfully
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  _id:
-                    type: string
-                  _index:
-                    type: string
-                  _source:
-                    type: object
-                    properties:
-                      annotation:
-                        type: string
-                      tags:
-                        type: array
-                        items:
-                          type: string
-                      message:
-                        type: string
-                      service:
-                        type: object
-                        properties:
-                          name:
-                            type: string
-                          environment:
-                            type: string
-                          version:
-                            type: string
-                      event:
-                        type: object
-                        properties:
-                          created:
-                            type: string
-                      '@timestamp':
-                        type: string
-
+                $ref: '#/components/schemas/create_annotation_response'
   /api/apm/settings/agent-configuration:
     get:
       summary: List of agent configurations
@@ -243,7 +154,10 @@ paths:
       tags:
         - APM agent configuration
       parameters:
-        - $ref: '#/components/parameters/overwrite'
+        - name: overwrite
+          in: query
+          schema:
+            type: boolean
       requestBody:
         required: true
         content:
@@ -271,8 +185,18 @@ paths:
       tags:
         - APM agent configuration
       parameters:
-        - $ref: '#/components/parameters/name'
-        - $ref: '#/components/parameters/environment'
+        - name: name
+          in: query
+          description: Service name
+          required: true
+          schema:
+            type: string
+        - name: environment
+          in: query
+          description: Service environment
+          required: true
+          schema:
+            type: string
       responses:
         '200':
           description: Successful response
@@ -320,7 +244,11 @@ paths:
       tags:
         - APM agent configuration
       parameters:
-        - $ref: '#/components/parameters/serviceName'
+        - name: serviceName
+          in: query
+          description: The name of the service
+          schema:
+            type: string
       responses:
         '200':
           description: Successful response
@@ -342,7 +270,12 @@ paths:
       tags:
         - APM agent configuration
       parameters:
-        - $ref: '#/components/parameters/serviceNameRequired'
+        - name: serviceName
+          in: query
+          description: The name of the service
+          required: true
+          schema:
+            type: string
       responses:
         '200':
           description: Successful response
@@ -364,8 +297,14 @@ paths:
       tags:
         - APM sourcemaps
       parameters:
-        - $ref: '#/components/parameters/page'
-        - $ref: '#/components/parameters/perPage'
+        - name: page
+          in: query
+          schema:
+            type: number
+        - name: perPage
+          in: query
+          schema:
+            type: number
       responses:
         '200':
           description: Successful response
@@ -424,7 +363,10 @@ paths:
       tags:
         - APM sourcemaps
       parameters:
-        - $ref: '#/components/parameters/id'
+        - name: id
+          in: path
+          schema:
+            type: string
       responses:
         '200':
           description: Successful response
@@ -479,52 +421,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/404_response'
 components:
-  parameters:
-    name:
-      in: query
-      name: name
-      schema:
-        type: string
-      description: Service name
-      required: true
-    environment:
-      in: query
-      name: environment
-      schema:
-        type: string
-      description: Service environment
-      required: true
-    overwrite:
-      in: query
-      name: overwrite
-      schema:
-        type: boolean
-    serviceName:
-      in: query
-      name: serviceName
-      schema:
-        type: string
-    serviceNameRequired:
-      in: query
-      name: serviceName
-      schema:
-        type: string
-      required: true
-    page:
-      in: query
-      name: page
-      schema:
-        type: number
-    perPage:
-      in: query
-      name: perPage
-      schema:
-        type: number
-    id:
-      in: path
-      name: id
-      schema:
-        type: string
   schemas:
     404_response:
       type: object
@@ -561,6 +457,36 @@ components:
         message:
           type: string
           example: Not Implemented
+    agent_keys_object:
+      type: object
+      properties:
+        name:
+          type: string
+        privileges:
+          type: array
+          items:
+            type: string
+            enum:
+              - event:write
+              - config_agent:read
+    create_annotation_object:
+      type: object
+      properties:
+        '@timestamp':
+          type: string
+        service:
+          type: object
+          properties:
+            version:
+              type: string
+            environment:
+              type: string
+        message:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
     service_object:
       type: object
       properties:
@@ -676,6 +602,72 @@ components:
           type: string
         packageName:
           type: string
+    agent_keys_response:
+      type: object
+      properties:
+        api_key:
+          type: string
+        expiration:
+          type: integer
+          format: int64
+        id:
+          type: string
+        name:
+          type: string
+        encoded:
+          type: string
+    annotation_search_response:
+      type: object
+      properties:
+        annotations:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+                enum:
+                  - version
+              id:
+                type: string
+              "@timestamp":
+                type: number
+              text:
+                type: string
+    create_annotation_response:
+      type: object
+      properties:
+        _id:
+          type: string
+        _index:
+          type: string
+        _source:
+          type: object
+          properties:
+            annotation:
+              type: string
+            tags:
+              type: array
+              items:
+                type: string
+            message:
+              type: string
+            service:
+              type: object
+              properties:
+                name:
+                  type: string
+                environment:
+                  type: string
+                version:
+                  type: string
+            event:
+              type: object
+              properties:
+                created:
+                  type: string
+            '@timestamp':
+              type: string
     agent_configurations_response:
       type: object
       properties:
