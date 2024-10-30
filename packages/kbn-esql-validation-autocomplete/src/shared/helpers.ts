@@ -132,7 +132,7 @@ export function isSourceCommand({ label }: { label: string }) {
 }
 
 let fnLookups: Map<string, FunctionDefinition> | undefined;
-let commandLookups: Map<string, CommandDefinition> | undefined;
+let commandLookups: Map<string, CommandDefinition<string>> | undefined;
 
 function buildFunctionLookup() {
   // we always refresh if we have test functions
@@ -197,7 +197,7 @@ export function getFunctionDefinition(name: string) {
 
 const unwrapStringLiteralQuotes = (value: string) => value.slice(1, -1);
 
-function buildCommandLookup() {
+function buildCommandLookup(): Map<string, CommandDefinition<string>> {
   if (!commandLookups) {
     commandLookups = commandDefinitions.reduce((memo, def) => {
       memo.set(def.name, def);
@@ -205,12 +205,12 @@ function buildCommandLookup() {
         memo.set(def.alias, def);
       }
       return memo;
-    }, new Map<string, CommandDefinition>());
+    }, new Map<string, CommandDefinition<string>>());
   }
-  return commandLookups;
+  return commandLookups!;
 }
 
-export function getCommandDefinition(name: string): CommandDefinition {
+export function getCommandDefinition(name: string): CommandDefinition<string> {
   return buildCommandLookup().get(name.toLowerCase())!;
 }
 
@@ -218,7 +218,7 @@ export function getAllCommands() {
   return Array.from(buildCommandLookup().values());
 }
 
-export function getCommandOption(optionName: CommandOptionsDefinition['name']) {
+export function getCommandOption(optionName: CommandOptionsDefinition<string>['name']) {
   return [byOption, metadataOption, asOption, onOption, withOption, appendSeparatorOption].find(
     ({ name }) => name === optionName
   );
