@@ -196,6 +196,12 @@ export class EntityStoreDataClient {
       // clean up any existing entity store
       await this.delete(entityType, taskManager, { deleteData: false, deleteEngine: false });
 
+      await new Promise((resolve, reject) =>
+        setTimeout(() => {
+          reject(new Error('timeout test error'));
+        }, 2000)
+      );
+
       // set up the entity manager definition
       await this.entityClient.createEntityDefinition({
         definition: {
@@ -266,14 +272,22 @@ export class EntityStoreDataClient {
       return updated;
     } catch (err) {
       this.options.logger.error(
-        `Error initializing entity store for ${entityType}: ${err.message}`
+        `Error initializing entity store for ${entityType}: ${err.message}`,
+        err
       );
 
       this.options.telemetry?.reportEvent(ENTITY_ENGINE_RESOURCE_INIT_FAILURE_EVENT.eventType, {
         error: err.message,
       });
 
-      await this.engineClient.update(entityType, ENGINE_STATUS.ERROR);
+      await this.engineClient.update(entityType, {
+        status: ENGINE_STATUS.ERROR,
+        error: {
+          message: err.message,
+          stack: err.stack,
+          action: 'init',
+        },
+      });
 
       await this.delete(entityType, taskManager, { deleteData: true, deleteEngine: false });
     }
@@ -312,7 +326,7 @@ export class EntityStoreDataClient {
     const fullEntityDefinition = await this.getExistingEntityDefinition(entityType);
     await this.entityClient.startEntityDefinition(fullEntityDefinition);
 
-    return this.engineClient.update(entityType, ENGINE_STATUS.STARTED);
+    return this.engineClient.setStatus(entityType, ENGINE_STATUS.STARTED);
   }
 
   public async stop(entityType: EntityType) {
@@ -332,7 +346,7 @@ export class EntityStoreDataClient {
     const fullEntityDefinition = await this.getExistingEntityDefinition(entityType);
     await this.entityClient.stopEntityDefinition(fullEntityDefinition);
 
-    return this.engineClient.update(entityType, ENGINE_STATUS.STOPPED);
+    return this.engineClient.setStatus(entityType, ENGINE_STATUS.STOPPED);
   }
 
   public async get(entityType: EntityType) {
@@ -499,7 +513,7 @@ export class EntityStoreDataClient {
         }
 
         // Update savedObject status
-        await this.engineClient.update(engine.type, ENGINE_STATUS.UPDATING);
+        await this.engineClient.setStatus(engine.type, ENGINE_STATUS.UPDATING);
 
         try {
           // Update entity manager definition
@@ -512,12 +526,12 @@ export class EntityStoreDataClient {
           });
 
           // Restore the savedObject status and set the new index pattern
-          await this.engineClient.update(engine.type, originalStatus);
+          await this.engineClient.setStatus(engine.type, originalStatus);
 
           return { type: engine.type, changes: { indexPatterns } };
         } catch (error) {
           // Rollback the engine initial status when the update fails
-          await this.engineClient.update(engine.type, originalStatus);
+          await this.engineClient.setStatus(engine.type, originalStatus);
 
           throw error;
         }

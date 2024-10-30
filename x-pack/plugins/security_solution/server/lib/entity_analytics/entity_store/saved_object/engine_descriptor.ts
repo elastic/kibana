@@ -78,7 +78,18 @@ export class EngineDescriptorClient {
     return attributes;
   }
 
-  async update(entityType: EntityType, status: EngineStatus) {
+  async update(entityType: EntityType, engine: Partial<EngineDescriptor>) {
+    const id = this.getSavedObjectId(entityType);
+    const { attributes } = await this.deps.soClient.update<EngineDescriptor>(
+      entityEngineDescriptorTypeName,
+      id,
+      engine,
+      { refresh: 'wait_for' }
+    );
+    return attributes;
+  }
+
+  async setStatus(entityType: EntityType, status: EngineStatus) {
     const id = this.getSavedObjectId(entityType);
     const { attributes } = await this.deps.soClient.update<EngineDescriptor>(
       entityEngineDescriptorTypeName,

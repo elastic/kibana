@@ -15,6 +15,8 @@ import {
   EuiLoadingLogo,
   EuiPanel,
   EuiImage,
+  EuiGlobalToastList,
+  EuiCallOut,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -46,12 +48,27 @@ import { useRiskEngineStatus } from '../../../api/hooks/use_risk_engine_status';
 const EntityStoreDashboardPanelsComponent = () => {
   const [modal, setModalState] = useState({ visible: false });
   const [riskEngineInitializing, setRiskEngineInitializing] = useState(false);
+  const [hiddenToasts, setHiddenToasts] = useState<number[]>([]);
 
   const entityStore = useEntityEngineStatus();
   const riskEngineStatus = useRiskEngineStatus();
 
-  const { enable: enableStore } = useEntityStoreEnablement();
+  const { enable: enableStore, query } = useEntityStoreEnablement();
+
   const { mutate: initRiskEngine } = useInitRiskEngineMutation();
+
+  const toasts = entityStore.errors
+    .filter((_, i) => !hiddenToasts.includes(i))
+    .map(
+      (err, i) =>
+        ({
+          id: i.toString(),
+          title: 'Error',
+          color: 'danger',
+          iconType: 'alert',
+          text: <p>{err?.message}</p>,
+        } as const)
+    );
 
   const enableEntityStore = (enable: Enablements) => () => {
     setModalState({ visible: false });
@@ -72,6 +89,18 @@ const EntityStoreDashboardPanelsComponent = () => {
       enableStore();
     }
   };
+
+  if (query.error) {
+    return (
+      <EuiCallOut
+        title={'There was a problem initializing the entity store'}
+        color="danger"
+        iconType="error"
+      >
+        <p>{(query.error as { body: { message: string } }).body.message}</p>
+      </EuiCallOut>
+    );
+  }
 
   if (entityStore.status === 'loading') {
     return (
@@ -177,6 +206,11 @@ const EntityStoreDashboardPanelsComponent = () => {
           disabled: entityStore.status === 'enabled',
           checked: entityStore.status !== 'enabled',
         }}
+      />
+      <EuiGlobalToastList
+        toasts={toasts}
+        dismissToast={({ id }) => setHiddenToasts((prev) => [...prev, parseInt(id, 10)])}
+        toastLifeTimeMs={10000}
       />
     </EuiFlexGroup>
   );

@@ -30,6 +30,9 @@ export const entityEngineDescriptorTypeMappings: SavedObjectsType['mappings'] = 
       type: 'integer',
       index: false,
     },
+    error: {
+      type: 'object',
+    },
   },
 };
 
@@ -55,11 +58,33 @@ const version1: SavedObjectsModelVersion = {
   ],
 };
 
+const version2: SavedObjectsModelVersion = {
+  changes: [
+    {
+      type: 'mappings_addition',
+      addedMappings: {
+        error: { type: 'object' },
+      },
+    },
+    {
+      type: 'data_backfill',
+      backfillFn: (document) => {
+        return {
+          attributes: {
+            ...document.attributes,
+            error: null,
+          },
+        };
+      },
+    },
+  ],
+};
+
 export const entityEngineDescriptorType: SavedObjectsType = {
   name: entityEngineDescriptorTypeName,
   indexPattern: SECURITY_SOLUTION_SAVED_OBJECT_INDEX,
   hidden: false,
   namespaceType: 'multiple-isolated',
   mappings: entityEngineDescriptorTypeMappings,
-  modelVersions: { 1: version1 },
+  modelVersions: { 1: version1, 2: version2 },
 };
