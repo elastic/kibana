@@ -26,6 +26,8 @@ export default function ({ getService }: FtrProviderContext) {
     'saved-object-with-secret-and-multiple-spaces';
   const SAVED_OBJECT_WITHOUT_SECRET_TYPE = 'saved-object-without-secret';
 
+  const TYPE_WITH_PREDICTABLE_ID = 'type-with-predictable-ids';
+
   function runTests(
     encryptedSavedObjectType: string,
     getURLAPIBaseURL: () => string,
@@ -898,6 +900,80 @@ export default function ({ getService }: FtrProviderContext) {
             publicPropertyStoredEncrypted: 'some-public-but-encrypted-property-0',
           });
         }
+      });
+    });
+
+    describe('enforceRandomId', () => {
+      it('#create ESO which has opted out of random IDs allows setting ID', async () => {
+        const id = 'my_predictable_id';
+
+        const savedObjectOriginalAttributes = {
+          publicProperty: randomness.string(),
+          publicPropertyStoredEncrypted: randomness.string(),
+          privateProperty: randomness.string(),
+          publicPropertyExcludedFromAAD: randomness.string(),
+        };
+
+        const { body: response } = await supertest
+          .post(`/api/saved_objects/${TYPE_WITH_PREDICTABLE_ID}/${id}`)
+          .set('kbn-xsrf', 'xxx')
+          .send({ attributes: savedObjectOriginalAttributes })
+          .expect(200);
+
+        expect(response.id).to.be(id);
+      });
+
+      it('#create setting a predictable id on ESOs that have not opted out throws an error', async () => {
+        const id = 'my_predictable_id';
+
+        const savedObjectOriginalAttributes = {
+          publicProperty: randomness.string(),
+          publicPropertyStoredEncrypted: randomness.string(),
+          privateProperty: randomness.string(),
+          publicPropertyExcludedFromAAD: randomness.string(),
+        };
+
+        const { body: response } = await supertest
+          .post(`/api/saved_objects/saved-object-with-secret/${id}`)
+          .set('kbn-xsrf', 'xxx')
+          .send({ attributes: savedObjectOriginalAttributes })
+          .expect(400);
+
+        expect(response.message).to.contain(
+          'Predefined IDs are not allowed for saved objects with encrypted attributes unless the ID is a UUID.'
+        );
+      });
+
+      it('#bulkCreate not enforcing random ID allows to specify ID', async () => {
+        const bulkCreateParams = [
+          {
+            type: TYPE_WITH_PREDICTABLE_ID,
+            id: 'my_predictable_id',
+            attributes: {
+              publicProperty: randomness.string(),
+              publicPropertyExcludedFromAAD: randomness.string(),
+              publicPropertyStoredEncrypted: randomness.string(),
+              privateProperty: randomness.string(),
+            },
+          },
+          {
+            type: SAVED_OBJECT_WITHOUT_SECRET_TYPE,
+            attributes: {
+              publicProperty: randomness.string(),
+            },
+          },
+        ];
+
+        const {
+          body: { saved_objects: savedObjects },
+        } = await supertest
+          .post('/api/saved_objects/_bulk_create')
+          .set('kbn-xsrf', 'xxx')
+          .send(bulkCreateParams)
+          .expect(200);
+
+        expect(savedObjects).to.have.length(bulkCreateParams.length);
+        expect(savedObjects[0].id).to.be('my_predictable_id');
       });
     });
   });
