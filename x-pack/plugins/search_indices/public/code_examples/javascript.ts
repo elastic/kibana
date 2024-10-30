@@ -73,7 +73,7 @@ export const JSServerlessIngestVectorDataExample: IngestDataCodeDefinition = {
   ingestCommand: ({
     apiKey,
     elasticsearchURL,
-    sampleDocument,
+    sampleDocuments,
     indexName,
   }) => `import { Client } from "@elastic/elasticsearch";
 
@@ -85,9 +85,7 @@ const client = new Client({
 });
 
 const index = "${indexName}";
-const docs = [
-${JSON.stringify(sampleDocument, null, 2)},
-]
+const docs = ${JSON.stringify(sampleDocuments, null, 2)};
 
 const bulkIngestResponse = await client.helpers.bulk({
   index,

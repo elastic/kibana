@@ -76,12 +76,14 @@ export class SyntheticsMonitorTestService {
         updated_at: updatedAt,
         id,
         config_id: configId,
+        spaceId,
       } = apiResponse.body;
       expect(id).not.empty();
       expect(configId).not.empty();
+      expect(spaceId).not.empty();
       expect([createdAt, updatedAt].map((d) => moment(d).isValid())).eql([true, true]);
       return {
-        rawBody: apiResponse.body,
+        rawBody: omit(apiResponse.body, ['spaceId']),
         body: {
           ...omit(apiResponse.body, [
             'created_at',
@@ -89,6 +91,7 @@ export class SyntheticsMonitorTestService {
             'id',
             'config_id',
             'form_monitor_type',
+            'spaceId',
           ]),
         },
       };

@@ -5,27 +5,10 @@
  * 2.0.
  */
 import { schema } from '@kbn/config-schema';
-import { SavedObjectsClientContract, SavedObjectsErrorHelpers } from '@kbn/core/server';
-import pMap from 'p-map';
-import { validatePermissions } from './edit_monitor';
-import { SyntheticsServerSetup } from '../../types';
-import { RouteContext, SyntheticsRestApiRouteFactory } from '../types';
-import { syntheticsMonitorType } from '../../../common/types/saved_objects';
-import {
-  ConfigKey,
-  DeleteParamsResponse,
-  EncryptedSyntheticsMonitorAttributes,
-  MonitorFields,
-  SyntheticsMonitorWithId,
-  SyntheticsMonitorWithSecretsAttributes,
-} from '../../../common/runtime_types';
+import { DeleteMonitorAPI } from './services/delete_monitor_api';
+import { SyntheticsRestApiRouteFactory } from '../types';
+import { DeleteParamsResponse } from '../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
-import {
-  formatTelemetryDeleteEvent,
-  sendErrorTelemetryEvents,
-  sendTelemetryEvents,
-} from '../telemetry/monitor_upgrade_sender';
-import { formatSecrets, normalizeSecrets } from '../../synthetics_service/utils/secrets';
 
 export const deleteSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory<
   DeleteParamsResponse[],
@@ -62,7 +45,6 @@ export const deleteSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory<
       });
     }
 
-    const result: Array<{ id: string; deleted: boolean; error?: string }> = [];
     const idsToDelete = [...(ids ?? []), ...(queryId ? [queryId] : [])];
     if (idsToDelete.length === 0) {
       return response.badRequest({
@@ -70,33 +52,22 @@ export const deleteSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory<
       });
     }
 
-    await pMap(idsToDelete, async (id) => {
-      try {
-        const { errors, res } = await deleteMonitor({
-          routeContext,
-          monitorId: id,
+    const deleteMonitorAPI = new DeleteMonitorAPI(routeContext);
+    try {
+      const { errors } = await deleteMonitorAPI.execute({
+        monitorIds: idsToDelete,
+      });
+
+      if (errors && errors.length > 0) {
+        return response.ok({
+          body: { message: 'error pushing monitor to the service', attributes: { errors } },
         });
-        if (res) {
-          return res;
-        }
-
-        if (errors && errors.length > 0) {
-          return response.ok({
-            body: { message: 'error pushing monitor to the service', attributes: { errors } },
-          });
-        }
-
-        result.push({ id, deleted: true });
-      } catch (getErr) {
-        if (SavedObjectsErrorHelpers.isNotFoundError(getErr)) {
-          result.push({ id, deleted: false, error: `Monitor id ${id} not found!` });
-        } else {
-          throw getErr;
-        }
       }
-    });
+    } catch (getErr) {
+      throw getErr;
+    }
 
-    return result;
+    return deleteMonitorAPI.result;
   },
 });
 
