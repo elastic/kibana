@@ -191,11 +191,11 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
           stats.deployment_stats?.allocation_status.state === 'fully_allocated';
 
         const isReadyServerless = (stats: MlTrainedModelStats) =>
-          (stats.deployment_stats?.nodes as unknown as MlTrainedModelDeploymentNodesStats[]).some(
+          (stats.deployment_stats?.nodes as unknown as MlTrainedModelDeploymentNodesStats[])?.some(
             (node) => node.routing_state.routing_state === 'started'
           );
 
-        return getResponse.trained_model_stats.some(
+        return getResponse.trained_model_stats?.some(
           (stats) => isReadyESS(stats) || isReadyServerless(stats)
         );
       }

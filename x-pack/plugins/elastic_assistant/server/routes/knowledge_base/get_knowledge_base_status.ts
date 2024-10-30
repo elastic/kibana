@@ -73,13 +73,19 @@ export const getKnowledgeBaseStatusRoute = (router: ElasticAssistantPluginRouter
             pipeline_exists: pipelineExists,
           };
 
-          if (v2KnowledgeBaseEnabled && indexExists && isModelDeployed) {
-            const securityLabsExists = await kbDataClient.isSecurityLabsDocsLoaded();
+          if (indexExists && isModelDeployed) {
+            const securityLabsExists = v2KnowledgeBaseEnabled
+              ? await kbDataClient.isSecurityLabsDocsLoaded()
+              : true;
+            const userDataExists = v2KnowledgeBaseEnabled
+              ? await kbDataClient.isUserDataExists()
+              : true;
+
             return response.ok({
               body: {
                 ...body,
                 security_labs_exists: securityLabsExists,
-                user_data_exists: await kbDataClient.isUserDataExists(),
+                user_data_exists: userDataExists,
               },
             });
           }
