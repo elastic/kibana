@@ -48753,6 +48753,8 @@ components:
     Security_Entity_Analytics_API_EngineDescriptor:
       type: object
       properties:
+        error:
+          type: object
         fieldHistoryLength:
           type: integer
         filter:
