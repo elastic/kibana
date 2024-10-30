@@ -134,7 +134,7 @@ export class EntityStoreDataClient {
     if (!this.options.taskManager) {
       throw new Error('Task Manager is not available');
     }
-      
+
     const { config } = this.options;
 
     await this.riskScoreDataClient.createRiskScoreLatestIndex();
@@ -175,7 +175,7 @@ export class EntityStoreDataClient {
     ).catch((e) =>
       this.log('error', entityType, `Error during async setup of entity store: ${e.message}`)
     );
-      
+
     return descriptor;
   }
 
