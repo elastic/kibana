@@ -9,21 +9,23 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { visualize, lens, header, tagCloud } = getPageObjects([
+  const { visualize, lens, header, tagCloud, timePicker } = getPageObjects([
     'visualize',
     'lens',
     'header',
     'tagCloud',
+    'timePicker',
   ]);
   const elasticChart = getService('elasticChart');
   const filterBar = getService('filterBar');
 
   describe('lens tagcloud', () => {
     before(async () => {
+      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await visualize.navigateToNewVisualization();
       await visualize.clickVisType('lens');
       await elasticChart.setNewChartUiDebugFlag(true);
-      await lens.goToTimeRange();
+
       await lens.switchToVisualization('lnsTagcloud', 'Tag cloud');
 
       await lens.configureDimension({

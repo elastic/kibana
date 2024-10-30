@@ -9,12 +9,15 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { visualize, lens } = getPageObjects(['visualize', 'lens']);
+  const { visualize, lens, timePicker } = getPageObjects(['visualize', 'lens', 'timePicker']);
   const find = getService('find');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
 
   describe('lens reference lines tests', () => {
+    before(async () => {
+      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
+    });
     it('should show a disabled reference layer button if no data dimension is defined', async () => {
       await visualize.navigateToNewVisualization();
       await visualize.clickVisType('lens');
@@ -29,8 +32,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should add a reference layer with a static value in it', async () => {
-      await lens.goToTimeRange();
-
       await lens.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
         operation: 'date_histogram',

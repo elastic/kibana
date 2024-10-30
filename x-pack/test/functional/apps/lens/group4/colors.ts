@@ -8,13 +8,15 @@ import { ElasticBrandPalette } from '@kbn/coloring';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObjects }: FtrProviderContext) {
-  const { visualize, lens } = getPageObjects(['visualize', 'lens']);
+  const { visualize, lens, timePicker } = getPageObjects(['visualize', 'lens', 'timePicker']);
 
   describe('lens color palette tests', () => {
+    before(async () => {
+      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
+    });
     it('should allow to pick legacy color palette in xy chart', async () => {
       await visualize.navigateToNewVisualization();
       await visualize.clickVisType('lens');
-      await lens.goToTimeRange();
 
       await lens.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
@@ -41,7 +43,6 @@ export default function ({ getPageObjects }: FtrProviderContext) {
     it('should allow to pick color mapping palette in xy chart', async () => {
       await visualize.navigateToNewVisualization();
       await visualize.clickVisType('lens');
-      await lens.goToTimeRange();
 
       await lens.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',

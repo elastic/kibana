@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { visualize, lens } = getPageObjects(['visualize', 'lens']);
+  const { visualize, lens, timePicker } = getPageObjects(['visualize', 'lens', 'timePicker']);
   const browser = getService('browser');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
@@ -44,7 +44,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await visualize.navigateToNewVisualization();
       await visualize.clickVisType('lens');
-      await lens.goToTimeRange();
+      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
       // Detect here if the Chrome bug is present, and adjust the aspect ratio accordingly if not
       if (!within(width, DEFAULT_WINDOW_SIZE[0]) || !within(height, DEFAULT_WINDOW_SIZE[1])) {
         const { width: containerWidth, height: containerHeight } =
