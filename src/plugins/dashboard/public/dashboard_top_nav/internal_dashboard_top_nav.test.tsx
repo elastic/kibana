@@ -16,6 +16,11 @@ import { TopNavMenuProps } from '@kbn/navigation-plugin/public';
 import { DashboardContext } from '../dashboard_api/use_dashboard_api';
 import { dataService, navigationService } from '../services/kibana_services';
 
+jest.mock('../dashboard_app/top_nav/dashboard_editing_toolbar', () => ({
+  DashboardEditingToolbar: () => {
+    return <div>mockDashboardEditingToolbar</div>;
+  },
+}));
 describe('Internal dashboard top nav', () => {
   const mockTopNav = (badges: TopNavMenuProps['badges'] | undefined[]) => {
     if (badges) {
