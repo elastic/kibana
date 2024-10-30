@@ -494,31 +494,10 @@ export const GetBulkAssetsRequestSchema = {
   }),
 };
 
-export const GetInfoRequestSchemaDeprecated = {
-  params: schema.object({
-    pkgkey: schema.string(),
-  }),
-  query: schema.object({
-    ignoreUnverified: schema.maybe(schema.boolean()),
-    prerelease: schema.maybe(schema.boolean()),
-    full: schema.maybe(schema.boolean()),
-    withMetadata: schema.boolean({ defaultValue: false }),
-  }),
-};
-
 export const UpdatePackageRequestSchema = {
   params: schema.object({
     pkgName: schema.string(),
     pkgVersion: schema.maybe(schema.string()),
-  }),
-  body: schema.object({
-    keepPoliciesUpToDate: schema.boolean(),
-  }),
-};
-
-export const UpdatePackageRequestSchemaDeprecated = {
-  params: schema.object({
-    pkgkey: schema.string(),
   }),
   body: schema.object({
     keepPoliciesUpToDate: schema.boolean(),
@@ -560,22 +539,6 @@ export const ReauthorizeTransformRequestSchema = {
   body: schema.object({
     transforms: schema.arrayOf(schema.object({ transformId: schema.string() })),
   }),
-};
-
-export const InstallPackageFromRegistryRequestSchemaDeprecated = {
-  params: schema.object({
-    pkgkey: schema.string(),
-  }),
-  query: schema.object({
-    prerelease: schema.maybe(schema.boolean()),
-    ignoreMappingUpdateErrors: schema.boolean({ defaultValue: false }),
-    skipDataStreamRollover: schema.boolean({ defaultValue: false }),
-  }),
-  body: schema.nullable(
-    schema.object({
-      force: schema.boolean(),
-    })
-  ),
 };
 
 export const BulkInstallPackagesFromRegistryRequestSchema = {
@@ -628,7 +591,7 @@ export const CreateCustomIntegrationRequestSchema = {
 export const DeletePackageRequestSchema = {
   params: schema.object({
     pkgName: schema.string(),
-    pkgVersion: schema.string(),
+    pkgVersion: schema.maybe(schema.string()),
   }),
   query: schema.object({
     force: schema.maybe(schema.boolean()),
@@ -659,17 +622,6 @@ export const DeleteKibanaAssetsRequestSchema = {
     pkgName: schema.string(),
     pkgVersion: schema.string(),
   }),
-};
-
-export const DeletePackageRequestSchemaDeprecated = {
-  params: schema.object({
-    pkgkey: schema.string(),
-  }),
-  body: schema.nullable(
-    schema.object({
-      force: schema.boolean(),
-    })
-  ),
 };
 
 export const GetInputsRequestSchema = {
