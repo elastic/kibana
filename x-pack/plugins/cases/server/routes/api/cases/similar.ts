@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { CASES_URL } from '../../../../common/constants';
+import { CASES_INTERNAL_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
 import type { caseApiV1 } from '../../../../common/types/api';
 
 export const similarCaseRoute = createCasesRoute({
   method: 'post',
-  path: `${CASES_URL}/_similar`,
+  path: `${CASES_INTERNAL_URL}/_similar`,
   routerOptions: {
     access: 'public',
     summary: `Similar cases`,

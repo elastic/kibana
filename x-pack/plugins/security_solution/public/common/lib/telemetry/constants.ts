@@ -68,6 +68,8 @@ export enum TelemetryEventTypes {
   EntityDetailsClicked = 'Entity Details Clicked',
   EntityAlertsClicked = 'Entity Alerts Clicked',
   EntityRiskFiltered = 'Entity Risk Filtered',
+  EntityStoreEnablementToggleClicked = 'Entity Store Enablement Toggle Clicked',
+  EntityStoreDashboardInitButtonClicked = 'Entity Store Initialization Button Clicked',
   MLJobUpdate = 'ML Job Update',
   AddRiskInputToTimelineClicked = 'Add Risk Input To Timeline Clicked',
   ToggleRiskSummaryClicked = 'Toggle Risk Summary Clicked',
