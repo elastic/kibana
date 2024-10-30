@@ -26,7 +26,11 @@ export const SetupKnowledgeBaseButton: React.FC = React.memo(() => {
     assistantAvailability: { isAssistantEnabled },
   } = useAssistantContext();
 
-  const { data: kbStatus } = useKnowledgeBaseStatus({ http, enabled: isAssistantEnabled , resource: ESQL_RESOURCE });
+  const { data: kbStatus } = useKnowledgeBaseStatus({
+    http,
+    enabled: isAssistantEnabled,
+    resource: ESQL_RESOURCE,
+  });
   const { mutate: setupKB, isLoading: isSettingUpKB } = useSetupKnowledgeBase({ http, toasts });
 
   const isSetupInProgress = kbStatus?.is_setup_in_progress || isSettingUpKB;

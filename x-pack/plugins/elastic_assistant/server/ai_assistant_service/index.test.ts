@@ -29,7 +29,7 @@ const licensing = Promise.resolve(
     license: { type: 'enterprise' },
   })
 );
-let logger: ReturnType<(typeof loggingSystemMock)['createLogger']>;
+let logger: ReturnType<typeof loggingSystemMock['createLogger']>;
 const clusterClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
 const SimulateTemplateResponse = {

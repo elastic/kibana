@@ -66,7 +66,11 @@ export const useChatSend = ({
 
   const { isLoading, sendMessage, abortStream } = useSendMessage();
   const { clearConversation, removeLastMessage } = useConversation();
-  const { data: kbStatus } = useKnowledgeBaseStatus({ http, enabled: isAssistantEnabled , resource: ESQL_RESOURCE });
+  const { data: kbStatus } = useKnowledgeBaseStatus({
+    http,
+    enabled: isAssistantEnabled,
+    resource: ESQL_RESOURCE,
+  });
   const isSetupComplete =
     kbStatus?.elser_exists &&
     kbStatus?.index_exists &&
