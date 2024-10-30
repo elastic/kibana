@@ -285,14 +285,15 @@ export class AIAssistantService {
   };
 
   private async checkResourcesInstallation(opts: CreateAIAssistantClientParams) {
+    const licensing = await opts.licensing;
+    if (!hasAIAssistantLicense(licensing.license)) return null;
     // Check if resources installation has succeeded
     const { result: initialized, error } = await this.getSpaceResourcesInitializationPromise(
       opts.spaceId
     );
 
-    const licensing = await opts.licensing;
     // If space level resources initialization failed, retry
-    if (!initialized && error && hasAIAssistantLicense(licensing.license)) {
+    if (!initialized && error) {
       let initRetryPromise: Promise<InitializationPromise> | undefined;
 
       // If !this.initialized, we know that resource initialization failed
