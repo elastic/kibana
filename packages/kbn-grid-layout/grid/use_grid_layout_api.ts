@@ -8,6 +8,7 @@
  */
 
 import { useMemo } from 'react';
+import { cloneDeep } from 'lodash';
 
 import { SerializableRecord } from '@kbn/utility-types';
 
@@ -24,7 +25,7 @@ export const useGridLayoutApi = ({
     return {
       addPanel: (panelId, placementSettings) => {
         const currentLayout = gridLayoutStateManager.gridLayout$.getValue();
-        const [firstRow, ...rest] = currentLayout;
+        const [firstRow, ...rest] = currentLayout; // currently, only adding panels to the first row is supported
         const { columnCount: gridColumnCount } = gridLayoutStateManager.runtimeSettings$.getValue();
         const nextRow = runPanelPlacementStrategy(
           firstRow,
@@ -37,7 +38,6 @@ export const useGridLayoutApi = ({
           placementSettings?.strategy
         );
         gridLayoutStateManager.gridLayout$.next([nextRow, ...rest]);
-        gridLayoutStateManager.layoutUpdateEvent$.next([nextRow, ...rest]);
       },
 
       removePanel: (panelId) => {
@@ -57,13 +57,12 @@ export const useGridLayoutApi = ({
 
         // if the panels were updated (i.e. the panel was successfully found and deleted), update the layout
         if (updatedPanels) {
-          const newLayout = [...currentLayout];
+          const newLayout = cloneDeep(currentLayout);
           newLayout[rowIndex] = compactGridRow({
             ...newLayout[rowIndex],
             panels: updatedPanels,
           });
           gridLayoutStateManager.gridLayout$.next(newLayout);
-          gridLayoutStateManager.layoutUpdateEvent$.next(newLayout);
         }
       },
 
@@ -86,10 +85,9 @@ export const useGridLayoutApi = ({
 
         // if the panels were updated (i.e. the panel was successfully found and replaced), update the layout
         if (updatedPanels) {
-          const newLayout = [...currentLayout];
+          const newLayout = cloneDeep(currentLayout);
           newLayout[rowIndex].panels = updatedPanels;
           gridLayoutStateManager.gridLayout$.next(newLayout);
-          gridLayoutStateManager.layoutUpdateEvent$.next(newLayout);
         }
       },
 

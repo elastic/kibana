@@ -37,9 +37,9 @@ export const useGridLayoutState = ({
 
   const gridLayoutStateManager = useMemo(() => {
     const gridLayout$ = new BehaviorSubject<GridLayoutData>(initialLayout);
+    console.log('initialLayout', initialLayout);
     const gridDimensions$ = new BehaviorSubject<ObservedSize>({ width: 0, height: 0 });
     const interactionEvent$ = new BehaviorSubject<PanelInteractionEvent | undefined>(undefined);
-    const layoutUpdateEvent$ = new BehaviorSubject<GridLayoutData>(initialLayout);
     const activePanel$ = new BehaviorSubject<ActivePanel | undefined>(undefined);
     const runtimeSettings$ = new BehaviorSubject<RuntimeGridSettings>({
       ...gridSettings,
@@ -58,7 +58,6 @@ export const useGridLayoutState = ({
       gridDimensions$,
       runtimeSettings$,
       interactionEvent$,
-      layoutUpdateEvent$,
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

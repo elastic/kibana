@@ -12,18 +12,6 @@ import type { ObservedSize } from 'use-resize-observer/polyfilled';
 
 import { SerializableRecord } from '@kbn/utility-types';
 
-/**
- * The external API provided through the GridLayout component
- */
-export interface GridLayoutApi {
-  addPanel: (id: string, placementSettings: PanelPlacementSettings) => void;
-  removePanel: (panelId: string) => void;
-  replacePanel: (oldPanelId: string, newPanelId: string) => void;
-
-  getPanelCount: () => number;
-  serializeState: () => GridLayoutData & SerializableRecord;
-}
-
 export interface GridCoordinate {
   column: number;
   row: number;
@@ -78,8 +66,6 @@ export interface GridLayoutStateManager {
   activePanel$: BehaviorSubject<ActivePanel | undefined>;
   interactionEvent$: BehaviorSubject<PanelInteractionEvent | undefined>;
 
-  layoutUpdateEvent$: BehaviorSubject<GridLayoutData>;
-
   rowRefs: React.MutableRefObject<Array<HTMLDivElement | null>>;
   panelRefs: React.MutableRefObject<Array<{ [id: string]: HTMLDivElement | null }>>;
 }
@@ -120,9 +106,23 @@ export interface PanelInteractionEvent {
   };
 }
 
-// TODO: Remove from Dashboard app
+/**
+ * The external API provided through the GridLayout component
+ */
+export interface GridLayoutApi {
+  // gridLayout$: BehaviorSubject<GridLayoutData>; // fix
+
+  addPanel: (panelId: string, placementSettings: PanelPlacementSettings) => void;
+  removePanel: (panelId: string) => void;
+  replacePanel: (oldPanelId: string, newPanelId: string) => void;
+
+  getPanelCount: () => number;
+  serializeState: () => GridLayoutData & SerializableRecord;
+}
+
+// TODO: Remove from Dashboard plugin as part of https://github.com/elastic/kibana/issues/190446
 export enum PanelPlacementStrategy {
-  /** Place on the very top of the Dashboard, add the height of this panel to all other panels. */
+  /** Place on the very top of the grid layout, add the height of this panel to all other panels. */
   placeAtTop = 'placeAtTop',
   /** Look for the smallest y and x value where the default panel will fit. */
   findTopLeftMostOpenSpace = 'findTopLeftMostOpenSpace',

@@ -81,6 +81,7 @@ export const GridExample = ({ coreStart }: { coreStart: CoreStart }) => {
                   <EuiButtonEmpty
                     onClick={() => {
                       clearSerializedGridLayout();
+                      console.log('savedLayout', savedLayout);
                       setCurrentLayout(savedLayout);
                       setLayoutKey(uuidv4()); // force remount of grid
                     }}

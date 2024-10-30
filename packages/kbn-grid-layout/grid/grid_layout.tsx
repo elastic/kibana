@@ -8,7 +8,7 @@
  */
 
 import React, { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
-import { distinctUntilChanged, map, pairwise, skip } from 'rxjs';
+import { combineLatest, distinctUntilChanged, filter, map, pairwise, skip } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 
 import { GridHeightSmoother } from './grid_height_smoother';
@@ -54,8 +54,17 @@ export const GridLayout = forwardRef<GridLayoutApi, GridLayoutProps>(
           setRowCount(newRowCount);
         });
 
-      const onLayoutChangeSubscription = gridLayoutStateManager.layoutUpdateEvent$
-        .pipe(pairwise())
+      const onLayoutChangeSubscription = combineLatest([
+        gridLayoutStateManager.gridLayout$,
+        gridLayoutStateManager.interactionEvent$,
+      ])
+        .pipe(
+          // if an interaction event is happening, then ignore any "draft" layout changes
+          filter(([_, event]) => !Boolean(event)),
+          // once no interaction event, create pairs of "old" and "new" layouts for comparison
+          map(([layout]) => layout),
+          pairwise()
+        )
         .subscribe(([layoutBefore, layoutAfter]) => {
           if (!isLayoutEqual(layoutBefore, layoutAfter)) {
             onLayoutChange(layoutAfter);
@@ -92,9 +101,6 @@ export const GridLayout = forwardRef<GridLayoutApi, GridLayoutProps>(
                   setInteractionEvent={(nextInteractionEvent) => {
                     if (!nextInteractionEvent) {
                       gridLayoutStateManager.activePanel$.next(undefined);
-                      gridLayoutStateManager.layoutUpdateEvent$.next(
-                        gridLayoutStateManager.gridLayout$.getValue()
-                      );
                     }
                     gridLayoutStateManager.interactionEvent$.next(nextInteractionEvent);
                   }}
