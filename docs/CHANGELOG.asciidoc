@@ -180,7 +180,7 @@ Kibana security::
 * Adds an error handling framework to Automatic Import that provides error messages with more context to user ({kibana-pull}193577[#193577]).
 * When running in FIPS mode, Kibana forbids usage of PKCS12 configuration options ({kibana-pull}192627[#192627]).
 Machine Learning::
-* Daylight saving time calendar events ({kibana-pull}193605[#193605]).
+* Adds new section for creating daylight saving time calendar events ({kibana-pull}193605[#193605]).
 * Anomaly Detection: Adds a page to list supplied job configurations ({kibana-pull}191564[#191564]).
 * Redesigns start/update model deployment dialog to support adaptive resources ({kibana-pull}190243[#190243]).
 * File upload: Adds support for PDF files ({kibana-pull}186956[#186956]).
@@ -290,26 +290,26 @@ Kibana security::
 * Adds support for CHIPS cookies ({kibana-pull}188519[#188519]).
 * Adds support for Permissions Policy reporting ({kibana-pull}186892[#186892]).
 Machine Learning::
-* File upload: enabling check for model allocations ({kibana-pull}197395[#197395]).
-* Data visualizer: Add icons for semantic text, sparse vector and dense vector ({kibana-pull}196069[#196069]).
-* Update vCPUs ranges for start model deployment ({kibana-pull}195617[#195617]).
-* Adds ML tasks to the kibana audit log ({kibana-pull}195120[#195120]).
+* File upload: enables check for model allocations ({kibana-pull}197395[#197395]).
+* Data visualizer: Adds icons for semantic text, sparse vector, and dense vector ({kibana-pull}196069[#196069]).
+* Updates vCPUs ranges for start model deployment ({kibana-pull}195617[#195617]).
+* Adds ML tasks to the Kibana audit log ({kibana-pull}195120[#195120]).
 * Anomaly Detection: adds ability to delete forecasts from job ({kibana-pull}194896[#194896]).
 * Updates for Trained Models table layout and model states ({kibana-pull}194614[#194614]).
-* Log rate analysis: ensure ability to sort on Log rate change ({kibana-pull}193501[#193501]).
-* Single Metric Viewer: Enable cross-filtering for 'by', 'over' and 'partition' field values ({kibana-pull}193255[#193255]).
+* Log rate analysis: ensures ability to sort on Log rate change ({kibana-pull}193501[#193501]).
+* Single Metric Viewer: Enables cross-filtering for 'by', 'over', and 'partition' field values ({kibana-pull}193255[#193255]).
 * Adds link to anomaly detection configurations from Integration > Assets tab ({kibana-pull}193105[#193105]).
-* Anomaly Explorer: Display markers for scheduled events in distribution type anomaly charts ({kibana-pull}192377[#192377]).
-* Serverless Security: Adds ES|QL visualizer menu item in nav ({kibana-pull}192314[#192314]).
+* Anomaly Explorer: Displays markers for scheduled events in distribution-type anomaly charts ({kibana-pull}192377[#192377]).
+* Serverless Security: Adds ES|QL visualizer menu item to the nav ({kibana-pull}192314[#192314]).
 * Updates icons for Machine Learning embeddable dashboard panel types ({kibana-pull}191718[#191718]).
-* AIOps: Using no minimum time range by default for pattern analysis ({kibana-pull}191192[#191192]).
-* Link to ML assets from Integration > Assets tab ({kibana-pull}189767[#189767]).
-* Utilize the `DataViewLazy` in ML plugin ({kibana-pull}189188[#189188]).
-* AIOps: Chunk groups of field candidates into single queries for top items and histograms ({kibana-pull}189155[#189155]).
-* AIOps: Update fields filter popover to be able to filter fields from analysis (not just grouping) ({kibana-pull}188913[#188913]).
-* Single Metric Viewer embeddable: add forecasting ({kibana-pull}188791[#188791]).
+* AIOps: Uses no minimum time range by default for pattern analysis ({kibana-pull}191192[#191192]).
+* Links to ML assets from Integration > Assets tab ({kibana-pull}189767[#189767]).
+* Utilizes the `DataViewLazy` in ML plugin ({kibana-pull}189188[#189188]).
+* AIOps: Chunks groups of field candidates into single queries for top items and histograms ({kibana-pull}189155[#189155]).
+* AIOps: Updates fields filter popover to be able to filter fields from analysis (not just grouping) ({kibana-pull}188913[#188913]).
+* Single Metric Viewer embeddable: adds forecasting ({kibana-pull}188791[#188791]).
 * Adds new custom rule action to force time shift ({kibana-pull}188710[#188710]).
-* AIOps: Chunk groups of field candidates into single queries ({kibana-pull}188137[#188137]).
+* AIOps: Chunks groups of field candidates into single queries ({kibana-pull}188137[#188137]).
 * AIOps: Adds log rate analysis to alert details page contextual insight ({kibana-pull}187690[#187690]).
 * Adds ability to toggle visibility for empty fields when choosing an aggregation or field in Anomaly detection, data frame analytics ({kibana-pull}186670[#186670]).
 * Anomaly Detection: Adds popover links menu to anomaly explorer charts ({kibana-pull}186587[#186587]).
@@ -404,23 +404,23 @@ Kibana platform::
 Kibana security::
 * Fixes an issue where an LLM was likely to generate invalid processors containing array access in Automatic Import ({kibana-pull}196207[#196207]).
 Machine Learning::
-* File upload fixing PDF character count limit ({kibana-pull}197333[#197333]).
-* Data Drift: Update brush positions on window resize fix ({kibana-pull}196830[#196830]).
+* File upload: fixes PDF character count limit ({kibana-pull}197333[#197333]).
+* Data Drift: Updates brush positions on window resize fix ({kibana-pull}196830[#196830]).
 * AIOps: Fixes issue where some queries cause filters to not be applied ({kibana-pull}196585[#196585]).
-* Transforms: Limit the data grid result window ({kibana-pull}196510[#196510]).
+* Transforms: Limits the data grid result window ({kibana-pull}196510[#196510]).
 * Fixes Anomaly Swim Lane Embeddable not updating properly on query change ({kibana-pull}195090[#195090]).
-* Hide ES|QL based saved searches in ML & Transforms ({kibana-pull}195084[#195084]).
+* Hides ES|QL based saved searches in ML & Transforms ({kibana-pull}195084[#195084]).
 * Fixes query for pattern analysis and change point analysis ({kibana-pull}194742[#194742]).
 * Various fixes for possible prototype pollution vulnerabilities ({kibana-pull}194529[#194529]).
-* Anomaly explorer: Show Data Gaps and Connect Anomalous Points on Single Metric Charts ({kibana-pull}194119[#194119]).
+* Anomaly explorer: Shows data gaps and connect anomalous points on Single Metric Charts ({kibana-pull}194119[#194119]).
 * Fixes file upload with no ingest pipeline ({kibana-pull}193744[#193744]).
-* Disable field statistics panel in Dashboard if ES|QL is disabled ({kibana-pull}193587[#193587]).
+* Disables field statistics panel in Dashboard if ES|QL is disabled ({kibana-pull}193587[#193587]).
 * Fixes display of assignees when attaching ML panels to a new case ({kibana-pull}192163[#192163]).
-* Anomaly explorer: Fix the order of the coordinates displayed on the map tooltip ({kibana-pull}192077[#192077]).
+* Anomaly explorer: Fixes the order of the coordinates displayed on the map tooltip ({kibana-pull}192077[#192077]).
 * Fixes links to the Single Metric Viewer from the Annotations and Forecasts tables ({kibana-pull}192000[#192000]).
 * Trained models: fixes responsiveness of state column for smaller displays ({kibana-pull}191900[#191900]).
-* File upload: Increasing timeout for upload request ({kibana-pull}191770[#191770]).
-* Improve expired license check ({kibana-pull}191503[#191503]).
+* File upload: increases timeout for upload request ({kibana-pull}191770[#191770]).
+* Improves expired license check ({kibana-pull}191503[#191503]).
 Management::
 * Fixes the pagination of the source documents data grid in Transforms ({kibana-pull}196119[#196119]).
 * Fixes autocomplete suggestions after a comma in Console ({kibana-pull}189656[#189656]).
