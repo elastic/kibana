@@ -69,7 +69,6 @@ export async function registerDocumentationFunction({
           documents: response.documents,
         },
       };
-    },
-    ['all']
+    }
   );
 }
