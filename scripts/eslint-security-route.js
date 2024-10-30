@@ -336,8 +336,8 @@ function runESLint() {
     // runCommand(
     //   `grep -rEl --include="*.ts" "router\.(get|post|delete|put)|router\.versioned\.(get|post|put|delete)" ./x-pack/plugins/ ./x-pack/packages/ | xargs env ${eslintRuleFlag} npx eslint --fix --rule "@kbn/eslint/no_deprecated_authz_config:error"`
     // );
-    const directories = ['./x-pack/plugins', './x-pack/packages', './src/plugins'];
-    // const directories = ['./x-pack/plugins/security', './x-pack/plugins/spaces']; // For testing purposes
+    // const directories = ['./x-pack/plugins', './x-pack/packages', './src/plugins'];
+    const directories = ['./x-pack/plugins/security_solution', './x-pack/plugins/spaces']; // For testing purposes
 
     for (const directory of directories) {
       console.log(`Running ESLint autofix for ${directory}`);
