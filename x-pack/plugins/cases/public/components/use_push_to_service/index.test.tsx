@@ -13,7 +13,6 @@ import { usePushToService } from '.';
 import { noPushCasesPermissions, readCasesPermissions, TestProviders } from '../../common/mock';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
 import { actionLicenses } from '../../containers/mock';
-import { CLOSED_CASE_PUSH_ERROR_ID } from './callout/types';
 import { useGetActionLicense } from '../../containers/use_get_action_license';
 import { getCaseConnectorsMockResponse } from '../../common/mock/connectors';
 import { useRefreshCaseViewPage } from '../case_view/use_on_refresh_case_view_page';
