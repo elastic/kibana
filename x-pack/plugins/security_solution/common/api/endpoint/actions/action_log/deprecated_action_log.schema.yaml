@@ -5,9 +5,9 @@ info:
 paths:
   /api/endpoint/action_log/{agent_id}:
     get:
-      summary: Get action requests log schema
+      summary: Get an action request log
       operationId: EndpointGetActionLog
-      description: Get action requests log
+      description: Get an action request log for the specified agent ID.
       deprecated: true
       x-codegen-enabled: false
       x-labels: [ess, serverless]

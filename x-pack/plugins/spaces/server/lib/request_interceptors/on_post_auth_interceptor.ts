@@ -14,6 +14,7 @@ import type { PluginsSetup } from '../../plugin';
 import type { SpacesServiceStart } from '../../spaces_service/spaces_service';
 import { wrapError } from '../errors';
 import { getSpaceSelectorUrl } from '../get_space_selector_url';
+import { withSpaceSolutionDisabledFeatures } from '../utils/space_solution_disabled_features';
 
 export interface OnPostAuthInterceptorDeps {
   http: CoreSetup['http'];
@@ -105,18 +106,23 @@ export function initSpacesOnPostAuthRequestInterceptor({
         }
       }
 
+      const allFeatures = features.getKibanaFeatures();
+      const disabledFeatureKeys = withSpaceSolutionDisabledFeatures(
+        allFeatures,
+        space.disabledFeatures,
+        space.solution
+      );
+
       // Verify application is available in this space
       // The management page is always visible, so we shouldn't be restricting access to the kibana application in any situation.
       const appId = path.split('/', 3)[2];
-      if (appId !== 'kibana' && space && space.disabledFeatures.length > 0) {
+      if (appId !== 'kibana' && space && disabledFeatureKeys.length > 0) {
         log.debug(`Verifying application is available: "${appId}"`);
-
-        const allFeatures = features.getKibanaFeatures();
 
         const isRegisteredApp = allFeatures.some((feature) => feature.app.includes(appId));
         if (isRegisteredApp) {
           const enabledFeatures = allFeatures.filter(
-            (feature) => !space.disabledFeatures.includes(feature.id)
+            (feature) => !disabledFeatureKeys.includes(feature.id)
           );
 
           const isAvailableInSpace = enabledFeatures.some((feature) => feature.app.includes(appId));

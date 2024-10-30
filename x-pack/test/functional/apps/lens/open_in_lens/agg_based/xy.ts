@@ -126,7 +126,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         const layerChartSwitches = await testSubjects.findAll('lnsChartSwitchPopover');
         expect(layerChartSwitches.length).to.be(2);
         expect(await layerChartSwitches[0].getVisibleText()).to.be('Area');
-        expect(await layerChartSwitches[1].getVisibleText()).to.be('Bar vertical');
+        expect(await layerChartSwitches[1].getVisibleText()).to.be('Bar');
         const yDimensionText1 = await lens.getDimensionTriggerText('lnsXY_yDimensionPanel', 0);
         const yDimensionText2 = await lens.getDimensionTriggerText('lnsXY_yDimensionPanel', 1);
         expect(yDimensionText1).to.be('Count');
@@ -152,7 +152,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(await lens.getLayerCount()).to.be(1);
         const layerChartSwitches = await testSubjects.findAll('lnsChartSwitchPopover');
         expect(layerChartSwitches.length).to.be(1);
-        expect(await layerChartSwitches[0].getVisibleText()).to.be('Bar vertical');
+        expect(await layerChartSwitches[0].getVisibleText()).to.be('Bar');
         const yDimensionText1 = await lens.getDimensionTriggerText('lnsXY_yDimensionPanel', 0);
         const yDimensionText2 = await lens.getDimensionTriggerText('lnsXY_yDimensionPanel', 1);
         expect(yDimensionText1).to.be('Count');
@@ -238,7 +238,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(await lens.getLayerCount()).to.be(1);
         const layerChartSwitches = await testSubjects.findAll('lnsChartSwitchPopover');
         expect(layerChartSwitches.length).to.be(1);
-        expect(await layerChartSwitches[0].getVisibleText()).to.be('Area stacked');
+        expect(await layerChartSwitches[0].getVisibleText()).to.be('Area');
       });
     });
 
@@ -258,7 +258,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(await lens.getLayerCount()).to.be(1);
         const layerChartSwitches = await testSubjects.findAll('lnsChartSwitchPopover');
         expect(layerChartSwitches.length).to.be(1);
-        expect(await layerChartSwitches[0].getVisibleText()).to.be('Area percentage');
+        expect(await layerChartSwitches[0].getVisibleText()).to.be('Area');
       });
     });
 
@@ -277,7 +277,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(await lens.getLayerCount()).to.be(1);
         const layerChartSwitches = await testSubjects.findAll('lnsChartSwitchPopover');
         expect(layerChartSwitches.length).to.be(1);
-        expect(await layerChartSwitches[0].getVisibleText()).to.be('Bar horizontal');
+        expect(await layerChartSwitches[0].getVisibleText()).to.be('Bar');
+        expect(await lens.getSelectedBarOrientationSetting()).to.be('Horizontal');
       });
     });
 

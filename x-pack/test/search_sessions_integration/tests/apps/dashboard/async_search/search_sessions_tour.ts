@@ -10,7 +10,7 @@ import { FtrProviderContext } from '../../../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const es = getService('es');
   const log = getService('log');
-  const PageObjects = getPageObjects(['common', 'header', 'dashboard', 'visChart']);
+  const { common, header, dashboard } = getPageObjects(['common', 'header', 'dashboard']);
   const browser = getService('browser');
   const searchSessions = getService('searchSessions');
   const kibanaServer = getService('kibanaServer');
@@ -27,7 +27,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     beforeEach(async () => {
-      await PageObjects.common.navigateToApp('dashboard');
+      await common.navigateToApp('dashboard');
       await searchSessions.markTourUndone();
     });
 
@@ -38,23 +38,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('search session popover auto opens when search is taking a while', async () => {
-      await PageObjects.dashboard.loadSavedDashboard('Delayed 15s');
+      await dashboard.loadSavedDashboard('Delayed 15s');
 
       await searchSessions.openedOrFail(); // tour auto opens when there is a long running search
 
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await header.waitUntilLoadingHasFinished();
       await searchSessions.expectState('completed');
 
       const url = await browser.getCurrentUrl();
       const fakeSessionId = '__fake__';
       const savedSessionURL = `${url}&searchSessionId=${fakeSessionId}`;
       await browser.get(savedSessionURL);
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await header.waitUntilLoadingHasFinished();
       await searchSessions.expectState('restored');
       await searchSessions.openedOrFail(); // tour auto opens on first restore
 
       await browser.get(savedSessionURL);
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await header.waitUntilLoadingHasFinished();
       await searchSessions.expectState('restored');
       await searchSessions.closedOrFail(); // do not open on next restore
     });

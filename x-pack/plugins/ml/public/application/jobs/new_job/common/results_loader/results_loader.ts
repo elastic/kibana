@@ -10,8 +10,8 @@ import { BehaviorSubject, lastValueFrom } from 'rxjs';
 import type { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils';
 import { getSeverityType, ES_AGGREGATION } from '@kbn/ml-anomaly-utils';
 import type { TimeBuckets } from '@kbn/ml-time-buckets';
+import { parseInterval } from '@kbn/ml-parse-interval';
 
-import { parseInterval } from '../../../../../../common/util/parse_interval';
 import { JOB_TYPE } from '../../../../../../common/constants/new_job';
 
 import type { ModelPlotOutputResults } from '../../../../services/results_service';
@@ -85,7 +85,7 @@ export class ResultsLoader {
     this._chartInterval = chartInterval;
     this._results$ = new BehaviorSubject(this._results);
     this._chartLoader = chartLoader;
-    this._mlResultsService = mlResultsServiceProvider(jobCreator.mlApiServices);
+    this._mlResultsService = mlResultsServiceProvider(jobCreator.mlApi);
 
     jobCreator.subscribeToProgress(this.progressSubscriber);
   }
@@ -242,7 +242,7 @@ export class ResultsLoader {
 
   private async _loadDetectorsAnomalyData(): Promise<Record<number, Anomaly[]>> {
     const resp = await getScoresByRecord(
-      this._jobCreator.mlApiServices,
+      this._jobCreator.mlApi,
       this._jobCreator.jobId,
       this._jobCreator.start,
       this._jobCreator.end,

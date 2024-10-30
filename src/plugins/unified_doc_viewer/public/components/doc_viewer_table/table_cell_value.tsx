@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { css } from '@emotion/react';
@@ -21,7 +22,7 @@ import classnames from 'classnames';
 import React, { Fragment, useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { IgnoredReason, TRUNCATE_MAX_HEIGHT } from '@kbn/discover-utils';
-import { FieldRecord } from './table';
+import { FieldRecordLegacy } from '@kbn/unified-doc-viewer/types';
 import { getUnifiedDocViewerServices } from '../../plugin';
 
 const DOC_VIEWER_DEFAULT_TRUNCATE_MAX_HEIGHT = 110;
@@ -95,12 +96,13 @@ const IgnoreWarning: React.FC<IgnoreWarningProps> = React.memo(({ rawValue, reas
   );
 });
 
-type TableFieldValueProps = Pick<FieldRecord['field'], 'field'> & {
-  formattedValue: FieldRecord['value']['formattedValue'];
+type TableFieldValueProps = Pick<FieldRecordLegacy['field'], 'field'> & {
+  formattedValue: FieldRecordLegacy['value']['formattedValue'];
   rawValue: unknown;
   ignoreReason?: IgnoredReason;
   isDetails?: boolean; // true when inside EuiDataGrid cell popover
   isLegacy?: boolean; // true when inside legacy table
+  isHighlighted?: boolean; // whether it's matching a search term
 };
 
 export const TableFieldValue = ({
@@ -110,6 +112,7 @@ export const TableFieldValue = ({
   ignoreReason,
   isDetails,
   isLegacy,
+  isHighlighted,
 }: TableFieldValueProps) => {
   const { euiTheme } = useEuiTheme();
   const { uiSettings } = getUnifiedDocViewerServices();
@@ -157,6 +160,7 @@ export const TableFieldValue = ({
 
   const valueClasses = classnames('kbnDocViewer__value', {
     'kbnDocViewer__value--truncated': shouldTruncate,
+    'kbnDocViewer__value--highlighted': isHighlighted && !isDetails,
   });
 
   return (

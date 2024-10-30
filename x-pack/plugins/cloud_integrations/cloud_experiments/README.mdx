@@ -9,174 +9,39 @@ tags: ['kibana', 'dev', 'contributor', 'api docs', 'cloud', 'a/b testing', 'expe
 
 # Kibana Cloud Experiments Service
 
-> [!WARNING]  
-> These APIs are deprecated and should not be used as we're working on a replacement Core Feature Flags Service that will arrive _soon_.
+> [!NOTE]  
+> This plugin no-longer exposes any evaluation APIs. Refer to <DocLink id="kibFeatureFlagsService" /> for more information about how to interact with feature flags.
 
-The Cloud Experiments Service provides the necessary APIs to implement A/B testing scenarios, fetching the variations in configuration and reporting back metrics to track conversion rates of the experiments.
+This plugin takes care of instrumenting the LaunchDarkly feature flags provider, and registering it in the <DocLink id="kibFeatureFlagsService" />.
+It also instantiates the most basic evaluation context that our segmentation rules can rely on.  
 
 The `cloudExperiments` plugin is disabled by default and only enabled on Elastic Cloud deployments.
 
-## Public API
+## Evaluation Context
 
-If you are developing a feature that needs to use a feature flag, or you are implementing an A/B-testing scenario, this is how you should fetch the value of your feature flags (for either server and browser side code):
+The fields populated by this plugin in the evaluation context are shown in the JSON snippet below.
+It reports the context split in 2 levels: `kibana` and `organization`. This should help providing a consistent behavior
+for all users in a deployment/project, or for all the deployments in an organization.
 
-First, you should declare the optional dependency on this plugin. Do not list it in your `requiredPlugins`, as this plugin is disabled by default and only enabled in Cloud deployments. Adding it to your `requiredPlugins` will cause Kibana to refuse to start by default.
-
-```json
-// plugin/kibana.json
+```JSON
 {
-  "id": "myPlugin",
-  "optionalPlugins": ["cloudExperiments"]
-}
-```
-
-Please, be aware that your plugin will run even when the `cloudExperiment` plugin is disabled. Make sure to declare it as an optional dependency in your plugin's TypeScript contract to remind you that it might not always be available.
-
-### Fetching the value of the feature flags
-
-First, make sure that your feature flag is listed in [`FEATURE_FLAG_NAMES`](./common/constants.ts). 
-Then, you can fetch the value of your feature flag by using the API `cloudExperiments.getVariation` as follows:
-
-```ts
-import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/(public|server)';
-import type { 
-  CloudExperimentsPluginSetup, 
-  CloudExperimentsPluginStart
-} from '@kbn/cloud-experiments-plugin/common';
-
-interface SetupDeps {
-  cloudExperiments?: CloudExperimentsPluginSetup;
-}
-
-interface StartDeps {
-  cloudExperiments?: CloudExperimentsPluginStart;
-}
-
-export class MyPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
-  public setup(core: CoreSetup, deps: SetupDeps) {
-    this.doSomethingBasedOnFeatureFlag(deps.cloudExperiments);
-  }
-  
-  public start(core: CoreStart, deps: StartDeps) {
-    this.doSomethingBasedOnFeatureFlag(deps.cloudExperiments);
-  }
-  
-  private async doSomethingBasedOnFeatureFlag(cloudExperiments?: CloudExperimentsPluginStart) {
-    let myConfig = 'default config';
-    if (cloudExperiments) {
-      myConfig = await cloudExperiments.getVariation(
-        'my-plugin.my-feature-flag', // The key 'my-plugin.my-feature-flag' should exist in FEATURE_FLAG_NAMES
-        'default config'
-      );
-    }
-    // do something with the final value of myConfig...
+  "kind": "multi",
+  "kibana": {
+    "key": "deployment/project ID",
+    "offering": "traditional/serverless",
+    "version": "8.16.0",
+    "build_num": 1234,
+    "build_sha": "cdadaasdasdjsljhl",
+    "build_sha_short": "cdada",
+    "project_type": "Serverless project type",
+    "orchestrator_target": "canary/non-canary",
+    "has_data": true
+  },
+  "organization": {
+    "key": "Cloud Organization ID",
+    "is_elastic_staff": false,
+    "in_trial": false,
+    "trial_end_date": "2024-01-01T01:00:00.000Z"
   }
 }
 ```
-
-Since the `getVariation` API returns a promise, when using it in a React component, you may want to use the hook `useEffect`.
-
-```tsx
-import React, { useEffect, useState } from 'react';
-import type { 
-  CloudExperimentsFeatureFlagNames,
-  CloudExperimentsPluginStart
-} from '@kbn/cloud-experiments-plugin/common';
-
-interface Props {
-  cloudExperiments?: CloudExperimentsPluginStart;
-}
-
-const useVariation = <Data>(
-  cloudExperiments: CloudExperimentsPluginStart | undefined,
-  featureFlagName: CloudExperimentsFeatureFlagNames,
-  defaultValue: Data,
-  setter: (value: Data) => void
-) => {
-  useEffect(() => {
-    (async function loadVariation() {
-      const variationUrl = await cloudExperiments?.getVariation(featureFlagName, defaultValue);
-      if (variationUrl) {
-        setter(variationUrl);
-      }
-    })();
-  }, [cloudExperiments, featureFlagName, defaultValue, setter]);
-};
-
-export const MyReactComponent: React.FC<Props> = ({ cloudExperiments }: Props) => {
-  const [myConfig, setMyConfig] = useState('default config');
-  useVariation(
-    cloudExperiments,
-    'my-plugin.my-feature-flag', // The key 'my-plugin.my-feature-flag' should exist in FEATURE_FLAG_NAMES
-    'default config',
-    setMyConfig
-  );
-  
-  // use myConfig in the component...
-}
-```
-
-### Reporting metrics
-
-Experiments require feedback to analyze which variation to the feature flag is the most successful. For this reason, we need to report some metrics defined in the success criteria of the experiment (check back with your PM if they are unclear).
-
-Our A/B testing provider allows some high-level analysis of the experiment based on the metrics. It also has some limitations about how it handles some type of metrics like number of objects or size of indices. For this reason, you might want to consider shipping the metrics via our usual telemetry channels (`core.analytics` for event-based metrics, or <DocLink id="kibUsageCollectionPlugin" />). 
-
-However, if our A/B testing provider's analysis tool is good enough for your use case, you can use the api `reportMetric` as follows.
-
-First, make sure to add the metric name in [`METRIC_NAMES`](./common/constants.ts). Then you can use it like below:
-
-```ts
-import type { CoreStart, Plugin } from '@kbn/core/(public|server)';
-import type { 
-  CloudExperimentsPluginSetup, 
-  CloudExperimentsPluginStart 
-} from '@kbn/cloud-experiments-plugin/common';
-
-interface SetupDeps {
-  cloudExperiments?: CloudExperimentsPluginSetup;
-}
-
-interface StartDeps {
-  cloudExperiments?: CloudExperimentsPluginStart;
-}
-
-export class MyPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
-  public start(core: CoreStart, deps: StartDeps) {
-    // whenever we need to report any metrics: 
-    // the user performed some action, 
-    // or a metric hit a threshold we want to communicate about
-    deps.cloudExperiments?.reportMetric({
-      name: 'Something happened', // The key 'Something happened' should exist in METRIC_NAMES
-      value: 22, // (optional) in case the metric requires a numeric metric
-      meta: { // Optional metadata.
-        hadSomething: true,  
-        userType: 'type 1',  
-        otherNumericField: 1,  
-      }
-    })
-  }
-}
-```
-
-### Testing
-
-To test your code locally when developing the A/B scenarios, this plugin accepts a custom config to skip the A/B provider calls and return the values. Use the following `kibana.dev.yml` configuration as an example:
-
-```yml
-xpack.cloud_integrations.experiments.enabled: true
-xpack.cloud_integrations.experiments.flag_overrides:
-  "my-plugin.my-feature-flag": "my custom value"
-```
-
-### How is my user identified?
-
-The user is automatically identified during the `setup` phase. It currently uses the ESS deployment ID, meaning all users accessing the same deployment will get the same values for the `getVariation` requests unless the A/B provider is explicitly configured to randomize it.
-
-If you are curious of the data provided to the `identify` call, you can see that in the [`cloud` plugin](../../cloud).
-
----
-
-## Development
-
-See the [kibana contributing guide](https://github.com/elastic/kibana/blob/main/CONTRIBUTING.md) for instructions setting up your development environment.

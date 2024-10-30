@@ -26,7 +26,7 @@ export class InferencePlugin
       InferenceStartDependencies
     >
 {
-  logger: Logger;
+  private logger: Logger;
 
   constructor(context: PluginInitializerContext<InferenceConfig>) {
     this.logger = context.logger.get();
@@ -40,6 +40,7 @@ export class InferencePlugin
     registerRoutes({
       router,
       coreSetup,
+      logger: this.logger,
     });
 
     return {};
@@ -48,7 +49,11 @@ export class InferencePlugin
   start(core: CoreStart, pluginsStart: InferenceStartDependencies): InferenceServerStart {
     return {
       getClient: ({ request }) => {
-        return createInferenceClient({ request, actions: pluginsStart.actions });
+        return createInferenceClient({
+          request,
+          actions: pluginsStart.actions,
+          logger: this.logger.get('client'),
+        });
       },
     };
   }

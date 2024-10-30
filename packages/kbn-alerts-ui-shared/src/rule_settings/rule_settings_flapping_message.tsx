@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { EuiText } from '@elastic/eui';
@@ -36,21 +37,34 @@ export const flappingOffMessage = i18n.translate(
 export interface RuleSettingsFlappingMessageProps {
   lookBackWindow: number;
   statusChangeThreshold: number;
+  isUsingRuleSpecificFlapping: boolean;
 }
 
 export const RuleSettingsFlappingMessage = (props: RuleSettingsFlappingMessageProps) => {
-  const { lookBackWindow, statusChangeThreshold } = props;
+  const { lookBackWindow, statusChangeThreshold, isUsingRuleSpecificFlapping } = props;
 
   return (
     <EuiText size="s" data-test-subj="ruleSettingsFlappingMessage">
-      <FormattedMessage
-        id="alertsUIShared.ruleSettingsFlappingMessage.flappingSettingsDescription"
-        defaultMessage="An alert is flapping if it changes status at least {statusChangeThreshold} in the last {lookBackWindow}."
-        values={{
-          lookBackWindow: <b>{getLookBackWindowLabelRuleRuns(lookBackWindow)}</b>,
-          statusChangeThreshold: <b>{getStatusChangeThresholdRuleRuns(statusChangeThreshold)}</b>,
-        }}
-      />
+      {!isUsingRuleSpecificFlapping && (
+        <FormattedMessage
+          id="alertsUIShared.ruleSettingsFlappingMessage.spaceFlappingSettingsDescription"
+          defaultMessage="All rules (in this space) detect an alert is flapping when it changes status at least {statusChangeThreshold} in the last {lookBackWindow}."
+          values={{
+            lookBackWindow: <b>{getLookBackWindowLabelRuleRuns(lookBackWindow)}</b>,
+            statusChangeThreshold: <b>{getStatusChangeThresholdRuleRuns(statusChangeThreshold)}</b>,
+          }}
+        />
+      )}
+      {isUsingRuleSpecificFlapping && (
+        <FormattedMessage
+          id="alertsUIShared.ruleSettingsFlappingMessage.flappingSettingsDescription"
+          defaultMessage="This rule detects an alert is flapping if it changes status at least {statusChangeThreshold} in the last {lookBackWindow}."
+          values={{
+            lookBackWindow: <b>{getLookBackWindowLabelRuleRuns(lookBackWindow)}</b>,
+            statusChangeThreshold: <b>{getStatusChangeThresholdRuleRuns(statusChangeThreshold)}</b>,
+          }}
+        />
+      )}
     </EuiText>
   );
 };

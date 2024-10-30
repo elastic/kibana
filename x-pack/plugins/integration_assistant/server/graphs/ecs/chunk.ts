@@ -27,7 +27,7 @@ export function mergeAndChunkSamples(objects: string[], chunkSize: number): stri
   const chunks = generateChunks(result, chunkSize);
 
   // Each chunk is used for the combinedSamples state when passed to the subgraph, which should be a nicely formatted string
-  return chunks.map((chunk) => JSON.stringify(chunk));
+  return chunks.map((chunk) => JSON.stringify(chunk, null, 2));
 }
 
 // This function takes the already merged array of samples, and splits it up into chunks of a given size.

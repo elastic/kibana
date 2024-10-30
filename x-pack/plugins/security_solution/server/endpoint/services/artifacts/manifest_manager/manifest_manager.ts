@@ -157,9 +157,14 @@ export class ManifestManager {
   }): Promise<WrappedTranslatedExceptionList> {
     if (!this.cachedExceptionsListsByOs.has(`${listId}-${os}`)) {
       let itemsByListId: ExceptionListItemSchema[] = [];
+      // endpointHostIsolationExceptions includes full CRUD support for Host Isolation Exceptions
+      // endpointArtifactManagement includes full CRUD support for all other exception lists + RD support for Host Isolation Exceptions
+      // If there are host isolation exceptions in place but there is a downgrade scenario, those shouldn't be taken into account when generating artifacts.
       if (
         (listId === ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id &&
-          this.productFeaturesService.isEnabled(ProductFeatureKey.endpointResponseActions)) ||
+          this.productFeaturesService.isEnabled(
+            ProductFeatureKey.endpointHostIsolationExceptions
+          )) ||
         (listId !== ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id &&
           this.productFeaturesService.isEnabled(ProductFeatureKey.endpointArtifactManagement))
       ) {

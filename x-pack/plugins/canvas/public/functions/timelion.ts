@@ -11,7 +11,6 @@ import { i18n } from '@kbn/i18n';
 
 import type { TimeRange } from '@kbn/es-query';
 import { ExpressionFunctionDefinition, DatatableRow } from '@kbn/expressions-plugin/public';
-import { fetch } from '../../common/lib/fetch';
 // @ts-expect-error untyped local
 import { buildBoolArray } from '../../common/lib/build_bool_array';
 import { Datatable, ExpressionValueFilter } from '../../types';
@@ -132,16 +131,14 @@ export function timelionFunctionFactory(initialize: InitializeArguments): () => 
         let result: any;
 
         try {
-          result = await fetch(initialize.prependBasePath(`/internal/timelion/run`), {
-            method: 'POST',
-            responseType: 'json',
-            data: body,
+          result = await initialize.http.post(`/internal/timelion/run`, {
+            body: JSON.stringify(body),
           });
         } catch (e) {
           throw errors.timelionError();
         }
 
-        const seriesList = result.data.sheet[0].list;
+        const seriesList = result.sheet[0].list;
         const rows = flatten(
           seriesList.map((series: { data: any[]; label: string }) =>
             series.data.map((row) => ({

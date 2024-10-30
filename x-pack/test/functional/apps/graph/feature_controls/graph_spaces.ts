@@ -11,7 +11,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const spacesService = getService('spaces');
-  const PageObjects = getPageObjects(['common', 'graph', 'security', 'error', 'header']);
+  const { common, header, error } = getPageObjects(['common', 'error', 'header']);
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
 
@@ -33,28 +33,28 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('shows graph navlink', async () => {
-        await PageObjects.common.navigateToApp('home', {
+        await common.navigateToApp('home', {
           basePath: '/s/custom_space',
         });
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await header.waitUntilLoadingHasFinished();
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
         expect(navLinks).to.contain('Graph');
       });
 
       it('landing page shows "Create new graph" button', async () => {
-        await PageObjects.common.navigateToApp('graph', {
+        await common.navigateToApp('graph', {
           basePath: '/s/custom_space',
         });
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await header.waitUntilLoadingHasFinished();
         await testSubjects.existOrFail('graphLandingPage', { timeout: 10000 });
         await testSubjects.existOrFail('graphCreateGraphPromptButton');
       });
 
       it('allows creating a new graph', async () => {
-        await PageObjects.common.navigateToApp('graph', {
+        await common.navigateToApp('graph', {
           basePath: '/s/custom_space',
         });
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await header.waitUntilLoadingHasFinished();
         await testSubjects.click('graphCreateGraphPromptButton');
         const breadcrumb = await testSubjects.find('~graphCurrentGraphBreadcrumb');
         expect(await breadcrumb.getVisibleText()).to.equal('Unsaved graph');
@@ -75,21 +75,21 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`doesn't show graph navlink`, async () => {
-        await PageObjects.common.navigateToApp('home', {
+        await common.navigateToApp('home', {
           basePath: '/s/custom_space',
         });
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await header.waitUntilLoadingHasFinished();
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
         expect(navLinks).not.to.contain('Graph');
       });
 
       it(`navigating to app shows 404`, async () => {
-        await PageObjects.common.navigateToUrl('graph', '', {
+        await common.navigateToUrl('graph', '', {
           basePath: '/s/custom_space',
           shouldLoginIfPrompted: false,
           ensureCurrentUrl: false,
         });
-        await PageObjects.error.expectNotFound();
+        await error.expectNotFound();
       });
     });
   });

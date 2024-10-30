@@ -11,9 +11,8 @@ import { TestProvider } from '../../../../../mocks/test_provider';
 import { parseNDJSON, parseJSONArray, SampleLogsInput } from './sample_logs_input';
 import { ActionsProvider } from '../../state';
 import { mockActions } from '../../mocks/state';
-import { mockServices } from '../../../../../services/mocks/services';
 
-const wrapper: React.FC = ({ children }) => (
+const wrapper: React.FC<React.PropsWithChildren<{}>> = ({ children }) => (
   <TestProvider>
     <ActionsProvider value={mockActions}>{children}</ActionsProvider>
   </TestProvider>
@@ -165,25 +164,6 @@ describe('SampleLogsInput', () => {
           samplesFormat: { name: 'json', json_path: [] },
         });
       });
-
-      describe('when the file has too many rows', () => {
-        const tooLargeLogsSample = Array(6).fill(logsSampleRaw).join(','); // 12 entries
-        beforeEach(async () => {
-          await changeFile(input, new File([`[${tooLargeLogsSample}]`], 'test.json', { type }));
-        });
-
-        it('should truncate the logs sample', () => {
-          expect(mockActions.setIntegrationSettings).toBeCalledWith({
-            logSamples: tooLargeLogsSample.split(',').slice(0, 10),
-            samplesFormat: { name: 'json', json_path: [] },
-          });
-        });
-        it('should add a notification toast', () => {
-          expect(mockServices.notifications.toasts.addInfo).toBeCalledWith(
-            `The logs sample has been truncated to 10 rows.`
-          );
-        });
-      });
     });
 
     describe('when the file is a json array under a key', () => {
@@ -236,25 +216,6 @@ describe('SampleLogsInput', () => {
           samplesFormat: { name: 'ndjson', multiline: false },
         });
       });
-
-      describe('when the file has too many rows', () => {
-        const tooLargeLogsSample = Array(6).fill(simpleNDJSON).join('\n'); // 12 entries
-        beforeEach(async () => {
-          await changeFile(input, new File([tooLargeLogsSample], 'test.json', { type }));
-        });
-
-        it('should truncate the logs sample', () => {
-          expect(mockActions.setIntegrationSettings).toBeCalledWith({
-            logSamples: tooLargeLogsSample.split('\n').slice(0, 10),
-            samplesFormat: { name: 'ndjson', multiline: false },
-          });
-        });
-        it('should add a notification toast', () => {
-          expect(mockServices.notifications.toasts.addInfo).toBeCalledWith(
-            `The logs sample has been truncated to 10 rows.`
-          );
-        });
-      });
     });
 
     describe('when the file is a an ndjson with a single record', () => {
@@ -303,6 +264,82 @@ describe('SampleLogsInput', () => {
           });
         });
       });
+    });
+  });
+
+  describe('when the file is too large', () => {
+    const type = 'text/plain';
+    let jsonParseSpy: jest.SpyInstance;
+
+    beforeEach(async () => {
+      // Simulate large log content that would cause a RangeError
+      jsonParseSpy = jest.spyOn(JSON, 'parse').mockImplementation(() => {
+        throw new RangeError();
+      });
+
+      await changeFile(input, new File(['...'], 'test.json', { type }));
+    });
+
+    afterAll(() => {
+      // Restore the original implementation after all tests
+      jsonParseSpy.mockRestore();
+    });
+
+    it('should raise an appropriate error', () => {
+      expect(result.queryByText('This logs sample file is too large to parse')).toBeInTheDocument();
+    });
+  });
+
+  describe('when the file is neither a valid json nor ndjson', () => {
+    const plainTextFile = 'test message 1\ntest message 2';
+    const type = 'text/plain';
+
+    beforeEach(async () => {
+      await changeFile(input, new File([plainTextFile], 'test.txt', { type }));
+    });
+
+    it('should set the integrationSetting correctly', () => {
+      expect(mockActions.setIntegrationSettings).toBeCalledWith({
+        logSamples: plainTextFile.split('\n'),
+        samplesFormat: undefined,
+      });
+    });
+  });
+
+  describe('when the file reader fails', () => {
+    const mockedMessage = 'Mocked error';
+    let myFileReader: FileReader;
+    let fileReaderSpy: jest.SpyInstance;
+
+    beforeEach(async () => {
+      myFileReader = new FileReader();
+      fileReaderSpy = jest.spyOn(global, 'FileReader').mockImplementation(() => myFileReader);
+
+      // We need to mock the error property
+      Object.defineProperty(myFileReader, 'error', {
+        value: new Error(mockedMessage),
+        writable: false,
+      });
+
+      jest.spyOn(myFileReader, 'readAsText').mockImplementation(() => {
+        const errorEvent = new ProgressEvent('error');
+        myFileReader.dispatchEvent(errorEvent);
+      });
+
+      const file = new File([`...`], 'test.json', { type: 'application/json' });
+      act(() => {
+        fireEvent.change(input, { target: { files: [file] } });
+      });
+    });
+
+    afterEach(() => {
+      fileReaderSpy.mockRestore();
+    });
+
+    it('should set the error message accordingly', () => {
+      expect(
+        result.queryByText(`An error occurred when reading logs sample: ${mockedMessage}`)
+      ).toBeInTheDocument();
     });
   });
 });

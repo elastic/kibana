@@ -10,6 +10,7 @@ import type { Conversation } from '@kbn/elastic-assistant';
 import { DATA_QUALITY_DASHBOARD_CONVERSATION_ID } from '@kbn/ecs-data-quality-dashboard';
 
 import { DETECTION_RULES_CONVERSATION_ID } from '../../../detections/pages/detection_engine/rules/translations';
+import { DETECTION_RULES_CREATE_FORM_CONVERSATION_ID } from '../../../detections/pages/detection_engine/translations';
 import {
   ALERT_SUMMARY_CONVERSATION_ID,
   EVENT_SUMMARY_CONVERSATION_ID,
@@ -36,6 +37,14 @@ export const BASE_SECURITY_CONVERSATIONS: Record<string, Conversation> = {
   [DETECTION_RULES_CONVERSATION_ID]: {
     id: '',
     title: DETECTION_RULES_CONVERSATION_ID,
+    category: 'assistant',
+    isDefault: true,
+    messages: [],
+    replacements: {},
+  },
+  [DETECTION_RULES_CREATE_FORM_CONVERSATION_ID]: {
+    id: '',
+    title: DETECTION_RULES_CREATE_FORM_CONVERSATION_ID,
     category: 'assistant',
     isDefault: true,
     messages: [],

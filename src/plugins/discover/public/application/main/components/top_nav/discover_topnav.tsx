@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
@@ -11,6 +12,7 @@ import { type DataView, DataViewType } from '@kbn/data-views-plugin/public';
 import { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { TextBasedLanguages } from '@kbn/esql-utils';
+import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
 import { useSavedSearchInitial } from '../../state_management/discover_state_provider';
 import { ESQL_TRANSITION_MODAL_KEY } from '../../../../../common/constants';
 import { useInternalStateSelector } from '../../state_management/discover_internal_state_container';
@@ -23,6 +25,7 @@ import { useAppStateSelector } from '../../state_management/discover_app_state_c
 import { useDiscoverTopNav } from './use_discover_topnav';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import { ESQLToDataViewTransitionModal } from './esql_dataview_transition';
+import './top_nav.scss';
 
 export interface DiscoverTopNavProps {
   savedQuery?: string;
@@ -191,6 +194,7 @@ export const DiscoverTopNav = ({
       badges: topNavBadges,
       config: topNavMenu,
       setMenuMountPoint: setHeaderActionMenu,
+      className: 'dscTopNav', // FIXME: Delete the scss file and pass `gutterSize="xxs"` instead (after next Eui release)
     };
   }, [
     setHeaderActionMenu,
@@ -231,6 +235,12 @@ export const DiscoverTopNav = ({
     stateContainer,
     uiSettings,
   ]);
+
+  const onESQLDocsFlyoutVisibilityChanged = useCallback((isOpen: boolean) => {
+    if (isOpen) {
+      dismissAllFlyoutsExceptFor(DiscoverFlyouts.esqlDocs);
+    }
+  }, []);
 
   const searchBarCustomization = useDiscoverCustomization('search_bar');
 
@@ -277,6 +287,7 @@ export const DiscoverTopNav = ({
             <searchBarCustomization.PrependFilterBar />
           ) : undefined
         }
+        onESQLDocsFlyoutVisibilityChanged={onESQLDocsFlyoutVisibilityChanged}
       />
       {isESQLToDataViewTransitionModalVisible && (
         <ESQLToDataViewTransitionModal onClose={onESQLToDataViewTransitionModalClose} />

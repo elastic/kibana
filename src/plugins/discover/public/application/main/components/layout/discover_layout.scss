@@ -9,6 +9,10 @@ discover-app {
 }
 
 .dscPage {
+  flex-direction: column;
+  overflow: hidden;
+  padding: 0;
+
   @include euiBreakpoint('m', 'l', 'xl') {
     @include kibanaFullBodyHeight();
 
@@ -16,14 +20,10 @@ discover-app {
       @include kibanaFullBodyHeight($euiSize * 3);
     }
   }
+}
 
-  flex-direction: column;
+.dscPage .dscPageBody {
   overflow: hidden;
-  padding: 0;
-
-  .dscPageBody {
-    overflow: hidden;
-  }
 }
 
 .dscPageBody__inner {

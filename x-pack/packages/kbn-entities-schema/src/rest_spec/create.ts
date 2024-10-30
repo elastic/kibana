@@ -11,5 +11,3 @@ import { BooleanFromString } from '@kbn/zod-helpers';
 export const createEntityDefinitionQuerySchema = z.object({
   installOnly: z.optional(BooleanFromString).default(false),
 });
-
-export type CreateEntityDefinitionQuery = z.infer<typeof createEntityDefinitionQuerySchema>;

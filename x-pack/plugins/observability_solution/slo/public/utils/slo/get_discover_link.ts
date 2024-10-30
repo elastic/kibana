@@ -11,13 +11,22 @@ import { i18n } from '@kbn/i18n';
 import { buildEsQuery } from '@kbn/observability-plugin/public';
 import { v4 } from 'uuid';
 import { isEmpty } from 'lodash';
+import { getEsQueryConfig } from '@kbn/data-plugin/public';
+import { IUiSettingsClient } from '@kbn/core/public';
 
-function createDiscoverLocator(
-  slo: SLOWithSummaryResponse,
+function createDiscoverLocator({
+  slo,
   showBad = false,
   showGood = false,
-  timeRange?: TimeRange
-) {
+  timeRange,
+  uiSettings,
+}: {
+  slo: SLOWithSummaryResponse;
+  showBad: boolean;
+  showGood: boolean;
+  timeRange: TimeRange;
+  uiSettings?: IUiSettingsClient;
+}) {
   const indexId = v4();
   const filters: Filter[] = [];
 
@@ -42,8 +51,17 @@ function createDiscoverLocator(
     const totalFilters = kqlWithFiltersSchema.is(slo.indicator.params.total)
       ? slo.indicator.params.total.filters
       : [];
-    const customGoodFilter = buildEsQuery({ kuery: goodKuery, filters: goodFilters });
-    const customTotalFilter = buildEsQuery({ kuery: totalKuery, filters: totalFilters });
+
+    const customGoodFilter = buildEsQuery({
+      kuery: goodKuery,
+      filters: goodFilters,
+      ...(uiSettings && { config: getEsQueryConfig(uiSettings) }),
+    });
+    const customTotalFilter = buildEsQuery({
+      kuery: totalKuery,
+      filters: totalFilters,
+      ...(uiSettings && { config: getEsQueryConfig(uiSettings) }),
+    });
     const customBadFilter = { bool: { filter: customTotalFilter, must_not: customGoodFilter } };
 
     filters.push({
@@ -144,22 +162,42 @@ function createDiscoverLocator(
   };
 }
 
-export function getDiscoverLink(
-  slo: SLOWithSummaryResponse,
-  timeRange: TimeRange,
-  discover?: DiscoverStart
-) {
-  const config = createDiscoverLocator(slo, false, false, timeRange);
-  return discover?.locator?.getRedirectUrl(config);
+export function getDiscoverLink({
+  slo,
+  timeRange,
+  discover,
+  uiSettings,
+}: {
+  slo: SLOWithSummaryResponse;
+  timeRange: TimeRange;
+  discover?: DiscoverStart;
+  uiSettings?: IUiSettingsClient;
+}) {
+  const locatorConfig = createDiscoverLocator({
+    slo,
+    showBad: false,
+    showGood: false,
+    timeRange,
+    uiSettings,
+  });
+  return discover?.locator?.getRedirectUrl(locatorConfig);
 }
 
-export function openInDiscover(
-  slo: SLOWithSummaryResponse,
+export function openInDiscover({
+  slo,
   showBad = false,
   showGood = false,
-  timeRange?: TimeRange,
-  discover?: DiscoverStart
-) {
-  const config = createDiscoverLocator(slo, showBad, showGood, timeRange);
-  discover?.locator?.navigate(config);
+  timeRange,
+  discover,
+  uiSettings,
+}: {
+  slo: SLOWithSummaryResponse;
+  showBad: boolean;
+  showGood: boolean;
+  timeRange: TimeRange;
+  discover?: DiscoverStart;
+  uiSettings?: IUiSettingsClient;
+}) {
+  const locatorConfig = createDiscoverLocator({ slo, showBad, showGood, timeRange, uiSettings });
+  discover?.locator?.navigate(locatorConfig);
 }

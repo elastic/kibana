@@ -7,6 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const SYSTEM = i18n.translate('xpack.securitySolution.assistant.getComments.system', {
+  defaultMessage: 'System',
+});
+
 export const ASSISTANT = i18n.translate('xpack.securitySolution.assistant.getComments.assistant', {
   defaultMessage: 'Assistant',
 });

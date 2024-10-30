@@ -22,12 +22,12 @@ export type APMClientOptions = Omit<FetchOptions, 'query' | 'body' | 'pathname' 
   signal: AbortSignal | null;
 };
 
-export type APMClient = RouteRepositoryClient<APMServerRouteRepository, APMClientOptions>;
+export type APMClient = RouteRepositoryClient<APMServerRouteRepository, APMClientOptions>['fetch'];
 
 export type AutoAbortedAPMClient = RouteRepositoryClient<
   APMServerRouteRepository,
   Omit<APMClientOptions, 'signal'>
->;
+>['fetch'];
 
 export type APIReturnType<TEndpoint extends APIEndpoint> = ReturnOf<
   APMServerRouteRepository,
@@ -43,7 +43,10 @@ export type APIClientRequestParamsOf<TEndpoint extends APIEndpoint> = ClientRequ
 
 export type AbstractAPMRepository = ServerRouteRepository;
 
-export type AbstractAPMClient = RouteRepositoryClient<AbstractAPMRepository, APMClientOptions>;
+export type AbstractAPMClient = RouteRepositoryClient<
+  AbstractAPMRepository,
+  APMClientOptions
+>['fetch'];
 
 export let callApmApi: APMClient = () => {
   throw new Error('callApmApi has to be initialized before used. Call createCallApmApi first.');

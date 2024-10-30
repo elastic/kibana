@@ -125,9 +125,7 @@ describe('CreateConnectorFlyout', () => {
     );
     await act(() => Promise.resolve());
 
-    act(() => {
-      userEvent.click(getByTestId(`${actionTypeModel.id}-card`));
-    });
+    await userEvent.click(getByTestId(`${actionTypeModel.id}-card`));
 
     await waitFor(() => {
       expect(getByTestId('create-connector-flyout-back-btn')).toBeInTheDocument();
@@ -179,17 +177,13 @@ describe('CreateConnectorFlyout', () => {
     );
     await act(() => Promise.resolve());
 
-    act(() => {
-      userEvent.click(getByTestId(`${actionTypeModel.id}-card`));
-    });
+    await userEvent.click(getByTestId(`${actionTypeModel.id}-card`));
 
     await waitFor(() => {
       expect(getByTestId('test-connector-text-field')).toBeInTheDocument();
     });
 
-    act(() => {
-      userEvent.click(getByTestId('create-connector-flyout-save-btn'));
-    });
+    await userEvent.click(getByTestId('create-connector-flyout-save-btn'));
 
     await waitFor(() => {
       expect(getByTestId('create-connector-flyout-back-btn')).not.toBeDisabled();
@@ -354,9 +348,7 @@ describe('CreateConnectorFlyout', () => {
 
       await act(() => Promise.resolve());
 
-      act(() => {
-        userEvent.click(getByTestId(`${actionTypeModel.id}-card`));
-      });
+      await userEvent.click(getByTestId(`${actionTypeModel.id}-card`));
 
       await waitFor(() => {
         expect(getByTestId('test-connector-text-field')).toBeInTheDocument();
@@ -378,9 +370,7 @@ describe('CreateConnectorFlyout', () => {
 
       await act(() => Promise.resolve());
 
-      act(() => {
-        userEvent.click(getByTestId(`${actionTypeModel.id}-card`));
-      });
+      await userEvent.click(getByTestId(`${actionTypeModel.id}-card`));
 
       await waitFor(() => {
         expect(getByTestId('test-connector-text-field')).toBeInTheDocument();
@@ -446,26 +436,20 @@ describe('CreateConnectorFlyout', () => {
       );
       await act(() => Promise.resolve());
 
-      act(() => {
-        userEvent.click(getByTestId(`${actionTypeModel.id}-card`));
-      });
+      await userEvent.click(getByTestId(`${actionTypeModel.id}-card`));
 
       await waitFor(() => {
         expect(getByTestId('test-connector-text-field')).toBeInTheDocument();
       });
 
-      await act(async () => {
-        await userEvent.type(getByTestId('nameInput'), 'My test', {
-          delay: 100,
-        });
-        await userEvent.type(getByTestId('test-connector-text-field'), 'My text field', {
-          delay: 100,
-        });
+      await userEvent.type(getByTestId('nameInput'), 'My test', {
+        delay: 100,
+      });
+      await userEvent.type(getByTestId('test-connector-text-field'), 'My text field', {
+        delay: 100,
       });
 
-      act(() => {
-        userEvent.click(getByTestId('create-connector-flyout-save-btn'));
-      });
+      await userEvent.click(getByTestId('create-connector-flyout-save-btn'));
 
       await waitFor(() => {
         expect(appMockRenderer.coreStart.http.post).toHaveBeenCalledWith('/api/actions/connector', {
@@ -514,26 +498,20 @@ describe('CreateConnectorFlyout', () => {
       );
       await act(() => Promise.resolve());
 
-      act(() => {
-        userEvent.click(getByTestId(`${errorActionTypeModel.id}-card`));
-      });
+      await userEvent.click(getByTestId(`${errorActionTypeModel.id}-card`));
 
       await waitFor(() => {
         expect(getByTestId('test-connector-error-text-field')).toBeInTheDocument();
       });
 
-      await act(async () => {
-        await userEvent.type(getByTestId('nameInput'), 'My test', {
-          delay: 100,
-        });
-        await userEvent.type(getByTestId('test-connector-error-text-field'), 'My text field', {
-          delay: 100,
-        });
+      await userEvent.type(getByTestId('nameInput'), 'My test', {
+        delay: 100,
+      });
+      await userEvent.type(getByTestId('test-connector-error-text-field'), 'My text field', {
+        delay: 100,
       });
 
-      act(() => {
-        userEvent.click(getByTestId('create-connector-flyout-save-btn'));
-      });
+      await userEvent.click(getByTestId('create-connector-flyout-save-btn'));
 
       await waitFor(() => {
         expect(getByText('Error on pre submit validator')).toBeInTheDocument();
@@ -553,26 +531,20 @@ describe('CreateConnectorFlyout', () => {
       );
       await act(() => Promise.resolve());
 
-      act(() => {
-        userEvent.click(getByTestId(`${actionTypeModel.id}-card`));
-      });
+      await userEvent.click(getByTestId(`${actionTypeModel.id}-card`));
 
       await waitFor(() => {
         expect(getByTestId('test-connector-text-field')).toBeInTheDocument();
       });
 
-      await act(async () => {
-        await userEvent.type(getByTestId('nameInput'), 'My test', {
-          delay: 100,
-        });
-        await userEvent.type(getByTestId('test-connector-text-field'), 'My text field', {
-          delay: 100,
-        });
+      await userEvent.type(getByTestId('nameInput'), 'My test', {
+        delay: 100,
+      });
+      await userEvent.type(getByTestId('test-connector-text-field'), 'My text field', {
+        delay: 100,
       });
 
-      act(() => {
-        userEvent.click(getByTestId('create-connector-flyout-save-test-btn'));
-      });
+      await userEvent.click(getByTestId('create-connector-flyout-save-test-btn'));
 
       await waitFor(() => {
         expect(appMockRenderer.coreStart.http.post).toHaveBeenCalledWith('/api/actions/connector', {
@@ -616,18 +588,14 @@ describe('CreateConnectorFlyout', () => {
       );
       await act(() => Promise.resolve());
 
-      act(() => {
-        userEvent.click(getByTestId(`${actionTypeModel.id}-card`));
-      });
+      await userEvent.click(getByTestId(`${actionTypeModel.id}-card`));
 
       await waitFor(() => {
         expect(getByTestId('create-connector-flyout-back-btn')).toBeInTheDocument();
         expect(getByTestId('nameInput')).toBeInTheDocument();
       });
 
-      act(() => {
-        userEvent.click(getByTestId('create-connector-flyout-back-btn'));
-      });
+      await userEvent.click(getByTestId('create-connector-flyout-back-btn'));
 
       await act(() => Promise.resolve());
 
@@ -645,9 +613,7 @@ describe('CreateConnectorFlyout', () => {
       );
       await act(() => Promise.resolve());
 
-      act(() => {
-        userEvent.click(getByTestId('create-connector-flyout-close-btn'));
-      });
+      await userEvent.click(getByTestId('create-connector-flyout-close-btn'));
 
       expect(onClose).toHaveBeenCalled();
     });

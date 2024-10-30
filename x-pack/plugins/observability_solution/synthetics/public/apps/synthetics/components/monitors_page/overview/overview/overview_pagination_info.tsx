@@ -8,22 +8,18 @@ import React from 'react';
 import { EuiText, EuiLoadingSpinner, EuiI18nNumber, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useSelector } from 'react-redux';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { selectOverviewState } from '../../../../state/overview';
+import { selectOverviewStatus } from '../../../../state/overview_status';
 
 export const OverviewPaginationInfo = ({
-  page,
-  loading,
   total,
   startRange,
   endRange,
 }: {
-  page: number;
-  loading: boolean;
   total?: number;
   startRange?: number;
   endRange?: number;
 }) => {
-  const { loaded } = useSelector(selectOverviewState);
+  const { loaded } = useSelector(selectOverviewStatus);
 
   return loaded && total !== undefined ? (
     <EuiText size="xs">

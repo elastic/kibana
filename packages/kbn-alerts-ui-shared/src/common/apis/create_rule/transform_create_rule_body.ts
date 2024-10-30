@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { RewriteResponseCase } from '@kbn/actions-types';
@@ -16,10 +17,8 @@ const transformCreateRuleFlapping = (flapping: Rule['flapping']) => {
   }
 
   return {
-    flapping: {
-      look_back_window: flapping.lookBackWindow,
-      status_change_threshold: flapping.statusChangeThreshold,
-    },
+    look_back_window: flapping.lookBackWindow,
+    status_change_threshold: flapping.statusChangeThreshold,
   };
 };
 
@@ -59,5 +58,5 @@ export const transformCreateRuleBody: RewriteResponseCase<CreateRuleBody> = ({
     };
   }),
   ...(alertDelay ? { alert_delay: alertDelay } : {}),
-  ...(flapping !== undefined ? transformCreateRuleFlapping(flapping) : {}),
+  ...(flapping !== undefined ? { flapping: transformCreateRuleFlapping(flapping) } : {}),
 });

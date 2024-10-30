@@ -83,12 +83,12 @@ const getPublicControlsStateFromControlPanels = (
 const getOptionsListPublicControlStateFromControlPanel = (
   optionsListControlPanel: ControlPanels[string]
 ): OptionsListControl => ({
-  mode: optionsListControlPanel.explicitInput.exclude ? 'exclude' : 'include',
-  selection: optionsListControlPanel.explicitInput.existsSelected
+  mode: optionsListControlPanel.exclude ? 'exclude' : 'include',
+  selection: optionsListControlPanel.existsSelected
     ? { type: 'exists' }
     : {
         type: 'options',
-        selectedOptions: optionsListControlPanel.explicitInput.selectedOptions ?? [],
+        selectedOptions: optionsListControlPanel.selectedOptions ?? [],
       },
 });
 
@@ -121,16 +121,13 @@ const getControlPanelFromOptionsListPublicControlState = (
 
   return {
     ...defaultControlPanelConfig,
-    explicitInput: {
-      ...defaultControlPanelConfig.explicitInput,
-      exclude: publicControlState.mode === 'exclude',
-      ...(publicControlState.selection.type === 'exists'
-        ? {
-            existsSelected: true,
-          }
-        : {
-            selectedOptions: publicControlState.selection.selectedOptions,
-          }),
-    },
+    exclude: publicControlState.mode === 'exclude',
+    ...(publicControlState.selection.type === 'exists'
+      ? {
+          existsSelected: true,
+        }
+      : {
+          selectedOptions: publicControlState.selection.selectedOptions,
+        }),
   };
 };

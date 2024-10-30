@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { BehaviorSubject, of } from 'rxjs';
@@ -50,7 +51,14 @@ const createStartContractMock = () => {
     setBadge: jest.fn(),
     getBreadcrumbs$: jest.fn(),
     setBreadcrumbs: jest.fn(),
-    getIsSideNavCollapsed$: jest.fn(),
+    sideNav: {
+      getIsCollapsed$: jest.fn(),
+      setIsCollapsed: jest.fn(),
+      getPanelSelectedNode$: jest.fn(),
+      setPanelSelectedNode: jest.fn(),
+      getIsFeedbackBtnVisible$: jest.fn(),
+      setIsFeedbackBtnVisible: jest.fn(),
+    },
     getBreadcrumbsAppendExtension$: jest.fn(),
     setBreadcrumbsAppendExtension: jest.fn(),
     getGlobalHelpExtensionMenuLinks$: jest.fn(),
@@ -76,6 +84,7 @@ const createStartContractMock = () => {
       initNavigation: jest.fn(),
       setSideNavComponent: jest.fn(),
       setBreadcrumbs: jest.fn(),
+      getBreadcrumbs$: jest.fn(),
       getActiveNavigationNodes$: jest.fn(),
       getNavigationTreeUi$: jest.fn(),
       changeActiveSolutionNavigation: jest.fn(),
@@ -93,7 +102,7 @@ const createStartContractMock = () => {
   startContract.getIsNavDrawerLocked$.mockReturnValue(new BehaviorSubject(false));
   startContract.getBodyClasses$.mockReturnValue(new BehaviorSubject([]));
   startContract.hasHeaderBanner$.mockReturnValue(new BehaviorSubject(false));
-  startContract.getIsSideNavCollapsed$.mockReturnValue(new BehaviorSubject(false));
+  startContract.sideNav.getIsCollapsed$.mockReturnValue(new BehaviorSubject(false));
   return startContract;
 };
 

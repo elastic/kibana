@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { SecurityPageName, SERVER_APP_ID, TIMELINES_PATH } from '../../common/constants';
-import { TIMELINES, NOTES } from '../app/translations';
+import { TIMELINES } from '../app/translations';
 import type { LinkItem } from '../common/links/types';
 
 export const links: LinkItem = {
@@ -29,15 +29,6 @@ export const links: LinkItem = {
       }),
       path: `${TIMELINES_PATH}/template`,
       sideNavDisabled: true,
-    },
-    {
-      id: SecurityPageName.notesManagement,
-      title: NOTES,
-      description: i18n.translate('xpack.securitySolution.appLinks.notesManagementDescription', {
-        defaultMessage: 'Visualize and delete notes.',
-      }),
-      path: `${TIMELINES_PATH}/notes`,
-      experimentalKey: 'securitySolutionNotesEnabled',
     },
   ],
 };

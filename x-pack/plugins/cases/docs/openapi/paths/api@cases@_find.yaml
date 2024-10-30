@@ -8,11 +8,11 @@ get:
   tags:
     - cases
   parameters:
-    - $ref: '../components/parameters/assignees.yaml'
+    - $ref: '../components/parameters/assignees_filter.yaml'
     - $ref: '../components/parameters/category.yaml'
     - $ref: '../components/parameters/defaultSearchOperator.yaml'
     - $ref: '../components/parameters/from.yaml'
-    - $ref: '../components/parameters/owner.yaml'
+    - $ref: '../components/parameters/owner_filter.yaml'
     - $ref: '../components/parameters/page_index.yaml'
     - $ref: '../components/parameters/page_size.yaml'
     - $ref: '../components/parameters/reporters.yaml'

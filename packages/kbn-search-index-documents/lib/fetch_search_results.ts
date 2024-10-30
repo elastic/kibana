@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { SearchHit } from '@elastic/elasticsearch/lib/api/types';
@@ -17,7 +18,8 @@ export const fetchSearchResults = async (
   indexName: string,
   query?: string,
   from: number = 0,
-  size: number = DEFAULT_DOCS_PER_PAGE
+  size: number = DEFAULT_DOCS_PER_PAGE,
+  trackTotalHits: boolean = false
 ): Promise<Paginate<SearchHit>> => {
   const result = await fetchWithPagination(
     async () =>
@@ -26,6 +28,7 @@ export const fetchSearchResults = async (
         index: indexName,
         size,
         ...(!!query ? { q: escapeLuceneChars(query) } : {}),
+        track_total_hits: trackTotalHits,
       }),
     from,
     size

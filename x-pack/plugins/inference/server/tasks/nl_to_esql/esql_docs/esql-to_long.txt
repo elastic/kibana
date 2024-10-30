@@ -1,0 +1,29 @@
+# TO_LONG
+
+The TO_LONG function converts an input value into a long value.
+
+## Syntax
+
+`TO_LONG(field)`
+
+### Parameters
+
+#### field
+
+The input value. This can be a single or multi-valued column or an expression.
+
+## Examples
+
+```esql
+ROW str1 = "2147483648", str2 = "2147483648.2", str3 = "foo"
+| EVAL long1 = TO_LONG(str1), long2 = TO_LONG(str2), long3 = TO_LONG(str3)
+```
+
+```esql
+ROW str1 = "1234567890", str2 = "9876543210"
+| EVAL long1 = TO_LONG(str1), long2 = TO_LONG(str2)
+```
+
+## Notes
+
+- If the input parameter is of a date type, its value is interpreted as milliseconds since the Unix epoch and converted to a long value. A boolean value of true is converted to a long value of 1, and false is converted to 0.

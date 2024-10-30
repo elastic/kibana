@@ -1,0 +1,391 @@
+# overlays.yaml
+overlay: 1.0.0
+info:
+  title: Overlays for the connector objects and examples
+  version: 0.0.1
+actions:
+  # Fix some optional path parameters
+  - target: "$.paths['/api/actions/connector/{id}']['post'].parameters[?(@.name=='id')]"
+    description: Remove optional indicator from path parameter
+    update:
+      required: true
+  # Add some connector API examples
+  - target: "$.paths['/api/actions/connector/{id}']['post']"
+    description: "Add examples to create connector API"
+    update: 
+      requestBody: 
+        content: 
+          application/json; Elastic-Api-Version=2023-10-31: 
+            examples:
+              createEmailConnectorRequest:
+                $ref: "../examples/create_email_connector_request.yaml"
+              createIndexConnectorRequest:
+                $ref: "../examples/create_index_connector_request.yaml"
+              createWebhookConnectorRequest:
+                $ref: "../examples/create_webhook_connector_request.yaml"
+              createXmattersConnectorRequest:
+                $ref: "../examples/create_xmatters_connector_request.yaml"
+      responses:
+        200:
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                createEmailConnectorResponse:
+                  $ref: "../examples/create_email_connector_response.yaml"
+                createIndexConnectorResponse:
+                  $ref: "../examples/create_index_connector_response.yaml"
+                createWebhookConnectorResponse:
+                  $ref: "../examples/create_webhook_connector_response.yaml"
+                createXmattersConnectorResponse:
+                  $ref: "../examples/get_connector_response.yaml"
+  - target: "$.paths['/api/actions/connector/{id}/_execute']['post']"
+    description: "Add examples to run connector API"
+    update: 
+      requestBody: 
+        content: 
+          application/json; Elastic-Api-Version=2023-10-31: 
+            examples:
+              runIndexConnectorRequest:
+                $ref: "../examples/run_index_connector_request.yaml"
+              runJiraConnectorRequest:
+                $ref: "../examples/run_jira_connector_request.yaml"
+              runServerLogConnectorRequest:
+                $ref: "../examples/run_servicenow_itom_connector_request.yaml"
+              runSlackConnectorRequest:
+                $ref: "../examples/run_slack_api_connector_request.yaml"
+              runSwimlaneConnectorRequest:
+                $ref: "../examples/run_swimlane_connector_request.yaml"
+      responses:
+        200:
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                runIndexConnectorResponse:
+                  $ref: "../examples/run_index_connector_response.yaml"
+                runJiraConnectorResponse:
+                  $ref: "../examples/run_jira_connector_response.yaml"
+                runServerLogConnectorResponse:
+                  $ref: "../examples/run_server_log_connector_response.yaml"
+                runServiceNowITOMConnectorResponse:
+                  $ref: "../examples/run_servicenow_itom_connector_response.yaml"
+                runSlackConnectorResponse:
+                  $ref: "../examples/run_slack_api_connector_response.yaml"
+                runSwimlaneConnectorResponse:
+                  $ref: "../examples/run_swimlane_connector_response.yaml"
+  - target: "$.paths['/api/actions/connector/{id}']['get']"
+    description: "Add examples to get connector API"
+    update:
+      responses:
+        200:
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                getConnectorResponse:
+                  $ref: '../examples/get_connector_response.yaml'
+  - target: "$.paths['/api/actions/connector_types']['get']"
+    description: "Add examples to get connector types API"
+    update:
+      responses:
+        200:
+          description: Indicates a successful call.
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                getConnectorTypesServerlessResponse:
+                  $ref: '../examples/get_connector_types_generativeai_response.yaml'
+  - target: "$.paths['/api/actions/connectors']['get']"
+    description: "Add examples to get all connectors API"
+    update:
+      responses:
+        200:
+          description: Indicates a successful call.
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                getConnectorsResponse:
+                  $ref: '../examples/get_connectors_response.yaml'
+  - target: "$.paths['/api/actions/connector/{id}']['put']"
+    description: "Add examples to update connector API"
+    update: 
+      requestBody: 
+        content: 
+          application/json; Elastic-Api-Version=2023-10-31:
+            examples:
+              updateIndexConnectorRequest:
+                $ref: '../examples/update_index_connector_request.yaml'
+  # Remove the automated empty connector config and secrets
+  - target: "$.paths['/api/actions/connector/{id}']['post'].requestBody.content.*.schema.properties.config"
+    description: "Remove config in create connector API"
+    remove: true
+  - target: "$.paths['/api/actions/connector/{id}']['put'].requestBody.content.*.schema.properties.config"
+    description: "Remove config in update connector API"
+    remove: true
+  - target: "$.paths['/api/actions/connector/{id}']['post'].requestBody.content.*.schema.properties.secrets"
+    description: "Remove secrets in create connector API"
+    remove: true
+  - target: "$.paths['/api/actions/connector/{id}']['put'].requestBody.content.*.schema.properties.secrets"
+    description: "Remove secrets in update connector API"
+    remove: true
+  # Add some connector configuration schemas
+  - target: "$.paths['/api/actions/connector/{id}']['post']"
+    description: "Add config and secrets to create connector API"
+    update: 
+      requestBody: 
+        content: 
+          application/json; Elastic-Api-Version=2023-10-31:
+            schema:
+              properties:
+                config:
+                  additionalProperties: {}
+                  default: {}
+                  description: The connector configuration details.
+                  oneOf:
+                    # Bedrock (.bedrock)
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/bedrock_config.yaml'
+                    # Crowdstrike (.crowdstrike)
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/crowdstrike_config.yaml'
+                    # D3 Security (.d3security)
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/d3security_config.yaml'
+                    # Email (.email)
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/email_config.yaml'
+                    # Google Gemini (.gemini)
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/gemini_config.yaml'
+                    # IBM Resilient (.resilient)
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/resilient_config.yaml'
+                    # Index (.index)
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/index_config.yaml'
+                    # Jira (.jira)
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/jira_config.yaml'
+                    # Microsoft Teams (.teams) N/A
+                    # Observability AI Assistant (.observability-ai-assistant) TBD
+                    # Azure OpenAI (.gen-ai)
+                    - $ref:  '../../x-pack/plugins/actions/docs/openapi/components/schemas/genai_azure_config.yaml'
+                    # OpenAI (.gen-ai)
+                    - $ref:  '../../x-pack/plugins/actions/docs/openapi/components/schemas/genai_openai_config.yaml'
+                    # Opsgenie (.opsgenie)
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/opsgenie_config.yaml'
+                    # PagerDuty (.pagerduty)
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/pagerduty_config.yaml'
+                    # SentinelOne (.sentinelone)
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/sentinelone_config.yaml'
+                    # Server log (.server-log) N/A
+                    # ServiceNow ITSM (.servicenow)
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/servicenow_config.yaml'
+                    # ServiceNow SecOps (.servicenow-sir) TBD
+                    # ServiceNow ITOM (.servicenow-itom)
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/servicenow_itom_config.yaml'
+                    # Slack (.slack_api)
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/slack_api_config.yaml'
+                    # Swimlane (.swimlane)
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/swimlane_config.yaml'
+                    # TheHive (.thehive)
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/thehive_config.yaml'
+                    # Tines (.tines)
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/tines_config.yaml'
+                    # Torq (.torq)
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/torq_config.yaml'
+                    # Webhook (.webhook)
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/webhook_config.yaml'
+                    # Webhook - Case Management (.cases-webhook)
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/cases_webhook_config.yaml'
+                    # xMatters (.xmatters)
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/xmatters_config.yaml'
+                secrets:
+                  additionalProperties: {}
+                  default: {}
+                  oneOf:
+                    # Bedrock (.bedrock)
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/bedrock_secrets.yaml'
+                    # Crowdstrike (.crowdstrike)
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/crowdstrike_secrets.yaml'
+                    # D3 Security (.d3security)
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/d3security_secrets.yaml'
+                    # Email (.email)
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/email_secrets.yaml'
+                    # Google Gemini (.gemini)
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/gemini_secrets.yaml'
+                    # IBM Resilient (.resilient)
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/resilient_secrets.yaml'
+                    # Index (.index) N/A
+                    # Jira (.jira)
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/jira_secrets.yaml'
+                    # Microsoft Teams (.teams)
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/teams_secrets.yaml'
+                    # Observability AI Assistant (.observability-ai-assistant) TBD
+                    # OpenAI (.gen-ai)
+                    - $ref:  '../../x-pack/plugins/actions/docs/openapi/components/schemas/genai_secrets.yaml'
+                    # Opsgenie (.opsgenie)
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/opsgenie_secrets.yaml'
+                    # PagerDuty (.pagerduty)
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/pagerduty_secrets.yaml'
+                    # SentinelOne (.sentinelone)
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/sentinelone_secrets.yaml'
+                    # ServiceNow (.servicenow)
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/servicenow_secrets.yaml'
+                    # ServiceNow Sec Ops (.servicenow-sir) TBD
+                    # ServiceNow (.servicenow-itom) TBD
+                    # Slack (.slack_api)
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/slack_api_secrets.yaml'
+                    # Swimlane (.swimlane)
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/swimlane_secrets.yaml'
+                    # TheHive (.thehive)
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/thehive_secrets.yaml'
+                    # Tines (.tines)
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/tines_secrets.yaml'
+                    # Torq (.torq)
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/torq_secrets.yaml'
+                    # Webhook (.webhook)
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/webhook_secrets.yaml'
+                    # Webhook - Case Management (.cases-webhook)
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/cases_webhook_secrets.yaml'
+                    # xMatters (.xmatters)
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/xmatters_secrets.yaml'
+  - target: "$.paths['/api/actions/connector/{id}']['put']"
+    description: "Add config and secrets to update connector API"
+    update: 
+      requestBody: 
+        content: 
+          application/json; Elastic-Api-Version=2023-10-31:
+            schema:
+              properties:
+                config:
+                  additionalProperties: {}
+                  default: {}
+                  description: The connector configuration details.
+                  oneOf:
+                    # Bedrock (.bedrock)
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/bedrock_config.yaml'
+                    # Crowdstrike (.crowdstrike)
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/crowdstrike_config.yaml'
+                    # D3 Security (.d3security)
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/d3security_config.yaml'
+                    # Email (.email)
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/email_config.yaml'
+                    # Google Gemini (.gemini)
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/gemini_config.yaml'
+                    # IBM Resilient (.resilient)
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/resilient_config.yaml'
+                    # Index (.index)
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/index_config.yaml'
+                    # Jira (.jira)
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/jira_config.yaml'
+                    # Microsoft Teams (.teams) N/A
+                    # Observability AI Assistant (.observability-ai-assistant) TBD
+                    # Azue OpenAI (.gen-ai)
+                    - $ref:  '../../x-pack/plugins/actions/docs/openapi/components/schemas/genai_azure_config.yaml'
+                   # OpenAI (.gen-ai)
+                    - $ref:  '../../x-pack/plugins/actions/docs/openapi/components/schemas/genai_openai_config.yaml'
+                    # Opsgenie (.opsgenie)
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/opsgenie_config.yaml'
+                    # PagerDuty (.pagerduty)
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/pagerduty_config.yaml'
+                    # SentinelOne (.sentinelone)
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/sentinelone_config.yaml'
+                    # Server log (.server-log) N/A
+                    # ServiceNow ITSM (.servicenow)
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/servicenow_config.yaml'
+                    # ServiceNow SecOps (.servicenow-sir) TBD
+                    # ServiceNow ITOM (.servicenow-itom)
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/servicenow_itom_config.yaml'
+                    # Slack (.slack_api)
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/slack_api_config.yaml'
+                    # Swimlane (.swimlane)
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/swimlane_config.yaml'
+                    # TheHive (.thehive)
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/thehive_config.yaml'
+                    # Tines (.tines)
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/tines_config.yaml'
+                    # Torq (.torq)
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/torq_config.yaml'
+                    # Webhook (.webhook)
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/webhook_config.yaml'
+                    # Webhook - Case Management (.cases-webhook)
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/cases_webhook_config.yaml'
+                    # xMatters (.xmatters)
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/xmatters_config.yaml'
+                secrets:
+                  additionalProperties: {}
+                  default: {}
+                  oneOf:
+                    # Bedrock (.bedrock)
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/bedrock_secrets.yaml'
+                    # Crowdstrike (.crowdstrike)
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/crowdstrike_secrets.yaml'
+                    # D3 Security (.d3security)
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/d3security_secrets.yaml'
+                    # Email (.email)
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/email_secrets.yaml'
+                    # Google Gemini (.gemini)
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/gemini_secrets.yaml'
+                    # IBM Resilient (.resilient)
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/resilient_secrets.yaml'
+                    # Index (.index) N/A
+                    # Jira (.jira)
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/jira_secrets.yaml'
+                    # Microsoft Teams (.teams)
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/teams_secrets.yaml'
+                    # Observability AI Assistant (.observability-ai-assistant) TBD
+                    # OpenAI (.gen-ai)
+                    - $ref:  '../../x-pack/plugins/actions/docs/openapi/components/schemas/genai_secrets.yaml'
+                    # Opsgenie (.opsgenie)
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/opsgenie_secrets.yaml'
+                    # PagerDuty (.pagerduty)
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/pagerduty_secrets.yaml'
+                    # SentinelOne (.sentinelone)
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/sentinelone_secrets.yaml'
+                    # ServiceNow (.servicenow)
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/servicenow_secrets.yaml'
+                    # ServiceNow SecOps (.servicenow-sir) TBD
+                    # ServiceNow ITOM (.servicenow-itom) TBD
+                    # Slack (.slack_api)
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/slack_api_secrets.yaml'
+                    # Swimlane (.swimlane)
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/swimlane_secrets.yaml'
+                    # TheHive (.thehive)
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/thehive_secrets.yaml'
+                    # Tines (.tines)
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/tines_secrets.yaml'
+                    # Torq (.torq)
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/torq_secrets.yaml'
+                    # Webhook (.webhook)
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/webhook_secrets.yaml'
+                    # Webhook - Case Management (.cases-webhook)
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/cases_webhook_secrets.yaml'
+                    # xMatters (.xmatters)
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/xmatters_secrets.yaml'
+  # Remove the automated empty run connector params
+  - target: "$.paths['/api/actions/connector/{id}/_execute']['post'].requestBody.content.*.schema.properties.params"
+    description: "Remove params in run connector API"
+    remove: true
+  # Add some run connector params  
+  - target: "$.paths['/api/actions/connector/{id}/_execute']['post']"
+    description: "Add examples to run connector API"
+    update: 
+      requestBody: 
+        content: 
+          application/json; Elastic-Api-Version=2023-10-31: 
+            schema:
+              properties:
+                params:
+                  additionalProperties: {}
+                  oneOf:
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/run_acknowledge_resolve_pagerduty.yaml'
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/run_documents.yaml'
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/run_message_email.yaml'
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/run_message_serverlog.yaml'
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/run_message_slack.yaml'
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/run_trigger_pagerduty.yaml'
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/run_addevent.yaml'
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/run_closealert.yaml'
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/run_closeincident.yaml'
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/run_createalert.yaml'
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/run_fieldsbyissuetype.yaml'
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/run_getchoices.yaml'
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/run_getfields.yaml'
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/run_getincident.yaml'
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/run_issue.yaml'
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/run_issues.yaml'
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/run_issuetypes.yaml'
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/run_postmessage.yaml'
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/run_pushtoservice.yaml'
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/run_validchannelid.yaml'

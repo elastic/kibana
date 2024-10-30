@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
@@ -237,7 +238,7 @@ export function ChangeDataView({
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
       <>
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={true}>
           <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
             <EuiFlexItem
               grow={false}
@@ -253,23 +254,25 @@ export function ChangeDataView({
                 defaultMessage: 'Data view',
               })}
             </EuiFlexItem>
-            <EuiPopover
-              panelClassName="changeDataViewPopover"
-              button={createTrigger()}
-              panelProps={{
-                ['data-test-subj']: 'changeDataViewPopover',
-              }}
-              isOpen={isPopoverOpen}
-              closePopover={() => setPopoverIsOpen(false)}
-              panelPaddingSize="none"
-              initialFocus={`#${searchListInputId}`}
-              display="block"
-              buffer={8}
-            >
-              <div css={styles.popoverContent}>
-                <EuiContextMenuPanel size="s" items={getPanelItems()} />
-              </div>
-            </EuiPopover>
+            <EuiFlexItem grow={true}>
+              <EuiPopover
+                panelClassName="changeDataViewPopover"
+                button={createTrigger()}
+                panelProps={{
+                  ['data-test-subj']: 'changeDataViewPopover',
+                }}
+                isOpen={isPopoverOpen}
+                closePopover={() => setPopoverIsOpen(false)}
+                panelPaddingSize="none"
+                initialFocus={`[id="${searchListInputId}"]`}
+                display="block"
+                buffer={8}
+              >
+                <div css={styles.popoverContent}>
+                  <EuiContextMenuPanel size="s" items={getPanelItems()} />
+                </div>
+              </EuiPopover>
+            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
       </>

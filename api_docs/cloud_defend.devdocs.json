@@ -404,7 +404,7 @@
             "label": "type",
             "description": [],
             "signature": [
-              "\"file\" | \"process\""
+              "\"process\" | \"file\""
             ],
             "path": "x-pack/plugins/cloud_defend/common/v1.ts",
             "deprecated": false,
@@ -667,7 +667,7 @@
             "label": "type",
             "description": [],
             "signature": [
-              "\"file\" | \"process\""
+              "\"process\" | \"file\""
             ],
             "path": "x-pack/plugins/cloud_defend/common/v1.ts",
             "deprecated": false,
@@ -816,7 +816,7 @@
           "\ncloud_defend/control types"
         ],
         "signature": [
-          "\"file\" | \"process\""
+          "\"process\" | \"file\""
         ],
         "path": "x-pack/plugins/cloud_defend/common/v1.ts",
         "deprecated": false,

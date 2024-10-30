@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -28,6 +30,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('should return 200 with individual responses when deleting many docs', async () =>
       await supertest
         .post(`/api/saved_objects/_bulk_delete`)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send([
           {
             type: 'visualization',
@@ -59,6 +62,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('should return generic 404 when deleting an unknown doc', async () =>
       await supertest
         .post(`/api/saved_objects/_bulk_delete`)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send([{ type: 'dashboard', id: 'not-a-real-id' }])
         .expect(200)
         .then((resp) => {
@@ -81,6 +85,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('should return the result of deleting valid and invalid objects in the same request', async () =>
       await supertest
         .post(`/api/saved_objects/_bulk_delete`)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send([
           { type: 'visualization', id: 'not-a-real-vis-id' },
           {

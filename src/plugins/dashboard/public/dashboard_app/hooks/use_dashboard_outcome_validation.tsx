@@ -1,18 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { useCallback, useMemo, useState } from 'react';
 
-import { pluginServices } from '../../services/plugin_services';
-import { createDashboardEditUrl } from '../../dashboard_constants';
-import { useDashboardMountContext } from './dashboard_mount_context';
-import { LoadDashboardReturn } from '../../services/dashboard_content_management/types';
 import { DashboardCreationOptions } from '../..';
+import { createDashboardEditUrl } from '../../dashboard_constants';
+import { LoadDashboardReturn } from '../../services/dashboard_content_management_service/types';
+import { screenshotModeService, spacesService } from '../../services/kibana_services';
+import { useDashboardMountContext } from './dashboard_mount_context';
 
 export const useDashboardOutcomeValidation = () => {
   const [aliasId, setAliasId] = useState<string>();
@@ -21,11 +22,6 @@ export const useDashboardOutcomeValidation = () => {
 
   const { scopedHistory: getScopedHistory } = useDashboardMountContext();
   const scopedHistory = getScopedHistory?.();
-
-  /**
-   * Unpack dashboard services
-   */
-  const { screenshotMode, spaces } = pluginServices.getServices();
 
   const validateOutcome: DashboardCreationOptions['validateLoadedSavedObject'] = useCallback(
     ({ dashboardFound, resolveMeta, dashboardId }: LoadDashboardReturn) => {
@@ -40,10 +36,10 @@ export const useDashboardOutcomeValidation = () => {
          */
         if (loadOutcome === 'aliasMatch' && dashboardId && alias) {
           const path = scopedHistory.location.hash.replace(dashboardId, alias);
-          if (screenshotMode.isScreenshotMode()) {
+          if (screenshotModeService.isScreenshotMode()) {
             scopedHistory.replace(path); // redirect without the toast when in screenshot mode.
           } else {
-            spaces.redirectLegacyUrl?.({ path, aliasPurpose });
+            spacesService?.ui.redirectLegacyUrl({ path, aliasPurpose });
           }
           return 'redirected'; // redirected. Stop loading dashboard.
         }
@@ -53,20 +49,20 @@ export const useDashboardOutcomeValidation = () => {
       }
       return 'valid';
     },
-    [scopedHistory, screenshotMode, spaces]
+    [scopedHistory]
   );
 
   const getLegacyConflictWarning = useMemo(() => {
     if (savedObjectId && outcome === 'conflict' && aliasId) {
       return () =>
-        spaces.getLegacyUrlConflict?.({
+        spacesService?.ui.components.getLegacyUrlConflict({
           currentObjectId: savedObjectId,
           otherObjectId: aliasId,
           otherObjectPath: `#${createDashboardEditUrl(aliasId)}${scopedHistory.location.search}`,
         });
     }
     return null;
-  }, [aliasId, outcome, savedObjectId, scopedHistory, spaces]);
+  }, [aliasId, outcome, savedObjectId, scopedHistory]);
 
   return { validateOutcome, getLegacyConflictWarning };
 };

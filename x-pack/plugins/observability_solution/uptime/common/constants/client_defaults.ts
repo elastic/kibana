@@ -12,9 +12,9 @@ export const CLIENT_DEFAULTS = {
   // 15 minutes
   ABSOLUTE_DATE_RANGE_END: 1000 * 60 * 15,
   /**
-   * The application auto refreshes every 60s by default.
+   * The application auto refreshes every 5mins by default.
    */
-  AUTOREFRESH_INTERVAL: 60 * 1000,
+  AUTOREFRESH_INTERVAL: 5 * 60 * 1000,
   /**
    * The application's autorefresh feature is enabled.
    */

@@ -37,10 +37,12 @@ export const importFileBodySchema = schema.object({
   /** Mappings */
   mappings: schema.any(),
   /** Ingest pipeline definition */
-  ingestPipeline: schema.object({
-    id: schema.maybe(schema.string()),
-    pipeline: schema.maybe(schema.any()),
-  }),
+  ingestPipeline: schema.maybe(
+    schema.object({
+      id: schema.maybe(schema.string()),
+      pipeline: schema.maybe(schema.any()),
+    })
+  ),
 });
 
 export const runtimeMappingsSchema = schema.object(

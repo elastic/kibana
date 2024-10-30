@@ -22,7 +22,7 @@ export function defineRoutes({ router, featureRegistry }: RouteDefinitionParams)
     {
       path: '/api/features',
       options: {
-        tags: ['access:features'],
+        tags: ['access:read_features'],
         access: 'public',
         summary: `Get features`,
       },
@@ -33,10 +33,13 @@ export function defineRoutes({ router, featureRegistry }: RouteDefinitionParams)
     async (context, request, response) => {
       const { license: currentLicense } = await context.licensing;
 
-      const allFeatures = featureRegistry.getAllKibanaFeatures(
-        currentLicense,
-        request.query.ignoreValidLicenses
-      );
+      const allFeatures = featureRegistry.getAllKibanaFeatures({
+        license: currentLicense,
+        ignoreLicense: request.query.ignoreValidLicenses,
+        // This API is used to power user-facing UIs, which, unlike our server-side internal backward compatibility
+        // mechanisms, shouldn't display deprecated features.
+        omitDeprecated: true,
+      });
 
       return response.ok({
         body: allFeatures

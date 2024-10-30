@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { render, waitFor, act } from '@testing-library/react';
-import '@testing-library/jest-dom/extend-expect';
 import { FormProvider, LOCAL_STORAGE_KEY } from './form_provider';
 import { useLoadFieldsByIndices } from '../hooks/use_load_fields_by_indices';
 import { useLLMsModels } from '../hooks/use_llms_models';
@@ -67,6 +66,7 @@ describe('FormProvider', () => {
         doc_size: 3,
         indices: [],
         prompt: 'You are an assistant for question-answering tasks.',
+        search_query: '',
         source_fields: {},
         summarization_model: undefined,
       });
@@ -172,6 +172,7 @@ describe('FormProvider', () => {
         prompt: 'Loaded prompt',
         doc_size: 3,
         source_fields: {},
+        search_query: '',
         indices: [],
         summarization_model: undefined,
       });

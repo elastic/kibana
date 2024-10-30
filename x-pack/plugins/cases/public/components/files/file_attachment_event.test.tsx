@@ -25,6 +25,10 @@ describe.skip('FileAttachmentEvent', () => {
     appMockRender = createAppMockRenderer();
   });
 
+  afterEach(async () => {
+    await appMockRender.clearQueryCache();
+  });
+
   it('renders clickable name', async () => {
     appMockRender.render(
       <FileAttachmentEvent file={basicFileMock as unknown as DownloadableFile} />
@@ -34,7 +38,7 @@ describe.skip('FileAttachmentEvent', () => {
 
     expect(nameLink).toBeInTheDocument();
 
-    userEvent.click(nameLink);
+    await userEvent.click(nameLink);
 
     expect(await screen.findByTestId('cases-files-image-preview')).toBeInTheDocument();
   });

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import dedent from 'dedent';
+
 import {
   ENTERPRISE_SEARCH_APP_ID,
   ENTERPRISE_SEARCH_CONTENT_APP_ID,
@@ -194,7 +196,7 @@ export const SEMANTIC_SEARCH_PLUGIN = {
   URL: '/app/enterprise_search/semantic_search',
 };
 
-export const INFERENCE_ENDPOINTS_PLUGIN = {
+export const SEARCH_RELEVANCE_PLUGIN = {
   ID: ENTERPRISE_SEARCH_RELEVANCE_APP_ID,
   NAME: i18n.translate('xpack.enterpriseSearch.inferenceEndpoints.productName', {
     defaultMessage: 'Inference Endpoints',
@@ -203,11 +205,19 @@ export const INFERENCE_ENDPOINTS_PLUGIN = {
     defaultMessage: 'Relevance',
   }),
   DESCRIPTION: i18n.translate('xpack.enterpriseSearch.inferenceEndpoints.description', {
-    defaultMessage: 'View for managing inference endpoints.',
+    defaultMessage: 'Manage your inference endpoints for semantic search and AI use cases.',
   }),
   URL: '/app/enterprise_search/relevance',
   LOGO: 'logoEnterpriseSearch',
   SUPPORT_URL: 'https://discuss.elastic.co/c/enterprise-search/',
+};
+
+export const CREATE_CONNECTOR_PLUGIN = {
+  CLI_SNIPPET: dedent`./bin/connectors connector create
+  --index-name my-index
+  --index-language en
+  --from-file config.yml
+  `,
 };
 
 export const LICENSED_SUPPORT_URL = 'https://support.elastic.co';
@@ -280,6 +290,10 @@ export const PLUGIN_ID = 'enterpriseSearch';
 
 export const CONNECTOR_NATIVE_TYPE = 'native';
 export const CONNECTOR_CLIENTS_TYPE = 'connector_clients';
+
+export const CRAWLER = {
+  github_repo: 'https://github.com/elastic/crawler',
+};
 
 // TODO remove this once the connector service types are no longer in "example" state
 export const EXAMPLE_CONNECTOR_SERVICE_TYPES = ['opentext_documentum'];

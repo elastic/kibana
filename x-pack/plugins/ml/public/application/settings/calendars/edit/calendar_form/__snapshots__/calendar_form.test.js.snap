@@ -34,36 +34,8 @@ exports[`CalendarForm Renders calendar form 1`] = `
       value=""
     />
   </EuiFormRow>
-  <EuiFormRow
-    label={
-      <Memo(MemoizedFormattedMessage)
-        defaultMessage="Description"
-        id="xpack.ml.calendarsEdit.calendarForm.descriptionLabel"
-      />
-    }
-  >
-    <EuiFieldText
-      data-test-subj="mlCalendarDescriptionInput"
-      disabled={false}
-      name="description"
-      onChange={[MockFunction]}
-      value=""
-    />
-  </EuiFormRow>
   <EuiSpacer
     size="m"
-  />
-  <EuiSwitch
-    checked={false}
-    data-test-subj="mlCalendarApplyToAllJobsSwitch"
-    disabled={false}
-    label={
-      <Memo(MemoizedFormattedMessage)
-        defaultMessage="Apply calendar to all jobs"
-        id="xpack.ml.calendarsEdit.calendarForm.allJobsLabel"
-      />
-    }
-    name="switch"
   />
   <EuiSpacer
     size="m"
@@ -128,14 +100,12 @@ exports[`CalendarForm Renders calendar form 1`] = `
     }
   >
     <EventsTable
-      canCreateCalendar={true}
-      canDeleteCalendar={true}
       eventsList={Array []}
       onDeleteClick={[MockFunction]}
       saving={false}
       showImportModal={[MockFunction]}
       showNewEventModal={[MockFunction]}
-      showSearchBar={true}
+      showSearchBar={false}
     />
   </EuiFormRow>
   <EuiSpacer

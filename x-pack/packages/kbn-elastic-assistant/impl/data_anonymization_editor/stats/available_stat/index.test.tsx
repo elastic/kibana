@@ -24,7 +24,7 @@ describe('AvailableStat component', () => {
   it('displays the tooltip with the correct content', async () => {
     render(<AvailableStat total={total} />);
 
-    userEvent.hover(screen.getByTestId('availableStat'));
+    await userEvent.hover(screen.getByTestId('availableStat'));
 
     await waitFor(() => {
       const tooltipContent = i18n.AVAILABLE_TOOLTIP(total);

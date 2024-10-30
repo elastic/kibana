@@ -7,13 +7,14 @@
 import type { QueryObserverResult, UseQueryOptions } from '@tanstack/react-query';
 import { useQuery } from '@tanstack/react-query';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
-import type { GetInfoResponse } from '@kbn/fleet-plugin/common';
+import type { BulkGetAgentPoliciesResponse } from '@kbn/fleet-plugin/common';
+import { type GetInfoResponse } from '@kbn/fleet-plugin/common';
 import { firstValueFrom } from 'rxjs';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
 import { ENDPOINT_PACKAGE_POLICIES_STATS_STRATEGY } from '../../../../common/endpoint/constants';
 import { useHttp, useKibana } from '../../../common/lib/kibana';
 import { MANAGEMENT_DEFAULT_PAGE_SIZE } from '../../common/constants';
-import { sendGetEndpointSecurityPackage } from './ingest';
+import { sendBulkGetAgentPolicies, sendGetEndpointSecurityPackage } from './ingest';
 import type { GetPolicyListResponse } from '../../pages/policy/types';
 import { sendGetEndpointSpecificPackagePolicies } from './policies';
 import type { ServerApiError } from '../../../common/types';
@@ -81,5 +82,29 @@ export function useGetEndpointSecurityPackage({
       return sendGetEndpointSecurityPackage(http);
     },
     customQueryOptions
+  );
+}
+
+export function useBulkGetAgentPolicies({
+  isEnabled,
+  policyIds,
+}: {
+  isEnabled: boolean;
+  policyIds: string[];
+}): QueryObserverResult<BulkGetAgentPoliciesResponse['items'], IHttpFetchError> {
+  const http = useHttp();
+
+  return useQuery<BulkGetAgentPoliciesResponse['items'], IHttpFetchError>(
+    ['agentPolicies', policyIds],
+
+    async () => {
+      if (!policyIds.length) {
+        return [];
+      }
+
+      return (await sendBulkGetAgentPolicies({ http, requestBody: { ids: policyIds } }))?.items;
+    },
+
+    { enabled: isEnabled, refetchOnWindowFocus: false, retry: 1 }
   );
 }

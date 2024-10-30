@@ -71,6 +71,7 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
     loadTestFile(require.resolve('./servicenow_itsm_connector'));
     loadTestFile(require.resolve('./servicenow_sir_connector'));
     loadTestFile(require.resolve('./slack_connector'));
+    loadTestFile(require.resolve('./thehive_connector'));
     loadTestFile(require.resolve('./tines_connector'));
     loadTestFile(require.resolve('./webhook_connector'));
     loadTestFile(require.resolve('./xmatters_connector'));

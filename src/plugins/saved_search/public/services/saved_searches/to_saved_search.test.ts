@@ -1,15 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { contentManagementMock } from '@kbn/content-management-plugin/public/mocks';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
 import { AttributeService, type EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 import { SavedSearchByValueAttributes, byValueToSavedSearch } from '.';
@@ -20,12 +20,7 @@ const mockServices = {
   spaces: spacesPluginMock.createStartContract(),
   embeddable: {
     getAttributeService: jest.fn(
-      (_, opts) =>
-        new AttributeService(
-          SEARCH_EMBEDDABLE_TYPE,
-          coreMock.createStart().notifications.toasts,
-          opts
-        )
+      (_, opts) => new AttributeService('search', coreMock.createStart().notifications.toasts, opts)
     ),
   } as unknown as EmbeddableStart,
 };

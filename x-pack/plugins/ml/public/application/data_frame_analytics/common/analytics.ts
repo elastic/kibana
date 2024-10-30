@@ -20,7 +20,7 @@ import {
 } from '@kbn/ml-data-frame-analytics-utils';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Dictionary } from '../../../../common/types/common';
-import type { MlApiServices } from '../../services/ml_api_service';
+import type { MlApi } from '../../services/ml_api_service';
 
 export type IndexPattern = string;
 
@@ -289,7 +289,7 @@ export enum REGRESSION_STATS {
 }
 
 interface LoadEvalDataConfig {
-  mlApiServices: MlApiServices;
+  mlApi: MlApi;
   isTraining?: boolean;
   index: string;
   dependentVariable: string;
@@ -304,7 +304,7 @@ interface LoadEvalDataConfig {
 }
 
 export const loadEvalData = async ({
-  mlApiServices,
+  mlApi,
   isTraining,
   index,
   dependentVariable,
@@ -362,7 +362,7 @@ export const loadEvalData = async ({
   };
 
   try {
-    const evalResult = await mlApiServices.dataFrameAnalytics.evaluateDataFrameAnalytics(config);
+    const evalResult = await mlApi.dataFrameAnalytics.evaluateDataFrameAnalytics(config);
     results.success = true;
     results.eval = evalResult;
     return results;
@@ -373,7 +373,7 @@ export const loadEvalData = async ({
 };
 
 interface LoadDocsCountConfig {
-  mlApiServices: MlApiServices;
+  mlApi: MlApi;
   ignoreDefaultQuery?: boolean;
   isTraining?: boolean;
   searchQuery: estypes.QueryDslQueryContainer;
@@ -387,7 +387,7 @@ interface LoadDocsCountResponse {
 }
 
 export const loadDocsCount = async ({
-  mlApiServices,
+  mlApi,
   ignoreDefaultQuery = true,
   isTraining,
   searchQuery,
@@ -402,7 +402,7 @@ export const loadDocsCount = async ({
       query,
     };
 
-    const resp: TrackTotalHitsSearchResponse = await mlApiServices.esSearch({
+    const resp: TrackTotalHitsSearchResponse = await mlApi.esSearch({
       index: destIndex,
       size: 0,
       body,

@@ -1,11 +1,15 @@
 {
   "type": "plugin",
   "id": "@kbn/inspector-plugin",
-  "owner": "@elastic/kibana-presentation",
+  "owner": [
+    "@elastic/kibana-presentation"
+  ],
+  "group": "platform",
+  "visibility": "shared",
   "plugin": {
     "id": "inspector",
-    "server": false,
     "browser": true,
+    "server": false,
     "requiredPlugins": [
       "share"
     ],

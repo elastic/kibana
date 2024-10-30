@@ -1,15 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { EuiTab, EuiTabs, useEuiTheme } from '@elastic/eui';
-import { AllDatasetsLocatorParams, ALL_DATASETS_LOCATOR_ID } from '@kbn/deeplinks-observability';
+import { DISCOVER_APP_ID } from '@kbn/deeplinks-analytics';
+import {
+  AllDatasetsLocatorParams,
+  ALL_DATASETS_LOCATOR_ID,
+  OBS_LOGS_EXPLORER_LOGS_VIEWER_KEY,
+  OBSERVABILITY_LOGS_EXPLORER_APP_ID,
+} from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
-import React, { MouseEvent } from 'react';
+import React, { MouseEvent, useEffect } from 'react';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { DiscoverAppLocatorParams, DISCOVER_APP_LOCATOR } from '../../../common';
 import type { DiscoverServices } from '../../build_services';
 
@@ -28,6 +36,10 @@ export const LogsExplorerTabs = ({ services, selectedTab }: LogsExplorerTabsProp
   const discoverUrl = discoverLocator?.getRedirectUrl(emptyParams);
   const logsExplorerUrl = logsExplorerLocator?.getRedirectUrl(emptyParams);
 
+  const [lastUsedViewer, setLastUsedViewer] = useLocalStorage<
+    typeof DISCOVER_APP_ID | typeof OBSERVABILITY_LOGS_EXPLORER_APP_ID
+  >(OBS_LOGS_EXPLORER_LOGS_VIEWER_KEY, OBSERVABILITY_LOGS_EXPLORER_APP_ID);
+
   const navigateToDiscover = createNavigateHandler(() => {
     if (selectedTab !== 'discover') {
       discoverLocator?.navigate(emptyParams);
@@ -39,6 +51,16 @@ export const LogsExplorerTabs = ({ services, selectedTab }: LogsExplorerTabsProp
       logsExplorerLocator?.navigate(emptyParams);
     }
   });
+
+  useEffect(() => {
+    if (selectedTab === 'discover' && lastUsedViewer !== DISCOVER_APP_ID) {
+      setLastUsedViewer(DISCOVER_APP_ID);
+    }
+
+    if (selectedTab === 'logs-explorer' && lastUsedViewer !== OBSERVABILITY_LOGS_EXPLORER_APP_ID) {
+      setLastUsedViewer(OBSERVABILITY_LOGS_EXPLORER_APP_ID);
+    }
+  }, [setLastUsedViewer, lastUsedViewer, selectedTab]);
 
   return (
     <EuiTabs bottomBorder={false} data-test-subj="logsExplorerTabs">

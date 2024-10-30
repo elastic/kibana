@@ -1,0 +1,15 @@
+## LOG10
+
+The `LOG10` function returns the logarithm of a value to base 10. The input can be any numeric value, and the return value is always a double. Logs of 0 and negative numbers return null as well as a warning.
+
+### Examples
+
+```esql
+ROW d = 1000.0
+| EVAL s = LOG10(d)
+```
+
+```esql
+ROW value = 100
+| EVAL log_value = LOG10(value)
+```

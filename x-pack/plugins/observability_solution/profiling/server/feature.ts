@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
+import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 
 export const PROFILING_SERVER_FEATURE_ID = 'profiling';
 
@@ -17,6 +18,7 @@ export const PROFILING_FEATURE = {
   }),
   order: 1200,
   category: DEFAULT_APP_CATEGORIES.observability,
+  scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
   app: [PROFILING_SERVER_FEATURE_ID, 'ux', 'kibana'],
   // see x-pack/plugins/features/common/feature_kibana_privileges.ts
   privileges: {

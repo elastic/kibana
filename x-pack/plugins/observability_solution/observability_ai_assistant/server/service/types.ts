@@ -7,6 +7,7 @@
 
 import type { FromSchema } from 'json-schema-to-ts';
 import { Observable } from 'rxjs';
+import type { AssistantScope } from '@kbn/ai-assistant-common';
 import { ChatCompletionChunkEvent, ChatEvent } from '../../common/conversation_complete';
 import type {
   CompatibleJSONSchema,
@@ -28,11 +29,11 @@ export type ChatFunction = (
   params: Parameters<ObservabilityAIAssistantClient['chat']>[1]
 ) => Observable<ChatEvent>;
 
-export type ChatFunctionWithoutConnector = (
+export type AutoAbortedChatFunction = (
   name: string,
   params: Omit<
     Parameters<ObservabilityAIAssistantClient['chat']>[1],
-    'connectorId' | 'simulateFunctionCalling' | 'signal'
+    'simulateFunctionCalling' | 'signal'
   >
 ) => Observable<ChatEvent>;
 
@@ -50,6 +51,8 @@ type RespondFunction<TArguments, TResponse extends FunctionResponse> = (
     messages: Message[];
     screenContexts: ObservabilityAIAssistantScreenContextRequest[];
     chat: FunctionCallChatFunction;
+    connectorId: string;
+    useSimulatedFunctionCalling: boolean;
   },
   signal: AbortSignal
 ) => Promise<TResponse>;
@@ -61,13 +64,13 @@ export interface FunctionHandler {
 
 export type InstructionOrCallback = string | RegisterInstructionCallback;
 
-type RegisterInstructionCallback = ({
+export type RegisterInstructionCallback = ({
   availableFunctionNames,
 }: {
   availableFunctionNames: string[];
 }) => string | string[] | undefined;
 
-export type RegisterInstruction = (...instructions: InstructionOrCallback[]) => void;
+export type RegisterInstruction = (...instruction: InstructionOrCallback[]) => void;
 
 export type RegisterFunction = <
   TParameters extends CompatibleJSONSchema = any,
@@ -77,11 +80,12 @@ export type RegisterFunction = <
   definition: FunctionDefinition<TParameters>,
   respond: RespondFunction<TArguments, TResponse>
 ) => void;
-export type FunctionHandlerRegistry = Map<string, FunctionHandler>;
+export type FunctionHandlerRegistry = Map<string, { handler: FunctionHandler }>;
 
 export type RegistrationCallback = ({}: {
   signal: AbortSignal;
   resources: RespondFunctionResources;
   client: ObservabilityAIAssistantClient;
   functions: ChatFunctionClient;
+  scopes: AssistantScope[];
 }) => Promise<void>;

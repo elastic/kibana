@@ -5,10 +5,17 @@
  * 2.0.
  */
 
-import { EuiSplitPanel, EuiTabs, EuiTab, EuiTitle, EuiSteps, EuiSpacer } from '@elastic/eui';
-import React from 'react';
+import {
+  EuiSplitPanel,
+  EuiTabs,
+  EuiTab,
+  EuiTitle,
+  EuiSteps,
+  EuiSpacer,
+  useEuiTheme,
+} from '@elastic/eui';
+import React, { useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
-import { useEuiTheme } from '@elastic/eui';
 import {
   INSTRUCTION_VARIANT,
   getDisplayText,
@@ -30,57 +37,65 @@ function getTabs(variants: InstructionVariant[]): AgentTab[] {
   }));
 }
 
+function InstructionTabs({
+  agentTabs,
+  selectedTab,
+}: {
+  agentTabs: AgentTab[];
+  selectedTab: string;
+}) {
+  const history = useHistory();
+  const { euiTheme } = useEuiTheme();
+
+  const onSelectedTabChange = (agent: string) => {
+    push(history, { query: { agent } });
+  };
+
+  return (
+    <EuiTabs style={{ padding: `0 ${euiTheme.size.l}` }}>
+      {agentTabs.map((tab) => (
+        <EuiTab
+          key={tab.id}
+          isSelected={tab.id === selectedTab}
+          onClick={() => onSelectedTabChange(tab.id)}
+        >
+          {tab.text}
+        </EuiTab>
+      ))}
+    </EuiTabs>
+  );
+}
+
+function InstructionSteps({
+  instructionVariants,
+  selectedTab,
+}: {
+  instructionVariants: InstructionVariant[];
+  selectedTab: string;
+}) {
+  const selectInstructionSteps = instructionVariants.find((variant) => {
+    return variant.id === selectedTab;
+  });
+
+  if (!selectInstructionSteps) {
+    return <></>;
+  }
+
+  return <EuiSteps titleSize="xs" steps={selectInstructionSteps.instructions} />;
+}
+
 export function InstructionsSet({ instructions }: { instructions: InstructionSet }) {
-  const tabs = getTabs(instructions.instructionVariants);
+  const tabs = useMemo(() => getTabs(instructions.instructionVariants), [instructions]);
 
   const {
     query: { agent: agentQuery },
   } = useApmParams('/onboarding');
-  const history = useHistory();
   const selectedTab = agentQuery ?? tabs[0].id;
-  const onSelectedTabChange = (agent: string) => {
-    push(history, { query: { agent } });
-  };
-  const { euiTheme } = useEuiTheme();
-
-  function InstructionTabs({ agentTabs }: { agentTabs: AgentTab[] }) {
-    return (
-      <EuiTabs style={{ padding: `0 ${euiTheme.size.l}` }}>
-        {agentTabs.map((tab) => (
-          <EuiTab
-            key={tab.id}
-            isSelected={tab.id === selectedTab}
-            onClick={() => onSelectedTabChange(tab.id)}
-          >
-            {tab.text}
-          </EuiTab>
-        ))}
-      </EuiTabs>
-    );
-  }
-
-  function InstructionSteps({
-    instructionVariants,
-    tab,
-  }: {
-    instructionVariants: InstructionVariant[];
-    tab: string;
-  }) {
-    const selectInstructionSteps = instructionVariants.find((variant) => {
-      return variant.id === tab;
-    });
-
-    if (!selectInstructionSteps) {
-      return <></>;
-    }
-
-    return <EuiSteps titleSize="xs" steps={selectInstructionSteps.instructions} />;
-  }
 
   return (
     <EuiSplitPanel.Outer>
       <EuiSplitPanel.Inner color="subdued" paddingSize="none">
-        <InstructionTabs agentTabs={tabs} />
+        <InstructionTabs agentTabs={tabs} selectedTab={selectedTab} />
       </EuiSplitPanel.Inner>
       <EuiSplitPanel.Inner paddingSize="l">
         <EuiTitle size="m">
@@ -89,7 +104,7 @@ export function InstructionsSet({ instructions }: { instructions: InstructionSet
         <EuiSpacer />
         <InstructionSteps
           instructionVariants={instructions.instructionVariants}
-          tab={selectedTab}
+          selectedTab={selectedTab}
         />
       </EuiSplitPanel.Inner>
     </EuiSplitPanel.Outer>

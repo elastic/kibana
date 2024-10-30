@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { LogLevel, LogsSynthtraceEsClient, createLogger } from '@kbn/apm-synthtrace';
+import {
+  LogLevel,
+  LogsSynthtraceEsClient,
+  SyntheticsSynthtraceEsClient,
+  createLogger,
+} from '@kbn/apm-synthtrace';
 import { createDatasetQualityUsers } from '@kbn/dataset-quality-plugin/server/test_helpers/create_dataset_quality_users';
 import {
   DATASET_QUALITY_TEST_PASSWORD,
@@ -55,7 +60,7 @@ export type DatasetQualityApiClientKey =
   | 'readUser'
   | 'adminUser'
   | 'writeUser'
-  | 'datasetQualityLogsUser';
+  | 'datasetQualityMonitorUser';
 
 export type DatasetQualityApiClient = Record<
   DatasetQualityApiClientKey,
@@ -72,6 +77,9 @@ export interface CreateTest {
     logSynthtraceEsClient: (
       context: InheritedFtrProviderContext
     ) => Promise<LogsSynthtraceEsClient>;
+    syntheticsSynthtraceEsClient: (
+      context: InheritedFtrProviderContext
+    ) => SyntheticsSynthtraceEsClient;
     datasetQualityApiClient: (context: InheritedFtrProviderContext) => DatasetQualityApiClient;
     packageService: ({ getService }: FtrProviderContext) => ReturnType<typeof PackageService>;
   };
@@ -133,6 +141,12 @@ export function createTestConfig(
             logger: createLogger(LogLevel.info),
             refreshAfterIndex: true,
           }),
+        syntheticsSynthtraceEsClient: (context: InheritedFtrProviderContext) =>
+          new SyntheticsSynthtraceEsClient({
+            client: context.getService('es'),
+            logger: createLogger(LogLevel.info),
+            refreshAfterIndex: true,
+          }),
         datasetQualityApiClient: async (_: InheritedFtrProviderContext) => {
           const { username, password } = servers.kibana;
           const esUrl = format(esServer);
@@ -164,9 +178,9 @@ export function createTestConfig(
               kibanaServer,
               username: DatasetQualityUsername.editorUser,
             }),
-            datasetQualityLogsUser: await getDatasetQualityApiClient({
+            datasetQualityMonitorUser: await getDatasetQualityApiClient({
               kibanaServer,
-              username: DatasetQualityUsername.datasetQualityLogsUser,
+              username: DatasetQualityUsername.datasetQualityMonitorUser,
             }),
           };
         },

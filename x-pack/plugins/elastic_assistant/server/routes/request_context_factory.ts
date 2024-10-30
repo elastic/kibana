@@ -50,7 +50,7 @@ export class RequestContextFactory implements IRequestContextFactory {
     const { options } = this;
     const { core } = options;
 
-    const [, startPlugins] = await core.getStartServices();
+    const [coreStart, startPlugins] = await core.getStartServices();
     const coreContext = await context.core;
 
     const getSpaceId = (): string =>
@@ -79,16 +79,36 @@ export class RequestContextFactory implements IRequestContextFactory {
         return appContextService.getRegisteredFeatures(pluginName);
       },
 
+      inference: startPlugins.inference,
+
       telemetry: core.analytics,
 
-      getAIAssistantKnowledgeBaseDataClient: memoize(() => {
-        const currentUser = getCurrentUser();
-        return this.assistantService.createAIAssistantKnowledgeBaseDataClient({
-          spaceId: getSpaceId(),
-          logger: this.logger,
-          currentUser,
-        });
-      }),
+      // Note: Due to plugin lifecycle and feature flag registration timing, we need to pass in the feature flag here
+      // Remove `v2KnowledgeBaseEnabled` once 'assistantKnowledgeBaseByDefault' feature flag is removed
+      // Additionally, modelIdOverride is used here to enable setting up the KB using a different ELSER model, which
+      // is necessary for testing purposes (`pt_tiny_elser`).
+      getAIAssistantKnowledgeBaseDataClient: memoize(
+        async ({ modelIdOverride, v2KnowledgeBaseEnabled = false }) => {
+          const currentUser = getCurrentUser();
+
+          const { securitySolutionAssistant } = await coreStart.capabilities.resolveCapabilities(
+            request,
+            {
+              capabilityPath: 'securitySolutionAssistant.*',
+            }
+          );
+
+          return this.assistantService.createAIAssistantKnowledgeBaseDataClient({
+            spaceId: getSpaceId(),
+            logger: this.logger,
+            currentUser,
+            modelIdOverride,
+            v2KnowledgeBaseEnabled,
+            manageGlobalKnowledgeBaseAIAssistant:
+              securitySolutionAssistant.manageGlobalKnowledgeBaseAIAssistant as boolean,
+          });
+        }
+      ),
 
       getAttackDiscoveryDataClient: memoize(() => {
         const currentUser = getCurrentUser();

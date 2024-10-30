@@ -12,6 +12,10 @@ export {
   findInventoryFields,
   metrics,
   type InventoryModels,
+  isBasicMetricAgg,
+  isDerivativeAgg,
+  isSumBucketAgg,
+  isTermsWithAggregation,
 } from './inventory_models';
 
 export { podSnapshotMetricTypes } from './inventory_models/kubernetes/pod';
@@ -28,11 +32,7 @@ export {
   InventoryVisTypeRT,
   ItemTypeRT,
   SnapshotMetricTypeRT,
-  ESSumBucketAggRT,
-  ESDerivativeAggRT,
-  ESBasicMetricAggRT,
   SnapshotMetricTypeKeys,
-  ESTermsWithAggregationRT,
 } from './inventory_models/types';
 
 export type {

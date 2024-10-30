@@ -16,6 +16,9 @@ import { createCasesRoute } from '../create_cases_route';
 export const getCasesMetricRoute = createCasesRoute({
   method: 'get',
   path: INTERNAL_CASE_METRICS_URL,
+  routerOptions: {
+    access: 'internal',
+  },
   params: {
     query: schema.object({
       features: schema.oneOf([

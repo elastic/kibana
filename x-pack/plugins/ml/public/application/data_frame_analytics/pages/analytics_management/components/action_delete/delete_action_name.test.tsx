@@ -22,7 +22,7 @@ jest.mock('../../../../../capabilities/check_capabilities', () => ({
 }));
 
 jest.mock('../../../../../contexts/kibana', () => ({
-  useMlApiContext: jest.fn(),
+  useMlApi: jest.fn(),
   useMlKibana: () => ({
     services: { ...mockCoreServices.createStart(), data: { data_view: { find: jest.fn() } } },
   }),

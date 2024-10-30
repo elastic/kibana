@@ -20,6 +20,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const svlCases = getService('svlCases');
   const svlSecNavigation = getService('svlSecNavigation');
   const svlCommonPage = getPageObject('svlCommonPage');
+  const toasts = getService('toasts');
 
   describe('Cases List', function () {
     before(async () => {
@@ -217,6 +218,10 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     describe('row actions', () => {
+      afterEach(async () => {
+        await toasts.dismissAll();
+      });
+
       describe('Status', () => {
         createNCasesBeforeDeleteAllAfter(1, getPageObject, getService);
 

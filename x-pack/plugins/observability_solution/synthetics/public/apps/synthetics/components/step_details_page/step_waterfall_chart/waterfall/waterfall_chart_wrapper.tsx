@@ -11,7 +11,7 @@ import { EuiHealth } from '@elastic/eui';
 import { JourneyStep, NetworkEvent } from '../../../../../../../common/runtime_types';
 import { useDateFormat } from '../../../../../../hooks/use_date_format';
 import { getSeriesAndDomain, getSidebarItems } from '../../common/network_data/data_formatting';
-import { SidebarItem, LegendItem } from '../../common/network_data/types';
+import { WaterfallNetworkItem, LegendItem } from '../../common/network_data/types';
 import { RenderItem, WaterfallDataEntry } from '../../common/network_data/types';
 import { useFlyout } from './waterfall_flyout/use_flyout';
 import { WaterfallFlyout } from './waterfall_flyout/waterfall_flyout';
@@ -92,7 +92,7 @@ export const WaterfallChartWrapper: React.FC<Props> = ({
 
   const highestSideBarIndex = Math.max(...series.map((sr: WaterfallDataEntry) => sr.x));
 
-  const renderSidebarItem: RenderItem<SidebarItem> = useCallback(
+  const renderSidebarItem: RenderItem<WaterfallNetworkItem> = useCallback(
     (item) => {
       return (
         <WaterfallSidebarItem

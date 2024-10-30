@@ -10,7 +10,7 @@ import {
   type EuiBasicTableColumn,
   EuiButton,
   EuiCallOut,
-  EuiFlexGroup,
+  EuiFlexGrid,
   EuiFlexItem,
   EuiInMemoryTable,
   EuiLink,
@@ -19,6 +19,7 @@ import {
   EuiPageSection,
   EuiSpacer,
   EuiText,
+  useIsWithinBreakpoints,
 } from '@elastic/eui';
 import React, { Component, lazy, Suspense } from 'react';
 
@@ -35,7 +36,11 @@ import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 
 import { addSpaceIdToPath, type Space } from '../../../common';
 import { isReservedSpace } from '../../../common';
-import { DEFAULT_SPACE_ID, ENTER_SPACE_PATH } from '../../../common/constants';
+import {
+  DEFAULT_SPACE_ID,
+  ENTER_SPACE_PATH,
+  SOLUTION_VIEW_CLASSIC,
+} from '../../../common/constants';
 import { getSpacesFeatureDescription } from '../../constants';
 import { getSpaceAvatarComponent } from '../../space_avatar';
 import { SpaceSolutionBadge } from '../../space_solution_badge';
@@ -58,6 +63,7 @@ interface Props {
   getUrlForApp: ApplicationStart['getUrlForApp'];
   maxSpaces: number;
   allowSolutionVisibility: boolean;
+  isServerless: boolean;
 }
 
 interface State {
@@ -148,9 +154,7 @@ export class SpacesGridPage extends Component<Props, State> {
             box: {
               placeholder: i18n.translate(
                 'xpack.spaces.management.spacesGridPage.searchPlaceholder',
-                {
-                  defaultMessage: 'Search',
-                }
+                { defaultMessage: 'Search' }
               ),
             },
           }}
@@ -251,6 +255,9 @@ export class SpacesGridPage extends Component<Props, State> {
   };
 
   public getColumnConfig() {
+    const { activeSpace, features } = this.state;
+    const { solution: activeSolution } = activeSpace ?? {};
+
     const config: Array<EuiBasicTableColumn<Space>> = [
       {
         field: 'initials',
@@ -274,28 +281,49 @@ export class SpacesGridPage extends Component<Props, State> {
           defaultMessage: 'Space',
         }),
         sortable: true,
-        render: (value: string, rowRecord: Space) => (
-          <EuiFlexGroup responsive={false} alignItems="center" gutterSize="m">
-            <EuiFlexItem grow={false}>
-              <EuiLink
-                {...reactRouterNavigate(this.props.history, this.getEditSpacePath(rowRecord))}
-                data-test-subj={`${rowRecord.id}-hyperlink`}
+        render: (value: string, rowRecord: Space) => {
+          const SpaceName = () => {
+            const isCurrent = this.state.activeSpace?.id === rowRecord.id;
+            const isWide = useIsWithinBreakpoints(['xl']);
+            const gridColumns = isCurrent && isWide ? 2 : 1;
+            return (
+              <EuiFlexGrid
+                responsive={false}
+                columns={gridColumns}
+                alignItems="center"
+                gutterSize="s"
               >
-                {value}
-              </EuiLink>
-            </EuiFlexItem>
-            {this.state.activeSpace?.name === rowRecord.name && (
-              <EuiFlexItem grow={false}>
-                <EuiBadge color="primary" data-test-subj={`spacesListCurrentBadge-${rowRecord.id}`}>
-                  {i18n.translate('xpack.spaces.management.spacesGridPage.currentSpaceMarkerText', {
-                    defaultMessage: 'current',
-                  })}
-                </EuiBadge>
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-        ),
+                <EuiFlexItem>
+                  <EuiLink
+                    {...reactRouterNavigate(this.props.history, this.getEditSpacePath(rowRecord))}
+                    data-test-subj={`${rowRecord.id}-hyperlink`}
+                  >
+                    {value}
+                  </EuiLink>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  {isCurrent && (
+                    <span>
+                      <EuiBadge
+                        color="primary"
+                        data-test-subj={`spacesListCurrentBadge-${rowRecord.id}`}
+                      >
+                        {i18n.translate(
+                          'xpack.spaces.management.spacesGridPage.currentSpaceMarkerText',
+                          { defaultMessage: 'current' }
+                        )}
+                      </EuiBadge>
+                    </span>
+                  )}
+                </EuiFlexItem>
+              </EuiFlexGrid>
+            );
+          };
+
+          return <SpaceName />;
+        },
         'data-test-subj': 'spacesListTableRowNameCell',
+        width: '15%',
       },
       {
         field: 'description',
@@ -304,29 +332,34 @@ export class SpacesGridPage extends Component<Props, State> {
         }),
         sortable: true,
         truncateText: true,
-        width: '30%',
+        width: '45%',
       },
-      {
+    ];
+
+    const shouldShowFeaturesColumn =
+      !this.props.isServerless && (!activeSolution || activeSolution === SOLUTION_VIEW_CLASSIC);
+    if (shouldShowFeaturesColumn) {
+      config.push({
         field: 'disabledFeatures',
         name: i18n.translate('xpack.spaces.management.spacesGridPage.featuresColumnName', {
           defaultMessage: 'Features visible',
         }),
         sortable: (space: Space) => {
-          return getEnabledFeatures(this.state.features, space).length;
+          return getEnabledFeatures(features, space).length;
         },
         render: (_disabledFeatures: string[], rowRecord: Space) => {
-          const enabledFeatureCount = getEnabledFeatures(this.state.features, rowRecord).length;
-          if (enabledFeatureCount === this.state.features.length) {
+          const enabledFeatureCount = getEnabledFeatures(features, rowRecord).length;
+          if (enabledFeatureCount === features.length) {
             return (
               <FormattedMessage
                 id="xpack.spaces.management.spacesGridPage.allFeaturesEnabled"
-                defaultMessage="All features visible"
+                defaultMessage="All features"
               />
             );
           }
           if (enabledFeatureCount === 0) {
             return (
-              <EuiText color={'danger'}>
+              <EuiText color={'danger'} size="s">
                 <FormattedMessage
                   id="xpack.spaces.management.spacesGridPage.noFeaturesEnabled"
                   defaultMessage="No features visible"
@@ -340,32 +373,33 @@ export class SpacesGridPage extends Component<Props, State> {
               defaultMessage="{enabledFeatureCount} / {totalFeatureCount}"
               values={{
                 enabledFeatureCount,
-                totalFeatureCount: this.state.features.length,
+                totalFeatureCount: features.length,
               }}
             />
           );
         },
+      });
+    }
+
+    config.push({
+      field: 'id',
+      name: i18n.translate('xpack.spaces.management.spacesGridPage.identifierColumnName', {
+        defaultMessage: 'Identifier',
+      }),
+      sortable: true,
+      render(id: string) {
+        if (id === DEFAULT_SPACE_ID) {
+          return '';
+        }
+        return id;
       },
-      {
-        field: 'id',
-        name: i18n.translate('xpack.spaces.management.spacesGridPage.identifierColumnName', {
-          defaultMessage: 'Identifier',
-        }),
-        sortable: true,
-        render(id: string) {
-          if (id === DEFAULT_SPACE_ID) {
-            return '';
-          }
-          return id;
-        },
-      },
-    ];
+    });
 
     if (this.props.allowSolutionVisibility) {
       config.push({
         field: 'solution',
         name: i18n.translate('xpack.spaces.management.spacesGridPage.solutionColumnName', {
-          defaultMessage: 'Solution View',
+          defaultMessage: 'Solution view',
         }),
         sortable: true,
         render: (solution: Space['solution'], record: Space) => (
@@ -396,7 +430,7 @@ export class SpacesGridPage extends Component<Props, State> {
             reactRouterNavigate(this.props.history, this.getEditSpacePath(rowRecord)).href,
           onClick: (rowRecord) =>
             reactRouterNavigate(this.props.history, this.getEditSpacePath(rowRecord)).onClick,
-          'data-test-subj': (rowRecord) => `${rowRecord.name}-editSpace`,
+          'data-test-subj': (rowRecord) => `${rowRecord.id}-editSpace`,
         },
         {
           isPrimary: true,
@@ -404,7 +438,7 @@ export class SpacesGridPage extends Component<Props, State> {
             defaultMessage: 'Switch',
           }),
           description: (rowRecord) =>
-            this.state.activeSpace?.name !== rowRecord.name
+            activeSpace?.id !== rowRecord.id
               ? i18n.translate(
                   'xpack.spaces.management.spacesGridPage.switchSpaceActionDescription',
                   {
@@ -428,8 +462,8 @@ export class SpacesGridPage extends Component<Props, State> {
               rowRecord.id,
               `${ENTER_SPACE_PATH}?next=/app/management/kibana/spaces/`
             ),
-          enabled: (rowRecord) => this.state.activeSpace?.name !== rowRecord.name,
-          'data-test-subj': (rowRecord) => `${rowRecord.name}-switchSpace`,
+          enabled: (rowRecord) => activeSpace?.id !== rowRecord.id,
+          'data-test-subj': (rowRecord) => `${rowRecord.id}-switchSpace`,
         },
         {
           name: i18n.translate('xpack.spaces.management.spacesGridPage.deleteActionName', {
@@ -440,7 +474,7 @@ export class SpacesGridPage extends Component<Props, State> {
               ? i18n.translate(
                   'xpack.spaces.management.spacesGridPage.deleteActionDisabledDescription',
                   {
-                    defaultMessage: `{spaceName} is reserved`,
+                    defaultMessage: `You can't delete the {spaceName} space`,
                     values: { spaceName: rowRecord.name },
                   }
                 )
@@ -453,7 +487,7 @@ export class SpacesGridPage extends Component<Props, State> {
           color: 'danger',
           onClick: (rowRecord: Space) => this.onDeleteSpaceClick(rowRecord),
           enabled: (rowRecord: Space) => !isReservedSpace(rowRecord),
-          'data-test-subj': (rowRecord) => `${rowRecord.name}-deleteSpace`,
+          'data-test-subj': (rowRecord) => `${rowRecord.id}-deleteSpace`,
         },
       ],
     });

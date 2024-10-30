@@ -41,10 +41,10 @@ Go through each value step by step and modify it with the following process:
 You ALWAYS follow these guidelines when writing your response:
 <guidelines>
 - Never use \`event.category\` or \`event.type\` as target ECS fields.
-- The target key should never have a null value, if no matching target ECS field is found, the whole key value should be set to null.
+- The key named "target" should never have a null value or a "null" string, if no matching target ECS field is found the original source key's value should be set to null..
 - Never use the same ECS target multiple times. If no other field is found that you are confident in, it should always be null.
 - All keys should be under the {package_name} {data_stream_name} parent fields, same as the original combined sample above.
-- All target key values should be ECS field names only from the above ECS fields provided as context.
+- All values for the key named "target" should be ECS field names only from the above ECS fields provided as context.
 - All original keys from the combined sample object needs to be in your response.
 - Only when a target value is set should type, date_format and confidence be filled out. If no target value then the value should simply be null.
 - Do not respond with anything except the ecs maping JSON object enclosed with 3 backticks (\`), see example response below.

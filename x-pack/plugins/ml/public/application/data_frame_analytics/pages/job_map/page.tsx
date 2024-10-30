@@ -16,7 +16,7 @@ import { SavedObjectsWarning } from '../../../components/saved_objects_warning';
 import { UpgradeWarning } from '../../../components/upgrade';
 import { JobMap } from '.';
 import { HelpMenu } from '../../../components/help_menu';
-import { useMlKibana, useMlApiContext } from '../../../contexts/kibana';
+import { useMlKibana, useMlApi } from '../../../contexts/kibana';
 import { useRefreshAnalyticsList } from '../../common';
 import { MlPageHeader } from '../../../components/page_header';
 import type { AnalyticsSelectorIds } from '../components/analytics_selector';
@@ -29,10 +29,9 @@ export const Page: FC = () => {
   const modelId = globalState?.ml?.modelId;
 
   const [isLoading, setIsLoading] = useState(false);
-  const [isIdSelectorFlyoutVisible, setIsIdSelectorFlyoutVisible] = useState<boolean>(
-    !jobId && !modelId
-  );
+  const [isIdSelectorFlyoutVisible, setIsIdSelectorFlyoutVisible] = useState<boolean>(false);
   const [jobsExist, setJobsExist] = useState(true);
+  const [isLoadingJobsExist, setIsLoadingJobsExist] = useState(false);
   const { refresh } = useRefreshAnalyticsList({ isLoading: setIsLoading });
 
   const setAnalyticsId = useCallback(
@@ -52,16 +51,21 @@ export const Page: FC = () => {
   } = useMlKibana();
   const {
     dataFrameAnalytics: { getDataFrameAnalytics },
-  } = useMlApiContext();
+  } = useMlApi();
   const helpLink = docLinks.links.ml.dataFrameAnalytics;
 
   const checkJobsExist = async () => {
+    setIsLoadingJobsExist(true);
     try {
       const { count } = await getDataFrameAnalytics(undefined, undefined, 0);
-      setJobsExist(count > 0);
+      const hasAnalyticsJobs = count > 0;
+      setJobsExist(hasAnalyticsJobs);
+      setIsIdSelectorFlyoutVisible(hasAnalyticsJobs && !jobId && !modelId);
     } catch (e) {
       // Swallow the error and just show the empty table in the analytics id selector
       console.error('Error checking analytics jobs exist', e); // eslint-disable-line no-console
+    } finally {
+      setIsLoadingJobsExist(false);
     }
   };
 
@@ -71,6 +75,10 @@ export const Page: FC = () => {
   }, []);
 
   const getEmptyState = () => {
+    if (isLoadingJobsExist) {
+      return null;
+    }
+
     if (jobsExist === false) {
       return <AnalyticsEmptyPrompt />;
     }

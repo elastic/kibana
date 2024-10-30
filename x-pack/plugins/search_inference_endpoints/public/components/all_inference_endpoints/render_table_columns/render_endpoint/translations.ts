@@ -7,21 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const THREADS = (numThreads: number) =>
-  i18n.translate('xpack.searchInferenceEndpoints.elasticsearch.threads', {
-    defaultMessage: 'Threads: {numThreads}',
-    values: { numThreads },
-  });
-
-export const ALLOCATIONS = (numAllocations: number) =>
-  i18n.translate('xpack.searchInferenceEndpoints.elasticsearch.allocations', {
-    defaultMessage: 'Allocations: {numAllocations}',
-    values: { numAllocations },
-  });
-
-export const MIT_LICENSE = i18n.translate(
-  'xpack.searchInferenceEndpoints.elasticsearch.mitLicense',
+export const PRECONFIGURED_LABEL = i18n.translate(
+  'xpack.searchInferenceEndpoints.elasticsearch.endpointInfo.preconfigured',
   {
-    defaultMessage: 'License: MIT',
+    defaultMessage: 'PRECONFIGURED',
   }
 );

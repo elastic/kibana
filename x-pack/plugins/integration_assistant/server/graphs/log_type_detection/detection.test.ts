@@ -5,25 +5,34 @@
  * 2.0.
  */
 
-import { FakeLLM } from '@langchain/core/utils/testing';
-import { handleLogFormatDetection } from './detection';
-import type { LogFormatDetectionState } from '../../types';
-import { logFormatDetectionTestState } from '../../../__jest__/fixtures/log_type_detection';
 import {
   ActionsClientChatOpenAI,
   ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server/language_models';
+import { FakeLLM } from '@langchain/core/utils/testing';
+import { logFormatDetectionTestState } from '../../../__jest__/fixtures/log_type_detection';
+import type { LogFormatDetectionState } from '../../types';
+import { handleLogFormatDetection } from './detection';
+import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 
-const mockLLM = new FakeLLM({
-  response: '{ "log_type": "structured"}',
+const model = new FakeLLM({
+  response: '{ "name": "structured"}',
 }) as unknown as ActionsClientChatOpenAI | ActionsClientSimpleChatModel;
 
-const testState: LogFormatDetectionState = logFormatDetectionTestState;
+const state: LogFormatDetectionState = logFormatDetectionTestState;
 
 describe('Testing log type detection handler', () => {
   it('handleLogFormatDetection()', async () => {
-    const response = await handleLogFormatDetection(testState, mockLLM);
-    expect(response.logFormat).toStrictEqual('structured');
+    const client = {
+      asCurrentUser: {
+        ingest: {
+          simulate: jest.fn(),
+        },
+      },
+    } as unknown as IScopedClusterClient;
+
+    const response = await handleLogFormatDetection({ state, model, client });
+    expect(response.samplesFormat).toStrictEqual({ name: 'structured', header: false });
     expect(response.lastExecutedChain).toBe('logFormatDetection');
   });
 });

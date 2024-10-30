@@ -15,6 +15,16 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
     return comp;
   },
 }));
+jest.mock('../../../capabilities/check_capabilities', () => ({
+  usePermissionCheck: () => [true, true],
+}));
+jest.mock('../../../contexts/kibana/kibana_context', () => ({
+  useMlKibana: () => ({
+    services: {
+      docLinks: { links: { ml: { calendars: jest.fn() } } },
+    },
+  }),
+}));
 
 describe('CalendarListsHeader', () => {
   const refreshCalendars = jest.fn(() => {});

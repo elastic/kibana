@@ -10,13 +10,15 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useCreateConnector } from '../hooks/api/use_create_connector';
+import { useConnectors } from '../hooks/api/use_connectors';
 
 export const ConnectorsCallout = () => {
   const { createConnector, isLoading } = useCreateConnector();
+  const { data } = useConnectors();
   return (
     <EuiCallOut
       title={i18n.translate('xpack.serverlessSearch.selectClient.connectorsCallout.title', {
-        defaultMessage: 'Sync your data with a connector client',
+        defaultMessage: 'Sync your data with a self-managed connector',
       })}
       size="s"
       iconType="iInCircle"
@@ -31,6 +33,7 @@ export const ConnectorsCallout = () => {
         <EuiFlexItem grow={false}>
           <EuiButton
             color="primary"
+            disabled={!data?.canManageConnectors}
             iconType="plusInCircle"
             data-test-subj="connectors-callout-cta"
             onClick={() => createConnector()}

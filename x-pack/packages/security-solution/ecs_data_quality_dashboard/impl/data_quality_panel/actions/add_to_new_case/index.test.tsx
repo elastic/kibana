@@ -63,8 +63,8 @@ describe('AddToNewCaseAction', () => {
   });
 
   describe('when clicking on add to new case link', () => {
-    it('should open create case flyout with header content and provided markdown', () => {
-      let headerContent: React.ReactNode = null;
+    it('should open create case flyout with header content and provided markdown', async () => {
+      let headerContent: HTMLElement | null = null;
       const openCreateCaseFlyout = jest.fn(({ headerContent: _headerContent }) => {
         headerContent = render(_headerContent).container;
       });
@@ -76,7 +76,7 @@ describe('AddToNewCaseAction', () => {
         </TestExternalProviders>
       );
 
-      userEvent.click(screen.getByTestId('addToNewCase'));
+      await userEvent.click(screen.getByTestId('addToNewCase'));
 
       expect(openCreateCaseFlyout).toHaveBeenCalledWith({
         comments: ['test markdown'],

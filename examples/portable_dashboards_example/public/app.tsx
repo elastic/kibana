@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import ReactDOM from 'react-dom';
@@ -11,55 +12,65 @@ import React, { useMemo } from 'react';
 import { useAsync } from 'react-use/lib';
 import { Redirect } from 'react-router-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
-import { AppMountParameters } from '@kbn/core/public';
+import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { EuiButton, EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { DashboardListingTable } from '@kbn/dashboard-plugin/public';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
-import { DualReduxExample } from './dual_redux_example';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { DualDashboardsExample } from './dual_dashboards_example';
 import { StartDeps } from './plugin';
 import { StaticByValueExample } from './static_by_value_example';
 import { StaticByReferenceExample } from './static_by_reference_example';
-import { DynamicByReferenceExample } from './dynamically_add_panels_example';
 import { DashboardWithControlsExample } from './dashboard_with_controls_example';
 
 const DASHBOARD_DEMO_PATH = '/dashboardDemo';
 const DASHBOARD_LIST_PATH = '/listingDemo';
 
 export const renderApp = async (
+  coreStart: CoreStart,
   { data, dashboard }: StartDeps,
   { element, history }: AppMountParameters
 ) => {
   ReactDOM.render(
-    <PortableDashboardsDemos data={data} history={history} dashboard={dashboard} />,
+    <PortableDashboardsDemos
+      coreStart={coreStart}
+      data={data}
+      history={history}
+      dashboard={dashboard}
+    />,
     element
   );
   return () => ReactDOM.unmountComponentAtNode(element);
 };
 
 const PortableDashboardsDemos = ({
+  coreStart,
   data,
   dashboard,
   history,
 }: {
+  coreStart: CoreStart;
   data: StartDeps['data'];
   dashboard: StartDeps['dashboard'];
   history: AppMountParameters['history'];
 }) => {
   return (
-    <Router history={history}>
-      <Routes>
-        <Route exact path="/">
-          <Redirect to={DASHBOARD_DEMO_PATH} />
-        </Route>
-        <Route path={DASHBOARD_LIST_PATH}>
-          <PortableDashboardListingDemo history={history} />
-        </Route>
-        <Route path={DASHBOARD_DEMO_PATH}>
-          <DashboardsDemo data={data} dashboard={dashboard} history={history} />
-        </Route>
-      </Routes>
-    </Router>
+    <KibanaRenderContextProvider i18n={coreStart.i18n} theme={coreStart.theme}>
+      <Router history={history}>
+        <Routes>
+          <Route exact path="/">
+            <Redirect to={DASHBOARD_DEMO_PATH} />
+          </Route>
+          <Route path={DASHBOARD_LIST_PATH}>
+            <PortableDashboardListingDemo history={history} />
+          </Route>
+          <Route path={DASHBOARD_DEMO_PATH}>
+            <DashboardsDemo data={data} dashboard={dashboard} history={history} />
+          </Route>
+        </Routes>
+      </Router>
+    </KibanaRenderContextProvider>
   );
 };
 
@@ -90,9 +101,7 @@ const DashboardsDemo = ({
       <>
         <DashboardWithControlsExample dataView={dataViews[0]} />
         <EuiSpacer size="xl" />
-        <DynamicByReferenceExample />
-        <EuiSpacer size="xl" />
-        <DualReduxExample />
+        <DualDashboardsExample />
         <EuiSpacer size="xl" />
         <StaticByReferenceExample dashboardId={logsSampleDashboardId} dataView={dataViews[0]} />
         <EuiSpacer size="xl" />

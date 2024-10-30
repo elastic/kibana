@@ -37,8 +37,8 @@ describe('When using Artifacts Exceptions BaseValidator', () => {
 
     const servicesStart = createMockEndpointAppContextServiceStartContract();
 
-    packagePolicyService = servicesStart.endpointFleetServicesFactory.asInternalUser()
-      .packagePolicy as jest.Mocked<PackagePolicyClient>;
+    packagePolicyService = servicesStart.fleetStartServices
+      .packagePolicyService as jest.Mocked<PackagePolicyClient>;
 
     endpointAppContextServices = new EndpointAppContextService();
     endpointAppContextServices.setup(createMockEndpointAppContextServiceSetupContract());
@@ -48,7 +48,9 @@ describe('When using Artifacts Exceptions BaseValidator', () => {
       if (withNoAuth) {
         const fleetAuthz = createFleetAuthzMock();
         fleetAuthz.fleet.all = false;
-        (servicesStart.fleetAuthzService?.fromRequest as jest.Mock).mockResolvedValue(fleetAuthz);
+        (servicesStart.fleetStartServices.authz.fromRequest as jest.Mock).mockResolvedValue(
+          fleetAuthz
+        );
         (servicesStart.security.authc.getCurrentUser as jest.Mock).mockReturnValue(
           securityMock.createMockAuthenticatedUser()
         );

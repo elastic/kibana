@@ -165,7 +165,7 @@ export default function (providerContext: FtrProviderContext) {
               description: 'tata',
               space_ids: ['default', TEST_SPACE_1],
             }),
-          /400 Bad Request No enough permissions to create policies in space test1/
+          /400 Bad Request Not enough permissions to create policies in space test1/
         );
       });
 
@@ -190,8 +190,35 @@ export default function (providerContext: FtrProviderContext) {
               description: 'tata',
               space_ids: ['default'],
             }),
-          /400 Bad Request No enough permissions to remove policies from space test1/
+          /400 Bad Request Not enough permissions to remove policies from space test1/
         );
+      });
+    });
+
+    describe('DELETE /agent_policies/{id}', () => {
+      let policyRes: CreateAgentPolicyResponse;
+      before(async () => {
+        const _policyRes = await apiClient.createAgentPolicy();
+        policyRes = _policyRes;
+        await apiClient.createPackagePolicy(undefined, {
+          policy_ids: [policyRes.item.id],
+          name: `test-nginx-${Date.now()}`,
+          description: 'test',
+          package: {
+            name: 'nginx',
+            version: '1.20.0',
+          },
+          inputs: {},
+        });
+        await apiClient.putAgentPolicy(policyRes.item.id, {
+          name: `test-nginx-${Date.now()}`,
+          namespace: 'default',
+          description: 'tata',
+          space_ids: ['default', TEST_SPACE_1],
+        });
+      });
+      it('should allow to delete an agent policy through multiple spaces', async () => {
+        await apiClient.deleteAgentPolicy(policyRes.item.id);
       });
     });
   });

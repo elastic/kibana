@@ -137,6 +137,7 @@ describe('Security Plugin', () => {
               "getAll": [Function],
             },
             "roles": Object {
+              "bulkUpdateRoles": [Function],
               "deleteRole": [Function],
               "getRole": [Function],
               "getRoles": [Function],

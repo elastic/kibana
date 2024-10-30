@@ -12,7 +12,7 @@ import { cloneDeep } from 'lodash';
 import { CalendarsList } from './calendars_list';
 
 // Mocking the child components to just assert that they get the data
-// received via the async call using mlApiServices in the main component.
+// received via the async call using mlApi in the main component.
 jest.mock('../../../components/help_menu', () => ({
   HelpMenu: ({ docLink }) => <div data-test-subj="mockHelpMenu" data-link={docLink} />,
 }));
@@ -42,6 +42,9 @@ jest.mock('../../../capabilities/get_capabilities', () => ({
 }));
 jest.mock('../../../ml_nodes_check/check_ml_nodes', () => ({
   mlNodesAvailable: () => true,
+}));
+jest.mock('../../../capabilities/check_capabilities', () => ({
+  usePermissionCheck: () => [true, true],
 }));
 
 const mockCalendars = [
@@ -79,7 +82,7 @@ const mockCalendarsFn = jest.fn(() => Promise.resolve(cloneDeep(mockCalendars)))
 const mockKibanaProp = {
   services: {
     docLinks: { links: { ml: { calendars: 'https://calendars' } } },
-    mlServices: { mlApiServices: { calendars: mockCalendarsFn } },
+    mlServices: { mlApi: { calendars: mockCalendarsFn } },
     data: {
       query: {
         timefilter: {
@@ -114,6 +117,7 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
 const props = {
   canCreateCalendar: true,
   canDeleteCalendar: true,
+  isDst: false,
 };
 
 describe('CalendarsList', () => {

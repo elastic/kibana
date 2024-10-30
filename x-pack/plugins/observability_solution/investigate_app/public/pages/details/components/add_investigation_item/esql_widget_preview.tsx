@@ -11,7 +11,7 @@ import type { ESQLColumn, ESQLRow } from '@kbn/es-types';
 import { GlobalWidgetParameters } from '@kbn/investigate-plugin/public';
 import { Item } from '@kbn/investigation-shared';
 import type { Suggestion } from '@kbn/lens-plugin/public';
-import { useAbortableAsync } from '@kbn/observability-ai-assistant-plugin/public';
+import { useAbortableAsync } from '@kbn/observability-utils/hooks/use_abortable_async';
 import React, { useEffect, useMemo, useState } from 'react';
 import { ErrorMessage } from '../../../../components/error_message';
 import { SuggestVisualizationList } from '../../../../components/suggest_visualization_list';
@@ -181,9 +181,6 @@ export function EsqlWidgetPreview({
         <PreviewContainer>
           <EsqlWidget
             suggestion={selectedSuggestion}
-            columns={displayedProps.value.columns}
-            allColumns={displayedProps.value.allColumns}
-            values={displayedProps.value.values}
             dataView={displayedProps.value.dataView}
             esqlQuery={esqlQuery}
             dateHistogramResults={dateHistoResponse.value}

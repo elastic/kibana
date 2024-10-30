@@ -5,13 +5,6 @@
  * 2.0.
  */
 
-import { RuleTypeDisabledError } from '../../../../lib';
-import {
-  handleDisabledApiKeysError,
-  verifyAccessAndContext,
-  countUsageOfPredefinedIds,
-} from '../../../lib';
-import { BASE_ALERTING_API_PATH } from '../../../../types';
 import { RouteOptions } from '../../..';
 import type {
   CreateRuleRequestBodyV1,
@@ -24,9 +17,16 @@ import {
 } from '../../../../../common/routes/rule/apis/create';
 import { RuleParamsV1, ruleResponseSchemaV1 } from '../../../../../common/routes/rule/response';
 import { Rule } from '../../../../application/rule/types';
-import { transformCreateBodyV1 } from './transforms';
+import { RuleTypeDisabledError } from '../../../../lib';
+import { BASE_ALERTING_API_PATH } from '../../../../types';
+import {
+  countUsageOfPredefinedIds,
+  handleDisabledApiKeysError,
+  verifyAccessAndContext,
+} from '../../../lib';
 import { transformRuleToRuleResponseV1 } from '../../transforms';
 import { validateRequiredGroupInDefaultActionsV1 } from '../../validation';
+import { transformCreateBodyV1 } from './transforms';
 
 export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOptions) => {
   router.post(
@@ -47,6 +47,15 @@ export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOpt
             body: () => ruleResponseSchemaV1,
             description: 'Indicates a successful call.',
           },
+          400: {
+            description: 'Indicates an invalid schema or parameters.',
+          },
+          403: {
+            description: 'Indicates that this call is forbidden.',
+          },
+          409: {
+            description: 'Indicates that the rule id is already in use.',
+          },
         },
       },
     },
@@ -55,6 +64,7 @@ export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOpt
         verifyAccessAndContext(licenseState, async function (context, req, res) {
           const rulesClient = (await context.alerting).getRulesClient();
           const actionsClient = (await context.actions).getActionsClient();
+          const rulesSettingsClient = (await context.alerting).getRulesSettingsClient(true);
 
           // Assert versioned inputs
           const createRuleData: CreateRuleRequestBodyV1<RuleParamsV1> = req.body;
@@ -81,6 +91,8 @@ export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOpt
               actionsClient.isSystemAction(action.id)
             );
 
+            const flappingSettings = await rulesSettingsClient.flapping().get();
+
             // TODO (http-versioning): Remove this cast, this enables us to move forward
             // without fixing all of other solution types
             const createdRule: Rule<RuleParamsV1> = (await rulesClient.create<RuleParamsV1>({
@@ -89,6 +101,7 @@ export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOpt
                 actions,
                 systemActions,
               }),
+              isFlappingEnabled: flappingSettings.enabled,
               options: { id: params?.id },
             })) as Rule<RuleParamsV1>;
 

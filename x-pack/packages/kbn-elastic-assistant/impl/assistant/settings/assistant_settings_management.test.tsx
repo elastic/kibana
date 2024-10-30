@@ -16,8 +16,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AssistantSettingsManagement } from './assistant_settings_management';
 
 import {
-  ANONYMIZATION_TAB,
   CONNECTORS_TAB,
+  ANONYMIZATION_TAB,
   CONVERSATIONS_TAB,
   EVALUATION_TAB,
   KNOWLEDGE_BASE_TAB,
@@ -25,6 +25,7 @@ import {
   SYSTEM_PROMPTS_TAB,
 } from './const';
 import { mockSystemPrompts } from '../../mock/system_prompt';
+import { DataViewsContract } from '@kbn/data-views-plugin/public';
 
 const mockConversations = {
   [alertConvo.title]: alertConvo,
@@ -39,52 +40,57 @@ const mockValues = {
   quickPromptSettings: [],
 };
 
-const setSelectedSettingsTab = jest.fn();
 const mockContext = {
   basePromptContexts: MOCK_QUICK_PROMPTS,
-  setSelectedSettingsTab,
   http: {
     get: jest.fn(),
   },
   assistantFeatures: { assistantModelEvaluation: true },
-  selectedSettingsTab: null,
   assistantAvailability: {
     isAssistantEnabled: true,
   },
 };
 
+const mockDataViews = {
+  getIndices: jest.fn(),
+} as unknown as DataViewsContract;
+
+const onTabChange = jest.fn();
 const testProps = {
   selectedConversation: welcomeConvo,
+  dataViews: mockDataViews,
+  onTabChange,
+  currentTab: CONNECTORS_TAB,
 };
 jest.mock('../../assistant_context');
 
 jest.mock('../../connectorland/connector_settings_management', () => ({
-  ConnectorsSettingsManagement: () => <span data-test-subj="CONNECTORS_TAB-tab" />,
+  ConnectorsSettingsManagement: () => <span data-test-subj="connectors-tab" />,
 }));
 
 jest.mock('../conversations/conversation_settings_management', () => ({
-  ConversationSettingsManagement: () => <span data-test-subj="CONVERSATIONS_TAB-tab" />,
+  ConversationSettingsManagement: () => <span data-test-subj="conversations-tab" />,
 }));
 
 jest.mock('../quick_prompts/quick_prompt_settings_management', () => ({
-  QuickPromptSettingsManagement: () => <span data-test-subj="QUICK_PROMPTS_TAB-tab" />,
+  QuickPromptSettingsManagement: () => <span data-test-subj="quick_prompts-tab" />,
 }));
 
 jest.mock('../prompt_editor/system_prompt/system_prompt_settings_management', () => ({
-  SystemPromptSettingsManagement: () => <span data-test-subj="SYSTEM_PROMPTS_TAB-tab" />,
+  SystemPromptSettingsManagement: () => <span data-test-subj="system_prompts-tab" />,
 }));
 
 jest.mock('../../knowledge_base/knowledge_base_settings_management', () => ({
-  KnowledgeBaseSettingsManagement: () => <span data-test-subj="KNOWLEDGE_BASE_TAB-tab" />,
+  KnowledgeBaseSettingsManagement: () => <span data-test-subj="knowledge_base-tab" />,
 }));
 
 jest.mock('../../data_anonymization/settings/anonymization_settings_management', () => ({
-  AnonymizationSettingsManagement: () => <span data-test-subj="ANONYMIZATION_TAB-tab" />,
+  AnonymizationSettingsManagement: () => <span data-test-subj="anonymization-tab" />,
 }));
 
 jest.mock('.', () => {
   return {
-    EvaluationSettings: () => <span data-test-subj="EVALUATION_TAB-tab" />,
+    EvaluationSettings: () => <span data-test-subj="evaluation-tab" />,
   };
 });
 
@@ -132,25 +138,23 @@ describe('AssistantSettingsManagement', () => {
     SYSTEM_PROMPTS_TAB,
   ])('%s', (tab) => {
     it('Opens the tab on button click', () => {
-      (useAssistantContext as jest.Mock).mockImplementation(() => ({
-        ...mockContext,
-        selectedSettingsTab: tab,
-      }));
-      const { getByTestId } = render(<AssistantSettingsManagement {...testProps} />, {
-        wrapper,
-      });
+      const { getByTestId } = render(
+        <AssistantSettingsManagement {...testProps} currentTab={tab} />,
+        {
+          wrapper,
+        }
+      );
       fireEvent.click(getByTestId(`settingsPageTab-${tab}`));
-      expect(setSelectedSettingsTab).toHaveBeenCalledWith(tab);
+      expect(onTabChange).toHaveBeenCalledWith(tab);
     });
     it('renders with the correct tab open', () => {
-      (useAssistantContext as jest.Mock).mockImplementation(() => ({
-        ...mockContext,
-        selectedSettingsTab: tab,
-      }));
-      const { getByTestId } = render(<AssistantSettingsManagement {...testProps} />, {
-        wrapper,
-      });
-      expect(getByTestId(`${tab}-tab`)).toBeInTheDocument();
+      const { getByTestId } = render(
+        <AssistantSettingsManagement {...testProps} currentTab={tab} />,
+        {
+          wrapper,
+        }
+      );
+      expect(getByTestId(`tab-${tab}`)).toBeInTheDocument();
     });
   });
 });

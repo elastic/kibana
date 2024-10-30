@@ -20,6 +20,8 @@ import {
   ML_JOB_AGGREGATION,
   SPARSE_DATA_AGGREGATIONS,
 } from '@kbn/ml-anomaly-utils';
+import { cloneDeep } from 'lodash';
+import { jobCloningService } from '../../../../../services/job_cloning_service';
 import type {
   Job,
   Datafeed,
@@ -28,7 +30,6 @@ import type {
 import type { NewJobCapsService } from '../../../../../services/new_job_capabilities/new_job_capabilities_service';
 import type { NavigateToPath } from '../../../../../contexts/kibana';
 import { ML_PAGES } from '../../../../../../../common/constants/locator';
-import type { MlJobService } from '../../../../../services/job_service';
 import type { JobCreatorType } from '..';
 import { CREATED_BY_LABEL, JOB_TYPE } from '../../../../../../../common/constants/new_job';
 
@@ -237,53 +238,39 @@ export function isSparseDataJob(job: Job, datafeed: Datafeed): boolean {
 }
 
 export function convertToMultiMetricJob(
-  mlJobService: MlJobService,
   jobCreator: JobCreatorType,
   navigateToPath: NavigateToPath
 ) {
   jobCreator.createdBy = CREATED_BY_LABEL.MULTI_METRIC;
   jobCreator.modelPlot = false;
-  mlJobService.stashJobForCloning(jobCreator, true, true);
+  jobCloningService.stashJobForCloning(jobCreator, true, true);
   navigateToPath(ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_CONVERT_TO_MULTI_METRIC, true);
 }
 
-export function convertToAdvancedJob(
-  mlJobService: MlJobService,
-  jobCreator: JobCreatorType,
-  navigateToPath: NavigateToPath
-) {
+export function convertToAdvancedJob(jobCreator: JobCreatorType, navigateToPath: NavigateToPath) {
   jobCreator.createdBy = null;
-  mlJobService.stashJobForCloning(jobCreator, true, true);
+  jobCloningService.stashJobForCloning(jobCreator, true, true);
   navigateToPath(ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_CONVERT_TO_ADVANCED, true);
 }
 
-export function resetAdvancedJob(
-  mlJobService: MlJobService,
-  jobCreator: JobCreatorType,
-  navigateToPath: NavigateToPath
-) {
+export function resetAdvancedJob(jobCreator: JobCreatorType, navigateToPath: NavigateToPath) {
   jobCreator.createdBy = null;
-  mlJobService.stashJobForCloning(jobCreator, true, false);
+  jobCloningService.stashJobForCloning(jobCreator, true, false);
   navigateToPath(ML_PAGES.ANOMALY_DETECTION_CREATE_JOB);
 }
 
-export function resetJob(
-  mlJobService: MlJobService,
-  jobCreator: JobCreatorType,
-  navigateToPath: NavigateToPath
-) {
+export function resetJob(jobCreator: JobCreatorType, navigateToPath: NavigateToPath) {
   jobCreator.jobId = '';
-  mlJobService.stashJobForCloning(jobCreator, true, true);
+  jobCloningService.stashJobForCloning(jobCreator, true, true);
   navigateToPath(ML_PAGES.ANOMALY_DETECTION_CREATE_JOB);
 }
 
 export function advancedStartDatafeed(
-  mlJobService: MlJobService,
   jobCreator: JobCreatorType | null,
   navigateToPath: NavigateToPath
 ) {
   if (jobCreator !== null) {
-    mlJobService.stashJobForCloning(jobCreator, false, false);
+    jobCloningService.stashJobForCloning(jobCreator, false, false);
   }
   navigateToPath('/jobs');
 }
@@ -349,4 +336,14 @@ export function collectAggs(o: any, aggFields: Field[]) {
       collectAggs(o[i], aggFields);
     }
   }
+}
+
+export function cloneDatafeed(datafeed: Datafeed) {
+  const tempDatafeed = cloneDeep(datafeed);
+
+  // remove parts of the datafeed config which should not be copied
+  tempDatafeed.datafeed_id = '';
+  tempDatafeed.job_id = '';
+
+  return tempDatafeed;
 }

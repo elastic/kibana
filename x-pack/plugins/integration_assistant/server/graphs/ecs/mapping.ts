@@ -6,9 +6,9 @@
  */
 
 import { JsonOutputParser } from '@langchain/core/output_parsers';
-import type { EcsNodeParams } from './types';
 import type { EcsMappingState } from '../../types';
 import { ECS_MAIN_PROMPT } from './prompts';
+import type { EcsNodeParams } from './types';
 
 export async function handleEcsMapping({
   state,
@@ -24,5 +24,5 @@ export async function handleEcsMapping({
     data_stream_name: state.dataStreamName,
     ex_answer: state.exAnswer,
   });
-  return { currentMapping, lastExecutedChain: 'ecsMapping' };
+  return { currentMapping, hasTriedOnce: true, lastExecutedChain: 'ecsMapping' };
 }

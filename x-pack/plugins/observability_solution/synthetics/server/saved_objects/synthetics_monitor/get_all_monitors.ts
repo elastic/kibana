@@ -27,10 +27,12 @@ export const getAllMonitors = async ({
   sortField = 'name.keyword',
   sortOrder = 'asc',
   searchFields,
+  showFromAllSpaces,
 }: {
   soClient: SavedObjectsClientContract;
   search?: string;
   filter?: string;
+  showFromAllSpaces?: boolean;
 } & Pick<SavedObjectsFindOptions, 'sortField' | 'sortOrder' | 'fields' | 'searchFields'>) => {
   const finder = soClient.createPointInTimeFinder<EncryptedSyntheticsMonitorAttributes>({
     type: syntheticsMonitorType,
@@ -41,6 +43,7 @@ export const getAllMonitors = async ({
     fields,
     filter,
     searchFields,
+    ...(showFromAllSpaces && { namespaces: ['*'] }),
   });
 
   const hits: Array<SavedObjectsFindResult<EncryptedSyntheticsMonitorAttributes>> = [];
@@ -71,7 +74,7 @@ export const processMonitors = (
   let projectMonitorsCount = 0;
   const allIds: string[] = [];
   let listOfLocationsSet = new Set<string>();
-  const monitorLocationMap: Record<string, string[]> = {};
+  const monitorLocationsMap: Record<string, string[]> = {};
   const monitorQueryIdToConfigIdMap: Record<string, string> = {};
 
   for (const monitor of allMonitors) {
@@ -97,7 +100,7 @@ export const processMonitors = (
     } else {
       enabledMonitorQueryIds.push(attrs[ConfigKey.MONITOR_QUERY_ID]);
 
-      monitorLocationMap[attrs[ConfigKey.MONITOR_QUERY_ID]] = queryLocations
+      monitorLocationsMap[attrs[ConfigKey.MONITOR_QUERY_ID]] = queryLocations
         ? intersection(monitorLocations, queryLocations)
         : monitorLocations;
       listOfLocationsSet = new Set([...listOfLocationsSet, ...monitorLocations]);
@@ -112,7 +115,7 @@ export const processMonitors = (
     enabledMonitorQueryIds,
     disabledMonitorQueryIds,
     disabledCount,
-    monitorLocationMap,
+    monitorLocationsMap,
     disabledMonitorsCount,
     projectMonitorsCount,
     monitorLocationIds: [...listOfLocationsSet],

@@ -162,4 +162,11 @@ describe('LightweightParamFormatter', () => {
     const result = replaceVarsWithParams(formatter, params);
     expect(result).toEqual('https://default:1234');
   });
+  it('wraps content name when no default', () => {
+    const result = replaceVarsWithParams(
+      [{ type: 'var', content: { name: 'missing', default: null } }],
+      {}
+    );
+    expect(result).toEqual('${missing}');
+  });
 });

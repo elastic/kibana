@@ -1,19 +1,39 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { set } from '@kbn/safer-lodash-set';
 import { PersistableStateService } from '@kbn/kibana-utils-plugin/common';
+import { set } from '@kbn/safer-lodash-set';
+import type { ControlGroupSerializedState } from '../../common';
 import {
-  ControlGroupTelemetry,
-  RawControlGroupAttributes,
-  rawControlGroupAttributesToControlGroupInput,
-} from '../../common';
-import { ControlGroupInput } from '../../common/control_group/types';
+  type SerializableControlGroupState,
+  controlGroupSerializedStateToSerializableRuntimeState,
+  getDefaultControlGroupState,
+} from './control_group_persistence';
+
+export interface ControlGroupTelemetry {
+  total: number;
+  chaining_system: {
+    [key: string]: number;
+  };
+  label_position: {
+    [key: string]: number;
+  };
+  ignore_settings: {
+    [key: string]: number;
+  };
+  by_type: {
+    [key: string]: {
+      total: number;
+      details: { [key: string]: number };
+    };
+  };
+}
 
 export const initializeControlGroupTelemetry = (
   statsSoFar: Record<string, unknown>
@@ -31,7 +51,7 @@ export const initializeControlGroupTelemetry = (
 
 const reportChainingSystemInUse = (
   chainingSystemsStats: ControlGroupTelemetry['chaining_system'],
-  chainingSystem: ControlGroupInput['chainingSystem']
+  chainingSystem: SerializableControlGroupState['chainingSystem']
 ): ControlGroupTelemetry['chaining_system'] => {
   if (!chainingSystem) return chainingSystemsStats;
   if (Boolean(chainingSystemsStats[chainingSystem])) {
@@ -44,7 +64,7 @@ const reportChainingSystemInUse = (
 
 const reportLabelPositionsInUse = (
   labelPositionStats: ControlGroupTelemetry['label_position'],
-  labelPosition: ControlGroupInput['controlStyle'] // controlStyle was renamed labelPosition
+  labelPosition: SerializableControlGroupState['labelPosition']
 ): ControlGroupTelemetry['label_position'] => {
   if (!labelPosition) return labelPositionStats;
   if (Boolean(labelPositionStats[labelPosition])) {
@@ -57,7 +77,7 @@ const reportLabelPositionsInUse = (
 
 const reportIgnoreSettingsInUse = (
   settingsStats: ControlGroupTelemetry['ignore_settings'],
-  settings: ControlGroupInput['ignoreParentSettings']
+  settings: SerializableControlGroupState['ignoreParentSettings']
 ): ControlGroupTelemetry['ignore_settings'] => {
   if (!settings) return settingsStats;
   for (const [settingKey, settingValue] of Object.entries(settings)) {
@@ -72,7 +92,7 @@ const reportIgnoreSettingsInUse = (
 
 const reportControlTypes = (
   controlTypeStats: ControlGroupTelemetry['by_type'],
-  panels: ControlGroupInput['panels']
+  panels: SerializableControlGroupState['panels']
 ): ControlGroupTelemetry['by_type'] => {
   for (const { type } of Object.values(panels)) {
     const currentTypeCount = controlTypeStats[type]?.total ?? 0;
@@ -91,31 +111,34 @@ export const controlGroupTelemetry: PersistableStateService['telemetry'] = (
   stats
 ): ControlGroupTelemetry => {
   const controlGroupStats = initializeControlGroupTelemetry(stats);
-  const controlGroupInput = rawControlGroupAttributesToControlGroupInput(
-    state as unknown as RawControlGroupAttributes
-  );
-  if (!controlGroupInput) return controlGroupStats;
+  const controlGroupState = {
+    ...getDefaultControlGroupState(),
+    ...controlGroupSerializedStateToSerializableRuntimeState(
+      state as unknown as ControlGroupSerializedState
+    ),
+  };
+  if (!controlGroupState) return controlGroupStats;
 
-  controlGroupStats.total += Object.keys(controlGroupInput?.panels ?? {}).length;
+  controlGroupStats.total += Object.keys(controlGroupState?.panels ?? {}).length;
 
   controlGroupStats.chaining_system = reportChainingSystemInUse(
     controlGroupStats.chaining_system,
-    controlGroupInput.chainingSystem
+    controlGroupState.chainingSystem
   );
 
   controlGroupStats.label_position = reportLabelPositionsInUse(
     controlGroupStats.label_position,
-    controlGroupInput.controlStyle
+    controlGroupState.labelPosition
   );
 
   controlGroupStats.ignore_settings = reportIgnoreSettingsInUse(
     controlGroupStats.ignore_settings,
-    controlGroupInput.ignoreParentSettings
+    controlGroupState.ignoreParentSettings
   );
 
   controlGroupStats.by_type = reportControlTypes(
     controlGroupStats.by_type,
-    controlGroupInput.panels
+    controlGroupState.panels
   );
 
   return controlGroupStats;

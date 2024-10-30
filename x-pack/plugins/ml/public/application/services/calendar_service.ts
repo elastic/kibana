@@ -6,9 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { Calendar, CalendarId } from '../../../common/types/calendars';
+import type { MlCalendar, MlCalendarId } from '../../../common/types/calendars';
 import type { JobId } from '../../../common/types/anomaly_detection_jobs';
-import type { MlApiServices } from './ml_api_service';
+import type { MlApi } from './ml_api_service';
 
 class CalendarService {
   /**
@@ -16,10 +16,10 @@ class CalendarService {
    * @param calendar
    * @param jobId
    */
-  async assignNewJobId(mlApiServices: MlApiServices, calendar: Calendar, jobId: JobId) {
+  async assignNewJobId(mlApi: MlApi, calendar: MlCalendar, jobId: JobId) {
     const { calendar_id: calendarId } = calendar;
     try {
-      await mlApiServices.updateCalendar({
+      await mlApi.updateCalendar({
         ...calendar,
         calendarId,
         job_ids: [...calendar.job_ids, jobId],
@@ -38,12 +38,9 @@ class CalendarService {
    * Fetches calendars by the list of ids.
    * @param calendarIds
    */
-  async fetchCalendarsByIds(
-    mlApiServices: MlApiServices,
-    calendarIds: CalendarId[]
-  ): Promise<Calendar[]> {
+  async fetchCalendarsByIds(mlApi: MlApi, calendarIds: MlCalendarId[]): Promise<MlCalendar[]> {
     try {
-      const calendars = await mlApiServices.calendars({ calendarIds });
+      const calendars = await mlApi.calendars({ calendarIds });
       return Array.isArray(calendars) ? calendars : [calendars];
     } catch (e) {
       throw new Error(

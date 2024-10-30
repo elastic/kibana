@@ -12,6 +12,8 @@ import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiTitle, useEuiTheme } from '@elas
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { useNavigateFindings } from '@kbn/cloud-security-posture/src/hooks/use_navigate_findings';
+import type { NavFilter } from '@kbn/cloud-security-posture/src/utils/query_utils';
 import type {
   BenchmarkData,
   ComplianceDashboardDataV2,
@@ -24,7 +26,6 @@ import {
   LOCAL_STORAGE_DASHBOARD_BENCHMARK_SORT_KEY,
   FINDINGS_GROUPING_OPTIONS,
 } from '../../../common/constants';
-import { NavFilter, useNavigateFindings } from '../../../common/hooks/use_navigate_findings';
 import { dashboardColumnsGrow, getPolicyTemplateQuery } from './summary_section';
 import {
   DASHBOARD_TABLE_COLUMN_SCORE_TEST_ID,

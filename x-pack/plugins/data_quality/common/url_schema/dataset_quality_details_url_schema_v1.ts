@@ -18,6 +18,8 @@ export const urlSchemaRT = rt.exact(
       timeRange: timeRangeRT,
       breakdownField: rt.string,
       degradedFields: degradedFieldRT,
+      expandedDegradedField: rt.string,
+      showCurrentQualityIssues: rt.boolean,
     }),
   ])
 );

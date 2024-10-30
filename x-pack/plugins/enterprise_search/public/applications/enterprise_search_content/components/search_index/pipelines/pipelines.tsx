@@ -110,7 +110,6 @@ export const SearchIndexPipelines: React.FC = () => {
 
   return (
     <>
-      <EuiSpacer />
       {showMissingPipelineCallout && (
         <>
           <EuiCallOut

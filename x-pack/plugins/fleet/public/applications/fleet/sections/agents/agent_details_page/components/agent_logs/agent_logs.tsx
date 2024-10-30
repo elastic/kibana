@@ -50,6 +50,14 @@ const LOG_VIEW_SETTINGS: LogStreamProps['logView'] = {
   logViewId: 'default',
 };
 
+const LOG_VIEW_COLUMNS: LogStreamProps['columns'] = [
+  { type: 'timestamp' },
+  { field: 'event.dataset', type: 'field' },
+  { field: 'component.id', type: 'field' },
+  { type: 'message' },
+  { field: 'error.message', type: 'field' },
+];
+
 export interface AgentLogsProps {
   agent: Agent;
   agentPolicy?: AgentPolicy;
@@ -336,6 +344,7 @@ export const AgentLogsUI: React.FunctionComponent<AgentLogsProps> = memo(
               startTimestamp={dateRangeTimestamps.start}
               endTimestamp={dateRangeTimestamps.end}
               query={logStreamQuery}
+              columns={LOG_VIEW_COLUMNS}
             />
           </EuiPanel>
         </EuiFlexItem>

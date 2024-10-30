@@ -14,8 +14,8 @@ import { useCallback } from 'react';
 import { useDiscoverInTimelineContext } from '../../../common/components/discover_in_timeline/use_discover_in_timeline_context';
 import type { ColumnHeaderOptions } from '../../../../common/types/timeline';
 import type {
-  TimelineResult,
-  SingleTimelineResolveResponse,
+  TimelineResponse,
+  ResolvedTimeline,
   ColumnHeaderResult,
   FilterTimelineResult,
   DataProviderResult,
@@ -35,10 +35,7 @@ import { useUpdateTimeline } from './use_update_timeline';
 import type { TimelineModel } from '../../store/model';
 import { timelineDefaults } from '../../store/defaults';
 
-import {
-  defaultColumnHeaderType,
-  defaultHeaders,
-} from '../timeline/body/column_headers/default_headers';
+import { defaultColumnHeaderType } from '../timeline/body/column_headers/default_headers';
 
 import type { OpenTimelineResult, TimelineErrorCallback } from './types';
 import { IS_OPERATOR } from '../timeline/data_providers/data_provider';
@@ -80,7 +77,7 @@ export const isUntitled = ({ title }: OpenTimelineResult): boolean =>
 const omitTypename = (key: string, value: keyof TimelineModel) =>
   key === '__typename' ? undefined : value;
 
-export const omitTypenameInTimeline = (timeline: TimelineResult): TimelineResult =>
+export const omitTypenameInTimeline = (timeline: TimelineResponse): TimelineResponse =>
   JSON.parse(JSON.stringify(timeline), omitTypename);
 
 const parseString = (params: string) => {
@@ -164,7 +161,7 @@ const setPinnedEventIds = (duplicate: boolean, pinnedEventIds: string[] | null |
     : {};
 
 const getTemplateTimelineId = (
-  timeline: TimelineResult,
+  timeline: TimelineResponse,
   duplicate: boolean,
   targetTimelineType?: TimelineType
 ) => {
@@ -200,7 +197,7 @@ const convertToDefaultField = ({ and, ...dataProvider }: DataProviderResult) => 
 
 const getDataProviders = (
   duplicate: boolean,
-  dataProviders: TimelineResult['dataProviders'],
+  dataProviders: TimelineResponse['dataProviders'],
   timelineType?: TimelineType
 ) => {
   if (duplicate && dataProviders && timelineType === TimelineTypeEnum.default) {
@@ -214,7 +211,7 @@ const getDataProviders = (
 };
 
 export const getTimelineTitle = (
-  timeline: TimelineResult,
+  timeline: TimelineResponse,
   duplicate: boolean,
   timelineType?: TimelineType
 ) => {
@@ -225,7 +222,7 @@ export const getTimelineTitle = (
 };
 
 export const getTimelineStatus = (
-  timeline: TimelineResult,
+  timeline: TimelineResponse,
   duplicate: boolean,
   timelineType?: TimelineType
 ) => {
@@ -236,15 +233,12 @@ export const getTimelineStatus = (
 };
 
 export const defaultTimelineToTimelineModel = (
-  timeline: TimelineResult,
+  timeline: TimelineResponse,
   duplicate: boolean,
-  timelineType?: TimelineType,
-  unifiedComponentsInTimelineDisabled?: boolean
+  timelineType?: TimelineType
 ): TimelineModel => {
   const isTemplate = timeline.timelineType === TimelineTypeEnum.template;
-  const defaultHeadersValue = !unifiedComponentsInTimelineDisabled
-    ? defaultUdtHeaders
-    : defaultHeaders;
+  const defaultHeadersValue = defaultUdtHeaders;
 
   const timelineEntries = {
     ...timeline,
@@ -262,7 +256,7 @@ export const defaultTimelineToTimelineModel = (
           }
         : timeline.dateRange,
     dataProviders: getDataProviders(duplicate, timeline.dataProviders, timelineType),
-    excludedRowRendererIds: isTemplate ? [] : RowRendererValues,
+    excludedRowRendererIds: isTemplate ? [] : timeline.excludedRowRendererIds ?? RowRendererValues,
     eventIdToNoteIds: setEventIdToNoteIds(duplicate, timeline.eventIdToNoteIds),
     filters: timeline.filters != null ? timeline.filters.map(setTimelineFilters) : [],
     isFavorite: duplicate
@@ -291,21 +285,15 @@ export const defaultTimelineToTimelineModel = (
   );
 };
 
-export const formatTimelineResultToModel = (
-  timelineToOpen: TimelineResult,
+export const formatTimelineResponseToModel = (
+  timelineToOpen: TimelineResponse,
   duplicate: boolean = false,
-  timelineType?: TimelineType,
-  unifiedComponentsInTimelineDisabled?: boolean
+  timelineType?: TimelineType
 ): { notes: Note[] | null | undefined; timeline: TimelineModel } => {
   const { notes, ...timelineModel } = timelineToOpen;
   return {
     notes,
-    timeline: defaultTimelineToTimelineModel(
-      timelineModel,
-      duplicate,
-      timelineType,
-      unifiedComponentsInTimelineDisabled
-    ),
+    timeline: defaultTimelineToTimelineModel(timelineModel, duplicate, timelineType),
   };
 };
 
@@ -319,11 +307,6 @@ export interface QueryTimelineById {
   onOpenTimeline?: (timeline: TimelineModel) => void;
   openTimeline?: boolean;
   savedSearchId?: string;
-  /*
-   * Below feature flag will be removed once
-   * unified components have been fully migrated
-   * */
-  unifiedComponentsInTimelineDisabled?: boolean;
 }
 
 export const useQueryTimelineById = () => {
@@ -347,7 +330,6 @@ export const useQueryTimelineById = () => {
     onOpenTimeline,
     openTimeline = true,
     savedSearchId,
-    unifiedComponentsInTimelineDisabled = false,
   }: QueryTimelineById) => {
     updateIsLoading({ id: TimelineId.active, isLoading: true });
     if (timelineId == null) {
@@ -359,14 +341,14 @@ export const useQueryTimelineById = () => {
         to: DEFAULT_TO_MOMENT.toISOString(),
         timeline: {
           ...timelineDefaults,
-          columns: !unifiedComponentsInTimelineDisabled ? defaultUdtHeaders : defaultHeaders,
+          columns: defaultUdtHeaders,
           id: TimelineId.active,
           activeTab: activeTimelineTab,
           show: openTimeline,
           initialized: true,
           savedSearchId: savedSearchId ?? null,
           excludedRowRendererIds:
-            !unifiedComponentsInTimelineDisabled && timelineType !== TimelineTypeEnum.template
+            timelineType !== TimelineTypeEnum.template
               ? timelineDefaults.excludedRowRendererIds
               : [],
         },
@@ -376,16 +358,15 @@ export const useQueryTimelineById = () => {
     } else {
       return Promise.resolve(resolveTimeline(timelineId))
         .then((result) => {
-          const data: SingleTimelineResolveResponse['data'] | null = getOr(null, 'data', result);
+          const data: ResolvedTimeline | null = getOr(null, 'data', result);
           if (!data) return;
 
           const timelineToOpen = omitTypenameInTimeline(data.timeline);
 
-          const { timeline, notes } = formatTimelineResultToModel(
+          const { timeline, notes } = formatTimelineResponseToModel(
             timelineToOpen,
             duplicate,
-            timelineType,
-            unifiedComponentsInTimelineDisabled
+            timelineType
           );
 
           if (onOpenTimeline != null) {

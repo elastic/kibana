@@ -25,8 +25,8 @@ export const KNOWLEDGE_BASE_RETRIEVAL_TOOL: AssistantTool = {
   ...toolDetails,
   sourceRegister: APP_UI_ID,
   isSupported: (params: AssistantToolParams): params is KnowledgeBaseRetrievalToolParams => {
-    const { kbDataClient, isEnabledKnowledgeBase, modelExists } = params;
-    return isEnabledKnowledgeBase && modelExists && kbDataClient != null;
+    const { kbDataClient, isEnabledKnowledgeBase } = params;
+    return isEnabledKnowledgeBase && kbDataClient != null;
   },
   getTool(params: AssistantToolParams) {
     if (!this.isSupported(params)) return null;
@@ -45,7 +45,7 @@ export const KNOWLEDGE_BASE_RETRIEVAL_TOOL: AssistantTool = {
           () => `KnowledgeBaseRetrievalToolParams:input\n ${JSON.stringify(input, null, 2)}`
         );
 
-        const docs = await kbDataClient.getKnowledgeBaseDocuments({
+        const docs = await kbDataClient.getKnowledgeBaseDocumentEntries({
           query: input.query,
           kbResource: 'user',
           required: false,

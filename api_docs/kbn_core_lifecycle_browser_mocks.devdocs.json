@@ -70,6 +70,14 @@
                 "section": "def-public.FatalErrorsSetup",
                 "text": "FatalErrorsSetup"
               },
+              ">; featureFlags: jest.Mocked<",
+              {
+                "pluginId": "@kbn/core-feature-flags-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreFeatureFlagsBrowserPluginApi",
+                "section": "def-public.FeatureFlagsSetup",
+                "text": "FeatureFlagsSetup"
+              },
               ">; getStartServices: jest.Mock<Promise<[{ analytics: jest.Mocked<",
               {
                 "pluginId": "@kbn/core-analytics-browser",
@@ -123,6 +131,14 @@
                 "docId": "kibKbnCoreExecutionContextBrowserPluginApi",
                 "section": "def-public.ExecutionContextSetup",
                 "text": "ExecutionContextSetup"
+              },
+              ">; featureFlags: jest.Mocked<",
+              {
+                "pluginId": "@kbn/core-feature-flags-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreFeatureFlagsBrowserPluginApi",
+                "section": "def-public.FeatureFlagsStart",
+                "text": "FeatureFlagsStart"
               },
               ">; http: ",
               {
@@ -400,6 +416,14 @@
                 "docId": "kibKbnCoreExecutionContextBrowserPluginApi",
                 "section": "def-public.ExecutionContextSetup",
                 "text": "ExecutionContextSetup"
+              },
+              ">; featureFlags: jest.Mocked<",
+              {
+                "pluginId": "@kbn/core-feature-flags-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreFeatureFlagsBrowserPluginApi",
+                "section": "def-public.FeatureFlagsStart",
+                "text": "FeatureFlagsStart"
               },
               ">; http: ",
               {

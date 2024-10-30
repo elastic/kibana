@@ -28,13 +28,13 @@ import {
   type DataFrameAnalyticsConfig,
 } from '@kbn/ml-data-frame-analytics-utils';
 import { parseUrlState } from '@kbn/ml-url-state';
+import { parseInterval } from '@kbn/ml-parse-interval';
 
-import { useMlApiContext, useMlKibana } from '../../../contexts/kibana';
+import { useMlApi, useMlKibana } from '../../../contexts/kibana';
 import { useToastNotificationService } from '../../../services/toast_notification_service';
 import { isValidLabel, openCustomUrlWindow } from '../../../util/custom_url_utils';
 import { getTestUrl } from './utils';
 
-import { parseInterval } from '../../../../../common/util/parse_interval';
 import { TIME_RANGE_TYPE } from './constants';
 import type { Job } from '../../../../../common/types/anomaly_detection_jobs';
 
@@ -73,7 +73,7 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({
       data: { dataViews },
     },
   } = useMlKibana();
-  const ml = useMlApiContext();
+  const mlApi = useMlApi();
   const { displayErrorToast } = useToastNotificationService();
   const [expandedUrlIndex, setExpandedUrlIndex] = useState<number | null>(null);
 
@@ -162,7 +162,7 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({
     if (index < customUrls.length) {
       try {
         const testUrl = await getTestUrl(
-          ml,
+          mlApi,
           job,
           customUrl,
           timefieldName,

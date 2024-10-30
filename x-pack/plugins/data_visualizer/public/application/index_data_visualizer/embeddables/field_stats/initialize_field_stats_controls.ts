@@ -15,13 +15,22 @@ import type { AggregateQuery } from '@kbn/es-query';
 import type { StateComparators } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
 import fastIsEqual from 'fast-deep-equal';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { FieldStatsInitializerViewType } from '../grid_embeddable/types';
 import type { FieldStatsInitialState } from '../grid_embeddable/types';
 import type { FieldStatsControlsApi } from './types';
 
-export const initializeFieldStatsControls = (rawState: FieldStatsInitialState) => {
+export const initializeFieldStatsControls = (
+  rawState: FieldStatsInitialState,
+  uiSettings: IUiSettingsClient
+) => {
+  const isEsqlEnabled = uiSettings.get(ENABLE_ESQL);
+  const defaultType = isEsqlEnabled
+    ? FieldStatsInitializerViewType.ESQL
+    : FieldStatsInitializerViewType.DATA_VIEW;
   const viewType$ = new BehaviorSubject<FieldStatsInitializerViewType | undefined>(
-    rawState.viewType ?? FieldStatsInitializerViewType.ESQL
+    rawState.viewType ?? defaultType
   );
   const dataViewId$ = new BehaviorSubject<string | undefined>(rawState.dataViewId);
   const query$ = new BehaviorSubject<AggregateQuery | undefined>(rawState.query);

@@ -17,8 +17,7 @@ import { UNAUTHENTICATED_USER } from '../../../../../common/constants';
 import type {
   BarePinnedEvent,
   PinnedEvent,
-  PinnedEventResponse,
-  BarePinnedEventWithoutExternalRefs,
+  PersistPinnedEventResponse,
 } from '../../../../../common/api/timeline';
 import { SavedObjectPinnedEventRuntimeType } from '../../../../../common/types/timeline/pinned_event/saved_object';
 import type { SavedObjectPinnedEventWithoutExternalRefs } from '../../../../../common/types/timeline/pinned_event/saved_object';
@@ -77,7 +76,7 @@ export const persistPinnedEventOnTimeline = async (
   pinnedEventId: string | null, // pinned event saved object id
   eventId: string,
   timelineId: string
-): Promise<PinnedEventResponse | null> => {
+): Promise<PersistPinnedEventResponse> => {
   try {
     if (pinnedEventId != null) {
       // Delete Pinned Event on Timeline
@@ -111,9 +110,6 @@ export const persistPinnedEventOnTimeline = async (
             code: 403,
             message: err.message,
             pinnedEventId: eventId,
-            timelineId: '',
-            version: '',
-            eventId: '',
           }
         : null;
     }
@@ -140,7 +136,7 @@ const createPinnedEvent = async ({
   request: FrameworkRequest;
   eventId: string;
   timelineId: string;
-}): Promise<PinnedEventResponse> => {
+}): Promise<PersistPinnedEventResponse> => {
   const savedObjectsClient = (await request.context.core).savedObjects.client;
 
   const savedPinnedEvent: BarePinnedEvent = {
@@ -151,7 +147,7 @@ const createPinnedEvent = async ({
   const pinnedEventWithCreator = pickSavedPinnedEvent(null, savedPinnedEvent, request.user);
 
   const { transformedFields: migratedAttributes, references } =
-    pinnedEventFieldsMigrator.extractFieldsToReferences<BarePinnedEventWithoutExternalRefs>({
+    pinnedEventFieldsMigrator.extractFieldsToReferences<Omit<BarePinnedEvent, 'timelineId'>>({
       data: pinnedEventWithCreator,
     });
 

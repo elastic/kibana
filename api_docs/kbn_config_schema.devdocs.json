@@ -5524,7 +5524,7 @@
         "label": "metaFields",
         "description": [],
         "signature": [
-          "{ readonly META_FIELD_X_OAS_ANY: \"x-oas-any-type\"; readonly META_FIELD_X_OAS_OPTIONAL: \"x-oas-optional\"; readonly META_FIELD_X_OAS_DEPRECATED: \"x-oas-deprecated\"; readonly META_FIELD_X_OAS_MAX_LENGTH: \"x-oas-max-length\"; readonly META_FIELD_X_OAS_MIN_LENGTH: \"x-oas-min-length\"; readonly META_FIELD_X_OAS_GET_ADDITIONAL_PROPERTIES: \"x-oas-get-additional-properties\"; }"
+          "{ readonly META_FIELD_X_OAS_DISCONTINUED: \"x-oas-discontinued\"; readonly META_FIELD_X_OAS_ANY: \"x-oas-any-type\"; readonly META_FIELD_X_OAS_OPTIONAL: \"x-oas-optional\"; readonly META_FIELD_X_OAS_DEPRECATED: \"x-oas-deprecated\"; readonly META_FIELD_X_OAS_MAX_LENGTH: \"x-oas-max-length\"; readonly META_FIELD_X_OAS_MIN_LENGTH: \"x-oas-min-length\"; readonly META_FIELD_X_OAS_GET_ADDITIONAL_PROPERTIES: \"x-oas-get-additional-properties\"; }"
         ],
         "path": "packages/kbn-config-schema/index.ts",
         "deprecated": false,

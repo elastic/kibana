@@ -213,6 +213,58 @@ export default function ({ getService }: FtrProviderContext) {
               );
           });
 
+          it(`should error on [${blocklistApiCall.method}] if signer is set to match_any and a string is provided`, async () => {
+            const body = blocklistApiCall.getBody();
+
+            body.os_types = ['windows'];
+            body.entries = [
+              {
+                field: 'file.Ext.code_signature',
+                entries: [
+                  {
+                    field: 'subject_name',
+                    value: 'foo' as unknown as string[],
+                    type: 'match_any',
+                    operator: 'included',
+                  },
+                ],
+                type: 'nested',
+              },
+            ];
+
+            await endpointPolicyManagerSupertest[blocklistApiCall.method](blocklistApiCall.path)
+              .set('kbn-xsrf', 'true')
+              .send(body)
+              .expect(400)
+              .expect(anErrorMessageWith(/^.*(?!file\.Ext\.code_signature)/));
+          });
+
+          it(`should error on [${blocklistApiCall.method}] if signer is set to match and an array is provided`, async () => {
+            const body = blocklistApiCall.getBody();
+
+            body.os_types = ['windows'];
+            body.entries = [
+              {
+                field: 'file.Ext.code_signature',
+                entries: [
+                  {
+                    field: 'subject_name',
+                    value: ['foo'] as unknown as string,
+                    type: 'match',
+                    operator: 'included',
+                  },
+                ],
+                type: 'nested',
+              },
+            ];
+
+            await endpointPolicyManagerSupertest[blocklistApiCall.method](blocklistApiCall.path)
+              .set('kbn-xsrf', 'true')
+              .send(body)
+              .expect(400)
+              .expect(anErrorMessageWith(/^.*(?!file\.Ext\.code_signature)/));
+          });
+
           it(`should error on [${blocklistApiCall.method}] if signer is set for a non windows os entry item`, async () => {
             const body = blocklistApiCall.getBody();
 

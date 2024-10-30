@@ -1,4 +1,5 @@
-summary: Create an Elasticsearch query rule that uses Kibana query language (KQL).
+summary: Elasticsearch query rule (KQL)
+description: Create an Elasticsearch query rule that uses Kibana query language (KQL).
 value:
   consumer: alerts
   name: my Elasticsearch query KQL rule

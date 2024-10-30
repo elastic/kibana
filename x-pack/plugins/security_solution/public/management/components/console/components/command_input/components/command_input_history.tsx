@@ -65,7 +65,7 @@ export const CommandInputHistory = memo(() => {
     };
   }, []);
 
-  const renderSelectionContent: EuiSelectableProps['children'] = useCallback(
+  const renderSelectionContent = useCallback<NonNullable<EuiSelectableProps['children']>>(
     (list, search) => {
       return (
         <>
@@ -108,7 +108,9 @@ export const CommandInputHistory = memo(() => {
     [dispatch]
   );
 
-  const handleOnActiveOptionChange: EuiSelectableProps['onActiveOptionChange'] = useCallback(
+  const handleOnActiveOptionChange = useCallback<
+    NonNullable<EuiSelectableProps['onActiveOptionChange']>
+  >(
     (option) => {
       if (option) {
         dispatch({

@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -14,46 +15,51 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardPanelActions = getService('dashboardPanelActions');
   const log = getService('log');
   const testSubjects = getService('testSubjects');
-  const reporting = getService('reporting');
+  const reportingService = getService('reporting');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const filterBar = getService('filterBar');
-  const find = getService('find');
   const retry = getService('retry');
   const toasts = getService('toasts');
-  const PageObjects = getPageObjects([
+  const { reporting, common, dashboard, timePicker } = getPageObjects([
     'reporting',
     'common',
     'dashboard',
     'timePicker',
-    'discover',
   ]);
 
   const navigateToDashboardApp = async () => {
     log.debug('in navigateToDashboardApp');
-    await PageObjects.dashboard.navigateToApp();
+    await dashboard.navigateToApp();
     await retry.tryForTime(10000, async () => {
-      expect(await PageObjects.dashboard.onDashboardLandingPage()).to.be(true);
+      expect(await dashboard.onDashboardLandingPage()).to.be(true);
     });
   };
 
   const getCsvReportData = async () => {
     await toasts.dismissAll();
-    const url = await PageObjects.reporting.getReportURL(60000);
-    const res = await PageObjects.reporting.getResponse(url ?? '');
+    const url = await reporting.getReportURL(60000);
+    const res = await reporting.getResponse(url ?? '');
 
     expect(res.status).to.equal(200);
     expect(res.get('content-type')).to.equal('text/csv; charset=utf-8');
     return res.text;
   };
 
-  const clickActionsMenu = async (headingTestSubj: string) => {
-    const savedSearchPanel = await testSubjects.find('embeddablePanelHeading-' + headingTestSubj);
-    await dashboardPanelActions.toggleContextMenu(savedSearchPanel);
+  const clickDownloadCsv = async (wrapper?: WebElementWrapper) => {
+    log.debug('click "Generate CSV"');
+    await dashboardPanelActions.clickPanelAction(
+      'embeddablePanelAction-generateCsvReport',
+      wrapper
+    );
+    await testSubjects.existOrFail('csvReportStarted'); // validate toast panel
   };
 
-  const clickDownloadCsv = async () => {
-    log.debug('click "Generate CSV"');
-    await dashboardPanelActions.clickContextMenuItem('embeddablePanelAction-generateCsvReport');
+  const clickDownloadCsvByTitle = async (title?: string) => {
+    log.debug(`click "Generate CSV" on "${title}"`);
+    await dashboardPanelActions.clickPanelActionByTitle(
+      'embeddablePanelAction-generateCsvReport',
+      title
+    );
     await testSubjects.existOrFail('csvReportStarted'); // validate toast panel
   };
 
@@ -69,7 +75,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('Default Saved Search Data', () => {
       before(async () => {
         await esArchiver.emptyKibanaIndex();
-        await reporting.initEcommerce();
+        await reportingService.initEcommerce();
         await kibanaServer.uiSettings.update({ 'dateFormat:tz': 'UTC' });
       });
 
@@ -78,13 +84,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       after(async () => {
-        await reporting.teardownEcommerce();
+        await reportingService.teardownEcommerce();
       });
 
       it('Generate CSV export of a saved search panel', async function () {
-        await PageObjects.dashboard.loadSavedDashboard('Ecom Dashboard - 3 Day Period');
-        await clickActionsMenu('EcommerceData');
-        await clickDownloadCsv();
+        await dashboard.loadSavedDashboard('Ecom Dashboard - 3 Day Period');
+        await clickDownloadCsvByTitle('EcommerceData');
 
         const csvFile = await getCsvReportData();
         expect(csvFile.length).to.be(76137);
@@ -92,13 +97,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('Downloads a filtered CSV export of a saved search panel', async function () {
-        await PageObjects.dashboard.loadSavedDashboard('Ecom Dashboard - 3 Day Period');
+        await dashboard.loadSavedDashboard('Ecom Dashboard - 3 Day Period');
 
         // add a filter
         await filterBar.addFilter({ field: 'category', operation: 'is', value: `Men's Shoes` });
-
-        await clickActionsMenu('EcommerceData');
-        await clickDownloadCsv();
+        await clickDownloadCsvByTitle('EcommerceData');
 
         const csvFile = await getCsvReportData();
         expect(csvFile.length).to.be(17106);
@@ -106,12 +109,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('Downloads a saved search panel with a custom time range that does not intersect with dashboard time range', async function () {
-        await PageObjects.dashboard.loadSavedDashboard(
-          'Ecom Dashboard - 3 Day Period - custom time range'
-        );
-
-        await clickActionsMenu('EcommerceData');
-        await clickDownloadCsv();
+        await dashboard.loadSavedDashboard('Ecom Dashboard - 3 Day Period - custom time range');
+        await clickDownloadCsvByTitle('EcommerceData');
 
         const csvFile = await getCsvReportData();
         expect(csvFile.length).to.be(23277);
@@ -119,13 +118,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('Gets the correct filename if panel titles are hidden', async () => {
-        await PageObjects.dashboard.loadSavedDashboard('Ecom Dashboard Hidden Panel Titles');
-        const savedSearchPanel = await find.byCssSelector(
-          '[data-test-embeddable-id="94eab06f-60ac-4a85-b771-3a8ed475c9bb"]'
+        await dashboard.loadSavedDashboard('Ecom Dashboard Hidden Panel Titles');
+        const savedSearchPanel = await dashboardPanelActions.getPanelWrapperById(
+          '94eab06f-60ac-4a85-b771-3a8ed475c9bb'
         ); // panel title is hidden
-        await dashboardPanelActions.toggleContextMenu(savedSearchPanel);
 
-        await clickDownloadCsv();
+        await clickDownloadCsv(savedSearchPanel);
         await testSubjects.existOrFail('csvReportStarted');
 
         const csvFile = await getCsvReportData();
@@ -141,28 +139,27 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       before(async () => {
         await esArchiver.emptyKibanaIndex();
-        await reporting.initEcommerce();
+        await reportingService.initEcommerce();
         await kibanaServer.uiSettings.update({ 'dateFormat:tz': 'UTC' });
       });
 
       beforeEach(async () => {
         await navigateToDashboardApp();
         log.info(`Creating empty dashboard`);
-        await PageObjects.dashboard.clickNewDashboard();
-        await PageObjects.timePicker.setAbsoluteRange(from, to);
+        await dashboard.clickNewDashboard();
+        await timePicker.setAbsoluteRange(from, to);
         log.info(`Adding "${TEST_SEARCH_TITLE}" to dashboard`);
         await dashboardAddPanel.addSavedSearch(TEST_SEARCH_TITLE);
-        await PageObjects.dashboard.saveDashboard(TEST_DASHBOARD_TITLE);
+        await dashboard.saveDashboard(TEST_DASHBOARD_TITLE);
       });
 
       after(async () => {
-        await reporting.teardownEcommerce();
-        await PageObjects.common.unsetTime();
+        await reportingService.teardownEcommerce();
+        await common.unsetTime();
       });
 
       it('Downloads filtered Discover saved search report', async () => {
-        await clickActionsMenu(TEST_SEARCH_TITLE.replace(/ /g, ''));
-        await clickDownloadCsv();
+        await clickDownloadCsvByTitle(TEST_SEARCH_TITLE);
 
         const csvFile = await getCsvReportData();
         expect(csvFile.length).to.be(2446);
@@ -175,32 +172,31 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       before(async () => {
         await esArchiver.emptyKibanaIndex();
-        await reporting.initLogs();
+        await reportingService.initLogs();
         await esArchiver.load('x-pack/test/functional/es_archives/reporting/hugedata');
         await kibanaServer.uiSettings.update({ 'dateFormat:tz': 'UTC' });
       });
 
       beforeEach(async () => {
         await navigateToDashboardApp();
-        await PageObjects.dashboard.loadSavedDashboard(dashboardWithScriptedFieldsSearch);
-        await PageObjects.timePicker.setAbsoluteRange(
+        await dashboard.loadSavedDashboard(dashboardWithScriptedFieldsSearch);
+        await timePicker.setAbsoluteRange(
           'Nov 26, 1981 @ 21:54:15.526',
           'Mar 5, 1982 @ 18:17:44.821'
         );
 
-        await PageObjects.common.sleep(1000);
+        await common.sleep(1000);
         await filterBar.addFilter({ field: 'name.keyword', operation: 'is', value: 'Fethany' });
-        await PageObjects.common.sleep(1000);
+        await common.sleep(1000);
       });
 
       after(async () => {
-        await reporting.teardownLogs();
+        await reportingService.teardownLogs();
         await esArchiver.unload('x-pack/test/functional/es_archives/reporting/hugedata');
       });
 
       it('Generate CSV export of a saved search panel', async () => {
-        await clickActionsMenu('namessearch');
-        await clickDownloadCsv();
+        await clickDownloadCsvByTitle('namessearch');
 
         const csvFile = await getCsvReportData();
         expect(csvFile.length).to.be(166);

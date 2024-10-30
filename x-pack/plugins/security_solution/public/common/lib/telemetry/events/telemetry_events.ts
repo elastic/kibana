@@ -21,6 +21,8 @@ import {
   assetCriticalityCsvPreviewGeneratedEvent,
   assetCriticalityFileSelectedEvent,
   assetCriticalityCsvImportedEvent,
+  entityStoreEnablementEvent,
+  entityStoreInitEvent,
 } from './entity_analytics';
 import {
   assistantInvokedEvent,
@@ -48,6 +50,7 @@ import {
   addNoteFromExpandableFlyoutClickedEvent,
   openNoteInExpandableFlyoutClickedEvent,
 } from './notes';
+import { previewRuleEvent } from './preview_rule';
 
 const mlJobUpdateEvent: TelemetryEvent = {
   eventType: TelemetryEventTypes.MLJobUpdate,
@@ -171,6 +174,8 @@ export const telemetryEvents = [
   assetCriticalityCsvPreviewGeneratedEvent,
   assetCriticalityFileSelectedEvent,
   assetCriticalityCsvImportedEvent,
+  entityStoreEnablementEvent,
+  entityStoreInitEvent,
   toggleRiskSummaryClickedEvent,
   RiskInputsExpandedFlyoutOpenedEvent,
   addRiskInputToTimelineClickedEvent,
@@ -192,4 +197,5 @@ export const telemetryEvents = [
   eventLogShowSourceEventDateRangeEvent,
   openNoteInExpandableFlyoutClickedEvent,
   addNoteFromExpandableFlyoutClickedEvent,
+  previewRuleEvent,
 ];

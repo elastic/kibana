@@ -10,6 +10,8 @@ import { EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import {
   StepsProgress,
   useFlowProgressTelemetry,
@@ -17,6 +19,7 @@ import {
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { ProgressIndicator } from '../shared/progress_indicator';
 import { GetStartedPanel } from '../shared/get_started_panel';
+import { ObservabilityOnboardingContextValue } from '../../../plugin';
 
 interface Props {
   onboardingId: string;
@@ -29,6 +32,10 @@ const CLUSTER_OVERVIEW_DASHBOARD_ID = 'kubernetes-f4dc26db-1b53-4ea2-a78b-1bfab8
 export function DataIngestStatus({ onboardingId }: Props) {
   const [progress, setProgress] = useState<StepsProgress | undefined>(undefined);
   const [checkDataStartTime] = useState(Date.now());
+  const {
+    services: { share },
+  } = useKibana<ObservabilityOnboardingContextValue>();
+  const dashboardLocator = share.url.locators.get(DASHBOARD_APP_LOCATOR);
 
   const { data, status, refetch } = useFetcher(
     (callApi) => {
@@ -109,10 +116,13 @@ export function DataIngestStatus({ onboardingId }: Props) {
           <EuiSpacer />
 
           <GetStartedPanel
+            onboardingFlowType="kubernetes"
+            dataset="kubernetes"
             integration="kubernetes"
+            onboardingId={onboardingId}
             newTab={false}
             isLoading={false}
-            dashboardLinks={[
+            actionLinks={[
               {
                 id: CLUSTER_OVERVIEW_DASHBOARD_ID,
                 label: i18n.translate(
@@ -127,6 +137,10 @@ export function DataIngestStatus({ onboardingId }: Props) {
                     defaultMessage: 'Overview your Kubernetes cluster with this pre-made dashboard',
                   }
                 ),
+                href:
+                  dashboardLocator?.getRedirectUrl({
+                    dashboardId: CLUSTER_OVERVIEW_DASHBOARD_ID,
+                  }) ?? '',
               },
             ]}
           />

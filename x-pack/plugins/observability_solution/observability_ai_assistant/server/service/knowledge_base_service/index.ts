@@ -34,6 +34,7 @@ interface Dependencies {
   logger: Logger;
   taskManagerStart: TaskManagerStartContract;
   getModelId: () => Promise<string>;
+  enabled: boolean;
 }
 
 export interface RecalledEntry {
@@ -49,8 +50,8 @@ export interface RecalledEntry {
 function isModelMissingOrUnavailableError(error: Error) {
   return (
     error instanceof errors.ResponseError &&
-    (error.body.error?.type === 'resource_not_found_exception' ||
-      error.body.error?.type === 'status_exception')
+    (error.body?.error?.type === 'resource_not_found_exception' ||
+      error.body?.error?.type === 'status_exception')
   );
 }
 function isCreateModelValidationError(error: Error) {
@@ -95,6 +96,9 @@ export class KnowledgeBaseService {
 
   setup = async () => {
     this.dependencies.logger.debug('Setting up knowledge base');
+    if (!this.dependencies.enabled) {
+      return;
+    }
     const elserModelId = await this.dependencies.getModelId();
 
     const retryOptions = { factor: 1, minTimeout: 10000, retries: 12 };
@@ -116,9 +120,9 @@ export class KnowledgeBaseService {
       } catch (error) {
         if (isModelMissingOrUnavailableError(error)) {
           return false;
-        } else {
-          throw error;
         }
+
+        throw error;
       }
     };
 
@@ -130,7 +134,7 @@ export class KnowledgeBaseService {
     };
 
     const installModel = async () => {
-      this.dependencies.logger.info('Installing ELSER model');
+      this.dependencies.logger.info(`Installing ${elserModelId} model`);
       try {
         await this.dependencies.esClient.asInternalUser.ml.putTrainedModel(
           {
@@ -149,12 +153,12 @@ export class KnowledgeBaseService {
           throw error;
         }
       }
-      this.dependencies.logger.info('Finished installing ELSER model');
+      this.dependencies.logger.info(`Finished installing ${elserModelId} model`);
     };
 
     const pollForModelInstallCompleted = async () => {
       await pRetry(async () => {
-        this.dependencies.logger.info('Polling installation of ELSER model');
+        this.dependencies.logger.info(`Polling installation of ${elserModelId} model`);
         const modelInstalledAndReady = await isModelInstalledAndReady();
         if (!modelInstalledAndReady) {
           throwKnowledgeBaseNotReady({
@@ -172,7 +176,7 @@ export class KnowledgeBaseService {
         wait_for: 'fully_allocated',
       });
     } catch (error) {
-      this.dependencies.logger.debug('Error starting model deployment');
+      this.dependencies.logger.debug(`Error starting ${elserModelId} model deployment`);
       this.dependencies.logger.debug(error);
       if (!isModelMissingOrUnavailableError(error)) {
         throw error;
@@ -194,17 +198,20 @@ export class KnowledgeBaseService {
         return;
       }
 
-      this.dependencies.logger.debug('Model is not allocated yet');
+      this.dependencies.logger.debug(`${elserModelId} model is not allocated yet`);
       this.dependencies.logger.debug(() => JSON.stringify(response));
 
       throw gatewayTimeout();
     }, retryOptions);
 
-    this.dependencies.logger.info('Model is ready');
+    this.dependencies.logger.info(`${elserModelId} model is ready`);
     this.ensureTaskScheduled();
   };
 
   private ensureTaskScheduled() {
+    if (!this.dependencies.enabled) {
+      return;
+    }
     this.dependencies.taskManagerStart
       .ensureScheduled({
         taskType: INDEX_QUEUED_DOCUMENTS_TASK_TYPE,
@@ -266,7 +273,7 @@ export class KnowledgeBaseService {
   }
 
   async processQueue() {
-    if (!this._queue.length) {
+    if (!this._queue.length || !this.dependencies.enabled) {
       return;
     }
 
@@ -332,6 +339,9 @@ export class KnowledgeBaseService {
 
   status = async () => {
     this.dependencies.logger.debug('Checking model status');
+    if (!this.dependencies.enabled) {
+      return { ready: false, enabled: false };
+    }
     const elserModelId = await this.dependencies.getModelId();
 
     try {
@@ -352,6 +362,7 @@ export class KnowledgeBaseService {
         deployment_state: deploymentState,
         allocation_state: allocationState,
         model_name: elserModelId,
+        enabled: true,
       };
     } catch (error) {
       this.dependencies.logger.debug(
@@ -361,6 +372,7 @@ export class KnowledgeBaseService {
       return {
         error: error instanceof errors.ResponseError ? error.body.error : String(error),
         ready: false,
+        enabled: true,
         model_name: elserModelId,
       };
     }
@@ -440,6 +452,10 @@ export class KnowledgeBaseService {
     esClient: { asCurrentUser: ElasticsearchClient; asInternalUser: ElasticsearchClient };
     uiSettingsClient: IUiSettingsClient;
   }): Promise<RecalledEntry[]> => {
+    if (!this.dependencies.enabled) {
+      return [];
+    }
+
     this.dependencies.logger.debug(
       () => `Recalling entries from KB for queries: "${JSON.stringify(queries)}"`
     );
@@ -510,6 +526,9 @@ export class KnowledgeBaseService {
     namespace: string,
     user?: { name: string }
   ): Promise<Array<Instruction & { public?: boolean }>> => {
+    if (!this.dependencies.enabled) {
+      return [];
+    }
     try {
       const response = await this.dependencies.esClient.asInternalUser.search<KnowledgeBaseEntry>({
         index: resourceNames.aliases.kb,
@@ -550,6 +569,9 @@ export class KnowledgeBaseService {
     sortBy?: string;
     sortDirection?: 'asc' | 'desc';
   }): Promise<{ entries: KnowledgeBaseEntry[] }> => {
+    if (!this.dependencies.enabled) {
+      return { entries: [] };
+    }
     try {
       const response = await this.dependencies.esClient.asInternalUser.search<KnowledgeBaseEntry>({
         index: resourceNames.aliases.kb,
@@ -617,6 +639,9 @@ export class KnowledgeBaseService {
     user?: { name: string; id?: string };
     namespace?: string;
   }) => {
+    if (!this.dependencies.enabled) {
+      return null;
+    }
     const res = await this.dependencies.esClient.asInternalUser.search<
       Pick<KnowledgeBaseEntry, 'doc_id'>
     >({
@@ -679,6 +704,10 @@ export class KnowledgeBaseService {
     user?: { name: string; id?: string };
     namespace?: string;
   }): Promise<void> => {
+    if (!this.dependencies.enabled) {
+      return;
+    }
+
     try {
       await this.dependencies.esClient.asInternalUser.index({
         index: resourceNames.aliases.kb,
@@ -706,6 +735,9 @@ export class KnowledgeBaseService {
   }: {
     operations: KnowledgeBaseEntryOperation[];
   }): Promise<void> => {
+    if (!this.dependencies.enabled) {
+      return;
+    }
     this.dependencies.logger.info(`Starting import of ${operations.length} entries`);
 
     const limiter = pLimit(5);

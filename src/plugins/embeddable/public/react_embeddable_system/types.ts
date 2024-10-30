@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import {
   HasSerializableState,
   HasSnapshottableState,
@@ -12,6 +14,7 @@ import {
 } from '@kbn/presentation-containers';
 import { DefaultPresentationPanelApi } from '@kbn/presentation-panel-plugin/public/panel_component/types';
 import {
+  CanLockHoverActions,
   HasType,
   PublishesPhaseEvents,
   PublishesUnsavedChanges,
@@ -46,7 +49,7 @@ export type SetReactEmbeddableApiRegistration<
     SerializedState,
     RuntimeState
   >
-> = Omit<Api, 'uuid' | 'parent' | 'type' | 'phase$'>;
+> = Omit<Api, 'uuid' | 'parent' | 'type' | 'phase$' | keyof CanLockHoverActions>;
 
 /**
  * Defines the subset of the default embeddable API that the `buildApi` method uses, which allows implementors

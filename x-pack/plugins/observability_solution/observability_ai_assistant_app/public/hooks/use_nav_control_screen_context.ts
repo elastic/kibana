@@ -8,11 +8,11 @@
 import { useEffect, useState } from 'react';
 import datemath from '@elastic/datemath';
 import moment from 'moment';
+import { useAIAssistantAppService } from '@kbn/ai-assistant';
 import { useKibana } from './use_kibana';
-import { useObservabilityAIAssistantAppService } from './use_observability_ai_assistant_app_service';
 
 export function useNavControlScreenContext() {
-  const service = useObservabilityAIAssistantAppService();
+  const service = useAIAssistantAppService();
 
   const {
     services: {

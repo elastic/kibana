@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Subject, Observable } from 'rxjs';
+import { Subject } from 'rxjs';
 import { Logger } from '@kbn/core/server';
 
 import minimatch from 'minimatch';
@@ -39,12 +39,13 @@ export interface ClaimOwnershipResult {
     tasksConflicted: number;
     tasksClaimed: number;
     tasksLeftUnclaimed?: number;
+    tasksErrors?: number;
   };
   docs: ConcreteTaskInstance[];
   timing?: TaskTiming;
 }
 
-export type TaskClaimerFn = (opts: TaskClaimerOpts) => Observable<ClaimOwnershipResult>;
+export type TaskClaimerFn = (opts: TaskClaimerOpts) => Promise<ClaimOwnershipResult>;
 
 let WarnedOnInvalidClaimer = false;
 
