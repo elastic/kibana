@@ -25,6 +25,23 @@ function getInvalidJobIds(jobs: MlJobWithTimeRange[], ids: string[]) {
   });
 }
 
+// This is useful when redirecting from dashboards where groupIds are treated as jobIds
+const getJobIdsFromGroups = (jobIds: string[], jobs: MlJobWithTimeRange[]) => {
+  const result = new Set<string>();
+
+  jobs.forEach((job) => {
+    if (jobIds.includes(job.job_id)) {
+      result.add(job.job_id);
+    }
+
+    if (job.groups?.some((group) => jobIds.includes(group))) {
+      result.add(job.job_id);
+    }
+  });
+
+  return Array.from(result);
+};
+
 export interface JobSelection {
   jobIds: string[];
   selectedGroups: string[];
@@ -37,9 +54,9 @@ export const useJobSelection = (jobs: MlJobWithTimeRange[]) => {
   const getJobSelection = useJobSelectionFlyout();
 
   const tmpIds = useMemo(() => {
-    const ids = globalState?.ml?.jobIds || [];
+    const ids = getJobIdsFromGroups(globalState?.ml?.jobIds || [], jobs);
     return (typeof ids === 'string' ? [ids] : ids).map((id: string) => String(id));
-  }, [globalState?.ml?.jobIds]);
+  }, [globalState?.ml?.jobIds, jobs]);
 
   const invalidIds = useMemo(() => {
     return getInvalidJobIds(jobs, tmpIds);

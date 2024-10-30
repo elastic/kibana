@@ -22,7 +22,6 @@ import type { AnomalySwimLaneEmbeddableApi } from '../embeddables/anomaly_swimla
 import { isSwimLaneEmbeddableContext } from '../embeddables/anomaly_swimlane/types';
 import type { MlCoreSetup } from '../plugin';
 import { getEmbeddableTimeRange } from './get_embeddable_time_range';
-import type { MlApi } from '../application/services/ml_api_service';
 
 export interface OpenInAnomalyExplorerSwimLaneActionContext extends EmbeddableApiContext {
   embeddable: AnomalySwimLaneEmbeddableApi;
@@ -51,33 +50,6 @@ export function isAnomalyChartsEmbeddableContext(arg: unknown): arg is {
   );
 }
 
-// This is useful because embeddables do not differentiate between jobIds and groupIds
-// so for redirect to work we need to resolve the jobIds from the groupIds
-const resolveJobIdsFromGroups = async (
-  embeddableJobIds: string[],
-  allGroupIds: string[],
-  allJobIds: string[],
-  mlApi?: MlApi
-) => {
-  const jobIdsSet = new Set(allJobIds);
-  const groupIdsSet = new Set(allGroupIds);
-
-  const directJobIds = embeddableJobIds.filter((id) => jobIdsSet.has(id));
-  const groupIds = embeddableJobIds.filter((id) => groupIdsSet.has(id));
-
-  if (groupIds.length === 0) {
-    return directJobIds;
-  }
-
-  const allGroups = await mlApi?.jobs.groups();
-
-  const jobIdsFromGroups = allGroups
-    ?.filter((group) => groupIds.includes(group.id))
-    .flatMap((group) => group.jobIds);
-
-  return [...new Set([...directJobIds, ...(jobIdsFromGroups ?? [])])];
-};
-
 export function createOpenInExplorerAction(
   getStartServices: MlCoreSetup['getStartServices']
 ): UiActionsActionDefinition<
@@ -96,29 +68,18 @@ export function createOpenInExplorerAction(
       });
     },
     async getHref(context): Promise<string | undefined> {
-      const [, pluginsStart, { mlApi }] = await getStartServices();
+      const [, pluginsStart] = await getStartServices();
       const locator = pluginsStart.share.url.locators.get(ML_APP_LOCATOR)!;
-
-      const result = await mlApi?.jobs.getAllJobAndGroupIds();
-      const allGroupIds = result?.groupIds ?? [];
-      const allJobIds = result?.jobIds ?? [];
 
       if (isSwimLaneEmbeddableContext(context)) {
         const { data, embeddable } = context;
 
         const { viewBy, jobIds, perPage, fromPage } = embeddable;
 
-        const resolvedJobIds = await resolveJobIdsFromGroups(
-          jobIds.getValue(),
-          allGroupIds,
-          allJobIds,
-          mlApi
-        );
-
         return locator.getUrl({
           page: 'explorer',
           pageState: {
-            jobIds: resolvedJobIds,
+            jobIds: jobIds.getValue(),
             timeRange: getEmbeddableTimeRange(embeddable),
             mlExplorerSwimlane: {
               viewByFromPage: fromPage.getValue(),
@@ -139,7 +100,7 @@ export function createOpenInExplorerAction(
         const { jobIds$, selectedEntities$ } = embeddable;
 
         const jobIds = jobIds$?.getValue() ?? [];
-        const resolvedJobIds = await resolveJobIdsFromGroups(jobIds, allGroupIds, allJobIds, mlApi);
+
         let mlExplorerFilter: ExplorerAppState['mlExplorerFilter'] | undefined;
         const entityFieldsValue = selectedEntities$?.getValue();
 
@@ -174,7 +135,7 @@ export function createOpenInExplorerAction(
         return locator.getUrl({
           page: 'explorer',
           pageState: {
-            jobIds: resolvedJobIds,
+            jobIds,
             timeRange: getEmbeddableTimeRange(embeddable),
             // @ts-ignore QueryDslQueryContainer is not compatible with SerializableRecord
             ...(mlExplorerFilter ? ({ mlExplorerFilter } as SerializableRecord) : {}),
