@@ -35,6 +35,12 @@ export function definePutRolesRoutes({
     .addVersion(
       {
         version: API_VERSIONS.roles.public.v1,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           request: {
             params: schema.object({

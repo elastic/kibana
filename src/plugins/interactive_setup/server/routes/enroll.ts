@@ -40,6 +40,12 @@ export function defineEnrollRoutes({
   router.post(
     {
       path: '/internal/interactive_setup/enroll',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           hosts: schema.arrayOf(schema.uri({ scheme: 'https' }), {

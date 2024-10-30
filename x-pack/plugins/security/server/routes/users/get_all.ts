@@ -11,7 +11,16 @@ import { createLicensedRouteHandler } from '../licensed_route_handler';
 
 export function defineGetAllUsersRoutes({ router }: RouteDefinitionParams) {
   router.get(
-    { path: '/internal/security/users', validate: false },
+    {
+      path: '/internal/security/users',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate: false,
+    },
     createLicensedRouteHandler(async (context, request, response) => {
       try {
         const esClient = (await context.core).elasticsearch.client;

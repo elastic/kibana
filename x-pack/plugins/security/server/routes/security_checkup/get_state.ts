@@ -29,7 +29,16 @@ export function defineSecurityCheckupGetStateRoutes({
   const doesClusterHaveUserData = createClusterDataCheck();
 
   router.get(
-    { path: '/internal/security/security_checkup/state', validate: false },
+    {
+      path: '/internal/security/security_checkup/state',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate: false,
+    },
     async (context, _request, response) => {
       const esClient = (await context.core).elasticsearch.client;
       let displayAlert = false;

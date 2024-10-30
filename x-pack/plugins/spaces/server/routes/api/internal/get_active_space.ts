@@ -15,6 +15,12 @@ export function initGetActiveSpaceApi(deps: InternalRouteDeps) {
   router.get(
     {
       path: '/internal/spaces/_active_space',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: false,
     },
     createLicensedRouteHandler(async (context, request, response) => {

@@ -15,7 +15,16 @@ export function defineAnonymousAccessGetCapabilitiesRoutes({
   getAnonymousAccessService,
 }: RouteDefinitionParams) {
   router.get(
-    { path: '/internal/security/anonymous_access/capabilities', validate: false },
+    {
+      path: '/internal/security/anonymous_access/capabilities',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate: false,
+    },
     async (_context, request, response) => {
       const anonymousAccessService = getAnonymousAccessService();
       return response.ok({ body: await anonymousAccessService.getCapabilities(request) });

@@ -18,6 +18,12 @@ export function defineRoleMappingGetRoutes(params: RouteDefinitionParams) {
   router.get(
     {
       path: '/internal/security/role_mapping/{name?}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           name: schema.maybe(schema.string()),

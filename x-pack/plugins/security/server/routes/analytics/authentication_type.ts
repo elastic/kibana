@@ -31,6 +31,12 @@ export function defineRecordAnalyticsOnAuthTypeRoutes({
   router.post(
     {
       path: '/internal/security/analytics/_record_auth_type',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.nullable(
           schema.object({ signature: schema.string(), timestamp: schema.number() })

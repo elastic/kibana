@@ -27,6 +27,12 @@ export function defineUpdateUserProfileDataRoute({
   router.post(
     {
       path: '/internal/security/user_profile/_data',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.recordOf(schema.string(), schema.any()),
       },

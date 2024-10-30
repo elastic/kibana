@@ -24,6 +24,12 @@ export function defineChangeUserPasswordRoutes({
   router.post(
     {
       path: '/internal/security/users/{username}/password',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({ username: schema.string({ minLength: 1, maxLength: 1024 }) }),
         body: schema.object({

@@ -15,6 +15,12 @@ export function defineVerifyRoute({ router, verificationCode }: RouteDefinitionP
   router.post(
     {
       path: '/internal/interactive_setup/verify',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           code: schema.string(),

@@ -17,6 +17,12 @@ export function definePingRoute({ router, logger, elasticsearch, preboot }: Rout
   router.post(
     {
       path: '/internal/interactive_setup/ping',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           host: schema.uri({ scheme: ['http', 'https'] }),

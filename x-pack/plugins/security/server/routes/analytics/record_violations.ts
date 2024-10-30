@@ -135,6 +135,12 @@ export function defineRecordViolations({ router, analyticsService }: RouteDefini
   router.post(
     {
       path: '/internal/security/analytics/_record_violations',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         /**
          * Chrome supports CSP3 spec and sends an array of reports. Safari only sends a single

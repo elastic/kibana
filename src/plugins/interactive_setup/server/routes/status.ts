@@ -15,6 +15,12 @@ export function defineStatusRoute({ router, elasticsearch, preboot }: RouteDefin
   router.get(
     {
       path: '/internal/interactive_setup/status',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: false,
       options: { authRequired: false },
     },

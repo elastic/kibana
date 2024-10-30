@@ -23,6 +23,12 @@ export function defineKibanaUserRoleDeprecationRoutes({ router, logger }: RouteD
   router.post(
     {
       path: '/internal/security/deprecations/kibana_user_role/_fix_users',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: false,
     },
     createLicensedRouteHandler(async (context, request, response) => {
@@ -88,6 +94,12 @@ export function defineKibanaUserRoleDeprecationRoutes({ router, logger }: RouteD
   router.post(
     {
       path: '/internal/security/deprecations/kibana_user_role/_fix_role_mappings',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: false,
     },
     createLicensedRouteHandler(async (context, request, response) => {
