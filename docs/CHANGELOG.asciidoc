@@ -216,7 +216,7 @@ Data ingestion and Fleet::
 * Added format parameter to `agent_policies` APIs ({kibana-pull}191811[#191811]).
 * Adds toggles for `agent.monitoring.http.enabled` and `agent.monitoring.http.buffer.enabled` to agent policy advanced settings ({kibana-pull}190984[#190984]).
 * Support integration policies without agent policy references (aka orphaned integration policies) ({kibana-pull}190649[#190649]).
-* Change UX of edit integration policy agent policies ({kibana-pull}190583[#190583]).
+* Changed the UX of the Edit Integration Policy page to update agent policies ({kibana-pull}190583[#190583]).
 * Allow `traces` to be added to the `monitoring_enabled` array in Agent policies ({kibana-pull}189908[#189908]).
 * Create task that periodically unenrolls inactive agents ({kibana-pull}189861[#189861]).
 * Adds setup technology selector to add integration page ({kibana-pull}189612[#189612]).
