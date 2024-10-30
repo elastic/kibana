@@ -261,6 +261,7 @@ describe('SavedObjectsRepository Encryption Extension', () => {
 
     it(`fails if non-UUID ID is specified for encrypted type`, async () => {
       mockEncryptionExt.isEncryptableType.mockReturnValue(true);
+      mockEncryptionExt.shouldEnforceRandomId.mockReturnValue(true);
       mockEncryptionExt.decryptOrStripResponseAttributes.mockResolvedValue({
         ...encryptedSO,
         ...decryptedStrippedAttributes,
@@ -483,6 +484,7 @@ describe('SavedObjectsRepository Encryption Extension', () => {
 
     it(`fails if non-UUID ID is specified for encrypted type`, async () => {
       mockEncryptionExt.isEncryptableType.mockReturnValue(true);
+      mockEncryptionExt.shouldEnforceRandomId.mockReturnValue(true);
       const result = await bulkCreateSuccess(client, repository, [
         encryptedSO, // Predefined IDs are not allowed for saved objects with encrypted attributes unless the ID is a UUID
       ]);
