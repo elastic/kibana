@@ -39,7 +39,7 @@ type CreateEntityDefinitionQuery = QueryParamOf<
   ClientRequestParamsOf<EntityManagerRouteRepository, 'PUT /internal/entities/managed/enablement'>
 >;
 
-export type EntityLatest = z.infer<typeof entityLatestSchema>;
+export type EnitityInstance = z.infer<typeof entityLatestSchema>;
 
 export class EntityClient {
   public readonly repositoryClient: EntityManagerRepositoryClient['fetch'];
@@ -90,16 +90,10 @@ export class EntityClient {
     }
   }
 
-  asKqlFilter(entityLatest: EntityLatest) {
+  asKqlFilter(entityLatest: EnitityInstance) {
     const identityFieldsValue = this.getIdentityFieldsValue(entityLatest);
 
     const nodes: KueryNode[] = Object.entries(identityFieldsValue).map(([identityField, value]) => {
-      if (Array.isArray(value)) {
-        return nodeTypes.function.buildNode(
-          'or',
-          value.map((v) => nodeTypes.function.buildNode('is', identityField, v))
-        );
-      }
       return nodeTypes.function.buildNode('is', identityField, value);
     });
 
@@ -110,7 +104,7 @@ export class EntityClient {
     return toKqlExpression(kqlExpression);
   }
 
-  getIdentityFieldsValue(entityLatest: EntityLatest) {
+  getIdentityFieldsValue(entityLatest: EnitityInstance) {
     const { identity_fields: identityFields } = entityLatest.entity;
 
     if (!identityFields) {
