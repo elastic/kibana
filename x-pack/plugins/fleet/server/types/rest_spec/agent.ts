@@ -217,11 +217,6 @@ export const AgentResponseSchema = schema.object({
 });
 
 export const GetAgentsResponseSchema = ListResponseSchema(AgentResponseSchema).extends({
-  list: schema.maybe(
-    schema.arrayOf(AgentResponseSchema, {
-      meta: { deprecated: true },
-    })
-  ),
   statusSummary: schema.maybe(schema.recordOf(AgentStatusSchema, schema.number())),
 });
 

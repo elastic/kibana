@@ -28,8 +28,6 @@ export interface GetAgentsRequest {
 }
 
 export interface GetAgentsResponse extends ListResult<Agent> {
-  // deprecated in 8.x
-  list?: Agent[];
   statusSummary?: Record<AgentStatus, number>;
 }
 

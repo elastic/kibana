@@ -222,7 +222,6 @@ describe('schema validation', () => {
   it('list agents should return valid response', async () => {
     const expectedResponse: GetAgentsResponse = {
       items: [agent],
-      list: [agent],
       total: 1,
       page: 1,
       perPage: 1,

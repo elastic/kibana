@@ -205,7 +205,6 @@ export const getAgentsHandler: FleetRequestHandler<
     }
 
     const body: GetAgentsResponse = {
-      list: agents, // deprecated
       items: agents,
       total,
       page,
