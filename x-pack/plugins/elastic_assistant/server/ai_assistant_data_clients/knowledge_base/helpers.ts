@@ -220,6 +220,17 @@ export const getStructuredToolForIndexEntry = ({
               return { ...prev, [field]: hit._source[field] };
             }, {});
           }
+
+          // We want to send relevant inner hits (chunks) to the LLM as a context
+          const innerHitPath = `${indexEntry.name}.${indexEntry.field}`;
+          if (hit.inner_hits?.[innerHitPath]) {
+            return {
+              text: hit.inner_hits[innerHitPath].hits.hits
+                .map((innerHit) => innerHit._source.text)
+                .join('\n --- \n'),
+            };
+          }
+
           return {
             text: get(hit._source, `${indexEntry.field}.inference.chunks[0].text`),
           };
