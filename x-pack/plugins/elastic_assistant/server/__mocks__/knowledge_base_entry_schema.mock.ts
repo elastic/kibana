@@ -13,13 +13,13 @@ import {
 } from '@kbn/elastic-assistant-common';
 import { EsKnowledgeBaseEntrySchema } from '../ai_assistant_data_clients/knowledge_base/types';
 
-const documentEntry: EsKnowledgeBaseEntrySchema = {
+export const documentEntry: EsKnowledgeBaseEntrySchema = {
   id: '5678',
   '@timestamp': '2020-04-20T15:25:31.830Z',
   created_at: '2020-04-20T15:25:31.830Z',
-  created_by: 'elastic',
+  created_by: 'my_profile_uid',
   updated_at: '2020-04-20T15:25:31.830Z',
-  updated_by: 'elastic',
+  updated_by: 'my_profile_uid',
   name: 'test',
   namespace: 'default',
   type: 'document',
@@ -29,8 +29,8 @@ const documentEntry: EsKnowledgeBaseEntrySchema = {
   text: 'test',
   users: [
     {
-      name: 'elastic',
-      id: 'elastic1',
+      name: 'my_username',
+      id: 'my_profile_uid',
     },
   ],
 };
@@ -121,15 +121,15 @@ export const getKnowledgeBaseEntryMock = (
 ): KnowledgeBaseEntryResponse => ({
   id: '1',
   ...params,
-  createdBy: 'elastic',
-  updatedBy: 'elastic',
+  createdBy: 'my_profile_uid',
+  updatedBy: 'my_profile_uid',
   createdAt: '2020-04-20T15:25:31.830Z',
   updatedAt: '2020-04-20T15:25:31.830Z',
   namespace: 'default',
   users: [
     {
-      name: 'elastic',
-      id: 'elastic1',
+      name: 'my_username',
+      id: 'my_profile_uid',
     },
   ],
 });

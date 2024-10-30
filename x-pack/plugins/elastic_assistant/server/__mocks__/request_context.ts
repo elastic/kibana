@@ -28,6 +28,7 @@ import {
 } from '../ai_assistant_data_clients/knowledge_base';
 import { defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
 import { AttackDiscoveryDataClient } from '../lib/attack_discovery/persistence';
+import { authenticatedUser } from './user';
 
 export const createMockClients = () => {
   const core = coreMock.createRequestHandlerContext();
@@ -134,9 +135,9 @@ const createElasticAssistantRequestContextMock = (
       ((
         params: GetAIAssistantKnowledgeBaseDataClientParams
       ) => Promise<AIAssistantKnowledgeBaseDataClient | null>),
-    getCurrentUser: jest.fn(),
+    getCurrentUser: jest.fn().mockReturnValue(authenticatedUser),
     getServerBasePath: jest.fn(),
-    getSpaceId: jest.fn(),
+    getSpaceId: jest.fn().mockReturnValue('default'),
     inference: { getClient: jest.fn() },
     core: clients.core,
     telemetry: clients.elasticAssistant.telemetry,

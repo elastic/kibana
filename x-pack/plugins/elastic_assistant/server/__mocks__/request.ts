@@ -24,10 +24,12 @@ import {
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND,
   ELASTIC_AI_ASSISTANT_EVALUATE_URL,
   ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL,
+  ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_BULK_ACTION,
   ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_FIND,
   ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_URL,
   ELASTIC_AI_ASSISTANT_PROMPTS_URL_BULK_ACTION,
   ELASTIC_AI_ASSISTANT_PROMPTS_URL_FIND,
+  PerformKnowledgeBaseEntryBulkActionRequestBody,
   PostEvaluateRequestBodyInput,
 } from '@kbn/elastic-assistant-common';
 import {
@@ -68,6 +70,15 @@ export const getCreateKnowledgeBaseEntryRequest = () =>
     method: 'post',
     path: ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL,
     body: getCreateKnowledgeBaseEntrySchemaMock(),
+  });
+
+export const getBulkActionKnowledgeBaseEntryRequest = (
+  body: PerformKnowledgeBaseEntryBulkActionRequestBody
+) =>
+  requestMock.create({
+    method: 'post',
+    path: ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_BULK_ACTION,
+    body,
   });
 
 export const getGetCapabilitiesRequest = () =>

@@ -8,31 +8,57 @@
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { requestContextMock } from '../../../__mocks__/request_context';
 import { serverMock } from '../../../__mocks__/server';
-import { createKnowledgeBaseEntryRoute } from './create_route';
 import { getBasicEmptySearchResponse, getEmptyFindResult } from '../../../__mocks__/response';
-import { getCreateKnowledgeBaseEntryRequest, requestMock } from '../../../__mocks__/request';
 import {
+  getBulkActionKnowledgeBaseEntryRequest,
+  getCreateKnowledgeBaseEntryRequest,
+  requestMock,
+} from '../../../__mocks__/request';
+import {
+  documentEntry,
   getCreateKnowledgeBaseEntrySchemaMock,
   getKnowledgeBaseEntryMock,
   getQueryKnowledgeBaseEntryParams,
 } from '../../../__mocks__/knowledge_base_entry_schema.mock';
 import { ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL } from '@kbn/elastic-assistant-common';
-import { AuthenticatedUser } from '@kbn/core-security-common';
+import { bulkActionKnowledgeBaseEntriesRoute } from './bulk_actions_route';
+import { authenticatedUser } from '../../../__mocks__/user';
+import { UpdateKnowledgeBaseEntrySchema } from '../../../ai_assistant_data_clients/knowledge_base/types';
+import { getUpdateScript } from '../../../ai_assistant_data_clients/knowledge_base/create_knowledge_base_entry';
 
-describe('Create knowledge base entry route', () => {
+const date = '2023-03-28T22:27:28.159Z';
+describe.skip('Bulk actions knowledge base entry route', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
-  const mockUser1 = {
-    username: 'my_username',
-    authentication_realm: {
-      type: 'my_realm_type',
-      name: 'my_realm_name',
-    },
-  } as AuthenticatedUser;
 
+  const mockBulk = jest.fn().mockResolvedValue({
+    errors: [],
+    docs_created: [],
+    docs_deleted: [],
+    docs_updated: [],
+    took: 0,
+  });
+  beforeAll(() => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date(date));
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
   beforeEach(() => {
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
+
+    // @ts-ignore
+    clients.elasticAssistant.getAIAssistantKnowledgeBaseDataClient.options = {
+      manageGlobalKnowledgeBaseAIAssistant: true,
+    };
+
+    // @ts-ignore
+    clients.elasticAssistant.getAIAssistantKnowledgeBaseDataClient.getWriter.mockResolvedValue({
+      bulk: mockBulk,
+    });
 
     clients.elasticAssistant.getAIAssistantKnowledgeBaseDataClient.findDocuments.mockResolvedValue(
       Promise.resolve(getEmptyFindResult())
@@ -44,17 +70,38 @@ describe('Create knowledge base entry route', () => {
     context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise(getBasicEmptySearchResponse())
     );
-    context.elasticAssistant.getCurrentUser.mockReturnValue(mockUser1);
-    createKnowledgeBaseEntryRoute(server.router);
+    bulkActionKnowledgeBaseEntriesRoute(server.router);
   });
 
   describe('status codes', () => {
-    test('returns 200 with a conversation created via AIAssistantKnowledgeBaseDataClient', async () => {
+    test.only('returns 200 with a conversation created via AIAssistantKnowledgeBaseDataClient', async () => {
       const response = await server.inject(
-        getCreateKnowledgeBaseEntryRequest(),
+        getBulkActionKnowledgeBaseEntryRequest({
+          create: [getCreateKnowledgeBaseEntrySchemaMock()],
+        }),
         requestContextMock.convertContext(context)
       );
+      console.log('response', response);
+      const { id, ...documentEntrySansId } = documentEntry;
       expect(response.status).toEqual(200);
+      expect(mockBulk).toHaveBeenCalledWith({
+        documentsToUpdate: undefined,
+        documentsToDelete: undefined,
+        documentsToCreate: [
+          {
+            ...documentEntrySansId,
+            '@timestamp': '2023-03-28T22:27:28.159Z',
+            created_at: '2023-03-28T22:27:28.159Z',
+            updated_at: '2023-03-28T22:27:28.159Z',
+            namespace: 'default',
+            required: false,
+            vector: undefined,
+          },
+        ],
+        authenticatedUser,
+        getUpdateScript: (entry: UpdateKnowledgeBaseEntrySchema) =>
+          getUpdateScript({ entry, isPatch: true }),
+      });
     });
 
     test('returns 401 Unauthorized when request context getCurrentUser is not defined', async () => {

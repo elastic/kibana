@@ -181,6 +181,7 @@ export const bulkActionKnowledgeBaseEntriesRoute = (router: ElasticAssistantPlug
           // Authenticated user null check completed in `performChecks()` above
           const authenticatedUser = ctx.elasticAssistant.getCurrentUser() as AuthenticatedUser;
           const userFilter = getKBUserFilter(authenticatedUser);
+          console.log('userFilter??', userFilter);
           const manageGlobalKnowledgeBaseAIAssistant =
             kbDataClient?.options.manageGlobalKnowledgeBaseAIAssistant;
 
@@ -242,15 +243,42 @@ export const bulkActionKnowledgeBaseEntriesRoute = (router: ElasticAssistantPlug
               throw new Error(`Could not find documents to ${operation}: ${nonAvailableIds}.`);
             }
           };
-
+          console.log('one');
           await validateDocumentsModification(body.delete?.ids ?? [], 'delete');
           await validateDocumentsModification(
             body.update?.map((entry) => entry.id) ?? [],
             'update'
           );
+          console.log('two', authenticatedUser);
 
           const writer = await kbDataClient?.getWriter();
           const changedAt = new Date().toISOString();
+          console.log(
+            'three',
+            JSON.stringify({
+              documentsToCreate: body.create?.map((entry) =>
+                transformToCreateSchema({
+                  createdAt: changedAt,
+                  spaceId,
+                  user: authenticatedUser,
+                  entry,
+                  global: entry.users != null && entry.users.length === 0,
+                })
+              ),
+              documentsToDelete: body.delete?.ids,
+              documentsToUpdate: body.update?.map((entry) =>
+                transformToUpdateSchema({
+                  user: authenticatedUser,
+                  updatedAt: changedAt,
+                  entry,
+                  global: entry.users != null && entry.users.length === 0,
+                })
+              ),
+              getUpdateScript: (entry: UpdateKnowledgeBaseEntrySchema) =>
+                getUpdateScript({ entry, isPatch: true }),
+              authenticatedUser,
+            })
+          );
           const {
             errors,
             docs_created: docsCreated,
@@ -280,6 +308,7 @@ export const bulkActionKnowledgeBaseEntriesRoute = (router: ElasticAssistantPlug
               getUpdateScript({ entry, isPatch: true }),
             authenticatedUser,
           });
+          console.log('four');
           const created =
             docsCreated.length > 0
               ? await kbDataClient?.findDocuments<EsKnowledgeBaseEntrySchema>({
