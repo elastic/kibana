@@ -188,13 +188,13 @@ export type GetOpId = (input: { path: string; method: string }) => string;
 export const createOpIdGenerator = (): GetOpId => {
   const idMap = new Map<string, number>();
   return function getOpId({ path, method }) {
-    path = path.trim().toLowerCase();
-
     if (!method || !path) {
       throw new Error(
         `Must provide method and path, received: method: "${method}", path: "${path}"`
       );
     }
+
+    path = path.trim().toLowerCase();
 
     const removePrefixes = ['/internal/api/', '/internal/', '/api/']; // longest to shortest
     for (const prefix of removePrefixes) {
