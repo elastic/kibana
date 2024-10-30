@@ -1073,8 +1073,8 @@
     "urls"
   ],
   "synthetics-param": [],
+  "synthetics-private-locations-multiple": [],
   "synthetics-privates-locations": [],
-  "synthetics-privates-locations-multiple": [],
   "tag": [
     "color",
     "description",

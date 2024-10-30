@@ -3552,11 +3552,11 @@
     "dynamic": false,
     "properties": {}
   },
-  "synthetics-privates-locations": {
+  "synthetics-private-locations-multiple": {
     "dynamic": false,
     "properties": {}
   },
-  "synthetics-privates-locations-multiple": {
+  "synthetics-privates-locations": {
     "dynamic": false,
     "properties": {}
   },
