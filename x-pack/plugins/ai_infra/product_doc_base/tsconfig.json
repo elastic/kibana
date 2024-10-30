@@ -23,5 +23,6 @@
     "@kbn/utils",
     "@kbn/core-http-browser",
     "@kbn/logging-mocks",
+    "@kbn/licensing-plugin",
   ]
 }
