@@ -14,8 +14,18 @@ import {
   RuleStateAttributes,
 } from '@kbn/cloud-security-posture-common/schema/rules/latest';
 import { extractErrorMessage } from '@kbn/cloud-security-posture-common';
+import { METRIC_TYPE } from '@kbn/analytics';
+import {
+  CHANGE_MULTIPLE_RULE_STATE,
+  CHANGE_RULE_STATE,
+  uiMetricService,
+} from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { buildRuleKey } from '../../../common/utils/rules_states';
 import { RulesQuery, useFindCspBenchmarkRule } from './use_csp_benchmark_rules';
+import {
+  RuleStateAttributesWithoutStates,
+  useChangeCspRuleState,
+} from './use_change_csp_rule_state';
 import { usePageSize } from '../../common/hooks/use_page_size';
 import { LOCAL_STORAGE_PAGE_SIZE_RULES_KEY } from '../../common/constants';
 import { useCspGetRulesStates } from './use_csp_rules_state';
@@ -52,6 +62,8 @@ interface RulesContextValue {
   setSelectedRules: (rules: CspBenchmarkRulesWithStates[]) => void;
   setSelectAllRules: () => void;
   setEnabledDisabledItemsFilter: (filter: string) => void;
+  toggleRuleState: (rule: CspBenchmarkRulesWithStates) => void;
+  toggleSelectedRulesStates: (state: 'mute' | 'unmute') => void;
   enabledDisabledItemsFilter: string;
   mutedRulesCount?: number;
   rulesFlyoutData: CspBenchmarkRulesWithStates;
@@ -63,6 +75,7 @@ const MAX_ITEMS_PER_PAGE = 10000;
 export function RulesProvider({ children }: RulesProviderProps) {
   const params = useParams<PageUrlParams>();
   const { pageSize, setPageSize } = usePageSize(LOCAL_STORAGE_PAGE_SIZE_RULES_KEY);
+  const { mutate: mutateRuleState } = useChangeCspRuleState();
   const [page, setPage] = useState(1);
   const [rulesQuery, setRulesQuery] = useState<RulesQuery>({
     section: undefined,
@@ -147,6 +160,49 @@ export function RulesProvider({ children }: RulesProviderProps) {
     enabledDisabledItemsFilter
   );
 
+  const toggleRuleState = useCallback(
+    (rule: CspBenchmarkRulesWithStates) => {
+      if (rule.metadata.benchmark.rule_number) {
+        uiMetricService.trackUiMetric(METRIC_TYPE.COUNT, CHANGE_RULE_STATE);
+        const nextRuleStates = rule.state === 'muted' ? 'unmute' : 'mute';
+        const rulesObjectRequest: RuleStateAttributesWithoutStates = {
+          benchmark_id: rule.metadata.benchmark.id,
+          benchmark_version: rule.metadata.benchmark.version,
+          rule_number: rule.metadata.benchmark.rule_number,
+          rule_id: rule.metadata.id,
+        };
+        mutateRuleState({
+          newState: nextRuleStates,
+          ruleIds: [rulesObjectRequest],
+        });
+      }
+    },
+    [mutateRuleState]
+  );
+
+  const toggleSelectedRulesStates = useCallback(
+    (state: 'mute' | 'unmute') => {
+      const bulkSelectedRules: RuleStateAttributesWithoutStates[] = selectedRules.map(
+        (e: CspBenchmarkRulesWithStates) => ({
+          benchmark_id: e?.metadata.benchmark.id,
+          benchmark_version: e?.metadata.benchmark.version,
+          rule_number: e?.metadata.benchmark.rule_number!,
+          rule_id: e?.metadata.id,
+        })
+      );
+      // Only do the API Call IF there are no undefined value for rule number in the selected rules
+      if (!bulkSelectedRules.some((rule) => rule.rule_number === undefined)) {
+        uiMetricService.trackUiMetric(METRIC_TYPE.COUNT, CHANGE_MULTIPLE_RULE_STATE);
+        mutateRuleState({
+          newState: state,
+          ruleIds: bulkSelectedRules,
+        });
+      }
+      setSelectedRules([]);
+    },
+    [selectedRules, mutateRuleState]
+  );
+
   const rulesPageData = useMemo(
     () => getRulesPageData(filteredRulesWithStates, status, error, rulesQuery),
     [filteredRulesWithStates, status, error, rulesQuery]
@@ -211,6 +267,8 @@ export function RulesProvider({ children }: RulesProviderProps) {
       setSelectedRules,
       setSelectAllRules,
       setEnabledDisabledItemsFilter,
+      toggleRuleState,
+      toggleSelectedRulesStates,
       enabledDisabledItemsFilter,
       mutedRulesCount,
       rulesFlyoutData,
@@ -229,6 +287,8 @@ export function RulesProvider({ children }: RulesProviderProps) {
       setSelectAllRules,
       setEnabledDisabledItemsFilter,
       enabledDisabledItemsFilter,
+      toggleRuleState,
+      toggleSelectedRulesStates,
       mutedRulesCount,
       rulesFlyoutData,
     ]

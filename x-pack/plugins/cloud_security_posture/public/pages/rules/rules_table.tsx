@@ -19,15 +19,9 @@ import {
   EuiTableSortingType,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { METRIC_TYPE } from '@kbn/analytics';
-import {
-  CHANGE_RULE_STATE,
-  uiMetricService,
-} from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { uniqBy } from 'lodash';
 import { ColumnNameWithTooltip } from '../../components/column_name_with_tooltip';
 import * as TEST_SUBJECTS from './test_subjects';
-import { useChangeCspRuleState } from './use_change_csp_rule_state';
 import { CspBenchmarkRulesWithStates, useRules } from './rules_context';
 
 export const RULES_ROWS_ENABLE_SWITCH_BUTTON = 'rules-row-enable-switch-button';
@@ -262,34 +256,16 @@ const getColumns = ({
 ];
 
 const RuleStateSwitch = ({ rule }: { rule: CspBenchmarkRulesWithStates }) => {
+  const { toggleRuleState } = useRules();
   const isRuleMuted = rule?.state === 'muted';
-  const nextRuleState = isRuleMuted ? 'unmute' : 'mute';
 
-  const { mutate: mutateRulesStates } = useChangeCspRuleState();
-
-  const rulesObjectRequest = {
-    benchmark_id: rule?.metadata.benchmark.id,
-    benchmark_version: rule?.metadata.benchmark.version,
-    /* Rule number always exists from 8.7 */
-    rule_number: rule?.metadata.benchmark.rule_number!,
-    rule_id: rule?.metadata.id,
-  };
-  const changeCspRuleStateFn = async () => {
-    if (rule?.metadata.benchmark.rule_number) {
-      uiMetricService.trackUiMetric(METRIC_TYPE.COUNT, CHANGE_RULE_STATE);
-      mutateRulesStates({
-        newState: nextRuleState,
-        ruleIds: [rulesObjectRequest],
-      });
-    }
-  };
   return (
     <EuiFlexGroup justifyContent="flexEnd">
       <EuiFlexItem grow={false}>
         <EuiSwitch
           className="eui-textTruncate"
           checked={!isRuleMuted}
-          onChange={changeCspRuleStateFn}
+          onChange={() => toggleRuleState(rule)}
           data-test-subj={RULES_ROWS_ENABLE_SWITCH_BUTTON}
           label=""
           compressed={true}

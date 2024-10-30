@@ -27,10 +27,9 @@ import type { CspBenchmarkRuleMetadata } from '@kbn/cloud-security-posture-commo
 import { getRuleList } from '../configurations/findings_flyout/rule_tab';
 import { getRemediationList } from '../configurations/findings_flyout/overview_tab';
 import * as TEST_SUBJECTS from './test_subjects';
-import { useChangeCspRuleState } from './use_change_csp_rule_state';
-import { CspBenchmarkRulesWithStates } from './rules_container';
 import { TakeAction } from '../../components/take_action';
 import { createDetectionRuleFromBenchmarkRule } from '../configurations/utils/create_detection_rule_from_benchmark';
+import { CspBenchmarkRulesWithStates, useRules } from './rules_context';
 
 export const RULES_FLYOUT_SWITCH_BUTTON = 'rule-flyout-switch-button';
 
@@ -60,25 +59,9 @@ type RuleTab = (typeof tabs)[number]['id'];
 
 export const RuleFlyout = ({ onClose, rule }: RuleFlyoutProps) => {
   const [tab, setTab] = useState<RuleTab>('overview');
+  const { toggleRuleState } = useRules();
 
   const isRuleMuted = rule?.state === 'muted';
-  const { mutate: mutateRuleState } = useChangeCspRuleState();
-
-  const switchRuleStates = async () => {
-    if (rule.metadata.benchmark.rule_number) {
-      const rulesObjectRequest = {
-        benchmark_id: rule.metadata.benchmark.id,
-        benchmark_version: rule.metadata.benchmark.version,
-        rule_number: rule.metadata.benchmark.rule_number,
-        rule_id: rule.metadata.id,
-      };
-      const nextRuleStates = isRuleMuted ? 'unmute' : 'mute';
-      mutateRuleState({
-        newState: nextRuleStates,
-        ruleIds: [rulesObjectRequest],
-      });
-    }
-  };
 
   const createMisconfigurationRuleFn = async (http: HttpSetup) =>
     await createDetectionRuleFromBenchmarkRule(http, rule.metadata);
@@ -107,13 +90,7 @@ export const RuleFlyout = ({ onClose, rule }: RuleFlyoutProps) => {
         </EuiTabs>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        {tab === 'overview' && (
-          <RuleOverviewTab
-            rule={rule.metadata}
-            ruleData={rule}
-            switchRuleStates={switchRuleStates}
-          />
-        )}
+        {tab === 'overview' && <RuleOverviewTab rule={rule.metadata} ruleData={rule} />}
         {tab === 'remediation' && (
           <EuiDescriptionList compressed={false} listItems={getRemediationList(rule.metadata)} />
         )}
@@ -123,13 +100,13 @@ export const RuleFlyout = ({ onClose, rule }: RuleFlyoutProps) => {
           <EuiFlexItem grow={false}>
             {isRuleMuted ? (
               <TakeAction
-                enableBenchmarkRuleFn={switchRuleStates}
+                enableBenchmarkRuleFn={() => toggleRuleState(rule)}
                 createRuleFn={createMisconfigurationRuleFn}
                 isCreateDetectionRuleDisabled={true}
               />
             ) : (
               <TakeAction
-                disableBenchmarkRuleFn={switchRuleStates}
+                disableBenchmarkRuleFn={() => toggleRuleState(rule)}
                 createRuleFn={createMisconfigurationRuleFn}
                 isCreateDetectionRuleDisabled={false}
               />
@@ -144,22 +121,26 @@ export const RuleFlyout = ({ onClose, rule }: RuleFlyoutProps) => {
 const RuleOverviewTab = ({
   rule,
   ruleData,
-  switchRuleStates,
 }: {
   rule: CspBenchmarkRuleMetadata;
   ruleData: CspBenchmarkRulesWithStates;
-  switchRuleStates: () => Promise<void>;
-}) => (
-  <EuiFlexGroup direction="column">
-    <EuiFlexItem>
-      <EuiDescriptionList
-        listItems={[...ruleState(ruleData, switchRuleStates), ...getRuleList(rule, ruleData.state)]}
-      />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);
+}) => {
+  const { toggleRuleState } = useRules();
+  return (
+    <EuiFlexGroup direction="column">
+      <EuiFlexItem>
+        <EuiDescriptionList
+          listItems={[
+            ...ruleState(ruleData, () => toggleRuleState(ruleData)),
+            ...getRuleList(rule, ruleData.state),
+          ]}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
 
-const ruleState = (rule: CspBenchmarkRulesWithStates, switchRuleStates: () => Promise<void>) => [
+const ruleState = (rule: CspBenchmarkRulesWithStates, switchRuleStates: () => void) => [
   {
     title: (
       <EuiFlexGroup gutterSize="xs" alignItems="center">

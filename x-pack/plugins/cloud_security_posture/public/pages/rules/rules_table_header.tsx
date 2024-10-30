@@ -23,12 +23,8 @@ import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
-import {
-  RuleStateAttributesWithoutStates,
-  useChangeCspRuleState,
-} from './use_change_csp_rule_state';
 import { MultiSelectFilter } from '../../common/component/multi_select_filter';
-import { CspBenchmarkRulesWithStates, useRules } from './rules_context';
+import { useRules } from './rules_context';
 
 export const RULES_BULK_ACTION_BUTTON = 'bulk-action-button';
 export const RULES_BULK_ACTION_OPTION_ENABLE = 'bulk-action-option-enable';
@@ -200,39 +196,23 @@ const SearchField = ({ isSearching }: Pick<RulesTableToolbarProps, 'isSearching'
 };
 
 const CurrentPageOfTotal = () => {
-  const { selectedRules, setSelectedRules, rulesPageData, setSelectAllRules } = useRules();
+  const {
+    selectedRules,
+    setSelectedRules,
+    rulesPageData,
+    setSelectAllRules,
+    toggleSelectedRulesStates,
+  } = useRules();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const onPopoverClick = () => {
     setIsPopoverOpen((e) => !e);
   };
 
-  const { mutate: mutateRulesStates } = useChangeCspRuleState();
-
-  const changeCspRuleState = (state: 'mute' | 'unmute') => {
-    const bulkSelectedRules: RuleStateAttributesWithoutStates[] = selectedRules.map(
-      (e: CspBenchmarkRulesWithStates) => ({
-        benchmark_id: e?.metadata.benchmark.id,
-        benchmark_version: e?.metadata.benchmark.version,
-        rule_number: e?.metadata.benchmark.rule_number!,
-        rule_id: e?.metadata.id,
-      })
-    );
-    // Only do the API Call IF there are no undefined value for rule number in the selected rules
-    if (!bulkSelectedRules.some((rule) => rule.rule_number === undefined)) {
-      mutateRulesStates({
-        newState: state,
-        ruleIds: bulkSelectedRules,
-      });
-      setIsPopoverOpen(false);
-    }
-    setSelectedRules([]);
-  };
-
   const changeCspRuleStateMute = () => {
-    changeCspRuleState('mute');
+    toggleSelectedRulesStates('mute');
   };
   const changeCspRuleStateUnmute = () => {
-    changeCspRuleState('unmute');
+    toggleSelectedRulesStates('unmute');
   };
 
   const areAllSelectedRulesMuted = selectedRules.every((rule) => rule?.state === 'muted');
