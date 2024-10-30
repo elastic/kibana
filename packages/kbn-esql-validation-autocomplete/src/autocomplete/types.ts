@@ -80,3 +80,9 @@ export interface EditorContext {
    */
   triggerKind: number;
 }
+
+export type GetColumnsByTypeFn = (
+  type: string | string[],
+  ignored?: string[],
+  options?: { advanceCursor?: boolean; openSuggestions?: boolean; addComma?: boolean }
+) => Promise<SuggestionRawDefinition[]>;

@@ -7,19 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { parentPort, workerData } from 'worker_threads';
-import pidusage from 'pidusage';
-import { castArray } from 'lodash';
-import { memoryUsage } from 'process';
 import { timerange } from '@kbn/apm-synthtrace-client';
+import { castArray } from 'lodash';
+import pidusage from 'pidusage';
+import { memoryUsage } from 'process';
+import { parentPort, workerData } from 'worker_threads';
 import { getApmEsClient } from './get_apm_es_client';
+import { getEntitiesKibanaClient } from './get_entites_kibana_client';
+import { getEntitiesEsClient } from './get_entities_es_client';
+import { getInfraEsClient } from './get_infra_es_client';
+import { getLogsEsClient } from './get_logs_es_client';
+import { getOtelSynthtraceEsClient } from './get_otel_es_client';
 import { getScenario } from './get_scenario';
+import { getSyntheticsEsClient } from './get_synthetics_es_client';
 import { loggerProxy } from './logger_proxy';
 import { RunOptions } from './parse_run_cli_flags';
-import { getLogsEsClient } from './get_logs_es_client';
-import { getInfraEsClient } from './get_infra_es_client';
-import { getAssetsEsClient } from './get_assets_es_client';
-import { getSyntheticsEsClient } from './get_synthetics_es_client';
 
 export interface WorkerData {
   bucketFrom: Date;
@@ -28,15 +30,21 @@ export interface WorkerData {
   workerId: string;
   esUrl: string;
   version: string;
+  kibanaUrl: string;
 }
 
-const { bucketFrom, bucketTo, runOptions, esUrl, version } = workerData as WorkerData;
+const { bucketFrom, bucketTo, runOptions, esUrl, version, kibanaUrl } = workerData as WorkerData;
 
 async function start() {
   const logger = loggerProxy;
-  const assetsEsClient = getAssetsEsClient({
+  const entitiesEsClient = getEntitiesEsClient({
     concurrency: runOptions.concurrency,
     target: esUrl,
+    logger,
+  });
+
+  const entitiesKibanaClient = getEntitiesKibanaClient({
+    target: kibanaUrl,
     logger,
   });
 
@@ -65,6 +73,12 @@ async function start() {
     logger,
   });
 
+  const otelEsClient = getOtelSynthtraceEsClient({
+    concurrency: runOptions.concurrency,
+    target: esUrl,
+    logger,
+  });
+
   const file = runOptions.file;
 
   const scenario = await logger.perf('get_scenario', () => getScenario({ file, logger }));
@@ -78,8 +92,10 @@ async function start() {
       apmEsClient,
       logsEsClient,
       infraEsClient,
-      assetsEsClient,
       syntheticsEsClient,
+      otelEsClient,
+      entitiesEsClient,
+      entitiesKibanaClient,
     });
   }
 
@@ -88,7 +104,14 @@ async function start() {
   const generatorsAndClients = logger.perf('generate_scenario', () =>
     generate({
       range: timerange(bucketFrom, bucketTo),
-      clients: { logsEsClient, apmEsClient, infraEsClient, assetsEsClient, syntheticsEsClient },
+      clients: {
+        logsEsClient,
+        apmEsClient,
+        infraEsClient,
+        entitiesEsClient,
+        syntheticsEsClient,
+        otelEsClient,
+      },
     })
   );
 

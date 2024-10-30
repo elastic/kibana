@@ -8,6 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { memoize } from 'lodash';
 import { SuggestionRawDefinition } from './types';
 import { groupingFunctionDefinitions } from '../definitions/grouping';
 import { aggregationFunctionDefinitions } from '../definitions/generated/aggregation_functions';
@@ -25,10 +26,16 @@ import { buildDocumentation, buildFunctionDocumentation } from './documentation_
 import { DOUBLE_BACKTICK, SINGLE_TICK_REGEX } from '../shared/constants';
 import { ESQLRealField } from '../validation/types';
 import { isNumericType } from '../shared/esql_types';
+import { getTestFunctions } from '../shared/test_functions';
 
-const allFunctions = aggregationFunctionDefinitions
-  .concat(scalarFunctionDefinitions)
-  .concat(groupingFunctionDefinitions);
+const allFunctions = memoize(
+  () =>
+    aggregationFunctionDefinitions
+      .concat(scalarFunctionDefinitions)
+      .concat(groupingFunctionDefinitions)
+      .concat(getTestFunctions()),
+  () => getTestFunctions()
+);
 
 export const TIME_SYSTEM_PARAMS = ['?_tstart', '?_tend'];
 
@@ -57,7 +64,7 @@ function getSafeInsertSourceText(text: string) {
 export function getSuggestionFunctionDefinition(fn: FunctionDefinition): SuggestionRawDefinition {
   const fullSignatures = getFunctionSignatures(fn, { capitalize: true, withTypes: true });
   return {
-    label: fullSignatures[0].declaration,
+    label: fn.name.toUpperCase(),
     text: `${fn.name.toUpperCase()}($0)`,
     asSnippet: true,
     kind: 'Function',
@@ -94,11 +101,12 @@ export const getCompatibleFunctionDefinition = (
   returnTypes?: string[],
   ignored: string[] = []
 ): SuggestionRawDefinition[] => {
-  const fnSupportedByCommand = allFunctions
+  const fnSupportedByCommand = allFunctions()
     .filter(
-      ({ name, supportedCommands, supportedOptions }) =>
+      ({ name, supportedCommands, supportedOptions, ignoreAsSuggestion }) =>
         (option ? supportedOptions?.includes(option) : supportedCommands.includes(command)) &&
-        !ignored.includes(name)
+        !ignored.includes(name) &&
+        !ignoreAsSuggestion
     )
     .sort((a, b) => a.name.localeCompare(b.name));
   if (!returnTypes) {
@@ -115,7 +123,7 @@ export const getCompatibleFunctionDefinition = (
 };
 
 export function getSuggestionCommandDefinition(
-  command: CommandDefinition
+  command: CommandDefinition<string>
 ): SuggestionRawDefinition {
   const commandDefinition = getCommandDefinition(command.name);
   const commandSignature = getCommandSignature(commandDefinition);
@@ -171,7 +179,7 @@ export const buildFieldsDefinitions = (fields: string[]): SuggestionRawDefinitio
 export const buildVariablesDefinitions = (variables: string[]): SuggestionRawDefinition[] =>
   variables.map((label) => ({
     label,
-    text: label,
+    text: getSafeInsertText(label),
     kind: 'Variable',
     detail: i18n.translate(
       'kbn-esql-validation-autocomplete.esql.autocomplete.variableDefinition',

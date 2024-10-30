@@ -19,6 +19,7 @@ import type {
   ValidatorType as ValidationSchema,
 } from '../types';
 import type { SubActionConnector } from './sub_action_connector';
+import type { HookServices } from '../types';
 
 export interface ServiceParams<Config, Secrets> {
   /**
@@ -76,6 +77,35 @@ export type Validators<Config, Secrets> = Array<
   ConfigValidator<Config> | SecretsValidator<Secrets>
 >;
 
+export interface PreSaveConnectorHookParams<Config, Secrets> {
+  connectorId: string;
+  config: Config;
+  secrets: Secrets;
+  logger: Logger;
+  request: KibanaRequest;
+  services: HookServices;
+  isUpdate: boolean;
+}
+
+export interface PostSaveConnectorHookParams<Config, Secrets> {
+  connectorId: string;
+  config: Config;
+  secrets: Secrets;
+  logger: Logger;
+  request: KibanaRequest;
+  services: HookServices;
+  isUpdate: boolean;
+  wasSuccessful: boolean;
+}
+
+export interface PostDeleteConnectorHookParams<Config, Secrets> {
+  connectorId: string;
+  config: Config;
+  logger: Logger;
+  services: HookServices;
+  request: KibanaRequest;
+}
+
 export interface SubActionConnectorType<Config, Secrets> {
   id: string;
   name: string;
@@ -92,6 +122,9 @@ export interface SubActionConnectorType<Config, Secrets> {
   getKibanaPrivileges?: (args?: {
     params?: { subAction: string; subActionParams: Record<string, unknown> };
   }) => string[];
+  preSaveHook?: (params: PreSaveConnectorHookParams<Config, Secrets>) => Promise<void>;
+  postSaveHook?: (params: PostSaveConnectorHookParams<Config, Secrets>) => Promise<void>;
+  postDeleteHook?: (params: PostDeleteConnectorHookParams<Config, Secrets>) => Promise<void>;
 }
 
 export interface ExecutorParams extends ActionTypeParams {

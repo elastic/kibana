@@ -41,7 +41,7 @@ import {
   reactRouterNavigate,
   attemptToURIDecode,
 } from '../../../../../shared_imports';
-import { getDataStreamDetailsLink, getIndexDetailsLink } from '../../../../services/routing';
+import { getDataStreamDetailsLink, navigateToIndexDetailsPage } from '../../../../services/routing';
 import { documentationService } from '../../../../services/documentation';
 import { AppContextConsumer } from '../../../../app_context';
 import { renderBadges } from '../../../../lib/render_badges';
@@ -57,6 +57,8 @@ const getColumnConfigs = ({
   filterChanged,
   extensionsService,
   location,
+  application,
+  http,
 }) => {
   const columns = [
     {
@@ -65,17 +67,27 @@ const getColumnConfigs = ({
         defaultMessage: 'Name',
       }),
       order: 10,
-      render: (index) => (
-        <>
-          <EuiLink
-            data-test-subj="indexTableIndexNameLink"
-            onClick={() => history.push(getIndexDetailsLink(index.name, location.search || ''))}
-          >
-            {index.name}
-          </EuiLink>
-          {renderBadges(index, extensionsService, filterChanged)}
-        </>
-      ),
+      render: (index) => {
+        return (
+          <>
+            <EuiLink
+              data-test-subj="indexTableIndexNameLink"
+              onClick={() => {
+                navigateToIndexDetailsPage(
+                  index.name,
+                  location.search || '',
+                  extensionsService,
+                  application,
+                  http
+                );
+              }}
+            >
+              {index.name}
+            </EuiLink>
+            {renderBadges(index, extensionsService, filterChanged)}
+          </>
+        );
+      },
     },
     {
       fieldName: 'data_stream',
@@ -533,8 +545,9 @@ export class IndexTable extends Component {
 
     return (
       <AppContextConsumer>
-        {({ services, config }) => {
+        {({ services, config, core }) => {
           const { extensionsService } = services;
+          const { application, http } = core;
           const columnConfigs = getColumnConfigs({
             showIndexStats: config.enableIndexStats,
             showSizeAndDocCount: config.enableSizeAndDocCount,
@@ -542,6 +555,8 @@ export class IndexTable extends Component {
             filterChanged,
             history,
             location,
+            application,
+            http,
           });
           const columnsCount = columnConfigs.length + 1;
           return (

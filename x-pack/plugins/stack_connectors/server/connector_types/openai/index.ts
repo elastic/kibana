@@ -53,7 +53,11 @@ export const configValidator = (configObject: Config, validatorServices: Validat
 
     const { apiProvider } = configObject;
 
-    if (apiProvider !== OpenAiProviderType.OpenAi && apiProvider !== OpenAiProviderType.AzureAi) {
+    if (
+      apiProvider !== OpenAiProviderType.OpenAi &&
+      apiProvider !== OpenAiProviderType.AzureAi &&
+      apiProvider !== OpenAiProviderType.Other
+    ) {
       throw new Error(
         `API Provider is not supported${
           apiProvider && (apiProvider as OpenAiProviderType).length ? `: ${apiProvider}` : ``

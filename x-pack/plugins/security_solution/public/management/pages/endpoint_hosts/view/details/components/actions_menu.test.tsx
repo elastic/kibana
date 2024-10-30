@@ -56,6 +56,8 @@ describe('When using the Endpoint Details Actions Menu', () => {
     endpointHost.metadata.host.os.name = 'Windows';
     // @ts-expect-error TS2540
     endpointHost.metadata.agent.version = '7.14.0';
+    // @ts-expect-error TS2540
+    endpointHost.policy_info = { agent: { applied: { id: '123' } } };
     httpMocks.responseProvider.metadataDetails.mockReturnValue(endpointHost);
   };
 
@@ -87,7 +89,7 @@ describe('When using the Endpoint Details Actions Menu', () => {
     });
 
     render = async () => {
-      renderResult = mockedContext.render(<ActionsMenu hostMetadata={endpointHost?.metadata} />);
+      renderResult = mockedContext.render(<ActionsMenu hostInfo={endpointHost} />);
       const endpointDetailsActionsButton = renderResult.getByTestId('endpointDetailsActionsButton');
       endpointDetailsActionsButton.style.pointerEvents = 'all';
       await user.click(endpointDetailsActionsButton);
@@ -129,10 +131,6 @@ describe('When using the Endpoint Details Actions Menu', () => {
       'should navigate via kibana `navigateToApp()` when %s is clicked',
       async (_, dataTestSubj) => {
         await render();
-        // TODO middlewareSpy.waitForAction() times out after the upgrade to userEvent v14 https://github.com/elastic/kibana/pull/189949
-        // await act(async () => {
-        //   await middlewareSpy.waitForAction('serverReturnedEndpointAgentPolicies');
-        // });
 
         const takeActionMenuItem = renderResult.getByTestId(dataTestSubj);
         takeActionMenuItem.style.pointerEvents = 'all';

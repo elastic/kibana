@@ -265,6 +265,23 @@ export const logsOnlyAllSpacesAll: Role = {
   },
 };
 
+export const stackAlertsOnlyReadSpacesAll: Role = {
+  name: 'stack_alerts_only_read_spaces_all',
+  privileges: {
+    elasticsearch: {
+      indices: [],
+    },
+    kibana: [
+      {
+        feature: {
+          stackAlerts: ['read'],
+        },
+        spaces: ['*'],
+      },
+    ],
+  },
+};
+
 export const stackAlertsOnlyAllSpacesAll: Role = {
   name: 'stack_alerts_only_all_spaces_all',
   privileges: {
@@ -511,6 +528,7 @@ export const allRoles = [
   securitySolutionOnlyReadSpacesAll,
   observabilityOnlyAllSpacesAll,
   logsOnlyAllSpacesAll,
+  stackAlertsOnlyReadSpacesAll,
   stackAlertsOnlyAllSpacesAll,
   observabilityOnlyReadSpacesAll,
   observabilityOnlyAllSpacesAllWithReadESIndices,

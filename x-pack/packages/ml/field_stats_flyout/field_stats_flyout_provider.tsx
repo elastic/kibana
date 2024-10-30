@@ -142,6 +142,7 @@ export const FieldStatsFlyoutProvider: FC<FieldStatsFlyoutProviderProps> = (prop
           // Get all field names for each returned doc and flatten it
           // to a list of unique field names used across all docs.
           const fieldsWithData = new Set(docs.map(Object.keys).flat(1));
+
           manager.set(cacheKey, fieldsWithData);
           if (!unmounted) {
             setPopulatedFields(fieldsWithData);

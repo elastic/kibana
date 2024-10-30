@@ -217,7 +217,7 @@ describe('rule snoozing', { tags: ['@ess', '@serverless', '@skipInServerlessMKI'
   describe('Handling errors', () => {
     it('shows an error if unable to load snooze settings', () => {
       createRule(getNewRule({ name: 'Test rule', enabled: false })).then(({ body: rule }) => {
-        cy.intercept('GET', `${INTERNAL_ALERTING_API_FIND_RULES_PATH}*`, {
+        cy.intercept('POST', `${INTERNAL_ALERTING_API_FIND_RULES_PATH}*`, {
           statusCode: 500,
         });
 

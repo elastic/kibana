@@ -63,11 +63,13 @@ export class MonacoEditorService extends FtrService {
         value
       );
     });
-    const newCodeEditorValue = await this.getCodeEditorValue(nthIndex);
-    expect(newCodeEditorValue).equal(
-      value,
-      `Expected value was: ${value}, but got: ${newCodeEditorValue}`
-    );
+    await this.retry.try(async () => {
+      const newCodeEditorValue = await this.getCodeEditorValue(nthIndex);
+      expect(newCodeEditorValue).equal(
+        value,
+        `Expected value was: ${value}, but got: ${newCodeEditorValue}`
+      );
+    });
   }
 
   public async getCurrentMarkers(testSubjId: string) {

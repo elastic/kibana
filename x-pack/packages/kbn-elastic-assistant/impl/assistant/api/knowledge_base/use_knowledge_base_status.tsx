@@ -45,6 +45,8 @@ export const useKnowledgeBaseStatus = ({
     {
       retry: false,
       keepPreviousData: true,
+      // Polling interval for Knowledge Base setup in progress
+      refetchInterval: (data) => (data?.is_setup_in_progress ? 30000 : false),
       // Deprecated, hoist to `queryCache` w/in `QueryClient. See: https://stackoverflow.com/a/76961109
       onError: (error: IHttpFetchError<ResponseErrorBody>) => {
         if (error.name !== 'AbortError') {
@@ -86,13 +88,12 @@ export const useInvalidateKnowledgeBaseStatus = () => {
  *
  * @param kbStatus ReadKnowledgeBaseResponse
  */
-export const isKnowledgeBaseSetup = (kbStatus: ReadKnowledgeBaseResponse | undefined): boolean => {
-  return (
-    (kbStatus?.elser_exists &&
-      kbStatus?.esql_exists &&
-      kbStatus?.security_labs_exists &&
-      kbStatus?.index_exists &&
-      kbStatus?.pipeline_exists) ??
-    false
-  );
-};
+export const isKnowledgeBaseSetup = (kbStatus: ReadKnowledgeBaseResponse | undefined): boolean =>
+  (kbStatus?.elser_exists &&
+    kbStatus?.index_exists &&
+    kbStatus?.pipeline_exists &&
+    // Allows to use UI while importing Security Labs docs
+    (kbStatus?.security_labs_exists ||
+      kbStatus?.is_setup_in_progress ||
+      kbStatus?.user_data_exists)) ??
+  false;

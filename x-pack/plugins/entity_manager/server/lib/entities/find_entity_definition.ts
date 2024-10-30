@@ -10,18 +10,8 @@ import { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/serve
 import { EntityDefinition } from '@kbn/entities-schema';
 import { NodesIngestTotal } from '@elastic/elasticsearch/lib/api/types';
 import { SO_ENTITY_DEFINITION_TYPE } from '../../saved_objects';
-import {
-  generateHistoryTransformId,
-  generateHistoryBackfillTransformId,
-  generateHistoryIngestPipelineId,
-  generateHistoryIndexTemplateId,
-  generateLatestTransformId,
-  generateLatestIngestPipelineId,
-  generateLatestIndexTemplateId,
-} from './helpers/generate_component_id';
 import { BUILT_IN_ID_PREFIX } from './built_in';
 import { EntityDefinitionState, EntityDefinitionWithState } from './types';
-import { isBackfillEnabled } from './helpers/is_backfill_enabled';
 
 export async function findEntityDefinitions({
   soClient,
@@ -120,11 +110,9 @@ async function getTransformState({
   definition: EntityDefinition;
   esClient: ElasticsearchClient;
 }) {
-  const transformIds = [
-    generateHistoryTransformId(definition),
-    generateLatestTransformId(definition),
-    ...(isBackfillEnabled(definition) ? [generateHistoryBackfillTransformId(definition)] : []),
-  ];
+  const transformIds = (definition.installedComponents ?? [])
+    .filter(({ type }) => type === 'transform')
+    .map(({ id }) => id);
 
   const transformStats = await Promise.all(
     transformIds.map((id) => esClient.transform.getTransformStats({ transform_id: id }))
@@ -152,10 +140,10 @@ async function getIngestPipelineState({
   definition: EntityDefinition;
   esClient: ElasticsearchClient;
 }) {
-  const ingestPipelineIds = [
-    generateHistoryIngestPipelineId(definition),
-    generateLatestIngestPipelineId(definition),
-  ];
+  const ingestPipelineIds = (definition.installedComponents ?? [])
+    .filter(({ type }) => type === 'ingest_pipeline')
+    .map(({ id }) => id);
+
   const [ingestPipelines, ingestPipelinesStats] = await Promise.all([
     esClient.ingest.getPipeline({ id: ingestPipelineIds.join(',') }, { ignore: [404] }),
     esClient.nodes.stats({
@@ -193,10 +181,9 @@ async function getIndexTemplatesState({
   definition: EntityDefinition;
   esClient: ElasticsearchClient;
 }) {
-  const indexTemplatesIds = [
-    generateLatestIndexTemplateId(definition),
-    generateHistoryIndexTemplateId(definition),
-  ];
+  const indexTemplatesIds = (definition.installedComponents ?? [])
+    .filter(({ type }) => type === 'template')
+    .map(({ id }) => id);
   const templates = await Promise.all(
     indexTemplatesIds.map((id) =>
       esClient.indices

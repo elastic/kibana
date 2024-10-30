@@ -9,9 +9,8 @@ import type { FC } from 'react';
 import React from 'react';
 
 import { CodeEditor, type CodeEditorProps } from '@kbn/code-editor';
-import { expandLiteralStrings, XJsonMode } from '../../../shared_imports';
 
-export const EDITOR_MODE = { TEXT: 'text', JSON: 'json', XJSON: new XJsonMode() };
+export const EDITOR_MODE = { TEXT: 'text', JSON: 'json' };
 
 interface JobEditorProps {
   value: string;
@@ -30,10 +29,6 @@ export const JsonEditor: FC<JobEditorProps> = ({
   readOnly = false,
   onChange = () => {},
 }) => {
-  if (mode === EDITOR_MODE.XJSON) {
-    value = expandLiteralStrings(value);
-  }
-
   return (
     <CodeEditor
       value={value}

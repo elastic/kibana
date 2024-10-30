@@ -56,7 +56,7 @@ export const getAttackDiscoveryMarkdown = ({
   replacements?: Replacements;
 }): string => {
   const title = getMarkdownFields(attackDiscovery.title);
-  const entitySummaryMarkdown = getMarkdownFields(attackDiscovery.entitySummaryMarkdown);
+  const entitySummaryMarkdown = getMarkdownFields(attackDiscovery.entitySummaryMarkdown ?? '');
   const summaryMarkdown = getMarkdownFields(attackDiscovery.summaryMarkdown);
   const detailsMarkdown = getMarkdownFields(attackDiscovery.detailsMarkdown);
 

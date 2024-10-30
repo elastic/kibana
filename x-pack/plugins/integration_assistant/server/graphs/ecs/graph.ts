@@ -78,8 +78,7 @@ export async function getEcsSubGraph({ model }: EcsGraphParams) {
     })
     .addEdge('modelSubOutput', END);
 
-  const compiledEcsSubGraph = workflow.compile();
-
+  const compiledEcsSubGraph = workflow.compile().withConfig({ runName: 'ECS Mapping (Chunk)' });
   return compiledEcsSubGraph;
 }
 
@@ -120,7 +119,6 @@ export async function getEcsGraph({ model }: EcsGraphParams) {
     })
     .addEdge('modelOutput', END);
 
-  const compiledEcsGraph = workflow.compile();
-
+  const compiledEcsGraph = workflow.compile().withConfig({ runName: 'ECS Mapping' });
   return compiledEcsGraph;
 }

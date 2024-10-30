@@ -33,35 +33,31 @@ export function SourceBar({ alert, sources = [] }: SourceBarProps) {
   }, [alertStart, alertEnd]);
 
   return (
-    <>
-      {groups && groups.length > 0 && (
-        <EuiPanel data-test-subj="alert-summary-container" hasShadow={false} hasBorder={true}>
-          <EuiFlexGroup gutterSize="l" direction="row" wrap>
-            <EuiTitle size="xs">
-              <h5>
-                <FormattedMessage
-                  id="xpack.observability.alertDetails.sourceBar.source"
-                  defaultMessage="Source"
-                />
-              </h5>
-            </EuiTitle>
-            <Groups
-              groups={groups}
-              timeRange={alertEnd ? timeRange : { ...timeRange, to: 'now' }}
-            />
-            {sources.map((field, idx) => {
-              return (
-                <EuiFlexItem key={`sources-${idx}`} grow={false}>
-                  <EuiText>
-                    {field.label}: {field.value}
-                  </EuiText>
-                </EuiFlexItem>
-              );
-            })}
-          </EuiFlexGroup>
-        </EuiPanel>
-      )}
-    </>
+    groups &&
+    groups.length > 0 && (
+      <EuiPanel data-test-subj="alert-summary-container" hasShadow={false} hasBorder={true}>
+        <EuiFlexGroup gutterSize="l" direction="row" wrap>
+          <EuiTitle size="xs">
+            <h5>
+              <FormattedMessage
+                id="xpack.observability.alertDetails.sourceBar.source"
+                defaultMessage="Source"
+              />
+            </h5>
+          </EuiTitle>
+          <Groups groups={groups} timeRange={alertEnd ? timeRange : { ...timeRange, to: 'now' }} />
+          {sources.map((field, idx) => {
+            return (
+              <EuiFlexItem key={`sources-${idx}`} grow={false}>
+                <EuiText>
+                  {field.label}: {field.value}
+                </EuiText>
+              </EuiFlexItem>
+            );
+          })}
+        </EuiFlexGroup>
+      </EuiPanel>
+    )
   );
 }
 

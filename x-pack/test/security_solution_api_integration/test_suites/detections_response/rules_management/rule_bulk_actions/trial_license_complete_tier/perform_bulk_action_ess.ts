@@ -41,13 +41,20 @@ export default ({ getService }: FtrProviderContext): void => {
   const log = getService('log');
 
   const createConnector = async (payload: Record<string, unknown>) =>
-    (await supertest.post('/api/actions/action').set('kbn-xsrf', 'true').send(payload).expect(200))
-      .body;
+    (
+      await supertest
+        .post('/api/actions/connector')
+        .set('kbn-xsrf', 'true')
+        .send(payload)
+        .expect(200)
+    ).body;
 
   const createWebHookConnector = () => createConnector(getWebHookAction());
 
   // Failing: See https://github.com/elastic/kibana/issues/173804
-  describe('@ess perform_bulk_action - ESS specific logic', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/196470
+  // Failing: See https://github.com/elastic/kibana/issues/196462
+  describe.skip('@ess perform_bulk_action - ESS specific logic', () => {
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
     });

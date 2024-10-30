@@ -11,7 +11,7 @@ import dedent from 'dedent';
 import { compact, keyBy } from 'lodash';
 import { FunctionVisibility, type FunctionResponse } from '../../../common/functions/types';
 import type {
-  AssistantScope,
+  AdHocInstruction,
   Message,
   ObservabilityAIAssistantScreenContextRequest,
 } from '../../../common/types';
@@ -21,7 +21,7 @@ import type {
   FunctionHandler,
   FunctionHandlerRegistry,
   InstructionOrCallback,
-  InstructionOrCallbackWithScopes,
+  RegisterAdHocInstruction,
   RegisterFunction,
   RegisterInstruction,
 } from '../types';
@@ -39,7 +39,9 @@ const ajv = new Ajv({
 export const GET_DATA_ON_SCREEN_FUNCTION_NAME = 'get_data_on_screen';
 
 export class ChatFunctionClient {
-  private readonly instructions: InstructionOrCallbackWithScopes[] = [];
+  private readonly instructions: InstructionOrCallback[] = [];
+  private readonly adhocInstructions: AdHocInstruction[] = [];
+
   private readonly functionRegistry: FunctionHandlerRegistry = new Map();
   private readonly validators: Map<string, ValidateFunction> = new Map();
 
@@ -54,9 +56,7 @@ export class ChatFunctionClient {
       this.registerFunction(
         {
           name: GET_DATA_ON_SCREEN_FUNCTION_NAME,
-          description: dedent(`Get data that is on the screen:
-            ${allData.map((data) => `${data.name}: ${data.description}`).join('\n')}
-          `),
+          description: `Retrieve the structured data of content currently visible on the user's screen. Use this tool to understand what the user is viewing at this moment to provide more accurate and context-aware responses to their questions.`,
           visibility: FunctionVisibility.AssistantOnly,
           parameters: {
             type: 'object',
@@ -78,9 +78,15 @@ export class ChatFunctionClient {
           return {
             content: allData.filter((data) => dataNames.includes(data.name)),
           };
-        },
-        ['all']
+        }
       );
+
+      this.registerAdhocInstruction({
+        text: `The ${GET_DATA_ON_SCREEN_FUNCTION_NAME} function will retrieve specific content from the user's screen by specifying a data key. Use this tool to provide context-aware responses. Available data: ${dedent(
+          allData.map((data) => `${data.name}: ${data.description}`).join('\n')
+        )}`,
+        instruction_type: 'application_instruction',
+      });
     }
 
     this.actions.forEach((action) => {
@@ -90,15 +96,19 @@ export class ChatFunctionClient {
     });
   }
 
-  registerFunction: RegisterFunction = (definition, respond, scopes) => {
+  registerFunction: RegisterFunction = (definition, respond) => {
     if (definition.parameters) {
       this.validators.set(definition.name, ajv.compile(definition.parameters));
     }
-    this.functionRegistry.set(definition.name, { handler: { definition, respond }, scopes });
+    this.functionRegistry.set(definition.name, { handler: { definition, respond } });
   };
 
   registerInstruction: RegisterInstruction = (instruction) => {
     this.instructions.push(instruction);
+  };
+
+  registerAdhocInstruction: RegisterAdHocInstruction = (instruction: AdHocInstruction) => {
+    this.adhocInstructions.push(instruction);
   };
 
   validate(name: string, parameters: unknown) {
@@ -113,12 +123,12 @@ export class ChatFunctionClient {
     }
   }
 
-  getInstructions(scope: AssistantScope): InstructionOrCallback[] {
-    return this.instructions
-      .filter(
-        (instruction) => instruction.scopes.includes(scope) || instruction.scopes.includes('all')
-      )
-      .map((i) => i.instruction);
+  getInstructions(): InstructionOrCallback[] {
+    return this.instructions;
+  }
+
+  getAdhocInstructions(): AdHocInstruction[] {
+    return this.adhocInstructions;
   }
 
   hasAction(name: string) {
@@ -127,16 +137,10 @@ export class ChatFunctionClient {
 
   getFunctions({
     filter,
-    scope,
   }: {
     filter?: string;
-    scope?: AssistantScope;
   } = {}): FunctionHandler[] {
-    const allFunctions = Array.from(this.functionRegistry.values())
-      .filter(({ handler, scopes }) =>
-        scope ? scopes.includes(scope) || scopes.includes('all') : true
-      )
-      .map(({ handler }) => handler);
+    const allFunctions = Array.from(this.functionRegistry.values()).map(({ handler }) => handler);
 
     const functionsByName = keyBy(allFunctions, (definition) => definition.definition.name);
 

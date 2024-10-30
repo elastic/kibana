@@ -17,5 +17,5 @@ export {
 
 export { generateFields, mergeSamples } from './samples';
 export { deepCopy, generateUniqueId } from './util';
-export { testPipeline } from './pipeline';
+export { testPipeline, createJSONInput } from './pipeline';
 export { combineProcessors } from './processors';

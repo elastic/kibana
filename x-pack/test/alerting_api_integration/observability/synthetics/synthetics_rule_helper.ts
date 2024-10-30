@@ -143,7 +143,7 @@ export class SyntheticsRuleHelper {
       schedule: 1,
     };
     const res = await this.supertest
-      .post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
+      .post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '?internal=true')
       .set('kbn-xsrf', 'true')
       .send(testData);
 

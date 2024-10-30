@@ -17,7 +17,8 @@ import { EventCollectionCard } from './event_collection_card';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { expectIsViewOnly, exactMatchText } from '../mocks';
 import userEvent from '@testing-library/user-event';
-import { cloneDeep, set } from 'lodash';
+import { cloneDeep } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
 import { within } from '@testing-library/react';
 
 describe('Policy Event Collection Card common component', () => {

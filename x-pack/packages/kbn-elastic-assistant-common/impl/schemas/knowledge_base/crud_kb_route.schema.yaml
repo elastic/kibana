@@ -68,8 +68,6 @@ paths:
                 properties:
                   elser_exists:
                     type: boolean
-                  esql_exists:
-                    type: boolean
                   index_exists:
                     type: boolean
                   is_setup_available:
@@ -79,6 +77,8 @@ paths:
                   pipeline_exists:
                     type: boolean
                   security_labs_exists:
+                    type: boolean
+                  user_data_exists:
                     type: boolean
         400:
           description: Generic Error

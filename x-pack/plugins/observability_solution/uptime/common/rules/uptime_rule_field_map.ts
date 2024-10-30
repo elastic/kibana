@@ -101,4 +101,12 @@ export const uptimeRuleFieldMap: FieldMap = {
     type: 'keyword',
     required: false,
   },
+  'service.name': {
+    type: 'keyword',
+    required: false,
+  },
+  labels: {
+    type: 'object',
+    required: false,
+  },
 } as const;

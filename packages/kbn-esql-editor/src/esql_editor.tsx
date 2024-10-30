@@ -321,13 +321,10 @@ export const ESQLEditor = memo(function ESQLEditor({
   }, []);
 
   const { cache: dataSourcesCache, memoizedSources } = useMemo(() => {
-    const fn = memoize(
-      (...args: [DataViewsPublicPluginStart, CoreStart]) => ({
-        timestamp: Date.now(),
-        result: getESQLSources(...args),
-      }),
-      ({ esql }) => esql
-    );
+    const fn = memoize((...args: [DataViewsPublicPluginStart, CoreStart]) => ({
+      timestamp: Date.now(),
+      result: getESQLSources(...args),
+    }));
 
     return { cache: fn.cache, memoizedSources: fn };
   }, []);
@@ -339,7 +336,7 @@ export const ESQLEditor = memo(function ESQLEditor({
         const sources = await memoizedSources(dataViews, core).result;
         return sources;
       },
-      getFieldsFor: async ({ query: queryToExecute }: { query?: string } | undefined = {}) => {
+      getColumnsFor: async ({ query: queryToExecute }: { query?: string } | undefined = {}) => {
         if (queryToExecute) {
           // ES|QL with limit 0 returns only the columns and is more performant
           const esqlQuery = {

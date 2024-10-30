@@ -481,7 +481,11 @@ export class VisualizeEmbeddable
               return;
             }
             if (!this.input.disableTriggers) {
-              const triggerId = get(VIS_EVENT_TO_TRIGGER, event.name, VIS_EVENT_TO_TRIGGER.filter);
+              const triggerId: string = get(
+                VIS_EVENT_TO_TRIGGER,
+                event.name,
+                VIS_EVENT_TO_TRIGGER.filter
+              );
               let context;
 
               if (triggerId === VIS_EVENT_TO_TRIGGER.applyFilter) {

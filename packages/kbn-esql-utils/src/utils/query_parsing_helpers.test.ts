@@ -16,6 +16,7 @@ import {
   prettifyQuery,
   isQueryWrappedByPipes,
   retrieveMetadataColumns,
+  getQueryColumnsFromESQLQuery,
 } from './query_parsing_helpers';
 
 describe('esql query helpers', () => {
@@ -227,6 +228,49 @@ describe('esql query helpers', () => {
 
     it('should return empty columns if metadata doesnt exist', () => {
       expect(retrieveMetadataColumns('from a | eval b = 1')).toStrictEqual([]);
+    });
+  });
+
+  describe('getQueryColumnsFromESQLQuery', () => {
+    it('should return the columns used in stats', () => {
+      expect(
+        getQueryColumnsFromESQLQuery('from a | stats var0 = avg(bytes) by dest')
+      ).toStrictEqual(['var0', 'bytes', 'dest']);
+    });
+
+    it('should return the columns used in eval', () => {
+      expect(
+        getQueryColumnsFromESQLQuery('from a | eval dest = geo.dest, var1 = bytes')
+      ).toStrictEqual(['dest', 'geo.dest', 'var1', 'bytes']);
+    });
+
+    it('should return the columns used in eval and stats', () => {
+      expect(
+        getQueryColumnsFromESQLQuery('from a | stats var0 = avg(bytes) by dest | eval meow = var0')
+      ).toStrictEqual(['var0', 'bytes', 'dest', 'meow', 'var0']);
+    });
+
+    it('should return the metadata columns', () => {
+      expect(
+        getQueryColumnsFromESQLQuery('from a  metadata _id, _ignored | eval b = 1')
+      ).toStrictEqual(['_id', '_ignored', 'b']);
+    });
+
+    it('should return the keep columns', () => {
+      expect(getQueryColumnsFromESQLQuery('from a | keep b, c, d')).toStrictEqual(['b', 'c', 'd']);
+    });
+
+    it('should return the where columns', () => {
+      expect(
+        getQueryColumnsFromESQLQuery('from a | where field > 1000 and abs(fieldb) < 20')
+      ).toStrictEqual(['field', 'fieldb']);
+    });
+
+    it('should return the rename columns', () => {
+      expect(getQueryColumnsFromESQLQuery('from a | rename field as fieldb')).toStrictEqual([
+        'field',
+        'fieldb',
+      ]);
     });
   });
 });

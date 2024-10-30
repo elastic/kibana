@@ -38,7 +38,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { SignificantItem, SignificantItemGroup } from '@kbn/ml-agg-utils';
 import { useStorage } from '@kbn/ml-local-storage';
-import { AIOPS_TELEMETRY_ID } from '@kbn/aiops-common/constants';
+import { AIOPS_ANALYSIS_RUN_ORIGIN } from '@kbn/aiops-common/constants';
 import type { AiopsLogRateAnalysisSchema } from '@kbn/aiops-log-rate-analysis/api/schema';
 import type { AiopsLogRateAnalysisSchemaSignificantItem } from '@kbn/aiops-log-rate-analysis/api/schema_v3';
 import {
@@ -153,8 +153,6 @@ interface LogRateAnalysisResultsProps {
   barColorOverride?: string;
   /** Optional color override for the highlighted bar color for charts */
   barHighlightColorOverride?: string;
-  /** Identifier to indicate the plugin utilizing the component */
-  embeddingOrigin: string;
 }
 
 export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
@@ -162,9 +160,8 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
   searchQuery,
   barColorOverride,
   barHighlightColorOverride,
-  embeddingOrigin,
 }) => {
-  const { analytics, http } = useAiopsAppContext();
+  const { analytics, http, embeddingOrigin } = useAiopsAppContext();
   const { dataView } = useDataSource();
 
   const dispatch = useAppDispatch();
@@ -351,7 +348,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
         overrides,
         sampleProbability,
       },
-      headers: { [AIOPS_TELEMETRY_ID.AIOPS_ANALYSIS_RUN_ORIGIN]: embeddingOrigin },
+      headers: { [AIOPS_ANALYSIS_RUN_ORIGIN]: embeddingOrigin },
     };
   }, [
     analysisType,

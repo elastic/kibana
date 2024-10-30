@@ -8,7 +8,6 @@
 import React, { FC, useState, useCallback, useMemo, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fromExpression } from '@kbn/interpreter';
-import { useExpressionsService } from '../../services';
 import { getSelectedPage, getSelectedElement } from '../../state/selectors/workpad';
 // @ts-expect-error
 import { setExpression, flushContext } from '../../state/actions/elements';
@@ -16,6 +15,7 @@ import { setExpression, flushContext } from '../../state/actions/elements';
 import { ElementNotSelected } from './element_not_selected';
 import { Expression as Component } from './expression';
 import { State, CanvasElement } from '../../../types';
+import { getCanvasExpressionService } from '../../services/canvas_expressions_service';
 
 interface ExpressionProps {
   done: () => void;
@@ -45,7 +45,6 @@ export const Expression: FC<ExpressionProps> = ({ done }) => {
 };
 
 const ExpressionContainer: FC<ExpressionContainerProps> = ({ done, element, pageId }) => {
-  const expressions = useExpressionsService();
   const dispatch = useDispatch();
   const [isCompact, setCompact] = useState<boolean>(true);
   const toggleCompactView = useCallback(() => {
@@ -111,8 +110,8 @@ const ExpressionContainer: FC<ExpressionContainerProps> = ({ done, element, page
   }, [element, setFormState, formState]);
 
   const functionDefinitions = useMemo(
-    () => Object.values(expressions.getFunctions()),
-    [expressions]
+    () => Object.values(getCanvasExpressionService().getFunctions()),
+    []
   );
 
   return (
