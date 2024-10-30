@@ -111,7 +111,7 @@ const isValidArtifactVersion = (version: string) => !!version.match(/^\d+\.\d+\.
 const getAgentPolicyDataForUpdate = (
   agentPolicy: AgentPolicy
 ): UpdateAgentPolicyRequest['body'] => {
-  return pick(currentSavedPolicy, [
+  return pick(agentPolicy, [
     'id',
     'name',
     'namespace',
