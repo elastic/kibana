@@ -49,10 +49,7 @@ export function initializeUnsavedChangesManager({
   const saveNotification$ = new Subject<void>();
 
   const dashboardUnsavedChanges = initializeUnsavedChanges<
-    Omit<
-      DashboardState,
-      'controlGroupInput' | 'controlGroupState' | 'executionContext' | 'timeslice' | 'tags'
-    >
+    Omit<DashboardState, 'controlGroupInput' | 'controlGroupState' | 'timeslice' | 'tags'>
   >(
     lastSavedState,
     { saveNotification$ },

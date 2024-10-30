@@ -21,6 +21,7 @@ import {
 import {
   EmbeddableAppContext,
   HasAppContext,
+  HasExecutionContext,
   HasType,
   HasUniqueId,
   PublishesDataLoading,
@@ -49,7 +50,6 @@ import {
 import { Observable, Subject } from 'rxjs';
 import { RefreshInterval, SearchSessionInfoProvider } from '@kbn/data-plugin/public';
 import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
-import { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import { PublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
 import { PublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
 import { DashboardOptions, DashboardPanelMap, DashboardPanelState } from '../../common';
@@ -101,7 +101,6 @@ export interface DashboardState {
   tags: string[];
   viewMode: ViewMode;
   description?: string;
-  executionContext: KibanaExecutionContext;
 
   // settings
   hidePanelTitles: DashboardOptions['hidePanelTitles'];
@@ -128,6 +127,7 @@ export interface DashboardState {
 
 export type DashboardApi = CanExpandPanels &
   HasAppContext &
+  HasExecutionContext &
   HasRuntimeChildState &
   HasSaveNotification &
   HasSerializedChildState &

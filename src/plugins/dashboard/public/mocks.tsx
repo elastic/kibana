@@ -95,6 +95,7 @@ export function buildMockDashboardApi({
       managed: false,
       dashboardInput: {
         ...initialState,
+        executionContext: { type: 'dashboard' },
         viewMode: initialState.viewMode as ViewMode,
         id: savedObjectId ?? '123',
       },
@@ -129,9 +130,6 @@ export function getSampleDashboardState(overrides?: Partial<DashboardState>): Da
     timeRestore: false,
     viewMode: 'view',
     panels: {},
-    executionContext: {
-      type: 'dashboard',
-    },
     ...overrides,
   };
 }

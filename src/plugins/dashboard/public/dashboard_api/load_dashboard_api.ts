@@ -98,22 +98,15 @@ export async function loadDashboardApi({
   }
 
   // --------------------------------------------------------------------------------------
-  // Combine input from saved object, session storage, & passed input to create initial input.
+  // get dashboard Api
   // --------------------------------------------------------------------------------------
-  const initialDashboardState: DashboardState = {
-    ...combinedSessionState,
-    ...overrideState,
-  };
-
-  initialDashboardState.executionContext = {
-    type: 'dashboard',
-    description: initialDashboardState.title,
-  };
-
   const { api, cleanup, internalApi } = getDashboardApi({
     creationOptions,
     incomingEmbeddable,
-    initialState: initialDashboardState,
+    initialState: {
+      ...combinedSessionState,
+      ...overrideState,
+    },
     initialPanelsRuntimeState,
     savedObjectResult,
     savedObjectId,

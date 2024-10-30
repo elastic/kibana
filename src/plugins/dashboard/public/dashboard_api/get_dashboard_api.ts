@@ -116,7 +116,6 @@ export function getDashboardApi({
   async function getState() {
     const { panels, references: panelReferences } = await panelsManager!.internalApi.getState();
     const dashboardState: DashboardState = {
-      executionContext: initialState.executionContext,
       ...settingsManager.internalApi.getState(),
       ...unifiedSearchManager.internalApi.getState(),
       panels,
@@ -156,6 +155,10 @@ export function getDashboardApi({
     ...trackOverlayApi,
     ...initializeTrackContentfulRender(),
     controlGroupApi$,
+    executionContext: {
+      type: 'dashboard',
+      description: settingsManager.api.panelTitle.value,
+    },
     fullScreenMode$,
     getAppContext: () => {
       const embeddableAppContext = creationOptions?.getEmbeddableAppContext?.(savedObjectId$.value);

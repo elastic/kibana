@@ -28,6 +28,7 @@ describe('Migrate dashboard input', () => {
       ...getSampleDashboardState(),
       id: '1',
       viewMode: ViewMode.VIEW,
+      executionContext: { type: 'dashboard' },
     };
     dashboardInput.panels = {
       panel1: getSampleDashboardPanel({ type: 'superLens', explicitInput: { id: 'panel1' } }),
