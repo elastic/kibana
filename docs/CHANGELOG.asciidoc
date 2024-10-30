@@ -163,7 +163,7 @@ Elastic Observability solution::
 * Added alerts page ({kibana-pull}190751[#190751]).
 * Monitor list add bulk delete ({kibana-pull}190674[#190674]).
 * Delete monitor API via id param !! ({kibana-pull}190210[#190210]).
-* Enable page for metrics and traces ({kibana-pull}190043[#190043]).
+* Enable metrics and traces in the Data Set Quality page ({kibana-pull}190043[#190043]).
 * Adds alert grouping functionality to the observability alerts page ({kibana-pull}189958[#189958]).
 * Adds a new SLO Burn Rate embeddable ({kibana-pull}189429[#189429]).
 * The Slack Web API Alert Connector is now supported as a default connector for Synthetics and Uptime rules ({kibana-pull}188437[#188437]).
