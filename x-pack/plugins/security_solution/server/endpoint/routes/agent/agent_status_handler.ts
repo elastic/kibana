@@ -27,7 +27,12 @@ export const registerAgentStatusRoute = (
     .get({
       access: 'internal',
       path: AGENT_STATUS_ROUTE,
-      options: { authRequired: true, tags: ['access:securitySolution'] },
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
+      options: { authRequired: true },
     })
     .addVersion(
       {

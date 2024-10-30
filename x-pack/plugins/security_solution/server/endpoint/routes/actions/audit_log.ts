@@ -27,7 +27,12 @@ export function registerActionAuditLogRoutes(
     .get({
       access: 'public',
       path: ENDPOINT_ACTION_LOG_ROUTE,
-      options: { authRequired: true, tags: ['access:securitySolution'] },
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
+      options: { authRequired: true },
     })
     .addVersion(
       {
