@@ -415,7 +415,6 @@ export class EntityStoreDataClient {
         );
       this.log('debug', entityType, `Deleted entity definition`);
 
-
       await deleteEntityIndexComponentTemplate({
         unitedDefinition,
         esClient: this.esClient,
