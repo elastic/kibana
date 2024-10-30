@@ -15,7 +15,7 @@ There are four selectable solution views: Search, Observability, Security, and C
 
 Each space has its own solution view setting which determines the navigation experience for all users of that space.
 
-When creating a new deployment, you will now be asked to choose between one of the 3 following solution views for your default space: Search, Observability, or Security. If you prefer to stick with the classic, multi-layered navigation, you can do so once the deployment is created by navigating to your space settings.
+When creating a new deployment, you will now be asked to choose between one of the 3 new solution views for your default space. If you prefer to stick with the classic, multi-layered navigation, you can do so once the deployment is created by navigating to your space settings.
 
 Deployments upgrading from a previous version to 8.16 keep the classic navigation. Admins can enable one of the new solution views from the space settings.
 
