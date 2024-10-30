@@ -58,16 +58,17 @@ The {infer} actions have the following configuration properties. Properties depe
 ==== Completion
 
 The following example performs a completion task on the example question.
+
 Input::
 The text on which you want to perform the {infer} task. For example:
 +
 --
 [source,text]
---
+------------------------------------------------------------
 {
   input: 'What is Elastic?'
 }
---
+------------------------------------------------------------
 --
 
 [float]
@@ -75,20 +76,22 @@ The text on which you want to perform the {infer} task. For example:
 ==== Text embedding
 
 The following example performs a text embedding task.
+
 Input::
 The text on which you want to perform the {infer} task. For example:
 +
 --
 [source,text]
---
+------------------------------------------------------------
 {
   input: 'The sky above the port was the color of television tuned to a dead channel.',
   task_settings: {
     input_type: 'ingest'
   }
 }
+------------------------------------------------------------
 --
---
+
 Input type::
 An optional string that overwrites the connector's default model.
 
@@ -97,17 +100,18 @@ An optional string that overwrites the connector's default model.
 ==== Reranking
 
 The following example performs a reranking task on the example input.
+
 Input::
 The text on which you want to perform the {infer} task. Should be a string array. For example:
 +
 --
 [source,text]
---
+------------------------------------------------------------
 {
   input: ['luke', 'like', 'leia', 'chewy', 'r2d2', 'star', 'wars'],
   query: 'star wars main character'
 }
---
+------------------------------------------------------------
 --
 
 Query::
@@ -118,16 +122,17 @@ The search query text.
 ==== Sparse embedding
 
 The following example performs a sparse embedding task on the example sentence.
+
 Input::
 The text on which you want to perform the {infer} task. For example:
 +
 --
 [source,text]
---
+------------------------------------------------------------
 {
   input: 'The sky above the port was the color of television tuned to a dead channel.'
 }
---
+------------------------------------------------------------
 --
 
 [float]
