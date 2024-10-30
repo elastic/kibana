@@ -56,17 +56,14 @@ import {
   isPromiseFulfilled,
   isPromiseRejected,
 } from './utils';
-
 import { EntityEngineActions } from './auditing/actions';
 import { EntityStoreResource } from './auditing/resources';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../audit';
-
+import type { EntityRecord, EntityStoreConfig } from './types';
 import {
   ENTITY_ENGINE_INITIALIZATION_EVENT,
   ENTITY_ENGINE_RESOURCE_INIT_FAILURE_EVENT,
 } from '../../telemetry/event_based/events';
-
-import type { EntityRecord } from './types';
 import { CRITICALITY_VALUES } from '../asset_criticality/constants';
 
 interface EntityStoreClientOpts {
@@ -79,6 +76,7 @@ interface EntityStoreClientOpts {
   kibanaVersion: string;
   dataViewsService: DataViewsService;
   appClient: AppClient;
+  config: EntityStoreConfig;
   telemetry?: AnalyticsServiceSetup;
 }
 
@@ -136,6 +134,8 @@ export class EntityStoreDataClient {
     if (!this.options.taskManager) {
       throw new Error('Task Manager is not available');
     }
+      
+    const { config } = this.options;
 
     await this.riskScoreDataClient.createRiskScoreLatestIndex();
 
@@ -170,11 +170,12 @@ export class EntityStoreDataClient {
       this.options.taskManager,
       indexPattern,
       filter,
+      config,
       pipelineDebugMode
     ).catch((e) =>
       this.log('error', entityType, `Error during async setup of entity store: ${e.message}`)
     );
-
+      
     return descriptor;
   }
 
@@ -184,6 +185,7 @@ export class EntityStoreDataClient {
     taskManager: TaskManagerStartContract,
     indexPattern: string,
     filter: string,
+    config: EntityStoreConfig,
     pipelineDebugMode: boolean
   ) {
     const setupStartTime = moment().utc().toISOString();
@@ -195,6 +197,8 @@ export class EntityStoreDataClient {
       entityType,
       namespace,
       fieldHistoryLength,
+      syncDelay: `${config.syncDelay.asSeconds()}s`,
+      frequency: `${config.frequency.asSeconds()}s`,
     });
     const { entityManagerDefinition } = unitedDefinition;
 
@@ -374,16 +378,20 @@ export class EntityStoreDataClient {
     taskManager: TaskManagerStartContract,
     options = { deleteData: false, deleteEngine: true }
   ) {
-    const { namespace, logger, appClient, dataViewsService } = this.options;
+    const { namespace, logger, appClient, dataViewsService, config } = this.options;
     const { deleteData, deleteEngine } = options;
 
     const descriptor = await this.engineClient.maybeGet(entityType);
     const indexPatterns = await buildIndexPatterns(namespace, appClient, dataViewsService);
+
+    // TODO delete unitedDefinition from this method. we only need the id for deletion
     const unitedDefinition = getUnitedEntityDefinition({
       indexPatterns,
       entityType,
       namespace: this.options.namespace,
       fieldHistoryLength: descriptor?.fieldHistoryLength ?? 10,
+      syncDelay: `${config.syncDelay.asSeconds()}s`,
+      frequency: `${config.frequency.asSeconds()}s`,
     });
     const { entityManagerDefinition } = unitedDefinition;
 
