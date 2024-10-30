@@ -13,34 +13,6 @@ import {
 } from '@kbn/elastic-assistant-common';
 import { EsKnowledgeBaseEntrySchema } from '../ai_assistant_data_clients/knowledge_base/types';
 
-const indexEntry: EsKnowledgeBaseEntrySchema = {
-  id: '1234',
-  '@timestamp': '2020-04-20T15:25:31.830Z',
-  created_at: '2020-04-20T15:25:31.830Z',
-  created_by: 'elastic',
-  updated_at: '2020-04-20T15:25:31.830Z',
-  updated_by: 'elastic',
-  name: 'test',
-  namespace: 'default',
-  type: 'index',
-  index: 'test',
-  field: 'test',
-  description: 'test',
-  query_description: 'test',
-  input_schema: [
-    {
-      field_name: 'test',
-      field_type: 'test',
-      description: 'test',
-    },
-  ],
-  users: [
-    {
-      name: 'elastic',
-      id: 'elastic1',
-    },
-  ],
-};
 const documentEntry: EsKnowledgeBaseEntrySchema = {
   id: '5678',
   '@timestamp': '2020-04-20T15:25:31.830Z',

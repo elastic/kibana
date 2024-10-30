@@ -18,18 +18,16 @@ import {
 } from '../../__mocks__/knowledge_base_entry_schema.mock';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import { mlPluginMock } from '@kbn/ml-plugin/public/mocks';
-import { loggerMock } from '@kbn/logging-mocks';
 import pRetry from 'p-retry';
 
 import { loadSecurityLabs } from '../../lib/langchain/content_loaders/security_labs_loader';
-import { DocumentEntryType } from '@kbn/elastic-assistant-common';
+import { DynamicStructuredTool } from '@langchain/core/tools';
 jest.mock('../../lib/langchain/content_loaders/security_labs_loader');
 jest.mock('p-retry');
 const date = '2023-03-28T22:27:28.159Z';
 let logger: ReturnType<(typeof loggingSystemMock)['createLogger']>;
 const esClientMock = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
-const mockLogger = loggerMock.create();
 const mockUser1 = {
   username: 'my_username',
   authentication_realm: {
@@ -272,6 +270,118 @@ describe('AIAssistantKnowledgeBaseDataClient', () => {
     });
   });
 
+  describe('addKnowledgeBaseDocuments', () => {
+    const documents = [
+      {
+        pageContent: 'Document 1',
+        metadata: { kbResource: 'user', source: 'user', required: false },
+      },
+    ];
+    it('should add documents to the knowledge base', async () => {
+      esClientMock.bulk.mockResolvedValue({
+        items: [
+          {
+            create: {
+              status: 200,
+              _id: '123',
+              _index: 'index',
+            },
+          },
+        ],
+        took: 9999,
+        errors: false,
+      });
+      const client = new AIAssistantKnowledgeBaseDataClient(mockOptions);
+      mockOptions.currentUser = mockUser1;
+
+      const result = await client.addKnowledgeBaseDocuments({ documents });
+
+      expect(result).toHaveLength(1);
+      expect(result[0]).toEqual(getKnowledgeBaseEntryMock());
+    });
+
+    it('should swallow errors during bulk write', async () => {
+      esClientMock.bulk.mockRejectedValueOnce(new Error('Bulk write error'));
+      const client = new AIAssistantKnowledgeBaseDataClient(mockOptions);
+      mockOptions.currentUser = mockUser1;
+
+      const result = await client.addKnowledgeBaseDocuments({ documents });
+      expect(result).toEqual([]);
+    });
+  });
+
+  describe('isSecurityLabsDocsLoaded', () => {
+    it('should resolve to true when docs exist', async () => {
+      const client = new AIAssistantKnowledgeBaseDataClient(mockOptions);
+      mockOptions.currentUser = mockUser1;
+
+      const results = await client.isSecurityLabsDocsLoaded();
+
+      expect(results).toEqual(true);
+    });
+    it('should resolve to false when docs do not exist', async () => {
+      // @ts-expect-error not full response interface
+      esClientMock.search.mockResolvedValueOnce({ hits: { hits: [] } });
+      const client = new AIAssistantKnowledgeBaseDataClient(mockOptions);
+      mockOptions.currentUser = mockUser1;
+
+      const results = await client.isSecurityLabsDocsLoaded();
+
+      expect(results).toEqual(false);
+    });
+    it('should resolve to false when docs error', async () => {
+      esClientMock.search.mockRejectedValueOnce(new Error('Search error'));
+      const client = new AIAssistantKnowledgeBaseDataClient(mockOptions);
+      mockOptions.currentUser = mockUser1;
+
+      const results = await client.isSecurityLabsDocsLoaded();
+
+      expect(results).toEqual(false);
+    });
+  });
+
+  describe('getKnowledgeBaseDocumentEntries', () => {
+    it('should fetch documents based on query and filters', async () => {
+      const client = new AIAssistantKnowledgeBaseDataClient(mockOptions);
+      mockOptions.currentUser = mockUser1;
+
+      const results = await client.getKnowledgeBaseDocumentEntries({
+        query: 'test query',
+        kbResource: 'security_labs',
+      });
+
+      expect(results).toHaveLength(1);
+      expect(results[0].pageContent).toBe('test');
+      expect(results[0].metadata.kbResource).toBe('test');
+    });
+
+    it('should swallow errors during search', async () => {
+      const client = new AIAssistantKnowledgeBaseDataClient(mockOptions);
+      mockOptions.currentUser = mockUser1;
+
+      esClientMock.search.mockRejectedValueOnce(new Error('Search error'));
+
+      const results = await client.getKnowledgeBaseDocumentEntries({
+        query: 'test query',
+      });
+      expect(results).toEqual([]);
+    });
+
+    it('should return an empty array if no documents are found', async () => {
+      const client = new AIAssistantKnowledgeBaseDataClient(mockOptions);
+      mockOptions.currentUser = mockUser1;
+
+      // @ts-expect-error not full response interface
+      esClientMock.search.mockResolvedValueOnce({ hits: { hits: [] } });
+
+      const results = await client.getKnowledgeBaseDocumentEntries({
+        query: 'test query',
+      });
+
+      expect(results).toEqual([]);
+    });
+  });
+
   describe('getRequiredKnowledgeBaseDocumentEntries', () => {
     it('should throw is user is not found', async () => {
       const assistantKnowledgeBaseDataClient = new AIAssistantKnowledgeBaseDataClient({
@@ -310,45 +420,19 @@ describe('AIAssistantKnowledgeBaseDataClient', () => {
     });
   });
 
-  describe.only('createKnowledgeBaseEntry', () => {
+  describe('createKnowledgeBaseEntry', () => {
+    const knowledgeBaseEntry = getCreateKnowledgeBaseEntrySchemaMock();
     it('should create a new Knowledge Base entry', async () => {
       const client = new AIAssistantKnowledgeBaseDataClient(mockOptions);
       mockOptions.currentUser = mockUser1;
-      const knowledgeBaseEntry = {
-        type: DocumentEntryType.value,
-        name: 'test entry',
-        text: 'test text',
-      };
-      const expectedDocument = {
-        ...knowledgeBaseEntry,
-        createdAt: date,
-        spaceId: 'default',
-        user: mockUser1.username,
-        global: false,
-      };
 
-      await client.createKnowledgeBaseEntry({ knowledgeBaseEntry });
-
-      expect(createKnowledgeBaseEntry).toHaveBeenCalledWith({
-        esClient: esClientMock,
-        knowledgeBaseIndex: mockOptions.indexTemplateAndPattern.alias,
-        logger: mockLogger,
-        spaceId: 'default',
-        user: mockUser1.username,
-        knowledgeBaseEntry: expectedDocument,
-        global: false,
-        isV2: true,
-      });
+      const result = await client.createKnowledgeBaseEntry({ knowledgeBaseEntry });
+      expect(result).toEqual(getKnowledgeBaseEntryMock());
     });
 
     it('should throw error if user is not authenticated', async () => {
       const client = new AIAssistantKnowledgeBaseDataClient(mockOptions);
       mockOptions.currentUser = null;
-      const knowledgeBaseEntry = {
-        type: DocumentEntryType.value,
-        name: 'test entry',
-        text: 'test text',
-      };
 
       await expect(client.createKnowledgeBaseEntry({ knowledgeBaseEntry })).rejects.toThrow(
         'Authenticated user not found!'
@@ -359,15 +443,49 @@ describe('AIAssistantKnowledgeBaseDataClient', () => {
       const client = new AIAssistantKnowledgeBaseDataClient(mockOptions);
       mockOptions.currentUser = mockUser1;
       mockOptions.manageGlobalKnowledgeBaseAIAssistant = false;
-      const knowledgeBaseEntry = {
-        type: DocumentEntryType.value,
-        name: 'test entry',
-        text: 'test text',
-      };
 
       await expect(
         client.createKnowledgeBaseEntry({ knowledgeBaseEntry, global: true })
       ).rejects.toThrow('User lacks privileges to create global knowledge base entries');
+    });
+  });
+
+  describe('getAssistantTools', () => {
+    it('should return structured tools for relevant index entries', async () => {
+      const client = new AIAssistantKnowledgeBaseDataClient(mockOptions);
+      mockOptions.currentUser = mockUser1;
+
+      const result = await client.getAssistantTools({
+        esClient: esClientMock,
+      });
+
+      expect(result).toHaveLength(1);
+      expect(result[0]).toBeInstanceOf(DynamicStructuredTool);
+    });
+
+    it('should return an empty array if no relevant index entries are found', async () => {
+      const client = new AIAssistantKnowledgeBaseDataClient(mockOptions);
+      mockOptions.currentUser = mockUser1;
+      // @ts-expect-error not full response interface
+      esClientMock.search.mockResolvedValueOnce({ hits: { hits: [] } });
+
+      const result = await client.getAssistantTools({
+        esClient: esClientMock,
+      });
+
+      expect(result).toEqual([]);
+    });
+
+    it('should swallow errors during fetching index entries', async () => {
+      const client = new AIAssistantKnowledgeBaseDataClient(mockOptions);
+      mockOptions.currentUser = mockUser1;
+      esClientMock.search.mockRejectedValueOnce(new Error('Error fetching index entries'));
+
+      const result = await client.getAssistantTools({
+        esClient: esClientMock,
+      });
+
+      expect(result).toEqual([]);
     });
   });
 });

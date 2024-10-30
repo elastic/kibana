@@ -26,7 +26,7 @@ import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWith
 import { StructuredTool } from '@langchain/core/tools';
 import { ElasticsearchClient } from '@kbn/core/server';
 import { AIAssistantDataClient, AIAssistantDataClientParams } from '..';
-import { AssistantToolParams, GetElser } from '../../types';
+import { GetElser } from '../../types';
 import { createKnowledgeBaseEntry, transformToCreateSchema } from './create_knowledge_base_entry';
 import { EsDocumentEntry, EsIndexEntry, EsKnowledgeBaseEntrySchema } from './types';
 import { transformESSearchToKnowledgeBaseEntry } from './transforms';
@@ -505,10 +505,8 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
    * is scoped to system user.
    */
   public getAssistantTools = async ({
-    assistantToolParams,
     esClient,
   }: {
-    assistantToolParams: AssistantToolParams;
     esClient: ElasticsearchClient;
   }): Promise<StructuredTool[]> => {
     const user = this.options.currentUser;
