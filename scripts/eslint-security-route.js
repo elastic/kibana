@@ -21,6 +21,22 @@ const DRY_RUN = process.env.DRY_RUN === 'true';
 
 console.log('DRY_RUN:', DRY_RUN);
 
+const havePrs = [
+  'authz-migration/unauthorized-routes-by-appex-sharedux',
+  'authz-migration/unauthorized-routes-by-fleet',
+  'authz-migration/unauthorized-routes-by-kibana-core',
+  'authz-migration/unauthorized-routes-by-kibana-data-discovery',
+  'authz-migration/unauthorized-routes-by-kibana-management',
+  'authz-migration/unauthorized-routes-by-kibana-presentation',
+  'authz-migration/unauthorized-routes-by-kibana-security',
+  'authz-migration/unauthorized-routes-by-kibana-visualizations',
+  'authz-migration/unauthorized-routes-by-kibana-visualizations_kibana-data-discovery',
+  'authz-migration/unauthorized-routes-by-ml-ui',
+  'authz-migration/unauthorized-routes-by-obs-ai-assistant_security-solution',
+  'authz-migration/unauthorized-routes-by-response-ops',
+  'authz-migration/unauthorized-routes-by-security-threat-hunting-explore',
+];
+
 const teamLabels = {
   '@elastic/kibana-core': 'Team:Core',
   '@elastic/appex-ai-infra': 'Team:AI Infra',
@@ -64,7 +80,7 @@ const teamLabels = {
   '@elastic/kibana-esql': 'Team:ESQL',
   '@elastic/security-scalability': 'Team:Security-Scalability',
   '@elastic/obs-ai-assistant': 'Team:Obs AI Assistant',
-  '@elastic/search-kibana': 'Search',
+  '@elastic/search-kibana': 'Team:Search',
   '@elastic/logstash': 'logstash',
   '@elastic/stack-monitoring': 'Team:Monitoring',
   '@elastic/security-service-integrations': 'Team:Security-Scalability',
@@ -217,6 +233,11 @@ function processChangesByOwners(ownerFilesMap) {
       const rawOwner = owner.replaceAll(',', '_');
       const tempBranch = `temp/${process.env.ROUTE_TYPE}-eslint-changes-by-${rawOwner}`;
       const targetBranch = `authz-migration/${process.env.ROUTE_TYPE}-routes-by-${rawOwner}`;
+
+      if (havePrs.includes(targetBranch)) {
+        console.log(`PR already exists for ${targetBranch}. Skipping.`);
+        continue;
+      }
 
       console.log(`Checking out 'main' branch`);
       runCommand(`git checkout main`);
