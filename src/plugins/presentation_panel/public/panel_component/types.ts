@@ -60,7 +60,7 @@ export interface PresentationPanelInternalProps<
   index?: number;
 
   // TODO: Remove this
-  setDragHandles?: (refs: Array<React.MutableRefObject<HTMLElement | null>>) => void;
+  setDragHandles?: (refs: Array<HTMLElement | null>) => void;
 }
 
 /**

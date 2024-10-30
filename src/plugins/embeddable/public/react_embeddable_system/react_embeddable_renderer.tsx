@@ -15,7 +15,6 @@ import {
   initializeUnsavedChanges,
   SerializedPanelState,
 } from '@kbn/presentation-containers';
-import { useDragHandleContext } from '@kbn/grid-layout';
 import { PresentationPanel, PresentationPanelProps } from '@kbn/presentation-panel-plugin/public';
 import {
   apiPublishesDataLoading,

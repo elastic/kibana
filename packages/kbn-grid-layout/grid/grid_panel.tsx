@@ -10,14 +10,7 @@
 import React, { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { combineLatest, skip } from 'rxjs';
 
-import {
-  EuiIcon,
-  EuiPanel,
-  euiFullHeight,
-  transparentize,
-  useEuiOverflowScroll,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiIcon, transparentize, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 
@@ -30,11 +23,11 @@ export const GridPanel = forwardRef<
     rowIndex: number;
     renderPanelContents: (
       panelId: string,
-      setDragHandles: (refs: Array<React.MutableRefObject<HTMLElement | null>>) => void
+      setDragHandles: (refs: Array<HTMLElement | null>) => void
     ) => React.ReactNode;
     interactionStart: (
       type: PanelInteractionEvent['type'],
-      e: React.MouseEvent<HTMLDivElement, MouseEvent>
+      e: MouseEvent | React.MouseEvent<HTMLDivElement, MouseEvent>
     ) => void;
     gridLayoutStateManager: GridLayoutStateManager;
   }
@@ -43,7 +36,6 @@ export const GridPanel = forwardRef<
     { panelId, rowIndex, renderPanelContents, interactionStart, gridLayoutStateManager },
     panelRef
   ) => {
-    const dragHandleRefs = useRef<Array<HTMLElement | null>>([]);
     const removeEventListenersRef = useRef<(() => void) | null>(null);
     const [dragHandleCount, setDragHandleCount] = useState<number>(0);
 
@@ -51,22 +43,21 @@ export const GridPanel = forwardRef<
 
     const setDragHandles = useCallback(
       (dragHandles: Array<HTMLElement | null>) => {
-        dragHandleRefs.current = dragHandles;
         setDragHandleCount(dragHandles.length);
 
         const onMouseDown = (e: MouseEvent) => interactionStart('drag', e);
         const onMouseUp = (e: MouseEvent) => interactionStart('drop', e);
 
         for (const handle of dragHandles) {
-          console.log('handle', handle);
           if (handle === null) return;
           handle.addEventListener('mousedown', onMouseDown);
           handle.addEventListener('mouseup', onMouseUp);
         }
 
         removeEventListenersRef.current = () => {
+          console.log('UNMOUNT');
+
           for (const handle of dragHandles) {
-            console.log('HANDLE', handle);
             if (handle === null) return;
             handle.removeEventListener('mousedown', onMouseDown);
             handle.removeEventListener('mouseup', onMouseUp);

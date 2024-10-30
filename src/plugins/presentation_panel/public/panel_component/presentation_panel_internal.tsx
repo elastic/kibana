@@ -15,12 +15,11 @@ import {
   useBatchedOptionalPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import classNames from 'classnames';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { PresentationPanelHoverActions } from './panel_header/presentation_panel_hover_actions';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { PresentationPanelHeader } from './panel_header/presentation_panel_header';
+import { PresentationPanelHoverActions } from './panel_header/presentation_panel_hover_actions';
 import { PresentationPanelError } from './presentation_panel_error';
 import { DefaultPresentationPanelApi, PresentationPanelInternalProps } from './types';
-import { nodeConfig } from '@kbn/core-node-server-internal';
 
 export const PresentationPanelInternal = <
   ApiType extends DefaultPresentationPanelApi = DefaultPresentationPanelApi,

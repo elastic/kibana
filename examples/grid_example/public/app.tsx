@@ -13,7 +13,7 @@ import ReactDOM from 'react-dom';
 import { EuiPageTemplate, EuiProvider } from '@elastic/eui';
 import { AppMountParameters } from '@kbn/core-application-browser';
 import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
-import { DragHandleContext, GridLayout, type GridLayoutData } from '@kbn/grid-layout';
+import { GridLayout, type GridLayoutData } from '@kbn/grid-layout';
 
 import {
   SearchApi,

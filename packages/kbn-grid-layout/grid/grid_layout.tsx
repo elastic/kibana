@@ -24,7 +24,7 @@ export const GridLayout = ({
   getCreationOptions: () => { initialLayout: GridLayoutData; gridSettings: GridSettings };
   renderPanelContents: (
     panelId: string,
-    setDragHandles: (refs: Array<React.MutableRefObject<HTMLElement | null>>) => void
+    setDragHandles: (refs: Array<HTMLElement | null>) => void
   ) => React.ReactNode;
 }) => {
   const { gridLayoutStateManager, setDimensionsRef } = useGridLayoutState({

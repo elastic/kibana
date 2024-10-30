@@ -107,7 +107,7 @@ export const PresentationPanelHoverActions = ({
   index?: number;
   api: DefaultPresentationPanelApi | null;
   getActions: PresentationPanelInternalProps['getActions'];
-  dragHandleRef: React.Ref<HTMLElement>;
+  dragHandleRef: React.MutableRefObject<HTMLDivElement>;
   actionPredicate?: (actionId: string) => boolean;
   children: ReactElement;
   className?: string;
@@ -134,14 +134,14 @@ export const PresentationPanelHoverActions = ({
     const anchorWidth = anchorRef.current.offsetWidth;
     const hoverActionsWidth =
       (rightHoverActionsRef.current?.offsetWidth ?? 0) +
-      (leftHoverActionsRef.current?.offsetWidth ?? 0) +
+      (dragHandleRef.current?.offsetWidth ?? 0) +
       parseInt(euiThemeVars.euiSize, 10) * 2;
     const hoverActionsHeight = rightHoverActionsRef.current?.offsetHeight ?? 0;
 
     // Left align hover actions when they would get cut off by the right edge of the window
     if (anchorLeft - (hoverActionsWidth - anchorWidth) <= parseInt(euiThemeVars.euiSize, 10)) {
-      hoverActionsRef.current.style.removeProperty('right');
-      hoverActionsRef.current.style.setProperty('left', '0');
+      dragHandleRef?.current.style.removeProperty('right');
+      dragHandleRef?.current.style.setProperty('left', '0');
     } else {
       hoverActionsRef.current.style.removeProperty('left');
       hoverActionsRef.current.style.setProperty('right', '0');
