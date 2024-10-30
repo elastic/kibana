@@ -22,6 +22,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import pRetry from 'p-retry';
 
 import { loadSecurityLabs } from '../../lib/langchain/content_loaders/security_labs_loader';
+import { DocumentEntryType } from '@kbn/elastic-assistant-common';
 jest.mock('../../lib/langchain/content_loaders/security_labs_loader');
 jest.mock('p-retry');
 const date = '2023-03-28T22:27:28.159Z';
@@ -71,7 +72,6 @@ describe('AIAssistantKnowledgeBaseDataClient', () => {
       getIsKBSetupInProgress: jest.fn().mockReturnValue(false),
       ingestPipelineResourceName: 'something',
       setIsKBSetupInProgress: jest.fn().mockImplementation(() => {}),
-      v2KnowledgeBaseEnabled: true,
       manageGlobalKnowledgeBaseAIAssistant: true,
     };
     esClientMock.search.mockReturnValue(
@@ -307,6 +307,67 @@ describe('AIAssistantKnowledgeBaseDataClient', () => {
 
       expect(result).toEqual([]);
       expect(logger.error).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe.only('createKnowledgeBaseEntry', () => {
+    it('should create a new Knowledge Base entry', async () => {
+      const client = new AIAssistantKnowledgeBaseDataClient(mockOptions);
+      mockOptions.currentUser = mockUser1;
+      const knowledgeBaseEntry = {
+        type: DocumentEntryType.value,
+        name: 'test entry',
+        text: 'test text',
+      };
+      const expectedDocument = {
+        ...knowledgeBaseEntry,
+        createdAt: date,
+        spaceId: 'default',
+        user: mockUser1.username,
+        global: false,
+      };
+
+      await client.createKnowledgeBaseEntry({ knowledgeBaseEntry });
+
+      expect(createKnowledgeBaseEntry).toHaveBeenCalledWith({
+        esClient: esClientMock,
+        knowledgeBaseIndex: mockOptions.indexTemplateAndPattern.alias,
+        logger: mockLogger,
+        spaceId: 'default',
+        user: mockUser1.username,
+        knowledgeBaseEntry: expectedDocument,
+        global: false,
+        isV2: true,
+      });
+    });
+
+    it('should throw error if user is not authenticated', async () => {
+      const client = new AIAssistantKnowledgeBaseDataClient(mockOptions);
+      mockOptions.currentUser = null;
+      const knowledgeBaseEntry = {
+        type: DocumentEntryType.value,
+        name: 'test entry',
+        text: 'test text',
+      };
+
+      await expect(client.createKnowledgeBaseEntry({ knowledgeBaseEntry })).rejects.toThrow(
+        'Authenticated user not found!'
+      );
+    });
+
+    it('should throw error if user lacks privileges to create global entries', async () => {
+      const client = new AIAssistantKnowledgeBaseDataClient(mockOptions);
+      mockOptions.currentUser = mockUser1;
+      mockOptions.manageGlobalKnowledgeBaseAIAssistant = false;
+      const knowledgeBaseEntry = {
+        type: DocumentEntryType.value,
+        name: 'test entry',
+        text: 'test text',
+      };
+
+      await expect(
+        client.createKnowledgeBaseEntry({ knowledgeBaseEntry, global: true })
+      ).rejects.toThrow('User lacks privileges to create global knowledge base entries');
     });
   });
 });
