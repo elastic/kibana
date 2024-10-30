@@ -488,12 +488,14 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     }
 
     const esClient = await this.options.elasticsearchClientPromise;
+    const modelId = await this.options.getElserId();
 
     try {
       const vectorSearchQuery = getKBVectorSearchQuery({
         kbResource: USER_RESOURCE,
         required: false,
         user,
+        modelId,
         v2KnowledgeBaseEnabled: this.options.v2KnowledgeBaseEnabled,
       });
 
@@ -525,12 +527,14 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     const expectedDocsCount = await getSecurityLabsDocsCount({ logger: this.options.logger });
 
     const esClient = await this.options.elasticsearchClientPromise;
+    const modelId = await this.options.getElserId();
 
     try {
       const vectorSearchQuery = getKBVectorSearchQuery({
         kbResource: SECURITY_LABS_RESOURCE,
         required: false,
         user,
+        modelId,
         v2KnowledgeBaseEnabled: this.options.v2KnowledgeBaseEnabled,
       });
 
@@ -577,6 +581,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     }
 
     const esClient = await this.options.elasticsearchClientPromise;
+    const modelId = await this.options.getElserId();
 
     const vectorSearchQuery = getKBVectorSearchQuery({
       filter,
@@ -584,6 +589,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
       query,
       required,
       user,
+      modelId,
       v2KnowledgeBaseEnabled: this.options.v2KnowledgeBaseEnabled,
     });
 
