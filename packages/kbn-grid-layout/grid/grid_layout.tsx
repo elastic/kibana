@@ -8,7 +8,7 @@
  */
 
 import React, { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
-import { distinctUntilChanged, map, pairwise, skip, withLatestFrom } from 'rxjs';
+import { distinctUntilChanged, map, pairwise, skip } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 
 import { GridHeightSmoother } from './grid_height_smoother';

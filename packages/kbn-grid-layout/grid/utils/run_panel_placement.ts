@@ -8,13 +8,13 @@
  */
 import { i18n } from '@kbn/i18n';
 import { GridRowData } from '../..';
-import { DASHBOARD_GRID_COLUMN_COUNT } from '../constants';
 import { GridPanelData, PanelPlacementStrategy } from '../types';
 import { compactGridRow, resolveGridRow } from './resolve_grid_row';
 
 export const runPanelPlacementStrategy = (
   originalRowData: GridRowData,
   newPanel: Omit<GridPanelData, 'row' | 'column'>,
+  columnCount: number,
   strategy: PanelPlacementStrategy = PanelPlacementStrategy.findTopLeftMostOpenSpace
 ): GridRowData => {
   const nextRowData = { ...originalRowData, panels: { ...originalRowData.panels } };
@@ -54,7 +54,7 @@ export const runPanelPlacementStrategy = (
         // create a 2D array representation of the grid filled with zeros
         const grid = new Array(maxRow);
         for (let y = 0; y < maxRow; y++) {
-          grid[y] = new Array(DASHBOARD_GRID_COLUMN_COUNT).fill(0); // TODO: don't use constant here
+          grid[y] = new Array(columnCount).fill(0);
         }
 
         // fill in the 2D array with ones wherever a panel is
@@ -68,17 +68,13 @@ export const runPanelPlacementStrategy = (
 
         // now find the first empty spot where there are enough zeros (unoccupied spaces) to fit the whole panel
         for (let y = 0; y < maxRow; y++) {
-          for (let x = 0; x < DASHBOARD_GRID_COLUMN_COUNT; x++) {
+          for (let x = 0; x < columnCount; x++) {
             if (grid[y][x] === 1) {
               // space is filled, so skip this spot
               continue;
             } else {
               for (let h = y; h < Math.min(y + newPanel.height, maxRow); h++) {
-                for (
-                  let w = x;
-                  w < Math.min(x + newPanel.width, DASHBOARD_GRID_COLUMN_COUNT);
-                  w++
-                ) {
+                for (let w = x; w < Math.min(x + newPanel.width, columnCount); w++) {
                   const spaceIsEmpty = grid[h][w] === 0;
                   const fitsPanelWidth = w === x + newPanel.width - 1;
                   // if the panel is taller than any other panel in the current grid, it can still fit in the space, hence

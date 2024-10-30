@@ -16,7 +16,7 @@ import { SerializableRecord } from '@kbn/utility-types';
  * The external API provided through the GridLayout component
  */
 export interface GridLayoutApi {
-  addPanel: (id: string, placementStrategy?: PanelPlacementStrategy) => void;
+  addPanel: (id: string, placementSettings: PanelPlacementSettings) => void;
   removePanel: (panelId: string) => void;
   replacePanel: (oldPanelId: string, newPanelId: string) => void;
 
@@ -126,4 +126,10 @@ export enum PanelPlacementStrategy {
   placeAtTop = 'placeAtTop',
   /** Look for the smallest y and x value where the default panel will fit. */
   findTopLeftMostOpenSpace = 'findTopLeftMostOpenSpace',
+}
+
+export interface PanelPlacementSettings {
+  strategy?: PanelPlacementStrategy;
+  height: number;
+  width: number;
 }

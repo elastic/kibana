@@ -24,17 +24,18 @@ import {
 import { AppMountParameters } from '@kbn/core-application-browser';
 import { CoreStart } from '@kbn/core-lifecycle-browser';
 import { GridLayout, GridLayoutData, isLayoutEqual, type GridLayoutApi } from '@kbn/grid-layout';
-import {
-  DASHBOARD_GRID_COLUMN_COUNT,
-  DASHBOARD_GRID_HEIGHT,
-  DASHBOARD_MARGIN_SIZE,
-} from '@kbn/grid-layout/grid/constants';
 import { getPanelId } from './get_panel_id';
 import {
   clearSerializedGridLayout,
   getSerializedGridLayout,
   setSerializedGridLayout,
 } from './serialized_grid_layout';
+
+const DASHBOARD_MARGIN_SIZE = 8;
+const DASHBOARD_GRID_HEIGHT = 20;
+const DASHBOARD_GRID_COLUMN_COUNT = 48;
+const DEFAULT_PANEL_HEIGHT = 15;
+const DEFAULT_PANEL_WIDTH = DASHBOARD_GRID_COLUMN_COUNT / 2;
 
 export const GridExample = ({ coreStart }: { coreStart: CoreStart }) => {
   const [layoutKey, setLayoutKey] = useState<string>(uuidv4());
@@ -59,7 +60,11 @@ export const GridExample = ({ coreStart }: { coreStart: CoreStart }) => {
                     coreStart,
                     suggestion: `panel${(gridLayoutApi?.getPanelCount() ?? 0) + 1}`,
                   });
-                  if (panelId) gridLayoutApi?.addPanel(panelId);
+                  if (panelId)
+                    gridLayoutApi?.addPanel(panelId, {
+                      width: DEFAULT_PANEL_WIDTH,
+                      height: DEFAULT_PANEL_HEIGHT,
+                    });
                 }}
               >
                 Add a panel

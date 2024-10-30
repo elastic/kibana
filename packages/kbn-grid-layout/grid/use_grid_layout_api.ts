@@ -11,7 +11,6 @@ import { useMemo } from 'react';
 
 import { SerializableRecord } from '@kbn/utility-types';
 
-import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH } from './constants';
 import { GridLayoutApi, GridLayoutData, GridLayoutStateManager } from './types';
 import { compactGridRow } from './utils/resolve_grid_row';
 import { runPanelPlacementStrategy } from './utils/run_panel_placement';
@@ -23,17 +22,19 @@ export const useGridLayoutApi = ({
 }): GridLayoutApi => {
   const api: GridLayoutApi = useMemo(() => {
     return {
-      addPanel: (panelId, placementStrategy) => {
+      addPanel: (panelId, placementSettings) => {
         const currentLayout = gridLayoutStateManager.gridLayout$.getValue();
         const [firstRow, ...rest] = currentLayout;
+        const { columnCount: gridColumnCount } = gridLayoutStateManager.runtimeSettings$.getValue();
         const nextRow = runPanelPlacementStrategy(
           firstRow,
           {
             id: panelId,
-            width: DEFAULT_PANEL_WIDTH,
-            height: DEFAULT_PANEL_HEIGHT,
+            width: placementSettings.width,
+            height: placementSettings.height,
           },
-          placementStrategy
+          gridColumnCount,
+          placementSettings?.strategy
         );
         gridLayoutStateManager.gridLayout$.next([nextRow, ...rest]);
         gridLayoutStateManager.layoutUpdateEvent$.next([nextRow, ...rest]);
@@ -68,7 +69,6 @@ export const useGridLayoutApi = ({
 
       replacePanel: (oldPanelId, newPanelId) => {
         const currentLayout = gridLayoutStateManager.gridLayout$.getValue();
-        debugger;
 
         // find the row where the panel exists and update its ID to trigger a re-render
         let rowIndex = 0;
@@ -83,7 +83,6 @@ export const useGridLayoutApi = ({
             break;
           }
         }
-        console.log('UPDATE', currentLayout);
 
         // if the panels were updated (i.e. the panel was successfully found and replaced), update the layout
         if (updatedPanels) {
