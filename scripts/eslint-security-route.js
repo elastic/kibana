@@ -197,7 +197,7 @@ function groupFilesByOwners(files, codeowners) {
         .replace(/\*/g, '[^/]*')
         .replace(/\//g, '\\/');
 
-      const regex = new RegExp(`^${regexPattern}$`);
+      const regex = new RegExp(`^${regexPattern}`);
 
       if (regex.test(file)) {
         if (!bestMatch || pattern.length > bestMatch.length) {
