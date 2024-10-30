@@ -10,6 +10,12 @@
 import type { SavedObject, SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { Logger, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { favoritesSavedObjectType, FavoritesSavedObjectAttributes } from './favorites_saved_object';
+import { FavoritesRegistry } from './favorites_registry';
+
+export interface FavoritesState {
+  favoriteIds: string[];
+  favoriteMetadata?: Record<string, object>;
+}
 
 export class FavoritesService {
   constructor(
@@ -18,23 +24,35 @@ export class FavoritesService {
     private readonly deps: {
       savedObjectClient: SavedObjectsClientContract;
       logger: Logger;
+      favoritesRegistry: FavoritesRegistry;
     }
   ) {
     if (!this.userId || !this.type) {
       // This should never happen, but just in case let's do a runtime check
       throw new Error('userId and object type are required to use a favorite service');
     }
+
+    if (!this.deps.favoritesRegistry.hasType(this.type)) {
+      throw new Error(`Favorite type ${this.type} is not registered`);
+    }
   }
 
-  public async getFavorites(): Promise<{ favoriteIds: string[] }> {
+  public async getFavorites(): Promise<FavoritesState> {
     const favoritesSavedObject = await this.getFavoritesSavedObject();
 
     const favoriteIds = favoritesSavedObject?.attributes?.favoriteIds ?? [];
+    const favoriteMetadata = favoritesSavedObject?.attributes?.favoriteMetadata;
 
-    return { favoriteIds };
+    return { favoriteIds, favoriteMetadata };
   }
 
-  public async addFavorite({ id }: { id: string }): Promise<{ favoriteIds: string[] }> {
+  public async addFavorite({
+    id,
+    metadata,
+  }: {
+    id: string;
+    metadata?: object;
+  }): Promise<FavoritesState> {
     let favoritesSavedObject = await this.getFavoritesSavedObject();
 
     if (!favoritesSavedObject) {
@@ -44,13 +62,23 @@ export class FavoritesService {
           userId: this.userId,
           type: this.type,
           favoriteIds: [id],
+          ...(metadata
+            ? {
+                favoriteMetadata: {
+                  [id]: metadata,
+                },
+              }
+            : {}),
         },
         {
           id: this.getFavoriteSavedObjectId(),
         }
       );
 
-      return { favoriteIds: favoritesSavedObject.attributes.favoriteIds };
+      return {
+        favoriteIds: favoritesSavedObject.attributes.favoriteIds,
+        favoriteMetadata: favoritesSavedObject.attributes.favoriteMetadata,
+      };
     } else {
       const newFavoriteIds = [
         ...(favoritesSavedObject.attributes.favoriteIds ?? []).filter(
@@ -59,22 +87,34 @@ export class FavoritesService {
         id,
       ];
 
+      const newFavoriteMetadata = metadata
+        ? {
+            ...favoritesSavedObject.attributes.favoriteMetadata,
+            [id]: metadata,
+          }
+        : undefined;
+
       await this.deps.savedObjectClient.update(
         favoritesSavedObjectType.name,
         favoritesSavedObject.id,
         {
           favoriteIds: newFavoriteIds,
+          ...(newFavoriteMetadata
+            ? {
+                favoriteMetadata: newFavoriteMetadata,
+              }
+            : {}),
         },
         {
           version: favoritesSavedObject.version,
         }
       );
 
-      return { favoriteIds: newFavoriteIds };
+      return { favoriteIds: newFavoriteIds, favoriteMetadata: newFavoriteMetadata };
     }
   }
 
-  public async removeFavorite({ id }: { id: string }): Promise<{ favoriteIds: string[] }> {
+  public async removeFavorite({ id }: { id: string }): Promise<FavoritesState> {
     const favoritesSavedObject = await this.getFavoritesSavedObject();
 
     if (!favoritesSavedObject) {
@@ -85,19 +125,36 @@ export class FavoritesService {
       (favoriteId) => favoriteId !== id
     );
 
+    const newFavoriteMetadata = favoritesSavedObject.attributes.favoriteMetadata
+      ? { ...favoritesSavedObject.attributes.favoriteMetadata }
+      : undefined;
+
+    if (newFavoriteMetadata) {
+      delete newFavoriteMetadata[id];
+    }
+
     await this.deps.savedObjectClient.update(
       favoritesSavedObjectType.name,
       favoritesSavedObject.id,
       {
+        ...favoritesSavedObject.attributes,
         favoriteIds: newFavoriteIds,
+        ...(newFavoriteMetadata
+          ? {
+              favoriteMetadata: newFavoriteMetadata,
+            }
+          : {}),
       },
       {
         version: favoritesSavedObject.version,
+        // We don't want to merge the attributes here because we want to remove the keys from the metadata
+        mergeAttributes: false,
       }
     );
 
     return {
       favoriteIds: newFavoriteIds,
+      favoriteMetadata: newFavoriteMetadata,
     };
   }
 

@@ -76,10 +76,15 @@ export class ContentManagementPlugin
       contentRegistry,
     });
 
-    registerFavorites({ core, logger: this.logger, usageCollection: plugins.usageCollection });
+    const favoritesSetup = registerFavorites({
+      core,
+      logger: this.logger,
+      usageCollection: plugins.usageCollection,
+    });
 
     return {
       ...coreApi,
+      favorites: favoritesSetup,
     };
   }
 

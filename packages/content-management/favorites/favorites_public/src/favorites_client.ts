@@ -9,12 +9,16 @@
 
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
-import type { GetFavoritesResponse } from '@kbn/content-management-favorites-server';
+import type {
+  GetFavoritesResponse,
+  AddFavoriteResponse,
+  RemoveFavoriteResponse,
+} from '@kbn/content-management-favorites-server';
 
 export interface FavoritesClientPublic {
   getFavorites(): Promise<GetFavoritesResponse>;
-  addFavorite({ id }: { id: string }): Promise<GetFavoritesResponse>;
-  removeFavorite({ id }: { id: string }): Promise<GetFavoritesResponse>;
+  addFavorite({ id, metadata }: { id: string; metadata?: object }): Promise<AddFavoriteResponse>;
+  removeFavorite({ id }: { id: string }): Promise<RemoveFavoriteResponse>;
 
   getFavoriteType(): string;
   reportAddFavoriteClick(): void;
@@ -32,9 +36,16 @@ export class FavoritesClient implements FavoritesClientPublic {
     return this.deps.http.get(`/internal/content_management/favorites/${this.favoriteObjectType}`);
   }
 
-  public async addFavorite({ id }: { id: string }): Promise<GetFavoritesResponse> {
+  public async addFavorite({
+    id,
+    metadata,
+  }: {
+    id: string;
+    metadata?: object;
+  }): Promise<GetFavoritesResponse> {
     return this.deps.http.post(
-      `/internal/content_management/favorites/${this.favoriteObjectType}/${id}/favorite`
+      `/internal/content_management/favorites/${this.favoriteObjectType}/${id}/favorite`,
+      { body: metadata ? JSON.stringify(metadata) : undefined }
     );
   }
 
