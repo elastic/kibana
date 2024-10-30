@@ -148,7 +148,7 @@ export class AIAssistantService {
       // Apply `default_pipeline` if pipeline exists for resource
       ...(resource in this.resourceNames.pipelines &&
       // Remove this param and initialization when the `assistantKnowledgeBaseByDefault` feature flag is removed
-      !(resource === 'knowledgeBase' && this.v2KnowledgeBaseEnabled)
+      !(resource === 'knowledgeBase')
         ? {
             template: {
               settings: {
@@ -189,6 +189,7 @@ export class AIAssistantService {
         id: this.resourceNames.pipelines.knowledgeBase,
       });
       // ensure pipeline is re-created for those upgrading
+      // pipeline is noop now, so if one does not exist we do not need one
       if (pipelineCreated) {
         this.options.logger.debug(
           `Installing ingest pipeline - ${this.resourceNames.pipelines.knowledgeBase}`
@@ -196,14 +197,9 @@ export class AIAssistantService {
         const response = await createPipeline({
           esClient,
           id: this.resourceNames.pipelines.knowledgeBase,
-          modelId: await this.getElserId(),
         });
 
         this.options.logger.debug(`Installed ingest pipeline: ${response}`);
-      } else {
-        this.options.logger.debug(
-          `Ingest pipeline already exists - ${this.resourceNames.pipelines.knowledgeBase}`
-        );
       }
 
       await this.promptsDataStream.install({

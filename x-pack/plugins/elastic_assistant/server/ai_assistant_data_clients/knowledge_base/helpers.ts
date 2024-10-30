@@ -115,23 +115,12 @@ export const getKBVectorSearchQuery = ({
         text_expansion: { 'vector.tokens': { model_id: string; model_text: string } };
       }> = [];
 
-  if (v2KnowledgeBaseEnabled && query) {
+  if (query) {
     semanticTextFilter = [
       {
         semantic: {
           field: 'semantic_text',
           query,
-        },
-      },
-    ];
-  } else if (!v2KnowledgeBaseEnabled) {
-    semanticTextFilter = [
-      {
-        text_expansion: {
-          'vector.tokens': {
-            model_id: modelId,
-            model_text: query as string,
-          },
         },
       },
     ];
