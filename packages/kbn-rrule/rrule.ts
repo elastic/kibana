@@ -16,6 +16,7 @@ export enum Frequency {
   DAILY = 3,
   HOURLY = 4,
   MINUTELY = 5,
+  SECONDLY = 6,
 }
 
 export enum Weekday {
@@ -265,6 +266,13 @@ export const getNextRecurrences = function ({
     }
     case Frequency.MINUTELY: {
       const nextRef = moment(refDT).add(interval, 'm');
+      return getMinuteOfRecurrences({
+        refDT: nextRef,
+        ...opts,
+      });
+    }
+    case Frequency.SECONDLY: {
+      const nextRef = moment(refDT).add(interval, 's');
       return getMinuteOfRecurrences({
         refDT: nextRef,
         ...opts,
