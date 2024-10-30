@@ -411,9 +411,10 @@ export class EntityStoreDataClient {
         })
         // Swallowing the error as it is expected to fail if no entity definition exists
         .catch((e) =>
-          this.log(`error`, entityType, `Error deleting entity definition: ${e.message}`)
+          this.log(`warn`, entityType, `Error deleting entity definition: ${e.message}`)
         );
       this.log('debug', entityType, `Deleted entity definition`);
+
 
       await deleteEntityIndexComponentTemplate({
         unitedDefinition,

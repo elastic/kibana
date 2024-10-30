@@ -19,6 +19,7 @@ import type { ILicense } from '@kbn/licensing-plugin/server';
 import type { NewPackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
 import { FLEET_ENDPOINT_PACKAGE } from '@kbn/fleet-plugin/common';
 
+import { ensureIndicesExistsForPolicies } from './endpoint/migrations/ensure_indices_exists_for_policies';
 import { CompleteExternalResponseActionsTask } from './endpoint/lib/response_actions';
 import { registerAgentRoutes } from './endpoint/routes/agent';
 import { endpointPackagePoliciesStatsSearchStrategyProvider } from './search_strategy/endpoint_package_policies_stats';
@@ -606,8 +607,10 @@ export class Plugin implements ISecuritySolutionPlugin {
       plugins.fleet
         .fleetSetupCompleted()
         .then(async () => {
+          logger.info('Dependent plugin setup complete');
+
           if (this.manifestTask) {
-            logger.info('Dependent plugin setup complete - Starting ManifestTask');
+            logger.info('Starting ManifestTask');
             await this.manifestTask.start({
               taskManager,
             });
@@ -625,6 +628,10 @@ export class Plugin implements ISecuritySolutionPlugin {
           );
 
           await turnOffAgentPolicyFeatures(fleetServices, productFeaturesService, logger);
+
+          // Ensure policies have backing DOT indices (We don't need to `await` this.
+          // It can run in the background)
+          ensureIndicesExistsForPolicies(this.endpointAppContextService).catch(() => {});
         })
         .catch(() => {});
 
