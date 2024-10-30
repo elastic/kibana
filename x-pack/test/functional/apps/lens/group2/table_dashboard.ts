@@ -9,7 +9,12 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { lens, visualize, dashboard } = getPageObjects(['lens', 'visualize', 'dashboard']);
+  const { lens, visualize, dashboard, timePicker } = getPageObjects([
+    'lens',
+    'visualize',
+    'dashboard',
+    'timePicker',
+  ]);
   const listingTable = getService('listingTable');
   const retry = getService('retry');
 
@@ -35,11 +40,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   describe('lens table on dashboard', () => {
+    before(async () => {
+      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
+    });
     it('should sort a table by column in dashboard edit mode', async () => {
       await visualize.gotoVisualizationLandingPage();
       await listingTable.searchForItemWithName('lnsXYvis');
       await lens.clickVisualizeListItemTitle('lnsXYvis');
-      await lens.goToTimeRange();
       await lens.switchToVisualization('lnsDatatable');
       await lens.save('New Table', true, false, false, 'new');
 

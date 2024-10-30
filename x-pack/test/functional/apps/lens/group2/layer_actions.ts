@@ -9,16 +9,18 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { visualize, lens } = getPageObjects(['visualize', 'lens']);
+  const { visualize, lens, timePicker } = getPageObjects(['visualize', 'lens', 'timePicker']);
   const find = getService('find');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
 
   describe('lens layer actions tests', () => {
+    before(async () => {
+      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
+    });
     it('should allow creation of lens xy chart', async () => {
       await visualize.navigateToNewVisualization();
       await visualize.clickVisType('lens');
-      await lens.goToTimeRange();
 
       // check that no sampling info is shown in the dataView picker
       expect(await testSubjects.exists('lnsChangeIndexPatternSamplingInfo')).to.be(false);
@@ -188,7 +190,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should show visualization modifiers for layer settings when embedded in a dashboard', async () => {
       await visualize.navigateToNewVisualization();
       await visualize.clickVisType('lens');
-      await lens.goToTimeRange();
       // click on open layer settings
       await lens.openLayerContextMenu();
       await testSubjects.click('lnsLayerSettings');

@@ -7,11 +7,12 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { dashboard, visualize, lens, timeToVisualize } = getPageObjects([
+  const { dashboard, visualize, lens, timeToVisualize, timePicker } = getPageObjects([
     'dashboard',
     'visualize',
     'lens',
     'timeToVisualize',
+    'timePicker',
   ]);
   const find = getService('find');
   const log = getService('log');
@@ -23,7 +24,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const createNewLens = async () => {
     await visualize.navigateToNewVisualization();
     await visualize.clickVisType('lens');
-    await lens.goToTimeRange();
 
     await lens.configureDimension({
       dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
@@ -39,11 +39,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await visualize.gotoVisualizationLandingPage();
     await listingTable.searchForItemWithName('lnsXYvis');
     await lens.clickVisualizeListItemTitle('lnsXYvis');
-    await lens.goToTimeRange();
     await lens.waitForVisualization('xyVisChart');
   };
 
   describe('lens inline editing tests', () => {
+    before(async () => {
+      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
+    });
     it('should allow inline editing of a by value visualization', async () => {
       await createNewLens();
       await lens.save('New Lens from Modal', false, false, false, 'new');

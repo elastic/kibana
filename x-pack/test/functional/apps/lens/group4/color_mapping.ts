@@ -15,14 +15,14 @@ import {
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { visualize, lens } = getPageObjects(['visualize', 'lens']);
+  const { visualize, lens, timePicker } = getPageObjects(['visualize', 'lens', 'timePicker']);
   const elasticChart = getService('elasticChart');
 
   describe('lens color mapping', () => {
     before(async () => {
+      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await visualize.navigateToNewVisualization();
       await visualize.clickVisType('lens');
-      await lens.goToTimeRange();
       await elasticChart.setNewChartUiDebugFlag(true);
 
       await lens.configureDimension({

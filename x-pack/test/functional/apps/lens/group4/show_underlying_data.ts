@@ -8,14 +8,16 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { visualize, lens, common, header, discover, unifiedFieldList } = getPageObjects([
-    'visualize',
-    'lens',
-    'common',
-    'header',
-    'discover',
-    'unifiedFieldList',
-  ]);
+  const { visualize, lens, common, header, discover, unifiedFieldList, timePicker } =
+    getPageObjects([
+      'visualize',
+      'lens',
+      'common',
+      'header',
+      'discover',
+      'unifiedFieldList',
+      'timePicker',
+    ]);
   const queryBar = getService('queryBar');
   const filterBar = getService('filterBar');
   const listingTable = getService('listingTable');
@@ -24,11 +26,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
 
   describe('show underlying data', () => {
+    before(async () => {
+      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
+    });
     it('should show the open button for a compatible saved visualization', async () => {
       await visualize.gotoVisualizationLandingPage();
       await listingTable.searchForItemWithName('lnsXYvis');
       await lens.clickVisualizeListItemTitle('lnsXYvis');
-      await lens.goToTimeRange();
 
       await lens.waitForVisualization('xyVisChart');
 

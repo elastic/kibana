@@ -9,14 +9,16 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { dashboard, visualize, lens, timeToVisualize, common, header } = getPageObjects([
-    'dashboard',
-    'visualize',
-    'lens',
-    'timeToVisualize',
-    'common',
-    'header',
-  ]);
+  const { dashboard, visualize, lens, timeToVisualize, common, header, timePicker } =
+    getPageObjects([
+      'dashboard',
+      'visualize',
+      'lens',
+      'timeToVisualize',
+      'common',
+      'header',
+      'timePicker',
+    ]);
   const find = getService('find');
   const listingTable = getService('listingTable');
   const dashboardAddPanel = getService('dashboardAddPanel');
@@ -27,8 +29,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const createNewLens = async () => {
     await visualize.navigateToNewVisualization();
     await visualize.clickVisType('lens');
-    await lens.goToTimeRange();
-
     await lens.configureDimension({
       dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
       operation: 'average',
@@ -48,8 +48,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await dashboardAddPanel.filterEmbeddableNames('lnsXYvis');
     await find.clickByButtonText('lnsXYvis');
     await dashboardAddPanel.closeAddPanel();
-    await lens.goToTimeRange();
-
     await dashboard.saveDashboard(dashboardName);
     await dashboard.gotoDashboardLandingPage();
     await listingTable.searchAndExpectItemsCount('dashboard', dashboardName, 1);
@@ -59,12 +57,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await visualize.gotoVisualizationLandingPage();
     await listingTable.searchForItemWithName('Artistpreviouslyknownaslens');
     await lens.clickVisualizeListItemTitle('Artistpreviouslyknownaslens');
-    await lens.goToTimeRange();
     await lens.waitForVisualization('legacyMtrVis');
     await lens.assertLegacyMetric('Maximum of bytes', '19,986');
   };
 
   describe('lens add-to-dashboards tests', () => {
+    before(async () => {
+      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
+    });
     it('should allow new lens to be added by value to a new dashboard', async () => {
       await createNewLens();
       await lens.save('New Lens from Modal', false, false, false, 'new');
@@ -226,7 +226,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should add a Lens heatmap to the dashboard', async () => {
       await visualize.navigateToNewVisualization();
       await visualize.clickVisType('lens');
-      await lens.goToTimeRange();
 
       await lens.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
@@ -281,8 +280,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           it('should not display', async () => {
             await visualize.navigateToNewVisualization();
             await visualize.clickVisType('lens');
-            await lens.goToTimeRange();
-
             await lens.configureDimension({
               dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
               operation: 'average',
@@ -330,7 +327,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           it('should not display', async () => {
             await visualize.navigateToNewVisualization();
             await visualize.clickVisType('lens');
-            await lens.goToTimeRange();
 
             await lens.configureDimension({
               dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
