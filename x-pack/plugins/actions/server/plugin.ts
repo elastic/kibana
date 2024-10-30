@@ -84,10 +84,6 @@ import { setupSavedObjects } from './saved_objects';
 import { ACTIONS_FEATURE } from './feature';
 import { ActionsAuthorization } from './authorization/actions_authorization';
 import { ActionExecutionSource } from './lib/action_execution_source';
-import {
-  getAuthorizationModeBySource,
-  AuthorizationMode,
-} from './authorization/get_authorization_mode_by_source';
 import { ensureSufficientLicense } from './lib/ensure_sufficient_license';
 import { renderMustacheObject } from './lib/mustache_renderer';
 import { getAlertHistoryEsIndex } from './preconfigured_connectors/alert_history_es_index/alert_history_es_index';
@@ -467,10 +463,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
         scopedClusterClient: core.elasticsearch.client.asScoped(request),
         inMemoryConnectors: this.inMemoryConnectors,
         request,
-        authorization: instantiateAuthorization(
-          request,
-          await getAuthorizationModeBySource(unsecuredSavedObjectsClient, authorizationContext)
-        ),
+        authorization: instantiateAuthorization(request),
         actionExecutor: actionExecutor!,
         ephemeralExecutionEnqueuer: createEphemeralExecutionEnqueuerFunction({
           taskManager: plugins.taskManager,
@@ -523,9 +516,6 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       });
     };
 
-    // Ensure the public API cannot be used to circumvent authorization
-    // using our legacy exemption mechanism by passing in a legacy SO
-    // as authorizationContext which would then set a Legacy AuthorizationMode
     const secureGetActionsClientWithRequest = (request: KibanaRequest) =>
       getActionsClientWithRequest(request);
 
@@ -641,13 +631,9 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       includedHiddenTypes,
     });
 
-  private instantiateAuthorization = (
-    request: KibanaRequest,
-    authorizationMode?: AuthorizationMode
-  ) => {
+  private instantiateAuthorization = (request: KibanaRequest) => {
     return new ActionsAuthorization({
       request,
-      authorizationMode,
       authorization: this.security?.authz,
     });
   };
