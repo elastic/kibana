@@ -11,6 +11,7 @@ import type {
   AttachmentRequest,
   CaseResolveResponse,
   CasesFindResponse,
+  CasesSimilarResponse,
 } from '../../common/types/api';
 import type { Attachment, Case, Cases, UserActions } from '../../common/types/domain';
 import {
@@ -24,6 +25,7 @@ import type {
   CaseUI,
   AttachmentUI,
   ResolvedCase,
+  CasesSimilarResponseUI,
 } from '../containers/types';
 
 export const convertArrayToCamelCase = (arrayOfSnakes: unknown[]): unknown[] =>
@@ -121,6 +123,15 @@ export const convertAllCasesToCamel = (snakeCases: CasesFindResponse): CasesFind
   countOpenCases: snakeCases.count_open_cases,
   countInProgressCases: snakeCases.count_in_progress_cases,
   countClosedCases: snakeCases.count_closed_cases,
+  page: snakeCases.page,
+  perPage: snakeCases.per_page,
+  total: snakeCases.total,
+});
+
+export const convertSimilarCasesToCamel = (
+  snakeCases: CasesSimilarResponse
+): CasesSimilarResponseUI => ({
+  cases: convertCasesToCamelCase(snakeCases.cases),
   page: snakeCases.page,
   perPage: snakeCases.per_page,
   total: snakeCases.total,

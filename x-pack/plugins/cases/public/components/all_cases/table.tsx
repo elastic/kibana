@@ -14,7 +14,7 @@ import classnames from 'classnames';
 
 import { LinkButton } from '../links';
 
-import type { CasesFindResponseUI, CaseUI } from '../../../common/ui/types';
+import type { CasesFindResponseUI, CasesSimilarResponseUI, CaseUI } from '../../../common/ui/types';
 
 import * as i18n from './translations';
 import { useCreateCaseNavigation } from '../../common/navigation';
@@ -22,7 +22,7 @@ import { useCasesContext } from '../cases_context/use_cases_context';
 
 interface CasesTableProps {
   columns: EuiBasicTableProps<CaseUI>['columns'];
-  data: CasesFindResponseUI;
+  data: CasesFindResponseUI | CasesSimilarResponseUI;
   goToCreateCase?: () => void;
   isCasesLoading: boolean;
   isCommentUpdating: boolean;

@@ -25,7 +25,7 @@ export const similarCaseRoute = createCasesRoute({
       const caseContext = await context.cases;
       const casesClient = await caseContext.getCasesClient();
 
-      const res: caseApiV1.CasesFindResponse = await casesClient.cases.similar({ ...options });
+      const res: caseApiV1.CasesSimilarResponse = await casesClient.cases.similar({ ...options });
 
       return response.ok({
         body: res,

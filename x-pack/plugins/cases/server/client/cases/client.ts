@@ -21,6 +21,7 @@ import type {
   BulkCreateCasesResponse,
   CasesSearchRequest,
   SimilarCasesSearchRequest,
+  CasesSimilarResponse,
 } from '../../../common/types/api';
 import type { CasesClient } from '../client';
 import type { CasesClientInternal } from '../client_internal';
@@ -107,7 +108,7 @@ export interface CasesSubClient {
   /**
    * Returns cases that are similar to given case (by observables)
    */
-  similar(params: SimilarCasesSearchRequest): Promise<CasesFindResponse>;
+  similar(params: SimilarCasesSearchRequest): Promise<CasesSimilarResponse>;
 }
 
 /**

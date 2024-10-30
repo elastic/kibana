@@ -23,6 +23,7 @@ import type {
   SingleCaseMetricsResponse,
   CustomFieldPutRequest,
   ObservableRequest,
+  CasesSimilarResponse,
 } from '../../common/types/api';
 import type {
   CaseConnectors,
@@ -38,6 +39,7 @@ import type {
   FilterOptions,
   CaseUICustomField,
   SimilarCasesProps,
+  CasesSimilarResponseUI,
 } from '../../common/ui/types';
 import { SortFieldCase } from '../../common/ui/types';
 import {
@@ -74,6 +76,7 @@ import {
   convertCaseToCamelCase,
   convertCasesToCamelCase,
   convertCaseResolveToCamelCase,
+  convertSimilarCasesToCamel,
 } from '../api/utils';
 
 import type {
@@ -96,7 +99,7 @@ import {
   decodeCaseUserActionStatsResponse,
   constructCustomFieldsFilter,
 } from './utils';
-import { decodeCasesFindResponse } from '../api/decoders';
+import { decodeCasesFindResponse, decodeCasesSimilarResponse } from '../api/decoders';
 
 export const getCase = async (
   caseId: string,
@@ -630,12 +633,12 @@ export const getSimilarCases = async ({
   signal,
   pageSize,
   pageIndex,
-}: SimilarCasesProps): Promise<CasesFindResponseUI> => {
+}: SimilarCasesProps): Promise<CasesSimilarResponseUI> => {
   const body = {
     case_id: caseId,
   };
 
-  const response = await KibanaServices.get().http.fetch<CasesFindResponse>(
+  const response = await KibanaServices.get().http.fetch<CasesSimilarResponse>(
     `${CASES_INTERNAL_URL}/_similar`,
     {
       method: 'POST',
@@ -644,5 +647,5 @@ export const getSimilarCases = async ({
     }
   );
 
-  return convertAllCasesToCamel(decodeCasesFindResponse(response));
+  return convertSimilarCasesToCamel(decodeCasesSimilarResponse(response));
 };

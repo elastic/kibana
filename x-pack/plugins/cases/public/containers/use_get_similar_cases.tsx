@@ -8,17 +8,14 @@
 import type { UseQueryResult } from '@tanstack/react-query';
 import { useQuery } from '@tanstack/react-query';
 import { casesQueriesKeys } from './constants';
-import type { CasesFindResponseUI, CaseUI } from './types';
+import type { CasesSimilarResponseUI, CaseUI } from './types';
 import { useToasts } from '../common/lib/kibana';
 import * as i18n from './translations';
 import { getSimilarCases } from './api';
 import type { ServerError } from '../types';
 
-export const initialData: CasesFindResponseUI = {
+export const initialData: CasesSimilarResponseUI = {
   cases: [],
-  countClosedCases: 0,
-  countInProgressCases: 0,
-  countOpenCases: 0,
   page: 0,
   perPage: 0,
   total: 0,
@@ -28,7 +25,7 @@ export const useGetSimilarCases = (params: {
   caseData: CaseUI;
   pageSize: number;
   pageIndex: number;
-}): UseQueryResult<CasesFindResponseUI> => {
+}): UseQueryResult<CasesSimilarResponseUI> => {
   const toasts = useToasts();
 
   return useQuery(

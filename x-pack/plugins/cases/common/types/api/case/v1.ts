@@ -378,6 +378,13 @@ export const CasesFindResponseRt = rt.intersection([
   CasesStatusResponseRt,
 ]);
 
+export const CasesSimilarResponseRt = rt.strict({
+  cases: rt.array(CaseRt),
+  page: rt.number,
+  per_page: rt.number,
+  total: rt.number,
+});
+
 /**
  * Delete cases
  */
@@ -549,3 +556,4 @@ export type CaseRequestCustomField = rt.TypeOf<typeof CustomFieldRt>;
 export type BulkCreateCasesRequest = rt.TypeOf<typeof BulkCreateCasesRequestRt>;
 export type BulkCreateCasesResponse = rt.TypeOf<typeof BulkCreateCasesResponseRt>;
 export type SimilarCasesSearchRequest = rt.TypeOf<typeof SimilarCasesSearchRequestRt>;
+export type CasesSimilarResponse = rt.TypeOf<typeof CasesSimilarResponseRt>;

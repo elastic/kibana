@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-import type { SimilarCasesSearchRequest } from '../../../common/types/api';
-import {
-  type CasesFindResponse,
-  CasesFindResponseRt,
-  SimilarCasesSearchRequestRt,
-} from '../../../common/types/api';
+import type { CasesSimilarResponse, SimilarCasesSearchRequest } from '../../../common/types/api';
+import { SimilarCasesSearchRequestRt, CasesSimilarResponseRt } from '../../../common/types/api';
 import { decodeWithExcessOrThrow, decodeOrThrow } from '../../common/runtime_types';
 
 import { createCaseError } from '../../common/error';
@@ -25,7 +21,7 @@ import { flattenCaseSavedObject } from '../../common/utils';
 export const similar = async (
   params: SimilarCasesSearchRequest,
   clientArgs: CasesClientArgs
-): Promise<CasesFindResponse> => {
+): Promise<CasesSimilarResponse> => {
   const {
     services: { caseService },
     logger,
@@ -55,12 +51,9 @@ export const similar = async (
       page: cases.page,
       per_page: cases.per_page,
       total: cases.total,
-      count_open_cases: 0,
-      count_in_progress_cases: 0,
-      count_closed_cases: 0,
     };
 
-    return decodeOrThrow(CasesFindResponseRt)(res);
+    return decodeOrThrow(CasesSimilarResponseRt)(res);
   } catch (error) {
     throw createCaseError({
       message: `Failed to find cases: ${JSON.stringify(params)}: ${error}`,
