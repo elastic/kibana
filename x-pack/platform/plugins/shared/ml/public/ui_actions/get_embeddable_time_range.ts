@@ -6,7 +6,8 @@
  */
 
 import type { TimeRange } from '@kbn/es-query';
-import { apiHasParentApi, apiPublishesTimeRange } from '@kbn/presentation-publishing';
+import { apiHasParentApi } from '@kbn/presentation-publishing/interfaces/has_parent_api';
+import { apiPublishesTimeRange } from '@kbn/presentation-publishing/interfaces/fetch/publishes_unified_search';
 
 import type { MlEmbeddableBaseApi } from '../embeddables/types';
 
