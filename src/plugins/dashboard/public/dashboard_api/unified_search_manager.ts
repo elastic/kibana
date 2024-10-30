@@ -310,8 +310,6 @@ export function initializeUnifiedSearchManager(
             return false;
           }
           return true;
-          return false;
-          // timeRestore$.value ? fastIsEqual(a, b) : true
         },
       ],
       timeRestore: [timeRestore$, setTimeRestore],
