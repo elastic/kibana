@@ -13,7 +13,7 @@ import { firstValueFrom } from 'rxjs';
 import type { estypes } from '@elastic/elasticsearch';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 import type { DashboardLocatorParams } from '@kbn/dashboard-plugin/common';
-import { getTitle } from '@kbn/presentation-publishing';
+import { getTitle } from '@kbn/presentation-publishing/interfaces/titles/publishes_title';
 import type { Filter, Query, DataViewBase } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
 import type { ErrorType } from '@kbn/ml-error-utils';

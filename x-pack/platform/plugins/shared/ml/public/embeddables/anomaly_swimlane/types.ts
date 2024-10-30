@@ -13,7 +13,7 @@ import type {
   PublishesWritableTitle,
   PublishingSubject,
 } from '@kbn/presentation-publishing';
-import { apiIsOfType } from '@kbn/presentation-publishing';
+import { apiIsOfType } from '@kbn/presentation-publishing/interfaces/has_type';
 import type { TypeOf } from '@kbn/config-schema';
 import type { JobId } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 

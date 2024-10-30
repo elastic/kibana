@@ -13,7 +13,7 @@ import type {
   LensSavedObjectAttributes,
 } from '@kbn/lens-plugin/public';
 import type { Query } from '@kbn/es-query';
-import { apiIsOfType } from '@kbn/presentation-publishing';
+import { apiIsOfType } from '@kbn/presentation-publishing/interfaces/has_type';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { layerTypes } from '@kbn/lens-plugin/public';

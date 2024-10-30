@@ -16,18 +16,22 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { useTimeBuckets } from '@kbn/ml-time-buckets';
 import type { PublishesUnifiedSearch } from '@kbn/presentation-publishing';
+import { apiHasExecutionContext } from '@kbn/presentation-publishing/interfaces/has_execution_context';
+import { apiHasParentApi } from '@kbn/presentation-publishing/interfaces/has_parent_api';
 import {
-  apiHasExecutionContext,
-  apiHasParentApi,
   apiPublishesTimeRange,
   apiPublishesTimeslice,
-  fetch$,
-  initializeTimeRangeManager,
-  initializeTitleManager,
+} from '@kbn/presentation-publishing/interfaces/fetch/publishes_unified_search';
+import { fetch$ } from '@kbn/presentation-publishing/interfaces/fetch/fetch';
+import {
   timeRangeComparators,
+  initializeTimeRangeManager,
+} from '@kbn/presentation-publishing/interfaces/fetch/time_range_manager';
+import {
+  initializeTitleManager,
   titleComparators,
-  useBatchedPublishingSubjects,
-} from '@kbn/presentation-publishing';
+} from '@kbn/presentation-publishing/interfaces/titles/title_manager';
+import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing/publishing_subject';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import useUnmount from 'react-use/lib/useUnmount';
