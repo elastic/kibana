@@ -381,10 +381,7 @@ export class EntityStoreDataClient {
           deleteData,
         });
       } catch (e) {
-        logger.error(
-          `[Entity Store] Error deleting entity definition for ${entityType}: ${e.message}`
-        );
-        logger.debug(`[Entity Store] Continuing with deletion of other resources`);
+        logger.warn(`Error deleting entity definition for ${entityType}: ${e.message}`);
       }
       await deleteEntityIndexComponentTemplate({
         unitedDefinition,

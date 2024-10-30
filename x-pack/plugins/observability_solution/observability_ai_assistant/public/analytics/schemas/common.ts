@@ -6,9 +6,10 @@
  */
 
 import type { RootSchema } from '@kbn/core/public';
+import { AssistantScope } from '@kbn/ai-assistant-common';
 import type { Message } from '../../../common';
 
-export const messageSchema: RootSchema<Message> = {
+export const messageSchema: RootSchema<Message & { scopes: AssistantScope[] }> = {
   '@timestamp': {
     type: 'text',
     _meta: {
@@ -71,6 +72,15 @@ export const messageSchema: RootSchema<Message> = {
             },
           },
         },
+      },
+    },
+  },
+  scopes: {
+    type: 'array',
+    items: {
+      type: 'text',
+      _meta: {
+        description: 'The scopes that were used when generating the message.',
       },
     },
   },
