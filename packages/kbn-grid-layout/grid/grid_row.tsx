@@ -201,18 +201,22 @@ export const GridRow = forwardRef<
                   if (!panelRef) return;
 
                   const panelRect = panelRef.getBoundingClientRect();
-                  setInteractionEvent({
-                    type,
-                    id: panelId,
-                    panelDiv: panelRef,
-                    targetRowIndex: rowIndex,
-                    mouseOffsets: {
-                      top: e.clientY - panelRect.top,
-                      left: e.clientX - panelRect.left,
-                      right: e.clientX - panelRect.right,
-                      bottom: e.clientY - panelRect.bottom,
-                    },
-                  });
+                  if (type === 'drop') {
+                    setInteractionEvent(undefined);
+                  } else {
+                    setInteractionEvent({
+                      type,
+                      id: panelId,
+                      panelDiv: panelRef,
+                      targetRowIndex: rowIndex,
+                      mouseOffsets: {
+                        top: e.clientY - panelRect.top,
+                        left: e.clientX - panelRect.left,
+                        right: e.clientX - panelRect.right,
+                        bottom: e.clientY - panelRect.bottom,
+                      },
+                    });
+                  }
                 }}
                 ref={(element) => {
                   if (!gridLayoutStateManager.panelRefs.current[rowIndex]) {
