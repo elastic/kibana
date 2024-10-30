@@ -110,7 +110,7 @@ export class ConnectorUsageReportingTask {
     const { state } = taskInstance;
 
     if (!this.projectId) {
-      this.logger.error(
+      this.logger.warn(
         `Missing required project id while running ${CONNECTOR_USAGE_REPORTING_TASK_TYPE}`
       );
       return {

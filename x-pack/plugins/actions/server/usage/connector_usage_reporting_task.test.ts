@@ -229,7 +229,7 @@ describe('ConnectorUsageReportingTask', () => {
 
     const response = await taskRunner.run();
 
-    expect(logger.error).toHaveBeenCalledWith(
+    expect(logger.warn).toHaveBeenCalledWith(
       'Missing required project id while running actions:connector_usage_reporting'
     );
 
