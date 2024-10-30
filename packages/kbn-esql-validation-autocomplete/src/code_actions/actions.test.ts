@@ -18,7 +18,7 @@ import type { ESQLCallbacks, PartialFieldsMetadataClient } from '../shared/types
 
 function getCallbackMocks(): jest.Mocked<ESQLCallbacks> {
   return {
-    getFieldsFor: jest.fn<Promise<ESQLRealField[]>, any>(async ({ query }) => {
+    getColumnsFor: jest.fn<Promise<ESQLRealField[]>, any>(async ({ query }) => {
       if (/enrich/.test(query)) {
         const fields: ESQLRealField[] = [
           { name: 'otherField', type: 'keyword' },
@@ -375,11 +375,11 @@ describe('quick fixes logic', () => {
           const statement = `FROM index | DROP any#Char$Field`;
           const { errors } = await validateQuery(statement, getAstAndSyntaxErrors, undefined, {
             ...callbackMocks,
-            getFieldsFor: undefined,
+            getColumnsFor: undefined,
           });
           const edits = await getActions(statement, errors, getAstAndSyntaxErrors, undefined, {
             ...callbackMocks,
-            getFieldsFor: undefined,
+            getColumnsFor: undefined,
           });
           expect(edits.length).toBe(0);
         });
@@ -400,7 +400,7 @@ describe('quick fixes logic', () => {
           const statement = `FROM index | DROP any#Char$Field`;
           const { errors } = await validateQuery(statement, getAstAndSyntaxErrors, undefined, {
             ...callbackMocks,
-            getFieldsFor: undefined,
+            getColumnsFor: undefined,
             getFieldsMetadata: undefined,
           });
           const actions = await getActions(
@@ -412,7 +412,7 @@ describe('quick fixes logic', () => {
             },
             {
               ...callbackMocks,
-              getFieldsFor: undefined,
+              getColumnsFor: undefined,
               getFieldsMetadata: undefined,
             }
           );
@@ -435,7 +435,7 @@ describe('quick fixes logic', () => {
       );
       try {
         await getActions(statement, errors, getAstAndSyntaxErrors, undefined, {
-          getFieldsFor: undefined,
+          getColumnsFor: undefined,
           getSources: undefined,
           getPolicies: undefined,
         });
@@ -460,7 +460,7 @@ describe('quick fixes logic', () => {
           getAstAndSyntaxErrors,
           { relaxOnMissingCallbacks: true },
           {
-            getFieldsFor: undefined,
+            getColumnsFor: undefined,
             getSources: undefined,
             getPolicies: undefined,
             getFieldsMetadata: undefined,
