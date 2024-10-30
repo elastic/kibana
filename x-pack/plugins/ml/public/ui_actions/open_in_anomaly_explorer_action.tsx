@@ -100,7 +100,6 @@ export function createOpenInExplorerAction(
         const { jobIds$, selectedEntities$ } = embeddable;
 
         const jobIds = jobIds$?.getValue() ?? [];
-
         let mlExplorerFilter: ExplorerAppState['mlExplorerFilter'] | undefined;
         const entityFieldsValue = selectedEntities$?.getValue();
 
