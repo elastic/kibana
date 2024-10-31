@@ -6964,6 +6964,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/test-plugins-metadata@link:packages/kbn-test-plugins-metadata":
+  version "0.0.0"
+  uid ""
+
 "@kbn/test-subj-selector@link:packages/kbn-test-subj-selector":
   version "0.0.0"
   uid ""
