@@ -27,20 +27,37 @@ export const LeafPrinter = {
   source: (node: ESQLSource) => node.name,
 
   column: (node: ESQLColumn) => {
-    const parts: string[] = node.parts;
+    const args = node.args;
 
     let formatted = '';
 
-    for (const part of parts) {
-      if (formatted.length > 0) {
-        formatted += '.';
-      }
-      if (regexUnquotedIdPattern.test(part)) {
-        formatted += part;
-      } else {
-        // Escape backticks "`" with double backticks "``".
-        const escaped = part.replace(/`/g, '``');
-        formatted += '`' + escaped + '`';
+    for (const arg of args) {
+      switch (arg.type) {
+        case 'identifier': {
+          const name = arg.name;
+
+          if (formatted.length > 0) {
+            formatted += '.';
+          }
+          if (regexUnquotedIdPattern.test(name)) {
+            formatted += name;
+          } else {
+            // Escape backticks "`" with double backticks "``".
+            const escaped = name.replace(/`/g, '``');
+            formatted += '`' + escaped + '`';
+          }
+
+          break;
+        }
+        case 'literal': {
+          if (formatted.length > 0) {
+            formatted += '.';
+          }
+
+          formatted += LeafPrinter.literal(arg);
+
+          break;
+        }
       }
     }
 

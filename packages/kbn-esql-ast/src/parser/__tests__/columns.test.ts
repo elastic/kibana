@@ -10,6 +10,57 @@
 import { parse } from '..';
 
 describe('Column Identifier Expressions', () => {
+  it('can parse star column as function argument', () => {
+    const text = 'ROW fn(*)';
+    const { ast } = parse(text);
+
+    expect(ast).toMatchObject([
+      {
+        type: 'command',
+        name: 'row',
+        args: [
+          {
+            type: 'function',
+            name: 'fn',
+            args: [
+              {
+                type: 'column',
+                args: [
+                  {
+                    type: 'identifier',
+                    name: '*',
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    ]);
+  });
+
+  it('can parse a single identifier', () => {
+    const text = 'ROW hello';
+    const { ast } = parse(text);
+
+    expect(ast).toMatchObject([
+      {
+        type: 'command',
+        args: [
+          {
+            type: 'column',
+            args: [
+              {
+                type: 'identifier',
+                name: 'hello',
+              },
+            ],
+          },
+        ],
+      },
+    ]);
+  });
+
   it('can parse un-quoted identifiers', () => {
     const text = 'ROW a, b.c';
     const { ast } = parse(text);
@@ -20,11 +71,25 @@ describe('Column Identifier Expressions', () => {
         args: [
           {
             type: 'column',
-            parts: ['a'],
+            args: [
+              {
+                type: 'identifier',
+                name: 'a',
+              },
+            ],
           },
           {
             type: 'column',
-            parts: ['b', 'c'],
+            args: [
+              {
+                type: 'identifier',
+                name: 'b',
+              },
+              {
+                type: 'identifier',
+                name: 'c',
+              },
+            ],
           },
         ],
       },
@@ -41,15 +106,42 @@ describe('Column Identifier Expressions', () => {
         args: [
           {
             type: 'column',
-            parts: ['a'],
+            args: [
+              {
+                type: 'identifier',
+                name: 'a',
+              },
+            ],
           },
           {
             type: 'column',
-            parts: ['b', 'c'],
+            args: [
+              {
+                type: 'identifier',
+                name: 'b',
+              },
+              {
+                type: 'identifier',
+                name: 'c',
+              },
+            ],
           },
           {
             type: 'column',
-            parts: ['d', '👍', '123`123'],
+            args: [
+              {
+                type: 'identifier',
+                name: 'd',
+              },
+              {
+                type: 'identifier',
+                name: '👍',
+              },
+              {
+                type: 'identifier',
+                name: '123`123',
+              },
+            ],
           },
         ],
       },
@@ -66,7 +158,20 @@ describe('Column Identifier Expressions', () => {
         args: [
           {
             type: 'column',
-            parts: ['part1', 'part2', 'part`3️⃣'],
+            args: [
+              {
+                type: 'identifier',
+                name: 'part1',
+              },
+              {
+                type: 'identifier',
+                name: 'part2',
+              },
+              {
+                type: 'identifier',
+                name: 'part`3️⃣',
+              },
+            ],
           },
         ],
       },
@@ -84,10 +189,70 @@ describe('Column Identifier Expressions', () => {
         args: [
           {
             type: 'column',
-            parts: ['a', 'b'],
+            args: [
+              {
+                type: 'identifier',
+                name: 'a',
+              },
+              {
+                type: 'identifier',
+                name: 'b',
+              },
+            ],
           },
         ],
       },
     ]);
+  });
+
+  describe('params', () => {
+    it('can parse named param as a single param node', () => {
+      const text = 'ROW ?test';
+      const { ast } = parse(text);
+
+      expect(ast).toMatchObject([
+        {
+          type: 'command',
+          args: [
+            {
+              type: 'literal',
+              literalType: 'param',
+              paramType: 'named',
+              value: 'test',
+            },
+          ],
+        },
+      ]);
+    });
+
+    it('can parse nested named params as column', () => {
+      const text = 'ROW ?test1.?test2';
+      const { ast } = parse(text);
+
+      expect(ast).toMatchObject([
+        {
+          type: 'command',
+          args: [
+            {
+              type: 'column',
+              args: [
+                {
+                  type: 'literal',
+                  literalType: 'param',
+                  paramType: 'named',
+                  value: 'test1',
+                },
+                {
+                  type: 'literal',
+                  literalType: 'param',
+                  paramType: 'named',
+                  value: 'test2',
+                },
+              ],
+            },
+          ],
+        },
+      ]);
+    });
   });
 });

@@ -50,7 +50,7 @@ const createSortExpression = (
   template: string | string[] | NewSortExpressionTemplate
 ): SortExpression => {
   const column = Builder.expression.column({
-    parts:
+    args:
       typeof template === 'string'
         ? [template]
         : Array.isArray(template)
@@ -189,9 +189,9 @@ export const find = (
   return findByPredicate(ast, ([node]) => {
     let isMatch = false;
     if (node.type === 'column') {
-      isMatch = util.cmpArr(node.parts, arrParts);
+      isMatch = util.cmpArr(node.args, arrParts);
     } else if (node.type === 'order') {
-      const columnParts = (node.args[0] as ESQLColumn)?.parts;
+      const columnParts = (node.args[0] as ESQLColumn)?.args;
 
       if (Array.isArray(columnParts)) {
         isMatch = util.cmpArr(columnParts, arrParts);

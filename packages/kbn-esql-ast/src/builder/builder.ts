@@ -9,6 +9,7 @@
 
 /* eslint-disable @typescript-eslint/no-namespace */
 
+import { LeafPrinter } from '../pretty_print';
 import {
   ESQLAstComment,
   ESQLAstCommentMultiLine,
@@ -18,10 +19,14 @@ import {
   ESQLCommand,
   ESQLCommandOption,
   ESQLDecimalLiteral,
+  ESQLIdentifier,
   ESQLInlineCast,
   ESQLIntegerLiteral,
   ESQLList,
   ESQLLocation,
+  ESQLNamedParamLiteral,
+  ESQLParam,
+  ESQLPositionalParamLiteral,
   ESQLOrderExpression,
   ESQLSource,
 } from '../types';
@@ -124,13 +129,17 @@ export namespace Builder {
       template: Omit<AstNodeTemplate<ESQLColumn>, 'name' | 'quoted'>,
       fromParser?: Partial<AstNodeParserFields>
     ): ESQLColumn => {
-      return {
+      const node: ESQLColumn = {
         ...template,
         ...Builder.parserFields(fromParser),
         quoted: false,
-        name: template.parts.join('.'),
+        name: '',
         type: 'column',
       };
+
+      node.name = LeafPrinter.column(node);
+
+      return node;
     };
 
     export const order = (
@@ -189,5 +198,66 @@ export namespace Builder {
         };
       };
     }
+  }
+
+  export const identifier = (
+    template: AstNodeTemplate<ESQLIdentifier>,
+    fromParser?: Partial<AstNodeParserFields>
+  ): ESQLIdentifier => {
+    return {
+      ...template,
+      ...Builder.parserFields(fromParser),
+      type: 'identifier',
+    };
+  };
+
+  export namespace param {
+    export const unnamed = (fromParser?: Partial<AstNodeParserFields>): ESQLParam => {
+      const node = {
+        ...Builder.parserFields(fromParser),
+        name: '',
+        value: '',
+        paramType: 'unnamed',
+        type: 'literal',
+        literalType: 'param',
+      };
+
+      return node as ESQLParam;
+    };
+
+    export const named = (
+      template: Omit<AstNodeTemplate<ESQLNamedParamLiteral>, 'name' | 'literalType' | 'paramType'>,
+      fromParser?: Partial<AstNodeParserFields>
+    ): ESQLNamedParamLiteral => {
+      const node: ESQLNamedParamLiteral = {
+        ...template,
+        ...Builder.parserFields(fromParser),
+        name: '',
+        type: 'literal',
+        literalType: 'param',
+        paramType: 'named',
+      };
+
+      return node;
+    };
+
+    export const positional = (
+      template: Omit<
+        AstNodeTemplate<ESQLPositionalParamLiteral>,
+        'name' | 'literalType' | 'paramType'
+      >,
+      fromParser?: Partial<AstNodeParserFields>
+    ): ESQLPositionalParamLiteral => {
+      const node: ESQLPositionalParamLiteral = {
+        ...template,
+        ...Builder.parserFields(fromParser),
+        name: '',
+        type: 'literal',
+        literalType: 'param',
+        paramType: 'positional',
+      };
+
+      return node;
+    };
   }
 }
