@@ -292,6 +292,25 @@ describe('SavedObjectsRepository Encryption Extension', () => {
       ).resolves.not.toThrowError();
     });
 
+    it('allows to opt-out of random ID enforcement', async () => {
+      mockEncryptionExt.isEncryptableType.mockReturnValue(true);
+      mockEncryptionExt.shouldEnforceRandomId.mockReturnValue(false);
+      mockEncryptionExt.decryptOrStripResponseAttributes.mockResolvedValue({
+        ...encryptedSO,
+        ...decryptedStrippedAttributes,
+      });
+
+      const result = await repository.create(encryptedSO.type, encryptedSO.attributes, {
+        id: encryptedSO.id,
+        version: mockVersion,
+      });
+
+      expect(client.create).toHaveBeenCalled();
+      expect(mockEncryptionExt.isEncryptableType).toHaveBeenCalledWith(encryptedSO.type);
+      expect(mockEncryptionExt.shouldEnforceRandomId).toHaveBeenCalledWith(encryptedSO.type);
+      expect(result.id).toBe(encryptedSO.id);
+    });
+
     describe('namespace', () => {
       const doTest = async (optNamespace: string, expectNamespaceInDescriptor: boolean) => {
         const options = { overwrite: true, namespace: optNamespace };
@@ -530,6 +549,31 @@ describe('SavedObjectsRepository Encryption Extension', () => {
       expect(result.saved_objects).not.toBeUndefined();
       expect(result.saved_objects.length).toBe(1);
       expect(result.saved_objects[0].error).toBeUndefined();
+    });
+
+    it('allows to opt-out of random ID enforcement', async () => {
+      mockEncryptionExt.isEncryptableType.mockReturnValue(true);
+      mockEncryptionExt.shouldEnforceRandomId.mockReturnValue(false);
+      mockEncryptionExt.decryptOrStripResponseAttributes.mockResolvedValue({
+        ...encryptedSO,
+        ...decryptedStrippedAttributes,
+      });
+
+      const result = await bulkCreateSuccess(
+        client,
+        repository,
+        [{ ...encryptedSO, version: mockVersion }],
+        {
+          overwrite: true,
+          // version: mockVersion, // this doesn't work in bulk...looks like it checks the object itself?
+        }
+      );
+
+      expect(client.bulk).toHaveBeenCalled();
+      expect(result.saved_objects).not.toBeUndefined();
+      expect(result.saved_objects.length).toBe(1);
+      expect(result.saved_objects[0].error).toBeUndefined();
+      expect(result.saved_objects[0].id).toBe(encryptedSO.id);
     });
   });
 
