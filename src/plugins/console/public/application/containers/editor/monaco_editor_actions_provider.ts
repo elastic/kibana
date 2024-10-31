@@ -582,10 +582,6 @@ export class MonacoEditorActionsProvider {
     return model.getValue();
   }
 
-  public async fixWithAI() {
-    return 'fixin';
-  }
-
   public async readStreamToString(reader) {
     const decoder = new TextDecoder();
     let result = '';
@@ -675,6 +671,7 @@ export class MonacoEditorActionsProvider {
         });
 
         indexMappings = JSON.stringify(body, null, 2);
+        console.log(`Index mappings found}`);
       } catch (e) {}
     }
 
@@ -699,7 +696,7 @@ export class MonacoEditorActionsProvider {
               indexName ? indexName : 'your-index-name'
             }, index mappings: ${
               indexMappings ? indexMappings : '{guess index mappings}'
-            } Return just valid ES query, nothign else`,
+            } Return just valid ES query use provided mappings in context to generate query, don't return anything else.`,
           },
         ],
       }),
