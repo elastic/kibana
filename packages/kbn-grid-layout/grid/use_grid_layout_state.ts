@@ -37,7 +37,6 @@ export const useGridLayoutState = ({
 
   const gridLayoutStateManager = useMemo(() => {
     const gridLayout$ = new BehaviorSubject<GridLayoutData>(initialLayout);
-    console.log('initialLayout', initialLayout);
     const gridDimensions$ = new BehaviorSubject<ObservedSize>({ width: 0, height: 0 });
     const interactionEvent$ = new BehaviorSubject<PanelInteractionEvent | undefined>(undefined);
     const activePanel$ = new BehaviorSubject<ActivePanel | undefined>(undefined);

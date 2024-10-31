@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useRef, useState } from 'react';
+import { cloneDeep } from 'lodash';
+import React, { useRef, useState } from 'react';
 import ReactDOM from 'react-dom';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -41,8 +42,8 @@ export const GridExample = ({ coreStart }: { coreStart: CoreStart }) => {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState<boolean>(false);
   const [layoutKey, setLayoutKey] = useState<string>(uuidv4());
   const [gridLayoutApi, setGridLayoutApi] = useState<GridLayoutApi | null>();
-  const [savedLayout, setSavedLayout] = useState<GridLayoutData>(getSerializedGridLayout());
-  const currentLayout = useRef<GridLayoutData>(savedLayout);
+  const savedLayout = useRef<GridLayoutData>(getSerializedGridLayout());
+  const currentLayout = useRef<GridLayoutData>(savedLayout.current);
 
   return (
     <EuiProvider>
@@ -78,7 +79,7 @@ export const GridExample = ({ coreStart }: { coreStart: CoreStart }) => {
                   <EuiButtonEmpty
                     onClick={() => {
                       clearSerializedGridLayout();
-                      currentLayout.current = savedLayout;
+                      currentLayout.current = savedLayout.current;
                       setHasUnsavedChanges(false);
                       setLayoutKey(uuidv4()); // force remount of grid
                     }}
@@ -92,7 +93,7 @@ export const GridExample = ({ coreStart }: { coreStart: CoreStart }) => {
                       if (gridLayoutApi) {
                         const layoutToSave = gridLayoutApi.serializeState();
                         setSerializedGridLayout(layoutToSave);
-                        setSavedLayout(layoutToSave);
+                        savedLayout.current = layoutToSave;
                         setHasUnsavedChanges(false);
                       }
                     }}
@@ -107,7 +108,7 @@ export const GridExample = ({ coreStart }: { coreStart: CoreStart }) => {
           <GridLayout
             onLayoutChange={(newLayout) => {
               currentLayout.current = newLayout;
-              setHasUnsavedChanges(!isLayoutEqual(savedLayout, newLayout));
+              setHasUnsavedChanges(!isLayoutEqual(savedLayout.current, newLayout));
             }}
             key={layoutKey}
             ref={setGridLayoutApi}
@@ -143,7 +144,7 @@ export const GridExample = ({ coreStart }: { coreStart: CoreStart }) => {
                   rowHeight: DASHBOARD_GRID_HEIGHT,
                   columnCount: DASHBOARD_GRID_COLUMN_COUNT,
                 },
-                initialLayout: savedLayout,
+                initialLayout: cloneDeep(savedLayout.current),
               };
             }}
           />
