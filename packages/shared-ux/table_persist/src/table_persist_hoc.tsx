@@ -19,23 +19,28 @@ interface EuiTablePersistState<T> {
   sort?: PropertySort<T>;
 }
 
-interface EuiTablePersistInjectedProps<T> {
+export interface EuiTablePersistInjectedProps<T> {
   onTableChange: (change: CriteriaWithPagination<T>) => void;
   sorting: { sort: PropertySort<T> } | true;
   pageSize: number;
 }
 
 export function withEuiTablePersist<T extends object, Props>(
-  WrappedComponent: React.ComponentType<Props & EuiTablePersistInjectedProps<T>>
+  WrappedComponent: React.ComponentType<Props & EuiTablePersistInjectedProps<T>>,
+  persistProps: EuiTablePersistProps<T>
 ) {
-  type HOCProps = Omit<Props, keyof EuiTablePersistInjectedProps<T>> & EuiTablePersistProps<T>;
+  type HOCProps = Omit<Props, keyof EuiTablePersistInjectedProps<T>> &
+    Partial<EuiTablePersistProps<T>>;
 
   return class EuiTablePersistHOC extends PureComponent<HOCProps, EuiTablePersistState<T>> {
     private storage = createStorage();
 
     constructor(props: HOCProps) {
       super(props);
-      const { tableId, pageSizeOptions, initialPageSize, initialSort } = this.props;
+      const { tableId, pageSizeOptions, initialPageSize, initialSort } = {
+        ...persistProps,
+        ...this.props,
+      };
       const storedPersistData = this.storage.get(tableId, undefined);
       const { pageSize: storagePageSize, sort: storageSort }: PersistData<T> = validatePersistData(
         storedPersistData,
@@ -49,7 +54,10 @@ export function withEuiTablePersist<T extends object, Props>(
     }
 
     onTableChange = (nextValues: CriteriaWithPagination<T>) => {
-      const { customOnTableChange, tableId, pageSizeOptions } = this.props;
+      const { customOnTableChange, tableId, pageSizeOptions } = {
+        ...persistProps,
+        ...this.props,
+      };
       const { pageSize: storagePageSize, sort: storageSort } = validatePersistData(
         this.storage.get(tableId, undefined),
         pageSizeOptions ?? DEFAULT_PAGE_SIZE_OPTIONS
@@ -97,7 +105,10 @@ export function withEuiTablePersist<T extends object, Props>(
         initialPageSize,
         initialSort,
         ...rest
-      } = this.props;
+      } = {
+        ...persistProps,
+        ...this.props,
+      };
 
       return (
         <WrappedComponent
