@@ -1315,7 +1315,7 @@ describe('TaskStore', () => {
         took: 10,
       });
 
-      store.bulkPartialUpdate([task]);
+      await store.bulkPartialUpdate([task]);
 
       expect(await firstErrorPromise).toMatchInlineSnapshot(`[Error: Error reason]`);
     });
@@ -1342,7 +1342,7 @@ describe('TaskStore', () => {
         took: 10,
       });
 
-      store.bulkPartialUpdate([task]);
+      await store.bulkPartialUpdate([task]);
 
       expect(await firstErrorPromise).toMatchInlineSnapshot(`[Error: malformed response]`);
     });
