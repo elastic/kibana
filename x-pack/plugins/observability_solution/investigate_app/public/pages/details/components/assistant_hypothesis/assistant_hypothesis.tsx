@@ -88,7 +88,10 @@ export function AssistantHypothesis({ investigationId }: { investigationId: stri
           setLoading(false);
         },
         complete: () => {
-          console.log('done', events);
+          setEvents((prev) => {
+            console.log('done', prev);
+            return prev;
+          });
           setLoading(false);
         },
       });
