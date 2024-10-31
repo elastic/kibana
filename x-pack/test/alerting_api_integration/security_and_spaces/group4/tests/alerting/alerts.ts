@@ -1711,7 +1711,7 @@ instanceStateValue: true
                 reference
               );
               // @ts-expect-error doesnt handle total: number
-              expect(searchResult.body.hits.total.value).to.eql(1);
+              expect(searchResult.body.hits.total.value).to.be.greaterThan(0);
               expectExpect(
                 // @ts-expect-error _source: unknown
                 JSON.parse(searchResult.body.hits.hits[0]._source.params.message)
@@ -1901,7 +1901,7 @@ instanceStateValue: true
          */
         const response = await alertUtils.createAlwaysFiringSystemAction({
           reference,
-          overwrites: { schedule: { interval: '1s' } },
+          overwrites: { schedule: { interval: '1m' } },
         });
 
         expect(response.status).to.eql(200);

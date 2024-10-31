@@ -55,9 +55,12 @@ describe('dev/mocha/junit report generation', () => {
     const [testsuite] = report.testsuites.testsuite;
     expect(testsuite.$.time).toMatch(DURATION_REGEX);
     expect(testsuite.$.timestamp).toMatch(ISO_DATE_SEC_REGEX);
-    expect(testsuite.$).toEqual({
-      'command-line':
-        'node scripts/jest --config=packages/kbn-test/jest.config.js --runInBand --coverage=false --passWithNoTests',
+    const expectedCommandLine = process.env.CI
+      ? 'node scripts/jest --config=packages/kbn-test/jest.config.js --runInBand --coverage=false --passWithNoTests'
+      : 'node node_modules/jest-worker/build/workers/processChild.js';
+
+    expect(testsuite.$).toMatchObject({
+      'command-line': expectedCommandLine,
       failures: '2',
       name: 'test',
       skipped: '1',

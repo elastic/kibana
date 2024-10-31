@@ -343,6 +343,7 @@ export const createAgentPolicyHandler: FleetRequestHandler<
         currentSpaceId: spaceId,
         newSpaceIds: spaceIds,
         authorizedSpaces,
+        options: { force },
       });
     }
 
@@ -385,6 +386,7 @@ export const updateAgentPolicyHandler: FleetRequestHandler<
         currentSpaceId: spaceId,
         newSpaceIds: spaceIds,
         authorizedSpaces,
+        options: { force },
       });
 
       spaceId = spaceIds[0];
