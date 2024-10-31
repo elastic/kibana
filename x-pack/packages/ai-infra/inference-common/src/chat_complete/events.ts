@@ -8,37 +8,92 @@
 import type { InferenceTaskEventBase } from '../inference_task';
 import type { ToolCallsOf, ToolOptions } from './tools';
 
+/**
+ * List possible values of {@link ChatCompletionEvent} types.
+ */
 export enum ChatCompletionEventType {
   ChatCompletionChunk = 'chatCompletionChunk',
   ChatCompletionTokenCount = 'chatCompletionTokenCount',
   ChatCompletionMessage = 'chatCompletionMessage',
 }
 
+/**
+ * Message event, sent only once, after all the chunks were emitted, and containing
+ * the whole text content and potential tool calls of the response.
+ */
 export type ChatCompletionMessageEvent<TToolOptions extends ToolOptions = ToolOptions> =
   InferenceTaskEventBase<ChatCompletionEventType.ChatCompletionMessage> & {
+    /**
+     * The text content of the LLM response.
+     */
     content: string;
-  } & { toolCalls: ToolCallsOf<TToolOptions>['toolCalls'] };
+    /**
+     * The eventual tool calls performed by the LLM.
+     */
+    toolCalls: ToolCallsOf<TToolOptions>['toolCalls'];
+  };
 
+/**
+ * Represent a partial tool call present in a chunk event.
+ *
+ * Note that all properties of the structure, except from the index,
+ * are partial and must be aggregated.
+ */
 export interface ChatCompletionChunkToolCall {
+  /**
+   * The tool call index (position in the tool call array).
+   */
   index: number;
+  /**
+   * chunk of tool call id.
+   */
   toolCallId: string;
   function: {
+    /**
+     * chunk of tool name.
+     */
     name: string;
+    /**
+     * chunk of tool call arguments.
+     */
     arguments: string;
   };
 }
 
+/**
+ * Chunk event, containing a fragment of the total content,
+ * and potentially chunks of tool calls.
+ */
 export type ChatCompletionChunkEvent =
   InferenceTaskEventBase<ChatCompletionEventType.ChatCompletionChunk> & {
+    /**
+     * The content chunk
+     */
     content: string;
+    /**
+     * The tool call chunks
+     */
     tool_calls: ChatCompletionChunkToolCall[];
   };
 
+/**
+ * Token count event, send only once, usually (but not necessarily)
+ * before the message event
+ */
 export type ChatCompletionTokenCountEvent =
   InferenceTaskEventBase<ChatCompletionEventType.ChatCompletionTokenCount> & {
     tokens: {
+      /**
+       * Input token count
+       */
       prompt: number;
+      /**
+       * Output token count
+       */
       completion: number;
+      /**
+       * Total token count
+       */
       total: number;
     };
   };

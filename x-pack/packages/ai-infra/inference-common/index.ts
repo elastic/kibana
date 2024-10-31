@@ -36,6 +36,7 @@ export {
   isChatCompletionMessageEvent,
   isChatCompletionEvent,
   isChatCompletionChunkEvent,
+  isChatCompletionTokenCountEvent,
   ChatCompletionErrorCode,
   type ChatCompletionToolNotFoundError,
   type ChatCompletionToolValidationError,
@@ -47,6 +48,7 @@ export {
 export {
   OutputEventType,
   type OutputAPI,
+  type OutputResponse,
   type OutputCompleteEvent,
   type OutputUpdateEvent,
   type Output,

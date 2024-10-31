@@ -7,11 +7,17 @@
 
 import { InferenceTaskEventBase, InferenceTaskEventType } from './inference_task';
 
+/**
+ * Enum for generic inference error codes.
+ */
 export enum InferenceTaskErrorCode {
   internalError = 'internalError',
   requestError = 'requestError',
 }
 
+/**
+ * Base class for all inference API errors.
+ */
 export class InferenceTaskError<
   TCode extends string,
   TMeta extends Record<string, any> | undefined

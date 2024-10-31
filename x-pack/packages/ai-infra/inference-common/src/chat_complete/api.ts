@@ -24,18 +24,6 @@ import type { ChatCompletionEvent } from './events';
  *      { role: MessageRole.User, content: "Another question?"},
  *   ]
  * });
- *
- * ```
- * @example directly accessing the LLM message without using the observable API
- * ```ts
- * const message = await chatComplete({
- *   connectorId: 'my-connector',
- *   system: "You are a helpful assistant",
- *   messages: [
- *      { role: MessageRole.User, content: "Some question?"},
- *   ]
- * }).getMessage();
- * ```
  */
 export type ChatCompleteAPI = <TToolOptions extends ToolOptions = ToolOptions>(
   options: ChatCompleteOptions<TToolOptions>
@@ -46,7 +34,8 @@ export type ChatCompleteAPI = <TToolOptions extends ToolOptions = ToolOptions>(
  */
 export type ChatCompleteOptions<TToolOptions extends ToolOptions = ToolOptions> = {
   /**
-   * The ID of the connector to use
+   * The ID of the connector to use.
+   * Must be a genAI compatible connector, or an error will be thrown.
    */
   connectorId: string;
   /**

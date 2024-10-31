@@ -31,6 +31,16 @@ export type OutputAPI = <
     previousMessages?: Message[];
     functionCalling?: FunctionCallingMode;
   }
-) => Observable<
+) => OutputResponse<TId, TOutputSchema>;
+
+/**
+ * Response from the {@link OutputAPI}.
+ *
+ * Observable of {@link OutputEvent}
+ */
+export type OutputResponse<
+  TId extends string = string,
+  TOutputSchema extends ToolSchema | undefined = ToolSchema | undefined
+> = Observable<
   OutputEvent<TId, TOutputSchema extends ToolSchema ? FromToolSchema<TOutputSchema> : undefined>
 >;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export type { OutputAPI } from './api';
+export type { OutputAPI, OutputResponse } from './api';
 export {
   OutputEventType,
   type OutputCompleteEvent,

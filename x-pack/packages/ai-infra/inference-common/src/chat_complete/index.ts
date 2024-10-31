@@ -40,6 +40,7 @@ export {
   isChatCompletionChunkEvent,
   isChatCompletionEvent,
   isChatCompletionMessageEvent,
+  isChatCompletionTokenCountEvent,
   withoutChunkEvents,
   withoutTokenCountEvents,
 } from './event_utils';
