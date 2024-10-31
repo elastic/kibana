@@ -885,8 +885,8 @@ describe('xy_suggestions', () => {
     expect(suggestions).toHaveLength(1);
 
     expect(suggestions[0].hide).toEqual(false);
-    expect(suggestions[0].state.preferredSeriesType).toEqual('bar');
-    expect((suggestions[0].state.layers[0] as XYDataLayerConfig).seriesType).toEqual('bar');
+    expect(suggestions[0].state.preferredSeriesType).toEqual('bar_stacked');
+    expect((suggestions[0].state.layers[0] as XYDataLayerConfig).seriesType).toEqual('bar_stacked');
   });
 
   test('makes a visible seriesType suggestion for unchanged table without split', () => {
