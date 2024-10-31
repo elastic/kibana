@@ -229,10 +229,6 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    it('should work with deprecated api', async () => {
-      await supertest.get(`/api/fleet/agent-status`).set('kbn-xsrf', 'xxxx').expect(200);
-    });
-
     it('should work with adequate package privileges', async () => {
       await superTestWithoutAuth
         .get(`/api/fleet/agent_status`)
