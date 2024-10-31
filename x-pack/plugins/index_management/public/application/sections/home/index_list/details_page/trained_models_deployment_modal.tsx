@@ -155,9 +155,7 @@ export function TrainedModelsDeploymentModal({
       aria-labelledby={modalTitleId}
       onClose={closeModal}
       data-test-subj="trainedModelsDeploymentModal"
-      initialFocus={
-        erroredDeployments.length === 0 ? undefined : '[data-test-subj=tryAgainModalButton]'
-      }
+      initialFocus="[data-test-subj=tryAgainModalButton]"
     >
       <EuiModalHeader>
         <EuiModalHeaderTitle title={modalTitleId}>
@@ -262,7 +260,6 @@ export function TrainedModelsDeploymentModal({
               onClick={saveMappings}
               data-test-subj="tryAgainModalButton"
               isLoading={saveMappingsLoading}
-              disabled={erroredDeployments.length === 0}
             >
               {i18n.translate(
                 'xpack.idxMgmt.indexDetails.trainedModelsDeploymentModal.tryAgainButtonLabel',

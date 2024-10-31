@@ -173,8 +173,11 @@ describe('When semantic_text is enabled', () => {
       );
     });
 
-    it('should disable the try again button', () => {
-      expect(find('tryAgainModalButton').props().disabled).toBe(true);
+    it('should call saveMappings if refresh button is pressed', async () => {
+      await act(async () => {
+        find('tryAgainModalButton').simulate('click');
+      });
+      expect(saveMappings.mock.calls).toHaveLength(1);
     });
     it('should disable the force save mappings button if checkbox is not checked', async () => {
       expect(find('forceSaveMappingsButton').props().disabled).toBe(true);
