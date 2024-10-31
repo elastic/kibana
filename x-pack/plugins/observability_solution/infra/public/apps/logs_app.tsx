@@ -7,7 +7,7 @@
 
 import { History } from 'history';
 import { AppStatus, CoreStart } from '@kbn/core/public';
-import React from 'react';
+import React, { useMemo } from 'react';
 import ReactDOM from 'react-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { AppMountParameters } from '@kbn/core/public';
@@ -66,12 +66,16 @@ const LogsApp: React.FC<{
   const { logs } = core.application.capabilities;
 
   const isLogsExplorerAppAccessible = useObservable(
-    core.application.applications$.pipe(
-      map(
-        (apps) =>
-          (apps.get(OBSERVABILITY_LOGS_EXPLORER_APP_ID)?.status ?? AppStatus.inaccessible) ===
-          AppStatus.accessible
-      )
+    useMemo(
+      () =>
+        core.application.applications$.pipe(
+          map(
+            (apps) =>
+              (apps.get(OBSERVABILITY_LOGS_EXPLORER_APP_ID)?.status ?? AppStatus.inaccessible) ===
+              AppStatus.accessible
+          )
+        ),
+      [core.application.applications$]
     ),
     false
   );

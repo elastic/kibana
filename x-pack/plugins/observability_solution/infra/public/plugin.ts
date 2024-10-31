@@ -423,14 +423,12 @@ const getLogsNavigationEntries = ({
 };
 
 const getLogsExplorerAccessible$ = (application: CoreStart['application']) => {
-  const { capabilities, applications$ } = application;
+  const { applications$ } = application;
   return applications$.pipe(
     map(
       (apps) =>
         (apps.get(OBSERVABILITY_LOGS_EXPLORER_APP_ID)?.status ?? AppStatus.inaccessible) ===
-          AppStatus.accessible &&
-        !!capabilities.discover?.show &&
-        !!capabilities.fleet?.read
+        AppStatus.accessible
     ),
     distinctUntilChanged()
   );
