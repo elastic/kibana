@@ -15,6 +15,7 @@ import { ML_ANOMALY_THRESHOLD } from './anomaly_threshold';
 import { ML_ANOMALY_SEVERITY_TYPES } from './anomaly_severity_types';
 import type { MlAnomaliesTableRecord, MlAnomalyRecordDoc } from './types';
 import { ML_DETECTOR_RULE_CONDITIONS_NOT_SUPPORTED_FUNCTIONS } from './detector_rule';
+import type { MlEntityFieldOperation } from './entity_field_operations';
 
 /**
  * Enum of entity field types
@@ -24,20 +25,6 @@ export enum ML_ENTITY_FIELD_TYPE {
   OVER = 'over',
   PARTITON = 'partition',
 }
-
-/**
- * Custom enum of entity field operations
- */
-export const ML_ENTITY_FIELD_OPERATIONS = {
-  ADD: '+',
-  REMOVE: '-',
-} as const;
-
-/**
- * Union type of entity field operations
- */
-export type MlEntityFieldOperation =
-  (typeof ML_ENTITY_FIELD_OPERATIONS)[keyof typeof ML_ENTITY_FIELD_OPERATIONS];
 
 /**
  * Interface of an entity field

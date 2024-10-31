@@ -10,7 +10,7 @@ import React, { Fragment } from 'react';
 import { EuiCard, EuiIcon, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DataFrameAnalysisConfigType } from '@kbn/ml-data-frame-analytics-utils';
-import { ML_PAGES } from '@kbn/ml-common-types/locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { useMlLink } from '../../../../../contexts/kibana';
 interface Props {
   jobId: string;

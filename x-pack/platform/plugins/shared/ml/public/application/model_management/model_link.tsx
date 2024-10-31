@@ -8,7 +8,7 @@
 import { EuiLink } from '@elastic/eui';
 import type { FC } from 'react';
 import React from 'react';
-import { ML_PAGES } from '@kbn/ml-common-types/locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { useMlLink } from '../contexts/kibana';
 
 export interface TrainedModelLinkProps {
