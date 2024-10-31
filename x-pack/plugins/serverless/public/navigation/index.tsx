@@ -24,12 +24,9 @@ export const SideNavComponent: FC<NavigationProps> = (props) => (
         width={16}
         height={16}
         borderRadius="s"
-        contentAriaLabel={i18n.translate(
-          'core.ui.chrome.sideNavigation.loadingSolutionNavigationLabel',
-          {
-            defaultMessage: 'Loading solution navigation',
-          }
-        )}
+        contentAriaLabel={i18n.translate('xpack.serverless.nav.loadingSolutionNavigationLabel', {
+          defaultMessage: 'Loading solution navigation',
+        })}
       />
     }
   >
