@@ -140,7 +140,7 @@ export function Histogram({
       const totalHits = computeTotalHits(hasLensSuggestions, adapterTables, isPlainRecord);
       const totalHitsStatus = isLoading
         ? UnifiedHistogramFetchStatus.loading
-        : response?._shards?.failed
+        : response?._shards?.failed || response?.timed_out
         ? UnifiedHistogramFetchStatus.error
         : UnifiedHistogramFetchStatus.complete;
 
