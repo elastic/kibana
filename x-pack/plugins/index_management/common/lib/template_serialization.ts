@@ -73,6 +73,8 @@ export function deserializeTemplate(
     type = 'managed';
   }
 
+  const ilmPolicyName = settings?.index?.lifecycle?.name;
+
   const deserializedTemplate: TemplateDeserialized = {
     name,
     version,
@@ -80,7 +82,7 @@ export function deserializeTemplate(
     ...(template.lifecycle ? { lifecycle: deserializeESLifecycle(template.lifecycle) } : {}),
     indexPatterns: indexPatterns.sort(),
     template,
-    ilmPolicy: settings?.index?.lifecycle,
+    ilmPolicy: ilmPolicyName ? { name: ilmPolicyName } : undefined,
     composedOf: composedOf ?? [],
     ignoreMissingComponentTemplates: ignoreMissingComponentTemplates ?? [],
     dataStream,
