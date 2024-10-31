@@ -61,13 +61,10 @@ export async function removeInstallation(options: {
   esClient: ElasticsearchClient;
   force?: boolean;
 }): Promise<AssetReference[]> {
-  const { savedObjectsClient, pkgName, pkgVersion, esClient } = options;
+  const { savedObjectsClient, pkgName, esClient } = options;
   const installation = await getInstallation({ savedObjectsClient, pkgName });
   if (!installation) {
     throw new PackageRemovalError(`${pkgName} is not installed`);
-  }
-  if (pkgVersion && installation.version !== pkgVersion) {
-    throw new PackageRemovalError(`${pkgName} ${pkgVersion} is not installed`);
   }
   const { total, items } = await packagePolicyService.list(
     appContextService.getInternalUserSOClientWithoutSpaceExtension(),
