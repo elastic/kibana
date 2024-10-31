@@ -13,11 +13,7 @@ import { parse as parseCookie } from 'tough-cookie';
 import url from 'url';
 
 import expect from '@kbn/expect';
-import {
-  getLogoutRequest,
-  getSAMLRequestId,
-  getSAMLResponse,
-} from '@kbn/security-api-integration-helpers/saml/saml_tools';
+import { getLogoutRequest, getSAMLRequestId, getSAMLResponse } from '@kbn/saml-provider-plugin';
 import { adminTestUser } from '@kbn/test';
 
 import type { FtrProviderContext } from '../../ftr_provider_context';

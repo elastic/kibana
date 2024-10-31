@@ -4,18 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { resolve } from 'path';
+
 import { FtrConfigProviderContext } from '@kbn/test';
+import { IDP_METADATA_PATHS, pluginPath as samlIdPPlugin } from '@kbn/saml-provider-plugin';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const functionalConfig = await readConfigFile(require.resolve('../functional/config.base.js'));
 
   const kibanaPort = functionalConfig.get('servers.kibana.port');
-  const idpPath = resolve(
-    __dirname,
-    '../security_api_integration/plugins/saml_provider/metadata.xml'
-  );
-  const samlIdPPlugin = resolve(__dirname, '../security_api_integration/plugins/saml_provider');
 
   return {
     ...functionalConfig.getAll(),
@@ -31,7 +27,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         ...functionalConfig.get('esTestCluster.serverArgs'),
         'xpack.security.authc.token.enabled=true',
         'xpack.security.authc.realms.saml.cloud-saml-kibana.order=0',
-        `xpack.security.authc.realms.saml.cloud-saml-kibana.idp.metadata.path=${idpPath}`,
+        `xpack.security.authc.realms.saml.cloud-saml-kibana.idp.metadata.path=${IDP_METADATA_PATHS.default}`,
         'xpack.security.authc.realms.saml.cloud-saml-kibana.idp.entity_id=http://www.elastic.co/saml1',
         `xpack.security.authc.realms.saml.cloud-saml-kibana.sp.entity_id=http://localhost:${kibanaPort}`,
         `xpack.security.authc.realms.saml.cloud-saml-kibana.sp.logout=http://localhost:${kibanaPort}/logout`,

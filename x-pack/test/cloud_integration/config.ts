@@ -24,9 +24,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     require.resolve('@kbn/test-suites-src/functional/config.base')
   );
 
-  const kibanaPort = kibanaFunctionalConfig.get('servers.kibana.port');
   const idpPath = resolve(__dirname, './plugins/saml_provider/metadata.xml');
   const samlIdPPlugin = resolve(__dirname, './plugins/saml_provider');
+
+  const kibanaPort = kibanaFunctionalConfig.get('servers.kibana.port');
 
   return {
     testFiles: [...(RUN_FULLSTORY_TESTS ? [resolve(__dirname, './tests/fullstory')] : [])],

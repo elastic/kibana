@@ -12,15 +12,12 @@ import url from 'url';
 
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 import expect from '@kbn/expect';
+import { getSAMLRequestId, getSAMLResponse } from '@kbn/saml-provider-plugin';
 import {
   getMutualAuthenticationResponseToken,
   getSPNEGOToken,
 } from '@kbn/security-api-integration-helpers/kerberos/kerberos_tools';
 import { getStateAndNonce } from '@kbn/security-api-integration-helpers/oidc/oidc_tools';
-import {
-  getSAMLRequestId,
-  getSAMLResponse,
-} from '@kbn/security-api-integration-helpers/saml/saml_tools';
 import type { AuthenticationProvider } from '@kbn/security-plugin/common';
 
 import type { FtrProviderContext } from '../../ftr_provider_context';

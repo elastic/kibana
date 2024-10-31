@@ -9,7 +9,7 @@ import type { Cookie } from 'tough-cookie';
 import { parse as parseCookie } from 'tough-cookie';
 
 import expect from '@kbn/expect';
-import { getSAMLResponse } from '@kbn/security-api-integration-helpers/saml/saml_tools';
+import { getSAMLResponse } from '@kbn/saml-provider-plugin';
 
 import type { FtrProviderContext } from '../../ftr_provider_context';
 

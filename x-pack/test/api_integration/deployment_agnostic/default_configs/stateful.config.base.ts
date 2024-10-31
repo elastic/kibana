@@ -22,6 +22,7 @@ import {
 import path from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { STATEFUL_ROLES_ROOT_PATH } from '@kbn/es';
+import { IDP_METADATA_PATHS, pluginPath as samlIdPPlugin } from '@kbn/saml-provider-plugin';
 import { dockerImage } from '../../../fleet_api_integration/config.base';
 import { DeploymentAgnosticCommonServices, services } from '../services';
 
@@ -60,15 +61,6 @@ export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServi
     const dockerRegistryPort: string | undefined = process.env.FLEET_PACKAGE_REGISTRY_PORT;
 
     const xPackAPITestsConfig = await readConfigFile(require.resolve('../../config.ts'));
-
-    // TODO: move to kbn-es because currently metadata file has hardcoded entityID and Location
-    const idpPath = require.resolve(
-      '@kbn/security-api-integration-helpers/saml/idp_metadata_mock_idp.xml'
-    );
-    const samlIdPPlugin = path.resolve(
-      __dirname,
-      '../../../security_api_integration/plugins/saml_provider'
-    );
 
     const servers = {
       kibana: {
@@ -109,7 +101,7 @@ export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServi
           ...xPackAPITestsConfig.get('esTestCluster.serverArgs'),
           'xpack.security.authc.token.enabled=true',
           `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.order=0`,
-          `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.idp.metadata.path=${idpPath}`,
+          `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.idp.metadata.path=${IDP_METADATA_PATHS.mockIdpPlugin}`,
           `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.idp.entity_id=${MOCK_IDP_ENTITY_ID}`,
           `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.sp.entity_id=${kbnUrl}`,
           `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.sp.acs=${kbnUrl}/api/security/saml/callback`,

@@ -7,6 +7,7 @@
 
 import { resolve } from 'path';
 
+import { IDP_METADATA_PATHS, pluginPath as samlIdPPlugin } from '@kbn/saml-provider-plugin';
 import type { FtrConfigProviderContext } from '@kbn/test';
 
 import { pageObjects } from '../functional/page_objects';
@@ -23,11 +24,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   );
 
   const kibanaPort = kibanaFunctionalConfig.get('servers.kibana.port');
-  const idpPath = resolve(
-    __dirname,
-    '../security_api_integration/plugins/saml_provider/metadata.xml'
-  );
-  const samlIdPPlugin = resolve(__dirname, '../security_api_integration/plugins/saml_provider');
 
   const testEndpointsPlugin = resolve(__dirname, './plugins/test_endpoints');
 
@@ -45,7 +41,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       serverArgs: [
         'xpack.security.authc.token.enabled=true',
         'xpack.security.authc.realms.saml.saml1.order=0',
-        `xpack.security.authc.realms.saml.saml1.idp.metadata.path=${idpPath}`,
+        `xpack.security.authc.realms.saml.saml1.idp.metadata.path=${IDP_METADATA_PATHS.default}`,
         'xpack.security.authc.realms.saml.saml1.idp.entity_id=http://www.elastic.co/saml1',
         `xpack.security.authc.realms.saml.saml1.sp.entity_id=http://localhost:${kibanaPort}`,
         `xpack.security.authc.realms.saml.saml1.sp.logout=http://localhost:${kibanaPort}/logout`,

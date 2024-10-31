@@ -17,10 +17,7 @@ import type { Cookie } from 'tough-cookie';
 import { parse as parseCookie } from 'tough-cookie';
 
 import expect from '@kbn/expect';
-import {
-  getSAMLRequestId,
-  getSAMLResponse,
-} from '@kbn/security-api-integration-helpers/saml/saml_tools';
+import { getSAMLRequestId, getSAMLResponse } from '@kbn/saml-provider-plugin';
 import type { AuthenticationProvider } from '@kbn/security-plugin/common';
 import { adminTestUser } from '@kbn/test';
 

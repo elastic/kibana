@@ -22,6 +22,7 @@ import { MOCK_IDP_REALM_NAME } from '@kbn/mock-idp-utils';
 import path from 'path';
 import { defineDockerServersConfig } from '@kbn/test';
 import { dockerImage } from '@kbn/test-suites-xpack/fleet_api_integration/config.base';
+import { IDP_METADATA_PATHS, pluginPath as samlIdPPlugin } from '@kbn/saml-provider-plugin';
 import { services } from './services';
 
 export default async () => {
@@ -49,16 +50,6 @@ export default async () => {
     },
   };
 
-  // "Fake" SAML provider
-  const idpPath = resolve(
-    __dirname,
-    '../../test/security_api_integration/plugins/saml_provider/metadata.xml'
-  );
-  const samlIdPPlugin = resolve(
-    __dirname,
-    '../../test/security_api_integration/plugins/saml_provider'
-  );
-
   const jwksPath = require.resolve('@kbn/security-api-integration-helpers/oidc/jwks.json');
 
   return {
@@ -79,7 +70,7 @@ export default async () => {
     },
     esTestCluster: {
       from: 'serverless',
-      files: [idpPath, jwksPath],
+      files: [IDP_METADATA_PATHS.default, jwksPath],
       serverArgs: [
         'xpack.security.authc.realms.file.file1.order=-100',
         `xpack.security.authc.realms.native.native1.enabled=false`,

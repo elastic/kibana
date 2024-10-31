@@ -7,6 +7,7 @@
 
 import { resolve } from 'path';
 
+import { IDP_METADATA_PATHS, pluginPath as samlIdPPlugin } from '@kbn/saml-provider-plugin';
 import type { FtrConfigProviderContext } from '@kbn/test';
 
 import { pageObjects } from '../functional/page_objects';
@@ -23,14 +24,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   );
 
   const kibanaPort = kibanaFunctionalConfig.get('servers.kibana.port');
-  const idpPath = resolve(
-    __dirname,
-    '../security_api_integration/plugins/saml_provider/metadata.xml'
-  );
-  const idpNeverLoginPath = require.resolve(
-    '@kbn/security-api-integration-helpers/saml/idp_metadata_never_login.xml'
-  );
-  const samlIdPPlugin = resolve(__dirname, '../security_api_integration/plugins/saml_provider');
 
   const testEndpointsPlugin = resolve(__dirname, './plugins/test_endpoints');
 
@@ -49,14 +42,14 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         'xpack.security.authc.token.enabled=true',
         'xpack.security.authc.realms.native.native1.order=0',
         'xpack.security.authc.realms.saml.saml1.order=1',
-        `xpack.security.authc.realms.saml.saml1.idp.metadata.path=${idpPath}`,
+        `xpack.security.authc.realms.saml.saml1.idp.metadata.path=${IDP_METADATA_PATHS.default}`,
         'xpack.security.authc.realms.saml.saml1.idp.entity_id=http://www.elastic.co/saml1',
         `xpack.security.authc.realms.saml.saml1.sp.entity_id=http://localhost:${kibanaPort}`,
         `xpack.security.authc.realms.saml.saml1.sp.logout=http://localhost:${kibanaPort}/logout`,
         `xpack.security.authc.realms.saml.saml1.sp.acs=http://localhost:${kibanaPort}/api/security/saml/callback`,
         'xpack.security.authc.realms.saml.saml1.attributes.principal=urn:oid:0.0.7',
         'xpack.security.authc.realms.saml.saml_never.order=2',
-        `xpack.security.authc.realms.saml.saml_never.idp.metadata.path=${idpNeverLoginPath}`,
+        `xpack.security.authc.realms.saml.saml_never.idp.metadata.path=${IDP_METADATA_PATHS.neverLogin}`,
         'xpack.security.authc.realms.saml.saml_never.idp.entity_id=http://www.elastic.co/saml1',
         `xpack.security.authc.realms.saml.saml_never.sp.entity_id=http://localhost:${kibanaPort}`,
         `xpack.security.authc.realms.saml.saml_never.sp.logout=http://localhost:${kibanaPort}/logout`,
