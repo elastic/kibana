@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ML_APP_LOCATOR } from '@kbn/ml-common-types/locator_app_locator';
 import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -50,7 +51,7 @@ export function createOpenChangePointInMlAppAction(
         throw new IncompatibleActionError();
       }
 
-      const locator = pluginStart.share.url.locators.get('ML_APP_LOCATOR')!;
+      const locator = pluginStart.share.url.locators.get(ML_APP_LOCATOR)!;
 
       const { metricField, fn, splitField, dataViewId } = context.embeddable;
 
