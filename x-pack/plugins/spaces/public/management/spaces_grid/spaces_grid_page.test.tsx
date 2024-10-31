@@ -154,12 +154,21 @@ describe('SpacesGridPage', () => {
     wrapper.update();
 
     expect(wrapper.find('EuiInMemoryTable').prop('items')).toBe(spacesWithSolution);
-    expect(wrapper.find('EuiInMemoryTable').prop('columns')).toContainEqual({
-      field: 'solution',
-      name: 'Solution view',
-      sortable: true,
-      render: expect.any(Function),
-    });
+    expect(wrapper.find('EuiInMemoryTable').prop('columns')).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ name: '', field: 'initials' }),
+        expect.objectContaining({ name: 'Space', field: 'name' }),
+        expect.objectContaining({ name: 'Description', field: 'description' }),
+        expect.objectContaining({ name: 'Solution view', field: 'solution' }),
+        expect.objectContaining({
+          actions: expect.arrayContaining([
+            expect.objectContaining({ name: 'Edit', icon: 'pencil' }),
+            expect.objectContaining({ name: 'Switch', icon: 'merge' }),
+            expect.objectContaining({ name: 'Delete', icon: 'trash' }),
+          ]),
+        }),
+      ])
+    );
   });
 
   it('renders a "current" badge for the current space', async () => {
