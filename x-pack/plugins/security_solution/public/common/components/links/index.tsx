@@ -43,7 +43,7 @@ import {
 import type { HostsTableType } from '../../../explore/hosts/store/model';
 import type { UsersTableType } from '../../../explore/users/store/model';
 import { useGetSecuritySolutionLinkProps, withSecuritySolutionLink } from './link_props';
-import { TelemetryEventTypes } from '../../lib/telemetry/constants';
+import { EntityEventTypes } from '../../lib/telemetry';
 
 export { useSecuritySolutionLinkProps, type GetSecuritySolutionLinkProps } from './link_props';
 export { LinkButton, LinkAnchor } from './helpers';
@@ -97,7 +97,7 @@ const UserDetailsLinkComponent: React.FC<{
 
   const onClick = useCallback(
     (e: SyntheticEvent) => {
-      telemetry.reportEvent(TelemetryEventTypes.EntityDetailsClicked, { entity: 'user' });
+      telemetry.reportEvent(EntityEventTypes.EntityDetailsClicked, { entity: 'user' });
       const callback = onClickParam ?? goToUsersDetails;
       callback(e);
     },
@@ -174,7 +174,7 @@ const HostDetailsLinkComponent: React.FC<HostDetailsLinkProps> = ({
 
   const onClick = useCallback(
     (e: SyntheticEvent) => {
-      telemetry.reportEvent(TelemetryEventTypes.EntityDetailsClicked, { entity: 'host' });
+      telemetry.reportEvent(EntityEventTypes.EntityDetailsClicked, { entity: 'host' });
 
       const callback = onClickParam ?? goToHostDetails;
       callback(e);

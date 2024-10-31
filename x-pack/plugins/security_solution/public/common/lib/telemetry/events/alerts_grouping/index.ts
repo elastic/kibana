@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { TelemetryEvent } from '../../types';
-import { TelemetryEventTypes } from '../../constants';
+import type { AlertsGroupingTelemetryEvent } from './types';
+import { AlertsEventTypes } from './types';
 
-export const alertsGroupingToggledEvent: TelemetryEvent = {
-  eventType: TelemetryEventTypes.AlertsGroupingToggled,
+export const alertsGroupingToggledEvent: AlertsGroupingTelemetryEvent = {
+  eventType: AlertsEventTypes.AlertsGroupingToggled,
   schema: {
     isOpen: {
       type: 'boolean',
@@ -35,8 +35,8 @@ export const alertsGroupingToggledEvent: TelemetryEvent = {
   },
 };
 
-export const alertsGroupingChangedEvent: TelemetryEvent = {
-  eventType: TelemetryEventTypes.AlertsGroupingChanged,
+export const alertsGroupingChangedEvent: AlertsGroupingTelemetryEvent = {
+  eventType: AlertsEventTypes.AlertsGroupingChanged,
   schema: {
     tableId: {
       type: 'keyword',
@@ -55,8 +55,8 @@ export const alertsGroupingChangedEvent: TelemetryEvent = {
   },
 };
 
-export const alertsGroupingTakeActionEvent: TelemetryEvent = {
-  eventType: TelemetryEventTypes.AlertsGroupingTakeAction,
+export const alertsGroupingTakeActionEvent: AlertsGroupingTelemetryEvent = {
+  eventType: AlertsEventTypes.AlertsGroupingTakeAction,
   schema: {
     tableId: {
       type: 'keyword',
@@ -88,3 +88,9 @@ export const alertsGroupingTakeActionEvent: TelemetryEvent = {
     },
   },
 };
+
+export const alertsTelemetryEvents = [
+  alertsGroupingToggledEvent,
+  alertsGroupingChangedEvent,
+  alertsGroupingTakeActionEvent,
+];

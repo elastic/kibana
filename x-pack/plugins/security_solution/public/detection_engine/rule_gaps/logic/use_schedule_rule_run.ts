@@ -12,7 +12,7 @@ import { useScheduleRuleRunMutation } from '../api/hooks/use_schedule_rule_run_m
 import type { ScheduleBackfillProps } from '../types';
 
 import * as i18n from '../translations';
-import { TelemetryEventTypes } from '../../../common/lib/telemetry/constants';
+import { ManualRuleRunEventTypes } from '../../../common/lib/telemetry';
 
 export function useScheduleRuleRun() {
   const { mutateAsync } = useScheduleRuleRunMutation();
@@ -23,7 +23,7 @@ export function useScheduleRuleRun() {
     async (options: ScheduleBackfillProps) => {
       try {
         const results = await mutateAsync(options);
-        telemetry.reportEvent(TelemetryEventTypes.ManualRuleRunExecute, {
+        telemetry.reportEvent(ManualRuleRunEventTypes.ManualRuleRunExecute, {
           rangeInMs: options.timeRange.endDate.diff(options.timeRange.startDate),
           status: 'success',
           rulesCount: options.ruleIds.length,
@@ -32,7 +32,7 @@ export function useScheduleRuleRun() {
         return results;
       } catch (error) {
         addError(error, { title: i18n.BACKFILL_SCHEDULE_ERROR_TITLE });
-        telemetry.reportEvent(TelemetryEventTypes.ManualRuleRunExecute, {
+        telemetry.reportEvent(ManualRuleRunEventTypes.ManualRuleRunExecute, {
           rangeInMs: options.timeRange.endDate.diff(options.timeRange.startDate),
           status: 'error',
           rulesCount: options.ruleIds.length,

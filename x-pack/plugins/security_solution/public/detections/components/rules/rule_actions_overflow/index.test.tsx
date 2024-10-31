@@ -16,7 +16,7 @@ import { RuleActionsOverflow } from '.';
 import { mockRule } from '../../../../detection_engine/rule_management_ui/components/rules_table/__mocks__/mock';
 import { TestProviders } from '../../../../common/mock';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { TelemetryEventTypes } from '../../../../common/lib/telemetry/constants';
+import { ManualRuleRunEventTypes } from '../../../../common/lib/telemetry';
 
 const showBulkDuplicateExceptionsConfirmation = () => Promise.resolve(null);
 const showManualRuleRunConfirmation = () => Promise.resolve(null);
@@ -37,7 +37,7 @@ jest.mock('../../../../common/lib/kibana', () => {
     useKibana: jest.fn().mockReturnValue({
       services: {
         telemetry: {
-          reportEvent: (eventType: TelemetryEventTypes, params: { type: 'single' | 'bulk' }) =>
+          reportEvent: (eventType: ManualRuleRunEventTypes, params: { type: 'single' | 'bulk' }) =>
             mockReportEvent(eventType, params),
         },
         application: {
@@ -291,9 +291,12 @@ describe('RuleActionsOverflow', () => {
       fireEvent.click(getByTestId('rules-details-manual-rule-run'));
 
       await waitFor(() => {
-        expect(mockReportEvent).toHaveBeenCalledWith(TelemetryEventTypes.ManualRuleRunOpenModal, {
-          type: 'single',
-        });
+        expect(mockReportEvent).toHaveBeenCalledWith(
+          ManualRuleRunEventTypes.ManualRuleRunOpenModal,
+          {
+            type: 'single',
+          }
+        );
       });
     });
   });

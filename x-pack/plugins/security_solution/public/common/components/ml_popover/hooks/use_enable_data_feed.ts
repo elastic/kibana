@@ -13,7 +13,7 @@ import {
   METRIC_TYPE,
   ML_JOB_TELEMETRY_STATUS,
   TELEMETRY_EVENT,
-  TelemetryEventTypes,
+  EntityEventTypes,
   track,
 } from '../../../lib/telemetry';
 
@@ -44,7 +44,7 @@ export const useEnableDataFeed = () => {
             jobIdErrorFilter: [job.id],
             groups: job.groups,
           });
-          telemetry.reportEvent(TelemetryEventTypes.MLJobUpdate, {
+          telemetry.reportEvent(EntityEventTypes.MLJobUpdate, {
             jobId: job.id,
             isElasticJob: job.isElasticJob,
             moduleId: job.moduleId,
@@ -53,7 +53,7 @@ export const useEnableDataFeed = () => {
         } catch (error) {
           setIsLoading(false);
           addError(error, { title: i18n.CREATE_JOB_FAILURE });
-          telemetry.reportEvent(TelemetryEventTypes.MLJobUpdate, {
+          telemetry.reportEvent(EntityEventTypes.MLJobUpdate, {
             jobId: job.id,
             isElasticJob: job.isElasticJob,
             moduleId: job.moduleId,
@@ -83,7 +83,7 @@ export const useEnableDataFeed = () => {
           throw new Error(response[datafeedId].error);
         }
 
-        telemetry.reportEvent(TelemetryEventTypes.MLJobUpdate, {
+        telemetry.reportEvent(EntityEventTypes.MLJobUpdate, {
           jobId: job.id,
           isElasticJob: job.isElasticJob,
           status: ML_JOB_TELEMETRY_STATUS.started,
@@ -93,7 +93,7 @@ export const useEnableDataFeed = () => {
       } catch (error) {
         track(METRIC_TYPE.COUNT, TELEMETRY_EVENT.JOB_ENABLE_FAILURE);
         addError(error, { title: i18n.START_JOB_FAILURE });
-        telemetry.reportEvent(TelemetryEventTypes.MLJobUpdate, {
+        telemetry.reportEvent(EntityEventTypes.MLJobUpdate, {
           jobId: job.id,
           isElasticJob: job.isElasticJob,
           status: ML_JOB_TELEMETRY_STATUS.startError,
@@ -125,7 +125,7 @@ export const useEnableDataFeed = () => {
           throw new Error(response.error);
         }
 
-        telemetry.reportEvent(TelemetryEventTypes.MLJobUpdate, {
+        telemetry.reportEvent(EntityEventTypes.MLJobUpdate, {
           jobId: job.id,
           isElasticJob: job.isElasticJob,
           status: ML_JOB_TELEMETRY_STATUS.stopped,
@@ -135,7 +135,7 @@ export const useEnableDataFeed = () => {
       } catch (error) {
         track(METRIC_TYPE.COUNT, TELEMETRY_EVENT.JOB_DISABLE_FAILURE);
         addError(error, { title: i18n.STOP_JOB_FAILURE });
-        telemetry.reportEvent(TelemetryEventTypes.MLJobUpdate, {
+        telemetry.reportEvent(EntityEventTypes.MLJobUpdate, {
           jobId: job.id,
           isElasticJob: job.isElasticJob,
           status: ML_JOB_TELEMETRY_STATUS.stopError,

@@ -5,12 +5,15 @@
  * 2.0.
  */
 import type { RootSchema } from '@kbn/core/public';
-import type { TelemetryEventTypes } from '../../constants';
 
-export interface ReportEventLogFilterByRunTypeParams {
+export enum EventLogEventTypes {
+  EventLogFilterByRunType = 'Event Log Filter By Run Type',
+  EventLogShowSourceEventDateRange = 'Event Log -> Show Source -> Event Date Range',
+}
+interface ReportEventLogFilterByRunTypeParams {
   runType: string[];
 }
-export interface ReportEventLogShowSourceEventDateRangeParams {
+interface ReportEventLogShowSourceEventDateRangeParams {
   isVisible: boolean;
 }
 
@@ -18,12 +21,20 @@ export type ReportEventLogTelemetryEventParams =
   | ReportEventLogFilterByRunTypeParams
   | ReportEventLogShowSourceEventDateRangeParams;
 
+export type EventLogEventTypeData = {
+  [K in EventLogEventTypes]: K extends EventLogEventTypes.EventLogFilterByRunType
+    ? ReportEventLogFilterByRunTypeParams
+    : K extends EventLogEventTypes.EventLogShowSourceEventDateRange
+    ? ReportEventLogShowSourceEventDateRangeParams
+    : never;
+};
+
 export type EventLogTelemetryEvent =
   | {
-      eventType: TelemetryEventTypes.EventLogFilterByRunType;
+      eventType: EventLogEventTypes.EventLogFilterByRunType;
       schema: RootSchema<ReportEventLogFilterByRunTypeParams>;
     }
   | {
-      eventType: TelemetryEventTypes.EventLogShowSourceEventDateRange;
+      eventType: EventLogEventTypes.EventLogShowSourceEventDateRange;
       schema: RootSchema<ReportEventLogShowSourceEventDateRangeParams>;
     };

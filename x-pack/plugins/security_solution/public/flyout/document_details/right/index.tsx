@@ -21,7 +21,7 @@ import { RightPanelTour } from './components/tour';
 import type { RightPanelTabType } from './tabs';
 import { PanelFooter } from './footer';
 import { useFlyoutIsExpandable } from './hooks/use_flyout_is_expandable';
-import { TelemetryEventTypes } from '../../../common/lib/telemetry/constants';
+import { DocumentEventTypes } from '../../../common/lib/telemetry';
 
 export type RightPanelPaths = 'overview' | 'table' | 'json';
 
@@ -55,7 +55,7 @@ export const RightPanel: FC<Partial<DocumentDetailsProps>> = memo(({ path }) => 
     // saving which tab is currently selected in the right panel in local storage
     storage.set(FLYOUT_STORAGE_KEYS.RIGHT_PANEL_SELECTED_TABS, tabId);
 
-    telemetry.reportEvent(TelemetryEventTypes.DetailsFlyoutTabClicked, {
+    telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutTabClicked, {
       location: scopeId,
       panel: 'right',
       tabId,

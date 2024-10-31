@@ -6,29 +6,37 @@
  */
 
 import type { RootSchema } from '@kbn/core/public';
-import type { TelemetryEventTypes } from '../../constants';
 
-export interface ReportDetailsFlyoutOpenedParams {
+export enum DocumentEventTypes {
+  DetailsFlyoutOpened = 'Details Flyout Opened',
+  DetailsFlyoutTabClicked = 'Details Flyout Tabs Clicked',
+}
+
+interface ReportDetailsFlyoutOpenedParams {
   location: string;
   panel: 'left' | 'right' | 'preview';
 }
 
-export interface ReportDetailsFlyoutTabClickedParams {
+interface ReportDetailsFlyoutTabClickedParams {
   location: string;
   panel: 'left' | 'right';
   tabId: string;
 }
 
-export type ReportDocumentDetailsTelemetryEventParams =
-  | ReportDetailsFlyoutOpenedParams
-  | ReportDetailsFlyoutTabClickedParams;
+export type DocumentEventTypeData = {
+  [K in DocumentEventTypes]: K extends DocumentEventTypes.DetailsFlyoutOpened
+    ? ReportDetailsFlyoutOpenedParams
+    : K extends DocumentEventTypes.DetailsFlyoutTabClicked
+    ? ReportDetailsFlyoutTabClickedParams
+    : never;
+};
 
 export type DocumentDetailsTelemetryEvents =
   | {
-      eventType: TelemetryEventTypes.DetailsFlyoutOpened;
+      eventType: DocumentEventTypes.DetailsFlyoutOpened;
       schema: RootSchema<ReportDetailsFlyoutOpenedParams>;
     }
   | {
-      eventType: TelemetryEventTypes.DetailsFlyoutTabClicked;
+      eventType: DocumentEventTypes.DetailsFlyoutTabClicked;
       schema: RootSchema<ReportDetailsFlyoutTabClickedParams>;
     };

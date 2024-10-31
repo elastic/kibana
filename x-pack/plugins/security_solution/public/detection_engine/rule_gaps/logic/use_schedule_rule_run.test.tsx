@@ -11,7 +11,7 @@ import { useKibana } from '../../../common/lib/kibana';
 import { useKibana as mockUseKibana } from '../../../common/lib/kibana/__mocks__';
 import { TestProviders } from '../../../common/mock';
 import { useScheduleRuleRun } from './use_schedule_rule_run';
-import { TelemetryEventTypes } from '../../../common/lib/telemetry/constants';
+import { ManualRuleRunEventTypes } from '../../../common/lib/telemetry';
 
 const mockUseScheduleRuleRunMutation = jest.fn();
 
@@ -79,7 +79,7 @@ describe('When using the `useScheduleRuleRun()` hook', () => {
     });
 
     expect(mockedUseKibana.services.telemetry.reportEvent).toHaveBeenCalledWith(
-      TelemetryEventTypes.ManualRuleRunExecute,
+      ManualRuleRunEventTypes.ManualRuleRunExecute,
       {
         rangeInMs: timeRange.endDate.diff(timeRange.startDate),
         status: 'success',
@@ -105,7 +105,7 @@ describe('When using the `useScheduleRuleRun()` hook', () => {
     });
 
     expect(mockedUseKibana.services.telemetry.reportEvent).toHaveBeenCalledWith(
-      TelemetryEventTypes.ManualRuleRunExecute,
+      ManualRuleRunEventTypes.ManualRuleRunExecute,
       {
         rangeInMs: timeRange.endDate.diff(timeRange.startDate),
         status: 'error',

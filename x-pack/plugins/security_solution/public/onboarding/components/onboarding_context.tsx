@@ -9,7 +9,7 @@ import type { PropsWithChildren } from 'react';
 import React, { createContext, useContext, useMemo } from 'react';
 import { useKibana } from '../../common/lib/kibana/kibana_react';
 import type { OnboardingCardId } from '../constants';
-import { TelemetryEventTypes } from '../../common/lib/telemetry/constants';
+import { OnboardingHubEventTypes } from '../../common/lib/telemetry';
 
 export interface OnboardingContextValue {
   spaceId: string;
@@ -27,19 +27,19 @@ export const OnboardingContextProvider: React.FC<PropsWithChildren<{ spaceId: st
       () => ({
         spaceId,
         reportCardOpen: (cardId, { auto = false } = {}) => {
-          telemetry.reportEvent(TelemetryEventTypes.OnboardingHubStepOpen, {
+          telemetry.reportEvent(OnboardingHubEventTypes.OnboardingHubStepOpen, {
             stepId: cardId,
             trigger: auto ? 'navigation' : 'click',
           });
         },
         reportCardComplete: (cardId, { auto = false } = {}) => {
-          telemetry.reportEvent(TelemetryEventTypes.OnboardingHubStepFinished, {
+          telemetry.reportEvent(OnboardingHubEventTypes.OnboardingHubStepFinished, {
             stepId: cardId,
             trigger: auto ? 'auto_check' : 'click',
           });
         },
         reportCardLinkClicked: (cardId, linkId: string) => {
-          telemetry.reportEvent(TelemetryEventTypes.OnboardingHubStepLinkClicked, {
+          telemetry.reportEvent(OnboardingHubEventTypes.OnboardingHubStepLinkClicked, {
             originStepId: cardId,
             stepLinkId: linkId,
           });

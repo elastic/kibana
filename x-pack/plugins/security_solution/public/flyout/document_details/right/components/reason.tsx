@@ -22,7 +22,7 @@ import {
 } from './test_ids';
 import { useBasicDataFromDetailsData } from '../../shared/hooks/use_basic_data_from_details_data';
 import { useDocumentDetailsContext } from '../../shared/context';
-import { TelemetryEventTypes } from '../../../../common/lib/telemetry/constants';
+import { DocumentEventTypes } from '../../../../common/lib/telemetry';
 
 export const ALERT_REASON_BANNER = {
   title: i18n.translate(
@@ -56,7 +56,7 @@ export const Reason: FC = () => {
         banner: ALERT_REASON_BANNER,
       },
     });
-    telemetry.reportEvent(TelemetryEventTypes.DetailsFlyoutOpened, {
+    telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutOpened, {
       location: scopeId,
       panel: 'preview',
     });

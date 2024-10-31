@@ -15,7 +15,7 @@ import type {
   ReportAssistantQuickPromptParams,
   ReportAssistantSettingToggledParams,
 } from '../../common/lib/telemetry';
-import { TelemetryEventTypes } from '../../common/lib/telemetry';
+import { AssistantEventTypes } from '../../common/lib/telemetry';
 export const useAssistantTelemetry = (): AssistantTelemetry => {
   const {
     services: { telemetry },
@@ -36,7 +36,7 @@ export const useAssistantTelemetry = (): AssistantTelemetry => {
       eventType,
       params: { conversationId, ...rest },
     }: {
-      eventType: TelemetryEventTypes;
+      eventType: AssistantEventTypes;
       params:
         | ReportAssistantInvokedParams
         | ReportAssistantMessageSentParams
@@ -51,12 +51,12 @@ export const useAssistantTelemetry = (): AssistantTelemetry => {
 
   return {
     reportAssistantInvoked: (params: ReportAssistantInvokedParams) =>
-      reportTelemetry({ eventType: TelemetryEventTypes.AssistantInvoked, params }),
+      reportTelemetry({ eventType: AssistantEventTypes.AssistantInvoked, params }),
     reportAssistantMessageSent: (params: ReportAssistantMessageSentParams) =>
-      reportTelemetry({ eventType: TelemetryEventTypes.AssistantMessageSent, params }),
+      reportTelemetry({ eventType: AssistantEventTypes.AssistantMessageSent, params }),
     reportAssistantQuickPrompt: (params: ReportAssistantQuickPromptParams) =>
-      reportTelemetry({ eventType: TelemetryEventTypes.AssistantQuickPrompt, params }),
+      reportTelemetry({ eventType: AssistantEventTypes.AssistantQuickPrompt, params }),
     reportAssistantSettingToggled: (params: ReportAssistantSettingToggledParams) =>
-      telemetry.reportEvent(TelemetryEventTypes.AssistantSettingToggled, params),
+      telemetry.reportEvent(AssistantEventTypes.AssistantSettingToggled, params),
   };
 };

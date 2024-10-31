@@ -5,47 +5,60 @@
  * 2.0.
  */
 
-import type { AnalyticsServiceSetup, RootSchema } from '@kbn/core/public';
-import type { SecurityCellActionMetadata } from '../../../app/actions/types';
-import type { ML_JOB_TELEMETRY_STATUS, TelemetryEventTypes } from './constants';
+import type { AnalyticsServiceSetup } from '@kbn/core/public';
 import type {
+  AlertsEventTypeData,
+  AlertsEventTypes,
   AlertsGroupingTelemetryEvent,
-  ReportAlertsGroupingTelemetryEventParams,
 } from './events/alerts_grouping/types';
 import type {
-  ReportDataQualityCheckAllCompletedParams,
-  ReportDataQualityIndexCheckedParams,
+  DataQualityEventTypeData,
+  DataQualityEventTypes,
   DataQualityTelemetryEvents,
 } from './events/data_quality/types';
 import type {
   EntityAnalyticsTelemetryEvent,
-  ReportEntityAnalyticsTelemetryEventParams,
+  EntityEventTypeData,
+  EntityEventTypes,
 } from './events/entity_analytics/types';
 import type {
+  AssistantEventTypeData,
+  AssistantEventTypes,
   AssistantTelemetryEvent,
-  ReportAssistantTelemetryEventParams,
 } from './events/ai_assistant/types';
 import type {
   DocumentDetailsTelemetryEvents,
-  ReportDocumentDetailsTelemetryEventParams,
+  DocumentEventTypeData,
+  DocumentEventTypes,
 } from './events/document_details/types';
 import type {
-  OnboardingHubStepFinishedParams,
-  OnboardingHubStepLinkClickedParams,
-  OnboardingHubStepOpenParams,
+  OnboardingHubEventTypeData,
+  OnboardingHubEventTypes,
   OnboardingHubTelemetryEvent,
 } from './events/onboarding/types';
 import type {
+  ManualRuleRunEventTypeData,
+  ManualRuleRunEventTypes,
   ManualRuleRunTelemetryEvent,
-  ReportManualRuleRunTelemetryEventParams,
 } from './events/manual_rule_run/types';
 import type {
+  EventLogEventTypeData,
+  EventLogEventTypes,
   EventLogTelemetryEvent,
-  ReportEventLogTelemetryEventParams,
 } from './events/event_log/types';
-import type { NotesTelemetryEventParams, NotesTelemetryEvents } from './events/notes/types';
-import type { PreviewRuleParams, PreviewRuleTelemetryEvent } from './events/preview_rule/types';
+import type {
+  NotesEventTypeData,
+  NotesEventTypes,
+  NotesTelemetryEvents,
+} from './events/notes/types';
+import type {
+  PreviewRuleEventTypeData,
+  PreviewRuleEventTypes,
+  PreviewRuleTelemetryEvent,
+} from './events/preview_rule/types';
+import type { AppEventTypeData, AppEventTypes, AppTelemetryEvents } from './events/app/types';
 
+export * from './events/app/types';
 export * from './events/ai_assistant/types';
 export * from './events/alerts_grouping/types';
 export * from './events/data_quality/types';
@@ -55,9 +68,19 @@ export * from './events/document_details/types';
 export * from './events/manual_rule_run/types';
 export * from './events/event_log/types';
 export * from './events/preview_rule/types';
+export * from './events/notes/types';
 
 export interface TelemetryServiceSetupParams {
   analytics: AnalyticsServiceSetup;
+}
+
+export enum ML_JOB_TELEMETRY_STATUS {
+  started = 'started',
+  startError = 'start_error',
+  stopped = 'stopped',
+  stopError = 'stop_error',
+  moduleInstalled = 'module_installed',
+  installationError = 'installationError',
 }
 
 export interface ReportMLJobUpdateParams {
@@ -68,65 +91,58 @@ export interface ReportMLJobUpdateParams {
   errorMessage?: string;
 }
 
-export interface ReportCellActionClickedParams {
-  metadata: SecurityCellActionMetadata | undefined;
-  displayName: string;
-  actionId: string;
-  fieldName: string;
-}
-
 export interface ReportAnomaliesCountClickedParams {
   jobId: string;
   count: number;
 }
 
-export interface ReportBreadcrumbClickedParams {
-  title: string;
-}
-
-export type TelemetryEventParams =
-  | ReportAlertsGroupingTelemetryEventParams
-  | ReportAssistantTelemetryEventParams
-  | ReportEntityAnalyticsTelemetryEventParams
-  | ReportMLJobUpdateParams
-  | ReportCellActionClickedParams
-  | ReportAnomaliesCountClickedParams
-  | ReportDataQualityIndexCheckedParams
-  | ReportDataQualityCheckAllCompletedParams
-  | ReportBreadcrumbClickedParams
-  | ReportDocumentDetailsTelemetryEventParams
-  | OnboardingHubStepOpenParams
-  | OnboardingHubStepFinishedParams
-  | OnboardingHubStepLinkClickedParams
-  | ReportManualRuleRunTelemetryEventParams
-  | ReportEventLogTelemetryEventParams
-  | PreviewRuleParams
-  | NotesTelemetryEventParams;
+// Combine all event type data
+export type TelemetryEventTypeData<T extends TelemetryEventTypes> = T extends AssistantEventTypes
+  ? AssistantEventTypeData[T]
+  : T extends AlertsEventTypes
+  ? AlertsEventTypeData[T]
+  : T extends PreviewRuleEventTypes
+  ? PreviewRuleEventTypeData[T]
+  : T extends EntityEventTypes
+  ? EntityEventTypeData[T]
+  : T extends DataQualityEventTypes
+  ? DataQualityEventTypeData[T]
+  : T extends DocumentEventTypes
+  ? DocumentEventTypeData[T]
+  : T extends OnboardingHubEventTypes
+  ? OnboardingHubEventTypeData[T]
+  : T extends ManualRuleRunEventTypes
+  ? ManualRuleRunEventTypeData[T]
+  : T extends EventLogEventTypes
+  ? EventLogEventTypeData[T]
+  : T extends NotesEventTypes
+  ? NotesEventTypeData[T]
+  : T extends AppEventTypes
+  ? AppEventTypeData[T]
+  : never;
 
 export type TelemetryEvent =
   | AssistantTelemetryEvent
   | AlertsGroupingTelemetryEvent
+  | PreviewRuleTelemetryEvent
   | EntityAnalyticsTelemetryEvent
   | DataQualityTelemetryEvents
   | DocumentDetailsTelemetryEvents
-  | {
-      eventType: TelemetryEventTypes.MLJobUpdate;
-      schema: RootSchema<ReportMLJobUpdateParams>;
-    }
-  | {
-      eventType: TelemetryEventTypes.CellActionClicked;
-      schema: RootSchema<ReportCellActionClickedParams>;
-    }
-  | {
-      eventType: TelemetryEventTypes.AnomaliesCountClicked;
-      schema: RootSchema<ReportAnomaliesCountClickedParams>;
-    }
-  | {
-      eventType: TelemetryEventTypes.BreadcrumbClicked;
-      schema: RootSchema<ReportBreadcrumbClickedParams>;
-    }
+  | AppTelemetryEvents
   | OnboardingHubTelemetryEvent
   | ManualRuleRunTelemetryEvent
   | EventLogTelemetryEvent
-  | PreviewRuleTelemetryEvent
   | NotesTelemetryEvents;
+
+export type TelemetryEventTypes =
+  | AssistantEventTypes
+  | AlertsEventTypes
+  | PreviewRuleEventTypes
+  | EntityEventTypes
+  | DataQualityEventTypes
+  | DocumentEventTypes
+  | OnboardingHubEventTypes
+  | ManualRuleRunEventTypes
+  | EventLogEventTypes
+  | NotesEventTypes
+  | AppEventTypes;

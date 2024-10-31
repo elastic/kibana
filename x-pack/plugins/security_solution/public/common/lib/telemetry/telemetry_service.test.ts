@@ -8,7 +8,7 @@ import { coreMock } from '@kbn/core/server/mocks';
 import { telemetryEvents } from './events/telemetry_events';
 
 import { TelemetryService } from './telemetry_service';
-import { TelemetryEventTypes } from './constants';
+import { AlertsEventTypes } from './types';
 
 describe('TelemetryService', () => {
   let service: TelemetryService;
@@ -56,7 +56,7 @@ describe('TelemetryService', () => {
       service.setup(setupParams);
       const telemetry = service.start();
 
-      telemetry.reportEvent(TelemetryEventTypes.AlertsGroupingTakeAction, {
+      telemetry.reportEvent(AlertsEventTypes.AlertsGroupingTakeAction, {
         tableId: 'test-groupingId',
         groupNumber: 0,
         status: 'closed',
@@ -65,7 +65,7 @@ describe('TelemetryService', () => {
 
       expect(setupParams.analytics.reportEvent).toHaveBeenCalledTimes(1);
       expect(setupParams.analytics.reportEvent).toHaveBeenCalledWith(
-        TelemetryEventTypes.AlertsGroupingTakeAction,
+        AlertsEventTypes.AlertsGroupingTakeAction,
         {
           tableId: 'test-groupingId',
           groupNumber: 0,

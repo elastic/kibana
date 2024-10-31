@@ -69,7 +69,7 @@ import { PreviewLink } from '../../../shared/components/preview_link';
 import type { NarrowDateRange } from '../../../../common/components/ml/types';
 import { MisconfigurationsInsight } from '../../shared/components/misconfiguration_insight';
 import { AlertCountInsight } from '../../shared/components/alert_count_insight';
-import { TelemetryEventTypes } from '../../../../common/lib/telemetry/constants';
+import { DocumentEventTypes } from '../../../../common/lib/telemetry';
 
 const USER_DETAILS_ID = 'entities-users-details';
 const RELATED_HOSTS_ID = 'entities-users-related-hosts';
@@ -134,7 +134,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({ userName, timestamp, s
         banner: USER_PREVIEW_BANNER,
       },
     });
-    telemetry.reportEvent(TelemetryEventTypes.DetailsFlyoutOpened, {
+    telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutOpened, {
       location: scopeId,
       panel: 'preview',
     });

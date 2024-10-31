@@ -6,7 +6,11 @@
  */
 
 import type { RootSchema } from '@kbn/core/public';
-import type { TelemetryEventTypes } from '../../constants';
+
+export enum DataQualityEventTypes {
+  DataQualityIndexChecked = 'Data Quality Index Checked',
+  DataQualityCheckAllCompleted = 'Data Quality Check All Completed',
+}
 
 export type ReportDataQualityIndexCheckedParams = ReportDataQualityCheckAllCompletedParams & {
   errorCount?: number;
@@ -34,13 +38,21 @@ export interface ReportDataQualityCheckAllCompletedParams {
   timeConsumedMs?: number;
 }
 
+export type DataQualityEventTypeData = {
+  [K in DataQualityEventTypes]: K extends DataQualityEventTypes.DataQualityIndexChecked
+    ? ReportDataQualityIndexCheckedParams
+    : K extends DataQualityEventTypes.DataQualityCheckAllCompleted
+    ? ReportDataQualityCheckAllCompletedParams
+    : never;
+};
+
 export interface DataQualityTelemetryIndexCheckedEvent {
-  eventType: TelemetryEventTypes.DataQualityIndexChecked;
+  eventType: DataQualityEventTypes.DataQualityIndexChecked;
   schema: RootSchema<ReportDataQualityIndexCheckedParams>;
 }
 
 export interface DataQualityTelemetryCheckAllCompletedEvent {
-  eventType: TelemetryEventTypes.DataQualityCheckAllCompleted;
+  eventType: DataQualityEventTypes.DataQualityCheckAllCompleted;
   schema: RootSchema<ReportDataQualityCheckAllCompletedParams>;
 }
 

@@ -25,7 +25,7 @@ import type { ColumnHeaderOptions, OnRowSelected } from '../../../../../common/t
 import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
 import { useTourContext } from '../../guided_onboarding_tour';
 import { AlertsCasesTourSteps, SecurityStepId } from '../../guided_onboarding_tour/tour_config';
-import { TelemetryEventTypes } from '../../../lib/telemetry/constants';
+import { NotesEventTypes, DocumentEventTypes } from '../../../lib/telemetry';
 
 export type RowActionProps = EuiDataGridCellValueElementProps & {
   columnHeaders: ColumnHeaderOptions[];
@@ -110,7 +110,7 @@ const RowActionComponent = ({
         },
       },
     });
-    telemetry.reportEvent(TelemetryEventTypes.DetailsFlyoutOpened, {
+    telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutOpened, {
       location: tableId,
       panel: 'right',
     });
@@ -138,10 +138,10 @@ const RowActionComponent = ({
         },
       },
     });
-    telemetry.reportEvent(TelemetryEventTypes.OpenNoteInExpandableFlyoutClicked, {
+    telemetry.reportEvent(NotesEventTypes.OpenNoteInExpandableFlyoutClicked, {
       location: tableId,
     });
-    telemetry.reportEvent(TelemetryEventTypes.DetailsFlyoutOpened, {
+    telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutOpened, {
       location: tableId,
       panel: 'left',
     });

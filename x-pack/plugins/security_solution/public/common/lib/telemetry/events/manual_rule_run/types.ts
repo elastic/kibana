@@ -5,39 +5,48 @@
  * 2.0.
  */
 import type { RootSchema } from '@kbn/core/public';
-import type { TelemetryEventTypes } from '../../constants';
 
-export interface ReportManualRuleRunOpenModalParams {
+export enum ManualRuleRunEventTypes {
+  ManualRuleRunOpenModal = 'Manual Rule Run Open Modal',
+  ManualRuleRunExecute = 'Manual Rule Run Execute',
+  ManualRuleRunCancelJob = 'Manual Rule Run Cancel Job',
+}
+interface ReportManualRuleRunOpenModalParams {
   type: 'single' | 'bulk';
 }
 
-export interface ReportManualRuleRunExecuteParams {
+interface ReportManualRuleRunExecuteParams {
   rangeInMs: number;
   rulesCount: number;
   status: 'success' | 'error';
 }
 
-export interface ReportManualRuleRunCancelJobParams {
+interface ReportManualRuleRunCancelJobParams {
   totalTasks: number;
   completedTasks: number;
   errorTasks: number;
 }
 
-export type ReportManualRuleRunTelemetryEventParams =
-  | ReportManualRuleRunOpenModalParams
-  | ReportManualRuleRunExecuteParams
-  | ReportManualRuleRunCancelJobParams;
+export type ManualRuleRunEventTypeData = {
+  [K in ManualRuleRunEventTypes]: K extends ManualRuleRunEventTypes.ManualRuleRunOpenModal
+    ? ReportManualRuleRunOpenModalParams
+    : K extends ManualRuleRunEventTypes.ManualRuleRunExecute
+    ? ReportManualRuleRunExecuteParams
+    : K extends ManualRuleRunEventTypes.ManualRuleRunCancelJob
+    ? ReportManualRuleRunCancelJobParams
+    : never;
+};
 
 export type ManualRuleRunTelemetryEvent =
   | {
-      eventType: TelemetryEventTypes.ManualRuleRunOpenModal;
+      eventType: ManualRuleRunEventTypes.ManualRuleRunOpenModal;
       schema: RootSchema<ReportManualRuleRunOpenModalParams>;
     }
   | {
-      eventType: TelemetryEventTypes.ManualRuleRunExecute;
+      eventType: ManualRuleRunEventTypes.ManualRuleRunExecute;
       schema: RootSchema<ReportManualRuleRunExecuteParams>;
     }
   | {
-      eventType: TelemetryEventTypes.ManualRuleRunCancelJob;
+      eventType: ManualRuleRunEventTypes.ManualRuleRunCancelJob;
       schema: RootSchema<ReportManualRuleRunCancelJobParams>;
     };

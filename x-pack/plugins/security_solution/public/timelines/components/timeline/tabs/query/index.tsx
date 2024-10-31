@@ -49,7 +49,7 @@ import { useTimelineColumns } from '../shared/use_timeline_columns';
 import { useTimelineControlColumn } from '../shared/use_timeline_control_columns';
 import { NotesFlyout } from '../../properties/notes_flyout';
 import { useNotesInFlyout } from '../../properties/use_notes_in_flyout';
-import { TelemetryEventTypes } from '../../../../../common/lib/telemetry/constants';
+import { DocumentEventTypes, NotesEventTypes } from '../../../../../common/lib/telemetry';
 
 const compareQueryProps = (prevProps: Props, nextProps: Props) =>
   prevProps.kqlMode === nextProps.kqlMode &&
@@ -229,10 +229,10 @@ export const QueryTabContentComponent: React.FC<Props> = ({
             },
           },
         });
-        telemetry.reportEvent(TelemetryEventTypes.OpenNoteInExpandableFlyoutClicked, {
+        telemetry.reportEvent(NotesEventTypes.OpenNoteInExpandableFlyoutClicked, {
           location: timelineId,
         });
-        telemetry.reportEvent(TelemetryEventTypes.DetailsFlyoutOpened, {
+        telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutOpened, {
           location: timelineId,
           panel: 'left',
         });

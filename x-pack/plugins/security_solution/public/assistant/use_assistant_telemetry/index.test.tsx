@@ -9,7 +9,7 @@ import { renderHook } from '@testing-library/react-hooks';
 import { useAssistantTelemetry } from '.';
 import { BASE_SECURITY_CONVERSATIONS } from '../content/conversations';
 import { createTelemetryServiceMock } from '../../common/lib/telemetry/telemetry_service.mock';
-import { TelemetryEventTypes } from '../../common/lib/telemetry/constants';
+import { AssistantEventTypes } from '../../common/lib/telemetry';
 
 const customId = `My Convo`;
 const mockedConversations = {
@@ -50,9 +50,9 @@ jest.mock('@kbn/elastic-assistant', () => ({
 }));
 
 const trackingFns = [
-  { name: 'reportAssistantInvoked', eventType: TelemetryEventTypes.AssistantInvoked },
-  { name: 'reportAssistantMessageSent', eventType: TelemetryEventTypes.AssistantMessageSent },
-  { name: 'reportAssistantQuickPrompt', eventType: TelemetryEventTypes.AssistantQuickPrompt },
+  { name: 'reportAssistantInvoked', eventType: AssistantEventTypes.AssistantInvoked },
+  { name: 'reportAssistantMessageSent', eventType: AssistantEventTypes.AssistantMessageSent },
+  { name: 'reportAssistantQuickPrompt', eventType: AssistantEventTypes.AssistantQuickPrompt },
 ];
 
 describe('useAssistantTelemetry', () => {

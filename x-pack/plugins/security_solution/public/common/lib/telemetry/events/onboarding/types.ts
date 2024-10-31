@@ -5,17 +5,32 @@
  * 2.0.
  */
 import type { RootSchema } from '@kbn/core/public';
-import type { TelemetryEventTypes } from '../../constants';
 
-export type OnboardingHubStepOpenTrigger = 'navigation' | 'click';
+type OnboardingHubStepOpenTrigger = 'navigation' | 'click';
 
-export interface OnboardingHubStepOpenParams {
+interface OnboardingHubStepOpenParams {
   stepId: string;
   trigger: OnboardingHubStepOpenTrigger;
 }
 
+export enum OnboardingHubEventTypes {
+  OnboardingHubStepOpen = 'Onboarding Hub Step Open',
+  OnboardingHubStepFinished = 'Onboarding Hub Step Finished',
+  OnboardingHubStepLinkClicked = 'Onboarding Hub Step Link Clicked',
+}
+
+export type OnboardingHubEventTypeData = {
+  [K in OnboardingHubEventTypes]: K extends OnboardingHubEventTypes.OnboardingHubStepOpen
+    ? OnboardingHubStepOpenParams
+    : K extends OnboardingHubEventTypes.OnboardingHubStepFinished
+    ? OnboardingHubStepFinishedParams
+    : K extends OnboardingHubEventTypes.OnboardingHubStepLinkClicked
+    ? OnboardingHubStepLinkClickedParams
+    : never;
+};
+
 export interface OnboardingHubStepOpen {
-  eventType: TelemetryEventTypes.OnboardingHubStepOpen;
+  eventType: OnboardingHubEventTypes.OnboardingHubStepOpen;
   schema: RootSchema<OnboardingHubStepOpenParams>;
 }
 
@@ -25,7 +40,7 @@ export interface OnboardingHubStepLinkClickedParams {
 }
 
 export interface OnboardingHubStepLinkClicked {
-  eventType: TelemetryEventTypes.OnboardingHubStepLinkClicked;
+  eventType: OnboardingHubEventTypes.OnboardingHubStepLinkClicked;
   schema: RootSchema<OnboardingHubStepLinkClickedParams>;
 }
 
@@ -38,7 +53,7 @@ export interface OnboardingHubStepFinishedParams {
 }
 
 export interface OnboardingHubStepFinished {
-  eventType: TelemetryEventTypes.OnboardingHubStepFinished;
+  eventType: OnboardingHubEventTypes.OnboardingHubStepFinished;
   schema: RootSchema<OnboardingHubStepFinishedParams>;
 }
 

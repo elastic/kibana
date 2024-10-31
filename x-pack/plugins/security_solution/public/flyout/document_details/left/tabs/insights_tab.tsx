@@ -33,7 +33,7 @@ import { PREVALENCE_TAB_ID, PrevalenceDetails } from '../components/prevalence_d
 import { CORRELATIONS_TAB_ID, CorrelationsDetails } from '../components/correlations_details';
 import { getField } from '../../shared/utils';
 import { EventKind } from '../../shared/constants/event_kinds';
-import { TelemetryEventTypes } from '../../../../common/lib/telemetry/constants';
+import { DocumentEventTypes } from '../../../../common/lib/telemetry';
 
 const ENTITIES_TAB_ID = 'entity';
 
@@ -120,7 +120,7 @@ export const InsightsTab = memo(() => {
           scopeId,
         },
       });
-      telemetry.reportEvent(TelemetryEventTypes.DetailsFlyoutTabClicked, {
+      telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutTabClicked, {
         location: scopeId,
         panel: 'left',
         tabId: optionId,

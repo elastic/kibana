@@ -13,7 +13,7 @@ import type { RiskScoreEntity, RiskSeverity } from '../../../../common/search_st
 import { RiskScoreLevel } from './common';
 import { ENTITY_RISK_LEVEL } from '../risk_score/translations';
 import { useKibana } from '../../../common/lib/kibana';
-import { TelemetryEventTypes } from '../../../common/lib/telemetry/constants';
+import { EntityEventTypes } from '../../../common/lib/telemetry';
 
 export interface SeverityFilterProps {
   riskEntity?: RiskScoreEntity;
@@ -36,7 +36,7 @@ export const SeverityFilter: React.FC<SeverityFilterProps> = ({
   >(
     (newSelection, changedSeverity, changedStatus) => {
       if (changedStatus === 'on') {
-        telemetry.reportEvent(TelemetryEventTypes.EntityRiskFiltered, {
+        telemetry.reportEvent(EntityEventTypes.EntityRiskFiltered, {
           entity: riskEntity,
           selectedSeverity: changedSeverity,
         });

@@ -9,7 +9,7 @@ import type { StartServices } from '../../types';
 import { enhanceActionWithTelemetry } from './telemetry';
 import { createAction } from '@kbn/ui-actions-plugin/public';
 import type { CellActionExecutionContext } from '@kbn/cell-actions';
-import { TelemetryEventTypes } from '../../common/lib/telemetry/constants';
+import { AppEventTypes } from '../../common/lib/telemetry';
 
 const actionId = 'test_action_id';
 const displayName = 'test-actions';
@@ -36,7 +36,7 @@ describe('enhanceActionWithTelemetry', () => {
     const enhancedAction = enhanceActionWithTelemetry(action, services);
     enhancedAction.execute(context);
 
-    expect(telemetry.reportEvent).toHaveBeenCalledWith(TelemetryEventTypes.CellActionClicked, {
+    expect(telemetry.reportEvent).toHaveBeenCalledWith(AppEventTypes.CellActionClicked, {
       displayName,
       actionId,
       fieldName,

@@ -16,7 +16,7 @@ import { useSourcererDataView } from '../../sourcerer/containers';
 import { SourcererScopeName } from '../../sourcerer/store/model';
 import { useKibana } from '../../common/lib/kibana';
 import { DocumentDetailsRightPanelKey } from '../../flyout/document_details/shared/constants/panel_keys';
-import { TelemetryEventTypes } from '../../common/lib/telemetry/constants';
+import { DocumentEventTypes } from '../../common/lib/telemetry';
 
 export const OPEN_FLYOUT_BUTTON = i18n.translate(
   'xpack.securitySolution.notes.openFlyoutButtonLabel',
@@ -62,7 +62,7 @@ export const OpenFlyoutButtonIcon = memo(
           },
         },
       });
-      telemetry.reportEvent(TelemetryEventTypes.DetailsFlyoutOpened, {
+      telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutOpened, {
         location: timelineId,
         panel: 'right',
       });

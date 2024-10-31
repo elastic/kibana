@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { TelemetryEventTypes } from '../../constants';
-import type {
-  DataQualityTelemetryCheckAllCompletedEvent,
-  DataQualityTelemetryIndexCheckedEvent,
-} from '../../types';
+import {
+  DataQualityEventTypes,
+  type DataQualityTelemetryCheckAllCompletedEvent,
+  type DataQualityTelemetryIndexCheckedEvent,
+} from './types';
 
 export const dataQualityIndexCheckedEvent: DataQualityTelemetryIndexCheckedEvent = {
-  eventType: TelemetryEventTypes.DataQualityIndexChecked,
+  eventType: DataQualityEventTypes.DataQualityIndexChecked,
   schema: {
     batchId: {
       type: 'keyword',
@@ -164,7 +164,7 @@ export const dataQualityIndexCheckedEvent: DataQualityTelemetryIndexCheckedEvent
 };
 
 export const dataQualityCheckAllClickedEvent: DataQualityTelemetryCheckAllCompletedEvent = {
-  eventType: TelemetryEventTypes.DataQualityCheckAllCompleted,
+  eventType: DataQualityEventTypes.DataQualityCheckAllCompleted,
   schema: {
     batchId: {
       type: 'keyword',
@@ -259,3 +259,8 @@ export const dataQualityCheckAllClickedEvent: DataQualityTelemetryCheckAllComple
     },
   },
 };
+
+export const dataQualityTelemetryEvents = [
+  dataQualityIndexCheckedEvent,
+  dataQualityCheckAllClickedEvent,
+];

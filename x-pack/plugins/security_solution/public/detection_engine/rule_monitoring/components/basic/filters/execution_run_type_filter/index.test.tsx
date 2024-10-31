@@ -10,7 +10,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { ExecutionRunTypeFilter } from '.';
 import { RuleRunTypeEnum } from '../../../../../../../common/api/detection_engine/rule_monitoring';
 import { useKibana } from '../../../../../../common/lib/kibana';
-import { TelemetryEventTypes } from '../../../../../../common/lib/telemetry/constants';
+import { EventLogEventTypes } from '../../../../../../common/lib/telemetry';
 
 jest.mock('../../../../../../common/lib/kibana');
 
@@ -42,7 +42,7 @@ describe('ExecutionRunTypeFilter', () => {
 
     expect(handleChange).toHaveBeenCalledWith([RuleRunTypeEnum.backfill]);
     expect(mockTelemetry.reportEvent).toHaveBeenCalledWith(
-      TelemetryEventTypes.EventLogFilterByRunType,
+      EventLogEventTypes.EventLogFilterByRunType,
       {
         runType: [RuleRunTypeEnum.backfill],
       }

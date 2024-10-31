@@ -20,7 +20,7 @@ import { useKibana as mockUseKibana } from '../../../common/lib/kibana/__mocks__
 import { createTelemetryServiceMock } from '../../../common/lib/telemetry/telemetry_service.mock';
 import { useQueryAlerts } from '../../containers/detection_engine/alerts/use_query';
 import { getQuery, groupingSearchResponse } from './grouping_settings/mock';
-import { TelemetryEventTypes } from '../../../common/lib/telemetry';
+import { AlertsEventTypes } from '../../../common/lib/telemetry';
 
 jest.mock('../../containers/detection_engine/alerts/use_query');
 jest.mock('../../../sourcerer/containers');
@@ -555,7 +555,7 @@ describe('GroupedAlertsTable', () => {
     fireEvent.click(getByTestId('panel-user.name'));
 
     expect(mockedTelemetry.reportEvent).toHaveBeenCalledWith(
-      TelemetryEventTypes.AlertsGroupingChanged,
+      AlertsEventTypes.AlertsGroupingChanged,
       {
         groupByField: 'user.name',
         tableId: testProps.tableId,
@@ -566,7 +566,7 @@ describe('GroupedAlertsTable', () => {
     fireEvent.click(getByTestId('panel-host.name'));
 
     expect(mockedTelemetry.reportEvent).toHaveBeenCalledWith(
-      TelemetryEventTypes.AlertsGroupingChanged,
+      AlertsEventTypes.AlertsGroupingChanged,
       {
         groupByField: 'host.name',
         tableId: testProps.tableId,

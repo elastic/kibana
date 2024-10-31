@@ -16,7 +16,7 @@ import { timelineActions } from '../../../../timelines/store';
 import { TimelineId } from '../../../../../common/types/timeline';
 import type { GetSecuritySolutionUrl } from '../../link_to';
 import { useGetSecuritySolutionUrl } from '../../link_to';
-import { TelemetryEventTypes, type TelemetryServiceStart } from '../../../lib/telemetry';
+import { AppEventTypes, type TelemetryServiceStart } from '../../../lib/telemetry';
 import { useKibana, useNavigateTo, type NavigateTo } from '../../../lib/kibana';
 import { useRouteSpy } from '../../../utils/route/use_route_spy';
 import { updateBreadcrumbsNav } from '../../../breadcrumbs';
@@ -95,7 +95,7 @@ const createOnClickHandler =
   (ev: SyntheticEvent) => {
     ev.preventDefault();
     if (typeof title === 'string') {
-      telemetry.reportEvent(TelemetryEventTypes.BreadcrumbClicked, { title });
+      telemetry.reportEvent(AppEventTypes.BreadcrumbClicked, { title });
     }
     dispatch(timelineActions.showTimeline({ id: TimelineId.active, show: false }));
     navigateTo({ url: href });

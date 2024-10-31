@@ -6,7 +6,13 @@
  */
 
 import type { RootSchema } from '@kbn/core/public';
-import type { TelemetryEventTypes } from '../../constants';
+
+export enum AssistantEventTypes {
+  AssistantInvoked = 'Assistant Invoked',
+  AssistantMessageSent = 'Assistant Message Sent',
+  AssistantQuickPrompt = 'Assistant Quick Prompt',
+  AssistantSettingToggled = 'Assistant Setting Toggled',
+}
 
 export interface ReportAssistantInvokedParams {
   conversationId: string;
@@ -32,26 +38,32 @@ export interface ReportAssistantSettingToggledParams {
   assistantStreamingEnabled?: boolean;
 }
 
-export type ReportAssistantTelemetryEventParams =
-  | ReportAssistantInvokedParams
-  | ReportAssistantMessageSentParams
-  | ReportAssistantSettingToggledParams
-  | ReportAssistantQuickPromptParams;
+export type AssistantEventTypeData = {
+  [K in AssistantEventTypes]: K extends AssistantEventTypes.AssistantInvoked
+    ? ReportAssistantInvokedParams
+    : K extends AssistantEventTypes.AssistantMessageSent
+    ? ReportAssistantMessageSentParams
+    : K extends AssistantEventTypes.AssistantQuickPrompt
+    ? ReportAssistantQuickPromptParams
+    : K extends AssistantEventTypes.AssistantSettingToggled
+    ? ReportAssistantSettingToggledParams
+    : never;
+};
 
 export type AssistantTelemetryEvent =
   | {
-      eventType: TelemetryEventTypes.AssistantInvoked;
+      eventType: AssistantEventTypes.AssistantInvoked;
       schema: RootSchema<ReportAssistantInvokedParams>;
     }
   | {
-      eventType: TelemetryEventTypes.AssistantSettingToggled;
+      eventType: AssistantEventTypes.AssistantSettingToggled;
       schema: RootSchema<ReportAssistantSettingToggledParams>;
     }
   | {
-      eventType: TelemetryEventTypes.AssistantMessageSent;
+      eventType: AssistantEventTypes.AssistantMessageSent;
       schema: RootSchema<ReportAssistantMessageSentParams>;
     }
   | {
-      eventType: TelemetryEventTypes.AssistantQuickPrompt;
+      eventType: AssistantEventTypes.AssistantQuickPrompt;
       schema: RootSchema<ReportAssistantQuickPromptParams>;
     };

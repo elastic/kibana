@@ -14,7 +14,7 @@ import { TestProviders } from '../../../../common/mock';
 import { useKibana } from '../../../../common/lib/kibana';
 import * as i18n from '../../translations';
 import type { BackfillRow } from '../../types';
-import { TelemetryEventTypes } from '../../../../common/lib/telemetry/constants';
+import { ManualRuleRunEventTypes } from '../../../../common/lib/telemetry';
 
 jest.mock('../../../../common/hooks/use_app_toasts');
 jest.mock('../../api/hooks/use_delete_backfill');
@@ -92,7 +92,7 @@ describe('StopBackfill', () => {
 
     await waitFor(() => {
       expect(mockTelemetry.reportEvent).toHaveBeenCalledWith(
-        TelemetryEventTypes.ManualRuleRunCancelJob,
+        ManualRuleRunEventTypes.ManualRuleRunCancelJob,
         {
           totalTasks: backfill.total,
           completedTasks: backfill.complete,

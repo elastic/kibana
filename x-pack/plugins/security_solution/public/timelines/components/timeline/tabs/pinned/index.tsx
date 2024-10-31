@@ -37,7 +37,7 @@ import { useTimelineControlColumn } from '../shared/use_timeline_control_columns
 import { LeftPanelNotesTab } from '../../../../../flyout/document_details/left';
 import { useNotesInFlyout } from '../../properties/use_notes_in_flyout';
 import { NotesFlyout } from '../../properties/notes_flyout';
-import { TelemetryEventTypes } from '../../../../../common/lib/telemetry/constants';
+import { NotesEventTypes, DocumentEventTypes } from '../../../../../common/lib/telemetry';
 
 interface PinnedFilter {
   bool: {
@@ -191,10 +191,10 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
             },
           },
         });
-        telemetry.reportEvent(TelemetryEventTypes.OpenNoteInExpandableFlyoutClicked, {
+        telemetry.reportEvent(NotesEventTypes.OpenNoteInExpandableFlyoutClicked, {
           location: timelineId,
         });
-        telemetry.reportEvent(TelemetryEventTypes.DetailsFlyoutOpened, {
+        telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutOpened, {
           location: timelineId,
           panel: 'left',
         });
