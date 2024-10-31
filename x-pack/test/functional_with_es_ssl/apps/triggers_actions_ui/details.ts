@@ -13,7 +13,7 @@ import { asyncForEach } from '@kbn/std';
 import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { ObjectRemover } from '../../lib/object_remover';
-import { getTestAlertData, getTestActionData } from '../../lib/get_test_data';
+import { getTestAlertData, getTestConnectorData } from '../../lib/get_test_data';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
@@ -31,14 +31,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     const { body: createdConnector } = await supertest
       .post(`/api/actions/connector`)
       .set('kbn-xsrf', 'foo')
-      .send(getTestActionData(overwrites))
+      .send(getTestConnectorData(overwrites))
       .expect(200);
     return createdConnector;
   }
 
   async function createConnector(overwrites: Record<string, any> = {}) {
     const createdConnector = await createConnectorManualCleanup(overwrites);
-    objectRemover.add(createdConnector.id, 'action', 'actions');
+    objectRemover.add(createdConnector.id, 'connector', 'actions');
     return createdConnector;
   }
 
@@ -108,7 +108,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     return await createAlwaysFiringRule({
       name: `test-rule-${testRunUuid}`,
       schedule: {
-        interval: '1s',
+        interval: '3s',
       },
       actions: connectors.map((connector) => ({
         id: connector.id,
@@ -615,7 +615,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const rule = await createAlwaysFiringRule({
           name: `test-rule-${testRunUuid}`,
           schedule: {
-            interval: '1s',
+            interval: '3s',
           },
           notify_when: RuleNotifyWhen.THROTTLE,
           throttle: '2d',
