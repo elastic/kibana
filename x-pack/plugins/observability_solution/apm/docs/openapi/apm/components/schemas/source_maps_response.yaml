@@ -9,20 +9,29 @@ properties:
             body:
               type: object
               properties:
-                version:
-                  type: number
-                file:
+                serviceName:
                   type: string
-                sources:
-                  type: array
-                  items:
-                    type: string
-                sourcesContent:
-                  type: array
-                  items:
-                    type: string
-                mappings:
+                serviceVersion:
                   type: string
-                sourceRoot:
+                bundleFilepath:
                   type: string
+                sourceMap:
+                  type: object
+                  properties:
+                    version:
+                      type: number
+                    file:
+                      type: string
+                    sources:
+                      type: array
+                      items:
+                        type: string
+                    sourcesContent:
+                      type: array
+                      items:
+                        type: string
+                    mappings:
+                      type: string
+                    sourceRoot:
+                      type: string
         - $ref: 'base_source_map_object.yaml'

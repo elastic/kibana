@@ -7,6 +7,7 @@ properties:
   etag:
     type: string
     description: If etags match then `applied_by_agent` field will be set to `true`
+    example: 0bc3b5ebf18fba8163fe4c96f491e3767a358f85
   mark_as_applied_by_agent:
     type: boolean
     description: |

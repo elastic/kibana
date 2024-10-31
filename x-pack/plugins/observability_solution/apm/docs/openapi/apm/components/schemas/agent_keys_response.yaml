@@ -2,6 +2,11 @@ type: object
 properties:
   agentKey:
     type: object
+    required:
+      - id
+      - name
+      - api_key
+      - encoded
     properties:
       expiration:
         type: integer
@@ -9,6 +14,8 @@ properties:
       id:
         type: string
       name:
+        type: string
+      api_key:
         type: string
       encoded:
         type: string

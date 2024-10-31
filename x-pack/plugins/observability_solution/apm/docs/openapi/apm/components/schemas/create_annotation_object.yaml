@@ -1,9 +1,14 @@
 type: object
+required:
+  - '@timestamp'
+  - service
 properties:
   '@timestamp':
     type: string
   service:
     type: object
+    required:
+      - version
     properties:
       version:
         type: string

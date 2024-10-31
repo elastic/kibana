@@ -31,7 +31,7 @@ paths:
   /api/apm/settings/agent-configuration/search:
     $ref: 'paths/api@apm@settings@agent_configuration@search.yaml'
   /api/apm/settings/agent-configuration/environments:
-    $ref: 'paths/apm@settings@agent_configuration@environments.yaml'
+    $ref: 'paths/api@apm@settings@agent_configuration@environments.yaml'
   /api/apm/settings/agent-configuration/agent_name:
     $ref: 'paths/api@apm@settings@agent_configuration@agent_name.yaml'
   /api/apm/sourcemaps:

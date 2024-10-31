@@ -13,7 +13,10 @@ properties:
     $ref: 'settings_object.yaml'
   '@timestamp':
     type: number
+    example: 1730194190636
   applied_by_agent:
     type: boolean
+    example: true
   etag:
     type: string
+    example: 0bc3b5ebf18fba8163fe4c96f491e3767a358f85

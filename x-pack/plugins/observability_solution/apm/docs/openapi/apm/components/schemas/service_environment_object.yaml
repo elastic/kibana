@@ -2,5 +2,6 @@ type: object
 properties:
   name:
     type: string
+    example: ALL_OPTION_VALUE
   alreadyConfigured:
     type: boolean

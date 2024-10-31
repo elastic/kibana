@@ -2,5 +2,7 @@ type: object
 properties:
   name:
     type: string
+    example: node
   environment:
     type: string
+    example: prod

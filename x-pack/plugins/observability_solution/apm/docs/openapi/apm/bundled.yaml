@@ -317,11 +317,13 @@ paths:
           description: Service name
           schema:
             type: string
+          example: node
         - name: environment
           in: query
           description: Service environment
           schema:
             type: string
+          example: prod
       responses:
         '200':
           description: Successful response
@@ -442,6 +444,7 @@ paths:
           required: true
           schema:
             type: string
+          example: node
       responses:
         '200':
           description: Successful response
@@ -714,6 +717,11 @@ components:
       properties:
         agentKey:
           type: object
+          required:
+            - id
+            - name
+            - api_key
+            - encoded
           properties:
             expiration:
               type: integer
@@ -721,6 +729,8 @@ components:
             id:
               type: string
             name:
+              type: string
+            api_key:
               type: string
             encoded:
               type: string
@@ -789,11 +799,16 @@ components:
                 type: string
     create_annotation_object:
       type: object
+      required:
+        - '@timestamp'
+        - service
       properties:
         '@timestamp':
           type: string
         service:
           type: object
+          required:
+            - version
           properties:
             version:
               type: string
@@ -816,7 +831,12 @@ components:
           type: object
           properties:
             annotation:
-              type: string
+              type: object
+              properties:
+                type:
+                  type: string
+                title:
+                  type: string
             tags:
               type: array
               items:
@@ -856,8 +876,10 @@ components:
       properties:
         name:
           type: string
+          example: node
         environment:
           type: string
+          example: prod
     settings_object:
       type: object
       additionalProperties:
@@ -878,10 +900,13 @@ components:
           $ref: '#/components/schemas/settings_object'
         '@timestamp':
           type: number
+          example: 1730194190636
         applied_by_agent:
           type: boolean
+          example: true
         etag:
           type: string
+          example: 0bc3b5ebf18fba8163fe4c96f491e3767a358f85
     agent_configurations_response:
       type: object
       properties:
@@ -925,6 +950,7 @@ components:
         etag:
           type: string
           description: If etags match then `applied_by_agent` field will be set to `true`
+          example: 0bc3b5ebf18fba8163fe4c96f491e3767a358f85
         mark_as_applied_by_agent:
           type: boolean
           description: |
@@ -946,6 +972,7 @@ components:
       properties:
         name:
           type: string
+          example: ALL_OPTION_VALUE
         alreadyConfigured:
           type: boolean
     service_environments_response:
@@ -960,6 +987,7 @@ components:
       properties:
         agentName:
           type: string
+          example: nodejs
     base_source_map_object:
       type: object
       properties:
@@ -999,22 +1027,31 @@ components:
                   body:
                     type: object
                     properties:
-                      version:
-                        type: number
-                      file:
+                      serviceName:
                         type: string
-                      sources:
-                        type: array
-                        items:
-                          type: string
-                      sourcesContent:
-                        type: array
-                        items:
-                          type: string
-                      mappings:
+                      serviceVersion:
                         type: string
-                      sourceRoot:
+                      bundleFilepath:
                         type: string
+                      sourceMap:
+                        type: object
+                        properties:
+                          version:
+                            type: number
+                          file:
+                            type: string
+                          sources:
+                            type: array
+                            items:
+                              type: string
+                          sourcesContent:
+                            type: array
+                            items:
+                              type: string
+                          mappings:
+                            type: string
+                          sourceRoot:
+                            type: string
               - $ref: '#/components/schemas/base_source_map_object'
     501_response:
       type: object

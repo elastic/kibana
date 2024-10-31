@@ -525,7 +525,8 @@
             "description": "Service name",
             "schema": {
               "type": "string"
-            }
+            },
+            "example": "node"
           },
           {
             "name": "environment",
@@ -533,7 +534,8 @@
             "description": "Service environment",
             "schema": {
               "type": "string"
-            }
+            },
+            "example": "prod"
           }
         ],
         "responses": {
@@ -733,7 +735,8 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "example": "node"
           }
         ],
         "responses": {
@@ -1182,6 +1185,12 @@
         "properties": {
           "agentKey": {
             "type": "object",
+            "required": [
+              "id",
+              "name",
+              "api_key",
+              "encoded"
+            ],
             "properties": {
               "expiration": {
                 "type": "integer",
@@ -1191,6 +1200,9 @@
                 "type": "string"
               },
               "name": {
+                "type": "string"
+              },
+              "api_key": {
                 "type": "string"
               },
               "encoded": {
@@ -1295,12 +1307,19 @@
       },
       "create_annotation_object": {
         "type": "object",
+        "required": [
+          "@timestamp",
+          "service"
+        ],
         "properties": {
           "@timestamp": {
             "type": "string"
           },
           "service": {
             "type": "object",
+            "required": [
+              "version"
+            ],
             "properties": {
               "version": {
                 "type": "string"
@@ -1334,7 +1353,15 @@
             "type": "object",
             "properties": {
               "annotation": {
-                "type": "string"
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string"
+                  },
+                  "title": {
+                    "type": "string"
+                  }
+                }
               },
               "tags": {
                 "type": "array",
@@ -1395,10 +1422,12 @@
         "type": "object",
         "properties": {
           "name": {
-            "type": "string"
+            "type": "string",
+            "example": "node"
           },
           "environment": {
-            "type": "string"
+            "type": "string",
+            "example": "prod"
           }
         }
       },
@@ -1427,13 +1456,16 @@
             "$ref": "#/components/schemas/settings_object"
           },
           "@timestamp": {
-            "type": "number"
+            "type": "number",
+            "example": 1730194190636
           },
           "applied_by_agent": {
-            "type": "boolean"
+            "type": "boolean",
+            "example": true
           },
           "etag": {
-            "type": "string"
+            "type": "string",
+            "example": "0bc3b5ebf18fba8163fe4c96f491e3767a358f85"
           }
         }
       },
@@ -1503,7 +1535,8 @@
           },
           "etag": {
             "type": "string",
-            "description": "If etags match then `applied_by_agent` field will be set to `true`"
+            "description": "If etags match then `applied_by_agent` field will be set to `true`",
+            "example": "0bc3b5ebf18fba8163fe4c96f491e3767a358f85"
           },
           "mark_as_applied_by_agent": {
             "type": "boolean",
@@ -1532,7 +1565,8 @@
         "type": "object",
         "properties": {
           "name": {
-            "type": "string"
+            "type": "string",
+            "example": "ALL_OPTION_VALUE"
           },
           "alreadyConfigured": {
             "type": "boolean"
@@ -1554,7 +1588,8 @@
         "type": "object",
         "properties": {
           "agentName": {
-            "type": "string"
+            "type": "string",
+            "example": "nodejs"
           }
         }
       },
@@ -1612,29 +1647,43 @@
                     "body": {
                       "type": "object",
                       "properties": {
-                        "version": {
-                          "type": "number"
-                        },
-                        "file": {
+                        "serviceName": {
                           "type": "string"
                         },
-                        "sources": {
-                          "type": "array",
-                          "items": {
-                            "type": "string"
+                        "serviceVersion": {
+                          "type": "string"
+                        },
+                        "bundleFilepath": {
+                          "type": "string"
+                        },
+                        "sourceMap": {
+                          "type": "object",
+                          "properties": {
+                            "version": {
+                              "type": "number"
+                            },
+                            "file": {
+                              "type": "string"
+                            },
+                            "sources": {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              }
+                            },
+                            "sourcesContent": {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              }
+                            },
+                            "mappings": {
+                              "type": "string"
+                            },
+                            "sourceRoot": {
+                              "type": "string"
+                            }
                           }
-                        },
-                        "sourcesContent": {
-                          "type": "array",
-                          "items": {
-                            "type": "string"
-                          }
-                        },
-                        "mappings": {
-                          "type": "string"
-                        },
-                        "sourceRoot": {
-                          "type": "string"
                         }
                       }
                     }

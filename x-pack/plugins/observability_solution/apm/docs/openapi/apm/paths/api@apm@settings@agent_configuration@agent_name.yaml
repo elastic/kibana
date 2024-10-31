@@ -12,6 +12,7 @@ get:
       required: true
       schema:
         type: string
+      example: node
   responses:
     '200':
       description: Successful response

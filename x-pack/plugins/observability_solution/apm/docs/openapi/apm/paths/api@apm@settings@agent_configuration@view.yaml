@@ -10,11 +10,13 @@ get:
       description: Service name
       schema:
         type: string
+      example: node
     - name: environment
       in: query
       description: Service environment
       schema:
         type: string
+      example: prod
   responses:
     '200':
       description: Successful response
