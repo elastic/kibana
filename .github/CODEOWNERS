@@ -2020,7 +2020,7 @@ x-pack/plugins/observability_solution/observability_shared/public/components/pro
 # Shared UX
 /test/api_integration/apis/guided_onboarding @elastic/appex-sharedux
 /test/plugin_functional/test_suites/shared_ux @elastic/appex-sharedux
-/x-pack/test/functional/apps/advanced_settings @elastic/appex-sharedux
+/x-pack/test/functional/apps/advanced_settings @elastic/appex-sharedux @elastic/kibana-management
 /test/examples/content_management @elastic/appex-sharedux
 /test/plugin_functional/plugins/kbn_sample_panel_action @elastic/appex-sharedux
 /test/functional/apps/kibana_overview @elastic/appex-sharedux
