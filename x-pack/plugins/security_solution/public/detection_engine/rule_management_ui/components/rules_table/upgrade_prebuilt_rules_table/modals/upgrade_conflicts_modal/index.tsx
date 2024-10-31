@@ -26,6 +26,7 @@ const UpgradeConflictsModalComponent = ({ onCancel, onConfirm }: UpgradeConflict
       confirmButtonText={i18n.UPGRADE_CONFLICTS_MODAL_CONFIRM}
       buttonColor="primary"
       defaultFocusedButton="confirm"
+      data-test-subj="upgradeConflictsModal"
     >
       <EuiText>{i18n.UPGRADE_CONFLICTS_MODAL_BODY}</EuiText>
     </EuiConfirmModal>
