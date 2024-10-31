@@ -12,7 +12,7 @@ import React, { useCallback } from 'react';
 import type { EuiTableFieldDataColumnType, EuiTableActionsColumnType } from '@elastic/eui';
 import { EuiButtonEmpty, EuiInMemoryTable } from '@elastic/eui';
 
-import { ML_PAGES } from '@kbn/ml-common-types/locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import type {
   RecognizeModuleResult,
   RecognizeModuleResultDataView,

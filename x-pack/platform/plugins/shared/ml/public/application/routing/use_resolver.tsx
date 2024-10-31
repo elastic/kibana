@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import useMount from 'react-use/lib/useMount';
 import { PLUGIN_ID } from '@kbn/ml-common-constants/app';
 import { type MlCapabilitiesKey } from '@kbn/ml-common-types/capabilities';
-import { ML_PAGES } from '@kbn/ml-common-types/locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { AccessDeniedCallout } from '../access_denied';
 import { useMlApi, useMlKibana, useMlLicenseInfo } from '../contexts/kibana';
 import { usePermissionCheck } from '../capabilities/check_capabilities';

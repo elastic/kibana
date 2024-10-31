@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
-import { type TimeRange } from '@kbn/es-query';
-import type { PublishesUnifiedSearch } from '@kbn/presentation-publishing';
 import {
   BehaviorSubject,
   catchError,
@@ -25,13 +22,20 @@ import {
   switchMap,
   tap,
 } from 'rxjs';
-import { ANOMALY_SWIM_LANE_HARD_LIMIT } from '../../../common/constants/explorer';
+
+import type { estypes } from '@elastic/elasticsearch';
+
+import { type TimeRange } from '@kbn/es-query';
+import type { PublishesUnifiedSearch } from '@kbn/presentation-publishing';
+import { ANOMALY_SWIM_LANE_HARD_LIMIT } from '@kbn/ml-common-constants/explorer';
+import { CONTROLLED_BY_SWIM_LANE_FILTER } from '@kbn/ml-common-constants/ui_actions';
+
 import { SWIMLANE_TYPE } from '../../application/explorer/explorer_constants';
 import type { OverallSwimlaneData } from '../../application/explorer/explorer_utils';
-import { CONTROLLED_BY_SWIM_LANE_FILTER } from '../../ui_actions/constants';
 import { getJobsObservable } from '../common/get_jobs_observable';
 import { processFilters } from '../common/process_filters';
 import type { AnomalySwimlaneServices } from '../types';
+
 import type { AnomalySwimLaneEmbeddableApi } from './types';
 
 const FETCH_RESULTS_DEBOUNCE_MS = 500;

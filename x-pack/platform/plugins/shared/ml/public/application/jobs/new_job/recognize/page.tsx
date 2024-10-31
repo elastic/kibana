@@ -35,7 +35,7 @@ import type {
   ModuleJob,
 } from '@kbn/ml-common-types/modules';
 import type { JobId } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
-import { ML_PAGES } from '@kbn/ml-common-types/locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { useDataSource } from '../../../contexts/ml';
 import { useMlKibana, useMlLocator } from '../../../contexts/kibana';
 import { CreateResultCallout } from './components/create_result_callout';

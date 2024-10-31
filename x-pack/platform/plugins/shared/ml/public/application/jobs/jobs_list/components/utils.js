@@ -17,7 +17,7 @@ import { JOB_STATE, DATAFEED_STATE } from '@kbn/ml-common-constants/states';
 import { JOB_ACTION } from '@kbn/ml-common-constants/job_actions';
 import { mlCalendarService } from '../../../services/calendar_service';
 import { jobCloningService } from '../../../services/job_cloning_service';
-import { ML_PAGES } from '@kbn/ml-common-types/locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { CREATED_BY_LABEL } from '@kbn/ml-common-constants/new_job';
 
 export function loadFullJob(mlApi, jobId) {

@@ -10,7 +10,7 @@ import React, { useCallback } from 'react';
 import { type EuiComboBoxOptionOption } from '@elastic/eui';
 import type { Field } from '@kbn/ml-anomaly-utils';
 import { css } from '@emotion/react';
-import { EVENT_RATE_FIELD_ID } from '@kbn/ml-anomaly-utils/fields';
+import { EVENT_RATE_FIELD_ID } from '@kbn/ml-anomaly-utils/fields_constants';
 import type { DropDownLabel } from '.';
 import { useFieldStatsFlyoutContext } from '.';
 import type { FieldForStats } from './field_stats_info_button';

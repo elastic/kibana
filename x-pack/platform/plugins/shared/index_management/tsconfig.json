@@ -67,5 +67,7 @@
     "@kbn/failure-store-modal",
     "@kbn/react-query"
   ],
-  "exclude": ["target/**/*"]
+  "exclude": [
+    "target/**/*"
+  ]
 }

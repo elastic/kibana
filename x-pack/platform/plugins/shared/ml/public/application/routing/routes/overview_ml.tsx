@@ -10,7 +10,7 @@ import { useTimefilter } from '@kbn/ml-date-picker';
 import type { FC } from 'react';
 import React, { Suspense } from 'react';
 import { Redirect } from 'react-router-dom';
-import { ML_PAGES } from '@kbn/ml-common-types/locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import type { NavigateToPath } from '../../contexts/kibana';
 import { useEnabledFeatures } from '../../contexts/ml/serverless_context';
 import { getMlNodeCount } from '../../ml_nodes_check';

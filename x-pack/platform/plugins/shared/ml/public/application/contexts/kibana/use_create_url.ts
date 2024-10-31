@@ -9,7 +9,7 @@ import { useCallback, useEffect, useState } from 'react';
 import type { LocatorGetUrlParams } from '@kbn/share-plugin/common/url_service';
 import { useUrlState } from '@kbn/ml-url-state';
 import { MANAGEMENT_APP_LOCATOR } from '@kbn/deeplinks-management/constants';
-import { ML_APP_LOCATOR } from '@kbn/ml-common-types/locator';
+import { ML_APP_LOCATOR } from '@kbn/ml-common-types/locator_app_locator';
 import type { MlLocatorParams } from '@kbn/ml-common-types/locator';
 import { useMlKibana } from './kibana_context';
 import { MlManagementLocatorInternal } from '../../../locator/ml_management_locator';

@@ -16,7 +16,7 @@ import type {
 } from '@kbn/data-visualizer-plugin/public';
 import { useTimefilter } from '@kbn/ml-date-picker';
 import type { ResultLinks } from '@kbn/data-visualizer-plugin/common/app';
-import { ML_PAGES } from '@kbn/ml-common-types/locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { HelpMenu } from '../../components/help_menu';
 import {
   useMlApi,

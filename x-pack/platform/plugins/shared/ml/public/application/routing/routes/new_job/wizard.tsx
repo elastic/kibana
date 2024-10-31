@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { Redirect } from 'react-router-dom';
 import { dynamic } from '@kbn/shared-ux-utility';
 import { JOB_TYPE } from '@kbn/ml-common-constants/new_job';
-import { ML_PAGES } from '@kbn/ml-common-types/locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { DataSourceContextProvider } from '../../../contexts/ml/data_source_context';
 import { useMlKibana } from '../../../contexts/kibana';
 import { basicResolvers } from '../../resolvers';

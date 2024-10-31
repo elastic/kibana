@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { type Aggregation, METRIC_AGG_TYPE } from './fields';
+import type { Aggregation } from './fields';
+import { METRIC_AGG_TYPE } from './fields_constants';
+import { ES_AGGREGATION } from './es_aggregation';
 
 /**
  * Enum for ML job aggregations.
@@ -88,19 +90,6 @@ export enum KIBANA_AGGREGATION {
   MIN = 'min',
   SUM = 'sum',
   MEDIAN = 'median',
-  CARDINALITY = 'cardinality',
-}
-
-/**
- * Enum for ES aggregatins.
- */
-export enum ES_AGGREGATION {
-  COUNT = 'count',
-  AVG = 'avg',
-  MAX = 'max',
-  MIN = 'min',
-  SUM = 'sum',
-  PERCENTILES = 'percentiles',
   CARDINALITY = 'cardinality',
 }
 

@@ -21,7 +21,7 @@ import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { usePageUrlState } from '@kbn/ml-url-state';
 import type { ListingPageUrlState } from '@kbn/ml-url-state';
 import type { NodeDeploymentStatsResponse } from '@kbn/ml-common-types/trained_models';
-import { ML_PAGES } from '@kbn/ml-common-types/locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import type { ModelsBarStats } from '../../components/stats_bar';
 import { StatsBar } from '../../components/stats_bar';
 import { useTrainedModelsApiService } from '../../services/ml_api_service/trained_models';
