@@ -30,7 +30,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const es = getService('es');
   const ml = getService('ml');
   const log = getService('log');
-  const retry = getService('retry');
 
   describe('Knowledge base user instructions', () => {
     const userJohn = 'john';
