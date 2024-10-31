@@ -44,6 +44,8 @@ steps:
       image: family/kibana-ubuntu-2004
       imageProject: elastic-images-prod
       provider: gcp
+      localSsds: 1
+      localSsdInterface: nvme
       machineType: n2-standard-2
     depends_on: tests
 

@@ -6,4 +6,6 @@ steps:
       image: family/kibana-ubuntu-2004
       imageProject: elastic-images-prod
       provider: gcp
+      localSsds: 1
+      localSsdInterface: nvme
       machineType: c2-standard-8
