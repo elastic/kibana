@@ -47,7 +47,7 @@ export function ChatFlyout({
   isOpen,
   onClose,
   navigateToConversation,
-  hidePreviousConversations,
+  hideConversationList,
 }: {
   initialTitle: string;
   initialMessages: Message[];
@@ -55,7 +55,7 @@ export function ChatFlyout({
   isOpen: boolean;
   onClose: () => void;
   navigateToConversation?: (conversationId?: string) => void;
-  hidePreviousConversations?: boolean;
+  hideConversationList?: boolean;
 }) {
   const { euiTheme } = useEuiTheme();
   const breakpoint = useCurrentEuiBreakpoint();
@@ -176,7 +176,7 @@ export function ChatFlyout({
         }}
       >
         <EuiFlexGroup gutterSize="none" className={containerClassName}>
-          {!hidePreviousConversations ? (
+          {!hideConversationList ? (
             <EuiFlexItem className={breakpoint === 'xs' ? hideClassName : sidebarClass}>
               <EuiPopover
                 anchorPosition="downLeft"

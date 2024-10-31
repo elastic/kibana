@@ -128,7 +128,7 @@ function ChatContent({
                     service.conversations.openNewConversation({
                       messages,
                       title: defaultTitle,
-                      hidePreviousConversations: true,
+                      hideConversationList: true,
                     });
                   }}
                 />

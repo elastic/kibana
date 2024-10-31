@@ -39,7 +39,7 @@ export function createService({
   const predefinedConversation$ = new Subject<{
     messages: Message[];
     title?: string;
-    hidePreviousConversations?: boolean;
+    hideConversationList?: boolean;
   }>();
 
   const scope$ = new BehaviorSubject<AssistantScope[]>(scopes);
@@ -111,13 +111,13 @@ export function createService({
       openNewConversation: ({
         messages,
         title,
-        hidePreviousConversations = false,
+        hideConversationList = false,
       }: {
         messages: Message[];
         title?: string;
-        hidePreviousConversations?: boolean;
+        hideConversationList?: boolean;
       }) => {
-        predefinedConversation$.next({ messages, title, hidePreviousConversations });
+        predefinedConversation$.next({ messages, title, hideConversationList });
       },
       predefinedConversation$: predefinedConversation$.asObservable(),
     },

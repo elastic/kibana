@@ -94,12 +94,12 @@ export interface ObservabilityAIAssistantConversationService {
   openNewConversation: ({}: {
     messages: Message[];
     title?: string;
-    hidePreviousConversations?: boolean;
+    hideConversationList?: boolean;
   }) => void;
   predefinedConversation$: Observable<{
     messages: Message[];
     title?: string;
-    hidePreviousConversations?: boolean;
+    hideConversationList?: boolean;
   }>;
 }
 

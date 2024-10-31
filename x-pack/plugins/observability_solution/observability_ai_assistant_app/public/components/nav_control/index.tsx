@@ -103,12 +103,12 @@ export function NavControl() {
     };
   }, [service.conversations.predefinedConversation$]);
 
-  const { messages, title, hidePreviousConversations } = useObservable(
+  const { messages, title, hideConversationList } = useObservable(
     service.conversations.predefinedConversation$
   ) ?? {
     messages: [],
     title: undefined,
-    hidePreviousConversations: false,
+    hideConversationList: false,
   };
 
   const theme = useTheme();
@@ -174,7 +174,7 @@ export function NavControl() {
                 )
               );
             }}
-            hidePreviousConversations={hidePreviousConversations}
+            hideConversationList={hideConversationList}
           />
         </ObservabilityAIAssistantChatServiceContext.Provider>
       ) : undefined}
