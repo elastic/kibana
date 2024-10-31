@@ -21,9 +21,9 @@ paths:
   /api/apm/agent_keys:
     $ref: 'paths/api@apm@agent_keys.yaml'
   /api/apm/services/{serviceName}/annotation/search:
-    $ref: 'paths/api@apm@services@{serviceName}@annotation@search.yaml'
+    $ref: 'paths/api@apm@services@{service_name}@annotation@search.yaml'
   /api/apm/services/{serviceName}/annotation:
-    $ref: 'paths/api@apm@services@{serviceName}@annotation.yaml'
+    $ref: 'paths/api@apm@services@{service_name}@annotation.yaml'
   /api/apm/settings/agent-configuration:
     $ref: 'paths/api@apm@settings@agent_configuration.yaml'
   /api/apm/settings/agent-configuration/view:
