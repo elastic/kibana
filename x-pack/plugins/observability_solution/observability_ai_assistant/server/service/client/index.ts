@@ -47,6 +47,7 @@ import {
 } from '../../../common/conversation_complete';
 import { CompatibleJSONSchema } from '../../../common/functions/types';
 import {
+  AdHocInstruction,
   type Conversation,
   type ConversationCreateRequest,
   type ConversationUpdateRequest,
@@ -212,6 +213,9 @@ export class ObservabilityAIAssistantClient {
 
         const userInstructions$ = from(this.getKnowledgeBaseUserInstructions()).pipe(shareReplay());
 
+        const registeredAdhocInstructions = functionClient.getAdhocInstructions();
+        const allAdHocInstructions = adHocInstructions.concat(registeredAdhocInstructions);
+
         // from the initial messages, override any system message with
         // the one that is based on the instructions (registered, request, kb)
         const messagesWithUpdatedSystemMessage$ = userInstructions$.pipe(
@@ -221,7 +225,7 @@ export class ObservabilityAIAssistantClient {
               getSystemMessageFromInstructions({
                 applicationInstructions: functionClient.getInstructions(),
                 userInstructions,
-                adHocInstructions,
+                adHocInstructions: allAdHocInstructions,
                 availableFunctionNames: functionClient
                   .getFunctions()
                   .map((fn) => fn.definition.name),
