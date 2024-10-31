@@ -98,10 +98,16 @@ export interface AsyncProfileProvider<TProfile extends PartialProfile, TParams, 
 export type ContextWithProfileId<TContext> = TContext &
   Pick<BaseProfileProvider<{}, {}>, 'profileId'>;
 
+/**
+ * Used to extract the profile type from a profile provider
+ */
 type ExtractProfile<TProvider> = TProvider extends BaseProfileProvider<infer TProfile, {}>
   ? TProfile
   : never;
 
+/**
+ * Used to extract the context type from a profile provider
+ */
 type ExtractContext<TProvider> = TProvider extends BaseProfileProvider<{}, infer TContext>
   ? TContext
   : never;
@@ -132,9 +138,9 @@ export abstract class BaseProfileService<
   }
 
   /**
-   * Returns the composable profile associated with the provided context object
+   * Returns the profile associated with the provided context object
    * @param context A context object returned by a provider's `resolve` method
-   * @returns The composable profile associated with the context
+   * @returns The profile associated with the context
    */
   public getProfile(
     params: ComposableAccessorParams<ContextWithProfileId<TContext>>
@@ -161,6 +167,9 @@ export abstract class BaseProfileService<
   }
 }
 
+/**
+ * Used to extract the parameters type from a profile provider
+ */
 type ExtractParams<TProvider> = TProvider extends ProfileProvider<{}, infer P, {}>
   ? P
   : TProvider extends AsyncProfileProvider<{}, infer P, {}>

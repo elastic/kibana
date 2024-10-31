@@ -14,7 +14,13 @@ import type { Profile } from './types';
  */
 export type PartialProfile = Partial<Profile>;
 
+/**
+ * The parameters passed to a composable accessor, such as the current context object
+ */
 export interface ComposableAccessorParams<TContext> {
+  /**
+   * The current context object
+   */
   context: TContext;
 }
 
@@ -33,8 +39,14 @@ export type ComposableProfile<TProfile extends PartialProfile, TContext> = {
   [TKey in keyof TProfile]?: ComposableAccessor<TProfile[TKey], TContext>;
 };
 
+/**
+ * A partially applied accessor function with parameters bound to a specific context
+ */
 type AppliedAccessor<TPrev> = (prev: TPrev) => TPrev;
 
+/**
+ * A partial profile implementation with applied accessors
+ */
 export type AppliedProfile = {
   [TKey in keyof Profile]?: AppliedAccessor<Profile[TKey]>;
 };
