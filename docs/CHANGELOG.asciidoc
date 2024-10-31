@@ -374,7 +374,7 @@ Discover::
 Elastic Observability solution::
 * Change the slice outcome from bad to good whenever there is no data during the slice window ({kibana-pull}196942[#196942]).
 * Make agent names generic with otel-native mode ({kibana-pull}195594[#195594]).
-* Avoid showing error toast when action is aborted b… ({kibana-pull}195331[#195331]).
+* Avoid showing unnecessary error toast ({kibana-pull}195331[#195331]).
 * Use `fields` instead of `_source` on APM queries ({kibana-pull}195242[#195242]).
 * Fixes ping heatmap payload ({kibana-pull}195107[#195107]).
 * Fixes rule modal warnings in the developer console ({kibana-pull}194766[#194766]).
