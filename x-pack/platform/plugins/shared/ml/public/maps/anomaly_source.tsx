@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { ReactElement } from 'react';
 import React from 'react';
@@ -50,6 +51,7 @@ export type AnomalySourceDescriptor = SerializableRecord & {
 };
 
 export class AnomalySource implements IVectorSource {
+  static coreStart: CoreStart;
   static mlResultsService: MlApi['results'];
   static mlLocator?: LocatorPublic<SerializableRecord>;
 
@@ -77,6 +79,15 @@ export class AnomalySource implements IVectorSource {
     registerCancelCallback: (callback: () => void) => void,
     isRequestStillActive: () => boolean
   ): Promise<GeoJsonWithMeta> {
+    // initalized mlResultsService on first call (done this way to optimize bundle sizes)
+    if (!AnomalySource.mlResultsService) {
+      const { HttpService } = await import('../application/services/http_service');
+      const { mlApiProvider } = await import('../application/services/ml_api_service');
+      const httpService = new HttpService(AnomalySource.coreStart.http);
+      const mlResultsService = mlApiProvider(httpService).results;
+      AnomalySource.mlResultsService = mlResultsService;
+    }
+
     const results = await getResultsForJobId(
       AnomalySource.mlResultsService,
       this._descriptor.jobId,
