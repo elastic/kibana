@@ -18,13 +18,13 @@ deploy_to_bump() {
   local doc_token="${3:-}"
   local branch="${4:-}"
 
-  echo "Checking diff for doc '$doc_name' against file '$file_path'..."
+  echo "Checking diff for doc '$doc_name' against file '$file_path' on branch '$branch'..."
   local result=$(bump diff $file_path --doc $doc_name --token $doc_token --branch $branch --format=json)
   ## Bump.sh does not respond with JSON when the diff is empty so we need to handle possibly not JSON :'(
   local change_count=$(tr '\n' ' '<<<$result | jq -R 'fromjson? | length')
   if [[ ! -z $change_count && $change_count -gt 0 ]]; then
     echo "Found $change_count changes..."
-    echo "About to deploy file '$file_path' to doc '$doc_name' on bump.sh..."
+    echo "About to deploy file '$file_path' to doc '$doc_name' to '$branch' on bump.sh..."
     bump deploy $file_path \
       --branch $branch \
       --doc $doc_name \
@@ -41,10 +41,14 @@ if [[ "$BUILDKITE_BRANCH" == "main" ]]; then
   BUMP_KIBANA_DOC_NAME="$(vault_get kibana-bump-sh kibana-doc-name)"
   BUMP_KIBANA_DOC_TOKEN="$(vault_get kibana-bump-sh kibana-token)"
   deploy_to_bump oas_docs/output/kibana.yaml $BUMP_KIBANA_DOC_NAME $BUMP_KIBANA_DOC_TOKEN main;
+  exit 0;
 fi
 
 if [[ "$BUILDKITE_BRANCH" == "8.x" ]]; then
   BUMP_KIBANA_DOC_NAME="$(vault_get kibana-bump-sh kibana-doc-name)"
   BUMP_KIBANA_DOC_TOKEN="$(vault_get kibana-bump-sh kibana-token)"
-  deploy_to_bump oas_docs/output/kibana.yaml $BUMP_KIBANA_DOC_NAME $BUMP_KIBANA_DOC_TOKEN v8;
+  deploy_to_bump oas_docs/output/kibana.yaml $BUMP_KIBANA_DOC_NAME $BUMP_KIBANA_DOC_TOKEN 8x-unreleased;
+  exit 0;
 fi
+
+echo "No branches found to push to; stopping here."
