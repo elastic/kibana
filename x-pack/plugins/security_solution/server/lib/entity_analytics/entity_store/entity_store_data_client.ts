@@ -265,7 +265,6 @@ export class EntityStoreDataClient {
       this.log(`debug`, entityType, `Started entity store field retention enrich task`);
       this.log(`info`, entityType, `Entity store initialized`);
 
-
       const setupEndTime = moment().utc().toISOString();
       const duration = moment(setupEndTime).diff(moment(setupStartTime), 'seconds');
       this.options.telemetry?.reportEvent(ENTITY_ENGINE_INITIALIZATION_EVENT.eventType, {
@@ -274,7 +273,6 @@ export class EntityStoreDataClient {
 
       return updated;
     } catch (err) {
-      
       this.audit(
         EntityEngineActions.INIT,
         EntityStoreResource.ENTITY_ENGINE,
