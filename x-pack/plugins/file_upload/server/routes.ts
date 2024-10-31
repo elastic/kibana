@@ -54,16 +54,13 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
     .get({
       path: '/internal/file_upload/has_import_permission',
       access: 'internal',
+      options: {
+        tags: ['access:fileUpload:analyzeFile'],
+      },
     })
     .addVersion(
       {
         version: '1',
-        security: {
-          authz: {
-            enabled: false,
-            reason: 'This route is opted out from authorization',
-          },
-        },
         validate: {
           request: {
             query: schema.object({
@@ -156,17 +153,12 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
           accepts: ['application/json'],
           maxBytes: MAX_FILE_SIZE_BYTES,
         },
+        tags: ['access:fileUpload:analyzeFile'],
       },
     })
     .addVersion(
       {
         version: '1',
-        security: {
-          authz: {
-            enabled: false,
-            reason: 'This route is opted out from authorization',
-          },
-        },
         validate: {
           request: {
             query: importFileQuerySchema,
@@ -214,16 +206,13 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
     .post({
       path: '/internal/file_upload/index_exists',
       access: 'internal',
+      options: {
+        tags: ['access:fileUpload:analyzeFile'],
+      },
     })
     .addVersion(
       {
         version: '1',
-        security: {
-          authz: {
-            enabled: false,
-            reason: 'This route is opted out from authorization',
-          },
-        },
         validate: {
           request: {
             body: schema.object({ index: schema.string() }),
