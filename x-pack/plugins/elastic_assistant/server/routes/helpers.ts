@@ -35,7 +35,7 @@ import { FindResponse } from '../ai_assistant_data_clients/find';
 import { EsPromptsSchema } from '../ai_assistant_data_clients/prompts/types';
 import { AIAssistantDataClient } from '../ai_assistant_data_clients';
 import { MINIMUM_AI_ASSISTANT_LICENSE } from '../../common/constants';
-import { SECURITY_LABS_LOADED_QUERY } from './knowledge_base/constants';
+import { SECURITY_LABS_RESOURCE, SECURITY_LABS_LOADED_QUERY } from './knowledge_base/constants';
 import { buildResponse, getLlmType } from './utils';
 import {
   AgentExecutorParams,
