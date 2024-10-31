@@ -12484,6 +12484,15 @@
                 }
               ]
             }
+          },
+          {
+            "in": "query",
+            "name": "kuery",
+            "required": false,
+            "schema": {
+              "deprecated": true,
+              "type": "string"
+            }
           }
         ],
         "responses": {
