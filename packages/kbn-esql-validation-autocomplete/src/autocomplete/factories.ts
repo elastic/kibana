@@ -106,7 +106,7 @@ export const getFunctionSuggestions = (predicates?: {
   const functions = allFunctions();
   const { command, option, returnTypes, ignored = [] } = predicates ?? {};
   const filteredFunctions: FunctionDefinition[] = functions.filter(
-    ({ name, supportedCommands, supportedOptions, ignoreAsSuggestion }) => {
+    ({ name, supportedCommands, supportedOptions, ignoreAsSuggestion, signatures }) => {
       if (ignoreAsSuggestion) {
         return false;
       }
@@ -124,9 +124,7 @@ export const getFunctionSuggestions = (predicates?: {
       }
 
       if (returnTypes && !returnTypes.includes('any')) {
-        return functions.some((fn) =>
-          fn.signatures.some((signature) => returnTypes.includes(signature.returnType as string))
-        );
+        return signatures.some((signature) => returnTypes.includes(signature.returnType as string));
       }
 
       return true;
