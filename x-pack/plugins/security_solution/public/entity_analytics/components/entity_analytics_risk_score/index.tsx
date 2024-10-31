@@ -55,7 +55,7 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
       openAlertsPageWithFilters([
         {
           title: getRiskEntityTranslation(riskEntity),
-          selectedOptions: ['entityName'],
+          selectedOptions: [entityName],
           fieldName: riskEntity === RiskScoreEntity.host ? 'host.name' : 'user.name',
         },
       ]);
