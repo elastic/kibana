@@ -597,6 +597,7 @@ steps:
       machineType: n2-standard-2
       preemptible: true
     timeout_in_minutes: 60
+    continue_on_failure: true
     retry:
       automatic:
         - exit_status: '-1'
