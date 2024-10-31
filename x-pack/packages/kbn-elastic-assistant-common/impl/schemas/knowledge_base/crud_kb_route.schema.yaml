@@ -70,8 +70,6 @@ paths:
                     type: boolean
                   index_exists:
                     type: boolean
-                  is_model_deployed:
-                    type: boolean
                   is_setup_available:
                     type: boolean
                   is_setup_in_progress:

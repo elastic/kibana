@@ -61,15 +61,12 @@ export const getKnowledgeBaseStatusRoute = (router: ElasticAssistantPluginRouter
 
           const indexExists = true; // Installed at startup, always true
           const pipelineExists = true; // Installed at startup, always true
-          const modelExists = await kbDataClient.isModelInstalled();
           const setupAvailable = await kbDataClient.isSetupAvailable();
           const isModelDeployed = await kbDataClient.isModelDeployed();
 
           const body: ReadKnowledgeBaseResponse = {
-            elser_exists: modelExists,
-            // elser_exists: modelExists && isModelDeployed,
+            elser_exists: isModelDeployed,
             index_exists: indexExists,
-            is_model_deployed: isModelDeployed,
             is_setup_in_progress: kbDataClient.isSetupInProgress,
             is_setup_available: setupAvailable,
             pipeline_exists: pipelineExists,

@@ -102,7 +102,6 @@ export const getKnowledgeBaseStatus = async (
     .set('kbn-xsrf', 'true')
     .set(ELASTIC_HTTP_VERSION_HEADER, '1')
     .send();
-  log.error(`response: ${JSON.stringify(response, null, 2)}`);
   if (response.status !== 200) {
     throw new Error(
       `Unexpected non 200 ok when attempting to setup Knowledge Base: ${JSON.stringify(
@@ -126,8 +125,7 @@ export const waitForKnowledgeBaseModelToBeDeployed = async (
   await waitFor(
     async () => {
       const status = await getKnowledgeBaseStatus(supertest, log);
-      // return !!status.elser_exists;
-      return !!status.is_model_deployed;
+      return !!status.elser_exists;
     },
     'waitForKnowledgeBaseModelToBeDeployed',
     log
