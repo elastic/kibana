@@ -16,7 +16,6 @@ steps:
       image: family/kibana-ubuntu-2004
       imageProject: elastic-images-prod
       provider: gcp
-      localSsds: 1
       machineType: n2-standard-2
     env:
       # ensure that the FTR logs all output for these tests
