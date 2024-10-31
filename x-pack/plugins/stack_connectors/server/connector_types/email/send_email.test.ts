@@ -785,7 +785,7 @@ describe('send_email module', () => {
           "secure": false,
           "tls": Object {
             "ca": "ca cert data goes here",
-            "rejectUnauthorized": true,
+            "rejectUnauthorized": false,
           },
         },
       ]
@@ -835,7 +835,6 @@ describe('send_email module', () => {
           "secure": false,
           "tls": Object {
             "ca": "ca cert data goes here",
-            "rejectUnauthorized": true,
           },
         },
       ]
