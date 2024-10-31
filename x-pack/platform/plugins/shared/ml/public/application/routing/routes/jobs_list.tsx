@@ -15,7 +15,7 @@ import {
   useTimefilter,
 } from '@kbn/ml-date-picker';
 import { dynamic } from '@kbn/shared-ux-utility';
-import { ML_PAGES } from '@kbn/ml-common-types/locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { DEFAULT_REFRESH_INTERVAL_MS } from '@kbn/ml-common-constants/jobs_list';
 import type { NavigateToPath } from '../../contexts/kibana';
 import type { MlRoute } from '../router';

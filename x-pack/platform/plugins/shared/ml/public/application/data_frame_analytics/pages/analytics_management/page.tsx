@@ -11,7 +11,7 @@ import React, { useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useUrlState, usePageUrlState, type ListingPageUrlState } from '@kbn/ml-url-state';
-import { ML_PAGES } from '@kbn/ml-common-types/locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { DataFrameAnalyticsList } from './components/analytics_list';
 import { useRefreshInterval } from './components/analytics_list/use_refresh_interval';
 import { NodeAvailableWarning } from '../../../components/node_available_warning';

@@ -39,7 +39,7 @@ import { cloneDeep, isEmpty } from 'lodash';
 import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
-import { ML_PAGES } from '@kbn/ml-common-types/locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { ML_ELSER_CALLOUT_DISMISSED } from '@kbn/ml-common-types/storage';
 import {
   type DFAModelItem,
