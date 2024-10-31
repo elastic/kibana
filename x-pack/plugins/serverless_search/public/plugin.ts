@@ -164,7 +164,7 @@ export class ServerlessSearchPlugin
         useGlobalEmptyState
       )
     );
-    serverless.initNavigation('search', navigationTree$, { dataTestSubj: 'svlSearchSideNav' });
+    serverless.initNavigation('es', navigationTree$, { dataTestSubj: 'svlSearchSideNav' });
 
     const extendCardNavDefinitions = serverless.getNavigationCards(
       security.authz.isRoleManagementEnabled()
