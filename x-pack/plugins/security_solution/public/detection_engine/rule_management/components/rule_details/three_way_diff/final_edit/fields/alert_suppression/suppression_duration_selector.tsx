@@ -10,6 +10,12 @@ import { EuiFormRow, EuiRadioGroup } from '@elastic/eui';
 import { GroupByOptions } from '../../../../../../../../detections/pages/detection_engine/rules/types';
 import { DurationInput } from '../../../../../../../rule_creation_ui/components/duration_input';
 import { UseMultiFields } from '../../../../../../../../shared_imports';
+import {
+  SUPPRESSION_DURATION,
+  SUPPRESSION_DURATION_SELECTOR,
+  SUPPRESSION_DURATION_UNIT,
+  SUPPRESSION_DURATION_VALUE,
+} from './form_schema';
 import * as i18n from './translations';
 
 interface AlertSuppressionDurationProps {
@@ -22,26 +28,26 @@ export function SuppressionDurationSelector({
   return (
     <EuiFormRow data-test-subj="alertSuppressionDuration">
       <UseMultiFields<{
-        groupByRadioSelection: string;
-        groupByDurationUnit: string;
-        groupByDurationValue: number | undefined;
+        suppressionDurationSelector: string;
+        suppressionDurationValue: number | undefined;
+        suppressionDurationUnit: string;
       }>
         fields={{
-          groupByRadioSelection: {
-            path: 'groupByRadioSelection',
+          suppressionDurationSelector: {
+            path: SUPPRESSION_DURATION_SELECTOR,
           },
-          groupByDurationValue: {
-            path: 'groupByDuration.value',
+          suppressionDurationValue: {
+            path: `${SUPPRESSION_DURATION}.${SUPPRESSION_DURATION_VALUE}`,
           },
-          groupByDurationUnit: {
-            path: 'groupByDuration.unit',
+          suppressionDurationUnit: {
+            path: `${SUPPRESSION_DURATION}.${SUPPRESSION_DURATION_UNIT}`,
           },
         }}
       >
-        {({ groupByRadioSelection, groupByDurationUnit, groupByDurationValue }) => (
+        {({ suppressionDurationSelector, suppressionDurationValue, suppressionDurationUnit }) => (
           <EuiRadioGroup
             disabled={disabled}
-            idSelected={groupByRadioSelection.value}
+            idSelected={suppressionDurationSelector.value}
             options={[
               {
                 id: GroupByOptions.PerRuleExecution,
@@ -55,11 +61,12 @@ export function SuppressionDurationSelector({
                     {i18n.ALERT_SUPPRESSION_DURATION_PER_TIME_PERIOD_OPTION}
                     <DurationInput
                       data-test-subj="alertSuppressionDurationInput"
-                      durationValueField={groupByDurationValue}
-                      durationUnitField={groupByDurationUnit}
+                      durationValueField={suppressionDurationValue}
+                      durationUnitField={suppressionDurationUnit}
                       // Suppression duration is also disabled suppression by rule execution is selected in radio button
                       isDisabled={
-                        disabled || groupByRadioSelection.value !== GroupByOptions.PerTimePeriod
+                        disabled ||
+                        suppressionDurationSelector.value !== GroupByOptions.PerTimePeriod
                       }
                       minimumValue={1}
                     />
@@ -68,7 +75,7 @@ export function SuppressionDurationSelector({
               },
             ]}
             onChange={(id) => {
-              groupByRadioSelection.setValue(id);
+              suppressionDurationSelector.setValue(id);
             }}
             data-test-subj="groupByDurationOptions"
           />

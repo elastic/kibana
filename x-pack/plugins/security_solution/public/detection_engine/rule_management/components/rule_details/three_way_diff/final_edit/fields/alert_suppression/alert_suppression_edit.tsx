@@ -11,7 +11,7 @@ import { useFormData } from '../../../../../../../../shared_imports';
 import { MissingFieldsStrategySelector } from './missing_fields_strategy_selector';
 import { SuppressionDurationSelector } from './suppression_duration_selector';
 import { SuppressionFieldsSelector } from './suppression_fields_selector';
-import type { AlertSuppressionFormData } from './form_schema';
+import { SUPPRESSION_FIELDS, type AlertSuppressionFormData } from './form_schema';
 
 interface AlertSuppressionEditProps {
   suppressibleFieldSpecs: DataViewFieldBase[];
@@ -24,10 +24,10 @@ export function AlertSuppressionEdit({
   disabled,
   disabledText,
 }: AlertSuppressionEditProps): JSX.Element {
-  const [{ groupByFields }] = useFormData<AlertSuppressionFormData>({
-    watch: 'groupByFields',
+  const [{ suppressionFields }] = useFormData<AlertSuppressionFormData>({
+    watch: SUPPRESSION_FIELDS,
   });
-  const hasSelectedFields = groupByFields?.length > 0;
+  const hasSelectedFields = suppressionFields?.length > 0;
 
   return (
     <>

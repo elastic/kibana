@@ -5,31 +5,39 @@
  * 2.0.
  */
 
+import type { AlertSuppressionMissingFieldsStrategy } from '../../../../../../../../../common/api/detection_engine';
 import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../../../../../common/detection_engine/constants';
 import { type FormSchema, FIELD_TYPES } from '../../../../../../../../shared_imports';
 import * as i18n from './translations';
 
+export const SUPPRESSION_FIELDS = 'suppressionFields' as const;
+export const SUPPRESSION_DURATION_SELECTOR = 'suppressionDurationSelector' as const;
+export const SUPPRESSION_DURATION = 'suppressionDuration' as const;
+export const SUPPRESSION_DURATION_VALUE = 'value' as const;
+export const SUPPRESSION_DURATION_UNIT = 'unit' as const;
+export const SUPPRESSION_MISSING_FIELDS = 'suppressionMissingFields' as const;
+
 export interface AlertSuppressionFormData {
-  groupByFields: string[];
-  groupByRadioSelection: string;
-  groupByDuration: {
-    value: number;
-    unit: string;
+  [SUPPRESSION_FIELDS]: string[];
+  [SUPPRESSION_DURATION_SELECTOR]: string;
+  [SUPPRESSION_DURATION]: {
+    [SUPPRESSION_DURATION_VALUE]: number;
+    [SUPPRESSION_DURATION_UNIT]: 's' | 'm' | 'h';
   };
-  suppressionMissingFields: string;
+  [SUPPRESSION_MISSING_FIELDS]: AlertSuppressionMissingFieldsStrategy;
 }
 
 export const alertSuppressionFormSchema = {
-  groupByFields: {
+  [SUPPRESSION_FIELDS]: {
     type: FIELD_TYPES.COMBO_BOX,
     helpText: i18n.ALERT_SUPPRESSION_SUPPRESS_BY_FIELD_HELP_TEXT,
   },
-  groupByRadioSelection: {},
-  groupByDuration: {
+  [SUPPRESSION_DURATION_SELECTOR]: {},
+  [SUPPRESSION_DURATION]: {
     value: {},
     unit: {},
   },
-  suppressionMissingFields: {
+  [SUPPRESSION_MISSING_FIELDS]: {
     defaultValue: DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY,
   },
 } as FormSchema<AlertSuppressionFormData>;

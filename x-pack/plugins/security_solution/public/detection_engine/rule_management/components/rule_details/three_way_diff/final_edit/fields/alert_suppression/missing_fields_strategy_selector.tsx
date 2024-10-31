@@ -10,6 +10,7 @@ import { EuiFormRow, EuiRadioGroup } from '@elastic/eui';
 import { AlertSuppressionMissingFieldsStrategyEnum } from '../../../../../../../../../common/api/detection_engine';
 import { UseMultiFields } from '../../../../../../../../shared_imports';
 import { SuppressionInfoIcon } from './suppression_info_icon';
+import { SUPPRESSION_MISSING_FIELDS } from './form_schema';
 import * as i18n from './translations';
 
 interface MissingFieldsStrategySelectorProps {
@@ -34,7 +35,7 @@ export function MissingFieldsStrategySelector({
       }>
         fields={{
           suppressionMissingFields: {
-            path: 'suppressionMissingFields',
+            path: SUPPRESSION_MISSING_FIELDS,
           },
         }}
       >

@@ -10,6 +10,7 @@ import { EuiFormRow, EuiText } from '@elastic/eui';
 import type { DataViewFieldBase } from '@kbn/es-query';
 import { UseField } from '../../../../../../../../shared_imports';
 import { MultiSelectFieldsAutocomplete } from '../../../../../../../rule_creation_ui/components/multi_select_fields';
+import { SUPPRESSION_FIELDS } from './form_schema';
 import * as i18n from './translations';
 
 interface SuppressionFieldsSelectorProps {
@@ -36,7 +37,7 @@ export function SuppressionFieldsSelector({
       >
         <>
           <UseField
-            path="groupByFields"
+            path={SUPPRESSION_FIELDS}
             component={MultiSelectFieldsAutocomplete}
             componentProps={{
               browserFields: suppressibleFieldSpecs,
