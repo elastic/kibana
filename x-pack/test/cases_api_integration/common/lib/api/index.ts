@@ -460,7 +460,7 @@ export const getAllCasesStatuses = async ({
 export const getCase = async ({
   supertest,
   caseId,
-  includeComments = false,
+  includeComments,
   expectedHttpCode = 200,
   auth = { user: superUser, space: null },
 }: {
