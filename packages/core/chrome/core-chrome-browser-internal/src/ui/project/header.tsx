@@ -306,7 +306,11 @@ export const ProjectHeader = ({
                 />
               </EuiHeaderSectionItem>
 
-              <EuiHeaderSectionItem>
+              <EuiHeaderSectionItem
+                css={css`
+                  gap: ${euiTheme.size.s};
+                `}
+              >
                 <HeaderNavControls navControls$={observables.navControlsRight$} />
               </EuiHeaderSectionItem>
             </EuiHeaderSection>
