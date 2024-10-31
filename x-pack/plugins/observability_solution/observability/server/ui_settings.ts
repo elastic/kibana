@@ -28,7 +28,6 @@ import {
   apmEnableServiceMetrics,
   apmEnableContinuousRollups,
   enableCriticalPath,
-  enableInfrastructureHostsView,
   syntheticsThrottlingEnabled,
   enableLegacyUptimeApp,
   apmEnableProfilingIntegration,
@@ -45,7 +44,6 @@ import {
   enableInfrastructureAssetCustomDashboards,
   apmEnableServiceInventoryTableSearchBar,
   profilingFetchTopNFunctionsFromStacktraces,
-  enableInfrastructureContainerAssetView,
   searchExcludedDataTiers,
 } from '../common/ui_settings_keys';
 
@@ -231,31 +229,6 @@ export const uiSettings: Record<string, UiSettings> = {
     value: false,
     requiresPageReload: true,
     type: 'boolean',
-  },
-  [enableInfrastructureHostsView]: {
-    category: [observabilityFeatureId],
-    name: i18n.translate('xpack.observability.enableInfrastructureHostsView', {
-      defaultMessage: 'Infrastructure Hosts view',
-    }),
-    value: true,
-    description: i18n.translate('xpack.observability.enableInfrastructureHostsViewDescription', {
-      defaultMessage: 'Enable the Hosts view in the Infrastructure app.',
-    }),
-    schema: schema.boolean(),
-  },
-  [enableInfrastructureContainerAssetView]: {
-    category: [observabilityFeatureId],
-    name: i18n.translate('xpack.observability.enableInfrastructureContainerAssetView', {
-      defaultMessage: 'Container view',
-    }),
-    value: true,
-    description: i18n.translate(
-      'xpack.observability.enableInfrastructureContainerAssetViewDescription',
-      {
-        defaultMessage: 'Enable the Container asset view in the Infrastructure app.',
-      }
-    ),
-    schema: schema.boolean(),
   },
   [enableInfrastructureProfilingIntegration]: {
     category: [observabilityFeatureId],
