@@ -9,7 +9,10 @@ import React from 'react';
 import { GroupByOptions } from '../../../../../../../../detections/pages/detection_engine/rules/types';
 import { type FormData } from '../../../../../../../../shared_imports';
 import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../../../../../common/detection_engine/constants';
-import type { AlertSuppression } from '../../../../../../../../../common/api/detection_engine';
+import {
+  AlertSuppressionDurationUnitEnum,
+  type AlertSuppression,
+} from '../../../../../../../../../common/api/detection_engine';
 import { RuleFieldEditFormWrapper } from '../rule_field_edit_form_wrapper';
 import { AlertSuppressionEditAdapter } from './alert_suppression_edit_adapter';
 import type { AlertSuppressionFormData } from './form_schema';
@@ -42,7 +45,7 @@ function deserializer(defaultValue: FormData): AlertSuppressionFormData {
       : GroupByOptions.PerRuleExecution,
     [SUPPRESSION_DURATION]: alertSuppression?.duration ?? {
       value: 5,
-      unit: 'm',
+      unit: AlertSuppressionDurationUnitEnum.m,
     },
     [SUPPRESSION_MISSING_FIELDS]:
       alertSuppression?.missing_fields_strategy ?? DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY,

@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { AlertSuppressionMissingFieldsStrategy } from '../../../../../../../../../common/api/detection_engine';
+import type {
+  AlertSuppressionDurationUnit,
+  AlertSuppressionMissingFieldsStrategy,
+} from '../../../../../../../../../common/api/detection_engine';
 import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../../../../../common/detection_engine/constants';
 import { type FormSchema, FIELD_TYPES } from '../../../../../../../../shared_imports';
 import * as i18n from './translations';
@@ -22,7 +25,7 @@ export interface AlertSuppressionFormData {
   [SUPPRESSION_DURATION_SELECTOR]: string;
   [SUPPRESSION_DURATION]: {
     [SUPPRESSION_DURATION_VALUE]: number;
-    [SUPPRESSION_DURATION_UNIT]: 's' | 'm' | 'h';
+    [SUPPRESSION_DURATION_UNIT]: AlertSuppressionDurationUnit;
   };
   [SUPPRESSION_MISSING_FIELDS]: AlertSuppressionMissingFieldsStrategy;
 }
