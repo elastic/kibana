@@ -29,7 +29,7 @@ export const HostDetailsTabs = React.memo<HostDetailsTabsProps>(
     detailName,
     filterQuery,
     indexNames,
-    indexPattern,
+    dataViewSpec: indexPattern,
     hostDetailsPagePath,
     hostDetailsFilter,
   }) => {

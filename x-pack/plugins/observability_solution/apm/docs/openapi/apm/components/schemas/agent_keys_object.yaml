@@ -1,0 +1,16 @@
+type: object
+required:
+  - name
+  - privileges
+properties:
+  name:
+    type: string
+    description: Agent name
+  privileges:
+    type: array
+    description: Privileges configuration
+    items:
+      type: string
+      enum:
+        - event:write
+        - config_agent:read

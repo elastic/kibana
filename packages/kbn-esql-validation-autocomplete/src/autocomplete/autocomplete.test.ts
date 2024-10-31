@@ -31,6 +31,8 @@ import {
   TIME_PICKER_SUGGESTION,
   setup,
   attachTriggerCommand,
+  SuggestOptions,
+  fields,
 } from './__tests__/helpers';
 import { METADATA_FIELDS } from '../shared/constants';
 import { ESQL_COMMON_NUMERIC_TYPES, ESQL_STRING_TYPES } from '../shared/esql_types';
@@ -102,7 +104,7 @@ describe('autocomplete', () => {
         .map(({ name }) => name.toUpperCase() + ' $0')
     );
     testSuggestions(
-      'from a [metadata _id] | /',
+      'from a metadata _id | /',
       commandDefinitions
         .filter(({ name }) => !sourceCommands.includes(name))
         .map(({ name }) => name.toUpperCase() + ' $0')
@@ -114,7 +116,7 @@ describe('autocomplete', () => {
         .map(({ name }) => name.toUpperCase() + ' $0')
     );
     testSuggestions(
-      'from a [metadata _id] | eval var0 = a | /',
+      'from a metadata _id | eval var0 = a | /',
       commandDefinitions
         .filter(({ name }) => !sourceCommands.includes(name))
         .map(({ name }) => name.toUpperCase() + ' $0')
@@ -385,24 +387,56 @@ describe('autocomplete', () => {
           '```````round(doubleField) + 1```` + 1`` + 1`',
           '```````````````round(doubleField) + 1```````` + 1```` + 1`` + 1`',
           '```````````````````````````````round(doubleField) + 1```````````````` + 1```````` + 1```` + 1`` + 1`',
+        ],
+        undefined,
+        [
+          [
+            ...fields,
+            // the following non-field columns will come over the wire as part of the response
+            {
+              name: 'round(doubleField) + 1',
+              type: 'double',
+            },
+            {
+              name: '`round(doubleField) + 1` + 1',
+              type: 'double',
+            },
+            {
+              name: '```round(doubleField) + 1`` + 1` + 1',
+              type: 'double',
+            },
+            {
+              name: '```````round(doubleField) + 1```` + 1`` + 1` + 1',
+              type: 'double',
+            },
+            {
+              name: '```````````````round(doubleField) + 1```````` + 1```` + 1`` + 1` + 1',
+              type: 'double',
+            },
+          ],
         ]
       );
 
       it('should not suggest already-used fields and variables', async () => {
         const { suggest: suggestTest } = await setup();
-        const getSuggestions = async (query: string) =>
-          (await suggestTest(query)).map((value) => value.text);
+        const getSuggestions = async (query: string, opts?: SuggestOptions) =>
+          (await suggestTest(query, opts)).map((value) => value.text);
 
-        expect(await getSuggestions('from a_index | EVAL foo = 1 | KEEP /')).toContain('foo');
-        expect(await getSuggestions('from a_index | EVAL foo = 1 | KEEP foo, /')).not.toContain(
-          'foo'
-        );
-        expect(await getSuggestions('from a_index | EVAL foo = 1 | KEEP /')).toContain(
+        expect(
+          await getSuggestions('from a_index | EVAL foo = 1 | KEEP /', {
+            callbacks: { getColumnsFor: () => [...fields, { name: 'foo', type: 'integer' }] },
+          })
+        ).toContain('foo');
+        expect(
+          await getSuggestions('from a_index | EVAL foo = 1 | KEEP foo, /', {
+            callbacks: { getColumnsFor: () => [...fields, { name: 'foo', type: 'integer' }] },
+          })
+        ).not.toContain('foo');
+
+        expect(await getSuggestions('from a_index | KEEP /')).toContain('doubleField');
+        expect(await getSuggestions('from a_index | KEEP doubleField, /')).not.toContain(
           'doubleField'
         );
-        expect(
-          await getSuggestions('from a_index | EVAL foo = 1 | KEEP doubleField, /')
-        ).not.toContain('doubleField');
       });
     });
   }
@@ -504,7 +538,7 @@ describe('autocomplete', () => {
   });
 
   describe('callbacks', () => {
-    it('should send the fields query without the last command', async () => {
+    it('should send the columns query without the last command', async () => {
       const callbackMocks = createCustomCallbackMocks(undefined, undefined, undefined);
       const statement = 'from a | drop keywordField | eval var0 = abs(doubleField) ';
       const triggerOffset = statement.lastIndexOf(' ');
@@ -516,7 +550,7 @@ describe('autocomplete', () => {
         async (text) => (text ? getAstAndSyntaxErrors(text) : { ast: [], errors: [] }),
         callbackMocks
       );
-      expect(callbackMocks.getFieldsFor).toHaveBeenCalledWith({
+      expect(callbackMocks.getColumnsFor).toHaveBeenCalledWith({
         query: 'from a | drop keywordField',
       });
     });
@@ -532,7 +566,7 @@ describe('autocomplete', () => {
         async (text) => (text ? getAstAndSyntaxErrors(text) : { ast: [], errors: [] }),
         callbackMocks
       );
-      expect(callbackMocks.getFieldsFor).toHaveBeenCalledWith({ query: 'from a' });
+      expect(callbackMocks.getColumnsFor).toHaveBeenCalledWith({ query: 'from a' });
     });
   });
 
