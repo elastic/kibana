@@ -1901,7 +1901,7 @@ instanceStateValue: true
          */
         const response = await alertUtils.createAlwaysFiringSystemAction({
           reference,
-          overwrites: { schedule: { interval: '1s' } },
+          overwrites: { schedule: { interval: '1m' } },
         });
 
         expect(response.status).to.eql(200);
