@@ -24,11 +24,11 @@ import { TIME_SYSTEM_PARAMS, TRIGGER_SUGGESTION_COMMAND } from '../../factories'
  * Position of the caret in the sort command:
 *
 * ```
-* STATS [column1 =] expression1[, ..., [columnN =] expressionN] [BY grouping_expression1[, ..., grouping_expressionN]]
-       |            |          |                                     |                  |
-       |            |          expression_complete                  grouping_expression grouping_expression_complete
-       |            expression_after_assignment
-       expression_without_assignment
+* STATS [column1 =] expression1[, ..., [columnN =] expressionN] [BY [column1 =] grouping_expression1[, ..., grouping_expressionN]]
+        |           |          |                                    |           |                   |
+        |           |          expression_complete                  |           |                   grouping_expression_complete
+        |           expression_after_assignment                     |           grouping_expression_after_assignment
+        expression_without_assignment                               grouping_expression_without_assignment
 
 * ```
 */
@@ -36,27 +36,32 @@ export type CaretPosition =
   | 'expression_without_assignment'
   | 'expression_after_assignment'
   | 'expression_complete'
-  | 'grouping_expression'
+  | 'grouping_expression_without_assignment'
+  | 'grouping_expression_after_assignment'
   | 'grouping_expression_complete';
 
 export const getPosition = (innerText: string, command: ESQLCommand): CaretPosition => {
-  if (
-    command.args.some(
-      (arg) => isOptionItem(arg) && arg.name === 'by' && arg.location.min < innerText.length
-    )
-  ) {
+  const lastCommandArg = command.args[command.args.length - 1];
+
+  if (isOptionItem(lastCommandArg) && lastCommandArg.name === 'by') {
+    // in the BY clause
+
+    const lastOptionArg = lastCommandArg.args[lastCommandArg.args.length - 1];
+    if (isAssignment(lastOptionArg) && !isAssignmentComplete(lastOptionArg)) {
+      return 'grouping_expression_after_assignment';
+    }
+
     if (
       getLastNonWhitespaceChar(innerText) === ',' ||
       noCaseCompare(findPreviousWord(innerText), 'by')
     ) {
-      return 'grouping_expression';
+      return 'grouping_expression_without_assignment';
     } else {
       return 'grouping_expression_complete';
     }
   }
 
-  const lastArg = command.args[command.args.length - 1];
-  if (isAssignment(lastArg) && !isAssignmentComplete(lastArg)) {
+  if (isAssignment(lastCommandArg) && !isAssignmentComplete(lastCommandArg)) {
     return 'expression_after_assignment';
   }
 

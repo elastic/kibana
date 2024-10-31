@@ -27,6 +27,11 @@ export async function suggest(
 ): Promise<SuggestionRawDefinition[]> {
   const pos = getPosition(innerText, command);
 
+  const columnSuggestions = pushItUpInTheList(
+    await getColumnsByType('any', [], { advanceCursor: true, openSuggestions: true }),
+    true
+  );
+
   switch (pos) {
     case 'expression_without_assignment':
       return [
@@ -44,11 +49,14 @@ export async function suggest(
         { ...commaCompleteItem, command: TRIGGER_SUGGESTION_COMMAND, text: ', ' },
       ];
 
-    case 'grouping_expression':
-      const columnSuggestions = pushItUpInTheList(
-        await getColumnsByType('any', [], { advanceCursor: true, openSuggestions: true }),
-        true
-      );
+    case 'grouping_expression_after_assignment':
+      return [
+        ...getFunctionSuggestions({ command: 'stats', option: 'by' }),
+        getDateHistogramCompleteItem(),
+        ...columnSuggestions,
+      ];
+
+    case 'grouping_expression_without_assignment':
       return [
         ...getFunctionSuggestions({ command: 'stats', option: 'by' }),
         getDateHistogramCompleteItem(),

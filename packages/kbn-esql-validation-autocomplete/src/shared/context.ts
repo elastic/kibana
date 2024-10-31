@@ -21,7 +21,6 @@ import { EDITOR_MARKER } from './constants';
 import {
   isOptionItem,
   isColumnItem,
-  getFunctionDefinition,
   isSourceItem,
   isSettingItem,
   pipePrecedesCurrentWord,
@@ -133,9 +132,6 @@ function findAstPosition(ast: ESQLAst, offset: number) {
 function isNotEnrichClauseAssigment(node: ESQLFunction, command: ESQLCommand) {
   return node.name !== '=' && command.name !== 'enrich';
 }
-function isBuiltinFunction(node: ESQLFunction) {
-  return getFunctionDefinition(node.name)?.type === 'builtin';
-}
 
 /**
  * Given a ES|QL query string, its AST and the cursor position,
@@ -162,7 +158,7 @@ export function getAstContext(queryString: string, ast: ESQLAst, offset: number)
         // command ... a in ( <here> )
         return { type: 'list' as const, command, node, option, setting };
       }
-      if (isNotEnrichClauseAssigment(node, command) && !isBuiltinFunction(node)) {
+      if (isNotEnrichClauseAssigment(node, command)) {
         // command ... fn( <here> )
         return { type: 'function' as const, command, node, option, setting };
       }
