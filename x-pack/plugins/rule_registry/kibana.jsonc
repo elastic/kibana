@@ -5,10 +5,12 @@
     "@elastic/response-ops",
     "@elastic/obs-ux-management-team"
   ],
+  "group": "platform",
+  "visibility": "shared",
   "plugin": {
     "id": "ruleRegistry",
-    "server": true,
     "browser": false,
+    "server": true,
     "configPath": [
       "xpack",
       "ruleRegistry"

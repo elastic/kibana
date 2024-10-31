@@ -1,0 +1,53 @@
+delete:
+  summary: Delete source map
+  description: Delete a previously uploaded source map.
+  operationId: deleteSourceMap
+  tags:
+    - APM sourcemaps
+  parameters:
+    - $ref: '../components/headers/elastic_api_version.yaml'
+    - $ref: '../components/headers/kbn_xsrf.yaml'
+    - name: id
+      in: path
+      description: Source map identifier
+      required: true
+      schema:
+        type: string
+  responses:
+    '200':
+      description: Successful response
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: false
+    '400':
+      description: Bad Request response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/400_response.yaml'
+    '401':
+      description: Unauthorized response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/401_response.yaml'
+    '403':
+      description: Forbidden response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/403_response.yaml'
+    '500':
+      description: Internal Server Error response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/500_response.yaml'
+    '501':
+      description: Not Implemented response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/501_response.yaml'

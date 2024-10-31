@@ -62,6 +62,7 @@ import type {
   PostAgentPolicyUpdateCallback,
   PreconfiguredAgentPolicy,
   OutputsForAgentPolicy,
+  PostAgentPolicyPostUpdateCallback,
 } from '../types';
 import {
   AGENT_POLICY_INDEX,
@@ -309,8 +310,8 @@ class AgentPolicyService {
 
   public async runExternalCallbacks(
     externalCallbackType: ExternalCallback[0],
-    agentPolicy: NewAgentPolicy | Partial<AgentPolicy>
-  ): Promise<NewAgentPolicy | Partial<AgentPolicy>> {
+    agentPolicy: NewAgentPolicy | Partial<AgentPolicy> | AgentPolicy
+  ): Promise<NewAgentPolicy | Partial<AgentPolicy> | AgentPolicy> {
     const logger = appContextService.getLogger();
     logger.debug(`Running external callbacks for ${externalCallbackType}`);
     try {
@@ -330,6 +331,12 @@ class AgentPolicyService {
           if (externalCallbackType === 'agentPolicyUpdate') {
             result = await (callback as PostAgentPolicyUpdateCallback)(
               newAgentPolicy as Partial<AgentPolicy>
+            );
+            updatedNewAgentPolicy = result;
+          }
+          if (externalCallbackType === 'agentPolicyPostUpdate') {
+            result = await (callback as PostAgentPolicyPostUpdateCallback)(
+              newAgentPolicy as AgentPolicy
             );
             updatedNewAgentPolicy = result;
           }
@@ -741,6 +748,11 @@ class AgentPolicyService {
       bumpRevision: true,
       removeProtection: false,
       skipValidation: options?.skipValidation ?? false,
+    }).then((updatedAgentPolicy) => {
+      return this.runExternalCallbacks(
+        'agentPolicyPostUpdate',
+        updatedAgentPolicy
+      ) as unknown as AgentPolicy;
     });
   }
 
@@ -759,6 +771,17 @@ class AgentPolicyService {
     if (!baseAgentPolicy) {
       throw new AgentPolicyNotFoundError('Agent policy not found');
     }
+    if (baseAgentPolicy.package_policies?.length) {
+      const hasManagedPackagePolicies = baseAgentPolicy.package_policies.some(
+        (packagePolicy) => packagePolicy.is_managed
+      );
+      if (hasManagedPackagePolicies) {
+        throw new PackagePolicyRestrictionRelatedError(
+          `Cannot copy an agent policy ${id} that contains managed package policies`
+        );
+      }
+    }
+
     const newAgentPolicy = await this.create(
       soClient,
       esClient,
