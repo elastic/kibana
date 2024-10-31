@@ -25,7 +25,9 @@ import { buildResponse } from '../../lib/build_response';
 import {
   appendAssistantMessageToConversation,
   createConversationWithUserInput,
+  DEFAULT_PLUGIN_NAME,
   getIsKnowledgeBaseInstalled,
+  getPluginNameFromRequest,
   langChainExecute,
   performChecks,
 } from '../helpers';
@@ -64,9 +66,9 @@ export const chatCompleteRoute = (
         const assistantResponse = buildResponse(response);
         let telemetry;
         let actionTypeId;
+        const ctx = await context.resolve(['core', 'elasticAssistant', 'licensing']);
+        const logger: Logger = ctx.elasticAssistant.logger;
         try {
-          const ctx = await context.resolve(['core', 'elasticAssistant', 'licensing']);
-          const logger: Logger = ctx.elasticAssistant.logger;
           telemetry = ctx.elasticAssistant.telemetry;
           const inference = ctx.elasticAssistant.inference;
 
@@ -220,10 +222,15 @@ export const chatCompleteRoute = (
           });
         } catch (err) {
           const error = transformError(err as Error);
+          const pluginName = getPluginNameFromRequest({
+            request,
+            defaultPluginName: DEFAULT_PLUGIN_NAME,
+            logger,
+          });
           const v2KnowledgeBaseEnabled =
-            assistantContext.getRegisteredFeatures(pluginName).assistantKnowledgeBaseByDefault;
+            ctx.elasticAssistant.getRegisteredFeatures(pluginName).assistantKnowledgeBaseByDefault;
           const kbDataClient =
-            (await assistantContext.getAIAssistantKnowledgeBaseDataClient({
+            (await ctx.elasticAssistant.getAIAssistantKnowledgeBaseDataClient({
               v2KnowledgeBaseEnabled,
             })) ?? undefined;
           const isKnowledgeBaseInstalled = await getIsKnowledgeBaseInstalled(kbDataClient);
