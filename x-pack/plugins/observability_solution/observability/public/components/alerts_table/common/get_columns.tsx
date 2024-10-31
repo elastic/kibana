@@ -21,9 +21,8 @@ import {
   ALERT_INSTANCE_ID,
   TAGS,
 } from '@kbn/rule-data-utils';
-import { EuiDataGridColumn } from '@elastic/eui';
-import type { ColumnHeaderOptions } from '@kbn/timelines-plugin/common';
 import { i18n } from '@kbn/i18n';
+import type { AlertColumn } from '../types';
 
 /**
  * columns implements a subset of `EuiDataGrid`'s `EuiDataGridColumn` interface,
@@ -35,13 +34,8 @@ export const getColumns = (
   }: {
     showRuleName?: boolean;
   } = { showRuleName: false }
-): Array<
-  Pick<EuiDataGridColumn, 'display' | 'displayAsText' | 'id' | 'initialWidth'> & ColumnHeaderOptions
-> => {
-  const ruleNameColumn: Array<
-    Pick<EuiDataGridColumn, 'display' | 'displayAsText' | 'id' | 'initialWidth'> &
-      ColumnHeaderOptions
-  > = showRuleName
+): AlertColumn[] => {
+  const ruleNameColumn: AlertColumn[] = showRuleName
     ? [
         {
           columnHeaderType: 'not-filtered',

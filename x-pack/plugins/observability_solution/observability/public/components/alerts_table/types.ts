@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { EuiDataGridColumn } from '@elastic/eui';
+
 export interface BucketItem {
   key: string;
   doc_count: number;
@@ -33,4 +35,10 @@ export interface AlertsByGroupingAgg extends Record<string, unknown> {
   unitsCount: {
     value: number;
   };
+}
+
+export interface AlertColumn extends EuiDataGridColumn {
+  // FIXME this interface should be defined on a generic package?
+  columnHeaderType: 'not-filtered' | 'text-filter';
+  linkField?: string;
 }
