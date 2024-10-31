@@ -12,7 +12,7 @@ import { get } from 'lodash/fp';
 
 import { ChatOpenAI } from '@langchain/openai';
 import { Stream } from 'openai/streaming';
-import OpenAI from 'openai';
+import type OpenAI from 'openai';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { DEFAULT_OPEN_AI_MODEL, DEFAULT_TIMEOUT } from './constants';
 import { InvokeAIActionParamsSchema, RunActionParamsSchema } from './types';
@@ -123,21 +123,18 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
   }
 
   async completionWithRetry(
-    request: OpenAI.Chat.ChatCompletionCreateParamsStreaming
-  ): Promise<AsyncIterable<OpenAI.Chat.Completions.ChatCompletionChunk>>;
+    request: OpenAI.ChatCompletionCreateParamsStreaming
+  ): Promise<AsyncIterable<OpenAI.ChatCompletionChunk>>;
 
   async completionWithRetry(
-    request: OpenAI.Chat.ChatCompletionCreateParamsNonStreaming
-  ): Promise<OpenAI.Chat.Completions.ChatCompletion>;
+    request: OpenAI.ChatCompletionCreateParamsNonStreaming
+  ): Promise<OpenAI.ChatCompletion>;
 
   async completionWithRetry(
     completionRequest:
-      | OpenAI.Chat.ChatCompletionCreateParamsStreaming
-      | OpenAI.Chat.ChatCompletionCreateParamsNonStreaming
-  ): Promise<
-    | AsyncIterable<OpenAI.Chat.Completions.ChatCompletionChunk>
-    | OpenAI.Chat.Completions.ChatCompletion
-  > {
+      | OpenAI.ChatCompletionCreateParamsStreaming
+      | OpenAI.ChatCompletionCreateParamsNonStreaming
+  ): Promise<AsyncIterable<OpenAI.ChatCompletionChunk> | OpenAI.ChatCompletion> {
     return this.caller.call(async () => {
       const requestBody = this.formatRequestForActionsClient(completionRequest);
       this.#logger.debug(
