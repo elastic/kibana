@@ -49,9 +49,9 @@ import {
   useStartServices,
   useKibanaVersion,
   useConfig,
+  sendGetAgentStatus,
   useAgentVersion,
   sendGetAllFleetServerAgents,
-  sendGetAgentsQuery,
 } from '../../../../hooks';
 
 import { sendGetAgentsAvailableVersions } from '../../../../hooks';
@@ -135,11 +135,10 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
 
       // if selection is a query, do an api call to get updating agents
       try {
-        const res = await sendGetAgentsQuery({
+        const res = await sendGetAgentStatus({
           kuery: newQuery,
-          perPage: 0,
         });
-        setUpdatingAgents(res?.total ?? 0);
+        setUpdatingAgents(res?.data?.results?.updating ?? 0);
       } catch (err) {
         return;
       }

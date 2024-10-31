@@ -504,9 +504,6 @@ export const GetAgentStatusRequestSchema = {
             return validationObj?.error;
           }
         },
-        meta: {
-          deprecated: true,
-        },
       })
     ),
   }),

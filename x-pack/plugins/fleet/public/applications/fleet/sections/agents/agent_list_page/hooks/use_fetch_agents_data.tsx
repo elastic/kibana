@@ -16,6 +16,7 @@ import {
   usePagination,
   useGetAgentPolicies,
   sendGetAgents,
+  sendGetAgentStatus,
   useUrlParams,
   useStartServices,
   sendGetAgentTags,
@@ -217,10 +218,8 @@ export function useFetchAgentsData() {
               getStatusSummary: true,
               withMetrics: displayAgentMetrics,
             }),
-            sendGetAgents({
+            sendGetAgentStatus({
               kuery: AgentStatusKueryHelper.buildKueryForInactiveAgents(),
-              showInactive,
-              perPage: 0,
             }),
             sendGetAgentPolicies({
               kuery: `${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.is_managed:true`,
@@ -299,7 +298,7 @@ export function useFetchAgentsData() {
 
           setAgentsOnCurrentPage(agentsResponse.data.items);
           setNAgentsInTable(agentsResponse.data.total);
-          setTotalInactiveAgents(totalInactiveAgentsResponse.data.total || 0);
+          setTotalInactiveAgents(totalInactiveAgentsResponse.data.results.inactive || 0);
 
           const managedAgentPolicies = managedAgentPoliciesResponse.data?.items ?? [];
 

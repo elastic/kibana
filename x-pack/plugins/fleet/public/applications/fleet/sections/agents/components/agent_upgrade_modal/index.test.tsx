@@ -28,8 +28,8 @@ jest.mock('../../../../hooks', () => {
         items: ['8.10.2', '8.7.0'],
       },
     }),
-    sendGetAgentsQuery: jest.fn().mockResolvedValue({
-      total: 2,
+    sendGetAgentStatus: jest.fn().mockResolvedValue({
+      data: { results: { updating: 2 } },
     }),
     sendPostBulkAgentUpgrade: jest.fn(),
     useAgentVersion: jest.fn().mockReturnValue('8.10.2'),

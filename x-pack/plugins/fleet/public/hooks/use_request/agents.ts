@@ -53,7 +53,7 @@ import type {
   PostRetrieveAgentsByActionsResponse,
 } from '../../types';
 
-import { useRequest, sendRequest, sendRequestForRq } from './use_request';
+import { useRequest, sendRequest } from './use_request';
 import type { UseRequestConfig } from './use_request';
 
 type RequestOptions = Pick<Partial<UseRequestConfig>, 'pollIntervalMs'>;
@@ -92,16 +92,6 @@ export function useGetAgentsQuery(
 
 export function sendGetAgents(query: GetAgentsRequest['query'], options?: RequestOptions) {
   return sendRequest<GetAgentsResponse>({
-    method: 'get',
-    path: agentRouteService.getListPath(),
-    version: API_VERSIONS.public.v1,
-    query,
-    ...options,
-  });
-}
-
-export function sendGetAgentsQuery(query: GetAgentsRequest['query'], options?: RequestOptions) {
-  return sendRequestForRq<GetAgentsResponse>({
     method: 'get',
     path: agentRouteService.getListPath(),
     version: API_VERSIONS.public.v1,
