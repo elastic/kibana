@@ -5,4 +5,6 @@
  * 2.0.
  */
 
-export type { OnBoardingDefaultSolution } from './types';
+import { defaultConfig } from '@kbn/storybook';
+
+module.exports = defaultConfig;
