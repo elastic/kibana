@@ -144,6 +144,7 @@ The Ingest Pipelines app now supports adding and managing databases for the GeoI
 * Enable feature flag for reusable integration policies ({kibana-pull}187153[#187153]).
 Discover::
 * When writing ES|QL queries, you now get recommendations to help you get started ({kibana-pull}194418[#194418]).
+* Enhances the inline documentation experience in ES|QL mode ({kibana-pull}192156[#192156]).
 * Adds the ability to break down the histogram by field for ES|QL queries in Discover ({kibana-pull}193820[#193820]).
 * Adds a summary column to the Documents table when exploring log data in Discover ({kibana-pull}192567[#192567]).
 * Adds row indicators to the Documents table when exploring log data in Discover ({kibana-pull}190676[#190676]).
@@ -204,6 +205,8 @@ Alerting::
 Dashboards and visualizations::
 * Adds compressed style for dashboard controls ({kibana-pull}190636[#190636]).
 * Adds the ability to duplicate a managed dashboard from its `managed` badge ({kibana-pull}189404[#189404]).
+* Adds the ability to expand the height of various sections in the Edit ES|QL visualization flyout ({kibana-pull}193453[#193453]).
+* Improves the query authoring experience when editing an ES|QL visualization ({kibana-pull}186875[#186875]).
 * Syncs the cursor for time series charts powered by ES|QL ({kibana-pull}192837[#192837]).
 * Gauge and metric Lens visualizations are no longer experimental ({kibana-pull}192359[#192359]).
 * Sets gauge default palette to "temperature" in *Lens* ({kibana-pull}191853[#191853]).
@@ -225,27 +228,9 @@ Discover::
 * Renames the Documents tab to Results in ES|QL mode ({kibana-pull}197833[#197833]).
 * Adds a cluster details tab for CCS data sources when inspecting requests in ES|QL mode ({kibana-pull}195373[#195373]).
 * Adds the query time to the list of statistics when inspecting requests in ES|QL mode ({kibana-pull}194806[#194806]).
-* Changes the auto-focus to be on the ES|QL editor when loading the page ({kibana-pull}193800[#193800]).
-* Updates the autocomplete behavior for `SORT` to be in line with other field-list-based experiences like `KEEP` in ES|QL queries ({kibana-pull}193595[#193595]).
-* Adds the ability to expand the height of various sections in the Edit ES|QL visualization flyout ({kibana-pull}193453[#193453]).
-* Adds `all (*)` to the list of suggestions for `COUNT` functions in ES|QL queries ({kibana-pull}192205[#192205]).
-* Enhances the inline documentation experience in ES|QL mode ({kibana-pull}192156[#192156]).
-* Improves ES|QL autocomplete suggestions for `case()` expressions ({kibana-pull}192135[#192135]).
 * Improves display of error messages in ES|QL mode ({kibana-pull}191320[#191320]).
-* Opens suggestions automatically for sources lists and `ENRICH` functions when writing ES|QL queries ({kibana-pull}191312[#191312]).
-* Improves wrapping and readability for ES|QL queries ({kibana-pull}191269[#191269]).
-* Improves suggestions based on previous function arguments and date suggestions for `bucket` functions in ES|QL queries ({kibana-pull}190828[#190828]).
 * Adds a help menu to the ES|QL mode ({kibana-pull}190579[#190579]).
-* Show the `LIMIT` information in the ES|QL editor's footer ({kibana-pull}190498[#190498]).
-* Opens suggestions automatically for field lists in ES|QL queries ({kibana-pull}190466[#190466]).
-* Integrates a time picker for date fields into the ES|QL editor ({kibana-pull}187047[#187047]).
-* Improves the query authoring experience when editing an ES|QL visualization ({kibana-pull}186875[#186875]).
-* Improves ES|QL support for Elasticsearch sub-types in AST for both validation and autocomplete  ({kibana-pull}189689[#189689]).
-* Adds ECS information to the ES|QL editor suggestions and prioritizes fields based on ECS information on the editor ({kibana-pull}187922[#187922]).
-* Improves `BY` suggestions in ES|QL queries to include pipe and comma operators ({kibana-pull}189458[#189458]).
 * Initializes the ES|QL editor with time named parameters when switching from the classic mode with a data view without @timestamp ({kibana-pull}189367[#189367]).
-* Makes the suggestion menu open automatically in more places in ES|QL queries ({kibana-pull}189585[#189585]).
-* Adds hints upon hover for function argument types and time system types ({kibana-pull}191881[#191881]).
 * Adds the ability to select multiple rows from the Documents table using "Shift + Select" ({kibana-pull}193619[#193619]).
 * Adds the ability to filter on field names and values in the expanded document view ({kibana-pull}192299[#192299]).
 * Adds filtering for selected fields ({kibana-pull}191930[#191930]).
@@ -261,6 +246,22 @@ Discover::
 * Adds default app state extension and log integration data source profiles ({kibana-pull}186347[#186347]).
 * Allows to select and deselect all rows in the grid at once ({kibana-pull}184241[#184241]).
 * Limits the height of long field values by default ({kibana-pull}183736[#183736]).
+ES|QL editor::
+* Changes the auto-focus to be on the ES|QL editor when loading the page ({kibana-pull}193800[#193800]).
+* Updates the autocomplete behavior for `SORT` to be in line with other field-list-based experiences like `KEEP` in ES|QL queries ({kibana-pull}193595[#193595]).
+* Adds `all (*)` to the list of suggestions for `COUNT` functions in ES|QL queries ({kibana-pull}192205[#192205]).
+* Improves ES|QL autocomplete suggestions for `case()` expressions ({kibana-pull}192135[#192135]).
+* Opens suggestions automatically for sources lists and `ENRICH` functions when writing ES|QL queries ({kibana-pull}191312[#191312]).
+* Improves wrapping and readability for ES|QL queries ({kibana-pull}191269[#191269]).
+* Improves suggestions based on previous function arguments and date suggestions for `bucket` functions in ES|QL queries ({kibana-pull}190828[#190828]).
+* Show the `LIMIT` information in the ES|QL editor's footer ({kibana-pull}190498[#190498]).
+* Opens suggestions automatically for field lists in ES|QL queries ({kibana-pull}190466[#190466]).
+* Integrates a time picker for date fields into the ES|QL editor ({kibana-pull}187047[#187047]).
+* Improves ES|QL support for Elasticsearch sub-types in AST for both validation and autocomplete  ({kibana-pull}189689[#189689]).
+* Adds ECS information to the ES|QL editor suggestions and prioritizes fields based on ECS information on the editor ({kibana-pull}187922[#187922]).
+* Improves `BY` suggestions in ES|QL queries to include pipe and comma operators ({kibana-pull}189458[#189458]).
+* Makes the suggestion menu open automatically in more places in ES|QL queries ({kibana-pull}189585[#189585]).
+* Adds hints upon hover for function argument types and time system types ({kibana-pull}191881[#191881]).
 Elastic Observability solution::
 * Enable Kubernetes Otel flow ({kibana-pull}196531[#196531]).
 * Pass function responses when copying conversation ({kibana-pull}195635[#195635]).
@@ -367,6 +368,7 @@ Discover::
 * Excludes inactive integration data stream suggestions ({kibana-pull}192953[#192953]).
 * Fixes new variables being suggested in incorrect places ({kibana-pull}192405[#192405]).
 * Only log requests in the Inspector when they completed ({kibana-pull}191232[#191232]).
+ES|QL editor::
 * Fixes an issue where the autocomplete suggestions could cause duplicate entries in ES|QL queries ({kibana-pull}190465[#190465]).
 * Fixes several styling issues in the ES|QL editor ({kibana-pull}190170[#190170]).
 Elastic Observability solution::
