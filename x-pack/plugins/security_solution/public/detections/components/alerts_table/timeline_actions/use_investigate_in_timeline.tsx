@@ -23,7 +23,6 @@ import { createHistoryEntry } from '../../../../common/utils/global_query_string
 import { useKibana } from '../../../../common/lib/kibana';
 import { TimelineId } from '../../../../../common/types/timeline';
 import { TimelineTypeEnum } from '../../../../../common/api/timeline';
-import { timelineActions } from '../../../../timelines/store';
 import { sendAlertToTimelineAction } from '../actions';
 import { useUpdateTimeline } from '../../../../timelines/components/open_timeline/use_update_timeline';
 import { useCreateTimeline } from '../../../../timelines/hooks/use_create_timeline';
@@ -133,12 +132,6 @@ export const useInvestigateInTimeline = ({
     [addError, getExceptionFilterFromIds]
   );
 
-  const updateTimelineIsLoading = useCallback(
-    (payload: Parameters<typeof timelineActions.updateIsLoading>[0]) =>
-      dispatch(timelineActions.updateIsLoading(payload)),
-    [dispatch]
-  );
-
   const clearActiveTimeline = useCreateTimeline({
     timelineId: TimelineId.active,
     timelineType: TimelineTypeEnum.default,
@@ -153,7 +146,6 @@ export const useInvestigateInTimeline = ({
         !newColumns || isEmpty(newColumns) ? defaultUdtHeaders : newColumns;
 
       await clearActiveTimeline();
-      updateTimelineIsLoading({ id: TimelineId.active, isLoading: false });
       updateTimeline({
         duplicate: true,
         from: fromTimeline,
@@ -173,12 +165,11 @@ export const useInvestigateInTimeline = ({
         ruleNote,
       });
     },
-    [updateTimeline, updateTimelineIsLoading, clearActiveTimeline]
+    [updateTimeline, clearActiveTimeline]
   );
 
   const investigateInTimelineAlertClick = useCallback(async () => {
     createHistoryEntry();
-
     startTransaction({ name: ALERTS_ACTIONS.INVESTIGATE_IN_TIMELINE });
     if (onInvestigateInTimelineAlertClick) {
       onInvestigateInTimelineAlertClick();
@@ -188,7 +179,6 @@ export const useInvestigateInTimeline = ({
         createTimeline,
         ecsData: ecsRowData,
         searchStrategyClient,
-        updateTimelineIsLoading,
         getExceptionFilter,
       });
     }
@@ -198,7 +188,6 @@ export const useInvestigateInTimeline = ({
     ecsRowData,
     onInvestigateInTimelineAlertClick,
     searchStrategyClient,
-    updateTimelineIsLoading,
     getExceptionFilter,
   ]);
 
