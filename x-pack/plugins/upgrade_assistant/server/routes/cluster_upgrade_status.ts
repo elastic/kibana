@@ -11,7 +11,16 @@ import { RouteDependencies } from '../types';
 
 export function registerClusterUpgradeStatusRoutes({ router }: RouteDependencies) {
   router.get(
-    { path: `${API_BASE_PATH}/cluster_upgrade_status`, validate: false },
+    {
+      path: `${API_BASE_PATH}/cluster_upgrade_status`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate: false,
+    },
     // We're just depending on the version check to return a 426.
     // Otherwise we just return a 200.
     versionCheckHandlerWrapper(async (context, request, response) => {

@@ -21,6 +21,12 @@ export function registerGetRoute({
   router.get(
     {
       path: addInternalBasePath('/indices/{indexName}'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           indexName: schema.string(),

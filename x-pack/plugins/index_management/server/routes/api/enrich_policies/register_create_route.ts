@@ -46,6 +46,12 @@ export function registerCreateRoute({ router, lib: { handleEsError } }: RouteDep
   router.post(
     {
       path: addInternalBasePath('/enrich_policies'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: { body: validationSchema, query: querySchema },
     },
     async (context, request, response) => {
@@ -81,6 +87,12 @@ export function registerCreateRoute({ router, lib: { handleEsError } }: RouteDep
   router.post(
     {
       path: addInternalBasePath('/enrich_policies/get_matching_indices'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: { body: getMatchingIndicesSchema },
     },
     async (context, request, response) => {
@@ -109,6 +121,12 @@ export function registerCreateRoute({ router, lib: { handleEsError } }: RouteDep
   router.post(
     {
       path: addInternalBasePath('/enrich_policies/get_fields_from_indices'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: { body: getFieldsFromIndicesSchema },
     },
     async (context, request, response) => {

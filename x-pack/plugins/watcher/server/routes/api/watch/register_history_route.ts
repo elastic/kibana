@@ -56,6 +56,12 @@ export function registerHistoryRoute({
   router.get(
     {
       path: '/api/watcher/watch/{watchId}/history',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: paramsSchema,
         query: querySchema,

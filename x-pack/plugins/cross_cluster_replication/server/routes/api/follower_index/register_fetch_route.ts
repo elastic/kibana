@@ -20,6 +20,12 @@ export const registerFetchRoute = ({
   router.get(
     {
       path: addBasePath('/follower_indices'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: false,
     },
     license.guardApiRoute(async (context, request, response) => {

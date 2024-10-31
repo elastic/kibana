@@ -32,6 +32,12 @@ export function registerDeactivateRoute({
   router.put(
     {
       path: '/api/watcher/watch/{watchId}/deactivate',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: paramsSchema,
       },

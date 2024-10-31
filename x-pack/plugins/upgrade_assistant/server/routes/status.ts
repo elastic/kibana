@@ -24,6 +24,12 @@ export function registerUpgradeStatusRoute({
   router.get(
     {
       path: `${API_BASE_PATH}/status`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       options: {
         access: 'public',
         summary: `Get upgrade readiness status`,

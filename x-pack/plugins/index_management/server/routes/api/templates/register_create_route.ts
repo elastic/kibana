@@ -17,7 +17,16 @@ const bodySchema = templateSchema;
 
 export function registerCreateRoute({ router, lib: { handleEsError } }: RouteDependencies) {
   router.post(
-    { path: addBasePath('/index_templates'), validate: { body: bodySchema } },
+    {
+      path: addBasePath('/index_templates'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate: { body: bodySchema },
+    },
     async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
       const template = request.body as TemplateDeserialized;

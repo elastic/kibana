@@ -108,6 +108,12 @@ export const register = (deps: RouteDependencies): void => {
   router.put(
     {
       path: `${API_BASE_PATH}/{name}`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: paramsValidation,
         body: bodyValidation,

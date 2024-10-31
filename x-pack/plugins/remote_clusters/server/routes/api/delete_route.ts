@@ -140,6 +140,12 @@ export const register = (deps: RouteDependencies): void => {
   router.delete(
     {
       path: `${API_BASE_PATH}/{nameOrNames}`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: paramsValidation,
       },

@@ -28,6 +28,12 @@ export function registerSaveRoute({ router, license, lib: { handleEsError } }: R
   router.put(
     {
       path: '/api/watcher/watch/{id}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: paramsSchema,
         body: bodySchema,

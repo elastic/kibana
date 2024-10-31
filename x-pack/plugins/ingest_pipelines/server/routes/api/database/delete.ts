@@ -20,6 +20,12 @@ export const registerDeleteDatabaseRoute = ({
   router.delete(
     {
       path: `${API_BASE_PATH}/databases/{database_id}`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: paramsSchema,
       },

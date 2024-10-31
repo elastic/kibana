@@ -35,6 +35,12 @@ export function registerAcknowledgeRoute({
   router.put(
     {
       path: '/api/watcher/watch/{watchId}/action/{actionId}/acknowledge',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: paramsSchema,
       },

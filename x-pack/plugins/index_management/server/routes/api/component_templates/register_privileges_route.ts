@@ -25,6 +25,12 @@ export const registerPrivilegesRoute = ({
   router.get(
     {
       path: addBasePath('/component_templates/privileges'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: false,
     },
     async (context, request, response) => {

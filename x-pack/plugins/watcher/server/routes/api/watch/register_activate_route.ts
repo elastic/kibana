@@ -33,6 +33,12 @@ export function registerActivateRoute({
   router.put(
     {
       path: '/api/watcher/watch/{watchId}/activate',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: paramsSchema,
       },

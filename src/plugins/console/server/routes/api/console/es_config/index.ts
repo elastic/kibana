@@ -11,19 +11,31 @@ import { EsConfigApiResponse } from '../../../../../common/types/api_responses';
 import { RouteDependencies } from '../../..';
 
 export const registerEsConfigRoute = ({ router, services }: RouteDependencies): void => {
-  router.get({ path: '/api/console/es_config', validate: false }, async (ctx, req, res) => {
-    const cloudUrl = services.esLegacyConfigService.getCloudUrl();
-    if (cloudUrl) {
-      const body: EsConfigApiResponse = { host: cloudUrl };
+  router.get(
+    {
+      path: '/api/console/es_config',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate: false,
+    },
+    async (ctx, req, res) => {
+      const cloudUrl = services.esLegacyConfigService.getCloudUrl();
+      if (cloudUrl) {
+        const body: EsConfigApiResponse = { host: cloudUrl };
+
+        return res.ok({ body });
+      }
+      const {
+        hosts: [host],
+      } = await services.esLegacyConfigService.readConfig();
+
+      const body: EsConfigApiResponse = { host };
 
       return res.ok({ body });
     }
-    const {
-      hosts: [host],
-    } = await services.esLegacyConfigService.readConfig();
-
-    const body: EsConfigApiResponse = { host };
-
-    return res.ok({ body });
-  });
+  );
 };

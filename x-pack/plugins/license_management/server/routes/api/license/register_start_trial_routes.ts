@@ -14,23 +14,47 @@ export function registerStartTrialRoutes({
   lib: { handleEsError },
   plugins: { licensing },
 }: RouteDependencies) {
-  router.get({ path: addBasePath('/start_trial'), validate: false }, async (ctx, req, res) => {
-    const { client } = (await ctx.core).elasticsearch;
-    try {
-      return res.ok({ body: await canStartTrial(client) });
-    } catch (error) {
-      return handleEsError({ error, response: res });
+  router.get(
+    {
+      path: addBasePath('/start_trial'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate: false,
+    },
+    async (ctx, req, res) => {
+      const { client } = (await ctx.core).elasticsearch;
+      try {
+        return res.ok({ body: await canStartTrial(client) });
+      } catch (error) {
+        return handleEsError({ error, response: res });
+      }
     }
-  });
+  );
 
-  router.post({ path: addBasePath('/start_trial'), validate: false }, async (ctx, req, res) => {
-    const { client } = (await ctx.core).elasticsearch;
-    try {
-      return res.ok({
-        body: await startTrial({ client, licensing }),
-      });
-    } catch (error) {
-      return handleEsError({ error, response: res });
+  router.post(
+    {
+      path: addBasePath('/start_trial'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate: false,
+    },
+    async (ctx, req, res) => {
+      const { client } = (await ctx.core).elasticsearch;
+      try {
+        return res.ok({
+          body: await startTrial({ client, licensing }),
+        });
+      } catch (error) {
+        return handleEsError({ error, response: res });
+      }
     }
-  });
+  );
 }

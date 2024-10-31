@@ -73,6 +73,12 @@ export const registerConvertRequestRoute = ({
   router.post(
     {
       path: '/api/console/convert_request_to_language',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: routeValidationConfig,
     },
     handler

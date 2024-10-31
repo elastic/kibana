@@ -25,6 +25,12 @@ export const registerPrivilegesRoute = ({
   router.get(
     {
       path: addInternalBasePath('/enrich_policies/privileges'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: false,
     },
     async (context, request, response) => {

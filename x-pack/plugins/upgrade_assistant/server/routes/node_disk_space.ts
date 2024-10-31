@@ -47,6 +47,12 @@ export function registerNodeDiskSpaceRoute({ router, lib: { handleEsError } }: R
   router.get(
     {
       path: `${API_BASE_PATH}/node_disk_space`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: false,
     },
     versionCheckHandlerWrapper(async ({ core }, request, response) => {
