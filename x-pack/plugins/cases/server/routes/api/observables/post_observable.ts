@@ -6,14 +6,14 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { CASE_OBSERVABLES_URL } from '../../../../common/constants';
+import { INTERNAL_CASE_OBSERVABLES_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
 import type { observableApiV1 } from '../../../../common/types/api';
 
 export const postObservableRoute = createCasesRoute({
   method: 'post',
-  path: CASE_OBSERVABLES_URL,
+  path: INTERNAL_CASE_OBSERVABLES_URL,
   params: {
     params: schema.object({
       case_id: schema.string(),

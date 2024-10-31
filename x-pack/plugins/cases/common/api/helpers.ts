@@ -22,7 +22,7 @@ import {
   INTERNAL_DELETE_FILE_ATTACHMENTS_URL,
   CASE_FIND_ATTACHMENTS_URL,
   INTERNAL_PUT_CUSTOM_FIELDS_URL,
-  CASE_OBSERVABLES_URL,
+  INTERNAL_CASE_OBSERVABLES_URL,
 } from '../constants';
 
 export const getCaseDetailsUrl = (id: string): string => {
@@ -93,5 +93,5 @@ export const getCustomFieldReplaceUrl = (caseId: string, customFieldId: string):
 };
 
 export const getCaseObservablesUrl = (id: string): string => {
-  return CASE_OBSERVABLES_URL.replace('{case_id}', id);
+  return INTERNAL_CASE_OBSERVABLES_URL.replace('{case_id}', id);
 };
