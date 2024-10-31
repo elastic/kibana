@@ -229,7 +229,6 @@ kibana_vars=(
     xpack.alerting.healthCheck.interval
     xpack.alerting.invalidateApiKeysTask.interval
     xpack.alerting.invalidateApiKeysTask.removalDelay
-    xpack.alerting.defaultRuleTaskTimeout
     xpack.alerting.rules.run.timeout
     xpack.alerting.rules.run.ruleTypeOverrides
     xpack.alerting.cancelAlertsOnRuleTimeout
@@ -239,8 +238,6 @@ kibana_vars=(
     xpack.alerting.rules.run.alerts.max
     xpack.alerting.rules.run.actions.connectorTypeOverrides
     xpack.alerting.maxScheduledPerMinute
-    xpack.alerts.invalidateApiKeysTask.interval
-    xpack.alerts.invalidateApiKeysTask.removalDelay
     xpack.apm.indices.error
     xpack.apm.indices.metric
     xpack.apm.indices.onboarding

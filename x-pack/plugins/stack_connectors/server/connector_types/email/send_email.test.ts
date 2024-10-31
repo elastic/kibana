@@ -758,7 +758,6 @@ describe('send_email module', () => {
         url: 'smtp://example.com:1025',
         ssl: {
           certificateAuthoritiesData: 'ca cert data goes here',
-          rejectUnauthorized: true,
         },
         smtp: {
           ignoreTLS: true,
@@ -811,7 +810,6 @@ describe('send_email module', () => {
         url: 'smtp://example.com:1025',
         ssl: {
           certificateAuthoritiesData: 'ca cert data goes here',
-          rejectUnauthorized: true,
         },
         smtp: {
           requireTLS: true,
