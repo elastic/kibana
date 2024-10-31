@@ -7312,7 +7312,7 @@
   resolved "https://registry.yarnpkg.com/@kwsites/promise-deferred/-/promise-deferred-1.1.1.tgz#8ace5259254426ccef57f3175bc64ed7095ed919"
   integrity sha512-GaHYm+c0O9MjZRu0ongGBRbinu8gVAMd2UZjji6jVmqKtZluZnptXGWhz1E8j8D2HJ3f/yMxKAUC0b+57wncIw==
 
-"@langchain/community@^0.2.33":
+"@langchain/community@0.2.33":
   version "0.2.33"
   resolved "https://registry.yarnpkg.com/@langchain/community/-/community-0.2.33.tgz#c3c920492470196d0f560552cc95954fccdde0e8"
   integrity sha512-YsytROnBYoPqtUcV2In+afyLACzxwFrYRn7EBKYL7XWl3XNwrT85U1+nLM5b+MOjXvg9YfJSjrs1Tlbfy4st8g==

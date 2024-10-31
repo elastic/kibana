@@ -1009,7 +1009,7 @@
     "@kbn/xstate-utils": "link:packages/kbn-xstate-utils",
     "@kbn/zod": "link:packages/kbn-zod",
     "@kbn/zod-helpers": "link:packages/kbn-zod-helpers",
-    "@langchain/community": "^0.2.33",
+    "@langchain/community": "0.2.33",
     "@langchain/core": "^0.2.18",
     "@langchain/google-common": "^0.1.1",
     "@langchain/google-genai": "^0.1.0",
