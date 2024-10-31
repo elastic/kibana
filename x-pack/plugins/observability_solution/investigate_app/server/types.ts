@@ -17,6 +17,10 @@ import type {
 import type { SloPluginSetup, SloPluginStart } from '@kbn/slo-plugin/server';
 import type { InferenceServerStart, InferenceServerSetup } from '@kbn/inference-plugin/server';
 import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type {
+  ApmDataAccessPluginStart,
+  ApmDataAccessPluginSetup,
+} from '@kbn/apm-data-access-plugin/server';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
@@ -29,6 +33,7 @@ export interface InvestigateAppSetupDependencies {
   alerting: AlertingPluginSetup;
   inference: InferenceServerSetup;
   spaces?: SpacesPluginSetup;
+  apmDataAccess: ApmDataAccessPluginSetup;
 }
 
 export interface InvestigateAppStartDependencies {
@@ -37,6 +42,7 @@ export interface InvestigateAppStartDependencies {
   alerting: AlertingPluginStart;
   inference: InferenceServerStart;
   spaces?: SpacesPluginStart;
+  apmDataAccess: ApmDataAccessPluginStart;
 }
 
 export interface InvestigateAppServerSetup {}

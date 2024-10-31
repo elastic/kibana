@@ -16,10 +16,10 @@ export function createInferenceClient({
   request,
   actions,
   logger,
-}: { request: KibanaRequest; logger: Logger } & Pick<
-  InferenceStartDependencies,
-  'actions'
->): InferenceClient {
+}: {
+  request: KibanaRequest;
+  logger: Logger;
+} & Pick<InferenceStartDependencies, 'actions'>): InferenceClient {
   const chatComplete = createChatCompleteApi({ request, actions, logger });
   return {
     chatComplete,

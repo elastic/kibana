@@ -4,52 +4,67 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { withoutOutputUpdateEvents, type InferenceClient } from '@kbn/inference-plugin/server';
+import { withoutOutputUpdateEvents } from '@kbn/inference-plugin/server';
 import { getEntityKuery } from '@kbn/observability-utils-common/entities/get_entity_kuery';
 import { formatValueForKql } from '@kbn/observability-utils-common/es/format_value_for_kql';
 import type { TruncatedDocumentAnalysis } from '@kbn/observability-utils-common/llm/log_analysis/document_analysis';
 import { ShortIdTable } from '@kbn/observability-utils-common/llm/short_id_table';
-import { compact, groupBy } from 'lodash';
+import {
+  P_VALUE_SIGNIFICANCE_HIGH,
+  P_VALUE_SIGNIFICANCE_MEDIUM,
+} from '@kbn/observability-utils-common/ml/p_value_to_label';
+import { castArray, compact, groupBy, orderBy } from 'lodash';
 import { last, lastValueFrom, map } from 'rxjs';
-import { Logger } from '@kbn/logging';
-import { FieldPatternResultWithChanges, getLogPatterns } from '../entities/get_log_patterns';
-import { ObservabilityElasticsearchClient } from '../es/client/create_observability_es_client';
-import { SYSTEM_PROMPT_CHANGES, SYSTEM_PROMPT_ENTITIES } from './service_rca/system_prompt_base';
-import { formatEntity } from './service_rca/format_entity';
+import {
+  FieldPatternResultWithChanges,
+  getLogPatterns,
+} from '../../../../entities/get_log_patterns';
+import { RCA_PROMPT_CHANGES, RCA_PROMPT_ENTITIES } from '../../prompts';
+import { RootCauseAnalysisContext } from '../../types';
+import { formatEntity } from '../../util/format_entity';
 
 type LogPatternRelevance = 'normal' | 'unusual' | 'warning' | 'critical';
 
-export type AnalyzedLogPattern = FieldPatternResultWithChanges & { relevance: LogPatternRelevance };
+export type AnalyzedLogPattern = FieldPatternResultWithChanges & {
+  relevance: LogPatternRelevance;
+  interesting: boolean;
+};
 
 export interface AnalyzeLogPatternOutput {
   ownPatterns: AnalyzedLogPattern[];
   patternsFromOtherEntities: AnalyzedLogPattern[];
 }
 
+const normalDescription = `normal operations, such as such access logs`;
+const unusualDescription = `something unusual and/or
+appear rarely, such as startup or shutdown messages or
+other rare vents`;
+const warningDescription = `something being in an unexpected state,
+such as error messages, rate limiting or disk usage warnings`;
+const criticalDescription = `something being in a critical state,
+such as startup failure messages, out-of-memory errors or crashloopbackoff
+events`;
+
+interface LogPatternCutOff {
+  significance?: 'high' | 'medium' | 'low';
+  pValue?: number;
+}
+
 export async function analyzeLogPatterns({
-  inferenceClient,
-  connectorId,
-  esClient,
-  start,
-  end,
   entity,
-  index,
-  logSources,
   allAnalysis,
   system,
-  logger: parentLogger,
+  rcaContext: { logger: parentLogger, inferenceClient, connectorId, esClient, start, end, indices },
+  cutoff,
 }: {
-  connectorId: string;
-  inferenceClient: InferenceClient;
-  esClient: ObservabilityElasticsearchClient;
-  start: number;
-  end: number;
   entity: Record<string, string>;
-  index: string | string[];
-  logSources: string[];
-  allAnalysis: Array<{ dataStream: string; analysis: TruncatedDocumentAnalysis }>;
+  allAnalysis: Array<{ index: string | string[]; analysis: TruncatedDocumentAnalysis }>;
   system: string;
-  logger: Logger;
+  cutoff?: LogPatternCutOff;
+  rcaContext: Pick<
+    RootCauseAnalysisContext,
+    'indices' | 'logger' | 'inferenceClient' | 'connectorId' | 'esClient' | 'start' | 'end'
+  >;
 }): Promise<AnalyzeLogPatternOutput> {
   const kuery = getEntityKuery(entity);
 
@@ -65,9 +80,9 @@ export async function analyzeLogPatterns({
     to thoroughly analyze log patterns for things that require
     attention from the user.
 
-    ${SYSTEM_PROMPT_CHANGES}
+    ${RCA_PROMPT_CHANGES}
 
-    ${SYSTEM_PROMPT_ENTITIES}
+    ${RCA_PROMPT_ENTITIES}
 
     ## Entity
 
@@ -77,8 +92,8 @@ export async function analyzeLogPatterns({
 
     ### Entity analysis
 
-    ${allAnalysis.map(({ dataStream, analysis }) => {
-      return `#### Data stream: ${dataStream}
+    ${allAnalysis.map(({ index: analyzedIndex, analysis }) => {
+      return `#### Indices: ${castArray(analyzedIndex).join(',')}
 
   ${JSON.stringify(analysis)}`;
     })}
@@ -95,7 +110,7 @@ export async function analyzeLogPatterns({
   const [logPatternsFromEntity, logPatternsFromElsewhere] = await Promise.all([
     getLogPatterns({
       esClient,
-      index,
+      index: [...indices.logs, ...indices.traces],
       start,
       end,
       kuery,
@@ -105,7 +120,7 @@ export async function analyzeLogPatterns({
     }),
     getLogPatterns({
       esClient,
-      index: logSources,
+      index: [...indices.logs],
       start,
       end,
       kuery: kueryForOtherEntities,
@@ -117,6 +132,11 @@ export async function analyzeLogPatterns({
   const patternIdLookupTable = new ShortIdTable();
 
   logger.debug(
+    () =>
+      `Found ${logPatternsFromEntity.length} own log patterns and ${logPatternsFromElsewhere.length} from others`
+  );
+
+  logger.trace(
     () =>
       `Found log patterns${JSON.stringify({
         entity,
@@ -134,21 +154,39 @@ export async function analyzeLogPatterns({
 
   const patternsByRegex = new Map(patternsWithIds.map((pattern) => [pattern.regex, pattern]));
 
-  const serializedOwnEntity = JSON.stringify(entity);
+  const serializedOwnEntity = formatEntity(entity);
 
   const [ownPatterns, patternsFromOtherEntities] = await Promise.all([
     logPatternsFromEntity.length ? categorizeOwnPatterns() : [],
     logPatternsFromElsewhere.length ? selectRelevantPatternsFromOtherEntities() : [],
   ]);
 
-  logger.debug(
+  logger.trace(
     () =>
       `Classified log patterns ${JSON.stringify([entity, ownPatterns, patternsFromOtherEntities])}`
   );
 
+  const allPatterns = [...ownPatterns, ...patternsFromOtherEntities];
+
+  const sortedByPValueAsc = orderBy(
+    allPatterns.filter((pattern) => pattern.change && pattern.change.p_value),
+    (pattern) => {
+      return pattern.change.p_value;
+    },
+    'asc'
+  );
+
+  const pValueCutOff = getPValueCutoff({ cutoff, max: sortedByPValueAsc[0]?.change.p_value });
+
   return {
-    ownPatterns,
-    patternsFromOtherEntities,
+    ownPatterns: ownPatterns.map((pattern) => ({
+      ...pattern,
+      interesting: isInterestingPattern(pattern, pValueCutOff),
+    })),
+    patternsFromOtherEntities: patternsFromOtherEntities.map((pattern) => ({
+      ...pattern,
+      interesting: isInterestingPattern(pattern, pValueCutOff),
+    })),
   };
 
   function categorizeOwnPatterns() {
@@ -158,16 +196,13 @@ export async function analyzeLogPatterns({
           connectorId,
           system: systemPrompt,
           input: `Based on the following log patterns from
-            ${JSON.stringify(entity)}, group these patterns into
+            ${formatEntity(entity)}, group these patterns into
             the following categories:
 
-            - normal (patterns that are indicative of normal operations)
-            - unusual (patterns that indicate something unusual and/or
-            appear rarely)
-            - warning (patterns that indicate something is in an
-            unexpected state)
-            - critical (patterns that indicate a critical issue
-            with the entity)
+            - normal (patterns that are indicative of ${normalDescription})
+            - unusual (patterns that are indicative of ${unusualDescription})
+            - warning (patterns that are indicative of ${warningDescription})
+            - critical (patterns that are indicative of ${criticalDescription})
 
             ## Log patterns:
 
@@ -230,15 +265,14 @@ export async function analyzeLogPatterns({
 
             - irrelevant (patterns that are not relevant for
             ${serializedOwnEntity})
-            - normals (patterns that are relevant for
-            ${serializedOwnEntity} but are indicative of normal
-            operations
+            - normal (patterns that relevant for
+            ${serializedOwnEntity} and are indicative of ${normalDescription})
+            - unusual (patterns that are relevant for
+            ${serializedOwnEntity} and are indicative of ${unusualDescription})
             - warning (patterns that are relevant for
-            ${serializedOwnEntity} that indicate something is
-            in an unexpected state)
+            ${serializedOwnEntity} and are indicative of ${warningDescription})
             - critical (patterns that are relevant for
-            ${serializedOwnEntity} that indicate a critical issue
-            with the entity)
+            ${serializedOwnEntity} and are indicative of ${criticalDescription})
 
             Relevant patterns are messages that mention the
             investigated entity, or things that are indicative
@@ -314,9 +348,8 @@ export async function analyzeLogPatterns({
               shortId: patternIdLookupTable.take(pattern.regex),
               regex: pattern.regex,
               sample: pattern.sample,
-              change: pattern.change,
-              count: pattern.count,
               highlight: pattern.highlight,
+              change: pattern.change,
             };
           })
         )}
@@ -337,4 +370,39 @@ export async function analyzeLogPatterns({
       })
     );
   }
+}
+
+function isInterestingPattern(
+  pattern: Omit<AnalyzedLogPattern, 'interesting'>,
+  pValueCutOff: number
+) {
+  return (pattern.change.p_value ?? 1) <= pValueCutOff || pattern.relevance !== 'normal';
+}
+
+function getPValueCutoff({ max, cutoff }: { max?: number; cutoff?: LogPatternCutOff }) {
+  if (cutoff?.pValue) {
+    return cutoff?.pValue;
+  }
+
+  if (cutoff?.significance === 'high') {
+    return P_VALUE_SIGNIFICANCE_HIGH;
+  }
+
+  if (cutoff?.significance === 'medium') {
+    return P_VALUE_SIGNIFICANCE_MEDIUM;
+  }
+
+  if (max === undefined) {
+    return Number.MAX_VALUE;
+  }
+
+  if (max <= P_VALUE_SIGNIFICANCE_HIGH) {
+    return P_VALUE_SIGNIFICANCE_HIGH;
+  }
+
+  if (max <= P_VALUE_SIGNIFICANCE_MEDIUM) {
+    return P_VALUE_SIGNIFICANCE_MEDIUM;
+  }
+
+  return Number.MAX_VALUE;
 }

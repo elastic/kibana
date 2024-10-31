@@ -16,7 +16,9 @@ import {
 import { categorizationAnalyzer } from '@kbn/aiops-log-pattern-analysis';
 import { ChangePointType } from '@kbn/es-types/src';
 import { pValueToLabel } from '@kbn/observability-utils-common/ml/p_value_to_label';
-import { partition } from 'lodash';
+import { calculateAuto } from '@kbn/calculate-auto';
+import { orderBy, partition, uniqBy } from 'lodash';
+import moment from 'moment';
 import { ObservabilityElasticsearchClient } from '../es/client/create_observability_es_client';
 import { kqlQuery } from '../es/queries/kql_query';
 import { rangeQuery } from '../es/queries/range_query';
@@ -143,7 +145,9 @@ export async function runCategorizeTextAggregation({
                       min: start,
                       max: end,
                     },
-                    fixed_interval: `${Math.round((end - start) / 50)}ms`,
+                    fixed_interval: `${calculateAuto
+                      .atLeast(30, moment.duration(end - start, 'ms'))!
+                      .asMilliseconds()}ms`,
                   },
                 },
                 changes: {
@@ -382,5 +386,8 @@ export async function getLogPatterns({
     })
   );
 
-  return allPatterns.flat();
+  return uniqBy(
+    orderBy(allPatterns.flat(), (pattern) => pattern.count, 'desc'),
+    (pattern) => pattern.sample
+  );
 }

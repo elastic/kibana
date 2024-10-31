@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { InferenceClient, withoutOutputUpdateEvents } from '@kbn/inference-plugin/server';
 import { lastValueFrom, map } from 'rxjs';
-import { RCA_SYSTEM_PROMPT_BASE } from './system_prompt_base';
-import { ObservationStepSummary } from './observe';
-import { stringifySummaries } from './stringify_summaries';
+import { withoutOutputUpdateEvents } from '@kbn/inference-plugin/server';
+import { RCA_SYSTEM_PROMPT_BASE } from '../../prompts';
+import { stringifySummaries } from '../../util/stringify_summaries';
+import { RootCauseAnalysisContext } from '../../types';
 
 type SignificantEventSeverity = 'info' | 'unusual' | 'warning' | 'critical';
 
@@ -27,27 +27,25 @@ export interface SignificantEventsTimeline {
 }
 
 export async function generateSignificantEventsTimeline({
-  inferenceClient,
   report,
-  connectorId,
-  summaries,
+  rcaContext,
 }: {
-  inferenceClient: InferenceClient;
   report: string;
-  connectorId: string;
-  summaries: ObservationStepSummary[];
+  rcaContext: RootCauseAnalysisContext;
 }): Promise<SignificantEventsTimeline> {
+  const { connectorId, inferenceClient } = rcaContext;
+
   return await lastValueFrom(
     inferenceClient
       .output('generate_timeline', {
-        system: `${RCA_SYSTEM_PROMPT_BASE}`,
+        system: RCA_SYSTEM_PROMPT_BASE,
         connectorId,
         input: `Your current task is to generate a timeline
         of significant events, based on the given RCA report,
         according to a structured schema. This timeline will
         be presented to the user as a visualization.
 
-        ${stringifySummaries(summaries)}
+        ${stringifySummaries(rcaContext)}
 
         # Report
 

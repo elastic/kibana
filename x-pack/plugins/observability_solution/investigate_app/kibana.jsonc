@@ -26,7 +26,8 @@
       "inference",
       "alerting",
       "spaces",
-      "slo"
+      "slo",
+      "apmDataAccess"
     ],
     "requiredBundles": [
       "esql",

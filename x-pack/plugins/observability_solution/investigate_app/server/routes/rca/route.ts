@@ -8,9 +8,9 @@
 import { Observable, of, switchMap } from 'rxjs';
 import { ServerSentEventBase } from '@kbn/sse-utils';
 import {
-  RootCauseAnalysisForServiceEvent,
-  runRootCauseAnalysisForService,
-} from '@kbn/observability-utils-server/llm/service_rca';
+  RootCauseAnalysisEvent,
+  runRootCauseAnalysis,
+} from '@kbn/observability-utils-server/llm/root_cause_analysis';
 import { z } from '@kbn/zod';
 import datemath from '@elastic/datemath';
 import { OBSERVABILITY_LOGS_DATA_ACCESS_LOG_SOURCES_ID } from '@kbn/management-settings-ids';
@@ -37,9 +37,7 @@ export const rootCauseAnalysisRoute = createInvestigateAppServerRoute({
     request,
     context: requestContext,
     logger,
-  }): Promise<
-    Observable<ServerSentEventBase<'event', { event: RootCauseAnalysisForServiceEvent }>>
-  > => {
+  }): Promise<Observable<ServerSentEventBase<'event', { event: RootCauseAnalysisEvent }>>> => {
     const {
       body: { context, rangeFrom, rangeTo, serviceName, connectorId },
     } = params;
@@ -47,19 +45,27 @@ export const rootCauseAnalysisRoute = createInvestigateAppServerRoute({
     const start = datemath.parse(rangeFrom)?.valueOf()!;
     const end = datemath.parse(rangeTo)?.valueOf()!;
 
-    const [rulesClient, alertsClient, sloClient, inferenceClient, spaceId = 'default', esClient] =
-      await Promise.all([
-        (await plugins.alerting.start()).getRulesClientWithRequest(request),
-        (await plugins.ruleRegistry.start()).getRacClientWithRequest(request),
-        (await plugins.slo.start()).getSloClientWithRequest(request),
-        (await plugins.inference.start()).getClient({ request }),
-        (await plugins.spaces?.start())?.spacesService.getSpaceId(request),
-        createObservabilityEsClient({
-          client: (await requestContext.core).elasticsearch.client.asCurrentUser,
-          logger,
-          plugin: 'investigateApp',
-        }),
-      ]);
+    const [
+      rulesClient,
+      alertsClient,
+      sloClient,
+      inferenceClient,
+      spaceId = 'default',
+      esClient,
+      apmIndices,
+    ] = await Promise.all([
+      (await plugins.alerting.start()).getRulesClientWithRequest(request),
+      (await plugins.ruleRegistry.start()).getRacClientWithRequest(request),
+      (await plugins.slo.start()).getSloClientWithRequest(request),
+      (await plugins.inference.start()).getClient({ request }),
+      (await plugins.spaces?.start())?.spacesService.getSpaceId(request),
+      createObservabilityEsClient({
+        client: (await requestContext.core).elasticsearch.client.asCurrentUser,
+        logger,
+        plugin: 'investigateApp',
+      }),
+      plugins.apmDataAccess.setup.getApmIndices((await requestContext.core).savedObjects.client),
+    ]);
 
     const [sloSummaryIndices, logSources] = await Promise.all([
       sloClient.getSummaryIndices(),
@@ -68,21 +74,23 @@ export const rootCauseAnalysisRoute = createInvestigateAppServerRoute({
       ).uiSettings.client.get(OBSERVABILITY_LOGS_DATA_ACCESS_LOG_SOURCES_ID) as Promise<string[]>,
     ]);
 
-    return runRootCauseAnalysisForService({
+    return runRootCauseAnalysis({
       alertsClient,
       connectorId,
       start,
       end,
       esClient,
       inferenceClient,
-      logSources: logSources.concat(['traces-apm*']),
+      indices: {
+        logs: logSources,
+        traces: [apmIndices.span, apmIndices.error, apmIndices.transaction],
+        sloSummaries: sloSummaryIndices,
+      },
       rulesClient,
       serviceName,
-      sloSummaryIndices,
       spaceId,
       context,
       logger,
-      summaries: [],
     }).pipe(
       switchMap((event) => {
         return of({

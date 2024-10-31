@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { InferenceClient, withoutOutputUpdateEvents } from '@kbn/inference-plugin/server';
+import { withoutOutputUpdateEvents } from '@kbn/inference-plugin/server';
 import { lastValueFrom, map } from 'rxjs';
-import { ObservationStepSummary } from './observe';
-import { stringifySummaries } from './stringify_summaries';
-import { RCA_SYSTEM_PROMPT_BASE, RCA_TIMELINE_GUIDE_EXTENDED } from './system_prompt_base';
+import { RCA_PROMPT_TIMELINE_GUIDE, RCA_SYSTEM_PROMPT_BASE } from '../../prompts';
+import { RootCauseAnalysisContext } from '../../types';
+import { stringifySummaries } from '../../util/stringify_summaries';
 
 const SYSTEM_PROMPT_ADDENDUM = `
 # Guide: Writing a Root Cause Analysis (RCA) Report
@@ -142,7 +142,7 @@ requests, ultimately impacting user-facing services relying on that endpoint.
 
 ## 6. Timeline of Significant Events
 
-${RCA_TIMELINE_GUIDE_EXTENDED}
+${RCA_PROMPT_TIMELINE_GUIDE}
 
 ---
 
@@ -171,25 +171,23 @@ detect memory spikes earlier.
 recurrence. Investigate adding a memory ceiling for \`myservice\` to prevent
 future resource exhaustion.`;
 
-export async function writeRcaReport({
-  summaries,
-  inferenceClient,
-  connectorId,
+export async function writeFinalReport({
+  rcaContext,
 }: {
-  summaries: ObservationStepSummary[];
-  inferenceClient: InferenceClient;
-  connectorId: string;
+  rcaContext: RootCauseAnalysisContext;
 }): Promise<string> {
+  const { inferenceClient, connectorId } = rcaContext;
+
   return await lastValueFrom(
     inferenceClient
-      .output('write_rca_report', {
+      .output('write_final_report', {
         connectorId,
         system: `${RCA_SYSTEM_PROMPT_BASE}
         
         ${SYSTEM_PROMPT_ADDENDUM}`,
         input: `Write the RCA report, based on the observations.
         
-        ${stringifySummaries(summaries)}`,
+        ${stringifySummaries(rcaContext)}`,
       })
       .pipe(
         withoutOutputUpdateEvents(),

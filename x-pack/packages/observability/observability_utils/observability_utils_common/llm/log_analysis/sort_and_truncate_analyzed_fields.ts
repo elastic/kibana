@@ -21,26 +21,30 @@ export function sortAndTruncateAnalyzedFields(
     ...meta,
     fields: truncateList(
       sortedFields.map((field) => {
-        let name = `${field.name}:${field.types.join(',')}`;
+        let label = `${field.name}:${field.types.join(',')}`;
 
         if (field.empty) {
           return `${name} (empty)`;
         }
 
-        name += ` - ${field.cardinality} distinct values`;
+        label += ` - ${field.cardinality} distinct values`;
+
+        if (field.name === '@timestamp' || field.name === 'event.ingested') {
+          return `${label}`;
+        }
 
         const shortValues = field.values.filter((value) => {
           return String(value).length <= 1024;
         });
 
         if (shortValues.length) {
-          return `${name} (${truncateList(
+          return `${label} (${truncateList(
             shortValues.map((value) => '`' + value + '`'),
             field.types.includes('text') || field.types.includes('match_only_text') ? 2 : 10
           ).join(', ')})`;
         }
 
-        return name;
+        return label;
       }),
       500
     ).sort(),

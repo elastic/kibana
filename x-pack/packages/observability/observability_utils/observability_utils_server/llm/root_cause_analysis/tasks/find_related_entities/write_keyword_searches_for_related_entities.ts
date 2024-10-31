@@ -7,7 +7,11 @@
 
 import { InferenceClient, withoutOutputUpdateEvents } from '@kbn/inference-plugin/server';
 import { lastValueFrom } from 'rxjs';
-import { RCA_SYSTEM_PROMPT_BASE, SYSTEM_PROMPT_ENTITIES } from './system_prompt_base';
+import { TruncatedDocumentAnalysis } from '@kbn/observability-utils-common/llm/log_analysis/document_analysis';
+import { RCA_SYSTEM_PROMPT_BASE, RCA_PROMPT_ENTITIES } from '../../prompts';
+import { FieldPatternResultWithChanges } from '../../../../entities/get_log_patterns';
+import { toBlockquote } from '../../util/to_blockquote';
+import { formatEntity } from '../../util/format_entity';
 
 const SYSTEM_PROMPT_ADDENDUM = `# Guide: Constructing Keyword Searches to Find Related Entities
 
@@ -43,23 +47,26 @@ that matches the search request.
   - \`"10.44.0.11:8080"\`: Full address.
   - \`"10.44.0.11"\`: IP address only.
   - \`"8080"\`: Port number.
-- **Relationship:** Describes the IP and port of the investigated service
-(\`myservice\`).
+- **Appears as:** This IP address and port are referenced as
+<ip-field-name> and <port-field-name> in the investigated entity
+<entity-name>..
 
 ### 2. **Outgoing Request URL**
 - **Fragments:**
   - \`"http://called-service/api/product"\`: Full outgoing URL.
   - \`"/api/product*"\`: Endpoint path.
   - \`"called-service"\`: Service name of the upstream dependency.
-  - **Relationship:** Identifies an outgoing request from \`myservice\`
-  to an upstream service.
+  - **Appears as:** These URL fragments appear as attributes.request.url
+  in the investigated entity <entity-name>. They could appear as referer
+  in the upstream dependency.
 
 ### 3. **Parent and Span IDs**
   - **Fragments:**
     - \`"000aa"\`: Parent ID.
     - \`"000bbb"\`: Span ID.
-  - **Relationship:** Tracing IDs linking \`myservice\` with downstream
-  services making calls.
+  - **Relationship:** These ids appear as span.id and parent.id in the
+  investigated entity <entity-name>. They could be referring to spans
+  found on upstream or downstream services.
 
 ---
 
@@ -78,60 +85,75 @@ relationships in a JSON array like this:
         "10.44.0.11",
         "8080"
       ],
-      "relationship": "This describes the IP address and port that the investigated service (<service-name>) is running on."
+      "appearsAs": "This IP address and port are referenced as <ip-field-name> and <port-field-name> in the investigated entity <entity-name>."
     },
     {
       "fragments": [
         "http://<upstream-service>/api/product",
         "/api/product",
-        "<upstream-service>>"
+        "<upstream-service>"
       ],
-      "relationship": "These URL fragments, found in the data for the investigated service (<service-name>), were part of outgoing connections to an upstream service."
+      "relationship": "These URL fragments appear as attributes.request.url in the investigated entity <entity-name>."
     },
     {
       "fragments": [
         "000aa",
         "000bbb"
       ],
-      "relationship": "These describe parent and span IDs found on the investigated service (<service-name>). They could be referring to spans found on the downstream service that called out to <service-name>."
+      "relationship": " These ids appear as span.id and parent.id in the investigated entity <entity-name>. They could be referring to spans found on upstream or downstream services"
     }
   ]
 }`;
 
-export async function writeKeywordSearch({
+export interface RelatedEntityKeywordSearch {
+  fragments: string[];
+  appearsAs: string;
+}
+
+export async function writeKeywordSearchForRelatedEntities({
   connectorId,
   inferenceClient,
   entity,
-  dataToAnalyzePrompt,
+  analysis,
+  ownPatterns,
   context,
 }: {
   connectorId: string;
   inferenceClient: InferenceClient;
   entity: Record<string, string>;
-  dataToAnalyzePrompt: string;
+  analysis: TruncatedDocumentAnalysis;
+  ownPatterns: FieldPatternResultWithChanges[];
   context: string;
 }): Promise<{
   groupingFields: string[];
-  values: Array<{
-    fragments: string[];
-    relationship: string;
-  }>;
+  searches: RelatedEntityKeywordSearch[];
 }> {
+  const logPatternsPrompt = ownPatterns.length
+    ? JSON.stringify(
+        ownPatterns.map((pattern) => ({ regex: pattern.regex, sample: pattern.sample }))
+      )
+    : 'No log patterns found';
+
   const outputCompleteEvent$ = await lastValueFrom(
     inferenceClient
       .output('extract_keyword_searches', {
         connectorId,
         system: `${RCA_SYSTEM_PROMPT_BASE}
 
-        ${SYSTEM_PROMPT_ENTITIES}`,
+        ${RCA_PROMPT_ENTITIES}`,
         input: `Your current task is to to extract keyword searches
-        to find related entities to the entity ${JSON.stringify(entity)},
+        to find related entities to the entity ${formatEntity(entity)},
         based on the following context:
-        
-        ${dataToAnalyzePrompt}
 
-        ## Context
-        ${context}
+        ## Investigation context
+        ${toBlockquote(context)}
+
+        ## Data analysis
+        ${JSON.stringify(analysis)}
+
+        ## Log patterns 
+        
+        ${logPatternsPrompt}
 
         ## Instructions
         ${SYSTEM_PROMPT_ADDENDUM}`,
@@ -144,7 +166,7 @@ export async function writeKeywordSearch({
                 type: 'string',
               },
             },
-            values: {
+            searches: {
               type: 'array',
               items: {
                 type: 'object',
@@ -155,15 +177,17 @@ export async function writeKeywordSearch({
                       type: 'string',
                     },
                   },
-                  relationship: {
+                  appearsAs: {
                     type: 'string',
+                    description:
+                      'Describe in what fields these values appear as in the investigated entity. You can mention multiple fields if applicable',
                   },
                 },
-                required: ['fragments', 'relationship'],
+                required: ['fragments', 'appearsAs'],
               },
             },
           },
-          required: ['values', 'groupingFields'],
+          required: ['searches', 'groupingFields'],
         } as const,
       })
       .pipe(withoutOutputUpdateEvents())

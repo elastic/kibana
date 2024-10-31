@@ -74,6 +74,7 @@ export function AssistantHypothesis({ investigationId }: { investigationId: stri
       })
       .subscribe({
         next: (event) => {
+          console.log(event);
           setEvents((prev) => {
             return prev.concat(event.event);
           });
@@ -87,6 +88,7 @@ export function AssistantHypothesis({ investigationId }: { investigationId: stri
           setLoading(false);
         },
         complete: () => {
+          console.log('done', events);
           setLoading(false);
         },
       });
