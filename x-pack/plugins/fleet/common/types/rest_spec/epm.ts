@@ -25,8 +25,6 @@ import type {
 
 export interface GetCategoriesRequest {
   query: {
-    // deprecated in 8.6
-    experimental?: boolean;
     prerelease?: boolean;
     include_policy_templates?: boolean;
   };

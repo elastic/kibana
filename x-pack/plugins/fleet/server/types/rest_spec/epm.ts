@@ -12,7 +12,6 @@ import { ExperimentalDataStreamFeaturesSchema } from '../models/package_policy';
 export const GetCategoriesRequestSchema = {
   query: schema.object({
     prerelease: schema.maybe(schema.boolean()),
-    experimental: schema.maybe(schema.boolean()), // deprecated
     include_policy_templates: schema.maybe(schema.boolean()),
   }),
 };
