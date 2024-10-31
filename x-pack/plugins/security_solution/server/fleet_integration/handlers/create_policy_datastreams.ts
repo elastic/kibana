@@ -78,22 +78,20 @@ export const createPolicyDataStreamsIfNeeded: PolicyDataStreamsCreator = async (
   });
   const indexesCreated: string[] = [];
   const createErrors: string[] = [];
-  const indicesToCreate: string[] = Object.values(policyNamespaces.integrationPolicy).reduce<
-    string[]
-  >((acc, namespaceList) => {
-    for (const namespace of namespaceList) {
-      acc.push(
-        buildIndexNameWithNamespace(DEFAULT_DIAGNOSTIC_INDEX, namespace),
-        buildIndexNameWithNamespace(ENDPOINT_ACTION_RESPONSES_DS, namespace)
-      );
+  const indicesToCreate: string[] = Array.from(
+    Object.values(policyNamespaces.integrationPolicy).reduce<Set<string>>((acc, namespaceList) => {
+      for (const namespace of namespaceList) {
+        acc.add(buildIndexNameWithNamespace(DEFAULT_DIAGNOSTIC_INDEX, namespace));
+        acc.add(buildIndexNameWithNamespace(ENDPOINT_ACTION_RESPONSES_DS, namespace));
 
-      if (endpointServices.isServerless()) {
-        acc.push(buildIndexNameWithNamespace(ENDPOINT_HEARTBEAT_INDEX_PATTERN, namespace));
+        if (endpointServices.isServerless()) {
+          acc.add(buildIndexNameWithNamespace(ENDPOINT_HEARTBEAT_INDEX_PATTERN, namespace));
+        }
       }
-    }
 
-    return acc;
-  }, []);
+      return acc;
+    }, new Set<string>())
+  );
 
   const processesDatastreamIndex = async (datastreamIndexName: string): Promise<void> => {
     if (cache.get(datastreamIndexName)) {

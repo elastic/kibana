@@ -418,7 +418,7 @@ export interface ESQLAstGenericComment<SubType extends 'single-line' | 'multi-li
   type: 'comment';
   subtype: SubType;
   text: string;
-  location: ESQLLocation;
+  location?: ESQLLocation;
 }
 
 export type ESQLAstCommentSingleLine = ESQLAstGenericComment<'single-line'>;
