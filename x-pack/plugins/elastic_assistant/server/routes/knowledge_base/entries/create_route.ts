@@ -47,14 +47,12 @@ export const createKnowledgeBaseEntryRoute = (router: ElasticAssistantPluginRout
 
           // Perform license, authenticated user and FF checks
           const checkResponse = performChecks({
-            authenticatedUser: true,
             context: ctx,
-            license: true,
             request,
             response,
           });
-          if (checkResponse) {
-            return checkResponse;
+          if (!checkResponse.isSuccess) {
+            return checkResponse.response;
           }
 
           const kbDataClient = await ctx.elasticAssistant.getAIAssistantKnowledgeBaseDataClient({});

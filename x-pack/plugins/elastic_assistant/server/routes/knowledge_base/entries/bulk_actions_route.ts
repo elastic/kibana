@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment';
-import type { AuthenticatedUser, IKibanaResponse, KibanaResponseFactory } from '@kbn/core/server';
+import type { IKibanaResponse, KibanaResponseFactory } from '@kbn/core/server';
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import {
@@ -143,14 +143,12 @@ export const bulkActionKnowledgeBaseEntriesRoute = (router: ElasticAssistantPlug
 
           // Perform license, authenticated user and FF checks
           const checkResponse = performChecks({
-            authenticatedUser: true,
             context: ctx,
-            license: true,
             request,
             response,
           });
-          if (checkResponse) {
-            return checkResponse;
+          if (!checkResponse.isSuccess) {
+            return checkResponse.response;
           }
 
           logger.debug(
@@ -178,8 +176,7 @@ export const bulkActionKnowledgeBaseEntriesRoute = (router: ElasticAssistantPlug
           request.events.completed$.subscribe(() => abortController.abort());
           const kbDataClient = await ctx.elasticAssistant.getAIAssistantKnowledgeBaseDataClient({});
           const spaceId = ctx.elasticAssistant.getSpaceId();
-          // Authenticated user null check completed in `performChecks()` above
-          const authenticatedUser = ctx.elasticAssistant.getCurrentUser() as AuthenticatedUser;
+          const authenticatedUser = checkResponse.currentUser;
           const userFilter = getKBUserFilter(authenticatedUser);
           const manageGlobalKnowledgeBaseAIAssistant =
             kbDataClient?.options.manageGlobalKnowledgeBaseAIAssistant;

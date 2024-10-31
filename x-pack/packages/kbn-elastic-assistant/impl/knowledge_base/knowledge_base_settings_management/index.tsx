@@ -72,12 +72,15 @@ interface Params {
 
 export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ dataViews }) => {
   const {
-    assistantAvailability: { hasManageGlobalKnowledgeBase },
+    assistantAvailability: { hasManageGlobalKnowledgeBase, isAssistantEnabled },
     http,
     toasts,
   } = useAssistantContext();
   const [hasPendingChanges, setHasPendingChanges] = useState(false);
-  const { data: kbStatus, isFetched } = useKnowledgeBaseStatus({ http });
+  const { data: kbStatus, isFetched } = useKnowledgeBaseStatus({
+    http,
+    enabled: isAssistantEnabled,
+  });
   const isKbSetup = isKnowledgeBaseSetup(kbStatus);
 
   const [deleteKBItem, setDeleteKBItem] = useState<DocumentEntry | IndexEntry | null>(null);
@@ -157,6 +160,7 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
   } = useKnowledgeBaseEntries({
     http,
     toasts,
+    enabled: isAssistantEnabled,
     isRefetching: kbStatus?.is_setup_in_progress,
   });
 

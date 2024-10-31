@@ -298,6 +298,7 @@ export const createDataStreamPayload = (dataStream: Partial<DataStream>): DataSt
     enabled: true,
     data_retention: '7d',
   },
+  indexMode: 'standard',
   ...dataStream,
 });
 
