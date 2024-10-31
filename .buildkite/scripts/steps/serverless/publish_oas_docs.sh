@@ -4,12 +4,6 @@ set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
 
-echo "--- Install bump deps"
-cur_dir="$(pwd)"
-cd .buildkite/scripts/steps/serverless
-npm install
-cd $cur_dir
-
 echo "--- Publish OAS docs"
 
 deploy_to_bump() {
@@ -19,13 +13,13 @@ deploy_to_bump() {
   local branch="${4:-}"
 
   echo "Checking diff for doc '$doc_name' against file '$file_path' on branch '$branch'..."
-  local result=$(bump diff $file_path --doc $doc_name --token $doc_token --branch $branch --format=json)
+  local result=$(npx bump diff $file_path --doc $doc_name --token $doc_token --branch $branch --format=json)
   ## Bump.sh does not respond with JSON when the diff is empty so we need to handle possibly not JSON :'(
   local change_count=$(tr '\n' ' '<<<$result | jq -R 'fromjson? | length')
   if [[ ! -z $change_count && $change_count -gt 0 ]]; then
     echo "Found $change_count changes..."
     echo "About to deploy file '$file_path' to doc '$doc_name' to '$branch' on bump.sh..."
-    bump deploy $file_path \
+    npx bump deploy $file_path \
       --branch $branch \
       --doc $doc_name \
       --token $doc_token ;
