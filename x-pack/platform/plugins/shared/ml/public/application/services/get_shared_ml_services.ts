@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { type HttpStart } from '@kbn/core-http-browser';
-import { HttpService } from './http_service';
+import type { HttpStart } from '@kbn/core-http-browser';
 
 export type MlSharedServices = ReturnType<typeof getMlSharedServices>;
 
@@ -14,7 +13,9 @@ export type MlSharedServices = ReturnType<typeof getMlSharedServices>;
  * Provides ML services exposed from the plugin start.
  */
 export async function getMlSharedServices(httpStart: HttpStart) {
-  const httpService = new HttpService(httpStart);
+  const { HttpService } = await import('./http_service');
   const { mlApiProvider } = await import('./ml_api_service');
+
+  const httpService = new HttpService(httpStart);
   return mlApiProvider(httpService);
 }
