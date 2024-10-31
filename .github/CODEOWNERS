@@ -1842,7 +1842,6 @@ x-pack/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/
 /x-pack/plugins/security_solution/public/detection_engine/rule_management_ui @elastic/security-detection-rule-management
 /x-pack/plugins/security_solution/public/detection_engine/rule_monitoring @elastic/security-detection-rule-management
 /x-pack/plugins/security_solution/public/detections/components/callouts @elastic/security-detection-rule-management
-/x-pack/plugins/security_solution/public/detections/components/modals/ml_job_upgrade_modal @elastic/security-detection-rule-management
 /x-pack/plugins/security_solution/public/detections/components/rules @elastic/security-detection-rule-management
 /x-pack/plugins/security_solution/public/detections/components/rules/rule_preview @elastic/security-detection-engine
 /x-pack/plugins/security_solution/public/detections/containers/detection_engine/rules @elastic/security-detection-rule-management

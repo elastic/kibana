@@ -16,6 +16,7 @@ import type { ActionResult } from '@kbn/actions-plugin/server';
 import { convertRulesFilterToKQL } from '../../../../common/detection_engine/rule_management/rule_filtering';
 import type {
   UpgradeSpecificRulesRequest,
+  PickVersionValues,
   PerformRuleUpgradeResponseBody,
   InstallSpecificRulesRequest,
   PerformRuleInstallationResponseBody,
@@ -680,7 +681,7 @@ export const performInstallSpecificRules = async (
 
 export const performUpgradeSpecificRules = async (
   rules: UpgradeSpecificRulesRequest['rules'],
-  isPrebuiltRulesCustomizationEnabled: boolean
+  pickVersion: PickVersionValues
 ): Promise<PerformRuleUpgradeResponseBody> =>
   KibanaServices.get().http.fetch(PERFORM_RULE_UPGRADE_URL, {
     method: 'POST',
@@ -688,7 +689,7 @@ export const performUpgradeSpecificRules = async (
     body: JSON.stringify({
       mode: 'SPECIFIC_RULES',
       rules,
-      pick_version: isPrebuiltRulesCustomizationEnabled ? 'MERGED' : 'TARGET',
+      pick_version: pickVersion,
     }),
   });
 

@@ -7,7 +7,7 @@
 
 import { useInstalledSecurityJobs } from '../../../../../common/components/ml/hooks/use_installed_security_jobs';
 import { useBoolState } from '../../../../../common/hooks/use_bool_state';
-import { affectedJobIds } from '../../../../../detections/components/callouts/ml_job_compatibility_callout/affected_job_ids';
+import { affectedJobIds } from '../../../../../../common/machine_learning/affected_job_ids';
 import { useAsyncConfirmation } from '../rules_table/use_async_confirmation';
 
 export const useMlJobUpgradeModal = () => {

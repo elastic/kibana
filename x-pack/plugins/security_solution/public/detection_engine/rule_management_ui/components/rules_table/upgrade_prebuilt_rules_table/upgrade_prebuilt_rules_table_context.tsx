@@ -9,6 +9,7 @@ import type { Dispatch, SetStateAction } from 'react';
 import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
 import { EuiButton, EuiToolTip } from '@elastic/eui';
 import { useIsPrebuiltRulesCustomizationEnabled } from '../../../../rule_management/hooks/use_is_prebuilt_rules_customization_enabled';
+import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
 import type { RuleUpgradeInfoForReview } from '../../../../../../common/api/detection_engine';
 import type { RulesUpgradeState } from '../../../../rule_management/model/prebuilt_rule_upgrade';
 import { RuleUpgradeConflictsResolverTab } from '../../../../rule_management/components/rule_details/three_way_diff/rule_upgrade_conflicts_resolver_tab';
@@ -25,8 +26,8 @@ import type { UpgradePrebuiltRulesTableFilterOptions } from './use_filter_prebui
 import { useFilterPrebuiltRulesToUpgrade } from './use_filter_prebuilt_rules_to_upgrade';
 import { TabContentPadding } from '../../../../rule_management/components/rule_details/rule_details_flyout';
 import { RuleDiffTab } from '../../../../rule_management/components/rule_details/rule_diff_tab';
-import { MlJobUpgradeModal } from '../../../../../detections/components/modals/ml_job_upgrade_modal';
-import { UpgradeConflictsModal } from '../../../../../detections/components/modals/upgrade_conflicts_modal';
+import { MlJobUpgradeModal } from './modals/ml_job_upgrade_modal';
+import { UpgradeConflictsModal } from './modals/upgrade_conflicts_modal';
 import * as ruleDetailsI18n from '../../../../rule_management/components/rule_details/translations';
 import * as i18n from './translations';
 import { usePrebuiltRulesUpgradeState } from './use_prebuilt_rules_upgrade_state';
@@ -117,6 +118,7 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
     tags: [],
     ruleSource: [],
   });
+  const { addError } = useAppToasts();
 
   const isUpgradingSecurityPackages = useIsUpgradingSecurityPackages();
 
@@ -160,18 +162,22 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
   const shouldConfirmMLJobs = legacyJobsInstalled.length > 0;
   const getRulesWithConflicts = useCallback(
     (ruleIds?: RuleSignatureId[]) => {
-      // If no rules are selected (update all rules case), then check all rules
-      const rulesSelectedForUpgrade = ruleIds ?? Object.keys(rulesUpgradeState);
-      const rulesToUpgrade = rulesSelectedForUpgrade.map((ruleId) => rulesUpgradeState[ruleId]);
+      const rulesToUpgrade =
+        ruleIds?.map((ruleId) => {
+          const rule = rulesUpgradeState[ruleId];
+          invariant(rule, `Rule with ID ${ruleId} not found.`);
+
+          return rule;
+        }) ?? [];
 
       return rulesToUpgrade.filter((rule) => rule.diff.num_fields_with_conflicts > 0);
     },
     [rulesUpgradeState]
   );
 
-  const { mutateAsync: upgradeSpecificRulesRequest } = usePerformUpgradeSpecificRules(
-    isPrebuiltRulesCustomizationEnabled
-  );
+  const { mutateAsync: upgradeSpecificRulesRequest } = usePerformUpgradeSpecificRules({
+    pickVersion: isPrebuiltRulesCustomizationEnabled ? 'MERGED' : 'TARGET',
+  });
 
   const upgradeRules = useCallback(
     async (ruleIds: RuleSignatureId[]) => {
@@ -200,11 +206,13 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
         }
 
         // Prepare payload for upgrade with rules with no conflicts
-        const ruleIdsWithConflicts = rulesWithConflicts.map((rule) => rule.rule_id);
+        const ruleIdsWithConflicts = new Set(rulesWithConflicts.map((rule) => rule.rule_id));
         const rulesToUpgradeWithNoConflicts = isPrebuiltRulesCustomizationEnabled
-          ? rulesToUpgrade.filter((rule) => !ruleIdsWithConflicts.includes(rule.rule_id))
+          ? rulesToUpgrade.filter((rule) => !ruleIdsWithConflicts.has(rule.rule_id))
           : rulesToUpgrade;
         await upgradeSpecificRulesRequest(rulesToUpgradeWithNoConflicts);
+      } catch (err) {
+        addError(err, { title: i18n.UPDATE_ERROR });
       } finally {
         setLoadingRules((prev) =>
           prev.filter((id) => !rulesToUpgrade.some((r) => r.rule_id === id))
@@ -219,6 +227,7 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
       rulesUpgradeState,
       upgradeSpecificRulesRequest,
       isPrebuiltRulesCustomizationEnabled,
+      addError,
     ]
   );
 
