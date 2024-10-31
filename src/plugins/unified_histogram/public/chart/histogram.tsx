@@ -130,10 +130,7 @@ export function Histogram({
         | undefined;
       const response = json?.rawResponse;
 
-      // The response can have `response?._shards.failed` but we should still be able to show hits number
-      // TODO: show shards warnings as a badge next to the total hits number
-
-      if (requestFailed || response?._shards?.failed) {
+      if (requestFailed) {
         onTotalHitsChange?.(UnifiedHistogramFetchStatus.error, undefined);
         onChartLoad?.({ adapters: adapters ?? {} });
         return;
@@ -141,6 +138,12 @@ export function Histogram({
 
       const adapterTables = adapters?.tables?.tables;
       const totalHits = computeTotalHits(hasLensSuggestions, adapterTables, isPlainRecord);
+
+      if (response?._shards?.failed) {
+        onTotalHitsChange?.(UnifiedHistogramFetchStatus.error, totalHits);
+        onChartLoad?.({ adapters: adapters ?? {} });
+        return;
+      }
 
       onTotalHitsChange?.(
         isLoading ? UnifiedHistogramFetchStatus.loading : UnifiedHistogramFetchStatus.complete,

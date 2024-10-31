@@ -126,20 +126,30 @@ describe('hits counter', function () {
     expect(findTestSubject(component, 'discoverQueryTotalHits').text()).toBe('≥3 resultsInfo');
     expect(component.text()).toBe('≥3 resultsInfo');
 
+    stateContainer.dataState.data$.totalHits$ = new BehaviorSubject({
+      fetchStatus: FetchStatus.ERROR,
+      result: 200,
+    }) as DataTotalHits$;
+    stateContainer.dataState.data$.documents$ = getDocuments$(2);
+
     const component2 = mountWithIntl(
       <HitsCounter mode={HitsCounterMode.appended} stateContainer={stateContainer} />
     );
     expect(component2.find('[data-test-subj="discoverQueryHitsPartial"]').length).toBe(1);
-    expect(findTestSubject(component2, 'discoverQueryTotalHits').text()).toBe('≥3Info');
-    expect(component2.text()).toBe(' (≥3Info)');
+    expect(findTestSubject(component2, 'discoverQueryTotalHits').text()).toBe('≥200Info');
+    expect(component2.text()).toBe(' (≥200Info)');
 
-    stateContainer.dataState.data$.documents$ = getDocuments$(0);
+    stateContainer.dataState.data$.totalHits$ = new BehaviorSubject({
+      fetchStatus: FetchStatus.ERROR,
+      result: 0,
+    }) as DataTotalHits$;
+    stateContainer.dataState.data$.documents$ = getDocuments$(1);
 
     const component3 = mountWithIntl(
       <HitsCounter mode={HitsCounterMode.appended} stateContainer={stateContainer} />
     );
     expect(component3.find('[data-test-subj="discoverQueryHitsPartial"]').length).toBe(1);
-    expect(findTestSubject(component3, 'discoverQueryTotalHits').text()).toBe('≥0Info');
-    expect(component3.text()).toBe(' (≥0Info)');
+    expect(findTestSubject(component3, 'discoverQueryTotalHits').text()).toBe('≥1Info');
+    expect(component3.text()).toBe(' (≥1Info)');
   });
 });

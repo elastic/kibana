@@ -43,8 +43,10 @@ export const HitsCounter: React.FC<HitsCounterProps> = ({ mode, stateContainer }
   if (
     hitsStatus === FetchStatus.ERROR &&
     documentsState.fetchStatus === FetchStatus.COMPLETE &&
-    documentsCount > 0
+    documentsCount > (hitsTotal ?? 0)
   ) {
+    // if histogram returned partial results and which are less than the fetched documents count =>
+    // override hitsTotal with the fetched documents count
     hitsTotal = documentsCount;
   }
 
