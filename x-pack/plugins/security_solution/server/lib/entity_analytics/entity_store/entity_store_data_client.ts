@@ -163,7 +163,6 @@ export class EntityStoreDataClient {
     });
     this.log('debug', entityType, `Initialized engine saved object`);
 
-
     this.asyncSetup(
       entityType,
       fieldHistoryLength,
@@ -267,7 +266,6 @@ export class EntityStoreDataClient {
       });
       this.log(`debug`, entityType, `Started entity store field retention enrich task`);
       this.log(`info`, entityType, `Entity store initialized`);
-
 
       const setupEndTime = moment().utc().toISOString();
       const duration = moment(setupEndTime).diff(moment(setupStartTime), 'seconds');
