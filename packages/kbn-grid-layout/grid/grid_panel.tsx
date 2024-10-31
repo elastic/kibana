@@ -61,7 +61,7 @@ export const GridPanel = forwardRef<
           gridLayoutStateManager.gridLayout$,
           gridLayoutStateManager.runtimeSettings$,
         ])
-          // .pipe(skip(1)) // skip the first emit because the `initialStyles` will take care of it
+          .pipe(skip(1)) // skip the first emit because the `initialStyles` will take care of it
           .subscribe(([activePanel, gridLayout, runtimeSettings]) => {
             const ref = gridLayoutStateManager.panelRefs.current[rowIndex][panelId];
             const panel = gridLayout[rowIndex].panels[panelId];

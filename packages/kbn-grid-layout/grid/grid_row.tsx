@@ -122,7 +122,6 @@ export const GridRow = forwardRef<
          */
         const rowStateSubscription = gridLayoutStateManager.gridLayout$
           .pipe(
-            skip(1), // we are initializing all row state with a value, so skip the initial emit
             map((gridLayout) => {
               return {
                 title: gridLayout[rowIndex].title,
