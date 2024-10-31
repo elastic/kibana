@@ -93,6 +93,7 @@ export type {
   IRouter,
   RouteRegistrar,
   RouterRoute,
+  RouterDeprecatedRouteDetails,
   IKibanaSocket,
   KibanaErrorResponseFactory,
   KibanaRedirectionResponseFactory,
@@ -171,6 +172,7 @@ export type {
   VersionedRouter,
   VersionedRouteCustomResponseBodyValidation,
   VersionedResponseBodyValidation,
+  VersionedRouterRoute,
 } from './src/versioning';
 
 export type { IStaticAssets } from './src/static_assets';
