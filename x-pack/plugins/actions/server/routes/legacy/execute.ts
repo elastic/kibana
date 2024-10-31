@@ -37,8 +37,16 @@ export const executeActionRoute = (
       options: {
         access: 'public',
         summary: `Run a connector`,
-        // @ts-expect-error TODO(https://github.com/elastic/kibana/issues/196095): Replace {RouteDeprecationInfo}
-        deprecated: true,
+        deprecated: {
+          documentationUrl:
+            'https://www.elastic.co/docs/api/doc/kibana/v8/operation/operation-legacyrunconnector',
+          severity: 'warning',
+          reason: {
+            type: 'migrate',
+            newApiPath: `${BASE_ACTION_API_PATH}/connector/{id}/_execute`,
+            newApiMethod: 'POST',
+          },
+        },
         tags: ['oas-tag:connectors'],
       },
       validate: {

@@ -38,8 +38,16 @@ export const createActionRoute = (
         access: 'public',
         summary: `Create a connector`,
         tags: ['oas-tag:connectors'],
-        // @ts-expect-error TODO(https://github.com/elastic/kibana/issues/196095): Replace {RouteDeprecationInfo}
-        deprecated: true,
+        deprecated: {
+          documentationUrl:
+            'https://www.elastic.co/docs/api/doc/kibana/v8/operation/operation-legacycreateconnector',
+          severity: 'warning',
+          reason: {
+            type: 'migrate',
+            newApiPath: `${BASE_ACTION_API_PATH}/connector/{id?}`,
+            newApiMethod: 'POST',
+          },
+        },
       },
       validate: {
         request: {

@@ -37,8 +37,16 @@ export const updateActionRoute = (
       options: {
         access: 'public',
         summary: `Update a connector`,
-        // @ts-expect-error TODO(https://github.com/elastic/kibana/issues/196095): Replace {RouteDeprecationInfo}
-        deprecated: true,
+        deprecated: {
+          documentationUrl:
+            'https://www.elastic.co/docs/api/doc/kibana/v8/operation/operation-legacyupdateconnector',
+          severity: 'warning',
+          reason: {
+            type: 'migrate',
+            newApiPath: `${BASE_ACTION_API_PATH}/connector/{id}`,
+            newApiMethod: 'PUT',
+          },
+        },
         tags: ['oas-tag:connectors'],
       },
       validate: {
