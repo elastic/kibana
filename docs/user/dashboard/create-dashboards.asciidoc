@@ -163,7 +163,7 @@ image:https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt64206db263
 
 . In *View* mode, click *Duplicate* in the toolbar.
 
-. In the *Duplicate Dashboard* window, enter a title and optional description and tags.
+. In the *Duplicate dashboard* window, enter a title and optional description and tags.
 
 . Click *Save*.
 
