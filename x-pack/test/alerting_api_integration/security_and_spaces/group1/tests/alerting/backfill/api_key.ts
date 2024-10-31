@@ -254,9 +254,13 @@ export default function apiKeyBackfillTests({ getService }: FtrProviderContext) 
 
       // wait for all the api_key_pending_invalidation SOs to be deleted
       await retry.try(async () => {
-        const results = await getApiKeysPendingInvalidation();
-        expect(results.length).to.eql(0);
-        return results;
+        try {
+          // throws when not found
+          await getAdHocRunSO(backfillId);
+          throw new Error('should have thrown');
+        } catch (e) {
+          expect(e.message).not.to.eql('should have thrown');
+        }
       });
 
       // invoke the invalidate task
