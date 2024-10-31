@@ -204,7 +204,6 @@ export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab
           />
         ),
       },
-      // FIXME: add feature flag
       {
         id: CASE_VIEW_PAGE_TABS.OBSERVABLES,
         name: OBSERVABLES_TAB,
@@ -217,7 +216,6 @@ export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab
           />
         ),
       },
-      // FIXME: add feature flag
       {
         id: CASE_VIEW_PAGE_TABS.SIMILAR_CASES,
         name: SIMILAR_CASES_TAB,
