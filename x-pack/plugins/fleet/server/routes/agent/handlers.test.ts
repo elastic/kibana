@@ -41,6 +41,7 @@ describe('Handlers', () => {
       const request = {
         query: {
           policyId: 'policy-id',
+          kuery: 'kuery',
           policyIds: item.requested,
         },
       };
@@ -59,7 +60,7 @@ describe('Handlers', () => {
         expect.anything(),
         expect.anything(),
         'policy-id',
-        undefined,
+        'kuery',
         undefined,
         item.called
       );

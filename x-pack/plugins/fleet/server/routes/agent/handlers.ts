@@ -310,7 +310,7 @@ export const getAgentStatusForAgentPolicyHandler: FleetRequestHandler<
       esClient,
       soClient,
       request.query.policyId,
-      undefined,
+      request.query.kuery,
       coreContext.savedObjects.client.getCurrentNamespace(),
       parsePolicyIds(request.query.policyIds)
     );

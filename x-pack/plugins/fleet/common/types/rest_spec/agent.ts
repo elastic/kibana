@@ -197,6 +197,7 @@ export interface PostBulkUpdateAgentTagsRequest {
 
 export interface GetAgentStatusRequest {
   query: {
+    kuery?: string;
     policyId?: string;
   };
 }
