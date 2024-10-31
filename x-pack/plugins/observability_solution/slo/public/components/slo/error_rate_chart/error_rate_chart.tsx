@@ -21,6 +21,7 @@ interface Props {
   alertTimeRange?: TimeRange;
   annotations?: AlertAnnotation[];
   onBrushed?: (timeBounds: TimeBounds) => void;
+  variant?: 'success' | 'danger';
 }
 
 export function ErrorRateChart({
@@ -30,6 +31,7 @@ export function ErrorRateChart({
   alertTimeRange,
   annotations,
   onBrushed,
+  variant = 'success',
 }: Props) {
   const {
     lens: { EmbeddableComponent },
@@ -40,6 +42,7 @@ export function ErrorRateChart({
     alertTimeRange,
     dataTimeRange,
     annotations,
+    variant,
   });
   const delayInSeconds = getDelayInSecondsFromSLO(slo);
 

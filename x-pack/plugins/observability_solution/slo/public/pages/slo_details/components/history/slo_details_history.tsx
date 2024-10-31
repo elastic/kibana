@@ -94,7 +94,12 @@ export function SLODetailsHistory({ slo, isAutoRefreshing, selectedTabId }: Prop
               </h2>
             </EuiTitle>
           </EuiFlexItem>
-          <ErrorRateChart slo={slo} dataTimeRange={range} onBrushed={onBrushed} />
+          <ErrorRateChart
+            slo={slo}
+            dataTimeRange={range}
+            onBrushed={onBrushed}
+            variant={['VIOLATED', 'DEGRADING'].includes(slo.summary.status) ? 'danger' : 'success'}
+          />
         </EuiFlexGroup>
       </EuiPanel>
 

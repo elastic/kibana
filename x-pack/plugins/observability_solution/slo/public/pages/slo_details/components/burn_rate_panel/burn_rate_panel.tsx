@@ -14,6 +14,7 @@ import { ErrorRateChart } from '../../../../components/slo/error_rate_chart';
 import { useFetchSloBurnRates } from '../../../../hooks/use_fetch_slo_burn_rates';
 import { BurnRateWindow, useFetchBurnRateWindows } from '../../hooks/use_fetch_burn_rate_windows';
 import { BurnRateStatus } from './burn_rate_status';
+import { getStatus } from './utils';
 
 interface Props {
   slo: SLOWithSummaryResponse;
@@ -47,6 +48,8 @@ export function BurnRatePanel({ slo, isAutoRefreshing }: Props) {
   const shortWindowbBurnRate =
     data?.burnRates.find((curr) => curr.name === shortWindowName(selectedWindow.name))?.burnRate ??
     0;
+
+  const currentStatus = getStatus(threshold, longWindowBurnRate, shortWindowbBurnRate);
 
   return (
     <EuiPanel paddingSize="m" color="transparent" hasBorder data-test-subj="burnRatePanel">
@@ -97,6 +100,7 @@ export function BurnRatePanel({ slo, isAutoRefreshing }: Props) {
                 to: new Date(),
               }}
               threshold={threshold}
+              variant={currentStatus === 'BREACHED' ? 'danger' : 'success'}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

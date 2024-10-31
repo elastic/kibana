@@ -31,6 +31,7 @@ interface Props {
   dataTimeRange: TimeRange;
   alertTimeRange?: TimeRange;
   annotations?: AlertAnnotation[];
+  variant: 'success' | 'danger';
 }
 
 export function useLensDefinition({
@@ -39,8 +40,11 @@ export function useLensDefinition({
   dataTimeRange,
   alertTimeRange,
   annotations,
+  variant,
 }: Props): TypedLensByValueInput['attributes'] {
   const { euiTheme } = useEuiTheme();
+
+  const lineColor = variant === 'danger' ? euiTheme.colors.danger : euiTheme.colors.success;
 
   const interval = getLensDefinitionInterval(dataTimeRange, slo);
 
@@ -92,7 +96,7 @@ export function useLensDefinition({
             yConfig: [
               {
                 forAccessor: '9f69a7b0-34b9-4b76-9ff7-26dc1a06ec14',
-                color: euiTheme.colors.primary,
+                color: lineColor,
               },
             ],
           },

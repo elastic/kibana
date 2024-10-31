@@ -18,6 +18,7 @@ import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { BurnRateWindow } from '../../hooks/use_fetch_burn_rate_windows';
+import { getStatus } from './utils';
 
 export interface BurnRateParams {
   isLoading: boolean;
@@ -26,7 +27,7 @@ export interface BurnRateParams {
   shortWindowBurnRate: number;
 }
 
-type Status = 'BREACHED' | 'RECOVERING' | 'INCREASING' | 'ACCEPTABLE';
+export type Status = 'BREACHED' | 'RECOVERING' | 'INCREASING' | 'ACCEPTABLE';
 
 export function BurnRateStatus({
   selectedWindow,
@@ -82,25 +83,6 @@ export function BurnRateStatus({
       </EuiFlexGroup>
     </EuiPanel>
   );
-}
-
-function getStatus(
-  threshold: number,
-  longWindowBurnRate: number,
-  shortWindowBurnRate: number
-): Status {
-  const isLongWindowBurnRateAboveThreshold = longWindowBurnRate > threshold;
-  const isShortWindowBurnRateAboveThreshold = shortWindowBurnRate > threshold;
-  const areBothBurnRatesAboveThreshold =
-    isLongWindowBurnRateAboveThreshold && isShortWindowBurnRateAboveThreshold;
-
-  return areBothBurnRatesAboveThreshold
-    ? 'BREACHED'
-    : isLongWindowBurnRateAboveThreshold && !isShortWindowBurnRateAboveThreshold
-    ? 'RECOVERING'
-    : !isLongWindowBurnRateAboveThreshold && isShortWindowBurnRateAboveThreshold
-    ? 'INCREASING'
-    : 'ACCEPTABLE';
 }
 
 function getColor(status: Status) {
