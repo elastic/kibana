@@ -25,6 +25,7 @@ import { buildResponse } from '../../lib/build_response';
 import {
   appendAssistantMessageToConversation,
   createConversationWithUserInput,
+  getIsKnowledgeBaseInstalled,
   langChainExecute,
   performChecks,
 } from '../helpers';
@@ -219,6 +220,14 @@ export const chatCompleteRoute = (
           });
         } catch (err) {
           const error = transformError(err as Error);
+          const v2KnowledgeBaseEnabled =
+            assistantContext.getRegisteredFeatures(pluginName).assistantKnowledgeBaseByDefault;
+          const kbDataClient =
+            (await assistantContext.getAIAssistantKnowledgeBaseDataClient({
+              v2KnowledgeBaseEnabled,
+            })) ?? undefined;
+          const isKnowledgeBaseInstalled = await getIsKnowledgeBaseInstalled(kbDataClient);
+
           telemetry?.reportEvent(INVOKE_ASSISTANT_ERROR_EVENT.eventType, {
             actionTypeId: actionTypeId ?? '',
             model: request.body.model,
@@ -226,6 +235,7 @@ export const chatCompleteRoute = (
             // TODO rm actionTypeId check when llmClass for bedrock streaming is implemented
             // tracked here: https://github.com/elastic/security-team/issues/7363
             assistantStreamingEnabled: request.body.isStream ?? false,
+            isEnabledKnowledgeBase: isKnowledgeBaseInstalled,
           });
           return assistantResponse.error({
             body: error.message,
