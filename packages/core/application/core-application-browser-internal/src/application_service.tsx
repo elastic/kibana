@@ -409,6 +409,14 @@ export class ApplicationService {
     if (currentAppId === undefined) {
       return true;
     }
+
+    if (
+      currentAppId === 'dashboards' &&
+      (nextAppId === 'discover' || nextAppId === 'visualize' || nextAppId === 'lens')
+    ) {
+      return true;
+    }
+
     const action = getLeaveAction(
       this.appInternalStates.get(currentAppId)?.leaveHandler,
       nextAppId
