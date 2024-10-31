@@ -23,10 +23,27 @@ image::images/solution-view-obs.png[Example of observability solution view]
 _The Observability solution view and its Home page._
 
 [discrete]
-=== Developer Tools Console redesign
-We're excited to introduce a number of improvements to the overall user experience on one of our most popular features: **Console**. If you're new to Console, you will be welcomed by an onboarding tour that will help you get started quickly with your first requests. And if you're already a regular Console user, you will notice a variety of new features, including the ability to copy outputs to the clipboard, import and export request files, enjoy improved responsiveness, and other quality of life improvements. 
+=== Discover and ES|QL
 
-image::images/monaco-console.png[Console's redesign featuring the Monaco editor]
+[discrete]
+==== Contextual Data presentation
+
+In this release, Discover introduces enhanced contextual data presentation. Previously, you needed to manually select relevant fields and set up your workspace before diving into data exploration. Now, Discover automatically tailors the user experience based on the data being explored, powered by a scalable contextual architecture. For example, when analyzing logs, you'll see a *log.level* field rendered directly in the table, a custom Logs overview in the document viewer, and log.level indicators on individual rows. 
+
+image::images/discover-log-level.png[Log level badge displaying in the Discover grid]
+
+[discrete]
+==== Recommended ES|QL queries
+
+Writing ES|QL queries just got easier. Many users face challenges when authoring queries, and even more so when unfamiliar with the syntax or data structure. This can lead to inefficiencies in data analysis and visualization. We want to reduce the time it takes to create queries and to lower the learning curve for both new and existing users by suggesting recommended queries within the ES|QL Help menu and from the auto-complete.
+
+image::images/esql-suggestions.png[A list of suggestions to get started with an ES|QL query, width=30%]
+_Recommended ES|QL queries from the ES|QL help menu_
+
+image::images/esql-autocomplete-suggestions.png[A list of suggestions in the autocomplete menu of an ES|QL query, width=50%]
+_Recommended ES|QL queries from auto-complete suggestions_
+
+
 
 [discrete]
 === Dashboards
@@ -64,31 +81,39 @@ We've received a lot of feedback asking for more flexibility to customize the ap
 image::images/metric-customization.png[Customization options for a metric panel]
 
 
-[discrete]
-=== Discover and ES|QL
-
-[discrete]
-==== Contextual Data presentation
-
-In this release, Discover introduces enhanced contextual data presentation. Previously, you needed to manually select relevant fields and set up your workspace before diving into data exploration. Now, Discover automatically tailors the user experience based on the data being explored, powered by a scalable contextual architecture. For example, when analyzing logs, you'll see a *log.level* field rendered directly in the table, a custom Logs overview in the document viewer, and log.level indicators on individual rows. 
-
-image::images/discover-log-level.png[Log level badge displaying in the Discover grid]
-
-[discrete]
-==== Recommended ES|QL queries
-
-Writing ES|QL queries just got easier. Many users face challenges when authoring queries, and even more so when unfamiliar with the syntax or data structure. This can lead to inefficiencies in data analysis and visualization. We want to reduce the time it takes to create queries and to lower the learning curve for both new and existing users by suggesting recommended queries within the ES|QL Help menu and from the auto-complete.
-
-image::images/esql-suggestions.png[A list of suggestions to get started with an ES|QL query, width=30%]
-_Recommended ES|QL queries from the ES|QL help menu_
-
-image::images/esql-autocomplete-suggestions.png[A list of suggestions in the autocomplete menu of an ES|QL query, width=50%]
-_Recommended ES|QL queries from auto-complete suggestions_
-
 
 //[discrete]
 //=== Alerting, cases, and connectors
 
+
+[discrete]
+=== Managing {kib} and data
+
+[discrete]
+==== Edit space access from the space settings
+As an admin, you can now assign roles to and edit role permissions on a given space directly from the settings of that space.
+
+Prior to 8.16, you could only do this from the role settings, which was counterintuitive.
+
+image::space-settings.png[Editing space settings with new options]
+
+[discrete]
+==== New IP Location processor
+Enhancing location information based on IP addresses just got easier with the new IP Location processor. In addition to the existing free GeoLite offerings from MaxMind, we have integrated with MaxMind’s premium GeoIP databases for users who have licensed MaxMind’s products. If you're an Enterprise Elastic customer, you now have an additional third-party product, IP Info, available for use as well. These additional data sources provide improved options for enriching data with location information associated with IP addresses to improve telemetry and insights. To utilize these features beyond the free MaxMind GeoIP database, you will need to have licensed premium MaxMind products and/or the IP Info database. 
+
+image::images/ip-location-processor.png[The IP Location processor]
+
+[discrete]
+==== File uploader PDF support
+The file uploader provides a quick way to upload data and start using Elastic. In 8.16, we are improving it to allow you to upload data from PDF files.
+
+image:https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blte8f0b295330b7e68/67222fb0ca492a5044b51bd8/file_uploader_pdf.gif[File uploader with PDF support]
+
+[discrete]
+=== Developer Tools Console redesign
+We're excited to introduce a number of improvements to the overall user experience on one of our most popular features: **Console**. If you're new to Console, you will be welcomed by an onboarding tour that will help you get started quickly with your first requests. And if you're already a regular Console user, you will notice a variety of new features, including the ability to copy outputs to the clipboard, import and export request files, enjoy improved responsiveness, and other quality of life improvements. 
+
+image::images/monaco-console.png[Console's redesign featuring the Monaco editor]
 
 [discrete]
 === Machine Learning
@@ -116,30 +141,4 @@ In addition, from 8.16 you can choose between a word or sequence-based chunking 
 In 8.16, we are introducing support for DST changes in Anomaly Detection. Set up a DST calendar by selecting the right timezone and apply it to your anomaly detection jobs individually or in groups. This feature eliminates any false positives that you may have experienced previously due to Daylight Saving Time changes, and works without the need for your intervention for many years ahead.
 
 image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt5fb82f18cde26710/67222fb086339971144a31e5/daylight_savings.gif[DST support in Anomaly Detection]
-
-
-[discrete]
-=== Managing {kib} and data
-
-[discrete]
-==== Edit space access from the space settings
-As an admin, you can now assign roles to and edit role permissions on a given space directly from the settings of that space.
-
-Prior to 8.16, you could only do this from the role settings, which was counterintuitive.
-
-image::space-settings.png[Editing space settings with new options]
-
-[discrete]
-==== New IP Location processor
-Enhancing location information based on IP addresses just got easier with the new IP Location processor. In addition to the existing free GeoLite offerings from MaxMind, we have integrated with MaxMind’s premium GeoIP databases for users who have licensed MaxMind’s products. If you're an Enterprise Elastic customer, you now have an additional third-party product, IP Info, available for use as well. These additional data sources provide improved options for enriching data with location information associated with IP addresses to improve telemetry and insights. To utilize these features beyond the free MaxMind GeoIP database, you will need to have licensed premium MaxMind products and/or the IP Info database. 
-
-image::images/ip-location-processor.png[The IP Location processor]
-
-[discrete]
-==== File uploader PDF support
-The file uploader provides a quick way to upload data and start using Elastic. In 8.16, we are improving it to allow you to upload data from PDF files.
-
-image:https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blte8f0b295330b7e68/67222fb0ca492a5044b51bd8/file_uploader_pdf.gif[File uploader with PDF support]
-
-
 
