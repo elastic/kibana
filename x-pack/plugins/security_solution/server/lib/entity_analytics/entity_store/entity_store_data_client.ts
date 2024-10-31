@@ -280,7 +280,14 @@ export class EntityStoreDataClient {
         error: err.message,
       });
 
-      await this.engineClient.update(entityType, ENGINE_STATUS.ERROR);
+      await this.engineClient.update(entityType, {
+        status: ENGINE_STATUS.ERROR,
+        error: {
+          message: err.message,
+          stack: err.stack,
+          action: 'init',
+        },
+      });
 
       await this.delete(entityType, taskManager, { deleteData: true, deleteEngine: false });
     }
@@ -319,7 +326,7 @@ export class EntityStoreDataClient {
     const fullEntityDefinition = await this.getExistingEntityDefinition(entityType);
     await this.entityClient.startEntityDefinition(fullEntityDefinition);
 
-    return this.engineClient.update(entityType, ENGINE_STATUS.STARTED);
+    return this.engineClient.updateStatus(entityType, ENGINE_STATUS.STARTED);
   }
 
   public async stop(entityType: EntityType) {
@@ -339,7 +346,7 @@ export class EntityStoreDataClient {
     const fullEntityDefinition = await this.getExistingEntityDefinition(entityType);
     await this.entityClient.stopEntityDefinition(fullEntityDefinition);
 
-    return this.engineClient.update(entityType, ENGINE_STATUS.STOPPED);
+    return this.engineClient.updateStatus(entityType, ENGINE_STATUS.STOPPED);
   }
 
   public async get(entityType: EntityType) {
@@ -510,7 +517,7 @@ export class EntityStoreDataClient {
         }
 
         // Update savedObject status
-        await this.engineClient.update(engine.type, ENGINE_STATUS.UPDATING);
+        await this.engineClient.updateStatus(engine.type, ENGINE_STATUS.UPDATING);
 
         try {
           // Update entity manager definition
@@ -523,12 +530,12 @@ export class EntityStoreDataClient {
           });
 
           // Restore the savedObject status and set the new index pattern
-          await this.engineClient.update(engine.type, originalStatus);
+          await this.engineClient.updateStatus(engine.type, originalStatus);
 
           return { type: engine.type, changes: { indexPatterns } };
         } catch (error) {
           // Rollback the engine initial status when the update fails
-          await this.engineClient.update(engine.type, originalStatus);
+          await this.engineClient.updateStatus(engine.type, originalStatus);
 
           throw error;
         }
