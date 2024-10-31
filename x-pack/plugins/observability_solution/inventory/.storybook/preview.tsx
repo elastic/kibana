@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { setGlobalConfig } from '@storybook/testing-react';
-import * as globalStorybookConfig from './preview';
+import { addDecorator } from '@storybook/react';
+import * as jest from 'jest-mock';
+import { KibanaReactStorybookDecorator } from './storybook_decorator';
 
-setGlobalConfig(globalStorybookConfig);
+// @ts-ignore
+window.jest = jest;
+
+addDecorator(KibanaReactStorybookDecorator);
