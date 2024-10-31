@@ -25,7 +25,7 @@ import {
   type DataFrameAnalyticsId,
   type DataFrameAnalyticsStats,
 } from '@kbn/ml-data-frame-analytics-utils';
-import { ML_PAGES } from '@kbn/ml-common-types/locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { DFA_SAVED_OBJECT_TYPE } from '@kbn/ml-common-types/saved_objects';
 import type { DataFrameAnalyticsListRow } from './common';
 import {
@@ -37,7 +37,6 @@ import {
 } from './common';
 import { useActions } from './use_actions';
 import { useMlLink, useMlKibana } from '../../../../../contexts/kibana';
-import { ML_PAGES } from '../../../../../../../common/constants/locator';
 import { MLSavedObjectsSpacesList } from '../../../../../components/ml_saved_objects_spaces_list';
 import { useCanManageSpacesAndSavedObjects } from '../../../../../hooks/use_spaces';
 
