@@ -39,7 +39,7 @@ import useObservable from 'react-use/lib/useObservable';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import { useEuiMaxBreakpoint } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { ML_PAGES } from '@kbn/ml-common-types/locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { ML_ELSER_CALLOUT_DISMISSED } from '@kbn/ml-common-types/storage';
 import {
   type DFAModelItem,

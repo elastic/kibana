@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import type { estypes } from '@elastic/elasticsearch';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
-import { EVENT_RATE_FIELD_ID } from '@kbn/ml-anomaly-utils';
+import { EVENT_RATE_FIELD_ID } from '@kbn/ml-anomaly-utils/fields_constants';
 import {
   ANALYSIS_CONFIG_TYPE,
   BASIC_NUMERICAL_TYPES,

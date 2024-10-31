@@ -33,7 +33,6 @@ export type {
 } from './embeddables/types';
 
 // export { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from './embeddables/constants';
-// export { CONTROLLED_BY_SWIM_LANE_FILTER } from './ui_actions/constants';
 
 // export type { MlLocator } from './locator/ml_locator';
 // export { useMlManagementHref } from './locator/use_ml_management_href';

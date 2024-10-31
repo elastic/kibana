@@ -19,7 +19,8 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
-import { ML_APP_LOCATOR, ML_PAGES } from '@kbn/ml-common-types/locator';
+import { ML_APP_LOCATOR } from '@kbn/ml-common-types/locator_app_locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 
 import { PageTitle } from '../../../../components/page_title';
 import { useMlKibana, useMlManagementLocator } from '../../../../contexts/kibana';

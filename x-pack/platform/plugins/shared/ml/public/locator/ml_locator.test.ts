@@ -6,7 +6,7 @@
  */
 
 import { MlLocatorDefinition } from './ml_locator';
-import { ML_PAGES } from '@kbn/ml-common-types/locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { ANALYSIS_CONFIG_TYPE } from '@kbn/ml-data-frame-analytics-utils';
 
 describe('ML locator', () => {
