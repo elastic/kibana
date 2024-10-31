@@ -7,7 +7,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { EuiLink } from '@elastic/eui';
-import { ML_PAGES } from '@kbn/ml-common-types/locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import type { AnomalyDetectionQueryState } from '@kbn/ml-common-types/locator';
 import { useMlLocator } from '../../../../contexts/kibana';
 // @ts-ignore
