@@ -76,6 +76,8 @@
     "@kbn/observability-ai-assistant-plugin",
     "@kbn/apm-utils",
     "@kbn/ml-field-stats-flyout",
+    "@kbn/shared-ux-router",
+    "@kbn/ml-common-types",
   ],
   "exclude": [
     "target/**/*",

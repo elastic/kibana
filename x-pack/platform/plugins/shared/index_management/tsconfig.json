@@ -59,6 +59,9 @@
     "@kbn/streams-plugin",
     "@kbn/streams-app-plugin",
     "@kbn/shared-ux-link-redirect-app",
+    "@kbn/ml-common-types",
   ],
-  "exclude": ["target/**/*"]
+  "exclude": [
+    "target/**/*"
+  ]
 }

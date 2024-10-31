@@ -20,7 +20,7 @@ import { usePageUrlState } from '@kbn/ml-url-state';
 import type { ListingPageUrlState } from '@kbn/ml-url-state';
 import { useTimefilter, useTimeRangeUpdates } from '@kbn/ml-date-picker';
 import { ML_NOTIFICATIONS_MESSAGE_LEVEL } from '@kbn/ml-common-types/notifications';
-import { ML_PAGES } from '@kbn/ml-common-types/locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import type {
   MlNotificationMessageLevel,
   NotificationItem,
