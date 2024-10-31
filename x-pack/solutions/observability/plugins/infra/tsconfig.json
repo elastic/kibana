@@ -120,7 +120,9 @@
     "@kbn/presentation-containers",
     "@kbn/object-utils",
     "@kbn/coloring",
-    "@kbn/core-saved-objects-server"
+    "@kbn/core-saved-objects-server",
+    "@kbn/ml-common-types",
+    "@kbn/ml-common-constants"
   ],
   "exclude": ["target/**/*"]
 }

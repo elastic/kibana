@@ -141,6 +141,7 @@
     "@kbn/apm-sources-access-plugin",
     "@kbn/presentation-containers",
     "@kbn/object-utils",
+    "@kbn/ml-common-types",
   ],
   "exclude": ["target/**/*"]
 }
