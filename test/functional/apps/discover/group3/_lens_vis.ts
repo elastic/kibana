@@ -568,16 +568,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.existOrFail('partitionVisChart');
       expect(await discover.getVisContextSuggestionType()).to.be('lensSuggestion');
 
-      await monacoEditor.setCodeEditorValue(
-        'from logstash-* | stats averageB = avg(bytes) by extension.raw'
-      );
+      // reset to histogram
+      await monacoEditor.setCodeEditorValue('from logstash-*');
       await testSubjects.click('querySubmitButton');
       await header.waitUntilLoadingHasFinished();
       await discover.waitUntilSearchingHasFinished();
 
-      // type stays the same as the columns remain the same
-      expect(await getCurrentVisTitle()).to.be('Treemap');
-      expect(await discover.getVisContextSuggestionType()).to.be('lensSuggestion');
+      expect(await getCurrentVisTitle()).to.be('Bar');
+      expect(await discover.getVisContextSuggestionType()).to.be('histogramForESQL');
 
       await testSubjects.existOrFail('unsavedChangesBadge');
 
