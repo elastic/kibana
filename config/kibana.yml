@@ -1,13 +1,3 @@
-csp.strict: false
-xpack.security.encryptionKey: 've4Vohnu oa0Fu9ae Eethee8c oDieg4do Nohrah1u ao9Hu2oh Aeb4Ieyi Aew1aegi'
-xpack.encryptedSavedObjects.encryptionKey: 'Shah7nai Eew6izai Eir7OoW0 Gewi2ief eiSh8woo shoogh7E Quae6hal ce6Oumah'
-
-xpack.fleet.internal.registry.kibanaVersionCheckEnabled: false
-
-elasticsearch:
-  username: 'kibana_system'
-  password: 'changeme'
-  hosts: 'http://localhost:9200'
 # For more configuration options see the configuration guide for Kibana in
 # https://www.elastic.co/guide/index.html
 
