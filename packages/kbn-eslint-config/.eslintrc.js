@@ -30,6 +30,7 @@ module.exports = {
     '@kbn/eslint-plugin-i18n',
     'eslint-plugin-depend',
     'prettier',
+    'react-compiler',
   ],
 
   parserOptions: {
@@ -60,6 +61,8 @@ module.exports = {
         endOfLine: 'auto',
       },
     ],
+
+    'react-compiler/react-compiler': 'error',
 
     '@kbn/eslint/module_migration': [
       'error',
