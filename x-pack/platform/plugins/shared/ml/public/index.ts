@@ -40,5 +40,4 @@ export type {
 // export { MlLocatorDefinition } from './locator/ml_locator';
 // export { useMlHref } from './locator/use_ml_href';
 
-// export { MLJobsAwaitingNodeWarning } from './application/components/jobs_awaiting_node_warning/new_job_awaiting_node_shared';
 // export { MlNodeAvailableWarningShared } from './application/components/node_available_warning';
