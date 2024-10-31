@@ -10,14 +10,14 @@ import { MiddlewareAPI } from '@reduxjs/toolkit';
 import { i18n } from '@kbn/i18n';
 import { History } from 'history';
 import { setState, initExisting, initEmpty, LensStoreDeps, LensAppState } from '..';
-import { disableAutoApply, getPreloadedState } from '../lens_slice';
+import { type InitialAppState, disableAutoApply, getPreloadedState } from '../lens_slice';
 import { SharingSavedObjectProps } from '../../types';
 import { getInitialDatasourceId, getInitialDataViewsObject } from '../../utils';
 import { initializeSources } from '../../editor_frame_service/editor_frame';
 import { LensAppServices } from '../../app_plugin/types';
 import { getEditPath, getFullPath, LENS_EMBEDDABLE_TYPE } from '../../../common/constants';
 import { LensDocument } from '../../persistence';
-import { LensRuntimeState, LensSerializedState } from '../../react_embeddable/types';
+import { LensSerializedState } from '../../react_embeddable/types';
 
 interface PersistedDoc {
   doc: LensDocument;
@@ -317,17 +317,7 @@ async function loadFromSavedObject(
 export async function loadInitial(
   store: MiddlewareAPI,
   storeDeps: LensStoreDeps,
-  {
-    redirectCallback,
-    initialInput,
-    history,
-    inlineEditing,
-  }: {
-    redirectCallback?: (savedObjectId?: string) => void;
-    initialInput?: LensRuntimeState;
-    history?: History<unknown>;
-    inlineEditing?: boolean;
-  },
+  { redirectCallback, initialInput, history, inlineEditing }: InitialAppState,
   autoApplyDisabled: boolean
 ) {
   const { lensServices, datasourceMap, initialContext, initialStateFromLocator, visualizationMap } =
