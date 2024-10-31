@@ -171,7 +171,7 @@ describe(
         /* Create a new rule and install it */
         createAndInstallMockedPrebuiltRules([OUTDATED_RULE_1, OUTDATED_RULE_2]);
         /* Modify one of the rule's name to cause a conflict */
-        const patchedRule = patchRule(OUTDATED_RULE_1['security-rule'].rule_id, {
+        patchRule(OUTDATED_RULE_1['security-rule'].rule_id, {
           name: patchedName,
         });
         /* Create a second version of the rule, making it available for update */
