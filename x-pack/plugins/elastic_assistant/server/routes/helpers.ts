@@ -684,8 +684,7 @@ export const getIsKnowledgeBaseInstalled = async (
               kbResource: SECURITY_LABS_RESOURCE,
               query: SECURITY_LABS_LOADED_QUERY,
             })
-          ).length > 0
-        );
+          ).length > 0;
       }
     } catch (e) {
       /* if telemetry related requests fail, fallback to default values */
