@@ -18277,14 +18277,6 @@
           },
           {
             "in": "query",
-            "name": "experimental",
-            "required": false,
-            "schema": {
-              "type": "boolean"
-            }
-          },
-          {
-            "in": "query",
             "name": "include_policy_templates",
             "required": false,
             "schema": {
@@ -20971,7 +20963,7 @@
     "/api/fleet/epm/packages/{pkgName}/{pkgVersion}": {
       "delete": {
         "description": "Delete package",
-        "operationId": "%2Fapi%2Ffleet%2Fepm%2Fpackages%2F%7BpkgName%7D%2F%7BpkgVersion%7D#3",
+        "operationId": "%2Fapi%2Ffleet%2Fepm%2Fpackages%2F%7BpkgName%7D%2F%7BpkgVersion%3F%7D#3",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -21006,7 +20998,7 @@
           {
             "in": "path",
             "name": "pkgVersion",
-            "required": true,
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -21233,7 +21225,7 @@
       },
       "get": {
         "description": "Get package",
-        "operationId": "%2Fapi%2Ffleet%2Fepm%2Fpackages%2F%7BpkgName%7D%2F%7BpkgVersion%7D#0",
+        "operationId": "%2Fapi%2Ffleet%2Fepm%2Fpackages%2F%7BpkgName%7D%2F%7BpkgVersion%3F%7D#0",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -21258,7 +21250,7 @@
           {
             "in": "path",
             "name": "pkgVersion",
-            "required": true,
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -22497,7 +22489,7 @@
       },
       "post": {
         "description": "Install package from registry",
-        "operationId": "%2Fapi%2Ffleet%2Fepm%2Fpackages%2F%7BpkgName%7D%2F%7BpkgVersion%7D#2",
+        "operationId": "%2Fapi%2Ffleet%2Fepm%2Fpackages%2F%7BpkgName%7D%2F%7BpkgVersion%3F%7D#2",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -22532,7 +22524,7 @@
           {
             "in": "path",
             "name": "pkgVersion",
-            "required": true,
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -22792,7 +22784,7 @@
       },
       "put": {
         "description": "Update package settings",
-        "operationId": "%2Fapi%2Ffleet%2Fepm%2Fpackages%2F%7BpkgName%7D%2F%7BpkgVersion%7D#1",
+        "operationId": "%2Fapi%2Ffleet%2Fepm%2Fpackages%2F%7BpkgName%7D%2F%7BpkgVersion%3F%7D#1",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -22827,7 +22819,7 @@
           {
             "in": "path",
             "name": "pkgVersion",
-            "required": true,
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -24262,265 +24254,6 @@
         "tags": [
           "Elastic Package Manager (EPM)"
         ]
-      }
-    },
-    "/api/fleet/epm/packages/{pkgkey}": {
-      "delete": {
-        "operationId": "%2Fapi%2Ffleet%2Fepm%2Fpackages%2F%7Bpkgkey%7D#3",
-        "parameters": [
-          {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
-            "description": "A required header to protect against CSRF attacks",
-            "in": "header",
-            "name": "kbn-xsrf",
-            "required": true,
-            "schema": {
-              "example": "true",
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "pkgkey",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json; Elastic-Api-Version=2023-10-31": {
-              "schema": {
-                "additionalProperties": false,
-                "nullable": true,
-                "properties": {
-                  "force": {
-                    "type": "boolean"
-                  }
-                },
-                "required": [
-                  "force"
-                ],
-                "type": "object"
-              }
-            }
-          }
-        },
-        "responses": {},
-        "summary": "",
-        "tags": []
-      },
-      "get": {
-        "operationId": "%2Fapi%2Ffleet%2Fepm%2Fpackages%2F%7Bpkgkey%7D#0",
-        "parameters": [
-          {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "pkgkey",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "ignoreUnverified",
-            "required": false,
-            "schema": {
-              "type": "boolean"
-            }
-          },
-          {
-            "in": "query",
-            "name": "prerelease",
-            "required": false,
-            "schema": {
-              "type": "boolean"
-            }
-          },
-          {
-            "in": "query",
-            "name": "full",
-            "required": false,
-            "schema": {
-              "type": "boolean"
-            }
-          },
-          {
-            "in": "query",
-            "name": "withMetadata",
-            "required": false,
-            "schema": {
-              "default": false,
-              "type": "boolean"
-            }
-          }
-        ],
-        "responses": {},
-        "summary": "",
-        "tags": []
-      },
-      "post": {
-        "operationId": "%2Fapi%2Ffleet%2Fepm%2Fpackages%2F%7Bpkgkey%7D#2",
-        "parameters": [
-          {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
-            "description": "A required header to protect against CSRF attacks",
-            "in": "header",
-            "name": "kbn-xsrf",
-            "required": true,
-            "schema": {
-              "example": "true",
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "pkgkey",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "prerelease",
-            "required": false,
-            "schema": {
-              "type": "boolean"
-            }
-          },
-          {
-            "in": "query",
-            "name": "ignoreMappingUpdateErrors",
-            "required": false,
-            "schema": {
-              "default": false,
-              "type": "boolean"
-            }
-          },
-          {
-            "in": "query",
-            "name": "skipDataStreamRollover",
-            "required": false,
-            "schema": {
-              "default": false,
-              "type": "boolean"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json; Elastic-Api-Version=2023-10-31": {
-              "schema": {
-                "additionalProperties": false,
-                "nullable": true,
-                "properties": {
-                  "force": {
-                    "type": "boolean"
-                  }
-                },
-                "required": [
-                  "force"
-                ],
-                "type": "object"
-              }
-            }
-          }
-        },
-        "responses": {},
-        "summary": "",
-        "tags": []
-      },
-      "put": {
-        "operationId": "%2Fapi%2Ffleet%2Fepm%2Fpackages%2F%7Bpkgkey%7D#1",
-        "parameters": [
-          {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
-            "description": "A required header to protect against CSRF attacks",
-            "in": "header",
-            "name": "kbn-xsrf",
-            "required": true,
-            "schema": {
-              "example": "true",
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "pkgkey",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json; Elastic-Api-Version=2023-10-31": {
-              "schema": {
-                "additionalProperties": false,
-                "properties": {
-                  "keepPoliciesUpToDate": {
-                    "type": "boolean"
-                  }
-                },
-                "required": [
-                  "keepPoliciesUpToDate"
-                ],
-                "type": "object"
-              }
-            }
-          }
-        },
-        "responses": {},
-        "summary": "",
-        "tags": []
       }
     },
     "/api/fleet/epm/templates/{pkgName}/{pkgVersion}/inputs": {
