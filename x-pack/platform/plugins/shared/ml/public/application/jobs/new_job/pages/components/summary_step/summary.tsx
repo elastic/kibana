@@ -34,7 +34,7 @@ import { DetectorChart } from './components/detector_chart';
 import { JobProgress } from './components/job_progress';
 import { PostSaveOptions } from './components/post_save_options';
 import { StartDatafeedSwitch } from './components/start_datafeed_switch';
-import { NewJobAwaitingNodeWarning } from '../../../../../components/jobs_awaiting_node_warning';
+import { NewJobAwaitingNodeWarning } from '../../../../../components/jobs_awaiting_node_warning/new_job_awaiting_node';
 import { toastNotificationServiceProvider } from '../../../../../services/toast_notification_service';
 import {
   convertToAdvancedJob,

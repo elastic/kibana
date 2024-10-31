@@ -35,7 +35,7 @@ import { StatsBar } from '../../../../../components/stats_bar';
 import { filterAnalytics } from '../../../../common/search_bar_filters';
 import { AnalyticsEmptyPrompt } from '../empty_prompt';
 import { useTableSettings } from './use_table_settings';
-import { JobsAwaitingNodeWarning } from '../../../../../components/jobs_awaiting_node_warning';
+import { JobsAwaitingNodeWarning } from '../../../../../components/jobs_awaiting_node_warning/jobs_awaiting_node_warning';
 import { useRefresh } from '../../../../../routing/use_refresh';
 import { SpaceManagementContextWrapper } from '../../../../../components/space_management_context_wrapper';
 import { DatePicker } from '../../../../../components/ml_page/date_picker';
