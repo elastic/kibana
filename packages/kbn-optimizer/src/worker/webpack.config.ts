@@ -298,15 +298,6 @@ export function getWebpackConfig(
           'src/core/public/styles/core_app/images'
         ),
         vega: Path.resolve(worker.repoRoot, 'node_modules/vega/build-es5/vega.js'),
-        // TODO: remove once https://github.com/xyflow/xyflow/pull/4772 gets released
-        '@xyflow/react/dist/style.css': Path.resolve(
-          worker.repoRoot,
-          'node_modules/@xyflow/react/dist/style.css'
-        ),
-        '@xyflow/react': Path.resolve(
-          worker.repoRoot,
-          'node_modules/@xyflow/react/dist/esm/index.js'
-        ),
       },
     },
 
