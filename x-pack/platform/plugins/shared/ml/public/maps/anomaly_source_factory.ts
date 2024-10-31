@@ -5,16 +5,13 @@
  * 2.0.
  */
 
-import type { StartServicesAccessor } from '@kbn/core/public';
+import type { CoreStart, StartServicesAccessor } from '@kbn/core/public';
 import { SOURCE_TYPES } from '@kbn/maps-plugin/common';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { SerializableRecord } from '@kbn/utility-types';
 import { ML_APP_LOCATOR } from '@kbn/ml-common-types/locator_app_locator';
-import { HttpService } from '../application/services/http_service';
 import type { MlPluginStart, MlStartDependencies } from '../plugin';
-import type { MlApi } from '../application/services/ml_api_service';
 import { AnomalySource } from './anomaly_source';
-import { mlApiProvider } from '../application/services/ml_api_service';
 
 export class AnomalySourceFactory {
   public readonly type = SOURCE_TYPES.ES_ML_ANOMALIES;
@@ -24,21 +21,18 @@ export class AnomalySourceFactory {
   ) {}
 
   private async getServices(): Promise<{
-    mlResultsService: MlApi['results'];
+    coreStart: CoreStart;
     mlLocator?: LocatorPublic<SerializableRecord>;
   }> {
     const [coreStart, pluginStart] = await this.getStartServices();
     const mlLocator = pluginStart.share.url.locators.get(ML_APP_LOCATOR);
 
-    const httpService = new HttpService(coreStart.http);
-    const mlResultsService = mlApiProvider(httpService).results;
-
-    return { mlResultsService, mlLocator };
+    return { coreStart, mlLocator };
   }
 
   public async create(): Promise<any> {
-    const { mlResultsService, mlLocator } = await this.getServices();
-    AnomalySource.mlResultsService = mlResultsService;
+    const { coreStart, mlLocator } = await this.getServices();
+    AnomalySource.coreStart = coreStart;
     AnomalySource.mlLocator = mlLocator;
     return AnomalySource;
   }
