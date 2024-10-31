@@ -281,10 +281,6 @@ export const OBSERVABLE_TYPES_BUILTIN = [
     key: 'observable-type-domain',
   },
   {
-    label: 'URI',
-    key: 'observable-type-uri',
-  },
-  {
     label: 'Hostname',
     key: 'observable-type-hostname',
   },
