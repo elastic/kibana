@@ -28,11 +28,14 @@ export async function suggest(
   const pos = getPosition(innerText, command);
 
   switch (pos) {
-    case 'expression':
+    case 'expression_without_assignment':
       return [
         ...getFunctionSuggestions({ command: 'stats' }),
         getNewVariableSuggestion(getSuggestedVariableName()),
       ];
+
+    case 'expression_after_assignment':
+      return [...getFunctionSuggestions({ command: 'stats' })];
 
     case 'expression_complete':
       return [

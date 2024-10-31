@@ -12,6 +12,8 @@ import { i18n } from '@kbn/i18n';
 import {
   findPreviousWord,
   getLastNonWhitespaceChar,
+  isAssignment,
+  isAssignmentComplete,
   isOptionItem,
   noCaseCompare,
 } from '../../../shared/helpers';
@@ -23,13 +25,16 @@ import { TIME_SYSTEM_PARAMS, TRIGGER_SUGGESTION_COMMAND } from '../../factories'
 *
 * ```
 * STATS [column1 =] expression1[, ..., [columnN =] expressionN] [BY grouping_expression1[, ..., grouping_expressionN]]
-        |                      |                                     |                  |
-        expression             expression_complete                  grouping_expression grouping_expression_complete
+       |            |          |                                     |                  |
+       |            |          expression_complete                  grouping_expression grouping_expression_complete
+       |            expression_after_assignment
+       expression_without_assignment
 
 * ```
 */
 export type CaretPosition =
-  | 'expression'
+  | 'expression_without_assignment'
+  | 'expression_after_assignment'
   | 'expression_complete'
   | 'grouping_expression'
   | 'grouping_expression_complete';
@@ -50,11 +55,16 @@ export const getPosition = (innerText: string, command: ESQLCommand): CaretPosit
     }
   }
 
+  const lastArg = command.args[command.args.length - 1];
+  if (isAssignment(lastArg) && !isAssignmentComplete(lastArg)) {
+    return 'expression_after_assignment';
+  }
+
   if (
     getLastNonWhitespaceChar(innerText) === ',' ||
     noCaseCompare(findPreviousWord(innerText), 'stats')
   ) {
-    return 'expression';
+    return 'expression_without_assignment';
   } else {
     return 'expression_complete';
   }

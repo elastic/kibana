@@ -737,7 +737,7 @@ describe('autocomplete', () => {
     ]);
 
     // STATS argument BY
-    testSuggestions('FROM index1 | STATS AVG(booleanField) B/', ['BY $0', ',', '| ']);
+    testSuggestions('FROM index1 | STATS AVG(booleanField) B/', ['BY ', ',', '| ']);
 
     // STATS argument BY expression
     testSuggestions('FROM index1 | STATS field BY f/', [
@@ -1073,7 +1073,7 @@ describe('autocomplete', () => {
     // STATS argument BY
     testSuggestions('FROM a | STATS AVG(numberField) /', [
       ',',
-      attachAsSnippet(attachTriggerCommand('BY $0')),
+      attachAsSnippet(attachTriggerCommand('BY ')),
       attachTriggerCommand('| '),
     ]);
 
