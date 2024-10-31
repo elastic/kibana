@@ -52,6 +52,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     describe('when managing a single entry', () => {
       const knowledgeBaseEntry = {
         id: 'my-doc-id-1',
+        title: 'My title',
         text: 'My content',
       };
       it('returns 200 on create', async () => {
