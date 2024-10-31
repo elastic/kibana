@@ -1,0 +1,53 @@
+post:
+  summary: Save APM server schema
+  operationId: saveApmServerSchema
+  tags:
+    - APM server schema
+  parameters:
+    - $ref: '../components/headers/elastic_api_version.yaml'
+    - $ref: '../components/headers/kbn_xsrf.yaml'
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            schema:
+              type: object
+              description: Schema object
+              additionalProperties: true
+              example:
+                foo: "bar"
+  responses:
+    '200':
+      description: Successful response
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: false
+    '400':
+      description: Bad Request response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/400_response.yaml'
+    '401':
+      description: Unauthorized response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/401_response.yaml'
+    '403':
+      description: Forbidden response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/403_response.yaml'
+    '404':
+      description: Not found response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/404_response.yaml'

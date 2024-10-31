@@ -271,7 +271,7 @@ steps:
             - exit_status: "1"
               limit: 2
 
-- label: Running rule_execution_logic:esql:qa:serverless:release
+      - label: Running rule_execution_logic:esql:qa:serverless:release
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_execution_logic:esql:qa:serverless:release
         key: rule_execution_logic:esql:qa:serverless:release
         agents:
@@ -285,7 +285,7 @@ steps:
             - exit_status: "1"
               limit: 2
 
-- label: Running rule_execution_logic:general_logic:qa:serverless:release
+      - label: Running rule_execution_logic:general_logic:qa:serverless:release
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_execution_logic:general_logic:qa:serverless:release
         key: rule_execution_logic:general_logic:qa:serverless:release
         agents:
@@ -299,7 +299,7 @@ steps:
             - exit_status: "1"
               limit: 2
 
-- label: Running rule_execution_logic:indicator_match:qa:serverless:release
+      - label: Running rule_execution_logic:indicator_match:qa:serverless:release
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_execution_logic:indicator_match:qa:serverless:release
         key: rule_execution_logic:indicator_match:qa:serverless:release
         agents:
@@ -313,7 +313,7 @@ steps:
             - exit_status: "1"
               limit: 2
 
-- label: Running rule_execution_logic:machine_learning:qa:serverless:release
+      - label: Running rule_execution_logic:machine_learning:qa:serverless:release
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_execution_logic:machine_learning:qa:serverless:release
         key: rule_execution_logic:machine_learning:qa:serverless:release
         agents:
@@ -327,7 +327,7 @@ steps:
             - exit_status: "1"
               limit: 2
 
-- label: Running rule_execution_logic:new_terms:qa:serverless:release
+      - label: Running rule_execution_logic:new_terms:qa:serverless:release
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_execution_logic:new_terms:qa:serverless:release
         key: rule_execution_logic:new_terms:qa:serverless:release
         agents:
@@ -341,7 +341,7 @@ steps:
             - exit_status: "1"
               limit: 2
 
-- label: Running rule_execution_logic:query:qa:serverless:release
+      - label: Running rule_execution_logic:query:qa:serverless:release
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_execution_logic:query:qa:serverless:release
         key: rule_execution_logic:query:qa:serverless:release
         agents:
@@ -355,7 +355,7 @@ steps:
             - exit_status: "1"
               limit: 2
 
-- label: Running rule_execution_logic:threshold:qa:serverless:release
+      - label: Running rule_execution_logic:threshold:qa:serverless:release
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_execution_logic:threshold:qa:serverless:release
         key: rule_execution_logic:threshold:qa:serverless:release
         agents:
