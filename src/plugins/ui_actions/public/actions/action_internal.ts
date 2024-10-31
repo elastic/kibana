@@ -9,9 +9,9 @@
 
 import * as React from 'react';
 import type { Presentable, PresentableGrouping } from '@kbn/ui-actions-browser/src/types';
+import { i18n } from '@kbn/i18n';
 import { Action, ActionDefinition, ActionMenuItemProps } from './action';
 import { getNotifications } from '../services';
-import { i18n } from '@kbn/i18n';
 
 /**
  * @internal
@@ -54,7 +54,7 @@ export class ActionInternal<Context extends object = object>
           defaultMessage: `Unable to execute action, error: {errorMessage}`,
           values: { errorMessage: e.message },
         })
-      )
+      );
     });
   }
 
