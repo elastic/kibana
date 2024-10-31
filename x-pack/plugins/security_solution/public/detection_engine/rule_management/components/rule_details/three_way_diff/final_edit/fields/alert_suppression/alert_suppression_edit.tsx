@@ -9,29 +9,30 @@ import React from 'react';
 import type { DataViewFieldBase } from '@kbn/es-query';
 import { useFormData } from '../../../../../../../../shared_imports';
 import { MissingFieldsStrategySelector } from './missing_fields_strategy_selector';
-import { SuppressionFrequencySelector } from './suppression_frequency_selector';
+import { SuppressionDurationSelector } from './suppression_duration_selector';
 import { SuppressionFieldsSelector } from './suppression_fields_selector';
+import type { AlertSuppressionFormData } from './form_schema';
 
 interface AlertSuppressionEditProps {
-  supportedFieldSpecs: DataViewFieldBase[];
+  suppressibleFieldSpecs: DataViewFieldBase[];
   disabled?: boolean;
   disabledText?: string;
 }
 
 export function AlertSuppressionEdit({
-  supportedFieldSpecs,
+  suppressibleFieldSpecs,
   disabled,
   disabledText,
 }: AlertSuppressionEditProps): JSX.Element {
-  const [{ groupByFields }] = useFormData({
+  const [{ groupByFields }] = useFormData<AlertSuppressionFormData>({
     watch: 'groupByFields',
   });
-  const hasSelectedFields = groupByFields.length > 0;
+  const hasSelectedFields = groupByFields?.length > 0;
 
   return (
     <>
       <SuppressionFieldsSelector
-        supportedFieldSpecs={supportedFieldSpecs}
+        suppressibleFieldSpecs={suppressibleFieldSpecs}
         disabled={disabled}
         disabledText={disabledText}
       />

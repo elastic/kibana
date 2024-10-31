@@ -13,13 +13,13 @@ import { MultiSelectFieldsAutocomplete } from '../../../../../../../rule_creatio
 import * as i18n from './translations';
 
 interface SuppressionFieldsSelectorProps {
-  supportedFieldSpecs: DataViewFieldBase[];
+  suppressibleFieldSpecs: DataViewFieldBase[];
   disabled?: boolean;
   disabledText?: string;
 }
 
 export function SuppressionFieldsSelector({
-  supportedFieldSpecs,
+  suppressibleFieldSpecs,
   disabled,
   disabledText,
 }: SuppressionFieldsSelectorProps): JSX.Element {
@@ -27,7 +27,7 @@ export function SuppressionFieldsSelector({
     <>
       <EuiFormRow
         data-test-subj="alertSuppressionInput"
-        label={i18n.GROUP_BY_LABEL}
+        label={i18n.ALERT_SUPPRESSION_SUPPRESS_BY_FIELD_LABEL}
         labelAppend={
           <EuiText color="subdued" size="xs">
             {i18n.OPTIONAL}
@@ -39,7 +39,7 @@ export function SuppressionFieldsSelector({
             path="groupByFields"
             component={MultiSelectFieldsAutocomplete}
             componentProps={{
-              browserFields: supportedFieldSpecs,
+              browserFields: suppressibleFieldSpecs,
               isDisabled: disabled,
               disabledText,
             }}

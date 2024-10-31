@@ -24,7 +24,7 @@ export function MissingFieldsStrategySelector({
       data-test-subj="alertSuppressionMissingFields"
       label={
         <span>
-          {i18n.ALERT_SUPPRESSION_MISSING_FIELDS_FORM_ROW_LABEL} <SuppressionInfoIcon />
+          {i18n.ALERT_SUPPRESSION_MISSING_FIELDS_LABEL} <SuppressionInfoIcon />
         </span>
       }
       fullWidth
