@@ -83,6 +83,7 @@ const EntityStoreDashboardPanelsComponent = () => {
       };
       setRiskEngineInitializing(true);
       initRiskEngine(undefined, options);
+      return;
     }
 
     if (enable.entityStore) {
