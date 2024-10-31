@@ -9,7 +9,6 @@ import { i18n } from '@kbn/i18n';
 import type { PresentationContainer } from '@kbn/presentation-containers';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
-import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { ML_APP_NAME, PLUGIN_ICON, PLUGIN_ID } from '@kbn/ml-common-constants/app';
 import { HttpService } from '../application/services/http_service';
 import type { MlApi } from '../application/services/ml_api_service';
@@ -57,6 +56,8 @@ export function createAddSingleMetricViewerPanelAction(
       return Boolean(await parentApiIsCompatible(context.embeddable));
     },
     async execute(context) {
+      const { IncompatibleActionError } = await import('@kbn/ui-actions-plugin/public');
+
       const presentationContainerParent = await parentApiIsCompatible(context.embeddable);
       if (!presentationContainerParent) throw new IncompatibleActionError();
 
