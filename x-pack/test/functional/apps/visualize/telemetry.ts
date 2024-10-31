@@ -14,7 +14,7 @@ interface UiCounterEvent {
 }
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { dashboard, timePicker } = getPageObjects(['dashboard', 'timePicker', 'common', 'lens']);
+  const { dashboard, timePicker } = getPageObjects(['dashboard', 'timePicker']);
 
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');

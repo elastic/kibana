@@ -380,25 +380,6 @@ export class LensPlugin {
     };
 
     if (embeddable) {
-      // embeddable.registerEmbeddableFactory(
-      //   'lens',
-      //   new EmbeddableFactory(getStartServicesForEmbeddable)
-      // );
-
-      // embeddable.registerSavedObjectToPanelMethod<LensSavedObjectAttributes, LensByValueInput>(
-      //   CONTENT_ID,
-      //   (savedObject) => {
-      //     if (!savedObject.managed) {
-      //       return { savedObjectId: savedObject.id };
-      //     }
-
-      //     const panel = {
-      //       attributes: savedObjectToEmbeddableAttributes(savedObject),
-      //     };
-
-      //     return panel;
-      //   }
-      // );
 
       // Let Kibana know about the Lens embeddable
       embeddable.registerReactEmbeddableFactory(LENS_EMBEDDABLE_TYPE, async () => {
