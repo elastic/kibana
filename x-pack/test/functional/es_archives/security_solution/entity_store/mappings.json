@@ -45,15 +45,15 @@
         },
         "entity": {
           "properties": {
-            "definitionId": {
+            "definition_id": {
               "type": "keyword",
               "ignore_above": 1024
             },
-            "definitionVersion": {
+            "definition_version": {
               "type": "keyword",
               "ignore_above": 1024
             },
-            "displayName": {
+            "display_name": {
               "type": "text",
               "fields": {
                 "keyword": {
@@ -62,17 +62,14 @@
                 }
               }
             },
-            "firstSeenTimestamp": {
-              "type": "date"
-            },
             "id": {
               "type": "keyword",
               "ignore_above": 1024
             },
-            "identityFields": {
+            "identity_fields": {
               "type": "keyword"
             },
-            "lastSeenTimestamp": {
+            "last_seen_timestamp": {
               "type": "date"
             },
             "name": {
@@ -210,15 +207,15 @@
         },
         "entity": {
           "properties": {
-            "definitionId": {
+            "definition_id": {
               "type": "keyword",
               "ignore_above": 1024
             },
-            "definitionVersion": {
+            "definition_version": {
               "type": "keyword",
               "ignore_above": 1024
             },
-            "displayName": {
+            "display_name": {
               "type": "text",
               "fields": {
                 "keyword": {
@@ -227,17 +224,14 @@
                 }
               }
             },
-            "firstSeenTimestamp": {
-              "type": "date"
-            },
             "id": {
               "type": "keyword",
               "ignore_above": 1024
             },
-            "identityFields": {
+            "identity_fields": {
               "type": "keyword"
             },
-            "lastSeenTimestamp": {
+            "last_seen_timestamp": {
               "type": "date"
             },
             "name": {
