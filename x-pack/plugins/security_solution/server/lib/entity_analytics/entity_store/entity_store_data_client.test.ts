@@ -19,10 +19,11 @@ import type { EntityStoreConfig } from './types';
 
 describe('EntityStoreDataClient', () => {
   const mockSavedObjectClient = savedObjectsClientMock.create();
-  const esClientMock = elasticsearchServiceMock.createScopedClusterClient().asInternalUser;
+  const clusterClientMock = elasticsearchServiceMock.createScopedClusterClient();
+  const esClientMock = clusterClientMock.asCurrentUser;
   const loggerMock = loggingSystemMock.createLogger();
   const dataClient = new EntityStoreDataClient({
-    esClient: esClientMock,
+    clusterClient: clusterClientMock,
     logger: loggerMock,
     namespace: 'default',
     soClient: mockSavedObjectClient,
