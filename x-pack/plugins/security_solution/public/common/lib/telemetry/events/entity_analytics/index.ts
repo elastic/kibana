@@ -214,3 +214,36 @@ export const assetCriticalityCsvImportedEvent: TelemetryEvent = {
     },
   },
 };
+
+export const entityStoreInitEvent: TelemetryEvent = {
+  eventType: TelemetryEventTypes.EntityStoreDashboardInitButtonClicked,
+  schema: {
+    timestamp: {
+      type: 'date',
+      _meta: {
+        description: 'Timestamp of the event',
+        optional: false,
+      },
+    },
+  },
+};
+
+export const entityStoreEnablementEvent: TelemetryEvent = {
+  eventType: TelemetryEventTypes.EntityStoreEnablementToggleClicked,
+  schema: {
+    timestamp: {
+      type: 'date',
+      _meta: {
+        description: 'Timestamp of the event',
+        optional: false,
+      },
+    },
+    action: {
+      type: 'keyword',
+      _meta: {
+        description: 'Event toggle action',
+        optional: false,
+      },
+    },
+  },
+};

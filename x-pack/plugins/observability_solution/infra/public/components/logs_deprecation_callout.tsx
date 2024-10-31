@@ -6,16 +6,24 @@
  */
 
 import { EuiCallOut } from '@elastic/eui';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButton } from '@elastic/eui';
-import { AllDatasetsLocatorParams, ALL_DATASETS_LOCATOR_ID } from '@kbn/deeplinks-observability';
+import {
+  AllDatasetsLocatorParams,
+  ALL_DATASETS_LOCATOR_ID,
+  DatasetLocatorParams,
+  OBSERVABILITY_LOGS_EXPLORER_APP_ID,
+} from '@kbn/deeplinks-observability';
 import { getRouterLinkProps } from '@kbn/router-utils';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 
 import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/css';
-import { SharePublicStart } from '@kbn/share-plugin/public/plugin';
+import { LocatorPublic } from '@kbn/share-plugin/common';
+import useObservable from 'react-use/lib/useObservable';
+import { AppStatus } from '@kbn/core/public';
+import { map } from 'rxjs';
 import { useKibanaContextForPlugin } from '../hooks/use_kibana';
 
 const pageConfigurations = {
@@ -44,16 +52,34 @@ interface LogsDeprecationCalloutProps {
 
 export const LogsDeprecationCallout = ({ page }: LogsDeprecationCalloutProps) => {
   const {
-    services: { share },
+    services: { share, application },
   } = useKibanaContextForPlugin();
+
+  const isLogsExplorerAppAccessible = useObservable(
+    useMemo(
+      () =>
+        application.applications$.pipe(
+          map(
+            (apps) =>
+              (apps.get(OBSERVABILITY_LOGS_EXPLORER_APP_ID)?.status ?? AppStatus.inaccessible) ===
+              AppStatus.accessible
+          )
+        ),
+      [application.applications$]
+    ),
+    false
+  );
 
   const { dismissalStorageKey, message } = pageConfigurations[page];
 
   const [isDismissed, setDismissed] = useLocalStorage(dismissalStorageKey, false);
 
-  if (isDismissed) {
+  if (isDismissed || !isLogsExplorerAppAccessible) {
     return null;
   }
+
+  const allDatasetLocator =
+    share.url.locators.get<AllDatasetsLocatorParams>(ALL_DATASETS_LOCATOR_ID);
 
   return (
     <EuiCallOut
@@ -71,7 +97,7 @@ export const LogsDeprecationCallout = ({ page }: LogsDeprecationCalloutProps) =>
         fill
         data-test-subj="infraLogsDeprecationCalloutTryLogsExplorerButton"
         color="warning"
-        {...getLogsExplorerLinkProps(share)}
+        {...getLogsExplorerLinkProps(allDatasetLocator!)}
       >
         {i18n.translate('xpack.infra.logsDeprecationCallout.tryLogsExplorerButtonLabel', {
           defaultMessage: 'Try Logs Explorer',
@@ -81,9 +107,7 @@ export const LogsDeprecationCallout = ({ page }: LogsDeprecationCalloutProps) =>
   );
 };
 
-const getLogsExplorerLinkProps = (share: SharePublicStart) => {
-  const locator = share.url.locators.get<AllDatasetsLocatorParams>(ALL_DATASETS_LOCATOR_ID)!;
-
+const getLogsExplorerLinkProps = (locator: LocatorPublic<DatasetLocatorParams>) => {
   return getRouterLinkProps({
     href: locator.getRedirectUrl({}),
     onClick: () => locator.navigate({}),

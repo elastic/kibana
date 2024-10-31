@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import type { SolutionId } from '@kbn/core-chrome-browser';
 import type { FC, PropsWithChildren } from 'react';
-import type { OnBoardingDefaultSolution } from '../common';
 
 export interface CloudStart {
   /**
@@ -192,7 +192,7 @@ export interface CloudSetup {
     /**
      * The default solution selected during onboarding.
      */
-    defaultSolution?: OnBoardingDefaultSolution;
+    defaultSolution?: SolutionId;
   };
   /**
    * `true` when running on Serverless Elastic Cloud
