@@ -28,6 +28,7 @@
     "@kbn/fields-metadata-plugin",
     "@kbn/esql-validation-autocomplete",
     "@kbn/esql-utils",
+    "@kbn/shared-ux-table-persist",
   ],
   "exclude": [
     "target/**/*",
