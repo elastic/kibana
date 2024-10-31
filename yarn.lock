@@ -1748,10 +1748,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui@97.2.0":
-  version "97.2.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-97.2.0.tgz#ea752ce3febda67ce58493a463ea3197e21f9502"
-  integrity sha512-n0puvtip72YtQMYtkrC9G5SeNqew61N8DNMP3DsYDJWn/eqOTARP0MbU7P7/P66ZmOVIeUaa+vSsHvqgU3GmLQ==
+"@elastic/eui@97.3.0":
+  version "97.3.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-97.3.0.tgz#3961e39a6a8ac38e1af999baf0e96de8e1671943"
+  integrity sha512-Ic9DXHlh9yVumYypoLSM+plM0xBjSPc8PPRT4z5bHXLXZrLuSEVoqfix3co5yl4+ibLwfxNPCZFflbFiMl2apA==
   dependencies:
     "@hello-pangea/dnd" "^16.6.0"
     "@types/lodash" "^4.14.202"
@@ -7412,25 +7412,25 @@
   dependencies:
     ncp "^2.0.0"
 
-"@launchdarkly/js-sdk-common@2.9.0":
-  version "2.9.0"
-  resolved "https://registry.yarnpkg.com/@launchdarkly/js-sdk-common/-/js-sdk-common-2.9.0.tgz#2828eb12e48c28edaa849821ed9b7824e2ce01b9"
-  integrity sha512-BYYZ4MgYCc2l650gFotqRMW5oqFJna78+ivf/8Jwy6D3XpRW/DHwrsMBFnVv/G3gAjXq6/dW3ZZ6pS85ZK6mvQ==
+"@launchdarkly/js-sdk-common@2.11.0":
+  version "2.11.0"
+  resolved "https://registry.yarnpkg.com/@launchdarkly/js-sdk-common/-/js-sdk-common-2.11.0.tgz#efc0c94ee4b11d72910c5bcdf9294154a27dbb1c"
+  integrity sha512-96Jg4QH347w2+rL4Bpykqw28+HHUAW4HapjIkIfM3giELK7BwXUp3BiAVxo2ax78e7A7KqvMzPJUx5r2EGpkMw==
 
-"@launchdarkly/js-server-sdk-common@2.7.0":
-  version "2.7.0"
-  resolved "https://registry.yarnpkg.com/@launchdarkly/js-server-sdk-common/-/js-server-sdk-common-2.7.0.tgz#c53fb284af6875b991b6c3935612068719ba9839"
-  integrity sha512-EFfCVtp5VVl4E2sY6rUa2n0tvAiqstFAloJNN4ft5Tocec+6Te3XKivNdRpMxIrQBZg9c5gX9ofa6B0j0l33RA==
+"@launchdarkly/js-server-sdk-common@2.9.0":
+  version "2.9.0"
+  resolved "https://registry.yarnpkg.com/@launchdarkly/js-server-sdk-common/-/js-server-sdk-common-2.9.0.tgz#337d13d4bec596f6244b9723f7ec718ee087bfa5"
+  integrity sha512-hf/qkn+NvCkyoLl6fl+4Q737p4Jg3T+RnRqdkJDMxO+8aAI+vpXuD9bbhkgYA9XFHyQ9puhufRGzX1BX26b7Rg==
   dependencies:
-    "@launchdarkly/js-sdk-common" "2.9.0"
+    "@launchdarkly/js-sdk-common" "2.11.0"
     semver "7.5.4"
 
-"@launchdarkly/node-server-sdk@^9.6.0":
-  version "9.6.0"
-  resolved "https://registry.yarnpkg.com/@launchdarkly/node-server-sdk/-/node-server-sdk-9.6.0.tgz#eafdf6cb7d7f3239778d89d78ad7e5b6f7f5f08a"
-  integrity sha512-vYn+ATN7/QIbBfmsNmeFSfV/8XiwQSPAr31wrTEAr26WvWIpy4HUNHKAtbgRdtFg3fo+7bSuI0FLvFsNVmavcg==
+"@launchdarkly/node-server-sdk@^9.6.1":
+  version "9.7.0"
+  resolved "https://registry.yarnpkg.com/@launchdarkly/node-server-sdk/-/node-server-sdk-9.7.0.tgz#87223c2d3ab5fc7186065a0974960c94f73573ad"
+  integrity sha512-ABOsjcjH9pFdyG1m5++lhP+ngxfx4GMcIfgTp0iSPncuh0dMxCCWSx831gbhxR9M+f2x4EnsQ9HEdwnmwktb9g==
   dependencies:
-    "@launchdarkly/js-server-sdk-common" "2.7.0"
+    "@launchdarkly/js-server-sdk-common" "2.9.0"
     https-proxy-agent "^5.0.1"
     launchdarkly-eventsource "2.0.3"
 
@@ -10805,10 +10805,10 @@
   resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.17.0.tgz#d774355e41f372d5350a4d0714abb48194a489c3"
   integrity sha512-t7dhREVv6dbNj0q17X12j7yDG4bD/DHYX7o5/DbDxobP0HnGPgpRz2Ej77aL7TZT3DSw13fqUTj8J4mMnqa7WA==
 
-"@types/lodash@^4.17.12":
-  version "4.17.12"
-  resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.17.12.tgz#25d71312bf66512105d71e55d42e22c36bcfc689"
-  integrity sha512-sviUmCE8AYdaF/KIHLDJBQgeYzPBI0vf/17NaYehBJfYD1j6/L95Slh07NlyK2iNyBNaEkb3En2jRt+a8y3xZQ==
+"@types/lodash@^4.17.13":
+  version "4.17.13"
+  resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.17.13.tgz#786e2d67cfd95e32862143abe7463a7f90c300eb"
+  integrity sha512-lfx+dftrEZcdBPczf9d0Qv0x+j/rfNCMuC6OcfXmO8gkfeNAY88PgKUbvG56whcN23gc27yenwF6oJZXGFpYxg==
 
 "@types/long@^4.0.1":
   version "4.0.2"
@@ -14235,10 +14235,10 @@ chrome-trace-event@^1.0.2:
   dependencies:
     tslib "^1.9.0"
 
-chromedriver@^129.0.0:
-  version "129.0.1"
-  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-129.0.1.tgz#4a7215f57c419e87468f04f3b011db51e6bc80fc"
-  integrity sha512-thJqK3c7p9rIhmjBvs/cgaK0Hk30g7LbnmMXQ2aLnn75ZOiEl/2GBcgc6fw+4GIw1SmOYhnNmaEI1iTP3qob0w==
+chromedriver@^130.0.1:
+  version "130.0.1"
+  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-130.0.1.tgz#24fd5b2c9c9df4ebfc5d28c94eca8658915fbe15"
+  integrity sha512-JH+OxDZ7gVv02r9oXwj4mQ8JCtj62g0fCD1LMUUYdB/4mPxn/E2ys+1IzXItoE7vXM9fGVc9R1akvXLqwwuSww==
   dependencies:
     "@testim/chrome-version" "^1.1.4"
     axios "^1.7.4"
@@ -18751,10 +18751,10 @@ gcp-metadata@^6.1.0:
     gaxios "^6.0.0"
     json-bigint "^1.0.0"
 
-geckodriver@^4.4.4:
-  version "4.4.4"
-  resolved "https://registry.yarnpkg.com/geckodriver/-/geckodriver-4.4.4.tgz#0aad02533e8cf127573f4d86f1cc5450c913f095"
-  integrity sha512-0zaw19tcmWeluqx7+Y559JGBtidu1D0Lb8ElYKiNEQu8r3sCfrLUf5V10xypl8u29ZLbgRV7WflxCJVTCkCMFA==
+geckodriver@^4.5.1:
+  version "4.5.1"
+  resolved "https://registry.yarnpkg.com/geckodriver/-/geckodriver-4.5.1.tgz#624fc01815c1aa498dd3f717f7bd4c6cca0c57b8"
+  integrity sha512-lGCRqPMuzbRNDWJOQcUqhNqPvNsIFu6yzXF8J/6K3WCYFd2r5ckbeF7h1cxsnjA7YLSEiWzERCt6/gjZ3tW0ug==
   dependencies:
     "@wdio/logger" "^9.0.0"
     "@zip.js/zip.js" "^2.7.48"

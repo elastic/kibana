@@ -36,8 +36,8 @@ export const LeftPanel: FC<Partial<DocumentDetailsProps>> = memo(({ path }) => {
   const { openLeftPanel } = useExpandableFlyoutApi();
   const { eventId, indexName, scopeId, getFieldsData, isPreview } = useDocumentDetailsContext();
   const eventKind = getField(getFieldsData('event.kind'));
-  const securitySolutionNotesEnabled = useIsExperimentalFeatureEnabled(
-    'securitySolutionNotesEnabled'
+  const securitySolutionNotesDisabled = useIsExperimentalFeatureEnabled(
+    'securitySolutionNotesDisabled'
   );
 
   const [visualizationInFlyoutEnabled] = useUiSetting$<boolean>(
@@ -49,14 +49,14 @@ export const LeftPanel: FC<Partial<DocumentDetailsProps>> = memo(({ path }) => {
       eventKind === EventKind.signal
         ? [tabs.insightsTab, tabs.investigationTab, tabs.responseTab]
         : [tabs.insightsTab];
-    if (securitySolutionNotesEnabled && !isPreview) {
+    if (!securitySolutionNotesDisabled && !isPreview) {
       tabList.push(tabs.notesTab);
     }
     if (visualizationInFlyoutEnabled && !isPreview) {
       return [tabs.visualizeTab, ...tabList];
     }
     return tabList;
-  }, [eventKind, isPreview, securitySolutionNotesEnabled, visualizationInFlyoutEnabled]);
+  }, [eventKind, isPreview, securitySolutionNotesDisabled, visualizationInFlyoutEnabled]);
 
   const selectedTabId = useMemo(() => {
     const defaultTab = tabsDisplayed[0].id;
