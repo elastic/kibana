@@ -47,13 +47,12 @@ import {
 } from '../../../common/conversation_complete';
 import { CompatibleJSONSchema } from '../../../common/functions/types';
 import {
-  AdHocInstruction,
+  type AdHocInstruction,
   type Conversation,
   type ConversationCreateRequest,
   type ConversationUpdateRequest,
   type KnowledgeBaseEntry,
   type Message,
-  type AdHocInstruction,
   KnowledgeBaseType,
   KnowledgeBaseEntryRole,
 } from '../../../common/types';

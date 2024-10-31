@@ -17,7 +17,6 @@ import type {
 import type {
   Message,
   ObservabilityAIAssistantScreenContextRequest,
-  InstructionOrPlainText,
   AdHocInstruction,
 } from '../../common/types';
 import type { ObservabilityAIAssistantRouteHandlerResources } from '../routes/types';
