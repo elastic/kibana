@@ -9,34 +9,30 @@
 import { queryCannotBeSampled } from './query_cannot_be_sampled';
 describe('queryCannotBeSampled', () => {
   it('should return true if query contains "match" function', () => {
-    expect(
-      queryCannotBeSampled({ esql: 'SELECT * FROM index | where match(field, "value")' })
-    ).toBe(true);
-    expect(queryCannotBeSampled({ esql: 'SELECT * FROM index | where match()' })).toBe(true);
-    expect(queryCannotBeSampled({ esql: 'SELECT * FROM index | where MATCH()' })).toBe(true);
+    expect(queryCannotBeSampled({ esql: 'FROM index | where match(field, "value")' })).toBe(true);
+    expect(queryCannotBeSampled({ esql: 'FROM index | where match()' })).toBe(true);
+    expect(queryCannotBeSampled({ esql: 'FROM index | where MATCH()' })).toBe(true);
   });
 
   it('should return true if query contains "qstr" function', () => {
-    expect(queryCannotBeSampled({ esql: 'SELECT * FROM index | where qstr(field, "value")' })).toBe(
-      true
-    );
-    expect(queryCannotBeSampled({ esql: 'SELECT * FROM index | where qstr()' })).toBe(true);
-    expect(queryCannotBeSampled({ esql: 'SELECT * FROM index | where QSTR()' })).toBe(true);
+    expect(queryCannotBeSampled({ esql: 'FROM index | where qstr(field, "value")' })).toBe(true);
+    expect(queryCannotBeSampled({ esql: 'FROM index | where qstr()' })).toBe(true);
+    expect(queryCannotBeSampled({ esql: 'FROM index | where QSTR()' })).toBe(true);
   });
 
   it('should return false if query contains names', () => {
-    expect(queryCannotBeSampled({ esql: 'SELECT * FROM index | eval match =' })).toBe(false);
-    expect(queryCannotBeSampled({ esql: 'SELECT * FROM index | eval MATCH =' })).toBe(false);
-    expect(queryCannotBeSampled({ esql: 'SELECT * FROM index | eval qstr =' })).toBe(false);
+    expect(queryCannotBeSampled({ esql: 'FROM index | eval match =' })).toBe(false);
+    expect(queryCannotBeSampled({ esql: 'FROM index | eval MATCH =' })).toBe(false);
+    expect(queryCannotBeSampled({ esql: 'FROM index | eval qstr =' })).toBe(false);
   });
 
   it('should return false if query does not contain unsamplable functions', () => {
-    expect(
-      queryCannotBeSampled({ esql: 'SELECT * FROM index | eval otherFunction(field, "value")' })
-    ).toBe(false);
-    expect(
-      queryCannotBeSampled({ esql: 'SELECT * FROM index | where otherFunction(field, "value")' })
-    ).toBe(false);
+    expect(queryCannotBeSampled({ esql: 'FROM index | eval otherFunction(field, "value")' })).toBe(
+      false
+    );
+    expect(queryCannotBeSampled({ esql: 'FROM index | where otherFunction(field, "value")' })).toBe(
+      false
+    );
   });
 
   it('should return false if query is undefined', () => {
