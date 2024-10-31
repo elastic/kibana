@@ -26,6 +26,7 @@ export type ESQLSingleAstItem =
   | ESQLTimeInterval
   | ESQLList
   | ESQLLiteral
+  | ESQLIdentifier
   | ESQLCommandMode
   | ESQLInlineCast
   | ESQLOrderExpression
@@ -132,6 +133,11 @@ export interface ESQLFunction<
    */
   subtype?: Subtype;
 
+  /**
+   * A node representing the function or operator being called.
+   */
+  operator?: ESQLIdentifier | ESQLParamLiteral;
+
   args: ESQLAstItem[];
 }
 
@@ -193,10 +199,33 @@ export type BinaryExpressionAssignmentOperator = '=';
 export type BinaryExpressionComparisonOperator = '==' | '=~' | '!=' | '<' | '<=' | '>' | '>=';
 export type BinaryExpressionRegexOperator = 'like' | 'not_like' | 'rlike' | 'not_rlike';
 
+// from https://github.com/elastic/elasticsearch/blob/122e7288200ee03e9087c98dff6cebbc94e774aa/docs/reference/esql/functions/kibana/inline_cast.json
+export type InlineCastingType =
+  | 'bool'
+  | 'boolean'
+  | 'cartesian_point'
+  | 'cartesian_shape'
+  | 'date_nanos'
+  | 'date_period'
+  | 'datetime'
+  | 'double'
+  | 'geo_point'
+  | 'geo_shape'
+  | 'int'
+  | 'integer'
+  | 'ip'
+  | 'keyword'
+  | 'long'
+  | 'string'
+  | 'text'
+  | 'time_duration'
+  | 'unsigned_long'
+  | 'version';
+
 export interface ESQLInlineCast<ValueType = ESQLAstItem> extends ESQLAstBaseItem {
   type: 'inlineCast';
   value: ValueType;
-  castType: string;
+  castType: InlineCastingType;
 }
 
 /**
@@ -270,7 +299,7 @@ export interface ESQLList extends ESQLAstBaseItem {
   values: ESQLLiteral[];
 }
 
-export type ESQLNumericLiteralType = 'decimal' | 'integer';
+export type ESQLNumericLiteralType = 'double' | 'integer';
 
 export type ESQLLiteral =
   | ESQLDecimalLiteral
@@ -290,7 +319,7 @@ export interface ESQLNumericLiteral<T extends ESQLNumericLiteralType> extends ES
 }
 // We cast anything as decimal (e.g. 32.12) as generic decimal numeric type here
 // @internal
-export type ESQLDecimalLiteral = ESQLNumericLiteral<'decimal'>;
+export type ESQLDecimalLiteral = ESQLNumericLiteral<'double'>;
 
 // @internal
 export type ESQLIntegerLiteral = ESQLNumericLiteral<'integer'>;
@@ -312,7 +341,7 @@ export interface ESQLNullLiteral extends ESQLAstBaseItem {
 // @internal
 export interface ESQLStringLiteral extends ESQLAstBaseItem {
   type: 'literal';
-  literalType: 'string';
+  literalType: 'keyword';
   value: string;
 }
 
@@ -340,6 +369,10 @@ export interface ESQLNamedParamLiteral extends ESQLParamLiteral<'named'> {
   value: string;
 }
 
+export interface ESQLIdentifier extends ESQLAstBaseItem {
+  type: 'identifier';
+}
+
 export const isESQLNamedParamLiteral = (node: ESQLAstItem): node is ESQLNamedParamLiteral =>
   isESQLAstBaseItem(node) &&
   (node as ESQLNamedParamLiteral).literalType === 'param' &&
@@ -352,6 +385,11 @@ export const isESQLNamedParamLiteral = (node: ESQLAstItem): node is ESQLNamedPar
 export interface ESQLPositionalParamLiteral extends ESQLParamLiteral<'positional'> {
   value: number;
 }
+
+export type ESQLParam =
+  | ESQLUnnamedParamLiteral
+  | ESQLNamedParamLiteral
+  | ESQLPositionalParamLiteral;
 
 export interface ESQLMessage {
   type: 'error' | 'warning';
@@ -381,7 +419,7 @@ export interface ESQLAstGenericComment<SubType extends 'single-line' | 'multi-li
   type: 'comment';
   subtype: SubType;
   text: string;
-  location: ESQLLocation;
+  location?: ESQLLocation;
 }
 
 export type ESQLAstCommentSingleLine = ESQLAstGenericComment<'single-line'>;

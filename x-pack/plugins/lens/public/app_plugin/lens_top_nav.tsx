@@ -576,6 +576,8 @@ export const LensTopNavMenu = ({
               return;
             }
 
+            const activeVisualization = visualizationMap[visualization.activeId];
+
             const {
               shareableUrl,
               savedObjectURL,
@@ -598,12 +600,22 @@ export const LensTopNavMenu = ({
               isCurrentStateDirty
             );
 
-            const sharingData = {
-              activeData,
-              columnsSorting: visualizationMap[visualization.activeId].getSortedColumns?.(
+            const datasourceLayers = getDatasourceLayers(
+              datasourceStates,
+              datasourceMap,
+              dataViews.indexPatterns
+            );
+
+            const exportDatatables =
+              activeVisualization.getExportDatatables?.(
                 visualization.state,
-                getDatasourceLayers(datasourceStates, datasourceMap, dataViews.indexPatterns)
-              ),
+                datasourceLayers,
+                activeData
+              ) ?? [];
+            const datatables =
+              exportDatatables.length > 0 ? exportDatatables : Object.values(activeData ?? {});
+            const sharingData = {
+              datatables,
               csvEnabled,
               reportingDisabled: !csvEnabled,
               title: title || defaultLensTitle,
@@ -613,9 +625,8 @@ export const LensTopNavMenu = ({
               },
               layout: {
                 dimensions:
-                  visualizationMap[visualization.activeId].getReportingLayout?.(
-                    visualization.state
-                  ) ?? DEFAULT_LENS_LAYOUT_DIMENSIONS,
+                  activeVisualization.getReportingLayout?.(visualization.state) ??
+                  DEFAULT_LENS_LAYOUT_DIMENSIONS,
               },
             };
 
@@ -1071,6 +1082,7 @@ export const LensTopNavMenu = ({
   return (
     <AggregateQueryTopNavMenu
       setMenuMountPoint={setHeaderActionMenu}
+      popoverBreakpoints={['xs', 's', 'm']}
       config={topNavConfig}
       saveQueryMenuVisibility={
         application.capabilities.visualize.saveQuery

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { FieldFormWrapper } from './field_form_wrapper';
+import { RuleFieldEditFormWrapper } from './fields/rule_field_edit_form_wrapper';
 import type { UpgradeableCommonFields } from '../../../../model/prebuilt_rule_upgrade/fields';
 import {
   BuildingBlockEdit,
@@ -102,84 +102,89 @@ export function CommonRuleFieldEdit({ fieldName }: CommonRuleFieldEditProps) {
   switch (fieldName) {
     case 'building_block':
       return (
-        <FieldFormWrapper
+        <RuleFieldEditFormWrapper
           component={BuildingBlockEdit}
-          fieldFormSchema={buildingBlockSchema}
+          ruleFieldFormSchema={buildingBlockSchema}
           serializer={buildingBlockSerializer}
           deserializer={buildingBlockDeserializer}
         />
       );
     case 'description':
-      return <FieldFormWrapper component={DescriptionEdit} fieldFormSchema={descriptionSchema} />;
+      return (
+        <RuleFieldEditFormWrapper
+          component={DescriptionEdit}
+          ruleFieldFormSchema={descriptionSchema}
+        />
+      );
     case 'false_positives':
       return (
-        <FieldFormWrapper
+        <RuleFieldEditFormWrapper
           component={FalsePositivesEdit}
-          fieldFormSchema={falsePositivesSchema}
+          ruleFieldFormSchema={falsePositivesSchema}
           serializer={falsePositivesSerializer}
           deserializer={falsePositivesDeserializer}
         />
       );
     case 'investigation_fields':
       return (
-        <FieldFormWrapper
+        <RuleFieldEditFormWrapper
           component={InvestigationFieldsEdit}
-          fieldFormSchema={investigationFieldsSchema}
+          ruleFieldFormSchema={investigationFieldsSchema}
           serializer={investigationFieldsSerializer}
           deserializer={investigationFieldsDeserializer}
         />
       );
     case 'max_signals':
       return (
-        <FieldFormWrapper
+        <RuleFieldEditFormWrapper
           component={MaxSignalsEdit}
-          fieldFormSchema={maxSignalsSchema}
+          ruleFieldFormSchema={maxSignalsSchema}
           serializer={maxSignalsSerializer}
           deserializer={maxSignalsDeserializer}
         />
       );
     case 'name':
-      return <FieldFormWrapper component={NameEdit} fieldFormSchema={nameSchema} />;
+      return <RuleFieldEditFormWrapper component={NameEdit} ruleFieldFormSchema={nameSchema} />;
     case 'note':
-      return <FieldFormWrapper component={NoteEdit} fieldFormSchema={noteSchema} />;
+      return <RuleFieldEditFormWrapper component={NoteEdit} ruleFieldFormSchema={noteSchema} />;
     case 'references':
       return (
-        <FieldFormWrapper
+        <RuleFieldEditFormWrapper
           component={ReferencesEdit}
-          fieldFormSchema={referencesSchema}
+          ruleFieldFormSchema={referencesSchema}
           serializer={referencesSerializer}
         />
       );
     case 'related_integrations':
       return (
-        <FieldFormWrapper
+        <RuleFieldEditFormWrapper
           component={RelatedIntegrationsEdit}
-          fieldFormSchema={relatedIntegrationsSchema}
+          ruleFieldFormSchema={relatedIntegrationsSchema}
           serializer={relatedIntegrationsSerializer}
           deserializer={relatedIntegrationsDeserializer}
         />
       );
     case 'required_fields':
       return (
-        <FieldFormWrapper
+        <RuleFieldEditFormWrapper
           component={RequiredFieldsEdit}
-          fieldFormSchema={requiredFieldsSchema}
+          ruleFieldFormSchema={requiredFieldsSchema}
           serializer={requiredFieldsSerializer}
           deserializer={requiredFieldsDeserializer}
         />
       );
     case 'risk_score':
       return (
-        <FieldFormWrapper
+        <RuleFieldEditFormWrapper
           component={RiskScoreEdit}
-          fieldFormSchema={riskScoreSchema}
+          ruleFieldFormSchema={riskScoreSchema}
           serializer={riskScoreSerializer}
           deserializer={riskScoreDeserializer}
         />
       );
     case 'risk_score_mapping':
       return (
-        <FieldFormWrapper
+        <RuleFieldEditFormWrapper
           component={RiskScoreMappingEdit}
           serializer={riskScoreMappingSerializer}
           deserializer={riskScoreMappingDeserializer}
@@ -187,59 +192,59 @@ export function CommonRuleFieldEdit({ fieldName }: CommonRuleFieldEditProps) {
       );
     case 'rule_name_override':
       return (
-        <FieldFormWrapper
+        <RuleFieldEditFormWrapper
           component={RuleNameOverrideEdit}
-          fieldFormSchema={ruleNameOverrideSchema}
+          ruleFieldFormSchema={ruleNameOverrideSchema}
           serializer={ruleNameOverrideSerializer}
           deserializer={ruleNameOverrideDeserializer}
         />
       );
     case 'rule_schedule':
       return (
-        <FieldFormWrapper
+        <RuleFieldEditFormWrapper
           component={RuleScheduleEdit}
-          fieldFormSchema={ruleScheduleSchema}
+          ruleFieldFormSchema={ruleScheduleSchema}
           serializer={ruleScheduleSerializer}
           deserializer={ruleScheduleDeserializer}
         />
       );
     case 'setup':
-      return <FieldFormWrapper component={SetupEdit} fieldFormSchema={setupSchema} />;
+      return <RuleFieldEditFormWrapper component={SetupEdit} ruleFieldFormSchema={setupSchema} />;
     case 'severity':
-      return <FieldFormWrapper component={SeverityEdit} />;
+      return <RuleFieldEditFormWrapper component={SeverityEdit} />;
     case 'severity_mapping':
       return (
-        <FieldFormWrapper
+        <RuleFieldEditFormWrapper
           component={SeverityMappingEdit}
           serializer={severityMappingSerializer}
           deserializer={severityMappingDeserializer}
         />
       );
     case 'tags':
-      return <FieldFormWrapper component={TagsEdit} fieldFormSchema={tagsSchema} />;
+      return <RuleFieldEditFormWrapper component={TagsEdit} ruleFieldFormSchema={tagsSchema} />;
     case 'timeline_template':
       return (
-        <FieldFormWrapper
+        <RuleFieldEditFormWrapper
           component={TimelineTemplateEdit}
-          fieldFormSchema={timelineTemplateSchema}
+          ruleFieldFormSchema={timelineTemplateSchema}
           serializer={timelineTemplateSerializer}
           deserializer={timelineTemplateDeserializer}
         />
       );
     case 'timestamp_override':
       return (
-        <FieldFormWrapper
+        <RuleFieldEditFormWrapper
           component={TimestampOverrideEdit}
-          fieldFormSchema={timestampOverrideSchema}
+          ruleFieldFormSchema={timestampOverrideSchema}
           serializer={timestampOverrideSerializer}
           deserializer={timestampOverrideDeserializer}
         />
       );
     case 'threat':
       return (
-        <FieldFormWrapper
+        <RuleFieldEditFormWrapper
           component={ThreatEdit}
-          fieldFormSchema={threatSchema}
+          ruleFieldFormSchema={threatSchema}
           serializer={threatSerializer}
         />
       );
