@@ -40,7 +40,7 @@ export interface ISavedObjectsEncryptionExtension {
   isEncryptableType: (type: string) => boolean;
 
   /**
-   * Returns false if ESO explicilty opts out of highly random UID
+   * Returns false if ESO type explicitly opts out of highly random UID
    *
    * @param type the string name of the object type
    * @returns boolean, true by default unless explicitly set to false
