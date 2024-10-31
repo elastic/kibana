@@ -11,17 +11,16 @@
  * This way plugins can do targeted imports to reduce the final code bundle
  */
 
+import type { EuiDataGridColumn } from '@elastic/eui';
 import { ALERT_DURATION, ALERT_REASON, ALERT_STATUS, ALERT_RULE_NAME } from '@kbn/rule-data-utils';
 import { i18n } from '@kbn/i18n';
-import type { AlertColumn } from '../types';
 
 /**
  * columns implements a subset of `EuiDataGrid`'s `EuiDataGridColumn` interface,
  * plus additional TGrid column properties
  */
-export const columns: AlertColumn[] = [
+export const columns: EuiDataGridColumn[] = [
   {
-    columnHeaderType: 'not-filtered',
     displayAsText: i18n.translate(
       'xpack.observability.slo.sloAlertsEmbeddable.alertsTGrid.statusColumnDescription',
       {
@@ -32,7 +31,6 @@ export const columns: AlertColumn[] = [
     initialWidth: 110,
   },
   {
-    columnHeaderType: 'not-filtered',
     displayAsText: i18n.translate(
       'xpack.observability.slo.sloAlertsEmbeddable.alertsTGrid.durationColumnDescription',
       {
@@ -43,7 +41,6 @@ export const columns: AlertColumn[] = [
     initialWidth: 116,
   },
   {
-    columnHeaderType: 'not-filtered',
     displayAsText: i18n.translate(
       'xpack.observability.slo.sloAlertsEmbeddable.alertsTGrid.sloColumnDescription',
       {
@@ -54,7 +51,6 @@ export const columns: AlertColumn[] = [
     initialWidth: 110,
   },
   {
-    columnHeaderType: 'not-filtered',
     displayAsText: i18n.translate(
       'xpack.observability.slo.sloAlertsEmbeddable.alertsTGrid.reasonColumnDescription',
       {
@@ -62,6 +58,5 @@ export const columns: AlertColumn[] = [
       }
     ),
     id: ALERT_REASON,
-    linkField: '*',
   },
 ];
