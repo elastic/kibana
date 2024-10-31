@@ -62,5 +62,7 @@
     "@kbn/streams-app-plugin",
     "@kbn/licensing-types",
   ],
-  "exclude": ["target/**/*"]
+  "exclude": [
+    "target/**/*"
+  ]
 }
