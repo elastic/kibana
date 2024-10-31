@@ -273,7 +273,7 @@ export class ConnectorUsageReportingTask {
     timestamp.setMilliseconds(0);
 
     return {
-      id: `connector-request-body-bytes-${timestamp.toISOString()}`,
+      id: `connector-request-body-bytes-${projectId}-${timestamp.toISOString()}`,
       usage_timestamp: toStr,
       creation_timestamp: toStr,
       usage: {
