@@ -69,6 +69,7 @@ export interface MonitorSummaryStatusRule {
   };
   stateId?: string;
   lastErrorMessage?: string;
+  lastErrorStack?: string;
   timestamp: string;
   labels?: Record<string, string>;
 }

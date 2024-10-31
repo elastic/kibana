@@ -24,6 +24,7 @@ import {
   AGENT_NAME,
   STATE_ID,
   SERVICE_NAME,
+  ERROR_STACK_TRACE,
 } from '../../../common/field_names';
 import { OverviewPing } from '../../../common/runtime_types';
 import { UNNAMED_LOCATION } from '../../../common/constants';
@@ -42,6 +43,7 @@ export const getMonitorAlertDocument = (
   [OBSERVER_GEO_NAME]: locationNames,
   [OBSERVER_NAME]: locationIds,
   [ERROR_MESSAGE]: monitorSummary.lastErrorMessage,
+  [ERROR_STACK_TRACE]: monitorSummary.lastErrorStack,
   [AGENT_NAME]: monitorSummary.hostName,
   [ALERT_REASON]: monitorSummary.reason,
   [STATE_ID]: monitorSummary.stateId,
@@ -115,6 +117,7 @@ export const getMonitorSummary = ({
     monitorName,
     monitorType: typeToLabelMap[monitorInfo.monitor?.type] || monitorInfo.monitor?.type,
     lastErrorMessage: monitorInfo.error?.message!,
+    lastErrorStack: monitorInfo.error?.stack_trace!,
     serviceName: monitorInfo.service?.name,
     labels: monitorInfo.labels,
     locationName: formattedLocationName,
