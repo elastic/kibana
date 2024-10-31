@@ -200,7 +200,7 @@ export const DEFAULT_USER_SIZE = 10;
 export const MAX_ASSIGNEES_PER_CASE = 10;
 export const NO_ASSIGNEES_FILTERING_KEYWORD = 'none';
 export const KIBANA_SYSTEM_USERNAME = 'elastic/kibana';
-export const MAX_OBSERVABLES_PER_CASE = 10;
+export const MAX_OBSERVABLES_PER_CASE = 50;
 
 /**
  * Delays
