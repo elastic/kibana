@@ -9,7 +9,13 @@
 
 /* eslint-disable max-classes-per-file */
 
-import { AsyncProfileService, ContextWithProfileId, ProfileService } from './profile_service';
+import {
+  AsyncProfileProvider,
+  AsyncProfileService,
+  ContextWithProfileId,
+  ProfileProvider,
+  ProfileService,
+} from './profile_service';
 import { Profile } from './types';
 
 interface TestParams {
@@ -25,7 +31,7 @@ const defaultContext: ContextWithProfileId<TestContext> = {
   myContext: 'test',
 };
 
-class TestProfileService extends ProfileService<Profile, TestParams, TestContext> {
+class TestProfileService extends ProfileService<ProfileProvider<Profile, TestParams, TestContext>> {
   constructor() {
     super(defaultContext);
   }
@@ -33,7 +39,9 @@ class TestProfileService extends ProfileService<Profile, TestParams, TestContext
 
 type TestProfileProvider = Parameters<TestProfileService['registerProvider']>[0];
 
-class TestAsyncProfileService extends AsyncProfileService<Profile, TestParams, TestContext> {
+class TestAsyncProfileService extends AsyncProfileService<
+  AsyncProfileProvider<Profile, TestParams, TestContext>
+> {
   constructor() {
     super(defaultContext);
   }
@@ -80,17 +88,19 @@ describe('ProfileService', () => {
   it('should allow registering providers and getting profiles', () => {
     service.registerProvider(provider);
     service.registerProvider(provider2);
-    expect(service.getProfile({ profileId: 'test-profile-1', myContext: 'test' })).toBe(
-      provider.profile
-    );
-    expect(service.getProfile({ profileId: 'test-profile-2', myContext: 'test' })).toBe(
-      provider2.profile
-    );
+    expect(
+      service.getProfile({ context: { profileId: 'test-profile-1', myContext: 'test' } })
+    ).toBe(provider.profile);
+    expect(
+      service.getProfile({ context: { profileId: 'test-profile-2', myContext: 'test' } })
+    ).toBe(provider2.profile);
   });
 
   it('should return empty profile if no provider is found', () => {
     service.registerProvider(provider);
-    expect(service.getProfile({ profileId: 'test-profile-2', myContext: 'test' })).toEqual({});
+    expect(
+      service.getProfile({ context: { profileId: 'test-profile-2', myContext: 'test' } })
+    ).toEqual({});
   });
 
   it('should resolve to first matching context', () => {
