@@ -19,16 +19,12 @@ Reviewers should verify this PR satisfies this list as well.
 
 ### Identify risks
 
-Does this PR introduce any risks? For example, consider risks like hard to test bugs, performance regression, data loss, ...)
+Does this PR introduce any risks? For example, consider risks like hard to test bugs, performance regression, potential of data loss.
 
 Describe the risk, its severity, and mitigation for each identified risk. Invite stakeholders and evaluate how to proceed before merging.
 
-[See some risk examples](https://github.com/elastic/kibana/blob/main/RISK_MATRIX.mdx)
-
-| Risk                                                                                            | Probability | Severity   | Mitigation/Notes         |
-|-------------------------------------------------------------------------------------------------|-------------|------------|--------------------------|
-| Summarize the risk                                                                              | Low / High  | Low / High | Describe the mitigation  |
-| |
+- [ ] [See some risk examples](https://github.com/elastic/kibana/blob/main/RISK_MATRIX.mdx)
+- [ ] ...
 
 
 
