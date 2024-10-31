@@ -252,7 +252,7 @@ export default function apiKeyBackfillTests({ getService }: FtrProviderContext) 
         expect(e?.event?.outcome).to.eql('success');
       }
 
-      // wait for all the api_key_pending_invalidation SOs to be deleted
+      // wait for all the ad hoc run SO to be deleted
       await retry.try(async () => {
         try {
           // throws when not found
