@@ -39,7 +39,7 @@ import { CreateAnalyticsButton } from '../create_analytics_button';
 import { filterAnalytics } from '../../../../common/search_bar_filters';
 import { AnalyticsEmptyPrompt } from '../empty_prompt';
 import { useTableSettings } from './use_table_settings';
-import { JobsAwaitingNodeWarning } from '../../../../../components/jobs_awaiting_node_warning';
+import { JobsAwaitingNodeWarning } from '../../../../../components/jobs_awaiting_node_warning/jobs_awaiting_node_warning';
 import { useRefresh } from '../../../../../routing/use_refresh';
 
 const filters: EuiSearchBarProps['filters'] = [
