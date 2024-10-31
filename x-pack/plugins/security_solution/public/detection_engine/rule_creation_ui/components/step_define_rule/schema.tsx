@@ -34,6 +34,9 @@ import type { DefineStepRule } from '../../../../detections/pages/detection_engi
 import { DataSourceType } from '../../../../detections/pages/detection_engine/rules/types';
 import { debounceAsync, eqlValidator } from '../eql_query_bar/validators';
 import { esqlValidator } from '../../../rule_creation/logic/esql_validator';
+import { dataViewIdValidatorFactory } from '../../validators/data_view_id_validator_factory';
+import { indexPatternValidatorFactory } from '../../validators/index_pattern_validator_factory';
+import { alertSuppressionFieldsValidatorFactory } from '../../validators/alert_suppression_fields_validator_factory';
 import {
   CUSTOM_QUERY_REQUIRED,
   INVALID_CUSTOM_QUERY,
@@ -44,8 +47,6 @@ import {
   EQL_SEQUENCE_SUPPRESSION_GROUPBY_VALIDATION_TEXT,
 } from './translations';
 import { getQueryRequiredMessage } from './utils';
-import { dataViewIdValidatorFactory } from '../../validators/data_view_id_validator_factory';
-import { indexPatternValidatorFactory } from '../../validators/index_pattern_validator_factory';
 
 export const schema: FormSchema<DefineStepRule> = {
   index: {
@@ -658,24 +659,15 @@ export const schema: FormSchema<DefineStepRule> = {
     ),
     validations: [
       {
-        validator: (
-          ...args: Parameters<ValidationFunc>
-        ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
+        validator: (...args: Parameters<ValidationFunc>) => {
           const [{ formData }] = args;
           const needsValidation = isSuppressionRuleConfiguredWithGroupBy(formData.ruleType);
 
           if (!needsValidation) {
             return;
           }
-          return fieldValidators.maxLengthField({
-            length: 3,
-            message: i18n.translate(
-              'xpack.securitySolution.detectionEngine.validations.stepDefineRule.groupByFieldsMax',
-              {
-                defaultMessage: 'Number of grouping fields must be at most 3',
-              }
-            ),
-          })(...args);
+
+          return alertSuppressionFieldsValidatorFactory()(...args);
         },
       },
       {
