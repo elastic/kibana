@@ -53,6 +53,11 @@ export function DashboardRenderer({
   const [error, setError] = useState<Error | undefined>();
 
   useEffect(() => {
+    /* In case the locator prop changes, we need to reassign the value in the container */
+    if (dashboardApi) dashboardApi.locator = locator;
+  }, [dashboardApi, locator]);
+
+  useEffect(() => {
     if (error) setError(undefined);
     if (dashboardApi) setDashboardApi(undefined);
     if (dashboardInternalApi) setDashboardInternalApi(undefined);

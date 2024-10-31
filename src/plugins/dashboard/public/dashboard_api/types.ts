@@ -52,12 +52,16 @@ import { RefreshInterval, SearchSessionInfoProvider } from '@kbn/data-plugin/pub
 import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { PublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
 import { PublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
+import { LocatorPublic } from '@kbn/share-plugin/common';
 import { DashboardOptions, DashboardPanelMap, DashboardPanelState } from '../../common';
 import {
   LoadDashboardReturn,
   SaveDashboardReturn,
 } from '../services/dashboard_content_management_service/types';
-import { DashboardStateFromSettingsFlyout } from '../dashboard_container/types';
+import {
+  DashboardLocatorParams,
+  DashboardStateFromSettingsFlyout,
+} from '../dashboard_container/types';
 
 export const DASHBOARD_API_TYPE = 'dashboard';
 
@@ -161,6 +165,7 @@ export type DashboardApi = CanExpandPanels &
     highlightPanelId$: PublishingSubject<string | undefined>;
     isEmbeddedExternally: boolean;
     isManaged: boolean;
+    locator?: Pick<LocatorPublic<DashboardLocatorParams>, 'navigate' | 'getRedirectUrl'>;
     panels$: PublishingSubject<DashboardPanelMap>;
     runInteractiveSave: () => Promise<SaveDashboardReturn | undefined>;
     runQuickSave: () => Promise<void>;
