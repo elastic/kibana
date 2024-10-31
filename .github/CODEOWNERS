@@ -1034,6 +1034,8 @@ x-pack/test_serverless/api_integration/test_suites/common/platform_security @ela
 /x-pack/test/api_integration/apis/entity_manager @elastic/obs-entities
 
 # Data Discovery
+/test/plugin_functional/plugins/data_search @elastic/kibana-data-discovery
+/test/plugin_functional/plugins/index_patterns @elastic/kibana-data-discovery
 /x-pack/test/api_integration/apis/kibana/kql_telemetry @elastic/kibana-data-discovery @elastic/kibana-visualizations
 /x-pack/test_serverless/functional/es_archives/pre_calculated_histogram @elastic/kibana-data-discovery
 /x-pack/test_serverless/functional/es_archives/kibana_sample_data_flights_index_pattern @elastic/kibana-data-discovery
@@ -1161,6 +1163,7 @@ x-pack/test_serverless/**/test_suites/observability/ai_assistant @elastic/obs-ai
 ## This should allow the infra team to work without dependencies on the @elastic/obs-ux-logs-team, which will maintain ownership of the Logs UI code only.
 
 ## infra/{common,docs,public,server}/{sub-folders}/ -> @elastic/obs-ux-infra_services-team
+/test/common/plugins/otel_metrics @elastic/obs-ux-infra_services-team
 /x-pack/plugins/observability_solution/infra/common @elastic/obs-ux-infra_services-team
 /x-pack/plugins/observability_solution/infra/docs @elastic/obs-ux-infra_services-team
 /x-pack/plugins/observability_solution/infra/public/alerting @elastic/obs-ux-infra_services-team
@@ -2009,6 +2012,10 @@ x-pack/test/profiling_api_integration @elastic/obs-ux-infra_services-team
 x-pack/plugins/observability_solution/observability_shared/public/components/profiling @elastic/obs-ux-infra_services-team
 
 # Shared UX
+/test/examples/content_management @elastic/appex-sharedux
+/test/plugin_functional/plugins/kbn_sample_panel_action @elastic/appex-sharedux
+/test/functional/apps/kibana_overview @elastic/appex-sharedux
+/test/plugin_functional/plugins/eui_provider_dev_warning @elastic/appex-sharedux
 /x-pack/test/banners_functional @elastic/appex-sharedux
 /x-pack/test/custom_branding @elastic/appex-sharedux
 /x-pack/test/accessibility/apps/group3/snapshot_and_restore.ts @elastic/appex-sharedux
