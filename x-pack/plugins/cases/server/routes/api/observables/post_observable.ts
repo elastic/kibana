@@ -20,7 +20,7 @@ export const postObservableRoute = createCasesRoute({
     }),
   },
   routerOptions: {
-    access: 'public',
+    access: 'internal',
     summary: `Add a case observable`,
     tags: ['oas-tag:cases'],
     description: 'Each case can have a maximum of 10 observables.',

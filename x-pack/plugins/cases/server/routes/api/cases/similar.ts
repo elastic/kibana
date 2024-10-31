@@ -14,7 +14,7 @@ export const similarCaseRoute = createCasesRoute({
   method: 'post',
   path: `${CASES_INTERNAL_URL}/_similar`,
   routerOptions: {
-    access: 'public',
+    access: 'internal',
     summary: `Similar cases`,
     tags: ['oas-tag:cases'],
   },
