@@ -93,68 +93,64 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       it('"editor" can retrieve their own private instructions and the public instruction', async () => {
-        await retry.try(async () => {
-          const res = await observabilityAIAssistantAPIClient.editorUser({
-            endpoint: 'GET /internal/observability_ai_assistant/kb/user_instructions',
-          });
-
-          const instructions = res.body.userInstructions;
-
-          const sortByDocId = (data: Array<Instruction & { public?: boolean }>) =>
-            sortBy(data, 'doc_id');
-
-          expect(sortByDocId(instructions)).to.eql(
-            sortByDocId([
-              {
-                doc_id: 'private-doc-from-editor',
-                public: false,
-                text: 'Private user instruction from "editor"',
-              },
-              {
-                doc_id: 'public-doc-from-editor',
-                public: true,
-                text: 'Public user instruction from "editor"',
-              },
-              {
-                doc_id: 'public-doc-from-john',
-                public: true,
-                text: 'Public user instruction from "john"',
-              },
-            ])
-          );
+        const res = await observabilityAIAssistantAPIClient.editorUser({
+          endpoint: 'GET /internal/observability_ai_assistant/kb/user_instructions',
         });
+
+        const instructions = res.body.userInstructions;
+
+        const sortByDocId = (data: Array<Instruction & { public?: boolean }>) =>
+          sortBy(data, 'doc_id');
+
+        expect(sortByDocId(instructions)).to.eql(
+          sortByDocId([
+            {
+              doc_id: 'private-doc-from-editor',
+              public: false,
+              text: 'Private user instruction from "editor"',
+            },
+            {
+              doc_id: 'public-doc-from-editor',
+              public: true,
+              text: 'Public user instruction from "editor"',
+            },
+            {
+              doc_id: 'public-doc-from-john',
+              public: true,
+              text: 'Public user instruction from "john"',
+            },
+          ])
+        );
       });
 
       it('"john" can retrieve their own private instructions and the public instruction', async () => {
-        await retry.try(async () => {
-          const res = await getScopedApiClientForUsername(userJohn)({
-            endpoint: 'GET /internal/observability_ai_assistant/kb/user_instructions',
-          });
-          const instructions = res.body.userInstructions;
-
-          const sortByDocId = (data: Array<Instruction & { public?: boolean }>) =>
-            sortBy(data, 'doc_id');
-
-          expect(sortByDocId(instructions)).to.eql(
-            sortByDocId([
-              {
-                doc_id: 'public-doc-from-editor',
-                public: true,
-                text: 'Public user instruction from "editor"',
-              },
-              {
-                doc_id: 'public-doc-from-john',
-                public: true,
-                text: 'Public user instruction from "john"',
-              },
-              {
-                doc_id: 'private-doc-from-john',
-                public: false,
-                text: 'Private user instruction from "john"',
-              },
-            ])
-          );
+        const res = await getScopedApiClientForUsername(userJohn)({
+          endpoint: 'GET /internal/observability_ai_assistant/kb/user_instructions',
         });
+        const instructions = res.body.userInstructions;
+
+        const sortByDocId = (data: Array<Instruction & { public?: boolean }>) =>
+          sortBy(data, 'doc_id');
+
+        expect(sortByDocId(instructions)).to.eql(
+          sortByDocId([
+            {
+              doc_id: 'public-doc-from-editor',
+              public: true,
+              text: 'Public user instruction from "editor"',
+            },
+            {
+              doc_id: 'public-doc-from-john',
+              public: true,
+              text: 'Public user instruction from "john"',
+            },
+            {
+              doc_id: 'private-doc-from-john',
+              public: false,
+              text: 'Private user instruction from "john"',
+            },
+          ])
+        );
       });
     });
 
