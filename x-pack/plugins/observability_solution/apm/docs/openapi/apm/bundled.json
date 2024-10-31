@@ -291,8 +291,7 @@
     },
     "/api/apm/settings/agent-configuration": {
       "get": {
-        "summary": "List of agent configurations",
-        "description": "Get a list of agent configurations.",
+        "summary": "Get a list of agent configurations",
         "operationId": "getAgentConfigurations",
         "tags": [
           "APM agent configuration"
@@ -438,6 +437,7 @@
           {
             "name": "overwrite",
             "in": "query",
+            "description": "If the config exists ?overwrite=true is required",
             "schema": {
               "type": "boolean"
             }
@@ -798,6 +798,7 @@
           {
             "name": "page",
             "in": "query",
+            "description": "Page number",
             "schema": {
               "type": "number"
             }
@@ -805,6 +806,7 @@
           {
             "name": "perPage",
             "in": "query",
+            "description": "Number of records per page",
             "schema": {
               "type": "number"
             }
@@ -970,6 +972,8 @@
           {
             "name": "id",
             "in": "path",
+            "description": "Source map identifier",
+            "required": true,
             "schema": {
               "type": "string"
             }
@@ -1166,10 +1170,12 @@
         ],
         "properties": {
           "name": {
-            "type": "string"
+            "type": "string",
+            "description": "Agent name"
           },
           "privileges": {
             "type": "array",
+            "description": "Privileges configuration",
             "items": {
               "type": "string",
               "enum": [
@@ -1185,6 +1191,7 @@
         "properties": {
           "agentKey": {
             "type": "object",
+            "description": "Agent key",
             "required": [
               "id",
               "name",
@@ -1217,15 +1224,18 @@
         "properties": {
           "statusCode": {
             "type": "number",
-            "example": 400
+            "example": 400,
+            "description": "Error status code"
           },
           "error": {
             "type": "string",
-            "example": "Not Found"
+            "example": "Not Found",
+            "description": "Error type"
           },
           "message": {
             "type": "string",
-            "example": "Not Found"
+            "example": "Not Found",
+            "description": "Error message"
           }
         }
       },
@@ -1234,14 +1244,17 @@
         "properties": {
           "statusCode": {
             "type": "number",
-            "example": 401
+            "example": 401,
+            "description": "Error status code"
           },
           "error": {
             "type": "string",
-            "example": "Unauthorized"
+            "example": "Unauthorized",
+            "description": "Error type"
           },
           "message": {
-            "type": "string"
+            "type": "string",
+            "description": "Error message"
           }
         }
       },
@@ -1250,14 +1263,17 @@
         "properties": {
           "statusCode": {
             "type": "number",
-            "example": 403
+            "example": 403,
+            "description": "Error status code"
           },
           "error": {
             "type": "string",
-            "example": "Forbidden"
+            "example": "Forbidden",
+            "description": "Error type"
           },
           "message": {
-            "type": "string"
+            "type": "string",
+            "description": "Error message"
           }
         }
       },
@@ -1266,14 +1282,17 @@
         "properties": {
           "statusCode": {
             "type": "number",
-            "example": 500
+            "example": 500,
+            "description": "Error status code"
           },
           "error": {
             "type": "string",
-            "example": "Internal Server Error"
+            "example": "Internal Server Error",
+            "description": "Error type"
           },
           "message": {
-            "type": "string"
+            "type": "string",
+            "description": "Error message"
           }
         }
       },
@@ -1282,6 +1301,7 @@
         "properties": {
           "annotations": {
             "type": "array",
+            "description": "Annotations",
             "items": {
               "type": "object",
               "properties": {
@@ -1313,10 +1333,12 @@
         ],
         "properties": {
           "@timestamp": {
-            "type": "string"
+            "type": "string",
+            "description": "Timestamp"
           },
           "service": {
             "type": "object",
+            "description": "Service",
             "required": [
               "version"
             ],
@@ -1330,10 +1352,12 @@
             }
           },
           "message": {
-            "type": "string"
+            "type": "string",
+            "description": "Message"
           },
           "tags": {
             "type": "array",
+            "description": "Tags",
             "items": {
               "type": "string"
             }
@@ -1344,13 +1368,16 @@
         "type": "object",
         "properties": {
           "_id": {
-            "type": "string"
+            "type": "string",
+            "description": "Identifier"
           },
           "_index": {
-            "type": "string"
+            "type": "string",
+            "description": "Index"
           },
           "_source": {
             "type": "object",
+            "description": "Response",
             "properties": {
               "annotation": {
                 "type": "object",
@@ -1406,33 +1433,40 @@
         "properties": {
           "statusCode": {
             "type": "number",
-            "example": 404
+            "example": 404,
+            "description": "Error status code"
           },
           "error": {
             "type": "string",
-            "example": "Not Found"
+            "example": "Not Found",
+            "description": "Error type"
           },
           "message": {
             "type": "string",
-            "example": "Not Found"
+            "example": "Not Found",
+            "description": "Error message"
           }
         }
       },
       "service_object": {
         "type": "object",
+        "description": "Service",
         "properties": {
           "name": {
             "type": "string",
-            "example": "node"
+            "example": "node",
+            "description": "Name"
           },
           "environment": {
             "type": "string",
-            "example": "prod"
+            "example": "prod",
+            "description": "Environment"
           }
         }
       },
       "settings_object": {
         "type": "object",
+        "description": "Agent configuration settings",
         "additionalProperties": {
           "type": "string"
         }
@@ -1445,9 +1479,11 @@
           "@timestamp",
           "etag"
         ],
+        "description": "Agent configuration",
         "properties": {
           "agent_name": {
-            "type": "string"
+            "type": "string",
+            "description": "Agent name"
           },
           "service": {
             "$ref": "#/components/schemas/service_object"
@@ -1457,15 +1493,18 @@
           },
           "@timestamp": {
             "type": "number",
-            "example": 1730194190636
+            "example": 1730194190636,
+            "description": "Timestamp"
           },
           "applied_by_agent": {
             "type": "boolean",
-            "example": true
+            "example": true,
+            "description": "Applied by agent"
           },
           "etag": {
             "type": "string",
-            "example": "0bc3b5ebf18fba8163fe4c96f491e3767a358f85"
+            "example": "0bc3b5ebf18fba8163fe4c96f491e3767a358f85",
+            "description": "Etag"
           }
         }
       },
@@ -1474,6 +1513,7 @@
         "properties": {
           "configurations": {
             "type": "array",
+            "description": "Agent configuration",
             "items": {
               "$ref": "#/components/schemas/agent_configuration_object"
             }
@@ -1488,7 +1528,8 @@
         ],
         "properties": {
           "agent_name": {
-            "type": "string"
+            "type": "string",
+            "description": "Agent name"
           },
           "service": {
             "$ref": "#/components/schemas/service_object"
@@ -1502,7 +1543,8 @@
         "type": "object",
         "properties": {
           "result": {
-            "type": "string"
+            "type": "string",
+            "description": "Result"
           }
         }
       },
@@ -1548,13 +1590,16 @@
         "type": "object",
         "properties": {
           "_index": {
-            "type": "string"
+            "type": "string",
+            "description": "Index"
           },
           "_id": {
-            "type": "string"
+            "type": "string",
+            "description": "Identifier"
           },
           "_score": {
-            "type": "number"
+            "type": "number",
+            "description": "Score"
           },
           "_source": {
             "$ref": "#/components/schemas/agent_configuration_object"
@@ -1566,10 +1611,12 @@
         "properties": {
           "name": {
             "type": "string",
-            "example": "ALL_OPTION_VALUE"
+            "example": "ALL_OPTION_VALUE",
+            "description": "Service environment name"
           },
           "alreadyConfigured": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "Already configured"
           }
         }
       },
@@ -1578,6 +1625,7 @@
         "properties": {
           "environments": {
             "type": "array",
+            "description": "Service environment list",
             "items": {
               "$ref": "#/components/schemas/service_environment_object"
             }
@@ -1589,6 +1637,7 @@
         "properties": {
           "agentName": {
             "type": "string",
+            "description": "Agent name",
             "example": "nodejs"
           }
         }
@@ -1597,40 +1646,52 @@
         "type": "object",
         "properties": {
           "type": {
-            "type": "string"
+            "type": "string",
+            "description": "Type"
           },
           "identifier": {
-            "type": "string"
+            "type": "string",
+            "description": "Identifier"
           },
           "relative_url": {
-            "type": "string"
+            "type": "string",
+            "description": "Relative URL"
           },
           "created": {
-            "type": "string"
+            "type": "string",
+            "description": "Created date"
           },
           "id": {
-            "type": "string"
+            "type": "string",
+            "description": "Identifier"
           },
           "compressionAlgorithm": {
-            "type": "string"
+            "type": "string",
+            "description": "Compression Algorithm"
           },
           "decodedSha256": {
-            "type": "string"
+            "type": "string",
+            "description": "Decoded SHA-256"
           },
           "decodedSize": {
-            "type": "number"
+            "type": "number",
+            "description": "Decoded size"
           },
           "encodedSha256": {
-            "type": "string"
+            "type": "string",
+            "description": "Encoded SHA-256"
           },
           "encodedSize": {
-            "type": "number"
+            "type": "number",
+            "description": "Encoded size"
           },
           "encryptionAlgorithm": {
-            "type": "string"
+            "type": "string",
+            "description": "Encryption Algorithm"
           },
           "packageName": {
-            "type": "string"
+            "type": "string",
+            "description": "Package name"
           }
         }
       },
@@ -1639,6 +1700,7 @@
         "properties": {
           "artifacts": {
             "type": "array",
+            "description": "Artifacts",
             "items": {
               "allOf": [
                 {
@@ -1702,15 +1764,18 @@
         "properties": {
           "statusCode": {
             "type": "number",
-            "example": 501
+            "example": 501,
+            "description": "Error status code"
           },
           "error": {
             "type": "string",
-            "example": "Not Implemented"
+            "example": "Not Implemented",
+            "description": "Error type"
           },
           "message": {
             "type": "string",
-            "example": "Not Implemented"
+            "example": "Not Implemented",
+            "description": "Error message"
           }
         }
       },

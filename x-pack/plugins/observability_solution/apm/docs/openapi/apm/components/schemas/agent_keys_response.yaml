@@ -2,6 +2,7 @@ type: object
 properties:
   agentKey:
     type: object
+    description: Agent key
     required:
       - id
       - name

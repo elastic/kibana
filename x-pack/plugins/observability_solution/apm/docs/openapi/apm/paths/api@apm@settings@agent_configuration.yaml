@@ -1,6 +1,5 @@
 get:
-  summary: List of agent configurations
-  description: Get a list of agent configurations.
+  summary: Get a list of agent configurations
   operationId: getAgentConfigurations
   tags:
     - APM agent configuration
@@ -86,6 +85,7 @@ put:
     - $ref: '../components/headers/kbn_xsrf.yaml'
     - name: overwrite
       in: query
+      description: If the config exists ?overwrite=true is required
       schema:
         type: boolean
   requestBody:

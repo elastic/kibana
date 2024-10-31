@@ -2,6 +2,7 @@ type: object
 properties:
   annotations:
     type: array
+    description: Annotations
     items:
       type: object
       properties:

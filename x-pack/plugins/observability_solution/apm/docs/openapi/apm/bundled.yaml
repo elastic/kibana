@@ -177,8 +177,7 @@ paths:
                 $ref: '#/components/schemas/404_response'
   /api/apm/settings/agent-configuration:
     get:
-      summary: List of agent configurations
-      description: Get a list of agent configurations.
+      summary: Get a list of agent configurations
       operationId: getAgentConfigurations
       tags:
         - APM agent configuration
@@ -264,6 +263,7 @@ paths:
         - $ref: '#/components/parameters/kbn_xsrf'
         - name: overwrite
           in: query
+          description: If the config exists ?overwrite=true is required
           schema:
             type: boolean
       requestBody:
@@ -481,10 +481,12 @@ paths:
         - $ref: '#/components/parameters/elastic_api_version'
         - name: page
           in: query
+          description: Page number
           schema:
             type: number
         - name: perPage
           in: query
+          description: Number of records per page
           schema:
             type: number
       responses:
@@ -582,6 +584,8 @@ paths:
         - $ref: '#/components/parameters/kbn_xsrf'
         - name: id
           in: path
+          description: Source map identifier
+          required: true
           schema:
             type: string
       responses:
@@ -705,8 +709,10 @@ components:
       properties:
         name:
           type: string
+          description: Agent name
         privileges:
           type: array
+          description: Privileges configuration
           items:
             type: string
             enum:
@@ -717,6 +723,7 @@ components:
       properties:
         agentKey:
           type: object
+          description: Agent key
           required:
             - id
             - name
@@ -740,50 +747,63 @@ components:
         statusCode:
           type: number
           example: 400
+          description: Error status code
         error:
           type: string
           example: Not Found
+          description: Error type
         message:
           type: string
           example: Not Found
+          description: Error message
     401_response:
       type: object
       properties:
         statusCode:
           type: number
           example: 401
+          description: Error status code
         error:
           type: string
           example: Unauthorized
+          description: Error type
         message:
           type: string
+          description: Error message
     403_response:
       type: object
       properties:
         statusCode:
           type: number
           example: 403
+          description: Error status code
         error:
           type: string
           example: Forbidden
+          description: Error type
         message:
           type: string
+          description: Error message
     500_response:
       type: object
       properties:
         statusCode:
           type: number
           example: 500
+          description: Error status code
         error:
           type: string
           example: Internal Server Error
+          description: Error type
         message:
           type: string
+          description: Error message
     annotation_search_response:
       type: object
       properties:
         annotations:
           type: array
+          description: Annotations
           items:
             type: object
             properties:
@@ -805,8 +825,10 @@ components:
       properties:
         '@timestamp':
           type: string
+          description: Timestamp
         service:
           type: object
+          description: Service
           required:
             - version
           properties:
@@ -816,8 +838,10 @@ components:
               type: string
         message:
           type: string
+          description: Message
         tags:
           type: array
+          description: Tags
           items:
             type: string
     create_annotation_response:
@@ -825,10 +849,13 @@ components:
       properties:
         _id:
           type: string
+          description: Identifier
         _index:
           type: string
+          description: Index
         _source:
           type: object
+          description: Response
           properties:
             annotation:
               type: object
@@ -865,23 +892,30 @@ components:
         statusCode:
           type: number
           example: 404
+          description: Error status code
         error:
           type: string
           example: Not Found
+          description: Error type
         message:
           type: string
           example: Not Found
+          description: Error message
     service_object:
       type: object
+      description: Service
       properties:
         name:
           type: string
           example: node
+          description: Name
         environment:
           type: string
           example: prod
+          description: Environment
     settings_object:
       type: object
+      description: Agent configuration settings
       additionalProperties:
         type: string
     agent_configuration_object:
@@ -891,9 +925,11 @@ components:
         - settings
         - '@timestamp'
         - etag
+      description: Agent configuration
       properties:
         agent_name:
           type: string
+          description: Agent name
         service:
           $ref: '#/components/schemas/service_object'
         settings:
@@ -901,17 +937,21 @@ components:
         '@timestamp':
           type: number
           example: 1730194190636
+          description: Timestamp
         applied_by_agent:
           type: boolean
           example: true
+          description: Applied by agent
         etag:
           type: string
           example: 0bc3b5ebf18fba8163fe4c96f491e3767a358f85
+          description: Etag
     agent_configurations_response:
       type: object
       properties:
         configurations:
           type: array
+          description: Agent configuration
           items:
             $ref: '#/components/schemas/agent_configuration_object'
     agent_configuration_intake_object:
@@ -922,6 +962,7 @@ components:
       properties:
         agent_name:
           type: string
+          description: Agent name
         service:
           $ref: '#/components/schemas/service_object'
         settings:
@@ -931,6 +972,7 @@ components:
       properties:
         result:
           type: string
+          description: Result
     single_agent_configuration_response:
       allOf:
         - type: object
@@ -961,10 +1003,13 @@ components:
       properties:
         _index:
           type: string
+          description: Index
         _id:
           type: string
+          description: Identifier
         _score:
           type: number
+          description: Score
         _source:
           $ref: '#/components/schemas/agent_configuration_object'
     service_environment_object:
@@ -973,13 +1018,16 @@ components:
         name:
           type: string
           example: ALL_OPTION_VALUE
+          description: Service environment name
         alreadyConfigured:
           type: boolean
+          description: Already configured
     service_environments_response:
       type: object
       properties:
         environments:
           type: array
+          description: Service environment list
           items:
             $ref: '#/components/schemas/service_environment_object'
     service_agent_name_response:
@@ -987,39 +1035,53 @@ components:
       properties:
         agentName:
           type: string
+          description: Agent name
           example: nodejs
     base_source_map_object:
       type: object
       properties:
         type:
           type: string
+          description: Type
         identifier:
           type: string
+          description: Identifier
         relative_url:
           type: string
+          description: Relative URL
         created:
           type: string
+          description: Created date
         id:
           type: string
+          description: Identifier
         compressionAlgorithm:
           type: string
+          description: Compression Algorithm
         decodedSha256:
           type: string
+          description: Decoded SHA-256
         decodedSize:
           type: number
+          description: Decoded size
         encodedSha256:
           type: string
+          description: Encoded SHA-256
         encodedSize:
           type: number
+          description: Encoded size
         encryptionAlgorithm:
           type: string
+          description: Encryption Algorithm
         packageName:
           type: string
+          description: Package name
     source_maps_response:
       type: object
       properties:
         artifacts:
           type: array
+          description: Artifacts
           items:
             allOf:
               - type: object
@@ -1059,12 +1121,15 @@ components:
         statusCode:
           type: number
           example: 501
+          description: Error status code
         error:
           type: string
           example: Not Implemented
+          description: Error type
         message:
           type: string
           example: Not Implemented
+          description: Error message
     upload_source_map_object:
       type: object
       required:

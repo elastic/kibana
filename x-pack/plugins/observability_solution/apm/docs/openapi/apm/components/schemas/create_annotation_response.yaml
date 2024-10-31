@@ -2,10 +2,13 @@ type: object
 properties:
   _id:
     type: string
+    description: Identifier
   _index:
     type: string
+    description: Index
   _source:
     type: object
+    description: Response
     properties:
       annotation:
         type: object

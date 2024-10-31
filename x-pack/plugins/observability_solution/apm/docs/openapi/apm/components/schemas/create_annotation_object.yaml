@@ -5,8 +5,10 @@ required:
 properties:
   '@timestamp':
     type: string
+    description: Timestamp
   service:
     type: object
+    description: Service
     required:
       - version
     properties:
@@ -16,7 +18,9 @@ properties:
         type: string
   message:
     type: string
+    description: Message
   tags:
     type: array
+    description: Tags
     items:
       type: string

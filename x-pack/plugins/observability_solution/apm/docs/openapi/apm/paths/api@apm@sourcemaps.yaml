@@ -8,10 +8,12 @@ get:
     - $ref: '../components/headers/elastic_api_version.yaml'
     - name: page
       in: query
+      description: Page number
       schema:
         type: number
     - name: perPage
       in: query
+      description: Number of records per page
       schema:
         type: number
   responses:

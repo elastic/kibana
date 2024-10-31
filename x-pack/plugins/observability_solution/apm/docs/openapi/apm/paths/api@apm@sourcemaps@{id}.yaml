@@ -9,6 +9,8 @@ delete:
     - $ref: '../components/headers/kbn_xsrf.yaml'
     - name: id
       in: path
+      description: Source map identifier
+      required: true
       schema:
         type: string
   responses:

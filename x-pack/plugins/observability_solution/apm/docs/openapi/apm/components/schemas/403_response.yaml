@@ -3,8 +3,11 @@ properties:
   statusCode:
     type: number
     example: 403
+    description: Error status code
   error:
     type: string
     example: Forbidden
+    description: Error type
   message:
     type: string
+    description: Error message

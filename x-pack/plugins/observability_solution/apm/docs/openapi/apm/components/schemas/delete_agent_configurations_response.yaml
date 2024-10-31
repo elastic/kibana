@@ -2,3 +2,4 @@ type: object
 properties:
   result:
     type: string
+    description: Result

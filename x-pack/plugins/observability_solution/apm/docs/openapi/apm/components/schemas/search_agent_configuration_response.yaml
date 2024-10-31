@@ -2,9 +2,12 @@ type: object
 properties:
   _index:
     type: string
+    description: Index
   _id:
     type: string
+    description: Identifier
   _score:
     type: number
+    description: Score
   _source:
     $ref: 'agent_configuration_object.yaml'

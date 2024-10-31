@@ -1,3 +1,4 @@
 type: object
+description: Agent configuration settings
 additionalProperties:
   type: string

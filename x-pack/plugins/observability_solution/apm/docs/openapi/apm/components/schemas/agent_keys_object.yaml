@@ -5,8 +5,10 @@ required:
 properties:
   name:
     type: string
+    description: Agent name
   privileges:
     type: array
+    description: Privileges configuration
     items:
       type: string
       enum:

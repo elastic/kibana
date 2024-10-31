@@ -2,6 +2,7 @@ type: object
 properties:
   artifacts:
     type: array
+    description: Artifacts
     items:
       allOf:
         - type: object

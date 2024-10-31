@@ -5,6 +5,7 @@ required:
 properties:
   agent_name:
     type: string
+    description: Agent name
   service:
     $ref: 'service_object.yaml'
   settings:

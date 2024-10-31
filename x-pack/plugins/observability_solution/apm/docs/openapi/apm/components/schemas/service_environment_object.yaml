@@ -3,5 +3,7 @@ properties:
   name:
     type: string
     example: ALL_OPTION_VALUE
+    description: Service environment name
   alreadyConfigured:
     type: boolean
+    description: Already configured
