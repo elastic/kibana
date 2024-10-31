@@ -9,11 +9,9 @@ import { i18n } from '@kbn/i18n';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { apiIsOfType } from '@kbn/presentation-publishing/interfaces/has_type';
-import {
-  IncompatibleActionError,
-  type UiActionsActionDefinition,
-} from '@kbn/ui-actions-plugin/public';
-import { ML_APP_LOCATOR, ML_PAGES } from '@kbn/ml-common-types/locator';
+import { type UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
+import { ML_APP_LOCATOR } from '@kbn/ml-common-types/locator_app_locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import type { SingleMetricViewerEmbeddableApi } from '../embeddables/types';
 import { ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE } from '../embeddables/constants';
 
@@ -81,6 +79,8 @@ export function createOpenInSingleMetricViewerAction(
       }
     },
     async execute(context) {
+      const { IncompatibleActionError } = await import('@kbn/ui-actions-plugin/public');
+
       if (!isSingleMetricViewerEmbeddableContext(context)) {
         throw new IncompatibleActionError();
       }
