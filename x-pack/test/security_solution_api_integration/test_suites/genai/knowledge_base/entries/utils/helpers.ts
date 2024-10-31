@@ -104,7 +104,7 @@ export const getKnowledgeBaseStatus = async (
     .send();
   if (response.status !== 200) {
     throw new Error(
-      `Unexpected non 200 ok when attempting to setup Knowledge Base: ${JSON.stringify(
+      `Unexpected non 200 ok when attempting to get Knowledge Base status: ${JSON.stringify(
         response.status
       )},${JSON.stringify(response, null, 4)}`
     );
