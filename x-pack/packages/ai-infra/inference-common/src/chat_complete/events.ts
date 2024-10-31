@@ -43,6 +43,20 @@ export type ChatCompletionTokenCountEvent =
     };
   };
 
+/**
+ * Events emitted from the {@link ChatCompletionResponse} observable
+ * returned from the {@link ChatCompleteAPI}.
+ *
+ * The chatComplete API returns 3 type of events:
+ * - {@link ChatCompletionChunkEvent}: message chunk events
+ * - {@link ChatCompletionTokenCountEvent}: token count event
+ * - {@link ChatCompletionMessageEvent}: message event
+ *
+ * Note that chunk events can be emitted any amount of times, but token count will be emitted
+ * at most once (could not be emitted depending on the underlying connector), and message
+ * event will be emitted ex
+ *
+ */
 export type ChatCompletionEvent<TToolOptions extends ToolOptions = ToolOptions> =
   | ChatCompletionChunkEvent
   | ChatCompletionTokenCountEvent

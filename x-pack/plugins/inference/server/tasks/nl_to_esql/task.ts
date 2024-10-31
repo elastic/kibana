@@ -6,16 +6,12 @@
  */
 
 import { once } from 'lodash';
-import { Observable, Subject } from 'rxjs';
-import { MessageRole, type Message, type ToolOptions } from '@kbn/inference-common';
+import { Observable, from, switchMap } from 'rxjs';
+import { Message, MessageRole } from '../../../common/chat_complete';
+import type { ToolOptions } from '../../../common/chat_complete/tools';
 import { EsqlDocumentBase } from './doc_base';
-import {
-  type ActionsOptionsBase,
-  generateEsqlTaskFn,
-  requestDocumentationFn,
-  summarizeDiscussionFn,
-} from './actions';
-import { NlToEsqlTaskEvent, NlToEsqlTaskParams } from './types';
+import { requestDocumentation, generateEsqlTask } from './actions';
+import { NlToEsqlTaskParams, NlToEsqlTaskEvent } from './types';
 
 const loadDocBase = once(() => EsqlDocumentBase.load());
 
@@ -26,60 +22,48 @@ export function naturalLanguageToEsql<TToolOptions extends ToolOptions>({
   toolChoice,
   logger,
   functionCalling,
-  summarizeInput = false,
   ...rest
 }: NlToEsqlTaskParams<TToolOptions>): Observable<NlToEsqlTaskEvent<TToolOptions>> {
-  const output$ = new Subject<NlToEsqlTaskEvent<TToolOptions>>();
-
-  const baseOptions: ActionsOptionsBase = {
-    client,
-    connectorId,
-    functionCalling,
-    logger,
-    output$,
-  };
-
-  loadDocBase()
-    .then(async (docBase) => {
-      let messages: Message[] =
+  return from(loadDocBase()).pipe(
+    switchMap((docBase) => {
+      const systemMessage = docBase.getSystemMessage();
+      const messages: Message[] =
         'input' in rest ? [{ role: MessageRole.User, content: rest.input }] : rest.messages;
 
-      const summarizeDiscussion = summarizeDiscussionFn({
-        ...baseOptions,
-      });
-      const requestDocumentation = requestDocumentationFn({
-        ...baseOptions,
+      const askLlmToRespond = generateEsqlTask({
+        connectorId,
+        chatCompleteApi: client.chatComplete,
+        messages,
         docBase,
-        system: docBase.getSystemMessage(),
-      });
-      const generateEsql = generateEsqlTaskFn({
-        ...baseOptions,
-        systemMessage: docBase.getSystemMessage(),
+        logger,
+        systemMessage,
+        functionCalling,
+        toolOptions: {
+          tools,
+          toolChoice,
+        },
       });
 
-      if (summarizeInput) {
-        const discussionSummary = await summarizeDiscussion({ messages });
-        messages = discussionFromSummary(discussionSummary.summary);
-      }
-
-      const documentationRequest = await requestDocumentation({
+      return requestDocumentation({
+        connectorId,
+        functionCalling,
+        outputApi: client.output,
         messages,
-      });
-
-      await generateEsql({
-        documentationRequest,
-        messages,
-      });
-
-      output$.complete();
+        system: systemMessage,
+        toolOptions: {
+          tools,
+          toolChoice,
+        },
+      }).pipe(
+        switchMap((documentationEvent) => {
+          return askLlmToRespond({
+            documentationRequest: {
+              commands: documentationEvent.output.commands,
+              functions: documentationEvent.output.functions,
+            },
+          });
+        })
+      );
     })
-    .catch((err) => {
-      output$.error(err);
-    });
-
-  return output$.asObservable();
+  );
 }
-
-const discussionFromSummary = (summary: string): Message[] => {
-  return [{ role: MessageRole.User, content: summary }];
-};

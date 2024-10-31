@@ -5,86 +5,59 @@
  * 2.0.
  */
 
-import { lastValueFrom, tap, map } from 'rxjs';
-import { withoutOutputUpdateEvents, Message, ToolSchema } from '@kbn/inference-common';
-import { EsqlDocumentBase } from '../doc_base';
-import type { ActionsOptionsBase } from './types';
+import { isEmpty } from 'lodash';
+import { InferenceClient, withoutOutputUpdateEvents } from '../../..';
+import { Message } from '../../../../common';
+import { ToolChoiceType, ToolOptions } from '../../../../common/chat_complete/tools';
+import { requestDocumentationSchema } from './shared';
+import type { FunctionCallingMode } from '../../../../common/chat_complete';
 
-export const requestDocumentationSchema = {
-  type: 'object',
-  properties: {
-    commands: {
-      type: 'array',
-      items: {
-        type: 'string',
-      },
-      description:
-        'ES|QL source and processing commands you want to analyze before generating the query.',
-    },
-    functions: {
-      type: 'array',
-      items: {
-        type: 'string',
-      },
-      description: 'ES|QL functions you want to analyze before generating the query.',
-    },
-  },
-  required: ['commands', 'functions'] as const,
-} satisfies ToolSchema;
-
-export const requestDocumentationFn = ({
-  client,
+export const requestDocumentation = ({
+  outputApi,
   system,
+  messages,
   connectorId,
   functionCalling,
-  docBase,
-  output$,
-}: ActionsOptionsBase & {
-  docBase: EsqlDocumentBase;
+  toolOptions: { tools, toolChoice },
+}: {
+  outputApi: InferenceClient['output'];
   system: string;
+  messages: Message[];
+  connectorId: string;
+  functionCalling?: FunctionCallingMode;
+  toolOptions: ToolOptions;
 }) => {
-  return async ({ messages }: { messages: Message[] }) => {
-    const result = await lastValueFrom(
-      client
-        .output('request_documentation', {
-          connectorId,
-          functionCalling,
-          system,
-          previousMessages: messages,
-          input: `Based on the previous conversation, request documentation
-        for commands or functions listed in the ES|QL handbook to help you
-        get the right information needed to generate a query.
+  const hasTools = !isEmpty(tools) && toolChoice !== ToolChoiceType.none;
 
-        Make sure to request documentation for any command or function you think you may use,
-        even if you end up not using all of them.
+  return outputApi('request_documentation', {
+    connectorId,
+    functionCalling,
+    system,
+    previousMessages: messages,
+    input: `Based on the previous conversation, request documentation
+        from the ES|QL handbook to help you get the right information
+        needed to generate a query.
 
-        Example: if you need to...
-        - Group or aggregate data? Request \`STATS\`.
-        - Extract data? Request \`DISSECT\` and \`GROK\`.
+        Examples for functions and commands:
+        - Do you need to group data? Request \`STATS\`.
+        - Extract data? Request \`DISSECT\` AND \`GROK\`.
         - Convert a column based on a set of conditionals? Request \`EVAL\` and \`CASE\`.
-        - Group data by time intervals? Request \`BUCKET\`
-      `,
-          schema: requestDocumentationSchema,
-        })
-        .pipe(
-          withoutOutputUpdateEvents(),
-          map((event) => {
-            const keywords = [...(event.output.commands ?? []), ...(event.output.functions ?? [])];
-            const requestedDocumentation = docBase.getDocumentation(keywords);
-            return {
-              ...event,
-              output: {
-                keywords,
-                requestedDocumentation,
-              },
-            };
-          }),
-          tap((event) => {
-            output$.next(event);
-          })
-        )
-    );
 
-    return result.output;
-  };
+        ${
+          hasTools
+            ? `### Tools
+
+        The following tools will be available to be called in the step after this.
+
+        \`\`\`json
+        ${JSON.stringify({
+          tools,
+          toolChoice,
+        })}
+        \`\`\``
+            : ''
+        }
+      `,
+    schema: requestDocumentationSchema,
+  }).pipe(withoutOutputUpdateEvents());
 };

@@ -5,7 +5,5 @@
  * 2.0.
  */
 
-export { requestDocumentationFn } from './request_documentation';
-export { generateEsqlTaskFn } from './generate_esql';
-export { summarizeDiscussionFn } from './summarize_discussion';
-export type { ActionsOptionsBase } from './types';
+export { requestDocumentation } from './request_documentation';
+export { generateEsqlTask } from './generate_esql';

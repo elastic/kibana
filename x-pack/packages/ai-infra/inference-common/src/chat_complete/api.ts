@@ -10,28 +10,71 @@ import type { ToolOptions } from './tools';
 import type { Message } from './messages';
 import type { ChatCompletionEvent } from './events';
 
-export type ChatCompleteOptions<TToolOptions extends ToolOptions = ToolOptions> = {
-  connectorId: string;
-  system?: string;
-  messages: Message[];
-  functionCalling?: FunctionCallingMode;
-} & TToolOptions;
-
 /**
  * Request a completion from the LLM based on a prompt or conversation.
  *
- * @param {string} options.connectorId The ID of the connector to use
- * @param {string} [options.system] A system message that defines the behavior of the LLM.
- * @param {Message[]} options.message A list of messages that make up the conversation to be completed.
- * @param {ToolChoice} [options.toolChoice] Force the LLM to call a (specific) tool, or no tool
- * @param {Record<string, ToolDefinition>} [options.tools] A map of tools that can be called by the LLM
+ * @example using the API to get an event observable.
+ * ```ts
+ * const events$ = chatComplete({
+ *   connectorId: 'my-connector',
+ *   system: "You are a helpful assistant",
+ *   messages: [
+ *      { role: MessageRole.User, content: "First question?"},
+ *      { role: MessageRole.Assistant, content: "Some answer"},
+ *      { role: MessageRole.User, content: "Another question?"},
+ *   ]
+ * });
+ *
+ * ```
+ * @example directly accessing the LLM message without using the observable API
+ * ```ts
+ * const message = await chatComplete({
+ *   connectorId: 'my-connector',
+ *   system: "You are a helpful assistant",
+ *   messages: [
+ *      { role: MessageRole.User, content: "Some question?"},
+ *   ]
+ * }).getMessage();
+ * ```
  */
 export type ChatCompleteAPI = <TToolOptions extends ToolOptions = ToolOptions>(
   options: ChatCompleteOptions<TToolOptions>
 ) => ChatCompletionResponse<TToolOptions>;
 
+/**
+ * Options used to call the {@link ChatCompleteAPI}
+ */
+export type ChatCompleteOptions<TToolOptions extends ToolOptions = ToolOptions> = {
+  /**
+   * The ID of the connector to use
+   */
+  connectorId: string;
+  /**
+   * Optional system message for the LLM.
+   */
+  system?: string;
+  /**
+   * The list of messages for the current conversation
+   */
+  messages: Message[];
+  /**
+   * Function calling mode, defaults to "native".
+   */
+  functionCalling?: FunctionCallingMode;
+} & TToolOptions;
+
+/**
+ * Response from the {@link ChatCompleteAPI}.
+ *
+ * Observable of {@link ChatCompletionEvent}
+ */
 export type ChatCompletionResponse<TToolOptions extends ToolOptions = ToolOptions> = Observable<
   ChatCompletionEvent<TToolOptions>
 >;
 
+/**
+ * Define the function calling mode when using inference APIs.
+ * - native will use the LLM's native function calling (requires the LLM to have native support)
+ * - simulated: will emulate function calling with function calling instructions
+ */
 export type FunctionCallingMode = 'native' | 'simulated';

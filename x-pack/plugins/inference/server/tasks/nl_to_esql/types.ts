@@ -11,9 +11,9 @@ import type {
   ChatCompletionMessageEvent,
   FunctionCallingMode,
   Message,
-  ToolOptions,
-  OutputCompleteEvent,
-} from '@kbn/inference-common';
+} from '../../../common/chat_complete';
+import type { ToolOptions } from '../../../common/chat_complete/tools';
+import type { OutputCompleteEvent } from '../../../common/output';
 import type { InferenceClient } from '../../types';
 
 export type NlToEsqlTaskEvent<TToolOptions extends ToolOptions> =
@@ -21,16 +21,13 @@ export type NlToEsqlTaskEvent<TToolOptions extends ToolOptions> =
       'request_documentation',
       { keywords: string[]; requestedDocumentation: Record<string, string> }
     >
-  | OutputCompleteEvent<'summarize_discussion', { summary: string }>
-  | OutputCompleteEvent<'review_generation', { valid: boolean; review: string }>
   | ChatCompletionChunkEvent
   | ChatCompletionMessageEvent<TToolOptions>;
 
 export type NlToEsqlTaskParams<TToolOptions extends ToolOptions> = {
   client: Pick<InferenceClient, 'output' | 'chatComplete'>;
   connectorId: string;
-  logger: Logger;
+  logger: Pick<Logger, 'debug'>;
   functionCalling?: FunctionCallingMode;
-  summarizeInput?: boolean;
 } & TToolOptions &
   ({ input: string } | { messages: Message[] });
