@@ -10,7 +10,9 @@ import React, { Fragment, useState, useEffect } from 'react';
 import { EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
-import { type Field, EVENT_RATE_FIELD_ID, OMIT_FIELDS } from '@kbn/ml-anomaly-utils';
+import type { Field } from '@kbn/ml-anomaly-utils';
+import { EVENT_RATE_FIELD_ID } from '@kbn/ml-anomaly-utils/fields_constants';
+import { OMIT_FIELDS } from '@kbn/ml-anomaly-utils/field_types';
 import {
   type DataFrameAnalysisConfigType,
   ANALYSIS_CONFIG_TYPE,

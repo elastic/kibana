@@ -18,7 +18,7 @@ import { type MlEntityField, type MlEntityFieldOperation } from '@kbn/ml-anomaly
 import { TimeBuckets } from '@kbn/ml-time-buckets';
 import useObservable from 'react-use/lib/useObservable';
 import type { TimeRange } from '@kbn/es-query';
-import { ML_APP_LOCATOR } from '@kbn/ml-common-types/locator';
+import { ML_APP_LOCATOR } from '@kbn/ml-common-types/locator_app_locator';
 import type { MlLocatorParams } from '@kbn/ml-common-types/locator';
 import type {
   AnomalyChartsEmbeddableOverridableState,

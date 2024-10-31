@@ -6,7 +6,7 @@
  */
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import { ML_PAGES } from '@kbn/ml-common-types/locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import type { NotificationsUrlState } from '@kbn/ml-common-types/locator';
 
 export interface NotificationsAppState {

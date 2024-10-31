@@ -9,7 +9,7 @@ import type { estypes } from '@elastic/elasticsearch';
 
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { DEFAULT_SAMPLER_SHARD_SIZE } from '@kbn/ml-agg-utils';
-import { OMIT_FIELDS } from '@kbn/ml-anomaly-utils';
+import { OMIT_FIELDS } from '@kbn/ml-anomaly-utils/field_types';
 import { type RuntimeMappings } from '@kbn/ml-runtime-field-utils';
 import type { IndexPatternTitle } from '@kbn/ml-common-types/kibana';
 

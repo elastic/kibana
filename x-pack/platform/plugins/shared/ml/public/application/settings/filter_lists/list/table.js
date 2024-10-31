@@ -28,7 +28,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { DeleteFilterListModal } from '../components/delete_filter_list_modal';
 import { useCreateAndNavigateToManagementMlLink } from '../../../contexts/kibana/use_create_url';
-import { ML_PAGES } from '@kbn/ml-common-types/locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { MANAGEMENT_SECTION_IDS } from '../../../management';
 
 function UsedByIcon({ usedBy }) {

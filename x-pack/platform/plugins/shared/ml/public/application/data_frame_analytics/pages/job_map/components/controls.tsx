@@ -31,7 +31,7 @@ import {
 } from '@elastic/eui';
 import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-date-utils';
 import { JOB_MAP_NODE_TYPES } from '@kbn/ml-data-frame-analytics-utils';
-import { ML_PAGES } from '@kbn/ml-common-types/locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { CytoscapeContext } from './cytoscape';
 import { usePermissionCheck } from '../../../../capabilities/check_capabilities';
 import {

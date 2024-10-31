@@ -6,9 +6,18 @@
  */
 
 import type { CoreSetup } from '@kbn/core/public';
-import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
+
+// avoid importing from plugin root
+// import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public/';
+const CONTEXT_MENU_TRIGGER = 'CONTEXT_MENU_TRIGGER';
+
 import { CREATE_PATTERN_ANALYSIS_TO_ML_AD_JOB_TRIGGER } from '@kbn/ml-ui-actions';
-import { type UiActionsSetup, ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
+import type { UiActionsSetup } from '@kbn/ui-actions-plugin/public';
+
+// avoid importing from plugin root
+// import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
+const ADD_PANEL_TRIGGER = 'ADD_PANEL_TRIGGER';
+
 import type { MlPluginStart, MlStartDependencies } from '../plugin';
 import { createApplyEntityFieldFiltersAction } from './apply_entity_filters_action';
 import { createApplyInfluencerFiltersAction } from './apply_influencer_filters_action';
