@@ -26,7 +26,7 @@ export const AlertFlyoutHeader: FC<AlertsTableFlyoutBaseProps> = ({ alert }) => 
   );
 };
 
-interface AlertFlyoutProps extends AlertsTableFlyoutBaseProps {
+export interface AlertFlyoutProps extends AlertsTableFlyoutBaseProps {
   columns: EuiDataGridColumn[];
   formatter: RegisterFormatter;
 }
