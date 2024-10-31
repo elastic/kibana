@@ -127,7 +127,6 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
       ? [
           `--xpack.actions.proxyUrl=http://localhost:${proxyPort}`,
           `--xpack.actions.proxyOnlyHosts=${JSON.stringify(proxyHosts)}`,
-          '--xpack.actions.proxyRejectUnauthorizedCertificates=false',
         ]
       : [
           `--xpack.actions.proxyUrl=http://elastic.co`,

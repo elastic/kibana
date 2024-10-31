@@ -193,9 +193,6 @@ By default, no hosts will use the proxy, but if an action's hostname is in this 
 `xpack.actions.proxyHeaders` {ess-icon}::
 Specifies HTTP headers for the proxy, if using a proxy for actions. Default: {}.
 
-`xpack.actions.proxyRejectUnauthorizedCertificates` {ess-icon}::
-deprecated:[8.0.0] Use <<action-config-proxy-verification-mode,`xpack.actions.ssl.proxyVerificationMode`>> instead. Set to `false` to bypass certificate validation for the proxy, if using a proxy for actions. Default: `true`.
-
 [[action-config-proxy-verification-mode]]`xpack.actions.ssl.proxyVerificationMode` {ess-icon}::
 Controls the verification for the proxy server certificate that Kibana receives when making an outbound SSL/TLS connection to the proxy server. Valid values are `full`, `certificate`, and `none`.
 Use `full` to perform hostname verification, `certificate` to skip hostname verification, and `none` to skip verification. Default: `full`. <<elasticsearch-ssl-verificationMode,Equivalent {kib} setting>>.
