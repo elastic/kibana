@@ -116,26 +116,15 @@ export const StartStep: React.FC<StartStepProps> = ({
                   )}
                   helpText={
                     <>
-                      <EuiText
-                        size="xs"
-                        css={css`
-                          line-break: anywhere;
-                        `}
-                        color="danger"
-                      >
+                      <EuiText size="xs" grow={false} color="danger">
                         {formError}
                       </EuiText>
-                      <EuiText
-                        size="xs"
-                        css={css`
-                          line-break: anywhere;
-                        `}
-                      >
+                      <EuiText size="xs" grow={false}>
                         {i18n.translate(
                           'xpack.enterpriseSearch.startStep.namesShouldBeLowercaseTextLabel',
                           {
                             defaultMessage:
-                              'It should be lowercase and cannot contain spaces or special characters.',
+                              'The connector name should be lowercase and cannot contain spaces or special characters.',
                           }
                         )}
                       </EuiText>
