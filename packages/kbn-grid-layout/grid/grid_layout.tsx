@@ -9,7 +9,6 @@
 
 import React, { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
 import { combineLatest, distinctUntilChanged, filter, map, pairwise, skip } from 'rxjs';
-import { v4 as uuidv4 } from 'uuid';
 
 import { GridHeightSmoother } from './grid_height_smoother';
 import { GridRow } from './grid_row';
@@ -89,7 +88,7 @@ export const GridLayout = forwardRef<GridLayoutApi, GridLayoutProps>(
             {Array.from({ length: rowCount }, (_, rowIndex) => {
               return (
                 <GridRow
-                  key={uuidv4()}
+                  key={rowIndex}
                   rowIndex={rowIndex}
                   renderPanelContents={renderPanelContents}
                   gridLayoutStateManager={gridLayoutStateManager}

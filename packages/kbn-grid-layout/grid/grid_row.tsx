@@ -91,7 +91,7 @@ export const GridRow = forwardRef<
             )}, ${rowHeight}px)`;
 
             const targetRow = interactionEvent?.targetRowIndex;
-            if (rowIndex === targetRow && interactionEvent?.type !== 'drop') {
+            if (rowIndex === targetRow && interactionEvent) {
               // apply "targetted row" styles
               const gridColor = transparentize(euiThemeVars.euiColorSuccess, 0.2);
               rowRef.style.backgroundPosition = `top -${gutterSize / 2}px left -${
