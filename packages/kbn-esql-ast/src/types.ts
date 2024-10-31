@@ -26,6 +26,7 @@ export type ESQLSingleAstItem =
   | ESQLTimeInterval
   | ESQLList
   | ESQLLiteral
+  | ESQLIdentifier
   | ESQLCommandMode
   | ESQLInlineCast
   | ESQLOrderExpression
@@ -47,7 +48,7 @@ export type ESQLAstNodeWithChildren = ESQLAstNodeWithArgs | ESQLList;
  * of the nodes which are plain arrays, all nodes will be *proper* and we can
  * remove this type.
  */
-export type ESQLProperNode = ESQLAstExpression | ESQLAstCommand | ESQLIdentifier;
+export type ESQLProperNode = ESQLAstExpression | ESQLAstCommand;
 
 export interface ESQLLocation {
   min: number;
