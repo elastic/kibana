@@ -23,7 +23,7 @@ import { MultiJobActions } from '../multi_job_actions';
 import { NewJobButton } from '../new_job_button';
 import { JobStatsBar } from '../jobs_stats_bar';
 import { NodeAvailableWarning } from '../../../../components/node_available_warning';
-import { JobsAwaitingNodeWarning } from '../../../../components/jobs_awaiting_node_warning';
+import { JobsAwaitingNodeWarning } from '../../../../components/jobs_awaiting_node_warning/jobs_awaiting_node_warning';
 import { SavedObjectsWarning } from '../../../../components/saved_objects_warning';
 import { UpgradeWarning } from '../../../../components/upgrade';
 
