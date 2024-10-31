@@ -12,7 +12,6 @@ import { useActions, useValues } from 'kea';
 import { EuiText, EuiFlexItem, EuiFlexGroup, EuiSpacer, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-
 import { docLinks } from '../../../shared/doc_links';
 import { EngineLogic, getEngineBreadcrumbs } from '../engine';
 import { AppSearchPageTemplate } from '../layout';

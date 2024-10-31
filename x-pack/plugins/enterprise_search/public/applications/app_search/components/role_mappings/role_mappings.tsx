@@ -12,6 +12,7 @@ import { useActions, useValues } from 'kea';
 import { EuiSpacer } from '@elastic/eui';
 
 import { APP_SEARCH_PLUGIN } from '../../../../../common/constants';
+import { docLinks } from '../../../shared/doc_links';
 import {
   RoleMappingsTable,
   RoleMappingsHeading,
@@ -22,8 +23,6 @@ import {
 } from '../../../shared/role_mapping';
 import { ROLE_MAPPINGS_TITLE } from '../../../shared/role_mapping/constants';
 
-
-import { docLinks } from '../../../shared/doc_links';
 import { AppSearchPageTemplate } from '../layout';
 
 import { ROLE_MAPPINGS_ENGINE_ACCESS_HEADING } from './constants';

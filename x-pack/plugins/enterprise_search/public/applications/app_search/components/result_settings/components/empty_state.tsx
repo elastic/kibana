@@ -10,7 +10,6 @@ import React from 'react';
 import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-
 import { docLinks } from '../../../../shared/doc_links';
 
 export const EmptyState: React.FC = () => (

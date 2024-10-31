@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { docLinks } from '../shared/doc_links';
-
 export const ROOT_PATH = '/';
 export const SETUP_GUIDE_PATH = '/setup_guide';
 export const LIBRARY_PATH = '/library';
