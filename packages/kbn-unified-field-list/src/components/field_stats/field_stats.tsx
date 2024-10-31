@@ -188,18 +188,6 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
       abortControllerRef.current?.abort();
       abortControllerRef.current = new AbortController();
 
-      /**
-       * If the ES|QL query is unsupported, we can exit early
-       */
-      const unsupportedReasonForQuery = isTextBased
-        ? getReasonIfFieldDataUnavailableForQuery(query)
-        : undefined;
-
-      if (unsupportedReasonForQuery) {
-        setState((s) => ({ ...s, isLoading: false }));
-        return;
-      }
-
       const results = isTextBased
         ? await loadFieldStatsTextBased({
             services: { data },
