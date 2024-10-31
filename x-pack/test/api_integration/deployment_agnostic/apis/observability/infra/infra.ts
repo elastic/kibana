@@ -254,7 +254,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     describe('Host with active alerts', () => {
       before(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/infra/alerts');
         await Promise.all([
           esArchiver.load('x-pack/test/functional/es_archives/infra/alerts'),
           esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs'),

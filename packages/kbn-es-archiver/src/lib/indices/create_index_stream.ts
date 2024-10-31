@@ -172,16 +172,38 @@ export function createCreateIndexStream({
           }
         );
 
+        const allAliases = Object.keys(aliases ?? {});
+
+        // alias creation might conflict with managed data streams created during kibana startup
+        const dataStreamsResponse =
+          !isKibana && !isKibanaTaskManager
+            ? await client.indices
+                .getDataStream({
+                  name: allAliases.map((alias) => alias).join(','),
+                  expand_wildcards: ['open', 'hidden'],
+                })
+                .catch((e) => undefined)
+            : undefined;
+
+        const existingDataStreams = (dataStreamsResponse?.data_streams ?? []).reduce(
+          (acc, dataStream) => {
+            acc[dataStream.name] = true;
+            return acc;
+          },
+          {} as Record<string, boolean>
+        );
+
         // create the aliases on a separate step (see https://github.com/elastic/kibana/issues/158918)
-        const actions: estypes.IndicesUpdateAliasesAction[] = Object.keys(aliases ?? {}).map(
-          (alias) => ({
+        const actions: estypes.IndicesUpdateAliasesAction[] = allAliases
+          // add only aliases that don't conflict with existing data streams
+          .filter((alias) => !existingDataStreams[alias])
+          .map((alias) => ({
             add: {
               index,
               alias,
               ...aliases![alias],
             },
-          })
-        );
+          }));
 
         if (actions.length) {
           await client.indices.updateAliases({ body: { actions } });
