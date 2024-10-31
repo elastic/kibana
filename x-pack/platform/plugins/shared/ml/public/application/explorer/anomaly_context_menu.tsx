@@ -45,7 +45,7 @@ import { MAX_ANOMALY_CHARTS_ALLOWED } from '../../embeddables/anomaly_charts/ano
 import { useAnomalyExplorerContext } from './anomaly_explorer_context';
 import { escapeKueryForEmbeddableFieldValuePair } from '../util/string_utils';
 import { useCasesModal } from '../contexts/kibana/use_cases_modal';
-import { DEFAULT_MAX_SERIES_TO_PLOT } from '../services/anomaly_explorer_charts_service';
+import { DEFAULT_MAX_SERIES_TO_PLOT } from '../services/anomaly_explorer_charts_service_constants';
 import type { AnomalyChartsEmbeddableState } from '../../embeddables/types';
 import { ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE } from '../../embeddables/constants';
 import { useMlKibana } from '../contexts/kibana';
