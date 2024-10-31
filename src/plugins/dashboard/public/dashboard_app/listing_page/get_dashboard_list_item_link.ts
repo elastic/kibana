@@ -29,6 +29,7 @@ interface SessionStorageDashboardStates {
 
 export const getDashboardListItemLink = (
   id: string,
+  timeRestore: boolean,
   spaceId?: string,
   includeBasepath: boolean = false
 ) => {
@@ -49,6 +50,8 @@ export const getDashboardListItemLink = (
     const sessionDashboard: SessionStorageDashboardStates = JSON.parse(
       sessionStorage.getItem(DASHBOARD_STATE_SESSION_KEY) || '{}'
     );
+
+    // format unsaved changes in session storage vs the share url which pulls it from the dashboard api
     let latestPanels: DashboardPanelMap | undefined;
 
     Object.entries(sessionDashboard).map((value) => {
@@ -110,8 +113,14 @@ export const getDashboardListItemLink = (
     path: `#${createDashboardEditUrl(id)}`,
     absolute: includeBasepath,
   });
-  const _g = getStateFromKbnUrl<QueryState>('_g', url);
-  const baseUrl = setStateToKbnUrl('_g', _g, undefined, url);
+  const globalStateInUrl = getStateFromKbnUrl<QueryState>('_g', url);
+
+  if (timeRestore) {
+    delete globalStateInUrl?.time;
+    delete globalStateInUrl?.refreshInterval;
+  }
+
+  const baseUrl = setStateToKbnUrl('_g', globalStateInUrl, undefined, url);
 
   const shareableUrl = setStateToKbnUrl(
     '_a',
@@ -119,5 +128,6 @@ export const getDashboardListItemLink = (
     { useHash: false, storeInHashQuery: true },
     unhashUrl(baseUrl)
   );
+
   return shareableUrl;
 };

@@ -112,8 +112,8 @@ export const DashboardListingPage = ({
           goToDashboard={(id, viewMode) => {
             redirectTo({ destination: 'dashboard', id, editMode: viewMode === ViewMode.EDIT });
           }}
-          getDashboardUrl={(id) => {
-            return getDashboardListItemLink(id, spaceId);
+          getDashboardUrl={(id, timeRestore) => {
+            return getDashboardListItemLink(id, timeRestore, spaceId);
           }}
         />
       )}

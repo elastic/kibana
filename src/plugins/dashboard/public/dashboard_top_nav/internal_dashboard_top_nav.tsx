@@ -135,7 +135,7 @@ export function InternalDashboardTopNav({
       .subscribe((visible) => setIsChromeVisible(visible));
 
     if (lastSavedId && title) {
-      const fullEditPath = getDashboardListItemLink(lastSavedId, spaceId, true);
+      const fullEditPath = getDashboardListItemLink(lastSavedId, false, spaceId, true);
       coreServices.chrome.recentlyAccessed.add(fullEditPath, title, lastSavedId);
       getDashboardRecentlyAccessedService().add(fullEditPath, title, lastSavedId); // used to sort the listing table
     }
