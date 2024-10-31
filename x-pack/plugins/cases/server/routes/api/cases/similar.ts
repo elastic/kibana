@@ -16,7 +16,6 @@ export const similarCaseRoute = createCasesRoute({
   routerOptions: {
     access: 'internal',
     summary: `Similar cases`,
-    tags: ['oas-tag:cases'],
   },
   handler: async ({ context, request, response }) => {
     const options = request.body as caseApiV1.SimilarCasesSearchRequest;
