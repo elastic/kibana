@@ -76,7 +76,7 @@ export async function fetchLicenses(
 export interface ESClusterStatsWithLicense {
   cluster_uuid: string;
   type: 'cluster_stats';
-  license?: ESLicense;
+  license?: LicenseGetLicenseInformation;
 }
 
 /**
