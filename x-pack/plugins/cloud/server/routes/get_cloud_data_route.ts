@@ -17,15 +17,16 @@ export const getCloudSolutionDataRoute = ({ router }: RouteOptions) => {
       path: `/internal/cloud/solution`,
       access: 'internal',
       summary: 'Get cloud data for solutions',
-      security: {
-        authz: {
-          requiredPrivileges: ['cloudDataSolution'],
-        },
-      },
     })
     .addVersion(
       {
         version: '1',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           request: {},
         },

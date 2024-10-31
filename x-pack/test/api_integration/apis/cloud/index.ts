@@ -8,7 +8,7 @@
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('spaces', function () {
-    loadTestFile(require.resolve('./set_solution_default_space'));
+  describe('cloud data', function () {
+    loadTestFile(require.resolve('./set_cloud_data_route'));
   });
 }

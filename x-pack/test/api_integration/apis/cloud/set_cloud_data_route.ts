@@ -11,21 +11,24 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
-  describe('GET /internal/cloud/solution', () => {
-    it('set solution for default space', async () => {
+  describe('PUT /internal/cloud/solution', () => {
+    it('set solution data', async () => {
       await supertest
         .post('/internal/cloud/solution')
         .set('kbn-xsrf', 'xxx')
         .send({
-          type: 'oblt',
+          onboardingData: {
+            solutionType: 'search',
+            token: 'connectors',
+          },
         })
         .expect(200);
 
-      const { body: defaultSpace } = await supertest
-        .get('default/api/spaces/space/default')
-        .set('kbn-xsrf', 'xxx');
+      const {
+        body: { onboardingData },
+      } = await supertest.get('/internal/cloud/solution').set('kbn-xsrf', 'xxx');
 
-      expect(defaultSpace.solution).to.eql('oblt');
+      expect(onboardingData).to.eql({});
     });
   });
 }

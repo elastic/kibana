@@ -8,7 +8,6 @@
 import type { Logger } from '@kbn/logging';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import type { SpacesPluginStart, SpacesServiceStart } from '@kbn/spaces-plugin/server';
 
 import { registerCloudDeploymentMetadataAnalyticsContext } from '../common/register_cloud_deployment_id_analytics_context';
 import type { CloudConfigType } from './config';
@@ -28,10 +27,6 @@ import { setupSavedObjects } from './saved_objects';
 
 interface PluginsSetup {
   usageCollection?: UsageCollectionSetup;
-}
-
-interface PluginsStar {
-  spaces?: SpacesPluginStart;
 }
 
 /**
@@ -181,7 +176,6 @@ export interface CloudStart {
 export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
   private readonly config: CloudConfigType;
   private readonly logger: Logger;
-  private spacesServiceStart?: SpacesServiceStart;
 
   constructor(private readonly context: PluginInitializerContext) {
     this.config = this.context.config.get<CloudConfigType>();
@@ -219,7 +213,6 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
       logger: this.logger,
       router,
       elasticsearchUrl,
-      getSpacesService: this.getSpacesService,
     });
 
     setupSavedObjects(core.savedObjects, this.logger);
@@ -254,19 +247,11 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
     };
   }
 
-  public start(core: CoreStart, { spaces }: PluginsStar): CloudStart {
-    this.spacesServiceStart = spaces?.spacesService;
+  public start(core: CoreStart): CloudStart {
     return {
       ...this.getCloudUrls(),
       isCloudEnabled: getIsCloudEnabled(this.config.id),
     };
-  }
-
-  private getSpacesService() {
-    if (!this.spacesServiceStart) {
-      throw new Error('spaces service has not been initialized!');
-    }
-    return this.spacesServiceStart;
   }
 
   private getCloudUrls() {

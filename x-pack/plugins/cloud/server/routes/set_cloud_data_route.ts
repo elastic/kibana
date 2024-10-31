@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { ReservedPrivilegesSet, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { RouteOptions } from '.';
 import { createLicensedRouteHandler } from './error_handler';
 import { CLOUD_DATA_SAVED_OBJECT_ID } from './constants';
@@ -33,7 +33,7 @@ export const setCloudSolutionDataRoute = ({ router }: RouteOptions) => {
       summary: 'Save cloud data for solutions',
       security: {
         authz: {
-          requiredPrivileges: ['cloudDataSolution'],
+          requiredPrivileges: [ReservedPrivilegesSet.superuser],
         },
       },
     })

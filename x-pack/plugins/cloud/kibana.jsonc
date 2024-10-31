@@ -15,12 +15,7 @@
       "cloud"
     ],
     "optionalPlugins": [
-      "usageCollection",
-      "spaces"
-    ],
-    "requiredPlugins": [
-       "licensing"
-
+      "usageCollection"
     ]
   }
 }
