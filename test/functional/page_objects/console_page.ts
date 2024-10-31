@@ -374,7 +374,7 @@ export class ConsolePageObject extends FtrService {
       await fontSizeInput.clearValue({ withJS: true });
       await fontSizeInput.click();
       await fontSizeInput.type(newSizeString);
-      expect(fontSizeInput.getAttribute('value')).to.be(newSizeString);
+      expect(await fontSizeInput.getAttribute('value')).to.be(newSizeString);
     });
   }
 
