@@ -284,6 +284,10 @@ image:images/discover-add-filter.png[Add filter dialog in Discover]
 You can use **Discover** with the Elasticsearch Query Language, ES|QL. When using ES|QL,
 you don't have to select a data view. It's your query that determines the data to explore and display in Discover.
 
+You can switch to the ES|QL mode of Discover from the application top bar.
+
+Note that in ES|QL mode, the **Documents** tab is named **Results**.
+
 Learn more about how to use ES|QL queries in <<try-esql, Using ES|QL>>.
 
 
