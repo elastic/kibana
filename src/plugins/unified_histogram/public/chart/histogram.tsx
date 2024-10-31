@@ -138,17 +138,13 @@ export function Histogram({
 
       const adapterTables = adapters?.tables?.tables;
       const totalHits = computeTotalHits(hasLensSuggestions, adapterTables, isPlainRecord);
+      const totalHitsStatus = isLoading
+        ? UnifiedHistogramFetchStatus.loading
+        : response?._shards?.failed
+        ? UnifiedHistogramFetchStatus.error
+        : UnifiedHistogramFetchStatus.complete;
 
-      if (response?._shards?.failed) {
-        onTotalHitsChange?.(UnifiedHistogramFetchStatus.error, totalHits);
-        onChartLoad?.({ adapters: adapters ?? {} });
-        return;
-      }
-
-      onTotalHitsChange?.(
-        isLoading ? UnifiedHistogramFetchStatus.loading : UnifiedHistogramFetchStatus.complete,
-        totalHits ?? hits?.total
-      );
+      onTotalHitsChange?.(totalHitsStatus, totalHits ?? hits?.total);
 
       if (response) {
         const newBucketInterval = buildBucketInterval({
