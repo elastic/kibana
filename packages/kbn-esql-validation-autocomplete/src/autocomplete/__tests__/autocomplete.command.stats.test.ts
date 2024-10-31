@@ -9,7 +9,7 @@
 
 import { FieldType, FunctionReturnType } from '../../definitions/types';
 import { ESQL_COMMON_NUMERIC_TYPES, ESQL_NUMBER_TYPES } from '../../shared/esql_types';
-import { getDateHistogramCompleteItem } from '../commands/stats/util';
+import { getDateHistogramCompletionItem } from '../commands/stats/util';
 import { allStarConstant } from '../complete_items';
 import { roundParameterTypes } from './constants';
 import {
@@ -209,7 +209,7 @@ describe('autocomplete.suggest', () => {
         const { assertSuggestions } = await setup();
         const expected = [
           'var0 = ',
-          getDateHistogramCompleteItem(),
+          getDateHistogramCompletionItem(),
           ...getFieldNamesByType('any').map((field) => `${field} `),
           ...allEvaFunctions,
           ...allGroupingFunctions,
@@ -232,7 +232,7 @@ describe('autocomplete.suggest', () => {
         const fields = getFieldNamesByType('any').map((field) => `${field} `);
         await assertSuggestions('from a | stats a=c by d, /', [
           'var0 = ',
-          getDateHistogramCompleteItem(),
+          getDateHistogramCompletionItem(),
           ...fields,
           ...allEvaFunctions,
           ...allGroupingFunctions,
@@ -244,7 +244,7 @@ describe('autocomplete.suggest', () => {
         ]);
         await assertSuggestions('from a | stats avg(b) by c, /', [
           'var0 = ',
-          getDateHistogramCompleteItem(),
+          getDateHistogramCompletionItem(),
           ...fields,
           ...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true }),
           ...allGroupingFunctions,
@@ -264,13 +264,13 @@ describe('autocomplete.suggest', () => {
           ...allGroupingFunctions,
         ]);
         await assertSuggestions('from a | stats avg(b) by var0 = /', [
-          getDateHistogramCompleteItem(),
+          getDateHistogramCompletionItem(),
           ...getFieldNamesByType('any').map((field) => `${field} `),
           ...allEvaFunctions,
           ...allGroupingFunctions,
         ]);
         await assertSuggestions('from a | stats avg(b) by c, var0 = /', [
-          getDateHistogramCompleteItem(),
+          getDateHistogramCompletionItem(),
           ...getFieldNamesByType('any').map((field) => `${field} `),
           ...allEvaFunctions,
           ...allGroupingFunctions,

@@ -84,7 +84,7 @@ export const byCompleteItem: SuggestionRawDefinition = {
   command: TRIGGER_SUGGESTION_COMMAND,
 };
 
-export const getDateHistogramCompleteItem: () => SuggestionRawDefinition = () => ({
+export const getDateHistogramCompletionItem: () => SuggestionRawDefinition = () => ({
   label: i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.addDateHistogram', {
     defaultMessage: 'Add date histogram',
   }),

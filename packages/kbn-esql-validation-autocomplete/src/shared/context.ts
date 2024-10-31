@@ -24,6 +24,7 @@ import {
   isSourceItem,
   isSettingItem,
   pipePrecedesCurrentWord,
+  getFunctionDefinition,
 } from './helpers';
 
 function findNode(nodes: ESQLAstItem[], offset: number): ESQLSingleAstItem | undefined {
@@ -133,6 +134,10 @@ function isNotEnrichClauseAssigment(node: ESQLFunction, command: ESQLCommand) {
   return node.name !== '=' && command.name !== 'enrich';
 }
 
+function isBuiltinFunction(node: ESQLFunction) {
+  return getFunctionDefinition(node.name)?.type === 'builtin';
+}
+
 /**
  * Given a ES|QL query string, its AST and the cursor position,
  * it returns the type of context for the position ("list", "function", "option", "setting", "expression", "newCommand")
@@ -158,7 +163,14 @@ export function getAstContext(queryString: string, ast: ESQLAst, offset: number)
         // command ... a in ( <here> )
         return { type: 'list' as const, command, node, option, setting };
       }
-      if (isNotEnrichClauseAssigment(node, command)) {
+      if (
+        isNotEnrichClauseAssigment(node, command) &&
+        // Temporarily mangling the logic here to let operators
+        // be handled as functions for the stats command.
+        // I expect this to simplify once https://github.com/elastic/kibana/issues/195418
+        // is complete
+        !(isBuiltinFunction(node) && command.name !== 'stats')
+      ) {
         // command ... fn( <here> )
         return { type: 'function' as const, command, node, option, setting };
       }

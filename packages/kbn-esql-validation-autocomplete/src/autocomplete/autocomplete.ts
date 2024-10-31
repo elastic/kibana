@@ -206,9 +206,7 @@ export async function suggest(
   }
 
   if (astContext.type === 'expression') {
-    // suggest next possible argument, or option
-    // otherwise a variable
-    return getSuggestionsWithinCommand(
+    return getSuggestionsWithinCommandExpression(
       innerText,
       ast,
       astContext,
@@ -444,7 +442,7 @@ function extractArgMeta(
   return { argIndex, prevIndex, lastArg, nodeArg };
 }
 
-async function getSuggestionsWithinCommand(
+async function getSuggestionsWithinCommandExpression(
   innerText: string,
   commands: ESQLCommand[],
   {

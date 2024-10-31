@@ -16,7 +16,7 @@ import {
 } from '../../factories';
 import { commaCompleteItem, pipeCompleteItem } from '../../complete_items';
 import { pushItUpInTheList } from '../../helper';
-import { byCompleteItem, getDateHistogramCompleteItem, getPosition } from './util';
+import { byCompleteItem, getDateHistogramCompletionItem, getPosition } from './util';
 
 export async function suggest(
   innerText: string,
@@ -52,14 +52,14 @@ export async function suggest(
     case 'grouping_expression_after_assignment':
       return [
         ...getFunctionSuggestions({ command: 'stats', option: 'by' }),
-        getDateHistogramCompleteItem(),
+        getDateHistogramCompletionItem(),
         ...columnSuggestions,
       ];
 
     case 'grouping_expression_without_assignment':
       return [
         ...getFunctionSuggestions({ command: 'stats', option: 'by' }),
-        getDateHistogramCompleteItem(),
+        getDateHistogramCompletionItem(),
         ...columnSuggestions,
         getNewVariableSuggestion(getSuggestedVariableName()),
       ];
