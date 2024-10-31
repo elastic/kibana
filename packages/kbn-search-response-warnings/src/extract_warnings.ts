@@ -43,7 +43,9 @@ export function extractWarnings(
               indices: '',
               took: rawResponse.took,
               timed_out: 'timed_out' in rawResponse && rawResponse.timed_out,
-              ...('_shards' in rawResponse ? { _shards: rawResponse._shards, failures: rawResponse._shards.failures } : {}),
+              ...('_shards' in rawResponse
+                ? { _shards: rawResponse._shards, failures: rawResponse._shards.failures }
+                : {}),
             },
           },
       openInInspector: () => {
