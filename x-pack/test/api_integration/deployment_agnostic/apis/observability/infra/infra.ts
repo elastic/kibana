@@ -62,14 +62,19 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       supertestWithAdminScope = await roleScopedSupertest.getSupertestWithRoleScope('admin', {
         withInternalHeaders: true,
       });
-      await esArchiver.load('x-pack/test/functional/es_archives/infra/8.0.0/logs_and_metrics');
     });
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/infra/8.0.0/logs_and_metrics');
       await supertestWithAdminScope.destroy();
     });
 
-    describe('fetch hosts', () => {
+    describe('Fetch hosts', () => {
+      before(async () => {
+        await esArchiver.load('x-pack/test/functional/es_archives/infra/8.0.0/logs_and_metrics');
+      });
+      after(async () => {
+        await esArchiver.unload('x-pack/test/functional/es_archives/infra/8.0.0/logs_and_metrics');
+      });
+
       it('should return metrics for a host', async () => {
         const body: GetInfraMetricsRequestBodyPayloadClient = { ...basePayload, limit: 1 };
         const response = await makeRequest({ body, expectedHTTPCode: 200 });
@@ -167,30 +172,30 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const names = (response.body as GetInfraMetricsResponsePayload).nodes.map((p) => p.name);
         expect(names).eql([]);
       });
-    });
 
-    it('should return 0 hosts when filtered by not "host.name=gke-observability-8--observability-8--bc1afd95-nhhw"', async () => {
-      const body: GetInfraMetricsRequestBodyPayloadClient = {
-        ...basePayload,
-        metrics: ['cpuV2'],
-        query: {
-          bool: {
-            must_not: [
-              { term: { 'host.name': 'gke-observability-8--observability-8--bc1afd95-nhhw' } },
-            ],
+      it('should return 0 hosts when filtered by not "host.name=gke-observability-8--observability-8--bc1afd95-nhhw"', async () => {
+        const body: GetInfraMetricsRequestBodyPayloadClient = {
+          ...basePayload,
+          metrics: ['cpuV2'],
+          query: {
+            bool: {
+              must_not: [
+                { term: { 'host.name': 'gke-observability-8--observability-8--bc1afd95-nhhw' } },
+              ],
+            },
           },
-        },
-      };
-      const response = await makeRequest({ body, expectedHTTPCode: 200 });
+        };
+        const response = await makeRequest({ body, expectedHTTPCode: 200 });
 
-      const names = (response.body as GetInfraMetricsResponsePayload).nodes.map((p) => p.name);
-      expect(names).eql([
-        'gke-observability-8--observability-8--bc1afd95-f0zc',
-        'gke-observability-8--observability-8--bc1afd95-ngmh',
-      ]);
+        const names = (response.body as GetInfraMetricsResponsePayload).nodes.map((p) => p.name);
+        expect(names).eql([
+          'gke-observability-8--observability-8--bc1afd95-f0zc',
+          'gke-observability-8--observability-8--bc1afd95-ngmh',
+        ]);
+      });
     });
 
-    describe('endpoint validations', () => {
+    describe('Endpoint validations', () => {
       it('should fail when limit is 0', async () => {
         const body: GetInfraMetricsRequestBodyPayloadClient = { ...basePayload, limit: 0 };
         const response = await makeRequest({ body, expectedHTTPCode: 400 });
@@ -249,6 +254,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     describe('Host with active alerts', () => {
       before(async () => {
+        await esArchiver.unload('x-pack/test/functional/es_archives/infra/alerts');
         await Promise.all([
           esArchiver.load('x-pack/test/functional/es_archives/infra/alerts'),
           esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs'),
