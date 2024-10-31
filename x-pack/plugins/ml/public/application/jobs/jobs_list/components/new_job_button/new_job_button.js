@@ -13,7 +13,7 @@ import React from 'react';
 import { EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useCreateAndNavigateToMlLink } from '../../../../contexts/kibana/use_create_url';
-import { ML_PAGES } from '@kbn/ml-common-types/locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 
 export function NewJobButton() {
   const canCreateJob = usePermissionCheck('canCreateJob');

@@ -12,7 +12,7 @@ import { EuiLink, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { mlTimefilterRefresh$, useTimefilter } from '@kbn/ml-date-picker';
 import { useStorage } from '@kbn/ml-local-storage';
-import { ML_PAGES } from '@kbn/ml-common-types/locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import type { MlStorageKey, TMlStorageMapped } from '@kbn/ml-common-types/storage';
 import { ML_OVERVIEW_PANELS } from '@kbn/ml-common-types/storage';
 import { OverviewStatsBar } from '../components/collapsible_panel/collapsible_panel';

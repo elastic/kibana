@@ -25,7 +25,7 @@ import {
   type DataFrameAnalyticsId,
   type DataFrameAnalyticsStats,
 } from '@kbn/ml-data-frame-analytics-utils';
-import { ML_PAGES } from '@kbn/ml-common-types/locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import type { DataFrameAnalyticsListRow } from './common';
 import {
   getDataFrameAnalyticsProgressPhase,

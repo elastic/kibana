@@ -23,7 +23,7 @@ import { useStorage } from '@kbn/ml-local-storage';
 import type { Dictionary } from '@kbn/ml-common-types/common';
 import type { MlJobWithTimeRange } from '@kbn/ml-common-types/anomaly_detection_jobs/summary_job';
 import { ML_APPLY_TIME_RANGE_CONFIG } from '@kbn/ml-common-types/storage';
-import { ML_PAGES } from '@kbn/ml-common-types/locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { IdBadges } from './id_badges';
 import type { JobSelectorFlyoutProps } from './job_selector_flyout';
 import { BADGE_LIMIT, JobSelectorFlyoutContent } from './job_selector_flyout';
