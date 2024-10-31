@@ -8,6 +8,7 @@
 import React, { Component } from 'react';
 
 import { EuiPanel } from '@elastic/eui';
+import type { CoreStart } from '@kbn/core/public';
 import type { AnomalySourceDescriptor } from './anomaly_source';
 import { AnomalyJobSelectorLazy } from './anomaly_job_selector_lazy';
 import { LayerSelector } from './layer_selector';
@@ -17,7 +18,7 @@ import type { MlApi } from '../application/services/ml_api_service';
 
 interface Props {
   onSourceConfigChange: (sourceConfig: Partial<AnomalySourceDescriptor> | null) => void;
-  mlJobsService: MlApi['jobs'];
+  coreStart: CoreStart;
   jobsManagementPath?: string;
   canCreateJobs: boolean;
 }
@@ -28,6 +29,7 @@ interface State {
 }
 
 export class CreateAnomalySourceEditor extends Component<Props, State> {
+  private _mlJobsService: MlApi['jobs'] | undefined;
   private _isMounted: boolean = false;
   state: State = {};
 
@@ -41,6 +43,21 @@ export class CreateAnomalySourceEditor extends Component<Props, State> {
   }
 
   componentDidMount(): void {
+    if (!this._mlJobsService) {
+      const that = this;
+
+      async function initializeMlJobsService() {
+        const { HttpService } = await import('../application/services/http_service');
+        const { jobsApiProvider } = await import('../application/services/ml_api_service/jobs');
+
+        const httpService = new HttpService(that.props.coreStart.http);
+        that._mlJobsService = jobsApiProvider(httpService);
+        that.render();
+      }
+
+      initializeMlJobsService();
+    }
+
     this._isMounted = true;
   }
 
@@ -73,17 +90,22 @@ export class CreateAnomalySourceEditor extends Component<Props, State> {
   };
 
   render() {
+    if (!this._mlJobsService) {
+      return null;
+    }
+
     const selector = this.state.jobId ? (
       <LayerSelector
         onChange={this.onTypicalActualChange}
         typicalActual={this.state.typicalActual || ML_ANOMALY_LAYERS.ACTUAL}
       />
     ) : null;
+
     return (
       <EuiPanel>
         <AnomalyJobSelectorLazy
           onJobChange={this.previewLayer}
-          mlJobsService={this.props.mlJobsService}
+          mlJobsService={this._mlJobsService}
           jobsManagementPath={this.props.jobsManagementPath}
           canCreateJobs={this.props.canCreateJobs}
         />
