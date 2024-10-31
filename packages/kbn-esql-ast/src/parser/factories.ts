@@ -269,20 +269,15 @@ export const createParam = (ctx: ParseTree) => {
 
 export const createOrderExpression = (
   ctx: ParserRuleContext,
-  arg: ESQLAstItem,
+  arg: ESQLColumn,
   order: ESQLOrderExpression['order'],
   nulls: ESQLOrderExpression['nulls']
 ) => {
-  const node: ESQLOrderExpression = {
-    type: 'order',
-    name: '',
-    order,
-    nulls,
-    args: [arg],
-    text: ctx.getText(),
-    location: getPosition(ctx.start, ctx.stop),
-    incomplete: Boolean(ctx.exception),
-  };
+  const node = Builder.expression.order(
+    arg as ESQLColumn,
+    { order, nulls },
+    createParserFields(ctx)
+  );
 
   return node;
 };
