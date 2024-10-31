@@ -128,11 +128,12 @@ export const deserializeGlobalMaxRetention = (globalMaxRetention?: string) => {
   }
 
   const { size, unit } = splitSizeAndUnits(globalMaxRetention);
-  const unitText = timeUnits.find((item) => item.value === unit)?.text;
+  const availableTimeUnits = [...timeUnits, ...extraTimeUnits];
+  const match = availableTimeUnits.find((timeUnit) => timeUnit.value === unit);
 
   return {
     size,
     unit,
-    unitText,
+    unitText: match?.text ?? unit,
   };
 };

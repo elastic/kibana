@@ -51,11 +51,29 @@ describe('Data stream helpers', () => {
       expect(deserializeGlobalMaxRetention(undefined)).toEqual({});
     });
 
-    it('split globalMaxRetention size and units ', () => {
+    it('split globalMaxRetention size and units', () => {
       expect(deserializeGlobalMaxRetention('1000h')).toEqual({
         size: '1000',
         unit: 'h',
         unitText: 'hours',
+      });
+    });
+
+    it('support all of the units that are accepted by es', () => {
+      expect(deserializeGlobalMaxRetention('1000ms')).toEqual({
+        size: '1000',
+        unit: 'ms',
+        unitText: 'milliseconds',
+      });
+      expect(deserializeGlobalMaxRetention('1000micros')).toEqual({
+        size: '1000',
+        unit: 'micros',
+        unitText: 'microseconds',
+      });
+      expect(deserializeGlobalMaxRetention('1000nanos')).toEqual({
+        size: '1000',
+        unit: 'nanos',
+        unitText: 'nanoseconds',
       });
     });
   });
