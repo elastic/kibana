@@ -10,14 +10,6 @@ import type { AggregateQuery, Query } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { queryCannotBeSampled } from '@kbn/esql-utils';
 
-const FIELD_STATISTICS_LABEL = i18n.translate('unifiedFieldList.fieldStats.fieldStatisticsLabel', {
-  defaultMessage: `Field statistics are`,
-});
-
-export const FIELD_DATA_LABEL = i18n.translate('unifiedFieldList.fieldStats.fieldDataLabel', {
-  defaultMessage: `Field data is`,
-});
-
 export const getReasonIfFieldDataUnavailableForQuery = (
   query?: AggregateQuery | Query | { [key: string]: any }
 ): string | undefined => {
