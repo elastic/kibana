@@ -8,6 +8,7 @@
 import { withoutOutputUpdateEvents } from '@kbn/inference-plugin/server';
 import { lastValueFrom } from 'rxjs';
 import stringify from 'json-stable-stringify';
+import pLimit from 'p-limit';
 import {
   RCA_SYSTEM_PROMPT_BASE,
   RCA_PROMPT_DEPENDENCIES,
@@ -17,6 +18,7 @@ import { formatEntity } from '../../util/format_entity';
 import { RelatedEntityFromSearchResults } from '.';
 import { RootCauseAnalysisContext } from '../../types';
 import { getPreviouslyInvestigatedEntities } from '../../util/get_previously_investigated_entities';
+import { toBlockquote } from '../../util/to_blockquote';
 
 export interface RelatedEntityDescription {
   entity: Record<string, string>;
@@ -26,16 +28,16 @@ export interface RelatedEntityDescription {
 
 export async function extractRelatedEntities({
   entity,
-  relatedEntitiesSummary,
-  summary,
+  entityReport,
+  summaries,
   foundEntities,
   context,
   rcaContext: { events, connectorId, inferenceClient },
 }: {
-  relatedEntitiesSummary: string;
   foundEntities: RelatedEntityFromSearchResults[];
   entity: Record<string, string>;
-  summary: string;
+  entityReport: string;
+  summaries: string[];
   context: string;
   rcaContext: Pick<RootCauseAnalysisContext, 'events' | 'connectorId' | 'inferenceClient'>;
 }): Promise<{ relatedEntities: RelatedEntityDescription[] }> {
@@ -55,18 +57,19 @@ export async function extractRelatedEntities({
       .join('\n')}`
     : '';
 
-  const input = `
+  const prompts = summaries.map((summary) => {
+    return `
     # Investigated entity
 
     ${formatEntity(entity)}
 
     # Report
 
-    ${summary}
+    ${toBlockquote(entityReport)}
 
     # Related entities report
 
-    ${relatedEntitiesSummary}
+    ${toBlockquote(summary)}
     
     ${previouslyInvestigatedEntitiesPrompt}
 
@@ -80,67 +83,83 @@ export async function extractRelatedEntities({
     related entities report. Order them by relevance to the investigation, put the
     most relevant ones first.
   `;
+  });
 
-  const completeEvent = await lastValueFrom(
-    inferenceClient
-      .output('get_entity_relationships', {
-        connectorId,
-        system,
-        input,
-        schema: {
-          type: 'object',
-          properties: {
-            related_entities: {
-              type: 'array',
-              items: {
+  const limiter = pLimit(5);
+
+  const allEvents = await Promise.all(
+    prompts.map(async (input) => {
+      const completeEvent = await limiter(() =>
+        lastValueFrom(
+          inferenceClient
+            .output('get_entity_relationships', {
+              connectorId,
+              system,
+              input,
+              schema: {
                 type: 'object',
                 properties: {
-                  entity: {
-                    type: 'object',
-                    properties: {
-                      field: {
-                        type: 'string',
+                  related_entities: {
+                    type: 'array',
+                    items: {
+                      type: 'object',
+                      properties: {
+                        entity: {
+                          type: 'object',
+                          properties: {
+                            field: {
+                              type: 'string',
+                            },
+                            value: {
+                              type: 'string',
+                            },
+                          },
+                          required: ['field', 'value'],
+                        },
+                        reason: {
+                          type: 'string',
+                          description:
+                            'Describe why this entity might be relevant. Provide evidence.',
+                        },
+                        confidence: {
+                          type: 'string',
+                          description:
+                            'Describe how confident you are in your conclusion about this relationship: low, moderate, high',
+                        },
                       },
-                      value: {
-                        type: 'string',
-                      },
+
+                      required: ['entity', 'reason', 'confidence'],
                     },
-                    required: ['field', 'value'],
-                  },
-                  reason: {
-                    type: 'string',
-                    description: 'Describe why this entity might be relevant. Provide evidence.',
-                  },
-                  confidence: {
-                    type: 'string',
-                    description:
-                      'Describe how confident you are in your conclusion about this relationship: low, moderate, high',
                   },
                 },
-
-                required: ['entity', 'reason', 'confidence'],
-              },
-            },
-          },
-          required: ['related_entities'],
-        } as const,
-      })
-      .pipe(withoutOutputUpdateEvents())
+                required: ['related_entities'],
+              } as const,
+            })
+            .pipe(withoutOutputUpdateEvents())
+        )
+      );
+      return completeEvent.output;
+    })
   );
 
   const foundEntityIds = foundEntities.map(({ entity: foundEntity }) => stringify(foundEntity));
 
-  return {
-    relatedEntities: completeEvent.output.related_entities
-      .map((relationship): RelatedEntityDescription => {
+  const relatedEntities = allEvents
+    .flat()
+    .flatMap((event) => {
+      return event.related_entities.map((item) => {
         return {
-          entity: { [relationship.entity.field]: relationship.entity.value },
-          reason: relationship.reason,
-          confidence: relationship.confidence,
+          entity: { [item.entity.field]: item.entity.value },
+          reason: item.reason,
+          confidence: item.confidence,
         };
-      })
-      .filter((relationship) => {
-        return foundEntityIds.includes(stringify(relationship.entity));
-      }),
+      });
+    })
+    .filter((item) => {
+      return foundEntityIds.includes(stringify(item.entity));
+    });
+
+  return {
+    relatedEntities,
   };
 }

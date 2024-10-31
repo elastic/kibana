@@ -55,7 +55,7 @@ export async function findRelatedEntities({
   patternsFromOtherEntities: FieldPatternResultWithChanges[];
 }): Promise<{
   searches: RelatedEntityKeywordSearch[];
-  content: string;
+  summaries: string[];
   foundEntities: RelatedEntityFromSearchResults[];
 }> {
   const { groupingFields, searches } = await writeKeywordSearchForRelatedEntities({
@@ -67,7 +67,7 @@ export async function findRelatedEntities({
     context,
   });
 
-  const { content: relatedEntitiesContent, foundEntities } = await analyzeFetchedRelatedEntities({
+  const { summaries, foundEntities } = await analyzeFetchedRelatedEntities({
     entity,
     connectorId,
     start,
@@ -86,7 +86,7 @@ export async function findRelatedEntities({
 
   return {
     searches,
-    content: relatedEntitiesContent,
+    summaries,
     foundEntities,
   };
 }

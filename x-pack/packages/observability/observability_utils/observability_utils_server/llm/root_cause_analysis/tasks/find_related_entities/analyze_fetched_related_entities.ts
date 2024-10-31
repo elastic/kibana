@@ -212,7 +212,7 @@ export async function analyzeFetchedRelatedEntities({
   context: string;
   logger: Logger;
 }): Promise<{
-  content: string;
+  summaries: string[];
   foundEntities: RelatedEntityFromSearchResults[];
 }> {
   const entityFields = Object.keys(entity);
@@ -293,18 +293,7 @@ export async function analyzeFetchedRelatedEntities({
   );
 
   return {
-    content:
-      allRelevantEntityDescriptions.length === 1
-        ? allRelevantEntityDescriptions[0]
-        : allRelevantEntityDescriptions
-            .map((description, idx) => {
-              return `# Part ${idx + 1}
-        
-        ${description}
-        
-        --- end of part ${idx + 1}`;
-            })
-            .join('\n\n'),
+    summaries: allRelevantEntityDescriptions,
     foundEntities,
   };
 

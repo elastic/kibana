@@ -24,6 +24,6 @@ export interface EntityInvestigation {
     >;
     alerts: ParsedTechnicalFields[];
     searches: RelatedEntityKeywordSearch[];
-    relatedEntitiesSummary: string;
+    relatedEntitiesSummaries: string[];
   } & AnalyzeLogPatternOutput;
 }

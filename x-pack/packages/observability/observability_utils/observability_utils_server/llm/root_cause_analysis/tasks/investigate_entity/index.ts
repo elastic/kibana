@@ -143,12 +143,12 @@ export async function investigateEntity(
       },
       ownPatterns,
       patternsFromOtherEntities,
-    }).then(async ({ searches, content: relatedEntitiesSummary, foundEntities }) => {
+    }).then(async ({ searches, summaries, foundEntities }) => {
       const report = await entityReportPromise;
 
       const { relatedEntities } = await extractRelatedEntities({
-        summary: report.report,
-        relatedEntitiesSummary,
+        entityReport: report.report,
+        summaries,
         entity,
         foundEntities,
         context,
@@ -159,7 +159,7 @@ export async function investigateEntity(
         relatedEntities,
         foundEntities,
         searches,
-        relatedEntitiesSummary,
+        summaries,
       };
     }),
   ]);
@@ -179,7 +179,7 @@ export async function investigateEntity(
       ownPatterns,
       patternsFromOtherEntities,
       searches: relatedEntitiesResults.searches,
-      relatedEntitiesSummary: relatedEntitiesResults.relatedEntitiesSummary,
+      relatedEntitiesSummaries: relatedEntitiesResults.summaries,
     },
   };
 }

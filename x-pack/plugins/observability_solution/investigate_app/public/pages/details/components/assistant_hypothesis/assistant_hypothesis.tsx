@@ -5,9 +5,17 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import type { RootCauseAnalysisForServiceEvent } from '@kbn/observability-utils-server/llm/service_rca';
+import type { RootCauseAnalysisEvent } from '@kbn/observability-utils-server/llm/root_cause_analysis';
 import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common';
 import React, { useState } from 'react';
+import { omit } from 'lodash';
+import {
+  ALERT_FLAPPING_HISTORY,
+  ALERT_RULE_EXECUTION_TIMESTAMP,
+  ALERT_RULE_EXECUTION_UUID,
+  EVENT_ACTION,
+  EVENT_KIND,
+} from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useInvestigation } from '../../contexts/investigation_context';
 
@@ -37,10 +45,11 @@ export function AssistantHypothesis({ investigationId }: { investigationId: stri
 
   const serviceName = alert?.['service.name'] as string | undefined;
 
-  const [events, setEvents] = useState<RootCauseAnalysisForServiceEvent[]>([]);
+  const [events, setEvents] = useState<RootCauseAnalysisEvent[]>([]);
   const [loading, setLoading] = useState(false);
 
   const runRootCauseAnalysis = ({
+    alert: nonNullishAlert,
     connectorId,
     serviceName: nonNullishServiceName,
   }: {
@@ -64,7 +73,7 @@ export function AssistantHypothesis({ investigationId }: { investigationId: stri
             context: `The user is investigating an alert for the ${serviceName} service,
             and wants to find the root cause. Here is the alert:
 
-            ${JSON.stringify(alert)}`,
+            ${JSON.stringify(sanitizeAlert(nonNullishAlert))}`,
             rangeFrom,
             rangeTo,
             serviceName: nonNullishServiceName,
@@ -115,5 +124,18 @@ export function AssistantHypothesis({ investigationId }: { investigationId: stri
         }
       }}
     />
+  );
+}
+
+function sanitizeAlert(alert: EcsFieldsResponse) {
+  return omit(
+    alert,
+    ALERT_RULE_EXECUTION_TIMESTAMP,
+    '_index',
+    ALERT_FLAPPING_HISTORY,
+    EVENT_ACTION,
+    EVENT_KIND,
+    ALERT_RULE_EXECUTION_UUID,
+    '@timestamp'
   );
 }
