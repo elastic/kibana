@@ -16,12 +16,12 @@ import { ObservablesTable } from '../../observables/observables_table';
 import { ObservablesUtilityBar } from '../../observables/observables_utility_bar';
 import { useCaseObservables } from '../use_case_observables';
 
-interface CaseViewSimilarProps {
+interface CaseViewObservablesProps {
   caseData: CaseUI;
   isLoading: boolean;
 }
 
-export const CaseViewObservables = ({ caseData, isLoading }: CaseViewSimilarProps) => {
+export const CaseViewObservables = ({ caseData, isLoading }: CaseViewObservablesProps) => {
   const caseObservables = useCaseObservables(caseData);
 
   return (
