@@ -16,7 +16,7 @@ import type {
 } from '../../../../../../../../common/api/detection_engine';
 import { MultiSelectFieldsAutocomplete } from '../../../../../../rule_creation_ui/components/multi_select_fields';
 import { useAllEsqlRuleFields } from '../../../../../../rule_creation_ui/hooks';
-import { useDefaultIndexPattern } from '../../../use_default_index_pattern';
+import { useDefaultIndexPattern } from '../../../../../hooks/use_default_index_pattern';
 import { useRuleIndexPattern } from '../../../../../../rule_creation_ui/pages/form';
 import { getUseRuleIndexPatternParameters } from '../utils';
 

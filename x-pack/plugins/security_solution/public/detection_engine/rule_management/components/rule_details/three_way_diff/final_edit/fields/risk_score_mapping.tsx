@@ -13,7 +13,7 @@ import type {
   RiskScoreMapping,
 } from '../../../../../../../../common/api/detection_engine';
 import { RiskScoreOverride } from '../../../../../../rule_creation_ui/components/risk_score_mapping/risk_score_override';
-import { useDefaultIndexPattern } from '../../../use_default_index_pattern';
+import { useDefaultIndexPattern } from '../../../../../hooks/use_default_index_pattern';
 import { getUseRuleIndexPatternParameters } from '../utils';
 import { useRuleIndexPattern } from '../../../../../../rule_creation_ui/pages/form';
 import { filterOutEmptyRiskScoreMappingItems } from '../../../../../../rule_creation_ui/pages/rule_creation/helpers';

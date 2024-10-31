@@ -16,7 +16,7 @@ import type {
 import { AutocompleteField } from '../../../../../../rule_creation_ui/components/autocomplete_field';
 import { useRuleIndexPattern } from '../../../../../../rule_creation_ui/pages/form';
 import { getUseRuleIndexPatternParameters } from '../utils';
-import { useDefaultIndexPattern } from '../../../use_default_index_pattern';
+import { useDefaultIndexPattern } from '../../../../../hooks/use_default_index_pattern';
 
 export const ruleNameOverrideSchema = { ruleNameOverride: schema.ruleNameOverride } as FormSchema<{
   ruleNameOverride: string;

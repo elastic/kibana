@@ -10,7 +10,7 @@ import type { FormSchema, FormData } from '../../../../../../../shared_imports';
 import { Field, UseField, useFormData } from '../../../../../../../shared_imports';
 import { schema } from '../../../../../../rule_creation_ui/components/step_about_rule/schema';
 import { AutocompleteField } from '../../../../../../rule_creation_ui/components/autocomplete_field';
-import { useDefaultIndexPattern } from '../../../use_default_index_pattern';
+import { useDefaultIndexPattern } from '../../../../../hooks/use_default_index_pattern';
 import { getUseRuleIndexPatternParameters } from '../utils';
 import { useRuleIndexPattern } from '../../../../../../rule_creation_ui/pages/form';
 import type {

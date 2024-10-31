@@ -13,7 +13,7 @@ import type {
   RequiredFieldInput,
 } from '../../../../../../../../common/api/detection_engine';
 import { RequiredFields } from '../../../../../../rule_creation/components/required_fields';
-import { useDefaultIndexPattern } from '../../../use_default_index_pattern';
+import { useDefaultIndexPattern } from '../../../../../hooks/use_default_index_pattern';
 import { getUseRuleIndexPatternParameters } from '../utils';
 import { useRuleIndexPattern } from '../../../../../../rule_creation_ui/pages/form';
 
