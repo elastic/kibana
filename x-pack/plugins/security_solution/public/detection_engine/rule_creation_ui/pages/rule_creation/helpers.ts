@@ -19,6 +19,7 @@ import type {
   List,
 } from '@kbn/securitysolution-io-ts-list-types';
 import type {
+  RiskScoreMappingItem,
   Threats,
   ThreatSubtechnique,
   ThreatTechnique,
@@ -57,6 +58,7 @@ import type {
   RuleCreateProps,
   AlertSuppression,
   RequiredFieldInput,
+  SeverityMapping,
 } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { stepActionsDefaultValue } from '../../../rule_creation/components/step_rule_actions';
 import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../common/detection_engine/constants';
@@ -624,12 +626,12 @@ export const formatAboutStepData = (
       : { field_names: investigationFields },
     risk_score: riskScore.value,
     risk_score_mapping: riskScore.isMappingChecked
-      ? riskScore.mapping.filter((m) => m.field != null && m.field !== '')
+      ? filterOutEmptyRiskScoreMappingItems(riskScore.mapping)
       : [],
     rule_name_override: ruleNameOverride !== '' ? ruleNameOverride : undefined,
     severity: severity.value,
     severity_mapping: severity.isMappingChecked
-      ? severity.mapping.filter((m) => m.field != null && m.field !== '' && m.value != null)
+      ? filterOutEmptySeverityMappingItems(severity.mapping)
       : [],
     threat: filterEmptyThreats(threat).map((singleThreat) => ({
       ...singleThreat,
@@ -644,6 +646,12 @@ export const formatAboutStepData = (
   };
   return resp;
 };
+
+export const filterOutEmptyRiskScoreMappingItems = (riskScoreMapping: RiskScoreMappingItem[]) =>
+  riskScoreMapping.filter((m) => m.field != null && m.field !== '');
+
+export const filterOutEmptySeverityMappingItems = (severityMapping: SeverityMapping) =>
+  severityMapping.filter((m) => m.field != null && m.field !== '' && m.value != null);
 
 export const isRuleAction = (
   action: AlertingRuleAction | AlertingRuleSystemAction,

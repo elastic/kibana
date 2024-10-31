@@ -6,6 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
+import { noop } from 'lodash/fp';
 import styled from 'styled-components';
 import {
   EuiFormRow,
@@ -46,6 +47,7 @@ interface RiskScoreOverrideProps {
   indices: DataViewBase;
   dataTestSubj?: string;
   idAria?: string;
+  isDisabled: boolean;
 }
 
 export function RiskScoreOverride({
@@ -56,11 +58,16 @@ export function RiskScoreOverride({
   indices,
   dataTestSubj = 'riskScoreOverride',
   idAria,
+  isDisabled,
 }: RiskScoreOverrideProps) {
   const riskScoreMappingLabel = useMemo(() => {
     return (
       <div>
-        <EuiFlexGroup alignItems="center" gutterSize="s" onClick={onToggleMappingChecked}>
+        <EuiFlexGroup
+          alignItems="center"
+          gutterSize="s"
+          onClick={!isDisabled ? onToggleMappingChecked : noop}
+        >
           <EuiFlexItem grow={false}>
             <EuiCheckbox
               id={`risk_score-mapping-override`}
@@ -76,7 +83,7 @@ export function RiskScoreOverride({
         </NestedContent>
       </div>
     );
-  }, [isMappingChecked, onToggleMappingChecked]);
+  }, [isDisabled, isMappingChecked, onToggleMappingChecked]);
 
   const fieldTypeFilter = useMemo(() => ['number'], []);
   const selectedField = useMemo(() => getFieldTypeByMapping(mapping, indices), [mapping, indices]);
@@ -117,7 +124,7 @@ export function RiskScoreOverride({
                     fieldTypeFilter={fieldTypeFilter}
                     isLoading={false}
                     isClearable={false}
-                    isDisabled={false}
+                    isDisabled={isDisabled}
                     onChange={onMappingChange}
                     data-test-subj={dataTestSubj}
                     aria-label={idAria}

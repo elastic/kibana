@@ -24,7 +24,7 @@ import { AddMitreAttackThreat } from '../mitre';
 import type { FieldHook, FormHook } from '../../../../shared_imports';
 import { Field, Form, getUseField, UseField } from '../../../../shared_imports';
 
-import { defaultRiskScoreBySeverity, severityOptions } from './data';
+import { defaultRiskScoreBySeverity } from './data';
 import { isUrlInvalid } from '../../../../common/utils/validators';
 import { schema as defaultSchema } from './schema';
 import * as I18n from './translations';
@@ -176,7 +176,6 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
                 dataTestSubj: 'detectionEngineStepAboutRuleSeverityField',
                 idAria: 'detectionEngineStepAboutRuleSeverityField',
                 isDisabled: isLoading || indexPatternLoading,
-                options: severityOptions,
                 indices: indexPattern,
                 setRiskScore,
               }}

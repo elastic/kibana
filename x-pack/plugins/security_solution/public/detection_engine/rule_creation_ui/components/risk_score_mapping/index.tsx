@@ -18,9 +18,16 @@ interface RiskScoreFieldProps {
   field: FieldHook<AboutStepRiskScore>;
   idAria: string;
   indices: DataViewBase;
+  isDisabled: boolean;
 }
 
-export const RiskScoreField = ({ dataTestSubj, field, idAria, indices }: RiskScoreFieldProps) => {
+export const RiskScoreField = ({
+  dataTestSubj,
+  field,
+  idAria,
+  indices,
+  isDisabled,
+}: RiskScoreFieldProps) => {
   const { value, isMappingChecked, mapping } = field.value;
   const { setValue } = field;
 
@@ -81,6 +88,7 @@ export const RiskScoreField = ({ dataTestSubj, field, idAria, indices }: RiskSco
           idAria={idAria}
           mapping={mapping}
           indices={indices}
+          isDisabled={isDisabled}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

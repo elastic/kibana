@@ -72,6 +72,12 @@ import {
   ruleScheduleSerializer,
 } from './fields/rule_schedule';
 import { SetupEdit, setupSchema } from './fields/setup';
+import { SeverityEdit } from './fields/severity';
+import {
+  SeverityMappingEdit,
+  severityMappingDeserializer,
+  severityMappingSerializer,
+} from './fields/severity_mapping';
 import { TagsEdit, tagsSchema } from './fields/tags';
 import { ThreatEdit, threatSchema, threatSerializer } from './fields/threat';
 import {
@@ -91,6 +97,7 @@ interface CommonRuleFieldEditProps {
   fieldName: UpgradeableCommonFields;
 }
 
+/* eslint-disable-next-line complexity */
 export function CommonRuleFieldEdit({ fieldName }: CommonRuleFieldEditProps) {
   switch (fieldName) {
     case 'building_block':
@@ -198,6 +205,16 @@ export function CommonRuleFieldEdit({ fieldName }: CommonRuleFieldEditProps) {
       );
     case 'setup':
       return <FieldFormWrapper component={SetupEdit} fieldFormSchema={setupSchema} />;
+    case 'severity':
+      return <FieldFormWrapper component={SeverityEdit} />;
+    case 'severity_mapping':
+      return (
+        <FieldFormWrapper
+          component={SeverityMappingEdit}
+          serializer={severityMappingSerializer}
+          deserializer={severityMappingDeserializer}
+        />
+      );
     case 'tags':
       return <FieldFormWrapper component={TagsEdit} fieldFormSchema={tagsSchema} />;
     case 'timeline_template':

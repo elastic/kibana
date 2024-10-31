@@ -16,6 +16,7 @@ import { RiskScoreOverride } from '../../../../../../rule_creation_ui/components
 import { useDefaultIndexPattern } from '../../../use_default_index_pattern';
 import { getUseRuleIndexPatternParameters } from '../utils';
 import { useRuleIndexPattern } from '../../../../../../rule_creation_ui/pages/form';
+import { filterOutEmptyRiskScoreMappingItems } from '../../../../../../rule_creation_ui/pages/rule_creation/helpers';
 
 interface RiskScoreMappingEditProps {
   finalDiffableRule: DiffableRule;
@@ -44,14 +45,14 @@ function RiskScoreMappingField({ field, finalDiffableRule }: RiskScoreMappingFie
     finalDiffableRule,
     defaultIndexPattern
   );
-  const { indexPattern } = useRuleIndexPattern(indexPatternParameters);
+  const { indexPattern, isIndexPatternLoading } = useRuleIndexPattern(indexPatternParameters);
 
   const { value, setValue } = field;
 
   const handleToggleMappingChecked = useCallback(() => {
     setValue({
+      ...value,
       isMappingChecked: !value.isMappingChecked,
-      mapping: value.mapping,
     });
   }, [value, setValue]);
 
@@ -66,11 +67,11 @@ function RiskScoreMappingField({ field, finalDiffableRule }: RiskScoreMappingFie
       ];
 
       setValue({
-        isMappingChecked: value.isMappingChecked,
+        ...value,
         mapping,
       });
     },
-    [value.isMappingChecked, setValue]
+    [value, setValue]
   );
 
   return (
@@ -80,6 +81,7 @@ function RiskScoreMappingField({ field, finalDiffableRule }: RiskScoreMappingFie
       onToggleMappingChecked={handleToggleMappingChecked}
       onMappingChange={handleMappingChange}
       indices={indexPattern}
+      isDisabled={isIndexPatternLoading}
     />
   );
 }
@@ -98,7 +100,7 @@ export function riskScoreMappingSerializer(formData: FormData): {
 } {
   return {
     risk_score_mapping: formData.riskScoreMapping.isMappingChecked
-      ? formData.riskScoreMapping.mapping
+      ? filterOutEmptyRiskScoreMappingItems(formData.riskScoreMapping.mapping)
       : [],
   };
 }
