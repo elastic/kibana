@@ -72,6 +72,14 @@ interface RulesContextValue {
 const RulesContext = createContext<RulesContextValue | undefined>(undefined);
 const MAX_ITEMS_PER_PAGE = 10000;
 
+export function useRules() {
+  const context = useContext(RulesContext);
+  if (context === undefined) {
+    throw new Error('useRules must be used within a RulesProvider');
+  }
+  return context;
+}
+
 export function RulesProvider({ children }: RulesProviderProps) {
   const params = useParams<PageUrlParams>();
   const { pageSize, setPageSize } = usePageSize(LOCAL_STORAGE_PAGE_SIZE_RULES_KEY);
@@ -328,14 +336,6 @@ const getRulesPageData = (
     total: data?.length || 0,
   };
 };
-
-export function useRules() {
-  const context = useContext(RulesContext);
-  if (context === undefined) {
-    throw new Error('useRules must be used within a RulesProvider');
-  }
-  return context;
-}
 
 const getRulesWithStates = (
   data: FindCspBenchmarkRuleResponse | undefined,
