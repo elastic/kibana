@@ -35,7 +35,7 @@ export function AlertSuppressionEdit({
         disabled={disabled}
         disabledText={disabledText}
       />
-      <SuppressionFrequencySelector disabled={disabled || !hasSelectedFields} />
+      <SuppressionDurationSelector disabled={disabled || !hasSelectedFields} />
       <MissingFieldsStrategySelector disabled={disabled || !hasSelectedFields} />
     </>
   );

@@ -12,13 +12,13 @@ import { DurationInput } from '../../../../../../../rule_creation_ui/components/
 import { UseMultiFields } from '../../../../../../../../shared_imports';
 import * as i18n from './translations';
 
-interface AlertSuppressionFrequencyProps {
+interface AlertSuppressionDurationProps {
   disabled?: boolean;
 }
 
-export function SuppressionFrequencySelector({
+export function SuppressionDurationSelector({
   disabled,
-}: AlertSuppressionFrequencyProps): JSX.Element {
+}: AlertSuppressionDurationProps): JSX.Element {
   return (
     <EuiFormRow data-test-subj="alertSuppressionDuration">
       <UseMultiFields<{
@@ -45,14 +45,14 @@ export function SuppressionFrequencySelector({
             options={[
               {
                 id: GroupByOptions.PerRuleExecution,
-                label: i18n.ALERT_SUPPRESSION_PER_RULE_EXECUTION,
+                label: i18n.ALERT_SUPPRESSION_DURATION_PER_RULE_EXECUTION_OPTION,
               },
               {
                 id: GroupByOptions.PerTimePeriod,
                 disabled,
                 label: (
                   <>
-                    {i18n.ALERT_SUPPRESSION_PER_TIME_PERIOD}
+                    {i18n.ALERT_SUPPRESSION_DURATION_PER_TIME_PERIOD_OPTION}
                     <DurationInput
                       data-test-subj="alertSuppressionDurationInput"
                       durationValueField={groupByDurationValue}
