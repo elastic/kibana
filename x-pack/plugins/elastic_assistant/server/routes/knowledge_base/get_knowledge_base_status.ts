@@ -67,7 +67,9 @@ export const getKnowledgeBaseStatusRoute = (router: ElasticAssistantPluginRouter
 
           const body: ReadKnowledgeBaseResponse = {
             elser_exists: modelExists,
+            // elser_exists: modelExists && isModelDeployed,
             index_exists: indexExists,
+            is_model_deployed: isModelDeployed,
             is_setup_in_progress: kbDataClient.isSetupInProgress,
             is_setup_available: setupAvailable,
             pipeline_exists: pipelineExists,

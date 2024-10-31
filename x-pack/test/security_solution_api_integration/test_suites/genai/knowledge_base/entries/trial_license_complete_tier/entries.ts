@@ -7,6 +7,7 @@
 
 import expect from 'expect';
 import { KNOWLEDGE_BASE_ENTRIES_TABLE_MAX_PAGE_SIZE } from '@kbn/elastic-assistant-plugin/common/constants';
+import { isSystemEntry } from '@kbn/elastic-assistant/impl/knowledge_base/knowledge_base_settings_management/helpers';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { createEntry, createEntryForUser } from '../utils/create_entry';
 import { findEntries } from '../utils/find_entry';
@@ -15,6 +16,7 @@ import {
   deleteTinyElser,
   installTinyElser,
   setupKnowledgeBase,
+  waitForKnowledgeBaseModelToBeDeployed,
 } from '../utils/helpers';
 import { removeServerGeneratedProperties } from '../utils/remove_server_generated_properties';
 import { MachineLearningProvider } from '../../../../../../functional/services/ml';
@@ -32,10 +34,11 @@ export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
   const ml = getService('ml') as ReturnType<typeof MachineLearningProvider>;
 
-  describe.skip('@ess Basic Security AI Assistant Knowledge Base Entries', () => {
+  describe('@ess Basic Security AI Assistant Knowledge Base Entries', () => {
     before(async () => {
       await installTinyElser(ml);
-      await setupKnowledgeBase(supertest, log);
+      setupKnowledgeBase(supertest, log);
+      await waitForKnowledgeBaseModelToBeDeployed(supertest, log);
     });
 
     after(async () => {
@@ -170,8 +173,9 @@ export default ({ getService }: FtrProviderContext) => {
         );
 
         const entries = await findEntries({ supertest, log });
+        const globalEntries = entries.data.filter((entry) => !isSystemEntry(entry));
 
-        expect(entries.total).toEqual(1);
+        expect(globalEntries.length).toEqual(1);
       });
 
       it('should not see other users private entries', async () => {
@@ -189,8 +193,9 @@ export default ({ getService }: FtrProviderContext) => {
         );
 
         const entries = await findEntries({ supertest, log });
+        const privateEntries = entries.data.filter((entry) => !isSystemEntry(entry));
 
-        expect(entries.total).toEqual(0);
+        expect(privateEntries.length).toEqual(0);
       });
     });
 

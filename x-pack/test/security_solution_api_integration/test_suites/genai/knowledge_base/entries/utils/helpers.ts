@@ -9,6 +9,7 @@ import { Client } from '@elastic/elasticsearch';
 import {
   CreateKnowledgeBaseResponse,
   ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_URL,
+  ReadKnowledgeBaseResponse,
 } from '@kbn/elastic-assistant-common';
 
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
@@ -17,7 +18,7 @@ import type SuperTest from 'supertest';
 import { MachineLearningProvider } from '../../../../../../functional/services/ml';
 import { SUPPORTED_TRAINED_MODELS } from '../../../../../../functional/services/ml/api';
 
-import { routeWithNamespace } from '../../../../../../common/utils/security_solution';
+import { routeWithNamespace, waitFor } from '../../../../../../common/utils/security_solution';
 
 export const TINY_ELSER = {
   ...SUPPORTED_TRAINED_MODELS.TINY_ELSER,
@@ -79,6 +80,58 @@ export const setupKnowledgeBase = async (
   } else {
     return response.body;
   }
+};
+
+/**
+ * Get Knowledge Base status
+ * @param supertest The supertest deps
+ * @param log The tooling logger
+ * @param resource
+ * @param namespace The Kibana Space where the KB should be set up
+ */
+export const getKnowledgeBaseStatus = async (
+  supertest: SuperTest.Agent,
+  log: ToolingLog,
+  resource?: string,
+  namespace?: string
+): Promise<ReadKnowledgeBaseResponse> => {
+  const path = ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_URL.replace('{resource?}', resource || '');
+  const route = routeWithNamespace(path, namespace);
+  const response = await supertest
+    .get(route)
+    .set('kbn-xsrf', 'true')
+    .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+    .send();
+  log.error(`response: ${JSON.stringify(response, null, 2)}`);
+  if (response.status !== 200) {
+    throw new Error(
+      `Unexpected non 200 ok when attempting to setup Knowledge Base: ${JSON.stringify(
+        response.status
+      )},${JSON.stringify(response, null, 4)}`
+    );
+  } else {
+    return response.body;
+  }
+};
+
+/**
+ * Waits for the knowledge base model to be deployed
+ * @param supertest The supertest deps
+ * @param log The tooling logger
+ */
+export const waitForKnowledgeBaseModelToBeDeployed = async (
+  supertest: SuperTest.Agent,
+  log: ToolingLog
+): Promise<void> => {
+  await waitFor(
+    async () => {
+      const status = await getKnowledgeBaseStatus(supertest, log);
+      // return !!status.elser_exists;
+      return !!status.is_model_deployed;
+    },
+    'waitForKnowledgeBaseModelToBeDeployed',
+    log
+  );
 };
 
 /**
