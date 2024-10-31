@@ -15,7 +15,11 @@ import type {
 } from '@kbn/maps-plugin/common';
 import { MAX_ZOOM, MIN_ZOOM, SOURCE_TYPES, VECTOR_SHAPE_TYPE } from '@kbn/maps-plugin/common';
 import type { MapExtent } from '@kbn/maps-plugin/common/descriptor_types';
-import { GEOJSON_FEATURE_ID_PROPERTY_NAME } from '@kbn/maps-plugin/public';
+
+// avoid import from plugin root
+// import { GEOJSON_FEATURE_ID_PROPERTY_NAME } from '@kbn/maps-plugin/public';
+const GEOJSON_FEATURE_ID_PROPERTY_NAME = '__kbn__feature_id__';
+
 import type { DataFilters } from '@kbn/maps-plugin/common';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
@@ -26,7 +30,7 @@ import type { Attribution, ImmutableSourceProperty } from '@kbn/maps-plugin/publ
 import type { SourceEditorArgs } from '@kbn/maps-plugin/public';
 import type { DataRequest } from '@kbn/maps-plugin/public';
 import type { GetFeatureActionsArgs, IVectorSource, SourceStatus } from '@kbn/maps-plugin/public';
-import { ML_PAGES } from '@kbn/ml-common-types/locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import {
   AnomalySourceField,
   AnomalySourceTooltipProperty,

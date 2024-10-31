@@ -80,6 +80,8 @@
     "@kbn/aiops-utils",
     "@kbn/presentation-util",
     "@kbn/licensing-types",
+    "@kbn/shared-ux-router",
+    "@kbn/ml-common-types",
   ],
   "exclude": [
     "target/**/*",

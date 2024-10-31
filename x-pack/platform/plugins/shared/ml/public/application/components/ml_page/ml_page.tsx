@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { css } from '@emotion/react';
 import type { FC } from 'react';
 import React, { createContext, useEffect, useMemo, useState } from 'react';
 import { createHtmlPortalNode, type HtmlPortalNode, OutPortal } from 'react-reverse-portal';
 import { Redirect, useLocation } from 'react-router-dom';
-import { Routes, Route } from '@kbn/shared-ux-router';
 import { Subscription } from 'rxjs';
+import { map, distinctUntilChanged } from 'rxjs';
+
 import type { EuiPaddingSize } from '@elastic/eui';
 import {
   EuiPageSection,
@@ -19,15 +21,15 @@ import {
   EuiFlexItem,
   EuiPageHeaderSection,
 } from '@elastic/eui';
-import { map, distinctUntilChanged } from 'rxjs';
 
+import { Routes, Route } from '@kbn/shared-ux-router';
 import { i18n } from '@kbn/i18n';
 import { type AppMountParameters } from '@kbn/core/public';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { DatePickerWrapper } from '@kbn/ml-date-picker';
-import { css } from '@emotion/react';
-import { DEPRECATED_ML_ROUTE_TO_NEW_ROUTE } from '../../../../common/constants/locator';
+import { DEPRECATED_ML_ROUTE_TO_NEW_ROUTE } from '@kbn/ml-common-types/locator_deprecated_routes';
+
 import * as routes from '../../routing/routes';
 import * as overviewRoutes from '../../routing/routes/overview_management';
 import * as anomalyDetectionRoutes from '../../routing/routes/anomaly_detection_management';
@@ -40,13 +42,13 @@ import type { NavigateToPath } from '../../contexts/kibana';
 import type { MlRoute, PageDependencies } from '../../routing/router';
 import { useActiveRoute } from '../../routing/use_active_route';
 import { useDocTitle } from '../../routing/use_doc_title';
+import { useEnabledFeatures } from '../../contexts/ml';
+import { MANAGEMENT_SECTION_IDS } from '../../management';
+import type { NavigateToApp } from '../../routing/breadcrumbs';
 
 import { MlPageHeaderRenderer } from '../page_header/page_header';
 
 import { useSideNavItems } from './side_nav';
-import { useEnabledFeatures } from '../../contexts/ml';
-import { MANAGEMENT_SECTION_IDS } from '../../management';
-import type { NavigateToApp } from '../../routing/breadcrumbs';
 interface RouteToPath {
   [key: string]: (navigateToPath: NavigateToPath, basePath: string) => MlRoute;
 }
