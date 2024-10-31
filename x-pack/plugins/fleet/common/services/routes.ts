@@ -47,11 +47,14 @@ export const epmRouteService = {
   getInfoPath: (pkgName: string, pkgVersion?: string) => {
     if (pkgVersion) {
       return EPM_API_ROUTES.INFO_PATTERN.replace('{pkgName}', pkgName).replace(
-        '{pkgVersion}',
+        '{pkgVersion?}',
         pkgVersion
       );
     } else {
-      return EPM_API_ROUTES.INFO_PATTERN.replace('{pkgName}', pkgName).replace('/{pkgVersion}', '');
+      return EPM_API_ROUTES.INFO_PATTERN.replace('{pkgName}', pkgName).replace(
+        '/{pkgVersion?}',
+        ''
+      );
     }
   },
 
@@ -64,19 +67,31 @@ export const epmRouteService = {
   },
 
   getInstallPath: (pkgName: string, pkgVersion: string) => {
-    return EPM_API_ROUTES.INSTALL_FROM_REGISTRY_PATTERN.replace('{pkgName}', pkgName)
-      .replace('{pkgVersion}', pkgVersion)
-      .replace(/\/$/, ''); // trim trailing slash
+    if (pkgVersion) {
+      return EPM_API_ROUTES.INSTALL_FROM_REGISTRY_PATTERN.replace('{pkgName}', pkgName)
+        .replace('{pkgVersion?}', pkgVersion)
+        .replace(/\/$/, ''); // trim trailing slash
+    } else {
+      return EPM_API_ROUTES.INSTALL_FROM_REGISTRY_PATTERN.replace('{pkgName}', pkgName)
+        .replace('/{pkgVersion?}', '')
+        .replace(/\/$/, ''); // trim trailing slash
+    }
   },
 
   getBulkInstallPath: () => {
     return EPM_API_ROUTES.BULK_INSTALL_PATTERN;
   },
 
-  getRemovePath: (pkgName: string, pkgVersion: string) => {
-    return EPM_API_ROUTES.DELETE_PATTERN.replace('{pkgName}', pkgName)
-      .replace('{pkgVersion}', pkgVersion)
-      .replace(/\/$/, ''); // trim trailing slash
+  getRemovePath: (pkgName: string, pkgVersion?: string) => {
+    if (pkgVersion) {
+      return EPM_API_ROUTES.DELETE_PATTERN.replace('{pkgName}', pkgName)
+        .replace('/{pkgVersion?}', pkgVersion)
+        .replace(/\/$/, ''); // trim trailing slash
+    } else {
+      return EPM_API_ROUTES.DELETE_PATTERN.replace('{pkgName}', pkgName)
+        .replace('{pkgVersion?}', '')
+        .replace(/\/$/, ''); // trim trailing slash
+    }
   },
 
   getInstallKibanaAssetsPath: (pkgName: string, pkgVersion: string) => {

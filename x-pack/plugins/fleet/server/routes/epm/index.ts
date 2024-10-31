@@ -289,37 +289,6 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
 
   router.versioned
     .get({
-      path: EPM_API_ROUTES.INFO_WITHOUT_VERSION_PATTERN,
-      fleetAuthz: (fleetAuthz: FleetAuthz): boolean =>
-        calculateRouteAuthz(
-          fleetAuthz,
-          getRouteRequiredAuthz('get', EPM_API_ROUTES.INFO_WITHOUT_VERSION_PATTERN)
-        ).granted,
-      description: `Get package`,
-      options: {
-        tags: ['oas-tag:Elastic Package Manager (EPM)'],
-      },
-    })
-    .addVersion(
-      {
-        version: API_VERSIONS.public.v1,
-        validate: {
-          request: GetInfoRequestSchema,
-          response: {
-            200: {
-              body: () => GetInfoResponseSchema,
-            },
-            400: {
-              body: genericErrorResponse,
-            },
-          },
-        },
-      },
-      getInfoHandler
-    );
-
-  router.versioned
-    .get({
       path: EPM_API_ROUTES.INFO_PATTERN,
       fleetAuthz: (fleetAuthz: FleetAuthz): boolean =>
         calculateRouteAuthz(fleetAuthz, getRouteRequiredAuthz('get', EPM_API_ROUTES.INFO_PATTERN))
@@ -374,32 +343,6 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
         },
       },
       updatePackageHandler
-    );
-  router.versioned
-    .post({
-      path: EPM_API_ROUTES.INSTALL_FROM_REGISTRY_WITHOUT_VERSION_PATTERN,
-      fleetAuthz: INSTALL_PACKAGES_AUTHZ,
-      description: `Install package from registry`,
-      options: {
-        tags: ['oas-tag:Elastic Package Manager (EPM)'],
-      },
-    })
-    .addVersion(
-      {
-        version: API_VERSIONS.public.v1,
-        validate: {
-          request: InstallPackageFromRegistryRequestSchema,
-          response: {
-            200: {
-              body: () => InstallPackageResponseSchema,
-            },
-            400: {
-              body: genericErrorResponse,
-            },
-          },
-        },
-      },
-      installPackageFromRegistryHandler
     );
 
   router.versioned
@@ -578,36 +521,6 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
         },
       },
       createCustomIntegrationHandler
-    );
-
-  router.versioned
-    .delete({
-      path: EPM_API_ROUTES.DELETE_PATTERN_WITHOUT_VERSION_PATTERN,
-      fleetAuthz: {
-        integrations: { removePackages: true },
-      },
-      description: `Delete package`,
-      options: {
-        tags: ['oas-tag:Elastic Package Manager (EPM)'],
-      },
-    })
-    .addVersion(
-      {
-        version: API_VERSIONS.public.v1,
-        validate: {
-          request: DeletePackageRequestSchema,
-          response: {
-            200: {
-              body: () => DeletePackageResponseSchema,
-            },
-            400: {
-              body: genericErrorResponse,
-            },
-          },
-        },
-      },
-
-      deletePackageHandler
     );
 
   router.versioned
