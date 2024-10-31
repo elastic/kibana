@@ -65,11 +65,7 @@ export type DataSourceProfileProvider = AsyncProfileProvider<
   DataSourceContext
 >;
 
-export class DataSourceProfileService extends AsyncProfileService<
-  DataSourceProfile,
-  DataSourceProfileProviderParams,
-  DataSourceContext
-> {
+export class DataSourceProfileService extends AsyncProfileService<DataSourceProfileProvider> {
   constructor() {
     super({
       profileId: 'default-data-source-profile',

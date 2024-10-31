@@ -60,11 +60,7 @@ export type DocumentProfileProvider = ProfileProvider<
   DocumentContext
 >;
 
-export class DocumentProfileService extends ProfileService<
-  DocumentProfile,
-  DocumentProfileProviderParams,
-  DocumentContext
-> {
+export class DocumentProfileService extends ProfileService<DocumentProfileProvider> {
   constructor() {
     super({
       profileId: 'default-document-profile',

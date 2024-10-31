@@ -51,11 +51,7 @@ export type RootProfileProvider = AsyncProfileProvider<
   RootContext
 >;
 
-export class RootProfileService extends AsyncProfileService<
-  RootProfile,
-  RootProfileProviderParams,
-  RootContext
-> {
+export class RootProfileService extends AsyncProfileService<RootProfileProvider> {
   constructor() {
     super({
       profileId: 'default-root-profile',
