@@ -117,9 +117,7 @@ export class EntityClient {
     });
 
     if (!definition) {
-      const message = `Unable to find entity definition [${id}]`;
-      this.options.logger.error(message);
-      throw new EntityDefinitionNotFound(message);
+      throw new EntityDefinitionNotFound(`Unable to find entity definition [${id}]`);
     }
 
     this.options.logger.info(
