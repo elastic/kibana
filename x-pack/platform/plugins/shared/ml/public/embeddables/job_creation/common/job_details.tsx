@@ -34,7 +34,8 @@ import type { TimeRange } from '@kbn/es-query';
 import { JOB_ID_MAX_LENGTH } from '@kbn/ml-validators';
 
 import { JOB_TYPE, DEFAULT_BUCKET_SPAN } from '@kbn/ml-common-constants/new_job';
-import { ML_APP_LOCATOR, ML_PAGES } from '@kbn/ml-common-types/locator';
+import { ML_APP_LOCATOR } from '@kbn/ml-common-types/locator_app_locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import type { QuickLensJobCreator } from '../../../application/jobs/new_job/job_from_lens';
 import type { LayerResult } from '../../../application/jobs/new_job/job_from_lens';
 import type { CreateState } from '../../../application/jobs/new_job/job_from_dashboard';

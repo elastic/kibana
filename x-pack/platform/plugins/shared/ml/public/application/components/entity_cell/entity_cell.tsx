@@ -11,7 +11,7 @@ import React from 'react';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { ML_ENTITY_FIELD_OPERATIONS } from '@kbn/ml-anomaly-utils/anomaly_utils';
+import { ML_ENTITY_FIELD_OPERATIONS } from '@kbn/ml-anomaly-utils/entity_field_operations';
 import { MLCATEGORY } from '@kbn/ml-anomaly-utils/field_types';
 import { EMPTY_FIELD_VALUE_LABEL } from '../../timeseriesexplorer/components/entity_control/entity_control';
 import { blurButtonOnClick } from '../../util/component_utils';

@@ -15,7 +15,7 @@ import type { AppMountParameters, ChromeStart, ChromeBreadcrumb } from '@kbn/cor
 
 import { EuiSkeletonText } from '@elastic/eui';
 import { UrlStateProvider } from '@kbn/ml-url-state';
-import type { MlPages } from '@kbn/ml-common-types/locator';
+import type { MlPages } from '@kbn/ml-common-types/locator_ml_pages';
 import { MlNotificationsContextProvider } from '../contexts/ml/ml_notifications_context';
 
 import { MlPage } from '../components/ml_page';

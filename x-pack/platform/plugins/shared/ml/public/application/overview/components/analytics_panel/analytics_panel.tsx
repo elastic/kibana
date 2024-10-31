@@ -14,7 +14,7 @@ import { useStorage } from '@kbn/ml-local-storage';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { MlStorageKey, TMlStorageMapped } from '@kbn/ml-common-types/storage';
 import { ML_OVERVIEW_PANELS } from '@kbn/ml-common-types/storage';
-import { ML_PAGES } from '@kbn/ml-common-types/locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { type AnalyticStatsBarStats } from '../../../components/stats_bar';
 import {
   OverviewStatsBar,

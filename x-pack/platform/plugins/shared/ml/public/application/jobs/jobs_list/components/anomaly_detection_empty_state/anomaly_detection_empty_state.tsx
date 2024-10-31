@@ -9,7 +9,7 @@ import type { FC } from 'react';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton, EuiEmptyPrompt, EuiImage, EuiLink } from '@elastic/eui';
-import { ML_PAGES } from '@kbn/ml-common-types/locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import adImage from './anomaly_detection_kibana.png';
 import { useMlKibana, useMlLocator, useNavigateToPath } from '../../../../contexts/kibana';
 import { usePermissionCheck } from '../../../../capabilities/check_capabilities';

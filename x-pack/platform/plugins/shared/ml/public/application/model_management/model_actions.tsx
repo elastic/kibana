@@ -28,7 +28,7 @@ import {
   isModelDownloadItem,
   isNLPModelItem,
 } from '@kbn/ml-common-types/trained_models';
-import { ML_PAGES } from '@kbn/ml-common-types/locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { useEnabledFeatures, useMlServerInfo } from '../contexts/ml';
 import { useTrainedModelsApiService } from '../services/ml_api_service/trained_models';
 import { getUserConfirmationProvider } from './force_stop_dialog';
