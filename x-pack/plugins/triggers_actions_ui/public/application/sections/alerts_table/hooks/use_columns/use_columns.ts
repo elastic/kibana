@@ -302,7 +302,13 @@ export const useColumns = ({
   );
 
   const fieldsToFetch = useMemo(
-    () => [...columns.map((col) => ({ field: col.id, include_unmapped: true }))],
+    () => [
+      ...columns.map((col) => ({
+        field: col.id,
+        include_unmapped: true,
+        unmapped_type: 'keyword',
+      })),
+    ],
     [columns]
   );
 
