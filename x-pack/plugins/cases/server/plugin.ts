@@ -133,7 +133,6 @@ export class CasePlugin
       logger: this.logger,
       kibanaVersion: this.kibanaVersion,
       telemetryUsageCounter,
-      isServerless,
     });
 
     plugins.licensing.featureUsage.register(LICENSING_CASE_ASSIGNMENT_FEATURE, 'platinum');
