@@ -67,8 +67,8 @@ export const createPolicyDataStreamsIfNeeded: PolicyDataStreamsCreator = async (
     string[]
   >((acc, namespaceList) => {
     for (const namespace of namespaceList) {
-        acc.add(buildIndexNameWithNamespace(DEFAULT_DIAGNOSTIC_INDEX_PATTERN, namespace));
-        acc.add(buildIndexNameWithNamespace(ENDPOINT_ACTION_RESPONSES_DS, namespace));
+      acc.add(buildIndexNameWithNamespace(DEFAULT_DIAGNOSTIC_INDEX_PATTERN, namespace));
+      acc.add(buildIndexNameWithNamespace(ENDPOINT_ACTION_RESPONSES_DS, namespace));
 
       if (endpointServices.isServerless()) {
         acc.push(buildIndexNameWithNamespace(ENDPOINT_HEARTBEAT_INDEX_PATTERN, namespace));
