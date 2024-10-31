@@ -316,6 +316,16 @@ export const ModelsList: FC<Props> = ({
           };
         });
       });
+
+      setItemIdToExpandedRowMap((prev) => {
+        // Refresh expanded rows
+        return Object.fromEntries(
+          Object.keys(prev).map((modelId) => {
+            const item = resultItems.find((i) => i.model_id === modelId);
+            return item ? [modelId, <ExpandedRow item={item as ModelItemFull} />] : [];
+          })
+        );
+      });
     } catch (error) {
       displayErrorToast(
         error,
