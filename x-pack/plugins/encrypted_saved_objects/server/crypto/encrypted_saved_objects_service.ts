@@ -154,7 +154,7 @@ export class EncryptedSavedObjectsService {
   }
 
   /**
-   * Check whether the ESO has explicitly opted out of enforcing random IDs for the specified type.
+   * Checks whether the ESO type has explicitly opted out of enforcing random IDs.
    * @param type Saved object type.
    * @returns boolean - true unless explicitly opted out by setting enforceRandomId to false
    */
