@@ -25,6 +25,11 @@ import { selectMonitorListState } from '../../../state';
 import { getDynamicSettingsAction } from '../../../state/settings/actions';
 import { useSyntheticsSettingsContext } from '../../../contexts';
 import { ConfigKey } from '../../../../../../common/runtime_types';
+import { useActiveRules } from '../../monitors_page/overview/overview/use_active_rules';
+import {
+  SYNTHETICS_STATUS_RULE,
+  SYNTHETICS_TLS_RULE,
+} from '../../../../../../common/constants/synthetics_alerts';
 
 export const AlertingCallout = ({ isAlertingEnabled }: { isAlertingEnabled?: boolean }) => {
   const dispatch = useDispatch();
@@ -51,12 +56,43 @@ export const AlertingCallout = ({ isAlertingEnabled }: { isAlertingEnabled?: boo
     return locator?.getUrl({});
   }, [locator]);
 
-  const hasAlertingConfigured =
+  const { activeRules, activeRuleLoading } = useActiveRules();
+  console.log('active rules', activeRules, activeRuleLoading);
+
+  // if (!activeRules) {
+  //   return null;
+  // }
+  console.log('active rules', activeRules);
+  const hasStatusRule = activeRules.some(
+    (rule) => rule.rule_type_id === SYNTHETICS_STATUS_RULE && rule.enabled
+  );
+  const hasTls = activeRules.some(
+    (rule) => rule.rule_type_id === SYNTHETICS_TLS_RULE && rule.enabled
+  );
+  console.log('has status rule', hasStatusRule);
+  console.log('has tls rule', hasTls);
+
+  const hasMonitorsRunningWithAlertingConfigured =
     isAlertingEnabled ??
     (monitorsLoaded &&
       monitors.some((monitor) => monitor[ConfigKey.ALERT_CONFIG]?.status?.enabled));
 
-  const showCallout = !hasDefaultConnector && hasAlertingConfigured && defaultRuleEnabled;
+  const hasHttpMonitorsRunningWithAlertingEnabled =
+    monitorsLoaded &&
+    monitors.some(
+      (monitor) =>
+        monitor[ConfigKey.MONITOR_TYPE] === 'http' &&
+        monitor[ConfigKey.ALERT_CONFIG]?.status?.enabled &&
+        monitor[ConfigKey.ENABLED]
+    );
+  const showMonitorStatusCallout = !hasStatusRule && hasMonitorsRunningWithAlertingConfigured;
+  const showTlsCallout = !hasTls && hasHttpMonitorsRunningWithAlertingEnabled;
+  console.log('monitors', monitors);
+  console.log('has http monitors', hasHttpMonitorsRunningWithAlertingEnabled);
+
+  console.log('url', url);
+  const showCallout =
+    !hasDefaultConnector && hasMonitorsRunningWithAlertingConfigured && defaultRuleEnabled;
   const hasDefaultRules =
     !rulesLoaded || Boolean(defaultRules?.statusRule && defaultRules?.tlsRule);
   const missingRules = !hasDefaultRules && !canSave;
@@ -65,13 +101,47 @@ export const AlertingCallout = ({ isAlertingEnabled }: { isAlertingEnabled?: boo
     dispatch(getDynamicSettingsAction.get());
   }, [dispatch]);
 
+  if (!showMonitorStatusCallout && !showTlsCallout) return null;
   return (
     <>
-      <MissingRulesCallout
-        url={url}
-        missingConfig={Boolean(showCallout)}
-        missingRules={missingRules}
-      />
+      <MissingMonitorStatusRuleCallout showCallout={showMonitorStatusCallout} />
+      <MissingTlsCallout showCallout={showTlsCallout} />
+    </>
+  );
+  // return (
+  //   <>
+  //     <MissingRulesCallout
+  //       url={url}
+  //       missingConfig={Boolean(showCallout)}
+  //       missingRules={missingRules}
+  //     />
+  //     <EuiSpacer size="m" />
+  //   </>
+  // );
+};
+
+const MissingMonitorStatusRuleCallout = ({ showCallout }: { showCallout?: boolean }) => {
+  if (!showCallout) {
+    return null;
+  }
+  return (
+    <>
+      <EuiCallOut title="Alerts are not being sent" color="warning" iconType="warning">
+        You have Monitors enabled that are not covered by alerts
+      </EuiCallOut>
+      <EuiSpacer size="m" />
+    </>
+  );
+};
+const MissingTlsCallout = ({ showCallout }: { showCallout?: boolean }) => {
+  if (!showCallout) {
+    return null;
+  }
+  return (
+    <>
+      <EuiCallOut title="TLS Alerts are not being sent" color="warning" iconType="warning">
+        You have HTTP Monitors enabled that are not covered by TLS alerts
+      </EuiCallOut>
       <EuiSpacer size="m" />
     </>
   );

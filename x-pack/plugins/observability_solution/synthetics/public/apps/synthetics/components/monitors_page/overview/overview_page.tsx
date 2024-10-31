@@ -28,6 +28,7 @@ import { SearchField } from '../common/search_field';
 import { NoMonitorsFound } from '../common/no_monitors_found';
 import { OverviewErrors } from './overview/overview_errors/overview_errors';
 import { AlertingCallout } from '../../common/alerting_callout/alerting_callout';
+import { AlertMissingCallout } from './overview/alert_missing_callout';
 
 export const OverviewPage: React.FC = () => {
   useTrackPageview({ app: 'synthetics', path: 'overview' });
@@ -76,6 +77,7 @@ export const OverviewPage: React.FC = () => {
     <>
       <DisabledCallout total={absoluteTotal} />
       <AlertingCallout />
+      {/* <AlertMissingCallout /> */}
       <EuiFlexGroup gutterSize="s" wrap={true}>
         <EuiFlexItem>
           <SearchField />

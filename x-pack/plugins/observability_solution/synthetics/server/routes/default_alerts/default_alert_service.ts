@@ -73,7 +73,7 @@ export class DefaultAlertService {
     const interval = minimumIntervalInMs < defaultIntervalInMs ? '1m' : minimumInterval.value;
     return interval;
   }
-
+ 
   setupStatusRule() {
     const minimumRuleInterval = this.getMinimumRuleInterval();
     if (this.settings?.defaultStatusRuleEnabled === false) {
