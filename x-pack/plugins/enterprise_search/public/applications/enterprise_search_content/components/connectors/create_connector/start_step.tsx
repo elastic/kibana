@@ -138,7 +138,7 @@ export const StartStep: React.FC<StartStepProps> = ({
                           'xpack.enterpriseSearch.startStep.namesShouldBeLowercaseTextLabel',
                           {
                             defaultMessage:
-                              'Names should be lowercase and cannot contain spaces or special characters.',
+                              'It should be lowercase and cannot contain spaces or special characters.',
                           }
                         )}
                       </EuiText>
@@ -172,6 +172,14 @@ export const StartStep: React.FC<StartStepProps> = ({
                   'xpack.enterpriseSearch.createConnector.startStep.euiFormRow.descriptionLabel',
                   { defaultMessage: 'Description' }
                 )}
+                labelAppend={
+                  <EuiText size="xs">
+                    {i18n.translate(
+                      'xpack.enterpriseSearch.createConnector.startStep.euiFormRow.descriptionLabelAppend',
+                      { defaultMessage: 'Optional' }
+                    )}
+                  </EuiText>
+                }
               >
                 <EuiFieldText
                   data-test-subj="enterpriseSearchStartStepFieldText"
