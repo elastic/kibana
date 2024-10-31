@@ -84,12 +84,13 @@ export const byCompleteItem: SuggestionRawDefinition = {
   command: TRIGGER_SUGGESTION_COMMAND,
 };
 
-export const getDateHistogramCompletionItem: () => SuggestionRawDefinition = () => ({
+export const getDateHistogramCompletionItem: (
+  histogramBarTarget?: number
+) => SuggestionRawDefinition = (histogramBarTarget: number = 50) => ({
   label: i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.addDateHistogram', {
     defaultMessage: 'Add date histogram',
   }),
-  // TODO preferences?.histogramBarTarget
-  text: `BUCKET($0, ${1000}, ${TIME_SYSTEM_PARAMS.join(', ')})`,
+  text: `BUCKET($0, ${histogramBarTarget}, ${TIME_SYSTEM_PARAMS.join(', ')})`,
   asSnippet: true,
   kind: 'Issue',
   detail: i18n.translate(

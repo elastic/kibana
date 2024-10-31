@@ -23,7 +23,8 @@ export async function suggest(
   command: ESQLCommand<'stats'>,
   getColumnsByType: GetColumnsByTypeFn,
   _columnExists: (column: string) => boolean,
-  getSuggestedVariableName: () => string
+  getSuggestedVariableName: () => string,
+  getPreferences?: () => Promise<{ histogramBarTarget: number } | undefined>
 ): Promise<SuggestionRawDefinition[]> {
   const pos = getPosition(innerText, command);
 
@@ -52,14 +53,14 @@ export async function suggest(
     case 'grouping_expression_after_assignment':
       return [
         ...getFunctionSuggestions({ command: 'stats', option: 'by' }),
-        getDateHistogramCompletionItem(),
+        getDateHistogramCompletionItem((await getPreferences?.())?.histogramBarTarget),
         ...columnSuggestions,
       ];
 
     case 'grouping_expression_without_assignment':
       return [
         ...getFunctionSuggestions({ command: 'stats', option: 'by' }),
-        getDateHistogramCompletionItem(),
+        getDateHistogramCompletionItem((await getPreferences?.())?.histogramBarTarget),
         ...columnSuggestions,
         getNewVariableSuggestion(getSuggestedVariableName()),
       ];

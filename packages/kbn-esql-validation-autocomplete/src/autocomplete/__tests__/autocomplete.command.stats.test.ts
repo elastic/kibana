@@ -324,6 +324,29 @@ describe('autocomplete.suggest', () => {
         const suggestions = await suggest('from a | stats count(/)');
         expect(suggestions).toContain(allStarConstant);
       });
+
+      describe('date histogram snippet', () => {
+        test('uses histogramBarTarget preference when available', async () => {
+          const { suggest } = await setup();
+          const histogramBarTarget = Math.random() * 100;
+          const expectedCompletionItem = getDateHistogramCompletionItem(histogramBarTarget);
+
+          const suggestions = await suggest('FROM a | STATS BY /', {
+            callbacks: { getPreferences: () => Promise.resolve({ histogramBarTarget }) },
+          });
+
+          expect(suggestions).toContainEqual(expectedCompletionItem);
+        });
+
+        test('defaults gracefully', async () => {
+          const { suggest } = await setup();
+          const expectedCompletionItem = getDateHistogramCompletionItem();
+
+          const suggestions = await suggest('FROM a | STATS BY /');
+
+          expect(suggestions).toContainEqual(expectedCompletionItem);
+        });
+      });
     });
   });
 });
