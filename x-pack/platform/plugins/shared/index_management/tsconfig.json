@@ -61,6 +61,7 @@
     "@kbn/deeplinks-observability",
     "@kbn/streams-app-plugin",
     "@kbn/licensing-types",
+    "@kbn/ml-common-types",
   ],
   "exclude": [
     "target/**/*"

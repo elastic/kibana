@@ -14,7 +14,8 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { MLJobsAwaitingNodeWarning, ML_PAGES, useMlHref } from '@kbn/ml-plugin/public';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
+import { MLJobsAwaitingNodeWarning, useMlHref } from '@kbn/ml-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { HeaderSection } from '../../../common/components/header_section';
 import { useQueryToggle } from '../../../common/containers/query_toggle';
