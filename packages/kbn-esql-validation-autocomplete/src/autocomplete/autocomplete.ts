@@ -1498,6 +1498,10 @@ async function getSettingArgsSuggestions(
   return suggestions;
 }
 
+/**
+ * @deprecated — this will disappear when https://github.com/elastic/kibana/issues/195418 is complete
+ * because "options" will be handled in imperative command-specific routines instead of being independent.
+ */
 async function getOptionArgsSuggestions(
   innerText: string,
   commands: ESQLCommand[],
