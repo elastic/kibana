@@ -8,11 +8,11 @@
 import type { Logger } from '@kbn/logging';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { SolutionId } from '@kbn/core-chrome-browser';
 
 import { registerCloudDeploymentMetadataAnalyticsContext } from '../common/register_cloud_deployment_id_analytics_context';
 import type { CloudConfigType } from './config';
 import { registerCloudUsageCollector } from './collectors';
-import type { OnBoardingDefaultSolution } from '../common';
 import { getIsCloudEnabled } from '../common/is_cloud_enabled';
 import { parseDeploymentIdFromDeploymentUrl } from '../common/parse_deployment_id_from_deployment_url';
 import { decodeCloudId, DecodedCloudId } from '../common/decode_cloud_id';
@@ -113,7 +113,7 @@ export interface CloudSetup {
     /**
      * The default solution selected during onboarding.
      */
-    defaultSolution?: OnBoardingDefaultSolution;
+    defaultSolution?: SolutionId;
   };
   /**
    * `true` when running on Serverless Elastic Cloud

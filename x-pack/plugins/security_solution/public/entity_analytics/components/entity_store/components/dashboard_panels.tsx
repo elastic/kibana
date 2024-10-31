@@ -15,6 +15,7 @@ import {
   EuiLoadingLogo,
   EuiPanel,
   EuiImage,
+  EuiCallOut,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -50,8 +51,24 @@ const EntityStoreDashboardPanelsComponent = () => {
   const entityStore = useEntityEngineStatus();
   const riskEngineStatus = useRiskEngineStatus();
 
-  const { enable: enableStore } = useEntityStoreEnablement();
+  const { enable: enableStore, query } = useEntityStoreEnablement();
+
   const { mutate: initRiskEngine } = useInitRiskEngineMutation();
+
+  const callouts = entityStore.errors.map((err, i) => (
+    <EuiCallOut
+      title={
+        <FormattedMessage
+          id="xpack.securitySolution.entityAnalytics.entityStore.enablement.errors.title"
+          defaultMessage={'An error occurred during entity store resource initialization'}
+        />
+      }
+      color="danger"
+      iconType="error"
+    >
+      <p>{err?.message}</p>
+    </EuiCallOut>
+  ));
 
   const enableEntityStore = (enable: Enablements) => () => {
     setModalState({ visible: false });
@@ -73,6 +90,26 @@ const EntityStoreDashboardPanelsComponent = () => {
       enableStore();
     }
   };
+
+  if (query.error) {
+    return (
+      <>
+        <EuiCallOut
+          title={
+            <FormattedMessage
+              id="xpack.securitySolution.entityAnalytics.entityStore.enablement.errors.queryErrorTitle"
+              defaultMessage={'There was a problem initializing the entity store'}
+            />
+          }
+          color="danger"
+          iconType="error"
+        >
+          <p>{(query.error as { body: { message: string } }).body.message}</p>
+        </EuiCallOut>
+        {callouts}
+      </>
+    );
+  }
 
   if (entityStore.status === 'loading') {
     return (
@@ -110,6 +147,29 @@ const EntityStoreDashboardPanelsComponent = () => {
 
   return (
     <EuiFlexGroup direction="column" data-test-subj="entityStorePanelsGroup">
+      {entityStore.status === 'error' && isRiskScoreAvailable && (
+        <>
+          {callouts}
+          <EuiFlexItem>
+            <EntityAnalyticsRiskScores riskEntity={RiskScoreEntity.user} />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EntityAnalyticsRiskScores riskEntity={RiskScoreEntity.host} />
+          </EuiFlexItem>
+        </>
+      )}
+      {entityStore.status === 'error' && !isRiskScoreAvailable && (
+        <>
+          {callouts}
+          <EuiFlexItem>
+            <EnableEntityStore
+              onEnable={() => setModalState({ visible: true })}
+              loadingRiskEngine={riskEngineInitializing}
+              enablements="riskScore"
+            />
+          </EuiFlexItem>
+        </>
+      )}
       {entityStore.status === 'enabled' && isRiskScoreAvailable && (
         <>
           <EuiFlexItem>

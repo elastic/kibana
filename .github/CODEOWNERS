@@ -1237,6 +1237,7 @@ x-pack/test_serverless/**/test_suites/observability/ai_assistant @elastic/obs-ai
 /x-pack/test/accessibility/apps/group3/stack_monitoring.ts @elastic/stack-monitoring
 
 # Fleet
+/x-pack/test/fleet_packages @elastic/fleet
 /x-pack/test/fleet_api_integration @elastic/fleet
 /x-pack/test/fleet_cypress @elastic/fleet
 /x-pack/test/fleet_functional @elastic/fleet
@@ -1412,6 +1413,10 @@ x-pack/test/api_integration/deployment_agnostic/services/ @elastic/appex-qa
 x-pack/test/**/deployment_agnostic/ @elastic/appex-qa #temporarily to monitor tests migration
 
 # Core
+/test/plugin_functional/plugins/rendering_plugin @elastic/kibana-core
+/test/plugin_functional/plugins/session_notifications @elastic/kibana-core
+/x-pack/test/cloud_integration/plugins/saml_provider @elastic/kibana-core
+/x-pack/test/functional_embedded/plugins/iframe_embedded @elastic/kibana-core
 /x-pack/test/functional/apps/saved_objects_management @elastic/kibana-core
 /x-pack/test/usage_collection @elastic/kibana-core
 /x-pack/test/licensing_plugin @elastic/kibana-core
@@ -1502,6 +1507,8 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 #CC# /x-pack/plugins/security/ @elastic/kibana-security
 
 # Response Ops team
+/x-pack/test/examples/triggers_actions_ui_examples @elastic/response-ops
+/x-pack/test/functional_with_es_ssl/plugins/cases @elastic/response-ops
 /x-pack/test/screenshot_creation/apps/response_ops_docs @elastic/response-ops
 /x-pack/test/rule_registry @elastic/response-ops @elastic/obs-ux-management-team
 /x-pack/test/accessibility/apps/group3/rules_connectors.ts @elastic/response-ops
@@ -1561,6 +1568,9 @@ x-pack/test/api_integration/apis/management/index_management/inference_endpoints
 /x-pack/test/functional_search/ @elastic/search-kibana
 
 # Management Experience - Deployment Management
+/x-pack/test/functional/apps/license_management @elastic/kibana-management
+/x-pack/test/functional/apps/painless_lab @elastic/kibana-management
+/x-pack/test/functional/apps/management @elastic/kibana-management
 /x-pack/test/api_integration/services/index_management.ts @elastic/kibana-management
 /x-pack/test/functional/services/grok_debugger.js @elastic/kibana-management
 /x-pack/test/functional/apps/grok_debugger @elastic/kibana-management
@@ -1880,6 +1890,7 @@ x-pack/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/
 /x-pack/plugins/security_solution/public/common/components/threat_match @elastic/security-detection-engine
 
 ## Security Solution sub teams - security-defend-workflows
+/x-pack/test/defend_workflows_cypress @elastic/security-defend-workflows
 /x-pack/test/api_integration/apis/osquery @elastic/security-defend-workflows
 /x-pack/plugins/security_solution/public/management/ @elastic/security-defend-workflows
 /x-pack/plugins/security_solution/public/common/lib/endpoint/ @elastic/security-defend-workflows
@@ -1982,6 +1993,7 @@ x-pack/plugins/security_solution/server/lib/security_integrations @elastic/secur
 
 # Logstash
 /x-pack/test/api_integration/apis/logstash @elastic/logstash
+/x-pack/test/functional/apps/logstash @elastic/logstash
 #CC# /x-pack/plugins/logstash/ @elastic/logstash
 
 # EUI team
@@ -2006,9 +2018,10 @@ x-pack/plugins/observability_solution/observability_shared/public/components/pro
 /test/plugin_functional/plugins/eui_provider_dev_warning @elastic/appex-sharedux
 /x-pack/test/banners_functional @elastic/appex-sharedux
 /x-pack/test/custom_branding @elastic/appex-sharedux
-/x-pack/test/api_integration/apis/content_management @elastic/appex-sharedux
-/x-pack/test/accessibility/apps/group3/tags.ts @elastic/appex-sharedux
 /x-pack/test/accessibility/apps/group3/snapshot_and_restore.ts @elastic/appex-sharedux
+/x-pack/test/accessibility/apps/group3/tags.ts @elastic/appex-sharedux
+/x-pack/test/api_integration/apis/content_management @elastic/appex-sharedux
+/x-pack/test/functional_solution_sidenav @elastic/appex-sharedux
 /x-pack/test_serverless/functional/test_suites/common/spaces/spaces_selection.ts @elastic/appex-sharedux
 /x-pack/test_serverless/functional/test_suites/common/spaces/index.ts @elastic/appex-sharedux
 packages/react @elastic/appex-sharedux
