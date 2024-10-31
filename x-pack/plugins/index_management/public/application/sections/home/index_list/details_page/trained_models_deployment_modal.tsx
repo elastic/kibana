@@ -136,7 +136,7 @@ export function TrainedModelsDeploymentModal({
     );
     setPendingDeployments(uniqueDeployments);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [inferenceIdsInPendingList, inferenceToModelIdMap]);
+  }, [inferenceIdsInPendingList]);
 
   const erroredDeployments = pendingDeployments.filter(
     (deployment) => errorsInTrainedModelDeployment[deployment]
