@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { CORRELATIONS_TAB_ID } from '../../left/components/correlations_details';
 import { useFetchRelatedAlertsBySession } from '../../shared/hooks/use_fetch_related_alerts_by_session';
 import { InsightsSummaryRow } from './insights_summary_row';
 import { CORRELATIONS_RELATED_ALERTS_BY_SESSION_TEST_ID } from './test_ids';
-
-const ICON = 'warning';
 
 export interface RelatedAlertsBySessionProps {
   /**
@@ -35,21 +34,25 @@ export const RelatedAlertsBySession: React.VFC<RelatedAlertsBySessionProps> = ({
     entityId,
     scopeId,
   });
-  const text = (
-    <FormattedMessage
-      id="xpack.securitySolution.flyout.right.insights.correlations.sessionAlertsLabel"
-      defaultMessage="{count, plural, one {alert} other {alerts}} related by session"
-      values={{ count: dataCount }}
-    />
+
+  const text = useMemo(
+    () => (
+      <FormattedMessage
+        id="xpack.securitySolution.flyout.right.insights.correlations.sessionAlertsLabel"
+        defaultMessage="{count, plural, one {Alert} other {Alerts}} related by session"
+        values={{ count: dataCount }}
+      />
+    ),
+    [dataCount]
   );
 
   return (
     <InsightsSummaryRow
       loading={loading}
       error={error}
-      icon={ICON}
-      value={dataCount}
       text={text}
+      value={dataCount}
+      expandedSubTab={CORRELATIONS_TAB_ID}
       data-test-subj={CORRELATIONS_RELATED_ALERTS_BY_SESSION_TEST_ID}
       key={`correlation-row-${text}`}
     />
