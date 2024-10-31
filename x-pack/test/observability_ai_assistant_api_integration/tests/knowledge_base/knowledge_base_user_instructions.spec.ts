@@ -10,6 +10,7 @@ import { kbnTestConfig } from '@kbn/test';
 import { sortBy } from 'lodash';
 import { Message, MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
 import { CONTEXT_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server/functions/context';
+import { Instruction } from '@kbn/observability-ai-assistant-plugin/common/types';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   clearConversations,
@@ -99,7 +100,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
           const instructions = res.body.userInstructions;
 
-          const sortByDocId = (data: any) => sortBy(data, 'doc_id');
+          const sortByDocId = (data: Array<Instruction & { public?: boolean }>) =>
+            sortBy(data, 'doc_id');
+
           expect(sortByDocId(instructions)).to.eql(
             sortByDocId([
               {
@@ -129,7 +132,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           });
           const instructions = res.body.userInstructions;
 
-          const sortByDocId = (data: any) => sortBy(data, 'doc_id');
+          const sortByDocId = (data: Array<Instruction & { public?: boolean }>) =>
+            sortBy(data, 'doc_id');
+
           expect(sortByDocId(instructions)).to.eql(
             sortByDocId([
               {
