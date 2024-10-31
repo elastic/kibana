@@ -23,7 +23,12 @@ export const queryContainsFunction = (
 ): boolean => {
   if (query && isOfAggregateQueryType(query)) {
     const { root } = parse(query.esql);
-    return functions.some((f) => Walker.hasFunction(root, f));
+    return functions.some(
+      (f) =>
+        Walker.hasFunction(root, f) ||
+        // Walker API expects valid queries so we need to do additional check for partial matches
+        root.commands.some((c) => c.text.toLowerCase().includes(`${f}(`))
+    );
   }
   return false;
 };

@@ -12,6 +12,8 @@ describe('queryCannotBeSampled', () => {
     expect(queryCannotBeSampled({ esql: 'FROM index | where match(field, "value")' })).toBe(true);
     expect(queryCannotBeSampled({ esql: 'FROM index | where match()' })).toBe(true);
     expect(queryCannotBeSampled({ esql: 'FROM index | where MATCH()' })).toBe(true);
+    expect(queryCannotBeSampled({ esql: 'FROM index | where MATCH(fieldName,)' })).toBe(true);
+    expect(queryCannotBeSampled({ esql: 'FROM index | where MATCH(,)' })).toBe(true);
   });
 
   it('should return true if query contains "qstr" function', () => {

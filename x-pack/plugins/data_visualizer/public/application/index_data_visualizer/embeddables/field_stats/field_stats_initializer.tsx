@@ -292,7 +292,7 @@ export const FieldStatisticsInitializer: FC<FieldStatsInitializerProps> = ({
           >
             {unsupportedReason ? (
               <EuiFlexItem grow={false}>
-                <EuiIconTip type="iInCircle" content={unsupportedReason} color="warning" />
+                <EuiIconTip type="warning" content={unsupportedReason} color="warning" />
               </EuiFlexItem>
             ) : null}
 

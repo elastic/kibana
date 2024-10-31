@@ -163,6 +163,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
     data: dataPlugin,
     dataVisualizer: {
       FieldStatisticsTable: jest.fn(() => createElement('div')),
+      getReasonIfFieldStatsUnavailableForQuery: jest.fn().mockReturnValue(undefined),
     },
     aiops: {
       getPatternAnalysisAvailable: jest.fn().mockResolvedValue(jest.fn().mockResolvedValue(true)),
