@@ -76,7 +76,7 @@ export const StartStep: React.FC<StartStepProps> = ({
   const formError = () => {
     if (!isValidIndexName(rawName)) {
       return i18n.translate(
-        'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.nameInputHelpText.lineOne',
+        'xpack.enterpriseSearch.createConnector.startStep.euiFormRow.nameInputHelpText.lineOne',
         {
           defaultMessage: '{connectorName} is an invalid index name',
           values: {
