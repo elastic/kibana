@@ -238,7 +238,6 @@ Discover::
 * Adds a help menu to the ES|QL mode ({kibana-pull}190579[#190579]).
 * Show the `LIMIT` information in the ES|QL editor's footer ({kibana-pull}190498[#190498]).
 * Opens suggestions automatically for field lists in ES|QL queries ({kibana-pull}190466[#190466]).
-* Adds support for client-side `INLINESTATS` validation for ES|QL queries ({kibana-pull}189827[#189827]).
 * Integrates a time picker for date fields into the ES|QL editor ({kibana-pull}187047[#187047]).
 * Improves the query authoring experience when editing an ES|QL visualization ({kibana-pull}186875[#186875]).
 * Improves ES|QL support for Elasticsearch sub-types in AST for both validation and autocomplete  ({kibana-pull}189689[#189689]).
