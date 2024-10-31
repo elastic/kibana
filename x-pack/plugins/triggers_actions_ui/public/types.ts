@@ -67,8 +67,8 @@ import {
 import React from 'react';
 import { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
 import type { RuleType, RuleTypeIndex } from '@kbn/triggers-actions-ui-types';
+import { ValidationResult } from '@kbn/response-ops-rule-form';
 import {
-  ValidationResult,
   UserConfiguredActionConnector,
   ActionConnector,
   ActionTypeRegistryContract,
@@ -107,7 +107,6 @@ import { AlertTableConfigRegistry } from './application/alert_table_config_regis
 
 export type {
   GenericValidationResult,
-  ValidationResult,
   ConnectorValidationError,
   ConnectorValidationFunc,
   ActionConnectorFieldsProps,
@@ -122,6 +121,8 @@ export type {
   ActionTypeModel,
   ActionTypeRegistryContract,
 } from '@kbn/alerts-ui-shared/src/common/types';
+
+export type { ValidationResult } from '@kbn/response-ops-rule-form';
 
 export { ActionConnectorMode } from '@kbn/alerts-ui-shared/src/common/types';
 

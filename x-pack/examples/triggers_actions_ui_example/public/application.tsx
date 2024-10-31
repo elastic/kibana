@@ -21,7 +21,7 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { createRuleRoute, editRuleRoute, RuleForm } from '@kbn/alerts-ui-shared/src/rule_form';
+import { createRuleRoute, editRuleRoute, RuleForm } from '@kbn/response-ops-rule-form';
 import { TriggersActionsUiExamplePublicStartDeps } from './plugin';
 
 import { Page } from './components/page';
