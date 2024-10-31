@@ -51,8 +51,6 @@ export class ActionScheduler<
     IActionScheduler<State, Context, ActionGroupIds, RecoveryActionGroupId>
   > = [];
 
-  private ephemeralActionsToSchedule: number;
-
   constructor(
     private readonly context: ActionSchedulerOptions<
       Params,
@@ -65,7 +63,6 @@ export class ActionScheduler<
       AlertData
     >
   ) {
-    this.ephemeralActionsToSchedule = context.taskRunnerContext.maxEphemeralActionsPerRule;
     for (const [_, scheduler] of Object.entries(schedulers)) {
       this.schedulers.push(new scheduler(context));
     }
@@ -183,11 +180,7 @@ export class ActionScheduler<
     enqueueOptions: EnqueueExecutionOptions;
     bulkScheduleRequest: EnqueueExecutionOptions[];
   }) {
-    if (
-      this.context.taskRunnerContext.supportsEphemeralTasks &&
-      this.ephemeralActionsToSchedule > 0
-    ) {
-      this.ephemeralActionsToSchedule--;
+    if (this.context.taskRunnerContext.supportsEphemeralTasks) {
       try {
         await this.context.actionsClient!.ephemeralEnqueuedExecution(enqueueOptions);
       } catch (err) {

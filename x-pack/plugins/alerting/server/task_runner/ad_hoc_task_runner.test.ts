@@ -167,7 +167,6 @@ const taskRunnerFactoryInitializerParams: TaskRunnerFactoryInitializerParamsType
   kibanaBaseUrl: 'https://localhost:5601',
   logger,
   maxAlerts: 1000,
-  maxEphemeralActionsPerRule: 10,
   ruleTypeRegistry,
   rulesSettingsService,
   savedObjects: savedObjectsService,
