@@ -36,6 +36,7 @@ import type {
   ChromeSetProjectBreadcrumbsParams,
   NavigationTreeDefinition,
   AppDeepLinkId,
+  SolutionId,
 } from '@kbn/core-chrome-browser';
 import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 import type {
@@ -343,7 +344,10 @@ export class ChromeService {
       LinkId extends AppDeepLinkId = AppDeepLinkId,
       Id extends string = string,
       ChildrenId extends string = Id
-    >(id: string, navigationTree$: Observable<NavigationTreeDefinition<LinkId, Id, ChildrenId>>) {
+    >(
+      id: SolutionId,
+      navigationTree$: Observable<NavigationTreeDefinition<LinkId, Id, ChildrenId>>
+    ) {
       validateChromeStyle();
       projectNavigation.initNavigation(id, navigationTree$);
     }
