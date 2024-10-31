@@ -139,16 +139,9 @@ Object {
       },
     },
     "group_by": Object {
-      "entity.identity.event.category": Object {
-        "terms": Object {
-          "field": "event.category",
-          "missing_bucket": true,
-        },
-      },
       "entity.identity.log.logger": Object {
         "terms": Object {
           "field": "log.logger",
-          "missing_bucket": false,
         },
       },
     },

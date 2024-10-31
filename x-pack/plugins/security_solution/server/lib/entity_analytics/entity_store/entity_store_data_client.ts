@@ -11,6 +11,7 @@ import type {
   SavedObjectsClientContract,
   AuditLogger,
   AnalyticsServiceSetup,
+  IScopedClusterClient,
 } from '@kbn/core/server';
 import { EntityClient } from '@kbn/entityManager-plugin/server/lib/entity_client';
 import type { SortOrder } from '@elastic/elasticsearch/lib/api/types';
@@ -65,7 +66,7 @@ import { CRITICALITY_VALUES } from '../asset_criticality/constants';
 
 interface EntityStoreClientOpts {
   logger: Logger;
-  esClient: ElasticsearchClient;
+  clusterClient: IScopedClusterClient;
   namespace: string;
   soClient: SavedObjectsClientContract;
   taskManager?: TaskManagerStartContract;
@@ -91,12 +92,14 @@ export class EntityStoreDataClient {
   private assetCriticalityMigrationClient: AssetCriticalityEcsMigrationClient;
   private entityClient: EntityClient;
   private riskScoreDataClient: RiskScoreDataClient;
+  private esClient: ElasticsearchClient;
 
   constructor(private readonly options: EntityStoreClientOpts) {
-    const { esClient, logger, soClient, auditLogger, kibanaVersion, namespace } = options;
+    const { clusterClient, logger, soClient, auditLogger, kibanaVersion, namespace } = options;
+    this.esClient = clusterClient.asCurrentUser;
 
     this.entityClient = new EntityClient({
-      esClient,
+      clusterClient,
       soClient,
       logger,
     });
@@ -107,14 +110,14 @@ export class EntityStoreDataClient {
     });
 
     this.assetCriticalityMigrationClient = new AssetCriticalityEcsMigrationClient({
-      esClient,
+      esClient: this.esClient,
       logger,
       auditLogger,
     });
 
     this.riskScoreDataClient = new RiskScoreDataClient({
       soClient,
-      esClient,
+      esClient: this.esClient,
       logger,
       namespace,
       kibanaVersion,
@@ -181,8 +184,8 @@ export class EntityStoreDataClient {
     config: EntityStoreConfig,
     pipelineDebugMode: boolean
   ) {
-    const { esClient, logger, namespace, appClient, dataViewsService } = this.options;
     const setupStartTime = moment().utc().toISOString();
+    const { logger, namespace, appClient, dataViewsService } = this.options;
     const indexPatterns = await buildIndexPatterns(namespace, appClient, dataViewsService);
 
     const unitedDefinition = getUnitedEntityDefinition({
@@ -219,12 +222,12 @@ export class EntityStoreDataClient {
       // this is because the enrich policy will fail if the index does not exist with the correct fields
       await createEntityIndexComponentTemplate({
         unitedDefinition,
-        esClient,
+        esClient: this.esClient,
       });
       debugLog(`Created entity index component template`);
       await createEntityIndex({
         entityType,
-        esClient,
+        esClient: this.esClient,
         namespace,
         logger,
       });
@@ -234,12 +237,12 @@ export class EntityStoreDataClient {
       // this is because the pipeline will fail if the enrich index does not exist
       await createFieldRetentionEnrichPolicy({
         unitedDefinition,
-        esClient,
+        esClient: this.esClient,
       });
       debugLog(`Created field retention enrich policy`);
       await executeFieldRetentionEnrichPolicy({
         unitedDefinition,
-        esClient,
+        esClient: this.esClient,
         logger,
       });
       debugLog(`Executed field retention enrich policy`);
@@ -247,7 +250,7 @@ export class EntityStoreDataClient {
         debugMode: pipelineDebugMode,
         unitedDefinition,
         logger,
-        esClient,
+        esClient: this.esClient,
       });
       debugLog(`Created @platform pipeline`);
 
@@ -361,8 +364,9 @@ export class EntityStoreDataClient {
     taskManager: TaskManagerStartContract,
     options = { deleteData: false, deleteEngine: true }
   ) {
-    const { namespace, logger, esClient, appClient, dataViewsService, config } = this.options;
+    const { namespace, logger, appClient, dataViewsService, config } = this.options;
     const { deleteData, deleteEngine } = options;
+
     const descriptor = await this.engineClient.maybeGet(entityType);
     const indexPatterns = await buildIndexPatterns(namespace, appClient, dataViewsService);
 
@@ -390,23 +394,23 @@ export class EntityStoreDataClient {
       }
       await deleteEntityIndexComponentTemplate({
         unitedDefinition,
-        esClient,
+        esClient: this.esClient,
       });
       await deletePlatformPipeline({
         unitedDefinition,
         logger,
-        esClient,
+        esClient: this.esClient,
       });
       await deleteFieldRetentionEnrichPolicy({
         unitedDefinition,
-        esClient,
         logger,
+        esClient: this.esClient,
       });
 
       if (deleteData) {
         await deleteEntityIndex({
           entityType,
-          esClient,
+          esClient: this.esClient,
           namespace,
           logger,
         });
@@ -446,7 +450,7 @@ export class EntityStoreDataClient {
     const sort = sortField ? [{ [sortField]: sortOrder }] : undefined;
     const query = filterQuery ? JSON.parse(filterQuery) : undefined;
 
-    const response = await this.options.esClient.search<EntityRecord>({
+    const response = await this.esClient.search<EntityRecord>({
       index,
       query,
       size: Math.min(perPage, MAX_SEARCH_RESPONSE_SIZE),
