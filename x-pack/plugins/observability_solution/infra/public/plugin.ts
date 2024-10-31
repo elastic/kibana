@@ -139,9 +139,9 @@ export class Plugin implements InfraClientPluginClass {
       messageFields: this.config.sources?.default?.fields?.message,
     });
 
-    const startDep$AndAccessibilityFlag$ = combineLatest([from(core.getStartServices())]).pipe(
-      switchMap(([[{ application }]]) =>
-        combineLatest([of(application), getLogsExplorerAccessibility$(application)])
+    const startDep$AndAccessibleFlag$ = from(core.getStartServices()).pipe(
+      switchMap(([{ application }]) =>
+        combineLatest([of(application), getLogsExplorerAccessible$(application)])
       )
     );
 
@@ -149,7 +149,7 @@ export class Plugin implements InfraClientPluginClass {
 
     /** !! Need to be kept in sync with the deepLinks in x-pack/plugins/observability_solution/infra/public/plugin.ts */
     pluginsSetup.observabilityShared.navigation.registerSections(
-      startDep$AndAccessibilityFlag$.pipe(
+      startDep$AndAccessibleFlag$.pipe(
         map(([application, isLogsExplorerAccessible]) => {
           const { infrastructure, logs } = application.capabilities;
           return [
@@ -159,7 +159,7 @@ export class Plugin implements InfraClientPluginClass {
                     label: logsTitle,
                     sortKey: 200,
                     entries: getLogsNavigationEntries({
-                      isLogsExplorerAccessible: isLogsExplorerAccessible as boolean,
+                      isLogsExplorerAccessible,
                       config: this.config,
                       routes: logRoutes,
                     }),
@@ -321,7 +321,7 @@ export class Plugin implements InfraClientPluginClass {
         );
       },
     });
-    startDep$AndAccessibilityFlag$.subscribe(([_applicationStart, _isLogsExplorerAccessible]) => {
+    startDep$AndAccessibleFlag$.subscribe(([_applicationStart, _isLogsExplorerAccessible]) => {
       this.appUpdater$.next(() => ({
         deepLinks: getInfraDeepLinks({
           metricsExplorerEnabled: this.config.featureFlags.metricsExplorerEnabled,
@@ -422,15 +422,15 @@ const getLogsNavigationEntries = ({
   return entries;
 };
 
-const getLogsExplorerAccessibility$ = (application: CoreStart['application']) => {
+const getLogsExplorerAccessible$ = (application: CoreStart['application']) => {
   const { capabilities, applications$ } = application;
   return applications$.pipe(
     map(
       (apps) =>
         (apps.get(OBSERVABILITY_LOGS_EXPLORER_APP_ID)?.status ?? AppStatus.inaccessible) ===
           AppStatus.accessible &&
-        capabilities.discover?.show &&
-        capabilities.fleet?.read
+        !!capabilities.discover?.show &&
+        !!capabilities.fleet?.read
     ),
     distinctUntilChanged()
   );
