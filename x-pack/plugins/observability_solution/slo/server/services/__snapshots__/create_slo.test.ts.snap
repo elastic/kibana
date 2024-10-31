@@ -14,6 +14,12 @@ Array [
     "processors": Array [
       Object {
         "set": Object {
+          "field": "_id",
+          "value": "unique-id-1-{{{_id}}}",
+        },
+      },
+      Object {
+        "set": Object {
           "field": "event.ingested",
           "value": "{{{_ingest.timestamp}}}",
         },
