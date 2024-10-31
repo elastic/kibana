@@ -40,8 +40,10 @@ export const postActionsConnectorExecuteRoute = (
     .post({
       access: 'internal',
       path: POST_ACTIONS_CONNECTOR_EXECUTE,
-      options: {
-        tags: ['access:elasticAssistant'],
+      security: {
+        authz: {
+          requiredPrivileges: ['elasticAssistant'],
+        },
       },
     })
     .addVersion(

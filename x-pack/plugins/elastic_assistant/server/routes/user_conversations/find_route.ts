@@ -28,8 +28,10 @@ export const findUserConversationsRoute = (router: ElasticAssistantPluginRouter)
     .get({
       access: 'public',
       path: ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND,
-      options: {
-        tags: ['access:elasticAssistant'],
+      security: {
+        authz: {
+          requiredPrivileges: ['elasticAssistant'],
+        },
       },
     })
     .addVersion(

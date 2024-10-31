@@ -24,8 +24,10 @@ export const appendConversationMessageRoute = (router: ElasticAssistantPluginRou
     .post({
       access: 'internal',
       path: ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID_MESSAGES,
-      options: {
-        tags: ['access:elasticAssistant'],
+      security: {
+        authz: {
+          requiredPrivileges: ['elasticAssistant'],
+        },
       },
     })
     .addVersion(
