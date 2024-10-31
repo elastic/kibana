@@ -3225,6 +3225,7 @@ const matchDefinition: FunctionDefinition = {
           name: 'field',
           type: 'keyword',
           optional: false,
+          fieldsOnly: true,
         },
         {
           name: 'query',
@@ -3240,6 +3241,7 @@ const matchDefinition: FunctionDefinition = {
           name: 'field',
           type: 'keyword',
           optional: false,
+          fieldsOnly: true,
         },
         {
           name: 'query',
@@ -3255,6 +3257,7 @@ const matchDefinition: FunctionDefinition = {
           name: 'field',
           type: 'text',
           optional: false,
+          fieldsOnly: true,
         },
         {
           name: 'query',
@@ -3270,6 +3273,7 @@ const matchDefinition: FunctionDefinition = {
           name: 'field',
           type: 'text',
           optional: false,
+          fieldsOnly: true,
         },
         {
           name: 'query',
@@ -3280,8 +3284,7 @@ const matchDefinition: FunctionDefinition = {
       returnType: 'boolean',
     },
   ],
-  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
-  supportedOptions: ['by'],
+  supportedCommands: ['where'],
   validate: undefined,
   examples: [
     'from books \n| where match(author, "Faulkner")\n| keep book_no, author \n| sort book_no \n| limit 5;',
@@ -5872,8 +5875,7 @@ const qstrDefinition: FunctionDefinition = {
       returnType: 'boolean',
     },
   ],
-  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
-  supportedOptions: ['by'],
+  supportedCommands: ['where'],
   validate: undefined,
   examples: [
     'from books \n| where qstr("author: Faulkner")\n| keep book_no, author \n| sort book_no \n| limit 5;',

@@ -258,10 +258,13 @@ function getFunctionDefinition(ESFunctionDefinition: Record<string, any>): Funct
     signatures: _.uniqBy(
       ESFunctionDefinition.signatures.map((signature: any) => ({
         ...signature,
-        params: signature.params.map((param: any) => ({
+        params: signature.params.map((param: any, idx: number) => ({
           ...param,
           type: convertDateTime(param.type),
           description: undefined,
+          ...(idx === 0 && ['match', 'qstr'].includes(ESFunctionDefinition.name)
+            ? { fieldsOnly: true }
+            : {}),
         })),
         returnType: convertDateTime(signature.returnType),
         variadic: undefined, // we don't support variadic property

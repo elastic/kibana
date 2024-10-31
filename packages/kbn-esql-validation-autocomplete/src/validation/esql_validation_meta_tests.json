@@ -9955,7 +9955,7 @@
       "warning": []
     },
     {
-      "query": "from index METADATA _id, _source METADATA _id2",
+      "query": "from index metadata _id, _source METADATA _id2",
       "error": [
         "SyntaxError: mismatched input 'METADATA' expecting <EOF>"
       ],

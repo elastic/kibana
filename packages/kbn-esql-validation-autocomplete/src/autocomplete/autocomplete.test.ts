@@ -247,7 +247,7 @@ describe('autocomplete', () => {
     testSuggestions('from index | WHERE keywordField NOT /', ['LIKE $0', 'RLIKE $0', 'IN $0']);
     testSuggestions('from index | WHERE not /', [
       ...getFieldNamesByType('boolean'),
-      ...getFunctionSignaturesByReturnType('eval', 'boolean', { scalar: true }),
+      ...getFunctionSignaturesByReturnType(['eval', 'where'], 'boolean', { scalar: true }),
     ]);
     testSuggestions('from index | WHERE doubleField in /', ['( $0 )']);
     testSuggestions('from index | WHERE doubleField not in /', ['( $0 )']);

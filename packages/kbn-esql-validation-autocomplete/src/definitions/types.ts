@@ -130,6 +130,10 @@ export interface FunctionDefinition {
        */
       constantOnly?: boolean;
       /**
+       * Default to false. If set to true, this parameter does not accept a function or literal, only fields.
+       */
+      fieldsOnly?: boolean;
+      /**
        * if provided this means that the value must be one
        * of the options in the array iff the value is a literal.
        *

@@ -1347,17 +1347,19 @@ async function getFunctionArgsSuggestions(
     );
 
     // Functions
-    suggestions.push(
-      ...getCompatibleFunctionDefinition(
-        command.name,
-        option?.name,
-        canBeBooleanCondition ? ['any'] : (getTypesFromParamDefs(typesToSuggestNext) as string[]),
-        fnToIgnore
-      ).map((suggestion) => ({
-        ...suggestion,
-        text: addCommaIf(shouldAddComma, suggestion.text),
-      }))
-    );
+    if (typesToSuggestNext.every((d) => d.fieldsOnly !== true)) {
+      suggestions.push(
+        ...getCompatibleFunctionDefinition(
+          command.name,
+          option?.name,
+          canBeBooleanCondition ? ['any'] : (getTypesFromParamDefs(typesToSuggestNext) as string[]),
+          fnToIgnore
+        ).map((suggestion) => ({
+          ...suggestion,
+          text: addCommaIf(shouldAddComma, suggestion.text),
+        }))
+      );
+    }
     // could also be in stats (bucket) but our autocomplete is not great yet
     if (
       (getTypesFromParamDefs(typesToSuggestNext).includes('date') &&
