@@ -43,3 +43,12 @@ export {
   withoutChunkEvents,
   withoutTokenCountEvents,
 } from './event_utils';
+export {
+  ChatCompletionErrorCode,
+  type ChatCompletionToolNotFoundError,
+  type ChatCompletionToolValidationError,
+  type ChatCompletionTokenLimitReachedError,
+  isToolValidationError,
+  isTokenLimitReachedError,
+  isToolNotFoundError,
+} from './errors';

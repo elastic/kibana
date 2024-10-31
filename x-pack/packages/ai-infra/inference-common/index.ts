@@ -36,6 +36,13 @@ export {
   isChatCompletionMessageEvent,
   isChatCompletionEvent,
   isChatCompletionChunkEvent,
+  ChatCompletionErrorCode,
+  type ChatCompletionToolNotFoundError,
+  type ChatCompletionToolValidationError,
+  type ChatCompletionTokenLimitReachedError,
+  isToolValidationError,
+  isTokenLimitReachedError,
+  isToolNotFoundError,
 } from './src/chat_complete';
 export {
   OutputEventType,
