@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export type { OnBoardingDefaultSolution } from './types';
+export * from './v1';
