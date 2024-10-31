@@ -101,7 +101,11 @@ export class EntityClient {
     });
 
     if (shouldRestartTransforms) {
-      await startTransforms(secondaryAuthClient, updatedDefinition, this.options.logger);
+      await startTransforms(
+        this.options.clusterClient.asSecondaryAuthUser,
+        updatedDefinition,
+        this.options.logger
+      );
     }
     return updatedDefinition;
   }
