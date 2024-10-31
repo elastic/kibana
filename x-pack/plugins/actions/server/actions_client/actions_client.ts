@@ -10,13 +10,11 @@ import url from 'url';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
 import { i18n } from '@kbn/i18n';
-import { compact, uniq } from 'lodash';
+import { uniq } from 'lodash';
 import {
   IScopedClusterClient,
   SavedObjectsClientContract,
-  SavedObjectAttributes,
   KibanaRequest,
-  SavedObjectsUtils,
   Logger,
 } from '@kbn/core/server';
 import { AuditLogger } from '@kbn/security-plugin/server';
@@ -29,6 +27,7 @@ import { get } from '../application/connector/methods/get';
 import { getAll, getAllSystemConnectors } from '../application/connector/methods/get_all';
 import { update } from '../application/connector/methods/update';
 import { listTypes } from '../application/connector/methods/list_types';
+import { create } from '../application/connector/methods/create';
 import { execute } from '../application/connector/methods/execute';
 import {
   GetGlobalExecutionKPIParams,
@@ -36,15 +35,7 @@ import {
   IExecutionLogResult,
 } from '../../common';
 import { ActionTypeRegistry } from '../action_type_registry';
-import {
-  validateConfig,
-  validateSecrets,
-  ActionExecutorContract,
-  validateConnector,
-  ActionExecutionSource,
-  parseDate,
-  tryCatch,
-} from '../lib';
+import { ActionExecutorContract, parseDate } from '../lib';
 import {
   ActionResult,
   RawAction,
@@ -61,13 +52,7 @@ import {
   ExecutionResponse,
 } from '../create_execute_function';
 import { ActionsAuthorization } from '../authorization/actions_authorization';
-import {
-  getAuthorizationModeBySource,
-  bulkGetAuthorizationModeBySource,
-  AuthorizationMode,
-} from '../authorization/get_authorization_mode_by_source';
 import { connectorAuditEvent, ConnectorAuditAction } from '../lib/audit_events';
-import { trackLegacyRBACExemption } from '../lib/track_legacy_rbac_exemption';
 import { ActionsConfigurationUtilities } from '../actions_config';
 import {
   OAuthClientCredentialsParams,
@@ -94,19 +79,10 @@ import {
 import { connectorFromSavedObject, isConnectorDeprecated } from '../application/connector/lib';
 import { ListTypesParams } from '../application/connector/methods/list_types/types';
 import { ConnectorUpdateParams } from '../application/connector/methods/update/types';
-import { ConnectorUpdate } from '../application/connector/methods/update/types/types';
+import { ConnectorCreateParams } from '../application/connector/methods/create/types';
 import { isPreconfigured } from '../lib/is_preconfigured';
 import { isSystemAction } from '../lib/is_system_action';
 import { ConnectorExecuteParams } from '../application/connector/methods/execute/types';
-
-interface Action extends ConnectorUpdate {
-  actionTypeId: string;
-}
-
-export interface CreateOptions {
-  action: Action;
-  options?: { id?: string };
-}
 
 export interface ConstructorOptions {
   logger: Logger;
@@ -187,156 +163,10 @@ export class ActionsClient {
    * Create an action
    */
   public async create({
-    action: { actionTypeId, name, config, secrets },
+    action,
     options,
-  }: CreateOptions): Promise<ActionResult> {
-    const id = options?.id || SavedObjectsUtils.generateId();
-
-    try {
-      await this.context.authorization.ensureAuthorized({
-        operation: 'create',
-        actionTypeId,
-      });
-    } catch (error) {
-      this.context.auditLogger?.log(
-        connectorAuditEvent({
-          action: ConnectorAuditAction.CREATE,
-          savedObject: { type: 'action', id },
-          error,
-        })
-      );
-      throw error;
-    }
-
-    const foundInMemoryConnector = this.context.inMemoryConnectors.find(
-      (connector) => connector.id === id
-    );
-
-    if (
-      this.context.actionTypeRegistry.isSystemActionType(actionTypeId) ||
-      foundInMemoryConnector?.isSystemAction
-    ) {
-      throw Boom.badRequest(
-        i18n.translate('xpack.actions.serverSideErrors.systemActionCreationForbidden', {
-          defaultMessage: 'System action creation is forbidden. Action type: {actionTypeId}.',
-          values: {
-            actionTypeId,
-          },
-        })
-      );
-    }
-
-    if (foundInMemoryConnector?.isPreconfigured) {
-      throw Boom.badRequest(
-        i18n.translate('xpack.actions.serverSideErrors.predefinedIdConnectorAlreadyExists', {
-          defaultMessage: 'This {id} already exists in a preconfigured action.',
-          values: {
-            id,
-          },
-        })
-      );
-    }
-
-    const actionType = this.context.actionTypeRegistry.get(actionTypeId);
-    const configurationUtilities = this.context.actionTypeRegistry.getUtils();
-    const validatedActionTypeConfig = validateConfig(actionType, config, {
-      configurationUtilities,
-    });
-    const validatedActionTypeSecrets = validateSecrets(actionType, secrets, {
-      configurationUtilities,
-    });
-    if (actionType.validate?.connector) {
-      validateConnector(actionType, { config, secrets });
-    }
-    this.context.actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
-
-    const hookServices: HookServices = {
-      scopedClusterClient: this.context.scopedClusterClient,
-    };
-
-    if (actionType.preSaveHook) {
-      try {
-        await actionType.preSaveHook({
-          connectorId: id,
-          config,
-          secrets,
-          logger: this.context.logger,
-          request: this.context.request,
-          services: hookServices,
-          isUpdate: false,
-        });
-      } catch (error) {
-        this.context.auditLogger?.log(
-          connectorAuditEvent({
-            action: ConnectorAuditAction.CREATE,
-            savedObject: { type: 'action', id },
-            error,
-          })
-        );
-        throw error;
-      }
-    }
-
-    this.context.auditLogger?.log(
-      connectorAuditEvent({
-        action: ConnectorAuditAction.CREATE,
-        savedObject: { type: 'action', id },
-        outcome: 'unknown',
-      })
-    );
-
-    const result = await tryCatch(
-      async () =>
-        await this.context.unsecuredSavedObjectsClient.create(
-          'action',
-          {
-            actionTypeId,
-            name,
-            isMissingSecrets: false,
-            config: validatedActionTypeConfig as SavedObjectAttributes,
-            secrets: validatedActionTypeSecrets as SavedObjectAttributes,
-          },
-          { id }
-        )
-    );
-
-    const wasSuccessful = !(result instanceof Error);
-    const label = `connectorId: "${id}"; type: ${actionTypeId}`;
-    const tags = ['post-save-hook', id];
-
-    if (actionType.postSaveHook) {
-      try {
-        await actionType.postSaveHook({
-          connectorId: id,
-          config,
-          secrets,
-          logger: this.context.logger,
-          request: this.context.request,
-          services: hookServices,
-          isUpdate: false,
-          wasSuccessful,
-        });
-      } catch (err) {
-        this.context.logger.error(`postSaveHook create error for ${label}: ${err.message}`, {
-          tags,
-        });
-      }
-    }
-
-    if (!wasSuccessful) {
-      throw result;
-    }
-
-    return {
-      id: result.id,
-      actionTypeId: result.attributes.actionTypeId,
-      isMissingSecrets: result.attributes.isMissingSecrets,
-      name: result.attributes.name,
-      config: result.attributes.config,
-      isPreconfigured: false,
-      isSystemAction: false,
-      isDeprecated: isConnectorDeprecated(result.attributes),
-    };
+  }: Omit<ConnectorCreateParams, 'context'>): Promise<ActionResult> {
+    return create({ context: this.context, action, options });
   }
 
   /**
@@ -660,51 +490,26 @@ export class ActionsClient {
   public async bulkEnqueueExecution(
     options: EnqueueExecutionOptions[]
   ): Promise<ExecutionResponse> {
-    const sources: Array<ActionExecutionSource<unknown>> = compact(
-      (options ?? []).map((option) => option.source)
+    /**
+     * For scheduled executions the additional authorization check
+     * for system actions (kibana privileges) will be performed
+     * inside the ActionExecutor at execution time
+     */
+    await this.context.authorization.ensureAuthorized({ operation: 'execute' });
+    await Promise.all(
+      uniq(options.map((o) => o.actionTypeId)).map((actionTypeId) =>
+        this.context.authorization.ensureAuthorized({ operation: 'execute', actionTypeId })
+      )
     );
-
-    const authModes = await bulkGetAuthorizationModeBySource(
-      this.context.logger,
-      this.context.unsecuredSavedObjectsClient,
-      sources
-    );
-    if (authModes[AuthorizationMode.RBAC] > 0) {
-      /**
-       * For scheduled executions the additional authorization check
-       * for system actions (kibana privileges) will be performed
-       * inside the ActionExecutor at execution time
-       */
-      await this.context.authorization.ensureAuthorized({ operation: 'execute' });
-      await Promise.all(
-        uniq(options.map((o) => o.actionTypeId)).map((actionTypeId) =>
-          this.context.authorization.ensureAuthorized({ operation: 'execute', actionTypeId })
-        )
-      );
-    }
-    if (authModes[AuthorizationMode.Legacy] > 0) {
-      trackLegacyRBACExemption(
-        'bulkEnqueueExecution',
-        this.context.usageCounter,
-        authModes[AuthorizationMode.Legacy]
-      );
-    }
     return this.context.bulkExecutionEnqueuer(this.context.unsecuredSavedObjectsClient, options);
   }
 
   public async ephemeralEnqueuedExecution(options: EnqueueExecutionOptions): Promise<RunNowResult> {
-    const { source } = options;
-    if (
-      (await getAuthorizationModeBySource(this.context.unsecuredSavedObjectsClient, source)) ===
-      AuthorizationMode.RBAC
-    ) {
-      await this.context.authorization.ensureAuthorized({
-        operation: 'execute',
-        actionTypeId: options.actionTypeId,
-      });
-    } else {
-      trackLegacyRBACExemption('ephemeralEnqueuedExecution', this.context.usageCounter);
-    }
+    await this.context.authorization.ensureAuthorized({
+      operation: 'execute',
+      actionTypeId: options.actionTypeId,
+    });
+
     return this.context.ephemeralExecutionEnqueuer(
       this.context.unsecuredSavedObjectsClient,
       options

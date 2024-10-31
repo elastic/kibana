@@ -47,6 +47,7 @@ describe('updateSourceMappingsProperties', () => {
       appMappings: {
         properties: {
           a: { type: 'keyword' },
+          b: { type: 'long' },
           c: { type: 'long' },
           ...getBaseMappings().properties,
         },
@@ -68,12 +69,36 @@ describe('updateSourceMappingsProperties', () => {
   it('should not update mappings when there are no changes', async () => {
     // we overwrite the app mappings to have the "unchanged" values with respect to the index mappings
     const sameMappingsParams = chain(params)
+      // let's not introduce 'c' for now
+      .set('indexTypes', ['a', 'b'])
+      // even if the app versions are more recent, we emulate a scenario where mappings haven NOT changed
+      .set('latestMappingsVersions', { a: '10.1.0', b: '10.1.0' })
+      .value();
+    const result = await updateSourceMappingsProperties(sameMappingsParams)();
+
+    expect(client.indices.putMapping).not.toHaveBeenCalled();
+    expect(Either.isRight(result)).toEqual(true);
+    expect(result).toHaveProperty('right', 'update_mappings_succeeded');
+  });
+
+  it('should update mappings if there are new types', async () => {
+    // we overwrite the app mappings to have the "unchanged" values with respect to the index mappings
+    const sameMappingsParams = chain(params)
       // even if the app versions are more recent, we emulate a scenario where mappings haven NOT changed
       .set('latestMappingsVersions', { a: '10.1.0', b: '10.1.0', c: '10.1.0' })
       .value();
     const result = await updateSourceMappingsProperties(sameMappingsParams)();
 
-    expect(client.indices.putMapping).not.toHaveBeenCalled();
+    expect(client.indices.putMapping).toHaveBeenCalledTimes(1);
+    expect(client.indices.putMapping).toHaveBeenCalledWith(
+      expect.objectContaining({
+        properties: expect.objectContaining({
+          a: { type: 'keyword' },
+          b: { type: 'long' },
+          c: { type: 'long' },
+        }),
+      })
+    );
     expect(Either.isRight(result)).toEqual(true);
     expect(result).toHaveProperty('right', 'update_mappings_succeeded');
   });

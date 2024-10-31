@@ -566,6 +566,20 @@
           },
           {
             "parentPluginId": "dashboard",
+            "id": "def-public.DashboardCreationOptions.fullScreenMode",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "fullScreenMode",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/dashboard/public/dashboard_api/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "dashboard",
             "id": "def-public.DashboardCreationOptions.isEmbeddedExternally",
             "type": "CompoundType",
             "tags": [],
