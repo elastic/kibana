@@ -21,15 +21,15 @@ import type { ExplorerChartsData } from '../explorer/explorer_charts/explorer_ch
 import { SWIM_LANE_LABEL_WIDTH } from '../explorer/constants';
 
 import type { MlApi } from './ml_api_service';
-
-const MAX_CHARTS_PER_ROW = 4;
-const OPTIMAL_CHART_WIDTH = 550;
+import {
+  DEFAULT_MAX_SERIES_TO_PLOT,
+  MAX_CHARTS_PER_ROW,
+  OPTIMAL_CHART_WIDTH,
+} from './anomaly_explorer_charts_service_constants';
 
 export const isSeriesConfigWithMetadata = (arg: unknown): arg is SeriesConfigWithMetadata => {
   return isPopulatedObject(arg, ['bucketSpanSeconds', 'detectorLabel']);
 };
-
-export const DEFAULT_MAX_SERIES_TO_PLOT = 6;
 
 /**
  * Service for retrieving anomaly explorer charts data.
