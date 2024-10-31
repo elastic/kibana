@@ -47,6 +47,12 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           request: getDownloadSourcesRequestSchema,
           response: {
@@ -76,6 +82,12 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           request: GetOneDownloadSourcesRequestSchema,
           response: {
@@ -105,6 +117,12 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           request: PutDownloadSourcesRequestSchema,
           response: {
@@ -134,6 +152,12 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           request: PostDownloadSourcesRequestSchema,
           response: {
@@ -163,6 +187,12 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           request: DeleteDownloadSourcesRequestSchema,
           response: {

@@ -72,6 +72,12 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           request: GetAgentPoliciesRequestSchema,
           response: {
@@ -103,6 +109,12 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           request: BulkGetAgentPoliciesRequestSchema,
           response: {
@@ -134,6 +146,12 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           request: GetOneAgentPolicyRequestSchema,
           response: {
@@ -164,6 +182,12 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           request: CreateAgentPolicyRequestSchema,
           response: {
@@ -194,6 +218,12 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           request: UpdateAgentPolicyRequestSchema,
           response: {
@@ -224,6 +254,12 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           request: CopyAgentPolicyRequestSchema,
           response: {
@@ -254,6 +290,12 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           request: DeleteAgentPolicyRequestSchema,
           response: {
@@ -284,6 +326,12 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           request: GetFullAgentPolicyRequestSchema,
           response: {
@@ -315,6 +363,12 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           request: GetFullAgentPolicyRequestSchema,
           response: {
@@ -348,6 +402,12 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           request: GetK8sManifestRequestSchema,
           response: {
@@ -379,6 +439,12 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           request: GetK8sManifestRequestSchema,
           response: {
@@ -411,6 +477,12 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           request: GetListAgentPolicyOutputsRequestSchema,
           response: {
@@ -440,6 +512,12 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           request: GetAgentPolicyOutputsRequestSchema,
           response: {

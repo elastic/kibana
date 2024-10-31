@@ -51,6 +51,12 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           request: GetOutputsRequestSchema,
           response: {
@@ -79,6 +85,12 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           request: GetOneOutputRequestSchema,
           response: {
@@ -107,6 +119,12 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           request: PutOutputRequestSchema,
           response: {
@@ -136,6 +154,12 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           request: PostOutputRequestSchema,
           response: {
@@ -165,6 +189,12 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           request: DeleteOutputRequestSchema,
           response: {
@@ -197,6 +227,12 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           request: {},
           response: {
@@ -226,6 +262,12 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           request: GetLatestOutputHealthRequestSchema,
           response: {

@@ -26,6 +26,12 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.internal.v1,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: false,
       },
 
@@ -42,6 +48,12 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.internal.v1,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: { request: PostResetOnePreconfiguredAgentPoliciesSchema },
       },
       resetOnePreconfigurationHandler

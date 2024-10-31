@@ -50,6 +50,12 @@ export const registerFleetSetupRoute = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           request: {},
           response: {
@@ -112,6 +118,12 @@ export const registerCreateFleetSetupRoute = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           request: {},
           response: {
@@ -143,6 +155,12 @@ export const registerGetFleetStatusRoute = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           request: {},
           response: {

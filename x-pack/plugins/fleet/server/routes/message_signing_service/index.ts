@@ -31,6 +31,12 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           request: RotateKeyPairSchema,
           response: {

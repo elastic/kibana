@@ -15,14 +15,14 @@ import {
   updateFleetServerHost,
 } from '../fleet_server_host';
 
+import type { FleetServerHost } from '../../../common/types';
+
 import {
   createCloudFleetServerHostIfNeeded,
   getCloudFleetServersHosts,
   getPreconfiguredFleetServerHostFromConfig,
   createOrUpdatePreconfiguredFleetServerHosts,
 } from './fleet_server_host';
-
-import type { FleetServerHost } from '../../../common/types';
 
 jest.mock('../fleet_server_host');
 jest.mock('../app_context');

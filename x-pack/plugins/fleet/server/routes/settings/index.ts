@@ -50,6 +50,12 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
       .addVersion(
         {
           version: API_VERSIONS.public.v1,
+          security: {
+            authz: {
+              enabled: false,
+              reason: 'This route is opted out from authorization',
+            },
+          },
           validate: {
             request: GetSpaceSettingsRequestSchema,
             response: {
@@ -73,6 +79,12 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
       .addVersion(
         {
           version: API_VERSIONS.public.v1,
+          security: {
+            authz: {
+              enabled: false,
+              reason: 'This route is opted out from authorization',
+            },
+          },
           validate: {
             request: PutSpaceSettingsRequestSchema,
             response: {
@@ -100,6 +112,12 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           request: GetSettingsRequestSchema,
           response: {
@@ -131,6 +149,12 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           request: PutSettingsRequestSchema,
           response: {
@@ -162,6 +186,12 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           request: GetEnrollmentSettingsRequestSchema,
           response: {

@@ -21,6 +21,12 @@ export function defineRoutes(
   router.get(
     {
       path: ROUTES_APPEND_CUSTOM_INTEGRATIONS,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: false,
     },
     async (context, request, response) => {
@@ -34,6 +40,12 @@ export function defineRoutes(
   router.get(
     {
       path: ROUTES_REPLACEMENT_CUSTOM_INTEGRATIONS,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: false,
     },
     async (context, request, response) => {

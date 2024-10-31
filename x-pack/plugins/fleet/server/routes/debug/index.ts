@@ -34,6 +34,12 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.internal.v1,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: { request: FetchIndexRequestSchema },
       },
       fetchIndexHandler
@@ -50,6 +56,12 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.internal.v1,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: { request: FetchSavedObjectsRequestSchema },
       },
       fetchSavedObjectsHandler
@@ -66,6 +78,12 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.internal.v1,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: { request: FetchSavedObjectNamesRequestSchema },
       },
       fetchSavedObjectNamesHandler

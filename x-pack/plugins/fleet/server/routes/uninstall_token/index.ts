@@ -39,6 +39,12 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
       .addVersion(
         {
           version: API_VERSIONS.public.v1,
+          security: {
+            authz: {
+              enabled: false,
+              reason: 'This route is opted out from authorization',
+            },
+          },
           validate: {
             request: GetUninstallTokensMetadataRequestSchema,
             response: {
@@ -68,6 +74,12 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
       .addVersion(
         {
           version: API_VERSIONS.public.v1,
+          security: {
+            authz: {
+              enabled: false,
+              reason: 'This route is opted out from authorization',
+            },
+          },
           validate: {
             request: GetUninstallTokenRequestSchema,
             response: {

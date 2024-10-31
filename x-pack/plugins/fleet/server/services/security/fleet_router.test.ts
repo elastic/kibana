@@ -102,9 +102,19 @@ describe('FleetAuthzRouter', () => {
     appContextService.start(mockContext);
 
     const fleetAuthzRouter = makeRouterWithFleetAuthz(fakeRouter as any, mockLogger);
-    fleetAuthzRouter.versioned
-      .get({ ...routeConfig })
-      .addVersion({ version: API_VERSIONS.public.v1, validate: false }, fakeHandler);
+    fleetAuthzRouter.versioned.get({ ...routeConfig }).addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
+        validate: false,
+      },
+      fakeHandler
+    );
     // @ts-ignore
     const wrappedRouteConfig = fakeRouter.versioned.get.mock.calls[0][0];
     const wrappedHandler =

@@ -107,6 +107,12 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           request: GetOneAgentRequestSchema,
           response: {
@@ -137,6 +143,12 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           request: UpdateAgentRequestSchema,
           response: {
@@ -167,6 +179,12 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           request: PostBulkUpdateAgentTagsRequestSchema,
           response: {
@@ -197,6 +215,12 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           request: DeleteAgentRequestSchema,
           response: {
@@ -228,6 +252,12 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           request: GetAgentsRequestSchema,
           response: {
@@ -258,6 +288,12 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           request: GetTagsRequestSchema,
           response: {
@@ -288,6 +324,12 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           request: PostNewAgentActionRequestSchema,
           response: {
@@ -322,6 +364,12 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           request: PostCancelActionRequestSchema,
           response: {
@@ -357,6 +405,12 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           request: PostRetrieveAgentsByActionsRequestSchema,
           response: {
@@ -386,6 +440,12 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: { request: PostAgentUnenrollRequestSchema, response: {} },
       },
       postAgentUnenrollHandler
@@ -403,6 +463,12 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: { request: PutAgentReassignRequestSchemaDeprecated },
       },
       putAgentsReassignHandlerDeprecated
@@ -422,6 +488,12 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           request: PostAgentReassignRequestSchema,
           response: {
@@ -451,6 +523,12 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           request: PostRequestDiagnosticsActionRequestSchema,
           response: {
@@ -480,6 +558,12 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           request: PostBulkRequestDiagnosticsActionRequestSchema,
           response: {
@@ -509,6 +593,12 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           request: ListAgentUploadsRequestSchema,
           response: {
@@ -538,6 +628,12 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           request: GetAgentUploadFileRequestSchema,
           response: {
@@ -567,6 +663,12 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           request: DeleteAgentUploadFileRequestSchema,
           response: {
@@ -599,6 +701,12 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           request: GetAgentStatusRequestSchema,
           response: {
@@ -625,6 +733,12 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: { request: GetAgentStatusRequestSchema },
       },
       getAgentStatusForAgentPolicyHandler
@@ -644,6 +758,12 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           request: GetAgentDataRequestSchema,
           response: {
@@ -674,6 +794,12 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           request: PostAgentUpgradeRequestSchema,
           response: {
@@ -703,6 +829,12 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           request: PostBulkAgentUpgradeRequestSchema,
           response: {
@@ -733,6 +865,12 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           request: GetActionStatusRequestSchema,
           response: {
@@ -763,6 +901,12 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           request: PostBulkAgentReassignRequestSchema,
           response: {
@@ -793,6 +937,12 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           request: PostBulkAgentUnenrollRequestSchema,
           response: {
@@ -823,6 +973,12 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           request: {},
           response: {
