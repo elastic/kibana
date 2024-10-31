@@ -10,6 +10,7 @@
 
 Review important information about the {kib} 8.x releases.
 
+* <<release-notes-8.15.4>>
 * <<release-notes-8.15.3>>
 * <<release-notes-8.15.2>>
 * <<release-notes-8.15.1>>
@@ -76,6 +77,12 @@ Review important information about the {kib} 8.x releases.
 
 
 include::upgrade-notes.asciidoc[]
+
+[[release-notes-8.15.4]]
+== {kib} 8.15.4
+
+=== Bug fixes and enhancements
+There are no user-facing changes in the 8.15.4 release.
 
 [[release-notes-8.15.3]]
 == {kib} 8.15.3
