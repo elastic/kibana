@@ -133,7 +133,7 @@ export function Histogram({
       // The response can have `response?._shards.failed` but we should still be able to show hits number
       // TODO: show shards warnings as a badge next to the total hits number
 
-      if (requestFailed) {
+      if (requestFailed || response?._shards?.failed) {
         onTotalHitsChange?.(UnifiedHistogramFetchStatus.error, undefined);
         onChartLoad?.({ adapters: adapters ?? {} });
         return;
