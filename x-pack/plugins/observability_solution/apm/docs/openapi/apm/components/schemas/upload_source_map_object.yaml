@@ -1,0 +1,22 @@
+type: object
+required:
+  - service_name
+  - service_version
+  - bundle_filepath
+  - sourcemap
+properties:
+  service_name:
+    type: string
+    description: The name of the service that the service map should apply to.
+  service_version:
+    type: string
+    description: The version of the service that the service map should apply to.
+  bundle_filepath:
+    type: string
+    description: The absolute path of the final bundle as used in the web application.
+  sourcemap:
+    type: string
+    format: binary
+    description: |
+      The source map. String or file upload. It must follow the
+      [source map revision 3 proposal](https://docs.google.com/document/d/1U1RGAehQwRypUTovF1KRlpiOFze0b-_2gc6fAH0KY0k).
