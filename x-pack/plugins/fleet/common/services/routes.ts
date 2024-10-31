@@ -85,11 +85,11 @@ export const epmRouteService = {
   getRemovePath: (pkgName: string, pkgVersion?: string) => {
     if (pkgVersion) {
       return EPM_API_ROUTES.DELETE_PATTERN.replace('{pkgName}', pkgName)
-        .replace('/{pkgVersion?}', pkgVersion)
+        .replace('{pkgVersion?}', pkgVersion)
         .replace(/\/$/, ''); // trim trailing slash
     } else {
       return EPM_API_ROUTES.DELETE_PATTERN.replace('{pkgName}', pkgName)
-        .replace('{pkgVersion?}', '')
+        .replace('/{pkgVersion?}', '')
         .replace(/\/$/, ''); // trim trailing slash
     }
   },
