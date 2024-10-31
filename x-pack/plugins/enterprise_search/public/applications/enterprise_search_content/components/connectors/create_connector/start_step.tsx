@@ -242,10 +242,16 @@ export const StartStep: React.FC<StartStepProps> = ({
               hasShadow={false}
               hasBorder
               paddingSize="l"
-              color={selectedConnector?.name && isValidIndexName(rawName) ? 'plain' : 'subdued'}
+              color={
+                selectedConnector?.name && isValidIndexName(rawName) && !error ? 'plain' : 'subdued'
+              }
             >
               <EuiText
-                color={selectedConnector?.name && isValidIndexName(rawName) ? 'default' : 'subdued'}
+                color={
+                  selectedConnector?.name && isValidIndexName(rawName) && !error
+                    ? 'default'
+                    : 'subdued'
+                }
               >
                 <h3>
                   {i18n.translate(
@@ -284,7 +290,7 @@ export const StartStep: React.FC<StartStepProps> = ({
                   }
                 }}
                 fill
-                disabled={!canConfigureConnector || !isValidIndexName(rawName)}
+                disabled={!canConfigureConnector || !isValidIndexName(rawName) || Boolean(error)}
                 isLoading={isCreateLoading || isGenerateLoading}
               >
                 {Constants.NEXT_BUTTON_LABEL}
@@ -294,13 +300,19 @@ export const StartStep: React.FC<StartStepProps> = ({
         ) : (
           <EuiFlexItem>
             <EuiPanel
-              color={selectedConnector?.name && isValidIndexName(rawName) ? 'plain' : 'subdued'}
+              color={
+                selectedConnector?.name && isValidIndexName(rawName) && !error ? 'plain' : 'subdued'
+              }
               hasShadow={false}
               hasBorder
               paddingSize="l"
             >
               <EuiText
-                color={selectedConnector?.name && isValidIndexName(rawName) ? 'default' : 'subdued'}
+                color={
+                  selectedConnector?.name && isValidIndexName(rawName) && !error
+                    ? 'default'
+                    : 'subdued'
+                }
               >
                 <h3>
                   {i18n.translate(
@@ -313,7 +325,11 @@ export const StartStep: React.FC<StartStepProps> = ({
               </EuiText>
               <EuiSpacer size="m" />
               <EuiText
-                color={selectedConnector?.name && isValidIndexName(rawName) ? 'default' : 'subdued'}
+                color={
+                  selectedConnector?.name && isValidIndexName(rawName) && !error
+                    ? 'default'
+                    : 'subdued'
+                }
                 size="s"
               >
                 <p>
@@ -356,7 +372,9 @@ export const StartStep: React.FC<StartStepProps> = ({
                     <EuiButton
                       data-test-subj="entSearchContent-connector-configuration-generateConfigButton"
                       data-telemetry-id="entSearchContent-connector-configuration-generateConfigButton"
-                      disabled={!canConfigureConnector || !isValidIndexName(rawName)}
+                      disabled={
+                        !canConfigureConnector || !isValidIndexName(rawName) || Boolean(error)
+                      }
                       fill
                       iconType="sparkles"
                       isLoading={isGenerateLoading || isCreateLoading}
@@ -381,7 +399,8 @@ export const StartStep: React.FC<StartStepProps> = ({
                         isGenerateLoading ||
                         isCreateLoading ||
                         !canConfigureConnector ||
-                        !isValidIndexName(rawName)
+                        !isValidIndexName(rawName) ||
+                        Boolean(error)
                       }
                       selfManagePreference={selfManagePreference}
                     />
