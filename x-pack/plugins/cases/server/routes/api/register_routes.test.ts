@@ -71,14 +71,13 @@ describe('registerRoutes', () => {
     }),
   ] as CaseRoute[];
 
-  const initApi = (casesRoutes: CaseRoute[], isServerless?: boolean) => {
+  const initApi = (casesRoutes: CaseRoute[]) => {
     registerRoutes({
       router,
       logger,
       routes: casesRoutes,
       kibanaVersion: '8.2.0',
       telemetryUsageCounter,
-      isServerless,
     });
 
     const simulateRequest = async ({
@@ -172,13 +171,7 @@ describe('registerRoutes', () => {
 
         expect(router[method]).toHaveBeenCalledTimes(1);
         expect(router[method]).toBeCalledWith(
-          {
-            path,
-            options: {
-              access: 'internal',
-            },
-            validate: expect.anything(),
-          },
+          { path, validate: expect.anything() },
           expect.anything()
         );
       }
@@ -334,91 +327,6 @@ describe('registerRoutes', () => {
       expect(badRequest).toBeCalledWith({
         body: 'RouteHandlerContext is not registered for cases',
       });
-    });
-  });
-
-  describe('serverless', () => {
-    it('sets the deprecated APIs as internals in serverless', async () => {
-      const deprecatedRoute = createCasesRoute({
-        method: 'get',
-        path: '/deprecated',
-        options: { deprecated: true },
-        routerOptions: { access: 'public' },
-        handler: async () => response.ok(),
-      });
-
-      initApi([deprecatedRoute], true);
-
-      expect(router.get).toHaveBeenCalledWith(
-        expect.objectContaining({
-          options: {
-            access: 'internal',
-          },
-        }),
-        expect.anything()
-      );
-    });
-
-    it('respects the access property of the route in non-serverless', async () => {
-      const deprecatedRoute = createCasesRoute({
-        method: 'get',
-        path: '/deprecated',
-        options: { deprecated: true },
-        routerOptions: { access: 'public' },
-        handler: async () => response.ok(),
-      });
-
-      initApi([deprecatedRoute], false);
-
-      expect(router.get).toHaveBeenCalledWith(
-        expect.objectContaining({
-          options: {
-            access: 'public',
-          },
-        }),
-        expect.anything()
-      );
-    });
-  });
-
-  describe('route access', () => {
-    it('mark the API as internal if it does not specify its access', async () => {
-      const route = createCasesRoute({
-        method: 'get',
-        path: '/foo',
-        handler: async () => response.ok(),
-      });
-
-      initApi([route]);
-
-      expect(router.get).toHaveBeenCalledWith(
-        expect.objectContaining({
-          options: {
-            access: 'internal',
-          },
-        }),
-        expect.anything()
-      );
-    });
-
-    it('does not mark the API as internal if it does specify its access', async () => {
-      const route = createCasesRoute({
-        method: 'get',
-        path: '/foo',
-        routerOptions: { access: 'public' },
-        handler: async () => response.ok(),
-      });
-
-      initApi([route]);
-
-      expect(router.get).toHaveBeenCalledWith(
-        expect.objectContaining({
-          options: {
-            access: 'public',
-          },
-        }),
-        expect.anything()
-      );
     });
   });
 });

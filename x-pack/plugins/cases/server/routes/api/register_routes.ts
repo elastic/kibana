@@ -71,18 +71,15 @@ const logAndIncreaseDeprecationTelemetryCounters = ({
 };
 
 export const registerRoutes = (deps: RegisterRoutesDeps) => {
-  const { router, routes, logger, kibanaVersion, telemetryUsageCounter, isServerless } = deps;
+  const { router, routes, logger, kibanaVersion, telemetryUsageCounter } = deps;
 
   routes.forEach((route) => {
     const { method, path, params, options, routerOptions, handler } = route;
 
-    const routeAccess =
-      isServerless && options?.deprecated ? 'internal' : routerOptions?.access ?? 'internal';
-
     (router[method] as RouteRegistrar<typeof method, CasesRequestHandlerContext>)(
       {
         path,
-        options: { ...routerOptions, access: routeAccess },
+        options: routerOptions,
         validate: {
           params: params?.params ?? escapeHatch,
           query: params?.query ?? escapeHatch,
