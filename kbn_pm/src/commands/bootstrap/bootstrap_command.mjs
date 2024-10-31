@@ -23,6 +23,20 @@ import { regenerateBaseTsconfig } from './regenerate_base_tsconfig.mjs';
 import { discovery } from './discovery.mjs';
 import { updatePackageJson } from './update_package_json.mjs';
 
+const tryImportLockValidator = (() => {
+  let yarnLockValidator = null;
+  return () => {
+    try {
+      if (!yarnLockValidator) {
+        yarnLockValidator = External['@kbn/yarn-lock-validator']();
+      }
+      return yarnLockValidator;
+    } catch (_err) {
+      return null;
+    }
+  };
+})();
+
 /** @type {import('../../lib/command').Command} */
 export const command = {
   name: 'bootstrap',
@@ -64,8 +78,24 @@ export const command = {
       args.getBooleanValue('vscode') ?? (process.env.KBN_BOOTSTRAP_NO_VSCODE ? false : true);
 
     // Force install is set in case a flag is passed into yarn kbn bootstrap, or node_modules have been removed
-    const forceInstall =
+    let forceReinstall =
       args.getBooleanValue('force-install') ?? (await haveNodeModulesBeenManuallyDeleted());
+    if (!forceReinstall) {
+      const lockValidatorModule = tryImportLockValidator();
+      if (!lockValidatorModule) {
+        // linking is not done, we should install
+        forceReinstall = true;
+      } else {
+        const { findProductionDependencies, readYarnLock } = lockValidatorModule;
+        const yarnLock = await readYarnLock();
+        const allListedPackagesResolvedInYarnLock = !!findProductionDependencies(
+          log,
+          yarnLock,
+          false
+        );
+        forceReinstall = !allListedPackagesResolvedInYarnLock;
+      }
+    }
 
     const { packageManifestPaths, tsConfigRepoRels } = await time('discovery', discovery);
 
@@ -88,7 +118,7 @@ export const command = {
       }),
     ]);
 
-    if (forceInstall) {
+    if (forceReinstall) {
       await time('force install dependencies', async () => {
         await removeYarnIntegrityFileIfExists();
         await yarnInstallDeps(log, { offline, quiet });
@@ -101,28 +131,27 @@ export const command = {
         disableNXCache,
         quiet,
       });
-      log.success('build required webpack bundles for packages');
+      log.success('shared bundles built');
     });
 
-    await Promise.all([
-      time('sort package json', async () => {
-        await sortPackageJson(log);
-      }),
-      validate
-        ? time('validate dependencies', async () => {
-            // now that deps are installed we can import `@kbn/yarn-lock-validator`
-            const { readYarnLock, validateDependencies } = External['@kbn/yarn-lock-validator']();
-            await validateDependencies(log, await readYarnLock());
-          })
-        : undefined,
-      vscodeConfig
-        ? time('update vscode config', async () => {
-            // Update vscode settings
-            await run('node', ['scripts/update_vscode_config']);
+    await time('sort package json', async () => {
+      await sortPackageJson(log);
+    });
+    if (validate) {
+      await time('validate dependencies', async () => {
+        // now that deps are installed we can import `@kbn/yarn-lock-validator`
+        const lockValidatorModule = tryImportLockValidator();
+        const { readYarnLock, validateDependencies } = lockValidatorModule;
+        await validateDependencies(log, await readYarnLock());
+      });
+    }
+    if (vscodeConfig) {
+      await time('update vscode config', async () => {
+        // Update vscode settings
+        await run('node', ['scripts/update_vscode_config']);
 
-            log.success('vscode config updated');
-          })
-        : undefined,
-    ]);
+        log.success('vscode config updated');
+      });
+    }
   },
 };

@@ -17,11 +17,15 @@ import { YarnLock } from './yarn_lock';
  * dependencies listed in package.json and then traversing deeply into the transitive
  * dependencies as declared by the yarn.lock file.
  */
-export function findProductionDependencies(log: SomeDevLog, yarnLock: YarnLock) {
+export function findProductionDependencies(
+  log: SomeDevLog,
+  yarnLock: YarnLock,
+  exitOnFailure = true
+) {
   const resolved = new Map<string, { name: string; version: string }>();
 
   // queue of dependencies entries, we will add the transitive dependencies to
-  // this queue as we itterate
+  // this queue as we iterate
   const depQueue = Object.entries(kibanaPackageJson.dependencies);
 
   for (const [name, versionRange] of depQueue) {
@@ -34,8 +38,13 @@ export function findProductionDependencies(log: SomeDevLog, yarnLock: YarnLock) 
 
     const pkg = yarnLock[key];
     if (!pkg) {
-      log.warning('yarn.lock file is out of date, please re-run `yarn kbn bootstrap`');
-      process.exit(1);
+      if (exitOnFailure) {
+        log.warning('yarn.lock file is out of date, please re-run `yarn kbn bootstrap`');
+        process.exit(1);
+      } else {
+        log.warning('yarn.lock file is out of date');
+        return;
+      }
     }
 
     resolved.set(key, { name, version: pkg.version });
