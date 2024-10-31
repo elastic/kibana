@@ -15,7 +15,8 @@
     "scripts/**/*.json",
     "public/**/*.json",
     "../../../../../typings/**/*",
-    "emotion.d.ts" ],
+    "emotion.d.ts"
+  ],
   "exclude": [
     "target/**/*",
     "**/cypress/**",
@@ -256,5 +257,6 @@
     "@kbn/spaces-utils",
     "@kbn/licensing-types",
     "@kbn/core-metrics-server",
+    "@kbn/ml-common-types",
   ]
 }
