@@ -44,7 +44,7 @@ export async function getEntitiesByFuzzySearch({
 
   const results = new Fuse(terms, { includeScore: true, threshold: 0.75 }).search(value);
 
-  return orderBy(results, (result) => result.score, 'desc')
+  return orderBy(results, (result) => result.score, 'asc')
     .slice(0, 5)
     .map((result) => result.item);
 }
