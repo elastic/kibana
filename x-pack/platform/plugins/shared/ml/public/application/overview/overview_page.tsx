@@ -19,7 +19,6 @@ import type { MlStorageKey, TMlStorageMapped } from '@kbn/ml-common-types/storag
 import { ML_OVERVIEW_PANELS, ML_OVERVIEW_PANELS_EXTENDED } from '@kbn/ml-common-types/storage';
 import type { MlSavedObjectType } from '@kbn/ml-common-types/saved_objects';
 import { OverviewStatsBar } from '../components/collapsible_panel/collapsible_panel';
-import { OverviewStatsBar } from '../components/collapsible_panel/collapsible_panel';
 import { CollapsiblePanel } from '../components/collapsible_panel';
 import { usePermissionCheck } from '../capabilities/check_capabilities';
 import { mlNodesAvailable } from '../ml_nodes_check';

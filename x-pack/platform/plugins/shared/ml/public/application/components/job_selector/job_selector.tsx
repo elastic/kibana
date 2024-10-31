@@ -16,7 +16,7 @@ import type {
   MlJobWithTimeRange,
   MlSummaryJob,
 } from '@kbn/ml-common-types/anomaly_detection_jobs/summary_job';
-import { ML_PAGES } from '@kbn/ml-common-types/locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 
 import { JobInfoFlyoutsProvider } from '../../jobs/components/job_details_flyout';
 import { JobInfoFlyoutsManager } from '../../jobs/components/job_details_flyout/job_details_context_manager';
@@ -26,8 +26,6 @@ import { useJobSelectionFlyout } from '../../contexts/ml/use_job_selection_flyou
 
 import { FeedBackButton } from '../feedback_button';
 
-import { IdBadges } from './id_badges';
-import { BADGE_LIMIT } from './job_selector_flyout';
 import { IdBadges } from './id_badges';
 import { BADGE_LIMIT } from './job_selector_flyout';
 
