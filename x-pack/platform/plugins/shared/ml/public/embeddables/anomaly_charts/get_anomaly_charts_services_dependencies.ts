@@ -5,18 +5,18 @@
  * 2.0.
  */
 import type { CoreStart } from '@kbn/core/public';
-import { HttpService } from '../../application/services/http_service';
 import type { MlStartDependencies } from '../../plugin';
 import type { MlDependencies } from '../../application/app';
 import type { AnomalyChartsEmbeddableServices } from '../types';
-import { AnomalyExplorerChartsService } from '../../application/services/anomaly_explorer_charts_service';
 
 export const getAnomalyChartsServiceDependencies = async (
   coreStart: CoreStart,
   pluginsStart: MlStartDependencies
 ): Promise<AnomalyChartsEmbeddableServices> => {
   const [
+    { HttpService },
     { AnomalyDetectorService },
+    { AnomalyExplorerChartsService },
     { fieldFormatServiceFactory },
     { indexServiceFactory },
     { mlApiProvider },
@@ -24,7 +24,9 @@ export const getAnomalyChartsServiceDependencies = async (
     { mlResultsServiceProvider },
     { MlCapabilitiesService },
   ] = await Promise.all([
+    await import('../../application/services/http_service'),
     await import('../../application/services/anomaly_detector_service'),
+    await import('../../application/services/anomaly_explorer_charts_service'),
     await import('../../application/services/field_format_service_factory'),
     await import('../../application/util/index_service'),
     await import('../../application/services/ml_api_service'),
