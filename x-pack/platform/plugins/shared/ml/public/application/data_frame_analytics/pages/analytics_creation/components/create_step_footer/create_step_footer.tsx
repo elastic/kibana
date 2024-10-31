@@ -20,7 +20,7 @@ import { useMlApi, useMlKibana } from '../../../../../contexts/kibana';
 import { BackToListPanel } from '../back_to_list_panel';
 import { ViewResultsPanel } from '../view_results_panel';
 import { ProgressStats } from './progress_stats';
-import { NewJobAwaitingNodeWarning } from '../../../../../components/jobs_awaiting_node_warning';
+import { NewJobAwaitingNodeWarning } from '../../../../../components/jobs_awaiting_node_warning/new_job_awaiting_node';
 
 export const PROGRESS_REFRESH_INTERVAL_MS = 1000;
 
