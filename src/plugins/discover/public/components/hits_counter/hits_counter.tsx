@@ -70,7 +70,7 @@ export const HitsCounter: React.FC<HitsCounterProps> = ({ mode, stateContainer }
 
   const element = (
     <EuiFlexGroup
-      gutterSize="s"
+      gutterSize="xs"
       responsive={false}
       justifyContent="center"
       alignItems="center"
@@ -122,6 +122,7 @@ export const HitsCounter: React.FC<HitsCounterProps> = ({ mode, stateContainer }
           <EuiIconTip
             type="warning"
             color="warning"
+            size="s"
             content={i18n.translate('discover.hitsCounter.hitCountWarningTooltip', {
               defaultMessage: 'Results might be incomplete',
             })}
