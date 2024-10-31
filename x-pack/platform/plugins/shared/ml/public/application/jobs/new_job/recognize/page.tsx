@@ -44,7 +44,7 @@ import { ModuleJobs } from './components/module_jobs';
 import type { JobSettingsFormValues } from './components/job_settings_form';
 import { JobSettingsForm } from './components/job_settings_form';
 import type { TimeRange } from '../common/components';
-import { JobsAwaitingNodeWarning } from '../../../components/jobs_awaiting_node_warning';
+import { JobsAwaitingNodeWarning } from '../../../components/jobs_awaiting_node_warning/jobs_awaiting_node_warning';
 import { MlPageHeader } from '../../../components/page_header';
 import { PageTitle } from '../../../components/page_title';
 

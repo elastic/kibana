@@ -24,7 +24,7 @@ import { usePermissionCheck } from '../capabilities/check_capabilities';
 import { mlNodesAvailable } from '../ml_nodes_check';
 import { OverviewContent } from './components/content';
 import { NodeAvailableWarning } from '../components/node_available_warning';
-import { JobsAwaitingNodeWarning } from '../components/jobs_awaiting_node_warning';
+import { JobsAwaitingNodeWarning } from '../components/jobs_awaiting_node_warning/jobs_awaiting_node_warning';
 import { SavedObjectsWarning } from '../components/saved_objects_warning';
 import { UpgradeWarning } from '../components/upgrade';
 import { HelpMenu } from '../components/help_menu';
