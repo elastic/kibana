@@ -24,8 +24,8 @@ kbnUrlStateStorage.set(GLOBAL_STATE_STORAGE_KEY, { time: { from: 'now-7d', to: '
 
 describe('listing dashboard link', () => {
   test('creates a link to a dashboard without the timerange query if time is saved on the dashboard', async () => {
-    const url = getDashboardListItemLink(DASHBOARD_ID);
-    expect(url).toMatchInlineSnapshot(`"http://localhost/#/?_g=(time:(from:now-7d,to:now))&_a=()"`);
+    const url = getDashboardListItemLink(DASHBOARD_ID, true);
+    expect(url).toMatchInlineSnapshot(`"http://localhost/#/?_g=()&_a=()"`);
   });
 });
 
@@ -40,7 +40,7 @@ describe('when global time changes', () => {
   });
 
   test('propagates the correct time on the query', async () => {
-    const url = getDashboardListItemLink(DASHBOARD_ID);
+    const url = getDashboardListItemLink(DASHBOARD_ID, false);
     expect(url).toMatchInlineSnapshot(
       `"http://localhost/#/?_g=(time:(from:'2021-01-05T11:45:53.375Z',to:'2021-01-21T11:46:00.990Z'))&_a=()"`
     );
@@ -55,7 +55,7 @@ describe('when global refreshInterval changes', () => {
   });
 
   test('propagates the refreshInterval on the query', async () => {
-    const url = getDashboardListItemLink(DASHBOARD_ID);
+    const url = getDashboardListItemLink(DASHBOARD_ID, false);
     expect(url).toMatchInlineSnapshot(
       `"http://localhost/#/?_g=(refreshInterval:(pause:!f,value:300))&_a=()"`
     );
@@ -91,7 +91,7 @@ describe('when global filters change', () => {
   });
 
   test('propagates the filters on the query', async () => {
-    const url = getDashboardListItemLink(DASHBOARD_ID);
+    const url = getDashboardListItemLink(DASHBOARD_ID, false);
     expect(url).toMatchInlineSnapshot(
       `"http://localhost/#/?_g=(filters:!((meta:(alias:!n,disabled:!f,negate:!f),query:(query:q1)),('$state':(store:globalState),meta:(alias:!n,disabled:!f,negate:!f),query:(query:q1))))&_a=()"`
     );
