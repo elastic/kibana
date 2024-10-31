@@ -160,7 +160,7 @@ export const Graph: React.FC<GraphProps> = ({
         zoomOnScroll={!isGraphLocked && !isLockedProp}
         zoomOnPinch={!isGraphLocked && !isLockedProp}
         zoomOnDoubleClick={!isGraphLocked && !isLockedProp}
-        preventScrolling={!interactive}
+        preventScrolling={interactive}
         nodesDraggable={interactive && !isGraphLocked && !isLockedProp}
         maxZoom={1.3}
       >
