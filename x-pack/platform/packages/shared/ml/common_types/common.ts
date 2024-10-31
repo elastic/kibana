@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { MlPages } from './locator';
+import type { MlPages } from './locator_ml_pages';
 
 export interface Dictionary<TValue> {
   [id: string]: TValue;

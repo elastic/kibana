@@ -25,7 +25,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useTimefilter } from '@kbn/ml-date-picker';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
-import { ML_PAGES } from '@kbn/ml-common-types/locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { isFullLicense } from '../license';
 import { useMlKibana, useNavigateToPath } from '../contexts/kibana';
 import { HelpMenu } from '../components/help_menu';
