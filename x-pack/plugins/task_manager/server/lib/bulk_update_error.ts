@@ -11,7 +11,7 @@ export class BulkUpdateError extends Error {
 
   constructor({
     statusCode,
-    message,
+    message = 'Bulk update failed with unknown reason',
     type,
   }: {
     statusCode: number;
@@ -26,6 +26,7 @@ export class BulkUpdateError extends Error {
   public get statusCode() {
     return this._statusCode;
   }
+
   public get type() {
     return this._type;
   }
