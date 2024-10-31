@@ -49,7 +49,7 @@ export const disableEntityDiscoveryRoute = createEntityManagerServerRoute({
       deleteData: z.optional(BooleanFromString).default(false),
     }),
   }),
-  handler: async ({ context, response, params, logger, server }) => {
+  handler: async ({ context, request, response, params, logger, server, getScopedClient }) => {
     try {
       const esClientAsCurrentUser = (await context.core).elasticsearch.client.asCurrentUser;
       const canDisable = await canDisableEntityDiscovery(esClientAsCurrentUser);
@@ -62,15 +62,13 @@ export const disableEntityDiscoveryRoute = createEntityManagerServerRoute({
         });
       }
 
-      const esClient = (await context.core).elasticsearch.client.asSecondaryAuthUser;
+      const entityClient = await getScopedClient({ request });
       const soClient = (await context.core).savedObjects.getClient({
         includedHiddenTypes: [EntityDiscoveryApiKeyType.name],
       });
 
       await uninstallBuiltInEntityDefinitions({
-        soClient,
-        esClient,
-        logger,
+        entityClient,
         deleteData: params.query.deleteData,
       });
 
