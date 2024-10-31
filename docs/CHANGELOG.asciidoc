@@ -143,7 +143,7 @@ The Ingest Pipelines app now supports adding and managing databases for the GeoI
 * Adds agentless ux creation flow ({kibana-pull}189932[#189932]).
 * Enable feature flag for reusable integration policies ({kibana-pull}187153[#187153]).
 Discover::
-* When editing ES|QL queries, you now get recommendations to help you get started ({kibana-pull}194418[#194418]).
+* When writing ES|QL queries, you now get recommendations to help you get started ({kibana-pull}194418[#194418]).
 * Adds the ability to break down the histogram by field for ES|QL queries in Discover ({kibana-pull}193820[#193820]).
 * Adds a summary column to the Documents table when exploring log data in Discover ({kibana-pull}192567[#192567]).
 * Adds row indicators to the Documents table when exploring log data in Discover ({kibana-pull}190676[#190676]).
