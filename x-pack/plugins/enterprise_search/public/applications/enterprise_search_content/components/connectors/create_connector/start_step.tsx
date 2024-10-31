@@ -73,9 +73,9 @@ export const StartStep: React.FC<StartStepProps> = ({
     setRawName(e.target.value);
   };
 
-  const formError = () => {
-    if (!isValidIndexName(rawName)) {
-      return i18n.translate(
+  const formError = isValidIndexName(rawName)
+    ? error
+    : i18n.translate(
         'xpack.enterpriseSearch.createConnector.startStep.euiFormRow.nameInputHelpText.lineOne',
         {
           defaultMessage: '{connectorName} is an invalid index name',
@@ -84,9 +84,6 @@ export const StartStep: React.FC<StartStepProps> = ({
           },
         }
       );
-    }
-    return error;
-  };
 
   return (
     <EuiForm component="form" id="enterprise-search-create-connector">
@@ -126,7 +123,7 @@ export const StartStep: React.FC<StartStepProps> = ({
                         `}
                         color="danger"
                       >
-                        {formError()}
+                        {formError}
                       </EuiText>
                       <EuiText
                         size="xs"
