@@ -9,8 +9,6 @@ import type { StartServicesAccessor } from '@kbn/core/public';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { MlPluginStart, MlStartDependencies } from '../../plugin';
 import type { MlDependencies } from '../../application/app';
-import { HttpService } from '../../application/services/http_service';
-import { AnomalyExplorerChartsService } from '../../application/services/anomaly_explorer_charts_service';
 import type { SingleMetricViewerEmbeddableServices, SingleMetricViewerServices } from '../types';
 
 /**
@@ -21,7 +19,9 @@ export const getMlServices = async (
   pluginsStart: MlStartDependencies
 ): Promise<SingleMetricViewerServices> => {
   const [
+    { HttpService },
     { AnomalyDetectorService },
+    { AnomalyExplorerChartsService },
     { fieldFormatServiceFactory },
     { indexServiceFactory },
     { timeSeriesExplorerServiceFactory },
@@ -32,7 +32,9 @@ export const getMlServices = async (
     { toastNotificationServiceProvider },
     { mlJobServiceFactory },
   ] = await Promise.all([
+    await import('../../application/services/http_service'),
     await import('../../application/services/anomaly_detector_service'),
+    await import('../../application/services/anomaly_explorer_charts_service'),
     await import('../../application/services/field_format_service_factory'),
     await import('../../application/util/index_service'),
     await import('../../application/util/time_series_explorer_service'),
