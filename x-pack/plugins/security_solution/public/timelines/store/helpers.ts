@@ -131,7 +131,6 @@ export const addTimelineToStore = ({
     ...timelineById,
     [id]: {
       ...timeline,
-      isLoading: timelineById[id].isLoading,
       initialized: timeline.initialized ?? timelineById[id].initialized,
       resolveTimelineConfig,
       dateRange:
@@ -180,7 +179,6 @@ export const addNewTimeline = ({
       savedObjectId: null,
       version: null,
       isSaving: false,
-      isLoading: false,
       timelineType,
       ...templateTimelineInfo,
     },

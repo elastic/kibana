@@ -11,11 +11,8 @@ import { useDispatch } from 'react-redux';
 import { isDataViewFieldSubtypeNested } from '@kbn/es-query';
 
 import type { ColumnHeaderOptions } from '../../../../../../../common/types';
-import {
-  useDeepEqualSelector,
-  useShallowEqualSelector,
-} from '../../../../../../common/hooks/use_selector';
-import { timelineActions, timelineSelectors } from '../../../../../store';
+import { useShallowEqualSelector } from '../../../../../../common/hooks/use_selector';
+import { timelineActions } from '../../../../../store';
 import type { OnColumnRemoved, OnFilterChange } from '../../../events';
 import type { Sort } from '../../sort';
 import { Actions } from '../actions';
@@ -86,17 +83,12 @@ export const HeaderComponent: React.FC<Props> = ({
     [dispatch, timelineId]
   );
 
-  const getManageTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-  const { isLoading } = useDeepEqualSelector(
-    (state) => getManageTimeline(state, timelineId) || { isLoading: false }
-  );
   const showSortingCapability = !isEqlOn && !isDataViewFieldSubtypeNested(header);
 
   return (
     <>
       <HeaderContent
         header={header}
-        isLoading={isLoading}
         isResizing={false}
         onClick={onColumnSort}
         showSortingCapability={showSortingCapability}

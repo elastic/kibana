@@ -369,13 +369,9 @@ export const EventsTdContent = styled.div.attrs(({ className }) => ({
 
 export const EventsHeading = styled.div.attrs(({ className = '' }) => ({
   className: `siemEventsHeading ${className}`,
-}))<{ isLoading: boolean }>`
+}))`
   align-items: center;
   display: flex;
-
-  &:hover {
-    cursor: ${({ isLoading }) => (isLoading ? 'wait' : 'grab')};
-  }
 `;
 
 export const EventsHeadingTitleButton = styled.button.attrs(({ className = '' }) => ({

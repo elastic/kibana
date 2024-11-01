@@ -29,17 +29,16 @@ interface HeaderContentProps {
 const HeaderContentComponent: React.FC<HeaderContentProps> = ({
   children,
   header,
-  isLoading,
   isResizing,
   onClick,
   showSortingCapability,
   sort,
 }) => (
-  <EventsHeading data-test-subj={`header-${header.id}`} isLoading={isLoading}>
+  <EventsHeading data-test-subj={`header-${header.id}`}>
     {header.aggregatable && showSortingCapability ? (
       <EventsHeadingTitleButton
         data-test-subj="header-sort-button"
-        onClick={!isResizing && !isLoading ? onClick : noop}
+        onClick={!isResizing ? onClick : noop}
       >
         <TruncatableText data-test-subj={`header-text-${header.id}`}>
           <EuiToolTip

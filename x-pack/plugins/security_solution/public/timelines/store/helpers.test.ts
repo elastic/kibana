@@ -102,7 +102,6 @@ const basicTimeline: TimelineModel = {
   indexNames: [],
   isFavorite: false,
   isLive: false,
-  isLoading: false,
   isSaving: false,
   isSelectAllChecked: false,
   itemsPerPage: 25,
