@@ -8,6 +8,7 @@
 import { log, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
 
+import { LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import {
   createBackingIndexNameWithoutVersion,
   getDataStreamSettingsOfEarliestIndex,
@@ -19,7 +20,7 @@ import { RoleCredentials, SupertestWithRoleScopeType } from '../../../services';
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const samlAuth = getService('samlAuth');
   const roleScopedSupertest = getService('roleScopedSupertest');
-  const synthtrace = getService('logsSynthtraceEsClient');
+  const synthtrace = getService('synthtrace');
   const esClient = getService('es');
   const packageApi = getService('packageApi');
   const config = getService('config');
@@ -56,8 +57,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   describe('Dataset quality settings', function () {
     let adminRoleAuthc: RoleCredentials;
     let supertestAdminWithCookieCredentials: SupertestWithRoleScopeType;
+    let synthtraceLogsEsClient: LogsSynthtraceEsClient;
 
     before(async () => {
+      synthtraceLogsEsClient = await synthtrace.createLogsSynthtraceEsClient();
       adminRoleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
       supertestAdminWithCookieCredentials = await roleScopedSupertest.getSupertestWithRoleScope(
         'admin',
@@ -86,7 +89,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     describe('gets the data stream settings for non integrations', () => {
       before(async () => {
-        await synthtrace.index([
+        await synthtraceLogsEsClient.index([
           timerange(start, end)
             .interval('1m')
             .rate(1)
@@ -106,7 +109,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         ]);
       });
       after(async () => {
-        await synthtrace.clean();
+        await synthtraceLogsEsClient.clean();
       });
 
       it('returns "createdOn", "indexTemplate" and "lastBackingIndexName" correctly when available for non integration', async () => {
@@ -166,7 +169,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           roleAuthc: adminRoleAuthc,
           pkg: syntheticsDataset,
         });
-        await synthtrace.index([
+        await synthtraceLogsEsClient.index([
           timerange(start, end)
             .interval('1m')
             .rate(1)
@@ -186,7 +189,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         ]);
       });
       after(async () => {
-        await synthtrace.clean();
+        await synthtraceLogsEsClient.clean();
         await packageApi.uninstallPackage({
           roleAuthc: adminRoleAuthc,
           pkg: syntheticsDataset,

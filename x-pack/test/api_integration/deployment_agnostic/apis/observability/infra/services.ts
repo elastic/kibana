@@ -11,7 +11,6 @@ import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import type { SupertestWithRoleScopeType } from '../../../services';
-import { getApmSynthtraceEsClient } from '../../../../../common/utils/synthtrace/apm_es_client';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 
 const SERVICES_ENDPOINT = '/api/infra/services';
@@ -96,8 +95,7 @@ export function generateServicesLogsOnlyData({
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
-  const apmSynthtraceKibanaClient = getService('apmSynthtraceKibanaClient');
-  const esClient = getService('es');
+  const synthtrace = getService('synthtrace');
 
   describe('GET /infra/services', () => {
     let synthtraceApmClient: ApmSynthtraceEsClient;
@@ -110,14 +108,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         withInternalHeaders: true,
       });
 
-      const version = (await apmSynthtraceKibanaClient.installApmPackage()).version;
-      synthtraceApmClient = await getApmSynthtraceEsClient({
-        client: esClient,
-        packageVersion: version,
-      });
+      const version = (await synthtrace.apmSynthtraceKibanaClient.installApmPackage()).version;
+      synthtraceApmClient = await synthtrace.createApmSynthtraceEsClient(version);
     });
     after(async () => {
-      await apmSynthtraceKibanaClient.uninstallApmPackage();
+      await synthtrace.apmSynthtraceKibanaClient.uninstallApmPackage();
       await supertestWithAdminScope.destroy();
     });
 

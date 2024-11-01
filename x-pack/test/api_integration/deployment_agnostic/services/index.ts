@@ -12,8 +12,7 @@ import { deploymentAgnosticServices } from './deployment_agnostic_services';
 import { PackageApiProvider } from './package_api';
 import { RoleScopedSupertestProvider, SupertestWithRoleScope } from './role_scoped_supertest';
 import { SloApiProvider } from './slo_api';
-import { LogsSynthtraceEsClientProvider } from './logs_synthtrace_es_client';
-import { ApmSynthtraceKibanaClientProvider } from './apm_synthtrace_kibana_client';
+import { SynthtraceProvider } from './synthtrace';
 
 export type {
   InternalRequestHeader,
@@ -30,9 +29,8 @@ export const services = {
   packageApi: PackageApiProvider,
   sloApi: SloApiProvider,
   roleScopedSupertest: RoleScopedSupertestProvider,
-  logsSynthtraceEsClient: LogsSynthtraceEsClientProvider,
   // create a new deployment-agnostic service and load here
-  apmSynthtraceKibanaClient: ApmSynthtraceKibanaClientProvider,
+  synthtrace: SynthtraceProvider,
 };
 
 export type SupertestWithRoleScopeType = SupertestWithRoleScope;
