@@ -434,6 +434,7 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
             />
           ) : (
             <IndexEntryEditor
+              http={http}
               entry={selectedEntry as IndexEntry}
               originalEntry={originalEntry as IndexEntry}
               dataViews={dataViews}
