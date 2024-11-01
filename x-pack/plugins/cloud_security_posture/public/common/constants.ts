@@ -268,7 +268,6 @@ export const CDR_VULNERABILITY_DATA_TABLE_RUNTIME_MAPPING_FIELDS: string[] = [
 ];
 export const CDR_MISCONFIGURATION_DATA_TABLE_RUNTIME_MAPPING_FIELDS: string[] = [
   'rule.benchmark.rule_number',
-  'rule.name',
   'rule.section',
   'resource.sub_type',
 ];
