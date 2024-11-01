@@ -17,7 +17,7 @@ export const runPanelPlacementStrategy = (
   columnCount: number,
   strategy: PanelPlacementStrategy = PanelPlacementStrategy.findTopLeftMostOpenSpace
 ): GridRowData => {
-  const nextRowData = { ...originalRowData, panels: { ...originalRowData.panels } };
+  const nextRowData = { ...originalRowData, panels: { ...originalRowData.panels } }; // prevent mutation of original row object
   switch (strategy) {
     case PanelPlacementStrategy.placeAtTop:
       // move all other panels down by the height of the new panel to make room for the new panel

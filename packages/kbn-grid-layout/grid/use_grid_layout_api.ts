@@ -49,7 +49,7 @@ export const useGridLayoutApi = ({
         for (rowIndex; rowIndex < currentLayout.length; rowIndex++) {
           const row = currentLayout[rowIndex];
           if (Object.keys(row.panels).includes(panelId)) {
-            updatedPanels = { ...row.panels };
+            updatedPanels = { ...row.panels }; // prevent mutation of original panel object
             delete updatedPanels[panelId];
             break;
           }
@@ -75,7 +75,7 @@ export const useGridLayoutApi = ({
         for (rowIndex; rowIndex < currentLayout.length; rowIndex++) {
           const row = { ...currentLayout[rowIndex] };
           if (Object.keys(row.panels).includes(oldPanelId)) {
-            updatedPanels = { ...row.panels };
+            updatedPanels = { ...row.panels }; // prevent mutation of original panel object
             const oldPanel = updatedPanels[oldPanelId];
             delete updatedPanels[oldPanelId];
             updatedPanels[newPanelId] = { ...oldPanel, id: newPanelId };

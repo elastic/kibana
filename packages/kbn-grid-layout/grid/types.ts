@@ -110,8 +110,6 @@ export interface PanelInteractionEvent {
  * The external API provided through the GridLayout component
  */
 export interface GridLayoutApi {
-  // gridLayout$: BehaviorSubject<GridLayoutData>; // fix
-
   addPanel: (panelId: string, placementSettings: PanelPlacementSettings) => void;
   removePanel: (panelId: string) => void;
   replacePanel: (oldPanelId: string, newPanelId: string) => void;
