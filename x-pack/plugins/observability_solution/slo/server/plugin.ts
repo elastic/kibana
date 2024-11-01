@@ -136,7 +136,7 @@ export class SLOPlugin
     registerServerRoutes({
       core,
       dependencies: {
-        core,
+        corePlugins: core,
         plugins: routeHandlerPlugins,
       },
       logger: this.logger,

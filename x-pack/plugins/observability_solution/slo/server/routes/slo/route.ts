@@ -83,8 +83,8 @@ const transformGenerators: Record<IndicatorTypes, TransformGenerator> = {
   'sli.metric.timeslice': new TimesliceMetricTransformGenerator(),
 };
 
-const assertPlatinumLicense = async (dependencies: SLORoutesDependencies) => {
-  const licensing = await dependencies.plugins.licensing.start();
+const assertPlatinumLicense = async (plugins: SLORoutesDependencies['plugins']) => {
+  const licensing = await plugins.licensing.start();
   const hasCorrectLicense = (await licensing.getLicense()).hasAtLeast('platinum');
 
   if (!hasCorrectLicense) {
@@ -92,8 +92,8 @@ const assertPlatinumLicense = async (dependencies: SLORoutesDependencies) => {
   }
 };
 
-const getSpaceId = async (dependencies: SLORoutesDependencies, request: KibanaRequest) => {
-  const spaces = await dependencies.plugins.spaces.start();
+const getSpaceId = async (plugins: SLORoutesDependencies['plugins'], request: KibanaRequest) => {
+  const spaces = await plugins.spaces.start();
   return (await spaces?.spacesService?.getActiveSpace(request))?.id ?? 'default';
 };
 
@@ -104,19 +104,19 @@ const createSLORoute = createSloServerRoute({
     access: 'public',
   },
   params: createSLOParamsSchema,
-  handler: async ({ context, params, logger, dependencies, request }) => {
-    await assertPlatinumLicense(dependencies);
+  handler: async ({ context, params, logger, request, plugins, corePlugins }) => {
+    await assertPlatinumLicense(plugins);
 
-    const dataViews = await dependencies.plugins.dataViews.start();
+    const dataViews = await plugins.dataViews.start();
     const core = await context.core;
     const scopedClusterClient = core.elasticsearch.client;
     const esClient = core.elasticsearch.client.asCurrentUser;
-    const basePath = dependencies.core.http.basePath;
     const soClient = core.savedObjects.client;
+    const basePath = corePlugins.http.basePath;
     const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
 
     const [spaceId, dataViewsService] = await Promise.all([
-      getSpaceId(dependencies, request),
+      getSpaceId(plugins, request),
       dataViews.dataViewsServiceFactory(soClient, esClient),
     ]);
     const transformManager = new DefaultTransformManager(
@@ -153,12 +153,12 @@ const inspectSLORoute = createSloServerRoute({
     access: 'internal',
   },
   params: createSLOParamsSchema,
-  handler: async ({ context, params, logger, dependencies, request }) => {
-    await assertPlatinumLicense(dependencies);
+  handler: async ({ context, params, logger, request, plugins, corePlugins }) => {
+    await assertPlatinumLicense(plugins);
 
-    const dataViews = await dependencies.plugins.dataViews.start();
-    const spaceId = await getSpaceId(dependencies, request);
-    const basePath = dependencies.core.http.basePath;
+    const dataViews = await plugins.dataViews.start();
+    const spaceId = await getSpaceId(plugins, request);
+    const basePath = corePlugins.http.basePath;
     const core = await context.core;
     const scopedClusterClient = core.elasticsearch.client;
     const esClient = core.elasticsearch.client.asCurrentUser;
@@ -200,13 +200,13 @@ const updateSLORoute = createSloServerRoute({
     access: 'public',
   },
   params: updateSLOParamsSchema,
-  handler: async ({ context, request, params, logger, dependencies }) => {
-    await assertPlatinumLicense(dependencies);
+  handler: async ({ context, request, params, logger, plugins, corePlugins }) => {
+    await assertPlatinumLicense(plugins);
 
-    const spaceId = await getSpaceId(dependencies, request);
-    const dataViews = await dependencies.plugins.dataViews.start();
+    const spaceId = await getSpaceId(plugins, request);
+    const dataViews = await plugins.dataViews.start();
 
-    const basePath = dependencies.core.http.basePath;
+    const basePath = corePlugins.http.basePath;
     const core = await context.core;
     const scopedClusterClient = core.elasticsearch.client;
     const esClient = core.elasticsearch.client.asCurrentUser;
@@ -250,18 +250,18 @@ const deleteSLORoute = createSloServerRoute({
     access: 'public',
   },
   params: deleteSLOParamsSchema,
-  handler: async ({ request, context, params, logger, dependencies }) => {
-    await assertPlatinumLicense(dependencies);
+  handler: async ({ request, context, params, logger, plugins }) => {
+    await assertPlatinumLicense(plugins);
 
-    const spaceId = await getSpaceId(dependencies, request);
-    const dataViews = await dependencies.plugins.dataViews.start();
+    const spaceId = await getSpaceId(plugins, request);
+    const dataViews = await plugins.dataViews.start();
 
     const core = await context.core;
     const scopedClusterClient = core.elasticsearch.client;
     const esClient = core.elasticsearch.client.asCurrentUser;
     const soClient = core.savedObjects.client;
 
-    const alerting = await dependencies.plugins.alerting.start();
+    const alerting = await plugins.alerting.start();
     const rulesClient = await alerting.getRulesClientWithRequest(request);
 
     const dataViewsService = await dataViews.dataViewsServiceFactory(soClient, esClient);
@@ -301,10 +301,10 @@ const getSLORoute = createSloServerRoute({
     access: 'public',
   },
   params: getSLOParamsSchema,
-  handler: async ({ request, context, params, logger, dependencies }) => {
-    await assertPlatinumLicense(dependencies);
+  handler: async ({ request, context, params, logger, plugins }) => {
+    await assertPlatinumLicense(plugins);
 
-    const spaceId = await getSpaceId(dependencies, request);
+    const spaceId = await getSpaceId(plugins, request);
 
     const soClient = (await context.core).savedObjects.client;
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
@@ -325,11 +325,11 @@ const enableSLORoute = createSloServerRoute({
     access: 'public',
   },
   params: manageSLOParamsSchema,
-  handler: async ({ request, context, params, logger, dependencies }) => {
-    await assertPlatinumLicense(dependencies);
+  handler: async ({ request, context, params, logger, plugins }) => {
+    await assertPlatinumLicense(plugins);
 
-    const spaceId = await getSpaceId(dependencies, request);
-    const dataViews = await dependencies.plugins.dataViews.start();
+    const spaceId = await getSpaceId(plugins, request);
+    const dataViews = await plugins.dataViews.start();
 
     const core = await context.core;
     const scopedClusterClient = core.elasticsearch.client;
@@ -365,11 +365,11 @@ const disableSLORoute = createSloServerRoute({
     access: 'public',
   },
   params: manageSLOParamsSchema,
-  handler: async ({ request, context, params, logger, dependencies }) => {
-    await assertPlatinumLicense(dependencies);
+  handler: async ({ request, context, params, logger, plugins }) => {
+    await assertPlatinumLicense(plugins);
 
-    const spaceId = await getSpaceId(dependencies, request);
-    const dataViews = await dependencies.plugins.dataViews.start();
+    const spaceId = await getSpaceId(plugins, request);
+    const dataViews = await plugins.dataViews.start();
 
     const core = await context.core;
     const scopedClusterClient = core.elasticsearch.client;
@@ -405,16 +405,16 @@ const resetSLORoute = createSloServerRoute({
     access: 'public',
   },
   params: resetSLOParamsSchema,
-  handler: async ({ context, request, params, logger, dependencies }) => {
-    await assertPlatinumLicense(dependencies);
+  handler: async ({ context, request, params, logger, plugins, corePlugins }) => {
+    await assertPlatinumLicense(plugins);
 
-    const dataViews = await dependencies.plugins.dataViews.start();
-    const spaceId = await getSpaceId(dependencies, request);
+    const dataViews = await plugins.dataViews.start();
+    const spaceId = await getSpaceId(plugins, request);
     const core = await context.core;
     const scopedClusterClient = core.elasticsearch.client;
     const soClient = core.savedObjects.client;
     const esClient = core.elasticsearch.client.asCurrentUser;
-    const basePath = dependencies.core.http.basePath;
+    const basePath = corePlugins.http.basePath;
 
     const dataViewsService = await dataViews.dataViewsServiceFactory(soClient, esClient);
     const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
@@ -455,10 +455,10 @@ const findSLORoute = createSloServerRoute({
     access: 'public',
   },
   params: findSLOParamsSchema,
-  handler: async ({ context, request, params, logger, dependencies }) => {
-    await assertPlatinumLicense(dependencies);
+  handler: async ({ context, request, params, logger, plugins }) => {
+    await assertPlatinumLicense(plugins);
 
-    const spaceId = await getSpaceId(dependencies, request);
+    const spaceId = await getSpaceId(plugins, request);
     const soClient = (await context.core).savedObjects.client;
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
     const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
@@ -477,10 +477,10 @@ const findSLOGroupsRoute = createSloServerRoute({
     access: 'internal',
   },
   params: findSLOGroupsParamsSchema,
-  handler: async ({ context, request, params, logger, dependencies }) => {
-    await assertPlatinumLicense(dependencies);
+  handler: async ({ context, request, params, logger, plugins }) => {
+    await assertPlatinumLicense(plugins);
 
-    const spaceId = await getSpaceId(dependencies, request);
+    const spaceId = await getSpaceId(plugins, request);
     const soClient = (await context.core).savedObjects.client;
     const coreContext = context.core;
     const esClient = (await coreContext).elasticsearch.client.asCurrentUser;
@@ -496,8 +496,8 @@ const getSLOSuggestionsRoute = createSloServerRoute({
     tags: ['access:slo_read'],
     access: 'internal',
   },
-  handler: async ({ context, dependencies }) => {
-    await assertPlatinumLicense(dependencies);
+  handler: async ({ context, plugins }) => {
+    await assertPlatinumLicense(plugins);
 
     const soClient = (await context.core).savedObjects.client;
     const getSLOSuggestions = new GetSLOSuggestions(soClient);
@@ -512,8 +512,8 @@ const deleteSloInstancesRoute = createSloServerRoute({
     access: 'public',
   },
   params: deleteSLOInstancesParamsSchema,
-  handler: async ({ context, params, dependencies }) => {
-    await assertPlatinumLicense(dependencies);
+  handler: async ({ context, params, plugins }) => {
+    await assertPlatinumLicense(plugins);
 
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
     const deleteSloInstances = new DeleteSLOInstances(esClient);
@@ -529,8 +529,8 @@ const findSloDefinitionsRoute = createSloServerRoute({
     access: 'public',
   },
   params: findSloDefinitionsParamsSchema,
-  handler: async ({ context, params, logger, dependencies }) => {
-    await assertPlatinumLicense(dependencies);
+  handler: async ({ context, params, logger, plugins }) => {
+    await assertPlatinumLicense(plugins);
 
     const soClient = (await context.core).savedObjects.client;
     const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
@@ -549,8 +549,8 @@ const fetchHistoricalSummary = createSloServerRoute({
     access: 'internal',
   },
   params: fetchHistoricalSummaryParamsSchema,
-  handler: async ({ context, params, logger, dependencies }) => {
-    await assertPlatinumLicense(dependencies);
+  handler: async ({ context, params, plugins }) => {
+    await assertPlatinumLicense(plugins);
 
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
     const historicalSummaryClient = new DefaultHistoricalSummaryClient(esClient);
@@ -568,8 +568,8 @@ const getSLOInstancesRoute = createSloServerRoute({
     access: 'internal',
   },
   params: getSLOInstancesParamsSchema,
-  handler: async ({ context, params, logger, dependencies }) => {
-    await assertPlatinumLicense(dependencies);
+  handler: async ({ context, params, logger, plugins }) => {
+    await assertPlatinumLicense(plugins);
 
     const soClient = (await context.core).savedObjects.client;
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
@@ -590,9 +590,9 @@ const getDiagnosisRoute = createSloServerRoute({
     access: 'internal',
   },
   params: undefined,
-  handler: async ({ context, dependencies }) => {
+  handler: async ({ context, plugins }) => {
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-    const licensing = await dependencies.plugins.licensing.start();
+    const licensing = await plugins.licensing.start();
 
     try {
       const response = await getGlobalDiagnosis(esClient, licensing);
@@ -613,8 +613,8 @@ const fetchSloHealthRoute = createSloServerRoute({
     access: 'internal',
   },
   params: fetchSLOHealthParamsSchema,
-  handler: async ({ context, params, logger, dependencies }) => {
-    await assertPlatinumLicense(dependencies);
+  handler: async ({ context, params, logger, plugins }) => {
+    await assertPlatinumLicense(plugins);
 
     const core = await context.core;
     const scopedClusterClient = core.elasticsearch.client;
@@ -635,10 +635,10 @@ const getSloBurnRates = createSloServerRoute({
     access: 'internal',
   },
   params: getSLOBurnRatesParamsSchema,
-  handler: async ({ request, context, params, logger, dependencies }) => {
-    await assertPlatinumLicense(dependencies);
+  handler: async ({ request, context, params, logger, plugins }) => {
+    await assertPlatinumLicense(plugins);
 
-    const spaceId = await getSpaceId(dependencies, request);
+    const spaceId = await getSpaceId(plugins, request);
 
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
     const soClient = (await context.core).savedObjects.client;
@@ -666,11 +666,11 @@ const getPreviewData = createSloServerRoute({
     access: 'internal',
   },
   params: getPreviewDataParamsSchema,
-  handler: async ({ request, context, params, dependencies }) => {
-    await assertPlatinumLicense(dependencies);
+  handler: async ({ request, context, params, plugins }) => {
+    await assertPlatinumLicense(plugins);
 
-    const spaceId = await getSpaceId(dependencies, request);
-    const dataViews = await dependencies.plugins.dataViews.start();
+    const spaceId = await getSpaceId(plugins, request);
+    const dataViews = await plugins.dataViews.start();
 
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
     const soClient = (await context.core).savedObjects.client;
@@ -686,8 +686,8 @@ const getSloSettingsRoute = createSloServerRoute({
     tags: ['access:slo_read'],
     access: 'internal',
   },
-  handler: async ({ context, dependencies }) => {
-    await assertPlatinumLicense(dependencies);
+  handler: async ({ context, plugins }) => {
+    await assertPlatinumLicense(plugins);
 
     const soClient = (await context.core).savedObjects.client;
     return await getSloSettings(soClient);
@@ -702,8 +702,8 @@ const putSloSettings = (isServerless?: boolean) =>
       access: 'internal',
     },
     params: isServerless ? putSLOServerlessSettingsParamsSchema : putSLOSettingsParamsSchema,
-    handler: async ({ context, params, dependencies }) => {
-      await assertPlatinumLicense(dependencies);
+    handler: async ({ context, params, plugins }) => {
+      await assertPlatinumLicense(plugins);
 
       const soClient = (await context.core).savedObjects.client;
       return await storeSloSettings(soClient, params.body as PutSLOSettingsParams);
@@ -717,18 +717,18 @@ const getSLOsOverview = createSloServerRoute({
     access: 'internal',
   },
   params: getOverviewParamsSchema,
-  handler: async ({ context, params, request, logger, dependencies }) => {
-    await assertPlatinumLicense(dependencies);
+  handler: async ({ context, params, request, logger, plugins }) => {
+    await assertPlatinumLicense(plugins);
 
     const soClient = (await context.core).savedObjects.client;
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
 
-    const ruleRegistry = await dependencies.plugins.ruleRegistry.start();
+    const ruleRegistry = await plugins.ruleRegistry.start();
     const racClient = await ruleRegistry.getRacClientWithRequest(request);
 
-    const spaceId = await getSpaceId(dependencies, request);
+    const spaceId = await getSpaceId(plugins, request);
 
-    const alerting = await dependencies.plugins.alerting.start();
+    const alerting = await plugins.alerting.start();
     const rulesClient = await alerting.getRulesClientWithRequest(request);
 
     const slosOverview = new GetSLOsOverview(

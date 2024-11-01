@@ -18,9 +18,7 @@ export interface SLORoutesDependencies {
       start: () => Promise<Required<SLOPluginStartDependencies>[key]>;
     };
   };
-  core: CoreSetup;
+  corePlugins: CoreSetup;
 }
 
-export type SLORouteHandlerResources = {
-  dependencies: SLORoutesDependencies;
-} & DefaultRouteHandlerResources;
+export type SLORouteHandlerResources = SLORoutesDependencies & DefaultRouteHandlerResources;
