@@ -100,7 +100,7 @@ export function registerChatCompleteRoute({
 
       const { connectorId, messages, system, toolChoice, tools, functionCalling } = request.body;
 
-      const chatCompleteResponse = client.chatComplete({
+      const chatCompleteResponse = await client.chatComplete({
         connectorId,
         messages,
         system,
