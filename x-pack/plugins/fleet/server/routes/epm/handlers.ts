@@ -9,7 +9,7 @@ import type { TypeOf } from '@kbn/config-schema';
 import semverValid from 'semver/functions/valid';
 import type { HttpResponseOptions } from '@kbn/core/server';
 
-import { pick } from 'lodash';
+import { omit, pick } from 'lodash';
 
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../common';
 
@@ -197,7 +197,6 @@ export const getLimitedListHandler: FleetRequestHandler<
     });
     const body: GetLimitedPackagesResponse = {
       items: res,
-      response: res,
     };
     return response.ok({
       body,
@@ -458,7 +457,6 @@ export const bulkInstallPackagesFromRegistryHandler: FleetRequestHandler<
   const payload = bulkInstalledResponses.map(bulkInstallServiceResponseToHttpEntry);
   const body: BulkInstallPackagesResponse = {
     items: payload,
-    response: payload,
   };
   return response.ok({ body });
 };
@@ -492,7 +490,6 @@ export const installPackageByUploadHandler: FleetRequestHandler<
   if (!res.error) {
     const body: InstallPackageResponse = {
       items: res.assets || [],
-      response: res.assets || [],
       _meta: {
         install_source: res.installSource ?? installSource,
       },
@@ -674,8 +671,7 @@ const soToInstallationInfo = (pkg: PackageListItem | PackageInfo) => {
     };
 
     return {
-      // When savedObject gets removed, replace `pkg` with `...omit(pkg, 'savedObject')`
-      ...pkg,
+      ...omit(pkg, 'savedObject'),
       installationInfo,
     };
   }

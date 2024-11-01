@@ -71,8 +71,6 @@ export interface GetEpmDataStreamsResponse {
 }
 export interface GetLimitedPackagesResponse {
   items: string[];
-  // deprecated in 8.0
-  response?: string[];
 }
 
 export interface GetFileRequest {
@@ -85,8 +83,6 @@ export interface GetFileRequest {
 
 export interface GetInfoRequest {
   params: {
-    // deprecated in 8.0
-    pkgkey?: string;
     pkgName: string;
     pkgVersion: string;
   };
@@ -95,14 +91,10 @@ export interface GetInfoRequest {
 export interface GetInfoResponse {
   item: PackageInfo;
   metadata?: PackageMetadata;
-  // deprecated in 8.0
-  response?: PackageInfo;
 }
 
 export interface UpdatePackageRequest {
   params: {
-    // deprecated in 8.0
-    pkgkey?: string;
     pkgName: string;
     pkgVersion: string;
   };
@@ -113,8 +105,6 @@ export interface UpdatePackageRequest {
 
 export interface UpdatePackageResponse {
   item: PackageInfo;
-  // deprecated in 8.0
-  response?: PackageInfo;
 }
 
 export interface GetStatsRequest {
@@ -129,8 +119,6 @@ export interface GetStatsResponse {
 
 export interface InstallPackageRequest {
   params: {
-    // deprecated in 8.0
-    pkgkey?: string;
     pkgName: string;
     pkgVersion: string;
   };
@@ -141,8 +129,6 @@ export interface InstallPackageResponse {
   _meta: {
     install_source: InstallSource;
   };
-  // deprecated in 8.0
-  response?: AssetReference[];
 }
 
 export interface IBulkInstallPackageHTTPError {
@@ -167,8 +153,6 @@ export interface BulkInstallPackageInfo {
 
 export interface BulkInstallPackagesResponse {
   items: Array<BulkInstallPackageInfo | IBulkInstallPackageHTTPError>;
-  // deprecated in 8.0
-  response?: Array<BulkInstallPackageInfo | IBulkInstallPackageHTTPError>;
 }
 
 export interface BulkInstallPackagesRequest {
@@ -183,8 +167,6 @@ export interface MessageResponse {
 
 export interface DeletePackageRequest {
   params: {
-    // deprecated in 8.0
-    pkgkey?: string;
     pkgName: string;
     pkgVersion: string;
   };
@@ -194,8 +176,6 @@ export interface DeletePackageRequest {
 }
 
 export interface DeletePackageResponse {
-  // deprecated in 8.0
-  response?: AssetReference[];
   items: AssetReference[];
 }
 export interface GetVerificationKeyIdResponse {

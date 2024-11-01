@@ -137,7 +137,6 @@ const PackageIconSchema = schema.object({
 export const PackageInfoSchema = schema
   .object({
     status: schema.maybe(schema.string()),
-    savedObject: schema.maybe(schema.any({ meta: { deprecated: true } })),
     installationInfo: schema.maybe(InstallationInfoSchema),
     name: schema.string(),
     version: schema.string(),
@@ -246,7 +245,6 @@ export const GetInstalledPackagesResponseSchema = schema.object({
 
 export const GetLimitedPackagesResponseSchema = schema.object({
   items: schema.arrayOf(schema.string()),
-  response: schema.maybe(schema.arrayOf(schema.string(), { meta: { deprecated: true } })),
 });
 
 export const GetStatsResponseSchema = schema.object({
@@ -319,12 +317,10 @@ export const GetPackageInfoSchema = PackageInfoSchema.extends({
 export const GetInfoResponseSchema = schema.object({
   item: GetPackageInfoSchema,
   metadata: schema.maybe(PackageMetadataSchema),
-  response: schema.maybe(GetPackageInfoSchema.extends({}, { meta: { deprecated: true } })),
 });
 
 export const UpdatePackageResponseSchema = schema.object({
   item: GetPackageInfoSchema,
-  response: schema.maybe(GetPackageInfoSchema.extends({}, { meta: { deprecated: true } })),
 });
 
 export const AssetReferenceSchema = schema.oneOf([
@@ -337,7 +333,6 @@ export const InstallPackageResponseSchema = schema.object({
   _meta: schema.object({
     install_source: schema.string(),
   }),
-  response: schema.maybe(schema.arrayOf(AssetReferenceSchema, { meta: { deprecated: true } })),
 });
 
 export const InstallKibanaAssetsResponseSchema = schema.object({
@@ -367,14 +362,10 @@ export const BulkInstallPackagesResponseItemSchema = schema.oneOf([
 
 export const BulkInstallPackagesFromRegistryResponseSchema = schema.object({
   items: schema.arrayOf(BulkInstallPackagesResponseItemSchema),
-  response: schema.maybe(
-    schema.arrayOf(BulkInstallPackagesResponseItemSchema, { meta: { deprecated: true } })
-  ),
 });
 
 export const DeletePackageResponseSchema = schema.object({
   items: schema.arrayOf(AssetReferenceSchema),
-  response: schema.maybe(schema.arrayOf(AssetReferenceSchema, { meta: { deprecated: true } })),
 });
 
 export const GetVerificationKeyIdResponseSchema = schema.object({

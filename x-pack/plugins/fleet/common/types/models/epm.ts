@@ -532,7 +532,6 @@ export type PackageListItem = Installable<RegistrySearchResult> & {
   id: string;
   integration?: string;
   installationInfo?: InstallationInfo;
-  savedObject?: InstallableSavedObject;
 };
 export type PackagesGroupedByStatus = Record<ValueOf<InstallationStatus>, PackageList>;
 export type PackageInfo =

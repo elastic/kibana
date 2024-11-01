@@ -599,7 +599,7 @@ export function MachineLearningTestResourcesProvider(
         mlApi.assertResponseStatusCode(200, status, body);
 
         packageVersion =
-          body.response.find(
+          body.items.find(
             ({ name, version }: { name: string; version: string }) =>
               name === packageName && version
           )?.version ?? '';
