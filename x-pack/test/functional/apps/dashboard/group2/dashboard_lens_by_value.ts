@@ -47,7 +47,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it('edits to a by value lens panel are properly applied', async () => {
       await dashboard.waitForRenderComplete();
-      await dashboardPanelActions.clickEdit();
+      await dashboardPanelActions.openContextMenu();
+      await dashboardPanelActions.navigateToEditorFromFlyout();
       await lens.switchToVisualization('pie');
       await lens.saveAndReturn();
       await dashboard.waitForRenderComplete();
@@ -59,7 +60,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     it('editing and saving a lens by value panel retains number of panels', async () => {
       const originalPanelCount = await dashboard.getPanelCount();
       await dashboard.waitForRenderComplete();
-      await dashboardPanelActions.clickEdit();
+      await dashboardPanelActions.openContextMenu();
+      await dashboardPanelActions.navigateToEditorFromFlyout();
       await lens.switchToVisualization('treemap');
       await lens.saveAndReturn();
       await dashboard.waitForRenderComplete();
@@ -71,7 +73,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const newTitle = 'look out library, here I come!';
       const originalPanelCount = await dashboard.getPanelCount();
       await dashboard.waitForRenderComplete();
-      await dashboardPanelActions.clickEdit();
+      await dashboardPanelActions.openContextMenu();
+      await dashboardPanelActions.navigateToEditorFromFlyout();
       await lens.save(newTitle, false, true);
       await dashboard.waitForRenderComplete();
       const newPanelCount = await dashboard.getPanelCount();

@@ -117,7 +117,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const titles = await dashboard.getPanelTitles();
       expect(titles[0]).to.be(`${visTitle} (converted)`);
 
-      await panelActions.expectNotLinkedToLibrary(titles[0], true);
+      await panelActions.expectNotLinkedToLibrary(titles[0]);
       await dashboardBadgeActions.expectExistsTimeRangeBadgeAction();
       await panelActions.removePanel();
     });
