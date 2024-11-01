@@ -31,6 +31,7 @@ import {
   getSerializedGridLayout,
   setSerializedGridLayout,
 } from './serialized_grid_layout';
+import { i18n } from '@kbn/i18n';
 
 const DASHBOARD_MARGIN_SIZE = 8;
 const DASHBOARD_GRID_HEIGHT = 20;
@@ -48,7 +49,12 @@ export const GridExample = ({ coreStart }: { coreStart: CoreStart }) => {
   return (
     <EuiProvider>
       <EuiPageTemplate grow={false} offset={0} restrictWidth={false}>
-        <EuiPageTemplate.Header iconType={'dashboardApp'} pageTitle="Grid Layout Example" />
+        <EuiPageTemplate.Header
+          iconType={'dashboardApp'}
+          pageTitle={i18n.translate('examples.gridExample.pageTitle', {
+            defaultMessage: 'Grid Layout Example',
+          })}
+        />
         <EuiPageTemplate.Section color="subdued">
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
             <EuiFlexItem grow={false}>
@@ -65,14 +71,20 @@ export const GridExample = ({ coreStart }: { coreStart: CoreStart }) => {
                     });
                 }}
               >
-                Add a panel
+                {i18n.translate('examples.gridExample.addPanelButton', {
+                  defaultMessage: 'Add a panel',
+                })}
               </EuiButton>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiFlexGroup gutterSize="xs" alignItems="center">
                 {hasUnsavedChanges && (
                   <EuiFlexItem grow={false}>
-                    <EuiBadge color="warning">Unsaved changes</EuiBadge>
+                    <EuiBadge color="warning">
+                      {i18n.translate('examples.gridExample.unsavedChangesBadge', {
+                        defaultMessage: 'Unsaved changes',
+                      })}
+                    </EuiBadge>
                   </EuiFlexItem>
                 )}
                 <EuiFlexItem grow={false}>
@@ -84,7 +96,9 @@ export const GridExample = ({ coreStart }: { coreStart: CoreStart }) => {
                       setLayoutKey(uuidv4()); // force remount of grid
                     }}
                   >
-                    Reset
+                    {i18n.translate('examples.gridExample.resetLayoutButton', {
+                      defaultMessage: 'Reset',
+                    })}
                   </EuiButtonEmpty>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
@@ -98,7 +112,9 @@ export const GridExample = ({ coreStart }: { coreStart: CoreStart }) => {
                       }
                     }}
                   >
-                    Save
+                    {i18n.translate('examples.gridExample.saveLayoutButton', {
+                      defaultMessage: 'Save',
+                    })}
                   </EuiButton>
                 </EuiFlexItem>
               </EuiFlexGroup>
@@ -121,7 +137,9 @@ export const GridExample = ({ coreStart }: { coreStart: CoreStart }) => {
                       gridLayoutApi?.removePanel(id);
                     }}
                   >
-                    Delete this panel
+                    {i18n.translate('examples.gridExample.deletePanelButton', {
+                      defaultMessage: 'Delete panel',
+                    })}
                   </EuiButtonEmpty>
                   <EuiButtonEmpty
                     onClick={async () => {
@@ -132,7 +150,9 @@ export const GridExample = ({ coreStart }: { coreStart: CoreStart }) => {
                       if (newPanelId) gridLayoutApi?.replacePanel(id, newPanelId);
                     }}
                   >
-                    Replace this panel
+                    {i18n.translate('examples.gridExample.replacePanelButton', {
+                      defaultMessage: 'Replace panel',
+                    })}
                   </EuiButtonEmpty>
                 </>
               );
