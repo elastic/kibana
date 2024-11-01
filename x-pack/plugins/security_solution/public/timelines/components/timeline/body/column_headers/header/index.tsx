@@ -94,12 +94,7 @@ export const HeaderComponent: React.FC<Props> = ({
         showSortingCapability={showSortingCapability}
         sort={sort}
       >
-        <Actions
-          header={header}
-          isLoading={isLoading}
-          onColumnRemoved={onColumnRemoved}
-          sort={sort}
-        />
+        <Actions header={header} onColumnRemoved={onColumnRemoved} />
       </HeaderContent>
 
       <Filter header={header} onFilterChange={onFilterChange} />

@@ -189,7 +189,6 @@ export type SubsetTimelineModel = Readonly<
     | 'show'
     | 'sort'
     | 'isSaving'
-    | 'isLoading'
     | 'savedObjectId'
     | 'version'
     | 'status'

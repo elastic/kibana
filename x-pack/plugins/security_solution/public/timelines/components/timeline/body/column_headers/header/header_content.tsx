@@ -19,7 +19,6 @@ import { getSortDirection, getSortIndex } from './helpers';
 interface HeaderContentProps {
   children: React.ReactNode;
   header: ColumnHeaderOptions;
-  isLoading: boolean;
   isResizing: boolean;
   onClick: () => void;
   showSortingCapability: boolean;

@@ -10,16 +10,13 @@ import React, { useCallback } from 'react';
 
 import type { ColumnHeaderOptions } from '../../../../../../../common/types';
 import type { OnColumnRemoved } from '../../../events';
-import { EventsHeadingExtra, EventsLoading } from '../../../styles';
-import type { Sort } from '../../sort';
+import { EventsHeadingExtra } from '../../../styles';
 
 import * as i18n from '../translations';
 
 interface Props {
   header: ColumnHeaderOptions;
-  isLoading: boolean;
   onColumnRemoved: OnColumnRemoved;
-  sort: Sort[];
 }
 
 /** Given a `header`, returns the `SortDirection` applicable to it */
@@ -51,19 +48,11 @@ export const CloseButton = React.memo<{
 
 CloseButton.displayName = 'CloseButton';
 
-export const Actions = React.memo<Props>(({ header, onColumnRemoved, sort, isLoading }) => {
+export const Actions = React.memo<Props>(({ header, onColumnRemoved }) => {
   return (
-    <>
-      {sort.some((i) => i.columnId === header.id) && isLoading ? (
-        <EventsHeadingExtra className="siemEventsHeading__extra--loading">
-          <EventsLoading data-test-subj="timeline-loading-spinner" />
-        </EventsHeadingExtra>
-      ) : (
-        <EventsHeadingExtra className="siemEventsHeading__extra--close">
-          <CloseButton columnId={header.id} onColumnRemoved={onColumnRemoved} />
-        </EventsHeadingExtra>
-      )}
-    </>
+    <EventsHeadingExtra className="siemEventsHeading__extra--close">
+      <CloseButton columnId={header.id} onColumnRemoved={onColumnRemoved} />
+    </EventsHeadingExtra>
   );
 });
 

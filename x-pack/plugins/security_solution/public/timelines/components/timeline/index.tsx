@@ -100,7 +100,6 @@ const StatefulTimelineComponent: React.FC<Props> = ({
         'sessionViewConfig',
         'initialized',
         'show',
-        'isLoading',
         'activeTab',
       ],
       getTimeline(state, timelineId) ?? timelineDefaults

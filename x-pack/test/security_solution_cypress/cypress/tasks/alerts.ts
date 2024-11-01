@@ -56,7 +56,6 @@ import {
   TOOLTIP,
 } from '../screens/alerts';
 import { LOADING_INDICATOR, REFRESH_BUTTON } from '../screens/security_header';
-import { TIMELINE_COLUMN_SPINNER } from '../screens/timeline';
 import {
   UPDATE_ENRICHMENT_RANGE_BUTTON,
   ENRICHMENT_QUERY_END_INPUT,
@@ -214,7 +213,6 @@ export const goToClosedAlertsOnRuleDetailsPage = () => {
   cy.get(CLOSED_ALERTS_FILTER_BTN).click();
   cy.get(REFRESH_BUTTON).should('not.have.attr', 'aria-label', 'Needs updating');
   cy.get(REFRESH_BUTTON).should('have.attr', 'aria-label', 'Refresh query');
-  cy.get(TIMELINE_COLUMN_SPINNER).should('not.exist');
 };
 
 export const goToClosedAlerts = () => {
@@ -231,7 +229,6 @@ export const goToClosedAlerts = () => {
   selectPageFilterValue(0, 'closed');
   cy.get(REFRESH_BUTTON).should('not.have.attr', 'aria-label', 'Needs updating');
   cy.get(REFRESH_BUTTON).should('have.attr', 'aria-label', 'Refresh query');
-  cy.get(TIMELINE_COLUMN_SPINNER).should('not.exist');
 };
 
 export const goToOpenedAlertsOnRuleDetailsPage = () => {
@@ -295,7 +292,6 @@ export const goToAcknowledgedAlerts = () => {
   selectPageFilterValue(0, 'acknowledged');
   cy.get(REFRESH_BUTTON).should('not.have.attr', 'aria-label', 'Needs updating');
   cy.get(REFRESH_BUTTON).should('have.attr', 'aria-label', 'Refresh query');
-  cy.get(TIMELINE_COLUMN_SPINNER).should('not.exist');
 };
 
 export const markAlertsAcknowledged = () => {
