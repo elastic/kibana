@@ -35,29 +35,21 @@ const getColumns: (data: RelatedCase[]) => Array<EuiBasicTableColumn<RelatedCase
         defaultMessage="Name"
       />
     ),
-    render: (_: string, caseData: RelatedCase) => {
-      const index = data.findIndex((d) => d.id === caseData.id);
-      return (
-        <CellTooltipWrapper tooltip={caseData.title}>
-          <CaseDetailsLink
-            detailName={caseData.id}
-            title={caseData.title}
-            index={index}
-            openInNewTab={true}
-          >
-            {caseData.title}
-            <EuiIcon
-              type={'popout'}
-              size="m"
-              color="primary"
-              css={css`
-                margin-left: 4px;
-              `}
-            />
-          </CaseDetailsLink>
-        </CellTooltipWrapper>
-      );
-    },
+    render: (_: string, caseData: RelatedCase) => (
+      <CellTooltipWrapper tooltip={caseData.title}>
+        <CaseDetailsLink detailName={caseData.id} title={caseData.title} openInNewTab={true}>
+          {caseData.title}
+          <EuiIcon
+            type={'popout'}
+            size="m"
+            color="primary"
+            css={css`
+              margin-left: 4px;
+            `}
+          />
+        </CaseDetailsLink>
+      </CellTooltipWrapper>
+    ),
   },
   {
     field: 'status',

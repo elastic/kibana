@@ -8,12 +8,9 @@
 import type { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiToolTip } from '@elastic/eui';
 import type { SyntheticEvent, MouseEvent } from 'react';
-import React, { useMemo, useCallback, useEffect } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { isArray, isNil } from 'lodash/fp';
 import type { NavigateToAppOptions } from '@kbn/core-application-browser';
-import { GuidedOnboardingTourStep } from '../guided_onboarding_tour/tour_step';
-import { AlertsCasesTourSteps, SecurityStepId } from '../guided_onboarding_tour/tour_config';
-import { useTourContext } from '../guided_onboarding_tour';
 import { IP_REPUTATION_LINKS_SETTING, APP_UI_ID } from '../../../../common/constants';
 import { encodeIpv6 } from '../../lib/helpers';
 import {
@@ -307,17 +304,12 @@ export interface CaseDetailsLinkComponentProps {
    */
   title?: string;
   /**
-   * Link index
-   */
-  index?: number;
-  /**
    * If true, will open the app in new tab, will share session information via window.open if base
    */
   openInNewTab?: NavigateToAppOptions['openInNewTab'];
 }
 
 const CaseDetailsLinkComponent: React.FC<CaseDetailsLinkComponentProps> = ({
-  index,
   children,
   detailName,
   title,
@@ -325,14 +317,6 @@ const CaseDetailsLinkComponent: React.FC<CaseDetailsLinkComponentProps> = ({
 }) => {
   const { formatUrl, search } = useFormatUrl(SecurityPageName.case);
   const { navigateToApp } = useKibana().services.application;
-  const { activeStep, isTourShown } = useTourContext();
-  const isTourStepActive = useMemo(
-    () =>
-      activeStep === AlertsCasesTourSteps.viewCase &&
-      isTourShown(SecurityStepId.alertsCases) &&
-      index === 0,
-    [activeStep, index, isTourShown]
-  );
 
   const goToCaseDetails = useCallback(
     async (ev?: SyntheticEvent) => {
@@ -346,27 +330,15 @@ const CaseDetailsLinkComponent: React.FC<CaseDetailsLinkComponentProps> = ({
     [detailName, navigateToApp, openInNewTab, search]
   );
 
-  useEffect(() => {
-    if (isTourStepActive)
-      document.querySelector(`[tour-step="RelatedCases-accordion"]`)?.scrollIntoView();
-  }, [isTourStepActive]);
-
   return (
-    <GuidedOnboardingTourStep
+    <LinkAnchor
       onClick={goToCaseDetails}
-      isTourAnchor={isTourStepActive}
-      step={AlertsCasesTourSteps.viewCase}
-      tourId={SecurityStepId.alertsCases}
+      href={formatUrl(getCaseDetailsUrl({ id: detailName }))}
+      data-test-subj="case-details-link"
+      aria-label={i18n.CASE_DETAILS_LINK_ARIA(title ?? detailName)}
     >
-      <LinkAnchor
-        onClick={goToCaseDetails}
-        href={formatUrl(getCaseDetailsUrl({ id: detailName }))}
-        data-test-subj="case-details-link"
-        aria-label={i18n.CASE_DETAILS_LINK_ARIA(title ?? detailName)}
-      >
-        {children ? children : detailName}
-      </LinkAnchor>
-    </GuidedOnboardingTourStep>
+      {children ? children : detailName}
+    </LinkAnchor>
   );
 };
 export const CaseDetailsLink = React.memo(CaseDetailsLinkComponent);
