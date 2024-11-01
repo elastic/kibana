@@ -32,8 +32,6 @@ export interface GetCategoriesRequest {
 
 export interface GetCategoriesResponse {
   items: CategorySummaryList;
-  // deprecated in 8.0
-  response?: CategorySummaryList;
 }
 
 export interface GetPackagesRequest {

@@ -98,12 +98,11 @@ export const getCategoriesHandler: FleetRequestHandler<
   TypeOf<typeof GetCategoriesRequestSchema.query>
 > = async (context, request, response) => {
   try {
-    const res = await getCategories({
+    const items = await getCategories({
       ...request.query,
     });
     const body: GetCategoriesResponse = {
-      items: res,
-      response: res,
+      items,
     };
     return response.ok({ body, headers: { ...CACHE_CONTROL_10_MINUTES_HEADER } });
   } catch (error) {

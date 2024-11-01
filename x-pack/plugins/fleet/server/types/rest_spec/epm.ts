@@ -26,9 +26,6 @@ const CategorySummaryItemSchema = schema.object({
 
 export const GetCategoriesResponseSchema = schema.object({
   items: schema.arrayOf(CategorySummaryItemSchema),
-  response: schema.maybe(
-    schema.arrayOf(CategorySummaryItemSchema.extends({}, { meta: { deprecated: true } }))
-  ),
 });
 
 export const GetPackagesRequestSchema = {
