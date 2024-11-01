@@ -37,7 +37,7 @@ export type SupportedMethod = 'GET' | 'POST' | 'PUT' | 'DELETE';
  */
 export interface UMServerRoute<T> {
   method: SupportedMethod;
-  writeAccess?: boolean;
+  writeAccess: boolean;
   handler: T;
   validation?: VersionedRouteValidation<any, any, any>;
   streamHandler?: (
