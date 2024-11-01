@@ -16,7 +16,7 @@ const timeRange = {
   rangeTo: end,
 };
 // flaky
-describe.skip('Transaction details', () => {
+describe('Transaction details', () => {
   before(() => {
     synthtrace.index(
       opbeans({
@@ -35,7 +35,7 @@ describe.skip('Transaction details', () => {
   });
 
   // skipping this as it´s been failing a lot lately, more information here https://github.com/elastic/kibana/issues/197386
-  it.skip('shows transaction name and transaction charts', () => {
+  it('shows transaction name and transaction charts', () => {
     cy.intercept('GET', '/internal/apm/services/opbeans-java/transactions/charts/latency?*').as(
       'transactionLatencyRequest'
     );
