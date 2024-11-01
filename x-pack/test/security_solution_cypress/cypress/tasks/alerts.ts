@@ -55,7 +55,6 @@ import {
   HOVER_ACTIONS_CONTAINER,
   ALERT_TABLE_GRID_VIEW_OPTION,
   TOOLTIP,
-  ALERT_TABLE_SUMMARY_VIEW_SELECTOR,
 } from '../screens/alerts';
 import { LOADING_INDICATOR, REFRESH_BUTTON } from '../screens/security_header';
 import { TIMELINE_COLUMN_SPINNER } from '../screens/timeline';

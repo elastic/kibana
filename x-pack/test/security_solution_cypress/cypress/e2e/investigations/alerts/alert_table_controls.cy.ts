@@ -25,7 +25,6 @@ import {
   DATA_GRID_COLUMN_ORDER_BTN,
   DATA_GRID_FIELDS,
   DATA_GRID_FULL_SCREEN,
-  GET_DATA_GRID_HEADER_ACTION_BUTTON,
   GET_DATA_GRID_HEADER_CELL_ACTION_GROUP,
 } from '../../../screens/common/data_grid';
 import { createRule } from '../../../tasks/api_calls/rules';
