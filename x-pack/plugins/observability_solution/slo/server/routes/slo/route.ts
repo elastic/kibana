@@ -7,31 +7,29 @@
 
 import { errors } from '@elastic/elasticsearch';
 import { failedDependency, forbidden } from '@hapi/boom';
+import { KibanaRequest } from '@kbn/core-http-server';
 import {
+  PutSLOSettingsParams,
   createSLOParamsSchema,
   deleteSLOInstancesParamsSchema,
   deleteSLOParamsSchema,
   fetchHistoricalSummaryParamsSchema,
   fetchHistoricalSummaryResponseSchema,
   fetchSLOHealthParamsSchema,
-  findSloDefinitionsParamsSchema,
   findSLOGroupsParamsSchema,
   findSLOParamsSchema,
+  findSloDefinitionsParamsSchema,
   getPreviewDataParamsSchema,
   getSLOBurnRatesParamsSchema,
   getSLOInstancesParamsSchema,
   getSLOParamsSchema,
   manageSLOParamsSchema,
   putSLOServerlessSettingsParamsSchema,
-  PutSLOSettingsParams,
   putSLOSettingsParamsSchema,
   resetSLOParamsSchema,
   updateSLOParamsSchema,
 } from '@kbn/slo-schema';
 import { getOverviewParamsSchema } from '@kbn/slo-schema/src/rest_specs/routes/get_overview';
-import { KibanaRequest } from '@kbn/core-http-server';
-import { RequestHandlerContext } from '@kbn/core/server';
-import { GetSLOsOverview } from '../../services/get_slos_overview';
 import type { IndicatorTypes } from '../../domain/models';
 import {
   CreateSLO,
@@ -54,6 +52,7 @@ import { getGlobalDiagnosis } from '../../services/get_diagnosis';
 import { GetPreviewData } from '../../services/get_preview_data';
 import { GetSLOInstances } from '../../services/get_slo_instances';
 import { GetSLOSuggestions } from '../../services/get_slo_suggestions';
+import { GetSLOsOverview } from '../../services/get_slos_overview';
 import { DefaultHistoricalSummaryClient } from '../../services/historical_summary_client';
 import { ManageSLO } from '../../services/manage_slo';
 import { ResetSLO } from '../../services/reset_slo';
@@ -93,8 +92,8 @@ const assertPlatinumLicense = async (dependencies: SLORoutesDependencies) => {
   }
 };
 
-const getSpaceId = async (deps: SLORoutesDependencies, request: KibanaRequest) => {
-  const spaces = await deps.getSpacesStart();
+const getSpaceId = async (dependencies: SLORoutesDependencies, request: KibanaRequest) => {
+  const spaces = await dependencies.plugins.spaces.start();
   return (await spaces?.spacesService?.getActiveSpace(request))?.id ?? 'default';
 };
 
@@ -155,7 +154,7 @@ const inspectSLORoute = createSloServerRoute({
   },
   params: createSLOParamsSchema,
   handler: async ({ context, params, logger, dependencies, request }) => {
-    await assertPlatinumLicense(context);
+    await assertPlatinumLicense(dependencies);
 
     const spaces = await dependencies.getSpacesStart();
     const dataViews = await dependencies.getDataViewsStart();
@@ -203,7 +202,7 @@ const updateSLORoute = createSloServerRoute({
   },
   params: updateSLOParamsSchema,
   handler: async ({ context, request, params, logger, dependencies }) => {
-    await assertPlatinumLicense(context);
+    await assertPlatinumLicense(dependencies);
 
     const spaces = await dependencies.getSpacesStart();
     const spaceId = (await spaces?.spacesService?.getActiveSpace(request))?.id ?? 'default';
@@ -254,7 +253,7 @@ const deleteSLORoute = createSloServerRoute({
   },
   params: deleteSLOParamsSchema,
   handler: async ({ request, context, params, logger, dependencies }) => {
-    await assertPlatinumLicense(context);
+    await assertPlatinumLicense(dependencies);
 
     const spaces = await dependencies.getSpacesStart();
     const spaceId = (await spaces?.spacesService?.getActiveSpace(request))?.id ?? 'default';
@@ -304,7 +303,7 @@ const getSLORoute = createSloServerRoute({
   },
   params: getSLOParamsSchema,
   handler: async ({ request, context, params, logger, dependencies }) => {
-    await assertPlatinumLicense(context);
+    await assertPlatinumLicense(dependencies);
 
     const spaces = await dependencies.getSpacesStart();
     const spaceId = (await spaces?.spacesService?.getActiveSpace(request))?.id ?? 'default';
@@ -329,7 +328,7 @@ const enableSLORoute = createSloServerRoute({
   },
   params: manageSLOParamsSchema,
   handler: async ({ request, context, params, logger, dependencies }) => {
-    await assertPlatinumLicense(context);
+    await assertPlatinumLicense(dependencies);
 
     const spaces = await dependencies.getSpacesStart();
     const spaceId = (await spaces?.spacesService?.getActiveSpace(request))?.id ?? 'default';
@@ -370,7 +369,7 @@ const disableSLORoute = createSloServerRoute({
   },
   params: manageSLOParamsSchema,
   handler: async ({ request, context, params, logger, dependencies }) => {
-    await assertPlatinumLicense(context);
+    await assertPlatinumLicense(dependencies);
 
     const spaces = await dependencies.getSpacesStart();
     const spaceId = (await spaces?.spacesService?.getActiveSpace(request))?.id ?? 'default';
@@ -411,7 +410,7 @@ const resetSLORoute = createSloServerRoute({
   },
   params: resetSLOParamsSchema,
   handler: async ({ context, request, params, logger, dependencies }) => {
-    await assertPlatinumLicense(context);
+    await assertPlatinumLicense(dependencies);
 
     const spaces = await dependencies.getSpacesStart();
     const dataViews = await dependencies.getDataViewsStart();
@@ -462,7 +461,7 @@ const findSLORoute = createSloServerRoute({
   },
   params: findSLOParamsSchema,
   handler: async ({ context, request, params, logger, dependencies }) => {
-    await assertPlatinumLicense(context);
+    await assertPlatinumLicense(dependencies);
 
     const spaces = await dependencies.getSpacesStart();
     const spaceId = (await spaces?.spacesService?.getActiveSpace(request))?.id ?? 'default';
@@ -485,7 +484,7 @@ const findSLOGroupsRoute = createSloServerRoute({
   },
   params: findSLOGroupsParamsSchema,
   handler: async ({ context, request, params, logger, dependencies }) => {
-    await assertPlatinumLicense(context);
+    await assertPlatinumLicense(dependencies);
     const spaces = await dependencies.getSpacesStart();
     const spaceId = (await spaces?.spacesService.getActiveSpace(request))?.id ?? 'default';
     const soClient = (await context.core).savedObjects.client;
@@ -503,8 +502,8 @@ const getSLOSuggestionsRoute = createSloServerRoute({
     tags: ['access:slo_read'],
     access: 'internal',
   },
-  handler: async ({ context }) => {
-    await assertPlatinumLicense(context);
+  handler: async ({ context, dependencies }) => {
+    await assertPlatinumLicense(dependencies);
 
     const soClient = (await context.core).savedObjects.client;
     const getSLOSuggestions = new GetSLOSuggestions(soClient);
@@ -519,8 +518,8 @@ const deleteSloInstancesRoute = createSloServerRoute({
     access: 'public',
   },
   params: deleteSLOInstancesParamsSchema,
-  handler: async ({ context, params }) => {
-    await assertPlatinumLicense(context);
+  handler: async ({ context, params, dependencies }) => {
+    await assertPlatinumLicense(dependencies);
 
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
     const deleteSloInstances = new DeleteSLOInstances(esClient);
@@ -536,8 +535,8 @@ const findSloDefinitionsRoute = createSloServerRoute({
     access: 'public',
   },
   params: findSloDefinitionsParamsSchema,
-  handler: async ({ context, params, logger }) => {
-    await assertPlatinumLicense(context);
+  handler: async ({ context, params, logger, dependencies }) => {
+    await assertPlatinumLicense(dependencies);
 
     const soClient = (await context.core).savedObjects.client;
     const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
@@ -556,8 +555,8 @@ const fetchHistoricalSummary = createSloServerRoute({
     access: 'internal',
   },
   params: fetchHistoricalSummaryParamsSchema,
-  handler: async ({ context, params, logger }) => {
-    await assertPlatinumLicense(context);
+  handler: async ({ context, params, logger, dependencies }) => {
+    await assertPlatinumLicense(dependencies);
 
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
     const historicalSummaryClient = new DefaultHistoricalSummaryClient(esClient);
@@ -575,8 +574,8 @@ const getSLOInstancesRoute = createSloServerRoute({
     access: 'internal',
   },
   params: getSLOInstancesParamsSchema,
-  handler: async ({ context, params, logger }) => {
-    await assertPlatinumLicense(context);
+  handler: async ({ context, params, logger, dependencies }) => {
+    await assertPlatinumLicense(dependencies);
 
     const soClient = (await context.core).savedObjects.client;
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
@@ -597,7 +596,7 @@ const getDiagnosisRoute = createSloServerRoute({
     access: 'internal',
   },
   params: undefined,
-  handler: async ({ context }) => {
+  handler: async ({ context, dependencies }) => {
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
     const licensing = await context.licensing;
 
@@ -620,8 +619,8 @@ const fetchSloHealthRoute = createSloServerRoute({
     access: 'internal',
   },
   params: fetchSLOHealthParamsSchema,
-  handler: async ({ context, params, logger }) => {
-    await assertPlatinumLicense(context);
+  handler: async ({ context, params, logger, dependencies }) => {
+    await assertPlatinumLicense(dependencies);
 
     const core = await context.core;
     const scopedClusterClient = core.elasticsearch.client;
@@ -643,7 +642,7 @@ const getSloBurnRates = createSloServerRoute({
   },
   params: getSLOBurnRatesParamsSchema,
   handler: async ({ request, context, params, logger, dependencies }) => {
-    await assertPlatinumLicense(context);
+    await assertPlatinumLicense(dependencies);
 
     const spaces = await dependencies.getSpacesStart();
     const spaceId = (await spaces?.spacesService.getActiveSpace(request))?.id ?? 'default';
@@ -675,7 +674,7 @@ const getPreviewData = createSloServerRoute({
   },
   params: getPreviewDataParamsSchema,
   handler: async ({ request, context, params, dependencies }) => {
-    await assertPlatinumLicense(context);
+    await assertPlatinumLicense(dependencies);
 
     const spaces = await dependencies.getSpacesStart();
     const spaceId = (await spaces?.spacesService?.getActiveSpace(request))?.id ?? 'default';
@@ -695,8 +694,8 @@ const getSloSettingsRoute = createSloServerRoute({
     tags: ['access:slo_read'],
     access: 'internal',
   },
-  handler: async ({ context }) => {
-    await assertPlatinumLicense(context);
+  handler: async ({ context, dependencies }) => {
+    await assertPlatinumLicense(dependencies);
 
     const soClient = (await context.core).savedObjects.client;
     return await getSloSettings(soClient);
@@ -711,8 +710,8 @@ const putSloSettings = (isServerless?: boolean) =>
       access: 'internal',
     },
     params: isServerless ? putSLOServerlessSettingsParamsSchema : putSLOSettingsParamsSchema,
-    handler: async ({ context, params }) => {
-      await assertPlatinumLicense(context);
+    handler: async ({ context, params, dependencies }) => {
+      await assertPlatinumLicense(dependencies);
 
       const soClient = (await context.core).savedObjects.client;
       return await storeSloSettings(soClient, params.body as PutSLOSettingsParams);
@@ -727,7 +726,7 @@ const getSLOsOverview = createSloServerRoute({
   },
   params: getOverviewParamsSchema,
   handler: async ({ context, params, request, logger, dependencies }) => {
-    await assertPlatinumLicense(context);
+    await assertPlatinumLicense(dependencies);
 
     const soClient = (await context.core).savedObjects.client;
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;

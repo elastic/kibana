@@ -18,10 +18,12 @@ import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { AlertsLocatorDefinition, sloFeatureId } from '@kbn/observability-plugin/common';
 import { SLO_BURN_RATE_RULE_TYPE_ID } from '@kbn/rule-data-utils';
+import { mapValues } from 'lodash';
 import { registerSloUsageCollector } from './lib/collectors/register';
 import { registerBurnRateRule } from './lib/rules/register_burn_rate_rule';
 import { getSloServerRouteRepository } from './routes/get_slo_server_route_repository';
 import { registerServerRoutes } from './routes/register_routes';
+import { SLORoutesDependencies } from './routes/types';
 import { SO_SLO_TYPE, slo } from './saved_objects';
 import { SO_SLO_SETTINGS_TYPE, sloSettings } from './saved_objects/slo_settings';
 import { DefaultResourceInstaller, DefaultSLOInstaller } from './services';
@@ -33,8 +35,6 @@ import type {
   SLOServerSetup,
   SLOServerStart,
 } from './types';
-import { mapValues } from 'lodash';
-import { SLORoutesDependencies } from './routes/types';
 
 const sloRuleTypes = [SLO_BURN_RATE_RULE_TYPE_ID];
 
