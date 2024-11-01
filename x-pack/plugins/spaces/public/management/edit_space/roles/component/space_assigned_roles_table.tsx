@@ -267,14 +267,17 @@ export const SpaceAssignedRolesTable = ({
 
   const onSearchQueryChange = useCallback<NonNullable<NonNullable<EuiSearchBarProps['onChange']>>>(
     ({ query }) => {
-      const _assignedRolesTransformed = Array.from(assignedRoles.values());
+      const assignedRolesTransformed = Array.from(assignedRoles.values());
+      const sortedAssignedRolesTransformed = assignedRolesTransformed.sort(sortRolesForListing);
 
       if (query?.text) {
         setRolesInView(
-          _assignedRolesTransformed.filter((role) => role.name.includes(query.text.toLowerCase()))
+          sortedAssignedRolesTransformed.filter((role) =>
+            role.name.includes(query.text.toLowerCase())
+          )
         );
       } else {
-        setRolesInView(_assignedRolesTransformed);
+        setRolesInView(sortedAssignedRolesTransformed);
       }
     },
     [assignedRoles]
