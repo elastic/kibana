@@ -15,7 +15,6 @@ import { isPromise } from '@kbn/std';
 import React from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import { css } from '@emotion/react';
-import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { untilPluginStartServicesReady } from '../kibana_services';
 import { PresentationPanelError } from './presentation_panel_error';
