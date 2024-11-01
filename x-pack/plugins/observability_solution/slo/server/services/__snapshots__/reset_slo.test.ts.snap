@@ -210,6 +210,12 @@ exports[`ResetSLO resets all associated resources 8`] = `
         "processors": Array [
           Object {
             "set": Object {
+              "field": "_id",
+              "value": "{{{_id}}}-irrelevant-1",
+            },
+          },
+          Object {
+            "set": Object {
               "field": "event.ingested",
               "value": "{{{_ingest.timestamp}}}",
             },

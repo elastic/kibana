@@ -91,7 +91,9 @@ export function registerAnalyzeLogsRoutes(
             logSamples,
           };
           const graph = await getLogFormatDetectionGraph({ model, client });
-          const graphResults = await graph.invoke(logFormatParameters, options);
+          const graphResults = await graph
+            .withConfig({ runName: 'Log Format' })
+            .invoke(logFormatParameters, options);
           const graphLogFormat = graphResults.results.samplesFormat.name;
           if (graphLogFormat === 'unsupported') {
             throw new UnsupportedLogFormatError(GenerationErrorCode.UNSUPPORTED_LOG_SAMPLES_FORMAT);
