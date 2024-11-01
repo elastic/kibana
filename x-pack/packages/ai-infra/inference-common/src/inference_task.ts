@@ -5,7 +5,13 @@
  * 2.0.
  */
 
+/**
+ * Base interface for all inference events.
+ */
 export interface InferenceTaskEventBase<TEventType extends string> {
+  /**
+   * Unique identifier of the event type.
+   */
   type: TEventType;
 }
 

@@ -5344,6 +5344,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/inference-common@link:x-pack/packages/ai-infra/inference-common":
+  version "0.0.0"
+  uid ""
+
 "@kbn/inference-plugin@link:x-pack/plugins/inference":
   version "0.0.0"
   uid ""
