@@ -14,7 +14,7 @@ import {
   SECURITY_EXTENSION_ID,
 } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import { FavoritesService } from './favorites_service';
+import { FavoritesService, FavoritesLimitExceededError } from './favorites_service';
 import { favoritesSavedObjectType } from './favorites_saved_object';
 import { FavoritesRegistry } from './favorites_registry';
 
@@ -119,16 +119,23 @@ export function registerFavoritesRoutes({
         return response.badRequest({ body: { message: e.message } });
       }
 
-      const favoritesResult = await favorites.addFavorite({
-        id,
-        metadata,
-      });
+      try {
+        const favoritesResult = await favorites.addFavorite({
+          id,
+          metadata,
+        });
+        const addFavoritesResponse: AddFavoriteResponse = {
+          favoriteIds: favoritesResult.favoriteIds,
+        };
 
-      const addFavoritesResponse: AddFavoriteResponse = {
-        favoriteIds: favoritesResult.favoriteIds,
-      };
+        return response.ok({ body: addFavoritesResponse });
+      } catch (e) {
+        if (e instanceof FavoritesLimitExceededError) {
+          return response.forbidden({ body: { message: e.message } });
+        }
 
-      return response.ok({ body: addFavoritesResponse });
+        throw e; // unexpected error, let the global error handler deal with it
+      }
     }
   );
 

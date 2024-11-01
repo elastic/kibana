@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// eslint-disable-next-line max-classes-per-file
 import type { SavedObject, SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { Logger, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { favoritesSavedObjectType, FavoritesSavedObjectAttributes } from './favorites_saved_object';
@@ -16,6 +17,9 @@ export interface FavoritesState {
   favoriteIds: string[];
   favoriteMetadata?: Record<string, object>;
 }
+
+// Limit the number of favorites to prevent too large objects due to metadata
+const FAVORITES_LIMIT = 100;
 
 export class FavoritesService {
   constructor(
@@ -46,6 +50,9 @@ export class FavoritesService {
     return { favoriteIds, favoriteMetadata };
   }
 
+  /**
+   * @throws {FavoritesLimitExceededError}
+   */
   public async addFavorite({
     id,
     metadata,
@@ -80,6 +87,10 @@ export class FavoritesService {
         favoriteMetadata: favoritesSavedObject.attributes.favoriteMetadata,
       };
     } else {
+      if ((favoritesSavedObject.attributes.favoriteIds ?? []).length >= FAVORITES_LIMIT) {
+        throw new FavoritesLimitExceededError();
+      }
+
       const newFavoriteIds = [
         ...(favoritesSavedObject.attributes.favoriteIds ?? []).filter(
           (favoriteId) => favoriteId !== id
@@ -178,5 +189,16 @@ export class FavoritesService {
 
   private getFavoriteSavedObjectId() {
     return `${this.type}:${this.userId}`;
+  }
+}
+
+export class FavoritesLimitExceededError extends Error {
+  constructor() {
+    super(
+      `Limit reached: This list can contain a maximum of ${FAVORITES_LIMIT} items. Please remove an item before adding a new one.`
+    );
+
+    this.name = 'FavoritesLimitExceededError';
+    Object.setPrototypeOf(this, FavoritesLimitExceededError.prototype); // For TypeScript compatibility
   }
 }
