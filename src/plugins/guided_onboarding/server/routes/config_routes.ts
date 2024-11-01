@@ -18,6 +18,12 @@ export const registerGetConfigRoute = (router: IRouter, guidesConfig: GuidesConf
   router.get(
     {
       path: `${API_BASE_PATH}/configs/{guideId}`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           guideId: schema.string(),

@@ -16,6 +16,12 @@ export const registerInternalFindTagsRoute = (router: TagsPluginRouter) => {
   router.get(
     {
       path: '/internal/saved_objects_tagging/tags/_find',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         query: schema.object({
           perPage: schema.number({ min: 0, defaultValue: 20 }),

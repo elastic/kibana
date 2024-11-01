@@ -19,6 +19,12 @@ export const registerGetPluginStateRoute = (router: IRouter) => {
   router.get(
     {
       path: `${API_BASE_PATH}/state`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: false,
     },
     async (context, request, response) => {
@@ -40,6 +46,12 @@ export const registerPutPluginStateRoute = (router: IRouter) => {
   router.put(
     {
       path: `${API_BASE_PATH}/state`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           status: schema.maybe(schema.string()),

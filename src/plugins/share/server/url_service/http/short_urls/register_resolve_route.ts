@@ -16,6 +16,12 @@ export const registerResolveRoute = (router: IRouter, url: ServerUrlService) => 
   router.get(
     {
       path: '/api/short_url/_slug/{slug}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       options: {
         access: 'public',
         summary: `Resolve a short URL`,

@@ -16,6 +16,12 @@ export const registerCreateRoute = (router: IRouter, url: ServerUrlService) => {
   router.post(
     {
       path: '/api/short_url',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       options: {
         access: 'public',
         summary: `Create a short URL`,

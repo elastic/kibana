@@ -15,6 +15,12 @@ export const registerDeleteRoute = (router: IRouter, url: ServerUrlService) => {
   router.delete(
     {
       path: '/api/short_url/{id}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       options: {
         access: 'public',
         summary: `Delete a short URL`,

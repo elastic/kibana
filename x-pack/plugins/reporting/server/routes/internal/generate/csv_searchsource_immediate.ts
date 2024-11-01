@@ -46,6 +46,12 @@ export function registerGenerateCsvFromSavedObjectImmediate(
   router.post(
     {
       path,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           columns: schema.maybe(schema.arrayOf(schema.string())),

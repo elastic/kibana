@@ -63,6 +63,12 @@ export const registerDeprecationsRoutes = (reporting: ReportingCore, logger: Log
   router.get(
     {
       path: getStatusPath,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: false,
       options: { access: 'internal' },
     },
@@ -100,6 +106,12 @@ export const registerDeprecationsRoutes = (reporting: ReportingCore, logger: Log
   router.put(
     {
       path: migrateApiPath,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: false,
       options: { access: 'internal' },
     },

@@ -18,6 +18,12 @@ export const registerUpdateTagsAssignmentsRoute = (router: TagsPluginRouter) => 
   router.post(
     {
       path: '/api/saved_objects_tagging/assignments/update_by_tags',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object(
           {
