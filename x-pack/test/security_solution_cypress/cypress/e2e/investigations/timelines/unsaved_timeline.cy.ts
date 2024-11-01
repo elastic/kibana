@@ -32,16 +32,17 @@ import {
 } from '../../../tasks/serverless/navigation';
 import {
   addNameToTimelineAndSave,
+  closeTimeline,
   createNewTimeline,
+  duplicateFirstTimeline,
   populateTimeline,
 } from '../../../tasks/timeline';
-import { EXPLORE_URL, hostsUrl, MANAGE_URL } from '../../../urls/navigation';
+import { EXPLORE_URL, TIMELINES_URL, MANAGE_URL } from '../../../urls/navigation';
 
-// FLAKY: https://github.com/elastic/kibana/issues/174068
-describe.skip('[ESS] Save Timeline Prompts', { tags: ['@ess'] }, () => {
+describe('[ESS] Save Timeline Prompts', { tags: ['@ess'] }, () => {
   beforeEach(() => {
     login();
-    visitWithTimeRange(hostsUrl('allHosts'));
+    visitWithTimeRange(TIMELINES_URL);
     openTimelineUsingToggle();
     createNewTimeline();
     /*
@@ -58,7 +59,7 @@ describe.skip('[ESS] Save Timeline Prompts', { tags: ['@ess'] }, () => {
   it('should NOT prompt when navigating with an unchanged & unsaved timeline', () => {
     openKibanaNavigation();
     navigateFromKibanaCollapsibleTo(OBSERVABILITY_ALERTS_PAGE);
-    cy.url().should('not.contain', hostsUrl('allHosts'));
+    cy.url().should('not.contain', TIMELINES_URL);
   });
 
   it('should prompt when navigating away from security solution with a changed & unsaved timeline', () => {
@@ -119,13 +120,22 @@ describe.skip('[ESS] Save Timeline Prompts', { tags: ['@ess'] }, () => {
     cy.get(TIMELINE_SAVE_MODAL).should('not.exist');
     cy.url().should('not.contain', MANAGE_URL);
   });
+
+  it('should prompt when a timeline is duplicated but not saved', () => {
+    addNameToTimelineAndSave('Original');
+    closeTimeline();
+    duplicateFirstTimeline();
+    openKibanaNavigation();
+    navigateFromKibanaCollapsibleTo(MANAGE_PAGE);
+    cy.get(APP_LEAVE_CONFIRM_MODAL).should('be.visible');
+  });
 });
 
 // In serverless it is not possible to use the navigation menu without closing the timeline
 describe('[serverless] Save Timeline Prompts', { tags: ['@serverless'] }, () => {
   beforeEach(() => {
     login();
-    visitWithTimeRange(hostsUrl('allHosts'));
+    visitWithTimeRange(TIMELINES_URL);
     openTimelineUsingToggle();
     createNewTimeline();
     /*
@@ -200,5 +210,14 @@ describe('[serverless] Save Timeline Prompts', { tags: ['@serverless'] }, () => 
     addNameToTimelineAndSave('Test');
     navigateToExploreUsingBreadcrumb(); // explore has timelines disabled
     cy.get(APP_LEAVE_CONFIRM_MODAL).should('not.exist');
+  });
+
+  it('should prompt when a timeline is duplicated but not saved', () => {
+    addNameToTimelineAndSave('Original');
+    closeTimeline();
+    duplicateFirstTimeline();
+    openKibanaNavigation();
+    navigateFromKibanaCollapsibleTo(MANAGE_PAGE);
+    cy.get(APP_LEAVE_CONFIRM_MODAL).should('be.visible');
   });
 });
