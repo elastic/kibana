@@ -16,7 +16,7 @@ import {
 } from '@kbn/core/public';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { PLUGIN_NAME, sloAppId } from '../common';
-import { ExperimentalFeatures, SloConfig } from '../common/config';
+import { ExperimentalFeatures, SLOConfig } from '../common/config';
 import { SLOS_BASE_PATH } from '../common/locators/paths';
 import { SLO_ALERTS_EMBEDDABLE_ID } from './embeddable/slo/alerts/constants';
 import { SLO_BURN_RATE_EMBEDDABLE_ID } from './embeddable/slo/burn_rate/constants';
@@ -37,7 +37,7 @@ export class SloPlugin
   private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
   private experimentalFeatures: ExperimentalFeatures = { ruleFormV2: { enabled: false } };
 
-  constructor(private readonly initContext: PluginInitializerContext<SloConfig>) {
+  constructor(private readonly initContext: PluginInitializerContext<SLOConfig>) {
     this.experimentalFeatures =
       this.initContext.config.get().experimental ?? this.experimentalFeatures;
   }

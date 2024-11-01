@@ -30,7 +30,7 @@ import {
 } from '@kbn/slo-schema';
 import { getOverviewParamsSchema } from '@kbn/slo-schema/src/rest_specs/routes/get_overview';
 import { KibanaRequest } from '@kbn/core-http-server';
-import { RegisterRoutesDependencies } from '../register_routes';
+import { RequestHandlerContext } from '@kbn/core/server';
 import { GetSLOsOverview } from '../../services/get_slos_overview';
 import type { IndicatorTypes } from '../../domain/models';
 import {
@@ -71,8 +71,8 @@ import {
   TimesliceMetricTransformGenerator,
   TransformGenerator,
 } from '../../services/transform_generators';
-import type { SloRequestHandlerContext } from '../../types';
 import { createSloServerRoute } from '../create_slo_server_route';
+import { SLORoutesDependencies } from '../types';
 
 const transformGenerators: Record<IndicatorTypes, TransformGenerator> = {
   'sli.apm.transactionDuration': new ApmTransactionDurationTransformGenerator(),
@@ -84,7 +84,7 @@ const transformGenerators: Record<IndicatorTypes, TransformGenerator> = {
   'sli.metric.timeslice': new TimesliceMetricTransformGenerator(),
 };
 
-const assertPlatinumLicense = async (context: SloRequestHandlerContext) => {
+const assertPlatinumLicense = async (context: RequestHandlerContext) => {
   const licensing = await context.licensing;
   const hasCorrectLicense = licensing.license.hasAtLeast('platinum');
 
@@ -93,7 +93,7 @@ const assertPlatinumLicense = async (context: SloRequestHandlerContext) => {
   }
 };
 
-const getSpaceId = async (deps: RegisterRoutesDependencies, request: KibanaRequest) => {
+const getSpaceId = async (deps: SLORoutesDependencies, request: KibanaRequest) => {
   const spaces = await deps.getSpacesStart();
   return (await spaces?.spacesService?.getActiveSpace(request))?.id ?? 'default';
 };
