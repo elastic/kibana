@@ -55,7 +55,7 @@ export const forkStreamsRoute = createServerRoute({
 
       await createStream({
         scopedClusterClient,
-        definition: { ...params.body, forked_from: rootDefinition.id },
+        definition: { ...params.body, forked_from: rootDefinition.id, root: false },
       });
 
       await bootstrapStream({
