@@ -12,17 +12,36 @@ import {
   OutputEventType,
   ChatCompleteAPI,
   ChatCompletionEventType,
+  ChatCompleteStreamResponse,
+  ChatCompleteResponse,
   MessageRole,
   withoutTokenCountEvents,
+  ToolSchema,
+  OutputOptions,
+  OutputCompositeResponse,
 } from '@kbn/inference-common';
 import { ensureMultiTurn } from './utils/ensure_multi_turn';
 
 export function createOutputApi(chatCompleteApi: ChatCompleteAPI): OutputAPI {
-  return (id, { connectorId, input, schema, system, previousMessages, functionCalling }) => {
-    return chatCompleteApi({
+  return <
+    TId extends string = string,
+    TOutputSchema extends ToolSchema | undefined = ToolSchema | undefined,
+    TStream extends boolean = false
+  >({
+    id,
+    connectorId,
+    input,
+    schema,
+    system,
+    previousMessages,
+    functionCalling,
+    stream,
+  }: OutputOptions<TId, TOutputSchema, TStream>) => {
+    const response = chatCompleteApi({
       connectorId,
-      system,
+      stream,
       functionCalling,
+      system,
       messages: ensureMultiTurn([
         ...(previousMessages || []),
         {
@@ -41,27 +60,42 @@ export function createOutputApi(chatCompleteApi: ChatCompleteAPI): OutputAPI {
             toolChoice: { function: 'structuredOutput' as const },
           }
         : {}),
-    }).pipe(
-      withoutTokenCountEvents(),
-      map((event): OutputEvent<any, any> => {
-        if (event.type === ChatCompletionEventType.ChatCompletionChunk) {
-          return {
-            type: OutputEventType.OutputUpdate,
-            id,
-            content: event.content,
-          };
-        }
+    });
 
+    if (stream) {
+      return (response as ChatCompleteStreamResponse).pipe(
+        withoutTokenCountEvents(),
+        map((event): OutputEvent<any, any> => {
+          if (event.type === ChatCompletionEventType.ChatCompletionChunk) {
+            return {
+              type: OutputEventType.OutputUpdate,
+              id,
+              content: event.content,
+            };
+          }
+
+          return {
+            id,
+            output:
+              event.toolCalls.length && 'arguments' in event.toolCalls[0].function
+                ? event.toolCalls[0].function.arguments
+                : undefined,
+            content: event.content,
+            type: OutputEventType.OutputComplete,
+          };
+        })
+      ) as OutputCompositeResponse<TId, TOutputSchema, TStream>;
+    } else {
+      return (response as Promise<ChatCompleteResponse>).then((chatResponse) => {
         return {
           id,
+          content: chatResponse.content,
           output:
-            event.toolCalls.length && 'arguments' in event.toolCalls[0].function
-              ? event.toolCalls[0].function.arguments
+            chatResponse.toolCalls.length && 'arguments' in chatResponse.toolCalls[0].function
+              ? chatResponse.toolCalls[0].function.arguments
               : undefined,
-          content: event.content,
-          type: OutputEventType.OutputComplete,
         };
-      })
-    );
+      }) as OutputCompositeResponse<TId, TOutputSchema, TStream>;
+    }
   };
 }

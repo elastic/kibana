@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-export type { OutputAPI, OutputResponse } from './api';
+export type {
+  OutputAPI,
+  OutputOptions,
+  OutputCompositeResponse,
+  OutputResponse,
+  OutputStreamResponse,
+} from './api';
 export {
   OutputEventType,
   type OutputCompleteEvent,

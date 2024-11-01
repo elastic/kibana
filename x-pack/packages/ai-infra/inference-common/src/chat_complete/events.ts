@@ -77,25 +77,30 @@ export type ChatCompletionChunkEvent =
   };
 
 /**
+ * Token count structure the chatComplete API.
+ */
+export interface ChatCompletionTokenCount {
+  /**
+   * Input token count
+   */
+  prompt: number;
+  /**
+   * Output token count
+   */
+  completion: number;
+  /**
+   * Total token count
+   */
+  total: number;
+}
+
+/**
  * Token count event, send only once, usually (but not necessarily)
  * before the message event
  */
 export type ChatCompletionTokenCountEvent =
   InferenceTaskEventBase<ChatCompletionEventType.ChatCompletionTokenCount> & {
-    tokens: {
-      /**
-       * Input token count
-       */
-      prompt: number;
-      /**
-       * Output token count
-       */
-      completion: number;
-      /**
-       * Total token count
-       */
-      total: number;
-    };
+    tokens: ChatCompletionTokenCount;
   };
 
 /**

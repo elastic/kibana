@@ -107,6 +107,38 @@ export function registerChatCompleteRoute({
         toolChoice,
         tools,
         functionCalling,
+        stream: false,
+      });
+
+      return response.ok({
+        body: chatCompleteResponse,
+      });
+    }
+  );
+  router.post(
+    {
+      path: '/internal/inference/chat_complete/stream',
+      validate: {
+        body: chatCompleteBodySchema,
+      },
+    },
+    async (context, request, response) => {
+      const actions = await coreSetup
+        .getStartServices()
+        .then(([coreStart, pluginsStart]) => pluginsStart.actions);
+
+      const client = createInferenceClient({ request, actions, logger });
+
+      const { connectorId, messages, system, toolChoice, tools, functionCalling } = request.body;
+
+      const chatCompleteResponse = client.chatComplete({
+        connectorId,
+        messages,
+        system,
+        toolChoice,
+        tools,
+        functionCalling,
+        stream: true,
       });
 
       return response.ok({

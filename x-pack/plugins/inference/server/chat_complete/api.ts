@@ -11,13 +11,15 @@ import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import {
   type ChatCompleteAPI,
-  type ChatCompletionResponse,
+  type ChatCompleteCompositeResponse,
   createInferenceRequestError,
+  type ToolOptions,
+  ChatCompleteOptions,
 } from '@kbn/inference-common';
 import type { InferenceStartDependencies } from '../types';
 import { getConnectorById } from '../util/get_connector_by_id';
 import { getInferenceAdapter } from './adapters';
-import { createInferenceExecutor, chunksIntoMessage } from './utils';
+import { createInferenceExecutor, chunksIntoMessage, streamToResponse } from './utils';
 
 export function createChatCompleteApi({
   request,
@@ -28,15 +30,19 @@ export function createChatCompleteApi({
   actions: InferenceStartDependencies['actions'];
   logger: Logger;
 }) {
-  const chatCompleteAPI: ChatCompleteAPI = ({
+  const chatCompleteAPI: ChatCompleteAPI = <
+    TToolOptions extends ToolOptions = ToolOptions,
+    TStream extends boolean = false
+  >({
     connectorId,
     messages,
     toolChoice,
     tools,
     system,
     functionCalling,
-  }): ChatCompletionResponse => {
-    return defer(async () => {
+    stream,
+  }: ChatCompleteOptions<TToolOptions, TStream>): ChatCompleteCompositeResponse<TToolOptions, TStream> => {
+    const obs$ = defer(async () => {
       const actionsClient = await actions.getActionsClientWithRequest(request);
       const connector = await getConnectorById({ connectorId, actionsClient });
       const executor = createInferenceExecutor({ actionsClient, connector });
@@ -73,6 +79,12 @@ export function createChatCompleteApi({
         logger,
       })
     );
+
+    if (stream) {
+      return obs$ as ChatCompleteCompositeResponse<TToolOptions, TStream>;
+    } else {
+      return streamToResponse(obs$) as ChatCompleteCompositeResponse<TToolOptions, TStream>;
+    }
   };
 
   return chatCompleteAPI;
