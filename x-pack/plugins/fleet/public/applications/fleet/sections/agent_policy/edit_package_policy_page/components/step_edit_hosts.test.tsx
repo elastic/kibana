@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { act, waitFor } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
 
 import { userEvent } from '@testing-library/user-event';
 
