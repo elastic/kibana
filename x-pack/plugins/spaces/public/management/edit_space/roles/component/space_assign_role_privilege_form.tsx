@@ -431,6 +431,13 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
                     defaultMessage: 'Define privileges',
                   }
                 )}
+                helpText={i18n.translate(
+                  'xpack.spaces.management.spaceDetails.roles.assign.privilegesHelpText',
+                  {
+                    defaultMessage:
+                      'Assign the privilege level you wish to grant to all present and future features across this space.',
+                  }
+                )}
               >
                 <EuiButtonGroup
                   data-test-subj="space-assign-role-privilege-selection-switch"
