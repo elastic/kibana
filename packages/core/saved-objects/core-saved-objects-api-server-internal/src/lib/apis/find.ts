@@ -16,6 +16,7 @@ import {
   CheckAuthorizationResult,
   SavedObjectsRawDocSource,
   GetFindRedactTypeMapParams,
+  SavedObjectUnsanitizedDoc,
 } from '@kbn/core-saved-objects-server';
 import {
   DEFAULT_NAMESPACE_STRING,
@@ -266,13 +267,21 @@ export const performFind = async <T = unknown, A = unknown>(
   const migratedDocuments: Array<SavedObjectsFindResult<T>> = [];
   try {
     for (const savedObject of savedObjects) {
+      let migrated: SavedObjectUnsanitizedDoc | undefined;
       const { sort, score, ...rawObject } = savedObject;
-      const migrated = disableExtensions
-        ? migrationHelper.migrateStorageDocument(rawObject)
-        : await migrationHelper.migrateAndDecryptStorageDocument({
-            document: rawObject,
-            typeMap: redactTypeMap,
-          });
+
+      if (fields === undefined || fields.length === 0) {
+        // If this document only contains a subset of fields it's not possible to migrate it
+        migrated = savedObject;
+      } else if (disableExtensions) {
+        migrated = migrationHelper.migrateStorageDocument(rawObject);
+      } else {
+        migrated = await migrationHelper.migrateAndDecryptStorageDocument({
+          document: rawObject,
+          typeMap: redactTypeMap,
+        });
+      }
+
       migratedDocuments.push({ ...migrated, sort, score } as SavedObjectsFindResult<T>);
     }
   } catch (error) {
