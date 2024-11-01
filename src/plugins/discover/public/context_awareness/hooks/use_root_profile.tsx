@@ -50,4 +50,4 @@ export const useRootProfile = () => {
   return rootProfileState;
 };
 
-const BaseAppWrapper: Profile['getRenderAppWrapper'] = ({ children }) => <>{children}</>;
+export const BaseAppWrapper: Profile['getRenderAppWrapper'] = ({ children }) => <>{children}</>;

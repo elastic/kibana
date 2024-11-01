@@ -12,19 +12,26 @@ import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { common, discover, header, unifiedFieldList } = getPageObjects([
+  const { common, discover, header, unifiedFieldList, dashboard } = getPageObjects([
     'common',
     'discover',
     'header',
     'unifiedFieldList',
+    'dashboard',
   ]);
   const testSubjects = getService('testSubjects');
   const dataViews = getService('dataViews');
   const dataGrid = getService('dataGrid');
   const browser = getService('browser');
   const retry = getService('retry');
+  const dashboardAddPanel = getService('dashboardAddPanel');
+  const kibanaServer = getService('kibanaServer');
 
   describe('extension getRenderAppWrapper', () => {
+    after(async () => {
+      await kibanaServer.savedObjects.clean({ types: ['search'] });
+    });
+
     describe('ES|QL mode', () => {
       it('should allow clicking message cells to inspect the message', async () => {
         const state = kbnRison.encode({
@@ -42,6 +49,32 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await testSubjects.existOrFail('exampleRootProfileFlyout');
         });
         let message = await testSubjects.find('exampleRootProfileCurrentMessage');
+        expect(await message.getVisibleText()).to.be('This is a debug log');
+        messageCell = await dataGrid.getCellElementExcludingControlColumns(1, 2);
+        await retry.try(async () => {
+          await (await messageCell.findByTestSubject('exampleDataSourceProfileMessage')).click();
+          await testSubjects.existOrFail('exampleRootProfileFlyout');
+          message = await testSubjects.find('exampleRootProfileCurrentMessage');
+          expect(await message.getVisibleText()).to.be('This is an error log');
+        });
+        await testSubjects.click('euiFlyoutCloseButton');
+        await testSubjects.missingOrFail('exampleRootProfileFlyout');
+
+        // check Dashboard page
+        await discover.saveSearch('ES|QL app wrapper test');
+        await dashboard.navigateToApp();
+        await dashboard.gotoDashboardLandingPage();
+        await dashboard.clickNewDashboard();
+        await dashboardAddPanel.addSavedSearch('ES|QL app wrapper test');
+        await header.waitUntilLoadingHasFinished();
+        await dashboard.waitForRenderComplete();
+
+        messageCell = await dataGrid.getCellElementExcludingControlColumns(0, 2);
+        await retry.try(async () => {
+          await (await messageCell.findByTestSubject('exampleDataSourceProfileMessage')).click();
+          await testSubjects.existOrFail('exampleRootProfileFlyout');
+        });
+        message = await testSubjects.find('exampleRootProfileCurrentMessage');
         expect(await message.getVisibleText()).to.be('This is a debug log');
         messageCell = await dataGrid.getCellElementExcludingControlColumns(1, 2);
         await retry.try(async () => {
@@ -87,6 +120,34 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await header.waitUntilLoadingHasFinished();
         await browser.refresh();
         await header.waitUntilLoadingHasFinished();
+
+        messageCell = await dataGrid.getCellElementExcludingControlColumns(0, 2);
+        await retry.try(async () => {
+          await (await messageCell.findByTestSubject('exampleDataSourceProfileMessage')).click();
+          await testSubjects.existOrFail('exampleRootProfileFlyout');
+        });
+        message = await testSubjects.find('exampleRootProfileCurrentMessage');
+        expect(await message.getVisibleText()).to.be('This is a debug log');
+        messageCell = await dataGrid.getCellElementExcludingControlColumns(1, 2);
+        await retry.try(async () => {
+          await (await messageCell.findByTestSubject('exampleDataSourceProfileMessage')).click();
+          await testSubjects.existOrFail('exampleRootProfileFlyout');
+          message = await testSubjects.find('exampleRootProfileCurrentMessage');
+          expect(await message.getVisibleText()).to.be('This is an error log');
+        });
+        await testSubjects.click('euiFlyoutCloseButton');
+        await testSubjects.missingOrFail('exampleRootProfileFlyout');
+        await browser.goBack();
+        await discover.waitUntilSearchingHasFinished();
+
+        // check Dashboard page
+        await discover.saveSearch('Data view app wrapper test');
+        await dashboard.navigateToApp();
+        await dashboard.gotoDashboardLandingPage();
+        await dashboard.clickNewDashboard();
+        await dashboardAddPanel.addSavedSearch('Data view app wrapper test');
+        await header.waitUntilLoadingHasFinished();
+        await dashboard.waitForRenderComplete();
 
         messageCell = await dataGrid.getCellElementExcludingControlColumns(0, 2);
         await retry.try(async () => {
