@@ -13,7 +13,6 @@
   "kbn_references": [
     "@kbn/std",
     "@kbn/io-ts-utils",
-    "@kbn/i18n"
   ],
   "exclude": [
     "target/**/*",
