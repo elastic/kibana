@@ -195,6 +195,21 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
           />
         </EuiFormRow>
 
+        <EuiFormRow fullWidth>
+          <EuiCallOut
+            color="primary"
+            iconType="iInCircle"
+            size="s"
+            title={i18n.translate(
+              'xpack.security.management.editRole.spacePrivilegeForm.featurePrivilegeSummaryDescription',
+              {
+                defaultMessage:
+                  'Some features might be hidden by the space or affected by a global space privilege.',
+              }
+            )}
+          />
+        </EuiFormRow>
+
         {this.getPrivilegeCallout()}
 
         <EuiFormRow
