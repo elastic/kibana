@@ -33,6 +33,8 @@ import type {
   SLOServerSetup,
   SLOServerStart,
 } from './types';
+import { mapValues } from 'lodash';
+import { SLORoutesDependencies } from './routes/types';
 
 const sloRuleTypes = [SLO_BURN_RATE_RULE_TYPE_ID];
 
@@ -121,9 +123,22 @@ export class SLOPlugin
 
     registerSloUsageCollector(plugins.usageCollection);
 
+    const routeHandlerPlugins = mapValues(plugins, (value, key) => {
+      return {
+        setup: value,
+        start: () =>
+          core.getStartServices().then(([, pluginStart]) => {
+            return pluginStart[key as keyof SLOPluginStartDependencies];
+          }),
+      };
+    }) as SLORoutesDependencies['plugins'];
+
     registerServerRoutes({
       core,
       dependencies: {
+        core,
+        plugins: routeHandlerPlugins,
+        // TODO: Remove following after refactoed usage of core and plugins
         pluginsSetup: {
           ...plugins,
           core,

@@ -84,9 +84,9 @@ const transformGenerators: Record<IndicatorTypes, TransformGenerator> = {
   'sli.metric.timeslice': new TimesliceMetricTransformGenerator(),
 };
 
-const assertPlatinumLicense = async (context: RequestHandlerContext) => {
-  const licensing = await context.licensing;
-  const hasCorrectLicense = licensing.license.hasAtLeast('platinum');
+const assertPlatinumLicense = async (dependencies: SLORoutesDependencies) => {
+  const licensing = await dependencies.plugins.licensing.start();
+  const hasCorrectLicense = (await licensing.getLicense()).hasAtLeast('platinum');
 
   if (!hasCorrectLicense) {
     throw forbidden('Platinum license or higher is needed to make use of this feature.');
@@ -106,7 +106,7 @@ const createSLORoute = createSloServerRoute({
   },
   params: createSLOParamsSchema,
   handler: async ({ context, params, logger, dependencies, request }) => {
-    await assertPlatinumLicense(context);
+    await assertPlatinumLicense(dependencies);
 
     const dataViews = await dependencies.getDataViewsStart();
     const core = await context.core;

@@ -40,6 +40,7 @@ export interface SLOPluginSetupDependencies {
   cloud?: CloudSetup;
   usageCollection: UsageCollectionSetup;
   licensing: LicensingPluginSetup;
+  dataViews: DataViewsServerPluginStart;
 }
 
 export interface SLOPluginStartDependencies {

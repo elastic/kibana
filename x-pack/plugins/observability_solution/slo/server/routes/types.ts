@@ -14,8 +14,20 @@ import {
 } from '@kbn/rule-registry-plugin/server';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { DefaultRouteHandlerResources } from '@kbn/server-route-repository';
+import { SLOPluginSetupDependencies, SLOPluginStartDependencies } from '../types';
 
 export interface SLORoutesDependencies {
+  plugins: {
+    [key in keyof SLOPluginSetupDependencies]: {
+      setup: Required<SLOPluginSetupDependencies>[key];
+    };
+  } & {
+    [key in keyof SLOPluginStartDependencies]: {
+      start: () => Promise<Required<SLOPluginStartDependencies>[key]>;
+    };
+  };
+  core: CoreSetup;
+  // TODO: remove and replace with above core or plugins.start()
   pluginsSetup: {
     core: CoreSetup;
     ruleRegistry: RuleRegistryPluginSetupContract;
@@ -27,4 +39,6 @@ export interface SLORoutesDependencies {
   getDataViewsStart: () => Promise<DataViewsServerPluginStart>;
 }
 
-export type SLORouteHandlerResources = SLORoutesDependencies & DefaultRouteHandlerResources;
+export type SLORouteHandlerResources = {
+  dependencies: SLORoutesDependencies;
+} & DefaultRouteHandlerResources;
