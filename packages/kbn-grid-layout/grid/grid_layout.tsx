@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { cloneDeep } from 'lodash';
 import React, { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
 import { combineLatest, distinctUntilChanged, filter, map, pairwise, skip } from 'rxjs';
 
@@ -65,6 +66,7 @@ export const GridLayout = forwardRef<GridLayoutApi, GridLayoutProps>(
           pairwise()
         )
         .subscribe(([layoutBefore, layoutAfter]) => {
+          console.log({ layoutBefore, layoutAfter });
           if (!isLayoutEqual(layoutBefore, layoutAfter)) {
             onLayoutChange(layoutAfter);
           }
@@ -93,9 +95,9 @@ export const GridLayout = forwardRef<GridLayoutApi, GridLayoutProps>(
                   renderPanelContents={renderPanelContents}
                   gridLayoutStateManager={gridLayoutStateManager}
                   toggleIsCollapsed={() => {
-                    const currentLayout = gridLayoutStateManager.gridLayout$.value;
-                    currentLayout[rowIndex].isCollapsed = !currentLayout[rowIndex].isCollapsed;
-                    gridLayoutStateManager.gridLayout$.next(currentLayout);
+                    const newLayout = cloneDeep(gridLayoutStateManager.gridLayout$.value);
+                    newLayout[rowIndex].isCollapsed = !newLayout[rowIndex].isCollapsed;
+                    gridLayoutStateManager.gridLayout$.next(newLayout);
                   }}
                   setInteractionEvent={(nextInteractionEvent) => {
                     if (!nextInteractionEvent) {
