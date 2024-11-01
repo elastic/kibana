@@ -20,26 +20,30 @@ interface IndexAlias {
  *
  * @param esClient An {@link ElasticsearchClient}
  * @param alias alias name used to filter results
+ * @param index alias name used to filter results
  *
  * @returns an array of {@link IndexAlias} objects
  */
 export const getIndexAliases = async ({
   esClient,
   alias,
+  index,
 }: {
   esClient: ElasticsearchClient;
   alias: string;
+  index?: string;
 }): Promise<IndexAlias[]> => {
   const response = await esClient.indices.getAlias(
     {
       name: alias,
+      ...(index ? { index } : {}),
     },
     { meta: true }
   );
 
-  return Object.keys(response.body).map((index) => ({
+  return Object.keys(response.body).map((indexName) => ({
     alias,
-    index,
-    isWriteIndex: response.body[index].aliases[alias]?.is_write_index === true,
+    index: indexName,
+    isWriteIndex: response.body[indexName].aliases[alias]?.is_write_index === true,
   }));
 };

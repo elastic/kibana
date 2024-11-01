@@ -60,7 +60,11 @@ export const getSignalsMigrationStatusRoute = (router: SecuritySolutionPluginRou
 
           const signalsAlias = appClient.getSignalsIndex();
           const currentVersion = await getTemplateVersion({ alias: signalsAlias, esClient });
-          const indexAliases = await getIndexAliases({ alias: signalsAlias, esClient });
+          const indexAliases = await getIndexAliases({
+            alias: signalsAlias,
+            esClient,
+            index: `${signalsAlias}-*`,
+          });
           const signalsIndices = indexAliases.map((indexAlias) => indexAlias.index);
           const indicesInRange = await getSignalsIndicesInRange({
             esClient,
