@@ -12,7 +12,7 @@ import {
   TemplateListItem,
   TemplateType,
 } from '../types';
-import { deserializeESLifecycle } from './data_stream_serialization';
+import { deserializeESLifecycle } from './data_stream_utils';
 import { allowAutoCreateRadioValues, allowAutoCreateRadioIds } from '../constants';
 
 const hasEntries = (data: object = {}) => Object.entries(data).length > 0;
@@ -73,6 +73,8 @@ export function deserializeTemplate(
     type = 'managed';
   }
 
+  const ilmPolicyName = settings?.index?.lifecycle?.name;
+
   const deserializedTemplate: TemplateDeserialized = {
     name,
     version,
@@ -80,7 +82,7 @@ export function deserializeTemplate(
     ...(template.lifecycle ? { lifecycle: deserializeESLifecycle(template.lifecycle) } : {}),
     indexPatterns: indexPatterns.sort(),
     template,
-    ilmPolicy: settings?.index?.lifecycle,
+    ilmPolicy: ilmPolicyName ? { name: ilmPolicyName } : undefined,
     composedOf: composedOf ?? [],
     ignoreMissingComponentTemplates: ignoreMissingComponentTemplates ?? [],
     dataStream,
