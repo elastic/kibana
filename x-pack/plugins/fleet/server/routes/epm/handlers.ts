@@ -123,7 +123,6 @@ export const getListHandler: FleetRequestHandler<
     const flattenedRes = res.map((pkg) => soToInstallationInfo(pkg)) as PackageList;
     const body: GetPackagesResponse = {
       items: flattenedRes,
-      response: res,
     };
     return response.ok({
       body,

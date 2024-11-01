@@ -323,7 +323,6 @@ describe('schema validation', () => {
     };
     const expectedResponse: GetCategoriesResponse = {
       items: [category],
-      response: [category],
     };
     (getCategoriesHandler as jest.Mock).mockImplementation((ctx, request, res) => {
       return res.ok({ body: expectedResponse });
@@ -386,7 +385,6 @@ describe('schema validation', () => {
     };
     const expectedResponse: GetPackagesResponse = {
       items: [packageItem],
-      response: [packageItem],
     };
     (getListHandler as jest.Mock).mockImplementation((ctx, request, res) => {
       return res.ok({ body: expectedResponse });

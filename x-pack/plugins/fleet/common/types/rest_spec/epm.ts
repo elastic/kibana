@@ -37,8 +37,6 @@ export interface GetCategoriesResponse {
 export interface GetPackagesRequest {
   query: {
     category?: string;
-    // deprecated in 8.6
-    experimental?: boolean;
     prerelease?: boolean;
     excludeInstallStatus?: boolean;
   };
@@ -46,8 +44,6 @@ export interface GetPackagesRequest {
 
 export interface GetPackagesResponse {
   items: PackageList;
-  // deprecated in 8.0
-  response?: PackageList;
 }
 
 export interface InstalledPackage {

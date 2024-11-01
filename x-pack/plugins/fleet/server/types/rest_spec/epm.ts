@@ -32,7 +32,6 @@ export const GetPackagesRequestSchema = {
   query: schema.object({
     category: schema.maybe(schema.string()),
     prerelease: schema.maybe(schema.boolean()),
-    experimental: schema.maybe(schema.boolean()), // deprecated
     excludeInstallStatus: schema.maybe(schema.boolean({ defaultValue: false })),
   }),
 };
@@ -212,9 +211,6 @@ export const PackageListItemSchema = PackageInfoSchema.extends({
 
 export const GetPackagesResponseSchema = schema.object({
   items: schema.arrayOf(PackageListItemSchema),
-  response: schema.maybe(
-    schema.arrayOf(PackageListItemSchema.extends({}, { meta: { deprecated: true } }))
-  ),
 });
 
 export const InstalledPackageSchema = schema.object({
