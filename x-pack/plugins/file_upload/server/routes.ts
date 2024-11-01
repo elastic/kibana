@@ -62,7 +62,7 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
           authz: {
             enabled: false,
             reason:
-              'This route is opted out from authorization because permissions will be checked by elasticsearch ',
+              'This route is opted out from authorization because permissions will be checked by elasticsearch',
           },
         },
         validate: {
