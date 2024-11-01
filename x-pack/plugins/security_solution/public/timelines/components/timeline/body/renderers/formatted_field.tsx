@@ -39,12 +39,18 @@ import {
   IP_FIELD_TYPE,
   MESSAGE_FIELD_NAME,
   REFERENCE_URL_FIELD_NAME,
+  RISK_SCORE,
   RULE_REFERENCE_FIELD_NAME,
   SIGNAL_RULE_NAME_FIELD_NAME,
   SIGNAL_STATUS_FIELD_NAME,
   USER_NAME_FIELD_NAME,
 } from './constants';
-import { renderEventModule, RenderRuleName, renderUrl } from './formatted_field_helpers';
+import {
+  renderEventModule,
+  RenderRiskScore,
+  RenderRuleName,
+  renderUrl,
+} from './formatted_field_helpers';
 import { RuleStatus } from './rule_status';
 import { HostName } from './host_name';
 import { UserName } from './user_name';
@@ -239,6 +245,8 @@ const FormattedFieldValueComponent: React.FC<{
         value={value}
       />
     );
+  } else if (fieldName === RISK_SCORE) {
+    return value ? <RenderRiskScore value={value} /> : null;
   } else if (fieldName === EVENT_MODULE_FIELD_NAME) {
     return renderEventModule({
       contextId,
