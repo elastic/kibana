@@ -57,11 +57,12 @@ export const PresentationPanel = <
     return props.hideLoader ? null : (
       <PanelLoader
         showShadow={props.showShadow}
-        showBorder={props?.showBorder}
+        showBorder={props.showBorder}
         css={css`
           border-radius: ${euiThemeVars.euiBorderRadius};
         `}
-        dataTestSubj="embeddablePanelLoadingIndicator"
+        dataTestSubj="embed
+        dablePanelLoadingIndicator"
       />
     );
 
