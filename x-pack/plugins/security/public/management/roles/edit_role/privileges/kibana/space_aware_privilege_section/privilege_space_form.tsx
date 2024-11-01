@@ -205,7 +205,7 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
           label={i18n.translate(
             'xpack.security.management.editRole.spacePrivilegeForm.privilegeSelectorFormLabel',
             {
-              defaultMessage: 'Privileges for all features',
+              defaultMessage: 'Define privileges',
             }
           )}
           helpText={i18n.translate(

@@ -431,7 +431,7 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
                 label={i18n.translate(
                   'xpack.spaces.management.spaceDetails.roles.assign.privilegesLabelText',
                   {
-                    defaultMessage: 'Define role privileges',
+                    defaultMessage: 'Define privileges',
                   }
                 )}
               >
