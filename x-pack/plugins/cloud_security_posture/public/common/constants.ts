@@ -256,3 +256,9 @@ export const VULNERABILITY_GROUPING_OPTIONS = {
   CLOUD_ACCOUNT_NAME: VULNERABILITY_FIELDS.CLOUD_ACCOUNT_NAME,
   CVE: VULNERABILITY_FIELDS.VULNERABILITY_ID,
 };
+export const CDR_MISCONFIGURATION_DATA_TABLE_RUNTIME_MAPPING_FIELDS: string[] = [
+  'rule.benchmark.rule_number',
+  'rule.name',
+  'rule.section',
+  'resource.sub_type',
+];
