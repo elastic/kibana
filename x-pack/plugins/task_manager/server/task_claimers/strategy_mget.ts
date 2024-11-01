@@ -196,7 +196,7 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
 
   // perform the task object updates, deal with errors
   const updatedTaskIds: string[] = [];
-  let conflicts = staleTasks.length;
+  let conflicts = 0;
   let bulkUpdateErrors = 0;
   let bulkGetErrors = 0;
 
@@ -288,6 +288,7 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
       tasksClaimed: fullTasksToRun.length,
       tasksLeftUnclaimed: leftOverTasks.length,
       tasksErrors: bulkUpdateErrors + bulkGetErrors,
+      staleTasks: staleTasks.length,
     },
     docs: fullTasksToRun,
     timing: stopTaskTimer(),
