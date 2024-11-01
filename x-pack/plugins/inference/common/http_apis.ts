@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { Message, FunctionCallingMode } from '.';
-import type { ToolOptions } from './tools';
+import type { FunctionCallingMode, Message, ToolOptions } from '@kbn/inference-common';
+import { InferenceConnector } from './connectors';
 
 export type ChatCompleteRequestBody = {
   connectorId: string;
@@ -15,3 +15,7 @@ export type ChatCompleteRequestBody = {
   messages: Message[];
   functionCalling?: FunctionCallingMode;
 } & ToolOptions;
+
+export interface GetConnectorsResponseBody {
+  connectors: InferenceConnector[];
+}
