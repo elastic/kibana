@@ -402,6 +402,7 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
           <EuiCallOut
             color="primary"
             iconType="iInCircle"
+            size="s"
             title={i18n.translate(
               'xpack.security.management.editRole.spacePrivilegeForm.globalPrivilegeNotice',
               {
