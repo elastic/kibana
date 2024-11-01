@@ -5,19 +5,20 @@
  * 2.0.
  */
 
-import { from } from 'rxjs';
 import type { HttpStart } from '@kbn/core/public';
 import {
   ChatCompleteAPI,
-  ChatCompleteOptions,
   ChatCompleteCompositeResponse,
+  ChatCompleteOptions,
   ToolOptions,
 } from '@kbn/inference-common';
+import { from } from 'rxjs';
 import type { ChatCompleteRequestBody } from '../common/http_apis';
 import { httpResponseIntoObservable } from './util/http_response_into_observable';
 
-export function createChatCompleteApi({ http }: { http: HttpStart }): ChatCompleteAPI {
-  return <TToolOptions extends ToolOptions = ToolOptions, TStream extends boolean = false>({
+export function createChatCompleteApi({ http }: { http: HttpStart }): ChatCompleteAPI;
+export function createChatCompleteApi({ http }: { http: HttpStart }) {
+  return ({
     connectorId,
     messages,
     system,
@@ -25,7 +26,10 @@ export function createChatCompleteApi({ http }: { http: HttpStart }): ChatComple
     tools,
     functionCalling,
     stream,
-  }: ChatCompleteOptions<TToolOptions, TStream>) => {
+  }: ChatCompleteOptions<ToolOptions, boolean>): ChatCompleteCompositeResponse<
+    ToolOptions,
+    boolean
+  > => {
     const body: ChatCompleteRequestBody = {
       connectorId,
       system,
@@ -42,11 +46,11 @@ export function createChatCompleteApi({ http }: { http: HttpStart }): ChatComple
           rawResponse: true,
           body: JSON.stringify(body),
         })
-      ).pipe(httpResponseIntoObservable()) as ChatCompleteCompositeResponse<TToolOptions, TStream>;
+      ).pipe(httpResponseIntoObservable());
     } else {
       return http.post('/internal/inference/chat_complete', {
         body: JSON.stringify(body),
-      }) as ChatCompleteCompositeResponse<TToolOptions, TStream>;
+      });
     }
   };
 }

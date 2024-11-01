@@ -21,19 +21,15 @@ import { getConnectorById } from '../util/get_connector_by_id';
 import { getInferenceAdapter } from './adapters';
 import { createInferenceExecutor, chunksIntoMessage, streamToResponse } from './utils';
 
-export function createChatCompleteApi({
-  request,
-  actions,
-  logger,
-}: {
+interface CreateChatCompleteApiOptions {
   request: KibanaRequest;
   actions: InferenceStartDependencies['actions'];
   logger: Logger;
-}) {
-  const chatCompleteAPI: ChatCompleteAPI = <
-    TToolOptions extends ToolOptions = ToolOptions,
-    TStream extends boolean = false
-  >({
+}
+
+export function createChatCompleteApi(options: CreateChatCompleteApiOptions): ChatCompleteAPI;
+export function createChatCompleteApi({ request, actions, logger }: CreateChatCompleteApiOptions) {
+  return ({
     connectorId,
     messages,
     toolChoice,
@@ -41,9 +37,9 @@ export function createChatCompleteApi({
     system,
     functionCalling,
     stream,
-  }: ChatCompleteOptions<TToolOptions, TStream>): ChatCompleteCompositeResponse<
-    TToolOptions,
-    TStream
+  }: ChatCompleteOptions<ToolOptions, boolean>): ChatCompleteCompositeResponse<
+    ToolOptions,
+    boolean
   > => {
     const obs$ = defer(async () => {
       const actionsClient = await actions.getActionsClientWithRequest(request);
@@ -84,11 +80,9 @@ export function createChatCompleteApi({
     );
 
     if (stream) {
-      return obs$ as ChatCompleteCompositeResponse<TToolOptions, TStream>;
+      return obs$;
     } else {
-      return streamToResponse(obs$) as ChatCompleteCompositeResponse<TToolOptions, TStream>;
+      return streamToResponse(obs$);
     }
   };
-
-  return chatCompleteAPI;
 }
