@@ -25,7 +25,7 @@ import {
 } from '../validator';
 import { urlVars, urlVarsExt } from '../action_variables';
 import * as i18n from '../translations';
-import { HTTP_VERBS } from '../webhook_connectors';
+
 const { emptyField, urlField } = fieldValidators;
 
 interface Props {
@@ -71,7 +71,7 @@ export const GetStep: FunctionComponent<Props> = ({ display, readOnly }) => {
               componentProps={{
                 euiFieldProps: {
                   'data-test-subj': 'webhookGetIncidentMethodSelect',
-                  options: HTTP_VERBS.map((verb) => ({
+                  options: ['get', 'post'].map((verb) => ({
                     text: verb.toUpperCase(),
                     value: verb,
                   })),
