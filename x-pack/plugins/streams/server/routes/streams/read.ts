@@ -36,6 +36,8 @@ export const readStreamRoute = createServerRoute({
       if (e instanceof DefinitionNotFound) {
         return response.notFound({ body: e });
       }
+
+      return response.customError({ body: e, statusCode: 500 });
     }
   },
 });

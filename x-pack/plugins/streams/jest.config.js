@@ -8,11 +8,8 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../..',
-  roots: ['<rootDir>/x-pack/plugins/logsai/stream_entities_manager'],
-  coverageDirectory:
-    '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/logsai/stream_entities_manager',
+  roots: ['<rootDir>/x-pack/plugins/streams'],
+  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/streams',
   coverageReporters: ['text', 'html'],
-  collectCoverageFrom: [
-    '<rootDir>/x-pack/plugins/logsai/stream_entities_manager/{common,public,server}/**/*.{js,ts,tsx}',
-  ],
+  collectCoverageFrom: ['<rootDir>/x-pack/plugins/streams/{common,public,server}/**/*.{js,ts,tsx}'],
 };

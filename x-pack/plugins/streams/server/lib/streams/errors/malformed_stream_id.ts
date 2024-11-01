@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { StreamDefinition } from '../../../common/types';
-
-export const rootStreamDefinition: StreamDefinition = {
-  id: 'logs',
-  root: true,
-};
+export class MalformedStreamId extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'MalformedStreamId';
+  }
+}

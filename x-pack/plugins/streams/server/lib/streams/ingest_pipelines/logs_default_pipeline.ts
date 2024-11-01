@@ -7,8 +7,8 @@
 
 import { ASSET_VERSION } from '../../../../common/constants';
 
-export const logsAllDefaultPipeline = {
-  id: 'logs-all@default-pipeline',
+export const logsDefaultPipeline = {
+  id: 'logs@stream.default-pipeline',
   processors: [
     {
       set: {
@@ -25,26 +25,20 @@ export const logsAllDefaultPipeline = {
       },
     },
     {
-      append: {
-        field: 'labels.elastic.stream_entities',
-        value: ['logs-all'],
-      },
-    },
-    {
       pipeline: {
-        name: 'logs-all@json-pipeline',
+        name: 'logs@stream.json-pipeline',
         ignore_missing_pipeline: true,
       },
     },
     {
       pipeline: {
-        name: 'logs-all@reroutes',
+        name: 'logs@stream.reroutes',
         ignore_missing_pipeline: true,
       },
     },
   ],
   _meta: {
-    description: 'Default pipeline for the logs-all StreamEntity',
+    description: 'Default pipeline for the logs stream',
     managed: true,
   },
   version: ASSET_VERSION,

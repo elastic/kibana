@@ -33,23 +33,27 @@ interface ReadStreamParams extends BaseParams {
 }
 
 export async function readStream({ id, scopedClusterClient }: ReadStreamParams) {
-  const response = await scopedClusterClient.asCurrentUser.get<StreamDefinition>({
-    id,
-    index: STREAMS_INDEX,
-  });
-  if (!response.found) {
-    throw new DefinitionNotFound(`Stream Entity definition for ${id} not found.`);
+  try {
+    const response = await scopedClusterClient.asCurrentUser.get<StreamDefinition>({
+      id,
+      index: STREAMS_INDEX,
+    });
+    const definition = response._source as StreamDefinition;
+    const indexTemplate = await readIndexTemplate({ scopedClusterClient, definition });
+    const componentTemplate = await readComponentTemplate({ scopedClusterClient, definition });
+    const ingestPipelines = await readIngestPipelines({ scopedClusterClient, definition });
+    return {
+      definition,
+      index_template: indexTemplate,
+      component_template: componentTemplate,
+      ingest_pipelines: ingestPipelines,
+    };
+  } catch (e) {
+    if (e.meta?.statusCode === 404) {
+      throw new DefinitionNotFound(`Stream definition for ${id} not found.`);
+    }
+    throw e;
   }
-  const definition = response._source as StreamDefinition;
-  const indexTemplate = await readIndexTemplate({ scopedClusterClient, definition });
-  const componentTemplate = await readComponentTemplate({ scopedClusterClient, definition });
-  const ingestPipelines = await readIngestPipelines({ scopedClusterClient, definition });
-  return {
-    definition,
-    index_template: indexTemplate,
-    component_template: componentTemplate,
-    ingest_pipelines: ingestPipelines,
-  };
 }
 
 export async function readIndexTemplate({
@@ -57,9 +61,11 @@ export async function readIndexTemplate({
   definition,
 }: BaseParamsWithDefinition) {
   const response = await scopedClusterClient.asSecondaryAuthUser.indices.getIndexTemplate({
-    name: definition.id,
+    name: `${definition.id}@stream`,
   });
-  const indexTemplate = response.index_templates.find((doc) => doc.name === definition.id);
+  const indexTemplate = response.index_templates.find(
+    (doc) => doc.name === `${definition.id}@stream`
+  );
   if (!indexTemplate) {
     throw new IndexTemplateNotFound(`Unable to find index_template for ${definition.id}`);
   }
@@ -71,10 +77,10 @@ export async function readComponentTemplate({
   definition,
 }: BaseParamsWithDefinition) {
   const response = await scopedClusterClient.asSecondaryAuthUser.cluster.getComponentTemplate({
-    name: `${definition.id}@layer`,
+    name: `${definition.id}@stream.layer`,
   });
   const componentTemplate = response.component_templates.find(
-    (doc) => doc.name === `${definition.id}@layer`
+    (doc) => doc.name === `${definition.id}@stream.layer`
   );
   if (!componentTemplate) {
     throw new ComponentTemplateNotFound(`Unable to find component_template for ${definition.id}`);
@@ -87,7 +93,7 @@ export async function readIngestPipelines({
   definition,
 }: BaseParamsWithDefinition) {
   const response = await scopedClusterClient.asSecondaryAuthUser.ingest.getPipeline({
-    id: `${definition.id}*`,
+    id: `${definition.id}@stream.*`,
   });
 
   return response;

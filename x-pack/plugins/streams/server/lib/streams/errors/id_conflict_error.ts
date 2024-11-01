@@ -5,14 +5,9 @@
  * 2.0.
  */
 
-import { ApiScraperDefinition } from '../../../../common/types';
-
 export class IdConflict extends Error {
-  public definition: ApiScraperDefinition;
-
-  constructor(message: string, def: ApiScraperDefinition) {
+  constructor(message: string) {
     super(message);
     this.name = 'IdConflict';
-    this.definition = def;
   }
 }

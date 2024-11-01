@@ -8,8 +8,8 @@
 import { ClusterPutComponentTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
 import { ASSET_VERSION } from '../../../../common/constants';
 
-export const logsAllLayer: ClusterPutComponentTemplateRequest = {
-  name: 'logs-all@layer',
+export const logsLayer: ClusterPutComponentTemplateRequest = {
+  name: 'logs@stream.layer',
   template: {
     settings: {
       index: {
@@ -31,17 +31,6 @@ export const logsAllLayer: ClusterPutComponentTemplateRequest = {
       properties: {
         '@timestamp': {
           type: 'date',
-        },
-        'data_stream.namespace': {
-          type: 'constant_keyword',
-        },
-        'data_stream.dataset': {
-          type: 'constant_keyword',
-          value: 'all',
-        },
-        'data_stream.type': {
-          type: 'constant_keyword',
-          value: 'logs',
         },
 
         // Base
@@ -1180,7 +1169,7 @@ export const logsAllLayer: ClusterPutComponentTemplateRequest = {
   version: ASSET_VERSION,
   _meta: {
     managed: true,
-    description: 'Default layer for logs-all StreamEntity',
+    description: 'Default layer for logs stream',
   },
   deprecated: false,
 };

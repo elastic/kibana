@@ -16,6 +16,7 @@ import { createServerRoute } from '../create_server_route';
 import { streamDefinitonSchema } from '../../../common/types';
 import { bootstrapStream } from '../../lib/streams/bootstrap_stream';
 import { createStream, readStream } from '../../lib/streams/stream_crud';
+import { MalformedStreamId } from '../../lib/streams/errors/malformed_stream_id';
 
 export const forkStreamsRoute = createServerRoute({
   endpoint: 'POST /api/streams/{id}/_fork 2023-10-31',
@@ -46,6 +47,12 @@ export const forkStreamsRoute = createServerRoute({
         id: params.path.id,
       });
 
+      if (!params.body.id.startsWith(rootDefinition.id)) {
+        throw new MalformedStreamId(
+          `The ID (${params.body.id}) from the new stream must start with the parent's id (${rootDefinition.id})`
+        );
+      }
+
       await createStream({
         scopedClusterClient,
         definition: { ...params.body, forked_from: rootDefinition.id },
@@ -64,7 +71,11 @@ export const forkStreamsRoute = createServerRoute({
         return response.notFound({ body: e });
       }
 
-      if (e instanceof SecurityException || e instanceof ForkConditionMissing) {
+      if (
+        e instanceof SecurityException ||
+        e instanceof ForkConditionMissing ||
+        e instanceof MalformedStreamId
+      ) {
         return response.customError({ body: e, statusCode: 400 });
       }
 

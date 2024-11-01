@@ -10,7 +10,7 @@ import { ASSET_VERSION } from '../../../../common/constants';
 
 export function generateLayer(id: string): ClusterPutComponentTemplateRequest {
   return {
-    name: `${id}@layer`,
+    name: `${id}@stream.layer`,
     template: {
       settings: {
         index: {
@@ -30,7 +30,7 @@ export function generateLayer(id: string): ClusterPutComponentTemplateRequest {
     version: ASSET_VERSION,
     _meta: {
       managed: true,
-      description: `Default settings for the ${id} StreamEntity`,
+      description: `Default settings for the ${id} stream`,
     },
   };
 }

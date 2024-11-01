@@ -13,14 +13,14 @@ export function generateIndexTemplate(
   ignoreMissing: string[] = []
 ) {
   return {
-    name: id,
-    index_patterns: [`${id}-*`],
-    composed_of: [...composedOf, `${id}@layer`],
+    name: `${id}@stream`,
+    index_patterns: [id],
+    composed_of: [...composedOf, `${id}@stream.layer`],
     priority: 200,
     version: ASSET_VERSION,
     _meta: {
       managed: true,
-      description: `The index template for ${id} StreamEntity`,
+      description: `The index template for ${id} stream`,
     },
     data_stream: {
       hidden: false,
@@ -28,11 +28,11 @@ export function generateIndexTemplate(
     template: {
       settings: {
         index: {
-          default_pipeline: `${id}@default-pipeline`,
+          default_pipeline: `${id}@stream.default-pipeline`,
         },
       },
     },
     allow_auto_create: true,
-    ignore_missing_component_templates: [...ignoreMissing, `${id}@layer`],
+    ignore_missing_component_templates: [...ignoreMissing, `${id}@stream.layer`],
   };
 }

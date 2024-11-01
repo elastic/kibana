@@ -7,8 +7,8 @@
 
 import { ASSET_VERSION } from '../../../../common/constants';
 
-export const logsAllJsonPipeline = {
-  id: 'logs-all@json-pipeline',
+export const logsJsonPipeline = {
+  id: 'logs@stream.json-pipeline',
   processors: [
     {
       rename: {

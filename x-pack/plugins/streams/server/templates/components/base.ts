@@ -37,13 +37,15 @@ export const BaseComponentTemplateConfig: ClusterPutComponentTemplateRequest = {
           ignore_above: 1024,
           type: 'keyword',
         },
+        root: {
+          type: 'boolean',
+        },
         forked_from: {
           ignore_above: 1024,
           type: 'keyword',
         },
         condition: {
-          ignore_above: 1024,
-          type: 'keyword',
+          type: 'object',
         },
         event: {
           properties: {

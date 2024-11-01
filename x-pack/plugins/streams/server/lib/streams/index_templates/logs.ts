@@ -8,5 +8,4 @@
 import { IndicesPutIndexTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
 import { generateIndexTemplate } from './generate_index_template';
 
-export const logsAllIndexTemplate: IndicesPutIndexTemplateRequest =
-  generateIndexTemplate('logs-all');
+export const logsIndexTemplate: IndicesPutIndexTemplateRequest = generateIndexTemplate('logs');

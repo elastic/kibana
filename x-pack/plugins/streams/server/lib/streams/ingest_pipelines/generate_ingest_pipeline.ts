@@ -9,23 +9,17 @@ import { ASSET_VERSION } from '../../../../common/constants';
 
 export function generateIngestPipeline(id: string) {
   return {
-    id: `${id}@default-pipeline`,
+    id: `${id}@stream.default-pipeline`,
     processors: [
       {
-        append: {
-          field: 'labels.elastic.stream_entities',
-          value: [id],
-        },
-      },
-      {
         pipeline: {
-          name: `${id}@reroutes`,
+          name: `${id}@stream.reroutes`,
           ignore_missing_pipeline: true,
         },
       },
     ],
     _meta: {
-      description: `Default pipeline for the ${id} StreamEntity`,
+      description: `Default pipeline for the ${id} streams`,
       managed: true,
     },
     version: ASSET_VERSION,
