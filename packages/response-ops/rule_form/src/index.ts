@@ -17,5 +17,3 @@ export * from './types';
 export * from './constants';
 export * from './common/type_registry';
 export * from './rule_type_modal';
-
-export { useFetchFlappingSettings } from './common/hooks/use_fetch_flapping_settings';
