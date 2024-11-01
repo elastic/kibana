@@ -52,6 +52,15 @@ import { EntityDefinitionUpdateConflict } from '../../lib/entities/errors/entity
  */
 export const updateEntityDefinitionRoute = createEntityManagerServerRoute({
   endpoint: 'PATCH /internal/entities/definition/{id}',
+  options: {
+    security: {
+      authz: {
+        enabled: false,
+        reason:
+          'This endpoint mainly manages Elasticsearch resources using the requesting users credentials',
+      },
+    },
+  },
   params: z.object({
     path: z.object({ id: z.string() }),
     body: entityDefinitionUpdateSchema,
