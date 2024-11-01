@@ -211,7 +211,7 @@ exports[`ResetSLO resets all associated resources 8`] = `
           Object {
             "set": Object {
               "field": "_id",
-              "value": "irrelevant-1-{{{_id}}}",
+              "value": "{{{_id}}}-irrelevant-1",
             },
           },
           Object {
