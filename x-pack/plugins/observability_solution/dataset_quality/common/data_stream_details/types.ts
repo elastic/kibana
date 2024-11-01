@@ -5,10 +5,6 @@
  * 2.0.
  */
 
-export interface GetDataStreamIntegrationParams {
-  integrationName: string;
-}
-
 export interface AnalyzeDegradedFieldsParams {
   dataStream: string;
   lastBackingIndex: string;
@@ -18,4 +14,8 @@ export interface AnalyzeDegradedFieldsParams {
 export interface UpdateFieldLimitParams {
   dataStream: string;
   newFieldLimit: number;
+}
+
+export interface CheckAndLoadIntegrationParams {
+  dataStream: string;
 }

@@ -76,13 +76,20 @@ export const integrationRt = rt.intersection([
 
 export type IntegrationType = rt.TypeOf<typeof integrationRt>;
 
+export const checkAndLoadIntegrationResponseRt = rt.union([
+  rt.type({ isIntegration: rt.literal(false) }),
+  rt.type({ isIntegration: rt.literal(true), integration: integrationRt }),
+]);
+
+export type CheckAndLoadIntegrationResponse = rt.TypeOf<typeof checkAndLoadIntegrationResponseRt>;
+
 export const getIntegrationsResponseRt = rt.exact(
   rt.type({
     integrations: rt.array(integrationRt),
   })
 );
 
-export type IntegrationResponse = rt.TypeOf<typeof getIntegrationsResponseRt>;
+export type IntegrationsResponse = rt.TypeOf<typeof getIntegrationsResponseRt>;
 
 export const degradedDocsRt = rt.type({
   dataset: rt.string,
@@ -163,7 +170,6 @@ export const dataStreamSettingsRt = rt.partial({
   lastBackingIndexName: rt.string,
   indexTemplate: rt.string,
   createdOn: rt.union([rt.null, rt.number]), // rt.null is needed because `createdOn` is not available on Serverless
-  integration: rt.string,
   datasetUserPrivileges: datasetUserPrivilegesRt,
 });
 

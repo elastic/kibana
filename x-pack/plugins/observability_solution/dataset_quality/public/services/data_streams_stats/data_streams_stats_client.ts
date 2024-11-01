@@ -14,7 +14,7 @@ import {
   getDataStreamsStatsResponseRt,
   getIntegrationsResponseRt,
   getNonAggregatableDatasetsRt,
-  IntegrationResponse,
+  IntegrationsResponse,
   NonAggregatableDatasets,
 } from '../../../common/api_types';
 import {
@@ -108,7 +108,7 @@ export class DataStreamsStatsClient implements IDataStreamsStatsClient {
 
   public async getIntegrations(): Promise<Integration[]> {
     const response = await this.http
-      .get<IntegrationResponse>('/internal/dataset_quality/integrations')
+      .get<IntegrationsResponse>('/internal/dataset_quality/integrations')
       .catch((error) => {
         throw new DatasetQualityError(`Failed to fetch integrations: ${error}`, error);
       });

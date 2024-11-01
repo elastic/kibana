@@ -85,7 +85,10 @@ export interface WithDataStreamSettings {
 
 export interface WithIntegration {
   integration: Integration;
-  integrationDashboards?: Dashboard[];
+}
+
+export interface WithIntegrationDashboards {
+  integrationDashboards: Dashboard[];
 }
 
 export interface WithDegradedFieldValues {
@@ -116,15 +119,14 @@ export type DatasetQualityDetailsControllerTypeState =
       value:
         | 'initializing'
         | 'initializing.nonAggregatableDataset.fetching'
-        | 'initializing.dataStreamSettings.loadingIntegrationsAndDegradedFields.dataStreamDegradedFields.fetching'
+        | 'initializing.dataStreamDetails.fetching'
         | 'initializing.dataStreamSettings.fetchingDataStreamSettings'
-        | 'initializing.dataStreamDetails.fetching';
+        | 'initializing.dataStreamSettings.errorFetchingDataStreamSettings'
+        | 'initializing.checkAndLoadIntegrationAndDashboards.checkingAndLoadingIntegration';
       context: WithDefaultControllerState;
     }
   | {
-      value:
-        | 'initializing.nonAggregatableDataset.done'
-        | 'initializing.dataStreamSettings.loadingIntegrationsAndDegradedFields.dataStreamDegradedFields.fetching';
+      value: 'initializing.nonAggregatableDataset.done';
       context: WithDefaultControllerState & WithNonAggregatableDatasetStatus;
     }
   | {
@@ -140,24 +142,24 @@ export type DatasetQualityDetailsControllerTypeState =
       context: WithDefaultControllerState & WithBreakdownInEcsCheck;
     }
   | {
-      value: 'initializing.dataStreamSettings.loadingIntegrationsAndDegradedFields.dataStreamDegradedFields.done';
-      context: WithDefaultControllerState &
-        WithNonAggregatableDatasetStatus &
-        WithDegradedFieldsData;
-    }
-  | {
       value:
-        | 'initializing.dataStreamSettings.loadingIntegrationsAndDegradedFields'
-        | 'initializing.dataStreamSettings.loadingIntegrationsAndDegradedFields.integrationDetails.fetching'
-        | 'initializing.dataStreamSettings.loadingIntegrationsAndDegradedFields.integrationDashboards.fetching'
-        | 'initializing.dataStreamSettings.loadingIntegrationsAndDegradedFields.integrationDashboards.unauthorized';
+        | 'initializing.dataStreamSettings.fetchingDataStreamDegradedFields'
+        | 'initializing.dataStreamSettings.errorFetchingDegradedFields';
       context: WithDefaultControllerState & WithDataStreamSettings;
     }
   | {
+      value: 'initializing.dataStreamSettings.doneFetchingDegradedFields';
+      context: WithDefaultControllerState & WithDataStreamSettings & WithDegradedFieldsData;
+    }
+  | {
       value:
-        | 'initializing.dataStreamSettings.loadingIntegrationsAndDegradedFields.integrationDetails.done'
-        | 'initializing.dataStreamSettings.loadingIntegrationsAndDegradedFields.integrationDashboards.done';
-      context: WithDefaultControllerState & WithDataStreamSettings & WithIntegration;
+        | 'initializing.checkAndLoadIntegrationAndDashboards.loadingIntegrationDashboards'
+        | 'initializing.checkAndLoadIntegrationAndDashboards.unauthorizedToLoadDashboards';
+      context: WithDefaultControllerState & WithIntegration;
+    }
+  | {
+      value: 'initializing.checkAndLoadIntegrationAndDashboards.done';
+      context: WithDefaultControllerState & WithIntegration & WithIntegrationDashboards;
     }
   | {
       value: 'initializing.degradedFieldFlyout.open';

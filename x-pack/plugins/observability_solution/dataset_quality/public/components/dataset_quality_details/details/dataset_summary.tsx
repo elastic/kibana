@@ -7,7 +7,7 @@
 
 import React, { Fragment } from 'react';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
-import { EuiBadge, EuiFlexGroup, EuiPanel, EuiText } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiPanel, EuiSkeletonRectangle, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { IntegrationActionsMenu } from './integration_actions_menu';
 import {
@@ -29,7 +29,8 @@ export function DatasetSummary() {
   const {
     dataStreamDetailsLoading,
     dataStreamSettingsLoading,
-    integrationDetailsLoadings,
+    integrationDetailsLoading,
+    integrationDetailsLoaded,
     integrationDashboardsLoading,
   } = loadingState;
   const formattedLastActivity = dataStreamDetails?.lastActivity
@@ -39,7 +40,14 @@ export function DatasetSummary() {
     ? dataFormatter.convert(dataStreamSettings.createdOn)
     : '-';
 
-  return (
+  return !integrationDetailsLoaded ? (
+    <EuiSkeletonRectangle
+      width="100%"
+      height="200px"
+      data-test-subj="datasetQualityDetailsDetailsSectionLoading"
+      className="datasetQualityDetailsDetailsSectionLoading"
+    />
+  ) : (
     <EuiPanel hasBorder={false} hasShadow={false} paddingSize="none">
       <Fragment>
         <FieldsList
@@ -68,12 +76,12 @@ export function DatasetSummary() {
                         dashboardsLoading={integrationDashboardsLoading}
                       />
                     ),
-                    isLoading: integrationDetailsLoadings,
+                    isLoading: integrationDetailsLoading,
                   },
                   {
                     fieldTitle: integrationVersionText,
                     fieldValue: integrationDetails.integration?.version,
-                    isLoading: integrationDetailsLoadings,
+                    isLoading: integrationDetailsLoading,
                   },
                 ]
               : []),

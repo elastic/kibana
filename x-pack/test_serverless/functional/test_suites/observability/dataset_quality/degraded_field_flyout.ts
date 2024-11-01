@@ -765,10 +765,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           expect(newFieldLimit).to.be(newLimit);
 
           // Should display the apply button
-          await testSubjects.existOrFail('datasetQualityIncreaseFieldMappingLimitButtonButton');
+          await testSubjects.existOrFail('datasetQualityIncreaseFieldMappingLimitButton');
 
           const applyButton = await testSubjects.find(
-            'datasetQualityIncreaseFieldMappingLimitButtonButton'
+            'datasetQualityIncreaseFieldMappingLimitButton'
           );
           const applyButtonDisabledStatus = await applyButton.getAttribute('disabled');
 
@@ -793,7 +793,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           );
 
           const applyButton = await testSubjects.find(
-            'datasetQualityIncreaseFieldMappingLimitButtonButton'
+            'datasetQualityIncreaseFieldMappingLimitButton'
           );
           const applyButtonDisabledStatus = await applyButton.getAttribute('disabled');
 
@@ -808,7 +808,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           expect(invalidStatus).to.be('true');
         });
 
-        it('should validate and show error callout when API call fails', async () => {
+        it('should not display the apply button for editor user', async () => {
           await PageObjects.svlCommonPage.loginWithPrivilegedRole();
 
           await PageObjects.datasetQuality.navigateToDetails({
@@ -816,16 +816,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             expandedDegradedField: 'cloud.project.id',
           });
 
-          const applyButton = await testSubjects.find(
-            'datasetQualityIncreaseFieldMappingLimitButtonButton'
+          // Should not display the panel to increase field limit
+          await testSubjects.missingOrFail(
+            'datasetQualityDetailsDegradedFieldFlyoutIncreaseFieldLimitPanel'
           );
-
-          await applyButton.click();
-
-          await retry.tryForTime(5000, async () => {
-            // Should display the error callout
-            await testSubjects.existOrFail('datasetQualityDetailsNewFieldLimitErrorCallout');
-          });
 
           await PageObjects.svlCommonPage.loginAsAdmin();
         });
@@ -837,7 +831,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           });
 
           const applyButton = await testSubjects.find(
-            'datasetQualityIncreaseFieldMappingLimitButtonButton'
+            'datasetQualityIncreaseFieldMappingLimitButton'
           );
 
           await applyButton.click();

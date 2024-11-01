@@ -44,17 +44,10 @@ export const fetchIntegrationDashboardsFailedNotifier = (toasts: IToasts, error:
   });
 };
 
-export const fetchDataStreamIntegrationFailedNotifier = (
-  toasts: IToasts,
-  error: Error,
-  integrationName?: string
-) => {
+export const fetchDataStreamIntegrationFailedNotifier = (toasts: IToasts, error: Error) => {
   toasts.addDanger({
     title: i18n.translate('xpack.datasetQuality.details.fetchIntegrationsFailed', {
-      defaultMessage: "We couldn't get {integrationName} integration info.",
-      values: {
-        integrationName,
-      },
+      defaultMessage: "We couldn't get integration info.",
     }),
     text: error.message,
   });

@@ -13,23 +13,21 @@ import { CreateEditPipelineLink } from './pipeline_link';
 import { otherMitigationsLoadingAriaText } from '../../../../../../common/translations';
 
 export function ManualMitigations() {
-  const { integrationDetails, loadingState, dataStreamSettings } = useDatasetQualityDetailsState();
-  const isIntegrationPresentInSettings = dataStreamSettings?.integration;
+  const {
+    integrationDetails,
+    loadingState: { integrationDetailsLoaded },
+  } = useDatasetQualityDetailsState();
   const isIntegration = !!integrationDetails?.integration;
-  const { dataStreamSettingsLoading, integrationDetailsLoadings } = loadingState;
-
-  const hasIntegrationCheckCompleted =
-    !dataStreamSettingsLoading &&
-    ((isIntegrationPresentInSettings && !integrationDetailsLoadings) ||
-      !isIntegrationPresentInSettings);
 
   return (
     <EuiSkeletonRectangle
-      isLoading={!hasIntegrationCheckCompleted}
+      isLoading={!integrationDetailsLoaded}
       contentAriaLabel={otherMitigationsLoadingAriaText}
       width="100%"
       height={300}
       borderRadius="none"
+      data-test-subj="datasetQualityDetailsFlyoutManualMitigationsLoading"
+      className="datasetQualityDetailsFlyoutManualMitigationsLoading"
     >
       <CreateEditComponentTemplateLink isIntegration={isIntegration} />
       <EuiSpacer size="s" />

@@ -568,6 +568,8 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
             expandedDegradedField: 'test_field',
           });
 
+          await PageObjects.datasetQuality.waitUntilPossibleMitigationsLoaded();
+
           // Possible Mitigation Section should exist
           await testSubjects.existOrFail(
             'datasetQualityDetailsDegradedFieldFlyoutPossibleMitigationTitle'
@@ -764,10 +766,10 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
           expect(newFieldLimit).to.be(newLimit);
 
           // Should display the apply button
-          await testSubjects.existOrFail('datasetQualityIncreaseFieldMappingLimitButtonButton');
+          await testSubjects.existOrFail('datasetQualityIncreaseFieldMappingLimitButton');
 
           const applyButton = await testSubjects.find(
-            'datasetQualityIncreaseFieldMappingLimitButtonButton'
+            'datasetQualityIncreaseFieldMappingLimitButton'
           );
           const applyButtonDisabledStatus = await applyButton.getAttribute('disabled');
 
@@ -792,7 +794,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
           );
 
           const applyButton = await testSubjects.find(
-            'datasetQualityIncreaseFieldMappingLimitButtonButton'
+            'datasetQualityIncreaseFieldMappingLimitButton'
           );
           const applyButtonDisabledStatus = await applyButton.getAttribute('disabled');
 
@@ -814,7 +816,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
           });
 
           const applyButton = await testSubjects.find(
-            'datasetQualityIncreaseFieldMappingLimitButtonButton'
+            'datasetQualityIncreaseFieldMappingLimitButton'
           );
 
           await applyButton.click();
