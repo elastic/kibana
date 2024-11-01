@@ -52,8 +52,12 @@ function deserializer(defaultValue: FormData): AlertSuppressionFormData {
   };
 }
 
-function serializer(formData: FormData): { alert_suppression: AlertSuppression } {
+function serializer(formData: FormData): { alert_suppression?: AlertSuppression } {
   const alertSuppressionFormData = formData as AlertSuppressionFormData;
+
+  if (alertSuppressionFormData[SUPPRESSION_FIELDS].length === 0) {
+    return {};
+  }
 
   return {
     alert_suppression: {
