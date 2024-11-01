@@ -53,7 +53,8 @@ export const useUpdateTimeline = () => {
     }: UpdateTimeline) => {
       let _timeline = timeline;
       if (duplicate) {
-        // `changed: true` in this case indicates that the timeline hasn't been saved yet
+        // Reset the `updated` and `version` fields because a duplicated timeline has not been saved yet.
+        // The `changed` field is set to true because the duplicated timeline needs to be saved.
         _timeline = { ...timeline, updated: undefined, changed: true, version: null };
       }
       if (!isEmpty(_timeline.indexNames)) {
