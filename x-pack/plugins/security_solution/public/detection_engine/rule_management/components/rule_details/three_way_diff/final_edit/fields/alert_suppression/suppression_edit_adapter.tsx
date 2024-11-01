@@ -16,7 +16,7 @@ import { useMLRuleConfig } from '../../../../../../../../common/components/ml/ho
 import type { RuleFieldEditComponentProps } from '../rule_field_edit_component_props';
 import { DataSourceType as RuleFormDataSourceType } from '../../../../../../../../detections/pages/detection_engine/rules/types';
 import { DataSourceType } from '../../../../../../../../../common/api/detection_engine/prebuilt_rules';
-import { AlertSuppressionEdit } from './alert_suppression_edit';
+import { AlertSuppressionEdit } from './suppression_edit';
 import * as i18n from './translations';
 
 export function AlertSuppressionEditAdapter({

@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './threshold_alert_suppression_edit_form';
+export * from './suppression_edit_form';

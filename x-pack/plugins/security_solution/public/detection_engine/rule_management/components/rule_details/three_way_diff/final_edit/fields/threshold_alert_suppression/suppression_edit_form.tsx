@@ -16,7 +16,7 @@ import {
   SUPPRESSION_DURATION,
   THRESHOLD_SUPPRESSION_ENABLED,
 } from './form_schema';
-import { ThresholdAlertSuppressionEdit } from './threshold_alert_suppression_edit';
+import { ThresholdAlertSuppressionEdit } from './suppression_edit';
 
 export function ThresholdAlertSuppressionEditForm(): JSX.Element {
   return (

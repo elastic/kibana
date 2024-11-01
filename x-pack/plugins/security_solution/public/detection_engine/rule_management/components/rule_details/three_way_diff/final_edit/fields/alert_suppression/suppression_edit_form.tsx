@@ -14,7 +14,7 @@ import {
   type AlertSuppression,
 } from '../../../../../../../../../common/api/detection_engine';
 import { RuleFieldEditFormWrapper } from '../rule_field_edit_form_wrapper';
-import { AlertSuppressionEditAdapter } from './alert_suppression_edit_adapter';
+import { AlertSuppressionEditAdapter } from './suppression_edit_adapter';
 import type { AlertSuppressionFormData } from './form_schema';
 import {
   alertSuppressionFormSchema,

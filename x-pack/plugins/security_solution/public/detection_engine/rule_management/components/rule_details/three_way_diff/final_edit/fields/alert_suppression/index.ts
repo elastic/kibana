@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './alert_suppression_edit_form';
+export * from './suppression_edit_form';
