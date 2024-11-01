@@ -122,6 +122,7 @@ const MetadataPopover: React.FC<MetaDataProps> = ({
         <EuiPopoverFooter>
           <EuiToolTip
             content={
+              /* for serverless search users hasDeleteDocumentsPrivilege flag indicates if user has privilege to delete documents, for stack hasDeleteDocumentsPrivilege would be undefined */
               hasDeleteDocumentsPrivilege !== undefined && !hasDeleteDocumentsPrivilege
                 ? i18n.translate(
                     'searchIndexDocuments.result.header.metadata.deleteDocumentToolTip',
