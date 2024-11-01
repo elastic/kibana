@@ -40,6 +40,7 @@ export default function bulkUntrackTests({ getService }: FtrProviderContext) {
           match_all: {},
         },
         conflicts: 'proceed',
+        ignore_unavailable: true,
       });
       await objectRemover.removeAll();
     });

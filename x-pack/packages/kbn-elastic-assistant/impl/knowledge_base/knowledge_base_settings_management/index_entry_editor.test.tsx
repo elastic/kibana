@@ -22,6 +22,7 @@ describe('IndexEntryEditor', () => {
       { name: 'field-2', esTypes: ['text'] },
       { name: 'field-3', esTypes: ['semantic_text'] },
     ]),
+    getExistingIndices: jest.fn().mockResolvedValue(['index-1']),
   } as unknown as DataViewsContract;
 
   const defaultProps = {
@@ -42,10 +43,10 @@ describe('IndexEntryEditor', () => {
     jest.clearAllMocks();
   });
 
-  it('renders the form fields with initial values', () => {
+  it('renders the form fields with initial values', async () => {
     const { getByDisplayValue } = render(<IndexEntryEditor {...defaultProps} />);
 
-    waitFor(() => {
+    await waitFor(() => {
       expect(getByDisplayValue('Test Entry')).toBeInTheDocument();
       expect(getByDisplayValue('Test Description')).toBeInTheDocument();
       expect(getByDisplayValue('Test Query Description')).toBeInTheDocument();
@@ -54,35 +55,37 @@ describe('IndexEntryEditor', () => {
     });
   });
 
-  it('updates the name field on change', () => {
+  it('updates the name field on change', async () => {
     const { getByTestId } = render(<IndexEntryEditor {...defaultProps} />);
 
-    waitFor(() => {
+    await waitFor(() => {
       const nameInput = getByTestId('entry-name');
       fireEvent.change(nameInput, { target: { value: 'New Entry Name' } });
+      expect(mockSetEntry).toHaveBeenCalledWith(expect.any(Function));
     });
-
-    expect(mockSetEntry).toHaveBeenCalledWith(expect.any(Function));
   });
 
-  it('updates the description field on change', () => {
+  it('updates the description field on change', async () => {
     const { getByTestId } = render(<IndexEntryEditor {...defaultProps} />);
-    waitFor(() => {
+
+    await waitFor(() => {
       const descriptionInput = getByTestId('entry-description');
       fireEvent.change(descriptionInput, { target: { value: 'New Description' } });
     });
 
-    expect(mockSetEntry).toHaveBeenCalledWith(expect.any(Function));
+    await waitFor(() => {
+      expect(mockSetEntry).toHaveBeenCalledWith(expect.any(Function));
+    });
   });
 
-  it('updates the query description field on change', () => {
+  it('updates the query description field on change', async () => {
     const { getByTestId } = render(<IndexEntryEditor {...defaultProps} />);
-    waitFor(() => {
+
+    await waitFor(() => {
       const queryDescriptionInput = getByTestId('query-description');
       fireEvent.change(queryDescriptionInput, { target: { value: 'New Query Description' } });
+      expect(mockSetEntry).toHaveBeenCalledWith(expect.any(Function));
     });
-
-    expect(mockSetEntry).toHaveBeenCalledWith(expect.any(Function));
   });
 
   it('displays sharing options and updates on selection', async () => {
@@ -91,8 +94,6 @@ describe('IndexEntryEditor', () => {
     await waitFor(() => {
       fireEvent.click(getByTestId('sharing-select'));
       fireEvent.click(getByTestId('sharing-private-option'));
-    });
-    await waitFor(() => {
       expect(mockSetEntry).toHaveBeenCalledWith(expect.any(Function));
     });
   });
@@ -100,28 +101,25 @@ describe('IndexEntryEditor', () => {
   it('fetches index options and updates on selection', async () => {
     const { getAllByTestId, getByTestId } = render(<IndexEntryEditor {...defaultProps} />);
 
-    await waitFor(() => expect(mockDataViews.getIndices).toHaveBeenCalled());
-
     await waitFor(() => {
+      expect(mockDataViews.getIndices).toHaveBeenCalled();
       fireEvent.click(getByTestId('index-combobox'));
       fireEvent.click(getAllByTestId('comboBoxToggleListButton')[0]);
+      fireEvent.click(getByTestId('index-2'));
+      expect(mockSetEntry).toHaveBeenCalledWith(expect.any(Function));
     });
-    fireEvent.click(getByTestId('index-2'));
-
-    expect(mockSetEntry).toHaveBeenCalledWith(expect.any(Function));
   });
 
   it('fetches field options based on selected index and updates on selection', async () => {
     const { getByTestId, getAllByTestId } = render(<IndexEntryEditor {...defaultProps} />);
 
-    await waitFor(() =>
+    await waitFor(() => {
       expect(mockDataViews.getFieldsForWildcard).toHaveBeenCalledWith({
         pattern: 'index-1',
-        fieldTypes: ['semantic_text'],
-      })
-    );
+      });
+    });
 
-    await waitFor(() => {
+    await waitFor(async () => {
       fireEvent.click(getByTestId('index-combobox'));
       fireEvent.click(getAllByTestId('comboBoxToggleListButton')[0]);
     });
@@ -135,7 +133,10 @@ describe('IndexEntryEditor', () => {
       within(getByTestId('entry-combobox')).getByTestId('comboBoxSearchInput'),
       'field-3'
     );
-    expect(mockSetEntry).toHaveBeenCalledWith(expect.any(Function));
+
+    await waitFor(() => {
+      expect(mockSetEntry).toHaveBeenCalledWith(expect.any(Function));
+    });
   });
 
   it('disables the field combo box if no index is selected', () => {
@@ -146,5 +147,21 @@ describe('IndexEntryEditor', () => {
     waitFor(() => {
       expect(getByRole('combobox', { name: i18n.ENTRY_FIELD_PLACEHOLDER })).toBeDisabled();
     });
+  });
+
+  it('fetches index options and updates on selection 2', async () => {
+    (mockDataViews.getExistingIndices as jest.Mock).mockResolvedValue([]);
+    const { getByText } = render(
+      <IndexEntryEditor
+        {...defaultProps}
+        entry={{ ...defaultProps.entry, index: 'missing-index' }}
+      />
+    );
+
+    await waitFor(() => {
+      expect(mockDataViews.getExistingIndices).toHaveBeenCalled();
+    });
+
+    expect(getByText("Index doesn't exist")).toBeInTheDocument();
   });
 });

@@ -1,12 +1,16 @@
 {
   "type": "plugin",
   "id": "@kbn/expression-metric-plugin",
-  "owner": "@elastic/kibana-presentation",
+  "owner": [
+    "@elastic/kibana-presentation"
+  ],
+  "group": "platform",
+  "visibility": "shared",
   "description": "Adds 'metric' function and renderer to expressions",
   "plugin": {
     "id": "expressionMetric",
-    "server": true,
     "browser": true,
+    "server": true,
     "requiredPlugins": [
       "expressions",
       "presentationUtil"
