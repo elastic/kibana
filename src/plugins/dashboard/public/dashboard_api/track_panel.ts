@@ -27,7 +27,7 @@ export function initializeTrackPanel(untilEmbeddableLoaded: (id: string) => Prom
   return {
     expandedPanelId: expandedPanelId$,
     expandPanel: (panelId: string) => {
-      const isPanelExpanded = Boolean(expandedPanelId$.value);
+      const isPanelExpanded = panelId === expandedPanelId$.value;
 
       if (isPanelExpanded) {
         setExpandedPanelId(undefined);
@@ -79,7 +79,6 @@ export function initializeTrackPanel(untilEmbeddableLoaded: (id: string) => Prom
     scrollToTop: () => {
       window.scroll(0, 0);
     },
-    setExpandedPanelId,
     setFocusedPanelId: (id: string | undefined) => {
       if (focusedPanelId$.value !== id) focusedPanelId$.next(id);
       setScrollToPanelId(id);

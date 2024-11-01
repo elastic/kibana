@@ -102,7 +102,8 @@ test('DashboardGrid removes panel when removed from container', async () => {
 
 test('DashboardGrid renders expanded panel', async () => {
   const { dashboardApi, component } = await createAndMountDashboardGrid();
-  dashboardApi.setExpandedPanelId('1');
+  // maximize panel
+  dashboardApi.expandPanel('1');
   await new Promise((resolve) => setTimeout(resolve, 1));
   component.update();
   // Both panels should still exist in the dom, so nothing needs to be re-fetched once minimized.
@@ -111,7 +112,8 @@ test('DashboardGrid renders expanded panel', async () => {
   expect(component.find('#mockDashboardGridItem_1').hasClass('expandedPanel')).toBe(true);
   expect(component.find('#mockDashboardGridItem_2').hasClass('hiddenPanel')).toBe(true);
 
-  dashboardApi.setExpandedPanelId();
+  // minimize panel
+  dashboardApi.expandPanel('1');
   await new Promise((resolve) => setTimeout(resolve, 1));
   component.update();
   expect(component.find('GridItem').length).toBe(2);

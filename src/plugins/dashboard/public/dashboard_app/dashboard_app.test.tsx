@@ -94,7 +94,7 @@ describe('Dashboard App', () => {
     });
 
     // simulate minimizing a panel
-    dashboardApi.setExpandedPanelId(undefined);
+    dashboardApi.expandPanel('456');
 
     await waitFor(() => {
       expect(dashboardApi.expandedPanelId.getValue()).toBe(undefined);
