@@ -51,6 +51,7 @@ interface FetchAndCalculateFieldStatsParams {
   searchHandler: SearchHandlerTextBased;
   field: DataViewField;
   esqlBaseQuery: string;
+  size?: number;
 }
 
 export async function fetchAndCalculateFieldStats(params: FetchAndCalculateFieldStatsParams) {
@@ -62,10 +63,10 @@ export async function fetchAndCalculateFieldStats(params: FetchAndCalculateField
     return await getStringTopValues(params, 3);
   }
   if (canProvideTopValuesForFieldTextBased(field)) {
-    return await getStringTopValues(params);
+    return await getStringTopValues(params, params.size);
   }
   if (canProvideExamplesForField(field, true)) {
-    return await getSimpleTextExamples(params);
+    return await getSimpleTextExamples(params, params.size);
   }
 
   return {};
@@ -111,7 +112,8 @@ export async function getStringTopValues(
 }
 
 export async function getSimpleTextExamples(
-  params: FetchAndCalculateFieldStatsParams
+  params: FetchAndCalculateFieldStatsParams,
+  size: number = DEFAULT_SIMPLE_EXAMPLES_SIZE
 ): Promise<FieldStatsResponse<string | boolean>> {
   const { searchHandler, field, esqlBaseQuery } = params;
   const safeEsqlFieldName = getSafeESQLFieldName(field.name);
@@ -119,7 +121,7 @@ export async function getSimpleTextExamples(
     esqlBaseQuery,
     `| WHERE ${safeEsqlFieldName} IS NOT NULL
     | KEEP ${safeEsqlFieldName}
-    | LIMIT ${SIMPLE_EXAMPLES_FETCH_SIZE}`
+    | LIMIT ${Math.max(SIMPLE_EXAMPLES_FETCH_SIZE, size * 10)}`
   );
 
   const result = await searchHandler({ query: esqlQuery });
@@ -136,7 +138,7 @@ export async function getSimpleTextExamples(
   const fieldExampleBuckets = getFieldExampleBuckets({
     values,
     field,
-    count: DEFAULT_SIMPLE_EXAMPLES_SIZE,
+    count: size,
     isTextBased: true,
   });
 

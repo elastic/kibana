@@ -198,6 +198,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
             toDate,
             baseQuery: query,
             abortController: abortControllerRef.current,
+            size: topValuesSizeLimit,
           })
         : await loadFieldStats({
             services: { data },

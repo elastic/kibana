@@ -29,6 +29,7 @@ interface FetchFieldStatsParamsTextBased {
   toDate: string;
   baseQuery: AggregateQuery;
   abortController?: AbortController;
+  size?: number;
 }
 
 export type LoadFieldStatsTextBasedHandler = (
@@ -53,6 +54,7 @@ export const loadFieldStatsTextBased: LoadFieldStatsTextBasedHandler = async ({
   toDate,
   baseQuery,
   abortController,
+  size,
 }) => {
   const { data } = services;
 
@@ -81,6 +83,7 @@ export const loadFieldStatsTextBased: LoadFieldStatsTextBasedHandler = async ({
       searchHandler,
       field,
       esqlBaseQuery: getESQLWithSafeLimit(baseQuery.esql, ESQL_SAFE_LIMIT),
+      size,
     });
   } catch (error) {
     // console.error(error);
