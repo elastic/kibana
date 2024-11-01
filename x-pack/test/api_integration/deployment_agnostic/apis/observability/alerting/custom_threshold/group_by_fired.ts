@@ -4,54 +4,91 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
 
-import { Aggregators } from '@kbn/observability-plugin/common/custom_threshold_rule/types';
-import { NO_DATA_ACTIONS_ID } from '@kbn/observability-plugin/server/lib/rules/custom_threshold/constants';
 import expect from '@kbn/expect';
-import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
-import { parseSearchParams } from '@kbn/share-plugin/common/url_service';
-import { omit } from 'lodash';
-import { COMPARATORS } from '@kbn/alerting-comparators';
 import { kbnTestConfig } from '@kbn/test';
-import { FtrProviderContext } from '../../../ftr_provider_context';
-import { ISO_DATE_REGEX } from './constants';
-import { ActionDocument, LogsExplorerLocatorParsedParams } from './typings';
-import type { InternalRequestHeader, RoleCredentials } from '../../../../shared/services';
+import { cleanup, generate, Dataset, PartialConfig } from '@kbn/data-forge';
+import { Aggregators } from '@kbn/observability-plugin/common/custom_threshold_rule/types';
+import { FIRED_ACTIONS_ID } from '@kbn/observability-plugin/server/lib/rules/custom_threshold/constants';
+import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
+import { COMPARATORS } from '@kbn/alerting-comparators';
+import type { InternalRequestHeader, RoleCredentials } from '@kbn/ftr-common-functional-services';
+import { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
+import { ActionDocument } from './types';
 
-export default function ({ getService }: FtrProviderContext) {
+export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const esClient = getService('es');
   const supertest = getService('supertest');
+  const esDeleteAllIndices = getService('esDeleteAllIndices');
+  const logger = getService('log');
   const alertingApi = getService('alertingApi');
   const dataViewApi = getService('dataViewApi');
-  const esDeleteAllIndices = getService('esDeleteAllIndices');
-  const svlUserManager = getService('svlUserManager');
-  const svlCommonApi = getService('svlCommonApi');
+  const samlAuth = getService('samlAuth');
+  let alertId: string;
   let roleAuthc: RoleCredentials;
   let internalReqHeader: InternalRequestHeader;
+  const config = getService('config');
+  const isServerless = config.get('serverless');
+  const expectedConsumer = isServerless ? 'observability' : 'logs';
 
-  describe('Custom Threshold rule - AVG - PCT - NoData', () => {
+  describe('GROUP_BY - FIRED', () => {
     const CUSTOM_THRESHOLD_RULE_ALERT_INDEX = '.alerts-observability.threshold.alerts-default';
+    const DATA_VIEW = 'kbn-data-forge-fake_hosts.fake_hosts-*';
     const ALERT_ACTION_INDEX = 'alert-action-threshold';
-    const DATA_VIEW_NAME = 'no-data-pattern-name';
-    const DATA_VIEW_ID = 'data-view-id-no-data';
-    const DATA_VIEW_TITLE = 'no-data-pattern-title';
+    const DATA_VIEW_ID = 'data-view-id';
+    let dataForgeConfig: PartialConfig;
+    let dataForgeIndices: string[];
     let actionId: string;
     let ruleId: string;
-    let alertId: string;
 
     before(async () => {
-      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
-      internalReqHeader = svlCommonApi.getInternalRequestHeader();
+      roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
+      internalReqHeader = samlAuth.getInternalRequestHeader();
+      dataForgeConfig = {
+        schedule: [
+          {
+            template: 'good',
+            start: 'now-15m',
+            end: 'now+5m',
+            metrics: [
+              { name: 'system.cpu.user.pct', method: 'linear', start: 2.5, end: 2.5 },
+              { name: 'system.cpu.total.pct', method: 'linear', start: 0.5, end: 0.5 },
+              { name: 'system.cpu.total.norm.pct', method: 'linear', start: 0.8, end: 0.8 },
+            ],
+          },
+        ],
+        indexing: {
+          dataset: 'fake_hosts' as Dataset,
+          eventsPerCycle: 1,
+          interval: 10000,
+          alignEventsToInterval: true,
+        },
+      };
+      dataForgeIndices = await generate({ client: esClient, config: dataForgeConfig, logger });
+      await alertingApi.waitForDocumentInIndex({ indexName: DATA_VIEW, docCountTarget: 360 });
       await dataViewApi.create({
-        name: DATA_VIEW_NAME,
+        name: DATA_VIEW,
         id: DATA_VIEW_ID,
-        title: DATA_VIEW_TITLE,
+        title: DATA_VIEW,
+        roleAuthc,
       });
     });
 
     after(async () => {
-      await supertest.delete(`/api/alerting/rule/${ruleId}`).set(internalReqHeader);
-      await supertest.delete(`/api/actions/connector/${actionId}`).set(internalReqHeader);
+      await supertest
+        .delete(`/api/alerting/rule/${ruleId}`)
+        .set(roleAuthc.apiKeyHeader)
+        .set(internalReqHeader);
+      await supertest
+        .delete(`/api/actions/connector/${actionId}`)
+        .set(roleAuthc.apiKeyHeader)
+        .set(internalReqHeader);
       await esClient.deleteByQuery({
         index: CUSTOM_THRESHOLD_RULE_ALERT_INDEX,
         query: { term: { 'kibana.alert.rule.uuid': ruleId } },
@@ -64,9 +101,11 @@ export default function ({ getService }: FtrProviderContext) {
       });
       await dataViewApi.delete({
         id: DATA_VIEW_ID,
+        roleAuthc,
       });
-      await esDeleteAllIndices([ALERT_ACTION_INDEX]);
-      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
+      await esDeleteAllIndices([ALERT_ACTION_INDEX, ...dataForgeIndices]);
+      await cleanup({ client: esClient, config: dataForgeConfig, logger });
+      await samlAuth.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
     describe('Rule creation', () => {
@@ -80,18 +119,22 @@ export default function ({ getService }: FtrProviderContext) {
         const createdRule = await alertingApi.createRule({
           roleAuthc,
           tags: ['observability'],
-          consumer: 'observability',
+          consumer: expectedConsumer,
           name: 'Threshold rule',
           ruleTypeId: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
           params: {
             criteria: [
               {
-                comparator: COMPARATORS.GREATER_THAN,
-                threshold: [0.5],
-                timeSize: 5,
+                comparator: COMPARATORS.GREATER_THAN_OR_EQUALS,
+                threshold: [0.2],
+                timeSize: 1,
                 timeUnit: 'm',
                 metrics: [
-                  { name: 'A', field: 'system.cpu.user.pct', aggType: Aggregators.AVERAGE },
+                  {
+                    name: 'A',
+                    field: 'system.cpu.total.norm.pct',
+                    aggType: Aggregators.AVERAGE,
+                  },
                 ],
               },
             ],
@@ -104,10 +147,11 @@ export default function ({ getService }: FtrProviderContext) {
               },
               index: DATA_VIEW_ID,
             },
+            groupBy: ['host.name', 'container.id'],
           },
           actions: [
             {
-              group: NO_DATA_ACTIONS_ID,
+              group: FIRED_ACTIONS_ID,
               id: actionId,
               params: {
                 documents: [
@@ -116,7 +160,8 @@ export default function ({ getService }: FtrProviderContext) {
                     alertDetailsUrl: '{{context.alertDetailsUrl}}',
                     reason: '{{context.reason}}',
                     value: '{{context.value}}',
-                    viewInAppUrl: '{{context.viewInAppUrl}}',
+                    host: '{{context.host}}',
+                    group: '{{context.group}}',
                   },
                 ],
               },
@@ -144,7 +189,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should find the created rule with correct information about the consumer', async () => {
         const match = await alertingApi.findInRules(roleAuthc, ruleId);
         expect(match).not.to.be(undefined);
-        expect(match.consumer).to.be('observability');
+        expect(match.consumer).to.be(expectedConsumer);
       });
 
       it('should set correct information in the alert document', async () => {
@@ -158,7 +203,7 @@ export default function ({ getService }: FtrProviderContext) {
           'kibana.alert.rule.category',
           'Custom threshold'
         );
-        expect(resp.hits.hits[0]._source).property('kibana.alert.rule.consumer', 'observability');
+        expect(resp.hits.hits[0]._source).property('kibana.alert.rule.consumer', expectedConsumer);
         expect(resp.hits.hits[0]._source).property('kibana.alert.rule.name', 'Threshold rule');
         expect(resp.hits.hits[0]._source).property('kibana.alert.rule.producer', 'observability');
         expect(resp.hits.hits[0]._source).property('kibana.alert.rule.revision', 0);
@@ -173,63 +218,76 @@ export default function ({ getService }: FtrProviderContext) {
           .contain('observability');
         expect(resp.hits.hits[0]._source).property(
           'kibana.alert.action_group',
-          'custom_threshold.nodata'
+          'custom_threshold.fired'
         );
         expect(resp.hits.hits[0]._source).property('tags').contain('observability');
-        expect(resp.hits.hits[0]._source).property('kibana.alert.instance.id', '*');
+        expect(resp.hits.hits[0]._source).property(
+          'kibana.alert.instance.id',
+          'host-0,container-0'
+        );
         expect(resp.hits.hits[0]._source).property('kibana.alert.workflow_status', 'open');
         expect(resp.hits.hits[0]._source).property('event.kind', 'signal');
         expect(resp.hits.hits[0]._source).property('event.action', 'open');
 
+        expect(resp.hits.hits[0]._source).property('host.name', 'host-0');
+        expect(resp.hits.hits[0]._source)
+          .property('host.mac')
+          .eql(['00-00-5E-00-53-23', '00-00-5E-00-53-24']);
+        expect(resp.hits.hits[0]._source).property('container.id', 'container-0');
+        expect(resp.hits.hits[0]._source).property('container.name', 'container-name');
+        expect(resp.hits.hits[0]._source).not.property('container.cpu');
+        expect(resp.hits.hits[0]._source)
+          .property('kibana.alert.group')
+          .eql([
+            {
+              field: 'host.name',
+              value: 'host-0',
+            },
+            {
+              field: 'container.id',
+              value: 'container-0',
+            },
+          ]);
+        expect(resp.hits.hits[0]._source).property('kibana.alert.evaluation.threshold').eql([0.2]);
         expect(resp.hits.hits[0]._source)
           .property('kibana.alert.rule.parameters')
           .eql({
             criteria: [
               {
-                comparator: '>',
-                threshold: [0.5],
-                timeSize: 5,
+                comparator: '>=',
+                threshold: [0.2],
+                timeSize: 1,
                 timeUnit: 'm',
-                metrics: [{ name: 'A', field: 'system.cpu.user.pct', aggType: 'avg' }],
+                metrics: [{ name: 'A', field: 'system.cpu.total.norm.pct', aggType: 'avg' }],
               },
             ],
             alertOnNoData: true,
             alertOnGroupDisappear: true,
-            searchConfiguration: {
-              index: 'data-view-id-no-data',
-              query: { query: '', language: 'kuery' },
-            },
+            searchConfiguration: { index: 'data-view-id', query: { query: '', language: 'kuery' } },
+            groupBy: ['host.name', 'container.id'],
           });
       });
 
       it('should set correct action variables', async () => {
         const resp = await alertingApi.waitForDocumentInIndex<ActionDocument>({
           indexName: ALERT_ACTION_INDEX,
-          docCountTarget: 1,
         });
-
         const { protocol, hostname, port } = kbnTestConfig.getUrlParts();
+
         expect(resp.hits.hits[0]._source?.ruleType).eql('observability.rules.custom_threshold');
         expect(resp.hits.hits[0]._source?.alertDetailsUrl).eql(
           `${protocol}://${hostname}${port ? `:${port}` : ''}/app/observability/alerts/${alertId}`
         );
         expect(resp.hits.hits[0]._source?.reason).eql(
-          'Average system.cpu.user.pct reported no data in the last 5m'
+          `Average system.cpu.total.norm.pct is 80%, above or equal the threshold of 20%. (duration: 1 min, data view: ${DATA_VIEW}, group: host-0,container-0)`
         );
-        expect(resp.hits.hits[0]._source?.value).eql('[NO DATA]');
-
-        const parsedViewInAppUrl = parseSearchParams<LogsExplorerLocatorParsedParams>(
-          new URL(resp.hits.hits[0]._source?.viewInAppUrl || '').search
+        expect(resp.hits.hits[0]._source?.value).eql('80%');
+        expect(resp.hits.hits[0]._source?.host).eql(
+          '{"name":"host-0","mac":["00-00-5E-00-53-23","00-00-5E-00-53-24"]}'
         );
-
-        expect(resp.hits.hits[0]._source?.viewInAppUrl).contain('LOGS_EXPLORER_LOCATOR');
-        expect(omit(parsedViewInAppUrl.params, 'timeRange.from')).eql({
-          dataset: DATA_VIEW_ID,
-          timeRange: { to: 'now' },
-          query: { query: '', language: 'kuery' },
-          filters: [],
-        });
-        expect(parsedViewInAppUrl.params.timeRange.from).match(ISO_DATE_REGEX);
+        expect(resp.hits.hits[0]._source?.group).eql(
+          '{"field":"host.name","value":"host-0"},{"field":"container.id","value":"container-0"}'
+        );
       });
     });
   });
