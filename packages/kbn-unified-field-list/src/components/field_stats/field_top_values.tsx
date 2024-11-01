@@ -8,7 +8,7 @@
  */
 
 import React, { Fragment } from 'react';
-import { euiPaletteColorBlind, EuiSpacer } from '@elastic/eui';
+import { EuiButtonEmpty, euiPaletteColorBlind, EuiSpacer } from '@elastic/eui';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type { AddFieldFilterHandler, BucketedAggregation } from '../../types';
 import FieldTopValuesBucket from './field_top_values_bucket';
@@ -23,6 +23,7 @@ export interface FieldTopValuesProps {
   color?: string;
   'data-test-subj': string;
   onAddFilter?: AddFieldFilterHandler;
+  onLoadMore?: () => void;
   overrideFieldTopValueBar?: OverrideFieldTopValueBarCallback;
 }
 
@@ -35,6 +36,7 @@ export const FieldTopValues: React.FC<FieldTopValuesProps> = ({
   color = getDefaultColor(),
   'data-test-subj': dataTestSubject,
   onAddFilter,
+  onLoadMore,
   overrideFieldTopValueBar,
 }) => {
   if (!buckets?.length) {
@@ -99,6 +101,11 @@ export const FieldTopValues: React.FC<FieldTopValuesProps> = ({
               onAddFilter={onAddFilter}
               overrideFieldTopValueBar={overrideFieldTopValueBar}
             />
+            {onLoadMore ? (
+              <EuiButtonEmpty flush="both" onClick={onLoadMore}>
+                {'Load more'}
+              </EuiButtonEmpty>
+            ) : null}
           </>
         )}
       </div>

@@ -53,6 +53,7 @@ import {
 import { FieldSummaryMessage } from './field_summary_message';
 import { FieldNumberSummary, isNumberSummaryValid } from './field_number_summary';
 import { ErrorBoundary } from '../error_boundary';
+import { DEFAULT_TOP_VALUES_SIZE } from '../../constants';
 
 export interface FieldStatsState {
   isLoading: boolean;
@@ -137,6 +138,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
   const abortControllerRef = useRef<AbortController | null>(null);
   const isCanceledRef = useRef<boolean>(false);
   const isTextBased = !!query && isOfAggregateQueryType(query);
+  const [topValuesSizeLimit, setTopValuesSizeLimit] = useState(DEFAULT_TOP_VALUES_SIZE);
 
   const setState: typeof changeState = useCallback(
     (nextState) => {
@@ -212,6 +214,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
                 getEsQueryConfig(uiSettings)
               ),
             abortController: abortControllerRef.current,
+            size: topValuesSizeLimit,
           });
 
       abortControllerRef.current = null;
@@ -233,7 +236,18 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
 
   useEffect(() => {
     fetchData();
-  }, [dataViewOrDataViewId, field, dslQuery, query, filters, fromDate, toDate, services]); // eslint-disable-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    dataViewOrDataViewId,
+    field,
+    dslQuery,
+    query,
+    filters,
+    fromDate,
+    toDate,
+    services,
+    topValuesSizeLimit,
+  ]);
 
   useEffect(() => {
     return () => {
@@ -543,17 +557,25 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
 
   if (topValues && topValues.buckets.length) {
     return combineWithTitleAndFooter(
-      <FieldTopValues
-        areExamples={topValues.areExamples}
-        buckets={topValues.buckets}
-        dataView={dataView}
-        field={field}
-        sampledValuesCount={sampledValues!}
-        color={color}
-        data-test-subj={dataTestSubject}
-        onAddFilter={onAddFilter}
-        overrideFieldTopValueBar={overrideFieldTopValueBar}
-      />
+      <>
+        <FieldTopValues
+          areExamples={topValues.areExamples}
+          buckets={topValues.buckets}
+          dataView={dataView}
+          field={field}
+          sampledValuesCount={sampledValues!}
+          color={color}
+          data-test-subj={dataTestSubject}
+          onAddFilter={onAddFilter}
+          onLoadMore={
+            topValuesSizeLimit < 100
+              ? () =>
+                  setTopValuesSizeLimit((value) => value + Math.floor(DEFAULT_TOP_VALUES_SIZE / 2))
+              : undefined
+          }
+          overrideFieldTopValueBar={overrideFieldTopValueBar}
+        />
+      </>
     );
   }
 

@@ -115,12 +115,12 @@ export async function fetchAndCalculateFieldStats({
 }) {
   if (!field.aggregatable) {
     return canProvideExamplesForField(field, false)
-      ? await getSimpleExamples(searchHandler, field, dataView)
+      ? await getSimpleExamples(searchHandler, field, dataView, undefined, size)
       : {};
   }
 
   if (field.type === 'geo_point' || field.type === 'geo_shape') {
-    return await getGeoExamples(searchHandler, field, dataView);
+    return await getGeoExamples(searchHandler, field, dataView, size);
   }
 
   if (!canProvideAggregatedStatsForField(field, false)) {
@@ -128,7 +128,7 @@ export async function fetchAndCalculateFieldStats({
   }
 
   if (field.type === 'histogram') {
-    return await getNumberHistogram(searchHandler, field, false);
+    return await getNumberHistogram(searchHandler, field, false, size);
   }
 
   if (canProvideNumberSummaryForField(field, false)) {
@@ -136,7 +136,7 @@ export async function fetchAndCalculateFieldStats({
   }
 
   if (field.type === 'number') {
-    return await getNumberHistogram(searchHandler, field);
+    return await getNumberHistogram(searchHandler, field, true, size);
   }
 
   if (field.type === 'date') {
@@ -192,7 +192,8 @@ export async function getNumberSummary(
 export async function getNumberHistogram(
   aggSearchWithBody: SearchHandler,
   field: DataViewField,
-  useTopHits = true
+  useTopHits = true,
+  size?: number
 ): Promise<FieldStatsResponse<string | number>> {
   const fieldRef = getFieldRef(field);
 
@@ -217,7 +218,7 @@ export async function getNumberHistogram(
       aggs: {
         ...baseAggs,
         top_values: {
-          terms: { ...fieldRef, size: DEFAULT_TOP_VALUES_SIZE },
+          terms: { ...fieldRef, size: size ?? DEFAULT_TOP_VALUES_SIZE },
         },
       },
     },
@@ -400,7 +401,8 @@ export async function getSimpleExamples(
   search: SearchHandler,
   field: DataViewField,
   dataView: DataView,
-  formatter?: FieldFormat
+  formatter?: FieldFormat,
+  size?: number
 ): Promise<FieldStatsResponse<string | number>> {
   try {
     const fieldRef = getFieldRef(field);
@@ -415,7 +417,7 @@ export async function getSimpleExamples(
       {
         values: getFieldValues(simpleExamplesResult.hits.hits, field, dataView),
         field,
-        count: DEFAULT_SIMPLE_EXAMPLES_SIZE,
+        count: size ?? DEFAULT_SIMPLE_EXAMPLES_SIZE,
         isTextBased: false,
       },
       formatter
@@ -439,11 +441,12 @@ export async function getSimpleExamples(
 export async function getGeoExamples(
   search: SearchHandler,
   field: DataViewField,
-  dataView: DataView
+  dataView: DataView,
+  size?: number
 ): Promise<FieldStatsResponse<string | number>> {
   try {
     const formatter = dataView.getFormatterForField(field);
-    return await getSimpleExamples(search, field, dataView, formatter);
+    return await getSimpleExamples(search, field, dataView, formatter, size);
   } catch (e) {
     console.error(e); // eslint-disable-line  no-console
     return {};
