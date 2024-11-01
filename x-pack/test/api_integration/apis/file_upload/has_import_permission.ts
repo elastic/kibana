@@ -35,6 +35,7 @@ export default ({ getService }: FtrProviderContext) => {
             {
               feature: {
                 indexPatterns: ['all'],
+                discover: ['all'],
               },
               spaces: ['*'],
             },
