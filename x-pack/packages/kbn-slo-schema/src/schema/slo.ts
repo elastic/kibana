@@ -7,7 +7,6 @@
 
 import * as t from 'io-ts';
 import { Either } from 'fp-ts/Either';
-import { i18n } from '@kbn/i18n';
 import { allOrAnyStringOrArray, dateType } from './common';
 import { durationType } from './duration';
 import { indicatorSchema } from './indicators';
@@ -49,10 +48,7 @@ const sloIdSchema = new t.Type<string, string, unknown>(
         return t.failure(
           input,
           context,
-          i18n.translate('xpack.synthetics.namespaceValidation.error', {
-            defaultMessage:
-              'Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores',
-          })
+          'Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores'
         );
       }
 
