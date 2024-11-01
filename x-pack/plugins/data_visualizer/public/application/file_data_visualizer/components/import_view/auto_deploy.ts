@@ -11,10 +11,11 @@ import type { HttpSetup } from '@kbn/core/public';
 const POLL_INTERVAL = 5; // seconds
 
 export class AutoDeploy {
-  constructor(private http: HttpSetup, private inferenceId: string) {}
   private inferError: string | null = null;
+  constructor(private http: HttpSetup, private inferenceId: string) {}
 
   public async deploy() {
+    this.inferError = null;
     if (await this.isDeployed()) {
       return;
     }
@@ -24,17 +25,6 @@ export class AutoDeploy {
     });
     await this.pollIsDeployed();
   }
-
-  // private async infer2() {
-  //   const resp = await this.http.fetch<InferenceInferenceEndpointInfo[]>(
-  //     `/internal/data_visualizer/inference/${this.inferenceId}`,
-  //     {
-  //       method: 'POST',
-  //       version: '1',
-  //       body: JSON.stringify({ input: '' }),
-  //     }
-  //   );
-  // }
 
   private async infer() {
     this.http.fetch<InferenceInferenceEndpointInfo[]>(

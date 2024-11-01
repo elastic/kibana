@@ -73,6 +73,7 @@ export const ImportProgress: FC<{ statuses: Statuses }> = ({ statuses }) => {
 
   if (
     readStatus === IMPORT_STATUS.COMPLETE &&
+    (initializeDeployment === false || initializeDeploymentStatus === IMPORT_STATUS.COMPLETE) &&
     indexCreatedStatus === IMPORT_STATUS.INCOMPLETE &&
     ingestPipelineCreatedStatus === IMPORT_STATUS.INCOMPLETE
   ) {
@@ -194,6 +195,12 @@ export const ImportProgress: FC<{ statuses: Statuses }> = ({ statuses }) => {
       'xpack.dataVisualizer.file.importProgress.fileProcessedTitle',
       {
         defaultMessage: 'File processed',
+      }
+    );
+    initializeDeploymentTitle = i18n.translate(
+      'xpack.dataVisualizer.file.importProgress.creatingIndexTitle',
+      {
+        defaultMessage: 'Deployment initialized',
       }
     );
     createIndexTitle = i18n.translate(
