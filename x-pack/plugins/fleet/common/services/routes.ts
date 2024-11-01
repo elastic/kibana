@@ -66,7 +66,7 @@ export const epmRouteService = {
     return `${EPM_API_ROOT}${filePath.replace('/package', '/packages')}`;
   },
 
-  getInstallPath: (pkgName: string, pkgVersion: string) => {
+  getInstallPath: (pkgName: string, pkgVersion?: string) => {
     if (pkgVersion) {
       return EPM_API_ROUTES.INSTALL_FROM_REGISTRY_PATTERN.replace('{pkgName}', pkgName)
         .replace('{pkgVersion?}', pkgVersion)
