@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { i18n } from '@kbn/i18n';
 import { SyntheticsRestApiRouteFactory } from '../../types';
 import { syntheticsParamType } from '../../../../common/types/saved_objects';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
@@ -24,7 +25,9 @@ export const deleteSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
     request: {
       body: schema.nullable(
         schema.object({
-          ids: schema.arrayOf(schema.string()),
+          ids: schema.arrayOf(schema.string(), {
+            minSize: 1,
+          }),
         })
       ),
       params: schema.object({
@@ -38,7 +41,9 @@ export const deleteSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
 
     if (ids && paramId) {
       return response.badRequest({
-        body: `Both param id  and body parameters cannot be provided`,
+        body: i18n.translate('xpack.synthetics.deleteParam.errorMultipleIdsProvided', {
+          defaultMessage: `Both param id  and body parameters cannot be provided`,
+        }),
       });
     }
 
@@ -46,7 +51,9 @@ export const deleteSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
 
     if (idsToDelete.length === 0) {
       return response.badRequest({
-        body: 'At least one id must be provided',
+        body: i18n.translate('xpack.synthetics.deleteParam.errorNoIdsProvided', {
+          defaultMessage: `No param ids provided`,
+        }),
       });
     }
 

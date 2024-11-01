@@ -289,7 +289,7 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'true')
         .send({ ids });
 
-      expect(deleteResponse.status).eql(200, JSON.stringify(deleteResponse.body));
+      expect(deleteResponse.status).eql(200);
 
       expect(deleteResponse.body).to.have.length(2);
 
