@@ -20,7 +20,7 @@ export const getSLOPipelineTemplate = (slo: SLODefinition) => ({
     {
       set: {
         field: '_id',
-        value: `${slo.id}-${slo.revision}-{{{_id}}}`,
+        value: `{{{_id}}}-${slo.id}-${slo.revision}`,
       },
     },
     {
