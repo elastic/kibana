@@ -259,6 +259,7 @@ export const VULNERABILITY_GROUPING_OPTIONS = {
 
 /*
 The fields below are default columns of the Cloud Security Data Table that need to have keyword mapping.
+The runtime mappings are used to prevent filtering out the data when any of these columns are sorted in the Data Table.
 TODO: Remove the fields below once they are mapped as Keyword in the Third Party integrations, or remove
 the fields from the runtime mappings if they are removed from the Data Table.
 */
