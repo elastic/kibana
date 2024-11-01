@@ -195,84 +195,88 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
           />
         </EuiFormRow>
 
-        <EuiFormRow fullWidth>
-          <EuiCallOut
-            color="primary"
-            iconType="iInCircle"
-            size="s"
-            title={i18n.translate(
-              'xpack.security.management.editRole.spacePrivilegeForm.featurePrivilegeSummaryDescription',
-              {
-                defaultMessage:
-                  'Some features might be hidden by the space or affected by a global space privilege.',
-              }
-            )}
-          />
-        </EuiFormRow>
+        {Boolean(this.state.selectedSpaceIds.length) && (
+          <>
+            <EuiFormRow fullWidth>
+              <EuiCallOut
+                color="primary"
+                iconType="iInCircle"
+                size="s"
+                title={i18n.translate(
+                  'xpack.security.management.editRole.spacePrivilegeForm.featurePrivilegeSummaryDescription',
+                  {
+                    defaultMessage:
+                      'Some features might be hidden by the space or affected by a global space privilege.',
+                  }
+                )}
+              />
+            </EuiFormRow>
 
-        {this.getPrivilegeCallout()}
+            {this.getPrivilegeCallout()}
 
-        <EuiFormRow
-          fullWidth
-          label={i18n.translate(
-            'xpack.security.management.editRole.spacePrivilegeForm.privilegeSelectorFormLabel',
-            {
-              defaultMessage: 'Define privileges',
-            }
-          )}
-          helpText={i18n.translate(
-            'xpack.security.management.editRole.spacePrivilegeForm.privilegeSelectorFormHelpText',
-            {
-              defaultMessage:
-                'Assign the privilege level you wish to grant to all present and future features across this space.',
-            }
-          )}
-        >
-          <EuiButtonGroup
-            name={`basePrivilegeButtonGroup`}
-            data-test-subj={`basePrivilegeButtonGroup`}
-            isFullWidth={true}
-            color={'primary'}
-            options={[
-              {
-                id: 'basePrivilege_all',
-                label: 'All',
-                ['data-test-subj']: 'basePrivilege_all',
-              },
-              {
-                id: 'basePrivilege_read',
-                label: 'Read',
-                ['data-test-subj']: 'basePrivilege_read',
-              },
-              {
-                id: 'basePrivilege_custom',
-                label: 'Customize',
-                ['data-test-subj']: 'basePrivilege_custom',
-              },
-            ]}
-            idSelected={this.getDisplayedBasePrivilege()}
-            isDisabled={!hasSelectedSpaces}
-            onChange={this.onSpaceBasePrivilegeChange}
-            legend={i18n.translate(
-              'xpack.security.management.editRole.spacePrivilegeForm.basePrivilegeControlLegend',
-              {
-                defaultMessage: 'Privileges for all features',
-              }
-            )}
-          />
-        </EuiFormRow>
+            <EuiFormRow
+              fullWidth
+              label={i18n.translate(
+                'xpack.security.management.editRole.spacePrivilegeForm.privilegeSelectorFormLabel',
+                {
+                  defaultMessage: 'Define privileges',
+                }
+              )}
+              helpText={i18n.translate(
+                'xpack.security.management.editRole.spacePrivilegeForm.privilegeSelectorFormHelpText',
+                {
+                  defaultMessage:
+                    'Assign the privilege level you wish to grant to all present and future features across this space.',
+                }
+              )}
+            >
+              <EuiButtonGroup
+                name={`basePrivilegeButtonGroup`}
+                data-test-subj={`basePrivilegeButtonGroup`}
+                isFullWidth={true}
+                color={'primary'}
+                options={[
+                  {
+                    id: 'basePrivilege_all',
+                    label: 'All',
+                    ['data-test-subj']: 'basePrivilege_all',
+                  },
+                  {
+                    id: 'basePrivilege_read',
+                    label: 'Read',
+                    ['data-test-subj']: 'basePrivilege_read',
+                  },
+                  {
+                    id: 'basePrivilege_custom',
+                    label: 'Customize',
+                    ['data-test-subj']: 'basePrivilege_custom',
+                  },
+                ]}
+                idSelected={this.getDisplayedBasePrivilege()}
+                isDisabled={!hasSelectedSpaces}
+                onChange={this.onSpaceBasePrivilegeChange}
+                legend={i18n.translate(
+                  'xpack.security.management.editRole.spacePrivilegeForm.basePrivilegeControlLegend',
+                  {
+                    defaultMessage: 'Privileges for all features',
+                  }
+                )}
+              />
+            </EuiFormRow>
 
-        <KibanaPrivilegeTable
-          role={this.state.role}
-          privilegeCalculator={this.state.privilegeCalculator}
-          onChange={this.onFeaturePrivilegesChange}
-          onChangeAll={this.onChangeAllFeaturePrivileges}
-          kibanaPrivileges={this.props.kibanaPrivileges}
-          privilegeIndex={this.state.privilegeIndex}
-          canCustomizeSubFeaturePrivileges={this.props.canCustomizeSubFeaturePrivileges}
-          disabled={this.state.selectedBasePrivilege.length > 0 || !hasSelectedSpaces}
-          allSpacesSelected={this.state.selectedSpaceIds.includes(ALL_SPACES_ID)}
-        />
+            <KibanaPrivilegeTable
+              role={this.state.role}
+              privilegeCalculator={this.state.privilegeCalculator}
+              onChange={this.onFeaturePrivilegesChange}
+              onChangeAll={this.onChangeAllFeaturePrivileges}
+              kibanaPrivileges={this.props.kibanaPrivileges}
+              privilegeIndex={this.state.privilegeIndex}
+              canCustomizeSubFeaturePrivileges={this.props.canCustomizeSubFeaturePrivileges}
+              disabled={this.state.selectedBasePrivilege.length > 0 || !hasSelectedSpaces}
+              allSpacesSelected={this.state.selectedSpaceIds.includes(ALL_SPACES_ID)}
+            />
+          </>
+        )}
 
         {this.requiresGlobalPrivilegeWarning() && (
           <Fragment>
