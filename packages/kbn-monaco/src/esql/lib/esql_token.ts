@@ -11,7 +11,7 @@ import { monaco } from '../../monaco_imports';
 import { ESQL_TOKEN_POSTFIX } from './constants';
 
 /** @internal **/
-export class ESQLToken implements monaco.languages.IToken {
+export class ESQLMonacoToken implements monaco.languages.IToken {
   scopes: string;
 
   constructor(ruleName: string, public startIndex: number, public stopIndex?: number) {
