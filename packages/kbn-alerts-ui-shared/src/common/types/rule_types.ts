@@ -7,28 +7,29 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  ActionGroup,
-  SanitizedRule as AlertingSanitizedRule,
-  ResolvedSanitizedRule,
-  SanitizedRuleAction as RuleAction,
-  RuleNotifyWhenType,
-  RuleSystemAction,
-} from '@kbn/alerting-types';
-import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import { DocLinksStart } from '@kbn/core-doc-links-browser';
+import type { ComponentType } from 'react';
+import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type {
+  RuleNotifyWhenType,
+  ActionGroup,
+  SanitizedRule as AlertingSanitizedRule,
+  SanitizedRuleAction as RuleAction,
+  RuleSystemAction,
+  ResolvedSanitizedRule,
+} from '@kbn/alerting-types';
+import { RuleType } from '@kbn/triggers-actions-ui-types';
 import { PublicMethodsOf } from '@kbn/utility-types';
-import type { ComponentType } from 'react';
 import { TypeRegistry } from '../type_registry';
-export type {
-  RuleTypeIndexWithDescriptions,
-  RuleTypeWithDescription,
-} from '@kbn/triggers-actions-ui-types';
 
 export type { SanitizedRuleAction as RuleAction } from '@kbn/alerting-types';
+
+export type RuleTypeWithDescription = RuleType<string, string> & { description?: string };
+
+export type RuleTypeIndexWithDescriptions = Map<string, RuleTypeWithDescription>;
 
 export type RuleTypeParams = Record<string, unknown>;
 
