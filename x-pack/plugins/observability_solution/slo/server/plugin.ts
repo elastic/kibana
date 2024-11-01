@@ -42,11 +42,13 @@ export class SLOPlugin
 {
   private readonly logger: Logger;
   private readonly config: SLOConfig;
+  private readonly isServerless: boolean;
   private sloOrphanCleanupTask?: SloOrphanSummaryCleanupTask;
 
   constructor(private readonly initContext: PluginInitializerContext) {
     this.logger = this.initContext.logger.get();
     this.config = this.initContext.config.get<SLOConfig>();
+    this.isServerless = this.initContext.env.packageInfo.buildFlavor === 'serverless';
   }
 
   public setup(
@@ -145,9 +147,7 @@ export class SLOPlugin
         },
       },
       logger: this.logger,
-      repository: getSloServerRouteRepository({
-        isServerless: this.initContext.env.packageInfo.buildFlavor === 'serverless',
-      }),
+      repository: getSloServerRouteRepository({ isServerless: this.isServerless }),
     });
 
     core

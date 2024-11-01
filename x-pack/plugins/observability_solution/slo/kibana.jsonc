@@ -38,11 +38,11 @@
       "presentationUtil",
       "features",
       "licensing",
-      "usageCollection"
+      "usageCollection",
+      "spaces",
     ],
     "optionalPlugins": [
       "cloud",
-      "spaces",
       "serverless",
       "discover",
       "observabilityAIAssistant"

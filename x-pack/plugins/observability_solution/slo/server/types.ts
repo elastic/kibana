@@ -5,16 +5,11 @@
  * 2.0.
  */
 
-import type {
-  AlertingApiRequestHandlerContext,
-  PluginSetupContract,
-  PluginStartContract,
-} from '@kbn/alerting-plugin/server';
+import type { PluginSetupContract, PluginStartContract } from '@kbn/alerting-plugin/server';
 import { CloudSetup } from '@kbn/cloud-plugin/server';
-import type { CoreRequestHandlerContext, CustomRequestHandlerContext } from '@kbn/core/server';
 import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import type { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
+import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import {
   RuleRegistryPluginSetupContract,
   RuleRegistryPluginStartContract,
@@ -27,14 +22,7 @@ import {
 } from '@kbn/task-manager-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
-/**
- * @internal
- */
-export type SloRequestHandlerContext = CustomRequestHandlerContext<{
-  licensing: LicensingApiRequestHandlerContext;
-  alerting: AlertingApiRequestHandlerContext;
-  core: Promise<CoreRequestHandlerContext>;
-}>;
+export type { SLOConfig } from '../common/config';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SLOServerSetup {}
@@ -48,17 +36,17 @@ export interface SLOPluginSetupDependencies {
   share: SharePluginSetup;
   features: FeaturesPluginSetup;
   taskManager: TaskManagerSetupContract;
-  spaces?: SpacesPluginSetup;
+  spaces: SpacesPluginSetup;
   cloud?: CloudSetup;
   usageCollection: UsageCollectionSetup;
+  licensing: LicensingPluginSetup;
 }
 
 export interface SLOPluginStartDependencies {
   alerting: PluginStartContract;
   taskManager: TaskManagerStartContract;
-  spaces?: SpacesPluginStart;
+  spaces: SpacesPluginStart;
   ruleRegistry: RuleRegistryPluginStartContract;
   dataViews: DataViewsServerPluginStart;
+  licensing: LicensingPluginStart;
 }
-
-export type { SLOConfig } from '../common/config';
