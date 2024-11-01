@@ -296,42 +296,23 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
 
   private getSaveButton = () => {
     const { mode } = this.state;
-    const isGlobal = this.isDefiningGlobalPrivilege();
     let buttonText;
     switch (mode) {
       case 'create':
-        if (isGlobal) {
-          buttonText = (
-            <FormattedMessage
-              id="xpack.security.management.editRolespacePrivilegeForm.createGlobalPrivilegeButton"
-              defaultMessage="Create global privilege"
-            />
-          );
-        } else {
-          buttonText = (
-            <FormattedMessage
-              id="xpack.security.management.editRolespacePrivilegeForm.createPrivilegeButton"
-              defaultMessage="Add Kibana privilege"
-            />
-          );
-        }
+        buttonText = (
+          <FormattedMessage
+            id="xpack.security.management.editRolespacePrivilegeForm.createPrivilegeButton"
+            defaultMessage="Assign role"
+          />
+        );
         break;
       case 'update':
-        if (isGlobal) {
-          buttonText = (
-            <FormattedMessage
-              id="xpack.security.management.editRolespacePrivilegeForm.updateGlobalPrivilegeButton"
-              defaultMessage="Update global privilege"
-            />
-          );
-        } else {
-          buttonText = (
-            <FormattedMessage
-              id="xpack.security.management.editRolespacePrivilegeForm.updatePrivilegeButton"
-              defaultMessage="Update space privilege"
-            />
-          );
-        }
+        buttonText = (
+          <FormattedMessage
+            id="xpack.security.management.editRolespacePrivilegeForm.updatePrivilegeButton"
+            defaultMessage="Update role privileges"
+          />
+        );
         break;
       default:
         throw new Error(`Unsupported mode: ${mode}`);
