@@ -17,24 +17,31 @@ import { Layout, Responsive as ResponsiveReactGridLayout } from 'react-grid-layo
 
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 
-import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import {
+  useBatchedPublishingSubjects,
+  useStateFromPublishingSubject,
+} from '@kbn/presentation-publishing';
 import { DashboardPanelState } from '../../../../common';
 import { DashboardGridItem } from './dashboard_grid_item';
 import { useDashboardGridSettings } from './use_dashboard_grid_settings';
 import { useDashboardApi } from '../../../dashboard_api/use_dashboard_api';
-import { getPanelLayoutsAreEqual } from '../../state/diffing/dashboard_diffing_utils';
+import { arePanelLayoutsEqual } from '../../../dashboard_api/are_panel_layouts_equal';
+import { useDashboardInternalApi } from '../../../dashboard_api/use_dashboard_internal_api';
 import { DASHBOARD_GRID_HEIGHT, DASHBOARD_MARGIN_SIZE } from '../../../dashboard_constants';
 
 export const DashboardGrid = ({ viewportWidth }: { viewportWidth: number }) => {
   const dashboardApi = useDashboardApi();
+  const dashboardInternalApi = useDashboardInternalApi();
 
-  const [animatePanelTransforms, expandedPanelId, focusedPanelId, panels, useMargins, viewMode] =
+  const animatePanelTransforms = useStateFromPublishingSubject(
+    dashboardInternalApi.animatePanelTransforms$
+  );
+  const [expandedPanelId, focusedPanelId, panels, useMargins, viewMode] =
     useBatchedPublishingSubjects(
-      dashboardApi.animatePanelTransforms$,
       dashboardApi.expandedPanelId,
       dashboardApi.focusedPanelId$,
       dashboardApi.panels$,
-      dashboardApi.useMargins$,
+      dashboardApi.settings.useMargins$,
       dashboardApi.viewMode
     );
 
@@ -98,7 +105,7 @@ export const DashboardGrid = ({ viewportWidth }: { viewportWidth: number }) => {
         },
         {} as { [key: string]: DashboardPanelState }
       );
-      if (!getPanelLayoutsAreEqual(panels, updatedPanels)) {
+      if (!arePanelLayoutsEqual(panels, updatedPanels)) {
         dashboardApi.setPanels(updatedPanels);
       }
     },

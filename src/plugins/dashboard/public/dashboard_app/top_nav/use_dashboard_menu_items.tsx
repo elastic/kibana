@@ -8,7 +8,6 @@
  */
 
 import { Dispatch, SetStateAction, useCallback, useMemo, useState } from 'react';
-import { batch } from 'react-redux';
 
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
@@ -42,28 +41,17 @@ export const useDashboardMenuItems = ({
 
   const [isSaveInProgress, setIsSaveInProgress] = useState(false);
 
-  /**
-   * Unpack dashboard state from redux
-   */
   const dashboardApi = useDashboardApi();
 
-  const [
-    dashboardTitle,
-    hasOverlays,
-    hasRunMigrations,
-    hasUnsavedChanges,
-    lastSavedId,
-    managed,
-    viewMode,
-  ] = useBatchedPublishingSubjects(
-    dashboardApi.panelTitle,
-    dashboardApi.hasOverlays$,
-    dashboardApi.hasRunMigrations$,
-    dashboardApi.hasUnsavedChanges$,
-    dashboardApi.savedObjectId,
-    dashboardApi.managed$,
-    dashboardApi.viewMode
-  );
+  const [dashboardTitle, hasOverlays, hasRunMigrations, hasUnsavedChanges, lastSavedId, viewMode] =
+    useBatchedPublishingSubjects(
+      dashboardApi.panelTitle,
+      dashboardApi.hasOverlays$,
+      dashboardApi.hasRunMigrations$,
+      dashboardApi.hasUnsavedChanges$,
+      dashboardApi.savedObjectId,
+      dashboardApi.viewMode
+    );
   const disableTopNav = isSaveInProgress || hasOverlays;
 
   /**
@@ -96,8 +84,8 @@ export const useDashboardMenuItems = ({
    * initiate interactive dashboard copy action
    */
   const dashboardInteractiveSave = useCallback(() => {
-    dashboardApi.runInteractiveSave(viewMode).then((result) => maybeRedirect(result));
-  }, [maybeRedirect, dashboardApi, viewMode]);
+    dashboardApi.runInteractiveSave().then((result) => maybeRedirect(result));
+  }, [maybeRedirect, dashboardApi]);
 
   /**
    * Show the dashboard's "Confirm reset changes" modal. If confirmed:
@@ -118,15 +106,13 @@ export const useDashboardMenuItems = ({
         switchModes?.();
         return;
       }
-      confirmDiscardUnsavedChanges(() => {
-        batch(async () => {
-          setIsResetting(true);
-          await dashboardApi.asyncResetToLastSavedState();
-          if (isMounted()) {
-            setIsResetting(false);
-            switchModes?.();
-          }
-        });
+      confirmDiscardUnsavedChanges(async () => {
+        setIsResetting(true);
+        await dashboardApi.asyncResetToLastSavedState();
+        if (isMounted()) {
+          setIsResetting(false);
+          switchModes?.();
+        }
       }, viewMode as ViewMode);
     },
     [dashboardApi, hasUnsavedChanges, viewMode, isMounted]
@@ -273,7 +259,7 @@ export const useDashboardMenuItems = ({
     const labsMenuItem = isLabsEnabled ? [menuItems.labs] : [];
     const shareMenuItem = shareService ? [menuItems.share] : [];
     const duplicateMenuItem = showWriteControls ? [menuItems.interactiveSave] : [];
-    const editMenuItem = showWriteControls && !managed ? [menuItems.edit] : [];
+    const editMenuItem = showWriteControls && !dashboardApi.isManaged ? [menuItems.edit] : [];
     const mayberesetChangesMenuItem = showResetChange ? [resetChangesMenuItem] : [];
 
     return [
@@ -284,7 +270,7 @@ export const useDashboardMenuItems = ({
       ...mayberesetChangesMenuItem,
       ...editMenuItem,
     ];
-  }, [isLabsEnabled, menuItems, managed, showResetChange, resetChangesMenuItem]);
+  }, [isLabsEnabled, menuItems, dashboardApi.isManaged, showResetChange, resetChangesMenuItem]);
 
   const editModeTopNavConfig = useMemo(() => {
     const labsMenuItem = isLabsEnabled ? [menuItems.labs] : [];

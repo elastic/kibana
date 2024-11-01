@@ -19,6 +19,7 @@ import {
   SearchDashboardsArgs,
   SearchDashboardsResponse,
 } from './lib/find_dashboards';
+import { DashboardState } from '../../dashboard_api/types';
 
 export interface DashboardContentManagementService {
   findDashboards: FindDashboardsService;
@@ -77,7 +78,7 @@ export type SavedDashboardSaveOpts = SavedObjectSaveOpts & { saveAsCopy?: boolea
 
 export interface SaveDashboardProps {
   controlGroupReferences?: Reference[];
-  currentState: SavedDashboardInput;
+  currentState: DashboardState;
   saveOptions: SavedDashboardSaveOpts;
   panelReferences?: Reference[];
   lastSavedId?: string;

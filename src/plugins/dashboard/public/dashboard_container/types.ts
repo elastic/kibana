@@ -31,7 +31,7 @@ export type RedirectToProps =
 
 export type DashboardStateFromSaveModal = Pick<
   DashboardContainerInput,
-  'title' | 'description' | 'tags' | 'timeRestore' | 'timeRange' | 'refreshInterval'
+  'title' | 'description' | 'tags' | 'timeRestore'
 >;
 
 export type DashboardStateFromSettingsFlyout = DashboardStateFromSaveModal & DashboardOptions;
