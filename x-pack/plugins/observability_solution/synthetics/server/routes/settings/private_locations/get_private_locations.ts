@@ -15,7 +15,7 @@ import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { getPrivateLocations } from '../../../synthetics_service/get_private_locations';
 import type { SyntheticsPrivateLocationsAttributes } from '../../../runtime_types/private_locations';
 import { SyntheticsMonitorClient } from '../../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
-import { toClientContractLegacy } from './helpers';
+import { allLocationsToClientContract } from './helpers';
 
 export const getPrivateLocationsRoute: SyntheticsRestApiRouteFactory<
   SyntheticsPrivateLocations | PrivateLocation
@@ -40,7 +40,7 @@ export const getPrivateLocationsRoute: SyntheticsRestApiRouteFactory<
       savedObjectsClient,
       syntheticsMonitorClient
     );
-    const list = toClientContractLegacy({ locations }, agentPolicies);
+    const list = allLocationsToClientContract({ locations }, agentPolicies);
     if (!id) return list;
     const location = list.find((loc) => loc.id === id || loc.label === id);
     if (!location) {

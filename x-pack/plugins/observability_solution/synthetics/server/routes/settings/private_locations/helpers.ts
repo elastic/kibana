@@ -28,7 +28,7 @@ export const toClientContract = (
   };
 };
 
-export const toClientContractLegacy = (
+export const allLocationsToClientContract = (
   attributes: SyntheticsPrivateLocationsAttributes,
   agentPolicies?: AgentPolicyInfo[]
 ): SyntheticsPrivateLocations => {
