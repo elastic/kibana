@@ -11,7 +11,10 @@ import { EcsFlat } from '@elastic/ecs';
 import { ActionVariable } from '@kbn/alerting-types';
 import type { HttpStart } from '@kbn/core-http-browser';
 import { useQuery } from '@tanstack/react-query';
-import { fetchRuleTypeAadTemplateFields, getDescription } from '../apis';
+import {
+  fetchRuleTypeAadTemplateFields,
+  getDescription,
+} from '@kbn/alerts-ui-shared/src/common/apis';
 
 export interface UseLoadRuleTypeAadTemplateFieldProps {
   http: HttpStart;

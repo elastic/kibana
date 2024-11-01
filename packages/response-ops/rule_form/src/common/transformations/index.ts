@@ -7,10 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export interface UiConfig {
-  isUsingSecurity: boolean;
-  minimumScheduleInterval?: {
-    value: string;
-    enforce: boolean;
-  };
-}
+export * from './transform_rule';

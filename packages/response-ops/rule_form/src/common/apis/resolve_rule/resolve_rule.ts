@@ -9,7 +9,7 @@
 
 import { HttpSetup } from '@kbn/core-http-browser';
 import { AsApiContract } from '@kbn/actions-types';
-import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
+import { INTERNAL_BASE_ALERTING_API_PATH } from '../../../constants';
 import { transformResolvedRule } from '../../transformations';
 import { ResolvedRule } from '../../types';
 

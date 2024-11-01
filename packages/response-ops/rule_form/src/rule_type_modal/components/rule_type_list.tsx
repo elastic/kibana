@@ -22,7 +22,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { omit } from 'lodash';
-import { PRODUCER_DISPLAY_NAMES } from '../../common/i18n';
+import { PRODUCER_DISPLAY_NAMES } from '@kbn/alerts-ui-shared';
 import { RuleTypeWithDescription, RuleTypeCountsByProducer } from '../types';
 
 interface RuleTypeListProps {

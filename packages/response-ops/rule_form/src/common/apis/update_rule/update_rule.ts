@@ -11,7 +11,7 @@ import { HttpSetup } from '@kbn/core/public';
 import { pick } from 'lodash';
 import { AsApiContract } from '@kbn/actions-types';
 import { UpdateRuleBody } from './types';
-import { BASE_ALERTING_API_PATH } from '../../constants';
+import { BASE_ALERTING_API_PATH } from '../../../constants';
 import { transformUpdateRuleBody } from './transform_update_rule_body';
 import { transformRule } from '../../transformations';
 import { Rule } from '../../types';

@@ -8,7 +8,6 @@
  */
 
 export * from './use_create_rule';
-export * from './use_fetch_flapping_settings';
 export * from './use_load_connector_types';
 export * from './use_load_connectors';
 export * from './use_load_ui_config';

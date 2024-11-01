@@ -9,8 +9,8 @@
 
 import { AsApiContract, RewriteRequestCase } from '@kbn/actions-types';
 import { RuleExecutionStatus, RuleLastRun } from '@kbn/alerting-types';
-import type { ResolvedRule, RuleUiAction, Rule } from '..';
-import { transformAction } from '.';
+import { transformAction } from '@kbn/alerts-ui-shared/src/common/transformations';
+import type { ResolvedRule, Rule, RuleUiAction } from '..';
 
 const transformExecutionStatus: RewriteRequestCase<RuleExecutionStatus> = ({
   last_execution_date: lastExecutionDate,
