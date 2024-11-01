@@ -97,7 +97,7 @@ export const RuleTypeList: React.FC<RuleTypeListProps> = ({
       description={rule.description}
       style={{ marginRight: '8px', flexGrow: 0 }}
       data-test-subj={`${rule.id}-SelectOption`}
-      isDisabled={rule.enabledInLicense === false}
+      isDisabled={!rule.enabledInLicense}
     >
       <EuiText
         color="subdued"
