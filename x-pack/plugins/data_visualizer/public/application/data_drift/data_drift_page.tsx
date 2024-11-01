@@ -115,7 +115,7 @@ export const PageHeader: FC<PageHeaderProps> = ({ onRefresh, needsUpdate }) => {
           isAutoRefreshOnly={!hasValidTimeField}
           showRefresh={!hasValidTimeField}
           width="full"
-          flexGroup={false}
+          flexGroup={!hasValidTimeField}
           onRefresh={onRefresh}
           needsUpdate={needsUpdate}
         />,
