@@ -135,6 +135,7 @@ describe('useDetailViewRedirect', () => {
 
   [
     [ENTITY_TYPES.KUBERNETES.CLUSTER.ecs, 'kubernetes-f4dc26db-1b53-4ea2-a78b-1bfab8ea267c'],
+    [ENTITY_TYPES.KUBERNETES.CLUSTER.semconv, 'kubernetes_otel-cluster-overview'],
     [ENTITY_TYPES.KUBERNETES.CRONJOB.ecs, 'kubernetes-0a672d50-bcb1-11ec-b64f-7dd6e8e82013'],
     [ENTITY_TYPES.KUBERNETES.DAEMONSET.ecs, 'kubernetes-85879010-bcb1-11ec-b64f-7dd6e8e82013'],
     [ENTITY_TYPES.KUBERNETES.DEPLOYMENT.ecs, 'kubernetes-5be46210-bcb1-11ec-b64f-7dd6e8e82013'],
