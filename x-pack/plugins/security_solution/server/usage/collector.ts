@@ -9,6 +9,7 @@ import type { CollectorFetchContext } from '@kbn/usage-collection-plugin/server'
 
 import type { CollectorDependencies, DashboardMetrics } from './types';
 import { getDetectionsMetrics } from './detections/get_metrics';
+import { legacySiemSignalsSchema } from './detections/schema';
 import { getInternalSavedObjectsClient } from './get_internal_saved_objects_client';
 import { getEndpointMetrics } from './endpoint/get_metrics';
 import { getDashboardMetrics } from './dashboards/get_dashboards_metrics';
@@ -32,6 +33,7 @@ export const registerCollector: RegisterCollector = ({
   usageCollection,
   logger,
   riskEngineIndexPatterns,
+  legacySignalsIndex,
 }) => {
   if (!usageCollection) {
     logger.debug('Usage collection is undefined, therefore returning early without registering it');
@@ -3076,6 +3078,7 @@ export const registerCollector: RegisterCollector = ({
             },
           },
         },
+        legacySiemSignals: legacySiemSignalsSchema,
       },
       endpointMetrics: {
         unique_endpoint_count: {
@@ -3130,6 +3133,7 @@ export const registerCollector: RegisterCollector = ({
             savedObjectsClient,
             logger,
             mlClient: ml,
+            legacySignalsIndex,
           }),
           getEndpointMetrics({ esClient, logger }),
           getDashboardMetrics({

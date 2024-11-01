@@ -272,6 +272,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       core,
       eventLogIndex: plugins.eventLog.getIndexPattern(),
       signalsIndex: DEFAULT_ALERTS_INDEX,
+      legacySignalsIndex: config.signalsIndex,
       ml: plugins.ml,
       usageCollection: plugins.usageCollection,
       logger,
