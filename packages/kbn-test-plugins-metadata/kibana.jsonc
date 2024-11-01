@@ -1,0 +1,6 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/test-plugins-metadata",
+  "owner": "@elastic/appex-qa",
+  "devOnly": true
+}
