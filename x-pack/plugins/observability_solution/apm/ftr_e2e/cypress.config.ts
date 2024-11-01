@@ -13,6 +13,7 @@ export default defineCypressConfig({
   fileServerFolder: './cypress',
   fixturesFolder: './cypress/fixtures',
   screenshotsFolder: './cypress/screenshots',
+  experimentalMemoryManagement: true,
   videosFolder: './cypress/videos',
   requestTimeout: 10000,
   responseTimeout: 40000,
