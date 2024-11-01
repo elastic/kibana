@@ -5,29 +5,22 @@
  * 2.0.
  */
 
-import { map } from 'rxjs';
 import {
-  OutputAPI,
-  OutputEvent,
-  OutputEventType,
   ChatCompleteAPI,
   ChatCompletionEventType,
-  ChatCompleteStreamResponse,
-  ChatCompleteResponse,
   MessageRole,
-  withoutTokenCountEvents,
-  ToolSchema,
+  OutputAPI,
+  OutputEventType,
   OutputOptions,
-  OutputCompositeResponse,
+  ToolSchema,
+  withoutTokenCountEvents,
 } from '@kbn/inference-common';
+import { isObservable, map } from 'rxjs';
 import { ensureMultiTurn } from './utils/ensure_multi_turn';
 
-export function createOutputApi(chatCompleteApi: ChatCompleteAPI): OutputAPI {
-  return <
-    TId extends string = string,
-    TOutputSchema extends ToolSchema | undefined = ToolSchema | undefined,
-    TStream extends boolean = false
-  >({
+export function createOutputApi(chatCompleteApi: ChatCompleteAPI): OutputAPI;
+export function createOutputApi(chatCompleteApi: ChatCompleteAPI) {
+  return ({
     id,
     connectorId,
     input,
@@ -36,7 +29,7 @@ export function createOutputApi(chatCompleteApi: ChatCompleteAPI): OutputAPI {
     previousMessages,
     functionCalling,
     stream,
-  }: OutputOptions<TId, TOutputSchema, TStream>) => {
+  }: OutputOptions<string, ToolSchema | undefined, boolean>) => {
     const response = chatCompleteApi({
       connectorId,
       stream,
@@ -62,10 +55,10 @@ export function createOutputApi(chatCompleteApi: ChatCompleteAPI): OutputAPI {
         : {}),
     });
 
-    if (stream) {
-      return (response as ChatCompleteStreamResponse).pipe(
+    if (isObservable(response)) {
+      return response.pipe(
         withoutTokenCountEvents(),
-        map((event): OutputEvent<any, any> => {
+        map((event) => {
           if (event.type === ChatCompletionEventType.ChatCompletionChunk) {
             return {
               type: OutputEventType.OutputUpdate,
@@ -84,9 +77,9 @@ export function createOutputApi(chatCompleteApi: ChatCompleteAPI): OutputAPI {
             type: OutputEventType.OutputComplete,
           };
         })
-      ) as OutputCompositeResponse<TId, TOutputSchema, TStream>;
+      );
     } else {
-      return (response as Promise<ChatCompleteResponse>).then((chatResponse) => {
+      return response.then((chatResponse) => {
         return {
           id,
           content: chatResponse.content,
@@ -95,7 +88,7 @@ export function createOutputApi(chatCompleteApi: ChatCompleteAPI): OutputAPI {
               ? chatResponse.toolCalls[0].function.arguments
               : undefined,
         };
-      }) as OutputCompositeResponse<TId, TOutputSchema, TStream>;
+      });
     }
   };
 }

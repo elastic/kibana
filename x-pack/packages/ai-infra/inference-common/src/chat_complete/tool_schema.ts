@@ -11,9 +11,9 @@ interface ToolSchemaFragmentBase {
   description?: string;
 }
 
-interface ToolSchemaTypeObject extends ToolSchemaFragmentBase {
+export interface ToolSchemaTypeObject extends ToolSchemaFragmentBase {
   type: 'object';
-  properties?: Record<string, ToolSchemaType>;
+  properties: Record<string, ToolSchemaType>;
   required?: string[] | readonly string[];
 }
 
