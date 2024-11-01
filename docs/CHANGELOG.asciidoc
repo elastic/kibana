@@ -124,9 +124,8 @@ The Observability AI Assistant specific advanced setting for Logs index patterns
 AGPL license::
 * Adds AGPL 3.0 license ({kibana-pull}192025[#192025]).
 Alerting::
-* Support TheHive connector to cases ({kibana-pull}180931[#180931]).
-* TheHive Case Connector ({kibana-pull}180138[#180138]).
-* Inference Service Kibana connector ({kibana-pull}189027[#189027]).
+* Support TheHive connector in cases ({kibana-pull}180931[#180931]).
+* Adds TheHive connector ({kibana-pull}180138[#180138]).
 Dashboards and visualizations::
 * Adds the ability to star your favorite dashboards and quickly find them ({kibana-pull}189285[#189285]).
 * Adds a chart showing usage statistics to the dashboard details ({kibana-pull}187993[#187993]).
