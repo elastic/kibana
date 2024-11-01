@@ -41,7 +41,10 @@ export function createChatCompleteApi({
     system,
     functionCalling,
     stream,
-  }: ChatCompleteOptions<TToolOptions, TStream>): ChatCompleteCompositeResponse<TToolOptions, TStream> => {
+  }: ChatCompleteOptions<TToolOptions, TStream>): ChatCompleteCompositeResponse<
+    TToolOptions,
+    TStream
+  > => {
     const obs$ = defer(async () => {
       const actionsClient = await actions.getActionsClientWithRequest(request);
       const connector = await getConnectorById({ connectorId, actionsClient });
