@@ -15,7 +15,7 @@ import {
   EuiContextMenuPanelItemDescriptor,
 } from '@elastic/eui';
 import { ComponentTemplateDeserialized } from '../shared_imports';
-import { useKibana } from '../../..';
+import { useComponentTemplatesContext } from '../component_templates_context';
 
 export interface ManageAction {
   name: string;
@@ -35,7 +35,7 @@ export const ManageButton: React.FunctionComponent<Props> = ({
   componentTemplateDetails,
 }) => {
   const [isPopoverOpen, setIsPopOverOpen] = useState<boolean>(false);
-  const { services } = useKibana();
+  const { application } = useComponentTemplatesContext();
 
   const items: EuiContextMenuPanelItemDescriptor[] = actions.map(
     ({ name, icon, getIsDisabled, closePopoverOnClick, handleActionClick }) => {
@@ -63,7 +63,7 @@ export const ManageButton: React.FunctionComponent<Props> = ({
     }
   );
 
-  const button = services.application.capabilities.index_management.manageIndexTemplate ? (
+  const button = application.capabilities.index_management.manageIndexTemplate ? (
     <EuiButton
       fill
       data-test-subj="manageComponentTemplateButton"

@@ -32,7 +32,6 @@ import { ComponentTemplateListItem, reactRouterNavigate } from '../shared_import
 import { UIM_COMPONENT_TEMPLATE_DETAILS } from '../constants';
 import { useComponentTemplatesContext } from '../component_templates_context';
 import { DeprecatedBadge } from '../components';
-import { useKibana } from '../../..';
 
 const inUseFilterLabel = i18n.translate(
   'xpack.idxMgmt.componentTemplatesList.table.inUseFilterLabel',
@@ -74,8 +73,7 @@ export const ComponentTable: FunctionComponent<Props> = ({
   onCloneClick,
   history,
 }) => {
-  const { trackMetric } = useComponentTemplatesContext();
-  const { services } = useKibana();
+  const { trackMetric, application } = useComponentTemplatesContext();
 
   // By default, we want to show all the component templates that are not deprecated.
   const [filterOptions, setFilterOptions] = useState<EuiSelectableOption[]>([
@@ -325,13 +323,13 @@ export const ComponentTable: FunctionComponent<Props> = ({
     </EuiButton>,
   ];
 
-  if (services.application.capabilities.index_management.manageIndexTemplate) {
+  if (application.capabilities.index_management.manageIndexTemplate) {
     columns.push(actions);
     toolsRight.push(createBtn);
   }
 
-  const selectionConfig: EuiTableSelectionType<ComponentTemplateListItem> | undefined = services
-    .application.capabilities.index_management.manageIndexTemplate
+  const selectionConfig: EuiTableSelectionType<ComponentTemplateListItem> | undefined = application
+    .capabilities.index_management.manageIndexTemplate
     ? {
         onSelectionChange: setSelection,
         selectable: ({ usedBy }) => usedBy.length === 0,

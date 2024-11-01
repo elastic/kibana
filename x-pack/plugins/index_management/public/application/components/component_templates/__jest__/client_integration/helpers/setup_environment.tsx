@@ -43,6 +43,8 @@ const appDependencies = {
 
 export const componentTemplatesDependencies = (httpSetup: HttpSetup, coreStart?: CoreStart) => {
   const coreMockStart = coreMock.createStart();
+  // @ts-expect-error
+  coreMockStart.application.capabilities.index_management = { manageIndexTemplate: true };
   return {
     overlays: coreStart?.overlays ?? coreMockStart.overlays,
     httpClient: httpSetup,
@@ -53,6 +55,7 @@ export const componentTemplatesDependencies = (httpSetup: HttpSetup, coreStart?:
     getUrlForApp: applicationServiceMock.createStartContract().getUrlForApp,
     executionContext: executionContextServiceMock.createInternalStartContract(),
     startServices: coreStart ?? coreMockStart,
+    application: coreMockStart.application,
   };
 };
 

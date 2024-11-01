@@ -11,7 +11,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { EuiInMemoryTable, EuiButton, EuiLink, EuiBasicTableColumn } from '@elastic/eui';
 import { ScopedHistory } from '@kbn/core/public';
-import { UseRequestResponse, reactRouterNavigate } from '../../../../../../shared_imports';
+import {
+  UseRequestResponse,
+  reactRouterNavigate,
+  useKibana,
+} from '../../../../../../shared_imports';
 import { TemplateListItem } from '../../../../../../../common';
 import { UIM_TEMPLATE_SHOW_DETAILS_CLICK } from '../../../../../../../common/constants';
 import { TemplateDeleteModal } from '../../../../../components';
@@ -36,10 +40,70 @@ export const LegacyTemplateTable: React.FunctionComponent<Props> = ({
   history,
 }) => {
   const { uiMetricService } = useServices();
+  const { services } = useKibana();
   const [selection, setSelection] = useState<TemplateListItem[]>([]);
   const [templatesToDelete, setTemplatesToDelete] = useState<
     Array<{ name: string; isLegacy?: boolean }>
   >([]);
+
+  const actions: any = {
+    name: i18n.translate('xpack.idxMgmt.templateList.legacyTable.actionColumnTitle', {
+      defaultMessage: 'Actions',
+    }),
+    width: '120px',
+    actions: [
+      {
+        name: i18n.translate('xpack.idxMgmt.templateList.legacyTable.actionEditText', {
+          defaultMessage: 'Edit',
+        }),
+        isPrimary: true,
+        description: i18n.translate('xpack.idxMgmt.templateList.legacyTable.actionEditDecription', {
+          defaultMessage: 'Edit this template',
+        }),
+        icon: 'pencil',
+        type: 'icon',
+        onClick: ({ name }: TemplateListItem) => {
+          editTemplate(name, true);
+        },
+        enabled: ({ _kbnMeta: { type } }: TemplateListItem) => type !== 'cloudManaged',
+      },
+      {
+        type: 'icon',
+        name: i18n.translate('xpack.idxMgmt.templateList.legacyTable.actionCloneTitle', {
+          defaultMessage: 'Clone',
+        }),
+        description: i18n.translate(
+          'xpack.idxMgmt.templateList.legacyTable.actionCloneDescription',
+          {
+            defaultMessage: 'Clone this template',
+          }
+        ),
+        icon: 'copy',
+        onClick: ({ name }: TemplateListItem) => {
+          cloneTemplate(name, true);
+        },
+      },
+      {
+        name: i18n.translate('xpack.idxMgmt.templateList.legacyTable.actionDeleteText', {
+          defaultMessage: 'Delete',
+        }),
+        description: i18n.translate(
+          'xpack.idxMgmt.templateList.legacyTable.actionDeleteDecription',
+          {
+            defaultMessage: 'Delete this template',
+          }
+        ),
+        icon: 'trash',
+        color: 'danger',
+        type: 'icon',
+        onClick: ({ name, _kbnMeta: { isLegacy } }: TemplateListItem) => {
+          setTemplatesToDelete([{ name, isLegacy }]);
+        },
+        isPrimary: true,
+        enabled: ({ _kbnMeta: { type } }: TemplateListItem) => type !== 'cloudManaged',
+      },
+    ],
+  };
 
   const columns: Array<EuiBasicTableColumn<TemplateListItem>> = [
     {
@@ -122,68 +186,11 @@ export const LegacyTemplateTable: React.FunctionComponent<Props> = ({
         />
       ),
     },
-    {
-      name: i18n.translate('xpack.idxMgmt.templateList.legacyTable.actionColumnTitle', {
-        defaultMessage: 'Actions',
-      }),
-      width: '120px',
-      actions: [
-        {
-          name: i18n.translate('xpack.idxMgmt.templateList.legacyTable.actionEditText', {
-            defaultMessage: 'Edit',
-          }),
-          isPrimary: true,
-          description: i18n.translate(
-            'xpack.idxMgmt.templateList.legacyTable.actionEditDecription',
-            {
-              defaultMessage: 'Edit this template',
-            }
-          ),
-          icon: 'pencil',
-          type: 'icon',
-          onClick: ({ name }: TemplateListItem) => {
-            editTemplate(name, true);
-          },
-          enabled: ({ _kbnMeta: { type } }: TemplateListItem) => type !== 'cloudManaged',
-        },
-        {
-          type: 'icon',
-          name: i18n.translate('xpack.idxMgmt.templateList.legacyTable.actionCloneTitle', {
-            defaultMessage: 'Clone',
-          }),
-          description: i18n.translate(
-            'xpack.idxMgmt.templateList.legacyTable.actionCloneDescription',
-            {
-              defaultMessage: 'Clone this template',
-            }
-          ),
-          icon: 'copy',
-          onClick: ({ name }: TemplateListItem) => {
-            cloneTemplate(name, true);
-          },
-        },
-        {
-          name: i18n.translate('xpack.idxMgmt.templateList.legacyTable.actionDeleteText', {
-            defaultMessage: 'Delete',
-          }),
-          description: i18n.translate(
-            'xpack.idxMgmt.templateList.legacyTable.actionDeleteDecription',
-            {
-              defaultMessage: 'Delete this template',
-            }
-          ),
-          icon: 'trash',
-          color: 'danger',
-          type: 'icon',
-          onClick: ({ name, _kbnMeta: { isLegacy } }: TemplateListItem) => {
-            setTemplatesToDelete([{ name, isLegacy }]);
-          },
-          isPrimary: true,
-          enabled: ({ _kbnMeta: { type } }: TemplateListItem) => type !== 'cloudManaged',
-        },
-      ],
-    },
   ];
+
+  if (services.application?.capabilities.index_management.manageIndexTemplate) {
+    columns.push(actions);
+  }
 
   const pagination = {
     initialPageSize: 20,
@@ -197,21 +204,42 @@ export const LegacyTemplateTable: React.FunctionComponent<Props> = ({
     },
   } as const;
 
-  const selectionConfig = {
-    onSelectionChange: setSelection,
-    selectable: ({ _kbnMeta: { type } }: TemplateListItem) => type !== 'cloudManaged',
-    selectableMessage: (selectable: boolean) => {
-      if (!selectable) {
-        return i18n.translate(
-          'xpack.idxMgmt.templateList.legacyTable.deleteCloudManagedTemplateTooltip',
-          {
-            defaultMessage: 'You cannot delete a cloud-managed template.',
+  const selectionConfig = services.application?.capabilities.index_management.manageIndexTemplate
+    ? {
+        onSelectionChange: setSelection,
+        selectable: ({ _kbnMeta: { type } }: TemplateListItem) => type !== 'cloudManaged',
+        selectableMessage: (selectable: boolean) => {
+          if (!selectable) {
+            return i18n.translate(
+              'xpack.idxMgmt.templateList.legacyTable.deleteCloudManagedTemplateTooltip',
+              {
+                defaultMessage: 'You cannot delete a cloud-managed template.',
+              }
+            );
           }
-        );
+          return '';
+        },
       }
-      return '';
-    },
-  };
+    : undefined;
+
+  const toolsRight = services.application?.capabilities.index_management.manageIndexTemplate
+    ? [
+        <EuiButton
+          iconType="plusInCircle"
+          data-test-subj="createLegacyTemplateButton"
+          key="createTemplateButton"
+          {...reactRouterNavigate(history, {
+            pathname: '/create_template',
+            search: 'legacy=true',
+          })}
+        >
+          <FormattedMessage
+            id="xpack.idxMgmt.templateList.legacyTable.createLegacyTemplatesButtonLabel"
+            defaultMessage="Create legacy template"
+          />
+        </EuiButton>,
+      ]
+    : [];
 
   const searchConfig = {
     box: {
@@ -238,22 +266,7 @@ export const LegacyTemplateTable: React.FunctionComponent<Props> = ({
           />
         </EuiButton>
       ) : undefined,
-    toolsRight: [
-      <EuiButton
-        iconType="plusInCircle"
-        data-test-subj="createLegacyTemplateButton"
-        key="createTemplateButton"
-        {...reactRouterNavigate(history, {
-          pathname: '/create_template',
-          search: 'legacy=true',
-        })}
-      >
-        <FormattedMessage
-          id="xpack.idxMgmt.templateList.legacyTable.createLegacyTemplatesButtonLabel"
-          defaultMessage="Create legacy template"
-        />
-      </EuiButton>,
-    ],
+    toolsRight,
   };
 
   const goToList = () => {

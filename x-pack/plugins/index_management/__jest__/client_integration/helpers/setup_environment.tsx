@@ -95,6 +95,14 @@ const appDependencies = {
 
 export const kibanaVersion = new SemVer(MAJOR_VERSION);
 
+const application = applicationServiceMock.createStartContract();
+
+// todo find better way
+// @ts-expect-error
+application.capabilities.index_management = {
+  manageIndexTemplate: true,
+};
+
 const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
   uiSettings: uiSettingsServiceMock.createSetupContract(),
   settings: settingsServiceMock.createStartContract(),
@@ -102,6 +110,7 @@ const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
   kibanaVersion: {
     get: () => kibanaVersion,
   },
+  application,
 });
 
 export const setupEnvironment = () => {
