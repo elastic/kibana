@@ -64,7 +64,7 @@ function isValidId(id: string): boolean {
   const MIN_ID_LENGTH = 8;
   const MAX_ID_LENGTH = 48;
   const validLength = MIN_ID_LENGTH <= id.length && id.length <= MAX_ID_LENGTH;
-  return validLength && /^[a-zA-Z0-9-_]+$/.test(id);
+  return validLength && /^[a-z0-9-_]+$/.test(id);
 }
 
 const sloDefinitionSchema = t.type({
