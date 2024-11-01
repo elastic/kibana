@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { useCallback, useMemo } from 'react';
-import { useDispatch } from 'react-redux';
 
 import { i18n } from '@kbn/i18n';
 import { ALERT_RULE_EXCEPTIONS_LIST, ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
@@ -97,7 +96,6 @@ export const useInvestigateInTimeline = ({
   const {
     data: { search: searchStrategyClient },
   } = useKibana().services;
-  const dispatch = useDispatch();
   const { startTransaction } = useStartTransaction();
 
   const { services } = useKibana();
