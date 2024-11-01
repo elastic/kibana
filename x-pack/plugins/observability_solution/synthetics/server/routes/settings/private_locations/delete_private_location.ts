@@ -12,7 +12,7 @@ import { getMonitorsByLocation } from './get_location_monitors';
 import { getPrivateLocationsAndAgentPolicies } from './get_private_locations';
 import { SyntheticsRestApiRouteFactory } from '../../types';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
-import { privateLocationsSavedObjectName } from '../../../../common/saved_objects/private_locations';
+import { privateLocationSavedObjectName } from '../../../../common/saved_objects/private_locations';
 
 export const deletePrivateLocationRoute: SyntheticsRestApiRouteFactory<undefined> = () => ({
   method: 'DELETE',
@@ -56,7 +56,7 @@ export const deletePrivateLocationRoute: SyntheticsRestApiRouteFactory<undefined
       });
     }
 
-    await savedObjectsClient.delete(privateLocationsSavedObjectName, locationId, {
+    await savedObjectsClient.delete(privateLocationSavedObjectName, locationId, {
       force: true,
     });
   },

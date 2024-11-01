@@ -9,7 +9,7 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import { migrateLegacyPrivateLocations } from './migrate_legacy_private_locations';
 import { SyntheticsRestApiRouteFactory } from '../../types';
 import { getPrivateLocationsAndAgentPolicies } from './get_private_locations';
-import { privateLocationsSavedObjectName } from '../../../../common/saved_objects/private_locations';
+import { privateLocationSavedObjectName } from '../../../../common/saved_objects/private_locations';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { PrivateLocationAttributes } from '../../../runtime_types/private_locations';
 import { toClientContract, toSavedObjectContract } from './helpers';
@@ -81,8 +81,10 @@ export const addPrivateLocationRoute: SyntheticsRestApiRouteFactory<PrivateLocat
       });
     }
 
-    const result = await savedObjectsClient.create<PrivateLocationAttributes>(
-      privateLocationsSavedObjectName,
+    const soClient = routeContext.server.coreStart.savedObjects.createInternalRepository();
+
+    const result = await soClient.create<PrivateLocationAttributes>(
+      privateLocationSavedObjectName,
       formattedLocation,
       {
         id: location.agentPolicyId,

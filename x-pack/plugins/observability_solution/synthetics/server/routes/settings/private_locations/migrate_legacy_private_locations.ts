@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import pMap from 'p-map';
 import { SavedObject } from '@kbn/core-saved-objects-server';
 import {
   type PrivateLocationAttributes,
@@ -14,64 +13,54 @@ import {
 import {
   legacyPrivateLocationsSavedObjectId,
   legacyPrivateLocationsSavedObjectName,
-  privateLocationsSavedObjectName,
+  privateLocationSavedObjectName,
 } from '../../../../common/saved_objects/private_locations';
 import { RouteContext } from '../../types';
 
 export const migrateLegacyPrivateLocations = async ({
   server,
-  request,
   savedObjectsClient,
 }: RouteContext) => {
   try {
-    const { coreStart } = server;
-    const canSave =
-      (
-        await coreStart?.capabilities.resolveCapabilities(request, {
-          capabilityPath: 'uptime.*',
-        })
-      ).uptime.save ?? false;
+    let obj: SavedObject<SyntheticsPrivateLocationsAttributes> | undefined;
+    try {
+      obj = await savedObjectsClient.get<SyntheticsPrivateLocationsAttributes>(
+        legacyPrivateLocationsSavedObjectName,
+        legacyPrivateLocationsSavedObjectId
+      );
+    } catch (e) {
+      server.logger.error(`Error getting legacy private locations: ${e}`);
+      return;
+    }
+    const legacyLocations = obj?.attributes.locations ?? [];
+    if (legacyLocations.length === 0) {
+      return;
+    }
 
-    if (canSave) {
-      let obj: SavedObject<SyntheticsPrivateLocationsAttributes> | undefined;
-      try {
-        obj = await savedObjectsClient.get<SyntheticsPrivateLocationsAttributes>(
-          legacyPrivateLocationsSavedObjectName,
-          legacyPrivateLocationsSavedObjectId
-        );
-      } catch (e) {
-        return;
+    const soClient = server.coreStart.savedObjects.createInternalRepository();
+
+    await soClient.bulkCreate<PrivateLocationAttributes>(
+      legacyLocations.map((location) => ({
+        id: location.id,
+        attributes: location,
+        type: privateLocationSavedObjectName,
+        initialNamespaces: ['*'],
+      })),
+      {
+        overwrite: true,
       }
-      const legacyLocations = obj?.attributes.locations ?? [];
-      if (legacyLocations.length > 0) {
-        await pMap(
-          legacyLocations,
-          async (location) => {
-            await savedObjectsClient.create<PrivateLocationAttributes>(
-              privateLocationsSavedObjectName,
-              location,
-              {
-                id: location.id,
-                initialNamespaces: ['*'],
-                overwrite: true,
-              }
-            );
-          },
-          { concurrency: 10 }
-        );
+    );
 
-        const { total } = await savedObjectsClient.find<PrivateLocationAttributes>({
-          type: privateLocationsSavedObjectName,
-        });
+    const { total } = await savedObjectsClient.find<PrivateLocationAttributes>({
+      type: privateLocationSavedObjectName,
+    });
 
-        if (total === legacyLocations.length) {
-          await savedObjectsClient.delete(
-            legacyPrivateLocationsSavedObjectName,
-            legacyPrivateLocationsSavedObjectId,
-            {}
-          );
-        }
-      }
+    if (total === legacyLocations.length) {
+      await savedObjectsClient.delete(
+        legacyPrivateLocationsSavedObjectName,
+        legacyPrivateLocationsSavedObjectId,
+        {}
+      );
     }
   } catch (e) {
     server.logger.error(`Error migrating legacy private locations: ${e}`);

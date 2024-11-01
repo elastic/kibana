@@ -14,7 +14,7 @@ import { uniqBy } from 'lodash';
 import {
   legacyPrivateLocationsSavedObjectId,
   legacyPrivateLocationsSavedObjectName,
-  privateLocationsSavedObjectName,
+  privateLocationSavedObjectName,
 } from '../../common/saved_objects/private_locations';
 import {
   PrivateLocationAttributes,
@@ -26,7 +26,7 @@ export const getPrivateLocations = async (
 ): Promise<SyntheticsPrivateLocationsAttributes['locations']> => {
   try {
     const finder = client.createPointInTimeFinder<PrivateLocationAttributes>({
-      type: privateLocationsSavedObjectName,
+      type: privateLocationSavedObjectName,
       perPage: 1000,
     });
 

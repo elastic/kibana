@@ -16,7 +16,7 @@ import { syntheticsMonitorType, syntheticsParamType } from '../common/types/save
 import { SYNTHETICS_RULE_TYPES } from '../common/constants/synthetics_alerts';
 import {
   legacyPrivateLocationsSavedObjectName,
-  privateLocationsSavedObjectName,
+  privateLocationSavedObjectName,
 } from '../common/saved_objects/private_locations';
 import { PLUGIN } from '../common/constants/plugin';
 import {
@@ -74,7 +74,7 @@ export const syntheticsFeature = {
           syntheticsSettingsObjectType,
           syntheticsMonitorType,
           syntheticsApiKeyObjectType,
-          privateLocationsSavedObjectName,
+          privateLocationSavedObjectName,
           legacyPrivateLocationsSavedObjectName,
           syntheticsParamType,
           // uptime settings object is also registered here since feature is shared between synthetics and uptime

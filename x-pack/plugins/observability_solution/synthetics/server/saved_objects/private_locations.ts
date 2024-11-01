@@ -9,11 +9,11 @@ import { SavedObjectsType } from '@kbn/core/server';
 import { modelVersion1 } from './migrations/private_locations/model_version_1';
 import {
   legacyPrivateLocationsSavedObjectName,
-  privateLocationsSavedObjectName,
+  privateLocationSavedObjectName,
 } from '../../common/saved_objects/private_locations';
 
-export const PRIVATE_LOCATIONS_SAVED_OBJECT_TYPE: SavedObjectsType = {
-  name: privateLocationsSavedObjectName,
+export const PRIVATE_LOCATION_SAVED_OBJECT_TYPE: SavedObjectsType = {
+  name: privateLocationSavedObjectName,
   hidden: false,
   namespaceType: 'multiple',
   mappings: {
