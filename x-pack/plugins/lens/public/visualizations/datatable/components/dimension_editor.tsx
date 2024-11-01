@@ -256,7 +256,7 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
           label={i18n.translate('xpack.lens.table.columnVisibilityLabel', {
             defaultMessage: 'Hide column',
           })}
-          display="columnCompressedSwitch"
+          display="columnCompressed"
         >
           <EuiSwitch
             compressed
@@ -292,7 +292,7 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
           label={i18n.translate('xpack.lens.table.columnFilterClickLabel', {
             defaultMessage: 'Directly filter on click',
           })}
-          display="columnCompressedSwitch"
+          display="columnCompressed"
         >
           <EuiSwitch
             compressed

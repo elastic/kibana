@@ -143,7 +143,7 @@ export function GaugeDimensionEditor(
             </PalettePanelContainer>
           </EuiFormRow>
           <EuiFormRow
-            display="columnCompressedSwitch"
+            display="columnCompressed"
             fullWidth
             label={
               <TooltipWrapper

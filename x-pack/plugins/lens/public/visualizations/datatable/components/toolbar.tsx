@@ -112,7 +112,7 @@ export function DataTableToolbar(props: VisualizationToolbarProps<DatatableVisua
           label={i18n.translate('xpack.lens.table.visualOptionsPaginateTable', {
             defaultMessage: 'Paginate table',
           })}
-          display="columnCompressedSwitch"
+          display="columnCompressed"
         >
           <EuiToolTip
             content={i18n.translate('xpack.lens.table.visualOptionsPaginateTableTooltip', {

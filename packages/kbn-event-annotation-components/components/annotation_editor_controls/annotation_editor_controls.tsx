@@ -386,7 +386,7 @@ const ConfigPanelGenericSwitch = ({
   value: boolean;
   onChange: (event: EuiSwitchEvent) => void;
 }) => (
-  <EuiFormRow label={label} display="columnCompressedSwitch" fullWidth>
+  <EuiFormRow label={label} display="columnCompressed" fullWidth>
     <EuiSwitch
       compressed
       label={label}
