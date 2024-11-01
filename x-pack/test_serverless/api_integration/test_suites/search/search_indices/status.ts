@@ -49,30 +49,32 @@ export default function ({ getService }: FtrProviderContext) {
             },
           });
         });
+      });
+    });
+    describe('viewer', function () {
+      before(async () => {
+        supertestViewerWithCookieCredentials = await roleScopedSupertest.getSupertestWithRoleScope(
+          'viewer',
+          {
+            useCookieHeader: true,
+            withInternalHeaders: true,
+          }
+        );
+      });
+
+      it('returns expected privileges', async () => {
+        const { body } = await supertestViewerWithCookieCredentials
+          .get(`/internal/search_indices/start_privileges/${testIndexName}`)
+          .expect(200);
+
+        expect(body).toEqual({
+          privileges: {
+            canCreateApiKeys: false,
+            canDeleteDocuments: false,
+            canManageIndex: false,
+          },
         });
       });
-      describe('viewer', function () {
-        before(async () => {
-          supertestViewerWithCookieCredentials =
-            await roleScopedSupertest.getSupertestWithRoleScope('viewer', {
-              useCookieHeader: true,
-              withInternalHeaders: true,
-            });
-        });
-
-        it('returns expected privileges', async () => {
-          const { body } = await supertestViewerWithCookieCredentials
-            .get(`/internal/search_indices/start_privileges/${testIndexName}`)
-            .expect(200);
-
-          expect(body).toEqual({
-            privileges: {
-              canCreateApiKeys: false,
-              canDeleteDocuments: false,
-              canManageIndex: false,
-            },
-          });
-        });
-      });
+    });
   });
 }
