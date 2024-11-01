@@ -190,6 +190,7 @@ export const GridPanel = forwardRef<
               border-bottom: 2px solid ${euiThemeVars.euiColorSuccess};
               border-right: 2px solid ${euiThemeVars.euiColorSuccess};
               :hover {
+                opacity: 1;
                 background-color: ${transparentize(euiThemeVars.euiColorSuccess, 0.05)};
                 cursor: se-resize;
               }
