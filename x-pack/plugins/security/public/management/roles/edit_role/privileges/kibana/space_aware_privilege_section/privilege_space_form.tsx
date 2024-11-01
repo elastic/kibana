@@ -104,10 +104,17 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
             <h2>
-              <FormattedMessage
-                id="xpack.security.management.editRole.spacePrivilegeForm.modalTitle"
-                defaultMessage="Assign role to space"
-              />
+              {this.state.mode === 'create' ? (
+                <FormattedMessage
+                  id="xpack.security.management.editRole.spacePrivilegeForm.modalTitleCreate"
+                  defaultMessage="Assign role to spaces"
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.security.management.editRole.spacePrivilegeForm.modalTitleUpdate"
+                  defaultMessage="Edit role privileges for spaces"
+                />
+              )}
             </h2>
           </EuiTitle>
         </EuiFlyoutHeader>
@@ -171,14 +178,13 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
           label={i18n.translate(
             'xpack.security.management.editRole.spacePrivilegeForm.spaceSelectorFormLabel',
             {
-              defaultMessage: 'Spaces',
+              defaultMessage: 'Select spaces',
             }
           )}
           helpText={i18n.translate(
             'xpack.security.management.editRole.spacePrivilegeForm.spaceSelectorFormHelpText',
             {
-              defaultMessage:
-                'Select one or more Kibana spaces to which you wish to assign privileges.',
+              defaultMessage: 'Users assigned to this role will gain access to selected spaces.',
             }
           )}
         >

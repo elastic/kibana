@@ -622,7 +622,7 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
           <h2>
             {isEditOperation.current
               ? i18n.translate('xpack.spaces.management.spaceDetails.roles.assignRoleButton', {
-                  defaultMessage: 'Edit role privileges',
+                  defaultMessage: 'Edit role privileges for space',
                 })
               : i18n.translate(
                   'xpack.spaces.management.spaceDetails.roles.assign.privileges.custom',
