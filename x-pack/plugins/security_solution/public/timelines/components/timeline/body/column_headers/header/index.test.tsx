@@ -17,7 +17,6 @@ import { defaultHeaders } from '../default_headers';
 import { HeaderComponent } from '.';
 import { getNewSortDirectionOnClick, getNextSortDirection, getSortDirection } from './helpers';
 import { Direction } from '../../../../../../../common/search_strategy';
-import { useDeepEqualSelector } from '../../../../../../common/hooks/use_selector';
 import type { ColumnHeaderType } from '../../../../../../../common/types';
 import { TimelineId } from '../../../../../../../common/types/timeline';
 
@@ -34,7 +33,6 @@ jest.mock('react-redux', () => {
 
 jest.mock('../../../../../../common/hooks/use_selector', () => ({
   useShallowEqualSelector: jest.fn(),
-  useDeepEqualSelector: jest.fn(),
 }));
 
 const filteredColumnHeader: ColumnHeaderType = 'text-filter';
@@ -50,10 +48,6 @@ describe('Header', () => {
     },
   ];
   const timelineId = TimelineId.test;
-
-  beforeEach(() => {
-    (useDeepEqualSelector as jest.Mock).mockReturnValue({ isLoading: false });
-  });
 
   test('renders correctly against snapshot', () => {
     const wrapper = shallow(

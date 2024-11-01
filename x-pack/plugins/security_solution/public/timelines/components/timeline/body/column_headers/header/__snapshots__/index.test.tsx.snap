@@ -14,7 +14,6 @@ exports[`Header renders correctly against snapshot 1`] = `
         "type": "date",
       }
     }
-    isLoading={false}
     isResizing={false}
     onClick={[Function]}
     showSortingCapability={true}
@@ -43,20 +42,7 @@ exports[`Header renders correctly against snapshot 1`] = `
           "type": "date",
         }
       }
-      isLoading={false}
       onColumnRemoved={[Function]}
-      sort={
-        Array [
-          Object {
-            "columnId": "@timestamp",
-            "columnType": "date",
-            "esTypes": Array [
-              "date",
-            ],
-            "sortDirection": "desc",
-          },
-        ]
-      }
     />
   </Memo(HeaderContentComponent)>
   <Filter
