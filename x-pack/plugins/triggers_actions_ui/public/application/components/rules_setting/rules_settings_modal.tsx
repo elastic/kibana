@@ -26,7 +26,7 @@ import {
   EuiSpacer,
   EuiEmptyPrompt,
 } from '@elastic/eui';
-import { useFetchFlappingSettings } from '@kbn/response-ops-rule-form';
+import { useFetchFlappingSettings } from '@kbn/alerts-ui-shared';
 import { useKibana } from '../../../common/lib/kibana';
 import { RulesSettingsFlappingSection } from './flapping/rules_settings_flapping_section';
 import { RulesSettingsQueryDelaySection } from './query_delay/rules_settings_query_delay_section';

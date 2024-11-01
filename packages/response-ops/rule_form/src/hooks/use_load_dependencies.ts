@@ -12,13 +12,16 @@ import type { ToastsStart } from '@kbn/core-notifications-browser';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import { RuleCreationValidConsumer } from '@kbn/rule-data-utils';
 import { useMemo } from 'react';
-import { useHealthCheck, useLoadRuleTypesQuery } from '@kbn/alerts-ui-shared';
+import {
+  useHealthCheck,
+  useLoadRuleTypesQuery,
+  useFetchFlappingSettings,
+} from '@kbn/alerts-ui-shared';
 import {
   useLoadConnectors,
   useLoadConnectorTypes,
   useLoadUiConfig,
   useResolveRule,
-  useFetchFlappingSettings,
 } from '../common/hooks';
 import type { RuleTypeRegistryContract } from '../common/types';
 import { IS_RULE_SPECIFIC_FLAPPING_ENABLED } from '../constants';
