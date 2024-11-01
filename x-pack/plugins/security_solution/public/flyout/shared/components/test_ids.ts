@@ -27,7 +27,6 @@ export const EXPANDABLE_PANEL_CONTENT_TEST_ID = (dataTestSubj: string) => `${dat
 /* Header Navigation */
 
 const FLYOUT_NAVIGATION_TEST_ID = `${PREFIX}Navigation` as const;
-export const HEADER_NAVIGATION_BUTTON_TEST_ID = `${PREFIX}NavigationButton` as const;
 export const EXPAND_DETAILS_BUTTON_TEST_ID =
   `${FLYOUT_NAVIGATION_TEST_ID}ExpandDetailButton` as const;
 export const COLLAPSE_DETAILS_BUTTON_TEST_ID =
