@@ -58,6 +58,7 @@ export const performFind = async <T = unknown, A = unknown>(
     common: commonHelper,
     serializer: serializerHelper,
     migration: migrationHelper,
+    encryption: encryptionHelper,
   } = helpers;
   const { securityExtension, spacesExtension } = extensions;
   let namespaces!: string[];
@@ -271,8 +272,11 @@ export const performFind = async <T = unknown, A = unknown>(
       const { sort, score, ...rawObject } = savedObject;
 
       if (fields === undefined || fields.length === 0) {
-        // If this document only contains a subset of fields it's not possible to migrate it
-        migrated = savedObject;
+        // If this document only contains a subset of fields it's not possible to migrate it but we still try to decrypt it
+        migrated = await encryptionHelper.optionallyDecryptAndRedactSingleResult(
+          savedObject,
+          redactTypeMap
+        );
       } else if (disableExtensions) {
         migrated = migrationHelper.migrateStorageDocument(rawObject);
       } else {
