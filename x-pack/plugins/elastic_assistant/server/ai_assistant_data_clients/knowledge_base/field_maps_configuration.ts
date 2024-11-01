@@ -6,6 +6,8 @@
  */
 import { FieldMap } from '@kbn/data-stream-adapter';
 
+export const ASSISTANT_ELSER_INFERENCE_ID = 'elastic-security-ai-assistant-elser2';
+
 export const knowledgeBaseFieldMap: FieldMap = {
   '@timestamp': {
     type: 'date',
@@ -169,6 +171,12 @@ export const knowledgeBaseFieldMapV2: FieldMap = {
     required: false,
   },
   // Embeddings field
+  semantic_text: {
+    type: 'semantic_text',
+    array: false,
+    required: false,
+    inference_id: ASSISTANT_ELSER_INFERENCE_ID,
+  },
   vector: {
     type: 'object',
     array: false,

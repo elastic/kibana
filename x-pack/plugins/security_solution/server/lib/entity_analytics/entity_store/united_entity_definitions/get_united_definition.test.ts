@@ -15,6 +15,8 @@ describe('getUnitedEntityDefinition', () => {
       namespace: 'test',
       fieldHistoryLength: 10,
       indexPatterns,
+      syncDelay: '1m',
+      frequency: '1m',
     });
 
     it('mapping', () => {
@@ -172,6 +174,10 @@ describe('getUnitedEntityDefinition', () => {
           ],
           "latest": Object {
             "lookbackPeriod": "24h",
+            "settings": Object {
+              "frequency": "1m",
+              "syncDelay": "1m",
+            },
             "timestampField": "@timestamp",
           },
           "managed": true,
@@ -312,6 +318,8 @@ describe('getUnitedEntityDefinition', () => {
       namespace: 'test',
       fieldHistoryLength: 10,
       indexPatterns,
+      syncDelay: '1m',
+      frequency: '1m',
     });
 
     it('mapping', () => {
@@ -445,6 +453,10 @@ describe('getUnitedEntityDefinition', () => {
           ],
           "latest": Object {
             "lookbackPeriod": "24h",
+            "settings": Object {
+              "frequency": "1m",
+              "syncDelay": "1m",
+            },
             "timestampField": "@timestamp",
           },
           "managed": true,
