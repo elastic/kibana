@@ -125,7 +125,8 @@ export const getTLSAlertDocument = (cert: Cert, monitorSummary: CertSummary, uui
   [OBSERVER_GEO_NAME]: monitorSummary.locationName ? [monitorSummary.locationName] : [],
   [OBSERVER_NAME]: monitorSummary.locationId ? [monitorSummary.locationId] : [],
   [ERROR_MESSAGE]: monitorSummary.errorMessage,
-  [ERROR_STACK_TRACE]: monitorSummary.errorStackTrace,
+  // done to avoid assigning null to the field
+  [ERROR_STACK_TRACE]: monitorSummary.errorStackTrace ? monitorSummary.errorStackTrace : undefined,
   'location.id': monitorSummary.locationId ? [monitorSummary.locationId] : [],
   'location.name': monitorSummary.locationName ? [monitorSummary.locationName] : [],
   labels: cert.labels,

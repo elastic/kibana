@@ -43,7 +43,8 @@ export const getMonitorAlertDocument = (
   [OBSERVER_GEO_NAME]: locationNames,
   [OBSERVER_NAME]: locationIds,
   [ERROR_MESSAGE]: monitorSummary.lastErrorMessage,
-  [ERROR_STACK_TRACE]: monitorSummary.lastErrorStack,
+  // done to avoid assigning null to the field
+  [ERROR_STACK_TRACE]: monitorSummary.lastErrorStack ? monitorSummary.lastErrorStack : undefined,
   [AGENT_NAME]: monitorSummary.hostName,
   [ALERT_REASON]: monitorSummary.reason,
   [STATE_ID]: monitorSummary.stateId,
@@ -117,7 +118,8 @@ export const getMonitorSummary = ({
     monitorName,
     monitorType: typeToLabelMap[monitorInfo.monitor?.type] || monitorInfo.monitor?.type,
     lastErrorMessage: monitorInfo.error?.message,
-    lastErrorStack: monitorInfo.error?.stack_trace,
+    // done to avoid assigning null to the field
+    lastErrorStack: monitorInfo.error?.stack_trace ? monitorInfo.error?.stack_trace : undefined,
     serviceName: monitorInfo.service?.name,
     labels: monitorInfo.labels,
     locationName: formattedLocationName,
