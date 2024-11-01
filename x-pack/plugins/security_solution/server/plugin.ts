@@ -43,6 +43,7 @@ import { initSavedObjects } from './saved_objects';
 import { AppClientFactory } from './client';
 import type { ConfigType } from './config';
 import { createConfig } from './config';
+import { registerDeprecations } from './deprecations';
 import { initUiSettings } from './ui_settings';
 import {
   APP_ID,
@@ -204,6 +205,8 @@ export class Plugin implements ISecuritySolutionPlugin {
     events.forEach((eventConfig) => {
       core.analytics.registerEventType(eventConfig);
     });
+
+    registerDeprecations({ core, config: this.config });
 
     this.ruleMonitoringService.setup(core, plugins);
 
