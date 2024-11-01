@@ -121,8 +121,7 @@ export type MlClientParams =
   | Parameters<MlClient['updateFilter']>
   | Parameters<MlClient['updateJob']>
   | Parameters<MlClient['updateModelSnapshot']>
-  | Parameters<MlClient['validate']>
-  | Parameters<MlClient['validateDetector']>;
+  | Parameters<MlClient['validate']>;
 
 export type MlGetADParams = Parameters<MlClient['getJobStats']> | Parameters<MlClient['getJobs']>;
 

@@ -27,7 +27,6 @@ import type {
   JobStats,
   Datafeed,
   CombinedJob,
-  Detector,
   AnalysisConfig,
   ModelSnapshot,
   IndicesOptions,
@@ -347,15 +346,6 @@ export function mlApiProvider(httpService: HttpService) {
         path: `${ML_INTERNAL_BASE_PATH}/datafeeds/${datafeedId}/_preview`,
         method: 'GET',
         version: '1',
-      });
-    },
-
-    validateDetector({ detector }: { detector: Detector }) {
-      const body = JSON.stringify(detector);
-      return httpService.http<any>({
-        path: `${ML_INTERNAL_BASE_PATH}/anomaly_detectors/_validate/detector`,
-        method: 'POST',
-        body,
       });
     },
 
