@@ -124,8 +124,10 @@ The Observability AI Assistant specific advanced setting for Logs index patterns
 AGPL license::
 * Adds AGPL 3.0 license ({kibana-pull}192025[#192025]).
 Alerting::
-* Support TheHive connector in cases ({kibana-pull}180931[#180931]).
 * Adds TheHive connector ({kibana-pull}180138[#180138]).
+* Adds flapping settings per rule ({kibana-pull}189341[#189341]).
+Cases::
+* Support TheHive connector in cases ({kibana-pull}180931[#180931]).
 Dashboards and visualizations::
 * Adds the ability to star your favorite dashboards and quickly find them ({kibana-pull}189285[#189285]).
 * Adds a chart showing usage statistics to the dashboard details ({kibana-pull}187993[#187993]).
@@ -201,6 +203,7 @@ For detailed information about the 8.16.0 release, review the enhancements and b
 === Enhancements
 Alerting::
 * Allow users to select template while adding a case action in the rule ({kibana-pull}190701[#190701]).
+* New full-page rule form in the Stack Management app ({kibana-pull}194655[#194655]).
 Dashboards and visualizations::
 * Adds compressed style for dashboard controls ({kibana-pull}190636[#190636]).
 * Adds the ability to duplicate a managed dashboard from its `managed` badge ({kibana-pull}189404[#189404]).
@@ -323,11 +326,15 @@ Management::
 Alerting::
 * Skip scheduling actions for the alerts without scheduledActions ({kibana-pull}195948[#195948]).
 * Fixes Stack Alerts feature API access control ({kibana-pull}193948[#193948]).
-* Remove unintended internal Find routes API with public access ({kibana-pull}193757[#193757]).
+* Remove unintended internal find routes API with public access ({kibana-pull}193757[#193757]).
 * Convert timestamp before passing to validation ({kibana-pull}192379[#192379]).
 * Grouped over field is not populated correctly when editing a rule ({kibana-pull}192297[#192297]).
 * Mark slack rate-limiting errors as user errors ({kibana-pull}192200[#192200]).
+* Fixes maintenance window filtering with wildcards ({kibana-pull}194777[#194777])
+* Fixes search filters in rules, alerts, and maintenance windows ({kibana-pull}193623[#193623]).
+Cases::
 * Use absolute time ranges when adding visualizations to a case ({kibana-pull}189168[#189168]).
+* Fixes custom fields with long text that could not be edited in the UI ({kibana-pull}190490[#190490])
 Dashboards and visualizations::
 * Correctly show full screen mode when opening a dashboard or panel from a URL that contains the fullScreenMode parameter ({kibana-pull}196275[#196275]) and ({kibana-pull}190086[#190086]).
 * Fixes an issue that could cause a the dashboard list to stay in loading state ({kibana-pull}195277[#195277]).
