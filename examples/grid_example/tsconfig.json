@@ -12,5 +12,6 @@
     "@kbn/developer-examples-plugin",
     "@kbn/core-lifecycle-browser",
     "@kbn/react-kibana-mount",
+    "@kbn/i18n",
   ]
 }
