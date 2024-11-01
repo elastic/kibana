@@ -44,19 +44,22 @@ export function AlertSuppressionEditAdapter({
       esqlQuery: 'esql_query' in finalDiffableRule ? finalDiffableRule.esql_query.query : undefined,
       indexPatternsFields: dataView.fields,
     });
-  const machineLearningJobId =
-    'machine_learning_job_id' in finalDiffableRule
-      ? [finalDiffableRule.machine_learning_job_id].flat()
-      : [];
+  const machineLearningJobIds = useMemo(
+    () =>
+      'machine_learning_job_id' in finalDiffableRule
+        ? [finalDiffableRule.machine_learning_job_id].flat()
+        : [],
+    [finalDiffableRule]
+  );
   const {
     mlSuppressionFields,
     loading: mlRuleConfigLoading,
     allJobsStarted,
   } = useMLRuleConfig({
-    machineLearningJobId,
+    machineLearningJobId: machineLearningJobIds,
   });
   const isMlSuppressionIncomplete =
-    isMlRule(finalDiffableRule.type) && machineLearningJobId.length > 0 && !allJobsStarted;
+    isMlRule(finalDiffableRule.type) && machineLearningJobIds.length > 0 && !allJobsStarted;
 
   const suppressibleFieldSpecs = useMemo(() => {
     if (isEsqlRule(finalDiffableRule.type)) {
