@@ -271,3 +271,7 @@ export const CDR_MISCONFIGURATION_DATA_TABLE_RUNTIME_MAPPING_FIELDS: string[] = 
   'rule.section',
   'resource.sub_type',
 ];
+export const CDR_MISCONFIGURATION_GROUPING_RUNTIME_MAPPING_FIELDS: Record<string, string[]> = {
+  [FINDINGS_GROUPING_OPTIONS.ORCHESTRATOR_CLUSTER_NAME]: ['orchestrator.cluster.name'],
+  [FINDINGS_GROUPING_OPTIONS.CLOUD_ACCOUNT_NAME]: ['cloud.account.name'],
+};
