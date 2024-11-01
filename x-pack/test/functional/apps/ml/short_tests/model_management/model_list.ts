@@ -416,7 +416,8 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('displays a model without an ingest pipeline and model can be deleted', async () => {
         await ml.testExecution.logTestStep('should display the model in the table');
-        await ml.trainedModelsTable.filterWithSearchString(modelWithoutPipelineData.modelId, 1);
+        await ml.testExecution.logTestStep('expands the row to show the model details');
+        await ml.trainedModelsTable.ensureRowIsExpanded(modelWithoutPipelineData.modelId);
 
         await ml.testExecution.logTestStep(
           'displays expected row values for the model in the table'
