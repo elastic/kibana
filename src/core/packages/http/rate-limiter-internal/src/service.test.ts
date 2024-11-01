@@ -91,6 +91,24 @@ describe('HttpRateLimiterService', () => {
         expect(handler(request, response, toolkit)).toBe(ignored);
       });
 
+      it('should not throttle excluded routes', () => {
+        service.start();
+        elu$.next({ short: 0.9, medium: 0.9, long: 0.9 });
+        expect(
+          handler(
+            httpServerMock.createKibanaRequest({
+              kibanaRouteOptions: {
+                access: 'internal',
+                excludeFromRateLimiter: true,
+                xsrfRequired: true,
+              },
+            }),
+            response,
+            toolkit
+          )
+        ).toBe(ignored);
+      });
+
       it.each`
         threshold | term        | short  | medium | long   | expected
         ${0.6}    | ${'short'}  | ${0.5} | ${0.5} | ${0.5} | ${ignored}

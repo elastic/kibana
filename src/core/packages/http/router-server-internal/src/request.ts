@@ -13,6 +13,7 @@ import { inspect } from 'util';
 import type { Request, RouteOptions } from '@hapi/hapi';
 import { fromEvent, NEVER } from 'rxjs';
 import { shareReplay, first, filter } from 'rxjs';
+import { isNil, omitBy } from 'lodash';
 import { RecursiveReadonly } from '@kbn/utility-types';
 import { deepFreeze } from '@kbn/std';
 import {
@@ -270,6 +271,7 @@ export class CoreKibanaRequest<
     }
 
     const options = {
+      ...omitBy({ excludeFromRateLimiter: this.isExcludedFromRateLimiter(request) }, isNil),
       authRequired: this.getAuthRequired(request),
       // TypeScript note: Casting to `RouterOptions` to fix the following error:
       //
@@ -353,6 +355,11 @@ export class CoreKibanaRequest<
         this.url.pathname
       }${this.url.search}`
     );
+  }
+
+  private isExcludedFromRateLimiter(request: RawRequest): boolean | undefined {
+    return ((request.route?.settings as RouteOptions)?.app as KibanaRouteOptions)
+      ?.excludeFromRateLimiter;
   }
 }
 
