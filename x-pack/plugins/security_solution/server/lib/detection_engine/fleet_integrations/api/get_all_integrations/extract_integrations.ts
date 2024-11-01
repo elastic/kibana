@@ -21,7 +21,7 @@ export function extractIntegrations(
     const packageTitle = fleetPackage.title;
     const isPackageInstalled = fleetPackage.status === 'installed';
     // Actual `installed_version` is buried in SO, root `version` is latest package version available
-    const installedPackageVersion = fleetPackage.savedObject?.attributes.install_version;
+    const installedPackageVersion = fleetPackage.installationInfo?.version;
     // Policy templates correspond to package's integrations.
     const packagePolicyTemplates = fleetPackage.policy_templates ?? [];
 

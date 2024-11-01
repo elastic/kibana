@@ -579,12 +579,6 @@ export const DeletePackageRequestSchema = {
   query: schema.object({
     force: schema.maybe(schema.boolean()),
   }),
-  // body is deprecated on delete request
-  body: schema.nullable(
-    schema.object({
-      force: schema.boolean(),
-    })
-  ),
 };
 
 export const InstallKibanaAssetsRequestSchema = {

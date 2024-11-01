@@ -514,8 +514,7 @@ export const installPackageByUploadHandler: FleetRequestHandler<
 
 export const deletePackageHandler: FleetRequestHandler<
   TypeOf<typeof DeletePackageRequestSchema.params>,
-  TypeOf<typeof DeletePackageRequestSchema.query>,
-  TypeOf<typeof DeletePackageRequestSchema.body>
+  TypeOf<typeof DeletePackageRequestSchema.query>
 > = async (context, request, response) => {
   try {
     const { pkgName, pkgVersion } = request.params;
