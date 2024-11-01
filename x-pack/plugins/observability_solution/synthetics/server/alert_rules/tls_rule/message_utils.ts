@@ -29,6 +29,7 @@ import {
   CERT_VALID_NOT_AFTER,
   CERT_VALID_NOT_BEFORE,
   ERROR_MESSAGE,
+  ERROR_STACK_TRACE,
   MONITOR_ID,
   MONITOR_NAME,
   MONITOR_TYPE,
@@ -103,6 +104,7 @@ export const getCertSummary = (cert: Cert, expirationThreshold: number, ageThres
     configId: cert.configId,
     monitorTags: cert.tags,
     errorMessage: cert.errorMessage,
+    errorStackTrace: cert.errorStackTrace,
     labels: cert.labels,
   };
 };
@@ -123,6 +125,8 @@ export const getTLSAlertDocument = (cert: Cert, monitorSummary: CertSummary, uui
   [OBSERVER_GEO_NAME]: monitorSummary.locationName ? [monitorSummary.locationName] : [],
   [OBSERVER_NAME]: monitorSummary.locationId ? [monitorSummary.locationId] : [],
   [ERROR_MESSAGE]: monitorSummary.errorMessage,
+  // done to avoid assigning null to the field
+  [ERROR_STACK_TRACE]: monitorSummary.errorStackTrace ? monitorSummary.errorStackTrace : undefined,
   'location.id': monitorSummary.locationId ? [monitorSummary.locationId] : [],
   'location.name': monitorSummary.locationName ? [monitorSummary.locationName] : [],
   labels: cert.labels,
