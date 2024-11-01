@@ -111,7 +111,7 @@ const createSLORoute = createSloServerRoute({
     const core = await context.core;
     const scopedClusterClient = core.elasticsearch.client;
     const esClient = core.elasticsearch.client.asCurrentUser;
-    const basePath = dependencies.pluginsSetup.core.http.basePath;
+    const basePath = dependencies.core.http.basePath;
     const soClient = core.savedObjects.client;
     const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
 
@@ -158,7 +158,7 @@ const inspectSLORoute = createSloServerRoute({
 
     const dataViews = await dependencies.plugins.dataViews.start();
     const spaceId = await getSpaceId(dependencies, request);
-    const basePath = dependencies.pluginsSetup.core.http.basePath;
+    const basePath = dependencies.core.http.basePath;
     const core = await context.core;
     const scopedClusterClient = core.elasticsearch.client;
     const esClient = core.elasticsearch.client.asCurrentUser;
@@ -206,7 +206,7 @@ const updateSLORoute = createSloServerRoute({
     const spaceId = await getSpaceId(dependencies, request);
     const dataViews = await dependencies.plugins.dataViews.start();
 
-    const basePath = dependencies.pluginsSetup.core.http.basePath;
+    const basePath = dependencies.core.http.basePath;
     const core = await context.core;
     const scopedClusterClient = core.elasticsearch.client;
     const esClient = core.elasticsearch.client.asCurrentUser;
@@ -414,7 +414,7 @@ const resetSLORoute = createSloServerRoute({
     const scopedClusterClient = core.elasticsearch.client;
     const soClient = core.savedObjects.client;
     const esClient = core.elasticsearch.client.asCurrentUser;
-    const basePath = dependencies.pluginsSetup.core.http.basePath;
+    const basePath = dependencies.core.http.basePath;
 
     const dataViewsService = await dataViews.dataViewsServiceFactory(soClient, esClient);
     const repository = new KibanaSavedObjectsSLORepository(soClient, logger);

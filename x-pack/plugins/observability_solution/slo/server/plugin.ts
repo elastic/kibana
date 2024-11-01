@@ -138,11 +138,6 @@ export class SLOPlugin
       dependencies: {
         core,
         plugins: routeHandlerPlugins,
-        // TODO: Remove following after refactoed usage of core and plugins
-        pluginsSetup: {
-          ...plugins,
-          core,
-        },
       },
       logger: this.logger,
       repository: getSloServerRouteRepository({ isServerless: this.isServerless }),

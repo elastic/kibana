@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { CoreSetup } from '@kbn/core/server';
-import { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
 import type { DefaultRouteHandlerResources } from '@kbn/server-route-repository';
 import { SLOPluginSetupDependencies, SLOPluginStartDependencies } from '../types';
 
@@ -20,11 +19,6 @@ export interface SLORoutesDependencies {
     };
   };
   core: CoreSetup;
-  // TODO: remove and replace with above core or plugins.start()
-  pluginsSetup: {
-    core: CoreSetup;
-    ruleRegistry: RuleRegistryPluginSetupContract;
-  };
 }
 
 export type SLORouteHandlerResources = {
