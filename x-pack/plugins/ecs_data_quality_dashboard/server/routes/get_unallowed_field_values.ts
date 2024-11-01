@@ -19,16 +19,15 @@ export const getUnallowedFieldValuesRoute = (router: IRouter, logger: Logger) =>
     .post({
       path: GET_UNALLOWED_FIELD_VALUES,
       access: 'internal',
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
     })
     .addVersion(
       {
         version: INTERNAL_API_VERSION,
-        security: {
-          authz: {
-            enabled: false,
-            reason: 'This route is opted out from authorization',
-          },
-        },
         validate: { request: { body: buildRouteValidation(GetUnallowedFieldValuesBody) } },
       },
       async (context, request, response) => {
