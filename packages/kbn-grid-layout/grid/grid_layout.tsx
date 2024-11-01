@@ -66,7 +66,6 @@ export const GridLayout = forwardRef<GridLayoutApi, GridLayoutProps>(
           pairwise()
         )
         .subscribe(([layoutBefore, layoutAfter]) => {
-          console.log({ layoutBefore, layoutAfter });
           if (!isLayoutEqual(layoutBefore, layoutAfter)) {
             onLayoutChange(layoutAfter);
           }
