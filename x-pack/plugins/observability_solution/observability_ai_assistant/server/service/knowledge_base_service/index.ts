@@ -392,6 +392,7 @@ export class KnowledgeBaseService {
     namespace,
     esClient,
     uiSettingsClient,
+    limit = {},
   }: {
     queries: Array<{ text: string; boost?: number }>;
     categories?: string[];
@@ -399,6 +400,7 @@ export class KnowledgeBaseService {
     namespace: string;
     esClient: { asCurrentUser: ElasticsearchClient; asInternalUser: ElasticsearchClient };
     uiSettingsClient: IUiSettingsClient;
+    limit?: { tokens?: number; size?: number };
   }): Promise<{
     entries: RecalledEntry[];
   }> => {
@@ -444,9 +446,9 @@ export class KnowledgeBaseService {
       documentsFromKb.concat(documentsFromConnectors),
       'score',
       'desc'
-    ).slice(0, 20);
+    ).slice(0, limit.size ?? 20);
 
-    const MAX_TOKENS = 4000;
+    const maxTokens = limit.tokens ?? 4_000;
 
     let tokenCount = 0;
 
@@ -455,7 +457,7 @@ export class KnowledgeBaseService {
     for (const entry of sortedEntries) {
       returnedEntries.push(entry);
       tokenCount += encode(entry.text).length;
-      if (tokenCount >= MAX_TOKENS) {
+      if (tokenCount >= maxTokens) {
         break;
       }
     }

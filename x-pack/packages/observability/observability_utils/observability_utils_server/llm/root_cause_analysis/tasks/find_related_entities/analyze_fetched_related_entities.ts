@@ -30,6 +30,8 @@ import { chunkOutputCalls } from '../../util/chunk_output_calls';
 import { FieldPatternResultWithChanges } from '../../../../entities/get_log_patterns';
 import { toBlockquote } from '../../util/to_blockquote';
 import { RelatedEntityKeywordSearch } from './write_keyword_searches_for_related_entities';
+import { ScoredKnowledgeBaseEntry } from '../get_knowledge_base_entries';
+import { serializeKnowledgeBaseEntries } from '../../util/serialize_knowledge_base_entries';
 
 export interface RelatedEntityFromSearchResults {
   entity: { [x: string]: string };
@@ -52,6 +54,7 @@ function getInputPromptBase({
   patternsFromOtherEntities,
   searches,
   context,
+  kbEntries,
 }: {
   entity: Record<string, string>;
   analysis: TruncatedDocumentAnalysis;
@@ -59,6 +62,7 @@ function getInputPromptBase({
   patternsFromOtherEntities: FieldPatternResultWithChanges[];
   searches: RelatedEntityKeywordSearch[];
   context: string;
+  kbEntries: ScoredKnowledgeBaseEntry[];
 }) {
   const otherPatternsPrompt = patternsFromOtherEntities.length
     ? JSON.stringify(
@@ -80,6 +84,8 @@ function getInputPromptBase({
   ## Context
 
   ${toBlockquote(context)}
+
+  ${serializeKnowledgeBaseEntries(kbEntries)}
 
   ## Data analysis
   ${JSON.stringify(analysis)}
@@ -193,6 +199,7 @@ export async function analyzeFetchedRelatedEntities({
   patternsFromOtherEntities,
   logger: parentLogger,
   context,
+  kbEntries,
 }: {
   connectorId: string;
   inferenceClient: InferenceClient;
@@ -211,6 +218,7 @@ export async function analyzeFetchedRelatedEntities({
   patternsFromOtherEntities: FieldPatternResultWithChanges[];
   context: string;
   logger: Logger;
+  kbEntries: ScoredKnowledgeBaseEntry[];
 }): Promise<{
   summaries: string[];
   foundEntities: RelatedEntityFromSearchResults[];
@@ -248,6 +256,7 @@ export async function analyzeFetchedRelatedEntities({
     patternsFromOtherEntities,
     searches,
     context,
+    kbEntries,
   });
 
   const foundEntityPrompts = foundEntities.map((foundEntity) => {

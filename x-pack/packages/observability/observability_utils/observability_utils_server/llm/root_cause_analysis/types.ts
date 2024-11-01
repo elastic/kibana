@@ -17,6 +17,7 @@ import { InferenceClient } from '@kbn/inference-plugin/server';
 import { Logger } from '@kbn/logging';
 import { AlertsClient } from '@kbn/rule-registry-plugin/server';
 import { RulesClient } from '@kbn/alerting-plugin/server';
+import { ObservabilityAIAssistantClient } from '@kbn/observability-ai-assistant-plugin/server';
 import { ObservationStepSummary } from './tasks/observe_investigation_results';
 import { EntityInvestigation } from './tasks/investigate_entity';
 import { SignificantEventsTimeline } from './tasks/generate_timeline';
@@ -87,10 +88,12 @@ export interface RootCauseAnalysisContext {
     sloSummaries: string[];
   };
   inferenceClient: InferenceClient;
+  tokenLimit: number;
   connectorId: string;
   esClient: ObservabilityElasticsearchClient;
   alertsClient: AlertsClient;
   rulesClient: RulesClient;
   logger: Logger;
   spaceId: string;
+  observabilityAIAssistantClient: ObservabilityAIAssistantClient;
 }

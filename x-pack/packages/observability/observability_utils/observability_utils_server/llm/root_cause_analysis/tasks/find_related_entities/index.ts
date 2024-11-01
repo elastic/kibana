@@ -21,6 +21,7 @@ import {
   writeKeywordSearchForRelatedEntities,
 } from './write_keyword_searches_for_related_entities';
 import { FieldPatternResultWithChanges } from '../../../../entities/get_log_patterns';
+import { ScoredKnowledgeBaseEntry } from '../get_knowledge_base_entries';
 
 export type { RelatedEntityFromSearchResults };
 
@@ -37,6 +38,7 @@ export async function findRelatedEntities({
   context,
   ownPatterns,
   patternsFromOtherEntities,
+  kbEntries,
 }: {
   connectorId: string;
   inferenceClient: InferenceClient;
@@ -53,6 +55,7 @@ export async function findRelatedEntities({
   context: string;
   ownPatterns: FieldPatternResultWithChanges[];
   patternsFromOtherEntities: FieldPatternResultWithChanges[];
+  kbEntries: ScoredKnowledgeBaseEntry[];
 }): Promise<{
   searches: RelatedEntityKeywordSearch[];
   summaries: string[];
@@ -65,6 +68,7 @@ export async function findRelatedEntities({
     analysis: analysis.truncated,
     ownPatterns,
     context,
+    kbEntries,
   });
 
   const { summaries, foundEntities } = await analyzeFetchedRelatedEntities({
@@ -82,6 +86,7 @@ export async function findRelatedEntities({
     ownPatterns,
     patternsFromOtherEntities,
     context,
+    kbEntries,
   });
 
   return {

@@ -16,6 +16,7 @@ import { AlertsClient } from '@kbn/rule-registry-plugin/server';
 import { findLast, pick } from 'lodash';
 import moment from 'moment';
 import { catchError, filter, from, map, mergeMap, Observable, of, switchMap } from 'rxjs';
+import { ObservabilityAIAssistantClient } from '@kbn/observability-ai-assistant-plugin/server';
 import { ObservabilityElasticsearchClient } from '../../es/client/create_observability_es_client';
 import { callEndRcaProcessTool } from './call_end_rca_process_tool';
 import { callInvestigateEntityTool } from './call_investigate_entity_tool';
@@ -79,6 +80,7 @@ export function runRootCauseAnalysis({
   esClient,
   alertsClient,
   rulesClient,
+  observabilityAIAssistantClient,
   spaceId,
   indices,
   connectorId,
@@ -95,6 +97,7 @@ export function runRootCauseAnalysis({
   alertsClient: AlertsClient;
   rulesClient: RulesClient;
   esClient: ObservabilityElasticsearchClient;
+  observabilityAIAssistantClient: ObservabilityAIAssistantClient;
   indices: {
     logs: string[];
     traces: string[];
@@ -133,9 +136,11 @@ export function runRootCauseAnalysis({
     inferenceClient,
     initialContext,
     alertsClient,
+    observabilityAIAssistantClient,
     logger,
     rulesClient,
     spaceId,
+    tokenLimit: 32_000,
   };
 
   const investigationTimeRangePrompt = `## Time range

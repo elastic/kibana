@@ -22,6 +22,7 @@
       "observability",
       "licensing",
       "ruleRegistry",
+      "observabilityAIAssistant",
       "observabilityAIAssistantApp",
       "inference",
       "alerting",
@@ -34,7 +35,6 @@
       "kibanaReact",
       "kibanaUtils"
     ],
-    "optionalPlugins": ["observabilityAIAssistant"],
     "extraPublicDirs": []
   }
 }

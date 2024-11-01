@@ -13,6 +13,8 @@ import { RCA_SYSTEM_PROMPT_BASE } from '../../prompts';
 import { getInvestigateEntityTaskPrompt } from '../investigate_entity/prompts';
 import { formatEntity } from '../../util/format_entity';
 import { AnalyzedLogPattern } from '../analyze_log_patterns';
+import { serializeKnowledgeBaseEntries } from '../../util/serialize_knowledge_base_entries';
+import { ScoredKnowledgeBaseEntry } from '../get_knowledge_base_entries';
 
 export interface LogPatternDescription {
   content: string;
@@ -30,6 +32,7 @@ export async function describeLogPatterns({
   analysis,
   ownPatterns: allOwnPatterns,
   patternsFromOtherEntities,
+  kbEntries,
 }: {
   inferenceClient: InferenceClient;
   connectorId: string;
@@ -38,6 +41,7 @@ export async function describeLogPatterns({
   contextForEntityInvestigation: string;
   ownPatterns: AnalyzedLogPattern[];
   patternsFromOtherEntities: AnalyzedLogPattern[];
+  kbEntries: ScoredKnowledgeBaseEntry[];
 }): Promise<LogPatternDescription> {
   const system = RCA_SYSTEM_PROMPT_BASE;
 
@@ -114,6 +118,8 @@ export async function describeLogPatterns({
     ## Context for investigating ${formatEntity(entity)}
 
     ${contextForEntityInvestigation}
+
+    ${serializeKnowledgeBaseEntries(kbEntries)}
 
     ## Data samples
 

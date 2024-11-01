@@ -12,6 +12,8 @@ import { RCA_SYSTEM_PROMPT_BASE, RCA_PROMPT_ENTITIES } from '../../prompts';
 import { FieldPatternResultWithChanges } from '../../../../entities/get_log_patterns';
 import { toBlockquote } from '../../util/to_blockquote';
 import { formatEntity } from '../../util/format_entity';
+import { ScoredKnowledgeBaseEntry } from '../get_knowledge_base_entries';
+import { serializeKnowledgeBaseEntries } from '../../util/serialize_knowledge_base_entries';
 
 const SYSTEM_PROMPT_ADDENDUM = `# Guide: Constructing Keyword Searches to Find Related Entities
 
@@ -117,6 +119,7 @@ export async function writeKeywordSearchForRelatedEntities({
   analysis,
   ownPatterns,
   context,
+  kbEntries,
 }: {
   connectorId: string;
   inferenceClient: InferenceClient;
@@ -124,6 +127,7 @@ export async function writeKeywordSearchForRelatedEntities({
   analysis: TruncatedDocumentAnalysis;
   ownPatterns: FieldPatternResultWithChanges[];
   context: string;
+  kbEntries: ScoredKnowledgeBaseEntry[];
 }): Promise<{
   groupingFields: string[];
   searches: RelatedEntityKeywordSearch[];
@@ -147,6 +151,8 @@ export async function writeKeywordSearchForRelatedEntities({
 
         ## Investigation context
         ${toBlockquote(context)}
+
+        ${serializeKnowledgeBaseEntries(kbEntries)}
 
         ## Data analysis
         ${JSON.stringify(analysis)}

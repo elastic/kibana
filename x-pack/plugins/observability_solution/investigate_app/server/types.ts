@@ -21,6 +21,10 @@ import type {
   ApmDataAccessPluginStart,
   ApmDataAccessPluginSetup,
 } from '@kbn/apm-data-access-plugin/server';
+import type {
+  ObservabilityAIAssistantServerStart,
+  ObservabilityAIAssistantServerSetup,
+} from '@kbn/observability-ai-assistant-plugin/server';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
@@ -34,6 +38,7 @@ export interface InvestigateAppSetupDependencies {
   inference: InferenceServerSetup;
   spaces?: SpacesPluginSetup;
   apmDataAccess: ApmDataAccessPluginSetup;
+  observabilityAIAssistant: ObservabilityAIAssistantServerSetup;
 }
 
 export interface InvestigateAppStartDependencies {
@@ -43,6 +48,7 @@ export interface InvestigateAppStartDependencies {
   inference: InferenceServerStart;
   spaces?: SpacesPluginStart;
   apmDataAccess: ApmDataAccessPluginStart;
+  observabilityAIAssistant: ObservabilityAIAssistantServerStart;
 }
 
 export interface InvestigateAppServerSetup {}

@@ -10,6 +10,7 @@ import type { TruncatedDocumentAnalysis } from '@kbn/observability-utils-common/
 import type { AnalyzeLogPatternOutput } from '../analyze_log_patterns';
 import type { RelatedEntityDescription } from '../find_related_entities/extract_related_entities';
 import type { RelatedEntityKeywordSearch } from '../find_related_entities/write_keyword_searches_for_related_entities';
+import type { ScoredKnowledgeBaseEntry } from '../get_knowledge_base_entries';
 
 export interface EntityInvestigation {
   entity: Record<string, string>;
@@ -25,5 +26,6 @@ export interface EntityInvestigation {
     alerts: ParsedTechnicalFields[];
     searches: RelatedEntityKeywordSearch[];
     relatedEntitiesSummaries: string[];
+    kbEntries: ScoredKnowledgeBaseEntry[];
   } & AnalyzeLogPatternOutput;
 }

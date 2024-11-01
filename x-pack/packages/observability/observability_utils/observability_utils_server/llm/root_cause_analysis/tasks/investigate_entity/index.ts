@@ -21,6 +21,7 @@ import { findRelatedEntities } from '../find_related_entities';
 import { extractRelatedEntities } from '../find_related_entities/extract_related_entities';
 import { writeEntityInvestigationReport } from '../write_entity_investigation_report';
 import { EntityInvestigation } from './types';
+import { getKnowledgeBaseEntries } from '../get_knowledge_base_entries';
 
 export type { EntityInvestigation };
 
@@ -53,6 +54,17 @@ export async function investigateEntity(
 
   logger.debug(() => `Investigating entity: ${JSON.stringify(parameters.entity)}`);
 
+  const kbPromise = getKnowledgeBaseEntries({
+    entity,
+    context,
+    rcaContext,
+    maxTokens: 4_000,
+  }).catch((error) => {
+    logger.error(`Could not fetch entries from knowledge base`);
+    logger.error(error);
+    return [];
+  });
+
   const [{ dataStreams }, alerts, slos] = await getSignals({ ...parameters, kuery });
 
   logger.debug(
@@ -76,6 +88,8 @@ export async function investigateEntity(
 
   const truncatedAnalysis = sortAndTruncateAnalyzedFields(fullAnalysis);
 
+  const kbEntries = await kbPromise;
+
   const { ownPatterns, patternsFromOtherEntities } = await analyzeLogPatterns({
     allAnalysis: [{ index: dataStreams, analysis: truncatedAnalysis }],
     entity,
@@ -84,6 +98,7 @@ export async function investigateEntity(
       significance: 'high',
     },
     rcaContext,
+    kbEntries,
   });
 
   logger.trace(
@@ -98,6 +113,7 @@ export async function investigateEntity(
       contextForEntityInvestigation: context,
       entity,
       ownPatterns,
+      kbEntries,
     }),
     describeLogPatterns({
       analysis: truncatedAnalysis,
@@ -107,6 +123,7 @@ export async function investigateEntity(
       inferenceClient,
       ownPatterns,
       patternsFromOtherEntities,
+      kbEntries,
     }),
   ]).then(([entityDescription, logPatternDescription]) => {
     return writeEntityInvestigationReport({
@@ -143,6 +160,7 @@ export async function investigateEntity(
       },
       ownPatterns,
       patternsFromOtherEntities,
+      kbEntries,
     }).then(async ({ searches, summaries, foundEntities }) => {
       const report = await entityReportPromise;
 
@@ -180,6 +198,7 @@ export async function investigateEntity(
       patternsFromOtherEntities,
       searches: relatedEntitiesResults.searches,
       relatedEntitiesSummaries: relatedEntitiesResults.summaries,
+      kbEntries,
     },
   };
 }

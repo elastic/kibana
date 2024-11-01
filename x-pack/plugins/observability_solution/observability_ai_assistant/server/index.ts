@@ -18,6 +18,8 @@ export type {
   ObservabilityAIAssistantServerSetup,
 } from './types';
 
+export type { ObservabilityAIAssistantClient } from './service/client';
+
 export {
   aiAssistantLogsIndexPattern,
   aiAssistantSimulatedFunctionCalling,

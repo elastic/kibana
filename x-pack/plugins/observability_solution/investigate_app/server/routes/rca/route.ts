@@ -53,6 +53,7 @@ export const rootCauseAnalysisRoute = createInvestigateAppServerRoute({
       spaceId = 'default',
       esClient,
       apmIndices,
+      observabilityAIAssistantClient,
     ] = await Promise.all([
       (await plugins.alerting.start()).getRulesClientWithRequest(request),
       (await plugins.ruleRegistry.start()).getRacClientWithRequest(request),
@@ -65,6 +66,11 @@ export const rootCauseAnalysisRoute = createInvestigateAppServerRoute({
         plugin: 'investigateApp',
       }),
       plugins.apmDataAccess.setup.getApmIndices((await requestContext.core).savedObjects.client),
+      plugins.observabilityAIAssistant
+        .start()
+        .then((observabilityAIAssistantStart) =>
+          observabilityAIAssistantStart.service.getClient({ request, scopes: ['observability'] })
+        ),
     ]);
 
     const [sloSummaryIndices, logSources] = await Promise.all([
@@ -87,6 +93,7 @@ export const rootCauseAnalysisRoute = createInvestigateAppServerRoute({
         sloSummaries: sloSummaryIndices,
       },
       rulesClient,
+      observabilityAIAssistantClient,
       serviceName,
       spaceId,
       context,

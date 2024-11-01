@@ -22,6 +22,8 @@ import {
 import { RCA_PROMPT_CHANGES, RCA_PROMPT_ENTITIES } from '../../prompts';
 import { RootCauseAnalysisContext } from '../../types';
 import { formatEntity } from '../../util/format_entity';
+import { ScoredKnowledgeBaseEntry } from '../get_knowledge_base_entries';
+import { serializeKnowledgeBaseEntries } from '../../util/serialize_knowledge_base_entries';
 
 type LogPatternRelevance = 'normal' | 'unusual' | 'warning' | 'critical';
 
@@ -56,11 +58,13 @@ export async function analyzeLogPatterns({
   system,
   rcaContext: { logger: parentLogger, inferenceClient, connectorId, esClient, start, end, indices },
   cutoff,
+  kbEntries,
 }: {
   entity: Record<string, string>;
   allAnalysis: Array<{ index: string | string[]; analysis: TruncatedDocumentAnalysis }>;
   system: string;
   cutoff?: LogPatternCutOff;
+  kbEntries: ScoredKnowledgeBaseEntry[];
   rcaContext: Pick<
     RootCauseAnalysisContext,
     'indices' | 'logger' | 'inferenceClient' | 'connectorId' | 'esClient' | 'start' | 'end'
@@ -89,6 +93,8 @@ export async function analyzeLogPatterns({
     The following entity is being analyzed:
 
     ${formatEntity(entity)}
+
+    ${serializeKnowledgeBaseEntries(kbEntries)}
 
     ### Entity analysis
 

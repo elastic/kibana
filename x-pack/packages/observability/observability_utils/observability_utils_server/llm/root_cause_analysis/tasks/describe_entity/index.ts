@@ -12,6 +12,8 @@ import { RCA_SYSTEM_PROMPT_BASE } from '../../prompts';
 import { getInvestigateEntityTaskPrompt } from '../investigate_entity/prompts';
 import { FieldPatternResultWithChanges } from '../../../../entities/get_log_patterns';
 import { formatEntity } from '../../util/format_entity';
+import { ScoredKnowledgeBaseEntry } from '../get_knowledge_base_entries';
+import { serializeKnowledgeBaseEntries } from '../../util/serialize_knowledge_base_entries';
 
 export async function describeEntity({
   inferenceClient,
@@ -20,6 +22,7 @@ export async function describeEntity({
   contextForEntityInvestigation,
   analysis,
   ownPatterns,
+  kbEntries,
 }: {
   inferenceClient: InferenceClient;
   connectorId: string;
@@ -27,6 +30,7 @@ export async function describeEntity({
   analysis: TruncatedDocumentAnalysis;
   contextForEntityInvestigation: string;
   ownPatterns: FieldPatternResultWithChanges[];
+  kbEntries: ScoredKnowledgeBaseEntry[];
 }) {
   const system = RCA_SYSTEM_PROMPT_BASE;
 
@@ -35,6 +39,8 @@ export async function describeEntity({
     ## Context for investigating ${formatEntity(entity)}
 
     ${contextForEntityInvestigation}
+
+    ${serializeKnowledgeBaseEntries(kbEntries)}
 
     ## Data samples
 
