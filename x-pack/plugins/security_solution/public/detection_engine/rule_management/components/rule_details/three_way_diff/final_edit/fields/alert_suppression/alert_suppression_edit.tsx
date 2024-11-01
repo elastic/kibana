@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { EuiText } from '@elastic/eui';
 import type { DataViewFieldBase } from '@kbn/es-query';
 import { useFormData } from '../../../../../../../../shared_imports';
 import { MissingFieldsStrategySelector } from './missing_fields_strategy_selector';
@@ -17,12 +18,14 @@ interface AlertSuppressionEditProps {
   suppressibleFieldSpecs: DataViewFieldBase[];
   disabled?: boolean;
   disabledText?: string;
+  warningText?: string;
 }
 
 export function AlertSuppressionEdit({
   suppressibleFieldSpecs,
   disabled,
   disabledText,
+  warningText,
 }: AlertSuppressionEditProps): JSX.Element {
   const [{ suppressionFields }] = useFormData<AlertSuppressionFormData>({
     watch: SUPPRESSION_FIELDS,
@@ -36,6 +39,11 @@ export function AlertSuppressionEdit({
         disabled={disabled}
         disabledText={disabledText}
       />
+      {warningText && (
+        <EuiText size="xs" color="warning">
+          {warningText}
+        </EuiText>
+      )}
       <SuppressionDurationSelector disabled={disabled || !hasSelectedFields} />
       <MissingFieldsStrategySelector disabled={disabled || !hasSelectedFields} />
     </>

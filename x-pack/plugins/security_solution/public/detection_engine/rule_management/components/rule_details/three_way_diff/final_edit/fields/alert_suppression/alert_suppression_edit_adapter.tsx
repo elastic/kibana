@@ -17,11 +17,12 @@ import type { RuleFieldEditComponentProps } from '../rule_field_edit_component_p
 import { DataSourceType as RuleFormDataSourceType } from '../../../../../../../../detections/pages/detection_engine/rules/types';
 import { DataSourceType } from '../../../../../../../../../common/api/detection_engine/prebuilt_rules';
 import { AlertSuppressionEdit } from './alert_suppression_edit';
+import * as i18n from './translations';
 
 export function AlertSuppressionEditAdapter({
   finalDiffableRule,
 }: RuleFieldEditComponentProps): JSX.Element {
-  const { indexPattern } = useRuleIndexPattern({
+  const { indexPattern: dataView } = useRuleIndexPattern({
     dataSourceType:
       'data_source' in finalDiffableRule &&
       finalDiffableRule.data_source?.type === DataSourceType.data_view
@@ -38,21 +39,24 @@ export function AlertSuppressionEditAdapter({
         ? finalDiffableRule.data_source.data_view_id
         : undefined,
   });
-  const { fields: esqlSuppressionFields } = useAllEsqlRuleFields({
-    esqlQuery: 'esql_query' in finalDiffableRule ? finalDiffableRule.esql_query.query : undefined,
-    indexPatternsFields: indexPattern.fields,
+  const { fields: esqlSuppressionFields, isLoading: isEsqlSuppressionLoading } =
+    useAllEsqlRuleFields({
+      esqlQuery: 'esql_query' in finalDiffableRule ? finalDiffableRule.esql_query.query : undefined,
+      indexPatternsFields: dataView.fields,
+    });
+  const machineLearningJobId =
+    'machine_learning_job_id' in finalDiffableRule
+      ? [finalDiffableRule.machine_learning_job_id].flat()
+      : [];
+  const {
+    mlSuppressionFields,
+    loading: mlRuleConfigLoading,
+    allJobsStarted,
+  } = useMLRuleConfig({
+    machineLearningJobId,
   });
-  const { mlSuppressionFields } = useMLRuleConfig({
-    machineLearningJobId:
-      'machine_learning_job_id' in finalDiffableRule
-        ? [finalDiffableRule.machine_learning_job_id].flat()
-        : undefined,
-  });
-
-  const termsAggregationFields: FieldSpec[] = useMemo(
-    () => getTermsAggregationFields(aggregatableFields(indexPattern.fields as FieldSpec[])),
-    [indexPattern.fields]
-  );
+  const isMlSuppressionIncomplete =
+    isMlRule(finalDiffableRule.type) && machineLearningJobId.length > 0 && !allJobsStarted;
 
   const suppressibleFieldSpecs = useMemo(() => {
     if (isEsqlRule(finalDiffableRule.type)) {
@@ -60,9 +64,33 @@ export function AlertSuppressionEditAdapter({
     } else if (isMlRule(finalDiffableRule.type)) {
       return mlSuppressionFields;
     } else {
-      return termsAggregationFields;
+      return getTermsAggregationFields(aggregatableFields(dataView.fields as FieldSpec[]));
     }
-  }, [finalDiffableRule.type, esqlSuppressionFields, mlSuppressionFields, termsAggregationFields]);
+  }, [finalDiffableRule.type, esqlSuppressionFields, mlSuppressionFields, dataView.fields]);
 
-  return <AlertSuppressionEdit suppressibleFieldSpecs={suppressibleFieldSpecs} />;
+  const disabledText = useMemo(() => {
+    if (isMlRule(finalDiffableRule.type) && mlRuleConfigLoading) {
+      return i18n.MACHINE_LEARNING_SUPPRESSION_FIELDS_LOADING;
+    } else if (isMlRule(finalDiffableRule.type) && mlSuppressionFields.length === 0) {
+      return i18n.MACHINE_LEARNING_NO_SUPPRESSION_FIELDS;
+    } else if (isEsqlRule(finalDiffableRule.type) && isEsqlSuppressionLoading) {
+      return i18n.ESQL_SUPPRESSION_FIELDS_LOADING;
+    }
+  }, [
+    finalDiffableRule,
+    mlRuleConfigLoading,
+    mlSuppressionFields.length,
+    isEsqlSuppressionLoading,
+  ]);
+
+  return (
+    <AlertSuppressionEdit
+      suppressibleFieldSpecs={suppressibleFieldSpecs}
+      disabled={Boolean(disabledText)}
+      disabledText={disabledText}
+      warningText={
+        isMlSuppressionIncomplete ? i18n.MACHINE_LEARNING_SUPPRESSION_INCOMPLETE_LABEL : undefined
+      }
+    />
+  );
 }

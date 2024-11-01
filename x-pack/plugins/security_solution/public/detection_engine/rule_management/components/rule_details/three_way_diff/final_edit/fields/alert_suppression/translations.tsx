@@ -63,21 +63,39 @@ export const ALERT_SUPPRESSION_MISSING_FIELDS_DO_NOT_SUPPRESS_OPTION = i18n.tran
   }
 );
 
-const ALERT_SUPPRESSION_EQL_SEQUENCE_SUPPRESSION_DISABLED_TOOLTIP_MESSAGE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.eqlSequenceSuppressionDisableText',
+export const ALERT_SUPPRESSION_NOT_SUPPORTED_FOR_EQL_SEQUENCE = i18n.translate(
+  'xpack.securitySolution.ruleManagement.threeWayDiff.finalEdit.alertSuppression.notSupportedForEqlSequence',
   {
-    defaultMessage: 'Suppression is not supported for EQL sequence queries.',
+    defaultMessage: 'Suppression is not supported for EQL sequence queries',
   }
 );
 
-export const EQL_SEQUENCE_SUPPRESSION_GROUPBY_VALIDATION_TEXT = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.eqlSequenceSuppressionValidationText',
+export const MACHINE_LEARNING_SUPPRESSION_FIELDS_LOADING = i18n.translate(
+  'xpack.securitySolution.ruleManagement.threeWayDiff.finalEdit.alertSuppression.machineLearningSuppressionFieldsLoading',
+  {
+    defaultMessage: 'Machine Learning suppression fields are loading',
+  }
+);
+
+export const MACHINE_LEARNING_NO_SUPPRESSION_FIELDS = i18n.translate(
+  'xpack.securitySolution.ruleManagement.threeWayDiff.finalEdit.alertSuppression.machineLearningNoSuppressionFields',
   {
     defaultMessage:
-      '{EQL_SEQUENCE_SUPPRESSION_DISABLE_TOOLTIP} Change the EQL query to a non-sequence query, or remove the suppression fields.',
-    values: {
-      EQL_SEQUENCE_SUPPRESSION_DISABLE_TOOLTIP:
-        ALERT_SUPPRESSION_EQL_SEQUENCE_SUPPRESSION_DISABLED_TOOLTIP_MESSAGE,
-    },
+      'Unable to load machine Learning suppression fields, start relevant Machine Learning jobs.',
+  }
+);
+
+export const ESQL_SUPPRESSION_FIELDS_LOADING = i18n.translate(
+  'xpack.securitySolution.ruleManagement.threeWayDiff.finalEdit.alertSuppression.esqlFieldsLoading',
+  {
+    defaultMessage: 'ES|QL suppression fields are loading',
+  }
+);
+
+export const MACHINE_LEARNING_SUPPRESSION_INCOMPLETE_LABEL = i18n.translate(
+  'xpack.securitySolution.ruleManagement.threeWayDiff.finalEdit.alertSuppression.machineLearningSuppressionIncomplete',
+  {
+    defaultMessage:
+      'This list of fields might be incomplete as some Machine Learning jobs are not running. Start all relevant jobs for a complete list.',
   }
 );
