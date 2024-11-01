@@ -675,6 +675,8 @@
             "text": "ESQLParamLiteral"
           },
           "<string> | ",
+          "ESQLIdentifier",
+          " | ",
           {
             "pluginId": "@kbn/esql-ast",
             "scope": "common",
@@ -797,6 +799,8 @@
             "text": "ESQLParamLiteral"
           },
           "<string> | ",
+          "ESQLIdentifier",
+          " | ",
           {
             "pluginId": "@kbn/esql-ast",
             "scope": "common",
@@ -903,6 +907,8 @@
             "text": "ESQLParamLiteral"
           },
           "<string> | ",
+          "ESQLIdentifier",
+          " | ",
           {
             "pluginId": "@kbn/esql-ast",
             "scope": "common",
@@ -1017,6 +1023,8 @@
             "text": "ESQLParamLiteral"
           },
           "<string> | ",
+          "ESQLIdentifier",
+          " | ",
           {
             "pluginId": "@kbn/esql-ast",
             "scope": "common",
