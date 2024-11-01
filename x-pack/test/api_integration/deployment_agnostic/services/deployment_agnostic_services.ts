@@ -26,5 +26,4 @@ export const deploymentAgnosticServices = _.pick(apiIntegrationServices, [
   'retry',
   'security',
   'usageAPI',
-  'apmSynthtraceKibanaClient',
 ]);

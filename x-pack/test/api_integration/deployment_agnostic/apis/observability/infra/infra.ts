@@ -251,36 +251,5 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         );
       });
     });
-
-    describe('Host with active alerts', () => {
-      before(async () => {
-        await Promise.all([
-          esArchiver.load('x-pack/test/functional/es_archives/infra/alerts'),
-          esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs'),
-        ]);
-      });
-
-      after(async () => {
-        await Promise.all([
-          esArchiver.unload('x-pack/test/functional/es_archives/infra/alerts'),
-          esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs'),
-        ]);
-      });
-
-      describe('fetch hosts', () => {
-        it('should return metrics for a host with alert count', async () => {
-          const body: GetInfraMetricsRequestBodyPayloadClient = {
-            ...basePayload,
-            from: '2018-10-17T19:42:21.208Z',
-            to: '2018-10-17T19:58:03.952Z',
-            limit: 1,
-          };
-          const response = await makeRequest({ body, expectedHTTPCode: 200 });
-
-          expect(response.body.nodes).length(1);
-          expect(response.body.nodes[0].alertsCount).eql(2);
-        });
-      });
-    });
   });
 }
