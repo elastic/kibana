@@ -189,7 +189,7 @@
     padding: calc($euiSizeXS - 1px);
     display: flex;
     flex-wrap: nowrap;
-    border: $euiBorderThin;
+    // border: $euiBorderThin;
 
     background-color: $euiColorEmptyShade;
     height: $euiSizeXL;
@@ -197,11 +197,11 @@
     pointer-events: all; // Re-enable pointer-events for hover actions
   }
 
-  .embPanel--editing{
-    .embPanel__hoverActions {
-      border-style: dashed;
-    }
-  }
+  // .embPanel--editing{
+  //   .embPanel__hoverActions {
+  //     border-style: dashed;
+  //   }
+  // }
 
   .embPanel--dragHandle {
     cursor: move;

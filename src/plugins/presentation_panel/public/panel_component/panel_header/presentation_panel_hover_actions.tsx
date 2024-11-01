@@ -41,7 +41,7 @@ import {
 } from '@kbn/presentation-publishing';
 import { Subscription } from 'rxjs';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { css } from '@emotion/react';
+import { css, CSSObject } from '@emotion/react';
 import { ActionWithContext } from '@kbn/ui-actions-plugin/public/context_menu/build_eui_context_menu_panels';
 import { uiActions } from '../../kibana_services';
 import {
@@ -67,12 +67,19 @@ const QUICK_ACTION_IDS = {
 
 const ALLOWED_NOTIFICATIONS = ['ACTION_FILTERS_NOTIFICATION'] as const;
 
-const ALL_ROUNDED_CORNERS = `border-radius: ${euiThemeVars.euiBorderRadius};
-`;
-const TOP_ROUNDED_CORNERS = `border-top-left-radius: ${euiThemeVars.euiBorderRadius};
- border-top-right-radius: ${euiThemeVars.euiBorderRadius};
- border-bottom: 0 !important;
- `;
+const ALL_ROUNDED_CORNERS: CSSObject = {
+  borderRadius: euiThemeVars.euiBorderRadius,
+  borderWidth: '1px',
+};
+const TOP_ROUNDED_CORNERS: CSSObject = {
+  borderTopLeftRadius: euiThemeVars.euiBorderRadius,
+  borderTopRightRadius: euiThemeVars.euiBorderRadius,
+  borderWidth: '1px',
+  borderBottom: `0px`,
+};
+
+const DASHED_OUTLINE = `1px dashed ${euiThemeVars.euiColorMediumShade}`;
+const SOLID_OUTLINE = `1px solid ${euiThemeVars.euiBorderColor}`;
 
 const createClickHandler =
   (action: AnyApiAction, context: ActionExecutionContext<EmbeddableApiContext>) =>
@@ -123,7 +130,7 @@ export const PresentationPanelHoverActions = ({
   const leftHoverActionsRef = useRef<HTMLDivElement | null>(null);
   const rightHoverActionsRef = useRef<HTMLDivElement | null>(null);
   const [combineHoverActions, setCombineHoverActions] = useState<boolean>(false);
-  const [borderStyles, setBorderStyles] = useState<string>(TOP_ROUNDED_CORNERS);
+  const [borderStyles, setBorderStyles] = useState<CSSObject>(TOP_ROUNDED_CORNERS);
 
   const updateCombineHoverActions = () => {
     if (!hoverActionsRef.current || !anchorRef.current) return;
@@ -197,7 +204,6 @@ export const PresentationPanelHoverActions = ({
   );
 
   const hideTitle = hidePanelTitle || parentHideTitle;
-
   const showDescription = description && (!title || hideTitle);
 
   const quickActionIds = useMemo(
@@ -464,6 +470,15 @@ export const PresentationPanelHoverActions = ({
         /\s/g,
         ''
       )}`}
+      css={css`
+        ${showBorder ? `outline: ${viewMode === 'edit' ? DASHED_OUTLINE : SOLID_OUTLINE};` : ''};
+        border-radius: ${euiThemeVars.euiBorderRadius};
+
+        &:hover {
+          outline: ${viewMode === 'edit' ? DASHED_OUTLINE : SOLID_OUTLINE};
+          z-index: 2;
+        }
+      `}
     >
       {children}
       {api ? (
@@ -483,9 +498,14 @@ export const PresentationPanelHoverActions = ({
                 'embPanel__hoverActionsLeft',
                 className
               )}
-              css={css`
-                ${showBorder ? borderStyles : 'outline: none;'}
-              `}
+              css={{
+                ...borderStyles,
+                borderStyle: viewMode === 'edit' ? 'dashed' : 'solid',
+                borderColor:
+                  viewMode === 'edit'
+                    ? euiThemeVars.euiColorMediumShade
+                    : euiThemeVars.euiBorderColor,
+              }}
             >
               {dragHandle}
             </div>
@@ -501,9 +521,14 @@ export const PresentationPanelHoverActions = ({
                 'embPanel__hoverActionsRight',
                 className
               )}
-              css={css`
-                ${borderStyles}
-              `}
+              css={{
+                ...borderStyles,
+                borderStyle: viewMode === 'edit' ? 'dashed' : 'solid',
+                borderColor:
+                  viewMode === 'edit'
+                    ? euiThemeVars.euiColorMediumShade
+                    : euiThemeVars.euiBorderColor,
+              }}
             >
               {viewMode === 'edit' && combineHoverActions && dragHandle}
               {showNotifications && notificationElements}

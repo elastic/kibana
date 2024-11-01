@@ -14,6 +14,9 @@ import { PanelLoader } from '@kbn/panel-loader';
 import { isPromise } from '@kbn/std';
 import React from 'react';
 import useAsync from 'react-use/lib/useAsync';
+import { css } from '@emotion/react';
+import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { untilPluginStartServicesReady } from '../kibana_services';
 import { PresentationPanelError } from './presentation_panel_error';
 import { DefaultPresentationPanelApi, PresentationPanelProps } from './types';
@@ -54,7 +57,10 @@ export const PresentationPanel = <
     return props.hideLoader ? null : (
       <PanelLoader
         showShadow={props.showShadow}
-        showBorder={props.showBorder}
+        showBorder={props?.showBorder}
+        css={css`
+          border-radius: ${euiThemeVars.euiBorderRadius};
+        `}
         dataTestSubj="embeddablePanelLoadingIndicator"
       />
     );
