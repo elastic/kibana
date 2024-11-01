@@ -253,12 +253,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         beforeEach(async () => {
           await svlSearchNavigation.navigateToIndexDetailPage(indexName);
         });
-        it('delete document is disabled', async () => {
+        it('delete document button is disabled', async () => {
           await pageObjects.svlSearchIndexDetailPage.expectDeleteDocumentActionIsDisabled();
         });
         it('add field button is disabled', async () => {
           await pageObjects.svlSearchIndexDetailPage.changeTab('mappingsTab');
-          await pageObjects.svlSearchIndexDetailPage.expectIndexDetailsMappingsAddFieldToExist();
+          await pageObjects.svlSearchIndexDetailPage.expectAddFieldToBeDisabled();
         });
         it('edit settings button is disabled', async () => {
           await pageObjects.svlSearchIndexDetailPage.changeTab('settingsTab');
@@ -269,7 +269,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await pageObjects.svlSearchIndexDetailPage.clickMoreOptionsActionsButton();
           await pageObjects.svlSearchIndexDetailPage.expectMoreOptionsOverviewMenuIsShown();
           await pageObjects.svlSearchIndexDetailPage.expectDeleteIndexButtonExistsInMoreOptions();
-          await pageObjects.svlSearchIndexDetailPage.expectDeleteIndexButtonToDisabled();
+          await pageObjects.svlSearchIndexDetailPage.expectDeleteIndexButtonToBeDisabled();
         });
       });
     });

@@ -100,10 +100,12 @@ export function SvlSearchIndexDetailPageProvider({ getService }: FtrProviderCont
     async expectAPIReferenceDocLinkMissingInMoreOptions() {
       await testSubjects.missingOrFail('moreOptionsApiReference', { timeout: 2000 });
     },
-    async expectDeleteIndexButtonToDisabled() {
+    async expectDeleteIndexButtonToBeDisabled() {
       await testSubjects.existOrFail('moreOptionsDeleteIndex');
       const deleteIndexButton = await testSubjects.isEnabled('moreOptionsDeleteIndex');
       expect(deleteIndexButton).to.be(false);
+      await testSubjects.moveMouseTo('moreOptionsDeleteIndex');
+      await testSubjects.existOrFail('moreOptionsDeleteIndexTooltip');
     },
     async expectDeleteIndexButtonExistsInMoreOptions() {
       await testSubjects.existOrFail('moreOptionsDeleteIndex');
@@ -159,6 +161,8 @@ export function SvlSearchIndexDetailPageProvider({ getService }: FtrProviderCont
         'indexDetailsSettingsEditModeSwitch'
       );
       expect(isEditSettingsButtonDisabled).to.be(false);
+      await testSubjects.moveMouseTo('indexDetailsSettingsEditModeSwitch');
+      await testSubjects.existOrFail('indexDetailsSettingsEditModeSwitchToolTip');
     },
     async expectSelectedLanguage(language: string) {
       await testSubjects.existOrFail('codeExampleLanguageSelect');
@@ -209,7 +213,10 @@ export function SvlSearchIndexDetailPageProvider({ getService }: FtrProviderCont
       await testSubjects.existOrFail('deleteDocumentButton');
       const isDeleteDocumentEnabled = await testSubjects.isEnabled('deleteDocumentButton');
       expect(isDeleteDocumentEnabled).to.be(false);
+      await testSubjects.moveMouseTo('deleteDocumentButton');
+      await testSubjects.existOrFail('deleteDocumentButtonToolTip');
     },
+
     async openIndicesDetailFromIndexManagementIndicesListTable(indexOfRow: number) {
       const indexList = await testSubjects.findAll('indexTableIndexNameLink');
       await indexList[indexOfRow].click();
@@ -238,10 +245,12 @@ export function SvlSearchIndexDetailPageProvider({ getService }: FtrProviderCont
       }
     },
 
-    async expectIndexDetailsMappingsAddFieldToExist() {
+    async expectAddFieldToBeDisabled() {
       await testSubjects.existOrFail('indexDetailsMappingsAddField');
       const isMappingsFieldEnabled = await testSubjects.isEnabled('indexDetailsMappingsAddField');
       expect(isMappingsFieldEnabled).to.be(false);
+      await testSubjects.moveMouseTo('indexDetailsMappingsAddField');
+      await testSubjects.existOrFail('indexDetailsMappingsAddFieldTooltip');
     },
   };
 }
