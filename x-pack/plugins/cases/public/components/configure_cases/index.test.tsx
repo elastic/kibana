@@ -715,6 +715,8 @@ describe('ConfigureCases', () => {
             { ...customFieldsConfigurationMock[1] },
             { ...customFieldsConfigurationMock[2] },
             { ...customFieldsConfigurationMock[3] },
+            { ...customFieldsConfigurationMock[4] },
+            { ...customFieldsConfigurationMock[5] },
           ],
           templates: [],
           id: '',
@@ -774,6 +776,8 @@ describe('ConfigureCases', () => {
             { ...customFieldsConfigurationMock[1] },
             { ...customFieldsConfigurationMock[2] },
             { ...customFieldsConfigurationMock[3] },
+            { ...customFieldsConfigurationMock[4] },
+            { ...customFieldsConfigurationMock[5] },
           ],
           templates: [
             {
@@ -868,6 +872,16 @@ describe('ConfigureCases', () => {
                     value: false,
                   },
                   {
+                    key: customFieldsConfigurationMock[4].key,
+                    type: customFieldsConfigurationMock[4].type,
+                    value: customFieldsConfigurationMock[4].defaultValue,
+                  },
+                  {
+                    key: customFieldsConfigurationMock[5].key,
+                    type: customFieldsConfigurationMock[5].type,
+                    value: null,
+                  },
+                  {
                     key: expect.anything(),
                     type: CustomFieldTypes.TEXT as const,
                     value: 'This is a default value',
@@ -930,6 +944,8 @@ describe('ConfigureCases', () => {
             { ...customFieldsConfigurationMock[1] },
             { ...customFieldsConfigurationMock[2] },
             { ...customFieldsConfigurationMock[3] },
+            { ...customFieldsConfigurationMock[4] },
+            { ...customFieldsConfigurationMock[5] },
           ],
           templates: [],
           id: '',
@@ -1106,6 +1122,16 @@ describe('ConfigureCases', () => {
                     key: customFieldsConfigurationMock[3].key,
                     type: customFieldsConfigurationMock[3].type,
                     value: false, // when no default value for toggle, we set it to false
+                  },
+                  {
+                    key: customFieldsConfigurationMock[4].key,
+                    type: customFieldsConfigurationMock[4].type,
+                    value: customFieldsConfigurationMock[4].defaultValue,
+                  },
+                  {
+                    key: customFieldsConfigurationMock[5].key,
+                    type: customFieldsConfigurationMock[5].type,
+                    value: null,
                   },
                 ],
               },
