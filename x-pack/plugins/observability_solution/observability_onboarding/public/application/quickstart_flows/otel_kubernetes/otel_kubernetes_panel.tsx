@@ -245,7 +245,7 @@ spec:
       ...
 
 # To annotate all resources in a namespace
-kubectl annotate namespace my-namespace instrumentation.opentelemetry.io/inject-${idSelected}: "${namespace}/elastic-instrumentation"
+kubectl annotate namespace my-namespace instrumentation.opentelemetry.io/inject-${idSelected}="${namespace}/elastic-instrumentation"
 
 # Restart your deployment
 kubectl rollout restart deployment myapp -n my-namespace
