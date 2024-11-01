@@ -319,7 +319,7 @@ export const EntityStoreManagementPage = () => {
               <EuiCallOut
                 title={
                   <FormattedMessage
-                    id="xpack.securitySolution.entityAnalytics.entityStoreManagementPage.errors.queryErrorTitle"
+                    id="xpack.securitySolution.entityAnalytics.entityStoreManagementPage.errors.initErrorTitle"
                     defaultMessage={'There was a problem initializing the entity store'}
                   />
                 }
@@ -328,6 +328,22 @@ export const EntityStoreManagementPage = () => {
               >
                 <p>
                   {(initEntityEngineMutation.error as { body: { message: string } }).body.message}
+                </p>
+              </EuiCallOut>
+            )}
+            {deleteEntityEngineMutation.isError && (
+              <EuiCallOut
+                title={
+                  <FormattedMessage
+                    id="xpack.securitySolution.entityAnalytics.entityStoreManagementPage.errors.deleteErrorTitle"
+                    defaultMessage={'There was a problem deleting the entity store'}
+                  />
+                }
+                color="danger"
+                iconType="alert"
+              >
+                <p>
+                  {(deleteEntityEngineMutation.error as { body: { message: string } }).body.message}
                 </p>
               </EuiCallOut>
             )}
