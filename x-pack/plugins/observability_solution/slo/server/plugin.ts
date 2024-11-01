@@ -143,15 +143,6 @@ export class SLOPlugin
           ...plugins,
           core,
         },
-        ruleDataService,
-        getRulesClientWithRequest: async (request) => {
-          const [, pluginStart] = await core.getStartServices();
-          return pluginStart.alerting.getRulesClientWithRequest(request);
-        },
-        getRacClientWithRequest: async (request) => {
-          const [, pluginStart] = await core.getStartServices();
-          return pluginStart.ruleRegistry.getRacClientWithRequest(request);
-        },
       },
       logger: this.logger,
       repository: getSloServerRouteRepository({ isServerless: this.isServerless }),

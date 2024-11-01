@@ -260,7 +260,9 @@ const deleteSLORoute = createSloServerRoute({
     const scopedClusterClient = core.elasticsearch.client;
     const esClient = core.elasticsearch.client.asCurrentUser;
     const soClient = core.savedObjects.client;
-    const rulesClient = await dependencies.getRulesClientWithRequest(request);
+
+    const alerting = await dependencies.plugins.alerting.start();
+    const rulesClient = await alerting.getRulesClientWithRequest(request);
 
     const dataViewsService = await dataViews.dataViewsServiceFactory(soClient, esClient);
 
@@ -721,10 +723,13 @@ const getSLOsOverview = createSloServerRoute({
     const soClient = (await context.core).savedObjects.client;
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
 
-    const racClient = await dependencies.getRacClientWithRequest(request);
+    const ruleRegistry = await dependencies.plugins.ruleRegistry.start();
+    const racClient = await ruleRegistry.getRacClientWithRequest(request);
 
     const spaceId = await getSpaceId(dependencies, request);
-    const rulesClient = await dependencies.getRulesClientWithRequest(request);
+
+    const alerting = await dependencies.plugins.alerting.start();
+    const rulesClient = await alerting.getRulesClientWithRequest(request);
 
     const slosOverview = new GetSLOsOverview(
       soClient,

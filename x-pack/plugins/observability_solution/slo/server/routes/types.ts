@@ -4,13 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { RulesClientApi } from '@kbn/alerting-plugin/server/types';
-import { CoreSetup, KibanaRequest } from '@kbn/core/server';
-import {
-  AlertsClient,
-  RuleDataPluginService,
-  RuleRegistryPluginSetupContract,
-} from '@kbn/rule-registry-plugin/server';
+import { CoreSetup } from '@kbn/core/server';
+import { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
 import type { DefaultRouteHandlerResources } from '@kbn/server-route-repository';
 import { SLOPluginSetupDependencies, SLOPluginStartDependencies } from '../types';
 
@@ -30,9 +25,6 @@ export interface SLORoutesDependencies {
     core: CoreSetup;
     ruleRegistry: RuleRegistryPluginSetupContract;
   };
-  ruleDataService: RuleDataPluginService;
-  getRulesClientWithRequest: (request: KibanaRequest) => Promise<RulesClientApi>;
-  getRacClientWithRequest: (request: KibanaRequest) => Promise<AlertsClient>;
 }
 
 export type SLORouteHandlerResources = {
