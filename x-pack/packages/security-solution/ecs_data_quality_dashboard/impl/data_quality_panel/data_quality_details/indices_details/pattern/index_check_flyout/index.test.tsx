@@ -20,6 +20,7 @@ import { auditbeatWithAllResults } from '../../../../mock/pattern_rollup/mock_au
 import { mockStats } from '../../../../mock/stats/mock_stats';
 import { mockHistoricalResult } from '../../../../mock/historical_results/mock_historical_results_response';
 import { getFormattedCheckTime } from './utils/get_formatted_check_time';
+import { HISTORY_TAB_ID, LATEST_CHECK_TAB_ID } from '../constants';
 
 describe('IndexCheckFlyout', () => {
   beforeEach(() => {
@@ -55,7 +56,7 @@ describe('IndexCheckFlyout', () => {
     });
 
     it('should render heading section correctly with formatted latest check time', () => {
-      expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent(
+      expect(screen.getByTestId('indexCheckFlyoutHeading')).toHaveTextContent(
         'auditbeat-custom-index-1'
       );
       expect(screen.getByTestId('latestCheckedAt')).toHaveTextContent(
@@ -66,12 +67,12 @@ describe('IndexCheckFlyout', () => {
     });
 
     it('should render tabs correctly, with latest check preselected', () => {
-      expect(screen.getByRole('tab', { name: 'Latest Check' })).toHaveAttribute(
+      expect(screen.getByTestId(`indexCheckFlyoutTab-${LATEST_CHECK_TAB_ID}`)).toHaveAttribute(
         'aria-selected',
         'true'
       );
-      expect(screen.getByRole('tab', { name: 'Latest Check' })).not.toBeDisabled();
-      expect(screen.getByRole('tab', { name: 'History' })).not.toBeDisabled();
+      expect(screen.getByTestId(`indexCheckFlyoutTab-${LATEST_CHECK_TAB_ID}`)).not.toBeDisabled();
+      expect(screen.getByTestId(`indexCheckFlyoutTab-${HISTORY_TAB_ID}`)).not.toBeDisabled();
     });
 
     it('should render the correct index properties panel', () => {
@@ -80,7 +81,7 @@ describe('IndexCheckFlyout', () => {
     });
 
     it('should render footer with check now button', () => {
-      expect(screen.getByRole('button', { name: 'Check now' })).toBeInTheDocument();
+      expect(screen.getByTestId('indexCheckFlyoutCheckNowButton')).toBeInTheDocument();
     });
   });
 
@@ -107,7 +108,7 @@ describe('IndexCheckFlyout', () => {
         </TestExternalProviders>
       );
 
-      const closeButton = screen.getByRole('button', { name: 'Close this dialog' });
+      const closeButton = screen.getByTestId('euiFlyoutCloseButton');
       await userEvent.click(closeButton);
 
       expect(onClose).toHaveBeenCalled();
@@ -141,7 +142,7 @@ describe('IndexCheckFlyout', () => {
         </TestExternalProviders>
       );
 
-      const checkNowButton = screen.getByRole('button', { name: 'Check now' });
+      const checkNowButton = screen.getByTestId('indexCheckFlyoutCheckNowButton');
       await userEvent.click(checkNowButton);
 
       expect(checkIndex).toHaveBeenCalledWith({
@@ -189,16 +190,12 @@ describe('IndexCheckFlyout', () => {
         </TestExternalProviders>
       );
 
-      expect(screen.getByRole('tab', { name: 'Latest Check' })).toHaveAttribute(
-        'aria-selected',
-        'true'
-      );
-      expect(screen.getByRole('tab', { name: 'History' })).not.toHaveAttribute(
-        'aria-selected',
-        'true'
-      );
+      const latestCheckTab = screen.getByTestId(`indexCheckFlyoutTab-${LATEST_CHECK_TAB_ID}`);
+      expect(latestCheckTab).toHaveAttribute('aria-selected', 'true');
 
-      const historyTab = screen.getByRole('tab', { name: 'History' });
+      const historyTab = screen.getByTestId(`indexCheckFlyoutTab-${HISTORY_TAB_ID}`);
+      expect(historyTab).toHaveAttribute('aria-selected', 'false');
+
       await userEvent.click(historyTab);
 
       expect(fetchHistoricalResults).toHaveBeenCalledWith({
@@ -206,11 +203,8 @@ describe('IndexCheckFlyout', () => {
         abortController: expect.any(AbortController),
       });
 
-      expect(screen.getByRole('tab', { name: 'History' })).toHaveAttribute('aria-selected', 'true');
-      expect(screen.getByRole('tab', { name: 'Latest Check' })).not.toHaveAttribute(
-        'aria-selected',
-        'true'
-      );
+      expect(historyTab).toHaveAttribute('aria-selected', 'true');
+      expect(latestCheckTab).toHaveAttribute('aria-selected', 'false');
 
       expect(screen.getByTestId('historicalResults')).toBeInTheDocument();
     });
@@ -240,17 +234,15 @@ describe('IndexCheckFlyout', () => {
           </TestExternalProviders>
         );
 
-        const historyTab = screen.getByRole('tab', { name: 'History' });
-        const latestCheckTab = screen.getByRole('tab', { name: 'Latest Check' });
+        const historyTab = screen.getByTestId(`indexCheckFlyoutTab-${HISTORY_TAB_ID}`);
+        const latestCheckTab = screen.getByTestId(`indexCheckFlyoutTab-${LATEST_CHECK_TAB_ID}`);
 
         expect(historyTab).toHaveAttribute('data-tour-element', `${pattern}-history-tab`);
         expect(latestCheckTab).not.toHaveAttribute('data-tour-element', `${pattern}-history-tab`);
         await waitFor(() =>
           expect(historyTab.closest('[data-test-subj="historicalResultsTour"]')).toBeInTheDocument()
         );
-        expect(
-          screen.getByRole('dialog', { name: 'Introducing data quality history' })
-        ).toBeInTheDocument();
+        expect(screen.getByTestId('historicalResultsTourPanel')).toBeInTheDocument();
       });
 
       describe('when the tour close button is clicked', () => {
@@ -276,11 +268,8 @@ describe('IndexCheckFlyout', () => {
             </TestExternalProviders>
           );
 
-          const dialogWrapper = await screen.findByRole('dialog', {
-            name: 'Introducing data quality history',
-          });
-
-          const closeButton = within(dialogWrapper).getByRole('button', { name: 'Close' });
+          const dialogWrapper = await screen.findByTestId('historicalResultsTourPanel');
+          const closeButton = within(dialogWrapper).getByText('Close');
           await userEvent.click(closeButton);
 
           expect(onDismissTour).toHaveBeenCalled();
@@ -310,15 +299,13 @@ describe('IndexCheckFlyout', () => {
             </TestExternalProviders>
           );
 
-          const dialogWrapper = await screen.findByRole('dialog', {
-            name: 'Introducing data quality history',
-          });
+          const dialogWrapper = await screen.findByTestId('historicalResultsTourPanel');
 
-          const tryItButton = within(dialogWrapper).getByRole('button', { name: 'Try it' });
+          const tryItButton = within(dialogWrapper).getByText('Try it');
           await userEvent.click(tryItButton);
 
           expect(onDismissTour).toHaveBeenCalled();
-          expect(screen.getByRole('tab', { name: 'History' })).toHaveAttribute(
+          expect(screen.getByTestId(`indexCheckFlyoutTab-${HISTORY_TAB_ID}`)).toHaveAttribute(
             'aria-selected',
             'true'
           );
@@ -350,7 +337,7 @@ describe('IndexCheckFlyout', () => {
             </TestExternalProviders>
           );
 
-          const historyTab = screen.getByRole('tab', { name: 'History' });
+          const historyTab = screen.getByTestId(`indexCheckFlyoutTab-${HISTORY_TAB_ID}`);
           await userEvent.click(historyTab);
 
           expect(onDismissTour).toHaveBeenCalled();
@@ -384,9 +371,7 @@ describe('IndexCheckFlyout', () => {
           expect(screen.queryByTestId('historicalResultsTour')).not.toBeInTheDocument()
         );
 
-        expect(
-          screen.queryByRole('dialog', { name: 'Introducing data quality history' })
-        ).not.toBeInTheDocument();
+        expect(screen.queryByTestId('historicalResultsTourPanel')).not.toBeInTheDocument();
       });
     });
   });
