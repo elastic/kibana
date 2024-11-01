@@ -37,6 +37,13 @@ components:
                         type: boolean
                       write:
                         type: boolean
+            kibana:
+              type: object
+              properties:
+                manage_index_templates:
+                  type: boolean
+                manage_transform:
+                  type: boolean
           required:
             - elasticsearch
       required:

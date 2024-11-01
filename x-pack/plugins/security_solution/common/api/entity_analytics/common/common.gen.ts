@@ -41,6 +41,12 @@ export const EntityAnalyticsPrivileges = z.object({
         )
         .optional(),
     }),
+    kibana: z
+      .object({
+        manage_index_templates: z.boolean().optional(),
+        manage_transform: z.boolean().optional(),
+      })
+      .optional(),
   }),
 });
 
