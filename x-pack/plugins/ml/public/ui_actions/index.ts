@@ -28,6 +28,8 @@ import {
   EXPLORER_ENTITY_FIELD_SELECTION_TRIGGER,
   SWIM_LANE_SELECTION_TRIGGER,
   swimLaneSelectionTrigger,
+  smvEntityFieldSelectionTrigger,
+  SINGLE_METRIC_VIEWER_ENTITY_FIELD_SELECTION_TRIGGER,
 } from './triggers';
 import { createAddAnomalyChartsPanelAction } from './create_anomaly_chart';
 export { APPLY_INFLUENCER_FILTERS_ACTION } from './apply_influencer_filters_action';
@@ -76,6 +78,7 @@ export function registerMlUiActions(
 
   uiActions.registerTrigger(swimLaneSelectionTrigger);
   uiActions.registerTrigger(entityFieldSelectionTrigger);
+  uiActions.registerTrigger(smvEntityFieldSelectionTrigger);
   uiActions.registerTrigger(createCategorizationADJobTrigger);
 
   uiActions.addTriggerAction(SWIM_LANE_SELECTION_TRIGGER, applyInfluencerFiltersAction);
@@ -84,6 +87,10 @@ export function registerMlUiActions(
   uiActions.addTriggerAction(SWIM_LANE_SELECTION_TRIGGER, openInSingleMetricViewerAction);
   uiActions.addTriggerAction(SWIM_LANE_SELECTION_TRIGGER, clearSelectionAction);
   uiActions.addTriggerAction(EXPLORER_ENTITY_FIELD_SELECTION_TRIGGER, applyEntityFieldFilterAction);
+  uiActions.addTriggerAction(
+    SINGLE_METRIC_VIEWER_ENTITY_FIELD_SELECTION_TRIGGER,
+    applyEntityFieldFilterAction
+  );
   uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, visToAdJobAction);
   uiActions.addTriggerAction(
     CREATE_PATTERN_ANALYSIS_TO_ML_AD_JOB_TRIGGER,

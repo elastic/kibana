@@ -34,7 +34,7 @@ export const EntityFilter: FC<EntityFilterProps> = ({
         content={
           <FormattedMessage
             id="xpack.ml.entityFilter.addFilterTooltip"
-            defaultMessage="Add filter"
+            defaultMessage="Add filter for value"
           />
         }
       >
@@ -59,7 +59,7 @@ export const EntityFilter: FC<EntityFilterProps> = ({
         content={
           <FormattedMessage
             id="xpack.ml.entityFilter.removeFilterTooltip"
-            defaultMessage="Remove filter"
+            defaultMessage="Add negate filter for value"
           />
         }
       >
