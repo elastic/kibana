@@ -16,6 +16,7 @@ import {
   EuiBadge,
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPageTemplate,
@@ -25,13 +26,14 @@ import {
 import { AppMountParameters } from '@kbn/core-application-browser';
 import { CoreStart } from '@kbn/core-lifecycle-browser';
 import { GridLayout, GridLayoutData, isLayoutEqual, type GridLayoutApi } from '@kbn/grid-layout';
+import { i18n } from '@kbn/i18n';
+
 import { getPanelId } from './get_panel_id';
 import {
   clearSerializedGridLayout,
   getSerializedGridLayout,
   setSerializedGridLayout,
 } from './serialized_grid_layout';
-import { i18n } from '@kbn/i18n';
 
 const DASHBOARD_MARGIN_SIZE = 8;
 const DASHBOARD_GRID_HEIGHT = 20;
@@ -41,6 +43,7 @@ const DEFAULT_PANEL_WIDTH = DASHBOARD_GRID_COLUMN_COUNT / 2;
 
 export const GridExample = ({ coreStart }: { coreStart: CoreStart }) => {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState<boolean>(false);
+
   const [layoutKey, setLayoutKey] = useState<string>(uuidv4());
   const [gridLayoutApi, setGridLayoutApi] = useState<GridLayoutApi | null>();
   const savedLayout = useRef<GridLayoutData>(getSerializedGridLayout());
@@ -56,6 +59,26 @@ export const GridExample = ({ coreStart }: { coreStart: CoreStart }) => {
           })}
         />
         <EuiPageTemplate.Section color="subdued">
+          <EuiCallOut
+            title={i18n.translate('examples.gridExample.sessionStorageCallout', {
+              defaultMessage:
+                'This example uses session storage to persist saved state and unsaved changes',
+            })}
+          >
+            <EuiButton
+              color="accent"
+              size="s"
+              onClick={() => {
+                clearSerializedGridLayout();
+                window.location.reload();
+              }}
+            >
+              {i18n.translate('examples.gridExample.resetExampleButton', {
+                defaultMessage: 'Reset example',
+              })}
+            </EuiButton>
+          </EuiCallOut>
+          <EuiSpacer size="m" />
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
             <EuiFlexItem grow={false}>
               <EuiButton
@@ -90,8 +113,7 @@ export const GridExample = ({ coreStart }: { coreStart: CoreStart }) => {
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
                     onClick={() => {
-                      clearSerializedGridLayout();
-                      currentLayout.current = savedLayout.current;
+                      currentLayout.current = cloneDeep(savedLayout.current);
                       setHasUnsavedChanges(false);
                       setLayoutKey(uuidv4()); // force remount of grid
                     }}
@@ -122,11 +144,11 @@ export const GridExample = ({ coreStart }: { coreStart: CoreStart }) => {
           </EuiFlexGroup>
           <EuiSpacer size="m" />
           <GridLayout
+            key={layoutKey}
             onLayoutChange={(newLayout) => {
-              currentLayout.current = newLayout;
+              currentLayout.current = cloneDeep(newLayout);
               setHasUnsavedChanges(!isLayoutEqual(savedLayout.current, newLayout));
             }}
-            key={layoutKey}
             ref={setGridLayoutApi}
             renderPanelContents={(id) => {
               return (
@@ -164,7 +186,7 @@ export const GridExample = ({ coreStart }: { coreStart: CoreStart }) => {
                   rowHeight: DASHBOARD_GRID_HEIGHT,
                   columnCount: DASHBOARD_GRID_COLUMN_COUNT,
                 },
-                initialLayout: cloneDeep(savedLayout.current),
+                initialLayout: cloneDeep(currentLayout.current),
               };
             }}
           />

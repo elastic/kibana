@@ -11,15 +11,18 @@ import React, { useState } from 'react';
 
 import {
   EuiButton,
+  EuiCallOut,
   EuiFieldText,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
+  EuiSpacer,
 } from '@elastic/eui';
 import { CoreStart } from '@kbn/core-lifecycle-browser';
 import { toMountPoint } from '@kbn/react-kibana-mount';
+import { i18n } from '@kbn/i18n';
 
 const PanelIdModal = ({
   suggestion,
@@ -35,9 +38,22 @@ const PanelIdModal = ({
   return (
     <EuiModal onClose={onClose}>
       <EuiModalHeader>
-        <EuiModalHeaderTitle>Panel ID</EuiModalHeaderTitle>
+        <EuiModalHeaderTitle>
+          {i18n.translate('examples.gridExample.getPanelIdModalTitle', {
+            defaultMessage: 'Panel ID',
+          })}
+        </EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
+        <EuiCallOut
+          color="warning"
+          title={i18n.translate('examples.gridExample.getPanelIdWarning', {
+            defaultMessage: 'Ensure the panel ID is unique, or you may get unexpected behaviour.',
+          })}
+        />
+
+        <EuiSpacer size="m" />
+
         <EuiFieldText
           placeholder={suggestion}
           value={panelId}
@@ -52,7 +68,9 @@ const PanelIdModal = ({
             onSubmit(panelId);
           }}
         >
-          Submit
+          {i18n.translate('examples.gridExample.getPanelIdSubmitButton', {
+            defaultMessage: 'Submit',
+          })}
         </EuiButton>
       </EuiModalFooter>
     </EuiModal>

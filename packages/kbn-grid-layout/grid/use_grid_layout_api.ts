@@ -99,7 +99,7 @@ export const useGridLayoutApi = ({
 
       serializeState: () => {
         const currentLayout = gridLayoutStateManager.gridLayout$.getValue();
-        return currentLayout as GridLayoutData & SerializableRecord;
+        return cloneDeep(currentLayout) as GridLayoutData & SerializableRecord;
       },
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
