@@ -21,7 +21,6 @@ import {
   EuiForm,
   EuiFormRow,
   EuiSpacer,
-  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import { remove } from 'lodash';
@@ -111,14 +110,6 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
               />
             </h2>
           </EuiTitle>
-          <EuiText size="s">
-            <p>
-              <FormattedMessage
-                id="xpack.security.management.editRole.spacePrivilegeForm.modalHeadline"
-                defaultMessage="This role will be granted access to the following spaces"
-              />
-            </p>
-          </EuiText>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
           <EuiErrorBoundary>{this.getForm()}</EuiErrorBoundary>
@@ -250,20 +241,6 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
           />
         </EuiFormRow>
 
-        <EuiSpacer />
-
-        <EuiTitle size="xxs">
-          <h3>{this.getFeatureListLabel(this.state.selectedBasePrivilege.length > 0)}</h3>
-        </EuiTitle>
-
-        <EuiSpacer size="xs" />
-
-        <EuiText size="s">
-          <p>{this.getFeatureListDescription(this.state.selectedBasePrivilege.length > 0)}</p>
-        </EuiText>
-
-        <EuiSpacer size="l" />
-
         <KibanaPrivilegeTable
           role={this.state.role}
           privilegeCalculator={this.state.privilegeCalculator}
@@ -355,44 +332,6 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
         {buttonText}
       </EuiButton>
     );
-  };
-
-  private getFeatureListLabel = (disabled: boolean) => {
-    if (disabled) {
-      return i18n.translate(
-        'xpack.security.management.editRole.spacePrivilegeForm.summaryOfFeaturePrivileges',
-        {
-          defaultMessage: 'Summary of feature privileges',
-        }
-      );
-    } else {
-      return i18n.translate(
-        'xpack.security.management.editRole.spacePrivilegeForm.customizeFeaturePrivileges',
-        {
-          defaultMessage: 'Customize by feature',
-        }
-      );
-    }
-  };
-
-  private getFeatureListDescription = (disabled: boolean) => {
-    if (disabled) {
-      return i18n.translate(
-        'xpack.security.management.editRole.spacePrivilegeForm.featurePrivilegeSummaryDescription',
-        {
-          defaultMessage:
-            'Some features might be hidden by the space or affected by a global space privilege.',
-        }
-      );
-    } else {
-      return i18n.translate(
-        'xpack.security.management.editRole.spacePrivilegeForm.customizeFeaturePrivilegeDescription',
-        {
-          defaultMessage:
-            'Increase privilege levels on a per feature basis. Some features might be hidden by the space or affected by a global space privilege.',
-        }
-      );
-    }
   };
 
   private getPrivilegeCallout = () => {

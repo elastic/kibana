@@ -20,8 +20,6 @@ import {
   EuiFormRow,
   EuiLink,
   EuiLoadingSpinner,
-  EuiSpacer,
-  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
@@ -30,7 +28,6 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import type { KibanaFeature, KibanaFeatureConfig } from '@kbn/features-plugin/common';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type {
   RawKibanaPrivileges,
   Role,
@@ -485,7 +482,6 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
                       <EuiLoadingSpinner size="l" />
                     ) : (
                       <KibanaPrivilegeTable
-                        showTitle={false}
                         disabled={roleSpacePrivilege !== FEATURE_PRIVILEGES_CUSTOM}
                         role={roleCustomizationAnchor.value!}
                         privilegeIndex={roleCustomizationAnchor.privilegeIndex}
@@ -636,15 +632,6 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
                 )}
           </h2>
         </EuiTitle>
-        <EuiSpacer size="s" />
-        <EuiText size="s">
-          <p>
-            <FormattedMessage
-              id="xpack.spaces.management.spaceDetails.privilegeForm.heading"
-              defaultMessage="Define the privileges a given role should have in this space."
-            />
-          </p>
-        </EuiText>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>{getForm()}</EuiFlyoutBody>
       <EuiFlyoutFooter>
