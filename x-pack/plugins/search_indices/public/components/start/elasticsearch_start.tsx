@@ -54,7 +54,7 @@ export interface ElasticsearchStartProps {
   indicesData?: IndicesStatusResponse;
 }
 
-export const ElasticsearchStart = () => {
+export const ElasticsearchStart: React.FC<ElasticsearchStartProps> = () => {
   const { cloud, http } = useKibana().services;
   const { data: userPrivileges } = useUserPrivilegesQuery(initCreateIndexState().indexName);
 

@@ -479,6 +479,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
                 {!isAddingFields ? (
                   <EuiToolTip
                     position="bottom"
+                    data-test-subj="indexDetailsMappingsAddFieldTooltip"
                     content={
                       hasUpdateMappingsPrivilege !== undefined && !hasUpdateMappingsPrivilege
                         ? i18n.translate('xpack.idxMgmt.indexDetails.mappings.addNewFieldToolTip', {

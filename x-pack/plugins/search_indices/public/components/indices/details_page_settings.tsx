@@ -9,6 +9,7 @@ import React from 'react';
 import { useMemo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { useKibana } from '../../hooks/use_kibana';
+import type { UserStartPrivilegesResponse } from '../../../common';
 
 interface SearchIndexDetailsSettingsProps {
   indexName: string;

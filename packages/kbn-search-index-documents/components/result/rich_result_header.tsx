@@ -132,6 +132,7 @@ const MetadataPopover: React.FC<MetaDataProps> = ({
                 : undefined
             }
             position="bottom"
+            data-test-subj="deleteDocumentButtonToolTip"
           >
             <EuiButton
               iconType="trash"

@@ -196,6 +196,7 @@ export const DetailsPageSettingsContent: FunctionComponent<Props> = ({
                   })
                 : undefined
             }
+            data-test-subj="indexDetailsSettingsEditModeSwitchToolTip"
           >
             <EuiSwitch
               data-test-subj="indexDetailsSettingsEditModeSwitch"
