@@ -121,11 +121,12 @@ export class RulesClientFactory {
   ): Promise<RulesClient> {
     const { securityPluginSetup, securityService, securityPluginStart, actions, eventLog } = this;
     const spaceId = this.getSpaceId(request);
-    const authorization = await this.authorization.create(request);
 
     if (!this.authorization) {
       throw new Error('AlertingAuthorizationClientFactory is not defined');
     }
+
+    const authorization = await this.authorization.create(request);
 
     return new RulesClient({
       spaceId,
