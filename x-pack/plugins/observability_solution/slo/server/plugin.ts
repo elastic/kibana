@@ -143,14 +143,6 @@ export class SLOPlugin
           ...plugins,
           core,
         },
-        getDataViewsStart: async () => {
-          const [, pluginStart] = await core.getStartServices();
-          return pluginStart.dataViews;
-        },
-        getSpacesStart: async () => {
-          const [, pluginStart] = await core.getStartServices();
-          return pluginStart.spaces;
-        },
         ruleDataService,
         getRulesClientWithRequest: async (request) => {
           const [, pluginStart] = await core.getStartServices();
