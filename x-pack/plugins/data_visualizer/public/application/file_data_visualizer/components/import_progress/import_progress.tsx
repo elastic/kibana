@@ -102,7 +102,7 @@ export const ImportProgress: FC<{ statuses: Statuses }> = ({ statuses }) => {
     }
   );
   let initializeDeploymentTitle = i18n.translate(
-    'xpack.dataVisualizer.file.importProgress.createIndexTitle',
+    'xpack.dataVisualizer.file.importProgress.initializeDeploymentTitle',
     {
       defaultMessage: 'Initialize deployment',
     }
@@ -175,7 +175,7 @@ export const ImportProgress: FC<{ statuses: Statuses }> = ({ statuses }) => {
         }
       );
       initializeDeploymentTitle = i18n.translate(
-        'xpack.dataVisualizer.file.importProgress.creatingIndexTitle',
+        'xpack.dataVisualizer.file.importProgress.initializingDeploymentTitle',
         {
           defaultMessage: 'Initializing deployment',
         }
@@ -198,7 +198,7 @@ export const ImportProgress: FC<{ statuses: Statuses }> = ({ statuses }) => {
       }
     );
     initializeDeploymentTitle = i18n.translate(
-      'xpack.dataVisualizer.file.importProgress.creatingIndexTitle',
+      'xpack.dataVisualizer.file.importProgress.deploymentInitializedTitle',
       {
         defaultMessage: 'Deployment initialized',
       }
