@@ -256,6 +256,15 @@ export const VULNERABILITY_GROUPING_OPTIONS = {
   CLOUD_ACCOUNT_NAME: VULNERABILITY_FIELDS.CLOUD_ACCOUNT_NAME,
   CVE: VULNERABILITY_FIELDS.VULNERABILITY_ID,
 };
+
+/*
+The fields below are default columns of the Cloud Security Data Table that need to have keyword mapping.
+TODO: Remove the fields below once they are mapped as Keyword in the Third Party integrations, or remove
+the fields from the runtime mappings if they are removed from the Data Table.
+*/
+export const CDR_VULNERABILITY_DATA_TABLE_RUNTIME_MAPPING_FIELDS: string[] = [
+  VULNERABILITY_FIELDS.VENDOR,
+];
 export const CDR_MISCONFIGURATION_DATA_TABLE_RUNTIME_MAPPING_FIELDS: string[] = [
   'rule.benchmark.rule_number',
   'rule.name',
