@@ -330,11 +330,11 @@ Alerting::
 * Convert timestamp before passing to validation ({kibana-pull}192379[#192379]).
 * Grouped over field is not populated correctly when editing a rule ({kibana-pull}192297[#192297]).
 * Mark slack rate-limiting errors as user errors ({kibana-pull}192200[#192200]).
-* Fixes maintenance window filtering with wildcards ({kibana-pull}194777[#194777])
+* Fixes maintenance window filtering with wildcards ({kibana-pull}194777[#194777]).
 * Fixes search filters in rules, alerts, and maintenance windows ({kibana-pull}193623[#193623]).
 Cases::
 * Use absolute time ranges when adding visualizations to a case ({kibana-pull}189168[#189168]).
-* Fixes custom fields with long text that could not be edited in the UI ({kibana-pull}190490[#190490])
+* Fixes custom fields with long text that could not be edited in the UI ({kibana-pull}190490[#190490]).
 Dashboards and visualizations::
 * Correctly show full screen mode when opening a dashboard or panel from a URL that contains the fullScreenMode parameter ({kibana-pull}196275[#196275]) and ({kibana-pull}190086[#190086]).
 * Fixes an issue that could cause a the dashboard list to stay in loading state ({kibana-pull}195277[#195277]).
