@@ -70,8 +70,8 @@ function TimestampFallbackDisabled() {
 
 export function timestampOverrideDeserializer(defaultValue: FormData) {
   return {
-    timestampOverride: defaultValue.field_name,
-    timestampOverrideFallbackDisabled: defaultValue.fallback_disabled ?? false,
+    timestampOverride: defaultValue.timestamp_override.field_name,
+    timestampOverrideFallbackDisabled: defaultValue.timestamp_override.fallback_disabled ?? false,
   };
 }
 

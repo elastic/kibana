@@ -27,16 +27,15 @@ export function FalsePositivesEdit(): JSX.Element {
 }
 
 export function falsePositivesDeserializer(defaultValue: FormData) {
-  /* Set initial form value with camelCase "falsePositives" key instead of "false_positives" */
   return {
-    falsePositives: defaultValue,
+    falsePositives: defaultValue.false_positives,
   };
 }
 
 export function falsePositivesSerializer(formData: FormData): {
   false_positives: RuleFalsePositiveArray;
 } {
-  const falsePositives: RuleFalsePositiveArray = formData.false_positives;
+  const falsePositives: RuleFalsePositiveArray = formData.falsePositives;
 
   return {
     /* Remove empty items from the falsePositives array */

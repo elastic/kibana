@@ -59,6 +59,7 @@ import type {
   AlertSuppression,
   RequiredFieldInput,
   SeverityMapping,
+  RelatedIntegrationArray,
 } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { stepActionsDefaultValue } from '../../../rule_creation/components/step_rule_actions';
 import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../common/detection_engine/constants';
@@ -409,8 +410,9 @@ export const getStepDataDataSource = (
 /**
  * Strips away form rows that were not filled out by the user
  */
-const removeEmptyRequiredFields = (requiredFields: RequiredFieldInput[]): RequiredFieldInput[] =>
-  requiredFields.filter((field) => field.name !== '' && field.type !== '');
+export const removeEmptyRequiredFields = (
+  requiredFields: RequiredFieldInput[]
+): RequiredFieldInput[] => requiredFields.filter((field) => field.name !== '' && field.type !== '');
 
 export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStepRuleJson => {
   const stepData = getStepDataDataSource(defineStepData);
@@ -420,7 +422,9 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
 
   const baseFields = {
     type: ruleType,
-    related_integrations: defineStepData.relatedIntegrations?.filter((ri) => !isEmpty(ri.package)),
+    related_integrations: defineStepData.relatedIntegrations
+      ? filterOutEmptyRelatedIntegrations(defineStepData.relatedIntegrations)
+      : undefined,
     ...(timeline.id != null &&
       timeline.title != null && {
         timeline_id: timeline.id,
@@ -652,6 +656,9 @@ export const filterOutEmptyRiskScoreMappingItems = (riskScoreMapping: RiskScoreM
 
 export const filterOutEmptySeverityMappingItems = (severityMapping: SeverityMapping) =>
   severityMapping.filter((m) => m.field != null && m.field !== '' && m.value != null);
+
+export const filterOutEmptyRelatedIntegrations = (relatedIntegrations: RelatedIntegrationArray) =>
+  relatedIntegrations.filter((ri) => !isEmpty(ri.package));
 
 export const isRuleAction = (
   action: AlertingRuleAction | AlertingRuleSystemAction,

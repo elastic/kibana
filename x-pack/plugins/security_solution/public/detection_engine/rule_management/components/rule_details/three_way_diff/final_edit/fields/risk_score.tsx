@@ -49,7 +49,7 @@ function RiskScoreEditField({ field }: RiskScoreEditFieldProps) {
 
 export function riskScoreDeserializer(defaultValue: FormData) {
   return {
-    riskScore: defaultValue,
+    riskScore: defaultValue.risk_score,
   };
 }
 

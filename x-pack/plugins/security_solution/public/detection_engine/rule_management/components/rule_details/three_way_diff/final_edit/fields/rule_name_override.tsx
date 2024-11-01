@@ -55,9 +55,8 @@ export function RuleNameOverrideEdit({
 }
 
 export function ruleNameOverrideDeserializer(defaultValue: FormData) {
-  /* Set initial form value with camelCase "ruleNameOverride" key instead of "rule_name_override" */
   return {
-    ruleNameOverride: defaultValue?.field_name ?? '',
+    ruleNameOverride: defaultValue.rule_name_override?.field_name ?? '',
   };
 }
 

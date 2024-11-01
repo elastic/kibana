@@ -26,9 +26,8 @@ export function MaxSignalsEdit(): JSX.Element {
 }
 
 export function maxSignalsDeserializer(defaultValue: FormData) {
-  /* Set initial form value with camelCase "maxSignals" key instead of "max_signals" */
   return {
-    maxSignals: defaultValue,
+    maxSignals: defaultValue.max_signals,
   };
 }
 

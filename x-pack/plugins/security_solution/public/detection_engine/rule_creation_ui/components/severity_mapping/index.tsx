@@ -104,7 +104,6 @@ export const SeverityField = ({
       <EuiFlexItem>
         <SeverityOverride
           isDisabled={isDisabled}
-          isClearable={true}
           onSeverityMappingChecked={handleSeverityMappingChecked}
           onFieldChange={handleFieldChange}
           onFieldMatchValueChange={handleFieldMatchValueChange}

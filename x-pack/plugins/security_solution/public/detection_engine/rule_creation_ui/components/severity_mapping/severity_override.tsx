@@ -46,7 +46,6 @@ const EuiFlexItemSeverityColumn = styled(EuiFlexItem)`
 
 interface SeverityOverrideProps {
   isDisabled: boolean;
-  isClearable?: boolean;
   onSeverityMappingChecked: () => void;
   onFieldChange: (index: number, severity: Severity, [newField]: DataViewFieldBase[]) => void;
   onFieldMatchValueChange: (index: number, severity: Severity, newMatchValue: string) => void;
@@ -59,7 +58,6 @@ interface SeverityOverrideProps {
 
 export function SeverityOverride({
   isDisabled,
-  isClearable = false,
   onSeverityMappingChecked,
   onFieldChange,
   onFieldMatchValueChange,
@@ -153,7 +151,7 @@ export function SeverityOverride({
                       placeholder={''}
                       selectedField={getFieldTypeByMapping(severityMappingItem, indices)}
                       selectedValue={severityMappingItem.value}
-                      isClearable={isClearable}
+                      isClearable={true}
                       isDisabled={isDisabled}
                       isLoading={false}
                       indexPattern={indices}

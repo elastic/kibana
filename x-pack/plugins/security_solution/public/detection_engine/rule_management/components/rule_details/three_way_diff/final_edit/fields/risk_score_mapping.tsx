@@ -89,8 +89,8 @@ function RiskScoreMappingField({ field, finalDiffableRule }: RiskScoreMappingFie
 export function riskScoreMappingDeserializer(defaultValue: FormData) {
   return {
     riskScoreMapping: {
-      isMappingChecked: defaultValue.length > 0,
-      mapping: defaultValue,
+      isMappingChecked: defaultValue.risk_score_mapping.length > 0,
+      mapping: defaultValue.risk_score_mapping,
     },
   };
 }

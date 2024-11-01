@@ -35,11 +35,11 @@ export function RuleScheduleEdit(): JSX.Element {
 }
 
 export function ruleScheduleDeserializer(defaultValue: FormData) {
-  const lookbackSeconds = parseDuration(defaultValue.lookback) / 1000;
+  const lookbackSeconds = parseDuration(defaultValue.rule_schedule.lookback) / 1000;
   const lookbackHumanized = secondsToDurationString(lookbackSeconds);
 
   return {
-    interval: defaultValue.interval,
+    interval: defaultValue.rule_schedule.interval,
     from: lookbackHumanized,
   };
 }

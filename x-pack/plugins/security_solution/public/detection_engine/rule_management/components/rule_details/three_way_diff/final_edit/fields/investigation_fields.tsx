@@ -62,9 +62,8 @@ export function InvestigationFieldsEdit({
 }
 
 export function investigationFieldsDeserializer(defaultValue: FormData) {
-  /* Set initial form value with camelCase "investigationFields" key instead of "investigation_fields" */
   return {
-    investigationFields: defaultValue?.field_names ?? [],
+    investigationFields: defaultValue.investigation_fields?.field_names ?? [],
   };
 }
 

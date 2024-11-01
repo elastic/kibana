@@ -128,8 +128,8 @@ function SeverityMappingField({ field, finalDiffableRule }: SeverityMappingField
 export function severityMappingDeserializer(defaultValue: FormData) {
   return {
     severityMapping: {
-      isMappingChecked: defaultValue.length > 0,
-      mapping: fillEmptySeverityMappings(defaultValue as SeverityMapping),
+      isMappingChecked: defaultValue.severity_mapping.length > 0,
+      mapping: fillEmptySeverityMappings(defaultValue.severity_mapping as SeverityMapping),
     },
   };
 }

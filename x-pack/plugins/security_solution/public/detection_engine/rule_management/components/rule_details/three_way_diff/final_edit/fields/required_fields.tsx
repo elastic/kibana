@@ -16,6 +16,7 @@ import { RequiredFields } from '../../../../../../rule_creation/components/requi
 import { useDefaultIndexPattern } from '../../../../../hooks/use_default_index_pattern';
 import { getUseRuleIndexPatternParameters } from '../utils';
 import { useRuleIndexPattern } from '../../../../../../rule_creation_ui/pages/form';
+import { removeEmptyRequiredFields } from '../../../../../../rule_creation_ui/pages/rule_creation/helpers';
 
 export const requiredFieldsSchema = {
   requiredFields: schema.requiredFields,
@@ -46,7 +47,7 @@ export function RequiredFieldsEdit({ finalDiffableRule }: RequiredFieldsEditProp
 
 export function requiredFieldsDeserializer(defaultValue: FormData) {
   return {
-    requiredFields: defaultValue,
+    requiredFields: defaultValue.required_fields,
   };
 }
 
@@ -55,6 +56,6 @@ export function requiredFieldsSerializer(formData: FormData): {
 } {
   const requiredFields = (formData.requiredFields ?? []) as RequiredFieldInput[];
   return {
-    required_fields: requiredFields.filter((field) => field.name !== '' && field.type !== ''),
+    required_fields: removeEmptyRequiredFields(requiredFields),
   };
 }

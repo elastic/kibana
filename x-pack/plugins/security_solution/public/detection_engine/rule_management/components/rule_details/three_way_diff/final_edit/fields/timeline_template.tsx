@@ -26,8 +26,8 @@ export function TimelineTemplateEdit(): JSX.Element {
 export function timelineTemplateDeserializer(defaultValue: FormData) {
   return {
     timeline: {
-      id: defaultValue?.timeline_id ?? null,
-      title: defaultValue?.timeline_title ?? null,
+      id: defaultValue.timeline_template?.timeline_id ?? null,
+      title: defaultValue.timeline_template?.timeline_title ?? null,
     },
   };
 }

@@ -20,9 +20,8 @@ export function BuildingBlockEdit(): JSX.Element {
 }
 
 export function buildingBlockDeserializer(defaultValue: FormData) {
-  /* Set initial form value with "isBuildingBlock" key instead of "building_block" */
   return {
-    isBuildingBlock: defaultValue,
+    isBuildingBlock: defaultValue.building_block,
   };
 }
 
