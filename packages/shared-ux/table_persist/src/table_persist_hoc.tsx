@@ -121,4 +121,3 @@ export function withEuiTablePersist<T extends object, Props>(
     }
   };
 }
-
