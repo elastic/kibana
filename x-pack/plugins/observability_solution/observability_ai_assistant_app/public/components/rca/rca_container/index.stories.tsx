@@ -7,6 +7,7 @@
 
 import { Meta, Story } from '@storybook/react';
 import React from 'react';
+import { noop } from 'lodash';
 import { RootCauseAnalysisContainer } from '.';
 // @ts-ignore
 import fullAnalysis from '../mock/complete_root_cause_analysis.json';
@@ -18,20 +19,28 @@ const stories: Meta<{}> = {
 
 export default stories;
 
+const handlers = {
+  onStartAnalysisClick: noop,
+  onStopAnalysisClick: noop,
+  onResetAnalysisClick: noop,
+};
+
 export const Empty: Story<{}> = () => {
-  return <RootCauseAnalysisContainer loading={false} onStartAnalysisClick={() => {}} />;
+  return <RootCauseAnalysisContainer loading={false} {...handlers} />;
 };
 
 export const Loading: Story<{}> = () => {
-  return <RootCauseAnalysisContainer loading onStartAnalysisClick={() => {}} />;
+  return <RootCauseAnalysisContainer loading {...handlers} />;
+};
+
+const error = new Error('Failed to load analysis');
+
+export const WithError: Story<{}> = () => {
+  return <RootCauseAnalysisContainer loading={false} {...handlers} error={error} />;
 };
 
 export const Completed: Story<{}> = () => {
   return (
-    <RootCauseAnalysisContainer
-      loading={false}
-      events={fullAnalysis as any[]}
-      onStartAnalysisClick={() => {}}
-    />
+    <RootCauseAnalysisContainer loading={false} events={fullAnalysis as any[]} {...handlers} />
   );
 };

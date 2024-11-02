@@ -7,11 +7,11 @@
 
 import { Meta, Story } from '@storybook/react';
 import React from 'react';
-import { RootCauseAnalysisHypothesizeStepItem } from '.';
+import { RootCauseAnalysisObservationPanel } from '.';
 
 const stories: Meta<{}> = {
-  title: 'RCA/HypothesizeStepItem',
-  component: RootCauseAnalysisHypothesizeStepItem,
+  title: 'RCA/ObservationPanel',
+  component: RootCauseAnalysisObservationPanel,
 };
 
 const content =
@@ -20,5 +20,17 @@ const content =
 export default stories;
 
 export const Default: Story<{}> = () => {
-  return <RootCauseAnalysisHypothesizeStepItem content={content} />;
+  return (
+    <RootCauseAnalysisObservationPanel title={'High rate of HTTP 500 errors'} content={content} />
+  );
+};
+
+export const Loading: Story<{}> = () => {
+  return (
+    <RootCauseAnalysisObservationPanel
+      title={'High rate of HTTP 500 errors'}
+      content={content}
+      loading
+    />
+  );
 };

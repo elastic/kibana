@@ -14,15 +14,18 @@ import {
 export const RCA_TOOLS = {
   [RCA_OBSERVE_TOOL_NAME]: {
     description: `Request an observation from another agent on
-    the results of the returned investigations`,
+    the results of the returned investigations. The title should
+    cover key new observations from the initial context or
+    completed investigations, not anything about next steps.`,
     schema: {
       type: 'object',
       properties: {
-        observe: {
-          type: 'boolean',
+        title: {
+          type: 'string',
+          description: `A short title w/ the key new observations that will be displayed on top of a collapsible panel.`,
         },
       },
-      required: ['observe'],
+      required: ['title'],
     },
   },
   [RCA_END_PROCESS_TOOL_NAME]: {

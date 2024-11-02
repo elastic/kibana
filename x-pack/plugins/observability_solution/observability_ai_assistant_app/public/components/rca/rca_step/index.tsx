@@ -14,14 +14,14 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
-import { rgba } from 'polished';
 import React from 'react';
-import { useTheme } from '../../../hooks/use_theme';
+import { RootCauseAnalysisPanel } from '../rca_panel';
 
 export interface RootCauseAnalysisStepItemProps {
   label: React.ReactNode;
   loading?: boolean;
   color?: React.ComponentProps<typeof EuiPanel>['color'];
+  button?: React.ReactElement;
   iconType?: React.ComponentProps<typeof EuiIcon>['type'];
 }
 
@@ -30,29 +30,44 @@ export function RootCauseAnalysisStepItem({
   loading,
   color,
   iconType,
+  button,
 }: RootCauseAnalysisStepItemProps) {
-  const theme = useTheme();
-
-  const panelClassName =
-    color && color !== 'transparent' && color !== 'plain' && color !== 'subdued'
-      ? css`
-          border: 1px solid;
-          border-color: ${rgba(theme.colors[color], 0.25)};
-        `
-      : undefined;
-
   return (
-    <EuiPanel hasBorder paddingSize="l" color={color} className={panelClassName}>
-      <EuiFlexGroup direction="row" alignItems="center" justifyContent="flexStart" gutterSize="m">
+    <RootCauseAnalysisPanel color={color}>
+      <EuiFlexGroup
+        direction="row"
+        alignItems="flexStart"
+        justifyContent="flexStart"
+        gutterSize="m"
+      >
         <EuiFlexItem grow={false}>
-          {loading ? <EuiLoadingSpinner size="s" /> : <EuiIcon type={iconType || 'logoElastic'} />}
+          <EuiFlexGroup
+            className={css`
+              min-height: 40px;
+            `}
+            justifyContent="center"
+            alignItems="center"
+          >
+            {loading ? (
+              <EuiLoadingSpinner size="m" />
+            ) : (
+              <EuiIcon type={iconType || 'logoElastic'} />
+            )}
+          </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiText size="s" className={css``}>
-            {label}
-          </EuiText>
+          <EuiFlexGroup
+            direction="row"
+            alignItems="center"
+            className={css`
+              min-height: 40px;
+            `}
+          >
+            <EuiText size="s">{label}</EuiText>
+          </EuiFlexGroup>
         </EuiFlexItem>
+        {button ? <EuiFlexItem grow={false}>{button}</EuiFlexItem> : null}
       </EuiFlexGroup>
-    </EuiPanel>
+    </RootCauseAnalysisPanel>
   );
 }

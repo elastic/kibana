@@ -16,6 +16,11 @@ import moment from 'moment';
 import { catchError, filter, from, map, mergeMap, Observable, of, switchMap } from 'rxjs';
 import { ObservabilityAIAssistantClient } from '@kbn/observability-ai-assistant-plugin/server';
 import { ObservabilityElasticsearchClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
+import {
+  RCA_END_PROCESS_TOOL_NAME,
+  RCA_INVESTIGATE_ENTITY_TOOL_NAME,
+  RCA_OBSERVE_TOOL_NAME,
+} from '@kbn/observability-ai-common/root_cause_analysis';
 import { callEndRcaProcessTool } from './call_end_rca_process_tool';
 import { callInvestigateEntityTool } from './call_investigate_entity_tool';
 import { callObserveTool } from './call_observe_tool';
@@ -32,10 +37,6 @@ import {
 import { callTools } from './util/call_tools';
 import { formatEntity } from './util/format_entity';
 import { validateInvestigateEntityToolCalls } from './util/validate_investigate_entity_tool_call';
-
-const OBSERVE_TOOL_NAME = 'observe';
-const END_PROCESS_TOOL_NAME = 'endProcessAndWriteReport';
-const INVESTIGATE_ENTITY_TOOL_NAME = 'investigateEntity';
 
 const SYSTEM_PROMPT_WITH_OBSERVE_INSTRUCTIONS = `${RCA_SYSTEM_PROMPT_BASE}
 
@@ -169,11 +170,11 @@ export function runRootCauseAnalysis({
       ) as Exclude<ToolMessage, ToolErrorMessage> | undefined;
 
       const shouldWriteObservationNext =
-        !lastSuccessfulToolResponse || lastSuccessfulToolResponse.name !== OBSERVE_TOOL_NAME;
+        !lastSuccessfulToolResponse || lastSuccessfulToolResponse.name !== RCA_OBSERVE_TOOL_NAME;
 
       const nextTools = shouldWriteObservationNext
-        ? pick(RCA_TOOLS, OBSERVE_TOOL_NAME)
-        : pick(RCA_TOOLS, END_PROCESS_TOOL_NAME, INVESTIGATE_ENTITY_TOOL_NAME);
+        ? pick(RCA_TOOLS, RCA_OBSERVE_TOOL_NAME)
+        : pick(RCA_TOOLS, RCA_END_PROCESS_TOOL_NAME, RCA_INVESTIGATE_ENTITY_TOOL_NAME);
 
       const nextSystem = shouldWriteObservationNext
         ? SYSTEM_PROMPT_WITH_OBSERVE_INSTRUCTIONS
@@ -186,7 +187,7 @@ export function runRootCauseAnalysis({
         ${investigationTimeRangePrompt}`,
         tools: nextTools,
         toolChoice: shouldWriteObservationNext
-          ? { function: OBSERVE_TOOL_NAME }
+          ? { function: RCA_OBSERVE_TOOL_NAME }
           : ToolChoiceType.required,
       };
     },
@@ -220,7 +221,7 @@ export function runRootCauseAnalysis({
                   name: 'error',
                   response: {
                     error: {
-                      message: `Some ${INVESTIGATE_ENTITY_TOOL_NAME} calls were not valid:
+                      message: `Some ${RCA_INVESTIGATE_ENTITY_TOOL_NAME} calls were not valid:
                       ${errors.map((error) => `- ${error}`).join('\n')}`,
                     },
                   },
@@ -240,13 +241,13 @@ export function runRootCauseAnalysis({
                 | AssistantMessage
               > {
                 switch (toolCall.function.name) {
-                  case END_PROCESS_TOOL_NAME:
+                  case RCA_END_PROCESS_TOOL_NAME:
                     return callEndRcaProcessTool({
                       rcaContext: nextRcaContext,
                       toolCallId: toolCall.toolCallId,
                     });
 
-                  case INVESTIGATE_ENTITY_TOOL_NAME:
+                  case RCA_INVESTIGATE_ENTITY_TOOL_NAME:
                     return callInvestigateEntityTool({
                       context: toolCall.function.arguments.context,
                       field: toolCall.function.arguments.entity.field,
@@ -255,7 +256,7 @@ export function runRootCauseAnalysis({
                       toolCallId: toolCall.toolCallId,
                     });
 
-                  case OBSERVE_TOOL_NAME:
+                  case RCA_OBSERVE_TOOL_NAME:
                     return callObserveTool({
                       rcaContext: nextRcaContext,
                       toolCallId: toolCall.toolCallId,

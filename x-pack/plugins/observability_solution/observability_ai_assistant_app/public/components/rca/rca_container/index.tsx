@@ -4,25 +4,26 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import {
+  RCA_END_PROCESS_TOOL_NAME,
+  RCA_INVESTIGATE_ENTITY_TOOL_NAME,
+  RCA_OBSERVE_TOOL_NAME,
+} from '@Kbn/observability-ai-common/root_cause_analysis';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ToolMessage, MessageRole, AssistantMessage } from '@kbn/inference-common';
+import { AssistantMessage, MessageRole, ToolMessage } from '@kbn/inference-common';
 import type {
   RootCauseAnalysisEvent,
   RootCauseAnalysisToolMessage,
   RootCauseAnalysisToolRequest,
   ToolErrorMessage,
 } from '@kbn/observability-ai-server/root_cause_analysis';
-import React from 'react';
 import { findLast } from 'lodash';
-import {
-  RCA_END_PROCESS_TOOL_NAME,
-  RCA_INVESTIGATE_ENTITY_TOOL_NAME,
-} from '@Kbn/observability-ai-common/root_cause_analysis';
+import React from 'react';
 import { EntityBadge } from '../entity_badge';
 import { RootCauseAnalysisCallout } from '../rca_callout';
 import { RootCauseAnalysisEntityInvestigation } from '../rca_entity_investigation';
-import { RootCauseAnalysisHypothesizeStepItem } from '../rca_hypothesize_step';
+import { RootCauseAnalysisObservationPanel } from '../rca_observation_panel';
 import { RootCauseAnalysisReport } from '../rca_report';
 import { RootCauseAnalysisStepItem } from '../rca_step';
 import { RootCauseAnalysisStopButton } from '../rca_stop_button';
@@ -42,63 +43,44 @@ export function RootCauseAnalysisContainer({
   loading: boolean;
   error?: Error;
 }) {
-  if (!events?.length && !loading) {
+  if (!events?.length && !loading && !error) {
     return <RootCauseAnalysisCallout onClick={onStartAnalysisClick} />;
   }
 
   const elements: React.ReactElement[] = [];
 
-  function getToolResponseErrorItem(response: ToolErrorMessage['response']) {
-    return (
-      <RootCauseAnalysisStepItem
-        label={i18n.translate('xpack.observabilityAiAssistant.rca.toolResponseError', {
-          defaultMessage: 'Failed to execute task: {errorMessage}',
-          values: {
-            errorMessage: response.error.message,
-          },
-        })}
-        iconType="alert"
-        color="danger"
-      />
-    );
-  }
-
-  function getToolResponseItem(
-    message: RootCauseAnalysisToolMessage | ToolErrorMessage
-  ): React.ReactElement {
-    if (message.name === 'error') {
-      return getToolResponseErrorItem(message.response);
-    }
-
-    if (message.name === 'investigateEntity') {
-      return (
-        <RootCauseAnalysisEntityInvestigation
-          summary={message.response.summary}
-          entity={message.response.entity}
-          ownPatterns={message.data.attachments.ownPatterns}
-          patternsFromOtherEntities={message.data.attachments.patternsFromOtherEntities}
-        />
-      );
-    }
-
-    if (message.name === 'observe') {
-      return <RootCauseAnalysisHypothesizeStepItem content={message.response.content} />;
-    }
-
-    return (
-      <RootCauseAnalysisReport
-        report={message.response.report}
-        timeline={message.response.timeline}
-      />
-    );
-  }
+  const toolResponsesById = new Map(
+    events
+      ?.filter(
+        (event): event is Extract<RootCauseAnalysisEvent, ToolMessage> =>
+          event.role === MessageRole.Tool
+      )
+      .map((event) => [event.toolCallId, event])
+  );
 
   events?.forEach((event) => {
-    if (event.role === MessageRole.Tool) {
-      const nextElement = getToolResponseItem(event);
-      if (nextElement) {
-        elements.push(nextElement);
-      }
+    if (event.role === MessageRole.Assistant) {
+      event.toolCalls.forEach((toolCall) => {
+        switch (toolCall.function.name) {
+          case RCA_OBSERVE_TOOL_NAME:
+            elements.push(
+              getObservationItem(
+                toolCall.function.arguments.title,
+                toolResponsesById.get(toolCall.toolCallId)
+              )
+            );
+            break;
+
+          case RCA_INVESTIGATE_ENTITY_TOOL_NAME:
+          case RCA_END_PROCESS_TOOL_NAME:
+            const response = toolResponsesById.get(toolCall.toolCallId);
+            const element = response ? getToolResponseItem(response) : undefined;
+            if (element) {
+              elements.push(element);
+            }
+            break;
+        }
+      });
     }
   });
 
@@ -106,15 +88,13 @@ export function RootCauseAnalysisContainer({
     const label = getLoadingLabel(events);
     elements.push(
       <RootCauseAnalysisStepItem
-        label={
-          <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
-            <EuiFlexItem grow>{label}</EuiFlexItem>
-            <RootCauseAnalysisStopButton
-              onClick={() => {
-                onStopAnalysisClick();
-              }}
-            />
-          </EuiFlexGroup>
+        label={label}
+        button={
+          <RootCauseAnalysisStopButton
+            onClick={() => {
+              onStopAnalysisClick();
+            }}
+          />
         }
         loading
       />
@@ -122,33 +102,29 @@ export function RootCauseAnalysisContainer({
   } else if (error) {
     elements.push(
       <RootCauseAnalysisStepItem
-        label={
-          <EuiFlexGroup>
-            <EuiFlexItem grow>
-              {i18n.translate('xpack.observabilityAiAssistant.rca.analysisError', {
-                defaultMessage: 'Failed to complete analysis: {errorMessage}',
-                values: {
-                  errorMessage: error.message,
-                },
-              })}
-            </EuiFlexItem>
-            <EuiButton
-              data-test-subj="observabilityAiAssistantAppRootCauseAnalysisRestartButton"
-              color="danger"
-              fill
-              onClick={() => {
-                onResetAnalysisClick();
-              }}
-              iconType="refresh"
-            >
-              {i18n.translate('xpack.observabilityAiAssistant.rca.restartButtonLabel', {
-                defaultMessage: 'Restart',
-              })}
-            </EuiButton>
-          </EuiFlexGroup>
-        }
+        label={i18n.translate('xpack.observabilityAiAssistant.rca.analysisError', {
+          defaultMessage: 'Failed to complete analysis: {errorMessage}',
+          values: {
+            errorMessage: error.message,
+          },
+        })}
         iconType="alert"
         color="danger"
+        button={
+          <EuiButton
+            data-test-subj="observabilityAiAssistantAppRootCauseAnalysisRestartButton"
+            color="danger"
+            fill
+            onClick={() => {
+              onResetAnalysisClick();
+            }}
+            iconType="refresh"
+          >
+            {i18n.translate('xpack.observabilityAiAssistant.rca.restartButtonLabel', {
+              defaultMessage: 'Restart',
+            })}
+          </EuiButton>
+        }
       />
     );
   }
@@ -227,4 +203,71 @@ function getLoadingLabel(events?: RootCauseAnalysisEvent[]) {
   return i18n.translate('xpack.observabilityAiAssistant.rca.analysisLoadingLabel', {
     defaultMessage: 'Thinking...',
   });
+}
+
+function getToolResponseErrorItem(response: ToolErrorMessage['response']) {
+  return (
+    <RootCauseAnalysisStepItem
+      label={i18n.translate('xpack.observabilityAiAssistant.rca.toolResponseError', {
+        defaultMessage: 'Failed to execute task: {errorMessage}',
+        values: {
+          errorMessage: response.error.message,
+        },
+      })}
+      iconType="alert"
+      color="danger"
+    />
+  );
+}
+
+function getToolResponseItem(
+  message: RootCauseAnalysisToolMessage | ToolErrorMessage
+): React.ReactElement | null {
+  if (message.name === 'observe') {
+    return null;
+  }
+
+  if (message.name === 'error') {
+    return getToolResponseErrorItem(message.response);
+  }
+
+  if (message.name === 'investigateEntity') {
+    return (
+      <RootCauseAnalysisEntityInvestigation
+        summary={message.response.summary}
+        entity={message.response.entity}
+        ownPatterns={message.data.attachments.ownPatterns}
+        patternsFromOtherEntities={message.data.attachments.patternsFromOtherEntities}
+      />
+    );
+  }
+
+  return (
+    <RootCauseAnalysisReport
+      report={message.response.report}
+      timeline={message.response.timeline}
+    />
+  );
+}
+
+function getObservationItem(
+  title: React.ReactNode,
+  toolResponse?: RootCauseAnalysisToolMessage | ToolErrorMessage
+) {
+  let content: string | undefined;
+  switch (toolResponse?.name) {
+    case 'observe':
+      content = toolResponse.response.content;
+      break;
+
+    case 'error':
+      content = i18n.translate('xpack.observabilityAiAssistant.rca.failedObservation', {
+        defaultMessage: 'Failed to generate observations',
+      });
+      break;
+  }
+
+  return (
+    <RootCauseAnalysisObservationPanel title={title} content={content} loading={!toolResponse} />
+  );
 }
