@@ -25,28 +25,26 @@ export function SuppressionFieldsSelector({
   disabledText,
 }: SuppressionFieldsSelectorProps): JSX.Element {
   return (
-    <>
-      <EuiFormRow
-        data-test-subj="alertSuppressionInput"
-        label={i18n.ALERT_SUPPRESSION_SUPPRESS_BY_FIELD_LABEL}
-        labelAppend={
-          <EuiText color="subdued" size="xs">
-            {i18n.OPTIONAL}
-          </EuiText>
-        }
-      >
-        <>
-          <UseField
-            path={SUPPRESSION_FIELDS}
-            component={MultiSelectFieldsAutocomplete}
-            componentProps={{
-              browserFields: suppressibleFieldSpecs,
-              isDisabled: disabled,
-              disabledText,
-            }}
-          />
-        </>
-      </EuiFormRow>
-    </>
+    <EuiFormRow
+      data-test-subj="alertSuppressionInput"
+      label={i18n.ALERT_SUPPRESSION_SUPPRESS_BY_FIELD_LABEL}
+      labelAppend={
+        <EuiText color="subdued" size="xs">
+          {i18n.OPTIONAL}
+        </EuiText>
+      }
+    >
+      <>
+        <UseField
+          path={SUPPRESSION_FIELDS}
+          component={MultiSelectFieldsAutocomplete}
+          componentProps={{
+            browserFields: suppressibleFieldSpecs,
+            isDisabled: disabled,
+            disabledText,
+          }}
+        />
+      </>
+    </EuiFormRow>
   );
 }
