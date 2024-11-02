@@ -13,6 +13,7 @@ import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { EnterpriseSearchDeprecationCallout } from '../../../shared/deprecation_callout/deprecation_callout';
+import { docLinks } from '../../../shared/doc_links';
 import { AppLogic } from '../../app_logic';
 import { WorkplaceSearchPageTemplate } from '../../components/layout';
 
@@ -77,7 +78,10 @@ export const Overview: React.FC = () => {
       isLoading={dataLoading}
     >
       {showDeprecationCallout ? (
-        <EnterpriseSearchDeprecationCallout onDismissAction={onDismissDeprecationCallout} />
+        <EnterpriseSearchDeprecationCallout
+          onDismissAction={onDismissDeprecationCallout}
+          learnMoreLinkUrl={docLinks.workplaceSearchGuide}
+        />
       ) : (
         <></>
       )}

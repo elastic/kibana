@@ -126,9 +126,9 @@ export const KibanaDeprecationsList = ({
   const [flyoutContent, setFlyoutContent] = useState<undefined | KibanaDeprecationDetails>(
     undefined
   );
-  const [deprecationResolutionState, setDeprecationResolutionState] = useState<
-    DeprecationResolutionState | undefined
-  >(undefined);
+  const [deprecationResolutionStates, setDeprecationResolutionStates] = useState<
+    Record<string, DeprecationResolutionState>
+  >({});
 
   const {
     services: {
@@ -194,17 +194,25 @@ export const KibanaDeprecationsList = ({
 
   const resolveDeprecation = useCallback(
     async (deprecationDetails: KibanaDeprecationDetails) => {
-      setDeprecationResolutionState({
-        id: deprecationDetails.id,
-        resolveDeprecationStatus: 'in_progress',
+      setDeprecationResolutionStates((states) => {
+        states[deprecationDetails.id] = {
+          id: deprecationDetails.id,
+          resolveDeprecationStatus: 'in_progress',
+        };
+
+        return states;
       });
 
       const response = await deprecations.resolveDeprecation(deprecationDetails);
 
-      setDeprecationResolutionState({
-        id: deprecationDetails.id,
-        resolveDeprecationStatus: response.status,
-        resolveDeprecationError: response.status === 'fail' ? response.reason : undefined,
+      setDeprecationResolutionStates((states) => {
+        states[deprecationDetails.id] = {
+          id: deprecationDetails.id,
+          resolveDeprecationStatus: response.status,
+          resolveDeprecationError: response.status === 'fail' ? response.reason : undefined,
+        };
+
+        return states;
       });
 
       closeFlyout();
@@ -221,10 +229,7 @@ export const KibanaDeprecationsList = ({
           deprecation: flyoutContent,
           closeFlyout,
           resolveDeprecation,
-          deprecationResolutionState:
-            deprecationResolutionState && flyoutContent.id === deprecationResolutionState.id
-              ? deprecationResolutionState
-              : undefined,
+          deprecationResolutionState: deprecationResolutionStates[flyoutContent.id],
         },
         flyoutProps: {
           onClose: closeFlyout,
@@ -236,7 +241,7 @@ export const KibanaDeprecationsList = ({
   }, [
     addContentToGlobalFlyout,
     closeFlyout,
-    deprecationResolutionState,
+    deprecationResolutionStates,
     flyoutContent,
     resolveDeprecation,
   ]);
@@ -310,7 +315,7 @@ export const KibanaDeprecationsList = ({
         deprecations={kibanaDeprecations}
         reload={getAllDeprecations}
         toggleFlyout={toggleFlyout}
-        deprecationResolutionState={deprecationResolutionState}
+        deprecationResolutionStates={deprecationResolutionStates}
       />
     </div>
   );
