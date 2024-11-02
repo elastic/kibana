@@ -18,7 +18,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await kibanaServer.savedObjects.cleanStandardList();
       await PageObjects.common.navigateToApp('home');
       await security.testUser.setRoles(['index_management_monitor']);
-      await pageObjects.common.navigateToApp('indexManagement');
+      await PageObjects.common.navigateToApp('indexManagement');
     });
 
     it('Index Templates - should hide UI elements that perform CRUD operations', async () => {
