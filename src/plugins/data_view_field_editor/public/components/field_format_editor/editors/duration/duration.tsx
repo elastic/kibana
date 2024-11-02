@@ -31,7 +31,7 @@ interface InputFormat {
 
 interface OutputFormat {
   method: string;
-  text: string;
+  text: string | ((value: string) => string);
 }
 
 export interface DurationFormatEditorFormatParams {
@@ -136,7 +136,7 @@ export class DurationFormatEditor extends DefaultFormatEditor<
               (fmt: OutputFormat) => {
                 return {
                   value: fmt.method,
-                  text: fmt.text,
+                  text: typeof fmt.text === 'function' ? fmt.text('') : fmt.text,
                 };
               }
             )}
