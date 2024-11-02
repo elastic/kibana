@@ -12,7 +12,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['svlCommonPage', 'svlCommonNavigation', 'header']);
 
   const openInfraSection = async () => {
-    await pageObjects.svlCommonNavigation.sidenav.openSection('observability_project_nav.metrics');
+    await pageObjects.svlCommonNavigation.sidenav.openPanel('metrics', { button: 'link' });
   };
 
   describe('Infra Side Navigation', () => {
@@ -28,7 +28,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       it("shows the 'Hosts' nav item", async () => {
         await pageObjects.svlCommonNavigation.sidenav.expectLinkExists({
-          deepLinkId: 'metrics:hosts',
+          panelNavLinkId: 'metrics:hosts',
         });
       });
     });
