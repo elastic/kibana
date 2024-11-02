@@ -163,8 +163,10 @@ describe('extractIntegrations', () => {
               title: 'Integration B',
             },
           ],
-          installationInfo: {
-            version: '1.0.0',
+          savedObject: {
+            attributes: {
+              install_version: '1.0.0',
+            },
           },
         },
       ] as PackageList;
@@ -202,8 +204,10 @@ describe('extractIntegrations', () => {
               title: 'Integration B',
             },
           ],
-          installationInfo: {
-            version: '1.0.0',
+          savedObject: {
+            attributes: {
+              install_version: '1.0.0',
+            },
           },
         },
       ] as PackageList;
@@ -258,8 +262,10 @@ describe('extractIntegrations', () => {
               title: 'Integration B',
             },
           ],
-          installationInfo: {
-            version: '1.0.0',
+          savedObject: {
+            attributes: {
+              install_version: '1.0.0',
+            },
           },
         },
       ] as PackageList;
@@ -510,8 +516,10 @@ describe('extractIntegrations', () => {
               title: 'Integration A',
             },
           ],
-          installationInfo: {
-            version: '1.0.0',
+          savedObject: {
+            attributes: {
+              install_version: '1.0.0',
+            },
           },
         },
       ] as PackageList;
@@ -543,8 +551,10 @@ describe('extractIntegrations', () => {
               title: 'Integration A',
             },
           ],
-          installationInfo: {
-            version: '1.0.0',
+          savedObject: {
+            attributes: {
+              install_version: '1.0.0',
+            },
           },
         },
       ] as PackageList;
@@ -589,8 +599,10 @@ describe('extractIntegrations', () => {
               title: 'Integration A',
             },
           ],
-          installationInfo: {
-            version: '1.0.0',
+          savedObject: {
+            attributes: {
+              install_version: '1.0.0',
+            },
           },
         },
       ] as PackageList;
@@ -704,8 +716,10 @@ describe('extractIntegrations', () => {
           title: 'Package A',
           version: '1.1.1',
           status: 'installed',
-          installationInfo: {
-            version: '1.0.0',
+          savedObject: {
+            attributes: {
+              install_version: '1.0.0',
+            },
           },
         },
       ] as PackageList;
@@ -727,8 +741,10 @@ describe('extractIntegrations', () => {
           title: 'Package A',
           version: '1.1.1',
           status: 'installed',
-          installationInfo: {
-            version: '1.0.0',
+          savedObject: {
+            attributes: {
+              install_version: '1.0.0',
+            },
           },
         },
       ] as PackageList;
@@ -758,8 +774,10 @@ describe('extractIntegrations', () => {
           title: 'Package A',
           version: '1.1.1',
           status: 'installed',
-          installationInfo: {
-            version: '1.0.0',
+          savedObject: {
+            attributes: {
+              install_version: '1.0.0',
+            },
           },
         },
       ] as PackageList;
