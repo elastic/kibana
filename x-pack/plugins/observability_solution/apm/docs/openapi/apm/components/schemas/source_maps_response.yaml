@@ -1,0 +1,38 @@
+type: object
+properties:
+  artifacts:
+    type: array
+    description: Artifacts
+    items:
+      allOf:
+        - type: object
+          properties:
+            body:
+              type: object
+              properties:
+                serviceName:
+                  type: string
+                serviceVersion:
+                  type: string
+                bundleFilepath:
+                  type: string
+                sourceMap:
+                  type: object
+                  properties:
+                    version:
+                      type: number
+                    file:
+                      type: string
+                    sources:
+                      type: array
+                      items:
+                        type: string
+                    sourcesContent:
+                      type: array
+                      items:
+                        type: string
+                    mappings:
+                      type: string
+                    sourceRoot:
+                      type: string
+        - $ref: 'base_source_map_object.yaml'
