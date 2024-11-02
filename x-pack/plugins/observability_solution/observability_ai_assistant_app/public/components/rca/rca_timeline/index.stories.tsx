@@ -7,7 +7,7 @@
 
 import { Meta, Story } from '@storybook/react';
 import React from 'react';
-import type { SignificantEventsTimeline } from '@kbn/observability-utils-server/llm/service_rca/generate_timeline';
+import type { SignificantEventsTimeline } from '@kbn/observability-ai-server/root_cause_analysis';
 import { RootCauseAnalysisTimeline } from '.';
 
 const stories: Meta<{}> = {

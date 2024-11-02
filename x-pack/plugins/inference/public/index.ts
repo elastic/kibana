@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
 
-import { InferencePlugin } from './plugin';
+import type { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
 import type {
   InferencePublicSetup,
   InferencePublicStart,
@@ -14,8 +13,7 @@ import type {
   InferenceStartDependencies,
   ConfigSchema,
 } from './types';
-
-export { ChatCompletionEventType, MessageRole } from '../common/chat_complete';
+import { InferencePlugin } from './plugin';
 
 export { httpResponseIntoObservable } from './util/http_response_into_observable';
 

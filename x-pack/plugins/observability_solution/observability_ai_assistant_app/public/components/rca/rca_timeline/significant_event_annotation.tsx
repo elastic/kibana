@@ -9,7 +9,7 @@ import React from 'react';
 import moment from 'moment';
 import { AnnotationDomainType, LineAnnotation } from '@elastic/charts';
 import { EuiIcon } from '@elastic/eui';
-import type { SignificantEvent } from '@kbn/observability-utils-server/llm/service_rca/generate_timeline';
+import type { SignificantEvent } from '@kbn/observability-ai-server/root_cause_analysis';
 
 export function SignificantEventAnnotation({
   event,

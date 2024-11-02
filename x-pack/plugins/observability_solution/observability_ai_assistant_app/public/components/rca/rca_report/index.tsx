@@ -13,7 +13,7 @@ import {
   EuiPanel,
   EuiTitle,
 } from '@elastic/eui';
-import type { SignificantEventsTimeline } from '@kbn/observability-utils-server/llm/service_rca/generate_timeline';
+import type { SignificantEventsTimeline } from '@kbn/observability-ai-server/root_cause_analysis';
 
 export function RootCauseAnalysisReport({
   report,

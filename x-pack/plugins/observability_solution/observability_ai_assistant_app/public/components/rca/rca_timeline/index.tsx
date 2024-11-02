@@ -6,7 +6,7 @@
  */
 import { AreaSeries, Axis, Chart, Position, ScaleType, Settings } from '@elastic/charts';
 import { EuiPanel, EuiSkeletonText } from '@elastic/eui';
-import type { SignificantEventsTimeline } from '@kbn/observability-utils-server/llm/service_rca/generate_timeline';
+import type { SignificantEventsTimeline } from '@kbn/observability-ai-server/root_cause_analysis';
 import moment from 'moment';
 import React, { useMemo, useRef } from 'react';
 import { useChartTheme } from '../../../hooks/use_chart_theme';

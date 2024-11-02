@@ -15,7 +15,7 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import type { EntityHealthAnalysis } from '@kbn/observability-utils-server/llm/service_rca/analyze_entity_health';
+import type { EntityInvestigation } from '@kbn/observability-ai-server/root_cause_analysis/tasks/investigate_entity/types';
 import { EntityBadge } from '../entity_badge';
 import { RootCauseAnalysisEntityLogPatternTable } from '../rca_entity_log_pattern_table';
 
@@ -27,7 +27,7 @@ export function RootCauseAnalysisEntityInvestigation({
 }: {
   summary: string;
   entity: Record<string, string>;
-} & Pick<EntityHealthAnalysis['attachments'], 'ownPatterns' | 'patternsFromOtherEntities'>) {
+} & Pick<EntityInvestigation['attachments'], 'ownPatterns' | 'patternsFromOtherEntities'>) {
   return (
     <EuiPanel hasBorder paddingSize="l">
       <EuiAccordion

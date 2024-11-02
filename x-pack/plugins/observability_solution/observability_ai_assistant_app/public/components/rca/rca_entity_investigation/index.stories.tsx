@@ -20,8 +20,8 @@ export default stories;
 export const Default: Story<{}> = () => {
   return (
     <RootCauseAnalysisEntityInvestigation
-      entity={controllerEntityHealthAnalysis.response.analysis?.entity!}
-      summary={controllerEntityHealthAnalysis.response.analysis?.summary!}
+      entity={controllerEntityHealthAnalysis.response.entity}
+      summary={controllerEntityHealthAnalysis.response.summary}
       ownPatterns={controllerEntityHealthAnalysis.data.attachments.ownPatterns}
       patternsFromOtherEntities={
         controllerEntityHealthAnalysis.data.attachments.patternsFromOtherEntities

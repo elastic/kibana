@@ -25,7 +25,6 @@
     "@kbn/rule-registry-plugin",
     "@kbn/rule-data-utils",
     "@kbn/aiops-log-pattern-analysis",
-    "@kbn/inference-plugin",
-    "@kbn/logging",
+    "@kbn/calculate-auto"
   ]
 }

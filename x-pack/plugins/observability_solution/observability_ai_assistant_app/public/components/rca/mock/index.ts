@@ -6,21 +6,21 @@
  */
 
 import type {
-  AnalyzeEntityHealthToolMessage,
-  RootCauseAnalysisForServiceEvent,
-} from '@kbn/observability-utils-server/llm/service_rca';
-import { MessageRole } from '@kbn/inference-plugin/common';
+  InvestigateEntityToolMessage,
+  RootCauseAnalysisEvent,
+} from '@kbn/observability-ai-server/root_cause_analysis';
+import { RCA_INVESTIGATE_ENTITY_TOOL_NAME } from '@Kbn/observability-ai-common/root_cause_analysis';
+import { MessageRole } from '@kbn/inference-common';
 import { Required } from 'utility-types';
 // @ts-ignore
 import completeRootCauseAnalysisJson from './complete_root_cause_analysis.json';
 
-export const completeRootCauseAnalysis =
-  completeRootCauseAnalysisJson as RootCauseAnalysisForServiceEvent[];
+export const completeRootCauseAnalysis = completeRootCauseAnalysisJson as RootCauseAnalysisEvent[];
 
 export const controllerEntityHealthAnalysis = completeRootCauseAnalysis.find(
   (event) =>
     'role' in event &&
     event.role === MessageRole.Tool &&
-    'analysis' in event.response &&
-    event.response.analysis?.entity['service.name'] === 'cartservice'
-) as Required<AnalyzeEntityHealthToolMessage, 'data'>;
+    event.name === RCA_INVESTIGATE_ENTITY_TOOL_NAME &&
+    event.response.entity['service.name'] === 'cartservice'
+) as Required<InvestigateEntityToolMessage, 'data'>;

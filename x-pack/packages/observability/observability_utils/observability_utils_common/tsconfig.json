@@ -18,6 +18,6 @@
   "kbn_references": [
     "@kbn/es-query",
     "@kbn/safer-lodash-set",
-    "@kbn/inference-plugin",
+    "@kbn/inference-common",
   ]
 }

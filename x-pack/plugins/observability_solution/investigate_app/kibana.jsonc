@@ -2,6 +2,8 @@
   "type": "plugin",
   "id": "@kbn/investigate-app-plugin",
   "owner": "@elastic/obs-ux-management-team",
+  "visibility": "private",
+  "group": "observability",
   "plugin": {
     "id": "investigateApp",
     "server": true,

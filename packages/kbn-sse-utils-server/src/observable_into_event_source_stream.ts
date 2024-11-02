@@ -19,7 +19,13 @@ import { PassThrough } from 'stream';
 
 export function observableIntoEventSourceStream(
   source$: Observable<ServerSentEvent>,
-  logger: Pick<Logger, 'debug' | 'error'>
+  {
+    logger,
+    signal,
+  }: {
+    logger: Pick<Logger, 'debug' | 'error'>;
+    signal: AbortSignal;
+  }
 ) {
   const withSerializedErrors$ = source$.pipe(
     catchError((error): Observable<ServerSentErrorEvent> => {
@@ -58,7 +64,7 @@ export function observableIntoEventSourceStream(
     stream.write(': keep-alive');
   }, 10000);
 
-  withSerializedErrors$.subscribe({
+  const subscription = withSerializedErrors$.subscribe({
     next: (line) => {
       stream.write(line);
     },
@@ -78,6 +84,10 @@ export function observableIntoEventSourceStream(
       );
       stream.end();
     },
+  });
+
+  signal.addEventListener('abort', () => {
+    subscription.unsubscribe();
   });
 
   return stream;

@@ -25,7 +25,9 @@ export const Pending: Story<{}> = () => {
       label={
         <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
           <EuiFlexItem grow={false}>Investigating</EuiFlexItem>
-          <EntityBadge entity={{ 'service.name': 'controller' }} />
+          <EuiFlexItem grow={false}>
+            <EntityBadge entity={{ 'service.name': 'controller' }} />
+          </EuiFlexItem>
         </EuiFlexGroup>
       }
     />
@@ -39,7 +41,9 @@ export const Completed: Story<{}> = () => {
       label={
         <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
           <EuiFlexItem grow={false}>Completed investigation</EuiFlexItem>
-          <EntityBadge entity={{ 'service.name': 'controller' }} />
+          <EuiFlexItem grow={false}>
+            <EntityBadge entity={{ 'service.name': 'controller' }} />
+          </EuiFlexItem>
         </EuiFlexGroup>
       }
     />

@@ -10,8 +10,8 @@ import {
   AssistantMessage,
   Message as InferenceMessage,
   MessageRole as InferenceMessageRole,
-  generateFakeToolCallId,
-} from '@kbn/inference-plugin/common';
+} from '@kbn/inference-common';
+import { generateFakeToolCallId } from '@kbn/inference-plugin/common';
 
 export function convertMessagesForInference(messages: Message[]): InferenceMessage[] {
   const inferenceMessages: InferenceMessage[] = [];
@@ -52,6 +52,7 @@ export function convertMessagesForInference(messages: Message[]): InferenceMessa
       }
 
       inferenceMessages.push({
+        name: message.message.name!,
         role: InferenceMessageRole.Tool,
         response: JSON.parse(message.message.content ?? '{}'),
         toolCallId: toolCallRequest.toolCalls![0].toolCallId,

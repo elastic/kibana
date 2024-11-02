@@ -10,7 +10,7 @@ import { ServerSentEventBase } from '@kbn/sse-utils';
 import {
   RootCauseAnalysisEvent,
   runRootCauseAnalysis,
-} from '@kbn/observability-utils-server/llm/root_cause_analysis';
+} from '@kbn/observability-ai-server/root_cause_analysis';
 import { z } from '@kbn/zod';
 import datemath from '@elastic/datemath';
 import { OBSERVABILITY_LOGS_DATA_ACCESS_LOG_SOURCES_ID } from '@kbn/management-settings-ids';

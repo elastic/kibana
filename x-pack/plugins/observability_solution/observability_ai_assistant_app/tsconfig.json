@@ -75,6 +75,8 @@
     "@kbn/slo-plugin",
     "@kbn/spaces-plugin",
     "@kbn/data-service",
+    "@kbn/inference-common",
+    "@kbn/observability-ai-server",
   ],
   "exclude": [
     "target/**/*"

@@ -12,7 +12,7 @@ import { pick } from 'lodash';
 import { lastValueFrom, Subject, toArray } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import { loggerMock } from '@kbn/logging-mocks';
-import { ChatCompletionEventType, MessageRole } from '../../../../common/chat_complete';
+import { ChatCompletionEventType, MessageRole } from '@kbn/inference-common';
 import { observableIntoEventSourceStream } from '../../../util/observable_into_event_source_stream';
 import { InferenceExecutor } from '../../utils/inference_executor';
 import { openAIAdapter } from '.';
@@ -140,6 +140,7 @@ describe('openAIAdapter', () => {
             ],
           },
           {
+            name: 'my_function',
             role: MessageRole.Tool,
             toolCallId: '0',
             response: {

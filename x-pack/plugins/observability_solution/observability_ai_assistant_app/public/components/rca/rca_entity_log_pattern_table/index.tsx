@@ -18,10 +18,10 @@ import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import { formatInteger } from '@kbn/observability-utils-common/format/integer';
 import { highlightPatternFromRegex } from '@kbn/observability-utils-common/llm/log_analysis/highlight_patterns_from_regex';
-import type { AnalyzedLogPattern } from '@kbn/observability-utils-server/llm/analyze_log_patterns';
-import type { EntityHealthAnalysis } from '@kbn/observability-utils-server/llm/service_rca/analyze_entity_health';
+import type { EntityInvestigation } from '@kbn/observability-ai-server/root_cause_analysis/tasks/investigate_entity/types';
 import React, { useMemo, useState } from 'react';
 import { orderBy } from 'lodash';
+import type { AnalyzedLogPattern } from '@kbn/observability-ai-server/root_cause_analysis/tasks/analyze_log_patterns';
 import { useTheme } from '../../../hooks/use_theme';
 import { SparkPlot } from '../../charts/spark_plot';
 
@@ -38,7 +38,7 @@ export function RootCauseAnalysisEntityLogPatternTable({
   entity,
   ownPatterns,
   patternsFromOtherEntities,
-}: Pick<EntityHealthAnalysis['attachments'], 'ownPatterns' | 'patternsFromOtherEntities'> & {
+}: Pick<EntityInvestigation['attachments'], 'ownPatterns' | 'patternsFromOtherEntities'> & {
   entity: Record<string, string>;
 }) {
   const theme = useTheme();
