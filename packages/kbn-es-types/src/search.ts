@@ -685,6 +685,7 @@ export interface ESQLSearchResponse {
   all_columns?: ESQLColumn[];
   values: ESQLRow[];
   took?: number;
+  _clusters?: estypes.ClusterStatistics;
 }
 
 export interface ESQLSearchParams {

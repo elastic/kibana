@@ -76,5 +76,6 @@
     "@kbn/slo-plugin",
     "@kbn/spaces-plugin",
     "@kbn/observability-alerting-rule-utils",
+    "@kbn/apm-data-access-plugin",
   ],
 }

@@ -20,10 +20,10 @@ import {
   ChatCompletionEventType,
   Message,
   MessageRole,
-} from '../../../../common/chat_complete';
-import type { ToolOptions } from '../../../../common/chat_complete/tools';
-import { createTokenLimitReachedError } from '../../../../common/chat_complete/errors';
-import { createInferenceInternalError } from '../../../../common/errors';
+  ToolOptions,
+  createInferenceInternalError,
+} from '@kbn/inference-common';
+import { createTokenLimitReachedError } from '../../errors';
 import { eventSourceStreamIntoObservable } from '../../../util/event_source_stream_into_observable';
 import type { InferenceConnectorAdapter } from '../../types';
 import {
