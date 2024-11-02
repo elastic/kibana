@@ -13,7 +13,7 @@ interface EqQlRuleFieldEditProps {
   fieldName: UpgradeableEsqlFields;
 }
 
-export function EsQlRuleFieldEdit({ fieldName }: EqQlRuleFieldEditProps) {
+export function EsqlRuleFieldEdit({ fieldName }: EqQlRuleFieldEditProps) {
   switch (fieldName) {
     case 'alert_suppression':
       return <AlertSuppressionEditForm />;

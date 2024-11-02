@@ -27,7 +27,7 @@ import type {
 import { isCommonFieldName } from '../../../../model/prebuilt_rule_upgrade/fields';
 import { useFinalSideContext } from '../final_side/final_side_context';
 import { EqlRuleFieldEdit } from './eql_rule_field_edit';
-import { EsQlRuleFieldEdit } from './esql_rule_field_edit';
+import { EsqlRuleFieldEdit } from './esql_rule_field_edit';
 import { MachineLearningRuleFieldEdit } from './machine_learning_rule_field_edit';
 
 export function FinalEdit() {
@@ -48,7 +48,7 @@ export function FinalEdit() {
     case 'eql':
       return <EqlRuleFieldEdit fieldName={fieldName as UpgradeableEqlFields} />;
     case 'esql':
-      return <EsQlRuleFieldEdit fieldName={fieldName as UpgradeableEsqlFields} />;
+      return <EsqlRuleFieldEdit fieldName={fieldName as UpgradeableEsqlFields} />;
     case 'threat_match':
       return <ThreatMatchRuleFieldEdit fieldName={fieldName as UpgradeableThreatMatchFields} />;
     case 'threshold':
