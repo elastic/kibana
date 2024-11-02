@@ -38,6 +38,7 @@ export function RootCauseAnalysisObservationPanel({
             size="xs"
             className={css`
               color: ${loading ? theme.colors.subduedText : theme.colors.text};
+              white-space: nowrap;
             `}
           >
             <h2>

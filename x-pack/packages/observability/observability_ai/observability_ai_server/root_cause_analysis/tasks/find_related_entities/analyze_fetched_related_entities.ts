@@ -11,7 +11,7 @@ import pLimit from 'p-limit';
 import { getEntityKuery } from '@kbn/observability-utils-common/entities/get_entity_kuery';
 import { sortAndTruncateAnalyzedFields } from '@kbn/observability-utils-common/llm/log_analysis/sort_and_truncate_analyzed_fields';
 import { lastValueFrom } from 'rxjs';
-import { chunk, isEqual } from 'lodash';
+import { chunk, isEmpty, isEqual } from 'lodash';
 import { Logger } from '@kbn/logging';
 import {
   DocumentAnalysis,
@@ -313,6 +313,20 @@ export async function analyzeFetchedRelatedEntities({
     const excludeQuery = isEqual([groupingField], entityFields)
       ? `NOT (${groupingField}:"${entity[groupingField]}")`
       : ``;
+
+    const fieldCaps = await esClient.fieldCaps('check_if_grouping_field_exists', {
+      fields: [groupingField],
+      index,
+      index_filter: {
+        bool: {
+          filter: [...rangeQuery(start, end)],
+        },
+      },
+    });
+
+    if (isEmpty(fieldCaps.fields[groupingField])) {
+      return [];
+    }
 
     const keywordSearchResults = await esClient.search(
       'find_related_entities_via_keyword_searches',
