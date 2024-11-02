@@ -12,8 +12,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const security = getService('security');
   const PageObjects = getPageObjects(['common', 'settings', 'security']);
-  const appsMenu = getService('appsMenu');
-  const managementMenu = getService('managementMenu');
 
   describe('monitor only user', () => {
     before(async () => {

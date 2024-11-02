@@ -15,7 +15,6 @@ const CACHE_TEMPLATES = true;
 
 export default function ({ getService }: FtrProviderContext) {
   const log = getService('log');
-  const supertest = getService('supertest');
 
   const {
     createComponentTemplate,
