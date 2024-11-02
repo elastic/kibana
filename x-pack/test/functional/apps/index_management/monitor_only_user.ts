@@ -23,6 +23,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await pageObjects.common.navigateToApp('indexManagement');
     });
 
+    it('Index Templates - should hide UI elements that perform CRUD operations', async () => {
+      await testSubjects.click('templatesTab');
+      await testSubjects.missingOrFail('createTemplateButton');
+      await testSubjects.missingOrFail('checkboxSelectAll');
+      await testSubjects.missingOrFail('euiCollapsedItemActionsButton');
+    });
+
     it('Component Templates - should hide UI elements that perform CRUD operations', async () => {
       await testSubjects.click('component_templatesTab');
       await testSubjects.missingOrFail('createPipelineButton');
