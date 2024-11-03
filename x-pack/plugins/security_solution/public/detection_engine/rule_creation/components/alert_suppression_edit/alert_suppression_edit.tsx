@@ -29,7 +29,9 @@ export function AlertSuppressionEdit({
   disabledText,
   warningText,
 }: AlertSuppressionEditProps): JSX.Element {
-  const [{ suppressionFields }] = useFormData({
+  const [{ [ALERT_SUPPRESSION_FIELDS]: suppressionFields }] = useFormData<{
+    [ALERT_SUPPRESSION_FIELDS]: string[];
+  }>({
     watch: ALERT_SUPPRESSION_FIELDS,
   });
   const hasSelectedFields = suppressionFields?.length > 0;
