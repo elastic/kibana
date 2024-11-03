@@ -18,10 +18,9 @@ const { REPO_ROOT } = require('@kbn/repo-info');
       `${REPO_ROOT}/src/plugins/data_views/docs/openapi/bundled.yaml`,
       `${REPO_ROOT}/x-pack/plugins/ml/common/openapi/ml_apis_serverless.yaml`,
       `${REPO_ROOT}/packages/core/saved-objects/docs/openapi/bundled_serverless.yaml`,
-      `${REPO_ROOT}/x-pack/plugins/fleet/common/openapi/bundled.yaml`,
 
       // Observability Solution
-      `${REPO_ROOT}/x-pack/plugins/observability_solution/apm/docs/openapi/apm.yaml`,
+      `${REPO_ROOT}/x-pack/plugins/observability_solution/apm/docs/openapi/apm/bundled.yaml`,
       `${REPO_ROOT}/x-pack/plugins/observability_solution/slo/docs/openapi/slo/bundled.yaml`,
 
       // Security solution

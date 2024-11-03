@@ -23,6 +23,8 @@ import {
   ERROR_MESSAGE,
   AGENT_NAME,
   STATE_ID,
+  SERVICE_NAME,
+  ERROR_STACK_TRACE,
 } from '../../../common/field_names';
 import { OverviewPing } from '../../../common/runtime_types';
 import { UNNAMED_LOCATION } from '../../../common/constants';
@@ -36,15 +38,19 @@ export const getMonitorAlertDocument = (
   [MONITOR_ID]: monitorSummary.monitorId,
   [MONITOR_TYPE]: monitorSummary.monitorType,
   [MONITOR_NAME]: monitorSummary.monitorName,
+  [SERVICE_NAME]: monitorSummary.serviceName,
   [URL_FULL]: monitorSummary.monitorUrl,
   [OBSERVER_GEO_NAME]: locationNames,
   [OBSERVER_NAME]: locationIds,
   [ERROR_MESSAGE]: monitorSummary.lastErrorMessage,
+  // done to avoid assigning null to the field
+  [ERROR_STACK_TRACE]: monitorSummary.lastErrorStack ? monitorSummary.lastErrorStack : undefined,
   [AGENT_NAME]: monitorSummary.hostName,
   [ALERT_REASON]: monitorSummary.reason,
   [STATE_ID]: monitorSummary.stateId,
   'location.id': locationIds,
   'location.name': locationNames,
+  labels: monitorSummary.labels,
   configId: monitorSummary.configId,
   'kibana.alert.evaluation.threshold': monitorSummary.downThreshold,
   'kibana.alert.evaluation.value':
@@ -111,7 +117,11 @@ export const getMonitorSummary = ({
     monitorId: monitorInfo.monitor?.id,
     monitorName,
     monitorType: typeToLabelMap[monitorInfo.monitor?.type] || monitorInfo.monitor?.type,
-    lastErrorMessage: monitorInfo.error?.message!,
+    lastErrorMessage: monitorInfo.error?.message,
+    // done to avoid assigning null to the field
+    lastErrorStack: monitorInfo.error?.stack_trace ? monitorInfo.error?.stack_trace : undefined,
+    serviceName: monitorInfo.service?.name,
+    labels: monitorInfo.labels,
     locationName: formattedLocationName,
     locationNames: formattedLocationName,
     hostName: monitorInfo.agent?.name!,

@@ -57,7 +57,11 @@ export const PolicyTemplateSelector = ({
       </EuiText>
       <EuiSpacer size="m" />
       <RadioGroup
-        options={Array.from(policyTemplates, (v) => ({ id: v, label: getPolicyTemplateLabel(v) }))}
+        options={Array.from(policyTemplates, (v) => ({
+          id: v,
+          label: getPolicyTemplateLabel(v),
+          testId: `policy-template-radio-button-${v}`,
+        }))}
         idSelected={selectedTemplate}
         onChange={(id: CloudSecurityPolicyTemplate) => setPolicyTemplate(id)}
         disabled={disabled}

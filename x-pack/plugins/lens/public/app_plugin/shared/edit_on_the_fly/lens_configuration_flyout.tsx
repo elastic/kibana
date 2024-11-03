@@ -117,7 +117,7 @@ export function LensEditConfigurationFlyout({
   useEffect(() => {
     const s = output$?.subscribe(() => {
       const activeData: Record<string, Datatable> = {};
-      const adaptersTables = previousAdapters.current?.tables?.tables as Record<string, Datatable>;
+      const adaptersTables = previousAdapters.current?.tables?.tables;
       const [table] = Object.values(adaptersTables || {});
       if (table) {
         // there are cases where a query can return a big amount of columns
@@ -337,6 +337,7 @@ export function LensEditConfigurationFlyout({
         setErrors([]);
         updateSuggestion?.(attrs);
       }
+      prevQuery.current = q;
       setIsVisualizationLoading(false);
     },
     [
@@ -481,7 +482,6 @@ export function LensEditConfigurationFlyout({
                 query={query}
                 onTextLangQueryChange={(q) => {
                   setQuery(q);
-                  prevQuery.current = q;
                 }}
                 detectedTimestamp={adHocDataViews?.[0]?.timeFieldName}
                 hideTimeFilterInfo={hideTimeFilterInfo}
@@ -497,7 +497,8 @@ export function LensEditConfigurationFlyout({
                 editorIsInline
                 hideRunQueryText
                 onTextLangQuerySubmit={async (q, a) => {
-                  if (q) {
+                  // do not run the suggestions if the query is the same as the previous one
+                  if (q && !isEqual(q, prevQuery.current)) {
                     setIsVisualizationLoading(true);
                     await runQuery(q, a);
                   }

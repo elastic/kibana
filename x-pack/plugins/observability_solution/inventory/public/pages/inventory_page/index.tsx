@@ -4,105 +4,36 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiDataGridSorting } from '@elastic/eui';
-import React from 'react';
-import useEffectOnce from 'react-use/lib/useEffectOnce';
-import { EntityType } from '../../../common/entities';
-import { EntitiesGrid } from '../../components/entities_grid';
-import { useInventorySearchBarContext } from '../../context/inventory_search_bar_context_provider';
-import { useInventoryAbortableAsync } from '../../hooks/use_inventory_abortable_async';
+import React, { useEffect } from 'react';
 import { useInventoryParams } from '../../hooks/use_inventory_params';
+import { useInventorySearchBarContext } from '../../context/inventory_search_bar_context_provider';
 import { useInventoryRouter } from '../../hooks/use_inventory_router';
-import { useKibana } from '../../hooks/use_kibana';
+import { UnifiedInventory } from '../../components/grouped_inventory/unified_inventory';
+import { GroupedInventory } from '../../components/grouped_inventory';
 
 export function InventoryPage() {
   const { searchBarContentSubject$ } = useInventorySearchBarContext();
-  const {
-    services: { inventoryAPIClient },
-  } = useKibana();
-  const { query } = useInventoryParams('/');
-  const { sortDirection, sortField, pageIndex, kuery, entityTypes } = query;
-
   const inventoryRoute = useInventoryRouter();
+  const { query } = useInventoryParams('/');
 
-  const {
-    value = { entities: [] },
-    loading,
-    refresh,
-  } = useInventoryAbortableAsync(
-    ({ signal }) => {
-      return inventoryAPIClient.fetch('GET /internal/inventory/entities', {
-        params: {
-          query: {
-            sortDirection,
-            sortField,
-            entityTypes: entityTypes?.length ? JSON.stringify(entityTypes) : undefined,
-            kuery,
-          },
-        },
-        signal,
-      });
-    },
-    [entityTypes, inventoryAPIClient, kuery, sortDirection, sortField]
-  );
-
-  useEffectOnce(() => {
+  useEffect(() => {
     const searchBarContentSubscription = searchBarContentSubject$.subscribe(
-      ({ refresh: isRefresh, ...queryParams }) => {
-        if (isRefresh) {
-          refresh();
-        } else {
-          inventoryRoute.push('/', {
-            path: {},
-            query: { ...query, ...queryParams },
-          });
-        }
+      ({ ...queryParams }) => {
+        const { pagination: _, ...rest } = query;
+
+        inventoryRoute.push('/', {
+          path: {},
+          query: { ...rest, ...queryParams },
+        });
       }
     );
     return () => {
       searchBarContentSubscription.unsubscribe();
     };
-  });
+    // If query has updated, the inventoryRoute state is also updated
+    // as well, so we only need to track changes on query.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [query, searchBarContentSubject$]);
 
-  function handlePageChange(nextPage: number) {
-    inventoryRoute.push('/', {
-      path: {},
-      query: { ...query, pageIndex: nextPage },
-    });
-  }
-
-  function handleSortChange(sorting: EuiDataGridSorting['columns'][0]) {
-    inventoryRoute.push('/', {
-      path: {},
-      query: {
-        ...query,
-        sortField: sorting.id,
-        sortDirection: sorting.direction,
-      },
-    });
-  }
-
-  function handleTypeFilter(entityType: EntityType) {
-    inventoryRoute.push('/', {
-      path: {},
-      query: {
-        ...query,
-        // Override the current entity types
-        entityTypes: [entityType],
-      },
-    });
-  }
-
-  return (
-    <EntitiesGrid
-      entities={value.entities}
-      loading={loading}
-      sortDirection={sortDirection}
-      sortField={sortField}
-      onChangePage={handlePageChange}
-      onChangeSort={handleSortChange}
-      pageIndex={pageIndex}
-      onFilterByType={handleTypeFilter}
-    />
-  );
+  return query.view === 'unified' ? <UnifiedInventory /> : <GroupedInventory />;
 }

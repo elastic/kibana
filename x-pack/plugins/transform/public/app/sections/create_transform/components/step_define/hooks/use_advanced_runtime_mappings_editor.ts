@@ -6,12 +6,10 @@
  */
 
 import { useState } from 'react';
-import { XJsonMode } from '@kbn/ace';
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
 import type { StepDefineExposedState } from '../common';
 
 const { useXJsonMode } = XJson;
-const xJsonMode = new XJsonMode();
 
 export const useAdvancedRuntimeMappingsEditor = (defaults: StepDefineExposedState) => {
   const stringifiedRuntimeMappings = JSON.stringify(defaults.runtimeMappings, null, 2);
@@ -81,7 +79,6 @@ export const useAdvancedRuntimeMappingsEditor = (defaults: StepDefineExposedStat
       isRuntimeMappingsEditorSwitchModalVisible,
       runtimeMappingsUpdated,
       advancedRuntimeMappingsConfig,
-      xJsonMode,
       runtimeMappings,
     },
   };

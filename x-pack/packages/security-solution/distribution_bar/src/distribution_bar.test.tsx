@@ -79,5 +79,67 @@ describe('DistributionBar', () => {
     });
   });
 
+  it('should render last tooltip by default', () => {
+    const stats = [
+      {
+        key: 'low',
+        count: 9,
+        color: 'green',
+      },
+      {
+        key: 'medium',
+        count: 90,
+        color: 'red',
+      },
+      {
+        key: 'high',
+        count: 900,
+        color: 'red',
+      },
+    ];
+
+    const { container } = render(
+      <DistributionBar stats={stats} data-test-subj={testSubj} hideLastTooltip={true} />
+    );
+    expect(container).toBeInTheDocument();
+    const parts = container.querySelectorAll(`[classname*="distribution_bar--tooltip"]`);
+    parts.forEach((part, index) => {
+      if (index < parts.length - 1) {
+        expect(part).toHaveStyle({ opacity: 0 });
+      } else {
+        expect(part).toHaveStyle({ opacity: 1 });
+      }
+    });
+  });
+
+  it('should not render last tooltip when hideLastTooltip is true', () => {
+    const stats = [
+      {
+        key: 'low',
+        count: 9,
+        color: 'green',
+      },
+      {
+        key: 'medium',
+        count: 90,
+        color: 'red',
+      },
+      {
+        key: 'high',
+        count: 900,
+        color: 'red',
+      },
+    ];
+
+    const { container } = render(
+      <DistributionBar stats={stats} data-test-subj={testSubj} hideLastTooltip={true} />
+    );
+    expect(container).toBeInTheDocument();
+    const parts = container.querySelectorAll(`[classname*="distribution_bar--tooltip"]`);
+    parts.forEach((part) => {
+      expect(part).toHaveStyle({ opacity: 0 });
+    });
+  });
+
   // todo: test tooltip visibility logic
 });

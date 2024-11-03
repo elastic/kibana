@@ -11,23 +11,21 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '../../../../../../common/lib/kibana/kibana_react';
 
-export const NUM_OF_FIELDS_WITH_UPDATES = (count: number) =>
-  i18n.translate(
-    'xpack.securitySolution.detectionEngine.rules.upgradeRules.diffTab.fieldsWithUpdates',
-    {
-      values: { count },
-      defaultMessage: 'Upgrade has {count} {count, plural, one {field} other {fields}}',
-    }
-  );
+export const NUM_OF_FIELDS_WITH_UPDATES = (count: number) => (
+  <FormattedMessage
+    id="xpack.securitySolution.detectionEngine.rules.upgradeRules.diffTab.fieldsWithUpdates"
+    defaultMessage="Upgrade has {count} {count, plural, one {field} other {fields}}"
+    values={{ count: <strong>{count}</strong> }}
+  />
+);
 
-export const NUM_OF_CONFLICTS = (count: number) =>
-  i18n.translate(
-    'xpack.securitySolution.detectionEngine.rules.upgradeRules.diffTab.numOfConflicts',
-    {
-      values: { count },
-      defaultMessage: '{count} {count, plural, one {conflict} other {conflicts}}',
-    }
-  );
+export const NUM_OF_CONFLICTS = (count: number) => (
+  <FormattedMessage
+    id="xpack.securitySolution.detectionEngine.rules.upgradeRules.diffTab.numOfConflicts"
+    defaultMessage="{count} {count, plural, one {conflict} other {conflicts}}"
+    values={{ count: <strong>{count}</strong> }}
+  />
+);
 
 const UPGRADE_RULES_DOCS_LINK = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.upgradeRules.updateYourRulesDocsLink',

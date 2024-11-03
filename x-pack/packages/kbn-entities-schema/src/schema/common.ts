@@ -85,7 +85,11 @@ export const keyMetricSchema = z.object({
 export type KeyMetric = z.infer<typeof keyMetricSchema>;
 
 export const metadataAggregation = z.union([
-  z.object({ type: z.literal('terms'), limit: z.number().default(1000) }),
+  z.object({
+    type: z.literal('terms'),
+    limit: z.number().default(10),
+    lookbackPeriod: z.optional(durationSchema),
+  }),
   z.object({
     type: z.literal('top_value'),
     sort: z.record(z.string(), z.union([z.literal('asc'), z.literal('desc')])),
@@ -99,13 +103,13 @@ export const metadataSchema = z
     destination: z.optional(z.string()),
     aggregation: z
       .optional(metadataAggregation)
-      .default({ type: z.literal('terms').value, limit: 1000 }),
+      .default({ type: z.literal('terms').value, limit: 10, lookbackPeriod: undefined }),
   })
   .or(
     z.string().transform((value) => ({
       source: value,
       destination: value,
-      aggregation: { type: z.literal('terms').value, limit: 1000 },
+      aggregation: { type: z.literal('terms').value, limit: 10, lookbackPeriod: undefined },
     }))
   )
   .transform((metadata) => ({
@@ -141,7 +145,7 @@ export type MetadataField = z.infer<typeof metadataSchema>;
 export const identityFieldsSchema = z
   .object({
     field: z.string(),
-    optional: z.boolean(),
+    optional: z.literal(false),
   })
   .or(z.string().transform((value) => ({ field: value, optional: false })));
 

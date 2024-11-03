@@ -9,7 +9,6 @@ import { getNewThreatIndicatorRule } from '../../../../objects/rule';
 
 import {
   SUPPRESS_FOR_DETAILS,
-  DETAILS_TITLE,
   SUPPRESS_BY_DETAILS,
   SUPPRESS_MISSING_FIELD,
   DEFINITION_DETAILS,
@@ -59,7 +58,8 @@ describe(
     });
 
     // https://github.com/elastic/kibana/issues/187621
-    describe('without suppression', { tags: ['@skipInServerlessMKI'] }, () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/196711
+    describe.skip('without suppression', { tags: ['@skipInServerlessMKI'] }, () => {
       beforeEach(() => {
         createRule(rule);
       });
@@ -81,9 +81,6 @@ describe(
             'have.text',
             'Suppress and group alerts for events with missing fields'
           );
-
-          // suppression functionality should be under Tech Preview
-          cy.contains(DETAILS_TITLE, SUPPRESS_FOR_DETAILS).contains('Technical Preview');
         });
       });
     });

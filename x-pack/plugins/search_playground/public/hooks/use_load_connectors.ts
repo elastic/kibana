@@ -64,6 +64,20 @@ const connectorTypeToLLM: Array<{
     }),
   },
   {
+    actionId: OPENAI_CONNECTOR_ID,
+    actionProvider: OpenAiProviderType.Other,
+    match: (connector) =>
+      connector.actionTypeId === OPENAI_CONNECTOR_ID &&
+      (connector as OpenAIConnector)?.config?.apiProvider === OpenAiProviderType.Other,
+    transform: (connector) => ({
+      ...connector,
+      title: i18n.translate('xpack.searchPlayground.openAIOtherConnectorTitle', {
+        defaultMessage: 'OpenAI Other',
+      }),
+      type: LLMs.openai_other,
+    }),
+  },
+  {
     actionId: BEDROCK_CONNECTOR_ID,
     match: (connector) => connector.actionTypeId === BEDROCK_CONNECTOR_ID,
     transform: (connector) => ({

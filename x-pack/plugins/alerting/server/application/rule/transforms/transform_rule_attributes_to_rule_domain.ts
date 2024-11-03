@@ -10,8 +10,7 @@ import { SavedObjectReference } from '@kbn/core/server';
 import { ruleExecutionStatusValues } from '../constants';
 import { getRuleSnoozeEndTime } from '../../../lib';
 import { RuleDomain, Monitoring, RuleParams } from '../types';
-import { PartialRule, SanitizedRule } from '../../../types';
-import { RuleAttributes, RuleExecutionStatusAttributes } from '../../../data/rule/types';
+import { PartialRule, RawRule, RawRuleExecutionStatus, SanitizedRule } from '../../../types';
 import { UntypedNormalizedRuleType } from '../../../rule_type_registry';
 import { injectReferencesIntoParams } from '../../../rules_client/common';
 import { getActiveScheduledSnoozes } from '../../../lib/is_rule_snoozed';
@@ -32,7 +31,7 @@ const INITIAL_LAST_RUN_METRICS = {
 const transformEsExecutionStatus = (
   logger: Logger,
   ruleId: string,
-  esRuleExecutionStatus: RuleExecutionStatusAttributes
+  esRuleExecutionStatus: RawRuleExecutionStatus
 ): RuleDomain['executionStatus'] => {
   const {
     lastExecutionDate,
@@ -89,7 +88,7 @@ export const updateMonitoring = ({
 const transformEsMonitoring = (
   logger: Logger,
   ruleId: string,
-  monitoring?: RuleAttributes['monitoring']
+  monitoring?: RawRule['monitoring']
 ): Monitoring | undefined => {
   if (!monitoring) {
     return undefined;
@@ -120,7 +119,7 @@ interface TransformEsToRuleParams {
 }
 
 export const transformRuleAttributesToRuleDomain = <Params extends RuleParams = never>(
-  esRule: RuleAttributes,
+  esRule: RawRule,
   transformParams: TransformEsToRuleParams,
   isSystemAction: (connectorId: string) => boolean
 ): RuleDomain<Params> => {
@@ -232,6 +231,7 @@ export const transformRuleAttributesToRuleDomain = <Params extends RuleParams = 
     running: esRule.running,
     ...(esRule.alertDelay ? { alertDelay: esRule.alertDelay } : {}),
     ...(esRule.legacyId !== undefined ? { legacyId: esRule.legacyId } : {}),
+    ...(esRule.flapping !== undefined ? { flapping: esRule.flapping } : {}),
   };
 
   // Bad casts, but will fix once we fix all rule types
@@ -250,5 +250,6 @@ export const transformRuleAttributesToRuleDomain = <Params extends RuleParams = 
     }
   }
 
+  // nullable rrule bymonth?
   return rule;
 };

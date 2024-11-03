@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getAstAndSyntaxErrors as parse } from '..';
+import { parse } from '..';
 
 describe('FROM', () => {
   describe('correctly formatted', () => {
@@ -186,6 +186,22 @@ describe('FROM', () => {
       const { errors } = parse(text);
 
       expect(errors.length > 0).toBe(true);
+    });
+
+    it('when open square bracket "[" is entered', () => {
+      const text = 'FROM kibana_sample_data_logs [';
+      const { errors } = parse(text);
+
+      expect(errors.length > 0).toBe(true);
+      expect(errors[0].message.toLowerCase().includes('metadata')).toBe(true);
+    });
+
+    it('when close square bracket "]" is entered', () => {
+      const text = 'FROM kibana_sample_data_logs []';
+      const { errors } = parse(text);
+
+      expect(errors.length > 0).toBe(true);
+      expect(errors[0].message.toLowerCase().includes('metadata')).toBe(true);
     });
   });
 });

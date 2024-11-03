@@ -40,8 +40,18 @@ export const useLoadActionTypes = ({
         http,
         featureId: GenerativeAIForSecurityConnectorFeatureId,
       });
-      const sortedData = queryResult.sort((a, b) => a.name.localeCompare(b.name));
 
+      const actionTypeKey = {
+        bedrock: '.bedrock',
+        openai: '.gen-ai',
+        gemini: '.gemini',
+      };
+
+      const sortedData = queryResult
+        .filter((p) =>
+          [actionTypeKey.bedrock, actionTypeKey.openai, actionTypeKey.gemini].includes(p.id)
+        )
+        .sort((a, b) => a.name.localeCompare(b.name));
       return sortedData;
     },
     {

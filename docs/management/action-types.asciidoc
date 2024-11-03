@@ -28,6 +28,10 @@ a| <<gemini-action-type,{gemini}>>
 
 | Send a request to {gemini}.
 
+a| <<inference-action-type,{infer}>>
+
+| Send a request to {infer}.
+
 a| <<email-action-type,Email>>
 
 | Send email from your server.

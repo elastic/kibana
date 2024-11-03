@@ -27,6 +27,7 @@ import {
   type InternalSavedObjectsRequestHandlerContext,
 } from '@kbn/core-saved-objects-server-internal';
 import { setupServer, createExportableType } from '@kbn/core-test-helpers-test-utils';
+import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
@@ -40,6 +41,7 @@ describe(`POST ${URL}`, () => {
   let httpSetup: SetupServerReturn['httpSetup'];
   let handlerContext: SetupServerReturn['handlerContext'];
   let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
+  let mockLogger: MockedLogger;
 
   const emptyResponse = { saved_objects: [], total: 0, per_page: 0, page: 0 };
   const mockIndexPattern = {
@@ -59,6 +61,7 @@ describe(`POST ${URL}`, () => {
 
   beforeEach(async () => {
     ({ server, httpSetup, handlerContext } = await setupServer());
+    mockLogger = loggerMock.create();
     handlerContext.savedObjects.typeRegistry.getImportableAndExportableTypes.mockReturnValue(
       allowedTypes.map(createExportableType)
     );
@@ -76,6 +79,7 @@ describe(`POST ${URL}`, () => {
       savedObjectsClient,
       typeRegistry: handlerContext.savedObjects.typeRegistry,
       importSizeLimit: 10000,
+      logger: mockLogger,
     });
     handlerContext.savedObjects.getImporter = jest
       .fn()

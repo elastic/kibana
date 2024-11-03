@@ -32,6 +32,10 @@ export const uptimeRuleFieldMap: FieldMap = {
     type: 'text',
     required: false,
   },
+  'error.stack_trace': {
+    type: 'wildcard',
+    required: false,
+  },
   'agent.name': {
     type: 'keyword',
     required: false,
@@ -99,6 +103,14 @@ export const uptimeRuleFieldMap: FieldMap = {
   },
   'anomaly.bucket_span.minutes': {
     type: 'keyword',
+    required: false,
+  },
+  'service.name': {
+    type: 'keyword',
+    required: false,
+  },
+  labels: {
+    type: 'object',
     required: false,
   },
 } as const;

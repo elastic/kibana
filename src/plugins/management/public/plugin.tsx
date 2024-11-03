@@ -131,7 +131,9 @@ export class ManagementPlugin
               const [, ...trailingBreadcrumbs] = newBreadcrumbs;
               deps.serverless.setBreadcrumbs(trailingBreadcrumbs);
             } else {
-              coreStart.chrome.setBreadcrumbs(newBreadcrumbs);
+              coreStart.chrome.setBreadcrumbs(newBreadcrumbs, {
+                project: { value: newBreadcrumbs, absolute: true },
+              });
             }
           },
           isSidebarEnabled$: managementPlugin.isSidebarEnabled$,

@@ -16,11 +16,30 @@ import {
 import { i18n } from '@kbn/i18n';
 import { PublicAlertsClient } from '@kbn/alerting-plugin/server/alerts_client/types';
 import { ObservabilityUptimeAlert } from '@kbn/alerts-as-data-utils';
+import { ALERT_REASON, ALERT_UUID } from '@kbn/rule-data-utils';
 import { TLSLatestPing } from './tls_rule_executor';
 import { ALERT_DETAILS_URL } from '../action_variables';
 import { Cert } from '../../../common/runtime_types';
 import { tlsTranslations } from '../translations';
 import { MonitorStatusActionGroup } from '../../../common/constants/synthetics_alerts';
+import {
+  CERT_COMMON_NAME,
+  CERT_HASH_SHA256,
+  CERT_ISSUER_NAME,
+  CERT_VALID_NOT_AFTER,
+  CERT_VALID_NOT_BEFORE,
+  ERROR_MESSAGE,
+  ERROR_STACK_TRACE,
+  MONITOR_ID,
+  MONITOR_NAME,
+  MONITOR_TYPE,
+  OBSERVER_GEO_NAME,
+  OBSERVER_NAME,
+  SERVICE_NAME,
+  URL_FULL,
+} from '../../../common/field_names';
+import { generateAlertMessage } from '../common';
+import { TlsTranslations } from '../../../common/rules/synthetics/translations';
 interface TLSContent {
   summary: string;
   status?: string;
@@ -55,6 +74,8 @@ const getValidAfter = (notAfter?: string): TLSContent => {
       };
 };
 
+export type CertSummary = ReturnType<typeof getCertSummary>;
+
 export const getCertSummary = (cert: Cert, expirationThreshold: number, ageThreshold: number) => {
   const isExpiring = new Date(cert.not_after ?? '').valueOf() < expirationThreshold;
   const isAging = new Date(cert.not_before ?? '').valueOf() < ageThreshold;
@@ -74,12 +95,44 @@ export const getCertSummary = (cert: Cert, expirationThreshold: number, ageThres
     commonName: cert.common_name ?? '',
     issuer: cert.issuer ?? '',
     monitorName: cert.monitorName,
+    monitorId: cert.configId,
+    serviceName: cert.serviceName,
     monitorType: cert.monitorType,
+    locationId: cert.locationId,
     locationName: cert.locationName,
     monitorUrl: cert.monitorUrl,
     configId: cert.configId,
+    monitorTags: cert.tags,
+    errorMessage: cert.errorMessage,
+    errorStackTrace: cert.errorStackTrace,
+    labels: cert.labels,
   };
 };
+
+export const getTLSAlertDocument = (cert: Cert, monitorSummary: CertSummary, uuid: string) => ({
+  [CERT_COMMON_NAME]: cert.common_name,
+  [CERT_ISSUER_NAME]: cert.issuer,
+  [CERT_VALID_NOT_AFTER]: cert.not_after,
+  [CERT_VALID_NOT_BEFORE]: cert.not_before,
+  [CERT_HASH_SHA256]: cert.sha256,
+  [ALERT_UUID]: uuid,
+  [ALERT_REASON]: generateAlertMessage(TlsTranslations.defaultActionMessage, monitorSummary),
+  [MONITOR_ID]: monitorSummary.monitorId,
+  [MONITOR_TYPE]: monitorSummary.monitorType,
+  [MONITOR_NAME]: monitorSummary.monitorName,
+  [SERVICE_NAME]: monitorSummary.serviceName,
+  [URL_FULL]: monitorSummary.monitorUrl,
+  [OBSERVER_GEO_NAME]: monitorSummary.locationName ? [monitorSummary.locationName] : [],
+  [OBSERVER_NAME]: monitorSummary.locationId ? [monitorSummary.locationId] : [],
+  [ERROR_MESSAGE]: monitorSummary.errorMessage,
+  // done to avoid assigning null to the field
+  [ERROR_STACK_TRACE]: monitorSummary.errorStackTrace ? monitorSummary.errorStackTrace : undefined,
+  'location.id': monitorSummary.locationId ? [monitorSummary.locationId] : [],
+  'location.name': monitorSummary.locationName ? [monitorSummary.locationName] : [],
+  labels: cert.labels,
+  configId: monitorSummary.configId,
+  'monitor.tags': monitorSummary.monitorTags ?? [],
+});
 
 export const setTLSRecoveredAlertsContext = async ({
   alertsClient,

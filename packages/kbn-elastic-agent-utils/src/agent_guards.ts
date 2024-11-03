@@ -24,6 +24,22 @@ import type {
   ServerlessType,
 } from './agent_names';
 
+export function getAgentName(
+  agentName: string | null,
+  telemetryAgentName: string | null,
+  telemetrySdkName: string | null
+) {
+  if (agentName) {
+    return agentName;
+  }
+
+  if (telemetrySdkName && telemetryAgentName) {
+    return `${telemetrySdkName}/${telemetryAgentName}`;
+  }
+
+  return telemetryAgentName;
+}
+
 export function hasOpenTelemetryPrefix(agentName?: string, language: string = '') {
   if (!agentName) {
     return false;

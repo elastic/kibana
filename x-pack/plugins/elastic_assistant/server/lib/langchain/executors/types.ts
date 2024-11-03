@@ -37,7 +37,6 @@ export interface AgentExecutorParams<T extends boolean> {
   abortSignal?: AbortSignal;
   alertsIndexPattern?: string;
   actionsClient: PublicMethodsOf<ActionsClient>;
-  bedrockChatEnabled: boolean;
   assistantTools?: AssistantTool[];
   connectorId: string;
   conversationId?: string;
@@ -45,6 +44,7 @@ export interface AgentExecutorParams<T extends boolean> {
   esClient: ElasticsearchClient;
   langChainMessages: BaseMessage[];
   llmType?: string;
+  isOssModel?: boolean;
   logger: Logger;
   inference: InferenceServerStart;
   onNewReplacements?: (newReplacements: Replacements) => void;

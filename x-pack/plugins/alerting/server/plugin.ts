@@ -676,7 +676,10 @@ export class AlertingPlugin {
         getRulesClient: () => {
           return rulesClientFactory!.create(request, savedObjects);
         },
-        getRulesSettingsClient: () => {
+        getRulesSettingsClient: (withoutAuth?: boolean) => {
+          if (withoutAuth) {
+            return rulesSettingsClientFactory.create(request);
+          }
           return rulesSettingsClientFactory.createWithAuthorization(request);
         },
         getMaintenanceWindowClient: () => {

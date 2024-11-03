@@ -112,11 +112,11 @@ import {
 } from './create/controls/dashboard_control_group_integration';
 import { initializeDashboard } from './create/create_dashboard';
 import {
-  DashboardCreationOptions,
   dashboardTypeDisplayLowercase,
   dashboardTypeDisplayName,
 } from './dashboard_container_factory';
 import { InitialComponentState, getDashboardApi } from '../../dashboard_api/get_dashboard_api';
+import type { DashboardCreationOptions } from '../..';
 
 export interface InheritedChildInput {
   filters: Filter[];
@@ -314,6 +314,7 @@ export class DashboardContainer
             isEmbeddedExternally: false,
             lastSavedInput: initialInput,
             lastSavedId: undefined,
+            fullScreenMode: false,
             managed: false,
           },
       (id: string) => this.untilEmbeddableLoaded(id)

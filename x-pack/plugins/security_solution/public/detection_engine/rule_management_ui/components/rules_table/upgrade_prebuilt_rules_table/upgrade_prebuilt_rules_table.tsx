@@ -16,6 +16,7 @@ import {
   EuiSkeletonTitle,
 } from '@elastic/eui';
 import React, { useMemo, useState } from 'react';
+import type { RuleUpgradeState } from '../../../../rule_management/model/prebuilt_rule_upgrade';
 import * as i18n from '../../../../../detections/pages/detection_engine/rules/translations';
 import { RULES_TABLE_INITIAL_PAGE_SIZE, RULES_TABLE_PAGE_SIZE_OPTIONS } from '../constants';
 import { RulesChangelogLink } from '../rules_changelog_link';
@@ -23,7 +24,6 @@ import { UpgradePrebuiltRulesTableButtons } from './upgrade_prebuilt_rules_table
 import { useUpgradePrebuiltRulesTableContext } from './upgrade_prebuilt_rules_table_context';
 import { UpgradePrebuiltRulesTableFilters } from './upgrade_prebuilt_rules_table_filters';
 import { useUpgradePrebuiltRulesTableColumns } from './use_upgrade_prebuilt_rules_table_columns';
-import type { RuleUpgradeState } from './use_prebuilt_rules_upgrade_state';
 
 const NO_ITEMS_MESSAGE = (
   <EuiEmptyPrompt

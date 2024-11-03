@@ -29,6 +29,10 @@ export type InitEntityEngineRequestParamsInput = z.input<typeof InitEntityEngine
 
 export type InitEntityEngineRequestBody = z.infer<typeof InitEntityEngineRequestBody>;
 export const InitEntityEngineRequestBody = z.object({
+  /**
+   * The number of historical values to keep for each field.
+   */
+  fieldHistoryLength: z.number().int().optional().default(10),
   indexPattern: IndexPattern.optional(),
   filter: z.string().optional(),
 });

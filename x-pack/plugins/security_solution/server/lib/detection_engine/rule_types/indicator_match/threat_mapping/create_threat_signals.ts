@@ -74,6 +74,7 @@ export const createThreatSignals = async ({
   unprocessedExceptions,
   licensing,
   experimentalFeatures,
+  scheduleNotificationResponseActionsService,
 }: CreateThreatSignalsOptions): Promise<SearchAfterAndBulkCreateReturnType> => {
   const threatMatchedFields = getMatchedFields(threatMapping);
   const threatFieldsLength = threatMatchedFields.threat.length;
@@ -460,7 +461,11 @@ export const createThreatSignals = async ({
       `Error trying to close point in time: "${threatPitId}", it will expire within "${THREAT_PIT_KEEP_ALIVE}". Error is: "${error}"`
     );
   }
-
+  scheduleNotificationResponseActionsService({
+    signals: results.createdSignals,
+    signalsCount: results.createdSignalsCount,
+    responseActions: completeRule.ruleParams.responseActions,
+  });
   ruleExecutionLogger.debug('Indicator matching rule has completed');
   return results;
 };

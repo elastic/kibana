@@ -104,10 +104,13 @@ export const ConnectorSetup = React.memo<ConnectorSetupProps>(
                           size="xl"
                           color="text"
                           type={actionTypeRegistry.get(actionType.id).iconClass}
+                          data-test-subj="connectorActionId"
                         />
                       </EuiFlexItem>
                       <EuiFlexItem>
-                        <EuiText size="s">{actionType.name}</EuiText>
+                        <EuiText size="s" data-test-subj="connectorActionName">
+                          {actionType.name}
+                        </EuiText>
                       </EuiFlexItem>
                     </EuiFlexGroup>
                   </EuiPanel>
