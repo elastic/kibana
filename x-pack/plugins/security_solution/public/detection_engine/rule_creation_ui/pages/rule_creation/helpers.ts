@@ -433,8 +433,9 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
       }),
   };
 
+  // Threshold rule won't contain alert suppression fields
   const alertSuppressionFields =
-    ruleFields[ALERT_SUPPRESSION_FIELDS].length > 0
+    ruleFields[ALERT_SUPPRESSION_FIELDS]?.length > 0
       ? {
           alert_suppression: {
             group_by: ruleFields[ALERT_SUPPRESSION_FIELDS],
