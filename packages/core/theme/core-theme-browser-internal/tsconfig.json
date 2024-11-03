@@ -20,6 +20,7 @@
     "@kbn/react-kibana-context-theme",
     "@kbn/core-injected-metadata-common-internal",
     "@kbn/ui-theme",
+    "@kbn/core-ui-settings-common",
   ],
   "exclude": [
     "target/**/*",

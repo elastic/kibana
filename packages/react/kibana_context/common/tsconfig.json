@@ -15,5 +15,6 @@
   ],
   "kbn_references": [
     "@kbn/core-ui-settings-common",
+    "@kbn/ui-shared-deps-npm",
   ]
 }
