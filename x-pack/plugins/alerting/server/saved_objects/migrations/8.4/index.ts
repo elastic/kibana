@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { SavedObjectUnsanitizedDoc } from '@kbn/core-saved-objects-server';
-import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
+import type { SavedObjectUnsanitizedDoc } from '@kbn/core-saved-objects-server';
+import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import { omit } from 'lodash';
-import { RawRule } from '../../../types';
+import type { RawRule } from '../../../types';
 import { createEsoMigration, pipeMigrations } from '../utils';
 
 function removeIsSnoozedUntil(

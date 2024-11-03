@@ -6,7 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import { MaintenanceWindowClientContext } from '../../../../../common';
+import type { MaintenanceWindowClientContext } from '../../../../../common';
 import { transformMaintenanceWindowAttributesToMaintenanceWindow } from '../../transforms';
 import { findMaintenanceWindowSo } from '../../../../data/maintenance_window';
 import type { FindMaintenanceWindowsResult, FindMaintenanceWindowsParams } from './types';

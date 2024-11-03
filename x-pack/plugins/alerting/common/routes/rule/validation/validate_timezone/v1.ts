@@ -11,5 +11,5 @@ export function validateTimezone(timezone: string) {
   if (moment.tz.names().includes(timezone)) {
     return;
   }
-  return 'string is not a valid timezone: ' + timezone;
+  return `string is not a valid timezone: ${timezone}`;
 }

@@ -12,7 +12,6 @@ import { GenerationErrorCode } from '../../../common/constants';
 export class UnsupportedLogFormatError extends Error implements ErrorThatHandlesItsOwnResponse {
   private readonly errorCode: string = GenerationErrorCode.UNSUPPORTED_LOG_SAMPLES_FORMAT;
 
-  // eslint-disable-next-line @typescript-eslint/no-useless-constructor
   constructor(message: string) {
     super(message);
   }

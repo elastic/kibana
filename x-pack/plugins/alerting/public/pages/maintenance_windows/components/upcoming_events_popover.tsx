@@ -21,7 +21,8 @@ import {
   formatDate,
 } from '@elastic/eui';
 import * as i18n from '../translations';
-import { MAINTENANCE_WINDOW_DATE_FORMAT, MaintenanceWindow } from '../../../../common';
+import type { MaintenanceWindow } from '../../../../common';
+import { MAINTENANCE_WINDOW_DATE_FORMAT } from '../../../../common';
 import { recurringSummary } from '../helpers/recurring_summary';
 import { getPresets } from '../helpers/get_presets';
 import { convertFromMaintenanceWindowToForm } from '../helpers/convert_from_maintenance_window_to_form';

@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { KueryNode, fromKueryExpression, toKqlExpression } from '@kbn/es-query';
-import { KibanaRequest } from '@kbn/core/server';
+import type { KueryNode } from '@kbn/es-query';
+import { fromKueryExpression, toKqlExpression } from '@kbn/es-query';
+import type { KibanaRequest } from '@kbn/core/server';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
-import {
-  FeaturesPluginStart as FeaturesStartContract,
-  KibanaFeature,
-} from '@kbn/features-plugin/server';
+import type { FeaturesPluginStart as FeaturesStartContract } from '@kbn/features-plugin/server';
+import { KibanaFeature } from '@kbn/features-plugin/server';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 import {
   AlertingAuthorization,
@@ -22,7 +21,7 @@ import {
 } from './alerting_authorization';
 import { v4 as uuidv4 } from 'uuid';
 import { RecoveredActionGroup } from '../../common';
-import { NormalizedRuleType, RegistryRuleType } from '../rule_type_registry';
+import type { NormalizedRuleType, RegistryRuleType } from '../rule_type_registry';
 import { AlertingAuthorizationFilterType } from './alerting_authorization_kuery';
 import { schema } from '@kbn/config-schema';
 

@@ -5,17 +5,15 @@
  * 2.0.
  */
 
-import { IRouter } from '@kbn/core/server';
-import { ILicenseState } from '../../../../lib';
+import type { IRouter } from '@kbn/core/server';
+import type { ILicenseState } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
-import {
-  AlertingRequestHandlerContext,
-  INTERNAL_ALERTING_API_GET_ACTIVE_MAINTENANCE_WINDOWS_PATH,
-} from '../../../../types';
+import type { AlertingRequestHandlerContext } from '../../../../types';
+import { INTERNAL_ALERTING_API_GET_ACTIVE_MAINTENANCE_WINDOWS_PATH } from '../../../../types';
 import { MAINTENANCE_WINDOW_API_PRIVILEGES } from '../../../../../common';
 
-import { MaintenanceWindow } from '../../../../application/maintenance_window/types';
-import { GetActiveMaintenanceWindowsResponseV1 } from '../../../../../common/routes/maintenance_window/apis/get_active';
+import type { MaintenanceWindow } from '../../../../application/maintenance_window/types';
+import type { GetActiveMaintenanceWindowsResponseV1 } from '../../../../../common/routes/maintenance_window/apis/get_active';
 import { transformMaintenanceWindowToResponseV1 } from '../../transforms';
 
 export const getActiveMaintenanceWindowsRoute = (

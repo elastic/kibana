@@ -7,7 +7,8 @@
 
 import moment from 'moment';
 import Boom from '@hapi/boom';
-import { buildEsQuery, Filter } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
+import { buildEsQuery } from '@kbn/es-query';
 import type { MaintenanceWindowClientContext } from '../../../../../common';
 import { getScopedQueryErrorMessage } from '../../../../../common';
 import { getEsQueryConfig } from '../../../../lib/get_es_query_config';
@@ -26,7 +27,7 @@ import {
   getMaintenanceWindowSo,
   createMaintenanceWindowSo,
 } from '../../../../data/maintenance_window';
-import { UpdateMaintenanceWindowParams } from './types';
+import type { UpdateMaintenanceWindowParams } from './types';
 import { updateMaintenanceWindowParamsSchema } from './schemas';
 
 export async function updateMaintenanceWindow(

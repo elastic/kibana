@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import {
   ALERT_INSTANCE_ID,
   ALERT_RULE_UUID,
@@ -14,12 +14,12 @@ import {
   ALERT_MAINTENANCE_WINDOW_IDS,
 } from '@kbn/rule-data-utils';
 import { chunk, flatMap, get, isEmpty, keys } from 'lodash';
-import { SearchRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { SearchRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Alert } from '@kbn/alerts-as-data-utils';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
-import { DeepPartial } from '@kbn/utility-types';
-import { UntypedNormalizedRuleType } from '../rule_type_registry';
-import {
+import type { DeepPartial } from '@kbn/utility-types';
+import type { UntypedNormalizedRuleType } from '../rule_type_registry';
+import type {
   SummarizedAlerts,
   ScopedQueryAlerts,
   AlertInstanceContext,
@@ -29,13 +29,11 @@ import {
   DataStreamAdapter,
 } from '../types';
 import { LegacyAlertsClient } from './legacy_alerts_client';
-import {
-  getIndexTemplateAndPattern,
-  IIndexPatternString,
-} from '../alerts_service/resource_installer_utils';
-import { CreateAlertsClientParams } from '../alerts_service/alerts_service';
+import type { IIndexPatternString } from '../alerts_service/resource_installer_utils';
+import { getIndexTemplateAndPattern } from '../alerts_service/resource_installer_utils';
+import type { CreateAlertsClientParams } from '../alerts_service/alerts_service';
 import type { AlertRule, LogAlertsOpts, ProcessAlertsOpts, SearchResult } from './types';
-import {
+import type {
   IAlertsClient,
   InitializeExecutionOpts,
   TrackedAlerts,
@@ -425,7 +423,7 @@ export class AlertsClient<
     const activeAlertsToIndex: Array<Alert & AlertData> = [];
     for (const id of keys(alertsToReturn)) {
       // See if there's an existing active alert document
-      if (!!activeAlerts[id]) {
+      if (activeAlerts[id]) {
         if (
           Object.hasOwn(this.fetchedAlerts.data, id) &&
           get(this.fetchedAlerts.data[id], ALERT_STATUS) === 'active'
