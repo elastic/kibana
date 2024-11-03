@@ -73,7 +73,7 @@ export const ComponentTable: FunctionComponent<Props> = ({
   onCloneClick,
   history,
 }) => {
-  const { trackMetric, application } = useComponentTemplatesContext();
+  const { trackMetric, capabilities } = useComponentTemplatesContext();
 
   // By default, we want to show all the component templates that are not deprecated.
   const [filterOptions, setFilterOptions] = useState<EuiSelectableOption[]>([
@@ -323,13 +323,13 @@ export const ComponentTable: FunctionComponent<Props> = ({
     </EuiButton>,
   ];
 
-  if (application.capabilities.index_management.manageIndexTemplate) {
+  if (capabilities.index_management.manageIndexTemplate) {
     columns.push(actions);
     toolsRight.push(createBtn);
   }
 
-  const selectionConfig: EuiTableSelectionType<ComponentTemplateListItem> | undefined = application
-    .capabilities.index_management.manageIndexTemplate
+  const selectionConfig: EuiTableSelectionType<ComponentTemplateListItem> | undefined = capabilities
+    .index_management.manageIndexTemplate
     ? {
         onSelectionChange: setSelection,
         selectable: ({ usedBy }) => usedBy.length === 0,

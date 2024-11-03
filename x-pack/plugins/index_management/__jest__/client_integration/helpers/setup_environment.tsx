@@ -18,9 +18,9 @@ import {
   themeServiceMock,
   scopedHistoryMock,
   executionContextServiceMock,
-  applicationServiceMock,
   fatalErrorsServiceMock,
   httpServiceMock,
+  capabilitiesServiceMock,
 } from '@kbn/core/public/mocks';
 
 import { GlobalFlyout } from '@kbn/es-ui-shared-plugin/public';
@@ -95,11 +95,9 @@ const appDependencies = {
 
 export const kibanaVersion = new SemVer(MAJOR_VERSION);
 
-const application = applicationServiceMock.createStartContract();
+const capabilities = capabilitiesServiceMock.createStartContract();
 
-// todo find better way
-// @ts-expect-error
-application.capabilities.index_management = {
+capabilities.index_management = {
   manageIndexTemplate: true,
 };
 

@@ -35,7 +35,7 @@ export const ManageButton: React.FunctionComponent<Props> = ({
   componentTemplateDetails,
 }) => {
   const [isPopoverOpen, setIsPopOverOpen] = useState<boolean>(false);
-  const { application } = useComponentTemplatesContext();
+  const { capabilities } = useComponentTemplatesContext();
 
   const items: EuiContextMenuPanelItemDescriptor[] = actions.map(
     ({ name, icon, getIsDisabled, closePopoverOnClick, handleActionClick }) => {
@@ -63,7 +63,7 @@ export const ManageButton: React.FunctionComponent<Props> = ({
     }
   );
 
-  const button = application.capabilities.index_management.manageIndexTemplate ? (
+  const button = capabilities.index_management.manageIndexTemplate ? (
     <EuiButton
       fill
       data-test-subj="manageComponentTemplateButton"
