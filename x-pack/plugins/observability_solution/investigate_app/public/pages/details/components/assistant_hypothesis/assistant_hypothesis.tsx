@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import type { RootCauseAnalysisEvent } from '@kbn/observability-ai-server/root_cause_analysis';
 import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common';
 import React, { useState, useRef } from 'react';
-import { findLastIndex, omit } from 'lodash';
+import { omit } from 'lodash';
 import {
   ALERT_FLAPPING_HISTORY,
   ALERT_RULE_EXECUTION_TIMESTAMP,
@@ -89,7 +89,7 @@ export function AssistantHypothesis({ investigationId }: { investigationId: stri
       })
       .subscribe({
         next: (event) => {
-          console.log(event);
+          // console.log(event);
           setEvents((prev) => {
             return prev.concat(event.event);
           });
@@ -119,7 +119,7 @@ export function AssistantHypothesis({ investigationId }: { investigationId: stri
         },
         complete: () => {
           setEvents((prev) => {
-            console.log('done', prev);
+            // console.log('done', prev);
             return prev;
           });
           setLoading(false);

@@ -9,7 +9,7 @@ import type {
   InvestigateEntityToolMessage,
   RootCauseAnalysisEvent,
 } from '@kbn/observability-ai-server/root_cause_analysis';
-import { RCA_INVESTIGATE_ENTITY_TOOL_NAME } from '@Kbn/observability-ai-common/root_cause_analysis';
+import { RCA_INVESTIGATE_ENTITY_TOOL_NAME } from '@kbn/observability-ai-common/root_cause_analysis';
 import { MessageRole } from '@kbn/inference-common';
 import { Required } from 'utility-types';
 // @ts-ignore

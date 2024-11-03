@@ -8,7 +8,7 @@ import {
   RCA_END_PROCESS_TOOL_NAME,
   RCA_INVESTIGATE_ENTITY_TOOL_NAME,
   RCA_OBSERVE_TOOL_NAME,
-} from '@Kbn/observability-ai-common/root_cause_analysis';
+} from '@kbn/observability-ai-common/root_cause_analysis';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AssistantMessage, MessageRole, ToolMessage } from '@kbn/inference-common';

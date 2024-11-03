@@ -11,7 +11,7 @@
     "typings/**/*",
     "public/**/*.json",
     "server/**/*",
-    ".storybook/**/*.{ts,tsx}"
+    ".storybook/**/*.tsx"
   ],
   "kbn_references": [
     "@kbn/es-types",

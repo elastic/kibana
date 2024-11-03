@@ -11,7 +11,7 @@ import {
   EntityDataStreamType,
   SOURCE_DATA_STREAM_TYPE,
 } from '@kbn/observability-shared-plugin/common';
-import type { ObservabilityElasticsearchClient } from '@kbn/observability-utils/es/client/create_observability_es_client';
+import type { ObservabilityElasticsearchClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
 import { type InfraMetricsClient } from '../../lib/helpers/get_infra_metrics_client';
 import { getHasMetricsData } from './get_has_metrics_data';
 import { getLatestEntity } from './get_latest_entity';
