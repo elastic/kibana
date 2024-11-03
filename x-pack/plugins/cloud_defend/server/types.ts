@@ -5,6 +5,7 @@
  * 2.0.
  */
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import type { AuthenticatedUser } from '@kbn/core-security-common';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import type {
   IRouter,
@@ -48,7 +49,7 @@ export interface CloudDefendPluginStartDeps {
 }
 
 export interface CloudDefendApiRequestHandlerContext {
-  user: ReturnType<SecurityPluginStart['authc']['getCurrentUser']>;
+  user: AuthenticatedUser | null;
   logger: Logger;
   esClient: IScopedClusterClient;
   soClient: SavedObjectsClientContract;

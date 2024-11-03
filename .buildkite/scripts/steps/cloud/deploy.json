@@ -29,7 +29,6 @@
           "dedicated_masters_threshold": 6
         },
         "plan": {
-          "autoscaling_enabled": false,
           "cluster_topology": [
             {
               "zone_count": 1,
@@ -133,17 +132,22 @@
               }
             },
             {
-              "zone_count": 1,
+              "autoscaling_max": {
+                "resource": "memory",
+                "value": 8192
+              },
+              "autoscaling_min": {
+                "resource": "memory",
+                "value": 0
+              },
+              "autoscaling_tier_override": true,
+              "id": "ml",
               "instance_configuration_id": "gcp.ml.1",
               "node_roles": [
                 "ml",
                 "remote_cluster_client"
               ],
-              "id": "ml",
-              "size": {
-                "value": 1024,
-                "resource": "memory"
-              }
+              "zone_count": 1
             }
           ],
           "elasticsearch": {
@@ -155,33 +159,6 @@
           }
         },
         "ref_id": "main-elasticsearch"
-      }
-    ],
-    "enterprise_search": [
-      {
-        "elasticsearch_cluster_ref_id": "main-elasticsearch",
-        "region": "gcp-us-west2",
-        "plan": {
-          "cluster_topology": [
-            {
-              "node_type": {
-                "connector": true,
-                "appserver": true,
-                "worker": true
-              },
-              "instance_configuration_id": "gcp.enterprisesearch.1",
-              "zone_count": 1,
-              "size": {
-                "resource": "memory",
-                "value": 2048
-              }
-            }
-          ],
-          "enterprise_search": {
-            "version": null
-          }
-        },
-        "ref_id": "main-enterprise_search"
       }
     ],
     "kibana": [
@@ -208,7 +185,9 @@
       }
     ]
   },
-  "settings": {},
+  "settings": {
+    "autoscaling_enabled": false
+  },
   "name": null,
   "metadata": {
     "system_owned": false

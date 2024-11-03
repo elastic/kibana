@@ -10,7 +10,7 @@ import {
   SnapshotGroupBy,
   SnapshotMetricInput,
 } from '../../../../../../common/http_api/snapshot_api';
-import { InfraGroupByOptions } from '../../../../../lib/lib';
+import { InfraGroupByOptions } from '../../../../../common/inventory/types';
 import { WaffleOptionsState, WaffleSortOption } from '../../hooks/use_waffle_options';
 
 export interface ToolbarProps extends Omit<WaffleOptionsState, 'boundsOverride' | 'autoBounds'> {

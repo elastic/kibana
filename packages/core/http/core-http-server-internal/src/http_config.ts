@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { EOL, hostname } from 'node:os';
@@ -23,6 +24,7 @@ import {
   securityResponseHeadersSchema,
 } from './security_response_headers_config';
 import { CdnConfig } from './cdn_config';
+import { PermissionsPolicyConfigType } from './permissions_policy';
 
 const SECOND = 1000;
 
@@ -203,10 +205,8 @@ const configSchema = schema.object(
         },
       }
     ),
-    // allow access to internal routes by default to prevent breaking changes in current offerings
-    restrictInternalApis: offeringBasedSchema({
-      serverless: schema.boolean({ defaultValue: false }),
-    }),
+    // disable access to internal routes by default
+    restrictInternalApis: schema.boolean({ defaultValue: true }),
 
     versioned: schema.object({
       /**
@@ -343,14 +343,16 @@ export class HttpConfig implements IHttpConfig {
   constructor(
     rawHttpConfig: HttpConfigType,
     rawCspConfig: CspConfigType,
-    rawExternalUrlConfig: ExternalUrlConfig
+    rawExternalUrlConfig: ExternalUrlConfig,
+    rawPermissionsPolicyConfig: PermissionsPolicyConfigType
   ) {
     this.autoListen = rawHttpConfig.autoListen;
     this.host = rawHttpConfig.host;
     this.port = rawHttpConfig.port;
     this.cors = rawHttpConfig.cors;
     const { securityResponseHeaders, disableEmbedding } = parseRawSecurityResponseHeadersConfig(
-      rawHttpConfig.securityResponseHeaders
+      rawHttpConfig.securityResponseHeaders,
+      rawPermissionsPolicyConfig
     );
     this.securityResponseHeaders = securityResponseHeaders;
     this.customResponseHeaders = Object.entries(rawHttpConfig.customResponseHeaders ?? {}).reduce(
@@ -380,8 +382,8 @@ export class HttpConfig implements IHttpConfig {
     this.requestId = rawHttpConfig.requestId;
     this.shutdownTimeout = rawHttpConfig.shutdownTimeout;
 
-    // default to `false` to prevent breaking changes in current offerings
-    this.restrictInternalApis = rawHttpConfig.restrictInternalApis ?? false;
+    // defaults to `true` if not set through config.
+    this.restrictInternalApis = rawHttpConfig.restrictInternalApis;
     this.eluMonitor = rawHttpConfig.eluMonitor;
     this.versioned = rawHttpConfig.versioned;
     this.oas = rawHttpConfig.oas;

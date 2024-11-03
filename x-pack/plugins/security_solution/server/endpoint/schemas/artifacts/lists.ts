@@ -84,11 +84,36 @@ export const translatedEntryNested = t.exact(
   })
 );
 
+const translatedEntriesOfDescendantOf = t.type({
+  type: t.string,
+  entries: t.array(
+    t.union([
+      translatedEntryNested,
+      translatedEntryMatch,
+      translatedEntryMatchWildcard,
+      translatedEntryMatchAny,
+    ])
+  ),
+});
+export type TranslatedEntriesOfDescendantOf = t.TypeOf<typeof translatedEntriesOfDescendantOf>;
+
+export const translatedEntryDescendantOf = t.exact(
+  t.type({
+    operator,
+    type: t.keyof({ descendent_of: null }),
+    value: t.type({
+      entries: t.array(translatedEntriesOfDescendantOf),
+    }),
+  })
+);
+export type TranslatedEntryDescendantOf = t.TypeOf<typeof translatedEntryDescendantOf>;
+
 export const translatedEntry = t.union([
   translatedEntryNested,
   translatedEntryMatch,
   translatedEntryMatchWildcard,
   translatedEntryMatchAny,
+  translatedEntryDescendantOf,
 ]);
 export type TranslatedEntry = t.TypeOf<typeof translatedEntry>;
 

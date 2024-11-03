@@ -10,7 +10,6 @@ import path from 'path';
 import fs from 'fs';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry, isDockerRegistryEnabledOrSkipped } from '../../helpers';
-import { setupFleetAndAgents } from '../agents/services';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -20,6 +19,7 @@ export default function (providerContext: FtrProviderContext) {
   const pkgVersion = '0.1.0';
   const experimentalPkgName = 'experimental';
   const experimental2PkgName = 'experimental2';
+  const fleetAndAgents = getService('fleetAndAgents');
 
   const uploadPkgName = 'apache';
 
@@ -57,11 +57,12 @@ export default function (providerContext: FtrProviderContext) {
     return Promise.all(uninstallingPackagesPromise);
   };
 
-  describe('installs and uninstalls multiple packages side effects', async () => {
+  describe('installs and uninstalls multiple packages side effects', () => {
     skipIfNoDockerRegistry(providerContext);
-    setupFleetAndAgents(providerContext);
 
     before(async () => {
+      await fleetAndAgents.setup();
+
       if (!isDockerRegistryEnabledOrSkipped(providerContext)) return;
       await installPackages([
         { name: pkgName, version: pkgVersion },

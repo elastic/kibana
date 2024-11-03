@@ -18,8 +18,8 @@ const actionTypeRegistry = actionTypeRegistryMock.create();
 
 jest.mock('../../../common/lib/kibana');
 
-jest.mock('../../lib/action_variables', () => {
-  const original = jest.requireActual('../../lib/action_variables');
+jest.mock('@kbn/alerts-ui-shared/src/action_variables/transforms', () => {
+  const original = jest.requireActual('@kbn/alerts-ui-shared/src/action_variables/transforms');
   return {
     ...original,
     transformActionVariables: jest.fn(),
@@ -175,7 +175,7 @@ describe('action_type_form', () => {
       </I18nProvider>
     );
 
-    userEvent.click(await screen.findByTestId('system-action-delete-button'));
+    await userEvent.click(await screen.findByTestId('system-action-delete-button'));
 
     await waitFor(() => {
       expect(onDelete).toHaveBeenCalled();
@@ -205,7 +205,7 @@ describe('action_type_form', () => {
       </I18nProvider>
     );
 
-    userEvent.click(await screen.findByTestId('test-button'));
+    await userEvent.click(await screen.findByTestId('test-button'));
 
     expect(setActionParamsProperty).toHaveBeenCalledWith('my-key', 'my-value', 1);
   });

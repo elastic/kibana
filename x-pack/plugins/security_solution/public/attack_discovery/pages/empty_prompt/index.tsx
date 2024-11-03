@@ -7,7 +7,6 @@
 
 import { AssistantAvatar } from '@kbn/elastic-assistant';
 import {
-  EuiButton,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
@@ -15,31 +14,33 @@ import {
   EuiLink,
   EuiSpacer,
   EuiText,
-  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useMemo } from 'react';
 
-import { useAssistantAvailability } from '../../../assistant/use_assistant_availability';
 import { AnimatedCounter } from './animated_counter';
+import { Generate } from '../generate';
 import * as i18n from './translations';
 
 interface Props {
+  aiConnectorsCount: number | null; // null when connectors are not configured
   alertsCount: number;
+  attackDiscoveriesCount: number;
   isDisabled?: boolean;
   isLoading: boolean;
   onGenerate: () => void;
 }
 
 const EmptyPromptComponent: React.FC<Props> = ({
+  aiConnectorsCount,
   alertsCount,
+  attackDiscoveriesCount,
   isLoading,
   isDisabled = false,
   onGenerate,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const { hasAssistantPrivilege } = useAssistantAvailability();
   const title = useMemo(
     () => (
       <EuiFlexGroup
@@ -112,24 +113,12 @@ const EmptyPromptComponent: React.FC<Props> = ({
   );
 
   const actions = useMemo(() => {
-    const disabled = !hasAssistantPrivilege || isLoading || isDisabled;
+    return <Generate isLoading={isLoading} isDisabled={isDisabled} onGenerate={onGenerate} />;
+  }, [isDisabled, isLoading, onGenerate]);
 
-    return (
-      <EuiToolTip
-        content={disabled ? i18n.SELECT_A_CONNECTOR : null}
-        data-test-subj="generateTooltip"
-      >
-        <EuiButton
-          color="primary"
-          data-test-subj="generate"
-          disabled={disabled}
-          onClick={onGenerate}
-        >
-          {i18n.GENERATE}
-        </EuiButton>
-      </EuiToolTip>
-    );
-  }, [hasAssistantPrivilege, isDisabled, isLoading, onGenerate]);
+  if (isLoading || aiConnectorsCount == null || attackDiscoveriesCount > 0) {
+    return null;
+  }
 
   return (
     <EuiFlexGroup

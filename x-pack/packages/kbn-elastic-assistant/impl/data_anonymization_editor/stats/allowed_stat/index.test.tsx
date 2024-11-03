@@ -27,7 +27,7 @@ describe('AllowedStat', () => {
   it('displays the correct tooltip content', async () => {
     render(<AllowedStat {...defaultProps} />);
 
-    userEvent.hover(screen.getByTestId('allowedStat'));
+    await userEvent.hover(screen.getByTestId('allowedStat'));
 
     await waitFor(() => {
       expect(screen.getByText(i18n.ALLOWED_TOOLTIP(defaultProps))).toBeInTheDocument();

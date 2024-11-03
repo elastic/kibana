@@ -10,7 +10,6 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { AGENTS_INDEX } from '@kbn/fleet-plugin/common';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { setupFleetAndAgents } from './services';
 import { skipIfNoDockerRegistry } from '../../helpers';
 
 export default function (providerContext: FtrProviderContext) {
@@ -18,6 +17,7 @@ export default function (providerContext: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
   const esClient = getService('es');
+  const fleetAndAgents = getService('fleetAndAgents');
 
   describe('fleet_unenroll_agent', () => {
     skipIfNoDockerRegistry(providerContext);
@@ -25,8 +25,8 @@ export default function (providerContext: FtrProviderContext) {
     let outputAPIKeyId: string;
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+      await fleetAndAgents.setup();
     });
-    setupFleetAndAgents(providerContext);
     beforeEach(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/agents');

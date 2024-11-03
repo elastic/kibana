@@ -16,12 +16,12 @@ import { ReadConversationRequestParams } from '@kbn/elastic-assistant-common/imp
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { buildResponse } from '../utils';
 import { ElasticAssistantPluginRouter } from '../../types';
-import { UPGRADE_LICENSE_MESSAGE, hasAIAssistantLicense } from '../helpers';
+import { performChecks } from '../helpers';
 
 export const readConversationRoute = (router: ElasticAssistantPluginRouter) => {
   router.versioned
     .get({
-      access: 'internal',
+      access: 'public',
       path: ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID,
       options: {
         tags: ['access:elasticAssistant'],
@@ -29,7 +29,7 @@ export const readConversationRoute = (router: ElasticAssistantPluginRouter) => {
     })
     .addVersion(
       {
-        version: API_VERSIONS.internal.v1,
+        version: API_VERSIONS.public.v1,
         validate: {
           request: {
             params: buildRouteValidationWithZod(ReadConversationRequestParams),
@@ -43,21 +43,15 @@ export const readConversationRoute = (router: ElasticAssistantPluginRouter) => {
 
         try {
           const ctx = await context.resolve(['core', 'elasticAssistant', 'licensing']);
-          const license = ctx.licensing.license;
-          if (!hasAIAssistantLicense(license)) {
-            return response.forbidden({
-              body: {
-                message: UPGRADE_LICENSE_MESSAGE,
-              },
-            });
+          const checkResponse = performChecks({
+            context: ctx,
+            request,
+            response,
+          });
+          if (!checkResponse.isSuccess) {
+            return checkResponse.response;
           }
-          const authenticatedUser = ctx.elasticAssistant.getCurrentUser();
-          if (authenticatedUser == null) {
-            return assistantResponse.error({
-              body: `Authenticated user not found`,
-              statusCode: 401,
-            });
-          }
+          const authenticatedUser = checkResponse.currentUser;
 
           const dataClient = await ctx.elasticAssistant.getAIAssistantConversationsDataClient();
           const conversation = await dataClient?.getConversation({ id, authenticatedUser });

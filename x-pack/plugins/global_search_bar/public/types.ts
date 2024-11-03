@@ -66,3 +66,7 @@ export interface TrackedError {
   message: string | Error;
   searchValue?: string;
 }
+
+export interface GlobalSearchBarConfigType {
+  input_max_limit: number;
+}

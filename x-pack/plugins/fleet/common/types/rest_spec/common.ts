@@ -13,6 +13,7 @@ export interface ListWithKuery extends HttpFetchQuery {
   sortField?: string;
   sortOrder?: 'desc' | 'asc';
   kuery?: string;
+  fields?: string[];
 }
 
 export interface ListResult<T> {

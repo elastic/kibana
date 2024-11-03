@@ -7,10 +7,31 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const ANONYMIZED_VALUES = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.anonymizedValues',
+export const AI_ASSISTANT_SETTINGS = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.aiAssistantSettings',
   {
-    defaultMessage: 'Anonymized values',
+    defaultMessage: 'AI Assistant settings',
+  }
+);
+
+export const ANONYMIZATION = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.anonymization',
+  {
+    defaultMessage: 'Anonymization',
+  }
+);
+
+export const KNOWLEDGE_BASE = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.knowledgeBase',
+  {
+    defaultMessage: 'Knowledge Base',
+  }
+);
+
+export const ALERTS_TO_ANALYZE = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.alertsToAnalyze',
+  {
+    defaultMessage: 'Alerts to analyze',
   }
 );
 
@@ -18,13 +39,6 @@ export const RESET_CONVERSATION = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.resetConversation',
   {
     defaultMessage: 'Reset conversation',
-  }
-);
-
-export const CONNECTOR_TITLE = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.connectorTitle',
-  {
-    defaultMessage: 'Connector',
   }
 );
 
@@ -39,13 +53,6 @@ export const SHOW_REAL_VALUES = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.showAnonymizedToggleRealValuesLabel',
   {
     defaultMessage: 'Show real values',
-  }
-);
-
-export const SHOW_ANONYMIZED_TOOLTIP = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.showAnonymizedTooltip',
-  {
-    defaultMessage: 'Show the anonymized values sent to and from the assistant',
   }
 );
 

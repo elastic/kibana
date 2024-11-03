@@ -10,8 +10,8 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { schema } from '@kbn/config-schema';
+import { throwErrors } from '@kbn/io-ts-utils';
 import { InfraBackendLibs } from '../../lib/infra_types';
-import { throwErrors } from '../../../common/runtime_types';
 import { createSearchClient } from '../../lib/create_search_client';
 import { getProcessList } from '../../lib/host_details/process_list';
 import { getProcessListChart } from '../../lib/host_details/process_list_chart';
@@ -41,7 +41,14 @@ export const initProcessListRoute = (libs: InfraBackendLibs) => {
       );
 
       const client = createSearchClient(requestContext, framework);
-      const processListResponse = await getProcessList(client, options);
+      const soClient = (await requestContext.core).savedObjects.client;
+
+      const { configuration } = await libs.sources.getSourceConfiguration(
+        soClient,
+        options.sourceId
+      );
+
+      const processListResponse = await getProcessList(client, configuration, options);
 
       return response.ok({
         body: ProcessListAPIResponseRT.encode(processListResponse),

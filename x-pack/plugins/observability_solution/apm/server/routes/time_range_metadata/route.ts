@@ -8,10 +8,10 @@ import { toBooleanRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
 import { TimeRangeMetadata } from '../../../common/time_range_metadata';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
-import { getDocumentSources } from '../../lib/helpers/get_document_sources';
 import { getIsUsingServiceDestinationMetrics } from '../../lib/helpers/spans/get_is_using_service_destination_metrics';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { kueryRt, rangeRt } from '../default_api_types';
+import { getApmDataAccessServices } from '../../lib/helpers/get_apm_data_access_services';
 
 export const timeRangeMetadataRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/time_range_metadata',
@@ -31,6 +31,7 @@ export const timeRangeMetadataRoute = createApmServerRoute({
   },
   handler: async (resources): Promise<TimeRangeMetadata> => {
     const apmEventClient = await getApmEventClient(resources);
+    const apmDataAccessServices = await getApmDataAccessServices({ apmEventClient, ...resources });
 
     const {
       query: {
@@ -51,8 +52,7 @@ export const timeRangeMetadataRoute = createApmServerRoute({
         end,
         kuery,
       }),
-      getDocumentSources({
-        apmEventClient,
+      apmDataAccessServices.getDocumentSources({
         start,
         end,
         kuery,

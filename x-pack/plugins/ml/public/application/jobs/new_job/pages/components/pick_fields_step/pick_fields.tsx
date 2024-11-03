@@ -8,7 +8,8 @@
 import type { FC } from 'react';
 import React, { Fragment, useContext, useEffect, useState } from 'react';
 
-import { useFieldStatsFlyoutContext } from '../../../../../components/field_stats_flyout';
+import { useFieldStatsFlyoutContext } from '@kbn/ml-field-stats-flyout';
+
 import { JobCreatorContext } from '../job_creator_context';
 import { WizardNav } from '../wizard_nav';
 import type { StepProps } from '../step_types';

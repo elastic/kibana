@@ -11,7 +11,7 @@
         "label": "PanelLoader",
         "description": [],
         "signature": [
-          "(props: { showShadow?: boolean | undefined; showBorder?: boolean | undefined; dataTestSubj?: string | undefined; }) => JSX.Element"
+          "(props: { showShadow?: boolean | undefined; showBorder?: boolean | undefined; dataTestSubj?: string | undefined; }) => React.JSX.Element"
         ],
         "path": "packages/kbn-panel-loader/index.tsx",
         "deprecated": false,

@@ -1,29 +1,26 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
 
-import {
-  EuiCodeBlock,
-  EuiIcon,
-  EuiTableRow,
-  EuiTableRowCell,
-  EuiText,
-  EuiToken,
-} from '@elastic/eui';
+import { EuiTableRow, EuiTableRowCell, EuiText, EuiToken } from '@elastic/eui';
 
 import { euiThemeVars } from '@kbn/ui-theme';
 import { ResultFieldProps } from './result_types';
+import { PERMANENTLY_TRUNCATED_FIELDS } from './constants';
+import { ResultFieldValue } from './result_field_value';
 
 const iconMap: Record<string, string> = {
   boolean: 'tokenBoolean',
   date: 'tokenDate',
   date_range: 'tokenDate',
+  dense_vector: 'tokenVectorDense',
   double: 'tokenNumber',
   double_range: 'tokenDate',
   flattened: 'tokenObject',
@@ -48,8 +45,10 @@ const iconMap: Record<string, string> = {
   rank_features: 'tokenRankFeatures',
   scaled_float: 'tokenNumber',
   search_as_you_type: 'tokenSearchType',
+  semantic_text: 'tokenSemanticText',
   shape: 'tokenShape',
   short: 'tokenNumber',
+  sparse_vector: 'tokenVectorSparse',
   text: 'tokenString',
   token_count: 'tokenTokenCount',
   unsigned_long: 'tokenNumber',
@@ -60,9 +59,11 @@ export const ResultField: React.FC<ResultFieldProps> = ({
   iconType,
   fieldName,
   fieldValue,
-  fieldType,
+  fieldType = 'object',
   isExpanded,
 }) => {
+  const shouldTruncate = !isExpanded || PERMANENTLY_TRUNCATED_FIELDS.includes(fieldType);
+
   return (
     <EuiTableRow className="resultField">
       <EuiTableRowCell className="resultFieldRowCell" width={euiThemeVars.euiSizeL} valign="middle">
@@ -75,31 +76,16 @@ export const ResultField: React.FC<ResultFieldProps> = ({
       </EuiTableRowCell>
       <EuiTableRowCell
         className="resultFieldRowCell"
-        width="25%"
+        width="20%"
         truncateText={!isExpanded}
         valign="middle"
       >
-        <EuiText size="xs">{fieldName}</EuiText>
+        <EuiText size="s" color="default">
+          {fieldName}
+        </EuiText>
       </EuiTableRowCell>
-      <EuiTableRowCell
-        className="resultFieldRowCell"
-        width={euiThemeVars.euiSizeXXL}
-        valign="middle"
-      >
-        <EuiIcon type="sortRight" color="subdued" />
-      </EuiTableRowCell>
-      <EuiTableRowCell className="resultFieldRowCell" truncateText={!isExpanded} valign="middle">
-        {(fieldType === 'object' ||
-          fieldType === 'array' ||
-          fieldType === 'nested' ||
-          Array.isArray(fieldValue)) &&
-        isExpanded ? (
-          <EuiCodeBlock language="json" overflowHeight="250" transparentBackground>
-            {fieldValue}
-          </EuiCodeBlock>
-        ) : (
-          <EuiText size="xs">{fieldValue}</EuiText>
-        )}
+      <EuiTableRowCell className="resultFieldRowCell" truncateText={shouldTruncate} valign="middle">
+        <ResultFieldValue fieldValue={fieldValue} fieldType={fieldType} isExpanded={isExpanded} />
       </EuiTableRowCell>
     </EuiTableRow>
   );

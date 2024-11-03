@@ -87,7 +87,7 @@ export const CustomMetricForm = withTheme(({ theme, onCancel, onChange, metric }
   }, [metric, aggregation, field, onChange, label]);
 
   const handleLabelChange = useCallback(
-    (e) => {
+    (e: React.ChangeEvent<HTMLInputElement>) => {
       setLabel(e.target.value);
     },
     [setLabel]
@@ -101,7 +101,7 @@ export const CustomMetricForm = withTheme(({ theme, onCancel, onChange, metric }
   );
 
   const handleAggregationChange = useCallback(
-    (e) => {
+    (e: React.ChangeEvent<HTMLSelectElement>) => {
       const value = e.target.value;
       const aggValue: SnapshotCustomAggregation = SnapshotCustomAggregationRT.is(value)
         ? value
@@ -198,6 +198,7 @@ export const CustomMetricForm = withTheme(({ theme, onCancel, onChange, metric }
                   options={fieldOptions}
                   onChange={handleFieldChange}
                   isClearable={false}
+                  data-test-subj="infraCustomMetricFieldSelect"
                 />
               </EuiFlexItem>
             </EuiFlexGroup>

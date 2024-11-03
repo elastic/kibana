@@ -29,13 +29,13 @@ import type {
   TimelineStrategyResponseType,
 } from '@kbn/timelines-plugin/common/search_strategy';
 import { dataTableActions, Direction, TableId } from '@kbn/securitysolution-data-table';
-import { fetchNotesByDocumentIds } from '../../../notes/store/notes.slice';
 import type { RunTimeMappings } from '../../../sourcerer/store/model';
 import { TimelineEventsQueries } from '../../../../common/search_strategy';
 import type { KueryFilterQueryKind } from '../../../../common/types';
 import type { ESQuery } from '../../../../common/typed_json';
 import type { AlertWorkflowStatus } from '../../types';
 import { getSearchTransactionName, useStartTransaction } from '../../lib/apm/use_start_transaction';
+import { useFetchNotes } from '../../../notes/hooks/use_fetch_notes';
 export type InspectResponse = Inspect & { response: string[] };
 
 export const detectionsTimelineIds = [TableId.alertsOnAlertsPage, TableId.alertsOnRuleDetailsPage];
@@ -126,7 +126,7 @@ const useApmTracking = (tableId: string) => {
     // The blocking span needs to be ended manually when the batched request finishes.
     const span = transaction?.startSpan('batched search', 'http-request', { blocking: true });
     return {
-      endTracking: (result: 'success' | 'error' | 'aborted' | 'invalid') => {
+      endTracking: (result: 'success' | 'error' | 'aborted') => {
         transaction?.addLabels({ result });
         span?.end();
       },
@@ -230,7 +230,7 @@ export const useTimelineEventsHandler = ({
         abortCtrl.current = new AbortController();
         setLoading(true);
         if (data && data.search) {
-          startTracking();
+          const { endTracking } = startTracking();
           const abortSignal = abortCtrl.current.signal;
           searchSubscription$.current = data.search
             .search<TimelineRequest, TimelineResponse<typeof language>>(
@@ -249,6 +249,7 @@ export const useTimelineEventsHandler = ({
               next: (response) => {
                 if (!isRunningResponse(response)) {
                   setTimelineResponse((prevResponse) => {
+                    endTracking('success');
                     const newTimelineResponse = {
                       ...prevResponse,
                       consumers: response.consumers,
@@ -271,6 +272,7 @@ export const useTimelineEventsHandler = ({
                 }
               },
               error: (msg) => {
+                endTracking(abortSignal.aborted ? 'aborted' : 'error');
                 setLoading(false);
                 data.search.showError(msg);
                 searchSubscription$.current.unsubscribe();
@@ -458,14 +460,15 @@ export const useTimelineEvents = ({
     data,
   });
 
+  const { onLoad } = useFetchNotes();
+
   useEffect(() => {
     if (!timelineSearchHandler) return;
     timelineSearchHandler();
 
     // fetch notes for the events
-    const events = timelineResponse.events.map((event: TimelineItem) => event._id);
-    dispatch(fetchNotesByDocumentIds({ documentIds: events }));
-  }, [dispatch, timelineResponse.events, timelineSearchHandler]);
+    onLoad(timelineResponse.events);
+  }, [dispatch, timelineResponse.events, timelineSearchHandler, onLoad]);
 
   return [loading, timelineResponse];
 };

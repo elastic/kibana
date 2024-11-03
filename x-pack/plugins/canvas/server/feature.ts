@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { KibanaFeatureConfig } from '@kbn/features-plugin/common';
 import { ReportingStart } from '@kbn/reporting-plugin/server/types';
+import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 
 /*
  * Register Canvas as a Kibana feature,
@@ -22,6 +23,7 @@ export function getCanvasFeature(plugins: { reporting?: ReportingStart }): Kiban
     name: 'Canvas',
     order: 300,
     category: DEFAULT_APP_CATEGORIES.kibana,
+    scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
     app: ['canvas', 'kibana'],
     management: {
       ...(includeReporting ? { insightsAndAlerting: ['reporting'] } : {}),

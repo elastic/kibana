@@ -133,13 +133,16 @@ export function MetricDimensionEditor(
           display="columnCompressed"
           fullWidth
           label={i18n.translate('xpack.lens.paletteMetricGradient.label', {
-            defaultMessage: 'Color',
+            defaultMessage: 'Color mapping',
           })}
         >
           <PalettePanelContainer
             palette={displayStops.map(({ color }) => color)}
             siblingRef={props.panelRef}
             isInlineEditing={isInlineEditing}
+            title={i18n.translate('xpack.lens.paletteMetricGradient.label', {
+              defaultMessage: 'Color mapping',
+            })}
           >
             <CustomizablePalette
               palettes={props.paletteService}

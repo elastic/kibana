@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { RecursivePartial } from '@elastic/eui';
-import { Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { merge } from 'lodash';
 import { ProfilingESClient } from './profiling_es_client';
 

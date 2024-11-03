@@ -8,14 +8,14 @@
 import React from 'react';
 
 import type { RowRenderer } from '../../../../../../common/types/timeline';
-import { RowRendererId } from '../../../../../../common/api/timeline';
+import { RowRendererIdEnum } from '../../../../../../common/api/timeline';
 
 const PlainRowRenderer = () => <></>;
 
 PlainRowRenderer.displayName = 'PlainRowRenderer';
 
 export const plainRowRenderer: RowRenderer = {
-  id: RowRendererId.plain,
+  id: RowRendererIdEnum.plain,
   isInstance: (_) => true,
   renderRow: PlainRowRenderer,
 };

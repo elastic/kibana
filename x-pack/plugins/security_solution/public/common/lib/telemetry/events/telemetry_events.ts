@@ -21,6 +21,8 @@ import {
   assetCriticalityCsvPreviewGeneratedEvent,
   assetCriticalityFileSelectedEvent,
   assetCriticalityCsvImportedEvent,
+  entityStoreEnablementEvent,
+  entityStoreInitEvent,
 } from './entity_analytics';
 import {
   assistantInvokedEvent,
@@ -38,6 +40,17 @@ import {
   onboardingHubStepLinkClickedEvent,
   onboardingHubStepOpenEvent,
 } from './onboarding';
+import {
+  manualRuleRunCancelJobEvent,
+  manualRuleRunExecuteEvent,
+  manualRuleRunOpenModalEvent,
+} from './manual_rule_run';
+import { eventLogFilterByRunTypeEvent, eventLogShowSourceEventDateRangeEvent } from './event_log';
+import {
+  addNoteFromExpandableFlyoutClickedEvent,
+  openNoteInExpandableFlyoutClickedEvent,
+} from './notes';
+import { previewRuleEvent } from './preview_rule';
 
 const mlJobUpdateEvent: TelemetryEvent = {
   eventType: TelemetryEventTypes.MLJobUpdate,
@@ -161,6 +174,8 @@ export const telemetryEvents = [
   assetCriticalityCsvPreviewGeneratedEvent,
   assetCriticalityFileSelectedEvent,
   assetCriticalityCsvImportedEvent,
+  entityStoreEnablementEvent,
+  entityStoreInitEvent,
   toggleRiskSummaryClickedEvent,
   RiskInputsExpandedFlyoutOpenedEvent,
   addRiskInputToTimelineClickedEvent,
@@ -175,4 +190,12 @@ export const telemetryEvents = [
   onboardingHubStepOpenEvent,
   onboardingHubStepLinkClickedEvent,
   onboardingHubStepFinishedEvent,
+  manualRuleRunCancelJobEvent,
+  manualRuleRunExecuteEvent,
+  manualRuleRunOpenModalEvent,
+  eventLogFilterByRunTypeEvent,
+  eventLogShowSourceEventDateRangeEvent,
+  openNoteInExpandableFlyoutClickedEvent,
+  addNoteFromExpandableFlyoutClickedEvent,
+  previewRuleEvent,
 ];

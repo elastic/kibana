@@ -22,27 +22,27 @@ export function registerGetApmDownstreamDependenciesFunction({
   registerFunction(
     {
       name: 'get_apm_downstream_dependencies',
-      description: `Get the downstream dependencies (services or uninstrumented backends) for a 
-      service. This allows you to map the downstream dependency name to a service, by 
-      returning both span.destination.service.resource and service.name. Use this to 
+      description: `Get the downstream dependencies (services or uninstrumented backends) for a
+      service. This allows you to map the downstream dependency name to a service, by
+      returning both span.destination.service.resource and service.name. Use this to
       drilldown further if needed.`,
       descriptionForUser: i18n.translate(
         'xpack.apm.observabilityAiAssistant.functions.registerGetApmDownstreamDependencies.descriptionForUser',
         {
-          defaultMessage: `Get the downstream dependencies (services or uninstrumented backends) for a 
-      service. This allows you to map the dowstream dependency name to a service, by 
-      returning both span.destination.service.resource and service.name. Use this to 
+          defaultMessage: `Get the downstream dependencies (services or uninstrumented backends) for a
+      service. This allows you to map the dowstream dependency name to a service, by
+      returning both span.destination.service.resource and service.name. Use this to
       drilldown further if needed.`,
         }
       ),
       parameters: {
         type: 'object',
         properties: {
-          'service.name': {
+          serviceName: {
             type: 'string',
             description: 'The name of the service',
           },
-          'service.environment': {
+          serviceEnvironment: {
             type: 'string',
             description:
               'The environment that the service is running in. Leave empty to query for all environments.',
@@ -56,7 +56,7 @@ export function registerGetApmDownstreamDependenciesFunction({
             description: 'The end of the time range, in Elasticsearch date math, like `now-24h`.',
           },
         },
-        required: ['service.name', 'start', 'end'],
+        required: ['serviceName', 'start', 'end'],
       } as const,
     },
     async ({ arguments: args }, signal) => {

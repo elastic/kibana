@@ -11,12 +11,15 @@ import type { Filter, KueryNode } from '@kbn/es-query';
 import { FilterStateStore, fromKueryExpression } from '@kbn/es-query';
 
 import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
-import { TimelineType } from '../../../../common/api/timeline';
+import {
+  DataProviderTypeEnum,
+  type TimelineType,
+  TimelineTypeEnum,
+} from '../../../../common/api/timeline';
 import type {
   DataProvider,
   DataProvidersAnd,
 } from '../../../timelines/components/timeline/data_providers/data_provider';
-import { DataProviderType } from '../../../timelines/components/timeline/data_providers/data_provider';
 
 interface FindValueToChangeInQuery {
   field: string;
@@ -114,9 +117,9 @@ export const findValueToChangeInQuery = (
 export const replaceTemplateFieldFromQuery = (
   query: string,
   eventData: TimelineEventsDetailsItem[],
-  timelineType: TimelineType = TimelineType.default
+  timelineType: TimelineType = TimelineTypeEnum.default
 ): string => {
-  if (timelineType === TimelineType.default) {
+  if (timelineType === TimelineTypeEnum.default) {
     if (query.trim() !== '') {
       const valueToChange = findValueToChangeInQuery(fromKueryExpression(query));
       return valueToChange.reduce((newQuery, vtc) => {
@@ -157,10 +160,10 @@ export const replaceTemplateFieldFromMatchFilters = (
 export const reformatDataProviderWithNewValue = <T extends DataProvider | DataProvidersAnd>(
   dataProvider: T,
   eventData: TimelineEventsDetailsItem[],
-  timelineType: TimelineType = TimelineType.default
+  timelineType: TimelineType = TimelineTypeEnum.default
 ): T => {
   // Support for legacy "template-like" timeline behavior that is using hardcoded list of templateFields
-  if (timelineType !== TimelineType.template) {
+  if (timelineType !== TimelineTypeEnum.template) {
     if (templateFields.includes(dataProvider.queryMatch.field)) {
       const newValue = getStringArray(dataProvider.queryMatch.field, eventData);
       if (newValue.length) {
@@ -171,13 +174,13 @@ export const reformatDataProviderWithNewValue = <T extends DataProvider | DataPr
         dataProvider.queryMatch.displayValue = undefined;
       }
     }
-    dataProvider.type = DataProviderType.default;
+    dataProvider.type = DataProviderTypeEnum.default;
     return dataProvider;
   }
 
-  if (timelineType === TimelineType.template) {
+  if (timelineType === TimelineTypeEnum.template) {
     if (
-      dataProvider.type === DataProviderType.template &&
+      dataProvider.type === DataProviderTypeEnum.template &&
       dataProvider.queryMatch.operator === ':'
     ) {
       const newValue = getStringArray(dataProvider.queryMatch.field, eventData);
@@ -191,12 +194,12 @@ export const reformatDataProviderWithNewValue = <T extends DataProvider | DataPr
       dataProvider.queryMatch.value = newValue[0];
       dataProvider.queryMatch.displayField = undefined;
       dataProvider.queryMatch.displayValue = undefined;
-      dataProvider.type = DataProviderType.default;
+      dataProvider.type = DataProviderTypeEnum.default;
 
       return dataProvider;
     }
 
-    dataProvider.type = dataProvider.type ?? DataProviderType.default;
+    dataProvider.type = dataProvider.type ?? DataProviderTypeEnum.default;
 
     return dataProvider;
   }
@@ -207,7 +210,7 @@ export const reformatDataProviderWithNewValue = <T extends DataProvider | DataPr
 export const replaceTemplateFieldFromDataProviders = (
   dataProviders: DataProvider[],
   eventData: TimelineEventsDetailsItem[],
-  timelineType: TimelineType = TimelineType.default
+  timelineType: TimelineType = TimelineTypeEnum.default
 ): DataProvider[] =>
   dataProviders.map((dataProvider) => {
     const newDataProvider = reformatDataProviderWithNewValue(dataProvider, eventData, timelineType);

@@ -9,7 +9,7 @@ import type { EventTypeOpts } from '@kbn/core/server';
 
 export const KNOWLEDGE_BASE_EXECUTION_SUCCESS_EVENT: EventTypeOpts<{
   model: string;
-  resourceAccessed: string;
+  resourceAccessed?: string;
   resultCount: number;
   responseTime: number;
 }> = {
@@ -25,6 +25,7 @@ export const KNOWLEDGE_BASE_EXECUTION_SUCCESS_EVENT: EventTypeOpts<{
       type: 'keyword',
       _meta: {
         description: 'Which knowledge base resource was accessed',
+        optional: true,
       },
     },
     resultCount: {
@@ -44,7 +45,7 @@ export const KNOWLEDGE_BASE_EXECUTION_SUCCESS_EVENT: EventTypeOpts<{
 
 export const KNOWLEDGE_BASE_EXECUTION_ERROR_EVENT: EventTypeOpts<{
   model: string;
-  resourceAccessed: string;
+  resourceAccessed?: string;
   errorMessage: string;
 }> = {
   eventType: 'knowledge_base_execution_error',
@@ -59,6 +60,7 @@ export const KNOWLEDGE_BASE_EXECUTION_ERROR_EVENT: EventTypeOpts<{
       type: 'keyword',
       _meta: {
         description: 'Which knowledge base resource was accessed',
+        optional: true,
       },
     },
     errorMessage: {
@@ -71,26 +73,13 @@ export const KNOWLEDGE_BASE_EXECUTION_ERROR_EVENT: EventTypeOpts<{
 };
 
 export const INVOKE_ASSISTANT_SUCCESS_EVENT: EventTypeOpts<{
-  isEnabledKnowledgeBase: boolean;
-  isEnabledRAGAlerts: boolean;
   assistantStreamingEnabled: boolean;
   actionTypeId: string;
+  isEnabledKnowledgeBase: boolean;
   model?: string;
 }> = {
   eventType: 'invoke_assistant_success',
   schema: {
-    isEnabledKnowledgeBase: {
-      type: 'boolean',
-      _meta: {
-        description: 'Is Knowledge Base enabled',
-      },
-    },
-    isEnabledRAGAlerts: {
-      type: 'boolean',
-      _meta: {
-        description: 'Is RAG Alerts enabled',
-      },
-    },
     assistantStreamingEnabled: {
       type: 'boolean',
       _meta: {
@@ -110,14 +99,19 @@ export const INVOKE_ASSISTANT_SUCCESS_EVENT: EventTypeOpts<{
         optional: true,
       },
     },
+    isEnabledKnowledgeBase: {
+      type: 'boolean',
+      _meta: {
+        description: 'Is knowledge base enabled',
+      },
+    },
   },
 };
 
 export const INVOKE_ASSISTANT_ERROR_EVENT: EventTypeOpts<{
   errorMessage: string;
-  isEnabledKnowledgeBase: boolean;
-  isEnabledRAGAlerts: boolean;
   assistantStreamingEnabled: boolean;
+  isEnabledKnowledgeBase: boolean;
   actionTypeId: string;
   model?: string;
 }> = {
@@ -129,18 +123,6 @@ export const INVOKE_ASSISTANT_ERROR_EVENT: EventTypeOpts<{
         description: 'Error message from Elasticsearch',
       },
     },
-    isEnabledKnowledgeBase: {
-      type: 'boolean',
-      _meta: {
-        description: 'Is Knowledge Base enabled',
-      },
-    },
-    isEnabledRAGAlerts: {
-      type: 'boolean',
-      _meta: {
-        description: 'Is RAG Alerts enabled',
-      },
-    },
     assistantStreamingEnabled: {
       type: 'boolean',
       _meta: {
@@ -158,6 +140,12 @@ export const INVOKE_ASSISTANT_ERROR_EVENT: EventTypeOpts<{
       _meta: {
         description: 'LLM model',
         optional: true,
+      },
+    },
+    isEnabledKnowledgeBase: {
+      type: 'boolean',
+      _meta: {
+        description: 'Is knowledge base enabled',
       },
     },
   },

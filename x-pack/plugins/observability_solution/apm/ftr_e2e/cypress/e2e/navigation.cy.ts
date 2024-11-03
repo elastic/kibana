@@ -35,6 +35,9 @@ describe('When navigating between pages', () => {
 
   after(() => {
     synthtrace.clean();
+    cy.updateAdvancedSettings({
+      'observability:entityCentricExperience': false,
+    });
   });
 
   beforeEach(() => {
@@ -69,5 +72,15 @@ describe('When navigating between pages', () => {
     cy.get('@hasDataRequest.all').should('have.length', 1);
     cy.get('@serviceIconsRequest.all').should('have.length', 1);
     cy.get('@apmPoliciesRequest.all').should('have.length', 1);
+  });
+
+  it('should not show the custom no data screen', () => {
+    cy.updateAdvancedSettings({
+      'observability:entityCentricExperience': true,
+    });
+    cy.visitKibana('/app/apm');
+    cy.contains('Detect and resolve problems with your application').should('not.exist');
+    cy.contains('Traces').click();
+    cy.contains('Detect and resolve problems with your application').should('not.exist');
   });
 });

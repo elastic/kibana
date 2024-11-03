@@ -82,7 +82,7 @@ export const IncludeFeatureStatesField: FunctionComponent<Props> = ({ policy, on
       }
       fullWidth
     >
-      <EuiFormRow hasEmptyLabelSpace fullWidth>
+      <EuiFormRow fullWidth>
         <EuiSwitch
           data-test-subj="featureStatesToggle"
           label={

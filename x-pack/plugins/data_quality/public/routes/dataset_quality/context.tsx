@@ -7,7 +7,7 @@
 
 import { IToasts } from '@kbn/core-notifications-browser';
 import { DatasetQualityPluginStart } from '@kbn/dataset-quality-plugin/public';
-import { DatasetQualityController } from '@kbn/dataset-quality-plugin/public/controller';
+import { DatasetQualityController } from '@kbn/dataset-quality-plugin/public/controller/dataset_quality';
 import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import {
@@ -43,13 +43,6 @@ export function DatasetQualityContextProvider({
         initialState,
       });
       datasetQualityController.service.start();
-
-      if (initialState?.flyout?.dataset) {
-        datasetQualityController.service.send({
-          type: 'OPEN_FLYOUT',
-          dataset: initialState.flyout.dataset,
-        });
-      }
 
       setController(datasetQualityController);
 

@@ -16,9 +16,9 @@ import {
 import { DataViewsService } from '@kbn/data-views-plugin/common';
 import { getElasticsearchQueryOrThrow, TransformGenerator } from '.';
 import {
+  getSLOPipelineId,
   getSLOTransformId,
   SLO_DESTINATION_INDEX_NAME,
-  SLO_INGEST_PIPELINE_NAME,
 } from '../../../common/constants';
 import { getSLOTransformTemplate } from '../../assets/transform_templates/slo_transform_template';
 import { APMTransactionDurationIndicator, SLODefinition } from '../../domain/models';
@@ -40,7 +40,7 @@ export class ApmTransactionDurationTransformGenerator extends TransformGenerator
       this.buildTransformId(slo),
       this.buildDescription(slo),
       await this.buildSource(slo, slo.indicator, dataViewService),
-      this.buildDestination(),
+      this.buildDestination(slo),
       this.buildGroupBy(slo, slo.indicator),
       this.buildAggregations(slo, slo.indicator),
       this.buildSettings(slo),
@@ -138,9 +138,9 @@ export class ApmTransactionDurationTransformGenerator extends TransformGenerator
     };
   }
 
-  private buildDestination() {
+  private buildDestination(slo: SLODefinition) {
     return {
-      pipeline: SLO_INGEST_PIPELINE_NAME,
+      pipeline: getSLOPipelineId(slo.id, slo.revision),
       index: SLO_DESTINATION_INDEX_NAME,
     };
   }
@@ -185,9 +185,9 @@ export class ApmTransactionDurationTransformGenerator extends TransformGenerator
               goodEvents: 'slo.numerator.value',
               totalEvents: 'slo.denominator.value',
             },
-            script: `params.goodEvents / params.totalEvents ${getTimesliceTargetComparator(
+            script: `if (params.totalEvents == 0) { return 1 } else { return params.goodEvents / params.totalEvents ${getTimesliceTargetComparator(
               slo.objective.timesliceTarget!
-            )} ${slo.objective.timesliceTarget} ? 1 : 0`,
+            )} ${slo.objective.timesliceTarget} ? 1 : 0 }`,
           },
         },
       }),

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LOGS_INDEX_PATTERN, METRICS_INDEX_PATTERN } from '../constants';
+import { METRICS_INDEX_PATTERN } from '../constants';
 import { InfraSourceConfiguration } from './source_configuration';
 
 export const defaultSourceConfiguration: InfraSourceConfiguration = {
@@ -13,8 +13,7 @@ export const defaultSourceConfiguration: InfraSourceConfiguration = {
   description: '',
   metricAlias: METRICS_INDEX_PATTERN,
   logIndices: {
-    type: 'index_name',
-    indexName: LOGS_INDEX_PATTERN,
+    type: 'kibana_advanced_setting',
   },
   inventoryDefaultView: '0',
   metricsExplorerDefaultView: '0',

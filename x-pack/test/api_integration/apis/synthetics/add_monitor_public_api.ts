@@ -5,13 +5,9 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import { omitBy } from 'lodash';
+import { v4 as uuidv4 } from 'uuid';
 
 import { DEFAULT_FIELDS } from '@kbn/synthetics-plugin/common/constants/monitor_defaults';
-import {
-  removeMonitorEmptyValues,
-  transformPublicKeys,
-} from '@kbn/synthetics-plugin/server/routes/monitor_cruds/helper';
 import { LOCATION_REQUIRED_ERROR } from '@kbn/synthetics-plugin/server/routes/monitor_cruds/monitor_validation';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { addMonitorAPIHelper, omitMonitorKeys } from './add_monitor';
@@ -48,7 +44,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('return error if invalid location specified', async () => {
       const { message } = await addMonitorAPI({ type: 'http', locations: ['mars'] }, 400);
       expect(message).eql(
-        "Invalid locations specified. Elastic managed Location(s) 'mars' not found. Available locations are 'dev'"
+        "Invalid locations specified. Elastic managed Location(s) 'mars' not found. Available locations are 'dev|dev2'"
       );
     });
 
@@ -72,7 +68,7 @@ export default function ({ getService }: FtrProviderContext) {
         400
       );
       expect(result.message).eql(
-        "Invalid locations specified. Elastic managed Location(s) 'mars' not found. Available locations are 'dev' Private Location(s) 'moon' not found. No private location available to use."
+        "Invalid locations specified. Elastic managed Location(s) 'mars' not found. Available locations are 'dev|dev2' Private Location(s) 'moon' not found. No private location available to use."
       );
     });
 
@@ -100,7 +96,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('HTTP Monitor', () => {
-      const defaultFields = omitBy(DEFAULT_FIELDS.http, removeMonitorEmptyValues);
+      const defaultFields = DEFAULT_FIELDS.http;
       it('return error empty http', async () => {
         const { message, attributes } = await addMonitorAPI(
           {
@@ -135,10 +131,55 @@ export default function ({ getService }: FtrProviderContext) {
           })
         );
       });
+
+      it('can enable retries', async () => {
+        const name = `test name ${uuidv4()}`;
+        const monitor = {
+          type: 'http',
+          locations: ['dev'],
+          url: 'https://www.google.com',
+          name,
+          retest_on_failure: true,
+        };
+        const { body: result } = await addMonitorAPI(monitor);
+
+        expect(result).eql(
+          omitMonitorKeys({
+            ...defaultFields,
+            ...monitor,
+            locations: [localLoc],
+            name,
+            retest_on_failure: true,
+          })
+        );
+      });
+
+      it('can disable retries', async () => {
+        const name = `test name ${uuidv4()}`;
+        const monitor = {
+          type: 'http',
+          locations: ['dev'],
+          url: 'https://www.google.com',
+          name,
+          retest_on_failure: false,
+        };
+        const { body: result } = await addMonitorAPI(monitor);
+
+        expect(result).eql(
+          omitMonitorKeys({
+            ...defaultFields,
+            ...monitor,
+            locations: [localLoc],
+            name,
+            max_attempts: 1,
+            retest_on_failure: undefined, // this key is not part of the SO and should not be defined
+          })
+        );
+      });
     });
 
     describe('TCP Monitor', () => {
-      const defaultFields = omitBy(DEFAULT_FIELDS.tcp, removeMonitorEmptyValues);
+      const defaultFields = DEFAULT_FIELDS.tcp;
 
       it('base tcp monitor', async () => {
         const monitor = {
@@ -160,7 +201,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('ICMP Monitor', () => {
-      const defaultFields = omitBy(DEFAULT_FIELDS.icmp, removeMonitorEmptyValues);
+      const defaultFields = DEFAULT_FIELDS.icmp;
 
       it('base icmp monitor', async () => {
         const monitor = {
@@ -182,7 +223,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('Browser Monitor', () => {
-      const defaultFields = omitBy(DEFAULT_FIELDS.browser, removeMonitorEmptyValues);
+      const defaultFields = DEFAULT_FIELDS.browser;
 
       it('empty browser monitor', async () => {
         const monitor = {
@@ -212,7 +253,7 @@ export default function ({ getService }: FtrProviderContext) {
         };
         const { body: result } = await addMonitorAPI(monitor);
 
-        expect(transformPublicKeys(result)).eql(
+        expect(result).eql(
           omitMonitorKeys({
             ...defaultFields,
             ...monitor,

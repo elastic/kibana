@@ -44,7 +44,7 @@ describe('TTYTextSizer component', () => {
     const zoomFitBtn = renderResult.queryByTestId('sessionView:TTYZoomFit');
 
     if (zoomFitBtn) {
-      userEvent.click(zoomFitBtn);
+      await userEvent.click(zoomFitBtn);
     }
 
     expect(props.onFontSizeChanged).toHaveBeenCalledTimes(1);
@@ -57,7 +57,7 @@ describe('TTYTextSizer component', () => {
     const zoomInBtn = renderResult.queryByTestId('sessionView:TTYZoomIn');
 
     if (zoomInBtn) {
-      userEvent.click(zoomInBtn);
+      await userEvent.click(zoomInBtn);
     }
 
     expect(props.onFontSizeChanged).toHaveBeenCalledTimes(1);
@@ -70,7 +70,7 @@ describe('TTYTextSizer component', () => {
     const zoomOutBtn = renderResult.queryByTestId('sessionView:TTYZoomOut');
 
     if (zoomOutBtn) {
-      userEvent.click(zoomOutBtn);
+      await userEvent.click(zoomOutBtn);
     }
 
     expect(props.onFontSizeChanged).toHaveBeenCalledTimes(1);
@@ -85,7 +85,7 @@ describe('TTYTextSizer component', () => {
     const zoomFitBtn = renderResult.queryByTestId('sessionView:TTYZoomFit');
 
     if (zoomFitBtn) {
-      userEvent.click(zoomFitBtn);
+      await userEvent.click(zoomFitBtn);
     }
 
     expect(props.onFontSizeChanged).toHaveBeenCalledTimes(1);

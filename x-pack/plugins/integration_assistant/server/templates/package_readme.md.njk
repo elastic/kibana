@@ -1,24 +1,17 @@
-# {{ package_name }} Integration
+{% include "./description_readme.njk" %}
+{% for data_stream in fields %}
+### {{ data_stream.datastream }}
 
-This integration is for ingesting data from [{{ package_name }}](https://example.com/).
-{% for data_stream in data_streams %}
-- `{{ data_stream.name }}`: {{ data_stream.description }}
+Insert a description of the datastream here.
+
+**ECS Field Reference**
+
+Please refer to the following [document](https://www.elastic.co/guide/en/ecs/current/ecs-field-reference.html) for detailed information on ECS fields.
+
+**Exported fields**
+
+| Field | Description | Type |
+|---|---|---|
+{% for field in data_stream.fields %}| {{ field.name }} | {{ field.description | default('') | replace('\n', ' ') | trim }} | {{ field.type }} |
 {% endfor %}
-See [Link to docs](https://example.com/docs) for more information.
-
-## Compatibility
-
-Insert compatibility information here. This could for example be which versions of the product it was tested with.
-
-## Setup
-
-Insert how to configure the vendor side of the integration here, for example how to configure the API, create a syslog remote destination etc.
-
-## Logs
-{% for data_stream in data_streams %}
-### {{ data_stream.name }}
-
-Insert a description of the data stream here.
-
-{% raw %}{{fields {% endraw %}"{{ data_stream.name }}"{% raw %}}}{% endraw %}
 {% endfor %}

@@ -176,6 +176,9 @@ exports[`UploadLicense should display an error when ES says license is expired 1
           </div>
         </div>
         <div
+          class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+        />
+        <div
           class="euiFilePicker emotion-euiFilePicker-fullWidth"
         >
           <input
@@ -314,6 +317,9 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
             </ul>
           </div>
         </div>
+        <div
+          class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+        />
         <div
           class="euiFilePicker emotion-euiFilePicker-fullWidth"
         >
@@ -454,6 +460,9 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
           </div>
         </div>
         <div
+          class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+        />
+        <div
           class="euiFilePicker emotion-euiFilePicker-fullWidth"
         >
           <input
@@ -592,6 +601,9 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
             </ul>
           </div>
         </div>
+        <div
+          class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+        />
         <div
           class="euiFilePicker emotion-euiFilePicker-fullWidth"
         >

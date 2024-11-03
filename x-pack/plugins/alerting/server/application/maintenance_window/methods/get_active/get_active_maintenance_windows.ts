@@ -6,7 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import { nodeBuilder } from '@kbn/es-query';
+import { KueryNode, nodeBuilder } from '@kbn/es-query';
 import type { MaintenanceWindowClientContext } from '../../../../../common';
 import type { MaintenanceWindow } from '../../types';
 import { transformMaintenanceWindowAttributesToMaintenanceWindow } from '../../transforms';
@@ -23,15 +23,29 @@ export interface MaintenanceWindowAggregationResult {
 }
 
 export async function getActiveMaintenanceWindows(
-  context: MaintenanceWindowClientContext
+  context: MaintenanceWindowClientContext,
+  cacheIntervalMs?: number
 ): Promise<MaintenanceWindow[]> {
   const { savedObjectsClient, logger } = context;
 
   const startDate = new Date();
   const startDateISO = startDate.toISOString();
 
+  let eventsKuery: KueryNode;
+  if (cacheIntervalMs) {
+    // add offset to startDate
+    const startDateWithCacheOffset = new Date(startDate.getTime() + cacheIntervalMs);
+    const startDateWithCacheOffsetISO = startDateWithCacheOffset.toISOString();
+    eventsKuery = nodeBuilder.or([
+      nodeBuilder.is('maintenance-window.attributes.events', startDateISO),
+      nodeBuilder.is('maintenance-window.attributes.events', startDateWithCacheOffsetISO),
+    ]);
+  } else {
+    eventsKuery = nodeBuilder.is('maintenance-window.attributes.events', startDateISO);
+  }
+
   const filter = nodeBuilder.and([
-    nodeBuilder.is('maintenance-window.attributes.events', startDateISO),
+    eventsKuery,
     nodeBuilder.is('maintenance-window.attributes.enabled', 'true'),
   ]);
 

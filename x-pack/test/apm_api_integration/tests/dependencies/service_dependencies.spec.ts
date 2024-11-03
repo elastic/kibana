@@ -38,7 +38,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     'Dependency for service when data is not loaded',
     { config: 'basic', archives: [] },
     () => {
-      it('handles empty state', async () => {
+      it('handles empty state #1', async () => {
         const { status, body } = await callApi();
 
         expect(status).to.be(200);
@@ -76,7 +76,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     'Dependency for service breakdown when data is not loaded',
     { config: 'basic', archives: [] },
     () => {
-      it('handles empty state', async () => {
+      it('handles empty state #2', async () => {
         const { status, body } = await callApi();
 
         expect(status).to.be(200);
@@ -87,7 +87,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   // FLAKY: https://github.com/elastic/kibana/issues/177125
   registry.when('Dependency for services breakdown', { config: 'basic', archives: [] }, () => {
-    describe('when data is loaded', () => {
+    describe('when data is loaded - breakdown', () => {
       before(async () => {
         await generateData({ apmSynthtraceEsClient, start, end });
       });

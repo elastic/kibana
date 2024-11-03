@@ -1,0 +1,187 @@
+[[create-dashboards]]
+= Build dashboards
+
+{kib} offers many ways to build powerful dashboards that will help you visualize and keep track of the most important information contained in your {es} data.
+
+* Create and assemble visualizations such as charts or maps, and enrich them with helpful legends containing key data.
+* Extract and show key indicators and metrics to keep them visible and highlighted at all times.
+* Add text, images, and links to help viewers make the most of your dashboard.
+* Include additional controls to facilitate filtering and browsing the data.
+
+[float]
+[[dashboard-minimum-requirements]]
+
+To create or edit dashboards, you first need to:
+
+* have {ref}/getting-started-index.html[data indexed into {es}] and a <<data-views, data view>>. A data view is a subset of your {es} data, and allows you to load just the right data when building a visualization or exploring it. 
++
+TIP: If you don't have data at hand and still want to explore dashboards, you can import one of the <<sample-data,sample data sets>> available.
+
+* have sufficient permissions on the **Dashboard** feature. If that's not the case, you might get a read-only indicator. A {kib} administrator can <<kibana-privileges,grant you the required privileges>>.
+
+//include::dashboard-best-practices.asciidoc[]
+
+[[create-dashboard]]
+== Create a dashboard
+
+//To make your dashboard experience as good as possible for you and users who will view it, check the <<dashboard-best-practices,dashboard best practices>>. 
+
+. Open the *Dashboards* page in {kib}.
+
+. Select *Create dashboard* to start with an empty dashboard.
++
+When you create a dashboard, you are automatically in edit mode and can make changes to the dashboard. 
+[[create-panels-with-lens]]
+. Add content to the dashboard. You have several options covered in more detail in the <<panels-editors,Visualizations section>>:
+** <<lens,**Create visualization**>>. This option is a shortcut to create a chart using **Lens**, the default visualization editor in {kib}.
+** <<panels-editors,**Add panel**>>. Choose one of the available panels to add and configure content to your dashboard.
+** **Add from library**. Select existing content that has already been configured and saved to the **Visualize Library**.
+** <<add-controls,**Controls**>>. Add controls to help filter the content of your dashboard.
++
+[role="screenshot"]
+image::images/add_content_to_dashboard_8.15.0.png[Options to add content to your dashboard, width=70%]
+. Organize your dashboard by <<arrange-panels,organizing the various panels>>. 
+[[add-dashboard-settings]]
+. Define the main settings of your dashboard from the *Settings* menu located in the toolbar.
+.. A meaningful title, description, and <<managing-tags,tags>> allow you to find the dashboard quickly later when browsing your list of dashboards or using the {kib} search bar.
+.. Additional display options allow you unify the look and feel of the dashboard's panels:
+
+*** *Store time with dashboard* &mdash; Saves the specified time filter.
+*** *Use margins between panels* &mdash; Adds a margin of space between each panel.
+*** *Show panel titles* &mdash; Displays the titles in the panel headers.
+*** *Sync color palettes across panels* &mdash; Applies the same color palette to all panels on the dashboard.
+*** *Sync cursor across panels* &mdash; When you hover your cursor over a time series chart or a heatmap, the cursor on all other related dashboard charts automatically appears.
+*** *Sync tooltips across panels* &mdash; When you hover your cursor over a *Lens* chart, the tooltips on all other related dashboard charts automatically appear.
+
+.. Click *Apply*.
++
+[role="screenshot"]
+image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt532d6c9ca72817d6/66f31b1f80b55f3a20e1a329/dashboard_settings_8.15.0.gif[Change and apply dashboard settings, width 30%]
+
+. Click **Save**  to save the dashboard.
+
+[[open-the-dashboard]]
+== Edit a dashboard
+
+. Open the *Dashboards* page in {kib}.
+
+. Locate the dashboard you want to edit.
++
+TIP: When looking for a specific dashboard, you can filter them by tag or by creator, or search the list based on their name and description. Note that the creator information is only available for dashboards created on or after version 8.14.
+
+. Click the dashboard *Title* you want to open.
+
+. Make sure that you are in **Edit** mode to be able to make changes to the dashboard. You can switch between **Edit** and **View** modes from the toolbar.
++
+[role="screenshot"]
+image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/bltf75cdb828cef8b5a/66f5cfcfad4f59f38b73ba64/switch-to-view-mode-8.15.0.gif[Switch between Edit and View modes, width 30%]
+. Make the changes that you need to the dashboard:
+
+** Adjust the dashboard's settings
+** <<panels-editors,Add, remove, move, or edit panels>>
+** <<add-controls,Change the available controls>>
+[[save-dashboards]]
+. **Save** the dashboard. You can then leave the **Edit** mode and *Switch to view mode*. 
+
+NOTE: Managed dashboards can't be edited directly, but you can <<duplicate-dashboards,duplicate>> them and edit these duplicates.
+
+[[reset-the-dashboard]]
+=== Reset dashboard changes
+
+When editing a dashboard, you can revert any changes you've made since the last save using **Reset dashboards**.
+
+NOTE: Once changes are saved, you can no longer revert them in one click, and instead have to edit the dashboard manually.
+
+. In the toolbar, click *Reset*.
+
+. On the *Reset dashboard?* window, click *Reset dashboard*.
+
++
+[role="screenshot"]
+image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/bltcd3dbda9caf48a9b/66f4957fc9f9c71ce7533774/reset-dashboard-8.15.0.gif[Reset dashboard to revert unsaved changes, width 30%]
+
+include::dashboard-controls.asciidoc[leveloffset=-1]
+
+include::drilldowns.asciidoc[leveloffset=-1]
+
+
+[[arrange-panels]]
+== Organize dashboard panels
+
+[[moving-containers]]
+[[resizing-containers]]
+=== Move and resize panels
+
+Compare the data in your panels side-by-side, organize panels by priority, resize the panels so they all appear immediately on the dashboard, and more.
+
+In the toolbar, click *Edit*, then use the following options:
+
+* To move, click and hold the panel header, then drag to the new location.
+
+* To resize, click the resize control, then drag to the new dimensions.
+
+* To maximize to full screen, open the panel menu, then click *More > Maximize*.
++
+TIP: If you <<share-the-dashboard,share>> a dashboard while viewing a full screen panel, the generated link will directly open the same panel in full screen mode.
+
+[[duplicate-panels]]
+=== Copy and duplicate panels
+
+To duplicate a panel and the configured functionality, use the clone and copy panel options. Cloned and copied panels replicate all of the functionality from the original panel, 
+including renaming, editing, and cloning. 
+
+[float]
+[[clone-panels]]
+==== Duplicate panels
+
+Duplicated panels appear next to the original panel, and move the other panels to provide a space on the dashboard.
+
+. In the toolbar, click *Edit*.
+
+. Open the panel menu, then select *Duplicate*.
++
+[role="screenshot"]
+image::images/duplicate-panels-8.15.0.png[Duplicate a panel, width=50%] 
+
+[float]
+[[copy-to-dashboard]]
+==== Copy panels
+
+Copy panels from one dashboard to another dashboard.
+
+. Open the panel menu, then select *More > Copy to dashboard*.
+
+. On the *Copy to dashboard* window, select the dashboard, then click *Copy and go to dashboard*.
++
+[role="screenshot"]
+image:https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt64206db263cf5514/66f49286833cffb09bebd18d/copy-to-dashboard-8.15.0.gif[Copy a panel to another dashboard, width 30%]
+
+[[duplicate-dashboards]]
+== Duplicate dashboards
+
+. Open the dashboard you want to duplicate.
+
+. In *View* mode, click *Duplicate* in the toolbar.
+
+. In the *Duplicate dashboard* window, enter a title and optional description and tags.
+
+. Click *Save*.
+
+You will be redirected to the duplicated dashboard.
+
+To duplicate a managed dashboard, follow the instructions above or click the *Managed* badge in the toolbar. Then click *Duplicate* in the dialogue that appears. 
+
+[role="screenshot"]
+image::images/managed-dashboard-popover-8.16.0.png[Managed badge dialog with Duplicate button, width=40%]
+
+== Import dashboards
+
+You can import dashboards from the **Saved Objects** page under **Stack Management**. Refer to <<managing-saved-objects,Manage saved objects>>.
+
+When importing dashboards, you also import their related objects, such as data views and visualizations. Import options allow you to define how the import should behave with these related objects.
+
+* **Check for existing objects**: When selected, objects are not imported when another object with the same ID already exists in this space or cluster. For example, if you import a dashboard that uses a data view which already exists, the data view is not imported and the dashboard uses the existing data view instead. You can also chose to select manually which of the imported or the existing objects are kept by selecting **Request action on conflict**.
+
+* **Create new objects with random IDs**: All related objects are imported and are assigned a new ID to avoid conflicts.
+
+image:images/dashboard-import-saved-object.png[Import panel]

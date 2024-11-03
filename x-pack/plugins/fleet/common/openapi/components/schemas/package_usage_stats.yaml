@@ -1,7 +1,0 @@
-title: Package usage stats
-type: object
-properties:
-  agent_policy_count:
-    type: integer
-required:
-  - agent_policy_count

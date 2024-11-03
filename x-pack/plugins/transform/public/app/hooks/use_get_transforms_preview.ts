@@ -12,7 +12,7 @@ import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type {
   PostTransformsPreviewRequestSchema,
   PostTransformsPreviewResponseSchema,
-} from '../../../common/api_schemas/transforms';
+} from '../../../server/routes/api_schemas/transforms';
 import { addInternalBasePath, TRANSFORM_REACT_QUERY_KEYS } from '../../../common/constants';
 
 import { useAppDependencies } from '../app_dependencies';

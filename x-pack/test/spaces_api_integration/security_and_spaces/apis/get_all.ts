@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import type { SuperTest } from 'supertest';
+
+import type { FtrProviderContext } from '../../common/ftr_provider_context';
 import { AUTHENTICATION } from '../../common/lib/authentication';
 import { SPACES } from '../../common/lib/spaces';
 import { getAllTestSuiteFactory } from '../../common/suites/get_all';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function getAllSpacesTestSuite({ getService }: FtrProviderContext) {
@@ -16,7 +18,7 @@ export default function getAllSpacesTestSuite({ getService }: FtrProviderContext
   const esArchiver = getService('esArchiver');
 
   const { getAllTest, createExpectResults, createExpectAllPurposesResults, expectRbacForbidden } =
-    getAllTestSuiteFactory(esArchiver, supertestWithoutAuth);
+    getAllTestSuiteFactory(esArchiver, supertestWithoutAuth as unknown as SuperTest<any>);
 
   // these are used to determine expected results for tests where the `include_authorized_purposes` option is enabled
   const authorizedAll = {
@@ -118,15 +120,15 @@ export default function getAllSpacesTestSuite({ getService }: FtrProviderContext
         tests: {
           exists: {
             statusCode: 200,
-            response: createExpectResults('default', 'space_1', 'space_2'),
+            response: createExpectResults('default', 'space_1', 'space_2', 'space_3'),
           },
           copySavedObjectsPurpose: {
             statusCode: 200,
-            response: createExpectResults('default', 'space_1', 'space_2'),
+            response: createExpectResults('default', 'space_1', 'space_2', 'space_3'),
           },
           shareSavedObjectsPurpose: {
             statusCode: 200,
-            response: createExpectResults('default', 'space_1', 'space_2'),
+            response: createExpectResults('default', 'space_1', 'space_2', 'space_3'),
           },
           includeAuthorizedPurposes: {
             statusCode: 200,
@@ -134,7 +136,8 @@ export default function getAllSpacesTestSuite({ getService }: FtrProviderContext
               authorizedAll,
               'default',
               'space_1',
-              'space_2'
+              'space_2',
+              'space_3'
             ),
           },
         },
@@ -146,15 +149,15 @@ export default function getAllSpacesTestSuite({ getService }: FtrProviderContext
         tests: {
           exists: {
             statusCode: 200,
-            response: createExpectResults('default', 'space_1', 'space_2'),
+            response: createExpectResults('default', 'space_1', 'space_2', 'space_3'),
           },
           copySavedObjectsPurpose: {
             statusCode: 200,
-            response: createExpectResults('default', 'space_1', 'space_2'),
+            response: createExpectResults('default', 'space_1', 'space_2', 'space_3'),
           },
           shareSavedObjectsPurpose: {
             statusCode: 200,
-            response: createExpectResults('default', 'space_1', 'space_2'),
+            response: createExpectResults('default', 'space_1', 'space_2', 'space_3'),
           },
           includeAuthorizedPurposes: {
             statusCode: 200,
@@ -162,7 +165,8 @@ export default function getAllSpacesTestSuite({ getService }: FtrProviderContext
               authorizedAll,
               'default',
               'space_1',
-              'space_2'
+              'space_2',
+              'space_3'
             ),
           },
         },
@@ -174,15 +178,15 @@ export default function getAllSpacesTestSuite({ getService }: FtrProviderContext
         tests: {
           exists: {
             statusCode: 200,
-            response: createExpectResults('default', 'space_1', 'space_2'),
+            response: createExpectResults('default', 'space_1', 'space_2', 'space_3'),
           },
           copySavedObjectsPurpose: {
             statusCode: 200,
-            response: createExpectResults('default', 'space_1', 'space_2'),
+            response: createExpectResults('default', 'space_1', 'space_2', 'space_3'),
           },
           shareSavedObjectsPurpose: {
             statusCode: 200,
-            response: createExpectResults('default', 'space_1', 'space_2'),
+            response: createExpectResults('default', 'space_1', 'space_2', 'space_3'),
           },
           includeAuthorizedPurposes: {
             statusCode: 200,
@@ -190,7 +194,8 @@ export default function getAllSpacesTestSuite({ getService }: FtrProviderContext
               authorizedAll,
               'default',
               'space_1',
-              'space_2'
+              'space_2',
+              'space_3'
             ),
           },
         },
@@ -225,7 +230,7 @@ export default function getAllSpacesTestSuite({ getService }: FtrProviderContext
         tests: {
           exists: {
             statusCode: 200,
-            response: createExpectResults('default', 'space_1', 'space_2'),
+            response: createExpectResults('default', 'space_1', 'space_2', 'space_3'),
           },
           copySavedObjectsPurpose: {
             statusCode: 403,
@@ -241,7 +246,8 @@ export default function getAllSpacesTestSuite({ getService }: FtrProviderContext
               authorizedRead,
               'default',
               'space_1',
-              'space_2'
+              'space_2',
+              'space_3'
             ),
           },
         },
@@ -253,7 +259,7 @@ export default function getAllSpacesTestSuite({ getService }: FtrProviderContext
         tests: {
           exists: {
             statusCode: 200,
-            response: createExpectResults('default', 'space_1', 'space_2'),
+            response: createExpectResults('default', 'space_1', 'space_2', 'space_3'),
           },
           copySavedObjectsPurpose: {
             statusCode: 403,
@@ -269,7 +275,8 @@ export default function getAllSpacesTestSuite({ getService }: FtrProviderContext
               authorizedRead,
               'default',
               'space_1',
-              'space_2'
+              'space_2',
+              'space_3'
             ),
           },
         },

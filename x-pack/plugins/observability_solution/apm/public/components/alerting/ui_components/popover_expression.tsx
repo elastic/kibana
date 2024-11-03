@@ -14,10 +14,11 @@ interface Props {
   value: React.ReactNode;
   children?: React.ReactNode;
   color?: ExpressionColor;
+  dataTestSubj?: string;
 }
 
 export function PopoverExpression(props: Props) {
-  const { title, value, children, color } = props;
+  const { title, value, children, color, dataTestSubj } = props;
   const [popoverOpen, setPopoverOpen] = useState(false);
 
   return (
@@ -27,6 +28,7 @@ export function PopoverExpression(props: Props) {
       closePopover={() => setPopoverOpen(false)}
       button={
         <EuiExpression
+          data-test-subj={dataTestSubj}
           description={title}
           value={value}
           isActive={popoverOpen}

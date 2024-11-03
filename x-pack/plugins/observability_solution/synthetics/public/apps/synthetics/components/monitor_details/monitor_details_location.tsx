@@ -8,8 +8,13 @@ import React, { useCallback } from 'react';
 
 import { useParams, useRouteMatch } from 'react-router-dom';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibanaSpace } from '../../../../hooks/use_kibana_space';
 import { useGetUrlParams } from '../../hooks';
-import { MONITOR_ERRORS_ROUTE, MONITOR_HISTORY_ROUTE } from '../../../../../common/constants';
+import {
+  MONITOR_ALERTS_ROUTE,
+  MONITOR_ERRORS_ROUTE,
+  MONITOR_HISTORY_ROUTE,
+} from '../../../../../common/constants';
 import { ClientPluginsStart } from '../../../../plugin';
 import { PLUGIN } from '../../../../../common/constants/plugin';
 import { useSelectedLocation } from './hooks/use_selected_location';
@@ -28,8 +33,16 @@ export const MonitorDetailsLocation = ({ isDisabled }: { isDisabled?: boolean })
 
   const isErrorsTab = useRouteMatch(MONITOR_ERRORS_ROUTE);
   const isHistoryTab = useRouteMatch(MONITOR_HISTORY_ROUTE);
+  const isAlertsTab = useRouteMatch(MONITOR_ALERTS_ROUTE);
 
-  const params = `&dateRangeStart=${dateRangeStart}&dateRangeEnd=${dateRangeEnd}`;
+  const { space } = useKibanaSpace();
+  const { spaceId } = useGetUrlParams();
+
+  let params = `&dateRangeStart=${dateRangeStart}&dateRangeEnd=${dateRangeEnd}`;
+
+  if (spaceId && spaceId !== space?.id) {
+    params += `&spaceId=${spaceId}`;
+  }
 
   return (
     <MonitorLocationSelect
@@ -39,7 +52,11 @@ export const MonitorDetailsLocation = ({ isDisabled }: { isDisabled?: boolean })
       selectedLocation={selectedLocation}
       onChange={useCallback(
         (id, label) => {
-          if (isErrorsTab) {
+          if (isAlertsTab) {
+            services.application.navigateToApp(PLUGIN.SYNTHETICS_PLUGIN_ID, {
+              path: `/monitor/${monitorId}/alerts?locationId=${id}${params}`,
+            });
+          } else if (isErrorsTab) {
             services.application.navigateToApp(PLUGIN.SYNTHETICS_PLUGIN_ID, {
               path: `/monitor/${monitorId}/errors?locationId=${id}${params}`,
             });
@@ -53,7 +70,7 @@ export const MonitorDetailsLocation = ({ isDisabled }: { isDisabled?: boolean })
             });
           }
         },
-        [isErrorsTab, isHistoryTab, monitorId, params, services.application]
+        [isAlertsTab, isErrorsTab, isHistoryTab, monitorId, params, services.application]
       )}
     />
   );

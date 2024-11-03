@@ -5,6 +5,7 @@
  * 2.0.
  */
 import React, { useCallback } from 'react';
+import type { EuiSelectProps } from '@elastic/eui';
 import { EuiSelect, EuiIcon, EuiToolTip } from '@elastic/eui';
 import * as i18n from './translations';
 
@@ -31,7 +32,7 @@ export const SelectInterval: React.FC<{
   interval: string;
   onChange: (interval: string) => void;
 }> = ({ interval, onChange }) => {
-  const onChangeCb = useCallback(
+  const onChangeCb = useCallback<NonNullable<EuiSelectProps['onChange']>>(
     (e) => {
       onChange(e.target.value);
     },

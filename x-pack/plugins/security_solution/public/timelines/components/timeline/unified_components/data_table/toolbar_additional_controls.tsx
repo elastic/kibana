@@ -17,6 +17,7 @@ import { StatefulRowRenderersBrowser } from '../../../row_renderers_browser';
 import * as i18n from './translations';
 import { EXIT_FULL_SCREEN_CLASS_NAME } from '../../../../../common/components/exit_full_screen';
 import { LastUpdatedContainer } from '../../footer/last_updated';
+import { RowRendererSwitch } from '../../../row_renderer_switch';
 
 export const isFullScreen = ({
   globalFullScreen,
@@ -68,6 +69,7 @@ export const ToolbarAdditionalControlsComponent: React.FC<Props> = ({ timelineId
 
   return (
     <>
+      <RowRendererSwitch timelineId={timelineId} />
       <StatefulRowRenderersBrowser timelineId={timelineId} />
       <LastUpdatedContainer updatedAt={updatedAt} />
       <span className="rightPosition">

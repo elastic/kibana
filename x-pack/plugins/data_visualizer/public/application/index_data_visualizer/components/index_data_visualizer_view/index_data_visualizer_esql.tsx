@@ -12,7 +12,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { usePageUrlState } from '@kbn/ml-url-state';
 
 import { FullTimeRangeSelector, DatePickerWrapper } from '@kbn/ml-date-picker';
-import { TextBasedLangEditor } from '@kbn/text-based-languages/public';
+import { ESQLLangEditor } from '@kbn/esql/public';
 import type { AggregateQuery } from '@kbn/es-query';
 
 import {
@@ -48,12 +48,12 @@ import type {
 } from '../../embeddables/grid_embeddable/types';
 import type { ESQLQuery } from '../../search_strategy/requests/esql_utils';
 import { isESQLQuery } from '../../search_strategy/requests/esql_utils';
+import { FieldStatsComponentType } from '../../constants/field_stats_component_type';
 
 export interface IndexDataVisualizerESQLProps {
   getAdditionalLinks?: GetAdditionalLinks;
 }
 const DEFAULT_ESQL_QUERY = { esql: '' };
-const expandCodeEditor = () => true;
 export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVisualizerProps) => {
   const { services } = useDataVisualizerKibana();
   const { data } = services;
@@ -115,7 +115,7 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
         if (!indexPattern) return;
         const dv = await getOrCreateDataViewByIndexPattern(
           data.dataViews,
-          indexPattern,
+          query.esql,
           currentDataView
         );
 
@@ -144,7 +144,7 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
       sessionId: undefined,
       visibleFieldNames: undefined,
       allowEditDataView: true,
-      id: 'esql_data_visualizer',
+      id: FieldStatsComponentType.EsqlDataVisualizer,
       indexPattern,
       esql: true,
     };
@@ -259,17 +259,25 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
           </EuiFlexGroup>
         </EuiPageTemplate.Header>
         <EuiSpacer size="m" />
-        <TextBasedLangEditor
-          query={localQuery}
-          onTextLangQueryChange={onTextLangQueryChange}
-          onTextLangQuerySubmit={onTextLangQuerySubmit}
-          expandCodeEditor={expandCodeEditor}
-          isCodeEditorExpanded={true}
-          detectTimestamp={true}
-          hideMinimizeButton={true}
-          hideRunQueryText={false}
-          isLoading={queryHistoryStatus ?? false}
-        />
+        <EuiFlexItem
+          grow={false}
+          data-test-subj="DataVisualizerESQLEditor"
+          css={css({
+            borderTop: euiTheme.euiBorderThin,
+            borderLeft: euiTheme.euiBorderThin,
+            borderRight: euiTheme.euiBorderThin,
+          })}
+        >
+          <ESQLLangEditor
+            query={localQuery}
+            onTextLangQueryChange={onTextLangQueryChange}
+            onTextLangQuerySubmit={onTextLangQuerySubmit}
+            detectedTimestamp={currentDataView?.timeFieldName}
+            hideRunQueryText={false}
+            isLoading={queryHistoryStatus ?? false}
+            displayDocumentationAsFlyout
+          />
+        </EuiFlexItem>
 
         <EuiFlexGroup gutterSize="m" direction={isWithinLargeBreakpoint ? 'column' : 'row'}>
           <EuiFlexItem>

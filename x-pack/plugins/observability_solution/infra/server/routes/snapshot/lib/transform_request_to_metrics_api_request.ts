@@ -5,9 +5,14 @@
  * 2.0.
  */
 
-import { findInventoryFields, findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
+import {
+  type MetricsAPIMetric,
+  type MetricsAPIRequest,
+  findInventoryFields,
+  findInventoryModel,
+} from '@kbn/metrics-data-access-plugin/common';
 import { TIMESTAMP_FIELD } from '../../../../common/constants';
-import { MetricsAPIMetric, MetricsAPIRequest, SnapshotRequest } from '../../../../common/http_api';
+import { SnapshotRequest } from '../../../../common/http_api';
 import { ESSearchClient } from '../../../lib/metrics/types';
 import { InfraSource } from '../../../lib/sources';
 import { createTimeRangeWithInterval } from './create_timerange_with_interval';

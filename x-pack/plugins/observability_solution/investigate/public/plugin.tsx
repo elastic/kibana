@@ -4,8 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { CoreSetup, CoreStart, PluginInitializerContext, Plugin } from '@kbn/core/public';
-import type { Logger } from '@kbn/logging';
+import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import {
+  ItemDefinition,
+  ItemDefinitionData,
+  ItemDefinitionParams,
+  ItemDefinitionRegistry,
+} from './investigation/item_definition_registry';
 import type {
   ConfigSchema,
   InvestigatePublicSetup,
@@ -13,7 +18,6 @@ import type {
   InvestigateSetupDependencies,
   InvestigateStartDependencies,
 } from './types';
-import { WidgetRegistry } from './widget_registry';
 
 export class InvestigatePlugin
   implements
@@ -24,22 +28,28 @@ export class InvestigatePlugin
       InvestigateStartDependencies
     >
 {
-  logger: Logger;
+  private itemDefinitionRegistry: ItemDefinitionRegistry = new ItemDefinitionRegistry();
 
-  widgetRegistry: WidgetRegistry = new WidgetRegistry();
+  constructor(context: PluginInitializerContext<ConfigSchema>) {}
 
-  constructor(context: PluginInitializerContext<ConfigSchema>) {
-    this.logger = context.logger.get();
-  }
   setup(coreSetup: CoreSetup, pluginsSetup: InvestigateSetupDependencies): InvestigatePublicSetup {
     return {
-      registerWidget: this.widgetRegistry.registerWidget,
+      registerItemDefinition: <
+        Params extends ItemDefinitionParams,
+        Data extends ItemDefinitionData
+      >(
+        definition: ItemDefinition<Params, Data>
+      ) => {
+        this.itemDefinitionRegistry.registerItem(definition);
+      },
     };
   }
 
   start(coreStart: CoreStart, pluginsStart: InvestigateStartDependencies): InvestigatePublicStart {
     return {
-      getWidgetDefinitions: this.widgetRegistry.getWidgetDefinitions,
+      getItemDefinitions: () => this.itemDefinitionRegistry.getItemDefinitions(),
+      getItemDefinitionByType: (type: string) =>
+        this.itemDefinitionRegistry.getItemDefinitionByType(type),
     };
   }
 }

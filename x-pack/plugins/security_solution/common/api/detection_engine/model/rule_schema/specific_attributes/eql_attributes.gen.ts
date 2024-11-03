@@ -14,7 +14,7 @@
  *   version: not applicable
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 export type EventCategoryOverride = z.infer<typeof EventCategoryOverride>;
 export const EventCategoryOverride = z.string();

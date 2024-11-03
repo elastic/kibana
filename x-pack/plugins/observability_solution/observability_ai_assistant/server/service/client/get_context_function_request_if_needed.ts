@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { findLastIndex } from 'lodash';
+import { findLastIndex, last } from 'lodash';
 import { Message, MessageAddEvent, MessageRole } from '../../../common';
 import { createFunctionRequestMessage } from '../../../common/utils/create_function_request_message';
 import { CONTEXT_FUNCTION_NAME } from '../../functions/context';
@@ -22,11 +22,10 @@ export function getContextFunctionRequestIfNeeded(
     .slice(indexOfLastUserMessage)
     .some((message) => message.message.name === CONTEXT_FUNCTION_NAME);
 
-  if (hasContextSinceLastUserMessage) {
+  const isLastMessageFunctionRequest = !!last(messages)?.message.function_call?.name;
+  if (hasContextSinceLastUserMessage || isLastMessageFunctionRequest) {
     return undefined;
   }
 
-  return createFunctionRequestMessage({
-    name: CONTEXT_FUNCTION_NAME,
-  });
+  return createFunctionRequestMessage({ name: CONTEXT_FUNCTION_NAME });
 }

@@ -8,22 +8,21 @@
 import { has } from 'lodash';
 import {
   MetricsUIAggregation,
-  MetricsUIAggregationRT,
-  ESSumBucketAggRT,
-  ESTermsWithAggregationRT,
-  ESDerivativeAggRT,
-  ESBasicMetricAggRT,
+  isBasicMetricAgg,
+  isDerivativeAgg,
+  isSumBucketAgg,
+  isTermsWithAggregation,
 } from '@kbn/metrics-data-access-plugin/common';
 import { SnapshotCustomMetricInput } from '../../../../../common/http_api';
 
 export const isMetricRate = (metric: MetricsUIAggregation | undefined): boolean => {
-  if (!MetricsUIAggregationRT.is(metric)) {
+  if (!metric) {
     return false;
   }
   const values = Object.values(metric);
   return (
-    values.some((agg) => ESDerivativeAggRT.is(agg)) &&
-    values.some((agg) => ESBasicMetricAggRT.is(agg) && has(agg, 'max'))
+    values.some((agg) => isDerivativeAgg(agg)) &&
+    values.some((agg) => isBasicMetricAgg(agg) && has(agg, 'max'))
   );
 };
 
@@ -32,13 +31,12 @@ export const isCustomMetricRate = (customMetric: SnapshotCustomMetricInput) => {
 };
 
 export const isInterfaceRateAgg = (metric: MetricsUIAggregation | undefined) => {
-  if (!MetricsUIAggregationRT.is(metric)) {
+  if (!metric) {
     return false;
   }
   const values = Object.values(metric);
   return (
-    values.some((agg) => ESTermsWithAggregationRT.is(agg)) &&
-    values.some((agg) => ESSumBucketAggRT.is(agg))
+    values.some((agg) => isTermsWithAggregation(agg)) && values.some((agg) => isSumBucketAgg(agg))
   );
 };
 

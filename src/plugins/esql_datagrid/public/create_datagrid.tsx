@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import React, { lazy } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import type { ESQLRow } from '@kbn/es-types';
@@ -22,9 +24,15 @@ interface ESQLDataGridProps {
   dataView: DataView;
   columns: DatatableColumn[];
   query: AggregateQuery;
+  /**
+   * Optional parameters
+   */
   flyoutType?: 'overlay' | 'push';
   isTableView?: boolean;
   initialColumns?: DatatableColumn[];
+  fullHeight?: boolean;
+  initialRowHeight?: number;
+  controlColumnIds?: string[]; // default: ['openDetails', 'select']
 }
 
 const DataGridLazy = withSuspense(lazy(() => import('./data_grid')));
@@ -34,6 +42,10 @@ export const ESQLDataGrid = (props: ESQLDataGridProps) => {
     const startServicesPromise = untilPluginStartServicesReady();
     return Promise.all([startServicesPromise]);
   }, []);
+
+  const getWrapper = (children: JSX.Element) => {
+    return props.fullHeight ? <div style={{ height: 500 }}>{children}</div> : <>{children}</>;
+  };
 
   const deps = value?.[0];
   if (loading || !deps) return <EuiLoadingSpinner />;
@@ -45,14 +57,15 @@ export const ESQLDataGrid = (props: ESQLDataGridProps) => {
       }}
     >
       <CellActionsProvider getTriggerCompatibleActions={deps.uiActions.getTriggerCompatibleActions}>
-        <div style={{ height: 500 }}>
+        {getWrapper(
           <DataGridLazy
             data={deps.data}
             fieldFormats={deps.fieldFormats}
             core={deps.core}
+            share={deps.share}
             {...props}
           />
-        </div>
+        )}
       </CellActionsProvider>
     </KibanaContextProvider>
   );

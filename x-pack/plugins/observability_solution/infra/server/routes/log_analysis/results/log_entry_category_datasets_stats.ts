@@ -6,9 +6,9 @@
  */
 
 import Boom from '@hapi/boom';
+import { createRouteValidationFunction } from '@kbn/io-ts-utils';
 import { logAnalysisResultsV1 } from '../../../../common/http_api';
 
-import { createValidationFunction } from '../../../../common/runtime_types';
 import type { InfraBackendLibs } from '../../../lib/infra_types';
 import { getLatestLogEntriesCategoriesDatasetsStats } from '../../../lib/log_analysis';
 import { isMlPrivilegesError } from '../../../lib/log_analysis/errors';
@@ -29,7 +29,7 @@ export const initGetLogEntryCategoryDatasetsStatsRoute = ({ framework }: InfraBa
         version: '1',
         validate: {
           request: {
-            body: createValidationFunction(
+            body: createRouteValidationFunction(
               logAnalysisResultsV1.getLatestLogEntryCategoryDatasetsStatsRequestPayloadRT
             ),
           },

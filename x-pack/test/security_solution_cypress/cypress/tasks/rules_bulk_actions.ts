@@ -273,10 +273,10 @@ export const typeInvestigationFields = (fields: string[]) => {
 
 export const checkOverwriteInvestigationFieldsCheckbox = () => {
   cy.get(RULES_BULK_EDIT_OVERWRITE_INVESTIGATION_FIELDS_CHECKBOX)
-    .should('have.text', "Overwrite all selected rules' custom highlighted fields")
+    .should('have.text', 'Overwrite the custom highlighted fields for the selected rules')
     .click();
   cy.get(RULES_BULK_EDIT_OVERWRITE_INVESTIGATION_FIELDS_CHECKBOX)
-    .should('have.text', "Overwrite all selected rules' custom highlighted fields")
+    .should('have.text', 'Overwrite the custom highlighted fields for the selected rules')
     .get('input')
     .should('be.checked');
 };

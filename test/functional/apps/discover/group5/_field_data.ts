@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -16,11 +17,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const queryBar = getService('queryBar');
   const browser = getService('browser');
-  const PageObjects = getPageObjects([
+  const { common, discover, timePicker, unifiedFieldList } = getPageObjects([
     'common',
-    'header',
     'discover',
-    'visualize',
     'timePicker',
     'unifiedFieldList',
   ]);
@@ -35,8 +34,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         defaultIndex: 'logstash-*',
         'discover:searchFieldsFromSource': true,
       });
-      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
-      await PageObjects.common.navigateToApp('discover');
+      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
+      await common.navigateToApp('discover');
     });
     describe('field data', function () {
       it('search php should show the correct hit count', async function () {
@@ -44,7 +43,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.try(async function () {
           await queryBar.setQuery('php');
           await queryBar.submitQuery();
-          const hitCount = await PageObjects.discover.getHitCount();
+          const hitCount = await discover.getHitCount();
           expect(hitCount).to.be(expectedHitCount);
         });
       });
@@ -53,11 +52,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // marks is the style that highlights the text in yellow
         await queryBar.setQuery('php');
         await queryBar.submitQuery();
-        await PageObjects.unifiedFieldList.clickFieldListItemAdd('extension');
-        const marks = await PageObjects.discover.getMarks();
+        await unifiedFieldList.clickFieldListItemAdd('extension');
+        const marks = await discover.getMarks();
         expect(marks.length).to.be.greaterThan(0);
         expect(marks.indexOf('php')).to.be(0);
-        await PageObjects.unifiedFieldList.clickFieldListItemRemove('extension');
+        await unifiedFieldList.clickFieldListItemRemove('extension');
       });
 
       it('search type:apache should show the correct hit count', async function () {
@@ -65,7 +64,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await queryBar.setQuery('type:apache');
         await queryBar.submitQuery();
         await retry.try(async function tryingForTime() {
-          const hitCount = await PageObjects.discover.getHitCount();
+          const hitCount = await discover.getHitCount();
           expect(hitCount).to.be(expectedHitCount);
         });
       });
@@ -76,8 +75,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'whitespace but "(" found.';
         await queryBar.setQuery('xxx(yyy))');
         await queryBar.submitQuery();
-        await PageObjects.discover.showsErrorCallout();
-        const message = await PageObjects.discover.getDiscoverErrorMessage();
+        await discover.showsErrorCallout();
+        const message = await discover.getDiscoverErrorMessage();
         expect(message).to.contain(expectedError);
       });
 
@@ -86,19 +85,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await queryBar.submitQuery();
         const currentUrl = await browser.getCurrentUrl();
         const [, hash] = currentUrl.split('#/');
-        await PageObjects.common.navigateToUrl(
+        await common.navigateToUrl(
           'discover',
           hash.replace('columns:!(_source)', 'columns:!(relatedContent)'),
           { useActualUrl: true }
         );
         await retry.try(async function tryingForTime() {
-          expect(await PageObjects.discover.getDocHeader()).to.contain('relatedContent');
+          expect(await discover.getDocHeader()).to.contain('relatedContent');
 
-          const field = await PageObjects.discover.getDocTableIndex(1);
+          const field = await discover.getDocTableIndex(1);
           expect(field).to.contain('og:description');
         });
 
-        const marks = await PageObjects.discover.getMarks();
+        const marks = await discover.getMarks();
         expect(marks.length).to.be(0);
       });
     });

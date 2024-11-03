@@ -1,0 +1,29 @@
+# POW
+
+The POW function calculates the value of a base number raised to the power of an exponent number.
+
+## Syntax
+
+`POW(base, exponent)`
+
+### Parameters
+
+#### base
+
+This is a numeric expression for the base.
+
+#### exponent
+
+This is a numeric expression for the exponent.
+
+## Examples
+
+```esql
+ROW base = 2.0, exponent = 2
+| EVAL result = POW(base, exponent)
+```
+
+```esql
+ROW base = 4, exponent = 0.5
+| EVAL s = POW(base, exponent)
+```

@@ -75,8 +75,8 @@ export const fetchCategoryCounts = async (
   categories: FetchCategoriesResponse,
   from: number | undefined,
   to: number | undefined,
-  logger: Logger,
-  emitError: (m: string) => void,
+  logger?: Logger,
+  emitError?: (m: string) => void,
   abortSignal?: AbortSignal
 ): Promise<FetchCategoriesResponse> => {
   const updatedCategories = cloneDeep(categories);
@@ -92,23 +92,22 @@ export const fetchCategoryCounts = async (
   let mSearchresponse;
 
   try {
-    mSearchresponse = await esClient.msearch(
-      { searches },
-      {
-        signal: abortSignal,
-        maxRetries: 0,
-      }
-    );
+    mSearchresponse = await esClient.msearch({ searches }, { signal: abortSignal, maxRetries: 0 });
   } catch (error) {
     if (!isRequestAbortedError(error)) {
-      logger.error(
-        `Failed to fetch category counts for field name "${fieldName}", got: \n${JSON.stringify(
-          error,
-          null,
-          2
-        )}`
-      );
-      emitError(`Failed to fetch category counts for field name "${fieldName}".`);
+      if (logger) {
+        logger.error(
+          `Failed to fetch category counts for field name "${fieldName}", got: \n${JSON.stringify(
+            error,
+            null,
+            2
+          )}`
+        );
+      }
+
+      if (emitError) {
+        emitError(`Failed to fetch category counts for field name "${fieldName}".`);
+      }
     }
     return updatedCategories;
   }
@@ -118,14 +117,19 @@ export const fetchCategoryCounts = async (
       updatedCategories.categories[index].count =
         (resp.hits.total as estypes.SearchTotalHits).value ?? 0;
     } else {
-      logger.error(
-        `Failed to fetch category count for category "${
-          updatedCategories.categories[index].key
-        }", got: \n${JSON.stringify(resp, null, 2)}`
-      );
-      emitError(
-        `Failed to fetch category count for category "${updatedCategories.categories[index].key}".`
-      );
+      if (logger) {
+        logger.error(
+          `Failed to fetch category count for category "${
+            updatedCategories.categories[index].key
+          }", got: \n${JSON.stringify(resp, null, 2)}`
+        );
+      }
+
+      if (emitError) {
+        emitError(
+          `Failed to fetch category count for category "${updatedCategories.categories[index].key}".`
+        );
+      }
     }
   }
 

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useMemo } from 'react';
@@ -11,6 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { BehaviorSubject, combineLatest, merge, type Observable, of, ReplaySubject } from 'rxjs';
 import { mergeMap, map, takeUntil, filter } from 'rxjs';
 import { parse } from 'url';
+import { setEuiDevProviderWarning } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
 
 import type { CoreContext } from '@kbn/core-base-browser-internal';
@@ -25,6 +27,7 @@ import type {
   ChromeNavLink,
   ChromeBadge,
   ChromeBreadcrumb,
+  ChromeSetBreadcrumbsParams,
   ChromeBreadcrumbsAppendExtension,
   ChromeGlobalHelpExtensionMenuLink,
   ChromeHelpExtension,
@@ -33,25 +36,27 @@ import type {
   ChromeSetProjectBreadcrumbsParams,
   NavigationTreeDefinition,
   AppDeepLinkId,
+  SolutionId,
 } from '@kbn/core-chrome-browser';
 import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 import type {
   SideNavComponent as ISideNavComponent,
   ChromeHelpMenuLink,
 } from '@kbn/core-chrome-browser';
+import { RecentlyAccessedService } from '@kbn/recently-accessed';
 
 import { Logger } from '@kbn/logging';
 import { DocTitleService } from './doc_title';
 import { NavControlsService } from './nav_controls';
 import { NavLinksService } from './nav_links';
 import { ProjectNavigationService } from './project_navigation';
-import { RecentlyAccessedService } from './recently_accessed';
 import { Header, LoadingIndicator, ProjectHeader } from './ui';
 import { registerAnalyticsContextProvider } from './register_analytics_context_provider';
 import type { InternalChromeStart } from './types';
 import { HeaderTopBanner } from './ui/header/header_top_banner';
 
 const IS_LOCKED_KEY = 'core.chrome.isLocked';
+const IS_SIDENAV_COLLAPSED_KEY = 'core.chrome.isSideNavCollapsed';
 const SNAPSHOT_REGEX = /-snapshot/i;
 
 interface ConstructorParams {
@@ -84,7 +89,10 @@ export class ChromeService {
   private readonly docTitle = new DocTitleService();
   private readonly projectNavigation: ProjectNavigationService;
   private mutationObserver: MutationObserver | undefined;
-  private readonly isSideNavCollapsed$ = new BehaviorSubject<boolean>(true);
+  private readonly isSideNavCollapsed$ = new BehaviorSubject(
+    localStorage.getItem(IS_SIDENAV_COLLAPSED_KEY) === 'true'
+  );
+  private readonly isFeedbackBtnVisible$ = new BehaviorSubject(false);
   private logger: Logger;
   private isServerless = false;
 
@@ -173,6 +181,50 @@ export class ChromeService {
     this.mutationObserver.observe(body, { attributes: true });
   };
 
+  // Ensure developers are notified if working in a context that lacks the EUI Provider.
+  private handleEuiDevProviderWarning = (notifications: NotificationsStart) => {
+    const isDev = this.params.coreContext.env.mode.name === 'development';
+    if (isDev) {
+      setEuiDevProviderWarning((providerError) => {
+        const errorObject = new Error(providerError.toString());
+        // 1. show a stack trace in the console
+        // eslint-disable-next-line no-console
+        console.error(errorObject);
+
+        // 2. store error in sessionStorage so it can be detected in testing
+        const storedError = {
+          message: providerError.toString(),
+          stack: errorObject.stack ?? 'undefined',
+          pageHref: window.location.href,
+          pageTitle: document.title,
+        };
+        sessionStorage.setItem('dev.euiProviderWarning', JSON.stringify(storedError));
+
+        // 3. error toast / popup
+        notifications.toasts.addDanger({
+          title: '`EuiProvider` is missing',
+          text: mountReactNode(
+            <p>
+              <FormattedMessage
+                id="core.chrome.euiDevProviderWarning"
+                defaultMessage="Kibana components must be wrapped in a React Context provider for full functionality and proper theming support. See {link}."
+                values={{
+                  link: (
+                    <a href="https://docs.elastic.dev/kibana-dev-docs/react-context">
+                      https://docs.elastic.dev/kibana-dev-docs/react-context
+                    </a>
+                  ),
+                }}
+              />
+            </p>
+          ),
+          'data-test-subj': 'core-chrome-euiDevProviderWarning-toast',
+          toastLifeTimeMs: 60 * 60 * 1000, // keep message visible for up to an hour
+        });
+      });
+    }
+  };
+
   public setup({ analytics }: SetupDeps) {
     const docTitle = this.docTitle.setup({ document: window.document });
     registerAnalyticsContextProvider(analytics, docTitle.title$);
@@ -188,6 +240,7 @@ export class ChromeService {
   }: StartDeps): Promise<InternalChromeStart> {
     this.initVisibility(application);
     this.handleEuiFullScreenChanges();
+    this.handleEuiDevProviderWarning(notifications);
 
     const globalHelpExtensionMenuLinks$ = new BehaviorSubject<ChromeGlobalHelpExtensionMenuLink[]>(
       []
@@ -252,7 +305,7 @@ export class ChromeService {
       chromeBreadcrumbs$: breadcrumbs$,
       logger: this.logger,
     });
-    const recentlyAccessed = await this.recentlyAccessed.start({ http });
+    const recentlyAccessed = this.recentlyAccessed.start({ http, key: 'recentlyAccessed' });
     const docTitle = this.docTitle.start();
     const { customBranding$ } = customBranding;
     const helpMenuLinks$ = navControls.getHelpMenuLinks$();
@@ -291,7 +344,10 @@ export class ChromeService {
       LinkId extends AppDeepLinkId = AppDeepLinkId,
       Id extends string = string,
       ChildrenId extends string = Id
-    >(id: string, navigationTree$: Observable<NavigationTreeDefinition<LinkId, Id, ChildrenId>>) {
+    >(
+      id: SolutionId,
+      navigationTree$: Observable<NavigationTreeDefinition<LinkId, Id, ChildrenId>>
+    ) {
       validateChromeStyle();
       projectNavigation.initNavigation(id, navigationTree$);
     }
@@ -303,6 +359,17 @@ export class ChromeService {
       projectNavigation.setProjectBreadcrumbs(breadcrumbs, params);
     };
 
+    const setClassicBreadcrumbs = (
+      newBreadcrumbs: ChromeBreadcrumb[],
+      { project }: ChromeSetBreadcrumbsParams = {}
+    ) => {
+      breadcrumbs$.next(newBreadcrumbs);
+      if (project) {
+        const { value: projectValue, absolute = false } = project;
+        setProjectBreadcrumbs(projectValue ?? [], { absolute });
+      }
+    };
+
     const setProjectHome = (homeHref: string) => {
       validateChromeStyle();
       projectNavigation.setProjectHome(homeHref);
@@ -311,6 +378,11 @@ export class ChromeService {
     const setProjectName = (projectName: string) => {
       validateChromeStyle();
       projectNavigation.setProjectName(projectName);
+    };
+
+    const setIsSideNavCollapsed = (isCollapsed: boolean) => {
+      localStorage.setItem(IS_SIDENAV_COLLAPSED_KEY, JSON.stringify(isCollapsed));
+      this.isSideNavCollapsed$.next(isCollapsed);
     };
 
     if (!this.params.browserSupportsCsp && injectedMetadata.getCspConfig().warnLegacyBrowsers) {
@@ -367,6 +439,7 @@ export class ChromeService {
 
             return (
               <ProjectHeader
+                isServerless={this.isServerless}
                 application={application}
                 globalHelpExtensionMenuLinks$={globalHelpExtensionMenuLinks$}
                 actionMenu$={application.currentActionMenu$}
@@ -384,9 +457,8 @@ export class ChromeService {
                 docLinks={docLinks}
                 kibanaVersion={injectedMetadata.getKibanaVersion()}
                 prependBasePath={http.basePath.prepend}
-                toggleSideNav={(isCollapsed) => {
-                  this.isSideNavCollapsed$.next(isCollapsed);
-                }}
+                isSideNavCollapsed$={this.isSideNavCollapsed$}
+                toggleSideNav={setIsSideNavCollapsed}
               >
                 <SideNavComponent activeNodes={activeNodes} />
               </ProjectHeader>
@@ -398,6 +470,7 @@ export class ChromeService {
 
         return (
           <Header
+            isServerless={this.isServerless}
             loadingCount$={http.getLoadingCount$()}
             application={application}
             headerBanner$={headerBanner$.pipe(takeUntil(this.stop$))}
@@ -450,9 +523,7 @@ export class ChromeService {
 
       getBreadcrumbs$: () => breadcrumbs$.pipe(takeUntil(this.stop$)),
 
-      setBreadcrumbs: (newBreadcrumbs: ChromeBreadcrumb[]) => {
-        breadcrumbs$.next(newBreadcrumbs);
-      },
+      setBreadcrumbs: setClassicBreadcrumbs,
 
       getBreadcrumbsAppendExtension$: () => breadcrumbsAppendExtension$.pipe(takeUntil(this.stop$)),
 
@@ -509,7 +580,17 @@ export class ChromeService {
       getBodyClasses$: () => bodyClasses$.pipe(takeUntil(this.stop$)),
       setChromeStyle,
       getChromeStyle$: () => chromeStyle$,
-      getIsSideNavCollapsed$: () => this.isSideNavCollapsed$.asObservable(),
+      sideNav: {
+        getIsCollapsed$: () => this.isSideNavCollapsed$.asObservable(),
+        setIsCollapsed: setIsSideNavCollapsed,
+        getPanelSelectedNode$: projectNavigation.getPanelSelectedNode$.bind(projectNavigation),
+        setPanelSelectedNode: projectNavigation.setPanelSelectedNode.bind(projectNavigation),
+        getIsFeedbackBtnVisible$: () =>
+          combineLatest([this.isFeedbackBtnVisible$, this.isSideNavCollapsed$]).pipe(
+            map(([isVisible, isCollapsed]) => isVisible && !isCollapsed)
+          ),
+        setIsFeedbackBtnVisible: (isVisible: boolean) => this.isFeedbackBtnVisible$.next(isVisible),
+      },
       getActiveSolutionNavId$: () => projectNavigation.getActiveSolutionNavId$(),
       project: {
         setHome: setProjectHome,
@@ -519,6 +600,7 @@ export class ChromeService {
         getNavigationTreeUi$: () => projectNavigation.getNavigationTreeUi$(),
         setSideNavComponent: setProjectSideNavComponent,
         setBreadcrumbs: setProjectBreadcrumbs,
+        getBreadcrumbs$: projectNavigation.getProjectBreadcrumbs$.bind(projectNavigation),
         getActiveNavigationNodes$: () => projectNavigation.getActiveNodes$(),
         updateSolutionNavigations: projectNavigation.updateSolutionNavigations,
         changeActiveSolutionNavigation: projectNavigation.changeActiveSolutionNavigation,

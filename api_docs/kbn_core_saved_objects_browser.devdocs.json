@@ -3,26 +3,10 @@
   "client": {
     "classes": [],
     "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-saved-objects-browser",
-        "id": "def-common.SavedObjectsStart",
+        "id": "def-public.SavedObjectsStart",
         "type": "Interface",
         "tags": [
           "deprecated"
@@ -86,22 +70,22 @@
             "path": "x-pack/plugins/transform/public/app/app_dependencies.tsx"
           },
           {
-            "plugin": "@kbn/core-saved-objects-browser-mocks",
-            "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/saved_objects_service.mock.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-browser-mocks",
-            "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/saved_objects_service.mock.ts"
-          },
-          {
             "plugin": "@kbn/core",
             "path": "src/core/server/index.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-browser-mocks",
+            "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/saved_objects_service.mock.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-browser-mocks",
+            "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/saved_objects_service.mock.ts"
           }
         ],
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-browser",
-            "id": "def-common.SavedObjectsStart.client",
+            "id": "def-public.SavedObjectsStart.client",
             "type": "Object",
             "tags": [],
             "label": "client",
@@ -111,9 +95,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-api-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreSavedObjectsApiBrowserPluginApi",
-                "section": "def-common.SavedObjectsClientContract",
+                "section": "def-public.SavedObjectsClientContract",
                 "text": "SavedObjectsClientContract"
               }
             ],
@@ -125,6 +109,22 @@
         "initialIsOpen": false
       }
     ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
     "enums": [],
     "misc": [],
     "objects": []

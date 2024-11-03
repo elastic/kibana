@@ -44,6 +44,7 @@ export const syncJobObjects = schema.object({ simulate: schema.maybe(schema.bool
 export const syncCheckSchema = schema.object({ mlSavedObjectType: schema.maybe(schema.string()) });
 
 export const canDeleteMLSpaceAwareItemsSchema = schema.object({
-  /** List of job or trained model IDs. */
-  ids: schema.arrayOf(schema.string()),
+  ids: schema.arrayOf(schema.string(), {
+    meta: { description: 'List of job or trained model IDs' },
+  }),
 });

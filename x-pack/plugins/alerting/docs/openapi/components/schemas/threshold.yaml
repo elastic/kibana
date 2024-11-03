@@ -4,5 +4,4 @@ description: >
 type: array
 items:
   type: integer
-  examples:
-    - 4000
+  example: 4000

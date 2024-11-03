@@ -12,8 +12,7 @@ import * as stories from './link_preview.stories';
 
 const { Example } = composeStories(stories);
 
-export const removeExternalLinkText = (str: string) =>
-  str.replace(/\(opens in a new tab or window\)/g, '');
+export const removeExternalLinkText = (str: string) => str.replace(/\(external[^)]*\)/g, '');
 
 describe('LinkPreview', () => {
   const getElementValue = (container: HTMLElement, id: string) =>

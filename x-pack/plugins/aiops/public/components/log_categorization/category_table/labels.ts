@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-export function getLabels(isFlyout: boolean) {
+export function getLabels(inDiscover: boolean) {
   const flyoutFilterIn = (single: boolean) =>
     i18n.translate('xpack.aiops.logCategorization.flyout.filterIn', {
       defaultMessage: 'Filter for {values, plural, one {pattern} other {patterns}}',
@@ -38,18 +38,8 @@ export function getLabels(isFlyout: boolean) {
       },
     });
 
-  return isFlyout
+  return inDiscover
     ? {
-        multiSelect: {
-          in: flyoutFilterIn(false),
-          out: flyoutFilterOut(false),
-        },
-        singleSelect: {
-          in: flyoutFilterIn(true),
-          out: flyoutFilterOut(true),
-        },
-      }
-    : {
         multiSelect: {
           in: aiopsFilterIn(false),
           out: aiopsFilterOut(false),
@@ -57,6 +47,16 @@ export function getLabels(isFlyout: boolean) {
         singleSelect: {
           in: aiopsFilterIn(true),
           out: aiopsFilterOut(true),
+        },
+      }
+    : {
+        multiSelect: {
+          in: flyoutFilterIn(false),
+          out: flyoutFilterOut(false),
+        },
+        singleSelect: {
+          in: flyoutFilterIn(true),
+          out: flyoutFilterOut(true),
         },
       };
 }

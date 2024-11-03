@@ -6,9 +6,8 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import type { TransportResult } from '@elastic/elasticsearch';
-import type { SearchRequest } from '@kbn/data-plugin/common';
 import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
 import {
   ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
@@ -203,24 +202,22 @@ const getActionRequestsResult = async ({
     indexName: ENDPOINT_ACTIONS_INDEX,
   });
 
-  const actionsSearchQuery: SearchRequest = {
+  const actionsSearchQuery: estypes.SearchRequest = {
     index: hasLogsEndpointActionsIndex ? ACTION_REQUEST_INDICES : AGENT_ACTIONS_INDEX,
     size,
     from,
-    body: {
-      query: {
-        bool: {
-          filter: actionsFilters,
+    query: {
+      bool: {
+        filter: actionsFilters,
+      },
+    },
+    sort: [
+      {
+        '@timestamp': {
+          order: 'desc',
         },
       },
-      sort: [
-        {
-          '@timestamp': {
-            order: 'desc',
-          },
-        },
-      ],
-    },
+    ],
   };
 
   let actionRequests: TransportResult<estypes.SearchResponse<unknown>, unknown>;
@@ -268,16 +265,14 @@ const getActionResponsesResult = async ({
     indexName: ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
   });
 
-  const responsesSearchQuery: SearchRequest = {
+  const responsesSearchQuery: estypes.SearchRequest = {
     index: hasLogsEndpointActionResponsesIndex
       ? ACTION_RESPONSE_INDICES
       : AGENT_ACTIONS_RESULTS_INDEX,
     size: 1000,
-    body: {
-      query: {
-        bool: {
-          filter: responsesFilters,
-        },
+    query: {
+      bool: {
+        filter: responsesFilters,
       },
     },
   };

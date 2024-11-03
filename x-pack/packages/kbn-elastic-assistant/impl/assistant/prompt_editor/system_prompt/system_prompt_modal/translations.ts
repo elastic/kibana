@@ -20,13 +20,6 @@ export const SETTINGS_DESCRIPTION = i18n.translate(
       'Create and manage System Prompts. System Prompts are configurable chunks of context that are always sent for a given conversation.',
   }
 );
-export const ADD_SYSTEM_PROMPT_MODAL_TITLE = i18n.translate(
-  'xpack.elasticAssistant.assistant.promptEditor.systemPrompt.settings.modalTitle',
-  {
-    defaultMessage: 'System Prompts',
-  }
-);
-
 export const SYSTEM_PROMPT_NAME = i18n.translate(
   'xpack.elasticAssistant.assistant.promptEditor.systemPrompt.settings.nameLabel',
   {
@@ -65,7 +58,7 @@ export const SYSTEM_PROMPT_DEFAULT_NEW_CONVERSATION = i18n.translate(
 export const SYSTEM_PROMPT_DEFAULT_CONVERSATIONS_HELP_TEXT = i18n.translate(
   'xpack.elasticAssistant.assistant.promptEditor.systemPrompt.settings.defaultConversationsHelpText',
   {
-    defaultMessage: 'Conversations that should use this System Prompt by default',
+    defaultMessage: 'Conversations that should use this System Prompt by default.',
   }
 );
 

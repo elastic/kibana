@@ -47,6 +47,17 @@ export interface VisualizeQueryResponsev1 {
   };
 }
 
-export type VisualizeQueryResponse = VisualizeQueryResponsev0 | VisualizeQueryResponsev1;
+export type VisualizeQueryResponsev2 = VisualizeQueryResponsev1 & {
+  data: {
+    correctedQuery: string;
+  };
+};
 
-export type VisualizeESQLFunctionArguments = FromSchema<typeof visualizeESQLFunction['parameters']>;
+export type VisualizeQueryResponse =
+  | VisualizeQueryResponsev0
+  | VisualizeQueryResponsev1
+  | VisualizeQueryResponsev2;
+
+export type VisualizeESQLFunctionArguments = FromSchema<
+  (typeof visualizeESQLFunction)['parameters']
+>;

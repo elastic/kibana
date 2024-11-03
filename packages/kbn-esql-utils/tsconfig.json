@@ -24,6 +24,8 @@
     "@kbn/expressions-plugin",
     "@kbn/field-types",
     "@kbn/es-types",
-    "@kbn/i18n"
+    "@kbn/i18n",
+    "@kbn/datemath",
+    "@kbn/es-query"
   ]
 }

@@ -10,7 +10,7 @@
  */
 
 import PropTypes from 'prop-types';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 import {
   EuiButtonEmpty,
@@ -23,12 +23,32 @@ import {
 } from '@elastic/eui';
 
 import { MessageCallOut } from '../../../components/message_call_out';
+import { useMlKibana } from '../../../contexts/kibana';
+import { getMlNodeCount } from '../../../ml_nodes_check/check_ml_nodes';
 import { ForecastsList } from './forecasts_list';
 import { RunControls } from './run_controls';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
 export function Modal(props) {
+  const [mlNodesAvailable, setMlNodesAvailable] = useState(false);
+  const {
+    services: {
+      mlServices: { mlApi },
+    },
+  } = useMlKibana();
+
+  useEffect(
+    function prepMlNodeCheck() {
+      getMlNodeCount(mlApi)
+        .then(({ count, lazyNodeCount }) => {
+          setMlNodesAvailable(count !== 0 || lazyNodeCount !== 0);
+        })
+        .catch(console.error);
+    },
+    [mlApi]
+  );
+
   return (
     <EuiModal onClose={props.close} maxWidth={860} data-test-subj="mlModalForecast">
       <EuiModalHeader>
@@ -50,11 +70,15 @@ export function Modal(props) {
 
         {props.forecasts.length > 0 && (
           <React.Fragment>
-            <ForecastsList forecasts={props.forecasts} viewForecast={props.viewForecast} />
+            <ForecastsList
+              forecasts={props.forecasts}
+              viewForecast={props.viewForecast}
+              selectedForecastId={props.selectedForecastId}
+            />
             <EuiSpacer />
           </React.Fragment>
         )}
-        <RunControls {...props} />
+        <RunControls {...props} mlNodesAvailable={mlNodesAvailable} jobState={props.jobState} />
       </EuiModalBody>
 
       <EuiModalFooter>
@@ -84,4 +108,5 @@ Modal.propType = {
   jobOpeningState: PropTypes.number,
   jobClosingState: PropTypes.number,
   messages: PropTypes.array,
+  selectedForecastId: PropTypes.string,
 };

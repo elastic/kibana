@@ -66,12 +66,6 @@ export const OutputFormKafkaSection: React.FunctionComponent<Props> = (props) =>
           data-test-subj="settingsOutputsFlyout.kafkaVersionInput"
           {...inputs.kafkaVersionInput.props}
           options={kafkaVersionOptions}
-          placeholder={i18n.translate(
-            'xpack.fleet.settings.editOutputFlyout.kafkaVersionInputPlaceholder',
-            {
-              defaultMessage: 'Specify version',
-            }
-          )}
         />
       </EuiFormRow>
 

@@ -314,7 +314,7 @@ export const ExecutionHistoryPanel = () => {
                 <FormattedMessage
                   id="xpack.watcher.sections.watchHistory.watchHistoryDetail.title"
                   defaultMessage="Executed on {date}"
-                  values={{ date: watchHistoryDetails.startTime }}
+                  values={{ date: watchHistoryDetails.startTime?.format() }}
                 />
               </h3>
             </EuiTitle>

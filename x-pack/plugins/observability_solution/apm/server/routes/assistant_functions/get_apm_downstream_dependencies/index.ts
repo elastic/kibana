@@ -17,12 +17,12 @@ import { NodeType } from '../../../../common/connections';
 
 export const downstreamDependenciesRouteRt = t.intersection([
   t.type({
-    'service.name': t.string,
+    serviceName: t.string,
     start: t.string,
     end: t.string,
   }),
   t.partial({
-    'service.environment': t.string,
+    serviceEnvironment: t.string,
   }),
 ]);
 
@@ -50,8 +50,8 @@ export async function getAssistantDownstreamDependencies({
     end,
     apmEventClient,
     filter: [
-      ...termQuery(SERVICE_NAME, args['service.name']),
-      ...environmentQuery(args['service.environment'] ?? ENVIRONMENT_ALL.value),
+      ...termQuery(SERVICE_NAME, args.serviceName),
+      ...environmentQuery(args.serviceEnvironment ?? ENVIRONMENT_ALL.value),
     ],
     randomSampler,
   });

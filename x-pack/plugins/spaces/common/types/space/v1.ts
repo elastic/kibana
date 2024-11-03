@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { OnBoardingDefaultSolution } from '@kbn/cloud-plugin/common';
+import type { SolutionId } from '@kbn/core-chrome-browser';
+
+import type { SOLUTION_VIEW_CLASSIC } from '../../constants';
+
+export type SolutionView = SolutionId | typeof SOLUTION_VIEW_CLASSIC;
 
 /**
  * A Space.
@@ -64,7 +68,7 @@ export interface Space {
   /**
    * Solution selected for this space.
    */
-  solution?: OnBoardingDefaultSolution | 'classic';
+  solution?: SolutionView;
 }
 
 /**

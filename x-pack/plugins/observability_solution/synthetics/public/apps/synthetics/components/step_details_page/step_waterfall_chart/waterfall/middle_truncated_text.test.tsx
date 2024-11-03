@@ -26,14 +26,12 @@ describe('getChunks', () => {
 });
 
 describe('Component', () => {
-  const url = 'http://www.elastic.co';
   it('renders truncated text and aria label', () => {
     const { getByText, getByLabelText } = render(
       <MiddleTruncatedText
         index={1}
-        text={longString}
         ariaLabel={longString}
-        url={url}
+        url={longString}
         onClick={jest.fn()}
         highestIndex={10}
       />
@@ -47,13 +45,7 @@ describe('Component', () => {
 
   it('renders screen reader only text', () => {
     const { getByTestId } = render(
-      <MiddleTruncatedText
-        index={1}
-        text={longString}
-        ariaLabel={longString}
-        url={url}
-        highestIndex={10}
-      />
+      <MiddleTruncatedText index={1} ariaLabel={longString} url={longString} highestIndex={10} />
     );
 
     const { getByText } = within(getByTestId('middleTruncatedTextSROnly'));
@@ -63,17 +55,11 @@ describe('Component', () => {
 
   it('renders external link', () => {
     const { getByText } = render(
-      <MiddleTruncatedText
-        index={1}
-        text={longString}
-        ariaLabel={longString}
-        url={url}
-        highestIndex={10}
-      />
+      <MiddleTruncatedText index={1} ariaLabel={longString} url={longString} highestIndex={10} />
     );
     const link = getByText('Open resource in new tab').closest('a');
 
-    expect(link).toHaveAttribute('href', url);
+    expect(link).toHaveAttribute('href', longString);
     expect(link).toHaveAttribute('target', '_blank');
   });
 
@@ -82,9 +68,8 @@ describe('Component', () => {
     const { getByTestId } = render(
       <MiddleTruncatedText
         index={1}
-        text={longString}
         ariaLabel={longString}
-        url={url}
+        url={longString}
         onClick={handleClick}
         highestIndex={10}
       />

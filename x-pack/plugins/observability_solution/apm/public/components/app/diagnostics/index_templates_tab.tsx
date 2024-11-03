@@ -22,7 +22,7 @@ export function DiagnosticsIndexTemplates() {
   }
 
   const items = diagnosticsBundle?.apmIndexTemplates ?? [];
-  const columns: Array<EuiBasicTableColumn<typeof items[0]>> = [
+  const columns: Array<EuiBasicTableColumn<(typeof items)[0]>> = [
     {
       name: 'Index template name',
       field: 'name',

@@ -20,17 +20,12 @@ exports[`<SimplePrivilegeForm> renders without crashing 1`] = `
     </EuiFlexItem>
     <EuiFlexItem>
       <EuiFormRow
-        describedByIds={Array []}
-        display="row"
-        hasChildLabel={true}
-        hasEmptyLabelSpace={false}
         label={
           <Memo(MemoizedFormattedMessage)
             defaultMessage="Kibana privileges"
             id="xpack.security.management.editRole.simplePrivilegeForm.kibanaPrivilegesTitle"
           />
         }
-        labelType="label"
       >
         <EuiSuperSelect
           compressed={false}

@@ -45,7 +45,7 @@ export const ExtendedTemplate: FunctionComponent<Props> = (props) => {
   } = props;
   const chain = get(argValue, 'chain.0', {});
   const chainArgs = get(chain, 'arguments', {});
-  const selectedSeries = get(chainArgs, 'label.0', '');
+  const selectedSeries = get(chainArgs, 'label.0', '') as string;
 
   let name = '';
   if (typeInstance) {
@@ -101,7 +101,7 @@ export const ExtendedTemplate: FunctionComponent<Props> = (props) => {
               <EuiFlexItem>
                 <EuiFormRow label={strings.getLineLabel()} display="rowCompressed">
                   <EuiSelect
-                    value={get(chainArgs, 'lines.0', 0)}
+                    value={get(chainArgs, 'lines.0', 0) as number}
                     options={values}
                     compressed
                     onChange={(ev) => handleChange('lines', ev)}
@@ -113,7 +113,7 @@ export const ExtendedTemplate: FunctionComponent<Props> = (props) => {
               <EuiFlexItem>
                 <EuiFormRow label={strings.getBarLabel()} display="rowCompressed">
                   <EuiSelect
-                    value={get(chainArgs, 'bars.0', 0)}
+                    value={get(chainArgs, 'bars.0', 0) as number}
                     options={values}
                     compressed
                     onChange={(ev) => handleChange('bars', ev)}
@@ -125,7 +125,7 @@ export const ExtendedTemplate: FunctionComponent<Props> = (props) => {
               <EuiFlexItem>
                 <EuiFormRow label={strings.getPointLabel()} display="rowCompressed">
                   <EuiSelect
-                    value={get(chainArgs, 'points.0', 0)}
+                    value={get(chainArgs, 'points.0', 0) as number}
                     options={values}
                     compressed
                     onChange={(ev) => handleChange('points', ev)}

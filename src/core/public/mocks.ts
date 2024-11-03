@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { createMemoryHistory } from 'history';
@@ -20,6 +21,7 @@ export { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 export { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 export { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 export { executionContextServiceMock } from '@kbn/core-execution-context-browser-mocks';
+export { coreFeatureFlagsMock } from '@kbn/core-feature-flags-browser-mocks';
 export { fatalErrorsServiceMock } from '@kbn/core-fatal-errors-browser-mocks';
 export { httpServiceMock } from '@kbn/core-http-browser-mocks';
 export { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';

@@ -71,9 +71,9 @@
           "(schema: ZodSchema) => ",
           {
             "pluginId": "@kbn/core-http-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.RouteValidationFunction",
+            "section": "def-server.RouteValidationFunction",
             "text": "RouteValidationFunction"
           },
           "<Type>"

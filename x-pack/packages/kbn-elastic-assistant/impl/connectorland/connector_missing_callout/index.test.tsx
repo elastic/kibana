@@ -20,6 +20,7 @@ describe('connectorMissingCallout', () => {
         hasConnectorsAllPrivilege: false,
         hasConnectorsReadPrivilege: true,
         hasUpdateAIAssistantAnonymization: true,
+        hasManageGlobalKnowledgeBase: true,
         isAssistantEnabled: true,
       };
 
@@ -30,7 +31,6 @@ describe('connectorMissingCallout', () => {
               isConnectorConfigured={false}
               isSettingsModalVisible={false}
               setIsSettingsModalVisible={jest.fn()}
-              isFlyoutMode={false}
             />
           </TestProviders>
         );
@@ -45,7 +45,6 @@ describe('connectorMissingCallout', () => {
               isConnectorConfigured={true}
               isSettingsModalVisible={false}
               setIsSettingsModalVisible={jest.fn()}
-              isFlyoutMode={false}
             />
           </TestProviders>
         );
@@ -60,6 +59,7 @@ describe('connectorMissingCallout', () => {
         hasConnectorsAllPrivilege: false,
         hasConnectorsReadPrivilege: false,
         hasUpdateAIAssistantAnonymization: true,
+        hasManageGlobalKnowledgeBase: false,
         isAssistantEnabled: true,
       };
 
@@ -70,7 +70,6 @@ describe('connectorMissingCallout', () => {
               isConnectorConfigured={true}
               isSettingsModalVisible={false}
               setIsSettingsModalVisible={jest.fn()}
-              isFlyoutMode={false}
             />
           </TestProviders>
         );

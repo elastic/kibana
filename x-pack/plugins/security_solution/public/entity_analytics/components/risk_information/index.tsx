@@ -37,7 +37,7 @@ import {
   CriticalityLevels,
   CriticalityModifiers,
 } from '../../../../common/entity_analytics/asset_criticality';
-import { RiskScoreDocLink } from '../risk_score_onboarding/risk_score_doc_link';
+import { EntityAnalyticsLearnMoreLink } from '../risk_score_onboarding/entity_analytics_doc_link';
 import { BETA } from '../risk_score_onboarding/translations';
 import { AssetCriticalityBadge } from '../asset_criticality';
 
@@ -262,14 +262,7 @@ export const RiskInformationFlyout = ({ handleOnClose }: { handleOnClose: () => 
           </SpacedOrderedList>
         </EuiText>
         <EuiSpacer size="m" />
-        <RiskScoreDocLink
-          title={
-            <FormattedMessage
-              id="xpack.securitySolution.riskInformation.learnMore"
-              defaultMessage="Learn more about Entity risk"
-            />
-          }
-        />
+        <EntityAnalyticsLearnMoreLink />
       </EuiFlyoutBody>
 
       <EuiFlyoutFooter>

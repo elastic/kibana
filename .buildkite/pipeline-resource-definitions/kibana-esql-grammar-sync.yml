@@ -51,3 +51,5 @@ spec:
           cronline: 0 0 * * 1 America/New_York
           message: Weekly build
           branch: main
+      tags:
+        - kibana

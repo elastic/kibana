@@ -55,4 +55,16 @@ describe('ConfirmDeployAgentPolicyModal', () => {
       'Agent policies that will be updated to remove this integration policy:Agent policy 3'
     );
   });
+
+  it('should render no agent policies message when not adding/removing agent policies', () => {
+    testRenderer = createFleetTestRendererMock();
+    render({
+      agentCount: 0,
+      agentPolicies: [],
+      agentPoliciesToRemove: [],
+    });
+    const calloutText = renderResult.getByTestId('confirmNoPoliciesCallout').textContent;
+    expect(calloutText).toContain('No agent policies selected');
+    expect(calloutText).toContain('This integration will not be added to any agent policies.');
+  });
 });

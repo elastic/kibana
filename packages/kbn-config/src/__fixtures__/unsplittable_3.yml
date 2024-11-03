@@ -1,0 +1,7 @@
+
+'[foo.bar]': "foobar"
+list:
+  - id: "id1"
+    '[a.b]': ['foo', 'bar']
+    test.this.out: ['foo', 'bar']
+

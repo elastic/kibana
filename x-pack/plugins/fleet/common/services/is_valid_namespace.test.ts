@@ -14,6 +14,10 @@ describe('Fleet - isValidNamespace', () => {
     expect(isValidNamespace('testlength😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀').valid).toBe(
       true
     );
+    expect(isValidNamespace('', true).valid).toBe(true);
+    expect(isValidNamespace('', true, ['test']).valid).toBe(true);
+    expect(isValidNamespace('test', false, ['test']).valid).toBe(true);
+    expect(isValidNamespace('test_dev', false, ['test']).valid).toBe(true);
   });
 
   it('returns false for invalid namespaces', () => {
@@ -36,5 +40,6 @@ describe('Fleet - isValidNamespace', () => {
         'testlength😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀'
       ).valid
     ).toBe(false);
+    expect(isValidNamespace('default', false, ['test']).valid).toBe(false);
   });
 });

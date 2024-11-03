@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiLink } from '@elastic/eui';
+import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { FieldConfig, UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
@@ -42,18 +42,28 @@ const TeamsActionFields: React.FunctionComponent<ActionConnectorFieldsProps> = (
   const { docLinks } = useKibana().services;
 
   return (
-    <UseField
-      path="secrets.webhookUrl"
-      config={getWebhookUrlConfig(docLinks)}
-      component={Field}
-      componentProps={{
-        euiFieldProps: {
-          readOnly,
-          'data-test-subj': 'teamsWebhookUrlInput',
-          fullWidth: true,
-        },
-      }}
-    />
+    <>
+      <UseField
+        path="secrets.webhookUrl"
+        config={getWebhookUrlConfig(docLinks)}
+        component={Field}
+        componentProps={{
+          euiFieldProps: {
+            readOnly,
+            'data-test-subj': 'teamsWebhookUrlInput',
+            fullWidth: true,
+          },
+        }}
+      />
+      <EuiSpacer size="m" />
+      <EuiCallOut
+        size="s"
+        color="warning"
+        iconType="warning"
+        data-test-subj={'microsoftTeamsWebhookDeprecationWarning'}
+        title={i18n.WEBHOOK_DEPRECATION_WARNING}
+      />
+    </>
   );
 };
 

@@ -1,17 +1,14 @@
 fields:
   description: The fields specified in the case configuration are not used and are not propagated to individual cases, therefore it is recommended to set it to `null`.
-  type:
-    - "object"
-    - "null"
+  nullable: true
+  type: object
 id:
   description: The identifier for the connector. If you do not want a default connector, use `none`. To retrieve connector IDs, use the find connectors API.
   type: string
-  examples:
-    - none
+  example: none
 name:
   description: The name of the connector. If you do not want a default connector, use `none`. To retrieve connector names, use the find connectors API.
   type: string
-  examples:
-    - none
+  example: none
 type:
   $ref: 'connector_types.yaml'

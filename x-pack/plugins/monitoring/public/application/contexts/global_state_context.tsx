@@ -49,7 +49,7 @@ export const GlobalStateProvider: FC<PropsWithChildren<GlobalStateProviderProps>
 
   const initialState: any = globalState.getState();
   for (const key in initialState) {
-    if (!initialState.hasOwnProperty(key)) {
+    if (!Object.hasOwn(initialState, key)) {
       continue;
     }
     localState[key] = initialState[key];

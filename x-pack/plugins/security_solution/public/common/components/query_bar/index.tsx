@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { cloneDeep } from 'lodash';
+import { cloneDeep, isEmpty } from 'lodash';
 import React, { memo, useMemo, useCallback, useState, useEffect } from 'react';
 import deepEqual from 'fast-deep-equal';
 
@@ -125,7 +125,7 @@ export const QueryBar = memo<QueryBarComponentProps>(
       let dv: DataView;
       if (isDataView(indexPattern)) {
         setDataView(indexPattern);
-      } else if (!isEsql) {
+      } else if (!isEsql && !isEmpty(indexPattern.title)) {
         const createDataView = async () => {
           dv = await data.dataViews.create({ id: indexPattern.title, title: indexPattern.title });
           setDataView(dv);
@@ -180,7 +180,7 @@ export const QueryBar = memo<QueryBarComponentProps>(
         timeHistory={timeHistory}
         dataTestSubj={dataTestSubj}
         savedQuery={savedQuery}
-        displayStyle={displayStyle}
+        displayStyle={isEsql ? 'withBorders' : displayStyle}
         isDisabled={isDisabled}
       />
     );

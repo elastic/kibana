@@ -17,7 +17,7 @@ export function transformResults(
   const resultsMap = new Map<string, GeoContainmentAlertInstanceState[]>();
   const boundarySplitBuckets = results?.aggregations?.shapes?.buckets ?? {};
   for (const boundaryId in boundarySplitBuckets) {
-    if (!boundarySplitBuckets.hasOwnProperty(boundaryId)) {
+    if (!Object.hasOwn(boundarySplitBuckets, boundaryId)) {
       continue;
     }
 

@@ -293,7 +293,7 @@ function FieldListItemComponent(
 
             {isSemanticText && (
               <EuiFlexItem grow={false}>
-                <EuiBadge color="hollow">{source.inference_id}</EuiBadge>
+                <EuiBadge color="hollow">{source.inference_id as string}</EuiBadge>
               </EuiFlexItem>
             )}
 

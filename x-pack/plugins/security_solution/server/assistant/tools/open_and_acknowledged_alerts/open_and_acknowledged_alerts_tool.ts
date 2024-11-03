@@ -7,13 +7,17 @@
 
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { Replacements } from '@kbn/elastic-assistant-common';
-import { getAnonymizedValue, transformRawData } from '@kbn/elastic-assistant-common';
+import {
+  getAnonymizedValue,
+  getOpenAndAcknowledgedAlertsQuery,
+  getRawDataOrDefault,
+  sizeIsOutOfRange,
+  transformRawData,
+} from '@kbn/elastic-assistant-common';
 import { DynamicStructuredTool } from '@langchain/core/tools';
 import { requestHasRequiredAnonymizationParams } from '@kbn/elastic-assistant-plugin/server/lib/langchain/helpers';
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
-import { getOpenAndAcknowledgedAlertsQuery } from './get_open_and_acknowledged_alerts_query';
-import { getRawDataOrDefault, sizeIsOutOfRange } from './helpers';
 import { APP_UI_ID } from '../../../../common';
 
 export interface OpenAndAcknowledgedAlertsToolParams extends AssistantToolParams {
@@ -22,7 +26,7 @@ export interface OpenAndAcknowledgedAlertsToolParams extends AssistantToolParams
 }
 
 export const OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL_DESCRIPTION =
-  'Call this for knowledge about the latest n open and acknowledged alerts (sorted by `kibana.alert.risk_score`) in the environment, or when answering questions about open alerts. Do not call this tool for alert count or quantity. Input should be an empty object. The output is an array of the latest n open and acknowledged alerts.';
+  'Call this for knowledge about the latest n open and acknowledged alerts (sorted by `kibana.alert.risk_score`) in the environment, or when answering questions about open alerts. Do not call this tool for alert count or quantity. The output is an array of the latest n open and acknowledged alerts.';
 
 /**
  * Returns a tool for querying open and acknowledged alerts, or null if the

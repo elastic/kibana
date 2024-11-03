@@ -1,19 +1,27 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import chalk from 'chalk';
 import { OpenAPIV3 } from 'openapi-types';
-import { BundledDocument } from '../bundle_document';
+import { ResolvedDocument } from '../ref_resolver/resolved_document';
+import { isRefNode } from '../process_document';
+import { mergeOperations } from './merge_operations';
+import { mergeArrays } from './merge_arrays';
+import { MergeOptions } from './merge_options';
 
-export function mergePaths(bundledDocuments: BundledDocument[]): OpenAPIV3.PathsObject {
+export function mergePaths(
+  resolvedDocuments: ResolvedDocument[],
+  options: MergeOptions
+): OpenAPIV3.PathsObject {
   const mergedPaths: Record<string, OpenAPIV3.PathItemObject> = {};
 
-  for (const { absolutePath, document } of bundledDocuments) {
+  for (const { absolutePath, document } of resolvedDocuments) {
     if (!document.paths) {
       continue;
     }
@@ -28,11 +36,15 @@ export function mergePaths(bundledDocuments: BundledDocument[]): OpenAPIV3.Paths
       const sourcePathItem = pathsObject[path];
       const mergedPathItem = mergedPaths[path];
 
+      if (isRefNode(sourcePathItem)) {
+        throw new Error('Path item top level $ref is not supported');
+      }
+
       try {
         mergeOptionalPrimitiveValue('summary', sourcePathItem, mergedPathItem);
       } catch {
         throw new Error(
-          `❌  Unable to bundle ${chalk.bold(absolutePath)} since ${chalk.bold(
+          `❌  Unable to merge ${chalk.bold(absolutePath)} due to ${chalk.bold(
             `paths.${path}.summary`
           )}'s value ${chalk.blue(
             sourcePathItem.summary
@@ -44,7 +56,7 @@ export function mergePaths(bundledDocuments: BundledDocument[]): OpenAPIV3.Paths
         mergeOptionalPrimitiveValue('description', sourcePathItem, mergedPathItem);
       } catch {
         throw new Error(
-          `❌  Unable to bundle ${chalk.bold(absolutePath)} since ${chalk.bold(
+          `❌  Unable to merge ${chalk.bold(absolutePath)} due to ${chalk.bold(
             `paths.${path}.description`
           )}'s value ${chalk.blue(
             sourcePathItem.description
@@ -53,21 +65,25 @@ export function mergePaths(bundledDocuments: BundledDocument[]): OpenAPIV3.Paths
       }
 
       try {
-        mergeOperations(sourcePathItem, mergedPathItem);
+        mergeOperations(sourcePathItem, mergedPathItem, options);
       } catch (e) {
         throw new Error(
-          `❌  Unable to bundle ${chalk.bold(absolutePath)} since ${chalk.bold(
-            `paths.${path}.${e.message}`
-          )}'s definition is duplicated and differs from previously encountered.`
+          `❌  Unable to merge ${chalk.bold(absolutePath)} due to an error in ${chalk.bold(
+            `paths.${path}`
+          )} occurred "${e.message}".`
         );
+      }
+
+      if (!options.skipServers) {
+        mergePathItemServers(sourcePathItem, mergedPathItem);
       }
 
       try {
         mergeParameters(sourcePathItem, mergedPathItem);
       } catch (e) {
         throw new Error(
-          `❌  Unable to bundle ${chalk.bold(absolutePath)} since ${chalk.bold(
-            `paths.${path}.parameters.[${e.message}]`
+          `❌  Unable to merge ${chalk.bold(absolutePath)} since ${chalk.bold(
+            `paths.${path}.servers.[${e.message}]`
           )}'s definition is duplicated and differs from previously encountered.`
         );
       }
@@ -75,34 +91,6 @@ export function mergePaths(bundledDocuments: BundledDocument[]): OpenAPIV3.Paths
   }
 
   return mergedPaths;
-}
-
-const KNOWN_HTTP_METHODS = [
-  OpenAPIV3.HttpMethods.HEAD,
-  OpenAPIV3.HttpMethods.GET,
-  OpenAPIV3.HttpMethods.POST,
-  OpenAPIV3.HttpMethods.PATCH,
-  OpenAPIV3.HttpMethods.PUT,
-  OpenAPIV3.HttpMethods.OPTIONS,
-  OpenAPIV3.HttpMethods.DELETE,
-  OpenAPIV3.HttpMethods.TRACE,
-];
-
-function mergeOperations(
-  sourcePathItem: OpenAPIV3.PathItemObject,
-  mergedPathItem: OpenAPIV3.PathItemObject
-) {
-  for (const httpMethod of KNOWN_HTTP_METHODS) {
-    if (!sourcePathItem[httpMethod]) {
-      continue;
-    }
-
-    if (mergedPathItem[httpMethod]) {
-      throw new Error(httpMethod);
-    }
-
-    mergedPathItem[httpMethod] = sourcePathItem[httpMethod];
-  }
 }
 
 function mergeOptionalPrimitiveValue<FieldName extends string>(
@@ -123,6 +111,21 @@ function mergeOptionalPrimitiveValue<FieldName extends string>(
   }
 }
 
+function mergePathItemServers(
+  sourcePathItem: OpenAPIV3.PathItemObject,
+  mergedPathItem: OpenAPIV3.PathItemObject
+): void {
+  if (!sourcePathItem.servers) {
+    return;
+  }
+
+  if (!mergedPathItem.servers) {
+    mergedPathItem.servers = [];
+  }
+
+  mergedPathItem.servers = mergeArrays([sourcePathItem.servers, mergedPathItem.servers]);
+}
+
 function mergeParameters(
   sourcePathItem: OpenAPIV3.PathItemObject,
   mergedPathItem: OpenAPIV3.PathItemObject
@@ -136,9 +139,9 @@ function mergeParameters(
   }
 
   for (const sourceParameter of sourcePathItem.parameters) {
-    if ('$ref' in sourceParameter) {
+    if (isRefNode(sourceParameter)) {
       const existing = mergedPathItem.parameters.find(
-        (x) => '$ref' in x && x.$ref === sourceParameter.$ref
+        (x) => isRefNode(x) && x.$ref === sourceParameter.$ref
       );
 
       if (existing) {
@@ -146,7 +149,7 @@ function mergeParameters(
       }
     } else {
       const existing = mergedPathItem.parameters.find(
-        (x) => !('$ref' in x) && x.name === sourceParameter.name && x.in === sourceParameter.in
+        (x) => !isRefNode(x) && x.name === sourceParameter.name && x.in === sourceParameter.in
       );
 
       if (existing) {

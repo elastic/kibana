@@ -1,10 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
+import * as net from 'node:net';
 
 jest.mock('fs', () => ({
   readFileSync: jest.fn(),
@@ -28,14 +31,34 @@ function getServerListener(httpServer: HttpsRedirectServer) {
   return (httpServer as any).server.listener;
 }
 
-beforeEach(() => {
+async function getRandomAvailablePort(opts: Chance.Options): Promise<number> {
+  while (true) {
+    const candidatePort = chance.integer(opts);
+    try {
+      await new Promise<void>((resolve, reject) => {
+        const svr = net.createServer();
+        svr.once('error', reject);
+        svr.listen({ host: '127.0.0.1', port: candidatePort }, () => {
+          svr.close(() => {
+            resolve();
+          });
+        });
+      });
+      return candidatePort;
+    } catch (err) {
+      // just keep trying to find another port
+    }
+  }
+}
+
+beforeEach(async () => {
   config = {
     host: '127.0.0.1',
     maxPayload: new ByteSizeValue(1024),
-    port: chance.integer({ min: 10000, max: 15000 }),
+    port: await getRandomAvailablePort({ min: 10000, max: 15000 }),
     ssl: {
       enabled: true,
-      redirectHttpFromPort: chance.integer({ min: 20000, max: 30000 }),
+      redirectHttpFromPort: await getRandomAvailablePort({ min: 20000, max: 30000 }),
     },
     cors: {
       enabled: false,
@@ -55,7 +78,7 @@ test('throws if SSL is not enabled', async () => {
       ...config,
       ssl: {
         enabled: false,
-        redirectHttpFromPort: chance.integer({ min: 20000, max: 30000 }),
+        redirectHttpFromPort: await getRandomAvailablePort({ min: 20000, max: 30000 }),
       },
     } as HttpConfig)
   ).rejects.toMatchSnapshot();
@@ -94,5 +117,16 @@ test('forwards http requests to https', async () => {
     .expect(302)
     .then((res) => {
       expect(res.header.location).toEqual(`https://${config.host}:${config.port}/`);
+    });
+});
+
+test('keeps the request host when redirecting', async () => {
+  await server.start(config);
+
+  await supertest(`http://localhost:${config.ssl.redirectHttpFromPort}`)
+    .get('/')
+    .expect(302)
+    .then((res) => {
+      expect(res.header.location).toEqual(`https://localhost:${config.port}/`);
     });
 });

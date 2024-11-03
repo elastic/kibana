@@ -1,12 +1,12 @@
-import {
+import type {
   PluginInitializerContext,
   CoreSetup,
   CoreStart,
   Plugin,
   Logger
-} from '<%= importFromRoot('src/core/server') %>';
+} from '@kbn/core/server';
 
-import {
+import type {
   <%= upperCamelCase(name) %>PluginSetup,
   <%= upperCamelCase(name) %>PluginStart
 } from './types';

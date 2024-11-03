@@ -11,7 +11,7 @@ import { technicalRuleFieldMap } from '@kbn/rule-registry-plugin/common/assets/f
 import { isEmpty } from 'lodash/fp';
 import { ENRICHMENT_DESTINATION_PATH } from '../constants';
 
-import type { EventHit, TimelineEventsDetailsItem } from '../search_strategy';
+import type { Fields, TimelineEventsDetailsItem } from '../search_strategy';
 import { toObjectArrayOfStrings, toStringArray } from './to_array';
 
 export const baseCategoryFields = ['@timestamp', 'labels', 'message', 'tags'];
@@ -46,7 +46,7 @@ export const isThreatEnrichmentFieldOrSubfield = (field: string, prependField?: 
   prependField?.includes(ENRICHMENT_DESTINATION_PATH) || field === ENRICHMENT_DESTINATION_PATH;
 
 export const getDataFromFieldsHits = (
-  fields: EventHit['fields'],
+  fields: Fields,
   prependField?: string,
   prependFieldCategory?: string
 ): TimelineEventsDetailsItem[] =>
@@ -107,7 +107,10 @@ export const getDataFromFieldsHits = (
     // format nested fields
     const nestedFields = Array.isArray(item)
       ? item
-          .reduce((acc, i) => [...acc, getDataFromFieldsHits(i, dotField, fieldCategory)], [])
+          .reduce<TimelineEventsDetailsItem[][]>((acc, curr) => {
+            acc.push(getDataFromFieldsHits(curr as Fields, dotField, fieldCategory));
+            return acc;
+          }, [])
           .flat()
       : getDataFromFieldsHits(item, prependField, fieldCategory);
 
@@ -128,14 +131,14 @@ export const getDataFromFieldsHits = (
                 originalValue: acc[f.field].originalValue.includes(f.originalValue[0])
                   ? acc[f.field].originalValue
                   : [...acc[f.field].originalValue, ...f.originalValue],
-                values: acc[f.field].values.includes(f.values[0])
+                values: acc[f.field].values?.includes(f.values?.[0] || '')
                   ? acc[f.field].values
-                  : [...acc[f.field].values, ...f.values],
+                  : [...(acc[f.field].values || []), ...(f.values || [])],
               },
             }
           : { [f.field]: f }),
       }),
-      {}
+      {} as Record<string, TimelineEventsDetailsItem>
     );
 
     return Object.values(flat);

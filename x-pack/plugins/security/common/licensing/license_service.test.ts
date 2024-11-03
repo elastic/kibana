@@ -32,6 +32,7 @@ describe('license features', function () {
       allowSubFeaturePrivileges: false,
       allowAuditLogging: false,
       allowUserProfileCollaboration: false,
+      allowFips: false,
     });
   });
 
@@ -57,6 +58,7 @@ describe('license features', function () {
       allowSubFeaturePrivileges: false,
       allowAuditLogging: false,
       allowUserProfileCollaboration: false,
+      allowFips: false,
     });
   });
 
@@ -78,6 +80,7 @@ describe('license features', function () {
           Object {
             "allowAccessAgreement": false,
             "allowAuditLogging": false,
+            "allowFips": false,
             "allowLogin": false,
             "allowRbac": false,
             "allowRemoteClusterPrivileges": false,
@@ -102,6 +105,7 @@ describe('license features', function () {
           Object {
             "allowAccessAgreement": true,
             "allowAuditLogging": true,
+            "allowFips": true,
             "allowLogin": true,
             "allowRbac": true,
             "allowRemoteClusterPrivileges": true,
@@ -146,6 +150,7 @@ describe('license features', function () {
       allowSubFeaturePrivileges: false,
       allowAuditLogging: false,
       allowUserProfileCollaboration: false,
+      allowFips: false,
     });
     expect(getFeatureSpy).toHaveBeenCalledTimes(1);
     expect(getFeatureSpy).toHaveBeenCalledWith('security');
@@ -174,6 +179,7 @@ describe('license features', function () {
       allowSubFeaturePrivileges: false,
       allowAuditLogging: false,
       allowUserProfileCollaboration: false,
+      allowFips: false,
     });
   });
 
@@ -201,6 +207,7 @@ describe('license features', function () {
       allowSubFeaturePrivileges: false,
       allowAuditLogging: false,
       allowUserProfileCollaboration: true,
+      allowFips: false,
     });
   });
 
@@ -228,6 +235,7 @@ describe('license features', function () {
       allowSubFeaturePrivileges: true,
       allowAuditLogging: true,
       allowUserProfileCollaboration: true,
+      allowFips: false,
     });
   });
 
@@ -255,6 +263,7 @@ describe('license features', function () {
       allowSubFeaturePrivileges: true,
       allowAuditLogging: true,
       allowUserProfileCollaboration: true,
+      allowFips: true,
     });
   });
 });

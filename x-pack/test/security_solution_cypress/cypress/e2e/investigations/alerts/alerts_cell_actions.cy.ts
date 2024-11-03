@@ -38,7 +38,8 @@ import { openActiveTimeline } from '../../../tasks/timeline';
 
 import { ALERTS_URL } from '../../../urls/navigation';
 
-describe('Alerts cell actions', { tags: ['@ess', '@serverless'] }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/193840
+describe.skip('Alerts cell actions', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     deleteAlertsAndRules();
     createRule(getNewRule());
@@ -74,6 +75,7 @@ describe('Alerts cell actions', { tags: ['@ess', '@serverless'] }, () => {
 
     cy.log('filter out alert property');
 
+    scrollAlertTableColumnIntoView(ALERT_TABLE_FILE_NAME_HEADER);
     filterOutAlertProperty(ALERT_TABLE_FILE_NAME_VALUES, 0);
 
     cy.get(FILTER_BADGE).first().should('have.text', 'file.name: exists');

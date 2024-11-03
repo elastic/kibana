@@ -35,7 +35,7 @@ describe('GlobalDataTagsTable', () => {
   ];
   let renderer: TestRenderer;
 
-  const renderComponent = (tags: GlobalDataTag[]) => {
+  const renderComponent = (tags: GlobalDataTag[], options?: { isDisabled?: boolean }) => {
     mockUpdateAgentPolicy = jest.fn();
     renderer = createFleetTestRendererMock();
 
@@ -44,15 +44,18 @@ describe('GlobalDataTagsTable', () => {
         global_data_tags: tags,
       });
 
-      const updateAgentPolicy = React.useCallback((policy) => {
+      const updateAgentPolicy = React.useCallback<
+        React.ComponentProps<typeof GlobalDataTagsTable>['updateAgentPolicy']
+      >((policy) => {
         mockUpdateAgentPolicy(policy);
-        _updateAgentPolicy(policy);
+        _updateAgentPolicy({ ...policy, global_data_tags: policy.global_data_tags ?? [] });
       }, []);
 
       return (
         <GlobalDataTagsTable
           updateAgentPolicy={updateAgentPolicy}
           globalDataTags={agentPolicy.global_data_tags}
+          isDisabled={options?.isDisabled}
         />
       );
     };
@@ -122,7 +125,7 @@ describe('GlobalDataTagsTable', () => {
         { name: 'newTag2', value: '123 123' },
       ],
     });
-  });
+  }, 10000);
 
   it('should edit an existing tag', async () => {
     renderComponent(globalDataTags);
@@ -286,5 +289,20 @@ describe('GlobalDataTagsTable', () => {
         { name: 'updatedTag2', value: 'updatedValue2' },
       ],
     });
+  });
+
+  it('should not allow to add tag when disabled and no tags exists', () => {
+    renderComponent([], { isDisabled: true });
+
+    const test = renderResult.getByTestId('globalDataTagAddFieldBtn');
+    expect(test).toBeDisabled();
+  });
+
+  it('should not allow to add/edit/remove tag when disabled and tags already exists', () => {
+    renderComponent(globalDataTags, { isDisabled: true });
+
+    expect(renderResult.getByTestId('globalDataTagAddAnotherFieldBtn')).toBeDisabled();
+    expect(renderResult.getByTestId('globalDataTagDeleteField1Btn')).toBeDisabled();
+    expect(renderResult.getByTestId('globalDataTagEditField1Btn')).toBeDisabled();
   });
 });

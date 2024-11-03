@@ -66,18 +66,21 @@ export const MetaEngineCreationLogic = kea<
     indexedEngineNames: [
       [],
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setIndexedEngineNames: (_, { indexedEngineNames }) => indexedEngineNames,
       },
     ],
     rawName: [
       '',
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setRawName: (_, { rawName }) => rawName,
       },
     ],
     selectedIndexedEngineNames: [
       [],
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setSelectedIndexedEngineNames: (_, { selectedIndexedEngineNames }) =>
           selectedIndexedEngineNames,
       },

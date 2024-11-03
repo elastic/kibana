@@ -6,9 +6,6 @@
  */
 
 import React from 'react';
-// TODO(jbudz): should be removed when upgrading to TS@4.8
-// this is a skip for the errors created when typechecking with isolatedModules
-export {};
 
 jest.mock('../../hooks', () => {
   return {
@@ -21,6 +18,7 @@ jest.mock('../../hooks', () => {
         addAgents: true,
         addFleetServers: true,
       },
+      integrations: {},
     }),
     useFleetStatus: jest.fn().mockReturnValue({ isReady: true }),
   };
@@ -41,6 +39,7 @@ jest.mock('../../hooks/use_request', () => {
     sendGetOneAgentPolicy: jest.fn().mockResolvedValue({
       data: { item: { package_policies: [] } },
     }),
+    useGetSpaceSettings: jest.fn().mockReturnValue({}),
     useGetAgentPolicies: jest.fn(),
     useGetEnrollmentSettings: jest.fn().mockReturnValue({
       isLoading: false,

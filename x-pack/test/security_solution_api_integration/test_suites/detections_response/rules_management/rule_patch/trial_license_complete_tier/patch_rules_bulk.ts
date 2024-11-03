@@ -41,8 +41,8 @@ export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
   const utils = getService('securitySolutionUtils');
 
-  // See https://github.com/elastic/kibana/issues/130963 for discussion on deprecation
-  describe('@ess @skipInServerless patch_rules_bulk', () => {
+  // TODO: https://github.com/elastic/kibana/issues/193184 Delete this file and clean up the code
+  describe.skip('@ess @skipInServerless patch_rules_bulk', () => {
     describe('deprecations', () => {
       afterEach(async () => {
         await deleteAllRules(supertest, log);
@@ -532,7 +532,7 @@ export default ({ getService }: FtrProviderContext) => {
         );
       });
 
-      it('should patch a rule with a legacy investigation field and transform field in response', async () => {
+      it('should patch a rule with a legacy investigation field and migrate field', async () => {
         // patch a simple rule's name
         const { body } = await securitySolutionApi
           .bulkPatchRules({
@@ -548,19 +548,13 @@ export default ({ getService }: FtrProviderContext) => {
         });
         expect(bodyToCompareLegacyField.name).to.eql('some other name');
 
-        /**
-         * Confirm type on SO so that it's clear in the tests whether it's expected that
-         * the SO itself is migrated to the inteded object type, or if the transformation is
-         * happening just on the response. In this case, change should
-         * NOT include a migration on SO.
-         */
         const isInvestigationFieldMigratedInSo = await checkInvestigationFieldSoValue(
           undefined,
           { field_names: ['client.address', 'agent.name'] },
           es,
           body[0].id
         );
-        expect(isInvestigationFieldMigratedInSo).to.eql(false);
+        expect(isInvestigationFieldMigratedInSo).to.eql(true);
       });
 
       it('should patch a rule with a legacy investigation field - empty array - and transform field in response', async () => {

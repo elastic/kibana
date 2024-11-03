@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart } from '@kbn/core/public';
+import type { CoreSetup, CoreStart } from '@kbn/core/public';
 import { FetchOptions } from '..';
 
 function getFetchOptions(fetchOptions: FetchOptions) {

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { EuiBadge, EuiStat } from '@elastic/eui';
@@ -111,10 +112,10 @@ export const getSearchEmbeddableFactory = (services: Services) => {
         )
         .subscribe((next) => {
           dataLoading$.next(false);
-          if (next && next.hasOwnProperty('count') && next.count !== undefined) {
+          if (next && Object.hasOwn(next, 'count') && next.count !== undefined) {
             count$.next(next.count);
           }
-          if (next && next.hasOwnProperty('error')) {
+          if (next && Object.hasOwn(next, 'error')) {
             blockingError$.next(next.error);
           }
         });

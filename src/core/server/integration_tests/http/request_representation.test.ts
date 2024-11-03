@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 jest.mock('uuid', () => ({
@@ -86,6 +87,7 @@ describe('request logging', () => {
         route: {
           method: 'get',
           path: '/',
+          routePath: '/',
           options: expect.any(Object),
         },
         uuid: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
@@ -115,16 +117,21 @@ describe('request logging', () => {
           auth: { isAuthenticated: false },
           route: {
             path: '/',
+            routePath: '/',
             method: 'get',
             options: {
               authRequired: true,
               xsrfRequired: false,
+              deprecated: undefined,
               access: 'internal',
               tags: [],
+              security: undefined,
               timeout: [Object],
               body: undefined
             }
-          }
+          },
+          authzResult: undefined,
+          apiVersion: undefined
         }"
       `);
     });

@@ -9,7 +9,7 @@ import { createMetricsExplorerViewsClientMock } from './metrics_explorer_views_c
 import { MetricsExplorerViewsServiceStart } from './types';
 
 export const createMetricsExplorerViewsServiceStartMock = () => ({
-  client: createMetricsExplorerViewsClientMock(),
+  getClient: () => Promise.resolve(createMetricsExplorerViewsClientMock()),
 });
 
 export const _ensureTypeCompatibility = (): MetricsExplorerViewsServiceStart =>

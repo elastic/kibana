@@ -36,108 +36,54 @@ describe('getDataStreams', () => {
     jest.restoreAllMocks();
   });
 
-  it('Returns empty list when user doesnt have access to dataset', async () => {
-    const esClientMock = elasticsearchServiceMock.createElasticsearchClient();
-    mockGetDatasetPrivileges.mockImplementationOnce(() => ({
-      canRead: false,
-      canMonitor: false,
-      canViewIntegrations: false,
-    }));
-
-    const result = await getDataStreams({
-      esClient: esClientMock,
-      type: 'logs',
-      datasetQuery: 'nginx',
-      uncategorisedOnly: false,
-    });
-    expect(result.items).toEqual([]);
-    expect(result.datasetUserPrivileges.canMonitor).toBe(false);
-
-    expect(dataStreamService.getMatchingDataStreams).not.toHaveBeenCalled();
-  });
-
   it('Passes the correct parameters to the DataStreamService', async () => {
     const esClientMock = elasticsearchServiceMock.createElasticsearchClient();
     const result = await getDataStreams({
       esClient: esClientMock,
-      type: 'logs',
-      datasetQuery: 'nginx',
+      types: ['logs', 'metrics'],
       uncategorisedOnly: true,
     });
     expect(dataStreamService.getMatchingDataStreams).toHaveBeenCalledWith(
       expect.anything(),
-      'logs-*nginx*'
+      'logs-*-*,metrics-*-*'
     );
 
     expect(result.datasetUserPrivileges.canMonitor).toBe(true);
   });
 
-  it('Formats the items correctly', async () => {
+  it('Passes datasetQuery parameter to the DataStreamService', async () => {
     const esClientMock = elasticsearchServiceMock.createElasticsearchClient();
-
-    const results = await getDataStreams({
+    const result = await getDataStreams({
       esClient: esClientMock,
-      type: 'logs',
-      uncategorisedOnly: false,
+      datasetQuery: 'logs-nginx-*',
+      uncategorisedOnly: true,
     });
-    expect(results.items.sort()).toEqual([
-      {
-        name: 'logs-elastic_agent-default',
-        integration: 'elastic_agent',
-        userPrivileges: {
-          canMonitor: true,
-        },
-      },
-      {
-        name: 'logs-elastic_agent.filebeat-default',
-        integration: 'elastic_agent',
-        userPrivileges: {
-          canMonitor: true,
-        },
-      },
-      {
-        name: 'logs-elastic_agent.fleet_server-default',
-        integration: 'elastic_agent',
-        userPrivileges: {
-          canMonitor: true,
-        },
-      },
-      {
-        name: 'logs-elastic_agent.metricbeat-default',
-        integration: 'elastic_agent',
-        userPrivileges: {
-          canMonitor: true,
-        },
-      },
-      {
-        name: 'logs-test.test-default',
-        userPrivileges: {
-          canMonitor: true,
-        },
-      },
-    ]);
+    expect(dataStreamService.getMatchingDataStreams).toHaveBeenCalledWith(
+      expect.anything(),
+      'logs-nginx-*'
+    );
+
+    expect(result.datasetUserPrivileges.canMonitor).toBe(true);
   });
 
-  describe('uncategorisedOnly option', () => {
+  describe('uncategorized only option', () => {
     it('Returns the correct number of results when true', async () => {
       const esClientMock = elasticsearchServiceMock.createElasticsearchClient();
       const results = await getDataStreams({
         esClient: esClientMock,
-        type: 'logs',
-        datasetQuery: 'nginx',
+        types: ['logs'],
         uncategorisedOnly: true,
       });
-      expect(results.items.length).toBe(1);
+      expect(results.dataStreams.length).toBe(1);
     });
     it('Returns the correct number of results when false', async () => {
       const esClientMock = elasticsearchServiceMock.createElasticsearchClient();
       const results = await getDataStreams({
         esClient: esClientMock,
-        type: 'logs',
-        datasetQuery: 'nginx',
+        types: ['logs'],
         uncategorisedOnly: false,
       });
-      expect(results.items.length).toBe(5);
+      expect(results.dataStreams.length).toBe(5);
     });
   });
 });

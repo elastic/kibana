@@ -19,22 +19,28 @@ import {
 import type { TranslatedEntry, TranslatedExceptionListItem } from '../../schemas/artifacts';
 import { ArtifactConstants } from './common';
 import {
+  ENDPOINT_ARTIFACT_LISTS,
   ENDPOINT_BLOCKLISTS_LIST_ID,
   ENDPOINT_EVENT_FILTERS_LIST_ID,
   ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID,
   ENDPOINT_LIST_ID,
   ENDPOINT_TRUSTED_APPS_LIST_ID,
 } from '@kbn/securitysolution-list-constants';
+import { FILTER_PROCESS_DESCENDANTS_TAG } from '../../../../common/endpoint/service/artifacts/constants';
+import type { ExperimentalFeatures } from '../../../../common';
+import { allowedExperimentalValues } from '../../../../common';
 
 describe('artifacts lists', () => {
   let mockExceptionClient: ExceptionListClient;
+  let defaultFeatures: ExperimentalFeatures;
 
   beforeEach(() => {
     jest.clearAllMocks();
     mockExceptionClient = listMock.getExceptionListClient();
+    defaultFeatures = allowedExperimentalValues;
   });
 
-  describe('getFilteredEndpointExceptionListRaw', () => {
+  describe('getFilteredEndpointExceptionListRaw + convertExceptionsToEndpointFormat', () => {
     const TEST_FILTER = 'exception-list-agnostic.attributes.os_types:"linux"';
 
     test('it should get convert the exception lists response to the proper endpoint format', async () => {
@@ -69,7 +75,7 @@ describe('artifacts lists', () => {
         filter: TEST_FILTER,
         listId: ENDPOINT_LIST_ID,
       });
-      const translated = convertExceptionsToEndpointFormat(resp, 'v1');
+      const translated = convertExceptionsToEndpointFormat(resp, 'v1', defaultFeatures);
       expect(translated).toEqual({
         entries: [expectedEndpointExceptions],
       });
@@ -115,7 +121,7 @@ describe('artifacts lists', () => {
         filter: TEST_FILTER,
         listId: ENDPOINT_LIST_ID,
       });
-      const translated = convertExceptionsToEndpointFormat(resp, 'v1');
+      const translated = convertExceptionsToEndpointFormat(resp, 'v1', defaultFeatures);
       expect(translated).toEqual({
         entries: [expectedEndpointExceptions],
       });
@@ -166,7 +172,7 @@ describe('artifacts lists', () => {
         filter: TEST_FILTER,
         listId: ENDPOINT_LIST_ID,
       });
-      const translated = convertExceptionsToEndpointFormat(resp, 'v1');
+      const translated = convertExceptionsToEndpointFormat(resp, 'v1', defaultFeatures);
       expect(translated).toEqual({
         entries: [expectedEndpointExceptions],
       });
@@ -219,7 +225,7 @@ describe('artifacts lists', () => {
         filter: TEST_FILTER,
         listId: ENDPOINT_LIST_ID,
       });
-      const translated = convertExceptionsToEndpointFormat(resp, 'v1');
+      const translated = convertExceptionsToEndpointFormat(resp, 'v1', defaultFeatures);
       expect(translated).toEqual({
         entries: [expectedEndpointExceptions],
       });
@@ -271,7 +277,7 @@ describe('artifacts lists', () => {
         filter: TEST_FILTER,
         listId: ENDPOINT_LIST_ID,
       });
-      const translated = convertExceptionsToEndpointFormat(resp, 'v1');
+      const translated = convertExceptionsToEndpointFormat(resp, 'v1', defaultFeatures);
       expect(translated).toEqual({
         entries: [expectedEndpointExceptions],
       });
@@ -314,7 +320,7 @@ describe('artifacts lists', () => {
         filter: TEST_FILTER,
         listId: ENDPOINT_LIST_ID,
       });
-      const translated = convertExceptionsToEndpointFormat(resp, 'v1');
+      const translated = convertExceptionsToEndpointFormat(resp, 'v1', defaultFeatures);
       expect(translated).toEqual({
         entries: [expectedEndpointExceptions],
       });
@@ -357,7 +363,7 @@ describe('artifacts lists', () => {
         filter: TEST_FILTER,
         listId: ENDPOINT_LIST_ID,
       });
-      const translated = convertExceptionsToEndpointFormat(resp, 'v1');
+      const translated = convertExceptionsToEndpointFormat(resp, 'v1', defaultFeatures);
       expect(translated).toEqual({
         entries: [expectedEndpointExceptions],
       });
@@ -386,7 +392,7 @@ describe('artifacts lists', () => {
         filter: TEST_FILTER,
         listId: ENDPOINT_LIST_ID,
       });
-      const translated = convertExceptionsToEndpointFormat(resp, 'v1');
+      const translated = convertExceptionsToEndpointFormat(resp, 'v1', defaultFeatures);
 
       // Expect 1 exceptions, the first two calls returned the same exception list items
       expect(translated.entries.length).toEqual(1);
@@ -402,7 +408,7 @@ describe('artifacts lists', () => {
         filter: TEST_FILTER,
         listId: ENDPOINT_LIST_ID,
       });
-      const translated = convertExceptionsToEndpointFormat(resp, 'v1');
+      const translated = convertExceptionsToEndpointFormat(resp, 'v1', defaultFeatures);
       expect(translated.entries.length).toEqual(0);
     });
 
@@ -516,6 +522,215 @@ describe('artifacts lists', () => {
       );
       expect(artifact1.decodedSha256).toEqual(artifact2.decodedSha256);
     });
+
+    describe('`descendant_of` operator', () => {
+      let enabledProcessDescendant: ExperimentalFeatures;
+
+      beforeEach(() => {
+        enabledProcessDescendant = {
+          ...defaultFeatures,
+          filterProcessDescendantsForEventFiltersEnabled: true,
+        };
+      });
+
+      test('when feature flag is disabled, it should not convert `descendant_of`', async () => {
+        const expectedEndpointExceptions: TranslatedExceptionListItem = {
+          type: 'simple',
+          entries: [
+            {
+              field: 'process.executable',
+              operator: 'included',
+              type: 'exact_caseless',
+              value: 'C:\\Windows\\System32\\ping.exe',
+            },
+          ],
+        };
+
+        const inputEntry: EntriesArray = [
+          {
+            field: 'process.executable.text',
+            operator: 'included',
+            type: 'match',
+            value: 'C:\\Windows\\System32\\ping.exe',
+          },
+        ];
+
+        const exceptionMock = getFoundExceptionListItemSchemaMock();
+        exceptionMock.data[0].tags.push(FILTER_PROCESS_DESCENDANTS_TAG);
+        exceptionMock.data[0].list_id = ENDPOINT_ARTIFACT_LISTS.eventFilters.id;
+        exceptionMock.data[0].entries = inputEntry;
+        mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(exceptionMock);
+
+        const resp = await getFilteredEndpointExceptionListRaw({
+          elClient: mockExceptionClient,
+          filter: TEST_FILTER,
+          listId: ENDPOINT_LIST_ID,
+        });
+        const translated = convertExceptionsToEndpointFormat(resp, 'v1', {
+          filterProcessDescendantsForEventFiltersEnabled: false,
+        } as ExperimentalFeatures);
+
+        expect(translated).toEqual({ entries: [expectedEndpointExceptions] });
+      });
+
+      test.each([
+        ENDPOINT_ARTIFACT_LISTS.blocklists.id,
+        ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id,
+        ENDPOINT_ARTIFACT_LISTS.trustedApps.id,
+      ])('when %s, it should not convert `descendant_of`', async (listId) => {
+        const expectedEndpointExceptions: TranslatedExceptionListItem = {
+          type: 'simple',
+          entries: [
+            {
+              field: 'process.executable',
+              operator: 'included',
+              type: 'exact_caseless',
+              value: 'C:\\Windows\\System32\\ping.exe',
+            },
+          ],
+        };
+
+        const inputEntry: EntriesArray = [
+          {
+            field: 'process.executable.text',
+            operator: 'included',
+            type: 'match',
+            value: 'C:\\Windows\\System32\\ping.exe',
+          },
+        ];
+
+        const exceptionMock = getFoundExceptionListItemSchemaMock();
+        exceptionMock.data[0].tags.push(FILTER_PROCESS_DESCENDANTS_TAG);
+        exceptionMock.data[0].list_id = listId;
+        exceptionMock.data[0].entries = inputEntry;
+        mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(exceptionMock);
+
+        const resp = await getFilteredEndpointExceptionListRaw({
+          elClient: mockExceptionClient,
+          filter: TEST_FILTER,
+          listId: ENDPOINT_LIST_ID,
+        });
+        const translated = convertExceptionsToEndpointFormat(resp, 'v1', enabledProcessDescendant);
+
+        expect(translated).toEqual({ entries: [expectedEndpointExceptions] });
+      });
+
+      test('it should convert `descendant_of` to the expected format', async () => {
+        const expectedEndpointExceptions: TranslatedExceptionListItem = {
+          type: 'simple',
+          entries: [
+            {
+              operator: 'included',
+              type: 'descendent_of',
+              value: {
+                entries: [
+                  {
+                    type: 'simple',
+                    entries: [
+                      {
+                        field: 'process.executable',
+                        operator: 'included',
+                        type: 'exact_caseless',
+                        value: 'C:\\Windows\\System32\\ping.exe',
+                      },
+                      {
+                        field: 'event.category',
+                        operator: 'included',
+                        type: 'exact_cased',
+                        value: 'process',
+                      },
+                    ],
+                  },
+                ],
+              },
+            },
+          ],
+        };
+
+        const inputEntry: EntriesArray = [
+          {
+            field: 'process.executable.text',
+            operator: 'included',
+            type: 'match',
+            value: 'C:\\Windows\\System32\\ping.exe',
+          },
+        ];
+
+        const exceptionMock = getFoundExceptionListItemSchemaMock();
+        exceptionMock.data[0].tags.push(FILTER_PROCESS_DESCENDANTS_TAG);
+        exceptionMock.data[0].list_id = ENDPOINT_ARTIFACT_LISTS.eventFilters.id;
+        exceptionMock.data[0].entries = inputEntry;
+        mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(exceptionMock);
+
+        const resp = await getFilteredEndpointExceptionListRaw({
+          elClient: mockExceptionClient,
+          filter: TEST_FILTER,
+          listId: ENDPOINT_LIST_ID,
+        });
+        const translated = convertExceptionsToEndpointFormat(resp, 'v1', enabledProcessDescendant);
+
+        expect(translated).toEqual({ entries: [expectedEndpointExceptions] });
+      });
+
+      test('it should handle nested entries properly', async () => {
+        const expectedEndpointExceptions: TranslatedExceptionListItem = {
+          type: 'simple',
+          entries: [
+            {
+              operator: 'included',
+              type: 'descendent_of',
+              value: {
+                entries: [
+                  {
+                    type: 'simple',
+                    entries: [
+                      {
+                        entries: [
+                          {
+                            field: 'nested.field',
+                            operator: 'included',
+                            type: 'exact_cased',
+                            value: 'some value',
+                          },
+                        ],
+                        field: 'some.parentField',
+                        type: 'nested',
+                      },
+                      {
+                        field: 'some.not.nested.field',
+                        operator: 'included',
+                        type: 'exact_cased',
+                        value: 'some value',
+                      },
+                      {
+                        field: 'event.category',
+                        operator: 'included',
+                        type: 'exact_cased',
+                        value: 'process',
+                      },
+                    ],
+                  },
+                ],
+              },
+            },
+          ],
+        };
+
+        const exceptionMock = getFoundExceptionListItemSchemaMock();
+        exceptionMock.data[0].tags.push(FILTER_PROCESS_DESCENDANTS_TAG);
+        exceptionMock.data[0].list_id = ENDPOINT_ARTIFACT_LISTS.eventFilters.id;
+        mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(exceptionMock);
+
+        const resp = await getFilteredEndpointExceptionListRaw({
+          elClient: mockExceptionClient,
+          filter: TEST_FILTER,
+          listId: ENDPOINT_LIST_ID,
+        });
+        const translated = convertExceptionsToEndpointFormat(resp, 'v1', enabledProcessDescendant);
+
+        expect(translated).toEqual({ entries: [expectedEndpointExceptions] });
+      });
+    });
   });
 
   describe('Endpoint Artifacts', () => {
@@ -562,7 +777,7 @@ describe('artifacts lists', () => {
           filter: `${getOsFilter(os)} and (exception-list-agnostic.attributes.tags:"policy:all")`,
           listId: ENDPOINT_TRUSTED_APPS_LIST_ID,
         });
-        const translated = convertExceptionsToEndpointFormat(resp, 'v1');
+        const translated = convertExceptionsToEndpointFormat(resp, 'v1', defaultFeatures);
         expect(translated).toEqual({
           entries: [expectedEndpointExceptions],
         });
@@ -607,7 +822,7 @@ describe('artifacts lists', () => {
           filter: `${getOsFilter(os)} and (exception-list-agnostic.attributes.tags:"policy:all")`,
           listId: ENDPOINT_TRUSTED_APPS_LIST_ID,
         });
-        const translated = convertExceptionsToEndpointFormat(resp, 'v1');
+        const translated = convertExceptionsToEndpointFormat(resp, 'v1', defaultFeatures);
         expect(translated).toEqual({
           entries: [expectedEndpointExceptions],
         });
@@ -646,7 +861,7 @@ describe('artifacts lists', () => {
           filter: `${getOsFilter(os)} and (exception-list-agnostic.attributes.tags:"policy:all")`,
           listId: ENDPOINT_TRUSTED_APPS_LIST_ID,
         });
-        const translated = convertExceptionsToEndpointFormat(resp, 'v1');
+        const translated = convertExceptionsToEndpointFormat(resp, 'v1', defaultFeatures);
         expect(translated).toEqual({
           entries: [expectedEndpointExceptions],
         });
@@ -710,7 +925,7 @@ describe('artifacts lists', () => {
           filter: `${getOsFilter(os)} and (exception-list-agnostic.attributes.tags:"policy:all")`,
           listId: ENDPOINT_TRUSTED_APPS_LIST_ID,
         });
-        const translated = convertExceptionsToEndpointFormat(resp, 'v1');
+        const translated = convertExceptionsToEndpointFormat(resp, 'v1', defaultFeatures);
 
         expect(translated).toEqual({
           entries: [expectedEndpointExceptions],
@@ -750,7 +965,7 @@ describe('artifacts lists', () => {
           filter: `${getOsFilter(os)} and (exception-list-agnostic.attributes.tags:"policy:all")`,
           listId: ENDPOINT_TRUSTED_APPS_LIST_ID,
         });
-        const translated = convertExceptionsToEndpointFormat(resp, 'v1');
+        const translated = convertExceptionsToEndpointFormat(resp, 'v1', defaultFeatures);
         expect(translated).toEqual({
           entries: [expectedEndpointExceptions],
         });
@@ -815,7 +1030,7 @@ describe('artifacts lists', () => {
           listId: ENDPOINT_TRUSTED_APPS_LIST_ID,
         });
 
-        const translated = convertExceptionsToEndpointFormat(resp, 'v1');
+        const translated = convertExceptionsToEndpointFormat(resp, 'v1', defaultFeatures);
         expect(translated).toEqual({
           entries: [expectedEndpointExceptions],
         });
@@ -864,7 +1079,7 @@ describe('artifacts lists', () => {
           filter: `${getOsFilter(os)} and (exception-list-agnostic.attributes.tags:"policy:all")`,
           listId: ENDPOINT_TRUSTED_APPS_LIST_ID,
         });
-        const translated = convertExceptionsToEndpointFormat(resp, 'v1');
+        const translated = convertExceptionsToEndpointFormat(resp, 'v1', defaultFeatures);
         expect(translated).toEqual({
           entries: [expectedEndpointExceptions],
         });
@@ -911,7 +1126,7 @@ describe('artifacts lists', () => {
           filter: `${getOsFilter(os)} and (exception-list-agnostic.attributes.tags:"policy:all")`,
           listId: ENDPOINT_TRUSTED_APPS_LIST_ID,
         });
-        const translated = convertExceptionsToEndpointFormat(resp, 'v1');
+        const translated = convertExceptionsToEndpointFormat(resp, 'v1', defaultFeatures);
         expect(translated).toEqual({
           entries: [expectedEndpointExceptions],
         });
@@ -952,7 +1167,7 @@ describe('artifacts lists', () => {
           filter: `${getOsFilter(os)} and (exception-list-agnostic.attributes.tags:"policy:all")`,
           listId: ENDPOINT_TRUSTED_APPS_LIST_ID,
         });
-        const translated = convertExceptionsToEndpointFormat(resp, 'v1');
+        const translated = convertExceptionsToEndpointFormat(resp, 'v1', defaultFeatures);
         expect(translated).toEqual({
           entries: [expectedEndpointExceptions],
         });
@@ -1019,7 +1234,7 @@ describe('artifacts lists', () => {
           listId: ENDPOINT_TRUSTED_APPS_LIST_ID,
         });
 
-        const translated = convertExceptionsToEndpointFormat(resp, 'v1');
+        const translated = convertExceptionsToEndpointFormat(resp, 'v1', defaultFeatures);
         expect(translated).toEqual({
           entries: [expectedEndpointExceptions],
         });
@@ -1059,7 +1274,7 @@ describe('artifacts lists', () => {
           filter: `${getOsFilter(os)} and (exception-list-agnostic.attributes.tags:"policy:all")`,
           listId: ENDPOINT_TRUSTED_APPS_LIST_ID,
         });
-        const translated = convertExceptionsToEndpointFormat(resp, 'v1');
+        const translated = convertExceptionsToEndpointFormat(resp, 'v1', defaultFeatures);
         expect(translated).toEqual({
           entries: [expectedEndpointExceptions],
         });
@@ -1126,7 +1341,7 @@ describe('artifacts lists', () => {
           listId: ENDPOINT_TRUSTED_APPS_LIST_ID,
         });
 
-        const translated = convertExceptionsToEndpointFormat(resp, 'v1');
+        const translated = convertExceptionsToEndpointFormat(resp, 'v1', defaultFeatures);
         expect(translated).toEqual({
           entries: [expectedEndpointExceptions],
         });
@@ -1174,7 +1389,7 @@ describe('artifacts lists', () => {
         listId: ENDPOINT_LIST_ID,
       });
 
-      const translated = convertExceptionsToEndpointFormat(resp, 'v1');
+      const translated = convertExceptionsToEndpointFormat(resp, 'v1', defaultFeatures);
       expect(translated).toEqual(TEST_EXCEPTION_LIST_ITEM);
 
       expect(mockExceptionClient.findExceptionListItem).toHaveBeenCalledWith({
@@ -1198,7 +1413,7 @@ describe('artifacts lists', () => {
         os: 'macos',
         listId: ENDPOINT_TRUSTED_APPS_LIST_ID,
       });
-      const translated = convertExceptionsToEndpointFormat(resp, 'v1');
+      const translated = convertExceptionsToEndpointFormat(resp, 'v1', defaultFeatures);
 
       expect(translated).toEqual(TEST_EXCEPTION_LIST_ITEM);
 
@@ -1224,7 +1439,7 @@ describe('artifacts lists', () => {
         listId: ENDPOINT_EVENT_FILTERS_LIST_ID,
       });
 
-      const translated = convertExceptionsToEndpointFormat(resp, 'v1');
+      const translated = convertExceptionsToEndpointFormat(resp, 'v1', defaultFeatures);
       expect(translated).toEqual(TEST_EXCEPTION_LIST_ITEM);
 
       expect(mockExceptionClient.findExceptionListItem).toHaveBeenCalledWith({
@@ -1249,7 +1464,7 @@ describe('artifacts lists', () => {
         listId: ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID,
       });
 
-      const translated = convertExceptionsToEndpointFormat(resp, 'v1');
+      const translated = convertExceptionsToEndpointFormat(resp, 'v1', defaultFeatures);
       expect(translated).toEqual(TEST_EXCEPTION_LIST_ITEM);
 
       expect(mockExceptionClient.findExceptionListItem).toHaveBeenCalledWith({
@@ -1274,7 +1489,7 @@ describe('artifacts lists', () => {
         listId: ENDPOINT_BLOCKLISTS_LIST_ID,
       });
 
-      const translated = convertExceptionsToEndpointFormat(resp, 'v1');
+      const translated = convertExceptionsToEndpointFormat(resp, 'v1', defaultFeatures);
       expect(translated).toEqual(TEST_EXCEPTION_LIST_ITEM);
 
       expect(mockExceptionClient.findExceptionListItem).toHaveBeenCalledWith({

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { notFound } from '@hapi/boom';
@@ -32,7 +33,7 @@ import {
 } from '../../../common';
 import { ISearchSessionService, NoSearchIdInSessionError } from '../..';
 import { createRequestHash } from './utils';
-import { ConfigSchema, SearchSessionsConfigSchema } from '../../../config';
+import { ConfigSchema, SearchSessionsConfigSchema } from '../../config';
 import { getSessionStatus } from './get_session_status';
 
 export interface SearchSessionDependencies {
@@ -400,7 +401,7 @@ export class SearchSessionService implements ISearchSessionService {
 
     const session = await this.get(deps, user, sessionId);
     const requestHash = createRequestHash(searchRequest.params);
-    if (!session.attributes.idMapping.hasOwnProperty(requestHash)) {
+    if (!Object.hasOwn(session.attributes.idMapping, requestHash)) {
       this.logger.error(`SearchSessionService: getId | ${sessionId} | ${requestHash} not found`);
       this.logger.debug(
         `SearchSessionService: getId not found search with params: ${JSON.stringify(

@@ -8,9 +8,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { act } from 'react-dom/test-utils';
-import { ReactWrapper } from 'enzyme';
 import type { Query } from '@kbn/es-query';
-
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 import {
@@ -18,15 +16,14 @@ import {
   Start as DataViewPublicStart,
 } from '@kbn/data-views-plugin/public/mocks';
 import type { DatatableColumn } from '@kbn/expressions-plugin/public';
-import { EuiHighlight, EuiToken } from '@elastic/eui';
+import { coreMock } from '@kbn/core/public/mocks';
+import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
+import userEvent from '@testing-library/user-event';
+import { render, screen, within } from '@testing-library/react';
 
 import { type TextBasedDataPanelProps, TextBasedDataPanel } from './datapanel';
-
-import { coreMock } from '@kbn/core/public/mocks';
 import type { TextBasedPrivateState } from '../types';
-import { mountWithI18nProvider } from '@kbn/test-jest-helpers';
 
-import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { createIndexPatternServiceMock } from '../../../mocks/data_views_service_mock';
 import { createMockFramePublicAPI } from '../../../mocks';
 import { DataViewsState } from '../../../state_management';
@@ -136,25 +133,8 @@ function getFrameAPIMock({
 // @ts-expect-error Portal mocks are notoriously difficult to type
 ReactDOM.createPortal = jest.fn((element) => element);
 
-async function mountAndWaitForLazyModules(component: React.ReactElement): Promise<ReactWrapper> {
-  let inst: ReactWrapper;
-  await act(async () => {
-    inst = await mountWithI18nProvider(component);
-    // wait for lazy modules
-    await new Promise((resolve) => setTimeout(resolve, 0));
-    inst.update();
-  });
-
-  await inst!.update();
-
-  return inst!;
-}
-
-// TODO: After the i18n upgrade it seem that some underlying error in these tests surfaced:
-// | TypeError: Cannot read properties of null (reading 'tag')
-// Does not seem related to the i18n upgrade
-describe.skip('TextBased Query Languages Data Panel', () => {
-  let core: ReturnType<typeof coreMock['createStart']>;
+describe('TextBased Query Languages Data Panel', () => {
+  let core: ReturnType<(typeof coreMock)['createStart']>;
   let dataViews: DataViewPublicStart;
   const defaultIndexPatterns = {
     '1': {
@@ -207,84 +187,61 @@ describe.skip('TextBased Query Languages Data Panel', () => {
     };
   });
 
-  it('should render a search box', async () => {
-    const wrapper = await mountAndWaitForLazyModules(<TextBasedDataPanel {...defaultProps} />);
+  const renderTextBasedDataPanel = async (propsOverrides?: Partial<TextBasedDataPanelProps>) => {
+    const rtlRender = render(<TextBasedDataPanel {...defaultProps} {...propsOverrides} />);
+    await act(async () => {
+      // wait for lazy modules
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+    return { ...rtlRender };
+  };
 
-    expect(
-      wrapper.find('[data-test-subj="lnsTextBasedLanguagesFieldSearch"] input').length
-    ).toEqual(1);
-  });
+  it('should render a search box and all supported fields in the pattern', async () => {
+    await renderTextBasedDataPanel();
+    expect(screen.getByRole('searchbox', { name: 'Search field names' })).toBeInTheDocument();
+    const availableFieldsList = screen.getByTestId('lnsTextBasedLanguagesAvailableFields');
+    within(availableFieldsList)
+      .getAllByTestId('lnsFieldListPanelField')
+      .map((el, index) =>
+        expect(within(el).getAllByRole('button')[1]).toHaveTextContent(
+          ['bytes', 'memory', 'timestamp'][index]
+        )
+      );
 
-  it('should list all supported fields in the pattern', async () => {
-    const wrapper = await mountAndWaitForLazyModules(<TextBasedDataPanel {...defaultProps} />);
-
-    expect(
-      wrapper
-        .find('[data-test-subj="lnsTextBasedLanguagesAvailableFields"]')
-        .find(EuiHighlight)
-        .map((item) => item.prop('children'))
-    ).toEqual(['bytes', 'memory', 'timestamp']);
-
-    expect(wrapper.find('[data-test-subj="lnsTextBasedLanguagesEmptyFields"]').exists()).toBe(
-      false
-    );
-    expect(wrapper.find('[data-test-subj="lnsTextBasedLanguagesMetaFields"]').exists()).toBe(false);
+    expect(screen.queryByTestId('lnsTextBasedLanguagesEmptyFields')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('lnsTextBasedLanguagesMetaFields')).not.toBeInTheDocument();
   });
 
   it('should not display the selected fields accordion if there are no fields displayed', async () => {
-    const wrapper = await mountAndWaitForLazyModules(<TextBasedDataPanel {...defaultProps} />);
-
-    expect(wrapper.find('[data-test-subj="lnsTextBasedLanguagesSelectedFields"]').length).toEqual(
-      0
-    );
+    await renderTextBasedDataPanel();
+    expect(screen.queryByTestId('lnsTextBasedLanguagesSelectedFields')).not.toBeInTheDocument();
   });
 
   it('should display the selected fields accordion if there are fields displayed', async () => {
-    const props = {
-      ...defaultProps,
-      layerFields: ['memory'],
-    };
-    const wrapper = await mountAndWaitForLazyModules(<TextBasedDataPanel {...props} />);
-
-    expect(
-      wrapper.find('[data-test-subj="lnsTextBasedLanguagesSelectedFields"]').length
-    ).not.toEqual(0);
+    await renderTextBasedDataPanel({ layerFields: ['memory'] });
+    expect(screen.getByTestId('lnsTextBasedLanguagesSelectedFields')).toBeInTheDocument();
   });
 
   it('should list all supported fields in the pattern that match the search input', async () => {
-    const wrapper = await mountAndWaitForLazyModules(<TextBasedDataPanel {...defaultProps} />);
-
-    expect(
-      wrapper
-        .find('[data-test-subj="lnsTextBasedLanguagesAvailableFields"]')
-        .find(EuiHighlight)
-        .map((item) => item.prop('children'))
-    ).toEqual(['bytes', 'memory', 'timestamp']);
-
-    act(() => {
-      wrapper.find('[data-test-subj="lnsTextBasedLanguagesFieldSearch"] input').simulate('change', {
-        target: { value: 'mem' },
-      });
-    });
-
-    await wrapper.update();
-
-    expect(
-      wrapper
-        .find('[data-test-subj="lnsTextBasedLanguagesAvailableFields"]')
-        .find(EuiHighlight)
-        .map((item) => item.prop('children'))
-    ).toEqual(['memory']);
+    // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    await renderTextBasedDataPanel();
+    jest.useFakeTimers();
+    await user.type(screen.getByRole('searchbox', { name: 'Search field names' }), 'mem');
+    act(() => jest.advanceTimersByTime(256));
+    expect(screen.getByTestId('lnsFieldListPanelField')).toHaveTextContent('memory');
+    jest.useRealTimers();
   });
 
   it('should render correct field type icons', async () => {
-    const wrapper = await mountAndWaitForLazyModules(<TextBasedDataPanel {...defaultProps} />);
-
+    await renderTextBasedDataPanel();
+    const availableFieldsList = screen.getByTestId('lnsTextBasedLanguagesAvailableFields');
     expect(
-      wrapper
-        .find('[data-test-subj="lnsTextBasedLanguagesAvailableFields"]')
-        .find(EuiToken)
-        .map((item) => item.prop('iconType'))
+      [
+        ...availableFieldsList.querySelectorAll(
+          '.unifiedFieldListItemButton__fieldIcon span[data-euiicon-type]'
+        ),
+      ].map((el) => el.getAttribute('data-euiicon-type'))
     ).toEqual(['tokenNumber', 'tokenNumber', 'tokenDate']);
   });
 });

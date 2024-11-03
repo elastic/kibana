@@ -19,29 +19,24 @@ properties:
     properties:
       category:
         description: The category of the incident. 
-        type:
-          - "string"
-          - "null"
+        type: string
+        nullable: true
       impact:
         description: The effect an incident had on business.
-        type:
-          - "string"
-          - "null"
+        type: string
+        nullable: true
       severity: 
         description: The severity of the incident.
-        type:
-          - "string"
-          - "null"
+        type: string
+        nullable: true
       subcategory:
         description: The subcategory of the incident.
-        type:
-          - "string"
-          - "null"
+        type: string
+        nullable: true
       urgency:
         description: The extent to which the incident resolution can be delayed.
-        type:
-          - "string"
-          - "null"
+        type: string
+        nullable: true
   id:
     description: The identifier for the connector. To retrieve connector IDs, use the find connectors API.
     type: string
@@ -51,7 +46,6 @@ properties:
   type:
     description: The type of connector.
     type: string
-    examples:
-      - .servicenow
+    example: .servicenow
     enum:
       - .servicenow

@@ -1,696 +1,212 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`ActionConnectorWarnings should not render if importedActionConnectorsCount is falsy and empty warnings array 1`] = `
-Object {
-  "asFragment": [Function],
-  "baseElement": <body>
-    <div />
-  </body>,
-  "container": <div />,
-  "debug": [Function],
-  "findAllByAltText": [Function],
-  "findAllByDisplayValue": [Function],
-  "findAllByLabelText": [Function],
-  "findAllByPlaceholderText": [Function],
-  "findAllByRole": [Function],
-  "findAllByTestId": [Function],
-  "findAllByText": [Function],
-  "findAllByTitle": [Function],
-  "findByAltText": [Function],
-  "findByDisplayValue": [Function],
-  "findByLabelText": [Function],
-  "findByPlaceholderText": [Function],
-  "findByRole": [Function],
-  "findByTestId": [Function],
-  "findByText": [Function],
-  "findByTitle": [Function],
-  "getAllByAltText": [Function],
-  "getAllByDisplayValue": [Function],
-  "getAllByLabelText": [Function],
-  "getAllByPlaceholderText": [Function],
-  "getAllByRole": [Function],
-  "getAllByTestId": [Function],
-  "getAllByText": [Function],
-  "getAllByTitle": [Function],
-  "getByAltText": [Function],
-  "getByDisplayValue": [Function],
-  "getByLabelText": [Function],
-  "getByPlaceholderText": [Function],
-  "getByRole": [Function],
-  "getByTestId": [Function],
-  "getByText": [Function],
-  "getByTitle": [Function],
-  "queryAllByAltText": [Function],
-  "queryAllByDisplayValue": [Function],
-  "queryAllByLabelText": [Function],
-  "queryAllByPlaceholderText": [Function],
-  "queryAllByRole": [Function],
-  "queryAllByTestId": [Function],
-  "queryAllByText": [Function],
-  "queryAllByTitle": [Function],
-  "queryByAltText": [Function],
-  "queryByDisplayValue": [Function],
-  "queryByLabelText": [Function],
-  "queryByPlaceholderText": [Function],
-  "queryByRole": [Function],
-  "queryByTestId": [Function],
-  "queryByText": [Function],
-  "queryByTitle": [Function],
-  "rerender": [Function],
-  "unmount": [Function],
-}
-`;
+exports[`ActionConnectorWarnings should not render if importedActionConnectorsCount is falsy and empty warnings array 1`] = `<div />`;
 
-exports[`ActionConnectorWarnings should not render if importedActionConnectorsCount is truthy and empty warnings array 1`] = `
-Object {
-  "asFragment": [Function],
-  "baseElement": <body>
-    <div />
-  </body>,
-  "container": <div />,
-  "debug": [Function],
-  "findAllByAltText": [Function],
-  "findAllByDisplayValue": [Function],
-  "findAllByLabelText": [Function],
-  "findAllByPlaceholderText": [Function],
-  "findAllByRole": [Function],
-  "findAllByTestId": [Function],
-  "findAllByText": [Function],
-  "findAllByTitle": [Function],
-  "findByAltText": [Function],
-  "findByDisplayValue": [Function],
-  "findByLabelText": [Function],
-  "findByPlaceholderText": [Function],
-  "findByRole": [Function],
-  "findByTestId": [Function],
-  "findByText": [Function],
-  "findByTitle": [Function],
-  "getAllByAltText": [Function],
-  "getAllByDisplayValue": [Function],
-  "getAllByLabelText": [Function],
-  "getAllByPlaceholderText": [Function],
-  "getAllByRole": [Function],
-  "getAllByTestId": [Function],
-  "getAllByText": [Function],
-  "getAllByTitle": [Function],
-  "getByAltText": [Function],
-  "getByDisplayValue": [Function],
-  "getByLabelText": [Function],
-  "getByPlaceholderText": [Function],
-  "getByRole": [Function],
-  "getByTestId": [Function],
-  "getByText": [Function],
-  "getByTitle": [Function],
-  "queryAllByAltText": [Function],
-  "queryAllByDisplayValue": [Function],
-  "queryAllByLabelText": [Function],
-  "queryAllByPlaceholderText": [Function],
-  "queryAllByRole": [Function],
-  "queryAllByTestId": [Function],
-  "queryAllByText": [Function],
-  "queryAllByTitle": [Function],
-  "queryByAltText": [Function],
-  "queryByDisplayValue": [Function],
-  "queryByLabelText": [Function],
-  "queryByPlaceholderText": [Function],
-  "queryByRole": [Function],
-  "queryByTestId": [Function],
-  "queryByText": [Function],
-  "queryByTitle": [Function],
-  "rerender": [Function],
-  "unmount": [Function],
-}
-`;
+exports[`ActionConnectorWarnings should not render if importedActionConnectorsCount is truthy and empty warnings array 1`] = `<div />`;
 
 exports[`ActionConnectorWarnings should render if 1 connectors were imported and use the warning message with the correct imported number 1`] = `
-Object {
-  "asFragment": [Function],
-  "baseElement": <body>
-    <div>
-      <div
-        class="euiPanel euiPanel--warning euiPanel--paddingMedium euiCallOut euiCallOut--warning emotion-euiPanel-none-m-warning-euiCallOut"
-        data-test-subj="actionConnectorsWarningsCallOut"
+<div>
+  <div
+    class="euiPanel euiPanel--warning euiPanel--paddingMedium euiCallOut euiCallOut--warning emotion-euiPanel-none-m-warning-euiCallOut"
+    data-test-subj="actionConnectorsWarningsCallOut"
+  >
+    <h2
+      class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader-warning"
+    >
+      <span
+        aria-hidden="true"
+        class="emotion-euiCallOut__icon"
+        color="inherit"
+        data-euiicon-type="warning"
+      />
+      <span
+        data-test-subj="actionConnectorsWarningsCallOutTitle"
       >
-        <h2
-          class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader-warning"
-        >
-          <span
-            aria-hidden="true"
-            class="emotion-euiCallOut__icon"
-            color="inherit"
-            data-euiicon-type="warning"
-          />
-          <span
-            data-test-subj="actionConnectorsWarningsCallOutTitle"
-          >
-            1 connector imported
-          </span>
-        </h2>
+        1 connector imported
+      </span>
+    </h2>
+    <div
+      class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+    />
+    <div
+      class="euiText emotion-euiText-s-euiTextColor-default"
+    >
+      <div
+        class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-stretch-column"
+      >
         <div
-          class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
-        />
-        <div
-          class="euiText emotion-euiText-s-euiTextColor-default"
+          class="euiFlexItem emotion-euiFlexItem-grow-1"
+          data-test-subj="actionConnectorsWarningsCallOutMessage"
         >
           <div
-            class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-stretch-column"
+            class="euiText emotion-euiText-xs"
           >
-            <div
-              class="euiFlexItem emotion-euiFlexItem-grow-1"
-              data-test-subj="actionConnectorsWarningsCallOutMessage"
-            >
-              <div
-                class="euiText emotion-euiText-xs"
-              >
-                1 connector has sensitive information that requires updates.
-              </div>
-            </div>
-            <div
-              class="euiFlexItem emotion-euiFlexItem-grow-1"
-            >
-              <div
-                class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-flexEnd-columnReverse"
-              >
-                <button
-                  class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-warning"
-                  data-test-subj="actionConnectorsWarningsCallOutButton"
-                  type="button"
-                >
-                  <span
-                    class="emotion-euiButtonDisplayContent"
-                  >
-                    <span
-                      class="eui-textTruncate"
-                    >
-                      Go to connectors
-                    </span>
-                  </span>
-                </button>
-              </div>
-            </div>
+            1 connector has sensitive information that requires updates.
           </div>
         </div>
-      </div>
-    </div>
-  </body>,
-  "container": <div>
-    <div
-      class="euiPanel euiPanel--warning euiPanel--paddingMedium euiCallOut euiCallOut--warning emotion-euiPanel-none-m-warning-euiCallOut"
-      data-test-subj="actionConnectorsWarningsCallOut"
-    >
-      <h2
-        class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader-warning"
-      >
-        <span
-          aria-hidden="true"
-          class="emotion-euiCallOut__icon"
-          color="inherit"
-          data-euiicon-type="warning"
-        />
-        <span
-          data-test-subj="actionConnectorsWarningsCallOutTitle"
-        >
-          1 connector imported
-        </span>
-      </h2>
-      <div
-        class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
-      />
-      <div
-        class="euiText emotion-euiText-s-euiTextColor-default"
-      >
         <div
-          class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-stretch-column"
+          class="euiFlexItem emotion-euiFlexItem-grow-1"
         >
           <div
-            class="euiFlexItem emotion-euiFlexItem-grow-1"
-            data-test-subj="actionConnectorsWarningsCallOutMessage"
+            class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-flexEnd-columnReverse"
           >
-            <div
-              class="euiText emotion-euiText-xs"
+            <button
+              class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-warning"
+              data-test-subj="actionConnectorsWarningsCallOutButton"
+              type="button"
             >
-              1 connector has sensitive information that requires updates.
-            </div>
-          </div>
-          <div
-            class="euiFlexItem emotion-euiFlexItem-grow-1"
-          >
-            <div
-              class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-flexEnd-columnReverse"
-            >
-              <button
-                class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-warning"
-                data-test-subj="actionConnectorsWarningsCallOutButton"
-                type="button"
+              <span
+                class="emotion-euiButtonDisplayContent"
               >
                 <span
-                  class="emotion-euiButtonDisplayContent"
+                  class="eui-textTruncate"
                 >
-                  <span
-                    class="eui-textTruncate"
-                  >
-                    Go to connectors
-                  </span>
+                  Go to connectors
                 </span>
-              </button>
-            </div>
+              </span>
+            </button>
           </div>
         </div>
       </div>
     </div>
-  </div>,
-  "debug": [Function],
-  "findAllByAltText": [Function],
-  "findAllByDisplayValue": [Function],
-  "findAllByLabelText": [Function],
-  "findAllByPlaceholderText": [Function],
-  "findAllByRole": [Function],
-  "findAllByTestId": [Function],
-  "findAllByText": [Function],
-  "findAllByTitle": [Function],
-  "findByAltText": [Function],
-  "findByDisplayValue": [Function],
-  "findByLabelText": [Function],
-  "findByPlaceholderText": [Function],
-  "findByRole": [Function],
-  "findByTestId": [Function],
-  "findByText": [Function],
-  "findByTitle": [Function],
-  "getAllByAltText": [Function],
-  "getAllByDisplayValue": [Function],
-  "getAllByLabelText": [Function],
-  "getAllByPlaceholderText": [Function],
-  "getAllByRole": [Function],
-  "getAllByTestId": [Function],
-  "getAllByText": [Function],
-  "getAllByTitle": [Function],
-  "getByAltText": [Function],
-  "getByDisplayValue": [Function],
-  "getByLabelText": [Function],
-  "getByPlaceholderText": [Function],
-  "getByRole": [Function],
-  "getByTestId": [Function],
-  "getByText": [Function],
-  "getByTitle": [Function],
-  "queryAllByAltText": [Function],
-  "queryAllByDisplayValue": [Function],
-  "queryAllByLabelText": [Function],
-  "queryAllByPlaceholderText": [Function],
-  "queryAllByRole": [Function],
-  "queryAllByTestId": [Function],
-  "queryAllByText": [Function],
-  "queryAllByTitle": [Function],
-  "queryByAltText": [Function],
-  "queryByDisplayValue": [Function],
-  "queryByLabelText": [Function],
-  "queryByPlaceholderText": [Function],
-  "queryByRole": [Function],
-  "queryByTestId": [Function],
-  "queryByText": [Function],
-  "queryByTitle": [Function],
-  "rerender": [Function],
-  "unmount": [Function],
-}
+  </div>
+</div>
 `;
 
 exports[`ActionConnectorWarnings should render if 2 connectors were imported and use the button label when is set 1`] = `
-Object {
-  "asFragment": [Function],
-  "baseElement": <body>
-    <div>
-      <div
-        class="euiPanel euiPanel--warning euiPanel--paddingMedium euiCallOut euiCallOut--warning emotion-euiPanel-none-m-warning-euiCallOut"
-        data-test-subj="actionConnectorsWarningsCallOut"
+<div>
+  <div
+    class="euiPanel euiPanel--warning euiPanel--paddingMedium euiCallOut euiCallOut--warning emotion-euiPanel-none-m-warning-euiCallOut"
+    data-test-subj="actionConnectorsWarningsCallOut"
+  >
+    <h2
+      class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader-warning"
+    >
+      <span
+        aria-hidden="true"
+        class="emotion-euiCallOut__icon"
+        color="inherit"
+        data-euiicon-type="warning"
+      />
+      <span
+        data-test-subj="actionConnectorsWarningsCallOutTitle"
       >
-        <h2
-          class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader-warning"
-        >
-          <span
-            aria-hidden="true"
-            class="emotion-euiCallOut__icon"
-            color="inherit"
-            data-euiicon-type="warning"
-          />
-          <span
-            data-test-subj="actionConnectorsWarningsCallOutTitle"
-          >
-            2 connectors imported
-          </span>
-        </h2>
+        2 connectors imported
+      </span>
+    </h2>
+    <div
+      class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+    />
+    <div
+      class="euiText emotion-euiText-s-euiTextColor-default"
+    >
+      <div
+        class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-stretch-column"
+      >
         <div
-          class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
-        />
-        <div
-          class="euiText emotion-euiText-s-euiTextColor-default"
+          class="euiFlexItem emotion-euiFlexItem-grow-1"
+          data-test-subj="actionConnectorsWarningsCallOutMessage"
         >
           <div
-            class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-stretch-column"
+            class="euiText emotion-euiText-xs"
           >
-            <div
-              class="euiFlexItem emotion-euiFlexItem-grow-1"
-              data-test-subj="actionConnectorsWarningsCallOutMessage"
-            >
-              <div
-                class="euiText emotion-euiText-xs"
-              >
-                2 connectors have sensitive information that requires updates.
-              </div>
-            </div>
-            <div
-              class="euiFlexItem emotion-euiFlexItem-grow-1"
-            >
-              <div
-                class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-flexEnd-columnReverse"
-              >
-                <button
-                  class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-warning"
-                  data-test-subj="actionConnectorsWarningsCallOutButton"
-                  type="button"
-                >
-                  <span
-                    class="emotion-euiButtonDisplayContent"
-                  >
-                    <span
-                      class="eui-textTruncate"
-                    >
-                      Connectors
-                    </span>
-                  </span>
-                </button>
-              </div>
-            </div>
+            2 connectors have sensitive information that requires updates.
           </div>
         </div>
-      </div>
-    </div>
-  </body>,
-  "container": <div>
-    <div
-      class="euiPanel euiPanel--warning euiPanel--paddingMedium euiCallOut euiCallOut--warning emotion-euiPanel-none-m-warning-euiCallOut"
-      data-test-subj="actionConnectorsWarningsCallOut"
-    >
-      <h2
-        class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader-warning"
-      >
-        <span
-          aria-hidden="true"
-          class="emotion-euiCallOut__icon"
-          color="inherit"
-          data-euiicon-type="warning"
-        />
-        <span
-          data-test-subj="actionConnectorsWarningsCallOutTitle"
-        >
-          2 connectors imported
-        </span>
-      </h2>
-      <div
-        class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
-      />
-      <div
-        class="euiText emotion-euiText-s-euiTextColor-default"
-      >
         <div
-          class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-stretch-column"
+          class="euiFlexItem emotion-euiFlexItem-grow-1"
         >
           <div
-            class="euiFlexItem emotion-euiFlexItem-grow-1"
-            data-test-subj="actionConnectorsWarningsCallOutMessage"
+            class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-flexEnd-columnReverse"
           >
-            <div
-              class="euiText emotion-euiText-xs"
+            <button
+              class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-warning"
+              data-test-subj="actionConnectorsWarningsCallOutButton"
+              type="button"
             >
-              2 connectors have sensitive information that requires updates.
-            </div>
-          </div>
-          <div
-            class="euiFlexItem emotion-euiFlexItem-grow-1"
-          >
-            <div
-              class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-flexEnd-columnReverse"
-            >
-              <button
-                class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-warning"
-                data-test-subj="actionConnectorsWarningsCallOutButton"
-                type="button"
+              <span
+                class="emotion-euiButtonDisplayContent"
               >
                 <span
-                  class="emotion-euiButtonDisplayContent"
+                  class="eui-textTruncate"
                 >
-                  <span
-                    class="eui-textTruncate"
-                  >
-                    Connectors
-                  </span>
+                  Connectors
                 </span>
-              </button>
-            </div>
+              </span>
+            </button>
           </div>
         </div>
       </div>
     </div>
-  </div>,
-  "debug": [Function],
-  "findAllByAltText": [Function],
-  "findAllByDisplayValue": [Function],
-  "findAllByLabelText": [Function],
-  "findAllByPlaceholderText": [Function],
-  "findAllByRole": [Function],
-  "findAllByTestId": [Function],
-  "findAllByText": [Function],
-  "findAllByTitle": [Function],
-  "findByAltText": [Function],
-  "findByDisplayValue": [Function],
-  "findByLabelText": [Function],
-  "findByPlaceholderText": [Function],
-  "findByRole": [Function],
-  "findByTestId": [Function],
-  "findByText": [Function],
-  "findByTitle": [Function],
-  "getAllByAltText": [Function],
-  "getAllByDisplayValue": [Function],
-  "getAllByLabelText": [Function],
-  "getAllByPlaceholderText": [Function],
-  "getAllByRole": [Function],
-  "getAllByTestId": [Function],
-  "getAllByText": [Function],
-  "getAllByTitle": [Function],
-  "getByAltText": [Function],
-  "getByDisplayValue": [Function],
-  "getByLabelText": [Function],
-  "getByPlaceholderText": [Function],
-  "getByRole": [Function],
-  "getByTestId": [Function],
-  "getByText": [Function],
-  "getByTitle": [Function],
-  "queryAllByAltText": [Function],
-  "queryAllByDisplayValue": [Function],
-  "queryAllByLabelText": [Function],
-  "queryAllByPlaceholderText": [Function],
-  "queryAllByRole": [Function],
-  "queryAllByTestId": [Function],
-  "queryAllByText": [Function],
-  "queryAllByTitle": [Function],
-  "queryByAltText": [Function],
-  "queryByDisplayValue": [Function],
-  "queryByLabelText": [Function],
-  "queryByPlaceholderText": [Function],
-  "queryByRole": [Function],
-  "queryByTestId": [Function],
-  "queryByText": [Function],
-  "queryByTitle": [Function],
-  "rerender": [Function],
-  "unmount": [Function],
-}
+  </div>
+</div>
 `;
 
 exports[`ActionConnectorWarnings should render if 2 connectors were imported and use the warning message with the correct imported number 1`] = `
-Object {
-  "asFragment": [Function],
-  "baseElement": <body>
-    <div>
-      <div
-        class="euiPanel euiPanel--warning euiPanel--paddingMedium euiCallOut euiCallOut--warning emotion-euiPanel-none-m-warning-euiCallOut"
-        data-test-subj="actionConnectorsWarningsCallOut"
+<div>
+  <div
+    class="euiPanel euiPanel--warning euiPanel--paddingMedium euiCallOut euiCallOut--warning emotion-euiPanel-none-m-warning-euiCallOut"
+    data-test-subj="actionConnectorsWarningsCallOut"
+  >
+    <h2
+      class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader-warning"
+    >
+      <span
+        aria-hidden="true"
+        class="emotion-euiCallOut__icon"
+        color="inherit"
+        data-euiicon-type="warning"
+      />
+      <span
+        data-test-subj="actionConnectorsWarningsCallOutTitle"
       >
-        <h2
-          class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader-warning"
-        >
-          <span
-            aria-hidden="true"
-            class="emotion-euiCallOut__icon"
-            color="inherit"
-            data-euiicon-type="warning"
-          />
-          <span
-            data-test-subj="actionConnectorsWarningsCallOutTitle"
-          >
-            2 connectors imported
-          </span>
-        </h2>
+        2 connectors imported
+      </span>
+    </h2>
+    <div
+      class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+    />
+    <div
+      class="euiText emotion-euiText-s-euiTextColor-default"
+    >
+      <div
+        class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-stretch-column"
+      >
         <div
-          class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
-        />
-        <div
-          class="euiText emotion-euiText-s-euiTextColor-default"
+          class="euiFlexItem emotion-euiFlexItem-grow-1"
+          data-test-subj="actionConnectorsWarningsCallOutMessage"
         >
           <div
-            class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-stretch-column"
+            class="euiText emotion-euiText-xs"
           >
-            <div
-              class="euiFlexItem emotion-euiFlexItem-grow-1"
-              data-test-subj="actionConnectorsWarningsCallOutMessage"
-            >
-              <div
-                class="euiText emotion-euiText-xs"
-              >
-                2 connectors have sensitive information that requires updates.
-              </div>
-            </div>
-            <div
-              class="euiFlexItem emotion-euiFlexItem-grow-1"
-            >
-              <div
-                class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-flexEnd-columnReverse"
-              >
-                <button
-                  class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-warning"
-                  data-test-subj="actionConnectorsWarningsCallOutButton"
-                  type="button"
-                >
-                  <span
-                    class="emotion-euiButtonDisplayContent"
-                  >
-                    <span
-                      class="eui-textTruncate"
-                    >
-                      Go to connectors
-                    </span>
-                  </span>
-                </button>
-              </div>
-            </div>
+            2 connectors have sensitive information that requires updates.
           </div>
         </div>
-      </div>
-    </div>
-  </body>,
-  "container": <div>
-    <div
-      class="euiPanel euiPanel--warning euiPanel--paddingMedium euiCallOut euiCallOut--warning emotion-euiPanel-none-m-warning-euiCallOut"
-      data-test-subj="actionConnectorsWarningsCallOut"
-    >
-      <h2
-        class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader-warning"
-      >
-        <span
-          aria-hidden="true"
-          class="emotion-euiCallOut__icon"
-          color="inherit"
-          data-euiicon-type="warning"
-        />
-        <span
-          data-test-subj="actionConnectorsWarningsCallOutTitle"
-        >
-          2 connectors imported
-        </span>
-      </h2>
-      <div
-        class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
-      />
-      <div
-        class="euiText emotion-euiText-s-euiTextColor-default"
-      >
         <div
-          class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-stretch-column"
+          class="euiFlexItem emotion-euiFlexItem-grow-1"
         >
           <div
-            class="euiFlexItem emotion-euiFlexItem-grow-1"
-            data-test-subj="actionConnectorsWarningsCallOutMessage"
+            class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-flexEnd-columnReverse"
           >
-            <div
-              class="euiText emotion-euiText-xs"
+            <button
+              class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-warning"
+              data-test-subj="actionConnectorsWarningsCallOutButton"
+              type="button"
             >
-              2 connectors have sensitive information that requires updates.
-            </div>
-          </div>
-          <div
-            class="euiFlexItem emotion-euiFlexItem-grow-1"
-          >
-            <div
-              class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-flexEnd-columnReverse"
-            >
-              <button
-                class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-warning"
-                data-test-subj="actionConnectorsWarningsCallOutButton"
-                type="button"
+              <span
+                class="emotion-euiButtonDisplayContent"
               >
                 <span
-                  class="emotion-euiButtonDisplayContent"
+                  class="eui-textTruncate"
                 >
-                  <span
-                    class="eui-textTruncate"
-                  >
-                    Go to connectors
-                  </span>
+                  Go to connectors
                 </span>
-              </button>
-            </div>
+              </span>
+            </button>
           </div>
         </div>
       </div>
     </div>
-  </div>,
-  "debug": [Function],
-  "findAllByAltText": [Function],
-  "findAllByDisplayValue": [Function],
-  "findAllByLabelText": [Function],
-  "findAllByPlaceholderText": [Function],
-  "findAllByRole": [Function],
-  "findAllByTestId": [Function],
-  "findAllByText": [Function],
-  "findAllByTitle": [Function],
-  "findByAltText": [Function],
-  "findByDisplayValue": [Function],
-  "findByLabelText": [Function],
-  "findByPlaceholderText": [Function],
-  "findByRole": [Function],
-  "findByTestId": [Function],
-  "findByText": [Function],
-  "findByTitle": [Function],
-  "getAllByAltText": [Function],
-  "getAllByDisplayValue": [Function],
-  "getAllByLabelText": [Function],
-  "getAllByPlaceholderText": [Function],
-  "getAllByRole": [Function],
-  "getAllByTestId": [Function],
-  "getAllByText": [Function],
-  "getAllByTitle": [Function],
-  "getByAltText": [Function],
-  "getByDisplayValue": [Function],
-  "getByLabelText": [Function],
-  "getByPlaceholderText": [Function],
-  "getByRole": [Function],
-  "getByTestId": [Function],
-  "getByText": [Function],
-  "getByTitle": [Function],
-  "queryAllByAltText": [Function],
-  "queryAllByDisplayValue": [Function],
-  "queryAllByLabelText": [Function],
-  "queryAllByPlaceholderText": [Function],
-  "queryAllByRole": [Function],
-  "queryAllByTestId": [Function],
-  "queryAllByText": [Function],
-  "queryAllByTitle": [Function],
-  "queryByAltText": [Function],
-  "queryByDisplayValue": [Function],
-  "queryByLabelText": [Function],
-  "queryByPlaceholderText": [Function],
-  "queryByRole": [Function],
-  "queryByTestId": [Function],
-  "queryByText": [Function],
-  "queryByTitle": [Function],
-  "rerender": [Function],
-  "unmount": [Function],
-}
+  </div>
+</div>
 `;

@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 
-import { ResetTransformsRequestSchema } from '@kbn/transform-plugin/common/api_schemas/reset_transforms';
+import { ResetTransformsRequestSchema } from '@kbn/transform-plugin/server/routes/api_schemas/reset_transforms';
 import { TRANSFORM_STATE } from '@kbn/transform-plugin/common/constants';
 
 import { getCommonRequestHeader } from '../../../functional/services/ml/common_api';

@@ -51,8 +51,9 @@ describe('parseGeminiStream', () => {
     const tokenHandler = jest.fn();
     await parseGeminiStream(mockStream, mockLogger, undefined, tokenHandler);
 
-    expect(tokenHandler).toHaveBeenCalledWith('Hello ');
-    expect(tokenHandler).toHaveBeenCalledWith('world ');
+    expect(tokenHandler).toHaveBeenCalledWith('Hello');
+    expect(tokenHandler).toHaveBeenCalledWith(' worl');
+    expect(tokenHandler).toHaveBeenCalledWith('d');
   });
 
   it('should handle stream error correctly', async () => {

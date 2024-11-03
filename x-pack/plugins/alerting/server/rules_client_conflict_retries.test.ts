@@ -149,7 +149,7 @@ async function update(success: boolean) {
 
 async function updateApiKey(success: boolean) {
   try {
-    await rulesClient.updateApiKey({ id: MockRuleId });
+    await rulesClient.updateRuleApiKey({ id: MockRuleId });
   } catch (err) {
     return expectConflict(success, err);
   }
@@ -161,7 +161,7 @@ async function enable(success: boolean) {
   setupRawRuleMocks({}, { enabled: false });
 
   try {
-    await rulesClient.enable({ id: MockRuleId });
+    await rulesClient.enableRule({ id: MockRuleId });
   } catch (err) {
     return expectConflict(success, err);
   }
@@ -173,7 +173,7 @@ async function enable(success: boolean) {
 
 async function disable(success: boolean) {
   try {
-    await rulesClient.disable({ id: MockRuleId });
+    await rulesClient.disableRule({ id: MockRuleId });
   } catch (err) {
     return expectConflict(success, err);
   }

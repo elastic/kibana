@@ -10,11 +10,14 @@ import { Logger } from '@kbn/core/server';
 import { FieldsMetadataClient } from './fields_metadata_client';
 import { EcsFieldsRepository } from './repositories/ecs_fields_repository';
 import { IntegrationFieldsRepository } from './repositories/integration_fields_repository';
-import { IntegrationFieldsExtractor } from './repositories/types';
+import { MetadataFieldsRepository } from './repositories/metadata_fields_repository';
+import { IntegrationFieldsExtractor, IntegrationListExtractor } from './repositories/types';
 import { FieldsMetadataServiceSetup, FieldsMetadataServiceStart } from './types';
+import { MetadataFields as metadataFields } from '../../../common/metadata_fields';
 
 export class FieldsMetadataService {
   private integrationFieldsExtractor: IntegrationFieldsExtractor = () => Promise.resolve({});
+  private integrationListExtractor: IntegrationListExtractor = () => Promise.resolve([]);
 
   constructor(private readonly logger: Logger) {}
 
@@ -23,15 +26,20 @@ export class FieldsMetadataService {
       registerIntegrationFieldsExtractor: (extractor: IntegrationFieldsExtractor) => {
         this.integrationFieldsExtractor = extractor;
       },
+      registerIntegrationListExtractor: (extractor: IntegrationListExtractor) => {
+        this.integrationListExtractor = extractor;
+      },
     };
   }
 
   public start(): FieldsMetadataServiceStart {
-    const { logger, integrationFieldsExtractor } = this;
+    const { logger, integrationFieldsExtractor, integrationListExtractor } = this;
 
     const ecsFieldsRepository = EcsFieldsRepository.create({ ecsFields });
+    const metadataFieldsRepository = MetadataFieldsRepository.create({ metadataFields });
     const integrationFieldsRepository = IntegrationFieldsRepository.create({
       integrationFieldsExtractor,
+      integrationListExtractor,
     });
 
     return {
@@ -39,6 +47,7 @@ export class FieldsMetadataService {
         return FieldsMetadataClient.create({
           logger,
           ecsFieldsRepository,
+          metadataFieldsRepository,
           integrationFieldsRepository,
         });
       },

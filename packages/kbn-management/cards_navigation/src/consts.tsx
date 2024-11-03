@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
@@ -71,6 +72,14 @@ export const appDefinitions: Record<AppId, AppDefinition> = {
     icon: 'documents',
   },
 
+  [AppIds.DATA_USAGE]: {
+    category: appCategories.DATA,
+    description: i18n.translate('management.landing.withCardNavigation.dataUsageDescription', {
+      defaultMessage: 'View data usage and retention.',
+    }),
+    icon: 'stats',
+  },
+
   [AppIds.RULES]: {
     category: appCategories.ALERTS,
     description: i18n.translate('management.landing.withCardNavigation.rulesDescription', {
@@ -97,6 +106,13 @@ export const appDefinitions: Record<AppId, AppDefinition> = {
     icon: 'wrench',
   },
 
+  [AppIds.SPACES]: {
+    category: appCategories.CONTENT,
+    description: i18n.translate('management.landing.withCardNavigation.spacesDescription', {
+      defaultMessage: 'Organize your saved objects into meaningful categories.',
+    }),
+    icon: 'spaces',
+  },
   [AppIds.SAVED_OBJECTS]: {
     category: appCategories.CONTENT,
     description: i18n.translate('management.landing.withCardNavigation.objectsDescription', {

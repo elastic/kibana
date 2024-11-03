@@ -12,11 +12,12 @@ import { HttpSetup } from '@kbn/core-http-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/public/common';
 import { noop } from 'lodash/fp';
-import { Conversation, Prompt } from '../../../..';
+import { PromptResponse } from '@kbn/elastic-assistant-common';
+import { Conversation } from '../../../..';
 import * as i18n from './translations';
 import * as i18nModel from '../../../connectorland/models/model_selector/translations';
 
-import { ConnectorSelector } from '../../../connectorland/connector_selector';
+import { AIConnector, ConnectorSelector } from '../../../connectorland/connector_selector';
 import { SelectSystemPrompt } from '../../prompt_editor/system_prompt/select_system_prompt';
 import { ModelSelector } from '../../../connectorland/models/model_selector/model_selector';
 import { useLoadConnectors } from '../../../connectorland/use_load_connectors';
@@ -25,12 +26,11 @@ import { ConversationsBulkActions } from '../../api';
 import { getDefaultSystemPrompt } from '../../use_conversation/helpers';
 
 export interface ConversationSettingsEditorProps {
-  allSystemPrompts: Prompt[];
+  allSystemPrompts: PromptResponse[];
   conversationSettings: Record<string, Conversation>;
   conversationsSettingsBulkActions: ConversationsBulkActions;
   http: HttpSetup;
   isDisabled?: boolean;
-  isFlyoutMode: boolean;
   selectedConversation?: Conversation;
   setConversationSettings: React.Dispatch<React.SetStateAction<Record<string, Conversation>>>;
   setConversationsSettingsBulkActions: React.Dispatch<
@@ -44,19 +44,17 @@ export interface ConversationSettingsEditorProps {
 export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProps> = React.memo(
   ({
     allSystemPrompts,
-    selectedConversation,
     conversationSettings,
+    conversationsSettingsBulkActions,
     http,
     isDisabled = false,
-    isFlyoutMode,
+    selectedConversation,
     setConversationSettings,
-    conversationsSettingsBulkActions,
     setConversationsSettingsBulkActions,
   }) => {
     const { data: connectors, isSuccess: areConnectorsFetched } = useLoadConnectors({
       http,
     });
-
     const selectedSystemPrompt = useMemo(() => {
       return getDefaultSystemPrompt({ allSystemPrompts, conversation: selectedConversation });
     }, [allSystemPrompts, selectedConversation]);
@@ -96,13 +94,14 @@ export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProp
               },
             });
           } else {
-            setConversationsSettingsBulkActions({
+            const createdConversation = {
               ...conversationsSettingsBulkActions,
               create: {
                 ...(conversationsSettingsBulkActions.create ?? {}),
                 [updatedConversation.title]: updatedConversation,
               },
-            });
+            };
+            setConversationsSettingsBulkActions(createdConversation);
           }
         }
       },
@@ -136,7 +135,7 @@ export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProp
       [selectedConversation]
     );
     const handleOnConnectorSelectionChange = useCallback(
-      (connector) => {
+      (connector: AIConnector) => {
         if (selectedConversation != null) {
           const config = getGenAiConfig(connector);
           const updatedConversation = {
@@ -178,13 +177,14 @@ export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProp
               },
             });
           } else {
-            setConversationsSettingsBulkActions({
+            const createdConversation = {
               ...conversationsSettingsBulkActions,
               create: {
                 ...(conversationsSettingsBulkActions.create ?? {}),
                 [updatedConversation.title || updatedConversation.id]: updatedConversation,
               },
-            });
+            };
+            setConversationsSettingsBulkActions(createdConversation);
           }
         }
       },
@@ -240,13 +240,14 @@ export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProp
               },
             });
           } else {
-            setConversationsSettingsBulkActions({
+            const createdConversation = {
               ...conversationsSettingsBulkActions,
               create: {
                 ...(conversationsSettingsBulkActions.create ?? {}),
                 [updatedConversation.id || updatedConversation.title]: updatedConversation,
               },
-            });
+            };
+            setConversationsSettingsBulkActions(createdConversation);
           }
         }
       },
@@ -268,17 +269,13 @@ export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProp
           helpText={i18n.SETTINGS_PROMPT_HELP_TEXT_TITLE}
         >
           <SelectSystemPrompt
-            allSystemPrompts={allSystemPrompts}
+            allPrompts={allSystemPrompts}
             compressed
-            conversation={selectedConversation}
-            isEditing={true}
             isDisabled={isDisabled}
+            isSettingsModalVisible={true}
             onSystemPromptSelectionChange={handleOnSystemPromptSelectionChange}
             selectedPrompt={selectedSystemPrompt}
-            showTitles={true}
-            isSettingsModalVisible={true}
             setIsSettingsModalVisible={noop} // noop, already in settings
-            isFlyoutMode={isFlyoutMode}
           />
         </EuiFormRow>
 
@@ -294,7 +291,7 @@ export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProp
             >
               <FormattedMessage
                 id="xpack.elasticAssistant.assistant.settings.connectorHelpTextTitle"
-                defaultMessage="Kibana Connector to make requests with"
+                defaultMessage="The default LLM connector for this conversation type."
               />
             </EuiLink>
           }
@@ -303,7 +300,6 @@ export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProp
             isDisabled={isDisabled}
             onConnectorSelectionChange={handleOnConnectorSelectionChange}
             selectedConnectorId={selectedConnector?.id}
-            isFlyoutMode={isFlyoutMode}
           />
         </EuiFormRow>
 

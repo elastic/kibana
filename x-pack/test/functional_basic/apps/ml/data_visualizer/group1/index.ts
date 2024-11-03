@@ -12,7 +12,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const ml = getService('ml');
 
   describe('machine learning basic license - data visualizer - group 1', function () {
-    this.tags(['skipFirefox', 'ml']);
+    this.tags(['skipFirefox', 'ml', 'skipFIPS']);
 
     before(async () => {
       await ml.securityCommon.createMlRoles();

@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ModuleGroup, ModuleVisibility } from '@kbn/repo-info/types';
 import type { Package } from './package';
 import type { PLUGIN_CATEGORY } from './plugin_category_info';
 
@@ -34,6 +36,7 @@ export interface ParsedPackageJson {
 }
 
 export type KibanaPackageType =
+  | 'core'
   | 'plugin'
   | 'shared-browser'
   | 'shared-server'
@@ -42,7 +45,7 @@ export type KibanaPackageType =
   | 'functional-tests'
   | 'test-helper';
 
-interface PackageManifestBaseFields {
+export interface PackageManifestBaseFields {
   /**
    * The type of this package. Package types define how a package can and should
    * be used/built. Some package types also change the way that packages are
@@ -89,6 +92,14 @@ interface PackageManifestBaseFields {
    * @deprecated
    */
   serviceFolders?: string[];
+  /**
+   * Specifies the group to which this package belongs
+   */
+  group?: ModuleGroup;
+  /**
+   * Specifies the package visibility, i.e. whether it can be accessed by everybody or only packages in the same group
+   */
+  visibility?: ModuleVisibility;
 }
 
 export interface PluginPackageManifest extends PackageManifestBaseFields {
@@ -125,7 +136,7 @@ export interface SharedBrowserPackageManifest extends PackageManifestBaseFields 
 }
 
 export interface BasePackageManifest extends PackageManifestBaseFields {
-  type: 'shared-server' | 'functional-tests' | 'test-helper' | 'shared-scss';
+  type: 'shared-server' | 'functional-tests' | 'test-helper' | 'shared-scss' | 'core';
 }
 
 export type KibanaPackageManifest =

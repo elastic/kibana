@@ -63,7 +63,7 @@ export function isMlInferencePipelineInferenceConfig(
 export function isMlIngestInferenceProcessor(arg: unknown): arg is MLIngestInferenceProcessor {
   return (
     isPopulatedObject(arg) &&
-    arg.hasOwnProperty('inference_config') &&
+    Object.hasOwn(arg, 'inference_config') &&
     (isPopulatedObject(arg.inference_config, [SUPPORTED_PYTORCH_TASKS.QUESTION_ANSWERING]) ||
       isPopulatedObject(arg.inference_config, [SUPPORTED_PYTORCH_TASKS.ZERO_SHOT_CLASSIFICATION]))
   );
@@ -105,7 +105,7 @@ export function getInferencePropertiesFromPipelineConfig(
           const configSettings =
             propertiesToReturn.inferenceConfig && propertiesToReturn.inferenceConfig[type];
           propertiesToReturn[property] =
-            configSettings && configSettings.hasOwnProperty(property)
+            configSettings && Object.hasOwn(configSettings, property)
               ? // @ts-ignore
                 configSettings[property]
               : undefined;

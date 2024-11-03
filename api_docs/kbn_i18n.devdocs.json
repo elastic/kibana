@@ -682,34 +682,6 @@
             "trackAdoption": false,
             "returnComment": [],
             "children": []
-          },
-          {
-            "parentPluginId": "@kbn/i18n",
-            "id": "def-common.i18nLoader.polyfillLocale",
-            "type": "Function",
-            "tags": [],
-            "label": "polyfillLocale",
-            "description": [],
-            "signature": [
-              "(locale: string) => Promise<void>"
-            ],
-            "path": "packages/kbn-i18n/index.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "@kbn/i18n",
-                "id": "def-common.i18nLoader.polyfillLocale.$1",
-                "type": "string",
-                "tags": [],
-                "label": "locale",
-                "description": [],
-                "path": "packages/kbn-i18n/src/polyfills.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
           }
         ],
         "initialIsOpen": false

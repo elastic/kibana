@@ -7,7 +7,7 @@
 
 import { omit } from 'lodash/fp';
 import { TimelineId } from '../../../../common/types/timeline';
-import { TimelineType, TimelineStatus } from '../../../../common/api/timeline';
+import { TimelineTypeEnum, TimelineStatusEnum } from '../../../../common/api/timeline';
 
 export const mockDuplicateIdErrors = [];
 
@@ -140,7 +140,7 @@ export const mockGetTimelineValue = {
   kqlMode: 'filter',
   kqlQuery: { filterQuery: [] },
   title: 'My duplicate timeline',
-  timelineType: TimelineType.default,
+  timelineType: TimelineTypeEnum.default,
   dateRange: { start: '2020-03-18T09:31:47.294Z', end: '2020-03-19T09:31:47.294Z' },
   savedQueryId: null,
   sort: { columnId: '@timestamp', sortDirection: 'desc' },
@@ -154,7 +154,7 @@ export const mockGetTimelineValue = {
 
 export const mockGetTemplateTimelineValue = {
   ...mockGetTimelineValue,
-  timelineType: TimelineType.template,
+  timelineType: TimelineTypeEnum.template,
   templateTimelineId: '79deb4c0-6bc1-0000-0000-f5341fb7a189',
   templateTimelineVersion: 1,
 };
@@ -187,8 +187,8 @@ export const mockGetDraftTimelineValue = {
   updatedBy: 'angela',
   noteIds: [],
   pinnedEventIds: ['k-gi8nABm-sIqJ_scOoS'],
-  timelineType: TimelineType.default,
-  status: TimelineStatus.draft,
+  timelineType: TimelineTypeEnum.default,
+  status: TimelineStatusEnum.draft,
 };
 
 export const mockParsedTimelineObject = omit(

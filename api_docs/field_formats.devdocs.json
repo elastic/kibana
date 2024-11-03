@@ -827,9 +827,9 @@
             "(uiSettings: ",
             {
               "pluginId": "@kbn/core-ui-settings-server",
-              "scope": "common",
+              "scope": "server",
               "docId": "kibKbnCoreUiSettingsServerPluginApi",
-              "section": "def-common.IUiSettingsClient",
+              "section": "def-server.IUiSettingsClient",
               "text": "IUiSettingsClient"
             },
             ") => Promise<",
@@ -858,9 +858,9 @@
               "signature": [
                 {
                   "pluginId": "@kbn/core-ui-settings-server",
-                  "scope": "common",
+                  "scope": "server",
                   "docId": "kibKbnCoreUiSettingsServerPluginApi",
-                  "section": "def-common.IUiSettingsClient",
+                  "section": "def-server.IUiSettingsClient",
                   "text": "IUiSettingsClient"
                 }
               ],

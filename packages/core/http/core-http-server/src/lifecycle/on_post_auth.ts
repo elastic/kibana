@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { IKibanaResponse, KibanaRequest, LifecycleResponseFactory } from '../router';
@@ -13,6 +14,7 @@ import type { IKibanaResponse, KibanaRequest, LifecycleResponseFactory } from '.
  */
 export enum OnPostAuthResultType {
   next = 'next',
+  authzResult = 'authzResult',
 }
 
 /**
@@ -25,7 +27,15 @@ export interface OnPostAuthNextResult {
 /**
  * @public
  */
-export type OnPostAuthResult = OnPostAuthNextResult;
+export interface OnPostAuthAuthzResult {
+  type: OnPostAuthResultType.authzResult;
+  authzResult: Record<string, boolean>;
+}
+
+/**
+ * @public
+ */
+export type OnPostAuthResult = OnPostAuthNextResult | OnPostAuthAuthzResult;
 
 /**
  * @public
@@ -34,6 +44,7 @@ export type OnPostAuthResult = OnPostAuthNextResult;
 export interface OnPostAuthToolkit {
   /** To pass request to the next handler */
   next: () => OnPostAuthResult;
+  authzResultNext: (authzResult: Record<string, boolean>) => OnPostAuthAuthzResult;
 }
 
 /**

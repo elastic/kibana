@@ -8,7 +8,7 @@
 import { omit, uniqBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { isValidNamespace } from '@kbn/fleet-plugin/common';
-import { PrivateLocationAttributes } from '../../../runtime_types/private_locations';
+import { hasNoParams } from '../../formatters/formatting_utils';
 import { formatLocation } from '../../../../common/utils/location_formatter';
 import {
   BrowserFields,
@@ -20,6 +20,7 @@ import {
   ScheduleUnit,
   SourceType,
   MonitorFields,
+  type SyntheticsPrivateLocations,
 } from '../../../../common/runtime_types';
 import { DEFAULT_FIELDS } from '../../../../common/constants/monitor_defaults';
 import { DEFAULT_COMMON_FIELDS } from '../../../../common/constants/monitor_defaults';
@@ -27,7 +28,7 @@ import { formatKibanaNamespace } from '../../formatters/private_formatters';
 
 export interface NormalizedProjectProps {
   locations: Locations;
-  privateLocations: PrivateLocationAttributes[];
+  privateLocations: SyntheticsPrivateLocations;
   monitor: ProjectMonitor;
   projectId: string;
   namespace: string;
@@ -94,6 +95,7 @@ export const getNormalizeCommonFields = ({
       : defaultFields[ConfigKey.PARAMS],
     // picking out keys specifically, so users can't add arbitrary fields
     [ConfigKey.ALERT_CONFIG]: getAlertConfig(monitor),
+    [ConfigKey.LABELS]: monitor.fields || defaultFields[ConfigKey.LABELS],
   };
   return { normalizedFields, errors };
 };
@@ -124,8 +126,11 @@ const getAlertConfig = (monitor: ProjectMonitor) => {
 
 const ONLY_ONE_ATTEMPT = 1;
 
-export const getMaxAttempts = (retestOnFailure?: boolean) => {
+export const getMaxAttempts = (retestOnFailure?: boolean, maxAttempts?: number) => {
   const defaultFields = DEFAULT_COMMON_FIELDS;
+  if (!retestOnFailure && maxAttempts) {
+    return maxAttempts;
+  }
   if (retestOnFailure) {
     return defaultFields[ConfigKey.MAX_ATTEMPTS];
   } else if (retestOnFailure === false) {
@@ -193,7 +198,7 @@ export const getMonitorLocations = ({
     locations?: string[];
     privateLocations?: string[];
   };
-  allPrivateLocations: PrivateLocationAttributes[];
+  allPrivateLocations: SyntheticsPrivateLocations;
   allPublicLocations: Locations;
 }) => {
   const invalidPublicLocations: string[] = [];
@@ -306,11 +311,29 @@ export const getInvalidUrlsOrHostsError = (
   ),
 });
 
+export const getUnparseableUrlError = (monitor: ProjectMonitor, version: string) => ({
+  id: monitor.id,
+  reason: INVALID_CONFIGURATION_TITLE,
+  details: i18n.translate(
+    'xpack.synthetics.projectMonitorApi.validation.unparseableUrl.description',
+    {
+      defaultMessage:
+        '`{monitorType}` project monitors must specify a valid URL for field `{key}` in version `{version}`. Your monitor definition with ID `{monitorId}` was not saved.',
+      values: {
+        monitorType: monitor.type,
+        key: 'monitor.urls',
+        version,
+        monitorId: monitor.id,
+      },
+    }
+  ),
+});
+
 const getInvalidLocationError = (
   invalidPublic: string[],
   invalidPrivate: string[],
   allPublicLocations: Locations,
-  allPrivateLocations: PrivateLocationAttributes[]
+  allPrivateLocations: SyntheticsPrivateLocations
 ) => {
   const availablePublicMsg =
     allPublicLocations.length === 0
@@ -357,6 +380,17 @@ export const getValueInSeconds = (value: string) => {
 };
 
 /**
+ * Accounts for url values in a string or list
+ *
+ * @param {Array | string} [value]
+ * @returns {array} Returns an array
+ */
+export const getUrlsField = (value?: string[] | string): string[] => {
+  if (!value) return [];
+  return Array.isArray(value) ? value : [value];
+};
+
+/**
  * Accounts for array values that are optionally defined as a comma seperated list
  *
  * @param {Array | string} [value]
@@ -367,6 +401,24 @@ export const getOptionalListField = (value?: string[] | string): string[] => {
     return value;
   }
   return value ? value.split(',') : [];
+};
+
+/**
+ * Does a best-effort check to ensure that the `monitor.url` field will evaluate to a valid URL.
+ * @param url the value of a single entry in the `monitor.url` list intended to pass to the service
+ * @returns `true` if `new URL` does not throw an error, `false` otherwise
+ */
+export const isValidURL = (url: string): boolean => {
+  if (!hasNoParams(url)) {
+    // this is done to avoid parsing urls with variables
+    return true;
+  }
+  try {
+    new URL(url);
+    return true;
+  } catch {
+    return false;
+  }
 };
 
 /**
@@ -413,7 +465,9 @@ export const flattenAndFormatObject = (obj: Record<string, unknown>, prefix = ''
     return acc;
   }, {});
 
-export const normalizeYamlConfig = (monitor: NormalizedProjectProps['monitor']) => {
+export const normalizeYamlConfig = (data: NormalizedProjectProps['monitor']) => {
+  // we map fields to labels
+  const { fields: _fields, ...monitor } = data;
   const defaultFields = DEFAULT_FIELDS[monitor.type as MonitorTypeEnum];
   const supportedKeys = Object.keys(defaultFields);
   const flattenedConfig = flattenAndFormatObject(monitor, '', supportedKeys);

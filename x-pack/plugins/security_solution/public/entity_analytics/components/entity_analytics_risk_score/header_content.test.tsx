@@ -11,7 +11,6 @@ import { SecurityPageName } from '../../../../common/constants';
 import { RiskScoreEntity } from '../../../../common/search_strategy';
 import { useGetSecuritySolutionLinkProps } from '../../../common/components/links';
 import { RiskScoreHeaderContent } from './header_content';
-import { mockSeverityCount } from './__mocks__';
 
 jest.mock('../../../common/components/links', () => {
   const actual = jest.requireActual('../../../common/components/links');
@@ -37,10 +36,9 @@ describe('RiskScoreHeaderContent', () => {
           onClick: jest.fn(),
           path: '/userRisk',
         }}
-        onSelectSeverityFilterGroup={jest.fn()}
+        onSelectSeverityFilter={jest.fn()}
         riskEntity={RiskScoreEntity.user}
         selectedSeverity={[]}
-        severityCount={mockSeverityCount}
         toggleStatus={true}
       />
     );
@@ -54,7 +52,7 @@ describe('RiskScoreHeaderContent', () => {
   });
 
   it('should render severity filter group', () => {
-    expect(res.getByTestId(`risk-filter-button`)).toBeInTheDocument();
+    expect(res.getByTestId(`risk-filter`)).toBeInTheDocument();
   });
 
   it('should render view all button', () => {
@@ -69,10 +67,9 @@ describe('RiskScoreHeaderContent', () => {
           onClick: jest.fn(),
           path: '/userRisk',
         }}
-        onSelectSeverityFilterGroup={jest.fn()}
+        onSelectSeverityFilter={jest.fn()}
         riskEntity={RiskScoreEntity.user}
         selectedSeverity={[]}
-        severityCount={mockSeverityCount}
         toggleStatus={false}
       />
     );

@@ -6,29 +6,29 @@
  */
 
 import React, { FC, PropsWithChildren } from 'react';
-import { useLogViewContext } from '@kbn/logs-shared-plugin/public';
+import { useLogSourcesContext } from '@kbn/logs-data-access-plugin/public';
 import { logEntryCategoriesJobType, logEntryRateJobType } from '../../../../common/log_analysis';
-import { InlineLogViewSplashPage } from '../../../components/logging/inline_log_view_splash_page';
 import { LogAnalysisSetupFlyoutStateProvider } from '../../../components/logging/log_analysis_setup/setup_flyout';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
 import { LogEntryCategoriesModuleProvider } from '../../../containers/logs/log_analysis/modules/log_entry_categories';
 import { LogEntryRateModuleProvider } from '../../../containers/logs/log_analysis/modules/log_entry_rate';
 import { LogEntryFlyoutProvider } from '../../../containers/logs/log_flyout';
 import { useActiveKibanaSpace } from '../../../hooks/use_kibana_space';
-import { ConnectedLogViewErrorPage } from '../shared/page_log_view_error';
+import { LogSourceErrorPage } from '../shared/page_log_view_error';
 import { useLogMlJobIdFormatsShimContext } from '../shared/use_log_ml_job_id_formats_shim';
+
+const TIMESTAMP_FIELD = '@timestamp';
+const DEFAULT_MODULE_SOURCE_CONFIGURATION_ID = 'default'; // NOTE: Left in for legacy reasons, this used to refer to a log view ID (legacy).
 
 export const LogEntryRatePageProviders: FC<PropsWithChildren<unknown>> = ({ children }) => {
   const {
-    hasFailedLoading,
-    isLoading,
+    logSources,
+    isLoadingLogSources,
     isUninitialized,
-    logViewReference,
-    resolvedLogView,
-    isPersistedLogView,
-    revertToDefaultLogView,
-  } = useLogViewContext();
-
+    hasFailedLoadingLogSources,
+    logSourcesError,
+    combinedIndices,
+  } = useLogSourcesContext();
   const { space } = useActiveKibanaSpace();
 
   const { idFormats, isLoadingLogAnalysisIdFormats, hasFailedLoadingLogAnalysisIdFormats } =
@@ -39,33 +39,33 @@ export const LogEntryRatePageProviders: FC<PropsWithChildren<unknown>> = ({ chil
   // React concurrent mode and Suspense in order to handle that more gracefully.
   if (space == null) {
     return null;
-  } else if (!isPersistedLogView) {
-    return <InlineLogViewSplashPage revertToDefaultLogView={revertToDefaultLogView} />;
-  } else if (isLoading || isUninitialized || isLoadingLogAnalysisIdFormats || !idFormats) {
+  } else if (
+    isLoadingLogSources ||
+    isUninitialized ||
+    isLoadingLogAnalysisIdFormats ||
+    !idFormats
+  ) {
     return <SourceLoadingPage />;
-  } else if (hasFailedLoading || hasFailedLoadingLogAnalysisIdFormats) {
-    return <ConnectedLogViewErrorPage />;
-  } else if (resolvedLogView != null) {
-    if (logViewReference.type === 'log-view-inline') {
-      throw new Error('Logs ML features only support persisted Log Views');
-    }
+  } else if (hasFailedLoadingLogSources || hasFailedLoadingLogAnalysisIdFormats) {
+    return <LogSourceErrorPage errors={logSourcesError !== undefined ? [logSourcesError] : []} />;
+  } else if (logSources.length > 0) {
     return (
       <LogEntryFlyoutProvider>
         <LogEntryRateModuleProvider
-          indexPattern={resolvedLogView.indices}
-          logViewId={logViewReference.logViewId}
+          indexPattern={combinedIndices}
           spaceId={space.id}
+          sourceId={DEFAULT_MODULE_SOURCE_CONFIGURATION_ID}
           idFormat={idFormats[logEntryRateJobType]}
-          timestampField={resolvedLogView.timestampField}
-          runtimeMappings={resolvedLogView.runtimeMappings}
+          timestampField={TIMESTAMP_FIELD}
+          runtimeMappings={{}}
         >
           <LogEntryCategoriesModuleProvider
-            indexPattern={resolvedLogView.indices}
-            logViewId={logViewReference.logViewId}
+            indexPattern={combinedIndices}
             spaceId={space.id}
+            sourceId={DEFAULT_MODULE_SOURCE_CONFIGURATION_ID}
             idFormat={idFormats[logEntryCategoriesJobType]}
-            timestampField={resolvedLogView.timestampField}
-            runtimeMappings={resolvedLogView.runtimeMappings}
+            timestampField={TIMESTAMP_FIELD}
+            runtimeMappings={{}}
           >
             <LogAnalysisSetupFlyoutStateProvider>{children}</LogAnalysisSetupFlyoutStateProvider>
           </LogEntryCategoriesModuleProvider>

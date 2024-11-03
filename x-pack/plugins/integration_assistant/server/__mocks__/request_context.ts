@@ -72,6 +72,7 @@ const createRequestContextMock = (clients: MockClients = createMockClients()) =>
           ];
         }
       ),
+      isAvailable: jest.fn((): boolean => true),
       logger: loggerMock.create(),
     },
   };

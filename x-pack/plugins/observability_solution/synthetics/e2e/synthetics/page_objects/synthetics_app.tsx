@@ -6,8 +6,8 @@
  */
 import { expect, Page } from '@elastic/synthetics';
 import { RetryService } from '@kbn/ftr-common-functional-services';
+import { FormMonitorType } from '@kbn/synthetics-plugin/common/runtime_types/monitor_management';
 import { recordVideo } from '../../helpers/record_video';
-import { FormMonitorType } from '../../../common/runtime_types/monitor_management';
 import { loginPageProvider } from '../../page_objects/login';
 import { utilsPageProvider } from '../../page_objects/utils';
 
@@ -392,6 +392,11 @@ export function syntheticsAppPageProvider({
       const addMonitorBtn = await this.getAddMonitorButton();
       const isDisabled = await addMonitorBtn.isDisabled();
       return !isDisabled;
+    },
+
+    async goToRulesPage() {
+      const rulesPage = '/app/observability/alerts/rules';
+      await page.goto(basePath + rulesPage);
     },
   };
 }

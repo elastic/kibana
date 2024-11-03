@@ -57,7 +57,7 @@ export const getKnowledgeBaseStatus = async ({
  * @param {string} [options.resource] - Resource to be added to the KB, otherwise sets up the base KB
  * @param {AbortSignal} [options.signal] - AbortSignal
  *
- * @returns {Promise<CreateKnowledgeBaseResponse | IHttpFetchError>}
+ * @returns {Promise<CreateKnowledgeBaseResponse>}
  */
 export const postKnowledgeBase = async ({
   http,
@@ -66,19 +66,15 @@ export const postKnowledgeBase = async ({
 }: CreateKnowledgeBaseRequestParams & {
   http: HttpSetup;
   signal?: AbortSignal | undefined;
-}): Promise<CreateKnowledgeBaseResponse | IHttpFetchError> => {
-  try {
-    const path = ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_URL.replace('{resource?}', resource || '');
-    const response = await http.fetch(path, {
-      method: 'POST',
-      signal,
-      version: API_VERSIONS.internal.v1,
-    });
+}): Promise<CreateKnowledgeBaseResponse> => {
+  const path = ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_URL.replace('{resource?}', resource || '');
+  const response = await http.fetch(path, {
+    method: 'POST',
+    signal,
+    version: API_VERSIONS.internal.v1,
+  });
 
-    return response as CreateKnowledgeBaseResponse;
-  } catch (error) {
-    return error as IHttpFetchError;
-  }
+  return response as CreateKnowledgeBaseResponse;
 };
 
 /**

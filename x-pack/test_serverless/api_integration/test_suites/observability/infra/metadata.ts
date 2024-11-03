@@ -44,12 +44,12 @@ export default function ({ getService }: FtrProviderContext) {
     describe('works', () => {
       describe('Host asset type', () => {
         before(async () => {
-          roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+          roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
           await esArchiver.load(ARCHIVE_NAME);
         });
         after(async () => {
           await esArchiver.unload(ARCHIVE_NAME);
-          await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+          await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
         });
         it('with serverless existing host', async () => {
           const metadata = await fetchMetadata(
@@ -65,6 +65,7 @@ export default function ({ getService }: FtrProviderContext) {
           if (metadata) {
             expect(metadata.features.length).to.be(4);
             expect(metadata.name).to.equal('serverless-host');
+            expect(metadata.hasSystemIntegration).to.equal(true);
             expect(new Date(metadata.info?.timestamp ?? '')?.getTime()).to.be.above(timeRange.from);
             expect(new Date(metadata.info?.timestamp ?? '')?.getTime()).to.be.below(timeRange.to);
             expect(metadata.info?.agent).to.eql({

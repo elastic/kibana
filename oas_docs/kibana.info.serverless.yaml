@@ -2,6 +2,10 @@ openapi: 3.0.3
 info:
   title: Kibana Serverless APIs
   description: |
+    **Technical preview**  
+    This functionality is in technical preview and may be changed or removed in a future release.
+    Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+
     The Kibana REST APIs for Elastic serverless enable you to manage resources
     such as connectors, data views, and saved objects. The API calls are
     stateless. Each request that you make happens in isolation from other calls
@@ -22,26 +26,26 @@ info:
     ```
     GET kbn:/api/data_views
     ```
+
+    ## Documentation source and versions
+    
+    This documentation is derived from the `main` branch of the [kibana](https://github.com/elastic/kibana) repository.
+    It is provided under license [Attribution-NonCommercial-NoDerivatives 4.0 International](https://creativecommons.org/licenses/by-nc-nd/4.0/).
   version: "1.0.2"
-  license:
-    name: Elastic License 2.0
-    url: https://www.elastic.co/licensing/elastic-license
+  x-doc-license:
+    name: Attribution-NonCommercial-NoDerivatives 4.0 International
+    url: https://creativecommons.org/licenses/by-nc-nd/4.0/
   contact: 
     name: Kibana Team
-# servers:
-#   - url: https://{kibana_url}
-#     variables:
-#       kibana_url:
-#         default: localhost:5601
-# security:
-#   - apiKeyAuth: []
-# components:
-#   securitySchemes:
-#     apiKeyAuth:
-#       type: apiKey
-#       in: header
-#       name: Authorization
-#       description: >
-#         These APIs use key-based authentication.
-#         You must create an API key and use the encoded value in the request header.
-#         For example: `Authorization: ApiKey base64AccessApiKey`
+  x-feedbackLink:
+    label: Feedback
+    url: https://github.com/elastic/docs-content/issues/new?assignees=&labels=feedback%2Ccommunity&projects=&template=api-feedback.yaml&title=%5BFeedback%5D%3A+
+security:
+  - apiKeyAuth: []
+components:
+  securitySchemes:
+    apiKeyAuth:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: You must create an API key and use the encoded value in the request header. To learn about creating keys, go to [API keys](https://www.elastic.co/docs/current/serverless/api-keys).

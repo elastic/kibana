@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import type * as rt from 'io-ts';
 import type { Transform } from 'stream';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { fold } from 'fp-ts/lib/Either';
-import { identity } from 'fp-ts/lib/function';
 import { createConcatStream, createSplitStream, createMapStream } from '@kbn/utils';
 import { BadRequestError } from '@kbn/securitysolution-es-utils';
 import {
@@ -19,23 +15,15 @@ import {
 } from '../../../../../utils/read_stream/create_stream_from_ndjson';
 
 import type { ImportTimelineResponse } from './types';
-import { ImportTimelinesSchemaRt } from '../../../../../../common/api/timeline';
-import { throwErrors } from '../../../utils/common';
+import { ImportTimelines } from '../../../../../../common/api/timeline';
+import { parseOrThrowErrorFactory } from '../../../../../../common/timelines/zod_errors';
 
-type ErrorFactory = (message: string) => Error;
+const createPlainError = (message: string) => new Error(message);
+const parseOrThrow = parseOrThrowErrorFactory(createPlainError);
 
-export const createPlainError = (message: string) => new Error(message);
-
-export const decodeOrThrow =
-  <A, O, I>(runtimeType: rt.Type<A, O, I>, createError: ErrorFactory = createPlainError) =>
-  (inputValue: I) =>
-    pipe(runtimeType.decode(inputValue), fold(throwErrors(createError), identity));
-
-export const validateTimelines = (): Transform =>
+const validateTimelines = (): Transform =>
   createMapStream((obj: ImportTimelineResponse) =>
-    obj instanceof Error
-      ? new BadRequestError(obj.message)
-      : decodeOrThrow(ImportTimelinesSchemaRt)(obj)
+    obj instanceof Error ? new BadRequestError(obj.message) : parseOrThrow(ImportTimelines)(obj)
   );
 export const createTimelinesStreamFromNdJson = (ruleLimit: number) => {
   return [

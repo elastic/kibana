@@ -8,6 +8,7 @@
 import type { Filter } from '@kbn/es-query';
 import type { Query } from '@kbn/data-plugin/common/query';
 import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
+import type { ListingPageUrlState } from '@kbn/ml-url-state';
 import type { FieldVisConfig } from '../../../../common/types/field_vis_config';
 import type { RandomSamplerOption } from '../constants/random_sampler';
 
@@ -30,15 +31,8 @@ export interface DataVisualizerPageState {
   documentCountStats?: FieldVisConfig;
 }
 
-export interface ListingPageUrlState {
-  pageSize: number;
-  pageIndex: number;
-  sortField: string;
-  sortDirection: string;
-  queryText?: string;
-}
-
-export interface DataVisualizerIndexBasedAppState extends Omit<ListingPageUrlState, 'queryText'> {
+export interface DataVisualizerIndexBasedAppState
+  extends Omit<ListingPageUrlState, 'queryText' | 'showPerPageOptions' | 'showAll'> {
   searchString?: Query['query'];
   searchQuery?: Query['query'];
   searchQueryLanguage?: SearchQueryLanguage;

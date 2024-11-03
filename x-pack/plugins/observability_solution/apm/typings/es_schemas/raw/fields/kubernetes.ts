@@ -5,17 +5,4 @@
  * 2.0.
  */
 
-export interface Kubernetes {
-  pod?: { uid?: string | null; [key: string]: unknown };
-  namespace?: string;
-  replicaset?: {
-    name?: string;
-  };
-  deployment?: {
-    name?: string;
-  };
-  container?: {
-    id?: string;
-    name?: string;
-  };
-}
+export type { Kubernetes } from '@kbn/apm-types/es_schemas_raw';

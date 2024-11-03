@@ -25,6 +25,7 @@ import {
 } from '@elastic/eui';
 import { ScopedHistory } from '@kbn/core/public';
 
+import { useEuiTablePersist } from '@kbn/shared-ux-table-persist';
 import { ComponentTemplateListItem, reactRouterNavigate } from '../shared_imports';
 import { UIM_COMPONENT_TEMPLATE_DETAILS } from '../constants';
 import { useComponentTemplatesContext } from '../component_templates_context';
@@ -59,6 +60,8 @@ export interface Props {
   history: ScopedHistory;
 }
 
+const PAGE_SIZE_OPTIONS = [10, 20, 50];
+
 export const ComponentTable: FunctionComponent<Props> = ({
   componentTemplates,
   defaultFilter,
@@ -87,6 +90,13 @@ export const ComponentTable: FunctionComponent<Props> = ({
   ]);
 
   const [selection, setSelection] = useState<ComponentTemplateListItem[]>([]);
+
+  const { pageSize, sorting, onTableChange } = useEuiTablePersist<ComponentTemplateListItem>({
+    tableId: 'componentTemplates',
+    initialPageSize: 10,
+    initialSort: { field: 'name', direction: 'asc' },
+    pageSizeOptions: PAGE_SIZE_OPTIONS,
+  });
 
   const filteredComponentTemplates = useMemo(() => {
     const inUseFilter = filterOptions.find(({ key }) => key === 'inUse')?.checked;
@@ -132,17 +142,23 @@ export const ComponentTable: FunctionComponent<Props> = ({
     tableLayout: 'auto',
     itemId: 'name',
     'data-test-subj': 'componentTemplatesTable',
-    sorting: { sort: { field: 'name', direction: 'asc' } },
+    sorting,
     selection: {
       onSelectionChange: setSelection,
       selectable: ({ usedBy }) => usedBy.length === 0,
-      selectableMessage: (selectable) =>
+      selectableMessage: (selectable, { name }) =>
         selectable
           ? i18n.translate('xpack.idxMgmt.componentTemplatesList.table.selectionLabel', {
-              defaultMessage: 'Select this component template',
+              defaultMessage: 'Select "{name}" component template',
+              values: {
+                name,
+              },
             })
           : i18n.translate('xpack.idxMgmt.componentTemplatesList.table.disabledSelectionLabel', {
-              defaultMessage: 'Component template is in use and cannot be deleted',
+              defaultMessage: 'Component template "{name}" is in use and cannot be deleted',
+              values: {
+                name,
+              },
             }),
     },
     rowProps: () => ({
@@ -225,9 +241,10 @@ export const ComponentTable: FunctionComponent<Props> = ({
       defaultQuery: defaultFilter,
     },
     pagination: {
-      initialPageSize: 10,
-      pageSizeOptions: [10, 20, 50],
+      initialPageSize: pageSize,
+      pageSizeOptions: PAGE_SIZE_OPTIONS,
     },
+    onTableChange,
     columns: [
       {
         field: 'name',
@@ -246,6 +263,7 @@ export const ComponentTable: FunctionComponent<Props> = ({
                 },
                 () => trackMetric(METRIC_TYPE.CLICK, UIM_COMPONENT_TEMPLATE_DETAILS)
               )}
+              role="button"
               data-test-subj="templateDetailsLink"
             >
               {name}

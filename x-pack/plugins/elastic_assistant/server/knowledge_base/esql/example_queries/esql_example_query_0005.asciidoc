@@ -1,13 +1,12 @@
-[[esql-example-queries]]
-
-The following is an example ES|QL query:
-
-```
+//5. Detect DLL Hijack via Masquerading as Microsoft Native Libraries
+// Helpful when asking how to use ENRICH query results with enrich policies
 from logs-*
-| where process.name == "curl.exe"
-| stats bytes = sum(destination.bytes) by destination.address
-| eval kb =  bytes/1024
-| sort kb desc
-| limit 10
-| keep kb,destination.address
-```
+| where host.os.family == "windows" and event.action == "load" and process.code_signature.status == "trusted" and dll.code_signature.status != "trusted" and
+not dll.path rlike """[c-fC-F]:\\(Windows|windows|WINDOWS)\\(System32|SysWOW64|system32|syswow64)\\[a-zA-Z0-9_]+.dll"""
+| keep dll.name, dll.path, dll.hash.sha256, process.executable, host.id
+| ENRICH libs-policy-defend
+| where native == "yes" and not starts_with(dll.path, "C:\\Windows\\assembly\\NativeImages")
+| eval process_path = replace(process.executable, """([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}|ns[a-z][A-Z0-9]{3,4}\.tmp|DX[A-Z0-9]{3,4}\.tmp|7z[A-Z0-9]{3,5}\.tmp|[0-9\.\-\_]{3,})""", ""),
+dll_path = replace(dll.path, """([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}|ns[a-z][A-Z0-9]{3,4}\.tmp|DX[A-Z0-9]{3,4}\.tmp|7z[A-Z0-9]{3,5}\.tmp|[0-9\.\-\_]{3,})""", "")
+| stats host_count = count_distinct(host.id) by dll.name, dll_path, process_path, dll.hash.sha256
+| sort host_count asc

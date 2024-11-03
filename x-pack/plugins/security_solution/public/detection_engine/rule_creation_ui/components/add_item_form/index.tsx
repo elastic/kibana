@@ -32,14 +32,6 @@ interface AddItemProps {
   validate?: (args: unknown) => boolean;
 }
 
-const MyEuiFormRow = styled(EuiFormRow)`
-  .euiFormRow__labelWrapper {
-    .euiText {
-      padding-right: 32px;
-    }
-  }
-`;
-
 export const MyAddItemButton = styled(EuiButtonEmpty)`
   margin: 4px 0px;
   font-size: 12px;
@@ -130,7 +122,7 @@ export const AddItem = ({
 
   const values = field.value as string[];
   return (
-    <MyEuiFormRow
+    <EuiFormRow
       label={field.label}
       labelAppend={field.labelAppend}
       error={showValidation ? errorMessage : null}
@@ -180,6 +172,6 @@ export const AddItem = ({
           {addText}
         </MyAddItemButton>
       </>
-    </MyEuiFormRow>
+    </EuiFormRow>
   );
 };

@@ -10,8 +10,13 @@ import { parseAggregationResults } from '@kbn/triggers-actions-ui-plugin/common'
 import { SharePluginStart } from '@kbn/share-plugin/server';
 import { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { ecsFieldMap, alertFieldMap } from '@kbn/alerts-as-data-utils';
-import { OnlyEsqlQueryRuleParams } from '../types';
+import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
+import { LocatorPublic } from '@kbn/share-plugin/common';
+import { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
+import { DataViewsContract } from '@kbn/data-views-plugin/common';
+import { Filter, Query } from '@kbn/es-query';
 import { EsqlTable, toEsQueryHits } from '../../../../common';
+import { OnlyEsqlQueryRuleParams } from '../types';
 
 export interface FetchEsqlQueryOpts {
   ruleId: string;
@@ -42,13 +47,22 @@ export async function fetchEsqlQuery({
   const esClient = scopedClusterClient.asCurrentUser;
   const query = getEsqlQuery(params, alertLimit, dateStart, dateEnd);
 
-  logger.debug(`ES|QL query rule (${ruleId}) query: ${JSON.stringify(query)}`);
+  logger.debug(() => `ES|QL query rule (${ruleId}) query: ${JSON.stringify(query)}`);
 
-  const response = await esClient.transport.request<EsqlTable>({
-    method: 'POST',
-    path: '/_query',
-    body: query,
-  });
+  let response: EsqlTable;
+  try {
+    response = await esClient.transport.request<EsqlTable>({
+      method: 'POST',
+      path: '/_query',
+      body: query,
+    });
+  } catch (e) {
+    if (e.message?.includes('verification_exception')) {
+      throw createTaskRunError(e, TaskErrorSource.USER);
+    }
+    throw e;
+  }
+
   const hits = toEsQueryHits(response);
   const sourceFields = getSourceFields(response);
 
@@ -56,6 +70,7 @@ export async function fetchEsqlQuery({
 
   return {
     link,
+    query,
     numMatches: Number(response.values.length),
     parsedResults: parseAggregationResults({
       isCountAgg: true,
@@ -116,3 +131,31 @@ export const getSourceFields = (results: EsqlTable) => {
 
   return intersectionBy(resultFields, ecsFields, 'label');
 };
+
+export async function generateLink(
+  esqlQuery: Query,
+  discoverLocator: LocatorPublic<DiscoverAppLocatorParams>,
+  dataViews: DataViewsContract,
+  dataViewToUpdate: DataView,
+  dateStart: string,
+  dateEnd: string,
+  spacePrefix: string,
+  filterToExcludeHitsFromPreviousRun: Filter | null
+) {
+  const redirectUrlParams: DiscoverAppLocatorParams = {
+    filters: filterToExcludeHitsFromPreviousRun ? [filterToExcludeHitsFromPreviousRun] : [],
+    timeRange: { from: dateStart, to: dateEnd },
+    isAlertResults: true,
+    query: {
+      language: 'esql',
+      query: esqlQuery,
+    },
+  };
+
+  // use `lzCompress` flag for making the link readable during debugging/testing
+  // const redirectUrl = discoverLocator!.getRedirectUrl(redirectUrlParams, { lzCompress: false });
+  const redirectUrl = discoverLocator!.getRedirectUrl(redirectUrlParams);
+  const [start, end] = redirectUrl.split('/app');
+
+  return start + spacePrefix + '/app' + end;
+}

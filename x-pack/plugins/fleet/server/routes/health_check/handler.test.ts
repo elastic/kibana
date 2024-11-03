@@ -8,7 +8,9 @@ import fetch from 'node-fetch';
 
 import * as fleetServerService from '../../services/fleet_server_host';
 
-import { postHealthCheckHandler } from '.';
+import { PostHealthCheckResponseSchema } from '../../types';
+
+import { postHealthCheckHandler } from './handler';
 
 jest.mock('node-fetch');
 
@@ -102,15 +104,19 @@ describe('Fleet server health_check handler', () => {
       mockResponse as any
     );
 
+    const expectedResponse = {
+      host: 'https://localhost:8220',
+      host_id: 'default-fleet-server',
+      name: 'Default',
+      status: 'ONLINE',
+    };
     expect(res).toEqual({
-      body: {
-        host: 'https://localhost:8220',
-        host_id: 'default-fleet-server',
-        name: 'Default',
-        status: 'ONLINE',
-      },
+      body: expectedResponse,
       statusCode: 200,
     });
+
+    const validateResp = PostHealthCheckResponseSchema.validate(expectedResponse);
+    expect(validateResp).toEqual(expectedResponse);
   });
 
   it('should return an error when host id is not found', async () => {
@@ -147,12 +153,15 @@ describe('Fleet server health_check handler', () => {
       mockResponse as any
     );
 
+    const expectedResponse = {
+      host_id: 'default-fleet-server',
+      status: 'OFFLINE',
+    };
     expect(res).toEqual({
-      body: {
-        host_id: 'default-fleet-server',
-        status: 'OFFLINE',
-      },
+      body: expectedResponse,
       statusCode: 200,
     });
+    const validateResp = PostHealthCheckResponseSchema.validate(expectedResponse);
+    expect(validateResp).toEqual(expectedResponse);
   });
 });

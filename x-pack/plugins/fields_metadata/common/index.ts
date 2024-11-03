@@ -7,6 +7,7 @@
 
 export { fieldMetadataPlainRT } from './fields_metadata/types';
 export type {
+  AnyFieldName,
   EcsFieldName,
   FieldAttribute,
   FieldMetadataPlain,
@@ -14,6 +15,7 @@ export type {
   IntegrationFieldName,
   PartialFieldMetadataPlain,
   TEcsFields,
+  TMetadataFields,
 } from './fields_metadata/types';
 
 export { FieldMetadata } from './fields_metadata/models/field_metadata';

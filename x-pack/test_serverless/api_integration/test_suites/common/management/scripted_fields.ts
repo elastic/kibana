@@ -21,7 +21,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('scripted fields disabled', function () {
     before(async () => {
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       internalReqHeader = svlCommonApi.getInternalRequestHeader();
       // TODO: We're running into a 'Duplicate data view: basic_index'
       // error in Serverless, so make sure to clean up first
@@ -33,7 +33,7 @@ export default function ({ getService }: FtrProviderContext) {
       await esArchiver.unload(
         'test/api_integration/fixtures/es_archiver/index_patterns/basic_index'
       );
-      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
     it('scripted fields are ignored when disabled', async () => {
       const response = await supertestWithoutAuth

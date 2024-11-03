@@ -24,9 +24,9 @@ export const DefaultConversationsColumn: React.FC<Props> = React.memo(
       : Math.min(maxConversationsToShow, defaultConversations.length);
     const itemsToDisplay = defaultConversations.slice(0, currentDisplaying - 1);
 
-    const toggleContent = useCallback((prev) => {
-      setIsExpanded(!prev);
-    }, []);
+    const toggleContent = useCallback(() => {
+      setIsExpanded(!isExpanded);
+    }, [isExpanded]);
 
     if (!defaultConversations || defaultConversations?.length === 0) {
       return null;

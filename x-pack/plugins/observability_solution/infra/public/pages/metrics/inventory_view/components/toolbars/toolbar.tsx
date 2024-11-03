@@ -8,8 +8,10 @@
 import { EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import { decodeOrThrow } from '@kbn/io-ts-utils';
+import { InventoryMetaResponseRT } from '../../../../../../common/http_api/inventory_meta_api';
+import { useFetcher } from '../../../../../hooks/use_fetcher';
 import { useSourceContext } from '../../../../../containers/metrics_source';
-import { useInventoryMeta } from '../../hooks/use_inventory_meta';
 import { AwsEC2ToolbarItems } from './aws_ec2_toolbar_items';
 import { AwsRDSToolbarItems } from './aws_rds_toolbar_items';
 import { AwsS3ToolbarItems } from './aws_s3_toolbar_items';
@@ -27,7 +29,23 @@ interface Props {
 
 export const Toolbar = ({ nodeType, currentTime }: Props) => {
   const { sourceId } = useSourceContext();
-  const { accounts, regions } = useInventoryMeta(sourceId, nodeType, currentTime);
+  const { data } = useFetcher(
+    async (callApi) => {
+      const response = await callApi('/api/infra/inventory/meta', {
+        method: 'POST',
+        body: JSON.stringify({
+          sourceId,
+          nodeType,
+          currentTime,
+        }),
+      });
+
+      return decodeOrThrow(InventoryMetaResponseRT)(response);
+    },
+    [sourceId, nodeType, currentTime]
+  );
+
+  const { accounts = [], regions = [] } = data || {};
 
   return (
     <ToolbarWrapper>

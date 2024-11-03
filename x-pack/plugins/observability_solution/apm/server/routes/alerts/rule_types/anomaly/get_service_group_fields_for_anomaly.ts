@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { IScopedClusterClient, SavedObjectsClientContract } from '@kbn/core/server';
+import type {
+  IScopedClusterClient,
+  IUiSettingsClient,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import {
   SERVICE_ENVIRONMENT,
@@ -23,6 +27,7 @@ export async function getServiceGroupFieldsForAnomaly({
   apmIndices,
   scopedClusterClient,
   serviceName,
+  uiSettingsClient,
   environment,
   transactionType,
   timestamp,
@@ -31,6 +36,7 @@ export async function getServiceGroupFieldsForAnomaly({
   apmIndices: APMIndices;
   scopedClusterClient: IScopedClusterClient;
   savedObjectsClient: SavedObjectsClientContract;
+  uiSettingsClient: IUiSettingsClient;
   serviceName: string;
   environment: string;
   transactionType: string;
@@ -70,6 +76,7 @@ export async function getServiceGroupFieldsForAnomaly({
 
   const response = await alertingEsClient({
     scopedClusterClient,
+    uiSettingsClient,
     params,
   });
 

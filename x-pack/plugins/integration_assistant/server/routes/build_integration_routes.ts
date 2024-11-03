@@ -10,7 +10,10 @@ import { BuildIntegrationRequestBody, INTEGRATION_BUILDER_PATH } from '../../com
 import { buildPackage } from '../integration_builder';
 import type { IntegrationAssistantRouteHandlerContext } from '../plugin';
 import { buildRouteValidationWithZod } from '../util/route_validation';
-
+import { withAvailability } from './with_availability';
+import { isErrorThatHandlesItsOwnResponse } from '../lib/errors';
+import { handleCustomErrors } from './routes_util';
+import { GenerationErrorCode } from '../../common/constants';
 export function registerIntegrationBuilderRoutes(
   router: IRouter<IntegrationAssistantRouteHandlerContext>
 ) {
@@ -28,7 +31,7 @@ export function registerIntegrationBuilderRoutes(
           },
         },
       },
-      async (_, request, response) => {
+      withAvailability(async (_, request, response) => {
         const { integration } = request.body;
         try {
           const zippedIntegration = await buildPackage(integration);
@@ -37,9 +40,16 @@ export function registerIntegrationBuilderRoutes(
             body: zippedIntegration,
             headers: { 'Content-Type': 'application/zip' },
           });
-        } catch (e) {
-          return response.customError({ statusCode: 500, body: e });
+        } catch (err) {
+          try {
+            handleCustomErrors(err, GenerationErrorCode.RECURSION_LIMIT);
+          } catch (e) {
+            if (isErrorThatHandlesItsOwnResponse(e)) {
+              return e.sendResponse(response);
+            }
+          }
+          return response.customError({ statusCode: 500, body: err });
         }
-      }
+      })
     );
 }

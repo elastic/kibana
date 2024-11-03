@@ -11,9 +11,9 @@ import { type LogsFlowProgressStepId } from '../../common/logs_flow_progress_ste
 import { OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT } from '../../common/telemetry_events';
 import { useKibana } from './use_kibana';
 
-type EuiStepStatus = EuiStepsProps['steps'][number]['status'];
+export type EuiStepStatus = EuiStepsProps['steps'][number]['status'];
 
-type StepsProgress = Partial<
+export type StepsProgress = Partial<
   Record<LogsFlowProgressStepId, { status: EuiStepStatus; message?: string }>
 >;
 

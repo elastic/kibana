@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import React, { type ReactNode, useMemo, useState, useCallback } from 'react';
+import React, { type ReactNode, useMemo } from 'react';
 import styled from 'styled-components';
 import { EuiThemeProvider, useEuiTheme, type EuiThemeComputed } from '@elastic/eui';
 import { IS_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
 import { ExpandableFlyoutProvider } from '@kbn/expandable-flyout';
-import { DataViewPickerProvider } from '../../../sourcerer/experimental/containers/dataview_picker_provider';
-import { AttackDiscoveryTour } from '../../../attack_discovery/tour';
 import { URL_PARAM_KEY } from '../../../common/hooks/use_url_state';
 import { SecuritySolutionFlyout, TimelineFlyout } from '../../../flyout';
 import { useSecuritySolutionNavigation } from '../../../common/components/navigation/use_security_solution_navigation';
@@ -57,11 +55,7 @@ export type SecuritySolutionTemplateWrapperProps = Omit<KibanaPageTemplateProps,
 
 export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionTemplateWrapperProps> =
   React.memo(({ children, ...rest }) => {
-    const [didMount, setDidMount] = useState(false);
-    const onMount = useCallback(() => {
-      setDidMount(true);
-    }, []);
-    const solutionNavProps = useSecuritySolutionNavigation(onMount);
+    const solutionNavProps = useSecuritySolutionNavigation();
     const [isTimelineBottomBarVisible] = useShowTimeline();
     const getTimelineShowStatus = useMemo(() => getTimelineShowStatusByIdSelector(), []);
     const { show: isShowingTimelineOverlay } = useDeepEqualSelector((state) =>
@@ -104,14 +98,10 @@ export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionTemplateW
               component="div"
               grow={true}
             >
-              <DataViewPickerProvider>
-                <ExpandableFlyoutProvider urlKey={isPreview ? undefined : URL_PARAM_KEY.flyout}>
-                  {children}
-                  <SecuritySolutionFlyout />
-                </ExpandableFlyoutProvider>
-              </DataViewPickerProvider>
-
-              {didMount && <AttackDiscoveryTour />}
+              <ExpandableFlyoutProvider urlKey={isPreview ? undefined : URL_PARAM_KEY.flyout}>
+                {children}
+                <SecuritySolutionFlyout />
+              </ExpandableFlyoutProvider>
             </KibanaPageTemplate.Section>
             {isTimelineBottomBarVisible && (
               <KibanaPageTemplate.BottomBar data-test-subj="timeline-bottom-bar-container">

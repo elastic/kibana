@@ -7,7 +7,7 @@
 
 import { Logger } from '@kbn/logging';
 import { SOContentStorage } from '@kbn/content-management-utils';
-import { cmServicesDefinition } from '../../common/content_management/cm_services';
+import { cmServicesDefinition } from './cm_services';
 import type { GraphCrudTypes } from '../../common/content_management';
 
 const SO_TYPE = 'graph-workspace';

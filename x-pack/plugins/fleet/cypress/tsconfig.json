@@ -2,7 +2,9 @@
   "extends": "../../../../tsconfig.base.json",
   "include": [
     "**/*",
-    "../cypress.config.ts"
+    "../cypress.config.ts",
+    "../cypress.config.space_awareness.ts",
+    "../../../../typings/**/*"
   ],
   "exclude": [
     "target/**/*"
@@ -28,5 +30,6 @@
       "force": true
     },
     "@kbn/rison",
+    "@kbn/actions-plugin",
   ]
 }

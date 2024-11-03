@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { first } from 'lodash';
 import moment from 'moment';
 import { metricsExplorerResponseRT } from '@kbn/infra-plugin/common/http_api/metrics_explorer';
-import { decodeOrThrow } from '@kbn/infra-plugin/common/runtime_types';
+import { decodeOrThrow } from '@kbn/io-ts-utils';
 import { DATES } from './constants';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -241,6 +241,31 @@ export default function ({ getService }: FtrProviderContext) {
           afterKey: { groupBy0: 'demo-stack-mysql-01', groupBy1: 'eth2' },
           total: 4,
         });
+      });
+
+      it('should return 400 when requesting more than 20 metrics', async () => {
+        const postBody = {
+          timerange: {
+            field: '@timestamp',
+            to: max,
+            from: min,
+            interval: '>=1m',
+          },
+          indexPattern: 'metricbeat-*',
+          groupBy: ['host.name', 'system.network.name'],
+          limit: 3,
+          afterKey: null,
+          metrics: Array(21).fill({
+            aggregation: 'rate',
+            field: 'system.network.out.bytes',
+          }),
+        };
+
+        await supertest
+          .post('/api/infra/metrics_explorer')
+          .set('kbn-xsrf', 'xxx')
+          .send(postBody)
+          .expect(400);
       });
     });
 

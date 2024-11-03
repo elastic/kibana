@@ -19,8 +19,9 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import { cloneDeep, get, set } from 'lodash';
-import type { EuiCheckboxProps } from '@elastic/eui/src/components/form/checkbox/checkbox';
+import { cloneDeep, get } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
+import type { EuiCheckboxProps } from '@elastic/eui';
 import { getEmptyValue } from '../../../../../../common/components/empty_value';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 import type { PolicyFormComponentCommonProps } from '../types';
@@ -253,7 +254,7 @@ const EventCheckbox = memo<EventCheckboxProps>(
   ({ policy, onChange, label, keyPath, disabled, 'data-test-subj': dataTestSubj }) => {
     const isChecked: boolean = get(policy, keyPath);
 
-    const checkboxOnChangeHandler = useCallback(
+    const checkboxOnChangeHandler = useCallback<NonNullable<EuiCheckboxProps['onChange']>>(
       (ev) => {
         const updatedPolicy = cloneDeep(policy);
         set(updatedPolicy, keyPath, ev.target.checked);

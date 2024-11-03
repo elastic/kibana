@@ -7,7 +7,7 @@
 
 import type { RequestHandler } from '@kbn/core/server';
 
-import type { TransformIdParamSchema } from '../../../../common/api_schemas/common';
+import type { TransformIdParamSchema } from '../../api_schemas/common';
 
 import { wrapError, wrapEsError } from '../../utils/error_utils';
 

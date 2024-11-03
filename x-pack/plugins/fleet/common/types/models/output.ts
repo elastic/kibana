@@ -62,7 +62,7 @@ export interface NewElasticsearchOutput extends NewBaseOutput {
 
 export interface NewRemoteElasticsearchOutput extends NewBaseOutput {
   type: OutputType['RemoteElasticsearch'];
-  service_token?: string;
+  service_token?: string | null;
   secrets?: {
     service_token?: OutputSecret;
   };
@@ -110,11 +110,11 @@ export interface KafkaOutput extends NewBaseOutput {
   compression_level?: number;
   auth_type?: ValueOf<KafkaAuthType>;
   connection_type?: ValueOf<KafkaConnectionTypeType>;
-  username?: string;
-  password?: string;
+  username?: string | null;
+  password?: string | null;
   sasl?: {
     mechanism?: ValueOf<KafkaSaslMechanism>;
-  };
+  } | null;
   partition?: ValueOf<KafkaPartitionType>;
   random?: {
     group_events?: number;

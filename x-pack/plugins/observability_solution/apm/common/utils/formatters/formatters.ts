@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { asPercent as obltAsPercent } from '@kbn/observability-plugin/common';
 import numeral from '@elastic/numeral';
 import { Maybe } from '../../../typings/common';
 import { NOT_AVAILABLE_LABEL } from '../../i18n';
@@ -55,7 +56,11 @@ export function asPercent(
   return numeral(decimal).format('0.0%');
 }
 
-export function asDecimalOrInteger(value: number, threshold = 10) {
+export function asDecimalOrInteger(value: Maybe<number>, threshold = 10) {
+  if (!isFiniteNumber(value)) {
+    return NOT_AVAILABLE_LABEL;
+  }
+
   // exact 0 or above threshold should not have decimal
   if (value === 0 || value >= threshold) {
     return asInteger(value);
@@ -82,3 +87,7 @@ export function asBigNumber(value: number): string {
 
   return `${asInteger(value / 1e12)}t`;
 }
+
+export const yLabelAsPercent = (y?: number | null) => {
+  return obltAsPercent(y || 0, 1);
+};

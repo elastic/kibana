@@ -46,6 +46,9 @@ ECS_Version,Indexed,Field_Set,Field,Type,Level,Normalization,Example,Description
 8.0.0,true,system,system.cpu.system.pct,float,custom,,,Percentage of CPU usage by system processes
 8.0.0,true,system,system.cpu.total.norm.pct,float,custom,,,Percentage of CPU usage
 8.0.0,true,system,system.cpu.user.pct,float,custom,,,Percentage of CPU usage by user processes
+8.0.0,true,system,system.filesystem.used.pct,float,custom,,,Percentage of filesytem used by system processes
+8.0.0,true,system,system.load.1,float,custom,,,Load 1m by system processes
+8.0.0,true,system,system.memory.actual.used.pct,float,custom,,,Percentage of actual memory by system processes
 8.0.0,true,system,system.network.in.bytes,long,custom,,,Number of incoming bytes
 8.0.0,true,system,system.network.name,keyword,custom,,,Name of the network interface
 8.0.0,true,system,system.network.out.bytes,long,custom,,,Number of outgoing bytes

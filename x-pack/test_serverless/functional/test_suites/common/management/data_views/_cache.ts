@@ -11,7 +11,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['settings', 'common', 'header']);
   const testSubjects = getService('testSubjects');
 
-  describe('Data view field caps cache advanced setting', async function () {
+  describe('Data view field caps cache advanced setting', function () {
     before(async () => {
       await PageObjects.settings.navigateTo();
     });

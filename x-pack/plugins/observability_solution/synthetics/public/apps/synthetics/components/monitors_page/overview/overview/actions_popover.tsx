@@ -20,6 +20,7 @@ import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useCreateSLO } from '../../hooks/use_create_slo';
 import { TEST_SCHEDULED_LABEL } from '../../../monitor_add_edit/form/run_test_btn';
 import { useCanUsePublicLocById } from '../../hooks/use_can_use_public_loc_id';
 import { toggleStatusAlert } from '../../../../../../../common/runtime_types/monitor_management/alert_config';
@@ -28,7 +29,7 @@ import {
   manualTestRunInProgressSelector,
 } from '../../../../state/manual_test_runs';
 import { useMonitorAlertEnable } from '../../../../hooks/use_monitor_alert_enable';
-import { ConfigKey, MonitorOverviewItem } from '../../../../../../../common/runtime_types';
+import { ConfigKey, OverviewStatusMetaData } from '../../../../../../../common/runtime_types';
 import { useCanEditSynthetics } from '../../../../../../hooks/use_capabilities';
 import { useMonitorEnableHandler, useLocationName, useEnablement } from '../../../../hooks';
 import { setFlyoutConfig } from '../../../../state/overview/actions';
@@ -64,7 +65,7 @@ const Container = styled.div<ActionContainerProps>`
 interface Props {
   isPopoverOpen: boolean;
   isInspectView?: boolean;
-  monitor: MonitorOverviewItem;
+  monitor: OverviewStatusMetaData;
   setIsPopoverOpen: React.Dispatch<React.SetStateAction<boolean>>;
   position: PopoverPosition;
   iconHasPanel?: boolean;
@@ -111,9 +112,10 @@ export function ActionsPopover({
 
   const detailUrl = useMonitorDetailLocator({
     configId: monitor.configId,
-    locationId: locationId ?? monitor.location.id,
+    locationId: locationId ?? monitor.locationId,
+    spaceId: monitor.spaceId,
   });
-  const editUrl = useEditMonitorLocator({ configId: monitor.configId });
+  const editUrl = useEditMonitorLocator({ configId: monitor.configId, spaceId: monitor.spaceId });
 
   const canEditSynthetics = useCanEditSynthetics();
 
@@ -136,6 +138,11 @@ export function ActionsPopover({
   });
 
   const { alertStatus, updateAlertEnabledState } = useMonitorAlertEnable();
+  const { CreateSLOFlyout, setIsSLOFlyoutOpen } = useCreateSLO({
+    configId: monitor.configId,
+    label: monitor.name,
+    tags: monitor.tags,
+  });
 
   const [enableLabel, setEnableLabel] = useState(
     monitor.isEnabled ? disableMonitorLabel : enableMonitorLabel
@@ -162,8 +169,8 @@ export function ActionsPopover({
           setFlyoutConfig({
             configId: monitor.configId,
             location: locationName,
-            id: monitor.id,
-            locationId: monitor.location.id,
+            id: monitor.configId,
+            locationId: monitor.locationId,
           })
         );
         setIsPopoverOpen(false);
@@ -222,6 +229,20 @@ export function ActionsPopover({
     },
     {
       name: (
+        <NoPermissionsTooltip canEditSynthetics={canEditSynthetics}>
+          {CREATE_SLO}
+        </NoPermissionsTooltip>
+      ),
+      icon: 'visGauge',
+      disabled: !canEditSynthetics || !isServiceAllowed,
+      onClick: () => {
+        setIsPopoverOpen(false);
+        setIsSLOFlyoutOpen(true);
+      },
+      'data-test-subj': 'createSLOBtn',
+    },
+    {
+      name: (
         <NoPermissionsTooltip
           canEditSynthetics={canEditSynthetics}
           canUsePublicLocations={canUsePublicLocations}
@@ -274,40 +295,43 @@ export function ActionsPopover({
   if (isInspectView) popoverItems = popoverItems.filter((i) => i !== quickInspectPopoverItem);
 
   return (
-    <Container boxShadow={euiShadow} position={position}>
-      <EuiPopover
-        button={
-          <IconPanel hasPanel={iconHasPanel}>
-            <EuiButtonIcon
-              data-test-subj="syntheticsActionsPopoverButton"
-              aria-label={openActionsMenuAria}
-              iconType="boxesHorizontal"
-              color="primary"
-              size={iconSize}
-              display="empty"
-              onClick={() => setIsPopoverOpen((b: boolean) => !b)}
-              title={openActionsMenuAria}
-            />
-          </IconPanel>
-        }
-        color="lightestShade"
-        isOpen={isPopoverOpen}
-        closePopover={() => setIsPopoverOpen(false)}
-        anchorPosition="rightUp"
-        panelPaddingSize="none"
-      >
-        <EuiContextMenu
-          initialPanelId={0}
-          panels={[
-            {
-              id: '0',
-              title: actionsMenuTitle,
-              items: popoverItems,
-            },
-          ]}
-        />
-      </EuiPopover>
-    </Container>
+    <>
+      <Container boxShadow={euiShadow} position={position}>
+        <EuiPopover
+          button={
+            <IconPanel hasPanel={iconHasPanel}>
+              <EuiButtonIcon
+                data-test-subj="syntheticsActionsPopoverButton"
+                aria-label={openActionsMenuAria}
+                iconType="boxesHorizontal"
+                color="primary"
+                size={iconSize}
+                display="empty"
+                onClick={() => setIsPopoverOpen((b: boolean) => !b)}
+                title={openActionsMenuAria}
+              />
+            </IconPanel>
+          }
+          color="lightestShade"
+          isOpen={isPopoverOpen}
+          closePopover={() => setIsPopoverOpen(false)}
+          anchorPosition="rightUp"
+          panelPaddingSize="none"
+        >
+          <EuiContextMenu
+            initialPanelId={0}
+            panels={[
+              {
+                id: '0',
+                title: actionsMenuTitle,
+                items: popoverItems,
+              },
+            ]}
+          />
+        </EuiPopover>
+      </Container>
+      {CreateSLOFlyout}
+    </>
   );
 }
 
@@ -355,6 +379,10 @@ const actionsMenuCloneMonitorName = i18n.translate(
     defaultMessage: 'Clone monitor',
   }
 );
+
+const CREATE_SLO = i18n.translate('xpack.synthetics.overview.actions.createSlo.name', {
+  defaultMessage: 'Create SLO',
+});
 
 const loadingLabel = (isEnabled: boolean) =>
   isEnabled

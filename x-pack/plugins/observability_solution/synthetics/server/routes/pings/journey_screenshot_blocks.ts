@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 import { IKibanaResponse } from '@kbn/core-http-server';
 import { isRight } from 'fp-ts/Either';
 import * as t from 'io-ts';
-import { getJourneyScreenshotBlocks } from '../../legacy_uptime/lib/requests/get_journey_screenshot_blocks';
+import { getJourneyScreenshotBlocks } from '../../queries/get_journey_screenshot_blocks';
 import { ScreenshotBlockDoc } from '../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { RouteContext, SyntheticsRestApiRouteFactory } from '../types';
@@ -23,15 +23,15 @@ export const createJourneyScreenshotBlocksRoute: SyntheticsRestApiRouteFactory =
     }),
   },
   writeAccess: false,
-  handler: async (routeProps) => {
-    return await journeyScreenshotBlocksHandler(routeProps);
+  handler: (routeProps) => {
+    return journeyScreenshotBlocksHandler(routeProps);
   },
 });
 
 export const journeyScreenshotBlocksHandler = async ({
   response,
   request,
-  uptimeEsClient,
+  syntheticsEsClient,
 }: RouteContext): Promise<IKibanaResponse<ScreenshotBlockDoc[]>> => {
   const { hashes: blockIds } = request.body;
 
@@ -39,7 +39,7 @@ export const journeyScreenshotBlocksHandler = async ({
 
   const result = await getJourneyScreenshotBlocks({
     blockIds,
-    uptimeEsClient,
+    syntheticsEsClient,
   });
 
   if (result.length === 0) {

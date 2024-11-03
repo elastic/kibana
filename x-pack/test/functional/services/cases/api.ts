@@ -161,5 +161,23 @@ export function CasesAPIServiceProvider({ getService }: FtrProviderContext) {
         })
       );
     },
+
+    async createConfigWithTemplates({
+      templates,
+      owner,
+    }: {
+      templates: Configuration['templates'];
+      owner: string;
+    }) {
+      return createConfiguration(
+        kbnSupertest,
+        getConfigurationRequest({
+          overrides: {
+            templates,
+            owner,
+          },
+        })
+      );
+    },
   };
 }

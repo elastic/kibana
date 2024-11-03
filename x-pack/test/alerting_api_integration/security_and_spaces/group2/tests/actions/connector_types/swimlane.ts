@@ -9,16 +9,19 @@ import httpProxy from 'http-proxy';
 import expect from '@kbn/expect';
 import getPort from 'get-port';
 import http from 'http';
+import { IValidatedEvent } from '@kbn/event-log-plugin/server';
 
 import { getHttpProxyServer } from '@kbn/alerting-api-integration-helpers';
 import { getSwimlaneServer } from '@kbn/actions-simulators-plugin/server/plugin';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import { getEventLog } from '../../../../../common/lib';
 
 // eslint-disable-next-line import/no-default-export
 export default function swimlaneTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const configService = getService('config');
+  const retry = getService('retry');
 
   const mockSwimlane = {
     name: 'A swimlane action',
@@ -324,12 +327,12 @@ export default function swimlaneTest({ getService }: FtrProviderContext) {
               params: {},
             })
             .then((resp: any) => {
-              expect(Object.keys(resp.body)).to.eql([
-                'status',
+              expect(Object.keys(resp.body).sort()).to.eql([
+                'connector_id',
+                'errorSource',
                 'message',
                 'retry',
-                'errorSource',
-                'connector_id',
+                'status',
               ]);
               expect(resp.body.connector_id).to.eql(simulatedActionId);
               expect(resp.body.status).to.eql('error');
@@ -348,7 +351,7 @@ export default function swimlaneTest({ getService }: FtrProviderContext) {
                 connector_id: simulatedActionId,
                 status: 'error',
                 retry: false,
-                errorSource: TaskErrorSource.FRAMEWORK,
+                errorSource: TaskErrorSource.USER,
                 message:
                   'error validating action params: [subAction]: expected value to equal [pushToService]',
               });
@@ -374,7 +377,7 @@ export default function swimlaneTest({ getService }: FtrProviderContext) {
                 connector_id: simulatedActionId,
                 status: 'error',
                 retry: false,
-                errorSource: TaskErrorSource.FRAMEWORK,
+                errorSource: TaskErrorSource.USER,
                 message:
                   'error validating action params: [subActionParams]: expected a plain object value, but found [null] instead.',
               });
@@ -399,7 +402,7 @@ export default function swimlaneTest({ getService }: FtrProviderContext) {
                 connector_id: simulatedActionId,
                 status: 'error',
                 retry: false,
-                errorSource: TaskErrorSource.FRAMEWORK,
+                errorSource: TaskErrorSource.USER,
                 message:
                   'error validating action params: [subActionParams.comments]: types that failed validation:\n- [subActionParams.comments.0.0.commentId]: expected value of type [string] but got [undefined]\n- [subActionParams.comments.1]: expected value to equal [null]',
               });
@@ -424,7 +427,7 @@ export default function swimlaneTest({ getService }: FtrProviderContext) {
                 connector_id: simulatedActionId,
                 status: 'error',
                 retry: false,
-                errorSource: TaskErrorSource.FRAMEWORK,
+                errorSource: TaskErrorSource.USER,
                 message:
                   'error validating action params: [subActionParams.comments]: types that failed validation:\n- [subActionParams.comments.0.0.comment]: expected value of type [string] but got [undefined]\n- [subActionParams.comments.1]: expected value to equal [null]',
               });
@@ -459,6 +462,23 @@ export default function swimlaneTest({ getService }: FtrProviderContext) {
               url: `${swimlaneSimulatorURL}/record/123456asdf/wowzeronza`,
             },
           });
+
+          const events: IValidatedEvent[] = await retry.try(async () => {
+            return await getEventLog({
+              getService,
+              spaceId: 'default',
+              type: 'action',
+              id: simulatedActionId,
+              provider: 'actions',
+              actions: new Map([
+                ['execute-start', { equal: 1 }],
+                ['execute', { equal: 1 }],
+              ]),
+            });
+          });
+
+          const executeEvent = events[1];
+          expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(175);
         });
 
         it('should handle updating an incident', async () => {
@@ -490,6 +510,23 @@ export default function swimlaneTest({ getService }: FtrProviderContext) {
               url: `${swimlaneSimulatorURL}/record/123456asdf/wowzeronza`,
             },
           });
+
+          const events: IValidatedEvent[] = await retry.try(async () => {
+            return await getEventLog({
+              getService,
+              spaceId: 'default',
+              type: 'action',
+              id: simulatedActionId,
+              provider: 'actions',
+              actions: new Map([
+                ['execute-start', { gte: 1 }],
+                ['execute', { gte: 2 }],
+              ]),
+            });
+          });
+
+          const executeEvent = events[3];
+          expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(193);
         });
       });
     });

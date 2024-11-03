@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, PropsWithChildren, useCallback, useEffect, useState, useMemo } from 'react';
+import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { AppMountParameters, CoreSetup, CoreStart } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RouteComponentProps } from 'react-router-dom';
@@ -147,18 +147,11 @@ export async function mountApp(
   mountProps: {
     createEditorFrame: EditorFrameStart['createInstance'];
     attributeService: LensAttributeService;
-    getPresentationUtilContext: () => FC<PropsWithChildren<{}>>;
     topNavMenuEntryGenerators: LensTopNavMenuEntryGenerator[];
     locator?: LensAppLocator;
   }
 ) {
-  const {
-    createEditorFrame,
-    attributeService,
-    getPresentationUtilContext,
-    topNavMenuEntryGenerators,
-    locator,
-  } = mountProps;
+  const { createEditorFrame, attributeService, topNavMenuEntryGenerators, locator } = mountProps;
   const [[coreStart, startDependencies], instance] = await Promise.all([
     core.getStartServices(),
     createEditorFrame(),
@@ -411,25 +404,21 @@ export async function mountApp(
 
   params.element.classList.add('lnsAppWrapper');
 
-  const PresentationUtilContext = getPresentationUtilContext();
-
   render(
     <KibanaRenderContextProvider {...coreStart}>
       <KibanaContextProvider services={lensServices}>
-        <PresentationUtilContext>
-          <HashRouter>
-            <Routes>
-              <Route exact path="/edit/:id" component={EditorRoute} />
-              <Route
-                exact
-                path={`/${LENS_EDIT_BY_VALUE}`}
-                render={(routeProps) => <EditorRoute {...routeProps} editByValue />}
-              />
-              <Route exact path="/" component={EditorRoute} />
-              <Route path="/" component={NotFound} />
-            </Routes>
-          </HashRouter>
-        </PresentationUtilContext>
+        <HashRouter>
+          <Routes>
+            <Route exact path="/edit/:id" component={EditorRoute} />
+            <Route
+              exact
+              path={`/${LENS_EDIT_BY_VALUE}`}
+              render={(routeProps) => <EditorRoute {...routeProps} editByValue />}
+            />
+            <Route exact path="/" component={EditorRoute} />
+            <Route path="/" component={NotFound} />
+          </Routes>
+        </HashRouter>
       </KibanaContextProvider>
     </KibanaRenderContextProvider>,
     params.element

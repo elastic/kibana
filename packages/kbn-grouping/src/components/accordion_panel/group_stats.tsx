@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -15,9 +16,11 @@ import {
   EuiPopover,
   EuiToolTip,
 } from '@elastic/eui';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { Fragment, useCallback, useMemo, useState } from 'react';
 import { Filter } from '@kbn/es-query';
-import { StatRenderer } from '../types';
+import { css } from '@emotion/react';
+import { euiThemeVars } from '@kbn/ui-theme';
+import { GroupStatsItem } from '../types';
 import { statsContainerCss } from '../styles';
 import { TAKE_ACTION } from '../translations';
 
@@ -26,38 +29,44 @@ interface GroupStatsProps<T> {
   groupFilter: Filter[];
   groupNumber: number;
   onTakeActionsOpen?: () => void;
-  statRenderers?: StatRenderer[];
-  takeActionItems: (groupFilters: Filter[], groupNumber: number) => JSX.Element[];
+  stats?: GroupStatsItem[];
+  takeActionItems?: (groupFilters: Filter[], groupNumber: number) => JSX.Element[];
 }
+
+const Separator = () => {
+  return (
+    <EuiFlexItem
+      grow={false}
+      role="separator"
+      css={css`
+        align-self: center;
+        height: 20px;
+        border-right: ${euiThemeVars.euiBorderThin};
+      `}
+    />
+  );
+};
 
 const GroupStatsComponent = <T,>({
   bucketKey,
   groupFilter,
   groupNumber,
   onTakeActionsOpen,
-  statRenderers,
+  stats,
   takeActionItems: getTakeActionItems,
 }: GroupStatsProps<T>) => {
   const [isPopoverOpen, setPopover] = useState(false);
-  const [takeActionItems, setTakeActionItems] = useState<JSX.Element[]>([]);
+  const takeActionItems = useMemo(() => {
+    return getTakeActionItems?.(groupFilter, groupNumber) ?? [];
+  }, [getTakeActionItems, groupFilter, groupNumber]);
 
   const onButtonClick = useCallback(() => {
-    if (!isPopoverOpen && takeActionItems.length === 0) {
-      setTakeActionItems(getTakeActionItems(groupFilter, groupNumber));
-    }
     return !isPopoverOpen && onTakeActionsOpen ? onTakeActionsOpen() : setPopover(!isPopoverOpen);
-  }, [
-    getTakeActionItems,
-    groupFilter,
-    groupNumber,
-    isPopoverOpen,
-    onTakeActionsOpen,
-    takeActionItems.length,
-  ]);
+  }, [isPopoverOpen, onTakeActionsOpen]);
 
-  const statsComponent = useMemo(
+  const statsComponents = useMemo(
     () =>
-      statRenderers?.map((stat) => {
+      stats?.map((stat) => {
         const { dataTestSubj, component } =
           stat.badge != null
             ? {
@@ -73,7 +82,7 @@ const GroupStatsComponent = <T,>({
                   </EuiToolTip>
                 ),
               }
-            : { dataTestSubj: `customMetric-${stat.title}`, component: stat.renderer };
+            : { dataTestSubj: `customMetric-${stat.title}`, component: stat.component };
 
         return (
           <EuiFlexItem grow={false} key={stat.title}>
@@ -83,33 +92,34 @@ const GroupStatsComponent = <T,>({
             </span>
           </EuiFlexItem>
         );
-      }),
-    [statRenderers]
+      }) ?? [],
+    [stats]
   );
 
   const takeActionMenu = useMemo(
-    () => (
-      <EuiFlexItem grow={false}>
-        <EuiPopover
-          anchorPosition="downLeft"
-          button={
-            <EuiButtonEmpty
-              data-test-subj="take-action-button"
-              onClick={onButtonClick}
-              iconType="arrowDown"
-              iconSide="right"
-            >
-              {TAKE_ACTION}
-            </EuiButtonEmpty>
-          }
-          closePopover={() => setPopover(false)}
-          isOpen={isPopoverOpen}
-          panelPaddingSize="none"
-        >
-          <EuiContextMenuPanel items={takeActionItems} />
-        </EuiPopover>
-      </EuiFlexItem>
-    ),
+    () =>
+      takeActionItems.length ? (
+        <EuiFlexItem grow={false}>
+          <EuiPopover
+            anchorPosition="downLeft"
+            button={
+              <EuiButtonEmpty
+                data-test-subj="take-action-button"
+                onClick={onButtonClick}
+                iconType="arrowDown"
+                iconSide="right"
+              >
+                {TAKE_ACTION}
+              </EuiButtonEmpty>
+            }
+            closePopover={() => setPopover(false)}
+            isOpen={isPopoverOpen}
+            panelPaddingSize="none"
+          >
+            <EuiContextMenuPanel items={takeActionItems} />
+          </EuiPopover>
+        </EuiFlexItem>
+      ) : null,
     [isPopoverOpen, onButtonClick, takeActionItems]
   );
 
@@ -117,11 +127,15 @@ const GroupStatsComponent = <T,>({
     <EuiFlexGroup
       data-test-subj="group-stats"
       key={`stats-${bucketKey}`}
-      gutterSize="none"
+      gutterSize="m"
       alignItems="center"
     >
-      {statsComponent}
-      {takeActionMenu}
+      {[...statsComponents, takeActionMenu].filter(Boolean).map((component, index, { length }) => (
+        <Fragment key={index}>
+          {component}
+          {index < length - 1 && <Separator />}
+        </Fragment>
+      ))}
     </EuiFlexGroup>
   );
 };

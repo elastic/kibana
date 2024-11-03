@@ -15,5 +15,7 @@ export {
   UrlStateProvider,
   type Accessor,
   type Dictionary,
+  type ListingPageUrlState,
+  type PageUrlState,
   type SetUrlState,
 } from './src/url_state';

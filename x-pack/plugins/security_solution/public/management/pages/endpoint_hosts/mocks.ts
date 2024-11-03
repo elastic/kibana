@@ -21,7 +21,7 @@ import {
   BASE_POLICY_RESPONSE_ROUTE,
   HOST_METADATA_GET_ROUTE,
   HOST_METADATA_LIST_ROUTE,
-  METADATA_TRANSFORMS_STATUS_ROUTE,
+  METADATA_TRANSFORMS_STATUS_INTERNAL_ROUTE,
 } from '../../../../common/endpoint/constants';
 import type { PendingActionsHttpMockInterface } from '../../../common/lib/endpoint/endpoint_pending_actions/mocks';
 import { pendingActionsHttpMock } from '../../../common/lib/endpoint/endpoint_pending_actions/mocks';
@@ -120,7 +120,7 @@ export const failedTransformStateMock = {
 export const transformsHttpMocks = httpHandlerMockFactory<TransformHttpMocksInterface>([
   {
     id: 'metadataTransformStats',
-    path: METADATA_TRANSFORMS_STATUS_ROUTE,
+    path: METADATA_TRANSFORMS_STATUS_INTERNAL_ROUTE,
     method: 'get',
     handler: () => failedTransformStateMock,
   },

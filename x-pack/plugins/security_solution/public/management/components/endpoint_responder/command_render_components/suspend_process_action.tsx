@@ -6,10 +6,12 @@
  */
 
 import { memo, useMemo } from 'react';
-import { parsedPidOrEntityIdParameter } from '../lib/utils';
+import type { SuspendProcessRequestBody } from '../../../../../common/api/endpoint';
+import { parsedKillOrSuspendParameter } from '../lib/utils';
 import type {
-  KillOrSuspendProcessRequestBody,
   SuspendProcessActionOutputContent,
+  ResponseActionParametersWithEntityId,
+  ResponseActionParametersWithPid,
 } from '../../../../../common/endpoint/types';
 import { useSendSuspendProcessRequest } from '../../../hooks/response_actions/use_send_suspend_process_endpoint_request';
 import type { ActionRequestComponentProps } from '../types';
@@ -20,23 +22,23 @@ export const SuspendProcessActionResult = memo<
 >(({ command, setStore, store, status, setStatus, ResultComponent }) => {
   const actionCreator = useSendSuspendProcessRequest();
 
-  const actionRequestBody = useMemo<undefined | KillOrSuspendProcessRequestBody>(() => {
-    const endpointId = command.commandDefinition?.meta?.endpointId;
-    const parameters = parsedPidOrEntityIdParameter(command.args.args);
+  const actionRequestBody = useMemo<undefined | SuspendProcessRequestBody>(() => {
+    const { agentType, endpointId } = command.commandDefinition?.meta ?? {};
+    const parameters = parsedKillOrSuspendParameter(command.args.args) as
+      | ResponseActionParametersWithPid
+      | ResponseActionParametersWithEntityId;
 
     return endpointId
       ? {
+          agent_type: agentType,
           endpoint_ids: [endpointId],
           comment: command.args.args?.comment?.[0],
           parameters,
         }
       : undefined;
-  }, [command.args.args, command.commandDefinition?.meta?.endpointId]);
+  }, [command.args.args, command.commandDefinition?.meta]);
 
-  return useConsoleActionSubmitter<
-    KillOrSuspendProcessRequestBody,
-    SuspendProcessActionOutputContent
-  >({
+  return useConsoleActionSubmitter<SuspendProcessRequestBody, SuspendProcessActionOutputContent>({
     ResultComponent,
     setStore,
     store,

@@ -124,7 +124,10 @@ export class SpaceSelector extends Component<Props, State> {
       >
         {/* Portal the fixed background graphic so it doesn't affect page positioning or overlap on top of global banners */}
         <EuiPortal>
-          <div className="spcSelectorBackground" role="presentation" />
+          <div
+            className="spcSelectorBackground spcSelectorBackground__nonMixinAttributes"
+            role="presentation"
+          />
         </EuiPortal>
 
         <KibanaPageTemplate.Section color="transparent" paddingSize="xl">

@@ -16,7 +16,7 @@ import {
   StepLegendRT,
   InfraWaffleMapStepRule,
   InfraWaffleMapGradientRule,
-} from '../../../../lib/lib';
+} from '../../../../common/inventory/types';
 
 const OPERATOR_TO_FN = {
   [InfraWaffleMapRuleOperator.eq]: isEqual,

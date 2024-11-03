@@ -1,14 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import { useCallback, useMemo } from 'react';
 import { Query } from '@elastic/eui';
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
-import type { Tag } from './types';
+import type { SearchQueryError, Tag } from './types';
 
 type QueryUpdater = (query: Query, tag: Tag) => Query;
 
@@ -18,7 +20,7 @@ export function useTags({
   items,
 }: {
   query: Query;
-  updateQuery: (query: Query) => void;
+  updateQuery: (query: Query, error: SearchQueryError | null) => void;
   items: UserContentCommonSchema[];
 }) {
   // Return a map of tag.id to an array of saved object ids having that tag
@@ -45,7 +47,7 @@ export function useTags({
       (tag: Tag, q: Query = query, doUpdate: boolean = true) => {
         const updatedQuery = queryUpdater(q, tag);
         if (doUpdate) {
-          updateQuery(updatedQuery);
+          updateQuery(updatedQuery, null);
         }
         return updatedQuery;
       },
@@ -145,7 +147,7 @@ export function useTags({
 
   const clearTagSelection = useCallback(() => {
     const updatedQuery = query.removeOrFieldClauses('tag');
-    updateQuery(updatedQuery);
+    updateQuery(updatedQuery, null);
     return updateQuery;
   }, [query, updateQuery]);
 

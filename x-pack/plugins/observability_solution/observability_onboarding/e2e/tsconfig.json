@@ -9,9 +9,11 @@
   },
   "kbn_references": [
     { "path": "../../../test/tsconfig.json" },
-    { "path": "../../../../test/tsconfig.json" },
     "@kbn/test",
     "@kbn/dev-utils",
-    "@kbn/cypress-config"
+    "@kbn/cypress-config",
+    "@kbn/observability-onboarding-plugin",
+    "@kbn/ftr-common-functional-services",
+    "@kbn/ftr-common-functional-ui-services"
   ]
 }

@@ -11,7 +11,7 @@ import type { ElasticsearchClient, IUiSettingsClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { SpanKind, context } from '@opentelemetry/api';
-import { merge, omit } from 'lodash';
+import { last, merge, omit } from 'lodash';
 import {
   catchError,
   combineLatest,
@@ -30,6 +30,8 @@ import {
 } from 'rxjs';
 import { Readable } from 'stream';
 import { v4 } from 'uuid';
+import type { AssistantScope } from '@kbn/ai-assistant-common';
+import { resourceNames } from '..';
 import { ObservabilityAIAssistantConnectorType } from '../../../common/connectors';
 import {
   ChatCompletionChunkEvent,
@@ -45,7 +47,7 @@ import {
 } from '../../../common/conversation_complete';
 import { CompatibleJSONSchema } from '../../../common/functions/types';
 import {
-  UserInstructionOrPlainText,
+  AdHocInstruction,
   type Conversation,
   type ConversationCreateRequest,
   type ConversationUpdateRequest,
@@ -60,13 +62,13 @@ import {
   KnowledgeBaseService,
   RecalledEntry,
 } from '../knowledge_base_service';
-import type { ObservabilityAIAssistantResourceNames } from '../types';
 import { getAccessQuery } from '../util/get_access_query';
 import { getSystemMessageFromInstructions } from '../util/get_system_message_from_instructions';
 import { replaceSystemMessage } from '../util/replace_system_message';
 import { withAssistantSpan } from '../util/with_assistant_span';
 import { createBedrockClaudeAdapter } from './adapters/bedrock/bedrock_claude_adapter';
 import { failOnNonExistingFunctionCall } from './adapters/fail_on_non_existing_function_call';
+import { createGeminiAdapter } from './adapters/gemini/gemini_adapter';
 import { createOpenAiAdapter } from './adapters/openai_adapter';
 import { LlmApiAdapter } from './adapters/types';
 import { getContextFunctionRequestIfNeeded } from './get_context_function_request_if_needed';
@@ -93,13 +95,13 @@ export class ObservabilityAIAssistantClient {
         asInternalUser: ElasticsearchClient;
         asCurrentUser: ElasticsearchClient;
       };
-      resources: ObservabilityAIAssistantResourceNames;
       logger: Logger;
       user?: {
         id?: string;
         name: string;
       };
       knowledgeBaseService: KnowledgeBaseService;
+      scopes: AssistantScope[];
     }
   ) {}
 
@@ -107,7 +109,7 @@ export class ObservabilityAIAssistantClient {
     conversationId: string
   ): Promise<SearchHit<Conversation> | undefined> => {
     const response = await this.dependencies.esClient.asInternalUser.search<Conversation>({
-      index: this.dependencies.resources.aliases.conversations,
+      index: resourceNames.aliases.conversations,
       query: {
         bool: {
           filter: [
@@ -159,18 +161,30 @@ export class ObservabilityAIAssistantClient {
     });
   };
 
-  complete = (params: {
+  complete = ({
+    functionClient,
+    connectorId,
+    simulateFunctionCalling = false,
+    instructions: adHocInstructions = [],
+    messages: initialMessages,
+    signal,
+    persist,
+    kibanaPublicUrl,
+    isPublic,
+    title: predefinedTitle,
+    conversationId: predefinedConversationId,
+    disableFunctions = false,
+  }: {
     messages: Message[];
     connectorId: string;
     signal: AbortSignal;
     functionClient: ChatFunctionClient;
     persist: boolean;
-    responseLanguage?: string;
     conversationId?: string;
     title?: string;
     isPublic?: boolean;
     kibanaPublicUrl?: string;
-    instructions?: UserInstructionOrPlainText[];
+    instructions?: AdHocInstruction[];
     simulateFunctionCalling?: boolean;
     disableFunctions?:
       | boolean
@@ -181,41 +195,23 @@ export class ObservabilityAIAssistantClient {
     return new LangTracer(context.active()).startActiveSpan(
       'complete',
       ({ tracer: completeTracer }) => {
-        const {
-          functionClient,
-          connectorId,
-          simulateFunctionCalling,
-          instructions: requestInstructions = [],
-          messages: initialMessages,
-          signal,
-          responseLanguage = 'English',
-          persist,
-          kibanaPublicUrl,
-          isPublic,
-          title: predefinedTitle,
-          conversationId: predefinedConversationId,
-          disableFunctions = false,
-        } = params;
-
-        if (responseLanguage) {
-          requestInstructions.push(
-            `You MUST respond in the users preferred language which is: ${responseLanguage}.`
-          );
-        }
-
         const isConversationUpdate = persist && !!predefinedConversationId;
 
         const conversationId = persist ? predefinedConversationId || v4() : '';
 
         if (persist && !isConversationUpdate && kibanaPublicUrl) {
-          requestInstructions.push(
-            `This conversation will be persisted in Kibana and available at this url: ${
+          adHocInstructions.push({
+            instruction_type: 'application_instruction',
+            text: `This conversation will be persisted in Kibana and available at this url: ${
               kibanaPublicUrl + `/app/observabilityAIAssistant/conversations/${conversationId}`
-            }.`
-          );
+            }.`,
+          });
         }
 
-        const userInstructions$ = from(this.fetchUserInstructions()).pipe(shareReplay());
+        const userInstructions$ = from(this.getKnowledgeBaseUserInstructions()).pipe(shareReplay());
+
+        const registeredAdhocInstructions = functionClient.getAdhocInstructions();
+        const allAdHocInstructions = adHocInstructions.concat(registeredAdhocInstructions);
 
         // from the initial messages, override any system message with
         // the one that is based on the instructions (registered, request, kb)
@@ -224,9 +220,9 @@ export class ObservabilityAIAssistantClient {
             // this is what we eventually store in the conversation
             const messagesWithUpdatedSystemMessage = replaceSystemMessage(
               getSystemMessageFromInstructions({
-                registeredInstructions: functionClient.getInstructions(),
+                applicationInstructions: functionClient.getInstructions(),
                 userInstructions,
-                requestInstructions,
+                adHocInstructions: allAdHocInstructions,
                 availableFunctionNames: functionClient
                   .getFunctions()
                   .map((fn) => fn.definition.name),
@@ -252,7 +248,6 @@ export class ObservabilityAIAssistantClient {
                 switchMap((messages) =>
                   getGeneratedTitle({
                     messages,
-                    responseLanguage,
                     logger: this.dependencies.logger,
                     chat: (name, chatParams) => {
                       return this.chat(name, {
@@ -303,11 +298,13 @@ export class ObservabilityAIAssistantClient {
                 functionCallsLeft: MAX_FUNCTION_CALLS,
                 functionClient,
                 userInstructions,
-                requestInstructions,
+                adHocInstructions,
                 signal,
                 logger: this.dependencies.logger,
                 disableFunctions,
                 tracer: completeTracer,
+                connectorId,
+                useSimulatedFunctionCalling: simulateFunctionCalling === true,
               })
             );
           }),
@@ -335,13 +332,12 @@ export class ObservabilityAIAssistantClient {
                 const initialMessagesWithAddedMessages =
                   messagesWithUpdatedSystemMessage.concat(addedMessages);
 
-                const lastMessage =
-                  initialMessagesWithAddedMessages[initialMessagesWithAddedMessages.length - 1];
+                const lastMessage = last(initialMessagesWithAddedMessages);
 
                 // if a function request is at the very end, close the stream to consumer
                 // without persisting or updating the conversation. we need to wait
                 // on the function response to have a valid conversation
-                const isFunctionRequest = lastMessage.message.function_call?.name;
+                const isFunctionRequest = !!lastMessage?.message.function_call?.name;
 
                 if (!persist || isFunctionRequest) {
                   return of();
@@ -439,18 +435,20 @@ export class ObservabilityAIAssistantClient {
             if (this.dependencies.logger.isLevelEnabled('debug')) {
               switch (event.type) {
                 case StreamingChatResponseEventType.MessageAdd:
-                  this.dependencies.logger.debug(`Added message: ${JSON.stringify(event.message)}`);
+                  this.dependencies.logger.debug(
+                    () => `Added message: ${JSON.stringify(event.message)}`
+                  );
                   break;
 
                 case StreamingChatResponseEventType.ConversationCreate:
                   this.dependencies.logger.debug(
-                    `Created conversation: ${JSON.stringify(event.conversation)}`
+                    () => `Created conversation: ${JSON.stringify(event.conversation)}`
                   );
                   break;
 
                 case StreamingChatResponseEventType.ConversationUpdate:
                   this.dependencies.logger.debug(
-                    `Updated conversation: ${JSON.stringify(event.conversation)}`
+                    () => `Updated conversation: ${JSON.stringify(event.conversation)}`
                   );
                   break;
               }
@@ -514,13 +512,24 @@ export class ObservabilityAIAssistantClient {
             });
             break;
 
+          case ObservabilityAIAssistantConnectorType.Gemini:
+            adapter = createGeminiAdapter({
+              messages,
+              functions,
+              functionCall,
+              logger: this.dependencies.logger,
+            });
+            break;
+
           default:
             throw new Error(`Connector type is not supported: ${connector.actionTypeId}`);
         }
 
         const subAction = adapter.getSubAction();
 
-        this.dependencies.logger.trace(JSON.stringify(subAction.subActionParams, null, 2));
+        if (this.dependencies.logger.isLevelEnabled('trace')) {
+          this.dependencies.logger.trace(JSON.stringify(subAction.subActionParams, null, 2));
+        }
 
         return from(
           withAssistantSpan('get_execute_result', () =>
@@ -594,7 +603,7 @@ export class ObservabilityAIAssistantClient {
 
   find = async (options?: { query?: string }): Promise<{ conversations: Conversation[] }> => {
     const response = await this.dependencies.esClient.asInternalUser.search<Conversation>({
-      index: this.dependencies.resources.aliases.conversations,
+      index: resourceNames.aliases.conversations,
       allow_no_indices: true,
       query: {
         bool: {
@@ -686,7 +695,7 @@ export class ObservabilityAIAssistantClient {
     );
 
     await this.dependencies.esClient.asInternalUser.index({
-      index: this.dependencies.resources.aliases.conversations,
+      index: resourceNames.aliases.conversations,
       document: createdConversation,
       refresh: true,
     });
@@ -701,14 +710,16 @@ export class ObservabilityAIAssistantClient {
     queries: Array<{ text: string; boost?: number }>;
     categories?: string[];
   }): Promise<{ entries: RecalledEntry[] }> => {
-    return this.dependencies.knowledgeBaseService.recall({
-      namespace: this.dependencies.namespace,
-      user: this.dependencies.user,
-      queries,
-      categories,
-      esClient: this.dependencies.esClient,
-      uiSettingsClient: this.dependencies.uiSettingsClient,
-    });
+    return (
+      this.dependencies.knowledgeBaseService?.recall({
+        namespace: this.dependencies.namespace,
+        user: this.dependencies.user,
+        queries,
+        categories,
+        esClient: this.dependencies.esClient,
+        uiSettingsClient: this.dependencies.uiSettingsClient,
+      }) || { entries: [] }
+    );
   };
 
   getKnowledgeBaseStatus = () => {
@@ -719,7 +730,7 @@ export class ObservabilityAIAssistantClient {
     return this.dependencies.knowledgeBaseService.setup();
   };
 
-  createKnowledgeBaseEntry = async ({
+  addKnowledgeBaseEntry = async ({
     entry,
   }: {
     entry: Omit<KnowledgeBaseEntry, '@timestamp'>;
@@ -760,7 +771,7 @@ export class ObservabilityAIAssistantClient {
     return this.dependencies.knowledgeBaseService.deleteEntry({ id });
   };
 
-  fetchUserInstructions = async () => {
+  getKnowledgeBaseUserInstructions = async () => {
     return this.dependencies.knowledgeBaseService.getUserInstructions(
       this.dependencies.namespace,
       this.dependencies.user

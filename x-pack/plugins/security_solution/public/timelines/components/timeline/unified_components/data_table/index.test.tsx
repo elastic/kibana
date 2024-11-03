@@ -17,7 +17,7 @@ import type { ComponentProps } from 'react';
 import { getColumnHeaders } from '../../body/column_headers/helpers';
 import { mockSourcererScope } from '../../../../../sourcerer/containers/mocks';
 import { timelineActions } from '../../../../store';
-import { useUnifiedTableExpandableFlyout } from '../hooks/use_unified_timeline_expandable_flyout';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 
 jest.mock('../../../../../sourcerer/containers');
 
@@ -31,14 +31,11 @@ jest.mock('react-router-dom', () => ({
 
 const onFieldEditedMock = jest.fn();
 const refetchMock = jest.fn();
-const onEventClosedMock = jest.fn();
 const onChangePageMock = jest.fn();
 
 const openFlyoutMock = jest.fn();
-const closeFlyoutMock = jest.fn();
-const isExpandableFlyoutDisabled = false;
 
-jest.mock('../hooks/use_unified_timeline_expandable_flyout');
+jest.mock('@kbn/expandable-flyout');
 
 const initialEnrichedColumns = getColumnHeaders(
   defaultUdtHeaders,
@@ -75,9 +72,6 @@ const TestComponent = (props: TestComponentProps) => {
         refetch={refetchMock}
         dataLoadingState={DataLoadingState.loaded}
         totalCount={mockTimelineData.length}
-        onEventClosed={onEventClosedMock}
-        showExpandedDetails={false}
-        expandedDetail={{}}
         onChangePage={onChangePageMock}
         updatedAt={Date.now()}
         onSetColumns={jest.fn()}
@@ -98,10 +92,8 @@ const getTimelineFromStore = (
 describe('unified data table', () => {
   beforeEach(() => {
     (useSourcererDataView as jest.Mock).mockReturnValue(mockSourcererScope);
-    (useUnifiedTableExpandableFlyout as jest.Mock).mockReturnValue({
-      isExpandableFlyoutDisabled,
+    (useExpandableFlyoutApi as jest.Mock).mockReturnValue({
       openFlyout: openFlyoutMock,
-      closeFlyout: closeFlyoutMock,
     });
   });
   afterEach(() => {
@@ -237,7 +229,7 @@ describe('unified data table', () => {
     async () => {
       const rowHeight = {
         initial: 2,
-        new: 1,
+        new: 4,
       };
       const customMockStore = createMockStore();
 
@@ -248,7 +240,9 @@ describe('unified data table', () => {
         })
       );
 
-      render(<TestComponent store={customMockStore} />);
+      render(
+        <TestComponent store={customMockStore} events={[mockTimelineData[0]]} totalCount={1} />
+      );
 
       expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
 
@@ -278,24 +272,6 @@ describe('unified data table', () => {
     },
     SPECIAL_TEST_TIMEOUT
   );
-
-  describe('details flyout', () => {
-    it(
-      'should show defails flyout when clicked on expand event',
-      async () => {
-        render(<TestComponent showExpandedDetails={true} />);
-
-        expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
-
-        fireEvent.click(screen.getAllByTestId('docTableExpandToggleColumn')[0]);
-
-        await waitFor(() => {
-          expect(openFlyoutMock).toHaveBeenCalledTimes(1);
-        });
-      },
-      SPECIAL_TEST_TIMEOUT
-    );
-  });
 
   describe('pagination', () => {
     // change the number of items per page

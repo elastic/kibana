@@ -16,11 +16,11 @@ import {
   type DataFrameAnalyticsConfig,
 } from '@kbn/ml-data-frame-analytics-utils';
 
-import { newJobCapsServiceAnalytics } from '../../../../../services/new_job_capabilities/new_job_capabilities_service_analytics';
+import { useNewJobCapsServiceAnalytics } from '../../../../../services/new_job_capabilities/new_job_capabilities_service_analytics';
+import { useMlApi } from '../../../../../contexts/kibana';
 
 import type { ResultsSearchQuery, ClassificationMetricItem } from '../../../../common/analytics';
 import { isClassificationEvaluateResponse } from '../../../../common/analytics';
-
 import { loadEvalData, loadDocsCount } from '../../../../common';
 
 import { isTrainingFilter } from './is_training_filter';
@@ -60,6 +60,8 @@ export const useConfusionMatrix = (
   jobConfig: DataFrameAnalyticsConfig,
   searchQuery: ResultsSearchQuery
 ) => {
+  const mlApi = useMlApi();
+  const newJobCapsServiceAnalytics = useNewJobCapsServiceAnalytics();
   const [confusionMatrixData, setConfusionMatrixData] = useState<ConfusionMatrix[]>([]);
   const [overallAccuracy, setOverallAccuracy] = useState<null | number>(null);
   const [avgRecall, setAvgRecall] = useState<null | number>(null);
@@ -87,6 +89,7 @@ export const useConfusionMatrix = (
       }
 
       const evalData = await loadEvalData({
+        mlApi,
         isTraining,
         index: jobConfig.dest.index,
         dependentVariable,
@@ -98,6 +101,7 @@ export const useConfusionMatrix = (
       });
 
       const docsCountResp = await loadDocsCount({
+        mlApi,
         isTraining,
         searchQuery,
         resultsField,

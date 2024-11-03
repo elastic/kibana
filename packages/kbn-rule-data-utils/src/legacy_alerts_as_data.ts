@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { ALERT_NAMESPACE, ALERT_RULE_NAMESPACE } from './default_alerts_as_data';
@@ -11,6 +12,7 @@ import { ALERT_NAMESPACE, ALERT_RULE_NAMESPACE } from './default_alerts_as_data'
 const ECS_VERSION = 'ecs.version' as const;
 const EVENT_ACTION = 'event.action' as const;
 const EVENT_KIND = 'event.kind' as const;
+const EVENT_ORIGINAL = 'event.original' as const;
 const TAGS = 'tags' as const;
 
 // These are the fields that are in the rule registry technical component template
@@ -82,5 +84,6 @@ export {
   ECS_VERSION,
   EVENT_ACTION,
   EVENT_KIND,
+  EVENT_ORIGINAL,
   TAGS,
 };

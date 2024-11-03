@@ -7,7 +7,7 @@
 
 import { useCallback, useMemo } from 'react';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
-import { useTrackedPromise } from '../../utils/use_tracked_promise';
+import { useTrackedPromise } from '../../hooks/use_tracked_promise';
 import { useModuleStatus } from './infra_ml_module_status';
 import { ModuleDescriptor, ModuleSourceConfiguration } from './infra_ml_module_types';
 

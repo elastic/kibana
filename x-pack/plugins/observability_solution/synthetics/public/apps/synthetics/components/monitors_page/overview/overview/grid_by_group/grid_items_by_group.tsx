@@ -10,6 +10,7 @@ import React, { useRef, useState, FC, PropsWithChildren } from 'react';
 import { useSelector } from 'react-redux';
 import { get, invert, orderBy } from 'lodash';
 import styled from 'styled-components';
+import { i18n } from '@kbn/i18n';
 import { OverviewLoader } from '../overview_loader';
 import {
   getSyntheticsFilterDisplayValues,
@@ -17,23 +18,22 @@ import {
 } from '../../../../../utils/filters/filter_fields';
 import { useFilters } from '../../../common/monitor_filters/use_filters';
 import { GroupGridItem } from './grid_group_item';
-import { ConfigKey, MonitorOverviewItem } from '../../../../../../../../common/runtime_types';
-import { FlyoutParamProps } from '../overview_grid_item';
+import { ConfigKey } from '../../../../../../../../common/runtime_types';
 import { selectOverviewState, selectServiceLocationsState } from '../../../../../state';
+import { FlyoutParamProps } from '../types';
+import { selectOverviewStatus } from '../../../../../state/overview_status';
 
 export const GridItemsByGroup = ({
-  loaded,
-  currentMonitors,
   setFlyoutConfigCallback,
 }: {
-  loaded: boolean;
-  currentMonitors: MonitorOverviewItem[];
   setFlyoutConfigCallback: (params: FlyoutParamProps) => void;
 }) => {
   const [fullScreenGroup, setFullScreenGroup] = useState('');
   const {
     groupBy: { field: groupField, order: groupOrder },
   } = useSelector(selectOverviewState);
+
+  const { allConfigs, loaded } = useSelector(selectOverviewStatus);
 
   const { locations: allLocations } = useSelector(selectServiceLocationsState);
 
@@ -50,7 +50,7 @@ export const GridItemsByGroup = ({
     values: getSyntheticsFilterDisplayValues(locations, 'locations', allLocations),
     otherValues: {
       label: 'Without any location',
-      items: currentMonitors.filter((monitor) => get(monitor, 'locations', []).length === 0),
+      items: allConfigs?.filter((monitor) => get(monitor, 'locations', []).length === 0),
     },
   };
 
@@ -61,19 +61,26 @@ export const GridItemsByGroup = ({
         items: monitorTypes,
         values: getSyntheticsFilterDisplayValues(monitorTypes, 'monitorTypes', allLocations),
         otherValues: {
-          label: 'Invalid monitor type',
-          items: currentMonitors.filter((monitor) => !get(monitor, ConfigKey.MONITOR_TYPE)),
+          label: i18n.translate('xpack.synthetics.monitorsPage.overview.gridItemsByGroup.noType', {
+            defaultMessage: 'Invalid monitor type',
+          }),
+          items: allConfigs?.filter((monitor) => !get(monitor, ConfigKey.MONITOR_TYPE)),
         },
       };
       break;
     case 'locationId':
       selectedGroup = {
-        key: 'location.label',
+        key: 'locationLabel',
         items: locations,
         values: getSyntheticsFilterDisplayValues(locations, 'locations', allLocations),
         otherValues: {
-          label: 'Without any location',
-          items: currentMonitors.filter((monitor) => !get(monitor, 'location')),
+          label: i18n.translate(
+            'xpack.synthetics.monitorsPage.overview.gridItemsByGroup.noLocations',
+            {
+              defaultMessage: 'Without any location',
+            }
+          ),
+          items: allConfigs?.filter((monitor) => !get(monitor, 'location')),
         },
       };
       break;
@@ -83,8 +90,10 @@ export const GridItemsByGroup = ({
         items: tags,
         values: getSyntheticsFilterDisplayValues(tags, 'tags', allLocations),
         otherValues: {
-          label: 'Without any tags',
-          items: currentMonitors.filter((monitor) => get(monitor, 'tags', []).length === 0),
+          label: i18n.translate('xpack.synthetics.monitorsPage.overview.gridItemsByGroup.noTags', {
+            defaultMessage: 'Without any tags',
+          }),
+          items: allConfigs?.filter((monitor) => get(monitor, 'tags', []).length === 0),
         },
       };
       break;
@@ -94,8 +103,13 @@ export const GridItemsByGroup = ({
         items: projects,
         values: getSyntheticsFilterDisplayValues(projects, 'projects', allLocations),
         otherValues: {
-          label: 'UI Monitors',
-          items: currentMonitors.filter((monitor) => !Boolean(monitor.projectId)),
+          label: i18n.translate(
+            'xpack.synthetics.monitorsPage.overview.gridItemsByGroup.uiMonitors',
+            {
+              defaultMessage: 'UI Monitors',
+            }
+          ),
+          items: allConfigs?.filter((monitor) => !Boolean(monitor.projectId)),
         },
       };
       break;
@@ -111,17 +125,18 @@ export const GridItemsByGroup = ({
   return (
     <>
       {selectedValues.map((groupItem) => {
-        const filteredMonitors = currentMonitors.filter((monitor) => {
-          const value = get(monitor, selectedGroup.key);
-          if (Array.isArray(value)) {
-            return value.includes(groupItem.label);
-          }
-          if (selectedGroup.key === ConfigKey.MONITOR_TYPE) {
-            const typeKey = invert(monitorTypeKeyLabelMap)[groupItem.label];
-            return get(monitor, selectedGroup.key) === typeKey;
-          }
-          return get(monitor, selectedGroup.key) === groupItem.label;
-        });
+        const filteredMonitors =
+          allConfigs?.filter((monitor) => {
+            const value = get(monitor, selectedGroup.key);
+            if (Array.isArray(value)) {
+              return value.includes(groupItem.label);
+            }
+            if (selectedGroup.key === ConfigKey.MONITOR_TYPE) {
+              const typeKey = invert(monitorTypeKeyLabelMap)[groupItem.label];
+              return get(monitor, selectedGroup.key) === typeKey;
+            }
+            return get(monitor, selectedGroup.key) === groupItem.label;
+          }) ?? [];
         return (
           <>
             <WrappedPanel isFullScreen={fullScreenGroup === groupItem.label}>
@@ -138,11 +153,11 @@ export const GridItemsByGroup = ({
           </>
         );
       })}
-      {selectedGroup.otherValues.items.length > 0 && (
+      {(selectedGroup.otherValues.items ?? []).length > 0 && (
         <WrappedPanel isFullScreen={fullScreenGroup === selectedGroup.otherValues.label}>
           <GroupGridItem
             groupLabel={selectedGroup.otherValues.label}
-            groupMonitors={selectedGroup.otherValues.items}
+            groupMonitors={selectedGroup.otherValues.items ?? []}
             loaded={loaded}
             setFlyoutConfigCallback={setFlyoutConfigCallback}
             setFullScreenGroup={setFullScreenGroup}

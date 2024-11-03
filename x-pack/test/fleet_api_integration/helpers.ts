@@ -8,6 +8,7 @@
 import * as uuid from 'uuid';
 import { ToolingLog } from '@kbn/tooling-log';
 import { agentPolicyRouteService } from '@kbn/fleet-plugin/common/services';
+import { GLOBAL_SETTINGS_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common/constants';
 import {
   AgentPolicy,
   CreateAgentPolicyRequest,
@@ -139,6 +140,33 @@ export function setPrereleaseSetting(supertest: SuperTestAgent) {
       .set('kbn-xsrf', 'xxxx')
       .send({ prerelease_integrations_enabled: false });
   });
+}
+
+export async function enableSecrets(providerContext: FtrProviderContext) {
+  const settingsSO = await providerContext
+    .getService('kibanaServer')
+    .savedObjects.get({ type: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE, id: 'fleet-default-settings' })
+    .catch((err) => {});
+
+  if (settingsSO) {
+    await providerContext.getService('kibanaServer').savedObjects.update({
+      type: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
+      id: 'fleet-default-settings',
+      attributes: {
+        secret_storage_requirements_met: true,
+      },
+      overwrite: false,
+    });
+  } else {
+    await providerContext.getService('kibanaServer').savedObjects.create({
+      type: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
+      id: 'fleet-default-settings',
+      attributes: {
+        secret_storage_requirements_met: true,
+      },
+      overwrite: true,
+    });
+  }
 }
 
 export const generateNAgentPolicies = async (

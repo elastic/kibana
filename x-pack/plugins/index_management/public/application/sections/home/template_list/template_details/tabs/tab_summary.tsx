@@ -20,12 +20,15 @@ import {
   EuiCodeBlock,
   EuiSpacer,
 } from '@elastic/eui';
-import { serializeAsESLifecycle } from '../../../../../../../common/lib/data_stream_serialization';
+import { reactRouterNavigate } from '../../../../../../shared_imports';
+import { useAppContext } from '../../../../../app_context';
+import { serializeAsESLifecycle } from '../../../../../../../common/lib';
 import { getLifecycleValue } from '../../../../../lib/data_streams';
 import { TemplateDeserialized } from '../../../../../../../common';
 import { ILM_PAGES_POLICY_EDIT } from '../../../../../constants';
 import { useIlmLocator } from '../../../../../services/use_ilm_locator';
 import { allowAutoCreateRadioIds } from '../../../../../../../common/constants';
+import { getIndexModeLabel } from '../../../../../lib/index_mode_labels';
 
 interface Props {
   templateDetails: TemplateDeserialized;
@@ -55,10 +58,12 @@ export const TabSummary: React.FunctionComponent<Props> = ({ templateDetails }) 
     _meta,
     _kbnMeta: { isLegacy, hasDatastream },
     allowAutoCreate,
+    template,
   } = templateDetails;
 
   const numIndexPatterns = indexPatterns.length;
 
+  const { history } = useAppContext();
   const ilmPolicyLink = useIlmLocator(ILM_PAGES_POLICY_EDIT, ilmPolicy?.name);
 
   return (
@@ -135,9 +140,11 @@ export const TabSummary: React.FunctionComponent<Props> = ({ templateDetails }) 
                     <ul>
                       {composedOf.map((component) => (
                         <li key={component}>
-                          <EuiTitle size="xs">
+                          <EuiLink
+                            {...reactRouterNavigate(history, `/component_templates/${component}`)}
+                          >
                             <span>{component}</span>
-                          </EuiTitle>
+                          </EuiLink>
                         </li>
                       ))}
                     </ul>
@@ -215,6 +222,17 @@ export const TabSummary: React.FunctionComponent<Props> = ({ templateDetails }) 
                 </EuiDescriptionListDescription>
               </>
             )}
+
+            {/* Index mode */}
+            <EuiDescriptionListTitle>
+              <FormattedMessage
+                id="xpack.idxMgmt.templateDetails.stepReview.summaryTab.indexModeLabel"
+                defaultMessage="Index mode"
+              />
+            </EuiDescriptionListTitle>
+            <EuiDescriptionListDescription>
+              {getIndexModeLabel(template?.settings?.index?.mode)}
+            </EuiDescriptionListDescription>
 
             {/* Allow auto create */}
             {isLegacy !== true &&

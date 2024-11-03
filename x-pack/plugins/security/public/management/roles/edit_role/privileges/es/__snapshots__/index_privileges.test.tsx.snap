@@ -24,6 +24,7 @@ exports[`it renders without crashing 1`] = `
         "_subscribe": [Function],
       },
       "getFeatures": [MockFunction],
+      "getLicenseType": [MockFunction],
       "getUnavailableReason": [MockFunction],
       "hasAtLeast": [MockFunction],
       "isEnabled": [MockFunction],
@@ -45,6 +46,7 @@ exports[`it renders without crashing 1`] = `
   }
   validator={
     RoleValidator {
+      "buildFlavor": undefined,
       "shouldValidate": undefined,
     }
   }

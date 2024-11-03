@@ -10,12 +10,13 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiComboBoxOptionOption, EuiComboBoxProps } from '@elastic/eui';
-import { EuiComboBox, EuiFormRow } from '@elastic/eui';
+import { EuiButton, EuiComboBox, EuiEmptyPrompt, EuiFormRow } from '@elastic/eui';
 import useMountedState from 'react-use/lib/useMountedState';
 import { useMlKibana } from '../application/contexts/kibana';
 import type { JobId } from '../../common/types/anomaly_detection_jobs';
-import type { MlApiServices } from '../application/services/ml_api_service';
+import type { MlApi } from '../application/services/ml_api_service';
 import { ALL_JOBS_SELECTION } from '../../common/constants/alerts';
+import { LoadingIndicator } from '../application/components/loading_indicator';
 
 interface JobSelection {
   jobIds?: JobId[];
@@ -25,7 +26,7 @@ interface JobSelection {
 export interface JobSelectorControlProps {
   jobsAndGroupIds?: string[];
   onChange: (jobSelection: JobSelection) => void;
-  adJobsApiService: MlApiServices['jobs'];
+  adJobsApiService: MlApi['jobs'];
   /**
    * Validation is handled by alerting framework
    */
@@ -43,6 +44,10 @@ export interface JobSelectorControlProps {
    * Available options to select. By default suggest all existing jobs.
    */
   options?: Array<EuiComboBoxOptionOption<string>>;
+  /**
+   * Flag to indicate whether to use the job creation button in the empty prompt or the dropdown when no jobs are available.
+   */
+  shouldUseDropdownJobCreate?: boolean;
 }
 
 export const JobSelectorControl: FC<JobSelectorControlProps> = ({
@@ -55,6 +60,7 @@ export const JobSelectorControl: FC<JobSelectorControlProps> = ({
   allowSelectAll = false,
   createJobUrl,
   options: defaultOptions,
+  shouldUseDropdownJobCreate = false,
 }) => {
   const {
     services: {
@@ -66,6 +72,7 @@ export const JobSelectorControl: FC<JobSelectorControlProps> = ({
   const isMounted = useMountedState();
 
   const [options, setOptions] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
+  const [areJobsLoading, setAreJobsLoading] = useState<boolean>(false);
   const jobIds = useMemo(() => new Set(), []);
   const groupIds = useMemo(() => new Set(), []);
 
@@ -78,6 +85,7 @@ export const JobSelectorControl: FC<JobSelectorControlProps> = ({
   );
 
   const fetchOptions = useCallback(async () => {
+    setAreJobsLoading(true);
     try {
       const { jobIds: jobIdOptions, groupIds: groupIdOptions } =
         await adJobsApiService.getAllJobAndGroupIds();
@@ -147,6 +155,7 @@ export const JobSelectorControl: FC<JobSelectorControlProps> = ({
         }),
       });
     }
+    setAreJobsLoading(false);
   }, [
     adJobsApiService,
     allowSelectAll,
@@ -200,7 +209,9 @@ export const JobSelectorControl: FC<JobSelectorControlProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [createJobUrl]);
 
-  return (
+  if (areJobsLoading === true) return <LoadingIndicator />;
+
+  return jobIds.size || shouldUseDropdownJobCreate ? (
     <EuiFormRow
       data-test-subj="mlAnomalyJobSelectionControls"
       fullWidth
@@ -225,5 +236,32 @@ export const JobSelectorControl: FC<JobSelectorControlProps> = ({
         isInvalid={!!errors?.length}
       />
     </EuiFormRow>
+  ) : (
+    <EuiEmptyPrompt
+      data-test-subj="mlAnomalyJobSelectionControls"
+      titleSize="xxs"
+      iconType="warning"
+      title={
+        <h4>
+          <FormattedMessage
+            id="xpack.ml.embeddables.jobSelector.noJobsFoundTitle"
+            defaultMessage="No anomaly detection jobs found"
+          />
+        </h4>
+      }
+      body={
+        <EuiButton
+          fill
+          color="primary"
+          onClick={() => navigateToUrl(createJobUrl!)}
+          disabled={createJobUrl === undefined}
+        >
+          <FormattedMessage
+            id="xpack.ml.embeddables.jobSelector.createJobButtonLabel"
+            defaultMessage="Create job"
+          />
+        </EuiButton>
+      }
+    />
   );
 };

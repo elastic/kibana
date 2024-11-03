@@ -1,6 +1,6 @@
 {
   "name": "x-pack",
-  "version": "8.15.0",
+  "version": "9.0.0",
   "author": "Elastic",
   "private": true,
   "license": "Elastic-License",

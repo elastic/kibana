@@ -43,6 +43,7 @@ export const StepDetailsLinkIcon = ({
         iconType="apmTrace"
         href={stepDetailsLink}
       >
+        {/* @ts-expect-error Type '(stepIndex?: number) => string' is not assignable to type 'ReactNode'.*/}
         {label ?? VIEW_DETAILS}
       </EuiButtonEmpty>
     );
@@ -52,8 +53,7 @@ export const StepDetailsLinkIcon = ({
     <EuiButtonIcon
       data-test-subj="syntheticsStepDetailsLinkIconButton"
       {...commonProps}
-      aria-label={VIEW_DETAILS}
-      title={VIEW_DETAILS}
+      title={VIEW_DETAILS(stepIndex)}
       size="s"
       href={stepDetailsLink}
       target={target}
@@ -62,6 +62,10 @@ export const StepDetailsLinkIcon = ({
   );
 };
 
-const VIEW_DETAILS = i18n.translate('xpack.synthetics.monitor.step.viewStepDetails', {
-  defaultMessage: 'View step details',
-});
+const VIEW_DETAILS = (stepIndex: number = 1) =>
+  i18n.translate('xpack.synthetics.monitor.step.viewStepDetails', {
+    defaultMessage: 'View step {stepIndex} details',
+    values: {
+      stepIndex,
+    },
+  });

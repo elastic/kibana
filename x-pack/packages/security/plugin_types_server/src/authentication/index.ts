@@ -5,29 +5,22 @@
  * 2.0.
  */
 
+export type { AuthenticationServiceStart } from './authentication_service';
+
 export type {
-  CreateAPIKeyParams,
-  CreateAPIKeyResult,
-  CreateRestAPIKeyParams,
-  CreateRestAPIKeyWithKibanaPrivilegesParams,
-  CreateCrossClusterAPIKeyParams,
-  InvalidateAPIKeyResult,
-  InvalidateAPIKeysParams,
-  ValidateAPIKeyParams,
-  APIKeys,
-  GrantAPIKeyResult,
+  APIKeysService as APIKeys,
   UpdateAPIKeyParams,
   UpdateAPIKeyResult,
   UpdateCrossClusterAPIKeyParams,
   UpdateRestAPIKeyParams,
   UpdateRestAPIKeyWithKibanaPrivilegesParams,
-} from './api_keys';
-export type { AuthenticationServiceStart } from './authentication_service';
+} from '@kbn/core-security-server';
+
 export {
-  restApiKeySchema,
+  crossClusterApiKeySchema,
   getRestApiKeyWithKibanaPrivilegesSchema,
   getUpdateRestApiKeyWithKibanaPrivilegesSchema,
-  crossClusterApiKeySchema,
+  restApiKeySchema,
   updateRestApiKeySchema,
   updateCrossClusterApiKeySchema,
 } from './api_keys';

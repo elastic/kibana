@@ -44,7 +44,7 @@ export function parseInlineFunctionCalls({ logger }: { logger: Logger }) {
         logger.debug('Parsing function call:\n' + buffer);
 
         const match = buffer.match(
-          /<\|tool_use_start\|>\s*```json\n?(.*?)(\n```\s*).*<\|tool_use_end\|>/s
+          /<\|tool_use_start\|>\s*```json\n?(.*?)(\n?```\s*).*<\|tool_use_end\|>/s
         );
 
         const functionCallBody = match?.[1];
@@ -58,7 +58,7 @@ export function parseInlineFunctionCalls({ logger }: { logger: Logger }) {
           input?: unknown;
         };
 
-        logger.debug('Parsed function call:\n ' + JSON.stringify(parsedFunctionCall));
+        logger.debug(() => 'Parsed function call:\n ' + JSON.stringify(parsedFunctionCall));
 
         if (!parsedFunctionCall.name) {
           throw createInternalServerError(`Missing name for tool use`);

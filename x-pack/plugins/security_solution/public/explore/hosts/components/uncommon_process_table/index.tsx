@@ -8,17 +8,13 @@
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
-import type { HostEcs } from '@kbn/securitysolution-ecs';
 import type { HostsUncommonProcessesEdges } from '../../../../../common/search_strategy';
 import { hostsActions, hostsModel, hostsSelectors } from '../../store';
-import { defaultToEmptyTag, getEmptyValue } from '../../../../common/components/empty_value';
-import { HostDetailsLink } from '../../../../common/components/links';
-import type { Columns, ItemsPerRow } from '../../../components/paginated_table';
+import type { ItemsPerRow } from '../../../components/paginated_table';
 import { PaginatedTable } from '../../../components/paginated_table';
 import * as i18n from './translations';
-import { getRowItemsWithActions } from '../../../../common/components/tables/helpers';
-import { HostsType } from '../../store/model';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
+import { getUncommonColumnsCurated } from './columns';
 
 const tableType = hostsModel.HostsTableType.uncommonProcesses;
 interface UncommonProcessTableProps {
@@ -34,15 +30,6 @@ interface UncommonProcessTableProps {
   type: hostsModel.HostsType;
 }
 
-export type UncommonProcessTableColumns = [
-  Columns<HostsUncommonProcessesEdges>,
-  Columns<HostsUncommonProcessesEdges>,
-  Columns<HostsUncommonProcessesEdges>,
-  Columns<HostsUncommonProcessesEdges>,
-  Columns<HostsUncommonProcessesEdges>,
-  Columns<HostsUncommonProcessesEdges>
-];
-
 const rowItems: ItemsPerRow[] = [
   {
     text: i18n.ROWS_5,
@@ -53,14 +40,6 @@ const rowItems: ItemsPerRow[] = [
     numberOfRow: 10,
   },
 ];
-
-export const getArgs = (args: string[] | null | undefined): string | null => {
-  if (args != null && args.length !== 0) {
-    return args.join(' ');
-  } else {
-    return null;
-  }
-};
 
 const UncommonProcessTableComponent = React.memo<UncommonProcessTableProps>(
   ({
@@ -85,7 +64,7 @@ const UncommonProcessTableComponent = React.memo<UncommonProcessTableProps>(
     );
 
     const updateLimitPagination = useCallback(
-      (newLimit) =>
+      (newLimit: number) =>
         dispatch(
           hostsActions.updateTableLimit({
             hostsType: type,
@@ -97,7 +76,7 @@ const UncommonProcessTableComponent = React.memo<UncommonProcessTableProps>(
     );
 
     const updateActivePage = useCallback(
-      (newPage) =>
+      (newPage: number) =>
         dispatch(
           hostsActions.updateTableActivePage({
             activePage: newPage,
@@ -140,97 +119,3 @@ UncommonProcessTableComponent.displayName = 'UncommonProcessTableComponent';
 export const UncommonProcessTable = React.memo(UncommonProcessTableComponent);
 
 UncommonProcessTable.displayName = 'UncommonProcessTable';
-
-const getUncommonColumns = (): UncommonProcessTableColumns => [
-  {
-    name: i18n.NAME,
-    truncateText: false,
-    mobileOptions: { show: true },
-    width: '20%',
-    render: ({ node }) =>
-      getRowItemsWithActions({
-        values: node.process.name,
-        fieldName: 'process.name',
-        idPrefix: `uncommon-process-table-${node._id}-processName`,
-      }),
-  },
-  {
-    align: 'right',
-    name: i18n.NUMBER_OF_HOSTS,
-    truncateText: false,
-    mobileOptions: { show: true },
-    render: ({ node }) => <>{node.hosts != null ? node.hosts.length : getEmptyValue()}</>,
-    width: '8%',
-  },
-  {
-    align: 'right',
-    name: i18n.NUMBER_OF_INSTANCES,
-    truncateText: false,
-    mobileOptions: { show: true },
-    render: ({ node }) => defaultToEmptyTag(node.instances),
-    width: '8%',
-  },
-  {
-    name: i18n.HOSTS,
-    truncateText: false,
-    mobileOptions: { show: true },
-    width: '25%',
-    render: ({ node }) =>
-      getRowItemsWithActions({
-        values: getHostNames(node.hosts),
-        fieldName: 'host.name',
-        idPrefix: `uncommon-process-table-${node._id}-processHost`,
-        render: (item) => <HostDetailsLink hostName={item} />,
-      }),
-  },
-  {
-    name: i18n.LAST_COMMAND,
-    truncateText: false,
-    mobileOptions: { show: true },
-    width: '25%',
-    render: ({ node }) =>
-      getRowItemsWithActions({
-        values: node.process != null ? node.process.args : null,
-        fieldName: 'process.args',
-        idPrefix: `uncommon-process-table-${node._id}-processArgs`,
-        render: (item) => <HostDetailsLink hostName={item} />,
-        displayCount: 1,
-      }),
-  },
-  {
-    name: i18n.LAST_USER,
-    truncateText: false,
-    mobileOptions: { show: true },
-    render: ({ node }) =>
-      getRowItemsWithActions({
-        values: node.user != null ? node.user.name : null,
-        fieldName: 'user.name',
-        idPrefix: `uncommon-process-table-${node._id}-processUser`,
-      }),
-  },
-];
-
-export const getHostNames = (hosts: HostEcs[]): string[] => {
-  if (hosts != null) {
-    return hosts
-      .filter((host) => host.name != null && host.name[0] != null)
-      .map((host) => (host.name != null && host.name[0] != null ? host.name[0] : ''));
-  } else {
-    return [];
-  }
-};
-
-export const getUncommonColumnsCurated = (pageType: HostsType): UncommonProcessTableColumns => {
-  const columns: UncommonProcessTableColumns = getUncommonColumns();
-  if (pageType === HostsType.details) {
-    return [i18n.HOSTS, i18n.NUMBER_OF_HOSTS].reduce<UncommonProcessTableColumns>((acc, name) => {
-      acc.splice(
-        acc.findIndex((column) => column.name === name),
-        1
-      );
-      return acc;
-    }, columns);
-  } else {
-    return columns;
-  }
-};

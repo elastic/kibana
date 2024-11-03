@@ -1,15 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { $Values } from '@kbn/utility-types';
 import type { PaletteOutput, CustomPaletteParams } from '@kbn/coloring';
 import {
   Datatable,
+  DefaultInspectorAdapters,
+  ExecutionContext,
   ExpressionFunctionDefinition,
   ExpressionValueRender,
 } from '@kbn/expressions-plugin/common';
@@ -85,7 +88,8 @@ export type GaugeExpressionFunctionDefinition = ExpressionFunctionDefinition<
   typeof EXPRESSION_GAUGE_NAME,
   GaugeInput,
   GaugeArguments,
-  ExpressionValueRender<GaugeExpressionProps>
+  ExpressionValueRender<GaugeExpressionProps>,
+  ExecutionContext<DefaultInspectorAdapters>
 >;
 
 export interface Accessors {

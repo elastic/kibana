@@ -125,11 +125,16 @@ export default function ({ getService }: FtrProviderContext) {
   const monitoredAggregatedStatsRefreshRate = 5000;
 
   describe('health', () => {
+    after(async () => {
+      // clean up after each test
+      return await request.delete('/api/sample_tasks').set('kbn-xsrf', 'xxx').expect(200);
+    });
+
     it('should return basic configuration of task manager', async () => {
       const health = await getHealth();
       expect(health.status).to.eql('OK');
       expect(health.stats.configuration.value).to.eql({
-        poll_interval: 3000,
+        poll_interval: 500,
         monitored_aggregated_stats_refresh_rate: monitoredAggregatedStatsRefreshRate,
         monitored_stats_running_average_window: 50,
         monitored_task_execution_thresholds: {
@@ -140,7 +145,12 @@ export default function ({ getService }: FtrProviderContext) {
           },
         },
         request_capacity: 1000,
-        max_workers: 10,
+        capacity: {
+          config: 10,
+          as_workers: 10,
+          as_cost: 20,
+        },
+        claim_strategy: 'mget',
       });
     });
 
@@ -232,7 +242,6 @@ export default function ({ getService }: FtrProviderContext) {
       expect(typeof workload.overdue).to.eql('number');
 
       expect(typeof workload.non_recurring).to.eql('number');
-      expect(typeof workload.owner_ids).to.eql('number');
 
       expect(typeof workload.capacity_requirements.per_minute).to.eql('number');
       expect(typeof workload.capacity_requirements.per_hour).to.eql('number');

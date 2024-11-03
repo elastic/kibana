@@ -99,9 +99,7 @@ export const EditUserPage: FunctionComponent<EditUserPageProps> = ({ username })
           </EuiFlexGroup>
         }
       />
-
       <EuiSpacer size="l" />
-
       {isDeprecatedUser ? (
         <>
           <EuiCallOut
@@ -151,7 +149,6 @@ export const EditUserPage: FunctionComponent<EditUserPageProps> = ({ username })
           <EuiSpacer />
         </>
       ) : undefined}
-
       <UserForm
         isReservedUser={isReservedUser}
         defaultValues={user}
@@ -159,7 +156,6 @@ export const EditUserPage: FunctionComponent<EditUserPageProps> = ({ username })
         onSuccess={backToUsers}
         disabled={readOnly}
       />
-
       {readOnly ? undefined : (
         <>
           {action === 'changePassword' ? (

@@ -162,6 +162,13 @@ export default function ({ getService }: FtrProviderContext) {
 
         await ml.jobTable.clickOpenJobInSingleMetricViewerButton(jobConfig.job_id);
         await ml.commonUI.waitForMlLoadingIndicatorToDisappear();
+
+        // assert that the results view is not displayed when no entity is selected
+        await ml.testExecution.logTestStep('does not display the chart');
+        await ml.singleMetricViewer.assertChartNotExist();
+
+        await ml.testExecution.logTestStep('does not display the anomalies table');
+        await ml.anomaliesTable.assertTableNotExists();
       });
 
       it('render entity control', async () => {

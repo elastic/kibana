@@ -28,6 +28,9 @@ export const findingsMockData = [
       ingested: '2023-08-19T18:20:41Z',
       created: '2023-08-19T18:17:15.609124281Z',
     },
+    data_stream: {
+      dataset: 'cloud_security_posture.findings',
+    },
   },
   {
     resource: { id: chance.guid(), name: `Pod`, sub_type: 'Upper case sub type' },
@@ -47,6 +50,9 @@ export const findingsMockData = [
     event: {
       ingested: '2023-08-19T18:20:41Z',
       created: '2023-08-19T18:17:15.609124281Z',
+    },
+    data_stream: {
+      dataset: 'cloud_security_posture.findings',
     },
   },
 ];

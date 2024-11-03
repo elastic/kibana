@@ -18,6 +18,9 @@ import { useSourcererDataView } from '../../../../../sourcerer/containers';
 import { SourcererScopeName } from '../../../../../sourcerer/store/model';
 import type { TimeRange } from '../../../../store/inputs/model';
 
+const fields = ['*'];
+const runtimeMappings = {};
+
 export interface UseInsightQuery {
   dataProviders: DataProvider[];
   filters: Filter[];
@@ -38,7 +41,7 @@ export const useInsightQuery = ({
 }: UseInsightQuery): UseInsightQueryResult => {
   const { uiSettings } = useKibana().services;
   const esQueryConfig = useMemo(() => getEsQueryConfig(uiSettings), [uiSettings]);
-  const { browserFields, selectedPatterns, indexPattern, dataViewId } = useSourcererDataView(
+  const { browserFields, selectedPatterns, sourcererDataView, dataViewId } = useSourcererDataView(
     SourcererScopeName.timeline
   );
   const [hasError, setHasError] = useState(false);
@@ -48,7 +51,7 @@ export const useInsightQuery = ({
         const parsedCombinedQueries = combineQueries({
           config: esQueryConfig,
           dataProviders,
-          indexPattern,
+          indexPattern: sourcererDataView,
           browserFields,
           filters,
           kqlQuery: {
@@ -63,20 +66,20 @@ export const useInsightQuery = ({
       setHasError(true);
       return null;
     }
-  }, [browserFields, dataProviders, esQueryConfig, hasError, indexPattern, filters]);
+  }, [browserFields, dataProviders, esQueryConfig, hasError, sourcererDataView, filters]);
 
   const [dataLoadingState, { events, totalCount }] = useTimelineEvents({
     dataViewId,
-    fields: ['*'],
+    fields,
     filterQuery: combinedQueries?.filterQuery,
     id: TimelineId.active,
     indexNames: selectedPatterns,
     language: 'kuery',
     limit: 1,
-    runtimeMappings: {},
-    ...(relativeTimerange
-      ? { startDate: relativeTimerange?.from, endDate: relativeTimerange?.to }
-      : {}),
+    runtimeMappings,
+    startDate: relativeTimerange?.from,
+    endDate: relativeTimerange?.to,
+    fetchNotes: false,
   });
 
   const isQueryLoading = useMemo(

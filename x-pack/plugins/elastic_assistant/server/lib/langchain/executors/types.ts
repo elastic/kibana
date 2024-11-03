@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import { ActionsClient } from '@kbn/actions-plugin/server';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { BaseMessage } from '@langchain/core/messages';
 import { Logger } from '@kbn/logging';
@@ -13,10 +13,10 @@ import { KibanaRequest, KibanaResponseFactory, ResponseHeaders } from '@kbn/core
 import type { LangChainTracer } from '@langchain/core/tracers/tracer_langchain';
 import { ExecuteConnectorRequestBody, Message, Replacements } from '@kbn/elastic-assistant-common';
 import { StreamResponseWithHeaders } from '@kbn/ml-response-stream/server';
-import { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
+import { PublicMethodsOf } from '@kbn/utility-types';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { ResponseBody } from '../types';
 import type { AssistantTool } from '../../../types';
-import { ElasticsearchStore } from '../elasticsearch_store/elasticsearch_store';
 import { AIAssistantKnowledgeBaseDataClient } from '../../../ai_assistant_data_clients/knowledge_base';
 import { AIAssistantConversationsDataClient } from '../../../ai_assistant_data_clients/conversations';
 import { AIAssistantDataClient } from '../../../ai_assistant_data_clients';
@@ -36,18 +36,17 @@ export interface AssistantDataClients {
 export interface AgentExecutorParams<T extends boolean> {
   abortSignal?: AbortSignal;
   alertsIndexPattern?: string;
-  actions: ActionsPluginStart;
-  anonymizationFields?: AnonymizationFieldResponse[];
-  isEnabledKnowledgeBase: boolean;
+  actionsClient: PublicMethodsOf<ActionsClient>;
   assistantTools?: AssistantTool[];
   connectorId: string;
   conversationId?: string;
   dataClients?: AssistantDataClients;
   esClient: ElasticsearchClient;
-  esStore: ElasticsearchStore;
   langChainMessages: BaseMessage[];
   llmType?: string;
+  isOssModel?: boolean;
   logger: Logger;
+  inference: InferenceServerStart;
   onNewReplacements?: (newReplacements: Replacements) => void;
   replacements: Replacements;
   isStream?: T;
@@ -55,7 +54,9 @@ export interface AgentExecutorParams<T extends boolean> {
   request: KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
   response?: KibanaResponseFactory;
   size?: number;
+  systemPrompt?: string;
   traceOptions?: TraceOptions;
+  responseLanguage?: string;
 }
 
 export interface StaticReturnType {

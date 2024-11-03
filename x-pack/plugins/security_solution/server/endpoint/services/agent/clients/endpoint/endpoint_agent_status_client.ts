@@ -16,23 +16,20 @@ export class EndpointAgentStatusClient extends AgentStatusClient {
   protected readonly agentType: ResponseActionAgentType = 'endpoint';
 
   async getAgentStatuses(agentIds: string[]): Promise<AgentStatusRecords> {
-    const metadataService = this.options.endpointService.getEndpointMetadataService();
-    const esClient = this.options.esClient;
     const soClient = this.options.soClient;
+    const esClient = this.options.esClient;
+    const metadataService = this.options.endpointService.getEndpointMetadataService(
+      soClient.getCurrentNamespace()
+    );
 
     try {
       const agentIdsKql = agentIds.map((agentId) => `agent.id: ${agentId}`).join(' or ');
       const [{ data: hostInfoForAgents }, allPendingActions] = await Promise.all([
-        metadataService.getHostMetadataList(
-          esClient,
-          soClient,
-          this.options.endpointService.getInternalFleetServices(),
-          {
-            page: 0,
-            pageSize: 1000,
-            kuery: agentIdsKql,
-          }
-        ),
+        metadataService.getHostMetadataList({
+          page: 0,
+          pageSize: 1000,
+          kuery: agentIdsKql,
+        }),
         getPendingActionsSummary(esClient, metadataService, this.log, agentIds),
       ]).catch(catchAndWrapError);
 
@@ -59,7 +56,9 @@ export class EndpointAgentStatusClient extends AgentStatusClient {
       }, {});
     } catch (err) {
       const error = new AgentStatusClientError(
-        `Failed to fetch endpoint agent statuses for agentIds: [${agentIds}], failed with: ${err.message}`,
+        `Failed to fetch endpoint agent statuses for agentIds: [${agentIds.join()}], failed with: ${
+          err.message
+        }`,
         500,
         err
       );

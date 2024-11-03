@@ -13,6 +13,10 @@ import { stringify } from '../../utils/stringify';
 import { getResponseActionsClient, NormalizedExternalConnectorClient } from '../../services';
 import type { ResponseActionsClient } from '../../services/actions/clients/lib/types';
 import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
+import type {
+  KillProcessRequestBody,
+  SuspendProcessRequestBody,
+} from '../../../../common/api/endpoint';
 import {
   EndpointActionGetFileSchema,
   type ExecuteActionRequestBody,
@@ -47,12 +51,14 @@ import {
 import type {
   ActionDetails,
   EndpointActionDataParameterTypes,
-  KillOrSuspendProcessRequestBody,
-  ResponseActionParametersWithPidOrEntityId,
+  ResponseActionParametersWithProcessData,
   ResponseActionsExecuteParameters,
   ResponseActionScanParameters,
 } from '../../../../common/endpoint/types';
-import type { ResponseActionsApiCommandNames } from '../../../../common/endpoint/service/response_actions/constants';
+import type {
+  ResponseActionAgentType,
+  ResponseActionsApiCommandNames,
+} from '../../../../common/endpoint/service/response_actions/constants';
 import type {
   SecuritySolutionPluginRouter,
   SecuritySolutionRequestHandlerContext,
@@ -165,7 +171,7 @@ export function registerResponseActionRoutes(
       withEndpointAuthz(
         { all: ['canKillProcess'] },
         logger,
-        responseActionRequestHandler<ResponseActionParametersWithPidOrEntityId>(
+        responseActionRequestHandler<ResponseActionParametersWithProcessData>(
           endpointContext,
           'kill-process'
         )
@@ -188,7 +194,7 @@ export function registerResponseActionRoutes(
       withEndpointAuthz(
         { all: ['canSuspendProcess'] },
         logger,
-        responseActionRequestHandler<ResponseActionParametersWithPidOrEntityId>(
+        responseActionRequestHandler<ResponseActionParametersWithProcessData>(
           endpointContext,
           'suspend-process'
         )
@@ -283,28 +289,25 @@ export function registerResponseActionRoutes(
       )
     );
 
-  // 8.15 route
-  if (endpointContext.experimentalFeatures.responseActionScanEnabled) {
-    router.versioned
-      .post({
-        access: 'public',
-        path: SCAN_ROUTE,
-        options: { authRequired: true, tags: ['access:securitySolution'] },
-      })
-      .addVersion(
-        {
-          version: '2023-10-31',
-          validate: {
-            request: ScanActionRequestSchema,
-          },
+  router.versioned
+    .post({
+      access: 'public',
+      path: SCAN_ROUTE,
+      options: { authRequired: true, tags: ['access:securitySolution'] },
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: ScanActionRequestSchema,
         },
-        withEndpointAuthz(
-          { all: ['canWriteScanOperations'] },
-          logger,
-          responseActionRequestHandler<ResponseActionScanParameters>(endpointContext, 'scan')
-        )
-      );
-  }
+      },
+      withEndpointAuthz(
+        { all: ['canWriteScanOperations'] },
+        logger,
+        responseActionRequestHandler<ResponseActionScanParameters>(endpointContext, 'scan')
+      )
+    );
 }
 
 function responseActionRequestHandler<T extends EndpointActionDataParameterTypes>(
@@ -319,17 +322,14 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
   const logger = endpointContext.logFactory.get('responseActionsHandler');
 
   return async (context, req, res) => {
-    logger.debug(`response action [${command}]:\n${stringify(req.body)}`);
+    logger.debug(() => `response action [${command}]:\n${stringify(req.body)}`);
+
+    const experimentalFeatures = endpointContext.experimentalFeatures;
 
     // Note:  because our API schemas are defined as module static variables (as opposed to a
     //        `getter` function), we need to include this additional validation here, since
     //        `agent_type` is included in the schema independent of the feature flag
-    if (
-      (req.body.agent_type === 'sentinel_one' &&
-        !endpointContext.experimentalFeatures.responseActionsSentinelOneV1Enabled) ||
-      (req.body.agent_type === 'crowdstrike' &&
-        !endpointContext.experimentalFeatures.responseActionsCrowdstrikeManualHostIsolationEnabled)
-    ) {
+    if (isThirdPartyFeatureDisabled(req.body.agent_type, experimentalFeatures)) {
       return errorHandler(
         logger,
         res,
@@ -337,8 +337,9 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
       );
     }
 
-    const user = endpointContext.service.security?.authc.getCurrentUser(req);
-    const esClient = (await context.core).elasticsearch.client.asInternalUser;
+    const coreContext = await context.core;
+    const user = coreContext.security.authc.getCurrentUser();
+    const esClient = coreContext.elasticsearch.client.asInternalUser;
     const casesClient = await endpointContext.service.getCasesClient(req);
     const connectorActions = (await context.actions).getActionsClient();
     const responseActionsClient: ResponseActionsClient = getResponseActionsClient(
@@ -353,61 +354,12 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
     );
 
     try {
-      let action: ActionDetails;
-
-      switch (command) {
-        case 'isolate':
-          action = await responseActionsClient.isolate(req.body);
-          break;
-
-        case 'unisolate':
-          action = await responseActionsClient.release(req.body);
-          break;
-
-        case 'running-processes':
-          action = await responseActionsClient.runningProcesses(req.body);
-          break;
-
-        case 'execute':
-          action = await responseActionsClient.execute(req.body as ExecuteActionRequestBody);
-          break;
-
-        case 'suspend-process':
-          action = await responseActionsClient.suspendProcess(
-            req.body as KillOrSuspendProcessRequestBody
-          );
-          break;
-
-        case 'kill-process':
-          action = await responseActionsClient.killProcess(
-            req.body as KillOrSuspendProcessRequestBody
-          );
-          break;
-
-        case 'get-file':
-          action = await responseActionsClient.getFile(
-            req.body as ResponseActionGetFileRequestBody
-          );
-          break;
-
-        case 'upload':
-          action = await responseActionsClient.upload(req.body as UploadActionApiRequestBody);
-          break;
-
-        case 'scan':
-          action = await responseActionsClient.scan(req.body as ScanActionRequestBody);
-          break;
-
-        default:
-          throw new CustomHttpRequestError(
-            `No handler found for response action command: [${command}]`,
-            501
-          );
-      }
-
+      const action: ActionDetails = await handleActionCreation(
+        command,
+        req.body,
+        responseActionsClient
+      );
       const { action: actionId, ...data } = action;
-
-      // `action` is deprecated, but still returned in order to ensure backwards compatibility
       const legacyResponseData = responseActionsWithLegacyActionProperty.includes(command)
         ? {
             action: actionId ?? data.id ?? '',
@@ -424,6 +376,49 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
       return errorHandler(logger, res, err);
     }
   };
+}
+
+function isThirdPartyFeatureDisabled(
+  agentType: ResponseActionAgentType | undefined,
+  experimentalFeatures: EndpointAppContext['experimentalFeatures']
+): boolean {
+  return (
+    (agentType === 'sentinel_one' && !experimentalFeatures.responseActionsSentinelOneV1Enabled) ||
+    (agentType === 'crowdstrike' &&
+      !experimentalFeatures.responseActionsCrowdstrikeManualHostIsolationEnabled)
+  );
+}
+
+async function handleActionCreation(
+  command: ResponseActionsApiCommandNames,
+  body: ResponseActionsRequestBody,
+  responseActionsClient: ResponseActionsClient
+): Promise<ActionDetails> {
+  switch (command) {
+    case 'isolate':
+      return responseActionsClient.isolate(body);
+    case 'unisolate':
+      return responseActionsClient.release(body);
+    case 'running-processes':
+      return responseActionsClient.runningProcesses(body);
+    case 'execute':
+      return responseActionsClient.execute(body as ExecuteActionRequestBody);
+    case 'suspend-process':
+      return responseActionsClient.suspendProcess(body as SuspendProcessRequestBody);
+    case 'kill-process':
+      return responseActionsClient.killProcess(body as KillProcessRequestBody);
+    case 'get-file':
+      return responseActionsClient.getFile(body as ResponseActionGetFileRequestBody);
+    case 'upload':
+      return responseActionsClient.upload(body as UploadActionApiRequestBody);
+    case 'scan':
+      return responseActionsClient.scan(body as ScanActionRequestBody);
+    default:
+      throw new CustomHttpRequestError(
+        `No handler found for response action command: [${command}]`,
+        501
+      );
+  }
 }
 
 function redirectHandler(

@@ -1,15 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ISearchSource, RefreshInterval, TimeRange } from '@kbn/data-plugin/common';
+import type {
+  ISearchSource,
+  RefreshInterval,
+  SerializedSearchSourceFields,
+  TimeRange,
+} from '@kbn/data-plugin/common';
 import type { SavedObjectReference } from '@kbn/core-saved-objects-server';
 import type { SavedObjectsResolveResponse } from '@kbn/core/server';
 import type { SerializableRecord } from '@kbn/utility-types';
+import type { DataGridDensity } from '@kbn/unified-data-table';
 import { VIEW_MODE } from '.';
 
 export interface DiscoverGridSettings extends SerializableRecord {
@@ -37,7 +44,7 @@ export type VisContextUnmapped =
 /** @internal **/
 export interface SavedSearchAttributes {
   title: string;
-  sort: Array<[string, string]>;
+  sort: SortOrder[];
   columns: string[];
   description: string;
   grid: DiscoverGridSettings;
@@ -59,6 +66,7 @@ export interface SavedSearchAttributes {
   rowsPerPage?: number;
   sampleSize?: number;
   breakdownField?: string;
+  density?: DataGridDensity;
   visContext?: VisContextUnmapped;
 }
 
@@ -66,32 +74,10 @@ export interface SavedSearchAttributes {
 export type SortOrder = [string, string];
 
 /** @public **/
-export interface SavedSearch {
+export type SavedSearch = Partial<SavedSearchAttributes> & {
   searchSource: ISearchSource;
   id?: string;
-  title?: string;
-  sort?: SortOrder[];
-  columns?: string[];
-  description?: string;
   tags?: string[] | undefined;
-  grid?: DiscoverGridSettings;
-  hideChart?: boolean;
-  viewMode?: VIEW_MODE;
-  hideAggregatedPreview?: boolean;
-  rowHeight?: number;
-  headerRowHeight?: number;
-  isTextBasedQuery?: boolean;
-  usesAdHocDataView?: boolean;
-
-  // for restoring time range with a saved search
-  timeRestore?: boolean;
-  timeRange?: TimeRange;
-  refreshInterval?: RefreshInterval;
-
-  rowsPerPage?: number;
-  sampleSize?: number;
-  breakdownField?: string;
-  visContext?: VisContextUnmapped;
 
   // Whether or not this saved search is managed by the system
   managed: boolean;
@@ -102,4 +88,9 @@ export interface SavedSearch {
     aliasPurpose?: SavedObjectsResolveResponse['alias_purpose'];
     errorJSON?: string;
   };
-}
+};
+
+/** @internal **/
+export type SerializableSavedSearch = Omit<SavedSearch, 'searchSource'> & {
+  serializedSearchSource?: SerializedSearchSourceFields;
+};

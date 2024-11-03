@@ -10,14 +10,11 @@ import {
   type DataViewCreateQuerySchema,
 } from '@kbn/ml-data-view-utils/schemas/api_create_query_schema';
 
-import {
-  transformIdParamSchema,
-  type TransformIdParamSchema,
-} from '../../../../common/api_schemas/common';
+import { transformIdParamSchema, type TransformIdParamSchema } from '../../api_schemas/common';
 import {
   putTransformsRequestSchema,
   type PutTransformsRequestSchema,
-} from '../../../../common/api_schemas/transforms';
+} from '../../api_schemas/transforms';
 import { addInternalBasePath } from '../../../../common/constants';
 
 import type { RouteDependencies } from '../../../types';

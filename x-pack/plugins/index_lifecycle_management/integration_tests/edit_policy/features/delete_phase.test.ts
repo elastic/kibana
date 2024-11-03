@@ -156,4 +156,34 @@ describe('<EditPolicy /> delete phase', () => {
       expect(actions.delete.hasPolicyErrorCallout()).toBeTruthy();
     });
   });
+
+  describe('delete searchable snapshot', () => {
+    test('correctly updates the value', async () => {
+      const { actions } = testBed;
+
+      await actions.delete.toggleDeleteSearchableSnapshot();
+      await actions.savePolicy();
+
+      const expected = {
+        phases: {
+          ...DELETE_PHASE_POLICY.policy.phases,
+          delete: {
+            ...DELETE_PHASE_POLICY.policy.phases.delete,
+            actions: {
+              ...DELETE_PHASE_POLICY.policy.phases.delete?.actions,
+              delete: {
+                delete_searchable_snapshot: false,
+              },
+            },
+          },
+        },
+        name: DELETE_PHASE_POLICY.name,
+      };
+
+      expect(httpSetup.post).toHaveBeenLastCalledWith(
+        `${API_BASE_PATH}/policies`,
+        expect.objectContaining({ body: JSON.stringify(expected) })
+      );
+    });
+  });
 });

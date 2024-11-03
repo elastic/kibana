@@ -38,13 +38,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should show the "Convert to Lens" menu item for a count aggregation', async () => {
-      const visPanel = await panelActions.getPanelHeading('Timeseries - Basic');
-      expect(await panelActions.canConvertToLens(visPanel)).to.eql(true);
+      expect(await panelActions.canConvertToLensByTitle('Timeseries - Basic')).to.eql(true);
     });
 
     it('visualizes field to Lens and loads fields to the dimesion editor', async () => {
-      const visPanel = await panelActions.getPanelHeading('Timeseries - Basic');
-      await panelActions.convertToLens(visPanel);
+      await panelActions.convertToLensByTitle('Timeseries - Basic');
       await lens.waitForVisualization('xyVisChart');
       await retry.try(async () => {
         const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
@@ -55,24 +53,21 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should preserve app filters in lens', async () => {
-      const visPanel = await panelActions.getPanelHeading('Timeseries - With filter');
-      await panelActions.convertToLens(visPanel);
+      await panelActions.convertToLensByTitle('Timeseries - With filter');
       await lens.waitForVisualization('xyVisChart');
 
       expect(await filterBar.hasFilter('extension', 'css')).to.be(true);
     });
 
     it('should preserve query in lens', async () => {
-      const visPanel = await panelActions.getPanelHeading('Timeseries - With query');
-      await panelActions.convertToLens(visPanel);
+      await panelActions.convertToLensByTitle('Timeseries - With query');
       await lens.waitForVisualization('xyVisChart');
 
       expect(await queryBar.getQueryString()).to.equal('machine.os : ios');
     });
 
     it('should draw a reference line', async () => {
-      const visPanel = await panelActions.getPanelHeading('Timeseries - Reference line');
-      await panelActions.convertToLens(visPanel);
+      await panelActions.convertToLensByTitle('Timeseries - Reference line');
       await lens.waitForVisualization('xyVisChart');
       await retry.try(async () => {
         const layers = await find.allByCssSelector(`[data-test-subj^="lns-layerPanel-"]`);
@@ -92,8 +87,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should convert metric agg with params', async () => {
-      const visPanel = await panelActions.getPanelHeading('Timeseries - Agg with params');
-      await panelActions.convertToLens(visPanel);
+      await panelActions.convertToLensByTitle('Timeseries - Agg with params');
       await lens.waitForVisualization('xyVisChart');
       await retry.try(async () => {
         expect(await lens.getLayerCount()).to.be(1);
@@ -108,18 +102,19 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should not allow converting of invalid panel', async () => {
-      const visPanel = await panelActions.getPanelHeading('Timeseries - Invalid panel');
-      expect(await panelActions.canConvertToLens(visPanel)).to.eql(false);
+      expect(await panelActions.canConvertToLensByTitle('Timeseries - Invalid panel')).to.eql(
+        false
+      );
     });
 
     it('should not allow converting of unsupported aggregations', async () => {
-      const visPanel = await panelActions.getPanelHeading('Timeseries - Unsupported aggregations');
-      expect(await panelActions.canConvertToLens(visPanel)).to.eql(false);
+      expect(
+        await panelActions.canConvertToLensByTitle('Timeseries - Unsupported aggregations')
+      ).to.eql(false);
     });
 
     it('should convert parent pipeline aggregation with terms', async () => {
-      const visPanel = await panelActions.getPanelHeading('Timeseries - Parent pipeline agg');
-      await panelActions.convertToLens(visPanel);
+      await panelActions.convertToLensByTitle('Timeseries - Parent pipeline agg');
       await lens.waitForVisualization('xyVisChart');
       await retry.try(async () => {
         expect(await lens.getLayerCount()).to.be(1);
@@ -133,8 +128,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should convert sibling pipeline aggregation with terms', async () => {
-      const visPanel = await panelActions.getPanelHeading('Timeseries - Sibling pipeline agg');
-      await panelActions.convertToLens(visPanel);
+      await panelActions.convertToLensByTitle('Timeseries - Sibling pipeline agg');
       await lens.waitForVisualization('xyVisChart');
       await retry.try(async () => {
         expect(await lens.getLayerCount()).to.be(1);
@@ -148,20 +142,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should bring the ignore global filters configured at series level over', async () => {
-      const visPanel = await panelActions.getPanelHeading(
-        'Timeseries - Ignore global filters series'
-      );
-      await panelActions.convertToLens(visPanel);
+      await panelActions.convertToLensByTitle('Timeseries - Ignore global filters series');
       await lens.waitForVisualization('xyVisChart');
 
       expect(await testSubjects.exists('lnsChangeIndexPatternIgnoringFilters')).to.be(true);
     });
 
     it('should bring the ignore global filters configured at panel level over', async () => {
-      const visPanel = await panelActions.getPanelHeading(
-        'Timeseries - Ignore global filters panel'
-      );
-      await panelActions.convertToLens(visPanel);
+      await panelActions.convertToLensByTitle('Timeseries - Ignore global filters panel');
       await lens.waitForVisualization('xyVisChart');
 
       expect(await testSubjects.exists('lnsChangeIndexPatternIgnoringFilters')).to.be(true);

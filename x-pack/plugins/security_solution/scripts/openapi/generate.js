@@ -12,13 +12,14 @@ const { resolve, join } = require('path');
 
 const SECURITY_SOLUTION_ROOT = resolve(__dirname, '../..');
 
+// This script is also run in CI: to track down the scripts that run it in CI, code search for `yarn openapi:generate` in the `.buildkite` top level directory
+
 (async () => {
   await generate({
     title: 'API route schemas',
     rootDir: SECURITY_SOLUTION_ROOT,
     sourceGlob: './common/**/*.schema.yaml',
     templateName: 'zod_operation_schema',
-    skipLinting: true,
   });
 
   await generate({
@@ -29,6 +30,20 @@ const SECURITY_SOLUTION_ROOT = resolve(__dirname, '../..');
     skipLinting: true,
     bundle: {
       outFile: join(REPO_ROOT, 'x-pack/test/api_integration/services/security_solution_api.gen.ts'),
+    },
+  });
+
+  await generate({
+    title: 'API client for quickstart',
+    rootDir: SECURITY_SOLUTION_ROOT,
+    sourceGlob: './common/**/*.schema.yaml',
+    templateName: 'api_client_quickstart',
+    skipLinting: false,
+    bundle: {
+      outFile: join(
+        REPO_ROOT,
+        'x-pack/plugins/security_solution/common/api/quickstart_client.gen.ts'
+      ),
     },
   });
 })();

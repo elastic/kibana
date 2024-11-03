@@ -6,8 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { TimelineTypeLiteral } from '../../../../../common/api/timeline';
-import { TimelineType } from '../../../../../common/api/timeline';
+import { type TimelineType, TimelineTypeEnum } from '../../../../../common/api/timeline';
 
 export const NEW_TIMELINE_BTN = i18n.translate(
   'xpack.securitySolution.timeline.modal.newTimelineBtn',
@@ -115,10 +114,10 @@ export const CLOSE_MODAL = i18n.translate(
   }
 );
 
-export const UNSAVED_TIMELINE_WARNING = (timelineType: TimelineTypeLiteral) =>
+export const UNSAVED_TIMELINE_WARNING = (timelineType: TimelineType) =>
   i18n.translate('xpack.securitySolution.timeline.saveTimeline.modal.warning.title', {
     values: {
-      timeline: timelineType === TimelineType.template ? 'timeline template' : 'timeline',
+      timeline: timelineType === TimelineTypeEnum.template ? 'timeline template' : 'timeline',
     },
     defaultMessage: 'You have an unsaved {timeline}. Do you wish to save it?',
   });

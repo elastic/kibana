@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { DiscoveredPlugin } from '@kbn/core-base-common';
 import { InjectedMetadataService } from './injected_metadata_service';
+import type { InjectedMetadataParams } from '..';
 
 describe('setup.getElasticsearchInfo()', () => {
   it('returns elasticsearch info from injectedMetadata', () => {
@@ -160,78 +162,28 @@ describe('setup.getLegacyMetadata()', () => {
   });
 });
 
-describe('setup.getInjectedVar()', () => {
-  it('returns values from injectedMetadata.vars', () => {
-    const setup = new InjectedMetadataService({
+describe('setup.getFeatureFlags()', () => {
+  it('returns injectedMetadata.featureFlags', () => {
+    const injectedMetadata = new InjectedMetadataService({
       injectedMetadata: {
-        vars: {
-          foo: {
-            bar: '1',
-          },
-          'baz:box': {
-            foo: 2,
+        featureFlags: {
+          overrides: {
+            'my-overridden-flag': 1234,
           },
         },
       },
-    } as any).setup();
+    } as unknown as InjectedMetadataParams);
 
-    expect(setup.getInjectedVar('foo')).toEqual({
-      bar: '1',
-    });
-    expect(setup.getInjectedVar('foo.bar')).toBe('1');
-    expect(setup.getInjectedVar('baz:box')).toEqual({
-      foo: 2,
-    });
-    expect(setup.getInjectedVar('')).toBe(undefined);
+    const contract = injectedMetadata.setup();
+    expect(contract.getFeatureFlags()).toStrictEqual({ overrides: { 'my-overridden-flag': 1234 } });
   });
 
-  it('returns read-only values', () => {
-    const setup = new InjectedMetadataService({
-      injectedMetadata: {
-        vars: {
-          foo: {
-            bar: 1,
-          },
-        },
-      },
-    } as any).setup();
+  it('returns empty injectedMetadata.featureFlags', () => {
+    const injectedMetadata = new InjectedMetadataService({
+      injectedMetadata: {},
+    } as unknown as InjectedMetadataParams);
 
-    const foo: any = setup.getInjectedVar('foo');
-    expect(() => {
-      foo.bar = 2;
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"Cannot assign to read only property 'bar' of object '#<Object>'"`
-    );
-    expect(() => {
-      foo.newProp = 2;
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"Cannot add property newProp, object is not extensible"`
-    );
-  });
-});
-
-describe('setup.getInjectedVars()', () => {
-  it('returns all injected vars, readonly', () => {
-    const setup = new InjectedMetadataService({
-      injectedMetadata: {
-        vars: {
-          foo: {
-            bar: 1,
-          },
-        },
-      },
-    } as any).setup();
-
-    const vars: any = setup.getInjectedVars();
-    expect(() => {
-      vars.foo = 2;
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"Cannot assign to read only property 'foo' of object '#<Object>'"`
-    );
-    expect(() => {
-      vars.newProp = 2;
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"Cannot add property newProp, object is not extensible"`
-    );
+    const contract = injectedMetadata.setup();
+    expect(contract.getFeatureFlags()).toBeUndefined();
   });
 });

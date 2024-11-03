@@ -18,11 +18,11 @@ import { useApi } from '@kbn/securitysolution-list-hooks';
 
 import type { Filter } from '@kbn/es-query';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { isEmpty } from 'lodash';
 import { createHistoryEntry } from '../../../../common/utils/global_query_string/helpers';
 import { useKibana } from '../../../../common/lib/kibana';
 import { TimelineId } from '../../../../../common/types/timeline';
-import { TimelineType } from '../../../../../common/api/timeline';
+import { TimelineTypeEnum } from '../../../../../common/api/timeline';
 import { timelineActions } from '../../../../timelines/store';
 import { sendAlertToTimelineAction } from '../actions';
 import { useUpdateTimeline } from '../../../../timelines/components/open_timeline/use_update_timeline';
@@ -34,7 +34,6 @@ import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
 import { ALERTS_ACTIONS } from '../../../../common/lib/apm/user_actions';
 import { defaultUdtHeaders } from '../../../../timelines/components/timeline/unified_components/default_headers';
-import { defaultHeaders } from '../../../../timelines/components/timeline/body/column_headers/default_headers';
 
 interface UseInvestigateInTimelineActionProps {
   ecsRowData?: Ecs | Ecs[] | null;
@@ -135,22 +134,24 @@ export const useInvestigateInTimeline = ({
   );
 
   const updateTimelineIsLoading = useCallback(
-    (payload) => dispatch(timelineActions.updateIsLoading(payload)),
+    (payload: Parameters<typeof timelineActions.updateIsLoading>[0]) =>
+      dispatch(timelineActions.updateIsLoading(payload)),
     [dispatch]
   );
 
   const clearActiveTimeline = useCreateTimeline({
     timelineId: TimelineId.active,
-    timelineType: TimelineType.default,
+    timelineType: TimelineTypeEnum.default,
   });
 
-  const unifiedComponentsInTimelineEnabled = useIsExperimentalFeatureEnabled(
-    'unifiedComponentsInTimelineEnabled'
-  );
   const updateTimeline = useUpdateTimeline();
 
   const createTimeline = useCallback(
     async ({ from: fromTimeline, timeline, to: toTimeline, ruleNote }: CreateTimelineProps) => {
+      const newColumns = timeline.columns;
+      const newColumnsOverride =
+        !newColumns || isEmpty(newColumns) ? defaultUdtHeaders : newColumns;
+
       await clearActiveTimeline();
       updateTimelineIsLoading({ id: TimelineId.active, isLoading: false });
       updateTimeline({
@@ -160,20 +161,19 @@ export const useInvestigateInTimeline = ({
         notes: [],
         timeline: {
           ...timeline,
-          columns: unifiedComponentsInTimelineEnabled ? defaultUdtHeaders : defaultHeaders,
+          columns: newColumnsOverride,
           indexNames: timeline.indexNames ?? [],
           show: true,
+          excludedRowRendererIds:
+            timeline.timelineType !== TimelineTypeEnum.template
+              ? timeline.excludedRowRendererIds
+              : [],
         },
         to: toTimeline,
         ruleNote,
       });
     },
-    [
-      updateTimeline,
-      updateTimelineIsLoading,
-      clearActiveTimeline,
-      unifiedComponentsInTimelineEnabled,
-    ]
+    [updateTimeline, updateTimelineIsLoading, clearActiveTimeline]
   );
 
   const investigateInTimelineAlertClick = useCallback(async () => {

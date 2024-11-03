@@ -8,10 +8,11 @@
 import { camelCase } from 'lodash';
 import { getClipboardData, setClipboardData } from './clipboard';
 import { cloneSubgraphs } from './clone_subgraphs';
-import { pluginServices } from '../services';
 import { getId } from './get_id';
 import { PositionedElement } from '../../types';
 import { ELEMENT_NUDGE_OFFSET, ELEMENT_SHIFT_OFFSET } from '../../common/lib/constants';
+import { getCanvasNotifyService } from '../services/canvas_notify_service';
+import { getCustomElementService } from '../services/canvas_custom_element_service';
 
 const extractId = (node: { id: string }): string => node.id;
 
@@ -71,8 +72,8 @@ export const basicHandlerCreators = {
   createCustomElement:
     ({ selectedNodes }: Props) =>
     (name = '', description = '', image = ''): void => {
-      const notifyService = pluginServices.getServices().notify;
-      const customElementService = pluginServices.getServices().customElement;
+      const notifyService = getCanvasNotifyService();
+      const customElementService = getCustomElementService();
 
       if (selectedNodes.length) {
         const content = JSON.stringify({ selectedNodes });
@@ -145,7 +146,7 @@ export const clipboardHandlerCreators = {
   cutNodes:
     ({ pageId, removeNodes, selectedNodes }: Props) =>
     (): void => {
-      const notifyService = pluginServices.getServices().notify;
+      const notifyService = getCanvasNotifyService();
 
       if (selectedNodes.length) {
         setClipboardData({ selectedNodes });
@@ -156,7 +157,7 @@ export const clipboardHandlerCreators = {
   copyNodes:
     ({ selectedNodes }: Props) =>
     (): void => {
-      const notifyService = pluginServices.getServices().notify;
+      const notifyService = getCanvasNotifyService();
 
       if (selectedNodes.length) {
         setClipboardData({ selectedNodes });

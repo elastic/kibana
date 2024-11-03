@@ -1,21 +1,24 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 /* eslint-disable max-classes-per-file */
 
 import moment from 'moment';
 import userEvent from '@testing-library/user-event';
-import { screen, within, fireEvent } from '@testing-library/react';
+import { screen, within, fireEvent, Screen } from '@testing-library/react';
 
-export const getSelectedButtonInGroup = (testId: string) => () => {
-  const buttonGroup = screen.getByTestId(testId);
-  return within(buttonGroup).getByRole('button', { pressed: true });
-};
+export const getSelectedButtonInGroup =
+  (testId: string, container: Screen | ReturnType<typeof within> = screen) =>
+  () => {
+    const buttonGroup = container.getByTestId(testId);
+    return within(buttonGroup).getByRole('button', { pressed: true });
+  };
 
 export class EuiButtonGroupTestHarness {
   #testId: string;
@@ -53,7 +56,7 @@ export class EuiButtonGroupTestHarness {
   }
 
   /**
-   * Returns selected value of button group
+   * Returns selected option of button group
    */
   public get selected() {
     return within(this.#buttonGroup).getByRole('button', { pressed: true });
@@ -112,15 +115,15 @@ export class EuiSuperDatePickerTestHarness {
   /**
    * Opens the popover for the date picker
    */
-  static togglePopover() {
-    userEvent.click(screen.getByRole('button', { name: 'Date quick select' }));
+  static async togglePopover() {
+    await userEvent.click(screen.getByRole('button', { name: 'Date quick select' }));
   }
 
   /**
    * Selects a commonly-used range from the date picker (opens the popover if it's not already open)
    */
   static async selectCommonlyUsedRange(label: string) {
-    if (!screen.queryByText('Commonly used')) this.togglePopover();
+    if (!screen.queryByText('Commonly used')) await this.togglePopover();
 
     // Using fireEvent here because userEvent erroneously claims that
     // pointer-events is set to 'none'.
@@ -132,7 +135,63 @@ export class EuiSuperDatePickerTestHarness {
   /**
    * Activates the refresh button
    */
-  static refresh() {
-    userEvent.click(screen.getByRole('button', { name: 'Refresh' }));
+  static async refresh() {
+    await userEvent.click(screen.getByRole('button', { name: 'Refresh' }));
+  }
+}
+
+export class EuiSelectTestHarness {
+  #testId: string;
+
+  /**
+   * Returns select or throws
+   */
+  get #selectEl() {
+    return screen.getByTestId(this.#testId);
+  }
+
+  constructor(testId: string) {
+    this.#testId = testId;
+  }
+
+  /**
+   * Returns `data-test-subj` of select
+   */
+  public get testId() {
+    return this.#testId;
+  }
+
+  /**
+   * Returns button select if found, otherwise `null`
+   */
+  public get self() {
+    return screen.queryByTestId(this.#testId);
+  }
+
+  /**
+   * Returns all options of select
+   */
+  public get options(): HTMLOptionElement[] {
+    return within(this.#selectEl).getAllByRole('option');
+  }
+
+  /**
+   * Returns selected option
+   */
+  public get selected() {
+    return (this.#selectEl as HTMLSelectElement).value;
+  }
+
+  /**
+   * Select option by value
+   */
+  public select(optionName: string | RegExp) {
+    const option = this.options.find((o) => o.value === optionName)?.value;
+
+    if (!option) {
+      throw new Error(`Option [${optionName}] not found`);
+    }
+
+    fireEvent.change(this.#selectEl, { target: { value: option } });
   }
 }

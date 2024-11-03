@@ -175,7 +175,7 @@ export const loadLiveQuery = (
   }).then((response) => response.body.data);
 
 export const loadRule = (includeResponseActions = false) => {
-  cy.login(ServerlessRoleName.SOC_MANAGER);
+  cy.login(ServerlessRoleName.SOC_MANAGER, false);
 
   return request<RuleResponse>({
     method: 'POST',
@@ -231,7 +231,7 @@ export const loadRule = (includeResponseActions = false) => {
       tags: [],
       license: '',
       interval: '1m',
-      from: 'now-120s',
+      from: 'now-360s',
       to: 'now',
       meta: { from: '1m', kibana_siem_app_url: 'http://localhost:5620/app/security' },
       actions: [],

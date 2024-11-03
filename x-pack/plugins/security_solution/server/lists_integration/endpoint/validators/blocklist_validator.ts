@@ -6,7 +6,6 @@
  */
 
 import { cloneDeep, uniq } from 'lodash';
-import { ENDPOINT_BLOCKLISTS_LIST_ID } from '@kbn/securitysolution-list-constants';
 import type { Type, TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
@@ -15,6 +14,7 @@ import type {
   CreateExceptionListItemOptions,
   UpdateExceptionListItemOptions,
 } from '@kbn/lists-plugin/server';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import { BaseValidator } from './base_validator';
 import type { ExceptionItemLikeOptions } from '../types';
 import { isValidHash } from '../../../../common/endpoint/service/artifacts/validations';
@@ -44,9 +44,9 @@ type ConditionEntryFieldAllowedType =
 type BlocklistConditionEntry =
   | {
       field: ConditionEntryFieldAllowedType;
-      type: 'match_any';
+      type: 'match_any' | 'match';
       operator: 'included';
-      value: string[];
+      value: string[] | string;
     }
   | TypeOf<typeof WindowsSignerEntrySchema>;
 
@@ -97,8 +97,13 @@ const WindowsSignerEntrySchema = schema.object({
   entries: schema.arrayOf(
     schema.object({
       field: schema.literal('subject_name'),
-      value: schema.arrayOf(schema.string({ minLength: 1 })),
-      type: schema.literal('match_any'),
+      value: schema.conditional(
+        schema.siblingRef('type'),
+        schema.literal('match'),
+        schema.string({ minLength: 1 }),
+        schema.arrayOf(schema.string({ minLength: 1 }))
+      ),
+      type: schema.oneOf([schema.literal('match'), schema.literal('match_any')]),
       operator: schema.literal('included'),
     }),
     { minSize: 1 }
@@ -214,7 +219,7 @@ function removeDuplicateEntryValues(entries: BlocklistConditionEntry[]): Blockli
 
 export class BlocklistValidator extends BaseValidator {
   static isBlocklist(item: { listId: string }): boolean {
-    return item.listId === ENDPOINT_BLOCKLISTS_LIST_ID;
+    return item.listId === ENDPOINT_ARTIFACT_LISTS.blocklists.id;
   }
 
   protected async validateHasWritePrivilege(): Promise<void> {
@@ -230,7 +235,9 @@ export class BlocklistValidator extends BaseValidator {
   ): Promise<CreateExceptionListItemOptions> {
     await this.validateHasWritePrivilege();
 
-    item.entries = removeDuplicateEntryValues(item.entries as BlocklistConditionEntry[]);
+    (item.entries as BlocklistConditionEntry[]) = removeDuplicateEntryValues(
+      item.entries as BlocklistConditionEntry[]
+    );
 
     await this.validateBlocklistData(item);
     await this.validateCanCreateByPolicyArtifacts(item);
@@ -271,7 +278,7 @@ export class BlocklistValidator extends BaseValidator {
 
     await this.validateHasWritePrivilege();
 
-    _updatedItem.entries = removeDuplicateEntryValues(
+    (_updatedItem.entries as BlocklistConditionEntry[]) = removeDuplicateEntryValues(
       _updatedItem.entries as BlocklistConditionEntry[]
     );
 

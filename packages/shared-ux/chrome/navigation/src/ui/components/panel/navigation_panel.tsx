@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -17,8 +18,25 @@ import {
 import React, { useCallback, type FC } from 'react';
 import classNames from 'classnames';
 
+import type { PanelSelectedNode } from '@kbn/core-chrome-browser';
 import { usePanel } from './context';
 import { getNavPanelStyles, getPanelWrapperStyles } from './styles';
+
+const getTestSubj = (selectedNode: PanelSelectedNode | null): string | undefined => {
+  if (!selectedNode) return;
+
+  const deeplinkId = selectedNode.deepLink?.id;
+  return classNames(`sideNavPanel`, {
+    [`sideNavPanel-id-${selectedNode.id}`]: selectedNode.id,
+    [`sideNavPanel-deepLinkId-${deeplinkId}`]: !!deeplinkId,
+  });
+};
+
+const getTargetTestSubj = (target: EventTarget | null): string | undefined => {
+  if (!target) return;
+
+  return (target as HTMLElement).dataset.testSubj;
+};
 
 export const NavigationPanel: FC = () => {
   const { euiTheme } = useEuiTheme();
@@ -36,12 +54,22 @@ export const NavigationPanel: FC = () => {
 
   const onOutsideClick = useCallback(
     ({ target }: Event) => {
-      // Only close if we are not clicking on the currently selected nav node
-      if (
-        !(target as HTMLButtonElement).dataset.testSubj?.includes(
-          `panelOpener-${selectedNode?.path}`
-        )
-      ) {
+      let doClose = true;
+
+      if (target) {
+        // Only close if we are not clicking on the currently selected nav node
+        const testSubj =
+          getTargetTestSubj(target) ?? getTargetTestSubj((target as HTMLElement).parentNode);
+
+        if (
+          testSubj?.includes(`nav-item-${selectedNode?.path}`) ||
+          testSubj?.includes(`panelOpener-${selectedNode?.path}`)
+        ) {
+          doClose = false;
+        }
+      }
+
+      if (doClose) {
         close();
       }
     },
@@ -67,7 +95,7 @@ export const NavigationPanel: FC = () => {
               hasShadow
               borderRadius="none"
               paddingSize="m"
-              data-test-subj="sideNavPanel"
+              data-test-subj={getTestSubj(selectedNode)}
             >
               {getContent()}
             </EuiPanel>

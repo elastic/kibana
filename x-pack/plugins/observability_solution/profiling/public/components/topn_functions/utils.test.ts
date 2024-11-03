@@ -46,7 +46,7 @@ describe('Top N functions: Utils', () => {
       expect(getTotalCount()).toEqual(0);
     });
     it('returns value from topNFunctions', () => {
-      expect(getTotalCount({ TotalCount: 10 } as TopNFunctions)).toEqual(10);
+      expect(getTotalCount({ selfCPU: 10 } as TopNFunctions)).toEqual(10);
     });
   });
 });

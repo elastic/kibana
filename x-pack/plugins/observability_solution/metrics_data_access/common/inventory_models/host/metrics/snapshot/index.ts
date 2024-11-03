@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { cpuV2 } from './cpu_v2';
 import { cpu } from './cpu';
 import { diskLatency } from './disk_latency';
 import { diskSpaceUsage } from './disk_space_usage';
@@ -17,9 +18,11 @@ import { memoryTotal } from './memory_total';
 import { normalizedLoad1m } from './normalized_load_1m';
 import { rx } from './rx';
 import { tx } from './tx';
+import { txV2 } from './tx_v2';
+import { rxV2 } from './rx_v2';
 
 export const snapshot = {
-  cpu,
+  cpuV2,
   diskLatency,
   diskSpaceUsage,
   count,
@@ -29,6 +32,9 @@ export const snapshot = {
   memoryFree,
   memoryTotal,
   normalizedLoad1m,
+  rxV2,
+  txV2,
+  cpu,
   rx,
   tx,
 };

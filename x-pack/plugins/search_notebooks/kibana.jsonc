@@ -15,7 +15,9 @@
     "requiredPlugins": [
       "console"
     ],
-    "optionalPlugins": [],
+    "optionalPlugins": [
+      "usageCollection"
+    ],
     "requiredBundles": [
       "kibanaReact"
     ]

@@ -119,10 +119,18 @@ export interface ResolvedCase {
 
 export type CasesConfigurationUI = Pick<
   SnakeToCamelCase<Configuration>,
-  'closureType' | 'connector' | 'mappings' | 'customFields' | 'id' | 'version' | 'owner'
+  | 'closureType'
+  | 'connector'
+  | 'mappings'
+  | 'customFields'
+  | 'templates'
+  | 'id'
+  | 'version'
+  | 'owner'
 >;
 
 export type CasesConfigurationUICustomField = CasesConfigurationUI['customFields'][number];
+export type CasesConfigurationUITemplate = CasesConfigurationUI['templates'][number];
 
 export type SortOrder = 'asc' | 'desc';
 

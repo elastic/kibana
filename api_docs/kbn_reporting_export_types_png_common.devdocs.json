@@ -200,21 +200,6 @@
       },
       {
         "parentPluginId": "@kbn/reporting-export-types-png-common",
-        "id": "def-common.PNG_JOB_TYPE",
-        "type": "string",
-        "tags": [],
-        "label": "PNG_JOB_TYPE",
-        "description": [],
-        "signature": [
-          "\"PNG\""
-        ],
-        "path": "packages/kbn-reporting/export_types/png_common/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/reporting-export-types-png-common",
         "id": "def-common.PNG_JOB_TYPE_V2",
         "type": "string",
         "tags": [],
@@ -222,21 +207,6 @@
         "description": [],
         "signature": [
           "\"PNGV2\""
-        ],
-        "path": "packages/kbn-reporting/export_types/png_common/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/reporting-export-types-png-common",
-        "id": "def-common.PNG_REPORT_TYPE",
-        "type": "string",
-        "tags": [],
-        "label": "PNG_REPORT_TYPE",
-        "description": [],
-        "signature": [
-          "\"PNG\""
         ],
         "path": "packages/kbn-reporting/export_types/png_common/constants.ts",
         "deprecated": false,

@@ -5,16 +5,39 @@
  * 2.0.
  */
 import * as t from 'io-ts';
-import { EntityServiceListItem } from '../../../../common/entities/types';
-import { createEntitiesESClient } from '../../../lib/helpers/create_es_client/create_assets_es_client/create_assets_es_clients';
-import { getApmEventClient } from '../../../lib/helpers/get_apm_event_client';
+import { environmentQuery } from '../../../../common/utils/environment_query';
+import { createEntitiesESClient } from '../../../lib/helpers/create_es_client/create_entities_es_client/create_entities_es_client';
 import { createApmServerRoute } from '../../apm_routes/create_apm_server_route';
 import { environmentRt, kueryRt, rangeRt } from '../../default_api_types';
 import { getServiceEntities } from './get_service_entities';
+import { getServiceEntitySummary } from './get_service_entity_summary';
 
-export interface EntityServicesResponse {
-  services: EntityServiceListItem[];
-}
+const serviceEntitiesSummaryRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/entities/services/{serviceName}/summary',
+  params: t.type({
+    path: t.type({ serviceName: t.string }),
+    query: environmentRt,
+  }),
+  options: { tags: ['access:apm'] },
+  async handler(resources) {
+    const { context, params, request } = resources;
+    const coreContext = await context.core;
+
+    const entitiesESClient = await createEntitiesESClient({
+      request,
+      esClient: coreContext.elasticsearch.client.asCurrentUser,
+    });
+
+    const { serviceName } = params.path;
+    const { environment } = params.query;
+
+    return getServiceEntitySummary({
+      entitiesESClient,
+      serviceName,
+      environment,
+    });
+  },
+});
 
 const servicesEntitiesRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/entities/services',
@@ -22,13 +45,9 @@ const servicesEntitiesRoute = createApmServerRoute({
     query: t.intersection([environmentRt, kueryRt, rangeRt]),
   }),
   options: { tags: ['access:apm'] },
-  async handler(resources): Promise<EntityServicesResponse> {
-    const { context, params, request, plugins } = resources;
-    const [coreContext] = await Promise.all([
-      context.core,
-      getApmEventClient(resources),
-      plugins.logsDataAccess.start(),
-    ]);
+  async handler(resources) {
+    const { context, params, request } = resources;
+    const coreContext = await context.core;
 
     const entitiesESClient = await createEntitiesESClient({
       request,
@@ -50,6 +69,76 @@ const servicesEntitiesRoute = createApmServerRoute({
   },
 });
 
+const serviceLogRateTimeseriesRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/entities/services/{serviceName}/logs_rate_timeseries',
+  params: t.type({
+    path: t.type({
+      serviceName: t.string,
+    }),
+    query: t.intersection([environmentRt, kueryRt, rangeRt]),
+  }),
+  options: { tags: ['access:apm'] },
+  async handler(resources) {
+    const { context, params, plugins } = resources;
+    const [coreContext, logsDataAccessStart] = await Promise.all([
+      context.core,
+      plugins.logsDataAccess.start(),
+    ]);
+
+    const { serviceName } = params.path;
+    const { start, end, kuery, environment } = params.query;
+
+    const currentPeriodLogsRateTimeseries =
+      await logsDataAccessStart.services.getLogsRateTimeseries({
+        esClient: coreContext.elasticsearch.client.asCurrentUser,
+        identifyingMetadata: 'service.name',
+        timeFrom: start,
+        timeTo: end,
+        kuery,
+        serviceEnvironmentQuery: environmentQuery(environment),
+        serviceNames: [serviceName],
+      });
+
+    return { currentPeriod: currentPeriodLogsRateTimeseries };
+  },
+});
+
+const serviceLogErrorRateTimeseriesRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/entities/services/{serviceName}/logs_error_rate_timeseries',
+  params: t.type({
+    path: t.type({
+      serviceName: t.string,
+    }),
+    query: t.intersection([environmentRt, kueryRt, rangeRt]),
+  }),
+  options: { tags: ['access:apm'] },
+  async handler(resources) {
+    const { context, params, plugins } = resources;
+    const [coreContext, logsDataAccessStart] = await Promise.all([
+      context.core,
+      plugins.logsDataAccess.start(),
+    ]);
+
+    const { serviceName } = params.path;
+    const { start, end, kuery, environment } = params.query;
+
+    const logsErrorRateTimeseries = await logsDataAccessStart.services.getLogsErrorRateTimeseries({
+      esClient: coreContext.elasticsearch.client.asCurrentUser,
+      identifyingMetadata: 'service.name',
+      timeFrom: start,
+      timeTo: end,
+      kuery,
+      serviceEnvironmentQuery: environmentQuery(environment),
+      serviceNames: [serviceName],
+    });
+
+    return { currentPeriod: logsErrorRateTimeseries };
+  },
+});
+
 export const servicesEntitiesRoutesRepository = {
   ...servicesEntitiesRoute,
+  ...serviceLogRateTimeseriesRoute,
+  ...serviceLogErrorRateTimeseriesRoute,
+  ...serviceEntitiesSummaryRoute,
 };

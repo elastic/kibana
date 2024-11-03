@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 /**
@@ -19,6 +20,8 @@ export const INGEST_SAVED_OBJECT_INDEX = `${MAIN_SAVED_OBJECT_INDEX}_ingest`;
 export const ALERTING_CASES_SAVED_OBJECT_INDEX = `${MAIN_SAVED_OBJECT_INDEX}_alerting_cases`;
 export const SECURITY_SOLUTION_SAVED_OBJECT_INDEX = `${MAIN_SAVED_OBJECT_INDEX}_security_solution`;
 export const ANALYTICS_SAVED_OBJECT_INDEX = `${MAIN_SAVED_OBJECT_INDEX}_analytics`;
+export const USAGE_COUNTERS_SAVED_OBJECT_INDEX = `${MAIN_SAVED_OBJECT_INDEX}_usage_counters`;
+
 export const ALL_SAVED_OBJECT_INDICES = [
   MAIN_SAVED_OBJECT_INDEX,
   TASK_MANAGER_SAVED_OBJECT_INDEX,
@@ -26,4 +29,5 @@ export const ALL_SAVED_OBJECT_INDICES = [
   INGEST_SAVED_OBJECT_INDEX,
   SECURITY_SOLUTION_SAVED_OBJECT_INDEX,
   ANALYTICS_SAVED_OBJECT_INDEX,
+  USAGE_COUNTERS_SAVED_OBJECT_INDEX,
 ];

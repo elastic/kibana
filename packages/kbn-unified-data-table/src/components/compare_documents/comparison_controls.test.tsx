@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { render, screen } from '@testing-library/react';
@@ -20,7 +21,7 @@ const renderComparisonControls = ({
   isPlainRecord?: ComparisonControlsProps['isPlainRecord'];
   forceShowAllFields?: ComparisonControlsProps['forceShowAllFields'];
 } = {}) => {
-  const selectedDocs = ['0', '1', '2'];
+  const selectedDocIds = ['0', '1', '2'];
   const Wrapper = () => {
     const [showDiff, setShowDiff] = useState(true);
     const [diffMode, setDiffMode] = useState<DocumentDiffMode>('basic');
@@ -34,7 +35,7 @@ const renderComparisonControls = ({
         <IntlProvider locale="en">
           <ComparisonControls
             isPlainRecord={isPlainRecord}
-            selectedDocs={selectedDocs}
+            selectedDocIds={selectedDocIds}
             showDiff={showDiff}
             diffMode={diffMode}
             showDiffDecorations={showDiffDecorations}
@@ -67,53 +68,45 @@ const renderComparisonControls = ({
   return {
     getComparisonCountDisplay: () =>
       screen.getByText(
-        `Comparing ${selectedDocs.length} ${isPlainRecord ? 'results' : 'documents'}`
+        `Comparing ${selectedDocIds.length} ${isPlainRecord ? 'results' : 'documents'}`
       ),
     getComparisonSettingsButton,
-    clickComparisonSettingsButton: () => userEvent.click(getComparisonSettingsButton()),
+    clickComparisonSettingsButton: async () => await userEvent.click(getComparisonSettingsButton()),
     getShowDiffSwitch,
-    clickShowDiffSwitch: () =>
-      userEvent.click(getShowDiffSwitch(), undefined, {
-        skipPointerEventsCheck: true,
+    clickShowDiffSwitch: async () =>
+      await userEvent.click(getShowDiffSwitch(), { pointerEventsCheck: 0 }),
+    clickDiffModeFullValueButton: async () =>
+      await userEvent.click(screen.getByRole('button', { name: 'Full value' }), {
+        pointerEventsCheck: 0,
       }),
-    clickDiffModeFullValueButton: () =>
-      userEvent.click(screen.getByRole('button', { name: 'Full value' }), undefined, {
-        skipPointerEventsCheck: true,
+    clickDiffModeByCharacterButton: async () =>
+      await userEvent.click(screen.getByRole('button', { name: 'By character' }), {
+        pointerEventsCheck: 0,
       }),
-    clickDiffModeByCharacterButton: () =>
-      userEvent.click(screen.getByRole('button', { name: 'By character' }), undefined, {
-        skipPointerEventsCheck: true,
+    clickDiffModeByWordButton: async () =>
+      await userEvent.click(screen.getByRole('button', { name: 'By word' }), {
+        pointerEventsCheck: 0,
       }),
-    clickDiffModeByWordButton: () =>
-      userEvent.click(screen.getByRole('button', { name: 'By word' }), undefined, {
-        skipPointerEventsCheck: true,
-      }),
-    clickDiffModeByLineButton: () =>
-      userEvent.click(screen.getByRole('button', { name: 'By line' }), undefined, {
-        skipPointerEventsCheck: true,
+    clickDiffModeByLineButton: async () =>
+      await userEvent.click(screen.getByRole('button', { name: 'By line' }), {
+        pointerEventsCheck: 0,
       }),
     getDiffModeEntry,
     diffModeIsSelected: (mode: DocumentDiffMode) =>
       getDiffModeEntry(mode).getAttribute('aria-current') === 'true',
     getShowAllFieldsSwitch,
-    clickShowAllFieldsSwitch: () => {
+    clickShowAllFieldsSwitch: async () => {
       const fieldSwitch = getShowAllFieldsSwitch();
       if (fieldSwitch) {
-        userEvent.click(fieldSwitch, undefined, {
-          skipPointerEventsCheck: true,
-        });
+        await userEvent.click(fieldSwitch, { pointerEventsCheck: 0 });
       }
     },
     getShowMatchingValuesSwitch,
-    clickShowMatchingValuesSwitch: () =>
-      userEvent.click(getShowMatchingValuesSwitch(), undefined, {
-        skipPointerEventsCheck: true,
-      }),
+    clickShowMatchingValuesSwitch: async () =>
+      await userEvent.click(getShowMatchingValuesSwitch(), { pointerEventsCheck: 0 }),
     getShowDiffDecorationsSwitch,
-    clickShowDiffDecorationsSwitch: () =>
-      userEvent.click(getShowDiffDecorationsSwitch(), undefined, {
-        skipPointerEventsCheck: true,
-      }),
+    clickShowDiffDecorationsSwitch: async () =>
+      await userEvent.click(getShowDiffDecorationsSwitch(), { pointerEventsCheck: 0 }),
     getExitComparisonButton: () => screen.getByRole('button', { name: 'Exit comparison mode' }),
     isCompareActive: () => screen.queryByText('Comparison active') !== null,
   };
@@ -134,51 +127,51 @@ describe('ComparisonControls', () => {
     expect(result.getExitComparisonButton()).toBeInTheDocument();
   });
 
-  it('should allow toggling show diff switch', () => {
+  it('should allow toggling show diff switch', async () => {
     const result = renderComparisonControls();
-    result.clickComparisonSettingsButton();
+    await result.clickComparisonSettingsButton();
     expect(result.getShowDiffSwitch()).toBeChecked();
     expect(result.getDiffModeEntry('basic')).toBeEnabled();
     expect(result.getDiffModeEntry('chars')).toBeEnabled();
     expect(result.getDiffModeEntry('words')).toBeEnabled();
     expect(result.getDiffModeEntry('lines')).toBeEnabled();
     expect(result.getShowDiffDecorationsSwitch()).toBeEnabled();
-    result.clickShowDiffSwitch();
+    await result.clickShowDiffSwitch();
     expect(result.getShowDiffSwitch()).not.toBeChecked();
     expect(result.getDiffModeEntry('basic')).toBeDisabled();
     expect(result.getDiffModeEntry('chars')).toBeDisabled();
     expect(result.getDiffModeEntry('words')).toBeDisabled();
     expect(result.getDiffModeEntry('lines')).toBeDisabled();
     expect(result.getShowDiffDecorationsSwitch()).toBeDisabled();
-    result.clickShowDiffSwitch();
+    await result.clickShowDiffSwitch();
     expect(result.getShowDiffSwitch()).toBeChecked();
   });
 
-  it('should allow changing diff mode', () => {
+  it('should allow changing diff mode', async () => {
     const result = renderComparisonControls();
-    result.clickComparisonSettingsButton();
+    await result.clickComparisonSettingsButton();
     expect(result.diffModeIsSelected('basic')).toBe(true);
-    result.clickDiffModeByCharacterButton();
+    await result.clickDiffModeByCharacterButton();
     expect(result.diffModeIsSelected('chars')).toBe(true);
-    result.clickDiffModeByWordButton();
+    await result.clickDiffModeByWordButton();
     expect(result.diffModeIsSelected('words')).toBe(true);
-    result.clickDiffModeByLineButton();
+    await result.clickDiffModeByLineButton();
     expect(result.diffModeIsSelected('lines')).toBe(true);
-    result.clickDiffModeFullValueButton();
+    await result.clickDiffModeFullValueButton();
     expect(result.diffModeIsSelected('basic')).toBe(true);
   });
 
-  it('should allow toggling options', () => {
+  it('should allow toggling options', async () => {
     const result = renderComparisonControls();
-    result.clickComparisonSettingsButton();
+    await result.clickComparisonSettingsButton();
     expect(result.getShowAllFieldsSwitch()).toBeChecked();
     expect(result.getShowMatchingValuesSwitch()).toBeChecked();
     expect(result.getShowDiffDecorationsSwitch()).toBeChecked();
-    result.clickShowAllFieldsSwitch();
+    await result.clickShowAllFieldsSwitch();
     expect(result.getShowAllFieldsSwitch()).not.toBeChecked();
-    result.clickShowMatchingValuesSwitch();
+    await result.clickShowMatchingValuesSwitch();
     expect(result.getShowMatchingValuesSwitch()).not.toBeChecked();
-    result.clickShowDiffDecorationsSwitch();
+    await result.clickShowDiffDecorationsSwitch();
     expect(result.getShowDiffDecorationsSwitch()).not.toBeChecked();
   });
 
@@ -187,10 +180,10 @@ describe('ComparisonControls', () => {
     expect(result.getShowAllFieldsSwitch()).not.toBeInTheDocument();
   });
 
-  it('should exit comparison mode', () => {
+  it('should exit comparison mode', async () => {
     const result = renderComparisonControls();
     expect(result.isCompareActive()).toBe(true);
-    userEvent.click(result.getExitComparisonButton());
+    await userEvent.click(result.getExitComparisonButton());
     expect(result.isCompareActive()).toBe(false);
   });
 });

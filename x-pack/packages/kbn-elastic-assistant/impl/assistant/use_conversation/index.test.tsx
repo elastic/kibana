@@ -56,7 +56,7 @@ describe('useConversation', () => {
   it('should create a new conversation when called with valid conversationId and message', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(() => useConversation(), {
-        wrapper: ({ children }) => (
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
           <TestProviders providerContext={{ http: httpMock }}>{children}</TestProviders>
         ),
       });
@@ -77,7 +77,7 @@ describe('useConversation', () => {
   it('should delete an existing conversation when called with valid conversationId', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(() => useConversation(), {
-        wrapper: ({ children }) => (
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
           <TestProviders providerContext={{ http: httpMock }}>{children}</TestProviders>
         ),
       });
@@ -95,7 +95,7 @@ describe('useConversation', () => {
   it('should update the apiConfig for an existing conversation when called with a valid conversationId and apiConfig', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(() => useConversation(), {
-        wrapper: ({ children }) => (
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
           <TestProviders providerContext={{ http: httpMock }}>{children}</TestProviders>
         ),
       });
@@ -116,7 +116,7 @@ describe('useConversation', () => {
   it('should remove the last message from a conversation when called with valid conversationId', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(() => useConversation(), {
-        wrapper: ({ children }) => (
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
           <TestProviders providerContext={{ http: httpMock }}>{children}</TestProviders>
         ),
       });

@@ -12,20 +12,16 @@ export const rx: LensBaseLayer = {
   label: i18n.translate('xpack.metricsData.assetDetails.formulas.rx', {
     defaultMessage: 'Network Inbound (RX)',
   }),
-  value:
-    "average(host.network.ingress.bytes) * 8 / (max(metricset.period, kql='host.network.ingress.bytes: *') / 1000)",
+  value: 'sum(host.network.ingress.bytes) * 8',
   format: 'bits',
   decimals: 1,
-  normalizeByUnit: 's',
 };
 
 export const tx: LensBaseLayer = {
   label: i18n.translate('xpack.metricsData.assetDetails.formulas.tx', {
     defaultMessage: 'Network Outbound (TX)',
   }),
-  value:
-    "average(host.network.egress.bytes) * 8 / (max(metricset.period, kql='host.network.egress.bytes: *') / 1000)",
+  value: 'sum(host.network.egress.bytes) * 8',
   format: 'bits',
   decimals: 1,
-  normalizeByUnit: 's',
 };

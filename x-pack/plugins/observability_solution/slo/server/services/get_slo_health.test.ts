@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { TransformGetTransformStatsTransformStats } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient } from '@kbn/core/server';
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { ScopedClusterClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { getSLOSummaryTransformId, getSLOTransformId } from '../../common/constants';
 import { createSLO } from './fixtures/slo';
@@ -22,12 +22,14 @@ import { SLORepository } from './slo_repository';
 describe('GetSLOHealth', () => {
   let mockRepository: jest.Mocked<SLORepository>;
   let mockEsClient: jest.Mocked<ElasticsearchClient>;
+  let mockScopedClusterClient: ScopedClusterClientMock;
   let getSLOHealth: GetSLOHealth;
 
   beforeEach(() => {
     mockRepository = createSLORepositoryMock();
     mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
-    getSLOHealth = new GetSLOHealth(mockEsClient, mockRepository);
+    mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+    getSLOHealth = new GetSLOHealth(mockEsClient, mockScopedClusterClient, mockRepository);
   });
 
   it('returns the health and state', async () => {
@@ -128,10 +130,16 @@ describe('GetSLOHealth', () => {
       });
 
       // @ts-ignore
-      mockEsClient.transform.getTransformStats.mockResolvedValue({
+      mockScopedClusterClient.asSecondaryAuthUser.transform.getTransformStats.mockResolvedValue({
         transforms: [
-          { id: getSLOTransformId(slo.id, slo.revision), health: { status: 'green' } },
-          { id: getSLOSummaryTransformId(slo.id, slo.revision), health: { status: 'green' } },
+          {
+            id: getSLOTransformId(slo.id, slo.revision),
+            health: { status: 'green' },
+          } as TransformGetTransformStatsTransformStats,
+          {
+            id: getSLOSummaryTransformId(slo.id, slo.revision),
+            health: { status: 'green' },
+          } as TransformGetTransformStatsTransformStats,
         ],
       });
 
@@ -179,10 +187,16 @@ describe('GetSLOHealth', () => {
       });
 
       // @ts-ignore
-      mockEsClient.transform.getTransformStats.mockResolvedValue({
+      mockScopedClusterClient.asSecondaryAuthUser.transform.getTransformStats.mockResolvedValue({
         transforms: [
-          { id: getSLOTransformId(slo.id, slo.revision), health: { status: 'yellow' } },
-          { id: getSLOSummaryTransformId(slo.id, slo.revision), health: { status: 'green' } },
+          {
+            id: getSLOTransformId(slo.id, slo.revision),
+            health: { status: 'yellow' },
+          } as TransformGetTransformStatsTransformStats,
+          {
+            id: getSLOSummaryTransformId(slo.id, slo.revision),
+            health: { status: 'green' },
+          } as TransformGetTransformStatsTransformStats,
         ],
       });
 
@@ -240,10 +254,16 @@ describe('GetSLOHealth', () => {
       });
 
       // @ts-ignore
-      mockEsClient.transform.getTransformStats.mockResolvedValue({
+      mockScopedClusterClient.asSecondaryAuthUser.transform.getTransformStats.mockResolvedValue({
         transforms: [
-          { id: getSLOTransformId(slo.id, slo.revision), health: { status: 'green' } },
-          { id: getSLOSummaryTransformId(slo.id, slo.revision), health: { status: 'green' } },
+          {
+            id: getSLOTransformId(slo.id, slo.revision),
+            health: { status: 'green' },
+          } as TransformGetTransformStatsTransformStats,
+          {
+            id: getSLOSummaryTransformId(slo.id, slo.revision),
+            health: { status: 'green' },
+          } as TransformGetTransformStatsTransformStats,
         ],
       });
 
@@ -286,10 +306,16 @@ describe('GetSLOHealth', () => {
       });
 
       // @ts-ignore
-      mockEsClient.transform.getTransformStats.mockResolvedValue({
+      mockScopedClusterClient.asSecondaryAuthUser.transform.getTransformStats.mockResolvedValue({
         transforms: [
-          { id: getSLOTransformId(slo.id, slo.revision), health: { status: 'green' } },
-          { id: getSLOSummaryTransformId(slo.id, slo.revision), health: { status: 'green' } },
+          {
+            id: getSLOTransformId(slo.id, slo.revision),
+            health: { status: 'green' },
+          } as TransformGetTransformStatsTransformStats,
+          {
+            id: getSLOSummaryTransformId(slo.id, slo.revision),
+            health: { status: 'green' },
+          } as TransformGetTransformStatsTransformStats,
         ],
       });
 
@@ -332,10 +358,16 @@ describe('GetSLOHealth', () => {
       });
 
       // @ts-ignore
-      mockEsClient.transform.getTransformStats.mockResolvedValue({
+      mockScopedClusterClient.asSecondaryAuthUser.transform.getTransformStats.mockResolvedValue({
         transforms: [
-          { id: getSLOTransformId(slo.id, slo.revision), health: { status: 'green' } },
-          { id: getSLOSummaryTransformId(slo.id, slo.revision), health: { status: 'green' } },
+          {
+            id: getSLOTransformId(slo.id, slo.revision),
+            health: { status: 'green' },
+          } as TransformGetTransformStatsTransformStats,
+          {
+            id: getSLOSummaryTransformId(slo.id, slo.revision),
+            health: { status: 'green' },
+          } as TransformGetTransformStatsTransformStats,
         ],
       });
 

@@ -6,13 +6,15 @@
  */
 
 import * as t from 'io-ts';
+import Boom from '@hapi/boom';
 import { createObservabilityOnboardingServerRoute } from '../create_observability_onboarding_server_route';
+import { getFallbackESUrl } from '../../lib/get_fallback_urls';
 import { getKibanaUrl } from '../../lib/get_fallback_urls';
 import { getAgentVersion } from '../../lib/get_agent_version';
-import { hasLogMonitoringPrivileges } from './api_key/has_log_monitoring_privileges';
 import { saveObservabilityOnboardingFlow } from '../../lib/state';
-import { createShipperApiKey } from './api_key/create_shipper_api_key';
+import { createShipperApiKey } from '../../lib/api_key/create_shipper_api_key';
 import { ObservabilityOnboardingFlow } from '../../saved_objects/observability_onboarding_status';
+import { hasLogMonitoringPrivileges } from '../../lib/api_key/has_log_monitoring_privileges';
 
 const logMonitoringPrivilegesRoute = createObservabilityOnboardingServerRoute({
   endpoint: 'GET /internal/observability_onboarding/logs/setup/privileges',
@@ -38,8 +40,14 @@ const installShipperSetupRoute = createObservabilityOnboardingServerRoute({
     apiEndpoint: string;
     scriptDownloadUrl: string;
     elasticAgentVersion: string;
+    elasticsearchUrl: string[];
   }> {
-    const { core, plugins, kibanaVersion } = resources;
+    const {
+      core,
+      plugins,
+      kibanaVersion,
+      services: { esLegacyConfigService },
+    } = resources;
 
     const fleetPluginStart = await plugins.fleet.start();
     const elasticAgentVersion = await getAgentVersion(fleetPluginStart, kibanaVersion);
@@ -51,11 +59,37 @@ const installShipperSetupRoute = createObservabilityOnboardingServerRoute({
 
     const apiEndpoint = new URL(`${kibanaUrl}/internal/observability_onboarding`).toString();
 
+    const elasticsearchUrl = plugins.cloud?.setup?.elasticsearchUrl
+      ? [plugins.cloud?.setup?.elasticsearchUrl]
+      : await getFallbackESUrl(esLegacyConfigService);
+
     return {
       apiEndpoint,
+      elasticsearchUrl,
       scriptDownloadUrl,
       elasticAgentVersion,
     };
+  },
+});
+
+const createAPIKeyRoute = createObservabilityOnboardingServerRoute({
+  endpoint: 'POST /internal/observability_onboarding/otel/api_key',
+  options: { tags: [] },
+  params: t.type({}),
+  async handler(resources): Promise<{ apiKeyEncoded: string }> {
+    const { context } = resources;
+    const {
+      elasticsearch: { client },
+    } = await context.core;
+
+    const hasPrivileges = await hasLogMonitoringPrivileges(client.asCurrentUser);
+    if (!hasPrivileges) {
+      throw Boom.forbidden('Insufficient permissions to create shipper API key');
+    }
+
+    const { encoded: apiKeyEncoded } = await createShipperApiKey(client.asCurrentUser, 'otel logs');
+
+    return { apiKeyEncoded };
   },
 });
 
@@ -68,7 +102,7 @@ const createFlowRoute = createObservabilityOnboardingServerRoute({
         name: t.string,
       }),
       t.type({
-        type: t.union([t.literal('logFiles'), t.literal('systemLogs')]),
+        type: t.literal('logFiles'),
       }),
       t.partial({
         state: t.record(t.string, t.unknown),
@@ -88,16 +122,18 @@ const createFlowRoute = createObservabilityOnboardingServerRoute({
     const {
       elasticsearch: { client },
     } = await context.core;
-    const { encoded: apiKeyEncoded } = await createShipperApiKey(client.asCurrentUser, name);
+    const { encoded: apiKeyEncoded } = await createShipperApiKey(
+      client.asCurrentUser,
+      `standalone_agent_logs_onboarding_${name}`
+    );
 
-    const generatedState = type === 'systemLogs' ? { namespace: 'default' } : state;
     const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
 
     const { id } = await saveObservabilityOnboardingFlow({
       savedObjectsClient,
       observabilityOnboardingState: {
         type,
-        state: generatedState as ObservabilityOnboardingFlow['state'],
+        state: state as ObservabilityOnboardingFlow['state'],
         progress: {},
       },
     });
@@ -110,4 +146,5 @@ export const logsOnboardingRouteRepository = {
   ...logMonitoringPrivilegesRoute,
   ...installShipperSetupRoute,
   ...createFlowRoute,
+  ...createAPIKeyRoute,
 };

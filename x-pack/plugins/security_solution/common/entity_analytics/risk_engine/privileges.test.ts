@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EntityAnalyticsPrivileges } from '../../api/entity_analytics/asset_criticality/get_asset_criticality_privileges.gen';
+import type { EntityAnalyticsPrivileges } from '../../api/entity_analytics';
 import { getMissingRiskEnginePrivileges } from './privileges';
 
 describe('getMissingRiskEnginePrivileges', () => {

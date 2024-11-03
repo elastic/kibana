@@ -1,26 +1,10 @@
 {
   "id": "@kbn/core-security-browser-internal",
   "client": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
     "classes": [
       {
         "parentPluginId": "@kbn/core-security-browser-internal",
-        "id": "def-common.SecurityService",
+        "id": "def-public.SecurityService",
         "type": "Class",
         "tags": [],
         "label": "SecurityService",
@@ -28,9 +12,9 @@
         "signature": [
           {
             "pluginId": "@kbn/core-security-browser-internal",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreSecurityBrowserInternalPluginApi",
-            "section": "def-common.SecurityService",
+            "section": "def-public.SecurityService",
             "text": "SecurityService"
           },
           " implements ",
@@ -38,17 +22,17 @@
           "<",
           {
             "pluginId": "@kbn/core-security-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreSecurityBrowserPluginApi",
-            "section": "def-common.SecurityServiceSetup",
+            "section": "def-public.SecurityServiceSetup",
             "text": "SecurityServiceSetup"
           },
           ", ",
           {
             "pluginId": "@kbn/core-security-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreSecurityBrowserPluginApi",
-            "section": "def-common.SecurityServiceStart",
+            "section": "def-public.SecurityServiceStart",
             "text": "SecurityServiceStart"
           },
           ">"
@@ -59,7 +43,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-security-browser-internal",
-            "id": "def-common.SecurityService.Unnamed",
+            "id": "def-public.SecurityService.Unnamed",
             "type": "Function",
             "tags": [],
             "label": "Constructor",
@@ -73,7 +57,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-security-browser-internal",
-                "id": "def-common.SecurityService.Unnamed.$1",
+                "id": "def-public.SecurityService.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "coreContext",
@@ -91,7 +75,7 @@
           },
           {
             "parentPluginId": "@kbn/core-security-browser-internal",
-            "id": "def-common.SecurityService.setup",
+            "id": "def-public.SecurityService.setup",
             "type": "Function",
             "tags": [],
             "label": "setup",
@@ -100,9 +84,9 @@
               "() => ",
               {
                 "pluginId": "@kbn/core-security-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreSecurityBrowserPluginApi",
-                "section": "def-common.SecurityServiceSetup",
+                "section": "def-public.SecurityServiceSetup",
                 "text": "SecurityServiceSetup"
               }
             ],
@@ -114,7 +98,7 @@
           },
           {
             "parentPluginId": "@kbn/core-security-browser-internal",
-            "id": "def-common.SecurityService.start",
+            "id": "def-public.SecurityService.start",
             "type": "Function",
             "tags": [],
             "label": "start",
@@ -123,9 +107,9 @@
               "() => ",
               {
                 "pluginId": "@kbn/core-security-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreSecurityBrowserPluginApi",
-                "section": "def-common.SecurityServiceStart",
+                "section": "def-public.SecurityServiceStart",
                 "text": "SecurityServiceStart"
               }
             ],
@@ -137,7 +121,7 @@
           },
           {
             "parentPluginId": "@kbn/core-security-browser-internal",
-            "id": "def-common.SecurityService.stop",
+            "id": "def-public.SecurityService.stop",
             "type": "Function",
             "tags": [],
             "label": "stop",
@@ -161,7 +145,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/core-security-browser-internal",
-        "id": "def-common.InternalSecurityServiceSetup",
+        "id": "def-public.InternalSecurityServiceSetup",
         "type": "Type",
         "tags": [],
         "label": "InternalSecurityServiceSetup",
@@ -169,9 +153,9 @@
         "signature": [
           {
             "pluginId": "@kbn/core-security-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreSecurityBrowserPluginApi",
-            "section": "def-common.SecurityServiceSetup",
+            "section": "def-public.SecurityServiceSetup",
             "text": "SecurityServiceSetup"
           }
         ],
@@ -182,7 +166,7 @@
       },
       {
         "parentPluginId": "@kbn/core-security-browser-internal",
-        "id": "def-common.InternalSecurityServiceStart",
+        "id": "def-public.InternalSecurityServiceStart",
         "type": "Type",
         "tags": [],
         "label": "InternalSecurityServiceStart",
@@ -190,9 +174,9 @@
         "signature": [
           {
             "pluginId": "@kbn/core-security-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreSecurityBrowserPluginApi",
-            "section": "def-common.SecurityServiceStart",
+            "section": "def-public.SecurityServiceStart",
             "text": "SecurityServiceStart"
           }
         ],
@@ -202,6 +186,22 @@
         "initialIsOpen": false
       }
     ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": []
   }
 }

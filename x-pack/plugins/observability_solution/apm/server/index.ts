@@ -26,6 +26,7 @@ const configSchema = schema.object({
   serviceMapFingerprintGlobalBucketSize: schema.number({
     defaultValue: 1000,
   }),
+  serviceMapMaxAllowableBytes: schema.number({ defaultValue: 2_576_980_377 }), // 2.4GB
   serviceMapTraceIdBucketSize: schema.number({ defaultValue: 65 }),
   serviceMapTraceIdGlobalBucketSize: schema.number({ defaultValue: 6 }),
   serviceMapMaxTracesPerRequest: schema.number({ defaultValue: 50 }),

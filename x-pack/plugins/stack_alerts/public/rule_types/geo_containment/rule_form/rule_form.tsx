@@ -17,6 +17,7 @@ export const RuleForm: React.FunctionComponent<
   RuleTypeParamsExpressionProps<GeoContainmentAlertParams>
 > = (props) => {
   function getValidationError(key: string) {
+    // @ts-expect-error upgrade typescript v5.1.6
     return props.errors[key]?.length > 0 && key in props.ruleParams
       ? (props.errors[key] as string[])[0]
       : null;

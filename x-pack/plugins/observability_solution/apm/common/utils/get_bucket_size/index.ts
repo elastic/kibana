@@ -5,25 +5,4 @@
  * 2.0.
  */
 
-import moment from 'moment';
-import { calculateAuto } from './calculate_auto';
-
-export function getBucketSize({
-  start,
-  end,
-  numBuckets = 50,
-  minBucketSize,
-}: {
-  start: number;
-  end: number;
-  numBuckets?: number;
-  minBucketSize?: number;
-}) {
-  const duration = moment.duration(end - start, 'ms');
-  const bucketSize = Math.max(
-    calculateAuto.near(numBuckets, duration)?.asSeconds() ?? 0,
-    minBucketSize || 1
-  );
-
-  return { bucketSize, intervalString: `${bucketSize}s` };
-}
+export { getBucketSize } from '@kbn/apm-data-access-plugin/common';

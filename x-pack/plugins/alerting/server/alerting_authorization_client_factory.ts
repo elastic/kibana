@@ -7,7 +7,7 @@
 
 import { KibanaRequest } from '@kbn/core/server';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
-import { PluginStartContract as FeaturesPluginStart } from '@kbn/features-plugin/server';
+import { FeaturesPluginStart } from '@kbn/features-plugin/server';
 import { Space } from '@kbn/spaces-plugin/server';
 import { AlertingAuthorization } from './authorization/alerting_authorization';
 import { RuleTypeRegistry } from './types';

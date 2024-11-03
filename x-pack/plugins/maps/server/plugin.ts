@@ -18,13 +18,14 @@ import { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
 import type { EMSSettings } from '@kbn/maps-ems-plugin/server';
 
+import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
 import { getEcommerceSavedObjects } from './sample_data/ecommerce_saved_objects';
 import { getFlightsSavedObjects } from './sample_data/flights_saved_objects';
 import { getWebLogsSavedObjects } from './sample_data/web_logs_saved_objects';
 import { registerMapsUsageCollector } from './maps_telemetry/collectors/register';
 import { APP_ID, APP_ICON, MAP_SAVED_OBJECT_TYPE, getFullPath } from '../common/constants';
-import { MapsXPackConfig } from '../config';
+import { MapsXPackConfig } from './config';
 import { setStartServices } from './kibana_server_services';
 import { emsBoundariesSpecProvider } from './tutorials/ems';
 import { initRoutes } from './routes';
@@ -175,6 +176,7 @@ export class MapsPlugin implements Plugin {
       }),
       order: 400,
       category: DEFAULT_APP_CATEGORIES.kibana,
+      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       app: [APP_ID, 'kibana'],
       catalogue: [APP_ID],
       privileges: {

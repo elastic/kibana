@@ -13,15 +13,11 @@ exports[`CalendarForm Renders calendar form 1`] = `
     />
   </MlPageHeader>
   <EuiFormRow
-    describedByIds={Array []}
-    display="row"
     error={
       Array [
         "Use lowercase alphanumerics (a-z and 0-9), hyphens or underscores; must start and end with an alphanumeric character",
       ]
     }
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
     isInvalid={true}
     label={
       <Memo(MemoizedFormattedMessage)
@@ -29,7 +25,6 @@ exports[`CalendarForm Renders calendar form 1`] = `
         id="xpack.ml.calendarsEdit.calendarForm.calendarIdLabel"
       />
     }
-    labelType="label"
   >
     <EuiFieldText
       data-test-subj="mlCalendarIdInput"
@@ -39,57 +34,19 @@ exports[`CalendarForm Renders calendar form 1`] = `
       value=""
     />
   </EuiFormRow>
-  <EuiFormRow
-    describedByIds={Array []}
-    display="row"
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
-    label={
-      <Memo(MemoizedFormattedMessage)
-        defaultMessage="Description"
-        id="xpack.ml.calendarsEdit.calendarForm.descriptionLabel"
-      />
-    }
-    labelType="label"
-  >
-    <EuiFieldText
-      data-test-subj="mlCalendarDescriptionInput"
-      disabled={false}
-      name="description"
-      onChange={[MockFunction]}
-      value=""
-    />
-  </EuiFormRow>
   <EuiSpacer
     size="m"
-  />
-  <EuiSwitch
-    checked={false}
-    data-test-subj="mlCalendarApplyToAllJobsSwitch"
-    disabled={false}
-    label={
-      <Memo(MemoizedFormattedMessage)
-        defaultMessage="Apply calendar to all jobs"
-        id="xpack.ml.calendarsEdit.calendarForm.allJobsLabel"
-      />
-    }
-    name="switch"
   />
   <EuiSpacer
     size="m"
   />
   <EuiFormRow
-    describedByIds={Array []}
-    display="row"
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
     label={
       <Memo(MemoizedFormattedMessage)
         defaultMessage="Jobs"
         id="xpack.ml.calendarsEdit.calendarForm.jobsLabel"
       />
     }
-    labelType="label"
   >
     <EuiComboBox
       async={false}
@@ -107,17 +64,12 @@ exports[`CalendarForm Renders calendar form 1`] = `
     />
   </EuiFormRow>
   <EuiFormRow
-    describedByIds={Array []}
-    display="row"
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
     label={
       <Memo(MemoizedFormattedMessage)
         defaultMessage="Groups"
         id="xpack.ml.calendarsEdit.calendarForm.groupsLabel"
       />
     }
-    labelType="label"
   >
     <EuiComboBox
       async={false}
@@ -139,28 +91,21 @@ exports[`CalendarForm Renders calendar form 1`] = `
     size="xl"
   />
   <EuiFormRow
-    describedByIds={Array []}
-    display="row"
     fullWidth={true}
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
     label={
       <Memo(MemoizedFormattedMessage)
         defaultMessage="Events"
         id="xpack.ml.calendarsEdit.calendarForm.eventsLabel"
       />
     }
-    labelType="label"
   >
     <EventsTable
-      canCreateCalendar={true}
-      canDeleteCalendar={true}
       eventsList={Array []}
       onDeleteClick={[MockFunction]}
       saving={false}
       showImportModal={[MockFunction]}
       showNewEventModal={[MockFunction]}
-      showSearchBar={true}
+      showSearchBar={false}
     />
   </EuiFormRow>
   <EuiSpacer

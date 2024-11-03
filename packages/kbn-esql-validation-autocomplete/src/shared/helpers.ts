@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type {
@@ -17,14 +18,15 @@ import type {
   ESQLSource,
   ESQLTimeInterval,
 } from '@kbn/esql-ast';
-import { ESQLInlineCast } from '@kbn/esql-ast/src/types';
-import { statsAggregationFunctionDefinitions } from '../definitions/aggs';
+import { ESQLInlineCast, ESQLParamLiteral } from '@kbn/esql-ast/src/types';
+import { aggregationFunctionDefinitions } from '../definitions/generated/aggregation_functions';
 import { builtinFunctions } from '../definitions/builtin';
 import { commandDefinitions } from '../definitions/commands';
-import { evalFunctionDefinitions } from '../definitions/functions';
+import { scalarFunctionDefinitions } from '../definitions/generated/scalar_functions';
 import { groupingFunctionDefinitions } from '../definitions/grouping';
+import { getTestFunctions } from './test_functions';
 import { getFunctionSignatures } from '../definitions/helpers';
-import { timeUnits, chronoLiterals } from '../definitions/literals';
+import { timeUnits } from '../definitions/literals';
 import {
   byOption,
   metadataOption,
@@ -33,18 +35,21 @@ import {
   withOption,
   appendSeparatorOption,
 } from '../definitions/options';
-import type {
+import {
   CommandDefinition,
   CommandOptionsDefinition,
   FunctionParameter,
   FunctionDefinition,
   FunctionParameterType,
   FunctionReturnType,
+  ArrayType,
+  SupportedDataType,
 } from '../definitions/types';
 import type { ESQLRealField, ESQLVariable, ReferenceMaps } from '../validation/types';
 import { removeMarkerArgFromArgsList } from './context';
-import { esqlToKibanaType } from './esql_to_kibana_type';
 import type { ReasonTypes } from './types';
+import { DOUBLE_TICKS_REGEX, EDITOR_MARKER, SINGLE_BACKTICK } from './constants';
+import type { EditorContext } from '../autocomplete/types';
 
 export function nonNullable<T>(v: T): v is NonNullable<T> {
   return v != null;
@@ -94,10 +99,6 @@ export function isAssignmentComplete(node: ESQLFunction | undefined) {
   return Boolean(assignExpression && Array.isArray(assignExpression) && assignExpression.length);
 }
 
-export function isExpression(arg: ESQLAstItem): arg is ESQLFunction {
-  return isFunctionItem(arg) && arg.name !== '=';
-}
-
 export function isIncompleteItem(arg: ESQLAstItem): boolean {
   return !arg || (!Array.isArray(arg) && arg.incomplete);
 }
@@ -127,19 +128,21 @@ export function isComma(char: string) {
 }
 
 export function isSourceCommand({ label }: { label: string }) {
-  return ['from', 'row', 'show'].includes(String(label));
+  return ['FROM', 'ROW', 'SHOW', 'METRICS'].includes(label);
 }
 
 let fnLookups: Map<string, FunctionDefinition> | undefined;
-let commandLookups: Map<string, CommandDefinition> | undefined;
+let commandLookups: Map<string, CommandDefinition<string>> | undefined;
 
 function buildFunctionLookup() {
-  if (!fnLookups) {
+  // we always refresh if we have test functions
+  if (!fnLookups || getTestFunctions().length) {
     fnLookups = builtinFunctions
       .concat(
-        evalFunctionDefinitions,
-        statsAggregationFunctionDefinitions,
-        groupingFunctionDefinitions
+        scalarFunctionDefinitions,
+        aggregationFunctionDefinitions,
+        groupingFunctionDefinitions,
+        getTestFunctions()
       )
       .reduce((memo, def) => {
         memo.set(def.name, def);
@@ -194,7 +197,7 @@ export function getFunctionDefinition(name: string) {
 
 const unwrapStringLiteralQuotes = (value: string) => value.slice(1, -1);
 
-function buildCommandLookup() {
+function buildCommandLookup(): Map<string, CommandDefinition<string>> {
   if (!commandLookups) {
     commandLookups = commandDefinitions.reduce((memo, def) => {
       memo.set(def.name, def);
@@ -202,12 +205,12 @@ function buildCommandLookup() {
         memo.set(def.alias, def);
       }
       return memo;
-    }, new Map<string, CommandDefinition>());
+    }, new Map<string, CommandDefinition<string>>());
   }
-  return commandLookups;
+  return commandLookups!;
 }
 
-export function getCommandDefinition(name: string): CommandDefinition {
+export function getCommandDefinition(name: string): CommandDefinition<string> {
   return buildCommandLookup().get(name.toLowerCase())!;
 }
 
@@ -215,53 +218,82 @@ export function getAllCommands() {
   return Array.from(buildCommandLookup().values());
 }
 
-export function getCommandOption(optionName: CommandOptionsDefinition['name']) {
+export function getCommandOption(optionName: CommandOptionsDefinition<string>['name']) {
   return [byOption, metadataOption, asOption, onOption, withOption, appendSeparatorOption].find(
     ({ name }) => name === optionName
   );
 }
 
-function compareLiteralType(argType: string, item: ESQLLiteral) {
-  if (item.literalType === 'null') {
+function doesLiteralMatchParameterType(argType: FunctionParameterType, item: ESQLLiteral) {
+  if (item.literalType === argType) {
     return true;
   }
 
-  if (item.literalType !== 'string') {
-    if (argType === item.literalType) {
-      return true;
-    }
-    return false;
+  if (item.literalType === 'null') {
+    // all parameters accept null, but this is not yet reflected
+    // in our function definitions so we let it through here
+    return true;
   }
 
-  if (argType === 'chrono_literal') {
-    return chronoLiterals.some(({ name }) => name === item.text);
+  // some parameters accept string literals because of ES auto-casting
+  if (
+    item.literalType === 'keyword' &&
+    (argType === 'date' ||
+      argType === 'date_period' ||
+      argType === 'version' ||
+      argType === 'ip' ||
+      argType === 'boolean')
+  ) {
+    return true;
   }
-  // date-type parameters accept string literals because of ES auto-casting
-  return ['string', 'date'].includes(argType);
+
+  return false;
 }
 
 /**
  * This function returns the variable or field matching a column
  */
-export function lookupColumn(
+export function getColumnForASTNode(
   column: ESQLColumn,
   { fields, variables }: Pick<ReferenceMaps, 'fields' | 'variables'>
 ): ESQLRealField | ESQLVariable | undefined {
-  const columnName = getQuotedColumnName(column);
+  return getColumnByName(column.parts.join('.'), { fields, variables });
+}
+
+/**
+ * This function returns the variable or field matching a column
+ */
+export function getColumnByName(
+  columnName: string,
+  { fields, variables }: Pick<ReferenceMaps, 'fields' | 'variables'>
+): ESQLRealField | ESQLVariable | undefined {
+  // TODO this doesn't cover all escaping scenarios... the best thing to do would be
+  // to use the AST column node parts array, but in some cases the AST node isn't available.
+  if (columnName.startsWith(SINGLE_BACKTICK) && columnName.endsWith(SINGLE_BACKTICK)) {
+    columnName = columnName.slice(1, -1).replace(DOUBLE_TICKS_REGEX, SINGLE_BACKTICK);
+  }
   return fields.get(columnName) || variables.get(columnName)?.[0];
 }
 
 const ARRAY_REGEXP = /\[\]$/;
 
-export function isArrayType(type: string) {
+export function isArrayType(type: string): type is ArrayType {
   return ARRAY_REGEXP.test(type);
 }
 
-const arrayToSingularMap: Map<FunctionParameterType, FunctionParameterType> = new Map([
-  ['number[]', 'number'],
+const arrayToSingularMap: Map<ArrayType, FunctionParameterType> = new Map([
+  ['double[]', 'double'],
+  ['unsigned_long[]', 'unsigned_long'],
+  ['long[]', 'long'],
+  ['integer[]', 'integer'],
+  ['counter_integer[]', 'counter_integer'],
+  ['counter_long[]', 'counter_long'],
+  ['counter_double[]', 'counter_double'],
+  ['keyword[]', 'keyword'],
+  ['text[]', 'text'],
   ['date[]', 'date'],
+  ['date_period[]', 'date_period'],
   ['boolean[]', 'boolean'],
-  ['string[]', 'string'],
   ['any[]', 'any'],
 ]);
 
@@ -269,7 +301,7 @@ const arrayToSingularMap: Map<FunctionParameterType, FunctionParameterType> = ne
  * Given an array type for example `string[]` it will return `string`
  */
 export function extractSingularType(type: FunctionParameterType): FunctionParameterType {
-  return arrayToSingularMap.get(type) ?? type;
+  return isArrayType(type) ? arrayToSingularMap.get(type)! : type;
 }
 
 export function createMapFromList<T extends { name: string }>(arr: T[]): Map<string, T> {
@@ -312,7 +344,7 @@ export function printFunctionSignature(arg: ESQLFunction): string {
           },
         ],
       },
-      { withTypes: false }
+      { withTypes: false, capitalize: true }
     );
     return signature[0].declaration;
   }
@@ -358,7 +390,7 @@ export function getAllArrayTypes(
         types.push(subArg.literalType);
       }
       if (subArg.type === 'column') {
-        const hit = lookupColumn(subArg, references);
+        const hit = getColumnForASTNode(subArg, references);
         types.push(hit?.type || 'unsupported');
       }
       if (subArg.type === 'timeInterval') {
@@ -387,9 +419,9 @@ export function inKnownTimeInterval(item: ESQLTimeInterval): boolean {
  */
 export function isValidLiteralOption(arg: ESQLLiteral, argDef: FunctionParameter) {
   return (
-    arg.literalType === 'string' &&
-    argDef.literalOptions &&
-    !argDef.literalOptions
+    arg.literalType === 'keyword' &&
+    argDef.acceptedValues &&
+    !argDef.acceptedValues
       .map((option) => option.toLowerCase())
       .includes(unwrapStringLiteralQuotes(arg.value).toLowerCase())
   );
@@ -406,17 +438,18 @@ export function checkFunctionArgMatchesDefinition(
   parentCommand?: string
 ) {
   const argType = parameterDefinition.type;
-  if (argType === 'any') {
+  if (argType === 'any' || isParam(arg)) {
     return true;
   }
   if (arg.type === 'literal') {
-    return compareLiteralType(argType, arg);
+    const matched = doesLiteralMatchParameterType(argType, arg);
+    return matched;
   }
   if (arg.type === 'function') {
     if (isSupportedFunction(arg.name, parentCommand).supported) {
       const fnDef = buildFunctionLookup().get(arg.name)!;
       return fnDef.signatures.some(
-        (signature) => signature.returnType === 'any' || argType === signature.returnType
+        (signature) => signature.returnType === 'unknown' || argType === signature.returnType
       );
     }
   }
@@ -424,18 +457,20 @@ export function checkFunctionArgMatchesDefinition(
     return argType === 'time_literal' && inKnownTimeInterval(arg);
   }
   if (arg.type === 'column') {
-    const hit = lookupColumn(arg, references);
+    const hit = getColumnForASTNode(arg, references);
     const validHit = hit;
     if (!validHit) {
       return false;
     }
-    const wrappedTypes = Array.isArray(validHit.type) ? validHit.type : [validHit.type];
-    // if final type is of type any make it pass for now
-    return wrappedTypes.some((ct) => ['any', 'null'].includes(ct) || argType === ct);
+    const wrappedTypes: Array<(typeof validHit)['type']> = Array.isArray(validHit.type)
+      ? validHit.type
+      : [validHit.type];
+    return wrappedTypes.some((ct) => ct === argType || ct === 'null');
   }
   if (arg.type === 'inlineCast') {
-    // TODO - remove with https://github.com/elastic/kibana/issues/174710
-    return argType === esqlToKibanaType(arg.castType);
+    const lowerArgType = argType?.toLowerCase();
+    const castedType = getExpressionType(arg);
+    return castedType === lowerArgType;
   }
 }
 
@@ -502,19 +537,6 @@ export function isVariable(
 ): column is ESQLVariable {
   return Boolean(column && 'location' in column);
 }
-export function hasCCSSource(name: string) {
-  return name.includes(':');
-}
-
-/**
- * This will return the name without any quotes.
- *
- * E.g. "`bytes`" will become "bytes"
- *
- * @param column
- * @returns
- */
-export const getUnquotedColumnName = (column: ESQLColumn) => column.name;
 
 /**
  * This returns the name with any quotes that were present.
@@ -534,17 +556,16 @@ export function getColumnExists(
   column: ESQLColumn,
   { fields, variables }: Pick<ReferenceMaps, 'fields' | 'variables'>
 ) {
-  const namesToCheck = [getUnquotedColumnName(column), getQuotedColumnName(column)];
+  const columnName = column.parts.join('.');
+  if (fields.has(columnName) || variables.has(columnName)) {
+    return true;
+  }
 
-  for (const name of namesToCheck) {
-    if (fields.has(name) || variables.has(name)) {
-      return true;
-    }
-
-    // TODO — I don't see this fuzzy searching in lookupColumn... should it be there?
-    if (Boolean(fuzzySearch(name, fields.keys()) || fuzzySearch(name, variables.keys()))) {
-      return true;
-    }
+  // TODO — I don't see this fuzzy searching in lookupColumn... should it be there?
+  if (
+    Boolean(fuzzySearch(columnName, fields.keys()) || fuzzySearch(columnName, variables.keys()))
+  ) {
+    return true;
   }
 
   return false;
@@ -557,14 +578,57 @@ export function sourceExists(index: string, sources: Set<string>) {
   return Boolean(fuzzySearch(index, sources.keys()));
 }
 
-export function getLastCharFromTrimmed(text: string) {
+/**
+ * Works backward from the cursor position to determine if
+ * the final character of the previous word matches the given character.
+ */
+function characterPrecedesCurrentWord(text: string, char: string) {
+  let inCurrentWord = true;
+  for (let i = text.length - 1; i >= 0; i--) {
+    if (inCurrentWord && /\s/.test(text[i])) {
+      inCurrentWord = false;
+    }
+
+    if (!inCurrentWord && !/\s/.test(text[i])) {
+      return text[i] === char;
+    }
+  }
+}
+
+export function pipePrecedesCurrentWord(text: string) {
+  return characterPrecedesCurrentWord(text, '|');
+}
+
+export function getLastNonWhitespaceChar(text: string) {
   return text[text.trimEnd().length - 1];
 }
 
+/**
+ * Are we after a comma? i.e. STATS fieldA, <here>
+ */
 export function isRestartingExpression(text: string) {
-  return getLastCharFromTrimmed(text) === ',';
+  return getLastNonWhitespaceChar(text) === ',' || characterPrecedesCurrentWord(text, ',');
 }
 
+export function findPreviousWord(text: string) {
+  const words = text.split(/\s+/);
+  return words[words.length - 2];
+}
+
+/**
+ * Returns the word at the end of the text if there is one.
+ * @param text
+ * @returns
+ */
+export function findFinalWord(text: string) {
+  const words = text.split(/\s+/);
+  return words[words.length - 1];
+}
+
+export function shouldBeQuotedSource(text: string) {
+  // Based on lexer `fragment UNQUOTED_SOURCE_PART`
+  return /[:"=|,[\]\/ \t\r\n]/.test(text);
+}
 export function shouldBeQuotedText(
   text: string,
   { dashSupported }: { dashSupported?: boolean } = {}
@@ -574,3 +638,240 @@ export function shouldBeQuotedText(
 
 export const isAggFunction = (arg: ESQLFunction): boolean =>
   getFunctionDefinition(arg.name)?.type === 'agg';
+
+export const isParam = (x: unknown): x is ESQLParamLiteral =>
+  !!x &&
+  typeof x === 'object' &&
+  (x as ESQLParamLiteral).type === 'literal' &&
+  (x as ESQLParamLiteral).literalType === 'param';
+
+/**
+ * Compares two strings in a case-insensitive manner
+ */
+export const noCaseCompare = (a: string, b: string) => a.toLowerCase() === b.toLowerCase();
+
+/**
+ * This function count the number of unclosed brackets in order to
+ * locally fix the queryString to generate a valid AST
+ * A known limitation of this is that is not aware of commas "," or pipes "|"
+ * so it is not yet helpful on a multiple commands errors (a workaround it to pass each command here...)
+ * @param bracketType
+ * @param text
+ * @returns
+ */
+export function countBracketsUnclosed(bracketType: '(' | '[' | '"' | '"""', text: string) {
+  const stack = [];
+  const closingBrackets = { '(': ')', '[': ']', '"': '"', '"""': '"""' };
+  for (let i = 0; i < text.length; i++) {
+    const substr = text.substring(i, i + bracketType.length);
+    if (substr === closingBrackets[bracketType] && stack.length) {
+      stack.pop();
+    } else if (substr === bracketType) {
+      stack.push(bracketType);
+    }
+  }
+  return stack.length;
+}
+
+/**
+ * This function attempts to correct the syntax of a partial query to make it valid.
+ *
+ * This is important because a syntactically-invalid query will not generate a good AST.
+ *
+ * @param _query
+ * @param context
+ * @returns
+ */
+export function correctQuerySyntax(_query: string, context: EditorContext) {
+  let query = _query;
+  // check if all brackets are closed, otherwise close them
+  const unclosedRoundBrackets = countBracketsUnclosed('(', query);
+  const unclosedSquaredBrackets = countBracketsUnclosed('[', query);
+  const unclosedQuotes = countBracketsUnclosed('"', query);
+  const unclosedTripleQuotes = countBracketsUnclosed('"""', query);
+  // if it's a comma by the user or a forced trigger by a function argument suggestion
+  // add a marker to make the expression still valid
+  const charThatNeedMarkers = [',', ':'];
+  if (
+    (context.triggerCharacter && charThatNeedMarkers.includes(context.triggerCharacter)) ||
+    // monaco.editor.CompletionTriggerKind['Invoke'] === 0
+    (context.triggerKind === 0 && unclosedRoundBrackets === 0) ||
+    (context.triggerCharacter === ' ' && isMathFunction(query, query.length)) ||
+    isComma(query.trimEnd()[query.trimEnd().length - 1])
+  ) {
+    query += EDITOR_MARKER;
+  }
+
+  // if there are unclosed brackets, close them
+  if (unclosedRoundBrackets || unclosedSquaredBrackets || unclosedQuotes) {
+    for (const [char, count] of [
+      ['"""', unclosedTripleQuotes],
+      ['"', unclosedQuotes],
+      [')', unclosedRoundBrackets],
+      [']', unclosedSquaredBrackets],
+    ]) {
+      if (count) {
+        // inject the closing brackets
+        query += Array(count).fill(char).join('');
+      }
+    }
+  }
+
+  return query;
+}
+
+/**
+ * Gets the signatures of a function that match the number of arguments
+ * provided in the AST.
+ */
+export function getSignaturesWithMatchingArity(
+  fnDef: FunctionDefinition,
+  astFunction: ESQLFunction
+) {
+  return fnDef.signatures.filter((def) => {
+    if (def.minParams) {
+      return astFunction.args.length >= def.minParams;
+    }
+    return (
+      astFunction.args.length >= def.params.filter(({ optional }) => !optional).length &&
+      astFunction.args.length <= def.params.length
+    );
+  });
+}
+
+/**
+ * Given a function signature, returns the parameter at the given position.
+ *
+ * Takes into account variadic functions (minParams), returning the last
+ * parameter if the position is greater than the number of parameters.
+ *
+ * @param signature
+ * @param position
+ * @returns
+ */
+export function getParamAtPosition(
+  { params, minParams }: FunctionDefinition['signatures'][number],
+  position: number
+) {
+  return params.length > position ? params[position] : minParams ? params[params.length - 1] : null;
+}
+
+/**
+ * Determines the type of the expression
+ */
+export function getExpressionType(
+  root: ESQLAstItem,
+  fields?: Map<string, ESQLRealField>,
+  variables?: Map<string, ESQLVariable[]>
+): SupportedDataType | 'unknown' {
+  if (!isSingleItem(root)) {
+    if (root.length === 0) {
+      return 'unknown';
+    }
+    return getExpressionType(root[0], fields, variables);
+  }
+
+  if (isLiteralItem(root) && root.literalType !== 'param') {
+    return root.literalType;
+  }
+
+  if (isTimeIntervalItem(root)) {
+    return 'time_literal';
+  }
+
+  // from https://github.com/elastic/elasticsearch/blob/122e7288200ee03e9087c98dff6cebbc94e774aa/docs/reference/esql/functions/kibana/inline_cast.json
+  if (isInlineCastItem(root)) {
+    switch (root.castType) {
+      case 'int':
+        return 'integer';
+      case 'bool':
+        return 'boolean';
+      case 'string':
+        return 'keyword';
+      case 'text':
+        return 'keyword';
+      case 'datetime':
+        return 'date';
+      default:
+        return root.castType;
+    }
+  }
+
+  if (isColumnItem(root) && fields && variables) {
+    const column = getColumnForASTNode(root, { fields, variables });
+    if (!column) {
+      return 'unknown';
+    }
+    return column.type;
+  }
+
+  if (root.type === 'list') {
+    return getExpressionType(root.values[0], fields, variables);
+  }
+
+  if (isFunctionItem(root)) {
+    const fnDefinition = getFunctionDefinition(root.name);
+    if (!fnDefinition) {
+      return 'unknown';
+    }
+
+    /**
+     * Special case for COUNT(*) because
+     * the "*" column doesn't match any
+     * of COUNT's function definitions
+     */
+    if (
+      fnDefinition.name === 'count' &&
+      root.args[0] &&
+      isColumnItem(root.args[0]) &&
+      root.args[0].name === '*'
+    ) {
+      return 'long';
+    }
+
+    if (fnDefinition.name === 'case' && root.args.length) {
+      /**
+       * The CASE function doesn't fit our system of function definitions
+       * and needs special handling. This is imperfect, but it's a start because
+       * at least we know that the final argument to case will never be a conditional
+       * expression, always a result expression.
+       *
+       * One problem with this is that if a false case is not provided, the return type
+       * will be null, which we aren't detecting. But this is ok because we consider
+       * variables and fields to be nullable anyways and account for that during validation.
+       */
+      return getExpressionType(root.args[root.args.length - 1], fields, variables);
+    }
+
+    const signaturesWithCorrectArity = getSignaturesWithMatchingArity(fnDefinition, root);
+
+    if (!signaturesWithCorrectArity.length) {
+      return 'unknown';
+    }
+
+    const argTypes = root.args.map((arg) => getExpressionType(arg, fields, variables));
+
+    // When functions are passed null for any argument, they generally return null
+    // This is a special case that is not reflected in our function definitions
+    if (argTypes.some((argType) => argType === 'null')) return 'null';
+
+    const matchingSignature = signaturesWithCorrectArity.find((signature) => {
+      return argTypes.every((argType, i) => {
+        const param = getParamAtPosition(signature, i);
+        return (
+          param &&
+          (param.type === argType ||
+            (argType === 'keyword' && ['date', 'date_period'].includes(param.type)))
+        );
+      });
+    });
+
+    if (!matchingSignature) {
+      return 'unknown';
+    }
+
+    return matchingSignature.returnType === 'any' ? 'unknown' : matchingSignature.returnType;
+  }
+
+  return 'unknown';
+}

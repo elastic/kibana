@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import * as t from 'io-ts';
@@ -12,6 +13,7 @@ import { strictKeysRt } from '.';
 import { jsonRt } from '../json_rt';
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import { isoToEpochRt } from '../iso_to_epoch_rt';
+import { toBooleanRt } from '../to_boolean_rt';
 
 describe('strictKeysRt', () => {
   it('correctly and deeply validates object keys', () => {
@@ -205,7 +207,38 @@ describe('strictKeysRt', () => {
       {
         type: t.array(t.type({ foo: t.string })),
         passes: [[{ foo: 'bar' }], [{ foo: 'baz' }, { foo: 'bar' }]],
-        fails: [],
+        fails: [{ foo: 'bar', bar: 'foo' }],
+      },
+      {
+        type: t.type({
+          nestedArray: t.array(
+            t.type({
+              bar: t.string,
+            })
+          ),
+        }),
+        passes: [
+          {
+            nestedArray: [],
+          },
+          {
+            nestedArray: [
+              {
+                bar: 'foo',
+              },
+            ],
+          },
+        ],
+        fails: [
+          {
+            nestedArray: [
+              {
+                bar: 'foo',
+                foo: 'bar',
+              },
+            ],
+          },
+        ],
       },
     ];
 
@@ -236,6 +269,33 @@ describe('strictKeysRt', () => {
         }
       });
     });
+  });
+
+  it('deals with union types', () => {
+    const type = t.intersection([
+      t.type({
+        required: t.string,
+      }),
+      t.partial({
+        disable: t.union([
+          toBooleanRt,
+          t.type({
+            except: t.array(t.string),
+          }),
+        ]),
+      }),
+    ]);
+
+    const value = {
+      required: 'required',
+      disable: {
+        except: ['foo'],
+      },
+    };
+
+    const asStrictType = strictKeysRt(type);
+
+    expect(isRight(asStrictType.decode(value))).toBe(true);
   });
 
   it('does not support piped types', () => {

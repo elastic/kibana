@@ -198,6 +198,14 @@ export function eventID(event: SafeResolverEvent): number | undefined | string {
   }
 }
 
+export function documentID(event: SafeResolverEvent): string | undefined {
+  return firstNonNullValue(event._id);
+}
+
+export function indexName(event: SafeResolverEvent): string | undefined {
+  return firstNonNullValue(event._index);
+}
+
 /**
  * Retrieve the record_id field from a winlog event.
  *

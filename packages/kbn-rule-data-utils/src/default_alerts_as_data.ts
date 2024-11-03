@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { ValuesType } from 'utility-types';
@@ -57,6 +58,9 @@ const ALERT_INSTANCE_ID = `${ALERT_NAMESPACE}.instance.id` as const;
 
 // kibana.alert.last_detected - timestamp when the alert was last seen
 const ALERT_LAST_DETECTED = `${ALERT_NAMESPACE}.last_detected` as const;
+
+// kiana.alert.intended_timestamp - timestamp when the alert was intended to be detected, useful for backfilling
+const ALERT_INTENDED_TIMESTAMP = `${ALERT_NAMESPACE}.intended_timestamp` as const;
 
 // kibana.alert.reason - human readable reason that this alert is active
 const ALERT_REASON = `${ALERT_NAMESPACE}.reason` as const;
@@ -118,6 +122,9 @@ const ALERT_URL = `${ALERT_NAMESPACE}.url` as const;
 // kibana.alert.rule.uuid - rule ID for rule that generated this alert
 const ALERT_RULE_UUID = `${ALERT_RULE_NAMESPACE}.uuid` as const;
 
+// kibana.alert.rule.execution.type - rule execution type for rule that generated this alert (manual /scheduled)
+const ALERT_RULE_EXECUTION_TYPE = `${ALERT_RULE_NAMESPACE}.execution.type` as const;
+
 const namespaces = {
   KIBANA_NAMESPACE,
   ALERT_NAMESPACE,
@@ -140,6 +147,8 @@ const fields = {
   ALERT_RULE_CATEGORY,
   ALERT_RULE_CONSUMER,
   ALERT_RULE_EXECUTION_TIMESTAMP,
+  ALERT_RULE_EXECUTION_TYPE,
+  ALERT_INTENDED_TIMESTAMP,
   ALERT_RULE_EXECUTION_UUID,
   ALERT_RULE_NAME,
   ALERT_RULE_PARAMETERS,
@@ -184,6 +193,8 @@ export {
   ALERT_RULE_CATEGORY,
   ALERT_RULE_CONSUMER,
   ALERT_RULE_EXECUTION_TIMESTAMP,
+  ALERT_RULE_EXECUTION_TYPE,
+  ALERT_INTENDED_TIMESTAMP,
   ALERT_RULE_EXECUTION_UUID,
   ALERT_RULE_NAME,
   ALERT_RULE_PARAMETERS,

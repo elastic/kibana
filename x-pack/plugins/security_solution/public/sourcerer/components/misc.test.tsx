@@ -10,14 +10,14 @@ import type { ReactWrapper } from 'enzyme';
 import { mount } from 'enzyme';
 import { cloneDeep } from 'lodash';
 
-import { initialSourcererState, SourcererScopeName } from '../store/model';
+import { initialSourcererState, type SelectedDataView, SourcererScopeName } from '../store/model';
 import { Sourcerer } from '.';
 import { sourcererActions, sourcererModel } from '../store';
 import { createMockStore, mockGlobalState, TestProviders } from '../../common/mock';
 import { useSourcererDataView } from '../containers';
 import { useSignalHelpers } from '../containers/use_signal_helpers';
 import { TimelineId } from '../../../common/types/timeline';
-import { TimelineType } from '../../../common/api/timeline';
+import { type TimelineType, TimelineTypeEnum } from '../../../common/api/timeline';
 import { sortWithExcludesAtEnd } from '../../../common/utils/sourcerer';
 import { render, fireEvent, screen, waitFor } from '@testing-library/react';
 
@@ -74,9 +74,12 @@ const { id, patternList } = mockGlobalState.sourcerer.defaultDataView;
 const patternListNoSignals = sortWithExcludesAtEnd(
   patternList.filter((p) => p !== mockGlobalState.sourcerer.signalIndexName)
 );
-const sourcererDataView = {
+const sourcererDataView: Partial<SelectedDataView> = {
   indicesExist: true,
   loading: false,
+  sourcererDataView: {
+    title: 'myFakebeat-*',
+  },
 };
 
 describe('No data', () => {
@@ -263,7 +266,7 @@ describe('Update available for timeline template', () => {
         ...mockGlobalState.timeline.timelineById,
         [TimelineId.active]: {
           ...mockGlobalState.timeline.timelineById.test,
-          timelineType: TimelineType.template,
+          timelineType: TimelineTypeEnum.template,
         },
       },
     },
@@ -339,7 +342,7 @@ describe('Missing index patterns', () => {
         ...mockGlobalState.timeline.timelineById,
         [TimelineId.active]: {
           ...mockGlobalState.timeline.timelineById.test,
-          timelineType: TimelineType.template,
+          timelineType: TimelineTypeEnum.template as TimelineType,
         },
       },
     },
@@ -392,7 +395,7 @@ describe('Missing index patterns', () => {
       activePatterns: ['myFakebeat-*'],
     });
     const state3 = cloneDeep(state2);
-    state3.timeline.timelineById[TimelineId.active].timelineType = TimelineType.default;
+    state3.timeline.timelineById[TimelineId.active].timelineType = TimelineTypeEnum.default;
     store = createMockStore(state3);
 
     render(

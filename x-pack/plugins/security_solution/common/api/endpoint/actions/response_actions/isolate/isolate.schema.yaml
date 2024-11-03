@@ -1,0 +1,30 @@
+openapi: 3.0.0
+info:
+  title: Isolate Schema
+  version: '2023-10-31'
+paths:
+  /api/endpoint/action/isolate:
+    post:
+      summary: Isolate an endpoint
+      operationId: EndpointIsolateAction
+      description: Isolate an endpoint from the network. The endpoint remains isolated until it's released.
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IsolateRouteRequestBody'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '../../../model/schema/common.schema.yaml#/components/schemas/SuccessResponse'
+
+components:
+  schemas:
+    IsolateRouteRequestBody:
+        $ref: '../../../model/schema/common.schema.yaml#/components/schemas/NoParametersRequestSchema'

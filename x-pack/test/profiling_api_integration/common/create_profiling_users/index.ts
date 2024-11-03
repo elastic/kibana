@@ -5,10 +5,10 @@
  * 2.0.
  */
 import { asyncForEach } from '@kbn/std';
+import type { SecurityService } from '@kbn/ftr-common-functional-ui-services';
 import { ProfilingUsername, profilingUsers } from './authentication';
 import { AbortError, callKibana } from './helpers/call_kibana';
 import { createOrUpdateUser } from './helpers/create_or_update_user';
-import { SecurityService } from '../../../../../test/common/services/security/security';
 
 export interface Elasticsearch {
   node: string;

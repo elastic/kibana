@@ -6,7 +6,6 @@
  */
 
 import React, { useState, useEffect, useCallback, useMemo, memo } from 'react';
-import { isEmpty } from 'lodash';
 import { useRouteMatch } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -47,8 +46,6 @@ import {
   StepConfigurePackagePolicy,
   StepDefinePackagePolicy,
 } from '../create_package_policy_page/components';
-
-import { AGENTLESS_POLICY_ID } from '../../../../../../common/constants';
 import type { AgentPolicy, PackagePolicyEditExtensionComponentProps } from '../../../types';
 import { pkgKeyFromPackageInfo } from '../../../services';
 
@@ -63,6 +60,8 @@ import { RootPrivilegesCallout } from '../create_package_policy_page/single_page
 
 import { StepsWithLessPadding } from '../create_package_policy_page/single_page_layout';
 
+import { useAgentless } from '../create_package_policy_page/single_page_layout/hooks/setup_technology';
+
 import { UpgradeStatusCallout } from './components';
 import { usePackagePolicyWithRelatedData, useHistoryBlock } from './hooks';
 import { getNewSecrets } from './utils';
@@ -74,7 +73,6 @@ export const EditPackagePolicyPage = memo(() => {
   } = useRouteMatch<{ policyId: string; packagePolicyId: string }>();
 
   const packagePolicy = useGetOnePackagePolicy(packagePolicyId);
-
   const extensionView = useUIExtension(
     packagePolicy.data?.item?.package?.name ?? '',
     'package-policy-edit'
@@ -105,7 +103,7 @@ export const EditPackagePolicyForm = memo<{
   } = useConfig();
   const { getHref } = useLink();
   const { canUseMultipleAgentPolicies } = useMultipleAgentPolicies();
-
+  const { isAgentlessAgentPolicy, isAgentlessIntegration } = useAgentless();
   const {
     // data
     agentPolicies: existingAgentPolicies,
@@ -129,6 +127,15 @@ export const EditPackagePolicyForm = memo<{
     forceUpgrade,
   });
 
+  const hasAgentlessAgentPolicy = useMemo(
+    () =>
+      existingAgentPolicies.length === 1
+        ? existingAgentPolicies.some((policy) => isAgentlessAgentPolicy(policy)) &&
+          isAgentlessIntegration(packageInfo)
+        : false,
+    [existingAgentPolicies, isAgentlessAgentPolicy, packageInfo, isAgentlessIntegration]
+  );
+
   const canWriteIntegrationPolicies = useAuthz().integrations.writeIntegrationPolicies;
   useSetIsReadOnly(!canWriteIntegrationPolicies);
   const newSecrets = useMemo(() => {
@@ -143,6 +150,13 @@ export const EditPackagePolicyForm = memo<{
   const [isFirstLoad, setIsFirstLoad] = useState<boolean>(true);
   const [newAgentPolicyName, setNewAgentPolicyName] = useState<string | undefined>();
 
+  // make form dirty if new agent policy is selected
+  useEffect(() => {
+    if (newAgentPolicyName) {
+      setIsEdited(true);
+    }
+  }, [newAgentPolicyName, setIsEdited]);
+
   const [hasAgentPolicyError, setHasAgentPolicyError] = useState<boolean>(false);
 
   // Retrieve agent count
@@ -152,8 +166,8 @@ export const EditPackagePolicyForm = memo<{
       let count = 0;
       for (const id of packagePolicy.policy_ids) {
         const { data } = await sendGetAgentStatus({ policyId: id });
-        if (data?.results.total) {
-          count += data.results.total;
+        if (data?.results.active) {
+          count += data.results.active;
         }
       }
       setAgentCount(count);
@@ -183,24 +197,23 @@ export const EditPackagePolicyForm = memo<{
   //  if `from === 'edit'` then it links back to Policy Details
   //  if `from === 'package-edit'`, or `upgrade-from-integrations-policy-list` then it links back to the Integration Policy List
   const cancelUrl = useMemo((): string => {
-    if (packageInfo && policyId) {
-      return from === 'package-edit'
-        ? getHref('integration_details_policies', {
-            pkgkey: pkgKeyFromPackageInfo(packageInfo!),
-          })
-        : getHref('policy_details', { policyId });
-    }
-    return '/';
+    return from === 'package-edit' && packageInfo
+      ? getHref('integration_details_policies', {
+          pkgkey: pkgKeyFromPackageInfo(packageInfo!),
+        })
+      : policyId
+      ? getHref('policy_details', { policyId })
+      : getHref('agent_list');
   }, [from, getHref, packageInfo, policyId]);
   const successRedirectPath = useMemo(() => {
-    if (packageInfo && policyId) {
-      return from === 'package-edit' || from === 'upgrade-from-integrations-policy-list'
-        ? getHref('integration_details_policies', {
-            pkgkey: pkgKeyFromPackageInfo(packageInfo!),
-          })
-        : getHref('policy_details', { policyId });
-    }
-    return '/';
+    return (from === 'package-edit' || from === 'upgrade-from-integrations-policy-list') &&
+      packageInfo
+      ? getHref('integration_details_policies', {
+          pkgkey: pkgKeyFromPackageInfo(packageInfo!),
+        })
+      : policyId
+      ? getHref('policy_details', { policyId })
+      : getHref('agent_list');
   }, [from, getHref, packageInfo, policyId]);
 
   useHistoryBlock(isEdited);
@@ -240,8 +253,11 @@ export const EditPackagePolicyForm = memo<{
       return;
     }
     if (
-      (agentCount !== 0 || agentPoliciesToAdd.length > 0 || agentPoliciesToRemove.length > 0) &&
-      !packagePolicy.policy_ids.includes(AGENTLESS_POLICY_ID) &&
+      (agentCount !== 0 ||
+        agentPolicies.length === 0 ||
+        agentPoliciesToAdd.length > 0 ||
+        agentPoliciesToRemove.length > 0) &&
+      !hasAgentlessAgentPolicy &&
       formState !== 'CONFIRM'
     ) {
       setFormState('CONFIRM');
@@ -432,13 +448,14 @@ export const EditPackagePolicyForm = memo<{
   const replaceConfigurePackage = replaceDefineStepView && originalPackagePolicy && packageInfo && (
     <ExtensionWrapper>
       <replaceDefineStepView.Component
-        agentPolicy={agentPolicies[0]}
+        agentPolicies={agentPolicies}
         packageInfo={packageInfo}
         policy={originalPackagePolicy}
         newPolicy={packagePolicy}
         onChange={handleExtensionViewOnChange}
         validationResults={validationResults}
         isEditPage={true}
+        isAgentlessEnabled={hasAgentlessAgentPolicy}
       />
     </ExtensionWrapper>
   );
@@ -474,7 +491,7 @@ export const EditPackagePolicyForm = memo<{
       <EuiErrorBoundary>
         {isLoadingData ? (
           <Loading />
-        ) : loadingError || isEmpty(existingAgentPolicies) || !packageInfo ? (
+        ) : loadingError || !packageInfo ? (
           <ErrorComponent
             title={
               <FormattedMessage
@@ -521,7 +538,7 @@ export const EditPackagePolicyForm = memo<{
                 <EuiSpacer size="xxl" />
               </>
             )}
-            {canUseMultipleAgentPolicies ? (
+            {canUseMultipleAgentPolicies && !hasAgentlessAgentPolicy ? (
               <StepsWithLessPadding steps={steps} />
             ) : (
               replaceConfigurePackage || configurePackage
@@ -581,7 +598,7 @@ export const EditPackagePolicyForm = memo<{
                                 content: (
                                   <FormattedMessage
                                     id="xpack.fleet.agentPolicy.saveIntegrationTooltip"
-                                    defaultMessage="To save the integration policy, you must have security enabled and have the All privilege for Integrations. Contact your administrator."
+                                    defaultMessage="To save the integration policy, you must have security enabled and have the All privilege for Integrations and Agent Policies. Contact your administrator."
                                   />
                                 ),
                               }

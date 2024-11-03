@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -26,6 +27,16 @@ export class CoreSecurityRouteHandlerContext implements SecurityRequestHandlerCo
     if (this.#authc == null) {
       this.#authc = {
         getCurrentUser: () => this.securityStart.authc.getCurrentUser(this.request),
+        apiKeys: {
+          areAPIKeysEnabled: () => this.securityStart.authc.apiKeys.areAPIKeysEnabled(),
+          create: (createParams) =>
+            this.securityStart.authc.apiKeys.create(this.request, createParams),
+          update: (updateParams) =>
+            this.securityStart.authc.apiKeys.update(this.request, updateParams),
+          validate: (apiKeyParams) => this.securityStart.authc.apiKeys.validate(apiKeyParams),
+          invalidate: (apiKeyParams) =>
+            this.securityStart.authc.apiKeys.invalidate(this.request, apiKeyParams),
+        },
       };
     }
     return this.#authc;

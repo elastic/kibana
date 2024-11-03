@@ -42,8 +42,8 @@ export function complete(
     persist,
     disableFunctions,
     signal,
-    responseLanguage,
     instructions,
+    scopes,
   }: {
     client: Pick<ObservabilityAIAssistantChatService, 'chat' | 'complete'>;
     getScreenContexts: () => ObservabilityAIAssistantScreenContext[];
@@ -65,8 +65,8 @@ export function complete(
           disableFunctions,
           screenContexts,
           conversationId,
-          responseLanguage,
           instructions,
+          scopes,
         },
       },
     }).pipe(shareReplay());
@@ -131,9 +131,9 @@ export function complete(
               messages: initialMessages.concat(nextMessages),
               signal,
               persist,
-              responseLanguage,
               disableFunctions,
               instructions,
+              scopes,
             },
             requestCallback
           ).subscribe(subscriber);

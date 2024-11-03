@@ -15,6 +15,7 @@ interface SandboxProps {
 
 const mockSnoozeSettings: RuleSnoozeSettings = {
   muteAll: true,
+  name: '',
 };
 
 export const RulesListNotifyBadgeSandbox = ({ triggersActionsUi }: SandboxProps) => {

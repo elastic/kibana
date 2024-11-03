@@ -38,7 +38,8 @@ export default ({ getService }: FtrProviderContext): void => {
   const auditbeatPath = dataPathBuilder.getPath('auditbeat/hosts');
   const utils = getService('securitySolutionUtils');
 
-  describe('@ess @serverless create_rules_bulk', () => {
+  // TODO: https://github.com/elastic/kibana/issues/193184 Delete this file and clean up the code
+  describe.skip('@ess @serverless @skipInServerlessMKI create_rules_bulk', () => {
     describe('creating rules in bulk', () => {
       before(async () => {
         await esArchiver.load(auditbeatPath);

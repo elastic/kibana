@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
+import { rangeQuery, termQuery, wildcardQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { getProcessorEventForTransactions } from '../../lib/helpers/transactions';
 import { SERVICE_NAME } from '../../../common/es_fields/apm';
@@ -46,11 +46,7 @@ export async function getSuggestionsWithTermsAggregation({
           filter: [
             ...termQuery(SERVICE_NAME, serviceName),
             ...rangeQuery(start, end),
-            {
-              wildcard: {
-                [fieldName]: `*${fieldValue}*`,
-              },
-            },
+            ...(fieldName ? wildcardQuery(fieldName, fieldValue) : []),
           ],
         },
       },

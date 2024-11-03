@@ -11,10 +11,6 @@ import { createFleetTestRendererMock } from '../../../../../../mock';
 
 import { useFleetServerHostsForm } from './use_fleet_server_host_form';
 
-jest.mock('../../services/agent_and_policies_count', () => ({
-  ...jest.requireActual('../../services/agent_and_policies_count'),
-  getAgentAndPolicyCount: () => ({ agentCount: 0, agentPolicyCount: 0 }),
-}));
 jest.mock('../../hooks/use_confirm_modal', () => ({
   ...jest.requireActual('../../hooks/use_confirm_modal'),
   useConfirmModal: () => ({ confirm: () => true }),

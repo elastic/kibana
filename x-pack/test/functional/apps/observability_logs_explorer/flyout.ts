@@ -34,6 +34,7 @@ const docs = [
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dataGrid = getService('dataGrid');
   const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
   const PageObjects = getPageObjects(['observabilityLogsExplorer']);
 
   describe('Flyout content customization', () => {
@@ -66,7 +67,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should display the logs overview tab', async () => {
-      await dataGrid.clickRowToggle({ columnIndex: 1 });
+      await retry.try(async () => {
+        await dataGrid.clickRowToggle();
+      });
       await testSubjects.existOrFail('docViewerTab-doc_view_logs_overview');
     });
   });

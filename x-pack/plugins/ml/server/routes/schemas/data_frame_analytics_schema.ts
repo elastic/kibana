@@ -66,24 +66,15 @@ export const dataFrameAnalyticsExplainSchema = schema.object({
 });
 
 export const dataFrameAnalyticsIdSchema = schema.object({
-  /**
-   * Analytics ID
-   */
-  analyticsId: schema.string(),
+  analyticsId: schema.string({ meta: { description: 'Analytics ID' } }),
 });
 
 export const dataFrameAnalyticsQuerySchema = schema.object({
-  /**
-   * Analytics Query
-   */
   excludeGenerated: schema.maybe(schema.boolean()),
   size: schema.maybe(schema.number()),
 });
 
 export const deleteDataFrameAnalyticsJobSchema = schema.object({
-  /**
-   * Analytics Destination Index
-   */
   deleteDestIndex: schema.maybe(schema.boolean()),
   deleteDestDataView: schema.maybe(schema.boolean()),
   force: schema.maybe(schema.boolean()),

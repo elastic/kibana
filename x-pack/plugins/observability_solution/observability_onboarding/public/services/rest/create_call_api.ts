@@ -11,7 +11,7 @@ import type {
   ReturnOf,
   RouteRepositoryClient,
 } from '@kbn/server-route-repository';
-import { formatRequest } from '@kbn/server-route-repository';
+import { formatRequest } from '@kbn/server-route-repository-utils';
 import { FetchOptions } from '../../../common/fetch_options';
 import type {
   APIEndpoint,
@@ -29,12 +29,12 @@ export type ObservabilityOnboardingClientOptions = Omit<
 export type ObservabilityOnboardingClient = RouteRepositoryClient<
   ObservabilityOnboardingServerRouteRepository,
   ObservabilityOnboardingClientOptions
->;
+>['fetch'];
 
 export type AutoAbortedObservabilityClient = RouteRepositoryClient<
   ObservabilityOnboardingServerRouteRepository,
   Omit<ObservabilityOnboardingClientOptions, 'signal'>
->;
+>['fetch'];
 
 export type APIReturnType<TEndpoint extends APIEndpoint> = ReturnOf<
   ObservabilityOnboardingServerRouteRepository,

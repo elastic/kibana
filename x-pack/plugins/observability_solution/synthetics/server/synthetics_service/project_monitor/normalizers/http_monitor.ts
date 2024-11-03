@@ -20,10 +20,12 @@ import {
   getNormalizeCommonFields,
   normalizeYamlConfig,
   getOptionalListField,
-  getOptionalArrayField,
   getUnsupportedKeysError,
   getInvalidUrlsOrHostsError,
   getHasTLSFields,
+  isValidURL,
+  getUnparseableUrlError,
+  getUrlsField,
 } from './common_fields';
 
 export const getNormalizeHTTPFields = ({
@@ -50,9 +52,11 @@ export const getNormalizeHTTPFields = ({
   errors.push(...commonErrors);
 
   /* Check if monitor has multiple urls */
-  const urls = getOptionalListField(monitor.urls);
+  const urls = getUrlsField(monitor.urls);
   if (urls.length !== 1) {
     errors.push(getInvalidUrlsOrHostsError(monitor, 'urls', version));
+  } else if (isValidURL(urls[0]) === false) {
+    errors.push(getUnparseableUrlError(monitor, version));
   }
   if (unsupportedKeys.length) {
     errors.push(getUnsupportedKeysError(monitor, unsupportedKeys, version));
@@ -63,7 +67,7 @@ export const getNormalizeHTTPFields = ({
     ...commonFields,
     [ConfigKey.MONITOR_TYPE]: MonitorTypeEnum.HTTP,
     [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.HTTP,
-    [ConfigKey.URLS]: getOptionalArrayField(monitor.urls) || defaultFields[ConfigKey.URLS],
+    [ConfigKey.URLS]: urls.length > 0 ? urls[0] : defaultFields[ConfigKey.URLS],
     [ConfigKey.MAX_REDIRECTS]: formatMaxRedirects(monitor[ConfigKey.MAX_REDIRECTS]),
     [ConfigKey.REQUEST_BODY_CHECK]: getRequestBodyField(
       (yamlConfig as Record<keyof HTTPFields, unknown>)[ConfigKey.REQUEST_BODY_CHECK] as string,
@@ -120,5 +124,5 @@ export const formatMaxRedirects = (value?: string | number): string => {
 
   const defaultFields = DEFAULT_FIELDS[MonitorTypeEnum.HTTP];
 
-  return value ?? defaultFields[ConfigKey.MAX_REDIRECTS];
+  return value ?? String(defaultFields[ConfigKey.MAX_REDIRECTS]);
 };

@@ -13,7 +13,7 @@ describe('ActionMenuContent', () => {
   it('renders settings link', () => {
     const { getByRole, getByText } = render(<ActionMenuContent />);
 
-    const settingsAnchor = getByRole('link', { name: 'Navigate to the Uptime settings page' });
+    const settingsAnchor = getByRole('link', { name: 'Navigate to the Synthetics settings page' });
     expect(settingsAnchor.getAttribute('href')).toBe('/settings');
     expect(getByText('Settings'));
   });

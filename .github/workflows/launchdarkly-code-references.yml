@@ -1,0 +1,21 @@
+name: Find LaunchDarkly flag code references
+
+on:
+  push:
+    branches:
+      - 'main'
+
+jobs:
+  launchDarklyCodeReferences:
+    name: LaunchDarkly Code References
+    if: github.event.repository.fork == false
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # v4.2.0
+        with:
+          fetch-depth: 11 # This value must be set if the lookback configuration option is not disabled for find-code-references. Read more: https://github.com/launchdarkly/ld-find-code-refs#searching-for-unused-flags-extinctions
+      - name: LaunchDarkly Code References
+        uses: launchdarkly/find-code-references@ba05c32c4bddd0374bd3f5ecabcbb8e2118e8aa8 # v2.12.0
+        with:
+          accessToken: ${{ secrets.LD_ACCESS_TOKEN }}
+          projKey: ${{ secrets.LD_PROJECT_KEY }}

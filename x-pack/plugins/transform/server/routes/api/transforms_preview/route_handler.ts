@@ -9,7 +9,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type { RequestHandler } from '@kbn/core/server';
 
-import type { PostTransformsPreviewRequestSchema } from '../../../../common/api_schemas/transforms';
+import type { PostTransformsPreviewRequestSchema } from '../../api_schemas/transforms';
 import { isLatestTransform } from '../../../../common/types/transform';
 import { isKeywordDuplicate } from '../../../../common/utils/field_utils';
 

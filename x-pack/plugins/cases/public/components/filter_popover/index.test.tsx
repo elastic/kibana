@@ -25,6 +25,10 @@ describe('FilterPopover ', () => {
     jest.clearAllMocks();
   });
 
+  afterEach(async () => {
+    await appMockRender.clearQueryCache();
+  });
+
   it('renders button label correctly', async () => {
     appMockRender.render(
       <FilterPopover
@@ -49,7 +53,7 @@ describe('FilterPopover ', () => {
       />
     );
 
-    userEvent.click(await screen.findByTestId('options-filter-popover-button-Tags'));
+    await userEvent.click(await screen.findByTestId('options-filter-popover-button-Tags'));
 
     await waitForEuiPopoverOpen();
 
@@ -66,7 +70,7 @@ describe('FilterPopover ', () => {
       />
     );
 
-    userEvent.click(await screen.findByTestId('options-filter-popover-button-Tags'));
+    await userEvent.click(await screen.findByTestId('options-filter-popover-button-Tags'));
 
     await waitForEuiPopoverOpen();
 
@@ -84,11 +88,11 @@ describe('FilterPopover ', () => {
       />
     );
 
-    userEvent.click(await screen.findByTestId('options-filter-popover-button-Tags'));
+    await userEvent.click(await screen.findByTestId('options-filter-popover-button-Tags'));
 
     await waitForEuiPopoverOpen();
 
-    userEvent.click(await screen.findByTestId(`options-filter-popover-item-${tags[0]}`));
+    await userEvent.click(await screen.findByTestId(`options-filter-popover-item-${tags[0]}`));
 
     await waitFor(() => {
       expect(onSelectedOptionsChanged).toHaveBeenCalledWith([tags[0]]);
@@ -105,11 +109,11 @@ describe('FilterPopover ', () => {
       />
     );
 
-    userEvent.click(await screen.findByTestId('options-filter-popover-button-Tags'));
+    await userEvent.click(await screen.findByTestId('options-filter-popover-button-Tags'));
 
     await waitForEuiPopoverOpen();
 
-    userEvent.click(await screen.findByTestId(`options-filter-popover-item-${tags[0]}`));
+    await userEvent.click(await screen.findByTestId(`options-filter-popover-item-${tags[0]}`));
 
     await waitFor(() => {
       expect(onSelectedOptionsChanged).toHaveBeenCalledWith([]);
@@ -133,7 +137,7 @@ describe('FilterPopover ', () => {
         />
       );
 
-      userEvent.click(await screen.findByTestId('options-filter-popover-button-Tags'));
+      await userEvent.click(await screen.findByTestId('options-filter-popover-button-Tags'));
 
       await waitForEuiPopoverOpen();
 
@@ -158,7 +162,7 @@ describe('FilterPopover ', () => {
         />
       );
 
-      userEvent.click(await screen.findByTestId('options-filter-popover-button-Tags'));
+      await userEvent.click(await screen.findByTestId('options-filter-popover-button-Tags'));
 
       await waitForEuiPopoverOpen();
 
@@ -182,7 +186,7 @@ describe('FilterPopover ', () => {
         />
       );
 
-      userEvent.click(await screen.findByTestId('options-filter-popover-button-Tags'));
+      await userEvent.click(await screen.findByTestId('options-filter-popover-button-Tags'));
 
       await waitForEuiPopoverOpen();
 
@@ -203,11 +207,11 @@ describe('FilterPopover ', () => {
         />
       );
 
-      userEvent.click(await screen.findByTestId('options-filter-popover-button-Tags'));
+      await userEvent.click(await screen.findByTestId('options-filter-popover-button-Tags'));
 
       await waitForEuiPopoverOpen();
 
-      userEvent.click(await screen.findByTestId(`options-filter-popover-item-${newTags[1]}`));
+      await userEvent.click(await screen.findByTestId(`options-filter-popover-item-${newTags[1]}`));
 
       await waitFor(() => {
         expect(onSelectedOptionsChanged).toHaveBeenCalledWith([newTags[0], newTags[2], newTags[1]]);

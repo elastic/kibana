@@ -12,6 +12,7 @@ import {
 } from '@kbn/stack-connectors-plugin/common/crowdstrike/constants';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { CrowdstrikeBaseApiResponse } from '@kbn/stack-connectors-plugin/common/crowdstrike/types';
+import { v4 as uuidv4 } from 'uuid';
 import type { CrowdstrikeActionRequestCommonMeta } from '../../../../../../common/endpoint/types/crowdstrike';
 import type {
   CommonResponseActionMethodOptions,
@@ -26,7 +27,10 @@ import type {
   EndpointActionResponseDataOutput,
   LogsEndpointAction,
 } from '../../../../../../common/endpoint/types';
-import type { IsolationRouteRequestBody } from '../../../../../../common/api/endpoint';
+import type {
+  IsolationRouteRequestBody,
+  UnisolationRouteRequestBody,
+} from '../../../../../../common/api/endpoint';
 import type {
   ResponseActionsClientOptions,
   ResponseActionsClientWriteActionRequestToEndpointIndexOptions,
@@ -37,7 +41,6 @@ import type {
   NormalizedExternalConnectorClient,
   NormalizedExternalConnectorClientExecuteOptions,
 } from '../lib/normalized_external_connector_client';
-import { ELASTIC_RESPONSE_ACTION_MESSAGE } from '../../utils';
 
 export type CrowdstrikeActionsClientOptions = ResponseActionsClientOptions & {
   connectorActions: NormalizedExternalConnectorClient;
@@ -67,9 +70,8 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
     LogsEndpointAction<TParameters, TOutputContent, TMeta & CrowdstrikeActionRequestCommonMeta>
   > {
     const agentId = actionRequest.endpoint_ids[0];
-    const eventDetails = await this.getEventDetailsById(agentId);
+    const hostname = await this.getHostNameByAgentId(agentId);
 
-    const hostname = eventDetails.host.name;
     return super.writeActionRequestToEndpointIndex({
       ...actionRequest,
       hosts: {
@@ -98,7 +100,8 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
     };
 
     this.log.debug(
-      `calling connector actions 'execute()' for Crowdstrike with:\n${stringify(executeOptions)}`
+      () =>
+        `calling connector actions 'execute()' for Crowdstrike with:\n${stringify(executeOptions)}`
     );
 
     const actionSendResponse = await this.connectorActionsClient.execute(executeOptions);
@@ -114,19 +117,18 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
         actionSendResponse
       );
     } else {
-      this.log.debug(`Response:\n${stringify(actionSendResponse)}`);
+      this.log.debug(() => `Response:\n${stringify(actionSendResponse)}`);
     }
 
     return actionSendResponse;
   }
 
-  private async getEventDetailsById(agentId: string): Promise<{
-    host: { name: string };
-  }> {
+  private async getHostNameByAgentId(agentId: string): Promise<string> {
     const search = {
-      index: ['logs-crowdstrike.fdr*', 'logs-crowdstrike.falcon*'],
+      // Multiple indexes:  .falcon, .fdr, .host, .alert
+      index: ['logs-crowdstrike*'],
       size: 1,
-      _source: ['host.name'],
+      _source: ['host.hostname', 'host.name'],
       body: {
         query: {
           bool: {
@@ -136,13 +138,14 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
       },
     };
     try {
-      const result: SearchResponse<{ host: { name: string } }> =
-        await this.options.esClient.search<{ host: { name: string } }>(search, {
+      const result: SearchResponse<{ host: { name: string; hostname: string } }> =
+        await this.options.esClient.search<{ host: { name: string; hostname: string } }>(search, {
           ignore: [404],
         });
 
       // Check if host name exists
-      const hostName = result.hits.hits?.[0]?._source?.host?.name;
+      const host = result.hits.hits?.[0]?._source?.host;
+      const hostName = host?.name || host?.hostname;
       if (!hostName) {
         throw new ResponseActionsClientError(
           `Host name not found in the event document for agentId: ${agentId}`,
@@ -150,7 +153,7 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
         );
       }
 
-      return result.hits.hits[0]._source as { host: { name: string } };
+      return hostName;
     } catch (err) {
       throw new ResponseActionsClientError(
         `Failed to fetch event document: ${err.message}`,
@@ -189,19 +192,15 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
     let actionResponse: ActionTypeExecutorResult<CrowdstrikeBaseApiResponse> | undefined;
     if (!reqIndexOptions.error) {
       let error = (await this.validateRequest(reqIndexOptions)).error;
-      const actionCommentMessage = ELASTIC_RESPONSE_ACTION_MESSAGE(
-        this.options.username,
-        reqIndexOptions.actionId
-      );
       if (!error) {
+        if (!reqIndexOptions.actionId) {
+          reqIndexOptions.actionId = uuidv4();
+        }
+
         try {
           actionResponse = (await this.sendAction(SUB_ACTION.HOST_ACTIONS, {
             ids: actionRequest.endpoint_ids,
-            actionParameters: {
-              comment: reqIndexOptions.comment
-                ? `${actionCommentMessage}: ${reqIndexOptions.comment}`
-                : actionCommentMessage,
-            },
+            actionParameters: { comment: this.buildExternalComment(reqIndexOptions) },
             command: 'contain',
           })) as ActionTypeExecutorResult<CrowdstrikeBaseApiResponse>;
         } catch (err) {
@@ -241,7 +240,7 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
   }
 
   async release(
-    actionRequest: IsolationRouteRequestBody,
+    actionRequest: UnisolationRouteRequestBody,
     options: CommonResponseActionMethodOptions = {}
   ): Promise<ActionDetails> {
     const reqIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions = {
@@ -253,18 +252,13 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
     let actionResponse: ActionTypeExecutorResult<CrowdstrikeBaseApiResponse> | undefined;
     if (!reqIndexOptions.error) {
       let error = (await this.validateRequest(reqIndexOptions)).error;
-      const actionCommentMessage = ELASTIC_RESPONSE_ACTION_MESSAGE(
-        this.options.username,
-        reqIndexOptions.actionId
-      );
+
       if (!error) {
         try {
           actionResponse = (await this.sendAction(SUB_ACTION.HOST_ACTIONS, {
             ids: actionRequest.endpoint_ids,
             command: 'lift_containment',
-            comment: reqIndexOptions.comment
-              ? `${actionCommentMessage}: ${reqIndexOptions.comment}`
-              : actionCommentMessage,
+            comment: this.buildExternalComment(reqIndexOptions),
           })) as ActionTypeExecutorResult<CrowdstrikeBaseApiResponse>;
         } catch (err) {
           error = err;

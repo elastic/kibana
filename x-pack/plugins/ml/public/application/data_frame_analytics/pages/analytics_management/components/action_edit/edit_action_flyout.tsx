@@ -35,12 +35,11 @@ import {
   type DataFrameAnalyticsConfig,
   type UpdateDataFrameAnalyticsConfig,
 } from '@kbn/ml-data-frame-analytics-utils';
+import type { MemoryInputValidatorResult } from '@kbn/ml-validators';
+import { memoryInputValidator } from '@kbn/ml-validators';
 
-import { useMlKibana, useMlApiContext } from '../../../../../contexts/kibana';
-import { ml } from '../../../../../services/ml_api_service';
+import { useMlKibana, useMlApi } from '../../../../../contexts/kibana';
 import { useToastNotificationService } from '../../../../../services/toast_notification_service';
-import type { MemoryInputValidatorResult } from '../../../../../../../common/util/validators';
-import { memoryInputValidator } from '../../../../../../../common/util/validators';
 import { useRefreshAnalyticsList } from '../../../../common/analytics';
 
 import type { EditAction } from './use_edit_action';
@@ -70,10 +69,10 @@ export const EditActionFlyout: FC<Required<EditAction>> = ({ closeFlyout, item }
   } = useMlKibana();
   const { refresh } = useRefreshAnalyticsList();
 
-  const mlApiServices = useMlApiContext();
+  const mlApi = useMlApi();
   const {
     dataFrameAnalytics: { getDataFrameAnalytics },
-  } = mlApiServices;
+  } = mlApi;
 
   const toastNotificationService = useToastNotificationService();
 
@@ -123,7 +122,7 @@ export const EditActionFlyout: FC<Required<EditAction>> = ({ closeFlyout, item }
 
   const updateDataFrameAnalytics = async (updateConfig: UpdateDataFrameAnalyticsConfig) => {
     try {
-      await ml.dataFrameAnalytics.updateDataFrameAnalytics(jobId, updateConfig);
+      await mlApi.dataFrameAnalytics.updateDataFrameAnalytics(jobId, updateConfig);
       notifications.toasts.addSuccess(
         i18n.translate('xpack.ml.dataframe.analyticsList.editFlyoutSuccessMessage', {
           defaultMessage: 'Analytics job {jobId} has been updated.',

@@ -33,6 +33,8 @@ const pages = {
     retryButton: 'observabilityAiAssistantWelcomeMessageSetUpKnowledgeBaseButton',
     conversationLink: 'observabilityAiAssistantConversationsLink',
     positiveFeedbackButton: 'observabilityAiAssistantFeedbackButtonsPositiveButton',
+    connectorsErrorMsg: 'observabilityAiAssistantConnectorsError',
+    conversationsPage: 'observabilityAiAssistantConversationsPage',
   },
   createConnectorFlyout: {
     flyout: 'create-connector-flyout',
@@ -47,6 +49,19 @@ const pages = {
     container: 'obsAiAssistantInsightContainer',
     button: 'obsAiAssistantInsightButton',
     text: 'obsAiAssistantInsightResponse',
+  },
+  links: {
+    solutionMenuLink: 'observability-nav-observabilityAIAssistant-ai_assistant',
+    globalHeaderButton: 'observabilityAiAssistantAppNavControlButton',
+  },
+  settings: {
+    settingsPage: 'aiAssistantSettingsPage',
+    managementLink: 'aiAssistantManagementSelection',
+    logsIndexPatternInput: 'management-settings-editField-observability:logSources',
+    searchConnectorIndexPatternInput:
+      'management-settings-editField-observability:aiAssistantSearchConnectorIndexPattern',
+    saveButton: 'observabilityAiAssistantManagementBottomBarActionsButton',
+    aiAssistantCard: 'aiAssistantSelectionPageObservabilityCard',
   },
 };
 

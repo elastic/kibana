@@ -5,167 +5,44 @@
  * 2.0.
  */
 
-import * as rt from 'io-ts';
-import type { IKibanaSearchResponse } from '@kbn/search-types';
-import { ES_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
-import { useCallback, useEffect, useMemo } from 'react';
-import { catchError, map, Observable, of, startWith, tap } from 'rxjs';
 import createContainer from 'constate';
-import type { QueryDslQueryContainer, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import { HOST_NAME_FIELD, TIMESTAMP_FIELD } from '../../../../../common/constants';
-import type { ITelemetryClient } from '../../../../services/telemetry';
-import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
-import { decodeOrThrow } from '../../../../../common/runtime_types';
-import { useDataSearch, useLatestPartialDataSearchResponse } from '../../../../utils/data_search';
-import { useMetricsDataViewContext } from '../../../../containers/metrics_source';
+import { decodeOrThrow } from '@kbn/io-ts-utils';
+import { useMemo } from 'react';
+import { GetInfraAssetCountResponsePayloadRT } from '../../../../../common/http_api';
+import { isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import { useUnifiedSearchContext } from './use_unified_search';
 
 export const useHostCount = () => {
-  const { metricsView } = useMetricsDataViewContext();
-  const {
-    services: { telemetry },
-  } = useKibanaContextForPlugin();
-  const { buildQuery, searchCriteria } = useUnifiedSearchContext();
+  const { buildQuery, parsedDateRange } = useUnifiedSearchContext();
 
-  const { search: fetchHostCount, requests$ } = useDataSearch({
-    getRequest: useCallback(() => {
-      const query = buildQuery();
+  const payload = useMemo(
+    () =>
+      JSON.stringify({
+        query: buildQuery(),
+        from: parsedDateRange.from,
+        to: parsedDateRange.to,
+      }),
+    [buildQuery, parsedDateRange]
+  );
 
-      const filters: QueryDslQueryContainer = {
-        bool: {
-          ...query.bool,
-          filter: [
-            ...query.bool.filter,
-            {
-              exists: {
-                field: HOST_NAME_FIELD,
-              },
-            },
-            {
-              range: {
-                [metricsView?.timeFieldName ?? TIMESTAMP_FIELD]: {
-                  gte: searchCriteria.dateRange.from,
-                  lte: searchCriteria.dateRange.to,
-                },
-              },
-            },
-          ],
-        },
-      };
+  const { data, status, error } = useFetcher(
+    async (callApi) => {
+      const response = await callApi('/api/infra/host/count', {
+        method: 'POST',
+        body: payload,
+      });
 
-      return {
-        request: {
-          params: {
-            allow_no_indices: true,
-            ignore_unavailable: true,
-            index: metricsView?.indices,
-            size: 0,
-            track_total_hits: false,
-            body: {
-              query: filters,
-              aggs: {
-                count: {
-                  cardinality: {
-                    field: HOST_NAME_FIELD,
-                  },
-                },
-              },
-            },
-          },
-        },
-        options: { strategy: ES_SEARCH_STRATEGY },
-      };
-    }, [
-      buildQuery,
-      metricsView?.indices,
-      metricsView?.timeFieldName,
-      searchCriteria.dateRange.from,
-      searchCriteria.dateRange.to,
-    ]),
-    parseResponses: useMemo(
-      () =>
-        normalizeDataSearchResponse({
-          telemetry,
-          telemetryData: {
-            withQuery: !!searchCriteria.query.query,
-            withFilters:
-              searchCriteria.filters.length > 0 || searchCriteria.panelFilters.length > 0,
-          },
-        }),
-      [
-        searchCriteria.filters.length,
-        searchCriteria.panelFilters.length,
-        searchCriteria.query.query,
-        telemetry,
-      ]
-    ),
-  });
-
-  const { isRequestRunning, isResponsePartial, latestResponseData, latestResponseErrors } =
-    useLatestPartialDataSearchResponse(requests$);
-
-  useEffect(() => {
-    fetchHostCount();
-  }, [fetchHostCount]);
+      return decodeOrThrow(GetInfraAssetCountResponsePayloadRT)(response);
+    },
+    [payload]
+  );
 
   return {
-    errors: latestResponseErrors,
-    isRequestRunning,
-    isResponsePartial,
-    data: latestResponseData ?? null,
+    errors: error,
+    loading: isPending(status),
+    count: data?.count ?? 0,
   };
 };
 
 export const HostCount = createContainer(useHostCount);
 export const [HostCountProvider, useHostCountContext] = HostCount;
-
-const INITIAL_STATE = {
-  data: null,
-  errors: [],
-  isPartial: true,
-  isRunning: true,
-  loaded: 0,
-  total: undefined,
-};
-
-const normalizeDataSearchResponse =
-  ({
-    telemetry,
-    telemetryData,
-  }: {
-    telemetry: ITelemetryClient;
-    telemetryData: { withQuery: boolean; withFilters: boolean };
-  }) =>
-  (response$: Observable<IKibanaSearchResponse<SearchResponse<Record<string, unknown>>>>) => {
-    return response$.pipe(
-      map((response) => ({
-        data: decodeOrThrow(HostCountResponseRT)(response.rawResponse.aggregations),
-        errors: [],
-        isPartial: response.isPartial ?? false,
-        isRunning: response.isRunning ?? false,
-        loaded: response.loaded,
-        total: response.total,
-      })),
-      tap(({ data }) => {
-        telemetry.reportHostsViewTotalHostCountRetrieved({
-          total: data.count.value,
-          with_query: telemetryData.withQuery,
-          with_filters: telemetryData.withFilters,
-        });
-      }),
-      startWith(INITIAL_STATE),
-      catchError((error) =>
-        of({
-          ...INITIAL_STATE,
-          errors: [error.message ?? error],
-          isRunning: false,
-        })
-      )
-    );
-  };
-
-const HostCountResponseRT = rt.type({
-  count: rt.type({
-    value: rt.number,
-  }),
-});

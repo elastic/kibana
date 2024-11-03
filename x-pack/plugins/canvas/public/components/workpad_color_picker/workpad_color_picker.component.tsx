@@ -21,8 +21,11 @@ const strings = {
 
 export const WorkpadColorPicker = (props: Props) => {
   const dispatch = useDispatch();
-  const onAddColor = useCallback((payload) => dispatch(addColor(payload)), [dispatch]);
-  const onRemoveColor = useCallback((payload) => dispatch(removeColor(payload)), [dispatch]);
+  const onAddColor = useCallback((payload: string) => dispatch(addColor(payload)), [dispatch]);
+  const onRemoveColor = useCallback(
+    (payload: string) => dispatch(removeColor(payload)),
+    [dispatch]
+  );
   const colors = useSelector(getWorkpadColors);
 
   return (

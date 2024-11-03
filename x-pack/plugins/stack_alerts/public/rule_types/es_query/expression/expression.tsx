@@ -7,7 +7,6 @@
 
 import React, { memo, PropsWithChildren, useCallback } from 'react';
 import deepEqual from 'fast-deep-equal';
-import 'brace/theme/github';
 import { EuiCallOut, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
@@ -62,6 +61,7 @@ export const EsQueryRuleTypeExpression: React.FunctionComponent<
   );
 
   const errorParam = ALL_EXPRESSION_ERROR_KEYS.find((errorKey) => {
+    // @ts-expect-error upgrade typescript v5.1.6
     return errors[errorKey]?.length >= 1 && ruleParams[errorKey] !== undefined;
   });
 
@@ -73,7 +73,7 @@ export const EsQueryRuleTypeExpression: React.FunctionComponent<
         data-test-subj="esQueryAlertExpressionError"
         title={
           ['index', 'searchType', 'timeField'].includes(errorParam)
-            ? errors[errorParam]
+            ? (errors[errorParam] as string)
             : expressionGenericErrorMessage
         }
       />

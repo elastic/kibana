@@ -469,7 +469,7 @@ function GraphWorkspace(options) {
       },
     };
     for (const field in termsByField) {
-      if (termsByField.hasOwnProperty(field)) {
+      if (Object.hasOwn(termsByField, field)) {
         const tq = {};
         tq[field] = termsByField[field];
         q.bool.should.push({
@@ -529,7 +529,7 @@ function GraphWorkspace(options) {
     });
 
     for (const n in allNodes) {
-      if (!allNodes.hasOwnProperty(n)) {
+      if (!Object.hasOwn(allNodes, n)) {
         continue;
       }
       let node = allNodes[n];
@@ -994,7 +994,7 @@ function GraphWorkspace(options) {
     const primaryVertices = [];
     const secondaryVertices = [];
     for (const fieldName in nodesByField) {
-      if (nodesByField.hasOwnProperty(fieldName)) {
+      if (Object.hasOwn(nodesByField, fieldName)) {
         primaryVertices.push({
           field: fieldName,
           include: nodesByField[fieldName],
@@ -1327,7 +1327,7 @@ function GraphWorkspace(options) {
       txtsByFieldType[node.data.field] = txt;
     });
     for (const field in txtsByFieldType) {
-      if (txtsByFieldType.hasOwnProperty(field)) {
+      if (Object.hasOwn(txtsByFieldType, field)) {
         likeQueries.push({
           more_like_this: {
             like: txtsByFieldType[field],

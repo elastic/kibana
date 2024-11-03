@@ -41,7 +41,7 @@ const ViewResultsInLensActionComponent: React.FC<ViewResultsInLensActionProps> =
   const { data: logsDataView } = useLogsDataView({ skip: !actionId, checkOnly: true });
 
   const handleClick = useCallback(
-    (event) => {
+    (event: any) => {
       event.preventDefault();
 
       if (logsDataView) {

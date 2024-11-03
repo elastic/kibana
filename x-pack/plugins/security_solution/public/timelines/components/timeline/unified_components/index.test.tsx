@@ -67,16 +67,13 @@ jest.mock('react-router-dom', () => ({
 }));
 
 const useIsExperimentalFeatureEnabledMock = jest.fn((feature: keyof ExperimentalFeatures) => {
-  if (feature === 'unifiedComponentsInTimelineEnabled') {
-    return true;
-  }
   return allowedExperimentalValues[feature];
 });
 
 jest.mock('../../../../common/lib/kibana');
 
 // unified-field-list is reporting multiple analytics events
-jest.mock(`@kbn/ebt/client`);
+jest.mock(`@elastic/ebt/client`);
 
 const columnsToDisplay = [
   ...defaultUdtHeaders,
@@ -92,7 +89,10 @@ const SPECIAL_TEST_TIMEOUT = 50000;
 
 const localMockedTimelineData = structuredClone(mockTimelineData);
 
-const TestComponent = (props: Partial<ComponentProps<typeof UnifiedTimeline>>) => {
+const TestComponent = (
+  props: Partial<ComponentProps<typeof UnifiedTimeline>> & { show?: boolean }
+) => {
+  const { show, ...restProps } = props;
   const testComponentDefaultProps: ComponentProps<typeof QueryTabContent> = {
     columns: getColumnHeaders(columnsToDisplay, mockSourcererScope.browserFields),
     activeTab: TimelineTabs.query,
@@ -111,21 +111,19 @@ const TestComponent = (props: Partial<ComponentProps<typeof UnifiedTimeline>>) =
     events: localMockedTimelineData,
     refetch: jest.fn(),
     totalCount: localMockedTimelineData.length,
-    onEventClosed: jest.fn(),
-    expandedDetail: {},
-    showExpandedDetails: false,
     onChangePage: jest.fn(),
     dataLoadingState: DataLoadingState.loaded,
     updatedAt: Date.now(),
     isTextBasedQuery: false,
-    eventIdToNoteIds: {} as Record<string, string[]>,
-    pinnedEventIds: {} as Record<string, boolean>,
   };
 
   const dispatch = useDispatch();
 
-  // populating timeline so that it is not blank
   useEffect(() => {
+    // Unified field list can be a culprit for long load times, so we wait for the timeline to be interacted with to load
+    dispatch(timelineActions.showTimeline({ id: TimelineId.test, show: show ?? true }));
+
+    // populating timeline so that it is not blank
     dispatch(
       timelineActions.applyKqlFilterQuery({
         id: TimelineId.test,
@@ -138,9 +136,9 @@ const TestComponent = (props: Partial<ComponentProps<typeof UnifiedTimeline>>) =
         },
       })
     );
-  }, [dispatch]);
+  }, [dispatch, show]);
 
-  return <UnifiedTimeline {...testComponentDefaultProps} {...props} />;
+  return <UnifiedTimeline {...testComponentDefaultProps} {...restProps} />;
 };
 
 const customStore = createMockStore();
@@ -244,11 +242,7 @@ describe('unified timeline', () => {
           container.querySelector(`[data-gridcell-column-id="${field.name}"]`)
         ).toBeInTheDocument();
 
-        fireEvent.click(
-          container.querySelector(
-            `[data-gridcell-column-id="${field.name}"] .euiDataGridHeaderCell__icon`
-          ) as HTMLElement
-        );
+        fireEvent.click(screen.getByTestId(`dataGridHeaderCellActionButton-${field.name}`));
 
         await waitFor(() => {
           expect(screen.getByTitle('Move left')).toBeEnabled();
@@ -283,11 +277,7 @@ describe('unified timeline', () => {
           container.querySelector(`[data-gridcell-column-id="${field.name}"]`)
         ).toBeInTheDocument();
 
-        fireEvent.click(
-          container.querySelector(
-            `[data-gridcell-column-id="${field.name}"] .euiDataGridHeaderCell__icon`
-          ) as HTMLElement
-        );
+        fireEvent.click(screen.getByTestId(`dataGridHeaderCellActionButton-${field.name}`));
 
         await waitFor(() => {
           expect(screen.getByTitle('Move right')).toBeEnabled();
@@ -319,11 +309,7 @@ describe('unified timeline', () => {
           container.querySelector(`[data-gridcell-column-id="${field.name}"]`)
         ).toBeInTheDocument();
 
-        fireEvent.click(
-          container.querySelector(
-            `[data-gridcell-column-id="${field.name}"] .euiDataGridHeaderCell__icon`
-          ) as HTMLElement
-        );
+        fireEvent.click(screen.getByTestId(`dataGridHeaderCellActionButton-${field.name}`));
 
         // column is currently present in the state
         const currentColumns = getTimelineFromStore(customStore).columns;
@@ -368,16 +354,12 @@ describe('unified timeline', () => {
           container.querySelector('[data-gridcell-column-id="@timestamp"]')
         ).toBeInTheDocument();
 
-        fireEvent.click(
-          container.querySelector(
-            '[data-gridcell-column-id="@timestamp"] .euiDataGridHeaderCell__icon'
-          ) as HTMLElement
-        );
+        fireEvent.click(screen.getByTestId('dataGridHeaderCellActionButton-@timestamp'));
 
         await waitFor(() => {
           expect(screen.getByTitle('Sort Old-New')).toBeVisible();
         });
-        expect(screen.getByTitle('Sort New-Old')).toBeVisible();
+        expect(screen.getByTitle('Unsort New-Old')).toBeVisible();
 
         useTimelineEventsMock.mockClear();
 
@@ -409,11 +391,7 @@ describe('unified timeline', () => {
           container.querySelector('[data-gridcell-column-id="host.name"]')
         ).toBeInTheDocument();
 
-        fireEvent.click(
-          container.querySelector(
-            '[data-gridcell-column-id="host.name"] .euiDataGridHeaderCell__icon'
-          ) as HTMLElement
-        );
+        fireEvent.click(screen.getByTestId('dataGridHeaderCellActionButton-host.name'));
 
         await waitFor(() => {
           expect(screen.getByTestId('dataGridHeaderCellActionGroup-host.name')).toBeVisible();
@@ -462,11 +440,7 @@ describe('unified timeline', () => {
           container.querySelector(`[data-gridcell-column-id="${field.name}"]`)
         ).toBeInTheDocument();
 
-        fireEvent.click(
-          container.querySelector(
-            `[data-gridcell-column-id="${field.name}"] .euiDataGridHeaderCell__icon`
-          ) as HTMLElement
-        );
+        fireEvent.click(screen.getByTestId(`dataGridHeaderCellActionButton-${field.name}`));
 
         await waitFor(() => {
           expect(screen.getByTestId(`dataGridHeaderCellActionGroup-${field.name}`)).toBeVisible();
@@ -517,11 +491,7 @@ describe('unified timeline', () => {
           container.querySelector(`[data-gridcell-column-id="${field.name}"]`)
         ).toBeInTheDocument();
 
-        fireEvent.click(
-          container.querySelector(
-            `[data-gridcell-column-id="${field.name}"] .euiDataGridHeaderCell__icon`
-          ) as HTMLElement
-        );
+        fireEvent.click(screen.getByTestId(`dataGridHeaderCellActionButton-${field.name}`));
 
         await waitFor(() => {
           expect(screen.getByTitle('Edit data view field')).toBeEnabled();
@@ -546,6 +516,51 @@ describe('unified timeline', () => {
   });
 
   describe('unified field list', () => {
+    describe('render', () => {
+      let TestProviderWithNewStore: FC<PropsWithChildren<unknown>>;
+      beforeEach(() => {
+        const freshStore = createMockStore();
+        // eslint-disable-next-line react/display-name
+        TestProviderWithNewStore = ({ children }) => {
+          return <TestProviders store={freshStore}>{children}</TestProviders>;
+        };
+      });
+      it(
+        'should not render when timeline has never been opened',
+        async () => {
+          render(<TestComponent show={false} />, {
+            wrapper: TestProviderWithNewStore,
+          });
+          expect(await screen.queryByTestId('timeline-sidebar')).not.toBeInTheDocument();
+        },
+        SPECIAL_TEST_TIMEOUT
+      );
+
+      it(
+        'should render when timeline has been opened',
+        async () => {
+          render(<TestComponent />, {
+            wrapper: TestProviderWithNewStore,
+          });
+          expect(await screen.queryByTestId('timeline-sidebar')).toBeInTheDocument();
+        },
+        SPECIAL_TEST_TIMEOUT
+      );
+
+      it(
+        'should not re-render when timeline has been opened at least once',
+        async () => {
+          const { rerender } = render(<TestComponent />, {
+            wrapper: TestProviderWithNewStore,
+          });
+          rerender(<TestComponent show={false} />);
+          // Even after timeline is closed, it should still exist in the background
+          expect(await screen.queryByTestId('timeline-sidebar')).toBeInTheDocument();
+        },
+        SPECIAL_TEST_TIMEOUT
+      );
+    });
+
     it(
       'should be able to add filters',
       async () => {

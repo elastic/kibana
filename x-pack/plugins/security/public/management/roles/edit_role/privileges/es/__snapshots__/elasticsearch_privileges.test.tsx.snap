@@ -34,12 +34,8 @@ exports[`it renders correctly in serverless mode 1`] = `
     }
   >
     <EuiFormRow
-      describedByIds={Array []}
-      display="row"
       fullWidth={true}
-      hasChildLabel={true}
       hasEmptyLabelSpace={true}
-      labelType="label"
     >
       <ClusterPrivileges
         builtinClusterPrivileges={
@@ -124,6 +120,7 @@ exports[`it renders correctly in serverless mode 1`] = `
           "_subscribe": [Function],
         },
         "getFeatures": [MockFunction],
+        "getLicenseType": [MockFunction],
         "getUnavailableReason": [MockFunction],
         "hasAtLeast": [MockFunction],
         "isEnabled": [MockFunction],
@@ -145,6 +142,7 @@ exports[`it renders correctly in serverless mode 1`] = `
     }
     validator={
       RoleValidator {
+        "buildFlavor": "serverless",
         "shouldValidate": undefined,
       }
     }
@@ -186,12 +184,8 @@ exports[`it renders without crashing 1`] = `
     }
   >
     <EuiFormRow
-      describedByIds={Array []}
-      display="row"
       fullWidth={true}
-      hasChildLabel={true}
       hasEmptyLabelSpace={true}
-      labelType="label"
     >
       <ClusterPrivileges
         builtinClusterPrivileges={
@@ -322,6 +316,7 @@ exports[`it renders without crashing 1`] = `
           "_subscribe": [Function],
         },
         "getFeatures": [MockFunction],
+        "getLicenseType": [MockFunction],
         "getUnavailableReason": [MockFunction],
         "hasAtLeast": [MockFunction],
         "isEnabled": [MockFunction],
@@ -343,6 +338,7 @@ exports[`it renders without crashing 1`] = `
     }
     validator={
       RoleValidator {
+        "buildFlavor": undefined,
         "shouldValidate": undefined,
       }
     }

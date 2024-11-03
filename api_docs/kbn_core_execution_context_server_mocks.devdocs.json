@@ -14,18 +14,10 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
     "objects": [
       {
         "parentPluginId": "@kbn/core-execution-context-server-mocks",
-        "id": "def-common.executionContextServiceMock",
+        "id": "def-server.executionContextServiceMock",
         "type": "Object",
         "tags": [],
         "label": "executionContextServiceMock",
@@ -36,7 +28,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-execution-context-server-mocks",
-            "id": "def-common.executionContextServiceMock.createInternalSetupContract",
+            "id": "def-server.executionContextServiceMock.createInternalSetupContract",
             "type": "Function",
             "tags": [],
             "label": "createInternalSetupContract",
@@ -54,7 +46,7 @@
           },
           {
             "parentPluginId": "@kbn/core-execution-context-server-mocks",
-            "id": "def-common.executionContextServiceMock.createInternalStartContract",
+            "id": "def-server.executionContextServiceMock.createInternalStartContract",
             "type": "Function",
             "tags": [],
             "label": "createInternalStartContract",
@@ -72,7 +64,7 @@
           },
           {
             "parentPluginId": "@kbn/core-execution-context-server-mocks",
-            "id": "def-common.executionContextServiceMock.createSetupContract",
+            "id": "def-server.executionContextServiceMock.createSetupContract",
             "type": "Function",
             "tags": [],
             "label": "createSetupContract",
@@ -81,9 +73,9 @@
               "() => jest.Mocked<",
               {
                 "pluginId": "@kbn/core-execution-context-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreExecutionContextServerPluginApi",
-                "section": "def-common.ExecutionContextSetup",
+                "section": "def-server.ExecutionContextSetup",
                 "text": "ExecutionContextSetup"
               },
               ">"
@@ -96,7 +88,7 @@
           },
           {
             "parentPluginId": "@kbn/core-execution-context-server-mocks",
-            "id": "def-common.executionContextServiceMock.createStartContract",
+            "id": "def-server.executionContextServiceMock.createStartContract",
             "type": "Function",
             "tags": [],
             "label": "createStartContract",
@@ -105,9 +97,9 @@
               "() => jest.Mocked<",
               {
                 "pluginId": "@kbn/core-execution-context-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreExecutionContextServerPluginApi",
-                "section": "def-common.ExecutionContextSetup",
+                "section": "def-server.ExecutionContextSetup",
                 "text": "ExecutionContextSetup"
               },
               ">"
@@ -122,5 +114,13 @@
         "initialIsOpen": false
       }
     ]
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
   }
 }

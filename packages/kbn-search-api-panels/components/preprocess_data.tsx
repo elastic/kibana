@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -73,7 +75,16 @@ export const PreprocessDataPanel: React.FC<{
                 <EuiSpacer size="s" />
                 <EuiText>
                   <p>
-                    <EuiLink href={docLinks.dataEnrichment} target="_blank">
+                    <EuiLink
+                      href={docLinks.dataEnrichment}
+                      target="_blank"
+                      aria-label={i18n.translate(
+                        'searchApiPanels.preprocessData.overview.dataEnrichment.learnMore.ariaLabel',
+                        {
+                          defaultMessage: 'Learn more about data enrichment',
+                        }
+                      )}
+                    >
                       {i18n.translate(
                         'searchApiPanels.preprocessData.overview.dataEnrichment.learnMore',
                         {
@@ -109,7 +120,16 @@ export const PreprocessDataPanel: React.FC<{
                 <EuiSpacer size="s" />
                 <EuiText>
                   <p>
-                    <EuiLink href={docLinks.dataFiltering} target="_blank">
+                    <EuiLink
+                      href={docLinks.dataFiltering}
+                      target="_blank"
+                      aria-label={i18n.translate(
+                        'searchApiPanels.preprocessData.overview.dataFiltering.learnMore.ariaLabel',
+                        {
+                          defaultMessage: 'Learn more about data filtering',
+                        }
+                      )}
+                    >
                       {i18n.translate(
                         'searchApiPanels.preprocessData.overview.dataFiltering.learnMore',
                         {
@@ -147,7 +167,16 @@ export const PreprocessDataPanel: React.FC<{
                 <EuiSpacer size="s" />
                 <EuiText>
                   <p>
-                    <EuiLink href={docLinks.arrayOrJson} target="_blank">
+                    <EuiLink
+                      href={docLinks.arrayOrJson}
+                      target="_blank"
+                      aria-label={i18n.translate(
+                        'searchApiPanels.preprocessData.overview.arrayJsonHandling.learnMore.ariaLabel',
+                        {
+                          defaultMessage: 'Learn more about array/JSON handling',
+                        }
+                      )}
+                    >
                       {i18n.translate(
                         'searchApiPanels.preprocessData.overview.arrayJsonHandling.learnMore',
                         {
@@ -186,7 +215,16 @@ export const PreprocessDataPanel: React.FC<{
                 <EuiSpacer size="s" />
                 <EuiText size="s">
                   <p>
-                    <EuiLink href={docLinks.dataTransformation} target="_blank">
+                    <EuiLink
+                      href={docLinks.dataTransformation}
+                      target="_blank"
+                      aria-label={i18n.translate(
+                        'searchApiPanels.preprocessData.overview.dataTransformation.learnMore.ariaLabel',
+                        {
+                          defaultMessage: 'Learn more about data transformation',
+                        }
+                      )}
+                    >
                       {i18n.translate(
                         'searchApiPanels.preprocessData.overview.dataTransformation.learnMore',
                         {
@@ -225,7 +263,16 @@ export const PreprocessDataPanel: React.FC<{
                 <EuiSpacer size="s" />
                 <EuiText>
                   <p>
-                    <EuiLink href={docLinks.pipelineHandling} target="_blank">
+                    <EuiLink
+                      href={docLinks.pipelineHandling}
+                      target="_blank"
+                      aria-label={i18n.translate(
+                        'searchApiPanels.preprocessData.overview.pipelineHandling.learnMore.ariaLabel',
+                        {
+                          defaultMessage: 'Learn more about pipeline handling',
+                        }
+                      )}
+                    >
                       {i18n.translate(
                         'searchApiPanels.preprocessData.overview.pipelineHandling.learnMore',
                         {

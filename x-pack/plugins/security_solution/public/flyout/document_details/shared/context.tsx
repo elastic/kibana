@@ -9,13 +9,12 @@ import type { BrowserFields, TimelineEventsDetailsItem } from '@kbn/timelines-pl
 import React, { createContext, memo, useContext, useMemo } from 'react';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { TableId } from '@kbn/securitysolution-data-table';
+import { FlyoutError, FlyoutLoading } from '@kbn/security-solution-common/src/flyout';
 import { useEventDetails } from './hooks/use_event_details';
-import { FlyoutError } from '../../shared/components/flyout_error';
-import { FlyoutLoading } from '../../shared/components/flyout_loading';
 import type { SearchHit } from '../../../../common/search_strategy';
-import { useBasicDataFromDetailsData } from '../../../timelines/components/side_panel/event_details/helpers';
+import { useBasicDataFromDetailsData } from './hooks/use_basic_data_from_details_data';
 import type { DocumentDetailsProps } from './types';
-import type { GetFieldsData } from '../../../common/hooks/use_get_fields_data';
+import type { GetFieldsData } from './hooks/use_get_fields_data';
 import { useRuleWithFallback } from '../../../detection_engine/rule_management/logic/use_rule_with_fallback';
 
 export interface DocumentDetailsContext {
@@ -60,11 +59,18 @@ export interface DocumentDetailsContext {
    */
   getFieldsData: GetFieldsData;
   /**
-   * Boolean to indicate whether it is a preview flyout
+   * Boolean to indicate whether flyout is opened in rule preview
    */
   isPreview: boolean;
+  /**
+   * Boolean to indicate whether it is a preview panel
+   */
+  isPreviewMode: boolean;
 }
 
+/**
+ * A context provider shared by the right, left and preview panels in expandable document details flyout
+ */
 export const DocumentDetailsContext = createContext<DocumentDetailsContext | undefined>(undefined);
 
 export type DocumentDetailsProviderProps = {
@@ -75,7 +81,7 @@ export type DocumentDetailsProviderProps = {
 } & Partial<DocumentDetailsProps['params']>;
 
 export const DocumentDetailsProvider = memo(
-  ({ id, indexName, scopeId, children }: DocumentDetailsProviderProps) => {
+  ({ id, indexName, scopeId, isPreviewMode, children }: DocumentDetailsProviderProps) => {
     const {
       browserFields,
       dataAsNestedObject,
@@ -109,6 +115,7 @@ export const DocumentDetailsProvider = memo(
               refetchFlyoutData,
               getFieldsData,
               isPreview: scopeId === TableId.rulePreview,
+              isPreviewMode: Boolean(isPreviewMode),
             }
           : undefined,
       [
@@ -122,6 +129,7 @@ export const DocumentDetailsProvider = memo(
         searchHit,
         refetchFlyoutData,
         getFieldsData,
+        isPreviewMode,
       ]
     );
 

@@ -9,7 +9,7 @@ import React, { useCallback, memo } from 'react';
 import type { EuiSelectableOption, EuiMarkdownEditorUiPlugin } from '@elastic/eui';
 import { EuiModalBody, EuiModalHeader, EuiCodeBlock } from '@elastic/eui';
 
-import { TimelineType } from '../../../../../../common/api/timeline';
+import { TimelineTypeEnum } from '../../../../../../common/api/timeline';
 import { SelectableTimeline } from '../../../../../timelines/components/timeline/selectable_timeline';
 import type { OpenTimelineResult } from '../../../../../timelines/components/open_timeline/types';
 import { getTimelineUrl, useFormatUrl } from '../../../link_to';
@@ -45,7 +45,7 @@ const TimelineEditorComponent: React.FC<TimelineEditorProps> = ({ onClosePopover
   );
 
   const handleTimelineChange = useCallback(
-    (timelineTitle, timelineId, graphEventId) => {
+    (timelineTitle: string, timelineId: string | null, graphEventId?: string) => {
       const url = formatUrl(getTimelineUrl(timelineId ?? '', graphEventId), {
         absolute: true,
         skipSearch: true,
@@ -66,7 +66,7 @@ const TimelineEditorComponent: React.FC<TimelineEditorProps> = ({ onClosePopover
           getSelectableOptions={handleGetSelectableOptions}
           onTimelineChange={handleTimelineChange}
           onClosePopover={onClosePopover}
-          timelineType={TimelineType.default}
+          timelineType={TimelineTypeEnum.default}
         />
       </EuiModalBody>
     </>

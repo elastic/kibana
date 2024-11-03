@@ -10,26 +10,33 @@ import { groupBy } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import type { ErrorType } from '@kbn/ml-error-utils';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
-import type { ElserVersion, InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
+import type {
+  ElasticCuratedModelName,
+  ElserVersion,
+  InferenceAPIConfigResponse,
+} from '@kbn/ml-trained-models-utils';
 import { isDefined } from '@kbn/ml-is-defined';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { type MlFeatures, ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import type { RouteInitialization } from '../types';
 import { wrapError } from '../client/error_wrapper';
 import {
+  createIngestPipelineSchema,
+  curatedModelsParamsSchema,
+  curatedModelsQuerySchema,
   deleteTrainedModelQuerySchema,
   getInferenceQuerySchema,
   inferTrainedModelBody,
   inferTrainedModelQuery,
   modelAndDeploymentIdSchema,
+  modelDownloadsQuery,
   modelIdSchema,
   optionalModelIdSchema,
   pipelineSimulateBody,
   putTrainedModelQuerySchema,
-  threadingParamsSchema,
+  threadingParamsBodySchema,
+  threadingParamsQuerySchema,
   updateDeploymentParamsSchema,
-  createIngestPipelineSchema,
-  modelDownloadsQuery,
 } from './schemas/inference_schema';
 import type { PipelineDefinition } from '../../common/types/trained_models';
 import { type TrainedModelConfigResponse } from '../../common/types/trained_models';
@@ -63,16 +70,16 @@ export const populateInferenceServicesProvider = (client: IScopedClusterClient) 
 
     try {
       // Check if model is used by an inference service
-      const { models } = await esClient.transport.request<{
-        models: InferenceAPIConfigResponse[];
+      const { endpoints } = await esClient.transport.request<{
+        endpoints: InferenceAPIConfigResponse[];
       }>({
         method: 'GET',
         path: `/_inference/_all`,
       });
 
       const inferenceAPIMap = groupBy(
-        models,
-        (model) => model.service === 'elser' && model.service_settings.model_id
+        endpoints,
+        (endpoint) => endpoint.service === 'elser' && endpoint.service_settings.model_id
       );
 
       for (const model of trainedModels) {
@@ -97,13 +104,6 @@ export function trainedModelsRoutes(
   { router, routeGuard, getEnabledFeatures }: RouteInitialization,
   cloud: CloudSetup
 ) {
-  /**
-   * @apiGroup TrainedModels
-   *
-   * @api {get} /internal/ml/trained_models/:modelId Get info of a trained inference model
-   * @apiName GetTrainedModel
-   * @apiDescription Retrieves configuration information for a trained model.
-   */
   router.versioned
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/trained_models/{modelId?}`,
@@ -111,6 +111,8 @@ export function trainedModelsRoutes(
       options: {
         tags: ['access:ml:canGetTrainedModels'],
       },
+      summary: 'Get info of a trained inference model',
+      description: 'Retrieves configuration information for a trained model.',
     })
     .addVersion(
       {
@@ -272,13 +274,6 @@ export function trainedModelsRoutes(
       })
     );
 
-  /**
-   * @apiGroup TrainedModels
-   *
-   * @api {get} /internal/ml/trained_models/_stats Get stats for all trained models
-   * @apiName GetTrainedModelStats
-   * @apiDescription Retrieves usage information for all trained models.
-   */
   router.versioned
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/trained_models/_stats`,
@@ -286,6 +281,8 @@ export function trainedModelsRoutes(
       options: {
         tags: ['access:ml:canGetTrainedModels'],
       },
+      summary: 'Get stats for all trained models',
+      description: 'Retrieves usage information for all trained models.',
     })
     .addVersion(
       {
@@ -306,13 +303,6 @@ export function trainedModelsRoutes(
       })
     );
 
-  /**
-   * @apiGroup TrainedModels
-   *
-   * @api {get} /internal/ml/trained_models/:modelId/_stats Get stats of a trained model
-   * @apiName GetTrainedModelStatsById
-   * @apiDescription Retrieves usage information for trained models.
-   */
   router.versioned
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/trained_models/{modelId}/_stats`,
@@ -320,6 +310,8 @@ export function trainedModelsRoutes(
       options: {
         tags: ['access:ml:canGetTrainedModels'],
       },
+      summary: 'Get stats for a trained model',
+      description: 'Retrieves usage information for a trained model.',
     })
     .addVersion(
       {
@@ -346,13 +338,6 @@ export function trainedModelsRoutes(
       })
     );
 
-  /**
-   * @apiGroup TrainedModels
-   *
-   * @api {get} /internal/ml/trained_models/:modelId/pipelines Get trained model pipelines
-   * @apiName GetTrainedModelPipelines
-   * @apiDescription Retrieves pipelines associated with a trained model
-   */
   router.versioned
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/trained_models/{modelId}/pipelines`,
@@ -360,6 +345,8 @@ export function trainedModelsRoutes(
       options: {
         tags: ['access:ml:canGetTrainedModels'],
       },
+      summary: 'Get trained model pipelines',
+      description: 'Retrieves ingest pipelines associated with a trained model.',
     })
     .addVersion(
       {
@@ -385,13 +372,6 @@ export function trainedModelsRoutes(
       })
     );
 
-  /**
-   * @apiGroup TrainedModels
-   *
-   * @api {get} /internal/ml/trained_models/ingest_pipelines Get ingest pipelines
-   * @apiName GetIngestPipelines
-   * @apiDescription Retrieves pipelines
-   */
   router.versioned
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/trained_models/ingest_pipelines`,
@@ -399,6 +379,8 @@ export function trainedModelsRoutes(
       options: {
         tags: ['access:ml:canGetTrainedModels'], // TODO: update permissions
       },
+      summary: 'Get ingest pipelines',
+      description: 'Retrieves ingest pipelines.',
     })
     .addVersion(
       {
@@ -417,13 +399,6 @@ export function trainedModelsRoutes(
       })
     );
 
-  /**
-   * @apiGroup TrainedModels
-   *
-   * @api {post} /internal/ml/trained_models/create_inference_pipeline creates the pipeline with inference processor
-   * @apiName CreateInferencePipeline
-   * @apiDescription Creates the inference pipeline
-   */
   router.versioned
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/trained_models/create_inference_pipeline`,
@@ -431,6 +406,8 @@ export function trainedModelsRoutes(
       options: {
         tags: ['access:ml:canCreateTrainedModels'],
       },
+      summary: 'Create an inference pipeline',
+      description: 'Creates a pipeline with inference processor',
     })
     .addVersion(
       {
@@ -457,13 +434,6 @@ export function trainedModelsRoutes(
       })
     );
 
-  /**
-   * @apiGroup TrainedModels
-   *
-   * @api {put} /internal/ml/trained_models/:modelId Put a trained model
-   * @apiName PutTrainedModel
-   * @apiDescription Adds a new trained model
-   */
   router.versioned
     .put({
       path: `${ML_INTERNAL_BASE_PATH}/trained_models/{modelId}`,
@@ -471,6 +441,8 @@ export function trainedModelsRoutes(
       options: {
         tags: ['access:ml:canCreateTrainedModels'],
       },
+      summary: 'Put a trained model',
+      description: 'Adds a new trained model',
     })
     .addVersion(
       {
@@ -502,13 +474,6 @@ export function trainedModelsRoutes(
       })
     );
 
-  /**
-   * @apiGroup TrainedModels
-   *
-   * @api {delete} /internal/ml/trained_models/:modelId Delete a trained model
-   * @apiName DeleteTrainedModel
-   * @apiDescription Deletes an existing trained model that is currently not referenced by an ingest pipeline.
-   */
   router.versioned
     .delete({
       path: `${ML_INTERNAL_BASE_PATH}/trained_models/{modelId}`,
@@ -516,6 +481,9 @@ export function trainedModelsRoutes(
       options: {
         tags: ['access:ml:canDeleteTrainedModels'],
       },
+      summary: 'Delete a trained model',
+      description:
+        'Deletes an existing trained model that is currently not referenced by an ingest pipeline.',
     })
     .addVersion(
       {
@@ -551,13 +519,6 @@ export function trainedModelsRoutes(
       })
     );
 
-  /**
-   * @apiGroup TrainedModels
-   *
-   * @api {post} /internal/ml/trained_models/:modelId/deployment/_start Start trained model deployment
-   * @apiName StartTrainedModelDeployment
-   * @apiDescription Starts trained model deployment.
-   */
   router.versioned
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/trained_models/{modelId}/deployment/_start`,
@@ -565,6 +526,8 @@ export function trainedModelsRoutes(
       options: {
         tags: ['access:ml:canStartStopTrainedModels'],
       },
+      summary: 'Start trained model deployment',
+      description: 'Starts trained model deployment.',
     })
     .addVersion(
       {
@@ -572,22 +535,27 @@ export function trainedModelsRoutes(
         validate: {
           request: {
             params: modelIdSchema,
-            query: threadingParamsSchema,
+            query: threadingParamsQuerySchema,
+            body: threadingParamsBodySchema,
           },
         },
       },
       routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
         try {
           const { modelId } = request.params;
+
+          // TODO use mlClient.startTrainedModelDeployment when esClient is updated
           const body = await mlClient.startTrainedModelDeployment(
             {
               model_id: modelId,
               ...(request.query ? request.query : {}),
+              ...(request.body ? request.body : {}),
             },
             {
               maxRetries: 0,
             }
           );
+
           return response.ok({
             body,
           });
@@ -597,13 +565,6 @@ export function trainedModelsRoutes(
       })
     );
 
-  /**
-   * @apiGroup TrainedModels
-   *
-   * @api {post} /internal/ml/trained_models/:modelId/deployment/_update Update trained model deployment
-   * @apiName UpdateTrainedModelDeployment
-   * @apiDescription Updates trained model deployment.
-   */
   router.versioned
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/trained_models/{modelId}/{deploymentId}/deployment/_update`,
@@ -611,6 +572,8 @@ export function trainedModelsRoutes(
       options: {
         tags: ['access:ml:canStartStopTrainedModels'],
       },
+      summary: 'Update trained model deployment',
+      description: 'Updates trained model deployment.',
     })
     .addVersion(
       {
@@ -627,6 +590,7 @@ export function trainedModelsRoutes(
             deployment_id: deploymentId,
             ...request.body,
           });
+
           return response.ok({
             body,
           });
@@ -636,13 +600,6 @@ export function trainedModelsRoutes(
       })
     );
 
-  /**
-   * @apiGroup TrainedModels
-   *
-   * @api {post} /internal/ml/trained_models/:modelId/deployment/_stop Stop trained model deployment
-   * @apiName StopTrainedModelDeployment
-   * @apiDescription Stops trained model deployment.
-   */
   router.versioned
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/trained_models/{modelId}/{deploymentId}/deployment/_stop`,
@@ -650,6 +607,8 @@ export function trainedModelsRoutes(
       options: {
         tags: ['access:ml:canStartStopTrainedModels'],
       },
+      summary: 'Stop trained model deployment',
+      description: 'Stops trained model deployment.',
     })
     .addVersion(
       {
@@ -665,7 +624,8 @@ export function trainedModelsRoutes(
         try {
           const { deploymentId, modelId } = request.params;
 
-          const results: Record<string, { success: boolean; error?: ErrorType }> = {};
+          const results: Record<string, { success: boolean; error?: ErrorType }> =
+            Object.create(null);
 
           for (const id of deploymentId.split(',')) {
             try {
@@ -689,13 +649,6 @@ export function trainedModelsRoutes(
       })
     );
 
-  /**
-   * @apiGroup TrainedModels
-   *
-   * @api {post} /internal/ml/trained_models/pipeline_simulate Simulates an ingest pipeline
-   * @apiName SimulateIngestPipeline
-   * @apiDescription Simulates an ingest pipeline.
-   */
   router.versioned
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/trained_models/pipeline_simulate`,
@@ -703,6 +656,8 @@ export function trainedModelsRoutes(
       options: {
         tags: ['access:ml:canTestTrainedModels'],
       },
+      summary: 'Simulates an ingest pipeline',
+      description: 'Simulates an ingest pipeline.',
     })
     .addVersion(
       {
@@ -729,13 +684,6 @@ export function trainedModelsRoutes(
       })
     );
 
-  /**
-   * @apiGroup TrainedModels
-   *
-   * @api {post} /internal/ml/trained_models/infer/:modelId Evaluates a trained model
-   * @apiName InferTrainedModelDeployment
-   * @apiDescription Evaluates a trained model.
-   */
   router.versioned
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/trained_models/infer/{modelId}/{deploymentId}`,
@@ -743,6 +691,8 @@ export function trainedModelsRoutes(
       options: {
         tags: ['access:ml:canTestTrainedModels'],
       },
+      summary: 'Evaluates a trained model.',
+      description: 'Evaluates a trained model.',
     })
     .addVersion(
       {
@@ -778,13 +728,6 @@ export function trainedModelsRoutes(
       })
     );
 
-  /**
-   * @apiGroup TrainedModels
-   *
-   * @api {get} /internal/ml/trained_models/model_downloads Gets available models for download
-   * @apiName GetTrainedModelDownloadList
-   * @apiDescription Gets available models for download with default and recommended flags based on the cluster OS and CPU architecture.
-   */
   router.versioned
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/trained_models/model_downloads`,
@@ -792,6 +735,9 @@ export function trainedModelsRoutes(
       options: {
         tags: ['access:ml:canGetTrainedModels'],
       },
+      summary: 'Get available models for download',
+      description:
+        'Gets available models for download with supported and recommended flags based on the cluster OS and CPU architecture.',
     })
     .addVersion(
       {
@@ -811,13 +757,6 @@ export function trainedModelsRoutes(
       })
     );
 
-  /**
-   * @apiGroup TrainedModels
-   *
-   * @api {get} /internal/ml/trained_models/elser_config Gets ELSER config for download
-   * @apiName GetElserConfig
-   * @apiDescription Gets ELSER config for download based on the cluster OS and CPU architecture.
-   */
   router.versioned
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/trained_models/elser_config`,
@@ -825,6 +764,8 @@ export function trainedModelsRoutes(
       options: {
         tags: ['access:ml:canGetTrainedModels'],
       },
+      summary: 'Get ELSER config for download',
+      description: 'Gets ELSER config for download based on the cluster OS and CPU architecture.',
     })
     .addVersion(
       {
@@ -852,13 +793,6 @@ export function trainedModelsRoutes(
       })
     );
 
-  /**
-   * @apiGroup TrainedModels
-   *
-   * @api {post} /internal/ml/trained_models/install_elastic_trained_model/:modelId Installs Elastic trained model
-   * @apiName InstallElasticTrainedModel
-   * @apiDescription Downloads and installs Elastic trained model.
-   */
   router.versioned
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/trained_models/install_elastic_trained_model/{modelId}`,
@@ -866,6 +800,8 @@ export function trainedModelsRoutes(
       options: {
         tags: ['access:ml:canCreateTrainedModels'],
       },
+      summary: 'Install Elastic trained model',
+      description: 'Downloads and installs Elastic trained model.',
     })
     .addVersion(
       {
@@ -895,13 +831,6 @@ export function trainedModelsRoutes(
       )
     );
 
-  /**
-   * @apiGroup TrainedModels
-   *
-   * @api {get} /internal/ml/trained_models/download_status Gets models download status
-   * @apiName ModelsDownloadStatus
-   * @apiDescription Gets download status for all currently downloading models
-   */
   router.versioned
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/trained_models/download_status`,
@@ -909,6 +838,8 @@ export function trainedModelsRoutes(
       options: {
         tags: ['access:ml:canCreateTrainedModels'],
       },
+      summary: 'Get models download status',
+      description: 'Gets download status for all currently downloading models.',
     })
     .addVersion(
       {
@@ -919,6 +850,45 @@ export function trainedModelsRoutes(
         async ({ client, mlClient, request, response, mlSavedObjectService }) => {
           try {
             const body = await modelsProvider(client, mlClient, cloud).getModelsDownloadStatus();
+
+            return response.ok({
+              body,
+            });
+          } catch (e) {
+            return response.customError(wrapError(e));
+          }
+        }
+      )
+    );
+
+  router.versioned
+    .get({
+      path: `${ML_INTERNAL_BASE_PATH}/trained_models/curated_model_config/{modelName}`,
+      access: 'internal',
+      options: {
+        tags: ['access:ml:canGetTrainedModels'],
+      },
+      summary: 'Get curated model config',
+      description:
+        'Gets curated model config for the specified model based on cluster architecture.',
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            params: curatedModelsParamsSchema,
+            query: curatedModelsQuerySchema,
+          },
+        },
+      },
+      routeGuard.fullLicenseAPIGuard(
+        async ({ client, mlClient, request, response, mlSavedObjectService }) => {
+          try {
+            const body = await modelsProvider(client, mlClient, cloud).getCuratedModelConfig(
+              request.params.modelName as ElasticCuratedModelName,
+              { version: request.query.version as ElserVersion }
+            );
 
             return response.ok({
               body,

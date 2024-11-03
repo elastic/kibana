@@ -30,7 +30,6 @@ export const ConnectedDiscoverLink = React.memo(() => {
   } = useKibanaContextForPlugin();
 
   const [pageState] = useActor(useObservabilityLogsExplorerPageStateContext());
-
   if (pageState.matches({ initialized: 'validLogsExplorerState' })) {
     return <DiscoverLinkForValidState discover={discover} pageState={pageState} />;
   } else {
@@ -47,7 +46,7 @@ export const DiscoverLinkForValidState = React.memo(
   ({
     discover,
     pageState: {
-      context: { logsExplorerState },
+      context: { logsExplorerState, allSelection },
     },
   }: {
     discover: DiscoverStart;
@@ -55,7 +54,8 @@ export const DiscoverLinkForValidState = React.memo(
   }) => {
     const discoverLinkParams = useMemo<DiscoverAppLocatorParams>(() => {
       const index = hydrateDataSourceSelection(
-        logsExplorerState.dataSourceSelection
+        logsExplorerState.dataSourceSelection,
+        allSelection
       ).toDataviewSpec();
       return {
         breakdownField: logsExplorerState.chart.breakdownField ?? undefined,
@@ -70,7 +70,7 @@ export const DiscoverLinkForValidState = React.memo(
         timeRange: logsExplorerState.time,
         dataViewSpec: index,
       };
-    }, [logsExplorerState]);
+    }, [allSelection, logsExplorerState]);
 
     return <DiscoverLink discover={discover} discoverLinkParams={discoverLinkParams} />;
   }

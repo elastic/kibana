@@ -22,7 +22,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('main', () => {
     before(async () => {
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       internalReqHeader = svlCommonApi.getInternalRequestHeader();
       await esArchiver.load('test/api_integration/fixtures/es_archiver/index_patterns/basic_index');
     });
@@ -31,7 +31,7 @@ export default function ({ getService }: FtrProviderContext) {
       await esArchiver.unload(
         'test/api_integration/fixtures/es_archiver/index_patterns/basic_index'
       );
-      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
     configArray.forEach((config) => {

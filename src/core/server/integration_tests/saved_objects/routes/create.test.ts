@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import supertest from 'supertest';
@@ -78,6 +79,7 @@ describe('POST /api/saved_objects/{type}', () => {
   it('formats successful response and records usage stats', async () => {
     const result = await supertest(httpSetup.server.listener)
       .post('/api/saved_objects/index-pattern')
+      .set('x-elastic-internal-origin', 'kibana')
       .send({
         attributes: {
           title: 'Testing',
@@ -95,6 +97,7 @@ describe('POST /api/saved_objects/{type}', () => {
   it('requires attributes', async () => {
     const result = await supertest(httpSetup.server.listener)
       .post('/api/saved_objects/index-pattern')
+      .set('x-elastic-internal-origin', 'kibana')
       .send({})
       .expect(400);
 
@@ -107,6 +110,7 @@ describe('POST /api/saved_objects/{type}', () => {
   it('calls upon savedObjectClient.create', async () => {
     await supertest(httpSetup.server.listener)
       .post('/api/saved_objects/index-pattern')
+      .set('x-elastic-internal-origin', 'kibana')
       .send({
         attributes: {
           title: 'Testing',
@@ -130,6 +134,7 @@ describe('POST /api/saved_objects/{type}', () => {
   it('can specify an id', async () => {
     await supertest(httpSetup.server.listener)
       .post('/api/saved_objects/index-pattern/logstash-*')
+      .set('x-elastic-internal-origin', 'kibana')
       .send({
         attributes: {
           title: 'Testing',
@@ -150,6 +155,7 @@ describe('POST /api/saved_objects/{type}', () => {
   it('returns with status 400 if the type is hidden from the HTTP APIs', async () => {
     const result = await supertest(httpSetup.server.listener)
       .post('/api/saved_objects/hidden-from-http')
+      .set('x-elastic-internal-origin', 'kibana')
       .send({
         attributes: {
           properties: {},
@@ -163,6 +169,7 @@ describe('POST /api/saved_objects/{type}', () => {
   it('logs a warning message when called', async () => {
     await supertest(httpSetup.server.listener)
       .post('/api/saved_objects/index-pattern')
+      .set('x-elastic-internal-origin', 'kibana')
       .send({
         attributes: {
           title: 'Logging test',

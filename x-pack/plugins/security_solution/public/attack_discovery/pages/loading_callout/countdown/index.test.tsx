@@ -32,7 +32,7 @@ describe('Countdown', () => {
   ];
 
   beforeAll(() => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
+    jest.useFakeTimers();
   });
 
   beforeEach(() => {
@@ -76,7 +76,7 @@ describe('Countdown', () => {
     );
 
     act(() => {
-      jest.runOnlyPendingTimers();
+      jest.advanceTimersByTime(1000);
     });
 
     expect(screen.getByTestId('timerText')).toHaveTextContent('00:59');

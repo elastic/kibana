@@ -12,8 +12,10 @@ import { MonitorInspectResponse } from '@kbn/synthetics-plugin/public/apps/synth
 import { v4 as uuidv4 } from 'uuid';
 import expect from '@kbn/expect';
 import { ProjectAPIKeyResponse } from '@kbn/synthetics-plugin/server/routes/monitor_cruds/get_api_key';
+import moment from 'moment/moment';
+import { omit } from 'lodash';
+import { KibanaSupertestProvider } from '@kbn/ftr-common-functional-services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { KibanaSupertestProvider } from '../../../../../../test/api_integration/services/supertest';
 
 export class SyntheticsMonitorTestService {
   private supertest: ReturnType<typeof KibanaSupertestProvider>;
@@ -45,14 +47,56 @@ export class SyntheticsMonitorTestService {
     return apiKey;
   };
 
-  async getMonitor(monitorId: string, decrypted: boolean = true, space?: string) {
-    let url =
-      SYNTHETICS_API_URLS.GET_SYNTHETICS_MONITOR.replace('{monitorId}', monitorId) +
-      (decrypted ? '?decrypted=true' : '');
+  async getMonitor(
+    monitorId: string,
+    {
+      statusCode = 200,
+      space,
+      internal,
+    }: {
+      statusCode?: number;
+      space?: string;
+      internal?: boolean;
+    } = {}
+  ) {
+    let url = SYNTHETICS_API_URLS.GET_SYNTHETICS_MONITOR.replace('{monitorId}', monitorId);
     if (space) {
       url = '/s/' + space + url;
     }
-    return this.supertest.get(url).set('kbn-xsrf', 'true').expect(200);
+    if (internal) {
+      url += `?internal=${internal}`;
+    }
+    const apiResponse = await this.supertest.get(url).expect(200);
+
+    expect(apiResponse.status).eql(statusCode, JSON.stringify(apiResponse.body));
+
+    if (statusCode === 200) {
+      const {
+        created_at: createdAt,
+        updated_at: updatedAt,
+        id,
+        config_id: configId,
+        spaceId,
+      } = apiResponse.body;
+      expect(id).not.empty();
+      expect(configId).not.empty();
+      expect(spaceId).not.empty();
+      expect([createdAt, updatedAt].map((d) => moment(d).isValid())).eql([true, true]);
+      return {
+        rawBody: omit(apiResponse.body, ['spaceId']),
+        body: {
+          ...omit(apiResponse.body, [
+            'created_at',
+            'updated_at',
+            'id',
+            'config_id',
+            'form_monitor_type',
+            'spaceId',
+          ]),
+        },
+      };
+    }
+    return apiResponse.body;
   }
 
   async addMonitor(monitor: any) {
@@ -169,6 +213,19 @@ export class SyntheticsMonitorTestService {
           : SYNTHETICS_API_URLS.SYNTHETICS_MONITORS
       )
       .send({ ids: Array.isArray(monitorId) ? monitorId : [monitorId] })
+      .set('kbn-xsrf', 'true');
+    expect(deleteResponse.status).to.eql(statusCode);
+    return deleteResponse;
+  }
+
+  async deleteMonitorByIdParam(monitorId?: string, statusCode = 200, spaceId?: string) {
+    const deleteResponse = await this.supertest
+      .delete(
+        spaceId
+          ? `/s/${spaceId}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}/${monitorId}`
+          : SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/' + monitorId
+      )
+      .send()
       .set('kbn-xsrf', 'true');
     expect(deleteResponse.status).to.eql(statusCode);
     return deleteResponse;

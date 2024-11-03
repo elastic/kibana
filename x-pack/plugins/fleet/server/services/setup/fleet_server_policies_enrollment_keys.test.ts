@@ -29,6 +29,9 @@ describe('ensureAgentPoliciesFleetServerKeysAndPolicies', () => {
     jest.mocked(appContextService).getSecurity.mockReturnValue({
       authc: { apiKeys: { areAPIKeysEnabled: async () => true } },
     } as any);
+    jest.mocked(appContextService).getExperimentalFeatures.mockReturnValue({
+      asyncDeployPolicies: false,
+    } as any);
 
     mockedEnsureDefaultEnrollmentAPIKeyForAgentPolicy.mockReset();
     mockedAgentPolicyService.getLatestFleetPolicy.mockReset();

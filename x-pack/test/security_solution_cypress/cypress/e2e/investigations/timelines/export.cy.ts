@@ -41,6 +41,10 @@ describe('Export timelines', { tags: ['@ess', '@serverless'] }, () => {
     visit(TIMELINES_URL);
   });
 
+  /**
+   *  TODO: Good candidate for converting to a jest Test
+   *  https://github.com/elastic/kibana/issues/195612
+   */
   it('should export custom timeline(s)', function () {
     cy.log('Export a custom timeline via timeline actions');
 
@@ -59,6 +63,7 @@ describe('Export timelines', { tags: ['@ess', '@serverless'] }, () => {
       cy.wrap(response?.statusCode).should('eql', 200);
       cy.wrap(response?.body).should('eql', expectedExportedTimeline(this.timelineResponse1));
     });
+
     closeToast();
 
     cy.log('Export all custom timelines via bulk actions');

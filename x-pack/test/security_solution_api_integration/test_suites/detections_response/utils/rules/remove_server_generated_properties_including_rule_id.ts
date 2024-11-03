@@ -7,7 +7,10 @@
 
 import type { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
 
-import { removeServerGeneratedProperties } from './remove_server_generated_properties';
+import {
+  removeServerGeneratedProperties,
+  type RuleWithoutServerGeneratedProperties,
+} from './remove_server_generated_properties';
 
 /**
  * This will remove server generated properties such as date times, etc... including the rule_id
@@ -15,9 +18,8 @@ import { removeServerGeneratedProperties } from './remove_server_generated_prope
  */
 export const removeServerGeneratedPropertiesIncludingRuleId = (
   rule: RuleResponse
-): Partial<RuleResponse> => {
+): Omit<RuleWithoutServerGeneratedProperties, 'rule_id'> => {
   const ruleWithRemovedProperties = removeServerGeneratedProperties(rule);
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  const { rule_id, ...additionalRuledIdRemoved } = ruleWithRemovedProperties;
+  const { rule_id: _, ...additionalRuledIdRemoved } = ruleWithRemovedProperties;
   return additionalRuledIdRemoved;
 };

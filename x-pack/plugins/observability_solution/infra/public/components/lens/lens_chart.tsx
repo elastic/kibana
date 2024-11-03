@@ -4,15 +4,25 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
-import { EuiPanel, EuiToolTip, type EuiPanelProps } from '@elastic/eui';
+import React, { useCallback } from 'react';
+import {
+  EuiPanel,
+  EuiToolTip,
+  EuiText,
+  EuiHorizontalRule,
+  EuiLink,
+  type EuiPanelProps,
+} from '@elastic/eui';
 import { Action } from '@kbn/ui-actions-plugin/public';
+import { UserMessage } from '@kbn/lens-plugin/public';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { useLensAttributes, type UseLensAttributesParams } from '../../hooks/use_lens_attributes';
 import type { BaseChartProps } from './types';
 import type { TooltipContentProps } from './metric_explanation/tooltip_content';
 import { LensWrapper } from './lens_wrapper';
 import { ChartLoadError } from './chart_load_error';
+import { HOST_MISSING_FIELDS } from '../../common/visualizations/constants';
 
 const MIN_HEIGHT = 300;
 
@@ -32,7 +42,6 @@ export const LensChart = React.memo(
     dateRange,
     filters,
     hidePanelTitles,
-    lastReloadRequestTime,
     query,
     onBrushEnd,
     onFilter,
@@ -55,6 +64,57 @@ export const LensChart = React.memo(
       searchSessionId,
     });
 
+    const handleBeforeBadgesRender = useCallback((messages: UserMessage[]) => {
+      const missingFieldsMessage = messages.find(
+        (m) => m.uniqueId === 'field_not_found' && m.severity === 'error'
+      );
+      return missingFieldsMessage
+        ? [
+            {
+              ...missingFieldsMessage,
+              severity: 'warning' as const,
+              hidePopoverIcon: true,
+              longMessage: (
+                <>
+                  <EuiText size="s">
+                    <strong>
+                      <FormattedMessage
+                        id="xpack.infra.lens.customErrorHandler.title"
+                        defaultMessage="No results found"
+                      />
+                    </strong>
+                  </EuiText>
+                  <EuiHorizontalRule margin="s" />
+                  <EuiText size="xs" data-test-subj="infraLensCustomErrorHanlderText">
+                    <p>
+                      <FormattedMessage
+                        id="xpack.infra.lens.customErrorHandler.description"
+                        defaultMessage="To display this chart, please ensure you are collecting the following fields:"
+                      />
+                    </p>
+                    <p>
+                      {missingFieldsMessage &&
+                        (missingFieldsMessage.longMessage as React.ReactNode)}
+                    </p>
+                  </EuiText>
+                  <EuiHorizontalRule margin="s" />
+                  <EuiLink
+                    data-test-subj="infraLensCustomErrorHanlderLink"
+                    href={HOST_MISSING_FIELDS}
+                    target="_blank"
+                  >
+                    <FormattedMessage
+                      id="xpack.infra.customErrorHandler.learnMoreLink"
+                      defaultMessage="Learn more"
+                    />
+                  </EuiLink>
+                </>
+              ),
+            },
+          ]
+        : messages;
+    }, []);
+
     const lens = (
       <LensWrapper
         id={id}
@@ -71,6 +131,7 @@ export const LensChart = React.memo(
         onBrushEnd={onBrushEnd}
         searchSessionId={searchSessionId}
         onFilter={onFilter}
+        onBeforeBadgesRender={handleBeforeBadgesRender}
       />
     );
     const content = !toolTip ? (

@@ -8,9 +8,8 @@
 import { isEmpty, isError } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { Logger, LogMeta } from '@kbn/logging';
-import type { ElasticsearchClient, IBasePath } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { ObservabilityConfig } from '@kbn/observability-plugin/server';
-import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { ALERT_RULE_PARAMETERS, TIMESTAMP } from '@kbn/rule-data-utils';
 import {
   ParsedTechnicalFields,
@@ -19,8 +18,16 @@ import {
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { set } from '@kbn/safer-lodash-set';
 import { Alert } from '@kbn/alerts-as-data-utils';
+import { type Group } from '@kbn/observability-alerting-rule-utils';
 import { ParsedExperimentalFields } from '@kbn/rule-registry-plugin/common/parse_experimental_fields';
+import type { LocatorPublic } from '@kbn/share-plugin/common';
+import type {
+  AssetDetailsLocatorParams,
+  InventoryLocatorParams,
+  MetricsExplorerLocatorParams,
+} from '@kbn/observability-shared-plugin/common';
 import {
+  ALERT_RULE_PARAMETERS_NODE_TYPE,
   getInventoryViewInAppUrl,
   getMetricsViewInAppUrl,
 } from '../../../../common/alerting/metrics/alert_link';
@@ -28,7 +35,6 @@ import {
   AlertExecutionDetails,
   InventoryMetricConditions,
 } from '../../../../common/alerting/metrics/types';
-import { Group } from '../../../../common/alerting/types';
 
 const ALERT_CONTEXT_CONTAINER = 'container';
 const ALERT_CONTEXT_ORCHESTRATOR = 'orchestrator';
@@ -124,19 +130,19 @@ export const getAlertDetailsPageEnabledForApp = (
 };
 
 export const getInventoryViewInAppUrlWithSpaceId = ({
-  basePath,
   criteria,
   nodeType,
-  spaceId,
   timestamp,
   hostName,
+  assetDetailsLocator,
+  inventoryLocator,
 }: {
-  basePath: IBasePath;
   criteria: InventoryMetricConditions[];
   nodeType: string;
-  spaceId: string;
   timestamp: string;
   hostName?: string;
+  assetDetailsLocator?: LocatorPublic<AssetDetailsLocatorParams>;
+  inventoryLocator?: LocatorPublic<InventoryLocatorParams>;
 }) => {
   const { metric, customMetric } = criteria[0];
 
@@ -145,39 +151,42 @@ export const getInventoryViewInAppUrlWithSpaceId = ({
     [`${ALERT_RULE_PARAMETERS}.criteria.customMetric.id`]: [customMetric?.id],
     [`${ALERT_RULE_PARAMETERS}.criteria.customMetric.aggregation`]: [customMetric?.aggregation],
     [`${ALERT_RULE_PARAMETERS}.criteria.customMetric.field`]: [customMetric?.field],
-    [`${ALERT_RULE_PARAMETERS}.nodeType`]: [nodeType],
+    [ALERT_RULE_PARAMETERS_NODE_TYPE]: [nodeType],
     [TIMESTAMP]: timestamp,
     [HOST_NAME]: hostName,
   };
 
-  return addSpaceIdToPath(
-    basePath.publicBaseUrl,
-    spaceId,
-    getInventoryViewInAppUrl(parseTechnicalFields(fields, true))
-  );
+  return getInventoryViewInAppUrl({
+    fields: parseTechnicalFields(fields, true),
+    assetDetailsLocator,
+    inventoryLocator,
+  });
 };
 
 export const getMetricsViewInAppUrlWithSpaceId = ({
-  basePath,
-  spaceId,
   timestamp,
-  hostName,
+  groupBy,
+  assetDetailsLocator,
+  metricsExplorerLocator,
+  additionalContext,
 }: {
-  basePath: IBasePath;
-  spaceId: string;
   timestamp: string;
-  hostName?: string;
+  groupBy?: string[];
+  assetDetailsLocator?: LocatorPublic<AssetDetailsLocatorParams>;
+  metricsExplorerLocator?: LocatorPublic<MetricsExplorerLocatorParams>;
+  additionalContext?: AdditionalContext;
 }) => {
   const fields = {
+    ...flattenAdditionalContext(additionalContext),
     [TIMESTAMP]: timestamp,
-    [HOST_NAME]: hostName,
   };
 
-  return addSpaceIdToPath(
-    basePath.publicBaseUrl,
-    spaceId,
-    getMetricsViewInAppUrl(parseTechnicalFields(fields, true))
-  );
+  return getMetricsViewInAppUrl({
+    fields: parseTechnicalFields(fields, true),
+    groupBy,
+    assetDetailsLocator,
+    metricsExplorerLocator,
+  });
 };
 
 export const KUBERNETES_POD_UID = 'kubernetes.pod.uid';

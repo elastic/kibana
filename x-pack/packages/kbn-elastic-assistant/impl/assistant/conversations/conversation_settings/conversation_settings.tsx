@@ -17,8 +17,8 @@ import React, { useMemo } from 'react';
 
 import { HttpSetup } from '@kbn/core-http-browser';
 
-import { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
-import { Conversation, Prompt } from '../../../..';
+import { PromptResponse } from '@kbn/elastic-assistant-common';
+import { Conversation } from '../../../..';
 import * as i18n from './translations';
 
 import { AIConnector } from '../../../connectorland/connector_selector';
@@ -32,8 +32,7 @@ import { useConversationChanged } from './use_conversation_changed';
 import { getConversationApiConfig } from '../../use_conversation/helpers';
 
 export interface ConversationSettingsProps {
-  actionTypeRegistry: ActionTypeRegistryContract;
-  allSystemPrompts: Prompt[];
+  allSystemPrompts: PromptResponse[];
   connectors?: AIConnector[];
   conversationSettings: Record<string, Conversation>;
   conversationsSettingsBulkActions: ConversationsBulkActions;
@@ -48,7 +47,6 @@ export interface ConversationSettingsProps {
     React.SetStateAction<ConversationsBulkActions>
   >;
   isDisabled?: boolean;
-  isFlyoutMode: boolean;
 }
 
 /**
@@ -65,7 +63,6 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
     conversationSettings,
     http,
     isDisabled = false,
-    isFlyoutMode,
     setAssistantStreamingEnabled,
     setConversationSettings,
     conversationsSettingsBulkActions,
@@ -126,7 +123,6 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
           conversationsSettingsBulkActions={conversationsSettingsBulkActions}
           http={http}
           isDisabled={isDisabled}
-          isFlyoutMode={isFlyoutMode}
           selectedConversation={selectedConversationWithApiConfig}
           setConversationSettings={setConversationSettings}
           setConversationsSettingsBulkActions={setConversationsSettingsBulkActions}

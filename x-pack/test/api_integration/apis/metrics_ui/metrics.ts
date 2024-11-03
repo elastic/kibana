@@ -35,13 +35,14 @@ export default function ({ getService }: FtrProviderContext) {
     after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/8.0.0/pods_only'));
 
     const fetchNodeDetails = async (
-      body: NodeDetailsRequest
+      body: NodeDetailsRequest,
+      expectedStatusCode = 200
     ): Promise<NodeDetailsMetricDataResponse | undefined> => {
       const response = await supertest
         .post('/api/metrics/node_details')
         .set('kbn-xsrf', 'xxx')
         .send(body)
-        .expect(200);
+        .expect(expectedStatusCode);
       return response.body;
     };
 

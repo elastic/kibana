@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 export const endpointFieldsRequestSchema = z.object({
   indices: z.array(z.string()),

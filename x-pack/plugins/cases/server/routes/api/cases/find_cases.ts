@@ -16,6 +16,7 @@ export const findCaseRoute = createCasesRoute({
   routerOptions: {
     access: 'public',
     summary: `Search cases`,
+    tags: ['oas-tag:cases'],
   },
   handler: async ({ context, request, response }) => {
     try {

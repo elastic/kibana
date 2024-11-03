@@ -22,17 +22,17 @@ const testProps = {
   isSettingsModalVisible: false,
   selectedConversation: welcomeConvo,
   setIsSettingsModalVisible,
-  isFlyoutMode: false,
   onConversationSelected,
   conversations: {},
   conversationsLoaded: true,
-  refetchConversationsState: jest.fn(),
+  refetchCurrentUserConversations: jest.fn(),
   anonymizationFields: { total: 0, page: 1, perPage: 1000, data: [] },
   refetchAnonymizationFieldsResults: jest.fn(),
 };
 const setSelectedSettingsTab = jest.fn();
 const mockUseAssistantContext = {
   setSelectedSettingsTab,
+  assistantFeatures: {},
 };
 jest.mock('../../assistant_context', () => {
   const original = jest.requireActual('../../assistant_context');
@@ -58,6 +58,7 @@ describe('AssistantSettingsButton', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
+
   it('Clicking the settings gear opens the conversations tab', () => {
     const { getByTestId } = render(<AssistantSettingsButton {...testProps} />);
     fireEvent.click(getByTestId('settings'));

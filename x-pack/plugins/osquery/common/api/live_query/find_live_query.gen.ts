@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 import {
   KueryOrUndefined,
@@ -32,6 +32,3 @@ export const FindLiveQueryRequestQuery = z.object({
   sort: SortOrUndefined.optional(),
   sortOrder: SortOrderOrUndefined.optional(),
 });
-
-export type SuccessResponse = z.infer<typeof SuccessResponse>;
-export const SuccessResponse = z.object({});

@@ -14,7 +14,7 @@
  *   version: not applicable
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 import { AlertSuppressionDuration } from '../common_attributes.gen';
 

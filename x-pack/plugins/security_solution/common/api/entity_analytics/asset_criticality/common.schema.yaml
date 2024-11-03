@@ -58,27 +58,10 @@ components:
               $ref: '#/components/schemas/AssetCriticalityLevel'
           required:
             - criticality_level
-    CreateSingleAssetCriticalityRequest:
-      allOf:
-        - $ref: '#/components/schemas/CreateAssetCriticalityRecord'
-        - type: object
-          properties:
-            refresh:
-              type: string
-              enum: [wait_for]
-              description: If 'wait_for' the request will wait for the index refresh.
-    DeleteAssetCriticalityRecord:
-      allOf:
-        - $ref: '#/components/schemas/AssetCriticalityRecordIdParts'
-        - type: object
-          properties:
-            refresh:
-              type: string
-              enum: [wait_for]
-              description: If 'wait_for' the request will wait for the index refresh.
     AssetCriticalityRecord:
       allOf:
         - $ref: '#/components/schemas/CreateAssetCriticalityRecord'
+        - $ref: '#/components/schemas/AssetCriticalityRecordEcsParts'
         - type: object
           properties:
             '@timestamp':
@@ -88,46 +71,43 @@ components:
               description: The time the record was created or updated.
           required:
             - '@timestamp'
-    AssetCriticalityBulkUploadErrorItem:
+    AssetCriticalityRecordEcsParts:
       type: object
       properties:
-        message:
-          type: string
-        index:
-          type: integer
+        'asset':
+          type: object
+          properties:
+            'criticality':
+              $ref: '#/components/schemas/AssetCriticalityLevel'
+          required:
+            - 'asset'
+        'host':
+          type: object
+          properties:
+            'name':
+              type: string
+            'asset':
+              type: object
+              properties:
+                'criticality':
+                  $ref: '#/components/schemas/AssetCriticalityLevel'
+              required:
+                - 'criticality'
+          required:
+            - 'name'
+        'user':
+          type: object
+          properties:
+            'name':
+              type: string
+            'asset':
+              type: object
+              properties:
+                'criticality':
+                  $ref: '#/components/schemas/AssetCriticalityLevel'
+              required:
+                - 'criticality'
+          required:
+            - 'name'
       required:
-        - message
-        - index
-    AssetCriticalityBulkUploadStats:
-      type: object
-      properties:
-        successful:
-          type: integer
-        failed:
-          type: integer
-        total:
-          type: integer
-      required:
-        - successful
-        - failed
-        - total
-    AssetCriticalityBulkUploadResponse:
-      type: object
-      example:
-        errors:
-          - message: 'Invalid ID field'
-            index: 0
-        stats:
-          successful: 1
-          failed: 1
-          total: 2
-      properties:
-        errors:
-          type: array
-          items:
-            $ref: '#/components/schemas/AssetCriticalityBulkUploadErrorItem'
-        stats:
-          $ref: '#/components/schemas/AssetCriticalityBulkUploadStats'
-      required:
-        - errors
-        - stats
+        - 'asset'

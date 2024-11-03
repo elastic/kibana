@@ -17,18 +17,18 @@ import { kibanaService } from '../../../../../utils/kibana_service';
 import { store } from '../../../state';
 
 interface Props {
-  core: CoreStart;
+  coreStart: CoreStart;
   plugins: ClientPluginsStart;
   ruleParams: RuleTypeParamsExpressionProps<TLSParams>['ruleParams'];
   setRuleParams: RuleTypeParamsExpressionProps<TLSParams>['setRuleParams'];
 }
 
 // eslint-disable-next-line import/no-default-export
-export default function TLSAlert({ core, plugins, ruleParams, setRuleParams }: Props) {
-  kibanaService.core = core;
+export default function TLSAlert({ coreStart, plugins, ruleParams, setRuleParams }: Props) {
+  kibanaService.coreStart = coreStart;
   return (
     <ReduxProvider store={store}>
-      <KibanaContextProvider services={{ ...core, ...plugins }}>
+      <KibanaContextProvider services={{ ...coreStart, ...plugins }}>
         <TLSRuleComponent ruleParams={ruleParams} setRuleParams={setRuleParams} />
       </KibanaContextProvider>
     </ReduxProvider>

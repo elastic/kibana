@@ -179,7 +179,7 @@ describe('GettingStartedPage', () => {
     });
 
     // page is loaded
-    expect(kibanaService.core.application.navigateToApp).toHaveBeenCalledWith('synthetics', {
+    expect(kibanaService.coreStart.application.navigateToApp).toHaveBeenCalledWith('synthetics', {
       path: '/monitors',
     });
   });

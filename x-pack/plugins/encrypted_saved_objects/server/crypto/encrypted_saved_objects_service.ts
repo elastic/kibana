@@ -308,11 +308,12 @@ export class EncryptedSavedObjectsService {
     const encryptedAttributesKeys = Object.keys(encryptedAttributes);
     if (encryptedAttributesKeys.length !== typeDefinition.attributesToEncrypt.size) {
       this.options.logger.debug(
-        `The following attributes of saved object "${descriptorToArray(
-          descriptor
-        )}" should have been encrypted: ${Array.from(
-          typeDefinition.attributesToEncrypt
-        )}, but found only: ${encryptedAttributesKeys}`
+        () =>
+          `The following attributes of saved object "${descriptorToArray(
+            descriptor
+          )}" should have been encrypted: ${Array.from(
+            typeDefinition.attributesToEncrypt
+          )}, but found only: ${encryptedAttributesKeys}`
       );
     }
 
@@ -569,11 +570,12 @@ export class EncryptedSavedObjectsService {
     const decryptedAttributesKeys = Object.keys(decryptedAttributes);
     if (decryptedAttributesKeys.length !== typeDefinition.attributesToEncrypt.size) {
       this.options.logger.debug(
-        `The following attributes of saved object "${descriptorToArray(
-          descriptor
-        )}" should have been decrypted: ${Array.from(
-          typeDefinition.attributesToEncrypt
-        )}, but found only: ${decryptedAttributesKeys}`
+        () =>
+          `The following attributes of saved object "${descriptorToArray(
+            descriptor
+          )}" should have been decrypted: ${Array.from(
+            typeDefinition.attributesToEncrypt
+          )}, but found only: ${decryptedAttributesKeys}`
       );
     }
 
@@ -605,9 +607,10 @@ export class EncryptedSavedObjectsService {
 
     if (Object.keys(attributesAAD).length === 0) {
       this.options.logger.debug(
-        `The AAD for saved object "${descriptorToArray(
-          descriptor
-        )}" does not include any attributes.`
+        () =>
+          `The AAD for saved object "${descriptorToArray(
+            descriptor
+          )}" does not include any attributes.`
       );
     }
 

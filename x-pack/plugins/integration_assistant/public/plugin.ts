@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { CoreStart, Plugin, CoreSetup } from '@kbn/core/public';
+import type { CoreStart, Plugin, CoreSetup, PluginInitializerContext } from '@kbn/core/public';
+import { BehaviorSubject } from 'rxjs';
 import type {
   IntegrationAssistantPluginSetup,
   IntegrationAssistantPluginStart,
@@ -13,15 +14,33 @@ import type {
 } from './types';
 import { getCreateIntegrationLazy } from './components/create_integration';
 import { getCreateIntegrationCardButtonLazy } from './components/create_integration_card_button';
-import { Telemetry, type Services } from './services';
+import {
+  Telemetry,
+  ExperimentalFeaturesService,
+  type Services,
+  type RenderUpselling,
+} from './services';
+import { parseExperimentalConfigValue } from '../common/experimental_features';
+import type { ExperimentalFeatures } from '../common/experimental_features';
+import { type IntegrationAssistantConfigType } from '../server/config';
 
 export class IntegrationAssistantPlugin
   implements Plugin<IntegrationAssistantPluginSetup, IntegrationAssistantPluginStart>
 {
   private telemetry = new Telemetry();
+  private renderUpselling$ = new BehaviorSubject<RenderUpselling | undefined>(undefined);
+  private config: IntegrationAssistantConfigType;
+  private experimentalFeatures: ExperimentalFeatures;
+
+  constructor(private readonly initializerContext: PluginInitializerContext) {
+    this.config = this.initializerContext.config.get<IntegrationAssistantConfigType>();
+    this.experimentalFeatures = parseExperimentalConfigValue(this.config.enableExperimental || []);
+    ExperimentalFeaturesService.init(this.experimentalFeatures);
+  }
 
   public setup(core: CoreSetup): IntegrationAssistantPluginSetup {
     this.telemetry.setup(core.analytics);
+    this.config = this.config;
     return {};
   }
 
@@ -33,11 +52,17 @@ export class IntegrationAssistantPlugin
       ...core,
       ...dependencies,
       telemetry: this.telemetry.start(),
+      renderUpselling$: this.renderUpselling$.asObservable(),
     };
 
     return {
-      CreateIntegration: getCreateIntegrationLazy(services),
-      CreateIntegrationCardButton: getCreateIntegrationCardButtonLazy(),
+      components: {
+        CreateIntegration: getCreateIntegrationLazy(services),
+        CreateIntegrationCardButton: getCreateIntegrationCardButtonLazy(),
+      },
+      renderUpselling: (renderUpselling) => {
+        this.renderUpselling$.next(renderUpselling);
+      },
     };
   }
 

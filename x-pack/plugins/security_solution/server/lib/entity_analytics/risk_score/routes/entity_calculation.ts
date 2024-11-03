@@ -16,9 +16,9 @@ import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import type { SecuritySolutionRequestHandlerContext } from '../../../../types';
-import type { RiskScoresCalculationResponse } from '../../../../../common/api/entity_analytics/risk_engine/calculation_route.gen';
+import type { RiskScoresCalculationResponse } from '../../../../../common/api/entity_analytics';
 import type { AfterKeys } from '../../../../../common/api/entity_analytics/common';
-import { RiskScoresEntityCalculationRequest } from '../../../../../common/api/entity_analytics/risk_engine/entity_calculation_route.gen';
+import { RiskScoresEntityCalculationRequest } from '../../../../../common/api/entity_analytics';
 import { APP_ID, RISK_SCORE_ENTITY_CALCULATION_URL } from '../../../../../common/constants';
 import { getRiskInputsIndex } from '../get_risk_inputs_index';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
@@ -33,7 +33,7 @@ type Handler = (
   context: SecuritySolutionRequestHandlerContext,
   request: KibanaRequest<unknown, unknown, RiskScoresEntityCalculationRequest>,
   response: KibanaResponseFactory
-) => Promise<IKibanaResponse>;
+) => Promise<IKibanaResponse<RiskScoresCalculationResponse>>;
 
 const handler: (logger: Logger) => Handler = (logger) => async (context, request, response) => {
   const securityContext = await context.securitySolution;
@@ -101,7 +101,7 @@ const handler: (logger: Logger) => Handler = (logger) => async (context, request
 
     const filter = isEmpty(userFilter) ? [identifierFilter] : [userFilter, identifierFilter];
 
-    const result: RiskScoresCalculationResponse = await riskScoreService.calculateAndPersistScores({
+    const result = await riskScoreService.calculateAndPersistScores({
       pageSize,
       identifierType,
       index,

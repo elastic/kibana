@@ -24,7 +24,7 @@ import {
   ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server/language_models';
 
-const mockLlm = new FakeLLM({
+const model = new FakeLLM({
   response: "I'll callback later.",
 }) as unknown as ActionsClientChatOpenAI | ActionsClientSimpleChatModel;
 
@@ -69,17 +69,22 @@ describe('EcsGraph', () => {
       // When getEcsGraph runs, langgraph compiles the graph it will error if the graph has any issues.
       // Common issues for example detecting a node has no next step, or there is a infinite loop between them.
       try {
-        await getEcsGraph(mockLlm);
+        await getEcsGraph({ model });
       } catch (error) {
-        fail(`getEcsGraph threw an error: ${error}`);
+        throw Error(`getEcsGraph threw an error: ${error}`);
       }
     });
     it('Runs the whole graph, with mocked outputs from the LLM.', async () => {
       // The mocked outputs are specifically crafted to trigger ALL different conditions, allowing us to test the whole graph.
       // This is why we have all the expects ensuring each function was called.
+      const ecsGraph = await getEcsGraph({ model });
+      let response;
+      try {
+        response = await ecsGraph.invoke(mockedRequest);
+      } catch (error) {
+        throw Error(`getEcsGraph threw an error: ${error}`);
+      }
 
-      const ecsGraph = await getEcsGraph(mockLlm);
-      const response = await ecsGraph.invoke(mockedRequest);
       expect(response.results).toStrictEqual(ecsMappingExpectedResults);
 
       // Check if the functions were called

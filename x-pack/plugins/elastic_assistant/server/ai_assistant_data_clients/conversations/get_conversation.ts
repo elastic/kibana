@@ -34,9 +34,9 @@ export const getConversation = async ({
               bool: {
                 must: [
                   {
-                    match: user.profile_uid
-                      ? { 'users.id': user.profile_uid }
-                      : { 'users.name': user.username },
+                    match: user.username
+                      ? { 'users.name': user.username }
+                      : { 'users.id': user.profile_uid },
                   },
                 ],
               },

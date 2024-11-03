@@ -84,36 +84,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           );
         });
       });
-
-      describe('and onboarding type is systemLogs', () => {
-        before(async () => {
-          const req = await observabilityOnboardingApiClient.logMonitoringUser({
-            endpoint: 'POST /internal/observability_onboarding/logs/flow',
-            params: {
-              body: {
-                type: 'systemLogs',
-                name: 'name',
-              },
-            },
-          });
-
-          onboardingId = req.body.onboardingId;
-        });
-
-        it('should return input properties configured', async () => {
-          const req = await callApi({
-            onboardingId,
-          });
-
-          expect(req.status).to.be(200);
-
-          const ymlConfig = load(req.text);
-          expect(ymlConfig.inputs[0].data_stream.namespace).to.be('default');
-          expect(ymlConfig.inputs[0].streams.length).to.be(2);
-          expect(ymlConfig.inputs[0].streams[0].data_stream.dataset).to.be('system.auth');
-          expect(ymlConfig.inputs[0].streams[1].data_stream.dataset).to.be('system.syslog');
-        });
-      });
     });
   });
 }

@@ -6,7 +6,7 @@
  */
 
 import { SecurityIndexPrivilege } from '@elastic/elasticsearch/lib/api/types';
-import { UptimeEsClient } from '../../lib';
+import { SyntheticsEsClient } from '../../lib';
 import { SyntheticsServerSetup } from '../../types';
 import { getFakeKibanaRequest } from '../utils/fake_kibana_request';
 import { getServiceApiKeyPrivileges, syntheticsIndex } from '../get_api_key';
@@ -26,8 +26,8 @@ export const checkHasPrivileges = (
     });
 };
 
-export const checkIndicesReadPrivileges = (uptimeEsClient: UptimeEsClient) => {
-  return uptimeEsClient.baseESClient.security.hasPrivileges({
+export const checkIndicesReadPrivileges = (syntheticsEsClient: SyntheticsEsClient) => {
+  return syntheticsEsClient.baseESClient.security.hasPrivileges({
     body: {
       index: [
         {

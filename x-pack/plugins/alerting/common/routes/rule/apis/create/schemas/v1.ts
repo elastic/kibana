@@ -6,9 +6,11 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { ruleParamsSchemaWithDefaultValueV1 } from '@kbn/response-ops-rule-params';
 import { validateDurationV1, validateHoursV1, validateTimezoneV1 } from '../../../validation';
 import { notifyWhenSchemaV1, alertDelaySchemaV1 } from '../../../response';
 import { alertsFilterQuerySchemaV1 } from '../../../../alerts_filter_query';
+import { flappingSchemaV1 } from '../../../common';
 
 export const actionFrequencySchema = schema.object({
   summary: schema.boolean({
@@ -114,7 +116,13 @@ export const actionSchema = schema.object(
       })
     ),
     alerts_filter: schema.maybe(actionAlertsFilterSchema),
-    use_alert_data_for_template: schema.maybe(schema.boolean()),
+    use_alert_data_for_template: schema.maybe(
+      schema.boolean({
+        meta: {
+          description: 'Indicates whether to use alert data as a template.',
+        },
+      })
+    ),
   },
   {
     meta: { description: 'An action that runs under defined conditions.' },
@@ -159,10 +167,7 @@ export const createBodySchema = schema.object({
       })
     )
   ),
-  params: schema.recordOf(schema.string(), schema.maybe(schema.any()), {
-    defaultValue: {},
-    meta: { description: 'The parameters for the rule.' },
-  }),
+  params: ruleParamsSchemaWithDefaultValueV1,
   schedule: schema.object(
     {
       interval: schema.string({
@@ -180,8 +185,15 @@ export const createBodySchema = schema.object({
   actions: schema.arrayOf(actionSchema, { defaultValue: [] }),
   notify_when: schema.maybe(schema.nullable(notifyWhenSchemaV1)),
   alert_delay: schema.maybe(alertDelaySchemaV1),
+  flapping: schema.maybe(schema.nullable(flappingSchemaV1)),
 });
 
 export const createParamsSchema = schema.object({
-  id: schema.maybe(schema.string()),
+  id: schema.maybe(
+    schema.string({
+      meta: {
+        description: 'The identifier for the rule. If it is omitted, an ID is randomly generated.',
+      },
+    })
+  ),
 });

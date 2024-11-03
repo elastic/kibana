@@ -9,16 +9,22 @@ import { renderHook, act } from '@testing-library/react-hooks';
 import { useRequestObservable } from './use_request_observable';
 import { type RequestState, useLoadingStateContext } from './use_loading_state';
 import { useDatePickerContext, type UseDateRangeProviderProps } from './use_date_picker';
+import { useSearchSessionContext } from '../../../hooks/use_search_session';
 import { BehaviorSubject } from 'rxjs';
 
 jest.mock('./use_loading_state');
 jest.mock('./use_date_picker');
+jest.mock('../../../hooks/use_search_session');
 
 const useLoadingStateContextMock = useLoadingStateContext as jest.MockedFunction<
   typeof useLoadingStateContext
 >;
 const useDatePickerContextMock = useDatePickerContext as jest.MockedFunction<
   typeof useDatePickerContext
+>;
+
+const useSearchSessionMock = useSearchSessionContext as jest.MockedFunction<
+  typeof useSearchSessionContext
 >;
 
 describe('useRequestObservable', () => {
@@ -32,10 +38,15 @@ describe('useRequestObservable', () => {
   // needed to spy on `next` function
   requestStateMock$.next = jest.fn();
 
-  const mockUseLoadingStateContextMock = () => {
-    useLoadingStateContextMock.mockReturnValue({
+  const mockUseSearchSessionMock = () => {
+    useSearchSessionMock.mockReturnValue({
       updateSearchSessionId: jest.fn(() => {}),
       searchSessionId: '',
+    });
+  };
+
+  const mockUseLoadingStateContextMock = () => {
+    useLoadingStateContextMock.mockReturnValue({
       requestState$: requestStateMock$,
       isAutoRefreshRequestPending$: isAutoRefreshRequestPendingMock$,
     });
@@ -49,6 +60,7 @@ describe('useRequestObservable', () => {
 
   beforeEach(() => {
     mockDatePickerContext();
+    mockUseSearchSessionMock();
     mockUseLoadingStateContextMock();
   });
 
