@@ -24,6 +24,9 @@ export function registerSimulateRoute({ router, lib: { handleEsError } }: RouteD
     async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
       const template = request.body as TypeOf<typeof bodySchema>;
+      // Until ES fixes a bug on their side we need to send a fake index pattern
+      // that won't match any indices.
+      // Issue: https://github.com/elastic/elasticsearch/issues/59152
       // eslint-disable-next-line @typescript-eslint/naming-convention
       const index_patterns = ['a_fake_index_pattern_that_wont_match_any_indices'];
       const templateName = request.params.templateName;
@@ -38,9 +41,6 @@ export function registerSimulateRoute({ router, lib: { handleEsError } }: RouteD
         : {
             body: {
               ...template,
-              // Until ES fixes a bug on their side we need to send a fake index pattern
-              // that won't match any indices.
-              // Issue: https://github.com/elastic/elasticsearch/issues/59152
               index_patterns,
             },
           };
