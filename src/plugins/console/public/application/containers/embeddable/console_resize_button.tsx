@@ -62,6 +62,12 @@ export const EmbeddedConsoleResizeButton = ({
   const initialMouseY = useRef(0);
 
   useEffect(() => {
+    setTimeout(() => {
+      window.dispatchEvent(new Event('resize'));
+    }, 350);
+  }, [consoleHeight]);
+
+  useEffect(() => {
     function handleResize() {
       const newMaxConsoleHeight = getCurrentConsoleMaxSize(euiTheme);
       // Calculate and save the console max height. This is the window height minus the header
