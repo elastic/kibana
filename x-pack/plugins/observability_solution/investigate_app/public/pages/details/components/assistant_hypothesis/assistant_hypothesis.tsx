@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import type { RootCauseAnalysisEvent } from '@kbn/observability-ai-server/root_cause_analysis';
 import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common';
 import React, { useState, useRef } from 'react';
-import { findLastIndex, omit } from 'lodash';
+import { omit } from 'lodash';
 import {
   ALERT_FLAPPING_HISTORY,
   ALERT_RULE_EXECUTION_TIMESTAMP,
