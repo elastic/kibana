@@ -6,13 +6,13 @@
  */
 
 import type {
-  SUPPRESSION_DURATION_UNIT,
-  SUPPRESSION_DURATION_VALUE,
-  SUPPRESSION_DURATION,
-  SUPPRESSION_DURATION_SELECTOR,
-  SUPPRESSION_FIELDS,
+  ALERT_SUPPRESSION_DURATION_UNIT,
+  ALERT_SUPPRESSION_DURATION_VALUE,
+  ALERT_SUPPRESSION_DURATION,
+  ALERT_SUPPRESSION_DURATION_TYPE,
+  ALERT_SUPPRESSION_FIELDS,
 } from '../../../../../../../rule_creation/components/alert_suppression_edit/fields';
-import { SUPPRESSION_MISSING_FIELDS } from '../../../../../../../rule_creation/components/alert_suppression_edit/fields';
+import { ALERT_SUPPRESSION_MISSING_FIELDS } from '../../../../../../../rule_creation/components/alert_suppression_edit/fields';
 import type {
   AlertSuppressionDurationUnit,
   AlertSuppressionMissingFieldsStrategy,
@@ -21,17 +21,17 @@ import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../../.
 import { type FormSchema } from '../../../../../../../../shared_imports';
 
 export interface AlertSuppressionFormData {
-  [SUPPRESSION_FIELDS]: string[];
-  [SUPPRESSION_DURATION_SELECTOR]: string;
-  [SUPPRESSION_DURATION]: {
-    [SUPPRESSION_DURATION_VALUE]: number;
-    [SUPPRESSION_DURATION_UNIT]: AlertSuppressionDurationUnit;
+  [ALERT_SUPPRESSION_FIELDS]: string[];
+  [ALERT_SUPPRESSION_DURATION_TYPE]: string;
+  [ALERT_SUPPRESSION_DURATION]: {
+    [ALERT_SUPPRESSION_DURATION_VALUE]: number;
+    [ALERT_SUPPRESSION_DURATION_UNIT]: AlertSuppressionDurationUnit;
   };
-  [SUPPRESSION_MISSING_FIELDS]: AlertSuppressionMissingFieldsStrategy;
+  [ALERT_SUPPRESSION_MISSING_FIELDS]: AlertSuppressionMissingFieldsStrategy;
 }
 
 export const alertSuppressionFormSchema = {
-  [SUPPRESSION_MISSING_FIELDS]: {
+  [ALERT_SUPPRESSION_MISSING_FIELDS]: {
     defaultValue: DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY,
   },
 } as FormSchema<AlertSuppressionFormData>;

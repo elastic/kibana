@@ -25,7 +25,7 @@ import type {
   ScheduleStepRule,
   DefineStepRule,
 } from '../../../../detections/pages/detection_engine/rules/types';
-import { GroupByOptions } from '../../../../detections/pages/detection_engine/rules/types';
+import { AlertSuppressionDurationType } from '../../../../detections/pages/detection_engine/rules/types';
 import {
   getTimeTypeValue,
   formatDefineStepData,
@@ -45,6 +45,13 @@ import {
 } from '../../../rule_management_ui/components/rules_table/__mocks__/mock';
 import { getThreatMock } from '../../../../../common/detection_engine/schemas/types/threat.mock';
 import type { Threat, Threats } from '@kbn/securitysolution-io-ts-alerting-types';
+import {
+  ALERT_SUPPRESSION_DURATION,
+  ALERT_SUPPRESSION_DURATION_TYPE,
+  ALERT_SUPPRESSION_DURATION_UNIT,
+  ALERT_SUPPRESSION_DURATION_VALUE,
+  ALERT_SUPPRESSION_FIELDS,
+} from '../../../rule_creation/components/alert_suppression_edit/fields';
 
 describe('helpers', () => {
   describe('getTimeTypeValue', () => {
@@ -458,8 +465,8 @@ describe('helpers', () => {
               query: 'process where process_name == "explorer.exe"',
             },
           },
-          groupByFields: ['event.type'],
-          groupByRadioSelection: GroupByOptions.PerRuleExecution,
+          [ALERT_SUPPRESSION_FIELDS]: ['event.type'],
+          [ALERT_SUPPRESSION_DURATION_TYPE]: AlertSuppressionDurationType.PerRuleExecution,
         };
         const result = formatDefineStepData(mockStepData);
 
@@ -491,9 +498,9 @@ describe('helpers', () => {
               query: 'process where process_name == "explorer.exe"',
             },
           },
-          groupByFields: ['event.type'],
-          groupByRadioSelection: GroupByOptions.PerTimePeriod,
-          groupByDuration: { value: 10, unit: 'm' },
+          [ALERT_SUPPRESSION_FIELDS]: ['event.type'],
+          [ALERT_SUPPRESSION_DURATION_TYPE]: AlertSuppressionDurationType.PerTimePeriod,
+          [ALERT_SUPPRESSION_DURATION]: { value: 10, unit: 'm' },
         };
         const result = formatDefineStepData(mockStepData);
 
@@ -597,9 +604,12 @@ describe('helpers', () => {
         ruleType: 'machine_learning',
         machineLearningJobId: ['some_jobert_id'],
         anomalyThreshold: 44,
-        groupByFields: ['event.type'],
-        groupByRadioSelection: GroupByOptions.PerTimePeriod,
-        groupByDuration: { value: 10, unit: 'm' },
+        [ALERT_SUPPRESSION_FIELDS]: ['event.type'],
+        [ALERT_SUPPRESSION_DURATION_TYPE]: AlertSuppressionDurationType.PerTimePeriod,
+        [ALERT_SUPPRESSION_DURATION]: {
+          [ALERT_SUPPRESSION_DURATION_VALUE]: 10,
+          [ALERT_SUPPRESSION_DURATION_UNIT]: 'm',
+        },
       };
       const result = formatDefineStepData(mockStepData);
 

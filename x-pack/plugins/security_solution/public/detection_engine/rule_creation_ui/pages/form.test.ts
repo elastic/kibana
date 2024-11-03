@@ -18,6 +18,7 @@ import type {
 
 import { useRuleFormsErrors } from './form';
 import { transformEqlResponseErrorToValidationError } from '../components/eql_query_bar/validators';
+import { ALERT_SUPPRESSION_FIELDS } from '../../rule_creation/components/alert_suppression_edit/fields';
 
 const getFormWithErrorsMock = <T extends FormData = FormData>(fields: {
   [key: string]: { errors: Array<ValidationError<EQL_ERROR_CODES | ESQL_ERROR_CODES>> };
@@ -248,7 +249,7 @@ describe('useRuleFormsErrors', () => {
 
       const defineStepForm = getFormWithErrorsMock<DefineStepRule>({
         queryBar: { errors: [esqlValidationError] },
-        groupByFields: { errors: [groupByValidationError] },
+        [ALERT_SUPPRESSION_FIELDS]: { errors: [groupByValidationError] },
       });
       const aboutStepForm = getFormWithErrorsMock<AboutStepRule>({
         name: {

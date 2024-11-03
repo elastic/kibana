@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-export const SUPPRESSION_FIELDS = 'suppressionFields' as const;
-export const SUPPRESSION_DURATION_SELECTOR = 'suppressionDurationSelector' as const;
-export const SUPPRESSION_DURATION = 'suppressionDuration' as const;
-export const SUPPRESSION_DURATION_VALUE = 'value' as const;
-export const SUPPRESSION_DURATION_UNIT = 'unit' as const;
-export const SUPPRESSION_MISSING_FIELDS = 'suppressionMissingFields' as const;
+export const ALERT_SUPPRESSION_FIELDS = 'alertSuppressionFields' as const;
+export const ALERT_SUPPRESSION_DURATION_TYPE = 'alertSuppressionDurationType' as const;
+export const ALERT_SUPPRESSION_DURATION = 'alertSuppressionDuration' as const;
+export const ALERT_SUPPRESSION_DURATION_VALUE = 'value' as const;
+export const ALERT_SUPPRESSION_DURATION_UNIT = 'unit' as const;
+export const ALERT_SUPPRESSION_MISSING_FIELDS = 'alertSuppressionMissingFields' as const;

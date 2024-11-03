@@ -14,12 +14,25 @@ import type {
 } from '../../../../../detections/pages/detection_engine/rules/types';
 import {
   DataSourceType,
-  GroupByOptions,
+  AlertSuppressionDurationType,
 } from '../../../../../detections/pages/detection_engine/rules/types';
 import type { FieldValueQueryBar } from '../../../../rule_creation_ui/components/query_bar';
 import { fillEmptySeverityMappings } from '../../../../../detections/pages/detection_engine/rules/helpers';
 import { getThreatMock } from '../../../../../../common/detection_engine/schemas/types/threat.mock';
-import type { RuleResponse, SavedQueryRule } from '../../../../../../common/api/detection_engine';
+import {
+  AlertSuppressionMissingFieldsStrategyEnum,
+  type RuleResponse,
+  type SavedQueryRule,
+} from '../../../../../../common/api/detection_engine';
+import {
+  ALERT_SUPPRESSION_DURATION,
+  ALERT_SUPPRESSION_DURATION_TYPE,
+  ALERT_SUPPRESSION_DURATION_UNIT,
+  ALERT_SUPPRESSION_DURATION_VALUE,
+  ALERT_SUPPRESSION_FIELDS,
+  ALERT_SUPPRESSION_MISSING_FIELDS,
+} from '../../../../rule_creation/components/alert_suppression_edit/fields';
+import { THRESHOLD_ALERT_SUPPRESSION_ENABLED } from '../../../../rule_creation/components/threshold_alert_suppression_edit/fields';
 
 export const mockQueryBar: FieldValueQueryBar = {
   query: {
@@ -248,13 +261,14 @@ export const mockDefineStepRule = (): DefineStepRule => ({
   newTermsFields: ['host.ip'],
   historyWindowSize: '7d',
   shouldLoadQueryDynamically: false,
-  groupByFields: [],
-  groupByRadioSelection: GroupByOptions.PerRuleExecution,
-  groupByDuration: {
-    unit: 'm',
-    value: 5,
+  [ALERT_SUPPRESSION_FIELDS]: [],
+  [ALERT_SUPPRESSION_DURATION_TYPE]: AlertSuppressionDurationType.PerRuleExecution,
+  [ALERT_SUPPRESSION_DURATION]: {
+    [ALERT_SUPPRESSION_DURATION_VALUE]: 5,
+    [ALERT_SUPPRESSION_DURATION_UNIT]: 'm',
   },
-  enableThresholdSuppression: false,
+  [ALERT_SUPPRESSION_MISSING_FIELDS]: AlertSuppressionMissingFieldsStrategyEnum.suppress,
+  [THRESHOLD_ALERT_SUPPRESSION_ENABLED]: false,
 });
 
 export const mockScheduleStepRule = (): ScheduleStepRule => ({

@@ -6,29 +6,29 @@
  */
 
 import type {
-  SUPPRESSION_DURATION_UNIT,
-  SUPPRESSION_DURATION_VALUE,
+  ALERT_SUPPRESSION_DURATION_UNIT,
+  ALERT_SUPPRESSION_DURATION_VALUE,
 } from '../../../../../../../rule_creation/components/threshold_alert_suppression_edit/fields';
 import {
-  SUPPRESSION_DURATION,
-  THRESHOLD_SUPPRESSION_ENABLED,
+  ALERT_SUPPRESSION_DURATION,
+  THRESHOLD_ALERT_SUPPRESSION_ENABLED,
 } from '../../../../../../../rule_creation/components/threshold_alert_suppression_edit/fields';
 import type { AlertSuppressionDurationUnit } from '../../../../../../../../../common/api/detection_engine';
 import { type FormSchema, FIELD_TYPES } from '../../../../../../../../shared_imports';
 
 export interface ThresholdAlertSuppressionFormData {
-  [THRESHOLD_SUPPRESSION_ENABLED]: boolean;
-  [SUPPRESSION_DURATION]: {
-    [SUPPRESSION_DURATION_VALUE]: number;
-    [SUPPRESSION_DURATION_UNIT]: AlertSuppressionDurationUnit;
+  [THRESHOLD_ALERT_SUPPRESSION_ENABLED]: boolean;
+  [ALERT_SUPPRESSION_DURATION]: {
+    [ALERT_SUPPRESSION_DURATION_VALUE]: number;
+    [ALERT_SUPPRESSION_DURATION_UNIT]: AlertSuppressionDurationUnit;
   };
 }
 
 export const thresholdAlertSuppressionFormSchema = {
-  [THRESHOLD_SUPPRESSION_ENABLED]: {
+  [THRESHOLD_ALERT_SUPPRESSION_ENABLED]: {
     type: FIELD_TYPES.CHECKBOX,
   },
-  [SUPPRESSION_DURATION]: {
+  [ALERT_SUPPRESSION_DURATION]: {
     value: {},
     unit: {},
   },

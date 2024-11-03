@@ -41,7 +41,7 @@ import type {
 } from '../../../../detections/pages/detection_engine/rules/types';
 import {
   DataSourceType,
-  GroupByOptions,
+  AlertSuppressionDurationType,
 } from '../../../../detections/pages/detection_engine/rules/types';
 import { StepRuleDescription } from '../description_step';
 import type { QueryBarDefineRuleProps } from '../query_bar';
@@ -96,6 +96,7 @@ import { RelatedIntegrations } from '../../../rule_creation/components/related_i
 import { useMLRuleConfig } from '../../../../common/components/ml/hooks/use_ml_rule_config';
 import { ThresholdAlertSuppressionEdit } from '../../../rule_creation/components/threshold_alert_suppression_edit';
 import { AlertSuppressionEdit } from '../../../rule_creation/components/alert_suppression_edit';
+import { ALERT_SUPPRESSION_DURATION_TYPE } from '../../../rule_creation/components/alert_suppression_edit/fields';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -386,7 +387,10 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
    */
   useEffect(() => {
     if (isThresholdRule) {
-      form.setFieldValue('groupByRadioSelection', GroupByOptions.PerTimePeriod);
+      form.setFieldValue(
+        ALERT_SUPPRESSION_DURATION_TYPE,
+        AlertSuppressionDurationType.PerTimePeriod
+      );
     }
   }, [isThresholdRule, form]);
 
@@ -955,8 +959,8 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                 labelAppend={
                   <EuiText color="subdued" size="xs">
                     {isSuppressionRuleInGA(ruleType)
-                      ? i18n.GROUP_BY_GA_LABEL_APPEND
-                      : i18n.GROUP_BY_TECH_PREVIEW_LABEL_APPEND}
+                      ? i18n.ALERT_SUPPRESSION_FIELDS_GA_LABEL_APPEND
+                      : i18n.ALERT_SUPPRESSION_FIELDS_TECH_PREVIEW_LABEL_APPEND}
                   </EuiText>
                 }
                 warningText={

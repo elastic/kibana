@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export const THRESHOLD_SUPPRESSION_ENABLED = 'thresholdSuppressionEnabled' as const;
-export const SUPPRESSION_DURATION = 'suppressionDuration' as const;
-export const SUPPRESSION_DURATION_VALUE = 'value' as const;
-export const SUPPRESSION_DURATION_UNIT = 'unit' as const;
+export const THRESHOLD_ALERT_SUPPRESSION_ENABLED = 'thresholdAlertSuppressionEnabled' as const;
+export const ALERT_SUPPRESSION_DURATION = 'alertSuppressionDuration' as const;
+export const ALERT_SUPPRESSION_DURATION_VALUE = 'value' as const;
+export const ALERT_SUPPRESSION_DURATION_UNIT = 'unit' as const;

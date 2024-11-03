@@ -10,7 +10,7 @@ import { EuiPanel } from '@elastic/eui';
 import { CheckBoxField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { UseField, useFormData } from '../../../../shared_imports';
 import { SuppressionDurationSelector } from './suppression_duration_selector';
-import { THRESHOLD_SUPPRESSION_ENABLED } from './fields';
+import { THRESHOLD_ALERT_SUPPRESSION_ENABLED } from './fields';
 import * as i18n from './translations';
 
 interface ThresholdAlertSuppressionEditProps {
@@ -20,14 +20,14 @@ interface ThresholdAlertSuppressionEditProps {
 export function ThresholdAlertSuppressionEdit({
   suppressionFieldNames,
 }: ThresholdAlertSuppressionEditProps): JSX.Element {
-  const [{ [THRESHOLD_SUPPRESSION_ENABLED]: enabled }] = useFormData({
-    watch: THRESHOLD_SUPPRESSION_ENABLED,
+  const [{ [THRESHOLD_ALERT_SUPPRESSION_ENABLED]: enabled }] = useFormData({
+    watch: THRESHOLD_ALERT_SUPPRESSION_ENABLED,
   });
 
   return (
     <>
       <UseField
-        path={THRESHOLD_SUPPRESSION_ENABLED}
+        path={THRESHOLD_ALERT_SUPPRESSION_ENABLED}
         component={CheckBoxField}
         euiFieldProps={{
           label: suppressionFieldNames?.length

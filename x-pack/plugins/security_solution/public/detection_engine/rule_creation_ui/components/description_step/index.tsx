@@ -65,6 +65,13 @@ import {
   isSuppressionRuleConfiguredWithGroupBy,
   isSuppressionRuleConfiguredWithDuration,
 } from '../../../../../common/detection_engine/utils';
+import {
+  ALERT_SUPPRESSION_DURATION,
+  ALERT_SUPPRESSION_DURATION_TYPE,
+  ALERT_SUPPRESSION_FIELDS,
+  ALERT_SUPPRESSION_MISSING_FIELDS,
+} from '../../../rule_creation/components/alert_suppression_edit/fields';
+import { THRESHOLD_ALERT_SUPPRESSION_ENABLED } from '../../../rule_creation/components/threshold_alert_suppression_edit/fields';
 
 const DescriptionListContainer = styled(EuiDescriptionList)`
   max-width: 600px;
@@ -217,7 +224,7 @@ export const getDescriptionItem = (
     });
   } else if (field === 'responseActions') {
     return [];
-  } else if (field === 'groupByFields') {
+  } else if (field === ALERT_SUPPRESSION_FIELDS) {
     const ruleType: Type = get('ruleType', data);
 
     const ruleCanHaveGroupByFields = isSuppressionRuleConfiguredWithGroupBy(ruleType);
@@ -226,9 +233,9 @@ export const getDescriptionItem = (
     }
     const values: string[] = get(field, data);
     return buildAlertSuppressionDescription(label, values, ruleType);
-  } else if (field === 'groupByRadioSelection') {
+  } else if (field === ALERT_SUPPRESSION_DURATION_TYPE) {
     return [];
-  } else if (field === 'groupByDuration') {
+  } else if (field === ALERT_SUPPRESSION_DURATION) {
     const ruleType: Type = get('ruleType', data);
 
     const ruleCanHaveDuration = isSuppressionRuleConfiguredWithDuration(ruleType);
@@ -239,21 +246,21 @@ export const getDescriptionItem = (
     // threshold rule has suppression duration without grouping fields, but suppression should be explicitly enabled by user
     // query rule have suppression duration only if group by fields selected
     const showDuration = isThresholdRule(ruleType)
-      ? get('enableThresholdSuppression', data) === true
-      : get('groupByFields', data).length > 0;
+      ? get(THRESHOLD_ALERT_SUPPRESSION_ENABLED, data) === true
+      : get(ALERT_SUPPRESSION_FIELDS, data).length > 0;
 
     if (showDuration) {
       const value: Duration = get(field, data);
       return buildAlertSuppressionWindowDescription(
         label,
         value,
-        get('groupByRadioSelection', data),
+        get(ALERT_SUPPRESSION_DURATION_TYPE, data),
         ruleType
       );
     } else {
       return [];
     }
-  } else if (field === 'suppressionMissingFields') {
+  } else if (field === ALERT_SUPPRESSION_MISSING_FIELDS) {
     const ruleType: Type = get('ruleType', data);
     const ruleCanHaveSuppressionMissingFields =
       isSuppressionRuleConfiguredWithMissingFields(ruleType);
@@ -261,7 +268,7 @@ export const getDescriptionItem = (
     if (!ruleCanHaveSuppressionMissingFields) {
       return [];
     }
-    if (get('groupByFields', data).length > 0) {
+    if (get(ALERT_SUPPRESSION_FIELDS, data).length > 0) {
       const value = get(field, data);
       return buildAlertSuppressionMissingFieldsDescription(label, value, ruleType);
     } else {

@@ -22,12 +22,12 @@ import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
 import type { Filter } from '@kbn/es-query';
 import type { ActionVariables } from '@kbn/triggers-actions-ui-plugin/public';
 import { requiredOptional } from '@kbn/zod-helpers';
-import { THRESHOLD_SUPPRESSION_ENABLED } from '../../../../detection_engine/rule_creation/components/threshold_alert_suppression_edit/fields';
+import { THRESHOLD_ALERT_SUPPRESSION_ENABLED } from '../../../../detection_engine/rule_creation/components/threshold_alert_suppression_edit/fields';
 import {
-  SUPPRESSION_FIELDS,
-  SUPPRESSION_DURATION_SELECTOR,
-  SUPPRESSION_DURATION,
-  SUPPRESSION_MISSING_FIELDS,
+  ALERT_SUPPRESSION_FIELDS,
+  ALERT_SUPPRESSION_DURATION_TYPE,
+  ALERT_SUPPRESSION_DURATION,
+  ALERT_SUPPRESSION_MISSING_FIELDS,
 } from '../../../../detection_engine/rule_creation/components/alert_suppression_edit/fields';
 import type { ResponseAction } from '../../../../../common/api/detection_engine/model/rule_response_actions';
 import { normalizeThresholdField } from '../../../../../common/detection_engine/utils';
@@ -43,7 +43,7 @@ import type {
   ScheduleStepRule,
   ActionsStepRule,
 } from './types';
-import { DataSourceType, GroupByOptions } from './types';
+import { DataSourceType, AlertSuppressionDurationType } from './types';
 import { severityOptions } from '../../../../detection_engine/rule_creation_ui/components/step_about_rule/data';
 import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../common/detection_engine/constants';
 import type { RuleAction, RuleResponse } from '../../../../../common/api/detection_engine';
@@ -163,27 +163,28 @@ export const getDefineStepsData = (rule: RuleResponse): DefineStepRule => ({
       ? convertHistoryStartToSize(rule.history_window_start)
       : '7d',
   shouldLoadQueryDynamically: Boolean(rule.type === 'saved_query' && rule.saved_id),
-  [SUPPRESSION_FIELDS]:
+  [ALERT_SUPPRESSION_FIELDS]:
     ('alert_suppression' in rule &&
       rule.alert_suppression &&
       'group_by' in rule.alert_suppression &&
       rule.alert_suppression.group_by) ||
     [],
-  [SUPPRESSION_DURATION_SELECTOR]:
+  [ALERT_SUPPRESSION_DURATION_TYPE]:
     'alert_suppression' in rule && rule.alert_suppression?.duration
-      ? GroupByOptions.PerTimePeriod
-      : GroupByOptions.PerRuleExecution,
-  [SUPPRESSION_DURATION]: ('alert_suppression' in rule && rule.alert_suppression?.duration) || {
+      ? AlertSuppressionDurationType.PerTimePeriod
+      : AlertSuppressionDurationType.PerRuleExecution,
+  [ALERT_SUPPRESSION_DURATION]: ('alert_suppression' in rule &&
+    rule.alert_suppression?.duration) || {
     value: 5,
     unit: 'm',
   },
-  [SUPPRESSION_MISSING_FIELDS]:
+  [ALERT_SUPPRESSION_MISSING_FIELDS]:
     ('alert_suppression' in rule &&
       rule.alert_suppression &&
       'missing_fields_strategy' in rule.alert_suppression &&
       rule.alert_suppression.missing_fields_strategy) ||
     DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY,
-  [THRESHOLD_SUPPRESSION_ENABLED]: Boolean(
+  [THRESHOLD_ALERT_SUPPRESSION_ENABLED]: Boolean(
     'alert_suppression' in rule && rule.alert_suppression?.duration
   ),
 });

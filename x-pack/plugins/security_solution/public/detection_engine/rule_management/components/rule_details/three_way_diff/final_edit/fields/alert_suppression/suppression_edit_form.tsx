@@ -7,12 +7,12 @@
 
 import React from 'react';
 import {
-  SUPPRESSION_DURATION,
-  SUPPRESSION_DURATION_SELECTOR,
-  SUPPRESSION_FIELDS,
-  SUPPRESSION_MISSING_FIELDS,
+  ALERT_SUPPRESSION_DURATION,
+  ALERT_SUPPRESSION_DURATION_TYPE,
+  ALERT_SUPPRESSION_FIELDS,
+  ALERT_SUPPRESSION_MISSING_FIELDS,
 } from '../../../../../../../rule_creation/components/alert_suppression_edit/fields';
-import { GroupByOptions } from '../../../../../../../../detections/pages/detection_engine/rules/types';
+import { AlertSuppressionDurationType } from '../../../../../../../../detections/pages/detection_engine/rules/types';
 import { type FormData } from '../../../../../../../../shared_imports';
 import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../../../../../common/detection_engine/constants';
 import {
@@ -38,15 +38,15 @@ function deserializer(defaultValue: FormData): AlertSuppressionFormData {
   const alertSuppression = defaultValue.alert_suppression as AlertSuppression | undefined;
 
   return {
-    [SUPPRESSION_FIELDS]: alertSuppression?.group_by ?? [],
-    [SUPPRESSION_DURATION_SELECTOR]: alertSuppression?.duration
-      ? GroupByOptions.PerTimePeriod
-      : GroupByOptions.PerRuleExecution,
-    [SUPPRESSION_DURATION]: alertSuppression?.duration ?? {
+    [ALERT_SUPPRESSION_FIELDS]: alertSuppression?.group_by ?? [],
+    [ALERT_SUPPRESSION_DURATION_TYPE]: alertSuppression?.duration
+      ? AlertSuppressionDurationType.PerTimePeriod
+      : AlertSuppressionDurationType.PerRuleExecution,
+    [ALERT_SUPPRESSION_DURATION]: alertSuppression?.duration ?? {
       value: 5,
       unit: AlertSuppressionDurationUnitEnum.m,
     },
-    [SUPPRESSION_MISSING_FIELDS]:
+    [ALERT_SUPPRESSION_MISSING_FIELDS]:
       alertSuppression?.missing_fields_strategy ?? DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY,
   };
 }
@@ -54,19 +54,20 @@ function deserializer(defaultValue: FormData): AlertSuppressionFormData {
 function serializer(formData: FormData): { alert_suppression?: AlertSuppression } {
   const alertSuppressionFormData = formData as AlertSuppressionFormData;
 
-  if (alertSuppressionFormData[SUPPRESSION_FIELDS].length === 0) {
+  if (alertSuppressionFormData[ALERT_SUPPRESSION_FIELDS].length === 0) {
     return {};
   }
 
   return {
     alert_suppression: {
-      group_by: alertSuppressionFormData[SUPPRESSION_FIELDS],
+      group_by: alertSuppressionFormData[ALERT_SUPPRESSION_FIELDS],
       duration:
-        alertSuppressionFormData[SUPPRESSION_DURATION_SELECTOR] === GroupByOptions.PerTimePeriod
-          ? alertSuppressionFormData[SUPPRESSION_DURATION]
+        alertSuppressionFormData[ALERT_SUPPRESSION_DURATION_TYPE] ===
+        AlertSuppressionDurationType.PerTimePeriod
+          ? alertSuppressionFormData[ALERT_SUPPRESSION_DURATION]
           : undefined,
       missing_fields_strategy:
-        alertSuppressionFormData[SUPPRESSION_MISSING_FIELDS] ||
+        alertSuppressionFormData[ALERT_SUPPRESSION_MISSING_FIELDS] ||
         DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY,
     },
   };

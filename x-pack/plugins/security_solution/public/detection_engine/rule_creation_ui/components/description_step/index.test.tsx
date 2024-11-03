@@ -30,6 +30,15 @@ import { schema } from '../step_about_rule/schema';
 import type { ListItems } from './types';
 import type { AboutStepRule } from '../../../../detections/pages/detection_engine/rules/types';
 import { createLicenseServiceMock } from '../../../../../common/license/mocks';
+import {
+  ALERT_SUPPRESSION_DURATION,
+  ALERT_SUPPRESSION_DURATION_TYPE,
+  ALERT_SUPPRESSION_DURATION_UNIT,
+  ALERT_SUPPRESSION_DURATION_VALUE,
+  ALERT_SUPPRESSION_FIELDS,
+  ALERT_SUPPRESSION_MISSING_FIELDS,
+} from '../../../rule_creation/components/alert_suppression_edit/fields';
+import { THRESHOLD_ALERT_SUPPRESSION_ENABLED } from '../../../rule_creation/components/threshold_alert_suppression_edit/fields';
 
 jest.mock('../../../../common/lib/kibana');
 
@@ -575,25 +584,25 @@ describe('description_step', () => {
 
     describe('alert suppression', () => {
       const suppressionFields = {
-        groupByDuration: {
-          unit: 'm',
-          value: 50,
+        [ALERT_SUPPRESSION_DURATION]: {
+          [ALERT_SUPPRESSION_DURATION_VALUE]: 50,
+          [ALERT_SUPPRESSION_DURATION_UNIT]: 'm',
         },
-        groupByRadioSelection: 'per-time-period',
-        enableThresholdSuppression: true,
-        groupByFields: ['agent.name'],
-        suppressionMissingFields: 'suppress',
+        [ALERT_SUPPRESSION_DURATION_TYPE]: 'per-time-period',
+        [THRESHOLD_ALERT_SUPPRESSION_ENABLED]: true,
+        [ALERT_SUPPRESSION_FIELDS]: ['agent.name'],
+        [ALERT_SUPPRESSION_MISSING_FIELDS]: 'suppress',
       };
-      describe('groupByDuration', () => {
+      describe(ALERT_SUPPRESSION_DURATION, () => {
         ['query', 'saved_query'].forEach((ruleType) => {
-          test(`should be empty if groupByFields empty for ${ruleType} rule`, () => {
+          test(`should be empty if ${ALERT_SUPPRESSION_FIELDS} empty for ${ruleType} rule`, () => {
             const result: ListItems[] = getDescriptionItem(
-              'groupByDuration',
+              ALERT_SUPPRESSION_DURATION,
               'label',
               {
                 ruleType: 'query',
                 ...suppressionFields,
-                groupByFields: [],
+                [ALERT_SUPPRESSION_FIELDS]: [],
               },
               mockFilterManager,
               mockLicenseService
@@ -604,7 +613,7 @@ describe('description_step', () => {
 
           test(`should return item for ${ruleType} rule`, () => {
             const result: ListItems[] = getDescriptionItem(
-              'groupByDuration',
+              ALERT_SUPPRESSION_DURATION,
               'label',
               {
                 ruleType: 'query',
@@ -620,7 +629,7 @@ describe('description_step', () => {
 
         test('should return item for threshold rule', () => {
           const result: ListItems[] = getDescriptionItem(
-            'groupByDuration',
+            ALERT_SUPPRESSION_DURATION,
             'label',
             {
               ruleType: 'threshold',
@@ -633,14 +642,14 @@ describe('description_step', () => {
           expect(result[0].description).toBe('50m');
         });
 
-        test('should return item for threshold rule if groupByFields empty', () => {
+        test(`should return item for threshold rule if ${ALERT_SUPPRESSION_FIELDS} empty`, () => {
           const result: ListItems[] = getDescriptionItem(
-            'groupByDuration',
+            ALERT_SUPPRESSION_DURATION,
             'label',
             {
               ruleType: 'threshold',
               ...suppressionFields,
-              groupByFields: [],
+              [ALERT_SUPPRESSION_FIELDS]: [],
             },
             mockFilterManager,
             mockLicenseService
@@ -651,12 +660,12 @@ describe('description_step', () => {
 
         test('should be empty for threshold rule if suppression not enabled', () => {
           const result: ListItems[] = getDescriptionItem(
-            'groupByDuration',
+            ALERT_SUPPRESSION_DURATION,
             'label',
             {
               ruleType: 'threshold',
               ...suppressionFields,
-              enableThresholdSuppression: false,
+              [THRESHOLD_ALERT_SUPPRESSION_ENABLED]: false,
             },
             mockFilterManager,
             mockLicenseService
@@ -666,10 +675,10 @@ describe('description_step', () => {
         });
       });
 
-      describe('groupByFields', () => {
+      describe(ALERT_SUPPRESSION_FIELDS, () => {
         test(`should be empty if rule type is 'threshold'`, () => {
           const result: ListItems[] = getDescriptionItem(
-            'groupByFields',
+            ALERT_SUPPRESSION_FIELDS,
             'label',
             {
               ruleType: 'threshold',
@@ -685,7 +694,7 @@ describe('description_step', () => {
         ['query', 'saved_query'].forEach((ruleType) => {
           test(`should return item for ${ruleType} rule`, () => {
             const result: ListItems[] = getDescriptionItem(
-              'groupByFields',
+              ALERT_SUPPRESSION_FIELDS,
               'label',
               {
                 ruleType,
@@ -699,10 +708,10 @@ describe('description_step', () => {
         });
       });
 
-      describe('suppressionMissingFields', () => {
+      describe(ALERT_SUPPRESSION_MISSING_FIELDS, () => {
         test(`should be empty if rule type is 'threshold'`, () => {
           const result: ListItems[] = getDescriptionItem(
-            'suppressionMissingFields',
+            ALERT_SUPPRESSION_MISSING_FIELDS,
             'label',
             {
               ruleType: 'threshold',
@@ -718,7 +727,7 @@ describe('description_step', () => {
         ['query', 'saved_query'].forEach((ruleType) => {
           test(`should return item for ${ruleType} rule`, () => {
             const result: ListItems[] = getDescriptionItem(
-              'suppressionMissingFields',
+              ALERT_SUPPRESSION_MISSING_FIELDS,
               'label',
               {
                 ruleType,
@@ -730,14 +739,14 @@ describe('description_step', () => {
             expect(result[0].description).toContain('Suppress');
           });
 
-          test(`should be empty if groupByFields empty for ${ruleType} rule`, () => {
+          test(`should be empty if ${ALERT_SUPPRESSION_FIELDS} empty for ${ruleType} rule`, () => {
             const result: ListItems[] = getDescriptionItem(
-              'suppressionMissingFields',
+              ALERT_SUPPRESSION_MISSING_FIELDS,
               'label',
               {
                 ruleType: 'query',
                 ...suppressionFields,
-                groupByFields: [],
+                [ALERT_SUPPRESSION_FIELDS]: [],
               },
               mockFilterManager,
               mockLicenseService

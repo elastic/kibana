@@ -9,12 +9,12 @@ import React from 'react';
 import { EuiFormRow, EuiRadioGroup, EuiToolTip } from '@elastic/eui';
 import { noop } from 'lodash';
 import { UseMultiFields } from '../../../../shared_imports';
-import { GroupByOptions } from '../../../../detections/pages/detection_engine/rules/types';
+import { AlertSuppressionDurationType } from '../../../../detections/pages/detection_engine/rules/types';
 import { DurationInput } from '../duration_input';
 import {
-  SUPPRESSION_DURATION,
-  SUPPRESSION_DURATION_UNIT,
-  SUPPRESSION_DURATION_VALUE,
+  ALERT_SUPPRESSION_DURATION,
+  ALERT_SUPPRESSION_DURATION_UNIT,
+  ALERT_SUPPRESSION_DURATION_VALUE,
 } from './fields';
 import * as i18n from './translations';
 
@@ -33,20 +33,20 @@ export function SuppressionDurationSelector({
       }>
         fields={{
           suppressionDurationValue: {
-            path: `${SUPPRESSION_DURATION}.${SUPPRESSION_DURATION_VALUE}`,
+            path: `${ALERT_SUPPRESSION_DURATION}.${ALERT_SUPPRESSION_DURATION_VALUE}`,
           },
           suppressionDurationUnit: {
-            path: `${SUPPRESSION_DURATION}.${SUPPRESSION_DURATION_UNIT}`,
+            path: `${ALERT_SUPPRESSION_DURATION}.${ALERT_SUPPRESSION_DURATION_UNIT}`,
           },
         }}
       >
         {({ suppressionDurationValue, suppressionDurationUnit }) => (
           <EuiRadioGroup
             disabled={disabled}
-            idSelected={GroupByOptions.PerTimePeriod}
+            idSelected={AlertSuppressionDurationType.PerTimePeriod}
             options={[
               {
-                id: GroupByOptions.PerRuleExecution,
+                id: AlertSuppressionDurationType.PerRuleExecution,
                 label: (
                   <EuiToolTip content={i18n.THRESHOLD_SUPPRESSION_PER_RULE_EXECUTION_WARNING}>
                     <> {i18n.ALERT_SUPPRESSION_DURATION_PER_RULE_EXECUTION_OPTION}</>
@@ -55,7 +55,7 @@ export function SuppressionDurationSelector({
                 disabled: true,
               },
               {
-                id: GroupByOptions.PerTimePeriod,
+                id: AlertSuppressionDurationType.PerTimePeriod,
                 disabled,
                 label: (
                   <>
@@ -72,7 +72,7 @@ export function SuppressionDurationSelector({
               },
             ]}
             onChange={noop}
-            data-test-subj="groupByDurationOptions"
+            data-test-subj="alertSuppressionDurationOptions"
           />
         )}
       </UseMultiFields>

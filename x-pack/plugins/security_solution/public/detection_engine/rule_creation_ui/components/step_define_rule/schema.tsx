@@ -47,7 +47,7 @@ import {
   EQL_SEQUENCE_SUPPRESSION_GROUPBY_VALIDATION_TEXT,
 } from './translations';
 import { getQueryRequiredMessage } from './utils';
-import { SUPPRESSION_FIELDS } from '../../../rule_creation/components/alert_suppression_edit/fields';
+import { ALERT_SUPPRESSION_FIELDS } from '../../../rule_creation/components/alert_suppression_edit/fields';
 
 export const schema: FormSchema<DefineStepRule> = {
   index: {
@@ -114,7 +114,7 @@ export const schema: FormSchema<DefineStepRule> = {
     fieldsToValidateOnChange: ['eqlOptions', 'queryBar'],
   },
   queryBar: {
-    fieldsToValidateOnChange: ['queryBar', SUPPRESSION_FIELDS],
+    fieldsToValidateOnChange: ['queryBar', ALERT_SUPPRESSION_FIELDS],
     validations: [
       {
         validator: (
@@ -650,7 +650,7 @@ export const schema: FormSchema<DefineStepRule> = {
       },
     ],
   },
-  [SUPPRESSION_FIELDS]: {
+  [ALERT_SUPPRESSION_FIELDS]: {
     validations: [
       {
         validator: (...args: Parameters<ValidationFunc>) => {

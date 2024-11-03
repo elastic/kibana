@@ -27,7 +27,7 @@ export const ALERT_SUPPRESSION_FIELDS_COMBO_BOX =
 export const ALERT_SUPPRESSION_FIELDS_INPUT = `${ALERT_SUPPRESSION_FIELDS_COMBO_BOX} input`;
 
 export const ALERT_SUPPRESSION_DURATION_OPTIONS =
-  '[data-test-subj="alertSuppressionDuration"] [data-test-subj="groupByDurationOptions"]';
+  '[data-test-subj="alertSuppressionDuration"] [data-test-subj="alertSuppressionDurationOptions"]';
 
 export const ALERT_SUPPRESSION_DURATION_PER_TIME_INTERVAL = `${ALERT_SUPPRESSION_DURATION_OPTIONS} #per-time-period`;
 

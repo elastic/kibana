@@ -7,8 +7,8 @@
 
 import React from 'react';
 import {
-  SUPPRESSION_DURATION,
-  THRESHOLD_SUPPRESSION_ENABLED,
+  ALERT_SUPPRESSION_DURATION,
+  THRESHOLD_ALERT_SUPPRESSION_ENABLED,
 } from '../../../../../../../rule_creation/components/threshold_alert_suppression_edit/fields';
 import { type FormData } from '../../../../../../../../shared_imports';
 import type { ThresholdAlertSuppression } from '../../../../../../../../../common/api/detection_engine';
@@ -47,8 +47,8 @@ function deserializer(defaultValue: FormData): ThresholdAlertSuppressionFormData
   const alertSuppression = defaultValue.alert_suppression as ThresholdAlertSuppression | undefined;
 
   return {
-    [THRESHOLD_SUPPRESSION_ENABLED]: Boolean(alertSuppression?.duration),
-    [SUPPRESSION_DURATION]: alertSuppression?.duration ?? {
+    [THRESHOLD_ALERT_SUPPRESSION_ENABLED]: Boolean(alertSuppression?.duration),
+    [ALERT_SUPPRESSION_DURATION]: alertSuppression?.duration ?? {
       value: 5,
       unit: 'm',
     },
@@ -58,13 +58,13 @@ function deserializer(defaultValue: FormData): ThresholdAlertSuppressionFormData
 function serializer(formData: FormData): { alert_suppression?: ThresholdAlertSuppression } {
   const alertSuppressionFormData = formData as ThresholdAlertSuppressionFormData;
 
-  if (!alertSuppressionFormData[THRESHOLD_SUPPRESSION_ENABLED]) {
+  if (!alertSuppressionFormData[THRESHOLD_ALERT_SUPPRESSION_ENABLED]) {
     return {};
   }
 
   return {
     alert_suppression: {
-      duration: alertSuppressionFormData[SUPPRESSION_DURATION],
+      duration: alertSuppressionFormData[ALERT_SUPPRESSION_DURATION],
     },
   };
 }

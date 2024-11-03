@@ -36,6 +36,15 @@ import type {
   ActionsStepRule,
 } from './types';
 import { getThreatMock } from '../../../../../common/detection_engine/schemas/types/threat.mock';
+import {
+  ALERT_SUPPRESSION_DURATION,
+  ALERT_SUPPRESSION_DURATION_TYPE,
+  ALERT_SUPPRESSION_DURATION_UNIT,
+  ALERT_SUPPRESSION_DURATION_VALUE,
+  ALERT_SUPPRESSION_FIELDS,
+  ALERT_SUPPRESSION_MISSING_FIELDS,
+} from '../../../../detection_engine/rule_creation/components/alert_suppression_edit/fields';
+import { THRESHOLD_ALERT_SUPPRESSION_ENABLED } from '../../../../detection_engine/rule_creation/components/threshold_alert_suppression_edit/fields';
 
 describe('rule helpers', () => {
   moment.suppressDeprecationWarnings = true;
@@ -116,16 +125,16 @@ describe('rule helpers', () => {
           eventCategoryField: undefined,
           tiebreakerField: undefined,
         },
-        groupByFields: ['host.name'],
-        groupByDuration: {
-          value: 5,
-          unit: 'm',
+        [ALERT_SUPPRESSION_FIELDS]: ['host.name'],
+        [ALERT_SUPPRESSION_DURATION]: {
+          [ALERT_SUPPRESSION_DURATION_VALUE]: 5,
+          [ALERT_SUPPRESSION_DURATION_UNIT]: 'm',
         },
-        groupByRadioSelection: 'per-rule-execution',
+        [ALERT_SUPPRESSION_DURATION_TYPE]: 'per-rule-execution',
         newTermsFields: ['host.name'],
         historyWindowSize: '7d',
-        suppressionMissingFields: expect.any(String),
-        enableThresholdSuppression: false,
+        [ALERT_SUPPRESSION_MISSING_FIELDS]: expect.any(String),
+        [THRESHOLD_ALERT_SUPPRESSION_ENABLED]: false,
       };
 
       const aboutRuleStepData: AboutStepRule = {
@@ -294,7 +303,7 @@ describe('rule helpers', () => {
       test('returns default suppress value in suppress strategy is missing', () => {
         const result: DefineStepRule = getDefineStepsData(mockRule('test-id'));
         const expected = expect.objectContaining({
-          suppressionMissingFields: AlertSuppressionMissingFieldsStrategyEnum.suppress,
+          [ALERT_SUPPRESSION_MISSING_FIELDS]: AlertSuppressionMissingFieldsStrategyEnum.suppress,
         });
 
         expect(result).toEqual(expected);
@@ -309,7 +318,8 @@ describe('rule helpers', () => {
           },
         });
         const expected = expect.objectContaining({
-          suppressionMissingFields: AlertSuppressionMissingFieldsStrategyEnum.doNotSuppress,
+          [ALERT_SUPPRESSION_MISSING_FIELDS]:
+            AlertSuppressionMissingFieldsStrategyEnum.doNotSuppress,
         });
 
         expect(result).toEqual(expected);
