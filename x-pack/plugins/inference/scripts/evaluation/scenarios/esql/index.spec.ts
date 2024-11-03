@@ -8,11 +8,12 @@
 /// <reference types="@kbn/ambient-ftr-types"/>
 
 import expect from '@kbn/expect';
+import type { Logger } from '@kbn/logging';
 import { firstValueFrom, lastValueFrom, filter } from 'rxjs';
+import { isOutputCompleteEvent } from '@kbn/inference-common';
 import { naturalLanguageToEsql } from '../../../../server/tasks/nl_to_esql';
 import { chatClient, evaluationClient, logger } from '../../services';
 import { EsqlDocumentBase } from '../../../../server/tasks/nl_to_esql/doc_base';
-import { isOutputCompleteEvent } from '../../../../common';
 
 interface TestCase {
   title: string;
@@ -40,7 +41,7 @@ const callNaturalLanguageToEsql = async (question: string) => {
         debug: (source) => {
           logger.debug(typeof source === 'function' ? source() : source);
         },
-      },
+      } as Logger,
     })
   );
 };
