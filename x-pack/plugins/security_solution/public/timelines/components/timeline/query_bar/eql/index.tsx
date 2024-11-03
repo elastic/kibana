@@ -79,7 +79,7 @@ export const EqlQueryBarTimeline = memo(({ timelineId }: { timelineId: string })
 
   const {
     loading: indexPatternsLoading,
-    indexPattern,
+    sourcererDataView,
     selectedPatterns,
   } = useSourcererDataView(SourcererScopeName.timeline);
 
@@ -123,27 +123,23 @@ export const EqlQueryBarTimeline = memo(({ timelineId }: { timelineId: string })
 
   const prevEqlQuery = useRef<TimelineEqlQueryBar['eqlQueryBar']['query']['query']>('');
 
-  const optionsData = useMemo(
-    () =>
-      isEmpty(indexPattern.fields)
-        ? {
-            keywordFields: [],
-            dateFields: [],
-            nonDateFields: [],
-          }
-        : {
-            keywordFields: indexPattern.fields
-              .filter((f) => f.esTypes?.includes('keyword'))
-              .map((f) => ({ label: f.name })),
-            dateFields: indexPattern.fields
-              .filter((f) => f.type === 'date')
-              .map((f) => ({ label: f.name })),
-            nonDateFields: indexPattern.fields
-              .filter((f) => f.type !== 'date')
-              .map((f) => ({ label: f.name })),
-          },
-    [indexPattern]
-  );
+  const optionsData = useMemo(() => {
+    const fields = Object.values(sourcererDataView.fields || {});
+
+    return isEmpty(fields)
+      ? {
+          keywordFields: [],
+          dateFields: [],
+          nonDateFields: [],
+        }
+      : {
+          keywordFields: fields
+            .filter((f) => f.esTypes?.includes('keyword'))
+            .map((f) => ({ label: f.name })),
+          dateFields: fields.filter((f) => f.type === 'date').map((f) => ({ label: f.name })),
+          nonDateFields: fields.filter((f) => f.type !== 'date').map((f) => ({ label: f.name })),
+        };
+  }, [sourcererDataView]);
 
   useEffect(() => {
     const { index: indexField } = getFields();
@@ -206,7 +202,7 @@ export const EqlQueryBarTimeline = memo(({ timelineId }: { timelineId: string })
           idAria: 'timelineEqlQueryBar',
           isDisabled: indexPatternsLoading,
           isLoading: indexPatternsLoading,
-          indexPattern,
+          indexPattern: sourcererDataView,
           dataTestSubj: 'timelineEqlQueryBar',
         }}
         config={{

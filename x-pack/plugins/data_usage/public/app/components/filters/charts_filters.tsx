@@ -14,13 +14,13 @@ import type {
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import { useGetDataUsageMetrics } from '../../../hooks/use_get_usage_metrics';
 import { DateRangePickerValues, UsageMetricsDateRangePicker } from './date_picker';
-import { ChartsFilter } from './charts_filter';
+import { ChartsFilter, ChartsFilterProps } from './charts_filter';
+import { FilterName } from '../../hooks';
 
-interface ChartFiltersProps {
+export interface ChartFiltersProps {
   dateRangePickerState: DateRangePickerValues;
   isDataLoading: boolean;
-  onChangeDataStreamsFilter: (selectedDataStreams: string[]) => void;
-  onChangeMetricTypesFilter?: (selectedMetricTypes: string[]) => void;
+  filterOptions: Record<FilterName, ChartsFilterProps['filterOptions']>;
   onRefresh: () => void;
   onRefreshChange: (evt: OnRefreshChangeProps) => void;
   onTimeChange: ({ start, end }: DurationRange) => void;
@@ -33,9 +33,8 @@ export const ChartFilters = memo<ChartFiltersProps>(
   ({
     dateRangePickerState,
     isDataLoading,
+    filterOptions,
     onClick,
-    onChangeMetricTypesFilter,
-    onChangeDataStreamsFilter,
     onRefresh,
     onRefreshChange,
     onTimeChange,
@@ -47,19 +46,13 @@ export const ChartFilters = memo<ChartFiltersProps>(
     const filters = useMemo(() => {
       return (
         <>
-          {showMetricsTypesFilter && (
-            <ChartsFilter
-              filterName={'metricTypes'}
-              onChangeFilterOptions={onChangeMetricTypesFilter}
-            />
+          {showMetricsTypesFilter && <ChartsFilter filterOptions={filterOptions.metricTypes} />}
+          {!filterOptions.dataStreams.isFilterLoading && (
+            <ChartsFilter filterOptions={filterOptions.dataStreams} />
           )}
-          <ChartsFilter
-            filterName={'dataStreams'}
-            onChangeFilterOptions={onChangeDataStreamsFilter}
-          />
         </>
       );
-    }, [onChangeDataStreamsFilter, onChangeMetricTypesFilter, showMetricsTypesFilter]);
+    }, [filterOptions, showMetricsTypesFilter]);
 
     const onClickRefreshButton = useCallback(() => onClick(), [onClick]);
 

@@ -8,7 +8,7 @@
  */
 
 import type { CoreSetup } from '@kbn/core/server';
-import { TimedItemBuffer } from '@kbn/bfetch-plugin/common';
+import { TimedItemBuffer } from '@kbn/item-buffer';
 import type {
   EventStreamClient,
   EventStreamClientFactory,

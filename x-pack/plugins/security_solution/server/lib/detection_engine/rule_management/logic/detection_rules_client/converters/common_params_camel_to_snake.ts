@@ -12,6 +12,9 @@ import type { BaseRuleParams } from '../../../../rule_schema';
 import { migrateLegacyInvestigationFields } from '../../../utils/utils';
 import type { NormalizedRuleParams } from './normalize_rule_params';
 
+/**
+ * @deprecated Use convertObjectKeysToSnakeCase instead
+ */
 export const commonParamsCamelToSnake = (params: BaseRuleParams) => {
   return {
     description: params.description,
@@ -42,7 +45,7 @@ export const commonParamsCamelToSnake = (params: BaseRuleParams) => {
     version: params.version,
     exceptions_list: params.exceptionsList,
     immutable: params.immutable,
-    rule_source: convertObjectKeysToSnakeCase(params.ruleSource),
+    rule_source: params.ruleSource ? convertObjectKeysToSnakeCase(params.ruleSource) : undefined,
     related_integrations: params.relatedIntegrations ?? [],
     required_fields: params.requiredFields ?? [],
     response_actions: params.responseActions?.map(transformAlertToRuleResponseAction),
