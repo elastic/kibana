@@ -47,7 +47,12 @@ import {
   EQL_SEQUENCE_SUPPRESSION_GROUPBY_VALIDATION_TEXT,
 } from './translations';
 import { getQueryRequiredMessage } from './utils';
-import { ALERT_SUPPRESSION_FIELDS } from '../../../rule_creation/components/alert_suppression_edit/fields';
+import {
+  ALERT_SUPPRESSION_DURATION,
+  ALERT_SUPPRESSION_FIELDS,
+  ALERT_SUPPRESSION_MISSING_FIELDS,
+} from '../../../rule_creation/components/alert_suppression_edit/fields';
+import * as alertSuppressionEditI81n from '../../../rule_creation/components/alert_suppression_edit/translations';
 
 export const schema: FormSchema<DefineStepRule> = {
   index: {
@@ -684,6 +689,17 @@ export const schema: FormSchema<DefineStepRule> = {
         },
       },
     ],
+  },
+  [ALERT_SUPPRESSION_DURATION]: {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.groupByDurationValueLabel',
+      {
+        defaultMessage: 'Suppress alerts for',
+      }
+    ),
+  },
+  [ALERT_SUPPRESSION_MISSING_FIELDS]: {
+    label: alertSuppressionEditI81n.ALERT_SUPPRESSION_MISSING_FIELDS_LABEL,
   },
   shouldLoadQueryDynamically: {
     type: FIELD_TYPES.CHECKBOX,
