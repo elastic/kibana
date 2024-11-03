@@ -150,6 +150,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   describe('Rule Details', function () {
     describe('Header', function () {
       const testRunUuid = uuidv4();
+
       before(async () => {
         await pageObjects.common.navigateToApp('triggersActions');
         const rule = await createRuleWithSmallInterval(testRunUuid);
@@ -951,6 +952,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       const PAGE_SIZE = 10;
+
       it('renders the first page', async () => {
         // If the tab exists, click on the alert list
         await pageObjects.triggersActionsUI.maybeClickOnAlertTab();

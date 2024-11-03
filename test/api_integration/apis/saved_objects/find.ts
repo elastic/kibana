@@ -312,6 +312,7 @@ export default function ({ getService }: FtrProviderContext) {
           { space: SPACE_ID }
         );
       });
+
       after(async () => {
         await kibanaServer.importExport.unload(
           'test/api_integration/fixtures/kbn_archiver/saved_objects/references.json',
@@ -387,6 +388,7 @@ export default function ({ getService }: FtrProviderContext) {
           { space: SPACE_ID }
         );
       });
+
       after(async () => {
         await kibanaServer.importExport.unload(
           'test/api_integration/fixtures/kbn_archiver/saved_objects/references.json',
@@ -468,6 +470,7 @@ export default function ({ getService }: FtrProviderContext) {
           { space: SPACE_ID }
         );
       });
+
       after(async () => {
         await kibanaServer.importExport.unload(
           'test/api_integration/fixtures/kbn_archiver/saved_objects/references.json',
@@ -517,6 +520,7 @@ export default function ({ getService }: FtrProviderContext) {
           { space: SPACE_ID }
         );
       });
+
       after(async () => {
         await kibanaServer.importExport.unload(
           'test/api_integration/fixtures/kbn_archiver/saved_objects/find_edgecases.json',

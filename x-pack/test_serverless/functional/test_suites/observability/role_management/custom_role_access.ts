@@ -21,6 +21,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   describe('With custom role', function () {
     // skipping on MKI while we are working on a solution
     this.tags(['skipMKI']);
+
     before(async () => {
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');

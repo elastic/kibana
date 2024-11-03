@@ -145,6 +145,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe(`with ${farequoteLuceneFiltersSearchTestData.suiteTitle}`, function () {
       runTests(farequoteLuceneFiltersSearchTestData);
     });
+
     describe(`with ${farequoteKQLFiltersSearchTestData.suiteTitle}`, function () {
       runTests(farequoteKQLFiltersSearchTestData);
     });

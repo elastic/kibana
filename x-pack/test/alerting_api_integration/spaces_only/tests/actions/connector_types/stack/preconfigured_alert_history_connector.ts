@@ -44,10 +44,12 @@ export default function preconfiguredAlertHistoryConnectorTests({
     }
 
     const objectRemover = new ObjectRemover(supertest);
+
     beforeEach(async () => {
       await esDeleteAllIndices(AlertHistoryDefaultIndexName);
       await esDeleteAllIndices(ALERT_HISTORY_OVERRIDE_INDEX);
     });
+
     after(() => objectRemover.removeAll());
 
     it('should index document with preconfigured schema', async () => {

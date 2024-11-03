@@ -247,6 +247,7 @@ export default ({ getService }: FtrProviderContext) => {
       afterEach(async () => {
         await deleteAllExceptions(supertest, log);
       });
+
       it('generates no alerts when an exception is added for an ML rule', async () => {
         const { previewId } = await previewRuleWithExceptionEntries({
           supertest,

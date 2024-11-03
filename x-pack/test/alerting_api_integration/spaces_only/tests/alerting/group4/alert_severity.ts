@@ -32,6 +32,7 @@ export default function createAlertSeverityTests({ getService }: FtrProviderCont
     afterEach(async () => {
       await objectRemover.removeAll();
     });
+
     after(async () => {
       await es.deleteByQuery({
         index: alertsAsDataIndex,

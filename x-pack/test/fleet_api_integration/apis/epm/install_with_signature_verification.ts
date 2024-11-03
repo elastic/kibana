@@ -49,6 +49,7 @@ export default function (providerContext: FtrProviderContext) {
         if (!isDockerRegistryEnabledOrSkipped(providerContext)) return;
         await uninstallPackage('verified', '1.0.0');
       });
+
       it('should install a package with a valid signature', async () => {
         await installPackage('verified', '1.0.0').expect(200);
         const installationSO = await getInstallationSavedObject('verified');
@@ -56,12 +57,14 @@ export default function (providerContext: FtrProviderContext) {
         expect(installationSO?.verification_key_id).equal(TEST_KEY_ID);
       });
     });
+
     describe('unverified packages', () => {
       describe('unverified package content', () => {
         after(async () => {
           if (!isDockerRegistryEnabledOrSkipped(providerContext)) return;
           await uninstallPackage('unverified_content', '1.0.0');
         });
+
         it('should return 400 for valid signature but incorrect content', async () => {
           const res = await installPackage('unverified_content', '1.0.0');
 
@@ -70,6 +73,7 @@ export default function (providerContext: FtrProviderContext) {
             type: 'verification_failed',
           });
         });
+
         it('should return 200 for valid signature but incorrect content force install', async () => {
           await installPackage('unverified_content', '1.0.0', { force: true }).expect(200);
           const installationSO = await getInstallationSavedObject('unverified_content');
@@ -77,11 +81,13 @@ export default function (providerContext: FtrProviderContext) {
           expect(installationSO?.verification_key_id).equal(TEST_KEY_ID);
         });
       });
+
       describe('package verified with wrong key', () => {
         after(async () => {
           if (!isDockerRegistryEnabledOrSkipped(providerContext)) return;
           await uninstallPackage('wrong_key', '1.0.0');
         });
+
         it('should return 400 for valid signature but incorrect key', async () => {
           const res = await installPackage('wrong_key', '1.0.0');
           expect(res.status).equal(400);
@@ -89,6 +95,7 @@ export default function (providerContext: FtrProviderContext) {
             type: 'verification_failed',
           });
         });
+
         it('should return 200 for valid signature but incorrect key force install', async () => {
           await installPackage('wrong_key', '1.0.0', { force: true }).expect(200);
           const installationSO = await getInstallationSavedObject('wrong_key');

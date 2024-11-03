@@ -50,6 +50,7 @@ export default function ({ loadTestFile, getService, getPageObjects }: FtrProvid
 
   describe('Options list control', () => {
     before(setup);
+
     after(teardown);
 
     loadTestFile(require.resolve('./options_list_creation_and_editing'));

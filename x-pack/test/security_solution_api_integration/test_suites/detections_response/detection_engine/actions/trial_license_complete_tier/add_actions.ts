@@ -52,12 +52,14 @@ export default ({ getService }: FtrProviderContext) => {
           docsOnly: true,
         });
       });
+
       after(async () => {
         await esArchiver.unload(auditbeatPath);
         await esArchiver.unload(
           'x-pack/test/functional/es_archives/signals/severity_risk_overrides'
         );
       });
+
       beforeEach(async () => {
         await es.indices.delete({ index: 'logs-test', ignore_unavailable: true });
         await es.indices.create({

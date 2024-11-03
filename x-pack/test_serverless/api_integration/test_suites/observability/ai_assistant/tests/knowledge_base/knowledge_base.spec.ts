@@ -54,6 +54,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         id: 'my-doc-id-1',
         text: 'My content',
       };
+
       it('returns 200 on create', async () => {
         await observabilityAIAssistantAPIClient
           .slsUser({
@@ -150,6 +151,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       before(async () => {
         await clearKnowledgeBase(es);
       });
+
       afterEach(async () => {
         await clearKnowledgeBase(es);
       });
@@ -167,6 +169,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           text: 'My content c',
         },
       ];
+
       it('returns 200 on create', async () => {
         await observabilityAIAssistantAPIClient
           .slsUser({
@@ -245,6 +248,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(entriesAsc[1].id).to.eql('my_doc_b');
         expect(entriesAsc[2].id).to.eql('my_doc_c');
       });
+
       it('allows searching', async () => {
         await observabilityAIAssistantAPIClient
           .slsUser({

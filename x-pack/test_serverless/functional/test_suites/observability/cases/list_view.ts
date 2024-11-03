@@ -78,6 +78,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       describe('tags', () => {
         let caseIds: string[] = [];
+
         beforeEach(async () => {
           caseIds = [];
           const case1 = await cases.api.createCase({

@@ -12,6 +12,7 @@ import { buildUp, tearDown } from '../../helpers';
 export default function alertingTests({ loadTestFile, getService }: FtrProviderContext) {
   describe('Alerting', () => {
     before(async () => await buildUp(getService));
+
     after(async () => await tearDown(getService));
 
     loadTestFile(require.resolve('./execution_status'));

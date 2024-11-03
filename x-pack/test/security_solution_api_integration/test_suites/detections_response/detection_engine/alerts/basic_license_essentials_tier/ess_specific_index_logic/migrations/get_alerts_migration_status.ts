@@ -43,6 +43,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
   describe('@ess Alerts migration status', () => {
     let legacyAlertsIndexName: string;
+
     beforeEach(async () => {
       legacyAlertsIndexName = getIndexNameFromLoad(
         await esArchiver.load('x-pack/test/functional/es_archives/signals/legacy_signals_index')

@@ -19,6 +19,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('index result popularity', function describeIndexTests() {
     const fieldName = 'geo.coordinates';
+
     before(async function () {
       // delete .kibana index and then wait for Kibana to re-create it
       await kibanaServer.uiSettings.replace({});

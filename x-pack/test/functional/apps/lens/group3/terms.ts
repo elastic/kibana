@@ -96,6 +96,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await lens.closeDimensionEditor();
       });
     });
+
     describe('rank by', () => {
       describe('reset rank on metric change', () => {
         it('should reset the ranking when using decimals on percentile', async () => {
@@ -159,6 +160,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await testSubjects.click('toastCloseButton');
         });
       });
+
       describe('sorting by custom metric', () => {
         it('should allow sort by custom metric', async () => {
           await visualize.navigateToNewVisualization();
@@ -221,6 +223,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('Enable Other group', () => {
       const esIndexPrefix = 'terms-empty-string-index';
+
       before(async () => {
         log.info(`Creating index ${esIndexPrefix} with mappings`);
         await es.indices.create({
@@ -278,6 +281,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           index: esIndexPrefix,
         });
       });
+
       it('should work with empty string values as buckets', async () => {
         await visualize.navigateToNewVisualization();
         await visualize.clickVisType('lens');

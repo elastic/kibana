@@ -22,12 +22,14 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
   describe('Network details', () => {
     let supertest: TestAgent;
     let bsearch: BsearchService;
+
     describe('With filebeat', () => {
       before(async () => {
         supertest = await utils.createSuperTest();
         bsearch = await utils.createBsearch();
         await esArchiver.load('x-pack/test/functional/es_archives/filebeat/default');
       });
+
       after(
         async () => await esArchiver.unload('x-pack/test/functional/es_archives/filebeat/default')
       );
@@ -56,6 +58,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
         bsearch = await utils.createBsearch();
         await esArchiver.load('x-pack/test/functional/es_archives/packetbeat/default');
       });
+
       after(
         async () => await esArchiver.unload('x-pack/test/functional/es_archives/packetbeat/default')
       );

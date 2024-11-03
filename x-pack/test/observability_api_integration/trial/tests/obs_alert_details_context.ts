@@ -25,6 +25,7 @@ export default function ApiTest({ getService }: ObsFtrProviderContext) {
 
     describe('when no traces or logs are available', () => {
       let response: SupertestReturnType<'GET /internal/observability/assistant/alert_details_contextual_insights'>;
+
       before(async () => {
         response = await obsApiClient.adminUser({
           endpoint: 'GET /internal/observability/assistant/alert_details_contextual_insights',
@@ -58,6 +59,7 @@ export default function ApiTest({ getService }: ObsFtrProviderContext) {
 
       describe('when no params are specified', () => {
         let response: SupertestReturnType<'GET /internal/observability/assistant/alert_details_contextual_insights'>;
+
         before(async () => {
           response = await obsApiClient.adminUser({
             endpoint: 'GET /internal/observability/assistant/alert_details_contextual_insights',
@@ -84,6 +86,7 @@ export default function ApiTest({ getService }: ObsFtrProviderContext) {
 
       describe('when service name is specified', () => {
         let response: SupertestReturnType<'GET /internal/observability/assistant/alert_details_contextual_insights'>;
+
         before(async () => {
           response = await obsApiClient.adminUser({
             endpoint: 'GET /internal/observability/assistant/alert_details_contextual_insights',
@@ -144,6 +147,7 @@ export default function ApiTest({ getService }: ObsFtrProviderContext) {
 
       describe('when container id is specified', () => {
         let response: SupertestReturnType<'GET /internal/observability/assistant/alert_details_contextual_insights'>;
+
         before(async () => {
           response = await obsApiClient.adminUser({
             endpoint: 'GET /internal/observability/assistant/alert_details_contextual_insights',
@@ -203,6 +207,7 @@ export default function ApiTest({ getService }: ObsFtrProviderContext) {
 
       describe('when non-existing container id is specified', () => {
         let response: SupertestReturnType<'GET /internal/observability/assistant/alert_details_contextual_insights'>;
+
         before(async () => {
           response = await obsApiClient.adminUser({
             endpoint: 'GET /internal/observability/assistant/alert_details_contextual_insights',
@@ -222,6 +227,7 @@ export default function ApiTest({ getService }: ObsFtrProviderContext) {
 
       describe('when non-existing service.name is specified', () => {
         let response: SupertestReturnType<'GET /internal/observability/assistant/alert_details_contextual_insights'>;
+
         before(async () => {
           response = await obsApiClient.adminUser({
             endpoint: 'GET /internal/observability/assistant/alert_details_contextual_insights',
@@ -294,6 +300,7 @@ export default function ApiTest({ getService }: ObsFtrProviderContext) {
 
       describe('when no params are specified', () => {
         let response: SupertestReturnType<'GET /internal/observability/assistant/alert_details_contextual_insights'>;
+
         before(async () => {
           response = await obsApiClient.adminUser({
             endpoint: 'GET /internal/observability/assistant/alert_details_contextual_insights',
@@ -324,6 +331,7 @@ export default function ApiTest({ getService }: ObsFtrProviderContext) {
 
       describe('when service name is specified', () => {
         let response: SupertestReturnType<'GET /internal/observability/assistant/alert_details_contextual_insights'>;
+
         before(async () => {
           response = await obsApiClient.adminUser({
             endpoint: 'GET /internal/observability/assistant/alert_details_contextual_insights',
@@ -351,6 +359,7 @@ export default function ApiTest({ getService }: ObsFtrProviderContext) {
 
       describe('when container id is specified', () => {
         let response: SupertestReturnType<'GET /internal/observability/assistant/alert_details_contextual_insights'>;
+
         before(async () => {
           response = await obsApiClient.adminUser({
             endpoint: 'GET /internal/observability/assistant/alert_details_contextual_insights',
@@ -378,6 +387,7 @@ export default function ApiTest({ getService }: ObsFtrProviderContext) {
 
       describe('when non-existing service.name is specified', () => {
         let response: SupertestReturnType<'GET /internal/observability/assistant/alert_details_contextual_insights'>;
+
         before(async () => {
           response = await obsApiClient.adminUser({
             endpoint: 'GET /internal/observability/assistant/alert_details_contextual_insights',

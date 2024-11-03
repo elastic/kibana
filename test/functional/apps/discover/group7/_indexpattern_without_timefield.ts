@@ -74,6 +74,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         throw new Error('Expected timepicker to exist');
       }
     });
+
     it('should switch between with and without timefield using the browser back button', async () => {
       await discover.selectIndexPattern('without-timefield');
       await discover.waitForDocTableLoadingComplete();

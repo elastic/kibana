@@ -19,6 +19,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     this.tags(['skipCloud']);
 
     const EXPECTED_FIELD_COUNT = '10006';
+
     before(async function () {
       await security.testUser.setRoles(['kibana_admin', 'test_testhuge_reader']);
       await esArchiver.emptyKibanaIndex();

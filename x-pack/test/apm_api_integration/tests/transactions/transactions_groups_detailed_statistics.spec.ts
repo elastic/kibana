@@ -87,6 +87,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     describe('transactions groups detailed stats', () => {
       const GO_PROD_RATE = 75;
       const GO_PROD_ERROR_RATE = 25;
+
       before(async () => {
         const serviceGoProdInstance = apm
           .service({ name: serviceName, environment: 'production', agentName: 'go' })
@@ -125,6 +126,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         let metricsStatisticsOneMinute: TransactionsGroupsDetailedStatistics;
         let metricsStatisticsTenMinute: TransactionsGroupsDetailedStatistics;
         let metricsStatisticsSixtyMinute: TransactionsGroupsDetailedStatistics;
+
         before(async () => {
           [
             metricsStatisticsOneMinute,
@@ -264,6 +266,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       describe('with comparisons', () => {
         let transactionsStatistics: TransactionsGroupsDetailedStatistics;
+
         before(async () => {
           transactionsStatistics = await callApi({
             query: {
@@ -297,6 +300,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             expect(firstCurrentPeriodDate).to.equal(firstPreviousPeriodDate);
           });
         });
+
         it('has same end time for both periods', () => {
           const currentPeriod = transactionsStatistics.currentPeriod[transactionNames[0]];
           const previousPeriod = transactionsStatistics.previousPeriod[transactionNames[0]];

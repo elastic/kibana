@@ -61,6 +61,7 @@ export default function deleteBackfillTests({ getService }: FtrProviderContext) 
           username: user.username,
           password: user.password,
         };
+
         it('should handle delete backfill request appropriately', async () => {
           // create 2 rules
           const rresponse1 = await supertest

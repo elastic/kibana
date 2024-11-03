@@ -36,6 +36,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('keyboard shortcuts', () => {
       let tabOpened = false;
+
       afterEach(async () => {
         if (tabOpened) {
           await browser.closeCurrentWindow();
@@ -191,6 +192,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('invalid requests', () => {
       const invalidRequestText = 'GET _search\n{"query": {"match_all": {';
+
       it(`should not delete any text if indentations applied to an invalid request`, async () => {
         await PageObjects.console.clearEditorText();
         await PageObjects.console.enterText(invalidRequestText);

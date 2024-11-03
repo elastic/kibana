@@ -87,6 +87,7 @@ export default function (providerContext: FtrProviderContext) {
         },
       });
     });
+
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/fleet/agents');
       await supertest

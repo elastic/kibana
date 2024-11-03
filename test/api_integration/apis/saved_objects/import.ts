@@ -84,6 +84,7 @@ export default function ({ getService }: FtrProviderContext) {
           'test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
         );
       });
+
       after(async () => {
         await kibanaServer.importExport.unload(
           'test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
@@ -326,6 +327,7 @@ export default function ({ getService }: FtrProviderContext) {
             });
           });
       });
+
       it('should return 200 when conflicts exist but overwrite is passed in, without changing managed property on the object', async () => {
         await supertest
           .post('/api/saved_objects/_import')

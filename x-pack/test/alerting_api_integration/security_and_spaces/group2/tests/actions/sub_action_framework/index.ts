@@ -84,6 +84,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
 
   describe('Sub action framework', () => {
     const objectRemover = new ObjectRemover(supertest);
+
     after(() => objectRemover.removeAll());
 
     describe('Create', () => {

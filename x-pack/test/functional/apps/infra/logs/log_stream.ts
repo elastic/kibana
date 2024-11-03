@@ -26,12 +26,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await esArchiver.load('x-pack/test/functional/es_archives/infra/8.0.0/logs_and_metrics');
           await kibanaServer.uiSettings.update({ [OBSERVABILITY_ENABLE_LOGS_STREAM]: true });
         });
+
         after(async () => {
           await esArchiver.unload(
             'x-pack/test/functional/es_archives/infra/8.0.0/logs_and_metrics'
           );
           await kibanaServer.uiSettings.update({ [OBSERVABILITY_ENABLE_LOGS_STREAM]: false });
         });
+
         it('Expression and kind', async () => {
           const location = {
             hash: '',
@@ -59,6 +61,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             );
           });
         });
+
         it('Top-level query and language', async () => {
           const location = {
             hash: '',

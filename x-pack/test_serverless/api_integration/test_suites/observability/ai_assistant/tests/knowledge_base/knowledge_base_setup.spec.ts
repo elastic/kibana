@@ -22,13 +22,16 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     this.tags(['skipMKI']);
     let roleAuthc: RoleCredentials;
     let internalReqHeader: InternalRequestHeader;
+
     before(async () => {
       roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('editor');
       internalReqHeader = svlCommonApi.getInternalRequestHeader();
     });
+
     after(async () => {
       await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
+
     it('returns empty object when successful', async () => {
       await createKnowledgeBaseModel(ml);
       const res = await observabilityAIAssistantAPIClient
@@ -41,6 +44,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       expect(res.body).to.eql({});
       await deleteKnowledgeBaseModel(ml);
     });
+
     it('returns bad request if model cannot be installed', async () => {
       await observabilityAIAssistantAPIClient
         .slsUser({

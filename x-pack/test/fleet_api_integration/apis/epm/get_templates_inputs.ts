@@ -36,6 +36,7 @@ export default function (providerContext: FtrProviderContext) {
 
   describe('EPM Templates - Get Inputs', () => {
     skipIfNoDockerRegistry(providerContext);
+
     before(async () => {
       await fleetAndAgents.setup();
       const buf = fs.readFileSync(testPkgArchiveZip);
@@ -46,6 +47,7 @@ export default function (providerContext: FtrProviderContext) {
         .send(buf)
         .expect(200);
     });
+
     after(async () => {
       await uninstallPackage(testPkgName, testPkgVersion);
       await uninstallPackage(testPkgName, testPkgVersion);

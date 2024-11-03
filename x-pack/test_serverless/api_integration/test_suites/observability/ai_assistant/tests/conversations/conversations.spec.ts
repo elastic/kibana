@@ -50,13 +50,16 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   describe('Conversations', () => {
     let roleAuthc: RoleCredentials;
     let internalReqHeader: InternalRequestHeader;
+
     before(async () => {
       roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('editor');
       internalReqHeader = svlCommonApi.getInternalRequestHeader();
     });
+
     after(async () => {
       await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
+
     describe('without conversations', () => {
       it('returns no conversations when listing', async () => {
         const response = await observabilityAIAssistantAPIClient
@@ -108,6 +111,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       let createResponse: Awaited<
         SupertestReturnType<'POST /internal/observability_ai_assistant/conversation'>
       >;
+
       before(async () => {
         createResponse = await observabilityAIAssistantAPIClient
           .slsUser({
@@ -150,6 +154,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           })
           .expect(404);
       });
+
       it('returns the conversation', function () {
         // delete user from response to avoid comparing it as it will be different in MKI
         delete createResponse.body.user;

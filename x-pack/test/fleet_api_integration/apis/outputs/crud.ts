@@ -198,6 +198,7 @@ export default function (providerContext: FtrProviderContext) {
 
   describe('fleet_outputs_crud', function () {
     skipIfNoDockerRegistry(providerContext);
+
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
@@ -371,6 +372,7 @@ export default function (providerContext: FtrProviderContext) {
           },
         });
       });
+
       it('should allow return the latest output health', async () => {
         const { body: outputHealth } = await supertest
           .get(`/api/fleet/outputs/${defaultOutputId}/health`)
@@ -380,6 +382,7 @@ export default function (providerContext: FtrProviderContext) {
         expect(outputHealth.message).to.equal('connection error');
         expect(outputHealth.timestamp).not.to.be.empty();
       });
+
       it('should not return output health if older than output last updated time', async () => {
         const { body: outputHealth } = await supertest
           .get(`/api/fleet/outputs/${ESOutputId}/health`)

@@ -38,6 +38,7 @@ export default function (providerContext: FtrProviderContext) {
       await fleetAndAgents.setup();
       await installPackage(requiredPackage, pkgVersion);
     });
+
     after(async () => {
       await deletePackage(requiredPackage, pkgVersion);
     });

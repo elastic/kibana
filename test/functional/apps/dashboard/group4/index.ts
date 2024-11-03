@@ -26,6 +26,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
 
   describe('dashboard app - group 4', function () {
     before(loadLogstash);
+
     after(unloadLogstash);
 
     loadTestFile(require.resolve('./dashboard_empty'));

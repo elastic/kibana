@@ -620,12 +620,14 @@ export default function ({ getService }: FtrProviderContext) {
           { space: SPACE_ID }
         );
       });
+
       after(async () => {
         await kibanaServer.importExport.unload(
           'test/api_integration/fixtures/kbn_archiver/saved_objects/managed_objects.json',
           { space: SPACE_ID }
         );
       });
+
       it('should retain all existing saved object properties', async () => {
         // we're specifically asserting that the `managed` property isn't overwritten during export.
         await supertest

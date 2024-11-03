@@ -21,6 +21,7 @@ export default function ({ getService }: FtrProviderContext) {
   describe('search_indices Indices APIs', function () {
     describe('create index', function () {
       const createIndexName = 'a-test-index';
+
       describe('developer', function () {
         before(async () => {
           supertestDeveloperWithCookieCredentials =
@@ -50,6 +51,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           expect(body?.index).toBe(createIndexName);
         });
+
         it('gives a conflict error if the index exists already', async () => {
           await supertestDeveloperWithCookieCredentials
             .post(`${INTERNAL_API_BASE_PATH}/indices/create`)
@@ -59,6 +61,7 @@ export default function ({ getService }: FtrProviderContext) {
             .expect(409);
         });
       });
+
       describe('viewer', function () {
         before(async () => {
           supertestViewerWithCookieCredentials =

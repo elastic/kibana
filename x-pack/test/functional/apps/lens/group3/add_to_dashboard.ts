@@ -278,6 +278,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         describe('add-to-dashboard options', function () {
           this.tags('skipFIPS');
+
           it('should not display', async () => {
             await visualize.navigateToNewVisualization();
             await visualize.clickVisType('lens');
@@ -327,6 +328,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         describe('add-to-dashboard options', function () {
           this.tags('skipFIPS');
+
           it('should not display', async () => {
             await visualize.navigateToNewVisualization();
             await visualize.clickVisType('lens');

@@ -161,16 +161,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         before(async () => {
           await toasts.dismissAll();
         });
+
         afterEach(async () => {
           await PageObjects.security.submitUpdateUserForm();
           await toasts.dismissAll();
         });
+
         after(async () => {
           await PageObjects.security.forceLogout();
           await PageObjects.security.login();
           await PageObjects.settings.navigateTo();
           await PageObjects.security.clickElasticsearchUsers();
         });
+
         it('of other user when submitting form', async () => {
           optionalUser.password = 'NewOptionalUserPwd';
           optionalUser.confirm_password = 'NewOptionalUserPwd';

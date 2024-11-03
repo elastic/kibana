@@ -25,6 +25,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('observability security feature controls', function () {
     this.tags(['skipFirefox', 'skipFIPS']);
+
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/cases/default');
     });
@@ -92,6 +93,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('observability cases read-only privileges', function () {
       this.tags('skipFIPS');
+
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
         await observability.users.setTestUserRole(
@@ -146,6 +148,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('no observability privileges', function () {
       this.tags('skipFIPS');
+
       before(async () => {
         await observability.users.setTestUserRole({
           elasticsearch: { cluster: [], indices: [], run_as: [] },

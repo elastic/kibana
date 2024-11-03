@@ -45,6 +45,7 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
 
     describe('handle snooze rule request appropriately', function () {
       this.tags('skipFIPS');
+
       it('should handle snooze rule request appropriately', async () => {
         const { body: createdConnector } = await supertest
           .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
@@ -103,6 +104,7 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
 
     describe('handle snooze rule request appropriately when duration is -1', function () {
       this.tags('skipFIPS');
+
       it('should handle snooze rule request appropriately when duration is -1', async () => {
         const { body: createdConnector } = await supertest
           .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
@@ -251,6 +253,7 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
 
     describe('prevent more than 5 schedules from being added to a rule', function () {
       this.tags('skipFIPS');
+
       it('should prevent more than 5 schedules from being added to a rule', async () => {
         const { body: createdRule } = await supertest
           .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
@@ -327,6 +330,7 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
 
     describe('clear the snooze after it expires', function () {
       this.tags('skipFIPS');
+
       it('should clear the snooze after it expires', async () => {
         const { body: createdConnector } = await supertest
           .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)

@@ -225,6 +225,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const [lensHandle] = await browser.getAllWindowHandles();
       await browser.switchToWindow(lensHandle);
     });
+
     it('should navigate to discover from embeddable correctly', async () => {
       const [lensHandle] = await browser.getAllWindowHandles();
       await browser.switchToWindow(lensHandle);

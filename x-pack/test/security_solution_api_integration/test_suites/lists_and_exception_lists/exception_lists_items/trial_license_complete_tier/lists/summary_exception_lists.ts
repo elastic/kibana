@@ -28,6 +28,7 @@ export default ({ getService }: FtrProviderContext) => {
       beforeEach(async () => {
         await createListsIndex(supertest, log);
       });
+
       afterEach(async () => {
         await deleteListsIndex(supertest, log);
         await deleteAllExceptions(supertest, log);

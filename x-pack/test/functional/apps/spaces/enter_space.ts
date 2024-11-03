@@ -19,6 +19,7 @@ export default function enterSpaceFunctionalTests({
 
   describe('Enter Space', function () {
     this.tags('includeFirefox');
+
     before(async () => {
       await spacesService.create({
         id: 'another-space',
@@ -44,6 +45,7 @@ export default function enterSpaceFunctionalTests({
       });
       await PageObjects.security.forceLogout();
     });
+
     after(async () => {
       await spacesService.delete('another-space');
       await kibanaServer.savedObjects.cleanStandardList();

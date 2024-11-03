@@ -21,6 +21,7 @@ export default function customLinksTests({ getService }: FtrProviderContext) {
   registry.when('Custom links with a basic license', { config: 'basic', archives: [] }, () => {
     describe('basic', function () {
       this.tags('skipFIPS');
+
       it('returns a 403 forbidden', async () => {
         const customLink = {
           url: 'https://elastic.co',

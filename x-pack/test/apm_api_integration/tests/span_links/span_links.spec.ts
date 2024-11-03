@@ -60,6 +60,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       describe('producer-internal-only trace', () => {
         let traces: Awaited<ReturnType<typeof fetchTraces>>['body'];
+
         before(async () => {
           const tracesResponse = await fetchTraces({
             traceId: ids.producerInternalOnly.traceId,
@@ -78,6 +79,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       describe('producer-external-only trace', () => {
         let traces: Awaited<ReturnType<typeof fetchTraces>>['body'];
+
         before(async () => {
           const tracesResponse = await fetchTraces({
             traceId: ids.producerExternalOnly.traceId,
@@ -99,6 +101,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       describe('producer-consumer trace', () => {
         let traces: Awaited<ReturnType<typeof fetchTraces>>['body'];
+
         before(async () => {
           const tracesResponse = await fetchTraces({
             traceId: ids.producerConsumer.traceId,
@@ -118,6 +121,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       describe('consumer-multiple trace', () => {
         let traces: Awaited<ReturnType<typeof fetchTraces>>['body'];
+
         before(async () => {
           const tracesResponse = await fetchTraces({
             traceId: ids.producerMultiple.traceId,
@@ -185,6 +189,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       describe('producer-internal-only span links details', () => {
         let transactionALinksDetails: Awaited<ReturnType<typeof fetchChildrenAndParentsDetails>>;
         let spanALinksDetails: Awaited<ReturnType<typeof fetchChildrenAndParentsDetails>>;
+
         before(async () => {
           const [transactionALinksDetailsResponse, spanALinksDetailsResponse] = await Promise.all([
             fetchChildrenAndParentsDetails({
@@ -254,6 +259,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       describe('producer-external-only span links details', () => {
         let transactionBLinksDetails: Awaited<ReturnType<typeof fetchChildrenAndParentsDetails>>;
         let spanBLinksDetails: Awaited<ReturnType<typeof fetchChildrenAndParentsDetails>>;
+
         before(async () => {
           const [transactionALinksDetailsResponse, spanALinksDetailsResponse] = await Promise.all([
             fetchChildrenAndParentsDetails({
@@ -312,6 +318,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       describe('producer-consumer span links details', () => {
         let transactionCLinksDetails: Awaited<ReturnType<typeof fetchChildrenAndParentsDetails>>;
         let spanCLinksDetails: Awaited<ReturnType<typeof fetchChildrenAndParentsDetails>>;
+
         before(async () => {
           const [transactionALinksDetailsResponse, spanALinksDetailsResponse] = await Promise.all([
             fetchChildrenAndParentsDetails({
@@ -413,6 +420,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       describe('consumer-multiple span links details', () => {
         let transactionDLinksDetails: Awaited<ReturnType<typeof fetchChildrenAndParentsDetails>>;
         let spanELinksDetails: Awaited<ReturnType<typeof fetchChildrenAndParentsDetails>>;
+
         before(async () => {
           const [transactionALinksDetailsResponse, spanALinksDetailsResponse] = await Promise.all([
             fetchChildrenAndParentsDetails({

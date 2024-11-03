@@ -31,6 +31,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await pageObjects.indexManagement.changeTabs('indicesTab');
       await pageObjects.header.waitUntilLoadingHasFinished();
     });
+
     after(async () => {
       await esDeleteAllIndices(testIndexName);
     });

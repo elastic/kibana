@@ -25,6 +25,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
 
   describe('dashboard app - group 2', function () {
     before(loadCurrentData);
+
     after(unloadCurrentData);
 
     loadTestFile(require.resolve('./full_screen_mode'));

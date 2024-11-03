@@ -46,6 +46,7 @@ export default function ({ getService }: FtrProviderContext) {
       const cnva = now.add(6, 'months').toISOString();
       const cnvb = now.subtract(23, 'weeks').toISOString();
       const monitorId = 'monitor1';
+
       before(async () => {
         await makeChecksWithStatus(
           esService,
@@ -77,6 +78,7 @@ export default function ({ getService }: FtrProviderContext) {
           (d: any) => d
         );
       });
+
       after('unload test docs', async () => {
         await esArchiver.unload('x-pack/test/functional/es_archives/uptime/blank');
       });

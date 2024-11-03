@@ -94,6 +94,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             ruleTypeId: ApmRuleType.Anomaly,
           });
         });
+
         it('checks if alert is active', async () => {
           const ruleStatus = await waitForActiveRule({
             ruleId: createdRule.id,

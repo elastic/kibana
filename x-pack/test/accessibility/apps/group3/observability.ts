@@ -28,6 +28,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await observability.overview.common.openAlertsSectionAndWaitToAppear();
         await a11y.testAppSnapshot();
       });
+
       it('Guided Setup', async () => {
         await PageObjects.infraHome.clickGuidedSetupButton();
         await retry.waitFor('Guided setup header to be visible', async () => {

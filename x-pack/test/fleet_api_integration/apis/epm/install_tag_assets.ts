@@ -76,12 +76,14 @@ export default function (providerContext: FtrProviderContext) {
     after(async () => {
       await deleteSpace(testSpaceId);
     });
+
     describe('creates correct tags when installing a package in non default space after installing in default space', () => {
       before(async () => {
         if (!isDockerRegistryEnabledOrSkipped(providerContext)) return;
         await installPackageInSpace('all_assets', pkgVersion, 'default');
         await installPackageInSpace(pkgName, pkgVersion, testSpaceId);
       });
+
       after(async () => {
         if (!isDockerRegistryEnabledOrSkipped(providerContext)) return;
         await uninstallPackage('all_assets', pkgVersion);
@@ -95,6 +97,7 @@ export default function (providerContext: FtrProviderContext) {
         const spaceTag = await getTag('fleet-managed-fleet_test_space', testSpaceId);
         expect(spaceTag).not.equal(undefined);
       });
+
       it('Should create package tag saved objects', async () => {
         const defaultTag = await getTag(`fleet-pkg-all_assets-default`);
         expect(defaultTag).not.equal(undefined);
@@ -136,6 +139,7 @@ export default function (providerContext: FtrProviderContext) {
 
         await installPackageInSpace(pkgName, pkgVersion, 'default');
       });
+
       after(async () => {
         if (!isDockerRegistryEnabledOrSkipped(providerContext)) return;
         await uninstallPackage(pkgName, pkgVersion);
@@ -175,6 +179,7 @@ export default function (providerContext: FtrProviderContext) {
           .send(buf)
           .expect(200);
       });
+
       after(async () => {
         if (!isDockerRegistryEnabledOrSkipped(providerContext)) return;
         await uninstallPackage(testPackage, testPackageVersion);

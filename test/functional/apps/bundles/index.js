@@ -16,6 +16,7 @@ export default function ({ getService }) {
 
   describe('bundle compression', function () {
     let buildHash;
+
     before(async () => {
       const resp = await supertest.get('/api/status').expect(200);
       buildHash = resp.body.version.build_hash.slice(0, 12);

@@ -86,6 +86,7 @@ export default ({ getService }: FtrProviderContext) => {
       ml.api.assertResponseStatusCode(200, status, body);
       expect(body.maxScore).to.be.above(50);
     });
+
     it('should respond with an error when job with provided id does not exist', async () => {
       const requestBody = {
         jobIds: ['i_am_not_found'],

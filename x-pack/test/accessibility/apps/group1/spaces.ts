@@ -25,6 +25,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.savedObjects.cleanStandardList();
       await PageObjects.common.navigateToApp('home');
     });
+
     after(async () => {
       await spacesService.delete('space_a');
       await kibanaServer.savedObjects.cleanStandardList();

@@ -32,6 +32,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('import jobs', function () {
     this.tags(['ml']);
+
     before(async () => {
       await ml.api.cleanMlIndices();
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');

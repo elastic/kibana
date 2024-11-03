@@ -126,6 +126,7 @@ export default function (providerContext: FtrProviderContext) {
           refresh: 'wait_for',
         });
       });
+
       after(async () => {
         await uninstallPackage(testPkgName, testPkgVersion);
         await uninstallPackage('experimental', '0.1.0');
@@ -135,6 +136,7 @@ export default function (providerContext: FtrProviderContext) {
           name: 'logs-apache.access-default',
         });
       });
+
       it('Allows the fetching of installed packages', async () => {
         const res = await supertest.get(`/api/fleet/epm/packages/installed`).expect(200);
         const packages = res.body.items;
@@ -144,11 +146,13 @@ export default function (providerContext: FtrProviderContext) {
         expect(packageNames).to.contain('experimental');
         expect(packageNames.length).to.be(3);
       });
+
       it('Can be limited with perPage', async () => {
         const res = await supertest.get(`/api/fleet/epm/packages/installed?perPage=2`).expect(200);
         const packages = res.body.items;
         expect(packages.length).to.be(2);
       });
+
       it('Can be queried by dataStreamType', async () => {
         const res = await supertest
           .get(`/api/fleet/epm/packages/installed?dataStreamType=metrics`)
@@ -163,6 +167,7 @@ export default function (providerContext: FtrProviderContext) {
         });
         expect(streamsWithWrongType.length).to.be(0);
       });
+
       it('Can be sorted', async () => {
         const ascRes = await supertest
           .get(`/api/fleet/epm/packages/installed?sortOrder=asc`)
@@ -176,6 +181,7 @@ export default function (providerContext: FtrProviderContext) {
         const descPackages = descRes.body.items;
         expect(descPackages[0].name).to.be('experimental');
       });
+
       it('Can be filtered by name', async () => {
         const res = await supertest
           .get(`/api/fleet/epm/packages/installed?nameQuery=experimental`)
@@ -184,6 +190,7 @@ export default function (providerContext: FtrProviderContext) {
         expect(packages.length).to.be(1);
         expect(packages[0].name).to.be('experimental');
       });
+
       it('Can be to only return active datastreams', async () => {
         const res = await supertest
           .get(`/api/fleet/epm/packages/installed?nameQuery=apache&showOnlyActiveDataStreams=true`)
@@ -195,6 +202,7 @@ export default function (providerContext: FtrProviderContext) {
         expect(packages[0].dataStreams[0].name).to.be('logs-apache.access-*');
       });
     });
+
     it('returns a 404 for a package that do not exists', async function () {
       await supertest.get('/api/fleet/epm/packages/notexists/99.99.99').expect(404);
     });
@@ -209,12 +217,14 @@ export default function (providerContext: FtrProviderContext) {
         .auth(testUsers.fleet_all_only.username, testUsers.fleet_all_only.password)
         .expect(200);
     });
+
     it('allows user with only integrations permission to access', async () => {
       await supertestWithoutAuth
         .get(`/api/fleet/epm/packages/${testPkgName}/${testPkgVersion}`)
         .auth(testUsers.integr_all_only.username, testUsers.integr_all_only.password)
         .expect(200);
     });
+
     it('allows user with integrations read permission to access', async () => {
       await supertestWithoutAuth
         .get(`/api/fleet/epm/packages/${testPkgName}/${testPkgVersion}`)
@@ -234,6 +244,7 @@ export default function (providerContext: FtrProviderContext) {
       expect(packageInfo.name).to.equal('apache');
       await uninstallPackage(testPkgName, testPkgVersion);
     });
+
     it('should return all fields for input only packages', async function () {
       // input packages have to get their package info from the manifest directly
       // not from the package registry. This is because they contain a field the registry
@@ -246,6 +257,7 @@ export default function (providerContext: FtrProviderContext) {
       expect(packageInfo.policy_templates.length).to.equal(1);
       expect(packageInfo.policy_templates[0].vars).not.to.be(undefined);
     });
+
     describe('Pkg verification', () => {
       it('should return validation error for unverified input only pkg', async function () {
         const res = await supertest
@@ -255,12 +267,14 @@ export default function (providerContext: FtrProviderContext) {
 
         expect(error?.attributes?.type).to.equal('verification_failed');
       });
+
       it('should not return validation error for unverified input only pkg if ignoreUnverified is true', async function () {
         await supertest
           .get(`/api/fleet/epm/packages/input_only/0.1.0?ignoreUnverified=true&prerelease=true`)
           .expect(200);
       });
     });
+
     it('returns package info from the archive if ?full=true', async function () {
       const res = await supertest
         .get(`/api/fleet/epm/packages/non_epr_fields/1.0.0?full=true`)
@@ -272,6 +286,7 @@ export default function (providerContext: FtrProviderContext) {
       );
       expect(dataStream?.elasticsearch?.source_mode).equal('default');
     });
+
     it('returns package info from the registry if ?full=false', async function () {
       const res = await supertest
         .get(`/api/fleet/epm/packages/non_epr_fields/1.0.0?full=false`)
@@ -285,6 +300,7 @@ export default function (providerContext: FtrProviderContext) {
       // it is not part of the EPR API
       expect(dataStream?.elasticsearch?.source_mode).equal(undefined);
     });
+
     it('returns package info from the registry if ?full not provided', async function () {
       const res = await supertest
         .get(`/api/fleet/epm/packages/non_epr_fields/1.0.0?full=false`)

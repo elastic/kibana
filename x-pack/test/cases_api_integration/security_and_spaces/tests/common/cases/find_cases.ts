@@ -624,6 +624,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
     describe('find_cases pagination', () => {
       const numCases = 10;
+
       before(async () => {
         await createCasesWithTitleAsNumber(numCases);
       });

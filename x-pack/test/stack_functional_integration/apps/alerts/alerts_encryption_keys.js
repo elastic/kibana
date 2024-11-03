@@ -29,9 +29,11 @@ export default ({ getPageObjects, getService }) => {
     before(async () => {
       esArchiver.load(ARCHIVE);
     });
+
     beforeEach(async () => {
       await pageObjects.common.navigateToApp('triggersConnectors');
     });
+
     after(async () => {
       esArchiver.unload(ARCHIVE);
     });
@@ -50,6 +52,7 @@ export default ({ getPageObjects, getService }) => {
           expect(true).to.be(true);
         });
       });
+
       describe(`with a decryption only key`, () => {
         it('should show a success callout', async () => {
           const connectorName = 'decrypt_only';
@@ -59,6 +62,7 @@ export default ({ getPageObjects, getService }) => {
           });
         });
       });
+
       describe(`with the current key`, () => {
         it('should show a success callout', async () => {
           const connectorName = 'current_key';

@@ -566,6 +566,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await pageObjects.infraHome.clickAlertsAndRules();
         });
       });
+
       describe('Saved Views', () => {
         before(async () => {
           await pageObjects.infraHome.goToMetricExplorer();
@@ -574,6 +575,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         beforeEach(async () => {
           await pageObjects.infraSavedViews.clickSavedViewsButton();
         });
+
         afterEach(async () => {
           await pageObjects.infraSavedViews.closeSavedViewsPopover();
         });

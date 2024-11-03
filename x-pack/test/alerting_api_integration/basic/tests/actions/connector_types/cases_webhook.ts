@@ -58,6 +58,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
   };
   describe('casesWebhook', () => {
     let casesWebhookSimulatorURL: string = '<could not determine kibana url>';
+
     before(() => {
       // use jira because cases webhook works with any third party case management system
       casesWebhookSimulatorURL = kibanaServer.resolveUrl(

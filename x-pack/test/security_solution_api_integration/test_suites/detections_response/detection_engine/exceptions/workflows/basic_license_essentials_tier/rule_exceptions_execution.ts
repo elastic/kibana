@@ -290,6 +290,7 @@ export default ({ getService }: FtrProviderContext) => {
         const alertsOpen = await getOpenAlerts(supertest, log, es, createdRule);
         expect(alertsOpen.hits.hits.length).toEqual(0);
       });
+
       describe('rules with value list exceptions', () => {
         beforeEach(async () => {
           await createListsIndex(supertest, log);
@@ -440,6 +441,7 @@ export default ({ getService }: FtrProviderContext) => {
           const alertsOpen = await getOpenAlerts(supertest, log, es, createdRule);
           expect(alertsOpen.hits.hits.length).toEqual(0);
         });
+
         it('should Not allow deleting value list when there are references and ignoreReferences is false', async () => {
           const valueListId = 'value-list-id.txt';
           await importFile(supertest, log, 'keyword', ['suricata-sensor-amsterdam'], valueListId);

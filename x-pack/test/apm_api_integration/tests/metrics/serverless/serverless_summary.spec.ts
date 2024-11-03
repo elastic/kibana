@@ -63,6 +63,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
     describe('Python service', () => {
       let serverlessSummary: APIReturnType<'GET /internal/apm/services/{serviceName}/metrics/serverless/summary'>;
+
       before(async () => {
         const response = await callApi('lambda-python');
         serverlessSummary = response.body;
@@ -71,14 +72,17 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('returns correct memory avg', () => {
         expect(serverlessSummary.memoryUsageAvgRate).to.eql(expectedMemoryUsedRate);
       });
+
       it('returns correct serverless function total', () => {
         expect(serverlessSummary.serverlessFunctionsTotal).to.eql(
           pythonServerlessFunctionNames.length
         );
       });
+
       it('returns correct serverless duration avg', () => {
         expect(serverlessSummary.serverlessDurationAvg).to.eql(faasDuration);
       });
+
       it('returns correct billed duration avg', () => {
         expect(serverlessSummary.billedDurationAvg).to.eql(billedDurationMs);
       });
@@ -86,6 +90,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
     describe('detailed metrics', () => {
       let serverlessSummary: APIReturnType<'GET /internal/apm/services/{serviceName}/metrics/serverless/summary'>;
+
       before(async () => {
         const response = await callApi(
           'lambda-python',
@@ -97,12 +102,15 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('returns correct memory avg', () => {
         expect(serverlessSummary.memoryUsageAvgRate).to.eql(expectedMemoryUsedRate);
       });
+
       it('returns correct serverless function total', () => {
         expect(serverlessSummary.serverlessFunctionsTotal).to.eql(1);
       });
+
       it('returns correct serverless duration avg', () => {
         expect(serverlessSummary.serverlessDurationAvg).to.eql(faasDuration);
       });
+
       it('returns correct billed duration avg', () => {
         expect(serverlessSummary.billedDurationAvg).to.eql(billedDurationMs);
       });

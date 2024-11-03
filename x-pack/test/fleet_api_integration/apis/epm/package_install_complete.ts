@@ -38,6 +38,7 @@ export default function (providerContext: FtrProviderContext) {
           .send({ force: true })
           .expect(200);
       });
+
       it('should have not reinstalled if package install completed', async function () {
         const packageBeforeSetup = await kibanaServer.savedObjects.get({
           type: 'epm-packages',
@@ -52,6 +53,7 @@ export default function (providerContext: FtrProviderContext) {
         const installStartedAfterSetup = packageAfterSetup.attributes.install_started_at;
         expect(installStartedAtBeforeSetup).equal(installStartedAfterSetup);
       });
+
       it('should have reinstalled if package installing did not complete in elapsed time', async function () {
         // change the saved object to installing to mock kibana crashing and not finishing the install
         const previousInstallDate = new Date(Date.now() - MAX_TIME_COMPLETE_INSTALL).toISOString();
@@ -72,6 +74,7 @@ export default function (providerContext: FtrProviderContext) {
         expect(Date.parse(installStartedAfterSetup)).greaterThan(Date.parse(previousInstallDate));
         expect(packageAfterSetup.attributes.install_status).equal('installed');
       });
+
       it('should have not reinstalled if package installing did not surpass elapsed time', async function () {
         // change the saved object to installing to mock package still installing, but a time less than the max time allowable
         const previousInstallDate = new Date(Date.now()).toISOString();
@@ -92,6 +95,7 @@ export default function (providerContext: FtrProviderContext) {
         expect(Date.parse(installStartedAfterSetup)).equal(Date.parse(previousInstallDate));
         expect(packageAfterSetup.attributes.install_status).equal('installing');
       });
+
       after(async () => {
         if (!isDockerRegistryEnabledOrSkipped(providerContext)) return;
         await supertest
@@ -100,6 +104,7 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
       });
     });
+
     describe('package update', () => {
       before(async () => {
         if (!isDockerRegistryEnabledOrSkipped(providerContext)) return;
@@ -114,6 +119,7 @@ export default function (providerContext: FtrProviderContext) {
           .send({ force: true })
           .expect(200);
       });
+
       it('should have not reinstalled if package update completed', async function () {
         const packageBeforeSetup = await kibanaServer.savedObjects.get({
           type: 'epm-packages',
@@ -128,6 +134,7 @@ export default function (providerContext: FtrProviderContext) {
         const installStartedAfterSetup = packageAfterSetup.attributes.install_started_at;
         expect(installStartedAtBeforeSetup).equal(installStartedAfterSetup);
       });
+
       it('should have reinstalled if package updating did not complete in elapsed time', async function () {
         // change the saved object to installing to mock kibana crashing and not finishing the update
         const previousInstallDate = new Date(Date.now() - MAX_TIME_COMPLETE_INSTALL).toISOString();
@@ -152,6 +159,7 @@ export default function (providerContext: FtrProviderContext) {
         expect(packageAfterSetup.attributes.version).equal(pkgUpdateVersion);
         expect(packageAfterSetup.attributes.install_version).equal(pkgUpdateVersion);
       });
+
       it('should have not reinstalled if package updating did not surpass elapsed time', async function () {
         // change the saved object to installing to mock package still installing, but a time less than the max time allowable
         const previousInstallDate = new Date(Date.now()).toISOString();
@@ -174,6 +182,7 @@ export default function (providerContext: FtrProviderContext) {
         expect(packageAfterSetup.attributes.install_status).equal('installing');
         expect(packageAfterSetup.attributes.version).equal(pkgVersion);
       });
+
       after(async () => {
         if (!isDockerRegistryEnabledOrSkipped(providerContext)) return;
         await supertest

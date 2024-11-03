@@ -39,6 +39,7 @@ export default function createEnableAlertTests({ getService }: FtrProviderContex
 
     describe('handle enable alert request', function () {
       this.tags('skipFIPS');
+
       it('should handle enable alert request appropriately', async () => {
         const { body: createdAlert } = await supertestWithoutAuth
           .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
@@ -79,6 +80,7 @@ export default function createEnableAlertTests({ getService }: FtrProviderContex
 
     describe(`shouldn't enable alert from another space`, function () {
       this.tags('skipFIPS');
+
       it(`shouldn't enable alert from another space`, async () => {
         const { body: createdAlert } = await supertestWithoutAuth
           .post(`${getUrlPrefix(Spaces.other.id)}/api/alerting/rule`)
@@ -97,6 +99,7 @@ export default function createEnableAlertTests({ getService }: FtrProviderContex
 
     describe('legacy', function () {
       this.tags('skipFIPS');
+
       it('should handle enable alert request appropriately', async () => {
         const { body: createdAlert } = await supertestWithoutAuth
           .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)

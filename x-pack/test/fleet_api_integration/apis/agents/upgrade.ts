@@ -25,6 +25,7 @@ export default function (providerContext: FtrProviderContext) {
 
   describe('fleet_upgrade_agent', () => {
     skipIfNoDockerRegistry(providerContext);
+
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/agents');
       await fleetAndAgents.setup();
@@ -51,9 +52,11 @@ export default function (providerContext: FtrProviderContext) {
         throw new Error('default source_uri not set');
       }
     });
+
     afterEach(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/fleet/agents');
     });
+
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/fleet/agents');
     });

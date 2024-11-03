@@ -33,6 +33,7 @@ export default function createUpdateApiKeyTests({ getService }: FtrProviderConte
 
     describe('handle update alert api key appropriately', function () {
       this.tags('skipFIPS');
+
       it('should handle update alert api key appropriately', async () => {
         const { body: createdAlert } = await supertestWithoutAuth
           .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
@@ -64,6 +65,7 @@ export default function createUpdateApiKeyTests({ getService }: FtrProviderConte
 
     describe("shouldn't update alert api key", function () {
       this.tags('skipFIPS');
+
       it(`shouldn't update alert api key from another space`, async () => {
         const { body: createdAlert } = await supertestWithoutAuth
           .post(`${getUrlPrefix(Spaces.other.id)}/api/alerting/rule`)
@@ -82,6 +84,7 @@ export default function createUpdateApiKeyTests({ getService }: FtrProviderConte
 
     describe('legacy', function () {
       this.tags('skipFIPS');
+
       it('should handle update alert api key appropriately', async () => {
         const { body: createdAlert } = await supertestWithoutAuth
           .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)

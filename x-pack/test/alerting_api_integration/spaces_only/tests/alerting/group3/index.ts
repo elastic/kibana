@@ -12,7 +12,9 @@ import { buildUp, tearDown } from '../../helpers';
 export default function alertingTests({ loadTestFile, getService }: FtrProviderContext) {
   describe('Alerting', function () {
     this.tags('skipFIPS');
+
     before(async () => await buildUp(getService));
+
     after(async () => await tearDown(getService));
 
     loadTestFile(require.resolve('./builtin_alert_types'));

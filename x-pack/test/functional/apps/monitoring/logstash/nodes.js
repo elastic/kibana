@@ -33,6 +33,7 @@ export default function ({ getService, getPageObjects }) {
     after(async () => {
       await tearDown();
     });
+
     it('should have Logstash Cluster Summary Status showing correct info', async () => {
       expect(await logstashSummaryStatus.getContent()).to.eql({
         eventsInTotal: 'Events Received\n117.9k',
@@ -41,6 +42,7 @@ export default function ({ getService, getPageObjects }) {
         nodeCount: 'Nodes\n2',
       });
     });
+
     it('should have a nodes table with the correct number of rows', async () => {
       // retry in case the table hasn't had time to re-render
       await retry.try(async () => {
@@ -48,6 +50,7 @@ export default function ({ getService, getPageObjects }) {
         expect(rows.length).to.be(2);
       });
     });
+
     it('should have a nodes table with the correct data', async () => {
       const nodesAll = await nodes.getNodesAll();
 

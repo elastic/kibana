@@ -19,6 +19,7 @@ export default function (providerContext: FtrProviderContext) {
 
   describe('EPM - package file', () => {
     skipIfNoDockerRegistry(providerContext);
+
     describe('it gets files from registry', () => {
       it('fetches a .png screenshot image', async function () {
         // wait 10s before uploading again to avoid getting 429 just in case a previous test was hitting the same endpoint
@@ -95,6 +96,7 @@ export default function (providerContext: FtrProviderContext) {
           .expect(403);
       });
     });
+
     describe('it gets files from an uploaded package', () => {
       before(async () => {
         const testPkgArchiveTgz = path.join(
@@ -109,9 +111,11 @@ export default function (providerContext: FtrProviderContext) {
           .send(buf)
           .expect(200);
       });
+
       after(async () => {
         await supertest.delete(`/api/fleet/epm/packages/apache/0.1.4`).set('kbn-xsrf', 'xxxx');
       });
+
       it('fetches a .png screenshot image', async function () {
         const res = await supertest
           .get('/api/fleet/epm/packages/apache/0.1.4/img/kibana-apache-test.png')
@@ -120,6 +124,7 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
         expect(Buffer.isBuffer(res.body)).to.equal(true);
       });
+
       it('fetches the logo', async function () {
         const res = await supertest
           .get('/api/fleet/epm/packages/apache/0.1.4/img/logo_apache_test.svg')

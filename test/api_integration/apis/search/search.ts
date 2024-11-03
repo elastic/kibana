@@ -29,6 +29,7 @@ export default function ({ getService }: FtrProviderContext) {
     after(async () => {
       await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
     });
+
     describe('post', () => {
       it('should return 200 when correctly formatted searches are provided', async () => {
         const resp = await supertest

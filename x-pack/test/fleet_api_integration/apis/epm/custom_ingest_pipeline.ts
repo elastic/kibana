@@ -24,6 +24,7 @@ export default function (providerContext: FtrProviderContext) {
   const LOG_INTEGRATION_VERSION = '1.1.2';
   describe('custom ingest pipeline for fleet managed datastreams', () => {
     skipIfNoDockerRegistry(providerContext);
+
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
       await fleetAndAgents.setup();
@@ -138,6 +139,7 @@ export default function (providerContext: FtrProviderContext) {
           }),
         ])
       );
+
       it('Should write doc correctly', async () => {
         const res = await es.index({
           index: 'logs-log.log-test',

@@ -26,6 +26,7 @@ export default function ({ getService }: FtrProviderContext) {
       await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
       await kibanaServer.savedObjects.cleanStandardList();
     });
+
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
       await kibanaServer.savedObjects.cleanStandardList();
@@ -152,6 +153,7 @@ export default function ({ getService }: FtrProviderContext) {
         const response = await makeRequest({ modules: ['system'] });
         expect(response.body.hasData).to.be(true);
       });
+
       it('should return "hasData" false when modules is "nginx"', async () => {
         const response = await makeRequest({ modules: ['nginx'] });
         expect(response.body.hasData).to.be(true);

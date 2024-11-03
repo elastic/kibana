@@ -53,6 +53,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(cleanupResponse).to.contain('deleted_bytes');
         expect(cleanupResponse).to.contain('deleted_blobs');
       });
+
       after(async () => {
         await es.snapshot.deleteRepository({
           name: 'my-repository',

@@ -558,6 +558,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       expect(previewAlerts[0]._source?.['kibana.alert.new_terms']).toEqual(['host-0', '127.0.0.2']);
     });
+
     describe('null values', () => {
       it('should not generate alerts with null values for single field', async () => {
         const rule: NewTermsRuleCreateProps = {
@@ -940,6 +941,7 @@ export default ({ getService }: FtrProviderContext) => {
           'x-pack/test/functional/es_archives/security_solution/timestamp_override_3'
         );
       });
+
       after(async () => {
         await esArchiver.unload(
           'x-pack/test/functional/es_archives/security_solution/timestamp_fallback'

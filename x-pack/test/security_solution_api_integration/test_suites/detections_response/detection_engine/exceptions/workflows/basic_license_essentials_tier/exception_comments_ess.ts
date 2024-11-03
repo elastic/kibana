@@ -141,6 +141,7 @@ export default ({ getService }: FtrProviderContext) => {
         );
       });
     });
+
     describe('Endpoint Exceptions', () => {
       beforeEach(async () => {
         await createUserAndRole(getService, detectionAdmin);

@@ -49,6 +49,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       describe('when maxTraceItems is 5000 (default)', () => {
         let trace: APIReturnType<'GET /internal/apm/traces/{traceId}'>;
+
         before(async () => {
           trace = await getTrace({ es, apmApiClient, maxTraceItems: 5000 });
         });
@@ -72,6 +73,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       describe('when maxTraceItems is 20000', () => {
         let trace: APIReturnType<'GET /internal/apm/traces/{traceId}'>;
+
         before(async () => {
           trace = await getTrace({ es, apmApiClient, maxTraceItems: 20000 });
         });

@@ -116,6 +116,7 @@ export default function (providerContext: FtrProviderContext) {
           hosts: ['test.fr:443'],
         });
       });
+
       after(async () => {
         await supertest
           .delete(`/api/fleet/outputs/${output1Id}`)
@@ -188,6 +189,7 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     let output2Id = '';
+
     describe('GET /api/fleet/agent_policies/{agentPolicyId}/outputs', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
@@ -201,6 +203,7 @@ export default function (providerContext: FtrProviderContext) {
           hosts: ['https://test.fr:8080'],
         });
       });
+
       after(async () => {
         await supertest
           .delete(`/api/fleet/outputs/${output2Id}`)

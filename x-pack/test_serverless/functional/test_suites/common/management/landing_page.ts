@@ -16,6 +16,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   describe('Management landing page', function () {
     this.tags('smoke');
+
     before(async () => {
       await pageObjects.svlCommonPage.loginAsAdmin();
     });

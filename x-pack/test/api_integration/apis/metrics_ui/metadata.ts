@@ -44,6 +44,7 @@ export default function ({ getService }: FtrProviderContext) {
   describe('metadata', () => {
     describe('7.0.0', () => {
       before(async () => esArchiver.load('x-pack/test/functional/es_archives/infra/7.0.0/hosts'));
+
       after(async () => esArchiver.unload('x-pack/test/functional/es_archives/infra/7.0.0/hosts'));
 
       it('hosts', async () => {
@@ -64,6 +65,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('6.6.0', () => {
       before(async () => esArchiver.load('x-pack/test/functional/es_archives/infra/6.6.0/docker'));
+
       after(async () => esArchiver.unload('x-pack/test/functional/es_archives/infra/6.6.0/docker'));
 
       it('docker', async () => {
@@ -86,7 +88,9 @@ export default function ({ getService }: FtrProviderContext) {
       describe('cloud and host information', () => {
         const archiveName =
           'x-pack/test/functional/es_archives/infra/8.0.0/logs_and_metrics_with_aws';
+
         before(async () => esArchiver.load(archiveName));
+
         after(async () => esArchiver.unload(archiveName));
 
         it('host', async () => {

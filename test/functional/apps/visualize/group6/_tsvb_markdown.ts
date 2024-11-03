@@ -100,6 +100,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         const markdownText = await visualBuilder.getMarkdownText();
         expect(markdownText).to.be(expectedRenderer);
       });
+
       it('should render markdown table', async () => {
         const TABLE =
           '| raw | formatted |\n|-|-|\n| {{count.last.raw}} | {{count.last.formatted}} |';

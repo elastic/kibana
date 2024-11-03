@@ -19,6 +19,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
     });
+
     describe('global logs all privileges', () => {
       before(async () => {
         await security.role.create('global_logs_all_role', {

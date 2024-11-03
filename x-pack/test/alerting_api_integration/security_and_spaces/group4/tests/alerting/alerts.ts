@@ -123,6 +123,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
             objectRemover,
           });
         });
+
         after(() => objectRemover.add(space.id, indexRecordActionId, 'connector', 'actions'));
 
         it('should schedule task, run alert and schedule actions when appropriate', async () => {

@@ -15,9 +15,11 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('create index', () => {
     const testIndices = ['my-test-index-001', 'my-test-index-002'];
+
     before(async () => {
       await esDeleteAllIndices(testIndices);
     });
+
     after(async () => {
       await esDeleteAllIndices(testIndices);
     });

@@ -26,6 +26,7 @@ export default function ({ getService }: FtrProviderContext) {
         'test/api_integration/fixtures/kbn_archiver/saved_objects/managed_basic.json'
       );
     });
+
     after(async () => {
       await kibanaServer.importExport.unload(
         'test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
@@ -73,6 +74,7 @@ export default function ({ getService }: FtrProviderContext) {
           expect(resp.body.typeMigrationVersion).to.be.ok();
           expect(resp.body.managed).not.to.be.ok();
         }));
+
     it("should return an object's managed property", async () => {
       await supertest
         .get(`/api/saved_objects/dashboard/11fb046d-0e50-48a0-a410-a744b82cbffd`)

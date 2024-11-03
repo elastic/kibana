@@ -30,6 +30,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const url = await browser.getCurrentUrl();
       expect(url).to.contain(`/indices`);
     });
+
     it('can create an index', async () => {
       await pageObjects.indexManagement.clickCreateIndexButton();
       await pageObjects.indexManagement.setCreateIndexName(testIndexName);
@@ -46,14 +47,17 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.indexManagement.manageIndex(testIndexName);
         await pageObjects.indexManagement.manageIndexContextMenuExists();
       });
+
       describe('navigate to index detail tabs', function () {
         before(async () => {
           await es.indices.create({ index: testIndexName });
         });
+
         after(async () => {
           await esDeleteAllIndices(testIndexName);
         });
         this.tags('skipSvlSearch');
+
         it('navigates to overview', async () => {
           await pageObjects.indexManagement.changeManageIndexTab('showOverviewIndexMenuButton');
           await pageObjects.indexManagement.indexDetailsPage.expectIndexDetailsPageIsLoaded();
@@ -65,12 +69,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await pageObjects.indexManagement.indexDetailsPage.expectIndexDetailsPageIsLoaded();
           await pageObjects.indexManagement.indexDetailsPage.expectUrlShouldChangeTo('settings');
         });
+
         it('navigates to mappings tab', async () => {
           await pageObjects.indexManagement.changeManageIndexTab('showMappingsIndexMenuButton');
           await pageObjects.indexManagement.indexDetailsPage.expectIndexDetailsPageIsLoaded();
           await pageObjects.indexManagement.indexDetailsPage.expectUrlShouldChangeTo('mappings');
         });
       });
+
       it('can delete index', async () => {
         await pageObjects.indexManagement.confirmDeleteModalIsVisible();
         await pageObjects.indexManagement.expectIndexIsDeleted(testIndexName);

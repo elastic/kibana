@@ -97,6 +97,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await ml.testResources.setKibanaTimeZoneToUTC();
       await ml.securityUI.loginAsMlPowerUser();
     });
+
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/ml/ihp_outlier');
       await esArchiver.unload('x-pack/test/functional/es_archives/ml/farequote');

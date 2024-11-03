@@ -71,6 +71,7 @@ export default function (providerContext: FtrProviderContext) {
       ]);
       await installUploadPackage(uploadPkgName);
     });
+
     after(async () => {
       if (!isDockerRegistryEnabledOrSkipped(providerContext)) return;
       await uninstallPackages([
@@ -79,6 +80,7 @@ export default function (providerContext: FtrProviderContext) {
         { name: experimental2PkgName, version: pkgVersion },
       ]);
     });
+
     it('should create index patterns (without fields)', async () => {
       const resIndexPatternLogs = await kibanaServer.savedObjects.get({
         type: 'index-pattern',

@@ -56,6 +56,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
     describe('Python service', () => {
       let activeInstances: APIReturnType<'GET /internal/apm/services/{serviceName}/metrics/serverless/active_instances'>;
+
       before(async () => {
         const response = await callApi('lambda-python');
         activeInstances = response.body;
@@ -74,6 +75,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           expect(activeInstanceOverview?.memorySize).to.eql(memoryTotal);
         });
       });
+
       describe('timeseries', () => {
         it('returns correct sum value', () => {
           const sumValue = sumBy(
@@ -87,6 +89,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
     describe('detailed metrics', () => {
       let activeInstances: APIReturnType<'GET /internal/apm/services/{serviceName}/metrics/serverless/active_instances'>;
+
       before(async () => {
         const response = await callApi(
           'lambda-python',
@@ -108,6 +111,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(activeInstanceOverview?.avgMemoryUsed).to.eql(expectedMemoryUsed);
         expect(activeInstanceOverview?.memorySize).to.eql(memoryTotal);
       });
+
       describe('timeseries', () => {
         it('returns correct sum value', () => {
           const sumValue = sumBy(

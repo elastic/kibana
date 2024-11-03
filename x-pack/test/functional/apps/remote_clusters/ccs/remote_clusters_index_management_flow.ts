@@ -24,6 +24,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   describe('CCS Remote Clusters > Index Management', function () {
     const leaderName = 'my-index';
     const followerName = 'my-follower';
+
     before(async () => {
       await security.testUser.setRoles(['superuser']);
       // This test is temporarily using superuser because of an issue with the permissions
@@ -65,6 +66,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           return await testSubjects.isDisplayed('createFollowerIndexButton');
         });
       });
+
       it('Create Follower Index', async () => {
         await pageObjects.crossClusterReplication.clickCreateFollowerIndexButton();
         await pageObjects.crossClusterReplication.createFollowerIndex(
@@ -75,6 +77,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         );
       });
     });
+
     describe('Index Management', function () {
       before(async () => {
         await remoteEs.index({
@@ -86,6 +89,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           return await testSubjects.isDisplayed('indicesList');
         });
       });
+
       it('Verify that the follower index is duplicating from the remote.', async () => {
         await pageObjects.indexManagement.clickIndexAt(0);
         await pageObjects.indexManagement.performIndexAction('flush');

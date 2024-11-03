@@ -73,6 +73,7 @@ export default function ({ getService }: FtrProviderContext) {
         },
       });
     });
+
     after(async () => {
       await resolver.deleteData(resolverTrees);
     });

@@ -53,6 +53,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(body.mappings).to.eql(mappings);
     });
+
     it('show update the index mappings', async () => {
       const { status } = await updateMappings(indexName);
       expect(status).to.eql(200);

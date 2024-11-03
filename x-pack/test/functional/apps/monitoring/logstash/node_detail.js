@@ -51,16 +51,19 @@ export default function ({ getService, getPageObjects }) {
         await nodes.clickRowByResolver('29a3dfa6-c146-4534-9bc0-be475d2ce950');
         expect(await nodeDetail.getSummary()).to.eql(nodeSummaryStatus);
       });
+
       it('advanced view should have summary status showing correct info', async () => {
         await nodeDetail.clickAdvanced();
 
         expect(await nodeDetail.getSummary()).to.eql(nodeSummaryStatus);
       });
+
       it('pipelines view should have summary status showing correct info', async () => {
         await nodeDetail.clickPipelines();
 
         expect(await nodeDetail.getSummary()).to.eql(nodeSummaryStatus);
       });
+
       it('pipelines view should have Pipelines table showing correct rows with default sorting', async () => {
         const rows = await pipelinesList.getRows();
         expect(rows.length).to.be(3);

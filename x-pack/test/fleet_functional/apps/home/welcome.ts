@@ -39,7 +39,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     // Pending tests we should add once the FTR supports Elastic Agent / Fleet Server
     it('is still displayed after a Fleet server is enrolled with agent metrics');
+
     it('is not displayed after an agent is enrolled with system metrics');
+
     it('is not displayed after a standalone agent is enrolled with system metrics');
   });
 }

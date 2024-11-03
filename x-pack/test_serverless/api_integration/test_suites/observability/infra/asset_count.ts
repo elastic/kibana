@@ -48,12 +48,14 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('API /api/infra/{assetType}/count', () => {
     let roleAuthc: RoleCredentials;
+
     describe('works', () => {
       describe('with host', () => {
         before(async () => {
           roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
           return esArchiver.load(ARCHIVE_NAME);
         });
+
         after(async () => {
           await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
           return esArchiver.unload(ARCHIVE_NAME);

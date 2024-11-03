@@ -25,11 +25,13 @@ export default function ({ getService }) {
   describe('index_patterns/* error handler', () => {
     let indexNotFoundError;
     let docNotFoundError;
+
     before(async () => {
       await esArchiver.load('test/api_integration/fixtures/es_archiver/index_patterns/basic_index');
       indexNotFoundError = await getIndexNotFoundError(es);
       docNotFoundError = await getDocNotFoundError(es);
     });
+
     after(async () => {
       await esArchiver.unload(
         'test/api_integration/fixtures/es_archiver/index_patterns/basic_index'

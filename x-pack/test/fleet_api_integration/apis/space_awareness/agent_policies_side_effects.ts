@@ -56,6 +56,7 @@ export default function (providerContext: FtrProviderContext) {
 
     describe('Download source', () => {
       let downloadSourceId: string;
+
       before(async () => {
         const res = await apiClient.postDownloadSource({
           name: `test ${Date.now()}`,
@@ -81,6 +82,7 @@ export default function (providerContext: FtrProviderContext) {
           ),
         ]);
       });
+
       it('should remove download_source_id accross spaces', async () => {
         const policiesResBefore = await Promise.all([
           apiClient.getAgentPolicy(defaultSpacePolicy1.item.id),
@@ -106,6 +108,7 @@ export default function (providerContext: FtrProviderContext) {
 
     describe('Fleet server host', () => {
       let fleetServerHostId: string;
+
       before(async () => {
         const res = await apiClient.postFleetServerHosts({
           name: `test ${Date.now()}`,
@@ -131,6 +134,7 @@ export default function (providerContext: FtrProviderContext) {
           ),
         ]);
       });
+
       it('should remove fleet server host accross spaces', async () => {
         const policiesResBefore = await Promise.all([
           apiClient.getAgentPolicy(defaultSpacePolicy1.item.id),
@@ -156,6 +160,7 @@ export default function (providerContext: FtrProviderContext) {
 
     describe('Output', () => {
       let outputId: string;
+
       before(async () => {
         const res = await apiClient.postOutput({
           name: `test ${Date.now()}`,
@@ -186,6 +191,7 @@ export default function (providerContext: FtrProviderContext) {
           ),
         ]);
       });
+
       it('should remove output host accross spaces', async () => {
         const policiesResBefore = await Promise.all([
           apiClient.getAgentPolicy(defaultSpacePolicy1.item.id),

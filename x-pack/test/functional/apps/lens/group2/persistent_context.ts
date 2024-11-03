@@ -48,27 +48,32 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await navigationalSearch.clickOnOption(0);
           await lens.waitForWorkspaceWithVisualization();
         });
+
         it('filters, time and query reflect the visualization state', async () => {
           expect(await lens.getDatatableHeaderText(1)).to.equal('404 › Median of bytes');
           expect(await lens.getDatatableHeaderText(2)).to.equal('503 › Median of bytes');
           expect(await lens.getDatatableCellText(0, 0)).to.eql('TG');
           expect(await lens.getDatatableCellText(0, 1)).to.eql('9,931');
         });
+
         it('preserves time range', async () => {
           const timePickerValues = await timePicker.getTimeConfigAsAbsoluteTimes();
           expect(timePickerValues.start).to.eql(timePicker.defaultStartTime);
           expect(timePickerValues.end).to.eql(timePicker.defaultEndTime);
           // data is correct and top nav is correct
         });
+
         it('loads filters', async () => {
           const filterCount = await filterBar.getFilterCount();
           expect(filterCount).to.equal(1);
         });
+
         it('loads query', async () => {
           const query = await queryBar.getQueryString();
           expect(query).to.equal('extension.raw : "jpg" or extension.raw : "gif" ');
         });
       });
+
       describe('when opening from existing visualization to empty one', () => {
         before(async () => {
           await visualize.gotoVisualizationLandingPage();
@@ -82,6 +87,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await lens.switchToVisualization('lnsLegacyMetric');
           await lens.dragFieldToWorkspace('@timestamp', 'legacyMtrVis');
         });
+
         it('preserves time range', async () => {
           // fill the navigation search and select empty
           // see the time
@@ -89,14 +95,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           expect(timePickerValues.start).to.eql(timePicker.defaultStartTime);
           expect(timePickerValues.end).to.eql(timePicker.defaultEndTime);
         });
+
         it('cleans filters', async () => {
           const filterCount = await filterBar.getFilterCount();
           expect(filterCount).to.equal(0);
         });
+
         it('cleans query', async () => {
           const query = await queryBar.getQueryString();
           expect(query).to.equal('');
         });
+
         it('filters, time and query reflect the visualization state', async () => {
           await lens.assertLegacyMetric('Unique count of @timestamp', '14,181');
         });
@@ -128,6 +137,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(query).to.equal('');
         await lens.assertLegacyMetric('Unique count of @timestamp', '14,181');
       });
+
       it('when moving from empty to existing workspace, preserves time range and loads filters and query', async () => {
         // go to existing vis
         await lens.goToListingPageViaBreadcrumbs();

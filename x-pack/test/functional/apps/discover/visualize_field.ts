@@ -52,6 +52,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     before(async () => {
       await kibanaServer.uiSettings.replace(defaultSettings);
     });
+
     beforeEach(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
       await kibanaServer.importExport.load(

@@ -25,6 +25,7 @@ export default function (providerContext: FtrProviderContext) {
 
   describe('action_status_api', () => {
     skipIfNoDockerRegistry(providerContext);
+
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/agents');
       await fleetAndAgents.setup();

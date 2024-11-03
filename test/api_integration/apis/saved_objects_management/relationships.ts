@@ -50,6 +50,7 @@ export default function ({ getService }: FtrProviderContext) {
         'test/api_integration/fixtures/kbn_archiver/management/saved_objects/relationships.json'
       );
     });
+
     after(async () => {
       await kibanaServer.importExport.unload(
         'test/api_integration/fixtures/kbn_archiver/management/saved_objects/relationships.json'

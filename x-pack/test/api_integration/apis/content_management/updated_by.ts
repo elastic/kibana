@@ -19,6 +19,7 @@ export default function ({ getService }: FtrProviderContext) {
   describe('updated_by', function () {
     describe('for not interactive user', function () {
       const supertest = getService('supertest');
+
       it('updated_by is empty', async () => {
         const createResponse = await supertest
           .post('/api/content_management/rpc/create')

@@ -18,6 +18,7 @@ export default function ({ getService }: FtrProviderContext) {
     configArray.forEach((config) => {
       describe(config.name, () => {
         const newId = () => `default-id-${Date.now()}-${Math.random()}`;
+
         it('can set default index pattern', async () => {
           const defaultId = newId();
           const defaultPath = `${config.basePath}/default`;

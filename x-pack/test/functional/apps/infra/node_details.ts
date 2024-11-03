@@ -134,6 +134,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   describe('Node Details', () => {
     let synthEsClient: InfraSynthtraceEsClient;
+
     before(async () => {
       synthEsClient = await getInfraSynthtraceEsClient(esClient);
       await kibanaServer.savedObjects.cleanStandardList();
@@ -297,6 +298,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           const RECOVERED_ALERTS = 2;
           const ALL_ALERTS = ACTIVE_ALERTS + RECOVERED_ALERTS;
           const COLUMNS = 11;
+
           before(async () => {
             await esArchiver.load('x-pack/test/functional/es_archives/infra/alerts');
             await navigateToNodeDetails('demo-stack-apache-01', 'host', {
@@ -491,6 +493,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             END_HOST_PROCESSES_DATE.format(DATE_PICKER_FORMAT)
           );
         });
+
         after(async () => {
           await esArchiver.unload(
             'x-pack/test/functional/es_archives/infra/metrics_hosts_processes'
@@ -801,6 +804,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             END_CONTAINER_DATE.format(DATE_PICKER_FORMAT)
           );
         });
+
         it('should show asset container details page', async () => {
           await pageObjects.assetDetails.getOverviewTab();
         });
@@ -850,6 +854,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             await pageObjects.assetDetails.metadataTableExists();
           });
         });
+
         describe('Logs Tab', () => {
           before(async () => {
             await pageObjects.assetDetails.clickLogsTab();

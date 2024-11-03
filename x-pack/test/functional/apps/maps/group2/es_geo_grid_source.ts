@@ -46,6 +46,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     ) {
       describe('geoprecision - requests', () => {
         let beforeTimestamp = '';
+
         beforeEach(async () => {
           await maps.setView(DATA_CENTER_LAT, DATA_CENTER_LON, 1);
           beforeTimestamp = await getRequestTimestamp();
@@ -172,6 +173,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       const LAYER_ID = 'g1xkv';
+
       it('should get expected number of grid cells', async () => {
         const mapboxStyle = await maps.getMapboxStyle();
         expect(mapboxStyle.sources[LAYER_ID].data.features.length).to.equal(26);

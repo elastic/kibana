@@ -28,6 +28,7 @@ export default function deleteConnectorTests({ getService }: FtrProviderContext)
       await esTestIndexTool.destroy();
       await esTestIndexTool.setup();
     });
+
     after(async () => {
       await esTestIndexTool.destroy();
       await objectRemover.removeAll();

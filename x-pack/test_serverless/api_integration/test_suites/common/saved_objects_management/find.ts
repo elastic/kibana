@@ -19,6 +19,7 @@ export default function ({ getService }: FtrProviderContext) {
     before(async () => {
       roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
     });
+
     after(async () => {
       await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
@@ -30,11 +31,13 @@ export default function ({ getService }: FtrProviderContext) {
           'test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
         );
       });
+
       after(async () => {
         await kibanaServer.importExport.unload(
           'test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
         );
       });
+
       it('should return 200 with individual responses', async () => {
         const { body } = await supertestWithoutAuth
           .get('/api/kibana/management/saved_objects/_find?type=visualization')
@@ -107,6 +110,7 @@ export default function ({ getService }: FtrProviderContext) {
           'test/api_integration/fixtures/kbn_archiver/saved_objects/references.json'
         );
       });
+
       after(async () => {
         await kibanaServer.importExport.unload(
           'test/api_integration/fixtures/kbn_archiver/saved_objects/references.json'
@@ -115,6 +119,7 @@ export default function ({ getService }: FtrProviderContext) {
           'test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
         );
       });
+
       describe('`hasReference` and `hasReferenceOperator` parameters', () => {
         it('search for a reference', async () => {
           const { body } = await supertestWithoutAuth
@@ -210,6 +215,7 @@ export default function ({ getService }: FtrProviderContext) {
           'test/api_integration/fixtures/kbn_archiver/saved_objects/search.json'
         );
       });
+
       after(async () => {
         await kibanaServer.importExport.unload(
           'test/api_integration/fixtures/kbn_archiver/saved_objects/search.json'

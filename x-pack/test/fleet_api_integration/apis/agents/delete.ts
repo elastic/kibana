@@ -61,6 +61,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/agents');
     });
+
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/fleet/agents');
     });

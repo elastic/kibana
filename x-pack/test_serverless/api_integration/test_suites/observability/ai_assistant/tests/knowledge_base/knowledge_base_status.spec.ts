@@ -25,6 +25,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     this.tags(['skipMKI']);
     let roleAuthc: RoleCredentials;
     let internalReqHeader: InternalRequestHeader;
+
     before(async () => {
       roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('editor');
       internalReqHeader = svlCommonApi.getInternalRequestHeader();

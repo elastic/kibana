@@ -16,6 +16,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   describe('o11y sidenav', () => {
     let cleanUp: () => Promise<unknown>;
     let spaceCreated: { id: string } = { id: '' };
+
     before(async () => {
       // Navigate to the spaces management page which will log us in Kibana
       await common.navigateToUrl('management', 'kibana/spaces', {

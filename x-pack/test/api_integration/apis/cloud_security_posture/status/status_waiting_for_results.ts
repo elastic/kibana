@@ -27,6 +27,7 @@ export default function (providerContext: FtrProviderContext) {
       before(async () => {
         await fleetAndAgents.setup();
       });
+
       beforeEach(async () => {
         await kibanaServer.savedObjects.cleanStandardList();
         await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');

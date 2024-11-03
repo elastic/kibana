@@ -31,9 +31,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       before(async () => {
         await pageObjects.svlCommonPage.loginWithRole('developer');
       });
+
       after(async () => {
         await deleteAllTestIndices();
       });
+
       beforeEach(async () => {
         await deleteAllTestIndices();
         await pageObjects.svlApiKeys.deleteAPIKeys();
@@ -76,6 +78,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await es.indices.create({ index: 'test-my-index-002' });
         await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnIndexListPage();
       });
+
       it('should redirect to indices list if single index exist on page load', async () => {
         await svlSearchNavigation.navigateToGettingStartedPage();
         await es.indices.create({ index: 'test-my-index-001' });
@@ -157,14 +160,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.svlSearchElasticsearchStartPage.expectO11yTrialLink();
       });
     });
+
     describe('viewer', function () {
       before(async () => {
         await pageObjects.svlCommonPage.loginAsViewer();
         await deleteAllTestIndices();
       });
+
       beforeEach(async () => {
         await svlSearchNavigation.navigateToElasticsearchStartPage();
       });
+
       after(async () => {
         await deleteAllTestIndices();
       });

@@ -28,6 +28,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await esArchiver.load('x-pack/test/functional/es_archives/infra/logs_with_nano_date');
       await kibanaServer.uiSettings.update({ [OBSERVABILITY_ENABLE_LOGS_STREAM]: true });
     });
+
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/infra/logs_with_nano_date');
       await kibanaServer.uiSettings.update({ [OBSERVABILITY_ENABLE_LOGS_STREAM]: false });

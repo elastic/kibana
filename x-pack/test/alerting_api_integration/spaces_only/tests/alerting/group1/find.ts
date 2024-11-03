@@ -37,6 +37,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
 
     describe('handle find alert request', function () {
       this.tags('skipFIPS');
+
       it('should handle find alert request appropriately', async () => {
         const { body: createdAction } = await supertest
           .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
@@ -294,6 +295,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
 
     describe('legacy', function () {
       this.tags('skipFIPS');
+
       it('should handle find alert request appropriately', async () => {
         const { body: createdAlert } = await supertest
           .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)

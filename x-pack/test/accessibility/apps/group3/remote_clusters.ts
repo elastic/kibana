@@ -133,6 +133,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           mode === 'sniff'
             ? getPayloadClusterSniffMode(clusterName)
             : getPayloadClusterProxyMode(clusterName);
+
         before(async () => {
           await esClient.cluster.putSettings({ body });
         });

@@ -39,6 +39,7 @@ export default function (providerContext: FtrProviderContext) {
 
     describe('setup performs upgrades', () => {
       const oldEndpointVersion = '1.0.0';
+
       beforeEach(async () => {
         const url = '/api/fleet/epm/packages/endpoint';
         await supertest.delete(url).set('kbn-xsrf', 'xxxx').send({ force: true }).expect(200);
@@ -48,6 +49,7 @@ export default function (providerContext: FtrProviderContext) {
           .send({ force: true })
           .expect(200);
       });
+
       it('upgrades the endpoint package from 0.13.0 to the latest version available', async function () {
         let { body }: { body: GetInfoResponse } = await supertest
           .get(`/api/fleet/epm/packages/endpoint/${oldEndpointVersion}`)
@@ -70,6 +72,7 @@ export default function (providerContext: FtrProviderContext) {
 
     describe('package policy upgrade on setup', () => {
       let agentPolicyId: string;
+
       before(async function () {
         const { body: agentPolicyResponse } = await supertest
           .post(`/api/fleet/agent_policies`)

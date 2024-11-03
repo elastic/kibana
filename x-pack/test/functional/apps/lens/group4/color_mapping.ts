@@ -47,6 +47,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         ELASTIC_BRAND_PALETTE_COLORS.slice(0, 5).map((c) => c.toLowerCase())
       );
     });
+
     it('should allow switching color mapping palette', async () => {
       await lens.changeColorMappingPalette(
         'lnsXY_splitDimensionPanel > lnsLayerPanel-dimensionLink',

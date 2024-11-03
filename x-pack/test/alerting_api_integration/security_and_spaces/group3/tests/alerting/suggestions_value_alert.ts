@@ -22,6 +22,7 @@ export default function createRuleSuggestionValuesTests({ getService }: FtrProvi
       await esArchiver.load('x-pack/test/functional/es_archives/observability/alerts');
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/alerts/8.1.0');
     });
+
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/observability/alerts');
       await esArchiver.unload('x-pack/test/functional/es_archives/security_solution/alerts/8.1.0');

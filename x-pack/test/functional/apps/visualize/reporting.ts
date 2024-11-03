@@ -31,9 +31,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('Visualize Reporting Screenshots', function () {
     this.tags(['smoke']);
+
     before(async () => {
       await browser.setWindowSize(1600, 850);
     });
+
     after(async () => {
       await es.deleteByQuery({
         index: '.reporting-*',
@@ -56,6 +58,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           defaultIndex: '5193f870-d861-11e9-a311-0fa548c5f953',
         });
       });
+
       after('clean up archives', async () => {
         await esArchiver.unload('x-pack/test/functional/es_archives/reporting/ecommerce');
         await kibanaServer.importExport.unload(ecommerceSOPath);

@@ -49,6 +49,7 @@ export default function ({ getService }: FtrProviderContext) {
         refresh: 'wait_for',
       });
     });
+
     after(async () => {
       await es.indices.delete({
         index: 'search-api-test',
@@ -375,6 +376,7 @@ export default function ({ getService }: FtrProviderContext) {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/hybrid/rollup');
       });
+
       after(async () => {
         await esArchiver.unload('x-pack/test/functional/es_archives/hybrid/rollup');
       });

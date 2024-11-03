@@ -29,6 +29,7 @@ export default function ({ getService }: FtrProviderContext) {
     before(async () => {
       await esArchiver.emptyKibanaIndex();
     });
+
     after(async () => {
       await esArchiver.emptyKibanaIndex();
     });

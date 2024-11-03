@@ -324,6 +324,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             });
           }
         });
+
         after(async () => {
           await transform.api.deleteIndices(testData.destinationIndex);
           await transform.testResources.deleteDataViewByTitle(testData.destinationIndex);

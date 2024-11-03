@@ -50,6 +50,7 @@ export default function (providerContext: FtrProviderContext) {
       }
       expect(res.response.data.statusCode).equal(404);
     });
+
     it('should return 400 if trying to install an out-of-date package', async function () {
       await supertest
         .post(`/api/fleet/epm/packages/multiple_versions/0.1.0`)
@@ -66,6 +67,7 @@ export default function (providerContext: FtrProviderContext) {
       }
       expect(res.response.data.statusCode).equal(404);
     });
+
     it('should return 200 if trying to force install an out-of-date package', async function () {
       await supertest
         .post(`/api/fleet/epm/packages/multiple_versions/0.1.0`)
@@ -73,18 +75,21 @@ export default function (providerContext: FtrProviderContext) {
         .send({ force: true })
         .expect(200);
     });
+
     it('should return 200 if trying to reinstall an out-of-date package', async function () {
       await supertest
         .post(`/api/fleet/epm/packages/multiple_versions/0.1.0`)
         .set('kbn-xsrf', 'xxxx')
         .expect(200);
     });
+
     it('should return 400 if trying to update to an out-of-date package', async function () {
       await supertest
         .post(`/api/fleet/epm/packages/multiple_versions/0.2.0`)
         .set('kbn-xsrf', 'xxxx')
         .expect(400);
     });
+
     it('should return 200 if trying to force update to an out-of-date package', async function () {
       await supertest
         .post(`/api/fleet/epm/packages/multiple_versions/0.2.0`)
@@ -92,6 +97,7 @@ export default function (providerContext: FtrProviderContext) {
         .send({ force: true })
         .expect(200);
     });
+
     it('should return 200 if trying to reupdate an out-of-date package', async function () {
       const previousInstallDate = new Date(Date.now() - MAX_TIME_COMPLETE_INSTALL).toISOString();
       // mock package to be stuck installing an update
@@ -110,6 +116,7 @@ export default function (providerContext: FtrProviderContext) {
         .set('kbn-xsrf', 'xxxx')
         .expect(200);
     });
+
     it('should return 200 if trying to update to the latest package', async function () {
       await supertest
         .post(`/api/fleet/epm/packages/multiple_versions/0.3.0`)
@@ -117,6 +124,7 @@ export default function (providerContext: FtrProviderContext) {
         .expect(200);
       await deletePackage('multiple_versions', '0.3.0');
     });
+
     it('should return 200 if trying to install the latest package', async function () {
       await supertest
         .post(`/api/fleet/epm/packages/multiple_versions/0.3.0`)

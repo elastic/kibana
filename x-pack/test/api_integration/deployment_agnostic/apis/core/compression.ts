@@ -19,9 +19,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         withCustomHeaders: { 'accept-encoding': 'gzip' },
       });
     });
+
     after(async () => {
       await supertestWithAdminScope.destroy();
     });
+
     describe('against an application page', () => {
       it(`uses compression when there isn't a referer`, async () => {
         const response = await supertestWithAdminScope.get('/app/kibana');

@@ -84,6 +84,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await createUserAndRole(getService, ROLES.hunter_no_actions);
         await createUserAndRole(getService, ROLES.hunter);
       });
+
       after(async () => {
         await deleteUserAndRole(getService, ROLES.hunter_no_actions);
         await deleteUserAndRole(getService, ROLES.hunter);

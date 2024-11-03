@@ -25,6 +25,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
 
   describe('dashboard app - group 6', function () {
     before(loadCurrentData);
+
     after(unloadCurrentData);
 
     loadTestFile(require.resolve('./dashboard_grid'));

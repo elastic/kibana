@@ -25,6 +25,7 @@ export default ({ getService }: FtrProviderContext) => {
       await esArchiver.load('x-pack/test/functional/es_archives/endpoint/resolver/signals');
       await createAlertsIndex(supertest, log);
     });
+
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/endpoint/resolver/signals');
       await deleteAllAlerts(supertest, log, es);

@@ -56,6 +56,7 @@ export default function ({ getService }: FtrProviderContext) {
         'test/api_integration/fixtures/kbn_archiver/management/saved_objects/relationships.json'
       );
     });
+
     after(async () => {
       await kibanaServer.importExport.unload(
         'test/api_integration/fixtures/kbn_archiver/management/saved_objects/relationships.json'
@@ -85,6 +86,7 @@ export default function ({ getService }: FtrProviderContext) {
           responseSchema.validate(resp.body);
         }).not.to.throwError();
       });
+
       it('dashboard', async () => {
         const resp = await supertestWithoutAuth
           .get(relationshipsUrl('dashboard', 'b70c7ae0-3224-11e8-a572-ffca06da1357'))
@@ -96,6 +98,7 @@ export default function ({ getService }: FtrProviderContext) {
           responseSchema.validate(resp.body);
         }).not.to.throwError();
       });
+
       it('visualization', async () => {
         const resp = await supertestWithoutAuth
           .get(relationshipsUrl('visualization', 'a42c0580-3224-11e8-a572-ffca06da1357'))
@@ -107,6 +110,7 @@ export default function ({ getService }: FtrProviderContext) {
           responseSchema.validate(resp.body);
         }).not.to.throwError();
       });
+
       it('index-pattern', async () => {
         const resp = await supertestWithoutAuth
           .get(relationshipsUrl('index-pattern', '8963ca30-3224-11e8-a572-ffca06da1357'))
@@ -118,6 +122,7 @@ export default function ({ getService }: FtrProviderContext) {
           responseSchema.validate(resp.body);
         }).not.to.throwError();
       });
+
       it('invalid-refs', async () => {
         const resp = await supertestWithoutAuth
           .get(relationshipsUrl('dashboard', 'invalid-refs'))
@@ -168,6 +173,7 @@ export default function ({ getService }: FtrProviderContext) {
           },
         ]);
       });
+
       it('for dashboards', async () => {
         const resp = await supertestWithoutAuth
           .get(relationshipsUrl('dashboard', 'b70c7ae0-3224-11e8-a572-ffca06da1357'))
@@ -199,6 +205,7 @@ export default function ({ getService }: FtrProviderContext) {
           },
         ]);
       });
+
       it('for visualizations', async () => {
         const resp = await supertestWithoutAuth
           .get(relationshipsUrl('visualization', 'a42c0580-3224-11e8-a572-ffca06da1357'))
@@ -239,6 +246,7 @@ export default function ({ getService }: FtrProviderContext) {
           },
         ]);
       });
+
       it('for index patterns', async () => {
         const resp = await supertestWithoutAuth
           .get(relationshipsUrl('index-pattern', '8963ca30-3224-11e8-a572-ffca06da1357'))
@@ -317,6 +325,7 @@ export default function ({ getService }: FtrProviderContext) {
           },
         ]);
       });
+
       it('dashboard', async () => {
         const resp = await supertestWithoutAuth
           .get(relationshipsUrl('dashboard', 'b70c7ae0-3224-11e8-a572-ffca06da1357', ['search']))
@@ -349,6 +358,7 @@ export default function ({ getService }: FtrProviderContext) {
           },
         ]);
       });
+
       it('visualization', async () => {
         const resp = await supertestWithoutAuth
           .get(
@@ -376,6 +386,7 @@ export default function ({ getService }: FtrProviderContext) {
           },
         ]);
       });
+
       it('index-pattern', async () => {
         const resp = await supertestWithoutAuth
           .get(
@@ -413,6 +424,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set(roleAuthc.apiKeyHeader)
           .expect(404);
       });
+
       it('a dashboard', async () => {
         await supertestWithoutAuth
           .get(relationshipsUrl('dashboard', 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'))
@@ -420,6 +432,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set(roleAuthc.apiKeyHeader)
           .expect(404);
       });
+
       it('a visualization', async () => {
         await supertestWithoutAuth
           .get(relationshipsUrl('visualization', 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'))
@@ -427,6 +440,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set(roleAuthc.apiKeyHeader)
           .expect(404);
       });
+
       it('an index pattern', async () => {
         await supertestWithoutAuth
           .get(relationshipsUrl('index-pattern', 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'))

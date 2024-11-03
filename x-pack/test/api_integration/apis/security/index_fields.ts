@@ -18,6 +18,7 @@ export default function ({ getService }: FtrProviderContext) {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/security/flstest/data');
     });
+
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/security/flstest/data');
     });

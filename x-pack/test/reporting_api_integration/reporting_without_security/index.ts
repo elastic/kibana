@@ -11,6 +11,7 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export default function ({ loadTestFile, getService }: FtrProviderContext) {
   describe('Reporting API Integration Tests with Security disabled', function () {
     this.tags('skipFIPS');
+
     before(async () => {
       const reportingAPI = getService('reportingAPI');
       await reportingAPI.logTaskManagerHealth();

@@ -798,6 +798,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('Validation tests', () => {
       const { user, space } = SuperuserAtSpace1;
+
       it('should throw an error when bulk enable of rules when both ids and filter supplied in payload', async () => {
         const { body: createdRule } = await supertest
           .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)

@@ -27,6 +27,7 @@ export default function ({ getService }: FtrProviderContext) {
     before('load heartbeat data', () =>
       getService('esArchiver').load('x-pack/test/functional/es_archives/uptime/blank')
     );
+
     after('unload heartbeat index', () =>
       getService('esArchiver').unload('x-pack/test/functional/es_archives/uptime/blank')
     );
@@ -39,6 +40,7 @@ export default function ({ getService }: FtrProviderContext) {
     // See https://github.com/elastic/kibana/issues/81950
     describe('checks with no summaries', () => {
       const testMonitorId = 'scope-test-id';
+
       before(async () => {
         const es = getService('es');
         dateRangeStart = new Date().toISOString();
@@ -133,6 +135,7 @@ export default function ({ getService }: FtrProviderContext) {
       const upMonitorId = 'up-test-id';
       const downMonitorId = 'down-test-id';
       const mixMonitorId = 'mix-test-id';
+
       before('generate three monitors with up, down, mix state', async () => {
         await getService('esArchiver').load('x-pack/test/functional/es_archives/uptime/blank');
 

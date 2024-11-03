@@ -97,6 +97,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
     describe('return trace', () => {
       let traces: APIReturnType<'GET /internal/apm/traces/{traceId}'>;
+
       before(async () => {
         const response = await apmApiClient.readUser({
           endpoint: `GET /internal/apm/traces/{traceId}`,

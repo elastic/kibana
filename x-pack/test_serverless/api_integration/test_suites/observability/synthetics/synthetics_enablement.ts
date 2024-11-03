@@ -171,6 +171,7 @@ export default function ({ getService }: FtrProviderContext) {
           await enablementDelete();
         }
       });
+
       it('admin can delete api key', async () => {
         await enablementPut();
 

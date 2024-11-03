@@ -141,6 +141,7 @@ export default function findBackfillTests({ getService }: FtrProviderContext) {
           username: user.username,
           password: user.password,
         };
+
         it('should handle finding backfill requests with query string appropriately', async () => {
           // create 2 rules
           const rresponse1 = await supertest

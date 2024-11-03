@@ -24,9 +24,11 @@ export default function ({ getService }: FtrProviderContext) {
       roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       internalReqHeader = svlCommonApi.getInternalRequestHeader();
     });
+
     after(async () => {
       await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
+
     it('returns 404 error on non-existing index_pattern', async () => {
       const id = `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx-${Date.now()}`;
       const response = await supertestWithoutAuth

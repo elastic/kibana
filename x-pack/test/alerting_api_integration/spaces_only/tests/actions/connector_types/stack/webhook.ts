@@ -39,6 +39,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
     describe('with http endpoint', () => {
       let webhookSimulatorURL: string = '';
       let webhookServer: http.Server;
+
       before(async () => {
         webhookServer = await getWebhookServer();
         const availablePort = await getPort({ port: 9000 });

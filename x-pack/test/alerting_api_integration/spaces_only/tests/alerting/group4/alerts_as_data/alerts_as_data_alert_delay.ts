@@ -72,6 +72,7 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
 
   describe('alerts as data', function () {
     this.tags('skipFIPS');
+
     before(async () => {
       await esTestIndexTool.destroy();
       await esTestIndexTool.setup();
@@ -82,6 +83,7 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
         ignore_unavailable: true,
       });
     });
+
     afterEach(async () => {
       await objectRemover.removeAll();
       await es.deleteByQuery({
@@ -91,6 +93,7 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
         ignore_unavailable: true,
       });
     });
+
     after(async () => {
       await esTestIndexTool.destroy();
     });

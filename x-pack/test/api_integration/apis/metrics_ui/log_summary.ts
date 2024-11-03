@@ -37,6 +37,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('logSummaryBetween', () => {
     before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs'));
+
     after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs'));
 
     it('should return empty and non-empty consecutive buckets', async () => {

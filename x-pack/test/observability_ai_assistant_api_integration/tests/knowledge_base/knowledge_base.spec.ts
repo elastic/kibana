@@ -32,11 +32,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         .expect(200);
       expect(res.body).to.eql({});
     });
+
     describe('when managing a single entry', () => {
       const knowledgeBaseEntry = {
         id: 'my-doc-id-1',
         text: 'My content',
       };
+
       it('returns 200 on create', async () => {
         await observabilityAIAssistantAPIClient
           .editorUser({
@@ -117,10 +119,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           .expect(500);
       });
     });
+
     describe('when managing multiple entries', () => {
       before(async () => {
         await clearKnowledgeBase(es);
       });
+
       afterEach(async () => {
         await clearKnowledgeBase(es);
       });
@@ -138,6 +142,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           text: 'My content c',
         },
       ];
+
       it('returns 200 on create', async () => {
         await observabilityAIAssistantAPIClient
           .editorUser({
@@ -206,6 +211,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(entriesAsc[1].id).to.eql('my_doc_b');
         expect(entriesAsc[2].id).to.eql('my_doc_c');
       });
+
       it('allows searching', async () => {
         await observabilityAIAssistantAPIClient
           .editorUser({

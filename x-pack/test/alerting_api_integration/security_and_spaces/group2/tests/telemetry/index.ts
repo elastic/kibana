@@ -15,6 +15,7 @@ export default function telemetryTests({ loadTestFile, getService }: FtrProvider
       // reset the state in the telemetry task
       await setupSpacesAndUsers(getService);
     });
+
     after(async () => {
       await tearDown(getService);
     });

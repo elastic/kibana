@@ -41,6 +41,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('Exports and Spaces', () => {
     const id = 'non_default_space';
+
     before(async () => {
       await spacesService.create({ id, name: id });
       await kibanaServer.importExport.load(

@@ -105,6 +105,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             ),
         ]);
       });
+
       after(async () => {
         await synthtrace.clean();
       });
@@ -185,6 +186,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             ),
         ]);
       });
+
       after(async () => {
         await synthtrace.clean();
         await packageApi.uninstallPackage({

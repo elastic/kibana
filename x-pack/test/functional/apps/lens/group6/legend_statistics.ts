@@ -80,10 +80,12 @@ Max
         await expectLegendTableToHaveText(tableText);
       });
     });
+
     describe('lens persisted and runtime state differences properties', () => {
       after(async () => {
         await kibanaServer.uiSettings.unset('timepicker:timeDefaults');
       });
+
       describe('xy chart', () => {
         it('shows values in legend for legacy valuesInLegend===true property and saves it correctly', async () => {
           const title = 'xyValuesInLegendTrue';
@@ -98,20 +100,24 @@ Max
           await loadSavedLens('xyValuesInLegendFalse');
           await expectLegendOneItem('Count of records');
         });
+
         it('shows values in legend for legendStats===["values"] prop', async () => {
           await loadSavedLens('xyLegendStats');
           await expectLegendOneItem('Count of records', '2');
         });
       });
+
       describe('waffle chart', () => {
         it('waffleshows values in legend for legacy valuesInLegend===true property', async () => {
           await loadSavedLens('waffleValuesInLegendTrue');
           await expectLegendOneItem('Count of records', '14,003');
         });
+
         it('shows values in legend for legacy showValuesInLegend===false prop', async () => {
           await loadSavedLens('waffleValuesInLegendFalse');
           await expectLegendOneItem('Count of records', undefined);
         });
+
         it('shows values in legend for legendStats===["values"] prop', async () => {
           await loadSavedLens('waffleLegendStats');
           await expectLegendOneItem('Count of records', '14,003');

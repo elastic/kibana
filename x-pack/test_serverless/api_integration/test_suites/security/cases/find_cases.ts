@@ -18,6 +18,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
   describe('find_cases', () => {
     let roleAuthc: RoleCredentials;
+
     describe('basic tests', () => {
       before(async () => {
         findCasesResp = svlCases.api.getFindCasesResp();

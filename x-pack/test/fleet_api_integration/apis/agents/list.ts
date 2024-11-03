@@ -33,6 +33,7 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'xxxx')
         .expect(200);
     });
+
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/fleet/agents');
       await supertest

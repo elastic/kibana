@@ -50,6 +50,7 @@ export default function (providerContext: FtrProviderContext) {
     let agentPolicyId: string;
     let roleAuthc: RoleCredentials;
     let internalRequestHeader: { 'x-elastic-internal-origin': string; 'kbn-xsrf': string };
+
     before(async () => {
       mockUsageApiServer = mockUsageApiApp.listen(8081); // Start the usage api mock server on port 8081
     });
@@ -84,6 +85,7 @@ export default function (providerContext: FtrProviderContext) {
       await vulnerabilitiesIndex.deleteAll();
       await cloudDefinedIndex.deleteAll();
     });
+
     after(async () => {
       await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
       mockUsageApiServer.close();

@@ -75,6 +75,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     function () {
       describe('should return a 501', function () {
         this.tags('skipFIPS');
+
         it('returns a 501', async function () {
           const status = await statusOf(
             getAnomalyCharts({

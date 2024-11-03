@@ -31,6 +31,7 @@ export default function ({ getService }: FtrProviderContext) {
       await esTestIndexTool.setup();
       await es.indices.create({ index: authorizationIndex });
     });
+
     after(async () => {
       await esTestIndexTool.destroy();
       await es.indices.delete({ index: authorizationIndex });

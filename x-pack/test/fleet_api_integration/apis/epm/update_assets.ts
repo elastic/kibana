@@ -42,9 +42,11 @@ export default function (providerContext: FtrProviderContext) {
       await installPackage(pkgName, pkgVersion);
       await installPackage(pkgName, pkgUpdateVersion);
     });
+
     after(async () => {
       await uninstallPackage(pkgName, pkgUpdateVersion);
     });
+
     it('should have updated the ILM policy', async function () {
       const resPolicy = await es.ilm.getLifecycle(
         {
@@ -74,6 +76,7 @@ export default function (providerContext: FtrProviderContext) {
         },
       });
     });
+
     it('should have updated the index templates', async function () {
       const resLogsTemplate = await es.transport.request<any>(
         {
@@ -104,6 +107,7 @@ export default function (providerContext: FtrProviderContext) {
         },
       });
     });
+
     it('should have installed the new index template', async function () {
       const resLogsTemplate = await es.transport.request<any>(
         {
@@ -123,6 +127,7 @@ export default function (providerContext: FtrProviderContext) {
         },
       });
     });
+
     it('should have populated the new component template with the correct mapping', async () => {
       const resPackage = await es.transport.request<any>(
         {
@@ -158,6 +163,7 @@ export default function (providerContext: FtrProviderContext) {
         },
       });
     });
+
     it('should have installed the new versionized pipelines', async function () {
       const res = await es.ingest.getPipeline(
         {
@@ -174,6 +180,7 @@ export default function (providerContext: FtrProviderContext) {
       );
       expect(resPipeline1.statusCode).equal(200);
     });
+
     it('should have removed the old versionized pipelines', async function () {
       const res = await es.ingest.getPipeline(
         {
@@ -206,6 +213,7 @@ export default function (providerContext: FtrProviderContext) {
       );
       expect(resPipeline2.statusCode).equal(404);
     });
+
     it('should have updated the logs component templates', async function () {
       const resPackage = await es.transport.request<any>(
         {
@@ -258,6 +266,7 @@ export default function (providerContext: FtrProviderContext) {
         },
       });
     });
+
     it('should have updated the metrics mapping component template', async function () {
       const resPackage = await es.transport.request<any>(
         {
@@ -293,6 +302,7 @@ export default function (providerContext: FtrProviderContext) {
         },
       });
     });
+
     it('should have updated the kibana assets', async function () {
       const resDashboard = await kibanaServer.savedObjects.get({
         type: 'dashboard',
@@ -330,6 +340,7 @@ export default function (providerContext: FtrProviderContext) {
       });
       expect(resSearch2.id).equal('sample_search2');
     });
+
     it('should have updated the saved object', async function () {
       const res = await kibanaServer.savedObjects.get({
         type: 'epm-packages',

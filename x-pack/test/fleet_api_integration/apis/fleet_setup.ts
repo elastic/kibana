@@ -25,6 +25,7 @@ export default function (providerContext: FtrProviderContext) {
 
   describe('fleet_setup', () => {
     skipIfNoDockerRegistry(providerContext);
+
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
@@ -34,6 +35,7 @@ export default function (providerContext: FtrProviderContext) {
       await kibanaServer.savedObjects.cleanStandardList();
       await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
     });
+
     beforeEach(async () => {
       try {
         await es.security.deleteUser({
@@ -71,6 +73,7 @@ export default function (providerContext: FtrProviderContext) {
 
     describe('upgrade managed package policies', () => {
       const apiClient = new SpaceTestApiClient(supertest);
+
       before(async () => {
         const pkgRes = await apiClient.getPackage({
           pkgName: 'synthetics',
@@ -118,6 +121,7 @@ export default function (providerContext: FtrProviderContext) {
           pkgName: 'synthetics',
         });
       });
+
       it('should upgrade managed package policies', async () => {
         await apiClient.setup();
 

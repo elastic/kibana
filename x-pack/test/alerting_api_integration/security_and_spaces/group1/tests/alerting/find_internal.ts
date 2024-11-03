@@ -644,6 +644,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
         ]);
       });
     });
+
     describe('stack alerts', () => {
       const ruleTypes = [
         [

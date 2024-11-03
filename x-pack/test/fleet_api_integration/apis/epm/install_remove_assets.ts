@@ -49,6 +49,7 @@ export default function (providerContext: FtrProviderContext) {
         if (!isDockerRegistryEnabledOrSkipped(providerContext)) return;
         await installPackage(pkgName, pkgVersion);
       });
+
       after(async () => {
         if (!isDockerRegistryEnabledOrSkipped(providerContext)) return;
         await uninstallPackage(pkgName, pkgVersion);
@@ -101,6 +102,7 @@ export default function (providerContext: FtrProviderContext) {
         );
         expect(resMetricsTemplate.statusCode).equal(404);
       });
+
       it('should have uninstalled the component templates', async function () {
         const resPackage = await es.transport.request(
           {
@@ -126,6 +128,7 @@ export default function (providerContext: FtrProviderContext) {
         );
         expect(resUserSettings.statusCode).equal(404);
       });
+
       it('should have uninstalled the pipelines', async function () {
         const res = await es.transport.request(
           {
@@ -161,6 +164,7 @@ export default function (providerContext: FtrProviderContext) {
         );
         expect(resPipeline2.statusCode).equal(404);
       });
+
       it('should have uninstalled the ml model', async function () {
         const res = await es.transport.request(
           {
@@ -174,6 +178,7 @@ export default function (providerContext: FtrProviderContext) {
         );
         expect(res.statusCode).equal(404);
       });
+
       it('should have uninstalled the transforms', async function () {
         const res = await es.transport.request(
           {
@@ -187,6 +192,7 @@ export default function (providerContext: FtrProviderContext) {
         );
         expect(res.statusCode).equal(404);
       });
+
       it('should have deleted the index for the transform', async function () {
         // the  index is defined in the transform file
         const res = await es.transport.request(
@@ -201,6 +207,7 @@ export default function (providerContext: FtrProviderContext) {
         );
         expect(res.statusCode).equal(404);
       });
+
       it('should have uninstalled the kibana assets', async function () {
         let resDashboard;
         try {
@@ -280,6 +287,7 @@ export default function (providerContext: FtrProviderContext) {
         }
         expect(resOsquerySavedQuery.response.data.statusCode).equal(404);
       });
+
       it('should have removed the saved object', async function () {
         let res;
         try {
@@ -302,6 +310,7 @@ export default function (providerContext: FtrProviderContext) {
         // reinstall
         await installPackage(pkgName, pkgVersion);
       });
+
       after(async () => {
         if (!isDockerRegistryEnabledOrSkipped(providerContext)) return;
         await uninstallPackage(pkgName, pkgVersion);

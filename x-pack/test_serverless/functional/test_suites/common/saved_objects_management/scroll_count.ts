@@ -31,6 +31,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await testSubjects.click('app-card-objects');
         await pageObjects.savedObjects.waitTableIsLoaded();
       });
+
       after(async () => {
         await esArchiver.unload(
           'test/functional/fixtures/es_archiver/saved_objects_management/hidden_saved_objects'

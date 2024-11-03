@@ -27,6 +27,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
 
   describe('dashboard app - group 3', function () {
     before(loadLogstash);
+
     after(unloadLogstash);
 
     if (config.get('esTestCluster.ccs')) {

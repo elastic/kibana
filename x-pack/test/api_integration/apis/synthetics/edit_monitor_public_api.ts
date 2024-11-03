@@ -70,6 +70,7 @@ export default function ({ getService }: FtrProviderContext) {
     let monitorId = 'test-id';
 
     const defaultFields = DEFAULT_FIELDS.http;
+
     it('adds test monitor', async () => {
       const monitor = {
         type: 'http',

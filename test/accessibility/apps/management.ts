@@ -36,10 +36,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
         await PageObjects.settings.navigateTo();
       });
+
       after(async () => {
         await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
         await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
       });
+
       it('index pattern page', async () => {
         await PageObjects.settings.clickKibanaIndexPatterns();
         await a11y.testAppSnapshot();

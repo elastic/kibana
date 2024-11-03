@@ -34,12 +34,14 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(body).toBeDefined();
       });
+
       it('accepts search_query', async () => {
         await supertestViewerWithCookieCredentials
           .get(`${API_BASE_PATH}/indices`)
           .query({ search_query: 'foo' })
           .expect(200);
       });
+
       it('accepts from & size', async () => {
         await supertestViewerWithCookieCredentials
           .get(`${API_BASE_PATH}/indices`)

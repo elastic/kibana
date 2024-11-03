@@ -168,6 +168,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           );
         });
       });
+
       it('can save with same name', async () => {
         await PageObjects.settings.editIndexPattern(
           'logstash-*,hello_world*',
@@ -182,6 +183,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           );
         });
       });
+
       it('shows edit confirm message when editing index-pattern', async () => {
         await PageObjects.settings.editIndexPattern(
           'logstash-2*',

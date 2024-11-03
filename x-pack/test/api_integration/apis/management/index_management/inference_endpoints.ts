@@ -31,6 +31,7 @@ export default function ({ getService }: FtrProviderContext) {
         throw err;
       }
     });
+
     it('create inference endpoint', async () => {
       log.debug(`create inference endpoint`);
       await ml.api.createInferenceEndpoint(inferenceId, taskType, {
@@ -42,6 +43,7 @@ export default function ({ getService }: FtrProviderContext) {
         },
       });
     });
+
     it('get all inference endpoints and confirm inference endpoint exist', async () => {
       const { body: inferenceEndpoints } = await supertest
         .get(`${API_BASE_PATH}/inference/all`)
@@ -56,6 +58,7 @@ export default function ({ getService }: FtrProviderContext) {
         )
       ).to.eql(true, `${inferenceId} not found in the GET _inference/_all response`);
     });
+
     it('can delete inference endpoint', async () => {
       log.debug(`Deleting inference endpoint`);
       await ml.api.deleteInferenceEndpoint(inferenceId, taskType);

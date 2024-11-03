@@ -26,6 +26,7 @@ export default function optInTest({ getService }: FtrProviderContext) {
   describe('/internal/telemetry/optIn API', () => {
     let defaultAttributes: TelemetrySavedObjectAttributes;
     let kibanaVersion: string;
+
     before(async () => {
       await esArchiver.emptyKibanaIndex();
       const kibanaVersionAccessor = kibanaServer.version;

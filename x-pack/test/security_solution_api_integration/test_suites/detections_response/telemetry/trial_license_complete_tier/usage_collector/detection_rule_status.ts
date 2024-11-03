@@ -259,6 +259,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('"eql" rule type', () => {
       let stats: DetectionMetrics | undefined;
+
       before(async () => {
         const rule = getEqlRuleForAlertTesting(['telemetry']);
         const { id } = await createRule(supertest, log, rule);
@@ -446,6 +447,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('"threshold" rule type', () => {
       let stats: DetectionMetrics | undefined;
+
       before(async () => {
         const rule: ThresholdRuleCreateProps = {
           ...getThresholdRuleForAlertTesting(['telemetry']),
@@ -646,6 +648,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('"indicator_match/threat_match" rule type', () => {
       let stats: DetectionMetrics | undefined;
+
       before(async () => {
         const rule: ThreatMatchRuleCreateProps = {
           ...getSimpleThreatMatch('rule-1', true),

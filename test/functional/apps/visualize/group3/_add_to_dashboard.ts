@@ -29,9 +29,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await visualize.initTests();
       await timePicker.setDefaultAbsoluteRangeViaUiSettings();
     });
+
     after(async () => {
       await common.unsetTime();
     });
+
     it('adding a new metric to a new dashboard by value', async function () {
       await visualize.navigateToNewAggBasedVisualization();
       await visualize.clickMetric();

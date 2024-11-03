@@ -39,6 +39,7 @@ export default function (providerContext: FtrProviderContext) {
         if (!isDockerRegistryEnabledOrSkipped(providerContext)) return;
         await installPackage(pkgName, pkgVersion);
       });
+
       after(async () => {
         if (!isDockerRegistryEnabledOrSkipped(providerContext)) return;
         await uninstallPackage(pkgName, pkgVersion);

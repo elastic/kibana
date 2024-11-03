@@ -73,6 +73,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('downsampling', () => {
       const downsampleDataView: { index: string; dataView: string } = { index: '', dataView: '' };
+
       before(async () => {
         const downsampledTargetIndex = await dataStreams.downsampleTSDBIndex(tsdbIndex, {
           isStream: false,
@@ -123,6 +124,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             'Average of bytes_gauge'
           );
         });
+
         it('shows warnings in editor when using median', async () => {
           await lens.openDimensionEditor('lnsXY_yDimensionPanel');
           await testSubjects.existOrFail('median-partial-warning');
@@ -133,6 +135,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             'warning'
           );
         });
+
         it('shows warnings in dashboards as well', async () => {
           await lens.save('New', false, false, false, 'new');
 

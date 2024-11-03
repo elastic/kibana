@@ -23,10 +23,12 @@ export default function (providerContext: FtrProviderContext) {
     skipIfNoDockerRegistry(providerContext);
     let accessAPIKeyId: string;
     let outputAPIKeyId: string;
+
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
       await fleetAndAgents.setup();
     });
+
     beforeEach(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/agents');
@@ -65,10 +67,12 @@ export default function (providerContext: FtrProviderContext) {
         },
       });
     });
+
     afterEach(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/fleet/agents');
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
     });
+
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
     });
@@ -217,6 +221,7 @@ export default function (providerContext: FtrProviderContext) {
       const { body } = await supertest.get(`/api/fleet/agents`);
       expect(body.total).to.eql(0);
     });
+
     it('/agents/bulk_unenroll should allow to unenroll inactive agents that never had last checkin by kuery with includeInactive', async () => {
       // Agent inactive
       await esClient.update({

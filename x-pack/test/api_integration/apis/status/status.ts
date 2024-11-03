@@ -26,6 +26,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(body.status.core).to.be.an('object');
         expect(body.status.plugins).to.be.an('object');
       });
+
       it('returns redacted payload for unauthenticated requests', async () => {
         const { body } = await supertestWithoutAuth.get('/api/status').set('kbn-xsrf', 'kibana');
 

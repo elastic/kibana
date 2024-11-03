@@ -67,6 +67,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
       after(async () => {
         await synthtrace.clean();
       });
+
       it('should open and close the flyout when user clicks on the expand button', async () => {
         await PageObjects.datasetQuality.navigateToDetails({
           dataStream: degradedDataStreamName,

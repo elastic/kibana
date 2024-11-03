@@ -42,6 +42,7 @@ export default function ({ getService }: FtrProviderContext) {
           { space: SPACE_ID }
         );
       });
+
       after(() => kibanaServer.spaces.delete(SPACE_ID));
 
       it('should return 200 when skipping all the records', async () => {

@@ -36,6 +36,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
   describe('hosts', () => {
     let supertest: TestAgent;
     let bsearch: BsearchService;
+
     before(async () => {
       supertest = await utils.createSuperTest();
       bsearch = await utils.createBsearch();

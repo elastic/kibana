@@ -27,6 +27,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'x-pack/test/functional/fixtures/kbn_archiver/lens/epoch_millis.json'
       );
     });
+
     it('should show field list', async () => {
       await visualize.navigateToNewVisualization();
       await visualize.clickVisType('lens');

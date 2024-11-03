@@ -1194,6 +1194,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(logs[0].requests).equal(undefined);
       });
+
       it('should return requests property when enable_logged_requests set to true', async () => {
         const { logs } = await previewRule({
           supertest,

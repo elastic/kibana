@@ -79,7 +79,9 @@ export default function ({ getService }: FtrProviderContext) {
   describe('Metric Threshold Alerts Executor', () => {
     describe('with 10K plus docs', () => {
       before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/ten_thousand_plus'));
+
       after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/ten_thousand_plus'));
+
       describe('without group by', () => {
         it('should alert on document count', async () => {
           const params = {
@@ -136,6 +138,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
           ]);
         });
+
         it('should alert with custom metric that is a document ratio', async () => {
           const params = {
             ...baseParams,
@@ -204,6 +207,7 @@ export default function ({ getService }: FtrProviderContext) {
           ]);
         });
       });
+
       describe('with group by', () => {
         it('should trigger on document count', async () => {
           const params = {
@@ -261,6 +265,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
           ]);
         });
+
         it('shouldFire on document count and isNoData for missing group ', async () => {
           const params = {
             ...baseParams,
@@ -340,6 +345,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
           ]);
         });
+
         it('should trigger with contaier list in context on document count', async () => {
           const params = {
             ...baseParams,
@@ -423,6 +429,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
           ]);
         });
+
         it('should trigger with single container in context on document count', async () => {
           const params = {
             ...baseParams,
@@ -486,6 +493,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
       });
     });
+
     describe('without ANY data', () => {
       describe('without groupBy', () => {
         it('should trigger NO_DATA for document count queries', async () => {
@@ -539,6 +547,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
           ]);
         });
+
         it('should trigger NO_DATA for basic metric', async () => {
           const params = { ...baseParams };
           const timeFrame = { end: gauge.max };
@@ -580,6 +589,7 @@ export default function ({ getService }: FtrProviderContext) {
           ]);
         });
       });
+
       describe('with groupBy', () => {
         describe('without pre-existing groups', () => {
           it('should trigger NO_DATA for document count queries', async () => {
@@ -635,6 +645,7 @@ export default function ({ getService }: FtrProviderContext) {
             ]);
           });
         });
+
         describe('with pre-existing groups', () => {
           it('should trigger NO_DATA for document count queries', async () => {
             const params = {
@@ -739,8 +750,10 @@ export default function ({ getService }: FtrProviderContext) {
         });
       });
     });
+
     describe('with gauge data', () => {
       before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/alerts_test_data'));
+
       after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/alerts_test_data'));
 
       describe('without groupBy', () => {
@@ -795,6 +808,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
           ]);
         });
+
         it('should alert on ZERO document count outside the time frame', async () => {
           const params = {
             ...baseParams,
@@ -846,6 +860,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
           ]);
         });
+
         it('should alert on the last value when the end date is the same as the last event', async () => {
           const params = { ...baseParams };
           const timeFrame = { end: gauge.max };
@@ -887,6 +902,7 @@ export default function ({ getService }: FtrProviderContext) {
           ]);
         });
       });
+
       describe('with groupBy', () => {
         it('should alert on document count', async () => {
           const params = {
@@ -962,6 +978,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
           ]);
         });
+
         it('should alert on the last value when the end date is the same as the last event', async () => {
           const params = {
             ...baseParams,
@@ -1172,9 +1189,12 @@ export default function ({ getService }: FtrProviderContext) {
         });
       });
     });
+
     describe('with rate data', () => {
       before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/alerts_test_data'));
+
       after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/alerts_test_data'));
+
       it('should alert on rate with long threshold', async () => {
         const params = {
           ...baseParams,
@@ -1227,6 +1247,7 @@ export default function ({ getService }: FtrProviderContext) {
           },
         ]);
       });
+
       describe('without groupBy', () => {
         it('should alert on rate', async () => {
           const params = {
@@ -1281,6 +1302,7 @@ export default function ({ getService }: FtrProviderContext) {
           ]);
         });
       });
+
       describe('with groupBy', () => {
         it('should warn but not fire on rate', async () => {
           const params = {

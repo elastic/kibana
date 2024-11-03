@@ -28,6 +28,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
 
     describe('handle update alert request appropriately', function () {
       this.tags('skipFIPS');
+
       it('should handle update alert request appropriately', async () => {
         const { body: createdAlert } = await supertest
           .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
@@ -411,6 +412,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
 
     describe('legacy', function () {
       this.tags('skipFIPS');
+
       it('should handle update alert request appropriately', async () => {
         const { body: createdAlert } = await supertest
           .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)

@@ -248,6 +248,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         },
       });
     });
+
     describe('when creating a new conversation', () => {
       let events: StreamingChatResponseEvent[];
 

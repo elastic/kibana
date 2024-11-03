@@ -14,6 +14,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   describe('Home page', function () {
     this.tags(['skipCloud']);
+
     before(async () => {
       await pageObjects.common.navigateToApp('licenseManagement');
     });

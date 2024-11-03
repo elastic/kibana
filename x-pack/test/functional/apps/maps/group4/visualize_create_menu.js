@@ -41,6 +41,7 @@ export default function ({ getService, getPageObjects }) {
 
       describe('without write permission', function () {
         this.tags('skipFIPS');
+
         before(async () => {
           await security.testUser.setRoles(
             ['global_maps_read', 'global_visualize_all', 'test_logstash_reader'],
@@ -86,6 +87,7 @@ export default function ({ getService, getPageObjects }) {
         expect(hasLegecyViz).to.equal(false);
       });
     });
+
     describe('edit meta-data', () => {
       before(async () => {
         await security.testUser.setRoles(

@@ -27,6 +27,7 @@ export default function ({ getService }: FtrProviderContext) {
   describe('Log Threshold Rule', () => {
     describe('executeAlert', () => {
       before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/alerts_test_data'));
+
       after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/alerts_test_data'));
 
       describe('without group by', () => {
@@ -366,6 +367,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('executeRatioAlert', () => {
       before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/ten_thousand_plus'));
+
       after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/ten_thousand_plus'));
 
       describe('without group by', () => {

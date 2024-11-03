@@ -139,6 +139,7 @@ export default function (providerContext: FtrProviderContext) {
 
       describe('dry run', function () {
         withTestPackage('package_policy_upgrade', '0.2.0-add-non-required-test-var');
+
         it('returns a valid diff', async function () {
           const { body }: { body: UpgradePackagePolicyDryRunResponse } = await supertest
             .post(`/api/fleet/package_policies/upgrade/dryrun`)
@@ -163,6 +164,7 @@ export default function (providerContext: FtrProviderContext) {
 
       describe('upgrade', function () {
         withTestPackage('package_policy_upgrade', '0.2.0-add-non-required-test-var');
+
         it('should respond with an error', async function () {
           // upgrade policy to 0.2.0
           await supertest
@@ -1256,6 +1258,7 @@ export default function (providerContext: FtrProviderContext) {
       const POLICY_COUNT = 5;
       let packagePolicyIds: string[] = [];
       let expectedAssets: Array<{ type: string; id: string }> = [];
+
       beforeEach(async function () {
         packagePolicyIds = [];
         expectedAssets = [];

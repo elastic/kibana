@@ -24,6 +24,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       before(async () => {
         await security.testUser.setRoles(['alerts_and_actions_role']);
       });
+
       after(async () => {
         await security.testUser.restoreDefaults();
       });
@@ -41,6 +42,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       before(async () => {
         await security.testUser.setRoles(['only_actions_role']);
       });
+
       after(async () => {
         await security.testUser.restoreDefaults();
       });

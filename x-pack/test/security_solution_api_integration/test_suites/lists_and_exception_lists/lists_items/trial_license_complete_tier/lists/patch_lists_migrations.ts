@@ -32,6 +32,7 @@ export default ({ getService }: FtrProviderContext) => {
       afterEach(async () => {
         await deleteListsIndex(supertest, log);
       });
+
       describe('legacy list index (list created before migration to data stream)', () => {
         beforeEach(async () => {
           await deleteListsIndex(supertest, log);
@@ -40,6 +41,7 @@ export default ({ getService }: FtrProviderContext) => {
         afterEach(async () => {
           await deleteListsIndex(supertest, log);
         });
+
         it('should update list container that was created in legacy index and migrated through LIST_INDEX request', async () => {
           const listId = 'random-list';
           // create legacy indices

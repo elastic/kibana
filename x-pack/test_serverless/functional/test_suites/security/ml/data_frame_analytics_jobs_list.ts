@@ -17,6 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('Data frame analytics jobs list', function () {
     // Error: Failed to delete all indices with pattern [.ml-*]
     this.tags(['failsOnMKI']);
+
     before(async () => {
       await PageObjects.svlCommonPage.loginWithRole(ServerlessRoleName.PLATFORM_ENGINEER);
 

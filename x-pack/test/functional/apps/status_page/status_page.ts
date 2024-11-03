@@ -16,7 +16,9 @@ export default function statusPageFunctonalTests({
 
   describe('Status Page', function () {
     this.tags(['skipCloud', 'includeFirefox']);
+
     before(async () => await kibanaServer.savedObjects.cleanStandardList());
+
     after(async () => await kibanaServer.savedObjects.cleanStandardList());
 
     it('allows user to navigate without authentication', async () => {

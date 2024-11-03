@@ -213,6 +213,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const throughputValues = response.mainStatistics.map((item) => item.throughput);
         expect(throughputValues).to.be.eql([galaxyThroughput, huaweiThroughput]);
       });
+
       it('returns the correct data for Os version', async () => {
         const response = await getMobileMainStatisticsByField({
           serviceName: 'synth-android',
@@ -231,6 +232,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const throughputValues = response.mainStatistics.map((item) => item.throughput);
         expect(throughputValues).to.be.eql([galaxyThroughput, huaweiThroughput]);
       });
+
       it('returns the correct data for Devices', async () => {
         const response = await getMobileMainStatisticsByField({
           serviceName: 'synth-android',

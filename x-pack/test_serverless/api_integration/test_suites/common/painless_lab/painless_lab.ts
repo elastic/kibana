@@ -21,9 +21,11 @@ export default function ({ getService }: FtrProviderContext) {
     before(async () => {
       roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
     });
+
     after(async () => {
       await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
+
     describe('Execute', () => {
       it('should execute a valid painless script', async () => {
         const script =

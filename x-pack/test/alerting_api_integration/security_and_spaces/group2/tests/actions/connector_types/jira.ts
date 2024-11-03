@@ -61,6 +61,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
         getExternalServiceSimulatorPath(ExternalServiceSimulator.JIRA)
       );
     });
+
     describe('Jira - Action Creation', () => {
       it('should return 200 when creating a jira action successfully', async () => {
         const { body: createdAction } = await supertest

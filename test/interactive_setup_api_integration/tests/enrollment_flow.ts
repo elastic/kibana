@@ -25,6 +25,7 @@ export default function (context: FtrProviderContext) {
 
     let kibanaVerificationCode: string;
     let elasticsearchCaFingerprint: string;
+
     before(async () => {
       const esServerConfig = config.get('servers.elasticsearch');
       elasticsearchCaFingerprint = (
@@ -37,6 +38,7 @@ export default function (context: FtrProviderContext) {
     });
 
     let enrollmentAPIKey: string;
+
     beforeEach(async () => {
       const apiResponse = await es.security.createApiKey({ body: { name: 'enrollment_api_key' } });
       enrollmentAPIKey = Buffer.from(`${apiResponse.id}:${apiResponse.api_key}`).toString('base64');

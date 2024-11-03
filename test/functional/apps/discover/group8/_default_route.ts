@@ -23,6 +23,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('discover as defaultRoute', function () {
     this.tags('skipFIPS');
+
     before(async function () {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');

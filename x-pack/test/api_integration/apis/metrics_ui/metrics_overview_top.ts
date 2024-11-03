@@ -20,6 +20,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('API /metrics/overview/top', () => {
     before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/7.0.0/hosts'));
+
     after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/7.0.0/hosts'));
 
     it('works', async () => {
@@ -53,6 +54,7 @@ export default function ({ getService }: FtrProviderContext) {
       before(() =>
         esArchiver.load('x-pack/test/functional/es_archives/infra/8.0.0/hosts_and_network')
       );
+
       after(() =>
         esArchiver.unload('x-pack/test/functional/es_archives/infra/8.0.0/hosts_and_network')
       );

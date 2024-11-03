@@ -28,6 +28,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
     const scenario = UserAtSpaceScenarios[1];
 
     let alertUtils: AlertUtils;
+
     before(async () => {
       alertUtils = new AlertUtils({
         user: scenario.user,
@@ -36,6 +37,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
         objectRemover,
       });
     });
+
     after(() => objectRemover.removeAll());
 
     it('should handle create alert request appropriately', async () => {

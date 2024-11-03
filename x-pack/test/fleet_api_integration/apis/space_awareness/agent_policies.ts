@@ -87,6 +87,7 @@ export default function (providerContext: FtrProviderContext) {
       it('should allow to access a policy in a specific space', async () => {
         await apiClient.getAgentPolicy(spaceTest1Policy1.item.id, TEST_SPACE_1);
       });
+
       it('should not allow to get a policy from a different space from the default space', async () => {
         await expectToRejectWithNotFound(() => apiClient.getAgentPolicy(spaceTest1Policy1.item.id));
       });

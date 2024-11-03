@@ -54,6 +54,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('Field preview', function () {
     before(async () => await createIndex());
+
     after(async () => await deleteIndex());
 
     describe('should return the script value', () => {

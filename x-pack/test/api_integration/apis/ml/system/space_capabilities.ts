@@ -48,6 +48,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { mlFeatureEnabledInSpace } = await runRequest(USER.ML_POWERUSER, idSpaceWithMl);
         expect(mlFeatureEnabledInSpace).to.eql(true);
       });
+
       it('should not be enabled in space - space without ML', async () => {
         const { mlFeatureEnabledInSpace } = await runRequest(USER.ML_POWERUSER, idSpaceNoMl);
         expect(mlFeatureEnabledInSpace).to.eql(false);
@@ -57,6 +58,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { upgradeInProgress } = await runRequest(USER.ML_POWERUSER, idSpaceWithMl);
         expect(upgradeInProgress).to.eql(false);
       });
+
       it('should have upgradeInProgress false - space without ML', async () => {
         const { upgradeInProgress } = await runRequest(USER.ML_POWERUSER, idSpaceNoMl);
         expect(upgradeInProgress).to.eql(false);
@@ -66,6 +68,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { isPlatinumOrTrialLicense } = await runRequest(USER.ML_POWERUSER, idSpaceWithMl);
         expect(isPlatinumOrTrialLicense).to.eql(true);
       });
+
       it('should have full license - space without ML', async () => {
         const { isPlatinumOrTrialLicense } = await runRequest(USER.ML_POWERUSER, idSpaceNoMl);
         expect(isPlatinumOrTrialLicense).to.eql(true);
@@ -75,6 +78,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { capabilities } = await runRequest(USER.ML_POWERUSER, idSpaceWithMl);
         expect(Object.keys(capabilities).length).to.eql(NUMBER_OF_CAPABILITIES);
       });
+
       it('should have the right number of capabilities - space without ML', async () => {
         const { capabilities } = await runRequest(USER.ML_POWERUSER, idSpaceNoMl);
         expect(Object.keys(capabilities).length).to.eql(NUMBER_OF_CAPABILITIES);

@@ -22,6 +22,7 @@ export default function ({ getPageObjects, getService }) {
 
     describe('read', () => {
       let joinMapUrl = '';
+
       before(async () => {
         await security.testUser.setRoles([
           'global_maps_all',
@@ -32,6 +33,7 @@ export default function ({ getPageObjects, getService }) {
         await maps.loadSavedMap('join example');
         joinMapUrl = await browser.getCurrentUrl();
       });
+
       after(async () => {
         await security.testUser.restoreDefaults();
       });

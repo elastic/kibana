@@ -68,6 +68,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   registry.when('Error groups detailed statistics', { config: 'basic', archives: [] }, () => {
     describe('when data is loaded', () => {
       const { PROD_LIST_ERROR_RATE, PROD_ID_ERROR_RATE } = config;
+
       before(async () => {
         await generateData({ serviceName, start, end, apmSynthtraceEsClient });
       });
@@ -77,6 +78,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       describe('without data comparison', () => {
         let errorGroupsDetailedStatistics: ErrorGroupsDetailedStatistics;
         let errorIds: string[] = [];
+
         before(async () => {
           errorIds = await getErrorGroupIds({ serviceName, start, end, apmApiClient });
           const response = await callApi({
@@ -110,6 +112,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       describe('return empty state when invalid group id', () => {
         let errorGroupsDetailedStatistics: ErrorGroupsDetailedStatistics;
+
         before(async () => {
           const response = await callApi({
             body: {
@@ -130,6 +133,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       describe('with comparison', () => {
         let errorGroupsDetailedStatistics: ErrorGroupsDetailedStatistics;
         let errorIds: string[] = [];
+
         before(async () => {
           errorIds = await getErrorGroupIds({ serviceName, start, end, apmApiClient });
           const response = await callApi({

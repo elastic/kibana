@@ -42,6 +42,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           END_DATE.format(timepickerFormat)
         );
       });
+
       after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs'));
 
       it('should render the correct page title', async () => {
@@ -147,6 +148,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       beforeEach(async () => {
         await pageObjects.infraSavedViews.clickSavedViewsButton();
       });
+
       afterEach(async () => {
         await pageObjects.infraSavedViews.closeSavedViewsPopover();
       });

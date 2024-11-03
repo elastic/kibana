@@ -16,6 +16,7 @@ export default function ({ getPageObjects, getService }) {
 
   describe('shapefile upload', () => {
     let indexName = '';
+
     before(async () => {
       await security.testUser.setRoles([
         'global_maps_all',

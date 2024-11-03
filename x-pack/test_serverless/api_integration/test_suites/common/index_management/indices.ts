@@ -107,6 +107,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('create index', () => {
       const createIndexName = 'a-test-index';
+
       after(async () => {
         // Cleanup index created for testing purposes
         try {

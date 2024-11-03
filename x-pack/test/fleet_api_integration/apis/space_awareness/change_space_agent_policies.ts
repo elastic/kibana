@@ -248,6 +248,7 @@ export default function (providerContext: FtrProviderContext) {
 
     describe('DELETE /agent_policies/{id}', () => {
       let policyRes: CreateAgentPolicyResponse;
+
       before(async () => {
         const _policyRes = await apiClient.createAgentPolicy();
         policyRes = _policyRes;
@@ -268,6 +269,7 @@ export default function (providerContext: FtrProviderContext) {
           space_ids: ['default', TEST_SPACE_1],
         });
       });
+
       it('should allow to delete an agent policy through multiple spaces', async () => {
         await apiClient.deleteAgentPolicy(policyRes.item.id);
       });

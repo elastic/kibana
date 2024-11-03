@@ -30,12 +30,14 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
   describe('Users', () => {
     let supertest: TestAgent;
     let bsearch: BsearchService;
+
     describe('With auditbeat', () => {
       before(async () => {
         supertest = await utils.createSuperTest();
         bsearch = await utils.createBsearch();
         await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/users');
       });
+
       after(
         async () => await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/users')
       );

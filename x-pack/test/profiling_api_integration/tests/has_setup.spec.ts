@@ -29,14 +29,17 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
       before(async () => {
         await cleanUpProfilingData({ es, logger, bettertest });
       });
+
       describe('Admin user', () => {
         let statusCheck: ProfilingStatus;
+
         before(async () => {
           const response = await profilingApiClient.adminUser({
             endpoint: `GET ${profilingRoutePaths.HasSetupESResources}`,
           });
           statusCheck = response.body;
         });
+
         it(`has not been set up`, async () => {
           expect(statusCheck.has_setup).to.be(false);
         });
@@ -52,12 +55,14 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
 
       describe('Viewer user', () => {
         let statusCheck: ProfilingStatus;
+
         before(async () => {
           const response = await profilingApiClient.readUser({
             endpoint: `GET ${profilingRoutePaths.HasSetupESResources}`,
           });
           statusCheck = response.body;
         });
+
         it(`has been set up`, async () => {
           expect(statusCheck.has_setup).to.be(true);
         });
@@ -78,6 +83,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
 
     describe('Collector integration is not installed', () => {
       let collectorId: string | undefined;
+
       before(async () => {
         await setupProfiling(bettertest, logger);
         const response = await getProfilingPackagePolicyIds(bettertest);
@@ -93,12 +99,14 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
 
       describe('Admin user', () => {
         let statusCheck: ProfilingStatus;
+
         before(async () => {
           const response = await profilingApiClient.adminUser({
             endpoint: `GET ${profilingRoutePaths.HasSetupESResources}`,
           });
           statusCheck = response.body;
         });
+
         it(`has not been set up`, async () => {
           expect(statusCheck.has_setup).to.be(false);
         });
@@ -114,12 +122,14 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
 
       describe('Viewer user', () => {
         let statusCheck: ProfilingStatus;
+
         before(async () => {
           const response = await profilingApiClient.readUser({
             endpoint: `GET ${profilingRoutePaths.HasSetupESResources}`,
           });
           statusCheck = response.body;
         });
+
         it(`has been set up`, async () => {
           expect(statusCheck.has_setup).to.be(true);
         });
@@ -140,6 +150,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
 
     describe('Symbolizer integration is not installed', () => {
       let symbolizerId: string | undefined;
+
       before(async () => {
         await setupProfiling(bettertest, logger);
         const response = await getProfilingPackagePolicyIds(bettertest);
@@ -155,12 +166,14 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
 
       describe('Admin user', () => {
         let statusCheck: ProfilingStatus;
+
         before(async () => {
           const response = await profilingApiClient.adminUser({
             endpoint: `GET ${profilingRoutePaths.HasSetupESResources}`,
           });
           statusCheck = response.body;
         });
+
         it(`has not been set up`, async () => {
           expect(statusCheck.has_setup).to.be(false);
         });
@@ -176,12 +189,14 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
 
       describe('Viewer user', () => {
         let statusCheck: ProfilingStatus;
+
         before(async () => {
           const response = await profilingApiClient.readUser({
             endpoint: `GET ${profilingRoutePaths.HasSetupESResources}`,
           });
           statusCheck = response.body;
         });
+
         it(`has been set up`, async () => {
           expect(statusCheck.has_setup).to.be(true);
         });
@@ -208,12 +223,14 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
 
       describe('Admin user', () => {
         let statusCheck: ProfilingStatus;
+
         before(async () => {
           const response = await profilingApiClient.adminUser({
             endpoint: `GET ${profilingRoutePaths.HasSetupESResources}`,
           });
           statusCheck = response.body;
         });
+
         it(`has been set up`, async () => {
           expect(statusCheck.has_setup).to.be(true);
         });
@@ -229,12 +246,14 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
 
       describe('Viewer user', () => {
         let statusCheck: ProfilingStatus;
+
         before(async () => {
           const response = await profilingApiClient.readUser({
             endpoint: `GET ${profilingRoutePaths.HasSetupESResources}`,
           });
           statusCheck = response.body;
         });
+
         it(`has been set up`, async () => {
           expect(statusCheck.has_setup).to.be(true);
         });
@@ -261,12 +280,14 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
       describe('without data', () => {
         describe('Admin user', () => {
           let statusCheck: ProfilingStatus;
+
           before(async () => {
             const response = await profilingApiClient.adminUser({
               endpoint: `GET ${profilingRoutePaths.HasSetupESResources}`,
             });
             statusCheck = response.body;
           });
+
           it(`has been set up`, async () => {
             expect(statusCheck.has_setup).to.be(true);
           });
@@ -282,12 +303,14 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
 
         describe('Viewer user', () => {
           let statusCheck: ProfilingStatus;
+
           before(async () => {
             const response = await profilingApiClient.readUser({
               endpoint: `GET ${profilingRoutePaths.HasSetupESResources}`,
             });
             statusCheck = response.body;
           });
+
           it(`has been set up`, async () => {
             expect(statusCheck.has_setup).to.be(true);
           });
@@ -310,14 +333,17 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
         before(async () => {
           await loadProfilingData(es, logger);
         });
+
         describe('Admin user', () => {
           let statusCheck: ProfilingStatus;
+
           before(async () => {
             const response = await profilingApiClient.adminUser({
               endpoint: `GET ${profilingRoutePaths.HasSetupESResources}`,
             });
             statusCheck = response.body;
           });
+
           it(`has been set up`, async () => {
             expect(statusCheck.has_setup).to.be(true);
           });
@@ -333,12 +359,14 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
 
         describe('Viewer user', () => {
           let statusCheck: ProfilingStatus;
+
           before(async () => {
             const response = await profilingApiClient.readUser({
               endpoint: `GET ${profilingRoutePaths.HasSetupESResources}`,
             });
             statusCheck = response.body;
           });
+
           it(`has been set up`, async () => {
             expect(statusCheck.has_setup).to.be(true);
           });

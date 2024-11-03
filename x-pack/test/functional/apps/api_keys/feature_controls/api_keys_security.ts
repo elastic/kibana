@@ -16,6 +16,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('security', function () {
     this.tags('skipFIPS');
+
     before(async () => {
       await PageObjects.common.navigateToApp('home');
     });
@@ -24,6 +25,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       before(async () => {
         await security.testUser.setRoles(['kibana_admin']);
       });
+
       after(async () => {
         await security.testUser.restoreDefaults();
       });
@@ -49,9 +51,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       before(async () => {
         await security.testUser.setRoles(['global_dashboard_read', 'manage_security']);
       });
+
       after(async () => {
         await security.testUser.restoreDefaults();
       });
+
       it('should show the Stack Management nav link', async () => {
         const links = await appsMenu.readLinks();
         expect(links.map((link) => link.text)).to.contain('Stack Management');

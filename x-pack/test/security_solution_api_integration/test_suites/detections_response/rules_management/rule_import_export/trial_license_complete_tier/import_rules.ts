@@ -932,6 +932,7 @@ export default ({ getService }: FtrProviderContext): void => {
             'x-pack/test/functional/es_archives/security_solution/import_rule_connector'
           );
         });
+
         afterEach(async () => {
           await esArchiver.unload(
             'x-pack/test/functional/es_archives/security_solution/import_rule_connector'
@@ -982,6 +983,7 @@ export default ({ getService }: FtrProviderContext): void => {
               action_connectors_errors: [],
             });
           });
+
           it('should import a non-default-space 7.16 rule with a connector made in the non-default space into the default space successfully', async () => {
             // connectorId is from the 7.x connector here
             // x-pack/test/functional/es_archives/security_solution/import_rule_connector

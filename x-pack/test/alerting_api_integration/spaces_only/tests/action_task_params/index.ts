@@ -12,6 +12,7 @@ import { buildUp, tearDown } from '../helpers';
 export default function actionTaskParamsTests({ loadTestFile, getService }: FtrProviderContext) {
   describe('Action Task Params', () => {
     before(async () => buildUp(getService));
+
     after(async () => tearDown(getService));
 
     loadTestFile(require.resolve('./migrations'));

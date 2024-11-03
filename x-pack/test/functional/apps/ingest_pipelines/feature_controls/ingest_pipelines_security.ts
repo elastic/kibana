@@ -30,6 +30,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       before(async () => {
         await security.testUser.setRoles(['kibana_admin']);
       });
+
       after(async () => {
         await security.testUser.restoreDefaults();
       });
@@ -41,6 +42,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       describe('"Ingest" section', function () {
         this.tags('skipFIPS');
+
         it('should not render', async () => {
           await PageObjects.common.navigateToApp('management');
           const sections = await managementMenu.getSections();
@@ -58,9 +60,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       before(async () => {
         await security.testUser.setRoles(['global_dashboard_read', 'ingest_pipelines_user']);
       });
+
       after(async () => {
         await security.testUser.restoreDefaults();
       });
+
       it('should show the Stack Management nav link', async () => {
         const links = await appsMenu.readLinks();
         expect(links.map((link) => link.text)).to.contain('Stack Management');
@@ -68,6 +72,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       describe('"Ingest" section with ingest pipelines', function () {
         this.tags('skipFIPS');
+
         it('should render', async () => {
           await PageObjects.common.navigateToApp('management');
           const sections = await managementMenu.getSections();
@@ -86,6 +91,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       before(async () => {
         await security.testUser.setRoles(['global_devtools_read', 'ingest_pipelines_user']);
       });
+
       after(async () => {
         await security.testUser.restoreDefaults();
       });

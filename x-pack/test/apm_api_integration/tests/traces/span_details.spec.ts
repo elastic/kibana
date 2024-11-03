@@ -107,6 +107,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
     describe('span details', () => {
       let spanDetails: Awaited<ReturnType<typeof fetchSpanDetails>>['body'];
+
       before(async () => {
         const response = await fetchSpanDetails({
           traceId,
@@ -116,6 +117,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(response.status).to.eql(200);
         spanDetails = response.body;
       });
+
       it('returns span details', () => {
         expect(spanDetails.span?.span.name).to.eql('get_green_apple_🍏');
         expect(spanDetails.parentTransaction?.transaction.name).to.eql('GET /apple 🍏');

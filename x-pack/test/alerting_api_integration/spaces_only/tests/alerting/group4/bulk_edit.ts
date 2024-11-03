@@ -425,6 +425,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
 
     describe('bulk update API key with apiKey operation', function () {
       this.tags('skipFIPS');
+
       it('should not bulk update API key with apiKey operation', async () => {
         const { body: createdRule } = await supertest
           .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)

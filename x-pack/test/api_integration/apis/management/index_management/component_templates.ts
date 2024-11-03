@@ -467,6 +467,7 @@ export default function ({ getService }: FtrProviderContext) {
         before(async () => {
           await addDatastream(DATASTREAM_NAME, CACHE_TEMPLATES);
         });
+
         it('should return datastreams', async () => {
           const { status, body } = await getComponentTemplateDatastreams(COMPONENT_NAME);
           expect(status).to.eql(200);

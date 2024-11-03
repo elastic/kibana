@@ -21,9 +21,11 @@ export default function ({ getService }: FtrProviderContext) {
     before(async () => {
       roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
     });
+
     after(async () => {
       await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
+
     describe('Simulate', () => {
       it('should simulate a valid pattern', async () => {
         const rawEvent = '55.3.244.1 GET /index.html 15824 0.043';

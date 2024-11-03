@@ -442,6 +442,7 @@ export default function ({ getService }: FtrProviderContext) {
             .set('kbn-xsrf', 'true');
         }
       });
+
       it('with an admin', async () => {
         const username = 'admin';
         const roleName = `synthetics_admin`;

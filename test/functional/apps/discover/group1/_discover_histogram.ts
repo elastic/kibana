@@ -46,6 +46,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await common.navigateToApp('discover');
     });
+
     after(async () => {
       await esArchiver.unload('test/functional/fixtures/es_archiver/long_window_logstash');
       await kibanaServer.savedObjects.cleanStandardList();
@@ -139,6 +140,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const chartCanvasExist = await elasticChart.canvasExists();
       expect(chartCanvasExist).to.be(true);
     });
+
     it('should visualize weekly data with within DST changes', async () => {
       const from = 'Mar 1, 2018 @ 00:00:00.000';
       const to = 'May 1, 2018 @ 00:00:00.000';
@@ -146,6 +148,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const chartCanvasExist = await elasticChart.canvasExists();
       expect(chartCanvasExist).to.be(true);
     });
+
     it('should visualize monthly data with different years scaled to 30 days', async () => {
       const from = 'Jan 1, 2010 @ 00:00:00.000';
       const to = 'Mar 21, 2019 @ 00:00:00.000';
@@ -155,6 +158,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const chartIntervalIconTip = await discover.getChartIntervalWarningIcon();
       expect(chartIntervalIconTip).to.be(false);
     });
+
     it('should visualize monthly data with different years scaled to seconds', async () => {
       const from = 'Jan 1, 2010 @ 00:00:00.000';
       const to = 'Mar 21, 2019 @ 00:00:00.000';
@@ -164,6 +168,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const chartIntervalIconTip = await discover.getChartIntervalWarningIcon();
       expect(chartIntervalIconTip).to.be(true);
     });
+
     it('should allow hide/show histogram, persisted in url state', async () => {
       const from = 'Jan 1, 2010 @ 00:00:00.000';
       const to = 'Mar 21, 2019 @ 00:00:00.000';
@@ -186,6 +191,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(canvasExists).to.be(true);
       });
     });
+
     it('should allow hiding the histogram, persisted in saved search', async () => {
       const from = 'Jan 1, 2010 @ 00:00:00.000';
       const to = 'Mar 21, 2019 @ 00:00:00.000';
@@ -235,6 +241,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       canvasExists = await elasticChart.canvasExists();
       expect(canvasExists).to.be(true);
     });
+
     it('should show permitted hidden histogram state when returning back to discover', async () => {
       // close chart
       await discover.toggleChartVisibility();

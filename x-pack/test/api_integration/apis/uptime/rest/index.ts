@@ -41,6 +41,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       beforeEach('load heartbeat data', async () => {
         await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/uptime/blank');
       });
+
       after('unload', async () => {
         await esArchiver.unload('x-pack/test/functional/es_archives/uptime/blank');
       });
@@ -57,6 +58,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
         async () =>
           await esArchiver.load('x-pack/test/functional/es_archives/uptime/full_heartbeat')
       );
+
       afterEach(
         'unload',
         async () =>

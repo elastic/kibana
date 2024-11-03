@@ -237,6 +237,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('@skipInServerless and user has authorization to read event filters', function () {
       let hunterSupertest: TestAgent;
+
       before(async () => {
         hunterSupertest = await utils.createSuperTest(ROLE.hunter);
       });

@@ -14,6 +14,7 @@ export default function ({ getService }: FtrProviderContext) {
     const utils = getService('securitySolutionUtils');
 
     let adminSupertest: TestAgent;
+
     before(async () => {
       adminSupertest = await utils.createSuperTest();
     });

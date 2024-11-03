@@ -38,6 +38,7 @@ export default function ({ getPageObjects }: FtrProviderContext) {
 
       await lens.assertPalette('negative', true);
     });
+
     it('should allow to pick color mapping palette in xy chart', async () => {
       await visualize.navigateToNewVisualization();
       await visualize.clickVisType('lens');

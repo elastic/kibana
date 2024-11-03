@@ -19,12 +19,14 @@ export default function (providerContext: FtrProviderContext) {
     describe('Delete one', () => {
       let agentPolicy: any;
       let packagePolicy: any;
+
       before(async () => {
         await kibanaServer.savedObjects.cleanStandardList();
         await getService('esArchiver').load(
           'x-pack/test/functional/es_archives/fleet/empty_fleet_server'
         );
       });
+
       beforeEach(async () => {
         let agentPolicyResponse = await supertest
           .post(`/api/fleet/agent_policies`)
@@ -85,6 +87,7 @@ export default function (providerContext: FtrProviderContext) {
           .set('kbn-xsrf', 'xxxx')
           .send({ force: true, packagePolicyIds: [packagePolicy.id] });
       });
+
       after(async () => {
         await kibanaServer.savedObjects.cleanStandardList();
         await getService('esArchiver').unload(
@@ -169,9 +172,11 @@ export default function (providerContext: FtrProviderContext) {
         await supertest.get(`/api/fleet/agent_policies/${agentPolicy.id}`).expect(200);
       });
     });
+
     describe('Delete bulk', () => {
       let agentPolicy: any;
       let packagePolicy: any;
+
       before(async () => {
         await kibanaServer.savedObjects.cleanStandardList();
         await getService('esArchiver').load(

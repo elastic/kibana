@@ -16,13 +16,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   describe('Ingest Pipelines: Manage Processors', function () {
     this.tags('smoke');
+
     before(async () => {
       await security.testUser.setRoles(['manage_processors_user']);
     });
+
     beforeEach(async () => {
       await pageObjects.common.navigateToApp('ingestPipelines');
       await pageObjects.ingestPipelines.navigateToManageProcessorsPage();
     });
+
     after(async () => {
       await security.testUser.restoreDefaults();
     });

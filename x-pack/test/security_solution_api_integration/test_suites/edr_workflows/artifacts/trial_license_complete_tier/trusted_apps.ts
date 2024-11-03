@@ -275,6 +275,7 @@ export default function ({ getService }: FtrProviderContext) {
       // no such role in serverless
       describe('@skipInServerless and user has authorization to read trusted apps', function () {
         let hunterSupertest: TestAgent;
+
         before(async () => {
           hunterSupertest = await utils.createSuperTest(ROLE.hunter);
         });

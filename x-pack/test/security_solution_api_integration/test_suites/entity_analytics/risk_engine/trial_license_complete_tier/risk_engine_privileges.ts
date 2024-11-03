@@ -100,6 +100,7 @@ export default ({ getService }: FtrProviderContext) => {
         username,
         password: USER_PASSWORD,
       });
+
     before(async () => {
       await createPrivilegeTestUsers();
     });
@@ -123,6 +124,7 @@ export default ({ getService }: FtrProviderContext) => {
           },
         });
       });
+
       it('returns has_all_required false for user with no write access to risk indices', async () => {
         const { body } = await getPrivilegesForUsername('no_risk_score_index_write');
         expect(body.has_all_required).to.eql(false);
@@ -141,6 +143,7 @@ export default ({ getService }: FtrProviderContext) => {
           },
         });
       });
+
       it('returns has_all_required false for user with no read access to risk indices', async () => {
         const { body } = await getPrivilegesForUsername('no_risk_score_index_read');
         expect(body.has_all_required).to.eql(false);
@@ -159,6 +162,7 @@ export default ({ getService }: FtrProviderContext) => {
           },
         });
       });
+
       it('returns has_all_required false for user with no cluster manage transform privilege', async () => {
         const { body } = await getPrivilegesForUsername('no_cluster_manage_transform');
         expect(body.has_all_required).to.eql(false);
@@ -177,6 +181,7 @@ export default ({ getService }: FtrProviderContext) => {
           },
         });
       });
+
       it('returns has_all_required false for user with no cluster manage index templates privilege', async () => {
         const { body } = await getPrivilegesForUsername('no_cluster_manage_index_templates');
         expect(body.has_all_required).to.eql(false);

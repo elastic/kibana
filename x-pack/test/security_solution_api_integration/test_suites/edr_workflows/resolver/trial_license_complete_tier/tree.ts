@@ -66,6 +66,7 @@ export default function ({ getService }: FtrProviderContext) {
       // we need tree2 for comparison tests
       [tree, tree2] = resolverTrees.trees;
     });
+
     after(async () => {
       await resolver.deleteData(resolverTrees);
     });
@@ -701,6 +702,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
       });
     });
+
     describe('different agent.ids', () => {
       it('should return correct nodes for tree1 and tree2 based on agent.id', async () => {
         const { body: body1 }: { body: ResolverNode[] } = await adminSupertest

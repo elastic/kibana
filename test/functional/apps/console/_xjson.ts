@@ -16,6 +16,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
 
   describe('XJSON', function testXjson() {
     this.tags('includeFirefox');
+
     before(async () => {
       await PageObjects.common.navigateToApp('console');
       await PageObjects.console.skipTourIfExists();

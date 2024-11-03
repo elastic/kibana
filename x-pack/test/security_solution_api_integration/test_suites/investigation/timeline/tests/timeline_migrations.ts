@@ -132,6 +132,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
           'x-pack/test/functional/es_archives/security_solution/timelines/7.15.0'
         );
       });
+
       describe('notes timelineId', () => {
         it('removes the timelineId in the saved object', async () => {
           const timelines = await getSavedObjectFromES<NoteWithoutTimelineId>(
@@ -209,6 +210,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
           expect(resp.body.data.getOneTimeline.savedQueryId).to.be("It's me");
         });
       });
+
       describe('pinned events timelineId', () => {
         it('removes the timelineId in the saved object', async () => {
           const timelines = await getSavedObjectFromES<PinnedEventWithoutTimelineId>(

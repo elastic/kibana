@@ -12,6 +12,7 @@ import { buildUp, tearDown } from '../helpers';
 export default function actionsTests({ loadTestFile, getService }: FtrProviderContext) {
   describe('Actions', () => {
     before(async () => buildUp(getService));
+
     after(async () => tearDown(getService));
 
     loadTestFile(require.resolve('./create'));
