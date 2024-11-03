@@ -437,7 +437,6 @@ export const tasks: TelemetryTask[] = [
       const buckets = response.aggregations?.service_environments.buckets ?? [];
 
       buckets.forEach((bucket) => {
-        const keys = Object.keys(bucket.key);
         const serviceName = bucket.key['service.name'];
         const environment = bucket.key['service.environment'] as string | null;
 
