@@ -8,12 +8,12 @@
 import React from 'react';
 import { LocationDescriptorObject } from 'history';
 
-import type { CoreStart, HttpSetup } from '@kbn/core/public';
+import type { CoreStart, HttpSetup, Capabilities } from '@kbn/core/public';
 import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-browser-mocks';
 import {
   notificationServiceMock,
-  capabilitiesServiceMock,
+  applicationServiceMock,
   coreMock,
   scopedHistoryMock,
 } from '@kbn/core/public/mocks';
@@ -43,8 +43,10 @@ const appDependencies = {
 
 export const componentTemplatesDependencies = (httpSetup: HttpSetup, coreStart?: CoreStart) => {
   const coreMockStart = coreMock.createStart();
-  const capabilities = capabilitiesServiceMock.create();
-  capabilities.index_management = { manageIndexTemplate: true };
+
+  const capabilities = {
+    index_management: { manageIndexTemplate: true },
+  } as unknown as Capabilities;
   return {
     overlays: coreStart?.overlays ?? coreMockStart.overlays,
     httpClient: httpSetup,

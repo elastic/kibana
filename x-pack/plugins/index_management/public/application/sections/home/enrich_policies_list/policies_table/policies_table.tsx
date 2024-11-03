@@ -33,41 +33,85 @@ export const PoliciesTable: FunctionComponent<Props> = ({
   onDeletePolicyClick,
   onExecutePolicyClick,
 }) => {
-  const { history } = useAppContext();
+  const {
+    history,
+    core: { capabilities },
+  } = useAppContext();
 
-  const renderToolsRight = () => {
-    return [
-      <EuiButton
-        key="reloadPolicies"
-        data-test-subj="reloadPoliciesButton"
-        iconType="refresh"
-        color="success"
-        onClick={onReloadClick}
-      >
-        <FormattedMessage
-          id="xpack.idxMgmt.enrichPolicies.table.reloadButton"
-          defaultMessage="Reload"
-        />
-      </EuiButton>,
-      <EuiButton
-        key="createPolicy"
-        fill
-        iconType="plusInCircle"
-        {...reactRouterNavigate(history, '/enrich_policies/create')}
-      >
-        <FormattedMessage
-          id="xpack.idxMgmt.enrichPolicies.table.createPolicyButton"
-          defaultMessage="Create enrich policy"
-        />
-      </EuiButton>,
-    ];
-  };
+  const createBtn = (
+    <EuiButton
+      key="createPolicy"
+      fill
+      iconType="plusInCircle"
+      data-test-subj="createPolicyButton"
+      {...reactRouterNavigate(history, '/enrich_policies/create')}
+    >
+      <FormattedMessage
+        id="xpack.idxMgmt.enrichPolicies.table.createPolicyButton"
+        defaultMessage="Create enrich policy"
+      />
+    </EuiButton>
+  );
+
+  const toolsRight = [
+    <EuiButton
+      key="reloadPolicies"
+      data-test-subj="reloadPoliciesButton"
+      iconType="refresh"
+      color="success"
+      onClick={onReloadClick}
+    >
+      <FormattedMessage
+        id="xpack.idxMgmt.enrichPolicies.table.reloadButton"
+        defaultMessage="Reload"
+      />
+    </EuiButton>,
+  ];
+
+  if (capabilities.index_management.manageEnrich) {
+    toolsRight.push(createBtn);
+  }
 
   const search: EuiSearchBarProps = {
-    toolsRight: renderToolsRight(),
+    toolsRight,
     box: {
       incremental: true,
     },
+  };
+
+  const actions: EuiBasicTableColumn<SerializedEnrichPolicy> = {
+    name: i18n.translate('xpack.idxMgmt.enrichPolicies.table.actionsField', {
+      defaultMessage: 'Actions',
+    }),
+    actions: [
+      {
+        isPrimary: true,
+        name: i18n.translate('xpack.idxMgmt.enrichPolicies.table.executeAction', {
+          defaultMessage: 'Execute',
+        }),
+        description: i18n.translate('xpack.idxMgmt.enrichPolicies.table.executeDescription', {
+          defaultMessage: 'Execute this enrich policy',
+        }),
+        type: 'icon',
+        icon: 'play',
+        'data-test-subj': 'executePolicyButton',
+        onClick: ({ name }) => onExecutePolicyClick(name),
+      },
+      {
+        isPrimary: true,
+        name: i18n.translate('xpack.idxMgmt.enrichPolicies.table.deleteAction', {
+          defaultMessage: 'Delete',
+        }),
+        description: i18n.translate('xpack.idxMgmt.enrichPolicies.table.deleteDescription', {
+          defaultMessage: 'Delete this enrich policy',
+        }),
+        type: 'icon',
+        icon: 'trash',
+        color: 'danger',
+        'data-test-subj': 'deletePolicyButton',
+        onClick: ({ name }) => onDeletePolicyClick(name),
+      },
+    ],
   };
 
   const columns: Array<EuiBasicTableColumn<SerializedEnrichPolicy>> = [
@@ -120,41 +164,11 @@ export const PoliciesTable: FunctionComponent<Props> = ({
       truncateText: true,
       render: (fields: string[]) => <span className="eui-textTruncate">{fields.join(', ')}</span>,
     },
-    {
-      name: i18n.translate('xpack.idxMgmt.enrichPolicies.table.actionsField', {
-        defaultMessage: 'Actions',
-      }),
-      actions: [
-        {
-          isPrimary: true,
-          name: i18n.translate('xpack.idxMgmt.enrichPolicies.table.executeAction', {
-            defaultMessage: 'Execute',
-          }),
-          description: i18n.translate('xpack.idxMgmt.enrichPolicies.table.executeDescription', {
-            defaultMessage: 'Execute this enrich policy',
-          }),
-          type: 'icon',
-          icon: 'play',
-          'data-test-subj': 'executePolicyButton',
-          onClick: ({ name }) => onExecutePolicyClick(name),
-        },
-        {
-          isPrimary: true,
-          name: i18n.translate('xpack.idxMgmt.enrichPolicies.table.deleteAction', {
-            defaultMessage: 'Delete',
-          }),
-          description: i18n.translate('xpack.idxMgmt.enrichPolicies.table.deleteDescription', {
-            defaultMessage: 'Delete this enrich policy',
-          }),
-          type: 'icon',
-          icon: 'trash',
-          color: 'danger',
-          'data-test-subj': 'deletePolicyButton',
-          onClick: ({ name }) => onDeletePolicyClick(name),
-        },
-      ],
-    },
   ];
+
+  if (capabilities.index_management.manageEnrich) {
+    columns.push(actions);
+  }
 
   const { pageSize, sorting, onTableChange } = useEuiTablePersist<SerializedEnrichPolicy>({
     tableId: 'enrichPolicies',

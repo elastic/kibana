@@ -43,6 +43,7 @@ export interface AppDependencies {
     http: HttpSetup;
     i18n: I18nStart;
     theme: ThemeServiceStart;
+    capabilities: ApplicationStart['capabilities'];
   };
   plugins: {
     usageCollection: UsageCollectionSetup;

@@ -20,8 +20,10 @@ import {
   executionContextServiceMock,
   fatalErrorsServiceMock,
   httpServiceMock,
-  capabilitiesServiceMock,
+  applicationServiceMock,
 } from '@kbn/core/public/mocks';
+
+import type { Capabilities } from '@kbn/core/public';
 
 import { GlobalFlyout } from '@kbn/es-ui-shared-plugin/public';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
@@ -95,11 +97,9 @@ const appDependencies = {
 
 export const kibanaVersion = new SemVer(MAJOR_VERSION);
 
-const capabilities = capabilitiesServiceMock.createStartContract();
-
-capabilities.index_management = {
-  manageIndexTemplate: true,
-};
+const capabilities = {
+  index_management: { manageIndexTemplate: true },
+} as unknown as Capabilities;
 
 const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
   uiSettings: uiSettingsServiceMock.createSetupContract(),
@@ -108,7 +108,7 @@ const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
   kibanaVersion: {
     get: () => kibanaVersion,
   },
-  application,
+  capabilities,
 });
 
 export const setupEnvironment = () => {

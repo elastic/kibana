@@ -74,6 +74,7 @@ export function getIndexManagementDependencies({
   return {
     core: {
       getUrlForApp: application.getUrlForApp,
+      capabilities: application.capabilities,
       ...core,
     },
     plugins: {
