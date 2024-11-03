@@ -945,8 +945,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             </>
           </RuleTypeEuiFormRow>
           <EuiSpacer size="m" />
-          {JSON.stringify(isSuppressionGroupByDisabled)}
-          {JSON.stringify(suppressionGroupByDisabledText)}
 
           <RuleTypeEuiFormRow $isVisible={isAlertSuppressionEnabled} fullWidth>
             {isThresholdRule ? (
