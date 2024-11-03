@@ -77,6 +77,7 @@
     "@kbn/data-service",
     "@kbn/inference-common",
     "@kbn/observability-ai-server",
+    "@kbn/observability-ai-common",
   ],
   "exclude": [
     "target/**/*"
