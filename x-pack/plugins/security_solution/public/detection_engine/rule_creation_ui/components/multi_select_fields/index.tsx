@@ -54,7 +54,7 @@ export const MultiSelectAutocompleteComponent: React.FC<MultiSelectAutocompleteP
       data-test-subj={dataTestSubj}
     />
   );
-  return isDisabled ? (
+  return disabledText ? (
     <EuiToolTip position="right" content={disabledText}>
       {fieldComponent}
     </EuiToolTip>

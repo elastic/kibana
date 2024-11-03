@@ -1075,78 +1075,81 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               </EuiToolTip>
             </RuleTypeEuiFormRow>
 
-            <RuleTypeEuiFormRow
-              $isVisible={isAlertSuppressionEnabled && !isThresholdRule}
-              data-test-subj="alertSuppressionInput"
-              label={i18n.GROUP_BY_LABEL}
-              labelAppend={
-                <EuiText color="subdued" size="xs">
-                  {isSuppressionRuleInGA(ruleType)
-                    ? i18n.GROUP_BY_GA_LABEL_APPEND
-                    : i18n.GROUP_BY_TECH_PREVIEW_LABEL_APPEND}
-                </EuiText>
-              }
-            >
+            <EuiToolTip position="right" content={suppressionGroupByDisabledText}>
               <>
-                <UseField
-                  path="groupByFields"
-                  component={MultiSelectFieldsAutocomplete}
-                  componentProps={{
-                    browserFields: suppressionGroupByFields,
-                    isDisabled: isSuppressionGroupByDisabled,
-                    disabledText: suppressionGroupByDisabledText,
-                  }}
-                />
-                {isMlSuppressionIncomplete && (
-                  <EuiText size="xs" color="warning">
-                    {i18n.MACHINE_LEARNING_SUPPRESSION_INCOMPLETE_LABEL}
-                  </EuiText>
-                )}
+                <RuleTypeEuiFormRow
+                  $isVisible={isAlertSuppressionEnabled && !isThresholdRule}
+                  data-test-subj="alertSuppressionInput"
+                  label={i18n.GROUP_BY_LABEL}
+                  labelAppend={
+                    <EuiText color="subdued" size="xs">
+                      {isSuppressionRuleInGA(ruleType)
+                        ? i18n.GROUP_BY_GA_LABEL_APPEND
+                        : i18n.GROUP_BY_TECH_PREVIEW_LABEL_APPEND}
+                    </EuiText>
+                  }
+                >
+                  <>
+                    <UseField
+                      path="groupByFields"
+                      component={MultiSelectFieldsAutocomplete}
+                      componentProps={{
+                        browserFields: suppressionGroupByFields,
+                        isDisabled: isSuppressionGroupByDisabled,
+                      }}
+                    />
+                    {isMlSuppressionIncomplete && (
+                      <EuiText size="xs" color="warning">
+                        {i18n.MACHINE_LEARNING_SUPPRESSION_INCOMPLETE_LABEL}
+                      </EuiText>
+                    )}
+                  </>
+                </RuleTypeEuiFormRow>
+
+                <IntendedRuleTypeEuiFormRow
+                  $isVisible={isAlertSuppressionEnabled}
+                  data-test-subj="alertSuppressionDuration"
+                >
+                  <UseMultiFields
+                    fields={{
+                      groupByRadioSelection: {
+                        path: 'groupByRadioSelection',
+                      },
+                      groupByDurationValue: {
+                        path: 'groupByDuration.value',
+                      },
+                      groupByDurationUnit: {
+                        path: 'groupByDuration.unit',
+                      },
+                    }}
+                  >
+                    {GroupByChildren}
+                  </UseMultiFields>
+                </IntendedRuleTypeEuiFormRow>
+
+                <IntendedRuleTypeEuiFormRow
+                  // threshold rule does not have this suppression configuration
+                  $isVisible={isAlertSuppressionEnabled && !isThresholdRule}
+                  data-test-subj="alertSuppressionMissingFields"
+                  label={
+                    <span>
+                      {i18n.ALERT_SUPPRESSION_MISSING_FIELDS_FORM_ROW_LABEL} <SuppressionInfoIcon />
+                    </span>
+                  }
+                  fullWidth
+                >
+                  <UseMultiFields
+                    fields={{
+                      suppressionMissingFields: {
+                        path: 'suppressionMissingFields',
+                      },
+                    }}
+                  >
+                    {AlertSuppressionMissingFields}
+                  </UseMultiFields>
+                </IntendedRuleTypeEuiFormRow>
               </>
-            </RuleTypeEuiFormRow>
-
-            <IntendedRuleTypeEuiFormRow
-              $isVisible={isAlertSuppressionEnabled}
-              data-test-subj="alertSuppressionDuration"
-            >
-              <UseMultiFields
-                fields={{
-                  groupByRadioSelection: {
-                    path: 'groupByRadioSelection',
-                  },
-                  groupByDurationValue: {
-                    path: 'groupByDuration.value',
-                  },
-                  groupByDurationUnit: {
-                    path: 'groupByDuration.unit',
-                  },
-                }}
-              >
-                {GroupByChildren}
-              </UseMultiFields>
-            </IntendedRuleTypeEuiFormRow>
-
-            <IntendedRuleTypeEuiFormRow
-              // threshold rule does not have this suppression configuration
-              $isVisible={isAlertSuppressionEnabled && !isThresholdRule}
-              data-test-subj="alertSuppressionMissingFields"
-              label={
-                <span>
-                  {i18n.ALERT_SUPPRESSION_MISSING_FIELDS_FORM_ROW_LABEL} <SuppressionInfoIcon />
-                </span>
-              }
-              fullWidth
-            >
-              <UseMultiFields
-                fields={{
-                  suppressionMissingFields: {
-                    path: 'suppressionMissingFields',
-                  },
-                }}
-              >
-                {AlertSuppressionMissingFields}
-              </UseMultiFields>
-            </IntendedRuleTypeEuiFormRow>
+            </EuiToolTip>
           </>
 
           <EuiSpacer size="l" />

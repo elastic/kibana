@@ -16,13 +16,11 @@ import * as i18n from './translations';
 interface SuppressionFieldsSelectorProps {
   suppressibleFieldSpecs: DataViewFieldBase[];
   disabled?: boolean;
-  disabledText?: string;
 }
 
 export function SuppressionFieldsSelector({
   suppressibleFieldSpecs,
   disabled,
-  disabledText,
 }: SuppressionFieldsSelectorProps): JSX.Element {
   return (
     <EuiFormRow
@@ -41,7 +39,6 @@ export function SuppressionFieldsSelector({
           componentProps={{
             browserFields: suppressibleFieldSpecs,
             isDisabled: disabled,
-            disabledText,
           }}
         />
       </>
