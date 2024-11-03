@@ -6,17 +6,19 @@
  */
 
 import React from 'react';
+import {
+  SUPPRESSION_DURATION,
+  THRESHOLD_SUPPRESSION_ENABLED,
+} from '../../../../../../../rule_creation/components/threshold_alert_suppression_edit/fields';
 import { type FormData } from '../../../../../../../../shared_imports';
 import type { ThresholdAlertSuppression } from '../../../../../../../../../common/api/detection_engine';
 import { RuleFieldEditFormWrapper } from '../rule_field_edit_form_wrapper';
-import type { ThresholdAlertSuppressionFormData } from './form_schema';
-import type { RuleFieldEditComponentProps } from '../rule_field_edit_component_props';
 import {
   thresholdAlertSuppressionFormSchema,
-  SUPPRESSION_DURATION,
-  THRESHOLD_SUPPRESSION_ENABLED,
+  type ThresholdAlertSuppressionFormData,
 } from './form_schema';
-import { ThresholdAlertSuppressionEdit } from './suppression_edit';
+import type { RuleFieldEditComponentProps } from '../rule_field_edit_component_props';
+import { ThresholdAlertSuppressionEdit } from '../../../../../../../rule_creation/components/threshold_alert_suppression_edit';
 
 export function ThresholdAlertSuppressionEditForm(): JSX.Element {
   return (
@@ -38,7 +40,7 @@ function ThresholdAlertSuppressionEditAdapter({
 
   const suppressibleFields = [finalDiffableRule.threshold.field].flat();
 
-  return <ThresholdAlertSuppressionEdit suppressibleFields={suppressibleFields} />;
+  return <ThresholdAlertSuppressionEdit suppressionFieldNames={suppressibleFields} />;
 }
 
 function deserializer(defaultValue: FormData): ThresholdAlertSuppressionFormData {

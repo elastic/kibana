@@ -81,6 +81,8 @@ import { NextStep } from '../../components/next_step';
 import { useRuleForms, useRuleFormsErrors, useRuleIndexPattern } from '../form';
 import { CustomHeaderPageMemo } from '..';
 import { SaveWithErrorsModal } from '../../components/save_with_errors_confirmation';
+import { SUPPRESSION_FIELDS } from '../../../rule_creation/components/alert_suppression_edit/fields';
+import { THRESHOLD_SUPPRESSION_ENABLED } from '../../../rule_creation/components/threshold_alert_suppression_edit/fields';
 
 const MyEuiPanel = styled(EuiPanel)<{
   zindex?: number;
@@ -565,13 +567,13 @@ const CreateRulePageComponent: React.FC = () => {
             ruleType={defineStepData.ruleType}
             index={memoizedIndex}
             threatIndex={defineStepData.threatIndex}
-            groupByFields={defineStepData.groupByFields}
+            alertSuppressionFields={defineStepData[SUPPRESSION_FIELDS]}
             dataSourceType={defineStepData.dataSourceType}
             shouldLoadQueryDynamically={defineStepData.shouldLoadQueryDynamically}
             queryBarTitle={defineStepData.queryBar.title}
             queryBarSavedId={defineStepData.queryBar.saved_id}
             thresholdFields={defineStepData.threshold.field}
-            enableThresholdSuppression={defineStepData.enableThresholdSuppression}
+            enableThresholdSuppression={defineStepData[THRESHOLD_SUPPRESSION_ENABLED]}
           />
           <NextStep
             dataTestSubj="define-continue"
@@ -585,14 +587,8 @@ const CreateRulePageComponent: React.FC = () => {
     [
       activeStep,
       defineRuleNextStep,
-      defineStepData.dataSourceType,
-      defineStepData.groupByFields,
+      defineStepData,
       memoizedIndex,
-      defineStepData.queryBar.saved_id,
-      defineStepData.queryBar.title,
-      defineStepData.ruleType,
-      defineStepData.shouldLoadQueryDynamically,
-      defineStepData.threatIndex,
       defineStepForm,
       eqlOptionsSelected,
       indexPattern,
@@ -604,8 +600,6 @@ const CreateRulePageComponent: React.FC = () => {
       memoDefineStepReadOnly,
       setEqlOptionsSelected,
       threatIndicesConfig,
-      defineStepData.threshold.field,
-      defineStepData.enableThresholdSuppression,
     ]
   );
   const memoDefineStepExtraAction = useMemo(

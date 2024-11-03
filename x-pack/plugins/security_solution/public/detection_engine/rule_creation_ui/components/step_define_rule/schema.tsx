@@ -47,6 +47,7 @@ import {
   EQL_SEQUENCE_SUPPRESSION_GROUPBY_VALIDATION_TEXT,
 } from './translations';
 import { getQueryRequiredMessage } from './utils';
+import { SUPPRESSION_FIELDS } from '../../../rule_creation/components/alert_suppression_edit/fields';
 
 export const schema: FormSchema<DefineStepRule> = {
   index: {
@@ -649,14 +650,7 @@ export const schema: FormSchema<DefineStepRule> = {
       },
     ],
   },
-  groupByFields: {
-    type: FIELD_TYPES.COMBO_BOX,
-    helpText: i18n.translate(
-      'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldGroupByFieldHelpText',
-      {
-        defaultMessage: 'Select field(s) to use for suppressing extra alerts',
-      }
-    ),
+  [SUPPRESSION_FIELDS]: {
     validations: [
       {
         validator: (...args: Parameters<ValidationFunc>) => {
@@ -675,13 +669,13 @@ export const schema: FormSchema<DefineStepRule> = {
           ...args: Parameters<ValidationFunc>
         ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
           const [{ formData, value }] = args;
-          const groupByLength = (value as string[]).length;
-          const needsValidation = isEqlRule(formData.ruleType) && groupByLength > 0;
-          if (!needsValidation) {
+
+          if (!isEqlRule(formData.ruleType) || !Array.isArray(value) || value.length === 0) {
             return;
           }
 
           const query: string = formData.queryBar?.query?.query ?? '';
+
           if (isEqlSequenceQuery(query)) {
             return {
               message: EQL_SEQUENCE_SUPPRESSION_GROUPBY_VALIDATION_TEXT,
@@ -691,36 +685,7 @@ export const schema: FormSchema<DefineStepRule> = {
       },
     ],
   },
-  groupByRadioSelection: {},
-  groupByDuration: {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.groupByDurationValueLabel',
-      {
-        defaultMessage: 'Suppress alerts for',
-      }
-    ),
-    helpText: i18n.translate(
-      'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldGroupByDurationValueHelpText',
-      {
-        defaultMessage: 'Suppress alerts for',
-      }
-    ),
-    value: {},
-    unit: {},
-  },
-  suppressionMissingFields: {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.suppressionMissingFieldsLabel',
-      {
-        defaultMessage: 'If a suppression field is missing',
-      }
-    ),
-  },
   shouldLoadQueryDynamically: {
-    type: FIELD_TYPES.CHECKBOX,
-    defaultValue: false,
-  },
-  enableThresholdSuppression: {
     type: FIELD_TYPES.CHECKBOX,
     defaultValue: false,
   },

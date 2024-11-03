@@ -69,6 +69,8 @@ import { useRuleForms, useRuleFormsErrors, useRuleIndexPattern } from '../form';
 import { useEsqlIndex, useEsqlQueryForAboutStep } from '../../hooks';
 import { CustomHeaderPageMemo } from '..';
 import { SaveWithErrorsModal } from '../../components/save_with_errors_confirmation';
+import { SUPPRESSION_FIELDS } from '../../../rule_creation/components/alert_suppression_edit/fields';
+import { THRESHOLD_SUPPRESSION_ENABLED } from '../../../rule_creation/components/threshold_alert_suppression_edit/fields';
 
 const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
   const { addSuccess } = useAppToasts();
@@ -238,13 +240,13 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
                   ruleType={defineStepData.ruleType}
                   index={memoizedIndex}
                   threatIndex={defineStepData.threatIndex}
-                  groupByFields={defineStepData.groupByFields}
+                  alertSuppressionFields={defineStepData[SUPPRESSION_FIELDS]}
                   dataSourceType={defineStepData.dataSourceType}
                   shouldLoadQueryDynamically={defineStepData.shouldLoadQueryDynamically}
                   queryBarTitle={defineStepData.queryBar.title}
                   queryBarSavedId={defineStepData.queryBar.saved_id}
                   thresholdFields={defineStepData.threshold.field}
-                  enableThresholdSuppression={defineStepData.enableThresholdSuppression}
+                  enableThresholdSuppression={defineStepData[THRESHOLD_SUPPRESSION_ENABLED]}
                 />
               )}
               <EuiSpacer />

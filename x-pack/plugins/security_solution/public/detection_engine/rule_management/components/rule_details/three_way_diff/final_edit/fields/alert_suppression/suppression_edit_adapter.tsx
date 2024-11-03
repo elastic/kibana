@@ -6,6 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
+import { AlertSuppressionEdit } from '../../../../../../../rule_creation/components/alert_suppression_edit';
 import { getTermsAggregationFields } from '../../../../../../../rule_creation_ui/components/step_define_rule/utils';
 import { isEsqlRule, isMlRule } from '../../../../../../../../../common/detection_engine/utils';
 import { aggregatableFields } from '../../../../../../../rule_creation_ui/components/step_define_rule';
@@ -13,7 +14,6 @@ import { useAllEsqlRuleFields } from '../../../../../../../rule_creation_ui/hook
 import { useMLRuleConfig } from '../../../../../../../../common/components/ml/hooks/use_ml_rule_config';
 import type { RuleFieldEditComponentProps } from '../rule_field_edit_component_props';
 import { useDiffableRuleDataView } from '../hooks/use_diffable_rule_data_view';
-import { AlertSuppressionEdit } from './suppression_edit';
 import * as i18n from './translations';
 
 export function AlertSuppressionEditAdapter({
@@ -69,7 +69,7 @@ export function AlertSuppressionEditAdapter({
 
   return (
     <AlertSuppressionEdit
-      suppressibleFieldSpecs={suppressibleFieldSpecs}
+      suppressibleFields={suppressibleFieldSpecs}
       disabled={Boolean(disabledText)}
       disabledText={disabledText}
       warningText={

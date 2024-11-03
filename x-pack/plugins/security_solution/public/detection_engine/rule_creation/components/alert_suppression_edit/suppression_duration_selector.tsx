@@ -7,15 +7,15 @@
 
 import React from 'react';
 import { EuiFormRow, EuiRadioGroup } from '@elastic/eui';
-import { GroupByOptions } from '../../../../../../../../detections/pages/detection_engine/rules/types';
-import { DurationInput } from '../../../../../../../rule_creation_ui/components/duration_input';
-import { UseMultiFields } from '../../../../../../../../shared_imports';
+import { UseMultiFields } from '../../../../shared_imports';
+import { GroupByOptions } from '../../../../detections/pages/detection_engine/rules/types';
+import { DurationInput } from '../duration_input';
 import {
   SUPPRESSION_DURATION,
   SUPPRESSION_DURATION_SELECTOR,
   SUPPRESSION_DURATION_UNIT,
   SUPPRESSION_DURATION_VALUE,
-} from './form_schema';
+} from './fields';
 import * as i18n from './translations';
 
 interface AlertSuppressionDurationProps {

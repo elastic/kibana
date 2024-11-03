@@ -9,8 +9,8 @@ import React, { useMemo } from 'react';
 
 import { EuiToolTip } from '@elastic/eui';
 import type { DataViewFieldBase } from '@kbn/es-query';
+import { ComboBoxField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import type { FieldHook } from '../../../../shared_imports';
-import { Field } from '../../../../shared_imports';
 import { FIELD_PLACEHOLDER } from './translations';
 
 interface MultiSelectAutocompleteProps {
@@ -47,7 +47,7 @@ export const MultiSelectAutocompleteComponent: React.FC<MultiSelectAutocompleteP
     [browserFields, isDisabled, fullWidth]
   );
   const fieldComponent = (
-    <Field
+    <ComboBoxField
       field={field}
       idAria={fieldDescribedByIds}
       euiFieldProps={fieldEuiFieldProps}

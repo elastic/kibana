@@ -6,38 +6,37 @@
  */
 
 import React from 'react';
-import { EuiFormRow, EuiText } from '@elastic/eui';
+import { EuiFormRow } from '@elastic/eui';
 import type { DataViewFieldBase } from '@kbn/es-query';
-import { UseField } from '../../../../../../../../shared_imports';
-import { MultiSelectFieldsAutocomplete } from '../../../../../../../rule_creation_ui/components/multi_select_fields';
-import { SUPPRESSION_FIELDS } from './form_schema';
+import { UseField } from '../../../../shared_imports';
+import { MultiSelectFieldsAutocomplete } from '../../../rule_creation_ui/components/multi_select_fields';
+import { SUPPRESSION_FIELDS } from './fields';
 import * as i18n from './translations';
 
 interface SuppressionFieldsSelectorProps {
-  suppressibleFieldSpecs: DataViewFieldBase[];
+  suppressibleFields: DataViewFieldBase[];
+  labelAppend?: React.ReactNode;
   disabled?: boolean;
 }
 
 export function SuppressionFieldsSelector({
-  suppressibleFieldSpecs,
+  suppressibleFields,
+  labelAppend,
   disabled,
 }: SuppressionFieldsSelectorProps): JSX.Element {
   return (
     <EuiFormRow
       data-test-subj="alertSuppressionInput"
       label={i18n.ALERT_SUPPRESSION_SUPPRESS_BY_FIELD_LABEL}
-      labelAppend={
-        <EuiText color="subdued" size="xs">
-          {i18n.OPTIONAL}
-        </EuiText>
-      }
+      labelAppend={labelAppend}
+      helpText={i18n.ALERT_SUPPRESSION_SUPPRESS_BY_FIELD_HELP_TEXT}
     >
       <>
         <UseField
           path={SUPPRESSION_FIELDS}
           component={MultiSelectFieldsAutocomplete}
           componentProps={{
-            browserFields: suppressibleFieldSpecs,
+            browserFields: suppressibleFields,
             isDisabled: disabled,
           }}
         />

@@ -23,6 +23,12 @@ import type {
 } from '@kbn/alerting-plugin/common';
 import type { DataViewListItem } from '@kbn/data-views-plugin/common';
 
+import type {
+  SUPPRESSION_DURATION,
+  SUPPRESSION_DURATION_SELECTOR,
+  SUPPRESSION_FIELDS,
+  SUPPRESSION_MISSING_FIELDS,
+} from '../../../../detection_engine/rule_creation/components/alert_suppression_edit/fields';
 import type { FieldValueQueryBar } from '../../../../detection_engine/rule_creation_ui/components/query_bar';
 import type { FieldValueTimeline } from '../../../../detection_engine/rule_creation/components/pick_timeline';
 import type { FieldValueThreshold } from '../../../../detection_engine/rule_creation_ui/components/threshold_input';
@@ -48,6 +54,7 @@ import type {
   RuleResponseAction,
   ResponseAction,
 } from '../../../../../common/api/detection_engine/model/rule_response_actions';
+import type { THRESHOLD_SUPPRESSION_ENABLED } from '../../../../detection_engine/rule_creation/components/threshold_alert_suppression_edit/fields';
 
 export interface EuiBasicTableSortTypes {
   field: string;
@@ -162,11 +169,11 @@ export interface DefineStepRule {
   newTermsFields: string[];
   historyWindowSize: string;
   shouldLoadQueryDynamically: boolean;
-  groupByFields: string[];
-  groupByRadioSelection: GroupByOptions;
-  groupByDuration: Duration;
-  suppressionMissingFields?: AlertSuppressionMissingFieldsStrategy;
-  enableThresholdSuppression: boolean;
+  [SUPPRESSION_FIELDS]: string[];
+  [SUPPRESSION_DURATION_SELECTOR]: GroupByOptions;
+  [SUPPRESSION_DURATION]: Duration;
+  [SUPPRESSION_MISSING_FIELDS]: AlertSuppressionMissingFieldsStrategy;
+  [THRESHOLD_SUPPRESSION_ENABLED]: boolean;
 }
 
 export interface QueryDefineStep {

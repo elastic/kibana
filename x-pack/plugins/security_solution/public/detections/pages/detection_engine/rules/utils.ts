@@ -6,6 +6,15 @@
  */
 
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
+import { THRESHOLD_SUPPRESSION_ENABLED } from '../../../../detection_engine/rule_creation/components/threshold_alert_suppression_edit/fields';
+import {
+  SUPPRESSION_DURATION,
+  SUPPRESSION_DURATION_SELECTOR,
+  SUPPRESSION_DURATION_UNIT,
+  SUPPRESSION_DURATION_VALUE,
+  SUPPRESSION_FIELDS,
+  SUPPRESSION_MISSING_FIELDS,
+} from '../../../../detection_engine/rule_creation/components/alert_suppression_edit/fields';
 import { isThreatMatchRule } from '../../../../../common/detection_engine/utils';
 import { DEFAULT_TIMELINE_TITLE } from '../../../../timelines/components/timeline/translations';
 import { DEFAULT_THREAT_MATCH_QUERY } from '../../../../../common/constants';
@@ -66,14 +75,14 @@ export const stepDefineDefaultValue: DefineStepRule = {
   newTermsFields: [],
   historyWindowSize: '7d',
   shouldLoadQueryDynamically: false,
-  groupByFields: [],
-  groupByRadioSelection: GroupByOptions.PerRuleExecution,
-  groupByDuration: {
-    value: 5,
-    unit: 'm',
+  [SUPPRESSION_FIELDS]: [],
+  [SUPPRESSION_DURATION_SELECTOR]: GroupByOptions.PerRuleExecution,
+  [SUPPRESSION_DURATION]: {
+    [SUPPRESSION_DURATION_VALUE]: 5,
+    [SUPPRESSION_DURATION_UNIT]: 'm',
   },
-  suppressionMissingFields: DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY,
-  enableThresholdSuppression: false,
+  [SUPPRESSION_MISSING_FIELDS]: DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY,
+  [THRESHOLD_SUPPRESSION_ENABLED]: false,
 };
 
 export const stepAboutDefaultValue: AboutStepRule = {

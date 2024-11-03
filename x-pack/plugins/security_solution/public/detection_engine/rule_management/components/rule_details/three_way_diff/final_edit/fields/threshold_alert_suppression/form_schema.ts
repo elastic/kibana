@@ -5,13 +5,16 @@
  * 2.0.
  */
 
+import type {
+  SUPPRESSION_DURATION_UNIT,
+  SUPPRESSION_DURATION_VALUE,
+} from '../../../../../../../rule_creation/components/threshold_alert_suppression_edit/fields';
+import {
+  SUPPRESSION_DURATION,
+  THRESHOLD_SUPPRESSION_ENABLED,
+} from '../../../../../../../rule_creation/components/threshold_alert_suppression_edit/fields';
 import type { AlertSuppressionDurationUnit } from '../../../../../../../../../common/api/detection_engine';
 import { type FormSchema, FIELD_TYPES } from '../../../../../../../../shared_imports';
-
-export const THRESHOLD_SUPPRESSION_ENABLED = 'suppressionFieldlessEnabled' as const;
-export const SUPPRESSION_DURATION = 'suppressionDuration' as const;
-export const SUPPRESSION_DURATION_VALUE = 'value' as const;
-export const SUPPRESSION_DURATION_UNIT = 'unit' as const;
 
 export interface ThresholdAlertSuppressionFormData {
   [THRESHOLD_SUPPRESSION_ENABLED]: boolean;

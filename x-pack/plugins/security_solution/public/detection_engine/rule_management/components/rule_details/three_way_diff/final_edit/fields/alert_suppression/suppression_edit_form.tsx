@@ -6,6 +6,12 @@
  */
 
 import React from 'react';
+import {
+  SUPPRESSION_DURATION,
+  SUPPRESSION_DURATION_SELECTOR,
+  SUPPRESSION_FIELDS,
+  SUPPRESSION_MISSING_FIELDS,
+} from '../../../../../../../rule_creation/components/alert_suppression_edit/fields';
 import { GroupByOptions } from '../../../../../../../../detections/pages/detection_engine/rules/types';
 import { type FormData } from '../../../../../../../../shared_imports';
 import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../../../../../common/detection_engine/constants';
@@ -15,14 +21,7 @@ import {
 } from '../../../../../../../../../common/api/detection_engine';
 import { RuleFieldEditFormWrapper } from '../rule_field_edit_form_wrapper';
 import { AlertSuppressionEditAdapter } from './suppression_edit_adapter';
-import type { AlertSuppressionFormData } from './form_schema';
-import {
-  alertSuppressionFormSchema,
-  SUPPRESSION_DURATION,
-  SUPPRESSION_DURATION_SELECTOR,
-  SUPPRESSION_FIELDS,
-  SUPPRESSION_MISSING_FIELDS,
-} from './form_schema';
+import { alertSuppressionFormSchema, type AlertSuppressionFormData } from './form_schema';
 
 export function AlertSuppressionEditForm(): JSX.Element {
   return (

@@ -60,6 +60,13 @@ import type {
 } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { stepActionsDefaultValue } from '../../../rule_creation/components/step_rule_actions';
 import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../common/detection_engine/constants';
+import {
+  SUPPRESSION_DURATION,
+  SUPPRESSION_DURATION_SELECTOR,
+  SUPPRESSION_FIELDS,
+  SUPPRESSION_MISSING_FIELDS,
+} from '../../../rule_creation/components/alert_suppression_edit/fields';
+import { THRESHOLD_SUPPRESSION_ENABLED } from '../../../rule_creation/components/threshold_alert_suppression_edit/fields';
 
 export const getTimeTypeValue = (time: string): { unit: Unit; value: number } => {
   const timeObj: { unit: Unit; value: number } = {
@@ -427,15 +434,15 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
   };
 
   const alertSuppressionFields =
-    ruleFields.groupByFields.length > 0
+    ruleFields[SUPPRESSION_FIELDS].length > 0
       ? {
           alert_suppression: {
-            group_by: ruleFields.groupByFields,
+            group_by: ruleFields[SUPPRESSION_FIELDS],
             duration:
-              ruleFields.groupByRadioSelection === GroupByOptions.PerTimePeriod
-                ? ruleFields.groupByDuration
+              ruleFields[SUPPRESSION_DURATION_SELECTOR] === GroupByOptions.PerTimePeriod
+                ? ruleFields[SUPPRESSION_DURATION]
                 : undefined,
-            missing_fields_strategy: (ruleFields.suppressionMissingFields ||
+            missing_fields_strategy: (ruleFields[SUPPRESSION_MISSING_FIELDS] ||
               DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY) as AlertSuppression['missing_fields_strategy'],
           },
         }
@@ -472,8 +479,8 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
                   ]
                 : [],
           },
-          ...(ruleFields.enableThresholdSuppression && {
-            alert_suppression: { duration: ruleFields.groupByDuration },
+          ...(ruleFields[THRESHOLD_SUPPRESSION_ENABLED] && {
+            alert_suppression: { duration: ruleFields[SUPPRESSION_DURATION] },
           }),
         }),
       }

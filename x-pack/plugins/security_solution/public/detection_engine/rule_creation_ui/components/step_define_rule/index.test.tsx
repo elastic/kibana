@@ -629,7 +629,7 @@ function TestForm({
         ruleType={ruleType}
         index={stepDefineDefaultValue.index}
         threatIndex={stepDefineDefaultValue.threatIndex}
-        groupByFields={stepDefineDefaultValue.groupByFields}
+        alertSuppressionFields={stepDefineDefaultValue.groupByFields}
         dataSourceType={stepDefineDefaultValue.dataSourceType}
         shouldLoadQueryDynamically={stepDefineDefaultValue.shouldLoadQueryDynamically}
         queryBarTitle=""

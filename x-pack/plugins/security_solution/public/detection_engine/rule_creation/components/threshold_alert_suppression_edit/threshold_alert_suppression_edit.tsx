@@ -6,18 +6,19 @@
  */
 
 import React from 'react';
+import { EuiPanel } from '@elastic/eui';
 import { CheckBoxField } from '@kbn/es-ui-shared-plugin/static/forms/components';
-import { UseField, useFormData } from '../../../../../../../../shared_imports';
+import { UseField, useFormData } from '../../../../shared_imports';
 import { SuppressionDurationSelector } from './suppression_duration_selector';
-import { THRESHOLD_SUPPRESSION_ENABLED } from './form_schema';
+import { THRESHOLD_SUPPRESSION_ENABLED } from './fields';
 import * as i18n from './translations';
 
 interface ThresholdAlertSuppressionEditProps {
-  suppressibleFields: string[] | undefined;
+  suppressionFieldNames: string[] | undefined;
 }
 
 export function ThresholdAlertSuppressionEdit({
-  suppressibleFields,
+  suppressionFieldNames,
 }: ThresholdAlertSuppressionEditProps): JSX.Element {
   const [{ [THRESHOLD_SUPPRESSION_ENABLED]: enabled }] = useFormData({
     watch: THRESHOLD_SUPPRESSION_ENABLED,
@@ -29,12 +30,14 @@ export function ThresholdAlertSuppressionEdit({
         path={THRESHOLD_SUPPRESSION_ENABLED}
         component={CheckBoxField}
         euiFieldProps={{
-          label: suppressibleFields?.length
-            ? i18n.enableSuppressionForFields(suppressibleFields)
+          label: suppressionFieldNames?.length
+            ? i18n.enableSuppressionForFields(suppressionFieldNames)
             : i18n.SUPPRESS_ALERTS,
         }}
       />
-      <SuppressionDurationSelector disabled={!enabled} />
+      <EuiPanel paddingSize="m" hasShadow={false}>
+        <SuppressionDurationSelector disabled={!enabled} />
+      </EuiPanel>
     </>
   );
 }

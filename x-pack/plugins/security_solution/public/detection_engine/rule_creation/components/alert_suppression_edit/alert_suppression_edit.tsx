@@ -6,35 +6,38 @@
  */
 
 import React from 'react';
-import { EuiText, EuiToolTip } from '@elastic/eui';
+import { EuiPanel, EuiText, EuiToolTip } from '@elastic/eui';
 import type { DataViewFieldBase } from '@kbn/es-query';
-import { useFormData } from '../../../../../../../../shared_imports';
+import { useFormData } from '../../../../shared_imports';
 import { MissingFieldsStrategySelector } from './missing_fields_strategy_selector';
 import { SuppressionDurationSelector } from './suppression_duration_selector';
 import { SuppressionFieldsSelector } from './suppression_fields_selector';
-import { SUPPRESSION_FIELDS, type AlertSuppressionFormData } from './form_schema';
+import { SUPPRESSION_FIELDS } from './fields';
 
 interface AlertSuppressionEditProps {
-  suppressibleFieldSpecs: DataViewFieldBase[];
+  suppressibleFields: DataViewFieldBase[];
+  labelAppend?: React.ReactNode;
   disabled?: boolean;
   disabledText?: string;
   warningText?: string;
 }
 
 export function AlertSuppressionEdit({
-  suppressibleFieldSpecs,
+  suppressibleFields,
+  labelAppend,
   disabled,
   disabledText,
   warningText,
 }: AlertSuppressionEditProps): JSX.Element {
-  const [{ suppressionFields }] = useFormData<AlertSuppressionFormData>({
+  const [{ suppressionFields }] = useFormData({
     watch: SUPPRESSION_FIELDS,
   });
   const hasSelectedFields = suppressionFields?.length > 0;
   const content = (
     <>
       <SuppressionFieldsSelector
-        suppressibleFieldSpecs={suppressibleFieldSpecs}
+        suppressibleFields={suppressibleFields}
+        labelAppend={labelAppend}
         disabled={disabled}
       />
       {warningText && (
@@ -42,8 +45,10 @@ export function AlertSuppressionEdit({
           {warningText}
         </EuiText>
       )}
-      <SuppressionDurationSelector disabled={disabled || !hasSelectedFields} />
-      <MissingFieldsStrategySelector disabled={disabled || !hasSelectedFields} />
+      <EuiPanel paddingSize="m" hasShadow={false}>
+        <SuppressionDurationSelector disabled={disabled || !hasSelectedFields} />
+        <MissingFieldsStrategySelector disabled={disabled || !hasSelectedFields} />
+      </EuiPanel>
     </>
   );
 
