@@ -55,8 +55,12 @@ function deserializer(defaultValue: FormData): ThresholdAlertSuppressionFormData
   };
 }
 
-function serializer(formData: FormData): { alert_suppression: ThresholdAlertSuppression } {
+function serializer(formData: FormData): { alert_suppression?: ThresholdAlertSuppression } {
   const alertSuppressionFormData = formData as ThresholdAlertSuppressionFormData;
+
+  if (!alertSuppressionFormData[THRESHOLD_SUPPRESSION_ENABLED]) {
+    return {};
+  }
 
   return {
     alert_suppression: {
