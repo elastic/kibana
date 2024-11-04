@@ -84,7 +84,8 @@ export const EntityInsight = <T,>({
     );
   return (
     <>
-      {(hasMisconfigurationFindings ||
+      {(insightContent.length !== 0 ||
+        hasMisconfigurationFindings ||
         (isVulnerabilitiesFindingForHost && hasVulnerabilitiesFindings)) && (
         <>
           <EuiAccordion

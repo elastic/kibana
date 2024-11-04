@@ -12,8 +12,8 @@ import type { EuiThemeComputed } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
-import { ExpandablePanel } from '@kbn/security-solution-common';
 import { getAbbreviatedNumber } from '@kbn/cloud-security-posture-common';
+import { ExpandablePanel } from '../../../flyout/shared/components/expandable_panel';
 import { useSummaryChartData } from '../../../detections/components/alerts_kpis/alerts_summary_charts_panel/use_summary_chart_data';
 import {
   getIsAlertsBySeverityData,
@@ -98,13 +98,13 @@ export const AlertsPreview = ({
             `}
           >
             <FormattedMessage
-              id="xpack.securitySolution.flyout.right.insights.vulnerabilities.vulnerabilitiesTitle"
+              id="xpack.securitySolution.flyout.right.insights.alerts.alertsTitle"
               defaultMessage="Alerts"
             />
           </EuiText>
         ),
       }}
-      data-test-subj={'securitySolutionFlyoutInsightsVulnerabilities'}
+      data-test-subj={'securitySolutionFlyoutInsightsAlerts'}
     >
       <EuiFlexGroup gutterSize="none">
         <AlertsCount alertsTotal={getAbbreviatedNumber(totalAlerts)} euiTheme={euiTheme} />
