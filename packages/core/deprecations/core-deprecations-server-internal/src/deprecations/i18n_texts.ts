@@ -35,7 +35,7 @@ export const getApiDeprecationMessage = (
   details: RouterDeprecatedRouteDetails,
   apiUsageStats: CoreDeprecatedApiUsageStats
 ): string[] => {
-  const { routePath, routeMethod } = details;
+  const { routePath, routeMethod, routeDeprecationOptions } = details;
   const { apiLastCalledAt, apiTotalCalls, markedAsResolvedLastCalledAt, totalMarkedAsResolved } =
     apiUsageStats;
 
@@ -69,6 +69,11 @@ export const getApiDeprecationMessage = (
         }
       )
     );
+  }
+
+  if (routeDeprecationOptions.message) {
+    // Surfaces additional deprecation messages passed into the route in UA
+    messages.push(routeDeprecationOptions.message);
   }
 
   return messages;
