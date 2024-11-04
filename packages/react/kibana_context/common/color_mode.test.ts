@@ -11,10 +11,10 @@ import { getColorMode } from './color_mode';
 
 describe('getColorMode', () => {
   it('returns the correct `colorMode` when `darkMode` is enabled', () => {
-    expect(getColorMode({ darkMode: true })).toEqual('DARK');
+    expect(getColorMode({ darkMode: true, version: 'v8' })).toEqual('DARK');
   });
 
   it('returns the correct `colorMode` when `darkMode` is disabled', () => {
-    expect(getColorMode({ darkMode: false })).toEqual('LIGHT');
+    expect(getColorMode({ darkMode: false, version: 'v8' })).toEqual('LIGHT');
   });
 });
