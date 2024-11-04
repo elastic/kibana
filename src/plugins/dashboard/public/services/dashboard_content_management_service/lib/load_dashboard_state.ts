@@ -26,7 +26,11 @@ import {
   embeddableService,
   savedObjectsTaggingService,
 } from '../../kibana_services';
-import type { LoadDashboardFromSavedObjectProps, LoadDashboardReturn } from '../types';
+import type {
+  DashboardSearchSource,
+  LoadDashboardFromSavedObjectProps,
+  LoadDashboardReturn,
+} from '../types';
 import { convertNumberToDashboardVersion } from './dashboard_versioning';
 import { migrateDashboardInput } from './migrate_dashboard_input';
 
@@ -129,7 +133,10 @@ export const loadDashboardState = async ({
       return await dataSearchService.searchSource.create();
     }
     try {
-      searchSourceValues = injectSearchSourceReferences(searchSourceValues as any, references);
+      searchSourceValues = injectSearchSourceReferences(
+        searchSourceValues as any,
+        references
+      ) as DashboardSearchSource;
       return await dataSearchService.searchSource.create(searchSourceValues);
     } catch (error: any) {
       return await dataSearchService.searchSource.create();

@@ -41,7 +41,6 @@ test('dashboard migration 7.3.0 migrates filters to query on search source', () 
         searchSourceJSON:
           '{"filter":[{"query":{"query_string":{"query":"n: 6","analyze_wildcard":true}}}],"highlightAll":true,"version":true}',
       },
-      optionsJSON: '{}',
       panelsJSON:
         '[{"id":"1","type":"visualization","foo":true},{"id":"2","type":"visualization","bar":true}]',
     },
@@ -55,7 +54,6 @@ test('dashboard migration 7.3.0 migrates filters to query on search source', () 
         "kibanaSavedObjectMeta": Object {
           "searchSourceJSON": "{\\"filter\\":[],\\"highlightAll\\":true,\\"version\\":true,\\"query\\":{\\"query\\":\\"n: 6\\",\\"language\\":\\"lucene\\"}}",
         },
-        "optionsJSON": "{}",
         "panelsJSON": "[{\\"id\\":\\"1\\",\\"type\\":\\"visualization\\",\\"foo\\":true},{\\"id\\":\\"2\\",\\"type\\":\\"visualization\\",\\"bar\\":true}]",
         "timeRestore": false,
         "title": "hi",
@@ -148,7 +146,6 @@ test('dashboard migration 7.3.0 migrates panels', () => {
       kibanaSavedObjectMeta: {
         searchSourceJSON: '{"filter":[],"highlightAll":true,"version":true}',
       },
-      optionsJSON: '{}',
       panelsJSON:
         '[{"size_x":6,"size_y":3,"panelIndex":1,"type":"visualization","id":"AWtIUP8QRNXhJVz2_Mar","col":1,"row":1}]',
     },

@@ -13,6 +13,7 @@ import moment, { Moment } from 'moment';
 import { extractSearchSourceReferences, RefreshInterval } from '@kbn/data-plugin/public';
 import { isFilterPinned } from '@kbn/es-query';
 
+import type { SavedObjectReference } from '@kbn/core/server';
 import { getDashboardContentManagementCache } from '..';
 import { convertPanelMapToPanelsArray, extractReferences } from '../../../../common';
 import type {
@@ -34,7 +35,7 @@ import {
   embeddableService,
   savedObjectsTaggingService,
 } from '../../kibana_services';
-import { SaveDashboardProps, SaveDashboardReturn } from '../types';
+import { DashboardSearchSource, SaveDashboardProps, SaveDashboardReturn } from '../types';
 import { convertDashboardVersionToNumber } from './dashboard_versioning';
 
 export const convertTimeToUTCString = (time?: string | Moment): undefined | string => {
@@ -103,7 +104,10 @@ export const saveDashboardState = async ({
     searchSourceFields.setField('query', query);
 
     const rawSearchSourceFields = searchSourceFields.getSerializedFields();
-    const [fields, references] = extractSearchSourceReferences(rawSearchSourceFields);
+    const [fields, references] = extractSearchSourceReferences(rawSearchSourceFields) as [
+      DashboardSearchSource,
+      SavedObjectReference[]
+    ];
     return { searchSourceReferences: references, searchSource: fields };
   })();
 

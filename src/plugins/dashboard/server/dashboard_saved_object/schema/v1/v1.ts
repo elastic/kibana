@@ -45,7 +45,7 @@ export const dashboardAttributesSchema = schema.object(
     // Dashboard Content
     controlGroupInput: schema.maybe(controlGroupInputSchema),
     panelsJSON: schema.string({ defaultValue: '[]' }),
-    optionsJSON: schema.string({ defaultValue: '{}' }),
+    optionsJSON: schema.maybe(schema.string()),
 
     // Legacy
     hits: schema.maybe(schema.number()),

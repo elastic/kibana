@@ -8,6 +8,7 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
+import type { Query, SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { ControlGroupRuntimeState } from '@kbn/controls-plugin/public';
 import { SavedObjectSaveOpts } from '@kbn/saved-objects-plugin/public';
 
@@ -52,6 +53,10 @@ export type SavedDashboardInput = DashboardContainerInput & {
    * Use runtime state when building input for portable dashboards
    */
   controlGroupState?: Partial<ControlGroupRuntimeState>;
+};
+
+export type DashboardSearchSource = Omit<SerializedSearchSourceFields, 'query'> & {
+  query?: Query;
 };
 
 export interface LoadDashboardReturn {
