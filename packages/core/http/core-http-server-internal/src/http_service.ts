@@ -278,47 +278,270 @@ export class HttpService
       path: '/api/oas',
       method: 'GET',
       handler: async (req, h) => {
-        let filters: GenerateOpenApiDocumentOptionsFilters;
-        let query: TypeOf<typeof querySchema>;
-        try {
-          query = querySchema.validate(req.query);
-          filters = {
-            ...query,
-            excludePathsMatching:
-              typeof query.excludePathsMatching === 'string'
-                ? [query.excludePathsMatching]
-                : query.excludePathsMatching,
-            pathStartsWith:
-              typeof query.pathStartsWith === 'string'
-                ? [query.pathStartsWith]
-                : query.pathStartsWith,
-          };
-        } catch (e) {
-          return h.response({ message: e.message }).code(400);
-        }
-        return await firstValueFrom(
-          of(1).pipe(
-            HttpService.generateOasSemaphore.acquire(),
-            mergeMap(async () => {
-              try {
-                // Potentially quite expensive
-                const result = generateOpenApiDocument(
-                  this.httpServer.getRouters({ pluginId: query.pluginId }),
-                  {
-                    baseUrl,
-                    title: 'Kibana HTTP APIs',
-                    version: '0.0.0', // TODO get a better version here
-                    filters,
-                  }
-                );
-                return h.response(result);
-              } catch (e) {
-                this.log.error(e);
-                return h.response({ message: e.message }).code(500);
+        const routers = this.httpServer.getRouters();
+
+        const data = routers.routers
+          .map((router) => router.getRoutes({ excludeVersionedRoutes: false }))
+          .flat()
+          .reduce(
+            (acc, route) => {
+              const security = route.isVersioned ? route.security({ headers: {} }) : route.security;
+              const isVersioned = route.isVersioned;
+              const isMigratedClassicRoute = route.security && !route.isVersioned;
+
+              const isMigratedVersionedRoute = route.isVersioned && route.security({ headers: {} });
+
+              if (isMigratedClassicRoute) {
+                if (security.authz.enabled !== false) {
+                  acc.classic.migratedWithAuthz++;
+                } else if (security.authz.enabled === false) {
+                  acc.classic.migratedWithoutAuthz++;
+                }
+
+                return acc;
               }
-            })
+
+              if (isMigratedVersionedRoute) {
+                if (security.authz.enabled !== false) {
+                  acc.versioned.migratedWithAuthz++;
+                } else if (security.authz.enabled === false) {
+                  acc.versioned.migratedWithoutAuthz++;
+                }
+
+                return acc;
+              }
+
+              if (!route.path.startsWith('/XXXXXXXXXXXX')) {
+                const routerType = route.isVersioned ? 'versioned' : 'classic';
+                if (route.options.tags?.some((tag) => tag.startsWith('access:'))) {
+                  acc[routerType].nonMigratedAuthz++;
+                } else {
+                  acc[routerType].nonMigratedNoAuthz++;
+                }
+              }
+
+              return acc;
+            },
+            {
+              versioned: {
+                migratedWithAuthz: 0,
+                migratedWithoutAuthz: 0,
+                nonMigratedAuthz: 0,
+                nonMigratedNoAuthz: 0,
+              },
+              classic: {
+                migratedWithAuthz: 0,
+                migratedWithoutAuthz: 0,
+                nonMigratedAuthz: 0,
+                nonMigratedNoAuthz: 0,
+              },
+            }
+          );
+
+        return data;
+
+        const routes = routers.routers
+          .map((router) => router.getRoutes({ excludeVersionedRoutes: false }))
+          .flat()
+          .filter(
+            (route) =>
+              ((!route.security && !route.isVersioned) ||
+                (route.isVersioned && !route.security({ headers: {} }))) &&
+              !route.path.startsWith('/XXXXXXXXXXXX')
           )
-        );
+          .map((route) => {
+            let owner = 'unknown';
+
+            if (
+              [
+                '/internal/apm',
+                '/api/apm',
+                '/api/infra',
+                '/internal/dataset_quality',
+                '/api/log_entries',
+                '/api/logs_shared',
+              ].some((path) => route.path.startsWith(path))
+            ) {
+              owner = '@elastic/obs-ux-logs-team';
+            }
+
+            if (
+              route.path.startsWith('/internal/synthetics') ||
+              route.path.startsWith('/api/synthetics') ||
+              route.path.startsWith('/internal/uptime') ||
+              route.path.startsWith('/internal/observability/slos') ||
+              route.path.startsWith('/api/observability/slos') ||
+              route.path.startsWith('/internal/slo') ||
+              route.path.startsWith('/api/snapshot_restore') ||
+              route.path.startsWith('/api/observability/rules/alerts')
+            ) {
+              owner = '@elastic/obs-ux-management-team';
+            }
+
+            if (
+              route.path.startsWith('/api/files') ||
+              route.path.startsWith('/internal/content_management') ||
+              route.path.startsWith('/internal/reporting')
+            ) {
+              owner = '@elastic/appex-sharedux';
+            }
+
+            if (route.path.startsWith('/internal/rac/alerts')) {
+              owner = '@elastic/response-ops @elastic/obs-ux-management-team';
+            }
+
+            if (
+              route.path.startsWith('/internal/observability_ai_assistant') ||
+              route.path.startsWith('/api/observability_ai_assistant') ||
+              route.path.startsWith('/internal/observability/assistant')
+            ) {
+              owner = '@elastic/obs-ai-assistant';
+            }
+
+            if (route.path.startsWith('/api/metrics')) {
+              owner = '@elastic/obs-ux-logs-team @elastic/obs-ux-infra_services-team';
+            }
+
+            if (route.path.startsWith('/internal/observability_onboarding')) {
+              owner = '@elastic/obs-ux-logs-team @elastic/obs-ux-onboarding-team';
+            }
+
+            if (route.path.startsWith('/internal/inventory')) {
+              owner = '@elastic/obs-ux-infra_services-team';
+            }
+
+            if (
+              route.path.startsWith('/api/cases') ||
+              route.path.startsWith('/internal/cases') ||
+              route.path.startsWith('/internal/triggers_actions_ui') ||
+              route.path.startsWith('/api/alerting') ||
+              route.path.startsWith('/internal/alerting')
+            ) {
+              owner = '@elastic/response-ops';
+            }
+
+            if (
+              route.path.startsWith('/api/console') ||
+              route.path.startsWith('/api/upgrade_assistant') ||
+              route.path.startsWith('/api/watcher') ||
+              route.path.startsWith('/api/index_lifecycle_management') ||
+              route.path.startsWith('/api/cross_cluster_replication') ||
+              route.path.startsWith('/api/rollup') ||
+              route.path.startsWith('/api/index_management') ||
+              route.path.startsWith('/internal/index_management')
+            ) {
+              owner = '@elastic/kibana-management';
+            }
+
+            if (
+              route.path.startsWith('/internal/saved_objects') ||
+              route.path.startsWith('/api/saved_objects') ||
+              route.path.startsWith('/api/kibana') ||
+              route.path.startsWith('/internal/kibana') ||
+              route.path.startsWith('/api/core') ||
+              route.path.startsWith('/api/deprecations') ||
+              route.path.startsWith('/core') ||
+              route.path.startsWith('/status')
+            ) {
+              owner = '@elastic/kibana-core';
+            }
+
+            if (
+              route.path.startsWith('/internal/spaces') ||
+              route.path.startsWith('/api/spaces') ||
+              route.path.startsWith('/spaces') ||
+              route.path.startsWith('/internal/security') ||
+              route.path.startsWith('/api/security') ||
+              route.path.startsWith('/login') ||
+              route.path.startsWith('/logout') ||
+              route.path.startsWith('/security')
+            ) {
+              owner = '@elastic/kibana-security';
+            }
+
+            if (
+              route.path.startsWith('/internal/workplace_search') ||
+              route.path.startsWith('/internal/enterprise_search') ||
+              route.path.startsWith('/internal/app_search')
+            ) {
+              owner = '@elastic/search-kibana';
+            }
+
+            if (
+              route.path.startsWith('/internal/monitoring') ||
+              route.path.startsWith('/api/monitoring')
+            ) {
+              owner = '@elastic/stack-monitoring';
+            }
+
+            if (
+              route.path.startsWith('/api/detection_engine') ||
+              route.path.startsWith('/internal/detection_engine')
+            ) {
+              owner = '@elastic/security-detection-rule-management';
+            }
+
+            if (route.path.startsWith('/internal/entities')) {
+              owner = '@elastic/obs-entities';
+            }
+
+            if (route.path.startsWith('/api/timeline') || route.path.startsWith('/api/endpoint')) {
+              owner = '@elastic/security-solution';
+            }
+
+            return {
+              owner,
+              tags: route.options.tags?.filter((tag) => tag.startsWith('access')) ?? [],
+              versioned: route.isVersioned,
+              path: route.path,
+            };
+          })
+          .filter(({ owner }) => owner !== 'unknown');
+        // .map(({ route }) => route.path);
+
+        return [...new Set(routes)];
+
+        // let filters: GenerateOpenApiDocumentOptionsFilters;
+        // let query: TypeOf<typeof querySchema>;
+        // try {
+        //   query = querySchema.validate(req.query);
+        //   filters = {
+        //     ...query,
+        //     excludePathsMatching:
+        //       typeof query.excludePathsMatching === 'string'
+        //         ? [query.excludePathsMatching]
+        //         : query.excludePathsMatching,
+        //     pathStartsWith:
+        //       typeof query.pathStartsWith === 'string'
+        //         ? [query.pathStartsWith]
+        //         : query.pathStartsWith,
+        //   };
+        // } catch (e) {
+        //   return h.response({ message: e.message }).code(400);
+        // }
+        // return await firstValueFrom(
+        //   of(1).pipe(
+        //     HttpService.generateOasSemaphore.acquire(),
+        //     mergeMap(async () => {
+        //       try {
+        //         // Potentially quite expensive
+        //         const result = generateOpenApiDocument(
+        //           this.httpServer.getRouters({ pluginId: query.pluginId }),
+        //           {
+        //             baseUrl,
+        //             title: 'Kibana HTTP APIs',
+        //             version: '0.0.0', // TODO get a better version here
+        //             filters,
+        //           }
+        //         );
+        //         return h.response(result);
+        //       } catch (e) {
+        //         this.log.error(e);
+        //         return h.response({ message: e.message }).code(500);
+        //       }
+        //     })
+        //   )
+        // );
       },
       options: {
         app: { access: 'public' },

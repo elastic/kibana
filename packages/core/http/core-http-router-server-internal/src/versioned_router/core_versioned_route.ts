@@ -305,6 +305,12 @@ export class CoreVersionedRoute implements VersionedRoute {
   public getSecurity: RouteSecurityGetter = (req: RequestLike) => {
     const version = this.getVersion(req)!;
 
+    for (const [v, handler] of this.handlers) {
+      if (handler.options.security) {
+        return handler.options.security ?? this.defaultSecurityConfig;
+      }
+    }
+
     return this.handlers.get(version)?.options.security ?? this.defaultSecurityConfig;
   };
 }
