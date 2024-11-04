@@ -16,6 +16,6 @@ const SVG_WIDTH = 376;
  * A container component that maintains a fixed size for child elements.
  * used for displaying the empty state illustrations and prevent flickering while the SVGs are loading.
  */
-export const EmptyStatesIllustrationContainer = ({ children }): React.FC => (
-  <div style={{ height: SVG_HEIGHT, width: SVG_WIDTH }}>{children}</div>
-);
+export const EmptyStatesIllustrationContainer: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => <div style={{ height: SVG_HEIGHT, width: SVG_WIDTH }}>{children}</div>;
