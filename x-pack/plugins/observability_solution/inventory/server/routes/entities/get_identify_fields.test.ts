@@ -30,7 +30,7 @@ describe('getIdentityFields', () => {
   it('should return a Map with unique entity types and their respective identity fields', () => {
     const serviceEntity: Entity = {
       'agent.name': 'node',
-      'entity.identity_fields': ['service.name', 'service.environment'],
+      [ENTITY_IDENTITY_FIELDS]: ['service.name', 'service.environment'],
       'service.name': 'my-service',
       'entity.type': 'service',
       ...commonEntityFields,
