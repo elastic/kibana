@@ -583,6 +583,12 @@ export class LensVisService {
       ? (preferredVisAttributes?.visualizationType.replace(LENS_PREFIX, '') as ChartType)
       : undefined;
 
+    let visAttributes = preferredVisAttributes;
+
+    if (query && isOfAggregateQueryType(query) && preferredVisAttributes) {
+      visAttributes = injectESQLQueryIntoLensLayers(preferredVisAttributes, query);
+    }
+
     const context = {
       dataViewSpec: dataView?.toSpec(),
       fieldName: '',
@@ -595,7 +601,7 @@ export class LensVisService {
           dataView,
           ['lnsDatatable'],
           preferredChartType,
-          preferredVisAttributes
+          visAttributes
         ) ?? []
       : [];
 
