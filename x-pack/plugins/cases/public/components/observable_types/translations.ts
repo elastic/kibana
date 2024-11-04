@@ -44,7 +44,7 @@ export const REQUIRED_FIELD = (fieldName: string): string =>
 export const DELETE_OBSERVABLE_TYPE_TITLE = (fieldName: string) =>
   i18n.translate('xpack.cases.observableTypes.deleteField', {
     values: { fieldName },
-    defaultMessage: 'Delete field "{fieldName}"?',
+    defaultMessage: 'Delete observable type "{fieldName}"?',
   });
 
 export const DELETE_OBSERVABLE_TYPE_DESCRIPTION = i18n.translate(
