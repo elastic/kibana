@@ -24,7 +24,7 @@ import { ActionDocument } from './types';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const esClient = getService('es');
-  const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
   const logger = getService('log');
   const alertingApi = getService('alertingApi');
@@ -81,11 +81,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     after(async () => {
-      await supertest
+      await supertestWithoutAuth
         .delete(`/api/alerting/rule/${ruleId}`)
         .set(roleAuthc.apiKeyHeader)
         .set(internalReqHeader);
-      await supertest
+      await supertestWithoutAuth
         .delete(`/api/actions/connector/${actionId}`)
         .set(roleAuthc.apiKeyHeader)
         .set(internalReqHeader);
