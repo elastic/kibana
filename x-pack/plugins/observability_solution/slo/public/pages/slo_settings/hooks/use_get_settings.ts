@@ -7,16 +7,16 @@
 
 import { GetSLOSettingsResponse } from '@kbn/slo-schema';
 import { useQuery } from '@tanstack/react-query';
-import { DEFAULT_STALE_SLO_THRESHOLD_HOURS } from '../../../common/constants';
-import { useKibana } from '../../utils/kibana_react';
+import { DEFAULT_STALE_SLO_THRESHOLD_HOURS } from '../../../../common/constants';
+import { usePluginContext } from '../../../hooks/use_plugin_context';
 
 export const useGetSettings = () => {
-  const { http } = useKibana().services;
+  const { sloClient } = usePluginContext();
   const { isLoading, data } = useQuery({
     queryKey: ['getSloSettings'],
     queryFn: async ({ signal }) => {
       try {
-        return http.get<GetSLOSettingsResponse>('/internal/slo/settings', { signal });
+        return await sloClient.fetch('GET /internal/slo/settings', { signal });
       } catch (error) {
         return defaultSettings;
       }

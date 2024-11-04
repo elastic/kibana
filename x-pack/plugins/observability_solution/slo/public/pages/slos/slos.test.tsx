@@ -27,7 +27,7 @@ import { useLicense } from '../../hooks/use_license';
 import { usePermissions } from '../../hooks/use_permissions';
 import { useKibana } from '../../utils/kibana_react';
 import { render } from '../../utils/test_helper';
-import { useGetSettings } from '../slo_settings/use_get_settings';
+import { useGetSettings } from '../slo_settings/hooks/use_get_settings';
 import { SlosPage } from './slos';
 
 jest.mock('react-router-dom', () => ({
