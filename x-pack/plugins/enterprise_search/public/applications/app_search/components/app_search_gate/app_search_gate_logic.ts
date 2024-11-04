@@ -39,7 +39,10 @@ export const AppSearchGateLogic = kea<MakeLogicType<AppSearchGateValues, AppSear
     setParticipateInUXLabs: (participateInUXLabs) => ({ participateInUXLabs }),
   },
   connect: {
-    actions: [UpdateAppSearchGatedFormDataApiLogic, ['makeRequest as submitGatedFormDataRequest']],
+    actions: [
+      UpdateAppSearchGatedFormDataApiLogic,
+      ['makeRequest as submitGatedFormDataRequest', 'apiSuccess as submitGatedFormSuccess'],
+    ],
   },
   listeners: ({ actions, values }) => ({
     formSubmitRequest: () => {
@@ -51,6 +54,9 @@ export const AppSearchGateLogic = kea<MakeLogicType<AppSearchGateValues, AppSear
           participateInUXLabs: values?.participateInUXLabs,
         });
       }
+    },
+    submitGatedFormSuccess: () => {
+      window.location.reload();
     },
   }),
   path: ['enterprise_search', 'app_search', 'gate_form'],

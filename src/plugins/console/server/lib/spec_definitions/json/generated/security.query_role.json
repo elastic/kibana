@@ -1,5 +1,5 @@
 {
-  "query_ruleset.get": {
+  "security.query_role": {
     "url_params": {
       "error_trace": "__flag__",
       "filter_path": [],
@@ -7,15 +7,16 @@
       "pretty": "__flag__"
     },
     "methods": [
-      "GET"
+      "GET",
+      "POST"
     ],
     "patterns": [
-      "_query_rules/{ruleset_id}"
+      "_security/_query/role"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/get-query-ruleset.html",
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-query-role.html",
     "availability": {
       "stack": true,
-      "serverless": true
+      "serverless": false
     }
   }
 }

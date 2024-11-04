@@ -50,6 +50,7 @@ export const ShareMenuTabs = () => {
       modalTitle={objectTypeMeta.title}
       defaultSelectedTabId="link"
       anchorElement={anchorElement}
+      data-test-subj="shareContextModal"
     />
   );
 };

@@ -94,9 +94,9 @@ export class KQLCustomTransformGenerator extends TransformGenerator {
               goodEvents: 'slo.numerator>_count',
               totalEvents: 'slo.denominator>_count',
             },
-            script: `params.goodEvents / params.totalEvents ${getTimesliceTargetComparator(
+            script: `if (params.totalEvents == 0) { return 1 } else { return params.goodEvents / params.totalEvents ${getTimesliceTargetComparator(
               slo.objective.timesliceTarget!
-            )} ${slo.objective.timesliceTarget} ? 1 : 0`,
+            )} ${slo.objective.timesliceTarget} ? 1 : 0 }`,
           },
         },
       }),

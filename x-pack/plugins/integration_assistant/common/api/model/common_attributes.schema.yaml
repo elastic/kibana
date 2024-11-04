@@ -31,6 +31,7 @@ components:
     Mapping:
       type: object
       description: mapping object to ECS Mapping Request.
+      additionalProperties: true
 
     Connector:
       type: string
@@ -41,6 +42,7 @@ components:
       description: An array of processed documents.
       items:
         type: object
+        additionalProperties: true
 
     SamplesFormatName:
       type: string

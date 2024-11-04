@@ -1,20 +1,18 @@
 {
-  "query_ruleset.list": {
+  "query_rules.put_rule": {
     "url_params": {
       "error_trace": "__flag__",
       "filter_path": [],
       "human": "__flag__",
-      "pretty": "__flag__",
-      "from": "",
-      "size": ""
+      "pretty": "__flag__"
     },
     "methods": [
-      "GET"
+      "PUT"
     ],
     "patterns": [
-      "_query_rules"
+      "_query_rules/{ruleset_id}/_rule/{rule_id}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/list-query-rulesets.html",
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/put-query-rule.html",
     "availability": {
       "stack": true,
       "serverless": true

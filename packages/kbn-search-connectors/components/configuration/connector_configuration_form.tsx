@@ -108,6 +108,15 @@ export const ConnectorConfigurationForm: React.FC<ConnectorConfigurationForm> = 
             items={category.configEntries}
             hasDocumentLevelSecurityEnabled={hasDocumentLevelSecurity}
             setConfigEntry={(key, value) => {
+              const entry = localConfig[key];
+              if (entry && !isCategoryEntry(entry)) {
+                const newConfiguration: ConnectorConfiguration = {
+                  ...localConfig,
+                  [key]: { ...entry, value },
+                };
+                setLocalConfig(newConfiguration);
+              }
+
               const categories = configView.categories;
               categories[index] = { ...categories[index], [key]: value };
               setConfigView({
@@ -135,6 +144,15 @@ export const ConnectorConfigurationForm: React.FC<ConnectorConfigurationForm> = 
               items={configView.advancedConfigurations}
               hasDocumentLevelSecurityEnabled={hasDocumentLevelSecurity}
               setConfigEntry={(key, value) => {
+                const entry = localConfig[key];
+                if (entry && !isCategoryEntry(entry)) {
+                  const newConfiguration: ConnectorConfiguration = {
+                    ...localConfig,
+                    [key]: { ...entry, value },
+                  };
+                  setLocalConfig(newConfiguration);
+                }
+
                 setConfigView({
                   ...configView,
                   advancedConfigurations: configView.advancedConfigurations.map((config) =>

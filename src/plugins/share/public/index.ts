@@ -22,7 +22,8 @@ export type {
 export type {
   ShareContext,
   ShareMenuProvider,
-  ShareMenuItem,
+  ShareMenuItemLegacy,
+  ShareMenuItemV2,
   ShowShareMenuOptions,
   ShareContextMenuPanelItem,
   BrowserUrlService,

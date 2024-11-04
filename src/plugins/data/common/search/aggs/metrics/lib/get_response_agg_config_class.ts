@@ -30,6 +30,15 @@ export interface IResponseAggConfig extends IMetricAggConfig {
   parentId: IMetricAggConfig['id'];
 }
 
+export function getResponseAggId(parentId: string, key: string) {
+  const subId = String(key);
+  if (subId.indexOf('.') > -1) {
+    return parentId + "['" + subId.replace(/[\\']/g, '\\$&') + "']"; // $& means the whole matched string
+  } else {
+    return parentId + '.' + subId;
+  }
+}
+
 export const create = (parentAgg: IMetricAggConfig, props: Partial<IMetricAggConfig>) => {
   /**
    * AggConfig "wrapper" for multi-value metric aggs which
@@ -40,17 +49,7 @@ export const create = (parentAgg: IMetricAggConfig, props: Partial<IMetricAggCon
    */
   function ResponseAggConfig(this: IResponseAggConfig, key: string) {
     const parentId = parentAgg.id;
-    let id;
-
-    const subId = String(key);
-
-    if (subId.indexOf('.') > -1) {
-      id = parentId + "['" + subId.replace(/'/g, "\\'") + "']";
-    } else {
-      id = parentId + '.' + subId;
-    }
-
-    this.id = id;
+    this.id = getResponseAggId(parentId, key);
     this.key = key;
     this.parentId = parentId;
   }

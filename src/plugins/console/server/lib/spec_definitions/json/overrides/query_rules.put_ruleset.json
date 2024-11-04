@@ -1,5 +1,5 @@
 {
-  "query_ruleset.put": {
+  "query_rules.put_ruleset": {
     "data_autocomplete_rules": {
       "rules": [{
         "rule_id": "",

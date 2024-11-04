@@ -13,7 +13,7 @@ import { addAdditionalArgs } from '.';
 import { AdditionalArgs } from '../../types';
 
 const escapeQuotes = (str: string) => {
-  return str?.replace(/'/g, "\\'");
+  return str?.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
 };
 
 const constructFilterRationFormula = (

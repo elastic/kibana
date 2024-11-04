@@ -1,5 +1,5 @@
 {
-  "query_rule.put": {
+  "query_rules.delete_rule": {
     "url_params": {
       "error_trace": "__flag__",
       "filter_path": [],
@@ -7,12 +7,12 @@
       "pretty": "__flag__"
     },
     "methods": [
-      "PUT"
+      "DELETE"
     ],
     "patterns": [
       "_query_rules/{ruleset_id}/_rule/{rule_id}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/put-query-rule.html",
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/delete-query-rule.html",
     "availability": {
       "stack": true,
       "serverless": true

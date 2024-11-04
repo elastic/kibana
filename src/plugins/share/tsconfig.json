@@ -22,6 +22,9 @@
     "@kbn/shared-ux-tabbed-modal",
     "@kbn/core-theme-browser",
     "@kbn/test-jest-helpers",
+    "@kbn/core-theme-browser-mocks",
+    "@kbn/core-i18n-browser-mocks",
+    "@kbn/core-notifications-browser-mocks",
   ],
   "exclude": [
     "target/**/*",
