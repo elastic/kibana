@@ -10,8 +10,6 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           enableNestedVirtualization: true
-          localSsds: 1
-          localSsdInterface: nvme
           machineType: n2-standard-4
           preemptible: true
         timeout_in_minutes: 300
@@ -32,8 +30,6 @@ steps:
 #          imageProject: elastic-images-prod
 #          provider: gcp
 #          enableNestedVirtualization: true
-#          localSsds: 1
-#          localSsdInterface: nvme
 #          machineType: n2-standard-4
 #        timeout_in_minutes: 120
 #        retry:
@@ -49,8 +45,6 @@ steps:
 #          imageProject: elastic-images-prod
 #          provider: gcp
 #          enableNestedVirtualization: true
-#          localSsds: 1
-#          localSsdInterface: nvme
 #          machineType: n2-standard-4
 #        timeout_in_minutes: 120
 #        retry:
@@ -66,8 +60,6 @@ steps:
 #          imageProject: elastic-images-prod
 #          provider: gcp
 #          enableNestedVirtualization: true
-#          localSsds: 1
-#          localSsdInterface: nvme
 #          machineType: n2-standard-4
 #        timeout_in_minutes: 120
 #        retry:
@@ -83,8 +75,6 @@ steps:
 #          imageProject: elastic-images-prod
 #          provider: gcp
 #          enableNestedVirtualization: true
-#          localSsds: 1
-#          localSsdInterface: nvme
 #          machineType: n2-standard-4
 #        timeout_in_minutes: 120
 #        retry:
@@ -100,8 +90,6 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           enableNestedVirtualization: true
-          localSsds: 1
-          localSsdInterface: nvme
           machineType: n2-standard-4
           preemptible: true
         timeout_in_minutes: 120
@@ -118,8 +106,6 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           enableNestedVirtualization: true
-          localSsds: 1
-          localSsdInterface: nvme
           machineType: n2-standard-4
           preemptible: true
         timeout_in_minutes: 120
@@ -136,8 +122,6 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           enableNestedVirtualization: true
-          localSsds: 1
-          localSsdInterface: nvme
           machineType: n2-standard-4
           preemptible: true
         timeout_in_minutes: 120
@@ -157,8 +141,6 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           enableNestedVirtualization: true
-          localSsds: 1
-          localSsdInterface: nvme
           machineType: n2-standard-4
           preemptible: true
         timeout_in_minutes: 300
