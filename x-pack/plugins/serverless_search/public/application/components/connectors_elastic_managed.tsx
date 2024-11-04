@@ -23,7 +23,7 @@ import { PLUGIN_ID } from '../../../common';
 import { useConnectors } from '../hooks/api/use_connectors';
 import { useCreateConnector } from '../hooks/api/use_create_connector';
 import { useKibanaServices } from '../hooks/use_kibana';
-import { ElasticManagedConnectorCommingSoon } from './connectors/elastic_managed_connector_coming_soon';
+import { ElasticManagedConnectorComingSoon } from './connectors/elastic_managed_connector_coming_soon';
 import { ConnectorsTable } from './connectors/connectors_table';
 
 import { CONNECTORS } from '../constants';
@@ -122,7 +122,7 @@ export const ConnectorsElasticManaged = () => {
         </EuiPageTemplate.Section>
       ) : (
         <EuiPageTemplate.Section restrictWidth color="subdued">
-          <ElasticManagedConnectorCommingSoon />
+          <ElasticManagedConnectorComingSoon />
         </EuiPageTemplate.Section>
       )}
       {embeddableConsole}

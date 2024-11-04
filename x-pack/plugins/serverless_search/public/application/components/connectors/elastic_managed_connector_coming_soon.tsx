@@ -33,22 +33,21 @@ import { useAssetBasePath } from '../../hooks/use_asset_base_path';
 
 import { BACK_LABEL } from '../../../../common/i18n_string';
 
-export const ElasticManagedConnectorCommingSoon: React.FC = () => {
+export const ElasticManagedConnectorComingSoon: React.FC = () => {
   const connectorTypes = useConnectorTypes();
-  const allConnectors = connectorTypes ? connectorTypes.map((connectorType) => connectorType) : [];
 
-  const getRandomConnectors = (connectors: typeof allConnectors, count: number) => {
+  const getRandomConnectors = (connectors: typeof connectorTypes, count: number) => {
     const shuffled = connectors.sort(() => 0.5 - Math.random());
     return shuffled.slice(0, count);
   };
 
   const [randomConnectors, setRandomConnectors] = useState(() =>
-    getRandomConnectors(allConnectors, 4)
+    getRandomConnectors(connectorTypes, 4)
   );
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setRandomConnectors(getRandomConnectors(allConnectors, 4));
+      setRandomConnectors(getRandomConnectors(connectorTypes, 4));
     }, 5000);
 
     return () => clearInterval(interval);
