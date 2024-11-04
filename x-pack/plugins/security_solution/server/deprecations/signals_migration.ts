@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 
 import type { ConfigType } from '../config';
 
-import { getSpacesWithNonMigratedSignals } from '../lib/detection_engine/migrations/signals/get_spaces_with_non_migrated_signals';
+import { getNonMigratedSignalsInfo } from '../lib/detection_engine/migrations/signals/get_non_migrated_signals_info';
 
 export const getSignalsMigrationDeprecationsInfo = async (
   ctx: GetDeprecationsContext,
@@ -18,7 +18,7 @@ export const getSignalsMigrationDeprecationsInfo = async (
 ): Promise<DeprecationsDetails[]> => {
   const esClient = ctx.esClient.asInternalUser;
 
-  const { isMigrationRequired, spaces, fromRange } = await getSpacesWithNonMigratedSignals({
+  const { isMigrationRequired, spaces, fromRange } = await getNonMigratedSignalsInfo({
     esClient,
     signalsIndex: config.signalsIndex,
   });

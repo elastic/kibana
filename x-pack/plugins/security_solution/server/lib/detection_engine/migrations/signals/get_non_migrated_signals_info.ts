@@ -10,6 +10,9 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import { getIndexVersionsByIndex } from '../get_index_versions_by_index';
 import { getSignalVersionsByIndex } from '../get_signal_versions_by_index';
 import { isOutdated as getIsOutdated, signalsAreOutdated } from '../helpers';
+import { getLatestIndexTemplateVersion } from './get_latest_index_template_version';
+import { getIndexAliasPerSpace } from './get_index_alias_per_space';
+import { getOldestSignalTimestamp } from './get_oldest_signal';
 
 interface OutdatedSpaces {
   isMigrationRequired: boolean;
@@ -18,15 +21,10 @@ interface OutdatedSpaces {
   fromRange: string | undefined;
 }
 
-interface IndexAlias {
-  alias: string;
-  space: string;
-  indexName: string;
-}
 /**
  * gets lists of spaces that have non-migrated signal indices and time of oldest non-migrated document, from which migration is required
  */
-export const getSpacesWithNonMigratedSignals = async ({
+export const getNonMigratedSignalsInfo = async ({
   esClient,
   signalsIndex,
 }: {
@@ -35,46 +33,16 @@ export const getSpacesWithNonMigratedSignals = async ({
 }): Promise<OutdatedSpaces> => {
   const signalsAliasAllSpaces = `${signalsIndex}-*`;
 
-  let latestTemplateVersion: number;
-  try {
-    const response = await esClient.indices.getIndexTemplate({ name: signalsAliasAllSpaces });
-    const versions = response.index_templates.map(
-      (template) => template.index_template.version ?? 0
-    );
+  const latestTemplateVersion = await getLatestIndexTemplateVersion({
+    esClient,
+    name: signalsAliasAllSpaces,
+  });
 
-    latestTemplateVersion = Math.max(...versions);
-  } catch (e) {
-    latestTemplateVersion = 0;
-  }
-
-  // TODO: remove console.log
-  // console.log('latestTemplateVersion', latestTemplateVersion);
-
-  const response = await esClient.indices.getAlias(
-    {
-      name: signalsAliasAllSpaces,
-    },
-    { meta: true }
-  );
-
-  const indexAliasesMap: Record<string, IndexAlias> = Object.keys(response.body).reduce<
-    Record<string, IndexAlias>
-  >((acc, indexName) => {
-    if (!indexName.startsWith('.internal.alerts-')) {
-      const alias = Object.keys(response.body[indexName].aliases)[0];
-
-      acc[indexName] = {
-        alias,
-        space: alias.replace(`${signalsIndex}-`, ''),
-        indexName,
-      };
-    }
-
-    return acc;
-  }, {});
-
-  // TODO: remove console.log
-  // console.log('indexAliases', indexAliasesMap);
+  const indexAliasesMap = await getIndexAliasPerSpace({
+    esClient,
+    signalsAliasAllSpaces,
+    signalsIndex,
+  });
 
   const indices = Object.keys(indexAliasesMap);
 
@@ -111,34 +79,14 @@ export const getSpacesWithNonMigratedSignals = async ({
 
   const outdatedIndexNames = outdatedIndices.map((outdatedIndex) => outdatedIndex.indexName);
 
-  const responseX = await esClient.search({
+  const fromRange = await getOldestSignalTimestamp({
+    esClient,
     index: outdatedIndexNames,
-    size: 0,
-    body: {
-      aggs: {
-        min_timestamp: {
-          min: {
-            field: '@timestamp',
-          },
-        },
-      },
-    },
   });
-
-  // TODO: remove console.log
-  // console.log('indexAliases', indexAliasesMap);
-  // console.log('indexVersionsByIndex', indexVersionsByIndex);
-  // console.log('signalVersionsByIndex', signalVersionsByIndex);
-
-  // console.log('........... outdatedIndices', outdatedIndices);
-  // console.log('........... responseX', responseX);
-
-  // TODO: fix TS
-  // @ts-expect-error
-  const fromRange = responseX.aggregations?.min_timestamp?.value_as_string;
 
   // remove duplicated spaces
   const spaces = [...new Set<string>(outdatedIndices.map((indexStatus) => indexStatus.space))];
+
   return {
     isMigrationRequired: outdatedIndices.length > 0,
     spaces,

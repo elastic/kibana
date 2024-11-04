@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { getSpacesWithNonMigratedSignals } from '../../../lib/detection_engine/migrations/signals/get_spaces_with_non_migrated_signals';
+import { getNonMigratedSignalsInfo } from '../../../lib/detection_engine/migrations/signals/get_non_migrated_signals_info';
 import type { LegacySiemSignals } from './types';
 
 export interface GetLegacySiemSignalsUsageOptions {
@@ -20,7 +20,7 @@ export const getLegacySiemSignalsUsage = async ({
   esClient,
   logger,
 }: GetLegacySiemSignalsUsageOptions): Promise<LegacySiemSignals> => {
-  const { indices, spaces } = await getSpacesWithNonMigratedSignals({
+  const { indices, spaces } = await getNonMigratedSignalsInfo({
     esClient,
     signalsIndex,
   });
