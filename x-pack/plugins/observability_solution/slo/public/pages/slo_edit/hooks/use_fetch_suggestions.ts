@@ -6,22 +6,18 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import { GetSLOSuggestionsResponse } from '@kbn/slo-schema';
-import { useKibana } from '../../../utils/kibana_react';
+import { usePluginContext } from '../../../hooks/use_plugin_context';
 
 export function useFetchSLOSuggestions() {
-  const { http } = useKibana().services;
+  const { sloClient } = usePluginContext();
 
   const { isLoading, isError, isSuccess, data } = useQuery({
     queryKey: ['fetchSLOSuggestions'],
     queryFn: async ({ signal }) => {
       try {
-        return await http.get<GetSLOSuggestionsResponse>(
-          '/internal/observability/slos/suggestions',
-          {
-            signal,
-          }
-        );
+        return await sloClient.fetch('GET /internal/observability/slos/suggestions', {
+          signal,
+        });
       } catch (error) {
         // ignore error
       }
