@@ -17,11 +17,10 @@ import { AggTypesDependencies } from '..';
 /**
  * @returns true if response is abort
  */
-export const isAbortResponse = (response?: IKibanaSearchResponse) => {
-  return (
-    !response ||
-    (!response.rawResponse && !(response as unknown as Record<string, unknown>).response)
-  );
+export const isAbortResponse = (
+  response?: IKibanaSearchResponse | { response: IKibanaSearchResponse }
+) => {
+  return !response || !('rawResponse' in response || 'response' in response);
 };
 
 /**

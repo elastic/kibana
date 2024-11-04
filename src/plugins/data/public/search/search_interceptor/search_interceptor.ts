@@ -62,6 +62,7 @@ import { createEsError, isEsError, renderSearchError } from '@kbn/search-errors'
 import type { IKibanaSearchResponse, ISearchOptions } from '@kbn/search-types';
 import {
   AsyncSearchGetResponse,
+  ErrorResponseBase,
   SqlGetAsyncResponse,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
@@ -452,7 +453,7 @@ export class SearchInterceptor {
     if (this.bFetchDisabled) {
       const { executionContext, strategy, ...searchOptions } = this.getSerializableOptions(options);
       return this.deps.http
-        .post<IKibanaSearchResponse>(
+        .post<IKibanaSearchResponse | ErrorResponseBase>(
           `/internal/search/${strategy}${request.id ? `/${request.id}` : ''}`,
           {
             version: '1',
@@ -470,25 +471,30 @@ export class SearchInterceptor {
           }
         )
         .then((rawResponse) => {
-          const response = rawResponse.body!;
+          if (!rawResponse.body) throw new Error();
+
+          const response = rawResponse.body;
+
           const warning = rawResponse.response?.headers.get('warning');
           const requestParams =
-            response.requestParams ??
+            'requestParams' in response ??
             JSON.parse(rawResponse.response?.headers.get('kbn-search-request-params') || '{}');
           const isRestored =
-            response.isRestored ?? rawResponse.response?.headers.get('kbn-is-restored') === '?1';
-          const error = (response as unknown as Record<string, unknown>).error;
-          if (error) {
+            'isRestored' in response ??
+            rawResponse.response?.headers.get('kbn-search-is-restored') === '?1';
+
+          if ('error' in response) {
             // eslint-disable-next-line no-throw-literal
             throw {
               attributes: {
-                error,
+                error: response.error,
                 rawResponse: response,
                 requestParams,
                 isRestored,
               },
             };
           }
+
           switch (strategy) {
             case ENHANCED_ES_SEARCH_STRATEGY:
               if (response.rawResponse) return response;
