@@ -41,6 +41,7 @@ import type { SecurityTelemetryTask } from '../../lib/telemetry/task';
 import { Plugin as SecuritySolutionPlugin } from '../../plugin';
 import { AsyncTelemetryEventsSender } from '../../lib/telemetry/async_sender';
 import { type ITelemetryReceiver, TelemetryReceiver } from '../../lib/telemetry/receiver';
+import { DEFAULT_DIAGNOSTIC_INDEX_PATTERN } from '../../../common/endpoint/constants';
 import mockEndpointAlert from '../__mocks__/endpoint-alert.json';
 import mockedRule from '../__mocks__/rule.json';
 import fleetAgents from '../__mocks__/fleet-agents.json';
