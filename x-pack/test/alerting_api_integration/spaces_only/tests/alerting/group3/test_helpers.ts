@@ -81,7 +81,7 @@ export const createAction = async ({
     })
     .expect(200);
 
-  objectRemover.add(Spaces.space1.id, createdAction.id, 'action', 'actions');
+  objectRemover.add(Spaces.space1.id, createdAction.id, 'connector', 'actions');
   return createdAction;
 };
 
