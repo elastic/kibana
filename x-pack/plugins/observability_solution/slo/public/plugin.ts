@@ -15,9 +15,11 @@ import {
   PluginInitializerContext,
 } from '@kbn/core/public';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
+import { DefaultClientOptions, createRepositoryClient } from '@kbn/server-route-repository-client';
 import { PLUGIN_NAME, sloAppId } from '../common';
 import { ExperimentalFeatures, SLOConfig } from '../common/config';
 import { SLOS_BASE_PATH } from '../common/locators/paths';
+import type { SLORouteRepository } from '../server/routes/get_slo_server_route_repository';
 import { SLO_ALERTS_EMBEDDABLE_ID } from './embeddable/slo/alerts/constants';
 import { SLO_BURN_RATE_EMBEDDABLE_ID } from './embeddable/slo/burn_rate/constants';
 import { SLO_ERROR_BUDGET_ID } from './embeddable/slo/error_budget/constants';
@@ -48,6 +50,8 @@ export class SloPlugin
   ) {
     const kibanaVersion = this.initContext.env.packageInfo.version;
 
+    const sloClient = createRepositoryClient<SLORouteRepository, DefaultClientOptions>(coreSetup);
+
     const sloDetailsLocator = pluginsSetup.share.url.locators.create(
       new SloDetailsLocatorDefinition()
     );
@@ -70,6 +74,7 @@ export class SloPlugin
         plugins: pluginsStart,
         isServerless: !!pluginsStart.serverless,
         experimentalFeatures: this.experimentalFeatures,
+        sloClient,
       });
     };
     const appUpdater$ = this.appUpdater$;

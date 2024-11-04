@@ -10,6 +10,7 @@ import type { AppMountParameters } from '@kbn/core/public';
 import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
 import type { ObservabilityRuleTypeRegistry } from '@kbn/observability-plugin/public';
 import { ExperimentalFeatures } from '../../common/config';
+import type { SLORepositoryClient } from '../types';
 
 export interface PluginContextValue {
   isDev?: boolean;
@@ -18,6 +19,7 @@ export interface PluginContextValue {
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
   ObservabilityPageTemplate: React.ComponentType<LazyObservabilityPageTemplateProps>;
   experimentalFeatures?: ExperimentalFeatures;
+  sloClient: SLORepositoryClient;
 }
 
 export const PluginContext = createContext<PluginContextValue | null>(null);

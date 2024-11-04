@@ -58,6 +58,7 @@ export function useFetchSloList({
     http,
     notifications: { toasts },
   } = useKibana().services;
+
   const queryClient = useQueryClient();
 
   const { dataView } = useCreateDataView({
