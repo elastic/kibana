@@ -8,7 +8,7 @@
 export function createPicker(fields: string[]) {
   const wildcards = fields
     .filter((field) => field.endsWith('.*'))
-    .map((field) => field.replace('*', ''));
+    .map((field) => field.replace(/\*/g, ''));
 
   return (value: unknown, key: string) => {
     return fields.includes(key) || wildcards.some((field) => key.startsWith(field));
