@@ -120,13 +120,7 @@ export const transformToUpdateSchema = ({
   };
 };
 
-export const getUpdateScript = ({
-  entry,
-  isPatch,
-}: {
-  entry: UpdateKnowledgeBaseEntrySchema;
-  isPatch?: boolean;
-}) => {
+export const getUpdateScript = ({ entry }: { entry: UpdateKnowledgeBaseEntrySchema }) => {
   // Cannot use script for updating documents with semantic_text fields
   return {
     doc: {

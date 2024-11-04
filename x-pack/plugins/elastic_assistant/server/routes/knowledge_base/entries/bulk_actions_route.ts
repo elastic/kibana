@@ -301,8 +301,7 @@ export const bulkActionKnowledgeBaseEntriesRoute = (router: ElasticAssistantPlug
                 global: entry.users != null && entry.users.length === 0,
               })
             ),
-            getUpdateScript: (entry: UpdateKnowledgeBaseEntrySchema) =>
-              getUpdateScript({ entry, isPatch: true }),
+            getUpdateScript: (entry: UpdateKnowledgeBaseEntrySchema) => getUpdateScript({ entry }),
             authenticatedUser,
           });
           console.log('four');
