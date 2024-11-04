@@ -243,7 +243,7 @@ export const postEvaluateRoute = (
 
               // Check if KB is available
               const isEnabledKnowledgeBase =
-                (await dataClients.kbDataClient?.isModelDeployed()) ?? false;
+                (await dataClients.kbDataClient?.isInferenceEndpointExists()) ?? false;
 
               // Skeleton request from route to pass to the agents
               // params will be passed to the actions executor

@@ -646,11 +646,11 @@ export const getIsKnowledgeBaseInstalled = async (
   kbDataClient?: AIAssistantKnowledgeBaseDataClient | null
 ): Promise<boolean> => {
   let securityLabsDocsExist = false;
-  let isModelDeployed = false;
+  let isInferenceEndpointExists = false;
   if (kbDataClient != null) {
     try {
-      isModelDeployed = await kbDataClient.isModelDeployed();
-      if (isModelDeployed) {
+      isInferenceEndpointExists = await kbDataClient.isInferenceEndpointExists();
+      if (isInferenceEndpointExists) {
         securityLabsDocsExist =
           (
             await kbDataClient.getKnowledgeBaseDocumentEntries({
@@ -664,5 +664,5 @@ export const getIsKnowledgeBaseInstalled = async (
     }
   }
 
-  return isModelDeployed && securityLabsDocsExist;
+  return isInferenceEndpointExists && securityLabsDocsExist;
 };

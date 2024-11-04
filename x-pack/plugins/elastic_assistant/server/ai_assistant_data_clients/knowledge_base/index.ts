@@ -130,23 +130,10 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
   };
 
   /**
-   * Checks if the provided model is deployed and allocated in Elasticsearch
+   * Checks if the inference endpoint is deployed and allocated in Elasticsearch
    *
    * @returns Promise<boolean> indicating whether the model is deployed
    */
-  public isModelDeployed = async (): Promise<boolean> => {
-    const elserId = await this.options.getElserId();
-    this.options.logger.debug(`Checking if ELSER model '${elserId}' is deployed...`);
-
-    try {
-      return await this.isInferenceEndpointExists();
-    } catch (e) {
-      this.options.logger.debug(`Error checking if ELSER model '${elserId}' is deployed: ${e}`);
-      // Returns 404 if it doesn't exist
-      return false;
-    }
-  };
-
   public isInferenceEndpointExists = async (): Promise<boolean> => {
     try {
       const esClient = await this.options.elasticsearchClientPromise;
