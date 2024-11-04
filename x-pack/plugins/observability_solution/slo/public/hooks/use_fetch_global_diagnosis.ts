@@ -12,6 +12,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useKibana } from '../utils/kibana_react';
 import { convertErrorForUseInToast } from './helpers/convert_error_for_use_in_toast';
 import { sloKeys } from './query_key_factory';
+import { usePluginContext } from './use_plugin_context';
 
 interface SloGlobalDiagnosisResponse {
   licenseAndFeatures: PublicLicenseJSON;
@@ -25,23 +26,17 @@ export interface UseFetchSloGlobalDiagnoseResponse {
 
 export function useFetchSloGlobalDiagnosis(): UseFetchSloGlobalDiagnoseResponse {
   const {
-    http,
     notifications: { toasts },
   } = useKibana().services;
+  const { sloClient } = usePluginContext();
 
   const { isLoading, data } = useQuery({
     queryKey: sloKeys.globalDiagnosis(),
     queryFn: async ({ signal }) => {
       try {
-        const response = await http.get<SloGlobalDiagnosisResponse>(
-          '/internal/observability/slos/_diagnosis',
-          {
-            query: {},
-            signal,
-          }
-        );
-
-        return response;
+        return await sloClient.fetch('GET /internal/observability/slos/_diagnosis', {
+          signal,
+        });
       } catch (error) {
         throw convertErrorForUseInToast(error);
       }
