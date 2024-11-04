@@ -1,6 +1,6 @@
 [role="xpack"]
 [[drilldowns]]
-=== Drilldowns
+=== Add drilldowns
 
 Panels have built-in interactive capabilities that apply filters to the dashboard data. For example, when you drag a time range or click a pie slice, a filter for the time range or pie slice is applied. Drilldowns let you customize the interactive behavior while keeping the context of the interaction. 
 
