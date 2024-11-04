@@ -47,7 +47,7 @@ export function initializeStateManagement(
   >(initialState.savedObjectId);
 
   const [dataViews$] = buildObservableVariable<DataView[] | undefined>(internalApi.dataViews);
-  const [dataLoading$] = buildObservableVariable<boolean | undefined>(undefined);
+  const [dataLoading$] = buildObservableVariable<boolean | undefined>(internalApi.dataLoading$);
   const [abortController$, abortControllerComparator] = buildObservableVariable<
     AbortController | undefined
   >(internalApi.expressionAbortController$);

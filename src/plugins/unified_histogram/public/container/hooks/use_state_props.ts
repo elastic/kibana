@@ -196,7 +196,7 @@ export const useStateProps = ({
     request,
     isPlainRecord,
     lensAdapters,
-    lensDataLoading$,
+    dataLoading$: lensDataLoading$,
     onTopPanelHeightChange,
     onTimeIntervalChange,
     onTotalHitsChange,
