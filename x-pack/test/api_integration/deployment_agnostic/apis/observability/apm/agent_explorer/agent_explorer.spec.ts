@@ -57,8 +57,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       let apmSynthtraceEsClient: ApmSynthtraceEsClient;
 
       before(async () => {
-        const version = (await synthtrace.apmSynthtraceKibanaClient.installApmPackage()).version;
-        apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient(version);
+        apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
 
         const serviceOtelJava = apm
           .service({
