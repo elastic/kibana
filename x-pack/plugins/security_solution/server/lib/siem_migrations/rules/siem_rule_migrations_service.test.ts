@@ -8,27 +8,28 @@ import {
   loggingSystemMock,
   elasticsearchServiceMock,
   httpServerMock,
+  securityServiceMock,
 } from '@kbn/core/server/mocks';
 import { SiemRuleMigrationsService } from './siem_rule_migrations_service';
 import { Subject } from 'rxjs';
-import type { RuleMigration } from '../../../../common/siem_migrations/model/rule_migration.gen';
 import {
   MockRuleMigrationsDataStream,
   mockInstall,
-  mockInstallSpace,
-  mockIndexName,
+  mockCreateClient,
 } from './data_stream/__mocks__/mocks';
-import type { KibanaRequest } from '@kbn/core/server';
+import type { SiemRuleMigrationsCreateClientParams } from './types';
 
 jest.mock('./data_stream/rule_migrations_data_stream');
-
-const migrationId = 'dummy_migration_id';
+jest.mock('./task/rule_migrations_task_runner', () => ({
+  RuleMigrationsTaskRunner: jest.fn(),
+}));
 
 describe('SiemRuleMigrationsService', () => {
   let ruleMigrationsService: SiemRuleMigrationsService;
   const kibanaVersion = '8.16.0';
 
   const esClusterClient = elasticsearchServiceMock.createClusterClient();
+  const currentUser = securityServiceMock.createMockAuthenticatedUser();
   const logger = loggingSystemMock.createLogger();
   const pluginStop$ = new Subject<void>();
 
@@ -38,7 +39,7 @@ describe('SiemRuleMigrationsService', () => {
   });
 
   it('should instantiate the rule migrations data stream adapter', () => {
-    expect(MockRuleMigrationsDataStream).toHaveBeenCalledWith({ kibanaVersion });
+    expect(MockRuleMigrationsDataStream).toHaveBeenCalledWith(logger, kibanaVersion);
   });
 
   describe('when setup is called', () => {
@@ -47,22 +48,26 @@ describe('SiemRuleMigrationsService', () => {
 
       expect(mockInstall).toHaveBeenCalledWith({
         esClient: esClusterClient.asInternalUser,
-        logger,
         pluginStop$,
       });
     });
   });
 
   describe('when createClient is called', () => {
-    let request: KibanaRequest;
+    let createClientParams: SiemRuleMigrationsCreateClientParams;
+
     beforeEach(() => {
-      request = httpServerMock.createKibanaRequest();
+      createClientParams = {
+        spaceId: 'default',
+        currentUser,
+        request: httpServerMock.createKibanaRequest(),
+      };
     });
 
     describe('without setup', () => {
       it('should throw an error', () => {
         expect(() => {
-          ruleMigrationsService.createClient({ spaceId: 'default', request });
+          ruleMigrationsService.createClient(createClientParams);
         }).toThrowError('ES client not available, please call setup first');
       });
     });
@@ -73,44 +78,19 @@ describe('SiemRuleMigrationsService', () => {
       });
 
       it('should call installSpace', () => {
-        ruleMigrationsService.createClient({ spaceId: 'default', request });
-
-        expect(mockInstallSpace).toHaveBeenCalledWith('default');
+        ruleMigrationsService.createClient(createClientParams);
+        expect(mockCreateClient).toHaveBeenCalledWith({
+          spaceId: createClientParams.spaceId,
+          currentUser: createClientParams.currentUser,
+          esClient: esClusterClient.asScoped().asCurrentUser,
+        });
       });
 
-      it('should return a client with create and search methods after setup', () => {
-        const client = ruleMigrationsService.createClient({ spaceId: 'default', request });
+      it('should return data and task clients', () => {
+        const client = ruleMigrationsService.createClient(createClientParams);
 
-        expect(client).toHaveProperty('create');
-        expect(client).toHaveProperty('search');
-      });
-
-      it('should call ES bulk create API with the correct parameters with create is called', async () => {
-        const client = ruleMigrationsService.createClient({ spaceId: 'default', request });
-
-        const ruleMigrations = [{ migration_id: migrationId } as RuleMigration];
-        await client.create(ruleMigrations);
-
-        expect(esClusterClient.asScoped().asCurrentUser.bulk).toHaveBeenCalledWith(
-          expect.objectContaining({
-            body: [{ create: { _index: mockIndexName } }, { migration_id: migrationId }],
-            refresh: 'wait_for',
-          })
-        );
-      });
-
-      it('should call ES search API with the correct parameters with search is called', async () => {
-        const client = ruleMigrationsService.createClient({ spaceId: 'default', request });
-
-        const searchParams = { query: { term: { migration_id: migrationId } } };
-        await client.takePending(migrationId);
-
-        expect(esClusterClient.asScoped().asCurrentUser.search).toHaveBeenCalledWith(
-          expect.objectContaining({
-            index: mockIndexName,
-            ...searchParams,
-          })
-        );
+        expect(client).toHaveProperty('data');
+        expect(client).toHaveProperty('task');
       });
     });
   });

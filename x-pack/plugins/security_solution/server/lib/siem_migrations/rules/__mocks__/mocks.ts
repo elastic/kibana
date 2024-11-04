@@ -36,8 +36,10 @@ export const MockSiemRuleMigrationsClient = jest.fn().mockImplementation(createR
 
 export const mockSetup = jest.fn();
 export const mockCreateClient = jest.fn().mockReturnValue(createRuleMigrationClient());
+export const mockStop = jest.fn();
 
 export const MockSiemRuleMigrationsService = jest.fn().mockImplementation(() => ({
   setup: mockSetup,
   createClient: mockCreateClient,
+  stop: mockStop,
 }));

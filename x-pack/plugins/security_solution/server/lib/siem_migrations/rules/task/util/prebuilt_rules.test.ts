@@ -6,26 +6,27 @@
  */
 
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
-import { retrievePrebuiltRulesMap } from './prebuilt_rules';
+import type { PrebuiltRulesMapByName } from './prebuilt_rules';
+import { filterPrebuiltRules, retrievePrebuiltRulesMap } from './prebuilt_rules';
 import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
-import type { SplunkRule } from '../../../../../../../../common/api/siem_migrations/splunk/rules/splunk_rule.gen';
 
 jest.mock(
-  '../../../../../../detection_engine/prebuilt_rules/logic/rule_objects/prebuilt_rule_objects_client',
+  '../../../../detection_engine/prebuilt_rules/logic/rule_objects/prebuilt_rule_objects_client',
   () => ({ createPrebuiltRuleObjectsClient: jest.fn() })
 );
 jest.mock(
-  '../../../../../../detection_engine/prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client',
+  '../../../../detection_engine/prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client',
   () => ({ createPrebuiltRuleAssetsClient: jest.fn() })
 );
 
+const mitreAttackIds = 'T1234';
 const rule1 = {
   name: 'rule one',
   id: 'rule1',
   threat: [
     {
       framework: 'MITRE ATT&CK',
-      technique: [{ id: 'T1234', name: 'tactic one' }],
+      technique: [{ id: mitreAttackIds, name: 'tactic one' }],
     },
   ],
 };
@@ -40,23 +41,15 @@ const defaultRuleVersionsTriad = new Map<string, unknown>([
 ]);
 const mockFetchRuleVersionsTriad = jest.fn().mockResolvedValue(defaultRuleVersionsTriad);
 jest.mock(
-  '../../../../../../detection_engine/prebuilt_rules/logic/rule_versions/fetch_rule_versions_triad',
+  '../../../../detection_engine/prebuilt_rules/logic/rule_versions/fetch_rule_versions_triad',
   () => ({
     fetchRuleVersionsTriad: () => mockFetchRuleVersionsTriad(),
   })
 );
 
-const splunkRule: SplunkRule = {
-  title: 'splunk rule',
-  description: 'splunk rule description',
-  search: 'index=*',
-  mitreAttackIds: ['T1234'],
-};
-
 const defaultParams = {
   soClient: savedObjectsClientMock.create(),
   rulesClient: rulesClientMock.create(),
-  splunkRule,
 };
 
 describe('retrievePrebuiltRulesMap', () => {
@@ -69,51 +62,44 @@ describe('retrievePrebuiltRulesMap', () => {
       const prebuiltRulesMap = await retrievePrebuiltRulesMap(defaultParams);
       expect(prebuiltRulesMap.size).toBe(2);
       expect(prebuiltRulesMap.get('rule one')).toEqual(
-        expect.objectContaining({ isInstalled: false })
+        expect.objectContaining({ installedRuleId: undefined })
       );
       expect(prebuiltRulesMap.get('rule two')).toEqual(
-        expect.objectContaining({ isInstalled: true })
+        expect.objectContaining({ installedRuleId: rule2.id })
       );
     });
   });
+});
 
-  describe('when splunk rule does not contain mitreAttackIds', () => {
-    it('should return the full rules map', async () => {
-      const prebuiltRulesMap = await retrievePrebuiltRulesMap({
-        ...defaultParams,
-        splunkRule: { ...splunkRule, mitreAttackIds: undefined },
-      });
-      expect(prebuiltRulesMap.size).toBe(2);
-    });
+describe('filterPrebuiltRules', () => {
+  let prebuiltRulesMap: PrebuiltRulesMapByName;
+
+  beforeEach(async () => {
+    prebuiltRulesMap = await retrievePrebuiltRulesMap(defaultParams);
+    jest.clearAllMocks();
   });
 
   describe('when splunk rule contains empty mitreAttackIds', () => {
-    it('should return the full rules map', async () => {
-      const prebuiltRulesMap = await retrievePrebuiltRulesMap({
-        ...defaultParams,
-        splunkRule: { ...splunkRule, mitreAttackIds: [] },
-      });
-      expect(prebuiltRulesMap.size).toBe(2);
+    it('should return empty rules map', async () => {
+      const filteredPrebuiltRules = filterPrebuiltRules(prebuiltRulesMap, []);
+      expect(filteredPrebuiltRules.size).toBe(0);
     });
   });
 
-  describe('when splunk rule contains non matching mitreAttackIds', () => {
-    it('should return the full rules map', async () => {
-      const prebuiltRulesMap = await retrievePrebuiltRulesMap({
-        ...defaultParams,
-        splunkRule: { ...splunkRule, mitreAttackIds: ['T2345'] },
-      });
-      expect(prebuiltRulesMap.size).toBe(1);
-      expect(prebuiltRulesMap.get('rule two')).toEqual(expect.objectContaining({ rule: rule2 }));
+  describe('when splunk rule does not match mitreAttackIds', () => {
+    it('should return empty rules map', async () => {
+      const filteredPrebuiltRules = filterPrebuiltRules(prebuiltRulesMap, [`${mitreAttackIds}_2`]);
+      expect(filteredPrebuiltRules.size).toBe(0);
     });
   });
 
   describe('when splunk rule contains matching mitreAttackIds', () => {
     it('should return the filtered rules map', async () => {
-      const prebuiltRulesMap = await retrievePrebuiltRulesMap(defaultParams);
-      expect(prebuiltRulesMap.size).toBe(2);
-      expect(prebuiltRulesMap.get('rule one')).toEqual(expect.objectContaining({ rule: rule1 }));
-      expect(prebuiltRulesMap.get('rule two')).toEqual(expect.objectContaining({ rule: rule2 }));
+      const filteredPrebuiltRules = filterPrebuiltRules(prebuiltRulesMap, [mitreAttackIds]);
+      expect(filteredPrebuiltRules.size).toBe(1);
+      expect(filteredPrebuiltRules.get('rule one')).toEqual(
+        expect.objectContaining({ rule: rule1 })
+      );
     });
   });
 });
