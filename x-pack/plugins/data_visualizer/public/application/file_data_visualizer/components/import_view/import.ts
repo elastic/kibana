@@ -154,10 +154,27 @@ export async function importData(props: Props, config: Config, setState: (state:
   if (inferenceId) {
     // Initialize deployment
     const autoDeploy = new AutoDeploy(http, inferenceId);
-    await autoDeploy.deploy();
-    setState({
-      initializeDeploymentStatus: IMPORT_STATUS.COMPLETE,
-    });
+
+    try {
+      await autoDeploy.deploy();
+      setState({
+        initializeDeploymentStatus: IMPORT_STATUS.COMPLETE,
+      });
+    } catch (error) {
+      success = false;
+      const deployError = i18n.translate('xpack.dataVisualizer.file.importView.deployModelError', {
+        defaultMessage: 'Error deploying trained model:',
+      });
+      errors.push(`${deployError} ${error.message}`);
+      setState({
+        initializeDeploymentStatus: IMPORT_STATUS.FAILED,
+        errors,
+      });
+    }
+  }
+
+  if (success === false) {
+    return;
   }
 
   const initializeImportResp = await importer.initializeImport(index, settings, mappings, pipeline);

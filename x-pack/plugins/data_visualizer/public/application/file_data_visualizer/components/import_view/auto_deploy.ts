@@ -11,7 +11,7 @@ import type { HttpSetup } from '@kbn/core/public';
 const POLL_INTERVAL = 5; // seconds
 
 export class AutoDeploy {
-  private inferError: string | null = null;
+  private inferError: Error | null = null;
   constructor(private http: HttpSetup, private inferenceId: string) {}
 
   public async deploy() {
@@ -21,13 +21,21 @@ export class AutoDeploy {
     }
 
     this.infer().catch((e) => {
-      this.inferError = e.message;
+      // ignore timeout errors
+      // The deployment may take a long time
+      // we'll know when it's ready from polling the inference endpoints
+      // looking for num_allocations
+      const status = e.response?.status;
+      if (status === 408 || status === 504 || status === 502) {
+        return;
+      }
+      this.inferError = e;
     });
     await this.pollIsDeployed();
   }
 
   private async infer() {
-    this.http.fetch<InferenceInferenceEndpointInfo[]>(
+    return this.http.fetch<InferenceInferenceEndpointInfo[]>(
       `/internal/data_visualizer/inference/${this.inferenceId}`,
       {
         method: 'POST',
@@ -54,11 +62,11 @@ export class AutoDeploy {
 
   private async pollIsDeployed() {
     let setDeploymentReady: (value: boolean) => void = () => {};
-    let rejectWithError: (value: string) => void = () => {};
+    let rejectWithError: (error: Error) => void = () => {};
 
     const run = async () => {
       if (this.inferError) {
-        rejectWithError(this.inferError);
+        return rejectWithError(this.inferError);
       }
 
       const isDeployed = await this.isDeployed();
