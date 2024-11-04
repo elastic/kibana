@@ -984,7 +984,7 @@ export default function ({ getService }: FtrProviderContext) {
           );
         });
 
-        it('#bulkCreate not enforcing random ID allows to specify ID', async () => {
+        it('#bulkCreate setting random ID on ESO types that have not opted out throws an error', async () => {
           const bulkCreateParams = [
             {
               type: SAVED_OBJECT_WITH_SECRET_TYPE,
@@ -1017,8 +1017,12 @@ export default function ({ getService }: FtrProviderContext) {
             .expect(200);
 
           expect(savedObjects).to.have.length(bulkCreateParams.length);
-          expect(savedObjects[0].id).to.be('my_predictable_id');
-          expect(savedObjects[1].id).to.be('my_predictable_id_2');
+
+          savedObjects.forEach((savedObject: any) => {
+            expect(savedObject.error.message).to.contain(
+              'Predefined IDs are not allowed for saved objects with encrypted attributes unless the ID is a UUID.'
+            );
+          });
         });
       });
     });

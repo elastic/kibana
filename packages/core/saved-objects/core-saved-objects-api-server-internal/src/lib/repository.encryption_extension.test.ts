@@ -559,15 +559,9 @@ describe('SavedObjectsRepository Encryption Extension', () => {
         ...decryptedStrippedAttributes,
       });
 
-      const result = await bulkCreateSuccess(
-        client,
-        repository,
-        [{ ...encryptedSO, version: mockVersion }],
-        {
-          overwrite: true,
-          // version: mockVersion, // this doesn't work in bulk...looks like it checks the object itself?
-        }
-      );
+      const result = await bulkCreateSuccess(client, repository, [
+        { ...encryptedSO, version: mockVersion },
+      ]);
 
       expect(client.bulk).toHaveBeenCalled();
       expect(result.saved_objects).not.toBeUndefined();
