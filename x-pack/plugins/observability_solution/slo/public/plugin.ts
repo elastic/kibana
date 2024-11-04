@@ -178,6 +178,8 @@ export class SLOPlugin
 
   public start(core: CoreStart, plugins: SLOPublicPluginsStart) {
     const kibanaVersion = this.initContext.env.packageInfo.version;
+    const sloClient = createRepositoryClient<SLORouteRepository, DefaultClientOptions>(core);
+
     return {
       getCreateSLOFlyout: getCreateSLOFlyoutLazy({
         core,
@@ -188,6 +190,7 @@ export class SLOPlugin
         plugins,
         isServerless: !!plugins.serverless,
         experimentalFeatures: this.experimentalFeatures,
+        sloClient,
       }),
     };
   }

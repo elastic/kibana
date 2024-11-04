@@ -17,7 +17,7 @@ import { ObservabilityRuleTypeRegistry } from '@kbn/observability-plugin/public'
 import { ExperimentalFeatures } from '../../../../common/config';
 import { CreateSLOForm } from '../types';
 import { PluginContext } from '../../../context/plugin_context';
-import { SLOPublicPluginsStart } from '../../../types';
+import { SLOPublicPluginsStart, SLORepositoryClient } from '../../../types';
 import { SloAddFormFlyout } from './slo_form';
 
 export const getCreateSLOFlyoutLazy = ({
@@ -29,6 +29,7 @@ export const getCreateSLOFlyoutLazy = ({
   kibanaVersion,
   isServerless,
   experimentalFeatures,
+  sloClient,
 }: {
   core: CoreStart;
   plugins: SLOPublicPluginsStart;
@@ -38,6 +39,7 @@ export const getCreateSLOFlyoutLazy = ({
   kibanaVersion: string;
   isServerless?: boolean;
   experimentalFeatures: ExperimentalFeatures;
+  sloClient: SLORepositoryClient;
 }) => {
   return ({
     onClose,
@@ -64,6 +66,7 @@ export const getCreateSLOFlyoutLazy = ({
             observabilityRuleTypeRegistry,
             ObservabilityPageTemplate,
             experimentalFeatures,
+            sloClient,
           }}
         >
           <QueryClientProvider client={queryClient}>
