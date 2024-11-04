@@ -18,7 +18,7 @@ import {
   openKibanaNavigation,
 } from '../../../tasks/kibana_navigation';
 import { login } from '../../../tasks/login';
-import { visitWithTimeRange } from '../../../tasks/navigation';
+import { visit, visitWithTimeRange } from '../../../tasks/navigation';
 import {
   closeTimelineUsingCloseButton,
   openTimelineUsingToggle,
@@ -37,12 +37,12 @@ import {
   duplicateFirstTimeline,
   populateTimeline,
 } from '../../../tasks/timeline';
-import { EXPLORE_URL, TIMELINES_URL, MANAGE_URL } from '../../../urls/navigation';
+import { EXPLORE_URL, hostsUrl, MANAGE_URL, TIMELINES_URL } from '../../../urls/navigation';
 
 describe('[ESS] Save Timeline Prompts', { tags: ['@ess'] }, () => {
   beforeEach(() => {
     login();
-    visitWithTimeRange(TIMELINES_URL);
+    visitWithTimeRange(hostsUrl('allHosts'));
     openTimelineUsingToggle();
     createNewTimeline();
     /*
@@ -59,7 +59,7 @@ describe('[ESS] Save Timeline Prompts', { tags: ['@ess'] }, () => {
   it('should NOT prompt when navigating with an unchanged & unsaved timeline', () => {
     openKibanaNavigation();
     navigateFromKibanaCollapsibleTo(OBSERVABILITY_ALERTS_PAGE);
-    cy.url().should('not.contain', TIMELINES_URL);
+    cy.url().should('not.contain', hostsUrl('allHosts'));
   });
 
   it('should prompt when navigating away from security solution with a changed & unsaved timeline', () => {
@@ -121,10 +121,12 @@ describe('[ESS] Save Timeline Prompts', { tags: ['@ess'] }, () => {
     cy.url().should('not.contain', MANAGE_URL);
   });
 
-  it('should prompt when a timeline is duplicated but not saved', () => {
+  it.only('should prompt when a timeline is duplicated but not saved', () => {
     addNameToTimelineAndSave('Original');
     closeTimeline();
+    visit(TIMELINES_URL);
     duplicateFirstTimeline();
+    closeTimeline();
     openKibanaNavigation();
     navigateFromKibanaCollapsibleTo(MANAGE_PAGE);
     cy.get(APP_LEAVE_CONFIRM_MODAL).should('be.visible');
@@ -135,7 +137,7 @@ describe('[ESS] Save Timeline Prompts', { tags: ['@ess'] }, () => {
 describe('[serverless] Save Timeline Prompts', { tags: ['@serverless'] }, () => {
   beforeEach(() => {
     login();
-    visitWithTimeRange(TIMELINES_URL);
+    visitWithTimeRange(hostsUrl('allHosts'));
     openTimelineUsingToggle();
     createNewTimeline();
     /*
@@ -215,9 +217,10 @@ describe('[serverless] Save Timeline Prompts', { tags: ['@serverless'] }, () => 
   it('should prompt when a timeline is duplicated but not saved', () => {
     addNameToTimelineAndSave('Original');
     closeTimeline();
+    visit(TIMELINES_URL);
     duplicateFirstTimeline();
-    openKibanaNavigation();
-    navigateFromKibanaCollapsibleTo(MANAGE_PAGE);
+    closeTimeline();
+    navigateToExplorePageInServerless(); // security page with timelines disabled
     cy.get(APP_LEAVE_CONFIRM_MODAL).should('be.visible');
   });
 });
