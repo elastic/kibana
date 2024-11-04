@@ -230,6 +230,7 @@ export const links: LinkItem = {
       skipUrlState: true,
       hideTimeline: true,
       hideWhenExperimentalKey: 'securitySolutionNotesDisabled',
+      globalSearchDisabled: true,
     },
   ],
 };
