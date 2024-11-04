@@ -28,7 +28,6 @@ describe('similar', () => {
       await similar(
         {
           case_id: mockCase.id,
-          observables: { '4e7142ad-2c54-4ac8-84fb-38c8842d7b3f': ['test@email.com'] },
           pageIndex: 1,
           pageSize: 10,
         },
