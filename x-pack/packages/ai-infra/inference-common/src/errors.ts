@@ -4,14 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { i18n } from '@kbn/i18n';
+
 import { InferenceTaskEventBase, InferenceTaskEventType } from './inference_task';
 
+/**
+ * Enum for generic inference error codes.
+ */
 export enum InferenceTaskErrorCode {
   internalError = 'internalError',
   requestError = 'requestError',
 }
 
+/**
+ * Base class for all inference API errors.
+ */
 export class InferenceTaskError<
   TCode extends string,
   TMeta extends Record<string, any> | undefined
@@ -51,9 +57,7 @@ export type InferenceTaskRequestError = InferenceTaskError<
 >;
 
 export function createInferenceInternalError(
-  message: string = i18n.translate('xpack.inference.internalError', {
-    defaultMessage: 'An internal error occurred',
-  }),
+  message = 'An internal error occurred',
   meta?: Record<string, any>
 ): InferenceTaskInternalError {
   return new InferenceTaskError(InferenceTaskErrorCode.internalError, message, meta ?? {});
