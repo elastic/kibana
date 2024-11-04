@@ -22,8 +22,8 @@ import type {
   UserActionFindResponse,
   SingleCaseMetricsResponse,
   CustomFieldPutRequest,
-  ObservableRequest,
   CasesSimilarResponse,
+  ObservableRequest,
 } from '../../common/types/api';
 import type {
   CaseConnectors,
@@ -54,7 +54,7 @@ import {
   getCaseUsersUrl,
   getCaseUserActionStatsUrl,
   getCustomFieldReplaceUrl,
-  getCaseObservablesUrl,
+  getCaseCreateObservableUrl,
 } from '../../common/api';
 import {
   CASE_REPORTERS_URL,
@@ -620,7 +620,7 @@ export const postObservables = async (
   caseId: string,
   signal?: AbortSignal
 ): Promise<CaseUI> => {
-  const response = await KibanaServices.get().http.fetch<Case>(getCaseObservablesUrl(caseId), {
+  const response = await KibanaServices.get().http.fetch<Case>(getCaseCreateObservableUrl(caseId), {
     method: 'POST',
     body: JSON.stringify({ version: request.version, observables: request.observables }),
     signal,

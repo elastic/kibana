@@ -92,6 +92,6 @@ export const getCustomFieldReplaceUrl = (caseId: string, customFieldId: string):
   );
 };
 
-export const getCaseObservablesUrl = (id: string): string => {
+export const getCaseCreateObservableUrl = (id: string): string => {
   return INTERNAL_CASE_OBSERVABLES_URL.replace('{case_id}', id);
 };
