@@ -5340,6 +5340,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/inference-common@link:x-pack/packages/ai-infra/inference-common":
+  version "0.0.0"
+  uid ""
+
 "@kbn/inference-plugin@link:x-pack/plugins/inference":
   version "0.0.0"
   uid ""
@@ -6412,10 +6416,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/security-solution-common@link:x-pack/packages/security-solution/common":
-  version "0.0.0"
-  uid ""
-
 "@kbn/security-solution-distribution-bar@link:x-pack/packages/security-solution/distribution_bar":
   version "0.0.0"
   uid ""
@@ -7312,33 +7312,32 @@
   resolved "https://registry.yarnpkg.com/@kwsites/promise-deferred/-/promise-deferred-1.1.1.tgz#8ace5259254426ccef57f3175bc64ed7095ed919"
   integrity sha512-GaHYm+c0O9MjZRu0ongGBRbinu8gVAMd2UZjji6jVmqKtZluZnptXGWhz1E8j8D2HJ3f/yMxKAUC0b+57wncIw==
 
-"@langchain/community@0.2.18":
-  version "0.2.18"
-  resolved "https://registry.yarnpkg.com/@langchain/community/-/community-0.2.18.tgz#127a7ac53a30dd6dedede887811fdd992061e2d2"
-  integrity sha512-UsCB97dMG87giQLniKx4bjv7OnMw2vQeavSt9gqOnGCnfb5IQBAgdjX4SjwFPbVGMz1HQoQKVlNqQ64ozCdgNg==
+"@langchain/community@0.3.11":
+  version "0.3.11"
+  resolved "https://registry.yarnpkg.com/@langchain/community/-/community-0.3.11.tgz#cb0f188f4e72c00beb1efdbd1fc7d7f47b70e636"
+  integrity sha512-hgnqsgWAhfUj9Kp0y+FGxlKot/qJFxat9GfIPJSJU4ViN434PgeMAQK53tkGZ361E2Zoo1V4RoGlSw4AjJILiA==
   dependencies:
-    "@langchain/core" "~0.2.11"
-    "@langchain/openai" "~0.1.0"
+    "@langchain/openai" ">=0.2.0 <0.4.0"
     binary-extensions "^2.2.0"
     expr-eval "^2.0.2"
     flat "^5.0.2"
     js-yaml "^4.1.0"
-    langchain "0.2.3"
-    langsmith "~0.1.30"
+    langchain ">=0.2.3 <0.3.0 || >=0.3.4 <0.4.0"
+    langsmith "^0.2.0"
     uuid "^10.0.0"
     zod "^3.22.3"
     zod-to-json-schema "^3.22.5"
 
-"@langchain/core@>0.1.0  <0.3.0", "@langchain/core@>=0.2.11 <0.3.0", "@langchain/core@>=0.2.20 <0.3.0", "@langchain/core@>=0.2.5 <0.3.0", "@langchain/core@^0.2.18", "@langchain/core@~0.2.11":
-  version "0.2.32"
-  resolved "https://registry.yarnpkg.com/@langchain/core/-/core-0.2.32.tgz#a5dfbc49f8b6c15c8082763b93aeae8f9f4ca1a0"
-  integrity sha512-S27M+9Qou2qtcLfFGEvANkJ/zHq5XApeQsR6Q4I7C6v9x07eoYr558h6vVy6WQmKcksgbCIJ854ikwp173wBjA==
+"@langchain/core@>0.1.0  <0.3.0", "@langchain/core@^0.3.16":
+  version "0.3.16"
+  resolved "https://registry.yarnpkg.com/@langchain/core/-/core-0.3.16.tgz#60ece9762c2830eb8e5731c70b24e1707178fc67"
+  integrity sha512-g83M2Z1XlhECFUtT4C7XLsVVGt2Hk3Y/KhS5tZSsz+Gqtxwd790/MD7MxdUHpZj0VKkvrFuWARWpJmNKlkiY+g==
   dependencies:
     ansi-styles "^5.0.0"
     camelcase "6"
     decamelize "1.2.0"
     js-tiktoken "^1.0.12"
-    langsmith "^0.1.43"
+    langsmith "^0.2.0"
     mustache "^4.2.0"
     p-queue "^6.6.2"
     p-retry "4"
@@ -7362,10 +7361,10 @@
     "@langchain/google-common" "~0.1.0"
     google-auth-library "^8.9.0"
 
-"@langchain/google-genai@^0.1.0":
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/@langchain/google-genai/-/google-genai-0.1.0.tgz#89552873210d72a5834de20fcbef3e6753283344"
-  integrity sha512-6rIba77zJVMj+048tLfkCBrkFbfAMiT+AfLEsu5s+CFoFmXMiI/dbKeDL4vhUWrJVb9uL4ZZyrnl0nKxyEKYgA==
+"@langchain/google-genai@^0.1.2":
+  version "0.1.2"
+  resolved "https://registry.yarnpkg.com/@langchain/google-genai/-/google-genai-0.1.2.tgz#23387d7027b4a787b542fc5cfb7a2469e9f4c845"
+  integrity sha512-oePFjTurY4O2tJiU4cJ3Wu9L+JGVwYib2LovI+SxGJImVyVlQQ1HV2SVek03vqG4d0kiX0XLQTEC7mJ7EBySkg==
   dependencies:
     "@google/generative-ai" "^0.7.0"
     zod-to-json-schema "^3.22.4"
@@ -7377,27 +7376,45 @@
   dependencies:
     "@langchain/google-gauth" "~0.1.0"
 
-"@langchain/langgraph@0.0.34":
-  version "0.0.34"
-  resolved "https://registry.yarnpkg.com/@langchain/langgraph/-/langgraph-0.0.34.tgz#1504c29ce524d08d6f076c34e0623c6de1f1246c"
-  integrity sha512-cuig46hGmZkf+eXw1Cx2CtkAWgsAbIpa5ABLxn9oe1rbtvHXmfekqHZA6tGE0DipEmsN4H64zFcDEJydll6Sdw==
+"@langchain/langgraph-checkpoint@~0.0.10":
+  version "0.0.11"
+  resolved "https://registry.yarnpkg.com/@langchain/langgraph-checkpoint/-/langgraph-checkpoint-0.0.11.tgz#65c40bc175faca98ed0901df9e76682585710e8d"
+  integrity sha512-nroHHkAi/UPn9LqqZcgOydfB8qZw5TXuXDFc43MIydnW4lb8m9hVHnQ3lgb2WGSgtbZJnsIx0TzL19oemJBRKg==
   dependencies:
-    "@langchain/core" ">=0.2.20 <0.3.0"
+    uuid "^10.0.0"
+
+"@langchain/langgraph-sdk@~0.0.20":
+  version "0.0.20"
+  resolved "https://registry.yarnpkg.com/@langchain/langgraph-sdk/-/langgraph-sdk-0.0.20.tgz#5cb75d83408a8dd3aab0d8923956672746d1b499"
+  integrity sha512-58iGYL0PppSiIHtIUNAN+x6TCl+Vb0dAmlToSMJHUng8W53ffXHQTNqVNxJlPsHO6zdgPJm4DRl53z6vkSUZpw==
+  dependencies:
+    "@types/json-schema" "^7.0.15"
+    p-queue "^6.6.2"
+    p-retry "4"
+    uuid "^9.0.0"
+
+"@langchain/langgraph@0.2.19":
+  version "0.2.19"
+  resolved "https://registry.yarnpkg.com/@langchain/langgraph/-/langgraph-0.2.19.tgz#1a855ee0e63683a085b41e9b8cbc01e836ebf168"
+  integrity sha512-dgFdnEokC5zY32skZ6rcBYJNTH3WQXVY0LRI1zBGvbmK/nPfanIB1URwNxqRFjj/qHRKofxoehqYr1ww1zB+zA==
+  dependencies:
+    "@langchain/langgraph-checkpoint" "~0.0.10"
+    "@langchain/langgraph-sdk" "~0.0.20"
+    double-ended-queue "^2.1.0-0"
     uuid "^10.0.0"
     zod "^3.23.8"
 
-"@langchain/openai@>=0.1.0 <0.3.0", "@langchain/openai@^0.1.3", "@langchain/openai@~0.1.0":
-  version "0.1.3"
-  resolved "https://registry.yarnpkg.com/@langchain/openai/-/openai-0.1.3.tgz#6eb0994e970d85ffa9aaeafb94449024ccf6ca63"
-  integrity sha512-riv/JC9x2A8b7GcHu8sx+mlZJ8KAwSSi231IPTlcciYnKozmrQ5H0vrtiD31fxiDbaRsk7tyCpkSBIOQEo7CyQ==
+"@langchain/openai@>=0.1.0 <0.4.0", "@langchain/openai@>=0.2.0 <0.4.0", "@langchain/openai@^0.3.11":
+  version "0.3.11"
+  resolved "https://registry.yarnpkg.com/@langchain/openai/-/openai-0.3.11.tgz#c93ee298a87318562a1da6c2915a180fe5155ac4"
+  integrity sha512-mEFbpJ8w8NPArsquUlCwxvZTKNkXxqwzvTEYzv6Jb7gUoBDOZtwLg6AdcngTJ+w5VFh3wxgPy0g3zb9Aw0Qbpw==
   dependencies:
-    "@langchain/core" ">=0.2.5 <0.3.0"
     js-tiktoken "^1.0.12"
-    openai "^4.49.1"
+    openai "^4.68.0"
     zod "^3.22.4"
     zod-to-json-schema "^3.22.3"
 
-"@langchain/textsplitters@~0.0.0":
+"@langchain/textsplitters@>=0.0.0 <0.2.0":
   version "0.0.2"
   resolved "https://registry.yarnpkg.com/@langchain/textsplitters/-/textsplitters-0.0.2.tgz#500baa8341fb7fc86fca531a4192665a319504a3"
   integrity sha512-6bQOuYHTGYlkgPY/8M5WPq4nnXZpEysGzRopQCYjg2WLcEoIPUMMrXsAaNNdvU3BOeMrhin8izvpDPD165hX6Q==
@@ -10741,7 +10758,7 @@
   resolved "https://registry.yarnpkg.com/@types/json-schema/-/json-schema-7.0.11.tgz#d421b6c527a3037f7c84433fd2c4229e016863d3"
   integrity sha512-wOuvG1SN4Us4rez+tylwwwCV1psiNVOkJeM3AUWUNWg/jDQY2+HE/444y5gc+jBmRqASOm2Oeh5c1axHobwRKQ==
 
-"@types/json-schema@^7.0.7":
+"@types/json-schema@^7.0.15", "@types/json-schema@^7.0.7":
   version "7.0.15"
   resolved "https://registry.yarnpkg.com/@types/json-schema/-/json-schema-7.0.15.tgz#596a1747233694d50f6ad8a7869fcb6f56cf5841"
   integrity sha512-5+fP8P8MFNC+AyZCDxrB2pkZFPGzqQWUzpSeuuVLvm8VMcorNYavBqoFcxK8bQz4Qsbn4oUEEem4wDLfcysGHA==
@@ -13407,7 +13424,7 @@ binary-extensions@^2.0.0, binary-extensions@^2.2.0:
   resolved "https://registry.yarnpkg.com/binary-extensions/-/binary-extensions-2.2.0.tgz#75f502eeaf9ffde42fc98829645be4ea76bd9e2d"
   integrity sha512-jDctJ/IVQbZoJykoeHbhXpOlNBqGNcwXJKJog42E5HDPUwQTSdjCHdihjj0DlnheQ7blbT6dHOafNAiS8ooQKA==
 
-binary-search@^1.3.3, binary-search@^1.3.5:
+binary-search@^1.3.3:
   version "1.3.6"
   resolved "https://registry.yarnpkg.com/binary-search/-/binary-search-1.3.6.tgz#e32426016a0c5092f0f3598836a1c7da3560565c"
   integrity sha512-nbE1WxOTTrUWIfsfZ4aHGYu5DOuNkbxGokjV6Z2kxfJK3uaAb8zNK1muzOeipoLHZjInT4Br88BHpzevc681xA==
@@ -16539,6 +16556,11 @@ dotignore@^0.1.2:
   integrity sha512-UGGGWfSauusaVJC+8fgV+NVvBXkCTmVv7sk6nojDZZvuOUNGUy0Zk4UpHQD6EDjS0jpBwcACvH4eofvyzBcRDw==
   dependencies:
     minimatch "^3.0.4"
+
+double-ended-queue@^2.1.0-0:
+  version "2.1.0-0"
+  resolved "https://registry.yarnpkg.com/double-ended-queue/-/double-ended-queue-2.1.0-0.tgz#103d3527fd31528f40188130c841efdd78264e5c"
+  integrity sha512-+BNfZ+deCo8hMNpDqDnvT+c0XpJ5cUa6mqYq89bho2Ifze4URTqRkcwR399hWoTrTkbZ/XJYDgP6rc7pRgffEQ==
 
 downshift@^3.2.10:
   version "3.4.8"
@@ -20363,11 +20385,6 @@ is-alphanumerical@^1.0.0:
     is-alphabetical "^1.0.0"
     is-decimal "^1.0.0"
 
-is-any-array@^2.0.0:
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/is-any-array/-/is-any-array-2.0.1.tgz#9233242a9c098220290aa2ec28f82ca7fa79899e"
-  integrity sha512-UtilS7hLRu++wb/WBAw9bNuP1Eg04Ivn1vERJck8zJthEvXCBEBpGR/33u/xLKWEQf95803oalHrVDptcAvFdQ==
-
 is-arguments@^1.0.4, is-arguments@^1.1.1:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/is-arguments/-/is-arguments-1.1.1.tgz#15b3f88fda01f2a97fec84ca761a560f123efa9b"
@@ -22123,21 +22140,17 @@ kuler@^2.0.0:
   resolved "https://registry.yarnpkg.com/kuler/-/kuler-2.0.0.tgz#e2c570a3800388fb44407e851531c1d670b061b3"
   integrity sha512-Xq9nH7KlWZmXAtodXDDRE7vs6DU1gTU8zYDHDiWLSip45Egwq3plLHzPn27NgvzL2r1LMPC1vdqh98sQxtqj4A==
 
-langchain@0.2.3, langchain@^0.2.11:
-  version "0.2.11"
-  resolved "https://registry.yarnpkg.com/langchain/-/langchain-0.2.11.tgz#d97e5bbd57e8954f21356fd85603aa39e3efe03f"
-  integrity sha512-6FQWKNAXuTmwuhHHMOmurLo8pydSRu5C/FwCYvYbR4ulCLqcsj+jre/kfXvA5BdHOZHNo6oQn0/5kxDNnhxMUA==
+"langchain@>=0.2.3 <0.3.0 || >=0.3.4 <0.4.0", langchain@^0.3.5:
+  version "0.3.5"
+  resolved "https://registry.yarnpkg.com/langchain/-/langchain-0.3.5.tgz#87b282454bc215b12b920d4dd5e35ed58030bad1"
+  integrity sha512-Gq0xC45Sq6nszS8kQG9suCrmBsuXH0INMmiF7D2TwPb6mtG35Jiq4grCk9ykpwPsarTHdty3SzUbII/FqiYSSw==
   dependencies:
-    "@langchain/core" ">=0.2.11 <0.3.0"
-    "@langchain/openai" ">=0.1.0 <0.3.0"
-    "@langchain/textsplitters" "~0.0.0"
-    binary-extensions "^2.2.0"
+    "@langchain/openai" ">=0.1.0 <0.4.0"
+    "@langchain/textsplitters" ">=0.0.0 <0.2.0"
     js-tiktoken "^1.0.12"
     js-yaml "^4.1.0"
     jsonpointer "^5.0.1"
-    langchainhub "~0.0.8"
-    langsmith "~0.1.30"
-    ml-distance "^4.0.0"
+    langsmith "^0.2.0"
     openapi-types "^12.1.3"
     p-retry "4"
     uuid "^10.0.0"
@@ -22145,15 +22158,10 @@ langchain@0.2.3, langchain@^0.2.11:
     zod "^3.22.4"
     zod-to-json-schema "^3.22.3"
 
-langchainhub@~0.0.8:
-  version "0.0.8"
-  resolved "https://registry.yarnpkg.com/langchainhub/-/langchainhub-0.0.8.tgz#fd4b96dc795e22e36c1a20bad31b61b0c33d3110"
-  integrity sha512-Woyb8YDHgqqTOZvWIbm2CaFDGfZ4NTSyXV687AG4vXEfoNo7cGQp7nhl7wL3ehenKWmNEmcxCLgOZzW8jE6lOQ==
-
-langsmith@^0.1.43, langsmith@^0.1.55, langsmith@~0.1.30:
-  version "0.1.55"
-  resolved "https://registry.yarnpkg.com/langsmith/-/langsmith-0.1.55.tgz#bdbb8015a28093f4a248c0ee9b8937731c5baa93"
-  integrity sha512-6NVtI04UUnIY59I/imOX02FG/QMGfqStu8tiJtyyreKMv2GAN0EE9Z5Ap1wzOe6v8ukEcV3NwEO2LYOPwup1PQ==
+langsmith@^0.2.0, langsmith@^0.2.3:
+  version "0.2.3"
+  resolved "https://registry.yarnpkg.com/langsmith/-/langsmith-0.2.3.tgz#91c5b4e3d5b030d8a995e9acaac43dba4b9b225c"
+  integrity sha512-SPMYPVqR9kwXZVmJ2PXC61HeBnXIFHrjfjDxQ14H0+n5p4gqjLzgSHIQyxBlFeWQUQzArJxe65Ap+s+Xo1cZog==
   dependencies:
     "@types/uuid" "^10.0.0"
     commander "^10.0.1"
@@ -23520,42 +23528,6 @@ mkdirp@^3.0.1:
   resolved "https://registry.yarnpkg.com/mkdirp/-/mkdirp-3.0.1.tgz#e44e4c5607fb279c168241713cc6e0fea9adcb50"
   integrity sha512-+NsyUUAZDmo6YVHzL/stxSu3t9YS1iljliy3BSDrXJ/dkn1KYdmtZODGGjLcc9XLgVVpH4KshHB8XmZgMhaBXg==
 
-ml-array-mean@^1.1.6:
-  version "1.1.6"
-  resolved "https://registry.yarnpkg.com/ml-array-mean/-/ml-array-mean-1.1.6.tgz#d951a700dc8e3a17b3e0a583c2c64abd0c619c56"
-  integrity sha512-MIdf7Zc8HznwIisyiJGRH9tRigg3Yf4FldW8DxKxpCCv/g5CafTw0RRu51nojVEOXuCQC7DRVVu5c7XXO/5joQ==
-  dependencies:
-    ml-array-sum "^1.1.6"
-
-ml-array-sum@^1.1.6:
-  version "1.1.6"
-  resolved "https://registry.yarnpkg.com/ml-array-sum/-/ml-array-sum-1.1.6.tgz#d1d89c20793cd29c37b09d40e85681aa4515a955"
-  integrity sha512-29mAh2GwH7ZmiRnup4UyibQZB9+ZLyMShvt4cH4eTK+cL2oEMIZFnSyB3SS8MlsTh6q/w/yh48KmqLxmovN4Dw==
-  dependencies:
-    is-any-array "^2.0.0"
-
-ml-distance-euclidean@^2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/ml-distance-euclidean/-/ml-distance-euclidean-2.0.0.tgz#3a668d236649d1b8fec96380b9435c6f42c9a817"
-  integrity sha512-yC9/2o8QF0A3m/0IXqCTXCzz2pNEzvmcE/9HFKOZGnTjatvBbsn4lWYJkxENkA4Ug2fnYl7PXQxnPi21sgMy/Q==
-
-ml-distance@^4.0.0:
-  version "4.0.1"
-  resolved "https://registry.yarnpkg.com/ml-distance/-/ml-distance-4.0.1.tgz#4741d17a1735888c5388823762271dfe604bd019"
-  integrity sha512-feZ5ziXs01zhyFUUUeZV5hwc0f5JW0Sh0ckU1koZe/wdVkJdGxcP06KNQuF0WBTj8FttQUzcvQcpcrOp/XrlEw==
-  dependencies:
-    ml-array-mean "^1.1.6"
-    ml-distance-euclidean "^2.0.0"
-    ml-tree-similarity "^1.0.0"
-
-ml-tree-similarity@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/ml-tree-similarity/-/ml-tree-similarity-1.0.0.tgz#24705a107e32829e24d945e87219e892159c53f0"
-  integrity sha512-XJUyYqjSuUQkNQHMscr6tcjldsOoAekxADTplt40QKfwW6nd++1wHWV9AArl0Zvw/TIHgNaZZNvr8QGvE8wLRg==
-  dependencies:
-    binary-search "^1.3.5"
-    num-sort "^2.0.0"
-
 mobx-react-lite@^4.0.7:
   version "4.0.7"
   resolved "https://registry.yarnpkg.com/mobx-react-lite/-/mobx-react-lite-4.0.7.tgz#f4e21e18d05c811010dcb1d3007e797924c4d90b"
@@ -24374,11 +24346,6 @@ null-loader@^3.0.0:
     loader-utils "^1.2.3"
     schema-utils "^1.0.0"
 
-num-sort@^2.0.0:
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/num-sort/-/num-sort-2.1.0.tgz#1cbb37aed071329fdf41151258bc011898577a9b"
-  integrity sha512-1MQz1Ed8z2yckoBeSfkQHHO9K1yDRxxtotKSJ9yvcTUUxSvfvzEq5GwBrjjHEpMlq/k5gvXdmJ1SbYxWtpNoVg==
-
 num2fraction@^1.2.2:
   version "1.2.2"
   resolved "https://registry.yarnpkg.com/num2fraction/-/num2fraction-1.2.2.tgz#6f682b6a027a4e9ddfa4564cd2589d1d4e669ede"
@@ -24704,10 +24671,10 @@ open@^8.0.9, open@^8.4.0, open@~8.4.0:
     is-docker "^2.1.1"
     is-wsl "^2.2.0"
 
-openai@^4.24.1, openai@^4.49.1:
-  version "4.51.0"
-  resolved "https://registry.yarnpkg.com/openai/-/openai-4.51.0.tgz#8ab08bba2441375e8e4ce6161f9ac987d2b2c157"
-  integrity sha512-UKuWc3/qQyklqhHM8CbdXCv0Z0obap6T0ECdcO5oATQxAbKE5Ky3YCXFQY207z+eGG6ez4U9wvAcuMygxhmStg==
+openai@^4.68.0:
+  version "4.69.0"
+  resolved "https://registry.yarnpkg.com/openai/-/openai-4.69.0.tgz#ac2463719280987e506e4bd62dd477337e2406a1"
+  integrity sha512-S3hOHSkk609KqwgH+7dwFrSvO3Gm3Nk0YWGyPHNscoMH/Y2tH1qunMi7gtZnLbUv4/N1elqCp6bDior2401kCQ==
   dependencies:
     "@types/node" "^18.11.18"
     "@types/node-fetch" "^2.6.4"
@@ -24716,7 +24683,6 @@ openai@^4.24.1, openai@^4.49.1:
     form-data-encoder "1.7.2"
     formdata-node "^4.3.2"
     node-fetch "^2.6.7"
-    web-streams-polyfill "^3.2.1"
 
 openapi-sampler@^1.5.0:
   version "1.5.1"
@@ -32135,7 +32101,7 @@ web-streams-polyfill@4.0.0-beta.3:
   resolved "https://registry.yarnpkg.com/web-streams-polyfill/-/web-streams-polyfill-4.0.0-beta.3.tgz#2898486b74f5156095e473efe989dcf185047a38"
   integrity sha512-QW95TCTaHmsYfHDybGMwO5IJIM93I/6vTRk+daHTWFPhwh+C8Cg7j7XyKrwrj8Ib6vYXe0ocYNrmzY4xAAN6ug==
 
-web-streams-polyfill@^3.0.3, web-streams-polyfill@^3.2.1:
+web-streams-polyfill@^3.0.3:
   version "3.2.1"
   resolved "https://registry.yarnpkg.com/web-streams-polyfill/-/web-streams-polyfill-3.2.1.tgz#71c2718c52b45fd49dbeee88634b3a60ceab42a6"
   integrity sha512-e0MO3wdXWKrLbL0DgGnUV7WHVuw9OUvL4hjgnPkIeEvESk74gAITi5G606JtZPp39cd8HA9VQzCIvA49LpPN5Q==
