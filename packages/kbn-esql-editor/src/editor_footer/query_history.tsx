@@ -30,9 +30,9 @@ import {
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   FavoritesClient,
-  FavoritesContextProvider,
-  // useFavorites,
-  // FavoriteButton,
+  // FavoritesContextProvider,
+  useFavorites,
+  FavoriteButton,
 } from '@kbn/content-management-favorites-public';
 import { css, Interpolation, Theme } from '@emotion/react';
 import { type QueryHistoryItem, getHistoryItems } from '../history_local_storage';
@@ -114,6 +114,11 @@ export const getTableColumns = (
   isStarred?: boolean
 ): Array<EuiBasicTableColumn<QueryHistoryItem>> => {
   const columnsArray = [
+    {
+      'data-test-subj': 'favoriteBtn',
+      render: () => <FavoriteButton id={'some-object-id'} />,
+      width: isOnReducedSpaceLayout ? 'auto' : '30px',
+    },
     {
       field: 'status',
       name: '',
@@ -224,6 +229,7 @@ export function QueryList({
   isStarred,
   tableCaption,
   dataTestSubj,
+  addFavorite,
 }: {
   getItemsFn: (sortDirection: 'asc' | 'desc') => QueryHistoryItem[];
   isStarred?: boolean;
@@ -233,6 +239,7 @@ export function QueryList({
   height: number;
   tableCaption?: string;
   dataTestSubj?: string;
+  addFavorite?: (args: { id: string; metadata?: object }) => Promise<void>;
 }) {
   const theme = useEuiTheme();
   const scrollBarStyles = euiScrollBarStyles(theme);
@@ -442,6 +449,16 @@ export function HistoryAndStarredQueriesTabs({
     });
   }, [core.http, usageCollection]);
 
+  const addFavorite = useCallback(
+    async ({ id, metadata }: { id: string; metadata?: object }) => {
+      await esqlFavoritesClient.addFavorite({ id, metadata });
+    },
+    [esqlFavoritesClient]
+  );
+
+  const { data: favoritesData } = useFavorites();
+
+  console.log(favoritesData);
   const { euiTheme } = useEuiTheme();
   const tabs = useMemo(() => {
     return [
@@ -475,23 +492,22 @@ export function HistoryAndStarredQueriesTabs({
           </EuiNotificationBadge>
         ),
         content: (
-          <FavoritesContextProvider favoritesClient={esqlFavoritesClient}>
-            <QueryList
-              containerCSS={containerCSS}
-              onUpdateAndSubmit={onUpdateAndSubmit}
-              containerWidth={containerWidth}
-              height={height}
-              getItemsFn={(sortDirection) => []}
-              dataTestSubj="ESQLEditor-starredQueries"
-              tableCaption={i18n.translate('esqlEditor.query.starredQueriesTable', {
-                defaultMessage: 'Starred queries table',
-              })}
-            />
-          </FavoritesContextProvider>
+          <QueryList
+            containerCSS={containerCSS}
+            onUpdateAndSubmit={onUpdateAndSubmit}
+            containerWidth={containerWidth}
+            height={height}
+            getItemsFn={(sortDirection) => []}
+            addFavorite={addFavorite}
+            dataTestSubj="ESQLEditor-starredQueries"
+            tableCaption={i18n.translate('esqlEditor.query.starredQueriesTable', {
+              defaultMessage: 'Starred queries table',
+            })}
+          />
         ),
       },
     ];
-  }, [containerCSS, containerWidth, esqlFavoritesClient, height, onUpdateAndSubmit]);
+  }, [addFavorite, containerCSS, containerWidth, height, onUpdateAndSubmit]);
 
   const [selectedTabId, setSelectedTabId] = useState('history-queries-tab');
   const selectedTabContent = useMemo(() => {
