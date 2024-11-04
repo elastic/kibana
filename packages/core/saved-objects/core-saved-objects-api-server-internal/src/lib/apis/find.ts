@@ -271,8 +271,11 @@ export const performFind = async <T = unknown, A = unknown>(
       let migrated: SavedObjectUnsanitizedDoc | undefined;
       const { sort, score, ...rawObject } = savedObject;
 
-      if (fields === undefined || fields.length === 0) {
-        // If this document only contains a subset of fields it's not possible to migrate it but we still try to decrypt it
+      if (fields !== undefined) {
+        // If the fields argument is set, don't migrate.
+        // This document may only contains a subset of it's fields meaning the migration
+        // (transform and forwardCompatibilitySchema) is not guaranteed to succeed. We
+        // still try to decrypt/redact the fields that are present in the document.
         migrated = await encryptionHelper.optionallyDecryptAndRedactSingleResult(
           savedObject,
           redactTypeMap
