@@ -9,7 +9,6 @@ import type { CollectorFetchContext } from '@kbn/usage-collection-plugin/server'
 
 import type { CollectorDependencies, DashboardMetrics } from './types';
 import { getDetectionsMetrics } from './detections/get_metrics';
-import { legacySiemSignalsSchema } from './detections/schema';
 import { getInternalSavedObjectsClient } from './get_internal_saved_objects_client';
 import { getEndpointMetrics } from './endpoint/get_metrics';
 import { getDashboardMetrics } from './dashboards/get_dashboards_metrics';
@@ -3078,7 +3077,20 @@ export const registerCollector: RegisterCollector = ({
             },
           },
         },
-        legacySiemSignals: legacySiemSignalsSchema,
+        legacySiemSignals: {
+          indices_total: {
+            type: 'long',
+            _meta: {
+              description: 'Total number of legacy siem signals indices',
+            },
+          },
+          spaces_total: {
+            type: 'long',
+            _meta: {
+              description: 'Total number of Kibana spaces that have legacy siem signals indices',
+            },
+          },
+        },
       },
       endpointMetrics: {
         unique_endpoint_count: {
