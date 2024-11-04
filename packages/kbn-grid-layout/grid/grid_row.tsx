@@ -198,6 +198,8 @@ export const GridRow = forwardRef<
                 gridLayoutStateManager={gridLayoutStateManager}
                 renderPanelContents={renderPanelContents}
                 interactionStart={(type, e) => {
+                  if (e.button !== 0) return;
+
                   e.preventDefault();
                   e.stopPropagation();
                   const panelRef = gridLayoutStateManager.panelRefs.current[rowIndex][panelId];

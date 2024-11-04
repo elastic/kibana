@@ -44,23 +44,29 @@ export const GridPanel = forwardRef<
     const setDragHandles = useCallback(
       (dragHandles: Array<HTMLElement | null>) => {
         setDragHandleCount(dragHandles.length);
-
-        const onMouseDown = (e: MouseEvent) => interactionStart('drag', e);
-        const onMouseUp = (e: MouseEvent) => interactionStart('drop', e);
+        const onMouseUp = (e: MouseEvent) => {
+          interactionStart('drop', e);
+        };
+        const onMouseDown = (e: MouseEvent) => {
+          interactionStart('drag', e);
+          /**
+           * By adding the "drop" event listener to the document rather than the drag handler, we
+           * prevent the element from getting "stuck" in drag mode; however, we only attach this
+           * event listener **when the drag event starts**, and it only executes once, which means
+           * we don't have to remove the `mouseup` event listener
+           */
+          document.addEventListener('mouseup', onMouseUp, { once: true });
+        };
 
         for (const handle of dragHandles) {
           if (handle === null) return;
           handle.addEventListener('mousedown', onMouseDown);
-          handle.addEventListener('mouseup', onMouseUp);
         }
 
         removeEventListenersRef.current = () => {
-          console.log('UNMOUNT');
-
           for (const handle of dragHandles) {
             if (handle === null) return;
             handle.removeEventListener('mousedown', onMouseDown);
-            handle.removeEventListener('mouseup', onMouseUp);
           }
         };
       },
