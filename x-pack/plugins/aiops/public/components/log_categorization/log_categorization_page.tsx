@@ -55,6 +55,7 @@ import { FieldValidationCallout } from './category_validation_callout';
 import { createDocumentStatsHash } from './utils';
 import { TableHeader } from './category_table/table_header';
 import { useActions } from './category_table/use_actions';
+import { AttachmentsMenu } from './attachments_menu';
 
 const BAR_TARGET = 20;
 const DEFAULT_SELECTED_FIELD = 'message';
@@ -62,7 +63,10 @@ const DEFAULT_SELECTED_FIELD = 'message';
 export const LogCategorizationPage: FC = () => {
   const {
     notifications: { toasts },
+    application: { capabilities },
     embeddingOrigin,
+    embeddable,
+    cases,
   } = useAiopsAppContext();
   const { dataView, savedSearch } = useDataSource();
 
@@ -334,6 +338,16 @@ export const LogCategorizationPage: FC = () => {
 
   const actions = getActions(true);
 
+  const attachmentsMenuProps = {
+    embeddable,
+    cases,
+    capabilities,
+    dataView,
+    selectedField,
+    randomSamplerMode: randomSampler.getMode(),
+    randomSamplerProbability: randomSampler.getProbability(),
+  };
+
   return (
     <EuiPageBody data-test-subj="aiopsLogPatternAnalysisPage" paddingSize="none" panelled={false}>
       <PageHeader />
@@ -392,6 +406,9 @@ export const LogCategorizationPage: FC = () => {
         <EuiFlexItem />
         <EuiFlexItem grow={false} css={{ marginTop: 'auto' }}>
           <SamplingMenu randomSampler={randomSampler} reload={() => loadCategories()} />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false} css={{ marginTop: 'auto' }}>
+          <AttachmentsMenu {...attachmentsMenuProps} />
         </EuiFlexItem>
       </EuiFlexGroup>
 

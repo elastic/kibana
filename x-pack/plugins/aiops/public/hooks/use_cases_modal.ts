@@ -11,11 +11,22 @@ import { AttachmentType } from '@kbn/cases-plugin/common';
 import type { ChangePointEmbeddableRuntimeState } from '../embeddables/change_point_chart/types';
 import type { EmbeddableChangePointChartType } from '../embeddables/change_point_chart/embeddable_change_point_chart_factory';
 import { useAiopsAppContext } from './use_aiops_app_context';
+import type { EmbeddablePatternAnalysisType } from '../embeddables/pattern_analysis/embeddable_pattern_analysis_factory';
+import type { PatternAnalysisEmbeddableRuntimeState } from '../embeddables/pattern_analysis/types';
+
+type SupportedEmbeddableTypes = EmbeddableChangePointChartType | EmbeddablePatternAnalysisType;
+
+type EmbeddableRuntimeState<T extends SupportedEmbeddableTypes> =
+  T extends EmbeddableChangePointChartType
+    ? ChangePointEmbeddableRuntimeState
+    : T extends EmbeddablePatternAnalysisType
+    ? PatternAnalysisEmbeddableRuntimeState
+    : never;
 
 /**
  * Returns a callback for opening the cases modal with provided attachment state.
  */
-export const useCasesModal = <EmbeddableType extends EmbeddableChangePointChartType>(
+export const useCasesModal = <EmbeddableType extends SupportedEmbeddableTypes>(
   embeddableType: EmbeddableType
 ) => {
   const { cases } = useAiopsAppContext();
@@ -23,7 +34,7 @@ export const useCasesModal = <EmbeddableType extends EmbeddableChangePointChartT
   const selectCaseModal = cases?.hooks.useCasesAddToExistingCaseModal();
 
   return useCallback(
-    (persistableState: Partial<Omit<ChangePointEmbeddableRuntimeState, 'id'>>) => {
+    (persistableState: Partial<Omit<EmbeddableRuntimeState<EmbeddableType>, 'id'>>) => {
       const persistableStateAttachmentState = {
         ...persistableState,
         // Creates unique id based on the input

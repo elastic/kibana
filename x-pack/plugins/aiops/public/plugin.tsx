@@ -31,14 +31,14 @@ export class AiopsPlugin
       firstValueFrom(licensing.license$),
       import('./embeddables'),
       import('./ui_actions'),
-      import('./cases/register_change_point_charts_attachment'),
+      import('./cases/register_cases'),
       core.getStartServices(),
     ]).then(
       ([
         license,
         { registerEmbeddables },
         { registerAiopsUiActions },
-        { registerChangePointChartsAttachment },
+        { registerCases },
         [coreStart, pluginStart],
       ]) => {
         const { canUseAiops } = coreStart.application.capabilities.ml;
@@ -53,7 +53,7 @@ export class AiopsPlugin
           }
 
           if (cases) {
-            registerChangePointChartsAttachment(cases, coreStart, pluginStart);
+            registerCases(cases, coreStart, pluginStart);
           }
         }
       }
