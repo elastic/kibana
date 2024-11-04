@@ -54,7 +54,7 @@ describe(
         editFirstRule();
 
         // suppression fields are hidden since threshold fields used for suppression
-        cy.get(ALERT_SUPPRESSION_FIELDS).should('not.be.visible');
+        cy.get(ALERT_SUPPRESSION_FIELDS).should('not.exist');
 
         enablesAndPopulatesThresholdSuppression(60, 'm');
 
