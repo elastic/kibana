@@ -55,6 +55,7 @@ export interface KibanaLogicProps {
   data?: DataPublicPluginStart;
   esConfig: ESConfig;
   getChromeStyle$: ChromeStart['getChromeStyle$'];
+  getNavLinks: ChromeStart['navLinks']['getAll'];
   guidedOnboarding?: GuidedOnboardingPluginStart;
   history: ScopedHistory;
   indexMappingComponent?: React.FC<IndexMappingProps>;
@@ -87,6 +88,7 @@ export interface KibanaValues {
   data: DataPublicPluginStart | null;
   esConfig: ESConfig;
   getChromeStyle$: ChromeStart['getChromeStyle$'];
+  getNavLinks: ChromeStart['navLinks']['getAll'];
   guidedOnboarding: GuidedOnboardingPluginStart | null;
   history: ScopedHistory;
   indexMappingComponent: React.FC<IndexMappingProps> | null;
@@ -126,6 +128,7 @@ export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
     data: [props.data || null, {}],
     esConfig: [props.esConfig || { elasticsearch_host: ELASTICSEARCH_URL_PLACEHOLDER }, {}],
     getChromeStyle$: [props.getChromeStyle$, {}],
+    getNavLinks: [props.getNavLinks, {}],
     guidedOnboarding: [props.guidedOnboarding || null, {}],
     history: [props.history, {}],
     indexMappingComponent: [props.indexMappingComponent || null, {}],
