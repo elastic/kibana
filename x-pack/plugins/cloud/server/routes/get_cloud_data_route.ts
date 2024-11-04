@@ -6,14 +6,13 @@
  */
 
 import { RouteOptions } from '.';
-import { createLicensedRouteHandler } from './error_handler';
 import { CLOUD_DATA_SAVED_OBJECT_ID } from './constants';
 import { CLOUD_DATA_SAVED_OBJECT_TYPE } from '../saved_objects';
 import { CloudDataAttributes } from './types';
 
-export const getCloudSolutionDataRoute = ({ router }: RouteOptions) => {
+export const setGetCloudSolutionDataRoute = ({ router }: RouteOptions) => {
   router.versioned
-    .put({
+    .get({
       path: `/internal/cloud/solution`,
       access: 'internal',
       summary: 'Get cloud data for solutions',
@@ -31,7 +30,7 @@ export const getCloudSolutionDataRoute = ({ router }: RouteOptions) => {
           request: {},
         },
       },
-      createLicensedRouteHandler(async (context, request, response) => {
+      async (context, request, response) => {
         const coreContext = await context.core;
         const savedObjectsClient = coreContext.savedObjects.client;
         try {
@@ -43,6 +42,6 @@ export const getCloudSolutionDataRoute = ({ router }: RouteOptions) => {
         } catch (error) {
           return response.customError(error);
         }
-      })
+      }
     );
 };

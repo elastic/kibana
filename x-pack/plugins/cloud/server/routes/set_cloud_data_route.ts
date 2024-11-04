@@ -8,7 +8,6 @@
 import { schema } from '@kbn/config-schema';
 import { ReservedPrivilegesSet, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { RouteOptions } from '.';
-import { createLicensedRouteHandler } from './error_handler';
 import { CLOUD_DATA_SAVED_OBJECT_ID } from './constants';
 import { CLOUD_DATA_SAVED_OBJECT_TYPE } from '../saved_objects';
 import { CloudDataAttributes } from './types';
@@ -25,9 +24,9 @@ const createBodySchemaV1 = schema.object({
   }),
 });
 
-export const setCloudSolutionDataRoute = ({ router }: RouteOptions) => {
+export const setPostCloudSolutionDataRoute = ({ router }: RouteOptions) => {
   router.versioned
-    .put({
+    .post({
       path: `/internal/cloud/solution`,
       access: 'internal',
       summary: 'Save cloud data for solutions',
@@ -46,7 +45,7 @@ export const setCloudSolutionDataRoute = ({ router }: RouteOptions) => {
           },
         },
       },
-      createLicensedRouteHandler(async (context, request, response) => {
+      async (context, request, response) => {
         const coreContext = await context.core;
         const savedObjectsClient = coreContext.savedObjects.client;
         let cloudDataSo = null;
@@ -82,10 +81,10 @@ export const setCloudSolutionDataRoute = ({ router }: RouteOptions) => {
             );
           }
         } catch (error) {
-          return response.customError(error);
+          return response.badRequest(error);
         }
 
         return response.ok();
-      })
+      }
     );
 };

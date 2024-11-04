@@ -11,11 +11,13 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
-  describe('PUT /internal/cloud/solution', () => {
+  describe('POST /internal/cloud/solution', () => {
     it('set solution data', async () => {
       await supertest
         .post('/internal/cloud/solution')
         .set('kbn-xsrf', 'xxx')
+        .set('x-elastic-internal-origin', 'cloud')
+        .set('elastic-api-version', '1')
         .send({
           onboardingData: {
             solutionType: 'search',
@@ -26,9 +28,14 @@ export default function ({ getService }: FtrProviderContext) {
 
       const {
         body: { onboardingData },
-      } = await supertest.get('/internal/cloud/solution').set('kbn-xsrf', 'xxx');
+      } = await supertest
+        .get('/internal/cloud/solution')
+        .set('kbn-xsrf', 'xxx')
+        .set('x-elastic-internal-origin', 'cloud')
+        .set('elastic-api-version', '1')
+        .expect(200);
 
-      expect(onboardingData).to.eql({});
+      expect(onboardingData).to.eql({ solutionType: 'search', token: 'connectors' });
     });
   });
 }

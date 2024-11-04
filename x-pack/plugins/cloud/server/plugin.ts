@@ -22,8 +22,6 @@ import { readInstanceSizeMb } from './env';
 import { defineRoutes } from './routes';
 import { CloudRequestHandlerContext } from './routes/types';
 import { setupSavedObjects } from './saved_objects';
-// import { CloudRequestHandlerContext } from './routes/types';
-// import { defineRoutes as someRoute } from './routes';
 
 interface PluginsSetup {
   usageCollection?: UsageCollectionSetup;
