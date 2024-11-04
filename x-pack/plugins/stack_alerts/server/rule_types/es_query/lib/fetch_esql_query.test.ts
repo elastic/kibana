@@ -7,7 +7,11 @@
 
 import { OnlyEsqlQueryRuleParams } from '../types';
 import { Comparator } from '../../../../common/comparator_types';
-import { getEsqlQuery, getSourceFields } from './fetch_esql_query';
+import { fetchEsqlQuery, getEsqlQuery, getSourceFields } from './fetch_esql_query';
+import { getErrorSource, TaskErrorSource } from '@kbn/task-manager-plugin/server/task_running';
+import { SharePluginStart } from '@kbn/share-plugin/server';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 
 const getTimeRange = () => {
   const date = Date.now();
@@ -30,8 +34,43 @@ const defaultParams: OnlyEsqlQueryRuleParams = {
   groupBy: 'all',
   timeField: 'time',
 };
+const logger = loggingSystemMock.create().get();
 
 describe('fetchEsqlQuery', () => {
+  describe('fetch', () => {
+    afterEach(() => {
+      jest.resetAllMocks();
+    });
+    it('should throw a user error when the error is a verification_exception error', async () => {
+      const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+
+      scopedClusterClient.asCurrentUser.transport.request.mockRejectedValueOnce(
+        new Error(
+          'verification_exception: Found 1 problem line 1:23: Unknown column [user_agent.original]'
+        )
+      );
+
+      try {
+        await fetchEsqlQuery({
+          ruleId: 'testRuleId',
+          alertLimit: 1,
+          params: defaultParams,
+          services: {
+            logger,
+            scopedClusterClient,
+            share: {} as SharePluginStart,
+          },
+          spacePrefix: '',
+          publicBaseUrl: '',
+          dateStart: new Date().toISOString(),
+          dateEnd: new Date().toISOString(),
+        });
+      } catch (e) {
+        expect(getErrorSource(e)).toBe(TaskErrorSource.USER);
+      }
+    });
+  });
+
   describe('getEsqlQuery', () => {
     afterAll(() => {
       jest.resetAllMocks();

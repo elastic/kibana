@@ -9,7 +9,9 @@ import type { FC } from 'react';
 import React, { memo, useMemo } from 'react';
 
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING } from '../../../../common/constants';
 import { DocumentDetailsLeftPanelKey } from '../shared/constants/panel_keys';
 import { useKibana } from '../../../common/lib/kibana';
 import { PanelHeader } from './header';
@@ -32,10 +34,14 @@ export const LeftPanelNotesTab: LeftPanelPaths = 'notes';
 export const LeftPanel: FC<Partial<DocumentDetailsProps>> = memo(({ path }) => {
   const { telemetry } = useKibana().services;
   const { openLeftPanel } = useExpandableFlyoutApi();
-  const { eventId, indexName, scopeId, getFieldsData } = useDocumentDetailsContext();
+  const { eventId, indexName, scopeId, getFieldsData, isPreview } = useDocumentDetailsContext();
   const eventKind = getField(getFieldsData('event.kind'));
-  const securitySolutionNotesEnabled = useIsExperimentalFeatureEnabled(
-    'securitySolutionNotesEnabled'
+  const securitySolutionNotesDisabled = useIsExperimentalFeatureEnabled(
+    'securitySolutionNotesDisabled'
+  );
+
+  const [visualizationInFlyoutEnabled] = useUiSetting$<boolean>(
+    ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING
   );
 
   const tabsDisplayed = useMemo(() => {
@@ -43,11 +49,14 @@ export const LeftPanel: FC<Partial<DocumentDetailsProps>> = memo(({ path }) => {
       eventKind === EventKind.signal
         ? [tabs.insightsTab, tabs.investigationTab, tabs.responseTab]
         : [tabs.insightsTab];
-    if (securitySolutionNotesEnabled) {
+    if (!securitySolutionNotesDisabled && !isPreview) {
       tabList.push(tabs.notesTab);
     }
+    if (visualizationInFlyoutEnabled && !isPreview) {
+      return [tabs.visualizeTab, ...tabList];
+    }
     return tabList;
-  }, [eventKind, securitySolutionNotesEnabled]);
+  }, [eventKind, isPreview, securitySolutionNotesDisabled, visualizationInFlyoutEnabled]);
 
   const selectedTabId = useMemo(() => {
     const defaultTab = tabsDisplayed[0].id;

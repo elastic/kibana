@@ -1,15 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { OpenApiDocument } from '../openapi_types';
 import type { PlainObject } from './helpers/plain_object';
 import { extractByJsonPointer } from './helpers/extract_by_json_pointer';
-import { findRefs } from './find_refs';
+import { findLocalRefs } from './helpers/find_local_refs';
+import { parseRef } from './helpers/parse_ref';
 
 /**
  * Extracts circular references from a provided document.
@@ -19,7 +21,7 @@ export function getCircularRefs(document: OpenApiDocument): Set<string> {
   const localRefs = findLocalRefs(document);
   const circularRefs = new Set<string>();
   const resolveLocalRef = (localRef: string): PlainObject =>
-    extractByJsonPointer(document, extractJsonPointer(localRef));
+    extractByJsonPointer(document, parseRef(localRef).pointer);
 
   // In general references represent a disconnected graph. To find
   // all references cycles we need to check each reference.
@@ -79,27 +81,4 @@ function findCycleHeadRef(
   search(startRef);
 
   return result;
-}
-
-/**
- * Finds local references
- */
-function findLocalRefs(obj: unknown): string[] {
-  return findRefs(obj).filter((ref) => isLocalRef(ref));
-}
-
-/**
- * Checks whether the provided ref is local.
- * Local references start with `#/`
- */
-function isLocalRef(ref: string): boolean {
-  return ref.startsWith('#/');
-}
-
-/**
- * Extracts a JSON Pointer from a local reference
- * by getting rid of the leading slash
- */
-function extractJsonPointer(ref: string): string {
-  return ref.substring(1);
 }

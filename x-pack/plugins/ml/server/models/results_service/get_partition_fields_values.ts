@@ -35,15 +35,23 @@ function getFieldAgg(
   fieldType: MlPartitionFieldsType,
   isModelPlotSearch: boolean,
   query?: string,
-  fieldConfig?: FieldConfig
+  fieldsConfig?: FieldsConfig
 ) {
   const AGG_SIZE = 100;
 
+  const fieldConfig = fieldsConfig?.[fieldType];
   const fieldNameKey = `${fieldType}_name`;
   const fieldValueKey = `${fieldType}_value`;
 
   const sortByField =
     fieldConfig?.sort?.by === 'name' || isModelPlotSearch ? '_key' : 'maxRecordScore';
+
+  const splitFieldFilterValues = Object.entries(fieldsConfig ?? {})
+    .filter(([key, field]) => key !== fieldType && field.value)
+    .map(([key, field]) => ({
+      fieldValueKey: `${key}_value`,
+      fieldValue: field.value,
+    }));
 
   return {
     [fieldNameKey]: {
@@ -77,6 +85,11 @@ function getFieldAgg(
                   },
                 ]
               : []),
+            ...splitFieldFilterValues.map((filterValue) => ({
+              term: {
+                [filterValue.fieldValueKey]: filterValue.fieldValue,
+              },
+            })),
           ],
         },
       },
@@ -233,7 +246,7 @@ export const getPartitionFieldsValuesFactory = (mlClient: MlClient) =>
         ...ML_PARTITION_FIELDS.reduce((acc, key) => {
           return Object.assign(
             acc,
-            getFieldAgg(key, isModelPlotSearch, searchTerm[key], fieldsConfig[key])
+            getFieldAgg(key, isModelPlotSearch, searchTerm[key], fieldsConfig)
           );
         }, {}),
       },

@@ -1,0 +1,77 @@
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-ti_abusech.malware-default",
+    "id": "RP0HlUQkToBRTlZeGAItbyWMx1E=",
+    "index": ".ds-logs-ti_abusech.malware-default-2022.06.02-000001",
+    "source": {
+      "@timestamp": "2022-06-02T13:29:47.677Z",
+      "abusech": {
+        "malware": {
+        }
+      },
+      "agent": {
+        "ephemeral_id": "5c9f7693-8486-4634-a024-994faa6dee51",
+        "id": "8eee41bf-442d-48c3-9cc7-41b072d29a9b",
+        "name": "luke-VirtualBox",
+        "type": "filebeat",
+        "version": "8.2.0"
+      },
+      "data_stream": {
+        "dataset": "ti_abusech.malware",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "ecs": {
+        "version": "8.2.0"
+      },
+      "elastic_agent": {
+        "id": "8eee41bf-442d-48c3-9cc7-41b072d29a9b",
+        "snapshot": false,
+        "version": "8.2.0"
+      },
+      "event": {
+        "agent_id_status": "auth_metadata_missing",
+        "category": "threat",
+        "created": "2022-06-02T13:29:47.677Z",
+        "dataset": "ti_abusech.malware",
+        "ingested": "2022-06-02T13:29:48Z",
+        "kind": "enrichment",
+        "type": "indicator"
+      },
+      "input": {
+        "type": "httpjson"
+      },
+      "related": {
+        "hash": [
+          "a7f997be65f62fdbe5ec076f0fe207f7",
+          "d86e656455f985357df3063dff6637f7f3b95bb27d1769a6b88c7adecaf7763f",
+          "6144:Eiu4rKJqctSMeWml5SBm5bT6rhnMqvTRrbx50Elf03jhBtGuYEs0gw4N1c5b8Onl:vuI6QWm+6bTShnMIRUEKThB1sn5hOnl",
+          "T15194232F21ACD2E5F4379415A97680C8DE041E08695B5F2AD73B237AC5EF2F682C57"
+        ]
+      },
+      "tags": [
+        "forwarded",
+        "abusech-malware"
+      ],
+      "threat": {
+        "indicator": {
+          "file": {
+            "hash": {
+              "md5": "a7f997be65f62fdbe5ec076f0fe207f7",
+              "sha256": "d86e656455f985357df3063dff6637f7f3b95bb27d1769a6b88c7adecaf7763f",
+              "ssdeep": "6144:Eiu4rKJqctSMeWml5SBm5bT6rhnMqvTRrbx50Elf03jhBtGuYEs0gw4N1c5b8Onl:vuI6QWm+6bTShnMIRUEKThB1sn5hOnl",
+              "tlsh": "T15194232F21ACD2E5F4379415A97680C8DE041E08695B5F2AD73B237AC5EF2F682C57"
+            },
+            "pe": {
+            },
+            "size": 441803,
+            "type": "zip"
+          },
+          "first_seen": "2022-06-02T13:29:44.000Z",
+          "type": "file"
+        }
+      }
+    }
+  }
+}

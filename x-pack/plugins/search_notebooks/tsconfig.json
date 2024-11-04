@@ -15,6 +15,7 @@
     "target/**/*"
   ],
   "kbn_references": [
+    "@kbn/analytics",
     "@kbn/config-schema",
     "@kbn/core",
     "@kbn/i18n",
@@ -26,5 +27,6 @@
     "@kbn/shared-ux-utility",
     "@kbn/kibana-utils-plugin",
     "@kbn/ipynb",
+    "@kbn/usage-collection-plugin",
   ]
 }

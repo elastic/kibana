@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -21,6 +22,15 @@ import { ExistenceFetchStatus } from '../../types';
 import { FieldsAccordion } from './fields_accordion';
 import { NoFieldsCallout } from './no_fields_callout';
 import { useGroupedFields, type GroupedFieldsParams } from '../../hooks/use_grouped_fields';
+
+jest.mock('lodash', () => {
+  const original = jest.requireActual('lodash');
+
+  return {
+    ...original,
+    debounce: (fn: unknown) => fn,
+  };
+});
 
 describe('UnifiedFieldList FieldListGrouped + useGroupedFields()', () => {
   let defaultProps: FieldListGroupedProps<DataViewField>;

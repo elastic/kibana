@@ -5,16 +5,14 @@
  * 2.0.
  */
 
-import { uniq } from 'lodash';
+import { omit, uniq } from 'lodash';
 import { type RequestHandler, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
-import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 
 import type {
   GetAgentsResponse,
   GetOneAgentResponse,
   GetAgentStatusResponse,
-  PutAgentReassignResponse,
   GetAgentTagsResponse,
   GetAvailableVersionsResponse,
   GetActionStatusResponse,
@@ -31,7 +29,6 @@ import type {
   DeleteAgentRequestSchema,
   GetAgentStatusRequestSchema,
   GetAgentDataRequestSchema,
-  PutAgentReassignRequestSchemaDeprecated,
   PostAgentReassignRequestSchema,
   PostBulkAgentReassignRequestSchema,
   PostBulkUpdateAgentTagsRequestSchema,
@@ -45,15 +42,11 @@ import { defaultFleetErrorHandler, FleetNotFoundError } from '../../errors';
 import * as AgentService from '../../services/agents';
 import { fetchAndAssignAgentMetrics } from '../../services/agents/agent_metrics';
 import { getAgentStatusForAgentPolicy } from '../../services/agents';
+import { isAgentInNamespace } from '../../services/spaces/agent_namespaces';
+import { getCurrentNamespace } from '../../services/spaces/get_current_namespace';
 
-export function verifyNamespace(agent: Agent, currentNamespace?: string) {
-  const isInNamespace =
-    (currentNamespace && agent.namespaces?.includes(currentNamespace)) ||
-    (!currentNamespace &&
-      (!agent.namespaces ||
-        agent.namespaces.length === 0 ||
-        agent.namespaces?.includes(DEFAULT_NAMESPACE_STRING)));
-  if (!isInNamespace) {
+async function verifyNamespace(agent: Agent, namespace?: string) {
+  if (!(await isAgentInNamespace(agent, namespace))) {
     throw new FleetNotFoundError(`${agent.id} not found in namespace`);
   }
 }
@@ -67,8 +60,7 @@ export const getAgentHandler: FleetRequestHandler<
     const esClientCurrentUser = coreContext.elasticsearch.client.asCurrentUser;
 
     let agent = await fleetContext.agentClient.asCurrentUser.getAgent(request.params.agentId);
-
-    verifyNamespace(agent, coreContext.savedObjects.client.getCurrentNamespace());
+    await verifyNamespace(agent, getCurrentNamespace(coreContext.savedObjects.client));
 
     if (request.query.withMetrics) {
       agent = (await fetchAndAssignAgentMetrics(esClientCurrentUser, [agent]))[0];
@@ -90,12 +82,15 @@ export const getAgentHandler: FleetRequestHandler<
   }
 };
 
-export const deleteAgentHandler: RequestHandler<
+export const deleteAgentHandler: FleetRequestHandler<
   TypeOf<typeof DeleteAgentRequestSchema.params>
 > = async (context, request, response) => {
+  const [coreContext, fleetContext] = await Promise.all([context.core, context.fleet]);
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
+
   try {
-    const coreContext = await context.core;
-    const esClient = coreContext.elasticsearch.client.asInternalUser;
+    const agent = await fleetContext.agentClient.asCurrentUser.getAgent(request.params.agentId);
+    await verifyNamespace(agent, getCurrentNamespace(coreContext.savedObjects.client));
 
     await AgentService.deleteAgent(esClient, request.params.agentId);
 
@@ -116,12 +111,12 @@ export const deleteAgentHandler: RequestHandler<
   }
 };
 
-export const updateAgentHandler: RequestHandler<
+export const updateAgentHandler: FleetRequestHandler<
   TypeOf<typeof UpdateAgentRequestSchema.params>,
   undefined,
   TypeOf<typeof UpdateAgentRequestSchema.body>
 > = async (context, request, response) => {
-  const coreContext = await context.core;
+  const [coreContext, fleetContext] = await Promise.all([context.core, context.fleet]);
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const soClient = coreContext.savedObjects.client;
 
@@ -134,6 +129,9 @@ export const updateAgentHandler: RequestHandler<
   }
 
   try {
+    const agent = await fleetContext.agentClient.asCurrentUser.getAgent(request.params.agentId);
+    await verifyNamespace(agent, getCurrentNamespace(soClient));
+
     await AgentService.updateAgent(esClient, request.params.agentId, partialAgent);
     const body = {
       item: await AgentService.getAgentById(esClient, soClient, request.params.agentId),
@@ -207,7 +205,6 @@ export const getAgentsHandler: FleetRequestHandler<
     }
 
     const body: GetAgentsResponse = {
-      list: agents, // deprecated
       items: agents,
       total,
       page,
@@ -243,30 +240,7 @@ export const getAgentTagsHandler: RequestHandler<
   }
 };
 
-export const putAgentsReassignHandlerDeprecated: RequestHandler<
-  TypeOf<typeof PutAgentReassignRequestSchemaDeprecated.params>,
-  undefined,
-  TypeOf<typeof PutAgentReassignRequestSchemaDeprecated.body>
-> = async (context, request, response) => {
-  const coreContext = await context.core;
-  const soClient = coreContext.savedObjects.client;
-  const esClient = coreContext.elasticsearch.client.asInternalUser;
-  try {
-    await AgentService.reassignAgent(
-      soClient,
-      esClient,
-      request.params.agentId,
-      request.body.policy_id
-    );
-
-    const body: PutAgentReassignResponse = {};
-    return response.ok({ body });
-  } catch (error) {
-    return defaultFleetErrorHandler({ error, response });
-  }
-};
-
-export const postAgentsReassignHandler: RequestHandler<
+export const postAgentReassignHandler: RequestHandler<
   TypeOf<typeof PostAgentReassignRequestSchema.params>,
   undefined,
   TypeOf<typeof PostAgentReassignRequestSchema.body>
@@ -323,15 +297,25 @@ export const getAgentStatusForAgentPolicyHandler: FleetRequestHandler<
     const [coreContext, fleetContext] = await Promise.all([context.core, context.fleet]);
     const esClient = coreContext.elasticsearch.client.asInternalUser;
     const soClient = fleetContext.internalSoClient;
+
+    const parsePolicyIds = (policyIds: string | string[] | undefined): string[] | undefined => {
+      if (!policyIds || !policyIds.length) {
+        return undefined;
+      }
+
+      return Array.isArray(policyIds) ? policyIds : [policyIds];
+    };
+
     const results = await getAgentStatusForAgentPolicy(
       esClient,
       soClient,
       request.query.policyId,
       request.query.kuery,
-      coreContext.savedObjects.client.getCurrentNamespace()
+      coreContext.savedObjects.client.getCurrentNamespace(),
+      parsePolicyIds(request.query.policyIds)
     );
 
-    const body: GetAgentStatusResponse = { results };
+    const body: GetAgentStatusResponse = { results: omit(results, 'total') };
 
     return response.ok({ body });
   } catch (error) {
@@ -388,7 +372,11 @@ export const getActionStatusHandler: RequestHandler<
   const esClient = coreContext.elasticsearch.client.asInternalUser;
 
   try {
-    const actionStatuses = await AgentService.getActionStatuses(esClient, request.query);
+    const actionStatuses = await AgentService.getActionStatuses(
+      esClient,
+      request.query,
+      getCurrentNamespace(coreContext.savedObjects.client)
+    );
     const body: GetActionStatusResponse = { items: actionStatuses };
     return response.ok({ body });
   } catch (error) {

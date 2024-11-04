@@ -11,22 +11,29 @@ import { AxiosError, Method } from 'axios';
 import { IncomingMessage } from 'http';
 import { PassThrough } from 'stream';
 import { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
+import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
 import {
   RunActionParamsSchema,
   InvokeAIActionParamsSchema,
+  InvokeAIRawActionParamsSchema,
+  InvokeAIRawActionResponseSchema,
   StreamingResponseSchema,
   RunActionResponseSchema,
   RunApiLatestResponseSchema,
 } from '../../../common/bedrock/schema';
-import {
+import type {
   Config,
   Secrets,
   RunActionParams,
   RunActionResponse,
   InvokeAIActionParams,
   InvokeAIActionResponse,
+  InvokeAIRawActionParams,
+  InvokeAIRawActionResponse,
   RunApiLatestResponse,
+  BedrockMessage,
+  BedrockToolChoice,
 } from '../../../common/bedrock/types';
 import {
   SUB_ACTION,
@@ -89,6 +96,12 @@ export class BedrockConnector extends SubActionConnector<Config, Secrets> {
       name: SUB_ACTION.INVOKE_STREAM,
       method: 'invokeStream',
       schema: InvokeAIActionParamsSchema,
+    });
+
+    this.registerSubAction({
+      name: SUB_ACTION.INVOKE_AI_RAW,
+      method: 'invokeAIRaw',
+      schema: InvokeAIRawActionParamsSchema,
     });
   }
 
@@ -183,17 +196,19 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     return { available: response.success };
   }
 
-  private async runApiDeprecated(
-    params: SubActionRequestParams<RunActionResponse> // : SubActionRequestParams<RunApiLatestResponseSchema>
-  ): Promise<RunActionResponse> {
-    const response = await this.request(params);
+  private async runApiRaw(
+    params: SubActionRequestParams<RunActionResponse | InvokeAIRawActionResponse>,
+    connectorUsageCollector: ConnectorUsageCollector
+  ): Promise<RunActionResponse | InvokeAIRawActionResponse> {
+    const response = await this.request(params, connectorUsageCollector);
     return response.data;
   }
 
   private async runApiLatest(
-    params: SubActionRequestParams<RunApiLatestResponse> // : SubActionRequestParams<RunApiLatestResponseSchema>
+    params: SubActionRequestParams<RunApiLatestResponse>,
+    connectorUsageCollector: ConnectorUsageCollector
   ): Promise<RunActionResponse> {
-    const response = await this.request(params);
+    const response = await this.request(params, connectorUsageCollector);
     // keeping the response the same as claude 2 for our APIs
     // adding the usage object for better token tracking
     return {
@@ -208,12 +223,10 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
    * @param body The stringified request body to be sent in the POST request.
    * @param model Optional model to be used for the API request. If not provided, the default model from the connector will be used.
    */
-  public async runApi({
-    body,
-    model: reqModel,
-    signal,
-    timeout,
-  }: RunActionParams): Promise<RunActionResponse> {
+  public async runApi(
+    { body, model: reqModel, signal, timeout, raw }: RunActionParams,
+    connectorUsageCollector: ConnectorUsageCollector
+  ): Promise<RunActionResponse | InvokeAIRawActionResponse> {
     // set model on per request basis
     const currentModel = reqModel ?? this.model;
     const path = `/model/${currentModel}/invoke`;
@@ -227,11 +240,24 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
       // give up to 2 minutes for response
       timeout: timeout ?? DEFAULT_TIMEOUT_MS,
     };
+
+    if (raw) {
+      return this.runApiRaw(
+        { ...requestArgs, responseSchema: InvokeAIRawActionResponseSchema },
+        connectorUsageCollector
+      );
+    }
     // possible api received deprecated arguments, which will still work with the deprecated Claude 2 models
     if (usesDeprecatedArguments(body)) {
-      return this.runApiDeprecated({ ...requestArgs, responseSchema: RunActionResponseSchema });
+      return this.runApiRaw(
+        { ...requestArgs, responseSchema: RunActionResponseSchema },
+        connectorUsageCollector
+      );
     }
-    return this.runApiLatest({ ...requestArgs, responseSchema: RunApiLatestResponseSchema });
+    return this.runApiLatest(
+      { ...requestArgs, responseSchema: RunApiLatestResponseSchema },
+      connectorUsageCollector
+    );
   }
 
   /**
@@ -242,26 +268,27 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
    * @param body The stringified request body to be sent in the POST request.
    * @param model Optional model to be used for the API request. If not provided, the default model from the connector will be used.
    */
-  private async streamApi({
-    body,
-    model: reqModel,
-    signal,
-    timeout,
-  }: RunActionParams): Promise<StreamingResponse> {
+  private async streamApi(
+    { body, model: reqModel, signal, timeout }: RunActionParams,
+    connectorUsageCollector: ConnectorUsageCollector
+  ): Promise<StreamingResponse> {
     // set model on per request basis
     const path = `/model/${reqModel ?? this.model}/invoke-with-response-stream`;
     const signed = this.signRequest(body, path, true);
 
-    const response = await this.request({
-      ...signed,
-      url: `${this.url}${path}`,
-      method: 'post',
-      responseSchema: StreamingResponseSchema,
-      data: body,
-      responseType: 'stream',
-      signal,
-      timeout,
-    });
+    const response = await this.request(
+      {
+        ...signed,
+        url: `${this.url}${path}`,
+        method: 'post',
+        responseSchema: StreamingResponseSchema,
+        data: body,
+        responseType: 'stream',
+        signal,
+        timeout,
+      },
+      connectorUsageCollector
+    );
 
     return response.data.pipe(new PassThrough());
   }
@@ -274,21 +301,31 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
    * @param messages An array of messages to be sent to the API
    * @param model Optional model to be used for the API request. If not provided, the default model from the connector will be used.
    */
-  public async invokeStream({
-    messages,
-    model,
-    stopSequences,
-    system,
-    temperature,
-    signal,
-    timeout,
-  }: InvokeAIActionParams): Promise<IncomingMessage> {
-    const res = (await this.streamApi({
-      body: JSON.stringify(formatBedrockBody({ messages, stopSequences, system, temperature })),
+  public async invokeStream(
+    {
+      messages,
       model,
+      stopSequences,
+      system,
+      temperature,
       signal,
       timeout,
-    })) as unknown as IncomingMessage;
+      tools,
+      toolChoice,
+    }: InvokeAIActionParams | InvokeAIRawActionParams,
+    connectorUsageCollector: ConnectorUsageCollector
+  ): Promise<IncomingMessage> {
+    const res = (await this.streamApi(
+      {
+        body: JSON.stringify(
+          formatBedrockBody({ messages, stopSequences, system, temperature, tools, toolChoice })
+        ),
+        model,
+        signal,
+        timeout,
+      },
+      connectorUsageCollector
+    )) as unknown as IncomingMessage;
     return res;
   }
 
@@ -300,25 +337,79 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
    * @param model Optional model to be used for the API request. If not provided, the default model from the connector will be used.
    * @returns an object with the response string as a property called message
    */
-  public async invokeAI({
-    messages,
-    model,
-    stopSequences,
-    system,
-    temperature,
-    maxTokens,
-    signal,
-    timeout,
-  }: InvokeAIActionParams): Promise<InvokeAIActionResponse> {
-    const res = await this.runApi({
-      body: JSON.stringify(
-        formatBedrockBody({ messages, stopSequences, system, temperature, maxTokens })
-      ),
+  public async invokeAI(
+    {
+      messages,
       model,
+      stopSequences,
+      system,
+      temperature,
+      maxTokens,
       signal,
       timeout,
-    });
+      tools,
+      toolChoice,
+    }: InvokeAIActionParams,
+    connectorUsageCollector: ConnectorUsageCollector
+  ): Promise<InvokeAIActionResponse> {
+    const res = (await this.runApi(
+      {
+        body: JSON.stringify(
+          formatBedrockBody({
+            messages,
+            stopSequences,
+            system,
+            temperature,
+            maxTokens,
+            tools,
+            toolChoice,
+          })
+        ),
+        model,
+        signal,
+        timeout,
+      },
+      connectorUsageCollector
+    )) as RunActionResponse;
     return { message: res.completion.trim() };
+  }
+
+  public async invokeAIRaw(
+    {
+      messages,
+      model,
+      stopSequences,
+      system,
+      temperature,
+      maxTokens = DEFAULT_TOKEN_LIMIT,
+      signal,
+      timeout,
+      tools,
+      toolChoice,
+      anthropicVersion,
+    }: InvokeAIRawActionParams,
+    connectorUsageCollector: ConnectorUsageCollector
+  ): Promise<InvokeAIRawActionResponse> {
+    const res = await this.runApi(
+      {
+        body: JSON.stringify({
+          messages,
+          stop_sequences: stopSequences,
+          system,
+          temperature,
+          max_tokens: maxTokens,
+          tools,
+          tool_choice: toolChoice,
+          anthropic_version: anthropicVersion,
+        }),
+        model,
+        signal,
+        timeout,
+        raw: true,
+      },
+      connectorUsageCollector
+    );
+    return res;
   }
 }
 
@@ -328,20 +419,31 @@ const formatBedrockBody = ({
   temperature = 0,
   system,
   maxTokens = DEFAULT_TOKEN_LIMIT,
+  tools,
+  toolChoice,
 }: {
-  messages: Array<{ role: string; content: string }>;
+  messages: BedrockMessage[];
   stopSequences?: string[];
   temperature?: number;
   maxTokens?: number;
   // optional system message to be sent to the API
   system?: string;
+  tools?: Array<{ name: string; description: string }>;
+  toolChoice?: BedrockToolChoice;
 }) => ({
   anthropic_version: 'bedrock-2023-05-31',
   ...ensureMessageFormat(messages, system),
   max_tokens: maxTokens,
   stop_sequences: stopSequences,
   temperature,
+  tools,
+  tool_choice: toolChoice,
 });
+
+interface FormattedBedrockMessage {
+  role: string;
+  content: string | BedrockMessage['rawContent'];
+}
 
 /**
  * Ensures that the messages are in the correct format for the Bedrock API
@@ -350,19 +452,32 @@ const formatBedrockBody = ({
  * @param messages
  */
 const ensureMessageFormat = (
-  messages: Array<{ role: string; content: string }>,
+  messages: BedrockMessage[],
   systemPrompt?: string
-): { messages: Array<{ role: string; content: string }>; system?: string } => {
+): {
+  messages: FormattedBedrockMessage[];
+  system?: string;
+} => {
   let system = systemPrompt ? systemPrompt : '';
 
-  const newMessages = messages.reduce((acc: Array<{ role: string; content: string }>, m) => {
-    const lastMessage = acc[acc.length - 1];
+  const newMessages = messages.reduce<FormattedBedrockMessage[]>((acc, m) => {
     if (m.role === 'system') {
       system = `${system.length ? `${system}\n` : ''}${m.content}`;
       return acc;
     }
 
-    if (lastMessage && lastMessage.role === m.role) {
+    const messageRole = () => (['assistant', 'ai'].includes(m.role) ? 'assistant' : 'user');
+
+    if (m.rawContent) {
+      acc.push({
+        role: messageRole(),
+        content: m.rawContent,
+      });
+      return acc;
+    }
+
+    const lastMessage = acc[acc.length - 1];
+    if (lastMessage && lastMessage.role === m.role && typeof lastMessage.content === 'string') {
       // Bedrock only accepts assistant and user roles.
       // If 2 user or 2 assistant messages are sent in a row, combine the messages into a single message
       return [
@@ -372,11 +487,9 @@ const ensureMessageFormat = (
     }
 
     // force role outside of system to ensure it is either assistant or user
-    return [
-      ...acc,
-      { content: m.content, role: ['assistant', 'ai'].includes(m.role) ? 'assistant' : 'user' },
-    ];
+    return [...acc, { content: m.content, role: messageRole() }];
   }, []);
+
   return system.length ? { system, messages: newMessages } : { messages: newMessages };
 };
 

@@ -311,7 +311,7 @@ export const MultiRowInput: FunctionComponent<MultiRowInputProps> = ({
   }, [value, onChange]);
 
   const onDragEndHandler = useCallback(
-    ({ source, destination }) => {
+    ({ source, destination }: any) => {
       if (source && destination) {
         const items = euiDragDropReorder(value, source.index, destination.index);
         const sourceErrors = indexedErrors[source.index];

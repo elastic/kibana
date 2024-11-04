@@ -63,5 +63,5 @@ export async function generateData({
       return [...loopGeneratedDocs, customDoc];
     });
 
-  await apmSynthtraceEsClient.index(docs);
+  return apmSynthtraceEsClient.index(docs);
 }

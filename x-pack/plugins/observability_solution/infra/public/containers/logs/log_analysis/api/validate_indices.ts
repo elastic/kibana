@@ -8,14 +8,13 @@
 import type { HttpHandler } from '@kbn/core/public';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
+import { decodeOrThrow } from '@kbn/io-ts-utils';
 import {
   LOG_ANALYSIS_VALIDATE_INDICES_PATH,
   ValidationIndicesFieldSpecification,
   validationIndicesRequestPayloadRT,
   validationIndicesResponsePayloadRT,
 } from '../../../../../common/http_api';
-
-import { decodeOrThrow } from '../../../../../common/runtime_types';
 
 interface RequestArgs {
   indices: string[];

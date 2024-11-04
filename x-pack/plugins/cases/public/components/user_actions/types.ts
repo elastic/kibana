@@ -44,7 +44,7 @@ export interface UserActionTreeProps {
   userActionsStats: CaseUserActionsStats;
 }
 
-type UnsupportedUserActionTypes = typeof UNSUPPORTED_ACTION_TYPES[number];
+type UnsupportedUserActionTypes = (typeof UNSUPPORTED_ACTION_TYPES)[number];
 export type SupportedUserActionTypes = keyof Omit<
   typeof UserActionTypes,
   UnsupportedUserActionTypes

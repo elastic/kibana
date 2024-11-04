@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import kbnRison from '@kbn/rison';
@@ -11,7 +12,7 @@ import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'timePicker', 'discover']);
+  const { common, discover } = getPageObjects(['common', 'discover']);
   const testSubjects = getService('testSubjects');
   const dataViews = getService('dataViews');
 
@@ -23,10 +24,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             dataSource: { type: 'esql' },
             query: { esql: 'from my-example-* | sort @timestamp desc' },
           });
-          await PageObjects.common.navigateToApp('discover', {
-            hash: `/?_a=${state}`,
+          await common.navigateToActualUrl('discover', `?_a=${state}`, {
+            ensureCurrentUrl: false,
           });
-          await PageObjects.discover.waitUntilSearchingHasFinished();
+          await discover.waitUntilSearchingHasFinished();
           const timestamps = await testSubjects.findAll('exampleRootProfileTimestamp');
           expect(timestamps).to.have.length(6);
           expect(await timestamps[0].getVisibleText()).to.be('2024-06-10T16:30:00.000Z');
@@ -38,9 +39,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('data view mode', () => {
       describe('cell renderers', () => {
         it('should render custom @timestamp', async () => {
-          await PageObjects.common.navigateToApp('discover');
+          await common.navigateToActualUrl('discover', undefined, {
+            ensureCurrentUrl: false,
+          });
           await dataViews.switchTo('my-example-*');
-          await PageObjects.discover.waitUntilSearchingHasFinished();
+          await discover.waitUntilSearchingHasFinished();
           const timestamps = await testSubjects.findAll('exampleRootProfileTimestamp');
           expect(timestamps).to.have.length(6);
           expect(await timestamps[0].getVisibleText()).to.be('2024-06-10T16:30:00.000Z');

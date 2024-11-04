@@ -102,7 +102,7 @@ export async function getPaginatedNodes(
   );
 
   for (const metricName in metricSeriesData) {
-    if (!metricSeriesData.hasOwnProperty(metricName)) {
+    if (!Object.hasOwn(metricSeriesData, metricName)) {
       continue;
     }
 

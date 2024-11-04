@@ -37,7 +37,11 @@ async function deleteWithOCC(context: RulesClientContext, { id }: { id: string }
       context.auditLogger?.log(
         adHocRunAuditEvent({
           action: AdHocRunAuditAction.DELETE,
-          savedObject: { type: AD_HOC_RUN_SAVED_OBJECT_TYPE, id },
+          savedObject: {
+            type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
+            id,
+            name: `backfill for rule "${result.attributes.rule.name}"`,
+          },
           error: new Error(result.error.message),
         })
       );

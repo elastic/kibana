@@ -26,7 +26,7 @@ export default function ({ loadTestFile, getService }) {
       );
     });
 
-    describe('', () => {
+    describe('apis', () => {
       loadTestFile(require.resolve('./maps_telemetry'));
       loadTestFile(require.resolve('./get_indexes_matching_pattern'));
       loadTestFile(require.resolve('./create_doc_source'));

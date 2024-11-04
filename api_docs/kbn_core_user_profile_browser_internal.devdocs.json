@@ -1,26 +1,10 @@
 {
   "id": "@kbn/core-user-profile-browser-internal",
   "client": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
     "classes": [
       {
         "parentPluginId": "@kbn/core-user-profile-browser-internal",
-        "id": "def-common.UserProfileService",
+        "id": "def-public.UserProfileService",
         "type": "Class",
         "tags": [],
         "label": "UserProfileService",
@@ -28,9 +12,9 @@
         "signature": [
           {
             "pluginId": "@kbn/core-user-profile-browser-internal",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreUserProfileBrowserInternalPluginApi",
-            "section": "def-common.UserProfileService",
+            "section": "def-public.UserProfileService",
             "text": "UserProfileService"
           },
           " implements ",
@@ -38,17 +22,17 @@
           "<",
           {
             "pluginId": "@kbn/core-user-profile-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreUserProfileBrowserPluginApi",
-            "section": "def-common.UserProfileServiceSetup",
+            "section": "def-public.UserProfileServiceSetup",
             "text": "UserProfileServiceSetup"
           },
           ", ",
           {
             "pluginId": "@kbn/core-user-profile-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreUserProfileBrowserPluginApi",
-            "section": "def-common.UserProfileService",
+            "section": "def-public.UserProfileService",
             "text": "UserProfileService"
           },
           ">"
@@ -59,7 +43,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-user-profile-browser-internal",
-            "id": "def-common.UserProfileService.Unnamed",
+            "id": "def-public.UserProfileService.Unnamed",
             "type": "Function",
             "tags": [],
             "label": "Constructor",
@@ -73,7 +57,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-user-profile-browser-internal",
-                "id": "def-common.UserProfileService.Unnamed.$1",
+                "id": "def-public.UserProfileService.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "coreContext",
@@ -91,7 +75,7 @@
           },
           {
             "parentPluginId": "@kbn/core-user-profile-browser-internal",
-            "id": "def-common.UserProfileService.setup",
+            "id": "def-public.UserProfileService.setup",
             "type": "Function",
             "tags": [],
             "label": "setup",
@@ -100,9 +84,9 @@
               "() => ",
               {
                 "pluginId": "@kbn/core-user-profile-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreUserProfileBrowserPluginApi",
-                "section": "def-common.UserProfileServiceSetup",
+                "section": "def-public.UserProfileServiceSetup",
                 "text": "UserProfileServiceSetup"
               }
             ],
@@ -114,7 +98,7 @@
           },
           {
             "parentPluginId": "@kbn/core-user-profile-browser-internal",
-            "id": "def-common.UserProfileService.start",
+            "id": "def-public.UserProfileService.start",
             "type": "Function",
             "tags": [],
             "label": "start",
@@ -123,9 +107,9 @@
               "() => ",
               {
                 "pluginId": "@kbn/core-user-profile-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreUserProfileBrowserPluginApi",
-                "section": "def-common.UserProfileService",
+                "section": "def-public.UserProfileService",
                 "text": "UserProfileService"
               }
             ],
@@ -137,7 +121,7 @@
           },
           {
             "parentPluginId": "@kbn/core-user-profile-browser-internal",
-            "id": "def-common.UserProfileService.stop",
+            "id": "def-public.UserProfileService.stop",
             "type": "Function",
             "tags": [],
             "label": "stop",
@@ -161,7 +145,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/core-user-profile-browser-internal",
-        "id": "def-common.InternalUserProfileServiceSetup",
+        "id": "def-public.InternalUserProfileServiceSetup",
         "type": "Type",
         "tags": [],
         "label": "InternalUserProfileServiceSetup",
@@ -169,9 +153,9 @@
         "signature": [
           {
             "pluginId": "@kbn/core-user-profile-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreUserProfileBrowserPluginApi",
-            "section": "def-common.UserProfileServiceSetup",
+            "section": "def-public.UserProfileServiceSetup",
             "text": "UserProfileServiceSetup"
           }
         ],
@@ -182,7 +166,7 @@
       },
       {
         "parentPluginId": "@kbn/core-user-profile-browser-internal",
-        "id": "def-common.InternalUserProfileServiceStart",
+        "id": "def-public.InternalUserProfileServiceStart",
         "type": "Type",
         "tags": [],
         "label": "InternalUserProfileServiceStart",
@@ -190,9 +174,9 @@
         "signature": [
           {
             "pluginId": "@kbn/core-user-profile-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreUserProfileBrowserPluginApi",
-            "section": "def-common.UserProfileService",
+            "section": "def-public.UserProfileService",
             "text": "UserProfileService"
           }
         ],
@@ -202,6 +186,22 @@
         "initialIsOpen": false
       }
     ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": []
   }
 }

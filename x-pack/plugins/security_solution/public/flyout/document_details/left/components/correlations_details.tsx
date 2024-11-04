@@ -66,6 +66,7 @@ export const CorrelationsDetails: React.FC = () => {
               <SuppressedAlerts
                 alertSuppressionCount={alertSuppressionCount}
                 dataAsNestedObject={dataAsNestedObject}
+                isPreview={isPreview}
               />
             </EuiFlexItem>
           )}

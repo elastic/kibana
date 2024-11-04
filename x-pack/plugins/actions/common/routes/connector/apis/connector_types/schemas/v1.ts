@@ -8,5 +8,12 @@
 import { schema } from '@kbn/config-schema';
 
 export const connectorTypesQuerySchema = schema.object({
-  feature_id: schema.maybe(schema.string()),
+  feature_id: schema.maybe(
+    schema.string({
+      meta: {
+        description:
+          'A filter to limit the retrieved connector types to those that support a specific feature (such as alerting or cases).',
+      },
+    })
+  ),
 });

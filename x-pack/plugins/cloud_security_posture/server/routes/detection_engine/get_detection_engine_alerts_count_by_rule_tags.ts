@@ -15,10 +15,6 @@ import {
 } from '../../../common/constants';
 import { CspRouter } from '../../types';
 
-export interface VulnerabilitiesStatisticsQueryResult {
-  total: number;
-}
-
 const DEFAULT_ALERTS_INDEX = '.alerts-security.alerts-default' as const;
 
 export const getDetectionEngineAlertsCountByRuleTags = async (
@@ -57,6 +53,9 @@ export const defineGetDetectionEngineAlertsStatus = (router: CspRouter) =>
     .get({
       access: 'internal',
       path: GET_DETECTION_RULE_ALERTS_STATUS_PATH,
+      options: {
+        tags: ['access:cloud-security-posture-read'],
+      },
     })
     .addVersion(
       {
@@ -70,10 +69,6 @@ export const defineGetDetectionEngineAlertsStatus = (router: CspRouter) =>
         },
       },
       async (context, request, response) => {
-        if (!(await context.fleet).authz.fleet.all) {
-          return response.forbidden();
-        }
-
         const requestBody = request.query;
         const cspContext = await context.csp;
 

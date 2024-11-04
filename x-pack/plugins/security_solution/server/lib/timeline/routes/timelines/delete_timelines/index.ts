@@ -5,23 +5,21 @@
  * 2.0.
  */
 
+import type { IKibanaResponse } from '@kbn/core-http-server';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { buildRouteValidationWithExcess } from '../../../../../utils/build_validation/route_validation';
-import type { ConfigType } from '../../../../..';
-import { deleteTimelinesSchema } from '../../../../../../common/api/timeline';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import {
+  DeleteTimelinesRequestBody,
+  type DeleteTimelinesResponse,
+} from '../../../../../../common/api/timeline';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
-import type { SetupPlugins } from '../../../../../plugin';
 import { TIMELINE_URL } from '../../../../../../common/constants';
 import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
 
 import { buildFrameworkRequest } from '../../../utils/common';
 import { deleteTimeline } from '../../../saved_object/timelines';
 
-export const deleteTimelinesRoute = (
-  router: SecuritySolutionPluginRouter,
-  config: ConfigType,
-  security: SetupPlugins['security']
-) => {
+export const deleteTimelinesRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
     .delete({
       path: TIMELINE_URL,
@@ -34,18 +32,19 @@ export const deleteTimelinesRoute = (
       {
         version: '2023-10-31',
         validate: {
-          request: { body: buildRouteValidationWithExcess(deleteTimelinesSchema) },
+          request: { body: buildRouteValidationWithZod(DeleteTimelinesRequestBody) },
         },
       },
-      async (context, request, response) => {
+      async (context, request, response): Promise<IKibanaResponse<DeleteTimelinesResponse>> => {
         const siemResponse = buildSiemResponse(response);
 
         try {
-          const frameworkRequest = await buildFrameworkRequest(context, security, request);
+          const frameworkRequest = await buildFrameworkRequest(context, request);
           const { savedObjectIds, searchIds } = request.body;
 
           await deleteTimeline(frameworkRequest, savedObjectIds, searchIds);
-          return response.ok({ body: { data: { deleteTimeline: true } } });
+          const body: DeleteTimelinesResponse = { data: { deleteTimeline: true } };
+          return response.ok({ body });
         } catch (err) {
           const error = transformError(err);
           return siemResponse.error({

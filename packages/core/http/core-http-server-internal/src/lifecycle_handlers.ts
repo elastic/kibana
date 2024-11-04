@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type {
@@ -44,18 +45,35 @@ export const createXsrfPostAuthHandler = (config: HttpConfig): OnPostAuthHandler
   };
 };
 
+/**
+ * This should remain part of the logger prefix so that we can notify/track
+ * when we see this logged for observability purposes.
+ */
+export const INTERNAL_API_RESTRICTED_LOGGER_NAME = 'kbn-internal-api-restricted';
 export const createRestrictInternalRoutesPostAuthHandler = (
-  config: HttpConfig
+  config: HttpConfig,
+  log: Logger
 ): OnPostAuthHandler => {
   const isRestrictionEnabled = config.restrictInternalApis;
+  log = log.get('server', `${INTERNAL_API_RESTRICTED_LOGGER_NAME}`);
 
   return (request, response, toolkit) => {
     const isInternalRoute = request.route.options.access === 'internal';
-    if (isRestrictionEnabled && isInternalRoute && !request.isInternalApiRequest) {
-      // throw 400
-      return response.badRequest({
-        body: `uri [${request.url.pathname}] with method [${request.route.method}] exists but is not available with the current configuration`,
-      });
+    if (isInternalRoute && !request.isInternalApiRequest) {
+      if (!isRestrictionEnabled) {
+        // warn if the restriction is not enforced
+        log.warn(
+          `Access to uri [${request.url.pathname}] with method [${request.route.method}] is deprecated`
+        );
+      } else {
+        log.error(
+          `Access to uri [${request.url.pathname}] with method [${request.route.method}] is not available with the current configuration`
+        );
+        // throw 400
+        return response.badRequest({
+          body: `uri [${request.url.pathname}] with method [${request.route.method}] exists but is not available with the current configuration`,
+        });
+      }
     }
     return toolkit.next();
   };

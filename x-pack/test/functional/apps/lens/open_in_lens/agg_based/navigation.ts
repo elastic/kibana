@@ -17,9 +17,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   describe('Visualize to Lens and back', function describeIndexTests() {
     before(async () => {
       await visualize.initTests();
-    });
-
-    before(async () => {
       await visualize.navigateToNewAggBasedVisualization();
       await visualize.clickLineChart();
       await visualize.clickNewSearch();

@@ -436,7 +436,7 @@ export function MachineLearningDataFrameAnalyticsTableProvider({
       const vars: Record<string, string> = {};
 
       for (const row of $('tr').toArray()) {
-        const [name, value] = $(row).find('td').toArray();
+        const [name, value] = $(row).find('td').find('.euiTableCellContent').toArray();
 
         vars[$(name).text().trim()] = $(value).text().trim();
       }

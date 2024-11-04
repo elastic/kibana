@@ -17,17 +17,22 @@ import {
   CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE,
   DETECTION_RULE_RULES_API_CURRENT_VERSION,
 } from '@kbn/cloud-security-posture-plugin/common/constants';
-import type { CspBenchmarkRule } from '@kbn/cloud-security-posture-plugin/common/types/latest';
+import type { CspBenchmarkRule } from '@kbn/cloud-security-posture-common/schema/rules/latest';
 // eslint-disable @kbn/imports/no_boundary_crossing
 import { generateBenchmarkRuleTags } from '@kbn/cloud-security-posture-plugin/common/utils/detection_rules';
 import type { FtrProviderContext } from '../ftr_provider_context';
+import { CspSecurityCommonProvider } from './helper/user_roles_utilites';
+import { waitForPluginInitialized } from '../utils';
 
 // eslint-disable-next-line import/no-default-export
-export default function ({ getService }: FtrProviderContext) {
+export default function (providerContext: FtrProviderContext) {
+  const { getService } = providerContext;
   const retry = getService('retry');
   const supertest = getService('supertest');
-  const log = getService('log');
+  const logger = getService('log');
   const kibanaServer = getService('kibanaServer');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const cspSecurity = CspSecurityCommonProvider(providerContext);
 
   const generateRuleKey = (rule: CspBenchmarkRule): string => {
     return `${rule.metadata.benchmark.id};${rule.metadata.benchmark.version};${rule.metadata.benchmark.rule_number}`;
@@ -79,26 +84,18 @@ export default function ({ getService }: FtrProviderContext) {
     return detectionRule;
   };
 
-  /**
-   * required before indexing findings
-   */
-  const waitForPluginInitialized = (): Promise<void> =>
-    retry.try(async () => {
-      log.debug('Check CSP plugin is initialized');
-      const response = await supertest
-        .get('/internal/cloud_security_posture/status?check=init')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .expect(200);
-      expect(response.body).to.eql({ isPluginInitialized: true });
-      log.debug('CSP plugin is initialized');
-    });
-
   describe('Verify update csp rules states API', async () => {
     before(async () => {
-      await waitForPluginInitialized();
+      await waitForPluginInitialized({ retry, logger, supertest });
     });
 
     beforeEach(async () => {
+      await kibanaServer.savedObjects.clean({
+        types: ['cloud-security-posture-settings', 'alert'],
+      });
+    });
+
+    afterEach(async () => {
       await kibanaServer.savedObjects.clean({
         types: ['cloud-security-posture-settings', 'alert'],
       });
@@ -446,6 +443,69 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(body.error).to.eql('Bad Request');
       expect(body.statusCode).to.eql(400);
+    });
+
+    it('users without read privileges on cloud security should not be able to mute', async () => {
+      const rule1 = await getRandomCspBenchmarkRule();
+      const rule2 = await getRandomCspBenchmarkRule();
+
+      const { status } = await supertestWithoutAuth
+        .post(`/internal/cloud_security_posture/rules/_bulk_action`)
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .set('kbn-xsrf', 'xxxx')
+        .auth(
+          'role_security_no_read_user',
+          cspSecurity.getPasswordForUser('role_security_no_read_user')
+        )
+        .send({
+          action: 'mute',
+          rules: [
+            {
+              benchmark_id: rule1.metadata.benchmark.id,
+              benchmark_version: rule1.metadata.benchmark.version,
+              rule_number: rule1.metadata.benchmark.rule_number || '',
+              rule_id: rule1.metadata.id,
+            },
+            {
+              benchmark_id: rule2.metadata.benchmark.id,
+              benchmark_version: rule2.metadata.benchmark.version,
+              rule_number: rule2.metadata.benchmark.rule_number || '',
+              rule_id: rule2.metadata.id,
+            },
+          ],
+        });
+      expect(status).to.be(403);
+    });
+
+    it('users with all privileges on cloud security should be able to mute', async () => {
+      const rule1 = await getRandomCspBenchmarkRule();
+      const rule2 = await getRandomCspBenchmarkRule();
+
+      const { status } = await supertestWithoutAuth
+        .post(`/internal/cloud_security_posture/rules/_bulk_action`)
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .set('kbn-xsrf', 'xxxx')
+        .auth('role_security_all_user', cspSecurity.getPasswordForUser('role_security_all_user'))
+        .send({
+          action: 'mute',
+          rules: [
+            {
+              benchmark_id: rule1.metadata.benchmark.id,
+              benchmark_version: rule1.metadata.benchmark.version,
+              rule_number: rule1.metadata.benchmark.rule_number || '',
+              rule_id: rule1.metadata.id,
+            },
+            {
+              benchmark_id: rule2.metadata.benchmark.id,
+              benchmark_version: rule2.metadata.benchmark.version,
+              rule_number: rule2.metadata.benchmark.rule_number || '',
+              rule_id: rule2.metadata.id,
+            },
+          ],
+        });
+      expect(status).to.be(200);
     });
   });
 }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsTypeMappingDefinition } from '@kbn/core/server';
+import type { SavedObjectsTypeMappingDefinition } from '@kbn/core/server';
 
 export const alertMappings: SavedObjectsTypeMappingDefinition = {
   dynamic: false,
@@ -224,6 +224,18 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
         // rRule: rRuleMappingsField,
       },
     },
+    // NO NEED TO BE INDEXED
+    // flapping: {
+    //   index: false,
+    //   properties: {
+    //     lookBackWindow: {
+    //       type: 'long',
+    //     },
+    //     statusChangeThreshold: {
+    //       type: 'long',
+    //     },
+    //   },
+    // },
     // NO NEED TO BE INDEXED
     // nextRun: {
     //   type: 'date',

@@ -5,20 +5,28 @@
  * 2.0.
  */
 
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { EuiSkeletonRectangle } from '@elastic/eui';
+import { css } from '@emotion/react';
 import React, { lazy, Suspense } from 'react';
 import ReactDOM from 'react-dom';
 
 import type { CoreStart } from '@kbn/core/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { euiThemeVars } from '@kbn/ui-theme';
 
+import { initTour } from './solution_view_tour';
+import type { EventTracker } from '../analytics';
+import type { ConfigType } from '../config';
 import type { SpacesManager } from '../spaces_manager';
 
 export function initSpacesNavControl(
   spacesManager: SpacesManager,
   core: CoreStart,
-  solutionNavExperiment: Promise<boolean>
+  config: ConfigType,
+  eventTracker: EventTracker
 ) {
+  const { showTour$, onFinishTour } = initTour(core, spacesManager);
+
   core.chrome.navControls.registerLeft({
     order: 1000,
     mount(targetDomElement: HTMLElement) {
@@ -34,7 +42,17 @@ export function initSpacesNavControl(
 
       ReactDOM.render(
         <KibanaRenderContextProvider {...core}>
-          <Suspense fallback={<EuiLoadingSpinner />}>
+          <Suspense
+            fallback={
+              <EuiSkeletonRectangle
+                css={css`
+                  margin-inline: ${euiThemeVars.euiSizeS};
+                `}
+                borderRadius="m"
+                contentAriaLabel="Loading navigation"
+              />
+            }
+          >
             <LazyNavControlPopover
               spacesManager={spacesManager}
               serverBasePath={core.http.basePath.serverBasePath}
@@ -42,7 +60,10 @@ export function initSpacesNavControl(
               capabilities={core.application.capabilities}
               navigateToApp={core.application.navigateToApp}
               navigateToUrl={core.application.navigateToUrl}
-              solutionNavExperiment={solutionNavExperiment}
+              allowSolutionVisibility={config.allowSolutionVisibility}
+              eventTracker={eventTracker}
+              showTour$={showTour$}
+              onFinishTour={onFinishTour}
             />
           </Suspense>
         </KibanaRenderContextProvider>,

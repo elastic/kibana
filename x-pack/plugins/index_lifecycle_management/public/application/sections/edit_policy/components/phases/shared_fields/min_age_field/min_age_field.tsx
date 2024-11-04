@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent, useEffect } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { get } from 'lodash';
 
 import {
@@ -27,20 +25,7 @@ import { UseField, useConfiguration, useGlobalFields } from '../../../../form';
 import { getPhaseMinAgeInMilliseconds } from '../../../../lib';
 import { timeUnits } from '../../../../constants';
 import { getUnitsAriaLabelForPhase, getTimingLabelForPhase } from './util';
-
-const i18nTexts = {
-  rolloverToolTipDescription: i18n.translate(
-    'xpack.indexLifecycleMgmt.editPolicy.minimumAge.rolloverToolTipDescription',
-    {
-      defaultMessage:
-        'Data age is calculated from rollover. Rollover is configured in the hot phase.',
-    }
-  ),
-  minAgeUnitFieldSuffix: i18n.translate(
-    'xpack.indexLifecycleMgmt.editPolicy.minimumAge.minimumAgeFieldSuffixLabel',
-    { defaultMessage: 'old' }
-  ),
-};
+import { i18nTexts } from '../../../../i18n_texts';
 
 interface Props {
   phase: PhaseWithTiming;
@@ -95,10 +80,7 @@ export const MinAgeField: FunctionComponent<Props> = ({ phase }): React.ReactEle
             >
               <EuiFlexItem grow={false}>
                 <EuiText className={'eui-textNoWrap'} size={'xs'}>
-                  <FormattedMessage
-                    id="xpack.indexLifecycleMgmt.editPolicy.minimumAge.minimumAgeFieldLabel"
-                    defaultMessage="Move data into phase when:"
-                  />
+                  {`${i18nTexts.editPolicy.minAgeLabel}:`}
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={true}>
@@ -127,15 +109,15 @@ export const MinAgeField: FunctionComponent<Props> = ({ phase }): React.ReactEle
                             <div data-test-subj={`${phase}-rolloverMinAgeInputIconTip`} />
                             <EuiIconTip
                               type="iInCircle"
-                              aria-label={i18nTexts.rolloverToolTipDescription}
-                              content={i18nTexts.rolloverToolTipDescription}
+                              aria-label={i18nTexts.editPolicy.rolloverToolTipDescription}
+                              content={i18nTexts.editPolicy.rolloverToolTipDescription}
                             />
                           </>
                         );
                         const selectAppendValue: Array<string | React.ReactElement> =
                           isUsingRollover
-                            ? [i18nTexts.minAgeUnitFieldSuffix, icon]
-                            : [i18nTexts.minAgeUnitFieldSuffix];
+                            ? [i18nTexts.editPolicy.minAgeUnitFieldSuffix, icon]
+                            : [i18nTexts.editPolicy.minAgeUnitFieldSuffix];
                         const unitValue = unitField.value as string;
 
                         let unitOptions = timeUnits;

@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import type { LayoutDirection } from '@elastic/charts';
+import type { LayoutDirection, MetricStyle } from '@elastic/charts';
 import type { PaletteOutput, CustomPaletteParams } from '@kbn/coloring';
 import type { CollapseFunction } from '@kbn/visualizations-plugin/common';
 import type { LayerType } from '../../../common/types';
+
+export type ValueFontMode = Exclude<MetricStyle['valueFontSize'], number>;
 
 export interface MetricVisualizationState {
   layerId: string;
@@ -24,7 +26,12 @@ export interface MetricVisualizationState {
   secondaryPrefix?: string;
   progressDirection?: LayoutDirection;
   showBar?: boolean;
+  titlesTextAlign?: MetricStyle['titlesTextAlign'];
+  valuesTextAlign?: MetricStyle['valuesTextAlign'];
+  iconAlign?: MetricStyle['iconAlign'];
+  valueFontMode?: ValueFontMode;
   color?: string;
+  icon?: string;
   palette?: PaletteOutput<CustomPaletteParams>;
   maxCols?: number;
 

@@ -35,6 +35,8 @@ export enum TELEMETRY_EVENT {
   DASHBOARD = 'navigate_to_dashboard',
   CREATE_DASHBOARD = 'create_dashboard',
 
+  ONBOARDING = 'onboarding',
+
   // value list
   OPEN_VALUE_LIST_MODAL = 'open_value_list_modal',
   CREATE_VALUE_LIST_ITEM = 'create_value_list_item',
@@ -46,6 +48,9 @@ export enum TELEMETRY_EVENT {
   ADD_INVESTIGATION_FIELDS = 'add_investigation_fields',
   SET_INVESTIGATION_FIELDS = 'set_investigation_fields',
   DELETE_INVESTIGATION_FIELDS = 'delete_investigation_fields',
+
+  // AI assistant on rule creation form
+  OPEN_ASSISTANT_ON_RULE_QUERY_ERROR = 'open_assistant_on_rule_query_error',
 }
 
 export enum TelemetryEventTypes {
@@ -63,6 +68,8 @@ export enum TelemetryEventTypes {
   EntityDetailsClicked = 'Entity Details Clicked',
   EntityAlertsClicked = 'Entity Alerts Clicked',
   EntityRiskFiltered = 'Entity Risk Filtered',
+  EntityStoreEnablementToggleClicked = 'Entity Store Enablement Toggle Clicked',
+  EntityStoreDashboardInitButtonClicked = 'Entity Store Initialization Button Clicked',
   MLJobUpdate = 'ML Job Update',
   AddRiskInputToTimelineClicked = 'Add Risk Input To Timeline Clicked',
   ToggleRiskSummaryClicked = 'Toggle Risk Summary Clicked',
@@ -76,6 +83,14 @@ export enum TelemetryEventTypes {
   OnboardingHubStepOpen = 'Onboarding Hub Step Open',
   OnboardingHubStepFinished = 'Onboarding Hub Step Finished',
   OnboardingHubStepLinkClicked = 'Onboarding Hub Step Link Clicked',
+  ManualRuleRunOpenModal = 'Manual Rule Run Open Modal',
+  ManualRuleRunExecute = 'Manual Rule Run Execute',
+  ManualRuleRunCancelJob = 'Manual Rule Run Cancel Job',
+  EventLogFilterByRunType = 'Event Log Filter By Run Type',
+  EventLogShowSourceEventDateRange = 'Event Log -> Show Source -> Event Date Range',
+  OpenNoteInExpandableFlyoutClicked = 'Open Note In Expandable Flyout Clicked',
+  AddNoteFromExpandableFlyoutClicked = 'Add Note From Expandable Flyout Clicked',
+  PreviewRule = 'Preview rule',
 }
 
 export enum ML_JOB_TELEMETRY_STATUS {

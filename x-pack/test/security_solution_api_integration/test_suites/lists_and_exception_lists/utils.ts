@@ -7,6 +7,7 @@
 
 import type SuperTest from 'supertest';
 import { v4 as uuidv4 } from 'uuid';
+import limit from 'p-limit';
 
 import type {
   Type,
@@ -229,12 +230,16 @@ export const deleteAllExceptionsByType = async (
         .set('kbn-xsrf', 'true')
         .send();
       const ids: string[] = body.data.map((exception: ExceptionList) => exception.id);
-      for await (const id of ids) {
-        await supertest
-          .delete(`${EXCEPTION_LIST_URL}?id=${id}&namespace_type=${type}`)
-          .set('kbn-xsrf', 'true')
-          .send();
-      }
+      const limiter = limit(10);
+      const promises = ids.map((id) =>
+        limiter(() =>
+          supertest
+            .delete(`${EXCEPTION_LIST_URL}?id=${id}&namespace_type=${type}`)
+            .set('kbn-xsrf', 'true')
+            .send()
+        )
+      );
+      await Promise.all(promises);
       const { body: finalCheck } = await supertest
         .get(`${EXCEPTION_LIST_URL}/_find?namespace_type=${type}`)
         .set('kbn-xsrf', 'true')

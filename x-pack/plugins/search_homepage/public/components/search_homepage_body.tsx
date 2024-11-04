@@ -6,19 +6,16 @@
  */
 import React from 'react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+
+import { ConsoleLinkButton } from './console_link_button';
 
 export const SearchHomepageBody = () => (
-  <KibanaPageTemplate.Section
-    alignment="top"
-    restrictWidth={false}
-    grow
-    css={{
-      position: 'relative',
-    }}
-    contentProps={{ css: { display: 'flex', flexGrow: 1, position: 'absolute', inset: 0 } }}
-    paddingSize="none"
-    className="eui-fullHeight"
-  >
-    <div />
+  <KibanaPageTemplate.Section alignment="top" restrictWidth={false} grow>
+    <EuiFlexGroup justifyContent="spaceBetween">
+      <EuiFlexItem grow={false}>
+        <ConsoleLinkButton />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   </KibanaPageTemplate.Section>
 );

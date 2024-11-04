@@ -1,14 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { Component } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import PropTypes from 'prop-types';
 import {
   EuiButtonEmpty,
   EuiContextMenuPanel,
@@ -26,16 +26,10 @@ interface TableSelectorState {
 interface TableSelectorProps {
   tables: Datatable[];
   selectedTable: Datatable;
-  onTableChanged: Function;
+  onTableChanged: (table: Datatable) => void;
 }
 
 export class TableSelector extends Component<TableSelectorProps, TableSelectorState> {
-  static propTypes = {
-    tables: PropTypes.array.isRequired,
-    selectedTable: PropTypes.object.isRequired,
-    onTableChanged: PropTypes.func,
-  };
-
   state = {
     isPopoverOpen: false,
   };
@@ -84,35 +78,37 @@ export class TableSelector extends Component<TableSelectorProps, TableSelectorSt
             />
           </strong>
         </EuiFlexItem>
-        <EuiFlexItem grow={true}>
-          <EuiPopover
-            id="inspectorTableChooser"
-            button={
-              <EuiButtonEmpty
-                iconType="arrowDown"
-                iconSide="right"
-                size="s"
-                onClick={this.togglePopover}
-                data-test-subj="inspectorTableChooser"
-              >
-                <FormattedMessage
-                  id="data.inspector.table.inspectorTableChooserButton"
-                  defaultMessage="Table {index}"
-                  values={{ index: currentIndex + 1 }}
-                />
-              </EuiButtonEmpty>
-            }
-            isOpen={this.state.isPopoverOpen}
-            closePopover={this.closePopover}
-            panelPaddingSize="none"
-            anchorPosition="downLeft"
-            repositionOnScroll
-          >
-            <EuiContextMenuPanel
-              items={this.props.tables.map(this.renderTableDropdownItem)}
-              data-test-subj="inspectorTableChooserMenuPanel"
-            />
-          </EuiPopover>
+        <EuiFlexItem>
+          <div>
+            <EuiPopover
+              id="inspectorTableChooser"
+              button={
+                <EuiButtonEmpty
+                  iconType="arrowDown"
+                  iconSide="right"
+                  size="s"
+                  onClick={this.togglePopover}
+                  data-test-subj="inspectorTableChooser"
+                >
+                  <FormattedMessage
+                    id="data.inspector.table.inspectorTableChooserButton"
+                    defaultMessage="Table {index}"
+                    values={{ index: currentIndex + 1 }}
+                  />
+                </EuiButtonEmpty>
+              }
+              isOpen={this.state.isPopoverOpen}
+              closePopover={this.closePopover}
+              panelPaddingSize="none"
+              anchorPosition="downLeft"
+              repositionOnScroll
+            >
+              <EuiContextMenuPanel
+                items={this.props.tables.map(this.renderTableDropdownItem)}
+                data-test-subj="inspectorTableChooserMenuPanel"
+              />
+            </EuiPopover>
+          </div>
         </EuiFlexItem>
       </EuiFlexGroup>
     );

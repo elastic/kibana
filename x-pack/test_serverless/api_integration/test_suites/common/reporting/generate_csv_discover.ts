@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import type { SortDirection } from '@kbn/data-plugin/common';
 import type { JobParamsCSV } from '@kbn/reporting-export-types-csv-common';
 import type { Filter } from '@kbn/es-query';
-import { InternalRequestHeader, RoleCredentials } from '../../../../shared/services';
+import { CookieCredentials, InternalRequestHeader } from '@kbn/ftr-common-functional-services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -17,8 +17,8 @@ export default function ({ getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const reportingAPI = getService('svlReportingApi');
   const svlCommonApi = getService('svlCommonApi');
-  const svlUserManager = getService('svlUserManager');
-  let roleAuthc: RoleCredentials;
+  const samlAuth = getService('samlAuth');
+  let cookieCredentials: CookieCredentials;
   let internalReqHeader: InternalRequestHeader;
 
   /*
@@ -79,7 +79,7 @@ export default function ({ getService }: FtrProviderContext) {
     this.timeout(12 * 60 * 1000);
 
     before(async () => {
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      cookieCredentials = await samlAuth.getM2MApiCookieCredentialsWithRoleScope('admin');
       internalReqHeader = svlCommonApi.getInternalRequestHeader();
     });
 
@@ -90,10 +90,6 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    after(async () => {
-      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
-    });
-
     describe('exported CSV', () => {
       before(async () => {
         await esArchiver.load(archives.ecommerce.data);
@@ -101,7 +97,6 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       after(async () => {
-        await reportingAPI.deleteAllReports(roleAuthc, internalReqHeader);
         await esArchiver.unload(archives.ecommerce.data);
         await kibanaServer.importExport.unload(archives.ecommerce.savedObjects);
       });
@@ -170,13 +165,13 @@ export default function ({ getService }: FtrProviderContext) {
             title: 'Ecommerce Data',
             version: '8.14.0',
           }),
-          roleAuthc,
+          cookieCredentials,
           internalReqHeader
         );
-        await reportingAPI.waitForJobToFinish(res.path, roleAuthc, internalReqHeader);
+        await reportingAPI.waitForJobToFinish(res.path, cookieCredentials, internalReqHeader);
         const csvFile = await reportingAPI.getCompletedJobOutput(
           res.path,
-          roleAuthc,
+          cookieCredentials,
           internalReqHeader
         );
         expect((csvFile as string).length).to.be(124183);
@@ -213,11 +208,11 @@ export default function ({ getService }: FtrProviderContext) {
             title: 'Untitled discover search',
             version: '8.14.0',
           }),
-          roleAuthc,
+          cookieCredentials,
           internalReqHeader
         );
-        await reportingAPI.waitForJobToFinish(res.path, roleAuthc, internalReqHeader);
-        return reportingAPI.getCompletedJobOutput(res.path, roleAuthc, internalReqHeader);
+        await reportingAPI.waitForJobToFinish(res.path, cookieCredentials, internalReqHeader);
+        return reportingAPI.getCompletedJobOutput(res.path, cookieCredentials, internalReqHeader);
       }
 
       it('includes an unmapped field to the report', async () => {
@@ -360,13 +355,13 @@ export default function ({ getService }: FtrProviderContext) {
               },
             },
           }),
-          roleAuthc,
+          cookieCredentials,
           internalReqHeader
         );
-        await reportingAPI.waitForJobToFinish(res.path, roleAuthc, internalReqHeader);
+        await reportingAPI.waitForJobToFinish(res.path, cookieCredentials, internalReqHeader);
         const csvFile = await reportingAPI.getCompletedJobOutput(
           res.path,
-          roleAuthc,
+          cookieCredentials,
           internalReqHeader
         );
         expect((csvFile as string).length).to.be(1270683);
@@ -412,13 +407,13 @@ export default function ({ getService }: FtrProviderContext) {
               },
             },
           }),
-          roleAuthc,
+          cookieCredentials,
           internalReqHeader
         );
-        await reportingAPI.waitForJobToFinish(res.path, roleAuthc, internalReqHeader);
+        await reportingAPI.waitForJobToFinish(res.path, cookieCredentials, internalReqHeader);
         const csvFile = await reportingAPI.getCompletedJobOutput(
           res.path,
-          roleAuthc,
+          cookieCredentials,
           internalReqHeader
         );
         expect((csvFile as string).length).to.be(918298);
@@ -470,13 +465,13 @@ export default function ({ getService }: FtrProviderContext) {
             },
             columns: ['@timestamp', 'clientip', 'extension'],
           }),
-          roleAuthc,
+          cookieCredentials,
           internalReqHeader
         );
-        await reportingAPI.waitForJobToFinish(res.path, roleAuthc, internalReqHeader);
+        await reportingAPI.waitForJobToFinish(res.path, cookieCredentials, internalReqHeader);
         const csvFile = await reportingAPI.getCompletedJobOutput(
           res.path,
-          roleAuthc,
+          cookieCredentials,
           internalReqHeader
         );
         expect((csvFile as string).length).to.be(3020);
@@ -516,13 +511,13 @@ export default function ({ getService }: FtrProviderContext) {
             },
             columns: ['@timestamp', 'clientip', 'extension'],
           }),
-          roleAuthc,
+          cookieCredentials,
           internalReqHeader
         );
-        await reportingAPI.waitForJobToFinish(res.path, roleAuthc, internalReqHeader);
+        await reportingAPI.waitForJobToFinish(res.path, cookieCredentials, internalReqHeader);
         const csvFile = await reportingAPI.getCompletedJobOutput(
           res.path,
-          roleAuthc,
+          cookieCredentials,
           internalReqHeader
         );
         expect((csvFile as string).length).to.be(3020);
@@ -556,13 +551,13 @@ export default function ({ getService }: FtrProviderContext) {
             },
             columns: ['date', 'message'],
           }),
-          roleAuthc,
+          cookieCredentials,
           internalReqHeader
         );
-        await reportingAPI.waitForJobToFinish(res.path, roleAuthc, internalReqHeader);
+        await reportingAPI.waitForJobToFinish(res.path, cookieCredentials, internalReqHeader);
         const csvFile = await reportingAPI.getCompletedJobOutput(
           res.path,
-          roleAuthc,
+          cookieCredentials,
           internalReqHeader
         );
         expect((csvFile as string).length).to.be(103);
@@ -585,13 +580,13 @@ export default function ({ getService }: FtrProviderContext) {
             },
             columns: ['date', 'message'],
           }),
-          roleAuthc,
+          cookieCredentials,
           internalReqHeader
         );
-        await reportingAPI.waitForJobToFinish(res.path, roleAuthc, internalReqHeader);
+        await reportingAPI.waitForJobToFinish(res.path, cookieCredentials, internalReqHeader);
         const csvFile = await reportingAPI.getCompletedJobOutput(
           res.path,
-          roleAuthc,
+          cookieCredentials,
           internalReqHeader
         );
         expect((csvFile as string).length).to.be(103);
@@ -628,13 +623,13 @@ export default function ({ getService }: FtrProviderContext) {
             },
             columns: ['date', 'message', '_id', '_index'],
           }),
-          roleAuthc,
+          cookieCredentials,
           internalReqHeader
         );
-        await reportingAPI.waitForJobToFinish(res.path, roleAuthc, internalReqHeader);
+        await reportingAPI.waitForJobToFinish(res.path, cookieCredentials, internalReqHeader);
         const csvFile = await reportingAPI.getCompletedJobOutput(
           res.path,
-          roleAuthc,
+          cookieCredentials,
           internalReqHeader
         );
         expect((csvFile as string).length).to.be(134);
@@ -660,13 +655,13 @@ export default function ({ getService }: FtrProviderContext) {
             },
             columns: ['name', 'power'],
           }),
-          roleAuthc,
+          cookieCredentials,
           internalReqHeader
         );
-        await reportingAPI.waitForJobToFinish(res.path, roleAuthc, internalReqHeader);
+        await reportingAPI.waitForJobToFinish(res.path, cookieCredentials, internalReqHeader);
         const csvFile = await reportingAPI.getCompletedJobOutput(
           res.path,
-          roleAuthc,
+          cookieCredentials,
           internalReqHeader
         );
         expect((csvFile as string).length).to.be(274);
@@ -744,13 +739,13 @@ export default function ({ getService }: FtrProviderContext) {
             },
             columns: [],
           }),
-          roleAuthc,
+          cookieCredentials,
           internalReqHeader
         );
-        await reportingAPI.waitForJobToFinish(res.path, roleAuthc, internalReqHeader);
+        await reportingAPI.waitForJobToFinish(res.path, cookieCredentials, internalReqHeader);
         const csvFile = await reportingAPI.getCompletedJobOutput(
           res.path,
-          roleAuthc,
+          cookieCredentials,
           internalReqHeader
         );
         expect((csvFile as string).length).to.be(356);
@@ -810,13 +805,13 @@ export default function ({ getService }: FtrProviderContext) {
               },
             },
           }),
-          roleAuthc,
+          cookieCredentials,
           internalReqHeader
         );
-        await reportingAPI.waitForJobToFinish(res.path, roleAuthc, internalReqHeader);
+        await reportingAPI.waitForJobToFinish(res.path, cookieCredentials, internalReqHeader);
         const csvFile = await reportingAPI.getCompletedJobOutput(
           res.path,
-          roleAuthc,
+          cookieCredentials,
           internalReqHeader
         );
         expect((csvFile as string).length).to.be(4845684);

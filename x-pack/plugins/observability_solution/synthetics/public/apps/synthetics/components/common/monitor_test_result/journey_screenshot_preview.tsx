@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React, { useCallback, useState, MouseEvent } from 'react';
+import React, { useCallback, useState } from 'react';
 import { EuiPopover, useEuiTheme } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
 import { POPOVER_SCREENSHOT_SIZE, ScreenshotImageSize } from '../screenshot/screenshot_size';
 import { JourneyScreenshotDialog } from '../screenshot/journey_screenshot_dialog';
-import { ScreenshotImage } from '../screenshot/screenshot_image';
+import { ScreenshotImage, ScreenshotImageProps } from '../screenshot/screenshot_image';
 
 export interface StepImagePopoverProps {
   timestamp?: string;
@@ -46,24 +47,24 @@ export const JourneyScreenshotPreview: React.FC<StepImagePopoverProps> = ({
   // Only render the dialog if the image is at least once clicked
   const [isImageEverClick, setIsImageEverClicked] = useState(false);
 
-  const onMouseEnter = useCallback(
-    (_evt: MouseEvent<HTMLImageElement>) => {
+  const onImgFocus = useCallback<NonNullable<ScreenshotImageProps['onFocus']>>(
+    (_evt) => {
       setIsImagePopoverOpen(true);
     },
     [setIsImagePopoverOpen]
   );
 
-  const onMouseLeave = useCallback(
-    (_evt: MouseEvent<HTMLImageElement>) => {
+  const onImgBlur = useCallback<NonNullable<ScreenshotImageProps['onBlur']>>(
+    (_evt) => {
       setIsImagePopoverOpen(false);
     },
     [setIsImagePopoverOpen]
   );
 
-  const onImgClick = useCallback(
-    (evt: MouseEvent<HTMLImageElement>) => {
-      // needed to prevent propagation to the table row click
+  const onImgClick = useCallback<NonNullable<ScreenshotImageProps['onClick']>>(
+    (evt) => {
       evt.stopPropagation();
+
       setIsImageEverClicked(true);
       setIsImageDialogOpen(true);
       setIsImagePopoverOpen(false);
@@ -77,15 +78,22 @@ export const JourneyScreenshotPreview: React.FC<StepImagePopoverProps> = ({
 
   const renderScreenshotImage = (screenshotSize: ScreenshotImageSize) => (
     <ScreenshotImage
-      label={stepName}
+      label={i18n.translate('xpack.synthetics.monitorTestResult.screenshotImageLabel', {
+        defaultMessage: '"{stepName}", {stepNumber} of {totalSteps}',
+        values: {
+          stepName,
+          stepNumber,
+          totalSteps: maxSteps ?? stepNumber,
+        },
+      })}
       imgSrc={imgSrc}
       isLoading={isLoading}
       size={screenshotSize}
       unavailableMessage={unavailableMessage}
       borderColor={isStepFailed ? euiTheme.colors.danger : undefined}
       borderRadius={borderRadius}
-      onMouseEnter={onMouseEnter}
-      onMouseLeave={onMouseLeave}
+      onFocus={onImgFocus}
+      onBlur={onImgBlur}
       onClick={onImgClick}
     />
   );

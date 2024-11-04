@@ -86,7 +86,7 @@ export class CasePlugin
       this.persistableStateAttachmentTypeRegistry
     );
 
-    registerCaseFileKinds(this.caseConfig.files, plugins.files);
+    registerCaseFileKinds(this.caseConfig.files, plugins.files, core.security.fips.isEnabled());
 
     this.securityPluginSetup = plugins.security;
     this.lensEmbeddableFactory = plugins.lens.lensEmbeddableFactory;
@@ -122,9 +122,14 @@ export class CasePlugin
     const router = core.http.createRouter<CasesRequestHandlerContext>();
     const telemetryUsageCounter = plugins.usageCollection?.createUsageCounter(APP_ID);
 
+    const isServerless = plugins.cloud?.isServerlessEnabled;
+
     registerRoutes({
       router,
-      routes: [...getExternalRoutes(), ...getInternalRoutes(this.userProfileService)],
+      routes: [
+        ...getExternalRoutes({ isServerless }),
+        ...getInternalRoutes(this.userProfileService),
+      ],
       logger: this.logger,
       kibanaVersion: this.kibanaVersion,
       telemetryUsageCounter,
@@ -145,12 +150,16 @@ export class CasePlugin
       return plugins.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
     };
 
+    const isServerlessSecurity =
+      plugins.cloud?.isServerlessEnabled && plugins.cloud?.serverless.projectType === 'security';
+
     registerConnectorTypes({
       actions: plugins.actions,
       alerting: plugins.alerting,
       core,
       getCasesClient,
       getSpaceId,
+      isServerlessSecurity,
     });
 
     return {
@@ -186,6 +195,7 @@ export class CasePlugin
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       securityPluginSetup: this.securityPluginSetup!,
       securityPluginStart: plugins.security,
+      securityServiceStart: core.security,
       spacesPluginStart: plugins.spaces,
       featuresPluginStart: plugins.features,
       actionsPluginStart: plugins.actions,

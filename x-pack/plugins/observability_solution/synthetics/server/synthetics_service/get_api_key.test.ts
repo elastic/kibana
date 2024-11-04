@@ -19,7 +19,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 
 import * as authUtils from './authentication/check_has_privilege';
 import { SyntheticsServerSetup } from '../types';
-import { getUptimeESMockClient } from '../legacy_uptime/lib/requests/test_helpers';
+import { getUptimeESMockClient } from '../queries/test_helpers';
 
 describe('getAPIKeyTest', function () {
   const core = coreMock.createStart();
@@ -34,7 +34,7 @@ describe('getAPIKeyTest', function () {
     security,
     encryptedSavedObjects,
     savedObjectsClient: core.savedObjects.getScopedClient(request),
-    uptimeEsClient: getUptimeESMockClient().uptimeEsClient,
+    syntheticsEsClient: getUptimeESMockClient().syntheticsEsClient,
   } as unknown as SyntheticsServerSetup;
 
   security.authc.apiKeys.areAPIKeysEnabled = jest.fn().mockReturnValue(true);

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -21,7 +22,6 @@ import {
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
 import {
-  AvailableFields$,
   DataDocuments$,
   DataMain$,
   DataTotalHits$,
@@ -83,11 +83,6 @@ async function mountComponent(
     result: esHitsMock.map((esHit) => buildDataTableRecord(esHit, dataView)),
   }) as DataDocuments$;
 
-  const availableFields$ = new BehaviorSubject({
-    fetchStatus: FetchStatus.COMPLETE,
-    fields: [] as string[],
-  }) as AvailableFields$;
-
   const totalHits$ = new BehaviorSubject({
     fetchStatus: FetchStatus.COMPLETE,
     result: Number(esHitsMock.length),
@@ -97,7 +92,6 @@ async function mountComponent(
     main$,
     documents$,
     totalHits$,
-    availableFields$,
   };
 
   const session = getSessionServiceMock();

@@ -33,6 +33,7 @@ import {
 } from '@kbn/securitysolution-data-table';
 import { isEqual } from 'lodash';
 import type { FilterGroupHandler } from '@kbn/alerts-ui-shared';
+import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
 import { DetectionEngineFilters } from '../../components/detection_engine_filters/detection_engine_filters';
 import { FilterByAssigneesPopover } from '../../../common/components/filter_by_assignees_popover/filter_by_assignees_popover';
 import type { AssigneesIdsSelection } from '../../../common/components/assignees/types';
@@ -70,7 +71,7 @@ import {
   buildShowBuildingBlockFilter,
   buildThreatMatchFilter,
 } from '../../components/alerts_table/default_config';
-import { ChartPanels } from './chart_panels';
+import { ChartPanels } from '../../components/alerts_kpis/chart_panels';
 import { useSourcererDataView } from '../../../sourcerer/containers';
 import { useSignalHelpers } from '../../../sourcerer/containers/use_signal_helpers';
 
@@ -150,12 +151,9 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ()
     FilterGroupHandler | undefined
   >();
 
-  const {
-    sourcererDataView,
-    runtimeMappings,
-    loading: isLoadingIndexPattern,
-    indexPattern,
-  } = useSourcererDataView(SourcererScopeName.detections);
+  const { sourcererDataView, loading: isLoadingIndexPattern } = useSourcererDataView(
+    SourcererScopeName.detections
+  );
 
   const { formatUrl } = useFormatUrl(SecurityPageName.rules);
 
@@ -223,7 +221,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ()
   );
 
   const goToRules = useCallback(
-    (ev) => {
+    (ev: React.MouseEvent) => {
       ev.preventDefault();
       navigateToUrl(formatUrl(getRulesUrl()));
     },
@@ -314,10 +312,10 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ()
           mode: 'absolute',
         }}
         onInit={setDetectionPageFilterHandler}
-        indexPattern={indexPattern}
+        dataViewSpec={sourcererDataView}
       />
     ),
-    [from, indexPattern, onFilterControlsChange, query, to, topLevelFilters]
+    [from, sourcererDataView, onFilterControlsChange, query, to, topLevelFilters]
   );
 
   const renderAlertTable = useCallback(
@@ -419,7 +417,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ()
                 alertsDefaultFilters={alertsDefaultFilters}
                 isLoadingIndexPattern={isChartPanelLoading}
                 query={query}
-                runtimeMappings={runtimeMappings}
+                runtimeMappings={sourcererDataView.runtimeFieldMap as RunTimeMappings}
                 signalIndexName={signalIndexName}
                 updateDateRangeCallback={updateDateRangeCallback}
               />
@@ -435,7 +433,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ()
               hasIndexWrite={hasIndexWrite ?? false}
               loading={isAlertTableLoading}
               renderChildComponent={renderAlertTable}
-              runtimeMappings={runtimeMappings}
+              runtimeMappings={sourcererDataView.runtimeFieldMap as RunTimeMappings}
               signalIndexName={signalIndexName}
               tableId={TableId.alertsOnAlertsPage}
               to={to}

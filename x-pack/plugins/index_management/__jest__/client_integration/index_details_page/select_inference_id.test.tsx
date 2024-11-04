@@ -5,18 +5,39 @@
  * 2.0.
  */
 
+import {
+  Form,
+  useForm,
+} from '../../../public/application/components/mappings_editor/shared_imports';
 import { registerTestBed } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
-import { SelectInferenceId } from '../../../public/application/components/mappings_editor/components/document_fields/field_parameters/select_inference_id';
+import {
+  SelectInferenceId,
+  SelectInferenceIdProps,
+} from '../../../public/application/components/mappings_editor/components/document_fields/field_parameters/select_inference_id';
+import React from 'react';
+import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 
-const onChangeMock = jest.fn();
-const setValueMock = jest.fn();
-const setNewInferenceEndpointMock = jest.fn();
+const createInferenceEndpointMock = jest.fn();
+const mockDispatch = jest.fn();
 
 jest.mock('../../../public/application/app_context', () => ({
   useAppContext: jest.fn().mockReturnValue({
-    core: { application: {} },
-    docLinks: {},
+    core: {
+      application: {},
+      http: {
+        basePath: {
+          get: jest.fn().mockReturnValue('/base-path'),
+        },
+      },
+    },
+    docLinks: {
+      links: {
+        enterpriseSearch: {
+          inferenceApiCreate: 'https://abc.com/inference-api-create',
+        },
+      },
+    },
     plugins: {
       ml: {
         mlApi: {
@@ -41,23 +62,52 @@ jest.mock(
     }),
   })
 );
+
+jest.mock('../../../public/application/components/mappings_editor/mappings_state_context', () => ({
+  useMappingsState: () => ({ inferenceToModelIdMap: {} }),
+  useDispatch: () => mockDispatch,
+}));
+
+jest.mock('../../../public/application/services/api', () => ({
+  useLoadInferenceEndpoints: jest.fn().mockReturnValue({
+    data: [
+      { inference_id: 'endpoint-1', task_type: 'text_embedding' },
+      { inference_id: 'endpoint-2', task_type: 'sparse_embedding' },
+      { inference_id: 'endpoint-3', task_type: 'completion' },
+    ] as InferenceAPIConfigResponse[],
+    isLoading: false,
+    error: null,
+  }),
+}));
+
+function getTestForm(Component: React.FC<SelectInferenceIdProps>) {
+  return (defaultProps: SelectInferenceIdProps) => {
+    const { form } = useForm();
+    form.setFieldValue('inference_id', 'elser_model_2');
+    return (
+      <Form form={form}>
+        <Component {...(defaultProps as any)} />
+      </Form>
+    );
+  };
+}
+
 describe('SelectInferenceId', () => {
   let exists: any;
   let find: any;
 
   beforeAll(async () => {
-    const setup = registerTestBed(SelectInferenceId, {
-      defaultProps: {
-        onChange: onChangeMock,
-        'data-test-subj': 'data-inference-endpoint-list',
-        setValue: setValueMock,
-        setNewInferenceEndpoint: setNewInferenceEndpointMock,
-      },
+    const defaultProps: SelectInferenceIdProps = {
+      'data-test-subj': 'data-inference-endpoint-list',
+      createInferenceEndpoint: createInferenceEndpointMock,
+    };
+    const setup = registerTestBed(getTestForm(SelectInferenceId), {
+      defaultProps,
       memoryRouter: { wrapComponent: false },
     });
 
     await act(async () => {
-      const testBed = setup();
+      const testBed = await setup();
       exists = testBed.exists;
       find = testBed.find;
     });
@@ -69,7 +119,7 @@ describe('SelectInferenceId', () => {
 
   it('should contain the buttons for InferenceEndpoint management', () => {
     find('inferenceIdButton').simulate('click');
-    expect(exists('addInferenceEndpointButton')).toBe(true);
+    expect(exists('learn-how-to-create-inference-endpoints')).toBe(true);
     expect(exists('manageInferenceEndpointButton')).toBe(true);
   });
 
@@ -77,5 +127,8 @@ describe('SelectInferenceId', () => {
     find('inferenceIdButton').simulate('click');
     expect(find('data-inference-endpoint-list').contains('e5')).toBe(true);
     expect(find('data-inference-endpoint-list').contains('elser_model_2')).toBe(true);
+    expect(find('data-inference-endpoint-list').contains('endpoint-1')).toBe(true);
+    expect(find('data-inference-endpoint-list').contains('endpoint-2')).toBe(true);
+    expect(find('data-inference-endpoint-list').contains('endpoint-3')).toBe(false);
   });
 });

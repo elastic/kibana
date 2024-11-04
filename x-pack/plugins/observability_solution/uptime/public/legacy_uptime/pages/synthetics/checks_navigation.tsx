@@ -16,6 +16,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useHistory } from 'react-router-dom';
 import moment from 'moment';
+import { i18n } from '@kbn/i18n';
 import { SyntheticsJourneyApiResponse } from '../../../../common/runtime_types/ping';
 import { getShortTimeStamp } from '../../components/overview/monitor_list/columns/monitor_status_column';
 
@@ -27,6 +28,7 @@ interface Props {
 export const ChecksNavigation = ({ timestamp, details }: Props) => {
   const history = useHistory();
   const isMobile = useIsWithinMaxBreakpoint('s');
+  const shortTimestamp = getShortTimeStamp(moment(timestamp));
 
   return (
     <EuiFlexGroup alignItems="center" responsive={false} gutterSize="none">
@@ -47,8 +49,17 @@ export const ChecksNavigation = ({ timestamp, details }: Props) => {
         </EuiButtonEmpty>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiText size={isMobile ? 'xs' : 'm'} className="eui-textNoWrap">
-          {getShortTimeStamp(moment(timestamp))}
+        <EuiText
+          size={isMobile ? 'xs' : 'm'}
+          className="eui-textNoWrap"
+          aria-label={i18n.translate('xpack.uptime.synthetics.stepList.currentCheckAriaLabel', {
+            defaultMessage: 'Current check: {shortTimestamp}',
+            values: {
+              shortTimestamp,
+            },
+          })}
+        >
+          {shortTimestamp}
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

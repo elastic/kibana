@@ -143,7 +143,7 @@ export const RestoreSnapshotStepSettings: React.FunctionComponent<StepProps> = (
         }
         fullWidth
       >
-        <EuiFormRow hasEmptyLabelSpace fullWidth>
+        <EuiFormRow fullWidth>
           <Fragment>
             <EuiSwitch
               data-test-subj="modifyIndexSettingsSwitch"
@@ -244,7 +244,7 @@ export const RestoreSnapshotStepSettings: React.FunctionComponent<StepProps> = (
         }
         fullWidth
       >
-        <EuiFormRow hasEmptyLabelSpace fullWidth>
+        <EuiFormRow fullWidth>
           <Fragment>
             <EuiSwitch
               label={

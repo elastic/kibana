@@ -10,11 +10,15 @@ import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'timePicker', 'discover']);
+  const PageObjects = getPageObjects(['common', 'timePicker', 'discover', 'svlCommonPage']);
   const testSubjects = getService('testSubjects');
   const dataViews = getService('dataViews');
 
   describe('root profile', () => {
+    before(async () => {
+      await PageObjects.svlCommonPage.loginAsAdmin();
+    });
+
     describe('ES|QL mode', () => {
       describe('cell renderers', () => {
         it('should not render custom @timestamp', async () => {
@@ -22,8 +26,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             dataSource: { type: 'esql' },
             query: { esql: 'from my-example-* | sort @timestamp desc' },
           });
-          await PageObjects.common.navigateToApp('discover', {
-            hash: `/?_a=${state}`,
+          await PageObjects.common.navigateToActualUrl('discover', `?_a=${state}`, {
+            ensureCurrentUrl: false,
           });
           await PageObjects.discover.waitUntilSearchingHasFinished();
           const timestamps = await testSubjects.findAll('exampleRootProfileTimestamp', 2500);
@@ -35,7 +39,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('data view mode', () => {
       describe('cell renderers', () => {
         it('should not render custom @timestamp', async () => {
-          await PageObjects.common.navigateToApp('discover');
+          await PageObjects.common.navigateToActualUrl('discover', undefined, {
+            ensureCurrentUrl: false,
+          });
           await dataViews.switchTo('my-example-*');
           await PageObjects.discover.waitUntilSearchingHasFinished();
           const timestamps = await testSubjects.findAll('exampleRootProfileTimestamp', 2500);

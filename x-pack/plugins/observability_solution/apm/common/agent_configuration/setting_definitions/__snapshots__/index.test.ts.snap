@@ -258,7 +258,7 @@ Array [
   Object {
     "key": "session_sample_rate",
     "type": "float",
-    "validationName": "floatRt",
+    "validationName": "floatThreeDecimalPlacesRt",
   },
   Object {
     "key": "span_compression_enabled",
@@ -341,22 +341,22 @@ Array [
   Object {
     "key": "stress_monitor_gc_relief_threshold",
     "type": "float",
-    "validationName": "floatRt",
+    "validationName": "floatThreeDecimalPlacesRt",
   },
   Object {
     "key": "stress_monitor_gc_stress_threshold",
     "type": "float",
-    "validationName": "floatRt",
+    "validationName": "floatThreeDecimalPlacesRt",
   },
   Object {
     "key": "stress_monitor_system_cpu_relief_threshold",
     "type": "float",
-    "validationName": "floatRt",
+    "validationName": "floatThreeDecimalPlacesRt",
   },
   Object {
     "key": "stress_monitor_system_cpu_stress_threshold",
     "type": "float",
-    "validationName": "floatRt",
+    "validationName": "floatThreeDecimalPlacesRt",
   },
   Object {
     "key": "trace_continuation_strategy",
@@ -407,7 +407,7 @@ Array [
   Object {
     "key": "transaction_sample_rate",
     "type": "float",
-    "validationName": "floatRt",
+    "validationName": "floatFourDecimalPlacesRt",
   },
   Object {
     "key": "unnest_exceptions",

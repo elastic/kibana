@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import React from 'react';
 import type { AnalyticsNoDataPageProps } from '@kbn/shared-ux-page-analytics-no-data-types';
 
@@ -18,8 +20,9 @@ import { AnalyticsNoDataPage as Component } from './analytics_no_data_page.compo
  */
 export const AnalyticsNoDataPage = ({
   onDataViewCreated,
-  onESQLNavigationComplete,
   allowAdHocDataView,
+  onTryESQL,
+  onESQLNavigationComplete,
 }: AnalyticsNoDataPageProps) => {
   const { customBranding, ...services } = useServices();
   const showPlainSpinner = useObservable(customBranding.hasCustomBranding$) ?? false;
@@ -31,6 +34,7 @@ export const AnalyticsNoDataPage = ({
       allowAdHocDataView={allowAdHocDataView}
       onDataViewCreated={onDataViewCreated}
       onESQLNavigationComplete={onESQLNavigationComplete}
+      onTryESQL={onTryESQL}
     />
   );
 };

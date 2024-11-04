@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { ToolingLogTextWriter } from './tooling_log_text_writer';
@@ -26,16 +27,16 @@ export class ToolingLogCollectingWriter extends ToolingLogTextWriter {
   }
 
   /**
-   * Called by ToolingLog, extends messages with the source if message includes one.
+   * Called by ToolingLog, extends messages with the source and context if message include it.
    */
   write(msg: Message) {
-    if (msg.source) {
-      return super.write({
-        ...msg,
-        args: [`source[${msg.source}]`, ...msg.args],
-      });
-    }
+    const args = [
+      msg.source ? `source[${msg.source}]` : null,
+      msg.context ? `context[${msg.context}]` : null,
+    ]
+      .filter(Boolean)
+      .concat(msg.args);
 
-    return super.write(msg);
+    return super.write({ ...msg, args });
   }
 }

@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { RecursivePartial, Theme, PartialTheme } from '@elastic/charts';
+import { PartialTheme } from '@elastic/charts';
 import {
   ChartTypes,
   LabelPositions,
@@ -14,37 +15,13 @@ import {
   PieContainerDimensions,
 } from '../../common/types';
 
-type GetThemeByTypeFn = (
-  chartType: ChartTypes,
-  visParams: PartitionVisParams,
-  dimensions?: PieContainerDimensions,
-  rescaleFactor?: number
-) => PartialTheme;
-
-type GetThemeFn = (
-  chartType: ChartTypes,
-  visParams: PartitionVisParams,
-  chartTheme: RecursivePartial<Theme>,
-  dimensions?: PieContainerDimensions,
-  rescaleFactor?: number,
-  hasOpenedOnAggBasedEditor?: boolean
-) => PartialTheme;
-
-type GetPieDonutWaffleThemeFn = (
-  visParams: PartitionVisParams,
-  dimensions?: PieContainerDimensions,
-  rescaleFactor?: number
-) => PartialTheme;
-
-type GetTreemapMosaicThemeFn = (visParams: PartitionVisParams) => PartialTheme;
-
 const MAX_SIZE = 1000;
 
-const getPieDonutWaffleCommonTheme: GetPieDonutWaffleThemeFn = (
-  visParams,
-  dimensions,
+function getPieDonutWaffleCommonTheme(
+  visParams: PartitionVisParams,
+  dimensions?: PieContainerDimensions,
   rescaleFactor = 1
-) => {
+): PartialTheme['partition'] {
   const isSplitChart = Boolean(visParams.dimensions.splitColumn || visParams.dimensions.splitRow);
   const preventLinksFromShowing =
     (visParams.labels.position === LabelPositions.INSIDE || isSplitChart) && visParams.labels.show;
@@ -58,15 +35,14 @@ const getPieDonutWaffleCommonTheme: GetPieDonutWaffleThemeFn = (
         }
       : { outerSizeRatio: undefined };
 
-  const theme: PartialTheme = {};
-  theme.partition = { ...(usingOuterSizeRatio ?? {}) };
+  const partitionTheme: PartialTheme['partition'] = { ...(usingOuterSizeRatio ?? {}) };
 
   if (
     visParams.labels.show &&
     visParams.labels.position === LabelPositions.DEFAULT &&
     visParams.labels.last_level
   ) {
-    theme.partition.linkLabel = {
+    partitionTheme.linkLabel = {
       maxCount: Number.POSITIVE_INFINITY,
       maximumSection: Number.POSITIVE_INFINITY,
       maxTextLength: visParams.labels.truncate ?? undefined,
@@ -75,7 +51,7 @@ const getPieDonutWaffleCommonTheme: GetPieDonutWaffleThemeFn = (
 
   if (preventLinksFromShowing || !visParams.labels.show) {
     // Prevent links from showing
-    theme.partition.linkLabel = {
+    partitionTheme.linkLabel = {
       maxCount: 0,
       ...(!visParams.labels.show ? { maximumSection: Number.POSITIVE_INFINITY } : {}),
     };
@@ -83,48 +59,55 @@ const getPieDonutWaffleCommonTheme: GetPieDonutWaffleThemeFn = (
 
   if (!preventLinksFromShowing && dimensions && !isSplitChart) {
     // shrink up to 20% to give some room for the linked values
-    theme.partition.outerSizeRatio = rescaleFactor;
+    partitionTheme.outerSizeRatio = rescaleFactor;
   }
 
-  return theme;
-};
+  return partitionTheme;
+}
 
-const getDonutSpecificTheme: GetPieDonutWaffleThemeFn = (visParams, ...args) => {
-  const { partition, ...restTheme } = getPieDonutWaffleCommonTheme(visParams, ...args);
-  return { ...restTheme, partition: { ...partition, emptySizeRatio: visParams.emptySizeRatio } };
-};
+function getDonutSpecificTheme(
+  visParams: PartitionVisParams,
+  dimensions?: PieContainerDimensions,
+  rescaleFactor?: number
+): PartialTheme['partition'] {
+  const partition = getPieDonutWaffleCommonTheme(visParams, dimensions, rescaleFactor);
+  return { ...partition, emptySizeRatio: visParams.emptySizeRatio };
+}
 
-const getTreemapMosaicCommonTheme: GetTreemapMosaicThemeFn = (visParams) => {
-  if (!visParams.labels.show) {
-    return {
-      partition: {
-        fillLabel: { textColor: 'rgba(0,0,0,0)' },
-      },
-    };
+function getTreemapMosaicCommonTheme(visParams: PartitionVisParams): PartialTheme['partition'] {
+  return !visParams.labels.show ? { fillLabel: { textColor: 'rgba(0,0,0,0)' } } : {};
+}
+
+function getSpecificTheme(
+  chartType: ChartTypes,
+  visParams: PartitionVisParams,
+  dimensions?: PieContainerDimensions,
+  rescaleFactor?: number
+): PartialTheme['partition'] {
+  switch (chartType) {
+    case ChartTypes.PIE:
+      return getPieDonutWaffleCommonTheme(visParams, dimensions, rescaleFactor);
+    case ChartTypes.DONUT:
+      return getDonutSpecificTheme(visParams, dimensions, rescaleFactor);
+    case ChartTypes.TREEMAP:
+      return getTreemapMosaicCommonTheme(visParams);
+    case ChartTypes.MOSAIC:
+      return getTreemapMosaicCommonTheme(visParams);
+    case ChartTypes.WAFFLE:
+      return getPieDonutWaffleCommonTheme(visParams, dimensions, rescaleFactor);
   }
-  return {};
-};
+}
 
-const getSpecificTheme: GetThemeByTypeFn = (chartType, visParams, dimensions, rescaleFactor) =>
-  ({
-    [ChartTypes.PIE]: () => getPieDonutWaffleCommonTheme(visParams, dimensions, rescaleFactor),
-    [ChartTypes.DONUT]: () => getDonutSpecificTheme(visParams, dimensions, rescaleFactor),
-    [ChartTypes.TREEMAP]: () => getTreemapMosaicCommonTheme(visParams),
-    [ChartTypes.MOSAIC]: () => getTreemapMosaicCommonTheme(visParams),
-    [ChartTypes.WAFFLE]: () => getPieDonutWaffleCommonTheme(visParams, dimensions, rescaleFactor),
-  }[chartType]());
-
-export const getPartitionTheme: GetThemeFn = (
-  chartType,
-  visParams,
-  chartTheme,
-  dimensions,
+export function getPartitionTheme(
+  chartType: ChartTypes,
+  visParams: PartitionVisParams,
+  dimensions?: PieContainerDimensions,
   rescaleFactor = 1,
-  hasOpenedOnAggBasedEditor
-) => {
+  hasOpenedOnAggBasedEditor?: boolean
+): PartialTheme {
   // On small multiples we want the labels to only appear inside
   const isSplitChart = Boolean(visParams.dimensions.splitColumn || visParams.dimensions.splitRow);
-  const paddingProps: PartialTheme | null =
+  const paddingProps: PartialTheme =
     dimensions && !isSplitChart && hasOpenedOnAggBasedEditor
       ? {
           chartPaddings: {
@@ -134,34 +117,27 @@ export const getPartitionTheme: GetThemeFn = (
             right: ((1 - Math.min(1, MAX_SIZE / dimensions?.width)) / 2) * dimensions?.height,
           },
         }
-      : null;
-  const partition = {
-    fontFamily: chartTheme.barSeriesStyle?.displayValue?.fontFamily,
-    outerSizeRatio: 1,
-    minFontSize: 10,
-    maxFontSize: 16,
-    emptySizeRatio: 0,
-    sectorLineStroke: chartTheme.lineSeriesStyle?.point?.fill,
-    sectorLineWidth: 1.5,
-    circlePadding: 4,
-    linkLabel: {
-      maxCount: 5,
-      fontSize: 11,
-      textColor: chartTheme.axes?.axisTitle?.fill,
-      maxTextLength: visParams.labels.truncate ?? undefined,
-    },
-  };
-  const { partition: specificPartition = {}, ...restSpecificTheme } = getSpecificTheme(
-    chartType,
-    visParams,
-    dimensions,
-    rescaleFactor
-  );
+      : {};
+
+  const specificPartition = getSpecificTheme(chartType, visParams, dimensions, rescaleFactor);
 
   return {
-    partition: { ...partition, ...specificPartition },
+    partition: {
+      outerSizeRatio: 1,
+      minFontSize: 10,
+      maxFontSize: 16,
+      emptySizeRatio: 0,
+      sectorLineWidth: 1.5,
+      circlePadding: 4,
+      ...specificPartition,
+      linkLabel: {
+        // fontSize: 11,
+        maxTextLength: visParams.labels.truncate ?? undefined,
+        maxCount: 5,
+        ...specificPartition?.linkLabel,
+      },
+    },
     chartMargins: { top: 0, bottom: 0, left: 0, right: 0 },
-    ...(paddingProps ?? {}),
-    ...restSpecificTheme,
+    ...paddingProps,
   };
-};
+}

@@ -34,6 +34,7 @@
           "ml": ["read"],
           "siem": ["read", "read_alerts"],
           "securitySolutionAssistant": ["all"],
+          "securitySolutionAttackDiscovery": ["all"],
           "securitySolutionCases": ["read"],
           "actions": ["read"],
           "builtInAlerts": ["read"]
@@ -80,6 +81,7 @@
           "ml": ["read"],
           "siem": ["read", "read_alerts"],
           "securitySolutionAssistant": ["all"],
+          "securitySolutionAttackDiscovery": ["all"],
           "securitySolutionCases": ["read"],
           "actions": ["read"],
           "builtInAlerts": ["read"]
@@ -118,7 +120,12 @@
           "privileges": ["read", "write"]
         },
         {
-          "names": ["metrics-endpoint.metadata_current_*", ".fleet-agents*", ".fleet-actions*", "risk-score.risk-score-*"],
+          "names": [
+            "metrics-endpoint.metadata_current_*",
+            ".fleet-agents*", ".fleet-actions*",
+            "risk-score.risk-score-*",
+            ".entities.v1.latest.security_*"
+          ],
           "privileges": ["read"]
         }
       ],
@@ -145,6 +152,7 @@
           ],
           "securitySolutionCases": ["all"],
           "securitySolutionAssistant": ["all"],
+          "securitySolutionAttackDiscovery": ["all"],
           "actions": ["read"],
           "builtInAlerts": ["all"],
           "osquery": ["all"],
@@ -201,6 +209,7 @@
           "ml": ["read"],
           "siem": ["all", "read_alerts", "crud_alerts"],
           "securitySolutionAssistant": ["all"],
+          "securitySolutionAttackDiscovery": ["all"],
           "securitySolutionCases": ["all"],
           "actions": ["read"],
           "builtInAlerts": ["all"]
@@ -253,6 +262,7 @@
           "ml": ["read"],
           "siem": ["all", "read_alerts", "crud_alerts"],
           "securitySolutionAssistant": ["all"],
+          "securitySolutionAttackDiscovery": ["all"],
           "securitySolutionCases": ["all"],
           "actions": ["all"],
           "builtInAlerts": ["all"]
@@ -300,6 +310,7 @@
           "ml": ["all"],
           "siem": ["all", "read_alerts", "crud_alerts"],
           "securitySolutionAssistant": ["all"],
+          "securitySolutionAttackDiscovery": ["all"],
           "securitySolutionCases": ["all"],
           "actions": ["read"],
           "builtInAlerts": ["all"],
@@ -354,6 +365,7 @@
           "ml": ["all"],
           "siem": ["all", "read_alerts", "crud_alerts"],
           "securitySolutionAssistant": ["all"],
+          "securitySolutionAttackDiscovery": ["all"],
           "securitySolutionCases": ["all"],
           "actions": ["all"],
           "builtInAlerts": ["all"]

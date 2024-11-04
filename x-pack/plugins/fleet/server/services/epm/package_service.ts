@@ -28,7 +28,6 @@ import type {
   InstallablePackage,
   Installation,
   RegistryPackage,
-  TemplateAgentPolicyInput,
 } from '../../types';
 
 import type { FleetAuthzRouteConfig } from '../security/types';
@@ -40,7 +39,7 @@ import type { InstallResult } from '../../../common';
 
 import { appContextService } from '..';
 
-import type { CustomPackageDatasetConfiguration } from './packages/install';
+import type { CustomPackageDatasetConfiguration, EnsurePackageResult } from './packages/install';
 
 import type { FetchFindLatestPackageOptions } from './registry';
 import { getPackageFieldsMetadata } from './registry';
@@ -73,7 +72,7 @@ export interface PackageClient {
     pkgVersion?: string;
     spaceId?: string;
     force?: boolean;
-  }): Promise<Installation>;
+  }): Promise<EnsurePackageResult>;
 
   installPackage(options: {
     pkgName: string;
@@ -116,12 +115,12 @@ export interface PackageClient {
     prerelease?: false;
   }): Promise<PackageList>;
 
-  getAgentPolicyInputs(
+  getAgentPolicyConfigYAML(
     pkgName: string,
     pkgVersion?: string,
     prerelease?: false,
     ignoreUnverified?: boolean
-  ): Promise<TemplateAgentPolicyInput[]>;
+  ): Promise<string>;
 
   reinstallEsAssets(
     packageInfo: InstallablePackage,
@@ -201,7 +200,7 @@ class PackageClientImpl implements PackageClient {
     pkgVersion?: string;
     spaceId?: string;
     force?: boolean;
-  }): Promise<Installation> {
+  }): Promise<EnsurePackageResult> {
     await this.#runPreflight(INSTALL_PACKAGES_AUTHZ);
 
     return ensureInstalledPackage({
@@ -284,7 +283,7 @@ class PackageClientImpl implements PackageClient {
     return generatePackageInfoFromArchiveBuffer(archiveBuffer, 'application/zip');
   }
 
-  public async getAgentPolicyInputs(
+  public async getAgentPolicyConfigYAML(
     pkgName: string,
     pkgVersion?: string,
     prerelease?: false,
@@ -298,16 +297,14 @@ class PackageClientImpl implements PackageClient {
       pkgVersion = pkg.version;
     }
 
-    const { inputs } = await getTemplateInputs(
+    return getTemplateInputs(
       this.internalSoClient,
       pkgName,
       pkgVersion,
-      'json',
+      'yml',
       prerelease,
       ignoreUnverified
     );
-
-    return inputs;
   }
 
   public async getPackage(

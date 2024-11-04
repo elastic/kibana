@@ -14,18 +14,10 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
     "objects": [
       {
         "parentPluginId": "@kbn/core-status-server-mocks",
-        "id": "def-common.statusServiceMock",
+        "id": "def-server.statusServiceMock",
         "type": "Object",
         "tags": [],
         "label": "statusServiceMock",
@@ -36,7 +28,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-status-server-mocks",
-            "id": "def-common.statusServiceMock.create",
+            "id": "def-server.statusServiceMock.create",
             "type": "Function",
             "tags": [],
             "label": "create",
@@ -52,7 +44,7 @@
           },
           {
             "parentPluginId": "@kbn/core-status-server-mocks",
-            "id": "def-common.statusServiceMock.createSetupContract",
+            "id": "def-server.statusServiceMock.createSetupContract",
             "type": "Function",
             "tags": [],
             "label": "createSetupContract",
@@ -61,9 +53,9 @@
               "() => jest.Mocked<",
               {
                 "pluginId": "@kbn/core-status-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreStatusServerPluginApi",
-                "section": "def-common.StatusServiceSetup",
+                "section": "def-server.StatusServiceSetup",
                 "text": "StatusServiceSetup"
               },
               ">"
@@ -76,7 +68,7 @@
           },
           {
             "parentPluginId": "@kbn/core-status-server-mocks",
-            "id": "def-common.statusServiceMock.createInternalSetupContract",
+            "id": "def-server.statusServiceMock.createInternalSetupContract",
             "type": "Function",
             "tags": [],
             "label": "createInternalSetupContract",
@@ -96,5 +88,13 @@
         "initialIsOpen": false
       }
     ]
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
   }
 }

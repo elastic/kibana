@@ -14,7 +14,7 @@ import {
   InfraWaffleMapBounds,
   InfraWaffleMapGroupOfNodes,
   InfraWaffleMapOptions,
-} from '../../../../../lib/lib';
+} from '../../../../../common/inventory/types';
 import { GroupName } from './group_name';
 import { Node } from './node';
 import { useAssetDetailsFlyoutState } from '../../hooks/use_asset_details_flyout_url_state';

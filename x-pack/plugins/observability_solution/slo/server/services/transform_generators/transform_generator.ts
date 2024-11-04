@@ -23,18 +23,6 @@ export abstract class TransformGenerator {
 
   public buildCommonRuntimeMappings(slo: SLODefinition, dataView?: DataView): MappingRuntimeFields {
     return {
-      'slo.id': {
-        type: 'keyword',
-        script: {
-          source: `emit('${slo.id}')`,
-        },
-      },
-      'slo.revision': {
-        type: 'long',
-        script: {
-          source: `emit(${slo.revision})`,
-        },
-      },
       ...(dataView?.getRuntimeMappings?.() ?? {}),
     };
   }
@@ -70,8 +58,6 @@ export abstract class TransformGenerator {
         : {};
 
     return {
-      'slo.id': { terms: { field: 'slo.id' } },
-      'slo.revision': { terms: { field: 'slo.revision' } },
       ...groupings,
       ...extraGroupByFields,
       // @timestamp field defined in the destination index

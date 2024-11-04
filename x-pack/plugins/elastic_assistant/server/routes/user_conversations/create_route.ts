@@ -14,14 +14,15 @@ import {
   API_VERSIONS,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
+
 import { ElasticAssistantPluginRouter } from '../../types';
 import { buildResponse } from '../utils';
-import { UPGRADE_LICENSE_MESSAGE, hasAIAssistantLicense } from '../helpers';
+import { performChecks } from '../helpers';
 
 export const createConversationRoute = (router: ElasticAssistantPluginRouter): void => {
   router.versioned
     .post({
-      access: 'internal',
+      access: 'public',
       path: ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL,
 
       options: {
@@ -30,7 +31,7 @@ export const createConversationRoute = (router: ElasticAssistantPluginRouter): v
     })
     .addVersion(
       {
-        version: API_VERSIONS.internal.v1,
+        version: API_VERSIONS.public.v1,
         validate: {
           request: {
             body: buildRouteValidationWithZod(ConversationCreateProps),
@@ -41,39 +42,19 @@ export const createConversationRoute = (router: ElasticAssistantPluginRouter): v
         const assistantResponse = buildResponse(response);
         try {
           const ctx = await context.resolve(['core', 'elasticAssistant', 'licensing']);
-          const license = ctx.licensing.license;
-          if (!hasAIAssistantLicense(license)) {
-            return response.forbidden({
-              body: {
-                message: UPGRADE_LICENSE_MESSAGE,
-              },
-            });
+          // Perform license and authenticated user checks
+          const checkResponse = performChecks({
+            context: ctx,
+            request,
+            response,
+          });
+          if (!checkResponse.isSuccess) {
+            return checkResponse.response;
           }
           const dataClient = await ctx.elasticAssistant.getAIAssistantConversationsDataClient();
-          const authenticatedUser = ctx.elasticAssistant.getCurrentUser();
-          if (authenticatedUser == null) {
-            return assistantResponse.error({
-              body: `Authenticated user not found`,
-              statusCode: 401,
-            });
-          }
-
-          const result = await dataClient?.findDocuments({
-            perPage: 100,
-            page: 1,
-            filter: `users:{ id: "${authenticatedUser?.profile_uid}" } AND title:${request.body.title}`,
-            fields: ['title'],
-          });
-          if (result?.data != null && result.total > 0) {
-            return assistantResponse.error({
-              statusCode: 409,
-              body: `conversation title: "${request.body.title}" already exists`,
-            });
-          }
 
           const createdConversation = await dataClient?.createConversation({
             conversation: request.body,
-            authenticatedUser,
           });
 
           if (createdConversation == null) {

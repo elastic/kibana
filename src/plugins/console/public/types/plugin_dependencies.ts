@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { FC } from 'react';
@@ -59,6 +60,12 @@ export interface ConsolePluginStart {
    * this function will open the embedded console on the page if it is currently rendered.
    */
   openEmbeddedConsole?: (content?: string) => void;
+  /**
+   * openEmbeddedConsoleAlternateView is available if the embedded console can be rendered.
+   * Calling this function will open the embedded console to the alternative view. If there is no alternative view registered
+   * this will open the embedded console.
+   */
+  openEmbeddedConsoleAlternateView?: () => void;
   /**
    * EmbeddableConsole is a functional component used to render a portable version of the dev tools console on any page in Kibana
    */

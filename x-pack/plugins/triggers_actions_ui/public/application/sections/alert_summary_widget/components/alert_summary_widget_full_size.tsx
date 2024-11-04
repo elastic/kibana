@@ -28,6 +28,7 @@ export interface AlertSummaryWidgetFullSizeProps {
   activeAlerts: Alert[];
   chartProps?: ChartProps;
   recoveredAlertCount: number;
+  timeZone: string;
   dateFormat?: string;
   hideChart?: boolean;
   hideStats?: boolean;
@@ -40,6 +41,7 @@ export const AlertSummaryWidgetFullSize = ({
   chartProps: { themeOverrides, onBrushEnd } = {},
   dateFormat,
   recoveredAlertCount,
+  timeZone,
   hideChart,
   hideStats,
   dependencyProps: { baseTheme },
@@ -131,9 +133,10 @@ export const AlertSummaryWidgetFullSize = ({
                 line: {
                   strokeWidth: 2,
                 },
-                point: { visible: false },
+                point: { visible: 'never' },
               }}
               curve={CurveType.CURVE_MONOTONE_X}
+              timeZone={timeZone}
             />
           </Chart>
         </div>

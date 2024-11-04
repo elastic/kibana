@@ -12,7 +12,7 @@ import React from 'react';
  * spliced into text children at word boundaries.
  */
 // eslint-disable-next-line react/display-name
-export const GeneratedText = React.memo(function ({ children }) {
+export const GeneratedText = React.memo<React.PropsWithChildren<{}>>(function ({ children }) {
   return <>{processedValue()}</>;
 
   function processedValue() {

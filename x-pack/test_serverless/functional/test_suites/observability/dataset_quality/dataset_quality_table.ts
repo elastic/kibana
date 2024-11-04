@@ -56,7 +56,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           namespace: productionNamespace,
         }),
       ]);
-      await PageObjects.svlCommonPage.loginWithRole('admin');
+      await PageObjects.svlCommonPage.loginAsAdmin();
       await PageObjects.datasetQuality.navigateTo();
     });
 
@@ -110,6 +110,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const degradedDocsCol = cols['Degraded Docs (%)'];
       const degradedDocsColCellTexts = await degradedDocsCol.getCellTexts();
       expect(degradedDocsColCellTexts).to.eql(['0%', '0%', '0%', '100%']);
+    });
+
+    it('shows the value in the size column', async () => {
+      const cols = await PageObjects.datasetQuality.parseDatasetTable();
+
+      const sizeColCellTexts = await cols.Size.getCellTexts();
+      const sizeGreaterThanZero = sizeColCellTexts[3];
+      const sizeEqualToZero = sizeColCellTexts[2];
+
+      expect(sizeGreaterThanZero).to.not.eql('0.0 KB');
+      expect(sizeEqualToZero).to.eql('0.0 B');
     });
 
     it('shows dataset from integration', async () => {

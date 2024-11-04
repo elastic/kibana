@@ -9,7 +9,7 @@ import React from 'react';
 import type { ReactWrapper } from 'enzyme';
 import { mount } from 'enzyme';
 
-import { SourcererScopeName } from '../store/model';
+import { type SelectedDataView, SourcererScopeName } from '../store/model';
 import { Sourcerer } from '.';
 import { sourcererActions, sourcererModel } from '../store';
 import { createMockStore, mockGlobalState, TestProviders } from '../../common/mock';
@@ -74,9 +74,13 @@ const { id, patternList, title } = mockGlobalState.sourcerer.defaultDataView;
 const patternListNoSignals = sortWithExcludesAtEnd(
   patternList.filter((p) => p !== mockGlobalState.sourcerer.signalIndexName)
 );
-const sourcererDataView = {
+const sourcererDataView: Partial<SelectedDataView> = {
   indicesExist: true,
   loading: false,
+  sourcererDataView: {
+    title:
+      'apm-*-transaction*,auditbeat-*,endgame-*,filebeat-*,logs-*,packetbeat-*,traces-apm*,winlogbeat-*,-*elastic-cloud-logs-*',
+  },
 };
 
 describe('Sourcerer component', () => {

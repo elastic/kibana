@@ -20,16 +20,12 @@ export function useDeleteKnowledgeBaseEntry() {
   } = useKibana().services;
 
   const queryClient = useQueryClient();
-  const observabilityAIAssistantApi = observabilityAIAssistant?.service.callApi;
+  const observabilityAIAssistantApi = observabilityAIAssistant.service.callApi;
 
   return useMutation<unknown, ServerError, { id: string }>(
     [REACT_QUERY_KEYS.CREATE_KB_ENTRIES],
     ({ id: entryId }) => {
-      if (!observabilityAIAssistantApi) {
-        return Promise.reject('Error with observabilityAIAssistantApi: API not found.');
-      }
-
-      return observabilityAIAssistantApi?.(
+      return observabilityAIAssistantApi(
         'DELETE /internal/observability_ai_assistant/kb/entries/{entryId}',
         {
           signal: null,

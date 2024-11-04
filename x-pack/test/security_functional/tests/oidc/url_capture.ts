@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import { parse } from 'url';
-import { FtrProviderContext } from '../../ftr_provider_context';
+
+import expect from '@kbn/expect';
+
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
@@ -16,8 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common']);
 
-  // Failing: See https://github.com/elastic/kibana/issues/186780
-  describe.skip('URL capture', function () {
+  describe('URL capture', function () {
     this.tags('includeFirefox');
 
     before(async () => {

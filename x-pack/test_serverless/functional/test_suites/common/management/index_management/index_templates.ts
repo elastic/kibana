@@ -101,7 +101,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await testSubjects.click('nextButton');
 
         await retry.try(async () => {
-          expect(await testSubjects.getVisibleText('stepTitle')).to.contain(TEST_TEMPLATE_NAME);
+          expect(await testSubjects.getVisibleText('title')).to.contain(TEST_TEMPLATE_NAME);
         });
       });
     });

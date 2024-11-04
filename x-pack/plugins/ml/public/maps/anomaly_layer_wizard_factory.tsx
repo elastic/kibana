@@ -24,7 +24,7 @@ import { AnomalySource } from './anomaly_source';
 
 import { HttpService } from '../application/services/http_service';
 import type { MlPluginStart, MlStartDependencies } from '../plugin';
-import type { MlApiServices } from '../application/services/ml_api_service';
+import type { MlApi } from '../application/services/ml_api_service';
 
 export const ML_ANOMALY = 'ML_ANOMALIES';
 
@@ -41,7 +41,7 @@ export class AnomalyLayerWizardFactory {
   }
 
   private async getServices(): Promise<{
-    mlJobsService: MlApiServices['jobs'];
+    mlJobsService: MlApi['jobs'];
     mlLocator?: LocatorPublic<SerializableRecord>;
   }> {
     const [coreStart, pluginStart] = await this.getStartServices();

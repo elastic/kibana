@@ -9,6 +9,7 @@ import { chunk, get, invert, isEmpty, partition } from 'lodash';
 import moment from 'moment';
 
 import dateMath from '@kbn/datemath';
+import { isCCSRemoteIndexName } from '@kbn/es-query';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { TransportResult } from '@elastic/elasticsearch';
 import { ALERT_UUID, ALERT_RULE_UUID, ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
@@ -74,7 +75,7 @@ export const hasReadIndexPrivileges = async (args: {
   privileges: Privilege;
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
   uiSettingsClient: IUiSettingsClient;
-}): Promise<{ wroteWarningMessage: boolean; warningStatusMessage: string | undefined }> => {
+}): Promise<string | undefined> => {
   const { privileges, ruleExecutionLogger, uiSettingsClient } = args;
 
   const isCcsPermissionWarningEnabled = await uiSettingsClient.get(ENABLE_CCS_READ_WARNING_SETTING);
@@ -82,7 +83,9 @@ export const hasReadIndexPrivileges = async (args: {
   const indexNames = Object.keys(privileges.index);
   const filteredIndexNames = isCcsPermissionWarningEnabled
     ? indexNames
-    : indexNames.filter((indexName) => !indexName.includes(':')); // Cross cluster indices uniquely contain `:` in their name
+    : indexNames.filter((indexName) => {
+        return !isCCSRemoteIndexName(indexName);
+      });
 
   const [, indexesWithNoReadPrivileges] = partition(
     filteredIndexNames,
@@ -99,10 +102,9 @@ export const hasReadIndexPrivileges = async (args: {
       newStatus: RuleExecutionStatusEnum['partial failure'],
       message: warningStatusMessage,
     });
-    return { wroteWarningMessage: true, warningStatusMessage };
   }
 
-  return { wroteWarningMessage: false, warningStatusMessage };
+  return warningStatusMessage;
 };
 
 export const hasTimestampFields = async (args: {
@@ -114,7 +116,6 @@ export const hasTimestampFields = async (args: {
   inputIndices: string[];
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
 }): Promise<{
-  wroteWarningStatus: boolean;
   foundNoIndices: boolean;
   warningMessage: string | undefined;
 }> => {
@@ -136,7 +137,6 @@ export const hasTimestampFields = async (args: {
     });
 
     return {
-      wroteWarningStatus: true,
       foundNoIndices: true,
       warningMessage: errorString.trimEnd(),
     };
@@ -163,10 +163,10 @@ export const hasTimestampFields = async (args: {
       message: errorString,
     });
 
-    return { wroteWarningStatus: true, foundNoIndices: false, warningMessage: errorString };
+    return { foundNoIndices: false, warningMessage: errorString };
   }
 
-  return { wroteWarningStatus: false, foundNoIndices: false, warningMessage: undefined };
+  return { foundNoIndices: false, warningMessage: undefined };
 };
 
 export const checkPrivileges = async (
@@ -433,7 +433,6 @@ export const getRuleRangeTuples = async ({
 }) => {
   const originalFrom = dateMath.parse(from, { forceNow: startedAt });
   const originalTo = dateMath.parse(to, { forceNow: startedAt });
-  let wroteWarningStatus = false;
   let warningStatusMessage;
   if (originalFrom == null || originalTo == null) {
     throw new Error('Failed to parse date math of rule.from or rule.to');
@@ -448,7 +447,6 @@ export const getRuleRangeTuples = async ({
       newStatus: RuleExecutionStatusEnum['partial failure'],
       message: warningStatusMessage,
     });
-    wroteWarningStatus = true;
   }
 
   const tuples = [
@@ -466,7 +464,7 @@ export const getRuleRangeTuples = async ({
         interval
       )}"`
     );
-    return { tuples, remainingGap: moment.duration(0), wroteWarningStatus, warningStatusMessage };
+    return { tuples, remainingGap: moment.duration(0), warningStatusMessage };
   }
 
   const gap = getGapBetweenRuns({
@@ -498,7 +496,6 @@ export const getRuleRangeTuples = async ({
   return {
     tuples: tuples.reverse(),
     remainingGap: moment.duration(remainingGapMilliseconds),
-    wroteWarningStatus,
     warningStatusMessage,
   };
 };

@@ -80,20 +80,38 @@ export function getFrequentItemSetsAggFields(significantItems: SignificantItem[]
   );
 }
 
-export async function fetchFrequentItemSets(
-  client: ElasticsearchClient,
-  index: string,
-  searchQuery: estypes.QueryDslQueryContainer,
-  significantItems: SignificantItem[],
-  timeFieldName: string,
-  deviationMin: number,
-  deviationMax: number,
-  logger: Logger,
-  // The default value of 1 means no sampling will be used
-  sampleProbability: number = 1,
-  emitError: (m: string) => void,
-  abortSignal?: AbortSignal
-): Promise<FetchFrequentItemSetsResponse> {
+export async function fetchFrequentItemSets({
+  esClient,
+  abortSignal,
+  emitError,
+  logger,
+  arguments: args,
+}: {
+  esClient: ElasticsearchClient;
+  emitError: (m: string) => void;
+  abortSignal?: AbortSignal;
+  logger: Logger;
+  arguments: {
+    index: string;
+    searchQuery: estypes.QueryDslQueryContainer;
+    significantItems: SignificantItem[];
+    timeFieldName: string;
+    deviationMin: number;
+    deviationMax: number;
+    sampleProbability?: number;
+  };
+}): Promise<FetchFrequentItemSetsResponse> {
+  const {
+    index,
+    searchQuery,
+    significantItems,
+    timeFieldName,
+    deviationMin,
+    deviationMax,
+    // The default value of 1 means no sampling will be used
+    sampleProbability = 1,
+  } = args;
+
   // Sort significant terms by ascending p-value, necessary to apply the field limit correctly.
   const sortedSignificantItems = significantItems.slice().sort((a, b) => {
     return (a.pValue ?? 0) - (b.pValue ?? 0);
@@ -140,7 +158,7 @@ export async function fetchFrequentItemSets(
     track_total_hits: true,
   };
 
-  const body = await client.search<
+  const body = await esClient.search<
     unknown,
     { sample: FrequentItemSetsAggregation } | FrequentItemSetsAggregation
   >(

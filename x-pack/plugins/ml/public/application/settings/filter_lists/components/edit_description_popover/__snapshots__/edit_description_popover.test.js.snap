@@ -34,10 +34,6 @@ exports[`FilterListUsagePopover opens the popover onButtonClick 1`] = `
     >
       <EuiForm>
         <EuiFormRow
-          describedByIds={Array []}
-          display="row"
-          hasChildLabel={true}
-          hasEmptyLabelSpace={false}
           id="filter_list_edit_description_row"
           label={
             <Memo(MemoizedFormattedMessage)
@@ -45,7 +41,6 @@ exports[`FilterListUsagePopover opens the popover onButtonClick 1`] = `
               id="xpack.ml.settings.filterLists.editDescriptionPopover.filterListDescriptionAriaLabel"
             />
           }
-          labelType="label"
         >
           <EuiFieldText
             data-test-subj="mlFilterListDescriptionInput"
@@ -94,10 +89,6 @@ exports[`FilterListUsagePopover renders the popover with a description 1`] = `
     >
       <EuiForm>
         <EuiFormRow
-          describedByIds={Array []}
-          display="row"
-          hasChildLabel={true}
-          hasEmptyLabelSpace={false}
           id="filter_list_edit_description_row"
           label={
             <Memo(MemoizedFormattedMessage)
@@ -105,7 +96,6 @@ exports[`FilterListUsagePopover renders the popover with a description 1`] = `
               id="xpack.ml.settings.filterLists.editDescriptionPopover.filterListDescriptionAriaLabel"
             />
           }
-          labelType="label"
         >
           <EuiFieldText
             data-test-subj="mlFilterListDescriptionInput"
@@ -154,10 +144,6 @@ exports[`FilterListUsagePopover renders the popover with no description 1`] = `
     >
       <EuiForm>
         <EuiFormRow
-          describedByIds={Array []}
-          display="row"
-          hasChildLabel={true}
-          hasEmptyLabelSpace={false}
           id="filter_list_edit_description_row"
           label={
             <Memo(MemoizedFormattedMessage)
@@ -165,7 +151,6 @@ exports[`FilterListUsagePopover renders the popover with no description 1`] = `
               id="xpack.ml.settings.filterLists.editDescriptionPopover.filterListDescriptionAriaLabel"
             />
           }
-          labelType="label"
         >
           <EuiFieldText
             data-test-subj="mlFilterListDescriptionInput"

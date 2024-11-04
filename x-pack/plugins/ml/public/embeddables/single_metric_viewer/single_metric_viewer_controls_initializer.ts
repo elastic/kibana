@@ -20,6 +20,11 @@ export type AnomalySwimLaneControlsState = Pick<
   'jobIds' | 'selectedDetectorIndex' | 'selectedEntities' | 'functionDescription'
 >;
 
+export type SingleMetricViewerControlsState = Pick<
+  SingleMetricViewerEmbeddableState,
+  'jobIds' | 'selectedDetectorIndex' | 'selectedEntities' | 'functionDescription' | 'forecastId'
+>;
+
 export const initializeSingleMetricViewerControls = (
   rawState: SingleMetricViewerEmbeddableState,
   titlesApi: TitlesApi
@@ -30,6 +35,7 @@ export const initializeSingleMetricViewerControls = (
   const selectedEntities = new BehaviorSubject<Record<string, any> | undefined>(
     rawState.selectedEntities
   );
+  const forecastId = new BehaviorSubject<string | undefined>(rawState.forecastId);
 
   const updateUserInput = (update: SingleMetricViewerEmbeddableUserInput) => {
     jobIds.next(update.jobIds);
@@ -39,17 +45,23 @@ export const initializeSingleMetricViewerControls = (
     titlesApi.setPanelTitle(update.panelTitle);
   };
 
-  const serializeSingleMetricViewerState = (): AnomalySwimLaneControlsState => {
+  const updateForecastId = (id: string | undefined) => {
+    forecastId.next(id);
+  };
+
+  const serializeSingleMetricViewerState = (): SingleMetricViewerControlsState => {
     return {
-      jobIds: jobIds.value,
-      selectedDetectorIndex: selectedDetectorIndex.value,
-      selectedEntities: selectedEntities.value,
-      functionDescription: functionDescription?.value,
+      jobIds: jobIds.getValue(),
+      forecastId: forecastId.getValue(),
+      selectedDetectorIndex: selectedDetectorIndex.getValue(),
+      selectedEntities: selectedEntities.getValue(),
+      functionDescription: functionDescription?.getValue(),
     };
   };
 
-  const singleMetricViewerComparators: StateComparators<AnomalySwimLaneControlsState> = {
+  const singleMetricViewerComparators: StateComparators<SingleMetricViewerControlsState> = {
     jobIds: [jobIds, (ids) => jobIds.next(ids), fastIsEqual],
+    forecastId: [forecastId, (id) => forecastId.next(id)],
     selectedDetectorIndex: [selectedDetectorIndex, (index) => selectedDetectorIndex.next(index)],
     selectedEntities: [selectedEntities, (items) => selectedEntities.next(items), fastIsEqual],
     functionDescription: [
@@ -61,14 +73,17 @@ export const initializeSingleMetricViewerControls = (
   return {
     singleMetricViewerControlsApi: {
       jobIds,
+      forecastId,
       selectedDetectorIndex,
       selectedEntities,
       functionDescription,
+      updateForecastId,
       updateUserInput,
     },
     serializeSingleMetricViewerState,
     singleMetricViewerComparators,
     onSingleMetricViewerDestroy: () => {
+      forecastId.complete();
       jobIds.complete();
       selectedDetectorIndex.complete();
       selectedEntities.complete();

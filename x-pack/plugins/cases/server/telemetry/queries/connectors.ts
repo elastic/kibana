@@ -37,6 +37,7 @@ export const getConnectorsTelemetryData = async ({
       perPage: 0,
       filter,
       type: CASE_USER_ACTION_SAVED_OBJECT,
+      namespaces: ['*'],
       aggs: {
         ...aggs,
       },
@@ -86,7 +87,7 @@ export const getConnectorsTelemetryData = async ({
     acc[connectorTypes[currentIndex]] =
       res.aggregations?.references?.referenceType?.referenceAgg?.value ?? 0;
     return acc;
-  }, {} as Record<typeof connectorTypes[number], number>);
+  }, {} as Record<(typeof connectorTypes)[number], number>);
 
   const allAttached = all[0].aggregations?.references?.referenceType?.referenceAgg?.value ?? 0;
   const maxAttachedToACase = all[1].aggregations?.references?.cases?.max?.value ?? 0;

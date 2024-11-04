@@ -7,6 +7,7 @@
 
 import React, { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
+import type { NarrowDateRange } from '../../../../common/components/ml/types';
 import type { EntityAnomalies } from './observed_entity/types';
 import { AnomalyScores } from '../../../../common/components/ml/score/anomaly_scores';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
@@ -18,7 +19,7 @@ export const AnomaliesField = ({ anomalies }: { anomalies: EntityAnomalies }) =>
   const { to, from } = useGlobalTime();
   const dispatch = useDispatch();
 
-  const narrowDateRange = useCallback(
+  const narrowDateRange = useCallback<NarrowDateRange>(
     (score, interval) => {
       const fromTo = scoreIntervalToDateTime(score, interval);
       dispatch(

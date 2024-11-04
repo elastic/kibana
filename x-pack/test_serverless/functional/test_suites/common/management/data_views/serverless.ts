@@ -100,7 +100,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('when in single space mode', function () {
+    // Skipped due to change in QA environment for role management and spaces
+    // TODO: revisit once the change is rolled out to all environments
+    describe.skip('when in single space mode', function () {
       let dataViewId = '';
       before(async () => {
         await esArchiver.load(

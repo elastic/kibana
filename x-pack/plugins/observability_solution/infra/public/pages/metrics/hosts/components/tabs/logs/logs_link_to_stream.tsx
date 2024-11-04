@@ -5,9 +5,8 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiButtonEmpty } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { getLogsLocatorsFromUrlService, LogViewReference } from '@kbn/logs-shared-plugin/common';
+import { OpenInLogsExplorerButton } from '@kbn/logs-shared-plugin/public';
 import { useKibanaContextForPlugin } from '../../../../../../hooks/use_kibana';
 
 interface LogsLinkToStreamProps {
@@ -23,7 +22,7 @@ export const LogsLinkToStream = ({ startTime, endTime, query, logView }: LogsLin
   const { logsLocator } = getLogsLocatorsFromUrlService(share.url);
 
   return (
-    <EuiButtonEmpty
+    <OpenInLogsExplorerButton
       href={logsLocator.getRedirectUrl({
         time: endTime,
         timeRange: {
@@ -33,14 +32,8 @@ export const LogsLinkToStream = ({ startTime, endTime, query, logView }: LogsLin
         filter: query,
         logView,
       })}
-      data-test-subj="hostsView-logs-link-to-stream-button"
-      iconType="popout"
+      testSubject="hostsView-logs-link-to-stream-button"
       flush="both"
-    >
-      <FormattedMessage
-        id="xpack.infra.hostsViewPage.tabs.logs.openInLogsUiLinkText"
-        defaultMessage="Open in Logs"
-      />
-    </EuiButtonEmpty>
+    />
   );
 };

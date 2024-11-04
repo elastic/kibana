@@ -125,17 +125,27 @@ describe('when on the policy response', () => {
       mockedContext.render(<PolicyResponseWrapper endpointId="id" {...props} />);
     renderOpenedTree = async () => {
       const component = render();
-      userEvent.click(component.getByTestId('endpointPolicyResponseTitle'));
+      await userEvent.click(component.getByTestId('endpointPolicyResponseTitle'));
 
       const configs = component.queryAllByTestId('endpointPolicyResponseConfig');
       for (const config of configs) {
-        userEvent.click(config);
+        await userEvent.click(config);
       }
 
       const actions = component.queryAllByTestId('endpointPolicyResponseAction');
       for (const action of actions) {
-        userEvent.click(action);
+        await userEvent.click(action);
       }
+      const artifactsTitle = component.getByTestId('endpointPolicyResponseArtifactsTitle');
+
+      await userEvent.click(artifactsTitle);
+
+      const globalArtifacts = component.getByTestId(`endpointPolicyResponseArtifactGlobal`);
+      const userArtifacts = component.getByTestId(`endpointPolicyResponseArtifactUser`);
+
+      await userEvent.click(globalArtifacts);
+      await userEvent.click(userArtifacts);
+
       return component;
     };
   });
@@ -207,6 +217,42 @@ describe('when on the policy response', () => {
     // expect([...statusSuccessHealth, ...statusAttentionHealth]).toHaveLength(
     //   expectedActionAccordionCount + configurationKeys.length + 1
     // );
+  });
+
+  it('should show a configuration section for artifacts', async () => {
+    runMock();
+    const component = await renderOpenedTree();
+
+    const globalArtifacts = component.getByTestId(`endpointPolicyResponseArtifactGlobal`);
+    const userArtifacts = component.getByTestId(`endpointPolicyResponseArtifactUser`);
+    expect(globalArtifacts.textContent).toBe(
+      `Global (v${commonPolicyResponse.Endpoint.policy.applied.artifacts.global.version})`
+    );
+    expect(userArtifacts.textContent).toBe(
+      `User (v${commonPolicyResponse.Endpoint.policy.applied.artifacts.user.version})`
+    );
+  });
+
+  it('should show artifact section for each configuration section', async () => {
+    runMock();
+    const component = await renderOpenedTree();
+
+    const artifacts = [
+      ...commonPolicyResponse.Endpoint.policy.applied.artifacts.global.identifiers,
+      ...commonPolicyResponse.Endpoint.policy.applied.artifacts.user.identifiers,
+    ];
+
+    const names = component.queryAllByTestId('endpointPolicyResponseArtifactName');
+    const sha256s = component.queryAllByTestId('endpointPolicyResponseArtifactSha256');
+    const copyButtons = component.queryAllByTestId('endpointPolicyResponseArtifactCopyButton');
+
+    expect(names).toHaveLength(artifacts.length);
+    expect(sha256s).toHaveLength(artifacts.length);
+    expect(copyButtons).toHaveLength(artifacts.length);
+    expect(names[0].textContent).toBe(artifacts[0].name);
+    expect(names[1].textContent).toBe(artifacts[1].name);
+    expect(sha256s[0].textContent).toContain(artifacts[0].sha256.substring(0, 5)); // Rendered sha256 is truncated
+    expect(sha256s[1].textContent).toContain(artifacts[1].sha256.substring(0, 5));
   });
 
   it('should not show any numbered badges if all actions are successful', async () => {

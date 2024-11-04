@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
-import type { InfraWaffleMapOptions } from '../../../../../lib/lib';
+import type { InfraWaffleMapOptions } from '../../../../../common/inventory/types';
 import { AssetDetails } from '../../../../../components/asset_details';
 import { getAssetDetailsFlyoutTabs } from '../../../../../common/asset_details_config/asset_details_tabs';
 

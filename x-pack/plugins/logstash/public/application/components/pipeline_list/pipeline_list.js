@@ -254,7 +254,6 @@ class PipelineListUi extends React.Component {
               {
                 numSuccesses,
                 numPipelinesSelected,
-                numPipelinesSelected,
               }
             ),
             text,
@@ -288,7 +287,7 @@ class PipelineListUi extends React.Component {
   onSelectionChange = (selection) => this.setState({ selection });
 
   render() {
-    const { clonePipeline, createPipeline, isReadOnly, openPipeline } = this.props;
+    const { clonePipeline, createPipeline, isReadOnly, openPipeline, isServerless } = this.props;
     const { isSelectable, message, pipelines, selection, showConfirmDeleteModal } = this.state;
     return (
       <EuiPageSection data-test-subj="pipelineList">
@@ -326,8 +325,8 @@ class PipelineListUi extends React.Component {
           showConfirmDeleteModal={showConfirmDeleteModal}
         />
         <InfoAlerts
-          showAddRoleAlert={this.state.showAddRoleAlert}
-          showEnableMonitoringAlert={this.state.showEnableMonitoringAlert}
+          showAddRoleAlert={!isServerless && this.state.showAddRoleAlert}
+          showEnableMonitoringAlert={!isServerless && this.state.showEnableMonitoringAlert}
         />
       </EuiPageSection>
     );

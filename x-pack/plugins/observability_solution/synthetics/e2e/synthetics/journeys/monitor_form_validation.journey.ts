@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { expect, journey, Page, step } from '@elastic/synthetics';
-import { FormMonitorType } from '../../../common/runtime_types';
+import { FormMonitorType } from '@kbn/synthetics-plugin/common/runtime_types';
 import { syntheticsAppPageProvider } from '../page_objects/synthetics_app';
 import {
   isEuiFormFieldInValid,

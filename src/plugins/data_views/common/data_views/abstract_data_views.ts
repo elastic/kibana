@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type {
@@ -12,7 +13,7 @@ import type {
   SerializedFieldFormat,
 } from '@kbn/field-formats-plugin/common';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
-import { cloneDeep, merge } from 'lodash';
+import { cloneDeep } from 'lodash';
 import type { DataViewFieldBase } from '@kbn/es-query';
 import type {
   DataViewSpec,
@@ -134,6 +135,7 @@ export abstract class AbstractDataView {
   constructor(config: AbstractDataViewDeps) {
     const { spec = {}, fieldFormats, shortDotsEnable = false, metaFields = [] } = config;
 
+    // it's importing field attributes when a data view is imported from a spec and those attributes aren't provided in the fieldAttrs
     const extractedFieldAttrs = spec?.fields
       ? Object.entries(spec.fields).reduce((acc, [key, value]) => {
           const attrs: FieldAttrSet = {};
@@ -149,12 +151,17 @@ export abstract class AbstractDataView {
             hasAttrs = true;
           }
 
+          if (value.customDescription) {
+            attrs.customDescription = value.customDescription;
+            hasAttrs = true;
+          }
+
           if (hasAttrs) {
             acc[key] = attrs;
           }
           return acc;
         }, {} as Record<string, FieldAttrSet>)
-      : [];
+      : {};
 
     this.allowNoIndex = spec?.allowNoIndex || false;
 
@@ -184,7 +191,7 @@ export abstract class AbstractDataView {
     this.sourceFilters = [...(spec.sourceFilters || [])];
     this.type = spec.type;
     this.typeMeta = spec.typeMeta;
-    this.fieldAttrs = cloneDeep(merge({}, extractedFieldAttrs, spec.fieldAttrs)) || {};
+    this.fieldAttrs = new Map(Object.entries({ ...extractedFieldAttrs, ...spec.fieldAttrs }));
     this.runtimeFieldMap = cloneDeep(spec.runtimeFieldMap) || {};
     this.namespaces = spec.namespaces || [];
     this.name = spec.name || '';
@@ -293,10 +300,8 @@ export abstract class AbstractDataView {
     attrName: K,
     value: FieldAttrSet[K]
   ) {
-    if (!this.fieldAttrs[fieldName]) {
-      this.fieldAttrs[fieldName] = {} as FieldAttrSet;
-    }
-    this.fieldAttrs[fieldName][attrName] = value;
+    const fieldAttrs = this.fieldAttrs.get(fieldName) || {};
+    this.fieldAttrs.set(fieldName, { ...fieldAttrs, [attrName]: value });
   }
 
   /**
@@ -361,7 +366,7 @@ export abstract class AbstractDataView {
     const stringifyOrUndefined = (obj: any) => (obj ? JSON.stringify(obj) : undefined);
 
     return {
-      fieldAttrs: stringifyOrUndefined(this.fieldAttrs),
+      fieldAttrs: stringifyOrUndefined(Object.fromEntries(this.fieldAttrs.entries())),
       title: this.getIndexPattern(),
       timeFieldName: this.timeFieldName,
       sourceFilters: stringifyOrUndefined(this.sourceFilters),
@@ -378,7 +383,7 @@ export abstract class AbstractDataView {
 
   protected toSpecShared(includeFields = true): DataViewSpec {
     // if fields aren't included, don't include count
-    const fieldAttrs = cloneDeep(this.fieldAttrs);
+    const fieldAttrs = Object.fromEntries(this.fieldAttrs.entries());
     if (!includeFields) {
       Object.keys(fieldAttrs).forEach((key) => {
         delete fieldAttrs[key].count;
@@ -539,5 +544,8 @@ export abstract class AbstractDataView {
     this.runtimeFieldMap[name] = removeFieldAttrs(runtimeField);
   }
 
-  getFieldAttrs = () => cloneDeep(this.fieldAttrs);
+  getFieldAttrs = () => {
+    const clonedFieldAttrs = cloneDeep(Object.fromEntries(this.fieldAttrs.entries()));
+    return new Map(Object.entries(clonedFieldAttrs));
+  };
 }

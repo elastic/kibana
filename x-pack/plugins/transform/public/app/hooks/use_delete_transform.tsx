@@ -12,11 +12,11 @@ import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 
-import { addInternalBasePath } from '../../../common/constants';
 import type {
   DeleteTransformsRequestSchema,
   DeleteTransformsResponseSchema,
-} from '../../../common/api_schemas/delete_transforms';
+} from '../../../server/routes/api_schemas/delete_transforms';
+import { addInternalBasePath } from '../../../common/constants';
 import { getErrorMessage } from '../../../common/utils/errors';
 
 import { useAppDependencies, useToastNotifications } from '../app_dependencies';
@@ -110,7 +110,7 @@ export const useDeleteTransforms = () => {
     onSuccess: (results) => {
       for (const transformId in results) {
         // hasOwnProperty check to ensure only properties on object itself, and not its prototypes
-        if (results.hasOwnProperty(transformId)) {
+        if (Object.hasOwn(results, transformId)) {
           const status = results[transformId];
           const destinationIndex = status.destinationIndex;
 

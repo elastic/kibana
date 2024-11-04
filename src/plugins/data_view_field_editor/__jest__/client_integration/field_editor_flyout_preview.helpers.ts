@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import { act } from 'react-dom/test-utils';
 import { ReactWrapper } from 'enzyme';
 import { registerTestBed, TestBed } from '@kbn/test-jest-helpers';
@@ -18,7 +20,7 @@ import {
 import {
   WithFieldEditorDependencies,
   getCommonActions,
-  spyIndexPatternGetAllFields,
+  spyIndexPatternGetByName,
   spySearchQuery,
   spySearchQueryResponse,
   TestDoc,
@@ -34,7 +36,7 @@ const defaultProps: Props = {
  * @param fields The fields of the index pattern
  */
 export const setIndexPatternFields = (fields: Array<{ name: string; displayName: string }>) => {
-  spyIndexPatternGetAllFields.mockReturnValue(fields);
+  spyIndexPatternGetByName.mockReturnValue(fields);
 };
 
 export const getSearchCallMeta = () => {

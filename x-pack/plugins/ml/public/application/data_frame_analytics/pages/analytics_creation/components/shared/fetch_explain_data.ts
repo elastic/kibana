@@ -11,11 +11,11 @@ import type {
   DfAnalyticsExplainResponse,
   FieldSelectionItem,
 } from '@kbn/ml-data-frame-analytics-utils';
-import { ml } from '../../../../../services/ml_api_service';
 import type { State } from '../../../analytics_management/hooks/use_create_analytics_form/state';
 import { getJobConfigFromFormState } from '../../../analytics_management/hooks/use_create_analytics_form/state';
+import type { MlApi } from '../../../../../services/ml_api_service';
 
-export const fetchExplainData = async (formState: State['form']) => {
+export const fetchExplainData = async (mlApi: MlApi, formState: State['form']) => {
   const jobConfig = getJobConfigFromFormState(formState);
   let errorMessage = '';
   let errorReason = '';
@@ -28,9 +28,8 @@ export const fetchExplainData = async (formState: State['form']) => {
     delete jobConfig.dest;
     delete jobConfig.model_memory_limit;
     delete jobConfig.analyzed_fields;
-    const resp: DfAnalyticsExplainResponse = await ml.dataFrameAnalytics.explainDataFrameAnalytics(
-      jobConfig
-    );
+    const resp: DfAnalyticsExplainResponse =
+      await mlApi.dataFrameAnalytics.explainDataFrameAnalytics(jobConfig);
     expectedMemory = resp.memory_estimation?.expected_memory_without_disk;
     fieldSelection = resp.field_selection || [];
   } catch (error) {

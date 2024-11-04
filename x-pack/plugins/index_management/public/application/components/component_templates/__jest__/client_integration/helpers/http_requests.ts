@@ -76,6 +76,18 @@ const registerHttpRequestMockHelpers = (
     error?: ResponseError
   ) => mockResponse('GET', `${API_BASE_PATH}/component_templates/${templateId}`, response, error);
 
+  const setLoadReferencedIndexTemplateMetaResponse = (
+    templateId: string,
+    response?: HttpResponse,
+    error?: ResponseError
+  ) =>
+    mockResponse(
+      'GET',
+      `${API_BASE_PATH}/component_templates/${templateId}/referenced_index_template_meta`,
+      response,
+      error
+    );
+
   const setDeleteComponentTemplateResponse = (
     templateId: string,
     response?: HttpResponse,
@@ -100,6 +112,7 @@ const registerHttpRequestMockHelpers = (
 
   return {
     setLoadComponentTemplatesResponse,
+    setLoadReferencedIndexTemplateMetaResponse,
     setDeleteComponentTemplateResponse,
     setLoadComponentTemplateResponse,
     setCreateComponentTemplateResponse,

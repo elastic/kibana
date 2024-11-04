@@ -6,16 +6,18 @@
  */
 
 import { each } from 'lodash';
-import { ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import { stringify } from '../../../endpoint/utils/stringify';
 import type {
   RuleResponseEndpointAction,
   ProcessesParams,
 } from '../../../../common/api/detection_engine';
-import type { KillOrSuspendProcessRequestBody } from '../../../../common/endpoint/types';
 import { getErrorProcessAlerts, getIsolateAlerts, getProcessAlerts } from './utils';
 import type { AlertsAction, ResponseActionAlerts } from './types';
 import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
+import type {
+  ResponseActionParametersWithEntityId,
+  ResponseActionParametersWithPid,
+} from '../../../../common/endpoint/types';
 
 export const endpointResponseAction = async (
   responseAction: RuleResponseEndpointAction,
@@ -26,8 +28,8 @@ export const endpointResponseAction = async (
     'ruleExecution',
     'automatedResponseActions'
   );
-  const ruleId = alerts[0][ALERT_RULE_UUID];
-  const ruleName = alerts[0][ALERT_RULE_NAME];
+  const ruleId = alerts[0].kibana.alert?.rule.uuid;
+  const ruleName = alerts[0].kibana.alert?.rule.name;
   const logMsgPrefix = `Rule [${ruleName}][${ruleId}]:`;
   const { comment, command } = responseAction.params;
   const errors: string[] = [];
@@ -115,7 +117,9 @@ export const endpointResponseAction = async (
                     comment,
                     endpoint_ids,
                     alert_ids,
-                    parameters: parameters as KillOrSuspendProcessRequestBody['parameters'],
+                    parameters: parameters as
+                      | ResponseActionParametersWithPid
+                      | ResponseActionParametersWithEntityId,
                   },
                   {
                     hosts,

@@ -38,7 +38,7 @@ describe('AnonymizedStat', () => {
       </EuiToolTip>
     );
 
-    userEvent.hover(screen.getByTestId('anonymizedFieldsStat'));
+    await userEvent.hover(screen.getByTestId('anonymizedFieldsStat'));
 
     await waitFor(() => {
       expect(screen.getByText(i18n.NONE_OF_THE_DATA_WILL_BE_ANONYMIZED(false))).toBeInTheDocument();
@@ -55,7 +55,7 @@ describe('AnonymizedStat', () => {
       </EuiToolTip>
     );
 
-    userEvent.hover(screen.getByTestId('anonymizedFieldsStat'));
+    await userEvent.hover(screen.getByTestId('anonymizedFieldsStat'));
 
     await waitFor(() => {
       expect(screen.getByText(i18n.FIELDS_WILL_BE_ANONYMIZED(anonymized))).toBeInTheDocument();

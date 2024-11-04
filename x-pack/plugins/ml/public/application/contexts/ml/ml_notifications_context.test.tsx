@@ -18,7 +18,7 @@ const mockCountMessages = jest.fn(() => {
 const mockKibana = {
   services: {
     mlServices: {
-      mlApiServices: {
+      mlApi: {
         notifications: {
           countMessages$: mockCountMessages,
         },
@@ -67,7 +67,7 @@ describe('useMlNotifications', () => {
   });
 
   test('retries polling on error with 1m delay', () => {
-    mockKibana.services.mlServices.mlApiServices.notifications.countMessages$.mockReturnValueOnce(
+    mockKibana.services.mlServices.mlApi.notifications.countMessages$.mockReturnValueOnce(
       throwError(() => new Error('Cluster is down'))
     );
 
@@ -79,24 +79,24 @@ describe('useMlNotifications', () => {
       jest.advanceTimersByTime(0);
     });
 
-    expect(
-      mockKibana.services.mlServices.mlApiServices.notifications.countMessages$
-    ).toHaveBeenCalledTimes(1);
-    expect(
-      mockKibana.services.mlServices.mlApiServices.notifications.countMessages$
-    ).toHaveBeenCalledWith({ lastCheckedAt: 1663340537063 });
+    expect(mockKibana.services.mlServices.mlApi.notifications.countMessages$).toHaveBeenCalledTimes(
+      1
+    );
+    expect(mockKibana.services.mlServices.mlApi.notifications.countMessages$).toHaveBeenCalledWith({
+      lastCheckedAt: 1663340537063,
+    });
 
     act(() => {
       // ticks 4 minutes
       jest.advanceTimersByTime(60000 * 4);
     });
 
-    expect(
-      mockKibana.services.mlServices.mlApiServices.notifications.countMessages$
-    ).toHaveBeenCalledTimes(4);
-    expect(
-      mockKibana.services.mlServices.mlApiServices.notifications.countMessages$
-    ).toHaveBeenCalledWith({ lastCheckedAt: 1663340537063 });
+    expect(mockKibana.services.mlServices.mlApi.notifications.countMessages$).toHaveBeenCalledTimes(
+      4
+    );
+    expect(mockKibana.services.mlServices.mlApi.notifications.countMessages$).toHaveBeenCalledWith({
+      lastCheckedAt: 1663340537063,
+    });
   });
 
   test('returns the default values', () => {
@@ -244,7 +244,7 @@ describe('useMlNotifications', () => {
     });
 
     expect(
-      mockKibana.services.mlServices.mlApiServices.notifications.countMessages$
+      mockKibana.services.mlServices.mlApi.notifications.countMessages$
     ).not.toHaveBeenCalled();
   });
 });

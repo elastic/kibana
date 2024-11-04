@@ -5,12 +5,53 @@
  * 2.0.
  */
 
-import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
-import React from 'react';
+import {
+  EuiAccordion,
+  EuiCodeBlock,
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiText,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
+import React, { useMemo } from 'react';
 
 import * as i18n from './translations';
 
-const FailureComponent: React.FC<{ failureReason: string }> = ({ failureReason }) => {
+interface Props {
+  failureReason: string | null | undefined;
+}
+
+const FailureComponent: React.FC<Props> = ({ failureReason }) => {
+  const Failures = useMemo(() => {
+    const failures = failureReason != null ? failureReason.split('\n') : '';
+    const [firstFailure, ...restFailures] = failures;
+
+    return (
+      <>
+        <p>{firstFailure}</p>
+
+        {restFailures.length > 0 && (
+          <EuiAccordion
+            id="failuresFccordion"
+            buttonContent={i18n.DETAILS}
+            data-test-subj="failuresAccordion"
+            paddingSize="s"
+          >
+            <>
+              {restFailures.map((failure, i) => (
+                <EuiCodeBlock fontSize="m" key={i} paddingSize="m">
+                  {failure}
+                </EuiCodeBlock>
+              ))}
+            </>
+          </EuiAccordion>
+        )}
+      </>
+    );
+  }, [failureReason]);
+
   return (
     <EuiFlexGroup alignItems="center" data-test-subj="failure" direction="column">
       <EuiFlexItem data-test-subj="emptyPromptContainer" grow={false}>
@@ -18,8 +59,14 @@ const FailureComponent: React.FC<{ failureReason: string }> = ({ failureReason }
           iconType="error"
           color="danger"
           body={
-            <EuiText color="subdued" data-test-subj="bodyText">
-              {failureReason}
+            <EuiText
+              color="subdued"
+              css={css`
+                word-wrap: break-word;
+              `}
+              data-test-subj="bodyText"
+            >
+              {Failures}
             </EuiText>
           }
           title={<h2 data-test-subj="failureTitle">{i18n.FAILURE_TITLE}</h2>}

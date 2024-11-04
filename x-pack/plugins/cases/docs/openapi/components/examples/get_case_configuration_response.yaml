@@ -4,11 +4,12 @@ value:
     closure_type: close-by-user
     customFields:
       - key: d312efda-ec2b-42ec-9e2c-84981795c581
+        defaultValue: Custom text field value.
         label: my-text-field
         required: false
         type: text
     owner: cases
-    created_at: 2023-06-01T17:07:17.767Z
+    created_at: 2024-07-01T17:07:17.767Z
     created_by:
       username: elastic
       email: null
@@ -21,5 +22,30 @@ value:
       type: .none
       fields: null
     mappings: []
-    version: WzUxLDRd
+    version: WzEyLDNd
     error: null
+    templates:
+      - key: 505932fe-ee3a-4960-a661-c781b5acdb05
+        name: template-1
+        caseFields:
+          title: Default case title
+          tags:
+            - Default case tag
+          category: Default-category
+          description: A default description for cases.
+          assignees:
+            - uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
+          connector:
+            id: none
+            type: .none
+            fields: null
+            name: none
+          customFields:
+            - key: d312efda-ec2b-42ec-9e2c-84981795c581
+              value: Default text field value.
+              type: text
+          settings:
+            syncAlerts: false
+        description: A description of the template.
+        tags:
+          - Template tag 1

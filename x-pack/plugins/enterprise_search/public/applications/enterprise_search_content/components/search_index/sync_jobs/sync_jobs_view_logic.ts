@@ -175,12 +175,14 @@ export const SyncJobsViewLogic = kea<MakeLogicType<SyncJobsViewValues, SyncJobsV
     connectorId: [
       null,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setConnectorId: (_, { connectorId }) => connectorId,
       },
     ],
     selectedSyncJobCategory: [
       'content',
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setSelectedSyncJobCategory: (_, { category }) => category,
       },
     ],
@@ -188,14 +190,17 @@ export const SyncJobsViewLogic = kea<MakeLogicType<SyncJobsViewValues, SyncJobsV
       null,
       {
         resetCancelSyncJobApi: () => null,
+        // @ts-expect-error upgrade typescript v5.1.6
         setCancelSyncJob: (_, { syncJobId }) => syncJobId ?? null,
       },
     ],
     syncJobs: [
       [],
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         fetchSyncJobsApiSuccess: (currentState, { data }) => {
           const newState =
+            // @ts-expect-error upgrade typescript v5.1.6
             data?.map((syncJob) => {
               return {
                 ...syncJob,

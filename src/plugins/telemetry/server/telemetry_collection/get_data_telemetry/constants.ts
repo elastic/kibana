@@ -1,18 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 export const DATA_TELEMETRY_ID = 'data';
 
 export const DATA_KNOWN_TYPES = ['logs', 'traces', 'metrics'] as const;
 
-export type DataTelemetryType = typeof DATA_KNOWN_TYPES[number];
+export type DataTelemetryType = (typeof DATA_KNOWN_TYPES)[number];
 
-export type DataPatternName = typeof DATA_DATASETS_INDEX_PATTERNS[number]['patternName'];
+export type DataPatternName = (typeof DATA_DATASETS_INDEX_PATTERNS)[number]['patternName'];
 
 // TODO: Ideally this list should be updated from an external public URL (similar to the newsfeed)
 // But it's good to have a minimum list shipped with the build.
@@ -54,8 +55,10 @@ export const DATA_DATASETS_INDEX_PATTERNS = [
   { pattern: 'telegraf*', patternName: 'telegraf' },
   { pattern: 'prometheusbeat*', patternName: 'prometheusbeat' },
   { pattern: 'fluentbit*', patternName: 'fluentbit' },
+  { pattern: 'fluent-bit*', patternName: 'fluentbit' },
   { pattern: '*nginx*', patternName: 'nginx' },
   { pattern: '*apache*', patternName: 'apache' }, // Already in Security (keeping it in here for documentation)
+  { pattern: 'logs-*-*', patternName: 'dsns-logs' },
   { pattern: '*logs*', patternName: 'generic-logs' },
 
   // Security - Elastic

@@ -17,8 +17,9 @@ import {
   EuiFormLabel,
   EuiLink,
   useEuiTheme,
+  EuiComboBoxOptionOption,
 } from '@elastic/eui';
-import { useDebouncedValue } from '@kbn/visualization-ui-components';
+import { useDebouncedValue } from '@kbn/visualization-utils';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   DEFAULT_DURATION_INPUT_FORMAT,
@@ -125,7 +126,7 @@ const compactLabel = i18n.translate('xpack.lens.indexPattern.compactLabel', {
 type FormatParams = NonNullable<ValueFormatConfig['params']>;
 type FormatParamsKeys = keyof FormatParams;
 
-interface FormatSelectorProps {
+export interface FormatSelectorProps {
   selectedColumn: GenericIndexPatternColumn;
   onChange: (newFormat?: { id: string; params?: FormatParams }) => void;
   docLinks: DocLinksStart;
@@ -227,7 +228,7 @@ export function FormatSelector(props: FormatSelectorProps) {
   );
 
   const onChangeWrapped = useCallback(
-    (choices) => {
+    (choices: Array<EuiComboBoxOptionOption<string>>) => {
       if (choices.length === 0) {
         return;
       }
@@ -366,7 +367,6 @@ export function FormatSelector(props: FormatSelectorProps) {
           <EuiFormRow
             display="columnCompressed"
             hasEmptyLabelSpace
-            label=" "
             helpText={
               <EuiLink
                 href={docLinks.links.indexPatterns.fieldFormattersNumber}

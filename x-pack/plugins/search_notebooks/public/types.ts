@@ -6,12 +6,25 @@
  */
 
 import type { ConsolePluginStart } from '@kbn/console-plugin/public';
+import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SearchNotebooksPluginSetup {}
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface SearchNotebooksPluginStart {}
+
+export interface SearchNotebooksPluginStart {
+  setNotebookList: (value: NotebookListValue) => void;
+  setSelectedNotebook: (notebookId: string) => void;
+}
 
 export interface SearchNotebooksPluginStartDependencies {
   console: ConsolePluginStart;
+  usageCollection?: UsageCollectionStart;
+}
+
+export type NotebookListValue = string | null;
+
+export interface AppMetricsTracker {
+  click: (eventName: string | string[]) => void;
+  count: (eventName: string | string[]) => void;
+  load: (eventName: string | string[]) => void;
 }

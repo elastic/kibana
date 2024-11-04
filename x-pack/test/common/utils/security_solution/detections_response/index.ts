@@ -7,6 +7,7 @@
 
 export * from './rules';
 export * from './alerts';
+export * from './delete_all_anomalies';
 export * from './count_down_test';
 export * from './route_with_namespace';
 export * from './wait_for';

@@ -5,21 +5,20 @@
  * 2.0.
  */
 
-import { useState, useCallback, useEffect, useReducer, useRef } from 'react';
-import { HttpHandler } from '@kbn/core/public';
+import { useState, useCallback, useEffect, useReducer } from 'react';
+import { BehaviorSubject } from 'rxjs';
+import { decodeOrThrow } from '@kbn/io-ts-utils';
+import { isPending, isFailure, useFetcher } from '../../../../hooks/use_fetcher';
 import {
   INFA_ML_GET_METRICS_HOSTS_ANOMALIES_PATH,
-  Metric,
   Sort,
   Pagination,
   PaginationCursor,
   getMetricsHostsAnomaliesRequestPayloadRT,
   MetricsHostsAnomaly,
   getMetricsHostsAnomaliesSuccessReponsePayloadRT,
+  Metric,
 } from '../../../../../common/http_api/infra_ml';
-import { useTrackedPromise } from '../../../../utils/use_tracked_promise';
-import { decodeOrThrow } from '../../../../../common/runtime_types';
-import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 
 export type SortOptions = Sort;
 export type PaginationOptions = Pick<Pagination, 'pageSize'>;
@@ -155,28 +154,35 @@ const initStateReducer =
     };
   };
 
-export const useMetricsHostsAnomaliesResults = ({
-  endTime,
-  startTime,
-  sourceId,
-  anomalyThreshold,
-  defaultSortOptions,
-  defaultPaginationOptions,
-  onGetMetricsHostsAnomaliesDatasetsError,
-  filteredDatasets,
-}: {
-  endTime: number;
-  startTime: number;
-  sourceId: string;
-  anomalyThreshold: number;
-  defaultSortOptions: Sort;
-  defaultPaginationOptions: Pick<Pagination, 'pageSize'>;
-  onGetMetricsHostsAnomaliesDatasetsError?: (error: Error) => void;
-  filteredDatasets?: string[];
-}) => {
-  const { services } = useKibanaContextForPlugin();
-
-  const abortController = useRef(new AbortController());
+export const useMetricsHostsAnomaliesResults = (
+  {
+    endTime,
+    startTime,
+    sourceId,
+    anomalyThreshold,
+    defaultSortOptions,
+    defaultPaginationOptions,
+    filteredDatasets,
+    search,
+    hostName,
+    metric,
+  }: {
+    endTime: number;
+    startTime: number;
+    sourceId: string;
+    anomalyThreshold: number;
+    defaultSortOptions: Sort;
+    defaultPaginationOptions: Pick<Pagination, 'pageSize'>;
+    filteredDatasets?: string[];
+    search?: string;
+    hostName?: string;
+    metric?: Metric;
+  },
+  {
+    request$,
+    active = true,
+  }: { request$?: BehaviorSubject<(() => Promise<unknown>) | undefined>; active?: boolean }
+) => {
   const [reducerState, dispatch] = useReducer(
     stateReducer,
     STATE_DEFAULTS,
@@ -191,78 +197,84 @@ export const useMetricsHostsAnomaliesResults = ({
 
   const [metricsHostsAnomalies, setMetricsHostsAnomalies] = useState<MetricsHostsAnomalies>([]);
 
-  useEffect(() => {
-    const current = abortController?.current;
-    return () => {
-      current.abort();
-    };
-  }, []);
-
-  const [getMetricsHostsAnomaliesRequest, getMetricsHostsAnomalies] = useTrackedPromise(
-    {
-      cancelPreviousOn: 'creation',
-      createPromise: async (metric?: Metric, query?: string, hostName?: string) => {
-        const {
-          timeRange: { start: queryStartTime, end: queryEndTime },
-          sortOptions,
-          paginationOptions,
-          paginationCursor,
-        } = reducerState;
-
-        abortController.current.abort();
-        abortController.current = new AbortController();
-
-        return await callGetMetricHostsAnomaliesAPI(
-          {
-            sourceId,
-            anomalyThreshold,
-            startTime: queryStartTime,
-            endTime: queryEndTime,
-            metric,
-            query,
-            sort: sortOptions,
-            pagination: {
-              ...paginationOptions,
-              cursor: paginationCursor,
+  const {
+    data: response,
+    status,
+    refetch,
+  } = useFetcher(
+    async (callApi) => {
+      const apiResponse = await callApi(INFA_ML_GET_METRICS_HOSTS_ANOMALIES_PATH, {
+        method: 'POST',
+        body: JSON.stringify(
+          getMetricsHostsAnomaliesRequestPayloadRT.encode({
+            data: {
+              sourceId,
+              anomalyThreshold,
+              timeRange: {
+                startTime: reducerState.timeRange.start,
+                endTime: reducerState.timeRange.end,
+              },
+              metric,
+              query: search,
+              sort: reducerState.sortOptions,
+              pagination: {
+                ...reducerState.paginationOptions,
+                cursor: reducerState.paginationCursor,
+              },
+              hostName,
             },
-            hostName,
-          },
-          services.http.fetch,
-          abortController.current.signal
-        );
-      },
-      onResolve: ({ data: { anomalies, paginationCursors: requestCursors, hasMoreEntries } }) => {
-        const { paginationCursor } = reducerState;
-        if (requestCursors) {
-          dispatch({
-            type: 'changeLastReceivedCursors',
-            payload: { lastReceivedCursors: requestCursors },
-          });
-        }
+          })
+        ),
+      });
 
-        // Check if we have more "next" entries. "Page" covers the "previous" scenario,
-        // since we need to know the page we're on anyway.
-        if (!paginationCursor || (paginationCursor && 'searchAfter' in paginationCursor)) {
-          dispatch({ type: 'changeHasNextPage', payload: { hasNextPage: hasMoreEntries } });
-        } else if (paginationCursor && 'searchBefore' in paginationCursor) {
-          // We've requested a previous page, therefore there is a next page.
-          dispatch({ type: 'changeHasNextPage', payload: { hasNextPage: true } });
-        }
-        setMetricsHostsAnomalies(anomalies);
-      },
+      return decodeOrThrow(getMetricsHostsAnomaliesSuccessReponsePayloadRT)(apiResponse);
     },
     [
-      sourceId,
       anomalyThreshold,
-      dispatch,
-      reducerState.timeRange.start,
-      reducerState.timeRange.end,
-      reducerState.sortOptions,
-      reducerState.paginationOptions,
+      hostName,
+      metric,
       reducerState.paginationCursor,
-      reducerState.filteredDatasets,
-    ]
+      reducerState.paginationOptions,
+      reducerState.sortOptions,
+      reducerState.timeRange.end,
+      reducerState.timeRange.start,
+      search,
+      sourceId,
+    ],
+    {
+      requestObservable$: request$,
+      autoFetch: active,
+    }
   );
+
+  const { data } = response ?? {};
+
+  useEffect(() => {
+    if (isPending(status) || !data) {
+      return;
+    }
+
+    const { anomalies, paginationCursors: requestCursors, hasMoreEntries } = data;
+    if (requestCursors) {
+      dispatch({
+        type: 'changeLastReceivedCursors',
+        payload: { lastReceivedCursors: requestCursors },
+      });
+    }
+
+    // Check if we have more "next" entries. "Page" covers the "previous" scenario,
+    // since we need to know the page we're on anyway.
+    if (
+      !reducerState.paginationCursor ||
+      (reducerState.paginationCursor && 'searchAfter' in reducerState.paginationCursor)
+    ) {
+      dispatch({ type: 'changeHasNextPage', payload: { hasNextPage: hasMoreEntries } });
+    } else if (reducerState.paginationCursor && 'searchBefore' in reducerState.paginationCursor) {
+      // We've requested a previous page, therefore there is a next page.
+      dispatch({ type: 'changeHasNextPage', payload: { hasNextPage: true } });
+    }
+    setMetricsHostsAnomalies(anomalies);
+  }, [reducerState.paginationCursor, data, status]);
 
   const changeSortOptions = useCallback(
     (nextSortOptions: Sort) => {
@@ -309,16 +321,12 @@ export const useMetricsHostsAnomaliesResults = ({
     }
   }, [dispatch, reducerState]);
 
-  const isPendingMetricsHostsAnomalies =
-    getMetricsHostsAnomaliesRequest.state === 'pending' ||
-    getMetricsHostsAnomaliesRequest.state === 'uninitialized';
-
-  const hasFailedLoadingMetricsHostsAnomalies =
-    getMetricsHostsAnomaliesRequest.state === 'rejected';
+  const isPendingMetricsHostsAnomalies = isPending(status);
+  const hasFailedLoadingMetricsHostsAnomalies = isFailure(status);
 
   return {
     metricsHostsAnomalies,
-    getMetricsHostsAnomalies,
+    getMetricsHostsAnomalies: refetch,
     isPendingMetricsHostsAnomalies,
     hasFailedLoadingMetricsHostsAnomalies,
     changeSortOptions,
@@ -330,57 +338,4 @@ export const useMetricsHostsAnomaliesResults = ({
     page: reducerState.page,
     timeRange: reducerState.timeRange,
   };
-};
-
-interface RequestArgs {
-  sourceId: string;
-  anomalyThreshold: number;
-  startTime: number;
-  endTime: number;
-  metric?: Metric;
-  query?: string;
-  hostName?: string;
-  sort: Sort;
-  pagination: Pagination;
-}
-
-export const callGetMetricHostsAnomaliesAPI = async (
-  requestArgs: RequestArgs,
-  fetch: HttpHandler,
-  signal?: AbortSignal | null
-) => {
-  const {
-    sourceId,
-    anomalyThreshold,
-    startTime,
-    endTime,
-    metric,
-    sort,
-    pagination,
-    query,
-    hostName,
-  } = requestArgs;
-  const response = await fetch(INFA_ML_GET_METRICS_HOSTS_ANOMALIES_PATH, {
-    method: 'POST',
-    body: JSON.stringify(
-      getMetricsHostsAnomaliesRequestPayloadRT.encode({
-        data: {
-          sourceId,
-          anomalyThreshold,
-          timeRange: {
-            startTime,
-            endTime,
-          },
-          query,
-          metric,
-          sort,
-          pagination,
-          hostName,
-        },
-      })
-    ),
-    signal,
-  });
-
-  return decodeOrThrow(getMetricsHostsAnomaliesSuccessReponsePayloadRT)(response);
 };

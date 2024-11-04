@@ -22,7 +22,7 @@ import { ElasticAssistantPluginRouter } from '../../types';
 import { buildResponse } from '../utils';
 import { EsAnonymizationFieldsSchema } from '../../ai_assistant_data_clients/anonymization_fields/types';
 import { transformESSearchToAnonymizationFields } from '../../ai_assistant_data_clients/anonymization_fields/helpers';
-import { UPGRADE_LICENSE_MESSAGE, hasAIAssistantLicense } from '../helpers';
+import { performChecks } from '../helpers';
 
 export const findAnonymizationFieldsRoute = (
   router: ElasticAssistantPluginRouter,
@@ -30,7 +30,7 @@ export const findAnonymizationFieldsRoute = (
 ) => {
   router.versioned
     .get({
-      access: 'internal',
+      access: 'public',
       path: ELASTIC_AI_ASSISTANT_ANONYMIZATION_FIELDS_URL_FIND,
       options: {
         tags: ['access:elasticAssistant'],
@@ -38,7 +38,7 @@ export const findAnonymizationFieldsRoute = (
     })
     .addVersion(
       {
-        version: API_VERSIONS.internal.v1,
+        version: API_VERSIONS.public.v1,
         validate: {
           request: {
             query: buildRouteValidationWithZod(FindAnonymizationFieldsRequestQuery),
@@ -55,14 +55,16 @@ export const findAnonymizationFieldsRoute = (
         try {
           const { query } = request;
           const ctx = await context.resolve(['core', 'elasticAssistant', 'licensing']);
-          const license = ctx.licensing.license;
-          if (!hasAIAssistantLicense(license)) {
-            return response.forbidden({
-              body: {
-                message: UPGRADE_LICENSE_MESSAGE,
-              },
-            });
+          // Perform license and authenticated user checks
+          const checkResponse = performChecks({
+            context: ctx,
+            request,
+            response,
+          });
+          if (!checkResponse.isSuccess) {
+            return checkResponse.response;
           }
+
           const dataClient =
             await ctx.elasticAssistant.getAIAssistantAnonymizationFieldsDataClient();
 

@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useEditPolicyContext } from '../edit_policy_context';
 import { getIndicesListPath } from '../../../services/navigation';
 import { useKibana } from '../../../../shared_imports';
-import { IndexTemplatesFlyout } from '../../../components/index_templates_flyout';
+import { IndexTemplatesFlyout } from '../../../components';
 
 export const EditWarning: FunctionComponent = () => {
   const { isNewPolicy, indices, indexTemplates, policyName, policy } = useEditPolicyContext();

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type Subject, ReplaySubject } from 'rxjs';
+import { type Subject, ReplaySubject, of } from 'rxjs';
 import { loggerMock } from '@kbn/logging-mocks';
 import { RuleDataService } from './rule_data_plugin_service';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
@@ -29,6 +29,7 @@ const frameworkAlertsService = {
 describe('ruleDataPluginService', () => {
   let pluginStop$: Subject<void>;
   let dataStreamAdapter: DataStreamAdapter;
+  const elasticsearchAndSOAvailability$ = of(true);
 
   beforeEach(() => {
     jest.resetAllMocks();
@@ -56,6 +57,7 @@ describe('ruleDataPluginService', () => {
         frameworkAlerts: frameworkAlertsService,
         pluginStop$,
         dataStreamAdapter,
+        elasticsearchAndSOAvailability$,
       });
       expect(ruleDataService.isRegistrationContextDisabled('observability.logs')).toBe(true);
     });
@@ -74,6 +76,7 @@ describe('ruleDataPluginService', () => {
         frameworkAlerts: frameworkAlertsService,
         pluginStop$,
         dataStreamAdapter,
+        elasticsearchAndSOAvailability$,
       });
       expect(ruleDataService.isRegistrationContextDisabled('observability.apm')).toBe(false);
     });
@@ -94,6 +97,7 @@ describe('ruleDataPluginService', () => {
         frameworkAlerts: frameworkAlertsService,
         pluginStop$,
         dataStreamAdapter,
+        elasticsearchAndSOAvailability$,
       });
 
       expect(ruleDataService.isWriteEnabled('observability.logs')).toBe(false);
@@ -115,6 +119,7 @@ describe('ruleDataPluginService', () => {
         frameworkAlerts: frameworkAlertsService,
         pluginStop$,
         dataStreamAdapter,
+        elasticsearchAndSOAvailability$,
       });
       const indexOptions = {
         feature: AlertConsumers.LOGS,

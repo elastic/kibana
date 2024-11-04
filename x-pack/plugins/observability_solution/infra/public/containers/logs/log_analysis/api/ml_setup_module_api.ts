@@ -8,8 +8,8 @@
 import * as rt from 'io-ts';
 import type { HttpHandler } from '@kbn/core/public';
 
+import { decodeOrThrow } from '@kbn/io-ts-utils';
 import { getJobIdPrefix, jobCustomSettingsRT } from '../../../../../common/log_analysis';
-import { decodeOrThrow } from '../../../../../common/runtime_types';
 
 interface RequestArgs {
   moduleId: string;

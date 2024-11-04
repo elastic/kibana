@@ -152,9 +152,10 @@ async function createAliasStream(opts: CreateConcreteWriteIndexOpts): Promise<vo
     );
 
     logger.debug(
-      `Found ${concreteIndices.length} concrete indices for ${
-        indexPatterns.name
-      } - ${JSON.stringify(concreteIndices)}`
+      () =>
+        `Found ${concreteIndices.length} concrete indices for ${
+          indexPatterns.name
+        } - ${JSON.stringify(concreteIndices)}`
     );
   } catch (error) {
     // 404 is expected if no concrete write indices have been created

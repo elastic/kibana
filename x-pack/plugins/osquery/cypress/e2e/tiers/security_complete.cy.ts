@@ -10,7 +10,7 @@ import { checkOsqueryResponseActionsPermissions } from '../../tasks/response_act
 describe(
   'App Features for Security Complete PLI',
   {
-    tags: ['@serverless'],
+    tags: ['@serverless', '@skipInServerlessMKI'],
     env: {
       ftrConfig: {
         productTypes: [{ product_line: 'security', product_tier: 'complete' }],

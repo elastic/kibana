@@ -221,7 +221,7 @@ export default ({ getService }: FtrProviderContext) => {
     for (const testData of testDataList) {
       describe('lists matching modules', function () {
         before(async () => {
-          if (testData.hasOwnProperty('sourceDataArchive')) {
+          if (Object.hasOwn(testData, 'sourceDataArchive')) {
             await esArchiver.loadIfNeeded(testData.sourceDataArchive!);
           }
         });

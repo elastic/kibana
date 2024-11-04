@@ -24,8 +24,6 @@ import { HeaderSection } from '../../../../common/components/header_section';
 import { getAlertsPreviewDefaultModel } from '../../../../detections/components/alerts_table/default_config';
 import { SourcererScopeName } from '../../../../sourcerer/store/model';
 import { DEFAULT_PREVIEW_INDEX } from '../../../../../common/constants';
-import { useSourcererDataView } from '../../../../sourcerer/containers';
-import { DetailsPanel } from '../../../../timelines/components/side_panel';
 import { PreviewRenderCellValue } from './preview_table_cell_renderer';
 import { getPreviewTableControlColumn } from './preview_table_control_columns';
 import { useGlobalFullScreen } from '../../../../common/containers/use_full_screen';
@@ -95,7 +93,6 @@ const PreviewHistogramComponent = ({
   );
 
   const license = useLicense();
-  const { browserFields, runtimeMappings } = useSourcererDataView(SourcererScopeName.detections);
 
   const { globalFullScreen } = useGlobalFullScreen();
   const previousPreviewId = usePrevious(previewId);
@@ -202,13 +199,6 @@ const PreviewHistogramComponent = ({
           bulkActions={false}
         />
       </FullScreenContainer>
-      <DetailsPanel
-        browserFields={browserFields}
-        isFlyoutView
-        runtimeMappings={runtimeMappings}
-        scopeId={TableId.rulePreview}
-        isReadOnly
-      />
     </>
   );
 };

@@ -11,7 +11,7 @@ import { events as genAiEvents } from '@kbn/elastic-assistant-plugin/server/lib/
 
 import { events as securityEvents } from '../../server/lib/telemetry/event_based/events';
 import { telemetryEvents } from '../../public/common/lib/telemetry/events/telemetry_events';
-// uncomment and add to run script, but do not commit as creates cirular dependency
+// uncomment and add to run script, but do not commit as creates circular dependency
 // import { telemetryEvents as serverlessEvents } from '@kbn/security-solution-serverless/server/telemetry/event_based_telemetry';
 
 const logger = new ToolingLog({

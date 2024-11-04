@@ -24,6 +24,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
+import { useSpaceSettingsContext } from '../../../../../../hooks/use_space_settings_context';
 import type { NewAgentPolicy, AgentPolicy } from '../../../../types';
 import { MAX_FLYOUT_WIDTH } from '../../../../constants';
 import { useAuthz, useStartServices, sendCreateAgentPolicy } from '../../../../hooks';
@@ -48,13 +49,19 @@ export const CreateAgentPolicyFlyout: React.FunctionComponent<Props> = ({
 }) => {
   const { notifications } = useStartServices();
   const hasFleetAllAgentPoliciesPrivileges = useAuthz().fleet.allAgentPolicies;
+  const spaceSettings = useSpaceSettingsContext();
   const [agentPolicy, setAgentPolicy] = useState<NewAgentPolicy>(
-    generateNewAgentPolicyWithDefaults()
+    generateNewAgentPolicyWithDefaults({
+      namespace: spaceSettings.defaultNamespace,
+    })
   );
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [withSysMonitoring, setWithSysMonitoring] = useState<boolean>(true);
-  const validation = agentPolicyFormValidation(agentPolicy);
+  const validation = agentPolicyFormValidation(agentPolicy, {
+    allowedNamespacePrefixes: spaceSettings?.allowedNamespacePrefixes,
+  });
   const [hasAdvancedSettingsErrors, setHasAdvancedSettingsErrors] = useState<boolean>(false);
+  const [hasInvalidSpaceError, setInvalidSpaceError] = useState<boolean>(false);
 
   const updateAgentPolicy = (updatedFields: Partial<NewAgentPolicy>) => {
     setAgentPolicy({
@@ -98,6 +105,7 @@ export const CreateAgentPolicyFlyout: React.FunctionComponent<Props> = ({
         updateSysMonitoring={(newValue) => setWithSysMonitoring(newValue)}
         validation={validation}
         updateAdvancedSettingsHasErrors={setHasAdvancedSettingsErrors}
+        setInvalidSpaceError={setInvalidSpaceError}
       />
     </EuiFlyoutBody>
   );
@@ -124,7 +132,10 @@ export const CreateAgentPolicyFlyout: React.FunctionComponent<Props> = ({
               <EuiFlexItem grow={false}>
                 <DevtoolsRequestFlyoutButton
                   isDisabled={
-                    isLoading || Object.keys(validation).length > 0 || hasAdvancedSettingsErrors
+                    isLoading ||
+                    Object.keys(validation).length > 0 ||
+                    hasAdvancedSettingsErrors ||
+                    hasInvalidSpaceError
                   }
                   description={i18n.translate(
                     'xpack.fleet.createAgentPolicy.devtoolsRequestDescription',
@@ -144,7 +155,8 @@ export const CreateAgentPolicyFlyout: React.FunctionComponent<Props> = ({
                   !hasFleetAllAgentPoliciesPrivileges ||
                   isLoading ||
                   Object.keys(validation).length > 0 ||
-                  hasAdvancedSettingsErrors
+                  hasAdvancedSettingsErrors ||
+                  hasInvalidSpaceError
                 }
                 onClick={async () => {
                   setIsLoading(true);

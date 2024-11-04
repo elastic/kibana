@@ -74,6 +74,8 @@ beforeEach(() => {
 describe('find()', () => {
   test('calls ES client with given params', async () => {
     const alertsClient = new AlertsClient(alertsClientParams);
+    const searchAlertsSpy = jest.spyOn(alertsClient as any, 'searchAlerts');
+    alertsClient.getAuthorizedAlertsIndices = jest.fn().mockResolvedValue([]);
     esClientMock.search.mockResponseOnce({
       took: 5,
       timed_out: false,
@@ -107,10 +109,21 @@ describe('find()', () => {
         ],
       },
     });
+    const query = { match: { [ALERT_WORKFLOW_STATUS]: 'open' } };
+    const index = '.alerts-observability.apm.alerts';
+    const featureIds = ['siem'];
     const result = await alertsClient.find({
-      query: { match: { [ALERT_WORKFLOW_STATUS]: 'open' } },
-      index: '.alerts-observability.apm.alerts',
+      query,
+      index,
+      featureIds,
     });
+    expect(searchAlertsSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query,
+        index,
+        featureIds,
+      })
+    );
     expect(result).toMatchInlineSnapshot(`
       Object {
         "_shards": Object {
@@ -181,6 +194,7 @@ describe('find()', () => {
                 "should": Array [],
               },
             },
+            "runtime_mappings": undefined,
             "size": undefined,
             "sort": Array [
               Object {
@@ -314,6 +328,7 @@ describe('find()', () => {
                 "should": Array [],
               },
             },
+            "runtime_mappings": undefined,
             "size": undefined,
             "sort": Array [
               Object {

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
@@ -23,7 +24,9 @@ import { DataView, DataViewSpec, DataViewType } from '@kbn/data-views-plugin/pub
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { v4 as uuidv4 } from 'uuid';
 import { merge } from 'rxjs';
-import { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
+import { getInitialESQLQuery } from '@kbn/esql-utils';
+import { AggregateQuery, isOfAggregateQueryType, Query, TimeRange } from '@kbn/es-query';
+import { isFunction } from 'lodash';
 import { loadSavedSearch as loadSavedSearchFn } from './utils/load_saved_search';
 import { restoreStateFromSavedSearch } from '../../../services/saved_searches/restore_from_saved_search';
 import { FetchStatus } from '../../types';
@@ -175,6 +178,16 @@ export interface DiscoverStateContainer {
      */
     onDataViewEdited: (dataView: DataView) => Promise<void>;
     /**
+     * Triggered when transitioning from ESQL to Dataview
+     * Clean ups the ES|QL query and moves to the dataview mode
+     */
+    transitionFromESQLToDataView: (dataViewId: string) => void;
+    /**
+     * Triggered when transitioning from ESQL to Dataview
+     * Clean ups the ES|QL query and moves to the dataview mode
+     */
+    transitionFromDataViewToESQL: (dataView: DataView) => void;
+    /**
      * Triggered when a saved search is opened in the savedObject finder
      * @param savedSearchId
      */
@@ -207,6 +220,10 @@ export interface DiscoverStateContainer {
      * This is to prevent duplicate ids messing with our system
      */
     updateAdHocDataViewId: () => Promise<DataView | undefined>;
+    /**
+     * Updates the ES|QL query string
+     */
+    updateESQLQuery: (queryOrUpdater: string | ((prevQuery: string) => string)) => void;
   };
 }
 
@@ -257,18 +274,19 @@ export function getDiscoverStateContainer({
   });
 
   /**
+   * Internal State Container, state that's not persisted and not part of the URL
+   */
+  const internalStateContainer = getInternalStateContainer();
+
+  /**
    * App State Container, synced with the _a part URL
    */
   const appStateContainer = getDiscoverAppStateContainer({
     stateStorage,
-    savedSearch: savedSearchContainer.getState(),
+    internalStateContainer,
+    savedSearchContainer,
     services,
   });
-
-  /**
-   * Internal State Container, state that's not persisted and not part of the URL
-   */
-  const internalStateContainer = getInternalStateContainer();
 
   const pauseAutoRefreshInterval = async (dataView: DataView) => {
     if (dataView && (!dataView.isTimeBased() || dataView.type === DataViewType.ROLLUP)) {
@@ -281,6 +299,7 @@ export function getDiscoverStateContainer({
       }
     }
   };
+
   const setDataView = (dataView: DataView) => {
     internalStateContainer.transitions.setDataView(dataView);
     pauseAutoRefreshInterval(dataView);
@@ -290,8 +309,8 @@ export function getDiscoverStateContainer({
   const dataStateContainer = getDataStateContainer({
     services,
     searchSessionManager,
-    getAppState: appStateContainer.getState,
-    getInternalState: internalStateContainer.getState,
+    appStateContainer,
+    internalStateContainer,
     getSavedSearch: savedSearchContainer.getState,
     setDataView,
   });
@@ -352,6 +371,36 @@ export function getDiscoverStateContainer({
     }
   };
 
+  const transitionFromESQLToDataView = (dataViewId: string) => {
+    appStateContainer.update({
+      query: {
+        language: 'kuery',
+        query: '',
+      },
+      columns: [],
+      dataSource: {
+        type: DataSourceType.DataView,
+        dataViewId,
+      },
+    });
+  };
+
+  const transitionFromDataViewToESQL = (dataView: DataView) => {
+    const queryString = getInitialESQLQuery(dataView);
+
+    appStateContainer.update({
+      query: { esql: queryString },
+      filters: [],
+      dataSource: {
+        type: DataSourceType.Esql,
+      },
+      columns: [],
+    });
+    // clears pinned filters
+    const globalState = globalStateContainer.get();
+    globalStateContainer.set({ ...globalState, filters: [] });
+  };
+
   const onDataViewCreated = async (nextDataView: DataView) => {
     if (!nextDataView.isPersisted()) {
       internalStateContainer.transitions.appendAdHocDataViews(nextDataView);
@@ -403,9 +452,8 @@ export function getDiscoverStateContainer({
     });
 
     // initialize app state container, syncing with _g and _a part of the URL
-    const appStateInitAndSyncUnsubscribe = appStateContainer.initAndSync(
-      savedSearchContainer.getState()
-    );
+    const appStateInitAndSyncUnsubscribe = appStateContainer.initAndSync();
+
     // subscribing to state changes of appStateContainer, triggering data fetching
     const appStateUnsubscribe = appStateContainer.subscribe(
       buildStateSubscribe({
@@ -417,6 +465,7 @@ export function getDiscoverStateContainer({
         setDataView,
       })
     );
+
     // start subscribing to dataStateContainer, triggering data fetching
     const unsubscribeData = dataStateContainer.subscribe();
 
@@ -467,6 +516,7 @@ export function getDiscoverStateContainer({
     await onChangeDataView(newDataView);
     return newDataView;
   };
+
   /**
    * Triggered when a user submits a query in the search bar
    */
@@ -492,6 +542,7 @@ export function getDiscoverStateContainer({
       appState: appStateContainer,
     });
   };
+
   /**
    * Undo all changes to the current saved search
    */
@@ -518,11 +569,28 @@ export function getDiscoverStateContainer({
     await appStateContainer.replaceUrlState(newAppState);
     return nextSavedSearch;
   };
+
   const fetchData = (initial: boolean = false) => {
     addLog('fetchData', { initial });
     if (!initial || dataStateContainer.getInitialFetchStatus() === FetchStatus.LOADING) {
       dataStateContainer.fetch();
     }
+  };
+
+  const updateESQLQuery = (queryOrUpdater: string | ((prevQuery: string) => string)) => {
+    addLog('updateESQLQuery');
+    const { query: currentQuery } = appStateContainer.getState();
+
+    if (!isOfAggregateQueryType(currentQuery)) {
+      throw new Error(
+        'Cannot update a non-ES|QL query. Make sure this function is only called once in ES|QL mode.'
+      );
+    }
+
+    const queryUpdater = isFunction(queryOrUpdater) ? queryOrUpdater : () => queryOrUpdater;
+    const query = { esql: queryUpdater(currentQuery.esql) };
+
+    appStateContainer.update({ query });
   };
 
   return {
@@ -544,10 +612,13 @@ export function getDiscoverStateContainer({
       onDataViewCreated,
       onDataViewEdited,
       onOpenSavedSearch,
+      transitionFromESQLToDataView,
+      transitionFromDataViewToESQL,
       onUpdateQuery,
       setDataView,
       undoSavedSearchChanges,
       updateAdHocDataViewId,
+      updateESQLQuery,
     },
   };
 }

@@ -9,7 +9,7 @@ import { css } from '@emotion/react';
 import React from 'react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { DefaultFieldRenderer } from '../../../../../timelines/components/field_renderers/field_renderers';
+import { DefaultFieldRenderer } from '../../../../../timelines/components/field_renderers/default_renderer';
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
 import type { BasicEntityData, EntityTableColumns } from './types';
 

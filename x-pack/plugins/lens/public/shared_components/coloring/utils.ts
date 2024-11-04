@@ -17,8 +17,41 @@ import {
   getPaletteStops,
   CUSTOM_PALETTE,
   enforceColorContrast,
+  ColorMapping,
+  getColorsFromMapping,
+  DEFAULT_FALLBACK_PALETTE,
 } from '@kbn/coloring';
-import { Datatable } from '@kbn/expressions-plugin/common';
+import { getOriginalId } from '@kbn/transpose-utils';
+import { Datatable, DatatableColumnType } from '@kbn/expressions-plugin/common';
+import { DataType } from '../../types';
+
+/**
+ * Returns array of colors for provided palette or colorMapping
+ */
+export function getColorStops(
+  paletteService: PaletteRegistry,
+  isDarkMode: boolean,
+  palette?: PaletteOutput<CustomPaletteParams>,
+  colorMapping?: ColorMapping.Config
+): string[] {
+  return colorMapping
+    ? getColorsFromMapping(isDarkMode, colorMapping)
+    : palette?.name === CUSTOM_PALETTE
+    ? palette?.params?.stops?.map(({ color }) => color) ?? []
+    : paletteService
+        .get(palette?.name || DEFAULT_FALLBACK_PALETTE)
+        .getCategoricalColors(10, palette);
+}
+
+/**
+ * Bucketed numerical columns should be treated as categorical
+ */
+export function shouldColorByTerms(
+  dataType?: DataType | DatatableColumnType,
+  isBucketed?: boolean
+) {
+  return isBucketed || dataType !== 'number';
+}
 
 export function getContrastColor(
   color: string,
@@ -37,11 +70,8 @@ export function getContrastColor(
   return enforceColorContrast(color, backgroundColor) ? lightColor : darkColor;
 }
 
-export function getNumericValue(rowValue: number | number[] | undefined) {
-  if (rowValue == null || Array.isArray(rowValue)) {
-    return;
-  }
-  return rowValue;
+export function getNumericValue(rowValue?: unknown) {
+  return typeof rowValue === 'number' ? rowValue : undefined;
 }
 
 export function applyPaletteParams<T extends PaletteOutput<CustomPaletteParams>>(
@@ -61,17 +91,13 @@ export function applyPaletteParams<T extends PaletteOutput<CustomPaletteParams>>
   return displayStops;
 }
 
-export const findMinMaxByColumnId = (
-  columnIds: string[],
-  table: Datatable | undefined,
-  getOriginalId: (id: string) => string = (id: string) => id
-) => {
-  const minMax: Record<string, DataBounds> = {};
+export const findMinMaxByColumnId = (columnIds: string[], table: Datatable | undefined) => {
+  const minMaxMap = new Map<string, DataBounds>();
 
   if (table != null) {
     for (const columnId of columnIds) {
       const originalId = getOriginalId(columnId);
-      minMax[originalId] = minMax[originalId] || {
+      const minMax = minMaxMap.get(originalId) ?? {
         max: Number.NEGATIVE_INFINITY,
         min: Number.POSITIVE_INFINITY,
       };
@@ -79,19 +105,22 @@ export const findMinMaxByColumnId = (
         const rowValue = row[columnId];
         const numericValue = getNumericValue(rowValue);
         if (numericValue != null) {
-          if (minMax[originalId].min > numericValue) {
-            minMax[originalId].min = numericValue;
+          if (minMax.min > numericValue) {
+            minMax.min = numericValue;
           }
-          if (minMax[originalId].max < numericValue) {
-            minMax[originalId].max = numericValue;
+          if (minMax.max < numericValue) {
+            minMax.max = numericValue;
           }
         }
       });
+
       // what happens when there's no data in the table? Fallback to a percent range
-      if (minMax[originalId].max === Number.NEGATIVE_INFINITY) {
-        minMax[originalId] = getFallbackDataBounds();
+      if (minMax.max === Number.NEGATIVE_INFINITY) {
+        minMaxMap.set(originalId, getFallbackDataBounds());
+      } else {
+        minMaxMap.set(originalId, minMax);
       }
     }
   }
-  return minMax;
+  return minMaxMap;
 };

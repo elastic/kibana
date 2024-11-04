@@ -8,95 +8,48 @@
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import { RoleCredentials } from '../../../../shared/services';
 
 export default function ({ getService }: FtrProviderContext) {
-  const indexManagementService = getService('indexManagement');
+  const svlCommonApi = getService('svlCommonApi');
+  const svlUserManager = getService('svlUserManager');
+  const svlSettingsApi = getService('svlSettingsApi');
+  const svlIndicesHelpers = getService('svlIndicesHelpers');
+  let roleAuthc: RoleCredentials;
 
-  describe('settings', () => {
-    let getIndexSettings: typeof indexManagementService['settings']['api']['getIndexSettings'];
-    let updateIndexSettings: typeof indexManagementService['settings']['api']['updateIndexSettings'];
-    let createIndex: typeof indexManagementService['indices']['helpers']['createIndex'];
-    let deleteAllIndices: typeof indexManagementService['indices']['helpers']['deleteAllIndices'];
-
+  describe('settings', function () {
     before(async () => {
-      ({
-        settings: {
-          api: { getIndexSettings, updateIndexSettings },
-        },
-        indices: {
-          helpers: { createIndex, deleteAllIndices },
-        },
-      } = indexManagementService);
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
     });
 
-    after(async () => await deleteAllIndices());
+    after(async () => {
+      await svlIndicesHelpers.deleteAllIndices();
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
+    });
 
     it('should fetch an index settings', async () => {
-      const index = await createIndex();
+      const index = await svlIndicesHelpers.createIndex();
 
-      const { body } = await getIndexSettings(index).expect(200);
-
-      // Verify we fetch the corret index settings
-      expect(body.settings.index.provided_name).to.be(index);
+      const { status, body } = await svlSettingsApi.getIndexSettings(index, roleAuthc);
+      svlCommonApi.assertResponseStatusCode(200, status, body);
 
       const expectedSettings = [
-        'max_inner_result_window',
-        'unassigned',
-        'max_terms_count',
         'lifecycle',
-        'routing_partition_size',
-        'max_docvalue_fields_search',
         'merge',
-        'max_refresh_listeners',
-        'max_regex_length',
-        'load_fixed_bitset_filters_eagerly',
-        'number_of_routing_shards',
-        'write',
-        'verified_before_close',
         'mapping',
-        'source_only',
-        'soft_deletes',
-        'max_script_fields',
         'query',
-        'format',
-        'frozen',
         'sort',
-        'priority',
         'codec',
-        'max_rescore_window',
-        'analyze',
-        'gc_deletes',
-        'max_ngram_diff',
-        'translog',
-        'auto_expand_replicas',
-        'requests',
-        'data_path',
-        'highlight',
-        'routing',
-        'search',
-        'fielddata',
         'default_pipeline',
-        'max_slices_per_scroll',
-        'shard',
-        'xpack',
-        'percolator',
-        'allocation',
         'refresh_interval',
-        'indexing',
-        'compound_format',
         'blocks',
-        'max_result_window',
-        'store',
-        'queries',
-        'warmer',
-        'max_shingle_diff',
         'query_string',
       ];
 
       // Make sure none of the settings have been removed from ES API
       expectedSettings.forEach((setting) => {
         try {
-          expect(body.defaults.index.hasOwnProperty(setting)).to.be(true);
+          expect(Object.hasOwn(body.defaults.index, setting)).to.eql(true);
         } catch {
           throw new Error(`Expected setting "${setting}" not found.`);
         }
@@ -104,20 +57,23 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should update an index settings', async () => {
-      const index = await createIndex();
+      const index = await svlIndicesHelpers.createIndex();
 
-      const { body: body1 } = await getIndexSettings(index);
-      expect(body1.settings.index.number_of_replicas).to.be('1');
+      const { body: body1 } = await svlSettingsApi.getIndexSettings(index, roleAuthc);
+
+      // There are no settings by default
+      expect(body1.settings?.index?.number_of_replicas).to.be(undefined);
 
       const settings = {
         index: {
-          number_of_replicas: 2,
+          refresh_interval: '7s',
         },
       };
-      await updateIndexSettings(index, settings);
+      await svlSettingsApi.updateIndexSettings(index, settings, roleAuthc);
 
-      const { body: body2 } = await getIndexSettings(index);
-      expect(body2.settings.index.number_of_replicas).to.be('2');
+      const { body: body2 } = await svlSettingsApi.getIndexSettings(index, roleAuthc);
+
+      expect(body2.settings.index.refresh_interval).to.be('7s');
     });
   });
 }

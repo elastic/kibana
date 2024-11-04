@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback } from 'react';
-import type { Query, TimeRange, Filter } from '@kbn/es-query';
+import type { TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { useEuiTheme, EuiHorizontalRule, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -22,27 +22,20 @@ export const UnifiedSearchBar = () => {
     services: { unifiedSearch, application },
   } = useKibanaContextForPlugin();
   const { metricsView } = useMetricsDataViewContext();
-  const { searchCriteria, onSubmit } = useUnifiedSearchContext();
+  const { searchCriteria, onLimitChange, onPanelFiltersChange, onSubmit } =
+    useUnifiedSearchContext();
 
   const { SearchBar } = unifiedSearch.ui;
 
-  const onLimitChange = (limit: number) => {
-    onSubmit({ limit });
-  };
-
-  const onPanelFiltersChange = useCallback(
-    (panelFilters: Filter[]) => {
-      onSubmit({ panelFilters });
+  const handleRefresh = useCallback(
+    (payload: { dateRange: TimeRange }, isUpdate?: boolean) => {
+      // This makes sure `onSubmit` is only called when the submit button is clicked
+      if (isUpdate === false) {
+        onSubmit(payload);
+      }
     },
     [onSubmit]
   );
-
-  const handleRefresh = (payload: { query?: Query; dateRange: TimeRange }, isUpdate?: boolean) => {
-    // This makes sure `onQueryChange` is only called when the submit button is clicked
-    if (isUpdate === false) {
-      onSubmit(payload);
-    }
-  };
 
   return (
     <StickyContainer>

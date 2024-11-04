@@ -7,11 +7,13 @@
 
 import { EuiIcon, type EuiIconProps } from '@elastic/eui';
 import React, { memo, useMemo } from 'react';
+import type { SupportedHostOsType } from '../../../../../../../common/endpoint/constants';
 import linuxSvg from './logos/linux.svg';
 import windowsSvg from './logos/windows.svg';
 import macosSvg from './logos/macos.svg';
 
-export type Platform = 'macos' | 'linux' | 'windows';
+export type Platform = SupportedHostOsType;
+
 const getPlatformIcon = (platform: Platform): string | null => {
   switch (platform) {
     case 'macos':

@@ -8,13 +8,28 @@
 import ipaddr from 'ipaddr.js';
 import { defaultsDeep, sum } from 'lodash';
 import moment from 'moment';
-import { Observable, from, of, throwError } from 'rxjs';
-import { catchError, concatMap, first, map, mergeMap, take, takeUntil, tap, toArray } from 'rxjs';
+import {
+  Observable,
+  catchError,
+  concatMap,
+  first,
+  from,
+  map,
+  mergeMap,
+  of,
+  take,
+  takeUntil,
+  tap,
+  throwError,
+  toArray,
+} from 'rxjs';
 
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { HttpServiceSetup, Logger, PackageInfo } from '@kbn/core/server';
 import { Semaphore } from '@kbn/std';
 
+import type { ConfigType } from '@kbn/screenshotting-server';
+import { durationToNumber } from '@kbn/screenshotting-server';
 import { CaptureResult, ScreenshotOptions, ScreenshotResult } from '.';
 import {
   SCREENSHOTTING_APP_ID,
@@ -24,8 +39,6 @@ import {
 } from '../../common';
 import { HeadlessChromiumDriverFactory } from '../browsers';
 import { systemHasInsufficientMemory } from '../cloud';
-import type { ConfigType } from '../config';
-import { durationToNumber } from '../config';
 import {
   PdfScreenshotOptions,
   PdfScreenshotResult,

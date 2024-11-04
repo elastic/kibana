@@ -13,6 +13,7 @@ import {
   SavedObjectsUtils,
 } from '@kbn/core/server';
 import Boom from '@hapi/boom';
+import { decodeOrThrow } from '@kbn/io-ts-utils';
 import {
   metricsExplorerViewAttributesRT,
   staticMetricsExplorerViewAttributes,
@@ -29,7 +30,6 @@ import type {
   MetricsExplorerView,
   MetricsExplorerViewAttributes,
 } from '../../../common/metrics_explorer_views';
-import { decodeOrThrow } from '../../../common/runtime_types';
 import type { IInfraSources } from '../../lib/sources';
 import { metricsExplorerViewSavedObjectName } from '../../saved_objects/metrics_explorer_view';
 import { metricsExplorerViewSavedObjectRT } from '../../saved_objects/metrics_explorer_view/types';

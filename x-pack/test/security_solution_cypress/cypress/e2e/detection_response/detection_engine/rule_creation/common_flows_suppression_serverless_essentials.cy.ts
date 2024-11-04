@@ -15,6 +15,7 @@ import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
 import {
   ALERT_SUPPRESSION_FIELDS_INPUT,
+  MACHINE_LEARNING_TYPE,
   THRESHOLD_ENABLE_SUPPRESSION_CHECKBOX,
 } from '../../../../screens/create_new_rule';
 import { CREATE_RULE_URL } from '../../../../urls/navigation';
@@ -22,8 +23,7 @@ import { CREATE_RULE_URL } from '../../../../urls/navigation';
 describe(
   'Detection rules, Alert Suppression for Essentials tier',
   {
-    // skipped in MKI as it depends on feature flag alertSuppressionForEsqlRuleEnabled
-    tags: ['@serverless', '@skipInServerlessMKI'],
+    tags: ['@serverless'],
     env: {
       ftrConfig: {
         productTypes: [
@@ -31,12 +31,6 @@ describe(
           { product_line: 'endpoint', product_tier: 'essentials' },
         ],
       },
-      // alertSuppressionForEsqlRuleEnabled feature flag is also enabled in a global config
-      kbnServerArgs: [
-        `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-          'alertSuppressionForEsqlRuleEnabled',
-        ])}`,
-      ],
     },
   },
   () => {
@@ -60,6 +54,9 @@ describe(
 
       selectEsqlRuleType();
       cy.get(ALERT_SUPPRESSION_FIELDS_INPUT).should('be.enabled');
+
+      // ML Rules require Complete tier
+      cy.get(MACHINE_LEARNING_TYPE).get('button').should('be.disabled');
     });
   }
 );

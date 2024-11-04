@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { CoreSetup, Logger } from '@kbn/core/server';
-import type { AuthenticatedUser } from '@kbn/security-plugin/common';
+import type { AuthenticatedUser, CoreSetup, Logger } from '@kbn/core/server';
 import type {
   CloudDefendRequestHandlerContext,
   CloudDefendPluginStart,
@@ -33,8 +32,8 @@ export function setupRoutes({
 
   core.http.registerRouteHandlerContext<CloudDefendRequestHandlerContext, typeof PLUGIN_ID>(
     PLUGIN_ID,
-    async (context, request) => {
-      const [, { security, fleet }] = await core.getStartServices();
+    async (context, _request) => {
+      const [_, { fleet }] = await core.getStartServices();
       const coreContext = await context.core;
       await fleet.fleetSetupCompleted();
 
@@ -44,7 +43,7 @@ export function setupRoutes({
         get user() {
           // We want to call getCurrentUser only when needed and only once
           if (!user) {
-            user = security.authc.getCurrentUser(request);
+            user = coreContext.security.authc.getCurrentUser();
           }
           return user;
         },

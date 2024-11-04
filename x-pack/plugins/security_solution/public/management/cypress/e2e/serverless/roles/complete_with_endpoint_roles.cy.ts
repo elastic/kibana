@@ -40,6 +40,13 @@ describe(
           { product_line: 'security', product_tier: 'complete' },
           { product_line: 'endpoint', product_tier: 'complete' },
         ],
+        // This is not needed for this test, but it's a good example of
+        // how to enable experimental features in the Cypress tests.
+        // kbnServerArgs: [
+        //   `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+        //     'featureFlagName',
+        //   ])}`,
+        // ],
       },
     },
   },
@@ -118,7 +125,8 @@ describe(
         'kill-process',
         'suspend-process',
         'get-file',
-        'upload'
+        'upload',
+        'scan'
       );
 
       const deniedResponseActions = pick(consoleHelpPanelResponseActionsTestSubj, 'execute');

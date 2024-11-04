@@ -9,13 +9,7 @@ exports[`renders DashboardSaveModal 1`] = `
   onSave={[Function]}
   options={
     <React.Fragment>
-      <EuiFormRow
-        describedByIds={Array []}
-        display="row"
-        hasChildLabel={true}
-        hasEmptyLabelSpace={false}
-        labelType="label"
-      >
+      <EuiFormRow>
         <EuiFlexGroup
           alignItems="center"
           gutterSize="s"

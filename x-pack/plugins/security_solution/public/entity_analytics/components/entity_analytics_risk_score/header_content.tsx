@@ -5,11 +5,9 @@
  * 2.0.
  */
 import React, { useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFilterGroup, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { RiskSeverity, RiskScoreEntity } from '../../../../common/search_strategy';
-import { SeverityFilterGroup } from '../severity/severity_filter_group';
-import type { SeverityCount } from '../severity/types';
-import { EMPTY_SEVERITY_COUNT } from '../../../../common/search_strategy';
+import { SeverityFilter } from '../severity/severity_filter';
 import { LinkButton, useGetSecuritySolutionLinkProps } from '../../../common/components/links';
 import type { SecurityPageName } from '../../../../common/constants';
 import * as i18n from './translations';
@@ -17,10 +15,9 @@ import { RiskInformationButtonEmpty } from '../risk_information';
 
 const RiskScoreHeaderContentComponent = ({
   entityLinkProps,
-  onSelectSeverityFilterGroup,
+  onSelectSeverityFilter,
   riskEntity,
   selectedSeverity,
-  severityCount,
   toggleStatus,
 }: {
   entityLinkProps: {
@@ -28,10 +25,9 @@ const RiskScoreHeaderContentComponent = ({
     path: string;
     onClick: () => void;
   };
-  onSelectSeverityFilterGroup: (newSelection: RiskSeverity[]) => void;
+  onSelectSeverityFilter: (newSelection: RiskSeverity[]) => void;
   riskEntity: RiskScoreEntity;
   selectedSeverity: RiskSeverity[];
-  severityCount: SeverityCount | undefined;
   toggleStatus: boolean;
 }) => {
   const getSecuritySolutionLinkProps = useGetSecuritySolutionLinkProps();
@@ -50,12 +46,13 @@ const RiskScoreHeaderContentComponent = ({
         <RiskInformationButtonEmpty riskEntity={riskEntity} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <SeverityFilterGroup
-          selectedSeverities={selectedSeverity}
-          severityCount={severityCount ?? EMPTY_SEVERITY_COUNT}
-          riskEntity={riskEntity}
-          onSelect={onSelectSeverityFilterGroup}
-        />
+        <EuiFilterGroup>
+          <SeverityFilter
+            selectedItems={selectedSeverity}
+            riskEntity={riskEntity}
+            onSelect={onSelectSeverityFilter}
+          />
+        </EuiFilterGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <LinkButton

@@ -638,6 +638,33 @@ system:
       normalize: []
       short: Percentage of CPU usage by user processes
       type: float
+    system.filesystem.used.pct:
+      dashed_name: system-filesystem-used-pct
+      description: Percentage of filesytem used by system processes
+      flat_name: system.filesystem.used.pct
+      level: custom
+      name: filesystem.used.pct
+      normalize: []
+      short: Percentage of filesytem used by system processes
+      type: float
+    system.load.1:
+      dashed_name: system-load-1
+      description: Load 1m by system processes
+      flat_name: system.load.1
+      level: custom
+      name: load.1
+      normalize: []
+      short: Load 1m by system processes
+      type: float
+    system.memory.actual.used.pct:
+      dashed_name: system-memory-actual-used-pct
+      description: Percentage of actual memory by system processes
+      flat_name: system.memory.actual.used.pct
+      level: custom
+      name: memory.actual.used.pct
+      normalize: []
+      short: Percentage of actual memory by system processes
+      type: float
     system.network.in.bytes:
       dashed_name: system-network-in-bytes
       description: Number of incoming bytes

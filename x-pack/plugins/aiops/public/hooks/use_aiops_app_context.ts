@@ -7,6 +7,7 @@
 
 import { createContext, type FC, type PropsWithChildren, useContext } from 'react';
 
+import type { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
@@ -30,16 +31,15 @@ import type {
   FieldStatsServices,
 } from '@kbn/unified-field-list/src/components/field_stats';
 import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
-import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { CasesPublicStart } from '@kbn/cases-plugin/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
 /**
- * AIOps App Dependencies to be provided via React context.
+ * AIOps app context value to be provided via React context.
  */
-export interface AiopsAppDependencies {
+export interface AiopsAppContextValue {
   /**
    * Used for telemetry/performance metrics.
    */
@@ -128,23 +128,24 @@ export interface AiopsAppDependencies {
       }>
     >;
   };
-  presentationUtil?: PresentationUtilPluginStart;
   embeddable?: EmbeddableStart;
   cases?: CasesPublicStart;
   isServerless?: boolean;
   /** Identifier to indicate the plugin utilizing the component */
-  embeddingOrigin?: string;
+  embeddingOrigin: string;
+  /** Observability AI Assistant */
+  observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
 }
 
 /**
  * React AIOps app dependency context.
  */
-export const AiopsAppContext = createContext<AiopsAppDependencies | undefined>(undefined);
+export const AiopsAppContext = createContext<AiopsAppContextValue | undefined>(undefined);
 
 /**
  * Custom hook to get AIOps app dependency context.
  */
-export const useAiopsAppContext = (): AiopsAppDependencies => {
+export const useAiopsAppContext = (): AiopsAppContextValue => {
   const aiopsAppContext = useContext(AiopsAppContext);
 
   // if `undefined`, throw an error

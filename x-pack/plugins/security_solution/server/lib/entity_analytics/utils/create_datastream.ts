@@ -147,9 +147,10 @@ export const createDataStream = async ({
     dataStreams = response.data_streams.map((dataStream) => dataStream.name);
 
     logger.debug(
-      `Found ${dataStreams.length} concrete indices for ${indexPatterns.alias} - ${JSON.stringify(
-        dataStreams
-      )}`
+      () =>
+        `Found ${dataStreams.length} concrete indices for ${indexPatterns.alias} - ${JSON.stringify(
+          dataStreams
+        )}`
     );
   } catch (error) {
     // 404 is expected if no datastream have been created

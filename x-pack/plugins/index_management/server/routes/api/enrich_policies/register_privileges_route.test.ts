@@ -48,9 +48,11 @@ describe('GET privileges', () => {
         isSecurityEnabled: () => true,
         isLegacyTemplatesEnabled: true,
         isIndexStatsEnabled: true,
+        isSizeAndDocCountEnabled: false,
         isDataStreamStatsEnabled: true,
         enableMappingsSourceFieldSection: true,
         enableTogglingDataRetention: true,
+        enableProjectLevelRetentionChecks: false,
       },
       indexDataEnricher: mockedIndexDataEnricher,
       lib: {
@@ -119,9 +121,11 @@ describe('GET privileges', () => {
           isSecurityEnabled: () => false,
           isLegacyTemplatesEnabled: true,
           isIndexStatsEnabled: true,
+          isSizeAndDocCountEnabled: false,
           isDataStreamStatsEnabled: true,
           enableMappingsSourceFieldSection: true,
           enableTogglingDataRetention: true,
+          enableProjectLevelRetentionChecks: false,
         },
         indexDataEnricher: mockedIndexDataEnricher,
         lib: {

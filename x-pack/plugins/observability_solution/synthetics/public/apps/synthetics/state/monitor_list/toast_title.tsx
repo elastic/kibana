@@ -11,5 +11,5 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import { kibanaService } from '../../../../utils/kibana_service';
 
 export function toastTitle({ title, testAttribute }: { title: string; testAttribute?: string }) {
-  return toMountPoint(<p data-test-sub={testAttribute}>{title}</p>, kibanaService.core);
+  return toMountPoint(<p data-test-sub={testAttribute}>{title}</p>, kibanaService.coreStart);
 }

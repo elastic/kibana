@@ -11,6 +11,7 @@ import { useParams, useRouteMatch } from 'react-router-dom';
 import React, { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { i18n } from '@kbn/i18n';
+import { useGetUrlParams } from '../../../hooks';
 import { MONITOR_EDIT_ROUTE } from '../../../../../../common/constants';
 import { SyntheticsMonitor } from '../../../../../../common/runtime_types';
 import { createMonitorAPI, updateMonitorAPI } from '../../../state/monitor_management/api';
@@ -22,6 +23,7 @@ export const useMonitorSave = ({ monitorData }: { monitorData?: SyntheticsMonito
   const dispatch = useDispatch();
   const { refreshApp } = useSyntheticsRefreshContext();
   const { monitorId } = useParams<{ monitorId: string }>();
+  const { spaceId } = useGetUrlParams();
 
   const editRouteMatch = useRouteMatch({ path: MONITOR_EDIT_ROUTE });
   const isEdit = editRouteMatch?.isExact;
@@ -31,6 +33,7 @@ export const useMonitorSave = ({ monitorData }: { monitorData?: SyntheticsMonito
       if (isEdit) {
         return updateMonitorAPI({
           id: monitorId,
+          spaceId,
           monitor: monitorData,
         });
       } else {
@@ -45,7 +48,7 @@ export const useMonitorSave = ({ monitorData }: { monitorData?: SyntheticsMonito
   }, [monitorData]);
 
   useEffect(() => {
-    const { core, toasts } = kibanaService;
+    const { coreStart, toasts } = kibanaService;
 
     if (status === FETCH_STATUS.FAILURE && error) {
       toasts.addError(
@@ -64,7 +67,7 @@ export const useMonitorSave = ({ monitorData }: { monitorData?: SyntheticsMonito
           <p data-test-subj="synthetcsMonitorSaveSubtext">
             {monitorId ? MONITOR_UPDATED_SUCCESS_LABEL_SUBTEXT : MONITOR_SUCCESS_LABEL_SUBTEXT}
           </p>,
-          core
+          coreStart
         ),
         toastLifeTimeMs: 3000,
       });

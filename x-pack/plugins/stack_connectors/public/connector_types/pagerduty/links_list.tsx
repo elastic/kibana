@@ -50,7 +50,7 @@ export const LinksList: React.FC<LinksListProps> = ({
         </EuiText>
       }
       isInvalid={areLinksInvalid}
-      error={errors.links}
+      error={errors.links as string}
       fullWidth
     >
       <EuiFlexGroup direction="column" data-test-subj="linksList" gutterSize="s">

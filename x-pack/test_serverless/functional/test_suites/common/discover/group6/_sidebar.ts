@@ -30,6 +30,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const INITIAL_FIELD_LIST_SUMMARY = '48 available fields. 5 empty fields. 4 meta fields.';
 
   describe('discover sidebar', function describeIndexTests() {
+    // see details: https://github.com/elastic/kibana/issues/195100
+    this.tags(['failsOnMKI']);
+
     before(async function () {
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await PageObjects.svlCommonPage.loginAsAdmin();
@@ -173,6 +176,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           (await PageObjects.unifiedFieldList.getSidebarSectionFieldNames('available')).join(', ')
         ).to.be(
           'relatedContent.og:image, relatedContent.og:image:height, relatedContent.og:image:width, relatedContent.twitter:image'
+        );
+      });
+
+      it('should be able to search with fuzzy search (1 typo)', async function () {
+        await PageObjects.unifiedFieldList.findFieldByName('rel4tedContent.art');
+
+        await retry.waitFor('updates', async () => {
+          return (
+            (await PageObjects.unifiedFieldList.getSidebarAriaDescription()) ===
+            '4 available fields. 0 meta fields.'
+          );
+        });
+
+        expect(
+          (await PageObjects.unifiedFieldList.getSidebarSectionFieldNames('available')).join(', ')
+        ).to.be(
+          'relatedContent.article:modified_time, relatedContent.article:published_time, relatedContent.article:section, relatedContent.article:tag'
         );
       });
 
@@ -709,7 +729,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'selected'
         );
         expect(selectedFields.includes(newField)).to.be(false);
-        expect(await dataGrid.getHeaderFields()).to.eql(['@timestamp', 'Document']);
+        expect(await dataGrid.getHeaderFields()).to.eql(['@timestamp', 'Summary']);
 
         await PageObjects.unifiedFieldList.clickFieldListItemAdd(newField);
         await PageObjects.header.waitUntilLoadingHasFinished();
@@ -727,7 +747,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           return !(await PageObjects.unifiedFieldList.getAllFieldNames()).includes(newField);
         });
 
-        expect(await dataGrid.getHeaderFields()).to.eql(['@timestamp', 'Document']);
+        expect(await dataGrid.getHeaderFields()).to.eql(['@timestamp', 'Summary']);
       });
     });
   });

@@ -30,9 +30,9 @@
           "; } | undefined) => void; dynamicActionsState$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.PublishingSubject",
+            "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
           "<{ dynamicActions: ",
@@ -134,9 +134,9 @@
               "; } | undefined) => void; dynamicActionsState$: ",
               {
                 "pluginId": "@kbn/presentation-publishing",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.PublishingSubject",
+                "section": "def-public.PublishingSubject",
                 "text": "PublishingSubject"
               },
               "<{ dynamicActions: ",
@@ -316,9 +316,9 @@
           "; } | undefined) => void; dynamicActionsState$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.PublishingSubject",
+            "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
           "<{ dynamicActions: ",
@@ -363,9 +363,9 @@
           "; } | undefined) => void) | undefined; dynamicActionsState$?: ",
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.PublishingSubject",
+            "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
           "<{ dynamicActions: ",

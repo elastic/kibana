@@ -10,7 +10,7 @@ import {
   ProcessListAPIRequestRT,
   ProcessListAPIResponseRT,
 } from '@kbn/infra-plugin/common/http_api/host_details/process_list';
-import { decodeOrThrow } from '@kbn/infra-plugin/common/runtime_types';
+import { decodeOrThrow } from '@kbn/io-ts-utils';
 import type { RoleCredentials } from '../../../../shared/services';
 
 import type { FtrProviderContext } from '../../../ftr_provider_context';
@@ -25,12 +25,12 @@ export default function ({ getService }: FtrProviderContext) {
   describe('API /metrics/process_list', () => {
     let roleAuthc: RoleCredentials;
     before(async () => {
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       await esArchiver.load(ARCHIVE_NAME);
     });
     after(async () => {
       await esArchiver.unload(ARCHIVE_NAME);
-      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
     it('works', async () => {
@@ -43,7 +43,7 @@ export default function ({ getService }: FtrProviderContext) {
             hostTerm: {
               'host.name': 'serverless-host',
             },
-            indexPattern: 'metrics-*,metricbeat-*',
+            sourceId: 'default',
             to: DATES.serverlessTestingHost.max,
             sortBy: {
               name: 'cpu',

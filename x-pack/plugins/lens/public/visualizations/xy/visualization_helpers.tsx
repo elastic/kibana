@@ -18,7 +18,6 @@ import {
 } from '../../types';
 import {
   State,
-  visualizationTypes,
   XYState,
   XYAnnotationLayerConfig,
   XYLayerConfig,
@@ -27,6 +26,8 @@ import {
   SeriesType,
   XYByReferenceAnnotationLayerConfig,
   XYByValueAnnotationLayerConfig,
+  visualizationTypes,
+  visualizationSubtypes,
 } from './types';
 import { isHorizontalChart } from './state_helpers';
 import { layerTypes } from '../..';
@@ -191,10 +192,27 @@ export const getLayerTypeOptions = (layer: XYLayerConfig, options: LayerTypeToLa
   return options[layerTypes.ANNOTATIONS](layer);
 };
 
+export function getVisualizationSubtypeId(state: State) {
+  if (!state.layers.length) {
+    return (
+      visualizationSubtypes.find((t) => t.id === state.preferredSeriesType) ??
+      visualizationSubtypes[0]
+    ).id;
+  }
+  const dataLayers = getDataLayers(state?.layers);
+  const subtype = (
+    visualizationSubtypes.find((t) => t.id === dataLayers[0].seriesType) ?? visualizationSubtypes[0]
+  ).id;
+  const seriesTypes = uniq(dataLayers.map((l) => l.seriesType));
+
+  return subtype && seriesTypes.length === 1 ? subtype : 'mixed';
+}
+
 export function getVisualizationType(state: State, layerId?: string): VisualizationType | 'mixed' {
   if (!state.layers.length) {
     return (
-      visualizationTypes.find((t) => t.id === state.preferredSeriesType) ?? visualizationTypes[0]
+      visualizationTypes.find((t) => t.subtypes?.includes(state.preferredSeriesType)) ??
+      visualizationTypes[0]
     );
   }
   const dataLayers = getDataLayers(state?.layers);
@@ -202,9 +220,14 @@ export function getVisualizationType(state: State, layerId?: string): Visualizat
     const dataLayerSeries = layerId
       ? dataLayers.find((d) => d.layerId === layerId)?.seriesType
       : dataLayers[0].seriesType;
-    return visualizationTypes.find((t) => t.id === dataLayerSeries) || 'mixed';
+    return (
+      visualizationTypes.find((t) => dataLayerSeries && t.subtypes?.includes(dataLayerSeries)) ||
+      visualizationTypes[0]
+    );
   }
-  const visualizationType = visualizationTypes.find((t) => t.id === dataLayers[0].seriesType);
+  const visualizationType =
+    visualizationTypes.find((t) => t.subtypes?.includes(dataLayers[0].seriesType)) ??
+    visualizationTypes[0];
   const seriesTypes = uniq(dataLayers.map((l) => l.seriesType));
 
   return visualizationType && seriesTypes.length === 1 ? visualizationType : 'mixed';
@@ -247,7 +270,6 @@ export function getDescription(state?: State, layerId?: string) {
 }
 
 export const defaultIcon = IconChartBarStacked;
-export const defaultSeriesType = 'bar_stacked';
 
 export const supportedDataLayer = {
   type: layerTypes.DATA,

@@ -131,6 +131,20 @@ export const WEBHOOK_URL_FALLBACK_TEXT = (entity: 'Story' | 'Webhook') =>
     values: { entity, limit: API_MAX_RESULTS },
     defaultMessage: `Not possible to retrieve more than {limit} results from the Tines {entity} API. If your {entity} does not appear in the list, please fill the Webhook URL below`,
   });
+
+export const WEBHOOK_URL_ERROR_FALLBACK_TITLE = i18n.translate(
+  'xpack.stackConnectors.security.tines.params.webhookUrlErrorFallbackTitle',
+  {
+    defaultMessage: 'Error using Tines API',
+  }
+);
+export const WEBHOOK_URL_ERROR_FALLBACK = i18n.translate(
+  'xpack.stackConnectors.security.tines.params.webhookUrlErrorFallback',
+  {
+    defaultMessage:
+      'There seems to be an issue retrieving Stories or Webhooks using the Tines API. Alternatively, you can set the Tines Webhook URL in the input below',
+  }
+);
 export const WEBHOOK_URL_HELP = i18n.translate(
   'xpack.stackConnectors.security.tines.params.webhookUrlHelp',
   {

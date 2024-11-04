@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { FormulaPublicApi, TypedLensByValueInput } from '@kbn/lens-plugin/public';
-import type { Filter, Query } from '@kbn/es-query';
+import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import { DataViewsCommon } from './config_builder';
 
@@ -95,7 +96,7 @@ export interface LensConfigOptions {
   /** optional time range override */
   timeRange?: TimeRange;
   filters?: Filter[];
-  query?: Query;
+  query?: Query | AggregateQuery;
 }
 
 export interface LensAxisTitleVisibilityConfig {
@@ -208,9 +209,9 @@ export type LensRegionMapConfig = Identity<
 export interface LensMosaicConfigBase {
   chartType: 'mosaic';
   /** field name to apply breakdown based on field type or full breakdown configuration */
-  breakdown: LensBreakdownConfig;
+  breakdown: LensBreakdownConfig[];
   /** field name to apply breakdown based on field type or full breakdown configuration */
-  xAxis: LensBreakdownConfig;
+  xAxis?: LensBreakdownConfig;
 }
 
 export type LensMosaicConfig = Identity<LensBaseConfig & LensBaseLayer & LensMosaicConfigBase>;
@@ -228,7 +229,7 @@ export type LensTableConfig = Identity<LensBaseConfig & LensBaseLayer & LensTabl
 export interface LensHeatmapConfigBase {
   chartType: 'heatmap';
   /** field name to apply breakdown based on field type or full breakdown configuration */
-  breakdown: LensBreakdownConfig;
+  breakdown?: LensBreakdownConfig;
   xAxis: LensBreakdownConfig;
   legend?: Identity<LensLegendConfig>;
 }

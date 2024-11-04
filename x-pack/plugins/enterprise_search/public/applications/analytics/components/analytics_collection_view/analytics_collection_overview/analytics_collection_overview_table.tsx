@@ -171,6 +171,7 @@ const tableSettings: {
   },
   [ExploreTables.Clicked]: {
     columns: [
+      // @ts-expect-error Type '(value: string) => React.JSX.Element' is not assignable to type 'ReactNode'.
       {
         field: ExploreTableColumns.page,
         name: i18n.translate(
@@ -206,6 +207,7 @@ const tableSettings: {
   },
   [ExploreTables.Referrers]: {
     columns: [
+      // @ts-expect-error Type '(value: string) => React.JSX.Element' is not assignable to type 'ReactNode'.
       {
         field: ExploreTableColumns.page,
         name: i18n.translate(
@@ -241,6 +243,7 @@ const tableSettings: {
   },
   [ExploreTables.Locations]: {
     columns: [
+      // @ts-expect-error Type '(value: string, data: LocationsTable) => React.JSX.Element' is not assignable to type 'ReactNode'.
       {
         field: ExploreTableColumns.location,
         name: i18n.translate(

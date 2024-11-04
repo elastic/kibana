@@ -8,12 +8,14 @@
 import * as t from 'io-ts';
 import { schema } from '@kbn/config-schema';
 import { CoreSetup, RequestHandler, Logger } from '@kbn/core/server';
-import { PathReporter } from 'io-ts/lib/PathReporter';
 import { isLeft } from 'fp-ts/lib/Either';
+import { formatErrors } from '@kbn/securitysolution-io-ts-utils';
 import {
   getAnnotationByIdRt,
   createAnnotationRt,
   deleteAnnotationRt,
+  findAnnotationRt,
+  updateAnnotationRt,
 } from '../../../common/annotations';
 import { ScopedAnnotationsClient } from './bootstrap_annotations';
 import { createAnnotationsClient } from './create_annotations_client';
@@ -53,7 +55,7 @@ export function registerAnnotationAPIs({
 
       if (isLeft(validation)) {
         return response.badRequest({
-          body: PathReporter.report(validation).join(', '),
+          body: formatErrors(validation.left).join('|'),
         });
       }
 
@@ -77,10 +79,11 @@ export function registerAnnotationAPIs({
           body: res,
         });
       } catch (err) {
+        logger.error(err);
         return response.custom({
           statusCode: err.output?.statusCode ?? 500,
           body: {
-            message: err.output?.payload?.message ?? 'An internal server error occured',
+            message: err.output?.payload?.message ?? 'An internal server error occurred',
           },
         });
       }
@@ -95,9 +98,27 @@ export function registerAnnotationAPIs({
       validate: {
         body: unknowns,
       },
+      options: {
+        access: 'public',
+      },
     },
     wrapRouteHandler(t.type({ body: createAnnotationRt }), ({ data, client }) => {
       return client.create(data.body);
+    })
+  );
+
+  router.put(
+    {
+      path: '/api/observability/annotation/{id}',
+      validate: {
+        body: unknowns,
+      },
+      options: {
+        access: 'public',
+      },
+    },
+    wrapRouteHandler(t.type({ body: updateAnnotationRt }), ({ data, client }) => {
+      return client.update(data.body);
     })
   );
 
@@ -106,6 +127,9 @@ export function registerAnnotationAPIs({
       path: '/api/observability/annotation/{id}',
       validate: {
         params: unknowns,
+      },
+      options: {
+        access: 'public',
       },
     },
     wrapRouteHandler(t.type({ params: deleteAnnotationRt }), ({ data, client }) => {
@@ -119,9 +143,42 @@ export function registerAnnotationAPIs({
       validate: {
         params: unknowns,
       },
+      options: {
+        access: 'public',
+      },
     },
     wrapRouteHandler(t.type({ params: getAnnotationByIdRt }), ({ data, client }) => {
       return client.getById(data.params);
+    })
+  );
+
+  router.get(
+    {
+      path: '/api/observability/annotation/find',
+      validate: {
+        query: unknowns,
+      },
+      options: {
+        access: 'public',
+      },
+    },
+    wrapRouteHandler(t.type({ query: findAnnotationRt }), ({ data, client }) => {
+      return client.find(data.query);
+    })
+  );
+
+  router.get(
+    {
+      path: '/api/observability/annotation/permissions',
+      validate: {
+        query: unknowns,
+      },
+      options: {
+        access: 'public',
+      },
+    },
+    wrapRouteHandler(t.type({}), ({ client }) => {
+      return client.permissions();
     })
   );
 }

@@ -17,18 +17,11 @@
       "url": "/"
     }
   ],
-  "security": [
-    {
-      "basicAuth": []
-    },
-    {
-      "apiKeyAuth": []
-    }
-  ],
   "tags": [
     {
       "name": "saved objects",
-      "description": "Manage Kibana saved objects, including dashboards, visualizations, and more."
+      "x-displayName": "Saved objects",
+      "description": "Export sets of saved objects that you want to import into {kib}, resolve import errors, and rotate an encryption key for encrypted saved objects with the saved objects APIs.\n\nTo manage a specific type of saved object, use the corresponding APIs.\nFor example, use:\n\n* [Data views](../group/endpoint-data-views)\n* [Spaces](https://www.elastic.co/guide/en/kibana/current/spaces-api.html)\n* [Short URLs](https://www.elastic.co/guide/en/kibana/current/short-urls-api.html)\n\nWarning: Do not write documents directly to the `.kibana` index. When you write directly to the `.kibana` index, the data becomes corrupted and permanently breaks future Kibana versions.\n"
     }
   ],
   "paths": {
@@ -385,9 +378,9 @@
     },
     "/api/saved_objects/_export": {
       "post": {
-        "summary": "Export saved objects in the default space",
+        "summary": "Export saved objects",
         "operationId": "exportSavedObjectsDefault",
-        "description": "Retrieve sets of saved objects that you want to import into Kibana.\nYou must include `type` or `objects` in the request body.\n\nNOTE: The `savedObjects.maxImportExportSize` configuration setting limits the number of saved objects which may be exported.\n\nThis functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
+        "description": "Retrieve sets of saved objects that you want to import into Kibana.\nYou must include `type` or `objects` in the request body.\n\nExported saved objects are not backwards compatible and cannot be imported into an older version of Kibana.\n\nNOTE: The `savedObjects.maxImportExportSize` configuration setting limits the number of saved objects which may be exported.\n\nThis functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
         "tags": [
           "saved objects"
         ],
@@ -644,7 +637,7 @@
     },
     "/api/saved_objects/_import": {
       "post": {
-        "summary": "Import saved objects in the default space",
+        "summary": "Import saved objects",
         "operationId": "importSavedObjectsDefault",
         "description": "Create sets of Kibana saved objects from a file created by the export API.\nSaved objects can be imported only into the same version, a newer minor on the same major, or the next major. Exported saved objects are not backwards compatible and cannot be imported into an older version of Kibana.\n\nThis functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
         "tags": [
@@ -752,7 +745,14 @@
               }
             }
           }
-        }
+        },
+        "x-codeSamples": [
+          {
+            "lang": "cURL",
+            "label": "Import with createNewCopies",
+            "source": "curl \\\n  -X POST api/saved_objects/_import?createNewCopies=true\n  -H \"kbn-xsrf: true\"\n  --form file=@file.ndjson\n"
+          }
+        ]
       }
     },
     "/api/saved_objects/_resolve_import_errors": {
@@ -1208,18 +1208,6 @@
     }
   },
   "components": {
-    "securitySchemes": {
-      "basicAuth": {
-        "type": "http",
-        "scheme": "basic"
-      },
-      "apiKeyAuth": {
-        "type": "apiKey",
-        "in": "header",
-        "name": "Authorization",
-        "description": "e.g. Authorization: ApiKey base64AccessApiKey"
-      }
-    },
     "examples": {
       "key_rotation_response": {
         "summary": "Encryption key rotation using default parameters.",

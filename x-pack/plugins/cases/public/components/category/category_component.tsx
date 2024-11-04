@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox } from '@elastic/eui';
 import { ADD_CATEGORY_CUSTOM_OPTION_LABEL_COMBO_BOX } from './translations';
+import type { CaseUI } from '../../../common/ui';
+
+export type CategoryField = CaseUI['category'] | undefined;
 
 export interface CategoryComponentProps {
   isLoading: boolean;
@@ -26,15 +29,11 @@ export const CategoryComponent: React.FC<CategoryComponentProps> = React.memo(
       }));
     }, [availableCategories]);
 
-    const [selectedOptions, setSelectedOptions] = useState<Array<EuiComboBoxOptionOption<string>>>(
-      category != null ? [{ label: category }] : []
-    );
+    const selectedOptions = category != null ? [{ label: category }] : [];
 
     const onComboChange = useCallback(
       (currentOptions: Array<EuiComboBoxOptionOption<string>>) => {
         const value = currentOptions[0]?.label;
-
-        setSelectedOptions(currentOptions);
         onChange(value);
       },
       [onChange]

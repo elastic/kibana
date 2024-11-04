@@ -35,7 +35,7 @@ export function useFocusUpdate(ids: string[]) {
     }
   }, [ids, refsById, nextFocusedId]);
 
-  const registerNewRef = useCallback((id, el) => {
+  const registerNewRef = useCallback((id: string, el: HTMLElement | null) => {
     if (el) {
       setRefsById((refs) => {
         return new Map(refs.set(id, el));
@@ -44,7 +44,7 @@ export function useFocusUpdate(ids: string[]) {
   }, []);
 
   const removeRef = useCallback(
-    (id) => {
+    (id: string) => {
       if (ids.length <= 1) {
         return setNextFocusedId(id);
       }

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { FtrConfigProviderContext } from '@kbn/test';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
-import { configureHTTP2 } from '../../../test/common/configure_http2';
+import type { FtrConfigProviderContext } from '@kbn/test';
+import { configureHTTP2 } from '@kbn/test-suites-src/common/configure_http2';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const kibanaFunctionalConfig = await readConfigFile(
-    require.resolve('../../../test/functional/config.base.js')
+    require.resolve('@kbn/test-suites-src/functional/config.base')
   );
   const functionalConfig = await readConfigFile(require.resolve('./oidc.config'));
   const kibanaPort = kibanaFunctionalConfig.get('servers.kibana.port');

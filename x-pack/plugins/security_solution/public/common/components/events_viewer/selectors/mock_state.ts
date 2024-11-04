@@ -188,7 +188,6 @@ const timeline = {
     'threat_match',
     'zeek',
   ],
-  expandedDetail: {},
   filters: [],
   kqlQuery: { filterQuery: null },
   indexNames: ['.alerts-security.alerts-default'],

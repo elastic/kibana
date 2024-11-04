@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { chunk } from 'lodash';
+import { chunk, orderBy } from 'lodash';
 
 import expect from '@kbn/expect';
 
@@ -107,8 +107,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     }
   );
 
-  // FLAKY: https://github.com/elastic/kibana/issues/175855
-  registry.when.skip(
+  registry.when(
     'correlations latency with data and opbeans-node args',
     { config: 'trial', archives: ['8.0.0'] },
     () => {
@@ -142,10 +141,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           `Expected status to be '200', got '${fieldCandidatesResponse.status}'`
         );
 
-        // Identified 69 fieldCandidates.
+        // Identified 81 fieldCandidates.
         expect(fieldCandidatesResponse.body?.fieldCandidates.length).to.eql(
-          69,
-          `Expected field candidates length to be '69', got '${fieldCandidatesResponse.body?.fieldCandidates.length}'`
+          81,
+          `Expected field candidates length to be '81', got '${fieldCandidatesResponse.body?.fieldCandidates.length}'`
         );
 
         const fieldValuePairsResponse = await apmApiClient.readUser({
@@ -163,15 +162,15 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           `Expected status to be '200', got '${fieldValuePairsResponse.status}'`
         );
 
-        // Identified 379 fieldValuePairs.
+        // Identified 374 fieldValuePairs.
         expect(fieldValuePairsResponse.body?.fieldValuePairs.length).to.eql(
-          379,
-          `Expected field value pairs length to be '379', got '${fieldValuePairsResponse.body?.fieldValuePairs.length}'`
+          374,
+          `Expected field value pairs length to be '374', got '${fieldValuePairsResponse.body?.fieldValuePairs.length}'`
         );
 
         // This replicates the code used in the `useLatencyCorrelations` hook to chunk requests for correlation analysis.
         // Tests turned out to be flaky and occasionally overload ES with a `search_phase_execution_exception`
-        // when all 379 field value pairs from above are queried in parallel.
+        // when all 374 field value pairs from above are queried in parallel.
         // The chunking sends 10 field value pairs with each request to the Kibana API endpoint.
         // Kibana itself will then run those 10 requests in parallel against ES.
         const latencyCorrelations: LatencyCorrelation[] = [];
@@ -232,20 +231,23 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(finalRawResponse?.percentileThresholdValue).to.be(1309695.875);
         expect(finalRawResponse?.overallHistogram?.length).to.be(101);
 
-        // Identified 13 significant correlations out of 379 field/value pairs.
+        // Identified 13 significant correlations out of 374 field/value pairs.
         expect(finalRawResponse?.latencyCorrelations?.length).to.eql(
           13,
           `Expected 13 identified correlations, got ${finalRawResponse?.latencyCorrelations?.length}.`
         );
 
-        const correlation = finalRawResponse?.latencyCorrelations?.sort(
-          (a, b) => b.correlation - a.correlation
-        )[0];
+        const sortedCorrelations = orderBy(
+          finalRawResponse?.latencyCorrelations,
+          ['score', 'fieldName', 'fieldValue'],
+          ['desc', 'asc', 'asc']
+        );
+        const correlation = sortedCorrelations?.[0];
         expect(typeof correlation).to.be('object');
-        expect(correlation?.fieldName).to.be('transaction.result');
-        expect(correlation?.fieldValue).to.be('success');
-        expect(correlation?.correlation).to.be(0.6275246559191225);
-        expect(correlation?.ksTest).to.be(4.806503252860024e-13);
+        expect(correlation?.fieldName).to.be('agent.hostname');
+        expect(correlation?.fieldValue).to.be('rum-js');
+        expect(correlation?.correlation).to.be(0.34798078715348596);
+        expect(correlation?.ksTest).to.be(1.9848961005439386e-12);
         expect(correlation?.histogram?.length).to.be(101);
       });
     }

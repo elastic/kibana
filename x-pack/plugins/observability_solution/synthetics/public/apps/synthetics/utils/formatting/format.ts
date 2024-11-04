@@ -18,7 +18,7 @@ const NUM_MICROSECONDS_IN_MILLISECOND = 1000;
  * This simply converts microseconds to milliseconds. People tend to prefer ms to us
  * when visualizing request duration times.
  */
-export const microsToMillis = (microseconds: number | null): number | null => {
+const microsToMillis = (microseconds: number | null): number | null => {
   if (!microseconds && microseconds !== 0) return null;
   return Math.floor(microseconds / NUM_MICROSECONDS_IN_MILLISECOND);
 };

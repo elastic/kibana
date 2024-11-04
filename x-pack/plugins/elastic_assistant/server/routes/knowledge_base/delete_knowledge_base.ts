@@ -19,10 +19,7 @@ import {
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { buildResponse } from '../../lib/build_response';
 import { ElasticAssistantRequestHandlerContext } from '../../types';
-import { ElasticsearchStore } from '../../lib/langchain/elasticsearch_store/elasticsearch_store';
-import { ESQL_RESOURCE, KNOWLEDGE_BASE_INDEX_PATTERN } from './constants';
-import { DEFAULT_PLUGIN_NAME, getPluginNameFromRequest } from '../helpers';
-import { getKbResource } from './get_kb_resource';
+import { isV2KnowledgeBaseEnabled } from '../helpers';
 
 /**
  * Delete Knowledge Base index, pipeline, and resources (collection of documents)
@@ -50,60 +47,25 @@ export const deleteKnowledgeBaseRoute = (
       },
       async (context, request: KibanaRequest<DeleteKnowledgeBaseRequestParams>, response) => {
         const resp = buildResponse(response);
-        const assistantContext = await context.elasticAssistant;
-        const logger = assistantContext.logger;
-        const telemetry = assistantContext.telemetry;
-        const pluginName = getPluginNameFromRequest({
-          request,
-          defaultPluginName: DEFAULT_PLUGIN_NAME,
-          logger,
-        });
-        const enableKnowledgeBaseByDefault =
-          assistantContext.getRegisteredFeatures(pluginName).assistantKnowledgeBaseByDefault;
+        const ctx = await context.resolve(['core', 'elasticAssistant', 'licensing']);
+        const assistantContext = ctx.elasticAssistant;
+        const logger = ctx.elasticAssistant.logger;
+
+        // FF Check for V2 KB
+        const v2KnowledgeBaseEnabled = isV2KnowledgeBaseEnabled({ context: ctx, request });
 
         try {
-          const kbResource = getKbResource(request);
-
-          const esClient = (await context.core).elasticsearch.client.asInternalUser;
-          let esStore = new ElasticsearchStore(
-            esClient,
-            KNOWLEDGE_BASE_INDEX_PATTERN,
-            logger,
-            telemetry
-          );
-
-          // Code path for when `assistantKnowledgeBaseByDefault` FF is enabled, only need an esStore w/ kbDataClient
-          if (enableKnowledgeBaseByDefault) {
-            const knowledgeBaseDataClient =
-              await assistantContext.getAIAssistantKnowledgeBaseDataClient(false);
-            if (!knowledgeBaseDataClient) {
-              return response.custom({ body: { success: false }, statusCode: 500 });
-            }
-            esStore = new ElasticsearchStore(
-              esClient,
-              knowledgeBaseDataClient.indexTemplateAndPattern.alias,
-              logger,
-              telemetry,
-              'elserId', // Not needed for delete ops
-              kbResource,
-              knowledgeBaseDataClient
-            );
+          const knowledgeBaseDataClient =
+            await assistantContext.getAIAssistantKnowledgeBaseDataClient({
+              v2KnowledgeBaseEnabled,
+            });
+          if (!knowledgeBaseDataClient) {
+            return response.custom({ body: { success: false }, statusCode: 500 });
           }
 
-          if (kbResource === ESQL_RESOURCE) {
-            // For now, tearing down the Knowledge Base is fine, but will want to support removing specific assets based
-            // on resource name or document query
-            // Implement deleteDocuments(query: string) in ElasticsearchStore
-            // const success = await esStore.deleteDocuments();
-            // return const body: DeleteKnowledgeBaseResponse = { success };
-          }
-
-          // Delete index and pipeline
-          const indexDeleted = await esStore.deleteIndex();
-          const pipelineDeleted = await esStore.deletePipeline();
-
+          // TODO: This delete API is likely not needed and can be replaced by the new `entries` API
           const body: DeleteKnowledgeBaseResponse = {
-            success: indexDeleted && pipelineDeleted,
+            success: false,
           };
 
           return response.ok({ body });

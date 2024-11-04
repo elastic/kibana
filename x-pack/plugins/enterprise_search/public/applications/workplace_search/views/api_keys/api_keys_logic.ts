@@ -90,20 +90,25 @@ export const ApiKeysLogic = kea<MakeLogicType<ApiKeysLogicValues, ApiKeysLogicAc
     apiTokens: [
       [],
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setApiKeysData: (_, { apiTokens }) => apiTokens,
+        // @ts-expect-error upgrade typescript v5.1.6
         onApiTokenCreateSuccess: (apiTokens, apiToken) => [...apiTokens, apiToken],
       },
     ],
     meta: [
       DEFAULT_META,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setApiKeysData: (_, { meta }) => meta,
+        // @ts-expect-error upgrade typescript v5.1.6
         onPaginate: (state, { newPageIndex }) => updateMetaPageIndex(state, newPageIndex),
       },
     ],
     nameInputBlurred: [
       false,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setNameInputBlurred: (_, nameInputBlurred) => nameInputBlurred,
       },
     ],
@@ -112,12 +117,14 @@ export const ApiKeysLogic = kea<MakeLogicType<ApiKeysLogicValues, ApiKeysLogicAc
       {
         onApiTokenCreateSuccess: () => defaultApiToken,
         hideApiKeyForm: () => defaultApiToken,
+        // @ts-expect-error upgrade typescript v5.1.6
         setApiKeyName: (activeApiToken, name) => ({ ...activeApiToken, name: formatApiName(name) }),
       },
     ],
     activeApiTokenRawName: [
       '',
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setApiKeyName: (_, activeApiTokenRawName) => activeApiTokenRawName,
         hideApiKeyForm: () => '',
         onApiTokenCreateSuccess: () => '',
@@ -141,6 +148,7 @@ export const ApiKeysLogic = kea<MakeLogicType<ApiKeysLogicValues, ApiKeysLogicAc
     apiTokenNameToDelete: [
       '',
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         stageTokenNameForDeletion: (_, tokenName) => tokenName,
         hideDeleteModal: () => '',
       },
@@ -148,6 +156,7 @@ export const ApiKeysLogic = kea<MakeLogicType<ApiKeysLogicValues, ApiKeysLogicAc
     formErrors: [
       [],
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         onApiTokenError: (_, formErrors) => formErrors,
         onApiTokenCreateSuccess: () => [],
         showApiKeyForm: () => [],

@@ -70,7 +70,7 @@ export class TableSource extends AbstractVectorSource implements ITermJoinSource
       let propKey: string | number | undefined;
       const props: { [key: string]: string | number } = {};
       for (const key in row) {
-        if (row.hasOwnProperty(key)) {
+        if (Object.hasOwn(row, key)) {
           if (key === this._descriptor.term && row[key]) {
             propKey = row[key];
           }
@@ -200,7 +200,7 @@ export class TableSource extends AbstractVectorSource implements ITermJoinSource
   async getTooltipProperties(properties: GeoJsonProperties): Promise<ITooltipProperty[]> {
     const tooltipProperties: ITooltipProperty[] = [];
     for (const key in properties) {
-      if (properties.hasOwnProperty(key)) {
+      if (Object.hasOwn(properties, key)) {
         const field = this.getFieldByName(key);
         if (field) {
           tooltipProperties.push(new TooltipProperty(key, await field.getLabel(), properties[key]));

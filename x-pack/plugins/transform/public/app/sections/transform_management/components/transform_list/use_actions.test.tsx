@@ -9,7 +9,6 @@ import React, { type FC, type PropsWithChildren } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { renderHook } from '@testing-library/react-hooks';
 
-jest.mock('../../../../../shared_imports');
 jest.mock('../../../../app_dependencies');
 
 import { useActions } from './use_actions';

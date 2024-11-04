@@ -14,26 +14,6 @@ export const OPEN_SESSION_VIEW = i18n.translate(
   }
 );
 
-export const NOTES_DISABLE_TOOLTIP = i18n.translate(
-  'xpack.securitySolution.timeline.body.notes.disableEventTooltip',
-  {
-    defaultMessage: 'Notes may not be added here while editing a template timeline',
-  }
-);
-
-export const NOTE_COUNT_TOOLTIP = (notesCount: number) =>
-  i18n.translate('xpack.securitySolution.notes.noteCountTooltip', {
-    defaultMessage: '{notesCount} {notesCount, plural, one { note } other { notes }}',
-    values: { notesCount },
-  });
-
-export const NOTES_TOOLTIP = i18n.translate(
-  'xpack.securitySolution.timeline.body.notes.addNoteTooltip',
-  {
-    defaultMessage: 'Add note',
-  }
-);
-
 export const SORT_FIELDS = i18n.translate('xpack.securitySolution.timeline.sortFieldsButton', {
   defaultMessage: 'Sort fields',
 });

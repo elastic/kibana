@@ -7,7 +7,7 @@
 
 import { IRouter } from '@kbn/core/server';
 
-import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import { IndexManagementPluginSetup } from '@kbn/index-management-plugin/server';
 import { License } from './services';

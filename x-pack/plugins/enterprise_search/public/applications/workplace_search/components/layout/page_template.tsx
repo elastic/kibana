@@ -7,7 +7,11 @@
 
 import React from 'react';
 
+import { useValues } from 'kea';
+import useObservable from 'react-use/lib/useObservable';
+
 import { WORKPLACE_SEARCH_PLUGIN } from '../../../../../common/constants';
+import { KibanaLogic } from '../../../shared/kibana';
 import { SetWorkplaceSearchChrome } from '../../../shared/kibana_chrome';
 import { EnterpriseSearchPageTemplateWrapper, PageTemplateProps } from '../../../shared/layout';
 import { SendWorkplaceSearchTelemetry } from '../../../shared/telemetry';
@@ -20,13 +24,28 @@ export const WorkplaceSearchPageTemplate: React.FC<PageTemplateProps> = ({
   pageViewTelemetry,
   ...pageTemplateProps
 }) => {
+  const navItems = useWorkplaceSearchNav();
+  const { getChromeStyle$, updateSideNavDefinition } = useValues(KibanaLogic);
+  const chromeStyle = useObservable(getChromeStyle$(), 'classic');
+
+  React.useEffect(() => {
+    if (chromeStyle === 'classic') return;
+    // We update the new side nav definition with the selected app items
+    updateSideNavDefinition({ workplaceSearch: navItems?.[0]?.items });
+  }, [chromeStyle, navItems, updateSideNavDefinition]);
+  React.useEffect(() => {
+    return () => {
+      updateSideNavDefinition({ workplaceSearch: undefined });
+    };
+  }, [updateSideNavDefinition]);
+
   return (
     <EnterpriseSearchPageTemplateWrapper
       restrictWidth
       {...pageTemplateProps}
       solutionNav={{
+        items: chromeStyle === 'classic' ? navItems : undefined,
         name: WORKPLACE_SEARCH_PLUGIN.NAME,
-        items: useWorkplaceSearchNav(),
       }}
       setPageChrome={pageChrome && <SetWorkplaceSearchChrome trail={pageChrome} />}
       useEndpointHeaderActions={false}

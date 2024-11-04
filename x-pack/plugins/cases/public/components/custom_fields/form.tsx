@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import React, { useEffect, useMemo } from 'react';
 import { v4 as uuidv4 } from 'uuid';
@@ -15,14 +14,10 @@ import { FormFields } from './form_fields';
 import type { CustomFieldConfiguration } from '../../../common/types/domain';
 import { CustomFieldTypes } from '../../../common/types/domain';
 import { customFieldSerializer } from './utils';
-
-export interface CustomFieldFormState {
-  isValid: boolean | undefined;
-  submit: FormHook<CustomFieldConfiguration>['submit'];
-}
+import type { FormState } from '../configure_cases/flyout';
 
 interface Props {
-  onChange: (state: CustomFieldFormState) => void;
+  onChange: (state: FormState<CustomFieldConfiguration>) => void;
   initialValue: CustomFieldConfiguration | null;
 }
 

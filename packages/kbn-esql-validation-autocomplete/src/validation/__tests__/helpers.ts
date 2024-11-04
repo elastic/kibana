@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { EditorError, ESQLMessage, getAstAndSyntaxErrors } from '@kbn/esql-ast';
@@ -31,7 +32,7 @@ export const setup = async () => {
     return await validateQuery(query, getAstAndSyntaxErrors, opts, cb);
   };
 
-  const assertErrors = (errors: unknown[], expectedErrors: string[]) => {
+  const assertErrors = (errors: unknown[], expectedErrors: string[], query?: string) => {
     const errorMessages: string[] = [];
     for (const error of errors) {
       if (error && typeof error === 'object') {
@@ -46,7 +47,16 @@ export const setup = async () => {
         errorMessages.push(String(error));
       }
     }
-    expect(errorMessages.sort()).toStrictEqual(expectedErrors.sort());
+
+    try {
+      expect(errorMessages.sort()).toStrictEqual(expectedErrors.sort());
+    } catch (error) {
+      throw Error(`${query}\n
+      Received:
+      '${errorMessages.sort()}'
+      Expected:
+      ${expectedErrors.sort()}`);
+    }
   };
 
   const expectErrors = async (
@@ -57,9 +67,9 @@ export const setup = async () => {
     cb: ESQLCallbacks = callbacks
   ) => {
     const { errors, warnings } = await validateQuery(query, getAstAndSyntaxErrors, opts, cb);
-    assertErrors(errors, expectedErrors);
+    assertErrors(errors, expectedErrors, query);
     if (expectedWarnings) {
-      assertErrors(warnings, expectedWarnings);
+      assertErrors(warnings, expectedWarnings, query);
     }
   };
 

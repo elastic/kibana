@@ -5,32 +5,31 @@
  * 2.0.
  */
 
-import { IngestPutPipelineRequest } from '@elastic/elasticsearch/lib/api/types';
-
 export const knowledgeBaseIngestPipeline = ({
   id,
   modelId,
+  v2KnowledgeBaseEnabled,
 }: {
   id: string;
   modelId: string;
-}): IngestPutPipelineRequest => ({
+  v2KnowledgeBaseEnabled: boolean;
+}) => ({
   id,
   description: 'Embedding pipeline for Elastic AI Assistant ELSER Knowledge Base',
-  processors: [
-    {
-      inference: {
-        model_id: modelId,
-        target_field: 'vector',
-        field_map: {
-          text: 'text_field',
-        },
-        inference_config: {
-          // @ts-expect-error
-          text_expansion: {
-            results_field: 'tokens',
+  processors: !v2KnowledgeBaseEnabled
+    ? [
+        {
+          inference: {
+            if: 'ctx?.text != null',
+            model_id: modelId,
+            input_output: [
+              {
+                input_field: 'text',
+                output_field: 'vector.tokens',
+              },
+            ],
           },
         },
-      },
-    },
-  ],
+      ]
+    : [],
 });

@@ -1,8 +1,6 @@
 post:
-  summary: Create a data view in the default space
-  operationId: createDataViewDefault
-  description: >
-    This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+  summary: Create a data view
+  operationId: createDataViewDefaultw
   tags:
     - data views
   parameters:

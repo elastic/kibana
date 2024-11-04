@@ -8,9 +8,9 @@
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/common';
 import { ManagementAppLocatorParams } from '@kbn/management-plugin/common/locator';
 import { LocatorPublic } from '@kbn/share-plugin/common';
+import { DataQualityLocatorParams } from '@kbn/deeplinks-observability';
 import { datasetQualityUrlSchemaV1, DATA_QUALITY_URL_STATE_KEY } from '../url_schema';
 import { deepCompactObject } from '../utils/deep_compact_object';
-import { DataQualityLocatorParams } from './types';
 
 interface LocatorPathConstructionParams {
   locatorParams: DataQualityLocatorParams;

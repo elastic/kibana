@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { renderHook } from '@testing-library/react-hooks';
-import type { BrowserField } from '@kbn/timelines-plugin/common';
+import type { FieldSpec } from '@kbn/data-plugin/common';
 
 import type { GetAggregatableFields, UseInspectButtonParams } from './hooks';
 import { getAggregatableFields, useInspectButton, useStackByFields } from './hooks';
@@ -57,7 +57,7 @@ describe('getAggregatableFields', () => {
 
       expect(
         getAggregatableFields(
-          { [field]: mockBrowserFields?.destination?.fields?.[field] as Partial<BrowserField> },
+          { [field]: mockBrowserFields?.destination?.fields?.[field] as Partial<FieldSpec> },
           useLensCompatibleFields
         )
       ).toHaveLength(1);

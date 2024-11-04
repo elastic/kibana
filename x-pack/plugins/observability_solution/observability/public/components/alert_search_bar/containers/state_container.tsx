@@ -12,15 +12,7 @@ import {
 } from '@kbn/kibana-utils-plugin/public';
 import { AlertStatus } from '../../../../common/typings';
 import { ALL_ALERTS } from '../constants';
-
-interface AlertSearchBarContainerState {
-  rangeFrom: string;
-  rangeTo: string;
-  kuery: string;
-  status: AlertStatus;
-  filters: Filter[];
-  savedQueryId?: string;
-}
+import { AlertSearchBarContainerState } from '../types';
 
 interface AlertSearchBarStateTransitions {
   setRangeFrom: (
@@ -43,7 +35,7 @@ interface AlertSearchBarStateTransitions {
   ) => (savedQueryId?: string) => AlertSearchBarContainerState;
 }
 
-const defaultState: AlertSearchBarContainerState = {
+const DEFAULT_STATE: AlertSearchBarContainerState = {
   rangeFrom: 'now-24h',
   rangeTo: 'now',
   kuery: '',
@@ -60,13 +52,13 @@ const transitions: AlertSearchBarStateTransitions = {
   setSavedQueryId: (state) => (savedQueryId) => ({ ...state, savedQueryId }),
 };
 
-const alertSearchBarStateContainer = createStateContainer(defaultState, transitions);
+const alertSearchBarStateContainer = createStateContainer(DEFAULT_STATE, transitions);
 
 type AlertSearchBarStateContainer = typeof alertSearchBarStateContainer;
 
 const { Provider, useContainer } = createStateContainerReactHelpers<AlertSearchBarStateContainer>();
 
-export { Provider, alertSearchBarStateContainer, useContainer, defaultState };
+export { Provider, alertSearchBarStateContainer, useContainer, DEFAULT_STATE };
 export type {
   AlertSearchBarStateContainer,
   AlertSearchBarContainerState,

@@ -24,6 +24,10 @@ export const CORRELATIONS_ANCESTRY_SECTION_INVESTIGATE_IN_TIMELINE_BUTTON =
     'securitySolutionFlyoutCorrelationsDetailsAlertsByAncestrySectionInvestigateInTimeline'
   );
 
+export const CORRELATIONS_ANCESTRY_SECTION_PREVIEW_BUTTON = getDataTestSubjectSelector(
+  'securitySolutionFlyoutCorrelationsDetailsAlertsByAncestrySectionAlertPreviewButton'
+);
+
 export const CORRELATIONS_SOURCE_SECTION_TITLE = getDataTestSubjectSelector(
   'securitySolutionFlyoutCorrelationsDetailsAlertsBySourceSectionTitleText'
 );
@@ -37,6 +41,10 @@ export const CORRELATIONS_SOURCE_SECTION_INVESTIGATE_IN_TIMELINE_BUTTON =
     'securitySolutionFlyoutCorrelationsDetailsAlertsBySourceSectionInvestigateInTimeline'
   );
 
+export const CORRELATIONS_SOURCE_SECTION_PREVIEW_BUTTON = getDataTestSubjectSelector(
+  'securitySolutionFlyoutCorrelationsDetailsAlertsBySourceSectionAlertPreviewButton'
+);
+
 export const CORRELATIONS_SESSION_SECTION_TITLE = getDataTestSubjectSelector(
   'securitySolutionFlyoutCorrelationsDetailsAlertsBySessionSectionTitleText'
 );
@@ -49,6 +57,10 @@ export const CORRELATIONS_SESSION_SECTION_INVESTIGATE_IN_TIMELINE_BUTTON =
   getDataTestSubjectSelector(
     'securitySolutionFlyoutCorrelationsDetailsAlertsBySessionSectionInvestigateInTimeline'
   );
+
+export const CORRELATIONS_SESSION_SECTION_PREVIEW_BUTTON = getDataTestSubjectSelector(
+  'securitySolutionFlyoutCorrelationsDetailsAlertsBySessionSectionAlertPreviewButton'
+);
 
 export const CORRELATIONS_CASES_SECTION_TITLE = getDataTestSubjectSelector(
   'securitySolutionFlyoutCorrelationsDetailsCasesSectionTitleText'

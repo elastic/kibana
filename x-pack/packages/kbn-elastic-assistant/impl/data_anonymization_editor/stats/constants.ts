@@ -6,4 +6,3 @@
  */
 
 export const TITLE_SIZE = 'xs';
-export const STAT_TITLE_SIZE = 'm';

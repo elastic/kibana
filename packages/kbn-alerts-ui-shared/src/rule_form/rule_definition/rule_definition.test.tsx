@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -16,9 +17,38 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 
 import { RuleDefinition } from './rule_definition';
-import { RuleTypeModel } from '../../common';
-import { RuleType } from '@kbn/triggers-actions-ui-types';
-import { ALERT_DELAY_TITLE } from '../translations';
+import { RuleType } from '@kbn/alerting-types';
+import { RuleTypeModel } from '../../common/types';
+import { RuleSettingsFlappingFormProps } from '../../rule_settings/rule_settings_flapping_form';
+import { ALERT_FLAPPING_DETECTION_TITLE } from '../translations';
+import userEvent from '@testing-library/user-event';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+
+jest.mock('../hooks', () => ({
+  useRuleFormState: jest.fn(),
+  useRuleFormDispatch: jest.fn(),
+}));
+
+jest.mock('../../common/constants/rule_flapping', () => ({
+  IS_RULE_SPECIFIC_FLAPPING_ENABLED: true,
+}));
+
+jest.mock('../../rule_settings/rule_settings_flapping_form', () => ({
+  RuleSettingsFlappingForm: (props: RuleSettingsFlappingFormProps) => (
+    <div data-test-subj="ruleSettingsFlappingForm">
+      <button
+        onClick={() =>
+          props.onFlappingChange({
+            lookBackWindow: 15,
+            statusChangeThreshold: 15,
+          })
+        }
+      >
+        onFlappingChange
+      </button>
+    </div>
+  ),
+}));
 
 const ruleType = {
   id: '.es-query',
@@ -38,8 +68,10 @@ const ruleType = {
   recoveryActionGroup: 'recovered',
   producer: 'logs',
   authorizedConsumers: {
-    alerting: { read: true, all: true },
+    alerts: { read: true, all: true },
     test: { read: true, all: true },
+    stackAlerts: { read: true, all: true },
+    logs: { read: true, all: true },
   },
   actionVariables: {
     params: [],
@@ -60,160 +92,387 @@ const ruleModel: RuleTypeModel = {
   requiresAppContext: false,
 };
 
-const requiredPlugins = {
+const plugins = {
   charts: {} as ChartsPluginSetup,
   data: {} as DataPublicPluginStart,
   dataViews: {} as DataViewsPublicPluginStart,
   unifiedSearch: {} as UnifiedSearchPublicPluginStart,
   docLinks: {} as DocLinksStart,
+  application: {
+    capabilities: {
+      rulesSettings: {
+        readFlappingSettingsUI: true,
+        writeFlappingSettingsUI: true,
+      },
+    },
+  },
 };
+
+const { useRuleFormState, useRuleFormDispatch } = jest.requireMock('../hooks');
 
 const mockOnChange = jest.fn();
 
 describe('Rule Definition', () => {
+  beforeEach(() => {
+    useRuleFormDispatch.mockReturnValue(mockOnChange);
+  });
+
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
   test('Renders correctly', () => {
-    render(
-      <RuleDefinition
-        requiredPlugins={requiredPlugins}
-        formValues={{
-          id: 'test-id',
-          params: {},
-          schedule: {
-            interval: '1m',
-          },
-          alertDelay: {
-            active: 5,
-          },
-          notifyWhen: null,
-          consumer: 'stackAlerts',
-        }}
-        selectedRuleType={ruleType as RuleType}
-        selectedRuleTypeModel={ruleModel as RuleTypeModel}
-        canShowConsumerSelection
-        authorizedConsumers={['logs', 'stackAlerts']}
-        onChange={mockOnChange}
-      />
-    );
+    useRuleFormState.mockReturnValue({
+      plugins,
+      formData: {
+        id: 'test-id',
+        params: {},
+        schedule: {
+          interval: '1m',
+        },
+        alertDelay: {
+          active: 5,
+        },
+        notifyWhen: null,
+        consumer: 'alerts',
+        ruleTypeId: '.es-query',
+      },
+      selectedRuleType: ruleType,
+      selectedRuleTypeModel: ruleModel,
+      canShowConsumerSelection: true,
+      validConsumers: ['logs', 'stackAlerts'],
+      availableRuleTypes: [ruleType],
+    });
+
+    render(<RuleDefinition />);
     expect(screen.getByTestId('ruleDefinition')).toBeInTheDocument();
     expect(screen.getByTestId('ruleSchedule')).toBeInTheDocument();
     expect(screen.getByTestId('ruleConsumerSelection')).toBeInTheDocument();
     expect(screen.getByTestId('ruleDefinitionHeaderDocsLink')).toBeInTheDocument();
+    expect(screen.getByTestId('alertDelay')).not.toBeVisible();
 
-    expect(screen.getByText(ALERT_DELAY_TITLE)).not.toBeVisible();
     expect(screen.getByText('Expression')).toBeInTheDocument();
   });
 
   test('Hides doc link if not provided', () => {
-    render(
-      <RuleDefinition
-        requiredPlugins={requiredPlugins}
-        formValues={{
-          id: 'test-id',
-          params: {},
-          schedule: {
-            interval: '1m',
-          },
-          alertDelay: {
-            active: 5,
-          },
-          notifyWhen: null,
-          consumer: 'stackAlerts',
-        }}
-        selectedRuleType={ruleType}
-        selectedRuleTypeModel={{
-          ...ruleModel,
-          documentationUrl: null,
-        }}
-        canShowConsumerSelection
-        authorizedConsumers={['logs', 'stackAlerts']}
-        onChange={mockOnChange}
-      />
-    );
+    useRuleFormState.mockReturnValue({
+      plugins,
+      formData: {
+        id: 'test-id',
+        params: {},
+        schedule: {
+          interval: '1m',
+        },
+        alertDelay: {
+          active: 5,
+        },
+        notifyWhen: null,
+        consumer: 'alerts',
+        ruleTypeId: '.es-query',
+      },
+      selectedRuleType: ruleType,
+      selectedRuleTypeModel: {
+        ...ruleModel,
+        documentationUrl: null,
+      },
+      availableRuleTypes: [ruleType],
+      validConsumers: ['logs', 'stackAlerts'],
+    });
+    render(<RuleDefinition />);
 
     expect(screen.queryByTestId('ruleDefinitionHeaderDocsLink')).not.toBeInTheDocument();
   });
 
   test('Hides consumer selection if canShowConsumerSelection is false', () => {
-    render(
-      <RuleDefinition
-        requiredPlugins={requiredPlugins}
-        formValues={{
-          id: 'test-id',
-          params: {},
-          schedule: {
-            interval: '1m',
-          },
-          alertDelay: {
-            active: 5,
-          },
-          notifyWhen: null,
-          consumer: 'stackAlerts',
-        }}
-        selectedRuleType={ruleType}
-        selectedRuleTypeModel={ruleModel}
-        authorizedConsumers={['logs', 'stackAlerts']}
-        onChange={mockOnChange}
-      />
-    );
+    useRuleFormState.mockReturnValue({
+      plugins,
+      formData: {
+        id: 'test-id',
+        params: {},
+        schedule: {
+          interval: '1m',
+        },
+        alertDelay: {
+          active: 5,
+        },
+        notifyWhen: null,
+        consumer: 'stackAlerts',
+        ruleTypeId: '.es-query',
+      },
+      selectedRuleType: ruleType,
+      selectedRuleTypeModel: ruleModel,
+    });
+
+    render(<RuleDefinition />);
+
+    expect(screen.queryByTestId('ruleConsumerSelection')).not.toBeInTheDocument();
+  });
+
+  test('Hides consumer selection if there is only 1 consumer to select', () => {
+    useRuleFormState.mockReturnValue({
+      plugins,
+      formData: {
+        id: 'test-id',
+        params: {},
+        schedule: {
+          interval: '1m',
+        },
+        alertDelay: {
+          active: 5,
+        },
+        notifyWhen: null,
+        consumer: 'stackAlerts',
+        ruleTypeId: '.es-query',
+      },
+      selectedRuleType: ruleType,
+      selectedRuleTypeModel: ruleModel,
+      availableRuleTypes: [ruleType],
+      canShowConsumerSelect: true,
+      validConsumers: ['logs'],
+    });
+
+    render(<RuleDefinition />);
+
+    expect(screen.queryByTestId('ruleConsumerSelection')).not.toBeInTheDocument();
+  });
+
+  test('Hides consumer selection if valid consumers contain observability', () => {
+    useRuleFormState.mockReturnValue({
+      plugins,
+      formData: {
+        id: 'test-id',
+        params: {},
+        schedule: {
+          interval: '1m',
+        },
+        alertDelay: {
+          active: 5,
+        },
+        notifyWhen: null,
+        consumer: 'stackAlerts',
+        ruleTypeId: '.es-query',
+      },
+      selectedRuleType: ruleType,
+      selectedRuleTypeModel: ruleModel,
+      availableRuleTypes: [ruleType],
+      canShowConsumerSelect: true,
+      validConsumers: ['logs', 'observability'],
+    });
+
+    render(<RuleDefinition />);
 
     expect(screen.queryByTestId('ruleConsumerSelection')).not.toBeInTheDocument();
   });
 
   test('Can toggle advanced options', async () => {
-    render(
-      <RuleDefinition
-        requiredPlugins={requiredPlugins}
-        formValues={{
-          id: 'test-id',
-          params: {},
-          schedule: {
-            interval: '1m',
-          },
-          alertDelay: {
-            active: 5,
-          },
-          notifyWhen: null,
-          consumer: 'stackAlerts',
-        }}
-        selectedRuleType={ruleType}
-        selectedRuleTypeModel={ruleModel}
-        authorizedConsumers={['logs', 'stackAlerts']}
-        onChange={mockOnChange}
-      />
-    );
+    useRuleFormState.mockReturnValue({
+      plugins,
+      formData: {
+        id: 'test-id',
+        params: {},
+        schedule: {
+          interval: '1m',
+        },
+        alertDelay: {
+          active: 5,
+        },
+        notifyWhen: null,
+        consumer: 'stackAlerts',
+        ruleTypeId: '.es-query',
+      },
+      selectedRuleType: ruleType,
+      selectedRuleTypeModel: ruleModel,
+      availableRuleTypes: [ruleType],
+    });
+
+    render(<RuleDefinition />);
 
     fireEvent.click(screen.getByTestId('advancedOptionsAccordionButton'));
-    expect(screen.getByText(ALERT_DELAY_TITLE)).toBeVisible();
+    expect(screen.getByTestId('alertDelay')).toBeVisible();
   });
 
   test('Calls onChange when inputs are modified', () => {
-    render(
-      <RuleDefinition
-        requiredPlugins={requiredPlugins}
-        formValues={{
-          id: 'test-id',
-          params: {},
-          schedule: {
-            interval: '1m',
-          },
-          alertDelay: {
-            active: 5,
-          },
-          notifyWhen: null,
-          consumer: 'stackAlerts',
-        }}
-        selectedRuleType={ruleType}
-        selectedRuleTypeModel={ruleModel}
-        authorizedConsumers={['logs', 'stackAlerts']}
-        onChange={mockOnChange}
-      />
-    );
+    useRuleFormState.mockReturnValue({
+      plugins,
+      formData: {
+        id: 'test-id',
+        params: {},
+        schedule: {
+          interval: '1m',
+        },
+        alertDelay: {
+          active: 5,
+        },
+        notifyWhen: null,
+        consumer: 'stackAlerts',
+        ruleTypeId: '.es-query',
+      },
+      selectedRuleType: ruleType,
+      selectedRuleTypeModel: ruleModel,
+      availableRuleTypes: [ruleType],
+    });
+
+    render(<RuleDefinition />);
 
     fireEvent.change(screen.getByTestId('ruleScheduleNumberInput'), {
       target: {
         value: '10',
       },
     });
-    expect(mockOnChange).toHaveBeenCalledWith('interval', '10m');
+    expect(mockOnChange).toHaveBeenCalledWith({
+      type: 'setSchedule',
+      payload: {
+        interval: '10m',
+      },
+    });
+  });
+
+  test('should render rule flapping settings correctly', () => {
+    useRuleFormState.mockReturnValue({
+      plugins,
+      formData: {
+        id: 'test-id',
+        params: {},
+        schedule: {
+          interval: '1m',
+        },
+        alertDelay: {
+          active: 5,
+        },
+        notifyWhen: null,
+        consumer: 'stackAlerts',
+        ruleTypeId: '.es-query',
+      },
+      selectedRuleType: ruleType,
+      selectedRuleTypeModel: ruleModel,
+      availableRuleTypes: [ruleType],
+      canShowConsumerSelection: true,
+      validConsumers: ['logs', 'stackAlerts'],
+    });
+
+    render(<RuleDefinition />);
+
+    expect(screen.getByText(ALERT_FLAPPING_DETECTION_TITLE)).toBeInTheDocument();
+    expect(screen.getByTestId('ruleSettingsFlappingForm')).toBeInTheDocument();
+  });
+
+  test('should hide flapping if the user does not have read access', async () => {
+    useRuleFormState.mockReturnValue({
+      plugins: {
+        charts: {} as ChartsPluginSetup,
+        data: {} as DataPublicPluginStart,
+        dataViews: {} as DataViewsPublicPluginStart,
+        unifiedSearch: {} as UnifiedSearchPublicPluginStart,
+        docLinks: {} as DocLinksStart,
+        application: {
+          capabilities: {
+            rulesSettings: {
+              readFlappingSettingsUI: false,
+              writeFlappingSettingsUI: true,
+            },
+          },
+        },
+      },
+      formData: {
+        id: 'test-id',
+        params: {},
+        schedule: {
+          interval: '1m',
+        },
+        alertDelay: {
+          active: 5,
+        },
+        notifyWhen: null,
+        consumer: 'stackAlerts',
+        ruleTypeId: '.es-query',
+      },
+      selectedRuleType: ruleType,
+      selectedRuleTypeModel: ruleModel,
+      availableRuleTypes: [ruleType],
+      canShowConsumerSelection: true,
+      validConsumers: ['logs', 'stackAlerts'],
+    });
+
+    render(<RuleDefinition />);
+
+    expect(screen.queryByTestId('ruleDefinitionFlappingFormGroup')).not.toBeInTheDocument();
+  });
+
+  test('should allow flapping to be changed', async () => {
+    useRuleFormState.mockReturnValue({
+      plugins,
+      formData: {
+        id: 'test-id',
+        params: {},
+        schedule: {
+          interval: '1m',
+        },
+        alertDelay: {
+          active: 5,
+        },
+        notifyWhen: null,
+        consumer: 'stackAlerts',
+        ruleTypeId: '.es-query',
+      },
+      selectedRuleType: ruleType,
+      selectedRuleTypeModel: ruleModel,
+      availableRuleTypes: [ruleType],
+      canShowConsumerSelection: true,
+      validConsumers: ['logs', 'stackAlerts'],
+    });
+
+    render(<RuleDefinition />);
+
+    await userEvent.click(screen.getByText('onFlappingChange'));
+    expect(mockOnChange).toHaveBeenCalledWith({
+      payload: {
+        property: 'flapping',
+        value: {
+          lookBackWindow: 15,
+          statusChangeThreshold: 15,
+        },
+      },
+      type: 'setRuleProperty',
+    });
+  });
+
+  test('should open and close flapping popover when button icon is clicked', async () => {
+    useRuleFormState.mockReturnValue({
+      plugins,
+      formData: {
+        id: 'test-id',
+        params: {},
+        schedule: {
+          interval: '1m',
+        },
+        alertDelay: {
+          active: 5,
+        },
+        notifyWhen: null,
+        consumer: 'stackAlerts',
+        ruleTypeId: '.es-query',
+      },
+      selectedRuleType: ruleType,
+      selectedRuleTypeModel: ruleModel,
+      availableRuleTypes: [ruleType],
+      canShowConsumerSelection: true,
+      validConsumers: ['logs', 'stackAlerts'],
+    });
+
+    render(
+      <IntlProvider locale="en">
+        <RuleDefinition />
+      </IntlProvider>
+    );
+
+    expect(screen.queryByTestId('ruleSettingsFlappingTooltipTitle')).not.toBeInTheDocument();
+
+    await userEvent.click(screen.getByTestId('ruleSettingsFlappingTitleTooltipButton'));
+
+    expect(screen.queryByTestId('ruleSettingsFlappingTooltipTitle')).toBeInTheDocument();
+
+    await userEvent.click(screen.getByTestId('ruleSettingsFlappingTitleTooltipButton'));
+
+    expect(screen.queryByTestId('ruleSettingsFlappingTooltipTitle')).not.toBeVisible();
   });
 });

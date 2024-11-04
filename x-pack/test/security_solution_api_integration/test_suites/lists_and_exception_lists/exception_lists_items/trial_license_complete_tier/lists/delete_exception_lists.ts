@@ -24,7 +24,7 @@ export default ({ getService }: FtrProviderContext) => {
   const log = getService('log');
   const utils = getService('securitySolutionUtils');
 
-  describe('@ess @serverless delete_exception_lists', () => {
+  describe('@ess @serverless @serverlessQA delete_exception_lists', () => {
     describe('delete exception lists', () => {
       afterEach(async () => {
         await deleteAllExceptions(supertest, log);

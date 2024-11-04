@@ -5,8 +5,9 @@ info:
 paths:
   /internal/elastic_assistant/attack_discovery/{connectorId}:
     get:
-      operationId: AttackDiscoveryGet
       x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: AttackDiscoveryGet
       description: Get relevant data for performing an attack discovery like pending requests
       summary: Get relevant data for performing an attack discovery
       tags:

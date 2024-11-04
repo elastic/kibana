@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { readFileSync } from 'fs';
@@ -190,6 +191,7 @@ export const configSchema = schema.object({
     { defaultValue: [] }
   ),
   dnsCacheTtl: schema.duration({ defaultValue: 0, min: 0 }),
+  publicBaseUrl: schema.maybe(hostURISchema),
 });
 
 const deprecations: ConfigDeprecationProvider = () => [
@@ -358,6 +360,13 @@ export class ElasticsearchConfig implements IElasticsearchConfig {
   public readonly hosts: string[];
 
   /**
+   * Optional host that users can use to connect to your Elasticsearch cluster,
+   * this URL will be shown in Kibana as the Elasticsearch URL
+   */
+
+  public readonly publicBaseUrl?: string;
+
+  /**
    * List of Kibana client-side headers to send to Elasticsearch when request
    * scoped cluster client is used. If this is an empty array then *no* client-side
    * will be sent.
@@ -471,6 +480,7 @@ export class ElasticsearchConfig implements IElasticsearchConfig {
     this.skipStartupConnectionCheck = rawConfig.skipStartupConnectionCheck;
     this.apisToRedactInLogs = rawConfig.apisToRedactInLogs;
     this.dnsCacheTtl = rawConfig.dnsCacheTtl;
+    this.publicBaseUrl = rawConfig.publicBaseUrl;
 
     const { alwaysPresentCertificate, verificationMode } = rawConfig.ssl;
     const { key, keyPassphrase, certificate, certificateAuthorities } = readKeyAndCerts(rawConfig);

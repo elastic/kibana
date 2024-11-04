@@ -266,7 +266,7 @@ export function registerJobsMonitoringRuleType({
         throw new AlertsClientError();
       }
 
-      const fakeRequest = {} as KibanaRequest;
+      const fakeRequest = Object.create(null) as KibanaRequest;
       const { getTestsResults } = mlServicesProviders.jobsHealthServiceProvider(
         services.savedObjectsClient,
         fakeRequest,

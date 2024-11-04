@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { validate } from '@kbn/securitysolution-io-ts-utils';
+import { v4 as uuidv4 } from 'uuid';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { ENDPOINT_LIST_ID, ENDPOINT_LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
-
+import { buildRouteValidationWithZod, stringifyZodError } from '@kbn/zod-helpers';
 import {
-  CreateEndpointListItemRequestDecoded,
-  createEndpointListItemRequest,
-  createEndpointListItemResponse,
-} from '../../common/api';
+  CreateEndpointListItemRequestBody,
+  CreateEndpointListItemResponse,
+} from '@kbn/securitysolution-endpoint-exceptions-common/api';
+
 import type { ListsPluginRouter } from '../types';
 
-import { buildRouteValidation, buildSiemResponse, getExceptionListClient } from './utils';
+import { buildSiemResponse, getExceptionListClient } from './utils';
 import { validateExceptionListSize } from './validate';
 
 export const createEndpointListItemRoute = (router: ListsPluginRouter): void => {
@@ -32,10 +32,7 @@ export const createEndpointListItemRoute = (router: ListsPluginRouter): void => 
       {
         validate: {
           request: {
-            body: buildRouteValidation<
-              typeof createEndpointListItemRequest,
-              CreateEndpointListItemRequestDecoded
-            >(createEndpointListItemRequest),
+            body: buildRouteValidationWithZod(CreateEndpointListItemRequestBody),
           },
         },
         version: '2023-10-31',
@@ -50,7 +47,7 @@ export const createEndpointListItemRoute = (router: ListsPluginRouter): void => 
             comments,
             description,
             entries,
-            item_id: itemId,
+            item_id: itemId = uuidv4(),
             os_types: osTypes,
             type,
           } = request.body;
@@ -76,9 +73,10 @@ export const createEndpointListItemRoute = (router: ListsPluginRouter): void => 
               tags,
               type,
             });
-            const [validated, errors] = validate(createdList, createEndpointListItemResponse);
-            if (errors != null) {
-              return siemResponse.error({ body: errors, statusCode: 500 });
+
+            const { success, data, error } = CreateEndpointListItemResponse.safeParse(createdList);
+            if (success === false) {
+              return siemResponse.error({ body: stringifyZodError(error), statusCode: 500 });
             } else {
               const listSizeError = await validateExceptionListSize(
                 exceptionLists,
@@ -92,7 +90,7 @@ export const createEndpointListItemRoute = (router: ListsPluginRouter): void => 
                 });
                 return siemResponse.error(listSizeError);
               }
-              return response.ok({ body: validated ?? {} });
+              return response.ok({ body: data ?? {} });
             }
           }
         } catch (err) {

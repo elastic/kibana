@@ -75,11 +75,14 @@ export const getErrorToastText = (
 
 export const showNoAlertsPrompt = ({
   alertsContextCount,
+  connectorId,
   isLoading,
 }: {
   alertsContextCount: number | null;
+  connectorId: string | undefined;
   isLoading: boolean;
-}): boolean => !isLoading && alertsContextCount != null && alertsContextCount === 0;
+}): boolean =>
+  connectorId != null && !isLoading && alertsContextCount != null && alertsContextCount === 0;
 
 export const showWelcomePrompt = ({
   aiConnectorsCount,
@@ -90,12 +93,14 @@ export const showWelcomePrompt = ({
 }): boolean => !isLoading && aiConnectorsCount != null && aiConnectorsCount === 0;
 
 export const showEmptyPrompt = ({
+  aiConnectorsCount,
   attackDiscoveriesCount,
   isLoading,
 }: {
+  aiConnectorsCount: number | null;
   attackDiscoveriesCount: number;
   isLoading: boolean;
-}): boolean => !isLoading && attackDiscoveriesCount === 0;
+}): boolean => !isLoading && aiConnectorsCount != null && attackDiscoveriesCount === 0;
 
 export const showLoading = ({
   connectorId,
@@ -109,12 +114,26 @@ export const showLoading = ({
   loadingConnectorId: string | null;
 }): boolean => isLoading && (loadingConnectorId === connectorId || attackDiscoveriesCount === 0);
 
-export const showSummary = ({
+export const showSummary = (attackDiscoveriesCount: number) => attackDiscoveriesCount > 0;
+
+export const showFailurePrompt = ({
   connectorId,
-  attackDiscoveriesCount,
-  loadingConnectorId,
+  failureReason,
+  isLoading,
 }: {
   connectorId: string | undefined;
-  attackDiscoveriesCount: number;
-  loadingConnectorId: string | null;
-}): boolean => loadingConnectorId !== connectorId && attackDiscoveriesCount > 0;
+  failureReason: string | null;
+  isLoading: boolean;
+}): boolean => connectorId != null && !isLoading && failureReason != null;
+
+export const getSize = ({
+  defaultMaxAlerts,
+  localStorageAttackDiscoveryMaxAlerts,
+}: {
+  defaultMaxAlerts: number;
+  localStorageAttackDiscoveryMaxAlerts: string | undefined;
+}): number => {
+  const size = Number(localStorageAttackDiscoveryMaxAlerts);
+
+  return isNaN(size) || size <= 0 ? defaultMaxAlerts : size;
+};

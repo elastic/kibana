@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { Subject, Observable, firstValueFrom } from 'rxjs';
@@ -36,6 +37,7 @@ import type {
   CoreConfigUsageData,
   CoreIncrementCounterParams,
   CoreUsageCounter,
+  DeprecatedApiUsageFetcher,
 } from '@kbn/core-usage-data-server';
 import {
   CORE_USAGE_STATS_TYPE,
@@ -47,6 +49,7 @@ import {
   type SavedObjectsServiceStart,
 } from '@kbn/core-saved-objects-server';
 
+import { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
 import { isConfigured } from './is_configured';
 import { coreUsageStatsType } from './saved_objects';
 import { CoreUsageStatsClient } from './core_usage_stats_client';
@@ -87,6 +90,7 @@ export class CoreUsageDataService
   private coreUsageStatsClient?: CoreUsageStatsClient;
   private deprecatedConfigPaths: ChangedDeprecatedPaths = { set: [], unset: [] };
   private incrementUsageCounter: CoreIncrementUsageCounter = () => {}; // Initially set to noop
+  private deprecatedApiUsageFetcher: DeprecatedApiUsageFetcher = async () => []; // Initially set to noop
 
   constructor(core: CoreContext) {
     this.logger = core.logger.get('core-usage-stats-service');
@@ -512,12 +516,21 @@ export class CoreUsageDataService
       }
     };
 
+    const registerDeprecatedUsageFetch = (fetchFn: DeprecatedApiUsageFetcher) => {
+      this.deprecatedApiUsageFetcher = fetchFn;
+    };
+
+    const fetchDeprecatedUsageStats = (params: { soClient: ISavedObjectsRepository }) => {
+      return this.deprecatedApiUsageFetcher(params);
+    };
+
     this.coreUsageStatsClient = new CoreUsageStatsClient({
       debugLogger: (message: string) => this.logger.debug(message),
       basePath: http.basePath,
       repositoryPromise: internalRepositoryPromise,
       stop$: this.stop$,
       incrementUsageCounter,
+      fetchDeprecatedUsageStats,
     });
 
     const contract: InternalCoreUsageDataSetup = {
@@ -525,6 +538,7 @@ export class CoreUsageDataService
       getClient: () => this.coreUsageStatsClient!,
       registerUsageCounter,
       incrementUsageCounter,
+      registerDeprecatedUsageFetch,
     };
 
     return contract;

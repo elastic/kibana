@@ -51,7 +51,7 @@ describe('ImportDataModal', () => {
         title="title"
       />
     );
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.container).toMatchSnapshot();
   });
   test('should import file, cleanup the states and close Modal', async () => {
     const { queryByTestId } = render(
@@ -225,7 +225,7 @@ describe('ImportDataModal', () => {
     await waitFor(() => {
       fireEvent.click(queryByTestId('import-data-modal-button') as HTMLButtonElement);
     });
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.container).toMatchSnapshot();
     expect(queryByTestId('actionConnectorsWarningsCallOut')).not.toBeInTheDocument();
     expect(importWithWarning).toHaveBeenCalled();
     expect(closeModal).not.toHaveBeenCalled();
@@ -269,7 +269,7 @@ describe('ImportDataModal', () => {
     await waitFor(() => {
       fireEvent.click(queryByTestId('import-data-modal-button') as HTMLButtonElement);
     });
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.container).toMatchSnapshot();
     expect(queryByTestId('actionConnectorsWarningsCallOut')).toBeInTheDocument();
     expect(importWithWarning).toHaveBeenCalled();
     expect(importComplete).toHaveBeenCalled();

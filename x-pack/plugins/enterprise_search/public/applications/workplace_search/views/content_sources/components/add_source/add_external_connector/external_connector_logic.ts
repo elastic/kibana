@@ -86,20 +86,28 @@ export const ExternalConnectorLogic = kea<
     externalConnectorUrl: [
       '',
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         fetchExternalSourceSuccess: (
+          // @ts-expect-error upgrade typescript v5.1.6
           _,
+          // @ts-expect-error upgrade typescript v5.1.6
           { configuredFields: { external_connector_url: externalConnectorUrl } }
         ) => externalConnectorUrl || '',
+        // @ts-expect-error upgrade typescript v5.1.6
         setExternalConnectorUrl: (_, url) => url,
       },
     ],
     externalConnectorApiKey: [
       '',
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         fetchExternalSourceSuccess: (
+          // @ts-expect-error upgrade typescript v5.1.6
           _,
+          // @ts-expect-error upgrade typescript v5.1.6
           { configuredFields: { external_connector_api_key: externalConnectorApiKey } }
         ) => externalConnectorApiKey || '',
+        // @ts-expect-error upgrade typescript v5.1.6
         setExternalConnectorApiKey: (_, apiKey) => apiKey,
       },
     ],
@@ -107,12 +115,14 @@ export const ExternalConnectorLogic = kea<
       false,
       {
         fetchExternalSource: () => false,
+        // @ts-expect-error upgrade typescript v5.1.6
         setShowInsecureUrlCallout: (_, showCallout) => showCallout,
       },
     ],
     urlValid: [
       true,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setUrlValidation: (_, valid) => valid,
       },
     ],

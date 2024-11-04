@@ -12,7 +12,6 @@ import { useActions, useValues } from 'kea';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiTitle,
   EuiSpacer,
   EuiText,
@@ -37,11 +36,8 @@ export const ConvertConnector: React.FC = () => {
     <>
       {isModalVisible && <ConvertConnectorModal />}
       <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
-        <EuiFlexItem grow={false}>
-          <EuiIcon type="wrench" />
-        </EuiFlexItem>
         <EuiFlexItem>
-          <EuiTitle size="xs">
+          <EuiTitle size="s">
             <h3>
               {i18n.translate(
                 'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.convertConnector.title',
@@ -53,24 +49,31 @@ export const ConvertConnector: React.FC = () => {
           </EuiTitle>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="s" />
+      <EuiSpacer size="l" />
       <EuiText size="s">
         <FormattedMessage
           id="xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.convertConnector.description"
-          defaultMessage="Want to self-host this native connector? Convert it to a {link}, to be self-managed on your own infrastructure. You'll need to convert this connector if you want to customize the code using our Python framework."
+          defaultMessage="Want to self-host this connector? Convert it to a {link}, to be managed on your own infrastructure. You'll need to convert this connector if you want to customize the code using our Python framework."
           values={{
             link: (
-              <EuiLink href={docLinks.buildConnector} target="_blank">
+              <EuiLink
+                data-test-subj="enterpriseSearchConvertConnectorSelfManagedConnectorLink"
+                href={docLinks.buildConnector}
+                target="_blank"
+              >
                 {i18n.translate(
                   'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.convertConnector.linkTitle',
-                  { defaultMessage: 'connector client' }
+                  { defaultMessage: 'self-managed connector' }
                 )}
               </EuiLink>
             ),
           }}
         />
-        <EuiSpacer size="s" />
-        <EuiButton onClick={() => showModal()}>
+        <EuiSpacer size="l" />
+        <EuiButton
+          data-test-subj="enterpriseSearchConvertConnectorConvertConnectorButton"
+          onClick={() => showModal()}
+        >
           {i18n.translate(
             'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.convertConnector.buttonTitle',
             { defaultMessage: 'Convert connector' }

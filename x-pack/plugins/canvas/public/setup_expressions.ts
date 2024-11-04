@@ -21,7 +21,7 @@ export const setupExpressions = async ({
   coreSetup: CoreSetup;
   setupPlugins: CanvasSetupDeps;
 }) => {
-  const { expressions, bfetch } = setupPlugins;
+  const { expressions } = setupPlugins;
 
   const loadServerFunctionWrappers = async () => {
     if (!cached) {
@@ -29,7 +29,6 @@ export const setupExpressions = async ({
         const serverFunctionList = await coreSetup.http.get<any>(API_ROUTE_FUNCTIONS, {
           version: '1',
         });
-        const batchedFunction = bfetch.batchedFunction({ url: API_ROUTE_FUNCTIONS });
         const { serialize } = serializeProvider(expressions.getTypes());
 
         // For every sever-side function, register a client-side
@@ -43,7 +42,10 @@ export const setupExpressions = async ({
           const fn = () => ({
             ...serverFunctionList[functionName],
             fn: (input: any, args: any) => {
-              return batchedFunction({ functionName, args, context: serialize(input) });
+              return coreSetup.http.post(API_ROUTE_FUNCTIONS, {
+                body: JSON.stringify({ functionName, args, context: serialize(input) }),
+                version: '1',
+              });
             },
           });
 

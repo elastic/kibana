@@ -15,7 +15,13 @@ const PageTitleComponent: React.FC = () => {
   const { euiTheme } = useEuiTheme();
 
   return (
-    <EuiFlexGroup alignItems="center" data-test-subj="pageTitle" gutterSize="none">
+    <EuiFlexGroup
+      alignItems="center"
+      data-test-subj="pageTitle"
+      gutterSize="none"
+      responsive={false}
+      wrap={true}
+    >
       <EuiFlexItem grow={false}>
         <EuiTitle data-test-subj="attackDiscoveryPageTitle" size="l">
           <h1>{i18n.ATTACK_DISCOVERY_PAGE_TITLE}</h1>
@@ -23,14 +29,10 @@ const PageTitleComponent: React.FC = () => {
       </EuiFlexItem>
 
       <EuiFlexItem
-        grow={false}
         css={css`
-          vertical-align: middle;
-          padding-left: ${euiTheme.size.m};
-          * {
-            vertical-align: middle;
-          }
+          margin: ${euiTheme.size.m} 0 0 ${euiTheme.size.m};
         `}
+        grow={false}
       >
         <EuiBetaBadge
           iconType={'beaker'}
@@ -39,7 +41,10 @@ const PageTitleComponent: React.FC = () => {
           size="m"
           color="hollow"
           css={css`
-            margin-bottom: ${euiTheme.size.s};
+            .euiBetaBadge__icon {
+              position: relative;
+              top: 5px;
+            }
           `}
         />
       </EuiFlexItem>

@@ -22,7 +22,7 @@ export const awsEC2CpuUtilization = createTSVBModel(
         },
         {
           id: 'convert-to-percent',
-          script: 'params.avg / 100',
+          script: 'params.avg',
           type: 'calculation',
           variables: [
             {

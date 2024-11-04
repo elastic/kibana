@@ -23,7 +23,9 @@ const mockResult = jest.fn().mockResolvedValue({
 jest.mock('../graphs/categorization', () => {
   return {
     getCategorizationGraph: jest.fn().mockResolvedValue({
-      invoke: () => mockResult(),
+      withConfig: () => ({
+        invoke: () => mockResult(),
+      }),
     }),
   };
 });
@@ -41,6 +43,7 @@ describe('registerCategorizationRoute', () => {
       rawSamples: ['{"ei":0}'],
       currentPipeline: { processors: [{ script: { source: {} } }] },
       connectorId: 'testConnector',
+      samplesFormat: { name: 'json' },
     },
   });
 
@@ -63,5 +66,16 @@ describe('registerCategorizationRoute', () => {
     mockResult.mockResolvedValueOnce({});
     const response = await server.inject(req, requestContextMock.convertContext(context));
     expect(response.status).toEqual(400);
+  });
+
+  describe('when the integration assistant is not available', () => {
+    beforeEach(() => {
+      context.integrationAssistant.isAvailable.mockReturnValue(false);
+    });
+
+    it('returns a 404', async () => {
+      const response = await server.inject(req, requestContextMock.convertContext(context));
+      expect(response.status).toEqual(404);
+    });
   });
 });

@@ -9,7 +9,6 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { EcsError } from '@elastic/ecs';
 import moment from 'moment/moment';
-import { i18n } from '@kbn/i18n';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { FetchActionResponsesResult } from '../..';
 import type {
@@ -551,9 +550,7 @@ export const getAgentHostNamesWithIds = async ({
   metadataService: EndpointMetadataService;
 }): Promise<{ [id: string]: string }> => {
   // get host metadata docs with queried agents
-  const metaDataDocs = await metadataService.findHostMetadataForFleetAgents(esClient, [
-    ...new Set(agentIds),
-  ]);
+  const metaDataDocs = await metadataService.findHostMetadataForFleetAgents([...new Set(agentIds)]);
   // agent ids and names from metadata
   // map this into an object as {id1: name1, id2: name2} etc
   const agentsMetadataInfo = agentIds.reduce<{ [id: string]: string }>((acc, id) => {
@@ -611,12 +608,3 @@ export const createActionDetailsRecord = <T extends ActionDetails = ActionDetail
 export const getActionRequestExpiration = (): string => {
   return moment().add(2, 'weeks').toISOString();
 };
-
-export const ELASTIC_RESPONSE_ACTION_MESSAGE = (
-  username: string = 'system',
-  responseActionId: string = 'response-action-id' // I believe actionId exists always and there is a mismatch in types, but this default is just a safety net
-): string =>
-  i18n.translate('xpack.securitySolution.responseActions.comment.message', {
-    values: { username, responseActionId },
-    defaultMessage: `Action triggered from Elastic Security by user {username} for action {responseActionId}`,
-  });

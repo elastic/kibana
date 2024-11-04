@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -20,9 +21,8 @@ import type {
   DataViewsPublicPluginStart,
   FieldFormatsStart,
   DataViewField,
-  DataViewLazy,
 } from './shared_imports';
-import { DataView } from './shared_imports';
+import { DataView, DataViewLazy } from './shared_imports';
 import { createKibanaReactContext } from './shared_imports';
 import type { CloseEditor, Field, InternalFieldType, PluginStart } from './types';
 
@@ -130,13 +130,14 @@ export const getFieldEditorOpener =
         };
       };
 
-      const dataView =
-        dataViewLazyOrNot instanceof DataView
+      const dataViewLazy =
+        dataViewLazyOrNot instanceof DataViewLazy
           ? dataViewLazyOrNot
-          : await dataViews.toDataView(dataViewLazyOrNot);
+          : await dataViews.toDataViewLazy(dataViewLazyOrNot);
 
       const dataViewField = fieldNameToEdit
-        ? dataView.getFieldByName(fieldNameToEdit) || getRuntimeField(fieldNameToEdit)
+        ? (await dataViewLazy.getFieldByName(fieldNameToEdit, true)) ||
+          getRuntimeField(fieldNameToEdit)
         : undefined;
 
       if (fieldNameToEdit && !dataViewField) {
@@ -168,8 +169,8 @@ export const getFieldEditorOpener =
             customLabel: dataViewField.customLabel,
             customDescription: dataViewField.customDescription,
             popularity: dataViewField.count,
-            format: dataView.getFormatterForFieldNoDefault(fieldNameToEdit!)?.toJSON(),
-            ...dataView.getRuntimeField(fieldNameToEdit!)!,
+            format: dataViewLazy.getFormatterForFieldNoDefault(fieldNameToEdit!)?.toJSON(),
+            ...dataViewLazy.getRuntimeField(fieldNameToEdit!)!,
           };
         } else {
           // Concrete field
@@ -179,7 +180,7 @@ export const getFieldEditorOpener =
             customLabel: dataViewField.customLabel,
             customDescription: dataViewField.customDescription,
             popularity: dataViewField.count,
-            format: dataView.getFormatterForFieldNoDefault(fieldNameToEdit!)?.toJSON(),
+            format: dataViewLazy.getFormatterForFieldNoDefault(fieldNameToEdit!)?.toJSON(),
             parentName: dataViewField.spec.parentName,
           };
         }
@@ -195,7 +196,11 @@ export const getFieldEditorOpener =
               fieldToEdit={field}
               fieldToCreate={fieldToCreate}
               fieldTypeToProcess={fieldTypeToProcess}
-              dataView={dataView}
+              // currently using two dataView versions since API consumer is still potentially using legacy dataView
+              // this is what is used internally
+              dataView={dataViewLazy}
+              // this is what has been passed by API consumer
+              dataViewToUpdate={dataViewLazyOrNot}
               search={search}
               dataViews={dataViews}
               notifications={notifications}

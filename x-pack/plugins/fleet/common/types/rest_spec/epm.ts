@@ -7,6 +7,7 @@
 
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 
+import type { PackageSpecIcon } from '../models/package_spec';
 import type {
   AssetReference,
   CategorySummaryList,
@@ -19,6 +20,7 @@ import type {
   SimpleSOAssetType,
   AssetSOObject,
   InstallResultStatus,
+  PackageMetadata,
 } from '../models/epm';
 
 export interface GetCategoriesRequest {
@@ -60,6 +62,9 @@ export interface InstalledPackage {
     name: string;
     title: string;
   }>;
+  title?: string;
+  description?: string;
+  icons?: PackageSpecIcon[];
 }
 export interface GetInstalledPackagesResponse {
   items: InstalledPackage[];
@@ -97,6 +102,7 @@ export interface GetInfoRequest {
 
 export interface GetInfoResponse {
   item: PackageInfo;
+  metadata?: PackageMetadata;
   // deprecated in 8.0
   response?: PackageInfo;
 }
@@ -158,7 +164,7 @@ export interface InstallResult {
   status?: InstallResultStatus;
   error?: Error;
   installType: InstallType;
-  installSource: InstallSource;
+  installSource?: InstallSource;
 }
 
 export interface BulkInstallPackageInfo {
@@ -189,6 +195,9 @@ export interface DeletePackageRequest {
     pkgkey?: string;
     pkgName: string;
     pkgVersion: string;
+  };
+  query: {
+    force?: boolean;
   };
 }
 

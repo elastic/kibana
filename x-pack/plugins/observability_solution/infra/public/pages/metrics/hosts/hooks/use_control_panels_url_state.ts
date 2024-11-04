@@ -12,7 +12,7 @@ import { fold } from 'fp-ts/lib/Either';
 import { constant, identity } from 'fp-ts/lib/function';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { useMemo } from 'react';
-import { useUrlState } from '../../../../utils/use_url_state';
+import { useUrlState } from '../../../../hooks/use_url_state';
 
 const HOST_FILTERS_URL_STATE_KEY = 'controlPanels';
 
@@ -28,33 +28,24 @@ const controlPanelConfigs: ControlPanels = {
     width: 'medium',
     grow: false,
     type: 'optionsListControl',
-    explicitInput: {
-      id: availableControlsPanels.HOST_OS_NAME,
-      fieldName: availableControlsPanels.HOST_OS_NAME,
-      title: 'Operating System',
-    },
+    fieldName: availableControlsPanels.HOST_OS_NAME,
+    title: 'Operating System',
   },
   [availableControlsPanels.CLOUD_PROVIDER]: {
     order: 1,
     width: 'medium',
     grow: false,
     type: 'optionsListControl',
-    explicitInput: {
-      id: availableControlsPanels.CLOUD_PROVIDER,
-      fieldName: availableControlsPanels.CLOUD_PROVIDER,
-      title: 'Cloud Provider',
-    },
+    fieldName: availableControlsPanels.CLOUD_PROVIDER,
+    title: 'Cloud Provider',
   },
   [availableControlsPanels.SERVICE_NAME]: {
     order: 2,
     width: 'medium',
     grow: false,
     type: 'optionsListControl',
-    explicitInput: {
-      id: availableControlsPanels.SERVICE_NAME,
-      fieldName: availableControlsPanels.SERVICE_NAME,
-      title: 'Service Name',
-    },
+    fieldName: availableControlsPanels.SERVICE_NAME,
+    title: 'Service Name',
   },
 };
 
@@ -108,7 +99,7 @@ const addDataViewIdToControlPanels = (controlPanels: ControlPanels, dataViewId: 
       ...acc,
       [key]: {
         ...controlPanelConfig,
-        explicitInput: { ...controlPanelConfig.explicitInput, dataViewId },
+        dataViewId,
       },
     };
   }, {});
@@ -116,11 +107,10 @@ const addDataViewIdToControlPanels = (controlPanels: ControlPanels, dataViewId: 
 
 const cleanControlPanels = (controlPanels: ControlPanels) => {
   return Object.entries(controlPanels).reduce((acc, [key, controlPanelConfig]) => {
-    const { explicitInput } = controlPanelConfig;
-    const { dataViewId, ...rest } = explicitInput;
+    const { dataViewId, ...rest } = controlPanelConfig;
     return {
       ...acc,
-      [key]: { ...controlPanelConfig, explicitInput: rest },
+      [key]: rest,
     };
   }, {});
 };
@@ -140,21 +130,20 @@ const mergeDefaultPanelsWithUrlConfig = (dataView: DataView, urlPanels: ControlP
   );
 };
 
-const PanelRT = rt.type({
-  order: rt.number,
-  width: rt.union([rt.literal('medium'), rt.literal('small'), rt.literal('large')]),
-  grow: rt.boolean,
-  type: rt.string,
-  explicitInput: rt.intersection([
-    rt.type({ id: rt.string }),
-    rt.partial({
-      dataViewId: rt.string,
-      fieldName: rt.string,
-      title: rt.union([rt.string, rt.undefined]),
-      selectedOptions: rt.array(rt.string),
-    }),
-  ]),
-});
+const PanelRT = rt.intersection([
+  rt.type({
+    order: rt.number,
+    type: rt.string,
+  }),
+  rt.partial({
+    width: rt.union([rt.literal('medium'), rt.literal('small'), rt.literal('large')]),
+    grow: rt.boolean,
+    dataViewId: rt.string,
+    fieldName: rt.string,
+    title: rt.union([rt.string, rt.undefined]),
+    selectedOptions: rt.array(rt.string),
+  }),
+]);
 
 const ControlPanelRT = rt.record(rt.string, PanelRT);
 

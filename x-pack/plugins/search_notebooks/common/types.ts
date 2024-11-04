@@ -17,8 +17,12 @@ export interface NotebookInformation {
     url: string;
   };
 }
+
+export type NotebookCatalogResponse = Pick<NotebookCatalog, 'notebooks'>;
+
 export interface NotebookCatalog {
   notebooks: NotebookInformation[];
+  lists?: Record<string, string[] | undefined>;
 }
 
 export interface Notebook extends NotebookInformation {
@@ -46,6 +50,9 @@ export const NotebookCatalogSchema = schema.object(
         }
       ),
       { minSize: 1 }
+    ),
+    lists: schema.maybe(
+      schema.recordOf(schema.string(), schema.arrayOf(schema.string(), { minSize: 1 }))
     ),
   },
   {

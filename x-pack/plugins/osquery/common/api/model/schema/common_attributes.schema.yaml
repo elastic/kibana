@@ -241,11 +241,15 @@ components:
     SortOrderOrUndefined:
       oneOf:
 
-      - type: string
-        nullable: true
-      - enum: [ asc, desc ]
+        - type: string
+          nullable: true
+        - enum: [ asc, desc ]
 
     Shards:
       type: object
       additionalProperties:
         type: number
+
+    DefaultSuccessResponse:
+      type: object
+      properties: { }

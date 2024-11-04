@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { EuiAccordion, EuiFlexGroup, EuiFlexItem, EuiTitle, EuiIconTip } from '@elastic/eui';
@@ -18,7 +19,7 @@ interface GroupPanelProps<T> {
   extraAction?: React.ReactNode;
   forceState?: 'open' | 'closed';
   groupBucket: GroupingBucket<T>;
-  groupPanelRenderer?: JSX.Element;
+  groupPanel?: JSX.Element;
   groupingLevel?: number;
   isLoading: boolean;
   isNullGroup?: boolean;
@@ -62,7 +63,7 @@ const GroupPanelComponent = <T,>({
   extraAction,
   forceState,
   groupBucket,
-  groupPanelRenderer,
+  groupPanel,
   groupingLevel = 0,
   isLoading,
   isNullGroup = false,
@@ -102,7 +103,7 @@ const GroupPanelComponent = <T,>({
   );
 
   const onToggle = useCallback(
-    (isOpen) => {
+    (isOpen: boolean) => {
       if (onToggleGroup) {
         onToggleGroup(isOpen, groupBucket);
       }
@@ -115,7 +116,7 @@ const GroupPanelComponent = <T,>({
       buttonClassName={customAccordionButtonClassName}
       buttonContent={
         <div data-test-subj="group-panel-toggle" className="groupingPanelRenderer">
-          {groupPanelRenderer ?? (
+          {groupPanel ?? (
             <DefaultGroupPanelRenderer
               title={groupFieldValue.asString}
               isNullGroup={isNullGroup}

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { isEqual, uniqBy } from 'lodash';
@@ -12,7 +13,7 @@ import { ExecutionContext } from '@kbn/expressions-plugin/common';
 import { Filter, fromCombinedFilter } from '@kbn/es-query';
 import { Query, uniqFilters } from '@kbn/es-query';
 import { unboxExpressionValue } from '@kbn/expressions-plugin/common';
-import { SavedObjectReference } from '@kbn/core/server';
+import type { SavedObjectReference } from '@kbn/core/server';
 import { ExpressionFunctionKibanaContext } from '@kbn/data-plugin/common';
 import { SavedSearch } from '../types';
 

@@ -26,6 +26,9 @@ import {
 } from '@kbn/securitysolution-list-constants';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import { validate } from '@kbn/securitysolution-io-ts-utils';
+import { PROCESS_DESCENDANT_EVENT_FILTER_EXTRA_ENTRY } from '../../../../common/endpoint/service/artifacts/constants';
+import type { ExperimentalFeatures } from '../../../../common';
+import { isFilterProcessDescendantsEnabled } from '../../../../common/endpoint/service/artifacts/utils';
 import type {
   InternalArtifactCompleteSchema,
   TranslatedEntry,
@@ -36,6 +39,7 @@ import type {
   TranslatedEntryNestedEntry,
   TranslatedExceptionListItem,
   WrappedTranslatedExceptionList,
+  TranslatedEntriesOfDescendantOf,
 } from '../../schemas';
 import {
   translatedPerformantEntries as translatedPerformantEntriesType,
@@ -78,10 +82,11 @@ export type ArtifactListId =
 
 export function convertExceptionsToEndpointFormat(
   exceptions: ExceptionListItemSchema[],
-  schemaVersion: string
+  schemaVersion: string,
+  experimentalFeatures: ExperimentalFeatures
 ) {
   const translatedExceptions = {
-    entries: translateToEndpointExceptions(exceptions, schemaVersion),
+    entries: translateToEndpointExceptions(exceptions, schemaVersion, experimentalFeatures),
   };
   const [validated, errors] = validate(translatedExceptions, wrappedTranslatedExceptionList);
   if (errors != null) {
@@ -151,13 +156,24 @@ export async function getAllItemsFromEndpointExceptionList({
  * Translates Exception list items to Exceptions the endpoint can understand
  * @param exceptions
  * @param schemaVersion
+ * @param experimentalFeatures
  */
 export function translateToEndpointExceptions(
   exceptions: ExceptionListItemSchema[],
-  schemaVersion: string
+  schemaVersion: string,
+  experimentalFeatures: ExperimentalFeatures
 ): TranslatedExceptionListItem[] {
   const entrySet = new Set();
-  const entriesFiltered: TranslatedExceptionListItem[] = [];
+  const uniqueItems: TranslatedExceptionListItem[] = [];
+  const storeUniqueItem = (item: TranslatedExceptionListItem) => {
+    const entryHash = createHash('sha256').update(JSON.stringify(item)).digest('hex');
+
+    if (!entrySet.has(entryHash)) {
+      uniqueItems.push(item);
+      entrySet.add(entryHash);
+    }
+  };
+
   if (schemaVersion === 'v1') {
     exceptions.forEach((entry) => {
       // For Blocklist, we create a single entry for each blocklist entry item
@@ -172,28 +188,49 @@ export function translateToEndpointExceptions(
             ...entry,
             entries: [blocklistSingleEntry],
           });
-          const entryHash = createHash('sha256')
-            .update(JSON.stringify(translatedItem))
-            .digest('hex');
-          if (!entrySet.has(entryHash)) {
-            entriesFiltered.push(translatedItem);
-            entrySet.add(entryHash);
-          }
+
+          storeUniqueItem(translatedItem);
         });
+      } else if (
+        experimentalFeatures.filterProcessDescendantsForEventFiltersEnabled &&
+        entry.list_id === ENDPOINT_ARTIFACT_LISTS.eventFilters.id &&
+        isFilterProcessDescendantsEnabled(entry)
+      ) {
+        const translatedItem = translateProcessDescendantEventFilter(schemaVersion, entry);
+        storeUniqueItem(translatedItem);
       } else {
         const translatedItem = translateItem(schemaVersion, entry);
-        const entryHash = createHash('sha256').update(JSON.stringify(translatedItem)).digest('hex');
-        if (!entrySet.has(entryHash)) {
-          entriesFiltered.push(translatedItem);
-          entrySet.add(entryHash);
-        }
+        storeUniqueItem(translatedItem);
       }
     });
 
-    return entriesFiltered;
+    return uniqueItems;
   } else {
     throw new Error('unsupported schemaVersion');
   }
+}
+
+function translateProcessDescendantEventFilter(
+  schemaVersion: string,
+  entry: ExceptionListItemSchema
+): TranslatedExceptionListItem {
+  const translatedEntries: TranslatedEntriesOfDescendantOf = translateItem(schemaVersion, {
+    ...entry,
+    entries: [...entry.entries, PROCESS_DESCENDANT_EVENT_FILTER_EXTRA_ENTRY],
+  }) as TranslatedEntriesOfDescendantOf;
+
+  return {
+    type: entry.type,
+    entries: [
+      {
+        operator: 'included',
+        type: 'descendent_of',
+        value: {
+          entries: [translatedEntries],
+        },
+      },
+    ],
+  };
 }
 
 function getMatcherFunction({
@@ -246,8 +283,9 @@ function translateItem(
   item: ExceptionListItemSchema
 ): TranslatedExceptionListItem {
   const itemSet = new Set();
-  const getEntries = (): TranslatedExceptionListItem['entries'] => {
-    return item.entries.reduce<TranslatedEntry[]>((translatedEntries, entry) => {
+
+  const entries: TranslatedExceptionListItem['entries'] = item.entries.reduce<TranslatedEntry[]>(
+    (translatedEntries, entry) => {
       const translatedEntry = translateEntry(schemaVersion, item.entries, entry, item.os_types[0]);
 
       if (translatedEntry !== undefined) {
@@ -272,12 +310,13 @@ function translateItem(
       }
 
       return translatedEntries;
-    }, []);
-  };
+    },
+    []
+  );
 
   return {
     type: item.type,
-    entries: getEntries(),
+    entries,
   };
 }
 

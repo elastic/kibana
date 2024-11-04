@@ -1,14 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { v4 as uuidv4 } from 'uuid';
 import { config, HttpConfig } from './http_config';
 import { cspConfig } from './csp';
+import { permissionsPolicyConfig } from './permissions_policy';
 import { ExternalUrlConfig } from './external_url';
 
 const validHostnames = ['www.example.com', '8.8.8.8', '::1', 'localhost', '0.0.0.0'];
@@ -523,23 +525,27 @@ describe('versioned', () => {
 });
 
 describe('restrictInternalApis', () => {
-  it('is only allowed on serverless', () => {
-    expect(() => config.schema.validate({ restrictInternalApis: false }, {})).toThrow(
-      /a value wasn't expected/
-    );
-    expect(() => config.schema.validate({ restrictInternalApis: true }, {})).toThrow(
-      /a value wasn't expected/
-    );
+  it('is allowed on serverless and traditional', () => {
+    expect(() => config.schema.validate({ restrictInternalApis: false }, {})).not.toThrow();
+    expect(() => config.schema.validate({ restrictInternalApis: true }, {})).not.toThrow();
     expect(
       config.schema.validate({ restrictInternalApis: true }, { serverless: true })
     ).toMatchObject({
       restrictInternalApis: true,
     });
+    expect(
+      config.schema.validate({ restrictInternalApis: true }, { traditional: true })
+    ).toMatchObject({
+      restrictInternalApis: true,
+    });
   });
-  it('defaults to false', () => {
+  it('defaults to true', () => {
     expect(
       config.schema.validate({ restrictInternalApis: undefined }, { serverless: true })
-    ).toMatchObject({ restrictInternalApis: false });
+    ).toMatchObject({ restrictInternalApis: true });
+    expect(
+      config.schema.validate({ restrictInternalApis: undefined }, { traditional: true })
+    ).toMatchObject({ restrictInternalApis: true });
   });
 });
 
@@ -654,7 +660,13 @@ describe('HttpConfig', () => {
       },
     });
     const rawCspConfig = cspConfig.schema.validate({});
-    const httpConfig = new HttpConfig(rawConfig, rawCspConfig, ExternalUrlConfig.DEFAULT);
+    const rawPermissionsPolicyConfig = permissionsPolicyConfig.schema.validate({});
+    const httpConfig = new HttpConfig(
+      rawConfig,
+      rawCspConfig,
+      ExternalUrlConfig.DEFAULT,
+      rawPermissionsPolicyConfig
+    );
 
     expect(httpConfig.customResponseHeaders).toEqual({
       string: 'string',
@@ -665,10 +677,16 @@ describe('HttpConfig', () => {
     });
   });
 
-  it('defaults restrictInternalApis to false', () => {
+  it('defaults restrictInternalApis to true', () => {
     const rawConfig = config.schema.validate({}, {});
     const rawCspConfig = cspConfig.schema.validate({});
-    const httpConfig = new HttpConfig(rawConfig, rawCspConfig, ExternalUrlConfig.DEFAULT);
-    expect(httpConfig.restrictInternalApis).toBe(false);
+    const rawPermissionsPolicyConfig = permissionsPolicyConfig.schema.validate({});
+    const httpConfig = new HttpConfig(
+      rawConfig,
+      rawCspConfig,
+      ExternalUrlConfig.DEFAULT,
+      rawPermissionsPolicyConfig
+    );
+    expect(httpConfig.restrictInternalApis).toBe(true);
   });
 });

@@ -1,0 +1,1241 @@
+openapi: 3.0.3
+info:
+  description: Manage and interact with Security Assistant resources.
+  title: Security AI Assistant API (Elastic Cloud Serverless)
+  version: '2023-10-31'
+servers:
+  - url: http://{kibana_host}:{port}
+    variables:
+      kibana_host:
+        default: localhost
+      port:
+        default: '5601'
+paths:
+  /api/security_ai_assistant/anonymization_fields/_bulk_action:
+    post:
+      description: >-
+        Apply a bulk action to multiple anonymization fields. The bulk action is
+        applied to all anonymization fields that match the filter or to the list
+        of anonymization fields by their IDs.
+      operationId: PerformAnonymizationFieldsBulkAction
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                create:
+                  items:
+                    $ref: '#/components/schemas/AnonymizationFieldCreateProps'
+                  type: array
+                delete:
+                  type: object
+                  properties:
+                    ids:
+                      description: Array of anonymization fields IDs
+                      items:
+                        type: string
+                      minItems: 1
+                      type: array
+                    query:
+                      description: Query to filter anonymization fields
+                      type: string
+                update:
+                  items:
+                    $ref: '#/components/schemas/AnonymizationFieldUpdateProps'
+                  type: array
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnonymizationFieldsBulkCrudActionResponse'
+          description: Indicates a successful call.
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+          description: Generic Error
+      summary: Apply a bulk action to anonymization fields
+      tags:
+        - Security AI Assistant API
+        - Bulk API
+  /api/security_ai_assistant/anonymization_fields/_find:
+    get:
+      description: Get a list of all anonymization fields.
+      operationId: FindAnonymizationFields
+      parameters:
+        - in: query
+          name: fields
+          required: false
+          schema:
+            items:
+              type: string
+            type: array
+        - description: Search query
+          in: query
+          name: filter
+          required: false
+          schema:
+            type: string
+        - description: Field to sort by
+          in: query
+          name: sort_field
+          required: false
+          schema:
+            $ref: '#/components/schemas/FindAnonymizationFieldsSortField'
+        - description: Sort order
+          in: query
+          name: sort_order
+          required: false
+          schema:
+            $ref: '#/components/schemas/SortOrder'
+        - description: Page number
+          in: query
+          name: page
+          required: false
+          schema:
+            default: 1
+            minimum: 1
+            type: integer
+        - description: AnonymizationFields per page
+          in: query
+          name: per_page
+          required: false
+          schema:
+            default: 20
+            minimum: 0
+            type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    items:
+                      $ref: '#/components/schemas/AnonymizationFieldResponse'
+                    type: array
+                  page:
+                    type: integer
+                  perPage:
+                    type: integer
+                  total:
+                    type: integer
+                required:
+                  - page
+                  - perPage
+                  - total
+                  - data
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+          description: Generic Error
+      summary: Get anonymization fields
+      tags:
+        - Security AI Assistant API
+        - AnonymizationFields API
+  /api/security_ai_assistant/chat/complete:
+    post:
+      description: Create a model response for the given chat conversation.
+      operationId: ChatComplete
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChatCompleteProps'
+        required: true
+      responses:
+        '200':
+          content:
+            application/octet-stream:
+              schema:
+                format: binary
+                type: string
+          description: Indicates a successful call.
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+          description: Generic Error
+      summary: Create a model response
+      tags:
+        - Security AI Assistant API
+        - Chat Complete API
+  /api/security_ai_assistant/current_user/conversations:
+    post:
+      description: Create a new Security AI Assistant conversation.
+      operationId: CreateConversation
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConversationCreateProps'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConversationResponse'
+          description: Indicates a successful call.
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+          description: Generic Error
+      summary: Create a conversation
+      tags:
+        - Security AI Assistant API
+        - Conversation API
+  /api/security_ai_assistant/current_user/conversations/_find:
+    get:
+      description: Get a list of all conversations for the current user.
+      operationId: FindConversations
+      parameters:
+        - in: query
+          name: fields
+          required: false
+          schema:
+            items:
+              type: string
+            type: array
+        - description: Search query
+          in: query
+          name: filter
+          required: false
+          schema:
+            type: string
+        - description: Field to sort by
+          in: query
+          name: sort_field
+          required: false
+          schema:
+            $ref: '#/components/schemas/FindConversationsSortField'
+        - description: Sort order
+          in: query
+          name: sort_order
+          required: false
+          schema:
+            $ref: '#/components/schemas/SortOrder'
+        - description: Page number
+          in: query
+          name: page
+          required: false
+          schema:
+            default: 1
+            minimum: 1
+            type: integer
+        - description: Conversations per page
+          in: query
+          name: per_page
+          required: false
+          schema:
+            default: 20
+            minimum: 0
+            type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    items:
+                      $ref: '#/components/schemas/ConversationResponse'
+                    type: array
+                  page:
+                    type: integer
+                  perPage:
+                    type: integer
+                  total:
+                    type: integer
+                required:
+                  - page
+                  - perPage
+                  - total
+                  - data
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+          description: Generic Error
+      summary: Get conversations
+      tags:
+        - Security AI Assistant API
+        - Conversations API
+  /api/security_ai_assistant/current_user/conversations/{id}:
+    delete:
+      description: Delete an existing conversation using the conversation ID.
+      operationId: DeleteConversation
+      parameters:
+        - description: The conversation's `id` value.
+          in: path
+          name: id
+          required: true
+          schema:
+            $ref: '#/components/schemas/NonEmptyString'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConversationResponse'
+          description: Indicates a successful call.
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+          description: Generic Error
+      summary: Delete a conversation
+      tags:
+        - Security AI Assistant API
+        - Conversation API
+    get:
+      description: Get the details of an existing conversation using the conversation ID.
+      operationId: ReadConversation
+      parameters:
+        - description: The conversation's `id` value.
+          in: path
+          name: id
+          required: true
+          schema:
+            $ref: '#/components/schemas/NonEmptyString'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConversationResponse'
+          description: Indicates a successful call.
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+          description: Generic Error
+      summary: Get a conversation
+      tags:
+        - Security AI Assistant API
+        - Conversations API
+    put:
+      description: Update an existing conversation using the conversation ID.
+      operationId: UpdateConversation
+      parameters:
+        - description: The conversation's `id` value.
+          in: path
+          name: id
+          required: true
+          schema:
+            $ref: '#/components/schemas/NonEmptyString'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConversationUpdateProps'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConversationResponse'
+          description: Indicates a successful call.
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+          description: Generic Error
+      summary: Update a conversation
+      tags:
+        - Security AI Assistant API
+        - Conversation API
+  /api/security_ai_assistant/prompts/_bulk_action:
+    post:
+      description: >-
+        Apply a bulk action to multiple prompts. The bulk action is applied to
+        all prompts that match the filter or to the list of prompts by their
+        IDs.
+      operationId: PerformPromptsBulkAction
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                create:
+                  items:
+                    $ref: '#/components/schemas/PromptCreateProps'
+                  type: array
+                delete:
+                  type: object
+                  properties:
+                    ids:
+                      description: Array of prompts IDs
+                      items:
+                        type: string
+                      minItems: 1
+                      type: array
+                    query:
+                      description: Query to filter promps
+                      type: string
+                update:
+                  items:
+                    $ref: '#/components/schemas/PromptUpdateProps'
+                  type: array
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PromptsBulkCrudActionResponse'
+          description: Indicates a successful call.
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+          description: Generic Error
+      summary: Apply a bulk action to prompts
+      tags:
+        - Security AI Assistant API
+        - Bulk API
+  /api/security_ai_assistant/prompts/_find:
+    get:
+      description: Get a list of all prompts.
+      operationId: FindPrompts
+      parameters:
+        - in: query
+          name: fields
+          required: false
+          schema:
+            items:
+              type: string
+            type: array
+        - description: Search query
+          in: query
+          name: filter
+          required: false
+          schema:
+            type: string
+        - description: Field to sort by
+          in: query
+          name: sort_field
+          required: false
+          schema:
+            $ref: '#/components/schemas/FindPromptsSortField'
+        - description: Sort order
+          in: query
+          name: sort_order
+          required: false
+          schema:
+            $ref: '#/components/schemas/SortOrder'
+        - description: Page number
+          in: query
+          name: page
+          required: false
+          schema:
+            default: 1
+            minimum: 1
+            type: integer
+        - description: Prompts per page
+          in: query
+          name: per_page
+          required: false
+          schema:
+            default: 20
+            minimum: 0
+            type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    items:
+                      $ref: '#/components/schemas/PromptResponse'
+                    type: array
+                  page:
+                    type: integer
+                  perPage:
+                    type: integer
+                  total:
+                    type: integer
+                required:
+                  - page
+                  - perPage
+                  - total
+                  - data
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+          description: Generic Error
+      summary: Get prompts
+      tags:
+        - Security AI Assistant API
+        - Prompts API
+components:
+  schemas:
+    AnonymizationFieldCreateProps:
+      type: object
+      properties:
+        allowed:
+          type: boolean
+        anonymized:
+          type: boolean
+        field:
+          type: string
+      required:
+        - field
+    AnonymizationFieldDetailsInError:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+      required:
+        - id
+    AnonymizationFieldResponse:
+      type: object
+      properties:
+        allowed:
+          type: boolean
+        anonymized:
+          type: boolean
+        createdAt:
+          type: string
+        createdBy:
+          type: string
+        field:
+          type: string
+        id:
+          $ref: '#/components/schemas/NonEmptyString'
+        namespace:
+          description: Kibana space
+          type: string
+        timestamp:
+          $ref: '#/components/schemas/NonEmptyString'
+        updatedAt:
+          type: string
+        updatedBy:
+          type: string
+      required:
+        - id
+        - field
+    AnonymizationFieldsBulkActionSkipReason:
+      enum:
+        - ANONYMIZATION_FIELD_NOT_MODIFIED
+      type: string
+    AnonymizationFieldsBulkActionSkipResult:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        skip_reason:
+          $ref: '#/components/schemas/AnonymizationFieldsBulkActionSkipReason'
+      required:
+        - id
+        - skip_reason
+    AnonymizationFieldsBulkCrudActionResponse:
+      type: object
+      properties:
+        anonymization_fields_count:
+          type: integer
+        attributes:
+          type: object
+          properties:
+            errors:
+              items:
+                $ref: '#/components/schemas/NormalizedAnonymizationFieldError'
+              type: array
+            results:
+              $ref: '#/components/schemas/AnonymizationFieldsBulkCrudActionResults'
+            summary:
+              $ref: '#/components/schemas/BulkCrudActionSummary'
+          required:
+            - results
+            - summary
+        message:
+          type: string
+        status_code:
+          type: integer
+        success:
+          type: boolean
+      required:
+        - attributes
+    AnonymizationFieldsBulkCrudActionResults:
+      type: object
+      properties:
+        created:
+          items:
+            $ref: '#/components/schemas/AnonymizationFieldResponse'
+          type: array
+        deleted:
+          items:
+            type: string
+          type: array
+        skipped:
+          items:
+            $ref: '#/components/schemas/AnonymizationFieldsBulkActionSkipResult'
+          type: array
+        updated:
+          items:
+            $ref: '#/components/schemas/AnonymizationFieldResponse'
+          type: array
+      required:
+        - updated
+        - created
+        - deleted
+        - skipped
+    AnonymizationFieldUpdateProps:
+      type: object
+      properties:
+        allowed:
+          type: boolean
+        anonymized:
+          type: boolean
+        id:
+          type: string
+      required:
+        - id
+    ApiConfig:
+      type: object
+      properties:
+        actionTypeId:
+          description: action type id
+          type: string
+        connectorId:
+          description: connector id
+          type: string
+        defaultSystemPromptId:
+          description: defaultSystemPromptId
+          type: string
+        model:
+          description: model
+          type: string
+        provider:
+          $ref: '#/components/schemas/Provider'
+          description: Provider
+      required:
+        - connectorId
+        - actionTypeId
+    BulkCrudActionSummary:
+      type: object
+      properties:
+        failed:
+          type: integer
+        skipped:
+          type: integer
+        succeeded:
+          type: integer
+        total:
+          type: integer
+      required:
+        - failed
+        - skipped
+        - succeeded
+        - total
+    ChatCompleteProps:
+      type: object
+      properties:
+        connectorId:
+          type: string
+        conversationId:
+          type: string
+        isStream:
+          type: boolean
+        langSmithApiKey:
+          type: string
+        langSmithProject:
+          type: string
+        messages:
+          items:
+            $ref: '#/components/schemas/ChatMessage'
+          type: array
+        model:
+          type: string
+        persist:
+          type: boolean
+        promptId:
+          type: string
+        responseLanguage:
+          type: string
+      required:
+        - messages
+        - persist
+        - connectorId
+    ChatMessage:
+      description: AI assistant message.
+      type: object
+      properties:
+        content:
+          description: Message content.
+          type: string
+        data:
+          $ref: '#/components/schemas/MessageData'
+          description: ECS object to attach to the context of the message.
+        fields_to_anonymize:
+          items:
+            type: string
+          type: array
+        role:
+          $ref: '#/components/schemas/ChatMessageRole'
+          description: Message role.
+      required:
+        - role
+    ChatMessageRole:
+      description: Message role.
+      enum:
+        - system
+        - user
+        - assistant
+      type: string
+    ConversationCategory:
+      description: The conversation category.
+      enum:
+        - assistant
+        - insights
+      type: string
+    ConversationConfidence:
+      description: The conversation confidence.
+      enum:
+        - low
+        - medium
+        - high
+      type: string
+    ConversationCreateProps:
+      type: object
+      properties:
+        apiConfig:
+          $ref: '#/components/schemas/ApiConfig'
+          description: LLM API configuration.
+        category:
+          $ref: '#/components/schemas/ConversationCategory'
+          description: The conversation category.
+        excludeFromLastConversationStorage:
+          description: excludeFromLastConversationStorage.
+          type: boolean
+        id:
+          description: The conversation id.
+          type: string
+        isDefault:
+          description: Is default conversation.
+          type: boolean
+        messages:
+          description: The conversation messages.
+          items:
+            $ref: '#/components/schemas/Message'
+          type: array
+        replacements:
+          $ref: '#/components/schemas/Replacements'
+        title:
+          description: The conversation title.
+          type: string
+      required:
+        - title
+    ConversationResponse:
+      type: object
+      properties:
+        apiConfig:
+          $ref: '#/components/schemas/ApiConfig'
+          description: LLM API configuration.
+        category:
+          $ref: '#/components/schemas/ConversationCategory'
+          description: The conversation category.
+        createdAt:
+          description: The last time conversation was updated.
+          type: string
+        excludeFromLastConversationStorage:
+          description: excludeFromLastConversationStorage.
+          type: boolean
+        id:
+          $ref: '#/components/schemas/NonEmptyString'
+        isDefault:
+          description: Is default conversation.
+          type: boolean
+        messages:
+          description: The conversation messages.
+          items:
+            $ref: '#/components/schemas/Message'
+          type: array
+        namespace:
+          description: Kibana space
+          type: string
+        replacements:
+          $ref: '#/components/schemas/Replacements'
+        summary:
+          $ref: '#/components/schemas/ConversationSummary'
+        timestamp:
+          $ref: '#/components/schemas/NonEmptyString'
+        title:
+          description: The conversation title.
+          type: string
+        updatedAt:
+          description: The last time conversation was updated.
+          type: string
+        users:
+          items:
+            $ref: '#/components/schemas/User'
+          type: array
+      required:
+        - id
+        - title
+        - createdAt
+        - users
+        - namespace
+        - category
+    ConversationSummary:
+      type: object
+      properties:
+        confidence:
+          $ref: '#/components/schemas/ConversationConfidence'
+          description: >-
+            How confident you are about this being a correct and useful
+            learning.
+        content:
+          description: Summary text of the conversation over time.
+          type: string
+        public:
+          description: Define if summary is marked as publicly available.
+          type: boolean
+        timestamp:
+          $ref: '#/components/schemas/NonEmptyString'
+          description: The timestamp summary was updated.
+    ConversationUpdateProps:
+      type: object
+      properties:
+        apiConfig:
+          $ref: '#/components/schemas/ApiConfig'
+          description: LLM API configuration.
+        category:
+          $ref: '#/components/schemas/ConversationCategory'
+          description: The conversation category.
+        excludeFromLastConversationStorage:
+          description: excludeFromLastConversationStorage.
+          type: boolean
+        id:
+          $ref: '#/components/schemas/NonEmptyString'
+        messages:
+          description: The conversation messages.
+          items:
+            $ref: '#/components/schemas/Message'
+          type: array
+        replacements:
+          $ref: '#/components/schemas/Replacements'
+        summary:
+          $ref: '#/components/schemas/ConversationSummary'
+        title:
+          description: The conversation title.
+          type: string
+      required:
+        - id
+    FindAnonymizationFieldsSortField:
+      enum:
+        - created_at
+        - anonymized
+        - allowed
+        - field
+        - updated_at
+      type: string
+    FindConversationsSortField:
+      enum:
+        - created_at
+        - is_default
+        - title
+        - updated_at
+      type: string
+    FindPromptsSortField:
+      enum:
+        - created_at
+        - is_default
+        - name
+        - updated_at
+      type: string
+    Message:
+      description: AI assistant conversation message.
+      type: object
+      properties:
+        content:
+          description: Message content.
+          type: string
+        isError:
+          description: Is error message.
+          type: boolean
+        reader:
+          $ref: '#/components/schemas/Reader'
+          description: Message content.
+        role:
+          $ref: '#/components/schemas/MessageRole'
+          description: Message role.
+        timestamp:
+          $ref: '#/components/schemas/NonEmptyString'
+          description: The timestamp message was sent or received.
+        traceData:
+          $ref: '#/components/schemas/TraceData'
+          description: trace Data
+      required:
+        - timestamp
+        - content
+        - role
+    MessageData:
+      additionalProperties: true
+      type: object
+    MessageRole:
+      description: Message role.
+      enum:
+        - system
+        - user
+        - assistant
+      type: string
+    NonEmptyString:
+      description: A string that is not empty and does not contain only whitespace
+      minLength: 1
+      pattern: ^(?! *$).+$
+      type: string
+    NormalizedAnonymizationFieldError:
+      type: object
+      properties:
+        anonymization_fields:
+          items:
+            $ref: '#/components/schemas/AnonymizationFieldDetailsInError'
+          type: array
+        err_code:
+          type: string
+        message:
+          type: string
+        status_code:
+          type: integer
+      required:
+        - message
+        - status_code
+        - anonymization_fields
+    NormalizedPromptError:
+      type: object
+      properties:
+        err_code:
+          type: string
+        message:
+          type: string
+        prompts:
+          items:
+            $ref: '#/components/schemas/PromptDetailsInError'
+          type: array
+        status_code:
+          type: integer
+      required:
+        - message
+        - status_code
+        - prompts
+    PromptCreateProps:
+      type: object
+      properties:
+        categories:
+          items:
+            type: string
+          type: array
+        color:
+          type: string
+        consumer:
+          type: string
+        content:
+          type: string
+        isDefault:
+          type: boolean
+        isNewConversationDefault:
+          type: boolean
+        name:
+          type: string
+        promptType:
+          $ref: '#/components/schemas/PromptType'
+      required:
+        - name
+        - content
+        - promptType
+    PromptDetailsInError:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+      required:
+        - id
+    PromptResponse:
+      type: object
+      properties:
+        categories:
+          items:
+            type: string
+          type: array
+        color:
+          type: string
+        consumer:
+          type: string
+        content:
+          type: string
+        createdAt:
+          type: string
+        createdBy:
+          type: string
+        id:
+          $ref: '#/components/schemas/NonEmptyString'
+        isDefault:
+          type: boolean
+        isNewConversationDefault:
+          type: boolean
+        name:
+          type: string
+        namespace:
+          description: Kibana space
+          type: string
+        promptType:
+          $ref: '#/components/schemas/PromptType'
+        timestamp:
+          $ref: '#/components/schemas/NonEmptyString'
+        updatedAt:
+          type: string
+        updatedBy:
+          type: string
+        users:
+          items:
+            $ref: '#/components/schemas/User'
+          type: array
+      required:
+        - id
+        - name
+        - promptType
+        - content
+    PromptsBulkActionSkipReason:
+      enum:
+        - PROMPT_FIELD_NOT_MODIFIED
+      type: string
+    PromptsBulkActionSkipResult:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        skip_reason:
+          $ref: '#/components/schemas/PromptsBulkActionSkipReason'
+      required:
+        - id
+        - skip_reason
+    PromptsBulkCrudActionResponse:
+      type: object
+      properties:
+        attributes:
+          type: object
+          properties:
+            errors:
+              items:
+                $ref: '#/components/schemas/NormalizedPromptError'
+              type: array
+            results:
+              $ref: '#/components/schemas/PromptsBulkCrudActionResults'
+            summary:
+              $ref: '#/components/schemas/BulkCrudActionSummary'
+          required:
+            - results
+            - summary
+        message:
+          type: string
+        prompts_count:
+          type: integer
+        status_code:
+          type: integer
+        success:
+          type: boolean
+      required:
+        - attributes
+    PromptsBulkCrudActionResults:
+      type: object
+      properties:
+        created:
+          items:
+            $ref: '#/components/schemas/PromptResponse'
+          type: array
+        deleted:
+          items:
+            type: string
+          type: array
+        skipped:
+          items:
+            $ref: '#/components/schemas/PromptsBulkActionSkipResult'
+          type: array
+        updated:
+          items:
+            $ref: '#/components/schemas/PromptResponse'
+          type: array
+      required:
+        - updated
+        - created
+        - deleted
+        - skipped
+    PromptType:
+      description: Prompt type
+      enum:
+        - system
+        - quick
+      type: string
+    PromptUpdateProps:
+      type: object
+      properties:
+        categories:
+          items:
+            type: string
+          type: array
+        color:
+          type: string
+        consumer:
+          type: string
+        content:
+          type: string
+        id:
+          type: string
+        isDefault:
+          type: boolean
+        isNewConversationDefault:
+          type: boolean
+      required:
+        - id
+    Provider:
+      description: Provider
+      enum:
+        - OpenAI
+        - Azure OpenAI
+        - Other
+      type: string
+    Reader:
+      additionalProperties: true
+      type: object
+    Replacements:
+      additionalProperties:
+        type: string
+      description: Replacements object used to anonymize/deanomymize messsages
+      type: object
+    SortOrder:
+      enum:
+        - asc
+        - desc
+      type: string
+    TraceData:
+      description: trace Data
+      type: object
+      properties:
+        traceId:
+          description: Could be any string, not necessarily a UUID
+          type: string
+        transactionId:
+          description: Could be any string, not necessarily a UUID
+          type: string
+    User:
+      description: Could be any string, not necessarily a UUID
+      type: object
+      properties:
+        id:
+          description: User id
+          type: string
+        name:
+          description: User name
+          type: string
+  securitySchemes:
+    BasicAuth:
+      scheme: basic
+      type: http
+security:
+  - BasicAuth: []
+tags:
+  - description: Manage and interact with Security Assistant resources.
+    name: Security AI Assistant API
+    x-displayName: Security AI assistant

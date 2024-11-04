@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import type { DroppableProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiFormHelpText, EuiSpacer } from '@elastic/eui';
 import { rgba } from 'polished';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
-import type { DraggingStyle, NotDraggingStyle } from '@hello-pangea/dnd';
+import type { DraggableChildrenFn, DraggingStyle, NotDraggingStyle } from '@hello-pangea/dnd';
 import { Draggable, Droppable } from '@hello-pangea/dnd';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
@@ -28,11 +29,13 @@ import {
   getTimelineProviderDroppableId,
 } from '../../../../common/components/drag_and_drop/helpers';
 import type { DataProvider, DataProvidersAnd } from './data_provider';
-import { DataProviderType, IS_OPERATOR } from './data_provider';
+import { IS_OPERATOR } from './data_provider';
+import { DataProviderTypeEnum } from '../../../../../common/api/timeline';
 import { EMPTY_GROUP, flattenIntoAndGroups } from './helpers';
 import { ProviderItemBadge } from './provider_item_badge';
 
 import * as i18n from './translations';
+import type { OnDataProviderEdited } from '../events';
 
 export const EMPTY_PROVIDERS_GROUP_CLASS_NAME = 'empty-providers-group';
 
@@ -212,16 +215,16 @@ export const DataProvidersGroupItem = React.memo<DataProvidersGroupItem>(
         id: timelineId,
         providerId: index > 0 ? group[0].id : dataProvider.id,
         type:
-          dataProvider.type === DataProviderType.template
-            ? DataProviderType.default
-            : DataProviderType.template,
+          dataProvider.type === DataProviderTypeEnum.template
+            ? DataProviderTypeEnum.default
+            : DataProviderTypeEnum.template,
         andProviderId: index > 0 ? dataProvider.id : undefined,
       };
 
       dispatch(timelineActions.updateDataProviderType(payload));
     }, [dataProvider.id, dataProvider.type, dispatch, group, index, timelineId]);
 
-    const handleDataProviderEdited = useCallback(
+    const handleDataProviderEdited = useCallback<OnDataProviderEdited>(
       ({ andProviderId, excluded, field, operator, providerId, value }) =>
         dispatch(
           timelineActions.dataProviderEdited({
@@ -266,7 +269,7 @@ export const DataProvidersGroupItem = React.memo<DataProvidersGroupItem>(
       dataProvider.queryMatch.displayValue ?? dataProvider.queryMatch.value
     );
 
-    const DraggableContent = useCallback(
+    const DraggableContent = useCallback<DraggableChildrenFn>(
       (provided, snapshot) => (
         <div
           ref={provided.innerRef}
@@ -396,7 +399,7 @@ const DataProvidersGroup = React.memo<DataProvidersGroup>(
       [browserFields, group, groupIndex, timelineId]
     );
 
-    const DroppableContent = useCallback(
+    const DroppableContent = useCallback<DroppableProps['children']>(
       (droppableProvided) => (
         <DroppableContainer
           className={isLastGroup ? EMPTY_PROVIDERS_GROUP_CLASS_NAME : ''}

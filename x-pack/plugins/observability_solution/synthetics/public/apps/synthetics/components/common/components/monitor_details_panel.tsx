@@ -17,7 +17,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useDispatch } from 'react-redux';
-import { TagsBadges } from './tag_badges';
+import { TagsList } from '@kbn/observability-shared-plugin/public';
+import { isEmpty } from 'lodash';
+import { useKibanaSpace } from '../../../../../hooks/use_kibana_space';
 import { PanelWithTitle } from './panel_with_title';
 import { MonitorEnabled } from '../../monitors_page/management/monitor_list_table/monitor_enabled';
 import { getMonitorAction } from '../../../state';
@@ -27,15 +29,17 @@ import {
   EncryptedSyntheticsSavedMonitor,
   MonitorFields,
   Ping,
+  SyntheticsMonitorWithId,
 } from '../../../../../../common/runtime_types';
 import { MonitorTypeBadge } from './monitor_type_badge';
 import { useDateFormat } from '../../../../../hooks/use_date_format';
+import { useGetUrlParams } from '../../../hooks';
 
 export interface MonitorDetailsPanelProps {
   latestPing?: Ping;
   loading: boolean;
   configId: string;
-  monitor: EncryptedSyntheticsSavedMonitor | null;
+  monitor: SyntheticsMonitorWithId | EncryptedSyntheticsSavedMonitor | null;
   hideEnabled?: boolean;
   hideLocations?: boolean;
   hasBorder?: boolean;
@@ -51,12 +55,15 @@ export const MonitorDetailsPanel = ({
   hasBorder = true,
 }: MonitorDetailsPanelProps) => {
   const dispatch = useDispatch();
+  const { space } = useKibanaSpace();
+  const { spaceId } = useGetUrlParams();
 
   if (!monitor) {
     return <EuiSkeletonText lines={8} />;
   }
 
   const url = latestPing?.url?.full ?? (monitor as unknown as MonitorFields)[ConfigKey.URLS];
+  const labels = monitor[ConfigKey.LABELS];
 
   return (
     <PanelWithTitle
@@ -78,7 +85,12 @@ export const MonitorDetailsPanel = ({
                   configId={configId}
                   monitor={monitor}
                   reloadPage={() => {
-                    dispatch(getMonitorAction.get({ monitorId: configId }));
+                    dispatch(
+                      getMonitorAction.get({
+                        monitorId: configId,
+                        ...(spaceId && spaceId !== space?.id ? { spaceId } : {}),
+                      })
+                    );
                   }}
                 />
               )}
@@ -102,7 +114,11 @@ export const MonitorDetailsPanel = ({
           {latestPing?.timestamp ? (
             <Time timestamp={latestPing?.timestamp} />
           ) : (
-            <EuiText color="subdued">--</EuiText>
+            <EuiText color="subdued">
+              {i18n.translate('xpack.synthetics.monitorDetailsPanel.TextLabel', {
+                defaultMessage: '--',
+              })}
+            </EuiText>
           )}
         </EuiDescriptionListDescription>
         <EuiDescriptionListTitle>{LAST_MODIFIED_LABEL}</EuiDescriptionListTitle>
@@ -121,7 +137,7 @@ export const MonitorDetailsPanel = ({
         <EuiDescriptionListDescription>{monitor.id}</EuiDescriptionListDescription>
         <EuiDescriptionListTitle>{MONITOR_TYPE_LABEL}</EuiDescriptionListTitle>
         <EuiDescriptionListDescription>
-          <MonitorTypeBadge monitor={monitor} />
+          <MonitorTypeBadge monitorType={monitor.type} />
         </EuiDescriptionListDescription>
         <EuiDescriptionListTitle>{FREQUENCY_LABEL}</EuiDescriptionListTitle>
         <EuiDescriptionListDescription>
@@ -139,8 +155,21 @@ export const MonitorDetailsPanel = ({
 
         <EuiDescriptionListTitle>{TAGS_LABEL}</EuiDescriptionListTitle>
         <EuiDescriptionListDescription>
-          <TagsBadges tags={monitor[ConfigKey.TAGS]} />
+          <TagsList tags={monitor[ConfigKey.TAGS]} />
         </EuiDescriptionListDescription>
+
+        {!isEmpty(labels) ? (
+          <>
+            <EuiDescriptionListTitle>{LABELS_LABEL}</EuiDescriptionListTitle>
+            <EuiDescriptionListDescription>
+              {Object.entries(labels ?? {}).map(([key, value]) => (
+                <div key={key}>
+                  <strong>{key}</strong>: {value}
+                </div>
+              ))}
+            </EuiDescriptionListDescription>
+          </>
+        ) : null}
       </EuiDescriptionList>
     </PanelWithTitle>
   );
@@ -219,6 +248,10 @@ const URL_LABEL = i18n.translate('xpack.synthetics.management.monitorList.url', 
 
 const TAGS_LABEL = i18n.translate('xpack.synthetics.management.monitorList.tags', {
   defaultMessage: 'Tags',
+});
+
+const LABELS_LABEL = i18n.translate('xpack.synthetics.management.monitorList.labels', {
+  defaultMessage: 'Labels',
 });
 
 const ENABLED_LABEL = i18n.translate('xpack.synthetics.detailsPanel.monitorDetails.enabled', {

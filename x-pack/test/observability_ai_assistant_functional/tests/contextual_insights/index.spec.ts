@@ -8,12 +8,12 @@
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
 import moment from 'moment';
-import OpenAI from 'openai';
 import {
   createLlmProxy,
   LlmProxy,
 } from '../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { deleteConnectors, createConnector } from '../../common/connectors';
 
 export default function ApiTest({ getService, getPageObjects }: FtrProviderContext) {
   const ui = getService('observabilityAIAssistantUI');
@@ -60,35 +60,6 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
     await apmSynthtraceEsClient.index(documents);
   }
 
-  async function createConnector(proxy: LlmProxy) {
-    await supertest
-      .post('/api/actions/connector')
-      .set('kbn-xsrf', 'foo')
-      .send({
-        name: 'foo',
-        config: {
-          apiProvider: 'OpenAI',
-          apiUrl: `http://localhost:${proxy.getPort()}`,
-          defaultModel: 'gpt-4',
-        },
-        secrets: { apiKey: 'myApiKey' },
-        connector_type_id: '.gen-ai',
-      })
-      .expect(200);
-  }
-
-  async function deleteConnectors() {
-    const connectors = await supertest.get('/api/actions/connectors').expect(200);
-    const promises = connectors.body.map((connector: { id: string }) => {
-      return supertest
-        .delete(`/api/actions/connector/${connector.id}`)
-        .set('kbn-xsrf', 'foo')
-        .expect(204);
-    });
-
-    return Promise.all(promises);
-  }
-
   async function navigateToError() {
     await common.navigateToUrl('apm', 'services/opbeans-go/errors/some-expection-key', {
       shouldUseHashForSubUrl: false,
@@ -111,7 +82,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
   describe('Contextual insights for APM errors', () => {
     before(async () => {
       await Promise.all([
-        deleteConnectors(), // cleanup previous connectors
+        deleteConnectors(supertest), // cleanup previous connectors
         apmSynthtraceEsClient.clean(), // cleanup previous synthtrace data
       ]);
 
@@ -123,7 +94,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
 
     after(async () => {
       await Promise.all([
-        deleteConnectors(), // cleanup previous connectors
+        deleteConnectors(supertest), // cleanup previous connectors
         apmSynthtraceEsClient.clean(), // cleanup synthtrace data
         ui.auth.logout(), // logout
       ]);
@@ -141,7 +112,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
 
       before(async () => {
         proxy = await createLlmProxy(log);
-        await createConnector(proxy);
+        await createConnector(proxy, supertest);
       });
 
       after(async () => {
@@ -151,15 +122,13 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
       it('should show the contextual insight component on the APM error details page', async () => {
         await navigateToError();
 
-        const interceptor = proxy.intercept(
-          'conversation',
-          (body) => !isFunctionTitleRequest(body),
-          'This error is nothing to worry about. Have a nice day!'
-        );
+        const interceptor = proxy.interceptConversation({
+          response: 'This error is nothing to worry about. Have a nice day!',
+        });
 
         await openContextualInsights();
 
-        await interceptor.waitAndComplete();
+        await interceptor.completeAfterIntercept();
 
         await retry.tryForTime(5 * 1000, async () => {
           const llmResponse = await testSubjects.getVisibleText(ui.pages.contextualInsights.text);
@@ -168,9 +137,4 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
       });
     });
   });
-}
-
-function isFunctionTitleRequest(body: string) {
-  const parsedBody = JSON.parse(body) as OpenAI.Chat.ChatCompletionCreateParamsNonStreaming;
-  return parsedBody.functions?.find((fn) => fn.name === 'title_conversation') !== undefined;
 }

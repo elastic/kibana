@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { EuiDataGridProps } from '@elastic/eui';
@@ -52,7 +53,7 @@ const getDocById = (id: string) => docs.find((doc) => doc.raw._id === id);
 const renderCompareDocuments = ({
   forceShowAllFields = false,
 }: { forceShowAllFields?: boolean } = {}) => {
-  const setSelectedDocs = jest.fn();
+  const replaceSelectedDocs = jest.fn();
   const getCompareDocuments = (props?: Partial<CompareDocumentsProps>) => (
     <CompareDocuments
       id="test"
@@ -63,20 +64,20 @@ const renderCompareDocuments = ({
       dataView={dataViewWithTimefieldMock}
       isPlainRecord={false}
       selectedFieldNames={['message', 'extension', 'bytes']}
-      selectedDocs={['0', '1', '2']}
+      selectedDocIds={['0', '1', '2']}
       schemaDetectors={[]}
       forceShowAllFields={forceShowAllFields}
       showFullScreenButton={true}
       fieldFormats={{} as any}
       getDocById={getDocById}
-      setSelectedDocs={setSelectedDocs}
+      replaceSelectedDocs={replaceSelectedDocs}
       setIsCompareActive={jest.fn()}
       {...props}
     />
   );
   const { rerender } = render(getCompareDocuments());
   return {
-    setSelectedDocs,
+    replaceSelectedDocs,
     rerender: (props?: Partial<CompareDocumentsProps>) => rerender(getCompareDocuments(props)),
   };
 };
@@ -108,7 +109,7 @@ describe('CompareDocuments', () => {
         "data-test-subj": "unifiedDataTableCompareDocuments",
         "gridStyle": Object {
           "border": "horizontal",
-          "cellPadding": "l",
+          "cellPadding": "s",
           "fontSize": "s",
           "header": "underline",
           "rowHover": "highlight",
@@ -146,10 +147,10 @@ describe('CompareDocuments', () => {
   });
 
   it('should set selected docs when columns change', () => {
-    const { setSelectedDocs } = renderCompareDocuments();
+    const { replaceSelectedDocs } = renderCompareDocuments();
     const visibleColumns = ['fields_generated-id', '0', '1', '2'];
     mockDataGridProps?.columnVisibility.setVisibleColumns(visibleColumns);
-    expect(setSelectedDocs).toHaveBeenCalledWith(visibleColumns.slice(1));
+    expect(replaceSelectedDocs).toHaveBeenCalledWith(visibleColumns.slice(1));
   });
 
   it('should force show all fields when prop is true', () => {

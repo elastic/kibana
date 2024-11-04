@@ -21,8 +21,4 @@ npx @redocly/cli bundle entrypoint.yaml --output bundled.yaml --ext yaml
 npx @redocly/cli bundle entrypoint.yaml --output bundled.json --ext json
 ```
 
-After generating the json bundle ensure that it is also valid by running the following command:
-
-```bash
-npx @redocly/cli lint bundled.json
-```
+Then join these files with the rest of the Kibana APIs per `oas_docs/README.md`

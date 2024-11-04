@@ -13,7 +13,8 @@ import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 import { booleanRt } from '../runtime_types/boolean_rt';
 import { getIntegerRt } from '../runtime_types/integer_rt';
 import { isRumOrMobileAgentName } from '../../agent_name';
-import { floatRt } from '../runtime_types/float_rt';
+import { floatThreeDecimalPlacesRt } from '../runtime_types/float_three_decimal_places_rt';
+import { floatFourDecimalPlacesRt } from '../runtime_types/float_four_decimal_places_rt';
 import { RawSettingDefinition, SettingDefinition } from './types';
 import { generalSettings } from './general_settings';
 import { javaSettings } from './java_settings';
@@ -45,8 +46,14 @@ function getSettingDefaults(setting: RawSettingDefinition): SettingDefinition {
     }
 
     case 'float': {
+      if (setting.key === 'transaction_sample_rate') {
+        return {
+          validation: floatFourDecimalPlacesRt,
+          ...setting,
+        };
+      }
       return {
-        validation: floatRt,
+        validation: floatThreeDecimalPlacesRt,
         ...setting,
       };
     }

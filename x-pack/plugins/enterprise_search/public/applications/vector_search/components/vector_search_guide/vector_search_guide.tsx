@@ -17,66 +17,56 @@ import {
   EuiHorizontalRule,
   EuiIcon,
   EuiLink,
+  EuiSpacer,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { AI_SEARCH_PLUGIN } from '../../../../../common/constants';
+import { SEMANTIC_SEARCH_PLUGIN } from '../../../../../common/constants';
 import elserIllustration from '../../../../assets/images/elser.svg';
 import nlpIllustration from '../../../../assets/images/nlp.svg';
 import { docLinks } from '../../../shared/doc_links';
+import { HttpLogic } from '../../../shared/http';
 import { KibanaLogic } from '../../../shared/kibana';
 import { SetVectorSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { DevToolsConsoleCodeBlock } from '../dev_tools_console_code_block/dev_tools_console_code_block';
 import { EnterpriseSearchVectorSearchPageTemplate } from '../layout/page_template';
 
-const CREATE_INDEX_SNIPPET = `PUT /image-index
+const CREATE_INDEX_SNIPPET = `PUT /my-index
 {
   "mappings": {
     "properties": {
-      "image-vector": {
+      "vector": {
         "type": "dense_vector",
-        "dims": 3,
-        "index": true,
-        "similarity": "l2_norm"
+        "dims": 3
       },
-      "title-vector": {
-        "type": "dense_vector",
-        "dims": 5,
-        "index": true,
-        "similarity": "l2_norm"
-      },
-      "title": {
+      "text": {
         "type": "text"
-      },
-      "file-type": {
-        "type": "keyword"
       }
     }
   }
 }`;
 
-const INGEST_SNIPPET = `POST /image-index/_bulk?refresh=true
-{ "index": { "_id": "1" } }
-{ "image-vector": [1, 5, -20], "title-vector": [12, 50, -10, 0, 1], "title": "moose family", "file-type": "jpg" }
-{ "index": { "_id": "2" } }
-{ "image-vector": [42, 8, -15], "title-vector": [25, 1, 4, -12, 2], "title": "alpine lake", "file-type": "png" }
-{ "index": { "_id": "3" } }
-{ "image-vector": [15, 11, 23], "title-vector": [1, 5, 25, 50, 20], "title": "full moon", "file-type": "jpg" }`;
-
-const QUERY_SNIPPET = `POST /image-index/_search
+const INGEST_SNIPPET = `POST /my-index/_doc
 {
-  "knn": {
-    "field": "image-vector",
-    "query_vector": [-5, 9, -12],
-    "k": 10,
-    "num_candidates": 100
-  },
-  "fields": [ "title", "file-type" ]
+  "vector": [1, 5, -20],
+  "text": "hello world"
+}`;
+
+const QUERY_SNIPPET = `POST /my-index/_search
+{
+  "size" : 3,
+  "query" : {
+    "knn": {
+      "field": "vector",
+      "query_vector": [1, 5, -20]
+    }
+  }
 }`;
 
 export const VectorSearchGuide: React.FC = () => {
+  const { http } = useValues(HttpLogic);
   const { application } = useValues(KibanaLogic);
 
   return (
@@ -84,7 +74,7 @@ export const VectorSearchGuide: React.FC = () => {
       restrictWidth
       pageHeader={{
         description: (
-          <p>
+          <>
             <FormattedMessage
               id="xpack.enterpriseSearch.vectorSearch.guide.description"
               defaultMessage="Elasticsearch can be used as a vector database, which enables vector search and semantic search use cases."
@@ -99,7 +89,7 @@ export const VectorSearchGuide: React.FC = () => {
                 defaultMessage="Learn more about vector search."
               />
             </EuiLink>
-          </p>
+          </>
         ),
         pageTitle: (
           <FormattedMessage
@@ -120,6 +110,7 @@ export const VectorSearchGuide: React.FC = () => {
               />
             </h2>
           </EuiTitle>
+          <EuiSpacer size="s" />
           <EuiText>
             <p>
               <FormattedMessage
@@ -149,7 +140,7 @@ export const VectorSearchGuide: React.FC = () => {
             <p>
               <FormattedMessage
                 id="xpack.enterpriseSearch.vectorSearch.guide.ingest.description"
-                defaultMessage="Add data to your index to make it searchable."
+                defaultMessage="Add data to Elasticsearch."
               />
             </p>
           </EuiText>
@@ -165,7 +156,7 @@ export const VectorSearchGuide: React.FC = () => {
             <h2>
               <FormattedMessage
                 id="xpack.enterpriseSearch.vectorSearch.guide.query.title"
-                defaultMessage="Build your vector search query"
+                defaultMessage="Perform vector search"
               />
             </h2>
           </EuiTitle>
@@ -189,7 +180,7 @@ export const VectorSearchGuide: React.FC = () => {
             <h2>
               <FormattedMessage
                 id="xpack.enterpriseSearch.vectorSearch.guide.deployedModel.title"
-                defaultMessage="Don’t have a model deployed?"
+                defaultMessage="Want to use semantic search?"
               />
             </h2>
           </EuiTitle>
@@ -197,7 +188,7 @@ export const VectorSearchGuide: React.FC = () => {
             <p>
               <FormattedMessage
                 id="xpack.enterpriseSearch.vectorSearch.guide.deployedModel.description"
-                defaultMessage="Elastic can help you generate embeddings."
+                defaultMessage="Deploy ML models easily with Elastic Inference Endpoints to generate embeddings for your documents."
               />
             </p>
           </EuiText>
@@ -205,16 +196,18 @@ export const VectorSearchGuide: React.FC = () => {
         <EuiFlexItem grow={6}>
           <EuiFlexGroup gutterSize="l" direction="column">
             <EuiCard
-              onClick={() =>
-                application.navigateToApp(AI_SEARCH_PLUGIN.URL.replace(/^(?:\/app\/)?(.*)$/, '$1'))
-              }
+              onClick={() => {
+                application.navigateToUrl(
+                  http.basePath.prepend(`${SEMANTIC_SEARCH_PLUGIN.URL}?model_example=elser`)
+                );
+              }}
               layout="horizontal"
               titleSize="s"
               icon={<EuiIcon type={elserIllustration} size="xxl" />}
               title={
                 <FormattedMessage
                   id="xpack.enterpriseSearch.vectorSearch.guide.deployedModel.elser.title"
-                  defaultMessage="Elastic Learned Sparse Encoder (ELSER)"
+                  defaultMessage="ELSER"
                 />
               }
               description={
@@ -224,22 +217,26 @@ export const VectorSearchGuide: React.FC = () => {
                 />
               }
             />
+
             <EuiCard
-              href={docLinks.textEmbedding}
-              target="_blank"
+              onClick={() => {
+                application.navigateToUrl(
+                  http.basePath.prepend(`${SEMANTIC_SEARCH_PLUGIN.URL}?model_example=e5`)
+                );
+              }}
               layout="horizontal"
               titleSize="s"
               icon={<EuiIcon type={nlpIllustration} size="xxl" />}
               title={
                 <FormattedMessage
                   id="xpack.enterpriseSearch.vectorSearch.guide.deployedModel.byoModel.title"
-                  defaultMessage="Run your models in Elastic"
+                  defaultMessage="E5 Multilingual"
                 />
               }
               description={
                 <FormattedMessage
                   id="xpack.enterpriseSearch.vectorSearch.guide.deployedModel.byoModel.description"
-                  defaultMessage="Learn how to upload compatible third-party models"
+                  defaultMessage="Use E5 to enable semantic search for multiple languages"
                 />
               }
             />

@@ -5,7 +5,6 @@
  * 2.0.
  */
 import React from 'react';
-import {} from '@elastic/eui';
 
 import { NotebookInformation } from '../../common/types';
 import { LoadingPanel } from './loading_panel';

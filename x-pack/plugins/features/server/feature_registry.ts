@@ -15,9 +15,31 @@ import {
   ElasticsearchFeatureConfig,
   ElasticsearchFeature,
   SubFeaturePrivilegeConfig,
+  KibanaFeatureScope,
 } from '../common';
 import { validateKibanaFeature, validateElasticsearchFeature } from './feature_schema';
 import type { ConfigOverridesType } from './config';
+
+/**
+ * Describes parameters used to retrieve all Kibana features.
+ */
+export interface GetKibanaFeaturesParams {
+  /**
+   * If provided, the license will be used to filter out features that require a license higher than the specified one.
+   * */
+  license?: ILicense;
+
+  /**
+   * If true, features that require a license higher than the one provided in the `license` will be included.
+   */
+  ignoreLicense?: boolean;
+
+  /**
+   * If true, deprecated features will be omitted. For backward compatibility reasons, deprecated features are included
+   * in the result by default.
+   */
+  omitDeprecated?: boolean;
+}
 
 export class FeatureRegistry {
   private locked = false;
@@ -39,6 +61,10 @@ export class FeatureRegistry {
 
     if (feature.id in this.kibanaFeatures || feature.id in this.esFeatures) {
       throw new Error(`Feature with id ${feature.id} is already registered.`);
+    }
+
+    if (!feature.scope) {
+      feature.scope = [KibanaFeatureScope.Security];
     }
 
     const featureCopy = cloneDeep(feature);
@@ -164,19 +190,106 @@ export class FeatureRegistry {
     }
   }
 
-  public getAllKibanaFeatures(license?: ILicense, ignoreLicense = false): KibanaFeature[] {
+  /**
+   * Once all features are registered and the registry is locked, this method should validate the integrity of the registered feature set, including any potential cross-feature dependencies.
+   */
+  public validateFeatures() {
+    if (!this.locked) {
+      throw new Error(
+        'Cannot validate features while the registry is not locked and still allows further feature registrations.'
+      );
+    }
+
+    for (const feature of Object.values(this.kibanaFeatures)) {
+      if (!feature.privileges) {
+        continue;
+      }
+
+      // Iterate over all top-level and sub-feature privileges.
+      const isFeatureDeprecated = !!feature.deprecated;
+      for (const [privilegeId, privilege] of [
+        ...Object.entries(feature.privileges),
+        ...collectSubFeaturesPrivileges(feature),
+      ]) {
+        if (isFeatureDeprecated && !privilege.replacedBy) {
+          throw new Error(
+            `Feature "${feature.id}" is deprecated and must define a "replacedBy" property for privilege "${privilegeId}".`
+          );
+        }
+
+        if (!isFeatureDeprecated && privilege.replacedBy) {
+          throw new Error(
+            `Feature "${feature.id}" is not deprecated and must not define a "replacedBy" property for privilege "${privilegeId}".`
+          );
+        }
+
+        const replacedByReferences = privilege.replacedBy
+          ? 'default' in privilege.replacedBy
+            ? [...privilege.replacedBy.default, ...privilege.replacedBy.minimal]
+            : privilege.replacedBy
+          : [];
+        for (const featureReference of replacedByReferences) {
+          const referencedFeature = this.kibanaFeatures[featureReference.feature];
+          if (!referencedFeature) {
+            throw new Error(
+              `Cannot replace privilege "${privilegeId}" of deprecated feature "${feature.id}" with privileges of feature "${featureReference.feature}" since such feature is not registered.`
+            );
+          }
+
+          if (referencedFeature.deprecated) {
+            throw new Error(
+              `Cannot replace privilege "${privilegeId}" of deprecated feature "${feature.id}" with privileges of feature "${featureReference.feature}" since the referenced feature is deprecated.`
+            );
+          }
+
+          // Collect all known feature and sub-feature privileges for the referenced feature.
+          const knownPrivileges = new Map(
+            collectPrivileges(referencedFeature).concat(
+              collectSubFeaturesPrivileges(referencedFeature)
+            )
+          );
+
+          for (const privilegeReference of featureReference.privileges) {
+            const referencedPrivilege = knownPrivileges.get(privilegeReference);
+            if (!referencedPrivilege) {
+              throw new Error(
+                `Cannot replace privilege "${privilegeId}" of deprecated feature "${feature.id}" with privilege "${privilegeReference}" of feature "${featureReference.feature}" since such privilege is not registered.`
+              );
+            }
+
+            if (referencedPrivilege.disabled) {
+              throw new Error(
+                `Cannot replace privilege "${privilegeId}" of deprecated feature "${feature.id}" with disabled privilege "${privilegeReference}" of feature "${featureReference.feature}".`
+              );
+            }
+          }
+        }
+      }
+    }
+  }
+
+  public getAllKibanaFeatures({
+    license,
+    ignoreLicense = false,
+    omitDeprecated = false,
+  }: GetKibanaFeaturesParams = {}): KibanaFeature[] {
     if (!this.locked) {
       throw new Error('Cannot retrieve Kibana features while registration is still open');
     }
 
-    let features = Object.values(this.kibanaFeatures);
-
     const performLicenseCheck = license && !ignoreLicense;
+    const features = [];
+    for (const feature of Object.values(this.kibanaFeatures)) {
+      if (omitDeprecated && feature.deprecated) {
+        continue;
+      }
 
-    if (performLicenseCheck) {
-      features = features.filter((feature) => {
-        const filter = !feature.minimumLicense || license!.hasAtLeast(feature.minimumLicense);
-        if (!filter) return false;
+      if (performLicenseCheck) {
+        const isCompatibleLicense =
+          !feature.minimumLicense || license!.hasAtLeast(feature.minimumLicense);
+        if (!isCompatibleLicense) {
+          continue;
+        }
 
         feature.subFeatures?.forEach((subFeature) => {
           subFeature.privilegeGroups.forEach((group) => {
@@ -186,11 +299,12 @@ export class FeatureRegistry {
             );
           });
         });
+      }
 
-        return true;
-      });
+      features.push(new KibanaFeature(feature));
     }
-    return features.map((featureConfig) => new KibanaFeature(featureConfig));
+
+    return features;
   }
 
   public getAllElasticsearchFeatures(): ElasticsearchFeature[] {
@@ -245,6 +359,16 @@ function applyAutomaticReadPrivilegeGrants(
       ]);
     }
   });
+}
+
+function collectPrivileges(feature: KibanaFeatureConfig) {
+  return Object.entries(feature.privileges ?? {}).flatMap(
+    ([id, privilege]) =>
+      [
+        [id, privilege],
+        [`minimal_${id}`, privilege],
+      ] as Array<[string, FeatureKibanaPrivileges]>
+  );
 }
 
 function collectSubFeaturesPrivileges(feature: KibanaFeatureConfig) {

@@ -52,7 +52,7 @@ describe('UserActionsActivityBar ', () => {
 
     const commentsFilter = screen.getByTestId('user-actions-filter-activity-button-comments');
 
-    userEvent.click(commentsFilter);
+    await userEvent.click(commentsFilter);
 
     await waitFor(() =>
       expect(onUserActionsActivityChanged).toHaveBeenCalledWith({ ...params, type: 'user' })
@@ -118,7 +118,7 @@ describe('UserActionsActivityBar ', () => {
 
     const commentsFilter = screen.getByTestId('user-actions-filter-activity-button-history');
 
-    userEvent.click(commentsFilter);
+    await userEvent.click(commentsFilter);
 
     await waitFor(() =>
       expect(onUserActionsActivityChanged).toHaveBeenCalledWith({

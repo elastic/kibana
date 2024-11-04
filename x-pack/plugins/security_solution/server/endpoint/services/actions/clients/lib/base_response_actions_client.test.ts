@@ -36,13 +36,17 @@ import {
   ENDPOINT_ACTIONS_INDEX,
 } from '../../../../../../common/endpoint/constants';
 import type { DeepMutable } from '../../../../../../common/endpoint/types/utility_types';
-import { set } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
 import { responseActionsClientMock } from '../mocks';
 import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
 import { getResponseActionFeatureKey } from '../../../feature_usage/feature_keys';
 import { isActionSupportedByAgentType as _isActionSupportedByAgentType } from '../../../../../../common/endpoint/service/response_actions/is_response_action_supported';
 import { EndpointActionGenerator } from '../../../../../../common/endpoint/data_generators/endpoint_action_generator';
 import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
+import {
+  ENDPOINT_RESPONSE_ACTION_SENT_ERROR_EVENT,
+  ENDPOINT_RESPONSE_ACTION_SENT_EVENT,
+} from '../../../../../lib/telemetry/event_based/events';
 
 jest.mock('../../action_details_by_id', () => {
   const original = jest.requireActual('../../action_details_by_id');
@@ -533,6 +537,100 @@ describe('ResponseActionsClientImpl base class', () => {
             },
           });
         });
+      });
+    });
+
+    describe('Telemetry', () => {
+      beforeEach(() => {
+        // @ts-expect-error
+        endpointAppContextService.experimentalFeatures.responseActionsTelemetryEnabled = true;
+      });
+
+      it('should send action creation success telemetry for manual actions', async () => {
+        await baseClassMock.writeActionRequestToEndpointIndex(indexDocOptions);
+
+        expect(endpointAppContextService.getTelemetryService().reportEvent).toHaveBeenCalledWith(
+          ENDPOINT_RESPONSE_ACTION_SENT_EVENT.eventType,
+          {
+            responseActions: {
+              actionId: expect.any(String),
+              agentType: indexDocOptions.agent_type,
+              command: indexDocOptions.command,
+              isAutomated: false,
+            },
+          }
+        );
+      });
+
+      it('should send action creation success telemetry for automated actions', async () => {
+        constructorOptions.isAutomated = true;
+        baseClassMock = new MockClassWithExposedProtectedMembers(constructorOptions);
+
+        await baseClassMock.writeActionRequestToEndpointIndex(indexDocOptions);
+
+        expect(endpointAppContextService.getTelemetryService().reportEvent).toHaveBeenCalledWith(
+          ENDPOINT_RESPONSE_ACTION_SENT_EVENT.eventType,
+          {
+            responseActions: {
+              actionId: expect.any(String),
+              agentType: indexDocOptions.agent_type,
+              command: indexDocOptions.command,
+              isAutomated: true,
+            },
+          }
+        );
+      });
+
+      it('should send error telemetry if action creation fails', async () => {
+        esClient.index.mockImplementation(async () => {
+          throw new Error('test error');
+        });
+        const responsePromise = baseClassMock.writeActionRequestToEndpointIndex(indexDocOptions);
+        await expect(responsePromise).rejects.toBeInstanceOf(ResponseActionsClientError);
+
+        expect(endpointAppContextService.getTelemetryService().reportEvent).toHaveBeenCalledWith(
+          ENDPOINT_RESPONSE_ACTION_SENT_ERROR_EVENT.eventType,
+          {
+            responseActions: {
+              agentType: indexDocOptions.agent_type,
+              command: indexDocOptions.command,
+              error: 'test error',
+            },
+          }
+        );
+      });
+    });
+
+    describe('Telemetry (with feature disabled)', () => {
+      // although this is redundant, it is here to make sure that it works as expected wit the feature disabled
+      beforeEach(() => {
+        // @ts-expect-error
+        endpointAppContextService.experimentalFeatures.responseActionsTelemetryEnabled = false;
+      });
+
+      it('should not send action creation success telemetry for manual actions', async () => {
+        await baseClassMock.writeActionRequestToEndpointIndex(indexDocOptions);
+
+        expect(endpointAppContextService.getTelemetryService().reportEvent).not.toHaveBeenCalled();
+      });
+
+      it('should not send action creation success telemetry for automated actions', async () => {
+        constructorOptions.isAutomated = true;
+        baseClassMock = new MockClassWithExposedProtectedMembers(constructorOptions);
+
+        await baseClassMock.writeActionRequestToEndpointIndex(indexDocOptions);
+
+        expect(endpointAppContextService.getTelemetryService().reportEvent).not.toHaveBeenCalled();
+      });
+
+      it('should not send error telemetry if action creation fails', async () => {
+        esClient.index.mockImplementation(async () => {
+          throw new Error('test error');
+        });
+        const responsePromise = baseClassMock.writeActionRequestToEndpointIndex(indexDocOptions);
+        await expect(responsePromise).rejects.toBeInstanceOf(ResponseActionsClientError);
+
+        expect(endpointAppContextService.getTelemetryService().reportEvent).not.toHaveBeenCalled();
       });
     });
   });

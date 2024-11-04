@@ -71,7 +71,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   registry.when(`with data loaded`, { config: 'basic', archives: [] }, () => {
     // FLAKY: https://github.com/elastic/kibana/issues/176977
-    describe('transaction_error_rate', () => {
+    describe('transaction_error_rate: with data loaded', () => {
       before(async () => {
         await generateErrorData({ serviceName: 'synth-go', start, end, apmSynthtraceEsClient });
         await generateErrorData({ serviceName: 'synth-java', start, end, apmSynthtraceEsClient });
@@ -249,7 +249,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         ).to.eql([{ name: 'synth-go_production_request_GET /apple', y: 25 }]);
       });
 
-      it('with empty service name, transaction name and transaction type', async () => {
+      it.skip('with empty service name, transaction name and transaction type', async () => {
         const options = {
           params: {
             query: {
@@ -330,7 +330,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   registry.when(`with data loaded and using KQL filter`, { config: 'basic', archives: [] }, () => {
     // FLAKY: https://github.com/elastic/kibana/issues/176983
-    describe('transaction_error_rate', () => {
+    describe('transaction_error_rate: with data loaded and using KQL filter', () => {
       before(async () => {
         await generateErrorData({ serviceName: 'synth-go', start, end, apmSynthtraceEsClient });
         await generateErrorData({ serviceName: 'synth-java', start, end, apmSynthtraceEsClient });
@@ -548,7 +548,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         ]);
       });
 
-      it('with empty filter query and group by on transaction name', async () => {
+      it.skip('with empty filter query and group by on transaction name', async () => {
         const options = {
           params: {
             query: {

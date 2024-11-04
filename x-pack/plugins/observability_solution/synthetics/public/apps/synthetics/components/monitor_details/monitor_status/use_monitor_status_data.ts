@@ -5,75 +5,153 @@
  * 2.0.
  */
 
-import { useCallback, useMemo, useState } from 'react';
-import { throttle } from 'lodash';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import useDebounce from 'react-use/lib/useDebounce';
+import { useLocation } from 'react-router-dom';
 
-import { scheduleToMinutes } from '../../../../../../common/lib/schedule_to_time';
 import { useSyntheticsRefreshContext } from '../../../contexts/synthetics_refresh_context';
 
 import { useSelectedMonitor } from '../hooks/use_selected_monitor';
-import { usePingStatuses } from '../hooks/use_ping_statuses';
 import {
   dateToMilli,
   createTimeBuckets,
-  createStatusTimeBins,
   CHART_CELL_WIDTH,
   indexBinsByEndTime,
   MonitorStatusPanelProps,
+  createStatusTimeBins,
+  MonitorStatusTimeBin,
 } from './monitor_status_data';
+import { useSelectedLocation } from '../hooks/use_selected_location';
+import {
+  clearMonitorStatusHeatmapAction,
+  quietGetMonitorStatusHeatmapAction,
+  selectHeatmap,
+} from '../../../state/status_heatmap';
+import type { MonitorStatusHeatmapBucket } from '../../../../../../common/runtime_types';
 
-export const useMonitorStatusData = ({
-  from,
-  to,
-}: Pick<MonitorStatusPanelProps, 'from' | 'to'>) => {
+type Props = Pick<MonitorStatusPanelProps, 'from' | 'to'> & {
+  initialSizeRef?: React.MutableRefObject<HTMLDivElement | null>;
+};
+
+export const useMonitorStatusData = ({ from, to, initialSizeRef }: Props) => {
   const { lastRefresh } = useSyntheticsRefreshContext();
   const { monitor } = useSelectedMonitor();
-  const monitorInterval = Math.max(3, monitor?.schedule ? scheduleToMinutes(monitor?.schedule) : 3);
+  const location = useSelectedLocation();
+  const pageLocation = useLocation();
 
   const fromMillis = dateToMilli(from);
   const toMillis = dateToMilli(to);
   const totalMinutes = Math.ceil(toMillis - fromMillis) / (1000 * 60);
-  const pingStatuses = usePingStatuses({
-    from: fromMillis,
-    to: toMillis,
-    size: Math.min(10000, Math.ceil((totalMinutes / monitorInterval) * 2)), // Acts as max size between from - to
-    monitorInterval,
+
+  const [binsAvailableByWidth, setBinsAvailableByWidth] = useState<number | null>(null);
+  const [debouncedBinsCount, setDebouncedCount] = useState<number | null>(null);
+
+  const minsPerBin =
+    debouncedBinsCount !== null ? Math.floor(totalMinutes / debouncedBinsCount) : null;
+
+  const dispatch = useDispatch();
+  const { heatmap: dateHistogram, loading } = useSelector(selectHeatmap);
+
+  useEffect(() => {
+    if (binsAvailableByWidth === null && initialSizeRef?.current) {
+      setBinsAvailableByWidth(Math.floor(initialSizeRef?.current?.clientWidth / CHART_CELL_WIDTH));
+    }
+  }, [binsAvailableByWidth, initialSizeRef]);
+
+  useEffect(() => {
+    if (monitor?.id && location?.label && debouncedBinsCount !== null && !!minsPerBin) {
+      dispatch(
+        quietGetMonitorStatusHeatmapAction.get({
+          monitorId: monitor.id,
+          location: location.label,
+          from,
+          to,
+          interval: minsPerBin,
+        })
+      );
+    }
+  }, [
+    dispatch,
+    from,
+    to,
+    minsPerBin,
+    location?.label,
+    monitor?.id,
     lastRefresh,
-  });
+    debouncedBinsCount,
+  ]);
 
-  const [binsAvailableByWidth, setBinsAvailableByWidth] = useState(50);
-  const intervalByWidth = Math.floor(
-    Math.max(monitorInterval, totalMinutes / binsAvailableByWidth)
-  );
+  useEffect(() => {
+    dispatch(clearMonitorStatusHeatmapAction());
+  }, [dispatch, pageLocation.pathname]);
 
-  // Disabling deps warning as we wanna throttle the callback
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   const handleResize = useCallback(
-    throttle((e: { width: number; height: number }) => {
-      setBinsAvailableByWidth(Math.floor(e.width / CHART_CELL_WIDTH));
-    }, 500),
+    (e: { width: number; height: number }) =>
+      setBinsAvailableByWidth(Math.floor(e.width / CHART_CELL_WIDTH)),
     []
   );
 
-  const { timeBins, timeBinsByEndTime, xDomain } = useMemo(() => {
-    const timeBuckets = createTimeBuckets(intervalByWidth, fromMillis, toMillis);
-    const bins = createStatusTimeBins(timeBuckets, pingStatuses);
-    const indexedBins = indexBinsByEndTime(bins);
+  useDebounce(
+    async () => {
+      setDebouncedCount(binsAvailableByWidth === 0 ? null : binsAvailableByWidth);
+    },
+    500,
+    [binsAvailableByWidth]
+  );
 
-    const timeDomain = {
-      min: bins?.[0]?.end ?? fromMillis,
-      max: bins?.[bins.length - 1]?.end ?? toMillis,
-    };
-
-    return { timeBins: bins, timeBinsByEndTime: indexedBins, xDomain: timeDomain };
-  }, [intervalByWidth, pingStatuses, fromMillis, toMillis]);
+  const { timeBins, timeBinMap, xDomain } = useBins({
+    fromMillis,
+    toMillis,
+    dateHistogram,
+    minsPerBin,
+  });
 
   return {
-    intervalByWidth,
+    loading,
+    minsPerBin,
     timeBins,
+    getTimeBinByXValue: (xValue: number | undefined) =>
+      xValue === undefined ? undefined : timeBinMap.get(xValue),
     xDomain,
     handleResize,
-    getTimeBinByXValue: (xValue: number | undefined) =>
-      xValue === undefined ? undefined : timeBinsByEndTime.get(xValue),
   };
 };
+
+export const useBins = ({
+  minsPerBin,
+  fromMillis,
+  toMillis,
+  dateHistogram,
+}: {
+  minsPerBin: number | null;
+  fromMillis: number;
+  toMillis: number;
+  dateHistogram?: MonitorStatusHeatmapBucket[];
+}) =>
+  useMemo((): {
+    timeBins: MonitorStatusTimeBin[];
+    timeBinMap: Map<number, MonitorStatusTimeBin>;
+    xDomain: { min: number; max: number };
+  } => {
+    if (minsPerBin === null) {
+      return {
+        timeBins: [],
+        timeBinMap: new Map(),
+        xDomain: {
+          min: fromMillis,
+          max: toMillis,
+        },
+      };
+    }
+    const timeBuckets = createTimeBuckets(minsPerBin ?? 50, fromMillis, toMillis);
+    const bins = createStatusTimeBins(timeBuckets, dateHistogram);
+    return {
+      timeBins: bins,
+      timeBinMap: indexBinsByEndTime(bins),
+      xDomain: {
+        min: bins?.[0]?.end ?? fromMillis,
+        max: bins?.at(-1)?.end ?? toMillis,
+      },
+    };
+  }, [minsPerBin, fromMillis, toMillis, dateHistogram]);

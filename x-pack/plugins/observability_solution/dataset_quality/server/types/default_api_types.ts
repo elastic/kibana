@@ -7,11 +7,23 @@
 
 import { isoToEpochRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
-import { dataStreamTypesRt } from '../../common/types';
+import { DataStreamType, dataStreamTypesRt } from '../../common/types';
 
-export const typeRt = t.partial({
+export const typeRt = t.type({
   type: dataStreamTypesRt,
 });
+
+export const typesRt = new t.Type<DataStreamType[], DataStreamType[], unknown>(
+  'typesRt',
+  (input: unknown): input is DataStreamType[] =>
+    (typeof input === 'string' && input.split(',').every((value) => dataStreamTypesRt.is(value))) ||
+    (Array.isArray(input) && input.every((value) => dataStreamTypesRt.is(value))),
+  (input, context) =>
+    typeof input === 'string' && input.split(',').every((value) => dataStreamTypesRt.is(value))
+      ? t.success(input.split(',') as DataStreamType[])
+      : t.failure(input, context),
+  t.identity
+);
 
 export const rangeRt = t.type({
   start: isoToEpochRt,

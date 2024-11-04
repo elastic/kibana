@@ -10,13 +10,12 @@ import {
   KBN_SCREENSHOT_MODE_HEADER,
   ScreenshotModePluginSetup,
 } from '@kbn/screenshot-mode-plugin/server';
+import { ConfigType } from '@kbn/screenshotting-server';
 import { truncate } from 'lodash';
-import open from 'opn';
-import { ElementHandle, Page, EvaluateFunc, HTTPResponse } from 'puppeteer';
+import { ElementHandle, EvaluateFunc, HTTPResponse, Page } from 'puppeteer';
 import { Subject } from 'rxjs';
 import { parse as parseUrl } from 'url';
 import { getDisallowedOutgoingUrlError } from '.';
-import { ConfigType } from '../../config';
 import { Layout } from '../../layouts';
 import { getPrintLayoutSelectors } from '../../layouts/print_layout';
 import { allowRequest } from '../network_policy';
@@ -140,10 +139,6 @@ export class HeadlessChromiumDriver {
     this.registerListeners(url, headers, logger);
     await this.page.goto(url, { waitUntil: 'domcontentloaded' });
 
-    if (this.config.browser.chromium.inspect) {
-      await this.launchDebugger();
-    }
-
     await this.waitForSelector(
       pageLoadSelector,
       { timeout },
@@ -244,15 +239,17 @@ export class HeadlessChromiumDriver {
     if (error) {
       await this.injectScreenshottingErrorHeader(error, getPrintLayoutSelectors().screenshot);
     }
-    return this.page.pdf({
-      format: 'a4',
-      preferCSSPageSize: true,
-      scale: 1,
-      landscape: false,
-      displayHeaderFooter: true,
-      headerTemplate: await getHeaderTemplate({ title }),
-      footerTemplate: await getFooterTemplate({ logo }),
-    });
+    return Buffer.from(
+      await this.page.pdf({
+        format: 'a4',
+        preferCSSPageSize: true,
+        scale: 1,
+        landscape: false,
+        displayHeaderFooter: true,
+        headerTemplate: await getHeaderTemplate({ title }),
+        footerTemplate: await getFooterTemplate({ logo }),
+      })
+    );
   }
 
   /*
@@ -272,6 +269,7 @@ export class HeadlessChromiumDriver {
     }
 
     const { boundingClientRect, scroll } = elementPosition;
+
     const screenshot = await this.page.screenshot({
       clip: {
         x: boundingClientRect.left + scroll.x,
@@ -282,8 +280,8 @@ export class HeadlessChromiumDriver {
       captureBeyondViewport: false, // workaround for an internal resize. See: https://github.com/puppeteer/puppeteer/issues/7043
     });
 
-    if (Buffer.isBuffer(screenshot)) {
-      return screenshot;
+    if (screenshot.byteLength) {
+      return Buffer.from(screenshot);
     }
 
     if (typeof screenshot === 'string') {
@@ -447,26 +445,6 @@ export class HeadlessChromiumDriver {
     });
 
     this.listenersAttached = true;
-  }
-
-  private async launchDebugger() {
-    // In order to pause on execution we have to reach more deeply into Chromiums Devtools Protocol,
-    // and more specifically, for the page being used. _client is per-page.
-    // In order to get the inspector running, we have to know the page's internal ID (again, private)
-    // in order to construct the final debugging URL.
-
-    const client = this.page._client();
-    const target = this.page.target();
-    const targetId = target._targetId;
-
-    await client.send('Debugger.enable');
-    await client.send('Debugger.pause');
-    const wsEndpoint = this.page.browser().wsEndpoint();
-    const { port } = parseUrl(wsEndpoint);
-
-    await open(
-      `http://localhost:${port}/devtools/inspector.html?ws=localhost:${port}/devtools/page/${targetId}`
-    );
   }
 
   private _shouldUseCustomHeaders(sourceUrl: string, targetUrl: string) {

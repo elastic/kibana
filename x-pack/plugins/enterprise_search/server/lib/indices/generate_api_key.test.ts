@@ -69,7 +69,7 @@ describe('generateApiKey lib function for connector clients', () => {
       name: 'index_name-connector',
       role_descriptors: {
         ['index-name-connector-role']: {
-          cluster: ['monitor'],
+          cluster: ['monitor', 'manage_connector'],
           index: [
             {
               names: ['index_name', '.search-acl-filter-index_name', `${CONNECTORS_INDEX}*`],
@@ -108,7 +108,7 @@ describe('generateApiKey lib function for connector clients', () => {
       name: 'search-test-connector',
       role_descriptors: {
         ['search-test-connector-role']: {
-          cluster: ['monitor'],
+          cluster: ['monitor', 'manage_connector'],
           index: [
             {
               names: ['search-test', '.search-acl-filter-search-test', `${CONNECTORS_INDEX}*`],
@@ -159,7 +159,7 @@ describe('generateApiKey lib function for connector clients', () => {
       name: 'index_name-connector',
       role_descriptors: {
         ['index-name-connector-role']: {
-          cluster: ['monitor'],
+          cluster: ['monitor', 'manage_connector'],
           index: [
             {
               names: ['index_name', '.search-acl-filter-index_name', `${CONNECTORS_INDEX}*`],
@@ -229,7 +229,7 @@ describe('generateApiKey lib function for native connectors', () => {
       name: 'index_name-connector',
       role_descriptors: {
         ['index-name-connector-role']: {
-          cluster: ['monitor'],
+          cluster: ['monitor', 'manage_connector'],
           index: [
             {
               names: ['index_name', '.search-acl-filter-index_name', `${CONNECTORS_INDEX}*`],
@@ -270,7 +270,7 @@ describe('generateApiKey lib function for native connectors', () => {
       name: 'search-test-connector',
       role_descriptors: {
         ['search-test-connector-role']: {
-          cluster: ['monitor'],
+          cluster: ['monitor', 'manage_connector'],
           index: [
             {
               names: ['search-test', '.search-acl-filter-search-test', `${CONNECTORS_INDEX}*`],
@@ -323,7 +323,7 @@ describe('generateApiKey lib function for native connectors', () => {
       name: 'index_name-connector',
       role_descriptors: {
         ['index-name-connector-role']: {
-          cluster: ['monitor'],
+          cluster: ['monitor', 'manage_connector'],
           index: [
             {
               names: ['index_name', '.search-acl-filter-index_name', `${CONNECTORS_INDEX}*`],

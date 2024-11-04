@@ -8,44 +8,20 @@
 import React from 'react';
 import { Redirect } from 'react-router-dom';
 
-import { useValues } from 'kea';
-
 import { Route, Routes } from '@kbn/shared-ux-router';
 
-import { isVersionMismatch } from '../../../common/is_version_mismatch';
 import { InitialAppData } from '../../../common/types';
-import { ErrorStatePrompt } from '../shared/error_state';
-import { HttpLogic } from '../shared/http';
-import { VersionMismatchPage } from '../shared/version_mismatch';
 
 import { InferenceEndpoints } from './components/inference_endpoints';
 import { NotFound } from './components/not_found';
-import { INFERENCE_ENDPOINTS_PATH, ERROR_STATE_PATH, ROOT_PATH } from './routes';
+import { INFERENCE_ENDPOINTS_PATH, ROOT_PATH } from './routes';
 
 export const EnterpriseSearchRelevance: React.FC<InitialAppData> = (props) => {
-  const { errorConnectingMessage } = useValues(HttpLogic);
-  const { enterpriseSearchVersion, kibanaVersion } = props;
-  const incompatibleVersions = isVersionMismatch(enterpriseSearchVersion, kibanaVersion);
-
-  const showView = () => {
-    if (incompatibleVersions) {
-      return (
-        <VersionMismatchPage
-          enterpriseSearchVersion={enterpriseSearchVersion}
-          kibanaVersion={kibanaVersion}
-        />
-      );
-    }
-
-    return <EnterpriseSearchRelevanceConfigured {...(props as Required<InitialAppData>)} />;
-  };
-
   return (
     <Routes>
-      <Route exact path={ERROR_STATE_PATH}>
-        {errorConnectingMessage ? <ErrorStatePrompt /> : <Redirect to={INFERENCE_ENDPOINTS_PATH} />}
+      <Route>
+        <EnterpriseSearchRelevanceConfigured {...(props as Required<InitialAppData>)} />
       </Route>
-      <Route>{showView()}</Route>
     </Routes>
   );
 };

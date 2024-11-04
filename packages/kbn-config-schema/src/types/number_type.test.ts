@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { schema } from '../..';
@@ -60,6 +61,26 @@ describe('#max', () => {
   test('returns error when larger number', () => {
     expect(() => schema.number({ max: 2 }).validate(3)).toThrowErrorMatchingInlineSnapshot(
       `"Value must be equal to or lower than [2]."`
+    );
+  });
+});
+
+describe('#unsafe', () => {
+  it('rejects unsafe numbers when undefined', () => {
+    expect(() => schema.number().validate(9007199254740992)).toThrowErrorMatchingInlineSnapshot(
+      `"\\"value\\" must be a safe number"`
+    );
+  });
+
+  it('rejects unsafe numbers when false', () => {
+    expect(() =>
+      schema.number({ unsafe: false }).validate(9007199254740992)
+    ).toThrowErrorMatchingInlineSnapshot(`"\\"value\\" must be a safe number"`);
+  });
+
+  it('accepts unsafe numbers when true', () => {
+    expect(schema.number({ unsafe: true }).validate(9007199254740992)).toBeGreaterThan(
+      9007199254740991
     );
   });
 });

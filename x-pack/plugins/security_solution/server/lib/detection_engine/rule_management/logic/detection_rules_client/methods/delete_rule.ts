@@ -6,9 +6,13 @@
  */
 
 import type { RulesClient } from '@kbn/alerting-plugin/server';
-import type { DeleteRuleArgs } from '../detection_rules_client_interface';
+import type { RuleObjectId } from '../../../../../../../common/api/detection_engine';
 
-export const deleteRule = async (rulesClient: RulesClient, args: DeleteRuleArgs): Promise<void> => {
-  const { ruleId } = args;
+interface DeleteRuleParams {
+  rulesClient: RulesClient;
+  ruleId: RuleObjectId;
+}
+
+export const deleteRule = async ({ rulesClient, ruleId }: DeleteRuleParams): Promise<void> => {
   await rulesClient.delete({ id: ruleId });
 };

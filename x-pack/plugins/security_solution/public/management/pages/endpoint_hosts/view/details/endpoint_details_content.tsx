@@ -116,7 +116,7 @@ export const EndpointDetailsContent = memo<EndpointDetailsContentProps>(
               policyId={hostInfo.metadata.Endpoint.policy.applied.id}
               revision={hostInfo.metadata.Endpoint.policy.applied.endpoint_policy_version}
               isOutdated={isPolicyOutOfDate(hostInfo.metadata.Endpoint.policy.applied, policyInfo)}
-              policyExists={!missingPolicies[hostInfo.metadata.Endpoint.policy.applied.id]}
+              policyExists={!missingPolicies.has(hostInfo.metadata.Endpoint.policy.applied.id)}
               data-test-subj="policyDetailsValue"
             >
               {hostInfo.metadata.Endpoint.policy.applied.name}

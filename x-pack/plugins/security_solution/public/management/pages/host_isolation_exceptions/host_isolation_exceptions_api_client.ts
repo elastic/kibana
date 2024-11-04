@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID } from '@kbn/securitysolution-list-constants';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import type { HttpStart } from '@kbn/core/public';
 import { ExceptionsListApiClient } from '../../services/exceptions_list/exceptions_list_api_client';
 import { HOST_ISOLATION_EXCEPTIONS_LIST_DEFINITION } from './constants';
@@ -19,7 +19,7 @@ export class HostIsolationExceptionsApiClient extends ExceptionsListApiClient {
   constructor(http: HttpStart) {
     super(
       http,
-      ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID,
+      ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id,
       HOST_ISOLATION_EXCEPTIONS_LIST_DEFINITION
     );
   }
@@ -27,7 +27,7 @@ export class HostIsolationExceptionsApiClient extends ExceptionsListApiClient {
   public static getInstance(http: HttpStart): ExceptionsListApiClient {
     return super.getInstance(
       http,
-      ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID,
+      ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id,
       HOST_ISOLATION_EXCEPTIONS_LIST_DEFINITION
     );
   }

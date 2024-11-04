@@ -11,6 +11,7 @@ import type { Capabilities, CapabilitiesSwitcher, CoreSetup, Logger } from '@kbn
 import type { KibanaFeature } from '@kbn/features-plugin/server';
 
 import type { Space } from '../../common';
+import { withSpaceSolutionDisabledFeatures } from '../lib/utils/space_solution_disabled_features';
 import type { PluginsStart } from '../plugin';
 import type { SpacesServiceStart } from '../spaces_service';
 
@@ -61,7 +62,11 @@ function toggleDisabledFeatures(
   capabilities: Capabilities,
   activeSpace: Space
 ) {
-  const disabledFeatureKeys = activeSpace.disabledFeatures;
+  const disabledFeatureKeys = withSpaceSolutionDisabledFeatures(
+    features,
+    activeSpace.disabledFeatures,
+    activeSpace.solution
+  );
 
   const { enabledFeatures, disabledFeatures } = features.reduce(
     (acc, feature) => {
@@ -98,7 +103,7 @@ function toggleDisabledFeatures(
   for (const feature of disabledFeatures) {
     // Disable associated navLink, if one exists
     feature.app.forEach((app) => {
-      if (navLinks.hasOwnProperty(app) && !enabledAppEntries.has(app)) {
+      if (Object.hasOwn(navLinks, app) && !enabledAppEntries.has(app)) {
         navLinks[app] = false;
       }
     });
@@ -117,8 +122,8 @@ function toggleDisabledFeatures(
       sectionItems.forEach((item) => {
         const enabledManagementEntriesSection = enabledManagementEntries.get(sectionId);
         if (
-          managementItems.hasOwnProperty(sectionId) &&
-          managementItems[sectionId].hasOwnProperty(item)
+          Object.hasOwn(managementItems, sectionId) &&
+          Object.hasOwn(managementItems[sectionId], item)
         ) {
           const isEnabledElsewhere = (enabledManagementEntriesSection ?? []).includes(item);
           if (!isEnabledElsewhere) {
@@ -129,7 +134,7 @@ function toggleDisabledFeatures(
     });
 
     // Disable "sub features" that match the disabled feature
-    if (capabilities.hasOwnProperty(feature.id)) {
+    if (Object.hasOwn(capabilities, feature.id)) {
       const capability = capabilities[feature.id];
       Object.keys(capability).forEach((featureKey) => {
         capability[featureKey] = false;

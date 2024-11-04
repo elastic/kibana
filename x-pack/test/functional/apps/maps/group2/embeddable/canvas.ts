@@ -9,26 +9,26 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['canvas', 'common', 'maps']);
+  const { canvas, maps } = getPageObjects(['canvas', 'maps']);
   const retry = getService('retry');
 
   describe('Map embeddable in canvas', () => {
     before(async () => {
-      await PageObjects.canvas.goToListingPage();
-      await PageObjects.canvas.loadFirstWorkpad('Canvas with map');
+      await canvas.goToListingPage();
+      await canvas.loadFirstWorkpad('Canvas with map');
     });
 
     it('should render map embeddable', async () => {
       await retry.try(async () => {
-        const embeddableCount = await PageObjects.canvas.getEmbeddableCount();
+        const embeddableCount = await canvas.getEmbeddableCount();
         expect(embeddableCount).to.eql(1);
       });
-      await PageObjects.maps.waitForLayersToLoad();
-      expect(await PageObjects.maps.doesLayerExist('geo_shapes*')).to.equal(true);
+      await maps.waitForLayersToLoad();
+      expect(await maps.doesLayerExist('geo_shapes*')).to.equal(true);
     });
 
     it('should not show draw controls', async () => {
-      await PageObjects.maps.expectMissingToolsControl();
+      await maps.expectMissingToolsControl();
     });
   });
 }

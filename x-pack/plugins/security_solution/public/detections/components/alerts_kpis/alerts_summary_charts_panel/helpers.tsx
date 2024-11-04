@@ -7,12 +7,7 @@
 import type { SummaryChartsAgg } from './types';
 import type { AlertSearchResponse } from '../../../containers/detection_engine/alerts/types';
 import { parseSeverityData, getIsAlertsBySeverityAgg } from '../severity_level_panel/helpers';
-import {
-  parseAlertsTypeData,
-  getIsAlertsByTypeAgg,
-  parseAlertsRuleData,
-  getIsAlertsByRuleAgg,
-} from '../alerts_by_type_panel/helpers';
+import { parseAlertsRuleData, getIsAlertsByRuleAgg } from '../alerts_by_rule_panel/helpers';
 import {
   parseAlertsGroupingData,
   getIsAlertsByGroupingAgg,
@@ -20,14 +15,11 @@ import {
 import {
   parseChartCollapseData,
   getIsChartCollapseAgg,
-} from '../../../pages/detection_engine/chart_panels/chart_collapse/helpers';
+} from '../chart_panels/chart_collapse/helpers';
 
 export const parseData = (data: AlertSearchResponse<{}, SummaryChartsAgg>) => {
   if (getIsAlertsBySeverityAgg(data)) {
     return parseSeverityData(data);
-  }
-  if (getIsAlertsByTypeAgg(data)) {
-    return parseAlertsTypeData(data);
   }
   if (getIsAlertsByRuleAgg(data)) {
     return parseAlertsRuleData(data);

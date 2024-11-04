@@ -1,16 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useEffect, useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { NumberInputOption } from '@kbn/vis-default-editor-plugin/public';
+import { NumberInputOption, NumberInputOptionProps } from '@kbn/vis-default-editor-plugin/public';
 
 import { Scale, ScaleType } from '../../../../types';
 import { SetScale } from './value_axis_options';
@@ -54,7 +55,7 @@ function YExtents({ scale, setScale, setMultipleValidity }: YExtentsProps) {
 
   const isValid = !errors.length;
 
-  const setExtents = useCallback(
+  const setExtents = useCallback<NumberInputOptionProps<'min' | 'max'>['setValue']>(
     (paramName, value) => {
       setScale(paramName, value === '' ? null : value);
     },

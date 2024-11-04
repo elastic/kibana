@@ -11,13 +11,20 @@
 export const AIOPS_PLUGIN_ID = 'aiops';
 
 export const AIOPS_API_ENDPOINT = {
+  LOG_RATE_ANALYSIS_FIELD_CANDIDATES: '/internal/aiops/log_rate_analysis/field_candidates',
   LOG_RATE_ANALYSIS: '/internal/aiops/log_rate_analysis',
   CATEGORIZATION_FIELD_VALIDATION: '/internal/aiops/categorization_field_validation',
 } as const;
 
-export const AIOPS_TELEMETRY_ID = {
-  AIOPS_DEFAULT_SOURCE: 'ml_aiops_labs',
-  AIOPS_ANALYSIS_RUN_ORIGIN: 'aiops-analysis-run-origin',
-} as const;
+/**
+ * Used for telemetry purposes to track the origin of the analysis run.
+ */
+export const AIOPS_ANALYSIS_RUN_ORIGIN = 'aiops-analysis-run-origin';
 
-export const EMBEDDABLE_ORIGIN = 'embeddable';
+export const AIOPS_EMBEDDABLE_ORIGIN = {
+  CASES: 'cases',
+  DASHBOARD: 'dashboard',
+  DEFAULT: 'embeddable',
+  DISCOVER: 'discover',
+  ML_AIOPS_LABS: 'ml_aiops_labs',
+} as const;

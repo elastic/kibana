@@ -5,14 +5,6 @@
  * 2.0.
  */
 
-import type { TimelineItem } from '@kbn/timelines-plugin/common';
-import type { TimelineModel } from '../../store/model';
-
-export interface TimelineDataGridCellContext {
-  events: TimelineItem[];
-  pinnedEventIds: TimelineModel['pinnedEventIds'];
-  eventIdsAddingNotes: Set<string>;
-  onToggleShowNotes: (eventId?: string) => void;
-  eventIdToNoteIds: Record<string, string[]>;
-  refetch: () => void;
+export interface UnifiedTimelineDataGridCellContext {
+  expandedEventId?: string;
 }

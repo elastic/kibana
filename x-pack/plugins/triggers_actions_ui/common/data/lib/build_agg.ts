@@ -26,12 +26,15 @@ export interface BuildAggregationOpts {
     resultLimit?: number;
     conditionScript: string;
   };
+  loggerCb?: (message: string) => void;
 }
 
 export const BUCKET_SELECTOR_PATH_NAME = 'compareValue';
 export const BUCKET_SELECTOR_FIELD = `params.${BUCKET_SELECTOR_PATH_NAME}`;
 export const DEFAULT_GROUPS = 100;
 export const MAX_SOURCE_FIELDS_TO_COPY = 10;
+
+const MAX_TOP_HITS_SIZE = 100;
 
 export const isCountAggregation = (aggType: string) => aggType === 'count';
 export const isGroupAggregation = (termField?: string | string[]) => !!termField;
@@ -45,6 +48,7 @@ export const buildAggregation = ({
   sourceFieldsParams,
   condition,
   topHitsSize,
+  loggerCb,
 }: BuildAggregationOpts): Record<string, AggregationsAggregationContainer> => {
   const aggContainer: AggregationsAggregationContainer = {
     aggs: {},
@@ -165,6 +169,11 @@ export const buildAggregation = ({
   }
 
   if (isGroupAgg && topHitsSize) {
+    if (topHitsSize > MAX_TOP_HITS_SIZE) {
+      topHitsSize = MAX_TOP_HITS_SIZE;
+      if (loggerCb) loggerCb(`Top hits size is capped at ${MAX_TOP_HITS_SIZE}`);
+    }
+
     aggParent.aggs = {
       ...aggParent.aggs,
       topHitsAgg: {

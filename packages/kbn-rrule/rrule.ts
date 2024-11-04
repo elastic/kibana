@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import moment, { Moment } from 'moment-timezone';
 
 export enum Frequency {
@@ -14,6 +16,7 @@ export enum Frequency {
   DAILY = 3,
   HOURLY = 4,
   MINUTELY = 5,
+  SECONDLY = 6,
 }
 
 export enum Weekday {
@@ -263,6 +266,13 @@ export const getNextRecurrences = function ({
     }
     case Frequency.MINUTELY: {
       const nextRef = moment(refDT).add(interval, 'm');
+      return getMinuteOfRecurrences({
+        refDT: nextRef,
+        ...opts,
+      });
+    }
+    case Frequency.SECONDLY: {
+      const nextRef = moment(refDT).add(interval, 's');
       return getMinuteOfRecurrences({
         refDT: nextRef,
         ...opts,

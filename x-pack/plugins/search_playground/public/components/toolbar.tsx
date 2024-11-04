@@ -7,16 +7,17 @@
 
 import { EuiFlexGroup } from '@elastic/eui';
 import React from 'react';
+import { DataActionButton } from './data_action_button';
 import { ViewCodeAction } from './view_code/view_code_action';
-import { ViewQueryAction } from './view_query/view_query_action';
-import { EditContextAction } from './edit_context/edit_context_action';
+import { PlaygroundPageMode } from '../types';
 
-export const Toolbar: React.FC = () => {
+export const Toolbar: React.FC<{ selectedPageMode: PlaygroundPageMode }> = ({
+  selectedPageMode = PlaygroundPageMode.chat,
+}) => {
   return (
-    <EuiFlexGroup gutterSize="s" data-test-subj="playground-header-actions">
-      <EditContextAction />
-      <ViewQueryAction />
-      <ViewCodeAction />
+    <EuiFlexGroup gutterSize="s" alignItems="center" data-test-subj="playground-header-actions">
+      <DataActionButton />
+      <ViewCodeAction selectedPageMode={selectedPageMode} />
     </EuiFlexGroup>
   );
 };

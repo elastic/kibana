@@ -14,6 +14,7 @@ import React from 'react';
 import { ThemeProvider } from 'styled-components';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { UserProfileService } from '@kbn/core/public';
 import { AssistantProvider, AssistantProviderProps } from '../../assistant_context';
 import { AssistantAvailability } from '../../assistant_context/types';
 
@@ -31,6 +32,7 @@ export const mockAssistantAvailability: AssistantAvailability = {
   hasConnectorsAllPrivilege: true,
   hasConnectorsReadPrivilege: true,
   hasUpdateAIAssistantAnonymization: true,
+  hasManageGlobalKnowledgeBase: true,
   isAssistantEnabled: true,
 };
 
@@ -81,6 +83,8 @@ export const TestProvidersComponent: React.FC<Props> = ({
             baseConversations={{}}
             navigateToApp={mockNavigateToApp}
             {...providerContext}
+            currentAppId={'test'}
+            userProfileService={jest.fn() as unknown as UserProfileService}
           >
             {children}
           </AssistantProvider>

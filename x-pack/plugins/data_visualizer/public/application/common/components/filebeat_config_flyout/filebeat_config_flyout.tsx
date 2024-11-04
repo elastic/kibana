@@ -34,15 +34,10 @@ export enum EDITOR_MODE {
 interface Props {
   index: string;
   results: FindFileStructureResponse;
-  ingestPipelineId: string;
+  pipelineId: string;
   closeFlyout(): void;
 }
-export const FilebeatConfigFlyout: FC<Props> = ({
-  index,
-  results,
-  ingestPipelineId,
-  closeFlyout,
-}) => {
+export const FilebeatConfigFlyout: FC<Props> = ({ index, results, pipelineId, closeFlyout }) => {
   const [fileBeatConfig, setFileBeatConfig] = useState('');
   const [username, setUsername] = useState<string | null>(null);
   const {
@@ -56,9 +51,9 @@ export const FilebeatConfigFlyout: FC<Props> = ({
   }, [security]);
 
   useEffect(() => {
-    const config = createFilebeatConfig(index, results, ingestPipelineId, username);
+    const config = createFilebeatConfig(index, results, pipelineId, username);
     setFileBeatConfig(config);
-  }, [username, index, ingestPipelineId, results]);
+  }, [username, index, pipelineId, results]);
 
   return (
     <EuiFlyout onClose={closeFlyout} hideCloseButton size={'m'} ownFocus={false}>

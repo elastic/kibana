@@ -2,26 +2,10 @@
   "id": "@kbn/resizable-layout",
   "client": {
     "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/resizable-layout",
-        "id": "def-common.ResizableLayout",
+        "id": "def-public.ResizableLayout",
         "type": "Function",
         "tags": [],
         "label": "ResizableLayout",
@@ -30,9 +14,9 @@
           "React.ForwardRefExoticComponent<",
           {
             "pluginId": "@kbn/resizable-layout",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnResizableLayoutPluginApi",
-            "section": "def-common.ResizableLayoutProps",
+            "section": "def-public.ResizableLayoutProps",
             "text": "ResizableLayoutProps"
           },
           " & ",
@@ -52,7 +36,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/resizable-layout",
-            "id": "def-common.ResizableLayout.$1",
+            "id": "def-public.ResizableLayout.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "props",
@@ -60,7 +44,7 @@
             "signature": [
               "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -71,7 +55,7 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/resizable-layout",
-        "id": "def-common.ResizableLayoutProps",
+        "id": "def-public.ResizableLayoutProps",
         "type": "Interface",
         "tags": [],
         "label": "ResizableLayoutProps",
@@ -82,7 +66,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/resizable-layout",
-            "id": "def-common.ResizableLayoutProps.className",
+            "id": "def-public.ResizableLayoutProps.className",
             "type": "string",
             "tags": [],
             "label": "className",
@@ -98,7 +82,7 @@
           },
           {
             "parentPluginId": "@kbn/resizable-layout",
-            "id": "def-common.ResizableLayoutProps.mode",
+            "id": "def-public.ResizableLayoutProps.mode",
             "type": "Enum",
             "tags": [],
             "label": "mode",
@@ -108,9 +92,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/resizable-layout",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnResizableLayoutPluginApi",
-                "section": "def-common.ResizableLayoutMode",
+                "section": "def-public.ResizableLayoutMode",
                 "text": "ResizableLayoutMode"
               }
             ],
@@ -120,7 +104,7 @@
           },
           {
             "parentPluginId": "@kbn/resizable-layout",
-            "id": "def-common.ResizableLayoutProps.direction",
+            "id": "def-public.ResizableLayoutProps.direction",
             "type": "Enum",
             "tags": [],
             "label": "direction",
@@ -130,9 +114,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/resizable-layout",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnResizableLayoutPluginApi",
-                "section": "def-common.ResizableLayoutDirection",
+                "section": "def-public.ResizableLayoutDirection",
                 "text": "ResizableLayoutDirection"
               }
             ],
@@ -142,7 +126,7 @@
           },
           {
             "parentPluginId": "@kbn/resizable-layout",
-            "id": "def-common.ResizableLayoutProps.container",
+            "id": "def-public.ResizableLayoutProps.container",
             "type": "CompoundType",
             "tags": [],
             "label": "container",
@@ -158,7 +142,7 @@
           },
           {
             "parentPluginId": "@kbn/resizable-layout",
-            "id": "def-common.ResizableLayoutProps.fixedPanelSize",
+            "id": "def-public.ResizableLayoutProps.fixedPanelSize",
             "type": "number",
             "tags": [],
             "label": "fixedPanelSize",
@@ -171,7 +155,7 @@
           },
           {
             "parentPluginId": "@kbn/resizable-layout",
-            "id": "def-common.ResizableLayoutProps.minFixedPanelSize",
+            "id": "def-public.ResizableLayoutProps.minFixedPanelSize",
             "type": "number",
             "tags": [],
             "label": "minFixedPanelSize",
@@ -184,7 +168,7 @@
           },
           {
             "parentPluginId": "@kbn/resizable-layout",
-            "id": "def-common.ResizableLayoutProps.minFlexPanelSize",
+            "id": "def-public.ResizableLayoutProps.minFlexPanelSize",
             "type": "number",
             "tags": [],
             "label": "minFlexPanelSize",
@@ -197,7 +181,7 @@
           },
           {
             "parentPluginId": "@kbn/resizable-layout",
-            "id": "def-common.ResizableLayoutProps.fixedPanel",
+            "id": "def-public.ResizableLayoutProps.fixedPanel",
             "type": "Object",
             "tags": [],
             "label": "fixedPanel",
@@ -213,7 +197,7 @@
           },
           {
             "parentPluginId": "@kbn/resizable-layout",
-            "id": "def-common.ResizableLayoutProps.flexPanel",
+            "id": "def-public.ResizableLayoutProps.flexPanel",
             "type": "Object",
             "tags": [],
             "label": "flexPanel",
@@ -229,7 +213,7 @@
           },
           {
             "parentPluginId": "@kbn/resizable-layout",
-            "id": "def-common.ResizableLayoutProps.resizeButtonClassName",
+            "id": "def-public.ResizableLayoutProps.resizeButtonClassName",
             "type": "string",
             "tags": [],
             "label": "resizeButtonClassName",
@@ -245,7 +229,7 @@
           },
           {
             "parentPluginId": "@kbn/resizable-layout",
-            "id": "def-common.ResizableLayoutProps.datatestsubj",
+            "id": "def-public.ResizableLayoutProps.datatestsubj",
             "type": "string",
             "tags": [],
             "label": "['data-test-subj']",
@@ -261,7 +245,7 @@
           },
           {
             "parentPluginId": "@kbn/resizable-layout",
-            "id": "def-common.ResizableLayoutProps.onFixedPanelSizeChange",
+            "id": "def-public.ResizableLayoutProps.onFixedPanelSizeChange",
             "type": "Function",
             "tags": [],
             "label": "onFixedPanelSizeChange",
@@ -277,7 +261,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/resizable-layout",
-                "id": "def-common.ResizableLayoutProps.onFixedPanelSizeChange.$1",
+                "id": "def-public.ResizableLayoutProps.onFixedPanelSizeChange.$1",
                 "type": "number",
                 "tags": [],
                 "label": "fixedPanelSize",
@@ -300,7 +284,7 @@
     "enums": [
       {
         "parentPluginId": "@kbn/resizable-layout",
-        "id": "def-common.ResizableLayoutDirection",
+        "id": "def-public.ResizableLayoutDirection",
         "type": "Enum",
         "tags": [],
         "label": "ResizableLayoutDirection",
@@ -312,7 +296,7 @@
       },
       {
         "parentPluginId": "@kbn/resizable-layout",
-        "id": "def-common.ResizableLayoutMode",
+        "id": "def-public.ResizableLayoutMode",
         "type": "Enum",
         "tags": [],
         "label": "ResizableLayoutMode",
@@ -323,6 +307,22 @@
         "initialIsOpen": false
       }
     ],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
     "misc": [],
     "objects": []
   }

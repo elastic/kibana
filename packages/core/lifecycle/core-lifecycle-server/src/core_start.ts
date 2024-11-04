@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-server';
@@ -11,6 +12,7 @@ import type { CapabilitiesStart } from '@kbn/core-capabilities-server';
 import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
 import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
 import type { ExecutionContextStart } from '@kbn/core-execution-context-server';
+import type { FeatureFlagsStart } from '@kbn/core-feature-flags-server';
 import type { HttpServiceStart } from '@kbn/core-http-server';
 import type { MetricsServiceStart } from '@kbn/core-metrics-server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
@@ -39,6 +41,8 @@ export interface CoreStart {
   elasticsearch: ElasticsearchServiceStart;
   /** {@link ExecutionContextStart} */
   executionContext: ExecutionContextStart;
+  /** {@link FeatureFlagsStart} */
+  featureFlags: FeatureFlagsStart;
   /** {@link HttpServiceStart} */
   http: HttpServiceStart;
   /** {@link MetricsServiceStart} */

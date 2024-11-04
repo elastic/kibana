@@ -5,10 +5,14 @@
  * 2.0.
  */
 
-import type { Role, RoleKibanaPrivilege } from '../../../../../../../common';
-import type { KibanaPrivileges, PrimaryFeaturePrivilege, SecuredFeature } from '../../../../model';
-import type { PrivilegeCollection } from '../../../../model/privilege_collection';
-import { isGlobalPrivilegeDefinition } from '../../../privilege_utils';
+import type { Role, RoleKibanaPrivilege } from '@kbn/security-plugin-types-common';
+import {
+  isGlobalPrivilegeDefinition,
+  type KibanaPrivileges,
+  type PrimaryFeaturePrivilege,
+  type PrivilegeCollection,
+  type SecuredFeature,
+} from '@kbn/security-role-management-model';
 
 export interface EffectiveFeaturePrivileges {
   [featureId: string]: {
@@ -17,6 +21,7 @@ export interface EffectiveFeaturePrivileges {
     hasCustomizedSubFeaturePrivileges: boolean;
   };
 }
+
 export class PrivilegeSummaryCalculator {
   constructor(private readonly kibanaPrivileges: KibanaPrivileges, private readonly role: Role) {}
 

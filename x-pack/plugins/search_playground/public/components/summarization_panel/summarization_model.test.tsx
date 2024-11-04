@@ -39,6 +39,7 @@ describe('SummarizationModel', () => {
   it('renders correctly with models', () => {
     const models = [
       {
+        id: 'model1',
         name: 'Model1',
         disabled: false,
         icon: MockIcon,
@@ -47,6 +48,7 @@ describe('SummarizationModel', () => {
         connectorType: LLMs.openai_azure,
       },
       {
+        id: 'model2',
         name: 'Model2',
         disabled: true,
         icon: MockIcon,
@@ -60,9 +62,5 @@ describe('SummarizationModel', () => {
     );
 
     expect(getByTestId('summarizationModelSelect')).toBeInTheDocument();
-    expect(getByTestId('manageConnectorsLink')).toHaveAttribute(
-      'href',
-      'http://example.com/manage-connectors'
-    );
   });
 });

@@ -9,12 +9,15 @@ import type { EuiTableSortingType } from '@elastic/eui';
 import { Pagination } from '@elastic/eui';
 import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import { useMemo } from 'react';
+import { TaskTypes } from '../../common/types';
 import { DEFAULT_TABLE_LIMIT } from '../components/all_inference_endpoints/constants';
 import {
-  InferenceEndpointUI,
+  FilterOptions,
   INFERENCE_ENDPOINTS_TABLE_PER_PAGE_VALUES,
+  InferenceEndpointUI,
   QueryParams,
   SortOrder,
+  ServiceProviderKeys,
 } from '../components/all_inference_endpoints/types';
 
 interface UseTableDataReturn {
@@ -27,15 +30,33 @@ interface UseTableDataReturn {
 
 export const useTableData = (
   inferenceEndpoints: InferenceAPIConfigResponse[],
-  queryParams: QueryParams
+  queryParams: QueryParams,
+  filterOptions: FilterOptions,
+  searchKey: string
 ): UseTableDataReturn => {
   const tableData: InferenceEndpointUI[] = useMemo(() => {
-    return inferenceEndpoints.map((endpoint) => ({
-      endpoint: endpoint.model_id,
-      provider: endpoint.service,
-      type: endpoint.task_type,
-    }));
-  }, [inferenceEndpoints]);
+    let filteredEndpoints = inferenceEndpoints;
+
+    if (filterOptions.provider.length > 0) {
+      filteredEndpoints = filteredEndpoints.filter((endpoint) =>
+        filterOptions.provider.includes(ServiceProviderKeys[endpoint.service])
+      );
+    }
+
+    if (filterOptions.type.length > 0) {
+      filteredEndpoints = filteredEndpoints.filter((endpoint) =>
+        filterOptions.type.includes(TaskTypes[endpoint.task_type])
+      );
+    }
+
+    return filteredEndpoints
+      .filter((endpoint) => endpoint.inference_id.includes(searchKey))
+      .map((endpoint) => ({
+        endpoint: endpoint.inference_id,
+        provider: endpoint,
+        type: endpoint.task_type,
+      }));
+  }, [inferenceEndpoints, searchKey, filterOptions]);
 
   const sortedTableData: InferenceEndpointUI[] = useMemo(() => {
     return [...tableData].sort((a, b) => {

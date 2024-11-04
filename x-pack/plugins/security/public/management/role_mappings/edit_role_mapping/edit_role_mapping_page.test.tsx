@@ -5,11 +5,6 @@
  * 2.0.
  */
 
-// brace/ace uses the Worker class, which is not currently provided by JSDOM.
-// This is not required for the tests to pass, but it rather suppresses lengthy
-// warnings in the console which adds unnecessary noise to the test output.
-import '@kbn/web-worker-stub';
-
 import React from 'react';
 
 import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
@@ -440,5 +435,44 @@ describe('EditRoleMappingPage', () => {
     const rulePanels = wrapper.find('RuleEditorPanel[data-test-subj="roleMappingRulePanel"]');
     expect(rulePanels).toHaveLength(1);
     expect(rulePanels.at(0).props().readOnly).toBeTruthy();
+  });
+
+  it('renders a warning when empty any or all rules are present', async () => {
+    const roleMappingsAPI = roleMappingsAPIClientMock.create();
+    const securityFeaturesAPI = securityFeaturesAPIClientMock.create();
+    roleMappingsAPI.saveRoleMapping.mockResolvedValue(null);
+    roleMappingsAPI.getRoleMapping.mockResolvedValue({
+      name: 'foo',
+      role_templates: [
+        {
+          template: { id: 'foo' },
+        },
+      ],
+      enabled: true,
+      rules: {
+        all: [
+          {
+            field: {
+              username: '*',
+            },
+          },
+          {
+            all: [],
+          },
+        ],
+      },
+    });
+    securityFeaturesAPI.checkFeatures.mockResolvedValue({
+      canReadSecurity: true,
+      hasCompatibleRealms: true,
+      canUseInlineScripts: true,
+      canUseStoredScripts: true,
+    });
+
+    const wrapper = renderView(roleMappingsAPI, securityFeaturesAPI, 'foo');
+    await nextTick();
+    wrapper.update();
+
+    expect(findTestSubject(wrapper, 'emptyAnyOrAllRulesWarning')).toHaveLength(1);
   });
 });

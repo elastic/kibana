@@ -17,6 +17,7 @@ import {
   savedObjectsClientMock,
   savedObjectsTypeRegistryMock,
 } from '@kbn/core/server/mocks';
+import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 
 import type { SpaceContentTypeSummaryItem } from './get_content_summary';
 import { initGetSpaceContentSummaryApi } from './get_content_summary';
@@ -81,7 +82,7 @@ describe('GET /internal/spaces/{spaceId}/content_summary', () => {
       basePath: httpService.basePath,
     });
 
-    const clientServiceStart = clientService.start(coreStart);
+    const clientServiceStart = clientService.start(coreStart, featuresPluginMock.createStart());
 
     const spacesServiceStart = service.start({
       basePath: coreStart.http.basePath,
@@ -119,7 +120,7 @@ describe('GET /internal/spaces/{spaceId}/content_summary', () => {
 
     const paramsSchema = (config.validate as any).params;
 
-    expect(config.options).toEqual({ tags: ['access:manageSpaces'] });
+    expect(config.security?.authz).toEqual({ requiredPrivileges: ['manage_spaces'] });
     expect(() => paramsSchema.validate({})).toThrowErrorMatchingInlineSnapshot(
       `"[spaceId]: expected value of type [string] but got [undefined]"`
     );

@@ -7,6 +7,7 @@
 
 import { HttpSetup } from '@kbn/core/public';
 import {
+  createDeleteSearchableSnapshotActions,
   createMinAgeActions,
   createSavePolicyAction,
   createSnapshotPolicyActions,
@@ -31,6 +32,7 @@ export const setupDeleteTestBed = async (httpSetup: HttpSetup) => {
         isShown: () => exists('delete-phase'),
         ...createMinAgeActions(testBed, 'delete'),
         ...createSnapshotPolicyActions(testBed),
+        ...createDeleteSearchableSnapshotActions(testBed),
       },
     },
   };

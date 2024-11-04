@@ -86,7 +86,7 @@ const mockUiSettingsClient = uiSettingsServiceMock.createStartContract();
 const renderUseAppLinks = () =>
   renderHook<{}, AppLinkItems>(() => useAppLinks(), { wrapper: TestProviders });
 const renderUseLinkExists = (id: SecurityPageName) =>
-  renderHook<SecurityPageName, boolean>(() => useLinkExists(id), {
+  renderHook<React.PropsWithChildren<SecurityPageName>, boolean>(() => useLinkExists(id), {
     wrapper: TestProviders,
   });
 
@@ -547,7 +547,7 @@ describe('Security links', () => {
   describe('isLinkUiSettingsAllowed', () => {
     const SETTING_KEY = 'test setting';
     const mockedLink: LinkItem = {
-      id: SecurityPageName.entityAnalyticsAssetClassification,
+      id: SecurityPageName.entityAnalyticsEntityStoreManagement,
       title: 'test title',
       path: '/test_path',
     };

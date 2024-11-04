@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { PluginInitializerContext } from '@kbn/core-plugins-browser';
 import { LogstashPlugin } from './plugin';
 
-export const plugin = () => new LogstashPlugin();
+export const plugin = (initializerContext: PluginInitializerContext) =>
+  new LogstashPlugin(initializerContext);

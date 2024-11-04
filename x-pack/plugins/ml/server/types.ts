@@ -9,7 +9,7 @@ import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import type { IRouter } from '@kbn/core/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
-import type { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 

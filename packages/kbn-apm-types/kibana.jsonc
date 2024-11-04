@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/apm-types",
+  "owner": "@elastic/obs-ux-infra_services-team"
+}

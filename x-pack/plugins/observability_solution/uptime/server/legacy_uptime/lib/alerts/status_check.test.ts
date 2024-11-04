@@ -113,7 +113,10 @@ const mockCommonAlertDocumentFields = (monitorInfo: GetMonitorStatusResult['moni
   'monitor.name': monitorInfo.monitor.name || monitorInfo.monitor.id,
   'monitor.type': monitorInfo.monitor.type,
   'url.full': monitorInfo.url?.full,
-  'observer.geo.name': monitorInfo.observer?.geo?.name,
+  'observer.geo.name': monitorInfo.observer?.geo?.name
+    ? [monitorInfo.observer.geo.name]
+    : undefined,
+  'observer.name': [],
 });
 
 const mockStatusAlertDocument = (

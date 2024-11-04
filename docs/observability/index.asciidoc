@@ -4,7 +4,7 @@
 = Observability
 
 Observability enables you to add and monitor your logs, system
-metrics, uptime data, and application traces, as a single stack. 
+metrics, uptime data, and application traces, as a single stack.
 
 With *Observability*, you have:
 
@@ -44,8 +44,8 @@ image::observability/images/logs-app.png[Logs app in {kib}]
 
 The {metrics-app} in {kib} enables you to visualize infrastructure metrics
 to help diagnose problematic spikes, identify high resource utilization,
-automatically discover and track pods, and unify your metrics 
-with logs and APM data in {es}. 
+automatically discover and track pods, and unify your metrics
+with logs and APM data in {es}.
 
 To get started with the {metrics-app}, see {observability-guide}/ingest-metrics.html[Ingest metrics].
 
@@ -75,7 +75,7 @@ The APM app in {kib} enables you to monitors software services and applications 
 collect unhandled errors and exceptions, and automatically pick up basic host-level metrics
 and agent specific metrics.
 
-To get started with the APM app, see <<apm-ui,Set up the APM app>>.
+// To get started with the APM app, see <<apm-ui,Set up the APM app>>.
 
 [role="screenshot"]
 image::observability/images/apm-app.png[APM app in {kib}]

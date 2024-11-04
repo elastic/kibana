@@ -34,7 +34,12 @@ import {
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import React from 'react';
 import { StartDependencies } from '../../../../plugin';
-import { createDrilldownTemplatesFromSiblings, ensureNestedTriggers } from '../drilldown_shared';
+import {
+  createDrilldownTemplatesFromSiblings,
+  DRILLDOWN_ACTION_GROUP,
+  DRILLDOWN_MAX_WIDTH,
+  ensureNestedTriggers,
+} from '../drilldown_shared';
 
 export const OPEN_FLYOUT_ADD_DRILLDOWN = 'OPEN_FLYOUT_ADD_DRILLDOWN';
 
@@ -58,6 +63,7 @@ export class FlyoutCreateDrilldownAction implements Action<EmbeddableApiContext>
   public readonly type = OPEN_FLYOUT_ADD_DRILLDOWN;
   public readonly id = OPEN_FLYOUT_ADD_DRILLDOWN;
   public order = 12;
+  public grouping = [DRILLDOWN_ACTION_GROUP];
 
   constructor(protected readonly params: OpenFlyoutAddDrilldownParams) {}
 
@@ -126,6 +132,7 @@ export class FlyoutCreateDrilldownAction implements Action<EmbeddableApiContext>
         core
       ),
       {
+        maxWidth: DRILLDOWN_MAX_WIDTH,
         ownFocus: true,
         'data-test-subj': 'createDrilldownFlyout',
         onClose: () => {

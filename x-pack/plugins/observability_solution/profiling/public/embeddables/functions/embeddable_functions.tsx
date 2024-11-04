@@ -23,6 +23,7 @@ export interface FunctionsProps {
   isLoading: boolean;
   rangeFrom: number;
   rangeTo: number;
+  showFullScreenSelector?: boolean;
 }
 
 export function EmbeddableFunctions({
@@ -30,6 +31,7 @@ export function EmbeddableFunctions({
   isLoading,
   rangeFrom,
   rangeTo,
+  showFullScreenSelector,
   ...deps
 }: EmbeddableFunctionsProps) {
   const totalSeconds = useMemo(() => (rangeTo - rangeFrom) / 1000, [rangeFrom, rangeTo]);
@@ -37,7 +39,11 @@ export function EmbeddableFunctions({
     <ProfilingEmbeddableProvider deps={deps}>
       <AsyncEmbeddableComponent isLoading={isLoading}>
         <div style={{ width: '100%' }}>
-          <EmbeddableFunctionsGrid data={data} totalSeconds={totalSeconds} />
+          <EmbeddableFunctionsGrid
+            data={data}
+            totalSeconds={totalSeconds}
+            showFullScreenSelector={showFullScreenSelector}
+          />
         </div>
       </AsyncEmbeddableComponent>
     </ProfilingEmbeddableProvider>

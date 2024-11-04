@@ -19,6 +19,7 @@ import {
   MAX_SELECTABLE_GROUP_BY_TERMS,
   ES_QUERY_MAX_HITS_PER_EXECUTION_SERVERLESS,
   ES_QUERY_MAX_HITS_PER_EXECUTION,
+  MAX_HITS_FOR_GROUP_BY,
 } from '../../../common/constants';
 import { EsQueryRuleParams, SearchType } from './types';
 import { isEsqlQueryRule, isSearchSourceRule } from './util';
@@ -71,6 +72,21 @@ const validateCommonParams = (ruleParams: EsQueryRuleParams, isServerless?: bool
     errors.termSize.push(
       i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredTermSizedText', {
         defaultMessage: 'Term size is required.',
+      })
+    );
+  }
+
+  if (
+    groupBy &&
+    builtInGroupByTypes[groupBy] &&
+    builtInGroupByTypes[groupBy].sizeRequired &&
+    size &&
+    size > MAX_HITS_FOR_GROUP_BY
+  ) {
+    errors.size.push(
+      i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.sizeTooLargeForGroupByText', {
+        defaultMessage: 'Size cannot exceed {max} when using a group by field.',
+        values: { max: MAX_HITS_FOR_GROUP_BY },
       })
     );
   }

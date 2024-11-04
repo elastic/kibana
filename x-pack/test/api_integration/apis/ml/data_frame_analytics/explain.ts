@@ -88,7 +88,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     testJobConfigs.forEach((testConfig) => {
-      describe(`ExplainDataFrameAnalytics ${testConfig.jobType}`, async () => {
+      describe(`ExplainDataFrameAnalytics ${testConfig.jobType}`, () => {
         it(`should explain ${testConfig.jobType} analytics job`, async () => {
           const { body, status } = await supertest
             .post(`/internal/ml/data_frame/analytics/_explain`)

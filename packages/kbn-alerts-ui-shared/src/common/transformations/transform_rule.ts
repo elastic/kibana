@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { AsApiContract, RewriteRequestCase } from '@kbn/actions-types';
@@ -33,6 +34,17 @@ const transformLastRun: RewriteRequestCase<RuleLastRun> = ({
   ...rest,
 });
 
+const transformFlapping = (flapping: AsApiContract<Rule['flapping']>) => {
+  if (!flapping) {
+    return flapping;
+  }
+
+  return {
+    lookBackWindow: flapping.look_back_window,
+    statusChangeThreshold: flapping.status_change_threshold,
+  };
+};
+
 export const transformRule: RewriteRequestCase<Rule> = ({
   rule_type_id: ruleTypeId,
   created_by: createdBy,
@@ -53,6 +65,7 @@ export const transformRule: RewriteRequestCase<Rule> = ({
   last_run: lastRun,
   next_run: nextRun,
   alert_delay: alertDelay,
+  flapping,
   ...rest
 }: any) => ({
   ruleTypeId,
@@ -76,6 +89,7 @@ export const transformRule: RewriteRequestCase<Rule> = ({
   ...(nextRun ? { nextRun } : {}),
   ...(apiKeyCreatedByUser !== undefined ? { apiKeyCreatedByUser } : {}),
   ...(alertDelay ? { alertDelay } : {}),
+  ...(flapping !== undefined ? { flapping: transformFlapping(flapping) } : {}),
   ...rest,
 });
 

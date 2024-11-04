@@ -1,14 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { firstValueFrom, Subject } from 'rxjs';
 import { createEsqlDataSource } from '../../common/data_sources';
 import { addLog } from '../utils/add_log';
+import { SolutionType } from './profiles/root_profile';
 import { createContextAwarenessMocks } from './__mocks__';
 
 jest.mock('../utils/add_log');
@@ -19,6 +21,7 @@ describe('ProfilesManager', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mocks = createContextAwarenessMocks();
+    jest.spyOn(mocks.ebtManagerMock, 'updateProfilesContextWith');
   });
 
   it('should return default profiles', () => {
@@ -57,6 +60,11 @@ describe('ProfilesManager', () => {
       mocks.rootProfileProviderMock.profile,
       mocks.dataSourceProfileProviderMock.profile,
       mocks.documentProfileProviderMock.profile,
+    ]);
+
+    expect(mocks.ebtManagerMock.updateProfilesContextWith).toHaveBeenCalledWith([
+      'root-profile',
+      'data-source-profile',
     ]);
   });
 
@@ -220,10 +228,12 @@ describe('ProfilesManager', () => {
 
   it('should cancel existing data source profile resolution when another is triggered', async () => {
     const context = await mocks.dataSourceProfileProviderMock.resolve({
+      rootContext: { solutionType: SolutionType.Default },
       dataSource: createEsqlDataSource(),
       query: { esql: 'from *' },
     });
     const newContext = await mocks.dataSourceProfileProviderMock.resolve({
+      rootContext: { solutionType: SolutionType.Default },
       dataSource: createEsqlDataSource(),
       query: { esql: 'from logs-*' },
     });

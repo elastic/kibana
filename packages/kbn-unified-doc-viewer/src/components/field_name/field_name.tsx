@@ -1,21 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
 import './field_name.scss';
-import {
-  EuiBadge,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiToolTip,
-  EuiHighlight,
-  EuiIcon,
-} from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiToolTip, EuiHighlight } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { FieldIcon, FieldIconProps } from '@kbn/react-field';
@@ -30,7 +24,6 @@ interface Props {
   fieldIconProps?: Omit<FieldIconProps, 'type'>;
   scripted?: boolean;
   highlight?: string;
-  isPinned?: boolean;
 }
 
 export function FieldName({
@@ -40,7 +33,6 @@ export function FieldName({
   fieldIconProps,
   scripted = false,
   highlight = '',
-  isPinned = false,
 }: Props) {
   const typeName = getFieldTypeName(fieldType);
   const displayName =
@@ -63,17 +55,6 @@ export function FieldName({
           <EuiFlexItem grow={false}>
             <FieldIcon type={fieldType!} label={typeName} scripted={scripted} {...fieldIconProps} />
           </EuiFlexItem>
-          {isPinned && (
-            <EuiFlexItem grow={false}>
-              <EuiIcon
-                type="pinFilled"
-                size="s"
-                aria-label={i18n.translate('unifiedDocViewer.pinnedFieldTooltipContent', {
-                  defaultMessage: 'Pinned field',
-                })}
-              />
-            </EuiFlexItem>
-          )}
         </EuiFlexGroup>
       </EuiFlexItem>
 

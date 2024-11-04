@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 import {
   KueryOrUndefined,
@@ -22,7 +22,6 @@ import {
   PageSizeOrUndefined,
   SortOrUndefined,
   SortOrderOrUndefined,
-  Id,
 } from '../model/schema/common_attributes.gen';
 
 export type GetLiveQueryResultsRequestQuery = z.infer<typeof GetLiveQueryResultsRequestQuery>;
@@ -33,12 +32,3 @@ export const GetLiveQueryResultsRequestQuery = z.object({
   sort: SortOrUndefined.optional(),
   sortOrder: SortOrderOrUndefined.optional(),
 });
-
-export type GetLiveQueryResultsRequestParams = z.infer<typeof GetLiveQueryResultsRequestParams>;
-export const GetLiveQueryResultsRequestParams = z.object({
-  id: Id.optional(),
-  actionId: Id.optional(),
-});
-
-export type SuccessResponse = z.infer<typeof SuccessResponse>;
-export const SuccessResponse = z.object({});

@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 
 export const ASSIGNEES_SELECTION_STATUS_MESSAGE = (total: number) =>
   i18n.translate('xpack.securitySolution.assignees.totalUsersAssigned', {
-    defaultMessage: '{total, plural, one {# filter} other {# filters}} selected',
+    defaultMessage: '{total, plural, one {# assignee} other {# assignees}} selected',
     values: { total },
   });
 

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { firstValueFrom, Observable } from 'rxjs';
@@ -17,31 +18,34 @@ import {
   ThemeServiceSetup,
 } from '@kbn/core/public';
 import { DataPublicPluginStart, SerializedSearchSourceFields } from '@kbn/data-plugin/public';
-import type { ISearchEmbeddable } from '@kbn/discover-plugin/public';
-import { loadSharingDataHelpers, SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-plugin/public';
-import type { IEmbeddable } from '@kbn/embeddable-plugin/public';
+import {
+  loadSharingDataHelpers,
+  SEARCH_EMBEDDABLE_TYPE,
+  apiPublishesSavedSearch,
+  PublishesSavedSearch,
+  HasTimeRange,
+} from '@kbn/discover-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-import { toMountPoint } from '@kbn/react-kibana-mount';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
-import type { SavedSearch } from '@kbn/saved-search-plugin/public';
+import {
+  apiCanAccessViewMode,
+  apiHasType,
+  apiIsOfType,
+  CanAccessViewMode,
+  EmbeddableApiContext,
+  getInheritedViewMode,
+  HasType,
+} from '@kbn/presentation-publishing';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import { CSV_REPORTING_ACTION, JobAppParamsCSV } from '@kbn/reporting-export-types-csv-common';
+import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { UiActionsActionDefinition as ActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-
-import { CSV_REPORTING_ACTION, JobAppParamsCSV } from '@kbn/reporting-export-types-csv-common';
 import type { ClientConfigType } from '@kbn/reporting-public/types';
 import { checkLicense } from '@kbn/reporting-public/license_check';
 import type { ReportingAPIClient } from '@kbn/reporting-public/reporting_api_client';
+
 import { getI18nStrings } from './strings';
-
-function isSavedSearchEmbeddable(
-  embeddable: IEmbeddable | ISearchEmbeddable
-): embeddable is ISearchEmbeddable {
-  return embeddable.type === SEARCH_EMBEDDABLE_TYPE;
-}
-
-export interface ActionContext {
-  embeddable: ISearchEmbeddable;
-}
 
 export interface PanelActionDependencies {
   data: DataPublicPluginStart;
@@ -79,7 +83,19 @@ interface ExecutionParams {
   i18nStart: I18nStart;
 }
 
-export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> {
+type GetCsvActionApi = HasType & PublishesSavedSearch & CanAccessViewMode & HasTimeRange;
+
+const compatibilityCheck = (api: EmbeddableApiContext['embeddable']): api is GetCsvActionApi => {
+  return (
+    apiHasType(api) &&
+    apiIsOfType(api, SEARCH_EMBEDDABLE_TYPE) &&
+    apiPublishesSavedSearch(api) &&
+    apiCanAccessViewMode(api) &&
+    Boolean((api as unknown as HasTimeRange).hasTimeRange)
+  );
+};
+
+export class ReportingCsvPanelAction implements ActionDefinition<EmbeddableApiContext> {
   private isDownloading: boolean;
   public readonly type = '';
   public readonly id = CSV_REPORTING_ACTION;
@@ -118,10 +134,10 @@ export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> 
     return await getSharingData(savedSearch.searchSource, savedSearch, { uiSettings, data });
   }
 
-  public isCompatible = async (context: ActionContext) => {
+  public isCompatible = async (context: EmbeddableApiContext) => {
     const { embeddable } = context;
 
-    if (embeddable.type !== 'search') {
+    if (!compatibilityCheck(embeddable)) {
       return false;
     }
 
@@ -138,7 +154,7 @@ export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> 
       return false;
     }
 
-    return embeddable.getInput().viewMode !== ViewMode.EDIT;
+    return getInheritedViewMode(embeddable) !== ViewMode.EDIT;
   };
 
   /**
@@ -240,14 +256,14 @@ export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> 
       });
   };
 
-  public execute = async (context: ActionContext) => {
+  public execute = async (context: EmbeddableApiContext) => {
     const { embeddable } = context;
 
-    if (!isSavedSearchEmbeddable(embeddable) || !(await this.isCompatible(context))) {
+    if (!compatibilityCheck(embeddable) || !(await this.isCompatible(context))) {
       throw new IncompatibleActionError();
     }
 
-    const savedSearch = embeddable.getSavedSearch();
+    const savedSearch = embeddable.savedSearch$.getValue();
 
     if (!savedSearch || this.isDownloading) {
       return;

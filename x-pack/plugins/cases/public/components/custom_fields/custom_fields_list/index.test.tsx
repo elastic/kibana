@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { screen, within, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import userEvent, { type UserEvent } from '@testing-library/user-event';
 
 import type { AppMockRenderer } from '../../../common/mock';
 import { createAppMockRenderer } from '../../../common/mock';
@@ -15,6 +15,7 @@ import { customFieldsConfigurationMock } from '../../../containers/mock';
 import { CustomFieldsList } from '.';
 
 describe('CustomFieldsList', () => {
+  let user: UserEvent;
   let appMockRender: AppMockRenderer;
 
   const props = {
@@ -23,7 +24,20 @@ describe('CustomFieldsList', () => {
     onEditCustomField: jest.fn(),
   };
 
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
   beforeEach(() => {
+    // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
+    user = userEvent.setup({
+      advanceTimers: jest.advanceTimersByTime,
+    });
+
     jest.clearAllMocks();
     appMockRender = createAppMockRenderer();
   });
@@ -45,13 +59,20 @@ describe('CustomFieldsList', () => {
       )
     ).toBeInTheDocument();
     expect((await screen.findAllByText('Text')).length).toBe(2);
-    expect((await screen.findAllByText('Required')).length).toBe(2);
+    expect((await screen.findAllByText('Required')).length).toBe(3);
     expect(
       await screen.findByTestId(
         `custom-field-${customFieldsConfigurationMock[1].key}-${customFieldsConfigurationMock[1].type}`
       )
     ).toBeInTheDocument();
     expect((await screen.findAllByText('Toggle')).length).toBe(2);
+
+    expect(
+      await screen.findByTestId(
+        `custom-field-${customFieldsConfigurationMock[4].key}-${customFieldsConfigurationMock[4].type}`
+      )
+    ).toBeInTheDocument();
+    expect((await screen.findAllByText('Number')).length).toBe(2);
   });
 
   it('shows single CustomFieldsList correctly', async () => {
@@ -93,13 +114,13 @@ describe('CustomFieldsList', () => {
 
       const list = await screen.findByTestId('custom-fields-list');
 
-      userEvent.click(
+      await user.click(
         await within(list).findByTestId(
           `${customFieldsConfigurationMock[0].key}-custom-field-delete`
         )
       );
 
-      expect(await screen.findByTestId('confirm-delete-custom-field-modal')).toBeInTheDocument();
+      expect(await screen.findByTestId('confirm-delete-modal')).toBeInTheDocument();
     });
 
     it('calls onDeleteCustomField when confirm', async () => {
@@ -107,18 +128,18 @@ describe('CustomFieldsList', () => {
 
       const list = await screen.findByTestId('custom-fields-list');
 
-      userEvent.click(
+      await user.click(
         await within(list).findByTestId(
           `${customFieldsConfigurationMock[0].key}-custom-field-delete`
         )
       );
 
-      expect(await screen.findByTestId('confirm-delete-custom-field-modal')).toBeInTheDocument();
+      expect(await screen.findByTestId('confirm-delete-modal')).toBeInTheDocument();
 
-      userEvent.click(await screen.findByText('Delete'));
+      await user.click(await screen.findByText('Delete'));
 
       await waitFor(() => {
-        expect(screen.queryByTestId('confirm-delete-custom-field-modal')).not.toBeInTheDocument();
+        expect(screen.queryByTestId('confirm-delete-modal')).not.toBeInTheDocument();
         expect(props.onDeleteCustomField).toHaveBeenCalledWith(
           customFieldsConfigurationMock[0].key
         );
@@ -130,18 +151,18 @@ describe('CustomFieldsList', () => {
 
       const list = await screen.findByTestId('custom-fields-list');
 
-      userEvent.click(
+      await user.click(
         await within(list).findByTestId(
           `${customFieldsConfigurationMock[0].key}-custom-field-delete`
         )
       );
 
-      expect(await screen.findByTestId('confirm-delete-custom-field-modal')).toBeInTheDocument();
+      expect(await screen.findByTestId('confirm-delete-modal')).toBeInTheDocument();
 
-      userEvent.click(await screen.findByText('Cancel'));
+      await user.click(await screen.findByText('Cancel'));
 
       await waitFor(() => {
-        expect(screen.queryByTestId('confirm-delete-custom-field-modal')).not.toBeInTheDocument();
+        expect(screen.queryByTestId('confirm-delete-modal')).not.toBeInTheDocument();
         expect(props.onDeleteCustomField).not.toHaveBeenCalledWith();
       });
     });
@@ -157,7 +178,7 @@ describe('CustomFieldsList', () => {
 
       const list = await screen.findByTestId('custom-fields-list');
 
-      userEvent.click(
+      await user.click(
         await within(list).findByTestId(`${customFieldsConfigurationMock[0].key}-custom-field-edit`)
       );
 

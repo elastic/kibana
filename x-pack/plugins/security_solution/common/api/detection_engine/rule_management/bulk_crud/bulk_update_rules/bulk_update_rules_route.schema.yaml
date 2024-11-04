@@ -9,7 +9,11 @@ paths:
       x-codegen-enabled: true
       operationId: BulkUpdateRules
       deprecated: true
-      description: Updates multiple rules using the `PUT` method.
+      summary: Update multiple detection rules
+      description: |
+        Update multiple detection rules using the `rule_id` or `id` field. The original rules are replaced, and all unspecified fields are deleted.
+        > info
+        > You cannot modify the `id` or `rule_id` values.
       tags:
         - Bulk API
       requestBody:

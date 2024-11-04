@@ -82,7 +82,7 @@ const LiveQueryQueryFieldComponent: React.FC<LiveQueryQueryFieldProps> = ({
     [resetField]
   );
 
-  const handleToggle = useCallback((isOpen) => {
+  const handleToggle = useCallback((isOpen: any) => {
     const newState = isOpen ? 'open' : 'closed';
     setAdvancedContentState(newState);
   }, []);

@@ -38,10 +38,12 @@ describe('createCloudUsageCollector', () => {
       expect(await collector.fetch(collectorFetchContext)).toStrictEqual({
         isCloudEnabled: true,
         isElasticStaffOwned: undefined,
+        organizationId: undefined,
         trialEndDate: undefined,
         deploymentId: undefined,
         projectId: undefined,
         projectType: undefined,
+        orchestratorTarget: undefined,
       });
     });
 
@@ -54,11 +56,13 @@ describe('createCloudUsageCollector', () => {
       expect(await collector.fetch(collectorFetchContext)).toStrictEqual({
         isCloudEnabled: true,
         isElasticStaffOwned: undefined,
+        organizationId: undefined,
         trialEndDate: '2020-10-01T14:30:16Z',
         inTrial: false,
         deploymentId: undefined,
         projectId: undefined,
         projectType: undefined,
+        orchestratorTarget: undefined,
       });
     });
 
@@ -67,9 +71,11 @@ describe('createCloudUsageCollector', () => {
         isCloudEnabled: true,
         trialEndDate: '2020-10-01T14:30:16Z',
         isElasticStaffOwned: true,
+        organizationId: '1234',
         deploymentId: 'a-deployment-id',
         projectId: 'a-project-id',
         projectType: 'security',
+        orchestratorTarget: 'canary',
       });
 
       expect(await collector.fetch(collectorFetchContext)).toStrictEqual({
@@ -77,9 +83,11 @@ describe('createCloudUsageCollector', () => {
         trialEndDate: '2020-10-01T14:30:16Z',
         inTrial: false,
         isElasticStaffOwned: true,
+        organizationId: '1234',
         deploymentId: 'a-deployment-id',
         projectId: 'a-project-id',
         projectType: 'security',
+        orchestratorTarget: 'canary',
       });
     });
   });

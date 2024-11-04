@@ -59,11 +59,9 @@ describe('when calling the Action Details route handler', () => {
     expect(mockScopedEsClient.asInternalUser.search).toHaveBeenNthCalledWith(
       1,
       expect.objectContaining({
-        body: {
-          query: {
-            bool: {
-              filter: expect.arrayContaining([{ term: { action_id: 'a-b-c' } }]),
-            },
+        query: {
+          bool: {
+            filter: expect.arrayContaining([{ term: { action_id: 'a-b-c' } }]),
           },
         },
       }),

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { getAgentIconKey } from './get_agent_icon';
@@ -24,6 +25,16 @@ const examples = {
   'opentelemetry/python': 'python',
   'opentelemetry/ruby': 'ruby',
   'opentelemetry/rust': 'rust',
+  'opentelemetry/cpp/elastic': 'cpp', // Tests for additional arguments on OpenTelemetry agents
+  'opentelemetry/dotnet/elastic': 'dotnet',
+  'opentelemetry/erlang/elastic': 'erlang',
+  'opentelemetry/go/elastic': 'go',
+  'opentelemetry/nodejs/elastic': 'nodejs',
+  'opentelemetry/php/elastic': 'php',
+  'opentelemetry/python/elastic': 'python',
+  'opentelemetry/ruby/elastic': 'ruby',
+  'opentelemetry/rust/elastic': 'rust',
+  opentelemetry: 'opentelemetry',
   otlp: 'opentelemetry',
   php: 'php',
   python: 'python',

@@ -48,7 +48,7 @@ export default function ({ getService }: FtrProviderContext) {
       // Make sure none of the stats have been removed from ES API
       expectedStats.forEach((stat) => {
         try {
-          expect(body.stats.total.hasOwnProperty(stat)).to.be(true);
+          expect(Object.hasOwn(body.stats.total, stat)).to.be(true);
         } catch {
           throw new Error(`Expected stat "${stat}" not found.`);
         }

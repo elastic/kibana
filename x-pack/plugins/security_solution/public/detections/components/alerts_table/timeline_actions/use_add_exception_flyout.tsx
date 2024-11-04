@@ -55,7 +55,7 @@ export const useExceptionFlyout = ({
   }, [setAllTourStepsHidden]);
 
   const onAddExceptionConfirm = useCallback(
-    (didRuleChange: boolean, didCloseAlert: boolean, didBulkCloseAlert) => {
+    (didRuleChange: boolean, didCloseAlert: boolean, didBulkCloseAlert: boolean) => {
       if (refetch && (isActiveTimelines === false || didBulkCloseAlert)) {
         refetch();
       }

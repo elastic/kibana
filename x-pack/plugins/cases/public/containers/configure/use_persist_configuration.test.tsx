@@ -14,13 +14,14 @@ import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
 import { ConnectorTypes } from '../../../common';
 import { casesQueriesKeys } from '../constants';
+import { customFieldsConfigurationMock, templatesConfigurationMock } from '../mock';
 
 jest.mock('./api');
 jest.mock('../../common/lib/kibana');
 
 const useToastMock = useToasts as jest.Mock;
 
-describe('useCreateAttachments', () => {
+describe('usePersistConfiguration', () => {
   const addError = jest.fn();
   const addSuccess = jest.fn();
 
@@ -38,6 +39,7 @@ describe('useCreateAttachments', () => {
       type: ConnectorTypes.none,
     },
     customFields: [],
+    templates: [],
     version: '',
     id: '',
   };
@@ -53,7 +55,7 @@ describe('useCreateAttachments', () => {
     const spyPost = jest.spyOn(api, 'postCaseConfigure');
     const spyPatch = jest.spyOn(api, 'patchCaseConfigure');
 
-    const { waitForNextUpdate, result } = renderHook(() => usePersistConfiguration(), {
+    const { waitFor, result } = renderHook(() => usePersistConfiguration(), {
       wrapper: appMockRender.AppWrapper,
     });
 
@@ -61,22 +63,24 @@ describe('useCreateAttachments', () => {
       result.current.mutate({ ...request, version: 'test' });
     });
 
-    await waitForNextUpdate();
+    await waitFor(() => {
+      expect(spyPost).toHaveBeenCalledWith({
+        closure_type: 'close-by-user',
+        connector: { fields: null, id: 'none', name: 'none', type: '.none' },
+        customFields: [],
+        owner: 'securitySolution',
+        templates: [],
+      });
+    });
 
     expect(spyPatch).not.toHaveBeenCalled();
-    expect(spyPost).toHaveBeenCalledWith({
-      closure_type: 'close-by-user',
-      connector: { fields: null, id: 'none', name: 'none', type: '.none' },
-      customFields: [],
-      owner: 'securitySolution',
-    });
   });
 
   it('calls postCaseConfigure when the version is empty', async () => {
     const spyPost = jest.spyOn(api, 'postCaseConfigure');
     const spyPatch = jest.spyOn(api, 'patchCaseConfigure');
 
-    const { waitForNextUpdate, result } = renderHook(() => usePersistConfiguration(), {
+    const { waitFor, result } = renderHook(() => usePersistConfiguration(), {
       wrapper: appMockRender.AppWrapper,
     });
 
@@ -84,14 +88,44 @@ describe('useCreateAttachments', () => {
       result.current.mutate({ ...request, id: 'test' });
     });
 
-    await waitForNextUpdate();
+    await waitFor(() => {
+      expect(spyPost).toHaveBeenCalledWith({
+        closure_type: 'close-by-user',
+        connector: { fields: null, id: 'none', name: 'none', type: '.none' },
+        customFields: [],
+        templates: [],
+        owner: 'securitySolution',
+      });
+    });
 
     expect(spyPatch).not.toHaveBeenCalled();
-    expect(spyPost).toHaveBeenCalledWith({
-      closure_type: 'close-by-user',
-      connector: { fields: null, id: 'none', name: 'none', type: '.none' },
-      customFields: [],
-      owner: 'securitySolution',
+  });
+
+  it('calls postCaseConfigure with correct data', async () => {
+    const spyPost = jest.spyOn(api, 'postCaseConfigure');
+
+    const { waitFor, result } = renderHook(() => usePersistConfiguration(), {
+      wrapper: appMockRender.AppWrapper,
+    });
+
+    const newRequest = {
+      ...request,
+      customFields: customFieldsConfigurationMock,
+      templates: templatesConfigurationMock,
+    };
+
+    act(() => {
+      result.current.mutate({ ...newRequest, id: 'test-id' });
+    });
+
+    await waitFor(() => {
+      expect(spyPost).toHaveBeenCalledWith({
+        closure_type: 'close-by-user',
+        connector: { fields: null, id: 'none', name: 'none', type: '.none' },
+        customFields: customFieldsConfigurationMock,
+        templates: templatesConfigurationMock,
+        owner: 'securitySolution',
+      });
     });
   });
 
@@ -99,7 +133,7 @@ describe('useCreateAttachments', () => {
     const spyPost = jest.spyOn(api, 'postCaseConfigure');
     const spyPatch = jest.spyOn(api, 'patchCaseConfigure');
 
-    const { waitForNextUpdate, result } = renderHook(() => usePersistConfiguration(), {
+    const { waitFor, result } = renderHook(() => usePersistConfiguration(), {
       wrapper: appMockRender.AppWrapper,
     });
 
@@ -107,20 +141,50 @@ describe('useCreateAttachments', () => {
       result.current.mutate({ ...request, id: 'test-id', version: 'test-version' });
     });
 
-    await waitForNextUpdate();
+    await waitFor(() => {
+      expect(spyPatch).toHaveBeenCalledWith('test-id', {
+        closure_type: 'close-by-user',
+        connector: { fields: null, id: 'none', name: 'none', type: '.none' },
+        customFields: [],
+        templates: [],
+        version: 'test-version',
+      });
+    });
 
     expect(spyPost).not.toHaveBeenCalled();
-    expect(spyPatch).toHaveBeenCalledWith('test-id', {
-      closure_type: 'close-by-user',
-      connector: { fields: null, id: 'none', name: 'none', type: '.none' },
-      customFields: [],
-      version: 'test-version',
+  });
+
+  it('calls patchCaseConfigure with correct data', async () => {
+    const spyPatch = jest.spyOn(api, 'patchCaseConfigure');
+
+    const { waitFor, result } = renderHook(() => usePersistConfiguration(), {
+      wrapper: appMockRender.AppWrapper,
+    });
+
+    const newRequest = {
+      ...request,
+      customFields: customFieldsConfigurationMock,
+      templates: templatesConfigurationMock,
+    };
+
+    act(() => {
+      result.current.mutate({ ...newRequest, id: 'test-id', version: 'test-version' });
+    });
+
+    await waitFor(() => {
+      expect(spyPatch).toHaveBeenCalledWith('test-id', {
+        closure_type: 'close-by-user',
+        connector: { fields: null, id: 'none', name: 'none', type: '.none' },
+        customFields: customFieldsConfigurationMock,
+        templates: templatesConfigurationMock,
+        version: 'test-version',
+      });
     });
   });
 
   it('invalidates the queries correctly', async () => {
     const queryClientSpy = jest.spyOn(appMockRender.queryClient, 'invalidateQueries');
-    const { waitForNextUpdate, result } = renderHook(() => usePersistConfiguration(), {
+    const { waitFor, result } = renderHook(() => usePersistConfiguration(), {
       wrapper: appMockRender.AppWrapper,
     });
 
@@ -128,13 +192,13 @@ describe('useCreateAttachments', () => {
       result.current.mutate(request);
     });
 
-    await waitForNextUpdate();
-
-    expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.configuration({}));
+    await waitFor(() => {
+      expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.configuration({}));
+    });
   });
 
   it('shows the success toaster', async () => {
-    const { waitForNextUpdate, result } = renderHook(() => usePersistConfiguration(), {
+    const { waitFor, result } = renderHook(() => usePersistConfiguration(), {
       wrapper: appMockRender.AppWrapper,
     });
 
@@ -142,9 +206,9 @@ describe('useCreateAttachments', () => {
       result.current.mutate(request);
     });
 
-    await waitForNextUpdate();
-
-    expect(addSuccess).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(addSuccess).toHaveBeenCalled();
+    });
   });
 
   it('shows a toast error when the api return an error', async () => {
@@ -152,7 +216,7 @@ describe('useCreateAttachments', () => {
       .spyOn(api, 'postCaseConfigure')
       .mockRejectedValue(new Error('useCreateAttachments: Test error'));
 
-    const { waitForNextUpdate, result } = renderHook(() => usePersistConfiguration(), {
+    const { waitFor, result } = renderHook(() => usePersistConfiguration(), {
       wrapper: appMockRender.AppWrapper,
     });
 
@@ -160,8 +224,8 @@ describe('useCreateAttachments', () => {
       result.current.mutate(request);
     });
 
-    await waitForNextUpdate();
-
-    expect(addError).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(addError).toHaveBeenCalled();
+    });
   });
 });

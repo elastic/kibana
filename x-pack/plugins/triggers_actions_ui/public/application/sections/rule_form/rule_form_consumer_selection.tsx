@@ -81,7 +81,7 @@ const SINGLE_SELECTION = { asPlainText: true };
 
 export const RuleFormConsumerSelection = (props: RuleFormConsumerSelectionProps) => {
   const { consumers, errors, onChange, selectedConsumer, initialSelectedConsumer } = props;
-  const isInvalid = errors?.consumer?.length > 0;
+  const isInvalid = (errors?.consumer as string[])?.length > 0;
   const handleOnChange = useCallback(
     (selected: Array<EuiComboBoxOptionOption<RuleCreationValidConsumer>>) => {
       if (selected.length > 0) {
@@ -159,7 +159,12 @@ export const RuleFormConsumerSelection = (props: RuleFormConsumerSelectionProps)
     return null;
   }
   return (
-    <EuiFormRow fullWidth label={SELECT_LABEL} isInvalid={isInvalid} error={errors?.consumer ?? ''}>
+    <EuiFormRow
+      fullWidth
+      label={SELECT_LABEL}
+      isInvalid={isInvalid}
+      error={(errors?.consumer as string) ?? ''}
+    >
       <EuiComboBox
         data-test-subj="ruleFormConsumerSelect"
         aria-label={i18n.translate(

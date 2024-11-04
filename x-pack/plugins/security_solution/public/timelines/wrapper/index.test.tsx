@@ -58,28 +58,28 @@ describe('TimelineWrapper', () => {
     expect(getByText('Untitled timeline')).toBeInTheDocument();
   });
 
-  it('should show timeline when bottom bar button is clicked', () => {
+  it('should show timeline when bottom bar button is clicked', async () => {
     const { getByTestId } = render(
       <TestProviders>
         <TimelineWrapper {...props} />
       </TestProviders>
     );
 
-    userEvent.click(getByTestId('timeline-bottom-bar-title-button'));
+    await userEvent.click(getByTestId('timeline-bottom-bar-title-button'));
 
     expect(mockDispatch).toBeCalledWith(
       timelineActions.showTimeline({ id: TimelineId.test, show: true })
     );
   });
 
-  it('should hide timeline when user presses keyboard esc key', () => {
+  it('should hide timeline when user presses keyboard esc key', async () => {
     render(
       <TestProviders>
         <TimelineWrapper {...props} />
       </TestProviders>
     );
 
-    userEvent.keyboard('{Escape}');
+    await userEvent.keyboard('{Escape}');
 
     expect(mockDispatch).toBeCalledWith(
       timelineActions.showTimeline({ id: TimelineId.test, show: false })

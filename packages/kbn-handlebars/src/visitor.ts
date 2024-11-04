@@ -112,7 +112,7 @@ export class ElasticHandlebarsVisitor extends Handlebars.Visitor {
         if (result == null) {
           return result;
         }
-        if (Object.prototype.hasOwnProperty.call(parent, propertyName)) {
+        if (Object.hasOwn(parent, propertyName)) {
           return result;
         }
 

@@ -1,0 +1,314 @@
+{
+  "id": "@kbn/synthetics-private-location",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/synthetics-private-location",
+        "id": "def-common.cli",
+        "type": "Function",
+        "tags": [],
+        "label": "cli",
+        "description": [],
+        "signature": [
+          "(cliOptions: ",
+          {
+            "pluginId": "@kbn/synthetics-private-location",
+            "scope": "common",
+            "docId": "kibKbnSyntheticsPrivateLocationPluginApi",
+            "section": "def-common.CliOptions",
+            "text": "CliOptions"
+          },
+          " | undefined) => Promise<void>"
+        ],
+        "path": "x-pack/packages/kbn-synthetics-private-location/src/cli.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/synthetics-private-location",
+            "id": "def-common.cli.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "cliOptions",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/synthetics-private-location",
+                "scope": "common",
+                "docId": "kibKbnSyntheticsPrivateLocationPluginApi",
+                "section": "def-common.CliOptions",
+                "text": "CliOptions"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/packages/kbn-synthetics-private-location/src/cli.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/synthetics-private-location",
+        "id": "def-common.run",
+        "type": "Function",
+        "tags": [],
+        "label": "run",
+        "description": [],
+        "signature": [
+          "(options: ",
+          {
+            "pluginId": "@kbn/synthetics-private-location",
+            "scope": "common",
+            "docId": "kibKbnSyntheticsPrivateLocationPluginApi",
+            "section": "def-common.CliOptions",
+            "text": "CliOptions"
+          },
+          ", logger: ",
+          {
+            "pluginId": "@kbn/tooling-log",
+            "scope": "common",
+            "docId": "kibKbnToolingLogPluginApi",
+            "section": "def-common.ToolingLog",
+            "text": "ToolingLog"
+          },
+          ") => Promise<void>"
+        ],
+        "path": "x-pack/packages/kbn-synthetics-private-location/src/run.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/synthetics-private-location",
+            "id": "def-common.run.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/synthetics-private-location",
+                "scope": "common",
+                "docId": "kibKbnSyntheticsPrivateLocationPluginApi",
+                "section": "def-common.CliOptions",
+                "text": "CliOptions"
+              }
+            ],
+            "path": "x-pack/packages/kbn-synthetics-private-location/src/run.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/synthetics-private-location",
+            "id": "def-common.run.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "logger",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/tooling-log",
+                "scope": "common",
+                "docId": "kibKbnToolingLogPluginApi",
+                "section": "def-common.ToolingLog",
+                "text": "ToolingLog"
+              }
+            ],
+            "path": "x-pack/packages/kbn-synthetics-private-location/src/run.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/synthetics-private-location",
+        "id": "def-common.CliOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "CliOptions",
+        "description": [],
+        "path": "x-pack/packages/kbn-synthetics-private-location/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/synthetics-private-location",
+            "id": "def-common.CliOptions.locationName",
+            "type": "string",
+            "tags": [],
+            "label": "locationName",
+            "description": [],
+            "path": "x-pack/packages/kbn-synthetics-private-location/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthetics-private-location",
+            "id": "def-common.CliOptions.agentPolicyName",
+            "type": "string",
+            "tags": [],
+            "label": "agentPolicyName",
+            "description": [],
+            "path": "x-pack/packages/kbn-synthetics-private-location/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthetics-private-location",
+            "id": "def-common.CliOptions.kibanaUrl",
+            "type": "string",
+            "tags": [],
+            "label": "kibanaUrl",
+            "description": [],
+            "path": "x-pack/packages/kbn-synthetics-private-location/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthetics-private-location",
+            "id": "def-common.CliOptions.kibanaUsername",
+            "type": "string",
+            "tags": [],
+            "label": "kibanaUsername",
+            "description": [],
+            "path": "x-pack/packages/kbn-synthetics-private-location/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthetics-private-location",
+            "id": "def-common.CliOptions.kibanaPassword",
+            "type": "string",
+            "tags": [],
+            "label": "kibanaPassword",
+            "description": [],
+            "path": "x-pack/packages/kbn-synthetics-private-location/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthetics-private-location",
+            "id": "def-common.CliOptions.elasticsearchHost",
+            "type": "string",
+            "tags": [],
+            "label": "elasticsearchHost",
+            "description": [],
+            "path": "x-pack/packages/kbn-synthetics-private-location/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/synthetics-private-location",
+        "id": "def-common.DEFAULTS",
+        "type": "Object",
+        "tags": [],
+        "label": "DEFAULTS",
+        "description": [],
+        "path": "x-pack/packages/kbn-synthetics-private-location/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/synthetics-private-location",
+            "id": "def-common.DEFAULTS.LOCATION_NAME",
+            "type": "string",
+            "tags": [],
+            "label": "LOCATION_NAME",
+            "description": [],
+            "path": "x-pack/packages/kbn-synthetics-private-location/src/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthetics-private-location",
+            "id": "def-common.DEFAULTS.AGENT_POLICY_NAME",
+            "type": "string",
+            "tags": [],
+            "label": "AGENT_POLICY_NAME",
+            "description": [],
+            "path": "x-pack/packages/kbn-synthetics-private-location/src/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthetics-private-location",
+            "id": "def-common.DEFAULTS.ELASTICSEARCH_HOST",
+            "type": "string",
+            "tags": [],
+            "label": "ELASTICSEARCH_HOST",
+            "description": [],
+            "path": "x-pack/packages/kbn-synthetics-private-location/src/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthetics-private-location",
+            "id": "def-common.DEFAULTS.KIBANA_URL",
+            "type": "string",
+            "tags": [],
+            "label": "KIBANA_URL",
+            "description": [],
+            "path": "x-pack/packages/kbn-synthetics-private-location/src/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthetics-private-location",
+            "id": "def-common.DEFAULTS.KIBANA_USERNAME",
+            "type": "string",
+            "tags": [],
+            "label": "KIBANA_USERNAME",
+            "description": [],
+            "path": "x-pack/packages/kbn-synthetics-private-location/src/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthetics-private-location",
+            "id": "def-common.DEFAULTS.KIBANA_PASSWORD",
+            "type": "string",
+            "tags": [],
+            "label": "KIBANA_PASSWORD",
+            "description": [],
+            "path": "x-pack/packages/kbn-synthetics-private-location/src/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

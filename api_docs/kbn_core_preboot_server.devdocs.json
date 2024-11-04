@@ -11,18 +11,10 @@
   "server": {
     "classes": [],
     "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-preboot-server",
-        "id": "def-common.PrebootServicePreboot",
+        "id": "def-server.PrebootServicePreboot",
         "type": "Interface",
         "tags": [],
         "label": "PrebootServicePreboot",
@@ -35,7 +27,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-preboot-server",
-            "id": "def-common.PrebootServicePreboot.isSetupOnHold",
+            "id": "def-server.PrebootServicePreboot.isSetupOnHold",
             "type": "Function",
             "tags": [],
             "label": "isSetupOnHold",
@@ -53,7 +45,7 @@
           },
           {
             "parentPluginId": "@kbn/core-preboot-server",
-            "id": "def-common.PrebootServicePreboot.holdSetupUntilResolved",
+            "id": "def-server.PrebootServicePreboot.holdSetupUntilResolved",
             "type": "Function",
             "tags": [],
             "label": "holdSetupUntilResolved",
@@ -69,7 +61,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-preboot-server",
-                "id": "def-common.PrebootServicePreboot.holdSetupUntilResolved.$1",
+                "id": "def-server.PrebootServicePreboot.holdSetupUntilResolved.$1",
                 "type": "string",
                 "tags": [],
                 "label": "reason",
@@ -86,7 +78,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-preboot-server",
-                "id": "def-common.PrebootServicePreboot.holdSetupUntilResolved.$2",
+                "id": "def-server.PrebootServicePreboot.holdSetupUntilResolved.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "promise",
@@ -108,6 +100,14 @@
         "initialIsOpen": false
       }
     ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
     "enums": [],
     "misc": [],
     "objects": []

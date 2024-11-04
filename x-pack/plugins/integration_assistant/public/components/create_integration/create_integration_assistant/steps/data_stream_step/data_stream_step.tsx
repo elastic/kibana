@@ -5,41 +5,42 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
+  EuiComboBox,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
   EuiPanel,
-  EuiSelect,
 } from '@elastic/eui';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { InputType } from '../../../../../../common';
 import { useActions, type State } from '../../state';
 import type { IntegrationSettings } from '../../types';
 import { StepContentWrapper } from '../step_content_wrapper';
-import { SampleLogsInput } from './sample_logs_input';
-import type { OnComplete } from './generation_modal';
+import type { OnComplete } from './use_generation';
 import { GenerationModal } from './generation_modal';
-import { useLoadPackageNames } from './use_load_package_names';
+import { SampleLogsInput } from './sample_logs_input';
 import * as i18n from './translations';
+import { useLoadPackageNames } from './use_load_package_names';
 
-export const InputTypeOptions: Array<{ value: InputType; text: string }> = [
-  { value: 'aws_cloudwatch', text: 'AWS Cloudwatch' },
-  { value: 'aws_s3', text: 'AWS S3' },
-  { value: 'azure_blob_storage', text: 'Azure Blob Storage' },
-  { value: 'azure_eventhub', text: 'Azure Event Hub' },
-  { value: 'cel', text: 'Common Expression Language (CEL)' },
-  { value: 'cloudfoundry', text: 'Cloud Foundry' },
-  { value: 'filestream', text: 'File Stream' },
-  { value: 'gcp_pubsub', text: 'GCP Pub/Sub' },
-  { value: 'gcs', text: 'Google Cloud Storage' },
-  { value: 'http_endpoint', text: 'HTTP Endpoint' },
-  { value: 'journald', text: 'Journald' },
-  { value: 'kafka', text: 'Kafka' },
-  { value: 'tcp', text: 'TCP' },
-  { value: 'udp', text: 'UDP' },
+export const InputTypeOptions: Array<EuiComboBoxOptionOption<InputType>> = [
+  { value: 'aws-cloudwatch', label: 'AWS Cloudwatch' },
+  { value: 'aws-s3', label: 'AWS S3' },
+  { value: 'azure-blob-storage', label: 'Azure Blob Storage' },
+  { value: 'azure-eventhub', label: 'Azure Event Hub' },
+  { value: 'cel', label: 'Common Expression Language (CEL)' },
+  { value: 'cloudfoundry', label: 'Cloud Foundry' },
+  { value: 'filestream', label: 'File Stream' },
+  { value: 'gcp-pubsub', label: 'GCP Pub/Sub' },
+  { value: 'gcs', label: 'Google Cloud Storage' },
+  { value: 'http_endpoint', label: 'HTTP Endpoint' },
+  { value: 'journald', label: 'Journald' },
+  { value: 'kafka', label: 'Kafka' },
+  { value: 'tcp', label: 'TCP' },
+  { value: 'udp', label: 'UDP' },
 ];
 
 const isValidName = (name: string) => /^[a-z0-9_]+$/.test(name);
@@ -52,7 +53,8 @@ interface DataStreamStepProps {
 }
 export const DataStreamStep = React.memo<DataStreamStepProps>(
   ({ integrationSettings, connector, isGenerating }) => {
-    const { setIntegrationSettings, setIsGenerating, setStep, setResult } = useActions();
+    const { setIntegrationSettings, setIsGenerating, setHasCelInput, setStep, setResult } =
+      useActions();
     const { isLoading: isLoadingPackageNames, packageNames } = useLoadPackageNames(); // this is used to avoid duplicate names
 
     const [name, setName] = useState<string>(integrationSettings?.name ?? '');
@@ -96,11 +98,15 @@ export const DataStreamStep = React.memo<DataStreamStepProps>(
           setIntegrationValues({ dataStreamTitle: e.target.value }),
         dataStreamDescription: (e: React.ChangeEvent<HTMLInputElement>) =>
           setIntegrationValues({ dataStreamDescription: e.target.value }),
-        inputType: (e: React.ChangeEvent<HTMLSelectElement>) => {
-          setIntegrationValues({ inputType: e.target.value as InputType });
+        inputTypes: (options: EuiComboBoxOptionOption[]) => {
+          setIntegrationValues({ inputTypes: options.map((option) => option.value as InputType) });
+          setHasCelInput(
+            // the cel value here comes from the input type options defined above
+            options.map((option) => option.value as InputType).includes('cel' as InputType)
+          );
         },
       };
-    }, [setIntegrationValues, setInvalidFields, packageNames]);
+    }, [setIntegrationValues, setInvalidFields, setHasCelInput, packageNames]);
 
     useEffect(() => {
       // Pre-populates the name from the title set in the previous step.
@@ -135,8 +141,16 @@ export const DataStreamStep = React.memo<DataStreamStepProps>(
       }
     }, [packageNames, name]);
 
+    const selectedInputTypeOptions = useMemo<Array<EuiComboBoxOptionOption<InputType>>>(
+      () =>
+        InputTypeOptions.filter((inputType) =>
+          integrationSettings?.inputTypes?.includes(inputType.value as InputType)
+        ),
+      [integrationSettings?.inputTypes]
+    );
+
     return (
-      <EuiFlexGroup direction="column" gutterSize="l">
+      <EuiFlexGroup direction="column" gutterSize="l" data-test-subj="dataStreamStep">
         <EuiFlexItem>
           <StepContentWrapper
             title={i18n.INTEGRATION_NAME_TITLE}
@@ -154,6 +168,7 @@ export const DataStreamStep = React.memo<DataStreamStepProps>(
                 >
                   <EuiFieldText
                     name="name"
+                    data-test-subj="nameInput"
                     value={name}
                     onChange={onChange.name}
                     isInvalid={invalidFields.name}
@@ -176,6 +191,7 @@ export const DataStreamStep = React.memo<DataStreamStepProps>(
                 <EuiFormRow label={i18n.DATA_STREAM_TITLE_LABEL}>
                   <EuiFieldText
                     name="dataStreamTitle"
+                    data-test-subj="dataStreamTitleInput"
                     value={integrationSettings?.dataStreamTitle ?? ''}
                     onChange={onChange.dataStreamTitle}
                   />
@@ -183,6 +199,7 @@ export const DataStreamStep = React.memo<DataStreamStepProps>(
                 <EuiFormRow label={i18n.DATA_STREAM_DESCRIPTION_LABEL}>
                   <EuiFieldText
                     name="dataStreamDescription"
+                    data-test-subj="dataStreamDescriptionInput"
                     value={integrationSettings?.dataStreamDescription ?? ''}
                     onChange={onChange.dataStreamDescription}
                   />
@@ -195,23 +212,22 @@ export const DataStreamStep = React.memo<DataStreamStepProps>(
                 >
                   <EuiFieldText
                     name="dataStreamName"
+                    data-test-subj="dataStreamNameInput"
                     value={dataStreamName}
                     onChange={onChange.dataStreamName}
                     isInvalid={invalidFields.dataStreamName}
                   />
                 </EuiFormRow>
                 <EuiFormRow label={i18n.DATA_COLLECTION_METHOD_LABEL}>
-                  <EuiSelect
-                    name="dataCollectionMethod"
+                  <EuiComboBox
+                    data-test-subj="dataCollectionMethodInput"
                     options={InputTypeOptions}
-                    value={integrationSettings?.inputType ?? ''}
-                    onChange={onChange.inputType}
+                    selectedOptions={selectedInputTypeOptions}
+                    onChange={onChange.inputTypes}
+                    fullWidth
                   />
                 </EuiFormRow>
-                <SampleLogsInput
-                  integrationSettings={integrationSettings}
-                  setIntegrationSettings={setIntegrationSettings}
-                />
+                <SampleLogsInput integrationSettings={integrationSettings} />
               </EuiForm>
             </EuiPanel>
           </StepContentWrapper>

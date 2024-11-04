@@ -3,7 +3,8 @@ post:
   operationId: updateFieldsMetadata
   description: >
     Update fields presentation metadata such as count, customLabel and format.
-    This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features. You can update multiple fields in one request. Updates are merged with persisted metadata. To remove existing metadata, specify null as the value.
+    You can update multiple fields in one request. Updates are merged with persisted metadata.
+    To remove existing metadata, specify null as the value.
   tags:
     - data views
   parameters:

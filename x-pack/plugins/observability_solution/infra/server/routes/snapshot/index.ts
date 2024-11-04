@@ -6,21 +6,18 @@
  */
 
 import Boom from '@hapi/boom';
-import { schema } from '@kbn/config-schema';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { fold } from 'fp-ts/lib/Either';
-import { identity } from 'fp-ts/lib/function';
+import { createRouteValidationFunction } from '@kbn/io-ts-utils';
+import { SNAPSHOT_API_MAX_METRICS } from '../../../common/constants';
 import { InfraBackendLibs } from '../../lib/infra_types';
 import { UsageCollector } from '../../usage/usage_collector';
 import { SnapshotRequestRT, SnapshotNodeResponseRT } from '../../../common/http_api/snapshot_api';
-import { throwErrors } from '../../../common/runtime_types';
 import { createSearchClient } from '../../lib/create_search_client';
 import { getNodes } from './lib/get_nodes';
 import { LogQueryFields } from '../../lib/metrics/types';
 
-const escapeHatch = schema.object({}, { unknowns: 'allow' });
-
 export const initSnapshotRoute = (libs: InfraBackendLibs) => {
+  const validateBody = createRouteValidationFunction(SnapshotRequestRT);
+
   const { framework } = libs;
 
   framework.registerRoute(
@@ -28,34 +25,40 @@ export const initSnapshotRoute = (libs: InfraBackendLibs) => {
       method: 'post',
       path: '/api/metrics/snapshot',
       validate: {
-        body: escapeHatch,
+        body: validateBody,
       },
     },
     async (requestContext, request, response) => {
-      const snapshotRequest = pipe(
-        SnapshotRequestRT.decode(request.body),
-        fold(throwErrors(Boom.badRequest), identity)
-      );
-
-      const soClient = (await requestContext.core).savedObjects.client;
-      const source = await libs.sources.getSourceConfiguration(soClient, snapshotRequest.sourceId);
-      const compositeSize = libs.configuration.inventory.compositeSize;
-      const [, { logsShared }] = await libs.getStartServices();
-      const logQueryFields: LogQueryFields | undefined = await logsShared.logViews
-        .getScopedClient(request)
-        .getResolvedLogView({
-          type: 'log-view-reference',
-          logViewId: snapshotRequest.sourceId,
-        })
-        .then(
-          ({ indices }) => ({ indexPattern: indices }),
-          () => undefined
-        );
-
-      UsageCollector.countNode(snapshotRequest.nodeType);
-      const client = createSearchClient(requestContext, framework, request);
+      const snapshotRequest = request.body;
 
       try {
+        if (snapshotRequest.metrics.length > SNAPSHOT_API_MAX_METRICS) {
+          throw Boom.badRequest(
+            `'metrics' size is greater than maximum of ${SNAPSHOT_API_MAX_METRICS} allowed.`
+          );
+        }
+
+        const soClient = (await requestContext.core).savedObjects.client;
+        const source = await libs.sources.getSourceConfiguration(
+          soClient,
+          snapshotRequest.sourceId
+        );
+        const compositeSize = libs.configuration.inventory.compositeSize;
+        const [, { logsShared }] = await libs.getStartServices();
+        const logQueryFields: LogQueryFields | undefined = await logsShared.logViews
+          .getScopedClient(request)
+          .getResolvedLogView({
+            type: 'log-view-reference',
+            logViewId: snapshotRequest.sourceId,
+          })
+          .then(
+            ({ indices }) => ({ indexPattern: indices }),
+            () => undefined
+          );
+
+        UsageCollector.countNode(snapshotRequest.nodeType);
+        const client = createSearchClient(requestContext, framework, request);
+
         const snapshotResponse = await getNodes(
           client,
           snapshotRequest,

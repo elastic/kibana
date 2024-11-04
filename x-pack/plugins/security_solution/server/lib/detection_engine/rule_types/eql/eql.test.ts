@@ -17,8 +17,12 @@ import type { EqlRuleParams } from '../../rule_schema';
 import { getCompleteRuleMock, getEqlRuleParams } from '../../rule_schema/mocks';
 import { ruleExecutionLogMock } from '../../rule_monitoring/mocks';
 import { eqlExecutor } from './eql';
+import { getDataTierFilter } from '../utils/get_data_tier_filter';
 
 jest.mock('../../routes/index/get_index_version');
+jest.mock('../utils/get_data_tier_filter', () => ({ getDataTierFilter: jest.fn() }));
+
+const getDataTierFilterMock = getDataTierFilter as jest.Mock;
 
 describe('eql_executor', () => {
   const version = '8.0.0';
@@ -33,6 +37,7 @@ describe('eql_executor', () => {
     maxSignals: params.maxSignals,
   };
   const mockExperimentalFeatures = {} as ExperimentalFeatures;
+  const mockScheduleNotificationResponseActionsService = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -43,12 +48,13 @@ describe('eql_executor', () => {
         events: [],
       },
     });
+    getDataTierFilterMock.mockResolvedValue([]);
   });
 
   describe('eqlExecutor', () => {
     describe('warning scenarios', () => {
       it('warns when exception list for eql rule contains value list exceptions', async () => {
-        const result = await eqlExecutor({
+        const { result } = await eqlExecutor({
           inputIndex: DEFAULT_INDEX_PATTERN,
           runtimeMappings: {},
           completeRule: eqlCompleteRule,
@@ -67,6 +73,8 @@ describe('eql_executor', () => {
           alertWithSuppression: jest.fn(),
           isAlertSuppressionActive: false,
           experimentalFeatures: mockExperimentalFeatures,
+          scheduleNotificationResponseActionsService:
+            mockScheduleNotificationResponseActionsService,
         });
         expect(result.warningMessages).toEqual([
           `The following exceptions won't be applied to rule execution: ${
@@ -97,7 +105,7 @@ describe('eql_executor', () => {
           },
         });
 
-        const result = await eqlExecutor({
+        const { result } = await eqlExecutor({
           inputIndex: DEFAULT_INDEX_PATTERN,
           runtimeMappings: {},
           completeRule: ruleWithSequenceAndSuppression,
@@ -116,6 +124,8 @@ describe('eql_executor', () => {
           alertWithSuppression: jest.fn(),
           isAlertSuppressionActive: true,
           experimentalFeatures: mockExperimentalFeatures,
+          scheduleNotificationResponseActionsService:
+            mockScheduleNotificationResponseActionsService,
         });
 
         expect(result.warningMessages).toContain(
@@ -130,7 +140,7 @@ describe('eql_executor', () => {
         message:
           'verification_exception\n\tRoot causes:\n\t\tverification_exception: Found 1 problem\nline 1:1: Unknown column [event.category]',
       });
-      const result = await eqlExecutor({
+      const { result } = await eqlExecutor({
         inputIndex: DEFAULT_INDEX_PATTERN,
         runtimeMappings: {},
         completeRule: eqlCompleteRule,
@@ -149,8 +159,90 @@ describe('eql_executor', () => {
         alertWithSuppression: jest.fn(),
         isAlertSuppressionActive: true,
         experimentalFeatures: mockExperimentalFeatures,
+        scheduleNotificationResponseActionsService: mockScheduleNotificationResponseActionsService,
       });
       expect(result.userError).toEqual(true);
+    });
+
+    it('should handle scheduleNotificationResponseActionsService call', async () => {
+      const { result } = await eqlExecutor({
+        inputIndex: DEFAULT_INDEX_PATTERN,
+        runtimeMappings: {},
+        completeRule: eqlCompleteRule,
+        tuple,
+        ruleExecutionLogger,
+        services: alertServices,
+        version,
+        bulkCreate: jest.fn(),
+        wrapHits: jest.fn(),
+        wrapSequences: jest.fn(),
+        primaryTimestamp: '@timestamp',
+        exceptionFilter: undefined,
+        unprocessedExceptions: [],
+        wrapSuppressedHits: jest.fn(),
+        alertTimestampOverride: undefined,
+        alertWithSuppression: jest.fn(),
+        isAlertSuppressionActive: false,
+        experimentalFeatures: mockExperimentalFeatures,
+        scheduleNotificationResponseActionsService: mockScheduleNotificationResponseActionsService,
+      });
+      expect(mockScheduleNotificationResponseActionsService).toBeCalledWith({
+        signals: result.createdSignals,
+        signalsCount: result.createdSignalsCount,
+        responseActions: eqlCompleteRule.ruleParams.responseActions,
+      });
+    });
+
+    it('should pass frozen tier filters in eql search request', async () => {
+      getDataTierFilterMock.mockResolvedValue([
+        {
+          meta: { negate: true },
+          query: {
+            terms: {
+              _tier: ['data_cold'],
+            },
+          },
+        },
+      ]);
+
+      await eqlExecutor({
+        inputIndex: DEFAULT_INDEX_PATTERN,
+        runtimeMappings: {},
+        completeRule: eqlCompleteRule,
+        tuple,
+        ruleExecutionLogger,
+        services: alertServices,
+        version,
+        bulkCreate: jest.fn(),
+        wrapHits: jest.fn(),
+        wrapSequences: jest.fn(),
+        primaryTimestamp: '@timestamp',
+        exceptionFilter: undefined,
+        unprocessedExceptions: [],
+        wrapSuppressedHits: jest.fn(),
+        alertTimestampOverride: undefined,
+        alertWithSuppression: jest.fn(),
+        isAlertSuppressionActive: true,
+        experimentalFeatures: mockExperimentalFeatures,
+        scheduleNotificationResponseActionsService: mockScheduleNotificationResponseActionsService,
+      });
+
+      const searchArgs =
+        alertServices.scopedClusterClient.asCurrentUser.eql.search.mock.calls[0][0];
+
+      expect(searchArgs).toHaveProperty(
+        'body.filter.bool.filter',
+        expect.arrayContaining([
+          {
+            bool: {
+              filter: [],
+              must: [],
+              must_not: [{ terms: { _tier: ['data_cold'] } }],
+              should: [],
+            },
+          },
+        ])
+      );
     });
   });
 });

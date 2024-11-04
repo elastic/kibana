@@ -87,8 +87,20 @@ export const ComponentTemplatesSelector = ({
           .map((name) => components.find((comp) => comp.name === name))
           .filter(Boolean) as ComponentTemplateListItem[];
 
-        setComponentsSelected(nextComponentsSelected);
-        onChange(nextComponentsSelected.map(({ name }) => name));
+        // Add the non-existing templates from the "defaultValue" prop
+        const missingDefaultComponents: ComponentTemplateListItem[] = defaultValue
+          .filter((name) => !components.find((comp) => comp.name === name))
+          .map((name) => ({
+            name,
+            usedBy: [],
+            hasMappings: false,
+            hasAliases: false,
+            hasSettings: false,
+            isManaged: false,
+          }));
+
+        setComponentsSelected([...nextComponentsSelected, ...missingDefaultComponents]);
+        onChange([...nextComponentsSelected, ...missingDefaultComponents].map(({ name }) => name));
         isInitialized.current = true;
       } else {
         onChange(componentsSelected.map(({ name }) => name));

@@ -16,7 +16,7 @@ import { Failures } from './failures';
 interface Props {
   index: string;
   dataView: string;
-  ingestPipelineId: string;
+  pipelineId: string;
   docCount: number;
   importFailures: DocFailure[];
   createDataView: boolean;
@@ -26,7 +26,7 @@ interface Props {
 export const ImportSummary: FC<Props> = ({
   index,
   dataView,
-  ingestPipelineId,
+  pipelineId,
   docCount,
   importFailures,
   createDataView,
@@ -35,7 +35,7 @@ export const ImportSummary: FC<Props> = ({
   const items = createDisplayItems(
     index,
     dataView,
-    ingestPipelineId,
+    pipelineId,
     docCount,
     importFailures,
     createDataView,
@@ -99,7 +99,7 @@ export const ImportSummary: FC<Props> = ({
 function createDisplayItems(
   index: string,
   dataView: string,
-  ingestPipelineId: string,
+  pipelineId: string,
   docCount: number,
   importFailures: DocFailure[],
   createDataView: boolean,
@@ -134,7 +134,7 @@ function createDisplayItems(
           defaultMessage="Ingest pipeline"
         />
       ),
-      description: ingestPipelineId,
+      description: pipelineId,
     });
   }
 

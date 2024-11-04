@@ -19,16 +19,22 @@ describe('MultipleAgentPolicySummaryLine', () => {
   let testRenderer: TestRenderer;
 
   const render = (agentPolicies: AgentPolicy[]) =>
-    testRenderer.render(<MultipleAgentPoliciesSummaryLine policies={agentPolicies} />);
+    testRenderer.render(
+      <MultipleAgentPoliciesSummaryLine
+        policies={agentPolicies}
+        packagePolicyId="policy1"
+        onAgentPoliciesChange={jest.fn()}
+      />
+    );
 
   beforeEach(() => {
     testRenderer = createFleetTestRendererMock();
   });
 
-  test('it should render only the policy name when there is only one policy', async () => {
+  test('it should only render the policy name when there is only one policy', async () => {
     const results = render([{ name: 'Test policy', revision: 2 }] as AgentPolicy[]);
-    expect(results.container.textContent).toBe('Test policy');
-    expect(results.queryByTestId('agentPolicyNameBadge')).toBeInTheDocument();
+    expect(results.container.textContent).toBe('Test policyrev. 2');
+    expect(results.queryByTestId('agentPolicyNameLink')).toBeInTheDocument();
     expect(results.queryByTestId('agentPoliciesNumberBadge')).not.toBeInTheDocument();
   });
 
@@ -38,7 +44,7 @@ describe('MultipleAgentPolicySummaryLine', () => {
       { name: 'Test policy 2', id: '0002' },
       { name: 'Test policy 3', id: '0003' },
     ] as AgentPolicy[]);
-    expect(results.queryByTestId('agentPolicyNameBadge')).toBeInTheDocument();
+    expect(results.queryByTestId('agentPolicyNameLink')).toBeInTheDocument();
     expect(results.queryByTestId('agentPoliciesNumberBadge')).toBeInTheDocument();
     expect(results.container.textContent).toBe('Test policy 1+2');
 
@@ -50,5 +56,11 @@ describe('MultipleAgentPolicySummaryLine', () => {
     expect(results.queryByTestId('policy-0001')).toBeInTheDocument();
     expect(results.queryByTestId('policy-0002')).toBeInTheDocument();
     expect(results.queryByTestId('policy-0003')).toBeInTheDocument();
+
+    await act(async () => {
+      fireEvent.click(results.getByTestId('agentPoliciesPopoverButton'));
+    });
+
+    expect(results.queryByTestId('manageAgentPoliciesModal')).toBeInTheDocument();
   });
 });

@@ -19,10 +19,7 @@ import type {
   PluginStartContract as ActionsPluginStart,
 } from '@kbn/actions-plugin/server';
 import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import type {
-  PluginStartContract as FeaturesPluginStart,
-  PluginSetupContract as FeaturesPluginSetup,
-} from '@kbn/features-plugin/server';
+import type { FeaturesPluginStart, FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
 import type {
   TaskManagerSetupContract,
@@ -33,6 +30,7 @@ import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-
 import type { NotificationsPluginStart } from '@kbn/notifications-plugin/server';
 import type { RuleRegistryPluginStartContract } from '@kbn/rule-registry-plugin/server';
 import type { PluginSetupContract as AlertingPluginSetup } from '@kbn/alerting-plugin/server';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { CasesClient } from './client';
 import type { AttachmentFramework } from './attachment_framework/types';
 import type { ExternalReferenceAttachmentTypeRegistry } from './attachment_framework/external_reference_registry';
@@ -49,6 +47,7 @@ export interface CasesServerSetupDependencies {
   taskManager?: TaskManagerSetupContract;
   usageCollection?: UsageCollectionSetup;
   spaces?: SpacesPluginSetup;
+  cloud?: CloudSetup;
 }
 
 export interface CasesServerStartDependencies {

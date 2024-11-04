@@ -13,8 +13,8 @@ import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { useLogsBreadcrumbs } from '../../../hooks/use_logs_breadcrumbs';
 import { LogStreamPageStateProvider } from '../../../observability_logs/log_stream_page/state';
 import { streamTitle } from '../../../translations';
-import { useKbnUrlStateStorageFromRouterContext } from '../../../utils/kbn_url_state_context';
-import { useKibanaQuerySettings } from '../../../utils/use_kibana_query_settings';
+import { useKbnUrlStateStorageFromRouterContext } from '../../../containers/kbn_url_state_context';
+import { useKibanaQuerySettings } from '../../../hooks/use_kibana_query_settings';
 import { ConnectedStreamPageContent } from './page_content';
 
 export const StreamPage = () => {

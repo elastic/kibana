@@ -6,7 +6,6 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { once } from 'lodash/fp';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
@@ -18,18 +17,12 @@ import { GetElser } from '../types';
  *
  * @param ml
  */
-export const createGetElserId = (ml: MlPluginSetup): GetElser => {
-  return once(async () => {
-    return (
-      (
-        await ml
-          // Force check to happen as internal user
-          .trainedModelsProvider({} as KibanaRequest, {} as SavedObjectsClientContract)
-          .getELSER()
-      ).model_id
-    );
-  });
-};
+export const createGetElserId =
+  (trainedModelsProvider: MlPluginSetup['trainedModelsProvider']): GetElser =>
+  async () =>
+    // Force check to happen as internal user
+    (await trainedModelsProvider({} as KibanaRequest, {} as SavedObjectsClientContract).getELSER())
+      .model_id;
 
 interface PipelineExistsParams {
   esClient: ElasticsearchClient;
@@ -61,6 +54,7 @@ interface CreatePipelineParams {
   esClient: ElasticsearchClient;
   id: string;
   modelId: string;
+  v2KnowledgeBaseEnabled: boolean;
 }
 
 /**
@@ -77,17 +71,20 @@ export const createPipeline = async ({
   esClient,
   id,
   modelId,
+  v2KnowledgeBaseEnabled,
 }: CreatePipelineParams): Promise<boolean> => {
   try {
     const response = await esClient.ingest.putPipeline(
       knowledgeBaseIngestPipeline({
         id,
         modelId,
+        v2KnowledgeBaseEnabled,
       })
     );
 
     return response.acknowledged;
   } catch (e) {
+    // TODO: log error or just use semantic_text already
     return false;
   }
 };

@@ -1,29 +1,26 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import moment from 'moment';
-
+import type { Logger } from '@kbn/logging';
+import { UsageCounters } from '@kbn/usage-collection-plugin/common';
 import {
-  CollectorFetchContext,
-  UsageCollectionSetup,
+  type UsageCollectionSetup,
   USAGE_COUNTERS_SAVED_OBJECT_TYPE,
-  UsageCountersSavedObject,
-  UsageCountersSavedObjectAttributes,
 } from '@kbn/usage-collection-plugin/server';
-
-import { deserializeUiCounterName } from '@kbn/usage-collection-plugin/common/ui_counters';
+import { type CounterEvent, createCounterFetcher } from '../common/counters';
 
 interface UiCounterEvent {
   appName: string;
   eventName: string;
-  lastUpdatedAt?: string;
-  fromTimestamp?: string;
   counterType: string;
+  lastUpdatedAt: string;
+  fromTimestamp: string;
   total: number;
 }
 
@@ -31,58 +28,13 @@ export interface UiUsageCounters {
   dailyEvents: UiCounterEvent[];
 }
 
-export function transformRawUsageCounterObject(
-  rawUsageCounter: UsageCountersSavedObject
-): UiCounterEvent | undefined {
-  const {
-    attributes: { count, counterName, counterType, domainId },
-    updated_at: lastUpdatedAt,
-  } = rawUsageCounter;
+const UI: UsageCounters.v1.CounterEventSource = 'ui';
+const UI_COUNTERS_FILTER = `${USAGE_COUNTERS_SAVED_OBJECT_TYPE}.attributes.source: ${UI}`;
 
-  if (domainId !== 'uiCounter' || typeof count !== 'number' || count < 1) {
-    return;
-  }
-
-  const fromTimestamp = moment(lastUpdatedAt).utc().startOf('day').format();
-  const { appName, eventName } = deserializeUiCounterName(counterName);
-
-  return {
-    appName,
-    eventName,
-    lastUpdatedAt,
-    fromTimestamp,
-    counterType,
-    total: count,
-  };
-}
-
-export async function fetchUiCounters({ soClient }: CollectorFetchContext) {
-  const finder = soClient.createPointInTimeFinder<UsageCountersSavedObjectAttributes>({
-    type: USAGE_COUNTERS_SAVED_OBJECT_TYPE,
-    fields: ['count', 'counterName', 'counterType', 'domainId'],
-    filter: `${USAGE_COUNTERS_SAVED_OBJECT_TYPE}.attributes.domainId: uiCounter`,
-    perPage: 1000,
-  });
-
-  const dailyEvents: UiCounterEvent[] = [];
-
-  for await (const { saved_objects: rawUsageCounters } of finder.find()) {
-    rawUsageCounters.forEach((raw) => {
-      try {
-        const event = transformRawUsageCounterObject(raw);
-        if (event) {
-          dailyEvents.push(event);
-        }
-      } catch (_) {
-        // swallow error; allows sending successfully transformed objects.
-      }
-    });
-  }
-
-  return { dailyEvents };
-}
-
-export function registerUiCountersUsageCollector(usageCollection: UsageCollectionSetup) {
+export function registerUiCountersUsageCollector(
+  usageCollection: UsageCollectionSetup,
+  logger: Logger
+) {
   const collector = usageCollection.makeUsageCollector<UiUsageCounters>({
     type: 'ui_counters',
     schema: {
@@ -105,7 +57,10 @@ export function registerUiCountersUsageCollector(usageCollection: UsageCollectio
             type: 'date',
             _meta: { description: 'Time at which the metric was captured.' },
           },
-          counterType: { type: 'keyword', _meta: { description: 'The type of counter used.' } },
+          counterType: {
+            type: 'keyword',
+            _meta: { description: 'The type of counter used.' },
+          },
           total: {
             type: 'integer',
             _meta: { description: 'The total number of times the event happened.' },
@@ -113,9 +68,24 @@ export function registerUiCountersUsageCollector(usageCollection: UsageCollectio
         },
       },
     },
-    fetch: fetchUiCounters,
+    fetch: createCounterFetcher(logger, UI_COUNTERS_FILTER, toDailyEvents),
     isReady: () => true,
   });
 
   usageCollection.registerCollector(collector);
+}
+
+export function toDailyEvents(counters: CounterEvent[]) {
+  return {
+    dailyEvents: counters.map(toUiCounter),
+  };
+}
+
+function toUiCounter(counter: CounterEvent): UiCounterEvent {
+  const { domainId: appName, counterName: eventName, ...props } = counter;
+  return {
+    appName,
+    eventName,
+    ...props,
+  };
 }

@@ -18,12 +18,12 @@ import { ToggleFlyoutTranslations } from './translations';
 
 describe('ToggleAlertFlyoutButtonComponent', () => {
   describe('when users have write access to uptime', () => {
-    it('enables the button to create a rule', () => {
+    it('enables the button to create a rule', async () => {
       const { getByText } = render(
         <ToggleAlertFlyoutButtonComponent setAlertFlyoutVisible={jest.fn()} />,
         { core: makeUptimePermissionsCore({ save: true }) }
       );
-      userEvent.click(getByText('Alerts and rules'));
+      await userEvent.click(getByText('Alerts and rules'));
       expect(
         forNearestButton(getByText)(ToggleFlyoutTranslations.openAlertContextPanelLabel)
       ).toBeEnabled();
@@ -34,9 +34,9 @@ describe('ToggleAlertFlyoutButtonComponent', () => {
         <ToggleAlertFlyoutButtonComponent setAlertFlyoutVisible={jest.fn()} />,
         { core: makeUptimePermissionsCore({ save: true }) }
       );
-      userEvent.click(getByText('Alerts and rules'));
+      await userEvent.click(getByText('Alerts and rules'));
       await waitForEuiPopoverOpen();
-      userEvent.hover(getByText(ToggleFlyoutTranslations.openAlertContextPanelLabel));
+      await userEvent.hover(getByText(ToggleFlyoutTranslations.openAlertContextPanelLabel));
       await new Promise((r) => setTimeout(r, 250)); // wait for the default time for tooltips to show up
       await expect(
         queryByText('You need read-write access to Uptime to create alerts in this app.')
@@ -45,12 +45,12 @@ describe('ToggleAlertFlyoutButtonComponent', () => {
   });
 
   describe("when users don't have write access to uptime", () => {
-    it('disables the button to create a rule', () => {
+    it('disables the button to create a rule', async () => {
       const { getByText } = render(
         <ToggleAlertFlyoutButtonComponent setAlertFlyoutVisible={jest.fn()} />,
         { core: makeUptimePermissionsCore({ save: false }) }
       );
-      userEvent.click(getByText('Alerts and rules'));
+      await userEvent.click(getByText('Alerts and rules'));
       expect(
         forNearestButton(getByText)(ToggleFlyoutTranslations.openAlertContextPanelLabel)
       ).toBeDisabled();
@@ -61,10 +61,10 @@ describe('ToggleAlertFlyoutButtonComponent', () => {
         <ToggleAlertFlyoutButtonComponent setAlertFlyoutVisible={jest.fn()} />,
         { core: makeUptimePermissionsCore({ save: false }) }
       );
-      userEvent.click(getByText('Alerts and rules'));
+      await userEvent.click(getByText('Alerts and rules'));
       await waitForEuiPopoverOpen();
 
-      userEvent.hover(
+      await userEvent.hover(
         screen
           .getByTestSubject('xpack.synthetics.openAlertContextPanel')
           .closest('span') as HTMLElement

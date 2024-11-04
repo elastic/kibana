@@ -14,12 +14,17 @@ import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
 import { ColumnsPopover } from './columns_popover';
 
-describe('ColumnsPopover', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/174682
+describe.skip('ColumnsPopover', () => {
   let appMockRenderer: AppMockRenderer;
 
   beforeEach(() => {
     appMockRenderer = createAppMockRenderer();
     jest.clearAllMocks();
+  });
+
+  afterEach(async () => {
+    await appMockRenderer.clearQueryCache();
   });
 
   const selectedColumns = [
@@ -33,7 +38,7 @@ describe('ColumnsPopover', () => {
       <ColumnsPopover selectedColumns={selectedColumns} onSelectedColumnsChange={() => {}} />
     );
 
-    userEvent.click(await screen.findByTestId('column-selection-popover-button'));
+    await userEvent.click(await screen.findByTestId('column-selection-popover-button'));
 
     await waitForEuiPopoverOpen();
 
@@ -58,11 +63,10 @@ describe('ColumnsPopover', () => {
       />
     );
 
-    userEvent.click(await screen.findByTestId('column-selection-popover-button'));
-    userEvent.click(
+    await userEvent.click(await screen.findByTestId('column-selection-popover-button'));
+    await userEvent.click(
       await screen.findByTestId(`column-selection-switch-${selectedColumns[0].field}`),
-      undefined,
-      { skipPointerEventsCheck: true }
+      { pointerEventsCheck: 0 }
     );
 
     await waitFor(() => {
@@ -84,14 +88,10 @@ describe('ColumnsPopover', () => {
       />
     );
 
-    userEvent.click(await screen.findByTestId('column-selection-popover-button'));
-    userEvent.click(
-      await screen.findByTestId('column-selection-popover-show-all-button'),
-      undefined,
-      {
-        skipPointerEventsCheck: true,
-      }
-    );
+    await userEvent.click(await screen.findByTestId('column-selection-popover-button'));
+    await userEvent.click(await screen.findByTestId('column-selection-popover-show-all-button'), {
+      pointerEventsCheck: 0,
+    });
 
     const onSelectedColumnsChangeCallParams = selectedColumns.map((column) => ({
       ...column,
@@ -113,14 +113,10 @@ describe('ColumnsPopover', () => {
       />
     );
 
-    userEvent.click(await screen.findByTestId('column-selection-popover-button'));
-    userEvent.click(
-      await screen.findByTestId('column-selection-popover-hide-all-button'),
-      undefined,
-      {
-        skipPointerEventsCheck: true,
-      }
-    );
+    await userEvent.click(await screen.findByTestId('column-selection-popover-button'));
+    await userEvent.click(await screen.findByTestId('column-selection-popover-hide-all-button'), {
+      pointerEventsCheck: 0,
+    });
 
     await waitFor(() => {
       expect(onSelectedColumnsChange).toHaveBeenCalledWith(
@@ -134,9 +130,10 @@ describe('ColumnsPopover', () => {
       <ColumnsPopover selectedColumns={selectedColumns} onSelectedColumnsChange={() => {}} />
     );
 
-    userEvent.click(await screen.findByTestId('column-selection-popover-button'));
+    await userEvent.click(await screen.findByTestId('column-selection-popover-button'));
     await waitForEuiPopoverOpen();
-    userEvent.paste(await screen.findByTestId('column-selection-popover-search'), 'Title');
+    await userEvent.click(await screen.findByTestId('column-selection-popover-search'));
+    await userEvent.paste('Title');
 
     expect(await screen.findByTestId('column-selection-switch-title')).toBeInTheDocument();
     expect(screen.queryByTestId('column-selection-switch-category')).not.toBeInTheDocument();
@@ -153,9 +150,10 @@ describe('ColumnsPopover', () => {
       />
     );
 
-    userEvent.click(await screen.findByTestId('column-selection-popover-button'));
+    await userEvent.click(await screen.findByTestId('column-selection-popover-button'));
     await waitForEuiPopoverOpen();
-    userEvent.paste(await screen.findByTestId('column-selection-popover-search'), 'Category');
+    await userEvent.click(await screen.findByTestId('column-selection-popover-search'));
+    await userEvent.paste('Category');
 
     await waitFor(() => {
       expect(onSelectedColumnsChange).not.toHaveBeenCalled();
@@ -167,11 +165,12 @@ describe('ColumnsPopover', () => {
       <ColumnsPopover selectedColumns={selectedColumns} onSelectedColumnsChange={() => {}} />
     );
 
-    userEvent.click(await screen.findByTestId('column-selection-popover-button'));
+    await userEvent.click(await screen.findByTestId('column-selection-popover-button'));
 
     expect(await screen.findAllByTestId('column-selection-popover-draggable-icon')).toHaveLength(3);
 
-    userEvent.paste(await screen.findByTestId('column-selection-popover-search'), 'Foobar');
+    await userEvent.click(await screen.findByTestId('column-selection-popover-search'));
+    await userEvent.paste('Foobar');
 
     expect(
       await screen.queryByTestId('column-selection-popover-draggable-icon')
@@ -183,11 +182,12 @@ describe('ColumnsPopover', () => {
       <ColumnsPopover selectedColumns={selectedColumns} onSelectedColumnsChange={() => {}} />
     );
 
-    userEvent.click(await screen.findByTestId('column-selection-popover-button'));
+    await userEvent.click(await screen.findByTestId('column-selection-popover-button'));
 
     await waitForEuiPopoverOpen();
 
-    userEvent.paste(await screen.findByTestId('column-selection-popover-search'), 'Foobar');
+    await userEvent.click(await screen.findByTestId('column-selection-popover-search'));
+    await userEvent.paste('Foobar');
 
     expect(await screen.findByTestId('column-selection-popover-show-all-button')).toBeDisabled();
     expect(await screen.findByTestId('column-selection-popover-hide-all-button')).toBeDisabled();

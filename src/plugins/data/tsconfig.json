@@ -7,7 +7,6 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
-    "config.ts",
     "config.mock.ts",
     "common/**/*.json",
     "public/**/*.json",
@@ -55,7 +54,7 @@
     "@kbn/react-kibana-mount",
     "@kbn/search-types",
     "@kbn/safer-lodash-set",
-    "@kbn/esql-utils",
+    "@kbn/esql-utils"
   ],
   "exclude": [
     "target/**/*",

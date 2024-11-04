@@ -61,7 +61,7 @@ export interface IndexDetailsPageTestBed extends TestBed {
       selectInferenceIdButtonExists: () => void;
       openSelectInferencePopover: () => void;
       expectDefaultInferenceModelToExists: () => void;
-      expectCustomInferenceModelToExists: (customInference: string) => Promise<void>;
+      expectCustomInferenceModelToExists: (customInference: string) => void;
     };
     settings: {
       getCodeBlockContent: () => string;
@@ -107,6 +107,7 @@ export interface IndexDetailsPageTestBed extends TestBed {
       getDataStreamDetailsContent: () => string;
       reloadDataStreamDetails: () => Promise<void>;
       addDocCodeBlockExists: () => boolean;
+      indexErrorCalloutExists: () => boolean;
     };
   };
 }
@@ -195,6 +196,9 @@ export const setup = async ({
     },
     addDocCodeBlockExists: () => {
       return exists('codeBlockControlsPanel');
+    },
+    indexErrorCalloutExists: () => {
+      return exists('indexErrorCallout');
     },
   };
 
@@ -317,23 +321,23 @@ export const setup = async ({
         expect(exists('fieldTypesOptions-semantic_text')).toBe(false);
       });
     },
-    isReferenceFieldVisible: async () => {
-      expect(exists('referenceField.select')).toBe(true);
+    isReferenceFieldVisible: () => {
+      expect(exists('referenceFieldSelect')).toBe(true);
     },
-    selectInferenceIdButtonExists: async () => {
+    selectInferenceIdButtonExists: () => {
       expect(exists('selectInferenceId')).toBe(true);
       expect(exists('inferenceIdButton')).toBe(true);
       find('inferenceIdButton').simulate('click');
     },
-    openSelectInferencePopover: async () => {
-      expect(exists('addInferenceEndpointButton')).toBe(true);
+    openSelectInferencePopover: () => {
+      expect(exists('learn-how-to-create-inference-endpoints')).toBe(true);
       expect(exists('manageInferenceEndpointButton')).toBe(true);
     },
-    expectDefaultInferenceModelToExists: async () => {
-      expect(exists('default-inference_elser_model_2')).toBe(true);
-      expect(exists('default-inference_e5')).toBe(true);
+    expectDefaultInferenceModelToExists: () => {
+      expect(exists('custom-inference_elser_model_2')).toBe(true);
+      expect(exists('custom-inference_e5')).toBe(true);
     },
-    expectCustomInferenceModelToExists: async (customInference: string) => {
+    expectCustomInferenceModelToExists: (customInference: string) => {
       expect(exists(customInference)).toBe(true);
     },
   };

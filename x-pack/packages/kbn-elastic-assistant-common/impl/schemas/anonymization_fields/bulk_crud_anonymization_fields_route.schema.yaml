@@ -1,14 +1,15 @@
 openapi: 3.0.0
 info:
-  title: Bulk Actions API endpoint
-  version: '1'
+  title: Bulk Anonymization Fields Actions API endpoint
+  version: '2023-10-31'
 paths:
-  /internal/elastic_assistant/anonymization_fields/_bulk_action:
+  /api/security_ai_assistant/anonymization_fields/_bulk_action:
     post:
-      operationId: PerformBulkAction
       x-codegen-enabled: true
-      summary: Applies a bulk action to multiple anonymization fields
-      description: The bulk action is applied to all anonymization fields that match the filter or to the list of anonymization fields by their IDs.
+      x-labels: [ess, serverless]
+      operationId: PerformAnonymizationFieldsBulkAction
+      summary: Apply a bulk action to anonymization fields
+      description: Apply a bulk action to multiple anonymization fields. The bulk action is applied to all anonymization fields that match the filter or to the list of anonymization fields by their IDs.
       tags:
         - Bulk API
       requestBody:
@@ -33,7 +34,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BulkCrudActionResponse'
+                $ref: '#/components/schemas/AnonymizationFieldsBulkCrudActionResponse'
         400:
           description: Generic Error
           content:
@@ -50,12 +51,12 @@ paths:
 
 components:
   schemas:
-    BulkActionSkipReason:
+    AnonymizationFieldsBulkActionSkipReason:
       type: string
       enum:
         - ANONYMIZATION_FIELD_NOT_MODIFIED
 
-    BulkActionSkipResult:
+    AnonymizationFieldsBulkActionSkipResult:
       type: object
       properties:
         id:
@@ -63,7 +64,7 @@ components:
         name:
           type: string
         skip_reason:
-          $ref: '#/components/schemas/BulkActionSkipReason'
+          $ref: '#/components/schemas/AnonymizationFieldsBulkActionSkipReason'
       required:
         - id
         - skip_reason
@@ -124,7 +125,7 @@ components:
           type: string
           description: Kibana space
 
-    BulkCrudActionResults:
+    AnonymizationFieldsBulkCrudActionResults:
       type: object
       properties:
         updated:
@@ -142,7 +143,7 @@ components:
         skipped:
           type: array
           items:
-            $ref: '#/components/schemas/BulkActionSkipResult'
+            $ref: '#/components/schemas/AnonymizationFieldsBulkActionSkipResult'
       required:
         - updated
         - created
@@ -166,7 +167,7 @@ components:
         - succeeded
         - total
 
-    BulkCrudActionResponse:
+    AnonymizationFieldsBulkCrudActionResponse:
       type: object
       properties:
         success:
@@ -181,7 +182,7 @@ components:
           type: object
           properties:
             results:
-              $ref: '#/components/schemas/BulkCrudActionResults'
+              $ref: '#/components/schemas/AnonymizationFieldsBulkCrudActionResults'
             summary:
               $ref: '#/components/schemas/BulkCrudActionSummary'
             errors:
@@ -193,7 +194,6 @@ components:
             - summary
       required:
         - attributes
-
 
     BulkActionBase:
       x-inline: true

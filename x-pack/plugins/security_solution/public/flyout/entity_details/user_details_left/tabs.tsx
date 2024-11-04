@@ -8,7 +8,10 @@
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { getRiskInputTab } from '../../../entity_analytics/components/entity_details_flyout';
+import {
+  getInsightsInputTab,
+  getRiskInputTab,
+} from '../../../entity_analytics/components/entity_details_flyout';
 import { UserAssetTableType } from '../../../explore/users/store/model';
 import { ManagedUserDatasetKey } from '../../../../common/search_strategy/security_solution/users/managed_details';
 import type {
@@ -25,7 +28,9 @@ import { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_
 export const useTabs = (
   managedUser: ManagedUserHits,
   name: string,
-  isRiskScoreExist: boolean
+  isRiskScoreExist: boolean,
+  scopeId: string,
+  hasMisconfigurationFindings?: boolean
 ): LeftPanelTabsType =>
   useMemo(() => {
     const tabs: LeftPanelTabsType = [];
@@ -37,6 +42,7 @@ export const useTabs = (
         getRiskInputTab({
           entityName: name,
           entityType: RiskScoreEntity.user,
+          scopeId,
         })
       );
     }
@@ -49,8 +55,12 @@ export const useTabs = (
       tabs.push(getEntraTab(entraManagedUser));
     }
 
+    if (hasMisconfigurationFindings) {
+      tabs.push(getInsightsInputTab({ name, fieldName: 'user.name' }));
+    }
+
     return tabs;
-  }, [isRiskScoreExist, managedUser, name]);
+  }, [hasMisconfigurationFindings, isRiskScoreExist, managedUser, name, scopeId]);
 
 const getOktaTab = (oktaManagedUser: ManagedUserHit) => ({
   id: EntityDetailsLeftPanelTab.OKTA,

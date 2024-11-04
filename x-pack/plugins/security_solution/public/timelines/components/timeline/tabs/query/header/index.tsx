@@ -12,12 +12,12 @@ import { InPortal } from 'react-reverse-portal';
 import { IS_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 import styled from '@emotion/styled';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { useIsExperimentalFeatureEnabled } from '../../../../../../common/hooks/use_experimental_features';
 import { useTimelineEventsCountPortal } from '../../../../../../common/hooks/use_timeline_events_count';
-import { useTimelineFullScreen } from '../../../../../../common/containers/use_full_screen';
-import { ExitFullScreen } from '../../../../../../common/components/exit_full_screen';
-import type { TimelineStatusLiteralWithNull } from '../../../../../../../common/api/timeline';
-import { TimelineStatus, TimelineType } from '../../../../../../../common/api/timeline';
+import {
+  type TimelineStatus,
+  TimelineStatusEnum,
+  TimelineTypeEnum,
+} from '../../../../../../../common/api/timeline';
 import type { TimelineTabs } from '../../../../../../../common/types/timeline';
 import { timelineSelectors } from '../../../../../store';
 import { useDeepEqualSelector } from '../../../../../../common/hooks/use_selector';
@@ -33,7 +33,7 @@ interface Props {
   show: boolean;
   showCallOutUnauthorizedMsg: boolean;
   showEventsCountBadge: boolean;
-  status: TimelineStatusLiteralWithNull;
+  status: TimelineStatus | null;
   timelineId: string;
   totalCount: number;
 }
@@ -67,11 +67,7 @@ const QueryTabHeaderComponent: React.FC<Props> = ({
   showEventsCountBadge,
   totalCount,
 }) => {
-  const unifiedComponentsInTimelineEnabled = useIsExperimentalFeatureEnabled(
-    'unifiedComponentsInTimelineEnabled'
-  );
   const { portalNode: timelineEventsCountPortalNode } = useTimelineEventsCountPortal();
-  const { setTimelineFullScreen, timelineFullScreen } = useTimelineFullScreen();
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
 
   const getIsDataProviderVisible = useMemo(
@@ -87,26 +83,17 @@ const QueryTabHeaderComponent: React.FC<Props> = ({
     (state) => getIsDataProviderVisible(state, timelineId) ?? timelineDefaults.isDataProviderVisible
   );
 
-  const shouldShowQueryBuilder = isDataProviderVisible || timelineType === TimelineType.template;
+  const shouldShowQueryBuilder =
+    isDataProviderVisible || timelineType === TimelineTypeEnum.template;
 
   return (
     <StyledEuiFlyoutHeader data-test-subj={`${activeTab}-tab-flyout-header`} hasBorder={false}>
       <InPortal node={timelineEventsCountPortalNode}>
-        {showEventsCountBadge ? <EventsCountBadge>{totalCount}</EventsCountBadge> : null}
+        {showEventsCountBadge ? (
+          <EventsCountBadge data-test-subj="query-events-count">{totalCount}</EventsCountBadge>
+        ) : null}
       </InPortal>
       <EuiFlexGroup gutterSize="s" direction="column">
-        {!unifiedComponentsInTimelineEnabled &&
-          timelineFullScreen &&
-          setTimelineFullScreen != null && (
-            <EuiFlexItem>
-              <EuiFlexGroup alignItems="center" gutterSize="s">
-                <ExitFullScreen
-                  fullScreen={timelineFullScreen}
-                  setFullScreen={setTimelineFullScreen}
-                />
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          )}
         <EuiFlexItem data-test-subj="timeline-date-picker-container">
           <TabHeaderContainer data-test-subj="timelineHeader">
             <EuiFlexGroup gutterSize="s" direction="column">
@@ -124,7 +111,7 @@ const QueryTabHeaderComponent: React.FC<Props> = ({
                   />
                 </EuiFlexItem>
               )}
-              {status === TimelineStatus.immutable && (
+              {status === TimelineStatusEnum.immutable && (
                 <EuiFlexItem>
                   <EuiCallOut
                     data-test-subj="timelineImmutableCallOut"
