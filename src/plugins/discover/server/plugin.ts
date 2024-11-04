@@ -13,9 +13,7 @@ import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/common';
 import type { SharePluginSetup } from '@kbn/share-plugin/server';
-import { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
 import { PluginInitializerContext } from '@kbn/core/server';
-import { schema } from '@kbn/config-schema';
 import type { DiscoverServerPluginStart, DiscoverServerPluginStartDeps } from '.';
 import { DiscoverAppLocatorDefinition } from '../common';
 import { capabilitiesProvider } from './capabilities_provider';
@@ -41,7 +39,6 @@ export class DiscoverServerPlugin
       embeddable: EmbeddableSetup;
       home?: HomeServerPluginSetup;
       share?: SharePluginSetup;
-      contentManagement: ContentManagementServerSetup;
     }
   ) {
     core.capabilities.registerProvider(capabilitiesProvider);
@@ -58,10 +55,6 @@ export class DiscoverServerPlugin
     }
 
     plugins.embeddable.registerEmbeddableFactory(createSearchEmbeddableFactory());
-
-    plugins.contentManagement.favorites.registerFavoriteType('esql_query', {
-      typeMetadataSchema: schema.object({ query: schema.string() }),
-    });
 
     return {};
   }
