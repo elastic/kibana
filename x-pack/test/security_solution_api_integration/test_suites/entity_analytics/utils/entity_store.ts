@@ -82,6 +82,9 @@ export const EntityStoreUtils = (
         if (body.engines.every((engine: any) => engine.status === 'started')) {
           return true;
         }
+        if (body.engines.some((engine: any) => engine.status === 'error')) {
+          throw new Error(`Engines not started: ${JSON.stringify(body)}`);
+        }
         return false;
       }
     );

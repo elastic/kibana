@@ -12,7 +12,6 @@ import { scalarFunctionDefinitions } from '../definitions/generated/scalar_funct
 import { timeUnitsToSuggest } from '../definitions/literals';
 import { commandDefinitions as unmodifiedCommandDefinitions } from '../definitions/commands';
 import {
-  getAddDateHistogramSnippet,
   getDateLiterals,
   getSafeInsertText,
   TIME_SYSTEM_PARAMS,
@@ -38,6 +37,7 @@ import { METADATA_FIELDS } from '../shared/constants';
 import { ESQL_COMMON_NUMERIC_TYPES, ESQL_STRING_TYPES } from '../shared/esql_types';
 import { log10ParameterTypes, powParameterTypes } from './__tests__/constants';
 import { getRecommendedQueries } from './recommended_queries/templates';
+import { getDateHistogramCompletionItem } from './commands/stats/util';
 
 const commandDefinitions = unmodifiedCommandDefinitions.filter(({ hidden }) => !hidden);
 
@@ -737,12 +737,12 @@ describe('autocomplete', () => {
     ]);
 
     // STATS argument BY
-    testSuggestions('FROM index1 | STATS AVG(booleanField) B/', ['BY $0', ',', '| ']);
+    testSuggestions('FROM index1 | STATS AVG(booleanField) B/', ['BY ', ', ', '| ']);
 
     // STATS argument BY expression
     testSuggestions('FROM index1 | STATS field BY f/', [
       'var0 = ',
-      getAddDateHistogramSnippet(),
+      getDateHistogramCompletionItem(),
       ...getFunctionSignaturesByReturnType('stats', 'any', { grouping: true, scalar: true }),
       ...getFieldNamesByType('any').map((field) => `${field} `),
     ]);
@@ -1072,8 +1072,8 @@ describe('autocomplete', () => {
 
     // STATS argument BY
     testSuggestions('FROM a | STATS AVG(numberField) /', [
-      ',',
-      attachAsSnippet(attachTriggerCommand('BY $0')),
+      ', ',
+      attachTriggerCommand('BY '),
       attachTriggerCommand('| '),
     ]);
 
@@ -1090,7 +1090,7 @@ describe('autocomplete', () => {
       'by'
     );
     testSuggestions('FROM a | STATS AVG(numberField) BY /', [
-      getAddDateHistogramSnippet(),
+      getDateHistogramCompletionItem(),
       attachTriggerCommand('var0 = '),
       ...getFieldNamesByType('any')
         .map((field) => `${field} `)
@@ -1100,7 +1100,7 @@ describe('autocomplete', () => {
 
     // STATS argument BY assignment (checking field suggestions)
     testSuggestions('FROM a | STATS AVG(numberField) BY var0 = /', [
-      getAddDateHistogramSnippet(),
+      getDateHistogramCompletionItem(),
       ...getFieldNamesByType('any')
         .map((field) => `${field} `)
         .map(attachTriggerCommand),
