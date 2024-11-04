@@ -11,7 +11,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { CoreStart } from '@kbn/core/public';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
-import { AppMountParameters, AppStatus } from '@kbn/core/public';
+import { AppMountParameters } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { AllDatasetsLocatorParams, ALL_DATASETS_LOCATOR_ID } from '@kbn/deeplinks-observability';
 import { LinkToLogsPage } from '../pages/link_to/link_to_logs';
