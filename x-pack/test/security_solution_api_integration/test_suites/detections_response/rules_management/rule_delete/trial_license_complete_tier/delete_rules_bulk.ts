@@ -37,8 +37,8 @@ export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const utils = getService('securitySolutionUtils');
 
-  // See https://github.com/elastic/kibana/issues/130963 for discussion on deprecation
-  describe('@ess @skipInServerlesMKI delete_rules_bulk', () => {
+  // TODO: https://github.com/elastic/kibana/issues/193184 Unskip and rewrite using the _bulk_action API endpoint
+  describe.skip('@ess @skipInServerlesMKI delete_rules_bulk', () => {
     describe('deprecations', () => {
       it('should return a warning header', async () => {
         await createRule(supertest, log, getSimpleRule());
