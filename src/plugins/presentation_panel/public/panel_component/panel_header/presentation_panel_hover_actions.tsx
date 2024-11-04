@@ -75,7 +75,7 @@ const TOP_ROUNDED_CORNERS: CSSObject = {
   borderTopLeftRadius: euiThemeVars.euiBorderRadius,
   borderTopRightRadius: euiThemeVars.euiBorderRadius,
   borderWidth: '1px',
-  borderBottom: `0px`,
+  borderBottom: '0px',
 };
 
 const DASHED_OUTLINE = `1px dashed ${euiThemeVars.euiColorMediumShade}`;
@@ -471,7 +471,7 @@ export const PresentationPanelHoverActions = ({
         ''
       )}`}
       css={css`
-        ${showBorder ? `outline: ${viewMode === 'edit' ? DASHED_OUTLINE : SOLID_OUTLINE};` : ''};
+        ${showBorder ? `outline: ${viewMode === 'edit' ? DASHED_OUTLINE : SOLID_OUTLINE};` : ''}
         border-radius: ${euiThemeVars.euiBorderRadius};
 
         &:hover {
@@ -484,7 +484,6 @@ export const PresentationPanelHoverActions = ({
       {api ? (
         <div
           ref={hoverActionsRef}
-          css={css`anchorStyles`}
           className={classNames('embPanel__hoverActionsWrapper', {
             'embPanel__hoverActionsWrapper--lockHoverActions': hasLockedHoverActions,
           })}
@@ -522,12 +521,8 @@ export const PresentationPanelHoverActions = ({
                 className
               )}
               css={{
+                border: viewMode === 'edit' ? DASHED_OUTLINE : SOLID_OUTLINE,
                 ...borderStyles,
-                borderStyle: viewMode === 'edit' ? 'dashed' : 'solid',
-                borderColor:
-                  viewMode === 'edit'
-                    ? euiThemeVars.euiColorMediumShade
-                    : euiThemeVars.euiBorderColor,
               }}
             >
               {viewMode === 'edit' && combineHoverActions && dragHandle}
