@@ -47,7 +47,6 @@ import { getDashboardRecentlyAccessedService } from '../services/dashboard_recen
 import {
   coreServices,
   dataService,
-  embeddableService,
   navigationService,
   serverlessService,
 } from '../services/kibana_services';
@@ -194,13 +193,6 @@ export function InternalDashboardTopNav({
    */
   useEffect(() => {
     onAppLeave((actions) => {
-      if (
-        viewMode === 'edit' &&
-        hasUnsavedChanges &&
-        !embeddableService.getStateTransfer().isTransferInProgress
-      ) {
-        return actions.skip();
-      }
       return actions.default();
     });
     return () => {

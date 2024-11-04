@@ -1493,18 +1493,16 @@ describe('Lens App', () => {
   describe('showing a confirm message when leaving', () => {
     let defaultLeave: jest.Mock;
     let confirmLeave: jest.Mock;
-    let skipLeave: jest.Mock;
 
     beforeEach(() => {
       defaultLeave = jest.fn();
       confirmLeave = jest.fn();
-      skipLeave = jest.fn();
     });
 
     it('should not show a confirm message if there is no expression to save', async () => {
       const { props } = await mountWith({});
       const lastCall = props.onAppLeave.mock.calls[props.onAppLeave.mock.calls.length - 1][0];
-      lastCall({ default: defaultLeave, confirm: confirmLeave, skip: skipLeave });
+      lastCall({ default: defaultLeave, confirm: confirmLeave });
       expect(defaultLeave).toHaveBeenCalled();
       expect(confirmLeave).not.toHaveBeenCalled();
     });
@@ -1520,7 +1518,7 @@ describe('Lens App', () => {
       };
       const { props } = await mountWith({ services, preloadedState: { isSaveable: true } });
       const lastCall = props.onAppLeave.mock.calls[props.onAppLeave.mock.calls.length - 1][0];
-      lastCall({ default: defaultLeave, confirm: confirmLeave, skip: skipLeave });
+      lastCall({ default: defaultLeave, confirm: confirmLeave });
       expect(defaultLeave).toHaveBeenCalled();
       expect(confirmLeave).not.toHaveBeenCalled();
     });
@@ -1536,7 +1534,7 @@ describe('Lens App', () => {
         },
       });
       const lastCall = props.onAppLeave.mock.calls[props.onAppLeave.mock.calls.length - 1][0];
-      lastCall({ default: defaultLeave, confirm: confirmLeave, skip: skipLeave });
+      lastCall({ default: defaultLeave, confirm: confirmLeave });
       expect(confirmLeave).toHaveBeenCalled();
       expect(defaultLeave).not.toHaveBeenCalled();
     });
@@ -1553,7 +1551,7 @@ describe('Lens App', () => {
         },
       });
       const lastCall = props.onAppLeave.mock.calls[props.onAppLeave.mock.calls.length - 1][0];
-      lastCall({ default: defaultLeave, confirm: confirmLeave, skip: skipLeave });
+      lastCall({ default: defaultLeave, confirm: confirmLeave });
       expect(confirmLeave).toHaveBeenCalled();
       expect(defaultLeave).not.toHaveBeenCalled();
     });
@@ -1630,7 +1628,7 @@ describe('Lens App', () => {
         mountedApp.props.onAppLeave.mock.calls[
           mountedApp.props.onAppLeave.mock.calls.length - 1
         ][0];
-      lastCall({ default: defaultLeave, confirm: confirmLeave, skip: skipLeave });
+      lastCall({ default: defaultLeave, confirm: confirmLeave });
       expect(defaultLeave).not.toHaveBeenCalled();
       expect(confirmLeave).toHaveBeenCalled();
     });
@@ -1659,7 +1657,7 @@ describe('Lens App', () => {
       const { props } = await mountWith({ preloadedState, props: customProps });
 
       const lastCall = props.onAppLeave.mock.calls[props.onAppLeave.mock.calls.length - 1][0];
-      lastCall({ default: defaultLeave, confirm: confirmLeave, skip: skipLeave });
+      lastCall({ default: defaultLeave, confirm: confirmLeave });
       expect(defaultLeave).toHaveBeenCalled();
       expect(confirmLeave).not.toHaveBeenCalled();
     });
@@ -1676,7 +1674,7 @@ describe('Lens App', () => {
         );
       });
       const lastCall = props.onAppLeave.mock.calls[props.onAppLeave.mock.calls.length - 1][0];
-      lastCall({ default: defaultLeave, confirm: confirmLeave, skip: skipLeave });
+      lastCall({ default: defaultLeave, confirm: confirmLeave });
       expect(confirmLeave).toHaveBeenCalled();
       expect(defaultLeave).not.toHaveBeenCalled();
     });
