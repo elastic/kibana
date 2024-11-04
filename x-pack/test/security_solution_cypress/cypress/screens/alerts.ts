@@ -256,3 +256,11 @@ export const ALERT_DETAILS_TAKE_ACTION_BUTTON =
 
 export const USER_COLUMN = '[data-gridcell-column-id="user.name"]';
 export const TOOLTIP = '[data-test-subj="message-tool-tip"]';
+
+export const HOVER_ACTIONS = {
+  ADD_TO_TIMELINE: '[data-test-subj="actionItem-security-default-cellActions-addToTimeline"]',
+  FILTER_FOR: '[data-test-subj="actionItem-security-default-cellActions-filterIn"]',
+  FILTER_OUT: '[data-test-subj="actionItem-security-default-cellActions-filterOut"]',
+  COPY: '[data-test-subj="actionItem-security-default-cellActions-copyToClipboard"]',
+  SHOW_TOP: '[data-test-subj="actionItem-security-default-cellActions-showTopN"]',
+};

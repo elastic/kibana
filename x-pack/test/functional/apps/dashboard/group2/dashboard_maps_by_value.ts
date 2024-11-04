@@ -42,7 +42,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await dashboard.switchToEditMode();
     }
 
-    await dashboardPanelActions.openContextMenu();
     await dashboardPanelActions.clickEdit();
     await maps.clickAddLayer();
     await maps.selectLayerGroupCard();

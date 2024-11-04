@@ -64,7 +64,7 @@ export default ({ getService }: FtrProviderContext): void => {
         auth: authSpace1,
       });
 
-      actionsRemover.add(space, connector.id, 'action', 'actions');
+      actionsRemover.add(space, connector.id, 'connector', 'actions');
 
       // Configuration is created with no connector so the mappings are empty
       const configuration = await createConfiguration(
@@ -134,7 +134,7 @@ export default ({ getService }: FtrProviderContext): void => {
         auth: authSpace1,
       });
 
-      actionsRemover.add(space, connector.id, 'action', 'actions');
+      actionsRemover.add(space, connector.id, 'connector', 'actions');
 
       // Configuration is created with no connector so the mappings are empty
       const configuration = await createConfiguration(
