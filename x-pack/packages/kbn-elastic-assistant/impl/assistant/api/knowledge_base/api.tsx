@@ -9,8 +9,6 @@ import {
   API_VERSIONS,
   CreateKnowledgeBaseRequestParams,
   CreateKnowledgeBaseResponse,
-  DeleteKnowledgeBaseRequestParams,
-  DeleteKnowledgeBaseResponse,
   ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_URL,
   ReadKnowledgeBaseRequestParams,
   ReadKnowledgeBaseResponse,
@@ -75,36 +73,4 @@ export const postKnowledgeBase = async ({
   });
 
   return response as CreateKnowledgeBaseResponse;
-};
-
-/**
- * API call for deleting the Knowledge Base. Provide a resource to delete that specific resource.
- *
- * @param {Object} options - The options object.
- * @param {HttpSetup} options.http - HttpSetup
- * @param {string} [options.resource] - Resource to be deleted from the KB, otherwise delete the entire KB
- * @param {AbortSignal} [options.signal] - AbortSignal
- *
- * @returns {Promise<DeleteKnowledgeBaseResponse | IHttpFetchError>}
- */
-export const deleteKnowledgeBase = async ({
-  http,
-  resource,
-  signal,
-}: DeleteKnowledgeBaseRequestParams & {
-  http: HttpSetup;
-  signal?: AbortSignal | undefined;
-}): Promise<DeleteKnowledgeBaseResponse | IHttpFetchError> => {
-  try {
-    const path = ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_URL.replace('{resource?}', resource || '');
-    const response = await http.fetch(path, {
-      method: 'DELETE',
-      signal,
-      version: API_VERSIONS.internal.v1,
-    });
-
-    return response as DeleteKnowledgeBaseResponse;
-  } catch (error) {
-    return error as IHttpFetchError;
-  }
 };
