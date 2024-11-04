@@ -114,6 +114,13 @@ export class SLOPlugin
           }
         );
 
+        pluginsStart.dashboard.registerDashboardPanelPlacementSetting(
+          SLO_BURN_RATE_EMBEDDABLE_ID,
+          () => {
+            return { width: 14, height: 7 };
+          }
+        );
+
         plugins.embeddable.registerReactEmbeddableFactory(SLO_OVERVIEW_EMBEDDABLE_ID, async () => {
           const { getOverviewEmbeddableFactory } = await import(
             './embeddable/slo/overview/slo_embeddable_factory'
@@ -138,12 +145,6 @@ export class SLOPlugin
           return getErrorBudgetEmbeddableFactory(deps);
         });
 
-        pluginsStart.dashboard.registerDashboardPanelPlacementSetting(
-          SLO_BURN_RATE_EMBEDDABLE_ID,
-          () => {
-            return { width: 14, height: 7 };
-          }
-        );
         plugins.embeddable.registerReactEmbeddableFactory(SLO_BURN_RATE_EMBEDDABLE_ID, async () => {
           const deps = { ...coreStart, ...pluginsStart };
 
