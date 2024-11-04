@@ -48,8 +48,10 @@ export const DocumentViewModeToggle = ({
   );
   const state = stateContainer.appState.getState();
   const fieldStatsWarningMsgForQuery = useMemo(() => {
-    return dataVisualizerService?.getReasonIfFieldStatsUnavailableForQuery(state.query);
-  }, [state.query, dataVisualizerService]);
+    return (
+      isEsqlMode && dataVisualizerService?.getReasonIfFieldStatsUnavailableForQuery(state.query)
+    );
+  }, [state.query, dataVisualizerService, isEsqlMode]);
 
   const [showPatternAnalysisTab, setShowPatternAnalysisTab] = useState<boolean | null>(null);
   const showFieldStatisticsTab = useMemo(

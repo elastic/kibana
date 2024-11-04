@@ -337,9 +337,16 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
       : messageNoAnalysis;
   }
 
-  const unsupportedReasonForQuery = getReasonIfFieldDataUnavailableForQuery(query);
+  const unsupportedReasonForQuery = isTextBased
+    ? getReasonIfFieldDataUnavailableForQuery(query)
+    : undefined;
   if (unsupportedReasonForQuery) {
-    const messageUnsupportedReason = <FieldSummaryMessage message={unsupportedReasonForQuery} />;
+    const messageUnsupportedReason = (
+      <FieldSummaryMessage
+        message={unsupportedReasonForQuery}
+        dataTestSubj="unifiedFieldList.fieldStats.unsupportedReason"
+      />
+    );
 
     return overrideMissingContent
       ? overrideMissingContent({
