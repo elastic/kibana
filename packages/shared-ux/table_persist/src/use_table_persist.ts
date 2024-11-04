@@ -49,6 +49,14 @@ export function useEuiTablePersist<T extends object>(
   onTableChange: (nextValues: CriteriaWithPagination<T>) => void;
 };
 
+export function useEuiTablePersist<T extends object>(
+  props: EuiTablePersistProps<T>
+): {
+  sorting: true | { sort: PropertySort<T> };
+  pageSize: number;
+  onTableChange: (nextValues: CriteriaWithPagination<T>) => void;
+};
+
 export function useEuiTablePersist<T extends object>({
   tableId,
   customOnTableChange,
