@@ -90,7 +90,9 @@ export function registerRelatedRoutes(router: IRouter<IntegrationAssistantRouteH
           };
 
           const graph = await getRelatedGraph({ client, model });
-          const results = await graph.invoke(parameters, options);
+          const results = await graph
+            .withConfig({ runName: 'Related' })
+            .invoke(parameters, options);
           return res.ok({ body: RelatedResponse.parse(results) });
         } catch (err) {
           try {
