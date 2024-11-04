@@ -80,6 +80,7 @@ describe('EditSpaceSettings', () => {
           http={http}
           notifications={notifications}
           overlays={overlays}
+          getIsRoleManagementEnabled={() => Promise.resolve(() => undefined)}
           getPrivilegesAPIClient={getPrivilegeAPIClient}
           getSecurityLicense={getSecurityLicenseMock}
           theme={theme}

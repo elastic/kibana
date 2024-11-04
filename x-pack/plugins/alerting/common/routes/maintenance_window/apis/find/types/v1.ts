@@ -5,11 +5,15 @@
  * 2.0.
  */
 
-import { MaintenanceWindowResponseV1 } from '../../../response';
+import { TypeOf } from '@kbn/config-schema';
+import {
+  findMaintenanceWindowsResponseBodySchema,
+  findMaintenanceWindowsRequestQuerySchema,
+} from '..';
 
-export interface FindMaintenanceWindowsResponse {
-  body: {
-    data: MaintenanceWindowResponseV1[];
-    total: number;
-  };
-}
+export type FindMaintenanceWindowsResponse = TypeOf<
+  typeof findMaintenanceWindowsResponseBodySchema
+>;
+export type FindMaintenanceWindowsRequestQuery = TypeOf<
+  typeof findMaintenanceWindowsRequestQuerySchema
+>;

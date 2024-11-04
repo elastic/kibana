@@ -266,6 +266,37 @@ describe('TaskPoller', () => {
     expect(handler.mock.calls[0][0].error.stack).toContain(workError.stack);
   });
 
+  test('still logs errors when they are thrown as strings', async () => {
+    const pollInterval = 100;
+
+    const handler = jest.fn();
+    const workError = 'failed to work';
+    const poller = createTaskPoller<string, string[]>({
+      initialPollInterval: pollInterval,
+      logger: loggingSystemMock.create().get(),
+      pollInterval$: of(pollInterval),
+      pollIntervalDelay$: of(0),
+      work: async (...args) => {
+        throw workError;
+      },
+      getCapacity: () => 5,
+    });
+    poller.events$.subscribe(handler);
+    poller.start();
+
+    clock.tick(pollInterval);
+    await new Promise((resolve) => setImmediate(resolve));
+
+    const expectedError = new PollingError<string>(
+      'Failed to poll for work: failed to work',
+      PollingErrorType.WorkError,
+      none
+    );
+    expect(handler).toHaveBeenCalledWith(asErr(expectedError));
+    expect(handler.mock.calls[0][0].error.type).toEqual(PollingErrorType.WorkError);
+    expect(handler.mock.calls[0][0].error.stack).toBeDefined();
+  });
+
   test('continues polling after work fails', async () => {
     const pollInterval = 100;
 

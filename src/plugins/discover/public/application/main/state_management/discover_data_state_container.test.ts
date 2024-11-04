@@ -159,7 +159,6 @@ describe('test getDataStateContainer', () => {
         expect(
           stateContainer.searchSessionManager.getCurrentSearchSessionId as jest.Mock
         ).toHaveBeenCalled();
-
         unsubscribe();
         done();
       }
@@ -169,21 +168,24 @@ describe('test getDataStateContainer', () => {
   });
 
   it('should update app state from default profile state', async () => {
+    mockFetchDocuments.mockResolvedValue({ records: [] });
     const stateContainer = getDiscoverStateMock({ isTimeBased: true });
     const dataState = stateContainer.dataState;
     const dataUnsub = dataState.subscribe();
     const appUnsub = stateContainer.appState.initAndSync();
-    discoverServiceMock.profilesManager.resolveDataSourceProfile({});
+    await discoverServiceMock.profilesManager.resolveDataSourceProfile({});
     stateContainer.actions.setDataView(dataViewMock);
     stateContainer.internalState.transitions.setResetDefaultProfileState({
       columns: true,
       rowHeight: true,
     });
+
     dataState.data$.totalHits$.next({
       fetchStatus: FetchStatus.COMPLETE,
       result: 0,
     });
     dataState.refetch$.next(undefined);
+
     await waitFor(() => {
       expect(dataState.data$.main$.value.fetchStatus).toBe(FetchStatus.COMPLETE);
     });
@@ -202,7 +204,7 @@ describe('test getDataStateContainer', () => {
     const dataState = stateContainer.dataState;
     const dataUnsub = dataState.subscribe();
     const appUnsub = stateContainer.appState.initAndSync();
-    discoverServiceMock.profilesManager.resolveDataSourceProfile({});
+    await discoverServiceMock.profilesManager.resolveDataSourceProfile({});
     stateContainer.actions.setDataView(dataViewMock);
     stateContainer.internalState.transitions.setResetDefaultProfileState({
       columns: false,

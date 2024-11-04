@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ESQLAstBaseItem, ESQLProperNode } from '../types';
+import type { ESQLAstBaseItem, ESQLProperNode } from '../types';
 import { Walker } from '../walker';
 
 export interface QueryPrettyPrintStats {

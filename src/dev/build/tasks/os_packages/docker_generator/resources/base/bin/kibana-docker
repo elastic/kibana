@@ -321,7 +321,6 @@ kibana_vars=(
     xpack.observability.unsafe.thresholdRule.enabled
     xpack.reporting.capture.browser.autoDownload
     xpack.reporting.capture.browser.chromium.disableSandbox
-    xpack.reporting.capture.browser.chromium.inspect
     xpack.reporting.capture.browser.chromium.maxScreenshotDimension
     xpack.reporting.capture.browser.chromium.proxy.bypass
     xpack.reporting.capture.browser.chromium.proxy.enabled

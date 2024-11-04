@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, memo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingElastic, EuiCallOut } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingElastic } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { Charts } from './charts';
 import { useBreadcrumbs } from '../../utils/use_breadcrumbs';
 import { useKibanaContextForPlugin } from '../../utils/use_kibana';
@@ -16,21 +17,22 @@ import { useGetDataUsageMetrics } from '../../hooks/use_get_usage_metrics';
 import { useDataUsageMetricsUrlParams } from '../hooks/use_charts_url_params';
 import { DEFAULT_DATE_RANGE_OPTIONS, useDateRangePicker } from '../hooks/use_date_picker';
 import { DEFAULT_METRIC_TYPES, UsageMetricsRequestBody } from '../../../common/rest_types';
-import { ChartFilters } from './filters/charts_filters';
-import { UX_LABELS } from '../translations';
+import { ChartFilters, ChartFiltersProps } from './filters/charts_filters';
+import { useGetDataUsageDataStreams } from '../../hooks/use_get_data_streams';
 
 const EuiItemCss = css`
   width: 100%;
 `;
 
-const FlexItemWithCss = memo(({ children }: { children: React.ReactNode }) => (
+const FlexItemWithCss = ({ children }: { children: React.ReactNode }) => (
   <EuiFlexItem css={EuiItemCss}>{children}</EuiFlexItem>
-));
+);
 
 export const DataUsageMetrics = () => {
   const {
-    services: { chrome, appParams },
+    services: { chrome, appParams, notifications },
   } = useKibanaContextForPlugin();
+  useBreadcrumbs([{ text: PLUGIN_NAME }], appParams, chrome);
 
   const {
     metricTypes: metricTypesFromUrl,
@@ -38,8 +40,21 @@ export const DataUsageMetrics = () => {
     startDate: startDateFromUrl,
     endDate: endDateFromUrl,
     setUrlMetricTypesFilter,
+    setUrlDataStreamsFilter,
     setUrlDateRangeFilter,
   } = useDataUsageMetricsUrlParams();
+
+  const {
+    error: errorFetchingDataStreams,
+    data: dataStreams,
+    isFetching: isFetchingDataStreams,
+  } = useGetDataUsageDataStreams({
+    selectedDataStreams: dataStreamsFromUrl,
+    options: {
+      enabled: true,
+      retry: false,
+    },
+  });
 
   const [metricsFilters, setMetricsFilters] = useState<UsageMetricsRequestBody>({
     metricTypes: [...DEFAULT_METRIC_TYPES],
@@ -52,15 +67,22 @@ export const DataUsageMetrics = () => {
     if (!metricTypesFromUrl) {
       setUrlMetricTypesFilter(metricsFilters.metricTypes.join(','));
     }
+    if (!dataStreamsFromUrl && dataStreams) {
+      setUrlDataStreamsFilter(dataStreams.map((ds) => ds.name).join(','));
+    }
     if (!startDateFromUrl || !endDateFromUrl) {
       setUrlDateRangeFilter({ startDate: metricsFilters.from, endDate: metricsFilters.to });
     }
   }, [
+    dataStreams,
+    dataStreamsFromUrl,
     endDateFromUrl,
     metricTypesFromUrl,
+    metricsFilters.dataStreams,
     metricsFilters.from,
     metricsFilters.metricTypes,
     metricsFilters.to,
+    setUrlDataStreamsFilter,
     setUrlDateRangeFilter,
     setUrlMetricTypesFilter,
     startDateFromUrl,
@@ -77,7 +99,7 @@ export const DataUsageMetrics = () => {
   const { dateRangePickerState, onRefreshChange, onTimeChange } = useDateRangePicker();
 
   const {
-    error,
+    error: errorFetchingDataUsageMetrics,
     data,
     isFetching,
     isFetched,
@@ -90,6 +112,7 @@ export const DataUsageMetrics = () => {
     },
     {
       retry: false,
+      enabled: !!metricsFilters.dataStreams.length,
     }
   );
 
@@ -111,33 +134,68 @@ export const DataUsageMetrics = () => {
     [setMetricsFilters]
   );
 
-  useBreadcrumbs([{ text: PLUGIN_NAME }], appParams, chrome);
+  const filterOptions: ChartFiltersProps['filterOptions'] = useMemo(() => {
+    const dataStreamsOptions = dataStreams?.reduce<Record<string, number>>((acc, ds) => {
+      acc[ds.name] = ds.storageSizeBytes;
+      return acc;
+    }, {});
+
+    return {
+      dataStreams: {
+        filterName: 'dataStreams',
+        options: dataStreamsOptions ? Object.keys(dataStreamsOptions) : metricsFilters.dataStreams,
+        appendOptions: dataStreamsOptions,
+        selectedOptions: metricsFilters.dataStreams,
+        onChangeFilterOptions: onChangeDataStreamsFilter,
+        isFilterLoading: isFetchingDataStreams,
+      },
+      metricTypes: {
+        filterName: 'metricTypes',
+        options: metricsFilters.metricTypes,
+        onChangeFilterOptions: onChangeMetricTypesFilter,
+      },
+    };
+  }, [
+    dataStreams,
+    isFetchingDataStreams,
+    metricsFilters.dataStreams,
+    metricsFilters.metricTypes,
+    onChangeDataStreamsFilter,
+    onChangeMetricTypesFilter,
+  ]);
+
+  if (errorFetchingDataUsageMetrics) {
+    notifications.toasts.addDanger({
+      title: i18n.translate('xpack.dataUsage.getMetrics.addFailure.toast.title', {
+        defaultMessage: 'Error getting usage metrics',
+      }),
+      text: errorFetchingDataUsageMetrics.message,
+    });
+  }
+  if (errorFetchingDataStreams) {
+    notifications.toasts.addDanger({
+      title: i18n.translate('xpack.dataUsage.getDataStreams.addFailure.toast.title', {
+        defaultMessage: 'Error getting data streams',
+      }),
+      text: errorFetchingDataStreams.message,
+    });
+  }
 
   return (
     <EuiFlexGroup alignItems="flexStart" direction="column">
       <FlexItemWithCss>
         <ChartFilters
           dateRangePickerState={dateRangePickerState}
-          isDataLoading={isFetching}
+          isDataLoading={isFetchingDataStreams}
           onClick={refetchDataUsageMetrics}
           onRefresh={onRefresh}
           onRefreshChange={onRefreshChange}
           onTimeChange={onTimeChange}
-          onChangeDataStreamsFilter={onChangeDataStreamsFilter}
-          onChangeMetricTypesFilter={onChangeMetricTypesFilter}
+          filterOptions={filterOptions}
           showMetricsTypesFilter={false}
         />
       </FlexItemWithCss>
-      {!isFetching && error?.message && (
-        <FlexItemWithCss>
-          <EuiCallOut
-            size="s"
-            title={UX_LABELS.noDataStreamsSelected}
-            iconType="iInCircle"
-            color="warning"
-          />
-        </FlexItemWithCss>
-      )}
+
       <FlexItemWithCss>
         {isFetched && data?.metrics ? (
           <Charts data={data} />

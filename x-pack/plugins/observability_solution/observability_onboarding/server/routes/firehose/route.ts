@@ -42,11 +42,11 @@ const createFirehoseOnboardingFlowRoute = createObservabilityOnboardingServerRou
     request,
     plugins,
     services,
+    logger,
   }): Promise<CreateFirehoseOnboardingFlowRouteResponse> {
     const {
       elasticsearch: { client },
     } = await context.core;
-
     const hasPrivileges = await hasLogMonitoringPrivileges(client.asCurrentUser);
 
     if (!hasPrivileges) {
@@ -61,8 +61,18 @@ const createFirehoseOnboardingFlowRoute = createObservabilityOnboardingServerRou
     const [{ encoded: apiKeyEncoded }] = await Promise.all([
       createShipperApiKey(client.asCurrentUser, 'firehose_onboarding'),
       packageClient.ensureInstalledPackage({ pkgName: 'awsfirehose' }),
-      packageClient.ensureInstalledPackage({ pkgName: 'aws' }),
     ]);
+
+    /**
+     * Triggering the AWS package installation but not
+     * waiting for the completion as it might take a while.
+     * The AWS integration is not required for data ingestion
+     * and can be installed separately in case it fails to install
+     * during onboarding.
+     */
+    packageClient.ensureInstalledPackage({ pkgName: 'aws' }).catch((error) => {
+      logger.error(`Failed installing AWS package: ${error}`);
+    });
 
     const elasticsearchUrlList = plugins.cloud?.setup?.elasticsearchUrl
       ? [plugins.cloud?.setup?.elasticsearchUrl]

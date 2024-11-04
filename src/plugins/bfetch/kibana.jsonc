@@ -1,12 +1,16 @@
 {
   "type": "plugin",
   "id": "@kbn/bfetch-plugin",
-  "owner": "@elastic/appex-sharedux",
+  "owner": [
+    "@elastic/appex-sharedux"
+  ],
+  "group": "platform",
+  "visibility": "shared",
   "description": "Considering using bfetch capabilities when fetching large amounts of data. This services supports batching HTTP requests and streaming responses back.",
   "plugin": {
     "id": "bfetch",
-    "server": true,
     "browser": true,
+    "server": true,
     "requiredBundles": [
       "kibanaUtils"
     ]

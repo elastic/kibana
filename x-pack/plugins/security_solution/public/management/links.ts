@@ -198,7 +198,7 @@ export const links: LinkItem = {
       id: SecurityPageName.entityAnalyticsEntityStoreManagement,
       title: ENTITY_STORE,
       description: i18n.translate('xpack.securitySolution.appLinks.entityStoreDescription', {
-        defaultMessage: "Allows comprehensive monitoring of your system's hosts and users.",
+        defaultMessage: 'Store host and user entities observed in events.',
       }),
       landingIcon: IconAssetCriticality,
       path: ENTITY_ANALYTICS_ENTITY_STORE_MANAGEMENT_PATH,
@@ -223,13 +223,14 @@ export const links: LinkItem = {
       title: NOTES,
       description: i18n.translate('xpack.securitySolution.appLinks.notesDescription', {
         defaultMessage:
-          'Oversee, revise and revisit the annotations within each document and timeline.',
+          'Oversee, revise, and revisit the notes attached to alerts, events and Timelines.',
       }),
       landingIcon: 'filebeatApp',
       path: NOTES_PATH,
       skipUrlState: true,
       hideTimeline: true,
-      experimentalKey: 'securitySolutionNotesEnabled',
+      hideWhenExperimentalKey: 'securitySolutionNotesDisabled',
+      globalSearchDisabled: true,
     },
   ],
 };

@@ -578,7 +578,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       alertingRules: `${ELASTICSEARCH_DOCS}transform-alerts.html`,
     },
     visualize: {
-      guide: `${KIBANA_DOCS}dashboard.html`,
+      guide: `${KIBANA_DOCS}_panels_and_visualizations.html`,
       lens: `${ELASTIC_WEBSITE_URL}what-is/kibana-lens`,
       lensPanels: `${KIBANA_DOCS}lens.html`,
       maps: `${ELASTIC_WEBSITE_URL}maps`,

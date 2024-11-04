@@ -38,8 +38,9 @@ export interface EcsMetadata {
   properties?: Record<string, { type: string }>;
 }
 
-export interface FieldMap {
-  [key: string]: {
+export type FieldMap<T extends string = string> = Record<
+  T,
+  {
     type: string;
     required: boolean;
     array?: boolean;
@@ -53,5 +54,19 @@ export interface FieldMap {
     scaling_factor?: number;
     dynamic?: boolean | 'strict';
     properties?: Record<string, { type: string }>;
-  };
-}
+    inference_id?: string;
+    copy_to?: string;
+  }
+>;
+
+// This utility type flattens all the keys of a schema object and its nested objects as a union type.
+// Its purpose is to ensure that the FieldMap keys are always in sync with the schema object.
+// It assumes all optional fields of the schema are required in the field map, they can always be omitted from the resulting type.
+export type SchemaFieldMapKeys<
+  T extends Record<string, unknown>,
+  Key = keyof T
+> = Key extends string
+  ? NonNullable<T[Key]> extends Record<string, unknown>
+    ? `${Key}` | `${Key}.${SchemaFieldMapKeys<NonNullable<T[Key]>>}`
+    : `${Key}`
+  : never;

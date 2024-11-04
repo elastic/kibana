@@ -1,11 +1,15 @@
 {
   "type": "plugin",
   "id": "@kbn/kibana-overview-plugin",
-  "owner": "@elastic/appex-sharedux",
+  "owner": [
+    "@elastic/appex-sharedux"
+  ],
+  "group": "platform",
+  "visibility": "private",
   "plugin": {
     "id": "kibanaOverview",
-    "server": false,
     "browser": true,
+    "server": false,
     "requiredPlugins": [
       "navigation",
       "dataViews",

@@ -25,13 +25,22 @@ interface EntityNameProps {
 }
 
 export function EntityName({ entity }: EntityNameProps) {
-  const { services } = useKibana();
+  const {
+    services: { telemetry, share },
+  } = useKibana();
 
   const assetDetailsLocator =
-    services.share?.url.locators.get<AssetDetailsLocatorParams>(ASSET_DETAILS_LOCATOR_ID);
+    share?.url.locators.get<AssetDetailsLocatorParams>(ASSET_DETAILS_LOCATOR_ID);
 
   const serviceOverviewLocator =
-    services.share?.url.locators.get<ServiceOverviewParams>('serviceOverviewLocator');
+    share?.url.locators.get<ServiceOverviewParams>('serviceOverviewLocator');
+
+  const handleLinkClick = useCallback(() => {
+    telemetry.reportEntityViewClicked({
+      view_type: 'detail',
+      entity_type: entity['entity.type'],
+    });
+  }, [entity, telemetry]);
 
   const getEntityRedirectUrl = useCallback(() => {
     const type = entity[ENTITY_TYPE];
@@ -58,7 +67,12 @@ export function EntityName({ entity }: EntityNameProps) {
   }, [entity, assetDetailsLocator, serviceOverviewLocator]);
 
   return (
-    <EuiLink data-test-subj="entityNameLink" href={getEntityRedirectUrl()}>
+    // eslint-disable-next-line @elastic/eui/href-or-on-click
+    <EuiLink
+      data-test-subj="entityNameLink"
+      href={getEntityRedirectUrl()}
+      onClick={handleLinkClick}
+    >
       <EuiFlexGroup gutterSize="s" alignItems="center">
         <EuiFlexItem grow={0}>
           <EntityIcon entity={entity} />

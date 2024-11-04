@@ -29,13 +29,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await es
         .delete(
-          { id: `config-global:${version}`, index: '.kibana', refresh: true },
+          { id: `config-global:${version}`, index: '.kibana', refresh: 'wait_for' },
           { headers: { 'kbn-xsrf': 'spaces' } }
         )
         .catch((error) => {
           if (error.statusCode === 404) return; // ignore 404 errors
           throw error;
         });
+
+      await PageObjects.common.sleep(500); // just to be on the safe side
     };
 
     before(async () => {

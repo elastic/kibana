@@ -38,7 +38,7 @@ export const DegradedFieldInfo = ({ fieldList }: { fieldList?: DegradedField }) 
     degradedFieldValues,
     isDegradedFieldsLoading,
     isAnalysisInProgress,
-    degradedFieldAnalysisResult,
+    degradedFieldAnalysisFormattedResult,
     degradedFieldAnalysis,
   } = useDegradedFields();
 
@@ -94,9 +94,12 @@ export const DegradedFieldInfo = ({ fieldList }: { fieldList?: DegradedField }) 
           grow={2}
         >
           <div>
-            <EuiToolTip position="top" content={degradedFieldAnalysisResult?.tooltipContent}>
+            <EuiToolTip
+              position="top"
+              content={degradedFieldAnalysisFormattedResult?.tooltipContent}
+            >
               <EuiBadge color="hollow">
-                <strong>{degradedFieldAnalysisResult?.potentialCause}</strong>
+                <strong>{degradedFieldAnalysisFormattedResult?.potentialCause}</strong>
               </EuiBadge>
             </EuiToolTip>
           </div>
@@ -125,52 +128,53 @@ export const DegradedFieldInfo = ({ fieldList }: { fieldList?: DegradedField }) 
         </>
       )}
 
-      {!isAnalysisInProgress && degradedFieldAnalysisResult?.shouldDisplayValues && (
-        <>
-          <EuiFlexGroup
-            data-test-subj={'datasetQualityDetailsDegradedFieldFlyoutFieldsList-characterLimit'}
-          >
-            <EuiFlexItem grow={1}>
-              <EuiTitle size="xxs">
-                <span>{degradedFieldMaximumCharacterLimitColumnName}</span>
-              </EuiTitle>
-            </EuiFlexItem>
-            <EuiFlexItem
-              data-test-subj="datasetQualityDetailsDegradedFieldFlyoutFieldValue-characterLimit"
-              css={{ maxWidth: '64%' }}
-              grow={2}
+      {!isAnalysisInProgress &&
+        degradedFieldAnalysisFormattedResult?.shouldDisplayIgnoredValuesAndLimit && (
+          <>
+            <EuiFlexGroup
+              data-test-subj={'datasetQualityDetailsDegradedFieldFlyoutFieldsList-characterLimit'}
             >
-              <span>{degradedFieldAnalysis?.fieldMapping?.ignore_above}</span>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiHorizontalRule margin="s" />
-          <EuiFlexGroup
-            data-test-subj={`datasetQualityDetailsDegradedFieldFlyoutFieldsList-values`}
-          >
-            <EuiFlexItem grow={1}>
-              <EuiTitle size="xxs">
-                <span>{degradedFieldValuesColumnName}</span>
-              </EuiTitle>
-            </EuiFlexItem>
-            <EuiFlexItem
-              data-test-subj="datasetQualityDetailsDegradedFieldFlyoutFieldValue-values"
-              css={{ maxWidth: '64%' }}
-              grow={2}
+              <EuiFlexItem grow={1}>
+                <EuiTitle size="xxs">
+                  <span>{degradedFieldMaximumCharacterLimitColumnName}</span>
+                </EuiTitle>
+              </EuiFlexItem>
+              <EuiFlexItem
+                data-test-subj="datasetQualityDetailsDegradedFieldFlyoutFieldValue-characterLimit"
+                css={{ maxWidth: '64%' }}
+                grow={2}
+              >
+                <span>{degradedFieldAnalysis?.fieldMapping?.ignore_above}</span>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiHorizontalRule margin="s" />
+            <EuiFlexGroup
+              data-test-subj={`datasetQualityDetailsDegradedFieldFlyoutFieldsList-values`}
             >
-              <EuiBadgeGroup gutterSize="s">
-                {degradedFieldValues?.values.map((value, idx) => (
-                  <EuiBadge color="hollow" key={idx}>
-                    <EuiTextColor color="#765B96">
-                      <strong>{value}</strong>
-                    </EuiTextColor>
-                  </EuiBadge>
-                ))}
-              </EuiBadgeGroup>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiHorizontalRule margin="s" />
-        </>
-      )}
+              <EuiFlexItem grow={1}>
+                <EuiTitle size="xxs">
+                  <span>{degradedFieldValuesColumnName}</span>
+                </EuiTitle>
+              </EuiFlexItem>
+              <EuiFlexItem
+                data-test-subj="datasetQualityDetailsDegradedFieldFlyoutFieldValue-values"
+                css={{ maxWidth: '64%' }}
+                grow={2}
+              >
+                <EuiBadgeGroup gutterSize="s">
+                  {degradedFieldValues?.values.map((value, idx) => (
+                    <EuiBadge color="hollow" key={idx}>
+                      <EuiTextColor color="#765B96">
+                        <strong>{value}</strong>
+                      </EuiTextColor>
+                    </EuiBadge>
+                  ))}
+                </EuiBadgeGroup>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiHorizontalRule margin="s" />
+          </>
+        )}
     </EuiFlexGroup>
   );
 };

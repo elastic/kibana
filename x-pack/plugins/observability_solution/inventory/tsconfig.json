@@ -51,6 +51,7 @@
     "@kbn/observability-plugin",
     "@kbn/rule-data-utils",
     "@kbn/spaces-plugin",
-    "@kbn/cloud-plugin"
+    "@kbn/cloud-plugin",
+    "@kbn/storybook",
   ]
 }

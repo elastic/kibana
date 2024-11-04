@@ -99,7 +99,9 @@ export function registerCategorizationRoutes(
             };
 
             const graph = await getCategorizationGraph({ client, model });
-            const results = await graph.invoke(parameters, options);
+            const results = await graph
+              .withConfig({ runName: 'Categorization' })
+              .invoke(parameters, options);
 
             return res.ok({ body: CategorizationResponse.parse(results) });
           } catch (err) {

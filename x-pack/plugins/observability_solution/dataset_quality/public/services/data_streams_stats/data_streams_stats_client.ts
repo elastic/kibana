@@ -59,7 +59,7 @@ export class DataStreamsStatsClient implements IDataStreamsStatsClient {
     return { dataStreamsStats, datasetUserPrivileges };
   }
 
-  public async getDataStreamsDocsStats(params: GetDataStreamsTotalDocsQuery) {
+  public async getDataStreamsTotalDocs(params: GetDataStreamsTotalDocsQuery) {
     const response = await this.http
       .get<DataStreamTotalDocsResponse>('/internal/dataset_quality/data_streams/total_docs', {
         query: {

@@ -14,12 +14,20 @@ import * as monitorDetail from '../../../../hooks/use_monitor_detail';
 import * as statusByLocation from '../../../../hooks/use_status_by_location';
 import * as monitorDetailLocator from '../../../../hooks/use_monitor_detail_locator';
 import { TagsList } from '@kbn/observability-shared-plugin/public';
+import { useFetcher } from '@kbn/observability-shared-plugin/public';
 
 jest.mock('@kbn/observability-shared-plugin/public');
 
 const TagsListMock = TagsList as jest.Mock;
-
 TagsListMock.mockReturnValue(<div>Tags list</div>);
+
+const useFetcherMock = useFetcher as jest.Mock;
+
+useFetcherMock.mockReturnValue({
+  data: { monitor: { tags: ['tag1', 'tag2'] } },
+  status: 200,
+  refetch: jest.fn(),
+});
 
 describe('Monitor Detail Flyout', () => {
   beforeEach(() => {

@@ -121,6 +121,8 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiLinkTo
+              external
+              target="_blank"
               to={generateEncodedPath(CONNECTOR_DETAIL_PATH, {
                 connectorId: connector.id,
               })}
@@ -137,6 +139,8 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
             >
               <EuiFlexItem grow={false}>
                 <EuiLinkTo
+                  external
+                  target="_blank"
                   to={generateEncodedPath(CONNECTOR_DETAIL_PATH, {
                     connectorId: connector.id,
                   })}
@@ -174,6 +178,8 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
           <EuiFlexItem>
             {connector.index_name && (
               <EuiLinkTo
+                external
+                target="_blank"
                 to={generateEncodedPath(SEARCH_INDEX_PATH, {
                   indexName: connector.index_name,
                 })}

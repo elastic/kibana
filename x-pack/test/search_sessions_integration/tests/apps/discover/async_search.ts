@@ -29,7 +29,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const toasts = getService('toasts');
 
-  describe('discover async search', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/195955
+  describe.skip('discover async search', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
       await kibanaServer.importExport.load(

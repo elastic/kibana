@@ -3568,6 +3568,29 @@
         "children": [
           {
             "parentPluginId": "lists",
+            "id": "def-server.ListsApiRequestHandlerContext.getInternalListClient",
+            "type": "Function",
+            "tags": [],
+            "label": "getInternalListClient",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "lists",
+                "scope": "server",
+                "docId": "kibListsPluginApi",
+                "section": "def-server.ListClient",
+                "text": "ListClient"
+              }
+            ],
+            "path": "x-pack/plugins/lists/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "lists",
             "id": "def-server.ListsApiRequestHandlerContext.getListClient",
             "type": "Function",
             "tags": [],
