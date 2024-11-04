@@ -28,6 +28,7 @@ export const LayerTypes = {
   DATA: 'data',
   REFERENCELINE: 'referenceLine',
   ANNOTATIONS: 'annotations',
+  ESQL: 'esql',
 } as const;
 
 export const FittingFunctions = {
