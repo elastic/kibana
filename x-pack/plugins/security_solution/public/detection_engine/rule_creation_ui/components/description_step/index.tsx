@@ -70,8 +70,8 @@ import {
   ALERT_SUPPRESSION_DURATION_TYPE,
   ALERT_SUPPRESSION_FIELDS,
   ALERT_SUPPRESSION_MISSING_FIELDS,
+  THRESHOLD_ALERT_SUPPRESSION_ENABLED,
 } from '../../../rule_creation/components/alert_suppression_edit/fields';
-import { THRESHOLD_ALERT_SUPPRESSION_ENABLED } from '../../../rule_creation/components/threshold_alert_suppression_edit/fields';
 
 const DescriptionListContainer = styled(EuiDescriptionList)`
   max-width: 600px;

@@ -15,10 +15,8 @@ import {
 import { AlertSuppressionDurationType } from '../../../../../../../../detections/pages/detection_engine/rules/types';
 import { type FormData } from '../../../../../../../../shared_imports';
 import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../../../../../common/detection_engine/constants';
-import {
-  AlertSuppressionDurationUnitEnum,
-  type AlertSuppression,
-} from '../../../../../../../../../common/api/detection_engine';
+import { ALERT_SUPPRESSION_DEFAULT_DURATION } from '../../../../../../../rule_creation/components/alert_suppression_edit/default_duration';
+import { type AlertSuppression } from '../../../../../../../../../common/api/detection_engine';
 import { RuleFieldEditFormWrapper } from '../rule_field_edit_form_wrapper';
 import { AlertSuppressionEditAdapter } from './suppression_edit_adapter';
 import { alertSuppressionFormSchema, type AlertSuppressionFormData } from './form_schema';
@@ -42,10 +40,7 @@ function deserializer(defaultValue: FormData): AlertSuppressionFormData {
     [ALERT_SUPPRESSION_DURATION_TYPE]: alertSuppression?.duration
       ? AlertSuppressionDurationType.PerTimePeriod
       : AlertSuppressionDurationType.PerRuleExecution,
-    [ALERT_SUPPRESSION_DURATION]: alertSuppression?.duration ?? {
-      value: 5,
-      unit: AlertSuppressionDurationUnitEnum.m,
-    },
+    [ALERT_SUPPRESSION_DURATION]: alertSuppression?.duration ?? ALERT_SUPPRESSION_DEFAULT_DURATION,
     [ALERT_SUPPRESSION_MISSING_FIELDS]:
       alertSuppression?.missing_fields_strategy ?? DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY,
   };

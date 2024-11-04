@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 export const ALERT_SUPPRESSION_SUPPRESS_BY_FIELD_LABEL = i18n.translate(
   'xpack.securitySolution.ruleManagement.ruleFields.alertSuppression.fieldsSelector.label',
@@ -90,5 +92,27 @@ export const MACHINE_LEARNING_SUPPRESSION_INCOMPLETE_LABEL = i18n.translate(
   {
     defaultMessage:
       'This list of fields might be incomplete as some Machine Learning jobs are not running. Start all relevant jobs for a complete list.',
+  }
+);
+
+export const enableSuppressionForFields = (fields: string[]) => (
+  <FormattedMessage
+    id="xpack.securitySolution.ruleManagement.ruleFields.thresholdAlertSuppression.enableForFields"
+    defaultMessage="Suppress alerts by selected fields: {fieldsString}"
+    values={{ fieldsString: <strong>{fields.join(', ')}</strong> }}
+  />
+);
+
+export const SUPPRESS_ALERTS = i18n.translate(
+  'xpack.securitySolution.ruleManagement.ruleFields.thresholdAlertSuppression.enable',
+  {
+    defaultMessage: 'Suppress alerts',
+  }
+);
+
+export const THRESHOLD_SUPPRESSION_PER_RULE_EXECUTION_WARNING = i18n.translate(
+  'xpack.securitySolution.ruleManagement.ruleFields.thresholdAlertSuppression.perRuleExecutionWarning',
+  {
+    defaultMessage: 'Per rule execution option is not available for Threshold rule type',
   }
 );

@@ -28,6 +28,7 @@ import type {
   ALERT_SUPPRESSION_DURATION_TYPE,
   ALERT_SUPPRESSION_FIELDS,
   ALERT_SUPPRESSION_MISSING_FIELDS,
+  THRESHOLD_ALERT_SUPPRESSION_ENABLED,
 } from '../../../../detection_engine/rule_creation/components/alert_suppression_edit/fields';
 import type { FieldValueQueryBar } from '../../../../detection_engine/rule_creation_ui/components/query_bar';
 import type { FieldValueTimeline } from '../../../../detection_engine/rule_creation/components/pick_timeline';
@@ -54,7 +55,6 @@ import type {
   RuleResponseAction,
   ResponseAction,
 } from '../../../../../common/api/detection_engine/model/rule_response_actions';
-import type { THRESHOLD_ALERT_SUPPRESSION_ENABLED } from '../../../../detection_engine/rule_creation/components/threshold_alert_suppression_edit/fields';
 
 export interface EuiBasicTableSortTypes {
   field: string;

@@ -22,12 +22,12 @@ import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
 import type { Filter } from '@kbn/es-query';
 import type { ActionVariables } from '@kbn/triggers-actions-ui-plugin/public';
 import { requiredOptional } from '@kbn/zod-helpers';
-import { THRESHOLD_ALERT_SUPPRESSION_ENABLED } from '../../../../detection_engine/rule_creation/components/threshold_alert_suppression_edit/fields';
 import {
   ALERT_SUPPRESSION_FIELDS,
   ALERT_SUPPRESSION_DURATION_TYPE,
   ALERT_SUPPRESSION_DURATION,
   ALERT_SUPPRESSION_MISSING_FIELDS,
+  THRESHOLD_ALERT_SUPPRESSION_ENABLED,
 } from '../../../../detection_engine/rule_creation/components/alert_suppression_edit/fields';
 import type { ResponseAction } from '../../../../../common/api/detection_engine/model/rule_response_actions';
 import { normalizeThresholdField } from '../../../../../common/detection_engine/utils';

@@ -8,11 +8,11 @@
 import type {
   ALERT_SUPPRESSION_DURATION_UNIT,
   ALERT_SUPPRESSION_DURATION_VALUE,
-} from '../../../../../../../rule_creation/components/threshold_alert_suppression_edit/fields';
+} from '../../../../../../../rule_creation/components/alert_suppression_edit/fields';
 import {
   ALERT_SUPPRESSION_DURATION,
   THRESHOLD_ALERT_SUPPRESSION_ENABLED,
-} from '../../../../../../../rule_creation/components/threshold_alert_suppression_edit/fields';
+} from '../../../../../../../rule_creation/components/alert_suppression_edit/fields';
 import type { AlertSuppressionDurationUnit } from '../../../../../../../../../common/api/detection_engine';
 import { type FormSchema, FIELD_TYPES } from '../../../../../../../../shared_imports';
 
