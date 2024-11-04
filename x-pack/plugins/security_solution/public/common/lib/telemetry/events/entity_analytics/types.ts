@@ -59,6 +59,15 @@ export interface ReportAssetCriticalityCsvImportedParams {
   };
 }
 
+export interface ReportEntityStoreEnablementParams {
+  timestamp: string;
+  action: 'start' | 'stop';
+}
+
+export interface ReportEntityStoreInitParams {
+  timestamp: string;
+}
+
 export type ReportEntityAnalyticsTelemetryEventParams =
   | ReportEntityDetailsClickedParams
   | ReportEntityAlertsClickedParams
@@ -68,7 +77,9 @@ export type ReportEntityAnalyticsTelemetryEventParams =
   | ReportAddRiskInputToTimelineClickedParams
   | ReportAssetCriticalityCsvPreviewGeneratedParams
   | ReportAssetCriticalityFileSelectedParams
-  | ReportAssetCriticalityCsvImportedParams;
+  | ReportAssetCriticalityCsvImportedParams
+  | ReportEntityStoreEnablementParams
+  | ReportEntityStoreInitParams;
 
 export type EntityAnalyticsTelemetryEvent =
   | {
@@ -106,4 +117,12 @@ export type EntityAnalyticsTelemetryEvent =
   | {
       eventType: TelemetryEventTypes.AssetCriticalityCsvImported;
       schema: RootSchema<ReportAssetCriticalityCsvImportedParams>;
+    }
+  | {
+      eventType: TelemetryEventTypes.EntityStoreEnablementToggleClicked;
+      schema: RootSchema<ReportEntityStoreEnablementParams>;
+    }
+  | {
+      eventType: TelemetryEventTypes.EntityStoreDashboardInitButtonClicked;
+      schema: RootSchema<ReportEntityStoreInitParams>;
     };

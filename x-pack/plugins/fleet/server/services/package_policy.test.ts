@@ -76,8 +76,11 @@ import { sendTelemetryEvents } from './upgrade_sender';
 import { auditLoggingService } from './audit_logging';
 import { agentPolicyService } from './agent_policy';
 import { isSpaceAwarenessEnabled } from './spaces/helpers';
+import { licenseService } from './license';
 
 jest.mock('./spaces/helpers');
+
+jest.mock('./license');
 
 const mockedSendTelemetryEvents = sendTelemetryEvents as jest.MockedFunction<
   typeof sendTelemetryEvents
@@ -207,7 +210,7 @@ const mockedAuditLoggingService = auditLoggingService as jest.Mocked<typeof audi
 
 type CombinedExternalCallback = PutPackagePolicyUpdateCallback | PostPackagePolicyCreateCallback;
 
-const mockAgentPolicyGet = () => {
+const mockAgentPolicyGet = (spaceIds: string[] = ['default']) => {
   mockAgentPolicyService.get.mockImplementation(
     (_soClient: SavedObjectsClientContract, id: string, _force = false, _errorMessage?: string) => {
       return Promise.resolve({
@@ -220,7 +223,27 @@ const mockAgentPolicyGet = () => {
         updated_by: 'test',
         revision: 1,
         is_protected: false,
+        space_ids: spaceIds,
       });
+    }
+  );
+  mockAgentPolicyService.getByIDs.mockImplementation(
+    // @ts-ignore
+    (_soClient: SavedObjectsClientContract, ids: string[]) => {
+      return Promise.resolve(
+        ids.map((id) => ({
+          id,
+          name: 'Test Agent Policy',
+          namespace: 'test',
+          status: 'active',
+          is_managed: false,
+          updated_at: new Date().toISOString(),
+          updated_by: 'test',
+          revision: 1,
+          is_protected: false,
+          space_ids: spaceIds,
+        }))
+      );
     }
   );
 };
@@ -240,6 +263,9 @@ describe('Package policy service', () => {
   });
 
   describe('create', () => {
+    beforeEach(() => {
+      jest.mocked(licenseService.hasAtLeast).mockReturnValue(true);
+    });
     it('should call audit logger', async () => {
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
       const soClient = savedObjectsClientMock.create();
@@ -278,6 +304,46 @@ describe('Package policy service', () => {
         id: 'test-package-policy',
         savedObjectType: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
       });
+    });
+
+    it('should not allow to add a reusable integration policies to an agent policies belonging to multiple spaces', async () => {
+      jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(true);
+
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const soClient = savedObjectsClientMock.create();
+
+      soClient.create.mockResolvedValueOnce({
+        id: 'test-package-policy',
+        attributes: {},
+        references: [],
+        type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      });
+
+      mockAgentPolicyGet(['test', 'default']);
+
+      await expect(
+        packagePolicyService.create(
+          soClient,
+          esClient,
+          {
+            name: 'Test Package Policy',
+            namespace: 'test',
+            enabled: true,
+            policy_id: 'test',
+            policy_ids: ['test1', 'test2'],
+            inputs: [],
+            package: {
+              name: 'test',
+              title: 'Test',
+              version: '0.0.1',
+            },
+          },
+          // Skipping unique name verification just means we have to less mocking/setup
+          { id: 'test-package-policy', skipUniqueNameVerification: true }
+        )
+      ).rejects.toThrowError(
+        /Reusable integration policies cannot be used with agent policies belonging to multiple spaces./
+      );
     });
   });
 

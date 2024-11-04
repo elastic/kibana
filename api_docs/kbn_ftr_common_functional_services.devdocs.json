@@ -1901,7 +1901,7 @@
         "label": "InternalRequestHeader",
         "description": [],
         "signature": [
-          "{ 'kbn-xsrf': string; } | { 'x-elastic-internal-origin': string; 'kbn-xsrf': string; }"
+          "{ 'x-elastic-internal-origin': string; 'kbn-xsrf': string; } | { 'x-elastic-internal-origin': string; 'kbn-xsrf': string; }"
         ],
         "path": "packages/kbn-ftr-common-functional-services/services/saml_auth/default_request_headers.ts",
         "deprecated": false,

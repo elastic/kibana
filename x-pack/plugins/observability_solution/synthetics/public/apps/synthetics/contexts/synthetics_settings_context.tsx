@@ -38,7 +38,6 @@ export interface SyntheticsAppProps {
   setBadge: (badge?: ChromeBadge) => void;
   renderGlobalHelpControls(): void;
   commonlyUsedRanges: CommonlyUsedDateRange[];
-  setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
   appMountParameters: AppMountParameters;
   isDev: boolean;
   isServerless: boolean;
@@ -89,7 +88,6 @@ export const SyntheticsSettingsContextProvider: React.FC<PropsWithChildren<Synth
     isLogsAvailable,
     commonlyUsedRanges,
     isDev,
-    setBreadcrumbs,
     isServerless,
   } = props;
 
@@ -110,7 +108,6 @@ export const SyntheticsSettingsContextProvider: React.FC<PropsWithChildren<Synth
       commonlyUsedRanges,
       dateRangeStart: dateRangeStart ?? DATE_RANGE_START,
       dateRangeEnd: dateRangeEnd ?? DATE_RANGE_END,
-      setBreadcrumbs,
       isServerless,
     };
   }, [
@@ -123,7 +120,6 @@ export const SyntheticsSettingsContextProvider: React.FC<PropsWithChildren<Synth
     dateRangeStart,
     dateRangeEnd,
     commonlyUsedRanges,
-    setBreadcrumbs,
     isServerless,
   ]);
 
