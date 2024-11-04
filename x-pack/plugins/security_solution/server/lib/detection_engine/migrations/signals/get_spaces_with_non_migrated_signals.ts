@@ -14,6 +14,7 @@ import { isOutdated as getIsOutdated, signalsAreOutdated } from '../helpers';
 interface OutdatedSpaces {
   isMigrationRequired: boolean;
   spaces: string[];
+  indices: string[];
   fromRange: string | undefined;
 }
 
@@ -108,8 +109,10 @@ export const getSpacesWithNonMigratedSignals = async ({
     []
   );
 
+  const outdatedIndexNames = outdatedIndices.map((outdatedIndex) => outdatedIndex.indexName);
+
   const responseX = await esClient.search({
-    index: outdatedIndices.map((outdatedIndex) => outdatedIndex.indexName),
+    index: outdatedIndexNames,
     size: 0,
     body: {
       aggs: {
@@ -140,5 +143,6 @@ export const getSpacesWithNonMigratedSignals = async ({
     isMigrationRequired: outdatedIndices.length > 0,
     spaces,
     fromRange,
+    indices: outdatedIndexNames,
   };
 };
