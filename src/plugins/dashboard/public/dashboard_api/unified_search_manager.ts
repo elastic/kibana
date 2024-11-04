@@ -320,7 +320,10 @@ export function initializeUnifiedSearchManager(
       controlGroupReload$,
       panelsReload$,
       reset: (lastSavedState: DashboardState) => {
-        setUnifiedSearchFilters(lastSavedState.filters);
+        setUnifiedSearchFilters([
+          ...(unifiedSearchFilters$.value ?? []).filter(isFilterPinned),
+          ...lastSavedState.filters
+        ]);
         setQuery(lastSavedState.query);
         setTimeRestore(lastSavedState.timeRestore);
         if (lastSavedState.timeRestore) {
