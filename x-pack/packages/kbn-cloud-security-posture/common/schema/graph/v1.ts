@@ -71,8 +71,6 @@ export const groupNodeDataSchema = schema.allOf([
 export const labelNodeDataSchema = schema.allOf([
   nodeBaseDataSchema,
   schema.object({
-    source: schema.string(),
-    target: schema.string(),
     shape: schema.literal('label'),
     parentId: schema.maybe(schema.string()),
     color: colorSchema,
@@ -82,8 +80,6 @@ export const labelNodeDataSchema = schema.allOf([
 export const edgeDataSchema = schema.object({
   id: schema.string(),
   source: schema.string(),
-  sourceShape: nodeShapeSchema,
   target: schema.string(),
-  targetShape: nodeShapeSchema,
   color: colorSchema,
 });

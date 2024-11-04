@@ -23,7 +23,6 @@ import {
   GetAgentStatusRequestSchema,
   GetAgentDataRequestSchema,
   PostNewAgentActionRequestSchema,
-  PutAgentReassignRequestSchemaDeprecated,
   PostAgentReassignRequestSchema,
   PostBulkAgentReassignRequestSchema,
   PostAgentUpgradeRequestSchema,
@@ -68,7 +67,6 @@ import {
   updateAgentHandler,
   deleteAgentHandler,
   getAgentStatusForAgentPolicyHandler,
-  putAgentsReassignHandlerDeprecated,
   postBulkAgentReassignHandler,
   getAgentDataHandler,
   bulkUpdateAgentTagsHandler,
@@ -392,22 +390,6 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     );
 
   router.versioned
-    .put({
-      path: AGENT_API_ROUTES.REASSIGN_PATTERN,
-      fleetAuthz: {
-        fleet: { allAgents: true },
-      },
-      deprecated: true,
-    })
-    .addVersion(
-      {
-        version: API_VERSIONS.public.v1,
-        validate: { request: PutAgentReassignRequestSchemaDeprecated },
-      },
-      putAgentsReassignHandlerDeprecated
-    );
-
-  router.versioned
     .post({
       path: AGENT_API_ROUTES.REASSIGN_PATTERN,
       fleetAuthz: {
@@ -609,21 +591,6 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
             },
           },
         },
-      },
-      getAgentStatusForAgentPolicyHandler
-    );
-  router.versioned
-    .get({
-      path: AGENT_API_ROUTES.STATUS_PATTERN_DEPRECATED,
-      fleetAuthz: {
-        fleet: { readAgents: true },
-      },
-      deprecated: true,
-    })
-    .addVersion(
-      {
-        version: API_VERSIONS.public.v1,
-        validate: { request: GetAgentStatusRequestSchema },
       },
       getAgentStatusForAgentPolicyHandler
     );

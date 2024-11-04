@@ -132,7 +132,7 @@ export function isSourceCommand({ label }: { label: string }) {
 }
 
 let fnLookups: Map<string, FunctionDefinition> | undefined;
-let commandLookups: Map<string, CommandDefinition> | undefined;
+let commandLookups: Map<string, CommandDefinition<string>> | undefined;
 
 function buildFunctionLookup() {
   // we always refresh if we have test functions
@@ -197,7 +197,7 @@ export function getFunctionDefinition(name: string) {
 
 const unwrapStringLiteralQuotes = (value: string) => value.slice(1, -1);
 
-function buildCommandLookup() {
+function buildCommandLookup(): Map<string, CommandDefinition<string>> {
   if (!commandLookups) {
     commandLookups = commandDefinitions.reduce((memo, def) => {
       memo.set(def.name, def);
@@ -205,12 +205,12 @@ function buildCommandLookup() {
         memo.set(def.alias, def);
       }
       return memo;
-    }, new Map<string, CommandDefinition>());
+    }, new Map<string, CommandDefinition<string>>());
   }
-  return commandLookups;
+  return commandLookups!;
 }
 
-export function getCommandDefinition(name: string): CommandDefinition {
+export function getCommandDefinition(name: string): CommandDefinition<string> {
   return buildCommandLookup().get(name.toLowerCase())!;
 }
 
@@ -218,7 +218,7 @@ export function getAllCommands() {
   return Array.from(buildCommandLookup().values());
 }
 
-export function getCommandOption(optionName: CommandOptionsDefinition['name']) {
+export function getCommandOption(optionName: CommandOptionsDefinition<string>['name']) {
   return [byOption, metadataOption, asOption, onOption, withOption, appendSeparatorOption].find(
     ({ name }) => name === optionName
   );
@@ -465,7 +465,7 @@ export function checkFunctionArgMatchesDefinition(
     const wrappedTypes: Array<(typeof validHit)['type']> = Array.isArray(validHit.type)
       ? validHit.type
       : [validHit.type];
-    return wrappedTypes.some((ct) => ct === argType || ct === 'null' || ct === 'unknown');
+    return wrappedTypes.some((ct) => ct === argType || ct === 'null');
   }
   if (arg.type === 'inlineCast') {
     const lowerArgType = argType?.toLowerCase();
@@ -599,7 +599,7 @@ export function pipePrecedesCurrentWord(text: string) {
   return characterPrecedesCurrentWord(text, '|');
 }
 
-export function getLastCharFromTrimmed(text: string) {
+export function getLastNonWhitespaceChar(text: string) {
   return text[text.trimEnd().length - 1];
 }
 
@@ -607,7 +607,7 @@ export function getLastCharFromTrimmed(text: string) {
  * Are we after a comma? i.e. STATS fieldA, <here>
  */
 export function isRestartingExpression(text: string) {
-  return getLastCharFromTrimmed(text) === ',' || characterPrecedesCurrentWord(text, ',');
+  return getLastNonWhitespaceChar(text) === ',' || characterPrecedesCurrentWord(text, ',');
 }
 
 export function findPreviousWord(text: string) {
@@ -815,15 +815,31 @@ export function getExpressionType(
       return 'unknown';
     }
 
+    /**
+     * Special case for COUNT(*) because
+     * the "*" column doesn't match any
+     * of COUNT's function definitions
+     */
+    if (
+      fnDefinition.name === 'count' &&
+      root.args[0] &&
+      isColumnItem(root.args[0]) &&
+      root.args[0].name === '*'
+    ) {
+      return 'long';
+    }
+
     if (fnDefinition.name === 'case' && root.args.length) {
-      // The CASE function doesn't fit our system of function definitions
-      // and needs special handling. This is imperfect, but it's a start because
-      // at least we know that the final argument to case will never be a conditional
-      // expression, always a result expression.
-      //
-      // One problem with this is that if a false case is not provided, the return type
-      // will be null, which we aren't detecting. But this is ok because we consider
-      // variables and fields to be nullable anyways and account for that during validation.
+      /**
+       * The CASE function doesn't fit our system of function definitions
+       * and needs special handling. This is imperfect, but it's a start because
+       * at least we know that the final argument to case will never be a conditional
+       * expression, always a result expression.
+       *
+       * One problem with this is that if a false case is not provided, the return type
+       * will be null, which we aren't detecting. But this is ok because we consider
+       * variables and fields to be nullable anyways and account for that during validation.
+       */
       return getExpressionType(root.args[root.args.length - 1], fields, variables);
     }
 

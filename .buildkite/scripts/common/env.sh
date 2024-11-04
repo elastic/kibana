@@ -8,7 +8,6 @@ KIBANA_DIR=$(pwd)
 export KIBANA_DIR
 export XPACK_DIR="$KIBANA_DIR/x-pack"
 
-export XDG_CACHE_HOME="$HOME/.cache"
 export CACHE_DIR="$HOME/.kibana"
 export ES_CACHE_DIR="$HOME/.es-snapshot-cache"
 PARENT_DIR="$(cd "$KIBANA_DIR/.."; pwd)"
@@ -111,6 +110,7 @@ export TEST_CORS_SERVER_PORT=6105
 if [[ "$(which google-chrome-stable)" || "$(which google-chrome)" ]]; then
   echo "Chrome detected, setting DETECT_CHROMEDRIVER_VERSION=true"
   export DETECT_CHROMEDRIVER_VERSION=true
+  export CHROMEDRIVER_FORCE_DOWNLOAD=true
 else
   echo "Chrome not detected, installing default chromedriver binary for the package version"
 fi
