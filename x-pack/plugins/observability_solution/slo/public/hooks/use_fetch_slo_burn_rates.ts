@@ -12,7 +12,6 @@ import {
   useQuery,
 } from '@tanstack/react-query';
 import { SLO_LONG_REFETCH_INTERVAL } from '../constants';
-import { useKibana } from '../utils/kibana_react';
 import { sloKeys } from './query_key_factory';
 import { usePluginContext } from './use_plugin_context';
 
