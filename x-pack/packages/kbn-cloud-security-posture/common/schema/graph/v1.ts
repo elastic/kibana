@@ -13,14 +13,16 @@ export const graphRequestSchema = schema.object({
     // TODO: use zod for range validation instead of config schema
     start: schema.oneOf([schema.number(), schema.string()]),
     end: schema.oneOf([schema.number(), schema.string()]),
-    esQuery: schema.object({
-      bool: schema.object({
-        filter: schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
-        must: schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
-        should: schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
-        must_not: schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
-      }),
-    }),
+    esQuery: schema.maybe(
+      schema.object({
+        bool: schema.object({
+          filter: schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
+          must: schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
+          should: schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
+          must_not: schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
+        }),
+      })
+    ),
   }),
 });
 

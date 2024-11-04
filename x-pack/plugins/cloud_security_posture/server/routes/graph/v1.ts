@@ -40,7 +40,7 @@ interface LabelEdges {
 export const getGraph = async (
   services: GraphContextServices,
   query: {
-    esQuery: { bool: BoolQuery };
+    esQuery?: { bool: BoolQuery };
     eventIds: string[];
     spaceId?: string;
     start: string | number;
@@ -102,7 +102,7 @@ const fetchGraph = async ({
   logger: Logger;
   start: string | number;
   end: string | number;
-  esQuery: { bool: BoolQuery };
+  esQuery?: { bool: BoolQuery };
   eventIds: string[];
 }): Promise<EsqlToRecords<GraphEdge>> => {
   const query = `from logs-*
@@ -141,7 +141,7 @@ const buildDslFilter = (
   eventIds: string[],
   start: string | number,
   end: string | number,
-  esQuery: { bool: BoolQuery }
+  esQuery?: { bool: BoolQuery }
 ) => ({
   bool: {
     filter: [
@@ -156,10 +156,10 @@ const buildDslFilter = (
       {
         bool: {
           should: [
-            ...(esQuery.bool.filter.length ||
-            esQuery.bool.must.length ||
-            esQuery.bool.should.length ||
-            esQuery.bool.must_not.length
+            ...(esQuery?.bool.filter.length ||
+            esQuery?.bool.must.length ||
+            esQuery?.bool.should.length ||
+            esQuery?.bool.must_not.length
               ? [esQuery]
               : []),
             {

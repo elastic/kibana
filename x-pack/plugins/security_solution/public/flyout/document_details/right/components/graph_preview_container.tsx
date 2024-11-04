@@ -8,6 +8,7 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
+import moment from 'moment';
 import { ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING } from '../../../../../common/constants';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { GRAPH_PREVIEW_TEST_ID } from './test_ids';
@@ -43,14 +44,15 @@ export const GraphPreviewContainer: React.FC = () => {
     ecsData: dataAsNestedObject,
   });
 
+  const timestamp = getFieldsData('@timestamp')[0];
+
   // TODO: default start and end might not capture the original event
   const { isLoading, isError, data } = useFetchGraphData({
     req: {
       query: {
-        actorIds: [],
         eventIds,
-        start: DEFAULT_FROM,
-        end: DEFAULT_TO,
+        start: moment(timestamp).subtract(30, 'minutes').toISOString(),
+        end: moment(timestamp).add(30, 'minutes').toISOString(),
       },
     },
     options: {

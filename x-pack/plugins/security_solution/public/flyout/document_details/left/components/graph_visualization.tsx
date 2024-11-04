@@ -13,6 +13,13 @@ import { buildEsQuery } from '@kbn/es-query';
 import type { Filter, Query, TimeRange, BoolQuery } from '@kbn/es-query';
 import { css } from '@emotion/css';
 import { getEsQueryConfig } from '@kbn/data-service';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { DataProvider } from '@kbn/timelines-plugin/common/types';
+import { flatten } from 'lodash';
+import moment from 'moment';
+import { normalizeTimeRange } from '../../../../common/utils/normalize_time_range';
+import { getDataProvider } from '../../../../app/actions/add_to_timeline/data_provider';
+import { InvestigateInTimelineButton } from '../../../../common/components/event_details/investigate_in_timeline_button';
 import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { SourcererScopeName } from '../../../../sourcerer/store/model';
 import { useDocumentDetailsContext } from '../../shared/context';
@@ -29,10 +36,10 @@ const GraphLazy = React.lazy(() =>
   import('@kbn/cloud-security-posture-graph').then((module) => ({ default: module.Graph }))
 );
 
-const useTimeRange = () => {
+const useTimeRange = (timestamp: string) => {
   const [timeRange, setTimeRange] = useState<TimeRange>({
-    from: DEFAULT_FROM,
-    to: DEFAULT_TO,
+    from: moment(timestamp).subtract(30, 'minutes').toISOString(),
+    to: moment(timestamp).add(30, 'minutes').toISOString(),
   });
 
   const setPartialTimeRange = (newTimeRange: Partial<typeof timeRange>) => {
@@ -61,90 +68,90 @@ const useGraphData = (eventIds: string[], timeRange: TimeRange, filter: { bool: 
   return { data, refresh, isFetching };
 };
 
-const useGraphPopovers = (
-  setActorIds: React.Dispatch<React.SetStateAction<Set<string>>>,
-  setSearchFilters: React.Dispatch<React.SetStateAction<Filter[]>>
-) => {
+const addFilter = (prev: Filter[], key: string, value: string) => {
+  const [firstFilter, ...otherFilters] = prev;
+
+  if (firstFilter?.meta?.type === 'combined' && firstFilter?.meta?.relation === 'OR') {
+    return [
+      {
+        ...firstFilter,
+        meta: {
+          ...firstFilter.meta,
+          params: [
+            ...(Array.isArray(firstFilter.meta.params) ? firstFilter.meta.params : []),
+            {
+              meta: {
+                disabled: false,
+                negate: false,
+                key,
+                field: key,
+                type: 'phrase',
+                params: {
+                  query: value,
+                },
+              },
+              query: {
+                match_phrase: {
+                  [key]: value,
+                },
+              },
+            },
+          ],
+        },
+      },
+      ...otherFilters,
+    ];
+  } else {
+    return [
+      {
+        meta: {
+          params: [
+            {
+              meta: {
+                disabled: false,
+                negate: false,
+                key,
+                field: key,
+                type: 'phrase',
+                params: {
+                  query: value,
+                },
+              },
+              query: {
+                match_phrase: {
+                  [key]: value,
+                },
+              },
+            },
+          ],
+          type: 'combined',
+          relation: 'OR',
+          disabled: false,
+          negate: false,
+        },
+        $state: {
+          store: 'appState',
+        } as Filter['$state'],
+      },
+      ...prev,
+    ];
+  }
+};
+
+const useGraphPopovers = (setSearchFilters: React.Dispatch<React.SetStateAction<Filter[]>>) => {
   const {
     services: { notifications },
   } = useKibana();
 
   const nodeExpandPopover = useGraphNodeExpandPopover({
     onExploreRelatedEntitiesClick: (node) => {
-      setSearchFilters((prev) => [
-        ...prev,
-        {
-          meta: {
-            disabled: false,
-            key: 'related.entity',
-            field: 'related.entity',
-            negate: false,
-            params: {
-              query: node.id,
-            },
-            type: 'phrase',
-          },
-          query: {
-            match_phrase: {
-              'related.entity': node.id,
-            },
-          },
-          $state: {
-            store: 'appState',
-          } as Filter['$state'],
-        },
-      ]);
+      setSearchFilters((prev) => addFilter(prev, 'related.entity', node.id));
     },
     onShowActionsByEntityClick: (node) => {
-      setActorIds((prev) => new Set([...prev, node.id]));
-      setSearchFilters((prev) => [
-        ...prev,
-        {
-          meta: {
-            disabled: false,
-            key: 'actor.entity.id',
-            field: 'actor.entity.id',
-            negate: false,
-            params: {
-              query: node.id,
-            },
-            type: 'phrase',
-          },
-          query: {
-            match_phrase: {
-              'actor.entity.id': node.id,
-            },
-          },
-          $state: {
-            store: 'appState',
-          } as Filter['$state'],
-        },
-      ]);
+      setSearchFilters((prev) => addFilter(prev, 'actor.entity.id', node.id));
     },
     onShowActionsOnEntityClick: (node) => {
-      setSearchFilters((prev) => [
-        ...prev,
-        {
-          meta: {
-            disabled: false,
-            key: 'target.entity.id',
-            field: 'target.entity.id',
-            negate: false,
-            params: {
-              query: node.id,
-            },
-            type: 'phrase',
-          },
-          query: {
-            match_phrase: {
-              'target.entity.id': node.id,
-            },
-          },
-          $state: {
-            store: 'appState',
-          } as Filter['$state'],
-        },
-      ]);
+      setSearchFilters((prev) => addFilter(prev, 'target.entity.id', node.id));
     },
     onViewEntityDetailsClick: (node) => {
       notifications?.toasts.addInfo('View entity details is not implemented yet');
@@ -180,18 +187,50 @@ const useGraphNodes = (
   }, [nodes]);
 };
 
+const convertSearchFiltersToDataProviders = (searchFilters: Filter[]): DataProvider[] => {
+  return flatten(
+    searchFilters.map((filter) => {
+      if (
+        filter.meta.type === 'combined' &&
+        filter.meta.relation === 'OR' &&
+        Array.isArray(filter.meta.params)
+      ) {
+        return (
+          filter.meta.params?.map((param) =>
+            getDataProvider({
+              field: param.meta.field,
+              id: param.meta.key,
+              value: param.meta.params.query,
+            })
+          ) ?? []
+        );
+      } else {
+        return getDataProvider({
+          field: filter.meta.key ?? '',
+          id: filter.meta.key ?? '',
+          value: filter.meta.params?.query ?? '',
+        });
+      }
+    })
+  );
+};
+
 /**
  * Graph visualization view displayed in the document details expandable flyout left section under the Visualize tab
  */
 export const GraphVisualization: React.FC = memo(() => {
   const { indexPattern } = useSourcererDataView(SourcererScopeName.default);
   const [searchFilters, setSearchFilters] = useState<Filter[]>(() => []);
-  const { timeRange, setTimeRange } = useTimeRange();
   const { getFieldsData, dataAsNestedObject } = useDocumentDetailsContext();
   const { eventIds } = useGraphPreview({
     getFieldsData,
     ecsData: dataAsNestedObject,
   });
+
+  const { timeRange, setTimeRange } = useTimeRange(getFieldsData('@timestamp')[0]);
+  const [dataProviders, setDataProviders] = useState<DataProvider[]>(
+    eventIds.map((id) => getDataProvider({ field: 'event.id', id, value: id }))
+  );
 
   const {
     services: { uiSettings },
@@ -216,7 +255,7 @@ export const GraphVisualization: React.FC = memo(() => {
     );
   }, [searchFilters, indexPattern, uiSettings]);
 
-  const { nodeExpandPopover, popoverOpenWrapper } = useGraphPopovers(setActorIds, setSearchFilters);
+  const { nodeExpandPopover, popoverOpenWrapper } = useGraphPopovers(setSearchFilters);
   const expandButtonClickHandler = (...args: unknown[]) =>
     popoverOpenWrapper(nodeExpandPopover.onNodeExpandButtonClick, ...args);
   const isPopoverOpen = [nodeExpandPopover].some(({ state: { isOpen } }) => isOpen);
@@ -247,17 +286,29 @@ export const GraphVisualization: React.FC = memo(() => {
           },
           onQuerySubmit: (payload, isUpdate) => {
             if (isUpdate) {
-              setTimeRange({ from: payload.dateRange.from, to: payload.dateRange.to });
+              setTimeRange({ ...payload.dateRange });
             } else {
               refresh();
             }
           },
         }}
       />
+      <InvestigateInTimelineButton
+        asEmptyButton
+        dataProviders={[...dataProviders, ...convertSearchFiltersToDataProviders(searchFilters)]}
+        keepDataView
+        iconType={'timeline'}
+        timeRange={{ ...normalizeTimeRange(timeRange), kind: 'absolute' }}
+      >
+        <FormattedMessage
+          id="xpack.securitySolution.flyout.documentDetails.left.graphVisualization.investigateInTimelineButtonLabel"
+          defaultMessage="Investigate in Timeline"
+        />
+      </InvestigateInTimelineButton>
       <React.Suspense fallback={null}>
         <GraphLazy
           css={css`
-            height: calc(100vh - 305px);
+            height: calc(100vh - 320px);
             width: 100%;
           `}
           nodes={nodes}
