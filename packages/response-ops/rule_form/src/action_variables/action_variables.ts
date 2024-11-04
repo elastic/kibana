@@ -63,7 +63,7 @@ export const AlertProvidedActionVariableDescriptions: Record<
   ActionVariablesWithoutName
 > = Object.freeze({
   [LegacyAlertProvidedActionVariables.alertId]: {
-    description: i18n.translate('alertsUIShared.actionVariables.legacyAlertIdLabel', {
+    description: i18n.translate('responseOpsRuleForm.actionVariables.legacyAlertIdLabel', {
       defaultMessage: 'This has been deprecated in favor of {variable}.',
       values: {
         variable: AlertProvidedActionVariables.ruleId,
@@ -73,7 +73,7 @@ export const AlertProvidedActionVariableDescriptions: Record<
   },
   [LegacyAlertProvidedActionVariables.alertName]: {
     deprecated: true,
-    description: i18n.translate('alertsUIShared.actionVariables.legacyAlertNameLabel', {
+    description: i18n.translate('responseOpsRuleForm.actionVariables.legacyAlertNameLabel', {
       defaultMessage: 'This has been deprecated in favor of {variable}.',
       values: {
         variable: AlertProvidedActionVariables.ruleName,
@@ -82,7 +82,7 @@ export const AlertProvidedActionVariableDescriptions: Record<
   },
   [LegacyAlertProvidedActionVariables.alertInstanceId]: {
     deprecated: true,
-    description: i18n.translate('alertsUIShared.actionVariables.legacyAlertInstanceIdLabel', {
+    description: i18n.translate('responseOpsRuleForm.actionVariables.legacyAlertInstanceIdLabel', {
       defaultMessage: 'This has been deprecated in favor of {variable}.',
       values: {
         variable: AlertProvidedActionVariables.alertId,
@@ -91,7 +91,7 @@ export const AlertProvidedActionVariableDescriptions: Record<
   },
   [LegacyAlertProvidedActionVariables.alertActionGroup]: {
     deprecated: true,
-    description: i18n.translate('alertsUIShared.actionVariables.legacyAlertActionGroupLabel', {
+    description: i18n.translate('responseOpsRuleForm.actionVariables.legacyAlertActionGroupLabel', {
       defaultMessage: 'This has been deprecated in favor of {variable}.',
       values: {
         variable: AlertProvidedActionVariables.alertActionGroup,
@@ -100,16 +100,19 @@ export const AlertProvidedActionVariableDescriptions: Record<
   },
   [LegacyAlertProvidedActionVariables.alertActionGroupName]: {
     deprecated: true,
-    description: i18n.translate('alertsUIShared.actionVariables.legacyAlertActionGroupNameLabel', {
-      defaultMessage: 'This has been deprecated in favor of {variable}.',
-      values: {
-        variable: AlertProvidedActionVariables.alertActionGroupName,
-      },
-    }),
+    description: i18n.translate(
+      'responseOpsRuleForm.actionVariables.legacyAlertActionGroupNameLabel',
+      {
+        defaultMessage: 'This has been deprecated in favor of {variable}.',
+        values: {
+          variable: AlertProvidedActionVariables.alertActionGroupName,
+        },
+      }
+    ),
   },
   [LegacyAlertProvidedActionVariables.tags]: {
     deprecated: true,
-    description: i18n.translate('alertsUIShared.actionVariables.legacyTagsLabel', {
+    description: i18n.translate('responseOpsRuleForm.actionVariables.legacyTagsLabel', {
       defaultMessage: 'This has been deprecated in favor of {variable}.',
       values: {
         variable: AlertProvidedActionVariables.ruleTags,
@@ -118,7 +121,7 @@ export const AlertProvidedActionVariableDescriptions: Record<
   },
   [LegacyAlertProvidedActionVariables.spaceId]: {
     deprecated: true,
-    description: i18n.translate('alertsUIShared.actionVariables.legacySpaceIdLabel', {
+    description: i18n.translate('responseOpsRuleForm.actionVariables.legacySpaceIdLabel', {
       defaultMessage: 'This has been deprecated in favor of {variable}.',
       values: {
         variable: AlertProvidedActionVariables.ruleSpaceId,
@@ -127,7 +130,7 @@ export const AlertProvidedActionVariableDescriptions: Record<
   },
   [LegacyAlertProvidedActionVariables.params]: {
     deprecated: true,
-    description: i18n.translate('alertsUIShared.actionVariables.legacyParamsLabel', {
+    description: i18n.translate('responseOpsRuleForm.actionVariables.legacyParamsLabel', {
       defaultMessage: 'This has been deprecated in favor of {variable}.',
       values: {
         variable: AlertProvidedActionVariables.ruleParams,
@@ -135,84 +138,87 @@ export const AlertProvidedActionVariableDescriptions: Record<
     }),
   },
   [AlertProvidedActionVariables.date]: {
-    description: i18n.translate('alertsUIShared.actionVariables.dateLabel', {
+    description: i18n.translate('responseOpsRuleForm.actionVariables.dateLabel', {
       defaultMessage: 'The date the rule scheduled the action.',
     }),
   },
   [AlertProvidedActionVariables.kibanaBaseUrl]: {
-    description: i18n.translate('alertsUIShared.actionVariables.kibanaBaseUrlLabel', {
+    description: i18n.translate('responseOpsRuleForm.actionVariables.kibanaBaseUrlLabel', {
       defaultMessage:
         'The configured server.publicBaseUrl value or empty string if not configured.',
     }),
   },
   [AlertProvidedActionVariables.ruleId]: {
-    description: i18n.translate('alertsUIShared.actionVariables.ruleIdLabel', {
+    description: i18n.translate('responseOpsRuleForm.actionVariables.ruleIdLabel', {
       defaultMessage: 'The ID of the rule.',
     }),
   },
   [AlertProvidedActionVariables.ruleName]: {
-    description: i18n.translate('alertsUIShared.actionVariables.ruleNameLabel', {
+    description: i18n.translate('responseOpsRuleForm.actionVariables.ruleNameLabel', {
       defaultMessage: 'The name of the rule.',
     }),
   },
   [AlertProvidedActionVariables.ruleSpaceId]: {
-    description: i18n.translate('alertsUIShared.actionVariables.ruleSpaceIdLabel', {
+    description: i18n.translate('responseOpsRuleForm.actionVariables.ruleSpaceIdLabel', {
       defaultMessage: 'The space ID of the rule.',
     }),
   },
   [AlertProvidedActionVariables.ruleType]: {
-    description: i18n.translate('alertsUIShared.actionVariables.ruleTypeLabel', {
+    description: i18n.translate('responseOpsRuleForm.actionVariables.ruleTypeLabel', {
       defaultMessage: 'The type of rule.',
     }),
   },
   [AlertProvidedActionVariables.ruleTags]: {
-    description: i18n.translate('alertsUIShared.actionVariables.ruleTagsLabel', {
+    description: i18n.translate('responseOpsRuleForm.actionVariables.ruleTagsLabel', {
       defaultMessage: 'The tags of the rule.',
     }),
   },
   [AlertProvidedActionVariables.ruleParams]: {
-    description: i18n.translate('alertsUIShared.actionVariables.ruleParamsLabel', {
+    description: i18n.translate('responseOpsRuleForm.actionVariables.ruleParamsLabel', {
       defaultMessage: 'The parameters of the rule.',
     }),
   },
   [AlertProvidedActionVariables.ruleUrl]: {
-    description: i18n.translate('alertsUIShared.actionVariables.ruleUrlLabel', {
+    description: i18n.translate('responseOpsRuleForm.actionVariables.ruleUrlLabel', {
       defaultMessage:
         'The URL to the rule that generated the alert. This will be an empty string if the server.publicBaseUrl is not configured.',
     }),
     usesPublicBaseUrl: true,
   },
   [AlertProvidedActionVariables.alertId]: {
-    description: i18n.translate('alertsUIShared.actionVariables.alertIdLabel', {
+    description: i18n.translate('responseOpsRuleForm.actionVariables.alertIdLabel', {
       defaultMessage: 'The ID of the alert that scheduled actions for the rule.',
     }),
   },
   [AlertProvidedActionVariables.alertUuid]: {
-    description: i18n.translate('alertsUIShared.actionVariables.alertUuidLabel', {
+    description: i18n.translate('responseOpsRuleForm.actionVariables.alertUuidLabel', {
       defaultMessage: 'The UUID of the alert that scheduled actions for the rule.',
     }),
   },
   [AlertProvidedActionVariables.alertActionGroup]: {
-    description: i18n.translate('alertsUIShared.actionVariables.alertActionGroupLabel', {
+    description: i18n.translate('responseOpsRuleForm.actionVariables.alertActionGroupLabel', {
       defaultMessage: 'The action group of the alert that scheduled actions for the rule.',
     }),
   },
   [AlertProvidedActionVariables.alertActionGroupName]: {
-    description: i18n.translate('alertsUIShared.actionVariables.alertActionGroupNameLabel', {
+    description: i18n.translate('responseOpsRuleForm.actionVariables.alertActionGroupNameLabel', {
       defaultMessage:
         'The human readable name of the action group of the alert that scheduled actions for the rule.',
     }),
   },
   [AlertProvidedActionVariables.alertFlapping]: {
-    description: i18n.translate('alertsUIShared.actionVariables.alertFlappingLabel', {
+    description: i18n.translate('responseOpsRuleForm.actionVariables.alertFlappingLabel', {
       defaultMessage:
         'A flag on the alert that indicates whether the alert status is changing repeatedly.',
     }),
   },
   [AlertProvidedActionVariables.alertConsecutiveMatches]: {
-    description: i18n.translate('alertsUIShared.actionVariables.alertConsecutiveMatchesLabel', {
-      defaultMessage: 'The number of consecutive runs that meet the rule conditions.',
-    }),
+    description: i18n.translate(
+      'responseOpsRuleForm.actionVariables.alertConsecutiveMatchesLabel',
+      {
+        defaultMessage: 'The number of consecutive runs that meet the rule conditions.',
+      }
+    ),
   },
 });
 
@@ -222,42 +228,42 @@ export const SummarizedAlertProvidedActionVariableDescriptions: Record<
 > = Object.freeze({
   ...AlertProvidedActionVariableDescriptions,
   [SummaryAlertProvidedActionVariables.allAlertsCount]: {
-    description: i18n.translate('alertsUIShared.actionVariables.allAlertsCountLabel', {
+    description: i18n.translate('responseOpsRuleForm.actionVariables.allAlertsCountLabel', {
       defaultMessage: 'The count of all alerts.',
     }),
   },
   [SummaryAlertProvidedActionVariables.allAlertsData]: {
-    description: i18n.translate('alertsUIShared.actionVariables.allAlertsDataLabel', {
+    description: i18n.translate('responseOpsRuleForm.actionVariables.allAlertsDataLabel', {
       defaultMessage: 'An array of objects for all alerts.',
     }),
   },
   [SummaryAlertProvidedActionVariables.newAlertsCount]: {
-    description: i18n.translate('alertsUIShared.actionVariables.newAlertsCountLabel', {
+    description: i18n.translate('responseOpsRuleForm.actionVariables.newAlertsCountLabel', {
       defaultMessage: 'The count of new alerts.',
     }),
   },
   [SummaryAlertProvidedActionVariables.newAlertsData]: {
-    description: i18n.translate('alertsUIShared.actionVariables.newAlertsDataLabel', {
+    description: i18n.translate('responseOpsRuleForm.actionVariables.newAlertsDataLabel', {
       defaultMessage: 'An array of objects for new alerts.',
     }),
   },
   [SummaryAlertProvidedActionVariables.ongoingAlertsCount]: {
-    description: i18n.translate('alertsUIShared.actionVariables.ongoingAlertsCountLabel', {
+    description: i18n.translate('responseOpsRuleForm.actionVariables.ongoingAlertsCountLabel', {
       defaultMessage: 'The count of ongoing alerts.',
     }),
   },
   [SummaryAlertProvidedActionVariables.ongoingAlertsData]: {
-    description: i18n.translate('alertsUIShared.actionVariables.ongoingAlertsDataLabel', {
+    description: i18n.translate('responseOpsRuleForm.actionVariables.ongoingAlertsDataLabel', {
       defaultMessage: 'An array of objects for ongoing alerts.',
     }),
   },
   [SummaryAlertProvidedActionVariables.recoveredAlertsCount]: {
-    description: i18n.translate('alertsUIShared.actionVariables.recoveredAlertsCountLabel', {
+    description: i18n.translate('responseOpsRuleForm.actionVariables.recoveredAlertsCountLabel', {
       defaultMessage: 'The count of recovered alerts.',
     }),
   },
   [SummaryAlertProvidedActionVariables.recoveredAlertsData]: {
-    description: i18n.translate('alertsUIShared.actionVariables.recoveredAlertsDataLabel', {
+    description: i18n.translate('responseOpsRuleForm.actionVariables.recoveredAlertsDataLabel', {
       defaultMessage: 'An array of objects for recovered alerts.',
     }),
   },

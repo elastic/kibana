@@ -12,7 +12,7 @@ import Mustache from 'mustache';
 import { some } from 'lodash';
 import { ActionVariable, RuleActionParam } from '@kbn/alerting-types';
 
-const publicUrlWarning = i18n.translate('alertsUIShared.ruleForm.actionsForm.publicBaseUrl', {
+const publicUrlWarning = i18n.translate('responseOpsRuleForm.ruleForm.actionsForm.publicBaseUrl', {
   defaultMessage:
     'server.publicBaseUrl is not set. Generated URLs will be either relative or empty.',
 });

@@ -114,6 +114,7 @@
     "@kbn/core-ui-settings-server-mocks",
     "@kbn/es-types",
     "@kbn/logging-mocks",
+    "@kbn/response-ops-rule-form",
   ],
   "exclude": ["target/**/*"]
 }

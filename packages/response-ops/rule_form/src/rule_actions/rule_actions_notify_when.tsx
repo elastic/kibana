@@ -38,12 +38,15 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { DEFAULT_FREQUENCY } from '../constants';
 import { getTimeOptions } from '../utils';
 
-const FOR_EACH_ALERT = i18n.translate('alertsUIShared.actiActionsonNotifyWhen.forEachOption', {
+const FOR_EACH_ALERT = i18n.translate('responseOpsRuleForm.actiActionsonNotifyWhen.forEachOption', {
   defaultMessage: 'For each alert',
 });
-const SUMMARY_OF_ALERTS = i18n.translate('alertsUIShared.actiActionsonNotifyWhen.summaryOption', {
-  defaultMessage: 'Summary of alerts',
-});
+const SUMMARY_OF_ALERTS = i18n.translate(
+  'responseOpsRuleForm.actiActionsonNotifyWhen.summaryOption',
+  {
+    defaultMessage: 'Summary of alerts',
+  }
+);
 
 export interface NotifyWhenSelectOptions {
   isSummaryOption?: boolean;
@@ -58,7 +61,7 @@ export const NOTIFY_WHEN_OPTIONS: NotifyWhenSelectOptions[] = [
     value: {
       value: 'onActionGroupChange',
       inputDisplay: i18n.translate(
-        'alertsUIShared.ruleActionsNotifyWhen.onActionGroupChange.display',
+        'responseOpsRuleForm.ruleActionsNotifyWhen.onActionGroupChange.display',
         {
           defaultMessage: 'On status changes',
         }
@@ -69,14 +72,14 @@ export const NOTIFY_WHEN_OPTIONS: NotifyWhenSelectOptions[] = [
           <strong>
             <FormattedMessage
               defaultMessage="On status changes"
-              id="alertsUIShared.ruleActionsNotifyWhen.onActionGroupChange.label"
+              id="responseOpsRuleForm.ruleActionsNotifyWhen.onActionGroupChange.label"
             />
           </strong>
           <EuiText size="s" color="subdued">
             <p>
               <FormattedMessage
                 defaultMessage="Actions run if the alert status changes."
-                id="alertsUIShared.ruleActionsNotifyWhen.onActionGroupChange.description"
+                id="responseOpsRuleForm.ruleActionsNotifyWhen.onActionGroupChange.description"
               />
             </p>
           </EuiText>
@@ -89,23 +92,26 @@ export const NOTIFY_WHEN_OPTIONS: NotifyWhenSelectOptions[] = [
     isForEachAlertOption: true,
     value: {
       value: 'onActiveAlert',
-      inputDisplay: i18n.translate('alertsUIShared.ruleActionsNotifyWhen.onActiveAlert.display', {
-        defaultMessage: 'On check intervals',
-      }),
+      inputDisplay: i18n.translate(
+        'responseOpsRuleForm.ruleActionsNotifyWhen.onActiveAlert.display',
+        {
+          defaultMessage: 'On check intervals',
+        }
+      ),
       'data-test-subj': 'onActiveAlert',
       dropdownDisplay: (
         <>
           <strong>
             <FormattedMessage
               defaultMessage="On check intervals"
-              id="alertsUIShared.ruleActionsNotifyWhen.onActiveAlert.label"
+              id="responseOpsRuleForm.ruleActionsNotifyWhen.onActiveAlert.label"
             />
           </strong>
           <EuiText size="s" color="subdued">
             <p>
               <FormattedMessage
                 defaultMessage="Actions run if rule conditions are met."
-                id="alertsUIShared.ruleActionsNotifyWhen.onActiveAlert.description"
+                id="responseOpsRuleForm.ruleActionsNotifyWhen.onActiveAlert.description"
               />
             </p>
           </EuiText>
@@ -119,7 +125,7 @@ export const NOTIFY_WHEN_OPTIONS: NotifyWhenSelectOptions[] = [
     value: {
       value: 'onThrottleInterval',
       inputDisplay: i18n.translate(
-        'alertsUIShared.ruleActionsNotifyWhen.onThrottleInterval.display',
+        'responseOpsRuleForm.ruleActionsNotifyWhen.onThrottleInterval.display',
         {
           defaultMessage: 'On custom action intervals',
         }
@@ -130,14 +136,14 @@ export const NOTIFY_WHEN_OPTIONS: NotifyWhenSelectOptions[] = [
           <strong>
             <FormattedMessage
               defaultMessage="On custom action intervals"
-              id="alertsUIShared.ruleActionsNotifyWhen.onThrottleInterval.label"
+              id="responseOpsRuleForm.ruleActionsNotifyWhen.onThrottleInterval.label"
             />
           </strong>
           <EuiText size="s" color="subdued">
             <p>
               <FormattedMessage
                 defaultMessage="Actions run if rule conditions are met."
-                id="alertsUIShared.ruleActionsNotifyWhen.onThrottleInterval.description"
+                id="responseOpsRuleForm.ruleActionsNotifyWhen.onThrottleInterval.description"
               />
             </p>
           </EuiText>
@@ -290,7 +296,7 @@ export const RuleActionsNotifyWhen = ({
       anchorPosition="downLeft"
       aria-label={frequency.summary ? SUMMARY_OF_ALERTS : FOR_EACH_ALERT}
       aria-roledescription={i18n.translate(
-        'alertsUIShared.ruleActionsNotifyWhen.summaryOrRulePerSelectRoleDescription',
+        'responseOpsRuleForm.ruleActionsNotifyWhen.summaryOrRulePerSelectRoleDescription',
         { defaultMessage: 'Action frequency type select' }
       )}
       button={
@@ -311,7 +317,7 @@ export const RuleActionsNotifyWhen = ({
   return (
     <EuiFormRow
       fullWidth
-      label={i18n.translate('alertsUIShared.ruleActionsNotifyWhen.actionFrequencyLabel', {
+      label={i18n.translate('responseOpsRuleForm.ruleActionsNotifyWhen.actionFrequencyLabel', {
         defaultMessage: 'Action frequency',
       })}
     >
@@ -338,7 +344,7 @@ export const RuleActionsNotifyWhen = ({
                       name="throttle"
                       data-test-subj="throttleInput"
                       prepend={i18n.translate(
-                        'alertsUIShared.ruleActionsNotifyWhen.frequencyNotifyWhen.label',
+                        'responseOpsRuleForm.ruleActionsNotifyWhen.frequencyNotifyWhen.label',
                         {
                           defaultMessage: 'Run every',
                         }
@@ -380,7 +386,7 @@ export const RuleActionsNotifyWhen = ({
                   <EuiSpacer size="xs" />
                   <EuiText size="xs" color="danger">
                     {i18n.translate(
-                      'alertsUIShared.ruleActionsNotifyWhen.notifyWhenThrottleWarning',
+                      'responseOpsRuleForm.ruleActionsNotifyWhen.notifyWhenThrottleWarning',
                       {
                         defaultMessage:
                           "Custom action intervals cannot be shorter than the rule's check interval",

@@ -47,7 +47,7 @@ const loadingPrompt = (
   <EuiEmptyPrompt
     title={
       <h2>
-        {i18n.translate('alertsUIShared.components.ruleTypeModal.loadingRuleTypes', {
+        {i18n.translate('responseOpsRuleForm.components.ruleTypeModal.loadingRuleTypes', {
           defaultMessage: 'Loading rule types',
         })}
       </h2>
@@ -96,7 +96,7 @@ export const RuleTypeModal: React.FC<RuleTypeModalProps & RuleTypeModalState> = 
               <EuiPageHeaderSection style={{ width: '100%' }}>
                 <EuiTitle size="s">
                   <h1>
-                    {i18n.translate('alertsUIShared.components.ruleTypeModal.title', {
+                    {i18n.translate('responseOpsRuleForm.components.ruleTypeModal.title', {
                       defaultMessage: 'Select rule type',
                     })}
                   </h1>
@@ -105,7 +105,7 @@ export const RuleTypeModal: React.FC<RuleTypeModalProps & RuleTypeModalState> = 
                 <EuiPageHeaderSection style={{ width: isFullscreenPortrait ? '100%' : '50%' }}>
                   <EuiFieldSearch
                     placeholder={i18n.translate(
-                      'alertsUIShared.components.ruleTypeModal.searchPlaceholder',
+                      'responseOpsRuleForm.components.ruleTypeModal.searchPlaceholder',
                       {
                         defaultMessage: 'Search',
                       }

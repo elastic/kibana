@@ -103,41 +103,41 @@ export const RulePageShowRequestModal = (props: RulePageShowRequestModalProps) =
 };
 
 const SHOW_REQUEST_MODAL_EDIT = i18n.translate(
-  'alertsUIShared.ruleForm.showRequestModal.subheadingTitleEdit',
+  'responseOpsRuleForm.ruleForm.showRequestModal.subheadingTitleEdit',
   {
     defaultMessage: 'edit',
   }
 );
 
 const SHOW_REQUEST_MODAL_CREATE = i18n.translate(
-  'alertsUIShared.ruleForm.showRequestModal.subheadingTitleCreate',
+  'responseOpsRuleForm.ruleForm.showRequestModal.subheadingTitleCreate',
   {
     defaultMessage: 'create',
   }
 );
 
 const SHOW_REQUEST_MODAL_SUBTITLE = (edit: boolean) =>
-  i18n.translate('alertsUIShared.ruleForm.showRequestModal.subheadingTitle', {
+  i18n.translate('responseOpsRuleForm.ruleForm.showRequestModal.subheadingTitle', {
     defaultMessage: 'This Kibana request will {requestType} this rule.',
     values: { requestType: edit ? SHOW_REQUEST_MODAL_EDIT : SHOW_REQUEST_MODAL_CREATE },
   });
 
 const SHOW_REQUEST_MODAL_TITLE_EDIT = i18n.translate(
-  'alertsUIShared.ruleForm.showRequestModal.headerTitleEdit',
+  'responseOpsRuleForm.ruleForm.showRequestModal.headerTitleEdit',
   {
     defaultMessage: 'Edit',
   }
 );
 
 const SHOW_REQUEST_MODAL_TITLE_CREATE = i18n.translate(
-  'alertsUIShared.ruleForm.showRequestModal.headerTitleCreate',
+  'responseOpsRuleForm.ruleForm.showRequestModal.headerTitleCreate',
   {
     defaultMessage: 'Create',
   }
 );
 
 const SHOW_REQUEST_MODAL_TITLE = (edit: boolean) =>
-  i18n.translate('alertsUIShared.ruleForm.showRequestModal.headerTitle', {
+  i18n.translate('responseOpsRuleForm.ruleForm.showRequestModal.headerTitle', {
     defaultMessage: '{requestType} alerting rule request',
     values: {
       requestType: edit ? SHOW_REQUEST_MODAL_TITLE_EDIT : SHOW_REQUEST_MODAL_TITLE_CREATE,
@@ -145,7 +145,7 @@ const SHOW_REQUEST_MODAL_TITLE = (edit: boolean) =>
   });
 
 const SHOW_REQUEST_MODAL_ERROR = i18n.translate(
-  'alertsUIShared.ruleForm.showRequestModal.somethingWentWrongDescription',
+  'responseOpsRuleForm.ruleForm.showRequestModal.somethingWentWrongDescription',
   {
     defaultMessage: 'Sorry about that, something went wrong.',
   }

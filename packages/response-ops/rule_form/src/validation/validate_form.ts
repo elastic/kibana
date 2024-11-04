@@ -40,7 +40,7 @@ export const validateAction = ({ action }: { action: RuleUiAction }): RuleFormAc
     }
     if (!query.filters.length && !query.kql) {
       errors.filterQuery.push(
-        i18n.translate('alertsUIShared.ruleForm.actionsForm.requiredFilterQuery', {
+        i18n.translate('responseOpsRuleForm.ruleForm.actionsForm.requiredFilterQuery', {
           defaultMessage: 'A custom query is required.',
         })
       );

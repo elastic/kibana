@@ -57,12 +57,15 @@ import {
 } from '../translations';
 import { checkActionFormActionTypeEnabled } from '../utils/check_action_type_enabled';
 
-const SUMMARY_GROUP_TITLE = i18n.translate('alertsUIShared.ruleActionsItem.summaryGroupTitle', {
-  defaultMessage: 'Summary of alerts',
-});
+const SUMMARY_GROUP_TITLE = i18n.translate(
+  'responseOpsRuleForm.ruleActionsItem.summaryGroupTitle',
+  {
+    defaultMessage: 'Summary of alerts',
+  }
+);
 
 const RUN_WHEN_GROUP_TITLE = (groupName: string) =>
-  i18n.translate('alertsUIShared.ruleActionsItem.runWhenGroupTitle', {
+  i18n.translate('responseOpsRuleForm.ruleActionsItem.runWhenGroupTitle', {
     defaultMessage: 'Run when {groupName}',
     values: {
       groupName,
@@ -70,7 +73,7 @@ const RUN_WHEN_GROUP_TITLE = (groupName: string) =>
   });
 
 const ACTION_TITLE = (connector: ActionConnector) =>
-  i18n.translate('alertsUIShared.ruleActionsItem.existingAlertActionTypeEditTitle', {
+  i18n.translate('responseOpsRuleForm.ruleActionsItem.existingAlertActionTypeEditTitle', {
     defaultMessage: '{actionConnectorName}',
     values: {
       actionConnectorName: `${connector.name} ${
@@ -675,7 +678,7 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
             marginRight: euiTheme.size.l,
           }}
           aria-label={i18n.translate(
-            'alertsUIShared.ruleActionsSystemActionsItem.deleteActionAriaLabel',
+            'responseOpsRuleForm.ruleActionsSystemActionsItem.deleteActionAriaLabel',
             {
               defaultMessage: 'delete action',
             }

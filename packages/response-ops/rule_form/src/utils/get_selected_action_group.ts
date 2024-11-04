@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { RuleTypeModel, RuleTypeParams, RuleTypeWithDescription } from '../common';
 
 const recoveredActionGroupMessage = i18n.translate(
-  'alertsUIShared.actionForm.actionGroupRecoveredMessage',
+  'responseOpsRuleForm.actionForm.actionGroupRecoveredMessage',
   {
     defaultMessage: 'Recovered',
   }

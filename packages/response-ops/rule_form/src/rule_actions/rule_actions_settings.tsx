@@ -63,13 +63,13 @@ const getMinimumThrottleWarnings = ({
 };
 
 const ACTION_GROUP_NOT_SUPPORTED = (actionGroupName: string) =>
-  i18n.translate('alertsUIShared.ruleActionsSetting.actionGroupNotSupported', {
+  i18n.translate('responseOpsRuleForm.ruleActionsSetting.actionGroupNotSupported', {
     defaultMessage: '{actionGroupName} (Not Currently Supported)',
     values: { actionGroupName },
   });
 
 const ACTION_GROUP_RUN_WHEN = i18n.translate(
-  'alertsUIShared.ruleActionsSetting.actionGroupRunWhen',
+  'responseOpsRuleForm.ruleActionsSetting.actionGroupRunWhen',
   {
     defaultMessage: 'Run when',
   }

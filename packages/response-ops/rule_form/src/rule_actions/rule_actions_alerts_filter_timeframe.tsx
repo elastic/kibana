@@ -159,7 +159,7 @@ export const RuleActionsAlertsFilterTimeframe: React.FC<RuleActionsAlertsFilterT
     <>
       <EuiSwitch
         label={i18n.translate(
-          'alertsUIShared.ruleForm.ruleActionsAlertsFilterTimeframeToggleLabel',
+          'responseOpsRuleForm.ruleForm.ruleActionsAlertsFilterTimeframeToggleLabel',
           {
             defaultMessage: 'If alert is generated during timeframe',
           }
@@ -175,7 +175,7 @@ export const RuleActionsAlertsFilterTimeframe: React.FC<RuleActionsAlertsFilterT
             <EuiButtonGroup
               isFullWidth
               legend={i18n.translate(
-                'alertsUIShared.ruleForm.ruleActionsAlertsFilterTimeframeWeekdays',
+                'responseOpsRuleForm.ruleForm.ruleActionsAlertsFilterTimeframeWeekdays',
                 {
                   defaultMessage: 'Days of week',
                 }
@@ -219,7 +219,7 @@ export const RuleActionsAlertsFilterTimeframe: React.FC<RuleActionsAlertsFilterT
             <EuiFlexItem grow={1}>
               <EuiComboBox
                 prepend={i18n.translate(
-                  'alertsUIShared.ruleForm.ruleActionsAlertsFilterTimeframeTimezoneLabel',
+                  'responseOpsRuleForm.ruleForm.ruleActionsAlertsFilterTimeframeTimezoneLabel',
                   { defaultMessage: 'Timezone' }
                 )}
                 singleSelection={{ asPlainText: true }}

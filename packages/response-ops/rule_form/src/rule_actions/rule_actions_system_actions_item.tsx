@@ -184,7 +184,7 @@ export const RuleActionsSystemActionsItem = (props: RuleActionsSystemActionsItem
             marginRight: euiTheme.size.l,
           }}
           aria-label={i18n.translate(
-            'alertsUIShared.ruleActionsSystemActionsItem.deleteActionAriaLabel',
+            'responseOpsRuleForm.ruleActionsSystemActionsItem.deleteActionAriaLabel',
             {
               defaultMessage: 'delete action',
             }
