@@ -23,6 +23,7 @@ import { PanelManagementApi } from './panel_management';
 import { getStateManagementForInlineEditing } from './state_management';
 
 export function prepareInlineEditPanel(
+  initialState: LensRuntimeState | undefined,
   getState: GetStateType,
   updateState: (newState: Pick<LensRuntimeState, 'attributes' | 'savedObjectId'>) => void,
   { dataLoading$ }: Pick<LensInternalApi, 'dataLoading$'>,
@@ -120,7 +121,7 @@ export function prepareInlineEditPanel(
         canEditTextBasedQuery={isTextBasedLanguage(currentState)}
         isNewPanel={panelManagementApi.isNewPanel()}
         onCancel={() => {
-          panelManagementApi.onStopEditing(true, undefined);
+          panelManagementApi.onStopEditing(true, initialState);
           onCancel?.();
         }}
         onApply={(newAttributes) => {
