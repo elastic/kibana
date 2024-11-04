@@ -12,6 +12,8 @@ import { parseThemeTags } from './theme_tags';
 it('returns default tags when passed undefined', () => {
   expect(parseThemeTags()).toMatchInlineSnapshot(`
     Array [
+      "borealisdark",
+      "borealislight",
       "v8dark",
       "v8light",
     ]
@@ -21,6 +23,8 @@ it('returns default tags when passed undefined', () => {
 it('returns all tags when passed *', () => {
   expect(parseThemeTags('*')).toMatchInlineSnapshot(`
     Array [
+      "borealisdark",
+      "borealislight",
       "v8dark",
       "v8light",
     ]
@@ -55,13 +59,13 @@ it('returns specific tags when passed an array', () => {
 
 it('throws when an invalid tag is in the array', () => {
   expect(() => parseThemeTags(['v8light', 'v7light'])).toThrowErrorMatchingInlineSnapshot(
-    `"Invalid theme tags [v7light], options: [v8dark, v8light]"`
+    `"Invalid theme tags [v7light], options: [borealisdark, borealislight, v8dark, v8light]"`
   );
 });
 
 it('throws when an invalid tags in comma separated list', () => {
   expect(() => parseThemeTags('v8light ,v7light')).toThrowErrorMatchingInlineSnapshot(
-    `"Invalid theme tags [v7light], options: [v8dark, v8light]"`
+    `"Invalid theme tags [v7light], options: [borealisdark, borealislight, v8dark, v8light]"`
   );
 });
 
