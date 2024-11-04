@@ -131,7 +131,7 @@ export const RuleTypeList: React.FC<RuleTypeListProps> = ({
               onClick={onClickAll}
               isSelected={!selectedProducer}
             >
-              {i18n.translate('alertsUIShared.components.ruleTypeModal.allRuleTypes', {
+              {i18n.translate('responseOpsRuleForm.components.ruleTypeModal.allRuleTypes', {
                 defaultMessage: 'All',
               })}
             </EuiFacetButton>
@@ -152,16 +152,22 @@ export const RuleTypeList: React.FC<RuleTypeListProps> = ({
             iconType="search"
             title={
               <h2>
-                {i18n.translate('alertsUIShared.components.ruleTypeModal.noRuleTypesErrorTitle', {
-                  defaultMessage: 'No rule types found',
-                })}
+                {i18n.translate(
+                  'responseOpsRuleForm.components.ruleTypeModal.noRuleTypesErrorTitle',
+                  {
+                    defaultMessage: 'No rule types found',
+                  }
+                )}
               </h2>
             }
             body={
               <p>
-                {i18n.translate('alertsUIShared.components.ruleTypeModal.noRuleTypesErrorBody', {
-                  defaultMessage: 'Try a different search or change your filter settings',
-                })}
+                {i18n.translate(
+                  'responseOpsRuleForm.components.ruleTypeModal.noRuleTypesErrorBody',
+                  {
+                    defaultMessage: 'Try a different search or change your filter settings',
+                  }
+                )}
                 .
               </p>
             }
