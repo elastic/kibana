@@ -22,7 +22,7 @@ describe('getExceptionListFilter', () => {
       savedObjectTypes: ['exception-list-agnostic'],
     });
     expect(filter).toEqual(
-      '(exception-list-agnostic.attributes.list_type: list) AND exception-list-agnostic.attributes.name: "Sample Endpoint Exception List"'
+      '(exception-list-agnostic.attributes.list_type: list) AND (exception-list-agnostic.attributes.name: "Sample Endpoint Exception List")'
     );
   });
 
@@ -40,7 +40,7 @@ describe('getExceptionListFilter', () => {
       savedObjectTypes: ['exception-list'],
     });
     expect(filter).toEqual(
-      '(exception-list.attributes.list_type: list) AND exception-list.attributes.name: "Sample Endpoint Exception List"'
+      '(exception-list.attributes.list_type: list) AND (exception-list.attributes.name: "Sample Endpoint Exception List")'
     );
   });
 
@@ -60,7 +60,7 @@ describe('getExceptionListFilter', () => {
       savedObjectTypes: ['exception-list-agnostic', 'exception-list'],
     });
     expect(filter).toEqual(
-      '(exception-list-agnostic.attributes.list_type: list OR exception-list.attributes.list_type: list) AND exception-list-agnostic.attributes.name: "Sample Endpoint Exception List"'
+      '(exception-list-agnostic.attributes.list_type: list OR exception-list.attributes.list_type: list) AND (exception-list-agnostic.attributes.name: "Sample Endpoint Exception List")'
     );
   });
 });
