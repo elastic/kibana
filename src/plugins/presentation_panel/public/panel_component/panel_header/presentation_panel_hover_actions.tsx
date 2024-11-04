@@ -440,18 +440,20 @@ export const PresentationPanelHoverActions = ({
   );
 
   const dragHandle = (
-    <EuiIcon
-      type="move"
-      color="text"
-      className={`${viewMode === 'edit' ? 'embPanel--dragHandle' : ''}`}
-      aria-label={i18n.translate('presentationPanel.dragHandle', {
-        defaultMessage: 'Move panel',
-      })}
-      data-test-subj="embeddablePanelDragHandle"
-      css={css`
-        margin: ${euiThemeVars.euiSizeXS};
-      `}
-    />
+    <div ref={dragHandleRef}>
+      <EuiIcon
+        type="move"
+        color="text"
+        className={`${viewMode === 'edit' ? 'embPanel--dragHandle' : ''}`}
+        aria-label={i18n.translate('presentationPanel.dragHandle', {
+          defaultMessage: 'Move panel',
+        })}
+        data-test-subj="embeddablePanelDragHandle"
+        css={css`
+          margin: ${euiThemeVars.euiSizeXS};
+        `}
+      />
+    </div>
   );
 
   return (
@@ -477,7 +479,7 @@ export const PresentationPanelHoverActions = ({
         >
           {viewMode === 'edit' && !combineHoverActions ? (
             <div
-              ref={dragHandleRef}
+              // ref={dragHandleRef}
               data-test-subj="embPanel__hoverActions__left"
               className={classNames(
                 'embPanel__hoverActions',

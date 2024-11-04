@@ -41,23 +41,32 @@ export const GridPanel = forwardRef<
 
     const { euiTheme } = useEuiTheme();
 
+    const startInteraction = useCallback(
+      (
+        type: PanelInteractionEvent['type'],
+        e: MouseEvent | React.MouseEvent<HTMLDivElement, MouseEvent>
+      ) => {
+        interactionStart(type, e);
+        /**
+         * By adding the "drop" event listener to the document rather than the drag/resize event handler,
+         * we prevent the element from getting "stuck" in an interaction; however, we only attach this event
+         * listener **when the drag/resize event starts**, and it only executes once, which means we don't
+         * have to remove the `mouseup` event listener
+         */
+        document.addEventListener('mouseup', (dropEvent) => interactionStart('drop', dropEvent), {
+          once: true,
+        });
+      },
+      [interactionStart]
+    );
+
     const setDragHandles = useCallback(
       (dragHandles: Array<HTMLElement | null>) => {
         setDragHandleCount(dragHandles.length);
-        const onMouseUp = (e: MouseEvent) => {
-          interactionStart('drop', e);
-        };
-        const onMouseDown = (e: MouseEvent) => {
-          interactionStart('drag', e);
-          /**
-           * By adding the "drop" event listener to the document rather than the drag handler, we
-           * prevent the element from getting "stuck" in drag mode; however, we only attach this
-           * event listener **when the drag event starts**, and it only executes once, which means
-           * we don't have to remove the `mouseup` event listener
-           */
-          document.addEventListener('mouseup', onMouseUp, { once: true });
-        };
 
+        const onMouseDown = (e: MouseEvent) => {
+          startInteraction('drag', e);
+        };
         for (const handle of dragHandles) {
           if (handle === null) return;
           handle.addEventListener('mousedown', onMouseDown);
@@ -70,7 +79,7 @@ export const GridPanel = forwardRef<
           }
         };
       },
-      [interactionStart]
+      [startInteraction]
     );
 
     useEffect(() => {
@@ -212,8 +221,7 @@ export const GridPanel = forwardRef<
                   opacity: 1 !important;
                 }
               `}
-              onMouseDown={(e) => interactionStart('drag', e)}
-              onMouseUp={(e) => interactionStart('drop', e)}
+              onMouseDown={(e) => startInteraction('drag', e)}
             >
               <EuiIcon type="grabOmnidirectional" />
             </div>
@@ -221,8 +229,7 @@ export const GridPanel = forwardRef<
           {/* Resize handle */}
           <div
             className="resizeHandle"
-            onMouseDown={(e) => interactionStart('resize', e)}
-            onMouseUp={(e) => interactionStart('drop', e)}
+            onMouseDown={(e) => startInteraction('resize', e)}
             css={css`
               right: 0;
               bottom: 0;
