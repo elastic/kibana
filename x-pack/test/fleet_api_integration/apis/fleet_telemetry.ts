@@ -137,7 +137,7 @@ export default function (providerContext: FtrProviderContext) {
         .set('kbn-xsrf', 'xxxx')
         .expect(200);
 
-      if (apiResponse.list.length === expectedAgentCount) {
+      if (apiResponse.items.length === expectedAgentCount) {
         return apiResponse;
       }
 

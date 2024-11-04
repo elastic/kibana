@@ -372,3 +372,10 @@ export const MISSING_INDEX_TOOLTIP_CONTENT = i18n.translate(
       'The index assigned to this knowledge base entry is unavailable. Check the permissions on the configured index, or that the index has not been deleted. You can update the index to be used for this knowledge entry, or delete the entry entirely.',
   }
 );
+
+export const SECURITY_LABS_NOT_FULLY_LOADED = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.securityLabsNotFullyLoadedTooltipContent',
+  {
+    defaultMessage: 'Security Labs content is not fully loaded. Click to reload.',
+  }
+);
