@@ -283,6 +283,33 @@ export class LensVisService {
       }
     }
 
+    if (externalVisContext && queryParams.isPlainRecord) {
+      // externalVisContext can be based on an unfamiliar suggestion (not a part of allSuggestions), but it was saved before, so we try to restore it too
+      const derivedSuggestion = deriveLensSuggestionFromLensAttributes({
+        externalVisContext,
+        queryParams,
+      });
+
+      if (derivedSuggestion) {
+        availableSuggestionsWithType.push({
+          suggestion: derivedSuggestion,
+          type: UnifiedHistogramSuggestionType.lensSuggestion,
+        });
+      }
+    }
+
+    if (externalVisContext) {
+      // try to find a suggestion that is compatible with the external vis context
+      const matchingItem = availableSuggestionsWithType.find((item) =>
+        isSuggestionShapeAndVisContextCompatible(item.suggestion, externalVisContext)
+      );
+
+      if (matchingItem) {
+        currentSuggestion = matchingItem.suggestion;
+        type = matchingItem.type;
+      }
+    }
+
     if (!currentSuggestion && availableSuggestionsWithType.length) {
       // otherwise pick any first available suggestion
       currentSuggestion = availableSuggestionsWithType[0].suggestion;
