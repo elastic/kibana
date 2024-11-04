@@ -8,22 +8,25 @@
  */
 
 import { defaultConfig } from './serverless.base.config';
+import { ScoutLoaderConfig } from '../../types';
 
-export const serversConfig = {
+export const servers: ScoutLoaderConfig = {
   ...defaultConfig,
   esTestCluster: {
     ...defaultConfig.esTestCluster,
     serverArgs: [
       ...defaultConfig.esTestCluster.serverArgs,
-      'xpack.security.authc.api_key.cache.max_keys=70000',
+      'xpack.apm_data.enabled=true',
+      // for ML, data frame analytics are not part of this project type
+      'xpack.ml.dfa.enabled=false',
     ],
   },
   kbnTestServer: {
     serverArgs: [
       ...defaultConfig.kbnTestServer.serverArgs,
-      '--serverless=es',
+      '--serverless=oblt',
       '--coreApp.allowDynamicConfigOverrides=true',
-      `--xpack.task_manager.unsafe.exclude_task_types=${JSON.stringify(['Fleet-Metrics-Task'])}`,
+      '--xpack.uptime.service.manifestUrl=mockDevUrl',
     ],
   },
 };

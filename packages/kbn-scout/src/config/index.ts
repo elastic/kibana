@@ -7,5 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-require('../src/setup_node_env');
-require('@kbn/scout').startServersCli();
+export { loadConfig } from './loader/config_load';
+export { getConfigFilePath } from './get_config_file';

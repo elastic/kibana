@@ -13,8 +13,8 @@ import Path from 'path';
 import { cloneDeepWith, get, has, toPath } from 'lodash';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { schema } from './schema';
-import { formatCurrentDate, getProjectType } from './helpers';
-import { TestServersConfig } from './types';
+import { formatCurrentDate, getProjectType } from '../utils';
+import { ScoutServerConfig } from '../types';
 
 const $values = Symbol('values');
 
@@ -104,8 +104,8 @@ export class Config {
     });
   }
 
-  public getTestServersConfig() {
-    const config: TestServersConfig = {
+  public getTestServersConfig(): ScoutServerConfig {
+    return {
       serverless: this.get('serverless'),
       projectType: this.get('serverless')
         ? getProjectType(this.get('kbnTestServer.serverArgs'))
@@ -134,7 +134,5 @@ export class Config {
         config: this.getAll(),
       },
     };
-
-    return config;
   }
 }

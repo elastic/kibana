@@ -7,25 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { ScoutLoaderConfig } from '../../types';
 import { defaultConfig } from './serverless.base.config';
 
-export const serversConfig = {
+export const servers: ScoutLoaderConfig = {
   ...defaultConfig,
   esTestCluster: {
     ...defaultConfig.esTestCluster,
-    serverArgs: [
-      ...defaultConfig.esTestCluster.serverArgs,
-      'xpack.apm_data.enabled=true',
-      // for ML, data frame analytics are not part of this project type
-      'xpack.ml.dfa.enabled=false',
-    ],
+    serverArgs: [...defaultConfig.esTestCluster.serverArgs],
   },
   kbnTestServer: {
     serverArgs: [
       ...defaultConfig.kbnTestServer.serverArgs,
-      '--serverless=oblt',
+      '--serverless=es',
       '--coreApp.allowDynamicConfigOverrides=true',
-      '--xpack.uptime.service.manifestUrl=mockDevUrl',
     ],
   },
 };

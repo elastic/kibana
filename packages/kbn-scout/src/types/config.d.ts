@@ -7,19 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { defaultConfig } from './serverless.base.config';
+import { UrlParts } from '@kbn/test';
 
-export const serversConfig = {
-  ...defaultConfig,
+export interface ScoutLoaderConfig {
+  serverless?: boolean;
+  servers: {
+    kibana: UrlParts;
+    elasticsearch: UrlParts;
+    fleet?: UrlParts;
+  };
+  dockerServers: any;
   esTestCluster: {
-    ...defaultConfig.esTestCluster,
-    serverArgs: [...defaultConfig.esTestCluster.serverArgs],
-  },
+    from: string;
+    license?: string;
+    files: string[];
+    serverArgs: string[];
+    ssl: boolean;
+  };
   kbnTestServer: {
-    serverArgs: [
-      ...defaultConfig.kbnTestServer.serverArgs,
-      '--serverless=es',
-      '--coreApp.allowDynamicConfigOverrides=true',
-    ],
-  },
-};
+    env?: any;
+    buildArgs?: string[];
+    sourceArgs?: string[];
+    serverArgs: string[];
+    useDedicatedTastRunner?: boolean;
+  };
+}

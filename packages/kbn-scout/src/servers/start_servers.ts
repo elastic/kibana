@@ -16,25 +16,22 @@ import { getTimeReporter } from '@kbn/ci-stats-reporter';
 import { runElasticsearch } from './run_elasticsearch';
 import { runKibanaServer } from './run_kibana_server';
 import { StartServerOptions } from './flags';
-import { loadConfig, getConfigFilePath } from '../config/config_load';
-import { saveTestServersConfigOnDisk } from '../config/helpers';
-import { SupportedConfigurations } from '../config/types';
+import { loadConfig, getConfigFilePath } from '../config';
+import { saveTestServersConfigOnDisk } from '../utils';
 
 export async function startServers(log: ToolingLog, options: StartServerOptions) {
   const runStartTime = Date.now();
   const reportTime = getTimeReporter(log, 'scripts/functional_tests_server');
-  const configOption = options.config as SupportedConfigurations;
 
   await withProcRunner(log, async (procs) => {
     // get path to one of the predefined config files
-    const configPath = getConfigFilePath(options.config);
-    // load config this is compatible with kbn-test input format
+    const configPath = getConfigFilePath(options.mode);
+    // load config that is compatible with kbn-test input format
     const config = await loadConfig(configPath);
     // construct config for Playwright Test
-    const testServersConfig = config.getTestServersConfig();
+    const scoutServerConfig = config.getTestServersConfig();
     // save test config to the file
-    const savedPath = saveTestServersConfigOnDisk(testServersConfig);
-    log.info(`ui_tests: test configuration was saved to ${savedPath}`);
+    saveTestServersConfigOnDisk(scoutServerConfig, log);
 
     const shutdownEs = await runElasticsearch({
       config,
@@ -68,10 +65,6 @@ export async function startServers(log: ToolingLog, options: StartServerOptions)
     // success message so that it doesn't get buried
     await silence(log, 5000);
 
-    // const installDirFlag = options.installDir ? ` --kibana-install-dir=${options.installDir}` : '';
-    // const rel = Path.relative(process.cwd(), config.module.path);
-    // const pathsMessage = ` --${config.module.type}=${rel}`;
-
     log.success(
       '\n\n' +
         dedent`
@@ -94,12 +87,3 @@ async function silence(log: ToolingLog, milliseconds: number) {
     )
   );
 }
-
-// const writeGeneratedFile = (fileName: string, contents: string) => {
-//   const genFileName = path.join(PLUGIN_DIR, fileName);
-//   try {
-//     fs.writeFileSync(genFileName, contents);
-//   } catch (err) {
-//     logError(`error writing file: ${genFileName}: ${err.message}`);
-//   }
-// };

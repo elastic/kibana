@@ -8,28 +8,19 @@
  */
 
 import path from 'path';
-import { Config } from './config';
-import { SupportedConfigurations } from './types';
+import { Config } from '../config';
 
 export const loadConfig = async (configPath: string) => {
   try {
     const absolutePath = path.resolve(configPath);
     const configModule = await import(absolutePath);
 
-    if (configModule.serversConfig) {
-      return new Config(configModule.serversConfig);
+    if (configModule.servers) {
+      return new Config(configModule.servers);
     } else {
-      throw new Error('No `serversConfig` found in the specified config file');
+      throw new Error(`No 'servers' found in the specified config file: ${absolutePath}`);
     }
   } catch (error) {
     process.exit(1);
-  }
-};
-
-export const getConfigFilePath = (config: SupportedConfigurations) => {
-  if (config === 'stateful') {
-    return path.join(__dirname, 'stateful', 'stateful.config.ts');
-  } else {
-    return path.join(__dirname, 'serverless', `${config.split('=')[1]}.serverless.config.ts`);
   }
 };

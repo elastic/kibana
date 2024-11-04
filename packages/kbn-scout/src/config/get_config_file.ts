@@ -7,5 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-require('../src/setup_node_env');
-require('@kbn/scout').startServersCli();
+import path from 'path';
+import { CliSupportedServerModes } from '../types';
+
+export const getConfigFilePath = (config: CliSupportedServerModes) => {
+  if (config === 'stateful') {
+    return path.join(__dirname, 'stateful', 'stateful.config.ts');
+  } else {
+    return path.join(__dirname, 'serverless', `${config.split('=')[1]}.serverless.config.ts`);
+  }
+};

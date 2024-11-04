@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { test as base } from '@playwright/test';
+import { PlaywrightTestOptions, test as base } from '@playwright/test';
 import * as Url from 'url';
 import Path from 'path';
 import Fs from 'fs';
-import { EsArchiver } from '@kbn/es-archiver';
+import { EsArchiver, LoadActionPerfOptions } from '@kbn/es-archiver';
 import { KbnClient, SamlSessionManager, createEsClientForTesting } from '@kbn/test';
 import { ToolingLog } from '@kbn/tooling-log';
 import { Client } from '@elastic/elasticsearch';
@@ -22,11 +22,25 @@ import {
 } from '@kbn/es';
 import { Role } from '@kbn/test/src/auth/types';
 import { KibanaUrl } from './kibana_url';
+import { IndexStats } from '@kbn/es-archiver/src/lib/stats';
+
+const serviceLoadedMsg = (name: string) => `scout service loaded: ${name}`;
+
+interface KbtServersConfig {
+  serversConfigDir: string;
+}
 
 interface LoginFixture {
   loginAsViewer: () => Promise<void>;
   loginAsAdmin: () => Promise<void>;
   loginAsPrivilegedUser: () => Promise<void>;
+}
+
+interface EsArchiverFixture {
+  loadIfNeeded: (
+    name: string,
+    performance?: LoadActionPerfOptions | undefined
+  ) => Promise<Record<string, IndexStats>>;
 }
 
 const projectDefaultRoles = new Map<string, Role>([
@@ -51,13 +65,14 @@ export interface ServersConfig {
 }
 
 // Extend the base test with custom fixtures
-interface KbtFixtures {
+interface ScoutFixtures {
+  serversConfigDir: string;
   log: ToolingLog;
   serversConfig: ServersConfig;
   kbnUrl: KibanaUrl;
   esClient: Client;
   kbnClient: KbnClient;
-  esArchiver: EsArchiver;
+  esArchiver: EsArchiverFixture;
   samlAuth: SamlSessionManager;
   browserAuth: LoginFixture;
 }
@@ -71,7 +86,7 @@ let kbnClientInstance: KbnClient | null = null;
 let esArchiverInstance: EsArchiver | null = null;
 let samlSessionManagerInstance: SamlSessionManager | null = null;
 
-export const test = base.extend<KbtFixtures>({
+export const test = base.extend<ScoutFixtures>({
   log: ({}, use) => {
     if (!logInstance) {
       logInstance = new ToolingLog({ level: 'verbose', writeTo: process.stdout });
@@ -82,7 +97,9 @@ export const test = base.extend<KbtFixtures>({
 
   serversConfig: ({ log }, use, testInfo) => {
     if (!serversConfigInstance) {
-      const serversConfigDir = testInfo.project.use.serversConfigDir as string;
+      const projectUse = testInfo.project.use as PlaywrightTestOptions & KbtServersConfig;
+      const serversConfigDir = projectUse.serversConfigDir;
+
       if (!serversConfigDir || !Fs.existsSync(serversConfigDir)) {
         throw new Error(`Directory with servers configuration is missing`);
       }
@@ -98,7 +115,7 @@ export const test = base.extend<KbtFixtures>({
   kbnUrl: ({ serversConfig, log }, use) => {
     if (!kbnUrlInstance) {
       kbnUrlInstance = new KibanaUrl(new URL(serversConfig.hosts.kibana));
-      log.info('service loaded: kbnUrl');
+      log.info(serviceLoadedMsg('kbnUrl'));
     }
 
     use(kbnUrlInstance);
@@ -115,7 +132,7 @@ export const test = base.extend<KbtFixtures>({
           password,
         },
       });
-      log.info('service loaded: esClient');
+      log.info(serviceLoadedMsg('esClient'));
     }
 
     use(esClientInstance);
@@ -131,7 +148,7 @@ export const test = base.extend<KbtFixtures>({
         log,
         url: kibanaUrl.toString(),
       });
-      log.info('service loaded: kbnClient');
+      log.info(serviceLoadedMsg('kbnClient'));
     }
 
     use(kbnClientInstance);
@@ -145,10 +162,14 @@ export const test = base.extend<KbtFixtures>({
         kbnClient,
         baseDir: REPO_ROOT,
       });
-      log.info('service loaded: esArchiver');
+      log.info(serviceLoadedMsg('esArchiver'));
     }
 
-    use(esArchiverInstance);
+    // to speedup test execution we only allow to ingest the data indexes and only if index doesn't exist
+    const loadIfNeeded = async (name: string, performance?: LoadActionPerfOptions | undefined) =>
+      esArchiverInstance!.loadIfNeeded(name, performance);
+
+    use({ loadIfNeeded });
   },
 
   samlAuth: ({ log, serversConfig }, use) => {
@@ -166,7 +187,6 @@ export const test = base.extend<KbtFixtures>({
       ) as Record<string, unknown>;
       const supportedRoles = Object.keys(supportedRoleDescriptors);
 
-      log.info('Creating new SamlSessionManager instance');
       samlSessionManagerInstance = new SamlSessionManager({
         hostOptions: {
           protocol: kibanaUrl.protocol.replace(':', '') as 'http' | 'https',
@@ -183,7 +203,7 @@ export const test = base.extend<KbtFixtures>({
         },
         cloudUsersFilePath: serversConfig.cloudUsersFilePath,
       });
-      log.info('service loaded: samlAuth');
+      log.info(serviceLoadedMsg('samlAuth'));
     }
 
     use(samlSessionManagerInstance);

@@ -1,6 +1,6 @@
 {
   "type": "shared-common",
-  "id": "@kbn/ui-tests",
+  "id": "@kbn/scout",
   "owner": "@elastic/appex-qa",
   "devOnly": true
 }

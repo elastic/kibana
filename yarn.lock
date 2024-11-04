@@ -6281,6 +6281,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/scout@link:packages/kbn-scout":
+  version "0.0.0"
+  uid ""
+
 "@kbn/screenshot-mode-example-plugin@link:examples/screenshot_mode_example":
   version "0.0.0"
   uid ""
@@ -7098,10 +7102,6 @@
   uid ""
 
 "@kbn/ui-shared-deps-src@link:packages/kbn-ui-shared-deps-src":
-  version "0.0.0"
-  uid ""
-
-"@kbn/ui-tests@link:packages/kbn-ui-tests":
   version "0.0.0"
   uid ""
 

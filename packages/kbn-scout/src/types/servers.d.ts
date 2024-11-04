@@ -8,33 +8,8 @@
  */
 
 import { ServerlessProjectType } from '@kbn/es';
-import { UrlParts } from '@kbn/test';
 
-export interface ConfigType {
-  serverless: boolean;
-  servers: {
-    kibana: UrlParts;
-    elasticsearch: UrlParts;
-    fleet?: UrlParts;
-  };
-  dockerServers: any;
-  esTestCluster: {
-    from: string;
-    license?: string;
-    files: string[];
-    serverArgs: string[];
-    ssl: boolean;
-  };
-  kbnTestServer: {
-    env: any;
-    buildArgs: string[];
-    sourceArgs: string[];
-    serverArgs: string[];
-    useDedicatedTastRunner?: boolean;
-  };
-}
-
-export interface TestServersConfig {
+export interface ScoutServerConfig {
   serverless: boolean;
   projectType?: ServerlessProjectType;
   isCloud: boolean;
@@ -49,9 +24,3 @@ export interface TestServersConfig {
   };
   metadata?: any;
 }
-
-export type SupportedConfigurations =
-  | 'stateful'
-  | 'serverless=es'
-  | 'serverless=oblt'
-  | 'serverless=security';

@@ -21,8 +21,7 @@ test.describe('Discover app - value suggestions', () => {
     });
   });
 
-  test.afterAll(async ({ esArchiver, kbnClient }) => {
-    await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
+  test.afterAll(async ({ kbnClient }) => {
     await kbnClient.uiSettings.unset('doc_table:legacy');
     await kbnClient.savedObjects.cleanStandardList();
   });

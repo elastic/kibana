@@ -9,7 +9,7 @@ import { defineConfig, devices } from '@playwright/test';
 import * as Path from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
 
-interface KbtServersConfig {
+interface ScoutConfig {
   serversConfigDir: string;
 }
 
@@ -22,7 +22,7 @@ interface KbtServersConfig {
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
-export default defineConfig<KbtServersConfig>({
+export default defineConfig<ScoutConfig>({
   testDir: './tests',
   /* Run tests in files in parallel */
   fullyParallel: false,
@@ -39,7 +39,7 @@ export default defineConfig<KbtServersConfig>({
   ],
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
-    serversConfigDir: Path.resolve(REPO_ROOT, '.test_servers'),
+    serversConfigDir: Path.resolve(REPO_ROOT, '.scout', 'servers'),
     /* Base URL to use in actions like `await page.goto('/')`. */
     // baseURL: 'http://127.0.0.1:3000',
 
