@@ -131,6 +131,7 @@ Cases::
 Dashboards and visualizations::
 * Adds the ability to star your favorite dashboards and quickly find them ({kibana-pull}189285[#189285]).
 * Adds a chart showing usage statistics to the dashboard details ({kibana-pull}187993[#187993]).
+* Adds metric styling options in *Lens* ({kibana-pull}186929[#186929]).
 * Adds support for coloring table cells by terms with color mappings assignments. This is supported for both Rows and Metric dimensions ({kibana-pull}189895[#189895]).
 Data ingestion and Fleet::
 * Support content packages in UI ({kibana-pull}195831[#195831]).
@@ -212,7 +213,6 @@ Dashboards and visualizations::
 * Syncs the cursor for time series charts powered by ES|QL ({kibana-pull}192837[#192837]).
 * Gauge and metric Lens visualizations are no longer experimental ({kibana-pull}192359[#192359]).
 * Sets gauge default palette to "temperature" in *Lens* ({kibana-pull}191853[#191853]).
-* Improves metric styling options in *Lens* ({kibana-pull}186929[#186929]).
 * Supports fuzzy search on field pickers and field lists in *Lens* ({kibana-pull}186894[#186894]).
 Data ingestion and Fleet::
 * Update max supported package version ({kibana-pull}196551[#196551]).
