@@ -39,6 +39,16 @@ describe('getAllActionRoute', () => {
     const [config, handler] = router.get.mock.calls[0];
 
     expect(config.path).toMatchInlineSnapshot(`"/api/actions"`);
+    expect(config.options?.deprecated).toEqual({
+      documentationUrl:
+        'https://www.elastic.co/docs/api/doc/kibana/v8/operation/operation-legacygetconnectors',
+      severity: 'warning',
+      reason: {
+        type: 'migrate',
+        newApiPath: `/api/actions/connectors`,
+        newApiMethod: 'GET',
+      },
+    });
 
     const actionsClient = actionsClientMock.create();
     actionsClient.getAll.mockResolvedValueOnce([]);
