@@ -10,9 +10,9 @@ import { IndicesGetDataStreamResponse } from '@elastic/elasticsearch/lib/api/typ
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import { ReplaySubject, Subject } from 'rxjs';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { AuthenticatedUser } from '@kbn/core-security-common';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { conversationsDataClientMock } from '../__mocks__/data_clients.mock';
+import { authenticatedUser } from '../__mocks__/user';
 import { AIAssistantConversationsDataClient } from '../ai_assistant_data_clients/conversations';
 import { AIAssistantService, AIAssistantServiceOpts } from '.';
 import { retryUntil } from './create_resource_installation_helper.test';
@@ -93,13 +93,7 @@ const getSpaceResourcesInitialized = async (
 
 const conversationsDataClient = conversationsDataClientMock.create();
 
-const mockUser1 = {
-  username: 'my_username',
-  authentication_realm: {
-    type: 'my_realm_type',
-    name: 'my_realm_name',
-  },
-} as AuthenticatedUser;
+const mockUser1 = authenticatedUser;
 
 describe('AI Assistant Service', () => {
   let pluginStop$: Subject<void>;

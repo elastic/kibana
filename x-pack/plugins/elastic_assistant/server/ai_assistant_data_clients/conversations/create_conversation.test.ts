@@ -11,20 +11,14 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { estypes } from '@elastic/elasticsearch';
 import { EsConversationSchema } from './types';
 import { getConversation } from './get_conversation';
+import { authenticatedUser } from '../../__mocks__/user';
 import { ConversationCreateProps, ConversationResponse } from '@kbn/elastic-assistant-common';
-import { AuthenticatedUser } from '@kbn/core-security-common';
 
 jest.mock('./get_conversation', () => ({
   getConversation: jest.fn(),
 }));
 
-const mockUser1 = {
-  username: 'my_username',
-  authentication_realm: {
-    type: 'my_realm_type',
-    name: 'my_realm_name',
-  },
-} as AuthenticatedUser;
+const mockUser1 = authenticatedUser;
 
 export const getCreateConversationMock = (): ConversationCreateProps => ({
   title: 'test',

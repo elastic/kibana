@@ -14,7 +14,7 @@ import {
   getEmptyFindResult,
   getFindAnonymizationFieldsResultWithSingleHit,
 } from '../../__mocks__/response';
-import { AuthenticatedUser } from '@kbn/core-security-common';
+import { authenticatedUser } from '../../__mocks__/user';
 import { bulkActionAnonymizationFieldsRoute } from './bulk_actions_route';
 import {
   getAnonymizationFieldMock,
@@ -28,14 +28,7 @@ describe('Perform bulk action route', () => {
   let { clients, context } = requestContextMock.createTools();
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   const mockAnonymizationField = getAnonymizationFieldMock(getUpdateAnonymizationFieldSchemaMock());
-  const mockUser1 = {
-    profile_uid: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
-    username: 'my_username',
-    authentication_realm: {
-      type: 'my_realm_type',
-      name: 'my_realm_name',
-    },
-  } as AuthenticatedUser;
+  const mockUser1 = authenticatedUser;
 
   beforeEach(async () => {
     server = serverMock.create();

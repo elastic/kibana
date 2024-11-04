@@ -10,12 +10,12 @@ import {
   savedObjectsRepositoryMock,
 } from '@kbn/core/server/mocks';
 import { AIAssistantKnowledgeBaseDataClient, KnowledgeBaseDataClientParams } from '.';
-import { AuthenticatedUser } from '@kbn/core-security-common';
 import {
   getCreateKnowledgeBaseEntrySchemaMock,
   getKnowledgeBaseEntryMock,
   getKnowledgeBaseEntrySearchEsMock,
 } from '../../__mocks__/knowledge_base_entry_schema.mock';
+import { authenticatedUser } from '../../__mocks__/user';
 import { IndexPatternsFetcher } from '@kbn/data-plugin/server';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import { mlPluginMock } from '@kbn/ml-plugin/public/mocks';
@@ -32,13 +32,7 @@ const date = '2023-03-28T22:27:28.159Z';
 let logger: ReturnType<(typeof loggingSystemMock)['createLogger']>;
 const esClientMock = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
-const mockUser1 = {
-  username: 'my_username',
-  authentication_realm: {
-    type: 'my_realm_type',
-    name: 'my_realm_name',
-  },
-} as AuthenticatedUser;
+const mockUser1 = authenticatedUser;
 
 const mockedPRetry = pRetry as jest.MockedFunction<typeof pRetry>;
 mockedPRetry.mockResolvedValue({});

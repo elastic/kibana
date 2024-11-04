@@ -14,18 +14,12 @@ import {
   getKnowledgeBaseEntryMock,
   getCreateKnowledgeBaseEntrySchemaMock,
 } from '../../__mocks__/knowledge_base_entry_schema.mock';
-import type { AuthenticatedUser } from '@kbn/core-security-common';
+import { authenticatedUser } from '../../__mocks__/user';
 
 jest.mock('./get_knowledge_base_entry', () => ({
   getKnowledgeBaseEntry: jest.fn(),
 }));
-export const mockUser = {
-  username: 'my_username',
-  authentication_realm: {
-    type: 'my_realm_type',
-    name: 'my_realm_name',
-  },
-} as AuthenticatedUser;
+
 describe('createKnowledgeBaseEntry', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   beforeEach(() => {
@@ -47,7 +41,7 @@ describe('createKnowledgeBaseEntry', () => {
     jest.useRealTimers();
   });
 
-  test('it creates a knowledge base entry with create schema', async () => {
+  test('it creates a knowledge base document entry with create schema', async () => {
     const knowledgeBaseEntry = getCreateKnowledgeBaseEntrySchemaMock();
     (getKnowledgeBaseEntry as unknown as jest.Mock).mockResolvedValueOnce({
       ...getKnowledgeBaseEntryMock(),
@@ -63,7 +57,7 @@ describe('createKnowledgeBaseEntry', () => {
       esClient,
       knowledgeBaseIndex: 'index-1',
       spaceId: 'test',
-      user: mockUser,
+      user: authenticatedUser,
       knowledgeBaseEntry,
       logger,
     });
@@ -71,11 +65,11 @@ describe('createKnowledgeBaseEntry', () => {
       body: {
         '@timestamp': '2024-01-28T04:20:02.394Z',
         created_at: '2024-01-28T04:20:02.394Z',
-        created_by: 'unknown',
+        created_by: 'my_profile_uid',
         updated_at: '2024-01-28T04:20:02.394Z',
-        updated_by: 'unknown',
+        updated_by: 'my_profile_uid',
         namespace: 'test',
-        users: [{ id: undefined, name: 'my_username' }],
+        users: [{ id: 'my_profile_uid', name: 'my_username' }],
         type: 'document',
         semantic_text: 'test',
         source: 'test',
@@ -84,6 +78,62 @@ describe('createKnowledgeBaseEntry', () => {
         kb_resource: 'test',
         required: false,
         vector: undefined,
+      },
+      id: expect.any(String),
+      index: 'index-1',
+      refresh: 'wait_for',
+    });
+
+    const expected: KnowledgeBaseEntryResponse = {
+      ...getKnowledgeBaseEntryMock(),
+      id: 'elastic-id-123',
+    };
+
+    expect(createdEntry).toEqual(expected);
+  });
+
+  test('it creates a knowledge base index entry with create schema', async () => {
+    const knowledgeBaseEntry = getCreateKnowledgeBaseEntrySchemaMock({ type: 'index' });
+    (getKnowledgeBaseEntry as unknown as jest.Mock).mockResolvedValueOnce({
+      ...getKnowledgeBaseEntryMock(),
+      id: 'elastic-id-123',
+    });
+
+    const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
+    esClient.create.mockResponse(
+      // @ts-expect-error not full response interface
+      { _id: 'elastic-id-123' }
+    );
+    const createdEntry = await createKnowledgeBaseEntry({
+      esClient,
+      knowledgeBaseIndex: 'index-1',
+      spaceId: 'test',
+      user: authenticatedUser,
+      knowledgeBaseEntry,
+      logger,
+    });
+    expect(esClient.create).toHaveBeenCalledWith({
+      body: {
+        '@timestamp': '2024-01-28T04:20:02.394Z',
+        created_at: '2024-01-28T04:20:02.394Z',
+        created_by: 'my_profile_uid',
+        updated_at: '2024-01-28T04:20:02.394Z',
+        updated_by: 'my_profile_uid',
+        namespace: 'test',
+        users: [{ id: 'my_profile_uid', name: 'my_username' }],
+        query_description: 'test',
+        type: 'index',
+        name: 'test',
+        description: 'test',
+        field: 'test',
+        index: 'test',
+        input_schema: [
+          {
+            description: 'test',
+            field_name: 'test',
+            field_type: 'test',
+          },
+        ],
       },
       id: expect.any(String),
       index: 'index-1',
@@ -107,7 +157,7 @@ describe('createKnowledgeBaseEntry', () => {
         esClient,
         knowledgeBaseIndex: 'index-1',
         spaceId: 'test',
-        user: mockUser,
+        user: authenticatedUser,
         knowledgeBaseEntry,
         logger,
       })
