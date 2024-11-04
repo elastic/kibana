@@ -32,6 +32,10 @@ import {
   withOption,
 } from './options';
 import type { CommandDefinition } from './types';
+import { suggest as suggestForSort } from '../autocomplete/commands/sort';
+import { suggest as suggestForKeep } from '../autocomplete/commands/keep';
+import { suggest as suggestForDrop } from '../autocomplete/commands/drop';
+import { suggest as suggestForStats } from '../autocomplete/commands/stats';
 
 const statsValidator = (command: ESQLCommand) => {
   const messages: ESQLMessage[] = [];
@@ -148,7 +152,7 @@ const statsValidator = (command: ESQLCommand) => {
   }
   return messages;
 };
-export const commandDefinitions: CommandDefinition[] = [
+export const commandDefinitions: Array<CommandDefinition<any>> = [
   {
     name: 'row',
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.rowDoc', {
@@ -237,6 +241,7 @@ export const commandDefinitions: CommandDefinition[] = [
     options: [byOption],
     modes: [],
     validate: statsValidator,
+    suggest: suggestForStats,
   },
   {
     name: 'inlinestats',
@@ -311,6 +316,7 @@ export const commandDefinitions: CommandDefinition[] = [
       defaultMessage: 'Rearranges fields in the input table by applying the keep clauses in fields',
     }),
     examples: ['… | keep a', '… | keep a,b'],
+    suggest: suggestForKeep,
     options: [],
     modes: [],
     signature: {
@@ -330,6 +336,7 @@ export const commandDefinitions: CommandDefinition[] = [
       multipleParams: true,
       params: [{ name: 'column', type: 'column', wildcards: true }],
     },
+    suggest: suggestForDrop,
     validate: (command: ESQLCommand) => {
       const messages: ESQLMessage[] = [];
       const wildcardItems = command.args.filter((arg) => isColumnItem(arg) && arg.name === '*');
@@ -386,7 +393,9 @@ export const commandDefinitions: CommandDefinition[] = [
       multipleParams: true,
       params: [{ name: 'expression', type: 'any' }],
     },
+    suggest: suggestForSort,
   },
+
   {
     name: 'where',
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.whereDoc', {
