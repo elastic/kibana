@@ -10,13 +10,13 @@ import type { CoreSetup } from '@kbn/core/public';
 import { createOverviewPanelAction } from './create_overview_panel_action';
 import { createAddErrorBudgetPanelAction } from './create_error_budget_action';
 import { createAddAlertsPanelAction } from './create_alerts_panel_action';
-import { SloPublicPluginsStart, SloPublicStart, SloPublicPluginsSetup } from '..';
+import { SLOPublicPluginsStart, SLOPublicStart, SLOPublicPluginsSetup } from '..';
 import { createBurnRatePanelAction } from './create_burn_rate_panel_action';
 
 export function registerSloUiActions(
-  core: CoreSetup<SloPublicPluginsStart, SloPublicStart>,
-  pluginsSetup: SloPublicPluginsSetup,
-  pluginsStart: SloPublicPluginsStart
+  core: CoreSetup<SLOPublicPluginsStart, SLOPublicStart>,
+  pluginsSetup: SLOPublicPluginsSetup,
+  pluginsStart: SLOPublicPluginsStart
 ) {
   const { uiActions } = pluginsSetup;
   const { serverless, cloud } = pluginsStart;

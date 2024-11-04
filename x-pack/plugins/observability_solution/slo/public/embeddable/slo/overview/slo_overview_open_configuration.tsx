@@ -11,11 +11,11 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { GroupSloCustomInput, SingleSloCustomInput } from './types';
-import { SloPublicPluginsStart } from '../../..';
+import { SLOPublicPluginsStart } from '../../..';
 import { SloConfiguration } from './slo_configuration';
 export async function openSloConfiguration(
   coreStart: CoreStart,
-  pluginStart: SloPublicPluginsStart,
+  pluginStart: SLOPublicPluginsStart,
   initialState?: GroupSloCustomInput
 ): Promise<GroupSloCustomInput | SingleSloCustomInput> {
   const { overlays } = coreStart;

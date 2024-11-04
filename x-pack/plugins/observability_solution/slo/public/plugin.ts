@@ -14,8 +14,8 @@ import {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/public';
-import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { DefaultClientOptions, createRepositoryClient } from '@kbn/server-route-repository-client';
+import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { PLUGIN_NAME, sloAppId } from '../common';
 import { ExperimentalFeatures, SLOConfig } from '../common/config';
 import { SLOS_BASE_PATH } from '../common/locators/paths';
@@ -30,11 +30,15 @@ import { SloEditLocatorDefinition } from './locators/slo_edit';
 import { SloListLocatorDefinition } from './locators/slo_list';
 import { getCreateSLOFlyoutLazy } from './pages/slo_edit/shared_flyout/get_create_slo_flyout';
 import { registerBurnRateRuleType } from './rules/register_burn_rate_rule_type';
-import type { SloPublicSetup, SloPublicStart } from './types';
-import { SloPublicPluginsSetup, SloPublicPluginsStart } from './types';
+import type {
+  SLOPublicSetup,
+  SLOPublicStart,
+  SLOPublicPluginsSetup,
+  SLOPublicPluginsStart,
+} from './types';
 
-export class SloPlugin
-  implements Plugin<SloPublicSetup, SloPublicStart, SloPublicPluginsSetup, SloPublicPluginsStart>
+export class SLOPlugin
+  implements Plugin<SLOPublicSetup, SLOPublicStart, SLOPublicPluginsSetup, SLOPublicPluginsStart>
 {
   private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
   private experimentalFeatures: ExperimentalFeatures = { ruleFormV2: { enabled: false } };
@@ -45,22 +49,20 @@ export class SloPlugin
   }
 
   public setup(
-    coreSetup: CoreSetup<SloPublicPluginsStart, SloPublicStart>,
-    pluginsSetup: SloPublicPluginsSetup
+    core: CoreSetup<SLOPublicPluginsStart, SLOPublicStart>,
+    plugins: SLOPublicPluginsSetup
   ) {
     const kibanaVersion = this.initContext.env.packageInfo.version;
 
-    const sloClient = createRepositoryClient<SLORouteRepository, DefaultClientOptions>(coreSetup);
+    const sloClient = createRepositoryClient<SLORouteRepository, DefaultClientOptions>(core);
 
-    const sloDetailsLocator = pluginsSetup.share.url.locators.create(
-      new SloDetailsLocatorDefinition()
-    );
-    const sloEditLocator = pluginsSetup.share.url.locators.create(new SloEditLocatorDefinition());
-    const sloListLocator = pluginsSetup.share.url.locators.create(new SloListLocatorDefinition());
+    const sloDetailsLocator = plugins.share.url.locators.create(new SloDetailsLocatorDefinition());
+    const sloEditLocator = plugins.share.url.locators.create(new SloEditLocatorDefinition());
+    const sloListLocator = plugins.share.url.locators.create(new SloListLocatorDefinition());
 
     const mount = async (params: AppMountParameters<unknown>) => {
       const { renderApp } = await import('./application');
-      const [coreStart, pluginsStart] = await coreSetup.getStartServices();
+      const [coreStart, pluginsStart] = await core.getStartServices();
       const { observabilityRuleTypeRegistry } = pluginsStart.observability;
 
       return renderApp({
@@ -69,7 +71,7 @@ export class SloPlugin
         isDev: this.initContext.env.mode.dev,
         observabilityRuleTypeRegistry,
         kibanaVersion,
-        usageCollection: pluginsSetup.usageCollection,
+        usageCollection: plugins.usageCollection,
         ObservabilityPageTemplate: pluginsStart.observabilityShared.navigation.PageTemplate,
         plugins: pluginsStart,
         isServerless: !!pluginsStart.serverless,
@@ -90,17 +92,17 @@ export class SloPlugin
       keywords: ['observability', 'monitor', 'slos'],
     };
     // Register an application into the side navigation menu
-    coreSetup.application.register(app);
+    core.application.register(app);
 
-    registerBurnRateRuleType(pluginsSetup.observability.observabilityRuleTypeRegistry);
+    registerBurnRateRuleType(plugins.observability.observabilityRuleTypeRegistry);
 
     const assertPlatinumLicense = async () => {
-      const licensing = pluginsSetup.licensing;
+      const licensing = plugins.licensing;
       const license = await firstValueFrom(licensing.license$);
 
       const hasPlatinumLicense = license.hasAtLeast('platinum');
       if (hasPlatinumLicense) {
-        const [coreStart, pluginsStart] = await coreSetup.getStartServices();
+        const [coreStart, pluginsStart] = await core.getStartServices();
 
         pluginsStart.dashboard.registerDashboardPanelPlacementSetting(
           SLO_OVERVIEW_EMBEDDABLE_ID,
@@ -112,28 +114,22 @@ export class SloPlugin
           }
         );
 
-        pluginsSetup.embeddable.registerReactEmbeddableFactory(
-          SLO_OVERVIEW_EMBEDDABLE_ID,
-          async () => {
-            const { getOverviewEmbeddableFactory } = await import(
-              './embeddable/slo/overview/slo_embeddable_factory'
-            );
-            return getOverviewEmbeddableFactory(coreSetup.getStartServices);
-          }
-        );
+        plugins.embeddable.registerReactEmbeddableFactory(SLO_OVERVIEW_EMBEDDABLE_ID, async () => {
+          const { getOverviewEmbeddableFactory } = await import(
+            './embeddable/slo/overview/slo_embeddable_factory'
+          );
+          return getOverviewEmbeddableFactory(core.getStartServices);
+        });
 
-        pluginsSetup.embeddable.registerReactEmbeddableFactory(
-          SLO_ALERTS_EMBEDDABLE_ID,
-          async () => {
-            const { getAlertsEmbeddableFactory } = await import(
-              './embeddable/slo/alerts/slo_alerts_embeddable_factory'
-            );
+        plugins.embeddable.registerReactEmbeddableFactory(SLO_ALERTS_EMBEDDABLE_ID, async () => {
+          const { getAlertsEmbeddableFactory } = await import(
+            './embeddable/slo/alerts/slo_alerts_embeddable_factory'
+          );
 
-            return getAlertsEmbeddableFactory(coreSetup.getStartServices, kibanaVersion);
-          }
-        );
+          return getAlertsEmbeddableFactory(core.getStartServices, kibanaVersion);
+        });
 
-        pluginsSetup.embeddable.registerReactEmbeddableFactory(SLO_ERROR_BUDGET_ID, async () => {
+        plugins.embeddable.registerReactEmbeddableFactory(SLO_ERROR_BUDGET_ID, async () => {
           const deps = { ...coreStart, ...pluginsStart };
 
           const { getErrorBudgetEmbeddableFactory } = await import(
@@ -148,23 +144,20 @@ export class SloPlugin
             return { width: 14, height: 7 };
           }
         );
-        pluginsSetup.embeddable.registerReactEmbeddableFactory(
-          SLO_BURN_RATE_EMBEDDABLE_ID,
-          async () => {
-            const deps = { ...coreStart, ...pluginsStart };
+        plugins.embeddable.registerReactEmbeddableFactory(SLO_BURN_RATE_EMBEDDABLE_ID, async () => {
+          const deps = { ...coreStart, ...pluginsStart };
 
-            const { getBurnRateEmbeddableFactory } = await import(
-              './embeddable/slo/burn_rate/burn_rate_react_embeddable_factory'
-            );
-            return getBurnRateEmbeddableFactory(deps);
-          }
-        );
+          const { getBurnRateEmbeddableFactory } = await import(
+            './embeddable/slo/burn_rate/burn_rate_react_embeddable_factory'
+          );
+          return getBurnRateEmbeddableFactory(deps);
+        });
 
         const registerAsyncSloUiActions = async () => {
-          if (pluginsSetup.uiActions) {
+          if (plugins.uiActions) {
             const { registerSloUiActions } = await import('./ui_actions');
 
-            registerSloUiActions(coreSetup, pluginsSetup, pluginsStart);
+            registerSloUiActions(core, plugins, pluginsStart);
           }
         };
         registerAsyncSloUiActions();
@@ -179,17 +172,17 @@ export class SloPlugin
     };
   }
 
-  public start(coreStart: CoreStart, pluginsStart: SloPublicPluginsStart) {
+  public start(core: CoreStart, plugins: SLOPublicPluginsStart) {
     const kibanaVersion = this.initContext.env.packageInfo.version;
     return {
       getCreateSLOFlyout: getCreateSLOFlyoutLazy({
-        core: coreStart,
+        core,
         isDev: this.initContext.env.mode.dev,
         kibanaVersion,
-        observabilityRuleTypeRegistry: pluginsStart.observability.observabilityRuleTypeRegistry,
-        ObservabilityPageTemplate: pluginsStart.observabilityShared.navigation.PageTemplate,
-        plugins: pluginsStart,
-        isServerless: !!pluginsStart.serverless,
+        observabilityRuleTypeRegistry: plugins.observability.observabilityRuleTypeRegistry,
+        ObservabilityPageTemplate: plugins.observabilityShared.navigation.PageTemplate,
+        plugins,
+        isServerless: !!plugins.serverless,
         experimentalFeatures: this.experimentalFeatures,
       }),
     };

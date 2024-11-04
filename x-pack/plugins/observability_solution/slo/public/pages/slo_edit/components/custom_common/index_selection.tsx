@@ -12,7 +12,7 @@ import React, { useEffect } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 import { DataViewPicker } from '@kbn/unified-search-plugin/public';
 import { getDataViewPattern, useAdhocDataViews } from './use_adhoc_data_views';
-import { SloPublicPluginsStart } from '../../../..';
+import { SLOPublicPluginsStart } from '../../../..';
 import { useKibana } from '../../../../utils/kibana_react';
 import { CreateSLOForm } from '../../types';
 
@@ -26,7 +26,7 @@ export function IndexSelection({ selectedDataView }: { selectedDataView?: DataVi
   const { control, getFieldState, setValue, watch } = useFormContext<CreateSLOForm>();
   const { dataViews: dataViewsService, dataViewFieldEditor } = useKibana().services;
 
-  const { dataViewEditor } = useKibana<SloPublicPluginsStart>().services;
+  const { dataViewEditor } = useKibana<SLOPublicPluginsStart>().services;
 
   const currentIndexPattern = watch(INDEX_FIELD);
   const currentDataViewId = watch(DATA_VIEW_FIELD);

@@ -13,14 +13,14 @@ import {
   type UiActionsActionDefinition,
 } from '@kbn/ui-actions-plugin/public';
 import { COMMON_OBSERVABILITY_GROUPING } from '@kbn/observability-shared-plugin/common';
-import { SloPublicPluginsStart, SloPublicStart } from '..';
+import { SLOPublicPluginsStart, SLOPublicStart } from '..';
 import {
   ADD_BURN_RATE_ACTION_ID,
   SLO_BURN_RATE_EMBEDDABLE_ID,
 } from '../embeddable/slo/burn_rate/constants';
 
 export function createBurnRatePanelAction(
-  getStartServices: CoreSetup<SloPublicPluginsStart, SloPublicStart>['getStartServices']
+  getStartServices: CoreSetup<SLOPublicPluginsStart, SLOPublicStart>['getStartServices']
 ): UiActionsActionDefinition<EmbeddableApiContext> {
   return {
     id: ADD_BURN_RATE_ACTION_ID,

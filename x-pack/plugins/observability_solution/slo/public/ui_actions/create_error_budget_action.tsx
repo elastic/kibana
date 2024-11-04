@@ -17,9 +17,9 @@ import {
   ADD_SLO_ERROR_BUDGET_ACTION_ID,
   SLO_ERROR_BUDGET_ID,
 } from '../embeddable/slo/error_budget/constants';
-import { SloPublicPluginsStart, SloPublicStart } from '..';
+import { SLOPublicPluginsStart, SLOPublicStart } from '..';
 export function createAddErrorBudgetPanelAction(
-  getStartServices: CoreSetup<SloPublicPluginsStart, SloPublicStart>['getStartServices']
+  getStartServices: CoreSetup<SLOPublicPluginsStart, SLOPublicStart>['getStartServices']
 ): UiActionsActionDefinition<EmbeddableApiContext> {
   return {
     id: ADD_SLO_ERROR_BUDGET_ACTION_ID,

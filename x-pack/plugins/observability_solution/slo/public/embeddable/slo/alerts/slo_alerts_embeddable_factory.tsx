@@ -24,7 +24,7 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { StartServicesAccessor } from '@kbn/core-lifecycle-browser';
 import { SLO_ALERTS_EMBEDDABLE_ID } from './constants';
 import { SloAlertsEmbeddableState, SloAlertsApi } from './types';
-import { SloPublicPluginsStart, SloPublicStart } from '../../../types';
+import { SLOPublicPluginsStart, SLOPublicStart } from '../../../types';
 import { SloAlertsWrapper } from './slo_alerts_wrapper';
 const history = createBrowserHistory();
 const queryClient = new QueryClient();
@@ -35,7 +35,7 @@ export const getAlertsPanelTitle = () =>
   });
 
 export function getAlertsEmbeddableFactory(
-  getStartServices: StartServicesAccessor<SloPublicPluginsStart, SloPublicStart>,
+  getStartServices: StartServicesAccessor<SLOPublicPluginsStart, SLOPublicStart>,
   kibanaVersion: string
 ) {
   const factory: ReactEmbeddableFactory<

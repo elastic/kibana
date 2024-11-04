@@ -72,18 +72,6 @@ export const apiHasSloGroupOverviewConfig = (
   );
 };
 
-export interface SloEmbeddableDeps {
-  uiSettings: IUiSettingsClient;
-  http: CoreStart['http'];
-  i18n: CoreStart['i18n'];
-  theme: CoreStart['theme'];
-  application: ApplicationStart;
-  notifications: NotificationsStart;
-  observability: ObservabilityPublicStart;
-  observabilityShared: ObservabilitySharedPluginStart;
-  uiActions: UiActionsStart;
-}
-
 export type SloOverviewEmbeddableActionContext = EmbeddableApiContext & {
   embeddable: SloOverviewApi;
 };

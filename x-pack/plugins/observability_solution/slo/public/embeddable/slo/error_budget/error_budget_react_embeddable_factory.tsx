@@ -21,10 +21,11 @@ import { SLO_ERROR_BUDGET_ID } from './constants';
 import { SloErrorBudgetEmbeddableState, SloEmbeddableDeps, ErrorBudgetApi } from './types';
 import { SloErrorBudget } from './error_budget_burn_down';
 
-export const getErrorBudgetPanelTitle = () =>
+const getErrorBudgetPanelTitle = () =>
   i18n.translate('xpack.slo.errorBudgetEmbeddable.title', {
     defaultMessage: 'SLO Error Budget burn down',
   });
+
 const queryClient = new QueryClient();
 
 export const getErrorBudgetEmbeddableFactory = (deps: SloEmbeddableDeps) => {

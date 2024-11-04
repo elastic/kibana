@@ -17,10 +17,10 @@ import {
   ADD_SLO_ALERTS_ACTION_ID,
   SLO_ALERTS_EMBEDDABLE_ID,
 } from '../embeddable/slo/alerts/constants';
-import { SloPublicPluginsStart, SloPublicStart } from '..';
+import { SLOPublicPluginsStart, SLOPublicStart } from '..';
 
 export function createAddAlertsPanelAction(
-  getStartServices: CoreSetup<SloPublicPluginsStart, SloPublicStart>['getStartServices']
+  getStartServices: CoreSetup<SLOPublicPluginsStart, SLOPublicStart>['getStartServices']
 ): UiActionsActionDefinition<EmbeddableApiContext> {
   return {
     id: ADD_SLO_ALERTS_ACTION_ID,

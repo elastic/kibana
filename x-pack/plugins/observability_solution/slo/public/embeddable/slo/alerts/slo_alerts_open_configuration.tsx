@@ -9,12 +9,12 @@ import type { CoreStart } from '@kbn/core/public';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { SloPublicPluginsStart } from '../../..';
+import { SLOPublicPluginsStart } from '../../..';
 import { SloConfiguration } from './slo_configuration';
 import type { EmbeddableSloProps } from './types';
 export async function openSloConfiguration(
   coreStart: CoreStart,
-  pluginStart: SloPublicPluginsStart,
+  pluginStart: SLOPublicPluginsStart,
   initialState?: EmbeddableSloProps
 ): Promise<EmbeddableSloProps> {
   const { overlays } = coreStart;

@@ -47,52 +47,52 @@ import type {
   UsageCollectionStart,
 } from '@kbn/usage-collection-plugin/public';
 import type { SLORouteRepository } from '../server/routes/get_slo_server_route_repository';
-import { SloPlugin } from './plugin';
+import { SLOPlugin } from './plugin';
 
 export type SLORepositoryClient = RouteRepositoryClient<SLORouteRepository, DefaultClientOptions>;
 
-export interface SloPublicPluginsSetup {
+export interface SLOPublicPluginsSetup {
   data: DataPublicPluginSetup;
-  observability: ObservabilityPublicSetup;
-  observabilityShared: ObservabilitySharedPluginSetup;
-  triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
-  licensing: LicensingPluginSetup;
-  share: SharePluginSetup;
   embeddable: EmbeddableSetup;
-  uiActions: UiActionsSetup;
-  serverless?: ServerlessPluginSetup;
-  presentationUtil: PresentationUtilPluginStart;
+  licensing: LicensingPluginSetup;
+  observability: ObservabilityPublicSetup;
   observabilityAIAssistant?: ObservabilityAIAssistantPublicSetup;
+  observabilityShared: ObservabilitySharedPluginSetup;
+  presentationUtil: PresentationUtilPluginStart;
+  serverless?: ServerlessPluginSetup;
+  share: SharePluginSetup;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
+  uiActions: UiActionsSetup;
   usageCollection: UsageCollectionSetup;
 }
 
-export interface SloPublicPluginsStart {
+export interface SLOPublicPluginsStart {
   aiops: AiopsPluginStart;
   cases: CasesPublicStart;
+  charts: ChartsPluginStart;
   cloud?: CloudStart;
   dashboard: DashboardStart;
+  data: DataPublicPluginStart;
   dataViewEditor: DataViewEditorStart;
-  fieldFormats: FieldFormatsStart;
-  observability: ObservabilityPublicStart;
-  observabilityShared: ObservabilitySharedPluginStart;
-  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
-  spaces?: SpacesPluginStart;
-  share: SharePluginStart;
-  licensing: LicensingPluginStart;
+  dataViewFieldEditor: DataViewFieldEditorStart;
+  dataViews: DataViewsPublicPluginStart;
+  discover?: DiscoverStart;
   embeddable: EmbeddableStart;
-  uiActions: UiActionsStart;
+  fieldFormats: FieldFormatsStart;
+  lens: LensPublicStart;
+  licensing: LicensingPluginStart;
+  observability: ObservabilityPublicStart;
+  observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
+  observabilityShared: ObservabilitySharedPluginStart;
   presentationUtil: PresentationUtilPluginStart;
   serverless?: ServerlessPluginStart;
-  data: DataPublicPluginStart;
-  dataViews: DataViewsPublicPluginStart;
-  observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
-  lens: LensPublicStart;
-  charts: ChartsPluginStart;
+  share: SharePluginStart;
+  spaces?: SpacesPluginStart;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
+  uiActions: UiActionsStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   usageCollection: UsageCollectionStart;
-  discover?: DiscoverStart;
-  dataViewFieldEditor: DataViewFieldEditorStart;
 }
 
-export type SloPublicSetup = ReturnType<SloPlugin['setup']>;
-export type SloPublicStart = ReturnType<SloPlugin['start']>;
+export type SLOPublicSetup = ReturnType<SLOPlugin['setup']>;
+export type SLOPublicStart = ReturnType<SLOPlugin['start']>;

@@ -4,23 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
-import { Router } from '@kbn/shared-ux-router';
-import { createBrowserHistory } from 'history';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { Router } from '@kbn/shared-ux-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { createBrowserHistory } from 'history';
+import React from 'react';
 import { PluginContext } from '../../../context/plugin_context';
-import { SloEmbeddableDeps } from '../overview/types';
+import { SLOEmbeddableDeps } from '../types';
 
 const queryClient = new QueryClient();
 
-export interface SloEmbeddableContextProps {
-  deps: SloEmbeddableDeps;
+interface SLOEmbeddableContextProps {
+  deps: SLOEmbeddableDeps;
   children: React.ReactNode;
 }
 
-export function SloEmbeddableContext({ deps, children }: SloEmbeddableContextProps) {
+export function SLOEmbeddableContext({ deps, children }: SLOEmbeddableContextProps) {
   const { observabilityRuleTypeRegistry } = deps.observability;
   const { navigation } = deps.observabilityShared;
 
@@ -32,6 +32,7 @@ export function SloEmbeddableContext({ deps, children }: SloEmbeddableContextPro
             value={{
               observabilityRuleTypeRegistry,
               ObservabilityPageTemplate: navigation.PageTemplate,
+              sloClient: deps.sloClient,
             }}
           >
             <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>

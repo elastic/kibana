@@ -17,7 +17,7 @@ import { ObservabilityRuleTypeRegistry } from '@kbn/observability-plugin/public'
 import { ExperimentalFeatures } from '../../../../common/config';
 import { CreateSLOForm } from '../types';
 import { PluginContext } from '../../../context/plugin_context';
-import { SloPublicPluginsStart } from '../../../types';
+import { SLOPublicPluginsStart } from '../../../types';
 import { SloAddFormFlyout } from './slo_form';
 
 export const getCreateSLOFlyoutLazy = ({
@@ -31,7 +31,7 @@ export const getCreateSLOFlyoutLazy = ({
   experimentalFeatures,
 }: {
   core: CoreStart;
-  plugins: SloPublicPluginsStart;
+  plugins: SLOPublicPluginsStart;
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
   ObservabilityPageTemplate: React.ComponentType<LazyObservabilityPageTemplateProps>;
   isDev?: boolean;

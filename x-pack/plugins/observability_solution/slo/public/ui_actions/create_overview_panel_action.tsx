@@ -17,10 +17,10 @@ import {
   ADD_SLO_OVERVIEW_ACTION_ID,
   SLO_OVERVIEW_EMBEDDABLE_ID,
 } from '../embeddable/slo/overview/constants';
-import { SloPublicPluginsStart, SloPublicStart } from '..';
+import { SLOPublicPluginsStart, SLOPublicStart } from '..';
 
 export function createOverviewPanelAction(
-  getStartServices: CoreSetup<SloPublicPluginsStart, SloPublicStart>['getStartServices']
+  getStartServices: CoreSetup<SLOPublicPluginsStart, SLOPublicStart>['getStartServices']
 ): UiActionsActionDefinition<EmbeddableApiContext> {
   return {
     id: ADD_SLO_OVERVIEW_ACTION_ID,

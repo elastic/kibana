@@ -22,15 +22,16 @@ import { SloCardChartList } from './slo_overview_grid';
 import { SloOverview } from './slo_overview';
 import { GroupSloView } from './group_view/group_view';
 import { SloOverviewEmbeddableState, SloOverviewApi, GroupSloCustomInput } from './types';
-import { SloPublicPluginsStart, SloPublicStart } from '../../../types';
-import { SloEmbeddableContext } from '../common/slo_embeddable_context';
+import { SLOPublicPluginsStart, SLOPublicStart } from '../../../types';
+import { SLOEmbeddableContext } from '../common/slo_embeddable_context';
 
-export const getOverviewPanelTitle = () =>
+const getOverviewPanelTitle = () =>
   i18n.translate('xpack.slo.sloEmbeddable.displayName', {
     defaultMessage: 'SLO Overview',
   });
+
 export const getOverviewEmbeddableFactory = (
-  getStartServices: StartServicesAccessor<SloPublicPluginsStart, SloPublicStart>
+  getStartServices: StartServicesAccessor<SLOPublicPluginsStart, SLOPublicStart>
 ) => {
   const factory: ReactEmbeddableFactory<
     SloOverviewEmbeddableState,
@@ -185,9 +186,9 @@ export const getOverviewEmbeddableFactory = (
             }
           };
           return (
-            <SloEmbeddableContext deps={deps}>
+            <SLOEmbeddableContext deps={deps}>
               {showAllGroupByInstances ? <SloCardChartList sloId={sloId!} /> : renderOverview()}
-            </SloEmbeddableContext>
+            </SLOEmbeddableContext>
           );
         },
       };

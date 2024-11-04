@@ -25,11 +25,11 @@ import { ExperimentalFeatures } from '../common/config';
 import { PluginContext } from './context/plugin_context';
 import { usePluginContext } from './hooks/use_plugin_context';
 import { getRoutes } from './routes/routes';
-import { SLORepositoryClient, SloPublicPluginsStart } from './types';
+import { SLORepositoryClient, SLOPublicPluginsStart } from './types';
 
 interface Props {
   core: CoreStart;
-  plugins: SloPublicPluginsStart;
+  plugins: SLOPublicPluginsStart;
   appMountParameters: AppMountParameters;
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
   ObservabilityPageTemplate: React.ComponentType<LazyObservabilityPageTemplateProps>;
