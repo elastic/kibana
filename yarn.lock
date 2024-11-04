@@ -1751,9 +1751,9 @@
     "@types/lodash" "^4.14.202"
     lodash "^4.17.21"
 
-"@elastic/eui@file:./elastic_eui_97.0.0_138_002.tgz":
+"@elastic/eui@file:./elastic_eui_97.0.0_138_003.tgz":
   version "97.0.0"
-  resolved "file:./elastic_eui_97.0.0_138_002.tgz#1fc431f5602300b93e6a9826fd0c00876c141fb0"
+  resolved "file:./elastic_eui_97.0.0_138_003.tgz#4aaad077850d958cf6248c398191bcb089891899"
   dependencies:
     "@hello-pangea/dnd" "^16.6.0"
     "@types/lodash" "^4.14.202"
