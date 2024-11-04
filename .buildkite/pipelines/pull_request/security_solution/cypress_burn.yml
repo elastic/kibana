@@ -13,7 +13,6 @@ steps:
       - linting
       - linting_with_types
       - check_types
-      - check_oas_snapshot
     timeout_in_minutes: 60
     soft_fail: true
     parallelism: 1
@@ -32,7 +31,6 @@ steps:
       - linting
       - linting_with_types
       - check_types
-      - check_oas_snapshot
     timeout_in_minutes: 60
     parallelism: 1
     retry:
@@ -51,7 +49,6 @@ steps:
       - linting
       - linting_with_types
       - check_types
-      - check_oas_snapshot
     timeout_in_minutes: 50
     soft_fail: true
     retry:

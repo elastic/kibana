@@ -11,7 +11,6 @@ steps:
       - linting
       - linting_with_types
       - check_types
-      - check_oas_snapshot
     timeout_in_minutes: 30
     soft_fail: true
     retry:

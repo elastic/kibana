@@ -11,7 +11,6 @@ steps:
       - linting
       - linting_with_types
       - check_types
-      - check_oas_snapshot
     timeout_in_minutes: 30
     artifact_paths:
       - 'x-pack/plugins/observability_solution/slo/e2e/.journeys/**/*'
