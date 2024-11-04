@@ -59,8 +59,6 @@ describe('ReportDiagnostic', () => {
   });
 
   it('renders a callout with a warning if a problem is detected during diagnosis', async () => {
-    const user = userEvent.setup();
-
     mockedApiClient.verifyBrowser.mockResolvedValue({
       success: false,
       help: ['help'],
@@ -76,11 +74,11 @@ describe('ReportDiagnostic', () => {
       } as unknown as ComponentProps<typeof ReportDiagnostic>['clientConfig'],
     });
 
-    await user.click(screen.getByTestId('screenshotDiagnosticLink'));
+    userEvent.click(screen.getByTestId('screenshotDiagnosticLink'));
 
     await waitFor(() => expect(screen.getByTestId('reportDiagnosisFlyout')).toBeInTheDocument());
 
-    user.click(screen.getByTestId('reportingDiagnosticInitiationButton'));
+    userEvent.click(screen.getByTestId('reportingDiagnosticInitiationButton'));
 
     await waitFor(() =>
       expect(screen.getByTestId('reportingDiagnosticFailureCallout')).toBeInTheDocument()
@@ -88,8 +86,6 @@ describe('ReportDiagnostic', () => {
   });
 
   it('renders a success callout if no problem is detected during diagnosis', async () => {
-    const user = userEvent.setup();
-
     mockedApiClient.verifyBrowser.mockResolvedValue({
       success: true,
       help: [],
@@ -105,11 +101,11 @@ describe('ReportDiagnostic', () => {
       } as unknown as ComponentProps<typeof ReportDiagnostic>['clientConfig'],
     });
 
-    await user.click(screen.getByTestId('screenshotDiagnosticLink'));
+    userEvent.click(screen.getByTestId('screenshotDiagnosticLink'));
 
     await waitFor(() => expect(screen.getByTestId('reportDiagnosisFlyout')).toBeInTheDocument());
 
-    user.click(screen.getByTestId('reportingDiagnosticInitiationButton'));
+    userEvent.click(screen.getByTestId('reportingDiagnosticInitiationButton'));
 
     await waitFor(() =>
       expect(screen.getByTestId('reportingDiagnosticSuccessCallout')).toBeInTheDocument()
