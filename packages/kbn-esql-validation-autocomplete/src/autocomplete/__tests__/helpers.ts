@@ -177,7 +177,7 @@ export function getFunctionSignaturesByReturnType(
         ({ returnType }) =>
           expectedReturnType.includes('any') || expectedReturnType.includes(returnType as string)
       );
-      if (!filteredByReturnType.length) {
+      if (!filteredByReturnType.length && !expectedReturnType.includes('any')) {
         return false;
       }
       if (paramsTypes?.length) {
