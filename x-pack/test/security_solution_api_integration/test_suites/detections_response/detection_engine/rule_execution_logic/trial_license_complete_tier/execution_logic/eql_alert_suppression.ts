@@ -1843,7 +1843,7 @@ export default ({ getService }: FtrProviderContext) => {
           previewId,
           sort: [ALERT_ORIGINAL_TIME],
         });
-        // we expect one alert and two suppressed alerts
+        // we expect one created alert and one suppressed alert
         // and two building block alerts, let's confirm that
         expect(previewAlerts.length).toEqual(3);
         const [sequenceAlert, buildingBlockAlerts] = partition(
@@ -1858,13 +1858,11 @@ export default ({ getService }: FtrProviderContext) => {
           [ALERT_SUPPRESSION_TERMS]: [
             {
               field: 'host.name',
-              value: ['host-a'],
+              value: 'host-a',
             },
           ],
           [TIMESTAMP]: '2020-10-28T07:00:00.000Z',
           [ALERT_LAST_DETECTED]: '2020-10-28T07:00:00.000Z',
-          [ALERT_SUPPRESSION_START]: laterTimestamp,
-          [ALERT_SUPPRESSION_END]: laterTimestamp2,
           [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
         });
       });
@@ -1896,7 +1894,12 @@ export default ({ getService }: FtrProviderContext) => {
         // in one of the two events in the sequence, the sequence alert will
         // adopt the value for host.name and be suppressible.
 
-        await indexListOfSourceDocuments([doc1, doc1WithLaterTimestamp, doc2WithNoHost]);
+        await indexListOfSourceDocuments([
+          doc1,
+          doc1WithLaterTimestamp,
+          doc2WithNoHost,
+          { ...doc2WithNoHost, '@timestamp': '2020-10-28T06:53:01.000Z' },
+        ]);
 
         const rule: EqlRuleCreateProps = {
           ...getEqlRuleForAlertTesting(['ecs_compliant']),
@@ -1920,28 +1923,38 @@ export default ({ getService }: FtrProviderContext) => {
           previewId,
           sort: [ALERT_ORIGINAL_TIME],
         });
-        // we expect one alert and two suppressed alerts
+        // we expect one alert and one suppressed alerts
         // and two building block alerts, let's confirm that
-        expect(previewAlerts.length).toEqual(3);
-        const [sequenceAlert, buildingBlockAlerts] = partition(
+        expect(previewAlerts.length).toEqual(6);
+        const [sequenceAlerts, buildingBlockAlerts] = partition(
           previewAlerts,
           (alert) => alert?._source?.['kibana.alert.building_block_type'] == null
         );
-        expect(buildingBlockAlerts.length).toEqual(2);
-        expect(sequenceAlert.length).toEqual(1);
+        expect(buildingBlockAlerts.length).toEqual(4);
+        expect(sequenceAlerts.length).toEqual(2);
 
-        expect(sequenceAlert[0]?._source).toEqual({
-          ...sequenceAlert[0]?._source,
+        expect(sequenceAlerts[0]?._source).toEqual({
+          ...sequenceAlerts[0]?._source,
           [ALERT_SUPPRESSION_TERMS]: [
             {
               field: 'host.name',
-              value: ['host-a'],
+              value: 'host-a',
             },
           ],
           [TIMESTAMP]: '2020-10-28T07:00:00.000Z',
           [ALERT_LAST_DETECTED]: '2020-10-28T07:00:00.000Z',
-          [ALERT_SUPPRESSION_START]: laterTimestamp,
-          [ALERT_SUPPRESSION_END]: laterTimestamp2,
+          [ALERT_SUPPRESSION_DOCS_COUNT]: 0,
+        });
+        expect(sequenceAlerts[1]?._source).toEqual({
+          ...sequenceAlerts[1]?._source,
+          [ALERT_SUPPRESSION_TERMS]: [
+            {
+              field: 'host.name',
+              value: null,
+            },
+          ],
+          [TIMESTAMP]: '2020-10-28T07:00:00.000Z',
+          [ALERT_LAST_DETECTED]: '2020-10-28T07:00:00.000Z',
           [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
         });
       });
@@ -1998,27 +2011,37 @@ export default ({ getService }: FtrProviderContext) => {
         });
         // we expect one alert and two suppressed alerts
         // and two building block alerts, let's confirm that
-        expect(previewAlerts.length).toEqual(3);
+        expect(previewAlerts.length).toEqual(6);
         const [sequenceAlert, buildingBlockAlerts] = partition(
           previewAlerts,
           (alert) => alert?._source?.['kibana.alert.building_block_type'] == null
         );
-        expect(buildingBlockAlerts.length).toEqual(2);
-        expect(sequenceAlert.length).toEqual(1);
+        expect(buildingBlockAlerts.length).toEqual(4);
+        expect(sequenceAlert.length).toEqual(2);
 
         expect(sequenceAlert[0]?._source).toEqual({
           ...sequenceAlert[0]?._source,
           [ALERT_SUPPRESSION_TERMS]: [
             {
               field: 'host.name',
-              value: ['host-a'],
+              value: 'host-a',
             },
           ],
           [TIMESTAMP]: '2020-10-28T07:00:00.000Z',
           [ALERT_LAST_DETECTED]: '2020-10-28T07:00:00.000Z',
-          [ALERT_SUPPRESSION_START]: laterTimestamp,
-          [ALERT_SUPPRESSION_END]: laterTimestamp2,
-          [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
+          [ALERT_SUPPRESSION_DOCS_COUNT]: 0,
+        });
+        expect(sequenceAlert[1]?._source).toEqual({
+          ...sequenceAlert[1]?._source,
+          [ALERT_SUPPRESSION_TERMS]: [
+            {
+              field: 'host.name',
+              value: null,
+            },
+          ],
+          [TIMESTAMP]: '2020-10-28T07:00:00.000Z',
+          [ALERT_LAST_DETECTED]: '2020-10-28T07:00:00.000Z',
+          [ALERT_SUPPRESSION_DOCS_COUNT]: 0,
         });
       });
 
@@ -2075,22 +2098,18 @@ export default ({ getService }: FtrProviderContext) => {
           previewAlerts,
           (alert) => alert?._source?.['kibana.alert.building_block_type'] == null
         );
+        const [suppressedSequenceAlerts] = partition(
+          sequenceAlert,
+          (alert) => alert?._source?.['kibana.alert.suppression.docs_count']
+        );
         expect(buildingBlockAlerts.length).toEqual(4);
         expect(sequenceAlert.length).toEqual(2);
-
-        expect(sequenceAlert[1]?._source).toEqual({
-          ...sequenceAlert[1]?._source,
-          [ALERT_SUPPRESSION_TERMS]: [
-            {
-              field: 'host.name',
-              value: ['host-a'],
-            },
-          ],
+        expect(suppressedSequenceAlerts.length).toEqual(0);
+        expect(sequenceAlert[0]?._source).toEqual({
+          ...sequenceAlert[0]?._source,
+          [ALERT_SUPPRESSION_TERMS]: undefined,
           [TIMESTAMP]: '2020-10-28T07:00:00.000Z',
-          [ALERT_LAST_DETECTED]: '2020-10-28T07:00:00.000Z',
-          [ALERT_SUPPRESSION_START]: laterTimestamp,
-          [ALERT_SUPPRESSION_END]: laterTimestamp,
-          [ALERT_SUPPRESSION_DOCS_COUNT]: 0,
+          [ALERT_SUPPRESSION_DOCS_COUNT]: undefined,
         });
       });
 
@@ -2150,16 +2169,21 @@ export default ({ getService }: FtrProviderContext) => {
         });
         // we expect one alert and two suppressed alerts
         // and two building block alerts, let's confirm that
-        expect(previewAlerts.length).toEqual(6);
+        expect(previewAlerts.length).toEqual(3);
         const [sequenceAlert, buildingBlockAlerts] = partition(
           previewAlerts,
           (alert) => alert?._source?.['kibana.alert.building_block_type'] == null
         );
-        expect(buildingBlockAlerts.length).toEqual(4);
-        expect(sequenceAlert.length).toEqual(2);
+        const [suppressedSequenceAlerts] = partition(
+          sequenceAlert,
+          (alert) => alert?._source?.['kibana.alert.suppression.docs_count']
+        );
+        expect(suppressedSequenceAlerts.length).toEqual(1);
+        expect(buildingBlockAlerts.length).toEqual(2);
+        expect(sequenceAlert.length).toEqual(1);
 
-        expect(sequenceAlert[1]?._source).toEqual({
-          ...sequenceAlert[1]?._source,
+        expect(sequenceAlert[0]?._source).toEqual({
+          ...sequenceAlert[0]?._source,
           [ALERT_SUPPRESSION_TERMS]: [
             {
               field: 'host.name',
@@ -2168,13 +2192,18 @@ export default ({ getService }: FtrProviderContext) => {
           ],
           [TIMESTAMP]: '2020-10-28T07:00:00.000Z',
           [ALERT_LAST_DETECTED]: '2020-10-28T07:00:00.000Z',
-          [ALERT_SUPPRESSION_START]: laterTimestamp2,
-          [ALERT_SUPPRESSION_END]: laterTimestamp3,
-          [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
+          [ALERT_SUPPRESSION_DOCS_COUNT]: 2,
         });
       });
 
       it('does not suppress alerts when "doNotSuppress" is set and suppression field value is undefined for a sequence alert in a given rule execution', async () => {
+        // This logic should be understood within the confines of the
+        // objectPairIntersection function defined in
+        // x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/eql/build_alert_group_from_sequence.ts
+        // Any sequence comprised of events where one field contains a value, followed by any number of
+        // events in the sequence where the value is null or undefined will have that field
+        // stripped from the sequence alert. So given that, we expect three alerts here
+        // all with the suppression value as undefined
         const id = uuidv4();
         const timestamp = '2020-10-28T06:50:00.000Z';
         const laterTimestamp = '2020-10-28T06:51:00.000Z';
@@ -2204,10 +2233,6 @@ export default ({ getService }: FtrProviderContext) => {
           host: { name: undefined },
         };
 
-        // first suppressible sequence alert will be doc1, doc1WithNoHost
-        // two unsuppressible sequence alerts will consist of
-        // [doc1WithNoHost, doc2WithNoHost] and [doc2WithNoHost, doc3WithNoHost]
-
         await indexListOfSourceDocuments([doc1, doc1WithNoHost, doc2WithNoHost, doc3WithNoHost]);
 
         const rule: EqlRuleCreateProps = {
@@ -2232,30 +2257,27 @@ export default ({ getService }: FtrProviderContext) => {
           previewId,
           sort: [ALERT_ORIGINAL_TIME],
         });
-        // we expect two unsuppressed alerts and one suppressed alert
-        // for a total of 3 sequence alerts and two building block alerts per alert
-        // for a total of 6 building block alerts. Let's confirm that
+
         expect(previewAlerts.length).toEqual(9);
         const [sequenceAlert, buildingBlockAlerts] = partition(
           previewAlerts,
           (alert) => alert?._source?.['kibana.alert.building_block_type'] == null
         );
+        const [suppressedSequenceAlerts] = partition(
+          sequenceAlert,
+          (alert) => alert?._source?.['kibana.alert.suppression.docs_count']
+        );
+        // no alerts should be suppressed because doNotSuppress is set
+        expect(suppressedSequenceAlerts.length).toEqual(0);
         expect(buildingBlockAlerts.length).toEqual(6);
+        // 3 sequence alerts comprised of
+        // (doc1 + doc1WithNoHost), (doc1WithNoHost + doc2WithNoHost), (doc2WithNoHost + doc3WithNoHost)
         expect(sequenceAlert.length).toEqual(3);
 
-        expect(sequenceAlert[2]?._source).toEqual({
-          ...sequenceAlert[2]?._source,
-          [ALERT_SUPPRESSION_TERMS]: [
-            {
-              field: 'host.name',
-              value: ['host-a'],
-            },
-          ],
-          [TIMESTAMP]: '2020-10-28T07:00:00.000Z',
-          [ALERT_LAST_DETECTED]: '2020-10-28T07:00:00.000Z',
-          [ALERT_SUPPRESSION_START]: laterTimestamp,
-          [ALERT_SUPPRESSION_END]: laterTimestamp,
-          [ALERT_SUPPRESSION_DOCS_COUNT]: 0,
+        expect(sequenceAlert[0]?._source).toEqual({
+          ...sequenceAlert[0]?._source,
+          [ALERT_SUPPRESSION_TERMS]: undefined,
+          [ALERT_SUPPRESSION_DOCS_COUNT]: undefined,
         });
       });
 
@@ -2263,8 +2285,8 @@ export default ({ getService }: FtrProviderContext) => {
         const id = uuidv4();
         const timestamp = '2020-10-28T06:05:00.000Z'; // this should not count towards events
         const laterTimestamp = '2020-10-28T06:50:00.000Z';
-        const timestamp1 = '2020-10-28T06:51:00.000Z';
-        const laterTimestamp2 = '2020-10-28T06:53:00.000Z';
+        const laterTimestamp2 = '2020-10-28T06:51:00.000Z';
+        const laterTimestamp3 = '2020-10-28T06:53:00.000Z';
         const doc1 = {
           id,
           '@timestamp': timestamp,
@@ -2274,12 +2296,14 @@ export default ({ getService }: FtrProviderContext) => {
           ...doc1,
           '@timestamp': laterTimestamp,
         };
+        const doc2WithLaterTimestamp = { ...doc1WithLaterTimestamp, '@timestamp': laterTimestamp2 };
+        const doc3WithLaterTimestamp = { ...doc2WithLaterTimestamp, '@timestamp': laterTimestamp3 };
 
         await indexListOfSourceDocuments([
           doc1,
           doc1WithLaterTimestamp,
-          { ...doc1, '@timestamp': timestamp1 },
-          { ...doc1WithLaterTimestamp, '@timestamp': laterTimestamp2 },
+          doc2WithLaterTimestamp,
+          doc3WithLaterTimestamp,
         ]);
 
         const rule: EqlRuleCreateProps = {
@@ -2319,23 +2343,29 @@ export default ({ getService }: FtrProviderContext) => {
           [ALERT_SUPPRESSION_TERMS]: [
             {
               field: 'host.name',
-              value: ['host-a'],
+              value: 'host-a',
             },
           ],
           [TIMESTAMP]: '2020-10-28T07:00:00.000Z',
           [ALERT_LAST_DETECTED]: '2020-10-28T07:00:00.000Z',
-          [ALERT_SUPPRESSION_START]: timestamp1,
-          [ALERT_SUPPRESSION_END]: laterTimestamp2,
           [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
         });
       });
 
-      it('does not suppress alerts where no suppression field values match', async () => {
+      it('suppresses sequence alert with suppression value of "null" when all events have unique values for suppression field', async () => {
+        /*
+        Sequence alerts only contain values which make up the intersection of
+        a given field in all events for that sequence.
+
+        So for a sequence alert where the two events contain host name values of
+        host-a and host-b, the sequence alert will have 'null' for that value and will
+        suppress on null values if missing_fields_strategy is set to 'suppress'
+        */
         const id = uuidv4();
-        const timestamp = '2020-10-28T06:50:00.000Z'; // this should not count towards events
+        const timestamp = '2020-10-28T06:50:00.000Z';
         const laterTimestamp = '2020-10-28T06:50:01.000Z';
-        const timestamp1 = '2020-10-28T06:51:00.000Z';
-        const laterTimestamp2 = '2020-10-28T06:53:00.000Z';
+        const laterTimestamp2 = '2020-10-28T06:51:00.000Z';
+        const laterTimestamp3 = '2020-10-28T06:53:00.000Z';
         const doc1 = {
           id,
           '@timestamp': timestamp,
@@ -2346,12 +2376,21 @@ export default ({ getService }: FtrProviderContext) => {
           '@timestamp': laterTimestamp,
           host: { name: 'host-b' },
         };
-
+        const doc2WithLaterTimestamp = {
+          ...doc1WithLaterTimestamp,
+          '@timestamp': laterTimestamp2,
+          host: { name: 'host-c' },
+        };
+        const doc3WithLaterTimestamp = {
+          ...doc2WithLaterTimestamp,
+          '@timestamp': laterTimestamp3,
+          host: { name: 'host-d' },
+        };
         await indexListOfSourceDocuments([
           doc1,
           doc1WithLaterTimestamp,
-          { ...doc1, '@timestamp': timestamp1, host: { name: 'host-c' } },
-          { ...doc1WithLaterTimestamp, '@timestamp': laterTimestamp2, host: { name: 'host-d' } },
+          doc2WithLaterTimestamp,
+          doc3WithLaterTimestamp,
         ]);
 
         const rule: EqlRuleCreateProps = {
@@ -2378,17 +2417,26 @@ export default ({ getService }: FtrProviderContext) => {
         });
         // we expect one alert and two suppressed alerts
         // and two building block alerts, let's confirm that
-        expect(previewAlerts.length).toEqual(9);
+        expect(previewAlerts.length).toEqual(3);
         const [sequenceAlert, buildingBlockAlerts] = partition(
           previewAlerts,
           (alert) => alert?._source?.['kibana.alert.building_block_type'] == null
         );
-        expect(buildingBlockAlerts.length).toEqual(6);
-        expect(sequenceAlert.length).toEqual(3);
+        expect(buildingBlockAlerts.length).toEqual(2);
+        expect(sequenceAlert.length).toEqual(1);
 
-        expect(sequenceAlert[0]?._source?.[ALERT_SUPPRESSION_DOCS_COUNT]).toEqual(0);
-        expect(sequenceAlert[1]?._source?.[ALERT_SUPPRESSION_DOCS_COUNT]).toEqual(0);
-        expect(sequenceAlert[2]?._source?.[ALERT_SUPPRESSION_DOCS_COUNT]).toEqual(0);
+        expect(sequenceAlert[0]._source).toEqual({
+          ...sequenceAlert[0]._source,
+          [ALERT_SUPPRESSION_TERMS]: [
+            {
+              field: 'host.name',
+              value: null,
+            },
+          ],
+          [TIMESTAMP]: '2020-10-28T07:00:00.000Z',
+          [ALERT_LAST_DETECTED]: '2020-10-28T07:00:00.000Z',
+          [ALERT_SUPPRESSION_DOCS_COUNT]: 2,
+        });
       });
 
       it('suppresses alerts on a field with array values', async () => {
@@ -2446,8 +2494,6 @@ export default ({ getService }: FtrProviderContext) => {
           ],
           [TIMESTAMP]: '2020-10-28T07:00:00.000Z',
           [ALERT_LAST_DETECTED]: '2020-10-28T07:00:00.000Z',
-          [ALERT_SUPPRESSION_START]: timestamp2,
-          [ALERT_SUPPRESSION_END]: timestamp3,
           [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
         });
       });
@@ -2536,21 +2582,21 @@ export default ({ getService }: FtrProviderContext) => {
           (alert) => alert?._source?.['kibana.alert.building_block_type'] == null
         );
 
-        // for sequence alerts if neither of the fields are there, we cannot suppress?
+        // for sequence alerts if neither of the fields are there, we cannot suppress
         expect(sequenceAlert.length).toEqual(4);
         expect(sequenceAlert[0]._source).toEqual({
           ...sequenceAlert[0]._source,
           [ALERT_SUPPRESSION_TERMS]: [
             {
               field: 'agent.name',
-              value: ['agent-a'],
+              value: 'agent-a',
             },
             {
               field: 'agent.version',
-              value: ['10'],
+              value: 10,
             },
           ],
-          [ALERT_SUPPRESSION_DOCS_COUNT]: 3,
+          [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
         });
 
         expect(sequenceAlert[1]._source).toEqual({
@@ -2562,10 +2608,10 @@ export default ({ getService }: FtrProviderContext) => {
             },
             {
               field: 'agent.version',
-              value: ['10'],
+              value: 10,
             },
           ],
-          [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
+          [ALERT_SUPPRESSION_DOCS_COUNT]: 2,
         });
 
         expect(sequenceAlert[2]._source).toEqual({
@@ -2573,14 +2619,14 @@ export default ({ getService }: FtrProviderContext) => {
           [ALERT_SUPPRESSION_TERMS]: [
             {
               field: 'agent.name',
-              value: ['agent-a'],
+              value: null,
             },
             {
               field: 'agent.version',
               value: null,
             },
           ],
-          [ALERT_SUPPRESSION_DOCS_COUNT]: 2,
+          [ALERT_SUPPRESSION_DOCS_COUNT]: 3,
         });
 
         expect(sequenceAlert[3]._source).toEqual({
@@ -2588,7 +2634,7 @@ export default ({ getService }: FtrProviderContext) => {
           [ALERT_SUPPRESSION_TERMS]: [
             {
               field: 'agent.name',
-              value: null,
+              value: 'agent-a',
             },
             {
               field: 'agent.version',
@@ -2682,8 +2728,8 @@ export default ({ getService }: FtrProviderContext) => {
           (alert) => alert?._source?.['kibana.alert.building_block_type'] == null
         );
 
-        // for sequence alerts if neither of the fields are there, we cannot suppress?
-        expect(sequenceAlert.length).toEqual(9);
+        // for sequence alerts if neither of the fields are there, we cannot suppress
+        expect(sequenceAlert.length).toEqual(10);
         const [suppressedSequenceAlerts] = partition(
           sequenceAlert,
           (alert) => alert?._source?.['kibana.alert.suppression.docs_count']
@@ -2694,14 +2740,14 @@ export default ({ getService }: FtrProviderContext) => {
           [ALERT_SUPPRESSION_TERMS]: [
             {
               field: 'agent.name',
-              value: ['agent-a'],
+              value: 'agent-a',
             },
             {
               field: 'agent.version',
-              value: ['10'],
+              value: 10,
             },
           ],
-          [ALERT_SUPPRESSION_DOCS_COUNT]: 2,
+          [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
         });
       });
 
@@ -2755,24 +2801,21 @@ export default ({ getService }: FtrProviderContext) => {
           previewId,
           sort: ['host.name', ALERT_ORIGINAL_TIME],
         });
-        const [sequenceAlert] = partition(
+        const [sequenceAlert, buildingBlockAlerts] = partition(
           previewAlerts,
           (alert) => alert?._source?.['kibana.alert.building_block_type'] == null
         );
 
-        // for sequence alerts if neither of the fields are there, we cannot suppress?
+        expect(buildingBlockAlerts.length).toEqual(2);
         expect(sequenceAlert.length).toEqual(1);
-        expect(previewAlerts.length).toEqual(3);
         expect(sequenceAlert[0]._source).toEqual({
           ...sequenceAlert[0]._source,
           [ALERT_SUPPRESSION_TERMS]: [
             {
               field: 'host.name',
-              value: ['host-a'],
+              value: 'host-a',
             },
           ],
-          [ALERT_SUPPRESSION_START]: secondTimestamp,
-          [ALERT_SUPPRESSION_END]: secondTimestamp6,
           [ALERT_SUPPRESSION_DOCS_COUNT]: 5, // if deduplication failed this would 12, or the previewAlerts count would be double
         });
       });
@@ -2831,13 +2874,12 @@ export default ({ getService }: FtrProviderContext) => {
             [ALERT_SUPPRESSION_TERMS]: [
               {
                 field: 'host.name',
-                value: ['host-a'],
+                value: 'host-a',
               },
             ],
             // suppression boundaries equal to original event time, since no alert been suppressed
-            [ALERT_SUPPRESSION_START]: firstTimestamp2,
-            [ALERT_SUPPRESSION_END]: firstTimestamp2,
-            [TIMESTAMP]: suppressionStart,
+            [ALERT_SUPPRESSION_START]: suppressionStart,
+            [ALERT_SUPPRESSION_END]: suppressionStart,
             [ALERT_SUPPRESSION_DOCS_COUNT]: 0,
           })
         );
@@ -2879,11 +2921,11 @@ export default ({ getService }: FtrProviderContext) => {
           [ALERT_SUPPRESSION_TERMS]: [
             {
               field: 'host.name',
-              value: ['host-a'],
+              value: 'host-a',
             },
           ],
-          [ALERT_SUPPRESSION_START]: firstTimestamp2, // suppression start is the same
-          [ALERT_SUPPRESSION_END]: secondTimestamp, // suppression end is updated
+          // [ALERT_SUPPRESSION_START]: firstTimestamp2, // suppression start is the same
+          // [ALERT_SUPPRESSION_END]: secondTimestamp, // suppression end is updated
           [ALERT_SUPPRESSION_DOCS_COUNT]: 1, // 1 alert from second rule run, that's why 1 suppressed
         });
         // suppression end value should be greater than second document timestamp, but lesser than current time
@@ -2947,13 +2989,13 @@ export default ({ getService }: FtrProviderContext) => {
           [ALERT_SUPPRESSION_TERMS]: [
             {
               field: 'host.name',
-              value: ['host-a'],
+              value: 'host-a',
             },
           ],
           // suppression boundaries equal to original event time, since no alert been suppressed
-          [ALERT_SUPPRESSION_START]: firstTimestamp,
-          [ALERT_SUPPRESSION_END]: firstTimestamp,
-          [TIMESTAMP]: suppressionStart,
+          // [ALERT_SUPPRESSION_START]: firstTimestamp,
+          // [ALERT_SUPPRESSION_END]: firstTimestamp,
+          // [TIMESTAMP]: suppressionStart,
           [ALERT_SUPPRESSION_DOCS_COUNT]: 0,
         });
 
@@ -2976,7 +3018,7 @@ export default ({ getService }: FtrProviderContext) => {
           { ...secondDocument, '@timestamp': secondTimestamp2 },
         ]);
         await patchRule(supertest, log, { id: createdRule.id, enabled: true });
-        const afterTimestamp = new Date(Date.now() + 1000);
+        const afterTimestamp = new Date(Date.now() + 5000);
         const secondAlerts = await getOpenAlerts(
           supertest,
           log,
@@ -2998,11 +3040,11 @@ export default ({ getService }: FtrProviderContext) => {
           [ALERT_SUPPRESSION_TERMS]: [
             {
               field: 'host.name',
-              value: ['host-a'],
+              value: 'host-a',
             },
           ],
-          [ALERT_SUPPRESSION_START]: firstTimestamp,
-          [ALERT_SUPPRESSION_END]: firstTimestamp,
+          // [ALERT_SUPPRESSION_START]: firstTimestamp,
+          // [ALERT_SUPPRESSION_END]: firstTimestamp,
           [ALERT_SUPPRESSION_DOCS_COUNT]: 0, // 1 alert from second rule run, that's why 1 suppressed
         });
         expect(sequenceAlert2[1]._source).toEqual({
@@ -3010,12 +3052,142 @@ export default ({ getService }: FtrProviderContext) => {
           [ALERT_SUPPRESSION_TERMS]: [
             {
               field: 'host.name',
-              value: ['host-a'],
+              value: 'host-a',
             },
           ],
-          [ALERT_SUPPRESSION_START]: secondTimestamp2,
-          [ALERT_SUPPRESSION_END]: secondTimestamp2,
+          // [ALERT_SUPPRESSION_START]: secondTimestamp2,
+          // [ALERT_SUPPRESSION_END]: secondTimestamp2,
           [ALERT_SUPPRESSION_DOCS_COUNT]: 0, // 1 alert from second rule run, that's why 1 suppressed
+        });
+      });
+
+      it('does not suppress alerts outside of duration when query with 3 sequences', async () => {
+        const id = uuidv4();
+        // this timestamp is 1 minute in the past
+        const dateNow = Date.now();
+        const timestampSequenceEvent1 = new Date(dateNow - 5000).toISOString();
+        const timestampSequenceEvent2 = new Date(dateNow - 5500).toISOString();
+        const timestampSequenceEvent3 = new Date(dateNow - 5800).toISOString();
+
+        const firstSequenceEvent = {
+          id,
+          '@timestamp': timestampSequenceEvent1,
+          host: {
+            name: 'host-a',
+          },
+        };
+        await indexListOfSourceDocuments([
+          firstSequenceEvent,
+          { ...firstSequenceEvent, '@timestamp': timestampSequenceEvent2 },
+          { ...firstSequenceEvent, '@timestamp': timestampSequenceEvent3 },
+        ]);
+
+        const rule: EqlRuleCreateProps = {
+          ...getEqlRuleForAlertTesting(['ecs_compliant']),
+          query: `sequence [any where id == "${id}"] [any where id == "${id}"] [any where id == "${id}"]`,
+          alert_suppression: {
+            group_by: ['host.name'],
+            duration: {
+              value: 7,
+              unit: 's',
+            },
+            missing_fields_strategy: 'suppress',
+          },
+          from: 'now-10s',
+          interval: '5s',
+        };
+        const createdRule = await createRule(supertest, log, rule);
+        const alerts = await getOpenAlerts(supertest, log, es, createdRule);
+
+        // we expect one shell alert
+        // and three building block alerts
+        expect(alerts.hits.hits.length).toEqual(4);
+        const [sequenceAlert, buildingBlockAlerts] = partition(
+          alerts.hits.hits,
+          (alert) => alert?._source?.['kibana.alert.building_block_type'] == null
+        );
+        expect(buildingBlockAlerts.length).toEqual(3);
+        expect(sequenceAlert.length).toEqual(1);
+
+        expect(sequenceAlert[0]._source).toEqual({
+          ...sequenceAlert[0]._source,
+          [ALERT_SUPPRESSION_TERMS]: [
+            {
+              field: 'host.name',
+              value: 'host-a',
+            },
+          ],
+          [ALERT_SUPPRESSION_DOCS_COUNT]: 0,
+        });
+
+        const dateNow2 = Date.now();
+        const secondTimestampEventSequence = new Date(dateNow2 - 2000).toISOString();
+        const secondTimestampEventSequence2 = new Date(dateNow2 - 1000).toISOString();
+        const secondTimestampEventSequence3 = new Date(dateNow2).toISOString();
+
+        const secondSequenceEvent = {
+          id,
+          '@timestamp': secondTimestampEventSequence,
+          host: {
+            name: 'host-a',
+          },
+        };
+
+        // Add a new document, then disable and re-enable to trigger another rule run.
+        // the second rule run should generate a new alert
+        await patchRule(supertest, log, { id: createdRule.id, enabled: false });
+
+        await indexListOfSourceDocuments([
+          secondSequenceEvent,
+          { ...secondSequenceEvent, '@timestamp': secondTimestampEventSequence2 },
+          { ...secondSequenceEvent, '@timestamp': secondTimestampEventSequence3 },
+        ]);
+        await patchRule(supertest, log, { id: createdRule.id, enabled: true });
+        const afterTimestamp2 = new Date(dateNow2 + 2000);
+        const secondAlerts = await getOpenAlerts(
+          supertest,
+          log,
+          es,
+          createdRule,
+          RuleExecutionStatusEnum.succeeded,
+          undefined,
+          afterTimestamp2
+        );
+
+        const [sequenceAlert2, buildingBlockAlerts2] = partition(
+          secondAlerts.hits.hits,
+          (alert) => alert?._source?.['kibana.alert.building_block_type'] == null
+        );
+
+        // two sequence alerts because the second one happened
+        // outside of the rule's suppression duration
+        expect(sequenceAlert2.length).toEqual(2);
+        expect(buildingBlockAlerts2.length).toEqual(6);
+        // timestamps should be different for two alerts, showing they were
+        // created in different rule executions
+        expect(sequenceAlert2[0]?._source?.[TIMESTAMP]).not.toEqual(
+          sequenceAlert2[1]?._source?.[TIMESTAMP]
+        );
+
+        expect(sequenceAlert2[0]._source).toEqual({
+          ...sequenceAlert2[0]?._source,
+          [ALERT_SUPPRESSION_TERMS]: [
+            {
+              field: 'host.name',
+              value: 'host-a',
+            },
+          ],
+          [ALERT_SUPPRESSION_DOCS_COUNT]: 0, // only one alert created, so zero documents are suppressed
+        });
+        expect(sequenceAlert2[1]._source).toEqual({
+          ...sequenceAlert2[1]?._source,
+          [ALERT_SUPPRESSION_TERMS]: [
+            {
+              field: 'host.name',
+              value: 'host-a',
+            },
+          ],
+          [ALERT_SUPPRESSION_DOCS_COUNT]: 0, // only one alert created, so zero documents are suppressed
         });
       });
     });

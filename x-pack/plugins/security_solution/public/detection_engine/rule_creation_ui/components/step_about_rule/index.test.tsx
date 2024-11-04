@@ -110,6 +110,7 @@ describe('StepAboutRuleComponent', () => {
         timestampOverride={stepAboutDefaultValue.timestampOverride}
         isLoading={false}
         form={aboutStepForm}
+        eqlSequenceSuppressionEnabled={false}
       />
     );
   };

@@ -371,8 +371,7 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
               enrichAlerts,
               currentTimeOverride,
               isRuleExecutionOnly,
-              maxAlerts,
-              getMatchingBuildingBlockAlerts
+              maxAlerts
             ) => {
               const ruleDataClientWriter = await ruleDataClient.getWriter({
                 namespace: options.spaceId,
@@ -572,21 +571,12 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   currentTimeOverride,
                 });
 
-                const matchingBuildingBlockAlerts =
-                  newAlerts?.length > 0 && getMatchingBuildingBlockAlerts != null
-                    ? newAlerts.flatMap(
-                        (newAlert) =>
-                          getMatchingBuildingBlockAlerts(newAlert?._source) as Array<{
-                            _id: string;
-                            _source: Record<string, string | number | null>;
-                          }>
-                      )
-                    : [];
-
                 const augmentedBuildingBlockAlerts =
-                  matchingBuildingBlockAlerts.length > 0
+                  newAlerts != null && newAlerts.length > 0
                     ? await augmentAlerts({
-                        alerts: matchingBuildingBlockAlerts,
+                        alerts: newAlerts.flatMap((alert) =>
+                          alert.subAlerts != null ? alert.subAlerts : []
+                        ),
                         options,
                         kibanaVersion: ruleDataClient.kibanaVersion,
                         currentTimeOverride,

@@ -11,11 +11,11 @@ import { TIMESTAMP } from '@kbn/rule-data-utils';
 import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
 import type { EqlHitsSequence } from '@elastic/elasticsearch/lib/api/types';
 
-import partition from 'lodash/partition';
 import type { SignalSource, SignalSourceHit } from '../types';
 import type {
   BaseFieldsLatest,
   WrappedFieldsLatest,
+  EqlBuildingBlockFieldsLatest,
 } from '../../../../../common/api/detection_engine/model/alerts';
 import type { ConfigType } from '../../../../config';
 import type {
@@ -27,7 +27,7 @@ import type {
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 import { transformHitToAlert } from '../factories/utils/transform_hit_to_alert';
 import { getSuppressionAlertFields, getSuppressionTerms } from './suppression_utils';
-import { generateId, isEqlBuildingBlockAlert } from './utils';
+import { generateId, isEqlShellAlert } from './utils';
 
 import type { BuildReasonMessage } from './reason_formatters';
 import type { ExtraFieldsForShellAlert } from '../eql/build_alert_group_from_sequence';
@@ -147,9 +147,20 @@ export const wrapSuppressedSequenceAlerts = ({
   publicBaseUrl: string | undefined;
   primaryTimestamp: string;
   secondaryTimestamp?: string;
-}): Array<WrappedFieldsLatest<BaseFieldsLatest & SuppressionFieldsLatest>> => {
+}): Array<
+  WrappedFieldsLatest<BaseFieldsLatest & SuppressionFieldsLatest> & {
+    subAlerts: Array<WrappedFieldsLatest<BaseFieldsLatest & SuppressionFieldsLatest>>;
+  }
+> => {
   return sequences.reduce(
-    (acc: Array<WrappedFieldsLatest<BaseFieldsLatest & SuppressionFieldsLatest>>, sequence) => {
+    (
+      acc: Array<
+        WrappedFieldsLatest<BaseFieldsLatest & SuppressionFieldsLatest> & {
+          subAlerts: Array<WrappedFieldsLatest<BaseFieldsLatest & SuppressionFieldsLatest>>;
+        }
+      >,
+      sequence
+    ) => {
       const alertGroupFromSequence = buildAlertGroupFromSequence({
         ruleExecutionLogger,
         sequence,
@@ -162,18 +173,16 @@ export const wrapSuppressedSequenceAlerts = ({
         applyOverrides: true,
         publicBaseUrl,
       });
-
-      // find shell alert
-      const [buildingBlocks, shellAlert] = partition(alertGroupFromSequence, (alert) =>
-        isEqlBuildingBlockAlert(alert._source)
-      );
-
-      console.error('BUILDING BLOCKS LENGTH', buildingBlocks.length);
-      console.error('SHELL ALLERT LENGTH', shellAlert.length);
-
+      const shellAlert = alertGroupFromSequence[0];
+      if (!isEqlShellAlert(shellAlert)) {
+        return [...acc];
+      }
+      const buildingBlocks = alertGroupFromSequence.slice(1) as Array<
+        WrappedFieldsLatest<EqlBuildingBlockFieldsLatest>
+      >;
       const suppressionTerms = getSuppressionTerms({
         alertSuppression: completeRule?.ruleParams?.alertSuppression,
-        fields: shellAlert[0]?._source,
+        fields: shellAlert?._source,
       });
       const instanceId = objectHash([suppressionTerms, completeRule.alertId, spaceId]);
 
@@ -181,19 +190,26 @@ export const wrapSuppressedSequenceAlerts = ({
         primaryTimestamp,
         secondaryTimestamp,
         // as casting should work because the alert fields are flattened (hopefully?)
-        fields: shellAlert[0]._source as Record<string, string | number | null> | undefined,
+        fields: shellAlert?._source as Record<string, string | number | null> | undefined,
         suppressionTerms,
         fallbackTimestamp: alertTimestampOverride?.toISOString() ?? new Date().toISOString(),
         instanceId,
       });
       const theFields = Object.keys(suppressionFields) as Array<keyof ExtraFieldsForShellAlert>;
       // mutates shell alert to contain values from suppression fields
-      theFields.forEach((field) => (shellAlert[0]._source[field] = suppressionFields[field]));
+      theFields.forEach((field) => (shellAlert._source[field] = suppressionFields[field]));
+      shellAlert.subAlerts = buildingBlocks;
 
-      return [...acc, ...buildingBlocks, ...shellAlert] as Array<
-        WrappedFieldsLatest<BaseFieldsLatest & SuppressionFieldsLatest>
+      return [...acc, shellAlert] as Array<
+        WrappedFieldsLatest<BaseFieldsLatest & SuppressionFieldsLatest> & {
+          subAlerts: Array<WrappedFieldsLatest<BaseFieldsLatest & SuppressionFieldsLatest>>;
+        }
       >;
     },
-    [] as Array<WrappedFieldsLatest<BaseFieldsLatest & SuppressionFieldsLatest>>
+    [] as Array<
+      WrappedFieldsLatest<BaseFieldsLatest & SuppressionFieldsLatest> & {
+        subAlerts: Array<WrappedFieldsLatest<BaseFieldsLatest & SuppressionFieldsLatest>>;
+      }
+    >
   );
 };

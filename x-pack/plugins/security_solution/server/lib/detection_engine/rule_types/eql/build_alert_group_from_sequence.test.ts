@@ -72,7 +72,7 @@ describe('buildAlert', () => {
         }),
       })
     );
-    expect(alertGroup[0]._source[ALERT_URL]).toContain(
+    expect(alertGroup[0]?._source?.[ALERT_URL]).toContain(
       'http://testkibanabaseurl.com/s/space/app/security/alerts/redirect/f2db3574eaf8450e3f4d1cf4f416d70b110b035ae0a7a00026242df07f0a6c90?index=.alerts-security.alerts-space'
     );
     expect(alertGroup[1]).toEqual(
@@ -113,7 +113,7 @@ describe('buildAlert', () => {
             },
             {
               depth: 1,
-              id: alertGroup[0]._id,
+              id: alertGroup[0]?._id,
               index: '',
               rule: sampleRuleGuid,
               type: 'signal',
@@ -135,7 +135,7 @@ describe('buildAlert', () => {
     expect(alertGroup[2]._source[ALERT_URL]).toContain(
       'http://testkibanabaseurl.com/s/space/app/security/alerts/redirect/1b7d06954e74257140f3bf73f139078483f9658fe829fd806cc307fc0388fb23?index=.alerts-security.alerts-space'
     );
-    const groupIds = alertGroup.map((alert) => alert._source[ALERT_GROUP_ID]);
+    const groupIds = alertGroup.map((alert) => alert?._source?.[ALERT_GROUP_ID]);
     for (const groupId of groupIds) {
       expect(groupId).toEqual(groupIds[0]);
     }

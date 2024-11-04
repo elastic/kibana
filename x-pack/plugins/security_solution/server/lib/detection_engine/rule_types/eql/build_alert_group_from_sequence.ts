@@ -61,6 +61,17 @@ export interface BuildAlertGroupFromSequence {
   intendedTimestamp?: Date;
 }
 
+// eql shell alerts can have a subAlerts property
+// when suppression is used in EQL sequence queries
+export type WrappedEqlShellOptionalSubAlertsType = WrappedFieldsLatest<EqlShellFieldsLatest> & {
+  subAlerts?: Array<WrappedFieldsLatest<EqlShellFieldsLatest>>;
+};
+
+export type BuildAlertGroupFromSequenceReturnType = [
+  WrappedEqlShellOptionalSubAlertsType?,
+  ...Array<WrappedFieldsLatest<EqlBuildingBlockFieldsLatest>>
+];
+
 /**
  * Takes N raw documents from ES that form a sequence and builds them into N+1 signals ready to be indexed -
  * one signal for each event in the sequence, and a "shell" signal that ties them all together. All N+1 signals
@@ -79,9 +90,7 @@ export const buildAlertGroupFromSequence = ({
   alertTimestampOverride,
   publicBaseUrl,
   intendedTimestamp,
-}: BuildAlertGroupFromSequence): Array<
-  WrappedFieldsLatest<EqlBuildingBlockFieldsLatest | EqlShellFieldsLatest>
-> => {
+}: BuildAlertGroupFromSequence): BuildAlertGroupFromSequenceReturnType => {
   const ancestors: Ancestor[] = sequence.events.flatMap((event) => buildAncestors(event));
   if (ancestors.some((ancestor) => ancestor?.rule === completeRule.alertId)) {
     return [];
@@ -173,7 +182,11 @@ export const buildAlertGroupFromSequence = ({
     }
   );
 
-  return [...wrappedBuildingBlocks, sequenceAlert];
+  // sequence alert guaranteed to be first
+  return [sequenceAlert, ...wrappedBuildingBlocks] as [
+    WrappedFieldsLatest<EqlShellFieldsLatest>?,
+    ...Array<WrappedFieldsLatest<EqlBuildingBlockFieldsLatest>>
+  ];
 };
 
 export interface BuildAlertRootParams {

@@ -14,10 +14,9 @@ import type {
   SuppressionFieldsLatest,
 } from '@kbn/rule-registry-plugin/common/schemas';
 
-import { ALERT_GROUP_ID } from '../../../../../common/field_maps/field_names';
 import { isQueryRule } from '../../../../../common/detection_engine/utils';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
-import { makeFloatString, isEqlBuildingBlockAlert, isEqlShellAlert } from './utils';
+import { makeFloatString } from './utils';
 import type {
   BaseFieldsLatest,
   WrappedFieldsLatest,
@@ -55,7 +54,7 @@ export const bulkCreateWithSuppression = async <
 }: {
   alertWithSuppression: SuppressedAlertService;
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
-  wrappedDocs: Array<WrappedFieldsLatest<T>>;
+  wrappedDocs: Array<WrappedFieldsLatest<T> & { subAlerts?: Array<WrappedFieldsLatest<T>> }>;
   buildingBlockAlerts?: Array<WrappedFieldsLatest<BaseFieldsLatest>>;
   services: RuleServices;
   suppressionWindow: string;
@@ -100,32 +99,22 @@ export const bulkCreateWithSuppression = async <
     }
   };
 
-  let getMatchingBuildingBlockAlerts;
-
-  if (buildingBlockAlerts != null && buildingBlockAlerts.length > 0)
-    getMatchingBuildingBlockAlerts = (newAlertSource: unknown) => {
-      return buildingBlockAlerts?.filter((someAlert) => {
-        return (
-          isEqlBuildingBlockAlert(someAlert?._source) &&
-          isEqlShellAlert(newAlertSource) &&
-          someAlert?._source?.[ALERT_GROUP_ID] === newAlertSource?.[ALERT_GROUP_ID]
-        );
-      });
-    };
-
   const { createdAlerts, errors, suppressedAlerts, alertsWereTruncated } =
     await alertWithSuppression(
       wrappedDocs.map((doc) => ({
         _id: doc._id,
         // `fields` should have already been merged into `doc._source`
         _source: doc._source,
+        subAlerts:
+          doc?.subAlerts != null
+            ? doc?.subAlerts?.map((subAlert) => ({ _id: subAlert._id, _source: subAlert._source }))
+            : undefined,
       })),
       suppressionWindow,
       enrichAlertsWrapper,
       alertTimestampOverride,
       isSuppressionPerRuleExecution,
-      maxAlerts,
-      getMatchingBuildingBlockAlerts
+      maxAlerts
     );
 
   const end = performance.now();

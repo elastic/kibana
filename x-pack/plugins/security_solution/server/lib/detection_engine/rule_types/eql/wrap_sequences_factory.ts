@@ -11,7 +11,8 @@ import type { ConfigType } from '../../../../config';
 import type { CompleteRule, RuleParams } from '../../rule_schema';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 import type {
-  BaseFieldsLatest,
+  EqlBuildingBlockFieldsLatest,
+  EqlShellFieldsLatest,
   WrappedFieldsLatest,
 } from '../../../../../common/api/detection_engine/model/alerts';
 
@@ -39,9 +40,14 @@ export const wrapSequencesFactory =
   }): WrapSequences =>
   (sequences, buildReasonMessage) =>
     sequences.reduce(
-      (acc: Array<WrappedFieldsLatest<BaseFieldsLatest>>, sequence) => [
-        ...acc,
-        ...buildAlertGroupFromSequence({
+      (
+        acc: Array<
+          | WrappedFieldsLatest<EqlShellFieldsLatest>
+          | WrappedFieldsLatest<EqlBuildingBlockFieldsLatest>
+        >,
+        sequence
+      ) => {
+        const alerts = buildAlertGroupFromSequence({
           ruleExecutionLogger,
           sequence,
           completeRule,
@@ -52,7 +58,12 @@ export const wrapSequencesFactory =
           alertTimestampOverride,
           publicBaseUrl,
           intendedTimestamp,
-        }),
-      ],
+        });
+
+        return [...acc, ...alerts] as Array<
+          | WrappedFieldsLatest<EqlShellFieldsLatest>
+          | WrappedFieldsLatest<EqlBuildingBlockFieldsLatest>
+        >;
+      },
       []
     );
