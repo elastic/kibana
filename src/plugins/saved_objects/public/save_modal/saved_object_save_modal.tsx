@@ -286,6 +286,10 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
       this.setState({
         title: this.state.title.replace(regex, ` [${newNumber}]`),
       });
+    } else {
+      this.setState({
+        title: this.state.title + ' [1]',
+      });
     }
   };
 
