@@ -39,6 +39,7 @@ export default function ({ loadTestFile, getService, getPageObjects }: FtrProvid
 
   describe('links panel', function () {
     before(setup);
+
     after(teardown);
     loadTestFile(require.resolve('./links_create_edit'));
     loadTestFile(require.resolve('./links_navigation'));

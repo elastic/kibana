@@ -162,6 +162,7 @@ export default function (providerContext: FtrProviderContext) {
       await getService('supertest').post(`/api/fleet/setup`).set('kbn-xsrf', 'xxx').send();
       await cleanupFiles();
     });
+
     after(async () => {
       await Promise.all([
         esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server'),

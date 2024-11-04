@@ -27,6 +27,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async () => {
       await common.setTime({ from, to });
     });
+
     after(async () => {
       await common.unsetTime();
     });

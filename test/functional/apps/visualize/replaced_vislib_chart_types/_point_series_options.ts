@@ -193,6 +193,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const visName = 'Visualization Point Series Test';
       const customLabel = 'myLabel';
       const axisTitle = 'myTitle';
+
       before(async function () {
         await visualize.navigateToNewAggBasedVisualization();
         await visualize.clickLineChart();

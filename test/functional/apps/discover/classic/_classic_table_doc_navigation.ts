@@ -31,6 +31,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'discover:searchFieldsFromSource': true,
       });
     });
+
     after(async () => {
       await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
       await kibanaServer.uiSettings.replace({});

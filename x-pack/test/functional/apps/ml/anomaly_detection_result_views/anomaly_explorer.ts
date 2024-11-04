@@ -96,6 +96,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('anomaly explorer', function () {
     this.tags(['ml']);
+
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await ml.testResources.createDataViewIfNeeded('ft_farequote', '@timestamp');
@@ -602,6 +603,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       }
     });
+
     describe('with no influencers', function () {
       for (const testData of testDataListWithNoInfluencers) {
         before(async () => {

@@ -67,6 +67,7 @@ export default function (ftrContext: FtrProviderContext) {
           await removeOpenAIConnector?.();
           await browser.refresh();
         });
+
         it('show success llm button', async () => {
           await pageObjects.searchPlayground.PlaygroundStartChatPage.expectShowSuccessLLMButton();
         });
@@ -132,6 +133,7 @@ export default function (ftrContext: FtrProviderContext) {
         await browser.refresh();
         await pageObjects.searchPlayground.PlaygroundChatPage.navigateToChatPage();
       });
+
       it('loads successfully', async () => {
         await pageObjects.searchPlayground.PlaygroundChatPage.expectChatWindowLoaded();
       });

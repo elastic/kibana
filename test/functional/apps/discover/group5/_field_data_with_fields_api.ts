@@ -27,6 +27,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('discover tab with new fields API', function describeIndexTests() {
     this.tags('includeFirefox');
+
     before(async function () {
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover.json');
@@ -38,6 +39,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await common.navigateToApp('discover');
     });
+
     describe('field data', function () {
       it('search php should show the correct hit count', async function () {
         const expectedHitCount = '445';

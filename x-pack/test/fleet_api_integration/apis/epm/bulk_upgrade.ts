@@ -40,6 +40,7 @@ export default function (providerContext: FtrProviderContext) {
           .send({ force: true })
           .expect(200);
       });
+
       afterEach(async () => {
         await deletePackage('multiple_versions', '0.1.0');
         await deletePackage('multiple_versions', '0.3.0');
@@ -49,6 +50,7 @@ export default function (providerContext: FtrProviderContext) {
       it('should return 400 if no packages are requested for upgrade', async function () {
         await supertest.post(`/api/fleet/epm/packages/_bulk`).set('kbn-xsrf', 'xxxx').expect(400);
       });
+
       it('should return 403 if user without integrations all requests upgrade', async function () {
         await supertestWithoutAuth
           .post(`/api/fleet/epm/packages/_bulk`)
@@ -57,6 +59,7 @@ export default function (providerContext: FtrProviderContext) {
           .send({ packages: ['multiple_versions', 'overrides'] })
           .expect(403);
       });
+
       it('should return 403 if user without fleet access requests upgrade', async function () {
         await supertestWithoutAuth
           .post(`/api/fleet/epm/packages/_bulk`)
@@ -65,6 +68,7 @@ export default function (providerContext: FtrProviderContext) {
           .send({ packages: ['multiple_versions', 'overrides'] })
           .expect(403);
       });
+
       it('should return 200 and an array for upgrading a package', async function () {
         const { body }: { body: BulkInstallPackagesResponse } = await supertest
           .post(`/api/fleet/epm/packages/_bulk?prerelease=true`)
@@ -76,6 +80,7 @@ export default function (providerContext: FtrProviderContext) {
         const entry = body.items[0] as BulkInstallPackageInfo;
         expect(entry.version).equal('0.3.0');
       });
+
       it('should return an error for packages that do not exist', async function () {
         const { body }: { body: BulkInstallPackagesResponse } = await supertest
           .post(`/api/fleet/epm/packages/_bulk?prerelease=true`)
@@ -91,6 +96,7 @@ export default function (providerContext: FtrProviderContext) {
         expect(err.statusCode).equal(404);
         expect(body.items[1].name).equal('blahblah');
       });
+
       it('should upgrade multiple packages', async function () {
         const { body }: { body: BulkInstallPackagesResponse } = await supertest
           .post(`/api/fleet/epm/packages/_bulk?prerelease=true`)

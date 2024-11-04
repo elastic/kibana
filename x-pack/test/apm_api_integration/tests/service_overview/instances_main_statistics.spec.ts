@@ -79,6 +79,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     () => {
       describe('Return Top 100 instances', () => {
         const serviceName = 'synth-node-1';
+
         before(() => {
           const range = timerange(start, end);
           const transactionName = 'foo';
@@ -154,13 +155,16 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         after(() => {
           return synthtrace.clean();
         });
+
         describe('fetch instances', () => {
           let instancesMainStats: ServiceOverviewInstancesMainStatistics['currentPeriod'];
+
           before(async () => {
             instancesMainStats = await getServiceOverviewInstancesMainStatistics({
               serviceName,
             });
           });
+
           it('returns top 100 instances', () => {
             expect(instancesMainStats.length).to.be(100);
           });
@@ -169,6 +173,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       describe('Order by error rate', () => {
         const serviceName = 'synth-node-1';
+
         before(async () => {
           const range = timerange(start, end);
           const transactionName = 'foo';
@@ -317,8 +322,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         after(() => {
           return synthtrace.clean();
         });
+
         describe('sort by error rate asc', () => {
           let instancesMainStats: ServiceOverviewInstancesMainStatistics['currentPeriod'];
+
           before(async () => {
             instancesMainStats = await getServiceOverviewInstancesMainStatistics({
               serviceName,
@@ -326,14 +333,17 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               sortDirection: 'asc',
             });
           });
+
           it('returns instances sorted asc', () => {
             expect(instancesMainStats.map((item) => roundNumber(item.errorRate))).to.eql([
               0, 0.1, 0.8, 0.9, 1,
             ]);
           });
         });
+
         describe('sort by error rate desc', () => {
           let instancesMainStats: ServiceOverviewInstancesMainStatistics['currentPeriod'];
+
           before(async () => {
             instancesMainStats = await getServiceOverviewInstancesMainStatistics({
               serviceName,
@@ -341,6 +351,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               sortDirection: 'desc',
             });
           });
+
           it('returns instances sorted desc', () => {
             expect(instancesMainStats.map((item) => roundNumber(item.errorRate))).to.eql([
               1, 0.9, 0.8, 0.1, 0,
@@ -351,6 +362,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       describe('with transactions and system metrics', () => {
         const serviceName = 'synth-node-1';
+
         before(async () => {
           const range = timerange(start, end);
           const transactionName = 'foo';
@@ -504,6 +516,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       describe('with transactions only', () => {
         const serviceName = 'synth-node-1';
+
         before(async () => {
           const range = timerange(start, end);
           const transactionName = 'foo';
@@ -604,6 +617,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       describe('with system metrics only', () => {
         const serviceName = 'synth-node-1';
+
         before(async () => {
           const range = timerange(start, end);
           const instances = Array(3)

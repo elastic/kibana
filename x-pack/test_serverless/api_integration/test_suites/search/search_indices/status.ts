@@ -23,6 +23,7 @@ export default function ({ getService }: FtrProviderContext) {
             withInternalHeaders: true,
           });
       });
+
       it('returns list of index names', async () => {
         const { body } = await supertestDeveloperWithCookieCredentials
           .get('/internal/search_indices/status')
@@ -32,6 +33,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(Array.isArray(body.indexNames)).toBe(true);
       });
     });
+
     describe('user privileges', function () {
       // GET /internal/search_indices/start_privileges
       describe('developer', function () {
@@ -48,6 +50,7 @@ export default function ({ getService }: FtrProviderContext) {
           });
         });
       });
+
       describe('viewer', function () {
         before(async () => {
           supertestViewerWithCookieCredentials =

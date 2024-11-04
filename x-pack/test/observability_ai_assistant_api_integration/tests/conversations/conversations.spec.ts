@@ -90,6 +90,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       let createResponse: Awaited<
         SupertestReturnType<'POST /internal/observability_ai_assistant/conversation'>
       >;
+
       before(async () => {
         createResponse = await observabilityAIAssistantAPIClient
           .editorUser({

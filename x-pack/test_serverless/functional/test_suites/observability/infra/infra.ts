@@ -36,6 +36,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     describe('Inventory page', function () {
       this.tags('includeFirefox');
+
       before(async () => {
         await kibanaServer.savedObjects.cleanStandardList();
       });
@@ -47,6 +48,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await pageObjects.common.navigateToApp(INVENTORY_PATH);
           await pageObjects.infraHome.waitForLoading();
         });
+
         after(async () => {
           await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
           await esArchiver.unload('x-pack/test/functional/es_archives/infra/8.0.0/pods_only');
@@ -112,6 +114,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
       });
     });
+
     describe('Metrics explorer page', function () {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
@@ -119,6 +122,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.infraHome.waitForLoading();
         await pageObjects.header.waitUntilLoadingHasFinished();
       });
+
       after(async () => {
         await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
       });

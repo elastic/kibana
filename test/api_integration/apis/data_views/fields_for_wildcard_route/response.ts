@@ -84,6 +84,7 @@ export default function ({ getService }: FtrProviderContext) {
     before(() =>
       esArchiver.load('test/api_integration/fixtures/es_archiver/index_patterns/basic_index')
     );
+
     after(() =>
       esArchiver.unload('test/api_integration/fixtures/es_archiver/index_patterns/basic_index')
     );

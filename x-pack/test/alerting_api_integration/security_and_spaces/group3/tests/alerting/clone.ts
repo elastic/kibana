@@ -36,7 +36,9 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
     const space2 = Spaces[1].id;
     let ruleSpace1: RuleSpace = { body: {} };
     let ruleSpace2: RuleSpace = { body: {} };
+
     after(() => objectRemover.removeAll());
+
     before(async () => {
       const { body: createdActionSpace1 } = await supertest
         .post(`${getUrlPrefix(space1)}/api/actions/connector`)

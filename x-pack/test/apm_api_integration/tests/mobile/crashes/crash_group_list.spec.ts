@@ -135,10 +135,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       describe('returns the correct data', () => {
         let errorGroups: ErrorGroups;
+
         before(async () => {
           const response = await callApi();
           errorGroups = response.body.errorGroups;
         });
+
         it('returns correct number of crashes', () => {
           expect(errorGroups.length).to.equal(2);
           expect(errorGroups.map((error) => error.name).sort()).to.eql(['crash 1', 'crash 2']);

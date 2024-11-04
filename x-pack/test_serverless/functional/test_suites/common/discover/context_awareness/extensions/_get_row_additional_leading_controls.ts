@@ -19,6 +19,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async () => {
       await PageObjects.svlCommonPage.loginAsAdmin();
     });
+
     describe('ES|QL mode', () => {
       it('should render logs controls for logs data source', async () => {
         const state = kbnRison.encode({

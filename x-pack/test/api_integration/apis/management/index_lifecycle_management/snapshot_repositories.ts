@@ -27,6 +27,7 @@ export default function ({ getService }: FtrProviderContext) {
       isCloud = await deployment.isCloud();
       await Promise.all([cleanupRepositories()]);
     });
+
     after(async () => Promise.all([cleanupRepositories()]));
 
     it('returns empty array if no repositories ', async () => {

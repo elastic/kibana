@@ -38,6 +38,7 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
       lensDefault: string;
     };
     let indexPatternString: string;
+
     before(async () => {
       log.debug('Starting lens before method');
       await browser.setWindowSize(1280, 1200);

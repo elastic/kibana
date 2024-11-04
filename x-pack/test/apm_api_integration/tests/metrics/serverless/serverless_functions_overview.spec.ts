@@ -53,10 +53,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
     describe('Python service', () => {
       let functionsOverview: APIReturnType<'GET /internal/apm/services/{serviceName}/metrics/serverless/functions_overview'>;
+
       before(async () => {
         const response = await callApi('lambda-python');
         functionsOverview = response.body;
       });
+
       it('returns correct number of serverless functions', () => {
         expect(
           functionsOverview.serverlessFunctionsOverview.map((item) => {
@@ -64,6 +66,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           })
         ).to.eql(pythonServerlessFunctionNames);
       });
+
       it('returns correct values for all serverless functions', () => {
         pythonServerlessFunctionNames.forEach((name) => {
           const functionOverview = functionsOverview.serverlessFunctionsOverview.find(

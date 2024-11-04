@@ -1413,6 +1413,7 @@ export default ({ getService }: FtrProviderContext) => {
     describe('preview logged requests', () => {
       let rule: EsqlRuleCreateProps;
       let id: string;
+
       beforeEach(async () => {
         id = uuidv4();
         const interval: [string, string] = ['2020-10-28T06:00:00.000Z', '2020-10-28T06:10:00.000Z'];
@@ -1445,6 +1446,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(logs[0]).not.toHaveProperty('requests');
       });
+
       it('should return requests property when enable_logged_requests set to true', async () => {
         const { logs } = await previewRule({
           supertest,
@@ -1471,6 +1473,7 @@ export default ({ getService }: FtrProviderContext) => {
           'POST /ecs_compliant/_search?ignore_unavailable=true'
         );
       });
+
       it('should not return requests with any data tier filter', async () => {
         const { logs } = await previewRule({
           supertest,
@@ -1483,6 +1486,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(requests![0].request).not.toContain('data_frozen');
       });
+
       it('should return requests with included data tiers filters from advanced settings', async () => {
         await setAdvancedSettings(supertest, {
           [EXCLUDED_DATA_TIERS_FOR_RULE_EXECUTION]: ['data_frozen'],

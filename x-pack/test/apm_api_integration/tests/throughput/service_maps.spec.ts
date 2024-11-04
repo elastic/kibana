@@ -87,6 +87,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     describe('when data is loaded ', () => {
       const GO_PROD_RATE = 80;
       const GO_DEV_RATE = 20;
+
       before(async () => {
         const serviceGoProdInstance = apm
           .service({ name: serviceName, environment: 'production', agentName: 'go' })
@@ -139,6 +140,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       // FLAKY: https://github.com/elastic/kibana/issues/176987
       describe('when calling service maps transactions stats api', () => {
         let serviceMapsNodeThroughput: number | null | undefined;
+
         before(async () => {
           const response = await callApi();
           serviceMapsNodeThroughput =

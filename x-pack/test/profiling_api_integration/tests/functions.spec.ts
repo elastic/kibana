@@ -33,6 +33,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
 
     describe('With data', () => {
       let functions: TopNFunctions;
+
       before(async () => {
         await setupProfiling(bettertest, log);
         await loadProfilingData(es, log);

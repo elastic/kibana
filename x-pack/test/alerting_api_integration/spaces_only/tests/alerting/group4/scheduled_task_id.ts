@@ -64,6 +64,7 @@ export default function createScheduledTaskIdTests({ getService }: FtrProviderCo
 
     describe('sets scheduled task id to match rule id when rule is disabled then enabled', function () {
       this.tags('skipFIPS');
+
       it('for migrated rules - sets scheduled task id to match rule id when rule is disabled then enabled', async () => {
         const response = await supertest.get(
           `${getUrlPrefix(``)}/api/alerting/rule/${MIGRATED_RULE_ID}`
@@ -107,6 +108,7 @@ export default function createScheduledTaskIdTests({ getService }: FtrProviderCo
 
     describe('sets scheduled task id to rule id', function () {
       this.tags('skipFIPS');
+
       it('sets scheduled task id to rule id when rule is created', async () => {
         const response = await supertestWithoutAuth
           .post(`${getUrlPrefix(``)}/api/alerting/rule`)
@@ -131,6 +133,7 @@ export default function createScheduledTaskIdTests({ getService }: FtrProviderCo
 
     describe('deletes associated task for rule', function () {
       this.tags('skipFIPS');
+
       it('deletes associated task for rule if task is unrecognized', async () => {
         const RULE_ID = '46be60d4-ae63-48ed-ab6f-f4d9b4defacf';
         // We've archived a disabled rule with a scheduled task ID that references

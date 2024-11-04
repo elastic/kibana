@@ -22,9 +22,11 @@ export default function ({ getService }: FtrProviderContext) {
       roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       internalReqHeader = svlCommonApi.getInternalRequestHeader();
     });
+
     after(async () => {
       await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
+
     describe('get data views api', () => {
       it('returns list of data views', async () => {
         const response = await supertestWithoutAuth

@@ -26,6 +26,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(upCount).to.eql(1);
       });
     });
+
     it('Uptime app should show Kibana QA Monitor present', async function () {
       await PageObjects.uptime.pageHasExpectedIds(['kibana-qa-monitor']);
     });

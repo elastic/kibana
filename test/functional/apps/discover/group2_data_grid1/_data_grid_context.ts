@@ -61,6 +61,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await unifiedFieldList.clickFieldListPlusFilter(columnName, value);
       }
     });
+
     after(async () => {
       await timePicker.resetDefaultAbsoluteRangeViaUiSettings();
     });

@@ -22,9 +22,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         withCustomHeaders: { 'Content-Type': 'application/json;charset=UTF-8' },
       });
     });
+
     after(async () => {
       await supertestWithAdminScope.destroy();
     });
+
     describe('Execute', () => {
       it('should execute a valid painless script', async () => {
         const script =

@@ -35,6 +35,7 @@ export default function ({ getService }: FtrProviderContext) {
       );
       await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
+
     it('returns 200 and best effort response despite lack of rollup support', async () => {
       const response = await supertestWithoutAuth
         .get(BASE_URI)

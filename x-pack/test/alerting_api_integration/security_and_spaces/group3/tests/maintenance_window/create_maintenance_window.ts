@@ -54,6 +54,7 @@ export default function createMaintenanceWindowTests({ getService }: FtrProvider
       },
       category_ids: ['management'],
     };
+
     afterEach(() => objectRemover.removeAll());
 
     for (const scenario of UserAtSpaceScenarios) {

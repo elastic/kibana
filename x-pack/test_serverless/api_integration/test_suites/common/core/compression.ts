@@ -40,9 +40,11 @@ export default function ({ getService }: FtrProviderContext) {
     before(async () => {
       roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
     });
+
     after(async () => {
       await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
+
     describe('against an application page', () => {
       compressionSuite('/app/kibana');
     });

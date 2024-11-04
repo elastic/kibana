@@ -19,6 +19,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
     });
+
     describe('space with no features disabled', () => {
       before(async () => {
         await spacesService.create({

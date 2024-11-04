@@ -32,6 +32,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('metrics', () => {
     before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/8.0.0/pods_only'));
+
     after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/8.0.0/pods_only'));
 
     const fetchNodeDetails = async (

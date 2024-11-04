@@ -24,11 +24,13 @@ export default function spaceSelectorFunctionalTests({
 
   describe('Spaces', function () {
     const testSpacesIds = ['another-space', ...Array.from('123456789', (idx) => `space-${idx}`)];
+
     before(async () => {
       for (const testSpaceId of testSpacesIds) {
         await spacesService.create({ id: testSpaceId, name: `${testSpaceId} name` });
       }
     });
+
     after(async () => {
       for (const testSpaceId of testSpacesIds) {
         await spacesService.delete(testSpaceId);
@@ -100,6 +102,7 @@ export default function spaceSelectorFunctionalTests({
 
     describe('Search spaces in popover', function () {
       const spaceId = 'default';
+
       before(async () => {
         await PageObjects.security.forceLogout();
         await PageObjects.security.login(undefined, undefined, {

@@ -23,6 +23,7 @@ export default function ({ getService }: FtrProviderContext) {
     before(async () => {
       await createIndex(testIndex);
     });
+
     after(async () => {
       await esDeleteAllIndices([testIndex]);
     });

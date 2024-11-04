@@ -13,6 +13,7 @@ export default ({ loadTestFile, getService }: FtrProviderContext) => {
 
   describe('Canvas', function canvasAppTestSuite() {
     const isRunningInCcsMode = config.get('esTestCluster.ccs') ? true : false;
+
     describe('Canvas app', () => {
       before(async () => {
         // init data
@@ -54,6 +55,7 @@ export default ({ loadTestFile, getService }: FtrProviderContext) => {
         loadTestFile(require.resolve('./saved_object_resolve'));
       }
     });
+
     describe('Canvas management', () => {
       if (!isRunningInCcsMode) {
         loadTestFile(require.resolve('./migrations_smoke_test'));

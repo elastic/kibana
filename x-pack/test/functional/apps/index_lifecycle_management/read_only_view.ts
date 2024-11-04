@@ -20,6 +20,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await pageObjects.common.navigateToApp('indexLifecycleManagement');
     });
+
     after(async () => {
       await security.testUser.restoreDefaults();
     });

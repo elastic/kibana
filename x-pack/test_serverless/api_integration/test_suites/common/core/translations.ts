@@ -19,9 +19,11 @@ export default function ({ getService }: FtrProviderContext) {
     before(async () => {
       roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
     });
+
     after(async () => {
       await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
+
     it(`returns the translations with the correct headers`, async () => {
       const response = await supertestWithoutAuth
         .get('/translations/en.json')

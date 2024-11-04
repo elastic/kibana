@@ -186,6 +186,7 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
 
     describe('eventually have error reason "validate" when appropriate', function () {
       this.tags('skipFIPS');
+
       it('should eventually have error reason "validate" when appropriate', async () => {
         const response = await supertest
           .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)

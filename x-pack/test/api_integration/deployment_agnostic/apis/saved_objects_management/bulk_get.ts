@@ -36,6 +36,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           'test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
         )
       );
+
       after(() =>
         kibanaServer.importExport.unload(
           'test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'

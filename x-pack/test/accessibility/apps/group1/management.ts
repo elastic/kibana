@@ -31,6 +31,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await PageObjects.settings.clickIndexManagement();
           await a11y.testAppSnapshot();
         });
+
         describe('indices with data', () => {
           before(async () => {
             await esArchiver.loadIfNeeded(
@@ -41,9 +42,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             });
             await PageObjects.settings.navigateTo();
           });
+
           after(async () => {
             await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
           });
+
           it('index list', async () => {
             await a11y.testAppSnapshot();
           });

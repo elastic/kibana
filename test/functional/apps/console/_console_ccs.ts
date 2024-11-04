@@ -19,6 +19,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('Console App CCS', function describeIndexTests() {
     this.tags('includeFirefox');
+
     before(async () => {
       await remoteEsArchiver.loadIfNeeded(
         'test/functional/fixtures/es_archiver/logstash_functional'
@@ -38,6 +39,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       before(async () => {
         await PageObjects.console.clearEditorText();
       });
+
       it('it should be able to access remote data', async () => {
         await PageObjects.console.enterText(
           '\nGET ftr-remote:logstash-*/_search\n {\n "query": {\n "bool": {\n "must": [\n {"match": {"extension" : "jpg"} \n}\n]\n}\n}\n}'

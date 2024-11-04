@@ -27,6 +27,7 @@ export default function ({ getService }: FtrProviderContext) {
     after(async () => {
       await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
+
     describe('scroll_count with more than 10k objects', () => {
       const importVisualizations = async ({
         startIdx = 1,
@@ -104,6 +105,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
       });
     });
+
     describe('with less than 10k objects', () => {
       before(async () => {
         await kibanaServer.savedObjects.cleanStandardList();
@@ -111,6 +113,7 @@ export default function ({ getService }: FtrProviderContext) {
           'test/api_integration/fixtures/kbn_archiver/saved_objects/scroll_count.json'
         );
       });
+
       after(async () => {
         await kibanaServer.importExport.unload(
           'test/api_integration/fixtures/kbn_archiver/saved_objects/scroll_count.json'

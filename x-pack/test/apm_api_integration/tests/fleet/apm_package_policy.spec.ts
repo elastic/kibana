@@ -179,6 +179,7 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
           service: {},
           settings: { transaction_sample_rate: '0.55' },
         };
+
         before(async () => {
           await createConfiguration(testConfiguration);
           packagePolicyWithAgentConfig = await getPackagePolicy(bettertest, packagePolicyId);

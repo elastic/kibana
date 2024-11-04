@@ -69,6 +69,7 @@ export default function swimlaneTest({ getService }: FtrProviderContext) {
         getExternalServiceSimulatorPath(ExternalServiceSimulator.SWIMLANE)
       );
     });
+
     it('should return 403 when creating a swimlane connector', async () => {
       await supertest
         .post('/api/actions/connector')

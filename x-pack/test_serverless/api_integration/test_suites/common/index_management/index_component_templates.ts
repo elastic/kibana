@@ -453,6 +453,7 @@ export default function ({ getService }: FtrProviderContext) {
         before(async () => {
           await svlComponentTemplateHelpers.addDatastream(DATASTREAM_NAME, CACHE_TEMPLATES);
         });
+
         it('should return datastreams', async () => {
           const { body, status } = await svlComponentTemplatesApi.getComponentTemplateDatastreams(
             COMPONENT_NAME,

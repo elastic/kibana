@@ -50,6 +50,7 @@ export default ({ loadTestFile, getService }: FtrProviderContext) => {
       beforeEach('load heartbeat data', async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/uptime/blank');
       });
+
       afterEach('unload', async () => {
         await esArchiver.unload('x-pack/test/functional/es_archives/uptime/blank');
       });
@@ -65,6 +66,7 @@ export default ({ loadTestFile, getService }: FtrProviderContext) => {
         await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'UTC' });
         await uptime.navigation.goToUptime();
       });
+
       after(async () => await esArchiver.unload(ARCHIVE));
 
       loadTestFile(require.resolve('./overview'));

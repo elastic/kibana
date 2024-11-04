@@ -118,9 +118,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await common.navigateToApp('discover');
         await discover.waitUntilSearchingHasFinished();
       });
+
       after(async () => {
         await kibanaServer.uiSettings.replace({});
       });
+
       it(`should load up to ${rowsHardLimit} rows when scrolling at the end of the table`, async function () {
         const initialRows = await testSubjects.findAll('docTableRow');
         // click the Skip to the end of the table
@@ -149,6 +151,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       describe('expand a document row', function () {
         const rowToInspect = 1;
+
         beforeEach(async function () {
           // close the toggle if open
           const details = await docTable.getDetailsRows();
@@ -235,6 +238,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           phpmemory: 1,
           ip: 4,
         };
+
         afterEach(async function () {
           for (const column of extraColumns) {
             await unifiedFieldList.clickFieldListItemRemove(column);

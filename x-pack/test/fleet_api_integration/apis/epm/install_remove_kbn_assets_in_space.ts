@@ -54,11 +54,13 @@ export default function (providerContext: FtrProviderContext) {
     after(async () => {
       await deleteSpace(testSpaceId);
     });
+
     describe('installs all assets when installing a package for the first time in non default space', () => {
       before(async () => {
         if (!isDockerRegistryEnabledOrSkipped(providerContext)) return;
         await installPackageInSpace(pkgName, pkgVersion, testSpaceId);
       });
+
       after(async () => {
         if (!isDockerRegistryEnabledOrSkipped(providerContext)) return;
         await uninstallPackage(pkgName, pkgVersion);

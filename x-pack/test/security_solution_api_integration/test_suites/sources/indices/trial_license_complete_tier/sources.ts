@@ -16,6 +16,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('sources', () => {
     before(() => esArchiver.load('x-pack/test/functional/es_archives/auditbeat/default'));
+
     after(() => esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/default'));
 
     it('Make sure that we get source information when auditbeat indices is there', async () => {

@@ -24,9 +24,11 @@ export default ({ getService }: FtrProviderContext) => {
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
     });
+
     after(async () => {
       await deleteAllRules(supertest, log);
     });
+
     it('should not be able to create a new terms rule with too small history window', async () => {
       const rule = {
         ...getCreateNewTermsRulesSchemaMock('rule-1'),

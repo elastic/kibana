@@ -32,6 +32,7 @@ export default function ({ getService, getPageObjects }) {
     after(async () => {
       await tearDown();
     });
+
     it('should have Logstash Cluster Summary Status showing correct info', async () => {
       expect(await logstashSummaryStatus.getContent()).to.eql({
         eventsInTotal: 'Events Received\n117.9k',

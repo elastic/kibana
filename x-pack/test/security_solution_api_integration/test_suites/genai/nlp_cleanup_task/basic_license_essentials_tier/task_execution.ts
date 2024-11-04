@@ -38,6 +38,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         expect(task.attributes.enabled).to.eql(true);
       });
+
       describe('Model Loading', () => {
         before(async () => {
           // Make sure the .ml-stats index is created in advance, see https://github.com/elastic/elasticsearch/issues/65846

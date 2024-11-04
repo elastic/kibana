@@ -30,6 +30,7 @@ export default function ({ getPageObjects, getService }) {
       const VECTOR_SOURCE_ID = 'caffa63a-ebfb-466d-8ff6-d797975b88ab';
 
       let mapboxStyle;
+
       before(async () => {
         await maps.loadSavedMap('geo_shape_mvt');
         mapboxStyle = await maps.getMapboxStyle();

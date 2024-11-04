@@ -94,6 +94,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'Count of @message.raw',
         ]);
       });
+
       it('should duplicate the column when dragging to empty dimension in the same group', async () => {
         await lens.dragDimensionToDimension({
           from: 'lnsXY_yDimensionPanel > lns-dimensionTrigger',
@@ -109,6 +110,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'Count of @message.raw [2]',
         ]);
       });
+
       it('should move duplicated column to non-compatible dimension group', async () => {
         await lens.dragDimensionToDimension({
           from: 'lnsXY_yDimensionPanel > lns-dimensionTrigger',
@@ -230,6 +232,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await lens.getDimensionTriggerText('lnsXY_xDimensionPanel')).to.eql('@timestamp');
         await lens.assertFocusedField('@timestamp');
       });
+
       it('should drop a field to empty dimension', async () => {
         await lens.dragFieldWithKeyboard('bytes', 4);
         expect(await lens.getDimensionTriggersTexts('lnsXY_yDimensionPanel')).to.eql([
@@ -242,6 +245,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         ]);
         await lens.assertFocusedField('@message.raw');
       });
+
       it('should drop a field to an existing dimension replacing the old one', async () => {
         await lens.dragFieldWithKeyboard('clientip', 1, true);
         expect(await lens.getDimensionTriggersTexts('lnsXY_splitDimensionPanel')).to.eql([
@@ -250,6 +254,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await lens.assertFocusedField('clientip');
       });
+
       it('should duplicate an element in a group', async () => {
         await lens.dimensionKeyboardDragDrop('lnsXY_yDimensionPanel', 0, 1);
         expect(await lens.getDimensionTriggersTexts('lnsXY_yDimensionPanel')).to.eql([
@@ -275,6 +280,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await lens.getDimensionTriggersTexts('lnsXY_splitDimensionPanel')).to.eql([]);
         await lens.assertFocusedDimension('@timestamp');
       });
+
       it('should move dimension to incompatible dimension', async () => {
         await lens.dimensionKeyboardDragDrop('lnsXY_yDimensionPanel', 1, 2);
         expect(await lens.getDimensionTriggersTexts('lnsXY_splitDimensionPanel')).to.eql(['bytes']);
@@ -286,6 +292,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         ]);
         await lens.assertFocusedDimension('Count of @timestamp');
       });
+
       it('should reorder elements with keyboard', async () => {
         await lens.dimensionKeyboardReorder('lnsXY_yDimensionPanel', 0, 1);
         expect(await lens.getDimensionTriggersTexts('lnsXY_yDimensionPanel')).to.eql([
@@ -406,6 +413,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'moving_average(average(bytes), window=5)',
         ]);
       });
+
       it('swaps dimensions', async () => {
         await visualize.gotoVisualizationLandingPage();
         await listingTable.searchForItemWithName('lnsXYvis');
@@ -440,6 +448,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'Top 3 values of ip',
         ]);
       });
+
       it('can combine dimensions', async () => {
         // here the editor will error out as the mandatory vertical axis is missing
         await lens.dragDimensionToExtraDropType(

@@ -166,6 +166,7 @@ export default function createGetAlertSummaryTests({ getService }: FtrProviderCo
 
     describe('muted alerts', function () {
       this.tags('skipFIPS');
+
       it('handles muted alerts', async () => {
         const { body: createdRule } = await supertest
           .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
@@ -216,6 +217,7 @@ export default function createGetAlertSummaryTests({ getService }: FtrProviderCo
 
     describe('multi-alert', function () {
       this.tags('skipFIPS');
+
       it('handles multi-alert status', async () => {
         // pattern of when the rule should fire
         const pattern = {
@@ -288,6 +290,7 @@ export default function createGetAlertSummaryTests({ getService }: FtrProviderCo
 
     describe('multi-alert maintenance window', function () {
       this.tags('skipFIPS');
+
       it('handles multi-alert status during maintenance window', async () => {
         const { body: createdMaintenanceWindow } = await supertest
           .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/maintenance_window`)
@@ -387,6 +390,7 @@ export default function createGetAlertSummaryTests({ getService }: FtrProviderCo
 
     describe('legacy', function () {
       this.tags('skipFIPS');
+
       it('handles multi-alert status', async () => {
         // wait so cache expires
         await setTimeoutAsync(TEST_CACHE_EXPIRATION_TIME);

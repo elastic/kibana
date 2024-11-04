@@ -33,6 +33,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       ]);
       await visualize.initTests();
     });
+
     beforeEach(async () => {
       await visualize.navigateToNewVisualization();
       await visualize.clickVisualBuilder();
@@ -239,6 +240,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       describe('Elastic charts', function () {
         this.tags('skipFirefox');
+
         beforeEach(async () => {
           await visualBuilder.toggleNewChartsLibraryWithDebug(true);
           await visualBuilder.clickPanelOptions('timeSeries');
@@ -506,6 +508,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             const annotationsData = await visualBuilder.getAnnotationsData();
             expect(annotationsData).to.eql(expectedAnnotationsData);
           });
+
           it('should display correct annotations data for machine.os.raw and memory fields', async () => {
             const expectedAnnotationsData = [
               {
@@ -547,6 +550,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             const annotationsData = await visualBuilder.getAnnotationsData();
             expect(annotationsData).to.eql(expectedAnnotationsData);
           });
+
           it('should display correct annotations data when using runtime field', async () => {
             const expectedAnnotationsData = [
               {
@@ -597,6 +601,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       describe('index pattern selection mode', function () {
         this.tags('skipFirefox');
+
         it('should disable switch for Kibana index patterns mode by default', async () => {
           await visualBuilder.clickPanelOptions('timeSeries');
           const isEnabled = await visualBuilder.checkIndexPatternSelectionModeSwitchIsEnabled();

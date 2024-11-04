@@ -39,6 +39,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('Analytics apps cards', function () {
       this.tags('skipFIPS');
+
       it('should display ', async () => {
         const kbnOverviewAppsCards = await find.allByCssSelector('.kbnOverviewApps__item');
         expect(kbnOverviewAppsCards.length).to.be(apps.length);

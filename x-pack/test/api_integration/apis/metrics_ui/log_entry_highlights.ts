@@ -45,11 +45,13 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('log highlight apis', () => {
     before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/simple_logs'));
+
     after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/simple_logs'));
 
     describe('/log_entries/highlights', () => {
       describe('with the default source', () => {
         before(() => kibanaServer.savedObjects.cleanStandardList());
+
         after(() => kibanaServer.savedObjects.cleanStandardList());
 
         it('Handles empty responses', async () => {

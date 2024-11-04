@@ -18,6 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('Anomaly detection jobs list', function () {
     // Error: Failed to delete all indices with pattern [.ml-*]
     this.tags(['failsOnMKI']);
+
     before(async () => {
       await PageObjects.svlCommonPage.loginWithRole(ServerlessRoleName.PLATFORM_ENGINEER);
       // Load logstash* data and create dataview for logstash*, logstash-2015.09.22

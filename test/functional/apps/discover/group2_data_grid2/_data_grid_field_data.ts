@@ -27,6 +27,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('discover data grid field data tests', function describeIndexTests() {
     this.tags('includeFirefox');
+
     before(async function () {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
@@ -36,6 +37,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.update(defaultSettings);
       await common.navigateToApp('discover');
     });
+
     describe('field data', function () {
       it('search php should show the correct hit count', async function () {
         const expectedHitCount = '445';

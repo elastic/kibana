@@ -96,6 +96,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
         updateIncidentUrl: `${casesWebhookSimulatorURL}/rest/api/2/issue/{{{external.system.id}}}`,
       };
     });
+
     describe('CasesWebhook - Action Creation', () => {
       it('should return 200 when creating a casesWebhook action successfully', async () => {
         const { body: createdAction } = await supertest
@@ -135,6 +136,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
           config: simulatorConfig,
         });
       });
+
       describe('400s for all required fields when missing', () => {
         requiredFields.forEach((field) => {
           it(`should respond with a 400 Bad Request when creating a casesWebhook action with no ${field}`, async () => {
@@ -444,6 +446,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
         let proxyHaveBeenCalled = false;
         const jsonExtraCommas =
           '{"fields":{"summary":{{{case.title}}},"description":{{{case.description}}},"labels":{{{case.tags}}},"project":{"key":"ROC"},"issuetype":{"id":"10024"}}},,,,,';
+
         before(async () => {
           const { body } = await supertest
             .post('/api/actions/connector')
@@ -529,16 +532,19 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
             });
           expect(proxyHaveBeenCalled).to.equal(false);
         });
+
         after(() => {
           if (proxyServer) {
             proxyServer.close();
           }
         });
       });
+
       describe('bad comment JSON', () => {
         let simulatedActionId: string;
         let proxyServer: httpProxy | undefined;
         let proxyHaveBeenCalled = false;
+
         before(async () => {
           const { body } = await supertest
             .post('/api/actions/connector')
@@ -611,6 +617,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
         let simulatedActionId: string;
         let proxyServer: httpProxy | undefined;
         let proxyHaveBeenCalled = false;
+
         before(async () => {
           const { body } = await supertest
             .post('/api/actions/connector')
@@ -696,16 +703,19 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
             });
           expect(proxyHaveBeenCalled).to.equal(false);
         });
+
         after(() => {
           if (proxyServer) {
             proxyServer.close();
           }
         });
       });
+
       describe('bad comment URL', () => {
         let simulatedActionId: string;
         let proxyServer: httpProxy | undefined;
         let proxyHaveBeenCalled = false;
+
         before(async () => {
           const { body } = await supertest
             .post('/api/actions/connector')

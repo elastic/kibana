@@ -35,6 +35,7 @@ export default function ({ getService }: FtrProviderContext) {
       );
       await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
+
     it('scripted fields are ignored when disabled', async () => {
       const response = await supertestWithoutAuth
         .post(DATA_VIEW_PATH)

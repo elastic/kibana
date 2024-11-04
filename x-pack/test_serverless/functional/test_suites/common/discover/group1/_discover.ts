@@ -42,9 +42,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.timePicker.setDefaultAbsoluteRange();
     });
+
     after(async () => {
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
     });
+
     describe('query', function () {
       const queryName1 = 'Query # 1';
 
@@ -262,6 +264,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const currentUrlWithoutScore = await browser.getCurrentUrl();
         expect(currentUrlWithoutScore).not.to.contain('_score');
       });
+
       it('should add a field with customLabel, sort by it, display it correctly', async function () {
         await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
         await PageObjects.common.navigateToApp('discover');

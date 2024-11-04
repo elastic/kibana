@@ -365,6 +365,7 @@ export default function ({ getService }: FtrProviderContext) {
       // no such role in serverless
       describe('@skipInServerless and user has authorization to read blocklist', function () {
         let artifactReadSupertest: TestAgent;
+
         before(async () => {
           artifactReadSupertest = await utils.createSuperTest(ROLE.artifact_read_privileges);
         });

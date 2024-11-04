@@ -127,6 +127,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       describe('returns the correct data', () => {
         let errorGroups: ErrorGroups;
+
         before(async () => {
           const response = await callApi();
           errorGroups = response.body.errorGroups;

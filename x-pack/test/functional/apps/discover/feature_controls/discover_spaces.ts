@@ -129,6 +129,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('space with Visualize disabled', () => {
       const customSpace = 'custom_space';
+
       before(async () => {
         // we need to load the following in every situation as deleting
         // a space deletes all of the associated saved objects
@@ -161,6 +162,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       // unskipped because of flakiness in cloud, caused be ingest management tests
       // should be unskipped when https://github.com/elastic/kibana/issues/74353 was resolved
       this.tags(['skipCloud']);
+
       before(async () => {
         await spacesService.create({
           id: 'custom_space_no_index_patterns',

@@ -182,6 +182,7 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     let agentPolicyId: string;
+
     beforeEach(async () => {
       await installPackage(PACKAGE_NAME, START_VERSION);
       const agentPolicy = await createAgentPolicy();
@@ -369,6 +370,7 @@ export default function (providerContext: FtrProviderContext) {
 
       await uninstallPackage(PACKAGE_NAME, UPGRADE_VERSION);
     });
+
     it('should delete all index templates created by package policies when the package is uninstalled', async () => {
       await createPackagePolicyWithDataset(agentPolicyId, 'dataset1');
       await deleteAgentPolicy(agentPolicyId);

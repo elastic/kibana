@@ -64,6 +64,7 @@ export default function ({ getService }: FtrProviderContext) {
         const apiKeysToDelete = apiKeys.map(({ id }) => id);
         await es.security.invalidateApiKey({ ids: apiKeysToDelete });
       };
+
       before(async () => {
         await deleteAllApiKeys();
         supertestAdminWithCookieCredentials = await roleScopedSupertest.getSupertestWithRoleScope(
@@ -74,9 +75,11 @@ export default function ({ getService }: FtrProviderContext) {
           }
         );
       });
+
       after(async () => {
         await deleteAllApiKeys();
       });
+
       it('can create a key that expires', async () => {
         const createBody = {
           name: 'test-api-key-001',
@@ -89,6 +92,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(body).toMatchObject({ name: 'test-api-key-001', expiration: expect.anything() });
       });
+
       it('can create a key that never expires', async () => {
         const createBody = {
           name: 'test-api-key-002',
@@ -100,6 +104,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(body).toMatchObject({ name: 'test-api-key-002' });
       });
+
       it('has beats_logstash_format in result', async () => {
         const createBody = {
           name: 'test-api-key-003',

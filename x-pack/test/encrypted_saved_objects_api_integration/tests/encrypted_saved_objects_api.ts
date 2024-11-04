@@ -814,6 +814,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       const KIBANA_ADMIN_USERNAME = 'admin';
       const KIBANA_ADMIN_PASSWORD = 'changeme';
+
       before(async () => {
         await security.user.create(KIBANA_ADMIN_USERNAME, {
           password: KIBANA_ADMIN_PASSWORD,

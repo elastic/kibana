@@ -48,6 +48,7 @@ export default function ({ getService }: FtrProviderContext) {
     describe('entity api', () => {
       let origin: Event;
       let genData: InsertedEvents;
+
       before(async () => {
         origin = generator.generateEvent({
           parentEntityID: 'a',

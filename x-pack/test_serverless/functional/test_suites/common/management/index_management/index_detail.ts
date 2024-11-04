@@ -27,14 +27,17 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const url = await browser.getCurrentUrl();
       expect(url).to.contain(`/indices`);
     });
+
     it('can create an index', async () => {
       await pageObjects.indexManagement.clickCreateIndexButton();
       await pageObjects.indexManagement.setCreateIndexName(testIndexName);
       await pageObjects.indexManagement.clickCreateIndexSaveButton();
       await pageObjects.indexManagement.expectIndexToExist(testIndexName);
     });
+
     describe('can view index details', function () {
       this.tags(['skipSvlSearch']);
+
       it('index with no documents', async () => {
         await pageObjects.indexManagement.indexDetailsPage.openIndexDetailsPage(0);
         await pageObjects.indexManagement.indexDetailsPage.expectIndexDetailsPageIsLoaded();

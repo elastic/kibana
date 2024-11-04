@@ -53,6 +53,7 @@ export default function InferenceConnectorTest({ getService }: FtrProviderContex
     after(async () => {
       await objectRemover.removeAll();
     });
+
     describe('action creation', () => {
       const simulator = new InferenceSimulator({
         returnError: false,
@@ -335,6 +336,7 @@ export default function InferenceConnectorTest({ getService }: FtrProviderContex
             const executeEvent = events[1];
             expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(78);
           });
+
           describe('Token tracking dashboard', () => {
             const dashboardId = 'specific-dashboard-id-default';
 
@@ -398,6 +400,7 @@ export default function InferenceConnectorTest({ getService }: FtrProviderContex
             });
           });
         });
+
         describe('non-default space simulator', () => {
           const simulator = new InferenceSimulator({
             proxy: {
@@ -411,6 +414,7 @@ export default function InferenceConnectorTest({ getService }: FtrProviderContex
             apiUrl = await simulator.start();
             genAiActionId = await createConnector(apiUrl, 'space1');
           });
+
           after(() => {
             simulator.close();
           });

@@ -38,6 +38,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         kibanaServer.savedObjects.cleanStandardList(),
       ])
     );
+
     after(async () =>
       Promise.all([
         esArchiver.unload('x-pack/test/functional/es_archives/infra/alerts'),

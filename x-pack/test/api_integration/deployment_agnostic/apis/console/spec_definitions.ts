@@ -20,9 +20,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         withCustomHeaders: { 'kbn-xsrf': 'true' },
       });
     });
+
     after(async () => {
       await supertestWithAdminScope.destroy();
     });
+
     it('returns autocomplete definitions', async () => {
       const { body } = await supertestWithAdminScope.get('/api/console/api_server').expect(200);
       expect(body.es).to.be.ok();

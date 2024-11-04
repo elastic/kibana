@@ -57,6 +57,7 @@ export default function ({ getService }: FtrProviderContext) {
           }
         });
       }
+
       it('should work with a filterQuery', async () => {
         const timeframe = {
           start: moment().subtract(25, 'minutes').valueOf(),
@@ -79,6 +80,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(result.aggregations).to.be.ok();
       });
     });
+
     describe('querying with a groupBy parameter', () => {
       for (const aggType of aggs) {
         it(`should work with the ${aggType} aggregator`, async () => {
@@ -103,6 +105,7 @@ export default function ({ getService }: FtrProviderContext) {
           expect(result.aggregations).to.be.ok();
         });
       }
+
       it('should work with a filterQuery', async () => {
         const timeframe = {
           start: moment().subtract(25, 'minutes').valueOf(),

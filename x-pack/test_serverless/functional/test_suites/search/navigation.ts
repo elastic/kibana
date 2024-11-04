@@ -21,10 +21,12 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
   describe('navigation', function () {
     // see details: https://github.com/elastic/kibana/issues/196823
     this.tags(['failsOnMKI']);
+
     before(async () => {
       await svlCommonPage.loginWithRole('developer');
       await svlSearchNavigation.navigateToLandingPage();
     });
+
     it('navigate search sidenav & breadcrumbs', async () => {
       const expectNoPageReload = await svlCommonNavigation.createNoPageReloadCheck();
 

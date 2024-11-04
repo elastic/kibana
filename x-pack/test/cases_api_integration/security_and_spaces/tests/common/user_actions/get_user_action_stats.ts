@@ -137,6 +137,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const supertestWithoutAuth = getService('supertestWithoutAuth');
 
       let theCase: Case;
+
       beforeEach(async () => {
         theCase = await createCase(supertestWithoutAuth, getPostCaseRequest(), 200, {
           user: superUser,

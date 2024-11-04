@@ -19,6 +19,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaSettings();
     });
+
     it('should have cache setting', async () => {
       expect(
         await testSubjects.exists('management-settings-editField-data_views:cache_max_age')

@@ -58,6 +58,7 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
     after(async () => {
       await objectRemover.removeAll();
     });
+
     describe('action creation', () => {
       const simulator = new BedrockSimulator({
         returnError: false,
@@ -188,6 +189,7 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
             });
           });
       });
+
       it('should return 400 Bad Request when creating the connector without accessKey secret', async () => {
         await supertest
           .post('/api/actions/connector')
@@ -210,6 +212,7 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
             });
           });
       });
+
       it('should return 400 Bad Request when creating the connector without secret secret', async () => {
         await supertest
           .post('/api/actions/connector')
@@ -539,6 +542,7 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
             });
           });
         });
+
         describe('successful deprecated response simulator', () => {
           const simulator = new BedrockSimulator({
             proxy: {

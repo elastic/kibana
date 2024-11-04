@@ -127,6 +127,7 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
           username: user.username,
           password: user.password,
         };
+
         it('should handle scheduling backfill job requests appropriately', async () => {
           const defaultStart = moment().utc().startOf('day').subtract(7, 'days').toISOString();
           const defaultEnd = moment().utc().startOf('day').subtract(1, 'day').toISOString();

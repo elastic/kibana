@@ -26,6 +26,7 @@ export default function ({ getService }: FtrProviderContext) {
     before('load heartbeat data', () =>
       getService('esArchiver').load('x-pack/test/functional/es_archives/uptime/full_heartbeat')
     );
+
     after('unload heartbeat index', () =>
       getService('esArchiver').unload('x-pack/test/functional/es_archives/uptime/full_heartbeat')
     );

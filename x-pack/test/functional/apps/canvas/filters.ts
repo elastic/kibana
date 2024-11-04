@@ -31,6 +31,7 @@ export default function canvasFiltersTest({ getService, getPageObjects }: FtrPro
     after(async () => {
       await kibanaServer.importExport.unload(archive);
     });
+
     it('filter updates when dropdown is changed', async () => {
       // wait for all our elements to load up
       await retry.try(async () => {

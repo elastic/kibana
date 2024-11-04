@@ -864,6 +864,7 @@ export default function (providerContext: FtrProviderContext) {
         await cleanupPolicies();
         await cleanupSecrets();
       });
+
       it('should not store secrets if fleet server does not meet minimum version', async () => {
         const { fleetServerAgentPolicy } = await createFleetServerAgentPolicy();
         await createFleetServerAgent(fleetServerAgentPolicy.id, 'server_1', '7.0.0');

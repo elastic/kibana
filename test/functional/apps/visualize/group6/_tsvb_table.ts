@@ -25,6 +25,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     before(async () => {
       await visualize.initTests();
     });
+
     describe('table', () => {
       beforeEach(async () => {
         await visualBuilder.resetPage('Sep 22, 2015 @ 06:00:00.000', 'Sep 22, 2015 @ 11:00:00.000');

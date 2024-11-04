@@ -18,6 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('Anomaly detection jobs list', function () {
     // Error: Failed to delete all indices with pattern [.ml-*]
     this.tags(['failsOnMKI']);
+
     before(async () => {
       await PageObjects.svlCommonPage.loginWithPrivilegedRole();
 
@@ -58,6 +59,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await ml.jobTable.assertJobActionSingleMetricViewerButtonEnabled(adJobId, true);
         await ml.jobTable.assertJobActionAnomalyExplorerButtonEnabled(adJobId, true);
       });
+
       describe('job creation', () => {
         it('does not show exclude frozen data tier control in wizard', async () => {
           await ml.testExecution.logTestStep('loads the anomaly detection creation wizard');

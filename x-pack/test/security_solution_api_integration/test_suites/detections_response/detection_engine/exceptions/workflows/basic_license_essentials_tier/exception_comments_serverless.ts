@@ -125,6 +125,7 @@ export default ({ getService }: FtrProviderContext) => {
         );
       });
     });
+
     describe('Endpoint Exceptions', () => {
       afterEach(async () => {
         await deleteAllExceptions(supertest, log);

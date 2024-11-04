@@ -314,6 +314,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('only super users', function () {
       this.tags('skipFIPS');
+
       it('should be able to invalidate sessions', async function () {
         const basicSessionCookie = await loginWithBasic(notSuperuserTestUser);
         const samlSessionCookie = await loginWithSAML();

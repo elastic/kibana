@@ -28,6 +28,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       before(async function () {
         await security.testUser.setRoles(['kibana_admin', 'test_alias1_reader']);
       });
+
       it('can be an index pattern', async () => {
         await es.transport.request({
           path: '/blogs/_doc',

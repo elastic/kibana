@@ -29,6 +29,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await pageObjects.svlCommonPage.loginWithRole('developer');
       await pageObjects.svlApiKeys.deleteAPIKeys();
     });
+
     after(async () => {
       await esDeleteAllIndices(indexName);
     });
@@ -38,18 +39,22 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await es.indices.create({ index: indexName });
         await svlSearchNavigation.navigateToIndexDetailPage(indexName);
       });
+
       after(async () => {
         await esDeleteAllIndices(indexName);
       });
+
       it('can load index detail page', async () => {
         await pageObjects.svlSearchIndexDetailPage.expectIndexDetailPageHeader();
         await pageObjects.svlSearchIndexDetailPage.expectSearchIndexDetailsTabsExists();
         await pageObjects.svlSearchIndexDetailPage.expectAPIReferenceDocLinkExists();
         await pageObjects.svlSearchIndexDetailPage.expectAPIReferenceDocLinkMissingInMoreOptions();
       });
+
       it('should have embedded dev console', async () => {
         await testHasEmbeddedConsole(pageObjects);
       });
+
       it('should have connection details', async () => {
         await pageObjects.svlSearchIndexDetailPage.expectConnectionDetails();
       });
@@ -158,25 +163,30 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await svlSearchNavigation.navigateToIndexDetailPage(indexName);
           await esDeleteAllIndices(indexName);
         });
+
         it('has page load error section', async () => {
           await pageObjects.svlSearchIndexDetailPage.expectPageLoadErrorExists();
           await pageObjects.svlSearchIndexDetailPage.expectIndexNotFoundErrorExists();
         });
+
         it('reload button shows details page again', async () => {
           await es.indices.create({ index: indexName });
           await pageObjects.svlSearchIndexDetailPage.clickPageReload();
           await pageObjects.svlSearchIndexDetailPage.expectIndexDetailPageHeader();
         });
       });
+
       describe('Index more options menu', () => {
         before(async () => {
           await svlSearchNavigation.navigateToIndexDetailPage(indexName);
         });
+
         it('shows action menu in actions popover', async () => {
           await pageObjects.svlSearchIndexDetailPage.expectMoreOptionsActionButtonExists();
           await pageObjects.svlSearchIndexDetailPage.clickMoreOptionsActionsButton();
           await pageObjects.svlSearchIndexDetailPage.expectMoreOptionsOverviewMenuIsShown();
         });
+
         it('should delete index', async () => {
           await pageObjects.svlSearchIndexDetailPage.expectDeleteIndexButtonExistsInMoreOptions();
           await pageObjects.svlSearchIndexDetailPage.clickDeleteIndexButton();
@@ -184,25 +194,30 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
       });
     });
+
     describe('index management index details', () => {
       before(async () => {
         await es.indices.create({ index: indexName });
         await security.testUser.setRoles(['index_management_user']);
       });
+
       beforeEach(async () => {
         await pageObjects.common.navigateToApp('indexManagement');
         // Navigate to the indices tab
         await pageObjects.indexManagement.changeTabs('indicesTab');
         await pageObjects.header.waitUntilLoadingHasFinished();
       });
+
       after(async () => {
         await esDeleteAllIndices(indexName);
       });
+
       describe('manage index action', () => {
         beforeEach(async () => {
           await pageObjects.indexManagement.manageIndex(indexName);
           await pageObjects.indexManagement.manageIndexContextMenuExists();
         });
+
         it('navigates to overview tab', async () => {
           await pageObjects.indexManagement.changeManageIndexTab('showOverviewIndexMenuButton');
           await pageObjects.svlSearchIndexDetailPage.expectIndexDetailPageHeader();
@@ -214,12 +229,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await pageObjects.svlSearchIndexDetailPage.expectIndexDetailPageHeader();
           await pageObjects.svlSearchIndexDetailPage.expectUrlShouldChangeTo('settings');
         });
+
         it('navigates to mappings tab', async () => {
           await pageObjects.indexManagement.changeManageIndexTab('showMappingsIndexMenuButton');
           await pageObjects.svlSearchIndexDetailPage.expectIndexDetailPageHeader();
           await pageObjects.svlSearchIndexDetailPage.expectUrlShouldChangeTo('mappings');
         });
       });
+
       describe('can view search index details', function () {
         it('renders search index details with no documents', async () => {
           await pageObjects.svlSearchIndexDetailPage.openIndicesDetailFromIndexManagementIndicesListTable(

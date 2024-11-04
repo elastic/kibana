@@ -30,6 +30,7 @@ export default function ({ getService }: FtrProviderContext) {
       const testDataStreamName = 'test-data-stream';
 
       before(async () => await createDataStream(testDataStreamName));
+
       after(async () => await deleteDataStream(testDataStreamName));
 
       it('returns an array of data streams', async () => {
@@ -185,6 +186,7 @@ export default function ({ getService }: FtrProviderContext) {
       const testDataStreamName = 'test-data-stream';
 
       before(async () => await createDataStream(testDataStreamName));
+
       after(async () => await deleteDataStream(testDataStreamName));
 
       it('updates the data retention of a DS', async () => {

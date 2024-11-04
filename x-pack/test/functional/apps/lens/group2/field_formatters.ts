@@ -30,6 +30,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await fieldEditor.confirmDelete();
         await lens.waitForFieldMissing('runtimefield');
       });
+
       it('should display url formatter correctly', async () => {
         await retry.try(async () => {
           await dataViews.clickAddFieldFromSearchBar();
@@ -125,6 +126,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await fieldEditor.confirmDelete();
         await lens.waitForFieldMissing('runtimefield');
       });
+
       it('should display bytes number formatter correctly', async () => {
         await retry.try(async () => {
           await dataViews.clickAddFieldFromSearchBar();
@@ -185,6 +187,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await lens.getDatatableCellText(0, 0)).to.eql('572,732.21%');
       });
     });
+
     describe('formatter order', () => {
       before(async () => {
         await visualize.navigateToNewVisualization();
@@ -199,6 +202,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await fieldEditor.confirmDelete();
         await lens.waitForFieldMissing('runtimefield');
       });
+
       it('should be overridden by Lens formatter', async () => {
         await retry.try(async () => {
           await dataViews.clickAddFieldFromSearchBar();

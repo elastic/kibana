@@ -113,6 +113,7 @@ export default ({ getService }: FtrProviderContext) => {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote_small');
     });
+
     after(async () => {
       await ml.api.setUpgradeMode(false);
     });

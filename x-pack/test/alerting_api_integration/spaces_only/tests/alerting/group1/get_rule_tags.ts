@@ -33,6 +33,7 @@ export default function createAggregateTests({ getService }: FtrProviderContext)
 
     describe('get rule tags when there are no rules', function () {
       this.tags('skipFIPS');
+
       it('should get rule tags when there are no rules', async () => {
         const response = await supertest
           .get(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_tags`)
@@ -49,6 +50,7 @@ export default function createAggregateTests({ getService }: FtrProviderContext)
 
     describe('get rule tags from all rules', function () {
       this.tags('skipFIPS');
+
       it('should get rule tags from all rules', async () => {
         await Promise.all(
           tags.map(async (tag, index) => {
@@ -96,6 +98,7 @@ export default function createAggregateTests({ getService }: FtrProviderContext)
 
     describe('paginate rule tags', function () {
       this.tags('skipFIPS');
+
       it('should paginate rule tags', async () => {
         await createRule({
           tags: ['1', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '110'],

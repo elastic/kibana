@@ -111,6 +111,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             offset: '8m',
           });
         });
+
         it('returns some data for both periods', async () => {
           expect(Object.keys(mobiledetailedStatisticResponse.currentPeriod).sort()).to.be.eql(
             SERVICE_VERSIONS.sort()

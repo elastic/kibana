@@ -75,6 +75,7 @@ export default ({ getService }: FtrProviderContext) => {
         );
         await createAlertsIndex(supertest, log);
       });
+
       afterEach(async () => {
         await deleteAllAlerts(supertest, log, es);
       });

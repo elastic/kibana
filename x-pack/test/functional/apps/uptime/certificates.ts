@@ -35,6 +35,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await uptimeService.cert.hasViewCertButton();
         await uptimeService.navigation.goToCertificates();
       });
+
       it('displays empty message', async () => {
         await uptimeService.cert.displaysEmptyMessage();
       });

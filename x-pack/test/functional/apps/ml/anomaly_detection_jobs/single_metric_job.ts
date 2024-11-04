@@ -90,6 +90,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('single metric', function () {
     this.tags(['ml']);
+
     before(async () => {
       await esNode.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await ml.testResources.createDataViewIfNeeded(esIndexPatternString, '@timestamp');

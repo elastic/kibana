@@ -52,6 +52,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       describe('feature filters', function () {
         this.tags('skipFIPS');
+
         it('Shows only allowed feature filters', async () => {
           await pageObjects.common.navigateToUrl(
             'management',
@@ -80,6 +81,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     describe('Loads the page with actions but not alerting privilege', function () {
       this.tags('skipFIPS');
+
       beforeEach(async () => {
         await security.testUser.restoreDefaults();
         await security.testUser.setRoles(['only_actions_role']);

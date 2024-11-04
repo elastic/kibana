@@ -57,6 +57,7 @@ export default function ({ getService }: FtrProviderContext) {
         refresh: 'wait_for',
       });
     });
+
     after(async () => {
       await es.indices.delete({
         index: 'search-api-test',

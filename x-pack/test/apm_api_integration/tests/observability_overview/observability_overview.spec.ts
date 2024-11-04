@@ -94,6 +94,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       const GO_PROD_RATE = 50;
       const GO_DEV_RATE = 5;
       const JAVA_PROD_RATE = 45;
+
       before(async () => {
         const serviceGoProdInstance = apm
           .service({ name: 'synth-go', environment: 'production', agentName: 'go' })
@@ -141,6 +142,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       describe('compare throughput values', () => {
         let throughputValues: Awaited<ReturnType<typeof getThroughputValues>>;
+
         before(async () => {
           throughputValues = await getThroughputValues();
         });

@@ -166,6 +166,7 @@ export default function ({ getService }: FtrProviderContext) {
     let t1AnalystSupertest: TestAgent;
     let endpointOperationsAnalystSupertest: TestAgent;
     let platformEnginnerSupertest: TestAgent;
+
     before(async () => {
       adminSupertest = await utils.createSuperTest();
       t1AnalystSupertest = await utils.createSuperTest(ROLE.t1_analyst);

@@ -43,6 +43,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
 
     describe('create alert', function () {
       this.tags('skipFIPS');
+
       it('should handle create alert request appropriately', async () => {
         const { body: createdAction } = await supertest
           .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
@@ -135,6 +136,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
 
     describe('store references correctly', function () {
       this.tags('skipFIPS');
+
       it('should store references correctly for actions', async () => {
         const { body: createdAction } = await supertest
           .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
@@ -725,6 +727,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
 
     describe('legacy', function () {
       this.tags('skipFIPS');
+
       it('should handle create alert request appropriately', async () => {
         const { body: createdAction } = await supertest
           .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)

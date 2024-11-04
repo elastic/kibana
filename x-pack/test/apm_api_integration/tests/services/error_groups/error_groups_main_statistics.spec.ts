@@ -71,6 +71,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       describe('returns the correct data', () => {
         let errorGroupMainStatistics: ErrorGroupsMainStatistics;
+
         before(async () => {
           const response = await callApi();
           errorGroupMainStatistics = response.body;

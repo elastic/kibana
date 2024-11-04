@@ -29,6 +29,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('main', () => {
     const kibanaServer = getService('kibanaServer');
+
     before(async () => {
       roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       internalReqHeader = svlCommonApi.getInternalRequestHeader();
@@ -40,6 +41,7 @@ export default function ({ getService }: FtrProviderContext) {
         .set(roleAuthc.apiKeyHeader);
       dataViewId = result.body.data_view.id;
     });
+
     after(async () => {
       await supertestWithoutAuth
         .delete(SPECIFIC_DATA_VIEW_PATH.replace('{id}', dataViewId))
@@ -48,11 +50,13 @@ export default function ({ getService }: FtrProviderContext) {
         .set(roleAuthc.apiKeyHeader);
       await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
+
     beforeEach(async () => {
       await kibanaServer.importExport.load(
         'test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
       );
     });
+
     afterEach(async () => {
       await kibanaServer.importExport.unload(
         'test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
@@ -133,6 +137,7 @@ export default function ({ getService }: FtrProviderContext) {
           'test/api_integration/fixtures/kbn_archiver/management/saved_objects/relationships.json'
         );
       });
+
       afterEach(async () => {
         await kibanaServer.importExport.unload(
           'test/api_integration/fixtures/kbn_archiver/management/saved_objects/relationships.json'

@@ -381,6 +381,7 @@ export default ({ getService }: FtrProviderContext) => {
         }),
       });
     });
+
     it('should be able to execute and get all alerts when doing a specific query (match query)', async () => {
       const username = await utils.getUsername();
       const rule: ThreatMatchRuleCreateProps = createThreatMatchRule({

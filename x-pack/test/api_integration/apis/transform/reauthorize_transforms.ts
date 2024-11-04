@@ -122,6 +122,7 @@ export default ({ getService }: FtrProviderContext) => {
           generateHeaders(apiKeysForTransformUsers.get(USER.TRANSFORM_VIEWER)!, '1')
         );
       });
+
       afterEach(async () => {
         await cleanUpTransform(transformCreatedByViewerId);
       });

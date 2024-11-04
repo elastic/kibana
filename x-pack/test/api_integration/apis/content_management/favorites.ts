@@ -24,6 +24,7 @@ export default function ({ getService }: FtrProviderContext) {
   describe('favorites', function () {
     describe('for not interactive user', function () {
       const supertest = getService('supertest');
+
       it('favorites require interactive user', async () => {
         const { status: status1 } = await supertest
           .get('/internal/content_management/favorites/dashboard')

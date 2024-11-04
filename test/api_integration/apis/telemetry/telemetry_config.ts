@@ -25,6 +25,7 @@ export default function telemetryConfigTest({ getService }: FtrProviderContext) 
     ['/api/telemetry/v2/config', '/internal/telemetry/config'].forEach((api) => {
       describe(`GET ${api}`, () => {
         const apiVersion = api === '/api/telemetry/v2/config' ? '2023-10-31' : '2';
+
         before(async () => {
           try {
             await kbnClient.savedObjects.delete({ type: TELEMETRY_SO_TYPE, id: TELEMETRY_SO_ID });

@@ -36,6 +36,7 @@ export default function ({ getService }: FtrProviderContext) {
       await kibanaServer.savedObjects.cleanStandardList();
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
     });
+
     after(async () => {
       await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
     });

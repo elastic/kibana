@@ -75,13 +75,16 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
         });
         expect(body).to.have.property('has_cloud_agent_policy', false);
       });
+
       describe('with Cloud agent policy', () => {
         before(async () => {
           await createAgentPolicy({ bettertest, id: 'policy-elastic-agent-on-cloud' });
         });
+
         after(async () => {
           await deleteAgentPolicy(bettertest, 'policy-elastic-agent-on-cloud');
         });
+
         it('should be true when cloud agent policy exists', async () => {
           const { body } = await bettertest({
             pathname: '/internal/apm/fleet/migration_check',
@@ -95,9 +98,11 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
       before(async () => {
         await createAgentPolicy({ bettertest, id: 'policy-elastic-agent-on-cloud' });
       });
+
       after(async () => {
         await deleteAgentPolicy(bettertest, 'policy-elastic-agent-on-cloud');
       });
+
       it('should be false when the Cloud APM package policy does not exist', async () => {
         const { body } = await bettertest({
           pathname: '/internal/apm/fleet/migration_check',
@@ -106,6 +111,7 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
         expect(body).to.not.have.property('cloud_apm_package_policy');
         expect(body).to.have.property('has_apm_integrations', false);
       });
+
       describe('with Cloud APM package policy', () => {
         before(async () => {
           await createPackagePolicy({
@@ -114,9 +120,11 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
             id: 'apm',
           });
         });
+
         after(async () => {
           await deletePackagePolicy(bettertest, 'apm');
         });
+
         it('should be true when the Cloud APM package policy exists', async () => {
           const { body } = await bettertest({
             pathname: '/internal/apm/fleet/migration_check',
@@ -132,9 +140,11 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
       before(async () => {
         await createAgentPolicy({ bettertest, id: 'test-agent-policy' });
       });
+
       after(async () => {
         await deleteAgentPolicy(bettertest, 'test-agent-policy');
       });
+
       it('should be false when no APM package policies exist', async () => {
         const { body } = await bettertest({
           pathname: '/internal/apm/fleet/migration_check',
@@ -142,6 +152,7 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
         expect(body).to.have.property('has_apm_integrations', false);
         expect(body).to.have.property('has_cloud_apm_package_policy', false);
       });
+
       describe('with custom APM package policy', () => {
         before(async () => {
           await createPackagePolicy({
@@ -150,9 +161,11 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
             id: 'test-apm-package-policy',
           });
         });
+
         after(async () => {
           await deletePackagePolicy(bettertest, 'test-apm-package-policy');
         });
+
         it('should be true when any APM package policy exists', async () => {
           const { body } = await bettertest({
             pathname: '/internal/apm/fleet/migration_check',
@@ -170,6 +183,7 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
         });
         expect(body).to.have.property('has_required_role', true);
       });
+
       it('should be false when user is not superuser', async () => {
         const { body } = await apmApiClient.manageServiceAccount({
           endpoint: 'GET /internal/apm/fleet/migration_check',

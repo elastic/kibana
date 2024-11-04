@@ -19,6 +19,7 @@ export default function ({ getService }: FtrProviderContext) {
     const archive = 'x-pack/test/functional/es_archives/uptime/full_heartbeat';
 
     before('load heartbeat data', async () => await esArchiver.load(archive));
+
     after('unload heartbeat data', async () => await esArchiver.unload(archive));
 
     it('should get all pings stored in index', async () => {

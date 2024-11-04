@@ -104,6 +104,7 @@ export default function (providerContext: FtrProviderContext) {
     describe('DELETE /fleet/enrollment_api_keys/{id}', () => {
       let keyId: string;
       let esApiKeyId: string;
+
       before(async () => {
         const { body: apiResponse } = await supertest
           .post(`/api/fleet/enrollment_api_keys`)
@@ -288,6 +289,7 @@ export default function (providerContext: FtrProviderContext) {
 
     describe('deprecated API', () => {
       let keyId: string;
+
       before(async () => {
         const { body: apiResponse } = await supertest
           .post(`/api/fleet/enrollment-api-keys`)

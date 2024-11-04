@@ -93,6 +93,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(debugData?.target).to.be(11250);
       expect(debugData?.domain).to.eql([1000, 25000]);
     });
+
     it('should seamlessly switch to vertical bullet chart without losing configuration', async () => {
       await lens.openVisualOptions();
       await testSubjects.click('lns_gaugeOrientation_verticalBullet');
@@ -105,6 +106,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(debugData?.target).to.be(11250);
       expect(debugData?.domain).to.eql([1000, 25000]);
     });
+
     it('should seamlessly switch to minor arc gauge chart without losing configuration', async () => {
       await lens.openVisualOptions();
       await lens.setGaugeShape('Minor arc');
@@ -117,6 +119,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(debugData?.target).to.be(11250);
       expect(debugData?.domain).to.eql([1000, 25000]);
     });
+
     it('should seamlessly switch to arc gauge chart without losing configuration', async () => {
       await lens.openVisualOptions();
       await lens.setGaugeShape('Major arc');
@@ -129,6 +132,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(debugData?.target).to.be(11250);
       expect(debugData?.domain).to.eql([1000, 25000]);
     });
+
     it('should seamlessly switch to circular gauge chart without losing configuration', async () => {
       await lens.openVisualOptions();
       await lens.setGaugeShape('Circle');
@@ -141,6 +145,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(debugData?.target).to.be(11250);
       expect(debugData?.domain).to.eql([1000, 25000]);
     });
+
     it('should switch to table chart and filter not supported static values', async () => {
       await lens.switchToVisualization('lnsDatatable');
       const columnsCount = await lens.getCountOfDatatableColumns();

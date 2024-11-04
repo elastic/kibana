@@ -38,6 +38,7 @@ export default function ({ getService }: FtrProviderContext) {
         body: { bye: 'world' },
       });
     });
+
     after(async () => {
       await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });

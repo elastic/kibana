@@ -19,6 +19,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('User profiles suggestions', () => {
     const usersSessions = new Map<string, { cookie: Cookie }>();
+
     before(async () => {
       // 1. Create test roles.
       await security.role.create('role_one', {

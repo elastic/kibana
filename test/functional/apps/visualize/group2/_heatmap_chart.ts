@@ -129,6 +129,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       }
       expect(legends).to.eql(expectedLegends);
     });
+
     it('should show 6 custom color ranges', async function () {
       await visEditor.clickOptionsTab();
       await visEditor.clickEnableCustomRanges();

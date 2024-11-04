@@ -28,6 +28,7 @@ export default function ({ getService }) {
           'test/api_integration/fixtures/kbn_archiver/index_patterns/basic_kibana.json'
         );
       });
+
       after(async () => {
         await esArchiver.unload(
           'test/api_integration/fixtures/es_archiver/index_patterns/basic_index'
@@ -36,6 +37,7 @@ export default function ({ getService }) {
           'test/api_integration/fixtures/kbn_archiver/index_patterns/basic_kibana.json'
         );
       });
+
       it('should return 200 without a query', () =>
         supertest
           .post('/internal/kibana/suggestions/values/basic_index')

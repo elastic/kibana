@@ -52,6 +52,7 @@ export default ({ getService }: FtrProviderContext) => {
       describe('@ess', function () {
         /* Wrapped in `describe` block, because `this.tags` only works in `describe` blocks */
         this.tags('skipFIPS');
+
         it('should give a 403 when trying to create a single Machine Learning rule since the license is basic', async function () {
           const { body } = await supertest
             .post(DETECTION_ENGINE_RULES_URL)

@@ -34,6 +34,7 @@ export default ({ getService }: FtrProviderContext) => {
       index: 'ecs_compliant',
       log,
     });
+
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
     });

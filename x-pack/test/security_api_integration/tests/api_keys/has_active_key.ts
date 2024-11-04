@@ -32,6 +32,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('Has Active API Keys: _has_active', () => {
     before(cleanup);
+
     after(cleanup);
 
     it('detects when user has no API Keys', async () => {

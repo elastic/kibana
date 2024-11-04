@@ -24,6 +24,7 @@ export default function ({ getService }: FtrProviderContext) {
     let synthtraceApmClient: ApmSynthtraceEsClient;
     const from = new Date(Date.now() - 1000 * 60 * 2).toISOString();
     const to = new Date().toISOString();
+
     before(async () => {
       const version = (await apmSynthtraceKibanaClient.installApmPackage()).version;
       synthtraceApmClient = await getApmSynthtraceEsClient({
@@ -31,6 +32,7 @@ export default function ({ getService }: FtrProviderContext) {
         packageVersion: version,
       });
     });
+
     after(async () => {
       await apmSynthtraceKibanaClient.uninstallApmPackage();
     });
@@ -41,6 +43,7 @@ export default function ({ getService }: FtrProviderContext) {
           generateServicesData({ from, to, instanceCount: 3, servicesPerHost: 3 })
         )
       );
+
       after(async () => {
         await synthtraceApmClient.clean();
       });
@@ -65,6 +68,7 @@ export default function ({ getService }: FtrProviderContext) {
         const { services } = decodeOrThrow(ServicesAPIResponseRT)(response.body);
         expect(services.length).to.be(0);
       });
+
       it('should return correct number of services running on specified host', async () => {
         const filters = JSON.stringify({
           'host.name': 'host-0',
@@ -82,6 +86,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
         expect(response.body.services.length).to.equal(3);
       });
+
       it('should return bad request if unallowed filter', async () => {
         const filters = JSON.stringify({
           'host.name': 'host-0',
@@ -100,15 +105,18 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(400);
       });
     });
+
     describe('with logs only', () => {
       before(async () =>
         synthtraceApmClient.index(
           generateServicesLogsOnlyData({ from, to, instanceCount: 1, servicesPerHost: 2 })
         )
       );
+
       after(async () => {
         await synthtraceApmClient.clean();
       });
+
       it('should return services with logs only data', async () => {
         const filters = JSON.stringify({
           'host.name': 'host-0',

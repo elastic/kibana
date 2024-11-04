@@ -92,6 +92,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           duration: 1000,
         },
       ];
+
       before(async () => {
         const serviceGoProdInstance = apm
           .service({ name: serviceName, environment: 'production', agentName: 'go' })
@@ -124,6 +125,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             }),
         ]);
       });
+
       after(() => apmSynthtraceEsClient.clean());
 
       it('returns the correct data', async () => {

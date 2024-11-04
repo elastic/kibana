@@ -26,6 +26,7 @@ export default function ({ getService }: FtrProviderContext) {
     this.tags(['skipCloud']);
 
     before(async () => Promise.all([cleanupPolicies(), cleanupRepositories()]));
+
     after(async () => Promise.all([cleanupPolicies(), cleanupRepositories()]));
 
     it('returns empty array if no policies', async () => {

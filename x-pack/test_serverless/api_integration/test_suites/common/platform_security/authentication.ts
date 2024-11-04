@@ -28,11 +28,13 @@ export default function ({ getService }: FtrProviderContext) {
         }
       );
     });
+
     after(async () => {
       await supertestAdminWithApiKey.destroy();
       await supertestViewerWithApiKey.destroy();
       await supertestViewerWithCookieCredentials.destroy();
     });
+
     describe('route access', () => {
       describe('disabled', () => {
         // ToDo: uncomment when we disable login

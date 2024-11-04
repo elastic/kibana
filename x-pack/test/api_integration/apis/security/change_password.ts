@@ -17,6 +17,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('Change password', () => {
     let sessionCookie: Cookie;
+
     beforeEach(async () => {
       await security.user.create(mockUserName, { password: mockUserPassword, roles: [] });
 

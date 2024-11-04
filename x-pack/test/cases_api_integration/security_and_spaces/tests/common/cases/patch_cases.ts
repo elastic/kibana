@@ -1533,6 +1533,7 @@ export default ({ getService }: FtrProviderContext): void => {
         beforeEach(async () => {
           await esArchiver.load('x-pack/test/functional/es_archives/cases/signals/default');
         });
+
         afterEach(async () => {
           await esArchiver.unload('x-pack/test/functional/es_archives/cases/signals/default');
           await deleteAllCaseItems(es);
@@ -1667,6 +1668,7 @@ export default ({ getService }: FtrProviderContext): void => {
         beforeEach(async () => {
           await esArchiver.load('x-pack/test/functional/es_archives/cases/signals/duplicate_ids');
         });
+
         afterEach(async () => {
           await esArchiver.unload('x-pack/test/functional/es_archives/cases/signals/duplicate_ids');
           await deleteAllCaseItems(es);

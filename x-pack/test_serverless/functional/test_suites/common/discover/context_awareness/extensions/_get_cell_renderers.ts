@@ -259,6 +259,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           });
         });
       });
+
       describe('Service Name Cell', () => {
         it('should render service.name cell', async () => {
           await PageObjects.common.navigateToActualUrl('discover', undefined, {

@@ -11,6 +11,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('Verify upgraded dashboards', function () {
     const PageObjects = getPageObjects(['common', 'dashboard', 'timePicker']);
     const renderService = getService('renderable');
+
     before(async () => {
       await PageObjects.common.navigateToApp('management', { insertTimestamp: false });
     });

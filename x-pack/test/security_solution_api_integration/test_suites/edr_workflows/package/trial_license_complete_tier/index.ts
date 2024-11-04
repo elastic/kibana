@@ -20,6 +20,7 @@ export default function endpointAPIIntegrationTests(providerContext: FtrProvider
     const endpointRegistryHelpers = getService('endpointRegistryHelpers');
 
     const roles = Object.values(ROLE);
+
     before(async () => {
       try {
         if (!endpointRegistryHelpers.isRegistryEnabled()) {

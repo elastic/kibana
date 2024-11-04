@@ -29,12 +29,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await PageObjects.settings.navigateTo();
           await PageObjects.settings.clickKibanaIndexPatterns();
         });
+
         it('create index pattern using remote name', async () => {
           await PageObjects.settings.createIndexPattern('ftr-remote:logstash*', null);
           await PageObjects.settings.clickKibanaIndexPatterns();
           const indexPatternList = await PageObjects.settings.getIndexPatternList();
           expect(indexPatternList.length).to.eql(1);
         });
+
         it('create index pattern with wildcards in remote name', async () => {
           await PageObjects.settings.createIndexPattern('*t*-remo*:log*', null);
           await PageObjects.settings.clickKibanaIndexPatterns();
@@ -48,6 +50,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await kibanaServer.savedObjects.cleanStandardList();
         });
       });
+
       describe('remote and local clusters', () => {
         before(async () => {
           await es.transport.request({
@@ -63,12 +66,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await PageObjects.settings.navigateTo();
           await PageObjects.settings.clickKibanaIndexPatterns();
         });
+
         it('combined remote cluster and local cluster data view without wildcards', async () => {
           await PageObjects.settings.createIndexPattern('blog*, ftr-remote:log*', null);
           await PageObjects.settings.clickKibanaIndexPatterns();
           const indexPatternList = await PageObjects.settings.getIndexPatternList();
           expect(indexPatternList.length).to.eql(1);
         });
+
         it('combined remote cluster and local cluster data view with wildcards', async () => {
           await PageObjects.settings.createIndexPattern('blog*, *t*-remo*:lo*', null);
           await PageObjects.settings.clickKibanaIndexPatterns();
@@ -81,6 +86,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await testSubjects.exists('indexPatternTable');
           await kibanaServer.savedObjects.cleanStandardList();
         });
+
         after(async () => {
           await es.transport.request({
             path: '/blogs',
@@ -88,6 +94,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           });
         });
       });
+
       after(async () => {
         await security.testUser.restoreDefaults();
       });

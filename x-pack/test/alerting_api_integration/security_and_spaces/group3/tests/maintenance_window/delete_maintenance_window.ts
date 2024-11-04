@@ -26,6 +26,7 @@ export default function deleteMaintenanceWindowTests({ getService }: FtrProvider
         freq: 2, // weekly
       },
     };
+
     afterEach(() => objectRemover.removeAll());
 
     for (const scenario of UserAtSpaceScenarios) {

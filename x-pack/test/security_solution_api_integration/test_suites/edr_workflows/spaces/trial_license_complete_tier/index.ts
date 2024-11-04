@@ -21,6 +21,7 @@ export default function endpointAPIIntegrationTests(providerContext: FtrProvider
     const endpointRegistryHelpers = getService('endpointRegistryHelpers');
 
     const roles = Object.values(ROLE);
+
     before(async () => {
       if (!endpointRegistryHelpers.isRegistryEnabled()) {
         log.warning('These tests are being run with an external package registry');

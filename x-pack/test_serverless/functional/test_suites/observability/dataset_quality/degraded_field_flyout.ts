@@ -69,6 +69,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       after(async () => {
         await synthtrace.clean();
       });
+
       it('should open and close the flyout when user clicks on the expand button', async () => {
         await PageObjects.datasetQuality.navigateToDetails({
           dataStream: degradedDataStreamName,

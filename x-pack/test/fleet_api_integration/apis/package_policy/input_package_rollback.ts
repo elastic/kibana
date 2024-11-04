@@ -107,6 +107,7 @@ export default function (providerContext: FtrProviderContext) {
     skipIfNoDockerRegistry(providerContext);
 
     let agentPolicyId: string;
+
     before(async () => {
       const agentPolicy = await createAgentPolicy();
       agentPolicyId = agentPolicy.id;

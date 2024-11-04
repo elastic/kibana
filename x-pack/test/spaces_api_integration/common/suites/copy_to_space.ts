@@ -958,6 +958,7 @@ export function copyToSpaceTestSuiteFactory(context: FtrProviderContext) {
           const includeReferences = false;
           describe(`multi-namespace types with overwrite=${overwrite} and createNewCopies=${createNewCopies}`, () => {
             before(async () => await testDataLoader.createFtrSavedObjectsData(SPACE_DATA_TO_LOAD));
+
             after(async () => await testDataLoader.deleteFtrSavedObjectsData());
 
             const testCases = tests.multiNamespaceTestCases(overwrite, createNewCopies);

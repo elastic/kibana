@@ -19,6 +19,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('Getting user profiles in bulk', () => {
     const usersSessions = new Map<string, { cookie: Cookie; uid: string }>();
+
     before(async () => {
       // 1. Create test users
       await Promise.all(

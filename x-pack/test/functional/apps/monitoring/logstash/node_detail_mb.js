@@ -52,16 +52,19 @@ export default function ({ getService, getPageObjects }) {
       it('detail view should have summary status showing correct info', async () => {
         expect(await nodeDetail.getSummary()).to.eql(nodeSummaryStatus);
       });
+
       it('advanced view should have summary status showing correct info', async () => {
         await nodeDetail.clickAdvanced();
 
         expect(await nodeDetail.getSummary()).to.eql(nodeSummaryStatus);
       });
+
       it('pipelines view should have summary status showing correct info', async () => {
         await nodeDetail.clickPipelines();
 
         expect(await nodeDetail.getSummary()).to.eql(nodeSummaryStatus);
       });
+
       it('pipelines view should have Pipelines table showing correct rows with default sorting', async () => {
         const rows = await pipelinesList.getRows();
         expect(rows.length).to.be(3);

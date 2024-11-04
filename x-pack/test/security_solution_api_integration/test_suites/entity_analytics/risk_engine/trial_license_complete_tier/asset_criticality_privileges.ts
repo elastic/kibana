@@ -87,6 +87,7 @@ export default ({ getService }: FtrProviderContext) => {
           username,
           password: USER_PASSWORD,
         });
+
       before(async () => {
         await createPrivilegeTestUsers();
       });
@@ -106,6 +107,7 @@ export default ({ getService }: FtrProviderContext) => {
             },
           });
         });
+
         it('returns has_all_required false for user without asset criticality index read', async () => {
           const { body } = await getPrivilegesForUsername('no_asset_criticality_index_read');
           expect(body.has_all_required).to.eql(false);
@@ -120,6 +122,7 @@ export default ({ getService }: FtrProviderContext) => {
             },
           });
         });
+
         it('returns has_all_required false for user without asset criticality index write', async () => {
           const { body } = await getPrivilegesForUsername('no_asset_criticality_index_write');
           expect(body.has_all_required).to.eql(false);
@@ -142,6 +145,7 @@ export default ({ getService }: FtrProviderContext) => {
       const supertestWithoutAuth = getService('supertestWithoutAuth');
       const assetCriticalityRoutesNoAuth =
         assetCriticalityRouteHelpersFactoryNoAuth(supertestWithoutAuth);
+
       it('returns that t1_analyst only has read privileges', async () => {
         const { body } = await assetCriticalityRoutesNoAuth.privilegesForUser({
           username: SERVERLESS_USERNAMES.t1_analyst,

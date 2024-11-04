@@ -55,6 +55,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             await testSubjects.missingOrFail('fieldEditor');
           });
         });
+
         it('should show all fields as available', async () => {
           expect(
             await (await testSubjects.find('lnsIndexPatternAvailableFields-count')).getVisibleText()
@@ -257,6 +258,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
         await dataViews.waitForSwitcherToBe('field-update-test*');
       });
+
       after(async () => {
         await es.transport.request({
           path: '/field-update-test',

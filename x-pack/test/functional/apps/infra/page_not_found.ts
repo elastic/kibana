@@ -32,6 +32,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       before(async () => {
         await kibanaServer.uiSettings.update({ [OBSERVABILITY_ENABLE_LOGS_STREAM]: true });
       });
+
       after(async () => {
         await kibanaServer.uiSettings.update({ [OBSERVABILITY_ENABLE_LOGS_STREAM]: false });
       });

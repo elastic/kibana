@@ -29,6 +29,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       before(async () => {
         await security.testUser.setRoles(['kibana_admin']);
       });
+
       after(async () => {
         await security.testUser.restoreDefaults();
       });
@@ -40,6 +41,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       describe('"Data" section', function () {
         this.tags('skipFIPS');
+
         it('should render only data_quality section', async () => {
           await PageObjects.common.navigateToApp('management');
           const sections = await managementMenu.getSections();
@@ -57,9 +59,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       before(async () => {
         await security.testUser.setRoles(['global_dashboard_read', 'ccr_user']);
       });
+
       after(async () => {
         await security.testUser.restoreDefaults();
       });
+
       it('should show the Stack Management nav link', async () => {
         const links = await appsMenu.readLinks();
         expect(links.map((link) => link.text)).to.contain('Stack Management');
@@ -67,6 +71,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       describe('"Data" section with CCR', function () {
         this.tags('skipFIPS');
+
         it('should render', async () => {
           await PageObjects.common.navigateToApp('management');
           const sections = await managementMenu.getSections();

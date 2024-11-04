@@ -12,6 +12,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('page navigation', function () {
     this.tags(['skipFirefox', 'ml']);
+
     before(async () => {
       await ml.api.cleanMlIndices();
       await ml.securityUI.loginAsMlPowerUser();

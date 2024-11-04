@@ -32,6 +32,7 @@ export default function (providerContext: FtrProviderContext) {
         const res = await apiClient.postStandaloneApiKey('test');
         expect(res.item.name).to.eql('standalone_agent-test');
       });
+
       it('should return a 403 if the user cannot create the api key', async () => {
         const apiClient = new SpaceTestApiClient(supertestWithoutAuth, {
           username: testUsers.fleet_all_int_all.username,

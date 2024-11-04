@@ -19,6 +19,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('API /metrics/process_list', () => {
     before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/8.0.0/metrics_and_apm'));
+
     after(() =>
       esArchiver.unload('x-pack/test/functional/es_archives/infra/8.0.0/metrics_and_apm')
     );

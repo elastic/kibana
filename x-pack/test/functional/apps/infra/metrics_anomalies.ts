@@ -27,6 +27,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
     });
+
     after(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
     });
@@ -37,6 +38,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await pageObjects.common.navigateToApp('infraOps');
           await pageObjects.infraHome.openAnomalyFlyout();
         });
+
         it('shows both cards in create jobs tab Hosts and K8s', async () => {
           await testSubjects.exists('infraHostsJobCard');
           await testSubjects.exists('infraK8sJobCard');
@@ -89,9 +91,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             )
           );
         });
+
         after(async () => {
           await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_anomalies');
         });
+
         it('renders the anomaly table with anomalies', async () => {
           // if the input value is unchanged the save button won't be available
           // after the change of the settings action added in
@@ -117,6 +121,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           expect(k8sAnomalies.length).to.be(1);
           await pageObjects.infraHome.closeFlyout();
         });
+
         it('renders the anomaly table after a date change with no anomalies', async () => {
           await pageObjects.infraHome.openAnomalyFlyout();
           await pageObjects.infraHome.goToAnomaliesTab();
@@ -127,6 +132,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await pageObjects.infraHome.getNoAnomaliesMsg();
           await pageObjects.infraHome.closeFlyout();
         });
+
         it('renders more anomalies on threshold change', async () => {
           await pageObjects.infraHome.goToSettings();
           await pageObjects.infraHome.setAnomaliesThreshold('25');
@@ -142,6 +148,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           const k8sAnomalies = await pageObjects.infraHome.findAnomalies();
           expect(k8sAnomalies.length).to.be(3);
         });
+
         it("should take users to hosts list when 'Show affected Hosts' is clicked", async () => {
           await pageObjects.infraHome.goToInventory();
           await pageObjects.infraHome.openAnomalyFlyout();

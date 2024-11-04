@@ -18,6 +18,7 @@ export default function ({ getService }: FtrProviderContext) {
     before(async () => {
       await reportingAPI.initEcommerce();
     });
+
     after(async () => {
       await reportingAPI.teardownEcommerce();
       await reportingAPI.deleteAllReports();

@@ -334,6 +334,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(labels).to.eql(expectedLabels);
       });
     });
+
     describe('date histogram with long time range', () => {
       // that dataset spans from Oct 26, 2013 @ 06:10:17.855	to Apr 18, 2019 @ 11:38:12.790
       const fromTime = 'Jan 1, 2013 @ 00:00:00.000';
@@ -362,6 +363,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const numberOfSegments = 7 * 2;
         expect(paths.length).to.eql(numberOfSegments);
       });
+
       it('should render monthly areas with 168 svg paths', async () => {
         log.debug('navigateToApp visualize');
         await visualize.navigateToNewAggBasedVisualization();

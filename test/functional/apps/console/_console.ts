@@ -156,6 +156,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       before(async () => {
         await PageObjects.console.clearEditorText();
       });
+
       it('it should send successful request to Kibana API', async () => {
         const expectedResponseContains = '"name": "Default"';
         await PageObjects.console.enterText('GET kbn:/api/spaces/space');

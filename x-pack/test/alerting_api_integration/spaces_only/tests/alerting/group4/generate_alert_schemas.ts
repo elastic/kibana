@@ -34,6 +34,7 @@ export default function checkAlertSchemasTest({ getService }: FtrProviderContext
 
   describe('check alert schemas', function () {
     this.tags('skipFIPS');
+
     it('should not have discrepancies from the alert field map or the field map specific to a rule type', async () => {
       // Generate base alert schema
       createSchemaFromFieldMap({

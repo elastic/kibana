@@ -120,6 +120,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('/internal/telemetry/clusters/_stats', () => {
     const timestamp = new Date().toISOString();
+
     describe('monitoring/multicluster', () => {
       let localXPack: Record<string, unknown>;
       let monitoring: Array<Record<string, unknown>>;
@@ -150,6 +151,7 @@ export default function ({ getService }: FtrProviderContext) {
         localXPack = telemetryStats.shift() as Record<string, unknown>;
         monitoring = telemetryStats as Array<Record<string, unknown>>;
       });
+
       after(() => esArchiver.unload(archive));
 
       it('should pass the schema validations', () => {
@@ -196,11 +198,14 @@ export default function ({ getService }: FtrProviderContext) {
       const archive = 'x-pack/test/functional/es_archives/monitoring/basic_6.3.x';
       const fromTimestamp = '2018-07-23T22:54:59.087Z';
       const toTimestamp = '2018-07-23T22:55:05.933Z';
+
       before(async () => {
         await esArchiver.load(archive);
         await updateMonitoringDates(esSupertest, fromTimestamp, toTimestamp, timestamp);
       });
+
       after(() => esArchiver.unload(archive));
+
       it('should load non-expiring basic cluster', async () => {
         const { body }: { body: UnencryptedTelemetryPayload } = await supertest
           .post('/internal/telemetry/clusters/_stats')
@@ -238,6 +243,7 @@ export default function ({ getService }: FtrProviderContext) {
           .send({ unencrypted: true, refreshCache: true })
           .expect(200);
       });
+
       after(() => esArchiver.unload(archive));
     });
 

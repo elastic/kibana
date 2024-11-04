@@ -23,6 +23,7 @@ export default ({ getService, getPageObjects }) => {
     const REPORTING_TEST_EMAILS = process.env.REPORTING_TEST_EMAILS;
 
     const PageObjects = getPageObjects(['common']);
+
     describe('PNG Reporting watch', () => {
       let id = 'watcher_png_report-';
       id = id + new Date().getTime(); // For debugging.
@@ -84,6 +85,7 @@ export default ({ getService, getPageObjects }) => {
       it('should be successful and increment revision', async () => {
         await getWatcher(watch, id, client, log, PageObjects.common, retry.tryForTime.bind(retry));
       });
+
       it('should delete watch and update revision', async () => {
         await deleteWatcher(watch, id, client, log);
       });

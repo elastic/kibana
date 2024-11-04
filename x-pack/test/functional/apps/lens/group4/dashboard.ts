@@ -51,6 +51,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         { skipBrowserRefresh: true }
       );
     });
+
     after(async () => {
       await security.testUser.restoreDefaults();
     });

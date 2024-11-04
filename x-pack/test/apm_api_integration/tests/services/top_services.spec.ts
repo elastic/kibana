@@ -448,6 +448,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       describe('with a user that does not have access to ML', () => {
         let response: SupertestReturnType<'GET /internal/apm/services'>;
+
         before(async () => {
           response = await apmApiClient.noMlAccessUser({
             endpoint: 'GET /internal/apm/services',
@@ -485,6 +486,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       describe('and fetching a list of services with a filter', () => {
         let response: SupertestReturnType<'GET /internal/apm/services'>;
+
         before(async () => {
           response = await apmApiClient.noMlAccessUser({
             endpoint: 'GET /internal/apm/services',

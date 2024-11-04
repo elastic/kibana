@@ -40,6 +40,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await pageObjects.common.navigateToApp('indexLifecycleManagement');
     });
+
     after(async () => {
       const isCloud = await deployment.isCloud();
       if (!isCloud) {

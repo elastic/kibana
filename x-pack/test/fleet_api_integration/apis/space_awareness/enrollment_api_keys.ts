@@ -91,6 +91,7 @@ export default function (providerContext: FtrProviderContext) {
         it('should allow to access a enrollment keu in a specific space', async () => {
           await apiClient.getEnrollmentApiKey(spaceTest1EnrollmentKey1.id, TEST_SPACE_1);
         });
+
         it('should not allow to get an enrolmment key from a different space from the default space', async () => {
           let err: Error | undefined;
           try {
@@ -125,6 +126,7 @@ export default function (providerContext: FtrProviderContext) {
           });
           expect(res.item).to.have.key('id');
         });
+
         it('should allow to create an enrollment api key for a policy in the same space', async () => {
           const res = await apiClient.postEnrollmentApiKeys(
             {
@@ -164,6 +166,7 @@ export default function (providerContext: FtrProviderContext) {
           expect(err?.message).to.match(/404 "Not Found"/);
         });
       });
+
       describe('DELETE /enrollment_api_keys', () => {
         it('should not allow to delete an enrollment api key in a different space', async () => {
           let err: Error | undefined;
@@ -186,9 +189,11 @@ export default function (providerContext: FtrProviderContext) {
           expect(err).to.be.an(Error);
           expect(err?.message).to.match(/404 "Not Found"/);
         });
+
         it('should allow to delete an enrollment api key in the default space', async () => {
           await apiClient.deleteEnrollmentApiKey(defaultSpaceEnrollmentKey1.id);
         });
+
         it('should allow to create an enrollment api key in the same space', async () => {
           await apiClient.deleteEnrollmentApiKey(spaceTest1EnrollmentKey1.id, TEST_SPACE_1);
         });

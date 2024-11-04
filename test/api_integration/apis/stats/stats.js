@@ -151,6 +151,7 @@ export default function ({ getService }) {
         'test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
       );
     });
+
     after(async () => {
       await kibanaServer.importExport.unload(
         'test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
@@ -168,6 +169,7 @@ export default function ({ getService }) {
             assertStatsAndMetrics(body);
           });
       });
+
       it(`should return the stats without cluster_uuid with 'extended' query string param = false`, () => {
         return supertest
           .get('/api/stats?extended=false')

@@ -60,6 +60,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('disables rollups', function () {
       let dataViewId = '';
+
       before(async () => {
         await esArchiver.load(
           'test/api_integration/fixtures/es_archiver/index_patterns/basic_index'

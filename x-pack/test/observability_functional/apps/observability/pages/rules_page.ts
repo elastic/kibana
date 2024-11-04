@@ -144,6 +144,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
 
       describe('only infrastructure feature enabled', function () {
         this.tags('skipFIPS');
+
         it('Allows ES query rules to be created by users with only infrastructure feature enabled', async () => {
           await observability.users.setTestUserRole(
             observability.users.defineBasicObservabilityRole({
@@ -219,6 +220,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
     describe('Rules table', () => {
       let metricThresholdRuleId: string;
       let logThresholdRuleId: string;
+
       before(async () => {
         const metricThresholdRule = {
           params: {
@@ -267,6 +269,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         logThresholdRuleId = await createRule(logThresholdRule);
         await observability.alerts.common.navigateToRulesPage();
       });
+
       after(async () => {
         await deleteRuleById(metricThresholdRuleId);
         await deleteRuleById(logThresholdRuleId);
@@ -327,6 +330,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
 
       describe('permission prompt', function () {
         this.tags('skipFIPS');
+
         it(`shows the no permission prompt when the user has no permissions`, async () => {
           // We kept this test to make sure that the stack management rule page
           // is showing the right prompt corresponding to the right privileges.
@@ -359,6 +363,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
 
       describe('rules list', function () {
         this.tags('skipFIPS');
+
         it(`shows the rules list in read-only mode when the user only has read permissions`, async () => {
           await observability.users.setTestUserRole(
             observability.users.defineBasicObservabilityRole({

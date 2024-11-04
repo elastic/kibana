@@ -91,6 +91,7 @@ export default function (providerContext: FtrProviderContext) {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/fleet/agents');
       await fleetAndAgents.setup();
     });
+
     after(async () => {
       // Wait before agent status is updated
       await new Promise((resolve) => setTimeout(resolve, AGENT_UPDATE_LAST_CHECKIN_INTERVAL_MS));
@@ -146,6 +147,7 @@ export default function (providerContext: FtrProviderContext) {
 
     describe('In a non default space', () => {
       const SPACE_ID = 'test';
+
       before(async () => {
         await kibanaServer.spaces
           .create({
@@ -154,6 +156,7 @@ export default function (providerContext: FtrProviderContext) {
           })
           .catch((err) => {});
       });
+
       describe('POST /s/test/api/fleet/agent_policies', () => {
         it('should create an .fleet-policy and .fleet-enrollment key for the policy', async () => {
           const name = `test-${Date.now()}`;

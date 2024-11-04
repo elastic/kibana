@@ -64,6 +64,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   registry.when('when data is loaded', { config: 'basic', archives: [] }, () => {
     describe('errors distribution', () => {
       const { appleTransaction, bananaTransaction } = config;
+
       before(async () => {
         await generateData({ serviceName, start, end, apmSynthtraceEsClient });
       });
@@ -72,6 +73,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       describe('without comparison', () => {
         let errorsDistribution: ErrorsDistribution;
+
         before(async () => {
           const response = await callApi();
           errorsDistribution = response.body;
@@ -87,6 +89,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         describe('displays correct start in errors distribution chart', () => {
           let errorsDistributionWithComparison: ErrorsDistribution;
+
           before(async () => {
             const responseWithComparison = await callApi({
               query: {
@@ -97,6 +100,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             });
             errorsDistributionWithComparison = responseWithComparison.body;
           });
+
           it('has same start time when comparison is enabled', () => {
             expect(first(errorsDistribution.currentPeriod)?.x).to.equal(
               first(errorsDistributionWithComparison.currentPeriod)?.x
@@ -107,12 +111,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       describe('displays occurrences for type "apple transaction" only', () => {
         let errorsDistribution: ErrorsDistribution;
+
         before(async () => {
           const response = await callApi({
             query: { kuery: `error.exception.type:"${appleTransaction.name}"` },
           });
           errorsDistribution = response.body;
         });
+
         it('displays combined number of occurrences', () => {
           const countSum = sumBy(errorsDistribution.currentPeriod, 'y');
           const numberOfBuckets = 15;
@@ -123,6 +129,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       describe('with comparison', () => {
         describe('when data is returned', () => {
           let errorsDistribution: ErrorsDistribution;
+
           before(async () => {
             const fiveMinutes = 5 * 60 * 1000;
             const response = await callApi({
@@ -134,6 +141,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             });
             errorsDistribution = response.body;
           });
+
           it('returns some data', () => {
             const hasCurrentPeriodData = errorsDistribution.currentPeriod.some(({ y }) =>
               isFiniteNumber(y)
@@ -168,6 +176,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         describe('when no data is returned', () => {
           let errorsDistribution: ErrorsDistribution;
+
           before(async () => {
             const response = await callApi({
               query: {

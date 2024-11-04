@@ -24,17 +24,21 @@ export default function ({ getService }: FtrProviderContext) {
   describe('Data streams', function () {
     // see details: https://github.com/elastic/kibana/issues/187372
     this.tags(['failsOnMKI']);
+
     before(async () => {
       roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       internalReqHeader = svlCommonApi.getInternalRequestHeader();
     });
+
     after(async () => {
       await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
+
     describe('Get', () => {
       const testDataStreamName = 'test-data-stream';
 
       before(async () => await svlDatastreamsHelpers.createDataStream(testDataStreamName));
+
       after(async () => await svlDatastreamsHelpers.deleteDataStream(testDataStreamName));
 
       it('returns an array of data streams', async () => {
@@ -131,6 +135,7 @@ export default function ({ getService }: FtrProviderContext) {
       const testDataStreamName = 'test-data-stream';
 
       before(async () => await svlDatastreamsHelpers.createDataStream(testDataStreamName));
+
       after(async () => await svlDatastreamsHelpers.deleteDataStream(testDataStreamName));
 
       it('updates the data retention of a DS', async () => {

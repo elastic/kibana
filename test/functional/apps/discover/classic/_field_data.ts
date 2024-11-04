@@ -21,6 +21,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('discover tab', function describeIndexTests() {
     this.tags('includeFirefox');
+
     before(async function () {
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover.json');

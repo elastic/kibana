@@ -50,6 +50,7 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
         await fleetAndAgents.setup();
       });
+
       after(async () => {
         await esArchiver.unload('x-pack/test/functional/es_archives/fleet/fleet_server');
       });

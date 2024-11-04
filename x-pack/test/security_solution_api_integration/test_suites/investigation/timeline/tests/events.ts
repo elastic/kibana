@@ -69,6 +69,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
       bsearch = await utils.createBsearch();
       await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
     });
+
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
     });

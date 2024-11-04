@@ -57,6 +57,7 @@ export default function (providerContext: FtrProviderContext) {
         await kibanaServer.savedObjects.cleanStandardList();
         await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
       });
+
       it(`Should return not-deployed when installed kspm, no findings on either indices and no healthy agents`, async () => {
         await createPackagePolicy(
           supertestWithoutAuth,

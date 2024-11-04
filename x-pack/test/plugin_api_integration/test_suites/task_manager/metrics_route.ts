@@ -159,6 +159,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('task run', () => {
       let ruleId: string | null = null;
+
       before(async () => {
         // create a rule that fires actions
         const rule = await request

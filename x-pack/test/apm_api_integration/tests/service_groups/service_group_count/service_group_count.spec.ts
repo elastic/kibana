@@ -84,6 +84,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
     describe('with alerts', () => {
       let ruleId: string;
+
       before(async () => {
         const createdRule = await createRule();
         ruleId = createdRule.id;

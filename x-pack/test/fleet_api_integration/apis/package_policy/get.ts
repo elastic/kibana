@@ -483,6 +483,7 @@ export default function (providerContext: FtrProviderContext) {
 
         expect(packagePolicyResponse.items[0].id).to.eql(endpointPackagePolicyId);
       });
+
       it('should return 400 if the passed kuery does not have prefix ingest-package-policies', async () => {
         await supertest
           .get(`/api/fleet/package_policies?kuery=package.name:endpoint`)

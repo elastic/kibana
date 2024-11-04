@@ -189,6 +189,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('API access with missing access token document.', () => {
       let sessionCookie: Cookie;
+
       beforeEach(async () => (sessionCookie = await createSessionCookie()));
 
       it('should clear cookie and redirect to login', async function () {

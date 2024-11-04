@@ -28,11 +28,13 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
   describe('hosts', () => {
     let supertest: TestAgent;
     let bsearch: BsearchService;
+
     before(async () => {
       supertest = await utils.createSuperTest();
       bsearch = await utils.createBsearch();
       await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/uncommon_processes');
     });
+
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/uncommon_processes');
     });
@@ -92,6 +94,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
 
     describe('when given a pagination of length 1', () => {
       let response: HostsUncommonProcessesStrategyResponse | null = null;
+
       before(async () => {
         response = await bsearch.send<HostsUncommonProcessesStrategyResponse>({
           supertest,

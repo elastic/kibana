@@ -15,6 +15,7 @@ export default function ({ getService, getPageObjects }) {
 
   describe('Integration Tests - Console App CCS', function describeIndexTests() {
     this.tags('includeFirefox');
+
     before(async () => {
       log.debug('navigateTo console');
       await PageObjects.common.navigateToApp('console');
@@ -29,6 +30,7 @@ export default function ({ getService, getPageObjects }) {
         await browser.setScreenshotSize(1800, 2937); //add the full response in getVisibleText
         await PageObjects.console.clearEditorText();
       });
+
       it('it should be able to access remote data', async () => {
         await PageObjects.console.enterText(
           '\nGET ftr-remote:makelogs工程-*/_search\n {\n "query": {\n "bool": {\n "must": [\n {"match": {"extension" : "jpg"} \n}\n]\n}\n}\n}'

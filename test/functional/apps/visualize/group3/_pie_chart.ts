@@ -30,6 +30,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     // Used to track flag before and after reset
     let isNewChartsLibraryEnabled = false;
     const vizName1 = 'Visualization PieChart';
+
     before(async function () {
       isNewChartsLibraryEnabled = await visChart.isNewChartsLibraryEnabled();
       await visualize.initTests(isNewChartsLibraryEnabled);
@@ -318,6 +319,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await visChart.expectError();
       });
     });
+
     describe('multi series slice', () => {
       before(async () => {
         log.debug('navigateToApp visualize');

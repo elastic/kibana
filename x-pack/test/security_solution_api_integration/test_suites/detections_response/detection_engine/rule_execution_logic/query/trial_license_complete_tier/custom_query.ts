@@ -1983,6 +1983,7 @@ export default ({ getService }: FtrProviderContext) => {
           let id: string;
           const timestamp = '2020-10-28T06:00:00.000Z';
           const laterTimestamp = '2020-10-28T07:00:00.000Z';
+
           beforeEach(async () => {
             id = uuidv4();
             // we have 3 kind of documents here:
@@ -2007,6 +2008,7 @@ export default ({ getService }: FtrProviderContext) => {
               missingFieldDoc2,
             ]);
           });
+
           it('should create suppressed alerts for single host.name when rule configure with suppress', async () => {
             const rule: QueryRuleCreateProps = {
               ...getRuleForAlertTesting(['ecs_compliant']),
@@ -2155,6 +2157,7 @@ export default ({ getService }: FtrProviderContext) => {
       afterEach(async () => {
         await deleteAllExceptions(supertest, log);
       });
+
       it('should correctly evaluate exceptions with expiration time in the past', async () => {
         // create an exception list container of type "detection"
         const {

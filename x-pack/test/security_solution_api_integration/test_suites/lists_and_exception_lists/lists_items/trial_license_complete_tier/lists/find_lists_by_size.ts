@@ -33,6 +33,7 @@ export default ({ getService }: FtrProviderContext): void => {
     before(async () => {
       supertest = await utils.createSuperTest();
     });
+
     describe('find lists by size', () => {
       beforeEach(async () => {
         await createListsIndex(supertest, log);

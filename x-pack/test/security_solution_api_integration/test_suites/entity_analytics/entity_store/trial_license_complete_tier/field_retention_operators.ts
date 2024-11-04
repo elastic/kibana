@@ -137,6 +137,7 @@ export default ({ getService }: FtrProviderContext) => {
         expectArraysMatchAnyOrder(resultDoc.test_field, []);
       });
     });
+
     describe('prefer_newest_value operator', () => {
       it('should return latest value if no history value', async () => {
         const op: FieldRetentionOperator = {
@@ -152,6 +153,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(resultDoc.test_field).to.eql('latest');
       });
+
       it('should return history value if no latest value (undefined)', async () => {
         const op: FieldRetentionOperator = {
           operation: 'prefer_newest_value',
@@ -168,6 +170,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(resultDoc.test_field).to.eql('historical');
       });
+
       it('should return history value if no latest value (empty string)', async () => {
         const op: FieldRetentionOperator = {
           operation: 'prefer_newest_value',
@@ -185,6 +188,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(resultDoc.test_field).to.eql('historical');
       });
+
       it('should return history value if no latest value (empty array)', async () => {
         const op: FieldRetentionOperator = {
           operation: 'prefer_newest_value',
@@ -202,6 +206,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(resultDoc.test_field).to.eql('historical');
       });
+
       it('should return history value if no latest value (empty object)', async () => {
         const op: FieldRetentionOperator = {
           operation: 'prefer_newest_value',
@@ -219,6 +224,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(resultDoc.test_field).to.eql('historical');
       });
+
       it('should return latest value if both latest and history values', async () => {
         const op: FieldRetentionOperator = {
           operation: 'prefer_newest_value',
@@ -249,6 +255,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(resultDoc.test_field).to.eql(undefined);
       });
     });
+
     describe('prefer_oldest_value operator', () => {
       it('should return history value if no latest value', async () => {
         const op: FieldRetentionOperator = {
@@ -266,6 +273,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(resultDoc.test_field).to.eql('historical');
       });
+
       it('should return latest value if no history value (undefined)', async () => {
         const op: FieldRetentionOperator = {
           operation: 'prefer_oldest_value',
@@ -283,6 +291,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(resultDoc.test_field).to.eql('latest');
       });
+
       it('should return latest value if no history value (empty string)', async () => {
         const op: FieldRetentionOperator = {
           operation: 'prefer_oldest_value',
@@ -300,6 +309,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(resultDoc.test_field).to.eql('latest');
       });
+
       it('should return latest value if no history value (empty array)', async () => {
         const op: FieldRetentionOperator = {
           operation: 'prefer_oldest_value',
@@ -317,6 +327,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(resultDoc.test_field).to.eql('latest');
       });
+
       it('should return latest value if no history value (empty object)', async () => {
         const op: FieldRetentionOperator = {
           operation: 'prefer_oldest_value',
@@ -334,6 +345,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(resultDoc.test_field).to.eql('latest');
       });
+
       it('should return history value if both latest and history values', async () => {
         const op: FieldRetentionOperator = {
           operation: 'prefer_oldest_value',

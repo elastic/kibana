@@ -55,6 +55,7 @@ export default function ({ getService }: FtrProviderContext) {
         withCommonHeaders: true,
       });
     });
+
     after(async function () {
       await supertestAdminWithApiKey.destroy();
     });

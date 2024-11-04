@@ -104,6 +104,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       describe(scenario.id, () => {
         afterEach(() => objectRemover.removeAll());
+
         it('should handle bulk delete of one rule appropriately based on id', async () => {
           const { body: createdRule1 } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
@@ -587,6 +588,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('Validation tests', () => {
       const { user, space } = SuperuserAtSpace1;
+
       it('should throw an error when bulk delete of rules when both ids and filter supplied in payload', async () => {
         const { body: createdRule1 } = await supertest
           .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)

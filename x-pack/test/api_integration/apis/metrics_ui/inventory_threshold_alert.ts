@@ -78,7 +78,9 @@ export default function ({ getService }: FtrProviderContext) {
   describe('Inventory Threshold Rule Executor', () => {
     describe('CPU per Host', () => {
       before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/8.0.0/hosts_only'));
+
       after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/8.0.0/hosts_only'));
+
       it('should work FOR LAST 1 minute', async () => {
         const results = await evaluateCondition({
           ...baseOptions,
@@ -108,6 +110,7 @@ export default function ({ getService }: FtrProviderContext) {
           },
         });
       });
+
       it('should work FOR LAST 5 minute', async () => {
         const options = {
           ...baseOptions,
@@ -143,7 +146,9 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('Inbound network traffic per host', () => {
       before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/8.0.0/hosts_only'));
+
       after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/8.0.0/hosts_only'));
+
       it('should work FOR LAST 1 minute', async () => {
         const results = await evaluateCondition({
           ...baseOptions,
@@ -200,6 +205,7 @@ export default function ({ getService }: FtrProviderContext) {
           },
         });
       });
+
       it('should work with a long threshold', async () => {
         const results = await evaluateCondition({
           ...baseOptions,
@@ -257,6 +263,7 @@ export default function ({ getService }: FtrProviderContext) {
           },
         });
       });
+
       it('should work FOR LAST 5 minute', async () => {
         const options = {
           ...baseOptions,
@@ -319,7 +326,9 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('Custom rate metric per host', () => {
       before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/8.0.0/hosts_only'));
+
       after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/8.0.0/hosts_only'));
+
       it('should work FOR LAST 1 minute', async () => {
         const results = await evaluateCondition({
           ...baseOptions,
@@ -396,6 +405,7 @@ export default function ({ getService }: FtrProviderContext) {
           },
         });
       });
+
       it('should work FOR LAST 5 minute', async () => {
         const results = await evaluateCondition({
           ...baseOptions,
@@ -477,7 +487,9 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('Log rate per host', () => {
       before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/8.0.0/hosts_only'));
+
       after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/8.0.0/hosts_only'));
+
       it('should work FOR LAST 1 minute', async () => {
         const results = await evaluateCondition({
           ...baseOptions,
@@ -534,6 +546,7 @@ export default function ({ getService }: FtrProviderContext) {
           },
         });
       });
+
       it('should work FOR LAST 5 minute', async () => {
         const options = {
           ...baseOptions,
@@ -596,7 +609,9 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('Network rate per pod', () => {
       before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/8.0.0/pods_only'));
+
       after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/8.0.0/pods_only'));
+
       it('should work FOR LAST 1 minute', async () => {
         const results = await evaluateCondition({
           ...baseOptions,
@@ -654,6 +669,7 @@ export default function ({ getService }: FtrProviderContext) {
           },
         });
       });
+
       it('should work FOR LAST 5 minute', async () => {
         const results = await evaluateCondition({
           ...baseOptions,

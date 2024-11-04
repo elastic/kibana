@@ -22,6 +22,7 @@ export default function (providerContext: FtrProviderContext) {
   describe('fleet_download_sources_crud', function () {
     let defaultDownloadSourceId: string;
     skipIfNoDockerRegistry(providerContext);
+
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
@@ -236,6 +237,7 @@ export default function (providerContext: FtrProviderContext) {
 
     describe('proxy_id behaviour', () => {
       const PROXY_ID = 'download-source-proxy-id';
+
       before(async () => {
         await supertest.post(`/api/fleet/proxies`).set('kbn-xsrf', 'xxxx').send({
           id: PROXY_ID,

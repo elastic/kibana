@@ -19,6 +19,7 @@ export default function ({ getService }: FtrProviderContext) {
   describe('created_by', function () {
     describe('for not interactive user', function () {
       const supertest = getService('supertest');
+
       it('created_by is empty', async () => {
         const { body, status } = await supertest
           .post('/api/content_management/rpc/create')

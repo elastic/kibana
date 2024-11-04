@@ -79,6 +79,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       const GO_DEV_RATE = 20;
       const GO_PROD_DURATION = 1000;
       const GO_DEV_DURATION = 500;
+
       before(async () => {
         const serviceGoProdInstance = apm
           .service({ name: serviceName, environment: 'production', agentName: 'go' })

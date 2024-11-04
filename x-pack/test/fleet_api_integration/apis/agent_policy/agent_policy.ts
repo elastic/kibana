@@ -81,6 +81,7 @@ export default function (providerContext: FtrProviderContext) {
         await fleetAndAgents.setup();
         await createAgentPolicyWithPackagePolicy();
       });
+
       after(async () => {
         await supertest
           .post(`/api/fleet/agent_policies/delete`)
@@ -88,6 +89,7 @@ export default function (providerContext: FtrProviderContext) {
           .send({ agentPolicyId: agentPolicyWithPPId })
           .expect(200);
       });
+
       it('should get list agent policies', async () => {
         await supertest.get(`/api/fleet/agent_policies`).expect(200);
       });
@@ -162,12 +164,14 @@ export default function (providerContext: FtrProviderContext) {
 
     describe('POST /api/fleet/agent_policies', () => {
       let systemPkgVersion: string;
+
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
         await kibanaServer.savedObjects.cleanStandardList();
         await fleetAndAgents.setup();
       });
       let packagePoliciesToDeleteIds: string[] = [];
+
       after(async () => {
         if (systemPkgVersion) {
           await supertest.delete(`/api/fleet/epm/packages/system/${systemPkgVersion}`);
@@ -184,6 +188,7 @@ export default function (providerContext: FtrProviderContext) {
         await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
         await kibanaServer.savedObjects.cleanStandardList();
       });
+
       it('should work with valid minimum required values', async () => {
         const {
           body: { item: createdPolicy },
@@ -624,6 +629,7 @@ export default function (providerContext: FtrProviderContext) {
         createdPolicyIds.push(agentPolicyWithPPId!);
       });
       const createdPolicyIds: string[] = [];
+
       after(async () => {
         const deletedPromises = createdPolicyIds.map((agentPolicyId) =>
           supertest
@@ -1129,6 +1135,7 @@ export default function (providerContext: FtrProviderContext) {
         createdPolicyIds.push(agentPolicyWithPPId!);
       });
       const createdPolicyIds: string[] = [];
+
       after(async () => {
         const deletedPromises = createdPolicyIds.map((agentPolicyId) =>
           supertest
@@ -1141,6 +1148,7 @@ export default function (providerContext: FtrProviderContext) {
         await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
       });
       let agentPolicyId: undefined | string;
+
       it('should work with valid values', async () => {
         const {
           body: { item: originalPolicy },
@@ -1541,10 +1549,12 @@ export default function (providerContext: FtrProviderContext) {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
       });
+
       after(async () => {
         await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
       });
       let hostedPolicy: any | undefined;
+
       it('should prevent hosted policies being deleted', async () => {
         const {
           body: { item: createdPolicy },
@@ -1689,6 +1699,7 @@ export default function (providerContext: FtrProviderContext) {
 
     describe('POST /api/fleet/agent_policies/_bulk_get', () => {
       let policyId: string;
+
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
         await fleetAndAgents.setup();
@@ -1714,6 +1725,7 @@ export default function (providerContext: FtrProviderContext) {
 
         policyId = createdPolicy.id;
       });
+
       after(async () => {
         await supertest
           .post('/api/fleet/agent_policies/delete')

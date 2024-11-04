@@ -103,6 +103,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
     describe('transaction details', () => {
       let transactionDetails: Awaited<ReturnType<typeof fetchTransactionDetails>>['body'];
+
       before(async () => {
         const response = await fetchTransactionDetails({
           traceId,
@@ -111,6 +112,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(response.status).to.eql(200);
         transactionDetails = response.body;
       });
+
       it('returns transaction details', () => {
         expect(transactionDetails.transaction.name).to.eql('GET /apple 🍏');
       });

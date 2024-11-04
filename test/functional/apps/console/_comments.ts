@@ -17,6 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('console app', function testComments() {
     this.tags('includeFirefox');
+
     before(async () => {
       log.debug('navigateTo console');
       await PageObjects.common.navigateToApp('console');

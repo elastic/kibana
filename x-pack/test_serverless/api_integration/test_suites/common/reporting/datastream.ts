@@ -34,6 +34,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('Data Stream', function () {
     const generatedReports = new Set<string>();
+
     before(async () => {
       roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       cookieCredentials = await samlAuth.getM2MApiCookieCredentialsWithRoleScope('admin');

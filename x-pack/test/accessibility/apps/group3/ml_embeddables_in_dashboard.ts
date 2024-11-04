@@ -113,6 +113,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await ml.dashboardEmbeddables.assertSelectMaxSeriesToPlotValue(6);
           await a11y.testAppSnapshot();
         });
+
         it('create new anomaly charts panel', async () => {
           await ml.dashboardEmbeddables.clickInitializerConfirmButtonEnabled();
           await ml.dashboardEmbeddables.assertDashboardPanelExists(testData.panelTitle);

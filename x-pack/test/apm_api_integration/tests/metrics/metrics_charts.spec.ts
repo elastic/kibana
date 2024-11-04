@@ -24,6 +24,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       describe('for opbeans-node', () => {
         describe('returns metrics data', () => {
           let chartsResponse: ChartResponse;
+
           before(async () => {
             chartsResponse = await apmApiClient.readUser({
               endpoint: 'GET /internal/apm/services/{serviceName}/metrics/charts',
@@ -52,6 +53,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
           describe('CPU usage', () => {
             let cpuUsageChart: GenericMetricsChart | undefined;
+
             before(() => {
               cpuUsageChart = chartsResponse.body.charts.find(
                 ({ key }) => key === 'cpu_usage_chart'
@@ -85,6 +87,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
           describe("System memory usage (using 'system.memory' fields to calculate the memory usage)", () => {
             let systemMemoryUsageChart: GenericMetricsChart | undefined;
+
             before(() => {
               systemMemoryUsageChart = chartsResponse.body.charts.find(
                 ({ key }) => key === 'memory_usage_chart'
@@ -118,6 +121,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       describe('for opbeans-java', () => {
         describe('returns metrics data', () => {
           let chartsResponse: ChartResponse;
+
           before(async () => {
             chartsResponse = await apmApiClient.readUser({
               endpoint: 'GET /internal/apm/services/{serviceName}/metrics/charts',
@@ -151,6 +155,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
           describe('CPU usage', () => {
             let cpuUsageChart: GenericMetricsChart | undefined;
+
             before(() => {
               cpuUsageChart = chartsResponse.body.charts.find(
                 ({ key }) => key === 'cpu_usage_chart'
@@ -196,6 +201,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
           describe("System memory usage (using 'system.process.cgroup' fields to calculate the memory usage)", () => {
             let systemMemoryUsageChart: GenericMetricsChart | undefined;
+
             before(() => {
               systemMemoryUsageChart = chartsResponse.body.charts.find(
                 ({ key }) => key === 'memory_usage_chart'
@@ -236,6 +242,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
           describe('Heap Memory', () => {
             let cpuUsageChart: GenericMetricsChart | undefined;
+
             before(() => {
               cpuUsageChart = chartsResponse.body.charts.find(
                 ({ key }) => key === 'heap_memory_area_chart'
@@ -278,6 +285,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
           describe('Non-Heap Memory', () => {
             let cpuUsageChart: GenericMetricsChart | undefined;
+
             before(() => {
               cpuUsageChart = chartsResponse.body.charts.find(
                 ({ key }) => key === 'non_heap_memory_area_chart'
@@ -317,6 +325,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
           describe('Thread Count', () => {
             let cpuUsageChart: GenericMetricsChart | undefined;
+
             before(() => {
               cpuUsageChart = chartsResponse.body.charts.find(
                 ({ key }) => key === 'thread_count_line_chart'
@@ -356,6 +365,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
           describe('Garbage collection per minute', () => {
             let cpuUsageChart: GenericMetricsChart | undefined;
+
             before(() => {
               cpuUsageChart = chartsResponse.body.charts.find(
                 ({ key }) => key === 'gc_rate_line_chart'
@@ -385,6 +395,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
           describe('Garbage collection time spent per minute', () => {
             let cpuUsageChart: GenericMetricsChart | undefined;
+
             before(() => {
               cpuUsageChart = chartsResponse.body.charts.find(
                 ({ key }) => key === 'gc_time_line_chart'

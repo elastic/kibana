@@ -26,6 +26,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   describe('Onboarding Observability tour', function () {
     this.tags('includeFirefox');
     let isCloud: boolean;
+
     before(async () => {
       isCloud = await deployment.isCloud();
       await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');

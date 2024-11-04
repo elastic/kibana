@@ -29,7 +29,9 @@ export default function createNotifyWhenTests({ getService }: FtrProviderContext
       await esTestIndexTool.destroy();
       await esTestIndexTool.setup();
     });
+
     afterEach(async () => await esTestIndexTool.destroy());
+
     after(async () => {
       await objectRemover.removeAll();
     });

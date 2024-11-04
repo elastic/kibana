@@ -87,6 +87,7 @@ export default function ({ getService }: FtrProviderContext) {
       describe('without backups present', () => {
         // snapshot repository on Cloud always has a snapshot so the status is returned as backed up
         this.tags(['skipCloud']);
+
         it('returns not-backed-up status', async () => {
           const { body: cloudBackupStatus } = await supertest
             .get('/api/upgrade_assistant/cloud_backup_status')

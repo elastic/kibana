@@ -74,6 +74,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       describe('returns the correct data', () => {
         const NUMBER_OF_BUCKETS = 15;
         let errorGroups: ErrorGroups;
+
         before(async () => {
           const response = await callApi({ query: { transactionName: firstTransactionName } });
           errorGroups = response.body.errorGroups;

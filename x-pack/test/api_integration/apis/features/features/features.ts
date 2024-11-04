@@ -50,6 +50,7 @@ export default function ({ getService }: FtrProviderContext) {
         }
       });
     });
+
     describe('without the "global all" privilege', () => {
       it('should return a 403', async () => {
         const username = 'dashboard_all';

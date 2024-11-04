@@ -88,6 +88,7 @@ export default function (providerContext: FtrProviderContext) {
       it('should allow to access a uninstall token in a specific space', async () => {
         await apiClient.getUninstallToken(spaceTest1Token.id, TEST_SPACE_1);
       });
+
       it('should not allow to get an uninstall token from a different space from the default space', async () => {
         await expectToRejectWithNotFound(() => apiClient.getUninstallToken(spaceTest1Token.id));
       });

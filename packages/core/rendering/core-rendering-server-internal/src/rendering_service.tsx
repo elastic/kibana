@@ -56,7 +56,7 @@ type RenderOptions =
       userSettings?: never;
     });
 
-const themeVersion: ThemeVersion = 'v8';
+// const themeVersion: ThemeVersion = 'v8';
 
 /** @internal */
 export class RenderingService {
@@ -208,6 +208,8 @@ export class RenderingService {
     } else {
       darkMode = getSettingValue<DarkModeValue>('theme:darkMode', settings, parseDarkModeValue);
     }
+
+    const themeVersion = getSettingValue('theme:version', settings, String) as ThemeVersion;
 
     const themeStylesheetPaths = (mode: boolean) =>
       getThemeStylesheetPaths({

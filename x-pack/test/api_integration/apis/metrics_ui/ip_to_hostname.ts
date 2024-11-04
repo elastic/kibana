@@ -14,6 +14,7 @@ export default function ipToHostNameTest({ getService }: FtrProviderContext) {
 
   describe('Ip to Host API', () => {
     before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs'));
+
     after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs'));
 
     it('should basically work', async () => {

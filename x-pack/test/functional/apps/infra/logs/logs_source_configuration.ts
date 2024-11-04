@@ -34,6 +34,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.uiSettings.update({ [OBSERVABILITY_ENABLE_LOGS_STREAM]: true });
     });
+
     after(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.uiSettings.update({ [OBSERVABILITY_ENABLE_LOGS_STREAM]: false });
@@ -55,6 +56,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
       });
+
       after(async () => {
         await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
       });

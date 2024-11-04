@@ -32,9 +32,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const testFollower = `follower${Date.now().toString()}`;
       const testLeader = `leader${Date.now().toString()}`;
       const autoFollower = `autofollow${Date.now().toString()}`;
+
       it('empty follower index table', async () => {
         await a11y.testAppSnapshot();
       });
+
       describe('follower index tab', () => {
         describe('follower index form', () => {
           before(async () => {
@@ -43,6 +45,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             await es.indices.create({ index: testIndex });
             await es.indices.create({ index: testLeader });
           });
+
           it('create follow index form', async () => {
             await PageObjects.common.navigateToApp('crossClusterReplication');
             await PageObjects.crossClusterReplication.clickCreateFollowerIndexButton();
@@ -53,6 +56,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               false
             );
           });
+
           it('follower index flyout', async () => {
             await a11y.testAppSnapshot();
             await testSubjects.click('closeFlyoutButton');
@@ -60,22 +64,27 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               return await (await find.byCssSelector('table')).isDisplayed();
             });
           });
+
           it('follower index table', async () => {
             await a11y.testAppSnapshot();
           });
+
           after(async () => {
             await es.indices.delete({ index: testIndex });
           });
         });
       });
+
       describe('auto-follower patterns', () => {
         describe('auto follower index form', () => {
           before(async () => {
             await PageObjects.crossClusterReplication.clickAutoFollowerTab();
           });
+
           it('empty auto follower home screen', async () => {
             await a11y.testAppSnapshot();
           });
+
           it('auto follower index page ', async () => {
             await PageObjects.crossClusterReplication.clickAutoFollowerPatternButton();
             await a11y.testAppSnapshot();
@@ -84,6 +93,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               'logstash*'
             );
           });
+
           it('auto follower index flyout', async () => {
             await a11y.testAppSnapshot();
             await testSubjects.click('closeFlyoutButton');
@@ -91,6 +101,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               return await (await find.byCssSelector('table')).isDisplayed();
             });
           });
+
           it('auto follow index table with data', async () => {
             await a11y.testAppSnapshot();
           });

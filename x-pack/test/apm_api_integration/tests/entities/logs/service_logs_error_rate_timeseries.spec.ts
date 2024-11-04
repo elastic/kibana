@@ -79,6 +79,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               ),
           ]);
         });
+
         after(async () => {
           await logSynthtrace.clean();
         });
@@ -142,6 +143,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               ),
           ]);
         });
+
         after(async () => {
           await logSynthtrace.clean();
         });

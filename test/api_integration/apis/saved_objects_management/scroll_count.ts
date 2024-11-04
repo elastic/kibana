@@ -27,6 +27,7 @@ export default function ({ getService }: FtrProviderContext) {
           'test/api_integration/fixtures/kbn_archiver/saved_objects/scroll_count.json'
         );
       });
+
       after(async () => {
         await kibanaServer.importExport.unload(
           'test/api_integration/fixtures/kbn_archiver/saved_objects/scroll_count.json'
@@ -137,6 +138,7 @@ export default function ({ getService }: FtrProviderContext) {
         await importVisualizations({ startIdx: 1, endIdx: 6000 });
         await importVisualizations({ startIdx: 6001, endIdx: 12000 });
       });
+
       after(async () => {
         await esArchiver.emptyKibanaIndex();
       });

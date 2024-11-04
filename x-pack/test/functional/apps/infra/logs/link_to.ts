@@ -57,6 +57,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
       });
     });
+
     describe('Redirect to Node Logs', function () {
       it('redirects to the logs app and parses URL search params correctly', async () => {
         const nodeId = 1234;

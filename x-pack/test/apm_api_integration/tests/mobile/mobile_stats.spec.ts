@@ -226,6 +226,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         );
         expect(value).to.be(timeseriesMean);
       });
+
       it('returns same launch times', () => {
         const { value, timeseries } = response.currentPeriod.launchTimes;
         const timeseriesMean = meanBy(

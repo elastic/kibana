@@ -146,6 +146,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     describe('when data is loaded ', () => {
       const GO_PROD_RATE = 80;
       const GO_DEV_RATE = 20;
+
       before(async () => {
         const serviceGoProdInstance = apm
           .service({ name: serviceName, environment: 'production', agentName: 'go' })

@@ -22,6 +22,7 @@ export default function (context: FtrProviderContext) {
     this.tags(['skipCloud', 'skipFIPS']);
 
     let kibanaVerificationCode: string;
+
     before(async () => {
       kibanaVerificationCode = (
         await supertest.get('/test_endpoints/verification_code').expect(200)

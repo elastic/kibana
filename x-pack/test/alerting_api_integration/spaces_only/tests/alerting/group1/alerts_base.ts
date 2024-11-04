@@ -71,7 +71,9 @@ export function alertTests({ getService }: FtrProviderContext, space: Space) {
         objectRemover,
       });
     });
+
     afterEach(() => objectRemover.removeAll());
+
     after(async () => {
       await esTestIndexTool.destroy();
       await es.indices.delete({ index: authorizationIndex });

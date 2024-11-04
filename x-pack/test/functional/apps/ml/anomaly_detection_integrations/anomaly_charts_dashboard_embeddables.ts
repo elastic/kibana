@@ -73,6 +73,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             ML_EMBEDDABLE_TYPES.ANOMALY_CHARTS
           );
         });
+
         it('can select jobs', async () => {
           await ml.alerting.selectJobs([testData.jobConfig.job_id]);
           await ml.alerting.assertJobSelection([testData.jobConfig.job_id]);

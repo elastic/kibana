@@ -38,6 +38,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.load(archive);
       await browser.setWindowSize(1600, 850);
     });
+
     after('clean up archives', async () => {
       await kibanaServer.importExport.unload(archive);
       await es.deleteByQuery({

@@ -42,6 +42,7 @@ export default function ({ getService, getPageObjects }) {
       datemath.parse('now-2d', { forceNow: now }),
       datemath.parse('now-3d', { forceNow: now }),
     ];
+
     before(async () => {
       // <issue for security roles not working as expected>
       // https://github.com/elastic/kibana/issues/143720

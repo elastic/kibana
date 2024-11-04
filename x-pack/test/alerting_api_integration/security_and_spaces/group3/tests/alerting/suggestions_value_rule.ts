@@ -25,7 +25,9 @@ export default function createRuleSuggestionValuesTests({ getService }: FtrProvi
     const space2 = Spaces[1].id;
     let ruleSpace1: RuleSpace = { body: {} };
     let ruleSpace2: RuleSpace = { body: {} };
+
     after(() => objectRemover.removeAll());
+
     before(async () => {
       ruleSpace1 = await supertest
         .post(`${getUrlPrefix(space1)}/api/alerting/rule`)

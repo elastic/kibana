@@ -18,8 +18,10 @@ const getTestUtils = (
 ) => {
   describe(describeType, () => {
     afterEach(() => objectRemover.removeAll());
+
     describe('handle get alert request', function () {
       this.tags('skipFIPS');
+
       it('should handle get alert request appropriately', async () => {
         const { body: createdAlert } = await supertest
           .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
@@ -120,6 +122,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
 
   describe('get', () => {
     const objectRemover = new ObjectRemover(supertest);
+
     afterEach(() => objectRemover.removeAll());
 
     getTestUtils('public', objectRemover, supertest);
@@ -127,6 +130,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
 
     describe('legacy', function () {
       this.tags('skipFIPS');
+
       it('should handle get alert request appropriately', async () => {
         const { body: createdAlert } = await supertest
           .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)

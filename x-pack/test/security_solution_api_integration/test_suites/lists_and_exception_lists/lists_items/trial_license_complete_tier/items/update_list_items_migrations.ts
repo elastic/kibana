@@ -42,6 +42,7 @@ export default ({ getService }: FtrProviderContext) => {
         afterEach(async () => {
           await deleteListsIndex(supertest, log);
         });
+
         it('should update list item that was created in legacy index and migrated through LIST_INDEX request', async () => {
           const listId = 'random-list';
           const listItemId = 'random-list-item';

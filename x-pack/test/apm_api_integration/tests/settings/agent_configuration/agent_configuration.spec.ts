@@ -119,12 +119,14 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
 
       describe('[basic] as a read-only user', () => {
         const newConfig = { service: {}, settings: { transaction_sample_rate: '0.55' } };
+
         it('does not allow creating config', async () => {
           await expectStatusCode(() => createConfiguration(newConfig, { user: 'readUser' }), 403);
         });
 
         describe('[basic] when a configuration already exists', () => {
           before(async () => createConfiguration(newConfig));
+
           after(async () => deleteConfiguration(newConfig));
 
           it('[basic] does not allow updating the config', async () => {
@@ -167,6 +169,7 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
 
         describe('[basic] when a configuration exists', () => {
           before(async () => createConfiguration(newConfig));
+
           after(async () => deleteConfiguration(newConfig));
 
           it('[basic] can find the config', async () => {
@@ -369,6 +372,7 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
           // wait until `applied_by_agent` has been updated in elasticsearch
           expect(await waitFor(hasBeenAppliedByAgent)).to.be(true);
         });
+
         it(`[basic] should have 'applied_by_agent=false' before marking as applied`, async () => {
           const res1 = await searchConfigurations({
             service: { name: 'myservice', environment: 'production' },
@@ -376,6 +380,7 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
 
           expect(res1.body._source.applied_by_agent).to.be(false);
         });
+
         it(`[basic] should have 'applied_by_agent=true' when 'mark_as_applied_by_agent' attribute is true`, async () => {
           await searchConfigurations({
             service: { name: 'myservice', environment: 'production' },
@@ -413,12 +418,14 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
 
       describe('[trial] as a read-only user', () => {
         const newConfig = { service: {}, settings: { transaction_sample_rate: '0.55' } };
+
         it('[trial] does not allow creating config', async () => {
           await expectStatusCode(() => createConfiguration(newConfig, { user: 'readUser' }), 403);
         });
 
         describe('[trial] when a configuration already exists', () => {
           before(async () => createConfiguration(newConfig));
+
           after(async () => deleteConfiguration(newConfig));
 
           it('[trial] does not allow updating the config', async () => {
@@ -433,6 +440,7 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
 
       describe('[trial] as a all privileges without modify settings user', () => {
         const newConfig = { service: {}, settings: { transaction_sample_rate: '0.55' } };
+
         it('[trial] does not allow creating config', async () => {
           await expectStatusCode(
             () =>
@@ -443,6 +451,7 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
 
         describe('[trial] when a configuration already exists', () => {
           before(async () => createConfiguration(newConfig));
+
           after(async () => deleteConfiguration(newConfig));
 
           it('[trial] does not allow updating the config', async () => {
@@ -514,6 +523,7 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
 
         describe('[trial] when a configuration exists', () => {
           before(async () => createConfiguration(newConfig));
+
           after(async () => deleteConfiguration(newConfig));
 
           it('[trial] can find the config', async () => {
@@ -716,6 +726,7 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
           // wait until `applied_by_agent` has been updated in elasticsearch
           expect(await waitFor(hasBeenAppliedByAgent)).to.be(true);
         });
+
         it(`[trial] should have 'applied_by_agent=false' before marking as applied`, async () => {
           const res1 = await searchConfigurations({
             service: { name: 'myservice', environment: 'production' },
@@ -723,6 +734,7 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
 
           expect(res1.body._source.applied_by_agent).to.be(false);
         });
+
         it(`[trial] should have 'applied_by_agent=true' when 'mark_as_applied_by_agent' attribute is true`, async () => {
           await searchConfigurations({
             service: { name: 'myservice', environment: 'production' },

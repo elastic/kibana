@@ -22,12 +22,14 @@ export default function ({ getService }: FtrProviderContext) {
       roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       internalReqHeader = svlCommonApi.getInternalRequestHeader();
     });
+
     after(async () => {
       await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
     configArray.forEach((config) => {
       describe(config.name, () => {
         const newId = () => `default-id-${Date.now()}-${Math.random()}`;
+
         it('can set default index pattern', async () => {
           const defaultId = newId();
           const defaultPath = `${config.basePath}/default`;

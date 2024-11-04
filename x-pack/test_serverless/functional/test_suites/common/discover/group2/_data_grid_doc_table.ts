@@ -218,6 +218,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         phpmemory: 1,
         ip: 4,
       };
+
       afterEach(async function () {
         for (const column of extraColumns) {
           await PageObjects.unifiedFieldList.clickFieldListItemRemove(column);

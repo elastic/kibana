@@ -72,6 +72,7 @@ export default function ({
         'reporting_user', // NOTE: the built-in role granting full reporting access is deprecated. See the xpack.reporting.roles.enabled setting
       ]);
     });
+
     after('clean up archives', async () => {
       await share.closeShareModal();
       await unloadEcommerce();
@@ -106,6 +107,7 @@ export default function ({
       before(async () => {
         await loadEcommerce();
       });
+
       after(async () => {
         await unloadEcommerce();
       });
@@ -161,6 +163,7 @@ export default function ({
       before(async () => {
         await loadEcommerce();
       });
+
       after(async () => {
         await unloadEcommerce();
       });

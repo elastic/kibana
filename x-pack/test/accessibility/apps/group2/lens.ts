@@ -30,6 +30,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('Lens Accessibility', () => {
     const lensChartName = 'MyLensChart';
+
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/logstash_functional');
       await kibanaServer.importExport.load(
@@ -196,6 +197,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await lens.createLayer();
         expect(await hasFocus('lns-layerPanel-1')).to.be(true);
       });
+
       it('should focus the remaining layer when the first is removed', async () => {
         await lens.removeLayer(0);
         expect(await hasFocus('lns-layerPanel-0')).to.be(true);
@@ -203,6 +205,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await lens.removeLayer(1);
         expect(await hasFocus('lns-layerPanel-0')).to.be(true);
       });
+
       it('should focus the only layer when resetting the layer', async () => {
         await lens.removeLayer();
         expect(await hasFocus('lns-layerPanel-0')).to.be(true);

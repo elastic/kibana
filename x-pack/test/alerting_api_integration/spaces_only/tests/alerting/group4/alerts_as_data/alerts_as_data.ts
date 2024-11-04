@@ -64,6 +64,7 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
 
   describe('alerts as data', function () {
     this.tags('skipFIPS');
+
     afterEach(async () => {
       await objectRemover.removeAll();
       await es.deleteByQuery({

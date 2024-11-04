@@ -81,6 +81,7 @@ export default function apiTest({ getService }: FtrProviderContext) {
       before(async () => {
         await createV2Jobs(['production', 'development']);
       });
+
       it('creates a new job for each environment that has a v2 job', async () => {
         await callUpdateEndpoint();
 

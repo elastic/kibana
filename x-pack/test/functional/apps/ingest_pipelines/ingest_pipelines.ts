@@ -31,12 +31,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   describe('Ingest Pipelines', function () {
     this.tags('smoke');
+
     before(async () => {
       await security.testUser.setRoles(['ingest_pipelines_user']);
     });
+
     beforeEach(async () => {
       await pageObjects.common.navigateToApp('ingestPipelines');
     });
+
     after(async () => {
       await security.testUser.restoreDefaults();
     });

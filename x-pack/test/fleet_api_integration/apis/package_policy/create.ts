@@ -28,6 +28,7 @@ export default function (providerContext: FtrProviderContext) {
     skipIfNoDockerRegistry(providerContext);
     let agentPolicyId: string;
     let agentPolicyId2: string;
+
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await getService('esArchiver').load(
@@ -53,6 +54,7 @@ export default function (providerContext: FtrProviderContext) {
         .expect(200);
       agentPolicyId2 = agentPolicyResponse2.item.id;
     });
+
     after(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await getService('esArchiver').unload(
@@ -692,6 +694,7 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(200);
       });
+
       it('should successfully create an input only package policy with all required vars', async function () {
         await supertest
           .post(`/api/fleet/package_policies`)
@@ -1009,6 +1012,7 @@ export default function (providerContext: FtrProviderContext) {
         expect(installationSO?.verification_status).equal('verified');
         expect(installationSO?.verification_key_id).equal(TEST_KEY_ID);
       });
+
       it('should return 400 for unverified package', async function () {
         const res = await supertest
           .post(`/api/fleet/package_policies`)
@@ -1045,6 +1049,7 @@ export default function (providerContext: FtrProviderContext) {
           type: 'verification_failed',
         });
       });
+
       it('should return 200 for force installed unverified package', async function () {
         await supertest
           .post(`/api/fleet/package_policies`)

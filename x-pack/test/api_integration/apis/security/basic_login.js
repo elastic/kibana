@@ -156,6 +156,7 @@ export default function ({ getService }) {
 
     describe('with session cookie', () => {
       let sessionCookie;
+
       beforeEach(async () => {
         const loginResponse = await supertest
           .post('/internal/security/login')

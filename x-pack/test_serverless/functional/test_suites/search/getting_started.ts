@@ -52,12 +52,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.svlSearchLandingPage.apiKeys.setApiKeyName('test-api-key');
         await pageObjects.svlSearchLandingPage.apiKeys.createApiKeySubmitAndSuccess();
       });
+
       it('can create an API key that never expires', async () => {
         await pageObjects.svlSearchLandingPage.apiKeys.openCreateFlyout();
         await pageObjects.svlSearchLandingPage.apiKeys.setApiKeyName('test-unlimited-api-key');
         await pageObjects.svlSearchLandingPage.apiKeys.selectNeverExpires();
         await pageObjects.svlSearchLandingPage.apiKeys.createApiKeySubmitAndSuccess();
       });
+
       it('can create an API key with metadata', async () => {
         await pageObjects.svlSearchLandingPage.apiKeys.openCreateFlyout();
         await pageObjects.svlSearchLandingPage.apiKeys.setApiKeyName('test-metadata-api-key');
@@ -65,6 +67,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.svlSearchLandingPage.apiKeys.expectMetadataEditorToExist();
         await pageObjects.svlSearchLandingPage.apiKeys.createApiKeySubmitAndSuccess();
       });
+
       it('can create an API key with role descriptors', async () => {
         await pageObjects.svlSearchLandingPage.apiKeys.openCreateFlyout();
         await pageObjects.svlSearchLandingPage.apiKeys.setApiKeyName('test-roles-api-key');
@@ -72,6 +75,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.svlSearchLandingPage.apiKeys.expectRoleDescriptorsEditorToExist();
         await pageObjects.svlSearchLandingPage.apiKeys.createApiKeySubmitAndSuccess();
       });
+
       it('shows server error with invalid API key data', async () => {
         await pageObjects.svlSearchLandingPage.apiKeys.openCreateFlyout();
         await pageObjects.svlSearchLandingPage.apiKeys.setApiKeyName('test-roles-api-key');
@@ -88,10 +92,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       beforeEach(async () => {
         await svlSearchNavigation.navigateToGettingStartedPage();
       });
+
       it('can redirect to the pipeline creation index page', async () => {
         await pageObjects.svlSearchLandingPage.pipeline.createPipeline();
         await pageObjects.svlSearchLandingPage.pipeline.expectNavigateToCreatePipelinePage();
       });
+
       it('can redirect to the manage pipelines page', async () => {
         await pageObjects.svlSearchLandingPage.pipeline.managePipeline();
         await pageObjects.svlSearchLandingPage.pipeline.expectNavigateToManagePipelinePage();

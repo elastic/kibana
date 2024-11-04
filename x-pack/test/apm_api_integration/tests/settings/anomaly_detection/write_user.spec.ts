@@ -74,6 +74,7 @@ export default function apiTest({ getService }: FtrProviderContext) {
               before(async () => {
                 await createJobs(['production', 'staging'], { user });
               });
+
               it('skips duplicate job creation', async () => {
                 await createJobs(['production', 'test'], { user });
 

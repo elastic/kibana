@@ -390,6 +390,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
 
   describe('get', () => {
     const objectRemover = new ObjectRemover(supertest);
+
     afterEach(() => objectRemover.removeAll());
 
     getTestUtils('public', objectRemover, supertest, supertestWithoutAuth);

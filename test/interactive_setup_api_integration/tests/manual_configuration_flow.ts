@@ -24,6 +24,7 @@ export default function (context: FtrProviderContext) {
 
     let kibanaVerificationCode: string;
     let elasticsearchCaCertificate: string;
+
     before(async () => {
       const esServerConfig = config.get('servers.elasticsearch');
       elasticsearchCaCertificate = (

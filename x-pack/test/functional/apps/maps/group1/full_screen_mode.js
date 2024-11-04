@@ -18,6 +18,7 @@ export default function ({ getService, getPageObjects }) {
       await security.testUser.setRoles(['global_maps_all']);
       await maps.openNewMap();
     });
+
     after(async () => {
       await security.testUser.restoreDefaults();
     });

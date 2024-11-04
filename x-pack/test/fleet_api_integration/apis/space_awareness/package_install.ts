@@ -268,6 +268,7 @@ export default function (providerContext: FtrProviderContext) {
         expect(err).to.be.an(Error);
         expect(err?.message).to.match(/400 "Bad Request"/);
       });
+
       it('should not allow to delete a package with active agents in a different space', async () => {
         let err: Error | undefined;
         try {

@@ -25,6 +25,7 @@ export default function ({ getService }: FtrProviderContext) {
           expect(body.cluster_uuid).to.be.a('string');
           expect(body.usage).to.be.an('object');
         });
+
         it('returns extended stats payload for unauthenticated requests', async () => {
           const { body } = await supertestWithoutAuth
             .get('/api/stats?extended=true')

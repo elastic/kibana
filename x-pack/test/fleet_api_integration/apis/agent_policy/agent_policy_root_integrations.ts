@@ -18,6 +18,7 @@ export default function (providerContext: FtrProviderContext) {
 
   describe('agent policy with root integrations', () => {
     skipIfNoDockerRegistry(providerContext);
+
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
       await fleetAndAgents.setup();
@@ -35,6 +36,7 @@ export default function (providerContext: FtrProviderContext) {
           .send({ force: true })
           .expect(200);
       });
+
       after(async () => {
         await supertest
           .delete(`/api/fleet/epm/packages/auditd_manager/1.16.3`)

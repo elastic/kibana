@@ -79,6 +79,7 @@ export default function (providerContext: FtrProviderContext) {
           },
           { meta: true }
         );
+
       beforeEach(async () => {
         await installPackage(pkgName, pkgVersion);
         await Promise.all(
@@ -229,6 +230,7 @@ export default function (providerContext: FtrProviderContext) {
 
           packagePolicyId = responseWithForce.item.id;
         });
+
         afterEach(async () => {
           await supertest
             .post(`/api/fleet/agent_policies/delete`)
@@ -336,6 +338,7 @@ export default function (providerContext: FtrProviderContext) {
           },
           { meta: true }
         );
+
       beforeEach(async () => {
         await installPackage(pkgName, pkgVersion);
 

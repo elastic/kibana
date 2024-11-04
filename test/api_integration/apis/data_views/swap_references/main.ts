@@ -26,6 +26,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('main', () => {
     const kibanaServer = getService('kibanaServer');
+
     before(async () => {
       const result = await supertest
         .post(DATA_VIEW_PATH)
@@ -33,16 +34,19 @@ export default function ({ getService }: FtrProviderContext) {
         .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION);
       dataViewId = result.body.data_view.id;
     });
+
     after(async () => {
       await supertest
         .delete(SPECIFIC_DATA_VIEW_PATH.replace('{id}', dataViewId))
         .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION);
     });
+
     beforeEach(async () => {
       await kibanaServer.importExport.load(
         'test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
       );
     });
+
     afterEach(async () => {
       await kibanaServer.importExport.unload(
         'test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
@@ -113,6 +117,7 @@ export default function ({ getService }: FtrProviderContext) {
           'test/api_integration/fixtures/kbn_archiver/management/saved_objects/relationships.json'
         );
       });
+
       afterEach(async () => {
         await kibanaServer.importExport.unload(
           'test/api_integration/fixtures/kbn_archiver/management/saved_objects/relationships.json'

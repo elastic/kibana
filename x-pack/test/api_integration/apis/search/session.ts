@@ -502,6 +502,7 @@ export default function ({ getService }: FtrProviderContext) {
           full_name: 'test user',
         });
       });
+
       after(async () => {
         await security.role.delete('data_analyst');
         await security.user.delete('analyst');
@@ -534,6 +535,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('in non-default space', () => {
       const spaceId = 'foo-space';
+
       before(async () => {
         try {
           await spacesService.create({

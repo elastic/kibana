@@ -53,6 +53,7 @@ export default function genAiTest({ getService }: FtrProviderContext) {
     after(async () => {
       await objectRemover.removeAll();
     });
+
     describe('action creation', () => {
       const simulator = new OpenAISimulator({
         returnError: false,
@@ -335,6 +336,7 @@ export default function genAiTest({ getService }: FtrProviderContext) {
             const executeEvent = events[1];
             expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(78);
           });
+
           describe('Token tracking dashboard', () => {
             const dashboardId = 'specific-dashboard-id-default';
 
@@ -398,6 +400,7 @@ export default function genAiTest({ getService }: FtrProviderContext) {
             });
           });
         });
+
         describe('non-default space simulator', () => {
           const simulator = new OpenAISimulator({
             proxy: {
@@ -411,6 +414,7 @@ export default function genAiTest({ getService }: FtrProviderContext) {
             apiUrl = await simulator.start();
             genAiActionId = await createConnector(apiUrl, 'space1');
           });
+
           after(() => {
             simulator.close();
           });

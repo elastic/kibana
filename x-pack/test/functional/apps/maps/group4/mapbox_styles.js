@@ -14,6 +14,7 @@ export default function ({ getPageObjects, getService }) {
 
   describe('mapbox styles', () => {
     let mapboxStyle;
+
     before(async () => {
       await security.testUser.setRoles(
         ['global_maps_all', 'geoshape_data_reader', 'meta_for_geoshape_data_reader'],

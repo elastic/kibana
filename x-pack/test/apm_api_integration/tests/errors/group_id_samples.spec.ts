@@ -87,6 +87,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       describe('return correct data', () => {
         let errorsSamplesResponse: ErrorGroupSamples;
+
         before(async () => {
           const response = await callErrorGroupSamplesApi({
             groupId: '98b75903135eac35ad42419bd3b45cf8b4270c61cbd0ede0f7e8c8a9ac9fdb03',
@@ -115,6 +116,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       describe('return correct data', () => {
         let errorSampleDetailsResponse: ErrorSampleDetails;
+
         before(async () => {
           const errorsSamplesResponse = await callErrorGroupSamplesApi({
             groupId: '98b75903135eac35ad42419bd3b45cf8b4270c61cbd0ede0f7e8c8a9ac9fdb03',

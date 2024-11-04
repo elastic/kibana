@@ -37,6 +37,7 @@ export default ({ getService }: FtrProviderContext) => {
       removeItems: items,
       addItems: ['my_new_items_1', 'my_new_items_2'],
     };
+
     before(async () => {
       await ml.testResources.setKibanaTimeZoneToUTC();
       for (const filter of validFilters) {

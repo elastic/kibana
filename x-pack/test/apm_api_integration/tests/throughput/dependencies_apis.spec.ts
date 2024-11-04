@@ -98,6 +98,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     describe('when data is loaded', () => {
       const GO_PROD_RATE = 75;
       const JAVA_PROD_RATE = 25;
+
       before(async () => {
         const serviceGoProdInstance = apm
           .service({ name: 'synth-go', environment: 'production', agentName: 'go' })
@@ -218,6 +219,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             );
           });
         });
+
         describe('postgresql dependency', () => {
           before(async () => {
             throughputValues = await getThroughputValues({ dependencyName: 'postgresql' });

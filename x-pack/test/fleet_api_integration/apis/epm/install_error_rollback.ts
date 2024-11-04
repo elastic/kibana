@@ -49,6 +49,7 @@ export default function (providerContext: FtrProviderContext) {
     beforeEach(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
     });
+
     afterEach(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await uninstallPackage(pkgName, goodPackageVersion);

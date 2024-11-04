@@ -97,6 +97,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('HTTP Monitor', () => {
       const defaultFields = DEFAULT_FIELDS.http;
+
       it('return error empty http', async () => {
         const { message, attributes } = await addMonitorAPI(
           {

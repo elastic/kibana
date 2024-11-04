@@ -85,6 +85,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
     describe('Python service', () => {
       let serverlessMetrics: APIReturnType<'GET /internal/apm/services/{serviceName}/metrics/serverless/charts'>;
+
       before(async () => {
         const response = await callApi('lambda-python');
         serverlessMetrics = response.body;
@@ -127,6 +128,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             return chart.key === 'cold_start_duration';
           });
         });
+
         it('returns correct overall value', () => {
           expect(metricsChart?.series[0].overallValue).to.equal(coldStartDurationPython * 1000);
         });
@@ -185,11 +187,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       describe('Compute usage', () => {
         const GBSeconds = 1024 * 1024 * 1024 * 1000;
         let computeUsageMetric: (typeof serverlessMetrics.charts)[0] | undefined;
+
         before(() => {
           computeUsageMetric = serverlessMetrics.charts.find((chart) => {
             return chart.key === 'compute_usage';
           });
         });
+
         it('returns correct overall value', () => {
           const expectedValue =
             ((memoryTotal * billedDurationMs) / GBSeconds) * numberOfTransactionsCreated * 2;
@@ -209,6 +213,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
     describe('detailed metrics', () => {
       let serverlessMetrics: APIReturnType<'GET /internal/apm/services/{serviceName}/metrics/serverless/charts'>;
+
       before(async () => {
         const response = await callApi(
           'lambda-python',
@@ -254,6 +259,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             return chart.key === 'cold_start_duration';
           });
         });
+
         it('returns correct overall value', () => {
           expect(metricsChart?.series[0].overallValue).to.equal(coldStartDurationPython * 1000);
         });
@@ -308,11 +314,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       describe('Compute usage', () => {
         const GBSeconds = 1024 * 1024 * 1024 * 1000;
         let computeUsageMetric: (typeof serverlessMetrics.charts)[0] | undefined;
+
         before(() => {
           computeUsageMetric = serverlessMetrics.charts.find((chart) => {
             return chart.key === 'compute_usage';
           });
         });
+
         it('returns correct overall value', () => {
           const expectedValue =
             ((memoryTotal * billedDurationMs) / GBSeconds) * numberOfTransactionsCreated;

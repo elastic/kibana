@@ -140,6 +140,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await a11y.testAppSnapshot();
       });
     });
+
     describe('Behavioral Analytics', () => {
       before(async () => {
         await common.navigateToApp('enterprise_search/analytics');
@@ -153,6 +154,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await a11y.testAppSnapshot();
       });
     });
+
     describe('Vector Search', () => {
       before(async () => {
         await common.navigateToApp('enterprise_search/vector_search');
@@ -166,6 +168,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await a11y.testAppSnapshot();
       });
     });
+
     describe('AI Search', () => {
       before(async () => {
         await common.navigateToApp('enterprise_search/ai_search');

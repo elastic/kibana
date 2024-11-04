@@ -53,6 +53,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       before(async () => {
         await generateData({ apmSynthtraceEsClient, start, end });
       });
+
       after(() => apmSynthtraceEsClient.clean());
 
       it('returns a list of upstream services for the dependency', async () => {

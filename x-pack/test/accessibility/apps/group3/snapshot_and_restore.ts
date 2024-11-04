@@ -55,6 +55,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('table views with data', () => {
       const testRepoName = 'testrepo';
       const snapshotName = `testsnapshot${Date.now().toString()}`;
+
       before(async () => {
         await createRepo(testRepoName);
         await es.snapshot.create({
@@ -66,9 +67,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.settings.navigateTo();
         await PageObjects.settings.clickSnapshotRestore();
       });
+
       it('snapshots table with data', async () => {
         await a11y.testAppSnapshot();
       });
+
       it('repository table with data', async () => {
         await PageObjects.snapshotRestore.navToRepositories();
         await a11y.testAppSnapshot();
@@ -82,10 +85,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('create policy wizard', () => {
       const testRepoName = 'policyrepo';
+
       before(async () => {
         await createRepo(testRepoName);
         await PageObjects.snapshotRestore.navToPolicies();
       });
+
       it('page one', async () => {
         await PageObjects.snapshotRestore.fillCreateNewPolicyPageOne(
           'testpolicy',
@@ -93,18 +98,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
         await a11y.testAppSnapshot();
       });
+
       it('page two', async () => {
         await PageObjects.snapshotRestore.fillCreateNewPolicyPageTwo();
         await a11y.testAppSnapshot();
       });
+
       it('page three', async () => {
         await PageObjects.snapshotRestore.fillCreateNewPolicyPageThree();
         await a11y.testAppSnapshot();
       });
+
       it('submit page four and flyout', async () => {
         await PageObjects.snapshotRestore.submitNewPolicy();
         await a11y.testAppSnapshot();
       });
+
       it('policy table with data', async () => {
         await PageObjects.snapshotRestore.closeFlyout();
         await a11y.testAppSnapshot();

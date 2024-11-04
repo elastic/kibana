@@ -82,6 +82,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await removeOpenAIConnector?.();
           await browser.refresh();
         });
+
         it('show success llm button', async () => {
           await pageObjects.searchPlayground.PlaygroundStartChatPage.expectShowSuccessLLMButton();
         });
@@ -145,6 +146,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.searchPlayground.session.clearSession();
         await pageObjects.searchPlayground.PlaygroundChatPage.navigateToChatPage();
       });
+
       it('loads successfully', async () => {
         await pageObjects.searchPlayground.PlaygroundChatPage.expectChatWindowLoaded();
       });

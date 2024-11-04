@@ -13,6 +13,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('Elastic synthetics integration', function () {
     this.tags(['smoke']);
+
     before(async () => {
       await PageObjects.common.navigateToUrl('management', 'integrations/installed', {
         ensureCurrentUrl: false,

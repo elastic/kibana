@@ -25,6 +25,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
 
   describe('dashboard app - group 5', function () {
     before(loadCurrentData);
+
     after(unloadCurrentData);
 
     // This has to be first since the other tests create some embeddables as side affects and our counting assumes
