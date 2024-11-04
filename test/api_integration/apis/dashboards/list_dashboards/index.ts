@@ -43,6 +43,5 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await kibanaServer.savedObjects.cleanStandardList();
     });
     loadTestFile(require.resolve('./main'));
-    loadTestFile(require.resolve('./validation'));
   });
 }

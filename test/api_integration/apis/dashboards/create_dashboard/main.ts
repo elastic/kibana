@@ -172,7 +172,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     // TODO Maybe move this test to x-pack/test/api_integration/dashboards
-    it('in a defined space', async () => {
+    it('can create a dashboard in a defined space', async () => {
       const title = `foo-${Date.now()}-${Math.random()}`;
 
       const spaceId = 'space-1';
