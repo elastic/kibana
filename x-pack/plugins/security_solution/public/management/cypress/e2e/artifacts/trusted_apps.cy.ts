@@ -79,7 +79,7 @@ describe(
               operator: 'included',
             },
           ],
-          field: 'process.Ext.code_signature',
+          field: 'process.code_signature',
           type: 'nested',
         },
         ...(multiCondition
@@ -128,7 +128,7 @@ describe(
       });
 
       it('Correctly creates a trusted app with a single signature field on Mac', () => {
-        const expectedCondition = /AND\s*process\.Ext\.code_signature\s*IS\s*TestSignature/;
+        const expectedCondition = /AND\s*process\.code_signature\s*IS\s*TestSignature/;
 
         openTrustedApps({ create: true });
         fillOutTrustedAppsFlyout();
@@ -154,7 +154,7 @@ describe(
         });
 
         it('Updates Mac os single signature field trusted app item', () => {
-          const expectedCondition = /AND\s*process\.Ext\.code_signature\s*IS\s*TestSignatureNext/;
+          const expectedCondition = /AND\s*process\.code_signature\s*IS\s*TestSignatureNext/;
           openTrustedApps({ itemId });
           fillOutValueField('Next');
           submitForm();
@@ -171,7 +171,7 @@ describe(
 
       it('Correctly creates a trusted app with a multiple conditions on Mac', () => {
         const expectedCondition =
-          /\s*OSIS\s*Mac\s*AND\s*process\.Ext\.code_signature\s*IS\s*TestSignature\s*AND\s*process\.hash\.\*\s*IS\s*323769d194406183912bb903e7fe738221543348\s*AND\s*process\.executable\.caselessIS\s*\/dev\/null\s*/;
+          /\s*OSIS\s*Mac\s*AND\s*process\.code_signature\s*IS\s*TestSignature\s*AND\s*process\.hash\.\*\s*IS\s*323769d194406183912bb903e7fe738221543348\s*AND\s*process\.executable\.caselessIS\s*\/dev\/null\s*/;
 
         openTrustedApps({ create: true });
         fillOutTrustedAppsFlyout();
@@ -212,7 +212,7 @@ describe(
 
         it('Updates Mac os multiple condition trusted app item', () => {
           const expectedCondition =
-            /\s*AND\s*process\.Ext\.code_signature\s*IS\s*TestSignature\s*AND\s*process\.executable\.caselessIS\s*\/dev\/null\s*/;
+            /\s*AND\s*process\.code_signature\s*IS\s*TestSignature\s*AND\s*process\.executable\.caselessIS\s*\/dev\/null\s*/;
           openTrustedApps({ itemId });
           removeSingleCondition(1, 1);
           submitForm();

@@ -131,7 +131,7 @@ export const ConditionEntryInput = memo<ConditionEntryInputProps>(
             `field-type-${CONDITION_FIELD_TITLE[ConditionEntryField.PATH]}`
           ),
         },
-        ...(os !== OperatingSystem.LINUX
+        ...(os === OperatingSystem.WINDOWS
           ? [
               {
                 dropdownDisplay: getDropdownDisplay(ConditionEntryField.SIGNER),
@@ -139,6 +139,18 @@ export const ConditionEntryInput = memo<ConditionEntryInputProps>(
                 value: ConditionEntryField.SIGNER,
                 'data-test-subj': getTestId(
                   `field-type-${CONDITION_FIELD_TITLE[ConditionEntryField.SIGNER]}`
+                ),
+              },
+            ]
+          : []),
+        ...(os === OperatingSystem.MAC
+          ? [
+              {
+                dropdownDisplay: getDropdownDisplay(ConditionEntryField.SIGNER_MAC),
+                inputDisplay: CONDITION_FIELD_TITLE[ConditionEntryField.SIGNER_MAC],
+                value: ConditionEntryField.SIGNER_MAC,
+                'data-test-subj': getTestId(
+                  `field-type-${CONDITION_FIELD_TITLE[ConditionEntryField.SIGNER_MAC]}`
                 ),
               },
             ]

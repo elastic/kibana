@@ -30,7 +30,8 @@ const ProcessHashField = schema.oneOf([
   schema.literal('process.hash.sha256'),
 ]);
 const ProcessExecutablePath = schema.literal('process.executable.caseless');
-const ProcessCodeSigner = schema.literal('process.Ext.code_signature');
+const ProcessWindowsCodeSigner = schema.literal('process.Ext.code_signature');
+const ProcessMacCodeSigner = schema.literal('process.code_signature');
 
 const ConditionEntryTypeSchema = schema.conditional(
   schema.siblingRef('field'),
@@ -43,7 +44,8 @@ const ConditionEntryOperatorSchema = schema.literal('included');
 type ConditionEntryFieldAllowedType =
   | TypeOf<typeof ProcessHashField>
   | TypeOf<typeof ProcessExecutablePath>
-  | TypeOf<typeof ProcessCodeSigner>;
+  | TypeOf<typeof ProcessWindowsCodeSigner>
+  | TypeOf<typeof ProcessMacCodeSigner>;
 
 type TrustedAppConditionEntry<
   T extends ConditionEntryFieldAllowedType = ConditionEntryFieldAllowedType
@@ -54,7 +56,8 @@ type TrustedAppConditionEntry<
       operator: 'included';
       value: string;
     }
-  | TypeOf<typeof SignerEntrySchema>;
+  | TypeOf<typeof SignerWindowsEntrySchema>
+  | TypeOf<typeof SignerMacEntrySchema>;
 
 /*
  * A generic Entry schema to be used for a specific entry schema depending on the OS
@@ -87,9 +90,31 @@ const CommonEntrySchema = {
 
 // Windows/MacOS Signer entries use a Nested field that checks to ensure
 // that the certificate is trusted
-const SignerEntrySchema = schema.object({
+const SignerWindowsEntrySchema = schema.object({
   type: schema.literal('nested'),
-  field: ProcessCodeSigner,
+  field: ProcessWindowsCodeSigner,
+  entries: schema.arrayOf(
+    schema.oneOf([
+      schema.object({
+        field: schema.literal('trusted'),
+        value: schema.literal('true'),
+        type: schema.literal('match'),
+        operator: schema.literal('included'),
+      }),
+      schema.object({
+        field: schema.literal('subject_name'),
+        value: schema.string({ minLength: 1 }),
+        type: schema.literal('match'),
+        operator: schema.literal('included'),
+      }),
+    ]),
+    { minSize: 2, maxSize: 2 }
+  ),
+});
+
+const SignerMacEntrySchema = schema.object({
+  type: schema.literal('nested'),
+  field: ProcessMacCodeSigner,
   entries: schema.arrayOf(
     schema.oneOf([
       schema.object({
@@ -110,7 +135,7 @@ const SignerEntrySchema = schema.object({
 });
 
 const WindowsEntrySchema = schema.oneOf([
-  SignerEntrySchema,
+  SignerWindowsEntrySchema,
   schema.object({
     ...CommonEntrySchema,
     field: schema.oneOf([ProcessHashField, ProcessExecutablePath]),
@@ -118,7 +143,7 @@ const WindowsEntrySchema = schema.oneOf([
 ]);
 
 const MacEntrySchema = schema.oneOf([
-  SignerEntrySchema,
+  SignerMacEntrySchema,
   schema.object({
     ...CommonEntrySchema,
     field: schema.oneOf([ProcessHashField, ProcessExecutablePath]),

@@ -12,11 +12,7 @@ import {
   PutTrustedAppUpdateRequestSchema,
 } from './trusted_apps';
 import { ConditionEntryField, OperatingSystem } from '@kbn/securitysolution-utils';
-import type {
-  TrustedAppConditionEntry,
-  NewTrustedApp,
-  PutTrustedAppsRequestParams,
-} from '../types';
+import type { TrustedAppConditionEntry, PutTrustedAppsRequestParams } from '../types';
 
 describe('When invoking Trusted Apps Schema', () => {
   describe('for GET List', () => {
@@ -105,7 +101,23 @@ describe('When invoking Trusted Apps Schema', () => {
       value: 'c:/programs files/Anti-Virus',
       ...(data || {}),
     });
-    const createNewTrustedApp = <T>(data?: T): NewTrustedApp => ({
+    const createNewTrustedApp = <T>(
+      data?: T
+    ):
+      | (T & {
+          effectScope: { type: string };
+          entries: TrustedAppConditionEntry[];
+          os: OperatingSystem.WINDOWS;
+          name: string;
+          description: string;
+        })
+      | {
+          effectScope: { type: string };
+          entries: TrustedAppConditionEntry[];
+          os: OperatingSystem.WINDOWS;
+          name: string;
+          description: string;
+        } => ({
       name: 'Some Anti-Virus App',
       description: 'this one is ok',
       os: OperatingSystem.WINDOWS,
@@ -389,7 +401,23 @@ describe('When invoking Trusted Apps Schema', () => {
       value: 'c:/programs files/Anti-Virus',
       ...(data || {}),
     });
-    const createNewTrustedApp = <T>(data?: T): NewTrustedApp => ({
+    const createNewTrustedApp = <T>(
+      data?: T
+    ):
+      | (T & {
+          effectScope: { type: string };
+          entries: TrustedAppConditionEntry[];
+          os: OperatingSystem.WINDOWS;
+          name: string;
+          description: string;
+        })
+      | {
+          effectScope: { type: string };
+          entries: TrustedAppConditionEntry[];
+          os: OperatingSystem.WINDOWS;
+          name: string;
+          description: string;
+        } => ({
       name: 'Some Anti-Virus App',
       description: 'this one is ok',
       os: OperatingSystem.WINDOWS,

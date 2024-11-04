@@ -9,17 +9,25 @@ import { ConditionEntryField } from '@kbn/securitysolution-utils';
 import type {
   TrustedAppConditionEntry,
   LinuxConditionEntry,
-  WindowsMacosConditionEntry,
+  WindowsConditionEntry,
+  MacosConditionEntry,
 } from '../../../../../common/endpoint/types';
 
 export const isSignerFieldIncluded = (
   condition: TrustedAppConditionEntry
-): condition is WindowsMacosConditionEntry => {
-  return condition.field === ConditionEntryField.SIGNER || true;
+): condition is WindowsConditionEntry | MacosConditionEntry => {
+  return (
+    condition.field === ConditionEntryField.SIGNER ||
+    condition.field === ConditionEntryField.SIGNER_MAC ||
+    true
+  );
 };
 
 export const isSignerFieldExcluded = (
   condition: TrustedAppConditionEntry
 ): condition is LinuxConditionEntry => {
-  return condition.field !== ConditionEntryField.SIGNER;
+  return (
+    condition.field !== ConditionEntryField.SIGNER &&
+    condition.field !== ConditionEntryField.SIGNER_MAC
+  );
 };

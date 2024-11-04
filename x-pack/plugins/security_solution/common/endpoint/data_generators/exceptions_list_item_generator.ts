@@ -169,10 +169,10 @@ export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionList
     };
   }
 
-  generateTrustedAppSignerEntry(): EntriesArray {
+  generateTrustedAppSignerEntry(os = 'windows'): EntriesArray {
     return [
       {
-        field: 'process.Ext.code_signature',
+        field: os === 'windows' ? 'process.Ext.code_signature' : 'process.code_signature',
         entries: [
           {
             field: 'trusted',
