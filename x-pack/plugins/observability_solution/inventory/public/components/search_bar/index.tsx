@@ -10,7 +10,6 @@ import deepEqual from 'fast-deep-equal';
 import React, { useCallback, useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { Query } from '@kbn/es-query';
-import { EntityType } from '../../../common/entities';
 import { useInventorySearchBarContext } from '../../context/inventory_search_bar_context_provider';
 import { useAdHocInventoryDataView } from '../../hooks/use_adhoc_inventory_data_view';
 import { useInventoryParams } from '../../hooks/use_inventory_params';
@@ -20,7 +19,7 @@ import { DiscoverButton } from './discover_button';
 import { getKqlFieldsWithFallback } from '../../utils/get_kql_field_names_with_fallback';
 
 export function SearchBar() {
-  const { searchBarContentSubject$ } = useInventorySearchBarContext();
+  const { searchBarContentSubject$, refreshSubject$ } = useInventorySearchBarContext();
   const {
     services: {
       unifiedSearch,
@@ -84,8 +83,8 @@ export function SearchBar() {
   );
 
   const handleEntityTypesChange = useCallback(
-    (nextEntityTypes: EntityType[]) => {
-      searchBarContentSubject$.next({ kuery, entityTypes: nextEntityTypes, refresh: false });
+    (nextEntityTypes: string[]) => {
+      searchBarContentSubject$.next({ kuery, entityTypes: nextEntityTypes });
       registerEntityTypeFilteredEvent({ filterEntityTypes: nextEntityTypes, filterKuery: kuery });
     },
     [kuery, registerEntityTypeFilteredEvent, searchBarContentSubject$]
@@ -96,7 +95,6 @@ export function SearchBar() {
       searchBarContentSubject$.next({
         kuery: query?.query as string,
         entityTypes,
-        refresh: !isUpdate,
       });
 
       registerSearchSubmittedEvent({
@@ -104,8 +102,12 @@ export function SearchBar() {
         searchEntityTypes: entityTypes,
         searchIsUpdate: isUpdate,
       });
+
+      if (!isUpdate) {
+        refreshSubject$.next();
+      }
     },
-    [entityTypes, registerSearchSubmittedEvent, searchBarContentSubject$]
+    [entityTypes, registerSearchSubmittedEvent, searchBarContentSubject$, refreshSubject$]
   );
 
   return (
