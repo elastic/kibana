@@ -19,7 +19,6 @@ import { ReportingServerPluginSetup } from '@kbn/reporting-server';
 import { getCanvasFeature } from './feature';
 import { initRoutes } from './routes';
 import { registerCanvasUsageCollector } from './collectors';
-import { loadSampleData } from './sample_data';
 import { setupInterpreter } from './setup_interpreter';
 import { customElementType, workpadTypeFactory, workpadTemplateType } from './saved_objects';
 import type { CanvasSavedObjectTypeMigrationsDeps } from './saved_objects/migrations';
@@ -81,11 +80,6 @@ export class CanvasPlugin implements Plugin {
       expressions: expressionsSetup,
       logger: this.logger,
     });
-
-    loadSampleData(
-      plugins.home.sampleData.addSavedObjectsToSampleDataset,
-      plugins.home.sampleData.addAppLinksToSampleDataset
-    );
 
     const getIndexForType = (type: string) =>
       coreSetup

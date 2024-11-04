@@ -1,0 +1,72 @@
+summary: Failed copy response with conflict errors
+description: >
+  A response for a failed copy of a dashboard with the my-dashboard ID including all references from the default space to the marketing and sales spaces. In this example, the dashboard has a reference to a visualization and a Canvas workpad and the visualization has a reference to an index pattern.
+  The result indicates a successful copy for the marketing space and an unsuccessful copy for the sales space because the data view, visualization, and Canvas workpad each resulted in a conflict error.
+  Objects are created when the error is resolved using the resolve copy conflicts API.
+value:
+  marketing:
+    success: true
+    successCount: 4
+    successResults:
+      - id: my-dashboard
+        type: dashboard
+        meta:
+          icon: dashboardApp
+          title: Look at my dashboard
+      - id: my-vis
+        type: visualization
+        meta:
+          icon: visualizeApp
+          title: Look at my visualization
+      - id: my-canvas
+        type: canvas-workpad
+        meta:
+          icon: canvasApp
+          title: Look at my canvas
+      - id: my-index-pattern
+        type: index-pattern
+        meta:
+          icon: indexPatternApp
+          title: my-pattern-*
+  sales:
+    success: false
+    successCount: 1,
+    errors:
+      - id: my-pattern
+        type: index-pattern
+        title: my-pattern-*
+        error:
+          type: conflict
+        meta:
+          icon: indexPatternApp
+          title: my-pattern-*
+      - id: my-visualization
+        type: my-vis
+        title: Look at my visualization
+        error:
+          type: conflict
+          destinationId: another-vis
+        meta:
+          icon: visualizeApp
+          title: Look at my visualization
+      - id: my-canvas
+        type: canvas-workpad
+        title: Look at my canvas
+        error:
+          type: ambiguous_conflict
+          destinations:
+            - id: another-canvas
+              title: Look at another canvas
+              updatedAt: "2020-07-08T16:36:32.377Z"
+            - id: yet-another-canvas
+              title: Look at yet another canvas
+              updatedAt: "2020-07-05T12:29:54.849Z"
+        meta:
+          icon: canvasApp
+          title: Look at my canvas
+    successResults": 
+      - id: my-dashboard
+        type: dashboard
+        meta:
+          icon: dashboardApp
+          title: Look at my dashboard

@@ -140,6 +140,34 @@ describe('Assistant', () => {
       >);
   });
 
+  describe('persistent storage', () => {
+    it('should delete conversation when delete button is clicked', async () => {
+      await renderAssistant();
+      const deleteButton = screen.getAllByTestId('delete-option')[0];
+      await act(async () => {
+        fireEvent.click(deleteButton);
+      });
+
+      await act(async () => {
+        fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+      });
+
+      await waitFor(() => {
+        expect(mockDeleteConvo).toHaveBeenCalledWith(mockData.electric_sheep_id.id);
+      });
+    });
+    it('should refetchCurrentUserConversations after clear chat history button click', async () => {
+      await renderAssistant();
+      fireEvent.click(screen.getByTestId('chat-context-menu'));
+      fireEvent.click(screen.getByTestId('clear-chat'));
+      fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+      await waitFor(() => {
+        expect(clearConversation).toHaveBeenCalled();
+        expect(refetchResults).toHaveBeenCalled();
+      });
+    });
+  });
+
   describe('when selected conversation changes and some connectors are loaded', () => {
     it('should persist the conversation id to local storage', async () => {
       const getConversation = jest.fn().mockResolvedValue(mockData.electric_sheep_id);

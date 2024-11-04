@@ -252,6 +252,21 @@ export const EntityStoreManagementPage = () => {
     stopEntityEngineMutation.isLoading ||
     deleteEntityEngineMutation.isLoading;
 
+  const callouts = entityStoreStatus.errors.map((error) => (
+    <EuiCallOut
+      title={
+        <FormattedMessage
+          id="xpack.securitySolution.entityAnalytics.entityStoreManagementPage.errors.title"
+          defaultMessage={'An error occurred during entity store resource initialization'}
+        />
+      }
+      color="danger"
+      iconType="alert"
+    >
+      <p>{error.message}</p>
+    </EuiCallOut>
+  ));
+
   return (
     <>
       <EuiPageHeader
@@ -290,7 +305,7 @@ export const EntityStoreManagementPage = () => {
       <EuiText>
         <FormattedMessage
           id="xpack.securitySolution.entityAnalytics.entityStoreManagementPage.subTitle"
-          defaultMessage="Allows comprehensive monitoring of your system's hosts and users."
+          defaultMessage="Store host and user entities observed in events."
         />
       </EuiText>
       {isEntityStoreFeatureFlagDisabled && <EntityStoreFeatureFlagNotAvailableCallout />}
@@ -300,6 +315,39 @@ export const EntityStoreManagementPage = () => {
         <FileUploadSection />
         <EuiFlexItem grow={2}>
           <EuiFlexGroup direction="column">
+            {initEntityEngineMutation.isError && (
+              <EuiCallOut
+                title={
+                  <FormattedMessage
+                    id="xpack.securitySolution.entityAnalytics.entityStoreManagementPage.errors.initErrorTitle"
+                    defaultMessage={'There was a problem initializing the entity store'}
+                  />
+                }
+                color="danger"
+                iconType="alert"
+              >
+                <p>
+                  {(initEntityEngineMutation.error as { body: { message: string } }).body.message}
+                </p>
+              </EuiCallOut>
+            )}
+            {deleteEntityEngineMutation.isError && (
+              <EuiCallOut
+                title={
+                  <FormattedMessage
+                    id="xpack.securitySolution.entityAnalytics.entityStoreManagementPage.errors.deleteErrorTitle"
+                    defaultMessage={'There was a problem deleting the entity store'}
+                  />
+                }
+                color="danger"
+                iconType="alert"
+              >
+                <p>
+                  {(deleteEntityEngineMutation.error as { body: { message: string } }).body.message}
+                </p>
+              </EuiCallOut>
+            )}
+            {callouts}
             <WhatIsAssetCriticalityPanel />
             {!isEntityStoreFeatureFlagDisabled && canDeleteEntityEngine && <ClearEntityDataPanel />}
           </EuiFlexGroup>
@@ -317,6 +365,11 @@ const WhatIsAssetCriticalityPanel: React.FC = () => {
 
   return (
     <EuiPanel hasBorder={true} paddingSize="l" grow={false}>
+      <FormattedMessage
+        id="xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.information.intro"
+        defaultMessage="As part of importing entities using a text file, you are also able to set Asset Criticality for the imported Entities."
+      />
+      <EuiSpacer size="l" />
       <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiIcon type="questionInCircle" size="xl" />
         <EuiTitle size="xxs">
