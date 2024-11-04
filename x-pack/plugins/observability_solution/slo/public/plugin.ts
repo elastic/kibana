@@ -132,7 +132,7 @@ export class SLOPlugin
             './embeddable/slo/alerts/slo_alerts_embeddable_factory'
           );
 
-          return getAlertsEmbeddableFactory(core.getStartServices, kibanaVersion);
+          return getAlertsEmbeddableFactory({ coreStart, pluginsStart, sloClient, kibanaVersion });
         });
 
         plugins.embeddable.registerReactEmbeddableFactory(SLO_ERROR_BUDGET_ID, async () => {
