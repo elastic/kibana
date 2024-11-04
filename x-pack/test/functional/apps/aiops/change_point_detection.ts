@@ -17,8 +17,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const ml = getService('ml');
 
   describe('change point detection', function () {
-    this.tags(['dima']);
-
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ecommerce');
       await ml.testResources.createDataViewIfNeeded('ft_ecommerce', 'order_date');
