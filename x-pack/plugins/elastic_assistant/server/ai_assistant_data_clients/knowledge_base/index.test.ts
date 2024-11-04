@@ -142,7 +142,7 @@ describe('AIAssistantKnowledgeBaseDataClient', () => {
     });
   });
 
-  describe('isModelDeployed', () => {
+  describe('isInferenceEndpointExists', () => {
     it('should check if ELSER model is deployed and return true if allocated', async () => {
       const client = new AIAssistantKnowledgeBaseDataClient(mockOptions);
       esClientMock.ml.getTrainedModelsStats.mockResolvedValue({
@@ -158,7 +158,7 @@ describe('AIAssistantKnowledgeBaseDataClient', () => {
           },
         ],
       });
-      const result = await client.isModelDeployed();
+      const result = await client.isInferenceEndpointExists();
       expect(result).toBe(true);
       expect(esClientMock.ml.getTrainedModelsStats).toHaveBeenCalledWith({ model_id: 'elser-id' });
     });
@@ -175,7 +175,7 @@ describe('AIAssistantKnowledgeBaseDataClient', () => {
           },
         ],
       });
-      const result = await client.isModelDeployed();
+      const result = await client.isInferenceEndpointExists();
       expect(result).toBe(true);
     });
 
@@ -185,14 +185,14 @@ describe('AIAssistantKnowledgeBaseDataClient', () => {
         // @ts-expect-error not full response interface
         trained_model_stats: [{ deployment_stats: { state: 'stopped' } }],
       });
-      const result = await client.isModelDeployed();
+      const result = await client.isInferenceEndpointExists();
       expect(result).toBe(false);
     });
 
     it('should return false if model is not found', async () => {
       const client = new AIAssistantKnowledgeBaseDataClient(mockOptions);
       esClientMock.ml.getTrainedModelsStats.mockRejectedValue(new Error('Model not found'));
-      const result = await client.isModelDeployed();
+      const result = await client.isInferenceEndpointExists();
       expect(result).toBe(false);
     });
   });

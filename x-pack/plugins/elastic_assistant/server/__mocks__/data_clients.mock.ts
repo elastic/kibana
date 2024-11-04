@@ -60,7 +60,7 @@ const createKnowledgeBaseDataClientMock = () => {
     findDocuments: jest.fn(),
     isSetupAvailable: jest.fn(),
     isModelInstalled: jest.fn(),
-    isModelDeployed: jest.fn(),
+    isInferenceEndpointExists: jest.fn(),
     setupKnowledgeBase: jest.fn(),
     addKnowledgeBaseDocuments: jest.fn(),
     isSecurityLabsDocsLoaded: jest.fn(),
