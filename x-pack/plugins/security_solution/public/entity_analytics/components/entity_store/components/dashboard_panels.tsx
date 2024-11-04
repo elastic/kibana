@@ -55,7 +55,7 @@ const EntityStoreDashboardPanelsComponent = () => {
 
   const { mutate: initRiskEngine } = useInitRiskEngineMutation();
 
-  const callouts = entityStore.errors.map((err, i) => (
+  const callouts = entityStore.errors.map((err) => (
     <EuiCallOut
       title={
         <FormattedMessage
@@ -141,6 +141,7 @@ const EntityStoreDashboardPanelsComponent = () => {
     );
   }
 
+  // TODO Rename variable because the Risk score could be installed but disabled
   const isRiskScoreAvailable =
     riskEngineStatus.data &&
     riskEngineStatus.data.risk_engine_status !== RiskEngineStatusEnum.NOT_INSTALLED;
@@ -199,35 +200,37 @@ const EntityStoreDashboardPanelsComponent = () => {
         </>
       )}
 
-      {entityStore.status === 'not_installed' && !isRiskScoreAvailable && (
-        // TODO: Move modal inside EnableEntityStore component, eliminating the onEnable prop in favour of forwarding the riskScoreEnabled status
-        <EnableEntityStore
-          enablements="both"
-          onEnable={() => setModalState({ visible: true })}
-          loadingRiskEngine={riskEngineInitializing}
-        />
-      )}
+      {(entityStore.status === 'not_installed' || entityStore.status === 'stopped') &&
+        !isRiskScoreAvailable && (
+          // TODO: Move modal inside EnableEntityStore component, eliminating the onEnable prop in favour of forwarding the riskScoreEnabled status
+          <EnableEntityStore
+            enablements="both"
+            onEnable={() => setModalState({ visible: true })}
+            loadingRiskEngine={riskEngineInitializing}
+          />
+        )}
 
-      {entityStore.status === 'not_installed' && isRiskScoreAvailable && (
-        <>
-          <EuiFlexItem>
-            <EnableEntityStore
-              enablements="store"
-              onEnable={() =>
-                setModalState({
-                  visible: true,
-                })
-              }
-            />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EntityAnalyticsRiskScores riskEntity={RiskScoreEntity.user} />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EntityAnalyticsRiskScores riskEntity={RiskScoreEntity.host} />
-          </EuiFlexItem>
-        </>
-      )}
+      {(entityStore.status === 'not_installed' || entityStore.status === 'stopped') &&
+        isRiskScoreAvailable && (
+          <>
+            <EuiFlexItem>
+              <EnableEntityStore
+                enablements="store"
+                onEnable={() =>
+                  setModalState({
+                    visible: true,
+                  })
+                }
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EntityAnalyticsRiskScores riskEntity={RiskScoreEntity.user} />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EntityAnalyticsRiskScores riskEntity={RiskScoreEntity.host} />
+            </EuiFlexItem>
+          </>
+        )}
 
       <EntityStoreEnablementModal
         visible={modal.visible}

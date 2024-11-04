@@ -9,7 +9,6 @@ import React, { memo, useCallback, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiLink } from '@elastic/eui';
 import { ALERT_WORKFLOW_ASSIGNEE_IDS } from '@kbn/rule-data-utils';
 import { i18n } from '@kbn/i18n';
-import { FlyoutTitle } from '@kbn/security-solution-common';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { Notes } from './notes';
 import { useRuleDetailsLink } from '../../shared/hooks/use_rule_details_link';
@@ -22,6 +21,7 @@ import { useDocumentDetailsContext } from '../../shared/context';
 import { PreferenceFormattedDate } from '../../../../common/components/formatted_date';
 import { FLYOUT_ALERT_HEADER_TITLE_TEST_ID, ALERT_SUMMARY_PANEL_TEST_ID } from './test_ids';
 import { Assignees } from './assignees';
+import { FlyoutTitle } from '../../../shared/components/flyout_title';
 
 // minWidth for each block, allows to switch for a 1 row 4 blocks to 2 rows with 2 block each
 const blockStyles = {

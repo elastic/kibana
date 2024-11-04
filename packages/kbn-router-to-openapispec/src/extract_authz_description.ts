@@ -56,5 +56,5 @@ export const extractAuthzDescription = (routeSecurity: InternalRouteSecurity | u
     return `Route required privileges: ${getPrivilegesDescription(allRequired, anyRequired)}.`;
   };
 
-  return `[Authz] ${getDescriptionForRoute()}`;
+  return `[Required authorization] ${getDescriptionForRoute()}`;
 };
