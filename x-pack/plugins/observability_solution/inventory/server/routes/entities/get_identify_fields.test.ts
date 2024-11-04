@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { InventoryEntityLatest } from '../../../common/entities';
+import type { InventoryEntityLatest } from '../../../common/entities';
 import { getIdentityFieldsPerEntityType } from './get_identity_fields_per_entity_type';
 
 const commonEntityFields: InventoryEntityLatest = {

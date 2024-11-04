@@ -6,17 +6,17 @@
  */
 import {
   ASSET_DETAILS_LOCATOR_ID,
-  AssetDetailsLocatorParams,
   ENTITY_TYPES,
   SERVICE_OVERVIEW_LOCATOR_ID,
-  ServiceOverviewParams,
+  type AssetDetailsLocatorParams,
+  type ServiceOverviewParams,
 } from '@kbn/observability-shared-plugin/common';
 import { useCallback } from 'react';
-import { DashboardLocatorParams } from '@kbn/dashboard-plugin/public';
+import type { DashboardLocatorParams } from '@kbn/dashboard-plugin/public';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { castArray } from 'lodash';
 import { isEntityOfType } from '../../common/utils/entity_type_guards';
-import { type InventoryEntityLatest } from '../../common/entities';
+import type { InventoryEntityLatest } from '../../common/entities';
 import { useKibana } from './use_kibana';
 
 const KUBERNETES_DASHBOARDS_IDS: Record<string, string> = {

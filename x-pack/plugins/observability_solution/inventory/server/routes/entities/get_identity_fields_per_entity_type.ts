@@ -6,7 +6,7 @@
  */
 
 import { castArray } from 'lodash';
-import { InventoryEntityLatest } from '../../../common/entities';
+import type { InventoryEntityLatest } from '../../../common/entities';
 
 export type IdentityFieldsPerEntityType = Map<string, string[]>;
 

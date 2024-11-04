@@ -8,7 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { useKibana } from '../../../hooks/use_kibana';
-import { InventoryEntityLatest } from '../../../../common/entities';
+import type { InventoryEntityLatest } from '../../../../common/entities';
 import { EntityIcon } from '../../entity_icon';
 import { useDetailViewRedirect } from '../../../hooks/use_detail_view_redirect';
 
