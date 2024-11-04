@@ -23,9 +23,13 @@ interface Props {
  *
  */
 export const SetupKnowledgeBaseButton: React.FC<Props> = React.memo(({ display }: Props) => {
-  const { http, toasts } = useAssistantContext();
+  const {
+    http,
+    toasts,
+    assistantAvailability: { isAssistantEnabled },
+  } = useAssistantContext();
 
-  const { data: kbStatus } = useKnowledgeBaseStatus({ http });
+  const { data: kbStatus } = useKnowledgeBaseStatus({ http, enabled: isAssistantEnabled });
   const { mutate: setupKB, isLoading: isSettingUpKB } = useSetupKnowledgeBase({ http, toasts });
 
   const isSetupInProgress = kbStatus?.is_setup_in_progress || isSettingUpKB;

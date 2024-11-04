@@ -106,7 +106,7 @@ export const removeByPredicate = (
   option.args.splice(index, 1);
 
   if (option.args.length === 0) {
-    generic.removeCommandOption(ast, option);
+    generic.commands.options.remove(ast, option);
   }
 
   return tuple;
@@ -148,16 +148,16 @@ export const insert = (
   fieldName: string | string[],
   index: number = -1
 ): [column: ESQLColumn, option: ESQLCommandOption] | undefined => {
-  let option = generic.findCommandOptionByName(ast, 'from', 'metadata');
+  let option = generic.commands.options.findByName(ast, 'from', 'metadata');
 
   if (!option) {
-    const command = generic.findCommandByName(ast, 'from');
+    const command = generic.commands.findByName(ast, 'from');
 
     if (!command) {
       return;
     }
 
-    option = generic.appendCommandOption(command, 'metadata');
+    option = generic.commands.options.append(command, 'metadata');
   }
 
   const parts: string[] = typeof fieldName === 'string' ? [fieldName] : fieldName;
@@ -189,7 +189,7 @@ export const upsert = (
   fieldName: string | string[],
   index: number = -1
 ): [column: ESQLColumn, option: ESQLCommandOption] | undefined => {
-  const option = generic.findCommandOptionByName(ast, 'from', 'metadata');
+  const option = generic.commands.options.findByName(ast, 'from', 'metadata');
 
   if (option) {
     const parts = Array.isArray(fieldName) ? fieldName : [fieldName];

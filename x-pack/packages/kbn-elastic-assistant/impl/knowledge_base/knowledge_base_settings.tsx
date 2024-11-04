@@ -44,8 +44,16 @@ interface Props {
  */
 export const KnowledgeBaseSettings: React.FC<Props> = React.memo(
   ({ knowledgeBase, setUpdatedKnowledgeBaseSettings, modalMode = false }) => {
-    const { http, toasts } = useAssistantContext();
-    const { data: kbStatus, isLoading, isFetching } = useKnowledgeBaseStatus({ http });
+    const {
+      http,
+      toasts,
+      assistantAvailability: { isAssistantEnabled },
+    } = useAssistantContext();
+    const {
+      data: kbStatus,
+      isLoading,
+      isFetching,
+    } = useKnowledgeBaseStatus({ http, enabled: isAssistantEnabled });
     const { mutate: setupKB, isLoading: isSettingUpKB } = useSetupKnowledgeBase({ http, toasts });
 
     // Resource enabled state
