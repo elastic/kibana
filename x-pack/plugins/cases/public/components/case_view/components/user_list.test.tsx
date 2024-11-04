@@ -20,7 +20,8 @@ jest.mock('../../../common/navigation/hooks');
 
 const useCaseViewNavigationMock = useCaseViewNavigation as jest.Mock;
 
-describe('UserList ', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/192640
+describe.skip('UserList ', () => {
   const title = basicCase.title;
   const caseLink = 'https://example.com/cases/test';
   const user = {

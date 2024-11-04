@@ -6976,7 +6976,15 @@
             "section": "def-public.PublishesViewMode",
             "text": "PublishesViewMode"
           },
-          ">) | undefined; disableTriggers: boolean; timeRange$: ",
+          ">) | undefined; hasLockedHoverActions$: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishingSubject",
+            "text": "PublishingSubject"
+          },
+          "<boolean>; lockHoverActions: (lock: boolean) => void; disableTriggers: boolean; timeRange$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",

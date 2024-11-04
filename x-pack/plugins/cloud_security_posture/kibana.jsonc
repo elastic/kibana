@@ -1,13 +1,20 @@
 {
   "type": "plugin",
   "id": "@kbn/cloud-security-posture-plugin",
-  "owner": "@elastic/kibana-cloud-security-posture",
+  "owner": [
+    "@elastic/kibana-cloud-security-posture"
+  ],
+  "group": "security",
+  "visibility": "private",
   "description": "The cloud security posture plugin",
   "plugin": {
     "id": "cloudSecurityPosture",
-    "server": true,
     "browser": true,
-    "configPath": ["xpack", "cloudSecurityPosture"],
+    "server": true,
+    "configPath": [
+      "xpack",
+      "cloudSecurityPosture"
+    ],
     "requiredPlugins": [
       "navigation",
       "data",
@@ -25,7 +32,12 @@
       "alerting",
       "spaces"
     ],
-    "optionalPlugins": ["usageCollection"],
-    "requiredBundles": ["kibanaReact", "usageCollection"]
+    "optionalPlugins": [
+      "usageCollection"
+    ],
+    "requiredBundles": [
+      "kibanaReact",
+      "usageCollection"
+    ]
   }
 }

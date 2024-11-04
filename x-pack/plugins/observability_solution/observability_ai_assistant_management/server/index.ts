@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+export { config } from './config';
+
 export const plugin = async () => {
   const { AiAssistantManagementPlugin } = await import('./plugin');
   return new AiAssistantManagementPlugin();

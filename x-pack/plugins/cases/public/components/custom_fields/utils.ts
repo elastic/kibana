@@ -8,6 +8,7 @@
 import { isEmptyString } from '@kbn/es-ui-shared-plugin/static/validators/string';
 import { isString } from 'lodash';
 import type { CustomFieldConfiguration } from '../../../common/types/domain';
+import { CustomFieldTypes } from '../../../common/types/domain';
 
 export const customFieldSerializer = (
   field: CustomFieldConfiguration
@@ -16,6 +17,14 @@ export const customFieldSerializer = (
 
   if (defaultValue === undefined || (isString(defaultValue) && isEmptyString(defaultValue))) {
     return otherProperties;
+  }
+
+  if (field.type === CustomFieldTypes.NUMBER) {
+    if (defaultValue !== null && Number.isSafeInteger(Number(defaultValue))) {
+      return { ...field, defaultValue: Number(defaultValue) };
+    } else {
+      return otherProperties;
+    }
   }
 
   return field;

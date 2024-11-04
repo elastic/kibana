@@ -6,6 +6,7 @@
  */
 
 import { useCallback, useMemo, useState } from 'react';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import type {
   RulesUpgradeState,
   FieldsUpgradeState,
@@ -32,6 +33,9 @@ interface UseRulesUpgradeStateResult {
 export function usePrebuiltRulesUpgradeState(
   ruleUpgradeInfos: RuleUpgradeInfoForReview[]
 ): UseRulesUpgradeStateResult {
+  const isPrebuiltRulesCustomizationEnabled = useIsExperimentalFeatureEnabled(
+    'prebuiltRulesCustomizationEnabled'
+  );
   const [rulesResolvedConflicts, setRulesResolvedConflicts] = useState<RulesResolvedConflicts>({});
 
   const setRuleFieldResolvedValue = useCallback(
@@ -61,16 +65,17 @@ export function usePrebuiltRulesUpgradeState(
           ruleUpgradeInfo.diff.fields,
           rulesResolvedConflicts[ruleUpgradeInfo.rule_id] ?? {}
         ),
-        hasUnresolvedConflicts:
-          getUnacceptedConflictsCount(
-            ruleUpgradeInfo.diff.fields,
-            rulesResolvedConflicts[ruleUpgradeInfo.rule_id] ?? {}
-          ) > 0,
+        hasUnresolvedConflicts: isPrebuiltRulesCustomizationEnabled
+          ? getUnacceptedConflictsCount(
+              ruleUpgradeInfo.diff.fields,
+              rulesResolvedConflicts[ruleUpgradeInfo.rule_id] ?? {}
+            ) > 0
+          : false,
       };
     }
 
     return state;
-  }, [ruleUpgradeInfos, rulesResolvedConflicts]);
+  }, [ruleUpgradeInfos, rulesResolvedConflicts, isPrebuiltRulesCustomizationEnabled]);
 
   return {
     rulesUpgradeState,

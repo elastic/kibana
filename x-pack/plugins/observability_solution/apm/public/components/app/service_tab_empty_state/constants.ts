@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import type { ObservabilityOnboardingLocatorParams } from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
 import type { AddDataPanelProps } from '@kbn/observability-shared-plugin/public';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
+import {
+  ApmOnboardingLocatorCategory,
+  ApmOnboardingLocatorParams,
+} from '../../../locator/onboarding_locator';
 
 export type AddAPMCalloutKeys =
   | 'serviceOverview'
@@ -19,13 +22,11 @@ export type AddAPMCalloutKeys =
   | 'metrics'
   | 'errorGroupOverview';
 
-const defaultActions = (
-  locator: LocatorPublic<ObservabilityOnboardingLocatorParams> | undefined
-) => {
+const defaultActions = (locator: LocatorPublic<ApmOnboardingLocatorParams> | undefined) => {
   return {
     actions: {
       primary: {
-        href: locator?.getRedirectUrl({ category: 'application' }),
+        href: locator?.getRedirectUrl({ category: ApmOnboardingLocatorCategory.Apm }),
         label: i18n.translate('xpack.apm.serviceTabEmptyState.defaultPrimaryActionLabel', {
           defaultMessage: 'Add APM',
         }),
@@ -42,7 +43,7 @@ const defaultActions = (
 
 export const addAPMCalloutDefinitions = (
   baseFolderPath: string,
-  locator: LocatorPublic<ObservabilityOnboardingLocatorParams> | undefined
+  locator: LocatorPublic<ApmOnboardingLocatorParams> | undefined
 ): Record<
   AddAPMCalloutKeys,
   Omit<AddDataPanelProps, 'onDismiss' | 'onAddData' | 'onLearnMore' | 'onTryIt'>

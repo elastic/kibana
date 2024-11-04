@@ -8,6 +8,7 @@
  */
 
 import { useEffect, useRef } from 'react';
+import deepEqual from 'fast-deep-equal';
 
 import { resolveGridRow } from './resolve_grid_row';
 import { GridLayoutStateManager, GridPanelData } from './types';
@@ -121,6 +122,7 @@ export const useGridLayoutEvents = ({
         maxColumn
       );
       const targetRow = Math.max(Math.round(localYCoordinate / (rowHeight + gutterSize)), 0);
+
       const requestedGridData = { ...currentGridData };
       if (isResize) {
         requestedGridData.width = Math.max(targetColumn - requestedGridData.column, 1);
@@ -154,8 +156,9 @@ export const useGridLayoutEvents = ({
           const resolvedOriginGrid = resolveGridRow(originGrid);
           nextLayout[lastRowIndex] = resolvedOriginGrid;
         }
-
-        gridLayout$.next(nextLayout);
+        if (!deepEqual(currentLayout, nextLayout)) {
+          gridLayout$.next(nextLayout);
+        }
       }
     };
 

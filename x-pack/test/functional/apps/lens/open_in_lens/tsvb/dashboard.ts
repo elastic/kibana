@@ -53,14 +53,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await dashboardCustomizePanel.clickSaveButton();
       await dashboard.waitForRenderComplete();
       await dashboardBadgeActions.expectExistsTimeRangeBadgeAction();
-      await panelActions.openContextMenu();
-      const editInLensExists = await testSubjects.exists(
-        'embeddablePanelAction-ACTION_EDIT_IN_LENS'
-      );
-      if (!editInLensExists) {
-        await testSubjects.click('embeddablePanelMore-mainMenu');
-      }
-      await testSubjects.click('embeddablePanelAction-ACTION_EDIT_IN_LENS');
+      await panelActions.convertToLens();
 
       await lens.waitForVisualization('xyVisChart');
       await retry.try(async () => {
