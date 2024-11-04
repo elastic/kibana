@@ -166,7 +166,15 @@
           "label": "initNavigation",
           "description": [],
           "signature": [
-            "(id: string, navigationTree$: ",
+            "(id: ",
+            {
+              "pluginId": "@kbn/core-chrome-browser",
+              "scope": "public",
+              "docId": "kibKbnCoreChromeBrowserPluginApi",
+              "section": "def-public.SolutionId",
+              "text": "SolutionId"
+            },
+            ", navigationTree$: ",
             "Observable",
             "<",
             {
@@ -201,12 +209,18 @@
             {
               "parentPluginId": "serverless",
               "id": "def-public.ServerlessPluginStart.initNavigation.$1",
-              "type": "string",
+              "type": "CompoundType",
               "tags": [],
               "label": "id",
               "description": [],
               "signature": [
-                "string"
+                {
+                  "pluginId": "@kbn/core-chrome-browser",
+                  "scope": "public",
+                  "docId": "kibKbnCoreChromeBrowserPluginApi",
+                  "section": "def-public.SolutionId",
+                  "text": "SolutionId"
+                }
               ],
               "path": "x-pack/plugins/serverless/public/types.ts",
               "deprecated": false,
