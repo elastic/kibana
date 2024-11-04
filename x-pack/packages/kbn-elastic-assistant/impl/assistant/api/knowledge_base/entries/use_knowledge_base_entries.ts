@@ -56,6 +56,7 @@ export const useKnowledgeBaseEntries = ({
   query = defaultQuery,
   signal,
   toasts,
+  enabled = false,
   isRefetching = false,
 }: UseKnowledgeBaseEntriesParams) =>
   useQuery(
@@ -71,6 +72,7 @@ export const useKnowledgeBaseEntries = ({
         }
       ),
     {
+      enabled,
       keepPreviousData: true,
       initialData: { page: 1, perPage: 100, total: 0, data: [] },
       refetchInterval: isRefetching ? 30000 : false,

@@ -27,7 +27,6 @@ export const isModelAlreadyExistsError = (error: Error) => {
  *
  * @param filter - Optional filter to apply to the search
  * @param kbResource - Specific resource tag to filter for, e.g. 'esql' or 'user'
- * @param modelId - ID of the model to search with, e.g. `.elser_model_2`
  * @param query - The search query provided by the user
  * @param required - Whether to only include required entries
  * @param user - The authenticated user
@@ -36,14 +35,12 @@ export const isModelAlreadyExistsError = (error: Error) => {
 export const getKBVectorSearchQuery = ({
   filter,
   kbResource,
-  modelId,
   query,
   required,
   user,
 }: {
   filter?: QueryDslQueryContainer | undefined;
   kbResource?: string | undefined;
-  modelId: string;
   query?: string;
   required?: boolean | undefined;
   user: AuthenticatedUser;

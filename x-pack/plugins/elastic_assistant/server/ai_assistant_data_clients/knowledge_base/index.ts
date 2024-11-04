@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  MlTrainedModelDeploymentNodesStats,
-  MlTrainedModelStats,
-  SearchTotalHits,
-} from '@elastic/elasticsearch/lib/api/types';
+import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { Document } from 'langchain/document';
@@ -29,14 +25,11 @@ import { ElasticsearchClient } from '@kbn/core/server';
 import { IndexPatternsFetcher } from '@kbn/data-views-plugin/server';
 import { map } from 'lodash';
 import { AIAssistantDataClient, AIAssistantDataClientParams } from '..';
-import { AssistantToolParams, GetElser } from '../../types';
+import { GetElser } from '../../types';
 import { createKnowledgeBaseEntry, transformToCreateSchema } from './create_knowledge_base_entry';
 import { EsDocumentEntry, EsIndexEntry, EsKnowledgeBaseEntrySchema } from './types';
 import { transformESSearchToKnowledgeBaseEntry } from './transforms';
-import {
-  SECURITY_LABS_RESOURCE,
-  USER_RESOURCE,
-} from '../../routes/knowledge_base/constants';
+import { SECURITY_LABS_RESOURCE, USER_RESOURCE } from '../../routes/knowledge_base/constants';
 import {
   getKBVectorSearchQuery,
   getStructuredToolForIndexEntry,
@@ -137,24 +130,6 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
   };
 
   /**
-   * Deploy the ELSER model with default configuration
-   */
-  private deployModel = async () => {
-    const elserId = await this.options.getElserId();
-    this.options.logger.debug(`Deploying ELSER model '${elserId}'...`);
-    try {
-      const esClient = await this.options.elasticsearchClientPromise;
-      await esClient.ml.startTrainedModelDeployment({
-        model_id: elserId,
-        wait_for: 'fully_allocated',
-      });
-    } catch (error) {
-      this.options.logger.error(`Error deploying ELSER model '${elserId}':\n${error}`);
-      throw new Error(`Error deploying ELSER model '${elserId}':\n${error}`);
-    }
-  };
-
-  /**
    * Checks if the provided model is deployed and allocated in Elasticsearch
    *
    * @returns Promise<boolean> indicating whether the model is deployed
@@ -164,7 +139,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     this.options.logger.debug(`Checking if ELSER model '${elserId}' is deployed...`);
 
     try {
-        return await this.isInferenceEndpointExists();
+      return await this.isInferenceEndpointExists();
     } catch (e) {
       this.options.logger.debug(`Error checking if ELSER model '${elserId}' is deployed: ${e}`);
       // Returns 404 if it doesn't exist
@@ -194,23 +169,23 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     try {
       const esClient = await this.options.elasticsearchClientPromise;
 
-        await esClient.inference.put({
-          task_type: 'sparse_embedding',
-          inference_id: ASSISTANT_ELSER_INFERENCE_ID,
-          inference_config: {
-            service: 'elasticsearch',
-            service_settings: {
-              adaptive_allocations: {
-                enabled: true,
-                min_number_of_allocations: 0,
-                max_number_of_allocations: 8,
-              },
-              num_threads: 1,
-              model_id: elserId,
+      await esClient.inference.put({
+        task_type: 'sparse_embedding',
+        inference_id: ASSISTANT_ELSER_INFERENCE_ID,
+        inference_config: {
+          service: 'elasticsearch',
+          service_settings: {
+            adaptive_allocations: {
+              enabled: true,
+              min_number_of_allocations: 0,
+              max_number_of_allocations: 8,
             },
-            task_settings: {},
+            num_threads: 1,
+            model_id: elserId,
           },
-        });
+          task_settings: {},
+        },
+      });
     } catch (error) {
       this.options.logger.error(
         `Error creating inference endpoint for ELSER model '${elserId}':\n${error}`
@@ -399,14 +374,12 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     }
 
     const esClient = await this.options.elasticsearchClientPromise;
-    const modelId = await this.options.getElserId();
 
     try {
       const vectorSearchQuery = getKBVectorSearchQuery({
         kbResource: USER_RESOURCE,
         required: false,
         user,
-        modelId,
       });
 
       const result = await esClient.search<EsDocumentEntry>({
@@ -437,14 +410,12 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     const expectedDocsCount = await getSecurityLabsDocsCount({ logger: this.options.logger });
 
     const esClient = await this.options.elasticsearchClientPromise;
-    const modelId = await this.options.getElserId();
 
     try {
       const vectorSearchQuery = getKBVectorSearchQuery({
         kbResource: SECURITY_LABS_RESOURCE,
         required: false,
         user,
-        modelId,
       });
 
       const result = await esClient.search<EsDocumentEntry>({
@@ -490,7 +461,6 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     }
 
     const esClient = await this.options.elasticsearchClientPromise;
-    const modelId = await this.options.getElserId();
 
     const vectorSearchQuery = getKBVectorSearchQuery({
       filter,
@@ -498,7 +468,6 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
       query,
       required,
       user,
-      modelId,
     });
 
     try {
@@ -629,10 +598,8 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
    * is scoped to system user.
    */
   public getAssistantTools = async ({
-    assistantToolParams,
     esClient,
   }: {
-    assistantToolParams: AssistantToolParams;
     esClient: ElasticsearchClient;
   }): Promise<StructuredTool[]> => {
     const user = this.options.currentUser;
