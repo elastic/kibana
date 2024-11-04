@@ -9,7 +9,7 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../..',
+  rootDir: '../../..',
   roots: ['<rootDir>/packages/response-ops/rule_form'],
   setupFilesAfterEnv: ['<rootDir>/packages/response-ops/rule_form/setup_tests.ts'],
 };
