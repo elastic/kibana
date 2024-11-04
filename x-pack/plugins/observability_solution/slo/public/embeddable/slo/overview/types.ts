@@ -13,15 +13,6 @@ import {
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import { Filter } from '@kbn/es-query';
-import {
-  type CoreStart,
-  IUiSettingsClient,
-  ApplicationStart,
-  NotificationsStart,
-} from '@kbn/core/public';
-import { ObservabilityPublicStart } from '@kbn/observability-plugin/public';
-import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/public';
 
 export type OverviewMode = 'single' | 'groups';
 export type GroupBy = 'slo.tags' | 'status' | 'slo.indicator.type';
