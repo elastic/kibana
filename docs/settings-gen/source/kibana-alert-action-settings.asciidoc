@@ -81,15 +81,6 @@ A boolean value indicating that TLS must be used for this connection. The option
 Default: `false` +
 ====
 
-.`xpack.actions.customHostSettings[n].ssl.rejectUnauthorized`
-[%collapsible]
-====
-**Deprecated:** Deprecated in version 8.0.0. Use <<action-config-custom-host-verification-mode,`xpack.actions.customHostSettings.ssl.verificationMode`>> instead.
-
-A boolean value indicating whether to bypass server certificate validation. Overrides the general `xpack.actions.rejectUnauthorized` configuration for requests made for this hostname/port.
-
-====
-
 
 [[action-config-custom-host-verification-mode]]
 .`xpack.actions.customHostSettings[n].ssl.verificationMode` {ess-icon}
@@ -209,17 +200,7 @@ include::../embeds/example-xpack-actions-proxyonlyhosts.asciidoc[]
 ====
 Specifies HTTP headers for the proxy, if using a proxy for actions.
 
-Default: `HASH(0x1478378d0)` +
-====
-
-.`xpack.actions.proxyRejectUnauthorizedCertificates` {ess-icon}
-[%collapsible]
-====
-**Deprecated:** Deprecated in version 8.0.0. Use <<action-config-proxy-verification-mode,`xpack.actions.ssl.proxyVerificationMode`>> instead.
-
-Set to `false` to bypass certificate validation for the proxy, if using a proxy for actions.
-
-Default: `true` +
+Default: `HASH(0x12bb51a88)` +
 ====
 
 
@@ -241,18 +222,6 @@ Options:
 * `none`
 
 Default: `full` +
-====
-
-.`xpack.actions.rejectUnauthorized` {ess-icon}
-[%collapsible]
-====
-**Deprecated:** Deprecated in version 8.8.0. Use <<action-config-verification-mode,`xpack.actions.ssl.verificationMode`>> instead.
-
-Set to `false` to bypass certificate validation for actions.
-
-As an alternative to setting `xpack.actions.rejectUnauthorized`, you can use the setting `xpack.actions.customHostSettings` to set SSL options for specific servers.
-
-Default: `true` +
 ====
 
 
