@@ -6,19 +6,14 @@
  */
 
 import { History } from 'history';
-import React, { useMemo } from 'react';
+import { CoreStart } from '@kbn/core/public';
+import React from 'react';
 import ReactDOM from 'react-dom';
-import useObservable from 'react-use/lib/useObservable';
-import { map } from 'rxjs';
 import { CoreStart } from '@kbn/core/public';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { AppMountParameters, AppStatus } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import {
-  AllDatasetsLocatorParams,
-  ALL_DATASETS_LOCATOR_ID,
-  OBSERVABILITY_LOGS_EXPLORER_APP_ID,
-} from '@kbn/deeplinks-observability';
+import { AllDatasetsLocatorParams, ALL_DATASETS_LOCATOR_ID } from '@kbn/deeplinks-observability';
 import { LinkToLogsPage } from '../pages/link_to/link_to_logs';
 import { LogsPage } from '../pages/logs';
 import { InfraClientStartDeps, InfraClientStartExports } from '../types';
@@ -30,6 +25,7 @@ export const renderApp = (
   core: CoreStart,
   plugins: InfraClientStartDeps,
   pluginStart: InfraClientStartExports,
+  isLogsExplorerAccessible: boolean,
   { element, history, setHeaderActionMenu, theme$ }: AppMountParameters
 ) => {
   const storage = new Storage(window.localStorage);
@@ -45,6 +41,7 @@ export const renderApp = (
       pluginStart={pluginStart}
       setHeaderActionMenu={setHeaderActionMenu}
       theme$={theme$}
+      isLogsExplorerAccessible={isLogsExplorerAccessible}
     />,
     element
   );
@@ -62,26 +59,18 @@ const LogsApp: React.FC<{
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   storage: Storage;
   theme$: AppMountParameters['theme$'];
-}> = ({ core, history, pluginStart, plugins, setHeaderActionMenu, storage, theme$ }) => {
-  const {
-    capabilities: { logs },
-    applications$,
-  } = core.application;
-
-  const isLogsExplorerAppAccessible = useObservable(
-    useMemo(
-      () =>
-        applications$.pipe(
-          map(
-            (apps) =>
-              (apps.get(OBSERVABILITY_LOGS_EXPLORER_APP_ID)?.status ?? AppStatus.inaccessible) ===
-              AppStatus.accessible
-          )
-        ),
-      [applications$]
-    ),
-    false
-  );
+  isLogsExplorerAccessible: boolean;
+}> = ({
+  core,
+  history,
+  pluginStart,
+  plugins,
+  setHeaderActionMenu,
+  storage,
+  theme$,
+  isLogsExplorerAccessible,
+}) => {
+  const { logs } = core.application.capabilities;
 
   return (
     <CoreProviders core={core} pluginStart={pluginStart} plugins={plugins} theme$={theme$}>
@@ -98,7 +87,7 @@ const LogsApp: React.FC<{
             toastsService={core.notifications.toasts}
           >
             <Routes>
-              {isLogsExplorerAppAccessible && (
+              {isLogsExplorerAccessible && (
                 <Route
                   path="/"
                   exact

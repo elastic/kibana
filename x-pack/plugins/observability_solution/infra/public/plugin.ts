@@ -27,6 +27,7 @@ import {
   switchMap,
   of,
   distinctUntilChanged,
+  firstValueFrom,
 } from 'rxjs';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { apiCanAddNewPanel } from '@kbn/presentation-containers';
@@ -260,8 +261,12 @@ export class Plugin implements InfraClientPluginClass {
           // mount callback should not use setup dependencies, get start dependencies instead
           const [coreStart, plugins, pluginStart] = await core.getStartServices();
 
+          const isLogsExplorerAccessible = await firstValueFrom(
+            getLogsExplorerAccessible$(coreStart.application)
+          );
+
           const { renderApp } = await import('./apps/logs_app');
-          return renderApp(coreStart, plugins, pluginStart, params);
+          return renderApp(coreStart, plugins, pluginStart, isLogsExplorerAccessible, params);
         },
       });
     }
