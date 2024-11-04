@@ -17,7 +17,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects(['common', 'header', 'alerts']);
   const alertsPage = pageObjects.alerts;
 
-  describe('Security Alerts Page - Graph visualization', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/198632
+  describe.skip('Security Alerts Page - Graph visualization', function () {
     this.tags(['cloud_security_posture_graph_viz']);
 
     before(async () => {
