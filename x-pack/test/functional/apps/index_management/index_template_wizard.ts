@@ -107,6 +107,67 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
+    // https://github.com/elastic/kibana/pull/195174
+    it('can preview index template that matches a_fake_index_pattern_that_wont_match_any_indices', async () => {
+      // Click Create Template button
+      await testSubjects.click('createTemplateButton');
+      const pageTitleText = await testSubjects.getVisibleText('pageTitle');
+      expect(pageTitleText).to.be('Create template');
+
+      const stepTitle1 = await testSubjects.getVisibleText('stepTitle');
+      expect(stepTitle1).to.be('Logistics');
+
+      // Fill out required fields
+      await testSubjects.setValue('nameField', 'a*');
+      await testSubjects.setValue('indexPatternsField', 'a*');
+
+      // Click Next button
+      await pageObjects.indexManagement.clickNextButton();
+
+      // Verify empty prompt
+      const emptyPrompt = await testSubjects.exists('emptyPrompt');
+      expect(emptyPrompt).to.be(true);
+
+      // Click Next button
+      await pageObjects.indexManagement.clickNextButton();
+
+      // Verify step title
+      const stepTitle2 = await testSubjects.getVisibleText('stepTitle');
+      expect(stepTitle2).to.be('Index settings (optional)');
+
+      // Click Next button
+      await pageObjects.indexManagement.clickNextButton();
+
+      // Verify step title
+      const stepTitle3 = await testSubjects.getVisibleText('stepTitle');
+      expect(stepTitle3).to.be('Mappings (optional)');
+
+      // Click Next button
+      await pageObjects.indexManagement.clickNextButton();
+
+      // Verify step title
+      const stepTitle4 = await testSubjects.getVisibleText('stepTitle');
+      expect(stepTitle4).to.be('Aliases (optional)');
+
+      // Click Next button
+      await pageObjects.indexManagement.clickNextButton();
+
+      // Verify step title
+      const stepTitle = await testSubjects.getVisibleText('stepTitle');
+      expect(stepTitle).to.be("Review details for 'test-index-template'");
+
+      // Verify that summary exists
+      const summaryTabContent = await testSubjects.exists('summaryTabContent');
+      expect(summaryTabContent).to.be(true);
+
+      // Verify that index mode is set to "Standard"
+      expect(await testSubjects.exists('indexModeTitle')).to.be(true);
+      expect(await testSubjects.getVisibleText('indexModeValue')).to.be('Standard');
+
+      // Click Create template
+      await pageObjects.indexManagement.clickNextButton();
+    });
+
     describe('Mappings step', () => {
       beforeEach(async () => {
         await pageObjects.common.navigateToApp('indexManagement');
