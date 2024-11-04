@@ -219,6 +219,7 @@ export const RulePage = (props: RulePageProps) => {
           onConfirm={onCancel}
           buttonColor="danger"
           defaultFocusedButton="confirm"
+          data-test-subj="confirmRuleCloseModal"
           title={RULE_FORM_CANCEL_MODAL_TITLE}
           confirmButtonText={RULE_FORM_CANCEL_MODAL_CONFIRM}
           cancelButtonText={RULE_FORM_CANCEL_MODAL_CANCEL}

@@ -50,7 +50,7 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
   };
 
   // FLAKY: https://github.com/elastic/kibana/issues/157623
-  describe.skip('rules list', function () {
+  describe('rules list', function () {
     const assertRulesLength = async (length: number) => {
       return await retry.try(async () => {
         const rules = await pageObjects.triggersActionsUI.getAlertsList();
@@ -449,7 +449,7 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
       const infoIcon = await testSubjects.find('ruleInterval-config-icon-0');
       await infoIcon.click();
 
-      await testSubjects.click('cancelSaveEditedRuleButton');
+      await testSubjects.click('rulePageFooterCancelButton');
     });
 
     it('should delete all selection', async () => {
