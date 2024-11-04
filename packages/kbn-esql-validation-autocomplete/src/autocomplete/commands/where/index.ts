@@ -7,18 +7,38 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ESQLCommand } from '@kbn/esql-ast';
-import { GetColumnsByTypeFn, SuggestionRawDefinition } from '../../types';
-import { getFunctionSuggestions } from '../../factories';
+import type { ESQLAstItem, ESQLCommand } from '@kbn/esql-ast';
+import type { SupportedDataType } from '../../../definitions/types';
+import { isColumnItem } from '../../../shared/helpers';
+import type { GetColumnsByTypeFn, SuggestionRawDefinition } from '../../types';
+import { getFunctionSuggestions, getOperatorSuggestions } from '../../factories';
 
 export async function suggest(
   innerText: string,
   command: ESQLCommand<'where'>,
   getColumnsByType: GetColumnsByTypeFn,
-  _columnExists: (column: string) => boolean,
-  getSuggestedVariableName: () => string,
-  getPreferences?: () => Promise<{ histogramBarTarget: number } | undefined>
+  columnExists: (column: string) => boolean,
+  _getSuggestedVariableName: () => string,
+  getExpressionType: (expression: ESQLAstItem) => SupportedDataType | 'unknown',
+  _getPreferences?: () => Promise<{ histogramBarTarget: number } | undefined>
 ): Promise<SuggestionRawDefinition[]> {
+  const lastArg = command.args[command.args.length - 1];
+  if (isColumnItem(lastArg) && innerText.trimEnd().length !== innerText.length) {
+    const columnType = getExpressionType(lastArg);
+    if (columnType === 'unknown' || columnType === 'unsupported') {
+      return [];
+    }
+
+    // skip assign operator if the column exists so as not to promote shadowing
+    const ignoredOperators = columnExists(lastArg.parts.join('.')) ? ['='] : [];
+
+    return getOperatorSuggestions({
+      command: 'where',
+      leftParamType: columnType,
+      ignored: ignoredOperators,
+    });
+  }
+
   const columnSuggestions = await getColumnsByType('any', [], {
     advanceCursor: true,
     openSuggestions: true,

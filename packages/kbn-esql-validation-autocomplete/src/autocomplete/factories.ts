@@ -20,6 +20,7 @@ import {
   CommandDefinition,
   CommandOptionsDefinition,
   CommandModeDefinition,
+  FunctionParameterType,
 } from '../definitions/types';
 import { shouldBeQuotedSource, getCommandDefinition, shouldBeQuotedText } from '../shared/helpers';
 import { buildDocumentation, buildFunctionDocumentation } from './documentation_util';
@@ -153,7 +154,7 @@ export const getFunctionSuggestions = (
  * @returns
  */
 export const getOperatorSuggestions = (
-  predicates?: FunctionFilterPredicates & { leftParamType?: string }
+  predicates?: FunctionFilterPredicates & { leftParamType?: FunctionParameterType }
 ): SuggestionRawDefinition[] => {
   const filteredDefinitions = filterFunctionDefinitions(
     getTestFunctions().length ? [...builtinFunctions, ...getTestFunctions()] : builtinFunctions,

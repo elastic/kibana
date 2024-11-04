@@ -48,6 +48,7 @@ import {
   sourceExists,
   findFinalWord,
   getAllCommands,
+  getExpressionType,
 } from '../shared/helpers';
 import { collectVariables, excludeVariablesFromCurrentCommand } from '../shared/variables';
 import type { ESQLPolicy, ESQLRealField, ESQLVariable, ReferenceMaps } from '../validation/types';
@@ -469,6 +470,8 @@ async function getSuggestionsWithinCommandExpression(
       getColumnsByType,
       (col: string) => Boolean(getColumnByName(col, references)),
       () => findNewVariable(anyVariables),
+      (expression: ESQLAstItem) =>
+        getExpressionType(expression, references.fields, references.variables),
       getPreferences
     );
   } else {
