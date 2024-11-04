@@ -7,4 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { useEuiTablePersist, DEFAULT_PAGE_SIZE_OPTIONS } from './src';
+export { useEuiTablePersist, DEFAULT_PAGE_SIZE_OPTIONS, withEuiTablePersist } from './src';
+export type { EuiTablePersistInjectedProps, EuiTablePersistPropsGetter, HOCProps } from './src';

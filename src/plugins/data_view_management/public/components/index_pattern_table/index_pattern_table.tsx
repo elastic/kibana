@@ -30,7 +30,7 @@ import { NoDataViewsPromptComponent, useOnTryESQL } from '@kbn/shared-ux-prompt-
 import type { SpacesContextProps } from '@kbn/spaces-plugin/public';
 import { DataViewType } from '@kbn/data-views-plugin/public';
 import { RollupDeprecationTooltip } from '@kbn/rollup';
-import { useEuiTablePersist } from '@kbn/shared-ux-table-persist/src';
+import { useEuiTablePersist } from '@kbn/shared-ux-table-persist';
 
 import type { IndexPatternManagmentContext } from '../../types';
 import { getListBreadcrumbs } from '../breadcrumbs';

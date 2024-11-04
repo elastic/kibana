@@ -19,19 +19,39 @@ export interface EuiTablePersistInjectedProps<T> {
   };
 }
 
-export function withEuiTablePersist<T extends object, Props extends object>(
-  WrappedComponent: React.ComponentType<Props & EuiTablePersistInjectedProps<T>>,
-  euiTablePersistDefault: EuiTablePersistProps<T>
-) {
-  type HOCProps = Omit<Props, 'euiTablePersistProps'> & {
-    euiTablePersistProps: Partial<EuiTablePersistProps<T>>;
-  };
+export type EuiTablePersistPropsGetter<T extends object, P extends object> = (
+  props: Omit<P, keyof EuiTablePersistInjectedProps<T>>
+) => EuiTablePersistProps<T>;
 
-  const HOC: React.FC<HOCProps> = (props) => {
-    const mergedProps = { ...euiTablePersistDefault, ...props.euiTablePersistProps };
+export type HOCProps<T extends object, P extends object> = P & {
+  euiTablePersistProps?: Partial<EuiTablePersistProps<T>>;
+};
+
+export function withEuiTablePersist<T extends object, Props extends object>(
+  WrappedComponent: React.ComponentClass<Props & EuiTablePersistInjectedProps<T>>,
+  euiTablePersistDefault:
+    | (EuiTablePersistProps<T> & { get?: undefined })
+    | {
+        get: EuiTablePersistPropsGetter<T, Props>;
+      }
+) {
+  const HOC: React.FC<HOCProps<T, Props>> = (props) => {
+    const getterOverride = euiTablePersistDefault.get
+      ? euiTablePersistDefault.get(props)
+      : { tableId: '' };
+
+    const mergedProps = {
+      ...euiTablePersistDefault,
+      ...props.euiTablePersistProps,
+      ...getterOverride, // Getter override other props
+    };
 
     const { tableId, customOnTableChange, initialSort, initialPageSize, pageSizeOptions } =
       mergedProps;
+
+    if (!tableId) {
+      throw new Error('tableId is required');
+    }
 
     const euiTablePersist = useEuiTablePersist<T>({
       tableId,
