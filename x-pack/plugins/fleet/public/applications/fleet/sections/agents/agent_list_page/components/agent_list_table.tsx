@@ -24,7 +24,7 @@ import { isAgentUpgradeable, ExperimentalFeaturesService } from '../../../../ser
 import { AgentHealth } from '../../components';
 
 import type { Pagination } from '../../../../hooks';
-import { useAgentVersion, useGetListOutputsForPolicies } from '../../../../hooks';
+import { useAgentVersion } from '../../../../hooks';
 import { useLink, useAuthz } from '../../../../hooks';
 
 import { AgentPolicySummaryLine } from '../../../../components';
@@ -79,6 +79,7 @@ interface Props {
   ) => void;
   clearFilters: () => void;
   isCurrentRequestIncremented: boolean;
+  outputsByPolicyIds: { [k: string]: OutputsForAgentPolicy };
 }
 
 export const AgentListTable: React.FC<Props> = (props: Props) => {
@@ -100,6 +101,7 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
     setEnrollmentFlyoutState,
     clearFilters,
     isCurrentRequestIncremented,
+    outputsByPolicyIds,
   } = props;
 
   const authz = useAuthz();
@@ -127,14 +129,6 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
         : agents
       : [];
   }, [agents, isAgentSelectable, showUpgradeable, totalAgents]);
-
-  // get the policyIds of the agents shown on the page
-  const policyIds = useMemo(() => {
-    return agentsShown.map((agent) => agent?.policy_id ?? '');
-  }, [agentsShown]);
-  const allOutputs = useGetListOutputsForPolicies({
-    ids: policyIds,
-  });
 
   const noItemsMessage =
     isLoading && isCurrentRequestIncremented ? (
@@ -315,10 +309,7 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
       width: '180px',
       render: (outputs: OutputsForAgentPolicy[], agent: Agent) => {
         if (!agent?.policy_id) return null;
-
-        const outputsForPolicy = allOutputs?.data?.items.find(
-          (item) => item.agentPolicyId === agent?.policy_id
-        );
+        const outputsForPolicy = outputsByPolicyIds?.[agent?.policy_id];
         return <AgentPolicyOutputsSummary outputs={outputsForPolicy} />;
       },
     },
@@ -333,9 +324,7 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
       render: (outputs: OutputsForAgentPolicy[], agent: Agent) => {
         if (!agent?.policy_id) return null;
 
-        const outputsForPolicy = allOutputs?.data?.items.find(
-          (item) => item.agentPolicyId === agent?.policy_id
-        );
+        const outputsForPolicy = outputsByPolicyIds?.[agent?.policy_id];
         return <AgentPolicyOutputsSummary outputs={outputsForPolicy} isMonitoring={true} />;
       },
     },

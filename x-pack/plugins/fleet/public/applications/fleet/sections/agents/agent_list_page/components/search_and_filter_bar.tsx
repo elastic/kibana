@@ -24,6 +24,8 @@ import { AGENTS_INDEX, AGENTS_PREFIX } from '../../../../constants';
 
 import { useAuthz, useStartServices } from '../../../../hooks';
 
+import type { OutputsForAgentPolicy } from '../../../../../../../common/types';
+
 import { AgentBulkActions } from './bulk_actions';
 import type { SelectionMode } from './types';
 import { AgentActivityButton } from './agent_activity_button';
@@ -60,6 +62,7 @@ export interface SearchAndFilterBarProps {
   onClickAgentActivity: () => void;
   showAgentActivityTour: { isOpen: boolean };
   latestAgentActionErrors: number;
+  outputsByPolicyIds: { [k: string]: OutputsForAgentPolicy };
 }
 
 export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps> = ({
@@ -89,6 +92,7 @@ export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps
   onClickAgentActivity,
   showAgentActivityTour,
   latestAgentActionErrors,
+  outputsByPolicyIds,
 }) => {
   const authz = useAuthz();
 

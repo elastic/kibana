@@ -116,6 +116,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     currentRequestRef,
     latestAgentActionErrors,
     setLatestAgentActionErrors,
+    outputsByPolicyIds,
   } = useFetchAgentsData();
 
   const onSubmitSearch = useCallback(
@@ -429,6 +430,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         onClickAgentActivity={onClickAgentActivity}
         showAgentActivityTour={showAgentActivityTour}
         latestAgentActionErrors={latestAgentActionErrors.length}
+        outputsByPolicyIds={outputsByPolicyIds}
       />
       <EuiSpacer size="m" />
       {/* Agent total, bulk actions and status bar */}
@@ -468,6 +470,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         setEnrollmentFlyoutState={setEnrollmentFlyoutState}
         clearFilters={clearFilters}
         isCurrentRequestIncremented={isCurrentRequestIncremented}
+        outputsByPolicyIds={outputsByPolicyIds}
       />
     </>
   );

@@ -24,11 +24,13 @@ import {
   useAuthz,
   sendGetActionStatus,
   sendBulkGetAgentPolicies,
+  sendGetListOutputsForPolicies,
 } from '../../../../hooks';
 import { AgentStatusKueryHelper, ExperimentalFeaturesService } from '../../../../services';
 import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../../../constants';
 
 import { getKuery } from '../utils/get_kuery';
+import type { OutputsForAgentPolicy } from '../../../../../../../common/types';
 
 const REFRESH_INTERVAL_MS = 30000;
 const MAX_AGENT_ACTIONS = 100;
@@ -175,6 +177,9 @@ export function useFetchAgentsData() {
   }>({});
 
   const [latestAgentActionErrors, setLatestAgentActionErrors] = useState<string[]>([]);
+  const [outputsByPolicyIds, setOutputsByPolicyIds] = useState<{
+    [k: string]: OutputsForAgentPolicy;
+  }>({});
 
   const getSortFieldForAPI = (field: keyof Agent): string => {
     if ([VERSION_FIELD, HOSTNAME_FIELD].includes(field as string)) {
@@ -272,7 +277,7 @@ export function useFetchAgentsData() {
           const policies = await fullAgentPolicyFecher.fetchPolicies(policyIds);
 
           isLoadingVar.current = false;
-          // Return if a newe request has been triggerd
+          // Return if a newer request has been triggerd
           if (currentRequestRef.current !== currentRequest) {
             return;
           }
@@ -286,6 +291,19 @@ export function useFetchAgentsData() {
           );
 
           setAgentsStatus(agentStatusesToSummary(statusSummary));
+          const allOutputs = await sendGetListOutputsForPolicies({
+            ids: policyIds,
+          });
+          const indexedOutputs = allOutputs?.data?.items.reduce((acc, outputForAgentPolicy) => {
+            if (!!outputForAgentPolicy?.agentPolicyId) {
+              acc[outputForAgentPolicy.agentPolicyId] = outputForAgentPolicy;
+            }
+            return acc;
+          }, {} as { [k: string]: OutputsForAgentPolicy });
+
+          if (!outputsByPolicyIds || !isEqual(indexedOutputs, outputsByPolicyIds)) {
+            setOutputsByPolicyIds(indexedOutputs ?? {});
+          }
 
           const newAllTags = agentTagsResponse.data.items;
           // We only want to update the list of available tags if
@@ -363,6 +381,7 @@ export function useFetchAgentsData() {
       showUpgradeable,
       displayAgentMetrics,
       fullAgentPolicyFecher,
+      outputsByPolicyIds,
       allTags,
       latestAgentActionErrors,
       search,
@@ -429,5 +448,6 @@ export function useFetchAgentsData() {
     currentRequestRef,
     latestAgentActionErrors,
     setLatestAgentActionErrors,
+    outputsByPolicyIds,
   };
 }
