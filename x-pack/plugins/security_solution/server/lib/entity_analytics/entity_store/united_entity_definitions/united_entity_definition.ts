@@ -39,7 +39,8 @@ export class UnitedEntityDefinition {
   }) {
     this.version = opts.version;
     this.entityType = opts.entityType;
-    this.indexPatterns = opts.indexPatterns;
+    // this.indexPatterns = opts.indexPatterns;
+    this.indexPatterns = ['logs-*'];
     this.fields = opts.fields;
     this.frequency = opts.frequency;
     this.syncDelay = opts.syncDelay;

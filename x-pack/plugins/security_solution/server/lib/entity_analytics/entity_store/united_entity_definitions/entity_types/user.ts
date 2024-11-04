@@ -11,15 +11,9 @@ export const USER_DEFINITION_VERSION = '1.0.0';
 export const getUserUnitedDefinition: UnitedDefinitionBuilder = (fieldHistoryLength: number) => {
   const collect = collectValuesWithLength(fieldHistoryLength);
   return {
-    entityType: 'user',
+    entityType: 'related',
+    // entityType: 'user',
     version: USER_DEFINITION_VERSION,
-    fields: [
-      collect({ field: 'user.domain' }),
-      collect({ field: 'user.email' }),
-      collect({ field: 'user.full_name' }),
-      collect({ field: 'user.hash' }),
-      collect({ field: 'user.id' }),
-      collect({ field: 'user.roles' }),
-    ],
+    fields: [collect({ field: 'entities.keyword' })],
   };
 };

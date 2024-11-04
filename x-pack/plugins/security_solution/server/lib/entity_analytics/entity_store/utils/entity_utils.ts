@@ -20,7 +20,8 @@ import { entityEngineDescriptorTypeName } from '../saved_object';
 export const getIdentityFieldForEntityType = (entityType: EntityType) => {
   if (entityType === 'host') return 'host.name';
 
-  return 'user.name';
+  // return 'user.name';
+  return 'related.entity';
 };
 
 export const buildIndexPatterns = async (

@@ -30,7 +30,8 @@ export function entitiesIndexPattern<TDataset extends Dataset>({
   dataset,
   definitionId,
 }: IndexPatternOptions<TDataset>) {
-  return `.${ENTITY_BASE_PREFIX}.${schemaVersion}.${dataset}.${definitionId}` as const;
+  // return `.${ENTITY_BASE_PREFIX}.${schemaVersion}.${dataset}.${definitionId}` as const;
+  return `${ENTITY_BASE_PREFIX}.${schemaVersion}.${dataset}.${definitionId}` as const;
 }
 
 export function entitiesAliasPattern<TDataset extends Dataset>({
