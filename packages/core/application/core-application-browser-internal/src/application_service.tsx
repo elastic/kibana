@@ -406,13 +406,10 @@ export class ApplicationService {
 
   private async shouldNavigate(overlays: OverlayStart, nextAppId: string): Promise<boolean> {
     const currentAppId = this.currentAppId$.value;
-    if (currentAppId === undefined) {
-      return true;
-    }
-
     if (
-      currentAppId === 'dashboards' &&
-      (nextAppId === 'discover' || nextAppId === 'visualize' || nextAppId === 'lens')
+      currentAppId === undefined ||
+      (currentAppId === 'dashboards' &&
+        (nextAppId === 'discover' || nextAppId === 'visualize' || nextAppId === 'lens'))
     ) {
       return true;
     }

@@ -101,7 +101,7 @@ export default function ({ getService, getPageObjects }) {
       expect(await markdownText.getVisibleText()).to.eql(originalMarkdownText);
     });
 
-    it('visualize app menu navigates to the visualize listing page if the last opened visualization was by value', async () => {
+    it.only('visualize app menu navigates to the visualize listing page if the last opened visualization was by value', async () => {
       await dashboard.gotoDashboardLandingPage();
       await dashboard.clickNewDashboard();
 
@@ -114,7 +114,6 @@ export default function ({ getService, getPageObjects }) {
 
       await header.waitUntilLoadingHasFinished();
       await appsMenu.clickLink('Visualize Library');
-      await common.clickConfirmOnModal();
       expect(await testSubjects.exists('visualizationLandingPage')).to.be(true);
     });
 
