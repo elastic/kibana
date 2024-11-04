@@ -33,7 +33,6 @@ import {
   dashboardManagedBadge,
   getDashboardBreadcrumb,
   getDashboardTitle,
-  leaveConfirmStrings,
   unsavedChangesBadgeStrings,
 } from '../dashboard_app/_dashboard_app_strings';
 import { useDashboardMountContext } from '../dashboard_app/hooks/dashboard_mount_context';
@@ -195,17 +194,12 @@ export function InternalDashboardTopNav({
    */
   useEffect(() => {
     onAppLeave((actions) => {
-      if (hasUnsavedChanges && !embeddableService.getStateTransfer().isTransferInProgress) {
-        return actions.skip();
-      } else if (
+      if (
         viewMode === 'edit' &&
         hasUnsavedChanges &&
         !embeddableService.getStateTransfer().isTransferInProgress
       ) {
-        return actions.confirm(
-          leaveConfirmStrings.getLeaveSubtitle(),
-          leaveConfirmStrings.getLeaveTitle()
-        );
+        return actions.skip();
       }
       return actions.default();
     });
