@@ -21055,9 +21055,7 @@ paths:
         visualizations, data views, and saved searches, as required. You can
         request to overwrite any objects that already exist in the target space
         if they share an identifier or you can use the resolve copy saved
-        objects conflicts API to do this on a per-object
-        basis.<br/><br/>[Required authorization] Route required privileges: ALL
-        of [copySavedObjectsToSpaces].
+        objects conflicts API to do this on a per-object basis.
       operationId: post-spaces-copy-saved-objects
       parameters:
         - description: The version of the API to use
@@ -21246,8 +21244,7 @@ paths:
     post:
       description: >-
         Overwrite saved objects that are returned as errors from the copy saved
-        objects to space API.<br/><br/>[Required authorization] Route required
-        privileges: ALL of [copySavedObjectsToSpaces].
+        objects to space API.
       operationId: post-spaces-resolve-copy-saved-objects-errors
       parameters:
         - description: The version of the API to use
