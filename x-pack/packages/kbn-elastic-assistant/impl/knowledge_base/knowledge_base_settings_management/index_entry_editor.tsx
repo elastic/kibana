@@ -273,6 +273,7 @@ export const IndexEntryEditor: React.FC<Props> = React.memo(
           fullWidth
           isInvalid={isMissingIndex}
           error={isMissingIndex && <>{i18n.MISSING_INDEX_ERROR}</>}
+          helpText={i18n.ENTRY_INDEX_NAME_INPUT_DESCRIPTION}
         >
           <EuiComboBox
             data-test-subj="index-combobox"
