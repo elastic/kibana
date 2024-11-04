@@ -27,7 +27,7 @@ import {
 import { getLimitFromESQLQuery } from '@kbn/esql-utils';
 import { type MonacoMessage } from '../helpers';
 import { ErrorsWarningsFooterPopover } from './errors_warnings_popover';
-import { QueryHistoryAction, QueryHistory } from './query_history';
+import { QueryHistoryAction, HistoryAndStarredQueriesTabs } from './query_history';
 import { SubmitFeedbackComponent } from './feedback_component';
 import { QueryWrapComponent } from './query_wrap_component';
 import type { ESQLEditorDeps } from '../types';
@@ -310,7 +310,7 @@ export const EditorFooter = memo(function EditorFooter({
       </EuiFlexItem>
       {isHistoryOpen && (
         <EuiFlexItem grow={false}>
-          <QueryHistory
+          <HistoryAndStarredQueriesTabs
             containerCSS={styles.historyContainer}
             onUpdateAndSubmit={onUpdateAndSubmit}
             containerWidth={measuredContainerWidth}
