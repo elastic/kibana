@@ -854,7 +854,7 @@ describe('xy_suggestions', () => {
     expect((suggestions[0].state.layers[0] as XYDataLayerConfig).seriesType).toEqual('line');
   });
 
-  test('suggests line if changeType is initial and date column is involved', () => {
+  test('suggests bar if changeType is initial and date column is involved', () => {
     const currentState: XYState = {
       legend: { isVisible: true, position: 'bottom' },
       valueLabels: 'hide',
@@ -885,8 +885,8 @@ describe('xy_suggestions', () => {
     expect(suggestions).toHaveLength(1);
 
     expect(suggestions[0].hide).toEqual(false);
-    expect(suggestions[0].state.preferredSeriesType).toEqual('line');
-    expect((suggestions[0].state.layers[0] as XYDataLayerConfig).seriesType).toEqual('line');
+    expect(suggestions[0].state.preferredSeriesType).toEqual('bar_stacked');
+    expect((suggestions[0].state.layers[0] as XYDataLayerConfig).seriesType).toEqual('bar_stacked');
   });
 
   test('makes a visible seriesType suggestion for unchanged table without split', () => {
