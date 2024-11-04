@@ -48,9 +48,13 @@ const getColumns = (
     actions: [
       {
         name: i18n.OBSERVABLE_ACTIONS,
-        render: (observable: Observable) => (
-          <ObservableActionsPopoverButton caseData={caseData} observable={observable} />
-        ),
+        render: (observable: Observable) => {
+          if (!observable.id) {
+            return <></>;
+          }
+
+          return <ObservableActionsPopoverButton caseData={caseData} observable={observable} />;
+        },
       },
     ],
   },

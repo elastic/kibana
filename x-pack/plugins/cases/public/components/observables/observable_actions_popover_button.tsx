@@ -19,10 +19,10 @@ import { useCasesToast } from '../../common/use_cases_toast';
 import { DeleteAttachmentConfirmationModal } from '../user_actions/delete_attachment_confirmation_modal';
 import { useDeletePropertyAction } from '../user_actions/property_actions/use_delete_property_action';
 import { type CaseUI } from '../../containers/types';
-import { usePostObservable } from '../../containers/use_post_observables';
 import { useRefreshCaseViewPage } from '../case_view/use_on_refresh_case_view_page';
 import { EditObservableModal } from './edit_observable_modal';
-import { deleteObservable, patchObservable } from '../../containers/api';
+import { usePatchObservable } from '../../containers/use_patch_observables';
+import { useDeleteObservable } from '../../containers/use_delete_observables';
 
 export const ObservableActionsPopoverButton: React.FC<{
   caseData: CaseUI;
@@ -33,7 +33,18 @@ export const ObservableActionsPopoverButton: React.FC<{
   const refreshCaseViewPage = useRefreshCaseViewPage();
   const [showEditModal, setShowEditModal] = useState(false);
 
-  const { isLoading, mutateAsync: postObservables } = usePostObservable(caseData.id);
+  const { isLoading: isUpdateLoading, mutateAsync: patchObservable } = usePatchObservable(
+    caseData.id,
+    observable.id as string
+  );
+
+  const { isLoading: isDeleteLoading, mutateAsync: deleteObservable } = useDeleteObservable(
+    caseData.id,
+    observable.id as string
+  );
+
+  const isLoading = isUpdateLoading || isDeleteLoading;
+
   const { showSuccessToast } = useCasesToast();
   const {
     showDeletionModal,
@@ -46,7 +57,7 @@ export const ObservableActionsPopoverButton: React.FC<{
         throw new Error('invalid observable');
       }
 
-      deleteObservable(caseData.id, observable.id).then(() => {
+      deleteObservable().then(() => {
         showSuccessToast(i18n.OBSERVABLE_REMOVED);
         refreshCaseViewPage();
       });
@@ -139,13 +150,9 @@ export const ObservableActionsPopoverButton: React.FC<{
               throw new Error('invalid observable');
             }
 
-            patchObservable(
-              {
-                observable: updatedObservable,
-              },
-              caseData.id,
-              updatedObservable.id
-            ).then(() => {
+            patchObservable({
+              observable: updatedObservable,
+            }).then(() => {
               setShowEditModal(false);
               showSuccessToast(i18n.OBSERVABLE_UPDATED);
               refreshCaseViewPage();

@@ -6,7 +6,8 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { Observable } from '../../../common/types/domain';
+import { v4 } from 'uuid';
+import { CaseRt } from '../../../common/types/domain';
 import {
   AddObservableRequestRt,
   type AddObservableRequest,
@@ -15,7 +16,7 @@ import {
 } from '../../../common/types/api';
 import type { CasesClient } from '../client';
 import type { CasesClientArgs } from '../types';
-import { decodeWithExcessOrThrow } from '../../common/runtime_types';
+import { decodeOrThrow, decodeWithExcessOrThrow } from '../../common/runtime_types';
 import { createCaseError } from '../../common/error';
 import type { Authorization } from '../../authorization';
 import { Operations } from '../../authorization';
@@ -55,13 +56,15 @@ export const addObservable = async (
 
     const currentObservables = retrievedCase.attributes.observables ?? [];
 
-    return await caseService.patchCase({
+    const res = await caseService.patchCase({
       caseId: retrievedCase.id,
       originalCase: retrievedCase,
       updatedAttributes: {
-        observables: [...currentObservables, paramArgs.observable],
+        observables: [...currentObservables, { ...paramArgs.observable, id: v4() }],
       },
     });
+
+    return decodeOrThrow(CaseRt)(res);
   } catch (error) {
     throw createCaseError({
       message: `Failed to add observable: ${JSON.stringify(params)}: ${error}`,
@@ -97,13 +100,15 @@ export const updateObservable = async (
     const updatedObservables = [...currentObservables];
     updatedObservables[observableIndex] = paramArgs.observable;
 
-    return await caseService.patchCase({
+    const res = await caseService.patchCase({
       caseId: retrievedCase.id,
       originalCase: retrievedCase,
       updatedAttributes: {
         observables: updatedObservables,
       },
     });
+
+    return decodeOrThrow(CaseRt)(res);
   } catch (error) {
     throw createCaseError({
       message: `Failed to update observable: ${JSON.stringify(params)}: ${error}`,

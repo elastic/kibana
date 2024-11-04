@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Case, CaseCustomField, Cases, Observable, User } from '../../../common/types/domain';
+import type { Case, CaseCustomField, Cases, User } from '../../../common/types/domain';
 import type {
   CasePostRequest,
   CasesFindResponse,
@@ -115,11 +115,11 @@ export interface CasesSubClient {
   /**
    * Adds observable to the case
    */
-  addObservable(caseId: string, params: AddObservableRequest): Promise<Observable>;
+  addObservable(caseId: string, params: AddObservableRequest): Promise<Case>;
   /**
    * Updates observable
    */
-  updateObservable(caseId: string, params: UpdateObservableRequest): Promise<Observable>;
+  updateObservable(caseId: string, params: UpdateObservableRequest): Promise<Case>;
   /**
    * Removes observable
    */
