@@ -57,19 +57,21 @@ export const attackDiscoveryDataClientMock: {
 
 const createKnowledgeBaseDataClientMock = () => {
   const mocked: KnowledgeBaseDataClientMock = {
-    findDocuments: jest.fn(),
-    isSetupAvailable: jest.fn(),
-    isModelInstalled: jest.fn(),
-    isInferenceEndpointExists: jest.fn(),
-    setupKnowledgeBase: jest.fn(),
     addKnowledgeBaseDocuments: jest.fn(),
-    isSecurityLabsDocsLoaded: jest.fn(),
-    getKnowledgeBaseDocumentEntries: jest.fn(),
-    getRequiredKnowledgeBaseDocumentEntries: jest.fn(),
+    createInferenceEndpoint: jest.fn(),
     createKnowledgeBaseEntry: jest.fn(),
+    findDocuments: jest.fn(),
     getAssistantTools: jest.fn(),
+    getKnowledgeBaseDocumentEntries: jest.fn(),
     getReader: jest.fn(),
+    getRequiredKnowledgeBaseDocumentEntries: jest.fn(),
     getWriter: jest.fn().mockResolvedValue({ bulk: jest.fn() }),
+    isInferenceEndpointExists: jest.fn(),
+    isModelInstalled: jest.fn(),
+    isSecurityLabsDocsLoaded: jest.fn(),
+    isSetupAvailable: jest.fn(),
+    isUserDataExists: jest.fn(),
+    setupKnowledgeBase: jest.fn(),
   };
   return mocked;
 };
