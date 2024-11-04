@@ -15,7 +15,7 @@ export async function getEntityTypes({
 }: {
   inventoryEsClient: ObservabilityElasticsearchClient;
 }) {
-  const entityTypesEsqlResponse = await inventoryEsClient.esql<{ [ENTITY_TYPE]: string }>(
+  const entityTypesEsqlResponse = await inventoryEsClient.esql<{ entity: { type: string } }>(
     'get_entity_types',
     {
       query: `FROM ${ENTITIES_LATEST_ALIAS}
@@ -25,5 +25,5 @@ export async function getEntityTypes({
     }
   );
 
-  return entityTypesEsqlResponse.flatMap((types) => Object.values(types));
+  return entityTypesEsqlResponse.map((response) => response.entity.type);
 }

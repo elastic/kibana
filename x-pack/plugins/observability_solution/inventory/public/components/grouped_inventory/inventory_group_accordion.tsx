@@ -8,6 +8,7 @@ import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { EuiAccordion, EuiPanel, EuiSpacer, EuiTitle, useEuiTheme } from '@elastic/eui';
+import { flattenObject } from '@kbn/observability-utils/object/flatten_object';
 import { GroupedEntitiesGrid } from './grouped_entities_grid';
 import type { EntityGroup } from '../../../common/entities';
 import { InventoryPanelBadge } from './inventory_panel_badge';
@@ -29,7 +30,7 @@ export function InventoryGroupAccordion({
   isLoading,
 }: InventoryGroupAccordionProps) {
   const { euiTheme } = useEuiTheme();
-  const field = group[groupBy];
+  const field = flattenObject(group)[groupBy];
   const [open, setOpen] = useState(false);
 
   const onToggle = useCallback(() => {

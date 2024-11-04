@@ -7,7 +7,6 @@
 
 import type { ObservabilityElasticsearchClient } from '@kbn/observability-utils/es/client/create_observability_es_client';
 import { kqlQuery } from '@kbn/observability-utils/es/queries/kql_query';
-import { esqlResultToPlainObjects } from '@kbn/observability-utils/es/utils/esql_result_to_plain_objects';
 import { ENTITY_TYPE } from '@kbn/observability-shared-plugin/common';
 import { ScalarValue } from '@elastic/elasticsearch/lib/api/types';
 import {
@@ -44,7 +43,7 @@ export async function getEntityGroupsBy({
   const limit = `LIMIT ${MAX_NUMBER_OF_ENTITIES}`;
   const query = [from, ...where, group, sort, limit].join(' | ');
 
-  const groups = await inventoryEsClient.esql('get_entities_groups', {
+  return inventoryEsClient.esql<EntityGroup>('get_entities_groups', {
     query,
     filter: {
       bool: {
@@ -53,6 +52,4 @@ export async function getEntityGroupsBy({
     },
     params,
   });
-
-  return esqlResultToPlainObjects<EntityGroup>(groups);
 }

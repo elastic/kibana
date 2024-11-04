@@ -14,7 +14,7 @@ const commonEntityFields: EnitityInstance = {
     id: '1',
     display_name: 'entity_name',
     definition_id: 'entity_definition_id',
-  },
+  } as EnitityInstance['entity'],
 };
 
 describe('EntityClient', () => {
