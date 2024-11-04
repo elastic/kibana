@@ -27,7 +27,7 @@ import type {
 import type { AggregateQuery, TimeRange } from '@kbn/es-query';
 import { getAggregateQueryMode, isOfAggregateQueryType } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { getLensAttributesFromSuggestion, type ChartType } from '@kbn/visualization-utils';
+import { getLensAttributesFromSuggestion, ChartType } from '@kbn/visualization-utils';
 import { LegendSize } from '@kbn/visualizations-plugin/public';
 import { XYConfiguration } from '@kbn/visualizations-plugin/common';
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
@@ -504,7 +504,7 @@ export class LensVisService {
           context,
           dataView,
           ['lnsDatatable'],
-          'XY' as ChartType,
+          ChartType.XY,
           updatedAttributesWithQuery
         ) ?? [];
       if (suggestions.length) {

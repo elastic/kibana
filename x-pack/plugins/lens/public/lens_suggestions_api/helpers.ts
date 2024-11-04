@@ -5,6 +5,7 @@
  * 2.0.
  */
 import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
+import { getDatasourceId } from '@kbn/visualization-utils';
 import type { VisualizeEditorContext, Suggestion } from '../types';
 import type { TypedLensByValueInput } from '../embeddable/embeddable_component';
 
@@ -34,10 +35,7 @@ export function mergeSuggestionWithVisContext({
   }
 
   // it should be one of 'formBased'/'textBased' and have value
-  const datasourceId: 'formBased' | 'textBased' | undefined = [
-    'formBased' as const,
-    'textBased' as const,
-  ].find((key) => Boolean(visAttributes.state.datasourceStates[key]));
+  const datasourceId = getDatasourceId(visAttributes.state.datasourceStates);
 
   // if the datasource is formBased, we should not merge
   if (!datasourceId || datasourceId === 'formBased') {

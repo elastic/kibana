@@ -10,6 +10,7 @@
 import { isEqual, cloneDeep } from 'lodash';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import { getDatasourceId } from '@kbn/visualization-utils';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { PieVisualizationState, Suggestion, XYState } from '@kbn/lens-plugin/public';
 import { UnifiedHistogramSuggestionType, UnifiedHistogramVisContext } from '../types';
@@ -107,10 +108,7 @@ export const injectESQLQueryIntoLensLayers = (
   visAttributes: UnifiedHistogramVisContext['attributes'],
   query: AggregateQuery
 ) => {
-  const datasourceId: 'formBased' | 'textBased' | undefined = [
-    'formBased' as const,
-    'textBased' as const,
-  ].find((key) => Boolean(visAttributes.state.datasourceStates[key]));
+  const datasourceId = getDatasourceId(visAttributes.state.datasourceStates);
 
   // if the datasource is formBased, we should not fix the query
   if (!datasourceId || datasourceId === 'formBased') {
@@ -161,10 +159,7 @@ export function deriveLensSuggestionFromLensAttributes({
       }
 
       // it should be one of 'formBased'/'textBased' and have value
-      const datasourceId: 'formBased' | 'textBased' | undefined = [
-        'formBased' as const,
-        'textBased' as const,
-      ].find((key) => Boolean(externalVisContext.attributes.state.datasourceStates[key]));
+      const datasourceId = getDatasourceId(externalVisContext.attributes.state.datasourceStates);
 
       if (!datasourceId) {
         return undefined;
