@@ -7,22 +7,43 @@ date: 2024-07-04
 tags: ['kibana', 'onboarding', 'dev', 'architecture']
 ---
 
-All Kibana HTTP API developers and maintainers must ensure that past versions of HTTP APIs remain available.
+All Kibana HTTP API developers and maintainers must ensure that past versions of HTTP APIs remain available and usable according to backwards-compatibilty practices.
 
-<DocCallOut title="A note on internal vs public HTTP APIs">
-  HTTP APIs may be intended for **internal** or **public** use. Different levels of rigour are appropriate when designing and managing changes for each. However, in both cases we must support some minimal set of past HTTP APIs.
+### Internal vs public APIs
 
-  The exact number of past APIs and the length of time they are kept available will vary per use case. Generally, the length of time will be shorter for internal HTTP APIs than for public HTTP APIs.
-</DocCallOut>
+HTTP APIs may be intended for **internal** or **public** use. Different levels of rigour are appropriate when designing and managing changes for each. However, in both cases we must support some minimal set of past HTTP APIs.
+
+The exact number of past APIs and the length of time they are kept available will vary per use case. Generally, the length of time will be shorter for internal HTTP APIs than for public HTTP APIs.
 
 <DocAccordion buttonContent="FAQ: What is the difference between an internal and a public HTTP API?">
-<DocCallOut >
+  <DocCallOut >
+    We only declare HTTP APIs as public that are intended for 3rd party integration. All other HTTP APIs should be internal. Public HTTP APIs have deprecation windows of 18 months and must go through breaking changes committee before they can be modified in a breaking way (i.e. require a new version, or be removed). Internal HTTP APIs may change more frequently, as long as they adhere to the versioning principles outlined in the rest of this doc.
+  </DocCallOut>
+</DocAccordion>
 
-We only declare HTTP APIs that are stable and reliable as public and keep all development changes behind internal HTTP APIs. Public HTTP APIs are intended for external consumption and are typically garanteed not to change within a major. Internal HTTP APIs may change more frequently, as long as they adhere to the versioning principles outlined in the rest of this doc.
- 
-</DocCallOut></DocAccordion>
 
-Versioned HTTP APIs should hold to the following set of properties. **Note:** how you meet these is properties is up to you. Use the examples provided as a guide.
+### Public API status
+
+Public APIs can in one of the following statuses: `experimental`, `beta` or `stable`. This can be configured when creating the route using the router interface:
+
+```ts
+router.get(
+  {
+    path: '/api/myobject/{id}',
+    validate: { ... },
+    options: {
+      availability: {
+        stability: 'experimental'
+      },
+    },
+  },
+  async () => {}
+)
+```
+
+### Creating versionable HTTP APIs in Kibana
+
+Versioned HTTP APIs should hold to the following requirements. **Note:** how you meet these requirements is up to you. Use the examples provided as a guide.
 
 ### 1. Do not directly expose persistence schemas on your HTTP API endpoints
 
