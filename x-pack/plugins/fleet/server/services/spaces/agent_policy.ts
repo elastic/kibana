@@ -115,12 +115,30 @@ export async function updateAgentPolicySpaces({
   // Update fleet server index agents, enrollment api keys
   await esClient.updateByQuery({
     index: ENROLLMENT_API_KEYS_INDEX,
+    query: {
+      bool: {
+        must: {
+          terms: {
+            policy_id: [agentPolicyId],
+          },
+        },
+      },
+    },
     script: `ctx._source.namespaces = [${newSpaceIds.map((spaceId) => `"${spaceId}"`).join(',')}]`,
     ignore_unavailable: true,
     refresh: true,
   });
   await esClient.updateByQuery({
     index: AGENTS_INDEX,
+    query: {
+      bool: {
+        must: {
+          terms: {
+            policy_id: [agentPolicyId],
+          },
+        },
+      },
+    },
     script: `ctx._source.namespaces = [${newSpaceIds.map((spaceId) => `"${spaceId}"`).join(',')}]`,
     ignore_unavailable: true,
     refresh: true,

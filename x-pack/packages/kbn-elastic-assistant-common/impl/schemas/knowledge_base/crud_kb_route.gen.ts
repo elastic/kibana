@@ -81,4 +81,5 @@ export const ReadKnowledgeBaseResponse = z.object({
   is_setup_in_progress: z.boolean().optional(),
   pipeline_exists: z.boolean().optional(),
   security_labs_exists: z.boolean().optional(),
+  user_data_exists: z.boolean().optional(),
 });

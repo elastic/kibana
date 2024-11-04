@@ -599,7 +599,7 @@ export function pipePrecedesCurrentWord(text: string) {
   return characterPrecedesCurrentWord(text, '|');
 }
 
-export function getLastCharFromTrimmed(text: string) {
+export function getLastNonWhitespaceChar(text: string) {
   return text[text.trimEnd().length - 1];
 }
 
@@ -607,7 +607,7 @@ export function getLastCharFromTrimmed(text: string) {
  * Are we after a comma? i.e. STATS fieldA, <here>
  */
 export function isRestartingExpression(text: string) {
-  return getLastCharFromTrimmed(text) === ',' || characterPrecedesCurrentWord(text, ',');
+  return getLastNonWhitespaceChar(text) === ',' || characterPrecedesCurrentWord(text, ',');
 }
 
 export function findPreviousWord(text: string) {
