@@ -31,8 +31,11 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { KibanaFeature, KibanaFeatureConfig } from '@kbn/features-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { type RawKibanaPrivileges } from '@kbn/security-authorization-core';
-import type { Role, RoleKibanaPrivilege } from '@kbn/security-plugin-types-common';
+import type {
+  RawKibanaPrivileges,
+  Role,
+  RoleKibanaPrivilege,
+} from '@kbn/security-plugin-types-common';
 import type { BulkUpdateRoleResponse } from '@kbn/security-plugin-types-public/src/roles/roles_api_client';
 import { KibanaPrivileges } from '@kbn/security-role-management-model';
 import { KibanaPrivilegeTable, PrivilegeFormCalculator } from '@kbn/security-ui-components';
@@ -43,7 +46,7 @@ import {
   FEATURE_PRIVILEGES_CUSTOM,
   FEATURE_PRIVILEGES_READ,
 } from '../../../../../common/constants';
-import { type EditSpaceServices, type EditSpaceStore, useEditSpaceServices } from '../../provider';
+import { useEditSpaceServices, useEditSpaceStore } from '../../provider';
 
 type KibanaRolePrivilege =
   | keyof NonNullable<KibanaFeatureConfig['privileges']>
@@ -59,9 +62,6 @@ interface PrivilegesRolesFormProps {
    * this is useful when the form is opened in edit mode
    */
   defaultSelected?: Role[];
-  storeDispatch: EditSpaceStore['dispatch'];
-  spacesClientsInvocator: EditSpaceServices['invokeClient'];
-  getUrlForApp: EditSpaceServices['getUrlForApp'];
 }
 
 const createRolesComboBoxOptions = (roles: Role[]): Array<EuiComboBoxOptionOption<Role>> =>
@@ -71,17 +71,9 @@ const createRolesComboBoxOptions = (roles: Role[]): Array<EuiComboBoxOptionOptio
   }));
 
 export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
-  const {
-    space,
-    onSaveCompleted,
-    closeFlyout,
-    features,
-    defaultSelected = [],
-    spacesClientsInvocator,
-    storeDispatch,
-    getUrlForApp,
-  } = props;
-  const { logger, notifications } = useEditSpaceServices();
+  const { space, onSaveCompleted, closeFlyout, features, defaultSelected = [] } = props;
+  const { logger, notifications, license, invokeClient, getUrlForApp } = useEditSpaceServices();
+  const { dispatch: storeDispatch } = useEditSpaceStore();
   const [assigningToRole, setAssigningToRole] = useState(false);
   const [fetchingDataDeps, setFetchingDataDeps] = useState(false);
   const [kibanaPrivileges, setKibanaPrivileges] = useState<RawKibanaPrivileges | null>(null);
@@ -95,7 +87,7 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
     async function fetchRequiredData(spaceId: string) {
       setFetchingDataDeps(true);
 
-      const [systemRoles, _kibanaPrivileges] = await spacesClientsInvocator((clients) =>
+      const [systemRoles, _kibanaPrivileges] = await invokeClient((clients) =>
         Promise.all([
           clients.rolesClient.getRoles(),
           clients.privilegesClient.getAll({ includeActions: true, respectLicenseLevel: false }),
@@ -120,7 +112,7 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
     }
 
     fetchRequiredData(space.id!).finally(() => setFetchingDataDeps(false));
-  }, [space.id, spacesClientsInvocator]);
+  }, [invokeClient, space.id]);
 
   const selectedRolesCombinedPrivileges = useMemo(() => {
     const combinedPrivilege = new Set(
@@ -312,7 +304,7 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
         return selectedRole.value!;
       });
 
-      await spacesClientsInvocator((clients) =>
+      await invokeClient((clients) =>
         clients.rolesClient.bulkUpdateRoles({ rolesUpdate: updatedRoles }).then((response) => {
           setAssigningToRole(false);
           onSaveCompleted(response);
@@ -335,13 +327,14 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
       });
     }
   }, [
-    selectedRoles,
-    spacesClientsInvocator,
-    storeDispatch,
-    onSaveCompleted,
-    space.id,
     roleSpacePrivilege,
-    roleCustomizationAnchor,
+    roleCustomizationAnchor.value?.kibana,
+    roleCustomizationAnchor.privilegeIndex,
+    selectedRoles,
+    invokeClient,
+    storeDispatch,
+    space.id,
+    onSaveCompleted,
     logger,
     notifications.toasts,
   ]);
@@ -568,7 +561,9 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
                           )
                         }
                         allSpacesSelected={false}
-                        canCustomizeSubFeaturePrivileges={false}
+                        canCustomizeSubFeaturePrivileges={
+                          license?.getFeatures().allowSubFeaturePrivileges ?? false
+                        }
                       />
                     )}
                   </React.Fragment>

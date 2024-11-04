@@ -30,7 +30,7 @@
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/data-streams-delete-lifecycle.html",
     "availability": {
       "stack": true,
-      "serverless": true
+      "serverless": false
     }
   }
 }

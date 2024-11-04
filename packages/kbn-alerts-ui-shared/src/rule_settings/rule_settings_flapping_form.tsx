@@ -218,15 +218,17 @@ export const RuleSettingsFlappingForm = (props: RuleSettingsFlappingFormProps) =
           direction={isDesktop ? 'row' : 'column'}
           alignItems={isDesktop ? 'center' : undefined}
         >
-          <EuiFlexItem style={{ flexDirection: 'row' }}>
+          <EuiFlexItem style={{ flexDirection: 'row', alignItems: 'center' }}>
             <EuiText size="s" style={{ marginRight: euiTheme.size.xs }}>
               {flappingLabel}
             </EuiText>
-            <EuiBadge color={enabled ? 'success' : 'default'}>
+            <EuiBadge color={enabled ? 'success' : 'default'} style={{ height: '100%' }}>
               {enabled ? flappingOnLabel : flappingOffLabel}
             </EuiBadge>
             {flappingSettings && enabled && (
-              <EuiBadge color="primary">{flappingOverrideLabel}</EuiBadge>
+              <EuiBadge color="primary" style={{ height: '100%' }}>
+                {flappingOverrideLabel}
+              </EuiBadge>
             )}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -236,6 +238,7 @@ export const RuleSettingsFlappingForm = (props: RuleSettingsFlappingFormProps) =
                 compressed
                 checked={!!flappingSettings}
                 label={flappingOverrideConfiguration}
+                disabled={!canWriteFlappingSettingsUI}
                 onChange={onFlappingToggle}
               />
             )}
@@ -256,6 +259,7 @@ export const RuleSettingsFlappingForm = (props: RuleSettingsFlappingFormProps) =
     spaceFlappingSettings,
     flappingSettings,
     flappingOffTooltip,
+    canWriteFlappingSettingsUI,
     onFlappingToggle,
   ]);
 
@@ -273,12 +277,14 @@ export const RuleSettingsFlappingForm = (props: RuleSettingsFlappingFormProps) =
           statusChangeThreshold={flappingSettings.statusChangeThreshold}
           onLookBackWindowChange={onLookBackWindowChange}
           onStatusChangeThresholdChange={onStatusChangeThresholdChange}
+          isDisabled={!canWriteFlappingSettingsUI}
         />
       </EuiFlexItem>
     );
   }, [
     flappingSettings,
     spaceFlappingSettings,
+    canWriteFlappingSettingsUI,
     onLookBackWindowChange,
     onStatusChangeThresholdChange,
   ]);

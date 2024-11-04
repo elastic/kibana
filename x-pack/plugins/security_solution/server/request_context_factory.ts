@@ -32,6 +32,7 @@ import { AssetCriticalityDataClient } from './lib/entity_analytics/asset_critica
 import { createDetectionRulesClient } from './lib/detection_engine/rule_management/logic/detection_rules_client/detection_rules_client';
 import { buildMlAuthz } from './lib/machine_learning/authz';
 import { EntityStoreDataClient } from './lib/entity_analytics/entity_store/entity_store_data_client';
+import type { SiemMigrationsService } from './lib/siem_migrations/siem_migrations_service';
 
 export interface IRequestContextFactory {
   create(
@@ -47,6 +48,7 @@ interface ConstructorOptions {
   plugins: SecuritySolutionPluginSetupDependencies;
   endpointAppContextService: EndpointAppContextService;
   ruleMonitoringService: IRuleMonitoringService;
+  siemMigrationsService: SiemMigrationsService;
   kibanaVersion: string;
   kibanaBranch: string;
   buildFlavor: BuildFlavor;
@@ -64,7 +66,14 @@ export class RequestContextFactory implements IRequestContextFactory {
     request: KibanaRequest
   ): Promise<SecuritySolutionApiRequestHandlerContext> {
     const { options, appClientFactory } = this;
-    const { config, core, plugins, endpointAppContextService, ruleMonitoringService } = options;
+    const {
+      config,
+      core,
+      plugins,
+      endpointAppContextService,
+      ruleMonitoringService,
+      siemMigrationsService,
+    } = options;
 
     const { lists, ruleRegistry, security } = plugins;
 
@@ -73,6 +82,12 @@ export class RequestContextFactory implements IRequestContextFactory {
     const coreContext = await context.core;
     const licensing = await context.licensing;
     const actionsClient = await startPlugins.actions.getActionsClientWithRequest(request);
+
+    const dataViewsService = await startPlugins.dataViews.dataViewsServiceFactory(
+      coreContext.savedObjects.client,
+      coreContext.elasticsearch.client.asInternalUser,
+      request
+    );
 
     const getSpaceId = (): string =>
       startPlugins.spaces?.spacesService?.getSpaceId(request) || DEFAULT_SPACE_ID;
@@ -84,6 +99,7 @@ export class RequestContextFactory implements IRequestContextFactory {
       kibanaBranch: options.kibanaBranch,
       buildFlavor: options.buildFlavor,
     });
+    const getAppClient = () => appClientFactory.create(request);
 
     const getAuditLogger = () => security?.audit.asScoped(request);
 
@@ -109,7 +125,7 @@ export class RequestContextFactory implements IRequestContextFactory {
 
       getFrameworkRequest: () => frameworkRequest,
 
-      getAppClient: () => appClientFactory.create(request),
+      getAppClient,
 
       getSpaceId,
 
@@ -148,6 +164,10 @@ export class RequestContextFactory implements IRequestContextFactory {
           savedObjectsClient: coreContext.savedObjects.client,
           eventLogClient: startPlugins.eventLog.getClient(request),
         })
+      ),
+
+      getSiemMigrationsClient: memoize(() =>
+        siemMigrationsService.createClient({ request, spaceId: getSpaceId() })
       ),
 
       getExceptionListClient: () => {
@@ -192,17 +212,21 @@ export class RequestContextFactory implements IRequestContextFactory {
           })
       ),
       getEntityStoreDataClient: memoize(() => {
-        const esClient = coreContext.elasticsearch.client.asCurrentUser;
+        const clusterClient = coreContext.elasticsearch.client;
         const logger = options.logger;
         const soClient = coreContext.savedObjects.client;
         return new EntityStoreDataClient({
           namespace: getSpaceId(),
-          esClient,
+          clusterClient,
+          dataViewsService,
+          appClient: getAppClient(),
           logger,
           soClient,
           taskManager: startPlugins.taskManager,
           auditLogger: getAuditLogger(),
           kibanaVersion: options.kibanaVersion,
+          config: config.entityAnalytics.entityStore,
+          telemetry: core.analytics,
         });
       }),
     };

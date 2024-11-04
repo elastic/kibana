@@ -46,10 +46,6 @@ jest.mock('../../common/hooks/use_load_rule_type_aad_template_fields', () => ({
   useLoadRuleTypeAadTemplateField: jest.fn(),
 }));
 
-jest.mock('../utils/get_authorized_rule_types', () => ({
-  getAvailableRuleTypes: jest.fn(),
-}));
-
 jest.mock('../../common/hooks/use_fetch_flapping_settings', () => ({
   useFetchFlappingSettings: jest.fn(),
 }));
@@ -63,7 +59,6 @@ const { useLoadRuleTypeAadTemplateField } = jest.requireMock(
   '../../common/hooks/use_load_rule_type_aad_template_fields'
 );
 const { useLoadRuleTypesQuery } = jest.requireMock('../../common/hooks/use_load_rule_types_query');
-const { getAvailableRuleTypes } = jest.requireMock('../utils/get_authorized_rule_types');
 const { useFetchFlappingSettings } = jest.requireMock(
   '../../common/hooks/use_fetch_flapping_settings'
 );
@@ -168,13 +163,6 @@ useLoadRuleTypesQuery.mockReturnValue({
   },
 });
 
-getAvailableRuleTypes.mockReturnValue([
-  {
-    ruleType: indexThresholdRuleType,
-    ruleTypeModel: indexThresholdRuleTypeModel,
-  },
-]);
-
 const mockConnector = {
   id: 'test-connector',
   name: 'Test',
@@ -236,7 +224,7 @@ const toastsMock = jest.fn();
 const ruleTypeRegistryMock: RuleTypeRegistryContract = {
   has: jest.fn(),
   register: jest.fn(),
-  get: jest.fn(),
+  get: jest.fn().mockReturnValue(indexThresholdRuleTypeModel),
   list: jest.fn(),
 };
 
@@ -272,6 +260,7 @@ describe('useLoadDependencies', () => {
       isLoading: false,
       isInitialLoading: false,
       ruleType: indexThresholdRuleType,
+      ruleTypes: [...ruleTypeIndex.values()],
       ruleTypeModel: indexThresholdRuleTypeModel,
       uiConfig: uiConfigMock,
       healthCheckError: null,
@@ -317,39 +306,6 @@ describe('useLoadDependencies', () => {
     });
   });
 
-  test('should call getAvailableRuleTypes with the correct params', async () => {
-    const { result } = renderHook(
-      () => {
-        return useLoadDependencies({
-          http: httpMock as unknown as HttpStart,
-          toasts: toastsMock as unknown as ToastsStart,
-          ruleTypeRegistry: ruleTypeRegistryMock,
-          validConsumers: ['stackAlerts', 'logs'],
-          consumer: 'logs',
-          capabilities: {
-            actions: {
-              show: true,
-              save: true,
-              execute: true,
-            },
-          } as unknown as ApplicationStart['capabilities'],
-        });
-      },
-      { wrapper }
-    );
-
-    await waitFor(() => {
-      return expect(result.current.isInitialLoading).toEqual(false);
-    });
-
-    expect(getAvailableRuleTypes).toBeCalledWith({
-      consumer: 'logs',
-      ruleTypeRegistry: ruleTypeRegistryMock,
-      ruleTypes: [indexThresholdRuleType],
-      validConsumers: ['stackAlerts', 'logs'],
-    });
-  });
-
   test('should call resolve rule with the correct params', async () => {
     const { result } = renderHook(
       () => {
@@ -377,6 +333,7 @@ describe('useLoadDependencies', () => {
     expect(useResolveRule).toBeCalledWith({
       http: httpMock,
       id: 'test-rule-id',
+      cacheTime: 0,
     });
   });
 

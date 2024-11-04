@@ -1,0 +1,5 @@
+- version: 0.1.0
+  changes:
+    - description: Initial release
+      type: enhancement
+      link: https://github.com/elastic/package-spec/pull/777

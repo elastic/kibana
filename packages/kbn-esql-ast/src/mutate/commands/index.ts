@@ -8,5 +8,7 @@
  */
 
 import * as from from './from';
+import * as limit from './limit';
+import * as sort from './sort';
 
-export { from };
+export { from, limit, sort };

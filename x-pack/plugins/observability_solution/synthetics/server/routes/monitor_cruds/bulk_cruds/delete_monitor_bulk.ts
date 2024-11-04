@@ -4,10 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { SavedObjectsClientContract, KibanaRequest } from '@kbn/core/server';
 import { SavedObject } from '@kbn/core-saved-objects-server';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
-import { SyntheticsServerSetup } from '../../../types';
 import {
   formatTelemetryDeleteEvent,
   sendTelemetryEvents,
@@ -19,29 +16,20 @@ import {
   EncryptedSyntheticsMonitorAttributes,
   SyntheticsMonitorWithId,
 } from '../../../../common/runtime_types';
-import { SyntheticsMonitorClient } from '../../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import { syntheticsMonitorType } from '../../../../common/types/saved_objects';
+import { RouteContext } from '../../types';
 
 export const deleteMonitorBulk = async ({
-  savedObjectsClient,
-  server,
   monitors,
-  syntheticsMonitorClient,
-  request,
+  routeContext,
 }: {
-  savedObjectsClient: SavedObjectsClientContract;
-  server: SyntheticsServerSetup;
   monitors: Array<SavedObject<SyntheticsMonitor | EncryptedSyntheticsMonitorAttributes>>;
-  syntheticsMonitorClient: SyntheticsMonitorClient;
-  request: KibanaRequest;
+  routeContext: RouteContext;
 }) => {
+  const { savedObjectsClient, server, spaceId, syntheticsMonitorClient } = routeContext;
   const { logger, telemetry, stackVersion } = server;
 
   try {
-    const { id: spaceId } = (await server.spaces?.spacesService.getActiveSpace(request)) ?? {
-      id: DEFAULT_SPACE_ID,
-    };
-
     const deleteSyncPromise = syntheticsMonitorClient.deleteMonitors(
       monitors.map((normalizedMonitor) => ({
         ...normalizedMonitor.attributes,
@@ -55,7 +43,7 @@ export const deleteMonitorBulk = async ({
       monitors.map((monitor) => ({ type: syntheticsMonitorType, id: monitor.id }))
     );
 
-    const [errors] = await Promise.all([deleteSyncPromise, deletePromises]);
+    const [errors, result] = await Promise.all([deleteSyncPromise, deletePromises]);
 
     monitors.forEach((monitor) => {
       sendTelemetryEvents(
@@ -71,7 +59,7 @@ export const deleteMonitorBulk = async ({
       );
     });
 
-    return errors;
+    return { errors, result };
   } catch (e) {
     throw e;
   }

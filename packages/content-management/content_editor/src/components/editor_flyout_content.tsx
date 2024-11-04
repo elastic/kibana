@@ -79,6 +79,22 @@ export const ContentEditorFlyoutContent: FC<Props> = ({
   const i18nTexts = useMemo(() => getI18nTexts({ entityName }), [entityName]);
   const form = useMetadataForm({ item, customValidators });
 
+  const hasNoChanges = () => {
+    const itemTags = item.tags.map((obj) => obj.id).sort();
+    const formTags = form.tags.value.slice().sort();
+
+    const compareTags = (arr1: string[], arr2: string[]) => {
+      if (arr1.length !== arr2.length) return false;
+      return arr1.every((tag: string, index) => tag === arr2[index]);
+    };
+
+    return (
+      item.title === form.title.value &&
+      item.description === form.description.value &&
+      compareTags(itemTags, formTags)
+    );
+  };
+
   const onClickSave = useCallback(async () => {
     if (form.isValid && onSave && !form.getIsChangingValue()) {
       const id = item.id;
@@ -177,7 +193,7 @@ export const ContentEditorFlyoutContent: FC<Props> = ({
                   onClick={onClickSave}
                   data-test-subj="saveButton"
                   fill
-                  disabled={isSubmitted && !form.isValid}
+                  disabled={(isSubmitted && !form.isValid) || hasNoChanges()}
                   isLoading={isSubmitting}
                 >
                   {i18nTexts.saveButtonLabel}

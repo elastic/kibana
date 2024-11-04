@@ -5,27 +5,11 @@
  * 2.0.
  */
 
-import type {
-  AppDeepLinkId,
-  NavigationTreeDefinition,
-  NodeDefinition,
-} from '@kbn/core-chrome-browser';
+import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import { i18n } from '@kbn/i18n';
 import { CONNECTORS_LABEL } from '../common/i18n_string';
 
-const gettingStartedItem: NodeDefinition<AppDeepLinkId, string, string> = {
-  id: 'gettingStarted',
-  title: i18n.translate('xpack.serverlessSearch.nav.gettingStarted', {
-    defaultMessage: 'Getting Started',
-  }),
-  link: 'serverlessElasticsearch',
-  spaceBefore: 'm',
-};
-
-export const navigationTree = (
-  homeLink: AppDeepLinkId = 'serverlessElasticsearch' as AppDeepLinkId,
-  showGettingStarted: boolean
-): NavigationTreeDefinition => ({
+export const navigationTree = (): NavigationTreeDefinition => ({
   body: [
     {
       type: 'navGroup',
@@ -41,7 +25,7 @@ export const navigationTree = (
           title: i18n.translate('xpack.serverlessSearch.nav.home', {
             defaultMessage: 'Home',
           }),
-          link: homeLink,
+          link: 'elasticsearchStart',
           spaceBefore: 'm',
         },
         {
@@ -146,11 +130,19 @@ export const navigationTree = (
           spaceBefore: 'm',
           children: [{ link: 'maps' }],
         },
-        ...(showGettingStarted ? [gettingStartedItem] : []),
       ],
     },
   ],
   footer: [
+    {
+      id: 'gettingStarted',
+      type: 'navItem',
+      title: i18n.translate('xpack.serverlessSearch.nav.gettingStarted', {
+        defaultMessage: 'Getting Started',
+      }),
+      link: 'serverlessElasticsearch',
+      icon: 'launch',
+    },
     {
       type: 'navGroup',
       id: 'project_settings_project_nav',

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getAstAndSyntaxErrors as parse } from '..';
+import { parse } from '..';
 
 describe('Column Identifier Expressions', () => {
   it('can parse un-quoted identifiers', () => {

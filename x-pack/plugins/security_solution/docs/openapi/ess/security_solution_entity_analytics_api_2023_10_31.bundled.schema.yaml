@@ -452,6 +452,54 @@ paths:
       summary: Stop an Entity Engine
       tags:
         - Security Entity Analytics API
+  /api/entity_store/engines/apply_dataview_indices:
+    post:
+      operationId: ApplyEntityEngineDataviewIndices
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    items:
+                      $ref: '#/components/schemas/EngineDataviewUpdateResult'
+                    type: array
+                  success:
+                    type: boolean
+          description: Successful response
+        '207':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    items:
+                      type: string
+                    type: array
+                  result:
+                    items:
+                      $ref: '#/components/schemas/EngineDataviewUpdateResult'
+                    type: array
+                  success:
+                    type: boolean
+          description: Partial successful response
+        '500':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  body:
+                    type: string
+                  statusCode:
+                    type: number
+          description: Error response
+      summary: Apply DataView indices to all installed engines
+      tags:
+        - Security Entity Analytics API
   /api/entity_store/entities/list:
     get:
       description: List entities records, paging, sorting and filtering as needed.
@@ -720,9 +768,25 @@ components:
               $ref: '#/components/schemas/AssetCriticalityLevel'
           required:
             - criticality_level
+    EngineDataviewUpdateResult:
+      type: object
+      properties:
+        changes:
+          type: object
+          properties:
+            indexPatterns:
+              items:
+                type: string
+              type: array
+        type:
+          type: string
+      required:
+        - type
     EngineDescriptor:
       type: object
       properties:
+        error:
+          type: object
         fieldHistoryLength:
           type: integer
         filter:
@@ -743,6 +807,8 @@ components:
         - installing
         - started
         - stopped
+        - updating
+        - error
       type: string
     Entity:
       oneOf:
@@ -861,9 +927,7 @@ components:
             name:
               type: string
             source:
-              items:
-                type: string
-              type: array
+              type: string
           required:
             - name
             - source
@@ -1013,9 +1077,7 @@ components:
             name:
               type: string
             source:
-              items:
-                type: string
-              type: array
+              type: string
           required:
             - name
             - source

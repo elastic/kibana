@@ -15,3 +15,5 @@ export type {
   InputOverrides,
   IngestPipeline,
 } from './types';
+
+export { TIKA_PREVIEW_CHARS } from './constants';

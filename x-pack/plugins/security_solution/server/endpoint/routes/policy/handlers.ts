@@ -7,7 +7,9 @@
 
 import type { RequestHandler } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
-import { policyIndexPattern } from '../../../../common/endpoint/constants';
+import type { SecuritySolutionRequestHandlerContext } from '../../../types';
+import type { EndpointAppContextService } from '../../endpoint_app_context_services';
+import { errorHandler } from '../error_handler';
 import type {
   GetPolicyResponseSchema,
   GetAgentPolicySummaryRequestSchema,
@@ -15,21 +17,37 @@ import type {
 import type { EndpointAppContext } from '../../types';
 import { getAgentPolicySummary, getPolicyResponseByAgentId } from './service';
 import type { GetAgentSummaryResponse } from '../../../../common/endpoint/types';
+import { NotFoundError } from '../../errors';
 
-export const getHostPolicyResponseHandler = function (): RequestHandler<
-  undefined,
+export const getHostPolicyResponseHandler = function (
+  endpointAppContextServices: EndpointAppContextService
+): RequestHandler<
+  never,
   TypeOf<typeof GetPolicyResponseSchema.query>,
-  undefined
+  never,
+  SecuritySolutionRequestHandlerContext
 > {
+  const logger = endpointAppContextServices.createLogger('endpointPolicyResponse');
+
   return async (context, request, response) => {
-    const client = (await context.core).elasticsearch.client;
-    const doc = await getPolicyResponseByAgentId(policyIndexPattern, request.query.agentId, client);
+    const spaceId = (await context.securitySolution).getSpaceId();
+    const esClient = (await context.core).elasticsearch.client.asInternalUser;
+    const fleetServices = endpointAppContextServices.getInternalFleetServices(spaceId);
 
-    if (doc) {
-      return response.ok({ body: doc });
+    try {
+      const agentId = request.query.agentId;
+      const doc = await getPolicyResponseByAgentId(agentId, esClient, fleetServices);
+
+      if (doc) {
+        return response.ok({ body: doc });
+      }
+
+      logger.debug(`Agent id [${agentId}] has no policy response documents indexed yet`);
+
+      throw new NotFoundError(`Policy response for endpoint id [${agentId}] not found`);
+    } catch (err) {
+      return errorHandler(logger, response, err);
     }
-
-    return response.notFound({ body: 'Policy Response Not Found' });
   };
 };
 

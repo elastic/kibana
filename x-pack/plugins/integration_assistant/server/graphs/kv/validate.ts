@@ -93,7 +93,7 @@ export async function handleHeaderValidate({
 
 async function verifyKVProcessor(
   kvProcessor: ESProcessorItem,
-  formattedSamples: string[],
+  samples: string[],
   client: IScopedClusterClient
 ): Promise<{ errors: object[] }> {
   // This processor removes the original message field in the  output
@@ -101,7 +101,7 @@ async function verifyKVProcessor(
     processors: [kvProcessor[0], createRemoveProcessor()],
     on_failure: [createPassthroughFailureProcessor()],
   };
-  const { errors } = await testPipeline(formattedSamples, pipeline, client);
+  const { errors } = await testPipeline(samples, pipeline, client);
   return { errors };
 }
 

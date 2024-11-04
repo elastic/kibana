@@ -7,6 +7,7 @@
 /* eslint-disable max-classes-per-file */
 
 import { omit, partition, isEqual, cloneDeep, without } from 'lodash';
+import { indexBy } from 'lodash/fp';
 import { i18n } from '@kbn/i18n';
 import semverLt from 'semver/functions/lt';
 import { getFlattenedObject } from '@kbn/std';
@@ -94,6 +95,7 @@ import type {
   DryRunPackagePolicy,
   PostPackagePolicyCreateCallback,
   PostPackagePolicyPostCreateCallback,
+  PutPackagePolicyPostUpdateCallback,
 } from '../types';
 import type { ExternalCallback } from '..';
 
@@ -127,6 +129,8 @@ import type {
   PackagePolicyClient,
   PackagePolicyClientFetchAllItemsOptions,
   PackagePolicyService,
+  RunExternalCallbacksPackagePolicyArgument,
+  RunExternalCallbacksPackagePolicyResponse,
 } from './package_policy_service';
 import { installAssetsForInputPackagePolicy } from './epm/packages/install';
 import { auditLoggingService } from './audit_logging';
@@ -141,6 +145,7 @@ import { validateAgentPolicyOutputForIntegration } from './agent_policies/output
 import type { PackagePolicyClientFetchAllItemIdsOptions } from './package_policy_service';
 import { validatePolicyNamespaceForSpace } from './spaces/policy_namespaces';
 import { isSpaceAwarenessEnabled, isSpaceAwarenessMigrationPending } from './spaces/helpers';
+import { updatePackagePolicySpaces } from './spaces/package_policy';
 
 export type InputsOverride = Partial<NewPackagePolicyInput> & {
   vars?: Array<NewPackagePolicyInput['vars'] & { name: string }>;
@@ -224,6 +229,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     context?: RequestHandlerContext,
     request?: KibanaRequest
   ): Promise<PackagePolicy> {
+    const useSpaceAwareness = await isSpaceAwarenessEnabled();
     const packagePolicyId = options?.id || uuidv4();
 
     let authorizationHeader = options.authorizationHeader;
@@ -233,6 +239,17 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     }
 
     const savedObjectType = await getPackagePolicySavedObjectType();
+    const basePkgInfo =
+      options?.packageInfo ??
+      (packagePolicy.package
+        ? await getPackageInfo({
+            savedObjectsClient: soClient,
+            pkgName: packagePolicy.package.name,
+            pkgVersion: packagePolicy.package.version,
+            ignoreUnverified: true,
+            prerelease: true,
+          })
+        : undefined);
 
     auditLoggingService.writeCustomSoAuditLog({
       action: 'create',
@@ -245,7 +262,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     logger.debug(`Creating new package policy`);
 
     this.keepPolicyIdInSync(packagePolicy);
-    await preflightCheckPackagePolicy(soClient, packagePolicy);
+    await preflightCheckPackagePolicy(soClient, packagePolicy, basePkgInfo);
 
     let enrichedPackagePolicy = await packagePolicyService.runExternalCallbacks(
       'packagePolicyCreate',
@@ -260,6 +277,10 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     for (const policyId of enrichedPackagePolicy.policy_ids) {
       const agentPolicy = await agentPolicyService.get(soClient, policyId, true);
+      if (!agentPolicy) {
+        throw new AgentPolicyNotFoundError('Agent policy not found');
+      }
+
       agentPolicies.push(agentPolicy);
 
       // If package policy did not set an output_id, see if the agent policy's output is compatible
@@ -271,7 +292,10 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         );
       }
 
-      await validateIsNotHostedPolicy(soClient, policyId, options?.force);
+      validateIsNotHostedPolicy(agentPolicy, options?.force);
+      if (useSpaceAwareness) {
+        validateReusableIntegrationsAndSpaceAwareness(enrichedPackagePolicy, agentPolicies);
+      }
     }
 
     // trailing whitespace causes issues creating API keys
@@ -399,6 +423,21 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       { ...options, id: packagePolicyId }
     );
 
+    for (const agentPolicy of agentPolicies) {
+      if (
+        useSpaceAwareness &&
+        agentPolicy &&
+        agentPolicy.space_ids &&
+        agentPolicy.space_ids.length > 1
+      ) {
+        await updatePackagePolicySpaces({
+          packagePolicyId: newSo.id,
+          currentSpaceId: soClient.getCurrentNamespace() ?? DEFAULT_SPACE_ID,
+          newSpaceIds: agentPolicy.space_ids,
+        });
+      }
+    }
+
     if (options?.bumpRevision ?? true) {
       for (const policyId of enrichedPackagePolicy.policy_ids) {
         await agentPolicyService.bumpRevision(soClient, esClient, policyId, {
@@ -446,8 +485,18 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     created: PackagePolicy[];
     failed: Array<{ packagePolicy: NewPackagePolicy; error?: Error | SavedObjectError }>;
   }> {
+    const useSpaceAwareness = await isSpaceAwarenessEnabled();
     const savedObjectType = await getPackagePolicySavedObjectType();
     for (const packagePolicy of packagePolicies) {
+      const basePkgInfo = packagePolicy.package
+        ? await getPackageInfo({
+            savedObjectsClient: soClient,
+            pkgName: packagePolicy.package.name,
+            pkgVersion: packagePolicy.package.version,
+            ignoreUnverified: true,
+            prerelease: true,
+          })
+        : undefined;
       if (!packagePolicy.id) {
         packagePolicy.id = SavedObjectsUtils.generateId();
       }
@@ -458,13 +507,25 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       });
 
       this.keepPolicyIdInSync(packagePolicy);
-      await preflightCheckPackagePolicy(soClient, packagePolicy);
+      await preflightCheckPackagePolicy(soClient, packagePolicy, basePkgInfo);
     }
 
     const agentPolicyIds = new Set(packagePolicies.flatMap((pkgPolicy) => pkgPolicy.policy_ids));
 
-    for (const agentPolicyId of agentPolicyIds) {
-      await validateIsNotHostedPolicy(soClient, agentPolicyId, options?.force);
+    const agentPolicies = await agentPolicyService.getByIDs(soClient, [...agentPolicyIds]);
+    const agentPoliciesIndexById = indexBy('id', agentPolicies);
+    for (const agentPolicy of agentPolicies) {
+      validateIsNotHostedPolicy(agentPolicy, options?.force);
+    }
+    if (useSpaceAwareness) {
+      for (const packagePolicy of packagePolicies) {
+        validateReusableIntegrationsAndSpaceAwareness(
+          packagePolicy,
+          packagePolicy.policy_ids
+            .map((policyId) => agentPoliciesIndexById[policyId])
+            .filter((policy) => policy !== undefined)
+        );
+      }
     }
 
     const packageInfos = await getPackageInfoForPackagePolicies(packagePolicies, soClient);
@@ -580,6 +641,23 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         });
       }
     });
+
+    if (useSpaceAwareness) {
+      for (const newSo of newSos) {
+        // Do not support multpile spaces for reusable integrations
+        if (newSo.attributes.policy_ids.length > 1) {
+          continue;
+        }
+        const agentPolicy = agentPoliciesIndexById[newSo.attributes.policy_ids[0]];
+        if (agentPolicy && agentPolicy.space_ids && agentPolicy.space_ids.length > 1) {
+          await updatePackagePolicySpaces({
+            packagePolicyId: newSo.id,
+            currentSpaceId: soClient.getCurrentNamespace() ?? DEFAULT_SPACE_ID,
+            newSpaceIds: agentPolicy.space_ids,
+          });
+        }
+      }
+    }
 
     // Assign it to the given agent policy
 
@@ -751,7 +829,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           if (options.ignoreMissing && so.error.statusCode === 404) {
             return null;
           } else if (so.error.statusCode === 404) {
-            throw new PackagePolicyNotFoundError(`Package policy ${so.id} not found`);
+            throw new PackagePolicyNotFoundError(`Package policy ${so.id} not found`, {
+              packagePolicyId: so.id,
+            });
           } else {
             throw new FleetError(so.error.message);
           }
@@ -976,6 +1056,17 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       }
     }
 
+    if ((packagePolicyUpdate.policy_ids?.length ?? 0) > 1) {
+      for (const policyId of packagePolicyUpdate.policy_ids) {
+        const agentPolicy = await agentPolicyService.get(soClient, policyId, true);
+        if ((agentPolicy?.space_ids?.length ?? 0) > 1) {
+          throw new FleetError(
+            'Reusable integration policies cannot be used with agent policies belonging to multiple spaces.'
+          );
+        }
+      }
+    }
+
     // Handle component template/mappings updates for experimental features, e.g. synthetic source
     await handleExperimentalDatastreamFeatureOptIn({
       soClient,
@@ -1069,9 +1160,16 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     await Promise.all([...bumpPromises, assetRemovePromise, deleteSecretsPromise]);
 
     sendUpdatePackagePolicyTelemetryEvent(soClient, [packagePolicyUpdate], [oldPackagePolicy]);
+
     logger.debug(`Package policy ${id} update completed`);
 
-    return newPolicy;
+    // Run external post-update callbacks and return
+    return packagePolicyService.runExternalCallbacks(
+      'packagePolicyPostUpdate',
+      newPolicy,
+      soClient,
+      esClient
+    );
   }
 
   public async bulkUpdate(
@@ -1359,9 +1457,13 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     for (const agentPolicyId of uniqueAgentPolicyIds) {
       try {
-        const agentPolicy = await validateIsNotHostedPolicy(
-          soClient,
-          agentPolicyId,
+        const agentPolicy = await agentPolicyService.get(soClient, agentPolicyId);
+        if (!agentPolicy) {
+          throw new AgentPolicyNotFoundError('Agent policy not found');
+        }
+
+        validateIsNotHostedPolicy(
+          agentPolicy,
           options?.force,
           'Cannot remove integrations of hosted agent policy'
         );
@@ -1908,48 +2010,21 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
   public async runExternalCallbacks<A extends ExternalCallback[0]>(
     externalCallbackType: A,
-    packagePolicy: A extends 'packagePolicyDelete'
-      ? DeletePackagePoliciesResponse
-      : A extends 'packagePolicyPostDelete'
-      ? PostDeletePackagePoliciesResponse
-      : A extends 'packagePolicyPostCreate'
-      ? PackagePolicy
-      : A extends 'packagePolicyCreate'
-      ? NewPackagePolicy
-      : never,
+    packagePolicy: RunExternalCallbacksPackagePolicyArgument<A>,
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     context?: RequestHandlerContext,
     request?: KibanaRequest
-  ): Promise<
-    A extends 'packagePolicyDelete'
-      ? void
-      : A extends 'packagePolicyPostDelete'
-      ? void
-      : A extends 'packagePolicyPostCreate'
-      ? PackagePolicy
-      : A extends 'packagePolicyCreate'
-      ? NewPackagePolicy
-      : never
-  >;
-  public async runExternalCallbacks(
-    externalCallbackType: ExternalCallback[0],
-    packagePolicy:
-      | PackagePolicy
-      | NewPackagePolicy
-      | PostDeletePackagePoliciesResponse
-      | DeletePackagePoliciesResponse,
-    soClient: SavedObjectsClientContract,
-    esClient: ElasticsearchClient,
-    context?: RequestHandlerContext,
-    request?: KibanaRequest
-  ): Promise<PackagePolicy | NewPackagePolicy | void> {
+  ): Promise<RunExternalCallbacksPackagePolicyResponse<A>> {
     const logger = appContextService.getLogger();
     const numberOfCallbacks = appContextService.getExternalCallbacks(externalCallbackType)?.size;
+    let runResult: any;
+
     logger.debug(`Running ${numberOfCallbacks} external callbacks for ${externalCallbackType}`);
+
     try {
       if (externalCallbackType === 'packagePolicyPostDelete') {
-        return await this.runPostDeleteExternalCallbacks(
+        runResult = await this.runPostDeleteExternalCallbacks(
           packagePolicy as PostDeletePackagePoliciesResponse,
           soClient,
           esClient,
@@ -1957,7 +2032,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           request
         );
       } else if (externalCallbackType === 'packagePolicyDelete') {
-        return await this.runDeleteExternalCallbacks(
+        runResult = await this.runDeleteExternalCallbacks(
           packagePolicy as DeletePackagePoliciesResponse,
           soClient,
           esClient
@@ -1966,21 +2041,33 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         if (!Array.isArray(packagePolicy)) {
           let newData = packagePolicy;
           const externalCallbacks = appContextService.getExternalCallbacks(externalCallbackType);
+
           if (externalCallbacks && externalCallbacks.size > 0) {
-            let updatedNewData = newData;
+            let updatedNewData: any = newData;
+
             for (const callback of externalCallbacks) {
-              let result;
+              let thisCallbackResponse;
+
               if (externalCallbackType === 'packagePolicyPostCreate') {
-                result = await (callback as PostPackagePolicyPostCreateCallback)(
+                thisCallbackResponse = await (callback as PostPackagePolicyPostCreateCallback)(
                   updatedNewData as PackagePolicy,
                   soClient,
                   esClient,
                   context,
                   request
                 );
-                updatedNewData = PackagePolicySchema.validate(result) as NewPackagePolicy;
+                updatedNewData = PackagePolicySchema.validate(thisCallbackResponse);
+              } else if (externalCallbackType === 'packagePolicyPostUpdate') {
+                thisCallbackResponse = await (callback as PutPackagePolicyPostUpdateCallback)(
+                  updatedNewData as PackagePolicy,
+                  soClient,
+                  esClient,
+                  context,
+                  request
+                );
+                updatedNewData = PackagePolicySchema.validate(thisCallbackResponse);
               } else {
-                result = await (callback as PostPackagePolicyCreateCallback)(
+                thisCallbackResponse = await (callback as PostPackagePolicyCreateCallback)(
                   updatedNewData as NewPackagePolicy,
                   soClient,
                   esClient,
@@ -1990,10 +2077,10 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
               }
 
               if (externalCallbackType === 'packagePolicyCreate') {
-                updatedNewData = NewPackagePolicySchema.validate(result) as NewPackagePolicy;
+                updatedNewData = NewPackagePolicySchema.validate(thisCallbackResponse);
               } else if (externalCallbackType === 'packagePolicyUpdate') {
                 const omitted = {
-                  ...omit(result, [
+                  ...omit(thisCallbackResponse, [
                     'id',
                     'spaceIds',
                     'version',
@@ -2004,16 +2091,19 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
                     'created_by',
                     'elasticsearch',
                   ]),
-                  inputs: result.inputs.map((input) => omit(input, ['compiled_input'])),
+                  inputs: thisCallbackResponse.inputs.map((input) =>
+                    omit(input, ['compiled_input'])
+                  ),
                 };
 
-                updatedNewData = UpdatePackagePolicySchema.validate(omitted) as PackagePolicy;
+                updatedNewData = UpdatePackagePolicySchema.validate(omitted);
               }
             }
 
             newData = updatedNewData;
           }
-          return newData;
+
+          runResult = newData;
         }
       }
     } catch (error) {
@@ -2021,6 +2111,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       logger.error(error);
       throw error;
     }
+
+    return runResult as unknown as RunExternalCallbacksPackagePolicyResponse<A>;
   }
 
   public async runPostDeleteExternalCallbacks(
@@ -3003,27 +3095,30 @@ export function _validateRestrictedFieldsNotModifiedOrThrow(opts: {
   }
 }
 
-async function validateIsNotHostedPolicy(
-  soClient: SavedObjectsClientContract,
-  id: string,
-  force = false,
-  errorMessage?: string
-): Promise<AgentPolicy> {
-  const agentPolicy = await agentPolicyService.get(soClient, id, false);
-
-  if (!agentPolicy) {
-    throw new AgentPolicyNotFoundError('Agent policy not found');
+function validateReusableIntegrationsAndSpaceAwareness(
+  packagePolicy: Pick<NewPackagePolicy, 'policy_ids'>,
+  agentPolicies: AgentPolicy[]
+) {
+  if ((packagePolicy.policy_ids.length ?? 0) <= 1) {
+    return;
   }
+  for (const agentPolicy of agentPolicies) {
+    if ((agentPolicy?.space_ids?.length ?? 0) > 1) {
+      throw new FleetError(
+        'Reusable integration policies cannot be used with agent policies belonging to multiple spaces.'
+      );
+    }
+  }
+}
 
+function validateIsNotHostedPolicy(agentPolicy: AgentPolicy, force = false, errorMessage?: string) {
   const isManagedPolicyWithoutServerlessSupport = agentPolicy.is_managed && !force;
 
   if (isManagedPolicyWithoutServerlessSupport) {
     throw new HostedAgentPolicyRestrictionRelatedError(
-      errorMessage ?? `Cannot update integrations of hosted agent policy ${id}`
+      errorMessage ?? `Cannot update integrations of hosted agent policy ${agentPolicy.id}`
     );
   }
-
-  return agentPolicy;
 }
 
 export function sendUpdatePackagePolicyTelemetryEvent(

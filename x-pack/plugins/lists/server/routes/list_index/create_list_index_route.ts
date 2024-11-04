@@ -11,7 +11,7 @@ import { CreateListIndexResponse } from '@kbn/securitysolution-lists-common/api'
 
 import type { ListsPluginRouter } from '../../types';
 import { buildSiemResponse } from '../utils';
-import { getListClient } from '..';
+import { getInternalListClient } from '..';
 
 export const createListIndexRoute = (router: ListsPluginRouter): void => {
   router.versioned
@@ -26,7 +26,7 @@ export const createListIndexRoute = (router: ListsPluginRouter): void => {
       const siemResponse = buildSiemResponse(response);
 
       try {
-        const lists = await getListClient(context);
+        const lists = await getInternalListClient(context);
 
         const listDataStreamExists = await lists.getListDataStreamExists();
         const listItemDataStreamExists = await lists.getListItemDataStreamExists();

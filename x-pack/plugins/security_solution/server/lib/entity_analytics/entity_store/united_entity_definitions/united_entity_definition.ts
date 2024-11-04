@@ -7,13 +7,7 @@
 import { entityDefinitionSchema, type EntityDefinition } from '@kbn/entities-schema';
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import type { EntityType } from '../../../../../common/api/entity_analytics/entity_store/common.gen';
-import { getRiskScoreLatestIndex } from '../../../../../common/entity_analytics/risk_engine';
-import { getAssetCriticalityIndex } from '../../../../../common/entity_analytics/asset_criticality';
-import {
-  DEFAULT_INTERVAL,
-  DEFAULT_LOOKBACK_PERIOD,
-  ENTITY_STORE_DEFAULT_SOURCE_INDICES,
-} from '../constants';
+import { DEFAULT_LOOKBACK_PERIOD } from '../constants';
 import { buildEntityDefinitionId, getIdentityFieldForEntityType } from '../utils';
 import type {
   FieldRetentionDefinition,
@@ -25,21 +19,30 @@ import { BASE_ENTITY_INDEX_MAPPING } from './constants';
 export class UnitedEntityDefinition {
   version: string;
   entityType: EntityType;
+  indexPatterns: string[];
   fields: UnitedDefinitionField[];
   namespace: string;
   entityManagerDefinition: EntityDefinition;
   fieldRetentionDefinition: FieldRetentionDefinition;
   indexMappings: MappingTypeMapping;
+  syncDelay: string;
+  frequency: string;
 
   constructor(opts: {
     version: string;
     entityType: EntityType;
+    indexPatterns: string[];
     fields: UnitedDefinitionField[];
     namespace: string;
+    syncDelay: string;
+    frequency: string;
   }) {
     this.version = opts.version;
     this.entityType = opts.entityType;
+    this.indexPatterns = opts.indexPatterns;
     this.fields = opts.fields;
+    this.frequency = opts.frequency;
+    this.syncDelay = opts.syncDelay;
     this.namespace = opts.namespace;
     this.entityManagerDefinition = this.toEntityManagerDefinition();
     this.fieldRetentionDefinition = this.toFieldRetentionDefinition();
@@ -47,7 +50,7 @@ export class UnitedEntityDefinition {
   }
 
   private toEntityManagerDefinition(): EntityDefinition {
-    const { entityType, namespace } = this;
+    const { entityType, namespace, indexPatterns, syncDelay, frequency } = this;
     const identityField = getIdentityFieldForEntityType(this.entityType);
     const metadata = this.fields
       .filter((field) => field.definition)
@@ -57,18 +60,17 @@ export class UnitedEntityDefinition {
       id: buildEntityDefinitionId(entityType, namespace),
       name: `Security '${entityType}' Entity Store Definition`,
       type: entityType,
-      indexPatterns: [
-        ...ENTITY_STORE_DEFAULT_SOURCE_INDICES,
-        getAssetCriticalityIndex(namespace),
-        getRiskScoreLatestIndex(namespace),
-      ],
+      indexPatterns,
       identityFields: [identityField],
       displayNameTemplate: `{{${identityField}}}`,
       metadata,
       latest: {
         timestampField: '@timestamp',
         lookbackPeriod: DEFAULT_LOOKBACK_PERIOD,
-        interval: DEFAULT_INTERVAL,
+        settings: {
+          syncDelay,
+          frequency,
+        },
       },
       version: this.version,
       managed: true,

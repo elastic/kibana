@@ -12,3 +12,4 @@ export * from './list.gen';
 export * from './start.gen';
 export * from './stats.gen';
 export * from './stop.gen';
+export * from './apply_dataview_indices.gen';

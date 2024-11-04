@@ -7,10 +7,11 @@
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
-import type { FleetStartServices } from '../plugin';
+import type { FleetStart, FleetStartServices } from '../plugin';
 
-export function useStartServices(): FleetStartServices {
-  const { services } = useKibana<FleetStartServices>();
+// Downstream plugins may set `fleet` as part of the Kibana context
+export function useStartServices(): FleetStartServices & { fleet?: FleetStart } {
+  const { services } = useKibana<FleetStartServices & { fleet?: FleetStart }>();
   if (services === null) {
     throw new Error('KibanaContextProvider not initialized');
   }

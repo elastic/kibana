@@ -40,6 +40,7 @@ export function SloDetailsPage() {
     application: { navigateToUrl },
     http: { basePath },
     observabilityAIAssistant,
+    serverless,
   } = useKibana().services;
   const { ObservabilityPageTemplate } = usePluginContext();
   const { hasAtLeast } = useLicense();
@@ -105,7 +106,7 @@ export function SloDetailsPage() {
     }
   }, [onPageReady, slo, isLoading]);
 
-  useBreadcrumbs(getBreadcrumbs(basePath, slo));
+  useBreadcrumbs(getBreadcrumbs(basePath, slo), { serverless });
 
   const isSloNotFound = !isLoading && slo === undefined;
   if (isSloNotFound) {

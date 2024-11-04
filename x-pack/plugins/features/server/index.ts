@@ -21,6 +21,7 @@ export type {
   ElasticsearchFeatureConfig,
   FeatureElasticsearchPrivileges,
 } from '../common';
+export type { SubFeaturePrivilegeIterator } from './feature_privilege_iterator';
 export { KibanaFeature, ElasticsearchFeature } from '../common';
 export type { FeaturesPluginSetup, FeaturesPluginStart } from './plugin';
 

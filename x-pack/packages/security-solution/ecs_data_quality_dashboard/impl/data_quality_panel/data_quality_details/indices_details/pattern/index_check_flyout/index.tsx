@@ -36,8 +36,13 @@ import { HistoricalResults } from './historical_results';
 import { useHistoricalResultsContext } from '../contexts/historical_results_context';
 import { getFormattedCheckTime } from './utils/get_formatted_check_time';
 import { CHECK_NOW } from '../translations';
-import { HISTORY_TAB_ID, LATEST_CHECK_TAB_ID } from '../constants';
+import {
+  HISTORICAL_RESULTS_TOUR_SELECTOR_KEY,
+  HISTORY_TAB_ID,
+  LATEST_CHECK_TAB_ID,
+} from '../constants';
 import { IndexCheckFlyoutTabId } from './types';
+import { HistoricalResultsTour } from '../historical_results_tour';
 
 export interface Props {
   ilmExplain: Record<string, IlmExplainLifecycleLifecycleExplain> | null;
@@ -47,6 +52,8 @@ export interface Props {
   stats: Record<string, MeteringStatsIndex> | null;
   onClose: () => void;
   initialSelectedTabId: IndexCheckFlyoutTabId;
+  onDismissTour: () => void;
+  isTourActive: boolean;
 }
 
 const tabs = [
@@ -68,6 +75,8 @@ export const IndexCheckFlyoutComponent: React.FC<Props> = ({
   patternRollup,
   stats,
   onClose,
+  onDismissTour,
+  isTourActive,
 }) => {
   const didSwitchToLatestTabOnceRef = useRef(false);
   const { fetchHistoricalResults } = useHistoricalResultsContext();
@@ -90,12 +99,15 @@ export const IndexCheckFlyoutComponent: React.FC<Props> = ({
 
   const handleTabClick = useCallback(
     (tabId: IndexCheckFlyoutTabId) => {
+      setSelectedTabId(tabId);
       if (tabId === HISTORY_TAB_ID) {
+        if (isTourActive) {
+          onDismissTour();
+        }
         fetchHistoricalResults({
           abortController: fetchHistoricalResultsAbortControllerRef.current,
           indexName,
         });
-        setSelectedTabId(tabId);
       }
 
       if (tabId === LATEST_CHECK_TAB_ID) {
@@ -110,7 +122,6 @@ export const IndexCheckFlyoutComponent: React.FC<Props> = ({
             formatNumber,
           });
         }
-        setSelectedTabId(tabId);
       }
     },
     [
@@ -122,6 +133,8 @@ export const IndexCheckFlyoutComponent: React.FC<Props> = ({
       formatNumber,
       httpFetch,
       indexName,
+      isTourActive,
+      onDismissTour,
       pattern,
     ]
   );
@@ -149,20 +162,28 @@ export const IndexCheckFlyoutComponent: React.FC<Props> = ({
     selectedTabId,
   ]);
 
+  const handleSelectHistoryTab = useCallback(() => {
+    handleTabClick(HISTORY_TAB_ID);
+  }, [handleTabClick]);
+
   const renderTabs = useMemo(
     () =>
       tabs.map((tab, index) => {
         return (
           <EuiTab
+            data-test-subj={`indexCheckFlyoutTab-${tab.id}`}
             onClick={() => handleTabClick(tab.id)}
             isSelected={tab.id === selectedTabId}
             key={index}
+            {...(tab.id === HISTORY_TAB_ID && {
+              [HISTORICAL_RESULTS_TOUR_SELECTOR_KEY]: `${pattern}-history-tab`,
+            })}
           >
             {tab.name}
           </EuiTab>
         );
       }),
-    [handleTabClick, selectedTabId]
+    [handleTabClick, pattern, selectedTabId]
   );
 
   return (
@@ -179,7 +200,9 @@ export const IndexCheckFlyoutComponent: React.FC<Props> = ({
               {partitionedFieldMetadata?.incompatible != null && (
                 <IndexResultBadge incompatible={partitionedFieldMetadata.incompatible.length} />
               )}
-              <h2 id={indexCheckFlyoutTitleId}>{indexName}</h2>
+              <h2 data-test-subj="indexCheckFlyoutHeading" id={indexCheckFlyoutTitleId}>
+                {indexName}
+              </h2>
             </EuiFlexGroup>
           </EuiTitle>
           {indexResult != null && indexResult.checkedAt != null && (
@@ -195,12 +218,20 @@ export const IndexCheckFlyoutComponent: React.FC<Props> = ({
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
           {selectedTabId === LATEST_CHECK_TAB_ID ? (
-            <LatestResults
-              indexName={indexName}
-              stats={stats}
-              ilmExplain={ilmExplain}
-              patternRollup={patternRollup}
-            />
+            <>
+              <LatestResults
+                indexName={indexName}
+                stats={stats}
+                ilmExplain={ilmExplain}
+                patternRollup={patternRollup}
+              />
+              <HistoricalResultsTour
+                anchorSelectorValue={`${pattern}-history-tab`}
+                onTryIt={handleSelectHistoryTab}
+                isOpen={isTourActive}
+                onDismissTour={onDismissTour}
+              />
+            </>
           ) : (
             <HistoricalResults indexName={indexName} />
           )}
@@ -208,7 +239,13 @@ export const IndexCheckFlyoutComponent: React.FC<Props> = ({
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
-              <EuiButton iconType="refresh" isLoading={isChecking} onClick={handleCheckNow} fill>
+              <EuiButton
+                data-test-subj="indexCheckFlyoutCheckNowButton"
+                iconType="refresh"
+                isLoading={isChecking}
+                onClick={handleCheckNow}
+                fill
+              >
                 {CHECK_NOW}
               </EuiButton>
             </EuiFlexItem>
