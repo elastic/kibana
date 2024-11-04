@@ -18,13 +18,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useIsFirstTimeAgentUserQuery } from '../../../../../integrations/sections/epm/screens/detail/hooks';
 
-import type { Agent, AgentPolicy } from '../../../../types';
+import type { Agent, AgentPolicy, Output } from '../../../../types';
 import { SearchBar } from '../../../../components';
 import { AGENTS_INDEX, AGENTS_PREFIX } from '../../../../constants';
 
 import { useAuthz, useStartServices } from '../../../../hooks';
-
-import type { OutputsForAgentPolicy } from '../../../../../../../common/types';
 
 import { AgentBulkActions } from './bulk_actions';
 import type { SelectionMode } from './types';
@@ -34,6 +32,7 @@ import { DashboardsButtons } from './dashboards_buttons';
 import { AgentPolicyFilter } from './filter_bar/agent_policy_filter';
 import { TagsFilter } from './filter_bar/tags_filter';
 import { AgentActivityBadge } from './agent_activity_badge';
+import { OutputsFilter } from './filter_bar/outputs_filter';
 
 export interface SearchAndFilterBarProps {
   agentPolicies: AgentPolicy[];
@@ -62,7 +61,9 @@ export interface SearchAndFilterBarProps {
   onClickAgentActivity: () => void;
   showAgentActivityTour: { isOpen: boolean };
   latestAgentActionErrors: number;
-  outputsByPolicyIds: { [k: string]: OutputsForAgentPolicy };
+  outputs: Output[];
+  selectedOutputs: string[];
+  onSelectedOutputsChange: (selectedOutputs: string[]) => void;
 }
 
 export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps> = ({
@@ -92,7 +93,9 @@ export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps
   onClickAgentActivity,
   showAgentActivityTour,
   latestAgentActionErrors,
-  outputsByPolicyIds,
+  outputs,
+  selectedOutputs,
+  onSelectedOutputsChange,
 }) => {
   const authz = useAuthz();
 
@@ -195,6 +198,11 @@ export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps
                   selectedAgentPolicies={selectedAgentPolicies}
                   onSelectedAgentPoliciesChange={onSelectedAgentPoliciesChange}
                   agentPolicies={agentPolicies}
+                />
+                <OutputsFilter
+                  outputs={outputs}
+                  selectedOutputs={selectedOutputs}
+                  onSelectedOutputsChange={onSelectedOutputsChange}
                 />
                 <EuiFilterButton
                   hasActiveFilters={showUpgradeable}

@@ -25,12 +25,13 @@ import {
   sendGetActionStatus,
   sendBulkGetAgentPolicies,
   sendGetListOutputsForPolicies,
+  sendGetOutputs,
 } from '../../../../hooks';
 import { AgentStatusKueryHelper, ExperimentalFeaturesService } from '../../../../services';
 import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../../../constants';
 
 import { getKuery } from '../utils/get_kuery';
-import type { OutputsForAgentPolicy } from '../../../../../../../common/types';
+import type { Output, OutputsForAgentPolicy } from '../../../../../../../common/types';
 
 const REFRESH_INTERVAL_MS = 30000;
 const MAX_AGENT_ACTIONS = 100;
@@ -123,6 +124,8 @@ export function useFetchAgentsData() {
   ]);
 
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [selectedOutputsIds, setSelectedOutputs] = useState<string[]>([]);
+  const [allOutputs, setOutputs] = useState<Output[]>([]);
 
   const showInactive = useMemo(() => {
     return selectedStatus.some((status) => status === 'inactive') || selectedStatus.length === 0;
@@ -156,8 +159,9 @@ export function useFetchAgentsData() {
       selectedAgentPolicies,
       selectedTags,
       selectedStatus,
+      selectedOutputsIds,
     });
-  }, [search, selectedAgentPolicies, selectedStatus, selectedTags]);
+  }, [search, selectedAgentPolicies, selectedOutputsIds, selectedStatus, selectedTags]);
 
   kuery =
     includeUnenrolled && kuery ? `status:* AND (${kuery})` : includeUnenrolled ? `status:*` : kuery;
@@ -211,6 +215,7 @@ export function useFetchAgentsData() {
             managedAgentPoliciesResponse,
             agentTagsResponse,
             actionStatusResponse,
+            outputsResponse,
           ] = await Promise.all([
             sendGetAgents({
               page: pagination.currentPage,
@@ -239,6 +244,7 @@ export function useFetchAgentsData() {
               latest: REFRESH_INTERVAL_MS + 5000, // avoid losing errors
               perPage: MAX_AGENT_ACTIONS,
             }),
+            sendGetOutputs(),
           ]);
 
           // Return if a newer request has been triggered
@@ -263,10 +269,12 @@ export function useFetchAgentsData() {
           if (!agentTagsResponse.data) {
             throw new Error('Invalid GET /agent/tags response');
           }
+          if (!outputsResponse.data) {
+            throw new Error('Invalid GET /outputs response');
+          }
           if (actionStatusResponse.error) {
             throw new Error('Invalid GET /agents/action_status response');
           }
-
           const statusSummary = agentsResponse.data.statusSummary;
           if (!statusSummary) {
             throw new Error('Invalid GET /agents response - no status summary');
@@ -291,15 +299,21 @@ export function useFetchAgentsData() {
           );
 
           setAgentsStatus(agentStatusesToSummary(statusSummary));
-          const allOutputs = await sendGetListOutputsForPolicies({
+
+          setOutputs(outputsResponse.data.items);
+
+          const outputsForPolicies = await sendGetListOutputsForPolicies({
             ids: policyIds,
           });
-          const indexedOutputs = allOutputs?.data?.items.reduce((acc, outputForAgentPolicy) => {
-            if (!!outputForAgentPolicy?.agentPolicyId) {
-              acc[outputForAgentPolicy.agentPolicyId] = outputForAgentPolicy;
-            }
-            return acc;
-          }, {} as { [k: string]: OutputsForAgentPolicy });
+          const indexedOutputs = outputsForPolicies?.data?.items.reduce(
+            (acc, outputForAgentPolicy) => {
+              if (!!outputForAgentPolicy?.agentPolicyId) {
+                acc[outputForAgentPolicy.agentPolicyId] = outputForAgentPolicy;
+              }
+              return acc;
+            },
+            {} as { [k: string]: OutputsForAgentPolicy }
+          );
 
           if (!outputsByPolicyIds || !isEqual(indexedOutputs, outputsByPolicyIds)) {
             setOutputsByPolicyIds(indexedOutputs ?? {});
@@ -449,5 +463,8 @@ export function useFetchAgentsData() {
     latestAgentActionErrors,
     setLatestAgentActionErrors,
     outputsByPolicyIds,
+    allOutputs,
+    selectedOutputs: selectedOutputsIds,
+    setSelectedOutputs,
   };
 }

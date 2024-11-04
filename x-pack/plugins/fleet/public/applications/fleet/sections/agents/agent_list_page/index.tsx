@@ -117,6 +117,9 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     latestAgentActionErrors,
     setLatestAgentActionErrors,
     outputsByPolicyIds,
+    allOutputs,
+    selectedOutputs,
+    setSelectedOutputs,
   } = useFetchAgentsData();
 
   const onSubmitSearch = useCallback(
@@ -135,6 +138,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     selectedAgentPolicies.length ||
     selectedStatus.length ||
     selectedTags.length ||
+    selectedOutputs.length ||
     showUpgradeable
   );
 
@@ -144,6 +148,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     setSelectedAgentPolicies([]);
     setSelectedStatus([]);
     setSelectedTags([]);
+    setSelectedOutputs([]);
     setShowUpgradeable(false);
   }, [
     setDraftKuery,
@@ -151,6 +156,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     setSelectedAgentPolicies,
     setSelectedStatus,
     setSelectedTags,
+    setSelectedOutputs,
     setShowUpgradeable,
   ]);
 
@@ -236,6 +242,13 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       setSelectionMode('manual');
     }
     setSelectedAgentPolicies(policies);
+  };
+
+  const onSelectedOutputsChange = (outputs: string[]) => {
+    if (selectionMode === 'query') {
+      setSelectionMode('manual');
+    }
+    setSelectedOutputs(outputs);
   };
 
   const agentToUnenrollHasFleetServer = useMemo(() => {
@@ -430,7 +443,9 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         onClickAgentActivity={onClickAgentActivity}
         showAgentActivityTour={showAgentActivityTour}
         latestAgentActionErrors={latestAgentActionErrors.length}
-        outputsByPolicyIds={outputsByPolicyIds}
+        outputs={allOutputs ?? []}
+        selectedOutputs={selectedOutputs}
+        onSelectedOutputsChange={onSelectedOutputsChange}
       />
       <EuiSpacer size="m" />
       {/* Agent total, bulk actions and status bar */}

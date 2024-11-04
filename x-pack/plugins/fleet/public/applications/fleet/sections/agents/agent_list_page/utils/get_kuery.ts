@@ -14,12 +14,14 @@ export const getKuery = ({
   selectedTags,
   selectedStatus,
   selectedAgentIds,
+  selectedOutputsIds,
 }: {
   search?: string;
   selectedAgentPolicies?: string[];
   selectedTags?: string[];
   selectedStatus?: string[];
   selectedAgentIds?: string[];
+  selectedOutputsIds?: string[];
 }) => {
   let kueryBuilder = '';
   if (search) {
@@ -52,6 +54,15 @@ export const getKuery = ({
       .map((id) => `"${id}"`)
       .join(' or ')})`;
   }
+
+  // if (selectedOutputsIds?.length) {
+  //   if (kueryBuilder) {
+  //     kueryBuilder = `(${kueryBuilder}) and`;
+  //   }
+  //   kueryBuilder = `${kueryBuilder} ${AGENTS_PREFIX}.agent.id : (${selectedOutputsIds //FIX query
+  //     .map((id) => `"${id}"`)
+  //     .join(' or ')})`;
+  // }
 
   if (selectedStatus?.length) {
     const kueryStatus = selectedStatus

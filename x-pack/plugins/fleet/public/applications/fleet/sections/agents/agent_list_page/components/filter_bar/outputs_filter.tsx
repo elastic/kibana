@@ -11,36 +11,38 @@ import { EuiHorizontalRule } from '@elastic/eui';
 import { EuiFilterButton, EuiPopover, EuiSelectable } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import type { Output } from '../../../../../types';
+
 interface Props {
-  tags: string[];
-  selectedTags: string[];
-  onSelectedTagsChange: (selectedTags: string[]) => void;
+  outputs: Output[];
+  selectedOutputs: string[];
+  onSelectedOutputsChange: (selectedOutputs: string[]) => void;
 }
 
-export const TagsFilter: React.FunctionComponent<Props> = ({
-  tags,
-  selectedTags,
-  onSelectedTagsChange,
+export const OutputsFilter: React.FunctionComponent<Props> = ({
+  outputs,
+  selectedOutputs,
+  onSelectedOutputsChange,
 }: Props) => {
   const { euiTheme } = useEuiTheme();
-  const [isTagsFilterOpen, setIsTagsFilterOpen] = useState<boolean>(false);
+  const [isOutputsFilterOpen, setIsOutputsFilterOpen] = useState<boolean>(false);
 
-  const addTagsFilter = (tag: string) => {
-    onSelectedTagsChange([...selectedTags, tag]);
+  const addOutputsFilter = (output: string) => {
+    onSelectedOutputsChange([...selectedOutputs, output]);
   };
 
-  const removeTagsFilter = (tag: string) => {
-    onSelectedTagsChange(selectedTags.filter((t) => t !== tag));
+  const removeOutputsFilter = (output: string) => {
+    onSelectedOutputsChange(selectedOutputs.filter((t) => t !== output));
   };
 
   const getOptions = useCallback((): EuiSelectableOption[] => {
-    return tags.map((tag) => ({
-      label: tag,
-      checked: selectedTags.includes(tag) ? 'on' : undefined,
-      key: tag,
-      'data-test-subj': 'agentList.tagFilterOption',
+    return outputs.map((output) => ({
+      label: output.name,
+      checked: selectedOutputs.includes(output.id) ? 'on' : undefined,
+      key: output.id,
+      'data-test-subj': 'agentList.outputFilterOption',
     }));
-  }, [tags, selectedTags]);
+  }, [outputs, selectedOutputs]);
 
   const [options, setOptions] = useState<EuiSelectableOption[]>(getOptions());
 
@@ -55,19 +57,19 @@ export const TagsFilter: React.FunctionComponent<Props> = ({
       button={
         <EuiFilterButton
           iconType="arrowDown"
-          onClick={() => setIsTagsFilterOpen(!isTagsFilterOpen)}
-          isSelected={isTagsFilterOpen}
-          hasActiveFilters={selectedTags.length > 0}
-          numActiveFilters={selectedTags.length}
-          numFilters={tags.length}
-          disabled={tags.length === 0}
-          data-test-subj="agentList.tagsFilter"
+          onClick={() => setIsOutputsFilterOpen(!isOutputsFilterOpen)}
+          isSelected={isOutputsFilterOpen}
+          hasActiveFilters={selectedOutputs.length > 0}
+          numActiveFilters={selectedOutputs?.length}
+          numFilters={outputs.length}
+          disabled={outputs.length === 0}
+          data-test-subj="agentList.outputsFilter"
         >
-          <FormattedMessage id="xpack.fleet.agentList.tagsFilterText" defaultMessage="Tags" />
+          <FormattedMessage id="xpack.fleet.agentList.outputsFilterText" defaultMessage="Outputs" />
         </EuiFilterButton>
       }
-      isOpen={isTagsFilterOpen}
-      closePopover={() => setIsTagsFilterOpen(false)}
+      isOpen={isOutputsFilterOpen}
+      closePopover={() => setIsOutputsFilterOpen(false)}
       panelPaddingSize="none"
     >
       <EuiSelectable
@@ -75,19 +77,19 @@ export const TagsFilter: React.FunctionComponent<Props> = ({
         onChange={(newOptions: EuiSelectableOption[]) => {
           newOptions.forEach((option, index) => {
             if (option.checked !== options[index].checked) {
-              const tag = option.key!;
+              const output = option.key!;
               if (option.checked !== 'on') {
-                removeTagsFilter(tag);
+                removeOutputsFilter(output);
                 return;
               } else {
-                addTagsFilter(tag);
+                addOutputsFilter(output);
                 return;
               }
             }
           });
           setOptions(newOptions);
         }}
-        data-test-subj="agentList.tagFilterOptions"
+        data-test-subj="agentList.outputsFilterOptions"
         listProps={{
           paddingSize: 's',
           style: {
@@ -103,13 +105,13 @@ export const TagsFilter: React.FunctionComponent<Props> = ({
           <EuiButtonEmpty
             iconType="error"
             color="danger"
-            data-test-subj="agentList.tagFilterClearAllBtn"
+            data-test-subj="agentList.outputFilterClearAllBtn"
             onClick={() => {
-              onSelectedTagsChange([]);
+              onSelectedOutputsChange([]);
             }}
           >
             <FormattedMessage
-              id="xpack.fleet.agentList.tagsFilterClearAllBtnText"
+              id="xpack.fleet.agentList.outputsFilterClearAllBtnText"
               defaultMessage="Clear all"
             />
           </EuiButtonEmpty>

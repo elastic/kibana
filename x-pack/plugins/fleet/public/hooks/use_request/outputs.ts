@@ -27,6 +27,14 @@ export function useGetOutputs() {
   });
 }
 
+export function sendGetOutputs() {
+  return sendRequest<GetOutputsResponse>({
+    method: 'get',
+    path: outputRoutesService.getListPath(),
+    version: API_VERSIONS.public.v1,
+  });
+}
+
 export function useDefaultOutput() {
   const outputsRequest = useGetOutputs();
   const output = outputsRequest.data?.items.find((o) => o.is_default);
