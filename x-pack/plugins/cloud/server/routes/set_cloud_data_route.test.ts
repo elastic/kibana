@@ -6,128 +6,114 @@
  */
 
 import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
-import { setDefaultSpaceSolutionType } from './set_cloud_data_route';
-import { ISpacesClient, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import {
-  kibanaResponseFactory,
   RequestHandlerContext,
   RouteValidatorConfig,
+  SavedObjectsErrorHelpers,
+  kibanaResponseFactory,
 } from '@kbn/core/server';
+import { CLOUD_DATA_SAVED_OBJECT_TYPE } from '../saved_objects';
+import { CLOUD_DATA_SAVED_OBJECT_ID } from './constants';
+import { setPostCloudSolutionDataRoute } from './set_cloud_data_route';
+import { RouteOptions } from '.';
+
+const mockSavedObjectsClientGet = jest.fn();
+const mockSavedObjectsClientCreate = jest.fn();
+const mockSavedObjectsClientUpdate = jest.fn();
 
 const mockRouteContext = {
-  licensing: {
-    license: {
-      check: jest.fn().mockReturnValue({
-        state: 'valid',
-      }),
+  core: {
+    savedObjects: {
+      client: {
+        get: mockSavedObjectsClientGet,
+        create: mockSavedObjectsClientCreate,
+        update: mockSavedObjectsClientUpdate,
+      },
     },
   },
 } as unknown as RequestHandlerContext;
 
-const mockRouteContextWithInvalidLicense = {
-  licensing: {
-    license: {
-      check: jest.fn().mockReturnValue({
-        state: 'invalid',
-        message: 'License is invalid for spaces',
-      }),
-    },
-  },
-} as unknown as RequestHandlerContext;
-
-const mockDefaultSpace = {
-  id: 'default',
-  attributes: {
-    name: 'Default Space',
-    disabledFeatures: [],
-    _reserved: true,
-  },
-};
-
-const createMockSpaceClient = () => {
-  const mockSpaceClient = {
-    get: jest.fn(() => {
-      return mockDefaultSpace;
-    }),
-    update: jest.fn(() => {
-      return mockDefaultSpace;
-    }),
-  } as unknown as jest.Mocked<ISpacesClient>;
-
-  return mockSpaceClient;
-};
-
-const createMockSpaceService = (spaceClient: ISpacesClient) => {
-  const mockSpaceService = {
-    createSpacesClient: jest.fn(() => spaceClient),
-  } as unknown as jest.Mocked<SpacesPluginStart['spacesService']>;
-
-  return jest.fn().mockReturnValue(mockSpaceService);
-};
-
-describe('PUT /internal/cloud/solution', () => {
+describe('POST /internal/cloud/solution', () => {
   const setup = async () => {
     const httpService = httpServiceMock.createSetupContract();
     const router = httpService.createRouter();
 
-    const spacesClientMock = createMockSpaceClient();
-    const spacesServiceMock = createMockSpaceService(spacesClientMock);
-
-    setDefaultSpaceSolutionType({
+    setPostCloudSolutionDataRoute({
       router,
-      getSpacesService: spacesServiceMock,
-    });
+    } as unknown as RouteOptions);
 
     const [routeDefinition, routeHandler] =
-      router.versioned.put.mock.results[0].value.addVersion.mock.calls[0];
+      router.versioned.post.mock.results[0].value.addVersion.mock.calls[0];
 
     return {
       routeValidation: routeDefinition.validate as RouteValidatorConfig<{}, {}, {}>,
       routeHandler,
-      spacesClientMock,
     };
   };
-
-  it('should update the solution of the default space', async () => {
-    const payload = {
-      type: 'oblt',
-    };
-
-    const { routeHandler, spacesClientMock } = await setup();
-
-    const request = httpServerMock.createKibanaRequest({
-      body: payload,
-      method: 'put',
-    });
-
-    const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
-
-    const { status } = response;
-
-    expect(status).toEqual(200);
-    expect(spacesClientMock.get).toHaveBeenCalledTimes(1);
-    expect(spacesClientMock.update).toHaveBeenCalledWith('default', {
-      ...mockDefaultSpace,
-      solution: 'oblt',
-    });
+  beforeEach(() => {
+    jest.clearAllMocks();
   });
 
-  it(`returns http/403 when the license is invalid`, async () => {
+  it('should create cloud data if it does not exist', async () => {
     const { routeHandler } = await setup();
 
+    mockSavedObjectsClientGet.mockRejectedValue(
+      SavedObjectsErrorHelpers.createGenericNotFoundError()
+    );
+
     const request = httpServerMock.createKibanaRequest({
+      body: {
+        onboardingData: {
+          solutionType: 'security',
+          token: 'test-token',
+        },
+      },
       method: 'post',
     });
 
-    const response = await routeHandler(
-      mockRouteContextWithInvalidLicense,
-      request,
-      kibanaResponseFactory
-    );
+    await routeHandler(mockRouteContext, request, kibanaResponseFactory);
 
-    expect(response.status).toEqual(403);
-    expect(response.payload).toEqual({
-      message: 'License is invalid for spaces',
+    expect(mockSavedObjectsClientGet).toHaveBeenCalledWith(
+      CLOUD_DATA_SAVED_OBJECT_TYPE,
+      CLOUD_DATA_SAVED_OBJECT_ID
+    );
+    expect(mockSavedObjectsClientCreate).toHaveBeenCalledWith(
+      CLOUD_DATA_SAVED_OBJECT_TYPE,
+      { onboardingData: request.body.onboardingData },
+      { id: CLOUD_DATA_SAVED_OBJECT_ID }
+    );
+  });
+
+  it('should update cloud data if it exists', async () => {
+    const { routeHandler } = await setup();
+
+    mockSavedObjectsClientGet.mockResolvedValue({
+      id: CLOUD_DATA_SAVED_OBJECT_ID,
+      attributes: {
+        onboardingData: { solutionType: 'o11y', token: 'test-33' },
+      },
     });
+
+    const request = httpServerMock.createKibanaRequest({
+      body: {
+        onboardingData: {
+          solutionType: 'security',
+          token: 'test-token',
+        },
+      },
+      method: 'post',
+    });
+
+    await routeHandler(mockRouteContext, request, kibanaResponseFactory);
+
+    expect(mockSavedObjectsClientGet).toHaveBeenCalledWith(
+      CLOUD_DATA_SAVED_OBJECT_TYPE,
+      CLOUD_DATA_SAVED_OBJECT_ID
+    );
+    expect(mockSavedObjectsClientUpdate).toHaveBeenCalledWith(
+      CLOUD_DATA_SAVED_OBJECT_TYPE,
+      CLOUD_DATA_SAVED_OBJECT_ID,
+      { onboardingData: request.body.onboardingData }
+    );
   });
 });
