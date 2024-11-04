@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiPanel, EuiToolTip } from '@elastic/eui';
 import { CheckBoxField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { UseField, useFormData } from '../../../../shared_imports';
-import { SuppressionDurationSelector } from './suppression_duration_selector';
+import { ThresholdSuppressionDurationSelector } from './threshold_suppression_duration_selector';
 import { THRESHOLD_ALERT_SUPPRESSION_ENABLED } from './fields';
 import * as i18n from './translations';
 
@@ -44,7 +44,7 @@ export function ThresholdAlertSuppressionEdit({
         }}
       />
       <EuiPanel paddingSize="m" hasShadow={false}>
-        <SuppressionDurationSelector disabled={!suppressionEnabled || disabled} />
+        <ThresholdSuppressionDurationSelector disabled={!suppressionEnabled || disabled} />
       </EuiPanel>
     </>
   );

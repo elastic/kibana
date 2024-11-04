@@ -13,6 +13,7 @@ import { AlertSuppressionDurationType } from '../../../../detections/pages/detec
 import { DurationInput } from '../duration_input';
 import {
   ALERT_SUPPRESSION_DURATION,
+  ALERT_SUPPRESSION_DURATION_TYPE,
   ALERT_SUPPRESSION_DURATION_UNIT,
   ALERT_SUPPRESSION_DURATION_VALUE,
 } from './fields';
@@ -22,16 +23,21 @@ interface AlertSuppressionDurationProps {
   disabled?: boolean;
 }
 
-export function SuppressionDurationSelector({
+export function ThresholdSuppressionDurationSelector({
   disabled,
 }: AlertSuppressionDurationProps): JSX.Element {
   return (
     <EuiFormRow data-test-subj="alertSuppressionDuration">
       <UseMultiFields<{
+        suppressionDurationType: string;
         suppressionDurationValue: number | undefined;
         suppressionDurationUnit: string;
       }>
         fields={{
+          suppressionDurationType: {
+            path: ALERT_SUPPRESSION_DURATION_TYPE,
+            defaultValue: AlertSuppressionDurationType.PerTimePeriod,
+          },
           suppressionDurationValue: {
             path: `${ALERT_SUPPRESSION_DURATION}.${ALERT_SUPPRESSION_DURATION_VALUE}`,
           },
