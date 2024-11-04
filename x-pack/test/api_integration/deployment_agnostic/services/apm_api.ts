@@ -110,12 +110,8 @@ export interface SupertestReturnType<TEndpoint extends APIEndpoint> {
 
 export function ApmApiProvider(context: DeploymentAgnosticFtrProviderContext) {
   return {
-    async createApmApiClient() {
-      return {
-        readUser: createApmApiClient(context, 'viewer'),
-        adminUser: createApmApiClient(context, 'admin'),
-        writeUser: createApmApiClient(context, 'editor'),
-      };
-    },
+    readUser: createApmApiClient(context, 'viewer'),
+    adminUser: createApmApiClient(context, 'admin'),
+    writeUser: createApmApiClient(context, 'editor'),
   };
 }

@@ -13,7 +13,7 @@ import { keyBy } from 'lodash';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
-  const apiApi = getService('apmApi');
+  const apmApiClient = getService('apmApi');
   const registry = getService('registry');
   const synthtrace = getService('synthtrace');
 
@@ -28,8 +28,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       APIClientRequestParamsOf<'GET /internal/apm/get_agents_per_service'>['params']
     >
   ) {
-    const client = await apiApi.createApmApiClient();
-    return await client.readUser({
+    return await apmApiClient.readUser({
       endpoint: 'GET /internal/apm/get_agents_per_service',
       params: {
         query: {

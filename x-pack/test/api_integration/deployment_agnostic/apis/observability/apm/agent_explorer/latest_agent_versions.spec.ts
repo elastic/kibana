@@ -10,13 +10,12 @@ import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provi
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const registry = getService('registry');
-  const apiApi = getService('apmApi');
+  const apmApiClient = getService('apmApi');
 
   const nodeAgentName = 'nodejs';
   const unlistedAgentName = 'unlistedAgent';
 
   async function callApi() {
-    const apmApiClient = await apiApi.createApmApiClient();
     return await apmApiClient.readUser({
       endpoint: 'GET /internal/apm/get_latest_agent_versions',
     });
