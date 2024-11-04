@@ -14,6 +14,7 @@
       "build_on_commit": true,
       "build_on_comment": true,
       "build_drafts": false,
+      "build_on_ready": true,
       "trigger_comment_regex": "^(?:(?:buildkite\\W+)?(?:build|test)\\W+(?:this|it))|^\\/ci$",
       "always_trigger_comment_regex": "^(?:(?:buildkite\\W+)?(?:build|test)\\W+(?:this|it))|^\\/ci$",
       "skip_ci_labels": ["skip-ci"],
