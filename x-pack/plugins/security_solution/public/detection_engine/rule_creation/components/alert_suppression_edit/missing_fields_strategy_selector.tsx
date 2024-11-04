@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiFormRow, EuiRadioGroup } from '@elastic/eui';
+import React, { useMemo } from 'react';
+import type { EuiFormRowProps, EuiRadioGroupOption, EuiRadioGroupProps } from '@elastic/eui';
+import { RadioGroupField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { AlertSuppressionMissingFieldsStrategyEnum } from '../../../../../common/api/detection_engine';
-import { UseMultiFields } from '../../../../shared_imports';
+import { UseField } from '../../../../shared_imports';
 import { SuppressionInfoIcon } from './suppression_info_icon';
 import { ALERT_SUPPRESSION_MISSING_FIELDS } from './fields';
 import * as i18n from './translations';
@@ -20,46 +21,41 @@ interface MissingFieldsStrategySelectorProps {
 export function MissingFieldsStrategySelector({
   disabled,
 }: MissingFieldsStrategySelectorProps): JSX.Element {
+  const radioFieldProps: Partial<EuiRadioGroupProps> = useMemo(
+    () => ({
+      options: ALERT_SUPPRESSION_MISSING_FIELDS_STRATEGY_OPTIONS,
+      'data-test-subj': 'suppressionMissingFieldsOptions',
+      disabled,
+    }),
+    [disabled]
+  );
+
   return (
-    <EuiFormRow
-      data-test-subj="alertSuppressionMissingFields"
-      label={
-        <span>
-          {i18n.ALERT_SUPPRESSION_MISSING_FIELDS_LABEL} <SuppressionInfoIcon />
-        </span>
-      }
-      fullWidth
-    >
-      <UseMultiFields<{
-        suppressionMissingFields: string | undefined;
-      }>
-        fields={{
-          suppressionMissingFields: {
-            path: ALERT_SUPPRESSION_MISSING_FIELDS,
-          },
-        }}
-      >
-        {({ suppressionMissingFields }) => (
-          <EuiRadioGroup
-            disabled={disabled}
-            idSelected={suppressionMissingFields.value}
-            options={[
-              {
-                id: AlertSuppressionMissingFieldsStrategyEnum.suppress,
-                label: i18n.ALERT_SUPPRESSION_MISSING_FIELDS_SUPPRESS_OPTION,
-              },
-              {
-                id: AlertSuppressionMissingFieldsStrategyEnum.doNotSuppress,
-                label: i18n.ALERT_SUPPRESSION_MISSING_FIELDS_DO_NOT_SUPPRESS_OPTION,
-              },
-            ]}
-            onChange={(id) => {
-              suppressionMissingFields.setValue(id);
-            }}
-            data-test-subj="suppressionMissingFieldsOptions"
-          />
-        )}
-      </UseMultiFields>
-    </EuiFormRow>
+    <UseField
+      path={ALERT_SUPPRESSION_MISSING_FIELDS}
+      component={RadioGroupField}
+      componentProps={EUI_FORM_ROW_PROPS}
+      euiFieldProps={radioFieldProps}
+    />
   );
 }
+
+const EUI_FORM_ROW_PROPS: Partial<EuiFormRowProps> = {
+  label: (
+    <span>
+      {i18n.ALERT_SUPPRESSION_MISSING_FIELDS_LABEL} <SuppressionInfoIcon />
+    </span>
+  ),
+  'data-test-subj': 'alertSuppressionMissingFields',
+};
+
+const ALERT_SUPPRESSION_MISSING_FIELDS_STRATEGY_OPTIONS: EuiRadioGroupOption[] = [
+  {
+    id: AlertSuppressionMissingFieldsStrategyEnum.suppress,
+    label: i18n.ALERT_SUPPRESSION_MISSING_FIELDS_SUPPRESS_OPTION,
+  },
+  {
+    id: AlertSuppressionMissingFieldsStrategyEnum.doNotSuppress,
+    label: i18n.ALERT_SUPPRESSION_MISSING_FIELDS_DO_NOT_SUPPRESS_OPTION,
+  },
+];
