@@ -6516,7 +6516,7 @@
               "\nReturn the status by the Agent's Policy id"
             ],
             "signature": [
-              "(agentPolicyId?: string | undefined, filterKuery?: string | undefined) => Promise<{ events: number; total: number; online: number; error: number; offline: number; other: number; updating: number; inactive: number; unenrolled: number; all: number; active: number; }>"
+              "(agentPolicyId?: string | undefined, filterKuery?: string | undefined) => Promise<{ events: number; online: number; error: number; offline: number; other: number; updating: number; inactive: number; unenrolled: number; all: number; active: number; }>"
             ],
             "path": "x-pack/plugins/fleet/server/services/agents/agent_service.ts",
             "deprecated": false,
@@ -11646,41 +11646,9 @@
             "label": "runExternalCallbacks",
             "description": [],
             "signature": [
-              "<A extends \"packagePolicyCreate\" | \"packagePolicyPostCreate\" | \"packagePolicyDelete\" | \"packagePolicyPostDelete\" | \"packagePolicyUpdate\" | \"agentPolicyCreate\" | \"agentPolicyUpdate\">(externalCallbackType: A, packagePolicy: A extends \"packagePolicyDelete\" ? ",
-              "DeletePackagePoliciesResponse",
-              " : A extends \"packagePolicyPostDelete\" ? ",
-              {
-                "pluginId": "fleet",
-                "scope": "common",
-                "docId": "kibFleetPluginApi",
-                "section": "def-common.PostDeletePackagePoliciesResponse",
-                "text": "PostDeletePackagePoliciesResponse"
-              },
-              " : A extends \"packagePolicyPostCreate\" ? ",
-              {
-                "pluginId": "fleet",
-                "scope": "common",
-                "docId": "kibFleetPluginApi",
-                "section": "def-common.PackagePolicy",
-                "text": "PackagePolicy"
-              },
-              " : A extends \"packagePolicyUpdate\" ? ",
-              {
-                "pluginId": "fleet",
-                "scope": "common",
-                "docId": "kibFleetPluginApi",
-                "section": "def-common.UpdatePackagePolicy",
-                "text": "UpdatePackagePolicy"
-              },
-              " : ",
-              {
-                "pluginId": "fleet",
-                "scope": "common",
-                "docId": "kibFleetPluginApi",
-                "section": "def-common.NewPackagePolicy",
-                "text": "NewPackagePolicy"
-              },
-              ", soClient: ",
+              "<A extends \"packagePolicyCreate\" | \"packagePolicyPostCreate\" | \"packagePolicyDelete\" | \"packagePolicyPostDelete\" | \"packagePolicyUpdate\" | \"packagePolicyPostUpdate\" | \"agentPolicyCreate\" | \"agentPolicyUpdate\" | \"agentPolicyPostUpdate\">(externalCallbackType: A, packagePolicy: ",
+              "RunExternalCallbacksPackagePolicyArgument",
+              "<A>, soClient: ",
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
                 "scope": "server",
@@ -11712,31 +11680,9 @@
                 "section": "def-server.KibanaRequest",
                 "text": "KibanaRequest"
               },
-              "<unknown, unknown, unknown, any> | undefined) => Promise<A extends \"packagePolicyDelete\" ? void : A extends \"packagePolicyPostDelete\" ? void : A extends \"packagePolicyPostCreate\" ? ",
-              {
-                "pluginId": "fleet",
-                "scope": "common",
-                "docId": "kibFleetPluginApi",
-                "section": "def-common.PackagePolicy",
-                "text": "PackagePolicy"
-              },
-              " : A extends \"packagePolicyUpdate\" ? ",
-              {
-                "pluginId": "fleet",
-                "scope": "common",
-                "docId": "kibFleetPluginApi",
-                "section": "def-common.UpdatePackagePolicy",
-                "text": "UpdatePackagePolicy"
-              },
-              " : ",
-              {
-                "pluginId": "fleet",
-                "scope": "common",
-                "docId": "kibFleetPluginApi",
-                "section": "def-common.NewPackagePolicy",
-                "text": "NewPackagePolicy"
-              },
-              ">"
+              "<unknown, unknown, unknown, any> | undefined) => Promise<",
+              "RunExternalCallbacksPackagePolicyResponse",
+              "<A>>"
             ],
             "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
             "deprecated": false,
@@ -11765,40 +11711,8 @@
                 "label": "packagePolicy",
                 "description": [],
                 "signature": [
-                  "A extends \"packagePolicyDelete\" ? ",
-                  "DeletePackagePoliciesResponse",
-                  " : A extends \"packagePolicyPostDelete\" ? ",
-                  {
-                    "pluginId": "fleet",
-                    "scope": "common",
-                    "docId": "kibFleetPluginApi",
-                    "section": "def-common.PostDeletePackagePoliciesResponse",
-                    "text": "PostDeletePackagePoliciesResponse"
-                  },
-                  " : A extends \"packagePolicyPostCreate\" ? ",
-                  {
-                    "pluginId": "fleet",
-                    "scope": "common",
-                    "docId": "kibFleetPluginApi",
-                    "section": "def-common.PackagePolicy",
-                    "text": "PackagePolicy"
-                  },
-                  " : A extends \"packagePolicyUpdate\" ? ",
-                  {
-                    "pluginId": "fleet",
-                    "scope": "common",
-                    "docId": "kibFleetPluginApi",
-                    "section": "def-common.UpdatePackagePolicy",
-                    "text": "UpdatePackagePolicy"
-                  },
-                  " : ",
-                  {
-                    "pluginId": "fleet",
-                    "scope": "common",
-                    "docId": "kibFleetPluginApi",
-                    "section": "def-common.NewPackagePolicy",
-                    "text": "NewPackagePolicy"
-                  }
+                  "RunExternalCallbacksPackagePolicyArgument",
+                  "<A>"
                 ],
                 "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                 "deprecated": false,
@@ -12633,9 +12547,13 @@
           " | ",
           "ExternalCallbackUpdate",
           " | ",
+          "ExternalCallbackPostUpdate",
+          " | ",
           "ExternalCallbackAgentPolicyCreate",
           " | ",
-          "ExternalCallbackAgentPolicyUpdate"
+          "ExternalCallbackAgentPolicyUpdate",
+          " | ",
+          "ExternalCallbackAgentPolicyPostUpdate"
         ],
         "path": "x-pack/plugins/fleet/server/types/extensions.ts",
         "deprecated": false,
@@ -22817,27 +22735,6 @@
         "children": [
           {
             "parentPluginId": "fleet",
-            "id": "def-common.GetAgentsResponse.list",
-            "type": "Array",
-            "tags": [],
-            "label": "list",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "fleet",
-                "scope": "common",
-                "docId": "kibFleetPluginApi",
-                "section": "def-common.Agent",
-                "text": "Agent"
-              },
-              "[] | undefined"
-            ],
-            "path": "x-pack/plugins/fleet/common/types/rest_spec/agent.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "fleet",
             "id": "def-common.GetAgentsResponse.statusSummary",
             "type": "Object",
             "tags": [],
@@ -22872,7 +22769,7 @@
             "label": "results",
             "description": [],
             "signature": [
-              "{ events: number; total: number; online: number; error: number; offline: number; other: number; updating: number; inactive: number; unenrolled: number; all: number; active: number; }"
+              "{ events: number; online: number; error: number; offline: number; other: number; updating: number; inactive: number; unenrolled: number; all: number; active: number; }"
             ],
             "path": "x-pack/plugins/fleet/common/types/rest_spec/agent.ts",
             "deprecated": false,
@@ -29078,19 +28975,6 @@
           },
           {
             "parentPluginId": "fleet",
-            "id": "def-common.AGENT_API_ROUTES.STATUS_PATTERN_DEPRECATED",
-            "type": "string",
-            "tags": [],
-            "label": "STATUS_PATTERN_DEPRECATED",
-            "description": [
-              "// deprecated since 8.0"
-            ],
-            "path": "x-pack/plugins/fleet/common/constants/routes.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "fleet",
             "id": "def-common.AGENT_API_ROUTES.UPGRADE_PATTERN",
             "type": "string",
             "tags": [],
@@ -30407,19 +30291,6 @@
             "tags": [],
             "label": "AGENT_POLICIES_SPACES",
             "description": [],
-            "path": "x-pack/plugins/fleet/common/constants/routes.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "fleet",
-            "id": "def-common.APP_API_ROUTES.GENERATE_SERVICE_TOKEN_PATTERN_DEPRECATED",
-            "type": "string",
-            "tags": [],
-            "label": "GENERATE_SERVICE_TOKEN_PATTERN_DEPRECATED",
-            "description": [
-              "// deprecated since 8.0"
-            ],
             "path": "x-pack/plugins/fleet/common/constants/routes.ts",
             "deprecated": false,
             "trackAdoption": false

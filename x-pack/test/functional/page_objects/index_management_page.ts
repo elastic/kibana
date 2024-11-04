@@ -176,7 +176,9 @@ export function IndexManagementPageProvider({ getService }: FtrProviderContext) 
         await testSubjects.existOrFail('indexDetailsTab-overview', { timeout: 2000 });
         await testSubjects.existOrFail('indexDetailsTab-settings', { timeout: 2000 });
       },
-      async changeTab(tab: 'indexDetailsTab-mappings' | 'indexDetailsTab-overview' | 'indexDetailsTab-settings') {
+      async changeTab(
+        tab: 'indexDetailsTab-mappings' | 'indexDetailsTab-overview' | 'indexDetailsTab-settings'
+      ) {
         await testSubjects.click(tab);
       },
     },
