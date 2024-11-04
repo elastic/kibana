@@ -136,12 +136,14 @@ export class SLOPlugin
         });
 
         plugins.embeddable.registerReactEmbeddableFactory(SLO_ERROR_BUDGET_ID, async () => {
-          const deps = { ...coreStart, ...pluginsStart };
-
           const { getErrorBudgetEmbeddableFactory } = await import(
             './embeddable/slo/error_budget/error_budget_react_embeddable_factory'
           );
-          return getErrorBudgetEmbeddableFactory(deps);
+          return getErrorBudgetEmbeddableFactory({
+            coreStart,
+            pluginsStart,
+            sloClient,
+          });
         });
 
         plugins.embeddable.registerReactEmbeddableFactory(SLO_BURN_RATE_EMBEDDABLE_ID, async () => {
