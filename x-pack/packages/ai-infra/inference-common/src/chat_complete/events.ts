@@ -100,6 +100,9 @@ export interface ChatCompletionTokenCount {
  */
 export type ChatCompletionTokenCountEvent =
   InferenceTaskEventBase<ChatCompletionEventType.ChatCompletionTokenCount> & {
+    /**
+     * The token counts structure
+     */
     tokens: ChatCompletionTokenCount;
   };
 

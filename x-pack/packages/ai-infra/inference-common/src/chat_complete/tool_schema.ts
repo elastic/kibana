@@ -40,6 +40,9 @@ interface ToolSchemaTypeArray extends ToolSchemaFragmentBase {
   items: Exclude<ToolSchemaType, ToolSchemaTypeArray>;
 }
 
+/**
+ * A tool schema property's possible types.
+ */
 export type ToolSchemaType =
   | ToolSchemaTypeObject
   | ToolSchemaTypeString

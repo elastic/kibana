@@ -220,7 +220,7 @@ const mySchema = {
       },
     },
   },
-};
+} as const;
 
 const response = inferenceClient.outputApi({
   id: 'extract_from_article',

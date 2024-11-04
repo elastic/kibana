@@ -13,9 +13,7 @@ import type { ChatCompletionEvent, ChatCompletionTokenCount } from './events';
 /**
  * Request a completion from the LLM based on a prompt or conversation.
  *
- * By default, only the complete response will be returned as a promise.
- * Use `stream: true` to return an observable returning the full set
- * of events in real time.
+ * By default, The complete LLM response will be returned as a promise.
  *
  * @example using the API in stream mode to get an event observable.
  * ```ts
@@ -26,7 +24,12 @@ import type { ChatCompletionEvent, ChatCompletionTokenCount } from './events';
  *      { role: MessageRole.User, content: "Some question?"},
  *   ]
  * });
+ *
+ * const { content, tokens, toolCalls } = response;
  * ```
+ *
+ * Use `stream: true` to return an observable returning the full set
+ * of events in real time.
  *
  * @example using the API in stream mode to get an event observable.
  * ```ts
@@ -39,6 +42,15 @@ import type { ChatCompletionEvent, ChatCompletionTokenCount } from './events';
  *      { role: MessageRole.Assistant, content: "Some answer"},
  *      { role: MessageRole.User, content: "Another question?"},
  *   ]
+ * });
+ *
+ * // using the observable
+ * events$.pipe(withoutTokenCountEvents()).subscribe((event) => {
+ *  if (isChatCompletionChunkEvent(event)) {
+ *     // do something with the chunk event
+ *   } else {
+ *     // do something with the message event
+ *   }
  * });
  * ```
  */
@@ -62,6 +74,14 @@ export type ChatCompleteOptions<
    */
   connectorId: string;
   /**
+   * Set to true to enable streaming, which will change the API response type from
+   * a single {@link ChatCompleteResponse} promise
+   * to an {@link ChatCompleteStreamResponse} event observable.
+   *
+   * Defaults to false.
+   */
+  stream?: TStream;
+  /**
    * Optional system message for the LLM.
    */
   system?: string;
@@ -73,14 +93,6 @@ export type ChatCompleteOptions<
    * Function calling mode, defaults to "native".
    */
   functionCalling?: FunctionCallingMode;
-  /**
-   * Set to true to enable streaming, which will change the API response type from
-   * a single {@link ChatCompleteResponse} promise
-   * to an {@link ChatCompleteStreamResponse} event observable.
-   *
-   * Defaults to false.
-   */
-  stream?: TStream;
 } & TToolOptions;
 
 /**

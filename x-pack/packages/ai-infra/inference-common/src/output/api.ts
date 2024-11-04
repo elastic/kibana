@@ -11,6 +11,37 @@ import { Output, OutputEvent } from './events';
 
 /**
  * Generate a response with the LLM for a prompt, optionally based on a schema.
+ *
+ * @example
+ * ```ts
+ * // schema must be defined as full const or using the `satisfies ToolSchema` modifier for TS type inference to work
+ * const mySchema = {
+ *   type: 'object',
+ *   properties: {
+ *     animals: {
+ *       description: 'the list of animals that are mentioned in the provided article',
+ *       type: 'array',
+ *       items: {
+ *         type: 'string',
+ *       },
+ *     },
+ *   },
+ * } as const;
+ *
+ * const response = outputApi({
+ *   id: 'extract_from_article',
+ *   connectorId: 'my-connector connector',
+ *   schema: mySchema,
+ *   input: `
+ *     Please find all the animals that are mentioned in the following document:
+ *     ## Document¬
+ *     ${theDoc}
+ *   `,
+ * });
+ *
+ * // output is properly typed from the provided schema
+ * const { animals } = response.output;
+ * ```
  */
 export type OutputAPI = <
   TId extends string = string,
@@ -20,6 +51,9 @@ export type OutputAPI = <
   options: OutputOptions<TId, TOutputSchema, TStream>
 ) => OutputCompositeResponse<TId, TOutputSchema, TStream>;
 
+/**
+ * Options for the {@link OutputAPI}
+ */
 export interface OutputOptions<
   TId extends string = string,
   TOutputSchema extends ToolSchema | undefined = ToolSchema | undefined,
