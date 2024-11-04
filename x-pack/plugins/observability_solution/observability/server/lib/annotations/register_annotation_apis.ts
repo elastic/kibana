@@ -98,7 +98,7 @@ export function registerAnnotationAPIs({
       security: {
         authz: {
           enabled: false,
-          reason: 'This route is opted out from authorization',
+          reason: 'This route delegates authorization to Elasticsearch',
         },
       },
       validate: {
@@ -119,7 +119,7 @@ export function registerAnnotationAPIs({
       security: {
         authz: {
           enabled: false,
-          reason: 'This route is opted out from authorization',
+          reason: 'This route delegates authorization to Elasticsearch',
         },
       },
       validate: {
@@ -140,7 +140,7 @@ export function registerAnnotationAPIs({
       security: {
         authz: {
           enabled: false,
-          reason: 'This route is opted out from authorization',
+          reason: 'This route delegates authorization to Elasticsearch',
         },
       },
       validate: {
@@ -161,7 +161,7 @@ export function registerAnnotationAPIs({
       security: {
         authz: {
           enabled: false,
-          reason: 'This route is opted out from authorization',
+          reason: 'This route delegates authorization to Elasticsearch',
         },
       },
       validate: {
@@ -182,7 +182,7 @@ export function registerAnnotationAPIs({
       security: {
         authz: {
           enabled: false,
-          reason: 'This route is opted out from authorization',
+          reason: 'This route delegates authorization to Elasticsearch',
         },
       },
       validate: {
@@ -203,7 +203,7 @@ export function registerAnnotationAPIs({
       security: {
         authz: {
           enabled: false,
-          reason: 'This route is opted out from authorization',
+          reason: 'This route delegates authorization to Elasticsearch',
         },
       },
       validate: {
