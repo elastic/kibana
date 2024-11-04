@@ -288,5 +288,8 @@ const Wrapper = styled.div<{
       right: 50%;
       transform: translate(50%, -50%);
     }
+    .embPanel {
+      outline: none;
+    }
   }
 `;
