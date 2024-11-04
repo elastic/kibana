@@ -11,12 +11,15 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
 import { SLOPublicPluginsStart } from '../../..';
+import { PluginContext } from '../../../context/plugin_context';
+import { SLORepositoryClient } from '../../../types';
 import { Configuration } from './configuration';
 import type { EmbeddableProps, SloBurnRateEmbeddableState } from './types';
 
 export async function openConfiguration(
   coreStart: CoreStart,
-  pluginStart: SLOPublicPluginsStart,
+  pluginsStart: SLOPublicPluginsStart,
+  sloClient: SLORepositoryClient,
   initialState?: SloBurnRateEmbeddableState
 ): Promise<EmbeddableProps> {
   const { overlays } = coreStart;
@@ -28,21 +31,30 @@ export async function openConfiguration(
           <KibanaContextProvider
             services={{
               ...coreStart,
-              ...pluginStart,
+              ...pluginsStart,
             }}
           >
-            <QueryClientProvider client={queryClient}>
-              <Configuration
-                onCreate={(update: EmbeddableProps) => {
-                  flyoutSession.close();
-                  resolve(update);
-                }}
-                onCancel={() => {
-                  flyoutSession.close();
-                  reject();
-                }}
-              />
-            </QueryClientProvider>
+            <PluginContext.Provider
+              value={{
+                observabilityRuleTypeRegistry:
+                  pluginsStart.observability.observabilityRuleTypeRegistry,
+                ObservabilityPageTemplate: pluginsStart.observabilityShared.navigation.PageTemplate,
+                sloClient,
+              }}
+            >
+              <QueryClientProvider client={queryClient}>
+                <Configuration
+                  onCreate={(update: EmbeddableProps) => {
+                    flyoutSession.close();
+                    resolve(update);
+                  }}
+                  onCancel={() => {
+                    flyoutSession.close();
+                    reject();
+                  }}
+                />
+              </QueryClientProvider>
+            </PluginContext.Provider>
           </KibanaContextProvider>,
           coreStart
         )

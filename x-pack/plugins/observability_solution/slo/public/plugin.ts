@@ -161,7 +161,7 @@ export class SLOPlugin
           if (plugins.uiActions) {
             const { registerSloUiActions } = await import('./ui_actions');
 
-            registerSloUiActions(core, plugins, pluginsStart);
+            registerSloUiActions(plugins.uiActions, coreStart, pluginsStart, sloClient);
           }
         };
         registerAsyncSloUiActions();
