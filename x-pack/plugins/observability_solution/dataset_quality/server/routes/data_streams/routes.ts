@@ -18,6 +18,7 @@ import {
   DegradedFieldAnalysis,
   UpdateFieldLimitResponse,
   DataStreamRolloverResponse,
+  CheckAndLoadIntegrationResponse,
 } from '../../../common/api_types';
 import { rangeRt, typeRt, typesRt } from '../../types/default_api_types';
 import { createDatasetQualityServerRoute } from '../create_datasets_quality_server_route';
@@ -34,10 +35,7 @@ import { getDataStreamsMeteringStats } from './get_data_streams_metering_stats';
 import { updateFieldLimit } from './update_field_limit';
 import { createDatasetQualityESClient } from '../../utils';
 import { getDataStreamSettings } from './get_datastream_settings';
-import {
-  checkAndLoadIntegration,
-  CheckAndLoadIntegrationResponse,
-} from './check_and_load_integration';
+import { checkAndLoadIntegration } from './check_and_load_integration';
 
 const statsRoute = createDatasetQualityServerRoute({
   endpoint: 'GET /internal/dataset_quality/data_streams/stats',
@@ -293,9 +291,9 @@ const checkAndLoadIntegrationRoute = createDatasetQualityServerRoute({
 
     const integration = await checkAndLoadIntegration({
       esClient,
-      dataStream,
       packageClient,
       logger,
+      dataStream,
     });
 
     logger.info('aj-integration' + JSON.stringify(integration));

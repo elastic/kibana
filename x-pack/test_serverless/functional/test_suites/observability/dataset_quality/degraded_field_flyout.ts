@@ -808,7 +808,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           expect(invalidStatus).to.be('true');
         });
 
-        it('should not display the apply button for editor user', async () => {
+        it('should validate and show error callout when API call fails', async () => {
           await PageObjects.svlCommonPage.loginWithPrivilegedRole();
 
           await PageObjects.datasetQuality.navigateToDetails({
@@ -816,10 +816,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             expandedDegradedField: 'cloud.project.id',
           });
 
-          // Should not display the panel to increase field limit
-          await testSubjects.missingOrFail(
-            'datasetQualityDetailsDegradedFieldFlyoutIncreaseFieldLimitPanel'
+          const applyButton = await testSubjects.find(
+            'datasetQualityIncreaseFieldMappingLimitButton'
           );
+
+          await applyButton.click();
+
+          await retry.tryForTime(5000, async () => {
+            // Should display the error callout
+            await testSubjects.existOrFail('datasetQualityDetailsNewFieldLimitErrorCallout');
+          });
 
           await PageObjects.svlCommonPage.loginAsAdmin();
         });

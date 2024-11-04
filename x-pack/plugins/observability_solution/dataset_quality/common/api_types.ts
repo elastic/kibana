@@ -170,6 +170,7 @@ export const dataStreamSettingsRt = rt.partial({
   lastBackingIndexName: rt.string,
   indexTemplate: rt.string,
   createdOn: rt.union([rt.null, rt.number]), // rt.null is needed because `createdOn` is not available on Serverless
+  integration: rt.string,
   datasetUserPrivileges: datasetUserPrivilegesRt,
 });
 
