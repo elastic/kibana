@@ -15,6 +15,7 @@ import {
   type AppLeaveConfirmAction,
   type AppLeaveHandler,
 } from '@kbn/core-application-browser';
+import { AppLeaveSkipAction } from '@kbn/core-application-browser/src/app_leave';
 
 const appLeaveActionFactory: AppLeaveActionFactory = {
   confirm(
@@ -36,10 +37,17 @@ const appLeaveActionFactory: AppLeaveActionFactory = {
   default() {
     return { type: AppLeaveActionType.default };
   },
+  skip() {
+    return { type: AppLeaveActionType.skip };
+  },
 };
 
 export function isConfirmAction(action: AppLeaveAction): action is AppLeaveConfirmAction {
   return action.type === AppLeaveActionType.confirm;
+}
+
+export function isSkipAction(action: AppLeaveAction): action is AppLeaveSkipAction {
+  return action.type === AppLeaveActionType.skip;
 }
 
 export function getLeaveAction(handler?: AppLeaveHandler, nextAppId?: string): AppLeaveAction {

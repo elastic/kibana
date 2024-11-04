@@ -35,6 +35,7 @@ export type AppLeaveHandler = (
 export enum AppLeaveActionType {
   confirm = 'confirm',
   default = 'default',
+  skip = 'skip',
 }
 
 /**
@@ -47,6 +48,10 @@ export enum AppLeaveActionType {
  */
 export interface AppLeaveDefaultAction {
   type: AppLeaveActionType.default;
+}
+
+export interface AppLeaveSkipAction {
+  type: AppLeaveActionType.skip;
 }
 
 /**
@@ -73,12 +78,13 @@ export interface AppLeaveConfirmAction {
  *
  * @public
  * */
-export type AppLeaveAction = AppLeaveDefaultAction | AppLeaveConfirmAction;
+export type AppLeaveAction = AppLeaveDefaultAction | AppLeaveConfirmAction | AppLeaveSkipAction;
 
 /**
  * Factory provided when invoking a {@link AppLeaveHandler} to retrieve the {@link AppLeaveAction} to execute.
  */
 export interface AppLeaveActionFactory {
+  skip(): AppLeaveAction;
   /**
    * Returns a confirm action, resulting on prompting a message to the user before leaving the
    * application, allowing him to choose if he wants to stay on the app or confirm that he

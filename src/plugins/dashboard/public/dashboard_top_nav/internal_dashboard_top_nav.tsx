@@ -195,7 +195,9 @@ export function InternalDashboardTopNav({
    */
   useEffect(() => {
     onAppLeave((actions) => {
-      if (
+      if (hasUnsavedChanges && !embeddableService.getStateTransfer().isTransferInProgress) {
+        return actions.skip();
+      } else if (
         viewMode === 'edit' &&
         hasUnsavedChanges &&
         !embeddableService.getStateTransfer().isTransferInProgress

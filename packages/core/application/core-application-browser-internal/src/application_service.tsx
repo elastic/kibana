@@ -35,7 +35,7 @@ import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 import { AppRouter } from './ui';
 import type { InternalApplicationSetup, InternalApplicationStart, Mounter } from './types';
 
-import { getLeaveAction, isConfirmAction } from './application_leave';
+import { getLeaveAction, isConfirmAction, isSkipAction } from './application_leave';
 import { getUserConfirmationHandler } from './navigation_confirm';
 import {
   appendAppPath,
@@ -406,11 +406,7 @@ export class ApplicationService {
 
   private async shouldNavigate(overlays: OverlayStart, nextAppId: string): Promise<boolean> {
     const currentAppId = this.currentAppId$.value;
-    if (
-      currentAppId === undefined ||
-      (currentAppId === 'dashboards' &&
-        (nextAppId === 'discover' || nextAppId === 'visualize' || nextAppId === 'lens'))
-    ) {
+    if (currentAppId === undefined) {
       return true;
     }
 
@@ -418,6 +414,9 @@ export class ApplicationService {
       this.appInternalStates.get(currentAppId)?.leaveHandler,
       nextAppId
     );
+    if (isSkipAction(action)) {
+      return true;
+    }
     if (isConfirmAction(action)) {
       const confirmed = await overlays.openConfirm(action.text, {
         title: action.title,
