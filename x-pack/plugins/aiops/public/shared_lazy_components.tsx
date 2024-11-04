@@ -5,66 +5,54 @@
  * 2.0.
  */
 
-import type { FC, PropsWithChildren } from 'react';
-import React, { Suspense } from 'react';
+import React from 'react';
 
-import { EuiErrorBoundary, EuiSkeletonText } from '@elastic/eui';
-import type { LogRateAnalysisAppStateProps } from './components/log_rate_analysis';
-import type { LogRateAnalysisContentWrapperProps } from './components/log_rate_analysis/log_rate_analysis_content/log_rate_analysis_content_wrapper';
-import type { LogCategorizationAppStateProps } from './components/log_categorization';
-import type { ChangePointDetectionAppStateProps } from './components/change_point_detection';
+import { EuiSkeletonText } from '@elastic/eui';
 
-const LogRateAnalysisAppStateLazy = React.lazy(() => import('./components/log_rate_analysis'));
-
-const LogRateAnalysisContentWrapperLazy = React.lazy(
-  () => import('./components/log_rate_analysis/log_rate_analysis_content')
-);
-
-const LazyWrapper: FC<PropsWithChildren<unknown>> = ({ children }) => (
-  <EuiErrorBoundary>
-    <Suspense fallback={<EuiSkeletonText lines={3} />}>{children}</Suspense>
-  </EuiErrorBoundary>
-);
+import { withSuspense } from '@kbn/shared-ux-utility';
 
 /**
  * Lazy-wrapped LogRateAnalysisAppState React component
- * @param {LogRateAnalysisAppStateProps}  props - properties specifying the data on which to run the analysis.
  */
-export const LogRateAnalysis: FC<LogRateAnalysisAppStateProps> = (props) => (
-  <LazyWrapper>
-    <LogRateAnalysisAppStateLazy {...props} />
-  </LazyWrapper>
+export const LogRateAnalysis = withSuspense(
+  React.lazy(() => import('./components/log_rate_analysis')),
+  <EuiSkeletonText lines={3} />
 );
 
 /**
- * Lazy-wrapped LogRateAnalysisContentWrapperReact component
- * @param {LogRateAnalysisContentWrapperProps}  props - properties specifying the data on which to run the analysis.
+ * Lazy-wrapped LogRateAnalysisContentWrapperReact component which to run the analysis.
  */
-export const LogRateAnalysisContent: FC<LogRateAnalysisContentWrapperProps> = (props) => (
-  <LazyWrapper>
-    <LogRateAnalysisContentWrapperLazy {...props} />
-  </LazyWrapper>
+export const LogRateAnalysisContent = withSuspense(
+  React.lazy(() => import('./components/log_rate_analysis/log_rate_analysis_content')),
+  <EuiSkeletonText lines={3} />
 );
-
-const LogCategorizationAppStateLazy = React.lazy(() => import('./components/log_categorization'));
 
 /**
  * Lazy-wrapped LogCategorizationAppStateProps React component
- * @param {LogCategorizationAppStateProps}  props - properties specifying the data on which to run the analysis.
  */
-export const LogCategorization: FC<LogCategorizationAppStateProps> = (props) => (
-  <LazyWrapper>
-    <LogCategorizationAppStateLazy {...props} />
-  </LazyWrapper>
+export const LogCategorization = withSuspense(
+  React.lazy(() => import('./components/log_categorization')),
+  <EuiSkeletonText lines={3} />
 );
 
-const ChangePointDetectionLazy = React.lazy(() => import('./components/change_point_detection'));
+/**
+ * Lazy-wrapped LogCategorizationForDiscoverWrapper React component
+ */
+export const LogCategorizationForDiscover = withSuspense(
+  React.lazy(
+    () =>
+      import(
+        './components/log_categorization/log_categorization_for_embeddable/log_categorization_for_discover_wrapper'
+      )
+  ),
+  <EuiSkeletonText lines={3} />
+);
+
 /**
  * Lazy-wrapped ChangePointDetectionAppStateProps React component
  * @param {ChangePointDetectionAppStateProps}  props - properties specifying the data on which to run the analysis.
  */
-export const ChangePointDetection: FC<ChangePointDetectionAppStateProps> = (props) => (
-  <LazyWrapper>
-    <ChangePointDetectionLazy {...props} />
-  </LazyWrapper>
+export const ChangePointDetection = withSuspense(
+  React.lazy(() => import('./components/change_point_detection')),
+  <EuiSkeletonText lines={3} />
 );
