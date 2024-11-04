@@ -93,7 +93,7 @@ export function useAlertSearchBarStateContainer(
     onRangeToChange: setRangeTo,
     onStatusChange: setStatus,
     onFiltersChange: setFilters,
-    onGroupingsChange: stateContainer.transitions.setGroupings,
+    onGroupingsChange: setGroupings,
     filters,
     rangeFrom,
     rangeTo,
