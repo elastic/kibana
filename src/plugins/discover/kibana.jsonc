@@ -30,7 +30,7 @@
       "unifiedDocViewer",
       "unifiedSearch",
       "unifiedHistogram",
-      "contentManagement"
+      "contentManagement",
     ],
     "optionalPlugins": [
       "dataVisualizer",
@@ -46,7 +46,8 @@
       "observabilityAIAssistant",
       "aiops",
       "fieldsMetadata",
-      "logsDataAccess"
+      "logsDataAccess",
+      "slo"
     ],
     "requiredBundles": [
       "kibanaUtils",

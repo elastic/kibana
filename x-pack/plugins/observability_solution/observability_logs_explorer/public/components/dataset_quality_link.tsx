@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiHeaderLink } from '@elastic/eui';
+import { EuiHeaderLink, EuiLink } from '@elastic/eui';
 import { LogsExplorerPublicState } from '@kbn/logs-explorer-plugin/public';
 import { getRouterLinkProps } from '@kbn/router-utils';
 import { LocatorPublic } from '@kbn/share-plugin/public';
@@ -92,13 +92,14 @@ export const DatasetQualityLink = React.memo(
     });
 
     return (
-      <EuiHeaderLink
+      <EuiLink
         {...datasetQualityLinkProps}
+        external
         color="primary"
         data-test-subj="logsExplorerDatasetQualityLink"
       >
         {datasetQualityLinkTitle}
-      </EuiHeaderLink>
+      </EuiLink>
     );
   }
 );

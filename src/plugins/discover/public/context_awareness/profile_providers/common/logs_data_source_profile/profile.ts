@@ -13,6 +13,7 @@ import {
   getCellRenderers,
   getRowIndicatorProvider,
   getRowAdditionalLeadingControls,
+  createGetAppMenu,
 } from './accessors';
 import { extractIndexPatternFrom } from '../../extract_index_pattern_from';
 
@@ -21,6 +22,7 @@ export const createLogsDataSourceProfileProvider = (
 ): DataSourceProfileProvider => ({
   profileId: 'logs-data-source-profile',
   profile: {
+    getAppMenu: createGetAppMenu(services),
     getCellRenderers,
     getRowIndicatorProvider,
     getRowAdditionalLeadingControls,
