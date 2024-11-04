@@ -5,13 +5,18 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { EuiFlexItem, type EuiFlexGroupProps, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/css';
 import { useVulnerabilitiesPreview } from '@kbn/cloud-security-posture/src/hooks/use_vulnerabilities_preview';
 import { buildEntityFlyoutPreviewQuery } from '@kbn/cloud-security-posture-common';
 import { getVulnerabilityStats, hasVulnerabilitiesData } from '@kbn/cloud-security-posture';
+import {
+  uiMetricService,
+  VULNERABILITIES_INSIGHT,
+} from '@kbn/cloud-security-posture-common/utils/ui_metrics';
+import { METRIC_TYPE } from '@kbn/analytics';
 import { InsightDistributionBar } from './insight_distribution_bar';
 import { FormattedCount } from '../../../../common/components/formatted_number';
 import { PreviewLink } from '../../../shared/components/preview_link';
@@ -48,6 +53,14 @@ export const VulnerabilitiesInsight: React.FC<VulnerabilitiesInsightProps> = ({
     enabled: true,
     pageSize: 1,
   });
+
+  useEffect(() => {
+    uiMetricService.trackUiMetric(
+      METRIC_TYPE.COUNT,
+      `${VULNERABILITIES_INSIGHT} instance id: ${dataTestSubj}`
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const { CRITICAL = 0, HIGH = 0, MEDIUM = 0, LOW = 0, NONE = 0 } = data?.count || {};
   const totalVulnerabilities = useMemo(

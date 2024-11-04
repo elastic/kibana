@@ -5,12 +5,17 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { EuiFlexItem, type EuiFlexGroupProps, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/css';
 import { useMisconfigurationPreview } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview';
 import { buildEntityFlyoutPreviewQuery } from '@kbn/cloud-security-posture-common';
+import {
+  MISCONFIGURATION_INSIGHT,
+  uiMetricService,
+} from '@kbn/cloud-security-posture-common/utils/ui_metrics';
+import { METRIC_TYPE } from '@kbn/analytics';
 import { InsightDistributionBar } from './insight_distribution_bar';
 import { getFindingsStats } from '../../../../cloud_security_posture/components/misconfiguration/misconfiguration_preview';
 import { FormattedCount } from '../../../../common/components/formatted_number';
@@ -53,6 +58,14 @@ export const MisconfigurationsInsight: React.FC<MisconfigurationsInsightProps> =
     enabled: true,
     pageSize: 1,
   });
+
+  useEffect(() => {
+    uiMetricService.trackUiMetric(
+      METRIC_TYPE.COUNT,
+      `${MISCONFIGURATION_INSIGHT} instance id: ${dataTestSubj}`
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const passedFindings = data?.count.passed || 0;
   const failedFindings = data?.count.failed || 0;
