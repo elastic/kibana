@@ -49,7 +49,7 @@ jest.mock('../ai_assistant', () => {
   };
 });
 
-jest.mock('../data_view_selector_field/use_data_views');
+jest.mock('../data_view_selector_field/use_data_view_list_items');
 
 const mockRedirectLegacyUrl = jest.fn();
 const mockGetLegacyUrlConflict = jest.fn();
