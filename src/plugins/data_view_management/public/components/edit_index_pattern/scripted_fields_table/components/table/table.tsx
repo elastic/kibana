@@ -162,7 +162,7 @@ class TableClass extends PureComponent<
 }
 
 export const Table = withEuiTablePersist(TableClass, {
-  tableId: 'scriptedFieldsTable',
+  tableId: 'dataViewsScriptedFields',
   pageSizeOptions: PAGE_SIZE_OPTIONS,
   initialPageSize: 10,
 });
