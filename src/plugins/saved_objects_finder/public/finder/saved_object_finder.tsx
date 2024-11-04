@@ -140,7 +140,7 @@ export class SavedObjectFinderUi extends React.Component<
     const savedObjects = response.hits
       .map((savedObject) => {
         const {
-          attributes: { name, title },
+          attributes: { name, title, description },
         } = savedObject;
         const titleToUse = typeof title === 'string' ? title : '';
         const nameToUse = name ? name : titleToUse;
@@ -150,6 +150,7 @@ export class SavedObjectFinderUi extends React.Component<
           title: titleToUse,
           name: nameToUse,
           simple: savedObject,
+          description,
         };
       })
       .filter((savedObject) => {
@@ -316,6 +317,19 @@ export class SavedObjectFinderUi extends React.Component<
             link
           );
         },
+      },
+      {
+        field: 'description',
+        name: i18n.translate('savedObjectsFinder.descriptionName', {
+          defaultMessage: 'Description',
+        }),
+        width: '40%',
+        description: i18n.translate('savedObjectsFinder.descriptionDescription', {
+          defaultMessage: 'Description of the saved object',
+        }),
+        dataType: 'string',
+        'data-test-subj': 'savedObjectFinderDescription',
+        render: (description) => description,
       },
       ...(tagColumn ? [tagColumn] : []),
     ];
