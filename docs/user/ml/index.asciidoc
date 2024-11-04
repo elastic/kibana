@@ -202,7 +202,7 @@ displays them together with a chart that shows the distribution of each category
 and an example document that matches the category.
 //end::log-pattern-analysis-intro[]
 
-You can find log pattern analysis under **{ml-app}** > **AIOps Labs** or by or using the <<kibana-navigation-search,global search field>>. 
+You can find log pattern analysis under **{ml-app}** > **AIOps Labs** or by using the <<kibana-navigation-search,global search field>>. 
 Here, you can select the {data-source} or saved search that you want to analyze, or in 
 **Discover** as an available action for any text field.
 
