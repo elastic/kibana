@@ -12,7 +12,34 @@ import {
   KnowledgeBaseEntryUpdateProps,
 } from '@kbn/elastic-assistant-common';
 import { EsKnowledgeBaseEntrySchema } from '../ai_assistant_data_clients/knowledge_base/types';
-
+const indexEntry: EsKnowledgeBaseEntrySchema = {
+  id: '1234',
+  '@timestamp': '2020-04-20T15:25:31.830Z',
+  created_at: '2020-04-20T15:25:31.830Z',
+  created_by: 'my_profile_uid',
+  updated_at: '2020-04-20T15:25:31.830Z',
+  updated_by: 'my_profile_uid',
+  name: 'test',
+  namespace: 'default',
+  type: 'index',
+  index: 'test',
+  field: 'test',
+  description: 'test',
+  query_description: 'test',
+  input_schema: [
+    {
+      field_name: 'test',
+      field_type: 'test',
+      description: 'test',
+    },
+  ],
+  users: [
+    {
+      name: 'my_username',
+      id: 'my_profile_uid',
+    },
+  ],
+};
 export const documentEntry: EsKnowledgeBaseEntrySchema = {
   id: '5678',
   '@timestamp': '2020-04-20T15:25:31.830Z',
@@ -35,7 +62,7 @@ export const documentEntry: EsKnowledgeBaseEntrySchema = {
   ],
 };
 
-export const getKnowledgeBaseEntrySearchEsMock = () => {
+export const getKnowledgeBaseEntrySearchEsMock = (src = 'document') => {
   const searchResponse: estypes.SearchResponse<EsKnowledgeBaseEntrySchema> = {
     took: 3,
     timed_out: false,
@@ -56,7 +83,7 @@ export const getKnowledgeBaseEntrySearchEsMock = () => {
           _id: '1',
           _index: '',
           _score: 0,
-          _source: documentEntry,
+          _source: src === 'document' ? documentEntry : indexEntry,
         },
       ],
     },

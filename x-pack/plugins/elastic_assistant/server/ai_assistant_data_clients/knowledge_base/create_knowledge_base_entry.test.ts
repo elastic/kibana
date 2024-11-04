@@ -77,6 +77,7 @@ describe('createKnowledgeBaseEntry', () => {
         namespace: 'test',
         users: [{ id: undefined, name: 'my_username' }],
         type: 'document',
+        semantic_text: 'test',
         source: 'test',
         text: 'test',
         name: 'test',
