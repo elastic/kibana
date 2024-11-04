@@ -186,7 +186,7 @@ export const RuleTypeList: React.FC<RuleTypeListProps> = ({
               <EuiToolTip
                 position="top"
                 content={i18n.translate(
-                  'alertsUIShared.components.ruleTypeModal.minimumRequiredLicenseMessage',
+                  'responseOpsRuleForm.components.ruleTypeModal.minimumRequiredLicenseMessage',
                   {
                     defaultMessage: 'This rule requires a {minimumLicenseRequired} license.',
                     values: {
