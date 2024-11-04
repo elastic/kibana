@@ -8,13 +8,14 @@ import expect from '@kbn/expect';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import { APIClientRequestParamsOf } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { RecursivePartial } from '@kbn/apm-plugin/typings/common';
+import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import { keyBy } from 'lodash';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 
-export default function ApiTest({ getService }: FtrProviderContext) {
+export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
+  const apiApi = getService('apmApi');
   const registry = getService('registry');
-  const apmApiClient = getService('apmApiClient');
-  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
+  const synthtrace = getService('synthtrace');
 
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
   const end = new Date('2021-01-01T00:15:00.000Z').getTime() - 1;
@@ -27,7 +28,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       APIClientRequestParamsOf<'GET /internal/apm/get_agents_per_service'>['params']
     >
   ) {
-    return await apmApiClient.readUser({
+    const client = await apiApi.createApmApiClient();
+    return await client.readUser({
       endpoint: 'GET /internal/apm/get_agents_per_service',
       params: {
         query: {
@@ -42,7 +44,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   }
 
-  registry.when('Agent explorer when data is not loaded', { config: 'basic', archives: [] }, () => {
+  registry.when('Agent explorer when data is not loaded', () => {
     it('handles empty state', async () => {
       const { status, body } = await callApi();
 
@@ -51,9 +53,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   });
 
-  registry.when('Agent explorer', { config: 'basic', archives: [] }, () => {
+  registry.when('Agent explorer', () => {
     describe('when data is loaded', () => {
+      let apmSynthtraceEsClient: ApmSynthtraceEsClient;
+
       before(async () => {
+        const version = (await synthtrace.apmSynthtraceKibanaClient.installApmPackage()).version;
+        apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient(version);
+
         const serviceOtelJava = apm
           .service({
             name: otelJavaServiceName,
