@@ -19,7 +19,7 @@ import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import { RuleDefinition } from './rule_definition';
 import { RuleType } from '@kbn/alerting-types';
 import { RuleTypeModel } from '../common/types';
-import { RuleSettingsFlappingFormProps } from '../rule_settings/rule_settings_flapping_form';
+import { RuleSettingsFlappingFormProps } from '@kbn/alerts-ui-shared/src/rule_settings/rule_settings_flapping_form';
 import { ALERT_FLAPPING_DETECTION_TITLE } from '../translations';
 import userEvent from '@testing-library/user-event';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -33,7 +33,7 @@ jest.mock('../constants/rule_flapping', () => ({
   IS_RULE_SPECIFIC_FLAPPING_ENABLED: true,
 }));
 
-jest.mock('../rule_settings/rule_settings_flapping_form', () => ({
+jest.mock('@kbn/alerts-ui-shared/src/rule_settings/rule_settings_flapping_form', () => ({
   RuleSettingsFlappingForm: (props: RuleSettingsFlappingFormProps) => (
     <div data-test-subj="ruleSettingsFlappingForm">
       <button

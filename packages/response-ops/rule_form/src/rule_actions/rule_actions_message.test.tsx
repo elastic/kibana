@@ -11,15 +11,19 @@ import React, { lazy } from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { RuleActionsMessage } from './rule_actions_message';
 import { RuleType } from '@kbn/alerting-types';
-import { ActionParamsProps, ActionTypeModel, RuleTypeModel } from '../../common';
-import { TypeRegistry } from '../../common/type_registry';
+import {
+  ActionParamsProps,
+  ActionTypeModel,
+  RuleTypeModel,
+  TypeRegistry,
+} from '@kbn/alerts-ui-shared';
 import {
   getAction,
   getActionType,
   getActionTypeModel,
   getConnector,
   getSystemAction,
-} from '../../common/test_utils/actions_test_utils';
+} from '../common/test_utils/actions_test_utils';
 import userEvent from '@testing-library/user-event';
 
 jest.mock('../hooks', () => ({

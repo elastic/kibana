@@ -10,7 +10,7 @@
 import { HttpSetup } from '@kbn/core/public';
 import type { AsApiContract, RewriteRequestCase } from '@kbn/actions-types';
 import type { RuleType } from '@kbn/triggers-actions-ui-types';
-import { BASE_ALERTING_API_PATH } from '../constants';
+import { BASE_ALERTING_API_PATH } from '../../constants';
 
 const rewriteResponseRes = (results: Array<AsApiContract<RuleType>>): RuleType[] => {
   return results.map((item) => rewriteBodyReq(item));

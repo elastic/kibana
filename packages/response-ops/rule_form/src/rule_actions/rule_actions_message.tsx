@@ -17,8 +17,9 @@ import {
   EuiSwitch,
 } from '@elastic/eui';
 import { ActionVariable, RuleActionParam } from '@kbn/alerting-types';
+import { ActionConnector, ActionConnectorMode } from '@kbn/alerts-ui-shared';
 import { useRuleFormState } from '../hooks';
-import { ActionConnector, ActionConnectorMode, RuleAction, RuleUiAction } from '../common';
+import { RuleAction, RuleUiAction } from '../common';
 import { getSelectedActionGroup } from '../utils';
 import { ACTION_USE_AAD_TEMPLATE_FIELDS_LABEL } from '../translations';
 

@@ -11,7 +11,7 @@ import React, { useReducer } from 'react';
 import { act, renderHook } from '@testing-library/react-hooks/dom';
 import { ruleFormStateReducer } from './rule_form_state_reducer';
 import { RuleFormState } from '../types';
-import { getAction } from '../../common/test_utils/actions_test_utils';
+import { getAction } from '../common/test_utils/actions_test_utils';
 
 jest.mock('../validation/validate_form', () => ({
   validateRuleBase: jest.fn(),

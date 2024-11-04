@@ -11,9 +11,8 @@ import React from 'react';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { RuleActionsConnectorsModal } from './rule_actions_connectors_modal';
-import { ActionConnector, ActionTypeModel } from '../common';
+import { ActionConnector, ActionTypeModel, TypeRegistry } from '@kbn/alerts-ui-shared';
 import { ActionType } from '@kbn/actions-types';
-import { TypeRegistry } from '../common/type_registry';
 import {
   getActionType,
   getActionTypeModel,

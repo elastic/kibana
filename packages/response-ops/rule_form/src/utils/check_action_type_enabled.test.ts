@@ -8,11 +8,11 @@
  */
 
 import { ActionType } from '@kbn/actions-types';
+import { PreConfiguredActionConnector } from '@kbn/alerts-ui-shared';
 import {
-  checkActionTypeEnabled,
   checkActionFormActionTypeEnabled,
+  checkActionTypeEnabled,
 } from './check_action_type_enabled';
-import { PreConfiguredActionConnector } from '../common';
 
 describe('checkActionTypeEnabled', () => {
   test(`returns isEnabled:true when action type isn't provided`, async () => {

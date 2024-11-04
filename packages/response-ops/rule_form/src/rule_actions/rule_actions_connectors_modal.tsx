@@ -30,7 +30,7 @@ import {
   EuiLoadingSpinner,
   EuiToolTip,
 } from '@elastic/eui';
-import { ActionConnector } from '../common/types';
+import { ActionConnector } from '@kbn/alerts-ui-shared';
 import { useRuleFormState } from '../hooks';
 import {
   ACTION_TYPE_MODAL_EMPTY_TEXT,

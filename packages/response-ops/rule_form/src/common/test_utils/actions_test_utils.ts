@@ -9,8 +9,13 @@
 
 import { ActionType } from '@kbn/actions-types';
 import { RuleSystemAction } from '@kbn/alerting-types';
-import { ActionConnector, ActionTypeModel, GenericValidationResult, RuleAction } from '../types';
-import { actionTypeRegistryMock } from './action_type_registry.mock';
+import {
+  ActionConnector,
+  ActionTypeModel,
+  GenericValidationResult,
+  RuleAction,
+} from '@kbn/alerts-ui-shared';
+import { actionTypeRegistryMock } from '@kbn/alerts-ui-shared/src/common/test_utils/action_type_registry.mock';
 
 export const getConnector = (
   id: string,

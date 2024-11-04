@@ -7,51 +7,50 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { Suspense, useMemo, useState, useCallback, useEffect } from 'react';
 import {
+  COLOR_MODES_STANDARD,
+  EuiAccordion,
+  EuiDescribedFormGroup,
   EuiEmptyPrompt,
-  EuiLoadingSpinner,
-  EuiSplitPanel,
+  EuiErrorBoundary,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiText,
-  EuiLink,
-  EuiDescribedFormGroup,
   EuiIconTip,
-  EuiAccordion,
+  EuiLink,
+  EuiLoadingSpinner,
   EuiPanel,
   EuiSpacer,
-  EuiErrorBoundary,
+  EuiSplitPanel,
+  EuiText,
   useEuiTheme,
-  COLOR_MODES_STANDARD,
 } from '@elastic/eui';
 import { RuleSpecificFlappingProperties } from '@kbn/alerting-types';
+import { RuleSettingsFlappingForm, RuleSettingsFlappingTitleTooltip } from '@kbn/alerts-ui-shared';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { AlertConsumers } from '@kbn/rule-data-utils';
+import React, { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
+import { ALERTING_FEATURE_ID, MULTI_CONSUMER_RULE_TYPE_IDS } from '../constants';
+import { IS_RULE_SPECIFIC_FLAPPING_ENABLED } from '../constants/rule_flapping';
+import { useRuleFormDispatch, useRuleFormState } from '../hooks';
 import {
-  DOC_LINK_TITLE,
-  LOADING_RULE_TYPE_PARAMS_TITLE,
-  SCHEDULE_TITLE,
-  SCHEDULE_DESCRIPTION_TEXT,
-  SCHEDULE_TOOLTIP_TEXT,
-  ALERT_DELAY_TITLE,
-  SCOPE_TITLE,
-  SCOPE_DESCRIPTION_TEXT,
   ADVANCED_OPTIONS_TITLE,
   ALERT_DELAY_DESCRIPTION_TEXT,
   ALERT_DELAY_HELP_TEXT,
-  ALERT_FLAPPING_DETECTION_TITLE,
+  ALERT_DELAY_TITLE,
   ALERT_FLAPPING_DETECTION_DESCRIPTION,
+  ALERT_FLAPPING_DETECTION_TITLE,
+  DOC_LINK_TITLE,
+  LOADING_RULE_TYPE_PARAMS_TITLE,
+  SCHEDULE_DESCRIPTION_TEXT,
+  SCHEDULE_TITLE,
+  SCHEDULE_TOOLTIP_TEXT,
+  SCOPE_DESCRIPTION_TEXT,
+  SCOPE_TITLE,
 } from '../translations';
+import { getAuthorizedConsumers } from '../utils';
 import { RuleAlertDelay } from './rule_alert_delay';
 import { RuleConsumerSelection } from './rule_consumer_selection';
 import { RuleSchedule } from './rule_schedule';
-import { useRuleFormState, useRuleFormDispatch } from '../hooks';
-import { ALERTING_FEATURE_ID, MULTI_CONSUMER_RULE_TYPE_IDS } from '../constants';
-import { getAuthorizedConsumers } from '../utils';
-import { RuleSettingsFlappingTitleTooltip } from '../rule_settings/rule_settings_flapping_title_tooltip';
-import { RuleSettingsFlappingForm } from '../rule_settings/rule_settings_flapping_form';
-import { IS_RULE_SPECIFIC_FLAPPING_ENABLED } from '../constants/rule_flapping';
 
 export const RuleDefinition = () => {
   const {

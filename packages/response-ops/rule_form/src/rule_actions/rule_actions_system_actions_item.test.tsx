@@ -11,14 +11,13 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { RuleType } from '@kbn/alerting-types';
 import userEvent from '@testing-library/user-event';
-import { TypeRegistry } from '../common/type_registry';
+import { ActionTypeModel, TypeRegistry } from '@kbn/alerts-ui-shared';
 import {
   getAction,
   getActionType,
   getActionTypeModel,
   getConnector,
 } from '../common/test_utils/actions_test_utils';
-import { ActionTypeModel } from '../common';
 import { RuleActionsMessageProps } from './rule_actions_message';
 import { RuleActionsSystemActionsItem } from './rule_actions_system_actions_item';
 

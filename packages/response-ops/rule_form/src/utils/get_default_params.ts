@@ -6,7 +6,8 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { ActionTypeModel, RuleTypeWithDescription } from '../common/types';
+
+import type { ActionTypeModel, RuleTypeWithDescription } from '@kbn/alerts-ui-shared';
 
 export const getDefaultParams = ({
   group,

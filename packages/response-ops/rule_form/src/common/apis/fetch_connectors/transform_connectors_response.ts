@@ -8,7 +8,7 @@
  */
 
 import { AsApiContract, RewriteRequestCase } from '@kbn/actions-types';
-import { ActionConnectorProps } from '../../types';
+import { ActionConnectorProps } from '@kbn/alerts-ui-shared';
 
 export const transformConnectorResponse = (
   results: Array<

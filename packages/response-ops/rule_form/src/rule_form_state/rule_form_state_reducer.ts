@@ -9,7 +9,7 @@
 
 import { RuleActionParams } from '@kbn/alerting-types';
 import { isEmpty, omit } from 'lodash';
-import { RuleFormActionsErrors, RuleFormParamsErrors, RuleUiAction } from '../../common';
+import { RuleFormActionsErrors, RuleFormParamsErrors, RuleUiAction } from '../common';
 import { RuleFormData, RuleFormState } from '../types';
 import { validateRuleBase, validateRuleParams } from '../validation';
 

@@ -8,12 +8,8 @@
  */
 
 export * from './create_rule';
-export * from './fetch_alerting_framework_health';
-export * from './fetch_alerts_fields';
 export * from './fetch_connector_types';
 export * from './fetch_connectors';
-export * from './fetch_rule_type_aad_template_fields';
 export * from './fetch_ui_config';
-export * from './fetch_ui_health_status';
 export * from './resolve_rule';
 export * from './update_rule';
