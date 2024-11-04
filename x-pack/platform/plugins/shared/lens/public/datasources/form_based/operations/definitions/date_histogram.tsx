@@ -233,6 +233,8 @@ export const dateHistogramOperation: OperationDefinition<
     const { interval } = getTimeZoneAndInterval(column, indexPattern);
     const calcAutoInterval = getCalculateAutoTimeExpression((key) => uiSettings.get(key));
 
+    const calcAutoInterval = getCalculateAutoTimeExpression((key) => uiSettings.get(key));
+
     if (interval === 'auto') {
       return `BUCKET(${sanitazeESQLInput(column.sourceField)}, ${mapToEsqlInterval(
         dateRange,
