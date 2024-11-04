@@ -147,12 +147,14 @@ export class SLOPlugin
         });
 
         plugins.embeddable.registerReactEmbeddableFactory(SLO_BURN_RATE_EMBEDDABLE_ID, async () => {
-          const deps = { ...coreStart, ...pluginsStart };
-
           const { getBurnRateEmbeddableFactory } = await import(
             './embeddable/slo/burn_rate/burn_rate_react_embeddable_factory'
           );
-          return getBurnRateEmbeddableFactory(deps);
+          return getBurnRateEmbeddableFactory({
+            coreStart,
+            pluginsStart,
+            sloClient,
+          });
         });
 
         const registerAsyncSloUiActions = async () => {
