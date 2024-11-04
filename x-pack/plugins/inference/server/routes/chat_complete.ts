@@ -7,9 +7,8 @@
 
 import { schema, Type } from '@kbn/config-schema';
 import type { CoreSetup, IRouter, Logger, RequestHandlerContext } from '@kbn/core/server';
-import { MessageRole } from '../../common/chat_complete';
-import type { ChatCompleteRequestBody } from '../../common/chat_complete/request';
-import { ToolCall, ToolChoiceType } from '../../common/chat_complete/tools';
+import { MessageRole, ToolCall, ToolChoiceType } from '@kbn/inference-common';
+import type { ChatCompleteRequestBody } from '../../common/http_apis';
 import { createInferenceClient } from '../inference_client';
 import { InferenceServerStart, InferenceStartDependencies } from '../types';
 import { observableIntoEventSourceStream } from '../util/observable_into_event_source_stream';
