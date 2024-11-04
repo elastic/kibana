@@ -171,6 +171,7 @@ export interface TaskRunnerContext {
   logger: Logger;
   maintenanceWindowsService: MaintenanceWindowsService;
   maxAlerts: number;
+  maxEphemeralActionsPerRule: number;
   ruleTypeRegistry: RuleTypeRegistry;
   rulesSettingsService: RulesSettingsService;
   savedObjects: SavedObjectsServiceStart;

@@ -69,6 +69,9 @@ export const configSchema = schema.object({
     interval: schema.string({ validate: validateDurationSchema, defaultValue: '5m' }),
     removalDelay: schema.string({ validate: validateDurationSchema, defaultValue: '1h' }),
   }),
+  maxEphemeralActionsPerAlert: schema.number({
+    defaultValue: DEFAULT_MAX_EPHEMERAL_ACTIONS_PER_ALERT,
+  }),
   enableFrameworkAlerts: schema.boolean({ defaultValue: true }),
   cancelAlertsOnRuleTimeout: schema.boolean({ defaultValue: true }),
   rules: rulesSchema,

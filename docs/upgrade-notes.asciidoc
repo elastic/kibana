@@ -1527,6 +1527,7 @@ The following Task Manager settings are deprecated:
 
 * `xpack.task_manager.ephemeral_tasks.enabled`
 * `xpack.task_manager.ephemeral_tasks.request_capacity`
+* `xpack.alerting.maxEphemeralActionsPerAlert`
 
 For more information, refer to {kibana-pull}154275[#154275].
 

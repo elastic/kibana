@@ -614,6 +614,7 @@ export class AlertingPlugin {
         logger,
       }),
       maxAlerts: this.config.rules.run.alerts.max,
+      maxEphemeralActionsPerRule: this.config.maxEphemeralActionsPerAlert,
       ruleTypeRegistry: this.ruleTypeRegistry!,
       rulesSettingsService: new RulesSettingsService({
         cacheInterval: this.config.rulesSettings.cacheInterval,
