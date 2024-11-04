@@ -231,7 +231,7 @@ export default function ({ getService }: FtrProviderContext) {
           it(`should error on [${trustedAppApiCall.method} if Windows signer field is used for Mac entry`, async () => {
             const body = trustedAppApiCall.getBody();
 
-            body.os_types = ['mac'];
+            body.os_types = ['macos'];
             body.entries = exceptionsGenerator.generateTrustedAppSignerEntry();
 
             await endpointPolicyManagerSupertest[trustedAppApiCall.method](trustedAppApiCall.path)
