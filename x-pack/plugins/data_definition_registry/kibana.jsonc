@@ -1,0 +1,17 @@
+{
+  "type": "plugin",
+  "id": "@kbn/data-definition-registry-plugin",
+  "owner": "@elastic/obs-knowledge-team",
+  "plugin": {
+    "id": "dataDefinitionRegistry",
+    "server": true,
+    "browser": true,
+    "configPath": ["xpack", "dataDefinitionRegistry"],
+    "requiredPlugins": [
+      
+    ],
+    "requiredBundles": [],
+    "optionalPlugins": [],
+    "extraPublicDirs": []
+  }
+}

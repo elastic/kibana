@@ -1,0 +1,17 @@
+{
+  "type": "plugin",
+  "id": "@kbn/data-definition-plugin",
+  "owner": "@elastic/obs-knowledge-team",
+  "plugin": {
+    "id": "dataDefinition",
+    "server": true,
+    "browser": true,
+    "configPath": ["xpack", "dataDefinition"],
+    "requiredPlugins": [
+      "dataDefinitionRegistry"
+    ],
+    "requiredBundles": [],
+    "optionalPlugins": [],
+    "extraPublicDirs": []
+  }
+}

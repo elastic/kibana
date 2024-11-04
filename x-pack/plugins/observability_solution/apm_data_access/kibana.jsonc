@@ -8,7 +8,7 @@
     "browser": false,
     "configPath": ["xpack", "apm_data_access"],
     "requiredPlugins": ["data"],
-    "optionalPlugins": ["security"],
+    "optionalPlugins": ["security", "dataDefinitionRegistry"],
     "requiredBundles": []
   }
 }

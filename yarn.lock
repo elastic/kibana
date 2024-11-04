@@ -4683,6 +4683,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/data-definition-plugin@link:x-pack/plugins/data_definition":
+  version "0.0.0"
+  uid ""
+
+"@kbn/data-definition-registry-plugin@link:x-pack/plugins/data_definition_registry":
+  version "0.0.0"
+  uid ""
+
 "@kbn/data-forge@link:x-pack/packages/kbn-data-forge":
   version "0.0.0"
   uid ""

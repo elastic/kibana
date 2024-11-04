@@ -421,6 +421,8 @@
     "@kbn/custom-integrations-plugin": "link:src/plugins/custom_integrations",
     "@kbn/dashboard-enhanced-plugin": "link:x-pack/plugins/dashboard_enhanced",
     "@kbn/dashboard-plugin": "link:src/plugins/dashboard",
+    "@kbn/data-definition-plugin": "link:x-pack/plugins/data_definition",
+    "@kbn/data-definition-registry-plugin": "link:x-pack/plugins/data_definition_registry",
     "@kbn/data-forge": "link:x-pack/packages/kbn-data-forge",
     "@kbn/data-plugin": "link:src/plugins/data",
     "@kbn/data-quality-plugin": "link:x-pack/plugins/data_quality",
