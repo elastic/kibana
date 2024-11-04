@@ -142,12 +142,18 @@ export const shareModalStrings = {
   getDraftSharePanelChangesWarning: () =>
     i18n.translate('dashboard.snapshotShare.panelChangesWarning', {
       defaultMessage:
-        'One or more panels on this dashboard have changed. Before generating a link, save the dashboard.',
+        'You are about to share a dashboard with unsaved changes, and the link may not work properly. Save the dashboard first to create a permanent link.',
     }),
-  getDraftShareWarning: () =>
+  getEmbedSharePanelChangesWarning: () =>
+    i18n.translate('dashboard.embedShare.draftWarning', {
+      defaultMessage:
+        'You are about to create an embedded dashboard with unsaved changes, and the embed code may not work properly. Save the dashboard first to create a permanent embedded dashboard.',
+    }),
+  getDraftShareWarning: (shareType: 'embed' | 'link') =>
     i18n.translate('dashboard.snapshotShare.draftWarning', {
       defaultMessage:
-        'This dashboard has unsaved changes. Consider saving your dashboard before generating the link.',
+        'This dashboard has unsaved changes. Consider saving your dashboard before generating the {shareType}.',
+      values: { shareType: shareType === 'embed' ? 'embed code' : 'link' },
     }),
 };
 
