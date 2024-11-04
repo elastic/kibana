@@ -35,7 +35,7 @@ import { FindResponse } from '../ai_assistant_data_clients/find';
 import { EsPromptsSchema } from '../ai_assistant_data_clients/prompts/types';
 import { AIAssistantDataClient } from '../ai_assistant_data_clients';
 import { MINIMUM_AI_ASSISTANT_LICENSE } from '../../common/constants';
-import { ESQL_DOCS_LOADED_QUERY } from './knowledge_base/constants';
+import { SECURITY_LABS_RESOURCE, SECURITY_LABS_LOADED_QUERY } from './knowledge_base/constants';
 import { buildResponse, getLlmType } from './utils';
 import {
   AgentExecutorParams,
@@ -436,15 +436,13 @@ export const langChainExecute = async ({
     executorParams
   );
 
-  const { esqlExists, isModelDeployed } = await getIsKnowledgeBaseEnabled(kbDataClient);
+  const isKnowledgeBaseInstalled = await getIsKnowledgeBaseInstalled(kbDataClient);
 
   telemetry.reportEvent(INVOKE_ASSISTANT_SUCCESS_EVENT.eventType, {
     actionTypeId,
     model: request.body.model,
-    // TODO rm actionTypeId check when llmClass for bedrock streaming is implemented
-    // tracked here: https://github.com/elastic/security-team/issues/7363
-    assistantStreamingEnabled: isStream && actionTypeId === '.gen-ai',
-    isEnabledKnowledgeBase: isModelDeployed && esqlExists,
+    assistantStreamingEnabled: isStream,
+    isEnabledKnowledgeBase: isKnowledgeBaseInstalled,
   });
   return response.ok<StreamResponseWithHeaders['body'] | StaticReturnType['body']>(result);
 };
@@ -671,23 +669,20 @@ export const isV2KnowledgeBaseEnabled = ({
  * Telemetry function to determine whether knowledge base has been installed
  * @param kbDataClient
  */
-export const getIsKnowledgeBaseEnabled = async (
+export const getIsKnowledgeBaseInstalled = async (
   kbDataClient?: AIAssistantKnowledgeBaseDataClient | null
-): Promise<{
-  esqlExists: boolean;
-  isModelDeployed: boolean;
-}> => {
-  let esqlExists = false;
+): Promise<boolean> => {
+  let securityLabsDocsExist = false;
   let isModelDeployed = false;
   if (kbDataClient != null) {
     try {
       isModelDeployed = await kbDataClient.isModelDeployed();
       if (isModelDeployed) {
-        esqlExists =
+        securityLabsDocsExist =
           (
             await kbDataClient.getKnowledgeBaseDocumentEntries({
-              query: ESQL_DOCS_LOADED_QUERY,
-              required: true,
+              kbResource: SECURITY_LABS_RESOURCE,
+              query: SECURITY_LABS_LOADED_QUERY,
             })
           ).length > 0;
       }
@@ -696,8 +691,5 @@ export const getIsKnowledgeBaseEnabled = async (
     }
   }
 
-  return {
-    esqlExists,
-    isModelDeployed,
-  };
+  return isModelDeployed && securityLabsDocsExist;
 };

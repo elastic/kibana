@@ -6,32 +6,17 @@
  */
 
 import pMap from 'p-map';
+import { buildIndexNameWithNamespace } from '../../../common/endpoint/utils/index_name_utilities';
 import type { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
 import { catchAndWrapError } from '../../endpoint/utils';
 import type { SimpleMemCacheInterface } from '../../endpoint/lib/simple_mem_cache';
 import { SimpleMemCache } from '../../endpoint/lib/simple_mem_cache';
 import {
+  DEFAULT_DIAGNOSTIC_INDEX_PATTERN,
   ENDPOINT_ACTION_RESPONSES_DS,
   ENDPOINT_HEARTBEAT_INDEX_PATTERN,
 } from '../../../common/endpoint/constants';
-import { DEFAULT_DIAGNOSTIC_INDEX } from '../../lib/telemetry/constants';
 import { stringify } from '../../endpoint/utils/stringify';
-
-const buildIndexNameWithNamespace = (
-  indexNamePrefixOrPattern: string,
-  namespace: string
-): string => {
-  if (indexNamePrefixOrPattern.endsWith('*')) {
-    const hasDash = indexNamePrefixOrPattern.endsWith('-*');
-    return `${indexNamePrefixOrPattern.substring(0, indexNamePrefixOrPattern.length - 1)}${
-      hasDash ? '' : '-'
-    }${namespace}`;
-  }
-
-  return `${indexNamePrefixOrPattern}${
-    indexNamePrefixOrPattern.endsWith('-') ? '' : '-'
-  }${namespace}`;
-};
 
 const cache = new SimpleMemCache({
   // Cache of created Datastreams last for 12h, at which point it is checked again.
@@ -81,7 +66,7 @@ export const createPolicyDataStreamsIfNeeded: PolicyDataStreamsCreator = async (
   const indicesToCreate: string[] = Array.from(
     Object.values(policyNamespaces.integrationPolicy).reduce<Set<string>>((acc, namespaceList) => {
       for (const namespace of namespaceList) {
-        acc.add(buildIndexNameWithNamespace(DEFAULT_DIAGNOSTIC_INDEX, namespace));
+        acc.add(buildIndexNameWithNamespace(DEFAULT_DIAGNOSTIC_INDEX_PATTERN, namespace));
         acc.add(buildIndexNameWithNamespace(ENDPOINT_ACTION_RESPONSES_DS, namespace));
 
         if (endpointServices.isServerless()) {
