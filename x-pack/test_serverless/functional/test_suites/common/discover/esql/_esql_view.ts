@@ -88,7 +88,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await testSubjects.missingOrFail('showQueryBarMenu');
         await testSubjects.missingOrFail('addFilter');
-        await testSubjects.existOrFail('dscViewModeToggle');
+        await testSubjects.missingOrFail('dscViewModeToggle');
         await testSubjects.existOrFail('dscViewModeDocumentButton');
         // when Lens suggests a table, we render an ESQL based histogram
         await testSubjects.existOrFail('unifiedHistogramChart');

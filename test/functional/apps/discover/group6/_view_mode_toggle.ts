@@ -125,7 +125,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           await discover.selectTextBaseLang();
 
-          await testSubjects.existOrFail('dscViewModeToggle');
+          await testSubjects.missingOrFail('dscViewModeToggle');
 
           if (!useLegacyTable) {
             await testSubjects.existOrFail('unifiedDataTableToolbar');
