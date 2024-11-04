@@ -5,31 +5,32 @@
  * 2.0.
  */
 
+import expect from '@kbn/expect';
 import { cleanup, generate, Dataset, PartialConfig } from '@kbn/data-forge';
+import type { InternalRequestHeader, RoleCredentials } from '@kbn/ftr-common-functional-services';
 import { Aggregators } from '@kbn/observability-plugin/common/custom_threshold_rule/types';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import { FIRED_ACTIONS_ID } from '@kbn/observability-plugin/server/lib/rules/custom_threshold/constants';
-import expect from '@kbn/expect';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
-import { createIndexConnector, createRule } from '../helpers/alerting_api_helper';
-import { createDataView, deleteDataView } from '../helpers/data_view';
-import {
-  waitForAlertInIndex,
-  waitForDocumentInIndex,
-  waitForRuleStatus,
-} from '../helpers/alerting_wait_for_helpers';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { ActionDocument } from './typings';
+import { kbnTestConfig } from '@kbn/test';
+import { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
+import { ActionDocument } from './types';
 
-// eslint-disable-next-line import/no-default-export
-export default function ({ getService }: FtrProviderContext) {
+export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const esClient = getService('es');
-  const supertest = getService('supertest');
+  const samlAuth = getService('samlAuth');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
+  const alertingApi = getService('alertingApi');
+  const dataViewApi = getService('dataViewApi');
   const logger = getService('log');
-  const retryService = getService('retry');
+  const config = getService('config');
+  const isServerless = config.get('serverless');
+  const expectedConsumer = isServerless ? 'observability' : 'logs';
+  let roleAuthc: RoleCredentials;
+  let internalReqHeader: InternalRequestHeader;
 
-  describe('Custom Threshold rule RATE - GROUP_BY - BYTES - FIRED', () => {
+  describe('RATE - GROUP_BY - BYTES - FIRED', () => {
     const CUSTOM_THRESHOLD_RULE_ALERT_INDEX = '.alerts-observability.threshold.alerts-default';
     const ALERT_ACTION_INDEX = 'alert-action-threshold';
     const DATE_VIEW = 'kbn-data-forge-fake_hosts.fake_hosts-*';
@@ -41,6 +42,8 @@ export default function ({ getService }: FtrProviderContext) {
     let alertId: string;
 
     before(async () => {
+      roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
+      internalReqHeader = samlAuth.getInternalRequestHeader();
       dataForgeConfig = {
         schedule: [
           {
@@ -60,57 +63,56 @@ export default function ({ getService }: FtrProviderContext) {
         },
       };
       dataForgeIndices = await generate({ client: esClient, config: dataForgeConfig, logger });
-      await waitForDocumentInIndex({
-        esClient,
+      await alertingApi.waitForDocumentInIndex({
         indexName: dataForgeIndices.join(','),
         docCountTarget: 270,
-        retryService,
-        logger,
       });
-      await createDataView({
-        supertest,
+      await dataViewApi.create({
         name: DATE_VIEW,
         id: DATA_VIEW_ID,
         title: DATE_VIEW,
-        logger,
+        roleAuthc,
       });
     });
 
     after(async () => {
-      await supertest.delete(`/api/alerting/rule/${ruleId}`).set('kbn-xsrf', 'foo');
-      await supertest.delete(`/api/actions/connector/${actionId}`).set('kbn-xsrf', 'foo');
+      await supertestWithoutAuth
+        .delete(`/api/alerting/rule/${ruleId}`)
+        .set(roleAuthc.apiKeyHeader)
+        .set(internalReqHeader);
+      await supertestWithoutAuth
+        .delete(`/api/actions/connector/${actionId}`)
+        .set(roleAuthc.apiKeyHeader)
+        .set(internalReqHeader);
       await esClient.deleteByQuery({
         index: CUSTOM_THRESHOLD_RULE_ALERT_INDEX,
         query: { term: { 'kibana.alert.rule.uuid': ruleId } },
       });
       await esClient.deleteByQuery({
         index: '.kibana-event-log-*',
-        query: { term: { 'kibana.alert.rule.consumer': 'logs' } },
+        query: { term: { 'kibana.alert.rule.consumer': expectedConsumer } },
       });
-      await deleteDataView({
-        supertest,
+      await dataViewApi.delete({
         id: DATA_VIEW_ID,
-        logger,
+        roleAuthc,
       });
       await esDeleteAllIndices([ALERT_ACTION_INDEX, ...dataForgeIndices]);
       await cleanup({ client: esClient, config: dataForgeConfig, logger });
+      await samlAuth.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
     describe('Rule creation', () => {
       it('creates rule successfully', async () => {
-        actionId = await createIndexConnector({
-          supertest,
+        actionId = await alertingApi.createIndexConnector({
+          roleAuthc,
           name: 'Index Connector: Threshold API test',
           indexName: ALERT_ACTION_INDEX,
-          logger,
         });
 
-        const createdRule = await createRule({
-          supertest,
-          logger,
-          esClient,
+        const createdRule = await alertingApi.createRule({
+          roleAuthc,
           tags: ['observability'],
-          consumer: 'logs',
+          consumer: expectedConsumer,
           name: 'Threshold rule',
           ruleTypeId: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
           params: {
@@ -165,23 +167,18 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should be active', async () => {
-        const executionStatus = await waitForRuleStatus({
-          id: ruleId,
+        const executionStatus = await alertingApi.waitForRuleStatus({
+          roleAuthc,
+          ruleId,
           expectedStatus: 'active',
-          supertest,
-          retryService,
-          logger,
         });
-        expect(executionStatus.status).to.be('active');
+        expect(executionStatus).to.be('active');
       });
 
       it('should set correct information in the alert document', async () => {
-        const resp = await waitForAlertInIndex({
-          esClient,
+        const resp = await alertingApi.waitForAlertInIndex({
           indexName: CUSTOM_THRESHOLD_RULE_ALERT_INDEX,
           ruleId,
-          retryService,
-          logger,
         });
         alertId = (resp.hits.hits[0]._source as any)['kibana.alert.uuid'];
 
@@ -189,7 +186,7 @@ export default function ({ getService }: FtrProviderContext) {
           'kibana.alert.rule.category',
           'Custom threshold'
         );
-        expect(resp.hits.hits[0]._source).property('kibana.alert.rule.consumer', 'logs');
+        expect(resp.hits.hits[0]._source).property('kibana.alert.rule.consumer', expectedConsumer);
         expect(resp.hits.hits[0]._source).property('kibana.alert.rule.name', 'Threshold rule');
         expect(resp.hits.hits[0]._source).property('kibana.alert.rule.producer', 'observability');
         expect(resp.hits.hits[0]._source).property('kibana.alert.rule.revision', 0);
@@ -256,16 +253,15 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should set correct action variables', async () => {
-        const resp = await waitForDocumentInIndex<ActionDocument>({
-          esClient,
+        const resp = await alertingApi.waitForDocumentInIndex<ActionDocument>({
           indexName: ALERT_ACTION_INDEX,
-          retryService,
-          logger,
+          docCountTarget: 1,
         });
 
+        const { protocol, hostname, port } = kbnTestConfig.getUrlPartsWithStrippedDefaultPort();
         expect(resp.hits.hits[0]._source?.ruleType).eql('observability.rules.custom_threshold');
         expect(resp.hits.hits[0]._source?.alertDetailsUrl).eql(
-          `https://localhost:5601/app/observability/alerts/${alertId}`
+          `${protocol}://${hostname}${port ? `:${port}` : ''}/app/observability/alerts/${alertId}`
         );
         expect(resp.hits.hits[0]._source?.reason).eql(
           `Rate of system.network.in.bytes is 60 kB/s, above or equal the threshold of 50 kB/s. (duration: 1 min, data view: kbn-data-forge-fake_hosts.fake_hosts-*, group: host-0,container-0)`
