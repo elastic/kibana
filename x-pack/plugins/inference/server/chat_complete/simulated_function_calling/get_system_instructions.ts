@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { ToolDefinition } from '@kbn/inference-common';
 import { TOOL_USE_END, TOOL_USE_START } from './constants';
-import { ToolDefinition } from '../../../common/chat_complete/tools';
 
 export function getSystemMessageInstructions({
   tools,
