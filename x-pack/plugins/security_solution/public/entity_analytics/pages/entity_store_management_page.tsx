@@ -252,6 +252,21 @@ export const EntityStoreManagementPage = () => {
     stopEntityEngineMutation.isLoading ||
     deleteEntityEngineMutation.isLoading;
 
+  const callouts = entityStoreStatus.errors.map((error) => (
+    <EuiCallOut
+      title={
+        <FormattedMessage
+          id="xpack.securitySolution.entityAnalytics.entityStoreManagementPage.errors.title"
+          defaultMessage={'An error occurred during entity store resource initialization'}
+        />
+      }
+      color="danger"
+      iconType="alert"
+    >
+      <p>{error.message}</p>
+    </EuiCallOut>
+  ));
+
   return (
     <>
       <EuiPageHeader
@@ -300,6 +315,39 @@ export const EntityStoreManagementPage = () => {
         <FileUploadSection />
         <EuiFlexItem grow={2}>
           <EuiFlexGroup direction="column">
+            {initEntityEngineMutation.isError && (
+              <EuiCallOut
+                title={
+                  <FormattedMessage
+                    id="xpack.securitySolution.entityAnalytics.entityStoreManagementPage.errors.initErrorTitle"
+                    defaultMessage={'There was a problem initializing the entity store'}
+                  />
+                }
+                color="danger"
+                iconType="alert"
+              >
+                <p>
+                  {(initEntityEngineMutation.error as { body: { message: string } }).body.message}
+                </p>
+              </EuiCallOut>
+            )}
+            {deleteEntityEngineMutation.isError && (
+              <EuiCallOut
+                title={
+                  <FormattedMessage
+                    id="xpack.securitySolution.entityAnalytics.entityStoreManagementPage.errors.deleteErrorTitle"
+                    defaultMessage={'There was a problem deleting the entity store'}
+                  />
+                }
+                color="danger"
+                iconType="alert"
+              >
+                <p>
+                  {(deleteEntityEngineMutation.error as { body: { message: string } }).body.message}
+                </p>
+              </EuiCallOut>
+            )}
+            {callouts}
             <WhatIsAssetCriticalityPanel />
             {!isEntityStoreFeatureFlagDisabled && canDeleteEntityEngine && <ClearEntityDataPanel />}
           </EuiFlexGroup>
