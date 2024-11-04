@@ -39,10 +39,6 @@ const allFunctions = memoize(
 
 export const TIME_SYSTEM_PARAMS = ['?_tstart', '?_tend'];
 
-export const getAddDateHistogramSnippet = (histogramBarTarget = 50) => {
-  return `BUCKET($0, ${histogramBarTarget}, ${TIME_SYSTEM_PARAMS.join(', ')})`;
-};
-
 export const TRIGGER_SUGGESTION_COMMAND = {
   title: 'Trigger Suggestion Dialog',
   id: 'editor.action.triggerSuggest',
@@ -61,7 +57,7 @@ function getSafeInsertSourceText(text: string) {
   return shouldBeQuotedSource(text) ? getQuotedText(text) : text;
 }
 
-export function getSuggestionFunctionDefinition(fn: FunctionDefinition): SuggestionRawDefinition {
+export function getFunctionSuggestion(fn: FunctionDefinition): SuggestionRawDefinition {
   const fullSignatures = getFunctionSignatures(fn, { capitalize: true, withTypes: true });
   return {
     label: fn.name.toUpperCase(),
@@ -95,31 +91,47 @@ export function getSuggestionBuiltinDefinition(fn: FunctionDefinition): Suggesti
   };
 }
 
-export const getCompatibleFunctionDefinition = (
-  command: string,
-  option: string | undefined,
-  returnTypes?: string[],
-  ignored: string[] = []
-): SuggestionRawDefinition[] => {
-  const fnSupportedByCommand = allFunctions()
-    .filter(
-      ({ name, supportedCommands, supportedOptions, ignoreAsSuggestion }) =>
-        (option ? supportedOptions?.includes(option) : supportedCommands.includes(command)) &&
-        !ignored.includes(name) &&
-        !ignoreAsSuggestion
-    )
-    .sort((a, b) => a.name.localeCompare(b.name));
-  if (!returnTypes) {
-    return fnSupportedByCommand.map(getSuggestionFunctionDefinition);
-  }
-  return fnSupportedByCommand
-    .filter((mathDefinition) =>
-      mathDefinition.signatures.some(
-        (signature) =>
-          returnTypes[0] === 'any' || returnTypes.includes(signature.returnType as string)
-      )
-    )
-    .map(getSuggestionFunctionDefinition);
+/**
+ * Builds suggestions for functions based on the provided predicates.
+ *
+ * @param predicates a set of conditions that must be met for a function to be included in the suggestions
+ * @returns
+ */
+export const getFunctionSuggestions = (predicates?: {
+  command?: string;
+  option?: string | undefined;
+  returnTypes?: string[];
+  ignored?: string[];
+}): SuggestionRawDefinition[] => {
+  const functions = allFunctions();
+  const { command, option, returnTypes, ignored = [] } = predicates ?? {};
+  const filteredFunctions: FunctionDefinition[] = functions.filter(
+    ({ name, supportedCommands, supportedOptions, ignoreAsSuggestion, signatures }) => {
+      if (ignoreAsSuggestion) {
+        return false;
+      }
+
+      if (ignored.includes(name)) {
+        return false;
+      }
+
+      if (option && !supportedOptions?.includes(option)) {
+        return false;
+      }
+
+      if (command && !supportedCommands.includes(command)) {
+        return false;
+      }
+
+      if (returnTypes && !returnTypes.includes('any')) {
+        return signatures.some((signature) => returnTypes.includes(signature.returnType as string));
+      }
+
+      return true;
+    }
+  );
+
+  return filteredFunctions.map(getFunctionSuggestion);
 };
 
 export function getSuggestionCommandDefinition(
@@ -253,7 +265,7 @@ export const buildValueDefinitions = (
     command: options?.advanceCursorAndOpenSuggestions ? TRIGGER_SUGGESTION_COMMAND : undefined,
   }));
 
-export const buildNewVarDefinition = (label: string): SuggestionRawDefinition => {
+export const getNewVariableSuggestion = (label: string): SuggestionRawDefinition => {
   return {
     label,
     text: `${label} = `,

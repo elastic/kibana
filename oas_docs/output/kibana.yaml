@@ -18244,7 +18244,6 @@ paths:
           name: kuery
           required: false
           schema:
-            deprecated: true
             type: string
       responses:
         '200':
@@ -18274,16 +18273,12 @@ paths:
                         type: number
                       other:
                         type: number
-                      total:
-                        deprecated: true
-                        type: number
                       unenrolled:
                         type: number
                       updating:
                         type: number
                     required:
                       - events
-                      - total
                       - online
                       - error
                       - offline
@@ -18387,41 +18382,6 @@ paths:
       summary: ''
       tags:
         - Elastic Agents
-  /api/fleet/agent-status:
-    get:
-      operationId: get-fleet-agent-status-2
-      parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
-        - in: query
-          name: policyId
-          required: false
-          schema:
-            type: string
-        - in: query
-          name: policyIds
-          required: false
-          schema:
-            anyOf:
-              - items:
-                  type: string
-                type: array
-              - type: string
-        - in: query
-          name: kuery
-          required: false
-          schema:
-            deprecated: true
-            type: string
-      responses: {}
-      summary: ''
-      tags: []
   /api/fleet/agents:
     get:
       description: List agents
@@ -18498,285 +18458,6 @@ paths:
                 type: object
                 properties:
                   items:
-                    items:
-                      additionalProperties: false
-                      type: object
-                      properties:
-                        access_api_key:
-                          type: string
-                        access_api_key_id:
-                          type: string
-                        active:
-                          type: boolean
-                        agent:
-                          additionalProperties: true
-                          type: object
-                          properties:
-                            id:
-                              type: string
-                            version:
-                              type: string
-                          required:
-                            - id
-                            - version
-                        components:
-                          items:
-                            additionalProperties: false
-                            type: object
-                            properties:
-                              id:
-                                type: string
-                              message:
-                                type: string
-                              status:
-                                enum:
-                                  - STARTING
-                                  - CONFIGURING
-                                  - HEALTHY
-                                  - DEGRADED
-                                  - FAILED
-                                  - STOPPING
-                                  - STOPPED
-                                type: string
-                              type:
-                                type: string
-                              units:
-                                items:
-                                  additionalProperties: false
-                                  type: object
-                                  properties:
-                                    id:
-                                      type: string
-                                    message:
-                                      type: string
-                                    payload:
-                                      additionalProperties: {}
-                                      type: object
-                                    status:
-                                      enum:
-                                        - STARTING
-                                        - CONFIGURING
-                                        - HEALTHY
-                                        - DEGRADED
-                                        - FAILED
-                                        - STOPPING
-                                        - STOPPED
-                                      type: string
-                                    type:
-                                      enum:
-                                        - input
-                                        - output
-                                      type: string
-                                  required:
-                                    - id
-                                    - type
-                                    - status
-                                    - message
-                                type: array
-                            required:
-                              - id
-                              - type
-                              - status
-                              - message
-                          type: array
-                        default_api_key:
-                          type: string
-                        default_api_key_history:
-                          items:
-                            additionalProperties: false
-                            deprecated: true
-                            type: object
-                            properties:
-                              id:
-                                type: string
-                              retired_at:
-                                type: string
-                            required:
-                              - id
-                              - retired_at
-                          type: array
-                        default_api_key_id:
-                          type: string
-                        enrolled_at:
-                          type: string
-                        id:
-                          type: string
-                        last_checkin:
-                          type: string
-                        last_checkin_message:
-                          type: string
-                        last_checkin_status:
-                          enum:
-                            - error
-                            - online
-                            - degraded
-                            - updating
-                            - starting
-                          type: string
-                        local_metadata:
-                          additionalProperties: {}
-                          type: object
-                        metrics:
-                          additionalProperties: false
-                          type: object
-                          properties:
-                            cpu_avg:
-                              type: number
-                            memory_size_byte_avg:
-                              type: number
-                        namespaces:
-                          items:
-                            type: string
-                          type: array
-                        outputs:
-                          additionalProperties:
-                            additionalProperties: false
-                            type: object
-                            properties:
-                              api_key_id:
-                                type: string
-                              to_retire_api_key_ids:
-                                items:
-                                  additionalProperties: false
-                                  type: object
-                                  properties:
-                                    id:
-                                      type: string
-                                    retired_at:
-                                      type: string
-                                  required:
-                                    - id
-                                    - retired_at
-                                type: array
-                              type:
-                                type: string
-                            required:
-                              - api_key_id
-                              - type
-                          type: object
-                        packages:
-                          items:
-                            type: string
-                          type: array
-                        policy_id:
-                          type: string
-                        policy_revision:
-                          nullable: true
-                          type: number
-                        sort:
-                          items:
-                            anyOf:
-                              - type: number
-                              - type: string
-                              - enum: []
-                                nullable: true
-                          type: array
-                        status:
-                          enum:
-                            - offline
-                            - error
-                            - online
-                            - inactive
-                            - enrolling
-                            - unenrolling
-                            - unenrolled
-                            - updating
-                            - degraded
-                          type: string
-                        tags:
-                          items:
-                            type: string
-                          type: array
-                        type:
-                          enum:
-                            - PERMANENT
-                            - EPHEMERAL
-                            - TEMPORARY
-                          type: string
-                        unenrolled_at:
-                          type: string
-                        unenrollment_started_at:
-                          type: string
-                        unhealthy_reason:
-                          items:
-                            enum:
-                              - input
-                              - output
-                              - other
-                            type: string
-                          nullable: true
-                          type: array
-                        upgrade_details:
-                          additionalProperties: false
-                          type: object
-                          properties:
-                            action_id:
-                              type: string
-                            metadata:
-                              additionalProperties: false
-                              type: object
-                              properties:
-                                download_percent:
-                                  type: number
-                                download_rate:
-                                  type: number
-                                error_msg:
-                                  type: string
-                                failed_state:
-                                  enum:
-                                    - UPG_REQUESTED
-                                    - UPG_SCHEDULED
-                                    - UPG_DOWNLOADING
-                                    - UPG_EXTRACTING
-                                    - UPG_REPLACING
-                                    - UPG_RESTARTING
-                                    - UPG_FAILED
-                                    - UPG_WATCHING
-                                    - UPG_ROLLBACK
-                                  type: string
-                                retry_error_msg:
-                                  type: string
-                                retry_until:
-                                  type: string
-                                scheduled_at:
-                                  type: string
-                            state:
-                              enum:
-                                - UPG_REQUESTED
-                                - UPG_SCHEDULED
-                                - UPG_DOWNLOADING
-                                - UPG_EXTRACTING
-                                - UPG_REPLACING
-                                - UPG_RESTARTING
-                                - UPG_FAILED
-                                - UPG_WATCHING
-                                - UPG_ROLLBACK
-                              type: string
-                            target_version:
-                              type: string
-                          required:
-                            - target_version
-                            - action_id
-                            - state
-                        upgrade_started_at:
-                          nullable: true
-                          type: string
-                        upgraded_at:
-                          nullable: true
-                          type: string
-                        user_provided_metadata:
-                          additionalProperties: {}
-                          type: object
-                      required:
-                        - id
-                        - packages
-                        - type
-                        - active
-                        - enrolled_at
-                        - local_metadata
-                    type: array
-                  list:
-                    deprecated: true
                     items:
                       additionalProperties: false
                       type: object
@@ -20090,43 +19771,6 @@ paths:
       summary: ''
       tags:
         - Elastic Agent actions
-    put:
-      operationId: put-fleet-agents-agentid-reassign
-      parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
-        - description: A required header to protect against CSRF attacks
-          in: header
-          name: kbn-xsrf
-          required: true
-          schema:
-            example: 'true'
-            type: string
-        - in: path
-          name: agentId
-          required: true
-          schema:
-            type: string
-      requestBody:
-        content:
-          application/json; Elastic-Api-Version=2023-10-31:
-            schema:
-              additionalProperties: false
-              type: object
-              properties:
-                policy_id:
-                  type: string
-              required:
-                - policy_id
-      responses: {}
-      summary: ''
-      tags: []
   /api/fleet/agents/{agentId}/request_diagnostics:
     post:
       description: Request agent diagnostics
@@ -36841,29 +36485,6 @@ paths:
       summary: ''
       tags:
         - Fleet service tokens
-  /api/fleet/service-tokens:
-    post:
-      description: Create a service token
-      operationId: post-fleet-service-tokens-2
-      parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
-        - description: A required header to protect against CSRF attacks
-          in: header
-          name: kbn-xsrf
-          required: true
-          schema:
-            example: 'true'
-            type: string
-      responses: {}
-      summary: ''
-      tags: []
   /api/fleet/settings:
     get:
       description: Get settings
@@ -41429,7 +41050,9 @@ paths:
         visualizations, data views, and saved searches, as required. You can
         request to overwrite any objects that already exist in the target space
         if they share an identifier or you can use the resolve copy saved
-        objects conflicts API to do this on a per-object basis.
+        objects conflicts API to do this on a per-object
+        basis.<br/><br/>[Required authorization] Route required privileges: ALL
+        of [copySavedObjectsToSpaces].
       operationId: post-spaces-copy-saved-objects
       parameters:
         - description: The version of the API to use
@@ -41618,7 +41241,8 @@ paths:
     post:
       description: >-
         Overwrite saved objects that are returned as errors from the copy saved
-        objects to space API.
+        objects to space API.<br/><br/>[Required authorization] Route required
+        privileges: ALL of [copySavedObjectsToSpaces].
       operationId: post-spaces-resolve-copy-saved-objects-errors
       parameters:
         - description: The version of the API to use

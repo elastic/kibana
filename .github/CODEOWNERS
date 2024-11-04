@@ -525,6 +525,7 @@ x-pack/plugins/index_management @elastic/kibana-management
 x-pack/packages/index-management/index_management_shared_types @elastic/kibana-management
 test/plugin_functional/plugins/index_patterns @elastic/kibana-data-discovery
 x-pack/packages/ml/inference_integration_flyout @elastic/ml-ui
+x-pack/packages/ai-infra/inference-common @elastic/appex-ai-infra
 x-pack/plugins/inference @elastic/appex-ai-infra
 x-pack/packages/kbn-infra-forge @elastic/obs-ux-management-team
 x-pack/plugins/observability_solution/infra @elastic/obs-ux-logs-team @elastic/obs-ux-infra_services-team
@@ -792,7 +793,6 @@ x-pack/packages/security/plugin_types_common @elastic/kibana-security
 x-pack/packages/security/plugin_types_public @elastic/kibana-security
 x-pack/packages/security/plugin_types_server @elastic/kibana-security
 x-pack/packages/security/role_management_model @elastic/kibana-security
-x-pack/packages/security-solution/common @elastic/security-threat-hunting-investigations
 x-pack/packages/security-solution/distribution_bar @elastic/kibana-cloud-security-posture
 x-pack/plugins/security_solution_ess @elastic/security-solution
 x-pack/packages/security-solution/features @elastic/security-threat-hunting-explore
@@ -1145,8 +1145,12 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 #CC# /x-pack/plugins/reporting/ @elastic/appex-sharedux
 #CC# /x-pack/plugins/security_solution_serverless/ @elastic/appex-sharedux
 
-### Observability Plugins
 
+# Observability UI
+/x-pack/test_serverless/api_integration/test_suites/observability/config.ts @elastic/observability-ui @elastic/appex-qa
+/x-pack/test_serverless/api_integration/test_suites/observability/index.ts @elastic/observability-ui
+
+### Observability Plugins
 
 # Observability AI Assistant
 x-pack/test/observability_ai_assistant_api_integration @elastic/obs-ai-assistant
@@ -1237,6 +1241,7 @@ x-pack/test_serverless/**/test_suites/observability/ai_assistant @elastic/obs-ai
 /x-pack/test/accessibility/apps/group3/stack_monitoring.ts @elastic/stack-monitoring
 
 # Fleet
+/x-pack/test_serverless/api_integration/test_suites/security/fleet @elastic/fleet
 /x-pack/test/fleet_packages @elastic/fleet
 /x-pack/test/fleet_api_integration @elastic/fleet
 /x-pack/test/fleet_cypress @elastic/fleet
@@ -1513,8 +1518,6 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 /x-pack/test/rule_registry @elastic/response-ops @elastic/obs-ux-management-team
 /x-pack/test/accessibility/apps/group3/rules_connectors.ts @elastic/response-ops
 /x-pack/test/functional/es_archives/cases/default @elastic/response-ops
-/x-pack/test_serverless/api_integration/test_suites/observability/config.ts @elastic/response-ops
-/x-pack/test_serverless/api_integration/test_suites/observability/index.ts @elastic/response-ops
 /x-pack/test_serverless/functional/page_objects/svl_triggers_actions_ui_page.ts @elastic/response-ops
 /x-pack/test_serverless/functional/page_objects/svl_rule_details_ui_page.ts @elastic/response-ops
 /x-pack/test_serverless/functional/page_objects/svl_oblt_overview_page.ts @elastic/response-ops
@@ -1618,6 +1621,7 @@ x-pack/test/api_integration/apis/management/index_management/inference_endpoints
 # Security Solution
 /x-pack/test/common/services/security_solution @elastic/security-solution
 /x-pack/test/api_integration/services/security_solution_*.gen.ts @elastic/security-solution
+/x-pack/test_serverless/functional/test_suites/security/index.feature_flags.ts @elastic/security-solution
 /x-pack/test/accessibility/apps/group3/security_solution.ts @elastic/security-solution
 /x-pack/test_serverless/functional/test_suites/security/config.ts @elastic/security-solution @elastic/appex-qa
 /x-pack/test_serverless/functional/test_suites/security/config.feature_flags.ts @elastic/security-solution

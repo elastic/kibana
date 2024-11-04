@@ -78,7 +78,7 @@ export function registerCelInputRoutes(router: IRouter<IntegrationAssistantRoute
           };
 
           const graph = await getCelGraph({ model });
-          const results = await graph.invoke(parameters, options);
+          const results = await graph.withConfig({ runName: 'CEL' }).invoke(parameters, options);
 
           return res.ok({ body: CelInputResponse.parse(results) });
         } catch (e) {

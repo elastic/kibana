@@ -290,6 +290,7 @@ describe('chatCompleteRoute', () => {
                 actionTypeId: '.gen-ai',
                 model: 'gpt-4',
                 assistantStreamingEnabled: false,
+                isEnabledKnowledgeBase: false,
               });
             }),
           };
