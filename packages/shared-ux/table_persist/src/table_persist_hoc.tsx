@@ -17,26 +17,23 @@ export interface EuiTablePersistInjectedProps<T> {
   pageSize: number;
 }
 
-export function withEuiTablePersist<T extends object, Props>(
-  WrappedComponent: React.ComponentType<Props & EuiTablePersistInjectedProps<T>>,
-  persistProps: EuiTablePersistProps<T>
+export function withEuiTablePersist<T extends object, Props extends object>(
+  WrappedComponent: React.ComponentType<
+    Props & { euiTablePersist: EuiTablePersistInjectedProps<T> }
+  >,
+  euiTablePersistDefault: EuiTablePersistProps<T>
 ) {
-  type HOCProps = Omit<Props, keyof EuiTablePersistInjectedProps<T>> &
-    Partial<EuiTablePersistProps<T>>;
+  type HOCProps = Omit<Props, 'euiTablePersistProps'> & {
+    euiTablePersistProps: Partial<EuiTablePersistProps<T>>;
+  };
 
   const HOC: React.FC<HOCProps> = (props) => {
-    const mergedProps = { ...persistProps, ...props };
+    const mergedProps = { ...euiTablePersistDefault, ...props.euiTablePersistProps };
 
-    const {
-      tableId,
-      customOnTableChange,
-      initialSort,
-      initialPageSize,
-      pageSizeOptions,
-      ...restProps
-    } = mergedProps;
+    const { tableId, customOnTableChange, initialSort, initialPageSize, pageSizeOptions } =
+      mergedProps;
 
-    const { pageSize, sorting, onTableChange } = useEuiTablePersist<T>({
+    const euiTablePersist = useEuiTablePersist<T>({
       tableId,
       customOnTableChange,
       initialSort,
@@ -44,15 +41,9 @@ export function withEuiTablePersist<T extends object, Props>(
       pageSizeOptions,
     });
 
-    // Render the wrapped component with the injected props from `useEuiTablePersist`
-    return (
-      <WrappedComponent
-        {...(restProps as Props)}
-        pageSize={pageSize}
-        sorting={sorting}
-        onTableChange={onTableChange}
-      />
-    );
+    const { euiTablePersistProps, ...rest } = props;
+
+    return <WrappedComponent {...(rest as Props)} euiTablePersist={euiTablePersist} />;
   };
 
   return HOC;

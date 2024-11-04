@@ -31,6 +31,8 @@ import {
 } from '@kbn/shared-ux-table-persist/src';
 import { DataViewRow, DataViewColumn } from '../types';
 
+const PAGE_SIZE_OPTIONS = [10, 20, 50];
+
 interface DataTableFormatState {
   columns: DataViewColumn[];
   rows: DataViewRow[];
@@ -54,7 +56,7 @@ interface RenderCellArguments {
 }
 
 class DataTableFormatClass extends Component<
-  DataTableFormatProps & EuiTablePersistInjectedProps<DatatableRow>,
+  DataTableFormatProps & { euiTablePersist: EuiTablePersistInjectedProps<DatatableRow> },
   DataTableFormatState
 > {
   static propTypes = {
@@ -193,9 +195,9 @@ class DataTableFormatClass extends Component<
 
   render() {
     const { columns, rows } = this.state;
-    const { pageSize, sorting, onTableChange } = this.props;
+    const { pageSize, sorting, onTableChange } = this.props.euiTablePersist;
     const pagination = {
-      pageSizeOptions: [10, 20, 50],
+      pageSizeOptions: PAGE_SIZE_OPTIONS,
       initialPageSize: pageSize,
     };
 
@@ -228,6 +230,6 @@ class DataTableFormatClass extends Component<
 
 export const DataTableFormat = withEuiTablePersist(DataTableFormatClass, {
   tableId: 'inspectorDataTable',
-  pageSizeOptions: [10, 20, 50],
+  pageSizeOptions: PAGE_SIZE_OPTIONS,
   initialPageSize: 20,
 });
