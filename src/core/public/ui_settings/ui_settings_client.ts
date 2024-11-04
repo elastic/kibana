@@ -104,7 +104,7 @@ You can use \`IUiSettingsClient.get("${key}", defaultValue)\`, which will just r
 
   isDeclared(key: string) {
     return (
-      // @ts-ignore
+      // @ts-expect-error
       (key !== '__proto__' || key !== 'constructor' || key !== 'prototype') && key in this.cache
     );
   }
