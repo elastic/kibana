@@ -31,7 +31,7 @@ export interface ServerlessSearchPluginSetupDependencies {
   management: ManagementSetup;
   serverless: ServerlessPluginSetup;
   discover: DiscoverSetup;
-  searchIndices?: SearchIndicesPluginSetup;
+  searchIndices: SearchIndicesPluginSetup;
 }
 
 export interface ServerlessSearchPluginStartDependencies {
@@ -44,5 +44,5 @@ export interface ServerlessSearchPluginStartDependencies {
   serverless: ServerlessPluginStart;
   share: SharePluginStart;
   indexManagement?: IndexManagementPluginStart;
-  searchIndices?: SearchIndicesPluginStart;
+  searchIndices: SearchIndicesPluginStart;
 }

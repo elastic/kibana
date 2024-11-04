@@ -9,8 +9,7 @@ import type { LogFormatDetectionState } from '../../types';
 import { LOG_FORMAT_DETECTION_PROMPT } from './prompts';
 import type { LogDetectionNodeParams } from './types';
 import { SamplesFormat } from '../../../common';
-
-const MaxLogSamplesInPrompt = 5;
+import { LOG_FORMAT_DETECTION_SAMPLE_ROWS } from '../../../common/constants';
 
 export async function handleLogFormatDetection({
   state,
@@ -20,13 +19,13 @@ export async function handleLogFormatDetection({
   const logFormatDetectionNode = LOG_FORMAT_DETECTION_PROMPT.pipe(model).pipe(outputParser);
 
   const samples =
-    state.logSamples.length > MaxLogSamplesInPrompt
-      ? state.logSamples.slice(0, MaxLogSamplesInPrompt)
+    state.logSamples.length > LOG_FORMAT_DETECTION_SAMPLE_ROWS
+      ? state.logSamples.slice(0, LOG_FORMAT_DETECTION_SAMPLE_ROWS)
       : state.logSamples;
 
   const logFormatDetectionResult = await logFormatDetectionNode.invoke({
     ex_answer: state.exAnswer,
-    log_samples: samples,
+    log_samples: samples.join('\n'),
     package_title: state.packageTitle,
     datastream_title: state.dataStreamTitle,
   });

@@ -37,7 +37,7 @@ export function defineOIDCRoutes({
       {
         path,
         validate: false,
-        options: { authRequired: false },
+        options: { authRequired: false, excludeFromOAS: true },
       },
       (context, request, response) => {
         const serverBasePath = basePath.serverBasePath;
@@ -68,7 +68,7 @@ export function defineOIDCRoutes({
     {
       path: '/internal/security/oidc/implicit.js',
       validate: false,
-      options: { authRequired: false },
+      options: { authRequired: false, excludeFromOAS: true },
     },
     (context, request, response) => {
       const serverBasePath = basePath.serverBasePath;
@@ -106,7 +106,12 @@ export function defineOIDCRoutes({
             { unknowns: 'allow' }
           ),
         },
-        options: { authRequired: false, tags: [ROUTE_TAG_CAN_REDIRECT, ROUTE_TAG_AUTH_FLOW] },
+        options: {
+          access: 'public',
+          excludeFromOAS: true,
+          authRequired: false,
+          tags: [ROUTE_TAG_CAN_REDIRECT, ROUTE_TAG_AUTH_FLOW],
+        },
       },
       createLicensedRouteHandler(async (context, request, response) => {
         const serverBasePath = basePath.serverBasePath;
@@ -184,6 +189,8 @@ export function defineOIDCRoutes({
           ),
         },
         options: {
+          access: 'public',
+          excludeFromOAS: true,
           authRequired: false,
           xsrfRequired: false,
           tags: [ROUTE_TAG_CAN_REDIRECT, ROUTE_TAG_AUTH_FLOW],
@@ -227,6 +234,8 @@ export function defineOIDCRoutes({
         ),
       },
       options: {
+        access: 'public',
+        excludeFromOAS: true,
         authRequired: false,
         tags: [ROUTE_TAG_CAN_REDIRECT, ROUTE_TAG_AUTH_FLOW],
       },

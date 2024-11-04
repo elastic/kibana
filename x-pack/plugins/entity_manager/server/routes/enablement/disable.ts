@@ -49,7 +49,7 @@ export const disableEntityDiscoveryRoute = createEntityManagerServerRoute({
       deleteData: z.optional(BooleanFromString).default(false),
     }),
   }),
-  handler: async ({ context, response, params, logger, server }) => {
+  handler: async ({ context, request, response, params, logger, server, getScopedClient }) => {
     try {
       const esClientAsCurrentUser = (await context.core).elasticsearch.client.asCurrentUser;
       const canDisable = await canDisableEntityDiscovery(esClientAsCurrentUser);
@@ -62,19 +62,18 @@ export const disableEntityDiscoveryRoute = createEntityManagerServerRoute({
         });
       }
 
-      const esClient = (await context.core).elasticsearch.client.asSecondaryAuthUser;
+      const entityClient = await getScopedClient({ request });
       const soClient = (await context.core).savedObjects.getClient({
         includedHiddenTypes: [EntityDiscoveryApiKeyType.name],
       });
 
+      logger.info('Disabling managed entity discovery');
       await uninstallBuiltInEntityDefinitions({
-        soClient,
-        esClient,
-        logger,
+        entityClient,
         deleteData: params.query.deleteData,
       });
 
-      server.logger.debug('reading entity discovery API key from saved object');
+      logger.debug('reading entity discovery API key from saved object');
       const apiKey = await readEntityDiscoveryAPIKey(server);
       // api key could be deleted outside of the apis, it does not affect the
       // disablement flow
@@ -84,6 +83,7 @@ export const disableEntityDiscoveryRoute = createEntityManagerServerRoute({
           ids: [apiKey.id],
         });
       }
+      logger.info('Managed entity discovery is disabled');
 
       return response.ok({ body: { success: true } });
     } catch (err) {

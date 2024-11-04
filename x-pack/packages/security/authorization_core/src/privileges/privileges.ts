@@ -17,6 +17,7 @@ import {
   isMinimalPrivilegeId,
 } from '@kbn/security-authorization-core-common';
 import type { RawKibanaPrivileges, SecurityLicense } from '@kbn/security-plugin-types-common';
+import { ApiOperation } from '@kbn/security-plugin-types-server';
 
 import { featurePrivilegeBuilderFactory } from './feature_privilege_builder';
 import type { Actions } from '../actions';
@@ -210,10 +211,10 @@ export function privilegesFactory(
         global: {
           all: [
             actions.login,
-            actions.api.get('decryptedTelemetry'),
-            actions.api.get('features'),
-            actions.api.get('taskManager'),
-            actions.api.get('manageSpaces'),
+            actions.api.get(ApiOperation.Read, 'decryptedTelemetry'),
+            actions.api.get(ApiOperation.Read, 'features'),
+            actions.api.get(ApiOperation.Manage, 'taskManager'),
+            actions.api.get(ApiOperation.Manage, 'spaces'),
             actions.space.manage,
             actions.ui.get('spaces', 'manage'),
             actions.ui.get('management', 'kibana', 'spaces'),
@@ -225,7 +226,7 @@ export function privilegesFactory(
           ],
           read: [
             actions.login,
-            actions.api.get('decryptedTelemetry'),
+            actions.api.get(ApiOperation.Read, 'decryptedTelemetry'),
             actions.ui.get('globalSettings', 'show'),
             ...readActions,
           ],

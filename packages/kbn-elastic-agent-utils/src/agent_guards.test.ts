@@ -8,6 +8,7 @@
  */
 
 import {
+  getAgentName,
   hasOpenTelemetryPrefix,
   isAndroidAgentName,
   isAWSLambdaAgentName,
@@ -118,5 +119,17 @@ describe('Agents guards', () => {
   it('isAzureFunctionsAgentName should guard if the passed agent is an AzureFunctions one.', () => {
     expect(isAzureFunctionsAgentName('azure.functions')).toBe(true);
     expect(isAzureFunctionsAgentName('not-an-agent')).toBe(false);
+  });
+
+  it('getAgentName returns agent name by default', () => {
+    expect(getAgentName('nodejs', 'go', 'otlp')).toBe('nodejs');
+  });
+
+  it('getAgentName returns telemetry sdk name and telemetry agent name if agent name is not defined', () => {
+    expect(getAgentName(null, 'go', 'otlp')).toBe('otlp/go');
+  });
+
+  it('getAgentName returns telemetry agent name if agent name and telemetry sdk are not defined', () => {
+    expect(getAgentName(null, 'go', null)).toBe('go');
   });
 });

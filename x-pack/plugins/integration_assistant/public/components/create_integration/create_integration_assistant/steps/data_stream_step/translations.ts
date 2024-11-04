@@ -110,11 +110,6 @@ export const LOGS_SAMPLE_DESCRIPTION = i18n.translate(
     defaultMessage: 'Drag and drop a file or Browse files.',
   }
 );
-export const LOGS_SAMPLE_TRUNCATED = (maxRows: number) =>
-  i18n.translate('xpack.integrationAssistant.step.dataStream.logsSample.truncatedWarning', {
-    values: { maxRows },
-    defaultMessage: `The logs sample has been truncated to {maxRows} rows.`,
-  });
 export const LOGS_SAMPLE_ERROR = {
   CAN_NOT_READ: i18n.translate(
     'xpack.integrationAssistant.step.dataStream.logsSample.errorCanNotRead',

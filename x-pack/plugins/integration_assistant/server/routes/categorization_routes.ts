@@ -22,7 +22,7 @@ import { buildRouteValidationWithZod } from '../util/route_validation';
 import { withAvailability } from './with_availability';
 import { isErrorThatHandlesItsOwnResponse } from '../lib/errors';
 import { handleCustomErrors } from './routes_util';
-import { GenerationErrorCode } from '../../common/constants';
+import { CATEGORIZATION_RECURSION_LIMIT, GenerationErrorCode } from '../../common/constants';
 
 export function registerCategorizationRoutes(
   router: IRouter<IntegrationAssistantRouteHandlerContext>
@@ -91,6 +91,7 @@ export function registerCategorizationRoutes(
               samplesFormat,
             };
             const options = {
+              recursionLimit: CATEGORIZATION_RECURSION_LIMIT,
               callbacks: [
                 new APMTracer({ projectName: langSmithOptions?.projectName ?? 'default' }, logger),
                 ...getLangSmithTracer({ ...langSmithOptions, logger }),
@@ -98,7 +99,9 @@ export function registerCategorizationRoutes(
             };
 
             const graph = await getCategorizationGraph({ client, model });
-            const results = await graph.invoke(parameters, options);
+            const results = await graph
+              .withConfig({ runName: 'Categorization' })
+              .invoke(parameters, options);
 
             return res.ok({ body: CategorizationResponse.parse(results) });
           } catch (err) {

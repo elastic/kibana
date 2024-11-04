@@ -11,6 +11,7 @@ import type {
   GetNotesResponse,
   PersistNoteRouteResponse,
 } from '../../../common/api/timeline';
+import type { AssociatedFilter } from '../../../common/notes/constants';
 import { KibanaServices } from '../../common/lib/kibana';
 import { NOTE_URL } from '../../../common/constants';
 
@@ -42,6 +43,8 @@ export const fetchNotes = async ({
   sortField,
   sortOrder,
   filter,
+  createdByFilter,
+  associatedFilter,
   search,
 }: {
   page: number;
@@ -49,6 +52,8 @@ export const fetchNotes = async ({
   sortField: string;
   sortOrder: string;
   filter: string;
+  createdByFilter: string;
+  associatedFilter: AssociatedFilter;
   search: string;
 }) => {
   const response = await KibanaServices.get().http.get<GetNotesResponse>(NOTE_URL, {
@@ -58,6 +63,8 @@ export const fetchNotes = async ({
       sortField,
       sortOrder,
       filter,
+      createdByFilter,
+      associatedFilter,
       search,
     },
     version: '2023-10-31',

@@ -21,10 +21,7 @@ export function createInstallApiKey(name: string): CreateAPIKeyParams {
     },
     kibana_role_descriptors: {
       can_install_integrations: {
-        elasticsearch: {
-          cluster: [],
-          indices: [],
-        },
+        elasticsearch: {},
         kibana: [
           {
             feature: {

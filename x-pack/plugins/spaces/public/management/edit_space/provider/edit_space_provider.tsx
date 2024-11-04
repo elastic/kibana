@@ -15,6 +15,7 @@ import React, {
   useEffect,
   useReducer,
   useRef,
+  useState,
 } from 'react';
 
 import type { ApplicationStart } from '@kbn/core-application-browser';
@@ -23,6 +24,7 @@ import type { Logger } from '@kbn/logging';
 import type {
   PrivilegesAPIClientPublicContract,
   RolesAPIClient,
+  SecurityLicense,
 } from '@kbn/security-plugin-types-public';
 
 import {
@@ -32,7 +34,7 @@ import {
 } from './reducers';
 import type { SpacesManager } from '../../../spaces_manager';
 
-export interface EditSpaceProviderProps
+export interface EditSpaceProviderRootProps
   extends Pick<CoreStart, 'theme' | 'i18n' | 'overlays' | 'http' | 'notifications'> {
   logger: Logger;
   capabilities: ApplicationStart['capabilities'];
@@ -40,18 +42,29 @@ export interface EditSpaceProviderProps
   navigateToUrl: ApplicationStart['navigateToUrl'];
   serverBasePath: string;
   spacesManager: SpacesManager;
+  getIsRoleManagementEnabled: () => Promise<() => boolean | undefined>;
   getRolesAPIClient: () => Promise<RolesAPIClient>;
   getPrivilegesAPIClient: () => Promise<PrivilegesAPIClientPublicContract>;
-}
-
-export interface EditSpaceServices extends EditSpaceProviderProps {
-  invokeClient<R extends unknown>(arg: (clients: EditSpaceClients) => Promise<R>): Promise<R>;
+  getSecurityLicense: () => Promise<SecurityLicense>;
 }
 
 interface EditSpaceClients {
   spacesManager: SpacesManager;
   rolesClient: RolesAPIClient;
   privilegesClient: PrivilegesAPIClientPublicContract;
+}
+
+export interface EditSpaceServices
+  extends Omit<
+    EditSpaceProviderRootProps,
+    | 'getRolesAPIClient'
+    | 'getPrivilegesAPIClient'
+    | 'getSecurityLicense'
+    | 'getIsRoleManagementEnabled'
+  > {
+  invokeClient<R extends unknown>(arg: (clients: EditSpaceClients) => Promise<R>): Promise<R>;
+  license?: SecurityLicense;
+  isRoleManagementEnabled: boolean;
 }
 
 export interface EditSpaceStore {
@@ -63,16 +76,50 @@ const createSpaceRolesContext = once(() => createContext<EditSpaceStore | null>(
 
 const createEditSpaceServicesContext = once(() => createContext<EditSpaceServices | null>(null));
 
+/**
+ *
+ * @description EditSpaceProvider is a provider component that wraps the children components with the necessary context providers for the Edit Space feature. It provides the necessary services and state management for the feature,
+ * this is provided as an export for use with out of band renders within the spaces app
+ */
 export const EditSpaceProvider = ({
   children,
+  state,
+  dispatch,
   ...services
-}: PropsWithChildren<EditSpaceProviderProps>) => {
+}: PropsWithChildren<EditSpaceServices & EditSpaceStore>) => {
   const EditSpaceStoreContext = createSpaceRolesContext();
   const EditSpaceServicesContext = createEditSpaceServicesContext();
 
-  const clients = useRef(
-    Promise.all([services.getRolesAPIClient(), services.getPrivilegesAPIClient()])
+  return (
+    <EditSpaceServicesContext.Provider value={services}>
+      <EditSpaceStoreContext.Provider value={{ state, dispatch }}>
+        {children}
+      </EditSpaceStoreContext.Provider>
+    </EditSpaceServicesContext.Provider>
   );
+};
+
+/**
+ * @description EditSpaceProviderRoot is the root provider for the Edit Space feature. It instantiates the necessary services and state management for the feature. It ideally
+ * should only be rendered once
+ */
+export const EditSpaceProviderRoot = ({
+  children,
+  ...services
+}: PropsWithChildren<EditSpaceProviderRootProps>) => {
+  const {
+    logger,
+    getRolesAPIClient,
+    getPrivilegesAPIClient,
+    getSecurityLicense,
+    getIsRoleManagementEnabled,
+  } = services;
+
+  const [isRoleManagementEnabled, setIsRoleManagementEnabled] = useState<boolean>(false);
+  const clients = useRef(Promise.all([getRolesAPIClient(), getPrivilegesAPIClient()]));
+  const license = useRef(getSecurityLicense);
+
+  const licenseRef = useRef<SecurityLicense>();
   const rolesAPIClientRef = useRef<RolesAPIClient>();
   const privilegesClientRef = useRef<PrivilegesAPIClientPublicContract>();
 
@@ -81,7 +128,14 @@ export const EditSpaceProvider = ({
     fetchRolesError: false,
   });
 
-  const { logger } = services;
+  const resolveSecurityLicense = useCallback(async () => {
+    try {
+      licenseRef.current = await license.current();
+    } catch (err) {
+      logger.error('Could not resolve Security License!', err);
+    }
+  }, [logger]);
+
   const resolveAPIClients = useCallback(async () => {
     try {
       [rolesAPIClientRef.current, privilegesClientRef.current] = await clients.current;
@@ -93,6 +147,10 @@ export const EditSpaceProvider = ({
   useEffect(() => {
     resolveAPIClients();
   }, [resolveAPIClients]);
+
+  useEffect(() => {
+    resolveSecurityLicense();
+  }, [resolveSecurityLicense]);
 
   const createInitialState = useCallback((state: IEditSpaceStoreState) => {
     return state;
@@ -117,12 +175,24 @@ export const EditSpaceProvider = ({
     [resolveAPIClients, services.spacesManager]
   );
 
+  getIsRoleManagementEnabled().then((isEnabledFunction) => {
+    const result = isEnabledFunction();
+    setIsRoleManagementEnabled(typeof result === 'undefined' || result);
+  });
+
   return (
-    <EditSpaceServicesContext.Provider value={{ ...services, invokeClient }}>
-      <EditSpaceStoreContext.Provider value={{ state, dispatch }}>
-        {children}
-      </EditSpaceStoreContext.Provider>
-    </EditSpaceServicesContext.Provider>
+    <EditSpaceProvider
+      {...{
+        ...services,
+        invokeClient,
+        state,
+        dispatch,
+        license: licenseRef.current,
+        isRoleManagementEnabled,
+      }}
+    >
+      {children}
+    </EditSpaceProvider>
   );
 };
 

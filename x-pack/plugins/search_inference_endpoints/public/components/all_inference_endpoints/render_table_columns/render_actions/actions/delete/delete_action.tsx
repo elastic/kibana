@@ -8,6 +8,7 @@
 import { EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
+import { isEndpointPreconfigured } from '../../../../../../utils/preconfigured_endpoint_helper';
 import { useDeleteEndpoint } from '../../../../../../hooks/use_delete_endpoint';
 import { InferenceEndpointUI } from '../../../../types';
 import { ConfirmDeleteEndpointModal } from './confirm_delete_endpoint';
@@ -39,6 +40,8 @@ export const DeleteAction: React.FC<DeleteActionProps> = ({ selectedEndpoint }) 
           defaultMessage: 'Delete inference endpoint {selectedEndpointName}',
           values: { selectedEndpointName: selectedEndpoint.endpoint },
         })}
+        data-test-subj="inferenceUIDeleteAction"
+        disabled={isEndpointPreconfigured(selectedEndpoint.endpoint)}
         key="delete"
         iconType="trash"
         color="danger"

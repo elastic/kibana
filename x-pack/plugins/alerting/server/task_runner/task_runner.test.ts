@@ -1677,6 +1677,7 @@ describe('Task Runner', () => {
         return { state: {} };
       });
 
+      alertsClient.getProcessedAlerts.mockReturnValue({});
       alertsClient.getSummarizedAlerts.mockResolvedValue({
         new: {
           count: 1,
@@ -1738,7 +1739,7 @@ describe('Task Runner', () => {
       ruleType.executor.mockImplementation(async () => {
         return { state: {} };
       });
-
+      alertsClient.getProcessedAlerts.mockReturnValue({});
       alertsClient.getSummarizedAlerts.mockResolvedValue({
         new: {
           count: 1,
@@ -1747,6 +1748,7 @@ describe('Task Runner', () => {
         ongoing: { count: 0, data: [] },
         recovered: { count: 0, data: [] },
       });
+
       alertsClient.getAlertsToSerialize.mockResolvedValueOnce({ state: {}, meta: {} });
       alertsService.createAlertsClient.mockImplementation(() => alertsClient);
 

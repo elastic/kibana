@@ -56,7 +56,7 @@ interface UseChatPropsWithoutContext {
   disableFunctions?: boolean;
   onConversationUpdate?: (event: ConversationCreateEvent | ConversationUpdateEvent) => void;
   onChatComplete?: (messages: Message[]) => void;
-  scope: AssistantScope;
+  scopes: AssistantScope[];
 }
 
 export type UseChatProps = Omit<UseChatPropsWithoutContext, 'notifications'>;
@@ -72,7 +72,7 @@ function useChatWithoutContext({
   onChatComplete,
   persist,
   disableFunctions,
-  scope,
+  scopes,
 }: UseChatPropsWithoutContext): UseChatResult {
   const [chatState, setChatState] = useState(ChatState.Ready);
   const systemMessage = useMemo(() => {
@@ -165,7 +165,7 @@ function useChatWithoutContext({
         disableFunctions: disableFunctions ?? false,
         signal: abortControllerRef.current.signal,
         conversationId,
-        scope,
+        scopes,
       });
 
       function getPendingMessages() {
@@ -264,7 +264,7 @@ function useChatWithoutContext({
       disableFunctions,
       service,
       systemMessage,
-      scope,
+      scopes,
     ]
   );
 

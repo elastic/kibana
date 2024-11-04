@@ -22,11 +22,11 @@ const getQeryAst = (query: string) => {
 describe('computeHasMetadataOperator', () => {
   it('should be false if query does not have operator', () => {
     expect(computeHasMetadataOperator(getQeryAst('from test*'))).toBe(false);
-    expect(computeHasMetadataOperator(getQeryAst('from test* [metadata]'))).toBe(false);
-    expect(computeHasMetadataOperator(getQeryAst('from test* [metadata id]'))).toBe(false);
+    expect(computeHasMetadataOperator(getQeryAst('from test* metadata'))).toBe(false);
+    expect(computeHasMetadataOperator(getQeryAst('from test* metadata id'))).toBe(false);
     expect(computeHasMetadataOperator(getQeryAst('from metadata*'))).toBe(false);
     expect(computeHasMetadataOperator(getQeryAst('from test* | keep metadata'))).toBe(false);
-    expect(computeHasMetadataOperator(getQeryAst('from test* | eval x="[metadata _id]"'))).toBe(
+    expect(computeHasMetadataOperator(getQeryAst('from test* | eval x="metadata _id"'))).toBe(
       false
     );
   });
@@ -48,19 +48,19 @@ describe('computeHasMetadataOperator', () => {
     ).toBe(true);
 
     // still validates deprecated square bracket syntax
-    expect(computeHasMetadataOperator(getQeryAst('from test* [metadata _id]'))).toBe(true);
-    expect(computeHasMetadataOperator(getQeryAst('from test* [metadata _id, _index]'))).toBe(true);
-    expect(computeHasMetadataOperator(getQeryAst('from test* [metadata _index, _id]'))).toBe(true);
-    expect(computeHasMetadataOperator(getQeryAst('from test* [ metadata _id ]'))).toBe(true);
-    expect(computeHasMetadataOperator(getQeryAst('from test* [   metadata _id] '))).toBe(true);
-    expect(computeHasMetadataOperator(getQeryAst('from test* [ metadata _id] | limit 10'))).toBe(
+    expect(computeHasMetadataOperator(getQeryAst('from test* metadata _id'))).toBe(true);
+    expect(computeHasMetadataOperator(getQeryAst('from test* metadata _id, _index'))).toBe(true);
+    expect(computeHasMetadataOperator(getQeryAst('from test* metadata _index, _id'))).toBe(true);
+    expect(computeHasMetadataOperator(getQeryAst('from test*  metadata _id '))).toBe(true);
+    expect(computeHasMetadataOperator(getQeryAst('from test*    metadata _id '))).toBe(true);
+    expect(computeHasMetadataOperator(getQeryAst('from test*  metadata _id | limit 10'))).toBe(
       true
     );
     expect(
       computeHasMetadataOperator(
-        getQeryAst(`from packetbeat* [metadata
+        getQeryAst(`from packetbeat* metadata
 
-        _id ]
+        _id
         | limit 100`)
       )
     ).toBe(true);
@@ -111,7 +111,7 @@ describe('parseEsqlQuery', () => {
       errors: expect.arrayContaining([
         expect.objectContaining({
           message:
-            "SyntaxError: mismatched input 'aaa' expecting {'explain', 'from', 'meta', 'row', 'show'}",
+            "SyntaxError: mismatched input 'aaa' expecting {'explain', 'from', 'row', 'show'}",
         }),
       ]),
       isEsqlQueryAggregating: false,

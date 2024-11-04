@@ -9,22 +9,24 @@ import { SearchBarOwnProps } from '@kbn/unified-search-plugin/public/search_bar'
 import deepEqual from 'fast-deep-equal';
 import React, { useCallback, useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { EntityType } from '../../../common/entities';
+import { Query } from '@kbn/es-query';
 import { useInventorySearchBarContext } from '../../context/inventory_search_bar_context_provider';
 import { useAdHocInventoryDataView } from '../../hooks/use_adhoc_inventory_data_view';
 import { useInventoryParams } from '../../hooks/use_inventory_params';
 import { useKibana } from '../../hooks/use_kibana';
 import { EntityTypesControls } from './entity_types_controls';
 import { DiscoverButton } from './discover_button';
+import { getKqlFieldsWithFallback } from '../../utils/get_kql_field_names_with_fallback';
 
 export function SearchBar() {
-  const { searchBarContentSubject$ } = useInventorySearchBarContext();
+  const { searchBarContentSubject$, refreshSubject$ } = useInventorySearchBarContext();
   const {
     services: {
       unifiedSearch,
       data: {
         query: { queryString: queryStringService },
       },
+      telemetry,
     },
   } = useKibana();
 
@@ -51,11 +53,41 @@ export function SearchBar() {
     syncSearchBarWithUrl();
   }, [syncSearchBarWithUrl]);
 
-  const handleEntityTypesChange = useCallback(
-    (nextEntityTypes: EntityType[]) => {
-      searchBarContentSubject$.next({ kuery, entityTypes: nextEntityTypes, refresh: false });
+  const registerSearchSubmittedEvent = useCallback(
+    ({
+      searchQuery,
+      searchIsUpdate,
+      searchEntityTypes,
+    }: {
+      searchQuery?: Query;
+      searchEntityTypes?: string[];
+      searchIsUpdate?: boolean;
+    }) => {
+      telemetry.reportEntityInventorySearchQuerySubmitted({
+        kuery_fields: getKqlFieldsWithFallback(searchQuery?.query as string),
+        entity_types: searchEntityTypes || [],
+        action: searchIsUpdate ? 'submit' : 'refresh',
+      });
     },
-    [kuery, searchBarContentSubject$]
+    [telemetry]
+  );
+
+  const registerEntityTypeFilteredEvent = useCallback(
+    ({ filterEntityTypes, filterKuery }: { filterEntityTypes: string[]; filterKuery?: string }) => {
+      telemetry.reportEntityInventoryEntityTypeFiltered({
+        entity_types: filterEntityTypes,
+        kuery_fields: filterKuery ? getKqlFieldsWithFallback(filterKuery) : [],
+      });
+    },
+    [telemetry]
+  );
+
+  const handleEntityTypesChange = useCallback(
+    (nextEntityTypes: string[]) => {
+      searchBarContentSubject$.next({ kuery, entityTypes: nextEntityTypes });
+      registerEntityTypeFilteredEvent({ filterEntityTypes: nextEntityTypes, filterKuery: kuery });
+    },
+    [kuery, registerEntityTypeFilteredEvent, searchBarContentSubject$]
   );
 
   const handleQuerySubmit = useCallback<NonNullable<SearchBarOwnProps['onQuerySubmit']>>(
@@ -63,10 +95,19 @@ export function SearchBar() {
       searchBarContentSubject$.next({
         kuery: query?.query as string,
         entityTypes,
-        refresh: !isUpdate,
       });
+
+      registerSearchSubmittedEvent({
+        searchQuery: query,
+        searchEntityTypes: entityTypes,
+        searchIsUpdate: isUpdate,
+      });
+
+      if (!isUpdate) {
+        refreshSubject$.next();
+      }
     },
-    [entityTypes, searchBarContentSubject$]
+    [entityTypes, registerSearchSubmittedEvent, searchBarContentSubject$, refreshSubject$]
   );
 
   return (

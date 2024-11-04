@@ -8,13 +8,11 @@
 import { renderHook } from '@testing-library/react-hooks';
 
 import { useAssistantContext } from '.';
-import { useLocalStorage } from 'react-use';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { TestProviders } from '../mock/test_providers/test_providers';
 
-jest.mock('react-use', () => ({
-  useLocalStorage: jest.fn().mockReturnValue(['456', jest.fn()]),
-  useSessionStorage: jest.fn().mockReturnValue(['456', jest.fn()]),
-}));
+jest.mock('react-use/lib/useLocalStorage', () => jest.fn().mockReturnValue(['456', jest.fn()]));
+jest.mock('react-use/lib/useSessionStorage', () => jest.fn().mockReturnValue(['456', jest.fn()]));
 
 describe('AssistantContext', () => {
   beforeEach(() => jest.clearAllMocks());
