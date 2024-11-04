@@ -128,7 +128,7 @@ describe(`POST ${INTERNAL_ROUTES.DIAGNOSE.BROWSER}`, () => {
     screenshotting.diagnose.mockReturnValue(Rx.of(fontErrorLog));
 
     return supertest(httpSetup.server.listener)
-      .get(INTERNAL_ROUTES.DIAGNOSE.BROWSER)
+      .post(INTERNAL_ROUTES.DIAGNOSE.BROWSER)
       .expect(200)
       .then(({ body }) => {
         expect(body).toMatchInlineSnapshot(`
