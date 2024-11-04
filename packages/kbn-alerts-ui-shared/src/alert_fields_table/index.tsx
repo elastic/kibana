@@ -92,6 +92,7 @@ export interface AlertFieldsTableProps {
 export const AlertFieldsTable = memo(({ alert, fields }: AlertFieldsTableProps) => {
   const { pageSize, sorting, onTableChange } = useEuiTablePersist<AlertField>({
     tableId: 'obltAlertFields',
+    initialPageSize: 25,
   });
 
   const items = useMemo(() => {
@@ -114,7 +115,7 @@ export const AlertFieldsTable = memo(({ alert, fields }: AlertFieldsTableProps) 
       columns={columns}
       onTableChange={onTableChange}
       pagination={{
-        initialPageSize: pageSize,
+        pageSize,
         pageSizeOptions: COUNT_PER_PAGE_OPTIONS,
       }}
       sorting={sorting}
