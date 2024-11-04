@@ -48,6 +48,7 @@ import type {
 } from '@kbn/fleet-plugin/server';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import moment from 'moment';
+import { DEFAULT_DIAGNOSTIC_INDEX_PATTERN } from '../../../common/endpoint/constants';
 import type { ExperimentalFeatures } from '../../../common';
 import type { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
 import {
@@ -85,7 +86,6 @@ import type {
 import { telemetryConfiguration } from './configuration';
 import { ENDPOINT_METRICS_INDEX } from '../../../common/constants';
 import { PREBUILT_RULES_PACKAGE_NAME } from '../../../common/detection_engine/constants';
-import { DEFAULT_DIAGNOSTIC_INDEX } from './constants';
 import type { TelemetryLogger } from './telemetry_logger';
 
 export interface ITelemetryReceiver {
@@ -546,7 +546,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       to: executeTo,
     } as LogMeta);
 
-    let pitId = await this.openPointInTime(DEFAULT_DIAGNOSTIC_INDEX);
+    let pitId = await this.openPointInTime(DEFAULT_DIAGNOSTIC_INDEX_PATTERN);
     let fetchMore = true;
     let searchAfter: SortResults | undefined;
 
