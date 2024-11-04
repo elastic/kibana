@@ -199,9 +199,9 @@ const ActionsConnectorsList = ({
       truncateText: true,
       render: (value: string, item: ActionConnectorTableItem) => {
         const checkEnabledResult = checkActionTypeEnabled(
-          actionTypesIndex && actionTypesIndex[item.actionTypeId]
+          actionTypesIndex && actionTypesIndex[item.actionTypeId],
+          item.isPreconfigured
         );
-
         /**
          * TODO: Remove when connectors can provide their own UX message.
          * Issue: https://github.com/elastic/kibana/issues/114507
@@ -363,7 +363,8 @@ const ActionsConnectorsList = ({
       columns={actionsTableColumns}
       rowProps={(item: ActionConnectorTableItem) => ({
         className:
-          !actionTypesIndex || !actionTypesIndex[item.actionTypeId]?.enabled
+          !item.isPreconfigured &&
+          (!actionTypesIndex || !actionTypesIndex[item.actionTypeId]?.enabled)
             ? 'actConnectorsList__tableRowDisabled'
             : '',
         'data-test-subj': 'connectors-row',
