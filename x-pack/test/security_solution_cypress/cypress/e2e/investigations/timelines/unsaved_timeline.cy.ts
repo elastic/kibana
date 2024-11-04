@@ -121,7 +121,7 @@ describe('[ESS] Save Timeline Prompts', { tags: ['@ess'] }, () => {
     cy.url().should('not.contain', MANAGE_URL);
   });
 
-  it.only('should prompt when a timeline is duplicated but not saved', () => {
+  it('should prompt when a timeline is duplicated but not saved', () => {
     addNameToTimelineAndSave('Original');
     closeTimeline();
     visit(TIMELINES_URL);
