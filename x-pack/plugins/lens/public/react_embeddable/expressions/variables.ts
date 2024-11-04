@@ -22,6 +22,10 @@ function getInternalTables(states: Record<string, unknown>) {
   return result;
 }
 
+/**
+ * Collect all the data that need to be forwarded at the end of the
+ * expression pipeline as overrides, palette, etc... and merged them all here
+ */
 export function getVariables(api: LensApi, state: LensRuntimeState) {
   return {
     embeddableTitle: api.defaultPanelTitle?.getValue(),
