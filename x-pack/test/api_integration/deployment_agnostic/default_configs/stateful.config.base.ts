@@ -30,6 +30,7 @@ interface CreateTestConfigOptions<T extends DeploymentAgnosticCommonServices> {
   kbnServerArgs?: string[];
   services?: T;
   testFiles: string[];
+  servicesRequiredForTestAnalysis?: string[];
   junit: { reportName: string };
   suiteTags?: { include?: string[]; exclude?: string[] };
 }
@@ -100,6 +101,7 @@ export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServi
       security: { disableTestUser: true },
       // services can be customized, but must extend DeploymentAgnosticCommonServices
       services: options.services || services,
+      servicesRequiredForTestAnalysis: options.servicesRequiredForTestAnalysis,
       junit: options.junit,
       suiteTags: options.suiteTags,
 
