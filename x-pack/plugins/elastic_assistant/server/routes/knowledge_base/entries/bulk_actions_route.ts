@@ -272,7 +272,7 @@ export const bulkActionKnowledgeBaseEntriesRoute = (router: ElasticAssistantPlug
                 })
               ),
               getUpdateScript: (entry: UpdateKnowledgeBaseEntrySchema) =>
-                getUpdateScript({ entry, isPatch: true }),
+                getUpdateScript({ entry }),
               authenticatedUser,
             })
           );
