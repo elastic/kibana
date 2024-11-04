@@ -17,7 +17,7 @@ import {
 
 import { loadEmbeddableData } from './data_loader';
 import { isTextBasedLanguage, deserializeState } from './helper';
-import { initializeEditApi } from './initializers/inizialize_edit';
+import { initializeEditApi } from './initializers/initialize_edit';
 import { initializeInspector } from './initializers/initialize_inspector';
 import { initializeDashboardServices } from './initializers/initialize_dashboard_services';
 import { initializeInternalApi } from './initializers/initialize_internal_api';
