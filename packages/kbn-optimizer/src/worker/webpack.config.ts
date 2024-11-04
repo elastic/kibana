@@ -252,6 +252,12 @@ export function getWebpackConfig(
           },
         },
         {
+          test: /\.(html|md|txt|tmpl)$/,
+          use: {
+            loader: 'raw-loader',
+          },
+        },
+        {
           test: /\.peggy$/,
           loader: require.resolve('@kbn/peggy-loader'),
         },
