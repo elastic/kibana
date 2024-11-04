@@ -17,7 +17,7 @@ import {
   ENTITY_LAST_SEEN,
   ENTITY_TYPE,
 } from '@kbn/observability-shared-plugin/common';
-import { defaultEntityDefinitions, EntityColumnIds } from '../../../common/entities';
+import { EntityColumnIds } from '../../../common/entities';
 import { useInventoryParams } from '../../hooks/use_inventory_params';
 import { useKibana } from '../../hooks/use_kibana';
 
@@ -38,17 +38,6 @@ export function DiscoverButton({ dataView }: { dataView: DataView }) {
 
   const filters: PhrasesFilter[] = [];
 
-  const entityDefinitionField = dataView.getFieldByName(ENTITY_DEFINITION_ID);
-
-  if (entityDefinitionField) {
-    const entityDefinitionFilter = buildPhrasesFilter(
-      entityDefinitionField!,
-      defaultEntityDefinitions,
-      dataView
-    );
-    filters.push(entityDefinitionFilter);
-  }
-
   const entityTypeField = dataView.getFieldByName(ENTITY_TYPE);
 
   if (entityTypes && entityTypeField) {
@@ -56,10 +45,14 @@ export function DiscoverButton({ dataView }: { dataView: DataView }) {
     filters.push(entityTypeFilter);
   }
 
+  const kueryWithEntityDefinitionFilters = [kuery, `${ENTITY_DEFINITION_ID} : builtin*`]
+    .filter(Boolean)
+    .join(' AND ');
+
   const discoverLink = discoverLocator?.getRedirectUrl({
     indexPatternId: dataView?.id ?? '',
     columns: ACTIVE_COLUMNS,
-    query: { query: kuery ?? '', language: 'kuery' },
+    query: { query: kueryWithEntityDefinitionFilters, language: 'kuery' },
     filters,
   });
 

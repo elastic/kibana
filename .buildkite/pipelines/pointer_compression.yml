@@ -339,7 +339,7 @@ steps:
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_serverless_osquery.sh
-    label: 'Serverless Osquery Cypress Tests'
+    label: 'Osquery Cypress Tests on Serverless'
     agents:
       image: family/kibana-ubuntu-2004
       imageProject: elastic-images-prod
@@ -362,8 +362,6 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       enableNestedVirtualization: true
-      localSsds: 1
-      localSsdInterface: nvme
       machineType: n2-standard-4
     depends_on:
       - build
@@ -381,8 +379,6 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       enableNestedVirtualization: true
-      localSsds: 1
-      localSsdInterface: nvme
       machineType: n2-standard-4
     depends_on:
       - build

@@ -26,6 +26,9 @@ const mockUseAssistantContext = {
   },
   setAllSystemPrompts: jest.fn(),
   setConversations: jest.fn(),
+  assistantAvailability: {
+    isAssistantEnabled: true,
+  },
 };
 
 jest.mock('../assistant_context', () => {

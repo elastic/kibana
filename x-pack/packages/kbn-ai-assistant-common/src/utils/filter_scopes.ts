@@ -7,11 +7,15 @@
 
 import type { AssistantScope } from '../types';
 
-export function filterScopes<T extends { scopes?: AssistantScope[] }>(scope?: AssistantScope) {
+export function filterScopes<T extends { scopes?: AssistantScope[] }>(
+  scopeFilters?: AssistantScope[]
+) {
   return function (value: T): boolean {
-    if (!scope || !value) {
+    if (!scopeFilters || !value) {
       return true;
     }
-    return value?.scopes ? value.scopes.includes(scope) || value.scopes.includes('all') : true;
+    return value?.scopes
+      ? value.scopes.some((scope) => [...scopeFilters, 'all'].includes(scope))
+      : true;
   };
 }

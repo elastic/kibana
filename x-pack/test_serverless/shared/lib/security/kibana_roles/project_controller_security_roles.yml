@@ -34,6 +34,7 @@ viewer:
         - ".fleet-actions*"
         - "risk-score.risk-score-*"
         - ".asset-criticality.asset-criticality-*"
+        - ".entities.v1.latest.security_*"
         - ".ml-anomalies-*"
       privileges:
         - read
@@ -98,6 +99,7 @@ editor:
         - "maintenance"
     - names:
         - ".asset-criticality.asset-criticality-*"
+        - ".entities.v1.latest.security_*"
       privileges:
         - "read"
         - "write"
@@ -162,6 +164,7 @@ t1_analyst:
         - ".fleet-actions*"
         - risk-score.risk-score-*
         - .asset-criticality.asset-criticality-*
+        - .entities.v1.latest.security_*
         - ".ml-anomalies-*"
       privileges:
         - read
@@ -212,6 +215,7 @@ t2_analyst:
         - .fleet-agents*
         - .fleet-actions*
         - risk-score.risk-score-*
+        - .entities.v1.latest.security_*
         - ".ml-anomalies-*"
       privileges:
         - read
@@ -276,6 +280,7 @@ t3_analyst:
         - .fleet-agents*
         - .fleet-actions*
         - risk-score.risk-score-*
+        - .entities.v1.latest.security_*
         - ".ml-anomalies-*"
       privileges:
         - read
@@ -344,6 +349,7 @@ threat_intelligence_analyst:
         - .fleet-agents*
         - .fleet-actions*
         - risk-score.risk-score-*
+        - .entities.v1.latest.security_*
         - ".ml-anomalies-*"
       privileges:
         - read
@@ -405,6 +411,7 @@ rule_author:
         - .fleet-agents*
         - .fleet-actions*
         - risk-score.risk-score-*
+        - .entities.v1.latest.security_*
         - ".ml-anomalies-*"
       privileges:
         - read
@@ -449,6 +456,7 @@ soc_manager:
         - packetbeat-*
         - winlogbeat-*
         - .asset-criticality.asset-criticality-*
+        - .entities.v1.latest.security_*
       privileges:
         - read
         - write
@@ -472,6 +480,7 @@ soc_manager:
         - .fleet-agents*
         - .fleet-actions*
         - risk-score.risk-score-*
+        - .asset-criticality.asset-criticality-*
         - ".ml-anomalies-*"
       privileges:
         - read
@@ -544,6 +553,7 @@ detections_admin:
         - all
     - names:
         - .asset-criticality.asset-criticality-*
+        - .entities.v1.latest.security_*
       privileges:
         - read
         - write
@@ -592,6 +602,7 @@ platform_engineer:
         - all
     - names:
         - .asset-criticality.asset-criticality-*
+        - .entities.v1.latest.security_*
       privileges:
         - read
         - write
@@ -651,6 +662,7 @@ endpoint_operations_analyst:
         - .lists*
         - .items*
         - risk-score.risk-score-*
+        - .entities.v1.latest.security_*
         - ".ml-anomalies-*"
       privileges:
         - read
@@ -721,6 +733,7 @@ endpoint_policy_manager:
         - packetbeat-*
         - winlogbeat-*
         - risk-score.risk-score-*
+        - .entities.v1.latest.security_*
         - ".ml-anomalies-*"
       privileges:
         - read

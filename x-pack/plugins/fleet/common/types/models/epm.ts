@@ -178,12 +178,18 @@ export interface RegistryImage extends PackageSpecIcon {
   path: string;
 }
 
-export interface DeploymentsModesEnablement {
+export interface DeploymentsModesDefault {
   enabled: boolean;
 }
+
+export interface DeploymentsModesAgentless extends DeploymentsModesDefault {
+  organization?: string;
+  division?: string;
+  team?: string;
+}
 export interface DeploymentsModes {
-  agentless: DeploymentsModesEnablement;
-  default?: DeploymentsModesEnablement;
+  agentless: DeploymentsModesAgentless;
+  default?: DeploymentsModesDefault;
 }
 
 export enum RegistryPolicyTemplateKeys {

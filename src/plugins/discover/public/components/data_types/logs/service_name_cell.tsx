@@ -15,9 +15,10 @@ import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import { css } from '@emotion/react';
 import { getFieldValue } from '@kbn/discover-utils';
 import { euiThemeVars } from '@kbn/ui-theme';
+import { ServiceNameBadgeWithActions } from '@kbn/discover-contextual-components';
+import { useDiscoverServices } from '../../../hooks/use_discover_services';
 import { CellRenderersExtensionParams } from '../../../context_awareness';
 import { AGENT_NAME_FIELD } from '../../../../common/data_types/logs/constants';
-import { ServiceNameBadgeWithActions } from './service_name_badge_with_actions';
 
 const AgentIcon = dynamic(() => import('@kbn/custom-icons/src/components/agent_icon'));
 const dataTestSubj = 'serviceNameCell';
@@ -28,6 +29,7 @@ const agentIconStyle = css`
 export const getServiceNameCell =
   (serviceNameField: string, { actions }: CellRenderersExtensionParams) =>
   (props: DataGridCellValueElementProps) => {
+    const { core, share } = useDiscoverServices();
     const serviceNameValue = getFieldValue(props.row, serviceNameField) as string;
     const agentName = getFieldValue(props.row, AGENT_NAME_FIELD) as AgentName;
 
@@ -47,6 +49,8 @@ export const getServiceNameCell =
         icon={getIcon}
         value={serviceNameValue}
         property={serviceNameField}
+        core={core}
+        share={share}
       />
     );
   };

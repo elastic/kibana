@@ -439,11 +439,10 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
       routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
         try {
           const jobId = request.params.jobId;
-          const duration = request.body.duration;
           const body = await mlClient.forecast({
             job_id: jobId,
             body: {
-              duration,
+              ...request.body,
             },
           });
           return response.ok({
