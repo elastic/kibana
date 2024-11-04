@@ -6,39 +6,41 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { INTERNAL_CASE_OBSERVABLES_URL } from '../../../../common/constants';
+import { INTERNAL_CASE_OBSERVABLES_PATCH_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
 import type { observableApiV1 } from '../../../../common/types/api';
 
-export const postObservableRoute = createCasesRoute({
-  method: 'post',
-  path: INTERNAL_CASE_OBSERVABLES_URL,
+export const patchObservableRoute = createCasesRoute({
+  method: 'patch',
+  path: INTERNAL_CASE_OBSERVABLES_PATCH_URL,
   params: {
     params: schema.object({
       case_id: schema.string(),
+      observable_id: schema.string(),
     }),
   },
   routerOptions: {
     access: 'internal',
-    summary: `Add a case observable`,
-    description: 'Each case can have a maximum of 10 observables.',
-    // You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're creating.
+    summary: `Update a case observable`,
   },
   handler: async ({ context, request, response }) => {
     try {
       const caseContext = await context.cases;
       const casesClient = await caseContext.getCasesClient();
       const caseId = request.params.case_id;
-      const { observable } = request.body as observableApiV1.AddObservableRequest;
-      const theCase = await casesClient.cases.addObservable(caseId, { observable });
+      const { observable } = request.body as observableApiV1.UpdateObservableRequest;
+
+      const theCase = await casesClient.cases.updateObservable(caseId, {
+        observable,
+      });
 
       return response.ok({
         body: theCase,
       });
     } catch (error) {
       throw createCaseError({
-        message: `Failed to post observable in route case id: ${request.params.case_id}: ${error}`,
+        message: `Failed to patch observable in route case id: ${request.params.case_id}, observable id: ${request.params.observable_id}: ${error}`,
         error,
       });
     }

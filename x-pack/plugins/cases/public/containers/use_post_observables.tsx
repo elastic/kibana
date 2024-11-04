@@ -6,27 +6,21 @@
  */
 
 import { useMutation } from '@tanstack/react-query';
-import type { ObservablePatchType } from '../../common/types/domain/observable/v1';
-import { postObservables } from './api';
+import type { AddObservableRequest } from '../../common/types/api';
+import { postObservable } from './api';
 import * as i18n from './translations';
 import type { ServerError } from '../types';
 import { useCasesToast } from '../common/use_cases_toast';
 import { casesMutationsKeys } from './constants';
 import { useRefreshCases } from '../components/all_cases/use_on_refresh_cases';
 
-export interface PostObservables {
-  caseId: string;
-  version: string;
-  observables: ObservablePatchType[];
-}
-
-export const usePostObservables = () => {
+export const usePostObservable = (caseId: string) => {
   const { showErrorToast } = useCasesToast();
   const refreshCases = useRefreshCases();
 
   return useMutation(
-    (request: PostObservables) => {
-      return postObservables(request, request.caseId);
+    (request: AddObservableRequest) => {
+      return postObservable(request, caseId);
     },
     {
       mutationKey: casesMutationsKeys.postObservables,
@@ -40,4 +34,4 @@ export const usePostObservables = () => {
   );
 };
 
-export type UsePostObservables = ReturnType<typeof usePostObservables>;
+export type UsePostObservables = ReturnType<typeof usePostObservable>;

@@ -12,9 +12,12 @@ import { CaseObservableRt, ObservablePatch } from '../../domain';
  * Observables
  */
 
-export const ObservableRequestRt = rt.strict({
-  observables: rt.array(ObservablePatch),
-  version: rt.string,
+export const AddObservableRequestRt = rt.strict({
+  observable: ObservablePatch,
+});
+
+export const UpdateObservableRequestRt = rt.strict({
+  observable: ObservablePatch,
 });
 
 export const BulkGetObservablesResponseRt = rt.strict({
@@ -29,4 +32,7 @@ export const BulkGetObservablesResponseRt = rt.strict({
   ),
 });
 
-export type ObservableRequest = rt.TypeOf<typeof ObservableRequestRt>;
+export type AddObservableRequest = rt.TypeOf<typeof AddObservableRequestRt>;
+export type UpdateObservableRequest = rt.TypeOf<typeof UpdateObservableRequestRt>;
+
+export type ObservableRequest = AddObservableRequest;

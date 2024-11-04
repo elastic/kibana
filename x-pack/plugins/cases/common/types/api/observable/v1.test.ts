@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ObservableRequestRt } from './v1';
+import { AddObservableRequestRt } from './v1';
 
 describe('ObservableRequestRT', () => {
   it('has expected attributes in request', () => {
@@ -25,7 +25,7 @@ describe('ObservableRequestRT', () => {
       ],
     };
 
-    const query = ObservableRequestRt.decode(defaultRequest);
+    const query = AddObservableRequestRt.decode(defaultRequest);
 
     expect(query).toStrictEqual({
       _tag: 'Right',

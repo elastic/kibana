@@ -11,7 +11,7 @@ import type {
   EuiContextMenuPanelItemDescriptor,
 } from '@elastic/eui';
 import { EuiButtonIcon, EuiPopover, EuiContextMenu, EuiIcon, EuiTextColor } from '@elastic/eui';
-import type { ObservablePatchType, Observable } from '../../../common/types/domain/observable/v1';
+import type { Observable } from '../../../common/types/domain/observable/v1';
 import * as i18n from './translations';
 
 import { useCasesContext } from '../cases_context/use_cases_context';
@@ -19,9 +19,10 @@ import { useCasesToast } from '../../common/use_cases_toast';
 import { DeleteAttachmentConfirmationModal } from '../user_actions/delete_attachment_confirmation_modal';
 import { useDeletePropertyAction } from '../user_actions/property_actions/use_delete_property_action';
 import { type CaseUI } from '../../containers/types';
-import { usePostObservables } from '../../containers/use_post_observables';
+import { usePostObservable } from '../../containers/use_post_observables';
 import { useRefreshCaseViewPage } from '../case_view/use_on_refresh_case_view_page';
 import { EditObservableModal } from './edit_observable_modal';
+import { deleteObservable, patchObservable } from '../../containers/api';
 
 export const ObservableActionsPopoverButton: React.FC<{
   caseData: CaseUI;
@@ -32,7 +33,7 @@ export const ObservableActionsPopoverButton: React.FC<{
   const refreshCaseViewPage = useRefreshCaseViewPage();
   const [showEditModal, setShowEditModal] = useState(false);
 
-  const { isLoading, mutateAsync: postObservables } = usePostObservables();
+  const { isLoading, mutateAsync: postObservables } = usePostObservable(caseData.id);
   const { showSuccessToast } = useCasesToast();
   const {
     showDeletionModal,
@@ -41,14 +42,11 @@ export const ObservableActionsPopoverButton: React.FC<{
     onCancel,
   } = useDeletePropertyAction({
     onDelete: () => {
-      const filteredObservables = caseData.observables.filter(
-        (_observable) => _observable.id !== observable.id
-      );
-      postObservables({
-        observables: filteredObservables as ObservablePatchType[],
-        caseId: caseData.id,
-        version: caseData.version,
-      }).then(() => {
+      if (!observable.id) {
+        throw new Error('invalid observable');
+      }
+
+      deleteObservable(caseData.id, observable.id).then(() => {
         showSuccessToast(i18n.OBSERVABLE_REMOVED);
         refreshCaseViewPage();
       });
@@ -137,20 +135,17 @@ export const ObservableActionsPopoverButton: React.FC<{
         <EditObservableModal
           isLoading={isLoading}
           handleUpdateObservable={async (updatedObservable) => {
-            const updatedObservableIndex = caseData.observables.findIndex(
-              (_observable) => _observable.id === observable.id
-            );
-            const observables = [...caseData.observables];
-            observables[updatedObservableIndex] = {
-              ...observable,
-              ...updatedObservable,
-            };
+            if (!updatedObservable.id) {
+              throw new Error('invalid observable');
+            }
 
-            postObservables({
-              observables: observables as ObservablePatchType[],
-              caseId: caseData.id,
-              version: caseData.version,
-            }).then(() => {
+            patchObservable(
+              {
+                observable: updatedObservable,
+              },
+              caseData.id,
+              updatedObservable.id
+            ).then(() => {
               setShowEditModal(false);
               showSuccessToast(i18n.OBSERVABLE_UPDATED);
               refreshCaseViewPage();

@@ -23,6 +23,7 @@ import {
   CASE_FIND_ATTACHMENTS_URL,
   INTERNAL_PUT_CUSTOM_FIELDS_URL,
   INTERNAL_CASE_OBSERVABLES_URL,
+  INTERNAL_CASE_OBSERVABLES_PATCH_URL,
 } from '../constants';
 
 export const getCaseDetailsUrl = (id: string): string => {
@@ -94,4 +95,11 @@ export const getCustomFieldReplaceUrl = (caseId: string, customFieldId: string):
 
 export const getCaseCreateObservableUrl = (id: string): string => {
   return INTERNAL_CASE_OBSERVABLES_URL.replace('{case_id}', id);
+};
+
+export const getCaseUpdateObservableUrl = (id: string, observableId: string): string => {
+  return INTERNAL_CASE_OBSERVABLES_PATCH_URL.replace('{case_id}', id).replace(
+    '{observable_id}',
+    observableId
+  );
 };

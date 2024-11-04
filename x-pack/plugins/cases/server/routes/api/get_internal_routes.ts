@@ -22,6 +22,8 @@ import { searchCasesRoute } from './internal/search_cases';
 import { replaceCustomFieldRoute } from './internal/replace_custom_field';
 import { postObservableRoute } from './observables/post_observable';
 import { similarCaseRoute } from './cases/similar';
+import { patchObservableRoute } from './observables/patch_observable';
+import { deleteObservableRoute } from './observables/delete_observable';
 
 export const getInternalRoutes = (userProfileService: UserProfileService) =>
   [
@@ -39,5 +41,7 @@ export const getInternalRoutes = (userProfileService: UserProfileService) =>
     searchCasesRoute,
     replaceCustomFieldRoute,
     postObservableRoute,
+    patchObservableRoute,
+    deleteObservableRoute,
     similarCaseRoute,
   ] as CaseRoute[];

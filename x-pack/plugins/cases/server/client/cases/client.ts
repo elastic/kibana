@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Case, CaseCustomField, Cases, User } from '../../../common/types/domain';
+import type { Case, CaseCustomField, Cases, Observable, User } from '../../../common/types/domain';
 import type {
   CasePostRequest,
   CasesFindResponse,
@@ -22,6 +22,8 @@ import type {
   CasesSearchRequest,
   SimilarCasesSearchRequest,
   CasesSimilarResponse,
+  AddObservableRequest,
+  UpdateObservableRequest,
 } from '../../../common/types/api';
 import type { CasesClient } from '../client';
 import type { CasesClientInternal } from '../client_internal';
@@ -39,6 +41,7 @@ import { bulkCreate } from './bulk_create';
 import type { ReplaceCustomFieldArgs } from './replace_custom_field';
 import { replaceCustomField } from './replace_custom_field';
 import { similar } from './similar';
+import { addObservable, deleteObservable, updateObservable } from './observables';
 
 /**
  * API for interacting with the cases entities.
@@ -109,6 +112,18 @@ export interface CasesSubClient {
    * Returns cases that are similar to given case (by observables)
    */
   similar(params: SimilarCasesSearchRequest): Promise<CasesSimilarResponse>;
+  /**
+   * Adds observable to the case
+   */
+  addObservable(caseId: string, params: AddObservableRequest): Promise<Observable>;
+  /**
+   * Updates observable
+   */
+  updateObservable(caseId: string, params: UpdateObservableRequest): Promise<Observable>;
+  /**
+   * Removes observable
+   */
+  deleteObservable(caseId: string, observableId: string): Promise<void>;
 }
 
 /**
@@ -138,6 +153,12 @@ export const createCasesSubClient = (
     replaceCustomField: (params: ReplaceCustomFieldArgs) =>
       replaceCustomField(params, clientArgs, casesClient),
     similar: (params: SimilarCasesSearchRequest) => similar(params, clientArgs),
+    addObservable: (caseId: string, params: AddObservableRequest) =>
+      addObservable(caseId, params, clientArgs, casesClient),
+    updateObservable: (caseId: string, params: UpdateObservableRequest) =>
+      updateObservable(caseId, params, clientArgs, casesClient),
+    deleteObservable: (caseId: string, observableId: string) =>
+      deleteObservable(caseId, observableId, clientArgs, casesClient),
   };
 
   return Object.freeze(casesSubClient);

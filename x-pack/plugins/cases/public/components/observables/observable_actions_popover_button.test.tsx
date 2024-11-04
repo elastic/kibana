@@ -17,7 +17,7 @@ import { ObservableActionsPopoverButton } from './observable_actions_popover_but
 import type { CaseUI } from '../../../common';
 import type { Observable } from '../../../common/types/domain/observable/v1';
 import { mockCase } from '../../containers/mock';
-import { usePostObservables } from '../../containers/use_post_observables';
+import { usePostObservable } from '../../containers/use_post_observables';
 
 jest.mock('../../containers/use_post_observables');
 
@@ -30,9 +30,9 @@ describe('ObservableActionsPopoverButton', () => {
 
   beforeEach(() => {
     jest
-      .mocked(usePostObservables)
+      .mocked(usePostObservable)
       .mockReturnValue({ mutateAsync: mutate, isLoading: false } as unknown as ReturnType<
-        typeof usePostObservables
+        typeof usePostObservable
       >);
     jest.clearAllMocks();
     appMockRender = createAppMockRenderer();

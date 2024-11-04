@@ -41,7 +41,7 @@ import {
   deleteFileAttachments,
   getCategories,
   replaceCustomField,
-  postObservables,
+  postObservable,
   getSimilarCases,
 } from './api';
 
@@ -1236,7 +1236,7 @@ describe('Cases API', () => {
     });
 
     it('should be called with correct check url, method, signal', async () => {
-      await postObservables(
+      await postObservable(
         {
           version: mockCase.version,
           observables: [
@@ -1278,7 +1278,7 @@ describe('Cases API', () => {
     });
 
     it('should return correct response', async () => {
-      const resp = await postObservables(
+      const resp = await postObservable(
         {
           version: mockCase.version,
           observables: [
