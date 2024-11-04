@@ -225,7 +225,25 @@ export function ShowShareModal({
             >
               {Boolean(unsavedDashboardState?.panels)
                 ? shareModalStrings.getDraftSharePanelChangesWarning()
-                : shareModalStrings.getDraftShareWarning()}
+                : shareModalStrings.getDraftShareWarning('link')}
+            </EuiCallOut>
+          ),
+        },
+        embed: {
+          draftModeCallOut: (
+            <EuiCallOut
+              color="warning"
+              data-test-subj="DashboardDraftModeEmbedCallOut"
+              title={
+                <FormattedMessage
+                  id="dashboard.share.shareModal.draftModeCallout.title"
+                  defaultMessage="Unsaved changes"
+                />
+              }
+            >
+              {Boolean(unsavedDashboardState?.panels)
+                ? shareModalStrings.getEmbedSharePanelChangesWarning()
+                : shareModalStrings.getDraftShareWarning('embed')}
             </EuiCallOut>
           ),
         },
