@@ -95,8 +95,8 @@ export const initializeCanvas = async (
   // Some of these functions have deep dependencies into Canvas, which was bulking up the size
   // of our bundle entry point. Moving them here pushes that load to when canvas is actually loaded.
   const canvasFunctions = initFunctions({
+    http: coreSetup.http,
     timefilter: setupPlugins.data.query.timefilter.timefilter,
-    prependBasePath: coreStart.http.basePath.prepend,
     types: setupPlugins.expressions.getTypes(),
     paletteService: await setupPlugins.charts.palettes.getPalettes(),
   });
