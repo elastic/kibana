@@ -5,7 +5,8 @@
  * 2.0.
  */
 import { IconType } from '@elastic/eui';
-import type { ToolSchema } from '@kbn/inference-plugin/common';
+import type { ToolSchema } from '@kbn/inference-common';
+import type { AssistantScope } from '@kbn/ai-assistant-common';
 import type { ObservabilityAIAssistantChatService } from '../public';
 import type { FunctionResponse } from './functions/types';
 
@@ -145,6 +146,7 @@ export interface StarterPrompt {
   title: string;
   prompt: string;
   icon: IconType;
+  scopes?: AssistantScope[];
 }
 
 export interface ObservabilityAIAssistantScreenContext {
@@ -157,5 +159,3 @@ export interface ObservabilityAIAssistantScreenContext {
   actions?: Array<ScreenContextActionDefinition<any>>;
   starterPrompts?: StarterPrompt[];
 }
-
-export type AssistantScope = 'observability' | 'search' | 'all';

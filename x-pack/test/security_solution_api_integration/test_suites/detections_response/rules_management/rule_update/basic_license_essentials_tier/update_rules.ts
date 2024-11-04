@@ -18,6 +18,9 @@ import {
   getSimpleMlRuleUpdate,
   getSimpleRule,
   updateUsername,
+  createHistoricalPrebuiltRuleAssetSavedObjects,
+  installPrebuiltRules,
+  createRuleAssetSavedObject,
 } from '../../../utils';
 import {
   createAlertsIndex,
@@ -308,6 +311,34 @@ export default ({ getService }: FtrProviderContext) => {
 
           expect(updatedRuleResponse).toMatchObject(expectedRule);
         });
+      });
+
+      // Unskip: https://github.com/elastic/kibana/issues/195921
+      it('@skipInServerlessMKI throws an error if rule has external rule source and non-customizable fields are changed', async () => {
+        // Install base prebuilt detection rule
+        await createHistoricalPrebuiltRuleAssetSavedObjects(es, [
+          createRuleAssetSavedObject({ rule_id: 'rule-1', license: 'elastic' }),
+        ]);
+        await installPrebuiltRules(es, supertest);
+
+        const { body: existingRule } = await securitySolutionApi
+          .readRule({
+            query: { rule_id: 'rule-1' },
+          })
+          .expect(200);
+
+        const { body } = await securitySolutionApi
+          .updateRule({
+            body: getCustomQueryRuleParams({
+              ...existingRule,
+              rule_id: 'rule-1',
+              id: undefined,
+              license: 'new license',
+            }),
+          })
+          .expect(400);
+
+        expect(body.message).toEqual('Cannot update "license" field for prebuilt rules');
       });
     });
   });

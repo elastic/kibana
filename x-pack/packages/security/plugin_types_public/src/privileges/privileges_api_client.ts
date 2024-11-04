@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RawKibanaPrivileges } from '@kbn/security-authorization-core';
+import type { RawKibanaPrivileges } from '@kbn/security-plugin-types-common';
 
 export interface PrivilegesAPIClientGetAllArgs {
   includeActions: boolean;

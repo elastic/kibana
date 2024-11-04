@@ -625,7 +625,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           );
           expect(role).to.be('dialog');
           expect(tabindex).to.be('0');
-          expect(await find.existsByCssSelector(`#${describedBy}`)).to.be(true);
+          expect(await find.existsByCssSelector(`[id="${describedBy}"]`)).to.be(true);
           expect(noFocusLock).to.be('true');
           // overlay flyout
           await reduceScreenWidth();
@@ -635,7 +635,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           noFocusLock = await testSubjects.getAttribute('docViewerFlyout', 'data-no-focus-lock');
           expect(role).to.be('dialog');
           expect(tabindex).to.be('0');
-          expect(await find.existsByCssSelector(`#${describedBy}`)).to.be(true);
+          expect(await find.existsByCssSelector(`[id="${describedBy}"]`)).to.be(true);
           expect(noFocusLock).to.be(null);
         });
       });

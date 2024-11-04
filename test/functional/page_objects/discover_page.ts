@@ -32,6 +32,12 @@ export class DiscoverPageObject extends FtrService {
 
   private readonly defaultFindTimeout = this.config.get('timeouts.find');
 
+  /** Ensures that navigation to discover has completed */
+  public async expectOnDiscover() {
+    await this.testSubjects.existOrFail('discoverNewButton');
+    await this.testSubjects.existOrFail('discoverOpenButton');
+  }
+
   public async getChartTimespan() {
     return await this.testSubjects.getAttribute('unifiedHistogramChart', 'data-time-range');
   }
@@ -158,6 +164,7 @@ export class DiscoverPageObject extends FtrService {
 
   public async clickNewSearchButton() {
     await this.testSubjects.click('discoverNewButton');
+    await this.testSubjects.moveMouseTo('unifiedFieldListSidebar__toggle-collapse'); // cancel tooltips
     await this.header.waitUntilLoadingHasFinished();
   }
 

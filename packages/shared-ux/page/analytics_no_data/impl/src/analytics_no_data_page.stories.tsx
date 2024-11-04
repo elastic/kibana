@@ -29,8 +29,8 @@ export default {
 
 export const Analytics = (params: AnalyticsNoDataPageStorybookParams) => {
   return (
-    <AnalyticsNoDataPageProvider {...mock.getServices(params)}>
-      <Component {...mock.getProps()} />
+    <AnalyticsNoDataPageProvider {...mock.getProps(params)} {...mock.getServices(params)}>
+      <Component {...mock.getProps(params)} />
     </AnalyticsNoDataPageProvider>
   );
 };

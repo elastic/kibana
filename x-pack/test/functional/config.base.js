@@ -196,6 +196,9 @@ export default async function ({ readConfigFile }) {
       obsAIAssistantManagement: {
         pathname: '/app/management/kibana/observabilityAiAssistantManagement',
       },
+      enterpriseSearch: {
+        pathname: '/app/enterprise_search/overview',
+      },
     },
 
     suiteTags: {
@@ -629,6 +632,20 @@ export default async function ({ readConfigFile }) {
         ingest_pipelines_user: {
           elasticsearch: {
             cluster: ['manage_pipeline', 'cluster:monitor/nodes/info'],
+          },
+          kibana: [
+            {
+              feature: {
+                advancedSettings: ['read'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
+
+        manage_processors_user: {
+          elasticsearch: {
+            cluster: ['manage'],
           },
           kibana: [
             {

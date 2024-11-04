@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+// eslint-disable-next-line no-restricted-imports
 import { Router } from 'react-router-dom';
 // eslint-disable-next-line @kbn/eslint/module_migration
 import routeData from 'react-router';

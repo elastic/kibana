@@ -147,7 +147,13 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
       const actionResult = await this.#actionsClient.execute(requestBody);
 
       if (actionResult.status === 'error') {
-        throw new Error(`${LLM_TYPE}: ${actionResult?.message} - ${actionResult?.serviceMessage}`);
+        const error = new Error(
+          `${LLM_TYPE}: ${actionResult?.message} - ${actionResult?.serviceMessage}`
+        );
+        if (actionResult?.serviceMessage) {
+          error.name = actionResult?.serviceMessage;
+        }
+        throw error;
       }
 
       if (!this.streaming) {

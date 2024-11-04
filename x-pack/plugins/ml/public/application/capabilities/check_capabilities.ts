@@ -269,6 +269,10 @@ export function createPermissionFailureMessage(privilegeType: keyof MlCapabiliti
     message = i18n.translate('xpack.ml.privilege.noPermission.runForecastsTooltip', {
       defaultMessage: 'You do not have permission to run forecasts.',
     });
+  } else if (privilegeType === 'canDeleteForecast') {
+    message = i18n.translate('xpack.ml.privilege.noPermission.deleteForecastsTooltip', {
+      defaultMessage: 'You do not have permission to delete forecasts.',
+    });
   }
   return i18n.translate('xpack.ml.privilege.pleaseContactAdministratorTooltip', {
     defaultMessage: '{message} Please contact your administrator.',

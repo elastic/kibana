@@ -5,18 +5,20 @@
  * 2.0.
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { SuperTest } from 'supertest';
+
+import type {
+  SavedObjectsImportAmbiguousConflictError,
+  SavedObjectsImportFailure,
+} from '@kbn/core/server';
 import expect from '@kbn/expect';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
-import { CopyResponse } from '@kbn/spaces-plugin/server/lib/copy_to_spaces';
-import {
-  SavedObjectsImportFailure,
-  SavedObjectsImportAmbiguousConflictError,
-} from '@kbn/core/server';
-import { SuperTest } from 'supertest';
-import { getAggregatedSpaceData, getUrlPrefix } from '../lib/space_test_utils';
-import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
+import type { CopyResponse } from '@kbn/spaces-plugin/server/lib/copy_to_spaces';
+
 import { getTestDataLoader, SPACE_1, SPACE_2 } from '../../../common/lib/test_data_loader';
 import type { FtrProviderContext } from '../ftr_provider_context';
+import { getAggregatedSpaceData, getUrlPrefix } from '../lib/space_test_utils';
+import type { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
 
 type TestResponse = Record<string, any>;
 
@@ -152,7 +154,8 @@ export function copyToSpaceTestSuiteFactory(context: FtrProviderContext) {
     expect(resp.body).to.eql({
       statusCode: 403,
       error: 'Forbidden',
-      message: 'Forbidden',
+      message:
+        'API [POST /api/spaces/_copy_saved_objects] is unauthorized for user, this action is granted by the Kibana privileges [copySavedObjectsToSpaces]',
     });
   };
 

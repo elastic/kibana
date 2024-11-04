@@ -9,9 +9,10 @@ import React, { useCallback, useMemo } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 
-import { FlyoutLoading, FlyoutNavigation } from '@kbn/security-solution-common';
 import { buildEntityFlyoutPreviewQuery } from '@kbn/cloud-security-posture-common';
 import { useMisconfigurationPreview } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview';
+import { useVulnerabilitiesPreview } from '@kbn/cloud-security-posture/src/hooks/use_vulnerabilities_preview';
+import { sum } from 'lodash';
 import { useRefetchQueryById } from '../../../entity_analytics/api/hooks/use_refetch_query_by_id';
 import { RISK_INPUTS_TAB_QUERY_ID } from '../../../entity_analytics/components/entity_details_flyout/tabs/risk_inputs/risk_inputs_tab';
 import type { Refetch } from '../../../common/types';
@@ -24,6 +25,8 @@ import { useGlobalTime } from '../../../common/containers/use_global_time';
 import type { HostItem } from '../../../../common/search_strategy';
 import { buildHostNamesFilter } from '../../../../common/search_strategy';
 import { RiskScoreEntity } from '../../../../common/entity_analytics/risk_engine';
+import { FlyoutLoading } from '../../shared/components/flyout_loading';
+import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
 import { HostPanelContent } from './content';
 import { HostPanelHeader } from './header';
 import { AnomalyTableProvider } from '../../../common/components/ml/anomaly/anomaly_table_provider';
@@ -107,6 +110,15 @@ export const HostPanel = ({
 
   const hasMisconfigurationFindings = passedFindings > 0 || failedFindings > 0;
 
+  const { data: vulnerabilitiesData } = useVulnerabilitiesPreview({
+    query: buildEntityFlyoutPreviewQuery('host.name', hostName),
+    sort: [],
+    enabled: true,
+    pageSize: 1,
+  });
+
+  const hasVulnerabilitiesFindings = sum(Object.values(vulnerabilitiesData?.count || {})) > 0;
+
   useQueryInspector({
     deleteQuery,
     inspect: inspectRiskScore,
@@ -130,10 +142,19 @@ export const HostPanel = ({
           isRiskScoreExist,
           path: tab ? { tab } : undefined,
           hasMisconfigurationFindings,
+          hasVulnerabilitiesFindings,
         },
       });
     },
-    [telemetry, openLeftPanel, hostName, scopeId, isRiskScoreExist, hasMisconfigurationFindings]
+    [
+      telemetry,
+      openLeftPanel,
+      hostName,
+      scopeId,
+      isRiskScoreExist,
+      hasMisconfigurationFindings,
+      hasVulnerabilitiesFindings,
+    ]
   );
 
   const openDefaultPanel = useCallback(
@@ -173,7 +194,8 @@ export const HostPanel = ({
           <>
             <FlyoutNavigation
               flyoutIsExpandable={
-                !isPreviewMode && (isRiskScoreExist || hasMisconfigurationFindings)
+                !isPreviewMode &&
+                (isRiskScoreExist || hasMisconfigurationFindings || hasVulnerabilitiesFindings)
               }
               expandDetails={openDefaultPanel}
             />

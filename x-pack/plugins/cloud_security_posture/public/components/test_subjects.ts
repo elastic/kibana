@@ -42,8 +42,6 @@ export const THIRD_PARTY_NO_VULNERABILITIES_FINDINGS_PROMPT_WIZ_INTEGRATION_BUTT
   '3p-no-vulnerabilities-findings-prompt-wiz-integration-button';
 export const VULNERABILITIES_CONTAINER_TEST_SUBJ = 'vulnerabilities_container';
 
-export const VULNERABILITIES_CVSS_SCORE_BADGE_SUBJ = 'vulnerabilities_cvss_score_badge';
-
 export const TAKE_ACTION_SUBJ = 'csp:take_action';
 export const CREATE_RULE_ACTION_SUBJ = 'csp:create_rule';
 
@@ -94,3 +92,7 @@ export const CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS = {
 };
 
 export const SUBSCRIPTION_NOT_ALLOWED_TEST_SUBJECT = 'cloud_posture_page_subscription_not_allowed';
+
+export const COMPLIANCE_SCORE_BAR_UNKNOWN = 'complianceScoreBarUnknown';
+export const COMPLIANCE_SCORE_BAR_FAILED = 'complianceScoreBarFailed';
+export const COMPLIANCE_SCORE_BAR_PASSED = 'complianceScoreBarPassed';

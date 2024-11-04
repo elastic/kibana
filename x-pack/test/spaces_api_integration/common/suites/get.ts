@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import type { SuperAgent } from 'superagent';
+
 import expect from '@kbn/expect';
-import { SuperAgent } from 'superagent';
+
 import { getTestScenariosForSpace } from '../lib/space_test_utils';
-import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
+import type { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
 
 interface GetTest {
   statusCode: number;

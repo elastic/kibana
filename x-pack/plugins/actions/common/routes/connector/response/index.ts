@@ -6,11 +6,16 @@
  */
 
 // Latest
-export type { ConnectorResponse, AllConnectorsResponse } from './types/latest';
+export type {
+  ConnectorResponse,
+  AllConnectorsResponse,
+  ConnectorExecuteResponse,
+} from './types/latest';
 export {
   connectorResponseSchema,
   allConnectorsResponseSchema,
   connectorTypesResponseSchema,
+  connectorExecuteResponseSchema,
 } from './schemas/latest';
 
 // v1
@@ -18,9 +23,11 @@ export type {
   ConnectorResponse as ConnectorResponseV1,
   AllConnectorsResponse as AllConnectorsResponseV1,
   ConnectorTypesResponse as ConnectorTypesResponseV1,
+  ConnectorExecuteResponse as ConnectorExecuteResponseV1,
 } from './types/v1';
 export {
   connectorResponseSchema as connectorResponseSchemaV1,
   allConnectorsResponseSchema as connectorWithExtraFindDataSchemaV1,
   connectorTypesResponseSchema as connectorTypesResponseSchemaV1,
+  connectorExecuteResponseSchema as connectorExecuteResponseSchemaV1,
 } from './schemas/v1';

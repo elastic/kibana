@@ -120,56 +120,63 @@ export default function (providerContext: FtrProviderContext) {
       // omit routings
       delete body.template.settings.index.routing;
 
-      expect(body).to.eql({
-        template: {
-          settings: {
-            index: {
-              default_pipeline: 'logs-overrides.test-0.1.0',
-              lifecycle: {
-                name: 'overridden by user',
-              },
-              mapping: {
-                total_fields: {
-                  limit: '1000',
-                },
-              },
-              number_of_shards: '3',
+      expect(Object.keys(body)).to.eql(['template', 'overlapping']);
+      expect(body.template).to.eql({
+        settings: {
+          index: {
+            default_pipeline: 'logs-overrides.test-0.1.0',
+            lifecycle: {
+              name: 'overridden by user',
             },
-          },
-          mappings: {
-            dynamic: 'false',
-            properties: {
-              '@timestamp': {
-                type: 'date',
-              },
-              data_stream: {
-                properties: {
-                  dataset: {
-                    type: 'constant_keyword',
-                  },
-                  namespace: {
-                    type: 'constant_keyword',
-                  },
-                  type: {
-                    type: 'constant_keyword',
-                  },
-                },
+            mapping: {
+              total_fields: {
+                limit: '1000',
               },
             },
+            number_of_shards: '3',
           },
-          aliases: {},
         },
-        overlapping: [
-          {
-            name: 'logs',
-            index_patterns: ['logs-*-*'],
+        mappings: {
+          dynamic: 'false',
+          properties: {
+            '@timestamp': {
+              type: 'date',
+            },
+            data_stream: {
+              properties: {
+                dataset: {
+                  type: 'constant_keyword',
+                },
+                namespace: {
+                  type: 'constant_keyword',
+                },
+                type: {
+                  type: 'constant_keyword',
+                },
+              },
+            },
           },
-          {
-            index_patterns: ['logs-*.otel-*'],
-            name: 'logs-otel@template',
-          },
-        ],
+        },
+        aliases: {},
       });
+
+      // otel logs templates were added in 8.16 but these tests also run against
+      // previous versions, so we conditionally test based on the ES version
+      const esVersion = getService('esVersion');
+      expect(body.overlapping).to.eql([
+        {
+          name: 'logs',
+          index_patterns: ['logs-*-*'],
+        },
+        ...(esVersion.matchRange('>=8.16.0')
+          ? [
+              {
+                index_patterns: ['logs-*.otel-*'],
+                name: 'logs-otel@template',
+              },
+            ]
+          : []),
+      ]);
     });
   });
 }

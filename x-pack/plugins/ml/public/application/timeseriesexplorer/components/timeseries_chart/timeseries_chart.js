@@ -307,7 +307,7 @@ class TimeseriesChartIntl extends Component {
 
     if (this.props.annotation === null) {
       const chartElement = d3.select(this.rootNode);
-      chartElement.select('g.mlAnnotationBrush').call(this.annotateBrush.extent([0, 0]));
+      chartElement.select('g.ml-annotation__brush').call(this.annotateBrush.extent([0, 0]));
     }
   }
 
@@ -560,7 +560,7 @@ class TimeseriesChartIntl extends Component {
 
     fcsGroup
       .append('g')
-      .attr('class', 'mlAnnotationBrush')
+      .attr('class', 'ml-annotation__brush')
       .call(annotateBrush)
       .selectAll('rect')
       .attr('x', brushX)
@@ -568,7 +568,7 @@ class TimeseriesChartIntl extends Component {
       .attr('width', brushWidth)
       .attr('height', focusChartIncoming ?? focusChartHeight);
 
-    fcsGroup.append('g').classed('mlAnnotations', true);
+    fcsGroup.append('g').classed('ml-annotations', true);
 
     // Add border round plot area.
     fcsGroup
@@ -828,7 +828,7 @@ class TimeseriesChartIntl extends Component {
 
     // disable brushing (creation of annotations) when annotations aren't shown or when in embeddable mode
     focusChart
-      .select('.mlAnnotationBrush')
+      .select('.ml-annotation__brush')
       .style('display', !showAnnotations || embeddableMode ? 'none' : null);
 
     focusChart.select('.values-line').attr('d', this.focusValuesLine(data));
@@ -1245,18 +1245,18 @@ class TimeseriesChartIntl extends Component {
     drawLineChartDots(data, cxtGroup, contextValuesLine, 1);
 
     // Add annotation markers to the context area
-    cxtGroup.append('g').classed('mlContextAnnotations', true);
+    cxtGroup.append('g').classed('ml-annotation__context', true);
 
     const [contextXRangeStart, contextXRangeEnd] = this.contextXScale.range();
     const ctxAnnotations = cxtGroup
-      .select('.mlContextAnnotations')
-      .selectAll('g.mlContextAnnotation')
+      .select('.ml-annotation__context')
+      .selectAll('g.ml-annotation__context-item')
       .data(mergedAnnotations, (d) => `${d.start}-${d.end}` || '');
 
-    ctxAnnotations.enter().append('g').classed('mlContextAnnotation', true);
+    ctxAnnotations.enter().append('g').classed('ml-annotation__context-item', true);
 
     const ctxAnnotationRects = ctxAnnotations
-      .selectAll('.mlContextAnnotationRect')
+      .selectAll('.ml-annotation__context-rect')
       .data((d) => [d]);
 
     ctxAnnotationRects
@@ -1266,7 +1266,7 @@ class TimeseriesChartIntl extends Component {
         showFocusChartTooltip(d.annotations.length === 1 ? d.annotations[0] : d, this);
       })
       .on('mouseout', () => hideFocusChartTooltip())
-      .classed('mlContextAnnotationRect', true);
+      .classed('ml-annotation__context-rect', true);
 
     ctxAnnotationRects
       .attr('x', (item) => {
@@ -1370,8 +1370,6 @@ class TimeseriesChartIntl extends Component {
       .attr('y', -2)
       .attr('height', contextChartLineTopMargin);
 
-    // Draw the brush handles using SVG foreignObject elements.
-    // Note these are not supported on IE11 and below, so will not appear in IE.
     const leftHandle = contextGroup
       .append('foreignObject')
       .attr('width', 10)

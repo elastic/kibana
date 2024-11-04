@@ -197,6 +197,8 @@ include::{kibana-root}/docs/management/rollups/create_and_manage_rollups.asciido
 
 include::{kibana-root}/docs/management/managing-saved-objects.asciidoc[]
 
+include::{kibana-root}/docs/management/saved-objects/saved-object-ids.asciidoc[]
+
 include::security/index.asciidoc[]
 
 include::{kibana-root}/docs/spaces/index.asciidoc[]

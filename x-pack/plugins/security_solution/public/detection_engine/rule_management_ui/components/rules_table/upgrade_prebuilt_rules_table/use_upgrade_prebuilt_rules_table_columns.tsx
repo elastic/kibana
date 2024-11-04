@@ -8,6 +8,7 @@
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiBadge, EuiButtonEmpty, EuiLink, EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import React, { useMemo } from 'react';
+import type { RuleUpgradeState } from '../../../../rule_management/model/prebuilt_rule_upgrade/rule_upgrade_state';
 import { RulesTableEmptyColumnName } from '../rules_table_empty_column_name';
 import { SHOW_RELATED_INTEGRATIONS_SETTING } from '../../../../../../common/constants';
 import type { RuleSignatureId } from '../../../../../../common/api/detection_engine/model/rule_schema';
@@ -22,7 +23,6 @@ import type { Rule } from '../../../../rule_management/logic';
 import { getNormalizedSeverity } from '../helpers';
 import type { UpgradePrebuiltRulesTableActions } from './upgrade_prebuilt_rules_table_context';
 import { useUpgradePrebuiltRulesTableContext } from './upgrade_prebuilt_rules_table_context';
-import type { RuleUpgradeState } from './use_prebuilt_rules_upgrade_state';
 
 export type TableColumn = EuiBasicTableColumn<RuleUpgradeState>;
 

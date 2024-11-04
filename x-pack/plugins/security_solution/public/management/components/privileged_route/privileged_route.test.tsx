@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+// eslint-disable-next-line no-restricted-imports
 import { Switch, MemoryRouter } from 'react-router-dom';
 import type { AppContextTestRender } from '../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../common/mock/endpoint';

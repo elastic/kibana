@@ -6,7 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ErrorCode } from '../../../../../../common/constants';
+import { GenerationErrorCode } from '../../../../../../common/constants';
+import type { GenerationErrorAttributes } from '../../../../../../common/api/generation_error';
 
 export const INTEGRATION_NAME_TITLE = i18n.translate(
   'xpack.integrationAssistant.step.dataStream.integrationNameTitle',
@@ -109,17 +110,6 @@ export const LOGS_SAMPLE_DESCRIPTION = i18n.translate(
     defaultMessage: 'Drag and drop a file or Browse files.',
   }
 );
-export const LOGS_SAMPLE_DESCRIPTION_2 = i18n.translate(
-  'xpack.integrationAssistant.step.dataStream.logsSample.description2',
-  {
-    defaultMessage: 'JSON/NDJSON format',
-  }
-);
-export const LOGS_SAMPLE_TRUNCATED = (maxRows: number) =>
-  i18n.translate('xpack.integrationAssistant.step.dataStream.logsSample.truncatedWarning', {
-    values: { maxRows },
-    defaultMessage: `The logs sample has been truncated to {maxRows} rows.`,
-  });
 export const LOGS_SAMPLE_ERROR = {
   CAN_NOT_READ: i18n.translate(
     'xpack.integrationAssistant.step.dataStream.logsSample.errorCanNotRead',
@@ -188,7 +178,7 @@ export const PROGRESS_RELATED_GRAPH = i18n.translate(
     defaultMessage: 'Generating related fields',
   }
 );
-export const GENERATION_ERROR = (progressStep: string) =>
+export const GENERATION_ERROR_TITLE = (progressStep: string) =>
   i18n.translate('xpack.integrationAssistant.step.dataStream.generationError', {
     values: { progressStep },
     defaultMessage: 'An error occurred during: {progressStep}',
@@ -198,24 +188,44 @@ export const RETRY = i18n.translate('xpack.integrationAssistant.step.dataStream.
   defaultMessage: 'Retry',
 });
 
-export const ERROR_TRANSLATION: Record<ErrorCode, string> = {
-  [ErrorCode.RECURSION_LIMIT_ANALYZE_LOGS]: i18n.translate(
+export const GENERATION_ERROR_TRANSLATION: Record<
+  GenerationErrorCode,
+  string | ((attributes: GenerationErrorAttributes) => string)
+> = {
+  [GenerationErrorCode.RECURSION_LIMIT_ANALYZE_LOGS]: i18n.translate(
     'xpack.integrationAssistant.errors.recursionLimitAnalyzeLogsErrorMessage',
     {
       defaultMessage:
         'Please verify the format of log samples is correct and try again. Try with a fewer samples if error persists.',
     }
   ),
-  [ErrorCode.RECURSION_LIMIT]: i18n.translate(
+  [GenerationErrorCode.RECURSION_LIMIT]: i18n.translate(
     'xpack.integrationAssistant.errors.recursionLimitReached',
     {
       defaultMessage: 'Max attempts exceeded. Please try again.',
     }
   ),
-  [ErrorCode.UNSUPPORTED_LOG_SAMPLES_FORMAT]: i18n.translate(
+  [GenerationErrorCode.UNSUPPORTED_LOG_SAMPLES_FORMAT]: i18n.translate(
     'xpack.integrationAssistant.errors.unsupportedLogSamples',
     {
       defaultMessage: 'Unsupported log format in the samples.',
     }
   ),
+  [GenerationErrorCode.UNPARSEABLE_CSV_DATA]: (attributes) => {
+    if (
+      attributes.underlyingMessages !== undefined &&
+      attributes.underlyingMessages?.length !== 0
+    ) {
+      return i18n.translate('xpack.integrationAssistant.errors.uparseableCSV.withReason', {
+        values: {
+          reason: attributes.underlyingMessages[0],
+        },
+        defaultMessage: `Cannot parse the samples as the CSV data (reason: {reason}). Please check the provided samples.`,
+      });
+    } else {
+      return i18n.translate('xpack.integrationAssistant.errors.uparseableCSV.withoutReason', {
+        defaultMessage: `Cannot parse the samples as the CSV data. Please check the provided samples.`,
+      });
+    }
+  },
 };

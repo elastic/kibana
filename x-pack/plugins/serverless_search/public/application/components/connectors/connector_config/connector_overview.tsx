@@ -21,10 +21,14 @@ import { useKibanaServices } from '../../../hooks/use_kibana';
 import { SyncScheduledCallOut } from './sync_scheduled_callout';
 
 interface ConnectorOverviewProps {
+  canManageConnectors: boolean;
   connector: Connector;
 }
 
-export const ConnectorOverview: React.FC<ConnectorOverviewProps> = ({ connector }) => {
+export const ConnectorOverview: React.FC<ConnectorOverviewProps> = ({
+  canManageConnectors,
+  connector,
+}) => {
   const { http } = useKibanaServices();
   const queryClient = useQueryClient();
   const { queryKey } = useConnector(connector.id);
@@ -64,9 +68,11 @@ export const ConnectorOverview: React.FC<ConnectorOverviewProps> = ({ connector 
         <EuiButton
           data-test-subj="serverlessSearchConnectorOverviewSyncButton"
           color="primary"
-          disabled={[ConnectorStatus.CREATED, ConnectorStatus.NEEDS_CONFIGURATION].includes(
-            connector.status
-          )}
+          disabled={
+            [ConnectorStatus.CREATED, ConnectorStatus.NEEDS_CONFIGURATION].includes(
+              connector.status
+            ) || !canManageConnectors
+          }
           fill
           isLoading={isLoading}
           onClick={() => mutate()}

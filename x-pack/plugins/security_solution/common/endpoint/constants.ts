@@ -53,6 +53,10 @@ export const policyIndexPattern = 'metrics-endpoint.policy-*';
 export const telemetryIndexPattern = 'metrics-endpoint.telemetry-*';
 
 export const ENDPOINT_HEARTBEAT_INDEX = '.logs-endpoint.heartbeat-default';
+export const ENDPOINT_HEARTBEAT_INDEX_PATTERN = '.logs-endpoint.heartbeat-*';
+
+// Endpoint diagnostics index
+export const DEFAULT_DIAGNOSTIC_INDEX_PATTERN = '.logs-endpoint.diagnostic.collection-*' as const;
 
 // File storage indexes supporting endpoint Upload/download
 export const FILE_STORAGE_METADATA_INDEX = getFileMetadataIndexName('endpoint');
@@ -65,7 +69,11 @@ export const BASE_INTERNAL_ENDPOINT_ROUTE = `/internal${BASE_ENDPOINT_ROUTE}`;
 // Endpoint API routes
 export const HOST_METADATA_LIST_ROUTE = `${BASE_ENDPOINT_ROUTE}/metadata`;
 export const HOST_METADATA_GET_ROUTE = `${HOST_METADATA_LIST_ROUTE}/{id}`;
+
+/** @deprecated public route, use {@link METADATA_TRANSFORMS_STATUS_INTERNAL_ROUTE} internal route  */
 export const METADATA_TRANSFORMS_STATUS_ROUTE = `${BASE_ENDPOINT_ROUTE}/metadata/transforms`;
+
+export const METADATA_TRANSFORMS_STATUS_INTERNAL_ROUTE = `${BASE_INTERNAL_ENDPOINT_ROUTE}/metadata/transforms`;
 
 export const BASE_POLICY_RESPONSE_ROUTE = `${BASE_ENDPOINT_ROUTE}/policy_response`;
 export const BASE_POLICY_ROUTE = `${BASE_ENDPOINT_ROUTE}/policy`;

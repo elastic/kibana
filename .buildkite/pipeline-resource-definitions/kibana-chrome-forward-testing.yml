@@ -47,3 +47,5 @@ spec:
           cronline: 0 12 * * *
           message: Daily Chrome Forward Testing
           branch: main
+      tags:
+        - kibana

@@ -18,6 +18,7 @@ import { createStartServicesMock } from '../../../common/lib/kibana/kibana_react
 import { useGetAllCaseConfigurations } from '../../../containers/configure/use_get_all_case_configurations';
 import { useGetAllCaseConfigurationsResponse } from '../../configure_cases/__mock__';
 import { templatesConfigurationMock } from '../../../containers/mock';
+import * as utils from '../../../containers/configure/utils';
 
 jest.mock('@kbn/alerts-ui-shared/src/common/hooks/use_alerts_data_view');
 jest.mock('../../../common/lib/kibana/use_application');
@@ -28,10 +29,6 @@ const useKibanaMock = jest.mocked(useKibana);
 const useAlertsDataViewMock = jest.mocked(useAlertsDataView);
 const useApplicationMock = useApplication as jest.Mock;
 const useGetAllCaseConfigurationsMock = useGetAllCaseConfigurations as jest.Mock;
-
-useKibanaMock.mockReturnValue({
-  services: { ...createStartServicesMock(), data: { dataViews: {} } },
-} as unknown as ReturnType<typeof useKibana>);
 
 const actionParams = {
   subAction: 'run',
@@ -98,6 +95,9 @@ describe('CasesParamsFields renders', () => {
       },
     });
     useGetAllCaseConfigurationsMock.mockImplementation(() => useGetAllCaseConfigurationsResponse);
+    useKibanaMock.mockReturnValue({
+      services: { ...createStartServicesMock(), data: { dataViews: {} } },
+    } as unknown as ReturnType<typeof useKibana>);
   });
 
   afterEach(() => {
@@ -266,6 +266,54 @@ describe('CasesParamsFields renders', () => {
 
       expect(await screen.findByTestId('create-case-template-select')).toBeInTheDocument();
       expect(await screen.findByText(templatesConfigurationMock[1].name)).toBeInTheDocument();
+    });
+
+    it('renders security templates if the project is serverless security', async () => {
+      useKibanaMock.mockReturnValue({
+        services: {
+          ...createStartServicesMock(),
+          // simulate a serverless security project
+          cloud: { isServerlessEnabled: true, serverless: { projectType: 'security' } },
+          data: { dataViews: {} },
+        },
+      } as unknown as ReturnType<typeof useKibana>);
+
+      const configuration = {
+        ...useGetAllCaseConfigurationsResponse.data[0],
+        templates: templatesConfigurationMock,
+      };
+      useGetAllCaseConfigurationsMock.mockImplementation(() => ({
+        ...useGetAllCaseConfigurationsResponse,
+        data: [configuration],
+      }));
+      const getConfigurationByOwnerSpy = jest
+        .spyOn(utils, 'getConfigurationByOwner')
+        .mockImplementation(() => configuration);
+
+      const observabilityOwnedRule = {
+        ...defaultProps,
+        // these two would normally produce an observability owner
+        producerId: 'observability',
+        featureId: 'observability',
+        actionParams: {
+          subAction: 'run',
+          subActionParams: {
+            ...actionParams.subActionParams,
+            templateId: templatesConfigurationMock[1].key,
+          },
+        },
+      };
+
+      render(<CasesParamsFields {...observabilityOwnedRule} />);
+
+      expect(getConfigurationByOwnerSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          // the security owner was forced
+          owner: 'securitySolution',
+        })
+      );
+
+      getConfigurationByOwnerSpy.mockRestore();
     });
 
     it('updates template correctly', async () => {
