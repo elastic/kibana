@@ -21,10 +21,10 @@ import { EDITOR_MARKER } from './constants';
 import {
   isOptionItem,
   isColumnItem,
-  getFunctionDefinition,
   isSourceItem,
   isSettingItem,
   pipePrecedesCurrentWord,
+  getFunctionDefinition,
 } from './helpers';
 
 function findNode(nodes: ESQLAstItem[], offset: number): ESQLSingleAstItem | undefined {
@@ -133,6 +133,7 @@ function findAstPosition(ast: ESQLAst, offset: number) {
 function isNotEnrichClauseAssigment(node: ESQLFunction, command: ESQLCommand) {
   return node.name !== '=' && command.name !== 'enrich';
 }
+
 function isBuiltinFunction(node: ESQLFunction) {
   return getFunctionDefinition(node.name)?.type === 'builtin';
 }
@@ -162,14 +163,17 @@ export function getAstContext(queryString: string, ast: ESQLAst, offset: number)
         // command ... a in ( <here> )
         return { type: 'list' as const, command, node, option, setting };
       }
-      if (isNotEnrichClauseAssigment(node, command) && !isBuiltinFunction(node)) {
+      if (
+        isNotEnrichClauseAssigment(node, command) &&
+        // Temporarily mangling the logic here to let operators
+        // be handled as functions for the stats command.
+        // I expect this to simplify once https://github.com/elastic/kibana/issues/195418
+        // is complete
+        !(isBuiltinFunction(node) && command.name !== 'stats')
+      ) {
         // command ... fn( <here> )
         return { type: 'function' as const, command, node, option, setting };
       }
-    }
-    if (node.type === 'option' || option) {
-      // command ... by <here>
-      return { type: 'option' as const, command, node, option, setting };
     }
     // for now it's only an enrich thing
     if (node.type === 'source' && node.text === ENRICH_MODES.prefix) {
@@ -182,7 +186,8 @@ export function getAstContext(queryString: string, ast: ESQLAst, offset: number)
     return { type: 'newCommand' as const, command: undefined, node, option, setting };
   }
 
-  if (command && isOptionItem(command.args[command.args.length - 1])) {
+  // TODO — remove this option branch once https://github.com/elastic/kibana/issues/195418 is complete
+  if (command && isOptionItem(command.args[command.args.length - 1]) && command.name !== 'stats') {
     if (option) {
       return { type: 'option' as const, command, node, option, setting };
     }
