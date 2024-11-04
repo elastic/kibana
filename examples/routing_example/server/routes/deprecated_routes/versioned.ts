@@ -35,7 +35,7 @@ export const registerVersionedDeprecatedRoute = (router: IRouter) => {
     },
     (ctx, req, res) => {
       return res.ok({
-        body: { result: 'Called deprecated verison of the API. API version 1 -> 2' },
+        body: { result: 'Called deprecated version of the API. API version 1 -> 2' },
       });
     }
   );
