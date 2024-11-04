@@ -35,7 +35,7 @@ import { compareTypesWithLiterals } from '../shared/esql_types';
 import {
   TIME_SYSTEM_PARAMS,
   buildVariablesDefinitions,
-  getCompatibleFunctionDefinition,
+  getFunctionSuggestions,
   getCompatibleLiterals,
   getDateLiterals,
 } from './factories';
@@ -417,7 +417,14 @@ export async function getFieldsOrFunctionsSuggestions(
 
   const suggestions = filteredFieldsByType.concat(
     displayDateSuggestions ? getDateLiterals() : [],
-    functions ? getCompatibleFunctionDefinition(commandName, optionName, types, ignoreFn) : [],
+    functions
+      ? getFunctionSuggestions({
+          command: commandName,
+          option: optionName,
+          returnTypes: types,
+          ignored: ignoreFn,
+        })
+      : [],
     variables
       ? pushItUpInTheList(buildVariablesDefinitions(filteredVariablesByType), functions)
       : [],
