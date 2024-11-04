@@ -116,6 +116,12 @@ function initWorker(
 
   const remotes = BundleRemotes.fromBundles(config.bundles).toSpecJson();
 
+  const unimportantChange = Math.random() > 0;
+  if (unimportantChange) {
+    // eslint-disable-next-line no-console
+    console.log('unimportant change');
+  }
+
   return Rx.concat(
     msg$.pipe(first((msg) => msg === 'init')),
     Rx.defer(() => {
