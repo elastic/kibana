@@ -328,7 +328,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           }
         >
           <SpaceSelector
-            isDisabled={disabled}
+            isDisabled={disabled || agentPolicy.is_managed === true}
             value={
               'space_ids' in agentPolicy && agentPolicy.space_ids
                 ? agentPolicy.space_ids

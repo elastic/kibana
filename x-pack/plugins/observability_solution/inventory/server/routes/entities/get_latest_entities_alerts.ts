@@ -7,17 +7,17 @@
 
 import { kqlQuery, termQuery } from '@kbn/observability-plugin/server';
 import { ALERT_STATUS, ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils';
+import { ENTITY_TYPE } from '@kbn/observability-shared-plugin/common';
 import { AlertsClient } from '../../lib/create_alerts_client.ts/create_alerts_client';
 import { getGroupByTermsAgg } from './get_group_by_terms_agg';
 import { IdentityFieldsPerEntityType } from './get_identity_fields_per_entity_type';
-import { EntityType } from '../../../common/entities';
 
 interface Bucket {
   key: Record<string, any>;
   doc_count: number;
 }
 
-type EntityTypeBucketsAggregation = Record<EntityType, { buckets: Bucket[] }>;
+type EntityTypeBucketsAggregation = Record<string, { buckets: Bucket[] }>;
 
 export async function getLatestEntitiesAlerts({
   alertsClient,
@@ -27,7 +27,7 @@ export async function getLatestEntitiesAlerts({
   alertsClient: AlertsClient;
   kuery?: string;
   identityFieldsPerEntityType: IdentityFieldsPerEntityType;
-}): Promise<Array<{ [key: string]: any; alertsCount: number; type: EntityType }>> {
+}): Promise<Array<{ [key: string]: any; alertsCount?: number; [ENTITY_TYPE]: string }>> {
   if (identityFieldsPerEntityType.size === 0) {
     return [];
   }
@@ -56,7 +56,7 @@ export async function getLatestEntitiesAlerts({
 
     return buckets.map((bucket: Bucket) => ({
       alertsCount: bucket.doc_count,
-      type: entityType,
+      [ENTITY_TYPE]: entityType,
       ...bucket.key,
     }));
   });

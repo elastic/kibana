@@ -41,7 +41,14 @@ import { SelfManagePreference } from '../create_connector';
 const CLI_LABEL = i18n.translate(
   'xpack.enterpriseSearch.createConnector.manualConfiguration.cliLabel',
   {
-    defaultMessage: 'CLI',
+    defaultMessage: 'Command-line interface',
+  }
+);
+
+const CLI_LINK_TEXT = i18n.translate(
+  'xpack.enterpriseSearch.createConnector.manualConfiguration.cliLinkText',
+  {
+    defaultMessage: 'Connectors CLI',
   }
 );
 
@@ -87,7 +94,7 @@ export const ManualConfigurationFlyout: React.FC<ManualConfigurationFlyoutProps>
               <p>
                 <FormattedMessage
                   id="xpack.enterpriseSearch.createConnector.flyoutManualConfigContent.p.thisManualOptionIsLabel"
-                  defaultMessage="This manual option is an alternative to the {generateConfig} option, here you can bring your already existing index or API key."
+                  defaultMessage="This manual option enables you to use an existing index and/or API key. It's an alternative to the automated {generateConfig} process."
                   values={{
                     generateConfig: (
                       <b>
@@ -142,7 +149,7 @@ export const ManualConfigurationFlyout: React.FC<ManualConfigurationFlyoutProps>
                       'xpack.enterpriseSearch.createConnector.manualConfiguration.p.connectorNameDescription',
                       {
                         defaultMessage:
-                          'You will be redirected to the connector page to configure the rest of your connector',
+                          "You'll be redirected to the connector page to complete your configuration.",
                       }
                     )}
                   </p>
@@ -199,7 +206,7 @@ export const ManualConfigurationFlyout: React.FC<ManualConfigurationFlyoutProps>
               <p>
                 <FormattedMessage
                   id="xpack.enterpriseSearch.createConnector.manualConfiguration.p.youCanAlsoUseLabel"
-                  defaultMessage="You can also use the connectors {cliLink}. The following command creates a new connector attached to the {myIndex}, using configuration from your file."
+                  defaultMessage="You can also use the {cliLink} to create and manage connectors. The following command creates a new connector using the {myIndex} index. Configuration is defined in your {configFile} file."
                   values={{
                     cliLink: (
                       <EuiLink
@@ -208,10 +215,11 @@ export const ManualConfigurationFlyout: React.FC<ManualConfigurationFlyoutProps>
                         target="_blank"
                         external
                       >
-                        {CLI_LABEL}
+                        {CLI_LINK_TEXT}
                       </EuiLink>
                     ),
                     myIndex: <EuiCode>my-index</EuiCode>,
+                    configFile: <EuiCode>config.yml</EuiCode>,
                   }}
                 />
               </p>

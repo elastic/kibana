@@ -9,6 +9,7 @@ import type { SavedObjectsServiceSetup } from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { backgroundTaskNodeMapping, taskMappings } from './mappings';
 import { getMigrations } from './migrations';
+import { TaskManagerConfig } from '../config';
 import { getOldestIdleActionTask } from '../queries/oldest_idle_action_task';
 import { TASK_MANAGER_INDEX } from '../constants';
 import { backgroundTaskNodeModelVersions, taskModelVersions } from './model_versions';
@@ -16,7 +17,10 @@ import { backgroundTaskNodeModelVersions, taskModelVersions } from './model_vers
 export const TASK_SO_NAME = 'task';
 export const BACKGROUND_TASK_NODE_SO_NAME = 'background-task-node';
 
-export function setupSavedObjects(savedObjects: SavedObjectsServiceSetup) {
+export function setupSavedObjects(
+  savedObjects: SavedObjectsServiceSetup,
+  config: TaskManagerConfig
+) {
   savedObjects.registerType({
     name: TASK_SO_NAME,
     namespaceType: 'agnostic',

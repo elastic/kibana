@@ -18,7 +18,6 @@ import * as autocomplete from '../autocomplete';
 import type { ESQLCallbacks } from '../../shared/types';
 import type { EditorContext, SuggestionRawDefinition } from '../types';
 import { TIME_SYSTEM_PARAMS, TRIGGER_SUGGESTION_COMMAND, getSafeInsertText } from '../factories';
-import { getFunctionSignatures } from '../../definitions/helpers';
 import { ESQLRealField } from '../../validation/types';
 import {
   FieldType,
@@ -178,7 +177,7 @@ export function getFunctionSignaturesByReturnType(
         ({ returnType }) =>
           expectedReturnType.includes('any') || expectedReturnType.includes(returnType as string)
       );
-      if (!filteredByReturnType.length) {
+      if (!filteredByReturnType.length && !expectedReturnType.includes('any')) {
         return false;
       }
       if (paramsTypes?.length) {
@@ -214,13 +213,9 @@ export function getFunctionSignaturesByReturnType(
           label: name.toUpperCase(),
         };
       }
-      const printedSignatures = getFunctionSignatures(definition, {
-        withTypes: true,
-        capitalize: true,
-      });
       return {
         text: `${name.toUpperCase()}($0)`,
-        label: printedSignatures[0].declaration,
+        label: name.toUpperCase(),
       };
     });
 }
@@ -249,7 +244,17 @@ export function getDateLiteralsByFieldType(_requestedType: FieldType | FieldType
 }
 
 export function createCustomCallbackMocks(
-  customFields?: ESQLRealField[],
+  /**
+   * Columns that will come from Elasticsearch since the last command
+   * e.g. the test case may be `FROM index | EVAL foo = 1 | KEEP /`
+   *
+   * In this case, the columns available for the KEEP command will be the ones
+   * that were available after the EVAL command
+   *
+   * `FROM index | EVAL foo = 1 | LIMIT 0` will be used to fetch columns. The response
+   * will include "foo" as a column.
+   */
+  customColumnsSinceLastCommand?: ESQLRealField[],
   customSources?: Array<{ name: string; hidden: boolean }>,
   customPolicies?: Array<{
     name: string;
@@ -258,11 +263,11 @@ export function createCustomCallbackMocks(
     enrichFields: string[];
   }>
 ) {
-  const finalFields = customFields || fields;
+  const finalColumnsSinceLastCommand = customColumnsSinceLastCommand || fields;
   const finalSources = customSources || indexes;
   const finalPolicies = customPolicies || policies;
   return {
-    getFieldsFor: jest.fn(async () => finalFields),
+    getColumnsFor: jest.fn(async () => finalColumnsSinceLastCommand),
     getSources: jest.fn(async () => finalSources),
     getPolicies: jest.fn(async () => finalPolicies),
   };

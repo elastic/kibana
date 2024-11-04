@@ -16,7 +16,7 @@ export async function findMaintenanceWindows({
 }: {
   http: HttpSetup;
 }): Promise<MaintenanceWindow[]> {
-  const res = await http.get<FindMaintenanceWindowsResponse['body']>(
+  const res = await http.get<FindMaintenanceWindowsResponse>(
     `${INTERNAL_BASE_ALERTING_API_PATH}/rules/maintenance_window/_find`
   );
   return res.data.map((mw) => transformMaintenanceWindowResponse(mw));
