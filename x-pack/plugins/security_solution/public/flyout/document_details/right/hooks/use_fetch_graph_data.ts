@@ -80,9 +80,9 @@ export const useFetchGraphData = ({
   options,
 }: UseFetchGraphDataParams): UseFetchGraphDataResult => {
   const queryClient = useQueryClient();
-  const { actorIds, eventIds, start, end } = req.query;
+  const { esQuery, eventIds, start, end } = req.query;
   const http = useHttp();
-  const QUERY_KEY = ['useFetchGraphData', actorIds, eventIds, start, end];
+  const QUERY_KEY = ['useFetchGraphData', eventIds, start, end, esQuery];
 
   const { isLoading, isError, data, isFetching } = useQuery<GraphResponse>(
     QUERY_KEY,

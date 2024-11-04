@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import React, { memo, useMemo, useState } from 'react';
+import React, { memo, useEffect, useMemo, useState } from 'react';
 import { SearchBar } from '@kbn/unified-search-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { NodeViewModel } from '@kbn/cloud-security-posture-graph';
-import type { Filter, Query } from '@kbn/es-query';
+import { buildEsQuery } from '@kbn/es-query';
+import type { Filter, Query, TimeRange, BoolQuery } from '@kbn/es-query';
 import { css } from '@emotion/css';
+import { getEsQueryConfig } from '@kbn/data-service';
 import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { SourcererScopeName } from '../../../../sourcerer/store/model';
 import { useDocumentDetailsContext } from '../../shared/context';
@@ -27,31 +29,27 @@ const GraphLazy = React.lazy(() =>
   import('@kbn/cloud-security-posture-graph').then((module) => ({ default: module.Graph }))
 );
 
-const useGraphFilters = () => {
-  const [filters, setFilters] = useState({
+const useTimeRange = () => {
+  const [timeRange, setTimeRange] = useState<TimeRange>({
     from: DEFAULT_FROM,
     to: DEFAULT_TO,
   });
 
-  const updateFilters = (newFilters: Partial<typeof filters>) => {
-    setFilters((prevFilters) => ({ ...prevFilters, ...newFilters }));
+  const setPartialTimeRange = (newTimeRange: Partial<typeof timeRange>) => {
+    setTimeRange((currTimeRange) => ({ ...currTimeRange, ...newTimeRange }));
   };
 
-  return { filters, updateFilters };
+  return { timeRange, setTimeRange, setPartialTimeRange };
 };
 
-const useGraphData = (
-  actorIds: Set<string>,
-  eventIds: string[],
-  filters: { from: string; to: string }
-) => {
+const useGraphData = (eventIds: string[], timeRange: TimeRange, filter: { bool: BoolQuery }) => {
   const { data, refresh, isFetching } = useFetchGraphData({
     req: {
       query: {
-        actorIds: Array.from(actorIds),
         eventIds,
-        start: filters.from,
-        end: filters.to,
+        esQuery: filter,
+        start: timeRange.from,
+        end: timeRange.to,
       },
     },
     options: {
@@ -73,7 +71,29 @@ const useGraphPopovers = (
 
   const nodeExpandPopover = useGraphNodeExpandPopover({
     onExploreRelatedEntitiesClick: (node) => {
-      notifications?.toasts.addInfo('Explore related entities is not implemented yet');
+      setSearchFilters((prev) => [
+        ...prev,
+        {
+          meta: {
+            disabled: false,
+            key: 'related.entity',
+            field: 'related.entity',
+            negate: false,
+            params: {
+              query: node.id,
+            },
+            type: 'phrase',
+          },
+          query: {
+            match_phrase: {
+              'related.entity': node.id,
+            },
+          },
+          $state: {
+            store: 'appState',
+          } as Filter['$state'],
+        },
+      ]);
     },
     onShowActionsByEntityClick: (node) => {
       setActorIds((prev) => new Set([...prev, node.id]));
@@ -102,7 +122,29 @@ const useGraphPopovers = (
       ]);
     },
     onShowActionsOnEntityClick: (node) => {
-      notifications?.toasts.addInfo('Show actions on entity is not implemented yet');
+      setSearchFilters((prev) => [
+        ...prev,
+        {
+          meta: {
+            disabled: false,
+            key: 'target.entity.id',
+            field: 'target.entity.id',
+            negate: false,
+            params: {
+              query: node.id,
+            },
+            type: 'phrase',
+          },
+          query: {
+            match_phrase: {
+              'target.entity.id': node.id,
+            },
+          },
+          $state: {
+            store: 'appState',
+          } as Filter['$state'],
+        },
+      ]);
     },
     onViewEntityDetailsClick: (node) => {
       notifications?.toasts.addInfo('View entity details is not implemented yet');
@@ -144,19 +186,41 @@ const useGraphNodes = (
 export const GraphVisualization: React.FC = memo(() => {
   const { indexPattern } = useSourcererDataView(SourcererScopeName.default);
   const [searchFilters, setSearchFilters] = useState<Filter[]>(() => []);
-  const { filters, updateFilters } = useGraphFilters();
+  const { timeRange, setTimeRange } = useTimeRange();
   const { getFieldsData, dataAsNestedObject } = useDocumentDetailsContext();
   const { eventIds } = useGraphPreview({
     getFieldsData,
     ecsData: dataAsNestedObject,
   });
 
-  const [actorIds, setActorIds] = useState(() => new Set<string>());
+  const {
+    services: { uiSettings },
+  } = useKibana();
+  const [query, setQuery] = useState<{ bool: BoolQuery }>(
+    buildEsQuery(
+      indexPattern,
+      [],
+      [...searchFilters],
+      getEsQueryConfig(uiSettings as Parameters<typeof getEsQueryConfig>[0])
+    )
+  );
+
+  useEffect(() => {
+    setQuery(
+      buildEsQuery(
+        indexPattern,
+        [],
+        [...searchFilters],
+        getEsQueryConfig(uiSettings as Parameters<typeof getEsQueryConfig>[0])
+      )
+    );
+  }, [searchFilters, indexPattern, uiSettings]);
+
   const { nodeExpandPopover, popoverOpenWrapper } = useGraphPopovers(setActorIds, setSearchFilters);
   const expandButtonClickHandler = (...args: unknown[]) =>
     popoverOpenWrapper(nodeExpandPopover.onNodeExpandButtonClick, ...args);
   const isPopoverOpen = [nodeExpandPopover].some(({ state: { isOpen } }) => isOpen);
-  const { data, refresh, isFetching } = useGraphData(actorIds, eventIds, filters);
+  const { data, refresh, isFetching } = useGraphData(eventIds, timeRange, query);
   const nodes = useGraphNodes(data?.nodes ?? [], expandButtonClickHandler);
 
   return (
@@ -172,27 +236,18 @@ export const GraphVisualization: React.FC = memo(() => {
           showQueryInput: false,
           isLoading: isFetching,
           isAutoRefreshDisabled: true,
-          dateRangeFrom: filters.from.split('/')[0],
-          dateRangeTo: filters.to.split('/')[0],
+          dateRangeFrom: timeRange.from.split('/')[0],
+          dateRangeTo: timeRange.to.split('/')[0],
           query: { query: '', language: 'kuery' },
           indexPatterns: [indexPattern],
           filters: searchFilters,
           submitButtonStyle: 'iconOnly',
           onFiltersUpdated: (newFilters) => {
             setSearchFilters(newFilters);
-
-            setActorIds(
-              new Set(
-                newFilters
-                  .filter((filter) => filter.meta.key === 'actor.entity.id')
-                  .map((filter) => (filter.meta.params as { query: string })?.query)
-                  .filter((query) => typeof query === 'string')
-              )
-            );
           },
           onQuerySubmit: (payload, isUpdate) => {
             if (isUpdate) {
-              updateFilters({ from: payload.dateRange.from, to: payload.dateRange.to });
+              setTimeRange({ from: payload.dateRange.from, to: payload.dateRange.to });
             } else {
               refresh();
             }
