@@ -31,7 +31,7 @@ export interface IDataStreamsStatsClient {
   getDataStreamsDegradedStats(
     params?: GetDataStreamsDegradedDocsStatsQuery
   ): Promise<DataStreamDocsStat[]>;
-  getDataStreamsDocsStats(params: GetDataStreamsTotalDocsQuery): Promise<DataStreamDocsStat[]>;
+  getDataStreamsTotalDocs(params: GetDataStreamsTotalDocsQuery): Promise<DataStreamDocsStat[]>;
   getIntegrations(): Promise<Integration[]>;
   getNonAggregatableDatasets(
     params: GetNonAggregatableDataStreamsParams

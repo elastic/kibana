@@ -458,7 +458,7 @@ export const createDatasetQualityControllerStateMachine = ({
             const { startDate: start, endDate: end } = getDateISORange(context.filters.timeRange);
 
             const totalDocsStats = await (isTypeSelected(type, context)
-              ? dataStreamStatsClient.getDataStreamsDocsStats({
+              ? dataStreamStatsClient.getDataStreamsTotalDocs({
                   type,
                   datasetQuery: context.filters.query,
                   start,

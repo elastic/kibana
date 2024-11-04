@@ -53,15 +53,8 @@ export function generateDatasets(
   );
 
   const totalDocs = flattenStats(totalDocsStats);
-
   const totalDocsMap: Record<DataStreamDocsStat['dataset'], DataStreamDocsStat['count']> =
-    totalDocs.reduce(
-      (toalMapAcc, { dataset, count }) =>
-        Object.assign(toalMapAcc, {
-          [dataset]: count,
-        }),
-      {}
-    );
+    Object.fromEntries(totalDocs.map(({ dataset, count }) => [dataset, count]));
 
   if (!dataStreamStats.length) {
     return degradedDocStats.map((degradedDocStat) =>
