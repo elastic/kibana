@@ -48,9 +48,9 @@ export const DocumentViewModeToggle = ({
   );
   const state = stateContainer.appState.getState();
   const fieldStatsWarningMsgForQuery = useMemo(() => {
-    return (
-      isEsqlMode && dataVisualizerService?.getReasonIfFieldStatsUnavailableForQuery(state.query)
-    );
+    return isEsqlMode
+      ? dataVisualizerService?.getReasonIfFieldStatsUnavailableForQuery(state.query)
+      : undefined;
   }, [state.query, dataVisualizerService, isEsqlMode]);
 
   const [showPatternAnalysisTab, setShowPatternAnalysisTab] = useState<boolean | null>(null);
