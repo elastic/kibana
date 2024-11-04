@@ -25,7 +25,7 @@ export const registerSiemRuleMigrationsStartRoute = (
     .put({
       path: SIEM_RULE_MIGRATIONS_START_PATH,
       access: 'internal',
-      options: { tags: ['access:securitySolution'] },
+      security: { authz: { requiredPrivileges: ['securitySolution'] } },
     })
     .addVersion(
       {
@@ -84,9 +84,7 @@ export const registerSiemRuleMigrationsStartRoute = (
           return res.ok({ body: { started } });
         } catch (err) {
           logger.error(err);
-          return res.badRequest({
-            body: err.message,
-          });
+          return res.badRequest({ body: err.message });
         }
       }
     );

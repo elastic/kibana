@@ -32,11 +32,13 @@ paths:
                   migration_id:
                     type: string
                     description: The migration id created.
+
+  /internal/siem_migrations/rules/stats:
     get:
-      summary: Retrieves rule migrations
-      operationId: GetRuleMigration
+      summary: Retrieves the stats for all rule migrations
+      operationId: GetAllStatsRuleMigration
       x-codegen-enabled: true
-      description: Retrieves the rule migrations stored in the system
+      description: Retrieves the rule migrations stats for all migrations stored in the system
       tags:
         - SIEM Rule Migrations
       responses:
@@ -45,9 +47,34 @@ paths:
           content:
             application/json:
               schema:
+                $ref: '../../rule_migration.schema.yaml#/components/schemas/RuleMigrationAllTaskStats'
+
+  /internal/siem_migrations/rules/{migration_id}:
+    get:
+      summary: Retrieves all the rules of a migration
+      operationId: GetRuleMigration
+      x-codegen-enabled: true
+      description: Retrieves the rule documents stored in the system given the rule migration id
+      tags:
+        - SIEM Rule Migrations
+      parameters:
+        - name: migration_id
+          in: path
+          required: true
+          schema:
+            type: string
+            description: The migration id to start
+      responses:
+        200:
+          description: Indicates rule migration have been retrieved correctly.
+          content:
+            application/json:
+              schema:
                 type: array
                 items:
                   $ref: '../../rule_migration.schema.yaml#/components/schemas/RuleMigration'
+        204:
+          description: Indicates the migration id was not found.
 
   /internal/siem_migrations/rules/{migration_id}/start:
     put:

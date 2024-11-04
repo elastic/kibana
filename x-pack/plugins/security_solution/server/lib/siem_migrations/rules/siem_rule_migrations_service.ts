@@ -52,11 +52,14 @@ export class SiemRuleMigrationsService {
         start: (params) => {
           return this.taskRunner.start({ ...params, currentUser, dataClient });
         },
-        stats: async (migrationId) => {
-          return this.taskRunner.stats({ migrationId, dataClient });
-        },
         stop: (migrationId) => {
           return this.taskRunner.stop({ migrationId, dataClient });
+        },
+        getStats: async (migrationId) => {
+          return this.taskRunner.getStats({ migrationId, dataClient });
+        },
+        getAllStats: async () => {
+          return this.taskRunner.getAllStats({ dataClient });
         },
       },
     };

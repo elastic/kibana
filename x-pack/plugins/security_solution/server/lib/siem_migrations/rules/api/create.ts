@@ -22,7 +22,7 @@ export const registerSiemRuleMigrationsCreateRoute = (
     .post({
       path: SIEM_RULE_MIGRATIONS_PATH,
       access: 'internal',
-      options: { tags: ['access:securitySolution'] },
+      security: { authz: { requiredPrivileges: ['securitySolution'] } },
     })
     .addVersion(
       {
@@ -49,9 +49,7 @@ export const registerSiemRuleMigrationsCreateRoute = (
           return res.ok({ body: { migration_id: migrationId } });
         } catch (err) {
           logger.error(err);
-          return res.badRequest({
-            body: err.message,
-          });
+          return res.badRequest({ body: err.message });
         }
       }
     );

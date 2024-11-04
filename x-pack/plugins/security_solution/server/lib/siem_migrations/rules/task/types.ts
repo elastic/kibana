@@ -55,6 +55,10 @@ export interface RuleMigrationTaskStatsParams {
   dataClient: RuleMigrationsDataClient;
 }
 
+export interface RuleMigrationAllTaskStatsParams {
+  dataClient: RuleMigrationsDataClient;
+}
+
 export interface RuleMigrationTaskStartResult {
   started: boolean;
   exists: boolean;

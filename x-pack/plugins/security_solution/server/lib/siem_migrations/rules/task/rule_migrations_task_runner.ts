@@ -8,8 +8,11 @@
 import type { Logger } from '@kbn/core/server';
 import { AbortError, abortSignalToPromise } from '@kbn/kibana-utils-plugin/server';
 import type { RunnableConfig } from '@langchain/core/runnables';
-import type { RuleMigrationTaskStats } from '../../../../../common/siem_migrations/model/rule_migration.gen';
-import type { RuleMigrationStats } from '../data_stream/rule_migrations_data_client';
+import type {
+  RuleMigrationAllTaskStats,
+  RuleMigrationTaskStats,
+} from '../../../../../common/siem_migrations/model/rule_migration.gen';
+import type { RuleMigrationDataStats } from '../data_stream/rule_migrations_data_client';
 import type {
   RuleMigrationTaskStartParams,
   RuleMigrationTaskStartResult,
@@ -19,6 +22,7 @@ import type {
   RuleMigrationTaskPrepareParams,
   RuleMigrationTaskRunParams,
   MigrationAgent,
+  RuleMigrationAllTaskStatsParams,
 } from './types';
 import { getRuleMigrationAgent } from './agent';
 import type { MigrateRuleState } from './agent/types';
@@ -65,11 +69,11 @@ export class RuleMigrationsTaskRunner {
     // Just in case some previous execution was interrupted without releasing
     await dataClient.releaseProcessable(migrationId);
 
-    const { total, pending } = await dataClient.getStats(migrationId);
-    if (total === 0) {
+    const { rules } = await dataClient.getStats(migrationId);
+    if (rules.total === 0) {
       return { exists: false, started: false };
     }
-    if (pending === 0) {
+    if (rules.pending === 0) {
       return { exists: true, started: false };
     }
 
@@ -186,8 +190,8 @@ export class RuleMigrationsTaskRunner {
         );
         this.taskLogger.info(`Batch processed successfully for migration ID:${migrationId}`);
 
-        const { pending } = await dataClient.getStats(migrationId);
-        isDone = pending === 0;
+        const { rules } = await dataClient.getStats(migrationId);
+        isDone = rules.pending === 0;
         if (!isDone) {
           await sleep(ITERATION_SLEEP_SECONDS);
         }
@@ -211,37 +215,38 @@ export class RuleMigrationsTaskRunner {
     }
   }
 
-  /** Retries the status of a running migration */
-  async stats({
+  /** Returns the stats of a migration */
+  async getStats({
     migrationId,
     dataClient,
   }: RuleMigrationTaskStatsParams): Promise<RuleMigrationTaskStats> {
-    const stats = await dataClient.getStats(migrationId);
-    const status = this.getTaskStatus(stats, migrationId);
-    return {
-      status,
-      rules: {
-        total: stats.total,
-        finished: stats.finished,
-        pending: stats.pending,
-        processing: stats.processing,
-        failed: stats.failed,
-      },
-      last_updated_at: stats.lastUpdatedAt,
-    };
+    const dataStats = await dataClient.getStats(migrationId);
+    const status = this.getTaskStatus(migrationId, dataStats.rules);
+    return { status, ...dataStats };
+  }
+
+  /** Returns the stats of all migrations */
+  async getAllStats({
+    dataClient,
+  }: RuleMigrationAllTaskStatsParams): Promise<RuleMigrationAllTaskStats> {
+    const allDataStats = await dataClient.getAllStats();
+    return allDataStats.map((dataStats) => {
+      const status = this.getTaskStatus(dataStats.migration_id, dataStats.rules);
+      return { status, ...dataStats };
+    });
   }
 
   private getTaskStatus(
-    stats: RuleMigrationStats,
-    migrationId: string
+    migrationId: string,
+    dataStats: RuleMigrationDataStats['rules']
   ): RuleMigrationTaskStats['status'] {
     if (this.migrationsExecuting.has(migrationId)) {
       return 'running';
     }
-    if (stats.pending === stats.total) {
+    if (dataStats.pending === dataStats.total) {
       return 'ready';
     }
-    if (stats.finished + stats.failed === stats.total) {
+    if (dataStats.finished + dataStats.failed === dataStats.total) {
       return 'done';
     }
     return 'stopped';
@@ -259,8 +264,8 @@ export class RuleMigrationsTaskRunner {
         return { exists: true, stopped: true };
       }
 
-      const { total } = await dataClient.getStats(migrationId);
-      if (total > 0) {
+      const { rules } = await dataClient.getStats(migrationId);
+      if (rules.total > 0) {
         return { exists: true, stopped: false };
       }
       return { exists: false, stopped: false };

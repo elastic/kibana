@@ -10,23 +10,22 @@ import assert from 'assert';
 import type {
   AggregationsFilterAggregate,
   AggregationsMaxAggregate,
+  AggregationsStringTermsAggregate,
+  AggregationsStringTermsBucket,
   QueryDslQueryContainer,
   SearchHit,
   SearchResponse,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { StoredRuleMigration } from '../types';
 import { SiemMigrationsStatus } from '../../../../../common/siem_migrations/constants';
-import type { RuleMigration } from '../../../../../common/siem_migrations/model/rule_migration.gen';
+import type {
+  RuleMigration,
+  RuleMigrationTaskStats,
+} from '../../../../../common/siem_migrations/model/rule_migration.gen';
 
 export type CreateRuleMigrationInput = Omit<RuleMigration, '@timestamp' | 'status' | 'created_by'>;
-export interface RuleMigrationStats {
-  total: number;
-  pending: number;
-  processing: number;
-  finished: number;
-  failed: number;
-  lastUpdatedAt: string | undefined;
-}
+export type RuleMigrationDataStats = Omit<RuleMigrationTaskStats, 'status'>;
+export type RuleMigrationAllDataStats = Array<RuleMigrationDataStats & { migration_id: string }>;
 
 export class RuleMigrationsDataClient {
   constructor(
@@ -56,6 +55,21 @@ export class RuleMigrationsDataClient {
         this.logger.error(`Error creating rule migrations: ${error.message}`);
         throw error;
       });
+  }
+
+  /** Retrieves an array of rule documents of a specific migrations */
+  async getRules(migrationId: string): Promise<StoredRuleMigration[]> {
+    const index = await this.dataStreamNamePromise;
+    const query = this.getFilterQuery(migrationId);
+
+    const storedRuleMigrations = await this.esClient
+      .search<RuleMigration>({ index, query, sort: '_doc' })
+      .catch((error) => {
+        this.logger.error(`Error searching getting rule migrations: ${error.message}`);
+        throw error;
+      })
+      .then((response) => this.processHits(response.hits.hits));
+    return storedRuleMigrations;
   }
 
   /**
@@ -160,7 +174,7 @@ export class RuleMigrationsDataClient {
   }
 
   /** Retrieves the stats for the rule migrations with the provided id */
-  async getStats(migrationId: string): Promise<RuleMigrationStats> {
+  async getStats(migrationId: string): Promise<RuleMigrationDataStats> {
     const index = await this.dataStreamNamePromise;
     const query = this.getFilterQuery(migrationId);
     const aggregations = {
@@ -171,16 +185,7 @@ export class RuleMigrationsDataClient {
       lastUpdatedAt: { max: { field: 'updated_at' } },
     };
     const result = await this.esClient
-      .search<
-        unknown,
-        {
-          pending: AggregationsFilterAggregate;
-          processing: AggregationsFilterAggregate;
-          finished: AggregationsFilterAggregate;
-          failed: AggregationsFilterAggregate;
-          lastUpdatedAt: AggregationsMaxAggregate;
-        }
-      >({ index, query, aggregations, _source: false })
+      .search({ index, query, aggregations, _source: false })
       .catch((error) => {
         this.logger.error(`Error getting rule migrations stats: ${error.message}`);
         throw error;
@@ -188,13 +193,52 @@ export class RuleMigrationsDataClient {
 
     const { pending, processing, finished, lastUpdatedAt, failed } = result.aggregations ?? {};
     return {
-      total: this.getTotalHits(result),
-      pending: pending?.doc_count ?? 0,
-      processing: processing?.doc_count ?? 0,
-      finished: finished?.doc_count ?? 0,
-      failed: failed?.doc_count ?? 0,
-      lastUpdatedAt: lastUpdatedAt?.value_as_string,
+      rules: {
+        total: this.getTotalHits(result),
+        pending: (pending as AggregationsFilterAggregate)?.doc_count ?? 0,
+        processing: (processing as AggregationsFilterAggregate)?.doc_count ?? 0,
+        finished: (finished as AggregationsFilterAggregate)?.doc_count ?? 0,
+        failed: (failed as AggregationsFilterAggregate)?.doc_count ?? 0,
+      },
+      last_updated_at: (lastUpdatedAt as AggregationsMaxAggregate)?.value_as_string,
     };
+  }
+
+  /** Retrieves the stats for all the rule migrations aggregated by migration id */
+  async getAllStats(): Promise<RuleMigrationAllDataStats> {
+    const index = await this.dataStreamNamePromise;
+    const aggregations = {
+      migrationIds: {
+        terms: { field: 'migration_id' },
+        aggregations: {
+          pending: { filter: { term: { status: SiemMigrationsStatus.PENDING } } },
+          processing: { filter: { term: { status: SiemMigrationsStatus.PROCESSING } } },
+          finished: { filter: { term: { status: SiemMigrationsStatus.FINISHED } } },
+          failed: { filter: { term: { status: SiemMigrationsStatus.FAILED } } },
+          lastUpdatedAt: { max: { field: 'updated_at' } },
+        },
+      },
+    };
+    const result = await this.esClient
+      .search({ index, aggregations, _source: false })
+      .catch((error) => {
+        this.logger.error(`Error getting all rule migrations stats: ${error.message}`);
+        throw error;
+      });
+
+    const migrationsAgg = result.aggregations?.migrationIds as AggregationsStringTermsAggregate;
+    const buckets = (migrationsAgg?.buckets as AggregationsStringTermsBucket[]) ?? [];
+    return buckets.map((bucket) => ({
+      migration_id: bucket.key,
+      rules: {
+        total: bucket.doc_count,
+        pending: bucket.pending?.doc_count ?? 0,
+        processing: bucket.processing?.doc_count ?? 0,
+        finished: bucket.finished?.doc_count ?? 0,
+        failed: bucket.failed?.doc_count ?? 0,
+      },
+      last_updated_at: bucket.lastUpdatedAt?.value_as_string,
+    }));
   }
 
   private getFilterQuery(

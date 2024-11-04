@@ -33,7 +33,9 @@ export function getRuleMigrationAgent({
     .addEdge('translation', 'processResponse')
     .addEdge('processResponse', END);
 
-  return translateRuleGraph.compile();
+  const graph = translateRuleGraph.compile();
+  graph.name = 'Rule Migration Graph'; // Customizes the name displayed in LangSmith
+  return graph;
 }
 
 const matchedPrebuiltRuleConditional = (state: MigrateRuleState) => {

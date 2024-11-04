@@ -167,3 +167,16 @@ components:
         last_updated_at:
           type: string
           description: The moment of the last update.
+
+    RuleMigrationAllTaskStats:
+      type: array
+      items:
+        allOf:
+          - $ref: '#/components/schemas/RuleMigrationTaskStats'
+          - type: object
+            required:
+              - migration_id
+            properties:
+              migration_id:
+                type: string
+                description: The migration id

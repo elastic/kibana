@@ -16,7 +16,12 @@
 
 import { z } from '@kbn/zod';
 
-import { OriginalRule, RuleMigration, RuleMigrationTaskStats } from '../../rule_migration.gen';
+import {
+  OriginalRule,
+  RuleMigrationAllTaskStats,
+  RuleMigration,
+  RuleMigrationTaskStats,
+} from '../../rule_migration.gen';
 import { ConnectorId, LangSmithOptions } from '../common.gen';
 
 export type CreateRuleMigrationRequestBody = z.infer<typeof CreateRuleMigrationRequestBody>;
@@ -30,6 +35,15 @@ export const CreateRuleMigrationResponse = z.object({
    */
   migration_id: z.string(),
 });
+
+export type GetAllStatsRuleMigrationResponse = z.infer<typeof GetAllStatsRuleMigrationResponse>;
+export const GetAllStatsRuleMigrationResponse = RuleMigrationAllTaskStats;
+
+export type GetRuleMigrationRequestParams = z.infer<typeof GetRuleMigrationRequestParams>;
+export const GetRuleMigrationRequestParams = z.object({
+  migration_id: z.string(),
+});
+export type GetRuleMigrationRequestParamsInput = z.input<typeof GetRuleMigrationRequestParams>;
 
 export type GetRuleMigrationResponse = z.infer<typeof GetRuleMigrationResponse>;
 export const GetRuleMigrationResponse = z.array(RuleMigration);

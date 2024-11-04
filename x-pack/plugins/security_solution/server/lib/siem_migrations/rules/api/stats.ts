@@ -20,7 +20,7 @@ export const registerSiemRuleMigrationsStatsRoute = (
     .get({
       path: SIEM_RULE_MIGRATIONS_STATS_PATH,
       access: 'internal',
-      options: { tags: ['access:securitySolution'] },
+      security: { authz: { requiredPrivileges: ['securitySolution'] } },
     })
     .addVersion(
       {
@@ -34,13 +34,13 @@ export const registerSiemRuleMigrationsStatsRoute = (
         try {
           const ctx = await context.resolve(['securitySolution']);
           const ruleMigrationsClient = ctx.securitySolution.getSiemRuleMigrationsClient();
-          const stats = await ruleMigrationsClient.task.stats(migrationId);
+
+          const stats = await ruleMigrationsClient.task.getStats(migrationId);
+
           return res.ok({ body: stats });
         } catch (err) {
           logger.error(err);
-          return res.badRequest({
-            body: err.message,
-          });
+          return res.badRequest({ body: err.message });
         }
       }
     );

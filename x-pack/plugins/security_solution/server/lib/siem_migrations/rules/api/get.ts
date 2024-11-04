@@ -7,18 +7,18 @@
 
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import type { StopRuleMigrationResponse } from '../../../../../common/siem_migrations/model/api/rules/rules_migration.gen';
-import { StopRuleMigrationRequestParams } from '../../../../../common/siem_migrations/model/api/rules/rules_migration.gen';
-import { SIEM_RULE_MIGRATIONS_STOP_PATH } from '../../../../../common/siem_migrations/constants';
+import type { GetRuleMigrationResponse } from '../../../../../common/siem_migrations/model/api/rules/rules_migration.gen';
+import { GetRuleMigrationRequestParams } from '../../../../../common/siem_migrations/model/api/rules/rules_migration.gen';
+import { SIEM_RULE_MIGRATIONS_GET_PATH } from '../../../../../common/siem_migrations/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 
-export const registerSiemRuleMigrationsStopRoute = (
+export const registerSiemRuleMigrationsGetRoute = (
   router: SecuritySolutionPluginRouter,
   logger: Logger
 ) => {
   router.versioned
-    .put({
-      path: SIEM_RULE_MIGRATIONS_STOP_PATH,
+    .get({
+      path: SIEM_RULE_MIGRATIONS_GET_PATH,
       access: 'internal',
       security: { authz: { requiredPrivileges: ['securitySolution'] } },
     })
@@ -26,21 +26,18 @@ export const registerSiemRuleMigrationsStopRoute = (
       {
         version: '1',
         validate: {
-          request: { params: buildRouteValidationWithZod(StopRuleMigrationRequestParams) },
+          request: { params: buildRouteValidationWithZod(GetRuleMigrationRequestParams) },
         },
       },
-      async (context, req, res): Promise<IKibanaResponse<StopRuleMigrationResponse>> => {
+      async (context, req, res): Promise<IKibanaResponse<GetRuleMigrationResponse>> => {
         const migrationId = req.params.migration_id;
         try {
-          const ctx = await context.resolve(['core', 'actions', 'securitySolution']);
+          const ctx = await context.resolve(['securitySolution']);
           const ruleMigrationsClient = ctx.securitySolution.getSiemRuleMigrationsClient();
 
-          const { exists, stopped } = await ruleMigrationsClient.task.stop(migrationId);
+          const migrationRules = await ruleMigrationsClient.data.getRules(migrationId);
 
-          if (!exists) {
-            return res.noContent();
-          }
-          return res.ok({ body: { stopped } });
+          return res.ok({ body: migrationRules });
         } catch (err) {
           logger.error(err);
           return res.badRequest({ body: err.message });

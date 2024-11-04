@@ -18,6 +18,7 @@ import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type {
   RuleMigration,
+  RuleMigrationAllTaskStats,
   RuleMigrationTaskStats,
 } from '../../../../common/siem_migrations/model/rule_migration.gen';
 import type { RuleMigrationsDataClient } from './data_stream/rule_migrations_data_client';
@@ -54,7 +55,8 @@ export interface SiemRuleMigrationsClient {
   data: RuleMigrationsDataClient;
   task: {
     start: (params: SiemRuleMigrationsStartTaskParams) => Promise<RuleMigrationTaskStartResult>;
-    stats: (migrationId: string) => Promise<RuleMigrationTaskStats>;
     stop: (migrationId: string) => Promise<RuleMigrationTaskStopResult>;
+    getStats: (migrationId: string) => Promise<RuleMigrationTaskStats>;
+    getAllStats: () => Promise<RuleMigrationAllTaskStats>;
   };
 }

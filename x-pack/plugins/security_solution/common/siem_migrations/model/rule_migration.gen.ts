@@ -112,7 +112,7 @@ export const RuleMigration = z.object({
   /**
    * The status of the rule migration.
    */
-  status: z.enum(['pending', 'processing', 'finished', 'error']).default('pending'),
+  status: z.enum(['pending', 'processing', 'finished', 'failed']).default('pending'),
   /**
    * The comments for the migration including a summary from the LLM in markdown.
    */
@@ -166,3 +166,15 @@ export const RuleMigrationTaskStats = z.object({
    */
   last_updated_at: z.string().optional(),
 });
+
+export type RuleMigrationAllTaskStats = z.infer<typeof RuleMigrationAllTaskStats>;
+export const RuleMigrationAllTaskStats = z.array(
+  RuleMigrationTaskStats.merge(
+    z.object({
+      /**
+       * The migration id
+       */
+      migration_id: z.string(),
+    })
+  )
+);
