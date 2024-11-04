@@ -37,6 +37,7 @@ export function registerEluHistoryRoute(router: IRouter, elu: () => EluMetrics) 
       path: '/api/_elu_history',
       options: {
         authRequired: false,
+        excludeFromRateLimiter: true,
       },
     })
     .addVersion(
