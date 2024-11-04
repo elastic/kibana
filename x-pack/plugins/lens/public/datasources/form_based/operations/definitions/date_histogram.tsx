@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -27,7 +28,11 @@ import {
   search,
   UI_SETTINGS,
 } from '@kbn/data-plugin/public';
-import { extendedBoundsToAst, intervalOptions } from '@kbn/data-plugin/common';
+import {
+  extendedBoundsToAst,
+  intervalOptions,
+  getCalculateAutoTimeExpression,
+} from '@kbn/data-plugin/common';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { TooltipWrapper } from '@kbn/visualization-utils';
 import { sanitazeESQLInput } from '@kbn/esql-utils';
@@ -155,7 +160,19 @@ export const dateHistogramOperation: OperationDefinition<
       };
     }
   },
-  getDefaultLabel: (column, columns, indexPattern) => getSafeName(column.sourceField, indexPattern),
+  getDefaultLabel: (column, columns, indexPattern, uiSettings, dateRange) => {
+    const field = getSafeName(column.sourceField, indexPattern);
+    let interval = column.params?.interval || autoInterval;
+    if (dateRange && uiSettings) {
+      if (interval === 'auto') {
+        const calcAutoInterval = getCalculateAutoTimeExpression((key) => uiSettings.get(key));
+        interval =
+          calcAutoInterval({ from: dateRange.fromDate, to: dateRange.toDate }, true) || '1 hour';
+      }
+      return `${field} per ${interval}`;
+    }
+    return field;
+  },
   buildColumn({ field }, columnParams) {
     return {
       label: field.displayName,
@@ -193,8 +210,13 @@ export const dateHistogramOperation: OperationDefinition<
 
     if (timeZone || column.params?.includeEmptyRows) return;
 
+    const calcAutoInterval = getCalculateAutoTimeExpression((key) => uiSettings.get(key));
+
     if (interval === 'auto') {
-      return `BUCKET(${sanitazeESQLInput(column.sourceField)}, 50, ?_tstart, ?_tend)`;
+      return `BUCKET(${sanitazeESQLInput(column.sourceField)}, ${mapToEsqlInterval(
+        dateRange,
+        calcAutoInterval({ from: dateRange.fromDate, to: dateRange.toDate }) || '1h'
+      )})`;
     }
     return `BUCKET(${sanitazeESQLInput(column.sourceField)}, ${mapToEsqlInterval(
       dateRange,

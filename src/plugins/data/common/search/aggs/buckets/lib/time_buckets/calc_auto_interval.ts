@@ -145,8 +145,9 @@ export function calcAutoIntervalNear(targetBucketCount: number, duration: number
   const targetPerBucketMs = getPerBucketMs(targetBucketCount, duration);
 
   // Find the first bound which is smaller than our target.
-  const lowerBoundIndex = boundsDescending.findIndex(({ bound, interval }) => {
-    return interval <= targetPerBucketMs;
+  const lowerBoundIndex = boundsDescending.findIndex(({ bound }) => {
+    const boundMs = Number(bound);
+    return boundMs <= targetPerBucketMs;
   });
 
   // The bound immediately preceeding that lower bound contains the

@@ -8,22 +8,21 @@
  */
 
 import moment from 'moment';
-import { UI_SETTINGS } from '../../../constants';
 import { TimeRange } from '../../../query';
 import { TimeBuckets } from '../buckets/lib/time_buckets';
 import { toAbsoluteDates } from './date_interval_utils';
 import { autoInterval } from '../buckets/_interval_options';
 
 export function getCalculateAutoTimeExpression(getConfig: (key: string) => any) {
-  return function calculateAutoTimeExpression(range: TimeRange) {
+  return function calculateAutoTimeExpression(range: TimeRange, description: bool = false) {
     const dates = toAbsoluteDates(range);
     if (!dates) {
       return;
     }
 
     const buckets = new TimeBuckets({
-      'histogram:maxBars': getConfig(UI_SETTINGS.HISTOGRAM_MAX_BARS),
-      'histogram:barTarget': getConfig(UI_SETTINGS.HISTOGRAM_BAR_TARGET),
+      'histogram:maxBars': getConfig('histogram:maxBars'),
+      'histogram:barTarget': getConfig(`histogram:barTarget`),
       dateFormat: getConfig('dateFormat'),
       'dateFormat:scaled': getConfig('dateFormat:scaled'),
     });
@@ -34,6 +33,9 @@ export function getCalculateAutoTimeExpression(getConfig: (key: string) => any) 
       max: moment(dates.to),
     });
 
+    if (description) {
+      return buckets.getInterval().description;
+    }
     return buckets.getInterval().expression;
   };
 }

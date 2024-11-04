@@ -77,7 +77,9 @@ export function getESQLForLayer(
             : operationDefinitionMap[col.operationType].getDefaultLabel(
                 col,
                 layer.columns,
-                indexPattern
+                indexPattern,
+                uiSettings,
+                dateRange
               ),
         },
       ];
@@ -162,7 +164,9 @@ export function getESQLForLayer(
             : operationDefinitionMap[col.operationType].getDefaultLabel(
                 col,
                 layer.columns,
-                indexPattern
+                indexPattern,
+                uiSettings,
+                dateRange
               ),
         },
       ];
