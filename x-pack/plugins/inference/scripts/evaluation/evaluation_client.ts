@@ -7,8 +7,7 @@
 
 import { remove } from 'lodash';
 import { lastValueFrom } from 'rxjs';
-import type { OutputAPI } from '../../common/output';
-import { withoutOutputUpdateEvents } from '../../common/output/without_output_update_events';
+import { type OutputAPI, withoutOutputUpdateEvents } from '@kbn/inference-common';
 import type { EvaluationResult } from './types';
 
 export interface InferenceEvaluationClient {

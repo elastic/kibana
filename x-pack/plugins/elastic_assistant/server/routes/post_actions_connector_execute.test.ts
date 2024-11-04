@@ -51,7 +51,7 @@ jest.mock('./helpers', () => {
 
   return {
     ...original,
-    getIsKnowledgeBaseEnabled: jest.fn(),
+    getIsKnowledgeBaseInstalled: jest.fn(),
     appendAssistantMessageToConversation: jest.fn(),
     langChainExecute: jest.fn(),
     getPluginNameFromRequest: jest.fn(),
