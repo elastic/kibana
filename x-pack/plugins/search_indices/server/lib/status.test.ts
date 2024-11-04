@@ -239,36 +239,5 @@ describe('status api lib', function () {
         },
       });
     });
-    it('should default to default index name when generated index name is not given', async () => {
-      const result: SecurityHasPrivilegesResponse = {
-        application: {},
-        cluster: {},
-        has_all_requested: true,
-        index: {
-          'test-index-name': {
-            manage: true,
-            delete: false,
-          },
-        },
-        username: 'unit-test',
-      };
-      mockClient.security.hasPrivileges.mockResolvedValue(result);
-      await expect(fetchUserStartPrivileges(client, logger)).resolves.toEqual({
-        privileges: {
-          canManageIndex: true,
-          canDeleteDocuments: false,
-          canCreateApiKeys: false,
-        },
-      });
-      expect(mockClient.security.hasPrivileges).toHaveBeenCalledWith({
-        cluster: ['manage_api_key'],
-        index: [
-          {
-            names: ['test-index-name'],
-            privileges: ['manage', 'delete'],
-          },
-        ],
-      });
-    });
   });
 });

@@ -38,7 +38,7 @@ export async function fetchIndicesStatus(
 export async function fetchUserStartPrivileges(
   client: ElasticsearchClient,
   logger: Logger,
-  indexName: string = 'test-index-name'
+  indexName: string
 ): Promise<UserStartPrivilegesResponse> {
   try {
     const securityCheck = await client.security.hasPrivileges({
