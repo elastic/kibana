@@ -38,15 +38,12 @@ export function useFetchSloDefinitions({
     queryKey: sloKeys.definitions(search, page, perPage, includeOutdatedOnly),
     queryFn: async ({ signal }) => {
       try {
-        const response = await sloClient.fetch(
-          'GET /api/observability/slos/_definitions 2023-10-31',
-          {
-            query: { search, includeOutdatedOnly, page, perPage },
-            signal,
-          }
-        );
-
-        return response;
+        return await sloClient.fetch('GET /api/observability/slos/_definitions 2023-10-31', {
+          params: {
+            query: { search, includeOutdatedOnly, page: String(page), perPage: String(perPage) },
+          },
+          signal,
+        });
       } catch (error) {
         throw new Error(`Something went wrong. Error: ${error}`);
       }
