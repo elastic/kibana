@@ -18,7 +18,6 @@ import { useCallback } from 'react';
 import { DashboardLocatorParams } from '@kbn/dashboard-plugin/public';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { castArray } from 'lodash';
-import { Exception } from 'handlebars';
 import type { Entity } from '../../common/entities';
 import { unflattenEntity } from '../../common/utils/unflatten_entity';
 import { useKibana } from './use_kibana';
@@ -49,9 +48,7 @@ export const useDetailViewRedirect = () => {
     (entity: Entity) => {
       const identityFields = castArray(entity[ENTITY_IDENTITY_FIELDS]);
       if (identityFields.length > 1) {
-        throw new Exception(
-          `Multiple identity fields are not supported for ${entity[ENTITY_TYPE]}`
-        );
+        throw new Error(`Multiple identity fields are not supported for ${entity[ENTITY_TYPE]}`);
       }
 
       const identityField = identityFields[0];
