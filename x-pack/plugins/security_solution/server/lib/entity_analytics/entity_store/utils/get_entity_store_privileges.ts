@@ -39,8 +39,8 @@ export const getEntityStorePrivileges = (
     security,
     privilegesToCheck: {
       kibana: [
-        security.authz.actions.savedObject.get(entityEngineDescriptorTypeName, 'all'),
-        security.authz.actions.savedObject.get(SO_ENTITY_DEFINITION_TYPE, 'all'),
+        security.authz.actions.savedObject.get(entityEngineDescriptorTypeName, 'create'),
+        security.authz.actions.savedObject.get(SO_ENTITY_DEFINITION_TYPE, 'create'),
       ],
       elasticsearch: {
         cluster: ENTITY_STORE_REQUIRED_ES_CLUSTER_PRIVILEGES,
