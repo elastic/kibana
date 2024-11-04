@@ -168,7 +168,7 @@ It makes it easy to find and investigate causes of unusual spikes or drops by us
 Examine the histogram chart of the log rates for a given {data-source}, and find the reason behind a particular change possibly in millions of log events across multiple fields and values.
 
 You can find log rate analysis embedded in multiple applications.
-In {kib}, you can find it under **{ml-app}** > **AIOps Labs** or by or using the <<kibana-navigation-search,global search field>>. Here, you can select the {data-source} or saved search that you want to analyze.
+In {kib}, you can find it under **{ml-app}** > **AIOps Labs** or by using the <<kibana-navigation-search,global search field>>. Here, you can select the {data-source} or saved search that you want to analyze.
 
 [role="screenshot"]
 image::user/ml/images/ml-log-rate-analysis-before.png[Log event histogram chart]
