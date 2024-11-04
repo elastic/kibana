@@ -954,7 +954,7 @@ packages/kbn-triggers-actions-ui-types @elastic/response-ops
 packages/kbn-try-in-console @elastic/search-kibana
 packages/kbn-ts-projects @elastic/kibana-operations
 packages/kbn-ts-type-check-cli @elastic/kibana-operations
-packages/kbn-typed-react-router-config @elastic/obs-knowledge-team @elastic/obs-ux-management-team
+packages/kbn-typed-react-router-config @elastic/obs-knowledge-team @elastic/obs-ux-infra_services-team
 packages/kbn-ui-actions-browser @elastic/appex-sharedux
 x-pack/examples/ui_actions_enhanced_examples @elastic/appex-sharedux
 src/plugins/ui_actions_enhanced @elastic/appex-sharedux
