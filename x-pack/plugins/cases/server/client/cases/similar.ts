@@ -11,7 +11,10 @@ import { decodeWithExcessOrThrow, decodeOrThrow } from '../../common/runtime_typ
 
 import { createCaseError } from '../../common/error';
 import type { CasesClientArgs } from '..';
-import { flattenCaseSavedObject } from '../../common/utils';
+import { defaultSortField, flattenCaseSavedObject } from '../../common/utils';
+import { Operations } from '../../authorization';
+import { buildObservablesFieldsFilter } from '../utils';
+import { combineFilterWithAuthorizationFilter } from '../../authorization/utils';
 
 /**
  * Retrieves cases similar to a given Case
@@ -25,17 +28,18 @@ export const similar = async (
   const {
     services: { caseService },
     logger,
+    authorization,
   } = clientArgs;
 
   try {
     const paramArgs = decodeWithExcessOrThrow(SimilarCasesSearchRequestRt)(params);
     const retrievedCase = await caseService.getCase({ id: paramArgs.case_id });
 
-    const cases = await caseService.findSimilarCases({
-      caseId: retrievedCase.id,
-      pageSize: paramArgs.pageSize,
-      pageIndex: paramArgs.pageIndex,
-      observables: retrievedCase.attributes.observables.reduce((observableMap, observable) => {
+    const { filter: authorizationFilter, ensureSavedObjectsAreAuthorized } =
+      await authorization.getAuthorizationFilter(Operations.findCases);
+
+    const similarCasesFilter = buildObservablesFieldsFilter(
+      retrievedCase.attributes.observables.reduce((observableMap, observable) => {
         if (!observableMap[observable.typeKey]) {
           observableMap[observable.typeKey] = [];
         }
@@ -43,8 +47,29 @@ export const similar = async (
         observableMap[observable.typeKey].push(observable.value);
 
         return observableMap;
-      }, {} as Record<string, string[]>),
+      }, {} as Record<string, string[]>)
+    );
+
+    const finalCasesFilter = combineFilterWithAuthorizationFilter(
+      similarCasesFilter,
+      authorizationFilter
+    );
+
+    const cases = await caseService.findCases({
+      filter: finalCasesFilter,
+      sortField: defaultSortField,
+      search: `-"cases:${paramArgs.case_id}"`,
+      rootSearchFields: ['_id'],
+      page: params.pageIndex + 1,
+      perPage: params.pageSize,
     });
+
+    ensureSavedObjectsAreAuthorized(
+      cases.saved_objects.map((caseSavedObject) => ({
+        id: caseSavedObject.id,
+        owner: caseSavedObject.attributes.owner,
+      }))
+    );
 
     const res = {
       cases: cases.saved_objects.map((so) => flattenCaseSavedObject({ savedObject: so })),

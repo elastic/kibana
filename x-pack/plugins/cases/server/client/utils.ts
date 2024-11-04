@@ -660,3 +660,15 @@ export const transformTemplateCustomFields = ({
     };
   });
 };
+
+export const buildObservablesFieldsFilter = (observables: Record<string, string[]>) => {
+  const filterExpressions = Object.keys(observables).flatMap((typeKey) => {
+    return Object.values(observables[typeKey]).map((observableValue) => {
+      return fromKueryExpression(
+        `cases.attributes.observables:{value: "${observableValue}" AND typeKey: "${typeKey}"}`
+      );
+    });
+  });
+
+  return nodeBuilder.or(filterExpressions);
+};

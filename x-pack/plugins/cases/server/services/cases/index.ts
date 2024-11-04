@@ -19,7 +19,7 @@ import type {
 } from '@kbn/core/server';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { fromKueryExpression, nodeBuilder } from '@kbn/es-query';
+import { nodeBuilder } from '@kbn/es-query';
 
 import type { Case, CaseStatuses, User } from '../../../common/types/domain';
 import { caseStatuses } from '../../../common/types/domain';
@@ -364,50 +364,6 @@ export class CasesService {
       const cases = await this.unsecuredSavedObjectsClient.find<CasePersistedAttributes>({
         sortField: defaultSortField,
         ...options,
-        type: CASE_SAVED_OBJECT,
-      });
-
-      const res = transformFindResponseToExternalModel(cases);
-      const decodeRes = bulkDecodeSOAttributes(res.saved_objects, CaseTransformedAttributesRt);
-
-      return {
-        ...res,
-        saved_objects: res.saved_objects.map((so) => ({
-          ...so,
-          attributes: decodeRes.get(so.id) as CaseTransformedAttributes,
-        })),
-      };
-    } catch (error) {
-      this.log.error(`Error on find cases: ${error}`);
-      throw error;
-    }
-  }
-
-  public async findSimilarCases(options: {
-    caseId: string;
-    observables: Record<string, string[]>;
-    pageIndex: number;
-    pageSize: number;
-  }): Promise<SavedObjectsFindResponse<CaseTransformedAttributes>> {
-    try {
-      this.log.debug(`Attempting to find similar cases`);
-
-      const filterExpressions = Object.keys(options.observables).flatMap((typeKey) => {
-        return Object.values(options.observables[typeKey]).map((observableValue) => {
-          return fromKueryExpression(
-            `cases.attributes.observables:{value: "${observableValue}" AND typeKey: "${typeKey}"}`
-          );
-        });
-      });
-
-      const cases = await this.unsecuredSavedObjectsClient.find<CasePersistedAttributes>({
-        sortField: defaultSortField,
-        search: `-"cases:${options?.caseId}"`,
-        rootSearchFields: ['_id'],
-        filter: nodeBuilder.or(filterExpressions),
-        page: options.pageIndex + 1,
-        perPage: options.pageSize,
-
         type: CASE_SAVED_OBJECT,
       });
 
