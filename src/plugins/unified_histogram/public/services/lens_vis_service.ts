@@ -504,7 +504,7 @@ export class LensVisService {
           context,
           dataView,
           ['lnsDatatable'],
-          'lnsXY' as ChartType,
+          'XY' as ChartType,
           updatedAttributesWithQuery
         ) ?? [];
       if (suggestions.length) {
