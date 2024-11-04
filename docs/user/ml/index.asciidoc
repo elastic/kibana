@@ -227,7 +227,7 @@ Change point detection uses the
 to detect distribution changes, trend changes, and other statistically 
 significant change points in a metric of your time series data.
 
-You can find change point detection under **{ml-app}** > **AIOps Labs** or by or using the <<kibana-navigation-search,global search field>>. 
+You can find change point detection under **{ml-app}** > **AIOps Labs** or by using the <<kibana-navigation-search,global search field>>. 
 Here, you can select the {data-source} or saved search that you want to analyze.
 
 [role="screenshot"]
