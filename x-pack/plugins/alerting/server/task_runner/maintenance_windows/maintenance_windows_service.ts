@@ -132,7 +132,7 @@ export class MaintenanceWindowsService {
     spaceId: string,
     now: number
   ): Promise<MaintenanceWindow[]> {
-    return await withAlertingSpan('alerting:load-maintenance-windows', async () => {
+    return withAlertingSpan('alerting:load-maintenance-windows', async () => {
       const maintenanceWindowClient = this.options.getMaintenanceWindowClientWithRequest(request);
       const activeMaintenanceWindows = await maintenanceWindowClient.getActiveMaintenanceWindows(
         this.cacheIntervalMs

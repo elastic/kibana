@@ -67,10 +67,8 @@ export class RulesSettingsQueryDelayClient {
   }
 
   public async update(newQueryDelayProperties: RulesSettingsQueryDelayProperties) {
-    return await retryIfConflicts(
-      this.logger,
-      'ruleSettingsClient.queryDelay.update()',
-      async () => await this.updateWithOCC(newQueryDelayProperties)
+    return retryIfConflicts(this.logger, 'ruleSettingsClient.queryDelay.update()', async () =>
+      this.updateWithOCC(newQueryDelayProperties)
     );
   }
 
@@ -120,7 +118,7 @@ export class RulesSettingsQueryDelayClient {
   }
 
   private async getSettings(): Promise<SavedObject<RulesSettings>> {
-    return await this.savedObjectsClient.get<RulesSettings>(
+    return this.savedObjectsClient.get<RulesSettings>(
       RULES_SETTINGS_SAVED_OBJECT_TYPE,
       RULES_SETTINGS_QUERY_DELAY_SAVED_OBJECT_ID
     );
@@ -159,11 +157,11 @@ export class RulesSettingsQueryDelayClient {
    */
   private async getOrCreate(): Promise<SavedObject<RulesSettings>> {
     try {
-      return await this.getSettings();
+      return this.getSettings();
     } catch (e) {
       if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
         this.logger.info('Creating new default query delay rules settings for current space.');
-        return await this.createSettings();
+        return this.createSettings();
       }
       this.logger.error(`Failed to get query delay rules setting for current space. Error: ${e}`);
       throw e;

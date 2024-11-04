@@ -72,8 +72,10 @@ export class AlertNavigationRegistry {
 
   public get(consumer: string, alertType: RuleType): AlertNavigationHandler {
     if (this.has(consumer, alertType)) {
-      const consumerHandlers = this.alertNavigations.get(consumer)!;
-      return (consumerHandlers.get(alertType.id) ?? consumerHandlers.get(DEFAULT_HANDLER))!;
+      const consumerHandlers = this.alertNavigations.get(consumer);
+      return (
+        consumerHandlers?.get(alertType.id) ?? consumerHandlers?.get(DEFAULT_HANDLER) ?? (() => '')
+      );
     }
 
     throw new Error(

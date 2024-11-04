@@ -85,6 +85,7 @@ export const renderApp = ({
   ReactDOM.render(
     <KibanaRenderContextProvider i18n={i18n} theme={theme}>
       <KibanaContextProvider
+        // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
         services={{
           ...core,
           ...plugins,

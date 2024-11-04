@@ -320,10 +320,10 @@ export const generateAlertOpts = ({
   action,
   group,
   state,
-  id,
+  id: _id,
   maintenanceWindowIds,
 }: GeneratorParams = {}) => {
-  id = id ?? '1';
+  const id = _id ?? '1';
   let message: string = '';
   switch (action) {
     case EVENT_LOG_ACTIONS.newInstance:

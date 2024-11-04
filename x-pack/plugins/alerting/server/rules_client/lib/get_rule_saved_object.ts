@@ -31,7 +31,7 @@ export async function getRuleSavedObject(
     })
   );
 
-  return await withSpan({ name: 'unsecuredSavedObjectsClient.get', type: 'rules' }, () =>
+  return withSpan({ name: 'unsecuredSavedObjectsClient.get', type: 'rules' }, () =>
     getRuleSo({
       id: ruleId,
       savedObjectsClient: context.unsecuredSavedObjectsClient,

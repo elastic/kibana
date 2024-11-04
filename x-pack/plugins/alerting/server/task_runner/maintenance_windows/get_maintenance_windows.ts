@@ -56,7 +56,7 @@ export const filterMaintenanceWindowsIds = ({
 export const getMaintenanceWindows = async (
   opts: GetMaintenanceWindowsOpts
 ): Promise<MaintenanceWindow[]> => {
-  return await withAlertingSpan('alerting:load-maintenance-windows', async () => {
+  return withAlertingSpan('alerting:load-maintenance-windows', async () => {
     const {
       getMaintenanceWindowClientWithRequest,
       fakeRequest,

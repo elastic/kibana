@@ -105,12 +105,14 @@ export class AlertingPublicPlugin
       ruleTypeId: string,
       handler: AlertNavigationHandler
     ) => {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       this.alertNavigationRegistry!.register(applicationId, ruleTypeId, handler);
     };
 
     const registerDefaultNavigation = async (
       applicationId: string,
       handler: AlertNavigationHandler
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     ) => this.alertNavigationRegistry!.registerDefault(applicationId, handler);
 
     if (ENABLE_MAINTENANCE_WINDOWS) {
@@ -158,7 +160,9 @@ export class AlertingPublicPlugin
           return;
         }
 
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         if (this.alertNavigationRegistry!.has(rule.consumer, ruleType)) {
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           const navigationHandler = this.alertNavigationRegistry!.get(rule.consumer, ruleType);
           const navUrl = navigationHandler(rule);
           if (navUrl) return navUrl;

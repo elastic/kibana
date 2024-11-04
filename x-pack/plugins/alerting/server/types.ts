@@ -10,24 +10,22 @@ import type {
   CustomRequestHandlerContext,
   SavedObjectReference,
   IUiSettingsClient,
-} from '@kbn/core/server';
-import type { z } from '@kbn/zod';
-import type { DataViewsContract } from '@kbn/data-views-plugin/common';
-import type { ISearchStartSearchSource } from '@kbn/data-plugin/common';
-import type { LicenseType } from '@kbn/licensing-plugin/server';
-import type {
   IScopedClusterClient,
   SavedObjectAttributes,
   SavedObjectsClientContract,
   Logger,
 } from '@kbn/core/server';
+import type { z } from '@kbn/zod';
+import type { DataViewsContract } from '@kbn/data-views-plugin/common';
+import type { ISearchStartSearchSource } from '@kbn/data-plugin/common';
 import type { ObjectType } from '@kbn/config-schema';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { SharePluginStart } from '@kbn/share-plugin/server';
-import type { DefaultAlert, FieldMap } from '@kbn/alerts-as-data-utils';
-import type { Alert } from '@kbn/alerts-as-data-utils';
+import type { DefaultAlert, FieldMap, Alert } from '@kbn/alerts-as-data-utils';
 import type { ActionsApiRequestHandlerContext } from '@kbn/actions-plugin/server';
 import type { AlertsHealth } from '@kbn/alerting-types';
+import type { LicenseType } from '@kbn/licensing-plugin/server';
+
 import type { RuleTypeRegistry as OrigruleTypeRegistry } from './rule_type_registry';
 import type { PluginSetupContract, PluginStartContract } from './plugin';
 import type { RulesClient } from './rules_client';
@@ -55,6 +53,7 @@ import type { PublicAlertFactory } from './alert/create_alert_factory';
 import type { RulesSettingsFlappingProperties } from '../common/rules_settings';
 import type { PublicAlertsClient } from './alerts_client/types';
 import type { GetTimeRangeResult } from './lib/get_time_range';
+
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefined;
 export type { RuleTypeParams };

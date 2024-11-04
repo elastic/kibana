@@ -140,14 +140,13 @@ describe('createNewAPIKeySet', () => {
 
   test('should throw an error if getting the api key fails', async () => {
     rulesClientParams.createAPIKey.mockRejectedValueOnce(new Error('Test failure'));
-    await expect(
-      async () =>
-        await createNewAPIKeySet(rulesClientParams, {
-          id: attributes.alertTypeId,
-          ruleName: attributes.name,
-          username,
-          shouldUpdateApiKey: true,
-        })
+    await expect(async () =>
+      createNewAPIKeySet(rulesClientParams, {
+        id: attributes.alertTypeId,
+        ruleName: attributes.name,
+        username,
+        shouldUpdateApiKey: true,
+      })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Error creating API key for rule - Test failure"`
     );
@@ -155,15 +154,14 @@ describe('createNewAPIKeySet', () => {
 
   test('should throw an error if getting the api key fails and an error message is passed in', async () => {
     rulesClientParams.createAPIKey.mockRejectedValueOnce(new Error('Test failure'));
-    await expect(
-      async () =>
-        await createNewAPIKeySet(rulesClientParams, {
-          id: attributes.alertTypeId,
-          ruleName: attributes.name,
-          username,
-          shouldUpdateApiKey: true,
-          errorMessage: 'Error updating rule: could not create API key',
-        })
+    await expect(async () =>
+      createNewAPIKeySet(rulesClientParams, {
+        id: attributes.alertTypeId,
+        ruleName: attributes.name,
+        username,
+        shouldUpdateApiKey: true,
+        errorMessage: 'Error updating rule: could not create API key',
+      })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Error updating rule: could not create API key - Test failure"`
     );

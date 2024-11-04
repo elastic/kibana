@@ -43,7 +43,8 @@ async function OperationSuccessful() {
 
 const conflictOperationMock = jest.fn();
 
-function getOperationConflictsTimes(times: number) {
+function getOperationConflictsTimes(_times: number) {
+  let times = _times;
   return async function OperationConflictsTimes() {
     conflictOperationMock();
     times--;
