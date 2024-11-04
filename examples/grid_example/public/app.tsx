@@ -39,6 +39,11 @@ export const GridExample = () => {
         from: 'now-24h',
         to: 'now',
       }),
+      removePanel: () => {},
+      replacePanel: () => {},
+      addNewPanel: () => {},
+      canRemovePanels: () => true,
+      children$: new BehaviorSubject(null),
     };
     // only run onMount
   }, []);

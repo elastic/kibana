@@ -8,7 +8,7 @@
  */
 
 import React, { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { combineLatest, skip } from 'rxjs';
+import { combineLatest, debounceTime, skip } from 'rxjs';
 
 import { EuiIcon, transparentize, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -41,31 +41,40 @@ export const GridPanel = forwardRef<
 
     const { euiTheme } = useEuiTheme();
 
-    const startInteraction = useCallback(
-      (
-        type: PanelInteractionEvent['type'],
-        e: MouseEvent | React.MouseEvent<HTMLDivElement, MouseEvent>
-      ) => {
-        interactionStart(type, e);
-        /**
-         * By adding the "drop" event listener to the document rather than the drag/resize event handler,
-         * we prevent the element from getting "stuck" in an interaction; however, we only attach this event
-         * listener **when the drag/resize event starts**, and it only executes once, which means we don't
-         * have to remove the `mouseup` event listener
-         */
-        document.addEventListener('mouseup', (dropEvent) => interactionStart('drop', dropEvent), {
-          once: true,
+    useEffect(() => {
+      /**
+       * Subscription to add a singular "drop" event handler whenever an interaction starts -
+       * this is handled in a subscription so that it is not lost when the component gets remounted
+       * (which happens when a panel gets dragged from one grid row to another)
+       */
+      const dropEventSubscription = gridLayoutStateManager.interactionEvent$
+        .pipe(debounceTime(100))
+        .subscribe((event) => {
+          if (!event || event.id !== panelId || event.type === 'drop') return;
+
+          /**
+           * By adding the "drop" event listener to the document rather than the drag/resize event handler,
+           * we prevent the element from getting "stuck" in an interaction; however, we only attach this event
+           * listener **when the drag/resize event starts**, and it only executes once, which means we don't
+           * have to remove the `mouseup` event listener
+           */
+          document.addEventListener('mouseup', (dropEvent) => interactionStart('drop', dropEvent), {
+            once: true,
+          });
         });
-      },
-      [interactionStart]
-    );
+
+      return () => {
+        dropEventSubscription.unsubscribe();
+      };
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     const setDragHandles = useCallback(
       (dragHandles: Array<HTMLElement | null>) => {
         setDragHandleCount(dragHandles.length);
 
         const onMouseDown = (e: MouseEvent) => {
-          startInteraction('drag', e);
+          interactionStart('drag', e);
         };
         for (const handle of dragHandles) {
           if (handle === null) return;
@@ -79,7 +88,7 @@ export const GridPanel = forwardRef<
           }
         };
       },
-      [startInteraction]
+      [interactionStart]
     );
 
     useEffect(() => {
@@ -221,7 +230,7 @@ export const GridPanel = forwardRef<
                   opacity: 1 !important;
                 }
               `}
-              onMouseDown={(e) => startInteraction('drag', e)}
+              onMouseDown={(e) => interactionStart('drag', e)}
             >
               <EuiIcon type="grabOmnidirectional" />
             </div>
@@ -229,7 +238,7 @@ export const GridPanel = forwardRef<
           {/* Resize handle */}
           <div
             className="resizeHandle"
-            onMouseDown={(e) => startInteraction('resize', e)}
+            onMouseDown={(e) => interactionStart('resize', e)}
             css={css`
               right: 0;
               bottom: 0;

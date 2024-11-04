@@ -49,11 +49,10 @@ export const PresentationPanelInternal = <
     const map = dragHandleRefs.current;
     if (node) {
       map.set(dragHandleId, node);
-      // setDragHandles(Array.from(map.values));
     } else {
       map.delete(dragHandleId);
     }
-    setDragHandles(Array.from(map.values()));
+    setDragHandles?.(Array.from(map.values()));
   }, []);
 
   const viewModeSubject = (() => {
