@@ -26,6 +26,7 @@ export type ESQLSingleAstItem =
   | ESQLTimeInterval
   | ESQLList
   | ESQLLiteral
+  | ESQLIdentifier
   | ESQLCommandMode
   | ESQLInlineCast
   | ESQLOrderExpression
@@ -131,6 +132,11 @@ export interface ESQLFunction<
    * Default is 'variadic-call'.
    */
   subtype?: Subtype;
+
+  /**
+   * A node representing the function or operator being called.
+   */
+  operator?: ESQLIdentifier | ESQLParamLiteral;
 
   args: ESQLAstItem[];
 }
@@ -363,6 +369,10 @@ export interface ESQLNamedParamLiteral extends ESQLParamLiteral<'named'> {
   value: string;
 }
 
+export interface ESQLIdentifier extends ESQLAstBaseItem {
+  type: 'identifier';
+}
+
 export const isESQLNamedParamLiteral = (node: ESQLAstItem): node is ESQLNamedParamLiteral =>
   isESQLAstBaseItem(node) &&
   (node as ESQLNamedParamLiteral).literalType === 'param' &&
@@ -375,6 +385,11 @@ export const isESQLNamedParamLiteral = (node: ESQLAstItem): node is ESQLNamedPar
 export interface ESQLPositionalParamLiteral extends ESQLParamLiteral<'positional'> {
   value: number;
 }
+
+export type ESQLParam =
+  | ESQLUnnamedParamLiteral
+  | ESQLNamedParamLiteral
+  | ESQLPositionalParamLiteral;
 
 export interface ESQLMessage {
   type: 'error' | 'warning';
@@ -404,7 +419,7 @@ export interface ESQLAstGenericComment<SubType extends 'single-line' | 'multi-li
   type: 'comment';
   subtype: SubType;
   text: string;
-  location: ESQLLocation;
+  location?: ESQLLocation;
 }
 
 export type ESQLAstCommentSingleLine = ESQLAstGenericComment<'single-line'>;
