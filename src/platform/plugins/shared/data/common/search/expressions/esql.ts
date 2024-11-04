@@ -422,28 +422,31 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
 
           const rows = normalizedValues.map((row) => zipObject(columnNames, row));
 
-          if (partialRows === false) {
-            const timeFilter =
-              input?.timeRange &&
-              getTime(undefined, input.timeRange, {
-                fieldName: timeField,
-              });
+          const timeFilter =
+            input?.timeRange &&
+            getTime(undefined, input.timeRange, {
+              fieldName: timeField,
+            });
 
-            if (rows.length && timeFilter) {
-              let start = new Date(rows[0][timeField!]);
-              const from = new Date(timeFilter.query.range[timeField].gte);
-              const last = new Date(rows[rows.length - 1][timeField!]);
-              const to = new Date(timeFilter.query.range[timeField].lte);
+          if (rows.length && timeFilter) {
+            let firstEntry = new Date(rows[0][timeField!]);
+            const fromRange = new Date(timeFilter.query.range[timeField].gte);
+            const lastEntry = new Date(rows[rows.length - 1][timeField!]);
+            const toRange = new Date(timeFilter.query.range[timeField].lte);
 
-              const step =
-                new Date(rows[rows.length - 1][timeField!]) -
-                new Date(rows[rows.length - 2][timeField!]);
-              const end = new Date(last.getTime() + step);
-              while (from > start) {
+            const step =
+              new Date(rows[rows.length - 1][timeField!]) -
+              new Date(rows[rows.length - 2][timeField!]);
+            const end = new Date(lastEntry.getTime() + step);
+            const startLatest = new Date(fromRange.getTime() + step);
+            const endLatest = new Date(toRange.getTime() - step);
+
+            if (partialRows === false) {
+              while (fromRange > firstEntry) {
                 rows.shift();
-                start = new Date(rows[0][timeField!]);
+                firstEntry = new Date(rows[0][timeField!]);
               }
-              if (end > to) rows.pop();
+              if (end > toRange) rows.pop();
             }
           }
 
