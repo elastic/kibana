@@ -30,7 +30,7 @@ export const getSignalsMigrationDeprecationsInfo = async (
         title: i18n.translate('xpack.securitySolution.deprecations.signalsMigrationTitle', {
           defaultMessage: 'Found not migrated detection alerts',
         }),
-        level: 'warning',
+        level: 'critical',
         message: i18n.translate('xpack.securitySolution.deprecations.signalsMigrationMessage', {
           defaultMessage: `After upgrading Kibana, the latest Elastic Security features will be available for any newly generated detection alerts. However, in order to enable new features for existing detection alerts, migration may be necessary.`,
         }),
