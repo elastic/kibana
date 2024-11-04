@@ -12,9 +12,9 @@ import {
   RefetchQueryFilters,
   useQuery,
 } from '@tanstack/react-query';
-import { useKibana } from '../utils/kibana_react';
 import { SLO_LONG_REFETCH_INTERVAL } from '../constants';
 import { sloKeys } from './query_key_factory';
+import { usePluginContext } from './use_plugin_context';
 
 export interface UseFetchSloDetailsResponse {
   isInitialLoading: boolean;
@@ -39,17 +39,20 @@ export function useFetchSloDetails({
   remoteName?: string;
   shouldRefetch?: boolean;
 }): UseFetchSloDetailsResponse {
-  const { http } = useKibana().services;
+  const { sloClient } = usePluginContext();
 
   const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data, refetch } = useQuery(
     {
       queryKey: sloKeys.detail(sloId!, instanceId, remoteName),
       queryFn: async ({ signal }) => {
         try {
-          const response = await http.get<GetSLOResponse>(`/api/observability/slos/${sloId}`, {
-            query: {
-              ...(!!instanceId && instanceId !== ALL_VALUE && { instanceId }),
-              ...(remoteName && { remoteName }),
+          const response = await sloClient.fetch('GET /api/observability/slos/{id} 2023-10-31', {
+            params: {
+              path: { id: sloId! },
+              query: {
+                ...(!!instanceId && instanceId !== ALL_VALUE && { instanceId }),
+                ...(remoteName && { remoteName }),
+              },
             },
             signal,
           });
