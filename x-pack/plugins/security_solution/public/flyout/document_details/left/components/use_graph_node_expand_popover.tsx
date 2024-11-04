@@ -39,30 +39,31 @@ export const useGraphNodeExpandPopover = (args: UseGraphNodeExpandPopoverArgs = 
     unToggleCallback: () => void;
   } | null>(null);
 
+  const closePopoverHandler = useCallback(() => {
+    selectedNode.current = null;
+    unToggleCallbackRef.current?.();
+    unToggleCallbackRef.current = null;
+    closePopover();
+  }, [closePopover]);
+
   const onNodeExpandButtonClick: ExpandButtonClickCallback = useCallback(
     (e, node, unToggleCallback) => {
       if (selectedNode.current?.id === node.id) {
         // If the same node is clicked again, close the popover
-        selectedNode.current = null;
-        unToggleCallbackRef.current?.();
-        unToggleCallbackRef.current = null;
-        closePopover();
+        closePopoverHandler();
       } else {
         // Close the current popover if open
-        selectedNode.current = null;
-        unToggleCallbackRef.current?.();
-        unToggleCallbackRef.current = null;
+        closePopoverHandler();
 
         // Set the pending open state
         setPendingOpen({ node, el: e.currentTarget, unToggleCallback });
-
-        closePopover();
       }
     },
-    [closePopover]
+    [closePopoverHandler]
   );
 
   useEffect(() => {
+    // Open pending popover if the popover is not open
     if (!state.isOpen && pendingOpen) {
       const { node, el, unToggleCallback } = pendingOpen;
 
@@ -73,13 +74,6 @@ export const useGraphNodeExpandPopover = (args: UseGraphNodeExpandPopoverArgs = 
       setPendingOpen(null);
     }
   }, [state.isOpen, pendingOpen, openPopover]);
-
-  const closePopoverHandler = useCallback(() => {
-    selectedNode.current = null;
-    unToggleCallbackRef.current?.();
-    unToggleCallbackRef.current = null;
-    closePopover();
-  }, [closePopover]);
 
   const PopoverComponent = memo(() => (
     <GraphNodeExpandPopover

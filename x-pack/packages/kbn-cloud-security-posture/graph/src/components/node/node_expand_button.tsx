@@ -23,7 +23,7 @@ export const NodeExpandButton = ({ x, y, onClick }: NodeExpandButtonProps) => {
   }, []);
 
   const onClickHandler = (e: React.MouseEvent<HTMLElement>) => {
-    setIsToggled(!isToggled);
+    setIsToggled((currIsToggled) => !currIsToggled);
     onClick?.(e, unToggleCallback);
   };
 
