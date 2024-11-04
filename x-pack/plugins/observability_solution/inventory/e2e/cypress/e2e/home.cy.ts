@@ -121,6 +121,35 @@ describe('Home page', () => {
         cy.url().should('include', '/app/metrics/detail/host/server1');
       });
 
+      it('Navigates to discover with default filter', () => {
+        cy.intercept('GET', '/internal/entities/managed/enablement', {
+          fixture: 'eem_enabled.json',
+        }).as('getEEMStatus');
+        cy.visitKibana('/app/inventory');
+        cy.wait('@getEEMStatus');
+        cy.contains('Open in discover').click();
+        cy.url().should(
+          'include',
+          "query:(language:kuery,query:'entity.definition_id%20:%20builtin*"
+        );
+      });
+
+      it('Navigates to discover with kuery filter', () => {
+        cy.intercept('GET', '/internal/entities/managed/enablement', {
+          fixture: 'eem_enabled.json',
+        }).as('getEEMStatus');
+        cy.visitKibana('/app/inventory');
+        cy.wait('@getEEMStatus');
+        cy.getByTestSubj('queryInput').type('service.name : foo');
+
+        cy.contains('Update').click();
+        cy.contains('Open in discover').click();
+        cy.url().should(
+          'include',
+          "query:'service.name%20:%20foo%20AND%20entity.definition_id%20:%20builtin*'"
+        );
+      });
+
       it('Navigates to infra when clicking on a container type entity', () => {
         cy.intercept('GET', '/internal/entities/managed/enablement', {
           fixture: 'eem_enabled.json',
