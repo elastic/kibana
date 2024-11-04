@@ -324,6 +324,7 @@ Management::
 [[fixes-v8.16.0]]
 === Bug fixes
 Alerting::
+* Show up to 1k maintenance windows in the UI ({kibana-pull}198504[#198504])
 * Skip scheduling actions for the alerts without scheduledActions ({kibana-pull}195948[#195948]).
 * Fixes Stack Alerts feature API access control ({kibana-pull}193948[#193948]).
 * Remove unintended internal find routes API with public access ({kibana-pull}193757[#193757]).
