@@ -21,7 +21,6 @@ import type {
   DataVisualizerStartDependencies,
 } from './application/common/types/data_visualizer_plugin';
 import { registerEmbeddables } from './application/index_data_visualizer/embeddables/field_stats';
-import { registerDataVisualizerUiActions } from './application/index_data_visualizer/ui_actions';
 import { getReasonIfFieldStatsUnavailableForQuery } from './application/index_data_visualizer/utils/get_reason_fieldstats_unavailable_for_esql_query';
 export type DataVisualizerPluginSetup = ReturnType<DataVisualizerPlugin['setup']>;
 export type DataVisualizerPluginStart = ReturnType<DataVisualizerPlugin['start']>;
@@ -56,12 +55,6 @@ export class DataVisualizerPlugin
   public async setup(core: DataVisualizerCoreSetup, plugins: DataVisualizerSetupDependencies) {
     if (plugins.embeddable) {
       registerEmbeddables(plugins.embeddable, core);
-    }
-
-    const [coreStart, pluginStart] = await core.getStartServices();
-
-    if (plugins.uiActions) {
-      registerDataVisualizerUiActions(plugins.uiActions, coreStart, pluginStart);
     }
 
     if (plugins.home) {

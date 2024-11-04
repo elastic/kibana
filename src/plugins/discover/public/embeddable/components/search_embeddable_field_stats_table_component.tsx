@@ -14,6 +14,9 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import { FetchContext, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 
+import { EuiEmptyPrompt, EuiIcon, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { FieldStatisticsTable } from '../../application/main/components/field_stats_table';
 import { isEsqlMode } from '../initialize_fetch';
 import type { SearchEmbeddableApi, SearchEmbeddableStateManager } from '../types';
@@ -37,8 +40,30 @@ export function SearchEmbeddablFieldStatsTableComponent({
     api.fetchContext$,
     api.savedSearch$
   );
-
+  const { euiTheme } = useEuiTheme();
   const isEsql = useMemo(() => isEsqlMode(savedSearch), [savedSearch]);
+  if (isEsql) {
+    return (
+      <EuiEmptyPrompt
+        icon={<EuiIcon size="l" type="warning" color="warning" />}
+        color="plain"
+        paddingSize="m"
+        css={css`
+          margin: ${euiTheme.size.xl} auto;
+        `}
+        title={
+          <h2 data-test-subj="fieldStatsUnavailableCalloutTitle">
+            <FormattedMessage
+              id="discover.fieldStatsNotAvailableForESQLCalloutTitle"
+              defaultMessage="Field statistics are not available for ES|QL queries"
+            />
+          </h2>
+        }
+        titleSize="xs"
+        hasBorder
+      />
+    );
+  }
 
   return (
     <FieldStatisticsTable

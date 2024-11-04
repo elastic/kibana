@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiEmptyPrompt, EuiIcon, useEuiTheme, EuiToolTip, EuiFlexItem } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiIcon, useEuiTheme, EuiFlexItem } from '@elastic/eui';
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
@@ -13,7 +13,7 @@ import type { FieldStatisticTableEmbeddableProps } from './types';
 const FIELD_STATS_UNAVAILABLE_TITLE = i18n.translate(
   'xpack.dataVisualizer.fieldStats.unavailableTitle',
   {
-    defaultMessage: 'Field statistics unavailable',
+    defaultMessage: 'Field statistics not supported for ES|QL queries',
   }
 );
 
@@ -34,9 +34,7 @@ export const FieldStatsUnavailableMessage = ({
           height: 100%;
         `}
       >
-        <EuiToolTip content={content}>
-          <EmptyPlaceholder icon={'warning'} message={title} />
-        </EuiToolTip>
+        <EmptyPlaceholder icon={'warning'} message={title} />
       </EuiFlexItem>
     );
   }

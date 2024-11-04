@@ -55,8 +55,9 @@ export const DocumentViewModeToggle = ({
 
   const [showPatternAnalysisTab, setShowPatternAnalysisTab] = useState<boolean | null>(null);
   const showFieldStatisticsTab = useMemo(
-    () => uiSettings.get(SHOW_FIELD_STATISTICS) && dataVisualizerService !== undefined,
-    [dataVisualizerService, uiSettings]
+    () =>
+      !isEsqlMode && uiSettings.get(SHOW_FIELD_STATISTICS) && dataVisualizerService !== undefined,
+    [dataVisualizerService, uiSettings, isEsqlMode]
   );
   const isMounted = useMountedState();
 
@@ -106,6 +107,12 @@ export const DocumentViewModeToggle = ({
       line-height: ${euiTheme.size.xl};
     }
   `;
+
+  useEffect(() => {
+    if (viewMode === VIEW_MODE.AGGREGATED_LEVEL && isEsqlMode) {
+      setDiscoverViewMode(VIEW_MODE.DOCUMENT_LEVEL);
+    }
+  }, [viewMode, isEsqlMode, setDiscoverViewMode]);
 
   return (
     <EuiFlexGroup
@@ -164,7 +171,7 @@ export const DocumentViewModeToggle = ({
 
             {showFieldStatisticsTab ? (
               <EuiTab
-                disabled={fieldStatsWarningMsgForQuery !== undefined}
+                disabled={isEsqlMode || fieldStatsWarningMsgForQuery !== undefined}
                 isSelected={viewMode === VIEW_MODE.AGGREGATED_LEVEL}
                 onClick={() => setDiscoverViewMode(VIEW_MODE.AGGREGATED_LEVEL)}
                 data-test-subj="dscViewModeFieldStatsButton"
