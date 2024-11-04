@@ -56,7 +56,6 @@ import {
   colonCompleteItem,
   commaCompleteItem,
   getAssignmentDefinitionCompletitionItem,
-  getBuiltinCompatibleFunctionDefinition,
   getCommandAutocompleteDefinitions,
   getNextTokenForNot,
   listCompleteItem,
@@ -80,6 +79,7 @@ import {
   getDateLiterals,
   buildFieldsDefinitionsWithMetadata,
   TRIGGER_SUGGESTION_COMMAND,
+  getOperatorSuggestions,
 } from './factories';
 import { EDITOR_MARKER, METADATA_FIELDS } from '../shared/constants';
 import { getAstContext, removeMarkerArgFromArgsList } from '../shared/context';
@@ -316,16 +316,12 @@ function findNewVariable(variables: Map<string, ESQLVariable[]>) {
 function workoutBuiltinOptions(
   nodeArg: ESQLAstItem,
   references: Pick<ReferenceMaps, 'fields' | 'variables'>
-): { skipAssign: boolean; commandsToInclude?: string[] } {
-  const commandsToInclude =
-    (isSingleItem(nodeArg) && nodeArg.text?.toLowerCase().trim().endsWith('null')) ?? false
-      ? ['and', 'or']
-      : undefined;
-
+): { ignored?: string[] } {
   // skip assign operator if it's a function or an existing field to avoid promoting shadowing
   return {
-    skipAssign: Boolean(!isColumnItem(nodeArg) || getColumnForASTNode(nodeArg, references)),
-    commandsToInclude,
+    ignored: Boolean(!isColumnItem(nodeArg) || getColumnForASTNode(nodeArg, references))
+      ? ['=']
+      : undefined,
   };
 }
 
@@ -712,13 +708,11 @@ async function getExpressionSuggestionsByType(
         const nodeArgType = extractTypeFromASTArg(nodeArg, references);
         if (isParameterType(nodeArgType)) {
           suggestions.push(
-            ...getBuiltinCompatibleFunctionDefinition(
-              command.name,
-              undefined,
-              nodeArgType,
-              undefined,
-              workoutBuiltinOptions(nodeArg, references)
-            )
+            ...getOperatorSuggestions({
+              command: command.name,
+              leftParamType: nodeArgType,
+              ignored: workoutBuiltinOptions(nodeArg, references).ignored,
+            })
           );
         } else {
           suggestions.push(getAssignmentDefinitionCompletitionItem());
@@ -749,9 +743,7 @@ async function getExpressionSuggestionsByType(
           ))
         );
         if (['show', 'meta'].includes(command.name)) {
-          suggestions.push(
-            ...getBuiltinCompatibleFunctionDefinition(command.name, undefined, 'any')
-          );
+          suggestions.push(...getOperatorSuggestions({ command: command.name }));
         }
       }
     }
@@ -765,13 +757,11 @@ async function getExpressionSuggestionsByType(
           const [rightArg] = nodeArg.args[1] as [ESQLSingleAstItem];
           const nodeArgType = extractTypeFromASTArg(rightArg, references);
           suggestions.push(
-            ...getBuiltinCompatibleFunctionDefinition(
-              command.name,
-              undefined,
-              isParameterType(nodeArgType) ? nodeArgType : 'any',
-              undefined,
-              workoutBuiltinOptions(rightArg, references)
-            )
+            ...getOperatorSuggestions({
+              command: command.name,
+              leftParamType: isParameterType(nodeArgType) ? nodeArgType : 'any',
+              ignored: workoutBuiltinOptions(nodeArg, references).ignored,
+            })
           );
           if (isNumericType(nodeArgType) && isLiteralItem(rightArg)) {
             // ... EVAL var = 1 <suggest>
@@ -916,13 +906,11 @@ async function getExpressionSuggestionsByType(
             } else if (isParameterType(nodeArgType)) {
               // i.e. ... | <COMMAND> field <suggest>
               suggestions.push(
-                ...getBuiltinCompatibleFunctionDefinition(
-                  command.name,
-                  undefined,
-                  nodeArgType,
-                  undefined,
-                  workoutBuiltinOptions(nodeArg, references)
-                )
+                ...getOperatorSuggestions({
+                  command: command.name,
+                  leftParamType: nodeArgType,
+                  ignored: workoutBuiltinOptions(nodeArg, references).ignored,
+                })
               );
             }
           }
@@ -1092,13 +1080,12 @@ async function getBuiltinFunctionNextArgument(
     // i.e. ... | <COMMAND> field > 0 <suggest>
     // i.e. ... | <COMMAND> field + otherN <suggest>
     suggestions.push(
-      ...getBuiltinCompatibleFunctionDefinition(
-        command.name,
-        option?.name,
-        isParameterType(nodeArgType) ? nodeArgType : 'any',
-        undefined,
-        workoutBuiltinOptions(nodeArg, references)
-      )
+      ...getOperatorSuggestions({
+        command: command.name,
+        option: option?.name,
+        leftParamType: isParameterType(nodeArgType) ? nodeArgType : 'any',
+        ignored: workoutBuiltinOptions(nodeArg, references).ignored,
+      })
     );
   } else {
     // i.e. ... | <COMMAND> field >= <suggest>
@@ -1154,13 +1141,12 @@ async function getBuiltinFunctionNextArgument(
           isReturnType(argDef.type)
         ) {
           suggestions.push(
-            ...getBuiltinCompatibleFunctionDefinition(
-              command.name,
-              undefined,
-              nestedType,
-              [argDef.type],
-              workoutBuiltinOptions(nodeArg, references)
-            )
+            ...getOperatorSuggestions({
+              command: command.name,
+              leftParamType: nestedType,
+              returnTypes: [argDef.type],
+              ignored: workoutBuiltinOptions(nodeArg, references).ignored,
+            })
           );
         }
       }
@@ -1610,10 +1596,7 @@ async function getOptionArgsSuggestions(
           // ... | ENRICH ... WITH a
           // effectively only assign will apper
           suggestions.push(
-            ...pushItUpInTheList(
-              getBuiltinCompatibleFunctionDefinition(command.name, undefined, 'any'),
-              true
-            )
+            ...pushItUpInTheList(getOperatorSuggestions({ command: command.name }), true)
           );
         }
 
