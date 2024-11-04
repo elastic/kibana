@@ -5,17 +5,15 @@
  * 2.0.
  */
 
-export const createRuleMigrationDataClient = () => ({
+export const createRuleMigrationDataClient = jest.fn().mockImplementation(() => ({
   create: jest.fn().mockResolvedValue({ success: true }),
+  getRules: jest.fn().mockResolvedValue([]),
   takePending: jest.fn().mockResolvedValue([]),
-  releaseProcessing: jest.fn(),
-  finishProcessing: jest.fn(),
-  finish: jest.fn(),
-});
-export const createRuleMigrationTaskClient = () => ({
-  start: jest.fn().mockResolvedValue({ started: true }),
-  stop: jest.fn().mockResolvedValue({ stopped: true }),
-  stats: jest.fn().mockResolvedValue({
+  saveFinished: jest.fn().mockResolvedValue({ success: true }),
+  saveError: jest.fn().mockResolvedValue({ success: true }),
+  releaseProcessing: jest.fn().mockResolvedValue({ success: true }),
+  releaseProcessable: jest.fn().mockResolvedValue({ success: true }),
+  getStats: jest.fn().mockResolvedValue({
     status: 'done',
     rules: {
       total: 1,
@@ -25,6 +23,23 @@ export const createRuleMigrationTaskClient = () => ({
       failed: 0,
     },
   }),
+  getAllStats: jest.fn().mockResolvedValue([]),
+}));
+
+export const createRuleMigrationTaskClient = () => ({
+  start: jest.fn().mockResolvedValue({ started: true }),
+  stop: jest.fn().mockResolvedValue({ stopped: true }),
+  getStats: jest.fn().mockResolvedValue({
+    status: 'done',
+    rules: {
+      total: 1,
+      finished: 1,
+      processing: 0,
+      pending: 0,
+      failed: 0,
+    },
+  }),
+  getAllStats: jest.fn().mockResolvedValue([]),
 });
 
 export const createRuleMigrationClient = () => ({
