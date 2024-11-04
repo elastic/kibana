@@ -15,5 +15,4 @@ export * from './rule_form';
 export * from './utils';
 export * from './types';
 export * from './constants';
-export * from './common/type_registry';
 export * from './rule_type_modal';

@@ -22,7 +22,7 @@ jest.mock('../common/hooks/use_load_ui_config', () => ({
   useLoadUiConfig: jest.fn(),
 }));
 
-jest.mock('../common/hooks/use_health_check', () => ({
+jest.mock('@kbn/alerts-ui-shared/src/common/hooks/use_health_check', () => ({
   useHealthCheck: jest.fn(),
 }));
 
@@ -30,7 +30,7 @@ jest.mock('../common/hooks/use_resolve_rule', () => ({
   useResolveRule: jest.fn(),
 }));
 
-jest.mock('../common/hooks/use_load_rule_types_query', () => ({
+jest.mock('@kbn/alerts-ui-shared/src/common/hooks/use_load_rule_types_query', () => ({
   useLoadRuleTypesQuery: jest.fn(),
 }));
 
@@ -46,21 +46,25 @@ jest.mock('../common/hooks/use_load_rule_type_aad_template_fields', () => ({
   useLoadRuleTypeAadTemplateField: jest.fn(),
 }));
 
-jest.mock('../common/hooks/use_fetch_flapping_settings', () => ({
+jest.mock('@kbn/alerts-ui-shared/src/common/hooks/use_fetch_flapping_settings', () => ({
   useFetchFlappingSettings: jest.fn(),
 }));
 
 const { useLoadUiConfig } = jest.requireMock('../common/hooks/use_load_ui_config');
-const { useHealthCheck } = jest.requireMock('../common/hooks/use_health_check');
+const { useHealthCheck } = jest.requireMock(
+  '@kbn/alerts-ui-shared/src/common/hooks/use_health_check'
+);
 const { useResolveRule } = jest.requireMock('../common/hooks/use_resolve_rule');
 const { useLoadConnectors } = jest.requireMock('../common/hooks/use_load_connectors');
 const { useLoadConnectorTypes } = jest.requireMock('../common/hooks/use_load_connector_types');
 const { useLoadRuleTypeAadTemplateField } = jest.requireMock(
   '../common/hooks/use_load_rule_type_aad_template_fields'
 );
-const { useLoadRuleTypesQuery } = jest.requireMock('../common/hooks/use_load_rule_types_query');
+const { useLoadRuleTypesQuery } = jest.requireMock(
+  '@kbn/alerts-ui-shared/src/common/hooks/use_load_rule_types_query'
+);
 const { useFetchFlappingSettings } = jest.requireMock(
-  '../common/hooks/use_fetch_flapping_settings'
+  '@kbn/alerts-ui-shared/src/common/hooks/use_fetch_flapping_settings'
 );
 
 const uiConfigMock = {
