@@ -7,7 +7,7 @@
         "plan": {
           "cluster_topology": [
             {
-              "instance_configuration_id": "gcp.integrationsserver.1",
+              "instance_configuration_id": "gcp.integrationsserver.n2.68x32x45",
               "zone_count": 1,
               "size": {
                 "resource": "memory",
@@ -32,7 +32,7 @@
           "cluster_topology": [
             {
               "zone_count": 1,
-              "instance_configuration_id": "gcp.coordinating.1",
+              "instance_configuration_id": "gcp.es.coordinating.n2.68x16x45",
               "node_roles": [
                 "ingest",
                 "remote_cluster_client"
@@ -50,7 +50,7 @@
                   "data": "hot"
                 }
               },
-              "instance_configuration_id": "gcp.data.highio.1",
+              "instance_configuration_id": "gcp.es.datahot.n2.68x32x45",
               "node_roles": [
                 "master",
                 "ingest",
@@ -72,7 +72,7 @@
                   "data": "warm"
                 }
               },
-              "instance_configuration_id": "gcp.data.highstorage.1",
+              "instance_configuration_id": "gcp.es.datawarm.n2.68x10x190",
               "node_roles": [
                 "data_warm",
                 "remote_cluster_client"
@@ -90,7 +90,7 @@
                   "data": "cold"
                 }
               },
-              "instance_configuration_id": "gcp.data.highstorage.1",
+              "instance_configuration_id": "gcp.es.datacold.n2.68x10x190",
               "node_roles": [
                 "data_cold",
                 "remote_cluster_client"
@@ -108,7 +108,7 @@
                   "data": "frozen"
                 }
               },
-              "instance_configuration_id": "gcp.es.datafrozen.n1.64x10x95",
+              "instance_configuration_id": "gcp.es.datafrozen.n2.68x10x90",
               "node_roles": [
                 "data_frozen"
               ],
@@ -120,7 +120,7 @@
             },
             {
               "zone_count": 1,
-              "instance_configuration_id": "gcp.master.1",
+              "instance_configuration_id": "gcp.es.master.n2.68x32x45",
               "node_roles": [
                 "master",
                 "remote_cluster_client"
@@ -142,7 +142,7 @@
               },
               "autoscaling_tier_override": true,
               "id": "ml",
-              "instance_configuration_id": "gcp.ml.1",
+              "instance_configuration_id": "gcp.es.ml.n2.68x32x45",
               "node_roles": [
                 "ml",
                 "remote_cluster_client"
@@ -155,7 +155,7 @@
             "enabled_built_in_plugins": []
           },
           "deployment_template": {
-            "id": "gcp-io-optimized-v2"
+            "id": "gcp-cpu-optimized"
           }
         },
         "ref_id": "main-elasticsearch"
@@ -168,7 +168,7 @@
         "plan": {
           "cluster_topology": [
             {
-              "instance_configuration_id": "gcp.kibana.1",
+              "instance_configuration_id": "gcp.kibana.n2.68x32x45",
               "zone_count": 1,
               "size": {
                 "value": 2048,
