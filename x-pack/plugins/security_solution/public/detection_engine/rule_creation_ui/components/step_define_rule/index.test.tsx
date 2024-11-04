@@ -636,7 +636,6 @@ function TestForm({
         queryBarTitle=""
         queryBarSavedId=""
         thresholdFields={[]}
-        enableThresholdSuppression={false}
         {...formProps}
       />
       <button type="button" onClick={form.submit}>
