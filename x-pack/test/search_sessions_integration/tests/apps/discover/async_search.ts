@@ -128,8 +128,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const searchesCountBeforeRestore = searchSessionListBeforeRestore[0].searchesCount;
 
       // navigate to Discover
-      // there's currently a bug that causes additional requests in Discover (see https://github.com/elastic/kibana/issues/198456)
-      // to work around this, we open the browser directly to the restore URL instead of clicking the restore button
+      // Instead of clicking the link to navigate to Discover, we load Discover from scratch (just like we did when we
+      // ran the search session before saving). This ensures that the same number of requests are made.
       // await searchSessionListBeforeRestore[0].view();
       const restoreUrl = new URL(searchSessionListBeforeRestore[0].mainUrl, url).href;
       await browser.navigateTo(restoreUrl);
