@@ -101,7 +101,7 @@ export default function ({ getService, getPageObjects }) {
       expect(await markdownText.getVisibleText()).to.eql(originalMarkdownText);
     });
 
-    it.only('visualize app menu navigates to the visualize listing page if the last opened visualization was by value', async () => {
+    it('visualize app menu navigates to the visualize listing page if the last opened visualization was by value', async () => {
       await dashboard.gotoDashboardLandingPage();
       await dashboard.clickNewDashboard();
 
