@@ -82,7 +82,6 @@ import { useRuleForms, useRuleFormsErrors, useRuleIndexPattern } from '../form';
 import { CustomHeaderPageMemo } from '..';
 import { SaveWithErrorsModal } from '../../components/save_with_errors_confirmation';
 import { ALERT_SUPPRESSION_FIELDS } from '../../../rule_creation/components/alert_suppression_edit/fields';
-import { THRESHOLD_ALERT_SUPPRESSION_ENABLED } from '../../../rule_creation/components/threshold_alert_suppression_edit/fields';
 
 const MyEuiPanel = styled(EuiPanel)<{
   zindex?: number;
@@ -573,7 +572,6 @@ const CreateRulePageComponent: React.FC = () => {
             queryBarTitle={defineStepData.queryBar.title}
             queryBarSavedId={defineStepData.queryBar.saved_id}
             thresholdFields={defineStepData.threshold.field}
-            enableThresholdSuppression={defineStepData[THRESHOLD_ALERT_SUPPRESSION_ENABLED]}
           />
           <NextStep
             dataTestSubj="define-continue"

@@ -118,13 +118,12 @@ export interface StepDefineRuleProps extends RuleStepProps {
   ruleType: Type;
   index: string[];
   threatIndex: string[];
-  alertSuppressionFields: string[];
+  alertSuppressionFields?: string[];
   dataSourceType: DataSourceType;
   shouldLoadQueryDynamically: boolean;
   queryBarTitle: string | undefined;
   queryBarSavedId: string | null | undefined;
   thresholdFields: string[] | undefined;
-  enableThresholdSuppression: boolean;
 }
 
 interface StepDefineRuleReadOnlyProps {
@@ -158,7 +157,6 @@ const RuleTypeEuiFormRow = styled(EuiFormRow).attrs<{ $isVisible: boolean }>(({ 
 const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   dataSourceType,
   defaultSavedQuery,
-  enableThresholdSuppression,
   form,
   alertSuppressionFields,
   index,
@@ -472,12 +470,12 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
    * disable these fields and leave users in a bad state that they cannot change.
    * The exception is threshold rules, which use an existing threshold field for the same
    * purpose and so are treated as if the field is always selected.  */
-  const areSuppressionFieldsSelected = isThresholdRule || alertSuppressionFields.length > 0;
+  const areSuppressionFieldsSelected = isThresholdRule || Boolean(alertSuppressionFields?.length);
 
   const areSuppressionFieldsDisabledBySequence =
     isEqlRule(ruleType) &&
     isEqlSequenceQuery(queryBar?.query?.query as string) &&
-    alertSuppressionFields.length === 0;
+    alertSuppressionFields?.length === 0;
 
   /** If we don't have ML field information, users can't meaningfully interact with suppression fields */
   const areSuppressionFieldsDisabledByMlFields =
@@ -952,7 +950,11 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
 
           <RuleTypeEuiFormRow $isVisible={isAlertSuppressionEnabled} fullWidth>
             {isThresholdRule ? (
-              <ThresholdAlertSuppressionEdit suppressionFieldNames={thresholdFields} />
+              <ThresholdAlertSuppressionEdit
+                suppressionFieldNames={thresholdFields}
+                disabled={!isAlertSuppressionLicenseValid}
+                disabledText={alertSuppressionUpsellingMessage}
+              />
             ) : (
               <AlertSuppressionEdit
                 suppressibleFields={suppressionGroupByFields}
@@ -973,6 +975,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               />
             )}
           </RuleTypeEuiFormRow>
+
           {!isMlRule(ruleType) && (
             <>
               <RequiredFields

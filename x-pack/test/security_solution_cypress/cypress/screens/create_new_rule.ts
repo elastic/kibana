@@ -26,6 +26,8 @@ export const ALERT_SUPPRESSION_FIELDS_COMBO_BOX =
 
 export const ALERT_SUPPRESSION_FIELDS_INPUT = `${ALERT_SUPPRESSION_FIELDS_COMBO_BOX} input`;
 
+export const ALERT_SUPPRESSION_WARNING = '[data-test-subj="alertSuppressionWarning"]';
+
 export const ALERT_SUPPRESSION_DURATION_OPTIONS =
   '[data-test-subj="alertSuppressionDuration"] [data-test-subj="alertSuppressionDurationOptions"]';
 
@@ -44,7 +46,7 @@ export const ALERT_SUPPRESSION_DURATION_INPUT =
   '[data-test-subj="alertSuppressionDuration"] [data-test-subj="alertSuppressionDurationInput"]';
 
 export const THRESHOLD_ENABLE_SUPPRESSION_CHECKBOX =
-  '[data-test-subj="detectionEngineStepDefineRuleThresholdEnableSuppression"] input';
+  '[data-test-subj="thresholdAlertSuppressionEnabled"] input';
 
 export const ANOMALY_THRESHOLD_INPUT = '[data-test-subj="anomalyThresholdSlider"] .euiFieldNumber';
 

@@ -43,7 +43,7 @@ export function AlertSuppressionEdit({
         disabled={disabled}
       />
       {warningText && (
-        <EuiText size="xs" color="warning">
+        <EuiText size="xs" color="warning" data-test-subj="alertSuppressionWarning">
           {warningText}
         </EuiText>
       )}
@@ -54,7 +54,7 @@ export function AlertSuppressionEdit({
     </>
   );
 
-  return disabledText ? (
+  return disabled && disabledText ? (
     <EuiToolTip position="right" content={disabledText}>
       {content}
     </EuiToolTip>
