@@ -118,7 +118,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(stepTitle1).to.be('Logistics');
 
       // Fill out required fields
-      await testSubjects.setValue('nameField', 'a*');
+      await testSubjects.setValue('nameField', 'a-star');
       await testSubjects.setValue('indexPatternsField', 'a*');
 
       // Click Next button
