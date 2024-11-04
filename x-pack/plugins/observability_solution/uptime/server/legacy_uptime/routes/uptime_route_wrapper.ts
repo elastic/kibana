@@ -12,11 +12,12 @@ import { UptimeEsClient } from '../lib/lib';
 export const uptimeRouteWrapper: UMKibanaRouteWrapper = (uptimeRoute, server) => ({
   ...uptimeRoute,
   options: {
-    tags: [
-      'oas-tag:uptime',
-      'access:uptime-read',
-      ...(uptimeRoute?.writeAccess ? ['access:uptime-write'] : []),
-    ],
+    tags: ['oas-tag:uptime'],
+  },
+  security: {
+    authz: {
+      requiredPrivileges: ['uptime-read', ...(uptimeRoute?.writeAccess ? ['uptime-write'] : [])],
+    },
   },
   handler: async (context, request, response) => {
     const coreContext = await context.core;
