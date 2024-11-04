@@ -25,29 +25,29 @@ const TEST_QUERIES = [
     expected: `This \\\\ has \\(a lot of\\) \\<special\\> characters, don't you \\*think\\*? \\"Yes.\\"`,
   },
   {
-    description: 'should NOT escape keywords',
+    description: 'should escape keywords',
     value: 'foo and bar or baz not qux',
-    expected: 'foo and bar or baz not qux',
+    expected: 'foo \\and bar \\or baz \\not qux',
   },
   {
-    description: 'should NOT escape keywords next to each other',
+    description: 'should escape keywords next to each other',
     value: 'foo and bar or not baz',
-    expected: 'foo and bar or not baz',
+    expected: 'foo \\and bar \\or \\not baz',
   },
   {
-    description: 'should not escape keywords without surrounding spaces',
+    description: 'should NOT escape keywords without surrounding spaces',
     value: 'And this has keywords, or does it not?',
-    expected: 'And this has keywords, or does it not?',
+    expected: 'And this has keywords, \\or does it not?',
   },
   {
-    description: 'should NOT escape uppercase keywords',
+    description: 'should escape uppercase keywords',
     value: 'foo AND bar',
-    expected: 'foo AND bar',
+    expected: 'foo \\AND bar',
   },
   {
     description: 'should escape special characters and NOT keywords',
     value: 'Hello, "world", and <nice> to meet you!',
-    expected: 'Hello, \\"world\\", and <nice> to meet you!',
+    expected: 'Hello, \\"world\\", \\and \\<nice\\> to meet you!',
   },
   {
     description: 'should escape newlines and tabs',
