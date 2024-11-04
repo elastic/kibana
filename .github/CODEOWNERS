@@ -1457,7 +1457,6 @@ x-pack/test/**/deployment_agnostic/ @elastic/appex-qa #temporarily to monitor te
 # AppEx Platform Services Security
 //x-pack/test_serverless/api_integration/test_suites/common/security_response_headers.ts  @elastic/kibana-security
 /x-pack/test/api_integration/apis/es  @elastic/kibana-security
-/x-pack/test/functional_cors @elastic/kibana-security
 /x-pack/test/api_integration/apis/features  @elastic/kibana-security
 
 # Kibana Telemetry
