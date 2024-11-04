@@ -50,7 +50,7 @@ _Recommended ES|QL queries from auto-complete suggestions_
 
 [discrete]
 ==== Manage dashboards more easily and efficiently
-As part of a series of improvements to help you find and manage your dashboards [started in version 8.15], we are adding a way to sort your dashboards by recently viewed (new default), an option to star your favorite dashboards, as well as some statistics to monitor the usage of your dashboards. 
+As part of a series of improvements to help you find and manage your dashboards https://www.elastic.co/guide/en/kibana/8.15/whats-new.html#_view_dashboard_creator_and_last_editor[started in version 8.15], the new default way to sort your dashboards is by recently viewed, and we are adding an option to star your favorite dashboards, as well as some statistics to monitor the usage of your dashboards. 
 
 You can find your favorite dashboards in the new **Starred** tab.
 
@@ -62,21 +62,21 @@ image::images/dashboard-usage.png[Dashboard usage chart]
 
 [discrete]
 ==== Log Pattern Analysis dashboard panels
-Log Pattern Analysis panels are now available for you to add to your dashboards, making AIOps even more embedded in your workflows and where you need it. Filtering patterns adjusts the dashboard’s data accordingly. You can also choose the filtering to transition you into Discover for further exploration. 
+Log Pattern Analysis panels are now available for you to add to your dashboards, making AIOps even more embedded in your workflows and where you need it. When filtering patterns, the dashboard’s data adjusts accordingly. You can also choose the filtering to transition you into Discover for further exploration. 
 
 image:https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt8288e01386b5830c/67222fb0d2da223e27bc1e67/log_analysis_panel.gif[Log pattern analysis panel in dashboards]
 
 
 [discrete]
 ==== Color text values in tables
-Before, you could only decide to color numeric values in tables. We're adding the ability to also color your string values. You can decide whether you want to color the whole cell, or only the text.
+Previously, you could only decide to color numeric values in tables. We're adding the ability to also color your string values. You can decide whether you want to color the whole cell, or only the text.
 
 image::images/table-coloring.png[Coloring table cells with string values]
 
 
 [discrete]
 ==== Formatting options for your metrics
-We've received a lot of feedback asking for more flexibility to customize the appearance of your metrics. In this version, we are adding the ability to customize the title and value alignment, as well as the font size. Selecting the *Fit* option will make the metric value to occupy all of the panel's space.
+We've received a lot of feedback asking for more flexibility to customize the appearance of your metrics. In this version, we are adding the ability to customize the title and value alignment, as well as the font size. Selecting the *Fit* option will adjust the font size and make the metric value occupy the entire panel.
 
 image::images/metric-customization.png[Customization options for a metric panel]
 
