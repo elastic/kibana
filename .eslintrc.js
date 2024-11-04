@@ -1306,13 +1306,6 @@ module.exports = {
         },
       ],
     },
-    {
-      files: ['x-pack/plugins/cases/public/**/*.{js,mjs,ts,tsx}'],
-      excludedFiles: ['x-pack/plugins/cases/**/*.{test,mock,test_helper}.{ts,tsx}'],
-      rules: {
-        'react/display-name': ['error', { ignoreTranspilerName: true }],
-      },
-    },
 
     /**
      * Lists overrides. These rules below are maintained and owned by
@@ -1520,7 +1513,7 @@ module.exports = {
     },
 
     /**
-     * Alerting Services overrides
+     * ResponseOps overrides
      */
     {
       // typescript for front and back end
@@ -1537,21 +1530,16 @@ module.exports = {
       },
     },
 
-    /**
-     * ResponseOps overrides
-     */
     {
-      // front end and common typescript and javascript files only
+      // common and public files only
       files: [
-        'x-pack/plugins/cases/public/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/cases/common/**/*.{js,mjs,ts,tsx}',
-        'x-pack/plugins/alerting/public/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/cases/public/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/alerting/common/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/alerting/public/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
         'import/no-nodejs-modules': 'error',
-        'no-duplicate-imports': 'off',
-        '@typescript-eslint/no-duplicate-imports': ['error'],
         'no-restricted-imports': [
           'error',
           {
@@ -1562,10 +1550,65 @@ module.exports = {
       },
     },
     {
-      // typescript only for front and back end, but excludes the test files.
-      // We use this section to add rules in which we do not want to apply to test files.
-      // This should be a very small set as most linter rules are useful for tests as well.
-      files: ['x-pack/plugins/cases/**/*.{ts,tsx}', 'x-pack/plugins/alerting/**/*.{ts,tsx}'],
+      // public files
+      files: [
+        'x-pack/plugins/cases/public/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/alerting/public/**/*.{js,mjs,ts,tsx}',
+      ],
+      extends: [
+        'eslint:recommended',
+        'plugin:react/recommended',
+        'plugin:@typescript-eslint/recommended',
+        'plugin:react-hooks/recommended',
+      ],
+      plugins: ['react', '@typescript-eslint'],
+      rules: {
+        'import/no-nodejs-modules': 'error',
+        'no-restricted-imports': [
+          'error',
+          {
+            // prevents UI code from importing server side code and then webpack including it when doing builds
+            patterns: ['**/server/*'],
+          },
+        ],
+        'react/boolean-prop-naming': 'error',
+        'react/button-has-type': 'error',
+        'react/display-name': 'error',
+        'react/forbid-dom-props': 'error',
+        'react/no-access-state-in-setstate': 'error',
+        'react/no-children-prop': 'error',
+        'react/no-danger-with-children': 'error',
+        'react/no-deprecated': 'error',
+        'react/no-did-mount-set-state': 'error',
+        'react/no-did-update-set-state': 'error',
+        'react/no-direct-mutation-state': 'error',
+        'react/no-find-dom-node': 'error',
+        'react/no-redundant-should-component-update': 'error',
+        'react/no-render-return-value': 'error',
+        'react/no-typos': 'error',
+        'react/no-string-refs': 'error',
+        'react/no-this-in-sfc': 'error',
+        'react/no-unescaped-entities': 'error',
+        'react/no-unsafe': 'error',
+        'react/no-unused-prop-types': 'error',
+        'react/no-unused-state': 'error',
+        'react/sort-default-props': 'error',
+        'react/void-dom-elements-no-children': 'error',
+        'react/jsx-no-comment-textnodes': 'error',
+        'react/jsx-no-literals': 'error',
+        'react/jsx-no-target-blank': 'error',
+        'react/jsx-fragments': 'error',
+        'react/jsx-no-useless-fragment': 'error',
+        'react/no-danger': 'error',
+        'react/no-array-index-key': 'error',
+      },
+    },
+    {
+      // typescript only for public, but excludes the test files.
+      files: [
+        'x-pack/plugins/cases/public/**/*.{ts,tsx}',
+        'x-pack/plugins/alerting/public/**/*.{ts,tsx}',
+      ],
       excludedFiles: [
         'x-pack/plugins/cases/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/plugins/alerting/**/*.{test,mock,test_helper}.{ts,tsx}',
@@ -1576,10 +1619,12 @@ module.exports = {
         'react-perf/jsx-no-new-array-as-prop': 'error',
         'react-perf/jsx-no-new-function-as-prop': 'error',
         'react/jsx-no-bind': 'error',
+        'react/no-unstable-nested-components': 'error',
+        'react/jsx-no-leaked-render': 'error',
       },
     },
     {
-      // typescript only for front and back end
+      // front and back end
       files: ['x-pack/plugins/cases/**/*.{ts,tsx}', 'x-pack/plugins/alerting/**/*.{ts,tsx}'],
       rules: {
         '@typescript-eslint/no-this-alias': 'error',
@@ -1605,7 +1650,7 @@ module.exports = {
       },
     },
     {
-      // typescript and javascript for front and back end
+      // common, front and back end
       files: [
         'x-pack/plugins/cases/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/alerting/**/*.{js,mjs,ts,tsx}',
@@ -1666,61 +1711,11 @@ module.exports = {
         'prefer-rest-params': 'error',
         'prefer-spread': 'error',
         'prefer-template': 'error',
-        'react/boolean-prop-naming': 'error',
-        'react/button-has-type': 'error',
-        'react/display-name': 'error',
-        'react/forbid-dom-props': 'error',
-        'react/no-access-state-in-setstate': 'error',
-        'react/no-children-prop': 'error',
-        'react/no-danger-with-children': 'error',
-        'react/no-deprecated': 'error',
-        'react/no-did-mount-set-state': 'error',
-        'react/no-did-update-set-state': 'error',
-        'react/no-direct-mutation-state': 'error',
-        'react/no-find-dom-node': 'error',
-        'react/no-redundant-should-component-update': 'error',
-        'react/no-render-return-value': 'error',
-        'react/no-typos': 'error',
-        'react/no-string-refs': 'error',
-        'react/no-this-in-sfc': 'error',
-        'react/no-unescaped-entities': 'error',
-        'react/no-unsafe': 'error',
-        'react/no-unused-prop-types': 'error',
-        'react/no-unused-state': 'error',
-        'react/sort-default-props': 'error',
-        'react/void-dom-elements-no-children': 'error',
-        'react/jsx-no-comment-textnodes': 'error',
-        'react/jsx-no-literals': 'error',
-        'react/jsx-no-target-blank': 'error',
-        'react/jsx-fragments': 'error',
         'require-atomic-updates': 'error',
         'symbol-description': 'error',
         'vars-on-top': 'error',
         '@typescript-eslint/no-duplicate-imports': ['error'],
-      },
-      overrides: [
-        {
-          files: [
-            'x-pack/plugins/cases/**/*.{js,mjs,ts,tsx}',
-            'x-pack/plugins/alerting/**/*.{js,mjs,ts,tsx}',
-          ],
-          rules: {
-            '@typescript-eslint/consistent-type-imports': 'error',
-          },
-        },
-      ],
-    },
-    {
-      files: [
-        'x-pack/plugins/cases/public/**/*.{js,mjs,ts,tsx}',
-        'x-pack/plugins/alerting/public/**/*.{js,mjs,ts,tsx}',
-      ],
-      excludedFiles: [
-        'x-pack/plugins/cases/**/*.{test,mock,test_helper}.{ts,tsx}',
-        'x-pack/plugins/alerting/**/*.{test,mock,test_helper}.{ts,tsx}',
-      ],
-      rules: {
-        'react/display-name': ['error', { ignoreTranspilerName: true }],
+        '@typescript-eslint/consistent-type-imports': 'error',
       },
     },
 
