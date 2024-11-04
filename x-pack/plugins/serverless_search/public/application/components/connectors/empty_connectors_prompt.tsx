@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -33,31 +33,33 @@ import { CONNECTORS, ELASTIC_MANAGED_CONNECTOR_PATH, BASE_CONNECTORS_PATH } from
 
 export const EmptyConnectorsPrompt: React.FC = () => {
   const connectorTypes = useConnectorTypes();
-  const allConnectors = connectorTypes ? connectorTypes.map((connectorType) => connectorType) : [];
 
-  const getRandomConnectors = (connectors: typeof allConnectors, count: number) => {
-    const shuffled = connectors.sort(() => 0.5 - Math.random());
-    return shuffled.slice(0, count);
+  const getConnectorByName = (connectors: typeof connectorTypes, serviceType: string) => {
+    return connectors.find((connector) => connector.serviceType === serviceType);
   };
 
-  const [randomConnectors, setRandomConnectors] = useState(() =>
-    getRandomConnectors(allConnectors, 4)
-  );
+  const connectorIcon = (connector: { name: string; serviceType: string; iconPath?: string }) => {
+    return (
+      <EuiToolTip content={connector.name}>
+        <EuiIcon
+          size="l"
+          title={connector?.name}
+          id={connector?.serviceType}
+          type={connector?.iconPath || 'defaultIcon'}
+        />
+      </EuiToolTip>
+    );
+  };
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setRandomConnectors(getRandomConnectors(allConnectors, 4));
-    }, 5000);
-
-    return () => clearInterval(interval);
-  });
+  const connectorExample1 = getConnectorByName(connectorTypes, 'gmail');
+  const connectorExample2 = getConnectorByName(connectorTypes, 'sharepoint_online');
+  const connectorExample3 = getConnectorByName(connectorTypes, 'jira');
+  const connectorExample4 = getConnectorByName(connectorTypes, 'dropbox');
 
   const {
     application: { navigateToUrl },
   } = useKibanaServices();
 
-  const [connectorExample1, connectorExample2, connectorExample3, connectorExample4] =
-    randomConnectors;
   const { createConnector, isLoading } = useCreateConnector();
 
   const assetBasePath = useAssetBasePath();
@@ -143,55 +145,19 @@ export const EmptyConnectorsPrompt: React.FC = () => {
                             gutterSize="s"
                           >
                             <EuiFlexItem grow={false}>
-                              {connectorExample1 && (
-                                <EuiToolTip content={connectorExample1.name}>
-                                  <EuiIcon
-                                    size="l"
-                                    title={connectorExample1?.name}
-                                    id={connectorExample1?.serviceType}
-                                    type={connectorExample1?.iconPath || 'defaultIcon'}
-                                  />
-                                </EuiToolTip>
-                              )}
+                              {connectorExample1 && connectorIcon(connectorExample1)}
                             </EuiFlexItem>
                             <EuiFlexItem grow={false}>
-                              {connectorExample2 && (
-                                <EuiToolTip content={connectorExample2.name}>
-                                  <EuiIcon
-                                    size="l"
-                                    title={connectorExample2?.name}
-                                    id={connectorExample2?.serviceType}
-                                    type={connectorExample2?.iconPath || 'defaultIcon'}
-                                  />
-                                </EuiToolTip>
-                              )}
+                              {connectorExample2 && connectorIcon(connectorExample2)}
                             </EuiFlexItem>
                             <EuiFlexItem grow={false}>
                               <EuiIcon color="primary" size="l" type="documents" />
                             </EuiFlexItem>
                             <EuiFlexItem grow={false}>
-                              {connectorExample3 && (
-                                <EuiToolTip content={connectorExample3.name}>
-                                  <EuiIcon
-                                    size="l"
-                                    title={connectorExample3?.name}
-                                    id={connectorExample3?.serviceType}
-                                    type={connectorExample3?.iconPath || 'defaultIcon'}
-                                  />
-                                </EuiToolTip>
-                              )}
+                              {connectorExample3 && connectorIcon(connectorExample3)}
                             </EuiFlexItem>
                             <EuiFlexItem grow={false}>
-                              {connectorExample4 && (
-                                <EuiToolTip content={connectorExample4.name}>
-                                  <EuiIcon
-                                    size="l"
-                                    title={connectorExample4?.name}
-                                    id={connectorExample4?.serviceType}
-                                    type={connectorExample4?.iconPath || 'defaultIcon'}
-                                  />
-                                </EuiToolTip>
-                              )}
+                              {connectorExample4 && connectorIcon(connectorExample4)}
                             </EuiFlexItem>
                           </EuiFlexGroup>
                         </EuiFlexItem>
