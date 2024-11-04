@@ -107,7 +107,7 @@ export function EntitiesGrid({
               values={{
                 date: (
                   <FormattedDate
-                    value={entity.entity.lastSeenTimestamp}
+                    value={entity.entity.last_seen_timestamp}
                     month="short"
                     day="numeric"
                     year="numeric"
@@ -115,7 +115,7 @@ export function EntitiesGrid({
                 ),
                 time: (
                   <FormattedTime
-                    value={entity.entity.lastSeenTimestamp}
+                    value={entity.entity.last_seen_timestamp}
                     hour12={false}
                     hour="2-digit"
                     minute="2-digit"

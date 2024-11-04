@@ -10,10 +10,10 @@ import { getIdentityFieldsPerEntityType } from './get_identity_fields_per_entity
 
 const commonEntityFields: InventoryEntityLatest = {
   entity: {
-    lastSeenTimestamp: '2023-10-09T00:00:00Z',
+    last_seen_timestamp: '2023-10-09T00:00:00Z',
     id: '1',
-    displayName: 'entity_name',
-    definitionId: 'entity_definition_id',
+    display_name: 'entity_name',
+    definition_id: 'entity_definition_id',
   } as InventoryEntityLatest['entity'],
   alertCount: 3,
 };
@@ -30,7 +30,7 @@ describe('getIdentityFields', () => {
       },
       entity: {
         ...commonEntityFields.entity,
-        identityFields: ['service.name', 'service.environment'],
+        identity_fields: ['service.name', 'service.environment'],
         type: 'service',
       },
       service: {
@@ -42,7 +42,7 @@ describe('getIdentityFields', () => {
       ...commonEntityFields,
       entity: {
         ...commonEntityFields.entity,
-        identityFields: ['host.name'],
+        identity_fields: ['host.name'],
         type: 'host',
       },
       host: {
@@ -57,7 +57,7 @@ describe('getIdentityFields', () => {
       ...commonEntityFields,
       entity: {
         ...commonEntityFields.entity,
-        identityFields: ['container.id'],
+        identity_fields: ['container.id'],
         type: 'container',
       },
       host: {

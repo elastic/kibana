@@ -61,7 +61,7 @@ export const listLatestEntitiesRoute = createInventoryServerRoute({
     logger,
     plugins,
     request,
-  }): Promise<{ entities: Entity[] }> => {
+  }): Promise<{ entities: InventoryEntityLatest[] }> => {
     const coreContext = await context.core;
     const inventoryEsClient = createObservabilityEsClient({
       client: coreContext.elasticsearch.client.asCurrentUser,

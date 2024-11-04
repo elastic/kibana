@@ -8,23 +8,20 @@
 import { renderHook } from '@testing-library/react-hooks';
 import { useDetailViewRedirect } from './use_detail_view_redirect';
 import { useKibana } from './use_kibana';
-import { CONTAINER_ID, HOST_NAME, SERVICE_NAME } from '@kbn/observability-shared-plugin/common';
-import { unflattenEntity } from '../../common/utils/unflatten_entity';
+import { ENTITY_TYPES } from '@kbn/observability-shared-plugin/common';
 import type { InventoryEntityLatest } from '../../common/entities';
 
 jest.mock('./use_kibana');
-jest.mock('../../common/utils/unflatten_entity');
 
 const useKibanaMock = useKibana as jest.Mock;
-const unflattenEntityMock = unflattenEntity as jest.Mock;
 
 const commonEntityFields: Partial<InventoryEntityLatest['entity']> = {
-  lastSeenTimestamp: '2023-10-09T00:00:00Z',
+  last_seen_timestamp: '2023-10-09T00:00:00Z',
   id: '1',
-  displayName: 'entity_name',
-  definitionId: 'entity_definition_id',
-  definitionVersion: '1',
-  schemaVersion: '1',
+  display_name: 'entity_name',
+  definition_id: 'entity_definition_id',
+  definition_version: '1',
+  schema_version: '1',
 };
 
 describe('useDetailViewRedirect', () => {
@@ -54,8 +51,6 @@ describe('useDetailViewRedirect', () => {
         },
       },
     });
-
-    unflattenEntityMock.mockImplementation((entity) => entity);
   });
 
   it('getEntityRedirectUrl should return the correct URL for host entity', () => {
@@ -63,7 +58,7 @@ describe('useDetailViewRedirect', () => {
       entity: {
         ...(commonEntityFields as InventoryEntityLatest['entity']),
         type: 'host',
-        identityFields: ['host.name'],
+        identity_fields: ['host.name'],
       },
       host: {
         name: 'host-1',
@@ -73,7 +68,7 @@ describe('useDetailViewRedirect', () => {
       },
     };
 
-    mockGetIdentityFieldsValue.mockReturnValue({ [HOST_NAME]: 'host-1' });
+    mockGetIdentityFieldsValue.mockReturnValue({ host: { name: 'host-1' } });
     mockGetRedirectUrl.mockReturnValue('asset-details-url');
 
     const { result } = renderHook(() => useDetailViewRedirect());
@@ -88,7 +83,7 @@ describe('useDetailViewRedirect', () => {
       entity: {
         ...(commonEntityFields as InventoryEntityLatest['entity']),
         type: 'container',
-        identityFields: ['container.id'],
+        identity_fields: ['container.id'],
       },
       container: {
         id: 'container-1',
@@ -98,7 +93,7 @@ describe('useDetailViewRedirect', () => {
       },
     };
 
-    mockGetIdentityFieldsValue.mockReturnValue({ [CONTAINER_ID]: 'container-1' });
+    mockGetIdentityFieldsValue.mockReturnValue({ container: { id: 'container-1' } });
     mockGetRedirectUrl.mockReturnValue('asset-details-url');
 
     const { result } = renderHook(() => useDetailViewRedirect());
@@ -116,7 +111,7 @@ describe('useDetailViewRedirect', () => {
       entity: {
         ...(commonEntityFields as InventoryEntityLatest['entity']),
         type: 'service',
-        identityFields: ['service.name'],
+        identity_fields: ['service.name'],
       },
       agent: {
         name: 'node',
@@ -126,7 +121,7 @@ describe('useDetailViewRedirect', () => {
         environment: 'prod',
       },
     };
-    mockGetIdentityFieldsValue.mockReturnValue({ [SERVICE_NAME]: 'service-1' });
+    mockGetIdentityFieldsValue.mockReturnValue({ service: { name: 'service-1' } });
     mockGetRedirectUrl.mockReturnValue('service-overview-url');
 
     const { result } = renderHook(() => useDetailViewRedirect());
@@ -155,7 +150,7 @@ describe('useDetailViewRedirect', () => {
         entity: {
           ...(commonEntityFields as InventoryEntityLatest['entity']),
           type: entityType,
-          identityFields: ['some.field'],
+          identity_fields: ['some.field'],
         },
         some: {
           field: 'some-value',

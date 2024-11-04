@@ -14,7 +14,7 @@ export const getIdentityFieldsPerEntityType = (entities: InventoryEntityLatest[]
   const identityFieldsPerEntityType = new Map<string, string[]>();
 
   entities.forEach((entity) =>
-    identityFieldsPerEntityType.set(entity.entity.type, castArray(entity.entity.identityFields))
+    identityFieldsPerEntityType.set(entity.entity.type, castArray(entity.entity.identity_fields))
   );
 
   return identityFieldsPerEntityType;

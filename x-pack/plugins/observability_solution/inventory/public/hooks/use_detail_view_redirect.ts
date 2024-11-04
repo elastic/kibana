@@ -7,6 +7,7 @@
 import {
   ASSET_DETAILS_LOCATOR_ID,
   AssetDetailsLocatorParams,
+  ENTITY_TYPES,
   SERVICE_OVERVIEW_LOCATOR_ID,
   ServiceOverviewParams,
 } from '@kbn/observability-shared-plugin/common';
@@ -14,12 +15,8 @@ import { useCallback } from 'react';
 import { DashboardLocatorParams } from '@kbn/dashboard-plugin/public';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { castArray } from 'lodash';
-import {
-  isHostEntity,
-  type InventoryEntityLatest,
-  isContainerEntity,
-  isServiceEntity,
-} from '../../common/entities';
+import { isEntityOfType } from '../../common/utils/entity_type_guards';
+import { type InventoryEntityLatest } from '../../common/entities';
 import { useKibana } from './use_kibana';
 
 const KUBERNETES_DASHBOARDS_IDS: Record<string, string> = {
@@ -46,7 +43,7 @@ export const useDetailViewRedirect = () => {
 
   const getSingleIdentityFieldValue = useCallback(
     (latestEntity: InventoryEntityLatest) => {
-      const identityFields = castArray(latestEntity.entity.identityFields);
+      const identityFields = castArray(latestEntity.entity.identity_fields);
       if (identityFields.length > 1) {
         throw new Error(`Multiple identity fields are not supported for ${entity[ENTITY_TYPE]}`);
       }
@@ -61,19 +58,19 @@ export const useDetailViewRedirect = () => {
     (latestEntity: InventoryEntityLatest) => {
       const identityValue = getSingleIdentityFieldValue(latestEntity);
 
-      if (isHostEntity(latestEntity) || isContainerEntity(latestEntity)) {
+      if (isEntityOfType('host', latestEntity) || isEntityOfType('container', latestEntity)) {
         return assetDetailsLocator?.getRedirectUrl({
           assetId: identityValue,
           assetType: latestEntity.entity.type,
         });
       }
 
-      if (isServiceEntity(latestEntity)) {
+      if (isEntityOfType('service', latestEntity)) {
         return serviceOverviewLocator?.getRedirectUrl({
           serviceName: identityValue,
           // service.environemnt is not part of entity.identityFields
           // we need to manually get its value
-          environment: latestEntity.service.environment,
+          environment: latestEntity.service?.environment,
         });
       }
 

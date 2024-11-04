@@ -6,7 +6,8 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
-import React from 'react';
+import React, { useCallback } from 'react';
+import { useKibana } from '../../../hooks/use_kibana';
 import { InventoryEntityLatest } from '../../../../common/entities';
 import { EntityIcon } from '../../entity_icon';
 import { useDetailViewRedirect } from '../../../hooks/use_detail_view_redirect';
@@ -27,7 +28,7 @@ export function EntityName({ entity }: EntityNameProps) {
   const handleLinkClick = useCallback(() => {
     telemetry.reportEntityViewClicked({
       view_type: 'detail',
-      entity_type: entity['entity.type'],
+      entity_type: entity.entity.type,
     });
   }, [entity, telemetry]);
 
@@ -38,7 +39,7 @@ export function EntityName({ entity }: EntityNameProps) {
       </EuiFlexItem>
       <EuiFlexItem className="eui-textTruncate">
         <span className="eui-textTruncate" data-test-subj="entityNameDisplayName">
-          {entity.entity.displayName}
+          {entity.entity.display_name}
         </span>
       </EuiFlexItem>
     </EuiFlexGroup>
