@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { renderHook, act } from '@testing-library/react-hooks';
+import { screen } from '@testing-library/react';
 
 import type { ReturnUsePushToService, UsePushToService } from '.';
 import { usePushToService } from '.';
@@ -181,6 +182,22 @@ describe('usePushToService', () => {
     expect(result.current.hasErrorMessages).toBe(true);
   });
 
+  it('Successfully pushed a closed case', () => {
+    const { result } = renderHook<
+      React.PropsWithChildren<UsePushToService>,
+      ReturnUsePushToService
+    >(
+      () =>
+        usePushToService({
+          ...defaultArgs,
+          caseStatus: CaseStatuses.closed,
+        }),
+      {
+        wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
+      }
+    );
+    expect(result.current.hasBeenPushed).toBe(true);
+  });
   it('should not call pushCaseToExternalService when the selected connector is none', async () => {
     const { result } = renderHook<
       React.PropsWithChildren<UsePushToService>,
