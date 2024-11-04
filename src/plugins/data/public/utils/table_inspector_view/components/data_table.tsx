@@ -27,7 +27,7 @@ import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import {
   withEuiTablePersist,
-  EuiTablePersistInjectedProps,
+  type EuiTablePersistInjectedProps,
 } from '@kbn/shared-ux-table-persist/src';
 import { DataViewRow, DataViewColumn } from '../types';
 
@@ -56,7 +56,7 @@ interface RenderCellArguments {
 }
 
 class DataTableFormatClass extends Component<
-  DataTableFormatProps & { euiTablePersist: EuiTablePersistInjectedProps<DatatableRow> },
+  DataTableFormatProps & EuiTablePersistInjectedProps<DatatableRow>,
   DataTableFormatState
 > {
   static propTypes = {

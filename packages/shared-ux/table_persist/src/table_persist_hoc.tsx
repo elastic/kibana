@@ -12,15 +12,15 @@ import { EuiTablePersistProps, useEuiTablePersist } from './use_table_persist';
 import { PropertySort } from './types';
 
 export interface EuiTablePersistInjectedProps<T> {
-  onTableChange: (change: CriteriaWithPagination<T>) => void;
-  sorting: { sort: PropertySort<T> } | true;
-  pageSize: number;
+  euiTablePersist: {
+    onTableChange: (change: CriteriaWithPagination<T>) => void;
+    sorting: { sort: PropertySort<T> } | true;
+    pageSize: number;
+  };
 }
 
 export function withEuiTablePersist<T extends object, Props extends object>(
-  WrappedComponent: React.ComponentType<
-    Props & { euiTablePersist: EuiTablePersistInjectedProps<T> }
-  >,
+  WrappedComponent: React.ComponentType<Props & EuiTablePersistInjectedProps<T>>,
   euiTablePersistDefault: EuiTablePersistProps<T>
 ) {
   type HOCProps = Omit<Props, 'euiTablePersistProps'> & {
