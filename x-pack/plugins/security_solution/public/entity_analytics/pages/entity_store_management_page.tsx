@@ -298,7 +298,14 @@ export const EntityStoreManagementPage = () => {
         />
       </EuiText>
       {isEntityStoreFeatureFlagDisabled && <EntityStoreFeatureFlagNotAvailableCallout />}
-      <MissingPrivilegesCallout privileges={privileges} />
+      {!privileges || privileges.has_all_required ? null : (
+        <>
+          <EuiSpacer size="l" />
+          <MissingPrivilegesCallout privileges={privileges} />
+          <EuiSpacer size="l" />
+        </>
+      )}
+
       <EuiHorizontalRule />
       <EuiSpacer size="l" />
       <EuiFlexGroup gutterSize="xl">

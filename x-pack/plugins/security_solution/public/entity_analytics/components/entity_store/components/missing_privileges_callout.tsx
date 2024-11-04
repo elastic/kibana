@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiSpacer, EuiCode } from '@elastic/eui';
+import { EuiCode } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { EntityAnalyticsPrivileges } from '../../../../../common/api/entity_analytics';
@@ -16,15 +16,11 @@ import { CallOut } from '../../../../common/components/callouts';
 import { CommaSeparatedValues } from '../../../../detections/components/callouts/missing_privileges_callout/comma_separated_values';
 
 interface MissingPrivilegesCalloutProps {
-  privileges: EntityAnalyticsPrivileges | undefined;
+  privileges: EntityAnalyticsPrivileges;
 }
 
 export const MissingPrivilegesCallout = React.memo(
   ({ privileges }: MissingPrivilegesCalloutProps) => {
-    if (!privileges || privileges.has_all_required) {
-      return null;
-    }
-
     const missingPrivileges = getAllMissingPrivileges(privileges);
     const indexPrivileges = missingPrivileges.elasticsearch.index ?? {};
     const clusterPrivileges = missingPrivileges.elasticsearch.cluster ?? {};
@@ -102,13 +98,7 @@ export const MissingPrivilegesCallout = React.memo(
       description: body,
     };
 
-    return (
-      <>
-        <EuiSpacer size="l" />
-        <CallOut message={message} showDismissButton={false} />
-        <EuiSpacer size="l" />
-      </>
-    );
+    return <CallOut message={message} showDismissButton={false} />;
   }
 );
 MissingPrivilegesCallout.displayName = 'MissingPrivilegesCallout';

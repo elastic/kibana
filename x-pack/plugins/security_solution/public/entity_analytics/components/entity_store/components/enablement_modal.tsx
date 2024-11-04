@@ -126,7 +126,11 @@ export const EntityStoreEnablementModal: React.FC<EntityStoreEnablementModalProp
               </EuiToolTip>
             </EuiFlexGroup>
           </EuiFlexItem>
-          <MissingPrivilegesCallout privileges={privileges} />
+          {!privileges || privileges.has_all_required ? null : (
+            <EuiFlexItem>
+              <MissingPrivilegesCallout privileges={privileges} />
+            </EuiFlexItem>
+          )}
           <EuiFlexItem>
             <EuiText>{ENABLEMENT_DESCRIPTION_ENTITY_STORE_ONLY}</EuiText>
           </EuiFlexItem>
