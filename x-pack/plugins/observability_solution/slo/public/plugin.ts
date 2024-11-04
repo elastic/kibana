@@ -96,7 +96,7 @@ export class SLOPlugin
 
     registerBurnRateRuleType(plugins.observability.observabilityRuleTypeRegistry);
 
-    const assertPlatinumLicense = async () => {
+    const registerEmbeddables = async () => {
       const licensing = plugins.licensing;
       const license = await firstValueFrom(licensing.license$);
 
@@ -113,7 +113,6 @@ export class SLOPlugin
             return { width: 12, height: 8 };
           }
         );
-
         pluginsStart.dashboard.registerDashboardPanelPlacementSetting(
           SLO_BURN_RATE_EMBEDDABLE_ID,
           () => {
@@ -125,7 +124,7 @@ export class SLOPlugin
           const { getOverviewEmbeddableFactory } = await import(
             './embeddable/slo/overview/slo_embeddable_factory'
           );
-          return getOverviewEmbeddableFactory(core.getStartServices);
+          return getOverviewEmbeddableFactory({ coreStart, pluginsStart, sloClient });
         });
 
         plugins.embeddable.registerReactEmbeddableFactory(SLO_ALERTS_EMBEDDABLE_ID, async () => {
@@ -164,7 +163,7 @@ export class SLOPlugin
         registerAsyncSloUiActions();
       }
     };
-    assertPlatinumLicense();
+    registerEmbeddables();
 
     return {
       sloDetailsLocator,
