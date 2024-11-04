@@ -25,6 +25,7 @@ export const dashboards = [
   { id: 'dashboard2', title: 'Dashboard 2' },
 ];
 
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 type DashboardDrilldownConfig = {
   dashboardId?: string;
   useCurrentFilters: boolean;
@@ -119,6 +120,7 @@ export const dashboardFactory = new ActionFactory(dashboardDrilldownActionFactor
   getFeatureUsageStart: () => licensingMock.createStart().featureUsage,
 });
 
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 type UrlDrilldownConfig = {
   url: string;
   openInNewTab: boolean;
