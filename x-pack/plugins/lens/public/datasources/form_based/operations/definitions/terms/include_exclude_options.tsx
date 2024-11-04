@@ -136,52 +136,10 @@ export const IncludeExcludeRow = ({
     }
   };
 
-  const onCreateOption = (
-    searchValue: string,
-    flattenedOptions: IncludeExcludeOptions[] = [],
-    operation: 'include' | 'exclude'
-  ) => {
-    const newOption = {
-      label: searchValue,
-    };
-
-    let includeExcludeOptions = [];
-
-    const includeORExcludeSelectedOptions = includeExcludeSelectedOptions[operation] ?? [];
-    includeExcludeOptions = [...includeORExcludeSelectedOptions, newOption];
-
-    const otherOperation = operation === 'include' ? 'exclude' : 'include';
-    const otherOptions = includeExcludeSelectedOptions[otherOperation] ?? [];
-    const hasIdenticalOption = otherOptions.some((option) => option.label === newOption.label);
-
-    const otherOptionsWithoutNewOption = hasIdenticalOption
-      ? otherOptions.filter((option) => option.label !== newOption.label)
-      : otherOptions;
-
-    const options = {
-      [otherOperation]: otherOptionsWithoutNewOption,
-      [operation]: includeExcludeOptions,
-    };
-    setIncludeExcludeSelectedOptions(options);
-
-    const getTerms = (updatedOptions: IncludeExcludeOptions[]) => {
-      return updatedOptions.map((option) => {
-        if (!Number.isNaN(Number(option.label))) {
-          return Number(option.label);
-        }
-        return option.label;
-      });
-    };
-
-    const terms = getTerms(includeExcludeOptions);
-    const param = `${operation}IsRegex`;
-    updateParams(operation, terms, param, false);
-
-    if (hasIdenticalOption) {
-      const otherTerms = getTerms(otherOptionsWithoutNewOption);
-      const otherParam = `${otherOperation}IsRegex`;
-      updateParams(otherOperation, otherTerms, otherParam, false);
-    }
+  const onCreateOption = (searchValue: string, operation: 'include' | 'exclude') => {
+    const newOption = { label: searchValue };
+    const selectedOptions = [...(includeExcludeSelectedOptions[operation] ?? []), newOption];
+    onChangeIncludeExcludeOptions(selectedOptions, operation);
   };
 
   const onIncludeRegexChangeToDebounce = useCallback(
@@ -298,9 +256,7 @@ export const IncludeExcludeRow = ({
             options={termsOptions}
             selectedOptions={includeExcludeSelectedOptions.include}
             onChange={(options) => onChangeIncludeExcludeOptions(options, 'include')}
-            onCreateOption={(searchValue, options) =>
-              onCreateOption(searchValue, options, 'include')
-            }
+            onCreateOption={(searchValue) => onCreateOption(searchValue, 'include')}
             isClearable={true}
             data-test-subj="lens-include-terms-combobox"
             autoFocus
@@ -374,9 +330,7 @@ export const IncludeExcludeRow = ({
             options={termsOptions}
             selectedOptions={includeExcludeSelectedOptions.exclude}
             onChange={(options) => onChangeIncludeExcludeOptions(options, 'exclude')}
-            onCreateOption={(searchValue, options) =>
-              onCreateOption(searchValue, options, 'exclude')
-            }
+            onCreateOption={(searchValue) => onCreateOption(searchValue, 'exclude')}
             isClearable={true}
             data-test-subj="lens-exclude-terms-combobox"
             autoFocus
