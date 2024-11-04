@@ -10,7 +10,7 @@
 import moment from 'moment';
 import 'moment-timezone';
 const QUERY_HISTORY_ITEM_KEY = 'QUERY_HISTORY_ITEM_KEY';
-const dateFormat = 'MMM. D, YY HH:mm:ss.SSS';
+export const dateFormat = 'MMM. D, YY HH:mm:ss.SSS';
 
 /**
  * We show maximum 20 ES|QL queries in the Query history component
@@ -30,7 +30,7 @@ const getKey = (queryString: string) => {
   return queryString.replaceAll('\n', '').trim().replace(/\s\s+/g, ' ');
 };
 
-const getMomentTimeZone = (timeZone?: string) => {
+export const getMomentTimeZone = (timeZone?: string) => {
   return !timeZone || timeZone === 'Browser' ? moment.tz.guess() : timeZone;
 };
 
