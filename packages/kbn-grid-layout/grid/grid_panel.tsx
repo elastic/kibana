@@ -48,21 +48,19 @@ export const GridPanel = forwardRef<
        * this is handled in a subscription so that it is not lost when the component gets remounted
        * (which happens when a panel gets dragged from one grid row to another)
        */
-      const dropEventSubscription = gridLayoutStateManager.interactionEvent$
-        .pipe(debounceTime(100))
-        .subscribe((event) => {
-          if (!event || event.id !== panelId || event.type === 'drop') return;
+      const dropEventSubscription = gridLayoutStateManager.interactionEvent$.subscribe((event) => {
+        if (!event || event.id !== panelId || event.type === 'drop') return;
 
-          /**
-           * By adding the "drop" event listener to the document rather than the drag/resize event handler,
-           * we prevent the element from getting "stuck" in an interaction; however, we only attach this event
-           * listener **when the drag/resize event starts**, and it only executes once, which means we don't
-           * have to remove the `mouseup` event listener
-           */
-          document.addEventListener('mouseup', onDropEventHandler, {
-            once: true,
-          });
+        /**
+         * By adding the "drop" event listener to the document rather than the drag/resize event handler,
+         * we prevent the element from getting "stuck" in an interaction; however, we only attach this event
+         * listener **when the drag/resize event starts**, and it only executes once, which means we don't
+         * have to remove the `mouseup` event listener
+         */
+        document.addEventListener('mouseup', onDropEventHandler, {
+          once: true,
         });
+      });
 
       return () => {
         dropEventSubscription.unsubscribe();
@@ -71,13 +69,21 @@ export const GridPanel = forwardRef<
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
+    /**
+     * We need to memoize the `onMouseDown` callback so that we don't assign a new `onMouseDown` event handler
+     * every time `setDragHandles` is called
+     */
+    const onMouseDown = useCallback(
+      (e: MouseEvent) => {
+        interactionStart('drag', e);
+      },
+      [interactionStart]
+    );
+
     const setDragHandles = useCallback(
       (dragHandles: Array<HTMLElement | null>) => {
         setDragHandleCount(dragHandles.length);
 
-        const onMouseDown = (e: MouseEvent) => {
-          interactionStart('drag', e);
-        };
         for (const handle of dragHandles) {
           if (handle === null) return;
           handle.addEventListener('mousedown', onMouseDown);
@@ -90,7 +96,7 @@ export const GridPanel = forwardRef<
           }
         };
       },
-      [interactionStart]
+      [onMouseDown]
     );
 
     useEffect(() => {
