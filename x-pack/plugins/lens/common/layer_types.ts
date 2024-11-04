@@ -10,4 +10,5 @@ export const layerTypes = {
   REFERENCELINE: 'referenceLine',
   ANNOTATIONS: 'annotations',
   METRIC_TRENDLINE: 'metricTrendline',
+  ESQL: 'esql',
 } as const;

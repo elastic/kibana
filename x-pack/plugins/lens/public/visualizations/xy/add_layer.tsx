@@ -111,6 +111,19 @@ export function AddLayerButton({
 
   const firstLayerSubtype = getDataLayers(state.layers)?.[0]?.seriesType;
 
+  if (!supportedLayers.some((l) => l.type === LayerTypes.ESQL))
+    supportedLayers.push({
+      type: LayerTypes.ESQL,
+      disabled: false,
+      label: i18n.translate('xpack.lens.configPanel.esqlLayer', {
+        defaultMessage: 'Elasticsearch SQL',
+      }),
+      icon: 'logoElasticsearch',
+      toolTipContent: i18n.translate('xpack.lens.configPanel.esqlLayerTooltip', {
+        defaultMessage: 'Use Elasticsearch SQL to query your data',
+      }),
+    });
+
   return (
     <>
       <EuiPopover
