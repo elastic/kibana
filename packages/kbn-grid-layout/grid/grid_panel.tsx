@@ -42,6 +42,7 @@ export const GridPanel = forwardRef<
     const { euiTheme } = useEuiTheme();
 
     useEffect(() => {
+      const onDropEventHandler = (dropEvent: MouseEvent) => interactionStart('drop', dropEvent);
       /**
        * Subscription to add a singular "drop" event handler whenever an interaction starts -
        * this is handled in a subscription so that it is not lost when the component gets remounted
@@ -58,13 +59,14 @@ export const GridPanel = forwardRef<
            * listener **when the drag/resize event starts**, and it only executes once, which means we don't
            * have to remove the `mouseup` event listener
            */
-          document.addEventListener('mouseup', (dropEvent) => interactionStart('drop', dropEvent), {
+          document.addEventListener('mouseup', onDropEventHandler, {
             once: true,
           });
         });
 
       return () => {
         dropEventSubscription.unsubscribe();
+        document.removeEventListener('mouseup', onDropEventHandler); // removes the event listener on row change
       };
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
