@@ -32,6 +32,13 @@ export function registerRoute({ router, getLicense }: RouteDependencies) {
     .addVersion<estypes.TransformGetTransformRequest, undefined, undefined>(
       {
         version: '1',
+        security: {
+          authz: {
+            enabled: false,
+            reason:
+              'This route is opted out from authorization because permissions will be checked by elasticsearch',
+          },
+        },
         validate: false,
       },
       async (ctx, request, response) => {

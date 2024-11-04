@@ -24,6 +24,7 @@ export const renderApp = (
   core: CoreStart,
   plugins: InfraClientStartDeps,
   pluginStart: InfraClientStartExports,
+  isLogsExplorerAccessible: boolean,
   { element, history, setHeaderActionMenu, theme$ }: AppMountParameters
 ) => {
   const storage = new Storage(window.localStorage);
@@ -39,6 +40,7 @@ export const renderApp = (
       pluginStart={pluginStart}
       setHeaderActionMenu={setHeaderActionMenu}
       theme$={theme$}
+      isLogsExplorerAccessible={isLogsExplorerAccessible}
     />,
     element
   );
@@ -56,8 +58,18 @@ const LogsApp: React.FC<{
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   storage: Storage;
   theme$: AppMountParameters['theme$'];
-}> = ({ core, history, pluginStart, plugins, setHeaderActionMenu, storage, theme$ }) => {
-  const { logs, discover, fleet } = core.application.capabilities;
+  isLogsExplorerAccessible: boolean;
+}> = ({
+  core,
+  history,
+  pluginStart,
+  plugins,
+  setHeaderActionMenu,
+  storage,
+  theme$,
+  isLogsExplorerAccessible,
+}) => {
+  const { logs } = core.application.capabilities;
 
   return (
     <CoreProviders core={core} pluginStart={pluginStart} plugins={plugins} theme$={theme$}>
@@ -74,7 +86,7 @@ const LogsApp: React.FC<{
             toastsService={core.notifications.toasts}
           >
             <Routes>
-              {Boolean(discover?.show && fleet?.read) && (
+              {isLogsExplorerAccessible && (
                 <Route
                   path="/"
                   exact

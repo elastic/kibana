@@ -298,7 +298,7 @@ export const getSeriesName: GetSeriesNameFn = (
 
 const getPointConfig: GetPointConfigFn = ({ markSizeAccessor, showPoints, pointsRadius }) => {
   return {
-    visible: showPoints || markSizeAccessor ? 'always' : 'never',
+    visible: showPoints || markSizeAccessor ? 'always' : 'auto',
     radius: pointsRadius,
     fill: markSizeAccessor ? ColorVariant.Series : undefined,
   };

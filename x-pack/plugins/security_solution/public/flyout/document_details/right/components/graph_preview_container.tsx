@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ExpandablePanel } from '@kbn/security-solution-common';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import { ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING } from '../../../../../common/constants';
 import { useDocumentDetailsContext } from '../../shared/context';
@@ -16,6 +15,7 @@ import { GraphPreview } from './graph_preview';
 import { useFetchGraphData } from '../hooks/use_fetch_graph_data';
 import { useGraphPreview } from '../hooks/use_graph_preview';
 import { useNavigateToGraphVisualization } from '../../shared/hooks/use_navigate_to_graph_visualization';
+import { ExpandablePanel } from '../../../shared/components/expandable_panel';
 
 const DEFAULT_FROM = 'now-60d/d';
 const DEFAULT_TO = 'now/d';
