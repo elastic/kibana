@@ -16,5 +16,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./search'));
     // TODO: Removed `sql_search` since
     // SQL is not supported in Serverless
+    loadTestFile(require.resolve('./bsearch'));
   });
 }
