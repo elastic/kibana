@@ -26,7 +26,6 @@ export async function getHasData({
     });
 
     const totalCount = esqlResultToPlainObjects(esqlResults)?.[0]._count ?? 0;
-
     return { hasData: totalCount > 0 };
   } catch (e) {
     logger.error(e);
