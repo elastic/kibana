@@ -9,6 +9,7 @@ steps:
       - quick_checks
       - linting
       - linting_with_types
+      - check_types
     timeout_in_minutes: 30
     soft_fail: true
     retry:

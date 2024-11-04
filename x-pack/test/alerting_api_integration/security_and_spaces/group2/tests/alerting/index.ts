@@ -11,33 +11,19 @@ import { setupSpacesAndUsers, tearDown } from '../../../setup';
 // eslint-disable-next-line import/no-default-export
 export default function alertingTests({ loadTestFile, getService }: FtrProviderContext) {
   describe('Alerts', () => {
-    describe('legacy alerts', function () {
-      before(async () => {
-        await setupSpacesAndUsers(getService);
-      });
-
-      after(async () => {
-        await tearDown(getService);
-      });
-
-      loadTestFile(require.resolve('./rbac_legacy'));
+    before(async () => {
+      await setupSpacesAndUsers(getService);
     });
 
-    describe('alerts', () => {
-      before(async () => {
-        await setupSpacesAndUsers(getService);
-      });
-
-      after(async () => {
-        await tearDown(getService);
-      });
-
-      loadTestFile(require.resolve('./mute_all'));
-      loadTestFile(require.resolve('./mute_instance'));
-      loadTestFile(require.resolve('./unmute_all'));
-      loadTestFile(require.resolve('./unmute_instance'));
-      loadTestFile(require.resolve('./update'));
-      loadTestFile(require.resolve('./update_api_key'));
+    after(async () => {
+      await tearDown(getService);
     });
+
+    loadTestFile(require.resolve('./mute_all'));
+    loadTestFile(require.resolve('./mute_instance'));
+    loadTestFile(require.resolve('./unmute_all'));
+    loadTestFile(require.resolve('./unmute_instance'));
+    loadTestFile(require.resolve('./update'));
+    loadTestFile(require.resolve('./update_api_key'));
   });
 }
