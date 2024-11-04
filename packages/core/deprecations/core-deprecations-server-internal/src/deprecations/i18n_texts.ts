@@ -115,7 +115,7 @@ export const getApiDeprecationsManualSteps = (details: RouterDeprecatedRouteDeta
       manualSteps.push(
         i18n.translate('core.deprecations.deprecations.manualSteps.removeTypeExplainationStep', {
           defaultMessage:
-            'For now, the API will still work, but will be moved or removed in a future version. Check the documentation for more information. If you are no longer using the API, you can mark this issue as resolved. It will no longer appear in the Upgrade Assistant unless another call using this API is detected.',
+            'For now, the API will still work, but will be moved or removed in a future version. Check the Learn more link for more information. If you are no longer using the API, you can mark this issue as resolved. It will no longer appear in the Upgrade Assistant unless another call using this API is detected.',
         })
       );
       break;
