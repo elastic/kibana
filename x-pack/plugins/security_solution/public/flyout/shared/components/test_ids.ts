@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export const PREFIX = 'securitySolutionFlyout' as const;
+import { PREFIX } from '../test_ids';
 
 export const FLYOUT_ERROR_TEST_ID = `${PREFIX}Error` as const;
 export const FLYOUT_LOADING_TEST_ID = `${PREFIX}Loading` as const;
