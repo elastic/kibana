@@ -533,7 +533,6 @@ export class Cluster {
       // 1536m === 1.5g
       esJavaOpts += ' -Xms1536m -Xmx1536m';
     }
-
     return esJavaOpts.trim();
   }
 
