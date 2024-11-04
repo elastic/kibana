@@ -7,7 +7,7 @@
 
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { getIndexTemplateAndPattern } from '../alerts_service/resource_installer_utils';
-import { RuleTypeRegistry } from '../rule_type_registry';
+import type { RuleTypeRegistry } from '../rule_type_registry';
 
 export type GetAlertIndicesAlias = (rulesTypes: string[], spaceId?: string) => string[];
 

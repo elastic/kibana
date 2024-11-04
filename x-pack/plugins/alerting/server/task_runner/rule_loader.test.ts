@@ -8,7 +8,7 @@
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { CoreKibanaRequest, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 import {
@@ -16,9 +16,9 @@ import {
   getFakeKibanaRequest,
   validateRuleAndCreateFakeRequest,
 } from './rule_loader';
-import { TaskRunnerContext } from './types';
+import type { TaskRunnerContext } from './types';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
-import { Rule } from '../types';
+import type { Rule } from '../types';
 import { MONITORING_HISTORY_LIMIT, RuleExecutionStatusErrorReasons } from '../../common';
 import { getReasonFromError } from '../lib/error_with_reason';
 import { mockedRawRuleSO, mockedRule } from './fixtures';

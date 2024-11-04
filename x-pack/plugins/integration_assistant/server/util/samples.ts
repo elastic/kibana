@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { dump } from 'js-yaml';
 import type { CategorizationState, EcsMappingState, RelatedState } from '../types';
 

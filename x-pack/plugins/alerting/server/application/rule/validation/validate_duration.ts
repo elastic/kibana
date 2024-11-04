@@ -23,5 +23,5 @@ export function validateDuration(duration: string) {
   if (duration.match(DAYS_REGEX)) {
     return;
   }
-  return 'string is not a valid duration: ' + duration;
+  return `string is not a valid duration: ${duration}`;
 }

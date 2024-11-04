@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { SavedObjectReference } from '@kbn/core/server';
+import type { SavedObjectReference } from '@kbn/core/server';
 import {
   preconfiguredConnectorActionRefPrefix,
   systemConnectorActionRefPrefix,
 } from '../common/constants';
-import {
+import type {
   DenormalizedAction,
   NormalizedAlertActionWithGeneratedValues,
   RulesClientContext,

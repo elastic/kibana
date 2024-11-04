@@ -7,20 +7,18 @@
 
 import Boom from '@hapi/boom';
 import { has, isEmpty } from 'lodash';
-import { KibanaRequest } from '@kbn/core/server';
-import { JsonObject } from '@kbn/utility-types';
-import { KueryNode } from '@kbn/es-query';
-import { SecurityPluginSetup } from '@kbn/security-plugin/server';
-import { FeaturesPluginStart } from '@kbn/features-plugin/server';
-import { Space } from '@kbn/spaces-plugin/server';
+import type { KibanaRequest } from '@kbn/core/server';
+import type { JsonObject } from '@kbn/utility-types';
+import type { KueryNode } from '@kbn/es-query';
+import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
+import type { FeaturesPluginStart } from '@kbn/features-plugin/server';
+import type { Space } from '@kbn/spaces-plugin/server';
 import { STACK_ALERTS_FEATURE_ID } from '@kbn/rule-data-utils';
-import { RegistryRuleType } from '../rule_type_registry';
-import { ALERTING_FEATURE_ID, RuleTypeRegistry } from '../types';
-import {
-  asFiltersByRuleTypeAndConsumer,
-  asFiltersBySpaceId,
-  AlertingAuthorizationFilterOpts,
-} from './alerting_authorization_kuery';
+import type { RegistryRuleType } from '../rule_type_registry';
+import type { RuleTypeRegistry } from '../types';
+import { ALERTING_FEATURE_ID } from '../types';
+import type { AlertingAuthorizationFilterOpts } from './alerting_authorization_kuery';
+import { asFiltersByRuleTypeAndConsumer, asFiltersBySpaceId } from './alerting_authorization_kuery';
 
 export enum AlertingAuthorizationEntity {
   Rule = 'rule',

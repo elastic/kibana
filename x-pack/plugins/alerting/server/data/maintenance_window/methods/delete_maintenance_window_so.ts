@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract, SavedObjectsDeleteOptions } from '@kbn/core/server';
+import type { SavedObjectsClientContract, SavedObjectsDeleteOptions } from '@kbn/core/server';
 import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '../../../../common';
 
 export interface DeleteMaintenanceWindowSoParams {

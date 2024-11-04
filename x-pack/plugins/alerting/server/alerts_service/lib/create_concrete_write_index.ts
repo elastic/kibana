@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { IndicesSimulateIndexTemplateResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { Logger, ElasticsearchClient } from '@kbn/core/server';
+import type { IndicesSimulateIndexTemplateResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import { get, sortBy } from 'lodash';
-import { IIndexPatternString } from '../resource_installer_utils';
+import type { IIndexPatternString } from '../resource_installer_utils';
 import { retryTransientEsErrors } from './retry_transient_es_errors';
-import { DataStreamAdapter } from './data_stream_adapter';
+import type { DataStreamAdapter } from './data_stream_adapter';
 
 export interface ConcreteIndexInfo {
   index: string;
@@ -49,7 +49,6 @@ const updateTotalFieldLimitSetting = async ({
         }),
       { logger }
     );
-    return;
   } catch (err) {
     logger.error(
       `Failed to PUT index.mapping.total_fields.limit settings for ${alias}: ${err.message}`
@@ -93,8 +92,6 @@ const updateUnderlyingMapping = async ({
       () => esClient.indices.putMapping({ index, body: simulatedMapping }),
       { logger }
     );
-
-    return;
   } catch (err) {
     logger.error(`Failed to PUT mapping for ${alias}: ${err.message}`);
     throw err;

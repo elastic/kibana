@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KueryNode } from '@kbn/es-query';
+import type { KueryNode } from '@kbn/es-query';
 import { get, isEmpty } from 'lodash';
 import { alertMappings } from '../../../common/saved_objects/rules/mappings';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
@@ -92,7 +92,7 @@ export const iterateFilterKureyNode = ({
       localNestedKeys = ast.value;
     } else if (ast.type === 'literal' && ast.value && typeof ast.value === 'string') {
       const key = ast.value.replace('.attributes', '');
-      const mappingKey = 'properties.' + key.split('.').join('.properties.');
+      const mappingKey = `properties.${key.split('.').join('.properties.')}`;
       const field = get(alertMappings, mappingKey);
       if (field != null && field.type === 'nested') {
         localNestedKeys = ast.value;

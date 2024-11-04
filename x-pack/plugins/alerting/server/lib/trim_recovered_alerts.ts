@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
 import { map } from 'lodash';
-import { Alert } from '../alert';
-import { AlertInstanceState, AlertInstanceContext } from '../types';
+import type { Alert } from '../alert';
+import type { AlertInstanceState, AlertInstanceContext } from '../types';
 
 interface TrimmedRecoveredAlertsResult<
   State extends AlertInstanceState,
