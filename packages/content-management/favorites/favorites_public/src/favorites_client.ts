@@ -50,7 +50,7 @@ export class FavoritesClient<Metadata extends object | void = void>
   public async addFavorite(params: AddFavoriteRequest<Metadata>): Promise<AddFavoriteResponse> {
     return this.deps.http.post(
       `/internal/content_management/favorites/${this.favoriteObjectType}/${params.id}/favorite`,
-      { body: 'metadata' in params ? JSON.stringify(params.metadata) : undefined }
+      { body: 'metadata' in params ? JSON.stringify({ metadata: params.metadata }) : undefined }
     );
   }
 
