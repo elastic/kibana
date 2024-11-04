@@ -21,16 +21,26 @@ import React, { useCallback, useMemo } from 'react';
 import { IndexEntry } from '@kbn/elastic-assistant-common';
 import { DataViewsContract } from '@kbn/data-views-plugin/public';
 import * as i18n from './translations';
+import { isGlobalEntry } from './helpers';
 
 interface Props {
   dataViews: DataViewsContract;
   entry?: IndexEntry;
+  originalEntry?: IndexEntry;
   setEntry: React.Dispatch<React.SetStateAction<Partial<IndexEntry>>>;
   hasManageGlobalKnowledgeBase: boolean;
 }
 
 export const IndexEntryEditor: React.FC<Props> = React.memo(
-  ({ dataViews, entry, setEntry, hasManageGlobalKnowledgeBase }) => {
+  ({ dataViews, entry, setEntry, hasManageGlobalKnowledgeBase, originalEntry }) => {
+    const privateUsers = useMemo(() => {
+      const originalUsers = originalEntry?.users;
+      if (originalEntry && !isGlobalEntry(originalEntry)) {
+        return originalUsers;
+      }
+      return undefined;
+    }, [originalEntry]);
+
     // Name
     const setName = useCallback(
       (e: React.ChangeEvent<HTMLInputElement>) =>
@@ -43,9 +53,9 @@ export const IndexEntryEditor: React.FC<Props> = React.memo(
       (value: string) =>
         setEntry((prevEntry) => ({
           ...prevEntry,
-          users: value === i18n.SHARING_GLOBAL_OPTION_LABEL ? [] : undefined,
+          users: value === i18n.SHARING_GLOBAL_OPTION_LABEL ? [] : privateUsers,
         })),
-      [setEntry]
+      [privateUsers, setEntry]
     );
     const sharingOptions = [
       {
@@ -107,7 +117,7 @@ export const IndexEntryEditor: React.FC<Props> = React.memo(
         dataViews.getFieldsForWildcard({
           pattern: entry?.index ?? '',
         }),
-      []
+      [entry?.index]
     );
 
     const fieldOptions = useMemo(

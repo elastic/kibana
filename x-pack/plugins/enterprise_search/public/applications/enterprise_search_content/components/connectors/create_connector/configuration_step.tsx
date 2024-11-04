@@ -29,6 +29,7 @@ import { Status } from '../../../../../../common/types/api';
 import * as Constants from '../../../../shared/constants';
 import { ConnectorConfigurationApiLogic } from '../../../api/connector/update_connector_configuration_api_logic';
 import { ConnectorViewLogic } from '../../connector_detail/connector_view_logic';
+import { NewConnectorLogic } from '../../new_index/method_connector/new_connector_logic';
 
 interface ConfigurationStepProps {
   setCurrentStep: Function;
@@ -38,6 +39,7 @@ interface ConfigurationStepProps {
 export const ConfigurationStep: React.FC<ConfigurationStepProps> = ({ title, setCurrentStep }) => {
   const { connector } = useValues(ConnectorViewLogic);
   const { updateConnectorConfiguration } = useActions(ConnectorViewLogic);
+  const { setFormDirty } = useActions(NewConnectorLogic);
   const { status } = useValues(ConnectorConfigurationApiLogic);
   const isSyncing = false;
 
@@ -109,7 +111,10 @@ export const ConfigurationStep: React.FC<ConfigurationStepProps> = ({ title, set
             <EuiSpacer size="m" />
             <EuiButton
               data-test-subj="enterpriseSearchStartStepGenerateConfigurationButton"
-              onClick={() => setCurrentStep('finish')}
+              onClick={() => {
+                setFormDirty(false);
+                setCurrentStep('finish');
+              }}
               fill
             >
               {Constants.NEXT_BUTTON_LABEL}
