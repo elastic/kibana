@@ -113,6 +113,19 @@ export function AddLayerButton({
     defaultMessage: 'Add layer',
   });
 
+  if (!supportedLayers.some((l) => l.type === LayerTypes.ESQL))
+    supportedLayers.push({
+      type: LayerTypes.ESQL,
+      disabled: false,
+      label: i18n.translate('xpack.lens.configPanel.esqlLayer', {
+        defaultMessage: 'ES|QL',
+      }),
+      icon: 'logoElasticsearch',
+      toolTipContent: i18n.translate('xpack.lens.configPanel.esqlLayerTooltip', {
+        defaultMessage: 'Use ES|QL to query your data',
+      }),
+    });
+
   return (
     <div
       css={css`
