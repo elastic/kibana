@@ -57,7 +57,6 @@ export const postKnowledgeBaseRoute = (router: ElasticAssistantPluginRouter) => 
         try {
           const knowledgeBaseDataClient =
             await assistantContext.getAIAssistantKnowledgeBaseDataClient({
-              // TODO why?? not sure I follow
               modelIdOverride: request.query.modelId,
             });
           if (!knowledgeBaseDataClient) {

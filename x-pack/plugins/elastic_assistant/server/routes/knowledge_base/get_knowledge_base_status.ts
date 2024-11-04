@@ -48,7 +48,7 @@ export const getKnowledgeBaseStatusRoute = (router: ElasticAssistantPluginRouter
         const logger = ctx.elasticAssistant.logger;
 
         try {
-          const kbDataClient = await assistantContext.getAIAssistantKnowledgeBaseDataClient({});
+          const kbDataClient = await assistantContext.getAIAssistantKnowledgeBaseDataClient();
           if (!kbDataClient) {
             return response.custom({ body: { success: false }, statusCode: 500 });
           }

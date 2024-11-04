@@ -159,7 +159,7 @@ export const postActionsConnectorExecuteRoute = (
           }
 
           const kbDataClient =
-            (await assistantContext.getAIAssistantKnowledgeBaseDataClient({})) ?? undefined;
+            (await assistantContext.getAIAssistantKnowledgeBaseDataClient()) ?? undefined;
           const isKnowledgeBaseInstalled = await getIsKnowledgeBaseInstalled(kbDataClient);
           telemetry.reportEvent(INVOKE_ASSISTANT_ERROR_EVENT.eventType, {
             actionTypeId: request.body.actionTypeId,

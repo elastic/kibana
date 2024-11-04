@@ -387,7 +387,7 @@ export const langChainExecute = async ({
 
   // Create an ElasticsearchStore for KB interactions
   const kbDataClient =
-    (await assistantContext.getAIAssistantKnowledgeBaseDataClient({})) ?? undefined;
+    (await assistantContext.getAIAssistantKnowledgeBaseDataClient()) ?? undefined;
 
   const dataClients: AssistantDataClients = {
     anonymizationFieldsDataClient: anonymizationFieldsDataClient ?? undefined,

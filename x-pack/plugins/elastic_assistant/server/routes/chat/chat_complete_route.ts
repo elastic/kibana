@@ -221,7 +221,7 @@ export const chatCompleteRoute = (
         } catch (err) {
           const error = transformError(err as Error);
           const kbDataClient =
-            (await ctx.elasticAssistant.getAIAssistantKnowledgeBaseDataClient({})) ?? undefined;
+            (await ctx.elasticAssistant.getAIAssistantKnowledgeBaseDataClient()) ?? undefined;
           const isKnowledgeBaseInstalled = await getIsKnowledgeBaseInstalled(kbDataClient);
 
           telemetry?.reportEvent(INVOKE_ASSISTANT_ERROR_EVENT.eventType, {

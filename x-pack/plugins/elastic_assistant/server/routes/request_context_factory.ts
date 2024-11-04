@@ -85,7 +85,7 @@ export class RequestContextFactory implements IRequestContextFactory {
 
       // Note: modelIdOverride is used here to enable setting up the KB using a different ELSER model, which
       // is necessary for testing purposes (`pt_tiny_elser`).
-      getAIAssistantKnowledgeBaseDataClient: memoize(async ({ modelIdOverride }) => {
+      getAIAssistantKnowledgeBaseDataClient: memoize(async (params) => {
         const currentUser = getCurrentUser();
 
         const { securitySolutionAssistant } = await coreStart.capabilities.resolveCapabilities(
@@ -100,7 +100,7 @@ export class RequestContextFactory implements IRequestContextFactory {
           logger: this.logger,
           licensing: context.licensing,
           currentUser,
-          modelIdOverride,
+          modelIdOverride: params?.modelIdOverride,
           manageGlobalKnowledgeBaseAIAssistant:
             securitySolutionAssistant.manageGlobalKnowledgeBaseAIAssistant as boolean,
         });
