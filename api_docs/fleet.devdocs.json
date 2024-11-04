@@ -6516,7 +6516,7 @@
               "\nReturn the status by the Agent's Policy id"
             ],
             "signature": [
-              "(agentPolicyId?: string | undefined, filterKuery?: string | undefined) => Promise<{ events: number; total: number; online: number; error: number; offline: number; other: number; updating: number; inactive: number; unenrolled: number; all: number; active: number; }>"
+              "(agentPolicyId?: string | undefined, filterKuery?: string | undefined) => Promise<{ events: number; online: number; error: number; offline: number; other: number; updating: number; inactive: number; unenrolled: number; all: number; active: number; }>"
             ],
             "path": "x-pack/plugins/fleet/server/services/agents/agent_service.ts",
             "deprecated": false,
@@ -22735,27 +22735,6 @@
         "children": [
           {
             "parentPluginId": "fleet",
-            "id": "def-common.GetAgentsResponse.list",
-            "type": "Array",
-            "tags": [],
-            "label": "list",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "fleet",
-                "scope": "common",
-                "docId": "kibFleetPluginApi",
-                "section": "def-common.Agent",
-                "text": "Agent"
-              },
-              "[] | undefined"
-            ],
-            "path": "x-pack/plugins/fleet/common/types/rest_spec/agent.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "fleet",
             "id": "def-common.GetAgentsResponse.statusSummary",
             "type": "Object",
             "tags": [],
@@ -22790,7 +22769,7 @@
             "label": "results",
             "description": [],
             "signature": [
-              "{ events: number; total: number; online: number; error: number; offline: number; other: number; updating: number; inactive: number; unenrolled: number; all: number; active: number; }"
+              "{ events: number; online: number; error: number; offline: number; other: number; updating: number; inactive: number; unenrolled: number; all: number; active: number; }"
             ],
             "path": "x-pack/plugins/fleet/common/types/rest_spec/agent.ts",
             "deprecated": false,
@@ -28996,19 +28975,6 @@
           },
           {
             "parentPluginId": "fleet",
-            "id": "def-common.AGENT_API_ROUTES.STATUS_PATTERN_DEPRECATED",
-            "type": "string",
-            "tags": [],
-            "label": "STATUS_PATTERN_DEPRECATED",
-            "description": [
-              "// deprecated since 8.0"
-            ],
-            "path": "x-pack/plugins/fleet/common/constants/routes.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "fleet",
             "id": "def-common.AGENT_API_ROUTES.UPGRADE_PATTERN",
             "type": "string",
             "tags": [],
@@ -30325,19 +30291,6 @@
             "tags": [],
             "label": "AGENT_POLICIES_SPACES",
             "description": [],
-            "path": "x-pack/plugins/fleet/common/constants/routes.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "fleet",
-            "id": "def-common.APP_API_ROUTES.GENERATE_SERVICE_TOKEN_PATTERN_DEPRECATED",
-            "type": "string",
-            "tags": [],
-            "label": "GENERATE_SERVICE_TOKEN_PATTERN_DEPRECATED",
-            "description": [
-              "// deprecated since 8.0"
-            ],
             "path": "x-pack/plugins/fleet/common/constants/routes.ts",
             "deprecated": false,
             "trackAdoption": false
