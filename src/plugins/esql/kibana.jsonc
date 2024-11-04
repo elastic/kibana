@@ -8,7 +8,8 @@
     "browser": true,
     "optionalPlugins": [
       "indexManagement",
-      "fieldsMetadata"
+      "fieldsMetadata",
+      "usageCollection"
     ],
     "requiredPlugins": [
       "data",

@@ -27,10 +27,17 @@ import {
   EuiTabs,
   EuiNotificationBadge,
 } from '@elastic/eui';
-// import { FavoritesClient } from '@kbn/content-management-favorites-public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import {
+  FavoritesClient,
+  FavoritesContextProvider,
+  // useFavorites,
+  // FavoriteButton,
+} from '@kbn/content-management-favorites-public';
 import { css, Interpolation, Theme } from '@emotion/react';
 import { type QueryHistoryItem, getHistoryItems } from '../history_local_storage';
 import { getReducedSpaceStyling, swapArrayElements } from './query_history_helpers';
+import type { ESQLEditorDeps } from '../types';
 
 export function QueryHistoryAction({
   toggleHistory,
@@ -425,6 +432,16 @@ export function HistoryAndStarredQueriesTabs({
   onUpdateAndSubmit: (qs: string) => void;
   height: number;
 }) {
+  const kibana = useKibana<ESQLEditorDeps>();
+  const { core, usageCollection } = kibana.services;
+
+  const esqlFavoritesClient = useMemo(() => {
+    return new FavoritesClient('esql_editor', 'esql_query', {
+      http: core.http,
+      usageCollection,
+    });
+  }, [core.http, usageCollection]);
+
   const { euiTheme } = useEuiTheme();
   const tabs = useMemo(() => {
     return [
@@ -458,21 +475,23 @@ export function HistoryAndStarredQueriesTabs({
           </EuiNotificationBadge>
         ),
         content: (
-          <QueryList
-            containerCSS={containerCSS}
-            onUpdateAndSubmit={onUpdateAndSubmit}
-            containerWidth={containerWidth}
-            height={height}
-            getItemsFn={(sortDirection) => []}
-            dataTestSubj="ESQLEditor-starredQueries"
-            tableCaption={i18n.translate('esqlEditor.query.starredQueriesTable', {
-              defaultMessage: 'Starred queries table',
-            })}
-          />
+          <FavoritesContextProvider favoritesClient={esqlFavoritesClient}>
+            <QueryList
+              containerCSS={containerCSS}
+              onUpdateAndSubmit={onUpdateAndSubmit}
+              containerWidth={containerWidth}
+              height={height}
+              getItemsFn={(sortDirection) => []}
+              dataTestSubj="ESQLEditor-starredQueries"
+              tableCaption={i18n.translate('esqlEditor.query.starredQueriesTable', {
+                defaultMessage: 'Starred queries table',
+              })}
+            />
+          </FavoritesContextProvider>
         ),
       },
     ];
-  }, [containerCSS, containerWidth, height, onUpdateAndSubmit]);
+  }, [containerCSS, containerWidth, esqlFavoritesClient, height, onUpdateAndSubmit]);
 
   const [selectedTabId, setSelectedTabId] = useState('history-queries-tab');
   const selectedTabContent = useMemo(() => {
