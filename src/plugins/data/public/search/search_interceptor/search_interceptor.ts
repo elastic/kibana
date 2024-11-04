@@ -471,24 +471,22 @@ export class SearchInterceptor {
           }
         )
         .then((rawResponse) => {
-          if (!rawResponse.body) throw new Error();
-
-          const response = rawResponse.body;
-
           const warning = rawResponse.response?.headers.get('warning');
           const requestParams =
-            'requestParams' in response ??
-            JSON.parse(rawResponse.response?.headers.get('kbn-search-request-params') || '{}');
+            'requestParams' in rawResponse.body
+              ? rawResponse.body.requestParams
+              : JSON.parse(rawResponse.response?.headers.get('kbn-search-request-params') || '{}');
           const isRestored =
-            'isRestored' in response ??
-            rawResponse.response?.headers.get('kbn-search-is-restored') === '?1';
+            'isRestored' in rawResponse.body
+              ? rawResponse.body.isRestored
+              : rawResponse.response?.headers.get('kbn-search-is-restored') === '?1';
 
-          if ('error' in response) {
+          if ('error' in rawResponse.body) {
             // eslint-disable-next-line no-throw-literal
             throw {
               attributes: {
-                error: response.error,
-                rawResponse: response,
+                error: rawResponse.body.error,
+                rawResponse: rawResponse.body,
                 requestParams,
                 isRestored,
               },
@@ -497,8 +495,8 @@ export class SearchInterceptor {
 
           switch (strategy) {
             case ENHANCED_ES_SEARCH_STRATEGY:
-              if (response.rawResponse) return response;
-              const typedResponse = response as unknown as AsyncSearchGetResponse;
+              if (rawResponse.body?.rawResponse) return rawResponse.body;
+              const typedResponse = rawResponse.body as unknown as AsyncSearchGetResponse;
               const shimmedResponse = shimHitsTotal(typedResponse.response, {
                 legacyHitsTotal: searchOptions.legacyHitsTotal,
               });
@@ -513,16 +511,16 @@ export class SearchInterceptor {
                 ...getTotalLoaded(shimmedResponse),
               };
             case ESQL_ASYNC_SEARCH_STRATEGY:
-              const esqlResponse = response as unknown as SqlGetAsyncResponse;
+              const esqlResponse = rawResponse.body as unknown as SqlGetAsyncResponse;
               return {
                 id: esqlResponse.id,
-                rawResponse: response,
+                rawResponse: esqlResponse,
                 isPartial: esqlResponse.is_partial,
                 isRunning: esqlResponse.is_running,
                 warning,
               };
             default:
-              return response;
+              return rawResponse.body;
           }
         })
         .catch((e: IHttpFetchError<KibanaServerError>) => {
