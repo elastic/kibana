@@ -209,7 +209,7 @@ export const SharingMetaFields = React.memo(function SharingMetaFields({
   try {
     const dateRangePretty = usePrettyDuration({
       timeFrom: toAbsoluteString(from),
-      timeTo: toAbsoluteString(to),
+      timeTo: toAbsoluteString(to, true),
       quickRanges: [],
       dateFormat,
     });

@@ -515,7 +515,7 @@
         "label": "entityBaseSchema",
         "description": [],
         "signature": [
-          "Zod.ZodObject<{ id: Zod.ZodString; type: Zod.ZodString; identityFields: Zod.ZodArray<Zod.ZodString, \"many\">; displayName: Zod.ZodString; metrics: Zod.ZodRecord<Zod.ZodString, Zod.ZodNumber>; definitionVersion: Zod.ZodString; schemaVersion: Zod.ZodString; definitionId: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; type: string; metrics: Record<string, number>; displayName: string; identityFields: string[]; definitionId: string; definitionVersion: string; schemaVersion: string; }, { id: string; type: string; metrics: Record<string, number>; displayName: string; identityFields: string[]; definitionId: string; definitionVersion: string; schemaVersion: string; }>"
+          "Zod.ZodObject<{ id: Zod.ZodString; type: Zod.ZodString; identity_fields: Zod.ZodArray<Zod.ZodString, \"many\">; display_name: Zod.ZodString; metrics: Zod.ZodRecord<Zod.ZodString, Zod.ZodNumber>; definition_version: Zod.ZodString; schema_version: Zod.ZodString; definition_id: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; type: string; metrics: Record<string, number>; schema_version: string; definition_id: string; definition_version: string; display_name: string; identity_fields: string[]; }, { id: string; type: string; metrics: Record<string, number>; schema_version: string; definition_id: string; definition_version: string; display_name: string; identity_fields: string[]; }>"
         ],
         "path": "x-pack/packages/kbn-entities-schema/src/schema/entity.ts",
         "deprecated": false,
@@ -666,28 +666,13 @@
       },
       {
         "parentPluginId": "@kbn/entities-schema",
-        "id": "def-common.entityHistorySchema",
-        "type": "Object",
-        "tags": [],
-        "label": "entityHistorySchema",
-        "description": [],
-        "signature": [
-          "Zod.ZodIntersection<Zod.ZodObject<{ '@timestamp': Zod.ZodString; entity: Zod.ZodObject<{ id: Zod.ZodString; type: Zod.ZodString; identityFields: Zod.ZodArray<Zod.ZodString, \"many\">; displayName: Zod.ZodString; metrics: Zod.ZodRecord<Zod.ZodString, Zod.ZodNumber>; definitionVersion: Zod.ZodString; schemaVersion: Zod.ZodString; definitionId: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; type: string; metrics: Record<string, number>; displayName: string; identityFields: string[]; definitionId: string; definitionVersion: string; schemaVersion: string; }, { id: string; type: string; metrics: Record<string, number>; displayName: string; identityFields: string[]; definitionId: string; definitionVersion: string; schemaVersion: string; }>; }, \"strip\", Zod.ZodTypeAny, { '@timestamp': string; entity: { id: string; type: string; metrics: Record<string, number>; displayName: string; identityFields: string[]; definitionId: string; definitionVersion: string; schemaVersion: string; }; }, { '@timestamp': string; entity: { id: string; type: string; metrics: Record<string, number>; displayName: string; identityFields: string[]; definitionId: string; definitionVersion: string; schemaVersion: string; }; }>, Zod.ZodType<Metadata, Zod.ZodTypeDef, Metadata>>"
-        ],
-        "path": "x-pack/packages/kbn-entities-schema/src/schema/entity.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/entities-schema",
         "id": "def-common.entityLatestSchema",
         "type": "Object",
         "tags": [],
         "label": "entityLatestSchema",
         "description": [],
         "signature": [
-          "Zod.ZodIntersection<Zod.ZodObject<{ entity: Zod.ZodObject<Zod.objectUtil.extendShape<{ id: Zod.ZodString; type: Zod.ZodString; identityFields: Zod.ZodArray<Zod.ZodString, \"many\">; displayName: Zod.ZodString; metrics: Zod.ZodRecord<Zod.ZodString, Zod.ZodNumber>; definitionVersion: Zod.ZodString; schemaVersion: Zod.ZodString; definitionId: Zod.ZodString; }, { lastSeenTimestamp: Zod.ZodString; }>, \"strip\", Zod.ZodTypeAny, { id: string; type: string; metrics: Record<string, number>; displayName: string; identityFields: string[]; definitionId: string; definitionVersion: string; lastSeenTimestamp: string; schemaVersion: string; }, { id: string; type: string; metrics: Record<string, number>; displayName: string; identityFields: string[]; definitionId: string; definitionVersion: string; lastSeenTimestamp: string; schemaVersion: string; }>; }, \"strip\", Zod.ZodTypeAny, { entity: { id: string; type: string; metrics: Record<string, number>; displayName: string; identityFields: string[]; definitionId: string; definitionVersion: string; lastSeenTimestamp: string; schemaVersion: string; }; }, { entity: { id: string; type: string; metrics: Record<string, number>; displayName: string; identityFields: string[]; definitionId: string; definitionVersion: string; lastSeenTimestamp: string; schemaVersion: string; }; }>, Zod.ZodType<Metadata, Zod.ZodTypeDef, Metadata>>"
+          "Zod.ZodIntersection<Zod.ZodObject<{ entity: Zod.ZodObject<Zod.objectUtil.extendShape<{ id: Zod.ZodString; type: Zod.ZodString; identity_fields: Zod.ZodArray<Zod.ZodString, \"many\">; display_name: Zod.ZodString; metrics: Zod.ZodRecord<Zod.ZodString, Zod.ZodNumber>; definition_version: Zod.ZodString; schema_version: Zod.ZodString; definition_id: Zod.ZodString; }, { last_seen_timestamp: Zod.ZodString; }>, \"strip\", Zod.ZodTypeAny, { id: string; type: string; metrics: Record<string, number>; schema_version: string; definition_id: string; definition_version: string; display_name: string; last_seen_timestamp: string; identity_fields: string[]; }, { id: string; type: string; metrics: Record<string, number>; schema_version: string; definition_id: string; definition_version: string; display_name: string; last_seen_timestamp: string; identity_fields: string[]; }>; }, \"strip\", Zod.ZodTypeAny, { entity: { id: string; type: string; metrics: Record<string, number>; schema_version: string; definition_id: string; definition_version: string; display_name: string; last_seen_timestamp: string; identity_fields: string[]; }; }, { entity: { id: string; type: string; metrics: Record<string, number>; schema_version: string; definition_id: string; definition_version: string; display_name: string; last_seen_timestamp: string; identity_fields: string[]; }; }>, Zod.ZodType<Metadata, Zod.ZodTypeDef, Metadata>>"
         ],
         "path": "x-pack/packages/kbn-entities-schema/src/schema/entity.ts",
         "deprecated": false,

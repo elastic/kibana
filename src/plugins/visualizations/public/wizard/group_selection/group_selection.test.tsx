@@ -83,11 +83,11 @@ describe('GroupSelection', () => {
 
   const docLinks = {
     links: {
-      dashboard: {
+      visualize: {
         guide: 'test',
       },
     },
-  };
+  } as unknown as DocLinksStart;
 
   beforeAll(() => {
     Object.defineProperty(window, 'location', {

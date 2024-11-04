@@ -78,11 +78,11 @@ describe('NewVisModal', () => {
   const uiSettings: any = { get: settingsGet };
   const docLinks = {
     links: {
-      dashboard: {
+      visualize: {
         guide: 'test',
       },
     },
-  };
+  } as unknown as DocLinksStart;
 
   const contentManagement = contentManagementMock.createStartContract();
 
@@ -108,7 +108,7 @@ describe('NewVisModal', () => {
           addBasePath={addBasePath}
           uiSettings={uiSettings}
           application={{} as ApplicationStart}
-          docLinks={docLinks as DocLinksStart}
+          docLinks={docLinks}
           contentClient={contentManagement.client}
           {...propsOverrides}
         />

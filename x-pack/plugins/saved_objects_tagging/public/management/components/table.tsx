@@ -10,7 +10,8 @@ import { EuiInMemoryTable, EuiBasicTableColumn, EuiLink, Query, EuiIconTip } fro
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { TagsCapabilities, TagWithRelations } from '../../../common';
+import { TagsCapabilities } from '../../../common';
+import type { TagWithRelations } from '../../../common/types';
 import { TagBadge } from '../../components';
 import { TagAction } from '../actions';
 

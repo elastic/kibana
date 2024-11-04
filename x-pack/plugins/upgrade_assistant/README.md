@@ -17,7 +17,7 @@ When we want to enable ML model snapshot deprecation warnings again we need to c
 * Migrating system indices (`featureSet.migrateSystemIndices`): Migrating system indices should only be enabled for major version upgrades. This config hides the second step from the UA UI for migrating system indices.
 * Reindex corrective actions (`featureSet.reindexCorrectiveActions`): Deprecations with reindexing corrective actions are only enabled for major version upgrades. Currently, the reindex actions include some logic that is specific to the [8.0 upgrade](https://github.com/elastic/kibana/blob/main/x-pack/plugins/upgrade_assistant/server/lib/reindexing/index_settings.ts). End users could get into a bad situation if this is enabled before this logic is fixed.
 
-### Deprecations
+## Deprecations
 
 There are three sources of deprecation information:
 
@@ -273,6 +273,47 @@ PUT .reporting-*/_settings
     "index.lifecycle.name": null
   }
 }
+```
+
+#### Kibana API deprecations:
+Run kibana locally with the test example plugin that has deprecated routes
+```
+yarn start --plugin-path=examples/routing_example --plugin-path=examples/developer_examples
+```
+
+The following comprehensive deprecated routes examples are registered inside the folder: `examples/routing_example/server/routes/deprecated_routes`
+
+Run them in the console to trigger the deprecation condition so they show up in the UA:
+
+```
+# Versioned routes: Version 1 is deprecated
+GET kbn:/api/routing_example/d/versioned?apiVersion=1
+GET kbn:/api/routing_example/d/versioned?apiVersion=2
+
+# Non-versioned routes
+GET kbn:/api/routing_example/d/removed_route
+POST kbn:/api/routing_example/d/migrated_route
+{}
+```
+
+1. You can also mark as deprecated in the UA to remove the deprecation from the list.
+2. Check the telemetry response to see the reported data about the deprecated route.
+3. Calling version 2 of the API  does not do anything since it is not deprecated unlike version `1` (`GET kbn:/api/routing_example/d/versioned?apiVersion=2`)
+4. Internally you can see the deprecations counters from the dev console by running the following:
+```
+GET .kibana_usage_counters/_search
+{
+    "query": {
+        "bool": {
+            "should": [
+              {"match": { "usage-counter.counterType": "deprecated_api_call:total"}},
+              {"match": { "usage-counter.counterType": "deprecated_api_call:resolved"}},
+              {"match": { "usage-counter.counterType": "deprecated_api_call:marked_as_resolved"}}
+            ]
+        }
+    }
+}
+
 ```
 
 For a complete list of Kibana deprecations, refer to the [8.0 Kibana deprecations meta issue](https://github.com/elastic/kibana/issues/109166).
