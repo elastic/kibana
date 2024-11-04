@@ -6,43 +6,39 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
-import { DataStreamType } from '../../../common/types';
-import { DATA_STREAM_TYPE } from '../../../common/es_fields';
+import { rangeQuery } from '@kbn/observability-plugin/server';
+import { QueryDslBoolQuery } from '@elastic/elasticsearch/lib/api/types';
+import { DataStreamDocsStat } from '../../../common/api_types';
 import { createDatasetQualityESClient } from '../../utils';
 
-interface ResultBucket {
-  dataset: string;
-  count: number;
-}
-
 interface Dataset {
+  type: string;
   dataset: string;
   namespace: string;
 }
 
 const SIZE_LIMIT = 10000;
 
-export async function getDatasetPaginatedResults(options: {
+export async function getAggregatedDatasetPaginatedResults(options: {
   esClient: ElasticsearchClient;
-  type: DataStreamType;
+  index: string;
   start: number;
   end: number;
+  query?: QueryDslBoolQuery;
   after?: Dataset;
-  prevResults?: ResultBucket[];
-}): Promise<ResultBucket[]> {
-  const { esClient, type, start, end, after, prevResults = [] } = options;
+  prevResults?: DataStreamDocsStat[];
+}): Promise<DataStreamDocsStat[]> {
+  const { esClient, index, query, start, end, after, prevResults = [] } = options;
 
   const datasetQualityESClient = createDatasetQualityESClient(esClient);
 
-  const filter = [...rangeQuery(start, end), ...termQuery(DATA_STREAM_TYPE, type)];
-
-  const aggs = (afterKey?: { dataset: string; namespace: string }) => ({
+  const aggs = (afterKey?: Dataset) => ({
     datasets: {
       composite: {
         ...(afterKey ? { after: afterKey } : {}),
         size: SIZE_LIMIT,
         sources: [
+          { type: { terms: { field: 'data_stream.type' } } },
           { dataset: { terms: { field: 'data_stream.dataset' } } },
           { namespace: { terms: { field: 'data_stream.namespace' } } },
         ],
@@ -50,20 +46,26 @@ export async function getDatasetPaginatedResults(options: {
     },
   });
 
+  const bool = {
+    ...query,
+    filter: [
+      ...(query?.filter ? (Array.isArray(query.filter) ? query.filter : [query.filter]) : []),
+      ...[...rangeQuery(start, end)],
+    ],
+  };
+
   const response = await datasetQualityESClient.search({
-    index: `${type}-*-*`,
+    index,
     size: 0,
     query: {
-      bool: {
-        filter,
-      },
+      bool,
     },
     aggs: aggs(after),
   });
 
   const currResults =
     response.aggregations?.datasets.buckets.map((bucket) => ({
-      dataset: `${type}-${bucket.key.dataset}-${bucket.key.namespace}`,
+      dataset: `${bucket.key.type}-${bucket.key.dataset}-${bucket.key.namespace}`,
       count: bucket.doc_count,
     })) ?? [];
 
@@ -73,13 +75,14 @@ export async function getDatasetPaginatedResults(options: {
     response.aggregations?.datasets.after_key &&
     response.aggregations?.datasets.buckets.length === SIZE_LIMIT
   ) {
-    return getDatasetPaginatedResults({
+    return getAggregatedDatasetPaginatedResults({
       esClient,
-      type,
+      index,
       start,
       end,
       after:
         (response.aggregations?.datasets.after_key as {
+          type: string;
           dataset: string;
           namespace: string;
         }) || after,

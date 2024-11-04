@@ -19,9 +19,7 @@ export const DatasetQualityIndicator = ({
   isLoading: boolean;
   dataStreamStat: DataStreamStat;
 }) => {
-  const {
-    degradedDocs: { quality },
-  } = dataStreamStat;
+  const { quality } = dataStreamStat;
 
   const translatedQuality = i18n.translate('xpack.datasetQuality.datasetQualityIdicator', {
     defaultMessage: '{quality}',

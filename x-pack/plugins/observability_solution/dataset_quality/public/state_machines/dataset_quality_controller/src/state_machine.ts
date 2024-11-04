@@ -8,12 +8,13 @@
 import { IToasts } from '@kbn/core/public';
 import { getDateISORange } from '@kbn/timerange';
 import { assign, createMachine, DoneInvokeEvent, InterpreterFrom } from 'xstate';
-import { DataStreamStat, NonAggregatableDatasets } from '../../../../common/api_types';
-import { KNOWN_TYPES } from '../../../../common/constants';
 import {
-  DataStreamDegradedDocsStatServiceResponse,
-  DataStreamStatServiceResponse,
-} from '../../../../common/data_streams_stats';
+  DataStreamDocsStat,
+  DataStreamStat,
+  NonAggregatableDatasets,
+} from '../../../../common/api_types';
+import { KNOWN_TYPES } from '../../../../common/constants';
+import { DataStreamStatServiceResponse } from '../../../../common/data_streams_stats';
 import { Integration } from '../../../../common/data_streams_stats/integration';
 import { DataStreamType } from '../../../../common/types';
 import { IDataStreamsStatsClient } from '../../../services/data_streams_stats';
@@ -92,34 +93,69 @@ export const createPureDatasetQualityControllerStateMachine = (
               initial: 'fetching',
               states: {
                 fetching: {
-                  ...generateInvokePerType({
+                  invoke: {
                     src: 'loadDegradedDocs',
-                  }),
+                    onDone: {
+                      target: 'loaded',
+                      actions: ['storeDegradedDocStats', 'storeDatasets'],
+                    },
+                    onError: [
+                      {
+                        target: 'unauthorized',
+                        cond: 'checkIfActionForbidden',
+                      },
+                      {
+                        target: 'loaded',
+                        actions: ['notifyFetchDegradedStatsFailed'],
+                      },
+                    ],
+                  },
                 },
                 loaded: {},
                 unauthorized: { type: 'final' },
               },
               on: {
-                SAVE_DEGRADED_DOCS_STATS: {
-                  target: 'degradedDocs.loaded',
-                  actions: ['storeDegradedDocStats', 'storeDatasets'],
-                },
-                NOTIFY_DEGRADED_DOCS_STATS_FAILED: [
-                  {
-                    target: 'degradedDocs.unauthorized',
-                    cond: 'checkIfActionForbidden',
-                  },
-                  {
-                    target: 'degradedDocs.loaded',
-                    actions: ['notifyFetchDegradedStatsFailed'],
-                  },
-                ],
                 UPDATE_TIME_RANGE: {
                   target: 'degradedDocs.fetching',
                   actions: ['storeTimeRange'],
                 },
                 REFRESH_DATA: {
                   target: 'degradedDocs.fetching',
+                },
+              },
+            },
+            docsStats: {
+              initial: 'fetching',
+              states: {
+                fetching: {
+                  ...generateInvokePerType({
+                    src: 'loadDataStreamDocsStats',
+                  }),
+                },
+                loaded: {},
+                unauthorized: { type: 'final' },
+              },
+              on: {
+                SAVE_TOTAL_DOCS_STATS: {
+                  target: 'docsStats.loaded',
+                  actions: ['storeTotalDocStats', 'storeDatasets'],
+                },
+                NOTIFY_TOTAL_DOCS_STATS_FAILED: [
+                  {
+                    target: 'docsStats.unauthorized',
+                    cond: 'checkIfActionForbidden',
+                  },
+                  {
+                    target: 'docsStats.loaded',
+                    actions: ['notifyFetchDegradedStatsFailed'],
+                  },
+                ],
+                UPDATE_TIME_RANGE: {
+                  target: 'docsStats.fetching',
+                  actions: ['storeTimeRange'],
+                },
+                REFRESH_DATA: {
+                  target: 'docsStats.fetching',
                 },
               },
             },
@@ -329,18 +365,21 @@ export const createPureDatasetQualityControllerStateMachine = (
             };
           }
         ),
-        storeDegradedDocStats: assign(
-          (context, event: DoneInvokeEvent<DataStreamDegradedDocsStatServiceResponse>, meta) => {
+        storeTotalDocStats: assign(
+          (context, event: DoneInvokeEvent<DataStreamDocsStat[]>, meta) => {
             const type = meta._event.origin as DataStreamType;
 
             return {
-              degradedDocStats: {
-                ...context.degradedDocStats,
+              totalDocsStats: {
+                ...context.totalDocsStats,
                 [type]: event.data,
               },
             };
           }
         ),
+        storeDegradedDocStats: assign((_context, event: DoneInvokeEvent<DataStreamDocsStat[]>) => ({
+          degradedDocStats: event.data,
+        })),
         storeNonAggregatableDatasets: assign(
           (_context, event: DoneInvokeEvent<NonAggregatableDatasets>) => ({
             nonAggregatableDatasets: event.data.datasets,
@@ -364,7 +403,8 @@ export const createPureDatasetQualityControllerStateMachine = (
                 datasets: generateDatasets(
                   context.dataStreamStats,
                   context.degradedDocStats,
-                  context.integrations
+                  context.integrations,
+                  context.totalDocsStats
                 ),
               }
             : {};
@@ -411,14 +451,14 @@ export const createDatasetQualityControllerStateMachine = ({
           types: context.filters.types as DataStreamType[],
           datasetQuery: context.filters.query,
         }),
-      loadDegradedDocs:
+      loadDataStreamDocsStats:
         (context, _event, { data: { type } }) =>
         async (send) => {
           try {
             const { startDate: start, endDate: end } = getDateISORange(context.filters.timeRange);
 
-            const degradedDocsStats = await (isTypeSelected(type, context)
-              ? dataStreamStatsClient.getDataStreamsDegradedStats({
+            const totalDocsStats = await (isTypeSelected(type, context)
+              ? dataStreamStatsClient.getDataStreamsDocsStats({
                   type,
                   datasetQuery: context.filters.query,
                   start,
@@ -427,16 +467,26 @@ export const createDatasetQualityControllerStateMachine = ({
               : Promise.resolve([]));
 
             send({
-              type: 'SAVE_DEGRADED_DOCS_STATS',
-              data: degradedDocsStats,
+              type: 'SAVE_TOTAL_DOCS_STATS',
+              data: totalDocsStats,
             });
           } catch (e) {
             send({
-              type: 'NOTIFY_DEGRADED_DOCS_STATS_FAILED',
+              type: 'NOTIFY_TOTAL_DOCS_STATS_FAILED',
               data: e,
             });
           }
         },
+      loadDegradedDocs: (context) => {
+        const { startDate: start, endDate: end } = getDateISORange(context.filters.timeRange);
+
+        return dataStreamStatsClient.getDataStreamsDegradedStats({
+          types: context.filters.types as DataStreamType[],
+          datasetQuery: context.filters.query,
+          start,
+          end,
+        });
+      },
       loadNonAggregatableDatasets: (context) => {
         const { startDate: start, endDate: end } = getDateISORange(context.filters.timeRange);
 
