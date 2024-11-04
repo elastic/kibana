@@ -6412,10 +6412,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/security-solution-common@link:x-pack/packages/security-solution/common":
-  version "0.0.0"
-  uid ""
-
 "@kbn/security-solution-distribution-bar@link:x-pack/packages/security-solution/distribution_bar":
   version "0.0.0"
   uid ""
