@@ -7,6 +7,7 @@
 
 import { catchError, last, map, Observable, of, tap } from 'rxjs';
 import { Logger } from '@kbn/logging';
+import { asAbsoluteDateTime } from '../../../../common/utils/formatters/datetime';
 import type { ObservabilityAIAssistantClient } from '..';
 import { Message, MessageRole } from '../../../../common';
 import { concatenateChatCompletionChunks } from '../../../../common/utils/concatenate_chat_completion_chunks';
@@ -29,11 +30,13 @@ export function getGeneratedTitle({
   chat,
   logger,
   tracer,
+  isPublic,
 }: {
   messages: Message[];
   chat: ChatFunctionWithoutConnectorAndTokenCount;
   logger: Pick<Logger, 'debug' | 'error'>;
   tracer: LangTracer;
+  isPublic?: boolean;
 }): Observable<string | TokenCountEvent> {
   return hideTokenCountEvents((hide) =>
     chat('generate_title', {
@@ -91,8 +94,14 @@ export function getGeneratedTitle({
         // - "Hello, World!" => Captures: Hello, World!
         // - 'Another Example' => Captures: Another Example
         // - JustTextWithoutQuotes => Captures: JustTextWithoutQuotes
+        const formattedTitle = title.replace(/^"(.*)"$/g, '$1').replace(/^'(.*)'$/g, '$1');
 
-        return title.replace(/^"(.*)"$/g, '$1').replace(/^'(.*)'$/g, '$1');
+        if (isPublic) {
+          const timestamp = asAbsoluteDateTime(Date.now());
+          return `${formattedTitle} - ${timestamp}`;
+        }
+
+        return formattedTitle;
       }),
       tap((event) => {
         if (typeof event === 'string') {

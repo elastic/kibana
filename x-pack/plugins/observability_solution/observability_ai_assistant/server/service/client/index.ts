@@ -258,6 +258,7 @@ export class ObservabilityAIAssistantClient {
                       });
                     },
                     tracer: completeTracer,
+                    isPublic,
                   })
                 ),
                 shareReplay()
