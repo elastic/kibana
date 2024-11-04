@@ -9,7 +9,12 @@
 
 import { schema } from '@kbn/config-schema';
 import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
-import type { HttpServiceSetup } from '@kbn/core/server';
+import type {
+  HttpServiceSetup,
+  RequestHandler,
+  RequestHandlerContext,
+  RouteMethod,
+} from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { Logger } from '@kbn/logging';
 
@@ -18,6 +23,7 @@ import {
   PUBLIC_API_PATH,
   PUBLIC_API_VERSION,
   PUBLIC_API_CONTENT_MANAGEMENT_VERSION,
+  PUBLIC_API_FEATURE_FLAG,
 } from './constants';
 import {
   dashboardAttributesSchema,
@@ -36,6 +42,32 @@ interface RegisterAPIRoutesArgs {
 
 const TECHNICAL_PREVIEW_WARNING =
   'This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.';
+
+const createFeatureFlagRouteHandler = <
+  P,
+  Q,
+  B,
+  Context extends RequestHandlerContext,
+  Method extends RouteMethod
+>(
+  handler: RequestHandler<P, Q, B, Context, Method>
+) => {
+  const featureFlagRouteHandler: RequestHandler<P, Q, B, Context, Method> = async (
+    ctx,
+    req,
+    res
+  ) => {
+    const { featureFlags } = await ctx.core;
+    const isFeatureFlagEnabled = await featureFlags.getBooleanValue(PUBLIC_API_FEATURE_FLAG, false);
+    if (!isFeatureFlagEnabled) {
+      return res.badRequest({
+        body: `uri [${req.url.pathname}] with method [${req.route.method}] exists but is not available with the current configuration`,
+      });
+    }
+    return handler(ctx, req, res);
+  };
+  return featureFlagRouteHandler;
+};
 
 export function registerAPIRoutes({
   http,
@@ -77,7 +109,7 @@ export function registerAPIRoutes({
         },
       },
     },
-    async (ctx, req, res) => {
+    createFeatureFlagRouteHandler(async (ctx, req, res) => {
       const { id } = req.params;
       const { attributes, references, spaces: initialNamespaces } = req.body;
       const client = contentManagement.contentClient
@@ -107,7 +139,7 @@ export function registerAPIRoutes({
       }
 
       return res.ok({ body: result });
-    }
+    })
   );
 
   // Update API route
@@ -142,7 +174,7 @@ export function registerAPIRoutes({
         },
       },
     },
-    async (ctx, req, res) => {
+    createFeatureFlagRouteHandler(async (ctx, req, res) => {
       const { attributes, references } = req.body;
       const client = contentManagement.contentClient
         .getForRequest({ request: req, requestHandlerContext: ctx })
@@ -165,7 +197,7 @@ export function registerAPIRoutes({
       }
 
       return res.created({ body: result });
-    }
+    })
   );
 
   // List API route
@@ -200,7 +232,7 @@ export function registerAPIRoutes({
         },
       },
     },
-    async (ctx, req, res) => {
+    createFeatureFlagRouteHandler(async (ctx, req, res) => {
       const { page, perPage: limit } = req.query;
       const client = contentManagement.contentClient
         .getForRequest({ request: req, requestHandlerContext: ctx })
@@ -222,7 +254,7 @@ export function registerAPIRoutes({
         total: result.pagination.total,
       };
       return res.ok({ body });
-    }
+    })
   );
 
   // Get API route
@@ -252,7 +284,7 @@ export function registerAPIRoutes({
         },
       },
     },
-    async (ctx, req, res) => {
+    createFeatureFlagRouteHandler(async (ctx, req, res) => {
       const client = contentManagement.contentClient
         .getForRequest({ request: req, requestHandlerContext: ctx })
         .for(CONTENT_ID, PUBLIC_API_CONTENT_MANAGEMENT_VERSION);
@@ -276,7 +308,7 @@ export function registerAPIRoutes({
       }
 
       return res.ok({ body: result });
-    }
+    })
   );
 
   // Delete API route
@@ -301,7 +333,7 @@ export function registerAPIRoutes({
         },
       },
     },
-    async (ctx, req, res) => {
+    createFeatureFlagRouteHandler(async (ctx, req, res) => {
       const client = contentManagement.contentClient
         .getForRequest({ request: req, requestHandlerContext: ctx })
         .for(CONTENT_ID, PUBLIC_API_CONTENT_MANAGEMENT_VERSION);
@@ -322,6 +354,6 @@ export function registerAPIRoutes({
       }
 
       return res.ok();
-    }
+    })
   );
 }
