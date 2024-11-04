@@ -9,6 +9,7 @@ steps:
       - quick_checks
       - linting
       - linting_with_types
+      - check_types
     timeout_in_minutes: 60
     parallelism: 7
     retry:
@@ -26,6 +27,7 @@ steps:
       - quick_checks
       - linting
       - linting_with_types
+      - check_types
     timeout_in_minutes: 60
     parallelism: 8
     retry:

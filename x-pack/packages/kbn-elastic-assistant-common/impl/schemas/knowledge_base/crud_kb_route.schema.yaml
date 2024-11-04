@@ -78,6 +78,8 @@ paths:
                     type: boolean
                   security_labs_exists:
                     type: boolean
+                  user_data_exists:
+                    type: boolean
         400:
           description: Generic Error
           content:

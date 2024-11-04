@@ -55,6 +55,9 @@ export const telemetryIndexPattern = 'metrics-endpoint.telemetry-*';
 export const ENDPOINT_HEARTBEAT_INDEX = '.logs-endpoint.heartbeat-default';
 export const ENDPOINT_HEARTBEAT_INDEX_PATTERN = '.logs-endpoint.heartbeat-*';
 
+// Endpoint diagnostics index
+export const DEFAULT_DIAGNOSTIC_INDEX_PATTERN = '.logs-endpoint.diagnostic.collection-*' as const;
+
 // File storage indexes supporting endpoint Upload/download
 export const FILE_STORAGE_METADATA_INDEX = getFileMetadataIndexName('endpoint');
 export const FILE_STORAGE_DATA_INDEX = getFileDataIndexName('endpoint');
