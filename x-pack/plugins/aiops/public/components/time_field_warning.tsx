@@ -14,22 +14,16 @@ export const TimeFieldWarning = () => {
     <>
       <EuiCallOut
         size="s"
-        title={i18n.translate(
-          'xpack.aiops.logCategorization.embeddableMenu.timeFieldWarning.title',
-          {
-            defaultMessage: 'The selected data view does not contain a time field.',
-          }
-        )}
+        title={i18n.translate('xpack.aiops.embeddableMenu.timeFieldWarning.title', {
+          defaultMessage: 'The selected data view does not contain a time field.',
+        })}
         color="warning"
         iconType="warning"
       >
         <p>
-          {i18n.translate(
-            'xpack.aiops.logCategorization.embeddableMenu.timeFieldWarning.title.description',
-            {
-              defaultMessage: 'Pattern analysis can only be run on data views with a time field.',
-            }
-          )}
+          {i18n.translate('xpack.aiops.embeddableMenu.timeFieldWarning.title.description', {
+            defaultMessage: 'The analysis can only be run on data views with a time field.',
+          })}
         </p>
       </EuiCallOut>
       <EuiSpacer />
