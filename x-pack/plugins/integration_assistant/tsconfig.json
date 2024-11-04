@@ -1,4 +1,6 @@
 {
+  "allowJs": true,  
+  "esModuleInterop": true,
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "target/types"
@@ -11,7 +13,7 @@
     "scripts/**/*.ts",
     "__jest__/**/*",
     "../../typings/**/*"
-  ],
+, "server/graphs/cel/validation/validation.js"  ],
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/core",

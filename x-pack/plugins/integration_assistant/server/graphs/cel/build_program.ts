@@ -10,6 +10,7 @@ import { CelInputState } from '../../types';
 import { EX_ANSWER_PROGRAM, SAMPLE_CEL_PROGRAMS } from './constants';
 import { CEL_BASE_PROGRAM_PROMPT } from './prompts';
 import { CelInputNodeParams } from './types';
+import { loadWasm } from './validation/validate';
 
 export async function handleBuildProgram({
   state,
@@ -25,6 +26,10 @@ export async function handleBuildProgram({
     api_query_summary: state.apiQuerySummary,
     ex_answer: EX_ANSWER_PROGRAM,
   });
+
+  const validated = await loadWasm(program.trim());
+
+  console.log(validated);
 
   return {
     currentProgram: program.trim(),
