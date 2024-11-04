@@ -6826,7 +6826,15 @@
             "section": "def-common.Message",
             "text": "Message"
           },
-          "; }"
+          " & { scopes: ",
+          {
+            "pluginId": "@kbn/ai-assistant-common",
+            "scope": "common",
+            "docId": "kibKbnAiAssistantCommonPluginApi",
+            "section": "def-common.AssistantScope",
+            "text": "AssistantScope"
+          },
+          "[]; }; }"
         ],
         "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/analytics/index.ts",
         "deprecated": false,
