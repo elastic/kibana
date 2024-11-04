@@ -24,7 +24,7 @@ import { ElasticAssistantRequestHandlerContext, GetElser } from '../types';
 import {
   appendAssistantMessageToConversation,
   DEFAULT_PLUGIN_NAME,
-  getIsKnowledgeBaseEnabled,
+  getIsKnowledgeBaseInstalled,
   getPluginNameFromRequest,
   getSystemPromptFromUserConversation,
   langChainExecute,
@@ -170,14 +170,13 @@ export const postActionsConnectorExecuteRoute = (
             (await assistantContext.getAIAssistantKnowledgeBaseDataClient({
               v2KnowledgeBaseEnabled,
             })) ?? undefined;
-          const isEnabledKnowledgeBase = await getIsKnowledgeBaseEnabled(kbDataClient);
-
+          const isKnowledgeBaseInstalled = await getIsKnowledgeBaseInstalled(kbDataClient);
           telemetry.reportEvent(INVOKE_ASSISTANT_ERROR_EVENT.eventType, {
             actionTypeId: request.body.actionTypeId,
             model: request.body.model,
             errorMessage: error.message,
             assistantStreamingEnabled: request.body.subAction !== 'invokeAI',
-            isEnabledKnowledgeBase,
+            isEnabledKnowledgeBase: isKnowledgeBaseInstalled,
           });
 
           return resp.error({
