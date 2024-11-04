@@ -19,6 +19,7 @@ import { useKibana } from '../utils/kibana_react';
 import { useCreateDataView } from './use_create_data_view';
 
 import { sloKeys } from './query_key_factory';
+import { usePluginContext } from './use_plugin_context';
 
 export interface SLOListParams {
   kqlQuery?: string;
@@ -55,9 +56,9 @@ export function useFetchSloList({
   disabled = false,
 }: SLOListParams = {}): UseFetchSloListResponse {
   const {
-    http,
     notifications: { toasts },
   } = useKibana().services;
+  const { sloClient } = usePluginContext();
 
   const queryClient = useQueryClient();
 
@@ -96,7 +97,7 @@ export function useFetchSloList({
       lastRefresh,
     }),
     queryFn: async ({ signal }) => {
-      return await http.get<FindSLOResponse>(`/api/observability/slos`, {
+      return await sloClient.fetch('GET /api/observability/slos 2023-10-31', {
         query: {
           ...(kqlQuery && { kqlQuery }),
           ...(sortBy && { sortBy }),
