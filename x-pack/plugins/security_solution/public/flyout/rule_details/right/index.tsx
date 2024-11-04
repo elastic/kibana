@@ -7,13 +7,15 @@
 
 import React, { memo } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
-import { FlyoutLoading, FlyoutError, FlyoutNavigation } from '@kbn/security-solution-common';
 import { i18n } from '@kbn/i18n';
 import { PanelContent } from './content';
 import { PanelHeader } from './header';
 import { PreviewFooter } from '../preview/footer';
 import { useRuleDetails } from '../hooks/use_rule_details';
 import { LOADING_TEST_ID } from './test_ids';
+import { FlyoutLoading } from '../../shared/components/flyout_loading';
+import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
+import { FlyoutError } from '../../shared/components/flyout_error';
 
 export interface RulePanelExpandableFlyoutProps extends FlyoutPanelProps {
   key: 'rule-panel' | 'rule-preview-panel';

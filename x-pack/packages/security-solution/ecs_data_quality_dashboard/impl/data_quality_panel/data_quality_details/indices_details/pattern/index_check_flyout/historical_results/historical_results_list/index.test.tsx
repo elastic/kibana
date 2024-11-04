@@ -18,15 +18,10 @@ import { HistoricalResultsList } from '.';
 import {
   CHANGE_YOUR_SEARCH_CRITERIA_OR_RUN,
   NO_RESULTS_MATCH_YOUR_SEARCH_CRITERIA,
-  TOGGLE_HISTORICAL_RESULT_CHECKED_AT,
 } from './translations';
 import { getFormattedCheckTime } from '../../utils/get_formatted_check_time';
 import { getHistoricalResultStub } from '../../../../../../stub/get_historical_result_stub';
 import userEvent from '@testing-library/user-event';
-
-const getAccordionToggleLabel = (checkedAt: number) => {
-  return TOGGLE_HISTORICAL_RESULT_CHECKED_AT(getFormattedCheckTime(checkedAt));
-};
 
 describe('HistoricalResultsList', () => {
   it('should render individual historical result accordions with result outcome text, formatted check time and amount of incompatible fields', () => {
@@ -65,13 +60,13 @@ describe('HistoricalResultsList', () => {
     );
 
     expect(
-      screen.getByLabelText(getAccordionToggleLabel(historicalResultFail.checkedAt))
+      screen.getByTestId(`historicalResultAccordionButton-${historicalResultFail.checkedAt}`)
     ).toHaveTextContent(
       `Fail${getFormattedCheckTime(historicalResultFail.checkedAt)}1 Incompatible field`
     );
 
     expect(
-      screen.getByLabelText(getAccordionToggleLabel(historicalResultPass.checkedAt))
+      screen.getByTestId(`historicalResultAccordionButton-${historicalResultPass.checkedAt}`)
     ).toHaveTextContent(
       `Pass${getFormattedCheckTime(historicalResultPass.checkedAt)}0 Incompatible fields`
     );
@@ -97,9 +92,9 @@ describe('HistoricalResultsList', () => {
       </TestExternalProviders>
     );
 
-    const accordionToggleButton = screen.getByRole('button', {
-      name: TOGGLE_HISTORICAL_RESULT_CHECKED_AT(getFormattedCheckTime(historicalResult.checkedAt)),
-    });
+    const accordionToggleButton = screen.getByTestId(
+      `historicalResultAccordionButton-${historicalResult.checkedAt}`
+    );
 
     expect(accordionToggleButton).toBeInTheDocument();
 
@@ -127,11 +122,9 @@ describe('HistoricalResultsList', () => {
         </TestExternalProviders>
       );
 
-      const accordionToggleButton = screen.getByRole('button', {
-        name: TOGGLE_HISTORICAL_RESULT_CHECKED_AT(
-          getFormattedCheckTime(historicalResult.checkedAt)
-        ),
-      });
+      const accordionToggleButton = screen.getByTestId(
+        `historicalResultAccordionButton-${historicalResult.checkedAt}`
+      );
 
       expect(accordionToggleButton).toBeInTheDocument();
 
@@ -139,15 +132,11 @@ describe('HistoricalResultsList', () => {
 
       expect(accordionToggleButton).toHaveAttribute('aria-expanded', 'true');
 
-      const accordionToggleDiv = screen.getByLabelText(
-        getAccordionToggleLabel(historicalResult.checkedAt)
-      );
-
-      expect(accordionToggleDiv).toHaveTextContent(
+      expect(accordionToggleButton).toHaveTextContent(
         `Fail${getFormattedCheckTime(historicalResult.checkedAt)}`
       );
 
-      expect(accordionToggleDiv).not.toHaveTextContent('1 Incompatible field');
+      expect(accordionToggleButton).not.toHaveTextContent('1 Incompatible field');
     });
   });
 
@@ -198,9 +187,9 @@ describe('HistoricalResultsList', () => {
       );
 
       for (const result of results) {
-        const accordionToggleButton = screen.getByRole('button', {
-          name: TOGGLE_HISTORICAL_RESULT_CHECKED_AT(getFormattedCheckTime(result.checkedAt)),
-        });
+        const accordionToggleButton = screen.getByTestId(
+          `historicalResultAccordionButton-${result.checkedAt}`
+        );
 
         expect(accordionToggleButton).toBeInTheDocument();
 
@@ -209,9 +198,7 @@ describe('HistoricalResultsList', () => {
         await act(async () => userEvent.click(accordionToggleButton));
       }
 
-      const allAccordionToggles = screen.getAllByRole('button', {
-        name: /Toggle historical result checked at/,
-      });
+      const allAccordionToggles = screen.getAllByTestId(/historicalResultAccordionButton-.*/);
 
       for (const accordionToggleButton of allAccordionToggles) {
         expect(accordionToggleButton).toHaveAttribute('aria-expanded', 'true');

@@ -166,8 +166,8 @@ export const EditPackagePolicyForm = memo<{
       let count = 0;
       for (const id of packagePolicy.policy_ids) {
         const { data } = await sendGetAgentStatus({ policyId: id });
-        if (data?.results.total) {
-          count += data.results.total;
+        if (data?.results.active) {
+          count += data.results.active;
         }
       }
       setAgentCount(count);

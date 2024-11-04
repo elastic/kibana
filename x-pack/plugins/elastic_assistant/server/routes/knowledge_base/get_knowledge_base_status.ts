@@ -48,7 +48,7 @@ export const getKnowledgeBaseStatusRoute = (router: ElasticAssistantPluginRouter
         const logger = ctx.elasticAssistant.logger;
 
         try {
-          const kbDataClient = await assistantContext.getAIAssistantKnowledgeBaseDataClient({});
+          const kbDataClient = await assistantContext.getAIAssistantKnowledgeBaseDataClient();
           if (!kbDataClient) {
             return response.custom({ body: { success: false }, statusCode: 500 });
           }
@@ -57,7 +57,7 @@ export const getKnowledgeBaseStatusRoute = (router: ElasticAssistantPluginRouter
           const pipelineExists = true; // Installed at startup, always true
           const modelExists = await kbDataClient.isModelInstalled();
           const setupAvailable = await kbDataClient.isSetupAvailable();
-          const isModelDeployed = await kbDataClient.isModelDeployed();
+          const isInferenceEndpointExists = await kbDataClient.isInferenceEndpointExists();
 
           const body: ReadKnowledgeBaseResponse = {
             elser_exists: modelExists,
@@ -67,12 +67,15 @@ export const getKnowledgeBaseStatusRoute = (router: ElasticAssistantPluginRouter
             pipeline_exists: pipelineExists,
           };
 
-          if (indexExists && isModelDeployed) {
+          if (indexExists && isInferenceEndpointExists) {
             const securityLabsExists = await kbDataClient.isSecurityLabsDocsLoaded();
+            const userDataExists = await kbDataClient.isUserDataExists();
+
             return response.ok({
               body: {
                 ...body,
                 security_labs_exists: securityLabsExists,
+                user_data_exists: userDataExists,
               },
             });
           }

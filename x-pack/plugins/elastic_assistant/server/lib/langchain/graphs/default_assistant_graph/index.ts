@@ -91,7 +91,8 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   const latestMessage = langChainMessages.slice(-1); // the last message
 
   // Check if KB is available (not feature flag related)
-  const isEnabledKnowledgeBase = (await dataClients?.kbDataClient?.isModelDeployed()) ?? false;
+  const isEnabledKnowledgeBase =
+    (await dataClients?.kbDataClient?.isInferenceEndpointExists()) ?? false;
 
   // Fetch any applicable tools that the source plugin may have registered
   const assistantToolParams: AssistantToolParams = {

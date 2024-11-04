@@ -94,15 +94,13 @@ export const postEvaluateRoute = (
 
         // Perform license, authenticated user and evaluation FF checks
         const checkResponse = performChecks({
-          authenticatedUser: true,
           capability: 'assistantModelEvaluation',
           context: ctx,
-          license: true,
           request,
           response,
         });
-        if (checkResponse) {
-          return checkResponse;
+        if (!checkResponse.isSuccess) {
+          return checkResponse.response;
         }
 
         try {
@@ -159,7 +157,7 @@ export const postEvaluateRoute = (
           const conversationsDataClient =
             (await assistantContext.getAIAssistantConversationsDataClient()) ?? undefined;
           const kbDataClient =
-            (await assistantContext.getAIAssistantKnowledgeBaseDataClient({})) ?? undefined;
+            (await assistantContext.getAIAssistantKnowledgeBaseDataClient()) ?? undefined;
           const dataClients: AssistantDataClients = {
             anonymizationFieldsDataClient,
             conversationsDataClient,
@@ -245,7 +243,7 @@ export const postEvaluateRoute = (
 
               // Check if KB is available
               const isEnabledKnowledgeBase =
-                (await dataClients.kbDataClient?.isModelDeployed()) ?? false;
+                (await dataClients.kbDataClient?.isInferenceEndpointExists()) ?? false;
 
               // Skeleton request from route to pass to the agents
               // params will be passed to the actions executor

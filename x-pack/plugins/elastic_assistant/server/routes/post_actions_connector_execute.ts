@@ -23,9 +23,10 @@ import { buildResponse } from '../lib/build_response';
 import { ElasticAssistantRequestHandlerContext, GetElser } from '../types';
 import {
   appendAssistantMessageToConversation,
-  getIsKnowledgeBaseEnabled,
+  getIsKnowledgeBaseInstalled,
   getSystemPromptFromUserConversation,
   langChainExecute,
+  performChecks,
 } from './helpers';
 import { isOpenSourceModel } from './utils';
 
@@ -64,12 +65,16 @@ export const postActionsConnectorExecuteRoute = (
         let onLlmResponse;
 
         try {
-          const authenticatedUser = assistantContext.getCurrentUser();
-          if (authenticatedUser == null) {
-            return response.unauthorized({
-              body: `Authenticated user not found`,
-            });
+          const checkResponse = performChecks({
+            context: ctx,
+            request,
+            response,
+          });
+
+          if (!checkResponse.isSuccess) {
+            return checkResponse.response;
           }
+
           let latestReplacements: Replacements = request.body.replacements;
           const onNewReplacements = (newReplacements: Replacements) => {
             latestReplacements = { ...latestReplacements, ...newReplacements };
@@ -154,15 +159,14 @@ export const postActionsConnectorExecuteRoute = (
           }
 
           const kbDataClient =
-            (await assistantContext.getAIAssistantKnowledgeBaseDataClient({})) ?? undefined;
-          const isEnabledKnowledgeBase = await getIsKnowledgeBaseEnabled(kbDataClient);
-
+            (await assistantContext.getAIAssistantKnowledgeBaseDataClient()) ?? undefined;
+          const isKnowledgeBaseInstalled = await getIsKnowledgeBaseInstalled(kbDataClient);
           telemetry.reportEvent(INVOKE_ASSISTANT_ERROR_EVENT.eventType, {
             actionTypeId: request.body.actionTypeId,
             model: request.body.model,
             errorMessage: error.message,
             assistantStreamingEnabled: request.body.subAction !== 'invokeAI',
-            isEnabledKnowledgeBase,
+            isEnabledKnowledgeBase: isKnowledgeBaseInstalled,
           });
 
           return resp.error({
