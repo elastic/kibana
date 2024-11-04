@@ -230,6 +230,7 @@ export interface LayerTypeToLayer {
   [layerTypes.DATA]: (layer: XYDataLayerConfig) => XYDataLayerConfig;
   [layerTypes.REFERENCELINE]: (layer: XYReferenceLineLayerConfig) => XYReferenceLineLayerConfig;
   [layerTypes.ANNOTATIONS]: (layer: XYAnnotationLayerConfig) => XYAnnotationLayerConfig;
+  [layerTypes.ESQL]: (layer: XYDataLayerConfig) => XYDataLayerConfig;
 }
 
 export const getLayerTypeOptions = (layer: XYLayerConfig, options: LayerTypeToLayer) => {
@@ -374,6 +375,18 @@ function getMessageIdsForDimension(
 
 const newLayerFn = {
   [layerTypes.DATA]: ({
+    layerId,
+    seriesType,
+  }: {
+    layerId: string;
+    seriesType: SeriesType;
+  }): XYDataLayerConfig => ({
+    layerId,
+    layerType: layerTypes.DATA,
+    accessors: [],
+    seriesType,
+  }),
+  [layerTypes.ESQL]: ({
     layerId,
     seriesType,
   }: {
