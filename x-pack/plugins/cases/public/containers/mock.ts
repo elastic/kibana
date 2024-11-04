@@ -16,6 +16,7 @@ import type {
   Cases,
   CaseConnector,
   Attachment,
+  ObservableType,
 } from '../../common/types/domain';
 import {
   CaseSeverity,
@@ -1259,5 +1260,16 @@ export const templatesConfigurationMock: CasesConfigurationUITemplate[] = [
         fields: { issueType: 'Task', priority: 'Low', parent: null },
       },
     },
+  },
+];
+
+export const observableTypesMock: ObservableType[] = [
+  {
+    label: 'test_observable_type_1',
+    key: '26f3f226-6611-4371-9242-c959b37c7af6',
+  },
+  {
+    label: 'test_observable_type_2',
+    key: '67ec9e77-f64c-47d9-900c-1142239e0d25',
   },
 ];
