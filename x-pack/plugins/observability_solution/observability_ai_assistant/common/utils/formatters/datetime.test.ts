@@ -20,26 +20,27 @@ describe('date time formatters', () => {
 
     it('should add a leading plus for timezones with positive UTC offset', () => {
       moment.tz.setDefault('Europe/Copenhagen');
-      expect(asAbsoluteDateTime(1728000000000, 'minutes')).toBe('Oct 5, 2024, 14:00 (UTC+2)');
+      expect(asAbsoluteDateTime(1559390400000, 'minutes')).toBe('Jun 1, 2019, 14:00 (UTC+2)');
     });
 
     it('should add a leading minus for timezones with negative UTC offset', () => {
       moment.tz.setDefault('America/Los_Angeles');
-      expect(asAbsoluteDateTime(1728000000000, 'minutes')).toBe('Oct 5, 2024, 05:00 (UTC-7)');
+      expect(asAbsoluteDateTime(1559390400000, 'minutes')).toBe('Jun 1, 2019, 05:00 (UTC-7)');
     });
 
     it('should use default UTC offset formatting when offset contains minutes', () => {
       moment.tz.setDefault('Canada/Newfoundland');
-      expect(asAbsoluteDateTime(1728000000000, 'minutes')).toBe('Oct 5, 2024, 09:30 (UTC-02:30)');
+      expect(asAbsoluteDateTime(1559390400000, 'minutes')).toBe('Jun 1, 2019, 09:30 (UTC-02:30)');
     });
 
     it('should respect DST', () => {
       moment.tz.setDefault('Europe/Copenhagen');
-      const timeWithDST = 1728000000000; // Oct 5, 2024
-      const timeWithoutDST = 1733030400000; // Oct 31, 2024
+      const timeWithDST = 1559390400000; //  Jun 1, 2019
+      const timeWithoutDST = 1575201600000; //  Dec 1, 2019
 
-      expect(asAbsoluteDateTime(timeWithDST)).toBe('Oct 5, 2024, 14:00:00.000 (UTC+2)');
-      expect(asAbsoluteDateTime(timeWithoutDST)).toBe('Oct 31, 2024, 14:00:00.000 (UTC+1)');
+      expect(asAbsoluteDateTime(timeWithDST)).toBe('Jun 1, 2019, 14:00:00.000 (UTC+2)');
+
+      expect(asAbsoluteDateTime(timeWithoutDST)).toBe('Dec 1, 2019, 13:00:00.000 (UTC+1)');
     });
   });
 });

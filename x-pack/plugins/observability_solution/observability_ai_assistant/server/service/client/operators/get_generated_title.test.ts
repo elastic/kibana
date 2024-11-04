@@ -14,6 +14,7 @@ import {
 import { ChatEvent } from '../../../../common/conversation_complete';
 import { LangTracer } from '../instrumentation/lang_tracer';
 import { TITLE_CONVERSATION_FUNCTION_NAME, getGeneratedTitle } from './get_generated_title';
+import * as dateTimeUtils from '../../../../common/utils/formatters/datetime';
 
 describe('getGeneratedTitle', () => {
   const messages: Message[] = [
@@ -75,6 +76,28 @@ describe('getGeneratedTitle', () => {
     );
 
     expect(title).toEqual('My title');
+  });
+
+  it('appends timestamp when isPublic is true', async () => {
+    jest.spyOn(dateTimeUtils, 'asAbsoluteDateTime').mockReturnValue('Oct 10, 2024, 14:00 (UTC-4)');
+
+    const { title$ } = callGenerateTitle({ isPublic: true }, [
+      createChatCompletionChunk({
+        function_call: {
+          name: 'title_conversation',
+          arguments: JSON.stringify({ title: 'My title' }),
+        },
+      }),
+    ]);
+
+    const title = await lastValueFrom(
+      title$.pipe(filter((event): event is string => typeof event === 'string'))
+    );
+
+    expect(title).toEqual('My title - Oct 10, 2024, 14:00 (UTC-4)');
+
+    // Restore original implementation of asAbsoluteDateTime
+    jest.restoreAllMocks();
   });
 
   it('calls chat with the user message', async () => {
