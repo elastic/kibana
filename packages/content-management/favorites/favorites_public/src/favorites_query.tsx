@@ -11,8 +11,9 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 
-import { useFavoritesClient, useFavoritesContext } from './favorites_context';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
+
+import { useFavoritesClient, useFavoritesContext } from './favorites_context';
 
 const favoritesKeys = {
   all: ['favorites'] as const,
