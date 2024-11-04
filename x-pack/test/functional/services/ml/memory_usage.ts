@@ -8,6 +8,9 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
+type NodeExpandedRowTab = 'mlNodesOverviewPanelMemoryTab' | 'mlNodesOverviewPanelDetailsTab';
+type PageTab = 'memory-usage' | 'nodes';
+
 export function MachineLearningMemoryUsageProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const comboBox = getService('comboBox');
@@ -22,7 +25,7 @@ export function MachineLearningMemoryUsageProvider({ getService }: FtrProviderCo
       await testSubjects.existOrFail(`mlNodesOverviewPanel ${tabName}Tab`);
     },
 
-    async selectTab(tabName: string) {
+    async selectTab(tabName: PageTab) {
       await testSubjects.click(`mlMemoryUsageTab-${tabName}`);
     },
 
@@ -79,7 +82,7 @@ export function MachineLearningMemoryUsageProvider({ getService }: FtrProviderCo
       await testSubjects.setValue('mlNodesTableSearchInput', nodeId);
     },
 
-    async selectNodeExpandedRowTab(tabName: string) {
+    async selectNodeExpandedRowTab(tabName: NodeExpandedRowTab) {
       await testSubjects.click(tabName);
     },
 
