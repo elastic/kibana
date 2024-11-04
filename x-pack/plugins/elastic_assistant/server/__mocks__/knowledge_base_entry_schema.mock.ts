@@ -49,6 +49,7 @@ export const documentEntry: EsKnowledgeBaseEntrySchema = {
   updated_by: 'my_profile_uid',
   name: 'test',
   namespace: 'default',
+  semantic_text: 'test',
   type: 'document',
   kb_resource: 'test',
   required: true,
