@@ -480,6 +480,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       user?: AuthenticatedUser;
       bumpRevision?: boolean;
       force?: true;
+      asyncDeploy?: boolean;
     }
   ): Promise<{
     created: PackagePolicy[];
@@ -665,6 +666,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       for (const agentPolicyId of agentPolicyIds) {
         await agentPolicyService.bumpRevision(soClient, esClient, agentPolicyId, {
           user: options?.user,
+          asyncDeploy: options?.asyncDeploy,
         });
       }
     }
@@ -1176,7 +1178,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     packagePolicyUpdates: Array<NewPackagePolicy & { version?: string; id: string }>,
-    options?: { user?: AuthenticatedUser; force?: boolean }
+    options?: { user?: AuthenticatedUser; force?: boolean; asyncDeploy?: boolean }
   ): Promise<{
     updatedPolicies: PackagePolicy[] | null;
     failedPolicies: Array<{
@@ -1347,6 +1349,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       await agentPolicyService.bumpRevision(soClient, esClient, agentPolicyId, {
         user: options?.user,
         removeProtection,
+        asyncDeploy: options?.asyncDeploy,
       });
     });
 
@@ -2368,6 +2371,7 @@ class PackagePolicyClientWithAuthz extends PackagePolicyClientImpl {
           user?: AuthenticatedUser | undefined;
           bumpRevision?: boolean | undefined;
           force?: true | undefined;
+          asyncDeploy?: boolean;
         }
       | undefined
   ): Promise<{
