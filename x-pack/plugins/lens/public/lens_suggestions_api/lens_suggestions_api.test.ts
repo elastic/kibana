@@ -391,11 +391,15 @@ describe('suggestionsApi', () => {
     expect(suggestions?.length).toEqual(1);
     expect(suggestions?.[0]).toMatchInlineSnapshot(`
       Object {
+        "changeType": "unchanged",
+        "columns": 0,
         "datasourceId": "textBased",
         "datasourceState": Object {
           "layers": Object {},
         },
         "keptLayerIds": Array [],
+        "previewIcon": "empty",
+        "score": 0.8,
         "title": undefined,
         "visualizationId": "lnsXY",
         "visualizationState": Object {
