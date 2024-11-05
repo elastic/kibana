@@ -480,6 +480,11 @@ NOTE: By default, enabling `http2` requires a valid `h2c` configuration, meaning
 and <<server-ssl-supportedProtocols, `server.ssl.supportedProtocols`>>, if specified, must contain at least `TLSv1.2` or `TLSv1.3`. Strict validation of
 the `h2c` setup can be disabled by adding `server.http2.allowUnsecure: true` to the configuration.
 
+`server.rateLimiter.elu`::
+Enables rate-limiting of requests to the {kib} server based on Node.js' Event Loop Utilization.
+If the average event loop utilization for the last 60, 30, and 15 seconds exceeds the configured threshold, the server will respond with a `429 Too Many Requests` status code.
+*Default: `false`*
+
 [[server-requestId-allowFromAnyIp]] `server.requestId.allowFromAnyIp`::
 Sets whether or not the `X-Opaque-Id` header should be trusted from any IP address for identifying requests in logs and forwarded to Elasticsearch.
 
