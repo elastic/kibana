@@ -109,7 +109,6 @@ export function initializeEditApi(
   };
 
   const openInlineEditor = prepareInlineEditPanel(
-    initialState,
     getState,
     updateState,
     internalApi,

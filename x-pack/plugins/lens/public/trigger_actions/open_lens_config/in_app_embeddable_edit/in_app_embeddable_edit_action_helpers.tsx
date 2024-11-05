@@ -59,7 +59,6 @@ export async function executeEditEmbeddableAction({
     canBeCreatedInline: false, // this is the edit action
   });
   const openInlineEditor = prepareInlineEditPanel(
-    { attributes },
     () => ({ attributes }),
     (newState: LensRuntimeState) =>
       onUpdate(newState.attributes as TypedLensByValueInput['attributes']),
