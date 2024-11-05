@@ -24,7 +24,6 @@ import {
   getCommandOption,
   getFunctionDefinition,
   getLastNonWhitespaceChar,
-  isArrayType,
   isAssignment,
   isAssignmentComplete,
   isColumnItem,
@@ -59,7 +58,6 @@ import {
   getAssignmentDefinitionCompletitionItem,
   getCommandAutocompleteDefinitions,
   getNextTokenForNot,
-  listCompleteItem,
   pipeCompleteItem,
   semiColonCompleteItem,
 } from './complete_items';
@@ -93,10 +91,8 @@ import {
 import { ESQLCallbacks, ESQLSourceResult } from '../shared/types';
 import {
   getFunctionsToIgnoreForStats,
-  getOverlapRange,
   getQueryForFields,
   getSourcesFromCommands,
-  getSupportedTypesForBinaryOperators,
   isAggFunctionUsedAlready,
   removeQuoteForSuggestedSources,
   getValidSignaturesAndTypesToSuggestNext,
@@ -104,8 +100,10 @@ import {
   getFieldsOrFunctionsSuggestions,
   pushItUpInTheList,
   extractTypeFromASTArg,
+  getSuggestionsToRightOfOperatorExpression,
+  checkFunctionInvocationComplete,
 } from './helper';
-import { FunctionParameter, isParameterType, isReturnType } from '../definitions/types';
+import { FunctionParameter, isParameterType } from '../definitions/types';
 import { metadataOption } from '../definitions/options';
 import { comparisonFunctions } from '../definitions/builtin';
 import { getRecommendedQueriesSuggestions } from './recommended_queries/suggestions';
@@ -332,39 +330,16 @@ function areCurrentArgsValid(
   references: Pick<ReferenceMaps, 'fields' | 'variables'>
 ) {
   // unfortunately here we need to bake some command-specific logic
-  if (command.name === 'stats') {
-    if (node) {
-      // consider the following expressions not complete yet
-      // ... | stats a
-      // ... | stats a =
-      if (isColumnItem(node) || (isAssignment(node) && !isAssignmentComplete(node))) {
-        return false;
-      }
-    }
-  }
   if (command.name === 'eval') {
     if (node) {
       if (isFunctionItem(node)) {
         if (isAssignment(node)) {
           return isAssignmentComplete(node);
         } else {
-          return isFunctionArgComplete(node, references).complete;
+          return checkFunctionInvocationComplete(node, (expression) =>
+            getExpressionType(expression, references.fields, references.variables)
+          ).complete;
         }
-      }
-    }
-  }
-  if (command.name === 'where') {
-    if (node) {
-      if (
-        isColumnItem(node) ||
-        (isFunctionItem(node) && !isFunctionArgComplete(node, references).complete)
-      ) {
-        return false;
-      } else {
-        return (
-          extractTypeFromASTArg(node, references) ===
-          getCommandDefinition(command.name).signature.params[0].type
-        );
       }
     }
   }
@@ -376,45 +351,6 @@ function areCurrentArgsValid(
     }
   }
   return true;
-}
-
-// @TODO: refactor this to be shared with validation
-function isFunctionArgComplete(
-  arg: ESQLFunction,
-  references: Pick<ReferenceMaps, 'fields' | 'variables'>
-) {
-  const fnDefinition = getFunctionDefinition(arg.name);
-  if (!fnDefinition) {
-    return { complete: false };
-  }
-  const cleanedArgs = removeMarkerArgFromArgsList(arg)!.args;
-  const argLengthCheck = fnDefinition.signatures.some((def) => {
-    if (def.minParams && cleanedArgs.length >= def.minParams) {
-      return true;
-    }
-    if (cleanedArgs.length === def.params.length) {
-      return true;
-    }
-    return cleanedArgs.length >= def.params.filter(({ optional }) => !optional).length;
-  });
-  if (!argLengthCheck) {
-    return { complete: false, reason: 'fewArgs' };
-  }
-  if (fnDefinition.name === 'in' && Array.isArray(arg.args[1]) && !arg.args[1].length) {
-    return { complete: false, reason: 'fewArgs' };
-  }
-  const hasCorrectTypes = fnDefinition.signatures.some((def) => {
-    return arg.args.every((a, index) => {
-      return (
-        (fnDefinition.name.endsWith('null') && def.params[index].type === 'any') ||
-        def.params[index].type === extractTypeFromASTArg(a, references)
-      );
-    });
-  });
-  if (!hasCorrectTypes) {
-    return { complete: false, reason: 'wrongTypes' };
-  }
-  return { complete: true };
 }
 
 function extractArgMeta(
@@ -796,16 +732,14 @@ async function getExpressionSuggestionsByType(
                 ))
               );
             } else {
-              const nodeArgType = extractTypeFromASTArg(nodeArg, references);
               suggestions.push(
-                ...(await getBuiltinFunctionNextArgument(
+                ...(await getSuggestionsToRightOfOperatorExpression(
                   innerText,
-                  command,
-                  option,
-                  argDef,
+                  command.name,
+                  option?.name,
                   nodeArg,
-                  (nodeArgType as string) || 'any',
-                  references,
+                  (expression) =>
+                    getExpressionType(expression, references.fields, references.variables),
                   getFieldsByType
                 ))
               );
@@ -894,14 +828,13 @@ async function getExpressionSuggestionsByType(
                 );
               } else {
                 suggestions.push(
-                  ...(await getBuiltinFunctionNextArgument(
+                  ...(await getSuggestionsToRightOfOperatorExpression(
                     innerText,
-                    command,
-                    option,
-                    argDef,
+                    command.name,
+                    option?.name,
                     nodeArg,
-                    nodeArgType as string,
-                    references,
+                    (expression) =>
+                      getExpressionType(expression, references.fields, references.variables),
                     getFieldsByType
                   ))
                 );
@@ -1064,108 +997,6 @@ async function getExpressionSuggestionsByType(
   // Due to some logic overlapping functions can be repeated
   // so dedupe here based on text string (it can differ from name)
   return uniqBy(suggestions, (suggestion) => suggestion.text);
-}
-
-async function getBuiltinFunctionNextArgument(
-  queryText: string,
-  command: ESQLCommand,
-  option: ESQLCommandOption | undefined,
-  argDef: { type: string },
-  nodeArg: ESQLFunction,
-  nodeArgType: string,
-  references: Pick<ReferenceMaps, 'fields' | 'variables'>,
-  getFieldsByType: GetColumnsByTypeFn
-) {
-  const suggestions = [];
-  const isFnComplete = isFunctionArgComplete(nodeArg, references);
-
-  if (isFnComplete.complete) {
-    // i.e. ... | <COMMAND> field > 0 <suggest>
-    // i.e. ... | <COMMAND> field + otherN <suggest>
-    suggestions.push(
-      ...getOperatorSuggestions({
-        command: command.name,
-        option: option?.name,
-        leftParamType: isParameterType(nodeArgType) ? nodeArgType : 'any',
-        ignored: workoutBuiltinOptions(nodeArg, references).ignored,
-      })
-    );
-  } else {
-    // i.e. ... | <COMMAND> field >= <suggest>
-    // i.e. ... | <COMMAND> field + <suggest>
-    // i.e. ... | <COMMAND> field and <suggest>
-
-    // Because it's an incomplete function, need to extract the type of the current argument
-    // and suggest the next argument based on types
-
-    // pick the last arg and check its type to verify whether is incomplete for the given function
-    const cleanedArgs = removeMarkerArgFromArgsList(nodeArg)!.args;
-    const nestedType = extractTypeFromASTArg(nodeArg.args[cleanedArgs.length - 1], references);
-
-    if (isFnComplete.reason === 'fewArgs') {
-      const fnDef = getFunctionDefinition(nodeArg.name);
-      if (
-        fnDef?.signatures.every(({ params }) =>
-          params.some(({ type }) => isArrayType(type as string))
-        )
-      ) {
-        suggestions.push(listCompleteItem);
-      } else {
-        const finalType = nestedType || nodeArgType || 'any';
-        const supportedTypes = getSupportedTypesForBinaryOperators(fnDef, finalType as string);
-
-        suggestions.push(
-          ...(await getFieldsOrFunctionsSuggestions(
-            // this is a special case with AND/OR
-            // <COMMAND> expression AND/OR <suggest>
-            // technically another boolean value should be suggested, but it is a better experience
-            // to actually suggest a wider set of fields/functions
-            finalType === 'boolean' && getFunctionDefinition(nodeArg.name)?.type === 'builtin'
-              ? ['any']
-              : (supportedTypes as string[]),
-            command.name,
-            option?.name,
-            getFieldsByType,
-            {
-              functions: true,
-              fields: true,
-              variables: references.variables,
-            }
-          ))
-        );
-      }
-    }
-    if (isFnComplete.reason === 'wrongTypes') {
-      if (nestedType) {
-        // suggest something to complete the builtin function
-        if (
-          nestedType !== argDef.type &&
-          isParameterType(nestedType) &&
-          isReturnType(argDef.type)
-        ) {
-          suggestions.push(
-            ...getOperatorSuggestions({
-              command: command.name,
-              leftParamType: nestedType,
-              returnTypes: [argDef.type],
-              ignored: workoutBuiltinOptions(nodeArg, references).ignored,
-            })
-          );
-        }
-      }
-    }
-  }
-  return suggestions.map<SuggestionRawDefinition>((s) => {
-    const overlap = getOverlapRange(queryText, s.text);
-    const offset = overlap.start === overlap.end ? 1 : 0;
-    return {
-      ...s,
-      rangeToReplace: {
-        start: overlap.start + offset,
-        end: overlap.end + offset,
-      },
-    };
-  });
 }
 
 const addCommaIf = (condition: boolean, text: string) => (condition ? `${text},` : text);

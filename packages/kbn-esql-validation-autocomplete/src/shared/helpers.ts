@@ -615,6 +615,10 @@ export function findPreviousWord(text: string) {
   return words[words.length - 2];
 }
 
+export function endsInWhitespace(text: string) {
+  return /\s$/.test(text);
+}
+
 /**
  * Returns the word at the end of the text if there is one.
  * @param text
@@ -860,7 +864,8 @@ export function getExpressionType(
         const param = getParamAtPosition(signature, i);
         return (
           param &&
-          (param.type === argType ||
+          (param.type === 'any' ||
+            param.type === argType ||
             (argType === 'keyword' && ['date', 'date_period'].includes(param.type)))
         );
       });

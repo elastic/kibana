@@ -9,7 +9,7 @@
 
 import type { ESQLAstItem, ESQLCommand } from '@kbn/esql-ast';
 import type { SupportedDataType } from '../../../definitions/types';
-import { isColumnItem } from '../../../shared/helpers';
+import { endsInWhitespace, isColumnItem } from '../../../shared/helpers';
 import type { GetColumnsByTypeFn, SuggestionRawDefinition } from '../../types';
 import { getFunctionSuggestions, getOperatorSuggestions } from '../../factories';
 
@@ -23,12 +23,11 @@ export async function suggest(
   _getPreferences?: () => Promise<{ histogramBarTarget: number } | undefined>
 ): Promise<SuggestionRawDefinition[]> {
   const lastArg = command.args[command.args.length - 1];
-  if (isColumnItem(lastArg) && innerText.trimEnd().length !== innerText.length) {
+  if (isColumnItem(lastArg) && endsInWhitespace(innerText)) {
     const columnType = getExpressionType(lastArg);
     if (columnType === 'unknown' || columnType === 'unsupported') {
       return [];
     }
-
     // skip assign operator if the column exists so as not to promote shadowing
     const ignoredOperators = columnExists(lastArg.parts.join('.')) ? ['='] : [];
 
