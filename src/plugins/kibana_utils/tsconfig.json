@@ -23,6 +23,7 @@
     "@kbn/core-notifications-browser-mocks",
     "@kbn/react-kibana-context-theme",
     "@kbn/core-theme-browser",
+    "@kbn/core-ui-settings-common",
   ],
   "exclude": [
     "target/**/*",

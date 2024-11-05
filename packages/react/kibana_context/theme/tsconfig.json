@@ -19,5 +19,6 @@
     "@kbn/test-jest-helpers",
     "@kbn/react-kibana-context-common",
     "@kbn/react-kibana-context-root",
+    "@kbn/core-ui-settings-common",
   ]
 }

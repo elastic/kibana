@@ -40,5 +40,6 @@
     "@kbn/core-notifications-browser",
     "@kbn/core-capabilities-browser-mocks",
     "@kbn/sort-predicates",
+    "@kbn/core-ui-settings-common",
   ]
 }

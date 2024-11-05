@@ -22,6 +22,7 @@
     "@kbn/core-i18n-browser",
     "@kbn/react-kibana-context-root",
     "@kbn/core-analytics-browser",
+    "@kbn/core-ui-settings-common",
   ],
   "exclude": [
     "target/**/*",

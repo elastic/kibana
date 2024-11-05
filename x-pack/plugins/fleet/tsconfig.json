@@ -116,5 +116,6 @@
     "@kbn/server-http-tools",
     "@kbn/avc-banner",
     "@kbn/zod",
+    "@kbn/core-ui-settings-common",
   ]
 }
