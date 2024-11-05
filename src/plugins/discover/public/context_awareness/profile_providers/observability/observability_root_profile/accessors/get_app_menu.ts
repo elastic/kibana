@@ -17,11 +17,11 @@ import {
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { isOfQueryType } from '@kbn/es-query';
 import { AppMenuExtensionParams } from '../../../..';
-import type { DataSourceProfileProvider } from '../../../../profiles';
+import type { RootProfileProvider } from '../../../../profiles';
 import { ProfileProviderServices } from '../../../profile_provider_services';
 
 export const createGetAppMenu =
-  (services: ProfileProviderServices): DataSourceProfileProvider['profile']['getAppMenu'] =>
+  (services: ProfileProviderServices): RootProfileProvider['profile']['getAppMenu'] =>
   (prev) =>
   (params) => {
     const prevValue = prev(params);

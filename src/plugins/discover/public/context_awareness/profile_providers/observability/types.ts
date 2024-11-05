@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { getRowIndicatorProvider } from './get_row_indicator_provider';
-export { createGetDefaultAppState } from './get_default_app_state';
-export { getCellRenderers } from './get_cell_renderers';
-export { getRowAdditionalLeadingControls } from './get_row_additional_leading_controls';
+import { ProfileProviderServices } from '../profile_provider_services';
+
+export type SecurityProfileProviderFactory<T> = (services: ProfileProviderServices) => T;
