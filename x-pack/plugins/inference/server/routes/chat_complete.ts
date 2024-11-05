@@ -5,8 +5,14 @@
  * 2.0.
  */
 
-import { schema, Type } from '@kbn/config-schema';
-import type { CoreSetup, IRouter, Logger, RequestHandlerContext } from '@kbn/core/server';
+import { schema, Type, TypeOf } from '@kbn/config-schema';
+import type {
+  CoreSetup,
+  IRouter,
+  Logger,
+  RequestHandlerContext,
+  KibanaRequest,
+} from '@kbn/core/server';
 import { MessageRole, ToolCall, ToolChoiceType } from '@kbn/inference-common';
 import type { ChatCompleteRequestBody } from '../../common/http_apis';
 import { createInferenceClient } from '../inference_client';
@@ -84,6 +90,32 @@ export function registerChatCompleteRoute({
   router: IRouter<RequestHandlerContext>;
   logger: Logger;
 }) {
+  async function callChatComplete<T extends boolean>({
+    request,
+    stream,
+  }: {
+    request: KibanaRequest<unknown, unknown, TypeOf<typeof chatCompleteBodySchema>>;
+    stream: T;
+  }) {
+    const actions = await coreSetup
+      .getStartServices()
+      .then(([coreStart, pluginsStart]) => pluginsStart.actions);
+
+    const client = createInferenceClient({ request, actions, logger });
+
+    const { connectorId, messages, system, toolChoice, tools, functionCalling } = request.body;
+
+    return client.chatComplete({
+      connectorId,
+      messages,
+      system,
+      toolChoice,
+      tools,
+      functionCalling,
+      stream,
+    });
+  }
+
   router.post(
     {
       path: '/internal/inference/chat_complete',
@@ -92,23 +124,22 @@ export function registerChatCompleteRoute({
       },
     },
     async (context, request, response) => {
-      const actions = await coreSetup
-        .getStartServices()
-        .then(([coreStart, pluginsStart]) => pluginsStart.actions);
-
-      const client = createInferenceClient({ request, actions, logger });
-
-      const { connectorId, messages, system, toolChoice, tools, functionCalling } = request.body;
-
-      const chatCompleteResponse = client.chatComplete({
-        connectorId,
-        messages,
-        system,
-        toolChoice,
-        tools,
-        functionCalling,
+      const chatCompleteResponse = await callChatComplete({ request, stream: false });
+      return response.ok({
+        body: chatCompleteResponse,
       });
+    }
+  );
 
+  router.post(
+    {
+      path: '/internal/inference/chat_complete/stream',
+      validate: {
+        body: chatCompleteBodySchema,
+      },
+    },
+    async (context, request, response) => {
+      const chatCompleteResponse = await callChatComplete({ request, stream: true });
       return response.ok({
         body: observableIntoEventSourceStream(chatCompleteResponse, logger),
       });

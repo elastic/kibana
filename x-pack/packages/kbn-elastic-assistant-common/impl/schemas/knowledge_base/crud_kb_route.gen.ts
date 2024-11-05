@@ -15,6 +15,7 @@
  */
 
 import { z } from '@kbn/zod';
+import { BooleanFromString } from '@kbn/zod-helpers';
 
 /**
  * AI assistant KnowledgeBase.
@@ -33,6 +34,10 @@ export const CreateKnowledgeBaseRequestQuery = z.object({
    * Optional ELSER modelId to use when setting up the Knowledge Base
    */
   modelId: z.string().optional(),
+  /**
+   * Indicates whether we should or should not install Security Labs docs when setting up the Knowledge Base
+   */
+  ignoreSecurityLabs: BooleanFromString.optional().default(false),
 });
 export type CreateKnowledgeBaseRequestQueryInput = z.input<typeof CreateKnowledgeBaseRequestQuery>;
 
