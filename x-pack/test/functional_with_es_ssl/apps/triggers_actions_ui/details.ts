@@ -23,7 +23,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const retry = getService('retry');
   const find = getService('find');
   const supertest = getService('supertest');
-  const comboBox = getService('comboBox');
   const objectRemover = new ObjectRemover(supertest);
   const toasts = getService('toasts');
 
