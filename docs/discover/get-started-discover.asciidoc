@@ -62,7 +62,7 @@ In this example, we've entered `ma` in the search field to find the `manufacture
 [role="screenshot"]
 image:images/discover-sidebar-available-fields.png[Fields list that displays the top five search results, width=40%]
 +
-TIP: You can use wildcards in field searches.  For example, `goe*dest` finds `geo.dest` and `geo.src.dest`.
+TIP: You can use wildcards in field searches.  For example, `geo*dest` finds `geo.dest` and `geo.src.dest`.
 
 . Select a field to view its most frequent values.
 +
