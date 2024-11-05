@@ -50,22 +50,23 @@ export function createObservabilityAIAssistantAPIConfig({
   const apmSynthtraceKibanaClient = services.apmSynthtraceKibanaClient();
   const allConfigs = config.getAll() as Record<string, any>;
 
+  const getScopedApiClientForUsername = (username: string) =>
+    getScopedApiClient(kibanaServer, username);
+
   return {
     ...allConfigs,
     servers,
     services: {
       ...services,
-      getScopedApiClientForUsername: () => {
-        return (username: string) => getScopedApiClient(kibanaServer, username);
-      },
+      getScopedApiClientForUsername: () => getScopedApiClientForUsername,
       apmSynthtraceEsClient: (context: InheritedFtrProviderContext) =>
         getApmSynthtraceEsClient(context, apmSynthtraceKibanaClient),
       observabilityAIAssistantAPIClient: async () => {
         return {
-          admin: getScopedApiClient(kibanaServer, 'elastic'),
-          viewer: getScopedApiClient(kibanaServer, viewer.username),
-          editor: getScopedApiClient(kibanaServer, editor.username),
-          secondaryEditor: getScopedApiClient(kibanaServer, secondaryEditor.username),
+          admin: getScopedApiClientForUsername('elastic'),
+          viewer: getScopedApiClientForUsername(viewer.username),
+          editor: getScopedApiClientForUsername(editor.username),
+          secondaryEditor: getScopedApiClientForUsername(secondaryEditor.username),
         };
       },
     },

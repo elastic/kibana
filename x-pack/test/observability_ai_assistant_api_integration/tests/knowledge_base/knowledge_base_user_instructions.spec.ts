@@ -20,7 +20,6 @@ import {
 import { getConversationCreatedEvent } from '../conversations/helpers';
 import { LlmProxy, createLlmProxy } from '../../common/create_llm_proxy';
 import { createProxyActionConnector, deleteActionConnector } from '../../common/action_connectors';
-import { ObservabilityAIAssistantApiClients } from '../../common/config';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantAPIClient');
@@ -59,11 +58,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             isPublic: false,
           },
           {
-            username: 'secondaryEditor' as const,
+            username: 'secondary_editor' as const,
             isPublic: true,
           },
           {
-            username: 'secondaryEditor' as const,
+            username: 'secondary_editor' as const,
             isPublic: false,
           },
         ].map(async ({ username, isPublic }) => {
@@ -106,9 +105,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               text: 'Public user instruction from "editor"',
             },
             {
-              id: 'public-doc-from-secondaryEditor',
+              id: 'public-doc-from-secondary_editor',
               public: true,
-              text: 'Public user instruction from "secondaryEditor"',
+              text: 'Public user instruction from "secondary_editor"',
             },
           ])
         );
@@ -130,14 +129,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               text: 'Public user instruction from "editor"',
             },
             {
-              id: 'public-doc-from-secondaryEditor',
+              id: 'public-doc-from-secondary_editor',
               public: true,
-              text: 'Public user instruction from "secondaryEditor"',
+              text: 'Public user instruction from "secondary_editor"',
             },
             {
-              id: 'private-doc-from-secondaryEditor',
+              id: 'private-doc-from-secondary_editor',
               public: false,
-              text: 'Private user instruction from "secondaryEditor"',
+              text: 'Private user instruction from "secondary_editor"',
             },
           ])
         );
@@ -198,7 +197,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       const userInstructionText =
         'Be polite and use language that is easy to understand. Never disagree with the user.';
 
-      async function getConversationForUser(username: keyof ObservabilityAIAssistantApiClients) {
+      async function getConversationForUser(username: string) {
         const apiClient = getScopedApiClientForUsername(username);
 
         // the user instruction is always created by "editor" user
