@@ -35,6 +35,10 @@ interface VulnerabilitiesInsightProps {
    * The data-test-subj to use for the component
    */
   ['data-test-subj']?: string;
+  /**
+   * used to track the instance of this component, prefer kebab-case
+   */
+  telemetrySuffix?: string;
 }
 
 /*
@@ -44,6 +48,7 @@ export const VulnerabilitiesInsight: React.FC<VulnerabilitiesInsightProps> = ({
   hostName,
   direction,
   'data-test-subj': dataTestSubj,
+  telemetrySuffix,
 }) => {
   const { scopeId, isPreview } = useDocumentDetailsContext();
   const { euiTheme } = useEuiTheme();
@@ -57,7 +62,7 @@ export const VulnerabilitiesInsight: React.FC<VulnerabilitiesInsightProps> = ({
   useEffect(() => {
     uiMetricService.trackUiMetric(
       METRIC_TYPE.COUNT,
-      `${VULNERABILITIES_INSIGHT} instance id: ${dataTestSubj}`
+      `${VULNERABILITIES_INSIGHT}-${telemetrySuffix}`
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

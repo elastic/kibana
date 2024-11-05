@@ -39,6 +39,10 @@ interface MisconfigurationsInsightProps {
    * The data-test-subj to use for the component
    */
   ['data-test-subj']?: string;
+  /**
+   * used to track the instance of this component, prefer kebab-case
+   */
+  telemetrySuffix?: string;
 }
 
 /*
@@ -49,6 +53,7 @@ export const MisconfigurationsInsight: React.FC<MisconfigurationsInsightProps> =
   fieldName,
   direction,
   'data-test-subj': dataTestSubj,
+  telemetrySuffix,
 }) => {
   const { scopeId, isPreview } = useDocumentDetailsContext();
   const { euiTheme } = useEuiTheme();
@@ -62,7 +67,7 @@ export const MisconfigurationsInsight: React.FC<MisconfigurationsInsightProps> =
   useEffect(() => {
     uiMetricService.trackUiMetric(
       METRIC_TYPE.COUNT,
-      `${MISCONFIGURATION_INSIGHT} instance id: ${dataTestSubj}`
+      `${MISCONFIGURATION_INSIGHT}-${telemetrySuffix}`
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
