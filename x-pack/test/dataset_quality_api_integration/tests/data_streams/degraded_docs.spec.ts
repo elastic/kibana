@@ -7,10 +7,11 @@
 
 import { log, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
-import { DatasetQualityApiError } from '../../common/dataset_quality_api_supertest';
-import { expectToReject } from '../../utils';
+import rison from '@kbn/rison';
 import { DatasetQualityApiClientKey } from '../../common/config';
+import { DatasetQualityApiError } from '../../common/dataset_quality_api_supertest';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { expectToReject } from '../../utils';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
@@ -24,7 +25,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       endpoint: 'GET /internal/dataset_quality/data_streams/degraded_docs',
       params: {
         query: {
-          type: 'logs',
+          types: rison.encodeArray(['logs']),
           start,
           end,
         },
@@ -81,19 +82,16 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           (acc, curr) => ({
             ...acc,
             [curr.dataset]: {
-              percentage: curr.percentage,
               count: curr.count,
             },
           }),
-          {} as Record<string, { percentage: number; count: number }>
+          {} as Record<string, { count: number }>
         );
 
         expect(degradedDocsStats['logs-synth.1-default']).to.eql({
-          percentage: 0,
           count: 0,
         });
         expect(degradedDocsStats['logs-synth.2-default']).to.eql({
-          percentage: 100,
           count: 1,
         });
       });
