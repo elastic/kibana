@@ -9,9 +9,7 @@ import expect from '@kbn/expect';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
-  const registry = getService('registry');
   const apmApiClient = getService('apmApi');
-
   const nodeAgentName = 'nodejs';
   const unlistedAgentName = 'unlistedAgent';
 
@@ -21,7 +19,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     });
   }
 
-  registry.when('Agent latest versions when configuration is defined', () => {
+  describe('Agent latest versions when configuration is defined', () => {
     it('returns a version when agent is listed in the file', async () => {
       const { status, body } = await callApi();
       expect(status).to.be(200);

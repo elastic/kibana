@@ -14,7 +14,6 @@ import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provi
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const apmApiClient = getService('apmApi');
-  const registry = getService('registry');
   const synthtrace = getService('synthtrace');
 
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
@@ -43,16 +42,16 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     });
   }
 
-  registry.when('Agent explorer when data is not loaded', () => {
-    it('handles empty state', async () => {
-      const { status, body } = await callApi();
+  describe('Agent explorer', () => {
+    describe('when data is not loaded', () => {
+      it('handles empty state', async () => {
+        const { status, body } = await callApi();
 
-      expect(status).to.be(200);
-      expect(body.items).to.be.empty();
+        expect(status).to.be(200);
+        expect(body.items).to.be.empty();
+      });
     });
-  });
 
-  registry.when('Agent explorer', () => {
     describe('when data is loaded', () => {
       let apmSynthtraceEsClient: ApmSynthtraceEsClient;
 

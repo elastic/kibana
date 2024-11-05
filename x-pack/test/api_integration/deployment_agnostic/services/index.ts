@@ -14,7 +14,6 @@ import { RoleScopedSupertestProvider, SupertestWithRoleScope } from './role_scop
 import { SloApiProvider } from './slo_api';
 import { LogsSynthtraceEsClientProvider } from './logs_synthtrace_es_client';
 import { SynthtraceProvider } from './synthtrace';
-import { RegistryProvider } from './registry';
 import { ApmApiProvider } from './apm_api';
 
 export type {
@@ -36,7 +35,6 @@ export const services = {
   // create a new deployment-agnostic service and load here
   synthtrace: SynthtraceProvider,
   apmApi: ApmApiProvider,
-  registry: RegistryProvider,
 };
 
 export type SupertestWithRoleScopeType = SupertestWithRoleScope;
