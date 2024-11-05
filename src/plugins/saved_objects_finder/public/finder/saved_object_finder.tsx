@@ -400,9 +400,11 @@ export const SavedObjectFinderUi = withEuiTablePersist(SavedObjectFinderUiClass,
   get: (props) => ({
     tableId: `soFinder-${props.id}`,
     pageSizeOptions: PAGE_SIZE_OPTIONS,
-    initialPageSize: 10,
+    initialPageSize: props.initialPageSize ?? props.fixedPageSize ?? 10,
   }),
 });
+
+export const SavedObjectFinderWithoutPersist = SavedObjectFinderUiClass; // For testing
 
 // Needed for React.lazy
 // eslint-disable-next-line import/no-default-export
