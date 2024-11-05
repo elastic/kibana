@@ -17,7 +17,7 @@ const ANOTHER_1024_CHARS =
   'grape fig tangerine tangerine kiwi lemon papaya cherry nectarine papaya mango cherry nectarine fig cherry fig grape mango mango quince fig strawberry mango quince date kiwi quince raspberry apple kiwi banana quince fig papaya grape mango cherry banana mango cherry lemon cherry tangerine fig quince quince papaya tangerine grape strawberry banana kiwi grape mango papaya nectarine banana nectarine kiwi papaya lemon apple lemon orange fig cherry grape apple nectarine papaya orange fig papaya date mango papaya mango cherry tangerine papaya apple banana papaya cherry strawberry grape raspberry lemon date papaya mango kiwi cherry fig banana banana apple date strawberry mango tangerine date lemon kiwi quince date orange orange papaya date apple fig tangerine quince tangerine date papaya banana banana orange raspberry papaya apple nectarine lemon raspberry raspberry mango cherry kiwi cherry cherry nectarine cherry date strawberry banana orange mango mango tangerine quince papaya papaya kiwi papaya strawberry date mango';
 
 export default function ApiTest({ getService }: DatasetQualityFtrContextProvider) {
-  const synthtrace = getService('logSynthtraceEsClient');
+  const synthtrace = getService('logsSynthtraceEsClient');
   const datasetQualityApiClient = getService('datasetQualityApiClient');
   const svlUserManager = getService('svlUserManager');
   const svlCommonApi = getService('svlCommonApi');

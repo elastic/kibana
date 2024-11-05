@@ -14,7 +14,7 @@ import {
   rolloverDataStream,
   createBackingIndexNameWithoutVersion,
   DatasetQualitySupertestUser,
-  getDatasetQualityMonitorWithReadSupertestUser,
+  getDatasetQualityReadSupertestUser,
 } from './utils';
 
 const MORE_THAN_1024_CHARS =
@@ -48,7 +48,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     let supertestDatasetQualityMonitorUser: DatasetQualitySupertestUser;
 
     before(async () => {
-      supertestDatasetQualityMonitorUser = await getDatasetQualityMonitorWithReadSupertestUser({
+      supertestDatasetQualityMonitorUser = await getDatasetQualityReadSupertestUser({
         getService,
       });
     });
@@ -139,7 +139,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         );
 
         const logLevelTimeSeries = resp.body.degradedFields.find(
-          (dFields) => dFields.name === 'log.level'
+          (dFields: DegradedField) => dFields.name === 'log.level'
         )?.timeSeries;
 
         expect(logLevelTimeSeries).to.eql(logsTimeSeriesData);
@@ -172,11 +172,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         );
 
         const logLevelLastBackingIndex = resp.body.degradedFields.find(
-          (dFields) => dFields.name === 'log.level'
+          (dFields: DegradedField) => dFields.name === 'log.level'
         )?.indexFieldWasLastPresentIn;
 
         const traceIdLastBackingIndex = resp.body.degradedFields.find(
-          (dFields) => dFields.name === 'trace.id'
+          (dFields: DegradedField) => dFields.name === 'trace.id'
         )?.indexFieldWasLastPresentIn;
 
         expect(logLevelLastBackingIndex).to.be(

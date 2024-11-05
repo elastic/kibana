@@ -17,7 +17,7 @@ import { DatasetQualityFtrContextProvider } from './common/services';
 
 export default function ({ getService }: DatasetQualityFtrContextProvider) {
   const datasetQualityApiClient: DatasetQualityApiClient = getService('datasetQualityApiClient');
-  const synthtrace = getService('logSynthtraceEsClient');
+  const synthtrace = getService('logsSynthtraceEsClient');
   const svlUserManager = getService('svlUserManager');
   const svlCommonApi = getService('svlCommonApi');
   const retry = getService('retry');

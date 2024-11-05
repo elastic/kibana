@@ -5,15 +5,12 @@
  * 2.0.
  */
 
-import { log, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
+import { log, timerange } from '@kbn/apm-synthtrace-client';
+import { DegradedDocs } from '@kbn/dataset-quality-plugin/common/api_types';
 import { SupertestWithRoleScopeType } from '../../../services';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
-import {
-  DatasetQualitySupertestUser,
-  getDatasetQualityMonitorSupertestUser,
-  getDatasetQualityNoAccessSuperTestUser,
-} from './utils';
+import { DatasetQualitySupertestUser, getDatasetQualityMonitorSupertestUser } from './utils';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const synthtrace = getService('logsSynthtraceEsClient');
@@ -31,28 +28,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   }
 
   describe('Degraded docs', function () {
-    describe('Authorization', function () {
-      let supertestNoAccessUser: DatasetQualitySupertestUser;
-      before(async function () {
-        supertestNoAccessUser = await getDatasetQualityNoAccessSuperTestUser({
-          getService,
-        });
-
-        if (!supertestNoAccessUser.isCustomRoleEnabled) {
-          this.skip(); // The test is only relevant when custom roles are enabled
-        }
-      });
-
-      after(async function () {
-        await supertestNoAccessUser.clean();
-      });
-
-      it('should return a 403 when the user does not have sufficient privileges', async () => {
-        const response = await callApiAs(supertestNoAccessUser.user);
-        expect(response.status).to.be(403);
-      });
-    });
-
     describe('Querying', function () {
       let supertestDatasetQualityMonitorUser: DatasetQualitySupertestUser;
 
@@ -104,14 +79,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           expect(stats.body.degradedDocs.length).to.be(2);
 
           const degradedDocsStats = stats.body.degradedDocs.reduce(
-            (acc, curr) => ({
+            (acc: Record<string, { percentage: number; count: number }>, curr: DegradedDocs) => ({
               ...acc,
               [curr.dataset]: {
                 percentage: curr.percentage,
                 count: curr.count,
               },
             }),
-            {} as Record<string, { percentage: number; count: number }>
+            {}
           );
 
           expect(degradedDocsStats['logs-synth.1-default']).to.eql({

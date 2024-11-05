@@ -17,15 +17,39 @@ export interface DatasetQualitySupertestUser {
   clean: () => Promise<void>;
 }
 
+type DatasetQualitySuperUserParams = Pick<DeploymentAgnosticFtrProviderContext, 'getService'> & {
+  requestHeaderOptions?: RequestHeadersOptions;
+  fallbackRole?: 'admin' | 'editor' | 'viewer';
+};
+
+export async function getDatasetQualityAdminSupertestUser({
+  getService,
+  requestHeaderOptions = {
+    useCookieHeader: true,
+    withInternalHeaders: true,
+  },
+  fallbackRole = 'admin',
+}: DatasetQualitySuperUserParams): Promise<DatasetQualitySupertestUser> {
+  const roleScopedSupertest = getService('roleScopedSupertest');
+  const user = await roleScopedSupertest.getSupertestWithRoleScope(
+    fallbackRole,
+    requestHeaderOptions
+  );
+  const clean = async () => {
+    await user.destroy();
+  };
+
+  return { user, isCustomRoleEnabled: true, clean };
+}
+
 export async function getDatasetQualityMonitorSupertestUser({
   getService,
   requestHeaderOptions = {
     useCookieHeader: true,
     withInternalHeaders: true,
   },
-}: DeploymentAgnosticFtrProviderContext & {
-  userOptions?: RequestHeadersOptions;
-}): DatasetQualitySupertestUser {
+  fallbackRole = 'editor',
+}: DatasetQualitySuperUserParams): Promise<DatasetQualitySupertestUser> {
   const datasetQualityMonitorUserRoleDescriptors: KibanaRoleDescriptors = {
     elasticsearch: {
       indices: [
@@ -35,37 +59,40 @@ export async function getDatasetQualityMonitorSupertestUser({
         },
       ],
     },
+    kibana: [],
   };
 
   return getDatasetQualitySuperTestUserForRoleDescriptors(
     { getService, requestHeaderOptions },
-    datasetQualityMonitorUserRoleDescriptors
+    datasetQualityMonitorUserRoleDescriptors,
+    fallbackRole
   );
 }
 
-export async function getDatasetQualityMonitorWithReadSupertestUser({
+export async function getDatasetQualityReadSupertestUser({
   getService,
   requestHeaderOptions = {
     useCookieHeader: true,
     withInternalHeaders: true,
   },
-}: DeploymentAgnosticFtrProviderContext & {
-  userOptions?: RequestHeadersOptions;
-}): DatasetQualitySupertestUser {
+  fallbackRole = 'viewer',
+}: DatasetQualitySuperUserParams): Promise<DatasetQualitySupertestUser> {
   const datasetQualityMonitorUserRoleDescriptors: KibanaRoleDescriptors = {
     elasticsearch: {
       indices: [
         {
-          names: ['logs-*-*', 'metrics-*-*', 'traces-*-*', 'synthetics-*-*'],
-          privileges: ['read', 'monitor', 'view_index_metadata'],
+          names: ['logs-*-*'],
+          privileges: ['read'],
         },
       ],
     },
+    kibana: [],
   };
 
   return getDatasetQualitySuperTestUserForRoleDescriptors(
     { getService, requestHeaderOptions },
-    datasetQualityMonitorUserRoleDescriptors
+    datasetQualityMonitorUserRoleDescriptors,
+    fallbackRole
   );
 }
 
@@ -73,6 +100,7 @@ export async function getDatasetQualityMonitorWithReadSupertestUser({
  * Returns a Role Scoped Supertest User corresponding to Dataset Quality User with no privileges.
  * @param getService
  * @param requestHeaderOptions
+ * @param fallbackRole
  */
 export async function getDatasetQualityNoAccessSuperTestUser({
   getService,
@@ -80,18 +108,19 @@ export async function getDatasetQualityNoAccessSuperTestUser({
     useCookieHeader: true,
     withInternalHeaders: true,
   },
-}: DeploymentAgnosticFtrProviderContext & {
-  userOptions?: RequestHeadersOptions;
-}): DatasetQualitySupertestUser {
+  fallbackRole,
+}: DatasetQualitySuperUserParams): Promise<DatasetQualitySupertestUser> {
   const noAccessUserRoleDescriptors: KibanaRoleDescriptors = {
     elasticsearch: {
       indices: [],
     },
+    kibana: [],
   };
 
   return getDatasetQualitySuperTestUserForRoleDescriptors(
     { getService, requestHeaderOptions },
-    noAccessUserRoleDescriptors
+    noAccessUserRoleDescriptors,
+    fallbackRole
   );
 }
 
@@ -103,6 +132,7 @@ export async function getDatasetQualityNoAccessSuperTestUser({
  * @param getService { DeploymentAgnosticFtrProviderContext['getService'] } The getService from the FTR Provider Context
  * @param requestHeaderOptions { RequestHeadersOptions } The request header options
  * @param descriptors { KibanaRoleDescriptors } The role descriptors for the custom role
+ * @param fallbackRole { 'admin' | 'editor' | 'viewer' } The fallback role if custom role is not available
  * @returns { user: SupertestWithRoleScopeType, isCustomRoleEnabled: boolean, clean: () => Promise<void> } The user,
  * a flag indicating if the custom role is enabled, and a clean function to clean up the user after the test
  */
@@ -113,9 +143,10 @@ async function getDatasetQualitySuperTestUserForRoleDescriptors(
       useCookieHeader: true,
       withInternalHeaders: true,
     },
-  }: DeploymentAgnosticFtrProviderContext & { userOptions?: RequestHeadersOptions },
-  descriptors: KibanaRoleDescriptors
-): DatasetQualitySupertestUser {
+  }: Pick<DatasetQualitySuperUserParams, 'getService' | 'requestHeaderOptions'>,
+  descriptors: KibanaRoleDescriptors,
+  fallbackRole: DatasetQualitySuperUserParams['fallbackRole'] = 'admin'
+): Promise<DatasetQualitySupertestUser> {
   const roleScopedSupertest = getService('roleScopedSupertest');
   const samlAuth = getService('samlAuth');
   const config = getService('config');
@@ -125,7 +156,10 @@ async function getDatasetQualitySuperTestUserForRoleDescriptors(
   // Fallback to Admin Supertest User if custom role is not available
   // TODO: Remove this fallback once custom role is available in all environments
   if (!isCustomRoleEnabled) {
-    const user = await roleScopedSupertest.getSupertestWithRoleScope('admin', requestHeaderOptions);
+    const user = await roleScopedSupertest.getSupertestWithRoleScope(
+      fallbackRole,
+      requestHeaderOptions
+    );
     const clean = async () => {
       await user.destroy();
     };
