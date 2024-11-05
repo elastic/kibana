@@ -213,8 +213,34 @@ export class SavedObjectFinderUi extends React.Component<
 
   public render() {
     const { onChoose, savedObjectMetaData } = this.props;
+    const descriptionsDefined =
+      this.state.items.filter(
+        (item) =>
+          item.simple.attributes.description !== '' &&
+          item.simple.attributes.description !== undefined
+      ).length > 0;
+    const getWidth = (type: string) => {
+      if (type === 'type') {
+        return '70px';
+      } else if (type === 'description') {
+        return descriptionsDefined ? '33%' : '0%';
+      } else if (type === 'title') {
+        if (tagColumn || descriptionsDefined) {
+          return '55%';
+        } else if (tagColumn && descriptionsDefined) {
+          return '33%';
+        } else {
+          return '100%';
+        }
+      } else if (type === 'tags') {
+        return descriptionsDefined ? '33%' : '40%';
+      }
+    };
     const taggingApi = this.props.services.savedObjectsTagging;
-    const originalTagColumn = taggingApi?.ui.getTableColumnDefinition();
+    const originalTagColumn = {
+      ...taggingApi?.ui.getTableColumnDefinition(),
+      width: getWidth('tags'),
+    } as EuiTableFieldDataColumnType<SavedObjectCommon>;
     const tagColumn: EuiTableFieldDataColumnType<SavedObjectCommon> | undefined = originalTagColumn
       ? {
           ...originalTagColumn,
@@ -232,7 +258,7 @@ export class SavedObjectFinderUi extends React.Component<
             name: i18n.translate('savedObjectsFinder.typeName', {
               defaultMessage: 'Type',
             }),
-            width: '70px',
+            width: getWidth('type'),
             align: 'center',
             description: i18n.translate('savedObjectsFinder.typeDescription', {
               defaultMessage: 'Type of the saved object',
@@ -269,11 +295,44 @@ export class SavedObjectFinderUi extends React.Component<
             },
           }
         : undefined;
-    const descriptionsDefined = this.state.items.filter(
-      (item) =>
-        item.simple.attributes.description !== '' &&
-        item.simple.attributes.description !== undefined
-    ).length;
+    const descriptionColumn: EuiTableFieldDataColumnType<SavedObjectFinderItem> | undefined = {
+      field: 'description',
+      name: i18n.translate('savedObjectsFinder.descriptionName', {
+        defaultMessage: 'Description',
+      }),
+      width: getWidth('description'),
+      description: i18n.translate('savedObjectsFinder.descriptionDescription', {
+        defaultMessage: 'Description of the saved object',
+      }),
+      dataType: 'string',
+      'data-test-subj': 'savedObjectFinderDescription',
+      render: (_, item) => {
+        const currentSavedObjectMetaData = savedObjectMetaData.find(
+          (metaData) => metaData.type === item.type
+        )!;
+        const fullName = currentSavedObjectMetaData.getTooltipForSavedObject
+          ? currentSavedObjectMetaData.getTooltipForSavedObject(item.simple)
+          : `${item.name} (${currentSavedObjectMetaData!.name})`;
+
+        if (descriptionsDefined) {
+          return (
+            <EuiLink
+              onClick={
+                onChoose
+                  ? () => {
+                      onChoose(item.id, item.type, fullName, item.simple);
+                    }
+                  : undefined
+              }
+              title={item.simple.attributes.description}
+              data-test-subj={`savedObjectDescription${(item.title || '').split(' ').join('-')}`}
+            >
+              {item.simple.attributes.description}
+            </EuiLink>
+          );
+        }
+      },
+    };
     const columns: Array<EuiTableFieldDataColumnType<SavedObjectFinderItem>> = [
       ...(typeColumn ? [typeColumn] : []),
       {
@@ -281,7 +340,7 @@ export class SavedObjectFinderUi extends React.Component<
         name: i18n.translate('savedObjectsFinder.titleName', {
           defaultMessage: 'Title',
         }),
-        width: tagColumn ? '55%' : '100%',
+        width: getWidth('title'),
         description: i18n.translate('savedObjectsFinder.titleDescription', {
           defaultMessage: 'Title of the saved object',
         }),
@@ -323,45 +382,8 @@ export class SavedObjectFinderUi extends React.Component<
           );
         },
       },
-      {
-        field: 'description',
-        name: i18n.translate('savedObjectsFinder.descriptionName', {
-          defaultMessage: 'Description',
-        }),
-        width: descriptionsDefined > 0 ? '40%' : '0%',
-        description: i18n.translate('savedObjectsFinder.descriptionDescription', {
-          defaultMessage: 'Description of the saved object',
-        }),
-        dataType: 'string',
-        'data-test-subj': 'savedObjectFinderDescription',
-        render: (_, item) => {
-          const currentSavedObjectMetaData = savedObjectMetaData.find(
-            (metaData) => metaData.type === item.type
-          )!;
-          const fullName = currentSavedObjectMetaData.getTooltipForSavedObject
-            ? currentSavedObjectMetaData.getTooltipForSavedObject(item.simple)
-            : `${item.name} (${currentSavedObjectMetaData!.name})`;
-
-          if (item.simple.attributes.description !== undefined) {
-            return (
-              <EuiLink
-                onClick={
-                  onChoose
-                    ? () => {
-                        onChoose(item.id, item.type, fullName, item.simple);
-                      }
-                    : undefined
-                }
-                title={item.simple.attributes.description}
-                data-test-subj={`savedObjectDescription${(item.title || '').split(' ').join('-')}`}
-              >
-                {item.simple.attributes.description}
-              </EuiLink>
-            );
-          }
-        },
-      },
       ...(tagColumn ? [tagColumn] : []),
+      ...(descriptionsDefined ? [descriptionColumn] : []),
     ];
     const pagination = {
       initialPageSize: this.props.initialPageSize || this.props.fixedPageSize || 10,
