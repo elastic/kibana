@@ -8,20 +8,21 @@ import React from 'react';
 import rison from '@kbn/rison';
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Entity } from '../../../common/entities';
+import type { Entity } from '../../../common/entities';
+import { unflattenEntity } from '../../../common/utils/unflatten_entity';
 import { useKibana } from '../../hooks/use_kibana';
-import { parseIdentityFieldValuesToKql } from '../../../common/utils/parse_identity_field_values_to_kql';
 
 export function AlertsBadge({ entity }: { entity: Entity }) {
   const {
     services: {
       http: { basePath },
+      entityManager,
     },
   } = useKibana();
 
   const activeAlertsHref = basePath.prepend(
     `/app/observability/alerts?_a=${rison.encode({
-      kuery: parseIdentityFieldValuesToKql({ entity }),
+      kuery: entityManager.entityClient.asKqlFilter(unflattenEntity(entity)),
       status: 'active',
     })}`
   );
