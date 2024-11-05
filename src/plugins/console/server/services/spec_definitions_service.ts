@@ -7,9 +7,10 @@
  */
 
 import _, { merge } from 'lodash';
-import glob from 'glob';
+import globby from 'globby';
 import { basename, join, resolve } from 'path';
 import { readFileSync } from 'fs';
+import normalizePath from 'normalize-path';
 
 import { jsSpecLoaders } from '../lib';
 
@@ -115,8 +116,9 @@ export class SpecDefinitionsService {
   }
 
   private loadJSONSpecInDir(dirname: string) {
-    const generatedFiles = glob.sync(join(dirname, 'generated', '*.json'));
-    const overrideFiles = glob.sync(join(dirname, 'overrides', '*.json'));
+    // we need to normalize paths otherwise they don't work on windows, see https://github.com/elastic/kibana/issues/151032
+    const generatedFiles = globby.sync(normalizePath(join(dirname, 'generated', '*.json')));
+    const overrideFiles = globby.sync(normalizePath(join(dirname, 'overrides', '*.json')));
 
     return generatedFiles.reduce((acc, file) => {
       const overrideFile = overrideFiles.find((f) => basename(f) === basename(file));
