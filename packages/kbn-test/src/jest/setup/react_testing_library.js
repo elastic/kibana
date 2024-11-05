@@ -28,6 +28,6 @@ jest.mock('@testing-library/react', () => {
   return {
     ...actual,
     render: (ui, options) => actual.render(ui, { ...options, legacyRoot: true }),
-    renderHook: (render, options) => actual.render(render, { ...options, legacyRoot: true }),
+    renderHook: (render, options) => actual.renderHook(render, { ...options, legacyRoot: true }),
   };
 });
