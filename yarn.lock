@@ -3480,18 +3480,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/bfetch-error@link:packages/kbn-bfetch-error":
-  version "0.0.0"
-  uid ""
-
-"@kbn/bfetch-explorer-plugin@link:examples/bfetch_explorer":
-  version "0.0.0"
-  uid ""
-
-"@kbn/bfetch-plugin@link:src/plugins/bfetch":
-  version "0.0.0"
-  uid ""
-
 "@kbn/calculate-auto@link:packages/kbn-calculate-auto":
   version "0.0.0"
   uid ""

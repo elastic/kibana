@@ -412,14 +412,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'long',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'bfetch:disableCompression': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'bfetch:disable': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
   'visualization:visualize:legacyHeatmapChartsLibrary': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },

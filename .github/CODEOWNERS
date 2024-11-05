@@ -59,9 +59,7 @@ packages/kbn-babel-register @elastic/kibana-operations
 packages/kbn-babel-transform @elastic/kibana-operations
 x-pack/plugins/banners @elastic/appex-sharedux
 packages/kbn-bazel-runner @elastic/kibana-operations
-packages/kbn-bfetch-error @elastic/appex-sharedux
 examples/bfetch_explorer @elastic/appex-sharedux
-src/plugins/bfetch @elastic/appex-sharedux
 packages/kbn-calculate-auto @elastic/obs-ux-management-team
 packages/kbn-calculate-width-from-char-count @elastic/kibana-visualizations
 x-pack/plugins/canvas @elastic/kibana-presentation

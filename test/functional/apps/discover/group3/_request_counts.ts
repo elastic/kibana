@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -35,7 +35,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'logstash-*',
-        'bfetch:disable': true,
         enableESQL: true,
       });
       await timePicker.setDefaultAbsoluteRangeViaUiSettings();
