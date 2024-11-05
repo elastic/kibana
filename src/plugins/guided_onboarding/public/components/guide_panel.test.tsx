@@ -18,6 +18,7 @@ import { httpServiceMock } from '@kbn/core/public/mocks';
 import type { HttpSetup } from '@kbn/core/public';
 import { registerTestBed, TestBed } from '@kbn/test-jest-helpers';
 import { testGuideConfig, testGuideId } from '@kbn/guided-onboarding';
+import { DEFAULT_THEME_VERSION } from '@kbn/core-ui-settings-common';
 
 import type { PluginState } from '../../common';
 import { API_BASE_PATH } from '../../common';
@@ -58,7 +59,10 @@ const setupComponentWithPluginStateMock = async (
 };
 
 const setupGuidePanelComponent = async (api: GuidedOnboardingApi) => {
-  const coreTheme$ = new BehaviorSubject<CoreTheme>({ darkMode: true });
+  const coreTheme$ = new BehaviorSubject<CoreTheme>({
+    darkMode: true,
+    version: DEFAULT_THEME_VERSION,
+  });
   let testBed: TestBed;
   const GuidePanelComponent = () => (
     <GuidePanel

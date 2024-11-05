@@ -20,6 +20,7 @@ import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
 import { KibanaRootContextProvider } from './root_provider';
 import { I18nStart } from '@kbn/core-i18n-browser';
+import { DEFAULT_THEME_VERSION } from '@kbn/core-ui-settings-common';
 
 describe('KibanaRootContextProvider', () => {
   let euiTheme: UseEuiTheme | undefined;
@@ -58,7 +59,7 @@ describe('KibanaRootContextProvider', () => {
   };
 
   it('exposes the EUI theme provider', async () => {
-    const coreTheme: KibanaTheme = { darkMode: true };
+    const coreTheme: KibanaTheme = { darkMode: true, version: DEFAULT_THEME_VERSION };
 
     const wrapper = mountWithIntl(
       <KibanaRootContextProvider
@@ -76,7 +77,10 @@ describe('KibanaRootContextProvider', () => {
   });
 
   it('propagates changes of the coreTheme observable', async () => {
-    const coreTheme$ = new BehaviorSubject<KibanaTheme>({ darkMode: true });
+    const coreTheme$ = new BehaviorSubject<KibanaTheme>({
+      darkMode: true,
+      version: DEFAULT_THEME_VERSION,
+    });
 
     const wrapper = mountWithIntl(
       <KibanaRootContextProvider
@@ -93,7 +97,7 @@ describe('KibanaRootContextProvider', () => {
     expect(euiTheme!.colorMode).toEqual('DARK');
 
     await act(async () => {
-      coreTheme$.next({ darkMode: false });
+      coreTheme$.next({ darkMode: false, version: DEFAULT_THEME_VERSION });
     });
 
     await refresh(wrapper);

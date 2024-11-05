@@ -16,6 +16,7 @@ import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { IUiSettingsClient, ToastsStart } from '@kbn/core/public';
 import { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { DEFAULT_THEME_VERSION } from '@kbn/core-ui-settings-common';
 
 export function createServicesMock() {
   const expressionsPlugin = expressionsPluginMock.createStartContract();
@@ -43,7 +44,10 @@ export function createServicesMock() {
     ...uiSettingsMock,
   };
 
-  const theme = themeServiceMock.createSetupContract({ darkMode: false });
+  const theme = themeServiceMock.createSetupContract({
+    darkMode: false,
+    version: DEFAULT_THEME_VERSION,
+  });
   corePluginMock.theme = theme;
 
   const dataPlugin = dataPluginMock.createStartContract();

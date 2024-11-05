@@ -21,6 +21,7 @@ import { PartitionVisConfiguration } from '@kbn/visualizations-plugin/common/con
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { AccessorConfig } from '@kbn/visualization-ui-components';
 import useObservable from 'react-use/lib/useObservable';
+import { DEFAULT_THEME_VERSION } from '@kbn/core-ui-settings-common';
 import type { FormBasedPersistedState } from '../../datasources/form_based/types';
 import type {
   Visualization,
@@ -494,7 +495,10 @@ export const getPieVisualization = ({
     };
   },
   DimensionEditorComponent(props) {
-    const isDarkMode = useObservable(kibanaTheme.theme$, { darkMode: false }).darkMode;
+    const isDarkMode = useObservable(kibanaTheme.theme$, {
+      darkMode: false,
+      version: DEFAULT_THEME_VERSION,
+    }).darkMode;
     return <DimensionEditor {...props} paletteService={paletteService} isDarkMode={isDarkMode} />;
   },
   DimensionEditorDataExtraComponent(props) {

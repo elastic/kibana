@@ -11,6 +11,7 @@ import { BehaviorSubject } from 'rxjs';
 import type { CoreTheme } from '@kbn/core/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
+import { DEFAULT_THEME_VERSION } from '@kbn/core-ui-settings-common';
 
 type StoryContext = Parameters<DecoratorFn>[1];
 
@@ -53,8 +54,8 @@ export const decorateWithGlobalStorybookThemeProviders: DecoratorFn = (
 const euiThemeFromId = (themeId: string): CoreTheme => {
   switch (themeId) {
     case 'v8.dark':
-      return { darkMode: true };
+      return { darkMode: true, version: DEFAULT_THEME_VERSION };
     default:
-      return { darkMode: false };
+      return { darkMode: false, version: DEFAULT_THEME_VERSION };
   }
 };

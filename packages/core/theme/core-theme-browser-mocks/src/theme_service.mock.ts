@@ -11,9 +11,11 @@ import { of } from 'rxjs';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { ThemeServiceSetup, CoreTheme } from '@kbn/core-theme-browser';
 import type { ThemeService } from '@kbn/core-theme-browser-internal';
+import { DEFAULT_THEME_VERSION } from '@kbn/core-ui-settings-common';
 
 const mockTheme: CoreTheme = {
   darkMode: false,
+  version: DEFAULT_THEME_VERSION,
 };
 
 const createThemeMock = (): CoreTheme => {

@@ -17,6 +17,7 @@ import { ESQLEditor } from './esql_editor';
 import type { ESQLEditorProps } from './types';
 import { ReactWrapper } from 'enzyme';
 import { of } from 'rxjs';
+import { DEFAULT_THEME_VERSION } from '@kbn/core-ui-settings-common';
 
 describe('ESQLEditor', () => {
   const uiConfig: Record<string, any> = {};
@@ -24,7 +25,7 @@ describe('ESQLEditor', () => {
     get: (key: string) => uiConfig[key],
   } as IUiSettingsClient;
   const theme = {
-    theme$: of({ darkMode: false }),
+    theme$: of({ darkMode: false, version: DEFAULT_THEME_VERSION }),
   };
 
   const services = {

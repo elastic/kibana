@@ -20,6 +20,7 @@ import { PaletteRegistry, getColorsFromMapping } from '@kbn/coloring';
 import { IconChartTagcloud } from '@kbn/chart-icons';
 import { SystemPaletteExpressionFunctionDefinition } from '@kbn/charts-plugin/common';
 import useObservable from 'react-use/lib/useObservable';
+import { DEFAULT_THEME_VERSION } from '@kbn/core-ui-settings-common';
 import type { OperationMetadata, Visualization } from '../..';
 import { getColorMappingDefaults } from '../../utils';
 import type { TagcloudState } from './types';
@@ -294,7 +295,10 @@ export const getTagcloudVisualization = ({
   },
 
   DimensionEditorComponent(props) {
-    const isDarkMode: boolean = useObservable(kibanaTheme.theme$, { darkMode: false }).darkMode;
+    const isDarkMode: boolean = useObservable(kibanaTheme.theme$, {
+      darkMode: false,
+      version: DEFAULT_THEME_VERSION,
+    }).darkMode;
     if (props.groupId === TAG_GROUP_ID) {
       return (
         <TagsDimensionEditor

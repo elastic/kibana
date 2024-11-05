@@ -7,10 +7,11 @@
 
 import { CoreTheme } from '@kbn/core/public';
 import useObservable from 'react-use/lib/useObservable';
+import { DEFAULT_THEME_VERSION } from '@kbn/core-ui-settings-common';
 import { of } from 'rxjs';
 import { useKibanaContextForPlugin } from './use_kibana';
 
-const themeDefault: CoreTheme = { darkMode: false };
+const themeDefault: CoreTheme = { darkMode: false, version: DEFAULT_THEME_VERSION };
 
 export const useIsDarkMode = () => {
   const { services } = useKibanaContextForPlugin();

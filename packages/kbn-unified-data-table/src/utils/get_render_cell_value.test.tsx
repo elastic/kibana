@@ -20,6 +20,7 @@ import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { EsHitRecord } from '@kbn/discover-utils/types';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { SourceDocument } from '../components/source_document';
+import { DEFAULT_THEME_VERSION } from '@kbn/core-ui-settings-common';
 
 jest.mock('@kbn/code-editor', () => {
   const original = jest.requireActual('@kbn/code-editor');
@@ -52,7 +53,7 @@ const mockServices = {
     getDefaultInstance: jest.fn(() => ({ convert: (value: unknown) => (value ? value : '-') })),
   },
   theme: {
-    theme$: of({ darkMode: false }),
+    theme$: of({ darkMode: false, version: DEFAULT_THEME_VERSION }),
   },
 };
 
