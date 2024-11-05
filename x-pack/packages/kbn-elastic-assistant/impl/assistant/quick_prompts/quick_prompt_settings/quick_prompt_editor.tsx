@@ -112,7 +112,7 @@ const QuickPromptSettingsEditorComponent = ({
   );
 
   const handleColorChange = useCallback<EuiSetColorMethod>(
-    (color, { hex, isValid }) => {
+    (color) => {
       if (selectedQuickPrompt != null) {
         setUpdatedQuickPromptSettings((prev) => {
           const alreadyExists = prev.some((qp) => qp.name === selectedQuickPrompt.name);

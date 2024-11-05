@@ -50,7 +50,6 @@ export interface Props {
 }
 
 const AnonymizationSettingsManagementComponent: React.FC<Props> = ({
-  defaultPageSize = 5,
   modalMode = false,
   onClose,
 }) => {
@@ -151,7 +150,6 @@ const AnonymizationSettingsManagementComponent: React.FC<Props> = ({
             compressed={false}
             onListUpdated={onListUpdated}
             rawData={null}
-            pageSize={defaultPageSize}
           />
         </EuiModalBody>
         <EuiModalFooter>
@@ -187,7 +185,6 @@ const AnonymizationSettingsManagementComponent: React.FC<Props> = ({
           compressed={false}
           onListUpdated={onListUpdated}
           rawData={null}
-          pageSize={defaultPageSize}
         />
       </EuiPanel>
       <AssistantSettingsBottomBar
