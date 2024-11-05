@@ -8,7 +8,7 @@
  */
 
 import { parse } from '@kbn/esql-ast';
-import { getExpressionType, shouldBeQuotedSource } from './helpers';
+import { getBracketsToClose, getExpressionType, shouldBeQuotedSource } from './helpers';
 import { SupportedDataType } from '../definitions/types';
 import { setTestFunctions } from './test_functions';
 
@@ -322,5 +322,18 @@ describe('getExpressionType', () => {
         expect(getExpressionType(ast)).toBe(expectedType);
       }
     );
+  });
+});
+
+describe('getBracketsToClose', () => {
+  it('returns the number of brackets to close', () => {
+    expect(getBracketsToClose('foo(bar(baz')).toEqual([')', ')']);
+    expect(getBracketsToClose('foo(bar[baz')).toEqual([']', ')']);
+    expect(getBracketsToClose('foo(bar[baz"bap')).toEqual(['"', ']', ')']);
+    expect(
+      getBracketsToClose(
+        'from a | eval case(integerField < 0, "negative", integerField > 0, "positive", '
+      )
+    ).toEqual([')']);
   });
 });

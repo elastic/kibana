@@ -257,7 +257,15 @@ install_integrations() {
   local install_integrations_api_body_string=""
 
   for item in "${selected_known_integrations_array[@]}"; do
-    install_integrations_api_body_string+="$item\tregistry\n"
+    local metadata=""
+
+    case "$item" in
+    "system")
+      metadata="\t$(hostname | tr '[:upper:]' '[:lower:]')"
+      ;;
+    esac
+
+    install_integrations_api_body_string+="$item\tregistry$metadata\n"
   done
 
   for item in "${selected_unknown_log_file_pattern_array[@]}" "${custom_log_file_path_list_array[@]}"; do

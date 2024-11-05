@@ -18,7 +18,7 @@ import {
   typeInOsqueryFieldInput,
 } from '../../tasks/live_query';
 
-describe('EcsMapping', { tags: ['@ess', '@serverless'] }, () => {
+describe('EcsMapping', { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] }, () => {
   beforeEach(() => {
     initializeDataViews();
   });

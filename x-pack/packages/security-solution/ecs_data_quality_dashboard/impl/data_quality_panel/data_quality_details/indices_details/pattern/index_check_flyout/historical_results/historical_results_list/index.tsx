@@ -53,11 +53,11 @@ export const HistoricalResultsListComponent: FC<Props> = ({ indexName }) => {
               <EuiSpacer size="m" />
               <StyledAccordion
                 id={historicalResultsAccordionId}
-                buttonElement="div"
                 buttonProps={{
                   'aria-label': TOGGLE_HISTORICAL_RESULT_CHECKED_AT(
                     getFormattedCheckTime(result.checkedAt)
                   ),
+                  'data-test-subj': `historicalResultAccordionButton-${result.checkedAt}`,
                 }}
                 onToggle={(isOpen) => {
                   setAccordionState((prevState) => ({
