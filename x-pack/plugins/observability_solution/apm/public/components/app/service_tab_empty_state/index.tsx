@@ -8,10 +8,8 @@
 import React from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { AddDataPanel } from '@kbn/observability-shared-plugin/public';
-import {
-  OBSERVABILITY_ONBOARDING_LOCATOR,
-  ObservabilityOnboardingLocatorParams,
-} from '@kbn/deeplinks-observability';
+import { OBSERVABILITY_ONBOARDING_LOCATOR } from '@kbn/deeplinks-observability';
+import { ApmOnboardingLocatorParams } from '../../../locator/onboarding_locator';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { EmptyStateClickParams, EntityInventoryAddDataParams } from '../../../services/telemetry';
 import { ApmPluginStartDeps, ApmServices } from '../../../plugin';
@@ -39,7 +37,7 @@ export function ServiceTabEmptyState({ id, onDismiss }: ServiceTabEmptyStateProp
 
   const { share } = useApmPluginContext();
 
-  const onboardingLocator = share.url.locators.get<ObservabilityOnboardingLocatorParams>(
+  const onboardingLocator = share.url.locators.get<ApmOnboardingLocatorParams>(
     OBSERVABILITY_ONBOARDING_LOCATOR
   );
 

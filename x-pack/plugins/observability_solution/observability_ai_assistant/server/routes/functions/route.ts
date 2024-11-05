@@ -15,10 +15,10 @@ import { createObservabilityAIAssistantServerRoute } from '../create_observabili
 import { assistantScopeType } from '../runtime_types';
 
 const getFunctionsRoute = createObservabilityAIAssistantServerRoute({
-  endpoint: 'GET /internal/observability_ai_assistant/{scope}/functions',
+  endpoint: 'GET /internal/observability_ai_assistant/functions',
   params: t.type({
-    path: t.type({
-      scope: assistantScopeType,
+    query: t.partial({
+      scopes: t.union([t.array(assistantScopeType), assistantScopeType]),
     }),
   }),
   options: {
@@ -34,9 +34,11 @@ const getFunctionsRoute = createObservabilityAIAssistantServerRoute({
       service,
       request,
       params: {
-        path: { scope },
+        query: { scopes: inputScopes },
       },
     } = resources;
+
+    const scopes = inputScopes ? (Array.isArray(inputScopes) ? inputScopes : [inputScopes]) : [];
 
     const controller = new AbortController();
     request.events.aborted$.subscribe(() => {
@@ -51,19 +53,20 @@ const getFunctionsRoute = createObservabilityAIAssistantServerRoute({
         resources,
         client,
         screenContexts: [],
+        scopes,
       }),
       // error is caught in client
       client.getKnowledgeBaseUserInstructions(),
     ]);
 
-    const functionDefinitions = functionClient.getFunctions({ scope }).map((fn) => fn.definition);
+    const functionDefinitions = functionClient.getFunctions().map((fn) => fn.definition);
 
     const availableFunctionNames = functionDefinitions.map((def) => def.name);
 
     return {
       functionDefinitions,
       systemMessage: getSystemMessageFromInstructions({
-        applicationInstructions: functionClient.getInstructions(scope),
+        applicationInstructions: functionClient.getInstructions(),
         userInstructions,
         adHocInstructions: [],
         availableFunctionNames,

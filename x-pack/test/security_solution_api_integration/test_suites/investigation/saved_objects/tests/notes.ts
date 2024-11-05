@@ -408,37 +408,57 @@ export default function ({ getService }: FtrProviderContext) {
         expect(notes[2].eventId).to.be('1');
       });
 
-      // TODO figure out why this test is failing on CI but not locally
-      it.skip('should retrieve all notes that have been created by a specific user', async () => {
-        await Promise.all([
-          createNote(supertest, { text: 'first note' }),
-          createNote(supertest, { text: 'second note' }),
-        ]);
+      // skipped https://github.com/elastic/kibana/issues/196896
+      describe('@skipInServerless', () => {
+        // TODO we need to figure out how to retrieve the uid of the current user in the test environment
+        it.skip('should retrieve all notes that have been created by a specific user', async () => {
+          await Promise.all([
+            createNote(supertest, { text: 'first note' }),
+            createNote(supertest, { text: 'second note' }),
+          ]);
 
-        const response = await supertest
-          .get('/api/note?userFilter=elastic')
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31');
+          const response = await supertest
+            .get('/api/note?createdByFilter=elastic')
+            .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31');
+          const { totalCount } = response.body;
 
-        const { totalCount } = response.body;
-
-        expect(totalCount).to.be(2);
+          expect(totalCount).to.be(2);
+        });
       });
 
-      it('should return nothing if no notes have been created by that user', async () => {
+      // TODO we need to figure out how to create another user in the test environment
+      it.skip('should return nothing if no notes have been created by that user', async () => {
         await Promise.all([
           createNote(supertest, { text: 'first note' }),
           createNote(supertest, { text: 'second note' }),
         ]);
 
         const response = await supertest
-          .get('/api/note?userFilter=user1')
+          .get('/api/note?createdByFilter=user1')
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '2023-10-31');
 
         const { totalCount } = response.body;
 
         expect(totalCount).to.be(0);
+      });
+
+      it('should return error if user does not exist', async () => {
+        await Promise.all([
+          createNote(supertest, { text: 'first note' }),
+          createNote(supertest, { text: 'second note' }),
+        ]);
+
+        const response = await supertest
+          .get('/api/note?createdByFilter=wrong_user')
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31');
+
+        expect(response.body).to.not.have.property('totalCount');
+        expect(response.body).to.not.have.property('notes');
+        expect(response.body.message).to.be('User with uid wrong_user not found');
+        expect(response.body.status_code).to.be(500);
       });
 
       it('should retrieve all notes that have an association with a document only', async () => {

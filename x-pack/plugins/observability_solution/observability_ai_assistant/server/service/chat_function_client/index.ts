@@ -9,7 +9,6 @@
 import Ajv, { type ErrorObject, type ValidateFunction } from 'ajv';
 import dedent from 'dedent';
 import { compact, keyBy } from 'lodash';
-import { type AssistantScope, filterScopes } from '@kbn/ai-assistant-common';
 import { FunctionVisibility, type FunctionResponse } from '../../../common/functions/types';
 import type { Message, ObservabilityAIAssistantScreenContextRequest } from '../../../common/types';
 import { filterFunctionDefinitions } from '../../../common/utils/filter_function_definitions';
@@ -18,7 +17,6 @@ import type {
   FunctionHandler,
   FunctionHandlerRegistry,
   InstructionOrCallback,
-  InstructionOrCallbackWithScopes,
   RegisterFunction,
   RegisterInstruction,
 } from '../types';
@@ -36,7 +34,7 @@ const ajv = new Ajv({
 export const GET_DATA_ON_SCREEN_FUNCTION_NAME = 'get_data_on_screen';
 
 export class ChatFunctionClient {
-  private readonly instructions: InstructionOrCallbackWithScopes[] = [];
+  private readonly instructions: InstructionOrCallback[] = [];
   private readonly functionRegistry: FunctionHandlerRegistry = new Map();
   private readonly validators: Map<string, ValidateFunction> = new Map();
 
@@ -75,8 +73,7 @@ export class ChatFunctionClient {
           return {
             content: allData.filter((data) => dataNames.includes(data.name)),
           };
-        },
-        ['all']
+        }
       );
     }
 
@@ -87,11 +84,11 @@ export class ChatFunctionClient {
     });
   }
 
-  registerFunction: RegisterFunction = (definition, respond, scopes) => {
+  registerFunction: RegisterFunction = (definition, respond) => {
     if (definition.parameters) {
       this.validators.set(definition.name, ajv.compile(definition.parameters));
     }
-    this.functionRegistry.set(definition.name, { handler: { definition, respond }, scopes });
+    this.functionRegistry.set(definition.name, { handler: { definition, respond } });
   };
 
   registerInstruction: RegisterInstruction = (instruction) => {
@@ -110,8 +107,8 @@ export class ChatFunctionClient {
     }
   }
 
-  getInstructions(scope: AssistantScope): InstructionOrCallback[] {
-    return this.instructions.filter(filterScopes(scope)).map((i) => i.instruction);
+  getInstructions(): InstructionOrCallback[] {
+    return this.instructions;
   }
 
   hasAction(name: string) {
@@ -120,14 +117,10 @@ export class ChatFunctionClient {
 
   getFunctions({
     filter,
-    scope,
   }: {
     filter?: string;
-    scope?: AssistantScope;
   } = {}): FunctionHandler[] {
-    const allFunctions = Array.from(this.functionRegistry.values())
-      .filter(filterScopes(scope))
-      .map(({ handler }) => handler);
+    const allFunctions = Array.from(this.functionRegistry.values()).map(({ handler }) => handler);
 
     const functionsByName = keyBy(allFunctions, (definition) => definition.definition.name);
 

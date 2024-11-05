@@ -54,7 +54,7 @@ export const GetNotesRequestQuery = z.object({
   sortField: z.string().nullable().optional(),
   sortOrder: z.string().nullable().optional(),
   filter: z.string().nullable().optional(),
-  userFilter: z.string().nullable().optional(),
+  createdByFilter: z.string().nullable().optional(),
   associatedFilter: AssociatedFilterType.optional(),
 });
 export type GetNotesRequestQueryInput = z.input<typeof GetNotesRequestQuery>;

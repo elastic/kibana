@@ -13,6 +13,8 @@ import {
   DEFAULT_APP_CATEGORIES,
   PluginInitializerContext,
   AppDeepLinkLocations,
+  AppStatus,
+  ApplicationStart,
 } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { enableInfrastructureHostsView } from '@kbn/observability-plugin/public';
@@ -21,8 +23,16 @@ import {
   MetricsExplorerLocatorParams,
   ObservabilityTriggerId,
 } from '@kbn/observability-shared-plugin/common';
-import { BehaviorSubject, combineLatest, from } from 'rxjs';
-import { map } from 'rxjs';
+import {
+  BehaviorSubject,
+  combineLatest,
+  distinctUntilChanged,
+  from,
+  of,
+  switchMap,
+  map,
+  firstValueFrom,
+} from 'rxjs';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { apiCanAddNewPanel } from '@kbn/presentation-containers';
 import { IncompatibleActionError, ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
@@ -35,6 +45,7 @@ import {
 } from '@kbn/observability-shared-plugin/common';
 import { OBSERVABILITY_ENABLE_LOGS_STREAM } from '@kbn/management-settings-ids';
 import { NavigationEntry } from '@kbn/observability-shared-plugin/public';
+import { OBSERVABILITY_LOGS_EXPLORER_APP_ID } from '@kbn/deeplinks-observability/constants';
 import type { InfraPublicConfig } from '../common/plugin_config_types';
 import { createInventoryMetricRuleType } from './alerting/inventory';
 import { createLogThresholdRuleType } from './alerting/log_threshold';
@@ -131,76 +142,75 @@ export class Plugin implements InfraClientPluginClass {
       messageFields: this.config.sources?.default?.fields?.message,
     });
 
-    const startDep$AndHostViewFlag$ = combineLatest([
+    const startDep$AndAccessibleFlag$ = combineLatest([
       from(core.getStartServices()),
       core.settings.client.get$<boolean>(enableInfrastructureHostsView),
-    ]);
+    ]).pipe(
+      switchMap(([[{ application }], isInfrastructureHostsViewEnabled]) =>
+        combineLatest([
+          of(application),
+          of(isInfrastructureHostsViewEnabled),
+          getLogsExplorerAccessible$(application),
+        ])
+      )
+    );
 
     const logRoutes = getLogsAppRoutes({ isLogsStreamEnabled });
 
     /** !! Need to be kept in sync with the deepLinks in x-pack/plugins/observability_solution/infra/public/plugin.ts */
     pluginsSetup.observabilityShared.navigation.registerSections(
-      startDep$AndHostViewFlag$.pipe(
-        map(
-          ([
-            [
-              {
-                application: { capabilities },
-              },
-            ],
-            isInfrastructureHostsViewEnabled,
-          ]) => {
-            const { infrastructure, logs } = capabilities;
-            return [
-              ...(logs.show
-                ? [
-                    {
-                      label: logsTitle,
-                      sortKey: 200,
-                      entries: getLogsNavigationEntries({
-                        capabilities,
-                        config: this.config,
-                        routes: logRoutes,
-                      }),
-                    },
-                  ]
-                : []),
-              ...(infrastructure.show
-                ? [
-                    {
-                      label: metricsTitle,
-                      sortKey: 300,
-                      entries: [
-                        {
-                          label: inventoryTitle,
-                          app: 'metrics',
-                          path: '/inventory',
-                        },
-                        ...(this.config.featureFlags.metricsExplorerEnabled
-                          ? [
-                              {
-                                label: metricsExplorerTitle,
-                                app: 'metrics',
-                                path: '/explorer',
-                              },
-                            ]
-                          : []),
-                        ...(isInfrastructureHostsViewEnabled
-                          ? [
-                              {
-                                label: hostsTitle,
-                                app: 'metrics',
-                                path: '/hosts',
-                              },
-                            ]
-                          : []),
-                      ],
-                    },
-                  ]
-                : []),
-            ];
-          }
-        )
+      startDep$AndAccessibleFlag$.pipe(
+        map(([application, isInfrastructureHostsViewEnabled, isLogsExplorerAccessible]) => {
+          const { infrastructure, logs } = application.capabilities;
+          return [
+            ...(logs.show
+              ? [
+                  {
+                    label: logsTitle,
+                    sortKey: 200,
+                    entries: getLogsNavigationEntries({
+                      isLogsExplorerAccessible,
+                      config: this.config,
+                      routes: logRoutes,
+                    }),
+                  },
+                ]
+              : []),
+            ...(infrastructure.show
+              ? [
+                  {
+                    label: metricsTitle,
+                    sortKey: 300,
+                    entries: [
+                      {
+                        label: inventoryTitle,
+                        app: 'metrics',
+                        path: '/inventory',
+                      },
+                      ...(this.config.featureFlags.metricsExplorerEnabled
+                        ? [
+                            {
+                              label: metricsExplorerTitle,
+                              app: 'metrics',
+                              path: '/explorer',
+                            },
+                          ]
+                        : []),
+                      ...(isInfrastructureHostsViewEnabled
+                        ? [
+                            {
+                              label: hostsTitle,
+                              app: 'metrics',
+                              path: '/hosts',
+                            },
+                          ]
+                        : []),
+                    ],
+                  },
+                ]
+              : []),
+          ];
+        })
       )
     );
 
@@ -235,8 +245,12 @@ export class Plugin implements InfraClientPluginClass {
           // mount callback should not use setup dependencies, get start dependencies instead
           const [coreStart, plugins, pluginStart] = await core.getStartServices();
 
+          const isLogsExplorerAccessible = await firstValueFrom(
+            getLogsExplorerAccessible$(coreStart.application)
+          );
+
           const { renderApp } = await import('./apps/logs_app');
-          return renderApp(coreStart, plugins, pluginStart, params);
+          return renderApp(coreStart, plugins, pluginStart, isLogsExplorerAccessible, params);
         },
       });
     }
@@ -333,9 +347,10 @@ export class Plugin implements InfraClientPluginClass {
       },
     });
 
-    startDep$AndHostViewFlag$.subscribe(
-      ([_startServices, isInfrastructureHostsViewEnabled]: [
-        [CoreStart, InfraClientStartDeps, InfraClientStartExports],
+    startDep$AndAccessibleFlag$.subscribe(
+      ([_startServices, isInfrastructureHostsViewEnabled, _isLogsExplorerAccessible]: [
+        ApplicationStart,
+        boolean,
         boolean
       ]) => {
         this.appUpdater$.next(() => ({
@@ -408,11 +423,11 @@ export class Plugin implements InfraClientPluginClass {
 }
 
 const getLogsNavigationEntries = ({
-  capabilities,
+  isLogsExplorerAccessible,
   config,
   routes,
 }: {
-  capabilities: CoreStart['application']['capabilities'];
+  isLogsExplorerAccessible: boolean;
   config: InfraPublicConfig;
   routes: LogsAppRoutes;
 }) => {
@@ -420,7 +435,7 @@ const getLogsNavigationEntries = ({
 
   if (!config.featureFlags.logsUIEnabled) return entries;
 
-  if (capabilities.discover?.show && capabilities.fleet?.read) {
+  if (isLogsExplorerAccessible) {
     entries.push({
       label: 'Explorer',
       app: 'observability-logs-explorer',
@@ -438,6 +453,18 @@ const getLogsNavigationEntries = ({
   if (!routes.stream) entries.push(createNavEntryFromRoute(routes.settings));
 
   return entries;
+};
+
+const getLogsExplorerAccessible$ = (application: CoreStart['application']) => {
+  const { applications$ } = application;
+  return applications$.pipe(
+    map(
+      (apps) =>
+        (apps.get(OBSERVABILITY_LOGS_EXPLORER_APP_ID)?.status ?? AppStatus.inaccessible) ===
+        AppStatus.accessible
+    ),
+    distinctUntilChanged()
+  );
 };
 
 const createNavEntryFromRoute = ({ path, title }: LogsRoute): NavigationEntry => ({

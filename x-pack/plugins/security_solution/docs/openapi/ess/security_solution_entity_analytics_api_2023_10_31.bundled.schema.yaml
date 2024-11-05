@@ -770,6 +770,8 @@ components:
     EngineDescriptor:
       type: object
       properties:
+        error:
+          type: object
         fieldHistoryLength:
           type: integer
         filter:

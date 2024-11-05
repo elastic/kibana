@@ -33,7 +33,8 @@ import {
   XY_CHART,
 } from '../../../screens/shared';
 
-describe(`Event Rendered View`, { tags: ['@ess', '@serverless'] }, () => {
+// skipping as this test is also failing on main (see https://github.com/elastic/security-team/issues/10874)
+describe.skip(`Event Rendered View`, { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     login();
     createRule(getNewRule());

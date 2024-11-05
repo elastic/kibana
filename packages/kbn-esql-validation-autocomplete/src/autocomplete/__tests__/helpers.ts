@@ -18,7 +18,6 @@ import * as autocomplete from '../autocomplete';
 import type { ESQLCallbacks } from '../../shared/types';
 import type { EditorContext, SuggestionRawDefinition } from '../types';
 import { TIME_SYSTEM_PARAMS, TRIGGER_SUGGESTION_COMMAND, getSafeInsertText } from '../factories';
-import { getFunctionSignatures } from '../../definitions/helpers';
 import { ESQLRealField } from '../../validation/types';
 import {
   FieldType,
@@ -214,13 +213,9 @@ export function getFunctionSignaturesByReturnType(
           label: name.toUpperCase(),
         };
       }
-      const printedSignatures = getFunctionSignatures(definition, {
-        withTypes: true,
-        capitalize: true,
-      });
       return {
         text: `${name.toUpperCase()}($0)`,
-        label: printedSignatures[0].declaration,
+        label: name.toUpperCase(),
       };
     });
 }

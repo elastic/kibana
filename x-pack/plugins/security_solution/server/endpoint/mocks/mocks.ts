@@ -75,6 +75,7 @@ import type { EndpointAuthz } from '../../../common/endpoint/types/authz';
 import { createLicenseServiceMock } from '../../../common/license/mocks';
 import { createFeatureUsageServiceMock } from '../services/feature_usage/mocks';
 import { createProductFeaturesServiceMock } from '../../lib/product_features_service/mocks';
+import type { ConfigType } from '../../config';
 
 /**
  * Creates a mocked EndpointAppContext.
@@ -158,11 +159,15 @@ export const createMockEndpointAppContextServiceSetupContract =
     };
   };
 
+type CreateMockEndpointAppContextServiceStartContractType = Omit<
+  DeeplyMockedKeys<EndpointAppContextServiceStartContract>,
+  'config'
+> & { config: ConfigType }; // DeeplyMockedKeys doesn't support moment.Duration
 /**
  * Creates a mocked input contract for the `EndpointAppContextService#start()` method
  */
 export const createMockEndpointAppContextServiceStartContract =
-  (): DeeplyMockedKeys<EndpointAppContextServiceStartContract> => {
+  (): CreateMockEndpointAppContextServiceStartContractType => {
     const config = createMockConfig();
 
     const logger = loggingSystemMock.create().get('mock_endpoint_app_context');
@@ -184,7 +189,7 @@ export const createMockEndpointAppContextServiceStartContract =
       securityMock.createMockAuthenticatedUser({ roles: ['superuser'] })
     );
 
-    const startContract: DeeplyMockedKeys<EndpointAppContextServiceStartContract> = {
+    const startContract: CreateMockEndpointAppContextServiceStartContractType = {
       security,
       config,
       productFeaturesService: createProductFeaturesServiceMock(
