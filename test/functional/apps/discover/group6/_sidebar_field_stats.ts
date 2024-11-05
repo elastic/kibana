@@ -338,23 +338,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(editorValue).to.eql(`row enabled = true\n| WHERE \`enabled\`!=true`);
         await unifiedFieldList.closeFieldPopover();
       });
-
-      it('should show a reason if field data is unavailable for the query', async () => {
-        const testQuery = `from logstash-* METADATA _index, _id | sort @timestamp desc | where match(extension.raw,"css")`;
-
-        await monacoEditor.setCodeEditorValue(testQuery);
-        await testSubjects.click('querySubmitButton');
-        await header.waitUntilLoadingHasFinished();
-        await unifiedFieldList.waitUntilSidebarHasLoaded();
-
-        await unifiedFieldList.clickFieldListItem('@message');
-        await testSubjects.existOrFail('unifiedFieldList.fieldStats.unsupportedReason');
-        expect(
-          await testSubjects.getVisibleText('unifiedFieldList.fieldStats.unsupportedReason')
-        ).to.contain(
-          `Field data is not available for ES|QL queries with 'MATCH' or 'QSTR' functions.`
-        );
-      });
     });
   });
 }

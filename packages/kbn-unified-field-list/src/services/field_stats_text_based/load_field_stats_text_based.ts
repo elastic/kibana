@@ -18,7 +18,6 @@ import {
   fetchAndCalculateFieldStats,
 } from './field_stats_utils_text_based';
 import { ESQL_SAFE_LIMIT } from '../../constants';
-import { getReasonIfFieldDataUnavailableForQuery } from '../../utils/get_warning_message';
 
 interface FetchFieldStatsParamsTextBased {
   services: {
@@ -55,15 +54,6 @@ export const loadFieldStatsTextBased: LoadFieldStatsTextBasedHandler = async ({
   baseQuery,
   abortController,
 }) => {
-  /**
-   * If the ES|QL query is unsupported, we can exit early
-   */
-  const unsupportedReasonForQuery = getReasonIfFieldDataUnavailableForQuery(baseQuery);
-
-  if (unsupportedReasonForQuery) {
-    return {};
-  }
-
   const { data } = services;
 
   try {
