@@ -26,6 +26,15 @@ export const fetchDegradedStatsFailedNotifier = (toasts: IToasts, error: Error) 
   });
 };
 
+export const fetchTotalDocsFailedNotifier = (toasts: IToasts, error: Error) => {
+  toasts.addDanger({
+    title: i18n.translate('xpack.datasetQuality.fetchTotalDocsFailed', {
+      defaultMessage: "We couldn't get your total docs information.",
+    }),
+    text: error.message,
+  });
+};
+
 export const fetchIntegrationsFailedNotifier = (toasts: IToasts, error: Error) => {
   toasts.addDanger({
     title: i18n.translate('xpack.datasetQuality.fetchIntegrationsFailed', {

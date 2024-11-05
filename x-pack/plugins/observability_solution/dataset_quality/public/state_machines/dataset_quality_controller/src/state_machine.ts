@@ -25,6 +25,7 @@ import {
   fetchDatasetStatsFailedNotifier,
   fetchDegradedStatsFailedNotifier,
   fetchIntegrationsFailedNotifier,
+  fetchTotalDocsFailedNotifier,
 } from './notifications';
 import {
   DatasetQualityControllerContext,
@@ -147,7 +148,7 @@ export const createPureDatasetQualityControllerStateMachine = (
                   },
                   {
                     target: 'docsStats.loaded',
-                    actions: ['notifyFetchDegradedStatsFailed'],
+                    actions: ['notifyFetchTotalDocsFailed'],
                   },
                 ],
                 UPDATE_TIME_RANGE: {
@@ -444,6 +445,8 @@ export const createDatasetQualityControllerStateMachine = ({
         fetchNonAggregatableDatasetsFailedNotifier(toasts, event.data),
       notifyFetchIntegrationsFailed: (_context, event: DoneInvokeEvent<Error>) =>
         fetchIntegrationsFailedNotifier(toasts, event.data),
+      notifyFetchTotalDocsFailed: (_context, event: DoneInvokeEvent<Error>) =>
+        fetchTotalDocsFailedNotifier(toasts, event.data),
     },
     services: {
       loadDataStreamStats: (context, _event) =>
