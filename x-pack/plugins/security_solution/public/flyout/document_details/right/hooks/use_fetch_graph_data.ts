@@ -61,11 +61,12 @@ export const useFetchGraphData = ({
   req,
   options,
 }: UseFetchGraphDataParams): UseFetchGraphDataResult => {
-  const { actorIds, eventIds, start, end } = req.query;
+  const { eventIds, start, end, esQuery } = req.query;
   const http = useHttp();
+  const QUERY_KEY = ['useFetchGraphData', eventIds, start, end, esQuery];
 
   const { isLoading, isError, data } = useQuery<GraphResponse>(
-    ['useFetchGraphData', actorIds, eventIds, start, end],
+    QUERY_KEY,
     () => {
       return http.post<GraphResponse>(EVENT_GRAPH_VISUALIZATION_API, {
         version: '1',

@@ -10,6 +10,7 @@ import {
   graphResponseSchema,
 } from '@kbn/cloud-security-posture-common/schema/graph/latest';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import type { GraphRequest } from '@kbn/cloud-security-posture-common/types/graph/v1';
 import { GRAPH_ROUTE_PATH } from '../../../common/constants';
 import { CspRouter } from '../../types';
 import { getGraph as getGraphV1 } from './v1';
@@ -37,24 +38,24 @@ export const defineGraphRoute = (router: CspRouter) =>
         },
       },
       async (context, request, response) => {
-        const { actorIds, eventIds, start, end } = request.body.query;
+        const { eventIds, start, end, esQuery } = request.body.query as GraphRequest['query'];
         const cspContext = await context.csp;
         const spaceId = (await cspContext.spaces?.spacesService?.getActiveSpace(request))?.id;
 
         try {
-          const { nodes, edges } = await getGraphV1(
-            {
+          const { nodes, edges } = await getGraphV1({
+            services: {
               logger: cspContext.logger,
               esClient: cspContext.esClient,
             },
-            {
-              actorIds,
+            query: {
               eventIds,
               spaceId,
               start,
               end,
-            }
-          );
+              esQuery,
+            },
+          });
 
           return response.ok({ body: { nodes, edges } });
         } catch (err) {

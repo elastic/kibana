@@ -9,11 +9,20 @@ import { schema } from '@kbn/config-schema';
 
 export const graphRequestSchema = schema.object({
   query: schema.object({
-    actorIds: schema.arrayOf(schema.string()),
     eventIds: schema.arrayOf(schema.string()),
     // TODO: use zod for range validation instead of config schema
     start: schema.oneOf([schema.number(), schema.string()]),
     end: schema.oneOf([schema.number(), schema.string()]),
+    esQuery: schema.maybe(
+      schema.object({
+        bool: schema.object({
+          filter: schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
+          must: schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
+          should: schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
+          must_not: schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
+        }),
+      })
+    ),
   }),
 });
 
