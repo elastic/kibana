@@ -269,6 +269,11 @@ export class SavedObjectFinderUi extends React.Component<
             },
           }
         : undefined;
+    const descriptionsDefined = this.state.items.filter(
+      (item) =>
+        item.simple.attributes.description !== '' &&
+        item.simple.attributes.description !== undefined
+    ).length;
     const columns: Array<EuiTableFieldDataColumnType<SavedObjectFinderItem>> = [
       ...(typeColumn ? [typeColumn] : []),
       {
@@ -323,13 +328,38 @@ export class SavedObjectFinderUi extends React.Component<
         name: i18n.translate('savedObjectsFinder.descriptionName', {
           defaultMessage: 'Description',
         }),
-        width: '40%',
+        width: descriptionsDefined > 0 ? '40%' : '0%',
         description: i18n.translate('savedObjectsFinder.descriptionDescription', {
           defaultMessage: 'Description of the saved object',
         }),
         dataType: 'string',
         'data-test-subj': 'savedObjectFinderDescription',
-        render: (description) => description,
+        render: (_, item) => {
+          const currentSavedObjectMetaData = savedObjectMetaData.find(
+            (metaData) => metaData.type === item.type
+          )!;
+          const fullName = currentSavedObjectMetaData.getTooltipForSavedObject
+            ? currentSavedObjectMetaData.getTooltipForSavedObject(item.simple)
+            : `${item.name} (${currentSavedObjectMetaData!.name})`;
+
+          if (item.simple.attributes.description !== undefined) {
+            return (
+              <EuiLink
+                onClick={
+                  onChoose
+                    ? () => {
+                        onChoose(item.id, item.type, fullName, item.simple);
+                      }
+                    : undefined
+                }
+                title={item.simple.attributes.description}
+                data-test-subj={`savedObjectDescription${(item.title || '').split(' ').join('-')}`}
+              >
+                {item.simple.attributes.description}
+              </EuiLink>
+            );
+          }
+        },
       },
       ...(tagColumn ? [tagColumn] : []),
     ];
