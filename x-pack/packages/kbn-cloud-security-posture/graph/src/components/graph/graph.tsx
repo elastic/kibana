@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useMemo, useRef, useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
+import { size, isEmpty, isEqual, xorWith } from 'lodash';
 import {
   Background,
   Controls,
@@ -14,7 +15,7 @@ import {
   useEdgesState,
   useNodesState,
 } from '@xyflow/react';
-import type { Edge, Node } from '@xyflow/react';
+import type { Edge, FitViewOptions, Node } from '@xyflow/react';
 import type { CommonProps } from '@elastic/eui';
 import { SvgDefsMarker } from '../edge/styles';
 import {
@@ -33,9 +34,23 @@ import type { EdgeViewModel, NodeViewModel } from '../types';
 import '@xyflow/react/dist/style.css';
 
 export interface GraphProps extends CommonProps {
+  /**
+   * Array of node view models to be rendered in the graph.
+   */
   nodes: NodeViewModel[];
+  /**
+   * Array of edge view models to be rendered in the graph.
+   */
   edges: EdgeViewModel[];
+  /**
+   * Determines whether the graph is interactive (allows panning, zooming, etc.).
+   * When set to false, the graph is locked and user interactions are disabled, effectively putting it in view-only mode.
+   */
   interactive: boolean;
+  /**
+   * Determines whether the graph is locked. Nodes and edges are still interactive, but the graph itself is not.
+   */
+  isLocked?: boolean;
 }
 
 const nodeTypes = {
@@ -66,28 +81,45 @@ const edgeTypes = {
  *
  * @returns {JSX.Element} The rendered Graph component.
  */
-export const Graph: React.FC<GraphProps> = ({ nodes, edges, interactive, ...rest }) => {
-  const layoutCalled = useRef(false);
-  const [isGraphLocked, setIsGraphLocked] = useState(interactive);
-  const { initialNodes, initialEdges } = useMemo(
-    () => processGraph(nodes, edges, isGraphLocked),
-    [nodes, edges, isGraphLocked]
-  );
+export const Graph: React.FC<GraphProps> = ({
+  nodes,
+  edges,
+  interactive,
+  isLocked: isLockedProp = false,
+  ...rest
+}) => {
+  const backgroundId = Math.random().toFixed(4); // TODO: use useId(); when available (react >=18)
+  const fitViewRef = useRef<
+    ((fitViewOptions?: FitViewOptions<Node> | undefined) => Promise<boolean>) | null
+  >(null);
+  const [prevNodes, setPrevNodes] = useState<NodeViewModel[]>([]);
+  const [prevEdges, setPrevEdges] = useState<EdgeViewModel[]>([]);
+  const [isGraphLocked, setIsGraphLocked] = useState(!interactive);
+  const [nodesState, setNodes, onNodesChange] = useNodesState<Node<NodeViewModel>>([]);
+  const [edgesState, setEdges, onEdgesChange] = useEdgesState<Edge<EdgeViewModel>>([]);
 
-  const [nodesState, setNodes, onNodesChange] = useNodesState(initialNodes);
-  const [edgesState, _setEdges, onEdgesChange] = useEdgesState(initialEdges);
+  useEffect(() => {
+    // On nodes or edges changes reset the graph and re-layout
+    if (!isArrayOfObjectsEqual(nodes, prevNodes) || !isArrayOfObjectsEqual(edges, prevEdges)) {
+      const { initialNodes, initialEdges } = processGraph(nodes, edges, !isGraphLocked);
+      const { nodes: layoutedNodes } = layoutGraph(initialNodes, initialEdges);
 
-  if (!layoutCalled.current) {
-    const { nodes: layoutedNodes } = layoutGraph(nodesState, edgesState);
-    setNodes(layoutedNodes);
-    layoutCalled.current = true;
-  }
+      setNodes(layoutedNodes);
+      setEdges(initialEdges);
+      setPrevNodes(nodes);
+      setPrevEdges(edges);
+      setTimeout(() => {
+        fitViewRef.current?.();
+      }, 30);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- We only want to run this effect when nodes or edges change
+  }, [nodes, edges, setNodes, setEdges]);
 
   const onInteractiveStateChange = useCallback(
     (interactiveStatus: boolean): void => {
-      setIsGraphLocked(interactiveStatus);
-      setNodes((prevNodes) =>
-        prevNodes.map((node) => ({
+      setIsGraphLocked(!interactiveStatus);
+      setNodes((currNodes) =>
+        currNodes.map((node) => ({
           ...node,
           data: {
             ...node.data,
@@ -106,6 +138,7 @@ export const Graph: React.FC<GraphProps> = ({ nodes, edges, interactive, ...rest
         fitView={true}
         onInit={(xyflow) => {
           window.requestAnimationFrame(() => xyflow.fitView());
+          fitViewRef.current = xyflow.fitView;
 
           // When the graph is not initialized as interactive, we need to fit the view on resize
           if (!interactive) {
@@ -123,16 +156,17 @@ export const Graph: React.FC<GraphProps> = ({ nodes, edges, interactive, ...rest
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         proOptions={{ hideAttribution: true }}
-        panOnDrag={isGraphLocked}
-        zoomOnScroll={isGraphLocked}
-        zoomOnPinch={isGraphLocked}
-        zoomOnDoubleClick={isGraphLocked}
-        preventScrolling={isGraphLocked}
-        nodesDraggable={interactive && isGraphLocked}
+        panOnDrag={!isGraphLocked && !isLockedProp}
+        zoomOnScroll={!isGraphLocked && !isLockedProp}
+        zoomOnPinch={!isGraphLocked && !isLockedProp}
+        zoomOnDoubleClick={!isGraphLocked && !isLockedProp}
+        preventScrolling={interactive}
+        nodesDraggable={interactive && !isGraphLocked && !isLockedProp}
         maxZoom={1.3}
+        minZoom={0.1}
       >
         {interactive && <Controls onInteractiveChange={onInteractiveStateChange} />}
-        <Background />
+        <Background id={backgroundId} />{' '}
       </ReactFlow>
     </div>
   );
@@ -202,3 +236,6 @@ const processGraph = (
 
   return { initialNodes, initialEdges };
 };
+
+const isArrayOfObjectsEqual = (x: object[], y: object[]) =>
+  size(x) === size(y) && isEmpty(xorWith(x, y, isEqual));
