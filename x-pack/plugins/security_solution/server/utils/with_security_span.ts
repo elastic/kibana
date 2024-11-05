@@ -36,7 +36,7 @@ export const withSecuritySpan = <T>(
     cb
   );
 
-export const withSyncSecuritySpan = <T>(name: string, fn: (span: Span | null) => T): T => {
+export const withSecuritySpanSync = <T>(name: string, fn: (span: Span | null) => T): T => {
   const span = agent.startSpan(name, APP_ID);
 
   try {

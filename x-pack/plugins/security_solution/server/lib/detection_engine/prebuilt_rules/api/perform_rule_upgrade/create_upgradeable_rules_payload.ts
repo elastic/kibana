@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { pickBy } from 'lodash';
-import { withSyncSecuritySpan } from '../../../../../utils/with_security_span';
+import { withSecuritySpanSync } from '../../../../../utils/with_security_span';
 import type { PromisePoolError } from '../../../../../utils/promise_pool';
 import {
   PickVersionValuesEnum,
@@ -37,7 +37,7 @@ export const createModifiedPrebuiltRuleAssets = ({
   upgradeableRules,
   requestBody,
 }: CreateModifiedPrebuiltRuleAssetsProps) => {
-  return withSyncSecuritySpan('createModifiedPrebuiltRuleAssets', () => {
+  return withSecuritySpanSync(createModifiedPrebuiltRuleAssets.name, () => {
     const { pick_version: globalPickVersion = PickVersionValuesEnum.MERGED, mode } = requestBody;
 
     const { modifiedPrebuiltRuleAssets, processingErrors } =

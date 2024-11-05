@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { withSyncSecuritySpan } from '../../../../../utils/with_security_span';
+import { withSecuritySpanSync } from '../../../../../utils/with_security_span';
 import type {
   RuleResponse,
   RuleUpgradeSpecifier,
@@ -26,7 +26,7 @@ export const getUpgradeableRules = ({
   versionSpecifiers?: RuleUpgradeSpecifier[];
   mode: Mode;
 }) => {
-  return withSyncSecuritySpan('getUpgradeableRules', () => {
+  return withSecuritySpanSync(getUpgradeableRules.name, () => {
     const upgradeableRules = new Map(
       rawUpgradeableRules.map((_rule) => [_rule.current.rule_id, _rule])
     );
