@@ -4,6 +4,7 @@
   "cli": {
     "packageManager": "yarn"
   },
+  "parallel": 5,
   "useDaemonProcess": true,
   "tasksRunnerOptions": {
     "default": {
@@ -18,15 +19,41 @@
   },
   "plugins": [
   ],
+  "namedInputs": {
+    "global:tsConfigs": [
+      "{projectRoot}/tsconfig.json",
+      "{projectRoot}/tsconfig.type_check.json",
+      "{workspaceRoot}/tsconfig.base.json",
+      "{workspaceRoot}/tsconfig.base.type_check.json"
+    ]
+  },
   "targetDefaults": {
     "build": {
-      "dependsOn": ["^build"],
+      "dependsOn": [
+        "^build"
+      ],
       "cache": true
     },
     "lint": {
       "cache": true
     },
-    "test:type_check": {
+    "typecheck": {
+      "executor": "@kbn/nx:typecheck",
+      "dependsOn": [
+        "^typecheck"
+      ],
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target",
+        "{projectRoot}/tsconfig.type_check.json"
+      ],
+      "options": {
+      },
       "cache": true
     }
   }
