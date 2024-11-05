@@ -13,9 +13,23 @@ import { createAppMockRenderer } from '../common/mock';
 import { usePostObservable } from './use_post_observables';
 import { casesQueriesKeys } from './constants';
 import { mockCase } from './mock';
+import type { AddObservableRequest } from '../../common/types/api';
 
 jest.mock('./api');
 jest.mock('../common/lib/kibana');
+
+const observableMock: AddObservableRequest = {
+  observable: {
+    typeKey: '80a3cc9b-500a-45fa-909a-b4f78751726c',
+    value: 'test_value',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    id: undefined,
+    isIoc: false,
+    hasBeenSighted: false,
+    description: '',
+  },
+};
 
 describe('usePostObservables', () => {
   const addSuccess = jest.fn();
@@ -37,7 +51,7 @@ describe('usePostObservables', () => {
     });
 
     act(() => {
-      result.current.mutate({ observable: {} });
+      result.current.mutate(observableMock);
     });
 
     await waitForNextUpdate();
@@ -55,7 +69,7 @@ describe('usePostObservables', () => {
     });
 
     act(() => {
-      result.current.mutate({ observable: {} });
+      result.current.mutate(observableMock);
     });
 
     await waitForNextUpdate();
@@ -71,7 +85,7 @@ describe('usePostObservables', () => {
     });
 
     act(() => {
-      result.current.mutate({ observable: {} });
+      result.current.mutate(observableMock);
     });
 
     await waitForNextUpdate();
@@ -81,7 +95,7 @@ describe('usePostObservables', () => {
 
   it('shows a toast error when the api return an error', async () => {
     jest
-      .spyOn(api, 'postObservables')
+      .spyOn(api, 'postObservable')
       .mockRejectedValue(new Error('usePostObservables: Test error'));
 
     const { waitForNextUpdate, result } = renderHook(() => usePostObservable(mockCase.id), {
@@ -89,7 +103,7 @@ describe('usePostObservables', () => {
     });
 
     act(() => {
-      result.current.mutate({ observable: {} });
+      result.current.mutate(observableMock);
     });
 
     await waitForNextUpdate();
