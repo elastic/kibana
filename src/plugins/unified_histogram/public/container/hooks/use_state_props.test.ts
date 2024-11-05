@@ -81,6 +81,7 @@ describe('useStateProps', () => {
           "hidden": false,
           "timeInterval": "auto",
         },
+        "dataLoading$": undefined,
         "hits": Object {
           "status": "uninitialized",
           "total": undefined,
@@ -121,7 +122,6 @@ describe('useStateProps', () => {
             },
           },
         },
-        "lensDataLoading$": undefined,
         "onBreakdownFieldChange": [Function],
         "onChartHiddenChange": [Function],
         "onChartLoad": [Function],
@@ -165,6 +165,7 @@ describe('useStateProps', () => {
           "hidden": false,
           "timeInterval": "auto",
         },
+        "dataLoading$": undefined,
         "hits": Object {
           "status": "uninitialized",
           "total": undefined,
@@ -205,7 +206,6 @@ describe('useStateProps', () => {
             },
           },
         },
-        "lensDataLoading$": undefined,
         "onBreakdownFieldChange": [Function],
         "onChartHiddenChange": [Function],
         "onChartLoad": [Function],
@@ -349,6 +349,7 @@ describe('useStateProps', () => {
       Object {
         "breakdown": undefined,
         "chart": undefined,
+        "dataLoading$": undefined,
         "hits": Object {
           "status": "uninitialized",
           "total": undefined,
@@ -389,7 +390,6 @@ describe('useStateProps', () => {
             },
           },
         },
-        "lensDataLoading$": undefined,
         "onBreakdownFieldChange": [Function],
         "onChartHiddenChange": [Function],
         "onChartLoad": [Function],
@@ -428,6 +428,7 @@ describe('useStateProps', () => {
       Object {
         "breakdown": undefined,
         "chart": undefined,
+        "dataLoading$": undefined,
         "hits": Object {
           "status": "uninitialized",
           "total": undefined,
@@ -468,7 +469,6 @@ describe('useStateProps', () => {
             },
           },
         },
-        "lensDataLoading$": undefined,
         "onBreakdownFieldChange": [Function],
         "onChartHiddenChange": [Function],
         "onChartLoad": [Function],
