@@ -112,6 +112,7 @@ export const ElasticManagedWebCrawlersCommingSoon: React.FC = () => {
                       `}
                       steps={horizontalSteps}
                       size="s"
+                      role="presentation"
                       // @ts-ignore
                       inert=""
                     />
