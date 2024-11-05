@@ -1615,7 +1615,6 @@ x-pack/test/api_integration/apis/management/index_management/inference_endpoints
 /x-pack/test/accessibility/apps/group3/rollup_jobs.ts @elastic/kibana-management
 /x-pack/test/accessibility/apps/group3/upgrade_assistant.ts @elastic/kibana-management
 /x-pack/test/accessibility/apps/group3/watcher.ts @elastic/kibana-management
-/x-pack/test_serverless/**/test_suites/common/data_usage/ @elastic/security-solution @elastic/obs-ai-assistant
 
 #CC# /x-pack/plugins/cross_cluster_replication/ @elastic/kibana-management
 
