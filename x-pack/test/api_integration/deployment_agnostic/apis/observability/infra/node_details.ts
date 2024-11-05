@@ -7,13 +7,13 @@
 
 import expect from '@kbn/expect';
 import { first, last } from 'lodash';
-
 import { InfraTimerangeInput } from '@kbn/infra-plugin/common/http_api/snapshot_api';
 import { InventoryMetric } from '@kbn/metrics-data-access-plugin/common';
 import { NodeDetailsMetricDataResponse } from '@kbn/infra-plugin/common/http_api/node_details_api';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { SupertestWithRoleScopeType } from '../../../services';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 
-import { DATES } from './constants';
+import { DATES } from './utils/constants';
 
 const { min, max } = DATES['8.0.0'].pods_only;
 
@@ -26,21 +26,31 @@ interface NodeDetailsRequest {
   cloudId?: string;
 }
 
-export default function ({ getService }: FtrProviderContext) {
+export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const supertest = getService('supertest');
+  const roleScopedSupertest = getService('roleScopedSupertest');
 
-  describe('metrics', () => {
-    before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/8.0.0/pods_only'));
-    after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/8.0.0/pods_only'));
+  describe('API /api/metrics/node_details', () => {
+    let supertestWithAdminScope: SupertestWithRoleScopeType;
+
+    before(async () => {
+      supertestWithAdminScope = await roleScopedSupertest.getSupertestWithRoleScope('admin', {
+        withInternalHeaders: true,
+      });
+      await esArchiver.load('x-pack/test/functional/es_archives/infra/8.0.0/pods_only');
+    });
+    after(async () => {
+      await esArchiver.unload('x-pack/test/functional/es_archives/infra/8.0.0/pods_only');
+      await supertestWithAdminScope.destroy();
+    });
 
     const fetchNodeDetails = async (
       body: NodeDetailsRequest,
       expectedStatusCode = 200
     ): Promise<NodeDetailsMetricDataResponse | undefined> => {
-      const response = await supertest
+      const response = await supertestWithAdminScope
         .post('/api/metrics/node_details')
-        .set('kbn-xsrf', 'xxx')
+
         .send(body)
         .expect(expectedStatusCode);
       return response.body;
