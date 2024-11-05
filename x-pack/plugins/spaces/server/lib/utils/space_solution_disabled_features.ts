@@ -24,6 +24,10 @@ const getFeatureIdsForCategories = (
     .map((feature) => feature.id);
 };
 
+/**
+ * These features will be enabled per solution view, even if they fall under a category that is disabled in the solution.
+ */
+
 const enabledFeaturesPerSolution: Record<SolutionId, string[]> = {
   es: ['observabilityAIAssistant'],
   oblt: [],
