@@ -16,7 +16,6 @@ import { ObservabilityAIAssistantApiClients } from '../../common/config';
 export default function ApiTest({ getService }: FtrProviderContext) {
   const ml = getService('ml');
   const es = getService('es');
-  const log = getService('log');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantAPIClient');
 
   describe('Knowledge base', () => {
