@@ -47,6 +47,7 @@ import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
 import { SloPlugin } from './plugin';
 
 export interface SloPublicPluginsSetup {
@@ -70,6 +71,7 @@ export interface SloPublicPluginsStart {
   cloud?: CloudStart;
   dashboard: DashboardStart;
   dataViewEditor: DataViewEditorStart;
+  discoverShared: DiscoverSharedPublicStart;
   fieldFormats: FieldFormatsStart;
   observability: ObservabilityPublicStart;
   observabilityShared: ObservabilitySharedPluginStart;

@@ -15,6 +15,7 @@
       "charts",
       "data",
       "dataViews",
+      "discoverShared",
       "embeddable",
       "inspector",
       "fieldFormats",
@@ -47,7 +48,6 @@
       "aiops",
       "fieldsMetadata",
       "logsDataAccess",
-      "slo"
     ],
     "requiredBundles": [
       "kibanaUtils",

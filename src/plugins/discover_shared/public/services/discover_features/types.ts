@@ -30,8 +30,13 @@ export interface ObservabilityLogsAIAssistantFeature {
   render: (deps: ObservabilityLogsAIAssistantFeatureRenderDeps) => JSX.Element;
 }
 
+export interface ObservabilityCreateSLOFeature {
+  id: 'observability-create-slo';
+  createSLOFlyout: (props: any) => JSX.Element;
+}
+
 // This should be a union of all the available client features.
-export type DiscoverFeature = ObservabilityLogsAIAssistantFeature;
+export type DiscoverFeature = ObservabilityLogsAIAssistantFeature | ObservabilityCreateSLOFeature;
 
 /**
  * Service types
