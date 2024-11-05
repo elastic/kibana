@@ -114,6 +114,7 @@
     "@kbn/es-types",
     "@kbn/esql-datagrid",
     "@kbn/transpose-utils",
+    "@kbn/core-ui-settings-common",
   ],
   "exclude": ["target/**/*"]
 }

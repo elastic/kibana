@@ -20,6 +20,7 @@
     "@kbn/config-schema",
     "@kbn/features-plugin",
     "@kbn/react-kibana-context-render",
+    "@kbn/core-ui-settings-common",
   ],
   "exclude": [
     "target/**/*",

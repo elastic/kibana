@@ -14,7 +14,8 @@
   "kbn_references": [
     "@kbn/utility-types",
     "@kbn/core-theme-browser",
-    "@kbn/core-theme-browser-internal"
+    "@kbn/core-theme-browser-internal",
+    "@kbn/core-ui-settings-common"
   ],
   "exclude": [
     "target/**/*",
