@@ -8,11 +8,9 @@
  */
 
 import React, { useCallback, useReducer, createContext, useEffect } from 'react';
-import { useMutation } from '@tanstack/react-query';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { APIKeyCreationResponse } from '@kbn/search-api-keys-server/types';
-import { APIRoutes } from '../types';
+import { useCreateApiKey } from '../hooks/use_create_api_key';
 import { Status } from '../constants';
+import { useValidateApiKey } from '../hooks/use_validate_api_key';
 
 const API_KEY_STORAGE_KEY = 'searchApiKey';
 const API_KEY_MASK = '•'.repeat(60);
@@ -73,7 +71,6 @@ export const ApiKeyContext = createContext<APIKeyContext>({
 });
 
 export const SearchApiKeyProvider: React.FC<React.PropsWithChildren> = ({ children }) => {
-  const { http } = useKibana().services;
   const [state, dispatch] = useReducer(reducer, initialState);
 
   const updateApiKey = useCallback(({ id, encoded }: { id: string; encoded: string }) => {
@@ -86,39 +83,8 @@ export const SearchApiKeyProvider: React.FC<React.PropsWithChildren> = ({ childr
   const initialiseKey = useCallback(() => {
     dispatch({ type: 'SET_STATUS', status: Status.loading });
   }, []);
-  const { mutateAsync: validateApiKey } = useMutation(async (id: string) => {
-    try {
-      if (!http?.post) {
-        throw new Error('HTTP service is unavailable');
-      }
-
-      const response = await http.post<{ isValid: boolean }>(APIRoutes.API_KEY_VALIDITY, {
-        body: JSON.stringify({ id }),
-      });
-
-      return response.isValid;
-    } catch (err) {
-      return false;
-    }
-  });
-  const { mutateAsync: createApiKey } = useMutation<APIKeyCreationResponse | undefined>({
-    mutationFn: async () => {
-      try {
-        if (!http?.post) {
-          throw new Error('HTTP service is unavailable');
-        }
-
-        return await http.post<APIKeyCreationResponse>(APIRoutes.API_KEYS);
-      } catch (err) {
-        if (err.response?.status === 400) {
-          dispatch({ type: 'SET_STATUS', status: Status.showCreateButton });
-        } else if (err.response?.status === 403) {
-          dispatch({ type: 'SET_STATUS', status: Status.showUserPrivilegesError });
-        } else {
-          throw err;
-        }
-      }
-    },
+  const validateApiKey = useValidateApiKey();
+  const createApiKey = useCreateApiKey({
     onSuccess: (receivedApiKey) => {
       if (receivedApiKey) {
         sessionStorage.setItem(
@@ -130,6 +96,15 @@ export const SearchApiKeyProvider: React.FC<React.PropsWithChildren> = ({ childr
           apiKey: receivedApiKey.encoded,
           status: Status.showHiddenKey,
         });
+      }
+    },
+    onError: (err) => {
+      if (err.response?.status === 400) {
+        dispatch({ type: 'SET_STATUS', status: Status.showCreateButton });
+      } else if (err.response?.status === 403) {
+        dispatch({ type: 'SET_STATUS', status: Status.showUserPrivilegesError });
+      } else {
+        throw err;
       }
     },
   });
