@@ -179,6 +179,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
 
       if (isEsqlQuery) {
         // Not supported yet for ES|QL queries
+        // Previous implementation was removed in https://github.com/elastic/kibana/pull/198948/
         return;
       }
 
