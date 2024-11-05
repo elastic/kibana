@@ -11,7 +11,7 @@ import { encode } from '@kbn/rison';
 import type { FindSLOResponse, UpdateSLOInput, UpdateSLOResponse } from '@kbn/slo-schema';
 import { QueryKey, useMutation, useQueryClient } from '@tanstack/react-query';
 import { paths } from '../../common/locators/paths';
-import { useKibana } from '../utils/kibana_react';
+import { useKibana } from './kibana_react';
 import { sloKeys } from './query_key_factory';
 import { usePluginContext } from './use_plugin_context';
 

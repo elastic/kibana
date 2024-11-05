@@ -22,7 +22,7 @@ import styled from 'styled-components';
 import { usePermissions } from '../../../hooks/use_permissions';
 import { useCloneSlo } from '../../../hooks/use_clone_slo';
 import { BurnRateRuleParams } from '../../../typings';
-import { useKibana } from '../../../utils/kibana_react';
+import { useKibana } from '../../../hooks/kibana_react';
 import { useSloActions } from '../../slo_details/hooks/use_slo_actions';
 
 interface Props {

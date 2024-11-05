@@ -6,7 +6,7 @@
  */
 
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
-import { useKibana } from '../utils/kibana_react';
+import { useKibana } from './kibana_react';
 
 interface UseCreateDataViewProps {
   indexPatternString?: string;

@@ -9,7 +9,7 @@ import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useKibana } from '../utils/kibana_react';
+import { useKibana } from './kibana_react';
 import { sloKeys } from './query_key_factory';
 import { usePluginContext } from './use_plugin_context';
 
