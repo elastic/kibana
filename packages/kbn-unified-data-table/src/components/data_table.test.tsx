@@ -1361,6 +1361,7 @@ describe('UnifiedDataTable', () => {
         const component = await getComponent({
           ...getProps(),
           columns: ['message'],
+          canDragAndDropColumns: true,
         });
         expect(component.find(EuiDataGrid).last().prop('columnVisibility')).toMatchInlineSnapshot(`
           Object {
@@ -1369,6 +1370,28 @@ describe('UnifiedDataTable', () => {
             "visibleColumns": Array [
               "@timestamp",
               "message",
+            ],
+          }
+        `);
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
+
+    it(
+      'should disable drag&drop if Summary is present',
+      async () => {
+        const component = await getComponent({
+          ...getProps(),
+          columns: [],
+          canDragAndDropColumns: true,
+        });
+        expect(component.find(EuiDataGrid).last().prop('columnVisibility')).toMatchInlineSnapshot(`
+          Object {
+            "canDragAndDropColumns": false,
+            "setVisibleColumns": [Function],
+            "visibleColumns": Array [
+              "@timestamp",
+              "_source",
             ],
           }
         `);
