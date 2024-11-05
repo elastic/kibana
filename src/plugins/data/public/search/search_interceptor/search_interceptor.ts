@@ -473,15 +473,15 @@ export class SearchInterceptor {
         .then((rawResponse) => {
           const warning = rawResponse.response?.headers.get('warning');
           const requestParams =
-            'requestParams' in rawResponse.body
+            rawResponse.body && 'requestParams' in rawResponse.body
               ? rawResponse.body.requestParams
               : JSON.parse(rawResponse.response?.headers.get('kbn-search-request-params') || '{}');
           const isRestored =
-            'isRestored' in rawResponse.body
+            rawResponse.body && 'isRestored' in rawResponse.body
               ? rawResponse.body.isRestored
               : rawResponse.response?.headers.get('kbn-search-is-restored') === '?1';
 
-          if ('error' in rawResponse.body) {
+          if (rawResponse.body && 'error' in rawResponse.body) {
             // eslint-disable-next-line no-throw-literal
             throw {
               attributes: {
