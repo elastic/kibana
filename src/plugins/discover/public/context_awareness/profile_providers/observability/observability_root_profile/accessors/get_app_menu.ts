@@ -75,8 +75,6 @@ const registerCustomThresholdRuleAction = (
   { dataView }: AppMenuExtensionParams
 ) => {
   registry.registerCustomActionUnderSubmenu(AppMenuActionId.alerts, {
-    // It's also possible to override the submenu actions by using the same id
-    // as `AppMenuActionId.createRule` or `AppMenuActionId.manageRulesAndConnectors`
     id: AppMenuActionId.createRule,
     type: AppMenuActionType.custom,
     order: 101,
@@ -117,8 +115,6 @@ const registerCreateSLOAction = (
 
   if (sloFeature) {
     registry.registerCustomActionUnderSubmenu(AppMenuActionId.alerts, {
-      // It's also possible to override the submenu actions by using the same id
-      // as `AppMenuActionId.createRule` or `AppMenuActionId.manageRulesAndConnectors`
       id: 'create-slo',
       type: AppMenuActionType.custom,
       order: 102,

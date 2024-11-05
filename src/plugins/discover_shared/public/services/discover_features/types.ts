@@ -32,7 +32,10 @@ export interface ObservabilityLogsAIAssistantFeature {
 
 export interface ObservabilityCreateSLOFeature {
   id: 'observability-create-slo';
-  createSLOFlyout: (props: any) => JSX.Element;
+  createSLOFlyout: (props: {
+    onClose: () => void;
+    initialValues: Record<string, unknown>;
+  }) => JSX.Element;
 }
 
 // This should be a union of all the available client features.
