@@ -53,6 +53,7 @@ export const postKnowledgeBaseRoute = (router: ElasticAssistantPluginRouter) => 
         const assistantContext = ctx.elasticAssistant;
         const core = ctx.core;
         const soClient = core.savedObjects.getClient();
+        const ignoreSecurityLabs = request.query.ignoreSecurityLabs;
 
         try {
           const knowledgeBaseDataClient =
@@ -65,6 +66,7 @@ export const postKnowledgeBaseRoute = (router: ElasticAssistantPluginRouter) => 
 
           await knowledgeBaseDataClient.setupKnowledgeBase({
             soClient,
+            ignoreSecurityLabs,
           });
 
           return response.ok({ body: { success: true } });

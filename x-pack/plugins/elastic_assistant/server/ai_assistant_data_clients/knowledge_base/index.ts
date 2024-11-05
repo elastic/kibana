@@ -195,8 +195,10 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
    */
   public setupKnowledgeBase = async ({
     soClient,
+    ignoreSecurityLabs = false,
   }: {
     soClient: SavedObjectsClientContract;
+    ignoreSecurityLabs?: boolean;
   }): Promise<void> => {
     if (this.options.getIsKBSetupInProgress()) {
       this.options.logger.debug('Knowledge Base setup already in progress');
@@ -272,12 +274,14 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
 
       this.options.logger.debug(`Checking if Knowledge Base docs have been loaded...`);
 
-      const labsDocsLoaded = await this.isSecurityLabsDocsLoaded();
-      if (!labsDocsLoaded) {
-        this.options.logger.debug(`Loading Security Labs KB docs...`);
-        await loadSecurityLabs(this, this.options.logger);
-      } else {
-        this.options.logger.debug(`Security Labs Knowledge Base docs already loaded!`);
+      if (!ignoreSecurityLabs) {
+        const labsDocsLoaded = await this.isSecurityLabsDocsLoaded();
+        if (!labsDocsLoaded) {
+          this.options.logger.debug(`Loading Security Labs KB docs...`);
+          await loadSecurityLabs(this, this.options.logger);
+        } else {
+          this.options.logger.debug(`Security Labs Knowledge Base docs already loaded!`);
+        }
       }
     } catch (e) {
       this.options.setIsKBSetupInProgress(false);
