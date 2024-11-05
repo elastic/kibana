@@ -72,6 +72,13 @@ describe('AddComment ', () => {
   });
 
   it('should render spinner and disable submit when loading', async () => {
+    createAttachmentsMock.mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          /* empty promise that never resolves to test loading state */
+        })
+    );
+
     appMockRender.render(<AddComment {...{ ...addCommentProps, showLoading: true }} />);
 
     fireEvent.change(screen.getByLabelText('caseComment'), {
