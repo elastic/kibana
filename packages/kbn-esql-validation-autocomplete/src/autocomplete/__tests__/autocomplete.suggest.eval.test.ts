@@ -51,6 +51,13 @@ describe('autocomplete.suggest', () => {
         ...getFieldNamesByType('any'),
         ...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true }),
       ]);
+
+      await assertSuggestions('from a | eval doubleField/', [
+        'doubleField, ',
+        'doubleField | ',
+        'var0 = ',
+      ]);
+
       await assertSuggestions('from a | eval doubleField /', [
         ...getFunctionSignaturesByReturnType('eval', 'any', { builtin: true, skipAssign: true }, [
           'double',

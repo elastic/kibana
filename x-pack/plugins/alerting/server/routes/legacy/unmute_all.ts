@@ -34,6 +34,7 @@ export const unmuteAllAlertRoute = (
         access: isServerless ? 'internal' : 'public',
         summary: 'Unmute all alert instances',
         tags: ['oas-tag:alerting'],
+        // @ts-expect-error TODO(https://github.com/elastic/kibana/issues/196095): Replace {RouteDeprecationInfo}
         deprecated: true,
       },
     },
