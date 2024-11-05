@@ -7,22 +7,55 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
+import { cloneDeep } from 'lodash';
+import React, { useMemo, useRef, useState } from 'react';
 import ReactDOM from 'react-dom';
+import { BehaviorSubject, Subject } from 'rxjs';
+import { v4 as uuidv4 } from 'uuid';
 
-import { EuiPageTemplate, EuiProvider } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiButton,
+  EuiButtonEmpty,
+  EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPageTemplate,
+  EuiProvider,
+  EuiSpacer,
+} from '@elastic/eui';
 import { AppMountParameters } from '@kbn/core-application-browser';
-import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
-import { GridLayout, type GridLayoutData } from '@kbn/grid-layout';
-
+import { CoreStart } from '@kbn/core-lifecycle-browser';
 import {
   SearchApi,
   SearchSerializedState,
 } from '@kbn/embeddable-examples-plugin/public/react_embeddables/search/types';
+import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { TimeRange } from '@kbn/es-query';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { GridLayout, GridLayoutData, type GridLayoutApi } from '@kbn/grid-layout';
+import { i18n } from '@kbn/i18n';
 
-export const GridExample = () => {
+import { getPanelId } from './get_panel_id';
+import {
+  clearSerializedGridLayout,
+  getSerializedGridLayout,
+  setSerializedGridLayout,
+} from './serialized_grid_layout';
+
+const DASHBOARD_MARGIN_SIZE = 8;
+const DASHBOARD_GRID_HEIGHT = 20;
+const DASHBOARD_GRID_COLUMN_COUNT = 48;
+const DEFAULT_PANEL_HEIGHT = 15;
+const DEFAULT_PANEL_WIDTH = DASHBOARD_GRID_COLUMN_COUNT / 2;
+
+export const GridExample = ({ coreStart }: { coreStart: CoreStart }) => {
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState<boolean>(false);
+
+  const [layoutKey, setLayoutKey] = useState<string>(uuidv4());
+  const [gridLayoutApi, setGridLayoutApi] = useState<GridLayoutApi | null>();
+  const savedLayout = useRef<GridLayoutData>(getSerializedGridLayout());
+  const currentLayout = useRef<GridLayoutData>(savedLayout.current);
+
   const parentApi = useMemo(() => {
     return {
       // behaviour subjeect for drag handle references?
@@ -51,9 +84,104 @@ export const GridExample = () => {
   return (
     <EuiProvider>
       <EuiPageTemplate grow={false} offset={0} restrictWidth={false}>
-        <EuiPageTemplate.Header iconType={'dashboardApp'} pageTitle="Grid Layout Example" />
+        <EuiPageTemplate.Header
+          iconType={'dashboardApp'}
+          pageTitle={i18n.translate('examples.gridExample.pageTitle', {
+            defaultMessage: 'Grid Layout Example',
+          })}
+        />
         <EuiPageTemplate.Section color="subdued">
+          <EuiCallOut
+            title={i18n.translate('examples.gridExample.sessionStorageCallout', {
+              defaultMessage:
+                'This example uses session storage to persist saved state and unsaved changes',
+            })}
+          >
+            <EuiButton
+              color="accent"
+              size="s"
+              onClick={() => {
+                clearSerializedGridLayout();
+                window.location.reload();
+              }}
+            >
+              {i18n.translate('examples.gridExample.resetExampleButton', {
+                defaultMessage: 'Reset example',
+              })}
+            </EuiButton>
+          </EuiCallOut>
+          <EuiSpacer size="m" />
+          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                onClick={async () => {
+                  const panelId = await getPanelId({
+                    coreStart,
+                    suggestion: `panel${(gridLayoutApi?.getPanelCount() ?? 0) + 1}`,
+                  });
+                  if (panelId)
+                    gridLayoutApi?.addPanel(panelId, {
+                      width: DEFAULT_PANEL_WIDTH,
+                      height: DEFAULT_PANEL_HEIGHT,
+                    });
+                }}
+              >
+                {i18n.translate('examples.gridExample.addPanelButton', {
+                  defaultMessage: 'Add a panel',
+                })}
+              </EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup gutterSize="xs" alignItems="center">
+                {hasUnsavedChanges && (
+                  <EuiFlexItem grow={false}>
+                    <EuiBadge color="warning">
+                      {i18n.translate('examples.gridExample.unsavedChangesBadge', {
+                        defaultMessage: 'Unsaved changes',
+                      })}
+                    </EuiBadge>
+                  </EuiFlexItem>
+                )}
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    onClick={() => {
+                      currentLayout.current = cloneDeep(savedLayout.current);
+                      setHasUnsavedChanges(false);
+                      setLayoutKey(uuidv4()); // force remount of grid
+                    }}
+                  >
+                    {i18n.translate('examples.gridExample.resetLayoutButton', {
+                      defaultMessage: 'Reset',
+                    })}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    onClick={() => {
+                      if (gridLayoutApi) {
+                        const layoutToSave = gridLayoutApi.serializeState();
+                        setSerializedGridLayout(layoutToSave);
+                        savedLayout.current = layoutToSave;
+                        setHasUnsavedChanges(false);
+                      }
+                    }}
+                  >
+                    {i18n.translate('examples.gridExample.saveLayoutButton', {
+                      defaultMessage: 'Save',
+                    })}
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="m" />
           <GridLayout
+            key={layoutKey}
+            onLayoutChange={(newLayout) => {
+              currentLayout.current = cloneDeep(newLayout);
+              setHasUnsavedChanges(!isLayoutEqual(savedLayout.current, newLayout));
+            }}
+            ref={setGridLayoutApi}
             renderPanelContents={(id, setDragHandles) => {
               // console.log('RENDER PANEL', id);
               // return <div style={{ padding: 8 }}>{id}</div>;
@@ -73,36 +201,13 @@ export const GridExample = () => {
               );
             }}
             getCreationOptions={() => {
-              const initialLayout: GridLayoutData = [
-                {
-                  title: 'Large section',
-                  isCollapsed: false,
-                  panels: {
-                    panel1: { column: 0, row: 0, width: 12, height: 6, id: 'panel1' },
-                    panel2: { column: 0, row: 6, width: 8, height: 4, id: 'panel2' },
-                    panel3: { column: 8, row: 6, width: 12, height: 4, id: 'panel3' },
-                    panel4: { column: 0, row: 10, width: 48, height: 4, id: 'panel4' },
-                    panel5: { column: 12, row: 0, width: 36, height: 6, id: 'panel5' },
-                    panel6: { column: 24, row: 6, width: 24, height: 4, id: 'panel6' },
-                    panel7: { column: 20, row: 6, width: 4, height: 2, id: 'panel7' },
-                    panel8: { column: 20, row: 8, width: 4, height: 2, id: 'panel8' },
-                  },
-                },
-                {
-                  title: 'Small section',
-                  isCollapsed: false,
-                  panels: { panel9: { column: 0, row: 0, width: 12, height: 16, id: 'panel9' } },
-                },
-                {
-                  title: 'Another small section',
-                  isCollapsed: false,
-                  panels: { panel10: { column: 24, row: 0, width: 12, height: 6, id: 'panel10' } },
-                },
-              ];
-
               return {
-                gridSettings: { gutterSize: 8, rowHeight: 26, columnCount: 48 },
-                initialLayout,
+                gridSettings: {
+                  gutterSize: DASHBOARD_MARGIN_SIZE,
+                  rowHeight: DASHBOARD_GRID_HEIGHT,
+                  columnCount: DASHBOARD_GRID_COLUMN_COUNT,
+                },
+                initialLayout: cloneDeep(currentLayout.current),
               };
             }}
           />
@@ -112,8 +217,11 @@ export const GridExample = () => {
   );
 };
 
-export const renderGridExampleApp = (element: AppMountParameters['element']) => {
-  ReactDOM.render(<GridExample />, element);
+export const renderGridExampleApp = (
+  element: AppMountParameters['element'],
+  coreStart: CoreStart
+) => {
+  ReactDOM.render(<GridExample coreStart={coreStart} />, element);
 
   return () => ReactDOM.unmountComponentAtNode(element);
 };
