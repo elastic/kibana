@@ -40,7 +40,8 @@ import { closeTimeline, openTimelineById } from '../../../tasks/timeline';
 const siemDataViewTitle = 'Security Default Data View';
 const dataViews = ['logs-*', 'metrics-*', '.kibana-event-log-*'];
 
-describe('Timeline scope', { tags: ['@ess', '@serverless', '@skipInServerless'] }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/198943
+describe.skip('Timeline scope', { tags: ['@ess', '@serverless', '@skipInServerless'] }, () => {
   before(() => {
     waitForRulesBootstrap();
   });
