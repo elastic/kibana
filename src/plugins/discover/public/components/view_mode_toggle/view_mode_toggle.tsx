@@ -8,7 +8,7 @@
  */
 
 import React, { useMemo, useEffect, useState, type ReactElement, useCallback } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiTab, EuiTabs, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTab, EuiTabs, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { isLegacyTableEnabled, SHOW_FIELD_STATISTICS } from '@kbn/discover-utils';
@@ -46,12 +46,6 @@ export const DocumentViewModeToggle = ({
     () => isLegacyTableEnabled({ uiSettings, isEsqlMode }),
     [uiSettings, isEsqlMode]
   );
-  const state = stateContainer.appState.getState();
-  const fieldStatsWarningMsgForQuery = useMemo(() => {
-    return isEsqlMode
-      ? dataVisualizerService?.getReasonIfFieldStatsUnavailableForQuery(state.query)
-      : undefined;
-  }, [state.query, dataVisualizerService, isEsqlMode]);
 
   const [showPatternAnalysisTab, setShowPatternAnalysisTab] = useState<boolean | null>(null);
   const showFieldStatisticsTab = useMemo(
@@ -171,17 +165,15 @@ export const DocumentViewModeToggle = ({
 
             {showFieldStatisticsTab ? (
               <EuiTab
-                disabled={isEsqlMode || fieldStatsWarningMsgForQuery !== undefined}
+                disabled={isEsqlMode}
                 isSelected={viewMode === VIEW_MODE.AGGREGATED_LEVEL}
                 onClick={() => setDiscoverViewMode(VIEW_MODE.AGGREGATED_LEVEL)}
                 data-test-subj="dscViewModeFieldStatsButton"
               >
-                <EuiToolTip content={fieldStatsWarningMsgForQuery}>
-                  <FormattedMessage
-                    id="discover.viewModes.fieldStatistics.label"
-                    defaultMessage="Field statistics"
-                  />
-                </EuiToolTip>
+                <FormattedMessage
+                  id="discover.viewModes.fieldStatistics.label"
+                  defaultMessage="Field statistics"
+                />
               </EuiTab>
             ) : null}
           </EuiTabs>
