@@ -43,7 +43,8 @@ export function defineEnrollRoutes({
       security: {
         authz: {
           enabled: false,
-          reason: 'Interactive setup is strictly a "pre-boot" feature which cannot leverage conventional authorization.',
+          reason:
+            'Interactive setup is strictly a "pre-boot" feature which cannot leverage conventional authorization.',
         },
       },
       validate: {

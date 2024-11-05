@@ -138,7 +138,8 @@ export function defineRecordViolations({ router, analyticsService }: RouteDefini
       security: {
         authz: {
           enabled: false,
-          reason: 'This route is used by browsers to report CSP and Permission Policy violations. These requests are sent without authentication per the browser spec.',
+          reason:
+            'This route is used by browsers to report CSP and Permission Policy violations. These requests are sent without authentication per the browser spec.',
         },
       },
       validate: {
