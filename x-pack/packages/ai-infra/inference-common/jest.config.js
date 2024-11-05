@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import { OutputEvent, OutputEventType, OutputUpdateEvent } from '.';
-
-export function isOutputUpdateEvent<TId extends string>(
-  event: OutputEvent
-): event is OutputUpdateEvent<TId> {
-  return event.type === OutputEventType.OutputComplete;
-}
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/x-pack/packages/ai-infra/inference-common'],
+};

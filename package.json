@@ -571,6 +571,7 @@
     "@kbn/index-management-plugin": "link:x-pack/plugins/index_management",
     "@kbn/index-management-shared-types": "link:x-pack/packages/index-management/index_management_shared_types",
     "@kbn/index-patterns-test-plugin": "link:test/plugin_functional/plugins/index_patterns",
+    "@kbn/inference-common": "link:x-pack/packages/ai-infra/inference-common",
     "@kbn/inference-plugin": "link:x-pack/plugins/inference",
     "@kbn/inference_integration_flyout": "link:x-pack/packages/ml/inference_integration_flyout",
     "@kbn/infra-forge": "link:x-pack/packages/kbn-infra-forge",
