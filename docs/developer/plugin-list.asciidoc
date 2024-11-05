@@ -32,10 +32,6 @@ as uiSettings within the code.
 |The aiAssistantManagementSelection plugin manages the Ai Assistant management section.
 
 
-|{kib-repo}blob/{branch}/src/plugins/bfetch/README.md[bfetch]
-|bfetch allows to batch HTTP requests and streams responses back.
-
-
 |{kib-repo}blob/{branch}/src/plugins/charts/README.md[charts]
 |The Charts plugin is a way to create easier integration of shared colors, themes, types and other utilities across all Kibana charts and visualizations.
 
