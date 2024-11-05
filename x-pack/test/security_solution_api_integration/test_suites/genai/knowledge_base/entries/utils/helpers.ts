@@ -66,7 +66,10 @@ export const setupKnowledgeBase = async (
   namespace?: string
 ): Promise<CreateKnowledgeBaseResponse> => {
   const path = ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_URL.replace('{resource?}', resource || '');
-  const route = routeWithNamespace(`${path}?modelId=pt_tiny_elser`, namespace);
+  const route = routeWithNamespace(
+    `${path}?modelId=pt_tiny_elser&ignoreSecurityLabs=true`,
+    namespace
+  );
   const response = await supertest
     .post(route)
     .set('kbn-xsrf', 'true')
