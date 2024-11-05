@@ -35,7 +35,9 @@ export function withEuiTablePersist<T extends object, Props extends object>(
         get: EuiTablePersistPropsGetter<T, Props>;
       }
 ) {
-  const HOC: React.FC<HOCProps<T, Props>> = (props) => {
+  const HOC: React.FC<HOCProps<T, Omit<Props, keyof EuiTablePersistInjectedProps<T>>>> = (
+    props
+  ) => {
     const getterOverride = euiTablePersistDefault.get
       ? euiTablePersistDefault.get(props)
       : { tableId: '' };
