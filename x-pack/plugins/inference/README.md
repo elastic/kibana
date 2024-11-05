@@ -20,6 +20,18 @@ The following concepts are commonly used throughout the plugin:
 - **tools**: a set of tools that the LLM can choose to use when generating the next message. In essence, it allows the consumer of the API to define a schema for structured output instead of plain text, and having the LLM select the most appropriate one.
 - **tool call**: when the LLM has chosen a tool (schema) to use for its output, and returns a document that matches the schema, this is referred to as a tool call.
 
+## Inference connectors
+
+Performing inference, or more globally communicating with the LLM, is done using stack connectors.
+
+The subset of connectors that can be used for inference are called `genAI`, or `inference` connectors. 
+Calling any inference APIs with the ID of a connector that is not inference-compatible will result in the API throwing an error.
+
+The list of inference connector types:
+- `.gen-ai`: OpenAI connector
+- `.bedrock`: Bedrock Claude connector
+- `.gemini`: Vertex Gemini connector
+
 ## Usage examples
 
 The inference APIs are available via the inference client, which can be created using the inference plugin's start contract:
