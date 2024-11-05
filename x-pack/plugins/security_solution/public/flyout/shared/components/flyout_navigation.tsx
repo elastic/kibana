@@ -23,7 +23,7 @@ import {
   COLLAPSE_DETAILS_BUTTON_TEST_ID,
   EXPAND_DETAILS_BUTTON_TEST_ID,
   HEADER_NAVIGATION_BUTTON_TEST_ID,
-} from '../test_ids';
+} from './test_ids';
 
 export interface FlyoutNavigationProps {
   /**
@@ -63,14 +63,14 @@ export const FlyoutNavigation: FC<FlyoutNavigationProps> = memo(
           size="s"
           data-test-subj={COLLAPSE_DETAILS_BUTTON_TEST_ID}
           aria-label={i18n.translate(
-            'securitySolutionPackages.flyout.right.header.collapseDetailButtonAriaLabel',
+            'xpack.securitySolution.flyout.right.header.collapseDetailButtonAriaLabel',
             {
               defaultMessage: 'Collapse details',
             }
           )}
         >
           <FormattedMessage
-            id="securitySolutionPackages.flyout.right.header.collapseDetailButtonLabel"
+            id="xpack.securitySolution.flyout.right.header.collapseDetailButtonLabel"
             defaultMessage="Collapse details"
           />
         </EuiButtonEmpty>
@@ -87,14 +87,14 @@ export const FlyoutNavigation: FC<FlyoutNavigationProps> = memo(
           size="s"
           data-test-subj={EXPAND_DETAILS_BUTTON_TEST_ID}
           aria-label={i18n.translate(
-            'securitySolutionPackages.flyout.right.header.expandDetailButtonAriaLabel',
+            'xpack.securitySolution.flyout.right.header.expandDetailButtonAriaLabel',
             {
               defaultMessage: 'Expand details',
             }
           )}
         >
           <FormattedMessage
-            id="securitySolutionPackages.flyout.right.header.expandDetailButtonLabel"
+            id="xpack.securitySolution.flyout.right.header.expandDetailButtonLabel"
             defaultMessage="Expand details"
           />
         </EuiButtonEmpty>

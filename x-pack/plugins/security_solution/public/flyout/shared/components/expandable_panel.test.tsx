@@ -13,7 +13,7 @@ import {
   EXPANDABLE_PANEL_CONTENT_TEST_ID,
   EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID,
   EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID,
-} from '../test_ids';
+} from './test_ids';
 import { ThemeProvider } from '@emotion/react';
 import { ExpandablePanel } from './expandable_panel';
 
