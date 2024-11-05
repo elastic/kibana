@@ -435,7 +435,7 @@ export class SyntheticsPrivateLocation {
         policyIdsToDelete,
         {
           force: true,
-          asyncBumpAgentPolicyRevision: true,
+          asyncDeploy: true,
         }
       );
       const failedPolicies = result?.filter((policy) => {
