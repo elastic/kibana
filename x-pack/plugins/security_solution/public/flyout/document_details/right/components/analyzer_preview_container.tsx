@@ -10,7 +10,6 @@ import { useDispatch } from 'react-redux';
 import { TimelineTabs } from '@kbn/securitysolution-data-table';
 import { EuiLink, EuiMark } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ExpandablePanel } from '@kbn/security-solution-common';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import { ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING } from '../../../../../common/constants';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
@@ -23,6 +22,7 @@ import { useIsInvestigateInResolverActionEnabled } from '../../../../detections/
 import { AnalyzerPreview } from './analyzer_preview';
 import { ANALYZER_PREVIEW_TEST_ID } from './test_ids';
 import { useNavigateToAnalyzer } from '../../shared/hooks/use_navigate_to_analyzer';
+import { ExpandablePanel } from '../../../shared/components/expandable_panel';
 
 const timelineId = 'timeline-1';
 
