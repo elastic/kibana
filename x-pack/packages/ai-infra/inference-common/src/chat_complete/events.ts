@@ -77,7 +77,7 @@ export type ChatCompletionChunkEvent =
   };
 
 /**
- * Token count structure the chatComplete API.
+ * Token count structure for the chatComplete API.
  */
 export interface ChatCompletionTokenCount {
   /**
@@ -101,13 +101,13 @@ export interface ChatCompletionTokenCount {
 export type ChatCompletionTokenCountEvent =
   InferenceTaskEventBase<ChatCompletionEventType.ChatCompletionTokenCount> & {
     /**
-     * The token counts structure
+     * The token count structure
      */
     tokens: ChatCompletionTokenCount;
   };
 
 /**
- * Events emitted from the {@link ChatCompletionResponse} observable
+ * Events emitted from the {@link ChatCompleteResponse} observable
  * returned from the {@link ChatCompleteAPI}.
  *
  * The chatComplete API returns 3 type of events:

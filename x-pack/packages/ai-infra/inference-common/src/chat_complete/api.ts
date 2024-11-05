@@ -15,7 +15,7 @@ import type { ChatCompletionEvent, ChatCompletionTokenCount } from './events';
  *
  * By default, The complete LLM response will be returned as a promise.
  *
- * @example using the API in stream mode to get an event observable.
+ * @example using the API in default mode to get promise of the LLM response.
  * ```ts
  * const response = await chatComplete({
  *   connectorId: 'my-connector',
@@ -76,7 +76,7 @@ export type ChatCompleteOptions<
   /**
    * Set to true to enable streaming, which will change the API response type from
    * a single {@link ChatCompleteResponse} promise
-   * to an {@link ChatCompleteStreamResponse} event observable.
+   * to a {@link ChatCompleteStreamResponse} event observable.
    *
    * Defaults to false.
    */

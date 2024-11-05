@@ -74,7 +74,7 @@ class MyPlugin {
 - Normalizing request and response formats from all supported connector types
 - Tool calling and validation of tool calls
 - Token usage stats / events
-- Streaming mode to work with chunk in real time instead of waiting for the full response
+- Streaming mode to work with chunks in real time instead of waiting for the full response
 
 #### Standard usage
 
@@ -196,7 +196,7 @@ const toolCall = toolCalls[0];
 It's basically just making sure that the LLM will call the single tool that is exposed via the provided `schema`.
 It also drops the token count info to simplify usage.
 
-Similar to `chatComplete`, `output` supports two mode: normal full response mode by default, and optional streaming mode by passing the `stream: true` parameter.
+Similar to `chatComplete`, `output` supports two modes: normal full response mode by default, and optional streaming mode by passing the `stream: true` parameter.
 
 ```ts
 import { ToolSchema } from '@kbn/inference-common';
@@ -227,7 +227,7 @@ const response = inferenceClient.outputApi({
   connectorId: 'some-gen-ai-connector',
   schema: mySchema,
   system:
-    'You are an helpful assistant and your current task is to extract informations from the provided document',
+    'You are a helpful assistant and your current task is to extract informations from the provided document',
   input: `
     Please find all the animals and vegetables that are mentioned in the following document:
     

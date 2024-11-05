@@ -121,16 +121,15 @@ export type OutputCompositeResponse<
  */
 export interface OutputResponse<TId extends string = string, TOutput extends Output = Output> {
   /**
-   * The id of the operation, as provided as input
+   * The id of the operation, as specified when calling the API.
    */
   id: TId;
   /**
-   * The task output, following the schema specified as input
+   * The task output, following the schema specified as input.
    */
   output: TOutput;
   /**
-   * Potential text content provided by the LLM,
-   * if it was provided in addition to the tool call
+   * Potential text content provided by the LLM, if it was provided in addition to the tool call.
    */
   content: string;
 }
@@ -138,7 +137,7 @@ export interface OutputResponse<TId extends string = string, TOutput extends Out
 /**
  * Response from the {@link OutputAPI} in streaming mode.
  *
- * Observable of {@link OutputEvent}
+ * @returns Observable of {@link OutputEvent}
  */
 export type OutputStreamResponse<
   TId extends string = string,
