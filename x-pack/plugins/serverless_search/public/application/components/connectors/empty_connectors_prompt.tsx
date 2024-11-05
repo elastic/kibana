@@ -221,7 +221,7 @@ export const EmptyConnectorsPrompt: React.FC = () => {
                                     <EuiLink
                                       target="_blank"
                                       data-test-subj="serverlessSearchEmptyConnectorsPromptDockerLink"
-                                      href="https://github.com/elastic/connectors/blob/main/scripts/stack/README.md"
+                                      href={CONNECTORS.docker_doc}
                                     >
                                       {i18n.translate(
                                         'xpack.serverlessSearch.connectorsEmpty.dockerLabel',

@@ -111,7 +111,7 @@ export const ConnectorsOverview = () => {
                     data-test-subj="serverlessSearchConnectorsOverviewLink"
                     external
                     target="_blank"
-                    href={'TODO TODO'}
+                    href={CONNECTORS.self_managed_docs}
                   >
                     {LEARN_MORE_LABEL}
                   </EuiLink>

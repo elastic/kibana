@@ -26,4 +26,7 @@ export const CRAWLER = {
 
 export const CONNECTORS = {
   github_repo: 'https://github.com/elastic/connectors',
+  self_managed_docs:
+    'https://www.elastic.co/docs/current/serverless/elasticsearch/ingest-data-through-integrations-connector-client',
+  docker_doc: 'https://github.com/elastic/connectors/blob/main/scripts/stack/README.md',
 };
