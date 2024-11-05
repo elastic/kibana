@@ -8,12 +8,7 @@
  */
 
 import { AppMenuActionId, AppMenuActionType, AppMenuRegistry } from '@kbn/discover-utils';
-import {
-  DATA_QUALITY_LOCATOR_ID,
-  DataQualityLocatorParams,
-  OBSERVABILITY_ONBOARDING_LOCATOR,
-  ObservabilityOnboardingLocatorParams,
-} from '@kbn/deeplinks-observability';
+import { DATA_QUALITY_LOCATOR_ID, DataQualityLocatorParams } from '@kbn/deeplinks-observability';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { isOfQueryType } from '@kbn/es-query';
 import { AppMenuExtensionParams } from '../../../..';
@@ -29,7 +24,6 @@ export const createGetAppMenu =
     return {
       appMenuRegistry: (registry) => {
         // Register custom link actions
-        registerOnboardingLink(registry, services);
         registerDatasetQualityLink(registry, services);
         // Register alerts sub menu actions
         registerCreateSLOAction(registry, services, params);
@@ -39,28 +33,6 @@ export const createGetAppMenu =
       },
     };
   };
-
-const registerOnboardingLink = (registry: AppMenuRegistry, { share }: ProfileProviderServices) => {
-  const onboardingLocator = share?.url.locators.get<ObservabilityOnboardingLocatorParams>(
-    OBSERVABILITY_ONBOARDING_LOCATOR
-  );
-
-  if (onboardingLocator) {
-    registry.registerCustomAction({
-      id: 'add-data-action',
-      type: AppMenuActionType.custom,
-      controlProps: {
-        label: 'Add data',
-        testId: 'add-data-action',
-        onClick: ({ onFinishAction }) => {
-          onboardingLocator.navigate({ category: 'logs' });
-
-          onFinishAction();
-        },
-      },
-    });
-  }
-};
 
 const registerDatasetQualityLink = (
   registry: AppMenuRegistry,
