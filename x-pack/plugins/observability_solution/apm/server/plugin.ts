@@ -41,6 +41,7 @@ import { addApiKeysToEveryPackagePolicyIfMissing } from './routes/fleet/api_keys
 import { apmTutorialCustomIntegration } from '../common/tutorial/tutorials';
 import { registerAssistantFunctions } from './assistant_functions';
 import { getAlertDetailsContextHandler } from './routes/assistant_functions/get_observability_alert_details_context';
+import { registerDataDefinitions } from './data_definitions';
 
 export class APMPlugin
   implements Plugin<APMPluginSetup, void, APMPluginSetupDependencies, APMPluginStartDependencies>
@@ -177,6 +178,11 @@ export class APMPlugin
         alertsLocator: plugins.share.url.locators.get(alertsLocatorID),
       });
     }
+
+    registerDataDefinitions({
+      plugins,
+      coreSetup: core,
+    });
 
     registerFleetPolicyCallbacks({
       logger: this.logger,

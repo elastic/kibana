@@ -9,10 +9,10 @@ import { createServerRouteFactory, registerRoutes } from '@kbn/server-route-repo
 import type { CoreSetup, CustomRequestHandlerContext, KibanaRequest } from '@kbn/core/server';
 import type { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server/types';
 import type { Logger } from '@kbn/logging';
-import type {
+import {
   DataDefinitionRegistryServerSetupDependencies,
   DataDefinitionRegistryServerStartDependencies,
-} from '..';
+} from '../plugin';
 
 export function getGlobalDataDefinitionRegistryServerRouteRepository() {
   return {};

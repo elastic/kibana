@@ -4,157 +4,226 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { CoreSetup, Logger } from '@kbn/core/server';
+import { compact, groupBy, mapValues } from 'lodash';
 import pLimit from 'p-limit';
-import { castArray, uniq } from 'lodash';
 import {
+  ClientGetMetricDefinitionResult,
   DataDefinition,
   DataDefinitionRegistry,
   DataDefinitionRegistryClient,
-  DataDefinitionSource,
   DynamicDataDefinition,
+  DynamicDataSource,
   StaticDataDefinition,
 } from './types';
 
-type DynamicDefinitionsBySourceMap = Partial<{
-  [key in DataDefinitionSource['type']]: Extract<DataDefinitionSource, { type: key }> extends {
-    name: string;
-  }
-    ? Map<string, DynamicDataDefinition>
-    : DynamicDataDefinition;
-}>;
+const NAME_ALL = '_all_';
 
-export function createDataDefinitionRegistry(): DataDefinitionRegistry {
-  const internalDefinitions = new Set<StaticDataDefinition>();
-  const dynamicDefinitionsMap: DynamicDefinitionsBySourceMap = {
-    rule: new Map(),
-    visualization: new Map(),
-  };
+export function createDataDefinitionRegistry({
+  coreSetup,
+  logger,
+}: {
+  coreSetup: CoreSetup;
+  logger: Logger;
+}): DataDefinitionRegistry {
+  const staticDefinitions = new Set<StaticDataDefinition>();
+  const dynamicDefinitions = new Map<string, Map<string, DynamicDataDefinition>>();
 
   const allDefinitions = new Map<string, DataDefinition>();
 
-  function getDynamicDefinitionForSource(source: Omit<DataDefinitionSource, 'instance'>) {
-    if (source.type === 'slo') {
-      return dynamicDefinitionsMap[source.type];
+  function getDynamicDefinitionForSource(
+    source: Omit<DynamicDataSource, 'instance' | 'properties'>
+  ) {
+    const definitionsForType = dynamicDefinitions.get(source.type);
+
+    if (!definitionsForType) {
+      return undefined;
     }
-    return source.name ? dynamicDefinitionsMap[source.type]?.get(source.name) : undefined;
+
+    const name = source.name ?? NAME_ALL;
+
+    return definitionsForType.get(name);
   }
 
   function setDynamicDefinitionForSource(definition: DynamicDataDefinition) {
-    if (definition.source.type === 'slo') {
-      dynamicDefinitionsMap[definition.source.type] = definition;
-    } else if (definition.source.name) {
-      dynamicDefinitionsMap[definition.source.type]!.set(definition.source.name, definition);
+    let definitionsForType = dynamicDefinitions.get(definition.source.type);
+    if (!definitionsForType) {
+      definitionsForType = new Map<string, DynamicDataDefinition>();
+      dynamicDefinitions.set(definition.source.type, definitionsForType);
     }
+
+    definitionsForType.set(definition.source.name ?? NAME_ALL, definition);
   }
 
   function getApplicableStaticDefinitions() {
-    return Array.from(internalDefinitions.values());
+    return Array.from(staticDefinitions.values());
   }
 
-  return {
-    registerDefinition: (definition) => {
-      internalDefinitions.add(definition);
+  function getSourcesGroupedByDefinitionId(sources: DynamicDataSource[]) {
+    const sourcesWithDefinitionIds = sources.map((source) => ({
+      source,
+      definitionId: getDynamicDefinitionForSource(source)?.id,
+    }));
+
+    const sourcesByDefinitionId = groupBy(
+      sourcesWithDefinitionIds.filter(
+        (source): source is Omit<typeof source, 'definitionId'> & { definitionId: string } =>
+          !!source.definitionId
+      ),
+      ({ definitionId }) => definitionId
+    );
+
+    return sourcesByDefinitionId;
+  }
+
+  const registry: DataDefinitionRegistry = {
+    registerStaticDataDefinition: (
+      metadata: { id: string },
+      ...args:
+        | [StaticDataDefinition['getScopes']]
+        | [
+            StaticDataDefinition['getScopes'],
+            StaticDataDefinition['getMetrics'],
+            StaticDataDefinition['getTimeseries']
+          ]
+    ) => {
+      if (allDefinitions.get(metadata.id)) {
+        throw new Error(`Definition id ${metadata.id} already registered`);
+      }
+
+      const definition: StaticDataDefinition = {
+        id: metadata.id,
+        getScopes: args[0],
+        getMetrics: args[1],
+        getTimeseries: args[2],
+      };
+
       allDefinitions.set(definition.id, definition);
+      staticDefinitions.add(definition);
     },
-    registerDynamicDefinition: (definition) => {
-      const currentDefinition = getDynamicDefinitionForSource(definition.source);
-      if (currentDefinition) {
+    registerDynamicDataDefinition: (
+      metadata: { id: string; source: { type: string; name?: string } },
+      ...args:
+        | [DynamicDataDefinition['getSources'], DynamicDataDefinition['getScopes']]
+        | [
+            DynamicDataDefinition['getSources'],
+            DynamicDataDefinition['getScopes'],
+            DynamicDataDefinition['getMetrics'],
+            DynamicDataDefinition['getTimeseries']
+          ]
+    ) => {
+      if (getDynamicDefinitionForSource(metadata.source)) {
         throw new Error(
-          `Definition for ${definition.source.type}/${definition.source.name} already exists`
+          `Definition for source ${metadata.source.type}, ${metadata.source.name} already registered `
         );
       }
-      allDefinitions.set(definition.id, definition);
+
+      const definition: DynamicDataDefinition = {
+        id: metadata.id,
+        source: metadata.source,
+        getSources: args[0],
+        getScopes: args[1],
+        getMetrics: args[2],
+        getTimeseries: args[3],
+      };
+
       setDynamicDefinitionForSource(definition);
+      allDefinitions.set(definition.id, definition);
     },
-    getClientWithRequest: (request) => {
+
+    getClientWithRequest: async (request) => {
+      const [coreStart] = await coreSetup.getStartServices();
+      const esClient = coreStart.elasticsearch.client.asScoped(request);
+      const soClient = coreStart.savedObjects.getScopedClient(request);
+
+      const withClients = { esClient, soClient, request };
+
       const client: DataDefinitionRegistryClient = {
-        getDataScopes: async (sources, options) => {
-          const sourcesWithDefinitions = sources.map((source) => ({
-            source,
-            definition: getDynamicDefinitionForSource(source),
-          }));
+        getScopes: async (sources, options) => {
+          const sourcesByDefinitionId = getSourcesGroupedByDefinitionId(sources);
+          const optionsWithClient = { ...options, ...withClients };
 
-          const staticScopes = await Promise.all(
-            getApplicableStaticDefinitions().map(async (definition) => ({
-              scope: await definition.getDataScope({ ...options, request }),
-            }))
-          );
+          const staticScopes = (
+            await Promise.all(
+              getApplicableStaticDefinitions().map(
+                async (definition) => await definition.getScopes(optionsWithClient)
+              )
+            )
+          ).flat();
 
-          const dynamicScopes = sourcesWithDefinitions.flatMap(({ source, definition }) => {
-            const scope = definition?.getDataScope({ ...options, source });
-            return scope ? [{ scope, source }] : [];
-          });
+          const dynamicScopes = Object.entries(sourcesByDefinitionId)
+            .map(([definitionId, sourcesForDefinition]) => {
+              const definition = allDefinitions.get(definitionId)! as DynamicDataDefinition;
+              return definition.getScopes(
+                sourcesForDefinition.map(({ source }) => source),
+                optionsWithClient
+              );
+            })
+            .flat();
 
-          return [
-            ...staticScopes.map(({ scope }) => ({
-              scope: { ...scope, index: uniq(castArray(scope.index)).sort() },
-            })),
-            ...dynamicScopes,
-          ];
+          return [...staticScopes, ...dynamicScopes];
         },
         getMetrics: async (sources, options) => {
-          const sourcesWithDefinitions = sources.map((source) => ({
-            source,
-            definition: getDynamicDefinitionForSource(source),
-          }));
+          const optionsWithClient = { ...options, ...withClients };
 
-          const staticMetricDefinitions = await Promise.all(
-            getApplicableStaticDefinitions().map(async (definition) => {
-              const [scope, metrics] = await Promise.all([
-                definition.getDataScope({ ...options, request }),
-                definition.getMetrics({ ...options, request }),
-              ]);
-              return {
-                scope,
-                metrics,
-              };
+          const sourcesByDefinitionId = getSourcesGroupedByDefinitionId(sources);
+
+          const staticMetricDefinitions: ClientGetMetricDefinitionResult[] = compact(
+            await Promise.all(
+              getApplicableStaticDefinitions().map(async (definition) => {
+                const metrics = await definition.getMetrics?.(optionsWithClient);
+
+                if (metrics) {
+                  return mapValues(metrics, (metric) => ({
+                    ...metric,
+                    definitionId: definition.id,
+                  }));
+                }
+
+                return undefined;
+              })
+            )
+          );
+
+          const dynamicMetricDefinitions: ClientGetMetricDefinitionResult[] = compact(
+            Object.entries(sourcesByDefinitionId).map(([definitionId, sourcesForDefinition]) => {
+              const definition = allDefinitions.get(definitionId)! as DynamicDataDefinition;
+              const metrics = definition.getMetrics?.(
+                sourcesForDefinition.map(({ source }) => source),
+                optionsWithClient
+              );
+
+              if (metrics) {
+                return mapValues(metrics, (metric) => ({ ...metric, definitionId: definition.id }));
+              }
+              return undefined;
             })
           );
 
-          const dynamicMetricDefinitions = sourcesWithDefinitions.flatMap(
-            ({ source, definition }) => {
-              if (!definition) {
-                return [];
+          const metricResult: ClientGetMetricDefinitionResult = {};
+
+          const allMetricResults = [
+            ...compact(staticMetricDefinitions),
+            ...compact(dynamicMetricDefinitions),
+          ];
+
+          allMetricResults.forEach((partialMetricResult) => {
+            Object.keys(partialMetricResult).forEach((metricId) => {
+              if (metricResult[metricId]) {
+                logger.warn(`Overriding metric id ${metricId}`);
               }
-              return [
-                {
-                  source,
-                  scope: definition.getDataScope({ ...options, source }),
-                  metrics: definition.getMetrics({ ...options, source }),
-                },
-              ];
-            }
-          );
+              metricResult[metricId] = partialMetricResult[metricId];
+            });
+          });
 
-          return [...staticMetricDefinitions, ...dynamicMetricDefinitions];
+          return metricResult;
         },
-        getTimeseries: async (sources, options) => {
-          const { start, end, bucketSize, query } = options;
+        getTimeseries: async (options) => {
+          const optionsWithClient = { ...options, ...withClients };
           const limiter = pLimit(25);
-          const metricsById = new Map(
-            options.metrics.map((metric) => [[metric.id, metric.definitionId].join('/'), metric])
-          );
-
-          const selectedMetrics = (await client.getMetrics(sources, options)).flatMap(
-            ({ metrics, source }) => {
-              return metrics.flatMap((metric) => {
-                const id = [metric.id, metric.definitionId].join('/');
-
-                if (metricsById.get(id)) {
-                  return [
-                    {
-                      metric,
-                      source,
-                    },
-                  ];
-                }
-                return [];
-              });
-            }
-          );
 
           const allResults = await Promise.all(
-            selectedMetrics.map(({ metric, source }) => {
+            options.metrics.map((metric) => {
               const definition = allDefinitions.get(metric.definitionId);
               if (!definition) {
                 throw new Error(
@@ -162,31 +231,15 @@ export function createDataDefinitionRegistry(): DataDefinitionRegistry {
                 );
               }
 
-              if ('source' in definition && !source) {
-                throw new Error(`Expected source to be defined for metric ${metric.id}`);
-              }
+              const { getTimeseries } = definition;
 
-              if ('source' in definition) {
-                return limiter(() =>
-                  definition.getTimeseries({
-                    request,
-                    source: source!,
-                    bucketSize,
-                    start,
-                    end,
-                    query,
-                    metrics: [metric],
-                  })
-                );
+              if (!getTimeseries) {
+                throw new Error(`Definition ${metric.definitionId} does not support timeseries`);
               }
 
               return limiter(() =>
-                definition.getTimeseries({
-                  request,
-                  bucketSize,
-                  start,
-                  end,
-                  query,
+                getTimeseries({
+                  ...optionsWithClient,
                   metrics: [metric],
                 })
               );
@@ -200,4 +253,6 @@ export function createDataDefinitionRegistry(): DataDefinitionRegistry {
       return client;
     },
   };
+
+  return registry;
 }

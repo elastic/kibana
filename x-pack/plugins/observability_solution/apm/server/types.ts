@@ -5,52 +5,52 @@
  * 2.0.
  */
 
-import { SharePluginSetup } from '@kbn/share-plugin/server';
-import { Observable } from 'rxjs';
-import {
+import type { SharePluginSetup } from '@kbn/share-plugin/server';
+import type { Observable } from 'rxjs';
+import type {
   RuleRegistryPluginSetupContract,
   RuleRegistryPluginStartContract,
 } from '@kbn/rule-registry-plugin/server';
-import {
+import type {
   PluginSetup as DataPluginSetup,
   PluginStart as DataPluginStart,
 } from '@kbn/data-plugin/server';
-import {
+import type {
   ApmDataAccessPluginSetup,
   ApmDataAccessPluginStart,
 } from '@kbn/apm-data-access-plugin/server';
 
-import { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import { HomeServerPluginSetup, HomeServerPluginStart } from '@kbn/home-plugin/server';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import { ActionsPlugin } from '@kbn/actions-plugin/server';
-import { AlertingPlugin } from '@kbn/alerting-plugin/server';
-import { CloudSetup } from '@kbn/cloud-plugin/server';
-import { FeaturesPluginSetup, FeaturesPluginStart } from '@kbn/features-plugin/server';
-import { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
-import { MlPluginSetup, MlPluginStart } from '@kbn/ml-plugin/server';
-import { ObservabilityPluginSetup } from '@kbn/observability-plugin/server';
-import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
-import {
+import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { HomeServerPluginSetup, HomeServerPluginStart } from '@kbn/home-plugin/server';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { ActionsPlugin } from '@kbn/actions-plugin/server';
+import type { AlertingPlugin } from '@kbn/alerting-plugin/server';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import type { FeaturesPluginSetup, FeaturesPluginStart } from '@kbn/features-plugin/server';
+import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import type { MlPluginSetup, MlPluginStart } from '@kbn/ml-plugin/server';
+import type { ObservabilityPluginSetup } from '@kbn/observability-plugin/server';
+import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
+import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import {
+import type {
   FleetSetupContract as FleetPluginSetup,
   FleetStartContract as FleetPluginStart,
 } from '@kbn/fleet-plugin/server';
-import { MetricsDataPluginSetup } from '@kbn/metrics-data-access-plugin/server';
-import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
+import type { MetricsDataPluginSetup } from '@kbn/metrics-data-access-plugin/server';
+import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 
-import {
+import type {
   CustomIntegrationsPluginSetup,
   CustomIntegrationsPluginStart,
 } from '@kbn/custom-integrations-plugin/server';
-import {
+import type {
   ProfilingDataAccessPluginSetup,
   ProfilingDataAccessPluginStart,
 } from '@kbn/profiling-data-access-plugin/server';
-import {
+import type {
   LogsDataAccessPluginSetup,
   LogsDataAccessPluginStart,
 } from '@kbn/logs-data-access-plugin/server';
@@ -58,7 +58,11 @@ import type {
   ObservabilityAIAssistantServerSetup,
   ObservabilityAIAssistantServerStart,
 } from '@kbn/observability-ai-assistant-plugin/server';
-import { APMConfig } from '.';
+import type {
+  DataDefinitionRegistryServerStart,
+  DataDefinitionRegistryServerSetup,
+} from '@kbn/data-definition-registry-plugin/server';
+import type { APMConfig } from '.';
 
 export interface APMPluginSetup {
   config$: Observable<APMConfig>;
@@ -90,6 +94,7 @@ export interface APMPluginSetupDependencies {
   customIntegrations?: CustomIntegrationsPluginSetup;
   profilingDataAccess?: ProfilingDataAccessPluginSetup;
   logsDataAccess: LogsDataAccessPluginSetup;
+  dataDefinitionRegistry?: DataDefinitionRegistryServerSetup;
 }
 export interface APMPluginStartDependencies {
   // required dependencies
@@ -117,4 +122,5 @@ export interface APMPluginStartDependencies {
   customIntegrations?: CustomIntegrationsPluginStart;
   profilingDataAccess?: ProfilingDataAccessPluginStart;
   logsDataAccess: LogsDataAccessPluginStart;
+  dataDefinitionRegistry?: DataDefinitionRegistryServerStart;
 }

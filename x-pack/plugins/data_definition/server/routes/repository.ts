@@ -9,10 +9,12 @@ import { CoreSetup, Logger } from '@kbn/core/server';
 import { registerRoutes } from '@kbn/server-route-repository';
 import { dataScopesRoutes } from './data_scopes/route';
 import { DataDefinitionRouteHandlerResources } from '.';
+import { metricsRoutes } from './metrics/route';
 
 export function getGlobalDataDefinitionServerRouteRepository() {
   return {
     ...dataScopesRoutes,
+    ...metricsRoutes,
   };
 }
 

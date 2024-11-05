@@ -6,8 +6,6 @@
  */
 import {
   createPlugin,
-  type DataDefinitionRegistryServerSetupDependencies,
-  type DataDefinitionRegistryServerStartDependencies,
   type IDataDefinitionRegistryServerPluginInitializer,
   type DataDefinitionRegistryServerSetup,
   type DataDefinitionRegistryServerStart,
@@ -15,17 +13,13 @@ import {
 
 export type { DataDefinitionRegistryServerRouteRepository } from './routes';
 export type {
-  DataDefinitionScope,
-  DataDefinitionSource,
+  DynamicDataSource,
+  DataScope,
   DataDefinitionRegistryClient,
+  GetDataScopeResult,
 } from './data_definition_registry/types';
 
-export type {
-  DataDefinitionRegistryServerSetupDependencies,
-  DataDefinitionRegistryServerStartDependencies,
-  DataDefinitionRegistryServerSetup,
-  DataDefinitionRegistryServerStart,
-};
+export type { DataDefinitionRegistryServerSetup, DataDefinitionRegistryServerStart };
 
 export const plugin: IDataDefinitionRegistryServerPluginInitializer = async (
   pluginInitializerContext

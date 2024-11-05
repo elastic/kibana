@@ -6,11 +6,11 @@
  */
 
 import { z } from '@kbn/zod';
-import type { GetDataScopeResult } from '@kbn/data-definition-registry-plugin/server';
 import { createDataDefinitionServerRoute } from '..';
+import type { GetMetricDefinitionResult } from '../../../../data_definition_registry/server/data_definition_registry/types';
 
-const getDataScopesRoute = createDataDefinitionServerRoute({
-  endpoint: 'POST /internal/data_definition/data_scopes',
+const getMetricsRoute = createDataDefinitionServerRoute({
+  endpoint: 'POST /internal/data_definition/metrics',
   params: z.object({
     body: z.object({
       start: z.number(),
@@ -26,7 +26,7 @@ const getDataScopesRoute = createDataDefinitionServerRoute({
   handler: async (
     context
   ): Promise<{
-    results: GetDataScopeResult;
+    results: GetMetricDefinitionResult;
   }> => {
     const {
       request,
@@ -40,7 +40,7 @@ const getDataScopesRoute = createDataDefinitionServerRoute({
       await dataDefinitionRegistry.start()
     ).getClientWithRequest(request);
 
-    const results = await registryClient.getScopes([], {
+    const results = await registryClient.getMetrics([], {
       start,
       end,
       query: {
@@ -52,6 +52,6 @@ const getDataScopesRoute = createDataDefinitionServerRoute({
   },
 });
 
-export const dataScopesRoutes = {
-  ...getDataScopesRoute,
+export const metricsRoutes = {
+  ...getMetricsRoute,
 };

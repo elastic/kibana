@@ -5,17 +5,13 @@
  * 2.0.
  */
 
-import { Plugin } from '@kbn/core-plugins-server';
-import type { KibanaRequest, PluginInitializer, PluginInitializerContext } from '@kbn/core/server';
-import { mapValues } from 'lodash';
 import { schema, type TypeOf } from '@kbn/config-schema';
-import { registerServerRoutes } from './routes';
+import { Plugin } from '@kbn/core-plugins-server';
+import type { PluginInitializer, PluginInitializerContext } from '@kbn/core/server';
+import { mapValues, pick } from 'lodash';
 import { createDataDefinitionRegistry } from './data_definition_registry';
-import {
-  DataDefinitionRegistryClient,
-  DynamicDataDefinition,
-  StaticDataDefinition,
-} from './data_definition_registry/types';
+import { DataDefinitionRegistry } from './data_definition_registry/types';
+import { registerServerRoutes } from './routes';
 
 export const config = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
@@ -31,14 +27,15 @@ export interface DataDefinitionRegistryServerSetupDependencies {}
 
 export interface DataDefinitionRegistryServerStartDependencies {}
 
-export interface DataDefinitionRegistryServerSetup {
-  registerDynamicDefinition(options: DynamicDataDefinition): void;
-  registerDefinition(definition: StaticDataDefinition): void;
-}
+export type DataDefinitionRegistryServerSetup = Pick<
+  DataDefinitionRegistry,
+  'registerDynamicDataDefinition' | 'registerStaticDataDefinition'
+>;
 
-export interface DataDefinitionRegistryServerStart {
-  getClientWithRequest: (request: KibanaRequest) => DataDefinitionRegistryClient;
-}
+export type DataDefinitionRegistryServerStart = Pick<
+  DataDefinitionRegistry,
+  'getClientWithRequest'
+>;
 
 export type IDataDefinitionRegistryServerPluginInitializer = PluginInitializer<
   DataDefinitionRegistryServerSetup,
@@ -57,7 +54,7 @@ export type IDataDefinitionRegistryServerPlugin = Plugin<
 export function createPlugin(
   context: PluginInitializerContext<ConfigSchema>
 ): IDataDefinitionRegistryServerPlugin {
-  const registry = createDataDefinitionRegistry();
+  let registry!: DataDefinitionRegistry;
 
   return {
     setup(coreSetup, pluginsSetup) {
@@ -65,9 +62,13 @@ export function createPlugin(
         .getStartServices()
         .then(([_coreStart, pluginsStart]) => pluginsStart);
 
+      const logger = context.logger.get();
+
+      registry = createDataDefinitionRegistry({ coreSetup, logger });
+
       registerServerRoutes({
         core: coreSetup,
-        logger: context.logger.get(),
+        logger,
         dependencies: {
           plugins: mapValues(pluginsSetup, (value, key) => {
             return {
@@ -81,17 +82,10 @@ export function createPlugin(
         },
       });
 
-      return {
-        registerDefinition: registry.registerDefinition,
-        registerDynamicDefinition: registry.registerDynamicDefinition,
-      };
+      return pick(registry, 'registerStaticDataDefinition', 'registerDynamicDataDefinition');
     },
     start() {
-      return {
-        getClientWithRequest: (request) => {
-          return registry.getClientWithRequest(request);
-        },
-      };
+      return pick(registry, 'getClientWithRequest');
     },
   };
 }
