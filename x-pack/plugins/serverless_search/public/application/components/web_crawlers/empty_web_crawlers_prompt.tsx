@@ -104,6 +104,8 @@ export const EmptyWebCrawlersPrompt: React.FC = () => {
                       `}
                       steps={horizontalSteps}
                       size="s"
+                      // @ts-ignore
+                      inert=""
                     />
                   </EuiFlexItem>
                   <EuiFlexGroup>

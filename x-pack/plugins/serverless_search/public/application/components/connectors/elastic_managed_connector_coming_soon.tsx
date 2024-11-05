@@ -138,6 +138,8 @@ export const ElasticManagedConnectorComingSoon: React.FC = () => {
                       `}
                       steps={horizontalSteps}
                       size="s"
+                      // @ts-ignore
+                      inert=""
                     />
                   </EuiFlexItem>
                   <EuiFlexGroup>
