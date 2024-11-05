@@ -8,8 +8,6 @@
  */
 
 export * from './create_rule';
-export * from './fetch_connector_types';
-export * from './fetch_connectors';
 export * from './fetch_ui_config';
 export * from './resolve_rule';
 export * from './update_rule';

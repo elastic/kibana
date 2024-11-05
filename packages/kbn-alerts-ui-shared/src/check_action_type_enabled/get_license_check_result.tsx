@@ -19,7 +19,7 @@ export const getLicenseCheckResult = (actionType: ActionType) => {
   return {
     isEnabled: false,
     message: i18n.translate(
-      'responseOpsRuleForm.checkActionTypeEnabled.actionTypeDisabledByLicenseMessage',
+      'alertsUIShared.checkActionTypeEnabled.actionTypeDisabledByLicenseMessage',
       {
         defaultMessage: 'This connector requires a {minimumLicenseRequired} license.',
         values: {
@@ -31,7 +31,7 @@ export const getLicenseCheckResult = (actionType: ActionType) => {
       <EuiCard
         titleSize="xs"
         title={i18n.translate(
-          'responseOpsRuleForm.licenseCheck.actionTypeDisabledByLicenseMessageTitle',
+          'alertsUIShared.licenseCheck.actionTypeDisabledByLicenseMessageTitle',
           {
             defaultMessage: 'This feature requires a {minimumLicenseRequired} license.',
             values: {
@@ -42,7 +42,7 @@ export const getLicenseCheckResult = (actionType: ActionType) => {
         // The "re-enable" terminology is used here because this message is used when an alert
         // action was previously enabled and needs action to be re-enabled.
         description={i18n.translate(
-          'responseOpsRuleForm.licenseCheck.actionTypeDisabledByLicenseMessageDescription',
+          'alertsUIShared.licenseCheck.actionTypeDisabledByLicenseMessageDescription',
           { defaultMessage: 'To re-enable this action, please upgrade your license.' }
         )}
         className="actCheckActionTypeEnabled__disabledActionWarningCard"
@@ -50,7 +50,7 @@ export const getLicenseCheckResult = (actionType: ActionType) => {
           <EuiLink href={VIEW_LICENSE_OPTIONS_LINK} target="_blank">
             <FormattedMessage
               defaultMessage="View license options"
-              id="responseOpsRuleForm.licenseCheck.actionTypeDisabledByLicenseLinkTitle"
+              id="alertsUIShared.licenseCheck.actionTypeDisabledByLicenseLinkTitle"
             />
           </EuiLink>
         }
@@ -62,17 +62,14 @@ export const getLicenseCheckResult = (actionType: ActionType) => {
 export const configurationCheckResult = {
   isEnabled: false,
   message: i18n.translate(
-    'responseOpsRuleForm.checkActionTypeEnabled.actionTypeDisabledByConfigMessage',
+    'alertsUIShared.checkActionTypeEnabled.actionTypeDisabledByConfigMessage',
     { defaultMessage: 'This connector is disabled by the Kibana configuration.' }
   ),
   messageCard: (
     <EuiCard
-      title={i18n.translate(
-        'responseOpsRuleForm.licenseCheck.actionTypeDisabledByConfigMessageTitle',
-        {
-          defaultMessage: 'This feature is disabled by the Kibana configuration.',
-        }
-      )}
+      title={i18n.translate('alertsUIShared.licenseCheck.actionTypeDisabledByConfigMessageTitle', {
+        defaultMessage: 'This feature is disabled by the Kibana configuration.',
+      })}
       description=""
       className="actCheckActionTypeEnabled__disabledActionWarningCard"
     />

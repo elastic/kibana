@@ -36,7 +36,7 @@ import {
   RuleActionParam,
   RuleActionParams,
 } from '@kbn/alerting-types';
-import { ActionConnector } from '@kbn/alerts-ui-shared';
+import { ActionConnector, checkActionFormActionTypeEnabled } from '@kbn/alerts-ui-shared';
 import { isEmpty, some } from 'lodash';
 import { css } from '@emotion/react';
 import { SavedObjectAttribute } from '@kbn/core/types';
@@ -56,7 +56,6 @@ import {
   TECH_PREVIEW_DESCRIPTION,
   TECH_PREVIEW_LABEL,
 } from '../translations';
-import { checkActionFormActionTypeEnabled } from '../utils/check_action_type_enabled';
 
 const SUMMARY_GROUP_TITLE = i18n.translate(
   'responseOpsRuleForm.ruleActionsItem.summaryGroupTitle',

@@ -7,42 +7,42 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
 import {
-  EuiPageTemplate,
+  EuiButtonEmpty,
+  EuiCallOut,
+  EuiConfirmModal,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiHorizontalRule,
+  EuiPageTemplate,
   EuiSpacer,
   EuiSteps,
   EuiStepsProps,
   useEuiBackgroundColorCSS,
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiCallOut,
-  EuiConfirmModal,
 } from '@elastic/eui';
+import { checkActionFormActionTypeEnabled } from '@kbn/alerts-ui-shared';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
-  RuleDefinition,
   RuleActions,
+  RuleDefinition,
   RuleDetails,
-  RulePageNameInput,
-  RulePageFooter,
   RuleFormData,
+  RulePageFooter,
+  RulePageNameInput,
 } from '..';
 import { useRuleFormState } from '../hooks';
 import {
-  RULE_FORM_PAGE_RULE_DEFINITION_TITLE,
+  DISABLED_ACTIONS_WARNING_TITLE,
+  RULE_FORM_CANCEL_MODAL_CANCEL,
+  RULE_FORM_CANCEL_MODAL_CONFIRM,
+  RULE_FORM_CANCEL_MODAL_DESCRIPTION,
+  RULE_FORM_CANCEL_MODAL_TITLE,
   RULE_FORM_PAGE_RULE_ACTIONS_TITLE,
+  RULE_FORM_PAGE_RULE_DEFINITION_TITLE,
   RULE_FORM_PAGE_RULE_DETAILS_TITLE,
   RULE_FORM_RETURN_TITLE,
-  DISABLED_ACTIONS_WARNING_TITLE,
-  RULE_FORM_CANCEL_MODAL_TITLE,
-  RULE_FORM_CANCEL_MODAL_DESCRIPTION,
-  RULE_FORM_CANCEL_MODAL_CONFIRM,
-  RULE_FORM_CANCEL_MODAL_CANCEL,
 } from '../translations';
 import { hasActionsError, hasActionsParamsErrors, hasParamsErrors } from '../validation';
-import { checkActionFormActionTypeEnabled } from '../utils/check_action_type_enabled';
 
 export interface RulePageProps {
   isEdit?: boolean;

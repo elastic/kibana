@@ -7,30 +7,30 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, useCallback, useMemo, Suspense } from 'react';
 import {
+  EuiButton,
+  EuiCard,
+  EuiEmptyPrompt,
+  EuiFacetButton,
+  EuiFacetGroup,
+  EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiModal,
-  EuiModalHeader,
-  EuiFieldSearch,
-  EuiFacetButton,
-  EuiModalBody,
   EuiHorizontalRule,
-  EuiModalHeaderTitle,
-  useEuiTheme,
-  EuiEmptyPrompt,
-  EuiFacetGroup,
-  EuiCard,
   EuiIcon,
-  EuiText,
-  EuiSpacer,
-  useCurrentEuiBreakpoint,
-  EuiButton,
   EuiLoadingSpinner,
+  EuiModal,
+  EuiModalBody,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
+  EuiSpacer,
+  EuiText,
   EuiToolTip,
+  useCurrentEuiBreakpoint,
+  useEuiTheme,
 } from '@elastic/eui';
-import { ActionConnector } from '@kbn/alerts-ui-shared';
+import { ActionConnector, checkActionFormActionTypeEnabled } from '@kbn/alerts-ui-shared';
+import React, { Suspense, useCallback, useMemo, useState } from 'react';
 import { useRuleFormState } from '../hooks';
 import {
   ACTION_TYPE_MODAL_EMPTY_TEXT,
@@ -40,7 +40,6 @@ import {
   MODAL_SEARCH_CLEAR_FILTERS_TEXT,
   MODAL_SEARCH_PLACEHOLDER,
 } from '../translations';
-import { checkActionFormActionTypeEnabled } from '../utils/check_action_type_enabled';
 
 type ConnectorsMap = Record<string, { actionTypeId: string; name: string; total: number }>;
 
