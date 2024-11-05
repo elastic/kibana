@@ -100,7 +100,7 @@ describe('StepDefinePackagePolicy', () => {
     packagePolicy = {
       name: '',
       description: 'desc',
-      namespace: undefined,
+      namespace: '',
       enabled: true,
       policy_id: '',
       policy_ids: [''],
@@ -146,6 +146,21 @@ describe('StepDefinePackagePolicy', () => {
         expect(renderResult.getByTestId('comboBoxSearchInput')).toHaveAttribute(
           'placeholder',
           'ns'
+        );
+      });
+    });
+
+    it('should display namespace from package policy', async () => {
+      packagePolicy.namespace = 'package-policy-ns';
+      act(() => {
+        render();
+      });
+
+      await userEvent.click(renderResult.getByText('Advanced options').closest('button')!);
+
+      await waitFor(() => {
+        expect(renderResult.getByTestId('packagePolicyNamespaceInput')).toHaveTextContent(
+          'package-policy-ns'
         );
       });
     });
