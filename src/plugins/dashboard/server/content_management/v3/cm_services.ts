@@ -416,7 +416,6 @@ export const dashboardItemSchema = schema.object(
     version: schema.maybe(schema.string()),
     createdAt: schema.maybe(schema.string()),
     updatedAt: schema.maybe(schema.string()),
-    // TODO check if we can remove createdBy and updatedBy
     createdBy: schema.maybe(schema.string()),
     updatedBy: schema.maybe(schema.string()),
     managed: schema.maybe(schema.boolean()),
