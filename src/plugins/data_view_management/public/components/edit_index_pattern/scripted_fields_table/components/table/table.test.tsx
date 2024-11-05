@@ -37,7 +37,7 @@ describe('Table', () => {
   });
 
   test('should render normally', () => {
-    const component = shallow<Table>(
+    const component = shallow<typeof Table>(
       <Table
         indexPattern={indexPattern}
         items={items}
