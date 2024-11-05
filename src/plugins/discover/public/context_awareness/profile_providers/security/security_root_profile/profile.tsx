@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { getDiscoverCellRenderer } from '@kbn/security-solution-common';
 import { RootProfileProvider, SolutionType } from '../../../profiles';
 import { ProfileProviderServices } from '../../profile_provider_services';
 import { SecurityProfileProviderFactory } from '../types';
@@ -21,12 +19,6 @@ export const createSecurityRootProfileProvider: SecurityProfileProviderFactory<
   profile: {
     getCellRenderers: (prev) => (params) => ({
       ...prev(params),
-      'host.name': (props) => {
-        const CellRenderer = getDiscoverCellRenderer({
-          fieldName: 'host.name',
-        });
-        return <CellRenderer {...props} />;
-      },
     }),
   },
   resolve: (params) => {
