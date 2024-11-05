@@ -7,12 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type {
-  BaseDeprecationDetails,
-  ConfigDeprecationDetails,
-  FeatureDeprecationDetails,
-  ApiDeprecationDetails,
-  DeprecationsDetails,
-  DomainDeprecationDetails,
-  DeprecationsGetResponse,
-} from './src/types';
+export { registerApiDeprecationsInfo } from './register_api_depercation_info';
+export { buildApiDeprecationId } from './api_deprecation_id';

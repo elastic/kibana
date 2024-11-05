@@ -8,13 +8,13 @@
  */
 
 import type { DeepPartial } from '@kbn/utility-types';
-import { mockDeprecationsRegistry, mockDeprecationsFactory } from '../mocks';
+import { mockDeprecationsRegistry, mockDeprecationsFactory } from '../../mocks';
 import {
   registerApiDeprecationsInfo,
-  buildApiDeprecationId,
   createGetApiDeprecations,
-} from './api_deprecations';
-import { RouterDeprecatedRouteDetails } from '@kbn/core-http-server';
+} from './register_api_depercation_info';
+import { buildApiDeprecationId } from './api_deprecation_id';
+import { RouterDeprecatedApiDetails } from '@kbn/core-http-server';
 import { httpServiceMock } from '@kbn/core-http-server-mocks';
 import {
   coreUsageDataServiceMock,
@@ -58,8 +58,8 @@ describe('#registerApiDeprecationsInfo', () => {
 
   describe('#createGetApiDeprecations', () => {
     const createDeprecatedRouteDetails = (
-      overrides?: DeepPartial<RouterDeprecatedRouteDetails>
-    ): RouterDeprecatedRouteDetails =>
+      overrides?: DeepPartial<RouterDeprecatedApiDetails>
+    ): RouterDeprecatedApiDetails =>
       _.merge(
         {
           routeDeprecationOptions: {
@@ -72,7 +72,7 @@ describe('#registerApiDeprecationsInfo', () => {
           routeMethod: 'get',
           routePath: '/api/test/',
           routeVersion: '123',
-        } as RouterDeprecatedRouteDetails,
+        } as RouterDeprecatedApiDetails,
         overrides
       );
 
@@ -124,7 +124,7 @@ describe('#registerApiDeprecationsInfo', () => {
             },
             "deprecationType": "api",
             "documentationUrl": "https://fake-url",
-            "domainId": "core.routes-deprecations",
+            "domainId": "core.http.routes-deprecations",
             "level": "critical",
             "message": Array [
               "The API \\"GET /api/test_removed/\\" has been called 13 times. The last call was on Sunday, September 1, 2024 6:06 AM -04:00.",
@@ -171,7 +171,7 @@ describe('#registerApiDeprecationsInfo', () => {
             },
             "deprecationType": "api",
             "documentationUrl": "https://fake-url",
-            "domainId": "core.routes-deprecations",
+            "domainId": "core.http.routes-deprecations",
             "level": "critical",
             "message": Array [
               "The API \\"GET /api/test_migrated/\\" has been called 13 times. The last call was on Sunday, September 1, 2024 6:06 AM -04:00.",
@@ -216,7 +216,7 @@ describe('#registerApiDeprecationsInfo', () => {
             },
             "deprecationType": "api",
             "documentationUrl": "https://fake-url",
-            "domainId": "core.routes-deprecations",
+            "domainId": "core.http.routes-deprecations",
             "level": "critical",
             "message": Array [
               "The API \\"GET /api/test_bumped/\\" has been called 13 times. The last call was on Sunday, September 1, 2024 6:06 AM -04:00.",
@@ -278,7 +278,7 @@ describe('#registerApiDeprecationsInfo', () => {
             },
             "deprecationType": "api",
             "documentationUrl": "https://fake-url",
-            "domainId": "core.routes-deprecations",
+            "domainId": "core.http.routes-deprecations",
             "level": "critical",
             "message": Array [
               "The API \\"GET /api/test_never_resolved/\\" has been called 13 times. The last call was on Sunday, September 1, 2024 6:06 AM -04:00.",
@@ -308,46 +308,5 @@ describe('#registerApiDeprecationsInfo', () => {
       ]);
       expect(await getDeprecations()).toEqual([]);
     });
-  });
-});
-
-describe('#buildApiDeprecationId', () => {
-  it('returns apiDeprecationId string for versioned routes', () => {
-    const apiDeprecationId = buildApiDeprecationId({
-      routeMethod: 'get',
-      routePath: '/api/test',
-      routeVersion: '10-10-2023',
-    });
-    expect(apiDeprecationId).toBe('10-10-2023|get|/api/test');
-  });
-
-  it('returns apiDeprecationId string for unversioned routes', () => {
-    const apiDeprecationId = buildApiDeprecationId({
-      routeMethod: 'get',
-      routePath: '/api/test',
-    });
-    expect(apiDeprecationId).toBe('unversioned|get|/api/test');
-  });
-
-  it('gives the same ID the route method is capitalized or not', () => {
-    const apiDeprecationId = buildApiDeprecationId({
-      // @ts-expect-error
-      routeMethod: 'GeT',
-      routePath: '/api/test',
-      routeVersion: '10-10-2023',
-    });
-
-    expect(apiDeprecationId).toBe('10-10-2023|get|/api/test');
-  });
-
-  it('gives the same ID the route path has a trailing slash or not', () => {
-    const apiDeprecationId = buildApiDeprecationId({
-      // @ts-expect-error
-      routeMethod: 'GeT',
-      routePath: '/api/test/',
-      routeVersion: '10-10-2023',
-    });
-
-    expect(apiDeprecationId).toBe('10-10-2023|get|/api/test');
   });
 });

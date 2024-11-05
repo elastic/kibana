@@ -7,12 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type {
-  BaseDeprecationDetails,
-  ConfigDeprecationDetails,
-  FeatureDeprecationDetails,
-  ApiDeprecationDetails,
-  DeprecationsDetails,
-  DomainDeprecationDetails,
-  DeprecationsGetResponse,
-} from './src/types';
+import { RouterDeprecatedApiDetails } from '@kbn/core-http-server';
+
+export const buildApiDeprecationId = ({
+  routePath,
+  routeMethod,
+  routeVersion,
+}: Pick<RouterDeprecatedApiDetails, 'routeMethod' | 'routePath' | 'routeVersion'>): string => {
+  return [
+    routeVersion || 'unversioned',
+    routeMethod.toLocaleLowerCase(),
+    routePath.replace(/\/$/, ''),
+  ].join('|');
+};

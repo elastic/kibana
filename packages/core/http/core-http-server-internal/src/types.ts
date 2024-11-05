@@ -16,7 +16,7 @@ import type {
   IContextContainer,
   HttpServiceSetup,
   HttpServiceStart,
-  RouterDeprecatedRouteDetails,
+  RouterDeprecatedApiDetails,
 } from '@kbn/core-http-server';
 import { CoreKibanaRequest } from '@kbn/core-http-router-server-internal';
 import { RouteDeprecationInfo } from '@kbn/core-http-server/src/router/route';
@@ -71,7 +71,7 @@ export interface InternalHttpServiceSetup
     contextName: ContextName,
     provider: IContextProvider<Context, ContextName>
   ) => IContextContainer;
-  getRegisteredDeprecatedApis: () => RouterDeprecatedRouteDetails[];
+  getRegisteredDeprecatedApis: () => RouterDeprecatedApiDetails[];
 }
 
 /** @internal */

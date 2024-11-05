@@ -7,21 +7,19 @@
 
 import expect from '@kbn/expect';
 import { expect as expectExpect } from 'expect';
-import type { DomainDeprecationDetails } from '@kbn/core-deprecations-common';
-import { ApiDeprecationDetails } from '@kbn/core-deprecations-common/src/types';
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import { UsageCountersSavedObject } from '@kbn/usage-collection-plugin/server';
 import _ from 'lodash';
+import type {
+  ApiDeprecationDetails,
+  DomainDeprecationDetails,
+} from '@kbn/core-deprecations-common';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-
-interface DomainApiDeprecationDetails extends ApiDeprecationDetails {
-  domainId: string;
-}
 
 const getApiDeprecations = (allDeprecations: DomainDeprecationDetails[]) => {
   return allDeprecations.filter(
     (deprecation) => deprecation.deprecationType === 'api'
-  ) as unknown as DomainApiDeprecationDetails[];
+  ) as unknown as Array<DomainDeprecationDetails<ApiDeprecationDetails>>;
 };
 
 export default function ({ getService }: FtrProviderContext) {

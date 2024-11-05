@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { RouterDeprecatedRouteDetails } from '@kbn/core-http-server';
+import { RouterDeprecatedApiDetails } from '@kbn/core-http-server';
 import { CoreDeprecatedApiUsageStats } from '@kbn/core-usage-data-server';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 
-export const getApiDeprecationTitle = (details: RouterDeprecatedRouteDetails) => {
+export const getApiDeprecationTitle = (details: RouterDeprecatedApiDetails) => {
   const { routePath, routeMethod, routeDeprecationOptions } = details;
   const deprecationType = routeDeprecationOptions.reason.type;
   const routeWithMethod = `${routeMethod.toUpperCase()} ${routePath}`;
@@ -32,7 +32,7 @@ export const getApiDeprecationTitle = (details: RouterDeprecatedRouteDetails) =>
 };
 
 export const getApiDeprecationMessage = (
-  details: RouterDeprecatedRouteDetails,
+  details: RouterDeprecatedApiDetails,
   apiUsageStats: CoreDeprecatedApiUsageStats
 ): string[] => {
   const { routePath, routeMethod } = details;
@@ -74,7 +74,7 @@ export const getApiDeprecationMessage = (
   return messages;
 };
 
-export const getApiDeprecationsManualSteps = (details: RouterDeprecatedRouteDetails): string[] => {
+export const getApiDeprecationsManualSteps = (details: RouterDeprecatedApiDetails): string[] => {
   const { routeDeprecationOptions } = details;
   const deprecationType = routeDeprecationOptions.reason.type;
 

@@ -80,7 +80,7 @@ export type {
   LazyValidator,
 } from './route_validator';
 export { RouteValidationError } from './route_validator';
-export type { IRouter, RouteRegistrar, RouterRoute, RouterDeprecatedRouteDetails } from './router';
+export type { IRouter, RouteRegistrar, RouterRoute, RouterDeprecatedApiDetails } from './router';
 export type { IKibanaSocket } from './socket';
 export type {
   KibanaErrorResponseFactory,
