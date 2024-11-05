@@ -41,7 +41,7 @@ export const SECURITY_LABS_KNOWLEDGE_BASE_TOOL: AssistantTool = {
             `Key terms to retrieve Elastic Security Labs content for, like specific malware names or attack techniques.`
           ),
       }),
-      func: async (input, _, cbManager) => {
+      func: async (input) => {
         const docs = await kbDataClient.getKnowledgeBaseDocumentEntries({
           kbResource: SECURITY_LABS_RESOURCE,
           query: input.question,
