@@ -19,19 +19,18 @@ import { omit } from 'lodash';
 import { PackagePolicy } from '@kbn/fleet-plugin/common';
 import expect from '@kbn/expect';
 import { getDevLocation } from '@kbn/synthetics-plugin/server/synthetics_service/get_service_locations';
-import { FtrProviderContext } from '../../ftr_provider_context';
-import { getFixtureJson } from './helper/get_fixture_json';
+import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
+import { getFixtureJson } from './helpers/get_fixture_json';
 import { comparePolicies, getTestSyntheticsPolicy } from './sample_data/test_policy';
 import {
   INSTALLED_VERSION,
   PrivateLocationTestService,
-} from './services/private_location_test_service';
-import { addMonitorAPIHelper, keyToOmitList, omitMonitorKeys } from './add_monitor';
-import { SyntheticsMonitorTestService } from './services/synthetics_monitor_test_service';
+} from '../../../services/synthetics_private_location';
+import { addMonitorAPIHelper, keyToOmitList, omitMonitorKeys } from './create_monitor';
+import { SyntheticsMonitorTestService } from '../../../services/synthetics_monitor';
 
-export default function ({ getService }: FtrProviderContext) {
-  // skipped  until agnostic user auth is implemented
-  describe.skip('PrivateLocationAddMonitor', function () {
+export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
+  describe('PrivateLocationAddMonitor', function () {
     this.tags('skipCloud');
     const kibanaServer = getService('kibanaServer');
     const supertestAPI = getService('supertest');

@@ -113,6 +113,9 @@ export function createServerlessTestConfig<T extends DeploymentAgnosticCommonSer
           ...svlSharedConfig.get('kbnTestServer.serverArgs'),
           ...kbnServerArgsFromController[options.serverlessProject],
           `--serverless=${options.serverlessProject}`,
+          // defined in MKI control plane. Necessary for Synthetics app testing
+          '--xpack.uptime.service.manifestUrl=mockDevUrl',
+          '--xpack.uptime.service.devUrl=mockDevUrl',
         ],
       },
       testFiles: options.testFiles,
