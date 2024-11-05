@@ -11,24 +11,32 @@ import {
   TopNodesResponseRT,
 } from '@kbn/infra-plugin/common/http_api/overview_api';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
-import { FtrProviderContext } from '../../ftr_provider_context';
-import { DATES } from './constants';
+import type { SupertestWithRoleScopeType } from '../../../services';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
+import { DATES } from './utils/constants';
 
-export default function ({ getService }: FtrProviderContext) {
+export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const supertest = getService('supertest');
+  const roleScopedSupertest = getService('roleScopedSupertest');
 
   describe('API /metrics/overview/top', () => {
-    before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/7.0.0/hosts'));
-    after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/7.0.0/hosts'));
+    let supertestWithAdminScope: SupertestWithRoleScopeType;
+
+    before(async () => {
+      supertestWithAdminScope = await roleScopedSupertest.getSupertestWithRoleScope('admin', {
+        withInternalHeaders: true,
+      });
+      await esArchiver.load('x-pack/test/functional/es_archives/infra/7.0.0/hosts');
+    });
+    after(async () => {
+      await esArchiver.unload('x-pack/test/functional/es_archives/infra/7.0.0/hosts');
+      await supertestWithAdminScope.destroy();
+    });
 
     it('works', async () => {
       const { min, max } = DATES['7.0.0'].hosts;
-      const response = await supertest
+      const response = await supertestWithAdminScope
         .post('/api/metrics/overview/top')
-        .set({
-          'kbn-xsrf': 'some-xsrf-token',
-        })
         .send(
           TopNodesRequestRT.encode({
             sourceId: 'default',
@@ -59,11 +67,8 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should return correct sorted calculations', async () => {
         const { min, max } = DATES['8.0.0'].hosts_and_netowrk;
-        const response = await supertest
+        const response = await supertestWithAdminScope
           .post('/api/metrics/overview/top')
-          .set({
-            'kbn-xsrf': 'some-xsrf-token',
-          })
           .send(
             TopNodesRequestRT.encode({
               sourceId: 'default',
