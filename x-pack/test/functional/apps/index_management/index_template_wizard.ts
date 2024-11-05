@@ -166,6 +166,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       // Click Create template
       await pageObjects.indexManagement.clickNextButton();
+      // todo more here
+
+      await testSubjects.click('closeDetailsButton');
     });
 
     describe('Mappings step', () => {
