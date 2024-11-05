@@ -16,7 +16,6 @@ interface CreateTestConfigOptions<T extends DeploymentAgnosticCommonServices> {
   esServerArgs?: string[];
   kbnServerArgs?: string[];
   services?: T;
-  servicesRequiredForTestAnalysis?: string[];
   testFiles: string[];
   junit: { reportName: string };
   suiteTags?: { include?: string[]; exclude?: string[] };
@@ -86,7 +85,6 @@ export function createServerlessTestConfig<T extends DeploymentAgnosticCommonSer
         // services can be customized, but must extend DeploymentAgnosticCommonServices
         ...(options.services || services),
       },
-      servicesRequiredForTestAnalysis: options.servicesRequiredForTestAnalysis,
       dockerServers: defineDockerServersConfig({
         registry: {
           enabled: !!dockerRegistryPort,
