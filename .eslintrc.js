@@ -1959,9 +1959,6 @@ module.exports = {
     /**
      * Cloud Security Team overrides
      */
-    /**
-     * Fleet overrides
-     */
     {
       files: ['x-pack/plugins/cloud_security_posture/**/*.{js,mjs,ts,tsx}'],
       plugins: ['testing-library'],
