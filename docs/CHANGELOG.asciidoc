@@ -435,9 +435,32 @@ Management::
 [[release-notes-8.15.4]]
 == {kib} 8.15.4
 
+The 8.15.4 release includes the following bug fixes.
+
 [float]
-=== Bug fixes and enhancements
-There are no user-facing changes in the 8.15.4 release.
+[[fixes-v8.15.4]]
+=== Bug fixes
+Dashboards and visualizations::
+* Fixes incomplete string escaping and encoding in *TSVB* ({kibana-pull}196248[#196248]).
+* Adds scroll margin to panels ({kibana-pull}193430[#193430]).
+* Fixes an issue where label truncation in heat map legends was not working properly in *Lens* ({kibana-pull}195928[#195928]).
+Discover::
+* Fixes the width for saved object Type column ({kibana-pull}194388[#194388]).
+Elastic Observability solution::
+* Changes the slice outcome from bad to good whenever there is no data during the slice window ({kibana-pull}196942[#196942]).
+Elastic Search solution::
+* Fixes a bug with the https://www.elastic.co/guide/en/enterprise-search/8.15/connectors-network-drive.html[Network Drive connector] where advanced configuration fields were not displayed for CSV file role mappings with `Drive Type: Linux` selected ({kibana-pull}195567[#195567]).
+Elastic Security solution::
+For the Elastic Security 8.15.4 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Kibana platform::
+* Fixes an issue causing the wrong date to show in the header of a report when generated from a relative date ({kibana-pull}197027[#197027]).
+* Fixes an issue with the export options for PNG/PDF reports in a dashboard ({kibana-pull}192530[#192530]).
+Kibana security::
+* Automatic Import no longer returns an "Invalid ECS field" message when the ECS mapping slightly differs from the expected format. For example, `date_format` instead of `date_formats` ({kibana-pull}195167[#195167]).
+Machine Learning::
+* Fixes an issue preventing Anomaly swim lane panels from updating on query changes ({kibana-pull}195090[#195090]).
+Management::
+* Fixes the pagination of the source documents data grid in Transforms ({kibana-pull}196119[#196119]).
 
 [[release-notes-8.15.3]]
 == {kib} 8.15.3
