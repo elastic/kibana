@@ -37,10 +37,6 @@ export default async function ({ readConfigFile }) {
         '--savedObjects.maxImportPayloadBytes=30000000',
         // for testing set buffer duration to 0 to immediately flush counters into saved objects.
         '--usageCollection.usageCounters.bufferDuration=0',
-        // enable dashboard API endpoints for testing
-        `--feature_flags.overrides=${JSON.stringify({
-          'dashboard.enableExperimentalHttpApi': true,
-        })}`,
       ],
     },
   };
