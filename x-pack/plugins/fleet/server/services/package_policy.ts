@@ -486,17 +486,15 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     created: PackagePolicy[];
     failed: Array<{ packagePolicy: NewPackagePolicy; error?: Error | SavedObjectError }>;
   }> {
-    const useSpaceAwareness = await isSpaceAwarenessEnabled();
-    const savedObjectType = await getPackagePolicySavedObjectType();
-    for (const packagePolicy of packagePolicies) {
+    const [useSpaceAwareness, savedObjectType, packageInfos] = await Promise.all([
+      isSpaceAwarenessEnabled(),
+      getPackagePolicySavedObjectType(),
+      getPackageInfoForPackagePolicies(packagePolicies, soClient),
+    ]);
+
+    await pMap(packagePolicies, async (packagePolicy) => {
       const basePkgInfo = packagePolicy.package
-        ? await getPackageInfo({
-            savedObjectsClient: soClient,
-            pkgName: packagePolicy.package.name,
-            pkgVersion: packagePolicy.package.version,
-            ignoreUnverified: true,
-            prerelease: true,
-          })
+        ? packageInfos.get(`${packagePolicy.package.name}-${packagePolicy.package.version}`)
         : undefined;
       if (!packagePolicy.id) {
         packagePolicy.id = SavedObjectsUtils.generateId();
@@ -509,7 +507,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
       this.keepPolicyIdInSync(packagePolicy);
       await preflightCheckPackagePolicy(soClient, packagePolicy, basePkgInfo);
-    }
+    });
 
     const agentPolicyIds = new Set(packagePolicies.flatMap((pkgPolicy) => pkgPolicy.policy_ids));
 
@@ -528,8 +526,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         );
       }
     }
-
-    const packageInfos = await getPackageInfoForPackagePolicies(packagePolicies, soClient);
 
     const isoDate = new Date().toISOString();
 
