@@ -57,16 +57,16 @@ export const parseMeteringStats = (meteringStatsIndices: MeteringStatsIndex[]) =
   }, {});
 
 export const pickAvailableMeteringStats = (
-  indicesBuckets: Array<{ key: string }>,
+  indicesBuckets: string[],
   meteringStatsIndices: Record<string, MeteringStatsIndex>
 ) =>
-  indicesBuckets.reduce((acc: Record<string, MeteringStatsIndex>, { key }: { key: string }) => {
-    if (meteringStatsIndices?.[key]) {
-      acc[key] = {
-        name: meteringStatsIndices?.[key].name,
-        num_docs: meteringStatsIndices?.[key].num_docs,
+  indicesBuckets.reduce((acc: Record<string, MeteringStatsIndex>, indexName: string) => {
+    if (meteringStatsIndices?.[indexName]) {
+      acc[indexName] = {
+        name: meteringStatsIndices?.[indexName].name,
+        num_docs: meteringStatsIndices?.[indexName].num_docs,
         size_in_bytes: null, // We don't have size_in_bytes intentionally when ILM is not available
-        data_stream: meteringStatsIndices?.[key].data_stream,
+        data_stream: meteringStatsIndices?.[indexName].data_stream,
       };
     }
     return acc;

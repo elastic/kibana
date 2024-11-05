@@ -77,6 +77,7 @@ const ObservabilityUptimeAlertOptional = rt.partial({
   'anomaly.start': schemaDate,
   configId: schemaString,
   'error.message': schemaString,
+  'error.stack_trace': schemaString,
   'host.name': schemaString,
   'kibana.alert.context': schemaUnknown,
   'kibana.alert.evaluation.threshold': schemaStringOrNumber,
@@ -88,6 +89,7 @@ const ObservabilityUptimeAlertOptional = rt.partial({
       value: schemaStringArray,
     })
   ),
+  labels: schemaUnknown,
   'location.id': schemaStringArray,
   'location.name': schemaStringArray,
   'monitor.id': schemaString,
@@ -97,6 +99,7 @@ const ObservabilityUptimeAlertOptional = rt.partial({
   'monitor.type': schemaString,
   'observer.geo.name': schemaStringArray,
   'observer.name': schemaStringArray,
+  'service.name': schemaString,
   'tls.server.hash.sha256': schemaString,
   'tls.server.x509.issuer.common_name': schemaString,
   'tls.server.x509.not_after': schemaDate,

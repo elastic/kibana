@@ -66,7 +66,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           },
         ]);
         const connector = await getConnectorByName(connectorName, supertest);
-        objectRemover.add(connector.id, 'action', 'actions');
+        objectRemover.add(connector.id, 'connector', 'actions');
       });
 
       /* FUTURE ENGINEER
@@ -94,7 +94,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           },
         ]);
         const connector = await getConnectorByName(connectorName, supertest);
-        objectRemover.add(connector.id, 'action', 'actions');
+        objectRemover.add(connector.id, 'connector', 'actions');
       });
     });
 
@@ -140,8 +140,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           connectorTypeId: '.slack',
         });
 
-        objectRemover.add(webhookAction.id, 'action', 'actions');
-        objectRemover.add(webApiAction.id, 'action', 'actions');
+        objectRemover.add(webhookAction.id, 'connector', 'actions');
+        objectRemover.add(webApiAction.id, 'connector', 'actions');
         await pageObjects.common.navigateToApp('triggersActions');
       });
 

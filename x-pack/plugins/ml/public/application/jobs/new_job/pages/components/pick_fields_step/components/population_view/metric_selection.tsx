@@ -8,8 +8,9 @@
 import type { FC } from 'react';
 import React, { Fragment, useContext, useEffect, useState, useReducer, useMemo } from 'react';
 import { EuiHorizontalRule } from '@elastic/eui';
-import type { Field, AggFieldPair } from '@kbn/ml-anomaly-utils';
+import type { Field, AggFieldPair, Aggregation } from '@kbn/ml-anomaly-utils';
 
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { useUiSettings } from '../../../../../../../contexts/kibana';
 import { JobCreatorContext } from '../../../job_creator_context';
 import type { PopulationJobCreator } from '../../../../../common/job_creator';
@@ -72,9 +73,13 @@ export const PopulationDetectors: FC<Props> = ({ setIsValid }) => {
 
   function addDetector(selectedOptionsIn: DropDownLabel[]) {
     if (selectedOptionsIn !== null && selectedOptionsIn.length) {
-      const option = selectedOptionsIn[0] as DropDownLabel;
-      if (typeof option !== 'undefined') {
-        const newPair = { agg: option.agg, field: option.field, by: { field: null, value: null } };
+      const option = selectedOptionsIn[0] as DropDownLabel & { field: Field };
+      if (typeof option !== 'undefined' && isPopulatedObject(option, ['agg', 'field'])) {
+        const newPair: AggFieldPair = {
+          agg: option.agg as Aggregation,
+          field: option.field,
+          by: { field: null, value: null },
+        };
         setAggFieldPairList([...aggFieldPairList, newPair]);
         setSelectedOptions([]);
       } else {

@@ -79,7 +79,6 @@ export async function getEcsSubGraph({ model }: EcsGraphParams) {
     .addEdge('modelSubOutput', END);
 
   const compiledEcsSubGraph = workflow.compile();
-
   return compiledEcsSubGraph;
 }
 
@@ -97,7 +96,7 @@ export async function getEcsGraph({ model }: EcsGraphParams) {
     .addNode('handleMergedSubGraphResponse', (state: EcsMappingState) =>
       modelMergedInputFromSubGraph({ state })
     )
-    .addNode('subGraph', subGraph)
+    .addNode('subGraph', subGraph.withConfig({ runName: 'ECS Mapping (Chunk)' }))
     .addEdge(START, 'modelInput')
     .addEdge('subGraph', 'handleMergedSubGraphResponse')
     .addEdge('handleDuplicates', 'handleValidation')
@@ -121,6 +120,5 @@ export async function getEcsGraph({ model }: EcsGraphParams) {
     .addEdge('modelOutput', END);
 
   const compiledEcsGraph = workflow.compile();
-
   return compiledEcsGraph;
 }

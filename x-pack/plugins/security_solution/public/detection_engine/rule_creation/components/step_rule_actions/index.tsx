@@ -15,8 +15,6 @@ import type {
   ActionVariables,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { UseArray } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
-import { shouldShowResponseActions } from '../../../../../common/detection_engine/utils';
 import type { RuleObjectId } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { ResponseActionsForm } from '../../../rule_response_actions/response_actions_form';
 import type {
@@ -39,7 +37,6 @@ interface StepRuleActionsProps extends RuleStepProps {
   ruleId?: RuleObjectId; // Rule SO's id (not ruleId)
   actionMessageParams: ActionVariables;
   summaryActionMessageParams: ActionVariables;
-  ruleType?: Type;
   form: FormHook<ActionsStepRule>;
 }
 
@@ -78,13 +75,11 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
   isUpdateView = false,
   actionMessageParams,
   summaryActionMessageParams,
-  ruleType,
   form,
 }) => {
   const {
     services: { application },
   } = useKibana();
-
   const displayActionsOptions = useMemo(
     () => (
       <>
@@ -102,15 +97,12 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
     [actionMessageParams, summaryActionMessageParams]
   );
   const displayResponseActionsOptions = useMemo(() => {
-    if (shouldShowResponseActions(ruleType)) {
-      return (
-        <UseArray path="responseActions" initialNumberOfItems={0}>
-          {ResponseActionsForm}
-        </UseArray>
-      );
-    }
-    return null;
-  }, [ruleType]);
+    return (
+      <UseArray path="responseActions" initialNumberOfItems={0}>
+        {ResponseActionsForm}
+      </UseArray>
+    );
+  }, []);
   // only display the actions dropdown if the user has "read" privileges for actions
   const displayActionsDropDown = useMemo(() => {
     return application.capabilities.actions.show ? (

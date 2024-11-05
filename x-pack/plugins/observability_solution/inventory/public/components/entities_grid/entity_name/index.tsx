@@ -6,65 +6,52 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
-import {
-  ASSET_DETAILS_LOCATOR_ID,
-  AssetDetailsLocatorParams,
-  ENTITY_DISPLAY_NAME,
-  ENTITY_IDENTITY_FIELDS,
-  ENTITY_TYPE,
-  SERVICE_ENVIRONMENT,
-  ServiceOverviewParams,
-} from '@kbn/observability-shared-plugin/common';
 import React, { useCallback } from 'react';
-import { Entity } from '../../../../common/entities';
+import { ENTITY_DISPLAY_NAME } from '@kbn/observability-shared-plugin/common';
 import { useKibana } from '../../../hooks/use_kibana';
+import type { Entity } from '../../../../common/entities';
 import { EntityIcon } from '../../entity_icon';
+import { useDetailViewRedirect } from '../../../hooks/use_detail_view_redirect';
 
 interface EntityNameProps {
   entity: Entity;
 }
 
 export function EntityName({ entity }: EntityNameProps) {
-  const { services } = useKibana();
+  const {
+    services: { telemetry },
+  } = useKibana();
 
-  const assetDetailsLocator =
-    services.share?.url.locators.get<AssetDetailsLocatorParams>(ASSET_DETAILS_LOCATOR_ID);
+  const { getEntityRedirectUrl } = useDetailViewRedirect();
 
-  const serviceOverviewLocator =
-    services.share?.url.locators.get<ServiceOverviewParams>('serviceOverviewLocator');
+  const href = getEntityRedirectUrl(entity);
 
-  const getEntityRedirectUrl = useCallback(() => {
-    const type = entity[ENTITY_TYPE];
-    // For service, host and container type there is only one identity field
-    const identityField = entity[ENTITY_IDENTITY_FIELDS][0];
+  const handleLinkClick = useCallback(() => {
+    telemetry.reportEntityViewClicked({
+      view_type: 'detail',
+      entity_type: entity['entity.type'],
+    });
+  }, [entity, telemetry]);
 
-    // Any unrecognised types will always return undefined
-    switch (type) {
-      case 'host':
-      case 'container':
-        return assetDetailsLocator?.getRedirectUrl({
-          assetId: identityField,
-          assetType: type,
-        });
+  const entityName = (
+    <EuiFlexGroup gutterSize="s" alignItems="center">
+      <EuiFlexItem grow={0}>
+        <EntityIcon entity={entity} />
+      </EuiFlexItem>
+      <EuiFlexItem className="eui-textTruncate">
+        <span className="eui-textTruncate" data-test-subj="entityNameDisplayName">
+          {entity[ENTITY_DISPLAY_NAME]}
+        </span>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
 
-      case 'service':
-        return serviceOverviewLocator?.getRedirectUrl({
-          serviceName: identityField,
-          environment: [entity[SERVICE_ENVIRONMENT] || undefined].flat()[0],
-        });
-    }
-  }, [entity, assetDetailsLocator, serviceOverviewLocator]);
-
-  return (
-    <EuiLink data-test-subj="inventoryCellValueLink" href={getEntityRedirectUrl()}>
-      <EuiFlexGroup gutterSize="s" alignItems="center">
-        <EuiFlexItem grow={0}>
-          <EntityIcon entity={entity} />
-        </EuiFlexItem>
-        <EuiFlexItem className="eui-textTruncate">
-          <span className="eui-textTruncate">{entity[ENTITY_DISPLAY_NAME]}</span>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+  return href ? (
+    // eslint-disable-next-line @elastic/eui/href-or-on-click
+    <EuiLink data-test-subj="entityNameLink" href={href} onClick={handleLinkClick}>
+      {entityName}
     </EuiLink>
+  ) : (
+    entityName
   );
 }

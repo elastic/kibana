@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
+import { get } from 'lodash';
 import { DynamicStructuredTool } from '@langchain/core/tools';
 import { errors } from '@elastic/elasticsearch';
 import { QueryDslQueryContainer, SearchRequest } from '@elastic/elasticsearch/lib/api/types';
@@ -45,7 +46,7 @@ export const getKBVectorSearchQuery = ({
   filter?: QueryDslQueryContainer | undefined;
   kbResource?: string | undefined;
   modelId: string;
-  query: string;
+  query?: string;
   required?: boolean | undefined;
   user: AuthenticatedUser;
   v2KnowledgeBaseEnabled: boolean;
@@ -113,20 +114,37 @@ export const getKBVectorSearchQuery = ({
     ],
   };
 
-  return {
-    bool: {
-      must: [
-        {
-          text_expansion: {
-            'vector.tokens': {
-              model_id: modelId,
-              model_text: query,
-            },
+  let semanticTextFilter:
+    | Array<{ semantic: { field: string; query: string } }>
+    | Array<{
+        text_expansion: { 'vector.tokens': { model_id: string; model_text: string } };
+      }> = [];
+
+  if (v2KnowledgeBaseEnabled && query) {
+    semanticTextFilter = [
+      {
+        semantic: {
+          field: 'semantic_text',
+          query,
+        },
+      },
+    ];
+  } else if (!v2KnowledgeBaseEnabled) {
+    semanticTextFilter = [
+      {
+        text_expansion: {
+          'vector.tokens': {
+            model_id: modelId,
+            model_text: query as string,
           },
         },
-        ...requiredFilter,
-        ...resourceFilter,
-      ],
+      },
+    ];
+  }
+
+  return {
+    bool: {
+      must: [...semanticTextFilter, ...requiredFilter, ...resourceFilter],
       ...userFilter,
       filter,
       minimum_should_match: 1,
@@ -189,7 +207,7 @@ export const getStructuredToolForIndexEntry = ({
           standard: {
             query: {
               nested: {
-                path: 'semantic_text.inference.chunks',
+                path: `${indexEntry.field}.inference.chunks`,
                 query: {
                   sparse_vector: {
                     inference_id: elserId,
@@ -219,8 +237,19 @@ export const getStructuredToolForIndexEntry = ({
               return { ...prev, [field]: hit._source[field] };
             }, {});
           }
+
+          // We want to send relevant inner hits (chunks) to the LLM as a context
+          const innerHitPath = `${indexEntry.name}.${indexEntry.field}`;
+          if (hit.inner_hits?.[innerHitPath]) {
+            return {
+              text: hit.inner_hits[innerHitPath].hits.hits
+                .map((innerHit) => innerHit._source.text)
+                .join('\n --- \n'),
+            };
+          }
+
           return {
-            text: (hit._source as { text: string }).text,
+            text: get(hit._source, `${indexEntry.field}.inference.chunks[0].text`),
           };
         });
 

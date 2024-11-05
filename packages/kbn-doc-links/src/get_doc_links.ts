@@ -476,6 +476,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       blocklist: `${SECURITY_SOLUTION_DOCS}blocklist.html`,
       threatIntelInt: `${SECURITY_SOLUTION_DOCS}es-threat-intel-integrations.html`,
       endpointArtifacts: `${SECURITY_SOLUTION_DOCS}endpoint-artifacts.html`,
+      eventMerging: `${SECURITY_SOLUTION_DOCS}endpoint-data-volume.html`,
       policyResponseTroubleshooting: {
         full_disk_access: `${SECURITY_SOLUTION_DOCS}deploy-elastic-endpoint.html#enable-fda-endpoint`,
         macos_system_ext: `${SECURITY_SOLUTION_DOCS}deploy-elastic-endpoint.html#system-extension-endpoint`,
@@ -577,7 +578,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       alertingRules: `${ELASTICSEARCH_DOCS}transform-alerts.html`,
     },
     visualize: {
-      guide: `${KIBANA_DOCS}dashboard.html`,
+      guide: `${KIBANA_DOCS}_panels_and_visualizations.html`,
       lens: `${ELASTIC_WEBSITE_URL}what-is/kibana-lens`,
       lensPanels: `${KIBANA_DOCS}lens.html`,
       maps: `${ELASTIC_WEBSITE_URL}maps`,

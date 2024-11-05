@@ -103,7 +103,7 @@ The `--fix` flag will automatically update the persisted json files used by the 
 node scripts/telemetry_check.js --fix
 ```
 
-Note that any updates to the stored json files will require a review by the kibana-telemetry team to help us update the telemetry cluster mappings and ensure your changes adhere to our best practices.
+Note that any updates to the stored json files will require a review by the kibana-core team to help us update the telemetry cluster mappings and ensure your changes adhere to our best practices.
 
 
 ## Updating the collector schema
@@ -116,7 +116,7 @@ Once youre run the changes to both the `fetch` function and the `schema` field r
 node scripts/telemetry_check.js --fix
 ```
 
-The `--fix` flag will automatically update the persisted json files used by the telemetry team. Note that any updates to the stored json files will require a review by the kibana-telemetry team to help us update the telemetry cluster mappings and ensure your changes adhere to our best practices.
+The `--fix` flag will automatically update the persisted json files used by the telemetry team. Note that any updates to the stored json files will require a review by the kibana-core team to help us update the telemetry cluster mappings and ensure your changes adhere to our best practices.
 
 
 ## Writing the schema

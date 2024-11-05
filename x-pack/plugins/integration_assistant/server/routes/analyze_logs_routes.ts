@@ -18,7 +18,7 @@ import { buildRouteValidationWithZod } from '../util/route_validation';
 import { withAvailability } from './with_availability';
 import { isErrorThatHandlesItsOwnResponse, UnsupportedLogFormatError } from '../lib/errors';
 import { handleCustomErrors } from './routes_util';
-import { ErrorCode } from '../../common/constants';
+import { GenerationErrorCode } from '../../common/constants';
 
 export function registerAnalyzeLogsRoutes(
   router: IRouter<IntegrationAssistantRouteHandlerContext>
@@ -36,6 +36,13 @@ export function registerAnalyzeLogsRoutes(
     .addVersion(
       {
         version: '1',
+        security: {
+          authz: {
+            enabled: false,
+            reason:
+              'This route is opted out from authorization because the privileges are not defined yet.',
+          },
+        },
         validate: {
           request: {
             body: buildRouteValidationWithZod(AnalyzeLogsRequestBody),
@@ -43,7 +50,14 @@ export function registerAnalyzeLogsRoutes(
         },
       },
       withAvailability(async (context, req, res): Promise<IKibanaResponse<AnalyzeLogsResponse>> => {
-        const { packageName, dataStreamName, logSamples, langSmithOptions } = req.body;
+        const {
+          packageName,
+          dataStreamName,
+          packageTitle,
+          dataStreamTitle,
+          logSamples,
+          langSmithOptions,
+        } = req.body;
         const services = await context.resolve(['core']);
         const { client } = services.core.elasticsearch;
         const { getStartServices, logger } = await context.integrationAssistant;
@@ -79,18 +93,22 @@ export function registerAnalyzeLogsRoutes(
           const logFormatParameters = {
             packageName,
             dataStreamName,
+            packageTitle,
+            dataStreamTitle,
             logSamples,
           };
           const graph = await getLogFormatDetectionGraph({ model, client });
-          const graphResults = await graph.invoke(logFormatParameters, options);
+          const graphResults = await graph
+            .withConfig({ runName: 'Log Format' })
+            .invoke(logFormatParameters, options);
           const graphLogFormat = graphResults.results.samplesFormat.name;
-          if (graphLogFormat === 'unsupported' || graphLogFormat === 'csv') {
-            throw new UnsupportedLogFormatError(ErrorCode.UNSUPPORTED_LOG_SAMPLES_FORMAT);
+          if (graphLogFormat === 'unsupported') {
+            throw new UnsupportedLogFormatError(GenerationErrorCode.UNSUPPORTED_LOG_SAMPLES_FORMAT);
           }
           return res.ok({ body: AnalyzeLogsResponse.parse(graphResults) });
         } catch (err) {
           try {
-            handleCustomErrors(err, ErrorCode.RECURSION_LIMIT_ANALYZE_LOGS);
+            handleCustomErrors(err, GenerationErrorCode.RECURSION_LIMIT_ANALYZE_LOGS);
           } catch (e) {
             if (isErrorThatHandlesItsOwnResponse(e)) {
               return e.sendResponse(res);

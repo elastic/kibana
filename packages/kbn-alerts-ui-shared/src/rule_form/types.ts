@@ -20,7 +20,7 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import { RuleCreationValidConsumer } from '@kbn/rule-data-utils';
 import { ActionType } from '@kbn/actions-types';
-import { ActionVariable } from '@kbn/alerting-types';
+import { ActionVariable, RulesSettingsFlapping } from '@kbn/alerting-types';
 import {
   ActionConnector,
   ActionTypeRegistryContract,
@@ -46,6 +46,7 @@ export interface RuleFormData<Params extends RuleTypeParams = RuleTypeParams> {
   alertDelay?: Rule<Params>['alertDelay'];
   notifyWhen?: Rule<Params>['notifyWhen'];
   ruleTypeId?: Rule<Params>['ruleTypeId'];
+  flapping?: Rule<Params>['flapping'];
 }
 
 export interface RuleFormPlugins {
@@ -71,6 +72,7 @@ export interface RuleFormState<Params extends RuleTypeParams = RuleTypeParams> {
   connectors: ActionConnector[];
   connectorTypes: ActionType[];
   aadTemplateFields: ActionVariable[];
+  availableRuleTypes: RuleTypeWithDescription[];
   baseErrors?: RuleFormBaseErrors;
   paramsErrors?: RuleFormParamsErrors;
   actionsErrors?: Record<string, RuleFormActionsErrors>;
@@ -82,7 +84,9 @@ export interface RuleFormState<Params extends RuleTypeParams = RuleTypeParams> {
   metadata?: Record<string, unknown>;
   minimumScheduleInterval?: MinimumScheduleInterval;
   canShowConsumerSelection?: boolean;
-  validConsumers?: RuleCreationValidConsumer[];
+  validConsumers: RuleCreationValidConsumer[];
+  flappingSettings?: RulesSettingsFlapping;
+  touched?: boolean;
 }
 
 export type InitialRule = Partial<Rule> &

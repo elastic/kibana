@@ -18,6 +18,7 @@
       "cloud",
       "console",
       "usageCollection",
+      "serverless"
     ],
     "requiredBundles": [
       "kibanaReact",

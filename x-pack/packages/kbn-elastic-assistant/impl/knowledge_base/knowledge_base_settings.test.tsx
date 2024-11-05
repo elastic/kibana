@@ -26,6 +26,9 @@ const mockUseAssistantContext = {
   },
   setAllSystemPrompts: jest.fn(),
   setConversations: jest.fn(),
+  assistantAvailability: {
+    isAssistantEnabled: true,
+  },
 };
 
 jest.mock('../assistant_context', () => {
@@ -69,7 +72,6 @@ jest.mock('../assistant/api/knowledge_base/use_knowledge_base_status', () => ({
     return {
       data: {
         elser_exists: true,
-        esql_exists: true,
         index_exists: true,
         pipeline_exists: true,
       },
@@ -83,22 +85,11 @@ describe('Knowledge base settings', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
-  it('Shows correct description when esql is installed', () => {
-    const { getByTestId, queryByTestId } = render(
-      <TestProviders>
-        <KnowledgeBaseSettings {...defaultProps} />
-      </TestProviders>
-    );
-
-    expect(getByTestId('esql-installed')).toBeInTheDocument();
-    expect(queryByTestId('install-esql')).not.toBeInTheDocument();
-  });
   it('On enable knowledge base, call setup knowledge base setup', () => {
     (useKnowledgeBaseStatus as jest.Mock).mockImplementation(() => {
       return {
         data: {
           elser_exists: true,
-          esql_exists: false,
           index_exists: false,
           pipeline_exists: false,
           is_setup_available: true,
@@ -115,14 +106,13 @@ describe('Knowledge base settings', () => {
     expect(queryByTestId('kb-installed')).not.toBeInTheDocument();
     expect(getByTestId('install-kb')).toBeInTheDocument();
     fireEvent.click(getByTestId('setupKnowledgeBaseButton'));
-    expect(mockSetup).toHaveBeenCalledWith('esql');
+    expect(mockSetup).toHaveBeenCalled();
   });
   it('If elser does not exist, do not offer knowledge base', () => {
     (useKnowledgeBaseStatus as jest.Mock).mockImplementation(() => {
       return {
         data: {
           elser_exists: false,
-          esql_exists: false,
           index_exists: false,
           pipeline_exists: false,
         },

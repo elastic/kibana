@@ -147,7 +147,7 @@ function TimeIntervalParamEditor({
   const onCustomInterval = (customValue: string) => setValue(customValue.trim());
 
   const onChange = (opts: EuiComboBoxOptionOption[]) => {
-    const selectedOpt: ComboBoxOption = get(opts, '0');
+    const selectedOpt = get(opts, '0');
     setValue(selectedOpt ? selectedOpt.key : '');
   };
 

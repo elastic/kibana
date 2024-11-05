@@ -30,7 +30,7 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import { parseRuleCircuitBreakerErrorMessage } from '@kbn/alerting-plugin/common';
 import { updateRule } from '@kbn/alerts-ui-shared/src/common/apis/update_rule';
 import { fetchUiConfig as triggersActionsUiConfig } from '@kbn/alerts-ui-shared/src/common/apis/fetch_ui_config';
-import { IS_RULE_SPECIFIC_FLAPPING_ENABLED } from '../../../common/constants';
+import { IS_RULE_SPECIFIC_FLAPPING_ENABLED } from '@kbn/alerts-ui-shared/src/common/constants/rule_flapping';
 import {
   Rule,
   RuleFlyoutCloseReason,

@@ -8,6 +8,7 @@
 import type { Logger } from '@kbn/core/server';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { ActionsClient } from '@kbn/actions-plugin/server/actions_client';
+import { ExecuteOptions as EnqueueExecutionOptions } from '@kbn/actions-plugin/server/create_execute_function';
 import { IAlertsClient } from '../../alerts_client/types';
 import { Alert } from '../../alert';
 import {
@@ -24,7 +25,10 @@ import {
 import { NormalizedRuleType } from '../../rule_type_registry';
 import { CombinedSummarizedAlerts, RawRule } from '../../types';
 import { RuleRunMetricsStore } from '../../lib/rule_run_metrics_store';
-import { AlertingEventLogger } from '../../lib/alerting_event_logger/alerting_event_logger';
+import {
+  ActionOpts,
+  AlertingEventLogger,
+} from '../../lib/alerting_event_logger/alerting_event_logger';
 import { RuleTaskInstance, TaskRunnerContext } from '../types';
 
 export interface ActionSchedulerOptions<
@@ -80,14 +84,20 @@ export type Executable<
     }
 );
 
-export interface GenerateExecutablesOpts<
+export interface GetActionsToScheduleOpts<
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,
   RecoveryActionGroupId extends string
 > {
-  alerts: Record<string, Alert<State, Context, ActionGroupIds | RecoveryActionGroupId>>;
-  throttledSummaryActions: ThrottledActions;
+  activeCurrentAlerts?: Record<string, Alert<State, Context, ActionGroupIds>>;
+  recoveredCurrentAlerts?: Record<string, Alert<State, Context, RecoveryActionGroupId>>;
+  throttledSummaryActions?: ThrottledActions;
+}
+
+export interface ActionsToSchedule {
+  actionToEnqueue: EnqueueExecutionOptions;
+  actionToLog: ActionOpts;
 }
 
 export interface IActionScheduler<
@@ -97,9 +107,9 @@ export interface IActionScheduler<
   RecoveryActionGroupId extends string
 > {
   get priority(): number;
-  generateExecutables(
-    opts: GenerateExecutablesOpts<State, Context, ActionGroupIds, RecoveryActionGroupId>
-  ): Promise<Array<Executable<State, Context, ActionGroupIds, RecoveryActionGroupId>>>;
+  getActionsToSchedule(
+    opts: GetActionsToScheduleOpts<State, Context, ActionGroupIds, RecoveryActionGroupId>
+  ): Promise<ActionsToSchedule[]>;
 }
 
 export interface RuleUrl {
@@ -108,4 +118,31 @@ export interface RuleUrl {
   basePathname?: string;
   spaceIdSegment?: string;
   relativePath?: string;
+}
+
+export interface IsExecutableAlertOpts<
+  ActionGroupIds extends string,
+  RecoveryActionGroupId extends string
+> {
+  alert: Alert<AlertInstanceState, AlertInstanceContext, ActionGroupIds | RecoveryActionGroupId>;
+  action: RuleAction;
+  summarizedAlerts: CombinedSummarizedAlerts | null;
+}
+
+export interface IsExecutableActiveAlertOpts<ActionGroupIds extends string> {
+  alert: Alert<AlertInstanceState, AlertInstanceContext, ActionGroupIds>;
+  action: RuleAction;
+}
+
+export interface HelperOpts<ActionGroupIds extends string, RecoveryActionGroupId extends string> {
+  alert: Alert<AlertInstanceState, AlertInstanceContext, ActionGroupIds | RecoveryActionGroupId>;
+  action: RuleAction;
+}
+
+export interface AddSummarizedAlertsOpts<
+  ActionGroupIds extends string,
+  RecoveryActionGroupId extends string
+> {
+  alert: Alert<AlertInstanceState, AlertInstanceContext, ActionGroupIds | RecoveryActionGroupId>;
+  summarizedAlerts: CombinedSummarizedAlerts | null;
 }

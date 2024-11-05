@@ -4,9 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import React, { useMemo, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { EuiContextMenuItem } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import {
   UtilityBarGroup,
   UtilityBarText,
@@ -21,14 +23,38 @@ import {
   selectNotesTableSelectedIds,
   selectNotesTableSearch,
   userSelectedBulkDelete,
+  selectNotesTableCreatedByFilter,
+  selectNotesTableAssociatedFilter,
 } from '..';
-import * as i18n from './translations';
 
+export const BATCH_ACTIONS = i18n.translate(
+  'xpack.securitySolution.notes.management.batchActionsTitle',
+  {
+    defaultMessage: 'Bulk actions',
+  }
+);
+
+export const DELETE_SELECTED = i18n.translate(
+  'xpack.securitySolution.notes.management.deleteSelected',
+  {
+    defaultMessage: 'Delete selected notes',
+  }
+);
+
+export const REFRESH = i18n.translate('xpack.securitySolution.notes.management.refresh', {
+  defaultMessage: 'Refresh',
+});
+
+/**
+ * Renders the utility bar for the notes management page
+ */
 export const NotesUtilityBar = React.memo(() => {
   const dispatch = useDispatch();
   const pagination = useSelector(selectNotesPagination);
   const sort = useSelector(selectNotesTableSort);
   const selectedItems = useSelector(selectNotesTableSelectedIds);
+  const notesCreatedByFilter = useSelector(selectNotesTableCreatedByFilter);
+  const notesAssociatedFilter = useSelector(selectNotesTableAssociatedFilter);
   const resultsCount = useMemo(() => {
     const { perPage, page, total } = pagination;
     const startOfCurrentPage = perPage * (page - 1) + 1;
@@ -49,7 +75,7 @@ export const NotesUtilityBar = React.memo(() => {
         icon="trash"
         key="DeleteItemKey"
       >
-        {i18n.DELETE_SELECTED}
+        {DELETE_SELECTED}
       </EuiContextMenuItem>
     );
   }, [deleteSelectedNotes, selectedItems.length]);
@@ -61,10 +87,21 @@ export const NotesUtilityBar = React.memo(() => {
         sortField: sort.field,
         sortOrder: sort.direction,
         filter: '',
+        createdByFilter: notesCreatedByFilter,
+        associatedFilter: notesAssociatedFilter,
         search: notesSearch,
       })
     );
-  }, [dispatch, pagination.page, pagination.perPage, sort.field, sort.direction, notesSearch]);
+  }, [
+    dispatch,
+    pagination.page,
+    pagination.perPage,
+    sort.field,
+    sort.direction,
+    notesCreatedByFilter,
+    notesAssociatedFilter,
+    notesSearch,
+  ]);
   return (
     <UtilityBar border>
       <UtilityBarSection>
@@ -83,9 +120,7 @@ export const NotesUtilityBar = React.memo(() => {
             iconType="arrowDown"
             popoverContent={BulkActionPopoverContent}
           >
-            <span data-test-subj="notes-management-utility-bar-action-button">
-              {i18n.BATCH_ACTIONS}
-            </span>
+            <span data-test-subj="notes-management-utility-bar-action-button">{BATCH_ACTIONS}</span>
           </UtilityBarAction>
           <UtilityBarAction
             dataTestSubj="notes-management-utility-bar-refresh-button"
@@ -93,7 +128,7 @@ export const NotesUtilityBar = React.memo(() => {
             iconType="refresh"
             onClick={refresh}
           >
-            {i18n.REFRESH}
+            {REFRESH}
           </UtilityBarAction>
         </UtilityBarGroup>
       </UtilityBarSection>

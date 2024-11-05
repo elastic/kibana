@@ -242,7 +242,11 @@ export type {
 } from '@kbn/core-http-server';
 export type { IExternalUrlPolicy } from '@kbn/core-http-common';
 
-export { validBodyOutput, OnPostAuthResultType } from '@kbn/core-http-server';
+export {
+  validBodyOutput,
+  OnPostAuthResultType,
+  ReservedPrivilegesSet,
+} from '@kbn/core-http-server';
 
 export type {
   HttpResourcesRenderOptions,
@@ -267,7 +271,6 @@ export { PluginType } from '@kbn/core-base-common';
 export type {
   PrebootPlugin,
   Plugin,
-  AsyncPlugin,
   PluginConfigDescriptor,
   PluginConfigSchema,
   PluginInitializer,

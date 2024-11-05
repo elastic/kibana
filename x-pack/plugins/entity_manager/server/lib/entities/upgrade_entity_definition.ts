@@ -35,18 +35,20 @@ export async function upgradeBuiltInEntityDefinitions({
     );
   }
 
-  const { esClient, soClient } = getClientsFromAPIKey({ apiKey, server });
+  const { clusterClient, soClient } = getClientsFromAPIKey({ apiKey, server });
 
   logger.debug(`Starting built-in definitions upgrade`);
   const upgradedDefinitions = await installBuiltInEntityDefinitions({
-    esClient,
+    clusterClient,
     soClient,
     definitions,
     logger,
   });
 
   await Promise.all(
-    upgradedDefinitions.map((definition) => startTransforms(esClient, definition, logger))
+    upgradedDefinitions.map((definition) =>
+      startTransforms(clusterClient.asSecondaryAuthUser, definition, logger)
+    )
   );
 
   return { success: true, definitions: upgradedDefinitions };

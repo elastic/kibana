@@ -89,7 +89,9 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
             ...route,
             options: {
               access: 'public',
+              excludeFromOAS: true,
               ...route.options,
+              httpResource: true,
             },
           },
           (context, request, response) => {

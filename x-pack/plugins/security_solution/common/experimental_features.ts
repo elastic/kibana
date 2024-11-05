@@ -94,9 +94,9 @@ export const allowedExperimentalValues = Object.freeze({
   endpointManagementSpaceAwarenessEnabled: false,
 
   /**
-   * Enables new notes
+   * Disables new notes
    */
-  securitySolutionNotesEnabled: false,
+  securitySolutionNotesDisabled: false,
 
   /**
    * Disables entity and alert previews
@@ -111,12 +111,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables new Knowledge Base Entries features, introduced in `8.15.0`.
    */
-  assistantKnowledgeBaseByDefault: false,
-
-  /**
-   * Enables the NaturalLanguageESQLTool and disables the ESQLKnowledgeBaseTool, introduced in `8.16.0`.
-   */
-  assistantNaturalLanguageESQLTool: false,
+  assistantKnowledgeBaseByDefault: true,
 
   /**
    * Enables the Managed User section inside the new user details flyout.
@@ -137,11 +132,6 @@ export const allowedExperimentalValues = Object.freeze({
    * disables ES|QL rules
    */
   esqlRulesDisabled: false,
-
-  /**
-   * enables logging requests during rule preview
-   */
-  loggingRequestsEnabled: false,
 
   /**
    * Enables Protection Updates tab in the Endpoint Policy Details page
@@ -193,16 +183,17 @@ export const allowedExperimentalValues = Object.freeze({
    *
    */
   timelineEsqlTabDisabled: false,
-  /*
-   * Disables experimental Discover components, UnifiedFieldList and UnifiedDataTable in Timeline.
-   */
-  unifiedComponentsInTimelineDisabled: false,
 
   /*
    * Disables date pickers and sourcerer in analyzer if needed.
    *
    */
   analyzerDatePickersAndSourcererDisabled: false,
+
+  /**
+   * Enables graph visualization in alerts flyout
+   */
+  graphVisualizationInFlyoutEnabled: false,
 
   /**
    * Enables an ability to customize Elastic prebuilt rules.
@@ -231,11 +222,6 @@ export const allowedExperimentalValues = Object.freeze({
   valueListItemsModalEnabled: true,
 
   /**
-   * Enables the manual rule run
-   */
-  manualRuleRunEnabled: false,
-
-  /**
    * Adds a new option to filter descendants of a process for Management / Event Filters
    */
   filterProcessDescendantsForEventFiltersEnabled: true,
@@ -246,9 +232,15 @@ export const allowedExperimentalValues = Object.freeze({
   dataIngestionHubEnabled: false,
 
   /**
-   * Enables the new Entity Store engine routes
+   * Disables Security's Entity Store engine routes. The Entity Store feature is available by default, but
+   * can be disabled if necessary in a given environment.
    */
-  entityStoreEnabled: false,
+  entityStoreDisabled: false,
+
+  /**
+   * Enables the siem migrations feature
+   */
+  siemMigrationsEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

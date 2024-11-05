@@ -12,10 +12,11 @@ import {
   DocumentEntryCreateFields,
   KnowledgeBaseEntryCreateProps,
   KnowledgeBaseEntryResponse,
+  KnowledgeBaseEntryUpdateProps,
   Metadata,
 } from '@kbn/elastic-assistant-common';
 import { getKnowledgeBaseEntry } from './get_knowledge_base_entry';
-import { CreateKnowledgeBaseEntrySchema } from './types';
+import { CreateKnowledgeBaseEntrySchema, UpdateKnowledgeBaseEntrySchema } from './types';
 
 export interface CreateKnowledgeBaseEntryParams {
   esClient: ElasticsearchClient;
@@ -77,6 +78,76 @@ export const createKnowledgeBaseEntry = async ({
   }
 };
 
+interface TransformToUpdateSchemaProps {
+  user: AuthenticatedUser;
+  updatedAt: string;
+  entry: KnowledgeBaseEntryUpdateProps;
+  global?: boolean;
+}
+
+export const transformToUpdateSchema = ({
+  user,
+  updatedAt,
+  entry,
+  global = false,
+}: TransformToUpdateSchemaProps): UpdateKnowledgeBaseEntrySchema => {
+  const base = {
+    id: entry.id,
+    updated_at: updatedAt,
+    updated_by: user.profile_uid ?? 'unknown',
+    name: entry.name,
+    type: entry.type,
+    users: global
+      ? []
+      : [
+          {
+            id: user.profile_uid,
+            name: user.username,
+          },
+        ],
+  };
+
+  if (entry.type === 'index') {
+    const { inputSchema, outputFields, queryDescription, ...restEntry } = entry;
+    return {
+      ...base,
+      ...restEntry,
+      query_description: queryDescription,
+      input_schema:
+        entry.inputSchema?.map((schema) => ({
+          field_name: schema.fieldName,
+          field_type: schema.fieldType,
+          description: schema.description,
+        })) ?? undefined,
+      output_fields: outputFields ?? undefined,
+    };
+  }
+  return {
+    ...base,
+    kb_resource: entry.kbResource,
+    required: entry.required ?? false,
+    source: entry.source,
+    text: entry.text,
+    vector: undefined,
+  };
+};
+
+export const getUpdateScript = ({
+  entry,
+  isPatch,
+}: {
+  entry: UpdateKnowledgeBaseEntrySchema;
+  isPatch?: boolean;
+}) => {
+  // Cannot use script for updating documents with semantic_text fields
+  return {
+    doc: {
+      ...entry,
+      semantic_text: entry.text,
+    },
+  };
+};
+
 interface TransformToCreateSchemaProps {
   createdAt: string;
   spaceId: string;
@@ -132,7 +203,7 @@ export const transformToCreateSchema = ({
     required: entry.required ?? false,
     source: entry.source,
     text: entry.text,
-    vector: undefined,
+    semantic_text: entry.text,
   };
 };
 

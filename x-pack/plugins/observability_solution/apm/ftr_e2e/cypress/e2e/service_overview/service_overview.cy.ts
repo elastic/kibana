@@ -76,8 +76,7 @@ const aliasNamesWithComparison = apiRequestsToInterceptWithComparison.map(
 
 const aliasNames = [...aliasNamesNoComparison, ...aliasNamesWithComparison];
 
-// See details: https://github.com/elastic/kibana/issues/191961
-describe.skip('Service Overview', () => {
+describe('Service Overview', () => {
   before(() => {
     synthtrace.index(
       opbeans({

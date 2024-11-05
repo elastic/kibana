@@ -14,6 +14,7 @@ import {
   EuiListGroupItem,
   EuiSpacer,
 } from '@elastic/eui';
+import { IndexManagementLocatorParams } from '@kbn/index-management-shared-types';
 import { DatasetQualityLink } from './dataset_quality_link';
 import { useKibanaContextForPlugin } from '../../utils/use_kibana';
 
@@ -39,12 +40,11 @@ export const LegendAction: React.FC<LegendActionProps> = React.memo(
     const hasIndexManagementFeature = !!capabilities?.index_management;
 
     const onClickIndexManagement = useCallback(async () => {
-      // TODO: use proper index management locator https://github.com/elastic/kibana/issues/195083
-      const dataQualityLocator = locators.get('MANAGEMENT_APP_LOCATOR');
-      if (dataQualityLocator) {
-        await dataQualityLocator.navigate({
-          sectionId: 'data',
-          appId: `index_management/data_streams/${label}`,
+      const locator = locators.get<IndexManagementLocatorParams>('INDEX_MANAGEMENT_LOCATOR_ID');
+      if (locator) {
+        await locator.navigate({
+          page: 'data_streams_details',
+          dataStreamName: label,
         });
       }
       togglePopover(null); // Close the popover after action

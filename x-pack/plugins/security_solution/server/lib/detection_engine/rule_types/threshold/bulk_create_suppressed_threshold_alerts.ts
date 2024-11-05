@@ -84,6 +84,7 @@ export const bulkCreateSuppressedThresholdAlerts = async ({
     to,
     suppressionWindow,
     threshold: ruleParams.threshold,
+    intendedTimestamp: runOpts.intendedTimestamp,
   });
 
   const bulkCreateResult = await bulkCreateWithSuppression({

@@ -11,7 +11,7 @@ import type {
   OnRefreshChangeProps,
 } from '@elastic/eui/src/components/date_picker/types';
 import { useDataUsageMetricsUrlParams } from './use_charts_url_params';
-import { DateRangePickerValues } from '../components/date_picker';
+import { DateRangePickerValues } from '../components/filters/date_picker';
 
 export const DEFAULT_DATE_RANGE_OPTIONS = Object.freeze({
   autoRefreshOptions: {

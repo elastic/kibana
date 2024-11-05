@@ -9,18 +9,20 @@
     "browser": true,
     "configPath": ["xpack", "logs_shared"],
     "requiredPlugins": [
+      "charts",
       "data",
+      "fieldFormats", 
       "dataViews",
       "discoverShared",
-      "usageCollection",
+      "logsDataAccess",
       "observabilityShared",
       "share",
-      "logsDataAccess"
+      "usageCollection",
     ],
     "optionalPlugins": [
       "observabilityAIAssistant",
     ],
-    "requiredBundles": ["kibanaUtils", "kibanaReact"],
+    "requiredBundles": ["kibanaUtils", "kibanaReact", "unifiedDocViewer"],
     "extraPublicDirs": ["common"]
   }
 }

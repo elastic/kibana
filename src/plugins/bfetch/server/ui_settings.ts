@@ -18,7 +18,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
       name: i18n.translate('bfetch.disableBfetch', {
         defaultMessage: 'Disable request batching',
       }),
-      value: false,
+      value: true,
       description: i18n.translate('bfetch.disableBfetchDesc', {
         defaultMessage:
           'Disables requests batching. This increases number of HTTP requests from Kibana, but allows to debug requests individually.',

@@ -34,6 +34,7 @@ export const wrapNewTermsAlerts = ({
   alertTimestampOverride,
   ruleExecutionLogger,
   publicBaseUrl,
+  intendedTimestamp,
 }: {
   eventsAndTerms: EventsAndTerms[];
   spaceId: string | null | undefined;
@@ -43,6 +44,7 @@ export const wrapNewTermsAlerts = ({
   alertTimestampOverride: Date | undefined;
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
   publicBaseUrl: string | undefined;
+  intendedTimestamp: Date | undefined;
 }): Array<WrappedFieldsLatest<NewTermsFieldsLatest>> => {
   return eventsAndTerms.map((eventAndTerms) => {
     const id = objectHash([
@@ -66,6 +68,7 @@ export const wrapNewTermsAlerts = ({
       ruleExecutionLogger,
       alertUuid: id,
       publicBaseUrl,
+      intendedTimestamp,
     });
 
     return {

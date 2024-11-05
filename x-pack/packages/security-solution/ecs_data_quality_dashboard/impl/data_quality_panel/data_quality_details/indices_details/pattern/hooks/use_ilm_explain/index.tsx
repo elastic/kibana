@@ -11,7 +11,7 @@ import { useEffect, useState } from 'react';
 import { useDataQualityContext } from '../../../../../data_quality_context';
 import { INTERNAL_API_VERSION } from '../../../../../constants';
 import * as i18n from '../../../../../translations';
-import { useIsMounted } from '../../../../../hooks/use_is_mounted';
+import { useIsMountedRef } from '../../../../../hooks/use_is_mounted_ref';
 
 const ILM_EXPLAIN_ENDPOINT = '/internal/ecs_data_quality_dashboard/ilm_explain';
 
@@ -23,7 +23,7 @@ export interface UseIlmExplain {
 
 export const useIlmExplain = (pattern: string): UseIlmExplain => {
   const { httpFetch, isILMAvailable } = useDataQualityContext();
-  const { isMountedRef } = useIsMounted();
+  const { isMountedRef } = useIsMountedRef();
   const [ilmExplain, setIlmExplain] = useState<Record<
     string,
     IlmExplainLifecycleLifecycleExplain

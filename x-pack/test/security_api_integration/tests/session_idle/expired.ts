@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import { parse as parseCookie } from 'tough-cookie';
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
+import { parse as parseCookie } from 'tough-cookie';
+
 import expect from '@kbn/expect';
-import { adminTestUser } from '@kbn/test';
 import { SESSION_ERROR_REASON_HEADER } from '@kbn/security-plugin/common/constants';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { adminTestUser } from '@kbn/test';
+
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');

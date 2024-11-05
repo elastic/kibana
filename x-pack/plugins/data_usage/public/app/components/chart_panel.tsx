@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useCallback, useMemo } from 'react';
-import numeral from '@elastic/numeral';
+
 import { EuiFlexItem, EuiPanel, EuiTitle, useEuiTheme } from '@elastic/eui';
 import {
   Chart,
@@ -19,8 +19,8 @@ import {
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { LegendAction } from './legend_action';
-import { MetricTypes } from '../../../common/rest_types';
-import { MetricSeries } from '../types';
+import { MetricTypes, MetricSeries } from '../../../common/rest_types';
+import { formatBytes } from '../../utils/format_bytes';
 
 // TODO: Remove this when we have a title for each metric type
 type ChartKey = Extract<MetricTypes, 'ingest_rate' | 'storage_retained'>;
@@ -50,7 +50,7 @@ export const ChartPanel: React.FC<ChartPanelProps> = ({
 }) => {
   const theme = useEuiTheme();
 
-  const chartTimestamps = series.flatMap((stream) => stream.data.map((d) => d[0]));
+  const chartTimestamps = series.flatMap((stream) => stream.data.map((d) => d.x));
 
   const [minTimestamp, maxTimestamp] = [Math.min(...chartTimestamps), Math.max(...chartTimestamps)];
 
@@ -72,6 +72,7 @@ export const ChartPanel: React.FC<ChartPanelProps> = ({
     },
     [idx, popoverOpen, togglePopover]
   );
+
   return (
     <EuiFlexItem grow={false} key={metricType}>
       <EuiPanel hasShadow={false} hasBorder={true}>
@@ -94,9 +95,9 @@ export const ChartPanel: React.FC<ChartPanelProps> = ({
               data={stream.data}
               xScaleType={ScaleType.Time}
               yScaleType={ScaleType.Linear}
-              xAccessor={0} // x is the first element in the tuple
-              yAccessors={[1]} // y is the second element in the tuple
-              stackAccessors={[0]}
+              xAccessor="x"
+              yAccessors={['y']}
+              stackAccessors={['x']}
             />
           ))}
 
@@ -117,7 +118,4 @@ export const ChartPanel: React.FC<ChartPanelProps> = ({
       </EuiPanel>
     </EuiFlexItem>
   );
-};
-const formatBytes = (bytes: number) => {
-  return numeral(bytes).format('0.0 b');
 };

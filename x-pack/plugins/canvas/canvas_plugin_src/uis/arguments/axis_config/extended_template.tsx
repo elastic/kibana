@@ -52,7 +52,7 @@ export class ExtendedTemplate extends PureComponent<Props> {
 
   // TODO: this should be in a helper, it's the same code from container_style
   getArgValue = (name: string, alt: string) => {
-    return get(this.props.argValue, `chain.0.arguments.${name}.0`, alt);
+    return get(this.props.argValue, `chain.0.arguments.${name}.0`, alt) as string | undefined;
   };
 
   // TODO: this should be in a helper, it's the same code from container_style

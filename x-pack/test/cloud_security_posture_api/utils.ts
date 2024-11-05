@@ -9,6 +9,7 @@ import type { RetryService } from '@kbn/ftr-common-functional-services';
 import type { Agent } from 'supertest';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { Client as EsClient } from '@elastic/elasticsearch';
+import type { CallbackHandler, Response } from 'superagent';
 import expect from '@kbn/expect';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 
@@ -23,7 +24,7 @@ export const waitForPluginInitialized = ({
 }: {
   retry: RetryService;
   logger: ToolingLog;
-  supertest: Agent;
+  supertest: Pick<Agent, 'get'>;
 }): Promise<void> =>
   retry.try(async () => {
     logger.debug('Check CSP plugin is initialized');
@@ -35,6 +36,19 @@ export const waitForPluginInitialized = ({
     logger.debug('CSP plugin is initialized');
   });
 
+export function result(status: number): CallbackHandler {
+  return (err: any, res: Response) => {
+    if ((res?.status || err.status) !== status) {
+      const e = new Error(
+        `Expected ${status} ,got ${res?.status || err.status} resp: ${
+          res?.body ? JSON.stringify(res.body) : err.text
+        }`
+      );
+      throw e;
+    }
+  };
+}
+
 export class EsIndexDataProvider {
   private es: EsClient;
   private index: string;
@@ -44,13 +58,16 @@ export class EsIndexDataProvider {
     this.index = index;
   }
 
-  addBulk(docs: Array<Record<string, any>>, overrideTimestamp = true) {
+  async addBulk(docs: Array<Record<string, any>>, overrideTimestamp = true) {
     const operations = docs.flatMap((doc) => [
-      { index: { _index: this.index } },
+      { create: { _index: this.index } },
       { ...doc, ...(overrideTimestamp ? { '@timestamp': new Date().toISOString() } : {}) },
     ]);
 
-    return this.es.bulk({ refresh: 'wait_for', index: this.index, operations });
+    const resp = await this.es.bulk({ refresh: 'wait_for', index: this.index, operations });
+    expect(resp.errors).eql(false, `Error in bulk indexing: ${JSON.stringify(resp)}`);
+
+    return resp;
   }
 
   async deleteAll() {

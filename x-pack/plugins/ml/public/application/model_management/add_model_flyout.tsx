@@ -222,6 +222,7 @@ const ClickToDownloadTabContent: FC<ClickToDownloadTabContentProps> = ({
                       id="xpack.ml.trainedModels.addModelFlyout.e5Description"
                       defaultMessage="E5 is a third party NLP model that enables you to perform multi-lingual semantic search by using dense vector representations. This model performs best for non-English language documents and queries."
                     />
+                    &nbsp;{models[0].disclaimer}
                   </EuiText>
                 </p>
                 <EuiSpacer size="s" />

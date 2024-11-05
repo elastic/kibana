@@ -9,7 +9,8 @@
     "public/**/*.json",
     "server/**/*",
     "typings/**/*",
-    "../../../../typings/**/*"
+    "../../../../typings/**/*",
+    ".storybook/**/*"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -45,5 +46,5 @@
     "@kbn/es-query",
     "@kbn/serverless",
   ],
-  "exclude": ["target/**/*"]
+  "exclude": ["target/**/*", ".storybook/**/*.js"]
 }

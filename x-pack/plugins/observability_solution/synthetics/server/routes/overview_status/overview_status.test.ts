@@ -292,6 +292,7 @@ describe('current status route', () => {
               },
               "projectId": "project-id",
               "schedule": "1",
+              "spaceId": undefined,
               "status": "down",
               "tags": Array [
                 "tag-1",
@@ -337,6 +338,7 @@ describe('current status route', () => {
               },
               "projectId": "project-id",
               "schedule": "1",
+              "spaceId": undefined,
               "status": "up",
               "tags": Array [
                 "tag-1",
@@ -373,6 +375,7 @@ describe('current status route', () => {
               },
               "projectId": "project-id",
               "schedule": "1",
+              "spaceId": undefined,
               "status": "up",
               "tags": Array [
                 "tag-1",
@@ -558,6 +561,7 @@ describe('current status route', () => {
               },
               "projectId": "project-id",
               "schedule": "1",
+              "spaceId": undefined,
               "status": "down",
               "tags": Array [
                 "tag-1",
@@ -603,6 +607,7 @@ describe('current status route', () => {
               },
               "projectId": "project-id",
               "schedule": "1",
+              "spaceId": undefined,
               "status": "up",
               "tags": Array [
                 "tag-1",
@@ -639,6 +644,7 @@ describe('current status route', () => {
               },
               "projectId": "project-id",
               "schedule": "1",
+              "spaceId": undefined,
               "status": "up",
               "tags": Array [
                 "tag-1",
@@ -852,6 +858,7 @@ describe('current status route', () => {
               },
               "projectId": "project-id",
               "schedule": "1",
+              "spaceId": undefined,
               "status": "down",
               "tags": Array [
                 "tag-1",
@@ -972,6 +979,7 @@ describe('current status route', () => {
               },
               "projectId": "project-id",
               "schedule": "1",
+              "spaceId": undefined,
               "status": "up",
               "tags": Array [
                 "tag-1",
@@ -1008,6 +1016,7 @@ describe('current status route', () => {
               },
               "projectId": "project-id",
               "schedule": "1",
+              "spaceId": undefined,
               "status": "up",
               "tags": Array [
                 "tag-1",

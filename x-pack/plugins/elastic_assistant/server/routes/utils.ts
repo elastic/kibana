@@ -203,19 +203,25 @@ export const isOpenSourceModel = (connector?: Connector): boolean => {
   }
 
   const llmType = getLlmType(connector.actionTypeId);
-  const connectorApiUrl = connector.config?.apiUrl
-    ? (connector.config.apiUrl as string)
-    : undefined;
+  const isOpenAiType = llmType === 'openai';
+
+  if (!isOpenAiType) {
+    return false;
+  }
   const connectorApiProvider = connector.config?.apiProvider
     ? (connector.config?.apiProvider as OpenAiProviderType)
     : undefined;
+  if (connectorApiProvider === OpenAiProviderType.Other) {
+    return true;
+  }
 
-  const isOpenAiType = llmType === 'openai';
-  const isOpenAI =
-    isOpenAiType &&
-    (!connectorApiUrl ||
-      connectorApiUrl === OPENAI_CHAT_URL ||
-      connectorApiProvider === OpenAiProviderType.AzureAi);
+  const connectorApiUrl = connector.config?.apiUrl
+    ? (connector.config.apiUrl as string)
+    : undefined;
 
-  return isOpenAiType && !isOpenAI;
+  return (
+    !!connectorApiUrl &&
+    connectorApiUrl !== OPENAI_CHAT_URL &&
+    connectorApiProvider !== OpenAiProviderType.AzureAi
+  );
 };

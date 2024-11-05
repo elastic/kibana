@@ -1194,6 +1194,7 @@ components:
       enum:
         - OpenAI
         - Azure OpenAI
+        - Other
       type: string
     Reader:
       additionalProperties: true
