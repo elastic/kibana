@@ -120,6 +120,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       // Fill out required fields
       await testSubjects.setValue('nameField', 'a-star');
       await testSubjects.setValue('indexPatternsField', 'a*');
+      await testSubjects.setValue('priorityField', '1000');
 
       // Click Next button
       await pageObjects.indexManagement.clickNextButton();
