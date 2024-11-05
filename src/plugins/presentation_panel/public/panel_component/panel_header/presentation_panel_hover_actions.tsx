@@ -511,7 +511,7 @@ export const PresentationPanelHoverActions = ({
           ) : (
             <div /> // necessary for the right hover actions to align correctly when left hover actions are not present
           )}
-          {quickActionElements.length && contextMenuPanels.lastIndexOf.length ? (
+          {quickActionElements.length || contextMenuPanels.lastIndexOf.length ? (
             <div
               ref={rightHoverActionsRef}
               data-test-subj="embPanel__hoverActions__right"
