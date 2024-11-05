@@ -126,6 +126,7 @@ export const HitsCounter: React.FC<HitsCounterProps> = ({ mode, stateContainer }
             content={i18n.translate('discover.hitsCounter.hitCountWarningTooltip', {
               defaultMessage: 'Results might be incomplete',
             })}
+            iconProps={{ css: { display: 'block' } }}
           />
         </EuiFlexItem>
       )}
