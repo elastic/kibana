@@ -207,6 +207,7 @@ export class ReportingPublicPlugin
         apiClient,
         startServices$,
         usesUiCapabilities,
+        csvConfig: this.config.csv,
       })
     );
 
