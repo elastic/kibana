@@ -1073,7 +1073,7 @@
     "urls"
   ],
   "synthetics-param": [],
-  "synthetics-private-locations-multiple": [],
+  "synthetics-private-location": [],
   "synthetics-privates-locations": [],
   "tag": [
     "color",

@@ -3552,7 +3552,7 @@
     "dynamic": false,
     "properties": {}
   },
-  "synthetics-private-locations-multiple": {
+  "synthetics-private-location": {
     "dynamic": false,
     "properties": {}
   },
