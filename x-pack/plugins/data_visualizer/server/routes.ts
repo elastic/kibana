@@ -98,11 +98,6 @@ export function routes(coreSetup: CoreSetup<StartDeps, unknown>, logger: Logger)
             return (
               endpoint.task_type === 'sparse_embedding' || endpoint.task_type === 'text_embedding'
             );
-            // return (
-            //   (endpoint.task_type === 'sparse_embedding' ||
-            //     endpoint.task_type === 'text_embedding') &&
-            //   endpoint.service_settings.num_allocations >= 0
-            // );
           });
 
           return response.ok({ body: filteredInferenceEndpoints });

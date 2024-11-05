@@ -119,7 +119,6 @@ export class ImportView extends Component {
     } = this.state;
 
     const createPipeline = pipelineString !== '';
-    // getInferenceId(
 
     this.setState({
       createPipeline,
