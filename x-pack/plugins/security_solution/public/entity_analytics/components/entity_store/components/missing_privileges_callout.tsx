@@ -81,14 +81,14 @@ export const MissingPrivilegesCallout = React.memo(
             {featurePrivileges.length > 0 ? (
               <>
                 <FormattedMessage
-                  id="xpack.securitySolution.detectionEngine.missingPrivilegesCallOut.messageBody.featurePrivilegesTitle"
+                  id="xpack.securitySolution.riskEngine.missingPrivilegesCallOut.messageBody.featurePrivilegesTitle"
                   defaultMessage="Missing Kibana feature privileges:"
                 />
                 <ul>
                   {featurePrivileges.map((feature) => (
                     <li key={feature}>
                       <FormattedMessage
-                        id="xpack.securitySolution.detectionEngine.missingPrivilegesCallOut.messageBody.missingFeaturePrivileges"
+                        id="xpack.securitySolution.riskEngine.missingPrivilegesCallOut.messageBody.missingFeaturePrivileges"
                         defaultMessage="Missing privilege for the {feature} feature."
                         values={{
                           feature: <EuiCode>{feature}</EuiCode>,
