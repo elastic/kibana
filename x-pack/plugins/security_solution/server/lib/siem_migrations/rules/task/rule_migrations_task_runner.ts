@@ -48,8 +48,8 @@ const getRuleLogger = (logger: Logger): RuleLogger => {
   };
 };
 
-const ITERATION_BATCH_SIZE = 1 as const;
-const ITERATION_SLEEP_SECONDS = 5 as const;
+const ITERATION_BATCH_SIZE = 50 as const;
+const ITERATION_SLEEP_SECONDS = 10 as const;
 
 export class RuleMigrationsTaskRunner {
   private migrationsExecuting: Map<string, MigrationProcessing>;
@@ -78,11 +78,15 @@ export class RuleMigrationsTaskRunner {
     }
 
     const abortController = new AbortController();
+
     // Await the preparation to make sure the agent is created properly so the task can run
     const agent = await this.prepare({ ...params, abortController });
 
-    // not awaiting the promise to execute the task in the background
-    this.run({ ...params, agent, abortController });
+    // not awaiting the `run` promise to execute the task in the background
+    this.run({ ...params, agent, abortController }).catch((err) => {
+      // All errors in the `run` method are already catch, this should never happen, but just in case
+      this.taskLogger.error(`Unexpected error running the migration ID:${migrationId}`, err);
+    });
 
     return { exists: true, started: true };
   }
@@ -125,7 +129,7 @@ export class RuleMigrationsTaskRunner {
       // This should never happen, but just in case
       throw new Error(`Task already running for migration ID:${migrationId} `);
     }
-    this.taskLogger.info(`Starting migration task run for ID:${migrationId}`);
+    this.taskLogger.info(`Starting migration task for ID:${migrationId}`);
 
     this.migrationsExecuting.set(migrationId, { abortController, user: currentUser.username });
     const config: RunnableConfig = {
@@ -137,7 +141,7 @@ export class RuleMigrationsTaskRunner {
 
     try {
       const sleep = async (seconds: number) => {
-        this.taskLogger.info(`Sleeping ${seconds}s for migration ID:${migrationId}`);
+        this.taskLogger.debug(`Sleeping ${seconds}s for migration ID:${migrationId}`);
         await Promise.race([
           new Promise((resolve) => setTimeout(resolve, seconds * 1000)),
           abortPromise.promise,
@@ -147,13 +151,13 @@ export class RuleMigrationsTaskRunner {
       let isDone: boolean = false;
       do {
         const ruleMigrations = await dataClient.takePending(migrationId, ITERATION_BATCH_SIZE);
-        this.taskLogger.info(
+        this.taskLogger.debug(
           `Processing ${ruleMigrations.length} rules for migration ID:${migrationId}`
         );
 
         await Promise.all(
           ruleMigrations.map(async (ruleMigration) => {
-            this.taskLogger.info(
+            this.taskLogger.debug(
               `Starting migration of rule "${ruleMigration.original_rule.title}"`
             );
             try {
@@ -163,7 +167,7 @@ export class RuleMigrationsTaskRunner {
                 config
               );
               const duration = (Date.now() - start) / 1000;
-              this.taskLogger.info(
+              this.taskLogger.debug(
                 `Migration of rule "${ruleMigration.original_rule.title}" finished in ${duration}s`
               );
 
@@ -188,7 +192,7 @@ export class RuleMigrationsTaskRunner {
             }
           })
         );
-        this.taskLogger.info(`Batch processed successfully for migration ID:${migrationId}`);
+        this.taskLogger.debug(`Batch processed successfully for migration ID:${migrationId}`);
 
         const { rules } = await dataClient.getStats(migrationId);
         isDone = rules.pending === 0;
@@ -197,7 +201,7 @@ export class RuleMigrationsTaskRunner {
         }
       } while (!isDone);
 
-      this.taskLogger.info(`Finished task for migration ID:${migrationId}`);
+      this.taskLogger.info(`Finished migration task for ID:${migrationId}`);
     } catch (error) {
       await dataClient.releaseProcessing(migrationId);
 
