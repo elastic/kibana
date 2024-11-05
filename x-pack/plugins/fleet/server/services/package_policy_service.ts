@@ -75,6 +75,7 @@ export interface PackagePolicyClient {
       bumpRevision?: boolean;
       force?: true;
       authorizationHeader?: HTTPAuthorizationHeader | null;
+      asyncDeploy?: boolean;
     }
   ): Promise<{
     created: PackagePolicy[];
@@ -85,7 +86,7 @@ export interface PackagePolicyClient {
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     packagePolicyUpdates: UpdatePackagePolicy[],
-    options?: { user?: AuthenticatedUser; force?: boolean },
+    options?: { user?: AuthenticatedUser; force?: boolean; asyncDeploy?: boolean },
     currentVersion?: string
   ): Promise<{
     updatedPolicies: PackagePolicy[] | null;
@@ -135,6 +136,7 @@ export interface PackagePolicyClient {
       user?: AuthenticatedUser;
       skipUnassignFromAgentPolicies?: boolean;
       force?: boolean;
+      asyncDeploy?: boolean;
     },
     context?: RequestHandlerContext,
     request?: KibanaRequest
