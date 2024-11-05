@@ -16,6 +16,7 @@ import { KibanaServices } from '../context/types';
 import { BehaviorSubject } from 'rxjs';
 import { CoreTheme } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
+import { DEFAULT_THEME_VERSION } from '@kbn/core-ui-settings-common';
 
 describe('useDarkMode', () => {
   let container: HTMLDivElement | null;
@@ -37,7 +38,10 @@ describe('useDarkMode', () => {
 
   const mock = (): [KibanaServices, BehaviorSubject<CoreTheme>] => {
     const core = coreMock.createStart();
-    const subject = new BehaviorSubject<CoreTheme>({ darkMode: false });
+    const subject = new BehaviorSubject<CoreTheme>({
+      darkMode: false,
+      version: DEFAULT_THEME_VERSION,
+    });
     core.theme.theme$ = subject.asObservable();
 
     return [core, subject];
@@ -73,7 +77,7 @@ describe('useDarkMode', () => {
     expect(div!.textContent).toBe('false');
 
     act(() => {
-      subject.next({ darkMode: true });
+      subject.next({ darkMode: true, version: DEFAULT_THEME_VERSION });
     });
 
     div = container!.querySelector('div');

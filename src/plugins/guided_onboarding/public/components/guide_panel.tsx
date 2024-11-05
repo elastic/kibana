@@ -17,8 +17,9 @@ import { i18n } from '@kbn/i18n';
 
 import { ApplicationStart, CoreTheme, NotificationsStart } from '@kbn/core/public';
 import type { GuideState, GuideStep as GuideStepStatus } from '@kbn/guided-onboarding';
-
 import type { GuideId, GuideConfig, StepConfig } from '@kbn/guided-onboarding';
+import { DEFAULT_THEME_VERSION } from '@kbn/core-ui-settings-common';
+
 import type { GuidedOnboardingApi } from '../types';
 
 import type { PluginState } from '../../common';
@@ -57,7 +58,10 @@ export const GuidePanel = ({ api, application, notifications, theme$ }: GuidePan
   const [pluginState, setPluginState] = useState<PluginState | undefined>(undefined);
   const [guideConfig, setGuideConfig] = useState<GuideConfig | undefined>(undefined);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const { darkMode: isDarkTheme } = useObservable(theme$, { darkMode: false });
+  const { darkMode: isDarkTheme } = useObservable(theme$, {
+    darkMode: false,
+    version: DEFAULT_THEME_VERSION,
+  });
 
   const styles = getGuidePanelStyles({ euiThemeContext, isDarkTheme });
 

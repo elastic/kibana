@@ -11,6 +11,7 @@ import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 
 import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
+import { DEFAULT_THEME_VERSION } from '@kbn/core-ui-settings-common';
 
 import { UserProfile, useUserProfileForm } from './user_profile';
 import { UserProfileAPIClient } from '..';
@@ -318,7 +319,7 @@ describe('useUserProfileForm', () => {
       const data: UserProfileData = {};
 
       const nonCloudUser = mockAuthenticatedUser({ elastic_cloud_user: false });
-      coreStart.theme.getTheme.mockReturnValue({ darkMode: true });
+      coreStart.theme.getTheme.mockReturnValue({ darkMode: true, version: DEFAULT_THEME_VERSION });
       coreStart.settings.client.isOverridden.mockReturnValue(true);
 
       const testWrapper = mount(
@@ -354,7 +355,7 @@ describe('useUserProfileForm', () => {
       const data: UserProfileData = {};
 
       const nonCloudUser = mockAuthenticatedUser({ elastic_cloud_user: false });
-      coreStart.theme.getTheme.mockReturnValue({ darkMode: false });
+      coreStart.theme.getTheme.mockReturnValue({ darkMode: false, version: 'v8' });
       coreStart.settings.client.isOverridden.mockReturnValue(true);
 
       const testWrapper = mount(

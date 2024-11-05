@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { createElement } from 'react';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { DiscoverServices } from '../build_services';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
@@ -42,8 +43,8 @@ import { LocalStorageMock } from './local_storage_mock';
 import { createDiscoverDataViewsMock } from './data_views';
 import { SearchSourceDependencies } from '@kbn/data-plugin/common';
 import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import { DEFAULT_THEME_VERSION } from '@kbn/core-ui-settings-common';
 import { urlTrackerMock } from './url_tracker.mock';
-import { createElement } from 'react';
 import { createContextAwarenessMocks } from '../context_awareness/__mocks__';
 import { DiscoverEBTManager } from '../services/discover_ebt_manager';
 
@@ -143,7 +144,10 @@ export function createDiscoverServicesMock(): DiscoverServices {
   };
 
   const { profilesManagerMock } = createContextAwarenessMocks();
-  const theme = themeServiceMock.createSetupContract({ darkMode: false });
+  const theme = themeServiceMock.createSetupContract({
+    darkMode: false,
+    version: DEFAULT_THEME_VERSION,
+  });
 
   corePluginMock.theme = theme;
   corePluginMock.chrome.getActiveSolutionNavId$.mockReturnValue(new BehaviorSubject(null));

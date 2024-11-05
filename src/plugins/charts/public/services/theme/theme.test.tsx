@@ -15,11 +15,13 @@ import { render, act as renderAct } from '@testing-library/react';
 
 import { LIGHT_THEME, DARK_THEME } from '@elastic/charts';
 
-import { ThemeService } from './theme';
 import { coreMock } from '@kbn/core/public/mocks';
+import { ThemeVersion } from '@kbn/ui-shared-deps-npm';
+import { DEFAULT_THEME_VERSION } from '@kbn/core-ui-settings-common';
+import { ThemeService } from './theme';
 
-const createTheme$Mock = (mode: boolean) => {
-  return from([{ darkMode: mode }]);
+const createTheme$Mock = (mode: boolean, version: ThemeVersion = DEFAULT_THEME_VERSION) => {
+  return from([{ darkMode: mode, version }]);
 };
 
 const { theme: setUpMockTheme } = coreMock.createSetup();

@@ -17,6 +17,7 @@ import { BehaviorSubject } from 'rxjs';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import type { KibanaTheme } from '@kbn/react-kibana-context-common';
+import { DEFAULT_THEME_VERSION } from '@kbn/core-ui-settings-common';
 import { KibanaThemeProvider } from './theme_provider';
 
 describe('KibanaThemeProvider', () => {
@@ -52,7 +53,10 @@ describe('KibanaThemeProvider', () => {
   };
 
   it('exposes the EUI theme provider', async () => {
-    const coreTheme$ = new BehaviorSubject<KibanaTheme>({ darkMode: true });
+    const coreTheme$ = new BehaviorSubject<KibanaTheme>({
+      darkMode: true,
+      version: DEFAULT_THEME_VERSION,
+    });
 
     const wrapper = mountWithIntl(
       <KibanaThemeProvider theme={{ theme$: coreTheme$ }}>
@@ -66,7 +70,10 @@ describe('KibanaThemeProvider', () => {
   });
 
   it('propagates changes of the coreTheme observable', async () => {
-    const coreTheme$ = new BehaviorSubject<KibanaTheme>({ darkMode: true });
+    const coreTheme$ = new BehaviorSubject<KibanaTheme>({
+      darkMode: true,
+      version: DEFAULT_THEME_VERSION,
+    });
 
     const wrapper = mountWithIntl(
       <KibanaThemeProvider theme={{ theme$: coreTheme$ }}>
@@ -79,7 +86,7 @@ describe('KibanaThemeProvider', () => {
     expect(euiTheme!.colorMode).toEqual('DARK');
 
     await act(async () => {
-      coreTheme$.next({ darkMode: false });
+      coreTheme$.next({ darkMode: false, version: DEFAULT_THEME_VERSION });
     });
 
     await refresh(wrapper);

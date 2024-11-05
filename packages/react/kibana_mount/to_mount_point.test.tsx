@@ -16,6 +16,7 @@ import type { CoreTheme } from '@kbn/core/public';
 import { toMountPoint } from './to_mount_point';
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
+import { DEFAULT_THEME_VERSION } from '@kbn/core-ui-settings-common';
 
 describe('toMountPoint', () => {
   let euiTheme: UseEuiTheme;
@@ -41,7 +42,7 @@ describe('toMountPoint', () => {
   };
 
   it('exposes the euiTheme when `theme$` is provided', async () => {
-    const theme = { theme$: of<CoreTheme>({ darkMode: true }) };
+    const theme = { theme$: of<CoreTheme>({ darkMode: true, version: DEFAULT_THEME_VERSION }) };
     const mount = toMountPoint(<InnerComponent />, { theme, i18n, analytics });
 
     const targetEl = document.createElement('div');
@@ -53,7 +54,10 @@ describe('toMountPoint', () => {
   });
 
   it('propagates changes of the theme$ observable', async () => {
-    const theme$ = new BehaviorSubject<CoreTheme>({ darkMode: true });
+    const theme$ = new BehaviorSubject<CoreTheme>({
+      darkMode: true,
+      version: DEFAULT_THEME_VERSION,
+    });
 
     const mount = toMountPoint(<InnerComponent />, { theme: { theme$ }, i18n, analytics });
 
@@ -65,7 +69,7 @@ describe('toMountPoint', () => {
     expect(euiTheme!.colorMode).toEqual('DARK');
 
     await act(async () => {
-      theme$.next({ darkMode: false });
+      theme$.next({ darkMode: false, version: DEFAULT_THEME_VERSION });
     });
     await flushPromises();
 

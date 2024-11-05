@@ -33,6 +33,7 @@ import { IconChartDatatable } from '@kbn/chart-icons';
 import useObservable from 'react-use/lib/useObservable';
 import { getColorCategories } from '@kbn/chart-expressions-common';
 import { getOriginalId, isTransposeId } from '@kbn/transpose-utils';
+import { DEFAULT_THEME_VERSION } from '@kbn/core-ui-settings-common';
 import type { LensTableRowContextMenuEvent } from '../../../types';
 import type { FormatFactory } from '../../../../common/types';
 import { RowHeightMode } from '../../../../common/types';
@@ -80,7 +81,10 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
   const dataGridRef = useRef<EuiDataGridRefProps>(null);
 
   const isInteractive = props.interactive;
-  const isDarkMode = useObservable(props.theme.theme$, { darkMode: false }).darkMode;
+  const isDarkMode = useObservable(props.theme.theme$, {
+    darkMode: false,
+    version: DEFAULT_THEME_VERSION,
+  }).darkMode;
 
   const [columnConfig, setColumnConfig] = useState({
     columns: props.args.columns,

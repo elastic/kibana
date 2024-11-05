@@ -39,6 +39,7 @@ import {
   FeatureCatalogueCategory,
 } from '@kbn/home-plugin/public';
 import { withSuspense } from '@kbn/shared-ux-utility';
+import { DEFAULT_THEME_VERSION } from '@kbn/core-ui-settings-common';
 import { PLUGIN_ID, PLUGIN_PATH } from '../../../common';
 import { AppPluginStartDependencies } from '../../types';
 import { AddData } from '../add_data';
@@ -73,7 +74,10 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
     theme,
   } = services;
   const addBasePath = http.basePath.prepend;
-  const currentTheme = useObservable(theme.theme$, { darkMode: false });
+  const currentTheme = useObservable(theme.theme$, {
+    darkMode: false,
+    version: DEFAULT_THEME_VERSION,
+  });
 
   // Home does not have a locator implemented, so hard-code it here.
   const addDataHref = addBasePath('/app/integrations/browse');
