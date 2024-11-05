@@ -24,6 +24,7 @@ import { MOCK_QUICK_PROMPTS } from '../../mock/quick_prompt';
 import { useAssistantContext } from '../../..';
 import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { useKnowledgeBaseIndices } from '../../assistant/api/knowledge_base/use_knowledge_base_indices';
 
 const mockContext = {
   basePromptContexts: MOCK_QUICK_PROMPTS,
@@ -44,13 +45,13 @@ jest.mock('../../assistant/api/knowledge_base/entries/use_update_knowledge_base_
 jest.mock('../../assistant/api/knowledge_base/entries/use_delete_knowledge_base_entries');
 
 jest.mock('../../assistant/settings/use_settings_updater/use_settings_updater');
+jest.mock('../../assistant/api/knowledge_base/use_knowledge_base_indices');
 jest.mock('../../assistant/api/knowledge_base/use_knowledge_base_status');
 jest.mock('../../assistant/api/knowledge_base/entries/use_knowledge_base_entries');
 jest.mock(
   '../../assistant/common/components/assistant_settings_management/flyout/use_flyout_modal_visibility'
 );
 const mockDataViews = {
-  getIndices: jest.fn().mockResolvedValue([{ name: 'index-1' }, { name: 'index-2' }]),
   getFieldsForWildcard: jest.fn().mockResolvedValue([
     { name: 'field-1', esTypes: ['semantic_text'] },
     { name: 'field-2', esTypes: ['text'] },
@@ -147,6 +148,9 @@ describe('KnowledgeBaseSettingsManagement', () => {
         pipeline_exists: true,
       },
       isFetched: true,
+    });
+    (useKnowledgeBaseIndices as jest.Mock).mockReturnValue({
+      data: { indices: ['index-1', 'index-2'] },
     });
     (useKnowledgeBaseEntries as jest.Mock).mockReturnValue({
       data: { data: mockData },
