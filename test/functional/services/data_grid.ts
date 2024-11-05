@@ -102,22 +102,35 @@ export class DataGridService extends FtrService {
   public async resizeColumn(field: string, delta: number) {
     const header = await this.getHeaderElement(field);
     const originalWidth = (await header.getSize()).width;
-    const headerDraggableColumns = await this.find.allByCssSelector(
-      '[data-test-subj="euiDataGridHeaderDroppable"] > div'
-    );
-    // searching for a common parent of the field column header and its resizer
-    const fieldHeader: WebElementWrapper | null | undefined = (
-      await Promise.all(
-        headerDraggableColumns.map(async (column) => {
-          const hasFieldColumn =
-            (await column.findAllByCssSelector(`[data-gridcell-column-id="${field}"]`)).length > 0;
-          return hasFieldColumn ? column : null;
-        })
-      )
-    ).find(Boolean);
-    const resizer = await fieldHeader?.findByTestSubject('dataGridColumnResizer');
 
-    if (!fieldHeader || !resizer) {
+    let resizer: WebElementWrapper | undefined;
+
+    if (await this.testSubjects.exists('euiDataGridHeaderDroppable')) {
+      // if drag & drop is enabled for data grid columns
+      const headerDraggableColumns = await this.find.allByCssSelector(
+        '[data-test-subj="euiDataGridHeaderDroppable"] > div'
+      );
+      // searching for a common parent of the field column header and its resizer
+      const fieldHeader: WebElementWrapper | null | undefined = (
+        await Promise.all(
+          headerDraggableColumns.map(async (column) => {
+            const hasFieldColumn =
+              (await column.findAllByCssSelector(`[data-gridcell-column-id="${field}"]`)).length >
+              0;
+            return hasFieldColumn ? column : null;
+          })
+        )
+      ).find(Boolean);
+
+      resizer = await fieldHeader?.findByTestSubject('dataGridColumnResizer');
+    } else {
+      // if drag & drop is not enabled for data grid columns
+      resizer = await header.findByCssSelector(
+        this.testSubjects.getCssSelector('dataGridColumnResizer')
+      );
+    }
+
+    if (!resizer) {
       throw new Error(`Unable to find column resizer for field ${field}`);
     }
 
