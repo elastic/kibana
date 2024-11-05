@@ -12,7 +12,6 @@ import type { SyntheticEvent } from 'react';
 import React, { useCallback, useMemo, useContext } from 'react';
 import styled from 'styled-components';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { formatRiskScore } from '../../../../../entity_analytics/common';
 import { DefaultDraggable } from '../../../../../common/components/draggables';
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
 import { getRuleDetailsUrl } from '../../../../../common/components/link_to/redirect_to_detection_engine';
@@ -381,18 +380,5 @@ export const renderUrl = ({
     )
   ) : (
     getEmptyTagValue()
-  );
-};
-
-interface RenderRiskScoreProps {
-  value: number | string;
-}
-
-export const RenderRiskScore: React.FC<RenderRiskScoreProps> = ({ value }) => {
-  return (
-    <span data-test-subj="risk-score-truncate" title={`${value}`}>
-      {/* Usually is a string */}
-      {formatRiskScore(Number(value))}
-    </span>
   );
 };
