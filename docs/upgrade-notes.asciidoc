@@ -1672,6 +1672,30 @@ When you create *Lens* visualization, the default for the *Legend width* is now 
 [float]
 ==== Elastic Observability solution
 
+[discrete]
+[[deprecation-192003]]
+* Deprecated the Observability AI Assistant specific advanced setting `observability:aiAssistantLogsIndexPattern`. (8.16)
+[%collapsible]
+====
+*Details* +
+The Observability AI Assistant specific advanced setting for Logs index patterns `observability:aiAssistantLogsIndexPattern` is deprecated and no longer used. The AI Assistant will now use the existing **Log sources** setting `observability:logSources` instead. For more information, refer to ({kibana-pull}192003[#192003]).
+
+//*Impact* +
+//!!TODO!!
+====
+
+[discrete]
+[[deprecation-194519]]
+* The Logs Stream was hidden by default in favor of the Logs Explorer app. (8.16)
+[%collapsible]
+====
+*Details* +
+You can find the Logs Explorer app in the navigation menu under Logs > Explorer, or as a separate tab in Discover. For more information, refer to ({kibana-pull}194519[#194519]).
+
+*Impact* +
+You can still show the Logs Stream app again by navigating to Stack Management > Advanced Settings and by enabling the `observability:enableLogsStream` setting.
+====
+
 
 [discrete]
 [[deprecation-120689]]
