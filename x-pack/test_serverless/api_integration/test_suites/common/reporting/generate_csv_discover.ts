@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import type { SortDirection } from '@kbn/data-plugin/common';
-import type { JobParamsCSV } from '@kbn/reporting-export-types-csv-common';
 import type { Filter } from '@kbn/es-query';
+import expect from '@kbn/expect';
 import { CookieCredentials, InternalRequestHeader } from '@kbn/ftr-common-functional-services';
+import type { JobParamsCSV } from '@kbn/reporting-export-types-csv-common';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -79,7 +79,9 @@ export default function ({ getService }: FtrProviderContext) {
     this.timeout(12 * 60 * 1000);
 
     before(async () => {
-      cookieCredentials = await samlAuth.getM2MApiCookieCredentialsWithRoleScope('admin');
+      cookieCredentials = await samlAuth.getM2MApiCookieCredentialsWithRoleScope('admin', {
+        forceNewSession: true,
+      });
       internalReqHeader = svlCommonApi.getInternalRequestHeader();
     });
 
