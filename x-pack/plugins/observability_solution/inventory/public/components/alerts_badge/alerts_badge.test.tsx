@@ -5,81 +5,101 @@
  * 2.0.
  */
 import React from 'react';
-import { type KibanaReactContextValue } from '@kbn/kibana-react-plugin/public';
 import { render, screen } from '@testing-library/react';
 import { AlertsBadge } from './alerts_badge';
-import * as useKibana from '../../hooks/use_kibana';
-import { HostEntity, ServiceEntity } from '../../../common/entities';
+import { useKibana } from '../../hooks/use_kibana';
+import type { Entity } from '../../../common/entities';
+
+jest.mock('../../hooks/use_kibana');
+const useKibanaMock = useKibana as jest.Mock;
 
 describe('AlertsBadge', () => {
-  jest.spyOn(useKibana, 'useKibana').mockReturnValue({
-    services: {
-      http: {
-        basePath: {
-          prepend: (path: string) => path,
+  const mockAsKqlFilter = jest.fn();
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+
+    useKibanaMock.mockReturnValue({
+      services: {
+        http: {
+          basePath: {
+            prepend: (path: string) => path,
+          },
+        },
+        entityManager: {
+          entityClient: {
+            asKqlFilter: mockAsKqlFilter,
+          },
         },
       },
-    },
-  } as unknown as KibanaReactContextValue<useKibana.InventoryKibanaContext>);
+    });
+  });
 
   afterAll(() => {
     jest.clearAllMocks();
   });
 
   it('render alerts badge for a host entity', () => {
-    const entity: HostEntity = {
-      'entity.lastSeenTimestamp': 'foo',
+    const entity: Entity = {
+      'entity.last_seen_timestamp': 'foo',
       'entity.id': '1',
       'entity.type': 'host',
-      'entity.displayName': 'foo',
-      'entity.identityFields': 'host.name',
+      'entity.display_name': 'foo',
+      'entity.identity_fields': 'host.name',
       'host.name': 'foo',
-      'entity.definitionId': 'host',
+      'entity.definition_id': 'host',
       'cloud.provider': null,
       alertsCount: 1,
     };
+    mockAsKqlFilter.mockReturnValue('host.name: foo');
+
     render(<AlertsBadge entity={entity} />);
     expect(screen.queryByTestId('inventoryAlertsBadgeLink')?.getAttribute('href')).toEqual(
-      '/app/observability/alerts?_a=(kuery:\'host.name: "foo"\',status:active)'
+      "/app/observability/alerts?_a=(kuery:'host.name: foo',status:active)"
     );
     expect(screen.queryByTestId('inventoryAlertsBadgeLink')?.textContent).toEqual('1');
   });
   it('render alerts badge for a service entity', () => {
-    const entity: ServiceEntity = {
-      'entity.lastSeenTimestamp': 'foo',
+    const entity: Entity = {
+      'entity.last_seen_timestamp': 'foo',
       'agent.name': 'node',
       'entity.id': '1',
       'entity.type': 'service',
-      'entity.displayName': 'foo',
-      'entity.identityFields': 'service.name',
+      'entity.display_name': 'foo',
+      'entity.identity_fields': 'service.name',
       'service.name': 'bar',
-      'entity.definitionId': 'host',
+      'entity.definition_id': 'host',
       'cloud.provider': null,
       alertsCount: 5,
     };
+    mockAsKqlFilter.mockReturnValue('service.name: bar');
+
     render(<AlertsBadge entity={entity} />);
     expect(screen.queryByTestId('inventoryAlertsBadgeLink')?.getAttribute('href')).toEqual(
-      '/app/observability/alerts?_a=(kuery:\'service.name: "bar"\',status:active)'
+      "/app/observability/alerts?_a=(kuery:'service.name: bar',status:active)"
     );
     expect(screen.queryByTestId('inventoryAlertsBadgeLink')?.textContent).toEqual('5');
   });
   it('render alerts badge for a service entity with multiple identity fields', () => {
-    const entity: ServiceEntity = {
-      'entity.lastSeenTimestamp': 'foo',
+    const entity: Entity = {
+      'entity.last_seen_timestamp': 'foo',
       'agent.name': 'node',
       'entity.id': '1',
       'entity.type': 'service',
-      'entity.displayName': 'foo',
-      'entity.identityFields': ['service.name', 'service.environment'],
+      'entity.display_name': 'foo',
+      'entity.identity_fields': ['service.name', 'service.environment'],
       'service.name': 'bar',
       'service.environment': 'prod',
-      'entity.definitionId': 'host',
+      'entity.definition_id': 'host',
       'cloud.provider': null,
       alertsCount: 2,
     };
+
+    mockAsKqlFilter.mockReturnValue('service.name: bar AND service.environment: prod');
+
     render(<AlertsBadge entity={entity} />);
     expect(screen.queryByTestId('inventoryAlertsBadgeLink')?.getAttribute('href')).toEqual(
-      '/app/observability/alerts?_a=(kuery:\'service.name: "bar" AND service.environment: "prod"\',status:active)'
+      "/app/observability/alerts?_a=(kuery:'service.name: bar AND service.environment: prod',status:active)"
     );
     expect(screen.queryByTestId('inventoryAlertsBadgeLink')?.textContent).toEqual('2');
   });

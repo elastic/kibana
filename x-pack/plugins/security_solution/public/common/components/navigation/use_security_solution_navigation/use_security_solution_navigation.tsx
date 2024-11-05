@@ -23,9 +23,7 @@ const translatedNavTitle = i18n.translate('xpack.securitySolution.navigation.mai
   defaultMessage: 'Security',
 });
 
-export const useSecuritySolutionNavigation = (
-  onMount: () => void
-): KibanaPageTemplateProps['solutionNav'] => {
+export const useSecuritySolutionNavigation = (): KibanaPageTemplateProps['solutionNav'] => {
   const { chrome } = useKibana().services;
   const chromeStyle$ = useMemo(() => chrome.getChromeStyle$(), [chrome]);
   const chromeStyle = useObservable(chromeStyle$, 'classic');
@@ -41,7 +39,7 @@ export const useSecuritySolutionNavigation = (
     canBeCollapsed: true,
     name: translatedNavTitle,
     icon: 'logoSecurity',
-    children: <SecuritySideNav onMount={onMount} />,
+    children: <SecuritySideNav />,
     closeFlyoutButtonPosition: 'inside',
   };
 };

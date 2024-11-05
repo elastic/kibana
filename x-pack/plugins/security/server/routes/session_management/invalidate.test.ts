@@ -46,8 +46,9 @@ describe('Invalidate sessions routes', () => {
       expect(routeConfig.options).toEqual({
         access: 'public',
         summary: 'Invalidate user sessions',
-        tags: ['access:sessionManagement'],
       });
+
+      expect(routeConfig.security?.authz).toEqual({ requiredPrivileges: ['sessionManagement'] });
 
       const bodySchema = (routeConfig.validate as any).body as ObjectType;
       expect(() => bodySchema.validate({})).toThrowErrorMatchingInlineSnapshot(

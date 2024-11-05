@@ -63,7 +63,11 @@ export const CodeownersCommand: GenerateCommand = {
     }
 
     const newCodeowners = `${GENERATED_START}${pkgs
-      .map((pkg) => `${pkg.normalizedRepoRelativeDir} ${pkg.manifest.owner.join(' ')}`)
+      .map(
+        (pkg) =>
+          pkg.normalizedRepoRelativeDir +
+          (pkg.manifest.owner.length ? ' ' + pkg.manifest.owner.join(' ') : '')
+      )
       .join('\n')}${GENERATED_END}${content}${ULTIMATE_PRIORITY_RULES}`;
 
     if (newCodeowners === oldCodeowners) {

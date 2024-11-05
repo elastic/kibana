@@ -33,6 +33,8 @@ import {
 import { useDocumentDetailsContext } from '../../shared/context';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useWhichFlyout } from '../../shared/hooks/use_which_flyout';
+import { BasicAlertDataContext } from './investigation_guide_view';
+import { useInvestigationGuide } from '../../shared/hooks/use_investigation_guide';
 
 export const FETCH_NOTES_ERROR = i18n.translate(
   'xpack.securitySolution.flyout.left.notes.fetchNotesErrorLabel',
@@ -42,7 +44,7 @@ export const FETCH_NOTES_ERROR = i18n.translate(
 );
 export const NO_NOTES = (isAlert: boolean) =>
   i18n.translate('xpack.securitySolution.flyout.left.notes.noNotesLabel', {
-    defaultMessage: 'No notes have been created for this {value}',
+    defaultMessage: 'No notes have been created for this {value}.',
     values: { value: isAlert ? 'alert' : 'event' },
   });
 
@@ -55,6 +57,10 @@ export const NotesDetails = memo(() => {
   const dispatch = useDispatch();
   const { eventId, dataFormattedForFieldBrowser } = useDocumentDetailsContext();
   const { kibanaSecuritySolutionsPrivileges } = useUserPrivileges();
+  const { basicAlertData: basicData } = useInvestigationGuide({
+    dataFormattedForFieldBrowser,
+  });
+
   const canCreateNotes = kibanaSecuritySolutionsPrivileges.crud;
 
   // will drive the value we send to the AddNote component
@@ -130,7 +136,7 @@ export const NotesDetails = memo(() => {
   );
 
   return (
-    <>
+    <BasicAlertDataContext.Provider value={basicData}>
       {fetchStatus === ReqStatus.Loading && (
         <EuiLoadingElastic data-test-subj={NOTES_LOADING_TEST_ID} size="xxl" />
       )}
@@ -156,7 +162,7 @@ export const NotesDetails = memo(() => {
           </AddNote>
         </>
       )}
-    </>
+    </BasicAlertDataContext.Provider>
   );
 });
 

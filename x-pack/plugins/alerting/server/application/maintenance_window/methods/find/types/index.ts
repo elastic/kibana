@@ -6,3 +6,4 @@
  */
 
 export type { FindMaintenanceWindowsResult } from './find_maintenance_window_result';
+export type { FindMaintenanceWindowsParams } from './find_maintenance_window_params';

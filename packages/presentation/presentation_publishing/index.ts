@@ -30,6 +30,10 @@ export {
   useInheritedViewMode,
   type CanAccessViewMode,
 } from './interfaces/can_access_view_mode';
+export {
+  apiCanLockHoverActions,
+  type CanLockHoverActions,
+} from './interfaces/can_lock_hover_actions';
 export { fetch$, useFetchContext, type FetchContext } from './interfaces/fetch/fetch';
 export {
   initializeTimeRange,

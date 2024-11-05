@@ -190,7 +190,7 @@ export const SearchIndexDetailsPage = () => {
   }, [isShowingDeleteModal]);
   const { euiTheme } = useEuiTheme();
 
-  if (isInitialLoading || isMappingsInitialLoading) {
+  if (isInitialLoading || isMappingsInitialLoading || indexDocumentsIsInitialLoading) {
     return (
       <SectionLoading>
         {i18n.translate('xpack.searchIndices.loadingDescription', {
@@ -209,7 +209,7 @@ export const SearchIndexDetailsPage = () => {
       panelled
       bottomBorder
     >
-      {isIndexError || isMappingsError || !index || !mappings ? (
+      {isIndexError || isMappingsError || !index || !mappings || !indexDocuments ? (
         <IndexloadingError
           error={indexError}
           navigateToIndexListPage={navigateToIndexListPage}
@@ -297,7 +297,7 @@ export const SearchIndexDetailsPage = () => {
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiFlexGroup>
-                    <QuickStats index={index} mappings={mappings} />
+                    <QuickStats indexDocuments={indexDocuments} index={index} mappings={mappings} />
                   </EuiFlexGroup>
                 </EuiFlexItem>
               </EuiFlexGroup>

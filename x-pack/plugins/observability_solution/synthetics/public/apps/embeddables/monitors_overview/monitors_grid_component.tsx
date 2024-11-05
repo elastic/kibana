@@ -7,8 +7,8 @@
 
 import React, { useEffect, useRef } from 'react';
 import { Subject } from 'rxjs';
-import { i18n } from '@kbn/i18n';
 import { useDispatch } from 'react-redux';
+import { areFiltersEmpty } from '../common/utils';
 import { getOverviewStore } from './redux_store';
 import { ShowSelectedFilters } from '../common/show_selected_filters';
 import { setOverviewPageStateAction } from '../../synthetics/state';
@@ -26,13 +26,11 @@ export const StatusGridComponent = ({
 }) => {
   const overviewStore = useRef(getOverviewStore());
 
+  const hasFilters = !areFiltersEmpty(filters);
+
   return (
     <EmbeddablePanelWrapper
-      title={i18n.translate(
-        'xpack.synthetics.statusOverviewComponent.embeddablePanelWrapper.monitorsLabel',
-        { defaultMessage: 'Monitors' }
-      )}
-      titleAppend={<ShowSelectedFilters filters={filters ?? {}} />}
+      titleAppend={hasFilters ? <ShowSelectedFilters filters={filters ?? {}} /> : null}
     >
       <SyntheticsEmbeddableContext reload$={reload$} reduxStore={overviewStore.current}>
         <MonitorsOverviewList filters={filters} />
