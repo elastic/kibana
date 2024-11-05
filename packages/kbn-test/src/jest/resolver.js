@@ -51,6 +51,10 @@ module.exports = (request, options) => {
     });
   }
 
+  if (request === 'react-dom/client') {
+    return Path.resolve(__dirname, 'mocks/react_dom_client_mock.ts');
+  }
+
   if (request === `elastic-apm-node`) {
     return APM_AGENT_MOCK;
   }
