@@ -228,6 +228,5 @@
     "@kbn/data-stream-adapter",
     "@kbn/core-lifecycle-server",
     "@kbn/core-user-profile-common",
-    "@kbn/security-solution-plugin",
   ]
 }
