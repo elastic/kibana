@@ -8,6 +8,7 @@
  */
 
 import type { ESQLCommand } from '@kbn/esql-ast';
+import { SupportedDataType } from '../../../definitions/types';
 import type { GetColumnsByTypeFn, SuggestionRawDefinition } from '../../types';
 import {
   TRIGGER_SUGGESTION_COMMAND,
@@ -24,6 +25,7 @@ export async function suggest(
   getColumnsByType: GetColumnsByTypeFn,
   _columnExists: (column: string) => boolean,
   getSuggestedVariableName: () => string,
+  _getExpressionType: () => SupportedDataType | 'unknown',
   getPreferences?: () => Promise<{ histogramBarTarget: number } | undefined>
 ): Promise<SuggestionRawDefinition[]> {
   const pos = getPosition(innerText, command);
