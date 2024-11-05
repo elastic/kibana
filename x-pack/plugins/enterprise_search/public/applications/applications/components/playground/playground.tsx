@@ -14,7 +14,8 @@ import { i18n } from '@kbn/i18n';
 import type { PlaygroundPageMode } from '@kbn/search-playground/public';
 
 import { KibanaLogic } from '../../../shared/kibana';
-import { EnterpriseSearchApplicationsPageTemplate } from '../layout/page_template';
+
+import { SearchPlaygroundPageTemplate } from './page_template';
 
 interface PlaygroundProps {
   pageMode?: PageMode;
@@ -33,7 +34,7 @@ export const Playground: React.FC<PlaygroundProps> = ({ pageMode = PageMode.chat
   }
   return (
     <searchPlayground.PlaygroundProvider>
-      <EnterpriseSearchApplicationsPageTemplate
+      <SearchPlaygroundPageTemplate
         pageChrome={[
           i18n.translate('xpack.enterpriseSearch.content.playground.breadcrumb', {
             defaultMessage: 'Playground',
@@ -44,10 +45,9 @@ export const Playground: React.FC<PlaygroundProps> = ({ pageMode = PageMode.chat
         panelled={false}
         customPageSections
         bottomBorder="extended"
-        docLink="playground"
       >
         <searchPlayground.Playground pageMode={pageMode as unknown as PlaygroundPageMode} />
-      </EnterpriseSearchApplicationsPageTemplate>
+      </SearchPlaygroundPageTemplate>
     </searchPlayground.PlaygroundProvider>
   );
 };

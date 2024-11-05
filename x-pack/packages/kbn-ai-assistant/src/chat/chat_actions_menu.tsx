@@ -18,6 +18,7 @@ import {
 import { ConnectorSelectorBase } from '@kbn/observability-ai-assistant-plugin/public';
 import type { UseGenAIConnectorsResult } from '../hooks/use_genai_connectors';
 import { useKibana } from '../hooks/use_kibana';
+import { useKnowledgeBase } from '../hooks';
 
 export function ChatActionsMenu({
   connectors,
@@ -31,6 +32,7 @@ export function ChatActionsMenu({
   onCopyConversationClick: () => void;
 }) {
   const { application, http } = useKibana().services;
+  const knowledgeBase = useKnowledgeBase();
   const [isOpen, setIsOpen] = useState(false);
 
   const handleNavigateToConnectors = () => {
@@ -91,15 +93,19 @@ export function ChatActionsMenu({
               defaultMessage: 'Actions',
             }),
             items: [
-              {
-                name: i18n.translate('xpack.aiAssistant.chatHeader.actions.knowledgeBase', {
-                  defaultMessage: 'Manage knowledge base',
-                }),
-                onClick: () => {
-                  toggleActionsMenu();
-                  handleNavigateToSettingsKnowledgeBase();
-                },
-              },
+              ...(knowledgeBase?.status.value?.enabled
+                ? [
+                    {
+                      name: i18n.translate('xpack.aiAssistant.chatHeader.actions.knowledgeBase', {
+                        defaultMessage: 'Manage knowledge base',
+                      }),
+                      onClick: () => {
+                        toggleActionsMenu();
+                        handleNavigateToSettingsKnowledgeBase();
+                      },
+                    },
+                  ]
+                : []),
               {
                 name: i18n.translate('xpack.aiAssistant.chatHeader.actions.settings', {
                   defaultMessage: 'AI Assistant Settings',

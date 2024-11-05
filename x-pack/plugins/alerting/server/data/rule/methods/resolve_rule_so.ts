@@ -8,7 +8,7 @@
 import { SavedObjectsClientContract, SavedObjectsResolveResponse } from '@kbn/core/server';
 import { SavedObjectsResolveOptions } from '@kbn/core-saved-objects-api-server';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
-import { RuleAttributes } from '../types';
+import { RawRule } from '../../../types';
 
 export interface ResolveRuleSoParams {
   savedObjectsClient: SavedObjectsClientContract;
@@ -18,7 +18,7 @@ export interface ResolveRuleSoParams {
 
 export const resolveRuleSo = (
   params: ResolveRuleSoParams
-): Promise<SavedObjectsResolveResponse<RuleAttributes>> => {
+): Promise<SavedObjectsResolveResponse<RawRule>> => {
   const { savedObjectsClient, id, savedObjectsResolveOptions } = params;
 
   return savedObjectsClient.resolve(RULE_SAVED_OBJECT_TYPE, id, savedObjectsResolveOptions);
