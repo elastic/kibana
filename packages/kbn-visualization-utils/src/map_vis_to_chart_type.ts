@@ -10,28 +10,19 @@
 import { ChartType, LensVisualizationType } from './types';
 
 export const mapVisToChartType = (visualizationType: string) => {
-  let chartType: ChartType | undefined;
-
   switch (visualizationType) {
     case LensVisualizationType.XY:
-      chartType = ChartType.XY;
-      break;
+      return ChartType.XY;
     case LensVisualizationType.Metric:
-      chartType = ChartType.Metric;
-      break;
-    case LensVisualizationType.Pie:
-      chartType = ChartType.Pie;
-      break;
-    case LensVisualizationType.Heatmap:
-      chartType = ChartType.Heatmap;
-      break;
-    case LensVisualizationType.Datatable:
-      chartType = ChartType.Table;
-      break;
     case LensVisualizationType.LegacyMetric:
-      chartType = ChartType.Metric;
-      break;
+      return ChartType.Metric;
+    case LensVisualizationType.Pie:
+      return ChartType.Pie;
+    case LensVisualizationType.Heatmap:
+      return ChartType.Heatmap;
+    case LensVisualizationType.Gauge:
+      return ChartType.Gauge;
+    case LensVisualizationType.Datatable:
+      return ChartType.Table;
   }
-
-  return chartType;
 };
