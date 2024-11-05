@@ -59,11 +59,7 @@ import {
 import { withoutTokenCountEvents } from '../../../common/utils/without_token_count_events';
 import { CONTEXT_FUNCTION_NAME } from '../../functions/context';
 import type { ChatFunctionClient } from '../chat_function_client';
-import {
-  KnowledgeBaseEntryOperationType,
-  KnowledgeBaseService,
-  RecalledEntry,
-} from '../knowledge_base_service';
+import { KnowledgeBaseService, RecalledEntry } from '../knowledge_base_service';
 import { getAccessQuery } from '../util/get_access_query';
 import { getSystemMessageFromInstructions } from '../util/get_system_message_from_instructions';
 import { replaceSystemMessage } from '../util/replace_system_message';
@@ -781,19 +777,6 @@ export class ObservabilityAIAssistantClient {
         type: KnowledgeBaseType.Contextual,
       },
     });
-  };
-
-  importKnowledgeBaseEntries = async ({
-    entries,
-  }: {
-    entries: Array<Omit<KnowledgeBaseEntry, '@timestamp'>>;
-  }): Promise<void> => {
-    const operations = entries.map((entry) => ({
-      type: KnowledgeBaseEntryOperationType.Index,
-      document: { ...entry, '@timestamp': new Date().toISOString() },
-    }));
-
-    await this.dependencies.knowledgeBaseService.importEntries({ operations });
   };
 
   getKnowledgeBaseEntries = async ({

@@ -9,16 +9,11 @@ import { serverUnavailable, gatewayTimeout, badRequest } from '@hapi/boom';
 import type { ElasticsearchClient, IUiSettingsClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import pLimit from 'p-limit';
 import pRetry from 'p-retry';
-import { map, orderBy } from 'lodash';
+import { orderBy } from 'lodash';
 import { encode } from 'gpt-tokenizer';
 import { MlTrainedModelDeploymentNodesStats } from '@elastic/elasticsearch/lib/api/types';
-import {
-  INDEX_QUEUED_DOCUMENTS_TASK_ID,
-  INDEX_QUEUED_DOCUMENTS_TASK_TYPE,
-  resourceNames,
-} from '..';
+import { resourceNames } from '..';
 import {
   Instruction,
   KnowledgeBaseEntry,
@@ -63,34 +58,8 @@ function throwKnowledgeBaseNotReady(body: any) {
   throw serverUnavailable(`Knowledge base is not ready yet`, body);
 }
 
-export enum KnowledgeBaseEntryOperationType {
-  Index = 'index',
-  Delete = 'delete',
-}
-
-interface KnowledgeBaseDeleteOperation {
-  type: KnowledgeBaseEntryOperationType.Delete;
-  operationDocId?: string;
-  labels?: Record<string, string>;
-}
-
-interface KnowledgeBaseIndexOperation {
-  type: KnowledgeBaseEntryOperationType.Index;
-  document: KnowledgeBaseEntry;
-}
-
-export type KnowledgeBaseEntryOperation =
-  | KnowledgeBaseDeleteOperation
-  | KnowledgeBaseIndexOperation;
-
 export class KnowledgeBaseService {
-  private isModelReady: boolean = false;
-
-  private _queue: KnowledgeBaseEntryOperation[] = [];
-
-  constructor(private readonly dependencies: Dependencies) {
-    this.ensureTaskScheduled();
-  }
+  constructor(private readonly dependencies: Dependencies) {}
 
   setup = async () => {
     this.dependencies.logger.debug('Setting up knowledge base');
@@ -203,139 +172,7 @@ export class KnowledgeBaseService {
     }, retryOptions);
 
     this.dependencies.logger.info(`${elserModelId} model is ready`);
-    this.ensureTaskScheduled();
   };
-
-  private ensureTaskScheduled() {
-    if (!this.dependencies.enabled) {
-      return;
-    }
-    this.dependencies.taskManagerStart
-      .ensureScheduled({
-        taskType: INDEX_QUEUED_DOCUMENTS_TASK_TYPE,
-        id: INDEX_QUEUED_DOCUMENTS_TASK_ID,
-        state: {},
-        params: {},
-        schedule: {
-          interval: '1h',
-        },
-      })
-      .then(() => {
-        this.dependencies.logger.debug('Scheduled queue task');
-        return this.dependencies.taskManagerStart.runSoon(INDEX_QUEUED_DOCUMENTS_TASK_ID);
-      })
-      .then(() => {
-        this.dependencies.logger.debug('Queue task ran');
-      })
-      .catch((err) => {
-        this.dependencies.logger.error(`Failed to schedule queue task`);
-        this.dependencies.logger.error(err);
-      });
-  }
-
-  private async processOperation(operation: KnowledgeBaseEntryOperation) {
-    if (operation.type === KnowledgeBaseEntryOperationType.Delete) {
-      try {
-        await this.dependencies.esClient.asInternalUser.deleteByQuery({
-          index: resourceNames.aliases.kb,
-          query: {
-            bool: {
-              filter: [
-                ...(operation.operationDocId
-                  ? [{ term: { doc_id: operation.operationDocId } }]
-                  : []),
-                ...(operation.labels
-                  ? map(operation.labels, (value, key) => {
-                      return { term: { [key]: value } };
-                    })
-                  : []),
-              ],
-            },
-          },
-        });
-        return;
-      } catch (error) {
-        this.dependencies.logger.error(
-          `Failed to delete document "${operation?.operationDocId}" due to ${error.message}`
-        );
-        this.dependencies.logger.debug(() => JSON.stringify(operation));
-        throw error;
-      }
-    }
-
-    try {
-      await this.addEntry({ entry: operation.document });
-    } catch (error) {
-      this.dependencies.logger.error(`Failed to index document due to ${error.message}`);
-      this.dependencies.logger.debug(() => JSON.stringify(operation.document));
-      throw error;
-    }
-  }
-
-  async processQueue() {
-    if (!this._queue.length || !this.dependencies.enabled) {
-      return;
-    }
-
-    if (!(await this.status()).ready) {
-      this.dependencies.logger.debug(`Bailing on queue task: KB is not ready yet`);
-      return;
-    }
-
-    this.dependencies.logger.debug(`Processing queue`);
-
-    this.isModelReady = true;
-
-    this.dependencies.logger.info(`Processing ${this._queue.length} queue operations`);
-
-    const limiter = pLimit(5);
-
-    const operations = this._queue.concat();
-
-    await Promise.all(
-      operations.map((operation) =>
-        limiter(async () => {
-          this._queue.splice(operations.indexOf(operation), 1);
-          await this.processOperation(operation);
-        })
-      )
-    );
-
-    this.dependencies.logger.info(`Finished processing ${operations.length} queued operations`);
-  }
-
-  queue(operations: KnowledgeBaseEntryOperation[]): void {
-    if (!operations.length) {
-      return;
-    }
-
-    this.dependencies.logger.debug(
-      `Adding ${operations.length} operations to queue. Queue size now: ${this._queue.length})`
-    );
-    this._queue.push(...operations);
-
-    if (!this.isModelReady) {
-      this.dependencies.logger.debug(
-        `Delay processing ${operations.length} operations until knowledge base is ready`
-      );
-      return;
-    }
-
-    const limiter = pLimit(5);
-
-    const limitedFunctions = this._queue.map((operation) =>
-      limiter(() => this.processOperation(operation))
-    );
-
-    Promise.all(limitedFunctions)
-      .then(() => {
-        this.dependencies.logger.debug(`Processed all queued operations`);
-      })
-      .catch((err) => {
-        this.dependencies.logger.error(`Failed to process all queued operations`);
-        this.dependencies.logger.error(err);
-      });
-  }
 
   status = async () => {
     this.dependencies.logger.debug('Checking model status');
@@ -724,29 +561,6 @@ export class KnowledgeBaseService {
       }
       throw error;
     }
-  };
-
-  importEntries = async ({
-    operations,
-  }: {
-    operations: KnowledgeBaseEntryOperation[];
-  }): Promise<void> => {
-    if (!this.dependencies.enabled) {
-      return;
-    }
-    this.dependencies.logger.info(`Starting import of ${operations.length} entries`);
-
-    const limiter = pLimit(5);
-
-    await Promise.all(
-      operations.map((operation) =>
-        limiter(async () => {
-          await this.processOperation(operation);
-        })
-      )
-    );
-
-    this.dependencies.logger.info(`Completed import of ${operations.length} entries`);
   };
 
   deleteEntry = async ({ id }: { id: string }): Promise<void> => {

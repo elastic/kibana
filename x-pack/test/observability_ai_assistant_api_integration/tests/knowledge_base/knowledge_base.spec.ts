@@ -9,7 +9,6 @@ import expect from '@kbn/expect';
 import { type KnowledgeBaseEntry } from '@kbn/observability-ai-assistant-plugin/common';
 import pRetry from 'p-retry';
 import { ToolingLog } from '@kbn/tooling-log';
-import { uniq } from 'lodash';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { clearKnowledgeBase, createKnowledgeBaseModel, deleteKnowledgeBaseModel } from './helpers';
 import { ObservabilityAIAssistantApiClients } from '../../common/config';
@@ -199,100 +198,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const entries = await getEntries({ query: 'b' });
         expect(entries.length).to.eql(1);
         expect(entries[0].title).to.eql('My title b');
-      });
-    });
-
-    describe('when importing categories', () => {
-      beforeEach(async () => {
-        await clearKnowledgeBase(es);
-      });
-
-      afterEach(async () => {
-        await clearKnowledgeBase(es);
-      });
-
-      const importCategories = () =>
-        observabilityAIAssistantAPIClient
-          .editor({
-            endpoint: 'POST /internal/observability_ai_assistant/kb/entries/category/import',
-            params: {
-              body: {
-                category: 'my_new_category',
-                entries: [
-                  {
-                    id: 'my_new_category_a',
-                    texts: [
-                      'My first category content a',
-                      'My second category content a',
-                      'my third category content a',
-                    ],
-                  },
-                  {
-                    id: 'my_new_category_b',
-                    texts: [
-                      'My first category content b',
-                      'My second category content b',
-                      'my third category content b',
-                    ],
-                  },
-                  {
-                    id: 'my_new_category_c',
-                    texts: [
-                      'My first category content c',
-                      'My second category content c',
-                      'my third category content c',
-                    ],
-                  },
-                ],
-              },
-            },
-          })
-          .expect(200);
-
-      it('overwrites existing entries on subsequent import', async () => {
-        await waitForModelReady(observabilityAIAssistantAPIClient, log);
-        await importCategories();
-        await importCategories();
-
-        await pRetry(
-          async () => {
-            const res = await observabilityAIAssistantAPIClient
-              .editor({
-                endpoint: 'GET /internal/observability_ai_assistant/kb/entries',
-                params: {
-                  query: {
-                    query: '',
-                    sortBy: 'title',
-                    sortDirection: 'asc',
-                  },
-                },
-              })
-              .expect(200);
-
-            const categoryEntries = res.body.entries.filter(
-              (entry) => entry.labels?.category === 'my_new_category'
-            );
-
-            const entryGroups = uniq(categoryEntries.map((entry) => entry.title));
-
-            log.debug(
-              `Waiting for entries to be created. Found ${categoryEntries.length} entries and ${entryGroups.length} groups`
-            );
-
-            if (categoryEntries.length !== 9 || entryGroups.length !== 3) {
-              throw new Error(
-                `Expected 9 entries, found ${categoryEntries.length} and ${entryGroups.length} groups`
-              );
-            }
-
-            expect(categoryEntries.length).to.eql(9);
-            expect(entryGroups.length).to.eql(3);
-          },
-          {
-            retries: 100,
-            factor: 1,
-          }
-        );
       });
     });
   });
