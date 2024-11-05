@@ -15,6 +15,7 @@ import {
   PluginInitializerContext,
 } from '@kbn/core/public';
 import { DefaultClientOptions, createRepositoryClient } from '@kbn/server-route-repository-client';
+import { lazy } from 'react';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { PLUGIN_NAME, sloAppId } from '../common';
 import { ExperimentalFeatures, SLOConfig } from '../common/config';
@@ -28,7 +29,6 @@ import { SloOverviewEmbeddableState } from './embeddable/slo/overview/types';
 import { SloDetailsLocatorDefinition } from './locators/slo_details';
 import { SloEditLocatorDefinition } from './locators/slo_edit';
 import { SloListLocatorDefinition } from './locators/slo_list';
-import { getCreateSLOFlyoutLazy } from './pages/slo_edit/shared_flyout/get_create_slo_flyout';
 import { registerBurnRateRuleType } from './rules/register_burn_rate_rule_type';
 import type {
   SLOPublicPluginsSetup,
@@ -200,18 +200,23 @@ export class SLOPlugin
     const kibanaVersion = this.initContext.env.packageInfo.version;
     const sloClient = createRepositoryClient<SLORouteRepository, DefaultClientOptions>(core);
 
+    const lazyWithContextProviders = getLazyWithContextProviders({
+      core,
+      isDev: this.initContext.env.mode.dev,
+      kibanaVersion,
+      observabilityRuleTypeRegistry: plugins.observability.observabilityRuleTypeRegistry,
+      ObservabilityPageTemplate: plugins.observabilityShared.navigation.PageTemplate,
+      plugins,
+      isServerless: !!plugins.serverless,
+      experimentalFeatures: this.experimentalFeatures,
+      sloClient,
+    });
+
     return {
-      getCreateSLOFlyout: getCreateSLOFlyoutLazy({
-        core,
-        isDev: this.initContext.env.mode.dev,
-        kibanaVersion,
-        observabilityRuleTypeRegistry: plugins.observability.observabilityRuleTypeRegistry,
-        ObservabilityPageTemplate: plugins.observabilityShared.navigation.PageTemplate,
-        plugins,
-        isServerless: !!plugins.serverless,
-        experimentalFeatures: this.experimentalFeatures,
-        sloClient,
-      }),
+      getCreateSLOFlyout: lazyWithContextProviders(
+        lazy(() => import('./pages/slo_edit/shared_flyout/slo_add_form_flyout')),
+        { spinnerSize: 'm' }
+      ),
     };
   }
 

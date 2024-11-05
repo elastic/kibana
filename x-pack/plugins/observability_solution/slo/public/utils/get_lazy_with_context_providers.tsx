@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiLoadingSpinnerProps } from '@elastic/eui';
 import { CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
@@ -30,6 +31,10 @@ interface Props {
 
 export type LazyWithContextProviders = ReturnType<typeof getLazyWithContextProviders>;
 
+interface Options {
+  spinnerSize?: EuiLoadingSpinnerProps['size'];
+}
+
 export const getLazyWithContextProviders =
   ({
     core,
@@ -42,7 +47,8 @@ export const getLazyWithContextProviders =
     experimentalFeatures,
     sloClient,
   }: Props) =>
-  (LazyComponent: React.LazyExoticComponent<any>): React.FunctionComponent => {
+  (LazyComponent: React.LazyExoticComponent<any>, options?: Options): React.FunctionComponent => {
+    const { spinnerSize = 'xl' } = options ?? {};
     const queryClient = new QueryClient();
     return (props) => (
       <KibanaContextProvider
@@ -65,7 +71,7 @@ export const getLazyWithContextProviders =
           }}
         >
           <QueryClientProvider client={queryClient}>
-            <Suspense>
+            <Suspense fallback={<LoadingSpinner size={spinnerSize} />}>
               <LazyComponent {...props} />
             </Suspense>
           </QueryClientProvider>
@@ -73,3 +79,13 @@ export const getLazyWithContextProviders =
       </KibanaContextProvider>
     );
   };
+
+function LoadingSpinner({ size }: { size: EuiLoadingSpinnerProps['size'] }) {
+  return (
+    <EuiFlexGroup justifyContent="center">
+      <EuiFlexItem grow={false}>
+        <EuiLoadingSpinner size={size} />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+}
