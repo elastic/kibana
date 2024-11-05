@@ -14,6 +14,7 @@ import type {
   EntityNodeDataModel,
   LabelNodeDataModel,
   GroupNodeDataModel,
+  Color,
 } from '@kbn/cloud-security-posture-common/types/graph/latest';
 import type { EsqlToRecords } from '@elastic/elasticsearch/lib/helpers';
 import type { Writable } from '@kbn/utility-types';
@@ -121,7 +122,8 @@ const fetchGraph = async ({
       targetIds = target.entity.id,
       eventOutcome = event.outcome,
       isAlert
-| LIMIT 1000`;
+| LIMIT 1000
+| SORT isAlert desc`;
 
   logger.trace(`Executing query [${query}]`);
   logger.trace(JSON.stringify(buildDslFilter(eventIds, start, end, esQuery)));
@@ -307,14 +309,7 @@ const createEdgesAndGroups = (logger: Logger, context: ParseContext) => {
       };
       nodesMap[groupNode.id] = groupNode;
 
-      connectEntitiesAndLabelNode(
-        logger,
-        edgesMap,
-        nodesMap,
-        labelEdges[edgeLabelsIds[0]].source,
-        groupNode.id,
-        labelEdges[edgeLabelsIds[0]].target
-      );
+      let groupEdgesColor: Color = 'primary';
 
       edgeLabelsIds.forEach((edgeLabelId) => {
         (nodesMap[edgeLabelId] as Writable<LabelNodeDataModel>).parentId = groupNode.id;
@@ -326,7 +321,26 @@ const createEdgesAndGroups = (logger: Logger, context: ParseContext) => {
           edgeLabelId,
           groupNode.id
         );
+
+        if ((nodesMap[edgeLabelId] as LabelNodeDataModel).color === 'danger') {
+          groupEdgesColor = 'danger';
+        } else if (
+          (nodesMap[edgeLabelId] as LabelNodeDataModel).color === 'warning' &&
+          groupEdgesColor !== 'danger'
+        ) {
+          groupEdgesColor = 'warning';
+        }
       });
+
+      connectEntitiesAndLabelNode(
+        logger,
+        edgesMap,
+        nodesMap,
+        labelEdges[edgeLabelsIds[0]].source,
+        groupNode.id,
+        labelEdges[edgeLabelsIds[0]].target,
+        groupEdgesColor
+      );
     }
   });
 };
@@ -337,11 +351,12 @@ const connectEntitiesAndLabelNode = (
   nodesMap: Record<string, NodeDataModel>,
   sourceNodeId: string,
   labelNodeId: string,
-  targetNodeId: string
+  targetNodeId: string,
+  colorOverride?: Color
 ) => {
   [
-    connectNodes(nodesMap, sourceNodeId, labelNodeId),
-    connectNodes(nodesMap, labelNodeId, targetNodeId),
+    connectNodes(nodesMap, sourceNodeId, labelNodeId, colorOverride),
+    connectNodes(nodesMap, labelNodeId, targetNodeId, colorOverride),
   ].forEach((edge) => {
     logger.trace(`Connecting nodes [${edge.source} -> ${edge.target}]`);
     edgesMap[edge.id] = edge;
@@ -351,7 +366,8 @@ const connectEntitiesAndLabelNode = (
 const connectNodes = (
   nodesMap: Record<string, NodeDataModel>,
   sourceNodeId: string,
-  targetNodeId: string
+  targetNodeId: string,
+  colorOverride?: Color
 ): EdgeDataModel => {
   const sourceNode = nodesMap[sourceNodeId];
   const targetNode = nodesMap[targetNodeId];
@@ -366,6 +382,6 @@ const connectNodes = (
     id: `a(${sourceNodeId})-b(${targetNodeId})`,
     source: sourceNodeId,
     target: targetNodeId,
-    color,
+    color: colorOverride ?? color,
   };
 };

@@ -110,7 +110,7 @@ export const Graph: React.FC<GraphProps> = ({
       setPrevEdges(edges);
       setTimeout(() => {
         fitViewRef.current?.();
-      }, 0);
+      }, 30);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- We only want to run this effect when nodes or edges change
   }, [nodes, edges, setNodes, setEdges]);
