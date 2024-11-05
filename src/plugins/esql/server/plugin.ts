@@ -17,7 +17,11 @@ export class EsqlServerPlugin implements Plugin {
     core.uiSettings.register(getUiSettings());
 
     plugins.contentManagement.favorites.registerFavoriteType('esql_query', {
-      typeMetadataSchema: schema.object({ query: schema.string(), timeRan: schema.string() }),
+      typeMetadataSchema: schema.object({
+        queryString: schema.string(),
+        timeRan: schema.string(),
+        status: schema.string(),
+      }),
     });
     return {};
   }

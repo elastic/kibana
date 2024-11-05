@@ -26,7 +26,7 @@ export interface QueryHistoryItem {
 
 const MAX_QUERIES_NUMBER = 20;
 
-const getKey = (queryString: string) => {
+export const getTrimmedQuery = (queryString: string) => {
   return queryString.replaceAll('\n', '').trim().replace(/\s\s+/g, ' ');
 };
 
@@ -65,10 +65,10 @@ export const addQueriesToCache = (
   // the localStorage queries
   const queries = getHistoryItems('desc');
   queries.forEach((queryItem) => {
-    const trimmedQueryString = getKey(queryItem.queryString);
+    const trimmedQueryString = getTrimmedQuery(queryItem.queryString);
     cachedQueries.set(trimmedQueryString, queryItem);
   });
-  const trimmedQueryString = getKey(item.queryString);
+  const trimmedQueryString = getTrimmedQuery(item.queryString);
 
   if (item.queryString) {
     const tz = getMomentTimeZone(item.timeZone);

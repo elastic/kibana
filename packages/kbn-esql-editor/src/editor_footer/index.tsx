@@ -8,7 +8,6 @@
  */
 
 import React, { memo, useState, useCallback, useMemo } from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { i18n } from '@kbn/i18n';
 import {
   EuiText,
@@ -25,10 +24,6 @@ import {
   LanguageDocumentationFlyout,
 } from '@kbn/language-documentation';
 import { getLimitFromESQLQuery } from '@kbn/esql-utils';
-import {
-  FavoritesClient,
-  FavoritesContextProvider,
-} from '@kbn/content-management-favorites-public';
 import { type MonacoMessage } from '../helpers';
 import { ErrorsWarningsFooterPopover } from './errors_warnings_popover';
 import { QueryHistoryAction, HistoryAndStarredQueriesTabs } from './query_history';
@@ -64,13 +59,8 @@ interface EditorFooterProps {
   isSpaceReduced?: boolean;
   hideTimeFilterInfo?: boolean;
   hideQueryHistory?: boolean;
-  isInCompactMode?: boolean;
   displayDocumentationAsFlyout?: boolean;
 }
-
-const queryClient = new QueryClient({
-  defaultOptions: { queries: { retry: false, staleTime: 30 * 60 * 1000 } },
-});
 
 export const EditorFooter = memo(function EditorFooter({
   lines,
@@ -92,19 +82,18 @@ export const EditorFooter = memo(function EditorFooter({
   isLanguageComponentOpen,
   setIsLanguageComponentOpen,
   hideQueryHistory,
-  isInCompactMode,
   displayDocumentationAsFlyout,
   measuredContainerWidth,
   code,
 }: EditorFooterProps) {
   const kibana = useKibana<ESQLEditorDeps>();
-  const { docLinks, core, usageCollection } = kibana.services;
-  const esqlFavoritesClient = useMemo(() => {
-    return new FavoritesClient('esql_editor', 'esql_query', {
-      http: core.http,
-      usageCollection,
-    });
-  }, [core.http, usageCollection]);
+  const { docLinks } = kibana.services;
+  // const esqlFavoritesClient = useMemo(() => {
+  //   return new FavoritesClient<QueryHistoryItem>('esql_editor', 'esql_query', {
+  //     http: core.http,
+  //     usageCollection,
+  //   });
+  // }, [core.http, usageCollection]);
   const [isErrorPopoverOpen, setIsErrorPopoverOpen] = useState(false);
   const [isWarningPopoverOpen, setIsWarningPopoverOpen] = useState(false);
 
@@ -324,16 +313,12 @@ export const EditorFooter = memo(function EditorFooter({
       </EuiFlexItem>
       {isHistoryOpen && (
         <EuiFlexItem grow={false}>
-          <QueryClientProvider client={queryClient}>
-            <FavoritesContextProvider favoritesClient={esqlFavoritesClient}>
-              <HistoryAndStarredQueriesTabs
-                containerCSS={styles.historyContainer}
-                onUpdateAndSubmit={onUpdateAndSubmit}
-                containerWidth={measuredContainerWidth}
-                height={resizableContainerHeight}
-              />
-            </FavoritesContextProvider>
-          </QueryClientProvider>
+          <HistoryAndStarredQueriesTabs
+            containerCSS={styles.historyContainer}
+            onUpdateAndSubmit={onUpdateAndSubmit}
+            containerWidth={measuredContainerWidth}
+            height={resizableContainerHeight}
+          />
         </EuiFlexItem>
       )}
       {isLanguageComponentOpen && editorIsInline && (

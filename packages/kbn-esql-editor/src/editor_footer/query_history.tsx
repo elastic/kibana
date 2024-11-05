@@ -6,7 +6,6 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import moment from 'moment';
 import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -27,19 +26,12 @@ import {
   EuiTabs,
   EuiNotificationBadge,
 } from '@elastic/eui';
-import {
-  useFavoritesClient,
-  // FavoritesContextProvider,
-  // useFavorites,
-} from '@kbn/content-management-favorites-public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { css, Interpolation, Theme } from '@emotion/react';
-import {
-  type QueryHistoryItem,
-  getHistoryItems,
-  dateFormat,
-  getMomentTimeZone,
-} from '../history_local_storage';
+import { type QueryHistoryItem, getHistoryItems } from '../history_local_storage';
+import type { ESQLEditorDeps } from '../types';
 import { getReducedSpaceStyling, swapArrayElements } from './query_history_helpers';
+import { EsqlStarredQueriesService, StarredQueryItem } from './esql_starred_queries';
 
 export function QueryHistoryAction({
   toggleHistory,
@@ -113,32 +105,19 @@ export const getTableColumns = (
   width: number,
   isOnReducedSpaceLayout: boolean,
   actions: Array<CustomItemAction<QueryHistoryItem>>,
-  addFavorite: (params: { id: string; metadata?: object }) => Promise<void>,
-  isStarred?: boolean
+  isStarredTab = false,
+  starredQueriesService?: EsqlStarredQueriesService
 ): Array<EuiBasicTableColumn<QueryHistoryItem>> => {
-  const tz = getMomentTimeZone();
   const columnsArray = [
     {
       'data-test-subj': 'favoriteBtn',
-      render: (item: QueryHistoryItem) => (
-        <EuiButtonIcon
-          // isLoading={addFavorite.isLoading}
-          title={i18n.translate('esqlEditor.query.querieshistory.addFavoriteTitle', {
-            defaultMessage: 'Add ES|QL query to starred',
-          })}
-          aria-label={i18n.translate('esqlEditor.query.querieshistory.addFavoriteTitle', {
-            defaultMessage: 'Add ES|QL query to starred',
-          })}
-          iconType="starPlusFilled"
-          onClick={async () => {
-            await addFavorite({
-              id: 'id',
-              metadata: { query: item.queryString, timeRan: moment().tz(tz).format(dateFormat) },
-            });
-          }}
-          data-test-subj="favoriteButton"
-        />
-      ),
+      render: (item: QueryHistoryItem) => {
+        const StarredQueryButton = starredQueriesService?.renderStarredButton(item);
+        if (!StarredQueryButton) {
+          return null;
+        }
+        return StarredQueryButton;
+      },
       width: isOnReducedSpaceLayout ? 'auto' : '30px',
     },
     {
@@ -219,7 +198,7 @@ export const getTableColumns = (
     {
       field: 'timeRan',
       'data-test-subj': 'timeRan',
-      name: isStarred
+      name: isStarredTab
         ? i18n.translate('esqlEditor.query.dateAddedColumnLabel', {
             defaultMessage: 'Date Added',
           })
@@ -239,7 +218,7 @@ export const getTableColumns = (
   ];
 
   // I need to swap the elements here to get the desired design
-  return isOnReducedSpaceLayout ? swapArrayElements(columnsArray, 1, 2) : columnsArray;
+  return isOnReducedSpaceLayout ? swapArrayElements(columnsArray, 2, 3) : columnsArray;
 };
 
 export function QueryList({
@@ -247,31 +226,25 @@ export function QueryList({
   containerWidth,
   onUpdateAndSubmit,
   height,
-  getItemsFn,
-  isStarred,
+  listItems,
+  starredQueriesService,
   tableCaption,
   dataTestSubj,
+  isStarredTab = false,
 }: {
-  getItemsFn: (sortDirection: 'asc' | 'desc') => QueryHistoryItem[];
-  isStarred?: boolean;
+  listItems: QueryHistoryItem[];
   containerCSS: Interpolation<Theme>;
   containerWidth: number;
   onUpdateAndSubmit: (qs: string) => void;
   height: number;
+  starredQueriesService?: EsqlStarredQueriesService;
   tableCaption?: string;
   dataTestSubj?: string;
+  isStarredTab?: boolean;
 }) {
-  const esqlFavoritesClient = useFavoritesClient();
-  const addFavorite = useCallback(
-    async ({ id, metadata }: { id: string; metadata?: object }) => {
-      await esqlFavoritesClient?.addFavorite({ id, metadata });
-    },
-    [esqlFavoritesClient]
-  );
   const theme = useEuiTheme();
   const scrollBarStyles = euiScrollBarStyles(theme);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
-  const listItems: QueryHistoryItem[] = getItemsFn(sortDirection);
 
   const actions: Array<CustomItemAction<QueryHistoryItem>> = useMemo(() => {
     return [
@@ -332,8 +305,14 @@ export function QueryList({
 
   const isOnReducedSpaceLayout = containerWidth < 560;
   const columns = useMemo(() => {
-    return getTableColumns(containerWidth, isOnReducedSpaceLayout, actions, addFavorite, isStarred);
-  }, [actions, addFavorite, containerWidth, isOnReducedSpaceLayout, isStarred]);
+    return getTableColumns(
+      containerWidth,
+      isOnReducedSpaceLayout,
+      actions,
+      isStarredTab,
+      starredQueriesService
+    );
+  }, [containerWidth, isOnReducedSpaceLayout, actions, isStarredTab, starredQueriesService]);
 
   const onTableChange = ({ page, sort }: Criteria<QueryHistoryItem>) => {
     if (sort) {
@@ -466,20 +445,30 @@ export function HistoryAndStarredQueriesTabs({
   onUpdateAndSubmit: (qs: string) => void;
   height: number;
 }) {
-  const [starredQueries, setStarredQueries] = useState([]);
-  // const { data: favoritesData } = useFavorites();
-  const esqlFavoritesClient = useFavoritesClient();
-  // const { favoriteIds, favoriteMetadata } = await esqlFavoritesClient?.getFavorites();
+  const kibana = useKibana<ESQLEditorDeps>();
+  const { core, usageCollection } = kibana.services;
+  const [starredQueriesService, setStarredQueriesService] = useState<EsqlStarredQueriesService>();
+  const [starredQueries, setStarredQueries] = useState<StarredQueryItem[]>([]);
 
   useEffect(() => {
-    // declare the async data fetching function
-    const fetchStarredQueries = async () => {
-      const favoritesData = await esqlFavoritesClient?.getFavorites();
-      // console.dir(favoritesData);
-      // setStarredQueries(favoritesData);
+    const initializeService = async () => {
+      const starredService = await EsqlStarredQueriesService.initialize({
+        http: core.http,
+        usageCollection,
+      });
+      setStarredQueriesService(starredService);
     };
-    fetchStarredQueries();
-  }, [esqlFavoritesClient]);
+    if (!starredQueriesService) {
+      initializeService();
+    }
+  }, [core.http, starredQueriesService, usageCollection]);
+
+  starredQueriesService?.queries$.subscribe((nextQueries) => {
+    if (nextQueries.length !== starredQueries.length) {
+      setStarredQueries(nextQueries);
+    }
+  });
+
   const { euiTheme } = useEuiTheme();
   const tabs = useMemo(() => {
     return [
@@ -494,11 +483,12 @@ export function HistoryAndStarredQueriesTabs({
             onUpdateAndSubmit={onUpdateAndSubmit}
             containerWidth={containerWidth}
             height={height}
-            getItemsFn={(sortDirection) => getHistoryItems(sortDirection)}
+            listItems={getHistoryItems('desc')}
             dataTestSubj="ESQLEditor-queryHistory"
             tableCaption={i18n.translate('esqlEditor.query.querieshistoryTable', {
               defaultMessage: 'Queries history table',
             })}
+            starredQueriesService={starredQueriesService}
           />
         ),
       },
@@ -508,8 +498,8 @@ export function HistoryAndStarredQueriesTabs({
           defaultMessage: 'Starred',
         }),
         append: (
-          <EuiNotificationBadge className="eui-alignCenter" size="m">
-            10
+          <EuiNotificationBadge className="eui-alignCenter" size="m" color="subdued">
+            {starredQueries?.length}
           </EuiNotificationBadge>
         ),
         content: (
@@ -518,16 +508,25 @@ export function HistoryAndStarredQueriesTabs({
             onUpdateAndSubmit={onUpdateAndSubmit}
             containerWidth={containerWidth}
             height={height}
-            getItemsFn={(sortDirection) => []}
+            listItems={starredQueries}
             dataTestSubj="ESQLEditor-starredQueries"
             tableCaption={i18n.translate('esqlEditor.query.starredQueriesTable', {
               defaultMessage: 'Starred queries table',
             })}
+            starredQueriesService={starredQueriesService}
+            isStarredTab={true}
           />
         ),
       },
     ];
-  }, [containerCSS, containerWidth, height, onUpdateAndSubmit]);
+  }, [
+    containerCSS,
+    containerWidth,
+    height,
+    onUpdateAndSubmit,
+    starredQueries,
+    starredQueriesService,
+  ]);
 
   const [selectedTabId, setSelectedTabId] = useState('history-queries-tab');
   const selectedTabContent = useMemo(() => {
