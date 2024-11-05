@@ -178,7 +178,7 @@ You can compare multiple results or documents in details.
 
 . In the **Selected** dropdown at the top of the table, choose **Compare selected**. The comparison view opens and shows the selected entries next to each other.
 
-. Compare the values of each field. By default The first entry selected shows as the reference for displaying differences in the other entries. When the value remains the same for a given field, it's displayed in green. When the value differs, it's displayed in red.
+. Compare the values of each field. By default the first entry selected shows as the reference for displaying differences in the other entries. When the value remains the same for a given field, it's displayed in green. When the value differs, it's displayed in red.
 +
 image:images/discover-compare-rows.png[Comparison view in Discover]
 
