@@ -20,6 +20,8 @@ export const FILE_UPLOAD_PATH = '/app/ml/filedatavisualizer';
 
 export const CRAWLER = {
   github_repo: 'https://github.com/elastic/crawler',
+  docker_doc:
+    'https://github.com/elastic/crawler?tab=readme-ov-file#running-open-crawler-with-docker',
 };
 
 export const CONNECTORS = {

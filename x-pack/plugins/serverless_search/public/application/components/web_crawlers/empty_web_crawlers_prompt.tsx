@@ -152,7 +152,7 @@ export const EmptyWebCrawlersPrompt: React.FC = () => {
                                     <EuiLink
                                       target="_blank"
                                       data-test-subj="serverlessSearchEmptyConnectorsPromptDockerLink"
-                                      href="https://github.com/elastic/crawler?tab=readme-ov-file#running-open-crawler-with-docker"
+                                      href={CRAWLER.docker_doc}
                                     >
                                       {i18n.translate(
                                         'xpack.serverlessSearch.webCrawlersEmpty.dockerLabel',

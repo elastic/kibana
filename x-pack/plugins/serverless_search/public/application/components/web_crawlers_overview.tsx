@@ -10,6 +10,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
 
+import { CRAWLER } from '../constants';
+
 import { LEARN_MORE_LABEL } from '../../../common/i18n_string';
 
 import { useKibanaServices } from '../hooks/use_kibana';
@@ -45,7 +47,7 @@ export const WebCrawlersOverview = () => {
                     data-test-subj="serverlessSearchConnectorsOverviewLink"
                     external
                     target="_blank"
-                    href={'TODO TODO'}
+                    href={CRAWLER.github_repo}
                   >
                     {LEARN_MORE_LABEL}
                   </EuiLink>
