@@ -91,7 +91,10 @@ export const getV1 = (): KibanaFeatureConfig => {
           read: [...filesSavedObjectTypes],
         },
         ui: capabilities.read,
-        replacedBy: [{ feature: FEATURE_ID_V2, privileges: ['read'] }],
+        replacedBy: {
+          default: [{ feature: FEATURE_ID_V2, privileges: ['read'] }],
+          minimal: [{ feature: FEATURE_ID_V2, privileges: ['minimal_read'] }],
+        },
       },
     },
     subFeatures: [

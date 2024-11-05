@@ -78,7 +78,10 @@ export const getCasesFeature = (
         read: [...filesSavedObjectTypes],
       },
       ui: casesCapabilities.read,
-      replacedBy: [{ feature: casesFeatureIdV2, privileges: ['read'] }],
+      replacedBy: {
+        default: [{ feature: casesFeatureIdV2, privileges: ['read'] }],
+        minimal: [{ feature: casesFeatureIdV2, privileges: ['minimal_read'] }],
+      },
     },
   },
   subFeatures: [

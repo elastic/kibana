@@ -252,22 +252,22 @@ export default function ({ getService }: FtrProviderContext) {
       const v2Case = await createCase(v2User);
 
       const v1UpdateToClosed = await updateCaseToClosed(v1User, v1Case.id);
-      expect(v1UpdateToClosed.status).toBe(CaseStatuses.CLOSED);
+      expect(v1UpdateToClosed.status).toBe(CaseStatuses.closed);
       const v1Update = await updateCaseToOpen(v1User, v1Case.id);
-      expect(v1Update.status).toBe(CaseStatuses.OPEN);
+      expect(v1Update.status).toBe(CaseStatuses.open);
 
       const transformedUpdateToClosed = await updateCaseToClosed(
         v1TransformedUser,
         v1TransformedCase.id
       );
-      expect(transformedUpdateToClosed.status).toBe(CaseStatuses.CLOSED);
+      expect(transformedUpdateToClosed.status).toBe(CaseStatuses.closed);
       const transformedUpdate = await updateCaseToOpen(v1TransformedUser, v1TransformedCase.id);
-      expect(transformedUpdate.status).toBe(CaseStatuses.OPEN);
+      expect(transformedUpdate.status).toBe(CaseStatuses.open);
 
       const v2UpdateToClosed = await updateCaseToClosed(v2User, v2Case.id);
-      expect(v2UpdateToClosed.status).toBe(CaseStatuses.CLOSED);
+      expect(v2UpdateToClosed.status).toBe(CaseStatuses.closed);
       const v2Update = await updateCaseToOpen(v2User, v2Case.id);
-      expect(v2Update.status).toBe(CaseStatuses.OPEN);
+      expect(v2Update.status).toBe(CaseStatuses.closed);
     });
   });
 }

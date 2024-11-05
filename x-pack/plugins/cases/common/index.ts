@@ -18,6 +18,7 @@
 export type {
   CasesBulkGetResponse,
   CasePostRequest,
+  CasePatchRequest,
   GetRelatedCasesByAlertResponse,
   UserActionFindResponse,
 } from './types/api';

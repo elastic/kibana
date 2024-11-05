@@ -85,7 +85,10 @@ export const getCasesBaseKibanaFeature = ({
           read: [...savedObjects.files],
         },
         ui: uiCapabilities.read,
-        replacedBy: [{ feature: CASES_FEATURE_ID_V2, privileges: ['read'] }],
+        replacedBy: {
+          default: [{ feature: CASES_FEATURE_ID_V2, privileges: ['read'] }],
+          minimal: [{ feature: CASES_FEATURE_ID_V2, privileges: ['minimal_read'] }],
+        },
       },
     },
   };
