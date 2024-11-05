@@ -12,15 +12,14 @@ import { Integration } from '../../common/data_streams_stats/integration';
 import { DataStreamStat } from '../../common/data_streams_stats/data_stream_stat';
 import { DictionaryType } from '../state_machines/dataset_quality_controller/src/types';
 import { flattenStats } from './flatten_stats';
-
 export function generateDatasets(
   dataStreamStats: DataStreamStatType[] = [],
   degradedDocStats: DataStreamDocsStat[] = [],
   integrations: Integration[],
   totalDocsStats: DictionaryType<DataStreamDocsStat>
 ): DataStreamStat[] {
-  // Check totalDocsStats first, if there are no stats, we can't generate datasets
-  if (!dataStreamStats.length && !integrations.length) {
+  const totalDocs = flattenStats(totalDocsStats);
+  if (!totalDocs.length) {
     return [];
   }
 
@@ -52,7 +51,6 @@ export function generateDatasets(
     { datasetIntegrationMap: {}, integrationsMap: {} }
   );
 
-  const totalDocs = flattenStats(totalDocsStats);
   const totalDocsMap: Record<DataStreamDocsStat['dataset'], DataStreamDocsStat['count']> =
     Object.fromEntries(totalDocs.map(({ dataset, count }) => [dataset, count]));
 

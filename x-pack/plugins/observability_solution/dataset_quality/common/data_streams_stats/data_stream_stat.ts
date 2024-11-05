@@ -45,10 +45,7 @@ export class DataStreamStat {
     this.integration = dataStreamStat.integration;
     this.quality = dataStreamStat.quality;
     this.docsInTimeRange = dataStreamStat.docsInTimeRange;
-    this.degradedDocs = {
-      percentage: dataStreamStat.degradedDocs.percentage,
-      count: dataStreamStat.degradedDocs.count,
-    };
+    this.degradedDocs = dataStreamStat.degradedDocs;
   }
 
   public static create(dataStreamStat: DataStreamStatType) {
@@ -92,6 +89,7 @@ export class DataStreamStat {
       namespace,
       integration: datasetIntegrationMap[dataset]?.integration,
       quality: mapPercentageToQuality(percentage),
+      docsInTimeRange: totalDocs,
       degradedDocs: {
         percentage,
         count: degradedDocStat.count,
