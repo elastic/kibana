@@ -27,7 +27,11 @@ import type {
 import type { AggregateQuery, TimeRange } from '@kbn/es-query';
 import { getAggregateQueryMode, isOfAggregateQueryType } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { getLensAttributesFromSuggestion, ChartType } from '@kbn/visualization-utils';
+import {
+  getLensAttributesFromSuggestion,
+  ChartType,
+  mapVisToChartType,
+} from '@kbn/visualization-utils';
 import { LegendSize } from '@kbn/visualizations-plugin/public';
 import { XYConfiguration } from '@kbn/visualizations-plugin/common';
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
@@ -50,7 +54,6 @@ import { shouldDisplayHistogram } from '../layout/helpers';
 import { enrichLensAttributesWithTablesData } from '../utils/lens_vis_from_table';
 
 const UNIFIED_HISTOGRAM_LAYER_ID = 'unifiedHistogram';
-const LENS_PREFIX = 'lns';
 
 const stateSelectorFactory =
   <S>(state$: Observable<S>) =>
@@ -607,7 +610,7 @@ export class LensVisService {
     const { dataView, columns, query, isPlainRecord } = queryParams;
 
     const preferredChartType = preferredVisAttributes
-      ? (preferredVisAttributes?.visualizationType.replace(LENS_PREFIX, '') as ChartType)
+      ? mapVisToChartType(preferredVisAttributes.visualizationType)
       : undefined;
 
     let visAttributes = preferredVisAttributes;

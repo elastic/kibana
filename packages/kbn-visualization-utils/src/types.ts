@@ -46,6 +46,7 @@ export interface Suggestion<T = unknown, V = unknown> {
 
 export enum ChartType {
   XY = 'XY',
+  Gauge = 'Gauge',
   Bar = 'Bar',
   Line = 'Line',
   Area = 'Area',
@@ -58,4 +59,14 @@ export enum ChartType {
   Pie = 'Pie',
   Mosaic = 'Mosaic',
   Table = 'Table',
+}
+
+export enum LensVisualizationType {
+  XY = 'lnsXY',
+  Metric = 'lnsMetric',
+  Pie = 'lnsPie',
+  Heatmap = 'lnsHeatmap',
+  Gauge = 'lnsGauge',
+  Datatable = 'lnsDatatable',
+  LegacyMetric = 'lnsLegacyMetric',
 }
