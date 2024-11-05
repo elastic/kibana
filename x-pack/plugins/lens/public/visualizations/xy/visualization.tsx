@@ -29,6 +29,7 @@ import { getColorsFromMapping } from '@kbn/coloring';
 import useObservable from 'react-use/lib/useObservable';
 import { EuiPopover, EuiSelectable } from '@elastic/eui';
 import { ToolbarButton } from '@kbn/shared-ux-button-toolbar';
+import { DEFAULT_THEME_VERSION } from '@kbn/core-ui-settings-common';
 import { generateId } from '../../id_generator';
 import {
   isDraggedDataViewField,
@@ -742,7 +743,10 @@ export const getXyVisualization = ({
       paletteService,
     };
 
-    const isDarkMode: boolean = useObservable(kibanaTheme.theme$, { darkMode: false }).darkMode;
+    const isDarkMode: boolean = useObservable(kibanaTheme.theme$, {
+      darkMode: false,
+      version: DEFAULT_THEME_VERSION,
+    }).darkMode;
     const layer = props.state.layers.find((l) => l.layerId === props.layerId)!;
     const dimensionEditor = isReferenceLayer(layer) ? (
       <ReferenceLinePanel {...allProps} />

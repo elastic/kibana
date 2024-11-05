@@ -28,6 +28,7 @@ import { DropIllustration } from '@kbn/chart-icons';
 import { useDragDropContext, DragDropIdentifier, Droppable } from '@kbn/dom-drag-drop';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { ChartSizeSpec, isChartSizeEvent } from '@kbn/chart-expressions-common';
+import { DEFAULT_THEME_VERSION } from '@kbn/core-ui-settings-common';
 import { getSuccessfulRequestTimings } from '../../../report_performance_metric_util';
 import { trackUiCounterEvents } from '../../../lens_ui_telemetry';
 import { getSearchWarningMessages } from '../../../utils';
@@ -488,7 +489,10 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     }
   }, [suggestionForDraggedField, dispatchLens]);
 
-  const IS_DARK_THEME: boolean = useObservable(core.theme.theme$, { darkMode: false }).darkMode;
+  const IS_DARK_THEME: boolean = useObservable(core.theme.theme$, {
+    darkMode: false,
+    version: DEFAULT_THEME_VERSION,
+  }).darkMode;
 
   const renderDragDropPrompt = () => {
     if (chartSizeSpec) {

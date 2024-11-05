@@ -16,6 +16,7 @@ import type { UseEuiTheme } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import type { CoreTheme } from '@kbn/core-theme-browser';
 import { CoreThemeProvider } from './core_theme_provider';
+import { DEFAULT_THEME_VERSION } from '@kbn/core-ui-settings-common';
 
 describe('CoreThemeProvider', () => {
   let euiTheme: UseEuiTheme | undefined;
@@ -50,7 +51,7 @@ describe('CoreThemeProvider', () => {
   };
 
   it('exposes the EUI theme provider', async () => {
-    const coreTheme: CoreTheme = { darkMode: true };
+    const coreTheme: CoreTheme = { darkMode: true, version: DEFAULT_THEME_VERSION };
 
     const wrapper = mountWithIntl(
       <CoreThemeProvider theme$={of(coreTheme)}>
@@ -64,7 +65,10 @@ describe('CoreThemeProvider', () => {
   });
 
   it('propagates changes of the coreTheme observable', async () => {
-    const coreTheme$ = new BehaviorSubject<CoreTheme>({ darkMode: true });
+    const coreTheme$ = new BehaviorSubject<CoreTheme>({
+      darkMode: true,
+      version: DEFAULT_THEME_VERSION,
+    });
 
     const wrapper = mountWithIntl(
       <CoreThemeProvider theme$={coreTheme$}>
@@ -77,7 +81,7 @@ describe('CoreThemeProvider', () => {
     expect(euiTheme!.colorMode).toEqual('DARK');
 
     await act(async () => {
-      coreTheme$.next({ darkMode: false });
+      coreTheme$.next({ darkMode: false, version: DEFAULT_THEME_VERSION });
     });
 
     await refresh(wrapper);

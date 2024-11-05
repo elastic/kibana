@@ -17,6 +17,7 @@ import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
 import useObservable from 'react-use/lib/useObservable';
 import { getSortingCriteria } from '@kbn/sort-predicates';
+import { DEFAULT_THEME_VERSION } from '@kbn/core-ui-settings-common';
 import type { FormBasedPersistedState } from '../../datasources/form_based/types';
 import type {
   SuggestionRequest,
@@ -465,7 +466,10 @@ export const getDatatableVisualization = ({
     };
   },
   DimensionEditorComponent(props) {
-    const isDarkMode = useObservable(kibanaTheme.theme$, { darkMode: false }).darkMode;
+    const isDarkMode = useObservable(kibanaTheme.theme$, {
+      darkMode: false,
+      version: DEFAULT_THEME_VERSION,
+    }).darkMode;
 
     return (
       <TableDimensionEditor {...props} isDarkMode={isDarkMode} paletteService={paletteService} />

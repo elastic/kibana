@@ -9,8 +9,11 @@
 
 import { themeServiceMock } from '@kbn/core/public/mocks';
 import { ThemeService } from '@kbn/charts-plugin/public/services';
+import { DEFAULT_THEME_VERSION } from '@kbn/core-ui-settings-common';
 
 const theme = new ThemeService();
-theme.init(themeServiceMock.createSetupContract({ darkMode: false }));
+theme.init(
+  themeServiceMock.createSetupContract({ darkMode: false, version: DEFAULT_THEME_VERSION })
+);
 
 export { theme };

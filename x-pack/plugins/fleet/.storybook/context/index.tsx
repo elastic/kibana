@@ -23,6 +23,7 @@ import { coreFeatureFlagsMock } from '@kbn/core/public/mocks';
 import { getStorybookContextProvider } from '@kbn/custom-integrations-plugin/storybook';
 
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
+import { DEFAULT_THEME_VERSION } from '@kbn/core-ui-settings-common';
 
 import { IntegrationsAppContext } from '../../public/applications/integrations/app';
 import type { FleetConfigType, FleetStartServices } from '../../public/plugin';
@@ -99,7 +100,7 @@ export const StorybookContext: React.FC<{
       settings: getSettings(),
       theme: {
         theme$: EMPTY,
-        getTheme: () => ({ darkMode: false }),
+        getTheme: () => ({ darkMode: false, version: DEFAULT_THEME_VERSION }),
       },
       security: {} as unknown as SecurityServiceStart,
       userProfile: {} as unknown as UserProfileServiceStart,

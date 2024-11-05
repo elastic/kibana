@@ -9,6 +9,7 @@ import React from 'react';
 import { of } from 'rxjs';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
+import { DEFAULT_THEME_VERSION } from '@kbn/core-ui-settings-common';
 import type { ModalInspectProps } from './modal';
 import { ModalInspectQuery } from './modal';
 
@@ -43,7 +44,7 @@ describe('Modal Inspect', () => {
   };
 
   const renderModalInspectQuery = () => {
-    const theme = { theme$: of({ darkMode: false }) };
+    const theme = { theme$: of({ darkMode: false, version: DEFAULT_THEME_VERSION }) };
     return render(<ModalInspectQuery {...defaultProps} />, {
       wrapper: ({ children }) => (
         <KibanaThemeProvider theme={theme}>{children}</KibanaThemeProvider>
