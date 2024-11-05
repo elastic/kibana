@@ -119,7 +119,7 @@
     "@elastic/elasticsearch": "^8.15.0",
     "@elastic/ems-client": "8.5.3",
     "@elastic/eui": "file:./elastic_eui_97.3.0_borealis_001_testing.tgz",
-    "@elastic/eui-theme-borealis": "file:./elastic_eui_theme_borealis_0.0.1_borealis_001_testing.tgz",
+    "@elastic/eui-theme-borealis": "file:./elastic_eui_theme_borealis_0.0.1_borealis_003_testing.tgz",
     "@elastic/eui-theme-common": "file:./elastic_eui_theme_common_0.0.1_borealis_002_testing.tgz",
     "@elastic/filesaver": "1.1.2",
     "@elastic/node-crypto": "^1.2.3",
