@@ -21,7 +21,7 @@ import { ActionDocument } from './types';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const start = moment(Date.now()).subtract(10, 'minutes').valueOf();
-  const end = moment(Date.now()).valueOf();
+  const end = moment(Date.now()).add(15, 'minutes').valueOf();
   const esClient = getService('es');
   const samlAuth = getService('samlAuth');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
