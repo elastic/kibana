@@ -139,7 +139,7 @@ export const ElasticManagedWebCrawlersCommingSoon: React.FC = () => {
                               {i18n.translate(
                                 'xpack.serverlessSearch.elasticManagedWebCrawlerEmpty.guideOneDescription',
                                 {
-                                  defaultMessage: 'Set one or more domain URL you want to crawl',
+                                  defaultMessage: 'Set one or more domain URLs you want to crawl',
                                 }
                               )}
                             </p>
@@ -175,7 +175,7 @@ export const ElasticManagedWebCrawlersCommingSoon: React.FC = () => {
                                 'xpack.serverlessSearch.elasticManagedWebCrawlerEmpty.guideThreeDescription',
                                 {
                                   defaultMessage:
-                                    'Configure all the web crawler process using the Elastic UI',
+                                    'Configure all the web crawler process using Kibana',
                                 }
                               )}
                             </p>

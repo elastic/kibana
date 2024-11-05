@@ -17,8 +17,6 @@ import { LEARN_MORE_LABEL } from '../../../common/i18n_string';
 import { useKibanaServices } from '../hooks/use_kibana';
 import { EmptyWebCrawlersPrompt } from './web_crawlers/empty_web_crawlers_prompt';
 
-// import { CONNECTORS } from '../constants';
-
 export const WebCrawlersOverview = () => {
   const { console: consolePlugin } = useKibanaServices();
 

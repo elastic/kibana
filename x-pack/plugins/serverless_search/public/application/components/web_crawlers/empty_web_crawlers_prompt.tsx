@@ -191,7 +191,7 @@ export const EmptyWebCrawlersPrompt: React.FC = () => {
                               {i18n.translate(
                                 'xpack.serverlessSearch.webCrawlersEmpty.guideOneDescription',
                                 {
-                                  defaultMessage: 'Set one or more domain URL you want to crawl',
+                                  defaultMessage: 'Set one or more domain URLs you want to crawl',
                                 }
                               )}
                             </p>
@@ -249,7 +249,6 @@ export const EmptyWebCrawlersPrompt: React.FC = () => {
                 </EuiPanel>
               </EuiFlexItem>
             </EuiFlexGroup>
-            {/* <EuiSpacer size="xs" /> */}
             <EuiFlexGroup direction="row" gutterSize="m">
               <EuiFlexItem>
                 <EuiButton
@@ -288,7 +287,6 @@ export const EmptyWebCrawlersPrompt: React.FC = () => {
                 </EuiFlexGroup>
               </EuiFlexItem>
             </EuiFlexGroup>
-            {/* <EuiSpacer size="m" /> */}
           </EuiFlexGroup>
         </EuiPanel>
       </EuiFlexItem>

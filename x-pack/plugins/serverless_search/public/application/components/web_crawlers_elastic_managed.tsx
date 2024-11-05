@@ -17,8 +17,6 @@ import { LEARN_MORE_LABEL } from '../../../common/i18n_string';
 import { useKibanaServices } from '../hooks/use_kibana';
 import { ElasticManagedWebCrawlersCommingSoon } from './web_crawlers/elastic_managed_web_crawler_coming_soon';
 
-// import { CONNECTORS } from '../constants';
-
 export const WebCrawlersElasticManaged = () => {
   const { console: consolePlugin } = useKibanaServices();
 
