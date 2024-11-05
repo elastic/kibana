@@ -127,7 +127,6 @@ Alerting::
 * Adds TheHive connector ({kibana-pull}180138[#180138]).
 * Adds flapping settings per rule ({kibana-pull}189341[#189341]).
 * Efficiency improvements in the Kibana task manager and alerting frameworks ({kibana-issue}188194[#188194])
-
 Cases::
 * Support TheHive connector in cases ({kibana-pull}180931[#180931]).
 Dashboards and visualizations::
@@ -140,10 +139,8 @@ Data ingestion and Fleet::
 * Advanced agent monitoring options UI for HTTP endpoint and diagnostics ({kibana-pull}193361[#193361]).
 * Adds option to have Kafka dynamic topics in outputs ({kibana-pull}192720[#192720]).
 * Adds support for GeoIP processor databases in Ingest Pipelines ({kibana-pull}190830[#190830]).
-////
-!!TODO!! The above PR had a lengthy release note description:
-The Ingest Pipelines app now supports adding and managing databases for the GeoIP processor. Additionally, the pipeline creation flow now includes support for the IP Location processor.
-////
+// !!TODO!! The above PR had a lengthy release note description:
+// The Ingest Pipelines app now supports adding and managing databases for the GeoIP processor. Additionally, the pipeline creation flow now includes support for the IP Location processor.
 * Adds agentless ux creation flow ({kibana-pull}189932[#189932]).
 * Enable feature flag for reusable integration policies ({kibana-pull}187153[#187153]).
 Discover::
