@@ -45,7 +45,7 @@ export const Grid: Story<EntityGridStoriesArgs> = (args) => {
   const filteredAndSortedItems = useMemo(
     () =>
       orderBy(
-        entityType ? entitiesMock.filter((mock) => mock.entity.type === entityType) : entitiesMock,
+        entityType ? entitiesMock.filter((mock) => mock.entityType === entityType) : entitiesMock,
         sort.id,
         sort.direction
       ),
