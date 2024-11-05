@@ -46,16 +46,24 @@ type GetColumnProps = Pick<RulesTableProps, 'onRuleClick'> & {
 
 export const RulesTable = ({ selectedRuleId, onRuleClick }: RulesTableProps) => {
   const { euiTheme } = useEuiTheme();
-  const { setRulesQuery, page, setSelectedRules, selectedRules, rulesQuery, rulesPageData } =
-    useRules();
-  const items = rulesPageData.rules_page;
+  const {
+    page,
+    setSelectedRules,
+    selectedRules,
+    rulesPageData,
+    pageSize,
+    setPageSize,
+    sortOrder,
+    setSortOrder,
+  } = useRules();
+  const items = rulesPageData.all_rules;
   const total = rulesPageData.total;
   const error = rulesPageData.error;
   const loading = rulesPageData.loading;
 
   const euiPagination: EuiBasicTableProps<CspBenchmarkRulesWithStates>['pagination'] = {
     pageIndex: page,
-    pageSize: rulesQuery.perPage,
+    pageSize,
     totalItemCount: total,
     pageSizeOptions: [10, 25, 100],
   };
@@ -63,22 +71,17 @@ export const RulesTable = ({ selectedRuleId, onRuleClick }: RulesTableProps) => 
   const sorting: EuiTableSortingType<CspBenchmarkRulesWithStates> = {
     sort: {
       field: 'metadata.benchmark.rule_number' as keyof CspBenchmarkRulesWithStates,
-      direction: rulesQuery.sortOrder,
+      direction: sortOrder,
     },
   };
-  const onTableChange = ({
-    page: pagination,
-    sort: sortOrder,
-  }: Criteria<CspBenchmarkRulesWithStates>) => {
+  const onTableChange = ({ page: pagination, sort }: Criteria<CspBenchmarkRulesWithStates>) => {
     if (!pagination) return;
-    if (
-      pagination &&
-      (pagination.index !== rulesQuery.page || pagination.size !== rulesQuery.perPage)
-    ) {
-      setRulesQuery({ page: pagination.index, perPage: pagination.size });
+    if (pagination && (pagination.index !== page || pagination.size !== pageSize)) {
+      setPageSize(pagination.size);
+      setPageSize(pagination.index);
     }
-    if (sortOrder && sortOrder.direction !== rulesQuery.sortOrder) {
-      setRulesQuery({ sortOrder: sortOrder.direction });
+    if (sort && sort.direction !== sortOrder) {
+      setSortOrder(sort.direction);
     }
   };
 

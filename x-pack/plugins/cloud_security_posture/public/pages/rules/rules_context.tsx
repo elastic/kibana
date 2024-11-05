@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { createContext, useContext, useMemo, useEffect, useCallback, useState } from 'react';
+import React, { createContext, useContext, useMemo, useCallback, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
 import {
@@ -21,7 +21,7 @@ import {
   uiMetricService,
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { buildRuleKey } from '../../../common/utils/rules_states';
-import { RulesQuery, useFindCspBenchmarkRule } from './use_csp_benchmark_rules';
+import { useFindCspBenchmarkRule } from './use_csp_benchmark_rules';
 import {
   RuleStateAttributesWithoutStates,
   useChangeCspRuleState,
@@ -44,17 +44,27 @@ interface RulesPageData {
   loading: boolean;
 }
 
-export type RulesState = RulesPageData & RulesQuery;
-
 interface RulesProviderProps {
   children: React.ReactNode;
 }
 interface RulesContextValue {
-  rulesQuery: RulesQuery;
-  rulesPageData: RulesPageData;
-  setRulesQuery: (query: Partial<RulesQuery>) => void;
+  section: string[] | undefined;
+  setSection: (section: string[] | undefined) => void;
   page: number;
   setPage: (page: number) => void;
+  pageSize: number;
+  setPageSize: (pageSize: number) => void;
+  sortField: string;
+  setSortField: (sortField: string) => void;
+  sortOrder: 'asc' | 'desc';
+  setSortOrder: (sortOrder: 'asc' | 'desc') => void;
+  ruleNumber: string[] | undefined;
+  setRuleNumber: (ruleNumber: string[] | undefined) => void;
+  search: string;
+  setSearch: (search: string) => void;
+  rulesPageData: RulesPageData;
+  // setRulesQuery: (query: Partial<RulesQuery>) => void;
+
   sectionList: string[] | undefined;
   ruleNumberSelectOptions: string[];
   sectionSelectOptions: string[];
@@ -83,17 +93,13 @@ export function useRules() {
 export function RulesProvider({ children }: RulesProviderProps) {
   const params = useParams<PageUrlParams>();
   const { pageSize, setPageSize } = usePageSize(LOCAL_STORAGE_PAGE_SIZE_RULES_KEY);
-  const { mutate: mutateRuleState } = useChangeCspRuleState();
   const [page, setPage] = useState(1);
-  const [rulesQuery, setRulesQuery] = useState<RulesQuery>({
-    section: undefined,
-    ruleNumber: undefined,
-    search: '',
-    page: 1,
-    perPage: pageSize || 10,
-    sortField: 'metadata.benchmark.rule_number',
-    sortOrder: 'asc',
-  });
+  const [search, setSearch] = useState('');
+  const [sortField, setSortField] = useState('metadata.benchmark.rule_number');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+  const [section, setSection] = useState<string[] | undefined>(undefined);
+  const [ruleNumber, setRuleNumber] = useState<string[] | undefined>(undefined);
+  const { mutate: mutateRuleState } = useChangeCspRuleState();
   const [selectedRules, setSelectedRules] = useState<CspBenchmarkRulesWithStates[]>([]);
   const [enabledDisabledItemsFilter, setEnabledDisabledItemsFilter] = useState('no-filter');
 
@@ -106,24 +112,6 @@ export function RulesProvider({ children }: RulesProviderProps) {
     },
     params.benchmarkId,
     params.benchmarkVersion
-  );
-
-  const setRulesQueryCallback = useCallback(
-    (query: Partial<RulesQuery>) => {
-      setRulesQuery({ ...rulesQuery, ...query });
-      if (query.perPage) {
-        // set the local storage page size
-        setPageSize(query.perPage);
-      }
-    },
-    [rulesQuery, setRulesQuery, setPageSize]
-  );
-
-  const setPageCallback = useCallback(
-    (value: number) => {
-      setPage(value);
-    },
-    [setPage]
   );
 
   const sectionList = useMemo(
@@ -145,13 +133,13 @@ export function RulesProvider({ children }: RulesProviderProps) {
 
   const { data, status, error } = useFindCspBenchmarkRule(
     {
-      section: rulesQuery.section,
-      ruleNumber: rulesQuery.ruleNumber,
-      search: rulesQuery.search,
-      page: 1,
+      section,
+      ruleNumber,
+      search,
+      page,
       perPage: MAX_ITEMS_PER_PAGE,
       sortField: 'metadata.benchmark.rule_number',
-      sortOrder: rulesQuery.sortOrder,
+      sortOrder,
     },
     params.benchmarkId,
     params.benchmarkVersion
@@ -212,8 +200,8 @@ export function RulesProvider({ children }: RulesProviderProps) {
   );
 
   const rulesPageData = useMemo(
-    () => getRulesPageData(filteredRulesWithStates, status, error, rulesQuery),
-    [filteredRulesWithStates, status, error, rulesQuery]
+    () => getRulesPageData(filteredRulesWithStates, status, error, page, pageSize),
+    [filteredRulesWithStates, status, error, page, pageSize]
   );
 
   const setSelectAllRules = useCallback(() => {
@@ -238,36 +226,42 @@ export function RulesProvider({ children }: RulesProviderProps) {
   }, [rulesStates, params.ruleId, allRules]);
 
   // This useEffect is in charge of auto paginating to the correct page of a rule from the url params
-  useEffect(() => {
-    const getPageByRuleId = () => {
-      if (params.ruleId && allRules?.data?.items) {
-        const ruleIndex = allRules?.data?.items.findIndex(
-          (rule) => rule.metadata.id === params.ruleId
-        );
+  // useEffect(() => {
+  //   const getPageByRuleId = () => {
+  //     if (params.ruleId && allRules?.data?.items) {
+  //       const ruleIndex = allRules?.data?.items.findIndex(
+  //         (rule) => rule.metadata.id === params.ruleId
+  //       );
 
-        if (ruleIndex !== -1) {
-          // Calculate the page based on the rule index and page size
-          const rulePage = Math.floor(ruleIndex / pageSize);
-          return rulePage;
-        }
-      }
-      return 0;
-    };
+  //       if (ruleIndex !== -1) {
+  //         // Calculate the page based on the rule index and page size
+  //         const rulePage = Math.floor(ruleIndex / pageSize);
+  //         return rulePage;
+  //       }
+  //     }
+  //     return 1;
+  //   };
 
-    setRulesQuery({
-      ...rulesQuery,
-      page: getPageByRuleId(),
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [allRules?.data?.items]);
+  //   setPage(getPageByRuleId());
+  // }, [allRules?.data?.items, params.ruleId, pageSize]);
 
   const contextValue = useMemo<RulesContextValue>(
     () => ({
-      rulesQuery,
-      rulesPageData,
-      setRulesQuery: setRulesQueryCallback,
+      section,
+      setSection,
       page,
-      setPage: setPageCallback,
+      pageSize,
+      setPageSize,
+      sortField,
+      setSortField,
+      sortOrder,
+      setSortOrder,
+      ruleNumber,
+      setRuleNumber,
+      search,
+      setSearch,
+      rulesPageData,
+      setPage,
       sectionList,
       ruleNumberSelectOptions,
       sectionSelectOptions,
@@ -282,12 +276,22 @@ export function RulesProvider({ children }: RulesProviderProps) {
       rulesFlyoutData,
     }),
     [
-      rulesQuery,
       rulesPageData,
-      setRulesQueryCallback,
+      sortField,
+      setSortField,
+      sortOrder,
+      setSortOrder,
+      pageSize,
+      setPageSize,
       page,
-      setPageCallback,
+      setPage,
+      section,
+      setSection,
+      search,
+      setSearch,
       sectionList,
+      ruleNumber,
+      setRuleNumber,
       ruleNumberSelectOptions,
       sectionSelectOptions,
       selectedRules,
@@ -309,30 +313,33 @@ const getFilteredRulesWithStates = (
   rulesWithStates: CspBenchmarkRulesWithStates[],
   enabledDisabledItemsFilter: string
 ) => {
+  let rulesWithStatesFiltered = rulesWithStates;
   if (enabledDisabledItemsFilter === 'disabled')
-    return rulesWithStates?.filter((rule) => rule?.state === 'muted');
+    rulesWithStatesFiltered = rulesWithStates?.filter((rule) => rule?.state === 'muted');
   else if (enabledDisabledItemsFilter === 'enabled')
-    return rulesWithStates?.filter((rule) => rule?.state === 'unmuted');
-  else return rulesWithStates;
+    rulesWithStatesFiltered = rulesWithStates?.filter((rule) => rule?.state === 'unmuted');
+
+  return rulesWithStatesFiltered;
 };
 
-const getPage = (data: CspBenchmarkRulesWithStates[], { page, perPage }: RulesQuery) =>
+const getPage = (data: CspBenchmarkRulesWithStates[], page: number, perPage: number) =>
   data.slice(page * perPage, (page + 1) * perPage);
 
 const getRulesPageData = (
   data: CspBenchmarkRulesWithStates[],
   status: string,
   error: unknown,
-  query: RulesQuery
+  page: number,
+  perPage: number
 ): RulesPageData => {
-  const page = getPage(data, query);
+  const pageIndex = getPage(data, page, perPage);
 
   return {
     loading: status === 'loading',
     error: error ? extractErrorMessage(error) : undefined,
     all_rules: data,
     rules_map: new Map(data.map((rule) => [rule.metadata.id, rule])),
-    rules_page: page,
+    rules_page: pageIndex,
     total: data?.length || 0,
   };
 };

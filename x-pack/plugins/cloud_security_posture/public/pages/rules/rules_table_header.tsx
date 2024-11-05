@@ -39,14 +39,15 @@ interface RulesTableToolbarProps {
 }
 export const RulesTableHeader = ({ isSearching }: RulesTableToolbarProps) => {
   const {
-    setRulesQuery,
+    section,
+    setSection,
+    ruleNumber,
+    setRuleNumber,
     sectionSelectOptions,
     ruleNumberSelectOptions,
     setEnabledDisabledItemsFilter,
     enabledDisabledItemsFilter,
   } = useRules();
-  const [selectedSection, setSelectedSection] = useState<string[]>([]);
-  const [selectedRuleNumber, setSelectedRuleNumber] = useState<string[]>([]);
   const sectionOptions = sectionSelectOptions.map((option) => ({
     key: option,
     label: option,
@@ -87,14 +88,15 @@ export const RulesTableHeader = ({ isSearching }: RulesTableToolbarProps) => {
                   }
                 )}
                 id={'cis-section-multi-select-filter'}
-                onChange={(section) => {
-                  setSelectedSection([...section?.selectedOptionKeys]);
-                  setRulesQuery({
-                    section: section?.selectedOptionKeys ? section?.selectedOptionKeys : undefined,
-                  });
+                onChange={(changedSections) => {
+                  setSection(
+                    changedSections?.selectedOptionKeys
+                      ? changedSections?.selectedOptionKeys
+                      : undefined
+                  );
                 }}
                 options={sectionOptions}
-                selectedOptionKeys={selectedSection}
+                selectedOptionKeys={section}
               />
             </EuiFlexItem>
             <EuiFlexItem
@@ -110,16 +112,15 @@ export const RulesTableHeader = ({ isSearching }: RulesTableToolbarProps) => {
                   }
                 )}
                 id={'rule-number-multi-select-filter'}
-                onChange={(ruleNumber) => {
-                  setSelectedRuleNumber([...ruleNumber?.selectedOptionKeys]);
-                  setRulesQuery({
-                    ruleNumber: ruleNumber?.selectedOptionKeys
-                      ? ruleNumber?.selectedOptionKeys
-                      : undefined,
-                  });
+                onChange={(changedRuleNumbers) => {
+                  setRuleNumber(
+                    changedRuleNumbers?.selectedOptionKeys
+                      ? changedRuleNumbers?.selectedOptionKeys
+                      : undefined
+                  );
                 }}
                 options={ruleNumberOptions}
-                selectedOptionKeys={selectedRuleNumber}
+                selectedOptionKeys={ruleNumber}
               />
             </EuiFlexItem>
             <EuiFlexItem
@@ -164,18 +165,10 @@ export const RulesTableHeader = ({ isSearching }: RulesTableToolbarProps) => {
 const SEARCH_DEBOUNCE_MS = 300;
 
 const SearchField = ({ isSearching }: Pick<RulesTableToolbarProps, 'isSearching'>) => {
-  const { rulesQuery } = useRules();
-  const [localValue, setLocalValue] = useState(rulesQuery.search);
-  const { setRulesQuery } = useRules();
+  const { search, setSearch } = useRules();
+  const [localValue, setLocalValue] = useState(search);
 
-  useDebounce(
-    () =>
-      setRulesQuery({
-        search: localValue,
-      }),
-    SEARCH_DEBOUNCE_MS,
-    [localValue]
-  );
+  useDebounce(() => setSearch(localValue), SEARCH_DEBOUNCE_MS, [localValue]);
 
   return (
     <div>
