@@ -132,7 +132,7 @@ export const ConnectorsOverview = () => {
             <p>
               {i18n.translate('xpack.serverlessSearch.connectorsOverview.calloutDescription', {
                 defaultMessage:
-                  'We´re actively developing Elastic managed connectors, that won´t require any self-managed infrastructure. You´ﬁll be able to handle all configuration in the UI. This will simplify syncing your data into a serverless Elasticsearch project. ',
+                  "We're actively developing Elastic managed connectors, that won't require any self-managed infrastructure. You'll be able to handle all configuration in the UI. This will simplify syncing your data into a serverless Elasticsearch project.",
               })}
             </p>
             <EuiButton
@@ -142,7 +142,9 @@ export const ConnectorsOverview = () => {
                 navigateToUrl(`${BASE_CONNECTORS_PATH}/${ELASTIC_MANAGED_CONNECTOR_PATH}`)
               }
             >
-              Give feedback
+              {i18n.translate('xpack.serverlessSearch.connectorsOverview.giveFeedbackButton', {
+                defaultMessage: 'Give feedback',
+              })}
             </EuiButton>
           </EuiCallOut>
           <EuiSpacer size="m" />

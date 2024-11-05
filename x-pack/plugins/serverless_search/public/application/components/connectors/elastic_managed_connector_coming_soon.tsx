@@ -178,7 +178,7 @@ export const ElasticManagedConnectorComingSoon: React.FC = () => {
                                 'xpack.serverlessSearch.elasticManagedConnectorEmpty.guideOneDescription',
                                 {
                                   defaultMessage:
-                                    "Choose from over +30 third-party data sources you'd like to sync",
+                                    "Choose from over 30 third-party data sources you'd like to sync",
                                 }
                               )}
                             </p>

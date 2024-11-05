@@ -168,7 +168,7 @@ export const EmptyConnectorsPrompt: React.FC = () => {
                                 'xpack.serverlessSearch.connectorsEmpty.guideOneDescription',
                                 {
                                   defaultMessage:
-                                    "Choose from over +30 third-party data sources you'd like to sync",
+                                    "Choose from over 30 third-party data sources you'd like to sync",
                                 }
                               )}
                             </p>

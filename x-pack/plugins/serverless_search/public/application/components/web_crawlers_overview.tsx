@@ -44,7 +44,7 @@ export const WebCrawlersOverview = () => {
               values={{
                 learnMoreLink: (
                   <EuiLink
-                    data-test-subj="serverlessSearchConnectorsOverviewLink"
+                    data-test-subj="serverlessSearchConnectorsLearnMoreLink"
                     external
                     target="_blank"
                     href={CRAWLER.github_repo}
