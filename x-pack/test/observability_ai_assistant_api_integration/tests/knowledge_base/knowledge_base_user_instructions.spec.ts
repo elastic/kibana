@@ -199,7 +199,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         'Be polite and use language that is easy to understand. Never disagree with the user.';
 
       async function getConversationForUser(username: keyof ObservabilityAIAssistantApiClients) {
-        const apiClient = observabilityAIAssistantAPIClient[username];
+        const apiClient = getScopedApiClientForUsername(username);
 
         // the user instruction is always created by "editor" user
         await observabilityAIAssistantAPIClient
