@@ -19,11 +19,6 @@ export function generateDatasets(
   integrations: Integration[],
   totalDocsStats: DictionaryType<DataStreamDocsStat>
 ): DataStreamStat[] {
-  const totalDocs = flattenStats(totalDocsStats);
-  if (!totalDocs.length) {
-    return [];
-  }
-
   const {
     datasetIntegrationMap,
     integrationsMap,
@@ -52,6 +47,7 @@ export function generateDatasets(
     { datasetIntegrationMap: {}, integrationsMap: {} }
   );
 
+  const totalDocs = flattenStats(totalDocsStats);
   const totalDocsMap: Record<DataStreamDocsStat['dataset'], DataStreamDocsStat['count']> =
     Object.fromEntries(totalDocs.map(({ dataset, count }) => [dataset, count]));
 

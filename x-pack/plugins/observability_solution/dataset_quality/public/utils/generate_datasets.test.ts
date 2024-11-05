@@ -132,6 +132,60 @@ describe('generateDatasets', () => {
     ]);
   });
 
+  it('merges integrations information with dataStreamStats and degradedDocs when no docs in timerange', () => {
+    const datasets = generateDatasets(
+      dataStreamStats,
+      degradedDocs,
+      integrations,
+      DEFAULT_DICTIONARY_TYPE
+    );
+
+    expect(datasets).toEqual([
+      {
+        name: 'system.application',
+        type: 'logs',
+        namespace: 'default',
+        title: 'Windows Application Events',
+        rawName: 'logs-system.application-default',
+        lastActivity: 1712911241117,
+        size: '82.1kb',
+        sizeBytes: 84160,
+        integration: integrations[0],
+        totalDocs: 100,
+        userPrivileges: {
+          canMonitor: true,
+        },
+        docsInTimeRange: 0,
+        quality: 'good',
+        degradedDocs: {
+          percentage: 0,
+          count: 0,
+        },
+      },
+      {
+        name: 'synth',
+        type: 'logs',
+        namespace: 'default',
+        title: 'synth',
+        rawName: 'logs-synth-default',
+        lastActivity: 1712911241117,
+        size: '62.5kb',
+        sizeBytes: 64066,
+        integration: undefined,
+        totalDocs: 100,
+        userPrivileges: {
+          canMonitor: true,
+        },
+        docsInTimeRange: 0,
+        quality: 'good',
+        degradedDocs: {
+          count: 6,
+          percentage: 0,
+        },
+      },
+    ]);
+  });
+
   it('merges integrations information with degradedDocs', () => {
     const datasets = generateDatasets([], degradedDocs, integrations, totalDocs);
 
