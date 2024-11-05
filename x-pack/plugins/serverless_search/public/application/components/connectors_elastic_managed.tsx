@@ -24,7 +24,6 @@ import { useConnectors } from '../hooks/api/use_connectors';
 import { useCreateConnector } from '../hooks/api/use_create_connector';
 import { useKibanaServices } from '../hooks/use_kibana';
 import { ElasticManagedConnectorComingSoon } from './connectors/elastic_managed_connector_coming_soon';
-import { ConnectorsTable } from './connectors/connectors_table';
 
 import { CONNECTORS } from '../constants';
 
@@ -116,15 +115,9 @@ export const ConnectorsElasticManaged = () => {
           </p>
         </EuiText>
       </EuiPageTemplate.Header>
-      {connectorsLoading || (data?.connectors || []).length > 0 ? (
-        <EuiPageTemplate.Section restrictWidth color="subdued">
-          <ConnectorsTable />
-        </EuiPageTemplate.Section>
-      ) : (
-        <EuiPageTemplate.Section restrictWidth color="subdued">
-          <ElasticManagedConnectorComingSoon />
-        </EuiPageTemplate.Section>
-      )}
+      <EuiPageTemplate.Section restrictWidth color="subdued">
+        <ElasticManagedConnectorComingSoon />
+      </EuiPageTemplate.Section>
       {embeddableConsole}
     </EuiPageTemplate>
   );
