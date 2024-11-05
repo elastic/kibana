@@ -364,7 +364,16 @@ import type {
 import type {
   CreateRuleMigrationRequestBodyInput,
   CreateRuleMigrationResponse,
+  GetAllStatsRuleMigrationResponse,
+  GetRuleMigrationRequestParamsInput,
   GetRuleMigrationResponse,
+  GetRuleMigrationStatsRequestParamsInput,
+  GetRuleMigrationStatsResponse,
+  StartRuleMigrationRequestParamsInput,
+  StartRuleMigrationRequestBodyInput,
+  StartRuleMigrationResponse,
+  StopRuleMigrationRequestParamsInput,
+  StopRuleMigrationResponse,
 } from '../siem_migrations/model/api/rules/rules_migration.gen';
 
 export interface ClientOptions {
@@ -1226,6 +1235,21 @@ finalize it.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
+   * Retrieves the rule migrations stats for all migrations stored in the system
+   */
+  async getAllStatsRuleMigration() {
+    this.log.info(`${new Date().toISOString()} Calling API GetAllStatsRuleMigration`);
+    return this.kbnClient
+      .request<GetAllStatsRuleMigrationResponse>({
+        path: '/internal/siem_migrations/rules/stats',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'GET',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
    * Get the asset criticality record for a specific entity.
    */
   async getAssetCriticalityRecord(props: GetAssetCriticalityRecordProps) {
@@ -1418,13 +1442,28 @@ finalize it.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Retrieves the rule migrations stored in the system
+   * Retrieves the rule documents stored in the system given the rule migration id
    */
-  async getRuleMigration() {
+  async getRuleMigration(props: GetRuleMigrationProps) {
     this.log.info(`${new Date().toISOString()} Calling API GetRuleMigration`);
     return this.kbnClient
       .request<GetRuleMigrationResponse>({
-        path: '/internal/siem_migrations/rules',
+        path: replaceParams('/internal/siem_migrations/rules/{migration_id}', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'GET',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Retrieves the stats of a SIEM rules migration using the migration id provided
+   */
+  async getRuleMigrationStats(props: GetRuleMigrationStatsProps) {
+    this.log.info(`${new Date().toISOString()} Calling API GetRuleMigrationStats`);
+    return this.kbnClient
+      .request<GetRuleMigrationStatsResponse>({
+        path: replaceParams('/internal/siem_migrations/rules/{migration_id}/stats', props.params),
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
@@ -1960,6 +1999,22 @@ detection engine rules.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Starts a SIEM rules migration using the migration id provided
+   */
+  async startRuleMigration(props: StartRuleMigrationProps) {
+    this.log.info(`${new Date().toISOString()} Calling API StartRuleMigration`);
+    return this.kbnClient
+      .request<StartRuleMigrationResponse>({
+        path: replaceParams('/internal/siem_migrations/rules/{migration_id}/start', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'PUT',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
   async stopEntityEngine(props: StopEntityEngineProps) {
     this.log.info(`${new Date().toISOString()} Calling API StopEntityEngine`);
     return this.kbnClient
@@ -1969,6 +2024,21 @@ detection engine rules.
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
         method: 'POST',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Stops a running SIEM rules migration using the migration id provided
+   */
+  async stopRuleMigration(props: StopRuleMigrationProps) {
+    this.log.info(`${new Date().toISOString()} Calling API StopRuleMigration`);
+    return this.kbnClient
+      .request<StopRuleMigrationResponse>({
+        path: replaceParams('/internal/siem_migrations/rules/{migration_id}/stop', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'PUT',
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -2208,6 +2278,12 @@ export interface GetRuleExecutionResultsProps {
   query: GetRuleExecutionResultsRequestQueryInput;
   params: GetRuleExecutionResultsRequestParamsInput;
 }
+export interface GetRuleMigrationProps {
+  params: GetRuleMigrationRequestParamsInput;
+}
+export interface GetRuleMigrationStatsProps {
+  params: GetRuleMigrationStatsRequestParamsInput;
+}
 export interface GetTimelineProps {
   query: GetTimelineRequestQueryInput;
 }
@@ -2284,8 +2360,15 @@ export interface SetAlertTagsProps {
 export interface StartEntityEngineProps {
   params: StartEntityEngineRequestParamsInput;
 }
+export interface StartRuleMigrationProps {
+  params: StartRuleMigrationRequestParamsInput;
+  body: StartRuleMigrationRequestBodyInput;
+}
 export interface StopEntityEngineProps {
   params: StopEntityEngineRequestParamsInput;
+}
+export interface StopRuleMigrationProps {
+  params: StopRuleMigrationRequestParamsInput;
 }
 export interface SuggestUserProfilesProps {
   query: SuggestUserProfilesRequestQueryInput;
