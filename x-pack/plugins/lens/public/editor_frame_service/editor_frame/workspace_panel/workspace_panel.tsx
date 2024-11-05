@@ -783,8 +783,7 @@ export const VisualizationWrapper = ({
         searchSessionId={searchSessionId}
         onEvent={onEvent}
         hasCompatibleActions={hasCompatibleActions}
-        // @TODO: fix this before merging
-        // @ts-expect-error
+        // @ts-expect-error upgrade typescript v4.9.5
         onData$={onData$}
         onRender$={onRenderHandler}
         inspectorAdapters={lensInspector.getInspectorAdapters()}
