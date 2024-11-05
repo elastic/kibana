@@ -13,7 +13,7 @@ import { useIsOverflow } from '../../hooks/use_is_overflow';
 import * as i18n from './translations';
 
 const LINE_CLAMP = 3;
-const LINE_CLAMP_HEIGHT = 5.5;
+const LINE_CLAMP_HEIGHT = '5.5em';
 const MAX_HEIGHT = '33vh';
 
 const ReadMore = styled(EuiButtonEmpty)`
@@ -29,20 +29,26 @@ const ExpandedContent = styled.div<{ maxHeight: string }>`
   overflow-y: auto;
 `;
 
-const StyledLineClamp = styled.div<{ lineClampHeight: number }>`
+const StyledLineClamp = styled.div<{ lineClampHeight: string; lineClamp: number }>`
   display: -webkit-box;
-  -webkit-line-clamp: ${LINE_CLAMP};
+  -webkit-line-clamp: ${({ lineClamp }) => lineClamp};
   -webkit-box-orient: vertical;
   overflow: hidden;
-  max-height: ${({ lineClampHeight }) => lineClampHeight}em;
-  height: ${({ lineClampHeight }) => lineClampHeight}em;
+  max-height: ${({ lineClampHeight }) => lineClampHeight};
+  height: ${({ lineClampHeight }) => lineClampHeight};
 `;
 
 const LineClampComponent: React.FC<{
   children: ReactNode;
-  lineClampHeight?: number;
+  lineClampHeight?: string;
+  lineClamp?: number;
   maxHeight?: string;
-}> = ({ children, lineClampHeight = LINE_CLAMP_HEIGHT, maxHeight = MAX_HEIGHT }) => {
+}> = ({
+  children,
+  lineClampHeight = LINE_CLAMP_HEIGHT,
+  lineClamp = LINE_CLAMP,
+  maxHeight = MAX_HEIGHT,
+}) => {
   const [isExpanded, setIsExpanded] = useState<boolean | null>(null);
   const [isOverflow, descriptionRef] = useIsOverflow(children);
 
@@ -72,6 +78,7 @@ const LineClampComponent: React.FC<{
           data-test-subj="styled-line-clamp"
           ref={descriptionRef}
           lineClampHeight={lineClampHeight}
+          lineClamp={lineClamp}
         >
           {children}
         </StyledLineClamp>

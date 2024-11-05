@@ -17,6 +17,12 @@ interface MissingPrivilegesCalloutProps {
   privileges: EntityAnalyticsPrivileges;
 }
 
+/**
+ * The height of the callout when the content is clamped.
+ * The value was chosen based on trial and error.
+ */
+const LINE_CLAMP_HEIGHT = '4.4em';
+
 export const MissingPrivilegesCallout = React.memo(
   ({ privileges }: MissingPrivilegesCalloutProps) => {
     const missingPrivileges = getAllMissingPrivileges(privileges);
@@ -37,7 +43,7 @@ export const MissingPrivilegesCallout = React.memo(
         data-test-subj={`callout-${id}`}
         data-test-messages={`[${id}]`}
       >
-        <LineClamp maxHeight="100%" lineClampHeight={4.4}>
+        <LineClamp maxHeight="100%" lineClampHeight={LINE_CLAMP_HEIGHT}>
           <EuiText size="s">
             {indexPrivileges.length > 0 ? (
               <>
