@@ -50,11 +50,9 @@ export async function getDataStreamTypes({
     entityManagerClient,
   });
 
-  if (latestEntity) {
-    castArray(latestEntity.source_data_stream.type).forEach((item) => {
-      sourceDataStreams.add(item as EntityDataStreamType);
-    });
-  }
+  castArray(latestEntity?.sourceDataStreamType).forEach((item) => {
+    sourceDataStreams.add(item as EntityDataStreamType);
+  });
 
   return Array.from(sourceDataStreams);
 }

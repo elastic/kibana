@@ -8,7 +8,12 @@
 import { renderHook } from '@testing-library/react-hooks';
 import { useDetailViewRedirect } from './use_detail_view_redirect';
 import { useKibana } from './use_kibana';
-import { ENTITY_TYPES } from '@kbn/observability-shared-plugin/common';
+import {
+  CONTAINER_ID,
+  ENTITY_TYPES,
+  HOST_NAME,
+  SERVICE_NAME,
+} from '@kbn/observability-shared-plugin/common';
 import type { InventoryEntityLatest } from '../../common/entities';
 
 jest.mock('./use_kibana');
@@ -56,7 +61,7 @@ describe('useDetailViewRedirect', () => {
   it('getEntityRedirectUrl should return the correct URL for host entity', () => {
     const entity: InventoryEntityLatest = {
       ...(commonEntityFields as InventoryEntityLatest),
-      entityYype: 'host',
+      entityType: 'host',
       entityIdentityFields: ['host.name'],
       host: {
         name: 'host-1',
@@ -66,7 +71,7 @@ describe('useDetailViewRedirect', () => {
       },
     };
 
-    mockGetIdentityFieldsValue.mockReturnValue({ host: { name: 'host-1' } });
+    mockGetIdentityFieldsValue.mockReturnValue({ [HOST_NAME]: 'host-1' });
     mockGetRedirectUrl.mockReturnValue('asset-details-url');
 
     const { result } = renderHook(() => useDetailViewRedirect());
@@ -89,7 +94,7 @@ describe('useDetailViewRedirect', () => {
       },
     };
 
-    mockGetIdentityFieldsValue.mockReturnValue({ container: { id: 'container-1' } });
+    mockGetIdentityFieldsValue.mockReturnValue({ [CONTAINER_ID]: 'container-1' });
     mockGetRedirectUrl.mockReturnValue('asset-details-url');
 
     const { result } = renderHook(() => useDetailViewRedirect());
@@ -115,7 +120,7 @@ describe('useDetailViewRedirect', () => {
         environment: 'prod',
       },
     };
-    mockGetIdentityFieldsValue.mockReturnValue({ service: { name: 'service-1' } });
+    mockGetIdentityFieldsValue.mockReturnValue({ [SERVICE_NAME]: 'service-1' });
     mockGetRedirectUrl.mockReturnValue('service-overview-url');
 
     const { result } = renderHook(() => useDetailViewRedirect());

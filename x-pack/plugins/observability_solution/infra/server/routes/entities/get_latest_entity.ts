@@ -19,7 +19,7 @@ const ENTITIES_LATEST_ALIAS = entitiesAliasPattern({
 });
 
 interface LatestEntityResponse {
-  source_data_stream: { type?: string | string[] };
+  sourceDataStreamType?: string | string[];
 }
 
 export async function getLatestEntity({
@@ -43,7 +43,9 @@ export async function getLatestEntity({
     return undefined;
   }
 
-  const response = await inventoryEsClient.esql<LatestEntityResponse>('get_latest_entities', {
+  const response = await inventoryEsClient.esql<{
+    source_data_stream?: { type?: string | string[] };
+  }>('get_latest_entities', {
     query: `FROM ${ENTITIES_LATEST_ALIAS}
         | WHERE ${ENTITY_TYPE} == ?
         | WHERE ${hostOrContainerIdentityField} == ?
@@ -52,5 +54,5 @@ export async function getLatestEntity({
     params: [entityType, entityId],
   });
 
-  return response[0];
+  return { sourceDataStreamType: response[0].source_data_stream?.type };
 }
