@@ -11,8 +11,10 @@ import http from 'http';
 import { SupertestWithRoleScope } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/services/role_scoped_supertest';
 import { UsageMetricsRequestBody } from '@kbn/data-usage-plugin/common/rest_types';
 import { DATA_USAGE_METRICS_API_ROUTE } from '@kbn/data-usage-plugin/common';
+import { transformMetricsData } from '@kbn/data-usage-plugin/server/routes/internal/usage_metrics_handler';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 import { setupMockServer } from '../mock_api';
+import { mockAutoOpsResponse } from '../mock_data';
 
 export default function ({ getService }: FtrProviderContext) {
   const svlDatastreamsHelpers = getService('svlDatastreamsHelpers');
@@ -101,67 +103,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('elastic-api-version', '1')
           .send(requestBody);
         expect(res.statusCode).to.be(200);
-        // TODO: decide on how to generate data
-        expect(res.body).to.eql({
-          metrics: {
-            ingest_rate: [
-              {
-                data: [
-                  {
-                    x: 1726858530000,
-                    y: 13756849,
-                  },
-                  {
-                    x: 1726862130000,
-                    y: 14657904,
-                  },
-                ],
-                name: 'metrics-system.cpu-default',
-              },
-              {
-                data: [
-                  {
-                    x: 1726858530000,
-                    y: 12894623,
-                  },
-                  {
-                    x: 1726862130000,
-                    y: 14436905,
-                  },
-                ],
-                name: 'logs-nginx.access-default',
-              },
-            ],
-            storage_retained: [
-              {
-                data: [
-                  {
-                    x: 1726858530000,
-                    y: 12576413,
-                  },
-                  {
-                    x: 1726862130000,
-                    y: 13956423,
-                  },
-                ],
-                name: 'metrics-system.cpu-default',
-              },
-              {
-                data: [
-                  {
-                    x: 1726858530000,
-                    y: 12894623,
-                  },
-                  {
-                    x: 1726862130000,
-                    y: 14436905,
-                  },
-                ],
-                name: 'logs-nginx.access-default',
-              },
-            ],
-          },
-        });
+        expect(res.body).to.eql(transformMetricsData(mockAutoOpsResponse));
       });
     });
   });

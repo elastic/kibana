@@ -78,7 +78,7 @@ export const getUsageMetricsHandler = (
   };
 };
 
-function transformMetricsData(
+export function transformMetricsData(
   data: UsageMetricsAutoOpsResponseSchemaBody
 ): UsageMetricsResponseSchemaBody {
   return {

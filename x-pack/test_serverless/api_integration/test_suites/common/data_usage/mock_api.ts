@@ -7,8 +7,8 @@
 
 import { createServer } from '@mswjs/http-middleware';
 import { UsageMetricsAutoOpsResponseSchemaBody } from '@kbn/data-usage-plugin/common/rest_types';
-
 import { http, HttpResponse, StrictResponse } from 'msw';
+import { mockAutoOpsResponse } from './mock_data';
 
 export const setupMockServer = () => {
   const server = createServer(autoOpsHandler);
@@ -18,41 +18,6 @@ export const setupMockServer = () => {
 const autoOpsHandler = http.post(
   '/',
   async ({ request }): Promise<StrictResponse<UsageMetricsAutoOpsResponseSchemaBody>> => {
-    return HttpResponse.json({
-      metrics: {
-        ingest_rate: [
-          {
-            name: 'metrics-system.cpu-default',
-            data: [
-              [1726858530000, 13756849],
-              [1726862130000, 14657904],
-            ],
-          },
-          {
-            name: 'logs-nginx.access-default',
-            data: [
-              [1726858530000, 12894623],
-              [1726862130000, 14436905],
-            ],
-          },
-        ],
-        storage_retained: [
-          {
-            name: 'metrics-system.cpu-default',
-            data: [
-              [1726858530000, 12576413],
-              [1726862130000, 13956423],
-            ],
-          },
-          {
-            name: 'logs-nginx.access-default',
-            data: [
-              [1726858530000, 12894623],
-              [1726862130000, 14436905],
-            ],
-          },
-        ],
-      },
-    });
+    return HttpResponse.json(mockAutoOpsResponse);
   }
 );
