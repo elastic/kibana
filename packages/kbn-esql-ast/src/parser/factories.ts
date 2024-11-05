@@ -11,7 +11,13 @@
  * In case of changes in the grammar, this script should be updated: esql_update_ast_script.js
  */
 
-import type { Token, ParserRuleContext, TerminalNode, RecognitionException } from 'antlr4';
+import type {
+  Token,
+  ParserRuleContext,
+  TerminalNode,
+  RecognitionException,
+  ParseTree,
+} from 'antlr4';
 import {
   IndexPatternContext,
   QualifiedNameContext,
@@ -21,6 +27,10 @@ import {
   type IntegerValueContext,
   type QualifiedIntegerLiteralContext,
   QualifiedNamePatternContext,
+  FunctionContext,
+  IdentifierContext,
+  InputParamContext,
+  InputNamedOrPositionalParamContext,
 } from '../antlr/esql_parser';
 import { DOUBLE_TICKS_REGEX, SINGLE_BACKTICK, TICKS_REGEX } from './constants';
 import type {
@@ -42,6 +52,8 @@ import type {
   ESQLNumericLiteral,
   ESQLOrderExpression,
   InlineCastingType,
+  ESQLFunctionCallExpression,
+  ESQLIdentifier,
 } from '../types';
 import { parseIdentifier, getPosition } from './helpers';
 import { Builder, type AstNodeParserFields } from '../builder';
@@ -201,22 +213,71 @@ export function createFunction<Subtype extends FunctionSubtype>(
   return node;
 }
 
+export const createFunctionCall = (ctx: FunctionContext): ESQLFunctionCallExpression => {
+  const functionExpressionCtx = ctx.functionExpression();
+  const functionName = functionExpressionCtx.functionName();
+  const node: ESQLFunctionCallExpression = {
+    type: 'function',
+    subtype: 'variadic-call',
+    name: functionName.getText().toLowerCase(),
+    text: ctx.getText(),
+    location: getPosition(ctx.start, ctx.stop),
+    args: [],
+    incomplete: Boolean(ctx.exception),
+  };
+
+  const identifierOrParameter = functionName.identifierOrParameter();
+  if (identifierOrParameter) {
+    const identifier = identifierOrParameter.identifier();
+    if (identifier) {
+      node.operator = createIdentifier(identifier);
+    } else {
+      const parameter = identifierOrParameter.parameter();
+      if (parameter) {
+        node.operator = createParam(parameter);
+      }
+    }
+  }
+
+  return node;
+};
+
+const createIdentifier = (identifier: IdentifierContext): ESQLIdentifier => {
+  return Builder.identifier(
+    { name: identifier.getText().toLowerCase() },
+    createParserFields(identifier)
+  );
+};
+
+export const createParam = (ctx: ParseTree) => {
+  if (ctx instanceof InputParamContext) {
+    return Builder.param.unnamed(createParserFields(ctx));
+  } else if (ctx instanceof InputNamedOrPositionalParamContext) {
+    const text = ctx.getText();
+    const value = text.slice(1);
+    const valueAsNumber = Number(value);
+    const isPositional = String(valueAsNumber) === value;
+    const parserFields = createParserFields(ctx);
+
+    if (isPositional) {
+      return Builder.param.positional({ value: valueAsNumber }, parserFields);
+    } else {
+      return Builder.param.named({ value }, parserFields);
+    }
+  }
+};
+
 export const createOrderExpression = (
   ctx: ParserRuleContext,
-  arg: ESQLAstItem,
+  arg: ESQLColumn,
   order: ESQLOrderExpression['order'],
   nulls: ESQLOrderExpression['nulls']
 ) => {
-  const node: ESQLOrderExpression = {
-    type: 'order',
-    name: '',
-    order,
-    nulls,
-    args: [arg],
-    text: ctx.getText(),
-    location: getPosition(ctx.start, ctx.stop),
-    incomplete: Boolean(ctx.exception),
-  };
+  const node = Builder.expression.order(
+    arg as ESQLColumn,
+    { order, nulls },
+    createParserFields(ctx)
+  );
 
   return node;
 };
