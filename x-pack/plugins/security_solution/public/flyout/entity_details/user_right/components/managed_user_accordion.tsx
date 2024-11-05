@@ -11,14 +11,13 @@ import React from 'react';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { get } from 'lodash/fp';
-import { ExpandablePanel } from '@kbn/security-solution-common';
 import { EntityDetailsLeftPanelTab } from '../../shared/components/left_panel/left_panel_header';
+import { ExpandablePanel } from '../../../shared/components/expandable_panel';
 import type { ManagedUserFields } from '../../../../../common/search_strategy/security_solution/users/managed_details';
 
 import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
 import { ONE_WEEK_IN_HOURS } from '../../shared/constants';
 import { UserAssetTableType } from '../../../../explore/users/store/model';
-
 interface ManagedUserAccordionProps {
   children: React.ReactNode;
   title: string;

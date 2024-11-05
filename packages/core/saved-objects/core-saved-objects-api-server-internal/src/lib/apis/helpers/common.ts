@@ -105,10 +105,14 @@ export class CommonHelper {
     if (!id) {
       return SavedObjectsUtils.generateId();
     }
-    // only allow a specified ID if we're overwriting an existing ESO with a Version
-    // this helps us ensure that the document really was previously created using ESO
-    // and not being used to get around the specified ID limitation
-    const canSpecifyID = (overwrite && version) || SavedObjectsUtils.isRandomId(id);
+
+    const shouldEnforceRandomId = this.encryptionExtension?.shouldEnforceRandomId(type);
+
+    // Allow specified ID if:
+    // 1. we're overwriting an existing ESO with a Version (this helps us ensure that the document really was previously created using ESO)
+    // 2. enforceRandomId is explicitly set to false
+    const canSpecifyID =
+      !shouldEnforceRandomId || (overwrite && version) || SavedObjectsUtils.isRandomId(id);
     if (!canSpecifyID) {
       throw SavedObjectsErrorHelpers.createBadRequestError(
         'Predefined IDs are not allowed for saved objects with encrypted attributes unless the ID is a UUID.'

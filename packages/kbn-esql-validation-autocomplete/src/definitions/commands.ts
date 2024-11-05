@@ -35,6 +35,7 @@ import type { CommandDefinition } from './types';
 import { suggest as suggestForSort } from '../autocomplete/commands/sort';
 import { suggest as suggestForKeep } from '../autocomplete/commands/keep';
 import { suggest as suggestForDrop } from '../autocomplete/commands/drop';
+import { suggest as suggestForStats } from '../autocomplete/commands/stats';
 
 const statsValidator = (command: ESQLCommand) => {
   const messages: ESQLMessage[] = [];
@@ -240,6 +241,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     options: [byOption],
     modes: [],
     validate: statsValidator,
+    suggest: suggestForStats,
   },
   {
     name: 'inlinestats',
