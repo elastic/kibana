@@ -46,7 +46,7 @@ export interface SLOPluginSetupDependencies {
 export interface SLOPluginStartDependencies {
   alerting: PluginStartContract;
   taskManager: TaskManagerStartContract;
-  spaces: SpacesPluginStart;
+  spaces?: SpacesPluginStart;
   ruleRegistry: RuleRegistryPluginStartContract;
   dataViews: DataViewsServerPluginStart;
   licensing: LicensingPluginStart;

@@ -39,13 +39,13 @@
       "features",
       "licensing",
       "usageCollection",
-      "spaces",
     ],
     "optionalPlugins": [
       "cloud",
       "serverless",
       "discover",
-      "observabilityAIAssistant"
+      "observabilityAIAssistant",
+      "spaces",
     ],
     "requiredBundles": [
       "controls",
