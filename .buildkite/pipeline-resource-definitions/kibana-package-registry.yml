@@ -27,6 +27,9 @@ spec:
       pipeline_file: ".buildkite/pipelines/fleet/package_registry.yml"
       provider_settings:
         trigger_mode: none
+      schedules:
+        Daily promotion:
+          cronline: 0 22 * * * America/New_York
       teams:
         everyone:
           access_level: BUILD_AND_READ

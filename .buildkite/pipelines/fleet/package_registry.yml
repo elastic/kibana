@@ -1,2 +1,8 @@
 steps:
-  - command: echo "Placeholder"
+  - label: Promote docker.elastic.co/package-registry/distribution:lite
+    command: .buildkite/scripts/steps/fleet/promote_package_registry.sh
+    agents:
+      image: family/kibana-ubuntu-2004
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-2
