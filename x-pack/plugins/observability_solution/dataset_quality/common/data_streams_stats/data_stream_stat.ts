@@ -74,12 +74,11 @@ export class DataStreamStat {
     datasetIntegrationMap,
     totalDocs,
   }: {
-    degradedDocStat: DataStreamDocsStat;
+    degradedDocStat: DataStreamDocsStat & { percentage: number };
     datasetIntegrationMap: Record<string, { integration: Integration; title: string }>;
-    totalDocs?: number;
+    totalDocs: number;
   }) {
     const { type, dataset, namespace } = indexNameToDataStreamParts(degradedDocStat.dataset);
-    const percentage = this.calculatePercentage({ totalDocs, count: degradedDocStat.count });
 
     const dataStreamStatProps = {
       rawName: degradedDocStat.dataset,
@@ -88,10 +87,10 @@ export class DataStreamStat {
       title: datasetIntegrationMap[dataset]?.title || dataset,
       namespace,
       integration: datasetIntegrationMap[dataset]?.integration,
-      quality: mapPercentageToQuality(percentage),
+      quality: mapPercentageToQuality(degradedDocStat.percentage),
       docsInTimeRange: totalDocs,
       degradedDocs: {
-        percentage,
+        percentage: degradedDocStat.percentage,
         count: degradedDocStat.count,
       },
     };

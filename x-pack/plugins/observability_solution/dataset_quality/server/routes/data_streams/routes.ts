@@ -115,12 +115,6 @@ const degradedDocsRoute = createDatasetQualityServerRoute({
 
     const esClient = coreContext.elasticsearch.client.asCurrentUser;
 
-    /* await datasetQualityPrivileges.throwIfCannotReadDataset(
-      esClient,
-      params.query.type,
-      params.query.datasetQuery
-    ); */
-
     const degradedDocs = await getDegradedDocsPaginated({
       esClient,
       ...params.query,

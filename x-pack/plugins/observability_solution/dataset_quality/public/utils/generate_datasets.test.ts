@@ -177,6 +177,73 @@ describe('generateDatasets', () => {
     ]);
   });
 
+  it('merges integrations information with degradedDocs and totalDocs', () => {
+    const datasets = generateDatasets([], degradedDocs, integrations, {
+      ...totalDocs,
+      logs: [...totalDocs.logs, { dataset: 'logs-another-default', count: 100 }],
+    });
+
+    expect(datasets).toEqual([
+      {
+        name: 'system.application',
+        type: 'logs',
+        namespace: 'default',
+        title: 'Windows Application Events',
+        rawName: 'logs-system.application-default',
+        lastActivity: undefined,
+        size: undefined,
+        sizeBytes: undefined,
+        integration: integrations[0],
+        totalDocs: undefined,
+        userPrivileges: undefined,
+        docsInTimeRange: 100,
+        quality: 'good',
+        degradedDocs: {
+          percentage: 0,
+          count: 0,
+        },
+      },
+      {
+        name: 'synth',
+        type: 'logs',
+        namespace: 'default',
+        title: 'synth',
+        rawName: 'logs-synth-default',
+        lastActivity: undefined,
+        size: undefined,
+        sizeBytes: undefined,
+        integration: undefined,
+        totalDocs: undefined,
+        userPrivileges: undefined,
+        docsInTimeRange: 100,
+        quality: 'poor',
+        degradedDocs: {
+          count: 6,
+          percentage: 6,
+        },
+      },
+      {
+        name: 'another',
+        type: 'logs',
+        namespace: 'default',
+        title: 'another',
+        rawName: 'logs-another-default',
+        lastActivity: undefined,
+        size: undefined,
+        sizeBytes: undefined,
+        integration: undefined,
+        totalDocs: undefined,
+        userPrivileges: undefined,
+        docsInTimeRange: 100,
+        quality: 'good',
+        degradedDocs: {
+          percentage: 0,
+          count: 0,
+        },
+      },
+    ]);
+  });
+
   it('merges integrations information with dataStreamStats', () => {
     const datasets = generateDatasets(dataStreamStats, [], integrations, totalDocs);
 

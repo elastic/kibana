@@ -460,7 +460,6 @@ export const createDatasetQualityControllerStateMachine = ({
             const totalDocsStats = await (isTypeSelected(type, context)
               ? dataStreamStatsClient.getDataStreamsTotalDocs({
                   type,
-                  datasetQuery: context.filters.query,
                   start,
                   end,
                 })
