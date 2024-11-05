@@ -970,7 +970,7 @@ In 8.1.0 and later, {kib} uses the field caps API, by default, to determine the 
 `visualization:visualize:legacyPieChartsLibrary` has been removed from *Advanced Settings*. The setting allowed you to create aggregation-based pie chart visualizations using the legacy charts library. For more information, refer to {kibana-pull}146990[#146990].
 
 *Impact* +
-In 7.14.0 and later, the new aggregation-based pie chart visualization is available by default. For more information, check https://www.elastic.co/guide/en/kibana/8.8/add-aggregation-based-visualization-panels.html[Aggregation-based visualizations]..
+In 7.14.0 and later, the new aggregation-based pie chart visualization is available by default. For more information, check {kibana-ref-all}/8.8/add-aggregation-based-visualization-panels.html[Aggregation-based visualizations]..
 ====
 
 [discrete]
