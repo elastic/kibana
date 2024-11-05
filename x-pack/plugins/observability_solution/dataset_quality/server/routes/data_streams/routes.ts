@@ -135,13 +135,7 @@ const degradedDocsRoute = createDatasetQualityServerRoute({
 const totalDocsRoute = createDatasetQualityServerRoute({
   endpoint: 'GET /internal/dataset_quality/data_streams/total_docs',
   params: t.type({
-    query: t.intersection([
-      rangeRt,
-      typeRt,
-      t.partial({
-        datasetQuery: t.string,
-      }),
-    ]),
+    query: t.intersection([rangeRt, typeRt]),
   }),
   options: {
     tags: [],
@@ -154,11 +148,7 @@ const totalDocsRoute = createDatasetQualityServerRoute({
 
     const esClient = coreContext.elasticsearch.client.asCurrentUser;
 
-    await datasetQualityPrivileges.throwIfCannotReadDataset(
-      esClient,
-      params.query.type,
-      params.query.datasetQuery
-    );
+    await datasetQualityPrivileges.throwIfCannotReadDataset(esClient, params.query.type);
 
     const { type, start, end } = params.query;
 
@@ -167,7 +157,6 @@ const totalDocsRoute = createDatasetQualityServerRoute({
       start,
       end,
       index: `${type}-*-*`,
-      // index: 'logs-*-*,metrics-*-*,traces-*-*,synthetics-*-*',
     });
 
     return {
