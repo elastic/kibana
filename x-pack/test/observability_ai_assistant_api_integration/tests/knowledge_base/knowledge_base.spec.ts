@@ -7,11 +7,8 @@
 
 import expect from '@kbn/expect';
 import { type KnowledgeBaseEntry } from '@kbn/observability-ai-assistant-plugin/common';
-import pRetry from 'p-retry';
-import { ToolingLog } from '@kbn/tooling-log';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { clearKnowledgeBase, createKnowledgeBaseModel, deleteKnowledgeBaseModel } from './helpers';
-import { ObservabilityAIAssistantApiClients } from '../../common/config';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const ml = getService('ml');
