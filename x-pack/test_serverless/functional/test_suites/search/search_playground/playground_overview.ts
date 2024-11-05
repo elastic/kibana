@@ -117,11 +117,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/189314
-      describe.skip('with existing indices', () => {
+      describe('with existing indices', () => {
         before(async () => {
           await createConnector();
           await createIndex();
+          await pageObjects.searchPlayground.session.setSession();
           await browser.refresh();
         });
 
