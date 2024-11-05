@@ -190,6 +190,11 @@ export const useUpgradePrebuiltRulesTableColumns = (): TableColumn[] => {
   } = useUpgradePrebuiltRulesTableContext();
   const isDisabled = isRefetching || isUpgradingSecurityPackages;
 
+  // TODO: move this change to the `INTEGRATIONS_COLUMN` when `prebuiltRulesCustomizationEnabled` feature flag is removed
+  if (isPrebuiltRulesCustomizationEnabled) {
+    INTEGRATIONS_COLUMN.width = '70px';
+  }
+
   return useMemo(
     () => [
       RULE_NAME_COLUMN,

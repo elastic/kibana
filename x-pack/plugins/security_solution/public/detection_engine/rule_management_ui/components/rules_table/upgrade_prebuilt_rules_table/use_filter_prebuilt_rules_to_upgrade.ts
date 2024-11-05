@@ -7,7 +7,7 @@
 
 import { useMemo } from 'react';
 import type { RuleUpgradeInfoForReview } from '../../../../../../common/api/detection_engine/prebuilt_rules';
-import { RuleSourceTypesEnum, type FilterOptions } from '../../../../rule_management/logic/types';
+import { RuleCustomizationEnum, type FilterOptions } from '../../../../rule_management/logic/types';
 
 export type UpgradePrebuiltRulesTableFilterOptions = Pick<
   FilterOptions,
@@ -34,17 +34,17 @@ export const useFilterPrebuiltRulesToUpgrade = ({
 
       if (ruleSource && ruleSource.length > 0) {
         if (
-          ruleSource.includes(RuleSourceTypesEnum.MODIFIED) &&
-          ruleSource.includes(RuleSourceTypesEnum.UNMODIFIED)
+          ruleSource.includes(RuleCustomizationEnum.customized) &&
+          ruleSource.includes(RuleCustomizationEnum.not_customized)
         ) {
           return true;
         } else if (
-          ruleSource.includes(RuleSourceTypesEnum.MODIFIED) &&
+          ruleSource.includes(RuleCustomizationEnum.customized) &&
           ruleInfo.current_rule.rule_source.type === 'external'
         ) {
           return ruleInfo.current_rule.rule_source.is_customized;
         } else if (
-          ruleSource.includes(RuleSourceTypesEnum.UNMODIFIED) &&
+          ruleSource.includes(RuleCustomizationEnum.not_customized) &&
           ruleInfo.current_rule.rule_source.type === 'external'
         ) {
           return ruleInfo.current_rule.rule_source.is_customized === false;

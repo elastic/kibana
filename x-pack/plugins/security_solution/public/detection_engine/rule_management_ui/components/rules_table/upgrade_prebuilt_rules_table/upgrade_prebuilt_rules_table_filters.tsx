@@ -9,13 +9,13 @@ import { EuiFilterGroup, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { isEqual } from 'lodash/fp';
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
-import type { RuleSourceTypesEnum } from '../../../../rule_management/logic';
+import { useIsPrebuiltRulesCustomizationEnabled } from '../../../../rule_management/hooks/use_is_prebuilt_rules_customization_enabled';
+import type { RuleCustomizationEnum } from '../../../../rule_management/logic';
 import * as i18n from './translations';
 import { TagsFilterPopover } from '../rules_table_filters/tags_filter_popover';
 import { RuleSearchField } from '../rules_table_filters/rule_search_field';
 import { useUpgradePrebuiltRulesTableContext } from './upgrade_prebuilt_rules_table_context';
-import { RuleSourceFilterPopover } from './upgrade_rule_source_filter_popover';
+import { RuleCustomizationFilterPopover } from './upgrade_rule_customization_filter_popover';
 
 const FilterWrapper = styled(EuiFlexGroup)`
   margin-bottom: ${({ theme }) => theme.eui.euiSizeM};
@@ -31,9 +31,7 @@ const UpgradePrebuiltRulesTableFiltersComponent = () => {
     actions: { setFilterOptions },
   } = useUpgradePrebuiltRulesTableContext();
 
-  const isPrebuiltRulesCustomizationEnabled = useIsExperimentalFeatureEnabled(
-    'prebuiltRulesCustomizationEnabled'
-  );
+  const isPrebuiltRulesCustomizationEnabled = useIsPrebuiltRulesCustomizationEnabled();
 
   const { tags: selectedTags, ruleSource: selectedRuleSource = [] } = filterOptions;
 
@@ -60,7 +58,7 @@ const UpgradePrebuiltRulesTableFiltersComponent = () => {
   );
 
   const handleSelectedRuleSource = useCallback(
-    (newRuleSource: RuleSourceTypesEnum[]) => {
+    (newRuleSource: RuleCustomizationEnum[]) => {
       if (!isEqual(newRuleSource, selectedRuleSource)) {
         setFilterOptions((filters) => ({
           ...filters,
@@ -82,10 +80,10 @@ const UpgradePrebuiltRulesTableFiltersComponent = () => {
         <EuiFlexGroup gutterSize="s">
           {isPrebuiltRulesCustomizationEnabled && (
             <EuiFilterGroup>
-              <RuleSourceFilterPopover
+              <RuleCustomizationFilterPopover
                 onSelectedRuleSourceChanged={handleSelectedRuleSource}
                 selectedRuleSource={selectedRuleSource}
-                data-test-subj="upgradeRulesRuleSourcePopover"
+                data-test-subj="upgradeRulesRuleCustomizationPopover"
               />
             </EuiFilterGroup>
           )}

@@ -10,7 +10,6 @@ import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiLink, EuiText, EuiToolTip } fro
 import { FormattedMessage } from '@kbn/i18n-react';
 import moment from 'moment';
 import React, { useMemo } from 'react';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { RulesTableEmptyColumnName } from './rules_table_empty_column_name';
 import type { SecurityJob } from '../../../../common/components/ml_popover/types';
 import {
@@ -47,6 +46,7 @@ import { useRulesTableActions } from './use_rules_table_actions';
 import { MlRuleWarningPopover } from '../ml_rule_warning_popover/ml_rule_warning_popover';
 import { getMachineLearningJobId } from '../../../../detections/pages/detection_engine/rules/helpers';
 import type { TimeRange } from '../../../rule_gaps/types';
+import { useIsPrebuiltRulesCustomizationEnabled } from '../../../rule_management/hooks/use_is_prebuilt_rules_customization_enabled';
 
 export type TableColumn = EuiBasicTableColumn<Rule> | EuiTableActionsColumnType<Rule>;
 
@@ -295,9 +295,7 @@ export const useRulesColumns = ({
   });
   const ruleNameColumn = useRuleNameColumn();
   const [showRelatedIntegrations] = useUiSetting$<boolean>(SHOW_RELATED_INTEGRATIONS_SETTING);
-  const isPrebuiltRulesCustomizationEnabled = useIsExperimentalFeatureEnabled(
-    'prebuiltRulesCustomizationEnabled'
-  );
+  const isPrebuiltRulesCustomizationEnabled = useIsPrebuiltRulesCustomizationEnabled();
   const enabledColumn = useEnabledColumn({
     hasCRUDPermissions,
     isLoadingJobs,
@@ -311,6 +309,11 @@ export const useRulesColumns = ({
     mlJobs,
   });
   const snoozeColumn = useRuleSnoozeColumn();
+
+  // TODO: move this change to the `INTEGRATIONS_COLUMN` when `prebuiltRulesCustomizationEnabled` feature flag is removed
+  if (isPrebuiltRulesCustomizationEnabled) {
+    INTEGRATIONS_COLUMN.width = '70px';
+  }
 
   return useMemo(
     () => [
@@ -415,9 +418,7 @@ export const useMonitoringColumns = ({
   });
   const ruleNameColumn = useRuleNameColumn();
   const [showRelatedIntegrations] = useUiSetting$<boolean>(SHOW_RELATED_INTEGRATIONS_SETTING);
-  const isPrebuiltRulesCustomizationEnabled = useIsExperimentalFeatureEnabled(
-    'prebuiltRulesCustomizationEnabled'
-  );
+  const isPrebuiltRulesCustomizationEnabled = useIsPrebuiltRulesCustomizationEnabled();
   const enabledColumn = useEnabledColumn({
     hasCRUDPermissions,
     isLoadingJobs,
@@ -430,6 +431,11 @@ export const useMonitoringColumns = ({
     isLoadingJobs,
     mlJobs,
   });
+
+  // TODO: move this change to the `INTEGRATIONS_COLUMN` when `prebuiltRulesCustomizationEnabled` feature flag is removed
+  if (isPrebuiltRulesCustomizationEnabled) {
+    INTEGRATIONS_COLUMN.width = '70px';
+  }
 
   return useMemo(
     () => [

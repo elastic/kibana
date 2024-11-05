@@ -8,34 +8,36 @@
 import React, { useState, useMemo } from 'react';
 import type { EuiSelectableOption } from '@elastic/eui';
 import { EuiFilterButton, EuiPopover, EuiSelectable } from '@elastic/eui';
-import { RuleSourceTypesEnum } from '../../../../rule_management/logic';
+import { RuleCustomizationEnum } from '../../../../rule_management/logic';
 import * as i18n from '../../../../../detections/pages/detection_engine/rules/translations';
 import { toggleSelectedGroup } from '../../../../../common/components/ml_popover/jobs_table/filters/toggle_selected_group';
 
-interface RuleSourceFilterPopoverProps {
-  selectedRuleSource: RuleSourceTypesEnum[];
-  onSelectedRuleSourceChanged: (newRuleSource: RuleSourceTypesEnum[]) => void;
+interface RuleCustomizationFilterPopoverProps {
+  selectedRuleSource: RuleCustomizationEnum[];
+  onSelectedRuleSourceChanged: (newRuleSource: RuleCustomizationEnum[]) => void;
 }
 
-const RULE_SOURCE_POPOVER_WIDTH = 200;
+const RULE_CUSTOMIZATION_POPOVER_WIDTH = 200;
 
-const RuleSourceFilterPopoverComponent = ({
+const RuleCustomizationFilterPopoverComponent = ({
   selectedRuleSource,
   onSelectedRuleSourceChanged,
-}: RuleSourceFilterPopoverProps) => {
-  const [isRuleSourcePopoverOpen, setIsRuleSourcePopoverOpen] = useState(false);
+}: RuleCustomizationFilterPopoverProps) => {
+  const [isRuleCustomizationPopoverOpen, setIsRuleCustomizationPopoverOpen] = useState(false);
 
   const selectableOptions: EuiSelectableOption[] = useMemo(
     () => [
       {
         label: i18n.MODIFIED_LABEL,
-        key: RuleSourceTypesEnum.MODIFIED,
-        checked: selectedRuleSource.includes(RuleSourceTypesEnum.MODIFIED) ? 'on' : undefined,
+        key: RuleCustomizationEnum.customized,
+        checked: selectedRuleSource.includes(RuleCustomizationEnum.customized) ? 'on' : undefined,
       },
       {
         label: i18n.UNMODIFIED_LABEL,
-        key: RuleSourceTypesEnum.UNMODIFIED,
-        checked: selectedRuleSource.includes(RuleSourceTypesEnum.UNMODIFIED) ? 'on' : undefined,
+        key: RuleCustomizationEnum.not_customized,
+        checked: selectedRuleSource.includes(RuleCustomizationEnum.not_customized)
+          ? 'on'
+          : undefined,
       },
     ],
     [selectedRuleSource]
@@ -57,12 +59,12 @@ const RuleSourceFilterPopoverComponent = ({
     <EuiFilterButton
       grow
       iconType="arrowDown"
-      onClick={() => setIsRuleSourcePopoverOpen(!isRuleSourcePopoverOpen)}
+      onClick={() => setIsRuleCustomizationPopoverOpen(!isRuleCustomizationPopoverOpen)}
       numFilters={selectableOptions.length}
-      isSelected={isRuleSourcePopoverOpen}
+      isSelected={isRuleCustomizationPopoverOpen}
       hasActiveFilters={selectedRuleSource.length > 0}
       numActiveFilters={selectedRuleSource.length}
-      data-test-subj="rule-source-filter-popover-button"
+      data-test-subj="rule-customization-filter-popover-button"
     >
       {i18n.RULE_SOURCE}
     </EuiFilterButton>
@@ -72,19 +74,19 @@ const RuleSourceFilterPopoverComponent = ({
     <EuiPopover
       ownFocus
       button={triggerButton}
-      isOpen={isRuleSourcePopoverOpen}
-      closePopover={() => setIsRuleSourcePopoverOpen(!isRuleSourcePopoverOpen)}
+      isOpen={isRuleCustomizationPopoverOpen}
+      closePopover={() => setIsRuleCustomizationPopoverOpen(!isRuleCustomizationPopoverOpen)}
       panelPaddingSize="none"
       repositionOnScroll
       panelProps={{
-        'data-test-subj': 'rule-source-filter-popover',
+        'data-test-subj': 'rule-customization-filter-popover',
       }}
     >
       <EuiSelectable options={selectableOptions} onChange={handleSelectableOptionsChange}>
-        {(list) => <div style={{ width: RULE_SOURCE_POPOVER_WIDTH }}>{list}</div>}
+        {(list) => <div style={{ width: RULE_CUSTOMIZATION_POPOVER_WIDTH }}>{list}</div>}
       </EuiSelectable>
     </EuiPopover>
   );
 };
 
-export const RuleSourceFilterPopover = React.memo(RuleSourceFilterPopoverComponent);
+export const RuleCustomizationFilterPopover = React.memo(RuleCustomizationFilterPopoverComponent);
