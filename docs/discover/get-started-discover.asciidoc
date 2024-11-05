@@ -74,7 +74,7 @@ You can also drag them from the list into the table.
 [role="screenshot"]
 image::images/discover-add-icon.png[How to add a field as a column in the table, width="50%"]
 +
-When you add fields to the table, the **Summary** column that was summarizing each result's data is replaced.
+When you add fields to the table, the **Summary** column is replaced.
 +
 [role="screenshot"]
 image:images/document-table.png[Document table with fields for manufacturer, customer_first_name, and customer_last_name]
