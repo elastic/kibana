@@ -80,6 +80,7 @@ export const RuleSettingsFlappingTitleTooltip = (props: RuleSettingsFlappingTitl
         panelStyle={{
           width: 500,
         }}
+        closePopover={() => setIsPopoverOpen(false)}
         button={
           <EuiButtonIcon
             data-test-subj="ruleSettingsFlappingTitleTooltipButton"

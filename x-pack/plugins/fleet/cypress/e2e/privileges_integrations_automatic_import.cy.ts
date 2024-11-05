@@ -17,7 +17,7 @@ import {
   AutomaticImportConnectorReadUser,
   AutomaticImportConnectorReadRole,
 } from '../tasks/privileges';
-import { login, loginWithUserAndWaitForPage, logout } from '../tasks/login';
+import { loginWithUserAndWaitForPage, logout } from '../tasks/login';
 import {
   ASSISTANT_BUTTON,
   CONNECTOR_BEDROCK,
@@ -53,10 +53,6 @@ describe('When the user does not have enough previleges for Integrations', () =>
         createUsersAndRoles([AutomaticImportIntegrUser], [automaticImportIntegrRole]);
       });
 
-      beforeEach(() => {
-        login();
-      });
-
       afterEach(() => {
         logout();
       });
@@ -83,10 +79,6 @@ describe('When the user has All permissions for Integrations and No permissions 
     createUsersAndRoles([AutomaticImportConnectorNoneUser], [AutomaticImportConnectorNoneRole]);
   });
 
-  beforeEach(() => {
-    login();
-  });
-
   afterEach(() => {
     logout();
   });
@@ -105,10 +97,6 @@ describe('When the user has All permissions for Integrations and No permissions 
 describe('When the user has All permissions for Integrations and read permissions for actions', () => {
   before(() => {
     createUsersAndRoles([AutomaticImportConnectorReadUser], [AutomaticImportConnectorReadRole]);
-  });
-
-  beforeEach(() => {
-    login();
   });
 
   afterEach(() => {
@@ -136,10 +124,6 @@ describe('When the user has All permissions for Integrations and read permission
 describe('When the user has All permissions for Integrations and All permissions for actions', () => {
   before(() => {
     createUsersAndRoles([AutomaticImportConnectorAllUser], [AutomaticImportConnectorAllRole]);
-  });
-
-  beforeEach(() => {
-    login();
   });
 
   afterEach(() => {

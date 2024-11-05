@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { useToggle } from 'react-use';
+import useToggle from 'react-use/lib/useToggle';
 import { EuiPopover, EuiText, EuiButtonIcon } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import * as defineRuleI18n from '../../../rule_creation_ui/components/step_define_rule/translations';

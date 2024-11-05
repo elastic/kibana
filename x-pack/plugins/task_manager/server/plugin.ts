@@ -409,6 +409,11 @@ export class TaskManagerPlugin
   }
 
   public async stop() {
+    // Stop polling for tasks
+    if (this.taskPollingLifecycle) {
+      this.taskPollingLifecycle.stop();
+    }
+
     if (this.kibanaDiscoveryService?.isStarted()) {
       this.kibanaDiscoveryService.stop();
       try {

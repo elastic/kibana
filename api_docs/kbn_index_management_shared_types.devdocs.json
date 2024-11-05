@@ -506,6 +506,67 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/index-management-shared-types",
+            "id": "def-common.ExtensionsSetup.setIndexDetailsPageRoute",
+            "type": "Function",
+            "tags": [],
+            "label": "setIndexDetailsPageRoute",
+            "description": [],
+            "signature": [
+              "(route: ",
+              {
+                "pluginId": "@kbn/index-management-shared-types",
+                "scope": "common",
+                "docId": "kibKbnIndexManagementSharedTypesPluginApi",
+                "section": "def-common.IndexDetailsPageRoute",
+                "text": "IndexDetailsPageRoute"
+              },
+              ", detailsTabId?: string | undefined) => void"
+            ],
+            "path": "x-pack/packages/index-management/index_management_shared_types/src/services/extensions_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/index-management-shared-types",
+                "id": "def-common.ExtensionsSetup.setIndexDetailsPageRoute.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "route",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/index-management-shared-types",
+                    "scope": "common",
+                    "docId": "kibKbnIndexManagementSharedTypesPluginApi",
+                    "section": "def-common.IndexDetailsPageRoute",
+                    "text": "IndexDetailsPageRoute"
+                  }
+                ],
+                "path": "x-pack/packages/index-management/index_management_shared_types/src/services/extensions_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/index-management-shared-types",
+                "id": "def-common.ExtensionsSetup.setIndexDetailsPageRoute.$2",
+                "type": "string",
+                "tags": [],
+                "label": "detailsTabId",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "x-pack/packages/index-management/index_management_shared_types/src/services/extensions_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -971,6 +1032,67 @@
       },
       {
         "parentPluginId": "@kbn/index-management-shared-types",
+        "id": "def-common.IndexDetailsPageRoute",
+        "type": "Interface",
+        "tags": [],
+        "label": "IndexDetailsPageRoute",
+        "description": [],
+        "path": "x-pack/packages/index-management/index_management_shared_types/src/services/extensions_service.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/index-management-shared-types",
+            "id": "def-common.IndexDetailsPageRoute.renderRoute",
+            "type": "Function",
+            "tags": [],
+            "label": "renderRoute",
+            "description": [],
+            "signature": [
+              "(indexName: string, detailsTabId?: string | undefined) => string"
+            ],
+            "path": "x-pack/packages/index-management/index_management_shared_types/src/services/extensions_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/index-management-shared-types",
+                "id": "def-common.IndexDetailsPageRoute.renderRoute.$1",
+                "type": "string",
+                "tags": [],
+                "label": "indexName",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/packages/index-management/index_management_shared_types/src/services/extensions_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/index-management-shared-types",
+                "id": "def-common.IndexDetailsPageRoute.renderRoute.$2",
+                "type": "string",
+                "tags": [],
+                "label": "detailsTabId",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "x-pack/packages/index-management/index_management_shared_types/src/services/extensions_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/index-management-shared-types",
         "id": "def-common.IndexDetailsTab",
         "type": "Interface",
         "tags": [],
@@ -1186,65 +1308,6 @@
               " | undefined"
             ],
             "path": "x-pack/packages/index-management/index_management_shared_types/src/home_sections.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/index-management-shared-types",
-        "id": "def-common.IndexManagementLocatorParams",
-        "type": "Interface",
-        "tags": [],
-        "label": "IndexManagementLocatorParams",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "@kbn/index-management-shared-types",
-            "scope": "common",
-            "docId": "kibKbnIndexManagementSharedTypesPluginApi",
-            "section": "def-common.IndexManagementLocatorParams",
-            "text": "IndexManagementLocatorParams"
-          },
-          " extends ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "common",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-common.SerializableRecord",
-            "text": "SerializableRecord"
-          }
-        ],
-        "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/index-management-shared-types",
-            "id": "def-common.IndexManagementLocatorParams.page",
-            "type": "string",
-            "tags": [],
-            "label": "page",
-            "description": [],
-            "signature": [
-              "\"data_streams_details\""
-            ],
-            "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/index-management-shared-types",
-            "id": "def-common.IndexManagementLocatorParams.dataStreamName",
-            "type": "string",
-            "tags": [],
-            "label": "dataStreamName",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2046,6 +2109,28 @@
             "text": "IndexManagementLocatorParams"
           },
           ">"
+        ],
+        "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/index-management-shared-types",
+        "id": "def-common.IndexManagementLocatorParams",
+        "type": "Type",
+        "tags": [],
+        "label": "IndexManagementLocatorParams",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          },
+          " & ({ page: \"data_streams_details\"; dataStreamName?: string | undefined; } | { page: \"index_template\"; indexTemplate: string; } | { page: \"component_template\"; componentTemplate: string; })"
         ],
         "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
         "deprecated": false,

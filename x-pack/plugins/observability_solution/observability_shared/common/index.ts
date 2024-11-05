@@ -193,6 +193,7 @@ export type {
 
 export {
   ServiceOverviewLocatorDefinition,
+  SERVICE_OVERVIEW_LOCATOR_ID,
   TransactionDetailsByNameLocatorDefinition,
   ASSET_DETAILS_FLYOUT_LOCATOR_ID,
   AssetDetailsFlyoutLocatorDefinition,
@@ -217,3 +218,5 @@ export {
 } from './locators';
 
 export { COMMON_OBSERVABILITY_GROUPING } from './embeddable_grouping';
+
+export { ENTITY_TYPES, EntityDataStreamType } from './entity';

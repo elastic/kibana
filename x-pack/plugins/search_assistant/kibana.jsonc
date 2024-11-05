@@ -15,12 +15,12 @@
       "actions",
       "licensing",
       "observabilityAIAssistant",
-      "observabilityAIAssistantApp",
       "triggersActionsUi",
       "share"
     ],
     "optionalPlugins": [
       "cloud",
+      "serverless",
       "usageCollection",
     ],
     "requiredBundles": [

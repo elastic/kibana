@@ -44,7 +44,9 @@ export const RULE_DEFAULTS = {
   version: 1,
 };
 
-export function applyRuleDefaults(rule: RuleCreateProps & { immutable?: boolean }) {
+export function applyRuleDefaults(
+  rule: RuleCreateProps & { immutable?: boolean; rule_source?: RuleSource }
+) {
   const typeSpecificParams = setTypeSpecificDefaults(rule);
   const immutable = rule.immutable ?? false;
 
@@ -54,7 +56,7 @@ export function applyRuleDefaults(rule: RuleCreateProps & { immutable?: boolean 
     ...typeSpecificParams,
     rule_id: rule.rule_id ?? uuidv4(),
     immutable,
-    rule_source: convertImmutableToRuleSource(immutable),
+    rule_source: rule.rule_source ?? convertImmutableToRuleSource(immutable),
     required_fields: addEcsToRequiredFields(rule.required_fields),
   };
 }

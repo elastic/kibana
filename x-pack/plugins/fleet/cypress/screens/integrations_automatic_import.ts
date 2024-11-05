@@ -23,6 +23,7 @@ export const DATASTREAM_DESCRIPTION_INPUT = 'dataStreamDescriptionInput';
 export const DATASTREAM_NAME_INPUT = 'dataStreamNameInput';
 export const DATA_COLLECTION_METHOD_INPUT = 'dataCollectionMethodInput';
 export const LOGS_SAMPLE_FILE_PICKER = 'logsSampleFilePicker';
+export const LICENSE_PAYWALL_CARD = 'LicensePaywallCard';
 
 export const EDIT_PIPELINE_BUTTON = 'editPipelineButton';
 export const SAVE_PIPELINE_BUTTON = 'savePipelineButton';

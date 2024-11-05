@@ -7,8 +7,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { monaco } from '@kbn/monaco';
 import { createInitializedObject } from '../utils/create_initialized_object';
-import { useAIAssistantChatService } from './use_ai_assistant_chat_service';
 import { safeJsonParse } from '../utils/safe_json_parse';
+import { useFunctions } from './use_functions';
 
 const { editor, languages, Uri } = monaco;
 
@@ -19,9 +19,9 @@ export const useJsonEditorModel = ({
   functionName: string | undefined;
   initialJson?: string | undefined;
 }) => {
-  const chatService = useAIAssistantChatService();
+  const functions = useFunctions();
 
-  const functionDefinition = chatService.getFunctions().find((func) => func.name === functionName);
+  const functionDefinition = functions.find((func) => func.name === functionName);
 
   const [initialJsonValue, setInitialJsonValue] = useState<string | undefined>(initialJson);
 

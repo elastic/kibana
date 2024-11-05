@@ -52,7 +52,7 @@ function loadFunctionDocs(pathToElasticsearch: string) {
         (def) => def.name === path.basename(file, '.md')
       );
 
-      if (!functionDefinition) {
+      if (!functionDefinition || functionDefinition.snapshot_only) {
         continue;
       }
 

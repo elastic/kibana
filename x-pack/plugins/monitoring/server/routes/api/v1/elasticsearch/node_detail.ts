@@ -94,6 +94,7 @@ export function esNodeRoute(server: MonitoringCore) {
           includeNodes: true,
           nodeUuid,
         });
+        // @ts-expect-error `clusterState.master_node` types are incompatible
         const nodeSummary = await getNodeSummary(req, clusterState, shardStats, {
           clusterUuid,
           nodeUuid,
@@ -119,7 +120,7 @@ export function esNodeRoute(server: MonitoringCore) {
             cluster,
             'cluster_state.state_uuid',
             get(cluster, 'elasticsearch.cluster.stats.state.state_uuid')
-          );
+          )!;
           const allocationOptions = {
             shardFilter,
             stateUuid,

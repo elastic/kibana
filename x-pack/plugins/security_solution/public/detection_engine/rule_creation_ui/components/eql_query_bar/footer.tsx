@@ -21,7 +21,7 @@ import type { FC } from 'react';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
 
-import type { Cancelable } from 'lodash';
+import type { DebouncedFunc } from 'lodash';
 import { debounce } from 'lodash';
 import type {
   EqlOptionsData,
@@ -79,7 +79,7 @@ export const EqlQueryBarFooter: FC<Props> = ({
 }) => {
   const [openEqlSettings, setIsOpenEqlSettings] = useState(false);
   const [localSize, setLocalSize] = useState<string | number>(optionsSelected?.size ?? 100);
-  const debounceSize = useRef<Cancelable & SizeVoidFunc>();
+  const debounceSize = useRef<DebouncedFunc<SizeVoidFunc>>();
 
   const openEqlSettingsHandler = useCallback(() => {
     setIsOpenEqlSettings(true);

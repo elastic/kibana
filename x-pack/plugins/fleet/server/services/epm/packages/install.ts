@@ -60,6 +60,7 @@ import {
   FleetUnauthorizedError,
   PackageNotFoundError,
   FleetTooManyRequestsError,
+  PackageInvalidDeploymentMode,
 } from '../../../errors';
 import {
   PACKAGES_SAVED_OBJECT_TYPE,
@@ -81,6 +82,8 @@ import type { PackageUpdateEvent } from '../../upgrade_sender';
 import { sendTelemetryEvents, UpdateEventType } from '../../upgrade_sender';
 import { auditLoggingService } from '../../audit_logging';
 import { getFilteredInstallPackages } from '../filtered_packages';
+
+import { isAgentlessEnabled, isOnlyAgentlessIntegration } from '../../utils/agentless';
 
 import { _stateMachineInstallPackage } from './install_state_machine/_state_machine_package_install';
 
@@ -507,6 +510,21 @@ async function installPackageFromRegistry({
         }`
       );
     }
+
+    // only allow install of agentless packages if agentless is enabled, or if using force flag
+    const agentlessEnabled = isAgentlessEnabled();
+    const agentlessOnlyIntegration = isOnlyAgentlessIntegration(packageInfo);
+    if (!agentlessEnabled && agentlessOnlyIntegration) {
+      if (!force) {
+        throw new PackageInvalidDeploymentMode(
+          `${pkgkey} contains agentless policy templates, agentless is not available on this deployment`
+        );
+      }
+      logger.debug(
+        `${pkgkey} contains agentless policy templates, agentless is not available on this deployment but installing anyway due to force flag`
+      );
+    }
+
     return await installPackageWithStateMachine({
       pkgName,
       pkgVersion,

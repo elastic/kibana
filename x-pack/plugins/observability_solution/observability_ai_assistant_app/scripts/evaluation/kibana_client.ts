@@ -18,10 +18,8 @@ import {
   StreamingChatResponseEvent,
   StreamingChatResponseEventType,
 } from '@kbn/observability-ai-assistant-plugin/common';
-import type {
-  AssistantScope,
-  ObservabilityAIAssistantScreenContext,
-} from '@kbn/observability-ai-assistant-plugin/common/types';
+import type { ObservabilityAIAssistantScreenContext } from '@kbn/observability-ai-assistant-plugin/common/types';
+import type { AssistantScope } from '@kbn/ai-assistant-common';
 import { throwSerializedChatCompletionErrors } from '@kbn/observability-ai-assistant-plugin/common/utils/throw_serialized_chat_completion_errors';
 import {
   isSupportedConnectorType,
@@ -241,13 +239,13 @@ export class KibanaClient {
     evaluationConnectorId,
     persist,
     suite,
-    scope,
+    scopes,
   }: {
     connectorId: string;
     evaluationConnectorId: string;
     persist: boolean;
     suite?: Mocha.Suite;
-    scope: AssistantScope;
+    scopes: AssistantScope[];
   }): ChatClient {
     function getMessages(message: string | Array<Message['message']>): Array<Message['message']> {
       if (typeof message === 'string') {
@@ -375,7 +373,7 @@ export class KibanaClient {
             connectorId: connectorIdOverride || connectorId,
             functions: functions.map((fn) => pick(fn, 'name', 'description', 'parameters')),
             functionCall,
-            scope,
+            scopes,
           };
 
         return that.axios.post(
@@ -465,7 +463,7 @@ export class KibanaClient {
                 connectorId,
                 persist,
                 title: currentTitle,
-                scope,
+                scopes,
               },
               { responseType: 'stream', timeout: NaN }
             )

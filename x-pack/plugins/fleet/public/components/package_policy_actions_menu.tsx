@@ -122,6 +122,7 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
     >
       <FormattedMessage
         id="xpack.fleet.policyDetails.packagePoliciesTable.upgradeActionTitle"
+        data-test-subj="UpgradeIntegrationPolicy"
         defaultMessage="Upgrade integration policy"
       />
     </EuiContextMenuItem>,

@@ -20,7 +20,7 @@ import {
   getAnalysisType,
   type DataFrameAnalysisConfigType,
 } from '@kbn/ml-data-frame-analytics-utils';
-import { useEnabledFeatures } from '../contexts/ml';
+import { useEnabledFeatures, useMlServerInfo } from '../contexts/ml';
 import { useTrainedModelsApiService } from '../services/ml_api_service/trained_models';
 import { getUserConfirmationProvider } from './force_stop_dialog';
 import { useToastNotificationService } from '../services/toast_notification_service';
@@ -66,6 +66,7 @@ export function useModelActions({
   } = useMlKibana();
 
   const { showNodeInfo } = useEnabledFeatures();
+  const { nlpSettings } = useMlServerInfo();
 
   const cloudInfo = useCloudCheck();
 
@@ -124,9 +125,10 @@ export function useModelActions({
         startServices,
         startModelDeploymentDocUrl,
         cloudInfo,
-        showNodeInfo
+        showNodeInfo,
+        nlpSettings
       ),
-    [overlays, startServices, startModelDeploymentDocUrl, cloudInfo, showNodeInfo]
+    [overlays, startServices, startModelDeploymentDocUrl, cloudInfo, showNodeInfo, nlpSettings]
   );
 
   const isBuiltInModel = useCallback(
@@ -214,7 +216,10 @@ export function useModelActions({
         },
         available: (item) => {
           return (
-            item.model_type === TRAINED_MODEL_TYPE.PYTORCH && item.state === MODEL_STATE.DOWNLOADED
+            item.model_type === TRAINED_MODEL_TYPE.PYTORCH &&
+            !!item.state &&
+            item.state !== MODEL_STATE.DOWNLOADING &&
+            item.state !== MODEL_STATE.NOT_DOWNLOADED
           );
         },
         onClick: async (item) => {
@@ -539,7 +544,7 @@ export function useModelActions({
       },
       {
         name: i18n.translate('xpack.ml.inference.modelsList.testModelActionLabel', {
-          defaultMessage: 'Test model',
+          defaultMessage: 'Test',
         }),
         description: i18n.translate('xpack.ml.inference.modelsList.testModelActionLabel', {
           defaultMessage: 'Test model',

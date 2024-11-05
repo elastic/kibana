@@ -10,7 +10,7 @@
 import React from 'react';
 
 import { DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS } from '@kbn/presentation-util-plugin/public';
-import { createEvent, fireEvent, render, screen, within } from '@testing-library/react';
+import { createEvent, fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { LINKS_VERTICAL_LAYOUT } from '../../../common/content_management';
@@ -75,7 +75,7 @@ describe('Dashboard link component', () => {
     expect(link).toHaveTextContent('Dashboard 1');
 
     // does not render external link icon
-    const externalIcon = within(link).queryByText('External link');
+    const externalIcon = link.querySelector('[data-euiicon-type="popout"]');
     expect(externalIcon).toBeNull();
 
     // calls `navigate` on click
@@ -122,8 +122,8 @@ describe('Dashboard link component', () => {
     const link = screen.getByTestId('dashboardLink--foo');
     expect(link).toBeInTheDocument();
     // external link icon is rendered
-    const externalIcon = within(link).getByText('External link');
-    expect(externalIcon?.getAttribute('data-euiicon-type')).toBe('popout');
+    const externalIcon = link.querySelector('[data-euiicon-type="popout"]');
+    expect(externalIcon).toBeInTheDocument();
 
     // calls `window.open`
     await userEvent.click(link);

@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { css } from '@emotion/react';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, useEuiTheme, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
 import { useVulnerabilitiesPreview } from '@kbn/cloud-security-posture/src/hooks/use_vulnerabilities_preview';
-import { ExpandablePanel } from '@kbn/security-solution-common';
 import {
   buildEntityFlyoutPreviewQuery,
   getAbbreviatedNumber,
@@ -20,6 +19,12 @@ import {
 import { getVulnerabilityStats, hasVulnerabilitiesData } from '@kbn/cloud-security-posture';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useMisconfigurationPreview } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview';
+import {
+  ENTITY_FLYOUT_WITH_VULNERABILITY_PREVIEW,
+  uiMetricService,
+} from '@kbn/cloud-security-posture-common/utils/ui_metrics';
+import { METRIC_TYPE } from '@kbn/analytics';
+import { ExpandablePanel } from '../../../flyout/shared/components/expandable_panel';
 import { EntityDetailsLeftPanelTab } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import { HostDetailsPanelKey } from '../../../flyout/entity_details/host_details_left';
 import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score';
@@ -43,12 +48,12 @@ const VulnerabilitiesCount = ({
       <EuiFlexGroup direction="column" gutterSize="none">
         <EuiFlexItem>
           <EuiTitle size="s">
-            <h1>{vulnerabilitiesTotal}</h1>
+            <h3>{vulnerabilitiesTotal}</h3>
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiText
-            size="m"
+            size="xs"
             css={css`
               font-weight: ${euiTheme.font.weight.semiBold};
             `}
@@ -71,6 +76,10 @@ export const VulnerabilitiesPreview = ({
   name: string;
   isPreviewMode?: boolean;
 }) => {
+  useEffect(() => {
+    uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, ENTITY_FLYOUT_WITH_VULNERABILITY_PREVIEW);
+  }, []);
+
   const { data } = useVulnerabilitiesPreview({
     query: buildEntityFlyoutPreviewQuery('host.name', name),
     sort: [],
@@ -153,8 +162,7 @@ export const VulnerabilitiesPreview = ({
       header={{
         iconType: !isPreviewMode && hasVulnerabilitiesFindings ? 'arrowStart' : '',
         title: (
-          <EuiText
-            size="xs"
+          <EuiTitle
             css={css`
               font-weight: ${euiTheme.font.weight.semiBold};
             `}
@@ -163,7 +171,7 @@ export const VulnerabilitiesPreview = ({
               id="xpack.securitySolution.flyout.right.insights.vulnerabilities.vulnerabilitiesTitle"
               defaultMessage="Vulnerabilities"
             />
-          </EuiText>
+          </EuiTitle>
         ),
         link,
       }}

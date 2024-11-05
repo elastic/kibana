@@ -60,6 +60,7 @@ export const postKnowledgeBaseRoute = (router: ElasticAssistantPluginRouter) => 
         // Only allow modelId override if FF is enabled as this will re-write the ingest pipeline and break any previous KB entries
         // This is only really needed for API integration tests
         const modelIdOverride = v2KnowledgeBaseEnabled ? request.query.modelId : undefined;
+        const ignoreSecurityLabs = request.query.ignoreSecurityLabs;
 
         try {
           const knowledgeBaseDataClient =
@@ -73,7 +74,8 @@ export const postKnowledgeBaseRoute = (router: ElasticAssistantPluginRouter) => 
 
           await knowledgeBaseDataClient.setupKnowledgeBase({
             soClient,
-            installSecurityLabsDocs: v2KnowledgeBaseEnabled,
+            v2KnowledgeBaseEnabled,
+            ignoreSecurityLabs,
           });
 
           return response.ok({ body: { success: true } });

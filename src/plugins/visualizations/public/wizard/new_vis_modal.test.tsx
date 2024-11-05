@@ -8,13 +8,15 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { TypesStart, VisGroups, BaseVisType } from '../vis_types';
-import NewVisModal from './new_vis_modal';
+import NewVisModal, { TypeSelectionProps } from './new_vis_modal';
 import { ApplicationStart, DocLinksStart } from '@kbn/core/public';
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import { contentManagementMock } from '@kbn/content-management-plugin/public/mocks';
 import { VisParams } from '../../common';
+import { render, screen } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
+import userEvent from '@testing-library/user-event';
 
 describe('NewVisModal', () => {
   const defaultVisTypeParams = {
@@ -76,11 +78,11 @@ describe('NewVisModal', () => {
   const uiSettings: any = { get: settingsGet };
   const docLinks = {
     links: {
-      dashboard: {
+      visualize: {
         guide: 'test',
       },
     },
-  };
+  } as unknown as DocLinksStart;
 
   const contentManagement = contentManagementMock.createStartContract();
 
@@ -96,116 +98,67 @@ describe('NewVisModal', () => {
     jest.clearAllMocks();
   });
 
-  it('should show the aggbased group but not the visualization assigned to this group', () => {
-    const wrapper = mountWithIntl(
-      <NewVisModal
-        isOpen={true}
-        onClose={() => null}
-        visTypesRegistry={visTypes}
-        addBasePath={addBasePath}
-        uiSettings={uiSettings}
-        application={{} as ApplicationStart}
-        docLinks={docLinks as DocLinksStart}
-        contentClient={contentManagement.client}
-      />
+  const renderNewVisModal = (propsOverrides?: Partial<TypeSelectionProps>) => {
+    return render(
+      <I18nProvider>
+        <NewVisModal
+          isOpen={true}
+          onClose={() => null}
+          visTypesRegistry={visTypes}
+          addBasePath={addBasePath}
+          uiSettings={uiSettings}
+          application={{} as ApplicationStart}
+          docLinks={docLinks}
+          contentClient={contentManagement.client}
+          {...propsOverrides}
+        />
+      </I18nProvider>
     );
-    expect(wrapper.find('[data-test-subj="visGroup-aggbased"]').exists()).toBe(true);
-    expect(wrapper.find('[data-test-subj="visType-visWithSearch"]').exists()).toBe(false);
-  });
+  };
 
-  it('should show the tools group', () => {
-    const wrapper = mountWithIntl(
-      <NewVisModal
-        isOpen={true}
-        onClose={() => null}
-        visTypesRegistry={visTypes}
-        addBasePath={addBasePath}
-        uiSettings={uiSettings}
-        application={{} as ApplicationStart}
-        docLinks={docLinks as DocLinksStart}
-        contentClient={contentManagement.client}
-      />
-    );
-    expect(wrapper.find('[data-test-subj="visGroup-tools"]').exists()).toBe(true);
+  it('should show the aggbased group but not the visualization assigned to this group', async () => {
+    renderNewVisModal();
+    expect(screen.queryByText('Aggregation-based')).not.toBeInTheDocument();
+    expect(screen.queryByText('Vis with search')).not.toBeInTheDocument();
+    await userEvent.click(screen.getByRole('tab', { name: /Legacy/i }));
+    expect(screen.queryByText('Aggregation-based')).toBeInTheDocument();
+    expect(screen.queryByText('Vis with search')).not.toBeInTheDocument();
   });
 
   it('should display the visualizations of the other group', () => {
-    const wrapper = mountWithIntl(
-      <NewVisModal
-        isOpen={true}
-        onClose={() => null}
-        visTypesRegistry={visTypes}
-        addBasePath={addBasePath}
-        uiSettings={uiSettings}
-        application={{} as ApplicationStart}
-        docLinks={docLinks as DocLinksStart}
-        contentClient={contentManagement.client}
-      />
-    );
-    expect(wrapper.find('[data-test-subj="visType-vis2"]').exists()).toBe(true);
+    renderNewVisModal();
+    expect(screen.queryByText('Vis Type 2')).toBeInTheDocument();
   });
 
   describe('open editor', () => {
-    it('should open the editor for visualizations without search', () => {
-      const wrapper = mountWithIntl(
-        <NewVisModal
-          isOpen={true}
-          onClose={() => null}
-          visTypesRegistry={visTypes}
-          addBasePath={addBasePath}
-          uiSettings={uiSettings}
-          application={{} as ApplicationStart}
-          docLinks={docLinks as DocLinksStart}
-          contentClient={contentManagement.client}
-        />
-      );
-      const visCard = wrapper.find('[data-test-subj="visType-vis"]').last();
-      visCard.simulate('click');
+    it('should open the editor for visualizations without search', async () => {
+      renderNewVisModal();
+      await userEvent.click(screen.getByText('Vis Type 1'));
       expect(window.location.assign).toBeCalledWith('testbasepath/app/visualize#/create?type=vis');
     });
 
-    it('passes through editor params to the editor URL', () => {
-      const wrapper = mountWithIntl(
-        <NewVisModal
-          isOpen={true}
-          onClose={() => null}
-          visTypesRegistry={visTypes}
-          editorParams={['foo=true', 'bar=42']}
-          addBasePath={addBasePath}
-          uiSettings={uiSettings}
-          application={{} as ApplicationStart}
-          docLinks={docLinks as DocLinksStart}
-          contentClient={contentManagement.client}
-        />
-      );
-      const visCard = wrapper.find('[data-test-subj="visType-vis"]').last();
-      visCard.simulate('click');
+    it('passes through editor params to the editor URL', async () => {
+      renderNewVisModal({
+        editorParams: ['foo=true', 'bar=42'],
+      });
+      await userEvent.click(screen.getByText('Vis Type 1'));
       expect(window.location.assign).toBeCalledWith(
         'testbasepath/app/visualize#/create?type=vis&foo=true&bar=42'
       );
     });
 
-    it('closes and redirects properly if visualization with alias.path and originatingApp in props', () => {
+    it('closes and redirects properly if visualization with alias.path and originatingApp in props', async () => {
       const onClose = jest.fn();
       const navigateToApp = jest.fn();
       const stateTransfer = embeddablePluginMock.createStartContract().getStateTransfer();
-      const wrapper = mountWithIntl(
-        <NewVisModal
-          isOpen={true}
-          onClose={onClose}
-          visTypesRegistry={visTypes}
-          editorParams={['foo=true', 'bar=42']}
-          originatingApp={'coolJestTestApp'}
-          addBasePath={addBasePath}
-          uiSettings={uiSettings}
-          application={{ navigateToApp } as unknown as ApplicationStart}
-          docLinks={docLinks as DocLinksStart}
-          stateTransfer={stateTransfer}
-          contentClient={contentManagement.client}
-        />
-      );
-      const visCard = wrapper.find('[data-test-subj="visType-visWithAliasUrl"]').last();
-      visCard.simulate('click');
+      renderNewVisModal({
+        editorParams: ['foo=true', 'bar=42'],
+        onClose,
+        application: { navigateToApp } as unknown as ApplicationStart,
+        originatingApp: 'coolJestTestApp',
+        stateTransfer,
+      });
+      await userEvent.click(screen.getByText('Vis with alias Url'));
       expect(stateTransfer.navigateToEditor).toBeCalledWith('otherApp', {
         path: '#/aliasUrl',
         state: { originatingApp: 'coolJestTestApp' },
@@ -213,48 +166,28 @@ describe('NewVisModal', () => {
       expect(onClose).toHaveBeenCalled();
     });
 
-    it('closes and redirects properly if visualization with aliasApp and without originatingApp in props', () => {
+    it('closes and redirects properly if visualization with aliasApp and without originatingApp in props', async () => {
       const onClose = jest.fn();
       const navigateToApp = jest.fn();
-      const wrapper = mountWithIntl(
-        <NewVisModal
-          isOpen={true}
-          onClose={onClose}
-          visTypesRegistry={visTypes}
-          editorParams={['foo=true', 'bar=42']}
-          addBasePath={addBasePath}
-          uiSettings={uiSettings}
-          application={{ navigateToApp } as unknown as ApplicationStart}
-          docLinks={docLinks as DocLinksStart}
-          contentClient={contentManagement.client}
-        />
-      );
-      const visCard = wrapper.find('[data-test-subj="visType-visWithAliasUrl"]').last();
-      visCard.simulate('click');
+
+      renderNewVisModal({
+        editorParams: ['foo=true', 'bar=42'],
+        onClose,
+        application: { navigateToApp } as unknown as ApplicationStart,
+      });
+      await userEvent.click(screen.getByText('Vis with alias Url'));
       expect(navigateToApp).toBeCalledWith('otherApp', { path: '#/aliasUrl' });
       expect(onClose).toHaveBeenCalled();
     });
   });
 
   describe('aggBased visualizations', () => {
-    it('should render as expected', () => {
-      const wrapper = mountWithIntl(
-        <NewVisModal
-          isOpen={true}
-          onClose={() => null}
-          visTypesRegistry={visTypes}
-          addBasePath={addBasePath}
-          uiSettings={uiSettings}
-          application={{} as ApplicationStart}
-          docLinks={docLinks as DocLinksStart}
-          contentClient={contentManagement.client}
-        />
-      );
-      const aggBasedGroupCard = wrapper
-        .find('[data-test-subj="visGroupAggBasedExploreLink"]')
-        .last();
-      aggBasedGroupCard.simulate('click');
-      expect(wrapper.find('[data-test-subj="visType-visWithSearch"]').exists()).toBe(true);
+    it('should render as expected', async () => {
+      renderNewVisModal();
+      await userEvent.click(screen.getByRole('tab', { name: /Legacy/i }));
+      expect(screen.queryByText('Aggregation-based')).toBeInTheDocument();
+      await userEvent.click(screen.getByText('Aggregation-based'));
+      expect(screen.queryByText('Vis with search')).toBeInTheDocument();
     });
   });
 });

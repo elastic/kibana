@@ -18,9 +18,9 @@ import type {
 import { ClickTriggerEvent } from '@kbn/charts-plugin/public';
 import { getSortingCriteria } from '@kbn/sort-predicates';
 import { i18n } from '@kbn/i18n';
+import { getOriginalId } from '@kbn/transpose-utils';
 import type { LensResizeAction, LensSortAction, LensToggleAction } from './types';
 import type { DatatableColumnConfig, LensGridDirection } from '../../../../common/expressions';
-import { getOriginalId } from '../../../../common/expressions/datatable/transpose_helpers';
 import type { FormatFactory } from '../../../../common/types';
 import { buildColumnsMetaLookup } from './helpers';
 
@@ -168,6 +168,10 @@ function isRange(meta: { params?: { id?: string } } | undefined) {
   return meta?.params?.id === 'range';
 }
 
+export function getSimpleColumnType(meta?: DatatableColumnMeta) {
+  return isRange(meta) ? 'range' : meta?.type;
+}
+
 function getColumnType({
   columnConfig,
   columnId,
@@ -185,7 +189,7 @@ function getColumnType({
   >;
 }) {
   const sortingHint = columnConfig.columns.find((col) => col.columnId === columnId)?.sortingHint;
-  return sortingHint ?? (isRange(lookup[columnId]?.meta) ? 'range' : lookup[columnId]?.meta?.type);
+  return sortingHint ?? getSimpleColumnType(lookup[columnId]?.meta);
 }
 
 export const buildSchemaDetectors = (

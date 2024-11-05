@@ -9,19 +9,15 @@ import { entityLatestSchema, entityMetadataSchema } from './entity';
 
 const entity = {
   entity: {
-    lastSeenTimestamp: '2024-08-06T17:03:50.722Z',
-    schemaVersion: 'v1',
-    definitionVersion: '999.999.999',
-    displayName: 'message_processor',
-    identityFields: ['log.logger', 'event.category'],
+    last_seen_timestamp: '2024-08-06T17:03:50.722Z',
+    schema_version: 'v1',
+    definition_version: '999.999.999',
+    display_name: 'message_processor',
+    identity_fields: ['log.logger', 'event.category'],
     id: '6UHVPiduEC2qk6rMjs1Jzg==',
-    metrics: {
-      logRate: 100,
-      errorRate: 0,
-    },
     type: 'service',
-    firstSeenTimestamp: '2024-08-06T16:50:00.000Z',
-    definitionId: 'admin-console-services',
+    metrics: {},
+    definition_id: 'admin-console-services',
   },
 };
 
@@ -47,7 +43,7 @@ const metadata = {
     ingested: '2024-08-06T17:06:24.444700Z',
     category: '',
   },
-  sourceIndex: ['kbn-data-forge-fake_stack.message_processor-2024-08-01'],
+  source_index: ['kbn-data-forge-fake_stack.message_processor-2024-08-01'],
   log: {
     logger: 'message_processor',
   },

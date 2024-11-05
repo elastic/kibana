@@ -5,8 +5,12 @@
  * 2.0.
  */
 
+import { map } from 'rxjs';
 import { useMemo } from 'react';
+import useObservable from 'react-use/lib/useObservable';
+import { AppStatus } from '@kbn/core-application-browser';
 import {
+  OBSERVABILITY_LOGS_EXPLORER_APP_ID,
   SINGLE_DATASET_LOCATOR_ID,
   SingleDatasetLocatorParams,
 } from '@kbn/deeplinks-observability';
@@ -34,7 +38,7 @@ export const useRedirectLink = <T extends BasicDataStream>({
   sendTelemetry: SendTelemetryFn;
 }) => {
   const {
-    services: { share },
+    services: { share, application },
   } = useKibanaContextForPlugin();
 
   const { from, to } = timeRangeConfig;
@@ -42,12 +46,28 @@ export const useRedirectLink = <T extends BasicDataStream>({
   const logsExplorerLocator =
     share.url.locators.get<SingleDatasetLocatorParams>(SINGLE_DATASET_LOCATOR_ID);
 
+  const isLogsExplorerAppAccessible = useObservable(
+    useMemo(
+      () =>
+        application.applications$.pipe(
+          map(
+            (apps) =>
+              (apps.get(OBSERVABILITY_LOGS_EXPLORER_APP_ID)?.status ?? AppStatus.inaccessible) ===
+              AppStatus.accessible
+          )
+        ),
+      [application.applications$]
+    ),
+    false
+  );
+
   return useMemo<{
     linkProps: RouterLinkProps;
     navigate: () => void;
     isLogsExplorerAvailable: boolean;
   }>(() => {
-    const isLogsExplorerAvailable = !!logsExplorerLocator && dataStreamStat.type === 'logs';
+    const isLogsExplorerAvailable =
+      isLogsExplorerAppAccessible && !!logsExplorerLocator && dataStreamStat.type === 'logs';
     const config = isLogsExplorerAvailable
       ? buildLogsExplorerConfig({
           locator: logsExplorerLocator,
@@ -95,6 +115,7 @@ export const useRedirectLink = <T extends BasicDataStream>({
     query,
     sendTelemetry,
     share.url.locators,
+    isLogsExplorerAppAccessible,
   ]);
 };
 

@@ -10,8 +10,8 @@ import React from 'react';
 import styled from 'styled-components';
 
 import { getIndexResultToolTip } from '../utils/get_index_result_tooltip';
-import { getIndexResultBadgeColor } from './utils/get_index_result_badge_color';
-import * as i18n from './translations';
+import { getCheckTextColor } from '../utils/get_check_text_color';
+import { FAIL, PASS } from '../translations';
 
 const StyledBadge = styled(EuiBadge)`
   width: 44px;
@@ -37,10 +37,10 @@ export const IndexResultBadgeComponent: React.FC<Props> = ({
     <EuiToolTip content={tooltipText ?? getIndexResultToolTip(incompatible)}>
       <StyledBadge
         data-test-subj="indexResultBadge"
-        color={getIndexResultBadgeColor(incompatible)}
+        color={getCheckTextColor(incompatible)}
         {...props}
       >
-        {incompatible > 0 ? i18n.FAIL : i18n.PASS}
+        {incompatible > 0 ? FAIL : PASS}
       </StyledBadge>
     </EuiToolTip>
   );

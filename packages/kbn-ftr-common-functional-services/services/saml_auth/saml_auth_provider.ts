@@ -27,6 +27,19 @@ export interface CookieCredentials {
   [header: string]: string;
 }
 
+export interface KibanaRoleDescriptors {
+  kibana: any;
+  elasticsearch?: any;
+}
+
+const throwIfRoleNotSet = (role: string, customRole: string, roleDescriptors: Map<string, any>) => {
+  if (role === customRole && !roleDescriptors.get(customRole)) {
+    throw new Error(
+      `Set privileges for '${customRole}' using 'samlAuth.setCustomRole' before authentication.`
+    );
+  }
+};
+
 export function SamlAuthProvider({ getService }: FtrProviderContext) {
   const config = getService('config');
   const log = getService('log');
@@ -35,9 +48,8 @@ export function SamlAuthProvider({ getService }: FtrProviderContext) {
 
   const authRoleProvider = getAuthProvider({ config });
   const supportedRoleDescriptors = authRoleProvider.getSupportedRoleDescriptors();
-  const supportedRoles = Object.keys(supportedRoleDescriptors);
-
-  const customRolesFileName: string | undefined = process.env.ROLES_FILENAME_OVERRIDE;
+  const supportedRoles = Array.from(supportedRoleDescriptors.keys());
+  const customRolesFileName = process.env.ROLES_FILENAME_OVERRIDE;
   const cloudUsersFilePath = resolve(REPO_ROOT, '.ftr', customRolesFileName ?? 'role_users.json');
 
   // Sharing the instance within FTR config run means cookies are persistent for each role between tests.
@@ -61,14 +73,36 @@ export function SamlAuthProvider({ getService }: FtrProviderContext) {
   const DEFAULT_ROLE = authRoleProvider.getDefaultRole();
   const COMMON_REQUEST_HEADERS = authRoleProvider.getCommonRequestHeader();
   const INTERNAL_REQUEST_HEADERS = authRoleProvider.getInternalRequestHeader();
+  const CUSTOM_ROLE = authRoleProvider.getCustomRole();
+  const isCustomRoleEnabled = authRoleProvider.isCustomRoleEnabled();
+
+  const getAdminCredentials = async () => {
+    return await sessionManager.getApiCredentialsForRole('admin');
+  };
+
+  const createApiKeyPayload = (role: string, roleDescriptors: any) => {
+    return {
+      name: `myTestApiKey_${role}`,
+      metadata: {},
+      ...(role === CUSTOM_ROLE
+        ? { kibana_role_descriptors: roleDescriptors }
+        : { role_descriptors: roleDescriptors }),
+    };
+  };
 
   return {
     async getInteractiveUserSessionCookieWithRoleScope(role: string) {
+      // Custom role has no descriptors by default, check if it was added before authentication
+      throwIfRoleNotSet(role, CUSTOM_ROLE, supportedRoleDescriptors);
       return sessionManager.getInteractiveUserSessionCookieWithRoleScope(role);
     },
+
     async getM2MApiCookieCredentialsWithRoleScope(role: string): Promise<CookieCredentials> {
+      // Custom role has no descriptors by default, check if it was added before authentication
+      throwIfRoleNotSet(role, CUSTOM_ROLE, supportedRoleDescriptors);
       return sessionManager.getApiCredentialsForRole(role);
     },
+
     async getEmail(role: string) {
       return sessionManager.getEmail(role);
     },
@@ -76,40 +110,41 @@ export function SamlAuthProvider({ getService }: FtrProviderContext) {
     async getUserData(role: string) {
       return sessionManager.getUserData(role);
     },
+
     async createM2mApiKeyWithDefaultRoleScope() {
-      log.debug(`Creating api key for default role: [${this.DEFAULT_ROLE}]`);
-      return this.createM2mApiKeyWithRoleScope(this.DEFAULT_ROLE);
+      log.debug(`Creating API key for default role: [${DEFAULT_ROLE}]`);
+      return this.createM2mApiKeyWithRoleScope(DEFAULT_ROLE);
     },
+
     async createM2mApiKeyWithRoleScope(role: string): Promise<RoleCredentials> {
       // Get admin credentials in order to create the API key
-      const adminCookieHeader = await this.getM2MApiCookieCredentialsWithRoleScope('admin');
-
-      // Get the role descrtiptor for the role
+      const adminCookieHeader = await getAdminCredentials();
       let roleDescriptors = {};
+
       if (role !== 'admin') {
-        const roleDescriptor = supportedRoleDescriptors[role];
+        if (role === CUSTOM_ROLE && !isCustomRoleEnabled) {
+          throw new Error(`Custom roles are not supported for the current deployment`);
+        }
+        const roleDescriptor = supportedRoleDescriptors.get(role);
         if (!roleDescriptor) {
-          throw new Error(`Cannot create API key for non-existent role "${role}"`);
+          throw new Error(
+            role === CUSTOM_ROLE
+              ? `Before creating API key for '${CUSTOM_ROLE}', use 'samlAuth.setCustomRole' to set the role privileges`
+              : `Cannot create API key for non-existent role "${role}"`
+          );
         }
         log.debug(
-          `Creating api key for ${role} role with the following privileges ${JSON.stringify(
-            roleDescriptor
-          )}`
+          `Creating API key for ${role} with privileges: ${JSON.stringify(roleDescriptor)}`
         );
-        roleDescriptors = {
-          [role]: roleDescriptor,
-        };
+        roleDescriptors = { [role]: roleDescriptor };
       }
 
+      const payload = createApiKeyPayload(role, roleDescriptors);
       const response = await supertestWithoutAuth
         .post('/internal/security/api_key')
         .set(INTERNAL_REQUEST_HEADERS)
         .set(adminCookieHeader)
-        .send({
-          name: 'myTestApiKey',
-          metadata: {},
-          role_descriptors: roleDescriptors,
-        });
+        .send(payload);
 
       if (response.status !== 200) {
         throw new Error(
@@ -120,31 +155,72 @@ export function SamlAuthProvider({ getService }: FtrProviderContext) {
       const apiKey = response.body;
       const apiKeyHeader = { Authorization: 'ApiKey ' + apiKey.encoded };
 
-      log.debug(`Created api key for role: [${role}]`);
+      log.debug(`Created API key for role: [${role}]`);
       return { apiKey, apiKeyHeader };
     },
+
     async invalidateM2mApiKeyWithRoleScope(roleCredentials: RoleCredentials) {
       // Get admin credentials in order to invalidate the API key
-      const adminCookieHeader = await this.getM2MApiCookieCredentialsWithRoleScope('admin');
-
-      const requestBody = {
-        apiKeys: [
-          {
-            id: roleCredentials.apiKey.id,
-            name: roleCredentials.apiKey.name,
-          },
-        ],
-        isAdmin: true,
-      };
+      const adminCookieHeader = await getAdminCredentials();
 
       const { status } = await supertestWithoutAuth
         .post('/internal/security/api_key/invalidate')
         .set(INTERNAL_REQUEST_HEADERS)
         .set(adminCookieHeader)
-        .send(requestBody);
+        .send({
+          apiKeys: [{ id: roleCredentials.apiKey.id, name: roleCredentials.apiKey.name }],
+          isAdmin: true,
+        });
 
       expect(status).to.be(200);
     },
+
+    async setCustomRole(descriptors: KibanaRoleDescriptors) {
+      if (!isCustomRoleEnabled) {
+        throw new Error(`Custom roles are not supported for the current deployment`);
+      }
+      log.debug(`Updating role '${CUSTOM_ROLE}'`);
+      const adminCookieHeader = await getAdminCredentials();
+
+      const customRoleDescriptors = {
+        kibana: descriptors.kibana,
+        elasticsearch: descriptors.elasticsearch ?? [],
+      };
+
+      const { status } = await supertestWithoutAuth
+        .put(`/api/security/role/${CUSTOM_ROLE}`)
+        .set(INTERNAL_REQUEST_HEADERS)
+        .set(adminCookieHeader)
+        .send(customRoleDescriptors);
+
+      expect(status).to.be(204);
+
+      // Update descriptors for custome role, it will be used to create API key
+      supportedRoleDescriptors.set(CUSTOM_ROLE, customRoleDescriptors);
+    },
+
+    async deleteCustomRole() {
+      if (!isCustomRoleEnabled) {
+        throw new Error(`Custom roles are not supported for the current deployment`);
+      }
+
+      if (supportedRoleDescriptors.get(CUSTOM_ROLE)) {
+        log.debug(`Deleting role '${CUSTOM_ROLE}'`);
+        const adminCookieHeader = await getAdminCredentials();
+
+        // Resetting descriptors for the custom role, even if role deletion fails
+        supportedRoleDescriptors.set(CUSTOM_ROLE, null);
+        log.debug(`'${CUSTOM_ROLE}' descriptors  were reset`);
+
+        const { status } = await supertestWithoutAuth
+          .delete(`/api/security/role/${CUSTOM_ROLE}`)
+          .set(INTERNAL_REQUEST_HEADERS)
+          .set(adminCookieHeader);
+
+        expect(status).to.be(204);
+      }
+    },
+
     getCommonRequestHeader() {
       return COMMON_REQUEST_HEADERS;
     },
@@ -152,6 +228,8 @@ export function SamlAuthProvider({ getService }: FtrProviderContext) {
     getInternalRequestHeader(): InternalRequestHeader {
       return INTERNAL_REQUEST_HEADERS;
     },
+
     DEFAULT_ROLE,
+    CUSTOM_ROLE,
   };
 }

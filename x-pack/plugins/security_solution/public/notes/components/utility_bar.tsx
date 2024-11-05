@@ -23,6 +23,8 @@ import {
   selectNotesTableSelectedIds,
   selectNotesTableSearch,
   userSelectedBulkDelete,
+  selectNotesTableCreatedByFilter,
+  selectNotesTableAssociatedFilter,
 } from '..';
 
 export const BATCH_ACTIONS = i18n.translate(
@@ -51,6 +53,8 @@ export const NotesUtilityBar = React.memo(() => {
   const pagination = useSelector(selectNotesPagination);
   const sort = useSelector(selectNotesTableSort);
   const selectedItems = useSelector(selectNotesTableSelectedIds);
+  const notesCreatedByFilter = useSelector(selectNotesTableCreatedByFilter);
+  const notesAssociatedFilter = useSelector(selectNotesTableAssociatedFilter);
   const resultsCount = useMemo(() => {
     const { perPage, page, total } = pagination;
     const startOfCurrentPage = perPage * (page - 1) + 1;
@@ -83,10 +87,21 @@ export const NotesUtilityBar = React.memo(() => {
         sortField: sort.field,
         sortOrder: sort.direction,
         filter: '',
+        createdByFilter: notesCreatedByFilter,
+        associatedFilter: notesAssociatedFilter,
         search: notesSearch,
       })
     );
-  }, [dispatch, pagination.page, pagination.perPage, sort.field, sort.direction, notesSearch]);
+  }, [
+    dispatch,
+    pagination.page,
+    pagination.perPage,
+    sort.field,
+    sort.direction,
+    notesCreatedByFilter,
+    notesAssociatedFilter,
+    notesSearch,
+  ]);
   return (
     <UtilityBar border>
       <UtilityBarSection>

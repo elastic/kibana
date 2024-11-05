@@ -10,14 +10,14 @@ import { BUILT_IN_ID_PREFIX } from './constants';
 
 export const builtInServicesFromEcsEntityDefinition: EntityDefinition =
   entityDefinitionSchema.parse({
-    version: '0.4.0',
+    version: '0.5.0',
     id: `${BUILT_IN_ID_PREFIX}services_from_ecs_data`,
     name: 'Services from ECS data',
     description:
       'This definition extracts service entities from common data streams by looking for the ECS field service.name',
     type: 'service',
     managed: true,
-    indexPatterns: ['logs-*', 'filebeat*', 'traces-apm*'],
+    indexPatterns: ['logs-*', 'filebeat*', 'traces-*'],
     latest: {
       timestampField: '@timestamp',
       lookbackPeriod: '10m',
@@ -29,7 +29,7 @@ export const builtInServicesFromEcsEntityDefinition: EntityDefinition =
     identityFields: ['service.name'],
     displayNameTemplate: '{{service.name}}',
     metadata: [
-      { source: '_index', destination: 'sourceIndex' },
+      { source: '_index', destination: 'source_index' },
       {
         source: 'data_stream.type',
         destination: 'source_data_stream.type',
@@ -38,7 +38,7 @@ export const builtInServicesFromEcsEntityDefinition: EntityDefinition =
         source: 'data_stream.dataset',
         destination: 'source_data_stream.dataset',
       },
-      { source: 'agent.name', aggregation: { type: 'terms', limit: 100 } },
+      'agent.name',
       'service.environment',
       'service.name',
       'service.namespace',

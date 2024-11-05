@@ -10,7 +10,7 @@
     "@kbn/core-http-request-handler-context-server",
     "@kbn/es-query",
     "@kbn/core-test-helpers-kbn-server",
-    "@kbn/bfetch-plugin",
+    "@kbn/item-buffer",
     "@kbn/object-versioning",
     "@kbn/core-saved-objects-api-server-mocks",
     "@kbn/core-saved-objects-api-server",

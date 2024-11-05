@@ -7,14 +7,11 @@ Entity definitions are a core concept of the entity model. They define the way t
 > [!NOTE]
 > Entity definitions are based on transform and as such a subset of the configuration is tightly coupled to transform settings. While we provide defaults for these settings, one can still update properties such as `frequency`, `sync.time.delay` and `sync.time.field` (see [transform documentation](https://www.elastic.co/guide/en/elasticsearch/reference/current/put-transform.html)).
 
-When creating a definition (see [entity definition schema](https://github.com/elastic/kibana/blob/main/x-pack/packages/kbn-entities-schema/src/schema/entity_definition.ts#L21)), entity manager will create two transforms to collect entities based on the configured [identityFields](https://github.com/elastic/kibana/blob/main/x-pack/packages/kbn-entities-schema/src/schema/entity_definition.ts#L29):
-- the history transform creates a snapshot of entities over time, reading documents from the configured source indices and grouping them by the identity fields and a date histogram. For a given entity the transform creates at most one document per interval (configured by the `history.settings.interval` setting), with its associated metrics and metadata fields aggregated over that interval. While metrics support [multiple aggregations](https://github.com/elastic/kibana/blob/main/x-pack/packages/kbn-entities-schema/src/schema/common.ts#L13), metadata use a `terms` aggregation (to be expanded by https://github.com/elastic/elastic-entity-model/issues/130). To limit the amount of data processed when created, history transform accepts a `history.settings.lookbackPeriod` that defaults to 1h.
-- the summary transform creates one document per entity, reading documents from the history transform output indices. Each entity document gets overwritten over time, updating metadata and metrics with the following rules: metrics get the value of the most recent history document while metadata are aggregated over a computed period that attempts to limit the amount of data it looks at.
+When creating a definition (see [entity definition schema](https://github.com/elastic/kibana/blob/main/x-pack/packages/kbn-entities-schema/src/schema/entity_definition.ts#L21)), entity manager will create a transforms to collect entities based on the configured [identityFields](https://github.com/elastic/kibana/blob/main/x-pack/packages/kbn-entities-schema/src/schema/entity_definition.ts#L29).
+The transform creates one document per entity, reading documents from the configured source indices and grouping them by the identity fields. Each entity document gets overwritten each time the transform runs.
 
-The definition allows defining an optional backfill transform. This works on the principle that transforms only capture an immutable snapshot of the data at the time they execute. If data is ingested with delay and falls in a bucket that was already covered by a previous [transform checkpoint](https://www.elastic.co/guide/en/elasticsearch/reference/current/transform-checkpoints.html), the data will never be transformed in the output. Ideally one would sync the transform on the [event.ingested field](https://www.elastic.co/guide/en/elasticsearch/reference/current/transform-checkpoints.html#sync-field-ingest-timestamp) to work with delayed data, when that is not possible or desirable the backfill transform can be a fallback. Backfill transform will output its data to the same history indice, because transform uses deterministic ids for the generated document, it will not create duplicate but instead upsert documents from the initial history transform pass.
-To enable the backfill transform set a value to `history.settings.backfillSyncDelay` higher than the `history.settings.syncDelay`. The backfill lookback and frequency can also be configured.
-
-History and summary transforms will output their data to indices where history writes to time-based (monthly) indices (`.entities.v1.history.<definition-id>.<yyyy-MM-dd>`) and summary writes to a unique indice (`.entities.v1.latest.<definition-id>`). For convenience we create type-based aliases on top on these indices, where the type is extracted from the `entityDefinition.type` property. For a definition of `type: service`, the data can be read through the `entities-service-history` and `entities-service-latest` aliases.
+The transforms outputs the data to a unique index (`.entities.v1.latest.<definition-id>`).
+For convenience we create type-based aliases on top on these indices, where the type is extracted from the `entityDefinition.type` property. For a definition of `type: service`, the data can be read through the `entities-service-history` and `entities-service-latest` aliases.
 
 #### Iterating on a definition
 
@@ -48,7 +45,7 @@ Let's look at the most basic example, one that only discovers entities.
 ```
 
 This definition will look inside the `logs-*` index pattern for documents that container the field `host.name` and group them based on that value to create the entities. It will run the discovery every 2 minutes.
-The documents will be of type "host" so they can be queried via `entities-host-history` or `entities-host-latest`. Beyond the basic `entity` fields, each entity document will also contain all the identify fields at the root of the document, this it is easy to find your hosts by filtering by `host.name`. Note that it is not necessary to add the `identifyFields` as metadata as these will be automatically collected in the output documents, and that it is possible to set `identityFields` as optional.
+The documents will be of type "host" so they can be queried via `entities-host-history` or `entities-host-latest`. Beyond the basic `entity` fields, each entity document will also contain all the identify fields at the root of the document, this it is easy to find your hosts by filtering by `host.name`. Note that it is not necessary to add the `identifyFields` as metadata as these will be automatically collected in the output documents.
 
 An entity document for this definition will look like below.
 
@@ -213,8 +210,7 @@ __service_from_logs definition__
   "indexPatterns": ["logs-*"],
   /** the field/combination of fields identifying an entity **/
   "identityFields": [
-    "service.name", // == { "field": "service.name", "optional": false }
-    { "field": "service.environment", "optional": true }
+    "service.name",
   ],
   "displayNameTemplate": "{{service.name}}{{#service.environment}}:{{.}}{{/service.environment}}", // <a href="https://mustache.github.io/">mustache</a> template
   /**

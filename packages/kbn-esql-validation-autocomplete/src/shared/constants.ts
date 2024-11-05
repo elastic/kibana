@@ -12,7 +12,7 @@ export const EDITOR_MARKER = 'marker_esql_editor';
 export const TICKS_REGEX = /^`{1}|`{1}$/g;
 export const DOUBLE_TICKS_REGEX = /``/g;
 export const SINGLE_TICK_REGEX = /`/g;
-export const SINGLE_BACKTICK = '`';
 export const DOUBLE_BACKTICK = '``';
+export const SINGLE_BACKTICK = '`';
 
-export const METADATA_FIELDS = ['_version', '_id', '_index', '_source', '_ignored'];
+export const METADATA_FIELDS = ['_version', '_id', '_index', '_source', '_ignored', '_index_mode'];

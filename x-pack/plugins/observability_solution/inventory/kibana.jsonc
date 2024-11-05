@@ -16,10 +16,11 @@
       "features",
       "unifiedSearch",
       "data",
+      "ruleRegistry",
       "share"
     ],
     "requiredBundles": ["kibanaReact"],
-    "optionalPlugins": ["spaces"],
+    "optionalPlugins": ["spaces", "cloud"],
     "extraPublicDirs": []
   }
 }

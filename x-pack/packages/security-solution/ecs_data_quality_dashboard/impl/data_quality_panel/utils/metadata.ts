@@ -13,31 +13,52 @@ import { has, sortBy } from 'lodash/fp';
 
 import { EMPTY_METADATA, EcsFlatTyped } from '../constants';
 import {
-  EcsBasedFieldMetadata,
+  CustomFieldMetadata,
+  EcsCompliantFieldMetadata,
   EnrichedFieldMetadata,
+  IncompatibleFieldMetadata,
   PartitionedFieldMetadata,
+  SameFamilyFieldMetadata,
   UnallowedValueCount,
 } from '../types';
-import { getIsInSameFamily } from '../data_quality_details/indices_details/pattern/index_check_flyout/index_properties/utils/get_is_in_same_family';
+
+export const isEcsCompliantFieldMetadata = (
+  x: EnrichedFieldMetadata
+): x is EcsCompliantFieldMetadata => x.hasEcsMetadata && x.isEcsCompliant;
+
+export const isSameFamilyFieldMetadata = (x: EnrichedFieldMetadata): x is SameFamilyFieldMetadata =>
+  x.hasEcsMetadata && !x.isEcsCompliant && x.isInSameFamily;
+
+export const isIncompatibleFieldMetadata = (
+  x: EnrichedFieldMetadata
+): x is IncompatibleFieldMetadata => x.hasEcsMetadata && !x.isEcsCompliant && !x.isInSameFamily;
+
+export const isCustomFieldMetadata = (x: EnrichedFieldMetadata): x is CustomFieldMetadata =>
+  !x.hasEcsMetadata;
 
 export const getPartitionedFieldMetadata = (
   enrichedFieldMetadata: EnrichedFieldMetadata[]
 ): PartitionedFieldMetadata =>
   enrichedFieldMetadata.reduce<PartitionedFieldMetadata>(
-    (acc, x) => ({
-      all: [...acc.all, x],
-      ecsCompliant: x.isEcsCompliant ? [...acc.ecsCompliant, x] : acc.ecsCompliant,
-      custom: !x.hasEcsMetadata ? [...acc.custom, x] : acc.custom,
-      incompatible:
-        x.hasEcsMetadata && !x.isEcsCompliant && !x.isInSameFamily
-          ? [...acc.incompatible, x]
-          : acc.incompatible,
-      sameFamily: x.isInSameFamily ? [...acc.sameFamily, x] : acc.sameFamily,
-    }),
+    (acc, field) => {
+      acc.all.push(field);
+
+      if (isCustomFieldMetadata(field)) {
+        acc.custom.push(field);
+      } else if (isEcsCompliantFieldMetadata(field)) {
+        acc.ecsCompliant.push(field);
+      } else if (isSameFamilyFieldMetadata(field)) {
+        acc.sameFamily.push(field);
+      } else if (isIncompatibleFieldMetadata(field)) {
+        acc.incompatible.push(field);
+      }
+
+      return acc;
+    },
     {
       all: [],
-      ecsCompliant: [],
       custom: [],
+      ecsCompliant: [],
       incompatible: [],
       sameFamily: [],
     }
@@ -109,6 +130,39 @@ export function getFieldTypes(mappingsProperties: Record<string, unknown>): Fiel
   return result;
 }
 
+/**
+ * Per https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping-types.html#_core_datatypes
+ *
+ * ```
+ * Field types are grouped by _family_. Types in the same family have exactly
+ * the same search behavior but may have different space usage or
+ * performance characteristics.
+ *
+ * Currently, there are two type families, `keyword` and `text`. Other type
+ * families have only a single field type. For example, the `boolean` type
+ * family consists of one field type: `boolean`.
+ * ```
+ */
+export const fieldTypeFamilies: Record<string, Set<string>> = {
+  keyword: new Set(['keyword', 'constant_keyword', 'wildcard']),
+  text: new Set(['text', 'match_only_text']),
+};
+
+export const isTypeInSameFamily = ({
+  ecsExpectedType,
+  type,
+}: {
+  ecsExpectedType: string | undefined;
+  type: string;
+}): boolean => {
+  if (ecsExpectedType == null) {
+    return false;
+  }
+
+  const allFamilies = Object.values(fieldTypeFamilies);
+  return allFamilies.some((family) => family.has(ecsExpectedType) && family.has(type));
+};
+
 export const isMappingCompatible = ({
   ecsExpectedType,
   type,
@@ -129,35 +183,65 @@ export const getEnrichedFieldMetadata = ({
   const { field, type } = fieldMetadata;
   const indexInvalidValues = unallowedValues[field] ?? [];
 
-  if (has(fieldMetadata.field, ecsMetadata)) {
+  // Check if the field is ECS-based
+  if (has(field, ecsMetadata)) {
     const ecsExpectedType = ecsMetadata[field].type;
+
     const isEcsCompliant =
       isMappingCompatible({ ecsExpectedType, type }) && indexInvalidValues.length === 0;
 
     const isInSameFamily =
       !isMappingCompatible({ ecsExpectedType, type }) &&
       indexInvalidValues.length === 0 &&
-      getIsInSameFamily({ ecsExpectedType, type });
+      isTypeInSameFamily({ ecsExpectedType, type });
 
+    if (isEcsCompliant) {
+      return {
+        ...ecsMetadata[field],
+        indexFieldName: field,
+        indexFieldType: type,
+        indexInvalidValues: [],
+        hasEcsMetadata: true,
+        isEcsCompliant: true,
+        isInSameFamily: false,
+      };
+    }
+
+    // mutually exclusive with ECS compliant
+    // because of mappings compatibility check
+    if (isInSameFamily) {
+      return {
+        ...ecsMetadata[field],
+        indexFieldName: field,
+        indexFieldType: type,
+        indexInvalidValues: [],
+        hasEcsMetadata: true,
+        isEcsCompliant: false,
+        isInSameFamily: true,
+      };
+    }
+
+    // incompatible field (not compliant and not in the same family)
     return {
       ...ecsMetadata[field],
       indexFieldName: field,
       indexFieldType: type,
       indexInvalidValues,
       hasEcsMetadata: true,
-      isEcsCompliant,
-      isInSameFamily,
-    };
-  } else {
-    return {
-      indexFieldName: field,
-      indexFieldType: type,
-      indexInvalidValues: [],
-      hasEcsMetadata: false,
       isEcsCompliant: false,
-      isInSameFamily: false, // custom fields are never in the same family
+      isInSameFamily: false,
     };
   }
+
+  // custom field
+  return {
+    indexFieldName: field,
+    indexFieldType: type,
+    indexInvalidValues: [],
+    hasEcsMetadata: false,
+    isEcsCompliant: false,
+    isInSameFamily: false,
+  };
 };
 
 export const getSortedPartitionedFieldMetadata = ({
@@ -203,7 +287,7 @@ export const getSortedPartitionedFieldMetadata = ({
   return partitionedFieldMetadata;
 };
 
-export const getMissingTimestampFieldMetadata = (): EcsBasedFieldMetadata => ({
+export const getMissingTimestampFieldMetadata = (): IncompatibleFieldMetadata => ({
   ...EcsFlatTyped['@timestamp'],
   hasEcsMetadata: true,
   indexFieldName: '@timestamp',

@@ -40,6 +40,12 @@ export const PutSettingsRequestSchema = {
     ),
     kibana_ca_sha256: schema.maybe(schema.string()),
     prerelease_integrations_enabled: schema.maybe(schema.boolean()),
+    delete_unenrolled_agents: schema.maybe(
+      schema.object({
+        enabled: schema.boolean(),
+        is_preconfigured: schema.boolean(),
+      })
+    ),
   }),
 };
 
@@ -56,7 +62,7 @@ export const SettingsResponseSchema = schema.object({
   item: schema.object({
     has_seen_add_data_notice: schema.maybe(schema.boolean()),
     fleet_server_hosts: schema.maybe(schema.arrayOf(schema.string())),
-    prerelease_integrations_enabled: schema.boolean(),
+    prerelease_integrations_enabled: schema.maybe(schema.boolean()),
     id: schema.string(),
     version: schema.maybe(schema.string()),
     preconfigured_fields: schema.maybe(schema.arrayOf(schema.literal('fleet_server_hosts'))),
@@ -66,6 +72,12 @@ export const SettingsResponseSchema = schema.object({
       schema.oneOf([schema.literal('pending'), schema.literal('success'), schema.literal('error')])
     ),
     use_space_awareness_migration_started_at: schema.maybe(schema.string()),
+    delete_unenrolled_agents: schema.maybe(
+      schema.object({
+        enabled: schema.boolean(),
+        is_preconfigured: schema.boolean(),
+      })
+    ),
   }),
 });
 

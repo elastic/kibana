@@ -34,13 +34,13 @@ export type NavigateToUrlFn = ApplicationStart['navigateToUrl'];
 export interface NavigationServices {
   basePath: BasePathService;
   recentlyAccessed$: Observable<ChromeRecentlyAccessedHistoryItem[]>;
-  navIsOpen: boolean;
   navigateToUrl: NavigateToUrlFn;
   activeNodes$: Observable<ChromeProjectNavigationNode[][]>;
   isSideNavCollapsed: boolean;
   eventTracker: EventTracker;
   selectedPanelNode?: PanelSelectedNode | null;
   setSelectedPanelNode?: (node: PanelSelectedNode | null) => void;
+  isFeedbackBtnVisible$: Observable<boolean>;
 }
 
 /**
@@ -60,6 +60,7 @@ export interface NavigationKibanaDependencies {
         getIsCollapsed$: () => Observable<boolean>;
         getPanelSelectedNode$: () => Observable<PanelSelectedNode | null>;
         setPanelSelectedNode(node: string | PanelSelectedNode | null): void;
+        getIsFeedbackBtnVisible$: () => Observable<boolean>;
       };
     };
     http: {

@@ -1072,7 +1072,7 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
-              " | undefined>; }"
+              " | undefined>; updateESQLQuery: (queryOrUpdater: string | ((prevQuery: string) => string)) => void; }"
             ],
             "path": "src/plugins/discover/public/application/main/state_management/discover_state.ts",
             "deprecated": false,
@@ -1809,24 +1809,6 @@
           },
           {
             "parentPluginId": "discover",
-            "id": "def-public.TopNavCustomization.getMenuItems",
-            "type": "Function",
-            "tags": [],
-            "label": "getMenuItems",
-            "description": [],
-            "signature": [
-              "(() => ",
-              "TopNavMenuItem",
-              "[]) | undefined"
-            ],
-            "path": "src/plugins/discover/public/customizations/customization_types/top_nav_customization.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "discover",
             "id": "def-public.TopNavCustomization.defaultBadges",
             "type": "Object",
             "tags": [],
@@ -1839,24 +1821,6 @@
             "path": "src/plugins/discover/public/customizations/customization_types/top_nav_customization.ts",
             "deprecated": false,
             "trackAdoption": false
-          },
-          {
-            "parentPluginId": "discover",
-            "id": "def-public.TopNavCustomization.getBadges",
-            "type": "Function",
-            "tags": [],
-            "label": "getBadges",
-            "description": [],
-            "signature": [
-              "(() => ",
-              "TopNavBadge",
-              "[]) | undefined"
-            ],
-            "path": "src/plugins/discover/public/customizations/customization_types/top_nav_customization.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
           }
         ],
         "initialIsOpen": false

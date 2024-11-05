@@ -7,7 +7,6 @@
   // Sub applications
   @import 'data_frame_analytics/index';
   @import 'explorer/index'; // SASSTODO: This file needs to be rewritten
-  @import 'timeseriesexplorer/index';
 
   // Components
   @import 'components/annotations/annotation_description_list/index'; // SASSTODO: This file overwrites EUI directly

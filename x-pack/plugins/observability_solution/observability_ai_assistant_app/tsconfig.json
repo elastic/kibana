@@ -68,6 +68,8 @@
     "@kbn/task-manager-plugin",
     "@kbn/cloud-plugin",
     "@kbn/logs-data-access-plugin",
+    "@kbn/ai-assistant-common",
+    "@kbn/inference-common",
   ],
   "exclude": [
     "target/**/*"

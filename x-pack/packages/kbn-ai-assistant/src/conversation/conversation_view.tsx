@@ -9,6 +9,8 @@ import { css } from '@emotion/css';
 import { euiThemeVars } from '@kbn/ui-theme';
 import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
+import type { AssistantScope } from '@kbn/ai-assistant-common';
+import { isEqual } from 'lodash';
 import { useKibana } from '../hooks/use_kibana';
 import { ConversationList, ChatBody, ChatInlineEditingContent } from '../chat';
 import { useConversationKey } from '../hooks/use_conversation_key';
@@ -23,9 +25,10 @@ const SECOND_SLOT_CONTAINER_WIDTH = 400;
 
 interface ConversationViewProps {
   conversationId?: string;
-  navigateToConversation: (nextConversationId?: string) => void;
+  navigateToConversation?: (nextConversationId?: string) => void;
   getConversationHref?: (conversationId: string) => string;
   newConversationHref?: string;
+  scopes?: AssistantScope[];
 }
 
 export const ConversationView: React.FC<ConversationViewProps> = ({
@@ -33,6 +36,7 @@ export const ConversationView: React.FC<ConversationViewProps> = ({
   navigateToConversation,
   getConversationHref,
   newConversationHref,
+  scopes,
 }) => {
   const { euiTheme } = useEuiTheme();
 
@@ -57,6 +61,12 @@ export const ConversationView: React.FC<ConversationViewProps> = ({
     [service]
   );
 
+  useEffect(() => {
+    if (scopes && !isEqual(scopes, service.getScopes())) {
+      service.setScopes(scopes);
+    }
+  }, [scopes, service]);
+
   const { key: bodyKey, updateConversationIdInPlace } = useConversationKey(conversationId);
 
   const [secondSlotContainer, setSecondSlotContainer] = useState<HTMLDivElement | null>(null);
@@ -71,7 +81,9 @@ export const ConversationView: React.FC<ConversationViewProps> = ({
   const handleConversationUpdate = (conversation: { conversation: { id: string } }) => {
     if (!conversationId) {
       updateConversationIdInPlace(conversation.conversation.id);
-      navigateToConversation(conversation.conversation.id);
+      if (navigateToConversation) {
+        navigateToConversation(conversation.conversation.id);
+      }
     }
     handleRefreshConversations();
   };
@@ -133,7 +145,7 @@ export const ConversationView: React.FC<ConversationViewProps> = ({
           isLoading={conversationList.isLoading}
           onConversationDeleteClick={(deletedConversationId) => {
             conversationList.deleteConversation(deletedConversationId).then(() => {
-              if (deletedConversationId === conversationId) {
+              if (deletedConversationId === conversationId && navigateToConversation) {
                 navigateToConversation(undefined);
               }
             });

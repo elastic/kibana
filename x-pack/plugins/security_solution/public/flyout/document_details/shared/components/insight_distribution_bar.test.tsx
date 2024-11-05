@@ -11,7 +11,7 @@ import { InsightDistributionBar } from './insight_distribution_bar';
 import { TestProviders } from '../../../../common/mock';
 
 const title = 'test title';
-const count = 10;
+const count = <div data-test-subj="test-count">{'100'}</div>;
 const testId = 'test-id';
 const stats = [
   {
@@ -35,7 +35,7 @@ describe('<InsightDistributionBar />', () => {
     );
     expect(getByTestId(testId)).toBeInTheDocument();
     expect(getByText(title)).toBeInTheDocument();
-    expect(getByTestId(`${testId}-badge`)).toHaveTextContent(`${count}`);
+    expect(getByTestId('test-count')).toBeInTheDocument();
     expect(getByTestId(`${testId}-distribution-bar`)).toBeInTheDocument();
   });
 });
