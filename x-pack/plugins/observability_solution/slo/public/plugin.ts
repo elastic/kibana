@@ -31,11 +31,12 @@ import { SloListLocatorDefinition } from './locators/slo_list';
 import { getCreateSLOFlyoutLazy } from './pages/slo_edit/shared_flyout/get_create_slo_flyout';
 import { registerBurnRateRuleType } from './rules/register_burn_rate_rule_type';
 import type {
-  SLOPublicSetup,
-  SLOPublicStart,
   SLOPublicPluginsSetup,
   SLOPublicPluginsStart,
+  SLOPublicSetup,
+  SLOPublicStart,
 } from './types';
+import { getLazyWithContextProviders } from './utils/get_lazy_with_context_providers';
 
 export class SLOPlugin
   implements Plugin<SLOPublicSetup, SLOPublicStart, SLOPublicPluginsSetup, SLOPublicPluginsStart>
@@ -94,7 +95,26 @@ export class SLOPlugin
     // Register an application into the side navigation menu
     core.application.register(app);
 
-    registerBurnRateRuleType(plugins.observability.observabilityRuleTypeRegistry);
+    const registerRules = async () => {
+      const [coreStart, pluginsStart] = await core.getStartServices();
+      const lazyWithContextProviders = getLazyWithContextProviders({
+        core: coreStart,
+        isDev: this.initContext.env.mode.dev,
+        kibanaVersion,
+        observabilityRuleTypeRegistry: pluginsStart.observability.observabilityRuleTypeRegistry,
+        ObservabilityPageTemplate: pluginsStart.observabilityShared.navigation.PageTemplate,
+        plugins: pluginsStart,
+        isServerless: !!plugins.serverless,
+        experimentalFeatures: this.experimentalFeatures,
+        sloClient,
+      });
+
+      registerBurnRateRuleType(
+        plugins.observability.observabilityRuleTypeRegistry,
+        lazyWithContextProviders
+      );
+    };
+    registerRules();
 
     const registerEmbeddables = async () => {
       const licensing = plugins.licensing;
