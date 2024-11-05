@@ -899,6 +899,7 @@ class AgentPolicyService {
         removeProtection: options?.removeProtection ?? false,
         skipValidation: false,
         returnUpdatedPolicy: false,
+        asyncDeploy: options?.asyncDeploy,
       });
     });
   }
