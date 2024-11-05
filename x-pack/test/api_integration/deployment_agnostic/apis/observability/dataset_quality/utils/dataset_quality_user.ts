@@ -55,7 +55,7 @@ export async function getDatasetQualityMonitorSupertestUser({
       indices: [
         {
           names: ['logs-*-*', 'metrics-*-*', 'traces-*-*', 'synthetics-*-*'],
-          privileges: ['monitor', 'view_index_metadata'],
+          privileges: ['read', 'monitor', 'view_index_metadata'],
         },
       ],
     },
