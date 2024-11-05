@@ -82,7 +82,6 @@ export const DISCOVER_SAMPLE_SIZE_ID = 'discover:sampleSize';
 export const DISCOVER_SEARCH_FIELDS_FROM_SOURCE_ID = 'discover:searchFieldsFromSource';
 export const DISCOVER_SEARCH_ON_PAGE_LOAD_ID = 'discover:searchOnPageLoad';
 export const DISCOVER_SHOW_FIELD_STATISTICS_ID = 'discover:showFieldStatistics';
-export const DISCOVER_SHOW_LEGACY_FIELD_TOP_VALUES_ID = 'discover:showLegacyFieldTopValues';
 export const DISCOVER_SHOW_MULTI_FIELDS_ID = 'discover:showMultiFields';
 export const DISCOVER_SORT_DEFAULT_ORDER_ID = 'discover:sort:defaultOrder';
 export const DOC_TABLE_HIDE_TIME_COLUMNS_ID = 'doc_table:hideTimeColumn';
