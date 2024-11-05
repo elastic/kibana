@@ -12,7 +12,7 @@ npm install
 
 echo --- Merge Kibana OpenAPI specs
 make api-docs
-# make api-docs-lint <-- This relies on spectral which has 50 critical vulnerabilities based on `npm audit`
+# make api-docs-lint <-- Relies on JSONPath version with RCE vulnerabilities based on `npm audit`
 
 cd "$cur_dir"
 
