@@ -126,6 +126,8 @@ AGPL license::
 Alerting::
 * Adds TheHive connector ({kibana-pull}180138[#180138]).
 * Adds flapping settings per rule ({kibana-pull}189341[#189341]).
+* Efficiency improvements in the Kibana task manager and alerting frameworks ({kibana-issue}188194[#188194])
+
 Cases::
 * Support TheHive connector in cases ({kibana-pull}180931[#180931]).
 Dashboards and visualizations::
