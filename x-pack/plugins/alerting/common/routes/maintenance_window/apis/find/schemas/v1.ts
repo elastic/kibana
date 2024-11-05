@@ -12,26 +12,24 @@ const MAX_DOCS = 10000;
 
 export const findMaintenanceWindowsRequestQuerySchema = schema.object(
   {
-    page: schema.maybe(
-      schema.number({
-        defaultValue: 1,
-        min: 1,
-        max: MAX_DOCS,
-        meta: {
-          description: 'The page number to return.',
-        },
-      })
-    ),
-    per_page: schema.maybe(
-      schema.number({
-        defaultValue: 20,
-        min: 0,
-        max: 100,
-        meta: {
-          description: 'The number of maintenance windows to return per page.',
-        },
-      })
-    ),
+    // we do not need to use schema.maybe here, because if we do not pass property page, defaultValue will be used
+    page: schema.number({
+      defaultValue: 1,
+      min: 1,
+      max: MAX_DOCS,
+      meta: {
+        description: 'The page number to return.',
+      },
+    }),
+    // we do not need to use schema.maybe here, because if we do not pass property per_page, defaultValue will be used
+    per_page: schema.number({
+      defaultValue: 1000,
+      min: 0,
+      max: 100,
+      meta: {
+        description: 'The number of maintenance windows to return per page.',
+      },
+    }),
   },
   {
     validate: (params) => {

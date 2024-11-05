@@ -33,6 +33,8 @@ export default function ({ getService }: FtrProviderContext) {
   };
 
   describe('Data Stream', function () {
+    // see details: https://github.com/elastic/kibana/issues/198811
+    this.tags(['failsOnMKI']);
     const generatedReports = new Set<string>();
     before(async () => {
       roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
