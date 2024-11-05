@@ -54,6 +54,9 @@
     "@kbn/observability-utils-browser",
     "@kbn/observability-utils-server",
     "@kbn/observability-utils-common",
-    "@kbn/storybook"
+    "@kbn/storybook",
+    "@kbn/zod",
+    "@kbn/dashboard-plugin",
+    "@kbn/deeplinks-analytics"
   ]
 }
