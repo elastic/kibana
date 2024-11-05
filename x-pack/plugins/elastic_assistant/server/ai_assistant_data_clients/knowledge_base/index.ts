@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import {
+  MlTrainedModelDeploymentNodesStats,
+  MlTrainedModelStats,
+} from '@elastic/elasticsearch/lib/api/types';
 import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -138,10 +142,31 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     try {
       const esClient = await this.options.elasticsearchClientPromise;
 
-      return !!(await esClient.inference.get({
+      const inferenceExists = !!(await esClient.inference.get({
         inference_id: ASSISTANT_ELSER_INFERENCE_ID,
         task_type: 'sparse_embedding',
       }));
+      if (!inferenceExists) {
+        return false;
+      }
+      const elserId = await this.options.getElserId();
+      const getResponse = await esClient.ml.getTrainedModelsStats({
+        model_id: elserId,
+      });
+
+      // For standardized way of checking deployment status see: https://github.com/elastic/elasticsearch/issues/106986
+      const isReadyESS = (stats: MlTrainedModelStats) =>
+        stats.deployment_stats?.state === 'started' &&
+        stats.deployment_stats?.allocation_status.state === 'fully_allocated';
+
+      const isReadyServerless = (stats: MlTrainedModelStats) =>
+        (stats.deployment_stats?.nodes as unknown as MlTrainedModelDeploymentNodesStats[])?.some(
+          (node) => node.routing_state.routing_state === 'started'
+        );
+
+      return getResponse.trained_model_stats?.some(
+        (stats) => isReadyESS(stats) || isReadyServerless(stats)
+      );
     } catch (error) {
       this.options.logger.debug(
         `Error checking if Inference endpoint ${ASSISTANT_ELSER_INFERENCE_ID} exists: ${error}`
