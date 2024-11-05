@@ -40,7 +40,7 @@ jest.mock('../../utils/kibana_react');
 jest.mock('../../hooks/use_license');
 jest.mock('../../hooks/use_fetch_slo_list');
 jest.mock('../../hooks/use_create_slo');
-jest.mock('../slo_settings/use_get_settings');
+jest.mock('../slo_settings/hooks/use_get_settings');
 jest.mock('../../hooks/use_delete_slo');
 jest.mock('../../hooks/use_delete_slo_instance');
 jest.mock('../../hooks/use_fetch_historical_summary');
