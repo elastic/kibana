@@ -240,7 +240,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('can add private location to existing monitor', async () => {
       await testPrivateLocations.installSyntheticsPackage();
-      pvtLoc = await testPrivateLocations.addTestPrivateLocation();
+      pvtLoc = await testPrivateLocations.addPrivateLocation();
 
       expect(pvtLoc).not.empty();
 

@@ -88,6 +88,7 @@ export const addPrivateLocationRoute: SyntheticsRestApiRouteFactory<PrivateLocat
       formattedLocation,
       {
         id: location.agentPolicyId,
+        initialNamespaces: ['*'],
       }
     );
 

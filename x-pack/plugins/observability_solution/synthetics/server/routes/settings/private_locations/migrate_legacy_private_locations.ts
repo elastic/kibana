@@ -53,6 +53,8 @@ export const migrateLegacyPrivateLocations = async ({
 
     const { total } = await savedObjectsClient.find<PrivateLocationAttributes>({
       type: privateLocationSavedObjectName,
+      fields: [],
+      perPage: 0,
     });
 
     if (total === legacyLocations.length) {
