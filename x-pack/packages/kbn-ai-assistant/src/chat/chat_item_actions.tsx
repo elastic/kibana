@@ -8,7 +8,6 @@
 import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonIcon, EuiPopover, EuiText } from '@elastic/eui';
-import type { Message } from '@kbn/observability-ai-assistant-plugin/common';
 
 export function ChatItemActions({
   canCopy,
@@ -19,7 +18,6 @@ export function ChatItemActions({
   onToggleEdit,
   onToggleExpand,
   onCopyToClipboard,
-  content,
 }: {
   canCopy: boolean;
   canEdit: boolean;
@@ -29,7 +27,6 @@ export function ChatItemActions({
   onToggleEdit: () => void;
   onToggleExpand: () => void;
   onCopyToClipboard: () => void;
-  content: Message['message']['content'];
 }) {
   const [isPopoverOpen, setIsPopoverOpen] = useState<string | undefined>();
 
@@ -73,7 +70,7 @@ export function ChatItemActions({
         />
       ) : null}
 
-      {canCopy && content ? (
+      {canCopy ? (
         <EuiPopover
           button={
             <EuiButtonIcon
