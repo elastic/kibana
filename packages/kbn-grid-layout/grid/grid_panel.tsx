@@ -8,7 +8,7 @@
  */
 
 import React, { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { combineLatest, debounceTime, skip } from 'rxjs';
+import { combineLatest, debounceTime, skip, tap } from 'rxjs';
 
 import { EuiIcon, transparentize, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -36,6 +36,7 @@ export const GridPanel = forwardRef<
     { panelId, rowIndex, renderPanelContents, interactionStart, gridLayoutStateManager },
     panelRef
   ) => {
+    const resizeHandleRef = useRef<HTMLDivElement | null>(null);
     const removeEventListenersRef = useRef<(() => void) | null>(null);
     const [dragHandleCount, setDragHandleCount] = useState<number>(0);
 
@@ -152,31 +153,36 @@ export const GridPanel = forwardRef<
                 // undo any "lock to grid" styles **except** for the top left corner, which stays locked
                 ref.style.gridColumnStart = `${panel.column + 1}`;
                 ref.style.gridRowStart = `${panel.row + 1}`;
-                ref.style.gridColumnEnd = ``;
-                ref.style.gridRowEnd = ``;
+                ref.style.gridColumnEnd = `auto`;
+                ref.style.gridRowEnd = `auto`;
+
+                // if (resizeHandleRef.current) {
+                //   resizeHandleRef.current.style.width = `${Math.min(
+                //     24,
+                //     runtimeSettings.columnPixelWidth * panel.width
+                //   )}px`;
+                // }
               } else {
                 // if the current panel is being dragged, render it with a fixed position + size
                 ref.style.position = 'fixed';
+
                 ref.style.left = `${draggingPosition.left}px`;
                 ref.style.top = `${draggingPosition.top}px`;
                 ref.style.width = `${draggingPosition.right - draggingPosition.left}px`;
                 ref.style.height = `${draggingPosition.bottom - draggingPosition.top}px`;
 
                 // undo any "lock to grid" styles
-                ref.style.gridColumnStart = ``;
-                ref.style.gridRowStart = ``;
-                ref.style.gridColumnEnd = ``;
-                ref.style.gridRowEnd = ``;
+                ref.style.gridArea = `auto`; // shortcut to set all grid styles to `auto`
               }
             } else {
               ref.style.zIndex = `auto`;
 
               // if the panel is not being dragged and/or resized, undo any fixed position styles
-              ref.style.position = '';
-              ref.style.left = ``;
-              ref.style.top = ``;
-              ref.style.width = ``;
-              ref.style.height = ``;
+              ref.style.position = 'static';
+              ref.style.left = `auto`;
+              ref.style.top = `auto`;
+              ref.style.width = `auto`;
+              ref.style.height = `auto`;
 
               // and render the panel locked to the grid
               ref.style.gridColumnStart = `${panel.column + 1}`;
@@ -245,6 +251,7 @@ export const GridPanel = forwardRef<
           )}
           {/* Resize handle */}
           <div
+            ref={resizeHandleRef}
             className="resizeHandle"
             onMouseDown={(e) => interactionStart('resize', e)}
             css={css`
