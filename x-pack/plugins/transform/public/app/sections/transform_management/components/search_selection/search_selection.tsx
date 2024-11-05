@@ -48,6 +48,7 @@ export const SearchSelection: FC<SearchSelectionProps> = ({
       </EuiModalHeader>
       <EuiModalBody>
         <SavedObjectFinder
+          id="transformMgtSearchSelection"
           key="searchSavedObjectFinder"
           onChoose={onSearchSelected}
           showFilter
