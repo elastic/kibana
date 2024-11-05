@@ -404,12 +404,14 @@ export const LogCategorizationPage: FC = () => {
           )}
         </EuiFlexItem>
         <EuiFlexItem />
-        <EuiFlexItem grow={false} css={{ marginTop: 'auto' }}>
-          <SamplingMenu randomSampler={randomSampler} reload={() => loadCategories()} />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false} css={{ marginTop: 'auto' }}>
-          <AttachmentsMenu {...attachmentsMenuProps} />
-        </EuiFlexItem>
+        <EuiFlexGroup css={{ marginTop: 'auto' }} alignItems="center" justifyContent="flexEnd">
+          <EuiFlexItem grow={false}>
+            <SamplingMenu randomSampler={randomSampler} reload={() => loadCategories()} />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <AttachmentsMenu {...attachmentsMenuProps} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexGroup>
 
       {eventRate.length ? (

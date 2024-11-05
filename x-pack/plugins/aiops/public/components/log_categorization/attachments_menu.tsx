@@ -176,6 +176,7 @@ export const AttachmentsMenu = ({
                 size="s"
                 data-test-subj="aiopsLogPatternAnalysisAttachToDashboardSubmitButton"
                 fill
+                fullWidth
                 type={'submit'}
                 onClick={() => {
                   setIsActionMenuOpen(false);
