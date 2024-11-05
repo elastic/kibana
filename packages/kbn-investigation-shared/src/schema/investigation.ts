@@ -35,6 +35,11 @@ const investigationSchema = z.object({
   notes: z.array(investigationNoteSchema),
   items: z.array(investigationItemSchema),
   externalIncidentUrl: z.string().nullable(),
+  rootCauseAnalysis: z
+    .object({
+      events: z.array(z.any()),
+    })
+    .optional(),
 });
 
 type Status = z.infer<typeof statusSchema>;

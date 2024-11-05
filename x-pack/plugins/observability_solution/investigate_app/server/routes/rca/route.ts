@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Observable, of, switchMap } from 'rxjs';
+import { Observable, catchError, from, of, share, switchMap, toArray } from 'rxjs';
 import { ServerSentEventBase } from '@kbn/sse-utils';
 import {
   RootCauseAnalysisEvent,
@@ -16,6 +16,7 @@ import datemath from '@elastic/datemath';
 import { OBSERVABILITY_LOGS_DATA_ACCESS_LOG_SOURCES_ID } from '@kbn/management-settings-ids';
 import { createObservabilityEsClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
 import { createInvestigateAppServerRoute } from '../create_investigate_app_server_route';
+import { investigationRepositoryFactory } from '../../services/investigation_repository';
 
 export const rootCauseAnalysisRoute = createInvestigateAppServerRoute({
   endpoint: 'POST /internal/observability/investigation/root_cause_analysis',
@@ -24,11 +25,13 @@ export const rootCauseAnalysisRoute = createInvestigateAppServerRoute({
   },
   params: z.object({
     body: z.object({
+      investigationId: z.string(),
       rangeFrom: z.string(),
       rangeTo: z.string(),
       serviceName: z.string(),
       context: z.string(),
       connectorId: z.string(),
+      completeInBackground: z.boolean().optional(),
     }),
   }),
   handler: async ({
@@ -39,11 +42,28 @@ export const rootCauseAnalysisRoute = createInvestigateAppServerRoute({
     logger,
   }): Promise<Observable<ServerSentEventBase<'event', { event: RootCauseAnalysisEvent }>>> => {
     const {
-      body: { context, rangeFrom, rangeTo, serviceName, connectorId },
+      body: {
+        investigationId,
+        context,
+        rangeFrom,
+        rangeTo,
+        serviceName,
+        connectorId,
+        completeInBackground,
+      },
     } = params;
 
     const start = datemath.parse(rangeFrom)?.valueOf()!;
     const end = datemath.parse(rangeTo)?.valueOf()!;
+
+    const [coreEsClient, soClient] = await Promise.all([
+      (await requestContext.core).elasticsearch.client.asCurrentUser,
+      (await requestContext.core).savedObjects.client,
+    ]);
+
+    const repository = investigationRepositoryFactory({ soClient, logger });
+
+    const investigation = await repository.findById(investigationId);
 
     const [
       rulesClient,
@@ -61,11 +81,11 @@ export const rootCauseAnalysisRoute = createInvestigateAppServerRoute({
       (await plugins.inference.start()).getClient({ request }),
       (await plugins.spaces?.start())?.spacesService.getSpaceId(request),
       createObservabilityEsClient({
-        client: (await requestContext.core).elasticsearch.client.asCurrentUser,
+        client: coreEsClient,
         logger,
         plugin: 'investigateApp',
       }),
-      plugins.apmDataAccess.setup.getApmIndices((await requestContext.core).savedObjects.client),
+      plugins.apmDataAccess.setup.getApmIndices(soClient),
       plugins.observabilityAIAssistant
         .start()
         .then((observabilityAIAssistantStart) =>
@@ -80,7 +100,7 @@ export const rootCauseAnalysisRoute = createInvestigateAppServerRoute({
       ).uiSettings.client.get(OBSERVABILITY_LOGS_DATA_ACCESS_LOG_SOURCES_ID) as Promise<string[]>,
     ]);
 
-    return runRootCauseAnalysis({
+    const next$ = runRootCauseAnalysis({
       alertsClient,
       connectorId,
       start,
@@ -106,5 +126,37 @@ export const rootCauseAnalysisRoute = createInvestigateAppServerRoute({
         });
       })
     );
+
+    if (completeInBackground) {
+      const shared$ = next$.pipe(share());
+
+      shared$
+        .pipe(
+          toArray(),
+          catchError(() => {
+            return of();
+          }),
+          switchMap((events) => {
+            return from(
+              repository.save({
+                ...investigation,
+                rootCauseAnalysis: {
+                  events: events.map(({ event }) => event),
+                },
+              })
+            );
+          })
+        )
+        .subscribe({
+          error: (error) => {
+            logger.error(`Failed to update investigation: ${error.message}`);
+            logger.error(error);
+          },
+        });
+
+      return shared$;
+    }
+
+    return next$;
   },
 });

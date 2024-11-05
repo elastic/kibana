@@ -23,24 +23,37 @@ const handlers = {
   onStartAnalysisClick: noop,
   onStopAnalysisClick: noop,
   onResetAnalysisClick: noop,
+  onCompleteInBackgroundClick: noop,
+  onClearAnalysisClick: noop,
 };
 
 export const Empty: Story<{}> = () => {
-  return <RootCauseAnalysisContainer loading={false} {...handlers} />;
+  return <RootCauseAnalysisContainer completeInBackground loading={false} {...handlers} />;
 };
 
 export const Loading: Story<{}> = () => {
-  return <RootCauseAnalysisContainer loading {...handlers} />;
+  return <RootCauseAnalysisContainer completeInBackground loading {...handlers} />;
+};
+
+export const LoadingWithoutCompleteInBackground: Story<{}> = () => {
+  return <RootCauseAnalysisContainer completeInBackground={false} loading {...handlers} />;
 };
 
 const error = new Error('Failed to load analysis');
 
 export const WithError: Story<{}> = () => {
-  return <RootCauseAnalysisContainer loading={false} {...handlers} error={error} />;
+  return (
+    <RootCauseAnalysisContainer completeInBackground loading={false} {...handlers} error={error} />
+  );
 };
 
 export const Completed: Story<{}> = () => {
   return (
-    <RootCauseAnalysisContainer loading={false} events={fullAnalysis as any[]} {...handlers} />
+    <RootCauseAnalysisContainer
+      completeInBackground
+      loading={false}
+      events={fullAnalysis as any[]}
+      {...handlers}
+    />
   );
 };

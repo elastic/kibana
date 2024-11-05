@@ -9,7 +9,7 @@ import {
   RCA_INVESTIGATE_ENTITY_TOOL_NAME,
   RCA_OBSERVE_TOOL_NAME,
 } from '@kbn/observability-ai-common/root_cause_analysis';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AssistantMessage, MessageRole, ToolMessage } from '@kbn/inference-common';
 import type {
@@ -20,6 +20,7 @@ import type {
 } from '@kbn/observability-ai-server/root_cause_analysis';
 import { findLast } from 'lodash';
 import React from 'react';
+import { css } from '@emotion/css';
 import { EntityBadge } from '../entity_badge';
 import { RootCauseAnalysisCallout } from '../rca_callout';
 import { RootCauseAnalysisEntityInvestigation } from '../rca_entity_investigation';
@@ -30,21 +31,35 @@ import { RootCauseAnalysisStopButton } from '../rca_stop_button';
 
 export function RootCauseAnalysisContainer({
   events,
+  completeInBackground,
   onStartAnalysisClick,
   onStopAnalysisClick,
   onResetAnalysisClick,
+  onClearAnalysisClick,
+  onCompleteInBackgroundClick,
   loading,
   error,
 }: {
   events?: RootCauseAnalysisEvent[];
+  completeInBackground: boolean;
   onStartAnalysisClick: () => void;
   onStopAnalysisClick: () => void;
   onResetAnalysisClick: () => void;
+  onClearAnalysisClick: () => void;
+  onCompleteInBackgroundClick: () => void;
   loading: boolean;
   error?: Error;
 }) {
+  const theme = useEuiTheme();
+
   if (!events?.length && !loading && !error) {
-    return <RootCauseAnalysisCallout onClick={onStartAnalysisClick} />;
+    return (
+      <RootCauseAnalysisCallout
+        onClick={onStartAnalysisClick}
+        completeInBackground={completeInBackground}
+        onCompleteInBackgroundClick={onCompleteInBackgroundClick}
+      />
+    );
   }
 
   const elements: React.ReactElement[] = [];
@@ -84,17 +99,50 @@ export function RootCauseAnalysisContainer({
     }
   });
 
+  const clearButton = (
+    <EuiButton
+      data-test-subj="observabilityAiAssistantAppRootCauseAnalysisClearButton"
+      color={error ? 'danger' : 'primary'}
+      onClick={() => {
+        onClearAnalysisClick();
+      }}
+      iconType="crossInCircle"
+    >
+      {i18n.translate('xpack.observabilityAiAssistant.rca.clearButtonLabel', {
+        defaultMessage: 'Clear',
+      })}
+    </EuiButton>
+  );
+
+  const restartButton = (
+    <EuiButton
+      data-test-subj="observabilityAiAssistantAppRootCauseAnalysisRestartButton"
+      color={error ? 'danger' : 'primary'}
+      fill={!!error}
+      onClick={() => {
+        onResetAnalysisClick();
+      }}
+      iconType="refresh"
+    >
+      {i18n.translate('xpack.observabilityAiAssistant.rca.restartButtonLabel', {
+        defaultMessage: 'Restart',
+      })}
+    </EuiButton>
+  );
+
   if (loading) {
     const label = getLoadingLabel(events);
     elements.push(
       <RootCauseAnalysisStepItem
         label={label}
         button={
-          <RootCauseAnalysisStopButton
-            onClick={() => {
-              onStopAnalysisClick();
-            }}
-          />
+          completeInBackground ? undefined : (
+            <RootCauseAnalysisStopButton
+              onClick={() => {
+                onStopAnalysisClick();
+              }}
+            />
+          )
         }
         loading
       />
@@ -111,19 +159,36 @@ export function RootCauseAnalysisContainer({
         iconType="alert"
         color="danger"
         button={
-          <EuiButton
-            data-test-subj="observabilityAiAssistantAppRootCauseAnalysisRestartButton"
-            color="danger"
-            fill
-            onClick={() => {
-              onResetAnalysisClick();
-            }}
-            iconType="refresh"
+          <EuiFlexGroup direction="row" gutterSize="s">
+            {clearButton}
+            {restartButton}
+          </EuiFlexGroup>
+        }
+      />
+    );
+  } else {
+    // completed
+    elements.push(
+      <RootCauseAnalysisStepItem
+        label={
+          <EuiText
+            size="m"
+            className={css`
+              font-weight: ${theme.euiTheme.font.weight.bold};
+            `}
           >
-            {i18n.translate('xpack.observabilityAiAssistant.rca.restartButtonLabel', {
-              defaultMessage: 'Restart',
+            {i18n.translate('xpack.observabilityAiAssistant.rca.analysisCompleted', {
+              defaultMessage: 'Completed analysis',
             })}
-          </EuiButton>
+          </EuiText>
+        }
+        iconType="checkInCircleFilled"
+        color="primary"
+        button={
+          <EuiFlexGroup direction="row" gutterSize="s">
+            {clearButton}
+            {restartButton}
+          </EuiFlexGroup>
         }
       />
     );

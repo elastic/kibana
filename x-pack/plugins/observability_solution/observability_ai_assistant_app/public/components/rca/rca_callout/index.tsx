@@ -8,58 +8,97 @@
 import {
   EuiButton,
   EuiCallOut,
+  EuiCheckbox,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFormLabel,
   EuiPanel,
   EuiText,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { AssistantAvatar } from '@kbn/observability-ai-assistant-plugin/public';
 import { css } from '@emotion/css';
 
-export function RootCauseAnalysisCallout({ onClick }: { onClick: () => void }) {
+export function RootCauseAnalysisCallout({
+  onClick,
+  onCompleteInBackgroundClick,
+  completeInBackground,
+}: {
+  onClick: () => void;
+  onCompleteInBackgroundClick: () => void;
+  completeInBackground: boolean;
+}) {
+  const checkboxId = useGeneratedHtmlId();
+
   return (
     <EuiCallOut color="primary">
       <EuiPanel color="transparent" hasShadow={false} hasBorder={false}>
-        <EuiFlexGroup direction="column" alignItems="center">
-          <EuiFlexGroup direction="row" alignItems="center" justifyContent="center">
-            <AssistantAvatar />
-            <EuiFlexItem grow={false}>
-              <EuiTitle size="xs">
-                <h2>
-                  {i18n.translate('xpack.observabilityAiAssistant.rca.calloutTitle', {
-                    defaultMessage: 'AI-assisted root cause analysis',
-                  })}
-                </h2>
-              </EuiTitle>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiFlexItem
-            grow={false}
+        <EuiFlexGroup alignItems="center" justifyContent="center">
+          <EuiFlexGroup
+            direction="column"
+            alignItems="center"
+            justifyContent="center"
             className={css`
-              width: 512px;
+              max-width: 512px;
             `}
           >
-            <EuiText size="m">
-              {i18n.translate('xpack.observabilityAiAssistant.rca.calloutText', {
-                defaultMessage: `Start an automated investigation that will analyze
+            <EuiFlexGroup direction="row" alignItems="center" justifyContent="center">
+              <AssistantAvatar />
+              <EuiFlexItem grow={false}>
+                <EuiTitle size="xs">
+                  <h2>
+                    {i18n.translate('xpack.observabilityAiAssistant.rca.calloutTitle', {
+                      defaultMessage: 'AI-assisted root cause analysis',
+                    })}
+                  </h2>
+                </EuiTitle>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              <EuiText size="m">
+                {i18n.translate('xpack.observabilityAiAssistant.rca.calloutText', {
+                  defaultMessage: `Start an automated investigation that will analyze
               log patterns, SLOs and alerts for entities and provide an evidence-
               based root cause analysis of issues in your system.`,
-              })}
-            </EuiText>
-          </EuiFlexItem>
-          <EuiButton
-            data-test-subj="observabilityAiAssistantAppRootCauseAnalysisCalloutStartAnalysisButton"
-            iconType="sparkles"
-            fill
-            onClick={onClick}
-          >
-            {i18n.translate('xpack.observabilityAiAssistant.rca.calloutText', {
-              defaultMessage: 'Start analysis',
-            })}
-          </EuiButton>
+                })}
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexGroup direction="column" alignItems="center" gutterSize="m">
+              <EuiFlexGroup
+                direction="row"
+                alignItems="center"
+                justifyContent="center"
+                gutterSize="s"
+              >
+                <EuiCheckbox
+                  id={checkboxId}
+                  onChange={() => {
+                    onCompleteInBackgroundClick();
+                  }}
+                  checked={completeInBackground}
+                />
+                <EuiFormLabel htmlFor={checkboxId}>
+                  {i18n.translate(
+                    'xpack.observabilityAiAssistant.rootCauseAnalysisCallout.keepAnalysisRunningInFormLabelLabel',
+                    { defaultMessage: 'Keep analysis running in background' }
+                  )}
+                </EuiFormLabel>
+              </EuiFlexGroup>
+              <EuiButton
+                data-test-subj="observabilityAiAssistantAppRootCauseAnalysisCalloutStartAnalysisButton"
+                iconType="sparkles"
+                fill
+                onClick={onClick}
+              >
+                {i18n.translate('xpack.observabilityAiAssistant.rca.calloutText', {
+                  defaultMessage: 'Start analysis',
+                })}
+              </EuiButton>
+            </EuiFlexGroup>
+          </EuiFlexGroup>
         </EuiFlexGroup>
       </EuiPanel>
     </EuiCallOut>

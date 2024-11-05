@@ -17,5 +17,21 @@ const stories: Meta<{}> = {
 export default stories;
 
 export const Default: Story<{}> = () => {
-  return <RootCauseAnalysisCallout onClick={() => {}} />;
+  return (
+    <RootCauseAnalysisCallout
+      onClick={() => {}}
+      onCompleteInBackgroundClick={() => {}}
+      completeInBackground
+    />
+  );
+};
+
+export const CompleteInBackgroundDisabled: Story<{}> = () => {
+  return (
+    <RootCauseAnalysisCallout
+      onClick={() => {}}
+      onCompleteInBackgroundClick={() => {}}
+      completeInBackground={false}
+    />
+  );
 };
