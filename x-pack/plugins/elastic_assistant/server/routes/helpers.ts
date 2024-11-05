@@ -422,6 +422,7 @@ export const langChainExecute = async ({
     responseLanguage,
     size: request.body.size,
     systemPrompt,
+    telemetry,
     traceOptions: {
       projectName: request.body.langSmithProject,
       tracers: getLangSmithTracer({

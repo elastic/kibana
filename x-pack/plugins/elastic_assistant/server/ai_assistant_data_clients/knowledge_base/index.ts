@@ -25,7 +25,7 @@ import {
 import pRetry from 'p-retry';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { StructuredTool } from '@langchain/core/tools';
-import { ElasticsearchClient } from '@kbn/core/server';
+import { AnalyticsServiceSetup, ElasticsearchClient } from '@kbn/core/server';
 import { IndexPatternsFetcher } from '@kbn/data-views-plugin/server';
 import { map } from 'lodash';
 import { AIAssistantDataClient, AIAssistantDataClientParams } from '..';
@@ -686,10 +686,12 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
    */
   public createKnowledgeBaseEntry = async ({
     knowledgeBaseEntry,
+    telemetry,
     global = false,
   }: {
     knowledgeBaseEntry: KnowledgeBaseEntryCreateProps | LegacyKnowledgeBaseEntryCreateProps;
     global?: boolean;
+    telemetry: AnalyticsServiceSetup;
   }): Promise<KnowledgeBaseEntryResponse | null> => {
     const authenticatedUser = this.options.currentUser;
 
@@ -716,6 +718,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
       user: authenticatedUser,
       knowledgeBaseEntry,
       global,
+      telemetry,
       isV2: this.options.v2KnowledgeBaseEnabled,
     });
   };

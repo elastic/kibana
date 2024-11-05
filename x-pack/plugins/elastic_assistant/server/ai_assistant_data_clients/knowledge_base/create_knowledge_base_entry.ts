@@ -6,7 +6,12 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { AuthenticatedUser, ElasticsearchClient, Logger } from '@kbn/core/server';
+import {
+  AnalyticsServiceSetup,
+  AuthenticatedUser,
+  ElasticsearchClient,
+  Logger,
+} from '@kbn/core/server';
 
 import {
   DocumentEntryCreateFields,
@@ -15,6 +20,10 @@ import {
   KnowledgeBaseEntryUpdateProps,
   Metadata,
 } from '@kbn/elastic-assistant-common';
+import {
+  KNOWLEDGE_BASE_ENTRY_ERROR_EVENT,
+  KNOWLEDGE_BASE_ENTRY_SUCCESS_EVENT,
+} from '../../lib/telemetry/event_based_telemetry';
 import { getKnowledgeBaseEntry } from './get_knowledge_base_entry';
 import { CreateKnowledgeBaseEntrySchema, UpdateKnowledgeBaseEntrySchema } from './types';
 
@@ -27,6 +36,7 @@ export interface CreateKnowledgeBaseEntryParams {
   knowledgeBaseEntry: KnowledgeBaseEntryCreateProps | LegacyKnowledgeBaseEntryCreateProps;
   global?: boolean;
   isV2?: boolean;
+  telemetry: AnalyticsServiceSetup;
 }
 
 export const createKnowledgeBaseEntry = async ({
@@ -38,6 +48,7 @@ export const createKnowledgeBaseEntry = async ({
   logger,
   global = false,
   isV2 = false,
+  telemetry,
 }: CreateKnowledgeBaseEntryParams): Promise<KnowledgeBaseEntryResponse | null> => {
   const createdAt = new Date().toISOString();
   const body = isV2
@@ -63,17 +74,34 @@ export const createKnowledgeBaseEntry = async ({
       refresh: 'wait_for',
     });
 
-    return await getKnowledgeBaseEntry({
+    const newKnowledgeBaseEntry = await getKnowledgeBaseEntry({
       esClient,
       knowledgeBaseIndex,
       id: response._id,
       logger,
       user,
     });
+
+    telemetry.reportEvent(KNOWLEDGE_BASE_ENTRY_SUCCESS_EVENT.eventType, {
+      eventAction: 'create',
+      entryType: body.type,
+      required: body.required,
+      sharing: body.users.length ? 'private' : 'global',
+      ...(body.type === 'document' ? { source: body.source } : {}),
+    });
+    return newKnowledgeBaseEntry;
   } catch (err) {
     logger.error(
       `Error creating Knowledge Base Entry: ${err} with kbResource: ${knowledgeBaseEntry.name}`
     );
+    telemetry.reportEvent(KNOWLEDGE_BASE_ENTRY_ERROR_EVENT.eventType, {
+      eventAction: 'create',
+      entryType: body.type,
+      required: body.required,
+      sharing: body.users.length ? 'private' : 'global',
+      ...(body.type === 'document' ? { source: body.source } : {}),
+      errorMessage: err.message ?? 'Unknown error',
+    });
     throw err;
   }
 };

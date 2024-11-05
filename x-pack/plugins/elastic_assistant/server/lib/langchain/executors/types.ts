@@ -15,6 +15,7 @@ import { ExecuteConnectorRequestBody, Message, Replacements } from '@kbn/elastic
 import { StreamResponseWithHeaders } from '@kbn/ml-response-stream/server';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import { ResponseBody } from '../types';
 import type { AssistantTool } from '../../../types';
 import { AIAssistantKnowledgeBaseDataClient } from '../../../ai_assistant_data_clients/knowledge_base';
@@ -55,6 +56,7 @@ export interface AgentExecutorParams<T extends boolean> {
   response?: KibanaResponseFactory;
   size?: number;
   systemPrompt?: string;
+  telemetry: AnalyticsServiceSetup;
   traceOptions?: TraceOptions;
   responseLanguage?: string;
 }

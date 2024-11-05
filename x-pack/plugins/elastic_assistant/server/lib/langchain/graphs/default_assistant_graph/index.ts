@@ -44,6 +44,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   request,
   size,
   systemPrompt,
+  telemetry,
   traceOptions,
   responseLanguage = 'English',
 }) => {
@@ -107,6 +108,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     replacements,
     request,
     size,
+    telemetry,
   };
 
   const tools: StructuredTool[] = assistantTools.flatMap(

@@ -261,9 +261,104 @@ export const ATTACK_DISCOVERY_ERROR_EVENT: EventTypeOpts<{
   },
 };
 
+export const KNOWLEDGE_BASE_ENTRY_SUCCESS_EVENT: EventTypeOpts<{
+  eventAction: 'create' | 'update' | 'delete';
+  entryType: 'index' | 'document';
+  required: boolean;
+  sharing: 'private' | 'global';
+  source?: string;
+}> = {
+  eventType: 'knowledge_base_entry_success',
+  schema: {
+    eventAction: {
+      type: 'keyword',
+      _meta: {
+        description: 'The type of knowledge base entry event, either create, update, or delete.',
+      },
+    },
+    entryType: {
+      type: 'keyword',
+      _meta: {
+        description: 'Index entry or document entry',
+      },
+    },
+    sharing: {
+      type: 'keyword',
+      _meta: {
+        description: 'Sharing setting: private or global',
+      },
+    },
+    required: {
+      type: 'boolean',
+      _meta: {
+        description: 'Whether this resource should always be included',
+      },
+    },
+    source: {
+      type: 'keyword',
+      _meta: {
+        description: 'Where the knowledge base document entry was created',
+        optional: true,
+      },
+    },
+  },
+};
+
+export const KNOWLEDGE_BASE_ENTRY_ERROR_EVENT: EventTypeOpts<{
+  eventAction: 'create' | 'update' | 'delete';
+  entryType: 'index' | 'document';
+  required: boolean;
+  sharing: 'private' | 'global';
+  source?: string;
+  errorMessage: string;
+}> = {
+  eventType: 'knowledge_base_entry_error',
+  schema: {
+    eventAction: {
+      type: 'keyword',
+      _meta: {
+        description: 'The type of knowledge base entry event, either create, update, or delete.',
+      },
+    },
+    entryType: {
+      type: 'keyword',
+      _meta: {
+        description: 'Index entry or document entry',
+      },
+    },
+    sharing: {
+      type: 'keyword',
+      _meta: {
+        description: 'Sharing setting: private or global',
+      },
+    },
+    required: {
+      type: 'boolean',
+      _meta: {
+        description: 'Whether this resource should always be included',
+      },
+    },
+    source: {
+      type: 'keyword',
+      _meta: {
+        description: 'Where the knowledge base document entry was created',
+        optional: true,
+      },
+    },
+    errorMessage: {
+      type: 'keyword',
+      _meta: {
+        description: 'Error message',
+      },
+    },
+  },
+};
+
 export const events: Array<EventTypeOpts<{ [key: string]: unknown }>> = [
   KNOWLEDGE_BASE_EXECUTION_SUCCESS_EVENT,
   KNOWLEDGE_BASE_EXECUTION_ERROR_EVENT,
+  KNOWLEDGE_BASE_ENTRY_SUCCESS_EVENT,
+  KNOWLEDGE_BASE_ENTRY_ERROR_EVENT,
   INVOKE_ASSISTANT_SUCCESS_EVENT,
   INVOKE_ASSISTANT_ERROR_EVENT,
   ATTACK_DISCOVERY_SUCCESS_EVENT,
