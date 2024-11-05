@@ -212,9 +212,9 @@ export const AttachmentsMenu = ({
         <EuiPopover
           button={
             <EuiButtonIcon
-              data-test-subj="aiopsLogPatternAnalysisActionsMenuButton"
-              aria-label={i18n.translate('xpack.aiops.logCategorization.actionsMenuAriaLabel', {
-                defaultMessage: 'Actions',
+              data-test-subj="aiopsLogPatternAnalysisAttachmentsMenuButton"
+              aria-label={i18n.translate('xpack.aiops.logCategorization.attachmentsMenuAriaLabel', {
+                defaultMessage: 'Attachments',
               })}
               iconType="boxesHorizontal"
               color="text"

@@ -81,5 +81,12 @@ export function MachineLearningCasesProvider(
         expectedChartsCount
       );
     },
+
+    async assertCaseWithLogPatternAnalysisAttachment(params: CaseParams) {
+      await this.assertBasicCaseProps(params);
+      await testSubjects.existOrFail('comment-persistableState-aiopsPatternAnalysisEmbeddable');
+      await testSubjects.existOrFail('aiopsEmbeddablePatternAnalysis');
+      await testSubjects.existOrFail('aiopsLogPatternsTable');
+    },
   };
 }
