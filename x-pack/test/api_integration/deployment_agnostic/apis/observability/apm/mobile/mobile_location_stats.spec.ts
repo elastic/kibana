@@ -10,7 +10,7 @@ import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { ENVIRONMENT_ALL } from '@kbn/apm-plugin/common/environment_filter_values';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 
 type MobileLocationStats =
   APIReturnType<'GET /internal/apm/mobile-services/{serviceName}/location/stats'>;
@@ -176,10 +176,10 @@ async function generateData({
   ]);
 }
 
-export default function ApiTest({ getService }: FtrProviderContext) {
-  const apmApiClient = getService('apmApiClient');
+export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
+  const apmApiClient = getService('apmApi');
   const registry = getService('registry');
-  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
+  const synthtrace = getService('synthtrace');
 
   const start = new Date('2023-01-01T00:00:00.000Z').getTime();
   const end = new Date('2023-01-01T00:15:00.000Z').getTime() - 1;
@@ -212,7 +212,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       .then(({ body }) => body);
   }
 
-  registry.when('Location stats when data is not loaded', { config: 'basic', archives: [] }, () => {
+  registry.when('Location stats when data is not loaded', () => {
     describe('when no data', () => {
       it('handles empty state', async () => {
         const response = await getMobileLocationStats({ serviceName: 'foo' });
@@ -233,7 +233,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   });
 
   // FLAKY: https://github.com/elastic/kibana/issues/177396
-  registry.when.skip('Location stats', { config: 'basic', archives: [] }, () => {
+  registry.when.skip('Location stats', () => {
     before(async () => {
       await generateData({
         apmSynthtraceEsClient,

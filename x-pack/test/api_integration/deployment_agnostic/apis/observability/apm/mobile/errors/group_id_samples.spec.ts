@@ -10,7 +10,7 @@ import { service } from '@kbn/apm-synthtrace-client/src/lib/apm/service';
 import { orderBy } from 'lodash';
 import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { getErrorGroupingKey } from '@kbn/apm-synthtrace-client/src/lib/apm/instance';
-import { FtrProviderContext } from '../../../common/ftr_provider_context';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../../../ftr_provider_context';
 import { config, generateData } from './generate_data';
 
 type ErrorGroupSamples =
@@ -19,10 +19,10 @@ type ErrorGroupSamples =
 type ErrorSampleDetails =
   APIReturnType<'GET /internal/apm/services/{serviceName}/errors/{groupId}/error/{errorId}'>;
 
-export default function ApiTest({ getService }: FtrProviderContext) {
+export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const registry = getService('registry');
-  const apmApiClient = getService('apmApiClient');
-  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
+  const apmApiClient = getService('apmApi');
+  const synthtrace = getService('synthtrace');
 
   const serviceName = 'synth-go';
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
@@ -67,7 +67,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     return response;
   }
 
-  registry.when('when data is not loaded', { config: 'basic', archives: [] }, () => {
+  registry.when('when data is not loaded', () => {
     it('handles the empty state', async () => {
       const response = await callErrorGroupSamplesApi({ groupId: 'foo' });
       expect(response.status).to.be(200);
@@ -76,7 +76,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   });
 
   // FLAKY: https://github.com/elastic/kibana/issues/177654
-  registry.when.skip('when samples data is loaded', { config: 'basic', archives: [] }, () => {
+  registry.when.skip('when samples data is loaded', () => {
     const { bananaTransaction } = config;
     describe('error group id', () => {
       before(async () => {
@@ -105,7 +105,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   });
 
   // FLAKY: https://github.com/elastic/kibana/issues/177665
-  registry.when.skip('when error sample data is loaded', { config: 'basic', archives: [] }, () => {
+  registry.when.skip('when error sample data is loaded', () => {
     describe('error sample id', () => {
       before(async () => {
         await generateData({ serviceName, start, end, apmSynthtraceEsClient });

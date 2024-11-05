@@ -10,16 +10,18 @@ import { ENVIRONMENT_ALL } from '@kbn/apm-plugin/common/environment_filter_value
 import { isEmpty } from 'lodash';
 import moment from 'moment';
 import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import { generateMobileData, SERVICE_VERSIONS } from './generate_mobile_data';
 
 type MobileDetailedStatisticsResponse =
   APIReturnType<'GET /internal/apm/mobile-services/{serviceName}/detailed_statistics'>;
 
-export default function ApiTest({ getService }: FtrProviderContext) {
-  const apmApiClient = getService('apmApiClient');
+export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
+  const apmApiClient = getService('apmApi');
   const registry = getService('registry');
-  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
+  const synthtrace = getService('synthtrace');
+  let apmSynthtraceEsClient: ApmSynthtraceEsClient;
 
   const start = new Date('2023-01-01T00:00:00.000Z').getTime();
   const end = new Date('2023-01-01T00:15:00.000Z').getTime() - 1;
@@ -58,7 +60,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   registry.when(
     'Mobile detailed statistics when data is not loaded',
-    { config: 'basic', archives: [] },
+
     () => {
       describe('when no data', () => {
         it('handles empty state', async () => {
@@ -73,11 +75,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   );
 
   // FLAKY: https://github.com/elastic/kibana/issues/177388
-  registry.when.skip(
-    'Mobile detailed statistics when data is loaded',
-    { config: 'basic', archives: [] },
-    () => {
+  registry.when.skip('Mobile detailed statistics when data is loaded', () => {
+    describe('Mobile detailed statistics', () => {
       before(async () => {
+        apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
+
         await generateMobileData({
           apmSynthtraceEsClient,
           start,
@@ -133,6 +135,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           });
         });
       });
-    }
-  );
+    });
+  });
 }

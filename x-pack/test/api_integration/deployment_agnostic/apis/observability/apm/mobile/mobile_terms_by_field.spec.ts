@@ -8,12 +8,12 @@
 import expect from '@kbn/expect';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
-import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { ENVIRONMENT_ALL } from '@kbn/apm-plugin/common/environment_filter_values';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 
-type MobileFilters = APIReturnType<'GET /internal/apm/services/{serviceName}/mobile/filters'>;
-
+// we generate 3 transactions per each mobile device
+// timerange 15min, interval 5m, rate 1
+// generate 3 http spans for galaxy10 device
 async function generateData({
   start,
   end,
@@ -29,7 +29,7 @@ async function generateData({
       environment: 'production',
       agentName: 'android/java',
     })
-    .mobileDevice({ serviceVersion: '1.1' })
+    .mobileDevice({ serviceVersion: '1.2' })
     .deviceInfo({
       manufacturer: 'Samsung',
       modelIdentifier: 'SM-G973F',
@@ -98,6 +98,7 @@ async function generateData({
         return [
           galaxy10
             .transaction('Start View - View Appearing', 'Android Activity')
+            .errors(galaxy10.crash({ message: 'error' }).timestamp(timestamp))
             .timestamp(timestamp)
             .duration(500)
             .success()
@@ -114,45 +115,39 @@ async function generateData({
             ),
           huaweiP2
             .transaction('Start View - View Appearing', 'huaweiP2 Activity')
+            .errors(huaweiP2.crash({ message: 'error' }).timestamp(timestamp))
             .timestamp(timestamp)
             .duration(20)
-            .success()
-            .children(
-              huaweiP2
-                .httpSpan({
-                  spanName: 'GET backend:1234',
-                  httpMethod: 'GET',
-                  httpUrl: 'https://backend:1234/api/start',
-                })
-                .duration(800)
-                .success()
-                .timestamp(timestamp + 400)
-            ),
+            .success(),
         ];
       }),
   ]);
 }
 
-export default function ApiTest({ getService }: FtrProviderContext) {
-  const apmApiClient = getService('apmApiClient');
+export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
+  const apmApiClient = getService('apmApi');
   const registry = getService('registry');
-  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
+  const synthtrace = getService('synthtrace');
 
   const start = new Date('2023-01-01T00:00:00.000Z').getTime();
   const end = new Date('2023-01-01T00:15:00.000Z').getTime() - 1;
 
-  async function getMobileFilters({
+  async function getMobileTermsByField({
     environment = ENVIRONMENT_ALL.value,
     kuery = '',
     serviceName,
+    fieldName,
+    size,
   }: {
     environment?: string;
     kuery?: string;
     serviceName: string;
+    fieldName: string;
+    size: number;
   }) {
     return await apmApiClient
       .readUser({
-        endpoint: 'GET /internal/apm/services/{serviceName}/mobile/filters',
+        endpoint: 'GET /internal/apm/mobile-services/{serviceName}/terms',
         params: {
           path: { serviceName },
           query: {
@@ -160,25 +155,38 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             start: new Date(start).toISOString(),
             end: new Date(end).toISOString(),
             kuery,
+            size,
+            fieldName,
           },
         },
       })
       .then(({ body }) => body);
   }
 
-  registry.when('Mobile filters when data is not loaded', { config: 'basic', archives: [] }, () => {
+  registry.when('Mobile terms when data is not loaded', () => {
     describe('when no data', () => {
       it('handles empty state', async () => {
-        const response = await getMobileFilters({ serviceName: 'foo' });
-        response.mobileFilters.map(({ key, options }) => {
-          expect(options).to.eql([]);
+        const response = await getMobileTermsByField({
+          serviceName: 'foo',
+          fieldName: 'bar',
+          size: 1,
         });
+        expect(response.terms).to.eql([]);
+      });
+
+      it('handles empty fieldName', async () => {
+        const response = await getMobileTermsByField({
+          serviceName: 'synth-android',
+          fieldName: '',
+          size: 1,
+        });
+        expect(response.terms).to.eql([]);
       });
     });
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/177389
-  registry.when.skip('Mobile filters', { config: 'basic', archives: [] }, () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/177498
+  registry.when.skip('Mobile terms', () => {
     before(async () => {
       await generateData({
         apmSynthtraceEsClient,
@@ -190,45 +198,51 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     after(() => apmSynthtraceEsClient.clean());
 
     describe('when data is loaded', () => {
-      let response: MobileFilters;
-
-      before(async () => {
-        response = await getMobileFilters({
+      it('returns mobile devices', async () => {
+        const response = await getMobileTermsByField({
           serviceName: 'synth-android',
           environment: 'production',
+          fieldName: 'device.model.identifier',
+          size: 10,
         });
+        expect(response.terms).to.eql([
+          { label: 'HUAWEI P2-0000', count: 3 },
+          { label: 'SM-G973F', count: 3 },
+        ]);
       });
 
-      it('returns correct filters for device', () => {
-        response.mobileFilters.map(({ key, options }) => {
-          if (key === 'device') {
-            expect(options).to.eql(['HUAWEI P2-0000', 'SM-G973F']);
-          }
+      it('returns mobile versions', async () => {
+        const response = await getMobileTermsByField({
+          serviceName: 'synth-android',
+          environment: 'production',
+          fieldName: 'service.version',
+          size: 10,
         });
+        expect(response.terms).to.eql([
+          {
+            label: '1.2',
+            count: 3,
+          },
+          {
+            label: '2.3',
+            count: 3,
+          },
+        ]);
       });
 
-      it('returns correct filters for app version', () => {
-        response.mobileFilters.map(({ key, options }) => {
-          if (key === 'appVersion') {
-            expect(options).to.eql(['1.1', '2.3']);
-          }
+      it('return the most used mobile version', async () => {
+        const response = await getMobileTermsByField({
+          serviceName: 'synth-android',
+          environment: 'production',
+          fieldName: 'service.version',
+          size: 1,
         });
-      });
-
-      it('returns correct filters for os version', () => {
-        response.mobileFilters.map(({ key, options }) => {
-          if (key === 'osVersion') {
-            expect(options).to.eql(['10', '11']);
-          }
-        });
-      });
-
-      it('returns correct filters for network connection type', () => {
-        response.mobileFilters.map(({ key, options }) => {
-          if (key === 'netConnectionType') {
-            expect(options).to.eql(['cell', 'wifi']);
-          }
-        });
+        expect(response.terms).to.eql([
+          {
+            label: '1.2',
+            count: 3,
+          },
+        ]);
       });
     });
   });

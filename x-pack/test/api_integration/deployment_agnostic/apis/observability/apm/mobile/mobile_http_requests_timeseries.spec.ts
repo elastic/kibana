@@ -7,13 +7,13 @@
 
 import expect from '@kbn/expect';
 import { ENVIRONMENT_ALL } from '@kbn/apm-plugin/common/environment_filter_values';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import { generateMobileData } from './generate_mobile_data';
 
-export default function ApiTest({ getService }: FtrProviderContext) {
-  const apmApiClient = getService('apmApiClient');
+export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
+  const apmApiClient = getService('apmApi');
   const registry = getService('registry');
-  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
+  const synthtrace = getService('synthtrace');
 
   const start = new Date('2023-01-01T00:00:00.000Z').getTime();
   const end = new Date('2023-01-01T02:00:00.000Z').getTime();
@@ -49,7 +49,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   registry.when.skip(
     'Mobile HTTP requests without data loaded',
-    { config: 'basic', archives: [] },
+
     () => {
       describe('when no data', () => {
         it('handles empty state', async () => {
@@ -65,7 +65,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   // FLAKY: https://github.com/elastic/kibana/issues/177390
   registry.when.skip(
     'Mobile HTTP requests with data loaded',
-    { config: 'basic', archives: [] },
+
     () => {
       before(async () => {
         await generateMobileData({

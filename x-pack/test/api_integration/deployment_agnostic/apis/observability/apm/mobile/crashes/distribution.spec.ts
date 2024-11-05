@@ -11,17 +11,19 @@ import {
   APIClientRequestParamsOf,
   APIReturnType,
 } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
+import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+
 import { RecursivePartial } from '@kbn/apm-plugin/typings/common';
-import { FtrProviderContext } from '../../../common/ftr_provider_context';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../../../ftr_provider_context';
 import { config, generateData } from './generate_data';
 
 type ErrorsDistribution =
   APIReturnType<'GET /internal/apm/mobile-services/{serviceName}/crashes/distribution'>;
 
-export default function ApiTest({ getService }: FtrProviderContext) {
+export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const registry = getService('registry');
-  const apmApiClient = getService('apmApiClient');
-  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
+  const apmApiClient = getService('apmApi');
+  const synthtrace = getService('synthtrace');
 
   const serviceName = 'synth-swift';
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
@@ -51,7 +53,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     return response;
   }
 
-  registry.when('when data is not loaded', { config: 'basic', archives: [] }, () => {
+  registry.when('when data is not loaded', () => {
     it('handles the empty state', async () => {
       const response = await callApi();
       expect(response.status).to.be(200);
@@ -61,10 +63,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   });
 
   // FLAKY: https://github.com/elastic/kibana/issues/177652
-  registry.when.skip('when data is loaded', { config: 'basic', archives: [] }, () => {
+  registry.when.skip('when data is loaded', () => {
     describe('errors distribution', () => {
+      let apmSynthtraceEsClient: ApmSynthtraceEsClient;
+
       const { appleTransaction, bananaTransaction } = config;
       before(async () => {
+        apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
         await generateData({ serviceName, start, end, apmSynthtraceEsClient });
       });
 

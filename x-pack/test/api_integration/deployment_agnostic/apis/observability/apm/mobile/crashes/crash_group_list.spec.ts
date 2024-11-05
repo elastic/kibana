@@ -11,15 +11,16 @@ import {
   APIReturnType,
 } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { RecursivePartial } from '@kbn/apm-plugin/typings/common';
-import { FtrProviderContext } from '../../../common/ftr_provider_context';
+import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../../../ftr_provider_context';
 
 type ErrorGroups =
   APIReturnType<'GET /internal/apm/mobile-services/{serviceName}/crashes/groups/main_statistics'>['errorGroups'];
 
-export default function ApiTest({ getService }: FtrProviderContext) {
+export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const registry = getService('registry');
-  const apmApiClient = getService('apmApiClient');
-  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
+  const apmApiClient = getService('apmApi');
+  const synthtrace = getService('synthtrace');
 
   const serviceName = 'synth-swift';
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
@@ -45,7 +46,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   }
 
-  registry.when('when data is not loaded', { config: 'basic', archives: [] }, () => {
+  registry.when('when data is not loaded', () => {
     it('handles empty state', async () => {
       const response = await callApi();
       expect(response.status).to.be(200);
@@ -54,8 +55,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   });
 
   // FLAKY: https://github.com/elastic/kibana/issues/177651
-  registry.when.skip('when data is loaded', { config: 'basic', archives: [] }, () => {
+  registry.when.skip('when data is loaded', () => {
     describe('errors group', () => {
+      let apmSynthtraceEsClient: ApmSynthtraceEsClient;
+
       const appleTransaction = {
         name: 'GET /apple 🍎 ',
         successRate: 75,
@@ -72,6 +75,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const serviceInstance = apm
           .service({ name: serviceName, environment: 'production', agentName: 'swift' })
           .instance('instance-a');
+
+        apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
 
         await apmSynthtraceEsClient.index([
           timerange(start, end)

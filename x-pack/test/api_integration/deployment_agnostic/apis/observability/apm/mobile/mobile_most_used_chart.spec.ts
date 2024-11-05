@@ -8,16 +8,16 @@
 import expect from '@kbn/expect';
 import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { ENVIRONMENT_ALL } from '@kbn/apm-plugin/common/environment_filter_values';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import { generateMobileData } from './generate_mobile_data';
 
 type MostUsedCharts =
   APIReturnType<'GET /internal/apm/mobile-services/{serviceName}/most_used_charts'>;
 
-export default function ApiTest({ getService }: FtrProviderContext) {
-  const apmApiClient = getService('apmApiClient');
+export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
+  const apmApiClient = getService('apmApi');
   const registry = getService('registry');
-  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
+  const synthtrace = getService('synthtrace');
 
   const start = new Date('2023-01-01T00:00:00.000Z').getTime();
   const end = new Date('2023-01-01T00:15:00.000Z').getTime() - 1;
@@ -52,7 +52,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   registry.when(
     'Most used charts when data is not loaded',
-    { config: 'basic', archives: [] },
+
     () => {
       describe('when no data', () => {
         it('handles empty state', async () => {
@@ -65,7 +65,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   );
 
   // FLAKY: https://github.com/elastic/kibana/issues/177394
-  registry.when.skip('Mobile stats', { config: 'basic', archives: [] }, () => {
+  registry.when.skip('Mobile stats', () => {
     before(async () => {
       await generateMobileData({
         apmSynthtraceEsClient,
