@@ -1,7 +1,9 @@
 {
   "type": "plugin",
   "id": "@kbn/aiops-plugin",
-  "owner": ["@elastic/ml-ui"],
+  "owner": [
+    "@elastic/ml-ui"
+  ],
   "group": "platform",
   "visibility": "shared",
   "description": "AIOps plugin maintained by ML team.",
@@ -22,7 +24,11 @@
       "unifiedSearch",
       "share"
     ],
-    "optionalPlugins": ["cases", "usageCollection"],
+    "optionalPlugins": [
+      "cases",
+      "observabilityAIAssistant",
+      "usageCollection"
+    ],
     "requiredBundles": [
       "dataViews",
       "fieldFormats",
