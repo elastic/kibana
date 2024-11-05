@@ -149,6 +149,7 @@ export async function deleteKibanaAssets({
 
   const namespace = SavedObjectsUtils.namespaceStringToId(spaceId);
 
+  // TODO this should be the installed package info, not the package that is being installed
   const minKibana = packageInfo.conditions?.kibana?.version
     ? minVersion(packageInfo.conditions.kibana.version)
     : null;
