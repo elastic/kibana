@@ -8,7 +8,7 @@
  */
 
 import { camelCase } from 'lodash';
-import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
+import { parse } from '@kbn/esql-ast';
 import { scalarFunctionDefinitions } from '../../definitions/generated/scalar_functions';
 import { builtinFunctions } from '../../definitions/builtin';
 import { aggregationFunctionDefinitions } from '../../definitions/generated/aggregation_functions';
@@ -181,7 +181,7 @@ export function getFunctionSignaturesByReturnType(
         ({ returnType }) =>
           expectedReturnType.includes('any') || expectedReturnType.includes(returnType as string)
       );
-      if (!filteredByReturnType.length) {
+      if (!filteredByReturnType.length && !expectedReturnType.includes('any')) {
         return false;
       }
       if (paramsTypes?.length) {
@@ -316,7 +316,7 @@ export const setup = async (caret = '/') => {
       querySansCaret,
       pos,
       ctx,
-      getAstAndSyntaxErrors,
+      (_query: string | undefined) => parse(_query, { withFormatting: true }),
       opts.callbacks ?? callbacks
     );
   };

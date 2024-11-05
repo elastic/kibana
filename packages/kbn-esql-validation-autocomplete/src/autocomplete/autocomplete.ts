@@ -16,7 +16,6 @@ import type {
   ESQLFunction,
   ESQLSingleAstItem,
 } from '@kbn/esql-ast';
-import { i18n } from '@kbn/i18n';
 import { ESQL_NUMBER_TYPES, isNumericType } from '../shared/esql_types';
 import type { EditorContext, ItemKind, SuggestionRawDefinition, GetColumnsByTypeFn } from './types';
 import {
@@ -24,7 +23,7 @@ import {
   getCommandDefinition,
   getCommandOption,
   getFunctionDefinition,
-  getLastCharFromTrimmed,
+  getLastNonWhitespaceChar,
   isArrayType,
   isAssignment,
   isAssignmentComplete,
@@ -68,9 +67,9 @@ import {
   buildFieldsDefinitions,
   buildPoliciesDefinitions,
   buildSourcesDefinitions,
-  buildNewVarDefinition,
+  getNewVariableSuggestion,
   buildNoPoliciesAvailableDefinition,
-  getCompatibleFunctionDefinition,
+  getFunctionSuggestions,
   buildMatchingFieldsDefinition,
   getCompatibleLiterals,
   buildConstantsDefinitions,
@@ -81,7 +80,6 @@ import {
   getDateLiterals,
   buildFieldsDefinitionsWithMetadata,
   TRIGGER_SUGGESTION_COMMAND,
-  getAddDateHistogramSnippet,
 } from './factories';
 import { EDITOR_MARKER, METADATA_FIELDS } from '../shared/constants';
 import { getAstContext, removeMarkerArgFromArgsList } from '../shared/context';
@@ -109,7 +107,6 @@ import {
 import { FunctionParameter, isParameterType, isReturnType } from '../definitions/types';
 import { metadataOption } from '../definitions/options';
 import { comparisonFunctions } from '../definitions/builtin';
-import { countBracketsUnclosed } from '../shared/helpers';
 import { getRecommendedQueriesSuggestions } from './recommended_queries/suggestions';
 
 type GetFieldsMapFn = () => Promise<Map<string, ESQLRealField>>;
@@ -162,6 +159,11 @@ export async function suggest(
   const { ast } = await astProvider(correctedQuery);
 
   const astContext = getAstContext(innerText, ast, offset);
+
+  if (astContext.type === 'comment') {
+    return [];
+  }
+
   // build the correct query to fetch the list of fields
   const queryForFields = getQueryForFields(
     buildQueryUntilPreviousCommand(ast, correctedQuery),
@@ -206,9 +208,7 @@ export async function suggest(
   }
 
   if (astContext.type === 'expression') {
-    // suggest next possible argument, or option
-    // otherwise a variable
-    return getSuggestionsWithinCommand(
+    return getSuggestionsWithinCommandExpression(
       innerText,
       ast,
       astContext,
@@ -216,7 +216,8 @@ export async function suggest(
       getFieldsByType,
       getFieldsMap,
       getPolicies,
-      getPolicyMetadata
+      getPolicyMetadata,
+      resourceRetriever?.getPreferences
     );
   }
   if (astContext.type === 'setting') {
@@ -239,8 +240,7 @@ export async function suggest(
         { option, ...rest },
         getFieldsByType,
         getFieldsMap,
-        getPolicyMetadata,
-        resourceRetriever?.getPreferences
+        getPolicyMetadata
       );
     }
   }
@@ -444,7 +444,7 @@ function extractArgMeta(
   return { argIndex, prevIndex, lastArg, nodeArg };
 }
 
-async function getSuggestionsWithinCommand(
+async function getSuggestionsWithinCommandExpression(
   innerText: string,
   commands: ESQLCommand[],
   {
@@ -460,7 +460,8 @@ async function getSuggestionsWithinCommand(
   getColumnsByType: GetColumnsByTypeFn,
   getFieldsMap: GetFieldsMapFn,
   getPolicies: GetPoliciesFn,
-  getPolicyMetadata: GetPolicyMetadataFn
+  getPolicyMetadata: GetPolicyMetadataFn,
+  getPreferences?: () => Promise<{ histogramBarTarget: number } | undefined>
 ) {
   const commandDef = getCommandDefinition(command.name);
 
@@ -471,8 +472,13 @@ async function getSuggestionsWithinCommand(
   const references = { fields: fieldsMap, variables: anyVariables };
   if (commandDef.suggest) {
     // The new path.
-    return commandDef.suggest(innerText, command, getColumnsByType, (col: string) =>
-      Boolean(getColumnByName(col, references))
+    return commandDef.suggest(
+      innerText,
+      command,
+      getColumnsByType,
+      (col: string) => Boolean(getColumnByName(col, references)),
+      () => findNewVariable(anyVariables),
+      getPreferences
     );
   } else {
     // The deprecated path.
@@ -631,7 +637,7 @@ async function getExpressionSuggestionsByType(
           // ... | STATS ..., <suggest>
           // ... | EVAL <suggest>
           // ... | EVAL ..., <suggest>
-          suggestions.push(buildNewVarDefinition(findNewVariable(anyVariables)));
+          suggestions.push(getNewVariableSuggestion(findNewVariable(anyVariables)));
         }
       }
     }
@@ -1349,12 +1355,14 @@ async function getFunctionArgsSuggestions(
     // Functions
     if (typesToSuggestNext.every((d) => d.fieldsOnly !== true)) {
       suggestions.push(
-        ...getCompatibleFunctionDefinition(
-          command.name,
-          option?.name,
-          canBeBooleanCondition ? ['any'] : (getTypesFromParamDefs(typesToSuggestNext) as string[]),
-          fnToIgnore
-        ).map((suggestion) => ({
+        ...getFunctionSuggestions({
+          command: command.name,
+          option: option?.name,
+          returnTypes: canBeBooleanCondition
+          ? ['any']
+          : (getTypesFromParamDefs(typesToSuggestNext) as string[]),
+          ignored: fnToIgnore,
+        }).map((suggestion) => ({
           ...suggestion,
           text: addCommaIf(shouldAddComma, suggestion.text),
         }))
@@ -1487,7 +1495,7 @@ async function getSettingArgsSuggestions(
   const settingDefs = getCommandDefinition(command.name).modes || [];
 
   if (settingDefs.length) {
-    const lastChar = getLastCharFromTrimmed(innerText);
+    const lastChar = getLastNonWhitespaceChar(innerText);
     const matchingSettingDefs = settingDefs.filter(({ prefix }) => lastChar === prefix);
     if (matchingSettingDefs.length) {
       // COMMAND _<here>
@@ -1497,6 +1505,10 @@ async function getSettingArgsSuggestions(
   return suggestions;
 }
 
+/**
+ * @deprecated — this will disappear when https://github.com/elastic/kibana/issues/195418 is complete
+ * because "options" will be handled in imperative command-specific routines instead of being independent.
+ */
 async function getOptionArgsSuggestions(
   innerText: string,
   commands: ESQLCommand[],
@@ -1511,29 +1523,19 @@ async function getOptionArgsSuggestions(
   },
   getFieldsByType: GetColumnsByTypeFn,
   getFieldsMaps: GetFieldsMapFn,
-  getPolicyMetadata: GetPolicyMetadataFn,
-  getPreferences?: () => Promise<{ histogramBarTarget: number } | undefined>
+  getPolicyMetadata: GetPolicyMetadataFn
 ) {
-  let preferences: { histogramBarTarget: number } | undefined;
-  if (getPreferences) {
-    preferences = await getPreferences();
-  }
-
   const optionDef = getCommandOption(option.name);
   if (!optionDef || !optionDef.signature) {
     return [];
   }
-  const { nodeArg, argIndex, lastArg } = extractArgMeta(option, node);
+  const { nodeArg, lastArg } = extractArgMeta(option, node);
   const suggestions = [];
   const isNewExpression = isRestartingExpression(innerText) || option.args.length === 0;
 
   const fieldsMap = await getFieldsMaps();
   const anyVariables = collectVariables(commands, fieldsMap, innerText);
 
-  const references = {
-    fields: fieldsMap,
-    variables: anyVariables,
-  };
   if (command.name === 'enrich') {
     if (option.name === 'on') {
       // if it's a new expression, suggest fields to match on
@@ -1575,7 +1577,7 @@ async function getOptionArgsSuggestions(
         );
 
         if (isNewExpression || noCaseCompare(findPreviousWord(innerText), 'WITH')) {
-          suggestions.push(buildNewVarDefinition(findNewVariable(anyEnhancedVariables)));
+          suggestions.push(getNewVariableSuggestion(findNewVariable(anyEnhancedVariables)));
         }
 
         // make sure to remove the marker arg from the assign fn
@@ -1698,53 +1700,6 @@ async function getOptionArgsSuggestions(
     }
   }
 
-  if (command.name === 'stats') {
-    const argDef = optionDef?.signature.params[argIndex];
-
-    const nodeArgType = extractTypeFromASTArg(nodeArg, references);
-    // These cases can happen here, so need to identify each and provide the right suggestion
-    // i.e. ... | STATS ... BY field + <suggest>
-    // i.e. ... | STATS ... BY field >= <suggest>
-
-    if (nodeArgType) {
-      if (isFunctionItem(nodeArg) && !isFunctionArgComplete(nodeArg, references).complete) {
-        suggestions.push(
-          ...(await getBuiltinFunctionNextArgument(
-            innerText,
-            command,
-            option,
-            { type: argDef?.type || 'unknown' },
-            nodeArg,
-            nodeArgType as string,
-            {
-              fields: references.fields,
-              // you can't use a variable defined
-              // in the stats command in the by clause
-              variables: new Map(),
-            },
-            getFieldsByType
-          ))
-        );
-      }
-    }
-
-    // If it's a complete expression then propose some final suggestions
-    if (
-      (!nodeArgType &&
-        option.name === 'by' &&
-        option.args.length &&
-        !isNewExpression &&
-        !isAssignment(lastArg)) ||
-      (isAssignment(lastArg) && isAssignmentComplete(lastArg))
-    ) {
-      suggestions.push(
-        ...getFinalSuggestions({
-          comma: optionDef?.signature.multipleParams ?? option.name === 'by',
-        })
-      );
-    }
-  }
-
   if (optionDef) {
     if (!suggestions.length) {
       const argDefIndex = optionDef.signature.multipleParams
@@ -1770,52 +1725,6 @@ async function getOptionArgsSuggestions(
             openSuggestions: true,
           }))
         );
-        // Checks if cursor is still within function ()
-        // by checking if the marker editor/cursor is within an unclosed parenthesis
-        const canHaveAssignment = countBracketsUnclosed('(', innerText) === 0;
-
-        if (option.name === 'by') {
-          // Add quick snippet for for stats ... by bucket(<>)
-          if (command.name === 'stats' && canHaveAssignment) {
-            suggestions.push({
-              label: i18n.translate(
-                'kbn-esql-validation-autocomplete.esql.autocomplete.addDateHistogram',
-                {
-                  defaultMessage: 'Add date histogram',
-                }
-              ),
-              text: getAddDateHistogramSnippet(preferences?.histogramBarTarget),
-              asSnippet: true,
-              kind: 'Issue',
-              detail: i18n.translate(
-                'kbn-esql-validation-autocomplete.esql.autocomplete.addDateHistogramDetail',
-                {
-                  defaultMessage: 'Add date histogram using bucket()',
-                }
-              ),
-              sortText: '1A',
-              command: TRIGGER_SUGGESTION_COMMAND,
-            } as SuggestionRawDefinition);
-          }
-
-          suggestions.push(
-            ...(await getFieldsOrFunctionsSuggestions(
-              types[0] === 'column' ? ['any'] : types,
-              command.name,
-              option.name,
-              getFieldsByType,
-              {
-                functions: true,
-                fields: false,
-              },
-              { ignoreFn: canHaveAssignment ? [] : ['bucket', 'case'] }
-            ))
-          );
-        }
-
-        if (command.name === 'stats' && isNewExpression && canHaveAssignment) {
-          suggestions.push(buildNewVarDefinition(findNewVariable(anyVariables)));
-        }
       }
     }
   }

@@ -175,7 +175,9 @@ export interface CommandBaseDefinition<CommandName extends string> {
     innerText: string,
     command: ESQLCommand<CommandName>,
     getColumnsByType: GetColumnsByTypeFn,
-    columnExists: (column: string) => boolean
+    columnExists: (column: string) => boolean,
+    getSuggestedVariableName: () => string,
+    getPreferences?: () => Promise<{ histogramBarTarget: number } | undefined>
   ) => Promise<SuggestionRawDefinition[]>;
   /** @deprecated this property will disappear in the future */
   signature: {

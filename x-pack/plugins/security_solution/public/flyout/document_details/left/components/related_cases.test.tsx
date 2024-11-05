@@ -18,7 +18,7 @@ import {
   EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID,
   EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID,
   EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID,
-} from '@kbn/security-solution-common';
+} from '../../../shared/components/test_ids';
 
 jest.mock('../../shared/hooks/use_fetch_related_cases');
 jest.mock('../../../../common/components/links', () => ({
