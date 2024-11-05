@@ -18,7 +18,7 @@ import { UnitedEntityDefinition } from './united_entity_definition';
 const unitedDefinitionBuilders: Record<EntityType, UnitedDefinitionBuilder> = {
   host: getHostUnitedDefinition,
   user: getUserUnitedDefinition,
-  related: getUserUnitedDefinition,
+  universal: getUserUnitedDefinition,
 };
 
 interface Options {
