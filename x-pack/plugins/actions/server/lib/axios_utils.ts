@@ -141,7 +141,7 @@ export const throwIfResponseIsNotValid = ({
 
   /**
    * Some external services may return a 204
-   * status code but ain unsupported content type like tex/html.
+   * status code but with unsupported content type like text/html.
    * To avoid throwing on valid requests we return.
    */
   if (statusCode === 204) {
