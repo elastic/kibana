@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import pick from 'lodash/pick';
 import has from 'lodash/has';
 import get from 'lodash/get';
 import partition from 'lodash/partition';

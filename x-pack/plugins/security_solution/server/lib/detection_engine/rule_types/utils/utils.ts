@@ -39,6 +39,8 @@ import type {
 import { parseDuration } from '@kbn/alerting-plugin/server';
 import type { ExceptionListClient, ListClient, ListPluginSetup } from '@kbn/lists-plugin/server';
 import type { SanitizedRuleAction } from '@kbn/alerting-plugin/common';
+import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
+import type { ConfigType } from '../../../../config';
 import type { TimestampOverride } from '../../../../../common/api/detection_engine/model/rule_schema';
 import type { Privilege } from '../../../../../common/api/detection_engine';
 import { RuleExecutionStatusEnum } from '../../../../../common/api/detection_engine/rule_monitoring';
@@ -83,14 +85,12 @@ import type {
   EqlShellAlert800,
 } from '../../../../../common/api/detection_engine/model/alerts/8.0.0';
 import { ALERT_GROUP_ID } from '../../../../../common/field_maps/field_names';
-import {
+import type {
   ExtraFieldsForShellAlert,
   WrappedEqlShellOptionalSubAlertsType,
 } from '../eql/build_alert_group_from_sequence';
-import { ConfigType } from '@kbn/security-solution-plugin/server/config';
-import { BuildReasonMessage } from './reason_formatters';
+import type { BuildReasonMessage } from './reason_formatters';
 import { getSuppressionAlertFields, getSuppressionTerms } from './suppression_utils';
-import { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
 
 export const MAX_RULE_GAP_RATIO = 4;
 

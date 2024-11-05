@@ -15,7 +15,6 @@ import type { SignalSource, SignalSourceHit } from '../types';
 import type {
   BaseFieldsLatest,
   WrappedFieldsLatest,
-  EqlBuildingBlockFieldsLatest,
 } from '../../../../../common/api/detection_engine/model/alerts';
 import type { ConfigType } from '../../../../config';
 import type {
@@ -27,10 +26,9 @@ import type {
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 import { transformHitToAlert } from '../factories/utils/transform_hit_to_alert';
 import { getSuppressionAlertFields, getSuppressionTerms } from './suppression_utils';
-import { generateId, isEqlShellAlert } from './utils';
+import { generateId } from './utils';
 
 import type { BuildReasonMessage } from './reason_formatters';
-import type { ExtraFieldsForShellAlert } from '../eql/build_alert_group_from_sequence';
 
 type RuleWithInMemorySuppression = ThreatRuleParams | EqlRuleParams | MachineLearningRuleParams;
 
