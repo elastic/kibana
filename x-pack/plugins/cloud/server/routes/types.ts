@@ -6,14 +6,11 @@
  */
 
 import { CustomRequestHandlerContext } from '@kbn/core/server';
-import { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
 
 /**
  * @internal
  */
-export type CloudRequestHandlerContext = CustomRequestHandlerContext<{
-  licensing: LicensingApiRequestHandlerContext;
-}>;
+export type CloudRequestHandlerContext = CustomRequestHandlerContext<{}>;
 
 export interface CloudDataAttributes {
   onboardingData: {

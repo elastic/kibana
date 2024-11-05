@@ -24,11 +24,11 @@ const mockSavedObjectsClientUpdate = jest.fn();
 const mockRouteContext = {
   core: {
     savedObjects: {
-      client: {
+      getClient: () => ({
         get: mockSavedObjectsClientGet,
         create: mockSavedObjectsClientCreate,
         update: mockSavedObjectsClientUpdate,
-      },
+      }),
     },
   },
 } as unknown as RequestHandlerContext;

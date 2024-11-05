@@ -12,7 +12,7 @@ export const CLOUD_DATA_SAVED_OBJECT_TYPE = 'cloud' as const;
 export function setupSavedObjects(savedObjects: SavedObjectsServiceSetup, logger: Logger) {
   savedObjects.registerType({
     name: CLOUD_DATA_SAVED_OBJECT_TYPE,
-    hidden: false,
+    hidden: true,
     hiddenFromHttpApis: true,
     namespaceType: 'agnostic',
     mappings: {

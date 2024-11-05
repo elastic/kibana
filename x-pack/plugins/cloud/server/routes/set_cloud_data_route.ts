@@ -47,7 +47,9 @@ export const setPostCloudSolutionDataRoute = ({ router }: RouteOptions) => {
       },
       async (context, request, response) => {
         const coreContext = await context.core;
-        const savedObjectsClient = coreContext.savedObjects.client;
+        const savedObjectsClient = coreContext.savedObjects.getClient({
+          includedHiddenTypes: [CLOUD_DATA_SAVED_OBJECT_TYPE],
+        });
         let cloudDataSo = null;
         try {
           cloudDataSo = await savedObjectsClient.get<CloudDataAttributes>(
