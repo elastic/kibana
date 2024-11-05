@@ -157,7 +157,13 @@ export function useSetupTechnology({
 
       if (setupTechnology === SetupTechnology.AGENTLESS) {
         if (isAgentlessApiEnabled) {
-          setNewAgentPolicy(newAgentlessPolicy as NewAgentPolicy);
+          const agentlessPolicy = {
+            ...newAgentlessPolicy,
+            ...getAdditionalAgentlessPolicyInfo(policyTemplateName, packageInfo),
+          } as NewAgentPolicy;
+
+          setNewAgentPolicy(agentlessPolicy);
+          setNewAgentlessPolicy(agentlessPolicy);
           setSelectedPolicyTab(SelectedPolicyTab.NEW);
           updateAgentPolicies([newAgentlessPolicy] as AgentPolicy[]);
         }
