@@ -7,7 +7,6 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { InferenceClient } from '@kbn/inference-plugin/server';
-import { AIMessage } from '@langchain/core/messages';
 import type { GraphNode } from '../../types';
 import { getEsqlKnowledgeBase } from './esql_knowledge_base_caller';
 import { getEsqlTranslationPrompt } from './prompt';
@@ -27,6 +26,30 @@ export const getTranslateQueryNode = ({
   return async (state) => {
     const input = getEsqlTranslationPrompt(state);
     const response = await esqlKnowledgeBaseCaller(input);
-    return { messages: [new AIMessage(response)] };
+
+    const esqlQuery = response.match(/```esql\n([\s\S]*?)\n```/)?.[1] ?? '';
+    const summary = response.match(/## Migration Summary[\s\S]*$/)?.[0] ?? '';
+
+    const translationState = getTranslationState(esqlQuery);
+
+    return {
+      response,
+      comments: [summary],
+      translation_state: translationState,
+      elastic_rule: {
+        title: state.original_rule.title,
+        description: state.original_rule.description,
+        severity: 'low',
+        query: esqlQuery,
+        query_language: 'esql',
+      },
+    };
   };
+};
+
+const getTranslationState = (esqlQuery: string) => {
+  if (esqlQuery.match(/\[(macro|lookup):[\s\S]*\]/)) {
+    return 'partial';
+  }
+  return 'complete';
 };

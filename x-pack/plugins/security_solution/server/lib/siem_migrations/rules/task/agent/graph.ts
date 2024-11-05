@@ -8,7 +8,6 @@
 import { END, START, StateGraph } from '@langchain/langgraph';
 import { migrateRuleState } from './state';
 import type { MigrateRuleGraphParams, MigrateRuleState } from './types';
-import { processResponseNode } from './nodes/process_response';
 import { getTranslateQueryNode } from './nodes/translate_query';
 import { getMatchPrebuiltRuleNode } from './nodes/match_prebuilt_rule';
 
@@ -26,12 +25,10 @@ export function getRuleMigrationAgent({
     // Nodes
     .addNode('matchPrebuiltRule', matchPrebuiltRuleNode)
     .addNode('translation', translationNode)
-    .addNode('processResponse', processResponseNode)
     // Edges
     .addEdge(START, 'matchPrebuiltRule')
     .addConditionalEdges('matchPrebuiltRule', matchedPrebuiltRuleConditional)
-    .addEdge('translation', 'processResponse')
-    .addEdge('processResponse', END);
+    .addEdge('translation', END);
 
   const graph = translateRuleGraph.compile();
   graph.name = 'Rule Migration Graph'; // Customizes the name displayed in LangSmith
