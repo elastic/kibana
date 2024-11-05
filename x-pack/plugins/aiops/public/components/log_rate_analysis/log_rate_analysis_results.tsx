@@ -363,6 +363,9 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
                   data-test-subj="aiopsLogRateAnalysisOptionsButton"
                   iconType="controlsHorizontal"
                   onClick={onEmbeddableOptionsClickHandler}
+                  aria-label={i18n.translate('xpack.aiops.logRateAnalysis.optionsButtonAriaLabel', {
+                    defaultMessage: 'Analysis options',
+                  })}
                 />
               </EuiToolTip>
             </EuiFlexItem>
