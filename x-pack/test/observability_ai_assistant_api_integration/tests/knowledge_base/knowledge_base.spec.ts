@@ -205,21 +205,3 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 function omitCategories(entries: KnowledgeBaseEntry[]) {
   return entries.filter((entry) => entry.labels?.category === undefined);
 }
-
-async function waitForModelReady(
-  observabilityAIAssistantAPIClient: ObservabilityAIAssistantApiClients,
-  log: ToolingLog
-) {
-  return pRetry(async () => {
-    const res = await observabilityAIAssistantAPIClient
-      .editor({ endpoint: 'GET /internal/observability_ai_assistant/kb/status' })
-      .expect(200);
-
-    const isModelReady = res.body.ready;
-    log.debug(`Model status: ${isModelReady ? 'ready' : 'not ready'}`);
-
-    if (!isModelReady) {
-      throw new Error('Model not ready');
-    }
-  });
-}
