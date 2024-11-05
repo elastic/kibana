@@ -87,7 +87,11 @@ export const getIndexResultsRoute = (
     .get({
       path: GET_INDEX_RESULTS,
       access: 'internal',
-      options: { tags: ['access:securitySolution'] },
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
     })
     .addVersion(
       {
