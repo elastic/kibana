@@ -124,6 +124,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
   // to be able to track it across rerenders.
   const analysisStartTime = useRef<number | undefined>(window.performance.now());
   const abortCtrl = useRef(new AbortController());
+  const previousSearchQuery = useRef(searchQuery);
 
   const [overrides, setOverrides] = useState<AiopsLogRateAnalysisSchema['overrides'] | undefined>(
     undefined
@@ -306,6 +307,19 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
     [data.significantItemsGroups]
   );
 
+  const searchQueryUpdated = useMemo(() => {
+    let searchQueryChanged = false;
+    if (
+      !isRunning &&
+      previousSearchQuery.current !== undefined &&
+      !isEqual(previousSearchQuery.current, searchQuery)
+    ) {
+      searchQueryChanged = true;
+    }
+    previousSearchQuery.current = searchQuery;
+    return searchQueryChanged;
+  }, [searchQuery, isRunning]);
+
   const shouldRerunAnalysis = useMemo(
     () =>
       currentAnalysisWindowParameters !== undefined &&
@@ -329,7 +343,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
         onRefresh={() => startHandler(false)}
         onCancel={cancelHandler}
         onReset={onReset}
-        shouldRerunAnalysis={shouldRerunAnalysis}
+        shouldRerunAnalysis={shouldRerunAnalysis || searchQueryUpdated}
         analysisInfo={<LogRateAnalysisInfoPopover />}
       >
         <>
