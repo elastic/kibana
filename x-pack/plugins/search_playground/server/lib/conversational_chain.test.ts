@@ -527,11 +527,10 @@ describe('conversational chain', () => {
         question: 'This is a test question.',
         chat_history: 'This is a test chat history.',
       };
-      try {
-        await contextLimitCheck(33, prompt)(input);
-      } catch (err) {
-        expect(err).toMatchInlineSnapshot(`[ContextLimitError: Context exceeds the model limit]`);
-      }
+
+      await expect(contextLimitCheck(33, prompt)(input)).rejects.toMatchInlineSnapshot(
+        `[ContextLimitError: Context exceeds the model limit]`
+      );
     });
   });
 });
