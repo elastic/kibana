@@ -13,6 +13,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const retry = getService('retry');
 
   describe('Management', function () {
+    this.tags(['skipMKI']);
     before(async () => {
       await pageObjects.svlCommonPage.loginAsAdmin();
       await pageObjects.common.navigateToApp('management');
