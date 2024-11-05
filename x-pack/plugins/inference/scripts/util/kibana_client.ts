@@ -13,18 +13,19 @@ import { from, map, switchMap, throwError } from 'rxjs';
 import { UrlObject, format, parse } from 'url';
 import { inspect } from 'util';
 import { isReadable } from 'stream';
-import type { ChatCompleteAPI, ChatCompletionEvent } from '../../common/chat_complete';
-import { ChatCompleteRequestBody } from '../../common/chat_complete/request';
-import type { InferenceConnector } from '../../common/connectors';
 import {
+  ChatCompleteAPI,
+  OutputAPI,
+  ChatCompletionEvent,
   InferenceTaskError,
   InferenceTaskErrorEvent,
+  InferenceTaskEventType,
   createInferenceInternalError,
-} from '../../common/errors';
-import { InferenceTaskEventType } from '../../common/inference_task';
-import type { OutputAPI } from '../../common/output';
-import { createOutputApi } from '../../common/output/create_output_api';
-import { withoutOutputUpdateEvents } from '../../common/output/without_output_update_events';
+  withoutOutputUpdateEvents,
+} from '@kbn/inference-common';
+import type { ChatCompleteRequestBody } from '../../common/http_apis';
+import type { InferenceConnector } from '../../common/connectors';
+import { createOutputApi } from '../../common/create_output_api';
 import { eventSourceStreamIntoObservable } from '../../server/util/event_source_stream_into_observable';
 
 // eslint-disable-next-line spaced-comment

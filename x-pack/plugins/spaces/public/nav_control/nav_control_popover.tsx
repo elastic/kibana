@@ -8,8 +8,8 @@
 import type { PopoverAnchorPosition, WithEuiThemeProps } from '@elastic/eui';
 import {
   EuiHeaderSectionItemButton,
-  EuiLoadingSpinner,
   EuiPopover,
+  EuiSkeletonRectangle,
   withEuiTheme,
 } from '@elastic/eui';
 import React, { Component, lazy, Suspense } from 'react';
@@ -179,7 +179,14 @@ class NavControlPopoverUI extends Component<Props, State> {
   }
 
   private getAlignedLoadingSpinner() {
-    return <EuiLoadingSpinner size="m" className="eui-alignMiddle" />;
+    return (
+      <EuiSkeletonRectangle
+        borderRadius="m"
+        contentAriaLabel={i18n.translate('xpack.spaces.navControl.popover.loadingSpacesLabel', {
+          defaultMessage: 'Loading spaces navigation',
+        })}
+      />
+    );
   }
 
   private getActiveSpaceButton = () => {

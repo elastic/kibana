@@ -261,7 +261,7 @@ const FieldPanel: FC<FieldPanelProps> = ({
             disabled: removeDisabled,
           },
         ],
-        'data=test-subj': 'aiopsChangePointDetectionContextMenuPanel',
+        'data-test-subj': 'aiopsChangePointDetectionContextMenuPanel',
       },
       {
         id: 'attachMainPanel',
