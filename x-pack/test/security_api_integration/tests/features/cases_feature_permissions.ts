@@ -218,6 +218,7 @@ export default function ({ getService }: FtrProviderContext) {
         const updateRequest: CasePatchRequest = {
           status: CaseStatuses.closed,
           version: '1',
+          id: caseId,
         };
 
         const { body: updatedCase } = await supertestWithoutAuth
@@ -230,8 +231,9 @@ export default function ({ getService }: FtrProviderContext) {
 
       const updateCaseToOpen = async (authorization: string, caseId: string): Promise<Case> => {
         const updateRequest: CasePatchRequest = {
-          status: CaseStatuses.open, // Try to reopen the case
-          version: '2', // Assuming this is first update
+          status: CaseStatuses.open,
+          version: '2',
+          id: caseId,
         };
 
         const { body: updatedCase } = await supertestWithoutAuth
