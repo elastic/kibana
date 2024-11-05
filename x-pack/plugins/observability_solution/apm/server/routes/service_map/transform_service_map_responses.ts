@@ -226,7 +226,6 @@ export function transformServiceMapResponses({
     connection.sourceData,
     connection.targetData,
   ]);
-  // .concat(serviceNodes);
 
   const dedupedNodes: typeof nodes = [];
 
