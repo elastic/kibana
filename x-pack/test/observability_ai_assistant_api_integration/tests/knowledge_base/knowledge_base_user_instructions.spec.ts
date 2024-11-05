@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 import { sortBy } from 'lodash';
 import { Message, MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
 import { CONTEXT_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server/functions/context';
+import { Instruction } from '@kbn/observability-ai-assistant-plugin/common/types';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   clearConversations,
@@ -27,6 +28,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const es = getService('es');
   const ml = getService('ml');
   const log = getService('log');
+  const getScopedApiClientForUsername = getService('getScopedApiClientForUsername');
 
   describe('Knowledge base user instructions', () => {
     before(async () => {
@@ -43,8 +45,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       await clearConversations(es);
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/192222
-    describe.skip('when creating private and public user instructions', () => {
+    describe('when creating private and public user instructions', () => {
       before(async () => {
         await clearKnowledgeBase(es);
 
@@ -68,8 +69,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         ].map(async ({ username, isPublic }) => {
           const visibility = isPublic ? 'Public' : 'Private';
 
-          const apiClient = observabilityAIAssistantAPIClient[username];
-          await apiClient({
+          await getScopedApiClientForUsername(username)({
             endpoint: 'PUT /internal/observability_ai_assistant/kb/user_instructions',
             params: {
               body: {
@@ -88,9 +88,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const res = await observabilityAIAssistantAPIClient.editor({
           endpoint: 'GET /internal/observability_ai_assistant/kb/user_instructions',
         });
+
         const instructions = res.body.userInstructions;
 
-        const sortById = (data: any) => sortBy(data, 'id');
+        const sortById = (data: Array<Instruction & { public?: boolean }>) => sortBy(data, 'id');
+
         expect(sortById(instructions)).to.eql(
           sortById([
             {
@@ -118,7 +120,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
         const instructions = res.body.userInstructions;
 
-        const sortById = (data: any) => sortBy(data, 'id');
+        const sortById = (data: Array<Instruction & { public?: boolean }>) => sortBy(data, 'id');
+
         expect(sortById(instructions)).to.eql(
           sortById([
             {

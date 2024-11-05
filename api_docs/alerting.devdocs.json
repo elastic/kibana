@@ -3765,10 +3765,6 @@
             "references": [
               {
                 "plugin": "ruleRegistry",
-                "path": "x-pack/plugins/rule_registry/server/utils/create_lifecycle_executor.ts"
-              },
-              {
-                "plugin": "ruleRegistry",
                 "path": "x-pack/plugins/rule_registry/server/utils/create_persistence_rule_type_wrapper.ts"
               },
               {

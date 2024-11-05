@@ -185,6 +185,17 @@ describe('createManagedConfiguration()', () => {
         expect(subscription).toHaveBeenNthCalledWith(2, 8);
       });
 
+      test('should decrease configuration at the next interval when a 500 error is emitted', async () => {
+        const { subscription, errors$ } = setupScenario(10);
+        errors$.next(SavedObjectsErrorHelpers.decorateGeneralError(new Error('a'), 'b'));
+        clock.tick(ADJUST_THROUGHPUT_INTERVAL - 1);
+        expect(subscription).toHaveBeenCalledTimes(1);
+        expect(subscription).toHaveBeenNthCalledWith(1, 10);
+        clock.tick(1);
+        expect(subscription).toHaveBeenCalledTimes(2);
+        expect(subscription).toHaveBeenNthCalledWith(2, 8);
+      });
+
       test('should decrease configuration at the next interval when a 503 error is emitted', async () => {
         const { subscription, errors$ } = setupScenario(10);
         errors$.next(SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError('a', 'b'));
@@ -239,6 +250,17 @@ describe('createManagedConfiguration()', () => {
       test('should decrease configuration at the next interval when an msearch 429 error is emitted', async () => {
         const { subscription, errors$ } = setupScenario(10);
         errors$.next(new MsearchError(429));
+        clock.tick(ADJUST_THROUGHPUT_INTERVAL - 1);
+        expect(subscription).toHaveBeenCalledTimes(1);
+        expect(subscription).toHaveBeenNthCalledWith(1, 10);
+        clock.tick(1);
+        expect(subscription).toHaveBeenCalledTimes(2);
+        expect(subscription).toHaveBeenNthCalledWith(2, 8);
+      });
+
+      test('should decrease configuration at the next interval when an msearch 500 error is emitted', async () => {
+        const { subscription, errors$ } = setupScenario(10);
+        errors$.next(new MsearchError(500));
         clock.tick(ADJUST_THROUGHPUT_INTERVAL - 1);
         expect(subscription).toHaveBeenCalledTimes(1);
         expect(subscription).toHaveBeenNthCalledWith(1, 10);
@@ -331,6 +353,16 @@ describe('createManagedConfiguration()', () => {
     test('should increase configuration at the next interval when an error is emitted', async () => {
       const { subscription, errors$ } = setupScenario(100);
       errors$.next(SavedObjectsErrorHelpers.createTooManyRequestsError('a', 'b'));
+      clock.tick(ADJUST_THROUGHPUT_INTERVAL - 1);
+      expect(subscription).toHaveBeenCalledTimes(1);
+      clock.tick(1);
+      expect(subscription).toHaveBeenCalledTimes(2);
+      expect(subscription).toHaveBeenNthCalledWith(2, 120);
+    });
+
+    test('should increase configuration at the next interval when a 500 error is emitted', async () => {
+      const { subscription, errors$ } = setupScenario(100);
+      errors$.next(SavedObjectsErrorHelpers.decorateGeneralError(new Error('a'), 'b'));
       clock.tick(ADJUST_THROUGHPUT_INTERVAL - 1);
       expect(subscription).toHaveBeenCalledTimes(1);
       clock.tick(1);
