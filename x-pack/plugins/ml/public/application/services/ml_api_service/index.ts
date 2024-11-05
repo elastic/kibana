@@ -11,7 +11,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
 
-import { isNumber } from 'lodash';
+import { chunk, isNumber } from 'lodash';
 import { ML_INTERNAL_BASE_PATH } from '../../../../common/constants/app';
 import type {
   MlServerDefaults,
@@ -397,13 +397,13 @@ export function mlApiProvider(httpService: HttpService) {
       end,
       overallScore,
     }: {
-      jobId: string;
+      jobId: string[];
       topN: string;
       bucketSpan: string;
       start: number;
       end: number;
       overallScore?: number;
-    }) {
+    }): Promise<estypes.MlGetOverallBucketsResponse> {
       const body = JSON.stringify({
         topN,
         bucketSpan,
@@ -411,11 +411,31 @@ export function mlApiProvider(httpService: HttpService) {
         end,
         ...(overallScore ? { overall_score: overallScore } : {}),
       });
-      return httpService.http<any>({
-        path: `${ML_INTERNAL_BASE_PATH}/anomaly_detectors/${jobId}/results/overall_buckets`,
-        method: 'POST',
-        body,
-        version: '1',
+
+      // Max permitted job_id is 64 characters, so we can fit around 30 jobs per request
+      const maxJobsPerRequest = 30;
+
+      return Promise.all(
+        chunk(jobId, maxJobsPerRequest).map((jobIdsChunk) => {
+          return httpService.http<estypes.MlGetOverallBucketsResponse>({
+            path: `${ML_INTERNAL_BASE_PATH}/anomaly_detectors/${jobIdsChunk.join(
+              ','
+            )}/results/overall_buckets`,
+            method: 'POST',
+            body,
+            version: '1',
+          });
+        })
+      ).then((responses) => {
+        // Merge responses
+        return responses.reduce<estypes.MlGetOverallBucketsResponse>(
+          (acc, response) => {
+            acc.count += response.count;
+            acc.overall_buckets.push(...response.overall_buckets);
+            return acc;
+          },
+          { count: 0, overall_buckets: [] }
+        );
       });
     },
 

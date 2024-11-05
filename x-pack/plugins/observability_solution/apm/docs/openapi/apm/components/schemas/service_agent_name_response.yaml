@@ -1,0 +1,6 @@
+type: object
+properties:
+  agentName:
+    type: string
+    description: Agent name
+    example: nodejs
