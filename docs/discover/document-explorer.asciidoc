@@ -62,7 +62,7 @@ When the number of results or documents corresponding to your data view or searc
 
 On the last page of the table, a message indicates that you've reached the end of the loaded search results. From that message, you can choose to load more results to continue exploring the entries. 
 
-image:images/discover-downsampling.png[Downsampling in Discover]
+image:images/discover-limit-sample-size.png[Limit sample size in Discover]
 
 
 [float]
