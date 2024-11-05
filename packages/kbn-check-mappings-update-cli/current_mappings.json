@@ -788,6 +788,10 @@
       }
     }
   },
+  "cloud": {
+    "dynamic": false,
+    "properties": {}
+  },
   "cloud-security-posture-settings": {
     "dynamic": false,
     "properties": {}
