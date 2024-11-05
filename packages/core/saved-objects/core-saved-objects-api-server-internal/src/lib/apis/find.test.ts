@@ -357,6 +357,7 @@ describe('find', () => {
             fields: [], // don't return any fields
           })
         ).resolves.not.toHaveProperty('saved_objects.0.migrated');
+        expect(migrator.migrateDocument).not.toHaveBeenCalled();
       });
 
       it('does not perform migrations when a partial document is requested by specifying some fields', async () => {
