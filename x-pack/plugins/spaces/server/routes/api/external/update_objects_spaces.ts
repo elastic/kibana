@@ -43,7 +43,8 @@ export function initUpdateObjectsSpacesApi(deps: ExternalRouteDeps) {
       security: {
         authz: {
           enabled: false,
-          reason: 'This route is opted out from authorization',
+          reason:
+            'This route delegates authorization to the spaces service via a scoped spaces client',
         },
       },
       options: {

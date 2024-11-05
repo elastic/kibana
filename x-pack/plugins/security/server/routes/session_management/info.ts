@@ -19,7 +19,8 @@ export function defineSessionInfoRoutes({ router, getSession }: RouteDefinitionP
       security: {
         authz: {
           enabled: false,
-          reason: 'This route is opted out from authorization',
+          reason:
+            'This route is opted out from authorization because a valid session is required, and it does not return sensative session information',
         },
       },
       validate: false,

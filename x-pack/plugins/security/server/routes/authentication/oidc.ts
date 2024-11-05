@@ -90,7 +90,7 @@ export function defineOIDCRoutes({
         security: {
           authz: {
             enabled: false,
-            reason: 'This route is opted out from authorization',
+            reason: 'This route must remain accessible to 3rd-party OIDC providers',
           },
         },
         validate: {
@@ -185,7 +185,7 @@ export function defineOIDCRoutes({
         security: {
           authz: {
             enabled: false,
-            reason: 'This route is opted out from authorization',
+            reason: 'This route must remain accessible to 3rd-party OIDC providers',
           },
         },
         validate: {
@@ -236,7 +236,7 @@ export function defineOIDCRoutes({
       security: {
         authz: {
           enabled: false,
-          reason: 'This route is opted out from authorization',
+          reason: 'This route must remain accessible to 3rd-party OIDC providers',
         },
       },
       validate: {

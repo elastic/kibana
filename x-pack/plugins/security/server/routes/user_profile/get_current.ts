@@ -23,7 +23,8 @@ export function defineGetCurrentUserProfileRoute({
       security: {
         authz: {
           enabled: false,
-          reason: 'This route is opted out from authorization',
+          reason:
+            'This route delegates authorization to the internal authorization service; a currently authenticated user is required',
         },
       },
       validate: {

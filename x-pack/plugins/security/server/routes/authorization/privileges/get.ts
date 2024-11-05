@@ -17,7 +17,8 @@ export function defineGetPrivilegesRoutes({ router, authz }: RouteDefinitionPara
       security: {
         authz: {
           enabled: false,
-          reason: 'This route is opted out from authorization',
+          reason:
+            'This route is opted out from authorization because it returns only the global list of Kibana privileges',
         },
       },
       validate: {

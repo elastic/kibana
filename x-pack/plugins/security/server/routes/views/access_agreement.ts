@@ -40,7 +40,8 @@ export function defineAccessAgreementRoutes({
       security: {
         authz: {
           enabled: false,
-          reason: 'This route is opted out from authorization',
+          reason:
+            'This route is opted out from authorization because it requires only an active session in order to function',
         },
       },
       validate: false,

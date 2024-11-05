@@ -27,7 +27,7 @@ export function defineChangeUserPasswordRoutes({
       security: {
         authz: {
           enabled: false,
-          reason: 'This route is opted out from authorization',
+          reason: `This route delegates authorization to the internal authorization service and the Security plugin's canUserChangePassword function`,
         },
       },
       validate: {

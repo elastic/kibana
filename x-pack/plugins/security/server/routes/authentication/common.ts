@@ -46,7 +46,7 @@ export function defineCommonRoutes({
         security: {
           authz: {
             enabled: false,
-            reason: 'This route is opted out from authorization',
+            reason: 'This route must remain accessible to 3rd-party IdPs',
           },
         },
         // Allow unknown query parameters as this endpoint can be hit by the 3rd-party with any
@@ -103,7 +103,7 @@ export function defineCommonRoutes({
         security: {
           authz: {
             enabled: false,
-            reason: 'This route is opted out from authorization',
+            reason: `This route delegates authorization to Core's security service; there must be an authenticated user for this route to return information`,
           },
         },
         validate: false,
@@ -151,14 +151,14 @@ export function defineCommonRoutes({
   }
 
   // Register the login route for serverless for the time being. Note: This route will move into the buildFlavor !== 'serverless' block below. See next line.
-  // ToDo: In the serverless environment, we do not support API login - the only valid authentication methodology (or maybe just method or mechanism?) is SAML
+  // ToDo: In the serverless environment, we do not support API login - the only valid authentication type is SAML
   router.post(
     {
       path: '/internal/security/login',
       security: {
         authz: {
           enabled: false,
-          reason: 'This route is opted out from authorization',
+          reason: `This route provides basic and token login capbility, which is delegated to the internal authentication service`,
         },
       },
       validate: {
@@ -210,7 +210,7 @@ export function defineCommonRoutes({
         security: {
           authz: {
             enabled: false,
-            reason: 'This route is opted out from authorization',
+            reason: `This route delegates authorization to the internal authentication service; there must be an authenticated user for this route to function`,
           },
         },
         validate: false,

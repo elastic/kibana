@@ -30,7 +30,8 @@ export function defineUpdateUserProfileDataRoute({
       security: {
         authz: {
           enabled: false,
-          reason: 'This route is opted out from authorization',
+          reason:
+            'This route delegates authorization to the internal authorization service; an authenticated user and valid session are required',
         },
       },
       validate: {

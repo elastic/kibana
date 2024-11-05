@@ -18,7 +18,7 @@ export function defineRoleMappingDeleteRoutes({ router }: RouteDefinitionParams)
       security: {
         authz: {
           enabled: false,
-          reason: 'This route is opted out from authorization',
+          reason: `This route delegates authorization to Core's scoped ES cluster client`,
         },
       },
       validate: {

@@ -10,11 +10,11 @@ import type { RouteDefinitionParams } from '../..';
 export function defineGetBuiltinPrivilegesRoutes({ router }: RouteDefinitionParams) {
   router.get(
     {
-      path: '/internal/security/esPrivileges/builtin',
+      path: '/internal/security/esPrivileges/builtin adcv',
       security: {
         authz: {
           enabled: false,
-          reason: 'This route is opted out from authorization',
+          reason: `This route delegates authorization to Core's scoped ES cluster client`,
         },
       },
       validate: false,

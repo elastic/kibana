@@ -34,7 +34,8 @@ export function defineRecordAnalyticsOnAuthTypeRoutes({
       security: {
         authz: {
           enabled: false,
-          reason: 'This route is opted out from authorization',
+          reason:
+            'This route delegates authorization to the scoped ES cluster client of the internal authentication service',
         },
       },
       validate: {
