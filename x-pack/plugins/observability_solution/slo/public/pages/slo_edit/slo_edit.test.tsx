@@ -49,7 +49,7 @@ jest.mock('../../hooks/use_create_burn_rate_rule');
 
 const mockUseKibanaReturnValue = kibanaStartMock.startContract();
 
-jest.mock('../../utils/kibana_react', () => ({
+jest.mock('../../hooks/use_kibana', () => ({
   useKibana: jest.fn(() => mockUseKibanaReturnValue),
 }));
 

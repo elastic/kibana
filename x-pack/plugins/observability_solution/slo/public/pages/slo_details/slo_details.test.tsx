@@ -41,7 +41,7 @@ jest.mock('react-router-dom', () => ({
 }));
 
 jest.mock('@kbn/observability-shared-plugin/public');
-jest.mock('../../utils/kibana_react');
+jest.mock('../../hooks/use_kibana');
 jest.mock('../../hooks/use_license');
 jest.mock('../../hooks/use_permissions');
 jest.mock('../../hooks/use_fetch_active_alerts');
