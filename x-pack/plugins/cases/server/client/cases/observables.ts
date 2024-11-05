@@ -21,6 +21,7 @@ import { createCaseError } from '../../common/error';
 import type { Authorization } from '../../authorization';
 import { Operations } from '../../authorization';
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
+import { flattenCaseSavedObject } from '../../common/utils';
 
 const ensureUpdateAuthorized = async (
   authorization: PublicMethodsOf<Authorization>,
@@ -56,11 +57,20 @@ export const addObservable = async (
 
     const currentObservables = retrievedCase.attributes.observables ?? [];
 
-    const res = await caseService.patchCase({
+    const updatedCase = await caseService.patchCase({
       caseId: retrievedCase.id,
       originalCase: retrievedCase,
       updatedAttributes: {
         observables: [...currentObservables, { ...paramArgs.observable, id: v4() }],
+      },
+    });
+
+    const res = flattenCaseSavedObject({
+      savedObject: {
+        ...retrievedCase,
+        ...updatedCase,
+        attributes: { ...retrievedCase.attributes, ...updatedCase?.attributes },
+        references: retrievedCase.references,
       },
     });
 
@@ -100,11 +110,20 @@ export const updateObservable = async (
     const updatedObservables = [...currentObservables];
     updatedObservables[observableIndex] = paramArgs.observable;
 
-    const res = await caseService.patchCase({
+    const updatedCase = await caseService.patchCase({
       caseId: retrievedCase.id,
       originalCase: retrievedCase,
       updatedAttributes: {
         observables: updatedObservables,
+      },
+    });
+
+    const res = flattenCaseSavedObject({
+      savedObject: {
+        ...retrievedCase,
+        ...updatedCase,
+        attributes: { ...retrievedCase.attributes, ...updatedCase?.attributes },
+        references: retrievedCase.references,
       },
     });
 
