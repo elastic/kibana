@@ -110,9 +110,9 @@ export function routes(coreSetup: CoreSetup<StartDeps, unknown>, logger: Logger)
   /**
    * @apiGroup DataVisualizer
    *
-   * @api {get} /internal/data_visualizer/inference_endpoints Returns a list of inference endpoints which are currently deployed
-   * @apiName inferenceEndpoints
-   * @apiDescription Returns a list of inference endpoints where the underlying model is currently deployed
+   * @api {get} /internal/data_visualizer/inference/{inferenceId} Runs inference on a given inference endpoint with the provided input
+   * @apiName inference
+   * @apiDescription Runs inference on a given inference endpoint with the provided input.
    */
   router.versioned
     .post({
