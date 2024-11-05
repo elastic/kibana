@@ -46,7 +46,7 @@ describe('AIAssistantKnowledgeBaseDataClient', () => {
   const installElasticModel = jest.fn();
   const mockLoadSecurityLabs = loadSecurityLabs as jest.Mock;
   const mockGetSecurityLabsDocsCount = getSecurityLabsDocsCount as jest.Mock;
-
+  const mockGetIsKBSetupInProgress = jest.fn();
   beforeEach(() => {
     jest.clearAllMocks();
     logger = loggingSystemMock.createLogger();
@@ -66,7 +66,7 @@ describe('AIAssistantKnowledgeBaseDataClient', () => {
       kibanaVersion: '8.8.0',
       ml,
       getElserId: getElserId.mockResolvedValue('elser-id'),
-      getIsKBSetupInProgress: jest.fn().mockReturnValue(false),
+      getIsKBSetupInProgress: mockGetIsKBSetupInProgress.mockReturnValue(false),
       ingestPipelineResourceName: 'something',
       setIsKBSetupInProgress: jest.fn().mockImplementation(() => {}),
       manageGlobalKnowledgeBaseAIAssistant: true,
@@ -84,6 +84,25 @@ describe('AIAssistantKnowledgeBaseDataClient', () => {
 
   afterAll(() => {
     jest.useRealTimers();
+  });
+  describe('isSetupInProgress', () => {
+    it('should return true if setup is in progress', () => {
+      mockGetIsKBSetupInProgress.mockReturnValueOnce(true);
+      const client = new AIAssistantKnowledgeBaseDataClient(mockOptions);
+
+      const result = client.isSetupInProgress;
+
+      expect(result).toBe(true);
+    });
+
+    it('should return false if setup is not in progress', () => {
+      mockGetIsKBSetupInProgress.mockReturnValueOnce(false);
+      const client = new AIAssistantKnowledgeBaseDataClient(mockOptions);
+
+      const result = client.isSetupInProgress;
+
+      expect(result).toBe(false);
+    });
   });
   describe('isSetupAvailable', () => {
     it('should return true if ML capabilities check succeeds', async () => {
@@ -451,6 +470,34 @@ describe('AIAssistantKnowledgeBaseDataClient', () => {
       });
 
       expect(result).toEqual([]);
+    });
+  });
+
+  describe('createInferenceEndpoint', () => {
+    it('should create a new Knowledge Base entry', async () => {
+      const client = new AIAssistantKnowledgeBaseDataClient(mockOptions);
+
+      esClientMock.inference.put.mockResolvedValueOnce({
+        inference_id: 'id',
+        task_type: 'completion',
+        service: 'string',
+        service_settings: {},
+        task_settings: {},
+      });
+
+      await client.createInferenceEndpoint();
+
+      await expect(client.createInferenceEndpoint()).resolves.not.toThrow();
+      expect(esClientMock.inference.put).toHaveBeenCalled();
+    });
+
+    it('should throw error if user is not authenticated', async () => {
+      const client = new AIAssistantKnowledgeBaseDataClient(mockOptions);
+
+      esClientMock.inference.put.mockRejectedValueOnce(new Error('Inference error'));
+
+      await expect(client.createInferenceEndpoint()).rejects.toThrow('Inference error');
+      expect(esClientMock.inference.put).toHaveBeenCalled();
     });
   });
 });

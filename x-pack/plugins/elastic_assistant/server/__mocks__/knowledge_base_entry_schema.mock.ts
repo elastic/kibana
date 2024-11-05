@@ -11,7 +11,10 @@ import {
   KnowledgeBaseEntryResponse,
   KnowledgeBaseEntryUpdateProps,
 } from '@kbn/elastic-assistant-common';
-import { EsKnowledgeBaseEntrySchema } from '../ai_assistant_data_clients/knowledge_base/types';
+import {
+  EsKnowledgeBaseEntrySchema,
+  EsDocumentEntry,
+} from '../ai_assistant_data_clients/knowledge_base/types';
 const indexEntry: EsKnowledgeBaseEntrySchema = {
   id: '1234',
   '@timestamp': '2020-04-20T15:25:31.830Z',
@@ -40,7 +43,7 @@ const indexEntry: EsKnowledgeBaseEntrySchema = {
     },
   ],
 };
-export const documentEntry: EsKnowledgeBaseEntrySchema = {
+export const documentEntry: EsDocumentEntry = {
   id: '5678',
   '@timestamp': '2020-04-20T15:25:31.830Z',
   created_at: '2020-04-20T15:25:31.830Z',
