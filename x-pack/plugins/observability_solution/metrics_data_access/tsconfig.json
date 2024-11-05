@@ -36,6 +36,7 @@
     "@kbn/lens-embeddable-utils",
     "@kbn/react-kibana-context-render",
     "@kbn/react-kibana-context-theme",
-    "@kbn/router-utils"
+    "@kbn/router-utils",
+    "@kbn/core-ui-settings-common"
   ]
 }

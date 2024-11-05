@@ -87,6 +87,7 @@
     "@kbn/security-ui-components",
     "@kbn/core-http-router-server-mocks",
     "@kbn/security-authorization-core-common",
+    "@kbn/core-ui-settings-common",
   ],
   "exclude": [
     "target/**/*",

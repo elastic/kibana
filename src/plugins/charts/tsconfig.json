@@ -16,6 +16,8 @@
     "@kbn/shared-ux-utility",
     "@kbn/config-schema",
     "@kbn/data-plugin",
+    "@kbn/ui-shared-deps-npm",
+    "@kbn/core-ui-settings-common",
   ],
   "exclude": [
     "target/**/*",

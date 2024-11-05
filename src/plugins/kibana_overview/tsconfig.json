@@ -28,6 +28,7 @@
     "@kbn/shared-ux-avatar-solution",
     "@kbn/shared-ux-utility",
     "@kbn/react-kibana-context-render",
+    "@kbn/core-ui-settings-common",
   ],
   "exclude": [
     "target/**/*",
