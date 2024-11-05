@@ -14,6 +14,7 @@ import * as i18n from './translations';
 
 const LINE_CLAMP = 3;
 const LINE_CLAMP_HEIGHT = 5.5;
+const MAX_HEIGHT = '33vh';
 
 const ReadMore = styled(EuiButtonEmpty)`
   span.euiButtonContent {
@@ -21,8 +22,8 @@ const ReadMore = styled(EuiButtonEmpty)`
   }
 `;
 
-const ExpandedContent = styled.div`
-  max-height: 33vh;
+const ExpandedContent = styled.div<{ maxHeight: string }>`
+  max-height: ${({ maxHeight }) => maxHeight};
   overflow-wrap: break-word;
   overflow-x: hidden;
   overflow-y: auto;
@@ -40,7 +41,8 @@ const StyledLineClamp = styled.div<{ lineClampHeight: number }>`
 const LineClampComponent: React.FC<{
   children: ReactNode;
   lineClampHeight?: number;
-}> = ({ children, lineClampHeight = LINE_CLAMP_HEIGHT }) => {
+  maxHeight?: string;
+}> = ({ children, lineClampHeight = LINE_CLAMP_HEIGHT, maxHeight = MAX_HEIGHT }) => {
   const [isExpanded, setIsExpanded] = useState<boolean | null>(null);
   const [isOverflow, descriptionRef] = useIsOverflow(children);
 
@@ -51,7 +53,7 @@ const LineClampComponent: React.FC<{
   if (isExpanded) {
     return (
       <>
-        <ExpandedContent data-test-subj="expanded-line-clamp">
+        <ExpandedContent maxHeight={maxHeight} data-test-subj="expanded-line-clamp">
           <p>{children}</p>
         </ExpandedContent>
         {isOverflow && (
