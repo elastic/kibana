@@ -3,15 +3,15 @@ steps:
     label: '[Soft fail] Defend Workflows Cypress Tests, burning changed specs'
     agents:
       enableNestedVirtualization: true
-      localSsds: 1
-      localSsdInterface: nvme
       machineType: n2-standard-4
     depends_on:
       - build
       - quick_checks
+      - checks
       - linting
       - linting_with_types
       - check_types
+      - check_oas_snapshot
     timeout_in_minutes: 60
     soft_fail: true
     parallelism: 1
@@ -22,15 +22,15 @@ steps:
     label: '[Soft fail] Defend Workflows Cypress Tests on Serverless, burning changed specs'
     agents:
       enableNestedVirtualization: true
-      localSsds: 1
-      localSsdInterface: nvme
       machineType: n2-standard-4
     depends_on:
       - build
       - quick_checks
+      - checks
       - linting
       - linting_with_types
       - check_types
+      - check_oas_snapshot
     timeout_in_minutes: 60
     soft_fail: true
     parallelism: 1
@@ -45,9 +45,11 @@ steps:
     depends_on:
       - build
       - quick_checks
+      - checks
       - linting
       - linting_with_types
       - check_types
+      - check_oas_snapshot
     timeout_in_minutes: 60
     parallelism: 1
     retry:
@@ -62,9 +64,11 @@ steps:
     depends_on:
       - build
       - quick_checks
+      - checks
       - linting
       - linting_with_types
       - check_types
+      - check_oas_snapshot
     timeout_in_minutes: 50
     soft_fail: true
     retry:
