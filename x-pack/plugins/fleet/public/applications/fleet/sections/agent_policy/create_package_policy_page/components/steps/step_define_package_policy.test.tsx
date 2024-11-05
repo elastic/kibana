@@ -84,10 +84,10 @@ describe('StepDefinePackagePolicy', () => {
   let testRenderer: TestRenderer;
   let renderResult: ReturnType<typeof testRenderer.render>;
 
-  const render = () =>
+  const render = (namespacePlaceholder = getInheritedNamespace(agentPolicies)) =>
     (renderResult = testRenderer.render(
       <StepDefinePackagePolicy
-        namespacePlaceholder={getInheritedNamespace(agentPolicies)}
+        namespacePlaceholder={namespacePlaceholder}
         packageInfo={packageInfo}
         packagePolicy={packagePolicy}
         updatePackagePolicy={mockUpdatePackagePolicy}
@@ -100,7 +100,7 @@ describe('StepDefinePackagePolicy', () => {
     packagePolicy = {
       name: '',
       description: 'desc',
-      namespace: '',
+      namespace: 'package-policy-ns',
       enabled: true,
       policy_id: '',
       policy_ids: [''],
@@ -143,15 +143,14 @@ describe('StepDefinePackagePolicy', () => {
 
       await waitFor(() => {
         expect(renderResult.getByRole('switch', { name: 'Advanced var' })).toBeInTheDocument();
-        expect(renderResult.getByTestId('comboBoxSearchInput')).toHaveAttribute(
-          'placeholder',
-          'ns'
+        expect(renderResult.getByTestId('packagePolicyNamespaceInput')).toHaveTextContent(
+          'package-policy-ns'
         );
       });
     });
 
-    it('should display namespace from package policy', async () => {
-      packagePolicy.namespace = 'package-policy-ns';
+    it(`should display namespace from agent policy when there's no package policy namespace`, async () => {
+      packagePolicy.namespace = '';
       act(() => {
         render();
       });
@@ -159,8 +158,25 @@ describe('StepDefinePackagePolicy', () => {
       await userEvent.click(renderResult.getByText('Advanced options').closest('button')!);
 
       await waitFor(() => {
-        expect(renderResult.getByTestId('packagePolicyNamespaceInput')).toHaveTextContent(
-          'package-policy-ns'
+        expect(renderResult.getByTestId('comboBoxSearchInput')).toHaveAttribute(
+          'placeholder',
+          'ns'
+        );
+      });
+    });
+
+    it(`should fallback to the default namespace when namespace is not set in package policy and there's no agent policy`, async () => {
+      packagePolicy.namespace = '';
+      act(() => {
+        render(getInheritedNamespace([]));
+      });
+
+      await userEvent.click(renderResult.getByText('Advanced options').closest('button')!);
+
+      await waitFor(() => {
+        expect(renderResult.getByTestId('comboBoxSearchInput')).toHaveAttribute(
+          'placeholder',
+          'default'
         );
       });
     });
