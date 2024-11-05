@@ -20,7 +20,7 @@ export function definePingRoute({ router, logger, elasticsearch, preboot }: Rout
       security: {
         authz: {
           enabled: false,
-          reason: 'This route is opted out from authorization',
+          reason: 'Interactive setup is strictly a "pre-boot" feature which cannot leverage conventional authorization.',
         },
       },
       validate: {

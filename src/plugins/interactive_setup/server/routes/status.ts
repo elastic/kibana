@@ -18,7 +18,7 @@ export function defineStatusRoute({ router, elasticsearch, preboot }: RouteDefin
       security: {
         authz: {
           enabled: false,
-          reason: 'This route is opted out from authorization',
+          reason: 'Interactive setup is strictly a "pre-boot" feature which cannot leverage conventional authorization.',
         },
       },
       validate: false,
