@@ -9,8 +9,11 @@ import { last } from 'lodash';
 import { defer, switchMap, throwError } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { ChatCompleteAPI, ChatCompletionResponse } from '../../common/chat_complete';
-import { createInferenceRequestError } from '../../common/errors';
+import {
+  type ChatCompleteAPI,
+  type ChatCompletionResponse,
+  createInferenceRequestError,
+} from '@kbn/inference-common';
 import type { InferenceStartDependencies } from '../types';
 import { getConnectorById } from '../util/get_connector_by_id';
 import { getInferenceAdapter } from './adapters';

@@ -39,10 +39,6 @@ import { PopoverPlaceholder } from './popover_placeholder';
 import './search_bar.scss';
 import { SearchBarProps } from './types';
 
-const NoMatchesMessage = (props: { basePathUrl: string }) => {
-  return <PopoverPlaceholder basePath={props.basePathUrl} />;
-};
-
 const SearchCharLimitExceededMessage = (props: { basePathUrl: string }) => {
   const charLimitMessage = (
     <>
@@ -90,17 +86,17 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
   // General hooks
   const [initialLoad, setInitialLoad] = useState(false);
   const [searchValue, setSearchValue] = useState<string>('');
-  const [searchTerm, setSearchTerm] = useState<string>('');
   const [searchRef, setSearchRef] = useState<HTMLInputElement | null>(null);
   const [buttonRef, setButtonRef] = useState<HTMLDivElement | null>(null);
   const searchSubscription = useRef<Subscription | null>(null);
-  const [options, _setOptions] = useState<EuiSelectableTemplateSitewideOption[]>([]);
+  const [options, setOptions] = useState<EuiSelectableTemplateSitewideOption[]>([]);
   const [searchableTypes, setSearchableTypes] = useState<string[]>([]);
   const [showAppend, setShowAppend] = useState<boolean>(true);
   const UNKNOWN_TAG_ID = '__unknown__';
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [searchCharLimitExceeded, setSearchCharLimitExceeded] = useState(false);
 
+  // Initialize searchableTypes data
   useEffect(() => {
     if (initialLoad) {
       const fetch = async () => {
@@ -110,6 +106,11 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
       fetch();
     }
   }, [globalSearch, initialLoad]);
+
+  // Whenever searchValue changes, isLoading = true
+  useEffect(() => {
+    setIsLoading(true);
+  }, [searchValue]);
 
   const loadSuggestions = useCallback(
     (term: string) => {
@@ -122,17 +123,13 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
     [taggingApi, searchableTypes]
   );
 
-  const setOptions = useCallback(
+  const setDecoratedOptions = useCallback(
     (
       _options: GlobalSearchResult[],
       suggestions: SearchSuggestion[],
       searchTagIds: string[] = []
     ) => {
-      if (!isMounted()) {
-        return;
-      }
-
-      _setOptions([
+      setOptions([
         ...suggestions.map(suggestionToOption),
         ..._options.map((option) =>
           resultToOption(
@@ -143,7 +140,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         ),
       ]);
     },
-    [isMounted, _setOptions, taggingApi]
+    [setOptions, taggingApi]
   );
 
   useDebounce(
@@ -163,9 +160,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
           setSearchCharLimitExceeded(false);
         }
 
-        setIsLoading(true);
         const suggestions = loadSuggestions(searchValue.toLowerCase());
-        setIsLoading(false);
 
         let aggregatedResults: GlobalSearchResult[] = [];
 
@@ -187,26 +182,23 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
           types: rawParams.filters.types,
           tags: tagIds,
         };
-        // TODO technically a subtle bug here
-        // this term won't be set until the next time the debounce is fired
-        // so the SearchOption won't highlight anything if only one call is fired
-        // in practice, this is hard to spot, unlikely to happen, and is a negligible issue
-        setSearchTerm(rawParams.term ?? '');
-        setIsLoading(true);
+
         searchSubscription.current = globalSearch.find(searchParams, {}).subscribe({
           next: ({ results }) => {
+            if (!isMounted()) {
+              return;
+            }
+
             if (searchValue.length > 0) {
               aggregatedResults = [...results, ...aggregatedResults].sort(sort.byScore);
-              setOptions(aggregatedResults, suggestions, searchParams.tags);
+              setDecoratedOptions(aggregatedResults, suggestions, searchParams.tags);
               return;
             }
 
             // if searchbar is empty, filter to only applications and sort alphabetically
             results = results.filter(({ type }: GlobalSearchResult) => type === 'application');
-
             aggregatedResults = [...results, ...aggregatedResults].sort(sort.byTitle);
-
-            setOptions(aggregatedResults, suggestions, searchParams.tags);
+            setDecoratedOptions(aggregatedResults, suggestions, searchParams.tags);
           },
           error: (err) => {
             setIsLoading(false);
@@ -325,11 +317,12 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         buttonRef={visibilityButtonRef}
         color="text"
         data-test-subj="nav-search-reveal"
-        iconType="search"
         onClick={() => {
           setIsVisible(true);
         }}
-      />
+      >
+        <EuiIcon type="search" size="m" />
+      </EuiHeaderSectionItemButton>
     );
   }
 
@@ -370,7 +363,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
       className="kbnSearchBar"
       popoverButtonBreakpoints={['xs', 's']}
       singleSelection={true}
-      renderOption={(option) => euiSelectableTemplateSitewideRenderOptions(option, searchTerm)}
+      renderOption={(option) => euiSelectableTemplateSitewideRenderOptions(option, searchValue)}
       listProps={{
         className: 'eui-yScroll',
         css: css`
@@ -400,7 +393,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
       }}
       errorMessage={searchCharLimitExceeded ? <SearchCharLimitExceededMessage {...props} /> : null}
       emptyMessage={<EmptyMessage />}
-      noMatchesMessage={<NoMatchesMessage {...props} />}
+      noMatchesMessage={<PopoverPlaceholder basePath={props.basePathUrl} />}
       popoverProps={{
         'data-test-subj': 'nav-search-popover',
         panelClassName: 'navSearch__panel',

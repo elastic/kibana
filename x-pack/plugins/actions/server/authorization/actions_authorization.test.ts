@@ -12,7 +12,6 @@ import {
   ACTION_SAVED_OBJECT_TYPE,
   ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
 } from '../constants/saved_objects';
-import { AuthorizationMode } from './get_authorization_mode_by_source';
 import {
   CONNECTORS_ADVANCED_EXECUTE_PRIVILEGE_API_TAG,
   CONNECTORS_BASIC_EXECUTE_PRIVILEGE_API_TAG,
@@ -162,24 +161,6 @@ describe('ensureAuthorized', () => {
     await expect(
       actionsAuthorization.ensureAuthorized({ operation: 'create', actionTypeId: 'myType' })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"Unauthorized to create a \\"myType\\" action"`);
-  });
-
-  test('exempts users from requiring privileges to execute actions when authorizationMode is Legacy', async () => {
-    const { authorization } = mockSecurity();
-    const checkPrivileges: jest.MockedFunction<
-      ReturnType<typeof authorization.checkPrivilegesDynamicallyWithRequest>
-    > = jest.fn();
-    authorization.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
-    const actionsAuthorization = new ActionsAuthorization({
-      request,
-      authorization,
-      authorizationMode: AuthorizationMode.Legacy,
-    });
-
-    await actionsAuthorization.ensureAuthorized({ operation: 'execute', actionTypeId: 'myType' });
-
-    expect(authorization.actions.savedObject.get).not.toHaveBeenCalled();
-    expect(checkPrivileges).not.toHaveBeenCalled();
   });
 
   test('checks additional privileges correctly', async () => {

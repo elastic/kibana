@@ -1316,65 +1316,6 @@
       },
       {
         "parentPluginId": "@kbn/index-management-shared-types",
-        "id": "def-common.IndexManagementLocatorParams",
-        "type": "Interface",
-        "tags": [],
-        "label": "IndexManagementLocatorParams",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "@kbn/index-management-shared-types",
-            "scope": "common",
-            "docId": "kibKbnIndexManagementSharedTypesPluginApi",
-            "section": "def-common.IndexManagementLocatorParams",
-            "text": "IndexManagementLocatorParams"
-          },
-          " extends ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "common",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-common.SerializableRecord",
-            "text": "SerializableRecord"
-          }
-        ],
-        "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/index-management-shared-types",
-            "id": "def-common.IndexManagementLocatorParams.page",
-            "type": "string",
-            "tags": [],
-            "label": "page",
-            "description": [],
-            "signature": [
-              "\"data_streams_details\""
-            ],
-            "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/index-management-shared-types",
-            "id": "def-common.IndexManagementLocatorParams.dataStreamName",
-            "type": "string",
-            "tags": [],
-            "label": "dataStreamName",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/index-management-shared-types",
         "id": "def-common.IndexManagementPluginSetup",
         "type": "Interface",
         "tags": [],
@@ -2168,6 +2109,28 @@
             "text": "IndexManagementLocatorParams"
           },
           ">"
+        ],
+        "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/index-management-shared-types",
+        "id": "def-common.IndexManagementLocatorParams",
+        "type": "Type",
+        "tags": [],
+        "label": "IndexManagementLocatorParams",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          },
+          " & ({ page: \"data_streams_details\"; dataStreamName?: string | undefined; } | { page: \"index_template\"; indexTemplate: string; } | { page: \"component_template\"; componentTemplate: string; })"
         ],
         "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
         "deprecated": false,

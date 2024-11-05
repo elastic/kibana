@@ -764,19 +764,18 @@
           },
           {
             "parentPluginId": "lens",
-            "id": "def-public.Embeddable.canViewUnderlyingData",
-            "type": "Function",
+            "id": "def-public.Embeddable.canViewUnderlyingData$",
+            "type": "Object",
             "tags": [],
-            "label": "canViewUnderlyingData",
+            "label": "canViewUnderlyingData$",
             "description": [],
             "signature": [
-              "() => Promise<boolean>"
+              "BehaviorSubject",
+              "<boolean>"
             ],
             "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
             "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
+            "trackAdoption": false
           },
           {
             "parentPluginId": "lens",
@@ -11401,7 +11400,15 @@
             "section": "def-public.LensSavedObjectAttributes",
             "text": "LensSavedObjectAttributes"
           },
-          " | undefined>; canViewUnderlyingData: () => Promise<boolean>; getViewUnderlyingDataArgs: () => ",
+          " | undefined>; canViewUnderlyingData$: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishingSubject",
+            "text": "PublishingSubject"
+          },
+          "<boolean>; getViewUnderlyingDataArgs: () => ",
           "ViewUnderlyingDataArgs",
           "; getFullAttributes: () => ",
           {

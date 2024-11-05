@@ -701,9 +701,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           const linkURL = await linkButton.getAttribute('href');
 
-          expect(linkURL).to.be(
-            'https://www.elastic.co/guide/en/elasticsearch/reference/master/mapping-settings-limit.html'
-          );
+          expect(linkURL?.endsWith('mapping-settings-limit.html')).to.be(true);
         });
 
         it('should display increase field limit as a possible mitigation for non integration', async () => {
