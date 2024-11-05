@@ -6,9 +6,9 @@
  */
 
 import React, { useMemo } from 'react';
-import moment from 'moment';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { LogStream } from '@kbn/logs-shared-plugin/public';
+import { LazySavedSearchComponent } from '@kbn/saved-search-component';
+import useAsync from 'react-use/lib/useAsync';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { CONTAINER_ID, SERVICE_ENVIRONMENT, SERVICE_NAME } from '../../../../common/es_fields/apm';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
@@ -35,6 +35,20 @@ export function ServiceLogs() {
 }
 
 export function ClassicServiceLogsStream() {
+  const {
+    services: {
+      logsDataAccess: {
+        services: { logSourcesService },
+      },
+      embeddable,
+      savedSearch,
+      dataViews,
+      data: {
+        search: { searchSource },
+      },
+    },
+  } = useKibana();
+
   const { serviceName } = useApmServiceContext();
 
   const {
@@ -62,17 +76,30 @@ export function ClassicServiceLogsStream() {
     [environment, kuery, serviceName, start, end]
   );
 
-  return (
-    <LogStream
-      logView={{ type: 'log-view-reference', logViewId: 'default' }}
-      columns={[{ type: 'timestamp' }, { type: 'message' }]}
+  const logSources = useAsync(logSourcesService.getFlattenedLogSources);
+
+  const dependencies = useMemo(() => {
+    return { embeddable, savedSearch, searchSource, dataViews };
+  }, [dataViews, embeddable, savedSearch, searchSource]);
+
+  const timeRange = useMemo(() => ({ from: start, to: end }), [start, end]);
+
+  return logSources.value ? (
+    <LazySavedSearchComponent
+      dependencies={dependencies}
+      index={logSources.value}
+      timeRange={timeRange}
+      query={{
+        language: 'kuery',
+        query: getInfrastructureKQLFilter({ data, serviceName, environment }),
+      }}
       height={'60vh'}
-      startTimestamp={moment(start).valueOf()}
-      endTimestamp={moment(end).valueOf()}
-      query={getInfrastructureKQLFilter({ data, serviceName, environment })}
-      showFlyoutAction
+      displayOptions={{
+        enableFlyout: true,
+        enableFilters: false,
+      }}
     />
-  );
+  ) : null;
 }
 
 export function ServiceLogsOverview() {

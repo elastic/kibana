@@ -76,7 +76,6 @@ export const LogCategoriesResultContent: React.FC<LogCategoriesResultContentProp
             <LogCategoryDetailsFlyout
               logCategory={categoryDetailsServiceState.context.expandedCategory}
               onCloseFlyout={onCloseFlyout}
-              categoryDetailsServiceState={categoryDetailsServiceState}
               logsSource={logsSource}
               dependencies={dependencies}
               documentFilters={documentFilters}

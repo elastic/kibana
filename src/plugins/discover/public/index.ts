@@ -35,6 +35,9 @@ export {
   type PublishesSavedSearch,
   type HasTimeRange,
   type SearchEmbeddableSerializedState,
+  type SearchEmbeddableRuntimeState,
+  type SearchEmbeddableApi,
+  type NonPersistedDisplayOptions,
 } from './embeddable';
 export { loadSharingDataHelpers } from './utils';
 export { LogsExplorerTabs, type LogsExplorerTabsProps } from './components/logs_explorer_tabs';

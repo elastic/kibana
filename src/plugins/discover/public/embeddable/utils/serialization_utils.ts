@@ -67,6 +67,7 @@ export const deserializeState = async ({
     return {
       ...savedSearch,
       ...panelState,
+      nonPersistedDisplayOptions: serializedState.rawState.nonPersistedDisplayOptions,
     };
   }
 };

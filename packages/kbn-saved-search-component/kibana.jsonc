@@ -1,0 +1,5 @@
+{
+  "type": "shared-browser",
+  "id": "@kbn/saved-search-component",
+  "owner": "@elastic/obs-ux-logs-team"
+}

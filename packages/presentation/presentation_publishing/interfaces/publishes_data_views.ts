@@ -14,6 +14,10 @@ export interface PublishesDataViews {
   dataViews: PublishingSubject<DataView[] | undefined>;
 }
 
+export type PublishesWritableDataViews = PublishesDataViews & {
+  setDataViews: (dataViews: DataView[]) => void;
+};
+
 export const apiPublishesDataViews = (
   unknownApi: null | unknown
 ): unknownApi is PublishesDataViews => {

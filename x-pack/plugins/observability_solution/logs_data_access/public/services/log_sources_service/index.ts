@@ -12,23 +12,32 @@ import { RegisterServicesParams } from '../register_services';
 
 export function createLogSourcesService(params: RegisterServicesParams): LogSourcesService {
   const { uiSettings } = params.deps;
-  return {
-    async getLogSources() {
-      const logSources = uiSettings.get<string[]>(OBSERVABILITY_LOGS_DATA_ACCESS_LOG_SOURCES_ID);
-      return logSources.map((logSource) => ({
-        indexPattern: logSource,
-      }));
-    },
-    async getFlattenedLogSources() {
-      const logSources = await this.getLogSources();
-      return flattenLogSources(logSources);
-    },
-    async setLogSources(sources: LogSource[]) {
-      await uiSettings.set(
-        OBSERVABILITY_LOGS_DATA_ACCESS_LOG_SOURCES_ID,
-        sources.map((source) => source.indexPattern)
-      );
-      return;
-    },
+
+  const getLogSources = async () => {
+    const logSources = uiSettings.get<string[]>(OBSERVABILITY_LOGS_DATA_ACCESS_LOG_SOURCES_ID);
+    return logSources.map((logSource) => ({
+      indexPattern: logSource,
+    }));
   };
+
+  const getFlattenedLogSources = async () => {
+    const logSources = await getLogSources();
+    return flattenLogSources(logSources);
+  };
+
+  const setLogSources = async (sources: LogSource[]) => {
+    await uiSettings.set(
+      OBSERVABILITY_LOGS_DATA_ACCESS_LOG_SOURCES_ID,
+      sources.map((source) => source.indexPattern)
+    );
+    return;
+  };
+
+  const logSourcesService: LogSourcesService = {
+    getLogSources,
+    getFlattenedLogSources,
+    setLogSources,
+  };
+
+  return logSourcesService;
 }
