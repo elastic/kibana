@@ -99,17 +99,21 @@ export const bulkCreateWithSuppression = async <
     }
   };
 
+  const alerts = wrappedDocs.map((doc) => ({
+    _id: doc._id,
+    // `fields` should have already been merged into `doc._source`
+    _source: doc._source,
+    subAlerts:
+      doc?.subAlerts != null
+        ? doc?.subAlerts?.map((subAlert) => ({ _id: subAlert._id, _source: subAlert._source }))
+        : undefined,
+  }));
+
+  console.error('DO WE HAVE ALERTS TO SUPPRESS?', alerts.length);
+
   const { createdAlerts, errors, suppressedAlerts, alertsWereTruncated } =
     await alertWithSuppression(
-      wrappedDocs.map((doc) => ({
-        _id: doc._id,
-        // `fields` should have already been merged into `doc._source`
-        _source: doc._source,
-        subAlerts:
-          doc?.subAlerts != null
-            ? doc?.subAlerts?.map((subAlert) => ({ _id: subAlert._id, _source: subAlert._source }))
-            : undefined,
-      })),
+      alerts,
       suppressionWindow,
       enrichAlertsWrapper,
       alertTimestampOverride,

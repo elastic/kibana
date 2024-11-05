@@ -14,12 +14,19 @@ import { EqlRuleParams } from '../../rule_schema';
 import { eqlExecutor } from './eql';
 import type { CreateRuleOptions, SecurityAlertType, SignalSource, SignalSourceHit } from '../types';
 import { validateIndexPatterns } from '../utils';
+import { sequenceSuppressionTermsAndFieldsFactory } from '../utils/utils';
 import type { BuildReasonMessage } from '../utils/reason_formatters';
 import {
   wrapSuppressedAlerts,
   wrapSuppressedSequenceAlerts,
 } from '../utils/wrap_suppressed_alerts';
 import { getIsAlertSuppressionActive } from '../utils/get_is_alert_suppression_active';
+import type { WrappedEqlShellOptionalSubAlertsType } from './build_alert_group_from_sequence';
+import { buildAlertGroupFromSequence } from './build_alert_group_from_sequence';
+import type {
+  EqlBuildingBlockFieldsLatest,
+  WrappedFieldsLatest,
+} from '../../../../../common/api/detection_engine/model/alerts';
 
 export const createEqlAlertType = (
   createOptions: CreateRuleOptions
@@ -129,6 +136,42 @@ export const createEqlAlertType = (
         alertSuppression: completeRule.ruleParams.alertSuppression,
         licensing,
       });
+      const alertGroupFromSequenceBuilder = (
+        sequence: EqlHitsSequence<SignalSource>,
+        buildReasonMessage: BuildReasonMessage
+      ) =>
+        buildAlertGroupFromSequence({
+          ruleExecutionLogger,
+          sequence,
+          completeRule,
+          mergeStrategy,
+          spaceId,
+          buildReasonMessage,
+          indicesToQuery: inputIndex,
+          alertTimestampOverride,
+          applyOverrides: true,
+          publicBaseUrl,
+        });
+
+      const addSequenceSuppressionTermsAndFields = (
+        shellAlert: WrappedEqlShellOptionalSubAlertsType,
+        buildingBlockAlerts: Array<WrappedFieldsLatest<EqlBuildingBlockFieldsLatest>>,
+        buildReasonMessage: BuildReasonMessage
+      ) =>
+        sequenceSuppressionTermsAndFieldsFactory({
+          shellAlert,
+          buildingBlockAlerts,
+          spaceId,
+          completeRule,
+          mergeStrategy,
+          indicesToQuery: inputIndex,
+          buildReasonMessage,
+          alertTimestampOverride,
+          ruleExecutionLogger,
+          publicBaseUrl,
+          primaryTimestamp,
+          secondaryTimestamp,
+        });
       const { result, loggedRequests } = await eqlExecutor({
         completeRule,
         tuple,
@@ -146,6 +189,8 @@ export const createEqlAlertType = (
         unprocessedExceptions,
         wrapSuppressedHits,
         wrapSuppressedSequences,
+        alertGroupFromSequenceBuilder,
+        addSequenceSuppressionTermsAndFields,
         alertTimestampOverride,
         alertWithSuppression,
         isAlertSuppressionActive,

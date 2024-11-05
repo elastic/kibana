@@ -30,6 +30,7 @@ import type {
   WrapSuppressedSequences,
   CreateRuleOptions,
 } from '../types';
+import type { SequenceSuppressionTermsAndFieldsFactory } from '../utils/utils';
 import {
   addToSearchAfterReturn,
   createSearchAfterReturnType,
@@ -54,6 +55,7 @@ import { getDataTierFilter } from '../utils/get_data_tier_filter';
 import type { RulePreviewLoggedRequest } from '../../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
 import { logEqlRequest } from '../utils/logged_requests';
 import * as i18n from '../translations';
+import type { AlertGroupFromSequenceBuilder } from './build_alert_group_from_sequence';
 
 interface EqlExecutorParams {
   inputIndex: string[];
@@ -72,6 +74,8 @@ interface EqlExecutorParams {
   unprocessedExceptions: ExceptionListItemSchema[];
   wrapSuppressedHits: WrapSuppressedHits;
   wrapSuppressedSequences: WrapSuppressedSequences;
+  alertGroupFromSequenceBuilder: AlertGroupFromSequenceBuilder;
+  addSequenceSuppressionTermsAndFields: SequenceSuppressionTermsAndFieldsFactory;
   alertTimestampOverride: Date | undefined;
   alertWithSuppression: SuppressedAlertService;
   isAlertSuppressionActive: boolean;
@@ -97,6 +101,8 @@ export const eqlExecutor = async ({
   unprocessedExceptions,
   wrapSuppressedHits,
   wrapSuppressedSequences,
+  alertGroupFromSequenceBuilder,
+  addSequenceSuppressionTermsAndFields,
   alertTimestampOverride,
   alertWithSuppression,
   isAlertSuppressionActive,
@@ -203,9 +209,12 @@ export const eqlExecutor = async ({
             tuple,
             alertSuppression: completeRule.ruleParams.alertSuppression,
             wrapSuppressedSequences,
+            alertGroupFromSequenceBuilder,
+            addSequenceSuppressionTermsAndFields,
             alertTimestampOverride,
             alertWithSuppression,
             experimentalFeatures,
+            mergeSourceAndFields: true,
           });
         } else {
           newSignals = wrapSequences(sequences, buildReasonMessageForEqlAlert);

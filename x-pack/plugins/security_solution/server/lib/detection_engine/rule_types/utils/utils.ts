@@ -7,6 +7,7 @@
 import { createHash } from 'crypto';
 import { chunk, get, invert, isEmpty, partition } from 'lodash';
 import moment from 'moment';
+import objectHash from 'object-hash';
 
 import dateMath from '@kbn/datemath';
 import { isCCSRemoteIndexName } from '@kbn/es-query';
@@ -56,6 +57,7 @@ import type {
 } from '../types';
 import type { ShardError } from '../../../types';
 import type {
+  CompleteRule,
   EqlRuleParams,
   EsqlRuleParams,
   MachineLearningRuleParams,
@@ -70,6 +72,9 @@ import { withSecuritySpan } from '../../../../utils/with_security_span';
 import type {
   BaseFieldsLatest,
   DetectionAlert,
+  EqlBuildingBlockFieldsLatest,
+  EqlShellFieldsLatest,
+  WrappedFieldsLatest,
 } from '../../../../../common/api/detection_engine/model/alerts';
 import { ENABLE_CCS_READ_WARNING_SETTING } from '../../../../../common/constants';
 import type { GenericBulkCreateResponse } from '../factories';
@@ -78,6 +83,14 @@ import type {
   EqlShellAlert800,
 } from '../../../../../common/api/detection_engine/model/alerts/8.0.0';
 import { ALERT_GROUP_ID } from '../../../../../common/field_maps/field_names';
+import {
+  ExtraFieldsForShellAlert,
+  WrappedEqlShellOptionalSubAlertsType,
+} from '../eql/build_alert_group_from_sequence';
+import { ConfigType } from '@kbn/security-solution-plugin/server/config';
+import { BuildReasonMessage } from './reason_formatters';
+import { getSuppressionAlertFields, getSuppressionTerms } from './suppression_utils';
+import { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
 
 export const MAX_RULE_GAP_RATIO = 4;
 
@@ -1046,3 +1059,74 @@ export const isEqlBuildingBlockAlert = (
 export const isEqlShellAlert = (alertObject: unknown): alertObject is EqlShellAlert800 =>
   (alertObject as EqlShellAlert800)?.[ALERT_UUID] != null &&
   (alertObject as EqlShellAlert800)?.[ALERT_GROUP_ID] != null;
+
+type RuleWithInMemorySuppression = ThreatRuleParams | EqlRuleParams | MachineLearningRuleParams;
+
+export interface SequenceSuppressionTermsAndFieldsParams {
+  shellAlert: WrappedEqlShellOptionalSubAlertsType;
+  buildingBlockAlerts: Array<WrappedFieldsLatest<EqlBuildingBlockFieldsLatest>>;
+  spaceId: string;
+  completeRule: CompleteRule<RuleWithInMemorySuppression>;
+  mergeStrategy: ConfigType['alertMergeStrategy'];
+  indicesToQuery: string[];
+  buildReasonMessage: BuildReasonMessage;
+  alertTimestampOverride: Date | undefined;
+  ruleExecutionLogger: IRuleExecutionLogForExecutors;
+  publicBaseUrl: string | undefined;
+  primaryTimestamp: string;
+  secondaryTimestamp?: string;
+}
+
+export type SequenceSuppressionTermsAndFieldsFactory = (
+  shellAlert: WrappedEqlShellOptionalSubAlertsType,
+  buildingBlockAlerts: Array<WrappedFieldsLatest<EqlBuildingBlockFieldsLatest>>,
+  buildReasonMessage: BuildReasonMessage
+) => WrappedFieldsLatest<EqlShellFieldsLatest & SuppressionFieldsLatest> & {
+  subAlerts: Array<WrappedFieldsLatest<EqlBuildingBlockFieldsLatest>>;
+};
+
+export const sequenceSuppressionTermsAndFieldsFactory = ({
+  shellAlert,
+  buildingBlockAlerts,
+  spaceId,
+  completeRule,
+  mergeStrategy,
+  indicesToQuery,
+  buildReasonMessage,
+  alertTimestampOverride,
+  ruleExecutionLogger,
+  publicBaseUrl,
+  primaryTimestamp,
+  secondaryTimestamp,
+}: SequenceSuppressionTermsAndFieldsParams): WrappedFieldsLatest<
+  EqlShellFieldsLatest & SuppressionFieldsLatest
+> & {
+  subAlerts: Array<WrappedFieldsLatest<EqlBuildingBlockFieldsLatest>>;
+} => {
+  console.error('ARE WE IN HERE');
+  const suppressionTerms = getSuppressionTerms({
+    alertSuppression: completeRule?.ruleParams?.alertSuppression,
+    fields: shellAlert?._source,
+  });
+  console.error('SUPPRESSION TERMS', suppressionTerms);
+  const instanceId = objectHash([suppressionTerms, completeRule.alertId, spaceId]);
+
+  const suppressionFields = getSuppressionAlertFields({
+    primaryTimestamp,
+    secondaryTimestamp,
+    // as casting should work because the alert fields are flattened (hopefully?)
+    fields: shellAlert?._source as Record<string, string | number | null> | undefined,
+    suppressionTerms,
+    fallbackTimestamp: alertTimestampOverride?.toISOString() ?? new Date().toISOString(),
+    instanceId,
+  });
+  console.error('SUPPRESSION FIELDS', JSON.stringify(suppressionFields, null, 2));
+  const theFields = Object.keys(suppressionFields) as Array<keyof ExtraFieldsForShellAlert>;
+  // mutates shell alert to contain values from suppression fields
+  theFields.forEach((field) => (shellAlert._source[field] = suppressionFields[field]));
+  shellAlert.subAlerts = buildingBlockAlerts;
+
+  return shellAlert as WrappedFieldsLatest<EqlShellFieldsLatest & SuppressionFieldsLatest> & {
+    subAlerts: Array<WrappedFieldsLatest<EqlBuildingBlockFieldsLatest>>;
+  };
+};

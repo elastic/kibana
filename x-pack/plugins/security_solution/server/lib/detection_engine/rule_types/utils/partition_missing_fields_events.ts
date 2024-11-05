@@ -6,6 +6,7 @@
  */
 
 import pick from 'lodash/pick';
+import has from 'lodash/has';
 import get from 'lodash/get';
 import partition from 'lodash/partition';
 
@@ -22,21 +23,27 @@ export const partitionMissingFieldsEvents = <
   events: T[],
   suppressedBy: string[] = [],
   // path to fields property within event object. At this point, it can be in root of event object or within event key
-  fieldsPath: ['event', 'fields'] | ['fields'] | [] = [],
+  fieldsPath: ['event', 'fields'] | ['fields'] | ['_source'] | [] = [],
   mergeSourceAndFields: boolean = false
 ): T[][] => {
   return partition(events, (event) => {
     if (suppressedBy.length === 0) {
       return true;
     }
+    // console.error('SUPPRESSED BY', suppressedBy);
     const eventFields = fieldsPath.length ? get(event, fieldsPath) : event;
+    // console.error('EVENT FIELDS', eventFields);
     const sourceFields =
       (event as SignalSourceHit)?._source || (event as { event: SignalSourceHit })?.event?._source;
 
     const fields = mergeSourceAndFields ? { ...sourceFields, ...eventFields } : eventFields;
+    return suppressedBy.every((suppressionPath) => has(fields, suppressionPath));
+    // const picked = pick(fields, suppressedBy);
+    // console.error('PICKED', picked);
+    // console.error('PICK FIELDS', Object.keys(picked));
 
-    const hasMissingFields = Object.keys(pick(fields, suppressedBy)).length < suppressedBy.length;
+    // const hasMissingFields = Object.keys(picked).length < suppressedBy.length;
 
-    return !hasMissingFields;
+    // return !hasMissingFields;
   });
 };
