@@ -5,20 +5,20 @@
  * 2.0.
  */
 import { z } from '@kbn/zod';
-import { ENTITY_LATEST, entitiesAliasPattern, entityLatestSchema } from '@kbn/entities-schema';
 import {
-  ENTITY_DISPLAY_NAME,
-  ENTITY_LAST_SEEN,
-  ENTITY_TYPE,
-} from '@kbn/observability-shared-plugin/common';
+  ENTITY_LATEST,
+  entitiesAliasPattern,
+  entityLatestSchema,
+  entityMetadataSchema,
+} from '@kbn/entities-schema';
 import { decode, encode } from '@kbn/rison';
 import { isRight } from 'fp-ts/lib/Either';
 import * as t from 'io-ts';
 
 export const entityColumnIdsRt = t.union([
-  t.literal(ENTITY_DISPLAY_NAME),
-  t.literal(ENTITY_LAST_SEEN),
-  t.literal(ENTITY_TYPE),
+  t.literal('entityDisplayName'),
+  t.literal('entityLastSeenTimestamp'),
+  t.literal('entityType'),
   t.literal('alertsCount'),
 ]);
 
@@ -105,6 +105,16 @@ export type EntityGroup = {
   [key: string]: any;
 };
 
-export type InventoryEntityLatest = z.infer<typeof entityLatestSchema> & {
+export type EntityLatest = z.infer<typeof entityLatestSchema>;
+
+export type InventoryEntityLatest = {
+  entityId: string;
+  entityType: string;
+  entityIdentityFields: string | string[];
+  entityDisplayName: string;
+  entityDefinitionId: string;
+  entityLastSeenTimestamp: string;
+  entityDefinitionVersion: string;
+  entitySchemaVersion: string;
   alertsCount?: number;
-};
+} & z.infer<typeof entityMetadataSchema>;

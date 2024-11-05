@@ -28,7 +28,7 @@ export function EntityName({ entity }: EntityNameProps) {
   const handleLinkClick = useCallback(() => {
     telemetry.reportEntityViewClicked({
       view_type: 'detail',
-      entity_type: entity.entity.type,
+      entity_type: entity.entityType,
     });
   }, [entity, telemetry]);
 
@@ -39,7 +39,7 @@ export function EntityName({ entity }: EntityNameProps) {
       </EuiFlexItem>
       <EuiFlexItem className="eui-textTruncate">
         <span className="eui-textTruncate" data-test-subj="entityNameDisplayName">
-          {entity.entity.display_name}
+          {entity.entityDisplayName}
         </span>
       </EuiFlexItem>
     </EuiFlexGroup>

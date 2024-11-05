@@ -15,11 +15,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedDate, FormattedMessage, FormattedTime } from '@kbn/i18n-react';
 import { last } from 'lodash';
 import React, { useCallback, useMemo } from 'react';
-import {
-  ENTITY_DISPLAY_NAME,
-  ENTITY_LAST_SEEN,
-  ENTITY_TYPE,
-} from '@kbn/observability-shared-plugin/common';
+import { ENTITY_TYPE } from '@kbn/observability-shared-plugin/common';
 import { EntityColumnIds } from '../../../common/entities';
 import { APIReturnType } from '../../api';
 import { BadgeFilterWithPopover } from '../badge_filter_with_popover';
@@ -28,11 +24,11 @@ import { AlertsBadge } from '../alerts_badge/alerts_badge';
 import { EntityName } from './entity_name';
 
 type InventoryEntitiesAPIReturnType = APIReturnType<'GET /internal/inventory/entities'>;
-type LatestEntities = InventoryEntitiesAPIReturnType['entities'];
+type InventoryLatestEntities = InventoryEntitiesAPIReturnType['entities'];
 
 interface Props {
   loading: boolean;
-  entities: LatestEntities;
+  entities: InventoryLatestEntities;
   sortDirection: 'asc' | 'desc';
   sortField: string;
   pageIndex: number;
@@ -84,13 +80,13 @@ export function EntitiesGrid({
       }
 
       const columnEntityTableId = columnId as EntityColumnIds;
-      const entityType = entity.entity.type;
+      const entityType = entity.entityType;
 
       switch (columnEntityTableId) {
         case 'alertsCount':
           return entity?.alertsCount ? <AlertsBadge entity={entity} /> : null;
 
-        case ENTITY_TYPE:
+        case 'entityType':
           return (
             <BadgeFilterWithPopover
               field={ENTITY_TYPE}
@@ -99,7 +95,7 @@ export function EntitiesGrid({
               onFilter={() => onFilterByType(entityType)}
             />
           );
-        case ENTITY_LAST_SEEN:
+        case 'entityLastSeenTimestamp':
           return (
             <FormattedMessage
               id="xpack.inventory.entitiesGrid.euiDataGrid.lastSeen"
@@ -107,7 +103,7 @@ export function EntitiesGrid({
               values={{
                 date: (
                   <FormattedDate
-                    value={entity.entity.last_seen_timestamp}
+                    value={entity.entityLastSeenTimestamp}
                     month="short"
                     day="numeric"
                     year="numeric"
@@ -115,7 +111,7 @@ export function EntitiesGrid({
                 ),
                 time: (
                   <FormattedTime
-                    value={entity.entity.last_seen_timestamp}
+                    value={entity.entityLastSeenTimestamp}
                     hour12={false}
                     hour="2-digit"
                     minute="2-digit"
@@ -125,10 +121,10 @@ export function EntitiesGrid({
               }}
             />
           );
-        case ENTITY_DISPLAY_NAME:
+        case 'entityDisplayName':
           return <EntityName entity={entity} />;
         default:
-          return '';
+          return 'a';
       }
     },
     [entities, onFilterByType]

@@ -13,11 +13,9 @@ import type { InventoryEntityLatest } from '../../../common/entities';
 jest.mock('../../hooks/use_kibana');
 const useKibanaMock = useKibana as jest.Mock;
 
-const commonEntityFields: Partial<InventoryEntityLatest['entity']> = {
-  last_seen_timestamp: 'foo',
-  id: '1',
-  definition_version: '1',
-  schema_version: '1',
+const commonEntityFields: Partial<InventoryEntityLatest> = {
+  entityLastSeenTimestamp: 'foo',
+  entityId: '1',
 };
 
 describe('AlertsBadge', () => {
@@ -48,13 +46,11 @@ describe('AlertsBadge', () => {
 
   it('render alerts badge for a host entity', () => {
     const entity: InventoryEntityLatest = {
-      entity: {
-        ...(commonEntityFields as InventoryEntityLatest['entity']),
-        type: 'host',
-        display_name: 'foo',
-        identity_fields: 'host.name',
-        definition_id: 'host',
-      },
+      ...(commonEntityFields as InventoryEntityLatest),
+      entityType: 'host',
+      entityDisplayName: 'foo',
+      entityIdentityFields: 'host.name',
+      entityDefinitionId: 'host',
       alertsCount: 1,
       host: {
         name: 'foo',
@@ -73,13 +69,11 @@ describe('AlertsBadge', () => {
   });
   it('render alerts badge for a service entity', () => {
     const entity: InventoryEntityLatest = {
-      entity: {
-        ...(commonEntityFields as InventoryEntityLatest['entity']),
-        type: 'service',
-        display_name: 'foo',
-        identity_fields: 'service.name',
-        definition_id: 'service',
-      },
+      ...(commonEntityFields as InventoryEntityLatest),
+      entityType: 'service',
+      entityDisplayName: 'foo',
+      entityIdentityFields: 'service.name',
+      entityDefinitionId: 'service',
       service: {
         name: 'bar',
       },
@@ -102,13 +96,11 @@ describe('AlertsBadge', () => {
   });
   it('render alerts badge for a service entity with multiple identity fields', () => {
     const entity: InventoryEntityLatest = {
-      entity: {
-        ...(commonEntityFields as InventoryEntityLatest['entity']),
-        type: 'service',
-        display_name: 'foo',
-        identity_fields: ['service.name', 'service.environment'],
-        definition_id: 'service',
-      },
+      ...(commonEntityFields as InventoryEntityLatest),
+      entityType: 'service',
+      entityDisplayName: 'foo',
+      entityIdentityFields: ['service.name', 'service.environment'],
+      entityDefinitionId: 'service',
       service: {
         name: 'bar',
         environment: 'prod',

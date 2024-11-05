@@ -9,10 +9,10 @@ import type { AgentName } from '@kbn/elastic-agent-utils';
 import type { InventoryEntityLatest } from '../entities';
 
 interface EntityMap {
-  host: InventoryEntityLatest & { cloud?: { provider?: string } };
-  container: InventoryEntityLatest & { cloud?: { provider?: string } };
+  host: InventoryEntityLatest & { cloud?: { provider?: string[] } };
+  container: InventoryEntityLatest & { cloud?: { provider?: string[] } };
   service: InventoryEntityLatest & {
-    agent?: { name: AgentName };
+    agent?: { name: AgentName[] };
     service?: { name: string; environment?: string };
   };
 }
@@ -21,5 +21,5 @@ export const isEntityOfType = <T extends keyof EntityMap>(
   type: T,
   entity: InventoryEntityLatest
 ): entity is EntityMap[T] => {
-  return entity.entity.type === type;
+  return entity.entityType === type;
 };

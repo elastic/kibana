@@ -9,7 +9,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { EntityName } from '.';
 import { useDetailViewRedirect } from '../../../hooks/use_detail_view_redirect';
-import { InventoryEntityLatest } from '../../../../common/entities';
+import type { InventoryEntityLatest } from '../../../../common/entities';
 
 jest.mock('../../../hooks/use_detail_view_redirect');
 
@@ -17,16 +17,14 @@ const useDetailViewRedirectMock = useDetailViewRedirect as jest.Mock;
 
 describe('EntityName', () => {
   const mockEntity: InventoryEntityLatest = {
-    entity: {
-      last_seen_timestamp: '2023-10-09T00:00:00Z',
-      id: '1',
-      type: 'service',
-      display_name: 'entity_name',
-      identity_fields: ['service.name', 'service.environment'],
-      definition_id: 'entity_definition_id',
-      definition_version: '1.0.0',
-      schema_version: '1.0.0',
-    },
+    entityLastSeenTimestamp: '2023-10-09T00:00:00Z',
+    entityId: '1',
+    entityType: 'service',
+    entityDisplayName: 'entity_name',
+    entityIdentityFields: ['service.name', 'service.environment'],
+    entityDefinitionId: 'entity_definition_id',
+    entitySchemaVersion: '1',
+    entityDefinitionVersion: '1',
   };
 
   beforeEach(() => {

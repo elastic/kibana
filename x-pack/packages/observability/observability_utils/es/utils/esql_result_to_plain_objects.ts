@@ -23,7 +23,7 @@ export function esqlResultToPlainObjects<TDocument = unknown>(
         // Removes the type suffix from the column name
         const name = column.name.replace(/\.(text|keyword)$/, '');
         if (!acc[name]) {
-          acc[column.name] = value;
+          acc[name] = value;
         }
 
         return acc;

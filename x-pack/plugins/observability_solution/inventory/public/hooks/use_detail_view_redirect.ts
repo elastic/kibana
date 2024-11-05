@@ -17,6 +17,7 @@ import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { castArray } from 'lodash';
 import { isEntityOfType } from '../../common/utils/entity_type_guards';
 import type { InventoryEntityLatest } from '../../common/entities';
+import { toEntityLatest } from '../../common/utils/mappers';
 import { useKibana } from './use_kibana';
 
 const KUBERNETES_DASHBOARDS_IDS: Record<string, string> = {
@@ -43,13 +44,17 @@ export const useDetailViewRedirect = () => {
 
   const getSingleIdentityFieldValue = useCallback(
     (latestEntity: InventoryEntityLatest) => {
-      const identityFields = castArray(latestEntity.entity.identity_fields);
+      const identityFields = castArray(latestEntity.entityIdentityFields);
       if (identityFields.length > 1) {
-        throw new Error(`Multiple identity fields are not supported for ${entity[ENTITY_TYPE]}`);
+        throw new Error(
+          `Multiple identity fields are not supported for ${latestEntity.entityType}`
+        );
       }
 
       const identityField = identityFields[0];
-      return entityManager.entityClient.getIdentityFieldsValue(latestEntity)[identityField];
+      return entityManager.entityClient.getIdentityFieldsValue(toEntityLatest(latestEntity))[
+        identityField
+      ];
     },
     [entityManager.entityClient]
   );
@@ -61,7 +66,7 @@ export const useDetailViewRedirect = () => {
       if (isEntityOfType('host', latestEntity) || isEntityOfType('container', latestEntity)) {
         return assetDetailsLocator?.getRedirectUrl({
           assetId: identityValue,
-          assetType: latestEntity.entity.type,
+          assetType: latestEntity.entityType,
         });
       }
 
@@ -81,7 +86,7 @@ export const useDetailViewRedirect = () => {
 
   const getDashboardRedirectUrl = useCallback(
     (latestEntity: InventoryEntityLatest) => {
-      const type = latestEntity.entity.type;
+      const type = latestEntity.entityType;
       const dashboardId = KUBERNETES_DASHBOARDS_IDS[type];
 
       return dashboardId
@@ -89,7 +94,7 @@ export const useDetailViewRedirect = () => {
             dashboardId,
             query: {
               language: 'kuery',
-              query: entityManager.entityClient.asKqlFilter(latestEntity),
+              query: entityManager.entityClient.asKqlFilter(toEntityLatest(latestEntity)),
             },
           })
         : undefined;

@@ -8,11 +8,6 @@
 import { EuiButtonIcon, EuiDataGridColumn, EuiToolTip } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  ENTITY_DISPLAY_NAME,
-  ENTITY_LAST_SEEN,
-  ENTITY_TYPE,
-} from '@kbn/observability-shared-plugin/common';
 
 const alertsLabel = i18n.translate('xpack.inventory.entitiesGrid.euiDataGrid.alertsLabel', {
   defaultMessage: 'Alerts',
@@ -66,16 +61,12 @@ const CustomHeaderCell = ({ title, tooltipContent }: { title: string; tooltipCon
   </>
 );
 
-export const getColumns = ({
-  showAlertsColumn,
-}: {
-  showAlertsColumn: boolean;
-}): EuiDataGridColumn[] => {
+export const getColumns = ({ showAlertsColumn }: { showAlertsColumn: boolean }) => {
   return [
     ...(showAlertsColumn
       ? [
           {
-            id: 'alertsCount',
+            id: 'alertsCount' as const,
             displayAsText: alertsLabel,
             isSortable: true,
             display: <CustomHeaderCell title={alertsLabel} tooltipContent={alertsTooltip} />,
@@ -85,21 +76,21 @@ export const getColumns = ({
         ]
       : []),
     {
-      id: ENTITY_DISPLAY_NAME,
+      id: 'entityDisplayName' as const,
       // keep it for accessibility purposes
       displayAsText: entityNameLabel,
       display: <CustomHeaderCell title={entityNameLabel} tooltipContent={entityNameTooltip} />,
       isSortable: true,
     },
     {
-      id: ENTITY_TYPE,
+      id: 'entityType' as const,
       // keep it for accessibility purposes
       displayAsText: entityTypeLabel,
       display: <CustomHeaderCell title={entityTypeLabel} tooltipContent={entityTypeTooltip} />,
       isSortable: true,
     },
     {
-      id: ENTITY_LAST_SEEN,
+      id: 'entityLastSeenTimestamp' as const,
       // keep it for accessibility purposes
       displayAsText: entityLastSeenLabel,
       display: (
@@ -109,5 +100,5 @@ export const getColumns = ({
       isSortable: true,
       schema: 'datetime',
     },
-  ];
+  ] satisfies EuiDataGridColumn[];
 };

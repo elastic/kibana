@@ -8,15 +8,14 @@
 import type { InventoryEntityLatest } from '../../../common/entities';
 import { getIdentityFieldsPerEntityType } from './get_identity_fields_per_entity_type';
 
-const commonEntityFields: InventoryEntityLatest = {
-  entity: {
-    last_seen_timestamp: '2023-10-09T00:00:00Z',
-    id: '1',
-    display_name: 'entity_name',
-    definition_id: 'entity_definition_id',
-  } as InventoryEntityLatest['entity'],
-  alertCount: 3,
+const commonEntityFields: Partial<InventoryEntityLatest> = {
+  entityLastSeenTimestamp: '2023-10-09T00:00:00Z',
+  entityId: '1',
+  entityDisplayName: 'entity_name',
+  entityDefinitionId: 'entity_definition_id',
+  alertsCount: 3,
 };
+
 describe('getIdentityFields', () => {
   it('should return an empty Map when no entities are provided', () => {
     const result = getIdentityFieldsPerEntityType([]);
@@ -24,14 +23,11 @@ describe('getIdentityFields', () => {
   });
   it('should return a Map with unique entity types and their respective identity fields', () => {
     const serviceEntity: InventoryEntityLatest = {
-      ...commonEntityFields,
+      ...(commonEntityFields as InventoryEntityLatest),
+      entityIdentityFields: ['service.name', 'service.environment'],
+      entityType: 'service',
       agent: {
         name: 'node',
-      },
-      entity: {
-        ...commonEntityFields.entity,
-        identity_fields: ['service.name', 'service.environment'],
-        type: 'service',
       },
       service: {
         name: 'my-service',
@@ -39,27 +35,21 @@ describe('getIdentityFields', () => {
     };
 
     const hostEntity: InventoryEntityLatest = {
-      ...commonEntityFields,
-      entity: {
-        ...commonEntityFields.entity,
-        identity_fields: ['host.name'],
-        type: 'host',
+      ...(commonEntityFields as InventoryEntityLatest),
+      entityIdentityFields: ['host.name'],
+      entityType: 'host',
+      cloud: {
+        provider: null,
       },
       host: {
         name: 'my-host',
       },
-      cloud: {
-        provider: null,
-      },
     };
 
     const containerEntity: InventoryEntityLatest = {
-      ...commonEntityFields,
-      entity: {
-        ...commonEntityFields.entity,
-        identity_fields: ['container.id'],
-        type: 'container',
-      },
+      ...(commonEntityFields as InventoryEntityLatest),
+      entityIdentityFields: ['container.id'],
+      entityType: 'container',
       host: {
         name: 'my-host',
       },

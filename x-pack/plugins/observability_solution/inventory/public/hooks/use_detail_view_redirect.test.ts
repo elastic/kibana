@@ -15,13 +15,13 @@ jest.mock('./use_kibana');
 
 const useKibanaMock = useKibana as jest.Mock;
 
-const commonEntityFields: Partial<InventoryEntityLatest['entity']> = {
-  last_seen_timestamp: '2023-10-09T00:00:00Z',
-  id: '1',
-  display_name: 'entity_name',
-  definition_id: 'entity_definition_id',
-  definition_version: '1',
-  schema_version: '1',
+const commonEntityFields: Partial<InventoryEntityLatest> = {
+  entityLastSeenTimestamp: '2023-10-09T00:00:00Z',
+  entityId: '1',
+  entityDisplayName: 'entity_name',
+  entityDefinitionId: 'entity_definition_id',
+  entityDefinitionVersion: '1',
+  entitySchemaVersion: '1',
 };
 
 describe('useDetailViewRedirect', () => {
@@ -55,11 +55,9 @@ describe('useDetailViewRedirect', () => {
 
   it('getEntityRedirectUrl should return the correct URL for host entity', () => {
     const entity: InventoryEntityLatest = {
-      entity: {
-        ...(commonEntityFields as InventoryEntityLatest['entity']),
-        type: 'host',
-        identity_fields: ['host.name'],
-      },
+      ...(commonEntityFields as InventoryEntityLatest),
+      entityYype: 'host',
+      entityIdentityFields: ['host.name'],
       host: {
         name: 'host-1',
       },
@@ -80,11 +78,9 @@ describe('useDetailViewRedirect', () => {
 
   it('getEntityRedirectUrl should return the correct URL for container entity', () => {
     const entity: InventoryEntityLatest = {
-      entity: {
-        ...(commonEntityFields as InventoryEntityLatest['entity']),
-        type: 'container',
-        identity_fields: ['container.id'],
-      },
+      ...(commonEntityFields as InventoryEntityLatest),
+      entityType: 'container',
+      entityIdentityFields: ['container.id'],
       container: {
         id: 'container-1',
       },
@@ -108,11 +104,9 @@ describe('useDetailViewRedirect', () => {
 
   it('getEntityRedirectUrl should return the correct URL for service entity', () => {
     const entity: InventoryEntityLatest = {
-      entity: {
-        ...(commonEntityFields as InventoryEntityLatest['entity']),
-        type: 'service',
-        identity_fields: ['service.name'],
-      },
+      ...(commonEntityFields as InventoryEntityLatest),
+      entityType: 'service',
+      entityIdentityFields: ['service.name'],
       agent: {
         name: 'node',
       },
@@ -147,11 +141,9 @@ describe('useDetailViewRedirect', () => {
   ].forEach(([entityType, dashboardId]) => {
     it(`getEntityRedirectUrl should return the correct URL for ${entityType} entity`, () => {
       const entity: InventoryEntityLatest = {
-        entity: {
-          ...(commonEntityFields as InventoryEntityLatest['entity']),
-          type: entityType,
-          identity_fields: ['some.field'],
-        },
+        ...(commonEntityFields as InventoryEntityLatest),
+        entityType,
+        entityIdentityFields: ['some.field'],
         some: {
           field: 'some-value',
         },

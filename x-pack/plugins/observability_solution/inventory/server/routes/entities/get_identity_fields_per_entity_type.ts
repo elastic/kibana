@@ -10,11 +10,11 @@ import type { InventoryEntityLatest } from '../../../common/entities';
 
 export type IdentityFieldsPerEntityType = Map<string, string[]>;
 
-export const getIdentityFieldsPerEntityType = (entities: InventoryEntityLatest[]) => {
+export const getIdentityFieldsPerEntityType = (latestEntities: InventoryEntityLatest[]) => {
   const identityFieldsPerEntityType = new Map<string, string[]>();
 
-  entities.forEach((entity) =>
-    identityFieldsPerEntityType.set(entity.entity.type, castArray(entity.entity.identity_fields))
+  latestEntities.forEach((entity) =>
+    identityFieldsPerEntityType.set(entity.entityType, castArray(entity.entityIdentityFields))
   );
 
   return identityFieldsPerEntityType;

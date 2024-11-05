@@ -24,10 +24,18 @@ export interface MetadataRecord {
 }
 
 const literalSchema = z.union([z.string(), z.number(), z.boolean(), z.null()]);
+
 type Literal = z.infer<typeof literalSchema>;
-type Metadata = Literal | { [key: string]: Metadata } | Metadata[];
-export const entityMetadataSchema: z.ZodType<Metadata> = z.lazy(() =>
-  z.union([literalSchema, z.array(entityMetadataSchema), z.record(entityMetadataSchema)])
+interface Metadata {
+  [key: string]: Literal | Literal[] | Metadata;
+}
+
+// Define the recursive schema using z.lazy
+export const entityMetadataSchema: z.ZodSchema<Metadata> = z.lazy(() =>
+  z.union([
+    z.record(literalSchema), // Object with string keys and values of type string, number, or boolean
+    entityMetadataSchema, // Recursive reference to SomeType
+  ])
 );
 
 export const entityLatestSchema = z

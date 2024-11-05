@@ -9,6 +9,7 @@ import React from 'react';
 import { type CloudProvider, CloudProviderIcon, AgentIcon } from '@kbn/custom-icons';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
+import { castArray } from 'lodash';
 import type { InventoryEntityLatest } from '../../../common/entities';
 import { isEntityOfType } from '../../../common/utils/entity_type_guards';
 
@@ -20,7 +21,7 @@ export function EntityIcon({ entity }: EntityIconProps) {
   const defaultIconSize = euiThemeVars.euiSizeL;
 
   if (isEntityOfType('host', entity) || isEntityOfType('container', entity)) {
-    const cloudProvider = entity.cloud?.provider;
+    const cloudProvider = castArray(entity.cloud?.provider)[0];
 
     return (
       <EuiFlexGroup
@@ -41,10 +42,10 @@ export function EntityIcon({ entity }: EntityIconProps) {
   }
 
   if (isEntityOfType('service', entity)) {
-    return <AgentIcon agentName={entity.agent?.name} role="presentation" />;
+    return <AgentIcon agentName={castArray(entity.agent?.name)[0]} role="presentation" />;
   }
 
-  if (entity.entity.type.startsWith('kubernetes')) {
+  if (entity.entityType.startsWith('kubernetes')) {
     return <EuiIcon type="logoKubernetes" size="l" />;
   }
 

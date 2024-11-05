@@ -9,6 +9,7 @@ import rison from '@kbn/rison';
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { InventoryEntityLatest } from '../../../common/entities';
+import { toEntityLatest } from '../../../common/utils/mappers';
 import { useKibana } from '../../hooks/use_kibana';
 
 export function AlertsBadge({ entity }: { entity: InventoryEntityLatest }) {
@@ -21,7 +22,7 @@ export function AlertsBadge({ entity }: { entity: InventoryEntityLatest }) {
 
   const activeAlertsHref = basePath.prepend(
     `/app/observability/alerts?_a=${rison.encode({
-      kuery: entityManager.entityClient.asKqlFilter(entity),
+      kuery: entityManager.entityClient.asKqlFilter(toEntityLatest(entity)),
       status: 'active',
     })}`
   );

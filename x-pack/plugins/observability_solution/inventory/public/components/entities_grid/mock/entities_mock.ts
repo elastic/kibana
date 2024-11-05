@@ -6,7 +6,7 @@
  */
 
 import { faker } from '@faker-js/faker';
-import type { InventoryEntityLatest } from '../../../../common/entities';
+import type { EntityLatest } from '../../../../common/entities';
 
 const idGenerator = () => {
   let id = 0;
@@ -31,10 +31,7 @@ const indentityFieldsPerType: Record<string, string[]> = {
   service: ['service.name'],
 };
 
-const getEntityLatest = (
-  entityType: string,
-  overrides?: Partial<InventoryEntityLatest>
-): InventoryEntityLatest => ({
+const getEntityLatest = (entityType: string, overrides?: Partial<EntityLatest>): EntityLatest => ({
   entity: {
     last_seen_timestamp: generateRandomTimestamp(),
     type: entityType,
@@ -49,7 +46,7 @@ const getEntityLatest = (
   ...((overrides ? overrides : {}) as Record<string, unknown>),
 });
 
-const alertsMock: InventoryEntityLatest[] = [
+const alertsMock: EntityLatest[] = [
   getEntityLatest('host', {
     alertsCount: 1,
   }),
@@ -77,4 +74,4 @@ export const entitiesMock = [
   ...hostsMock,
   ...containersMock,
   ...servicesMock,
-] as InventoryEntityLatest[];
+] as EntityLatest[];
