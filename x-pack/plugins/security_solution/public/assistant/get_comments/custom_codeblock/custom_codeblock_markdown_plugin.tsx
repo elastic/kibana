@@ -9,7 +9,7 @@ import type { Node } from 'unist';
 import type { Parent } from 'mdast';
 
 export const customCodeBlockLanguagePlugin = () => {
-  const visitor = (node: Node, parent?: Parent) => {
+  const visitor = (node: Node) => {
     if ('children' in node) {
       const nodeAsParent = node as Parent;
       nodeAsParent.children.forEach((child) => {

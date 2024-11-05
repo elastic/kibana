@@ -18,7 +18,6 @@ import * as i18n from '../translations';
 
 export const MAX_ALERTS = 500;
 export const MIN_ALERTS = 50;
-export const ROW_MIN_WITH = 550; // px
 export const STEP = 50;
 
 interface Props {

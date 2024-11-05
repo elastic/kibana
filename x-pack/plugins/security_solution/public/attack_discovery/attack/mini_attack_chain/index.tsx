@@ -24,7 +24,7 @@ const MiniAttackChainComponent: React.FC<Props> = ({ attackDiscovery }) => {
 
   const detectedTacticsList = useMemo(
     () =>
-      detectedTactics.map(({ name, detected }) => (
+      detectedTactics.map(({ name }) => (
         <li key={name}>
           {' - '}
           {name}
