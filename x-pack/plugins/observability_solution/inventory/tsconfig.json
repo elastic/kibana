@@ -53,5 +53,8 @@
     "@kbn/spaces-plugin",
     "@kbn/cloud-plugin",
     "@kbn/storybook",
+    "@kbn/zod",
+    "@kbn/dashboard-plugin",
+    "@kbn/deeplinks-analytics"
   ]
 }
