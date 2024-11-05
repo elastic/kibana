@@ -143,7 +143,10 @@ export const getUpdateScript = ({
   return {
     doc: {
       ...entry,
-      semantic_text: entry.text,
+      // Seems like ES bulk update requires the `semantic_text` type fields to be specified
+      // even when they are not required in mapping configs.
+      // Since `semantic_text` is an optional field for index entries, we pass a dummy text to avoid ES error.
+      ...(entry.type === 'index' ? { semantic_text: 'a' } : { semantic_text: entry.text }),
     },
   };
 };
