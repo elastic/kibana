@@ -6,7 +6,7 @@
  */
 
 import { faker } from '@faker-js/faker';
-import type { EntityLatest } from '../../../../common/entities';
+import type { InventoryEntityLatest } from '../../../../common/entities';
 
 const idGenerator = () => {
   let id = 0;
@@ -31,22 +31,22 @@ const indentityFieldsPerType: Record<string, string[]> = {
   service: ['service.name'],
 };
 
-const getEntityLatest = (entityType: string, overrides?: Partial<EntityLatest>): EntityLatest => ({
-  entity: {
-    last_seen_timestamp: generateRandomTimestamp(),
-    type: entityType,
-    display_name: faker.person.fullName(),
-    id: generateId(),
-    definition_id: faker.string.uuid(),
-    definition_version: '1.0.0',
-    identity_fields: indentityFieldsPerType[entityType],
-    schema_version: '1.0.0',
-    ...(overrides?.entity ? overrides.entity : undefined),
-  },
-  ...((overrides ? overrides : {}) as Record<string, unknown>),
+const getEntityLatest = (
+  entityType: string,
+  overrides?: Partial<InventoryEntityLatest>
+): InventoryEntityLatest => ({
+  entityLastSeenTimestamp: generateRandomTimestamp(),
+  entityType,
+  entityDisplayName: faker.person.fullName(),
+  entityId: generateId(),
+  entityDefinitionId: faker.string.uuid(),
+  entityDefinitionVersion: '1.0.0',
+  entityIdentityFields: indentityFieldsPerType[entityType],
+  entitySchemaVersion: '1.0.0',
+  ...overrides,
 });
 
-const alertsMock: EntityLatest[] = [
+const alertsMock: InventoryEntityLatest[] = [
   getEntityLatest('host', {
     alertsCount: 1,
   }),
@@ -74,4 +74,4 @@ export const entitiesMock = [
   ...hostsMock,
   ...containersMock,
   ...servicesMock,
-] as EntityLatest[];
+] as InventoryEntityLatest[];

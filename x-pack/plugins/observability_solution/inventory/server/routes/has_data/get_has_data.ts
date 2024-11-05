@@ -16,14 +16,19 @@ export async function getHasData({
   inventoryEsClient: ObservabilityElasticsearchClient;
   logger: Logger;
 }) {
-  const esqlResults = await inventoryEsClient.esql<{ _count: number }>('get_has_data', {
-    query: `FROM ${ENTITIES_LATEST_ALIAS} 
+  try {
+    const esqlResults = await inventoryEsClient.esql<{ _count: number }>('get_has_data', {
+      query: `FROM ${ENTITIES_LATEST_ALIAS} 
       | ${getBuiltinEntityDefinitionIdESQLWhereClause()} 
       | STATS _count = COUNT(*)
       | LIMIT 1`,
-  });
+    });
 
-  const totalCount = esqlResults[0]._count;
+    const totalCount = esqlResults[0]._count;
 
-  return { hasData: totalCount > 0 };
+    return { hasData: totalCount > 0 };
+  } catch (e) {
+    logger.error(e);
+    return { hasData: false };
+  }
 }
