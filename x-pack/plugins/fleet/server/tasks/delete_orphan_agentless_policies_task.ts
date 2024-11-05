@@ -155,7 +155,7 @@ export class DeleteOrphanAgentlessPoliciesTask {
       }
 
       const orphanAgentlessPolicies = agentPolicyPageResults.filter(async (agentPolicy) => {
-        return agentPolicy.package_policies?.length === 1;
+        return !!agentPolicy.package_policies?.length && agentPolicy.package_policies?.length <= 1;
       });
 
       if (!orphanAgentlessPolicies.length) {
@@ -186,57 +186,62 @@ export class DeleteOrphanAgentlessPoliciesTask {
   ) => {
     this.logger.debug(`${agentPolicy.id} agentless policy id`);
 
-    if (!!agentPolicy.agents) {
-      // Unenroll Orphan Agent Policy
-      await agentPolicyUpdateEventHandler(esClient, 'deleted', agentPolicy.id, {
-        skipDeploy: true,
-        spaceId: soClient.getCurrentNamespace(),
-      });
-
-      // Delete agentless deployments
-      try {
-        this.logger.info(`${LOGGER_SUBJECT} deleting agentless deployments`);
-        await agentlessAgentService.deleteAgentlessAgent(agentPolicy.id);
-        this.endRun('successfully deleted agentless deployment');
-      } catch (e) {
-        if (e instanceof errors.RequestAbortedError) {
-          this.logger.error(`${LOGGER_SUBJECT} request aborted due to timeout: ${e}`);
-          this.endRun();
-          return;
-        }
-        this.logger.error(
-          `${LOGGER_SUBJECT} Failed to deleted agentless deployment ${agentPolicy.id} error: ${e}`
-        );
-      }
-    }
-
     const packagePolicies = await packagePolicyService.findAllForAgentPolicy(
       soClient,
       agentPolicy.id
     );
-
     // Delete Orphan Package Policies with system integration or no integrations policies installed
-    if (packagePolicies.length <= 1) {
-      try {
-        this.logger.info(
-          `${LOGGER_SUBJECT} deleting package policy for agentless policy ${agentPolicy.id}`
-        );
-        await packagePolicyService.delete(
-          soClient,
-          esClient,
-          packagePolicies.map((p) => p.id),
-          {
-            force: true,
-            skipUnassignFromAgentPolicies: true,
+    if (
+      packagePolicies.length === 0 ||
+      (packagePolicies.length === 1 && packagePolicies?.[0]?.package?.name === 'system')
+    ) {
+      if (!!agentPolicy.agents) {
+        // Unenroll Orphan Agent Policy
+        await agentPolicyUpdateEventHandler(esClient, 'deleted', agentPolicy.id, {
+          skipDeploy: true,
+          spaceId: soClient.getCurrentNamespace(),
+        });
+
+        // Delete agentless deployments
+        try {
+          this.logger.info(`${LOGGER_SUBJECT} deleting agentless deployments`);
+          await agentlessAgentService.deleteAgentlessAgent(agentPolicy.id);
+          this.endRun('successfully deleted agentless deployment');
+        } catch (e) {
+          if (e instanceof errors.RequestAbortedError) {
+            this.logger.error(`${LOGGER_SUBJECT} request aborted due to timeout: ${e}`);
+            this.endRun();
+            return;
           }
-        );
-        this.logger.info(
-          `${LOGGER_SUBJECT} deleting package policy for agentless policy ${agentPolicy.id}`
-        );
-      } catch (e) {
-        this.logger.error(
-          `${LOGGER_SUBJECT} Failed to deleted package policy for agentless policy ${agentPolicy.id} error: ${e}`
-        );
+          this.logger.error(
+            `${LOGGER_SUBJECT} Failed to deleted agentless deployment ${agentPolicy.id} error: ${e}`
+          );
+        }
+      }
+
+      // Delete Package Policy
+      if (packagePolicies?.length) {
+        try {
+          this.logger.info(
+            `${LOGGER_SUBJECT} deleting package policy for agentless policy ${agentPolicy.id}`
+          );
+          await packagePolicyService.delete(
+            soClient,
+            esClient,
+            packagePolicies.map((p) => p.id),
+            {
+              force: true,
+              skipUnassignFromAgentPolicies: true,
+            }
+          );
+          this.logger.info(
+            `${LOGGER_SUBJECT} deleting package policy for agentless policy ${agentPolicy.id}`
+          );
+        } catch (e) {
+          this.logger.error(
+            `${LOGGER_SUBJECT} Failed to deleted package policy for agentless policy ${agentPolicy.id} error: ${e}`
+          );
+        }
       }
 
       // Delete Agentless Policy from the Saved Object and .fleet-policies index
