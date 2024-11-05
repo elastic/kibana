@@ -7,11 +7,7 @@
 
 import { HttpSetup } from '@kbn/core-http-browser';
 
-import {
-  getKnowledgeBaseIndices,
-  getKnowledgeBaseStatus,
-  postKnowledgeBase,
-} from './api';
+import { getKnowledgeBaseIndices, getKnowledgeBaseStatus, postKnowledgeBase } from './api';
 
 jest.mock('@kbn/core-http-browser');
 
