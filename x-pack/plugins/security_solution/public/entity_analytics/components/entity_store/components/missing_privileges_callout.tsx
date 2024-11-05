@@ -27,7 +27,12 @@ export const MissingPrivilegesCallout = React.memo(
     return (
       <EuiCallOut
         color="primary"
-        title={'Insufficient privileges to enable the Entity Store'} // TODO: i18n
+        title={
+          <FormattedMessage
+            id="xpack.securitySolution.riskEngine.missingPrivilegesCallOut.title"
+            defaultMessage="Insufficient privileges to enable the Entity Store"
+          />
+        }
         iconType={'iInCircle'}
         data-test-subj={`callout-${id}`}
         data-test-messages={`[${id}]`}
