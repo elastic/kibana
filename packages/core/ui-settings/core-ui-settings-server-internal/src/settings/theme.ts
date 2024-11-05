@@ -7,14 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema } from '@kbn/config-schema';
+import { schema, Type } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
-import type { ThemeVersion } from '@kbn/ui-shared-deps-npm';
-import type { UiSettingsParams } from '@kbn/core-ui-settings-common';
+import {
+  AVAILABLE_THEME_TAGS,
+  AVAILABLE_THEME_VERSIONS,
+  DEFAULT_THEME_VERSION,
+  type UiSettingsParams,
+} from '@kbn/core-ui-settings-common';
 
 function parseThemeTags() {
   if (!process.env.KBN_OPTIMIZER_THEMES || process.env.KBN_OPTIMIZER_THEMES === '*') {
-    return ['v8light', 'v8dark'];
+    return AVAILABLE_THEME_TAGS;
   }
 
   return process.env.KBN_OPTIMIZER_THEMES.split(',').map((t) => t.trim());
@@ -24,12 +28,18 @@ function getThemeInfo(options: GetThemeSettingsOptions) {
   if (options?.isDist ?? true) {
     return {
       defaultDarkMode: false,
+      defaultVersion: DEFAULT_THEME_VERSION,
+      availableVersions: AVAILABLE_THEME_VERSIONS,
     };
   }
 
   const themeTags = parseThemeTags();
   return {
     defaultDarkMode: themeTags[0].endsWith('dark'),
+    defaultVersion: themeTags[0].slice(0, 2),
+    availableVersions: AVAILABLE_THEME_VERSIONS.filter((v) =>
+      themeTags.some((t) => t.startsWith(v))
+    ),
   };
 }
 
@@ -40,7 +50,9 @@ interface GetThemeSettingsOptions {
 export const getThemeSettings = (
   options: GetThemeSettingsOptions = {}
 ): Record<string, UiSettingsParams> => {
-  const { defaultDarkMode } = getThemeInfo(options);
+  const { defaultDarkMode, defaultVersion, availableVersions } = getThemeInfo(options);
+
+  const onlyOneThemeAvailable = !options?.isDist && availableVersions.length === 1;
 
   return {
     'theme:darkMode': {
@@ -85,9 +97,23 @@ export const getThemeSettings = (
       name: i18n.translate('core.ui_settings.params.themeVersionTitle', {
         defaultMessage: 'Theme version',
       }),
-      value: 'v8' as ThemeVersion,
-      readonly: true,
-      schema: schema.literal('v8'),
+      value: defaultVersion,
+      type: 'select',
+      options: availableVersions,
+      requiresPageReload: true,
+      schema: schema.oneOf(availableVersions.map((v) => schema.literal(v)) as [Type<string>]),
+      optionLabels: onlyOneThemeAvailable
+        ? {
+            [availableVersions[0]]: `${availableVersions[0]} (only)`,
+          }
+        : {
+            v8: i18n.translate('core.ui_settings.params.themeName.options.amsterdam', {
+              defaultMessage: 'Amsterdam',
+            }),
+            borealis: i18n.translate('core.ui_settings.params.themeName.options.borealis', {
+              defaultMessage: 'Borealis',
+            }),
+          },
     },
   };
 };

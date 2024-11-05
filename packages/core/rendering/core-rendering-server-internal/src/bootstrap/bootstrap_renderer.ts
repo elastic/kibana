@@ -11,7 +11,11 @@ import { createHash } from 'crypto';
 import { PackageInfo } from '@kbn/config';
 import { ThemeVersion } from '@kbn/ui-shared-deps-npm';
 import type { KibanaRequest, HttpAuth } from '@kbn/core-http-server';
-import { type DarkModeValue, parseDarkModeValue } from '@kbn/core-ui-settings-common';
+import {
+  type DarkModeValue,
+  parseDarkModeValue,
+  DEFAULT_THEME_VERSION,
+} from '@kbn/core-ui-settings-common';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
 import { InternalUserSettingsServiceSetup } from '@kbn/core-user-settings-server-internal';
@@ -59,13 +63,16 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
 
   return async function bootstrapRenderer({ uiSettingsClient, request, isAnonymousPage = false }) {
     let darkMode: DarkModeValue = false;
-    const themeVersion: ThemeVersion = 'v8';
+    let themeVersion: ThemeVersion = DEFAULT_THEME_VERSION;
 
     try {
       const authenticated = isAuthenticated(request);
 
       if (authenticated) {
         const userSettingDarkMode = await userSettingsService?.getUserSettingDarkMode(request);
+        themeVersion = authenticated
+          ? await uiSettingsClient.get('theme:version')
+          : DEFAULT_THEME_VERSION;
 
         if (userSettingDarkMode !== undefined) {
           darkMode = userSettingDarkMode;

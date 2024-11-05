@@ -58,6 +58,7 @@ describe('ThemeService', () => {
         const theme = await firstValueFrom(theme$);
         expect(theme).toEqual({
           darkMode: false,
+          version: 'v8',
         });
       });
 
@@ -101,6 +102,7 @@ describe('ThemeService', () => {
         const theme = await firstValueFrom(theme$);
         expect(theme).toEqual({
           darkMode: true,
+          version: 'v8',
         });
       });
 
@@ -150,6 +152,7 @@ describe('ThemeService', () => {
 
           expect(theme).toEqual({
             darkMode: false,
+            version: 'v8',
           });
 
           expect(window.__kbnThemeTag__).toEqual('v8light');
@@ -177,6 +180,7 @@ describe('ThemeService', () => {
 
           expect(theme).toEqual({
             darkMode: false,
+            version: 'v8',
           });
 
           expect(window.__kbnThemeTag__).toEqual('v8light');
@@ -196,6 +200,7 @@ describe('ThemeService', () => {
 
           expect(theme).toEqual({
             darkMode: true,
+            version: 'v8',
           });
 
           expect(window.__kbnThemeTag__).toEqual('v8dark');
@@ -220,6 +225,7 @@ describe('ThemeService', () => {
 
           expect(await firstValueFrom(theme$)).toEqual({
             darkMode: false,
+            version: 'v8',
           });
           expect(window.__kbnThemeTag__).toEqual('v8light');
 
@@ -255,6 +261,7 @@ describe('ThemeService', () => {
       const theme = await firstValueFrom(theme$);
       expect(theme).toEqual({
         darkMode: true,
+        version: 'v8',
       });
     });
   });

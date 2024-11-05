@@ -31,6 +31,7 @@ import {
 import { InternalRenderingServicePreboot, InternalRenderingServiceSetup } from './types';
 import { RenderingService } from './rendering_service';
 import { AuthStatus } from '@kbn/core-http-server';
+import { DEFAULT_THEME_VERSION } from '@kbn/core-ui-settings-common';
 
 const BUILD_DATE = '2023-05-15T23:12:09+0000';
 const INJECTED_METADATA = {
@@ -79,6 +80,13 @@ function renderTestCases(
       };
       uiSettings.client.getRegistered.mockReturnValue({
         registered: { name: 'title' },
+      });
+
+      getSettingValueMock.mockImplementation((settingName: string) => {
+        if (settingName === 'theme:version') {
+          return DEFAULT_THEME_VERSION;
+        }
+        return settingName;
       });
     });
 
@@ -180,6 +188,10 @@ function renderTestCases(
         if (settingName === 'theme:darkMode') {
           return true;
         }
+        if (settingName === 'theme:version') {
+          return DEFAULT_THEME_VERSION;
+        }
+
         return settingName;
       });
 
@@ -196,6 +208,9 @@ function renderTestCases(
       getSettingValueMock.mockImplementation((settingName: string) => {
         if (settingName === 'theme:darkMode') {
           return true;
+        }
+        if (settingName === 'theme:version') {
+          return DEFAULT_THEME_VERSION;
         }
         return settingName;
       });
@@ -214,6 +229,9 @@ function renderTestCases(
       getSettingValueMock.mockImplementation((settingName: string) => {
         if (settingName === 'theme:darkMode') {
           return true;
+        }
+        if (settingName === 'theme:version') {
+          return DEFAULT_THEME_VERSION;
         }
         return settingName;
       });
@@ -346,7 +364,6 @@ function renderDarkModeTestCases(
       client: ReturnType<typeof uiSettingsServiceMock.createClient>;
       globalClient: ReturnType<typeof uiSettingsServiceMock.createClient>;
     };
-
     beforeEach(async () => {
       uiSettings = {
         client: uiSettingsServiceMock.createClient(),
@@ -355,57 +372,44 @@ function renderDarkModeTestCases(
       uiSettings.client.getRegistered.mockReturnValue({
         registered: { name: 'title' },
       });
-    });
 
+      getSettingValueMock.mockImplementation((settingName: string) => {
+        if (settingName === 'theme:darkMode') {
+          return false;
+        }
+        if (settingName === 'theme:version') {
+          return DEFAULT_THEME_VERSION;
+        }
+        return settingName;
+      });
+    });
     describe('Dark Mode', () => {
       it('UserSettings darkMode === true should override the space setting', async () => {
         mockRenderingSetupDeps.userSettings.getUserSettingDarkMode.mockReturnValueOnce(
           Promise.resolve(true)
         );
-
-        getSettingValueMock.mockImplementation((settingName: string) => {
-          if (settingName === 'theme:darkMode') {
-            return false;
-          }
-          return settingName;
-        });
-
         const settings = { 'theme:darkMode': { userValue: false } };
         uiSettings.client.getUserProvided.mockResolvedValue(settings);
-
         const [render] = await getRender();
         await render(createKibanaRequest(), uiSettings);
-
         expect(getThemeStylesheetPathsMock).toHaveBeenCalledWith({
           darkMode: true,
           baseHref: '/mock-server-basepath',
         });
       });
-
       it('UserSettings darkMode === false should override the space setting', async () => {
         mockRenderingSetupDeps.userSettings.getUserSettingDarkMode.mockReturnValueOnce(
           Promise.resolve(false)
         );
-
-        getSettingValueMock.mockImplementation((settingName: string) => {
-          if (settingName === 'theme:darkMode') {
-            return true;
-          }
-          return settingName;
-        });
-
         const settings = { 'theme:darkMode': { userValue: false } };
         uiSettings.client.getUserProvided.mockResolvedValue(settings);
-
         const [render] = await getRender();
         await render(createKibanaRequest(), uiSettings);
-
         expect(getThemeStylesheetPathsMock).toHaveBeenCalledWith({
           darkMode: false,
           baseHref: '/mock-server-basepath',
         });
       });
-
       it('Space setting value should be used if UsersSettings value is undefined', async () => {
         mockRenderingSetupDeps.userSettings.getUserSettingDarkMode.mockReturnValueOnce(
           Promise.resolve(undefined)
@@ -414,42 +418,33 @@ function renderDarkModeTestCases(
           if (settingName === 'theme:darkMode') {
             return false;
           }
+          if (settingName === 'theme:version') {
+            return DEFAULT_THEME_VERSION;
+          }
           return settingName;
         });
-
         const settings = { 'theme:darkMode': { userValue: false } };
         uiSettings.client.getUserProvided.mockResolvedValue(settings);
         const [render] = await getRender();
         await render(createKibanaRequest(), uiSettings);
-
         expect(getThemeStylesheetPathsMock).toHaveBeenCalledWith({
           darkMode: false,
           baseHref: '/mock-server-basepath',
         });
       });
-
       it('config `theme:darkMode: true` setting should override User Settings theme `darkMode === false', async () => {
         mockRenderingSetupDeps.userSettings.getUserSettingDarkMode.mockReturnValueOnce(
           Promise.resolve(false)
         );
-        getSettingValueMock.mockImplementation((settingName: string) => {
-          if (settingName === 'theme:darkMode') {
-            return true;
-          }
-          return settingName;
-        });
-
         const settings = { 'theme:darkMode': { userValue: true, isOverridden: true } };
         uiSettings.client.getUserProvided.mockResolvedValue(settings);
         const [render] = await getRender();
         await render(createKibanaRequest(), uiSettings);
-
         expect(getThemeStylesheetPathsMock).toHaveBeenCalledWith({
           darkMode: true,
           baseHref: '/mock-server-basepath',
         });
       });
-
       it('config `theme:darkMode: false` setting should override User Settings theme `darkMode === true', async () => {
         mockRenderingSetupDeps.userSettings.getUserSettingDarkMode.mockReturnValueOnce(
           Promise.resolve(true)
@@ -458,20 +453,20 @@ function renderDarkModeTestCases(
           if (settingName === 'theme:darkMode') {
             return false;
           }
+          if (settingName === 'theme:version') {
+            return DEFAULT_THEME_VERSION;
+          }
           return settingName;
         });
-
         const settings = { 'theme:darkMode': { userValue: false, isOverridden: true } };
         uiSettings.client.getUserProvided.mockResolvedValue(settings);
         const [render] = await getRender();
         await render(createKibanaRequest(), uiSettings);
-
         expect(getThemeStylesheetPathsMock).toHaveBeenCalledWith({
           darkMode: false,
           baseHref: '/mock-server-basepath',
         });
       });
-
       it('config `theme:darkMode: false` setting should override User Settings theme `darkMode === undefined', async () => {
         mockRenderingSetupDeps.userSettings.getUserSettingDarkMode.mockReturnValueOnce(
           Promise.resolve(undefined)
@@ -480,36 +475,28 @@ function renderDarkModeTestCases(
           if (settingName === 'theme:darkMode') {
             return false;
           }
+          if (settingName === 'theme:version') {
+            return DEFAULT_THEME_VERSION;
+          }
           return settingName;
         });
-
         const settings = { 'theme:darkMode': { userValue: false, isOverridden: true } };
         uiSettings.client.getUserProvided.mockResolvedValue(settings);
         const [render] = await getRender();
         await render(createKibanaRequest(), uiSettings);
-
         expect(getThemeStylesheetPathsMock).toHaveBeenCalledWith({
           darkMode: false,
           baseHref: '/mock-server-basepath',
         });
       });
-
       it('config `theme:darkMode: true` setting should override User Settings theme `darkMode === undefined', async () => {
         mockRenderingSetupDeps.userSettings.getUserSettingDarkMode.mockReturnValueOnce(
           Promise.resolve(undefined)
         );
-        getSettingValueMock.mockImplementation((settingName: string) => {
-          if (settingName === 'theme:darkMode') {
-            return true;
-          }
-          return settingName;
-        });
-
         const settings = { 'theme:darkMode': { userValue: true, isOverridden: true } };
         uiSettings.client.getUserProvided.mockResolvedValue(settings);
         const [render] = await getRender();
         await render(createKibanaRequest(), uiSettings);
-
         expect(getThemeStylesheetPathsMock).toHaveBeenCalledWith({
           darkMode: true,
           baseHref: '/mock-server-basepath',
