@@ -68,9 +68,15 @@ export const getV1 = (): KibanaFeatureConfig => {
           read: [...filesSavedObjectTypes],
         },
         ui: capabilities.all,
-        replacedBy: [
-          { feature: FEATURE_ID_V2, privileges: ['minimal_all', 'create_comment', 'case_reopen'] },
-        ],
+        replacedBy: {
+          default: [{ feature: FEATURE_ID_V2, privileges: ['all'] }],
+          minimal: [
+            {
+              feature: FEATURE_ID_V2,
+              privileges: ['minimal_all', 'create_comment', 'case_reopen'],
+            },
+          ],
+        },
       },
       read: {
         api: apiTags.read,

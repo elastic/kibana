@@ -148,7 +148,7 @@ export const getCasesFeatureV2 = (
       ],
     },
     {
-      name: i18n.translate('xpack.observability.featureRegistry.reopenCaseubFeatureName', {
+      name: i18n.translate('xpack.observability.featureRegistry.reopenCaseSubFeatureName', {
         defaultMessage: 'Re-open',
       }),
       privilegeGroups: [
@@ -158,7 +158,7 @@ export const getCasesFeatureV2 = (
             {
               id: 'case_reopen',
               name: i18n.translate(
-                'xpack.observability.featureRegistry.reopenCaseubFeatureDetails',
+                'xpack.observability.featureRegistry.reopenCaseSubFeatureDetails',
                 {
                   defaultMessage: 'Re-open closed cases',
                 }

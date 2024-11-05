@@ -61,7 +61,7 @@ export {
   getProbabilityFromProgressiveLoadingQuality,
 } from './progressive_loading';
 
-/** @deprecated deprecated in 8.16. Please use casesFeatureIdV2 instead */
+/** @deprecated deprecated in 8.17. Please use casesFeatureIdV2 instead */
 export const casesFeatureId = 'observabilityCases';
 export const casesFeatureIdV2 = 'observabilityCasesV2';
 export const sloFeatureId = 'slo';

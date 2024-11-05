@@ -10,12 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import type { BaseKibanaFeatureConfig } from '../../types';
-import {
-  APP_ID,
-  CASES_FEATURE_ID,
-  CASES_FEATURE_ID_V2,
-  SECURITY_SOLUTION_CASES_APP_ID,
-} from '../../constants';
+import { APP_ID, CASES_FEATURE_ID_V2, SECURITY_SOLUTION_CASES_APP_ID } from '../../constants';
 import type { CasesFeatureParams } from '../types';
 
 export const getCasesBaseKibanaFeatureV2 = ({
@@ -55,7 +50,7 @@ export const getCasesBaseKibanaFeatureV2 = ({
       },
       read: {
         api: apiTags.read,
-        app: [CASES_FEATURE_ID, 'kibana'],
+        app: [SECURITY_SOLUTION_CASES_APP_ID, 'kibana'],
         catalogue: [APP_ID],
         cases: {
           read: [APP_ID],

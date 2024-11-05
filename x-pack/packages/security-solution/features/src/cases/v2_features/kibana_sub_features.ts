@@ -97,7 +97,7 @@ export const getCasesSubFeaturesMapV2 = ({
     ],
   };
 
-  /* The below sub features were newly added in v2 (8.16) */
+  /* The below sub features were newly added in v2 (8.17) */
 
   const casesAddCommentsCasesSubFeature: SubFeatureConfig = {
     name: i18n.translate(
@@ -133,9 +133,9 @@ export const getCasesSubFeaturesMapV2 = ({
       },
     ],
   };
-  const casesreopenCaseubFeature: SubFeatureConfig = {
+  const casesreopenCaseSubFeature: SubFeatureConfig = {
     name: i18n.translate(
-      'securitySolutionPackages.features.featureRegistry.reopenCaseubFeatureName',
+      'securitySolutionPackages.features.featureRegistry.reopenCaseSubFeatureName',
       {
         defaultMessage: 'Re-open',
       }
@@ -148,7 +148,7 @@ export const getCasesSubFeaturesMapV2 = ({
             api: apiTags.all,
             id: 'case_reopen',
             name: i18n.translate(
-              'securitySolutionPackages.features.featureRegistry.reopenCaseubFeatureDetails',
+              'securitySolutionPackages.features.featureRegistry.reopenCaseSubFeatureDetails',
               {
                 defaultMessage: 'Re-open closed cases',
               }
@@ -171,8 +171,8 @@ export const getCasesSubFeaturesMapV2 = ({
   return new Map<CasesSubFeatureId, SubFeatureConfig>([
     [CasesSubFeatureId.deleteCases, deleteCasesSubFeature],
     [CasesSubFeatureId.casesSettings, casesSettingsCasesSubFeature],
-    /* The below sub features were newly added in v2 (8.16) */
+    /* The below sub features were newly added in v2 (8.17) */
     [CasesSubFeatureId.createComment, casesAddCommentsCasesSubFeature],
-    [CasesSubFeatureId.reopenCase, casesreopenCaseubFeature],
+    [CasesSubFeatureId.reopenCase, casesreopenCaseSubFeature],
   ]);
 };

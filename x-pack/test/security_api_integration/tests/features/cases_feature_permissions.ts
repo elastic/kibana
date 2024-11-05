@@ -7,7 +7,8 @@
 
 import { expect } from 'expect';
 
-import type { Case, CasePostRequest } from '@kbn/cases-plugin/common';
+import { CaseStatuses } from '@kbn/cases-components';
+import type { Case, CasePatchRequest, CasePostRequest } from '@kbn/cases-plugin/common';
 import { CaseSeverity, ConnectorTypes, FEATURE_ID, FEATURE_ID_V2 } from '@kbn/cases-plugin/common';
 import type { CasesFindResponse } from '@kbn/cases-plugin/common/types/api';
 import type { Role } from '@kbn/security-plugin-types-common';
@@ -35,7 +36,7 @@ export default function ({ getService }: FtrProviderContext) {
           spaces: ['*'],
           base: [],
           feature: {
-            [FEATURE_ID_V2]: ['minimal_all', 'create_comment', 'case_reopen'],
+            [FEATURE_ID_V2]: ['all'],
           },
         },
       ]);
@@ -113,9 +114,9 @@ export default function ({ getService }: FtrProviderContext) {
           create_comment: true,
           case_reopen: true,
           cases_connectors: true,
-          cases_settings: false,
+          cases_settings: true,
           create_cases: true,
-          delete_cases: false,
+          delete_cases: true,
           push_cases: true,
           read_cases: true,
           update_cases: true,
@@ -184,6 +185,89 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
         expect(v2Response.body.id).toBe(testCase.id);
       }
+    });
+
+    it('case update permissions are properly handled for deprecated privileges', async () => {
+      const createCase = async (authorization: string): Promise<Case> => {
+        const caseRequest: CasePostRequest = {
+          description: 'Test case',
+          title: 'Test Case',
+          tags: ['test'],
+          severity: CaseSeverity.LOW,
+          connector: {
+            id: 'none',
+            name: 'none',
+            type: ConnectorTypes.none,
+            fields: null,
+          },
+          settings: { syncAlerts: false },
+          owner: 'cases',
+          assignees: [],
+        };
+
+        const { body: newCase } = await supertestWithoutAuth
+          .post('/api/cases')
+          .set('Authorization', authorization)
+          .set('kbn-xsrf', 'xxx')
+          .send(caseRequest)
+          .expect(200);
+        return newCase;
+      };
+
+      const updateCaseToClosed = async (authorization: string, caseId: string): Promise<Case> => {
+        const updateRequest: CasePatchRequest = {
+          status: CaseStatuses.closed,
+          version: '1',
+        };
+
+        const { body: updatedCase } = await supertestWithoutAuth
+          .patch(`/api/cases/${caseId}`)
+          .set('Authorization', authorization)
+          .set('kbn-xsrf', 'xxx')
+          .send(updateRequest);
+        return updatedCase;
+      };
+
+      const updateCaseToOpen = async (authorization: string, caseId: string): Promise<Case> => {
+        const updateRequest: CasePatchRequest = {
+          status: CaseStatuses.open, // Try to reopen the case
+          version: '2', // Assuming this is first update
+        };
+
+        const { body: updatedCase } = await supertestWithoutAuth
+          .patch(`/api/cases/${caseId}`)
+          .set('Authorization', authorization)
+          .set('kbn-xsrf', 'xxx')
+          .send(updateRequest);
+        return updatedCase;
+      };
+
+      const v1User = getUserCredentials('cases_v1_user');
+      const v1Case = await createCase(v1User);
+
+      const v1TransformedUser = getUserCredentials('cases_v1_transformed_user');
+      const v1TransformedCase = await createCase(v1TransformedUser);
+
+      const v2User = getUserCredentials('cases_v2_user');
+      const v2Case = await createCase(v2User);
+
+      const v1UpdateToClosed = await updateCaseToClosed(v1User, v1Case.id);
+      expect(v1UpdateToClosed.status).toBe(CaseStatuses.CLOSED);
+      const v1Update = await updateCaseToOpen(v1User, v1Case.id);
+      expect(v1Update.status).toBe(CaseStatuses.OPEN);
+
+      const transformedUpdateToClosed = await updateCaseToClosed(
+        v1TransformedUser,
+        v1TransformedCase.id
+      );
+      expect(transformedUpdateToClosed.status).toBe(CaseStatuses.CLOSED);
+      const transformedUpdate = await updateCaseToOpen(v1TransformedUser, v1TransformedCase.id);
+      expect(transformedUpdate.status).toBe(CaseStatuses.OPEN);
+
+      const v2UpdateToClosed = await updateCaseToClosed(v2User, v2Case.id);
+      expect(v2UpdateToClosed.status).toBe(CaseStatuses.CLOSED);
+      const v2Update = await updateCaseToOpen(v2User, v2Case.id);
+      expect(v2Update.status).toBe(CaseStatuses.OPEN);
     });
   });
 }

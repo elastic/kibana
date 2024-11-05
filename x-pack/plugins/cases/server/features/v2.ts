@@ -164,7 +164,7 @@ export const getV2 = (): KibanaFeatureConfig => {
         ],
       },
       {
-        name: i18n.translate('xpack.cases.features.reopenCaseubFeatureName', {
+        name: i18n.translate('xpack.cases.features.reopenCaseSubFeatureName', {
           defaultMessage: 'Re-open',
         }),
         privilegeGroups: [
@@ -173,7 +173,7 @@ export const getV2 = (): KibanaFeatureConfig => {
             privileges: [
               {
                 id: CASES_REOPEN_SUB_PRIVILEGE_ID,
-                name: i18n.translate('xpack.cases.features.reopenCaseubFeatureDetails', {
+                name: i18n.translate('xpack.cases.features.reopenCaseSubFeatureDetails', {
                   defaultMessage: 'Re-open closed cases',
                 }),
                 includeIn: 'all',
