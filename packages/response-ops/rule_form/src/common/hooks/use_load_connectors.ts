@@ -9,7 +9,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import type { HttpStart } from '@kbn/core-http-browser';
-import { fetchConnectors } from '../apis';
+import { fetchConnectors } from '@kbn/alerts-ui-shared';
 
 export interface UseLoadConnectorsProps {
   http: HttpStart;

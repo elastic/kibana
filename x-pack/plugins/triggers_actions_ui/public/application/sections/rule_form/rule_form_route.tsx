@@ -7,7 +7,7 @@
 
 import React, { useEffect } from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { RuleForm } from '@kbn/alerts-ui-shared/src/rule_form/rule_form';
+import { RuleForm } from '@kbn/response-ops-rule-form';
 import { getRuleDetailsRoute } from '@kbn/rule-data-utils';
 import { useLocation, useParams } from 'react-router-dom';
 import { useKibana } from '../../../common/lib/kibana';

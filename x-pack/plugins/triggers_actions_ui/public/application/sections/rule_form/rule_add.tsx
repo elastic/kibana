@@ -5,44 +5,47 @@
  * 2.0.
  */
 
-import React, { useReducer, useMemo, useState, useEffect, useCallback } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiTitle, EuiFlyoutHeader, EuiFlyout, EuiFlyoutBody, EuiPortal } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { isEmpty } from 'lodash';
-import { toMountPoint } from '@kbn/react-kibana-mount';
+import { EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader, EuiPortal, EuiTitle } from '@elastic/eui';
 import { parseRuleCircuitBreakerErrorMessage } from '@kbn/alerting-plugin/common';
-import { createRule, CreateRuleBody } from '@kbn/alerts-ui-shared/src/common/apis/create_rule';
-import { fetchUiConfig as triggersActionsUiConfig } from '@kbn/alerts-ui-shared/src/common/apis/fetch_ui_config';
 import { IS_RULE_SPECIFIC_FLAPPING_ENABLED } from '@kbn/alerts-ui-shared/src/common/constants/rule_flapping';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import {
-  Rule,
-  RuleTypeParams,
-  RuleTypeMetaData,
-  RuleUpdates,
-  RuleFlyoutCloseReason,
-  IErrorObject,
-  RuleAddProps,
-  RuleTypeIndex,
-  TriggersActionsUiConfig,
-  RuleCreationValidConsumer,
-} from '../../../types';
-import { RuleForm } from './rule_form';
-import { getRuleActionErrors, getRuleErrors, isValidRule } from './rule_errors';
-import { InitialRule, getRuleReducer } from './rule_reducer';
-import { loadRuleTypes } from '../../lib/rule_api/rule_types';
-import { HealthCheck } from '../../components/health_check';
-import { ConfirmRuleSave } from './confirm_rule_save';
-import { ConfirmRuleClose } from './confirm_rule_close';
-import { hasShowActionsCapability } from '../../lib/capabilities';
-import RuleAddFooter from './rule_add_footer';
-import { HealthContextProvider } from '../../context/health_context';
+  CreateRuleBody,
+  createRule,
+  fetchUiConfig as triggersActionsUiConfig,
+} from '@kbn/response-ops-rule-form';
+import { isEmpty } from 'lodash';
+import React, { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
 import { useKibana } from '../../../common/lib/kibana';
-import { hasRuleChanged, haveRuleParamsChanged } from './has_rule_changed';
-import { getRuleWithInvalidatedFields } from '../../lib/value_validators';
-import { DEFAULT_RULE_INTERVAL, MULTI_CONSUMER_RULE_TYPE_IDS } from '../../constants';
-import { getInitialInterval } from './get_initial_interval';
+import {
+  IErrorObject,
+  Rule,
+  RuleAddProps,
+  RuleCreationValidConsumer,
+  RuleFlyoutCloseReason,
+  RuleTypeIndex,
+  RuleTypeMetaData,
+  RuleTypeParams,
+  RuleUpdates,
+  TriggersActionsUiConfig,
+} from '../../../types';
+import { HealthCheck } from '../../components/health_check';
 import { ToastWithCircuitBreakerContent } from '../../components/toast_with_circuit_breaker_content';
+import { DEFAULT_RULE_INTERVAL, MULTI_CONSUMER_RULE_TYPE_IDS } from '../../constants';
+import { HealthContextProvider } from '../../context/health_context';
+import { hasShowActionsCapability } from '../../lib/capabilities';
+import { loadRuleTypes } from '../../lib/rule_api/rule_types';
+import { getRuleWithInvalidatedFields } from '../../lib/value_validators';
+import { ConfirmRuleClose } from './confirm_rule_close';
+import { ConfirmRuleSave } from './confirm_rule_save';
+import { getInitialInterval } from './get_initial_interval';
+import { hasRuleChanged, haveRuleParamsChanged } from './has_rule_changed';
+import RuleAddFooter from './rule_add_footer';
+import { getRuleActionErrors, getRuleErrors, isValidRule } from './rule_errors';
+import { RuleForm } from './rule_form';
+import { InitialRule, getRuleReducer } from './rule_reducer';
 import { ShowRequestModal } from './show_request_modal';
 
 const defaultCreateRuleErrorMessage = i18n.translate(

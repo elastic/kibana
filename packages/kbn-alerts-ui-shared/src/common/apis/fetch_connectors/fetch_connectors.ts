@@ -8,9 +8,9 @@
  */
 
 import { HttpSetup } from '@kbn/core/public';
-import { ActionConnector } from '@kbn/alerts-ui-shared';
+import { ActionConnector } from '../../types';
 import { transformConnectorResponse } from './transform_connectors_response';
-import { BASE_ACTION_API_PATH, INTERNAL_BASE_ACTION_API_PATH } from '../../../constants';
+import { BASE_ACTION_API_PATH, INTERNAL_BASE_ACTION_API_PATH } from '../../constants';
 
 export async function fetchConnectors({
   http,

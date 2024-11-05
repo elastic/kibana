@@ -9,7 +9,7 @@
 
 import { HttpSetup } from '@kbn/core/public';
 import { ActionType } from '@kbn/actions-types';
-import { BASE_ACTION_API_PATH, INTERNAL_BASE_ACTION_API_PATH } from '../../../constants';
+import { BASE_ACTION_API_PATH, INTERNAL_BASE_ACTION_API_PATH } from '../../constants';
 import { transformConnectorTypesResponse } from './transform_connector_types_response';
 
 export const fetchConnectorTypes = async ({

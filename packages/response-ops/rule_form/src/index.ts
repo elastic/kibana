@@ -16,3 +16,17 @@ export * from './utils';
 export * from './types';
 export * from './constants';
 export * from './rule_type_modal';
+export * from './action_variables';
+
+export {
+  fetchUiConfig,
+  createRule,
+  updateRule,
+  type CreateRuleBody,
+  UPDATE_FIELDS_WITH_ACTIONS,
+  transformCreateRuleBody,
+  transformUpdateRuleBody,
+  resolveRule,
+} from './common/apis';
+
+export { getAvailableActionVariables } from './action_variables/get_available_action_variables';
