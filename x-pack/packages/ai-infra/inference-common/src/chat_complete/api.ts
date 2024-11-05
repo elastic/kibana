@@ -70,7 +70,7 @@ export type ChatCompleteOptions<
 > = {
   /**
    * The ID of the connector to use.
-   * Must be a genAI compatible connector, or an error will be thrown.
+   * Must be an inference connector, or an error will be thrown.
    */
   connectorId: string;
   /**
