@@ -27,7 +27,6 @@ import { initializeActionApi } from './initializers/initialize_actions';
 import { initializeIntegrations } from './initializers/initialize_integrations';
 import { initializeStateManagement } from './initializers/initialize_state_management';
 import { LensEmbeddableComponent } from './renderer/lens_embeddable_component';
-// import { LensEmbeddableComponent } from './renderer/lens_embeddable_component';
 
 export const createLensEmbeddableFactory = (
   services: LensEmbeddableStartServices
