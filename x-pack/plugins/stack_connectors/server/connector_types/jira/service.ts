@@ -279,7 +279,7 @@ export const createExternalService = (
       const res = await request({
         axios: axiosInstance,
         method: 'put',
-        url: `${incidentUrl}/${incidentId}?returnIssue=true`,
+        url: `${incidentUrl}/${incidentId}`,
         logger,
         data: { fields },
         configurationUtilities,
