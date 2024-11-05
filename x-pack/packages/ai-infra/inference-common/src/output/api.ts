@@ -77,7 +77,7 @@ export interface OutputOptions<
    */
   input: string;
   /**
-   * The {@link ToolSchema} the response from the LLM should adhere to.
+   * The schema the response from the LLM should adhere to.
    */
   schema?: TOutputSchema;
   /**
