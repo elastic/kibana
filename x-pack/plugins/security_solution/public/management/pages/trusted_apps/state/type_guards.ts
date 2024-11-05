@@ -9,19 +9,7 @@ import { ConditionEntryField } from '@kbn/securitysolution-utils';
 import type {
   TrustedAppConditionEntry,
   LinuxConditionEntry,
-  WindowsConditionEntry,
-  MacosConditionEntry,
 } from '../../../../../common/endpoint/types';
-
-export const isSignerFieldIncluded = (
-  condition: TrustedAppConditionEntry
-): condition is WindowsConditionEntry | MacosConditionEntry => {
-  return (
-    condition.field === ConditionEntryField.SIGNER ||
-    condition.field === ConditionEntryField.SIGNER_MAC ||
-    true
-  );
-};
 
 export const isSignerFieldExcluded = (
   condition: TrustedAppConditionEntry

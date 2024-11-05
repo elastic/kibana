@@ -90,9 +90,8 @@ const CommonEntrySchema = {
 
 // Windows/MacOS Signer entries use a Nested field that checks to ensure
 // that the certificate is trusted
-const SignerWindowsEntrySchema = schema.object({
+const SignerEntrySchema = {
   type: schema.literal('nested'),
-  field: ProcessWindowsCodeSigner,
   entries: schema.arrayOf(
     schema.oneOf([
       schema.object({
@@ -110,28 +109,16 @@ const SignerWindowsEntrySchema = schema.object({
     ]),
     { minSize: 2, maxSize: 2 }
   ),
+};
+
+const SignerWindowsEntrySchema = schema.object({
+  ...SignerEntrySchema,
+  field: ProcessWindowsCodeSigner,
 });
 
 const SignerMacEntrySchema = schema.object({
-  type: schema.literal('nested'),
+  ...SignerEntrySchema,
   field: ProcessMacCodeSigner,
-  entries: schema.arrayOf(
-    schema.oneOf([
-      schema.object({
-        field: schema.literal('trusted'),
-        value: schema.literal('true'),
-        type: schema.literal('match'),
-        operator: schema.literal('included'),
-      }),
-      schema.object({
-        field: schema.literal('subject_name'),
-        value: schema.string({ minLength: 1 }),
-        type: schema.literal('match'),
-        operator: schema.literal('included'),
-      }),
-    ]),
-    { minSize: 2, maxSize: 2 }
-  ),
 });
 
 const WindowsEntrySchema = schema.oneOf([

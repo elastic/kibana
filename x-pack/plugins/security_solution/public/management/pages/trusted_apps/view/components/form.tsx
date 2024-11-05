@@ -44,7 +44,7 @@ import {
   getPolicyIdsFromArtifact,
   getArtifactTagsByPolicySelection,
 } from '../../../../../../common/endpoint/service/artifacts';
-import { isSignerFieldExcluded, isSignerFieldIncluded } from '../../state/type_guards';
+import { isSignerFieldExcluded } from '../../state/type_guards';
 
 import {
   CONDITIONS_HEADER,
@@ -361,16 +361,38 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
           entries: [] as ArtifactFormComponentProps['item']['entries'],
         };
 
-        if (os === OperatingSystem.LINUX) {
-          const linuxConditionEntry = item.entries.filter((entry) =>
-            isSignerFieldExcluded(entry as TrustedAppConditionEntry)
-          );
-          nextItem.entries.push(...linuxConditionEntry);
-          if (item.entries.length === 0) {
-            nextItem.entries.push(defaultConditionEntry());
-          }
-        } else {
-          nextItem.entries.push(...item.entries);
+        switch (os) {
+          case OperatingSystem.LINUX:
+            nextItem.entries = item.entries.filter((entry) =>
+              isSignerFieldExcluded(entry as TrustedAppConditionEntry)
+            );
+            if (item.entries.length === 0) {
+              nextItem.entries.push(defaultConditionEntry());
+            }
+            break;
+          case OperatingSystem.MAC:
+            nextItem.entries = item.entries.map((entry) =>
+              entry.field === ConditionEntryField.SIGNER
+                ? { ...entry, field: ConditionEntryField.SIGNER_MAC }
+                : entry
+            );
+            if (item.entries.length === 0) {
+              nextItem.entries.push(defaultConditionEntry());
+            }
+            break;
+          case OperatingSystem.WINDOWS:
+            nextItem.entries = item.entries.map((entry) =>
+              entry.field === ConditionEntryField.SIGNER_MAC
+                ? { ...entry, field: ConditionEntryField.SIGNER }
+                : entry
+            );
+            if (item.entries.length === 0) {
+              nextItem.entries.push(defaultConditionEntry());
+            }
+            break;
+          default:
+            nextItem.entries.push(...item.entries);
+            break;
         }
 
         processChanged(nextItem);
@@ -434,9 +456,7 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
           defaultConditionEntry(),
         ];
       } else {
-        nextItem.entries = [...item.entries, defaultConditionEntry()].filter((entry) =>
-          isSignerFieldIncluded(entry as TrustedAppConditionEntry)
-        );
+        nextItem.entries = [...item.entries, defaultConditionEntry()];
       }
       processChanged(nextItem);
       setHasFormChanged(true);
