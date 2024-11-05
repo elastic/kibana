@@ -118,7 +118,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(stepTitle1).to.be('Logistics');
 
       // Fill out required fields
-      await testSubjects.setValue('nameField', 'a*');
+      await testSubjects.setValue('nameField', 'a-star');
       await testSubjects.setValue('indexPatternsField', 'a*');
 
       // Click Next button
@@ -154,7 +154,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       // Verify step title
       const stepTitle = await testSubjects.getVisibleText('stepTitle');
-      expect(stepTitle).to.be("Review details for 'test-index-template'");
+      expect(stepTitle).to.be("Review details for 'a-star'");
 
       // Verify that summary exists
       const summaryTabContent = await testSubjects.exists('summaryTabContent');
