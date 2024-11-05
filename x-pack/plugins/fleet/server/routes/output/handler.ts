@@ -20,6 +20,7 @@ import type {
   GetOneOutputRequestSchema,
   PostOutputRequestSchema,
   PutOutputRequestSchema,
+  ListPoliciesByOutputsRequestSchema,
 } from '../../types';
 import type {
   DeleteOutputResponse,
@@ -27,6 +28,7 @@ import type {
   GetOutputsResponse,
   Output,
   PostLogstashApiKeyResponse,
+  GetListAgentPolicyByOutputsResponse
 } from '../../../common/types';
 import { outputService } from '../../services/output';
 import { defaultFleetErrorHandler, FleetUnauthorizedError } from '../../errors';
@@ -63,6 +65,30 @@ export const getOutputsHandler: RequestHandler = async (context, request, respon
       page: outputs.page,
       perPage: outputs.perPage,
       total: outputs.total,
+    };
+
+    return response.ok({ body });
+  } catch (error) {
+    return defaultFleetErrorHandler({ error, response });
+  }
+};
+
+export const listPoliciesByOutputsHandler: RequestHandler<
+  undefined,
+  undefined,
+  TypeOf<typeof ListPoliciesByOutputsRequestSchema.body>
+> = async (context, request, response) => {
+  try {
+    const { ids } = request.body;
+    if (!ids) {
+      return response.ok({
+        body: { items: [] },
+      });
+    }
+    const agentPolicies = await outputService.getAgentPoliciesPerOutputs(ids);
+
+    const body: GetListAgentPolicyByOutputsResponse = {
+      items: agentPolicies ?? [],
     };
 
     return response.ok({ body });

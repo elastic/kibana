@@ -72,3 +72,15 @@ export const GetLatestOutputHealthResponseSchema = schema.object({
     },
   }),
 });
+
+export const ListPoliciesByOutputsRequestSchema = {
+  body: schema.object({
+    ids: schema.arrayOf(schema.string(), {
+      meta: { description: 'list of output ids' },
+    }),
+  }),
+};
+
+export const ListPoliciesByOutputsResponseSchema = schema.object({
+  items: schema.arrayOf(schema.string()),
+});

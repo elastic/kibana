@@ -22,6 +22,8 @@ import {
   OutputResponseSchema,
   PostOutputRequestSchema,
   PutOutputRequestSchema,
+  ListPoliciesByOutputsRequestSchema,
+  ListPoliciesByOutputsResponseSchema,
 } from '../../types';
 
 import { genericErrorResponse } from '../schema/errors';
@@ -34,6 +36,7 @@ import {
   putOutputHandler,
   postLogstashApiKeyHandler,
   getLatestOutputHealth,
+  listPoliciesByOutputsHandler,
 } from './handler';
 
 export const registerRoutes = (router: FleetAuthzRouter) => {
@@ -239,5 +242,34 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
         },
       },
       getLatestOutputHealth
+    );
+
+  router.versioned
+    .post({
+      path: OUTPUT_API_ROUTES.GET_AGENT_POLICIES,
+      fleetAuthz: (authz) => {
+        return authz.fleet.readAgentPolicies && authz.fleet.readSettings;
+      },
+      description: `Get agent policies associated with outputs by output ids`,
+      options: {
+        tags: ['oas-tag:Fleet outputs'],
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: {
+          request: ListPoliciesByOutputsRequestSchema,
+          response: {
+            200: {
+              body: () => ListPoliciesByOutputsResponseSchema,
+            },
+            400: {
+              body: genericErrorResponse,
+            },
+          },
+        },
+      },
+      listPoliciesByOutputsHandler
     );
 };

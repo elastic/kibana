@@ -130,25 +130,14 @@ function outputSavedObjectToOutput(so: SavedObject<OutputSOAttributes>): Output 
   };
 }
 
-async function getAgentPoliciesPerOutput(outputId?: string, isDefault?: boolean) {
+/*
+ * Common functionality that allows to get agent policies by policies kuerys */
+async function getAgentPolicyByOutputKuery(
+  agentPoliciesKuery: string,
+  packagePoliciesKuery: string
+) {
   const internalSoClientWithoutSpaceExtension =
     appContextService.getInternalUserSOClientWithoutSpaceExtension();
-  let agentPoliciesKuery: string;
-  const packagePoliciesKuery: string = `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.output_id:"${outputId}"`;
-  if (outputId) {
-    if (isDefault) {
-      agentPoliciesKuery = `${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:"${outputId}" or not ${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:*`;
-    } else {
-      agentPoliciesKuery = `${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:"${outputId}"`;
-    }
-  } else {
-    if (isDefault) {
-      agentPoliciesKuery = `not ${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:*`;
-    } else {
-      return;
-    }
-  }
-
   // Get agent policies directly using output
   const directAgentPolicies = await agentPolicyService.list(internalSoClientWithoutSpaceExtension, {
     kuery: agentPoliciesKuery,
@@ -158,7 +147,7 @@ async function getAgentPoliciesPerOutput(outputId?: string, isDefault?: boolean)
   const directAgentPolicyIds = directAgentPolicies?.items.map((policy) => policy.id);
 
   // Get package policies using output and derive agent policies from that which
-  // are not already identfied above. The IDs cannot be used as part of the kuery
+  // are not already identified above. The IDs cannot be used as part of the kuery
   // above since the underlying saved object client .find() only filters on attributes
   const packagePolicySOs = await packagePolicyService.list(internalSoClientWithoutSpaceExtension, {
     kuery: packagePoliciesKuery,
@@ -209,6 +198,26 @@ async function getAgentPoliciesPerOutput(outputId?: string, isDefault?: boolean)
   }
 
   return Object.values(agentPoliciesIndexedById);
+}
+
+async function getAgentPoliciesPerOutput(outputId?: string, isDefault?: boolean) {
+  let agentPoliciesKuery: string;
+  const packagePoliciesKuery: string = `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.output_id:"${outputId}"`;
+  if (outputId) {
+    if (isDefault) {
+      agentPoliciesKuery = `${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:"${outputId}" or not ${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:*`;
+    } else {
+      agentPoliciesKuery = `${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:"${outputId}"`;
+    }
+  } else {
+    if (isDefault) {
+      agentPoliciesKuery = `not ${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:*`;
+    } else {
+      return;
+    }
+  }
+
+  return await getAgentPolicyByOutputKuery(agentPoliciesKuery, packagePoliciesKuery);
 }
 
 async function validateLogstashOutputNotUsedInAPMPolicy(outputId?: string, isDefault?: boolean) {
@@ -1169,6 +1178,29 @@ class OutputService {
         concurrency: 5,
       }
     );
+  }
+
+  public async getAgentPoliciesPerOutputs(outputIds?: string[]) {
+    let agentPoliciesKuery: string;
+    let packagePoliciesKuery: string;
+    if (outputIds) {
+      packagePoliciesKuery = outputIds
+        .map((id) => `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.output_id: "${id}"`)
+        .join(' or ');
+
+      const agentPoliciesDataOutputKuery = outputIds
+        .map((id) => `${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id: "${id}"`)
+        .join(' or ');
+      const agentPoliciesMonitoringOutputKuery = outputIds
+        .map((id) => `${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.monitoring_output_id: "${id}"`)
+        .join(' or ');
+      agentPoliciesKuery = `${agentPoliciesDataOutputKuery} or ${agentPoliciesMonitoringOutputKuery}`;
+    } else {
+      return;
+    }
+    const policies = await getAgentPolicyByOutputKuery(agentPoliciesKuery, packagePoliciesKuery);
+
+    return policies.map((policy) => policy.id);
   }
 
   async getLatestOutputHealth(esClient: ElasticsearchClient, id: string): Promise<OutputHealth> {
