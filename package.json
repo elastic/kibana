@@ -1628,7 +1628,7 @@
     "@types/resolve": "^1.20.1",
     "@types/scheduler": "^0.23.0",
     "@types/seedrandom": ">=2.0.0 <4.0.0",
-    "@types/selenium-webdriver": "^4.1.26",
+    "@types/selenium-webdriver": "^4.1.27",
     "@types/semver": "^7.5.8",
     "@types/set-value": "^2.0.0",
     "@types/sinon": "^7.0.13",
