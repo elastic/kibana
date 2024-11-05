@@ -62,6 +62,7 @@ export const getOverviewEmbeddableFactory = ({
           const result = await openSloConfiguration(
             coreStart,
             pluginsStart,
+            sloClient,
             api.getSloGroupOverviewConfig()
           );
           api.updateSloGroupOverviewConfig(result as GroupSloCustomInput);

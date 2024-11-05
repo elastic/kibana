@@ -64,6 +64,7 @@ export function getAlertsEmbeddableFactory({
           const result = await openSloConfiguration(
             coreStart,
             pluginsStart,
+            sloClient,
             api.getSloAlertsConfig()
           );
           api.updateSloAlertsConfig(result);
