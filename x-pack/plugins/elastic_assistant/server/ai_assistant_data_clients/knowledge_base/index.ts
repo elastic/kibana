@@ -8,8 +8,8 @@
 import {
   MlTrainedModelDeploymentNodesStats,
   MlTrainedModelStats,
+  SearchTotalHits,
 } from '@elastic/elasticsearch/lib/api/types';
-import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { Document } from 'langchain/document';
