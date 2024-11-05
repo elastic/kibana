@@ -179,6 +179,7 @@ export function ChatItem({
           onCopyToClipboard={handleCopyToClipboard}
           onToggleEdit={handleToggleEdit}
           onToggleExpand={handleToggleExpand}
+          content={content}
         />
       }
       className={
