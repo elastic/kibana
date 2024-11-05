@@ -19,7 +19,6 @@ import { executeConnectorRoute } from './connector/execute';
 import { getConnectorRoute } from './connector/get';
 import { updateConnectorRoute } from './connector/update';
 import { getOAuthAccessToken } from './get_oauth_access_token';
-import { defineLegacyRoutes } from './legacy';
 import { ActionsConfigurationUtilities } from '../actions_config';
 import { getGlobalExecutionLogRoute } from './get_global_execution_logs';
 import { getGlobalExecutionKPIRoute } from './get_global_execution_kpi';
@@ -32,9 +31,7 @@ export interface RouteOptions {
 }
 
 export function defineRoutes(opts: RouteOptions) {
-  const { router, licenseState, actionsConfigUtils, usageCounter } = opts;
-
-  defineLegacyRoutes(router, licenseState, usageCounter);
+  const { router, licenseState, actionsConfigUtils } = opts;
 
   createConnectorRoute(router, licenseState);
   deleteConnectorRoute(router, licenseState);

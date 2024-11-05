@@ -28,9 +28,9 @@ a| <<gemini-action-type,{gemini}>>
 
 | Send a request to {gemini}.
 
-a| <<inference-action-type,{inference}>>
+a| <<inference-action-type,{infer}>>
 
-| Send a request to {inference}.
+| Send a request to {infer}.
 
 a| <<email-action-type,Email>>
 

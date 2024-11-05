@@ -10,7 +10,6 @@ import { omit } from 'lodash';
 import { SavedObjectReference, SavedObjectAttributes } from '@kbn/core/server';
 import { UntypedNormalizedRuleType } from '../../rule_type_registry';
 import { RawRule, RuleTypeParams } from '../../types';
-import { RuleActionAttributes } from '../../data/rule/types';
 import {
   preconfiguredConnectorActionRefPrefix,
   extractedSavedObjectParamReferenceNamePrefix,
@@ -19,7 +18,7 @@ import {
 
 export function injectReferencesIntoActions(
   alertId: string,
-  actions: RawRule['actions'] | RuleActionAttributes[],
+  actions: RawRule['actions'],
   references: SavedObjectReference[]
 ) {
   return actions.map((action) => {

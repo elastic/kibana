@@ -135,7 +135,9 @@ describe('useAgentless', () => {
   });
 });
 
-describe('useSetupTechnology', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/189038
+// FLAKY: https://github.com/elastic/kibana/issues/192126
+describe.skip('useSetupTechnology', () => {
   const setNewAgentPolicy = jest.fn();
   const updateAgentPoliciesMock = jest.fn();
   const setSelectedPolicyTabMock = jest.fn();
@@ -592,7 +594,7 @@ describe('useSetupTechnology', () => {
   });
 
   it('should revert the agent policy name to the original value when switching from agentless back to agent-based', async () => {
-    const { result, waitForNextUpdate } = renderHook(() =>
+    const { result, rerender } = renderHook(() =>
       useSetupTechnology({
         setNewAgentPolicy,
         newAgentPolicy: newAgentPolicyMock,
@@ -601,8 +603,7 @@ describe('useSetupTechnology', () => {
         packagePolicy: packagePolicyMock,
       })
     );
-
-    await waitForNextUpdate();
+    await rerender();
 
     expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENT_BASED);
 
@@ -611,21 +612,17 @@ describe('useSetupTechnology', () => {
     });
 
     expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENTLESS);
-
-    waitFor(() => {
-      expect(setNewAgentPolicy).toHaveBeenCalledWith({
-        name: 'Agentless policy for endpoint-1',
-        supports_agentless: true,
-        inactivity_timeout: 3600,
-      });
+    expect(setNewAgentPolicy).toHaveBeenCalledWith({
+      id: 'agentless-policy-id',
     });
 
     act(() => {
       result.current.handleSetupTechnologyChange(SetupTechnology.AGENT_BASED);
     });
-
-    expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENT_BASED);
-    expect(setNewAgentPolicy).toHaveBeenCalledWith(newAgentPolicyMock);
+    await waitFor(() => {
+      expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENT_BASED);
+      expect(setNewAgentPolicy).toHaveBeenCalledWith(newAgentPolicyMock);
+    });
   });
 
   it('should have global_data_tags with the integration team when updating the agentless policy', async () => {

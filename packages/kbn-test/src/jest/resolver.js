@@ -51,6 +51,13 @@ module.exports = (request, options) => {
     });
   }
 
+  if (request === '@launchdarkly/js-sdk-common') {
+    return resolve.sync('@launchdarkly/js-sdk-common/dist/cjs/index.cjs', {
+      basedir: options.basedir,
+      extensions: options.extensions,
+    });
+  }
+
   if (request === 'react-dom/client') {
     return Path.resolve(__dirname, 'mocks/react_dom_client_mock.ts');
   }

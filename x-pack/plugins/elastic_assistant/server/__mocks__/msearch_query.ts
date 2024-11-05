@@ -34,12 +34,10 @@ export const mSearchQueryBody: MsearchQueryBody = {
           ],
           must: [
             {
-              text_expansion: {
-                'vector.tokens': {
-                  model_id: '.elser_model_2',
-                  model_text:
-                    'Generate an ESQL query that will count the number of connections made to external IP addresses, broken down by user. If the count is greater than 100 for a specific user, add a new field called "follow_up" that contains a value of "true", otherwise, it should contain "false". The user names should also be enriched with their respective group names.',
-                },
+              semantic: {
+                field: 'semantic_text',
+                query:
+                  'Generate an ESQL query that will count the number of connections made to external IP addresses, broken down by user. If the count is greater than 100 for a specific user, add a new field called "follow_up" that contains a value of "true", otherwise, it should contain "false". The user names should also be enriched with their respective group names.',
               },
             },
           ],
