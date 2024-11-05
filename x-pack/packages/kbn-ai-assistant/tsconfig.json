@@ -11,7 +11,7 @@
   },
   "include": [
     "**/*.ts",
-    "**/*.tsx",
+    "**/*.tsx"
   ],
   "exclude": [
     "target/**/*"
@@ -35,6 +35,6 @@
     "@kbn/code-editor",
     "@kbn/ml-plugin",
     "@kbn/share-plugin",
-    "@kbn/ai-assistant-common",
+    "@kbn/ai-assistant-common"
   ]
 }

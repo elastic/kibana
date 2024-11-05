@@ -1,18 +1,29 @@
 {
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
   "name": "@kbn/monaco",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/src/**",
+      "{projectRoot}/scripts/**",
+      "{projectRoot}/index.ts",
+      "{projectRoot}/server.ts"
+    ]
+  },
+  "implicitDependencies": [
+    "@kbn/i18n"
+  ],
   "targets": {
     "build": {
       "inputs": [
-        "{projectRoot}/src/**",
-        "{projectRoot}/scripts/**",
-        "{projectRoot}/index.ts",
-        "{projectRoot}/server.ts",
+        "src",
         "{projectRoot}/webpack.config.js"
       ],
       "outputs": [
         "{workspaceRoot}/bazel-bin/packages/kbn-monaco",
         "{projectRoot}/target"
       ]
+    },
+    "typecheck": {
     }
   }
 }

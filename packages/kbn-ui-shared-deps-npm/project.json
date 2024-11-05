@@ -1,12 +1,23 @@
 {
-  "$schema": "../../node_modules/nx/schemas/nx-schema.json",
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
   "name": "@kbn/ui-shared-deps-npm",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/src/**",
+      "{projectRoot}/index.ts",
+      "{projectRoot}/webpack.config.js"
+    ]
+  },
   "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "global:tsConfigs"
+      ]
+    },
     "build": {
       "inputs": [
-        "{projectRoot}/src/**",
-        "{projectRoot}/index.js",
-        "{projectRoot}/webpack.config.js"
+        "src"
       ],
       "outputs": [
         "{workspaceRoot}/bazel-bin/packages/kbn-ui-shared-deps-npm",

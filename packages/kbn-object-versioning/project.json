@@ -1,0 +1,24 @@
+{
+  "name": "@kbn/object-versioning",
+  "targets": {
+    "build": {
+      "inputs": [
+        "{projectRoot}/src/**",
+        "{projectRoot}/scripts/**",
+        "{projectRoot}/index.ts",
+        "{projectRoot}/server.ts",
+        "{projectRoot}/webpack.config.js"
+      ],
+      "outputs": [
+        "{workspaceRoot}/bazel-bin/packages/kbn-monaco",
+        "{projectRoot}/target"
+      ]
+    },
+    "typecheck": {
+      "inputs": [
+        "{projectRoot}/lib",
+        "{projectRoot}/index.ts"
+      ]
+    }
+  }
+}
