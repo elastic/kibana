@@ -459,6 +459,8 @@ export const PresentationPanelHoverActions = ({
     />
   );
 
+  const hasHoverActions = quickActionElements.length || contextMenuPanels.lastIndexOf.length;
+
   return (
     <div
       onMouseOver={updateCombineHoverActions}
@@ -474,10 +476,12 @@ export const PresentationPanelHoverActions = ({
         ${showBorder ? `outline: ${viewMode === 'edit' ? DASHED_OUTLINE : SOLID_OUTLINE};` : ''}
         border-radius: ${euiThemeVars.euiBorderRadius};
 
-        &:hover {
+        ${hasHoverActions
+          ? `&:hover {
           outline: ${viewMode === 'edit' ? DASHED_OUTLINE : SOLID_OUTLINE};
           z-index: 2;
-        }
+        }`
+          : ''}
       `}
     >
       {children}
@@ -511,7 +515,7 @@ export const PresentationPanelHoverActions = ({
           ) : (
             <div /> // necessary for the right hover actions to align correctly when left hover actions are not present
           )}
-          {quickActionElements.length || contextMenuPanels.lastIndexOf.length ? (
+          {hasHoverActions ? (
             <div
               ref={rightHoverActionsRef}
               data-test-subj="embPanel__hoverActions__right"
