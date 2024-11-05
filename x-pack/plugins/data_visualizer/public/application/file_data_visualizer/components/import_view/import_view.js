@@ -405,7 +405,7 @@ export class ImportView extends Component {
                 this.props.results.format !== FILE_FORMATS.TIKA && (
                   <DocCountChart
                     statuses={statuses}
-                    dataStart={this.props.dataStart}
+                    dataStart={this.context.services.data}
                     importer={importer}
                   />
                 )}
