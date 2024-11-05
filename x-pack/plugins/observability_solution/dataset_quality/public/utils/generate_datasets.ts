@@ -96,7 +96,7 @@ export function generateDatasets(
         datasetIntegrationMap[dataset.name]?.integration ??
         integrationsMap[dataStream.integration ?? ''],
       degradedDocs: degradedMap[dataset.rawName] || dataset.degradedDocs,
-      totalDocs: totalDocsMap[dataset.rawName] ?? 0,
+      docsInTimeRange: totalDocsMap[dataset.rawName] ?? 0,
       quality: mapPercentageToQuality(
         (degradedMap[dataset.rawName] || dataset.degradedDocs).percentage
       ),
