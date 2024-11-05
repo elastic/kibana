@@ -243,9 +243,7 @@ const FormattedFieldValueComponent: React.FC<{
     );
   } else if (fieldName === RISK_SCORE) {
     return value ? (
-      <span data-test-subj="risk-score-truncate" title={`${value}`}>
-        {formatRiskScore(Number(value))}
-      </span>
+      <span data-test-subj={`formatted-field-${fieldName}`}>{formatRiskScore(Number(value))}</span>
     ) : null;
   } else if (fieldName === EVENT_MODULE_FIELD_NAME) {
     return renderEventModule({
