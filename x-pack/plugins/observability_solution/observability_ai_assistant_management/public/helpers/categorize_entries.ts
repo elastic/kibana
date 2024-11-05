@@ -30,7 +30,7 @@ export function categorizeEntries({
 
     return acc.concat({
       categoryKey,
-      title: entry.labels?.category ?? entry.title ?? entry.doc_id ?? 'No title',
+      title: entry.labels?.category ?? entry.title ?? 'No title',
       entries: [entry],
       '@timestamp': entry['@timestamp'],
     });

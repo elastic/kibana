@@ -47,7 +47,7 @@ export function KnowledgeBaseEditManualEntryFlyout({
   const { mutateAsync: deleteEntry, isLoading: isDeleting } = useDeleteKnowledgeBaseEntry();
 
   const [isPublic, setIsPublic] = useState(entry?.public ?? false);
-  const [newEntryTitle, setNewEntryTitle] = useState(entry?.title ?? entry?.doc_id ?? '');
+  const [newEntryTitle, setNewEntryTitle] = useState(entry?.title ?? '');
   const [newEntryText, setNewEntryText] = useState(entry?.text ?? '');
 
   const isEntryTitleInvalid = newEntryTitle.trim() === '';
@@ -58,7 +58,6 @@ export function KnowledgeBaseEditManualEntryFlyout({
     await createEntry({
       entry: {
         id: entry?.id ?? v4(),
-        doc_id: entry?.doc_id,
         title: newEntryTitle,
         text: newEntryText,
         public: isPublic,
@@ -93,7 +92,7 @@ export function KnowledgeBaseEditManualEntryFlyout({
                   'xpack.observabilityAiAssistantManagement.knowledgeBaseNewEntryFlyout.h2.editEntryLabel',
                   {
                     defaultMessage: 'Edit {title}',
-                    values: { title: entry?.title ?? entry?.doc_id },
+                    values: { title: entry?.title },
                   }
                 )}
           </h2>

@@ -732,14 +732,6 @@ export class ObservabilityAIAssistantClient {
     return this.dependencies.knowledgeBaseService.setup();
   };
 
-  getUuidFromDocId = async (docId: string) => {
-    return this.dependencies.knowledgeBaseService.getUuidFromDocId({
-      namespace: this.dependencies.namespace,
-      user: this.dependencies.user,
-      docId,
-    });
-  };
-
   addUserInstruction = async ({
     entry,
   }: {

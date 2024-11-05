@@ -39,8 +39,6 @@ interface Dependencies {
 
 export interface RecalledEntry {
   id: string;
-  title?: string;
-  docId?: string;
   text: string;
   score: number | null;
   is_correction?: boolean;
@@ -72,7 +70,7 @@ export enum KnowledgeBaseEntryOperationType {
 
 interface KnowledgeBaseDeleteOperation {
   type: KnowledgeBaseEntryOperationType.Delete;
-  docId?: string;
+  operationDocId?: string;
   labels?: Record<string, string>;
 }
 
@@ -243,7 +241,9 @@ export class KnowledgeBaseService {
           query: {
             bool: {
               filter: [
-                ...(operation.docId ? [{ term: { doc_id: operation.docId } }] : []),
+                ...(operation.operationDocId
+                  ? [{ term: { doc_id: operation.operationDocId } }]
+                  : []),
                 ...(operation.labels
                   ? map(operation.labels, (value, key) => {
                       return { term: { [key]: value } };
@@ -256,7 +256,7 @@ export class KnowledgeBaseService {
         return;
       } catch (error) {
         this.dependencies.logger.error(
-          `Failed to delete document "${operation?.docId}" due to ${error.message}`
+          `Failed to delete document "${operation?.operationDocId}" due to ${error.message}`
         );
         this.dependencies.logger.debug(() => JSON.stringify(operation));
         throw error;
@@ -416,7 +416,7 @@ export class KnowledgeBaseService {
     };
 
     const response = await this.dependencies.esClient.asInternalUser.search<
-      Pick<KnowledgeBaseEntry, 'text' | 'is_correction' | 'labels' | 'doc_id' | 'title'>
+      Pick<KnowledgeBaseEntry, 'text' | 'is_correction' | 'labels' | 'title'> & { doc_id?: string }
     >({
       index: [resourceNames.aliases.kb],
       query: esQuery,
@@ -430,8 +430,7 @@ export class KnowledgeBaseService {
       text: hit._source?.text!,
       is_correction: hit._source?.is_correction,
       labels: hit._source?.labels,
-      title: hit._source?.title,
-      docId: hit._source?.doc_id,
+      title: hit._source?.title ?? hit._source?.doc_id, // use `doc_id` as fallback title for backwards compatibility
       score: hit._score!,
       id: hit._id!,
     }));
@@ -642,9 +641,7 @@ export class KnowledgeBaseService {
     if (!this.dependencies.enabled) {
       return null;
     }
-    const res = await this.dependencies.esClient.asInternalUser.search<
-      Pick<KnowledgeBaseEntry, 'doc_id'>
-    >({
+    const res = await this.dependencies.esClient.asInternalUser.search<KnowledgeBaseEntry>({
       index: resourceNames.aliases.kb,
       query: {
         bool: {
@@ -715,7 +712,6 @@ export class KnowledgeBaseService {
         document: {
           '@timestamp': new Date().toISOString(),
           ...doc,
-          title: doc.title ?? doc.doc_id,
           user,
           namespace,
         },

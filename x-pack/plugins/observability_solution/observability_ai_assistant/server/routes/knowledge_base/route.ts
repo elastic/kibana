@@ -148,7 +148,6 @@ const saveKnowledgeBaseEntry = createObservabilityAIAssistantServerRoute({
         text: nonEmptyStringRt,
       }),
       t.partial({
-        doc_id: t.string,
         confidence: t.union([t.literal('low'), t.literal('medium'), t.literal('high')]),
         is_correction: toBooleanRt,
         public: toBooleanRt,
@@ -173,7 +172,6 @@ const saveKnowledgeBaseEntry = createObservabilityAIAssistantServerRoute({
 
     const {
       id,
-      doc_id: docId,
       title,
       text,
       public: isPublic,
@@ -187,7 +185,6 @@ const saveKnowledgeBaseEntry = createObservabilityAIAssistantServerRoute({
       entry: {
         text,
         id,
-        doc_id: docId,
         title,
         confidence: confidence ?? 'high',
         is_correction: isCorrection ?? false,

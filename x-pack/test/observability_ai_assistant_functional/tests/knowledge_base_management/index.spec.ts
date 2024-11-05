@@ -24,18 +24,15 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
 
   async function saveKbEntry({
     apiClient,
-    docId,
     text,
   }: {
     apiClient: ObservabilityAIAssistantApiClient;
-    docId: string;
     text: string;
   }) {
     return apiClient({
       endpoint: 'POST /internal/observability_ai_assistant/functions/summarize',
       params: {
         body: {
-          doc_id: docId,
           text,
           confidence: 'high',
           is_correction: false,
@@ -99,13 +96,11 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
       before(async () => {
         await saveKbEntry({
           apiClient: observabilityAIAssistantAPIClient.editor,
-          docId: 'my_fav_color',
           text: 'My favourite color is red',
         });
 
         await saveKbEntry({
           apiClient: observabilityAIAssistantAPIClient.secondaryEditor,
-          docId: 'my_fav_color',
           text: 'My favourite color is blue',
         });
       });

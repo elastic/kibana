@@ -31,7 +31,7 @@ export const kbComponentTemplate: ClusterComponentTemplate['component_template']
     properties: {
       '@timestamp': date,
       id: keyword,
-      doc_id: { type: 'text', fielddata: true },
+      doc_id: { type: 'text', fielddata: true }, // deprecated but kept for backwards compatibility
       title: {
         type: 'text',
         fields: {

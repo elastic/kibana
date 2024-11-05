@@ -54,13 +54,8 @@ export async function scoreSuggestions({
   const newUserMessageContent =
     dedent(`Given the following prompt, score the documents that are relevant to the prompt on a scale from 0 to 7,
     0 being completely irrelevant, and 7 being extremely relevant. Information is relevant to the prompt if it helps in
-    answering the prompt. Judge the document according to the following criteria :
+    answering the prompt. Judge the document according to the following criteria:
     
-    If the prompt is a statement that should be stored in the knowledge base:
-    - The document contains information that directly contradicts the user's prompt or previous statements, indicating that it may need to be updated or corrected.
-    - The document contains outdated user preferences or information that the user indicate they want corrected or replaced.
-
-    If the prompt is a question:
     - The document is relevant to the prompt, and the rest of the conversation
     - The document has information relevant to the prompt that is not mentioned, or more detailed than what is available in the conversation
     - The document has a high amount of information relevant to the prompt compared to other documents

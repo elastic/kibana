@@ -69,7 +69,7 @@ export class ObservabilityAIAssistantService {
   private readonly core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
   private readonly logger: Logger;
   private readonly getModelId: () => Promise<string>;
-  private kbService?: KnowledgeBaseService;
+  public kbService?: KnowledgeBaseService;
   private enableKnowledgeBase: boolean;
 
   private readonly registrations: RegistrationCallback[] = [];
@@ -345,7 +345,6 @@ export class ObservabilityAIAssistantService {
               const entryWithSystemProperties = {
                 ...entry,
                 '@timestamp': new Date().toISOString(),
-                doc_id: entry.id,
                 public: true,
                 confidence: 'high' as const,
                 type: 'contextual' as const,

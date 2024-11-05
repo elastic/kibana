@@ -13,7 +13,6 @@ import { uniq } from 'lodash';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { clearKnowledgeBase, createKnowledgeBaseModel, deleteKnowledgeBaseModel } from './helpers';
 import { ObservabilityAIAssistantApiClients } from '../../common/config';
-import { ObservabilityAIAssistantApiClient } from '../../common/observability_ai_assistant_api_client';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const ml = getService('ml');
@@ -274,7 +273,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               (entry) => entry.labels?.category === 'my_new_category'
             );
 
-            const entryGroups = uniq(categoryEntries.map((entry) => entry.doc_id));
+            const entryGroups = uniq(categoryEntries.map((entry) => entry.title));
 
             log.debug(
               `Waiting for entries to be created. Found ${categoryEntries.length} entries and ${entryGroups.length} groups`
@@ -294,151 +293,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             factor: 1,
           }
         );
-      });
-    });
-
-    describe('When the LLM creates entries', () => {
-      async function saveKbEntry({
-        apiClient,
-        docId,
-        text,
-      }: {
-        apiClient: ObservabilityAIAssistantApiClient;
-        docId: string;
-        text: string;
-      }) {
-        return apiClient({
-          endpoint: 'POST /internal/observability_ai_assistant/functions/summarize',
-          params: {
-            body: {
-              doc_id: docId,
-              text,
-              confidence: 'high',
-              is_correction: false,
-              public: false,
-              labels: {},
-            },
-          },
-        }).expect(200);
-      }
-
-      async function getEntriesWithDocId(docId: string) {
-        const res = await observabilityAIAssistantAPIClient
-          .editor({
-            endpoint: 'GET /internal/observability_ai_assistant/kb/entries',
-            params: {
-              query: {
-                query: '',
-                sortBy: 'title',
-                sortDirection: 'asc',
-              },
-            },
-          })
-          .expect(200);
-
-        return res.body.entries.filter((entry) => entry.doc_id === docId);
-      }
-
-      describe('when the LLM uses the same doc_id for two entries created by the same user', () => {
-        let entries1: KnowledgeBaseEntry[];
-        let entries2: KnowledgeBaseEntry[];
-
-        before(async () => {
-          const docId = 'my_favourite_color';
-
-          await saveKbEntry({
-            apiClient: observabilityAIAssistantAPIClient.editor,
-            docId,
-            text: 'My favourite color is blue',
-          });
-          entries1 = await getEntriesWithDocId(docId);
-
-          await saveKbEntry({
-            apiClient: observabilityAIAssistantAPIClient.editor,
-            docId,
-            text: 'My favourite color is green',
-          });
-          entries2 = await getEntriesWithDocId(docId);
-        });
-
-        after(async () => {
-          await clearKnowledgeBase(es);
-        });
-
-        it('overwrites the first entry so there is only one', async () => {
-          expect(entries1.length).to.eql(1);
-          expect(entries2.length).to.eql(1);
-        });
-
-        it('replaces the text content of the first entry with the new text content', async () => {
-          expect(entries1[0].text).to.eql('My favourite color is blue');
-          expect(entries2[0].text).to.eql('My favourite color is green');
-        });
-
-        it('updates the timestamp', async () => {
-          const getAsMs = (timestamp: string) => new Date(timestamp).getTime();
-          expect(getAsMs(entries1[0]['@timestamp'])).to.be.lessThan(
-            getAsMs(entries2[0]['@timestamp'])
-          );
-        });
-
-        it('does not change the _id', () => {
-          expect(entries1[0].id).to.eql(entries2[0].id);
-        });
-      });
-
-      describe('when the LLM uses same doc_id for two entries created by different users', () => {
-        let entries: KnowledgeBaseEntry[];
-
-        before(async () => {
-          await saveKbEntry({
-            apiClient: observabilityAIAssistantAPIClient.editor,
-            docId: 'users_favorite_animal',
-            text: "The user's favourite animal is a dog",
-          });
-          await saveKbEntry({
-            apiClient: observabilityAIAssistantAPIClient.secondaryEditor,
-            docId: 'users_favorite_animal',
-            text: "The user's favourite animal is a cat",
-          });
-
-          const res = await observabilityAIAssistantAPIClient
-            .editor({
-              endpoint: 'GET /internal/observability_ai_assistant/kb/entries',
-              params: {
-                query: {
-                  query: '',
-                  sortBy: 'title',
-                  sortDirection: 'asc',
-                },
-              },
-            })
-            .expect(200);
-
-          entries = omitCategories(res.body.entries);
-        });
-
-        after(async () => {
-          await clearKnowledgeBase(es);
-        });
-
-        it('creates two separate entries with the same doc_id', async () => {
-          expect(entries.map(({ doc_id: docId }) => docId)).to.eql([
-            'users_favorite_animal',
-            'users_favorite_animal',
-          ]);
-        });
-
-        it('creates two entries with different text content', async () => {
-          expect(entries.map(({ text }) => text)).to.eql([
-            "The user's favourite animal is a cat",
-            "The user's favourite animal is a dog",
-          ]);
-        });
-
-        it('creates two entries by different users', async () => {
-          expect(entries.map(({ user }) => user?.name)).to.eql(['secondary_editor', 'editor']);
-        });
       });
     });
   });

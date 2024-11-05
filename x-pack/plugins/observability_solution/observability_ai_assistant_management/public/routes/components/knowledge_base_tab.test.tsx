@@ -89,7 +89,6 @@ describe('KnowledgeBaseTab', () => {
           text: 'bar',
           role: 'user_entry',
           confidence: 'high',
-          doc_id: undefined,
           is_correction: false,
           labels: expect.any(Object),
         },
@@ -138,7 +137,7 @@ describe('KnowledgeBaseTab', () => {
         entries: [
           {
             id: 'test',
-            doc_id: 'test',
+            title: 'test',
             text: 'test',
             '@timestamp': 1638340456,
             labels: {},
@@ -146,7 +145,7 @@ describe('KnowledgeBaseTab', () => {
           },
           {
             id: 'test2',
-            doc_id: 'test2',
+            title: 'test2',
             text: 'test',
             '@timestamp': 1638340456,
             labels: {
@@ -156,7 +155,7 @@ describe('KnowledgeBaseTab', () => {
           },
           {
             id: 'test3',
-            doc_id: 'test3',
+            title: 'test3',
             text: 'test',
             '@timestamp': 1638340456,
             labels: {

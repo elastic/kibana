@@ -124,7 +124,6 @@ const functionSummariseRoute = createObservabilityAIAssistantServerRoute({
   endpoint: 'POST /internal/observability_ai_assistant/functions/summarize',
   params: t.type({
     body: t.type({
-      doc_id: t.string,
       text: nonEmptyStringRt,
       confidence: t.union([t.literal('low'), t.literal('medium'), t.literal('high')]),
       is_correction: toBooleanRt,
@@ -143,7 +142,6 @@ const functionSummariseRoute = createObservabilityAIAssistantServerRoute({
     }
 
     const {
-      doc_id: docId,
       confidence,
       is_correction: isCorrection,
       text,
@@ -151,12 +149,10 @@ const functionSummariseRoute = createObservabilityAIAssistantServerRoute({
       labels,
     } = resources.params.body;
 
-    const id = await client.getUuidFromDocId(docId);
     return client.addKnowledgeBaseEntry({
       entry: {
         confidence,
-        id: id ?? v4(),
-        doc_id: docId,
+        id: v4(),
         is_correction: isCorrection,
         text,
         public: isPublic,

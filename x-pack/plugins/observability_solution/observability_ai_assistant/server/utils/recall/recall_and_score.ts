@@ -14,7 +14,7 @@ import type { FunctionCallChatFunction } from '../../service/types';
 import { RecallRanking, recallRankingEventType } from '../../analytics/recall_ranking';
 import { RecalledEntry } from '../../service/knowledge_base_service';
 
-export type RecalledSuggestion = Pick<RecalledEntry, 'id' | 'title' | 'docId' | 'text' | 'score'>;
+export type RecalledSuggestion = Pick<RecalledEntry, 'id' | 'text' | 'score'>;
 
 export async function recallAndScore({
   recall,
@@ -45,7 +45,7 @@ export async function recallAndScore({
   ].filter((query) => query.text.trim());
 
   const suggestions: RecalledSuggestion[] = (await recall({ queries })).map(
-    ({ id, title, docId, text, score }) => ({ id, title, docId, text, score })
+    ({ id, text, score }) => ({ id, text, score })
   );
 
   if (!suggestions.length) {

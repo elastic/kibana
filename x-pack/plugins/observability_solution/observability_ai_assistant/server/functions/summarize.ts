@@ -29,10 +29,10 @@ export function registerSummarizationFunction({
       parameters: {
         type: 'object',
         properties: {
-          id: {
+          title: {
             type: 'string',
             description:
-              'A lookup id for the document. This should be a short human-readable keyword field with only alphabetic characters and underscores, that allow you to find and update it later.',
+              'A human readable title that can be used to identify the document later. This should be no longer than 255 characters',
           },
           text: {
             type: 'string',
@@ -55,7 +55,7 @@ export function registerSummarizationFunction({
           },
         },
         required: [
-          'id' as const,
+          'title' as const,
           'text' as const,
           'is_correction' as const,
           'confidence' as const,
@@ -64,25 +64,17 @@ export function registerSummarizationFunction({
       },
     },
     async (
-      { arguments: { id: docId, text, is_correction: isCorrection, confidence, public: isPublic } },
+      { arguments: { title, text, is_correction: isCorrection, confidence, public: isPublic } },
       signal
     ) => {
-      // The LLM should be able to update an existing entry by providing the same doc_id
-      // if no existing entry is found, we generate a uuid
-      const id = await client.getUuidFromDocId(docId);
-
-      resources.logger.debug(
-        id
-          ? `Updating knowledge base entry with id: ${id}, doc_id: ${docId}`
-          : `Creating new knowledge base entry with doc_id: ${docId}`
-      );
+      const id = v4();
+      resources.logger.debug(`Creating new knowledge base entry with id: ${id}`);
 
       return client
         .addKnowledgeBaseEntry({
           entry: {
-            id: id ?? v4(),
-            doc_id: docId,
-            title: docId, // use doc_id as title for now
+            id,
+            title,
             text,
             public: isPublic,
             role: KnowledgeBaseEntryRole.AssistantSummarization,
