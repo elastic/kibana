@@ -406,4 +406,4 @@ export const SavedObjectFinderUi = withEuiTablePersist(SavedObjectFinderUiClass,
 
 // Needed for React.lazy
 // eslint-disable-next-line import/no-default-export
-export default SavedObjectFinderUi as React.ComponentType<SavedObjectFinderProps>;
+export default SavedObjectFinderUi;
