@@ -31,13 +31,13 @@ describe('usePostObservables', () => {
   });
 
   it('calls the api when invoked with the correct parameters', async () => {
-    const spy = jest.spyOn(api, 'postObservables');
-    const { waitForNextUpdate, result } = renderHook(() => usePostObservable(), {
+    const spy = jest.spyOn(api, 'postObservable');
+    const { waitForNextUpdate, result } = renderHook(() => usePostObservable(mockCase.id), {
       wrapper: appMockRender.AppWrapper,
     });
 
     act(() => {
-      result.current.mutate({ observable: [], caseId: mockCase.id, version: mockCase.version });
+      result.current.mutate({ observable: {} });
     });
 
     await waitForNextUpdate();
@@ -50,12 +50,12 @@ describe('usePostObservables', () => {
 
   it('invalidates the queries correctly', async () => {
     const queryClientSpy = jest.spyOn(appMockRender.queryClient, 'invalidateQueries');
-    const { waitForNextUpdate, result } = renderHook(() => usePostObservable(), {
+    const { waitForNextUpdate, result } = renderHook(() => usePostObservable(mockCase.id), {
       wrapper: appMockRender.AppWrapper,
     });
 
     act(() => {
-      result.current.mutate({ observable: [], caseId: mockCase.id, version: mockCase.version });
+      result.current.mutate({ observable: {} });
     });
 
     await waitForNextUpdate();
@@ -66,12 +66,12 @@ describe('usePostObservables', () => {
   });
 
   it('does not show a success toaster', async () => {
-    const { waitForNextUpdate, result } = renderHook(() => usePostObservable(), {
+    const { waitForNextUpdate, result } = renderHook(() => usePostObservable(mockCase.id), {
       wrapper: appMockRender.AppWrapper,
     });
 
     act(() => {
-      result.current.mutate({ observable: [], caseId: mockCase.id, version: mockCase.version });
+      result.current.mutate({ observable: {} });
     });
 
     await waitForNextUpdate();
@@ -84,12 +84,12 @@ describe('usePostObservables', () => {
       .spyOn(api, 'postObservables')
       .mockRejectedValue(new Error('usePostObservables: Test error'));
 
-    const { waitForNextUpdate, result } = renderHook(() => usePostObservable(), {
+    const { waitForNextUpdate, result } = renderHook(() => usePostObservable(mockCase.id), {
       wrapper: appMockRender.AppWrapper,
     });
 
     act(() => {
-      result.current.mutate({ observable: [], caseId: mockCase.id, version: mockCase.version });
+      result.current.mutate({ observable: {} });
     });
 
     await waitForNextUpdate();

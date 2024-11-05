@@ -1238,19 +1238,16 @@ describe('Cases API', () => {
     it('should be called with correct check url, method, signal', async () => {
       await postObservable(
         {
-          version: mockCase.version,
-          observables: [
-            {
-              id: '55d674fb-9a7f-4ebd-8aab-e12b142af20c',
-              typeKey: '18b62f19-8c60-415e-8a08-706d1078c556',
-              value: 'test value',
-              description: '',
-              hasBeenSighted: false,
-              isIoc: false,
-              createdAt: '2024-10-03 11:37',
-              updatedAt: '2024-10-03 11:37',
-            },
-          ],
+          observable: {
+            id: '55d674fb-9a7f-4ebd-8aab-e12b142af20c',
+            typeKey: '18b62f19-8c60-415e-8a08-706d1078c556',
+            value: 'test value',
+            description: '',
+            hasBeenSighted: false,
+            isIoc: false,
+            createdAt: '2024-10-03 11:37',
+            updatedAt: '2024-10-03 11:37',
+          },
         },
         mockCase.id,
         abortCtrl.signal
@@ -1280,19 +1277,16 @@ describe('Cases API', () => {
     it('should return correct response', async () => {
       const resp = await postObservable(
         {
-          version: mockCase.version,
-          observables: [
-            {
-              id: '55d674fb-9a7f-4ebd-8aab-e12b142af20c',
-              typeKey: '18b62f19-8c60-415e-8a08-706d1078c556',
-              value: 'test value',
-              description: '',
-              hasBeenSighted: false,
-              isIoc: false,
-              createdAt: '2024-10-03 11:37',
-              updatedAt: '2024-10-03 11:37',
-            },
-          ],
+          observable: {
+            id: '55d674fb-9a7f-4ebd-8aab-e12b142af20c',
+            typeKey: '18b62f19-8c60-415e-8a08-706d1078c556',
+            value: 'test value',
+            description: '',
+            hasBeenSighted: false,
+            isIoc: false,
+            createdAt: '2024-10-03 11:37',
+            updatedAt: '2024-10-03 11:37',
+          },
         },
         mockCase.id,
         abortCtrl.signal

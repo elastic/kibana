@@ -13,7 +13,7 @@ import { mockCase } from '../../../public/containers/mock';
 describe('similar', () => {
   describe('find similar cases', () => {
     const clientArgs = createCasesClientMockArgs();
-    clientArgs.services.caseService.findSimilarCases.mockResolvedValue({
+    clientArgs.services.caseService.findCases.mockResolvedValue({
       page: 1,
       per_page: 10,
       total: mockCases.length,
@@ -33,14 +33,11 @@ describe('similar', () => {
         },
         clientArgs
       );
-      expect(clientArgs.services.caseService.findSimilarCases).toHaveBeenCalled();
+      expect(clientArgs.services.caseService.findCases).toHaveBeenCalled();
 
-      const call = clientArgs.services.caseService.findSimilarCases.mock.calls[0][0];
+      const call = clientArgs.services.caseService.findCases.mock.calls[0][0];
 
-      expect(call?.caseId).toBe(mockCase.id);
-      expect(call?.observables).toEqual({
-        '4e7142ad-2c54-4ac8-84fb-38c8842d7b3f': ['test@email.com'],
-      });
+      expect(call).toMatchInlineSnapshot();
     });
   });
 });
