@@ -303,7 +303,7 @@ the document table, the sort order, and the {data-source}.
 
 . In the toolbar, click **Save**.
 
-. Give your search a title.
+. Give your search a title and a description.
 
 . Optionally store <<managing-tags,tags>> and the time range with the search.
 
