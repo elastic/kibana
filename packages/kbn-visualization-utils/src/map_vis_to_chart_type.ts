@@ -9,20 +9,24 @@
 
 import { ChartType, LensVisualizationType } from './types';
 
+type ValueOf<T> = T[keyof T];
+type LensToChartMap = {
+  [K in ValueOf<typeof LensVisualizationType>]: ChartType;
+};
+const lensTypesToChartTypes: LensToChartMap = {
+  [LensVisualizationType.XY]: ChartType.XY,
+  [LensVisualizationType.Metric]: ChartType.Metric,
+  [LensVisualizationType.LegacyMetric]: ChartType.Metric,
+  [LensVisualizationType.Pie]: ChartType.Pie,
+  [LensVisualizationType.Heatmap]: ChartType.Heatmap,
+  [LensVisualizationType.Gauge]: ChartType.Gauge,
+  [LensVisualizationType.Datatable]: ChartType.Table,
+};
+function isLensVisualizationType(value: string): value is LensVisualizationType {
+  return value in LensVisualizationType;
+}
 export const mapVisToChartType = (visualizationType: string) => {
-  switch (visualizationType) {
-    case LensVisualizationType.XY:
-      return ChartType.XY;
-    case LensVisualizationType.Metric:
-    case LensVisualizationType.LegacyMetric:
-      return ChartType.Metric;
-    case LensVisualizationType.Pie:
-      return ChartType.Pie;
-    case LensVisualizationType.Heatmap:
-      return ChartType.Heatmap;
-    case LensVisualizationType.Gauge:
-      return ChartType.Gauge;
-    case LensVisualizationType.Datatable:
-      return ChartType.Table;
+  if (isLensVisualizationType(visualizationType)) {
+    return lensTypesToChartTypes[visualizationType];
   }
 };
