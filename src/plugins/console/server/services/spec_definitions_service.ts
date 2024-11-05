@@ -10,6 +10,7 @@ import _, { merge } from 'lodash';
 import globby from 'globby';
 import { basename, join, resolve } from 'path';
 import { readFileSync } from 'fs';
+import normalizePath from 'normalize-path';
 
 import { jsSpecLoaders } from '../lib';
 
