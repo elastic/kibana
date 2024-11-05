@@ -10,9 +10,10 @@ import {
   InfraMetadata,
   InfraMetadataRequest,
 } from '@kbn/infra-plugin/common/http_api/metadata_api';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { SupertestWithRoleScopeType } from '../../../services';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 
-import { DATES } from './constants';
+import { DATES } from './utils/constants';
 
 const timeRange700 = {
   from: DATES['7.0.0'].hosts.min,
@@ -29,22 +30,35 @@ const timeRange800withAws = {
   to: DATES[`8.0.0`].logs_and_metrics_with_aws.max,
 };
 
-export default function ({ getService }: FtrProviderContext) {
+export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const supertest = getService('supertest');
-  const fetchMetadata = async (body: InfraMetadataRequest): Promise<InfraMetadata | undefined> => {
-    const response = await supertest
-      .post('/api/infra/metadata')
-      .set('kbn-xsrf', 'xxx')
-      .send(body)
-      .expect(200);
-    return response.body;
-  };
+  const roleScopedSupertest = getService('roleScopedSupertest');
 
-  describe('metadata', () => {
+  describe('API /api/infra/metadata', () => {
+    let supertestWithAdminScope: SupertestWithRoleScopeType;
+
+    const fetchMetadata = async (
+      body: InfraMetadataRequest
+    ): Promise<InfraMetadata | undefined> => {
+      const response = await supertestWithAdminScope
+        .post('/api/infra/metadata')
+        .send(body)
+        .expect(200);
+      return response.body;
+    };
+
+    before(async () => {
+      supertestWithAdminScope = await roleScopedSupertest.getSupertestWithRoleScope('admin', {
+        withInternalHeaders: true,
+      });
+    });
+    after(async () => {
+      await supertestWithAdminScope.destroy();
+    });
+
     describe('7.0.0', () => {
-      before(async () => esArchiver.load('x-pack/test/functional/es_archives/infra/7.0.0/hosts'));
-      after(async () => esArchiver.unload('x-pack/test/functional/es_archives/infra/7.0.0/hosts'));
+      before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/7.0.0/hosts'));
+      after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/7.0.0/hosts'));
 
       it('hosts', async () => {
         const metadata = await fetchMetadata({
@@ -63,8 +77,8 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('6.6.0', () => {
-      before(async () => esArchiver.load('x-pack/test/functional/es_archives/infra/6.6.0/docker'));
-      after(async () => esArchiver.unload('x-pack/test/functional/es_archives/infra/6.6.0/docker'));
+      before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/6.6.0/docker'));
+      after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/6.6.0/docker'));
 
       it('docker', async () => {
         const metadata = await fetchMetadata({
@@ -86,8 +100,8 @@ export default function ({ getService }: FtrProviderContext) {
       describe('cloud and host information', () => {
         const archiveName =
           'x-pack/test/functional/es_archives/infra/8.0.0/logs_and_metrics_with_aws';
-        before(async () => esArchiver.load(archiveName));
-        after(async () => esArchiver.unload(archiveName));
+        before(() => esArchiver.load(archiveName));
+        after(() => esArchiver.unload(archiveName));
 
         it('host', async () => {
           const metadata = await fetchMetadata({
