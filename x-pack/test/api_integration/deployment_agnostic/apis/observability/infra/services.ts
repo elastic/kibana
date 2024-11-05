@@ -9,30 +9,111 @@ import expect from '@kbn/expect';
 import { ServicesAPIResponseRT } from '@kbn/infra-plugin/common/http_api/host_details';
 import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
-import { FtrProviderContext } from '../../ftr_provider_context';
-import { generateServicesData, generateServicesLogsOnlyData } from './helpers';
-import { getApmSynthtraceEsClient } from '../../../common/utils/synthtrace/apm_es_client';
+import { apm, timerange } from '@kbn/apm-synthtrace-client';
+import type { SupertestWithRoleScopeType } from '../../../services';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 
 const SERVICES_ENDPOINT = '/api/infra/services';
 
-export default function ({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
-  const apmSynthtraceKibanaClient = getService('apmSynthtraceKibanaClient');
-  const esClient = getService('es');
+export function generateServicesData({
+  from,
+  to,
+  instanceCount = 1,
+  servicesPerHost = 1,
+}: {
+  from: string;
+  to: string;
+  instanceCount?: number;
+  servicesPerHost?: number;
+}) {
+  const range = timerange(from, to);
+  const services = Array(instanceCount)
+    .fill(null)
+    .flatMap((_, hostIdx) =>
+      Array(servicesPerHost)
+        .fill(null)
+        .map((__, serviceIdx) =>
+          apm
+            .service({
+              name: `service-${hostIdx}-${serviceIdx}`,
+              environment: 'production',
+              agentName: 'nodejs',
+            })
+            .instance(`host-${hostIdx}`)
+        )
+    );
+  return range
+    .interval('1m')
+    .rate(1)
+    .generator((timestamp) =>
+      services.map((service) =>
+        service
+          .transaction({ transactionName: 'GET /foo' })
+          .timestamp(timestamp)
+          .duration(500)
+          .success()
+      )
+    );
+}
+// generates error logs only for services
+export function generateServicesLogsOnlyData({
+  from,
+  to,
+  instanceCount = 1,
+  servicesPerHost = 1,
+}: {
+  from: string;
+  to: string;
+  instanceCount?: number;
+  servicesPerHost?: number;
+}) {
+  const range = timerange(from, to);
+  const services = Array(instanceCount)
+    .fill(null)
+    .flatMap((_, hostIdx) =>
+      Array(servicesPerHost)
+        .fill(null)
+        .map((__, serviceIdx) =>
+          apm
+            .service({
+              name: `service-${hostIdx}-${serviceIdx}`,
+              environment: 'production',
+              agentName: 'go',
+            })
+            .instance(`host-${hostIdx}`)
+        )
+    );
+  return range
+    .interval('1m')
+    .rate(1)
+    .generator((timestamp) =>
+      services.map((service) =>
+        service.error({ message: 'error', type: 'My Type' }).timestamp(timestamp)
+      )
+    );
+}
+
+export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
+  const roleScopedSupertest = getService('roleScopedSupertest');
+  const synthtrace = getService('synthtrace');
 
   describe('GET /infra/services', () => {
     let synthtraceApmClient: ApmSynthtraceEsClient;
+    let supertestWithAdminScope: SupertestWithRoleScopeType;
+
     const from = new Date(Date.now() - 1000 * 60 * 2).toISOString();
     const to = new Date().toISOString();
     before(async () => {
-      const version = (await apmSynthtraceKibanaClient.installApmPackage()).version;
-      synthtraceApmClient = await getApmSynthtraceEsClient({
-        client: esClient,
-        packageVersion: version,
+      supertestWithAdminScope = await roleScopedSupertest.getSupertestWithRoleScope('admin', {
+        withInternalHeaders: true,
       });
+
+      const version = (await synthtrace.apmSynthtraceKibanaClient.installApmPackage()).version;
+      synthtraceApmClient = await synthtrace.createApmSynthtraceEsClient(version);
     });
     after(async () => {
-      await apmSynthtraceKibanaClient.uninstallApmPackage();
+      await synthtrace.apmSynthtraceKibanaClient.uninstallApmPackage();
+      await supertestWithAdminScope.destroy();
     });
 
     describe('with transactions', () => {
@@ -50,11 +131,8 @@ export default function ({ getService }: FtrProviderContext) {
           'host.name': 'some-host',
         });
 
-        const response = await supertest
+        const response = await supertestWithAdminScope
           .get(SERVICES_ENDPOINT)
-          .set({
-            'kbn-xsrf': 'some-xsrf-token',
-          })
           .query({
             filters,
             from,
@@ -69,7 +147,7 @@ export default function ({ getService }: FtrProviderContext) {
         const filters = JSON.stringify({
           'host.name': 'host-0',
         });
-        const response = await supertest
+        const response = await supertestWithAdminScope
           .get(SERVICES_ENDPOINT)
           .set({
             'kbn-xsrf': 'some-xsrf-token',
@@ -87,11 +165,9 @@ export default function ({ getService }: FtrProviderContext) {
           'host.name': 'host-0',
           'agent.name': 'nodejs',
         });
-        await supertest
+        await supertestWithAdminScope
           .get(SERVICES_ENDPOINT)
-          .set({
-            'kbn-xsrf': 'some-xsrf-token',
-          })
+
           .query({
             filters,
             from,
@@ -113,7 +189,7 @@ export default function ({ getService }: FtrProviderContext) {
         const filters = JSON.stringify({
           'host.name': 'host-0',
         });
-        const response = await supertest
+        const response = await supertestWithAdminScope
           .get(SERVICES_ENDPOINT)
           .set({
             'kbn-xsrf': 'some-xsrf-token',

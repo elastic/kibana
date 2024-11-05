@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('Serverless observability API - feature flags', function () {
-    loadTestFile(require.resolve('./custom_threshold_rule'));
-    loadTestFile(require.resolve('./platform_security'));
+  describe('MetricsUI Endpoints', () => {
+    loadTestFile(require.resolve('./metrics_explorer'));
+    loadTestFile(require.resolve('./metric_threshold_alert'));
   });
 }
