@@ -14,13 +14,13 @@ type LensToChartMap = {
   [K in ValueOf<typeof LensVisualizationType>]: ChartType;
 };
 const lensTypesToChartTypes: LensToChartMap = {
-  [LensVisualizationType.XY]: ChartType.XY,
-  [LensVisualizationType.Metric]: ChartType.Metric,
-  [LensVisualizationType.LegacyMetric]: ChartType.Metric,
-  [LensVisualizationType.Pie]: ChartType.Pie,
-  [LensVisualizationType.Heatmap]: ChartType.Heatmap,
-  [LensVisualizationType.Gauge]: ChartType.Gauge,
-  [LensVisualizationType.Datatable]: ChartType.Table,
+  [LensVisualizationType.lnsXY]: ChartType.XY,
+  [LensVisualizationType.lnsMetric]: ChartType.Metric,
+  [LensVisualizationType.lnsLegacyMetric]: ChartType.Metric,
+  [LensVisualizationType.lnsPie]: ChartType.Pie,
+  [LensVisualizationType.lnsHeatmap]: ChartType.Heatmap,
+  [LensVisualizationType.lnsGauge]: ChartType.Gauge,
+  [LensVisualizationType.lnsDatatable]: ChartType.Table,
 };
 function isLensVisualizationType(value: string): value is LensVisualizationType {
   return value in LensVisualizationType;

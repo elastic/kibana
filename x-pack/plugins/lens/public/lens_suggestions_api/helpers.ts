@@ -65,7 +65,11 @@ export function mergeSuggestionWithVisContext({
       keptLayerIds: layerIds,
       datasourceState,
       datasourceId,
-    } as Suggestion;
+      columns: suggestion.columns,
+      changeType: suggestion.changeType,
+      score: suggestion.score,
+      previewIcon: suggestion.previewIcon,
+    };
   } catch {
     return suggestion;
   }

@@ -62,11 +62,11 @@ export enum ChartType {
 }
 
 export enum LensVisualizationType {
-  XY = 'lnsXY',
-  Metric = 'lnsMetric',
-  Pie = 'lnsPie',
-  Heatmap = 'lnsHeatmap',
-  Gauge = 'lnsGauge',
-  Datatable = 'lnsDatatable',
-  LegacyMetric = 'lnsLegacyMetric',
+  lnsXY = 'lnsXY',
+  lnsMetric = 'lnsMetric',
+  lnsPie = 'lnsPie',
+  lnsHeatmap = 'lnsHeatmap',
+  lnsGauge = 'lnsGauge',
+  lnsDatatable = 'lnsDatatable',
+  lnsLegacyMetric = 'lnsLegacyMetric',
 }
