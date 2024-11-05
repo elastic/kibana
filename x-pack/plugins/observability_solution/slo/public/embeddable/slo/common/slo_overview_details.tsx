@@ -29,7 +29,7 @@ import {
 } from '../../../pages/slo_details/components/slo_details';
 import { useSloDetailsTabs } from '../../../pages/slo_details/hooks/use_slo_details_tabs';
 import { getSloFormattedSummary } from '../../../pages/slos/hooks/use_slo_summary';
-import { useKibana } from '../../../hooks/kibana_react';
+import { useKibana } from '../../../hooks/use_kibana';
 
 export function SloOverviewDetails({
   slo,

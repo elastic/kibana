@@ -13,7 +13,7 @@ import { XJsonLang } from '@kbn/monaco';
 import React, { ReactNode, useCallback } from 'react';
 import { CodeEditor } from '@kbn/code-editor';
 import { compressToEncodedURIComponent } from 'lz-string';
-import { useKibana } from '../../../../../hooks/kibana_react';
+import { useKibana } from '../../../../../hooks/use_kibana';
 
 interface RequestCodeViewerProps {
   value: string;

@@ -9,7 +9,7 @@ import type { SecurityHasPrivilegesResponse } from '@elastic/elasticsearch/lib/a
 import { i18n } from '@kbn/i18n';
 import type { PublicLicenseJSON } from '@kbn/licensing-plugin/public';
 import { useQuery } from '@tanstack/react-query';
-import { useKibana } from './kibana_react';
+import { useKibana } from './use_kibana';
 import { convertErrorForUseInToast } from './helpers/convert_error_for_use_in_toast';
 import { sloKeys } from './query_key_factory';
 import { usePluginContext } from './use_plugin_context';

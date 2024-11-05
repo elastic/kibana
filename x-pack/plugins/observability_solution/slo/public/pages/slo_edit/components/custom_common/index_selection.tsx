@@ -13,7 +13,7 @@ import { Controller, useFormContext } from 'react-hook-form';
 import { DataViewPicker } from '@kbn/unified-search-plugin/public';
 import { getDataViewPattern, useAdhocDataViews } from './use_adhoc_data_views';
 import { SLOPublicPluginsStart } from '../../../..';
-import { useKibana } from '../../../../hooks/kibana_react';
+import { useKibana } from '../../../../hooks/use_kibana';
 import { CreateSLOForm } from '../../types';
 
 const BTN_MAX_WIDTH = 515;

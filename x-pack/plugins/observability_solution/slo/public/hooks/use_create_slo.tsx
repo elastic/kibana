@@ -15,7 +15,7 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
-import { useKibana } from './kibana_react';
+import { useKibana } from './use_kibana';
 import { paths } from '../../common/locators/paths';
 import { sloKeys } from './query_key_factory';
 import { usePluginContext } from './use_plugin_context';

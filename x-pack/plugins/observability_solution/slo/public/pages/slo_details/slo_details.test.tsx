@@ -30,7 +30,7 @@ import { useFetchHistoricalSummary } from '../../hooks/use_fetch_historical_summ
 import { useFetchSloDetails } from '../../hooks/use_fetch_slo_details';
 import { useLicense } from '../../hooks/use_license';
 import { usePermissions } from '../../hooks/use_permissions';
-import { useKibana } from '../../hooks/kibana_react';
+import { useKibana } from '../../hooks/use_kibana';
 import { render } from '../../utils/test_helper';
 import { SloDetailsPage } from './slo_details';
 import { usePerformanceContext } from '@kbn/ebt-tools';

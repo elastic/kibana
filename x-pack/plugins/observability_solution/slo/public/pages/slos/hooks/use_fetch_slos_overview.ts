@@ -13,7 +13,7 @@ import { SLO_SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../../common/consta
 import { sloKeys } from '../../../hooks/query_key_factory';
 import { useCreateDataView } from '../../../hooks/use_create_data_view';
 import { usePluginContext } from '../../../hooks/use_plugin_context';
-import { useKibana } from '../../../hooks/kibana_react';
+import { useKibana } from '../../../hooks/use_kibana';
 import { SearchState } from './use_url_search_state';
 
 interface SLOsOverviewParams {

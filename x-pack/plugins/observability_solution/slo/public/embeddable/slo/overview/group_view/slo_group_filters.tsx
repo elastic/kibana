@@ -16,7 +16,7 @@ import { useCreateDataView } from '../../../../hooks/use_create_data_view';
 import { useFetchSloGroups } from '../../../../hooks/use_fetch_slo_groups';
 import { SLI_OPTIONS } from '../../../../pages/slo_edit/constants';
 import { useGetSettings } from '../../../../pages/slo_settings/hooks/use_get_settings';
-import { useKibana } from '../../../../hooks/kibana_react';
+import { useKibana } from '../../../../hooks/use_kibana';
 import type { GroupBy, GroupFilters } from '../types';
 import './slo_group_filters.scss';
 

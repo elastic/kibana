@@ -11,7 +11,7 @@ import { PutSLOSettingsParams, PutSLOSettingsResponse } from '@kbn/slo-schema';
 import { useMutation } from '@tanstack/react-query';
 import { paths } from '../../../../common/locators/paths';
 import { usePluginContext } from '../../../hooks/use_plugin_context';
-import { useKibana } from '../../../hooks/kibana_react';
+import { useKibana } from '../../../hooks/use_kibana';
 
 type ServerError = IHttpFetchError<ResponseErrorBody>;
 
