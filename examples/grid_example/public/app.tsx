@@ -32,7 +32,7 @@ import {
 } from '@kbn/embeddable-examples-plugin/public/react_embeddables/search/types';
 import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { TimeRange } from '@kbn/es-query';
-import { GridLayout, GridLayoutData, type GridLayoutApi } from '@kbn/grid-layout';
+import { GridLayout, GridLayoutData, type GridLayoutApi, isLayoutEqual } from '@kbn/grid-layout';
 import { i18n } from '@kbn/i18n';
 
 import { getPanelId } from './get_panel_id';

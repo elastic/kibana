@@ -27,7 +27,7 @@ export const GridPanel = forwardRef<
     ) => React.ReactNode;
     interactionStart: (
       type: PanelInteractionEvent['type'] | 'drop',
-      e: React.MouseEvent<HTMLDivElement, MouseEvent>
+      e: MouseEvent | React.MouseEvent<HTMLDivElement, MouseEvent>
     ) => void;
     gridLayoutStateManager: GridLayoutStateManager;
   }
@@ -50,7 +50,7 @@ export const GridPanel = forwardRef<
        * (which happens when a panel gets dragged from one grid row to another)
        */
       const dropEventSubscription = gridLayoutStateManager.interactionEvent$.subscribe((event) => {
-        if (!event || event.id !== panelId || event.type === 'drop') return;
+        if (!event || event.id !== panelId) return;
 
         /**
          * By adding the "drop" event listener to the document rather than the drag/resize event handler,
