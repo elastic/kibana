@@ -1752,9 +1752,9 @@
   version "0.0.1"
   resolved "file:./elastic_eui_theme_borealis_0.0.1_borealis_001_testing.tgz#e13adac78c2c023dfbe42f8b1fec8c8f3c1fdde2"
 
-"@elastic/eui-theme-common@file:./elastic_eui_theme_common_0.0.1_borealis_001_testing.tgz":
+"@elastic/eui-theme-common@file:./elastic_eui_theme_common_0.0.1_borealis_002_testing.tgz":
   version "0.0.1"
-  resolved "file:./elastic_eui_theme_common_0.0.1_borealis_001_testing.tgz#20a46bdcfab4c99f8e88d6a285a404a32d2310f6"
+  resolved "file:./elastic_eui_theme_common_0.0.1_borealis_002_testing.tgz#ef4260937543be31f2ec372d235bd7e875fa8e67"
   dependencies:
     "@types/lodash" "^4.14.202"
     lodash "^4.17.21"
