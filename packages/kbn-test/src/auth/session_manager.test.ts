@@ -7,17 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SERVERLESS_ROLES_ROOT_PATH } from '@kbn/es';
-import { REPO_ROOT } from '@kbn/repo-info';
 import { ToolingLog } from '@kbn/tooling-log';
 import crypto from 'crypto';
-import { resolve } from 'path';
 import { Cookie } from 'tough-cookie';
-import * as helper from './helper';
-import * as samlAuth from './saml_auth';
 import { Session } from './saml_auth';
 import { SamlSessionManager, SupportedRoles } from './session_manager';
+import * as samlAuth from './saml_auth';
+import * as helper from './helper';
 import { Role, User, UserProfile } from './types';
+import { SERVERLESS_ROLES_ROOT_PATH } from '@kbn/es';
+import { resolve } from 'path';
+import { REPO_ROOT } from '@kbn/repo-info';
 
 const log = new ToolingLog();
 
