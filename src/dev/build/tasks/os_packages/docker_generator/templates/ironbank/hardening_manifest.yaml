@@ -63,7 +63,7 @@ maintainers:
   # InfoSec Members
   - email: 'abby.zumstein@elastic.co'
     name: 'Abby Zumstein'
-    username: <TODO>
+    username: 'azumstein'
     cht_member: false
   - email: 'arsalan.khan@elastic.co'
     name: 'Arsalan Khan'
