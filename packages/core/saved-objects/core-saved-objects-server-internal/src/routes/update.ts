@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { RouteAccess } from '@kbn/core-http-server';
+import type { RouteAccess, RouteDeprecationInfo } from '@kbn/core-http-server';
 import { schema } from '@kbn/config-schema';
 import type { SavedObjectsUpdateOptions } from '@kbn/core-saved-objects-api-server';
 import type { Logger } from '@kbn/logging';
@@ -19,14 +19,13 @@ import {
   logWarnOnExternalRequest,
   throwIfTypeNotVisibleByAPI,
 } from './utils';
-import { DeprecationInfo } from '.';
 
 interface RouteDependencies {
   config: SavedObjectConfig;
   coreUsageData: InternalCoreUsageDataSetup;
   logger: Logger;
   access: RouteAccess;
-  deprecationInfo: DeprecationInfo;
+  deprecationInfo: RouteDeprecationInfo;
 }
 
 export const registerUpdateRoute = (

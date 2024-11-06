@@ -15,6 +15,7 @@ import type {
 } from '@kbn/core-saved-objects-base-server-internal';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 import { DocLinksServiceSetup } from '@kbn/core-doc-links-server';
+import { RouteDeprecationInfo } from '@kbn/core-http-server';
 import type { InternalSavedObjectsRequestHandlerContext } from '../internal_types';
 import { registerGetRoute } from './get';
 import { registerResolveRoute } from './resolve';
@@ -35,13 +36,13 @@ import { registerLegacyExportRoute } from './legacy_import_export/export';
 import { registerBulkResolveRoute } from './bulk_resolve';
 import { registerDeleteUnknownTypesRoute } from './deprecations';
 
-export interface DeprecationInfo {
-  documentationUrl: string;
-  severity: 'warning';
-  reason: {
-    type: 'remove';
-  };
-}
+// export interface RouteDeprecationInfo {
+//   documentationUrl: string;
+//   severity: 'warning';
+//   reason: {
+//     type: 'deprecate' | 'remove';
+//   };
+// }
 
 export function registerRoutes({
   http,
@@ -68,19 +69,19 @@ export function registerRoutes({
     http.createRouter<InternalSavedObjectsRequestHandlerContext>('/api/saved_objects/');
 
   const internalOnServerless = isServerless ? 'internal' : 'public';
-  const deprecationInfo = {
+  const deprecationInfo: RouteDeprecationInfo = {
     documentationUrl: `${docLinks.links.management.savedObjectsApiList}`,
-    severity: 'warning' as const,
+    severity: 'warning' as const, // will not break deployment upon upgrade
     reason: {
-      type: 'remove' as const,
+      type: 'deprecate' as const,
     },
   };
 
   const legacyDeprecationInfo = {
     documentationUrl: `${docLinks.links.kibana.dashboardImportExport}`,
-    severity: 'warning' as const,
+    severity: 'warning' as const, // will not break deployment upon upgrade
     reason: {
-      type: 'remove' as const,
+      type: 'remove' as const, // no alternative for posting `.json`, requires file format change to `.ndjson`
     },
   };
 

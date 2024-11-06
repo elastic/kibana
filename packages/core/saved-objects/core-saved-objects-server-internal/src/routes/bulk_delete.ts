@@ -8,7 +8,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { RouteAccess } from '@kbn/core-http-server';
+import type { RouteAccess, RouteDeprecationInfo } from '@kbn/core-http-server';
 import { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-internal';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 import type { Logger } from '@kbn/logging';
@@ -18,14 +18,13 @@ import {
   logWarnOnExternalRequest,
   throwIfAnyTypeNotVisibleByAPI,
 } from './utils';
-import { DeprecationInfo } from '.';
 
 interface RouteDependencies {
   config: SavedObjectConfig;
   coreUsageData: InternalCoreUsageDataSetup;
   logger: Logger;
   access: RouteAccess;
-  deprecationInfo: DeprecationInfo;
+  deprecationInfo: RouteDeprecationInfo;
 }
 
 export const registerBulkDeleteRoute = (

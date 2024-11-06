@@ -11,10 +11,9 @@ import moment from 'moment';
 import { schema } from '@kbn/config-schema';
 import type { Logger } from '@kbn/logging';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
-import type { RouteAccess } from '@kbn/core-http-server';
+import type { RouteAccess, RouteDeprecationInfo } from '@kbn/core-http-server';
 import type { InternalSavedObjectRouter } from '../../internal_types';
 import { exportDashboards } from './lib';
-import { DeprecationInfo } from '..';
 
 export const registerLegacyExportRoute = (
   router: InternalSavedObjectRouter,
@@ -29,7 +28,7 @@ export const registerLegacyExportRoute = (
     coreUsageData: InternalCoreUsageDataSetup;
     logger: Logger;
     access: RouteAccess;
-    legacyDeprecationInfo: DeprecationInfo;
+    legacyDeprecationInfo: RouteDeprecationInfo;
   }
 ) => {
   router.get(
