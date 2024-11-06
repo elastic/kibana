@@ -13,7 +13,7 @@ import {
 
 export type { DataDefinitionRegistryServerRouteRepository } from './routes';
 export type {
-  DynamicDataSource,
+  DynamicDataAsset,
   DataScope,
   DataDefinitionRegistryClient,
   GetDataScopeResult,

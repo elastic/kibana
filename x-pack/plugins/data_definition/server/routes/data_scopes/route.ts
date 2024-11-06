@@ -40,12 +40,13 @@ const getDataScopesRoute = createDataDefinitionServerRoute({
       await dataDefinitionRegistry.start()
     ).getClientWithRequest(request);
 
-    const results = await registryClient.getScopes([], {
+    const results = await registryClient.getScopes({
       start,
       end,
       query: {
         match_all: {},
       },
+      index: ['*:*', '*'],
     });
 
     return { results };

@@ -5,17 +5,19 @@
  * 2.0.
  */
 import { CoreSetup, Logger } from '@kbn/core/server';
-import { compact, groupBy, mapValues } from 'lodash';
+import { groupBy, mapValues } from 'lodash';
 import pLimit from 'p-limit';
 import {
-  ClientGetMetricDefinitionResult,
   DataDefinition,
   DataDefinitionRegistry,
   DataDefinitionRegistryClient,
   DynamicDataDefinition,
-  DynamicDataSource,
   StaticDataDefinition,
+  DynamicDataAsset,
+  GetMetricDefinitionResult,
 } from './types';
+import { getDataStreamsForQuery } from './get_data_streams_for_query';
+import { createIndexPatternMatcher } from './create_index_pattern_matcher';
 
 const NAME_ALL = '_all_';
 
@@ -31,100 +33,81 @@ export function createDataDefinitionRegistry({
 
   const allDefinitions = new Map<string, DataDefinition>();
 
-  function getDynamicDefinitionForSource(
-    source: Omit<DynamicDataSource, 'instance' | 'properties'>
-  ) {
-    const definitionsForType = dynamicDefinitions.get(source.type);
+  function getDynamicDefinitionForAsset(asset: Omit<DynamicDataAsset, 'instance' | 'properties'>) {
+    const definitionsForType = dynamicDefinitions.get(asset.type);
 
     if (!definitionsForType) {
       return undefined;
     }
 
-    const name = source.name ?? NAME_ALL;
+    const name = asset.name ?? NAME_ALL;
 
     return definitionsForType.get(name);
   }
 
   function setDynamicDefinitionForSource(definition: DynamicDataDefinition) {
-    let definitionsForType = dynamicDefinitions.get(definition.source.type);
+    let definitionsForType = dynamicDefinitions.get(definition.asset.type);
     if (!definitionsForType) {
       definitionsForType = new Map<string, DynamicDataDefinition>();
-      dynamicDefinitions.set(definition.source.type, definitionsForType);
+      dynamicDefinitions.set(definition.asset.type, definitionsForType);
     }
 
-    definitionsForType.set(definition.source.name ?? NAME_ALL, definition);
+    definitionsForType.set(definition.asset.name ?? NAME_ALL, definition);
   }
 
-  function getApplicableStaticDefinitions() {
-    return Array.from(staticDefinitions.values());
-  }
-
-  function getSourcesGroupedByDefinitionId(sources: DynamicDataSource[]) {
-    const sourcesWithDefinitionIds = sources.map((source) => ({
-      source,
-      definitionId: getDynamicDefinitionForSource(source)?.id,
+  function getAssetsGroupedByDefinitionId(assets: DynamicDataAsset[]) {
+    const assetsWithDefinitionIds = assets.map((asset) => ({
+      asset,
+      definitionId: getDynamicDefinitionForAsset(asset)?.id,
     }));
 
-    const sourcesByDefinitionId = groupBy(
-      sourcesWithDefinitionIds.filter(
-        (source): source is Omit<typeof source, 'definitionId'> & { definitionId: string } =>
-          !!source.definitionId
+    const assetsByDefinitionId = groupBy(
+      assetsWithDefinitionIds.filter(
+        (asset): asset is Omit<typeof asset, 'definitionId'> & { definitionId: string } =>
+          !!asset.definitionId
       ),
       ({ definitionId }) => definitionId
     );
 
-    return sourcesByDefinitionId;
+    return mapValues(assetsByDefinitionId, (assetsForDefinition) =>
+      assetsForDefinition.map(({ asset }) => asset)
+    );
   }
 
   const registry: DataDefinitionRegistry = {
-    registerStaticDataDefinition: (
-      metadata: { id: string },
-      ...args:
-        | [StaticDataDefinition['getScopes']]
-        | [
-            StaticDataDefinition['getScopes'],
-            StaticDataDefinition['getMetrics'],
-            StaticDataDefinition['getTimeseries']
-          ]
-    ) => {
+    registerStaticDataDefinition: (metadata, getMetricDefinitions, getTimeseries) => {
       if (allDefinitions.get(metadata.id)) {
         throw new Error(`Definition id ${metadata.id} already registered`);
       }
 
       const definition: StaticDataDefinition = {
         id: metadata.id,
-        getScopes: args[0],
-        getMetrics: args[1],
-        getTimeseries: args[2],
+        getMetricDefinitions,
+        getTimeseries: getTimeseries as StaticDataDefinition['getTimeseries'],
       };
 
       allDefinitions.set(definition.id, definition);
       staticDefinitions.add(definition);
     },
     registerDynamicDataDefinition: (
-      metadata: { id: string; source: { type: string; name?: string } },
+      metadata: { id: string; asset: { type: string; name?: string } },
+      getScopes: DynamicDataDefinition['getScopes'],
       ...args:
-        | [DynamicDataDefinition['getSources'], DynamicDataDefinition['getScopes']]
-        | [
-            DynamicDataDefinition['getSources'],
-            DynamicDataDefinition['getScopes'],
-            DynamicDataDefinition['getMetrics'],
-            DynamicDataDefinition['getTimeseries']
-          ]
+        | []
+        | [DynamicDataDefinition['getMetricDefinitions'], DynamicDataDefinition['getTimeseries']]
     ) => {
-      if (getDynamicDefinitionForSource(metadata.source)) {
+      if (getDynamicDefinitionForAsset(metadata.asset)) {
         throw new Error(
-          `Definition for source ${metadata.source.type}, ${metadata.source.name} already registered `
+          `Definition for asset ${metadata.asset.type}, ${metadata.asset.name} already registered `
         );
       }
 
       const definition: DynamicDataDefinition = {
         id: metadata.id,
-        source: metadata.source,
-        getSources: args[0],
-        getScopes: args[1],
-        getMetrics: args[2],
-        getTimeseries: args[3],
+        asset: metadata.asset,
+        getScopes,
+        getMetricDefinitions: args[0],
+        getTimeseries: args[1],
       };
 
       setDynamicDefinitionForSource(definition);
@@ -139,84 +122,83 @@ export function createDataDefinitionRegistry({
       const withClients = { esClient, soClient, request };
 
       const client: DataDefinitionRegistryClient = {
-        getScopes: async (sources, options) => {
-          const sourcesByDefinitionId = getSourcesGroupedByDefinitionId(sources);
-          const optionsWithClient = { ...options, ...withClients };
+        getScopes: async (options) => {
+          const { query, start, end, index } = options;
 
-          const staticScopes = (
-            await Promise.all(
-              getApplicableStaticDefinitions().map(
-                async (definition) => await definition.getScopes(optionsWithClient)
-              )
-            )
-          ).flat();
+          const dataStreams = await getDataStreamsForQuery({
+            esClient: esClient.asCurrentUser,
+            query,
+            index,
+          });
 
-          const dynamicScopes = Object.entries(sourcesByDefinitionId)
-            .map(([definitionId, sourcesForDefinition]) => {
-              const definition = allDefinitions.get(definitionId)! as DynamicDataDefinition;
-              return definition.getScopes(
-                sourcesForDefinition.map(({ source }) => source),
-                optionsWithClient
-              );
-            })
-            .flat();
+          const optionsWithClient = {
+            start,
+            end,
+            dataStreams: createIndexPatternMatcher(dataStreams),
+            ...withClients,
+          };
 
-          return [...staticScopes, ...dynamicScopes];
-        },
-        getMetrics: async (sources, options) => {
-          const optionsWithClient = { ...options, ...withClients };
-
-          const sourcesByDefinitionId = getSourcesGroupedByDefinitionId(sources);
-
-          const staticMetricDefinitions: ClientGetMetricDefinitionResult[] = compact(
-            await Promise.all(
-              getApplicableStaticDefinitions().map(async (definition) => {
-                const metrics = await definition.getMetrics?.(optionsWithClient);
-
-                if (metrics) {
-                  return mapValues(metrics, (metric) => ({
-                    ...metric,
-                    definitionId: definition.id,
-                  }));
-                }
-
-                return undefined;
-              })
-            )
-          );
-
-          const dynamicMetricDefinitions: ClientGetMetricDefinitionResult[] = compact(
-            Object.entries(sourcesByDefinitionId).map(([definitionId, sourcesForDefinition]) => {
-              const definition = allDefinitions.get(definitionId)! as DynamicDataDefinition;
-              const metrics = definition.getMetrics?.(
-                sourcesForDefinition.map(({ source }) => source),
-                optionsWithClient
-              );
-
-              if (metrics) {
-                return mapValues(metrics, (metric) => ({ ...metric, definitionId: definition.id }));
+          const allScopes = await Promise.all(
+            Array.from(allDefinitions.values()).flatMap((definition) => {
+              if ('getScopes' in definition) {
+                return definition
+                  .getScopes(optionsWithClient)
+                  .then((scopesFromDefinition) =>
+                    scopesFromDefinition.map((scope) => ({ ...scope, definitionId: definition.id }))
+                  );
               }
-              return undefined;
+              return [];
             })
           );
 
-          const metricResult: ClientGetMetricDefinitionResult = {};
+          return allScopes.flat();
+        },
+        getMetricDefinitions: async (options, assets) => {
+          const { query, start, end, index } = options;
 
-          const allMetricResults = [
-            ...compact(staticMetricDefinitions),
-            ...compact(dynamicMetricDefinitions),
-          ];
+          const dataStreams = await getDataStreamsForQuery({
+            esClient: esClient.asCurrentUser,
+            query,
+            index,
+          });
 
-          allMetricResults.forEach((partialMetricResult) => {
-            Object.keys(partialMetricResult).forEach((metricId) => {
-              if (metricResult[metricId]) {
+          const optionsWithClient = {
+            start,
+            end,
+            dataStreams: createIndexPatternMatcher(dataStreams),
+            ...withClients,
+          };
+
+          const assetsByDefinitionId = getAssetsGroupedByDefinitionId(assets ?? []);
+
+          const allMetricDefinitions = await Promise.all(
+            Array.from(allDefinitions.values()).flatMap((definition) => {
+              if ('getMetricDefinitions' in definition && definition.getMetricDefinitions) {
+                return definition
+                  .getMetricDefinitions(optionsWithClient, assetsByDefinitionId[definition.id])
+                  .then((metricDefinitionsFromDefinition) =>
+                    mapValues(metricDefinitionsFromDefinition, (metricDef) => ({
+                      ...metricDef,
+                      definitionId: definition.id,
+                    }))
+                  );
+              }
+              return [];
+            })
+          );
+
+          const mergedMetricResult: GetMetricDefinitionResult = {};
+
+          allMetricDefinitions.forEach((metricResult) => {
+            Object.keys(metricResult).forEach((metricId) => {
+              if (mergedMetricResult[metricId]) {
                 logger.warn(`Overriding metric id ${metricId}`);
               }
-              metricResult[metricId] = partialMetricResult[metricId];
+              mergedMetricResult[metricId] = metricResult[metricId];
             });
           });
 
-          return metricResult;
+          return mergedMetricResult;
         },
         getTimeseries: async (options) => {
           const optionsWithClient = { ...options, ...withClients };
@@ -227,7 +209,7 @@ export function createDataDefinitionRegistry({
               const definition = allDefinitions.get(metric.definitionId);
               if (!definition) {
                 throw new Error(
-                  `Definition ${metric.definitionId} not found for metric ${metric.id}`
+                  `Definition ${metric.definitionId} not found for metric ${metric.metric.id}`
                 );
               }
 

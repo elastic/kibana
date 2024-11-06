@@ -14,92 +14,19 @@ interface DataDefinitionBase {
   id: string;
 }
 
-interface MetricBase {
+interface MetricDefinition {
   id: string;
-}
-
-interface MetricDefinition extends MetricBase {
   label: string;
   schema: ToolSchema;
+  properties: Record<string, any>;
 }
 
-interface MetricInput extends MetricBase {
+interface MetricInput {
+  metric: Omit<MetricDefinition, 'schema'>;
   input: Record<string, any>;
 }
 
-export interface DataScope {
-  index: string | string[];
-  query: QueryDslQueryContainer;
-}
-
-interface GetDataScopeOptions {
-  start: number;
-  end: number;
-  query: QueryDslQueryContainer;
-}
-
-interface GetMetricDefinitionOptions {
-  start: number;
-  end: number;
-  query: QueryDslQueryContainer;
-}
-
-interface GetTimeseriesOptions {
-  start: number;
-  end: number;
-  query: QueryDslQueryContainer;
-  bucketSize: number;
-}
-
-interface Timeseries {
-  id: string;
-  label: string;
-  values: Array<{ x: number; y: number | null }>;
-  metricId: string;
-}
-
-type GetStaticDataScopeResult = DataScope[];
-type GetTimeseriesResult = Timeseries[];
-
-export type GetMetricDefinitionResult = Record<string, Omit<MetricDefinition, 'id'>>;
-
-interface GetTimeseriesOptions {
-  start: number;
-  end: number;
-  query: QueryDslQueryContainer;
-  metrics: MetricInput[];
-}
-
-type GetTimeseriesOptionsOf<TMetricDefinitionResult extends GetMetricDefinitionResult> = Omit<
-  GetTimeseriesOptions,
-  'metrics'
-> & {
-  metrics: Array<
-    ValuesType<{
-      [TKey in keyof TMetricDefinitionResult]: Omit<MetricInput, 'input'> & {
-        input: FromToolSchema<TMetricDefinitionResult[TKey]['schema']>;
-      };
-    }>
-  >;
-};
-
-type WithScoped<TBaseOptions extends Record<string, any>> = TBaseOptions & {
-  request: KibanaRequest;
-  esClient: IScopedClusterClient;
-  soClient: SavedObjectsClientContract;
-};
-
-export interface StaticDataDefinition extends DataDefinitionBase {
-  getScopes: (options: WithScoped<GetDataScopeOptions>) => Promise<GetStaticDataScopeResult>;
-  getMetrics?: (
-    options: WithScoped<GetMetricDefinitionOptions>
-  ) => Promise<GetMetricDefinitionResult>;
-  getTimeseries?: (options: WithScoped<GetTimeseriesOptions>) => Promise<GetTimeseriesResult>;
-}
-
-export type DataDefinition = DynamicDataDefinition | StaticDataDefinition;
-
-export interface DynamicDataSource {
+interface DynamicDataAsset {
   type: string;
   name?: string;
   instance: {
@@ -108,102 +35,191 @@ export interface DynamicDataSource {
   properties: Record<string, any>;
 }
 
-interface GetSourceOptions {
+interface DataScope<TAsset extends DynamicDataAsset = DynamicDataAsset> {
+  assets: TAsset[];
+  index: string | string[];
   query: QueryDslQueryContainer;
 }
 
-export type ClientGetMetricDefinitionResult = GetMetricDefinitionResult &
-  Record<string, { definitionId: string }>;
+interface KibanaClientOptions {
+  request: KibanaRequest;
+  esClient: IScopedClusterClient;
+  soClient: SavedObjectsClientContract;
+}
 
-type GetDynamicDataScopeResult = Array<DataScope & { sources: DynamicDataSource[] }>;
-type GetDynamicMetricDefinitionResult = GetMetricDefinitionResult;
+interface TimeRangeOptions {
+  start: number;
+  end: number;
+}
 
-export interface DynamicDataDefinition extends DataDefinitionBase {
+interface QueryOptions {
+  index: string | string[];
+  query: QueryDslQueryContainer;
+}
+
+interface DataStreamOptions {
+  dataStreams: {
+    all: Set<string>;
+    matches: (indexPattern: string) => boolean;
+  };
+}
+
+type InternalGetDataScopeOptions = TimeRangeOptions & DataStreamOptions & KibanaClientOptions;
+
+type GetDataScopeOptions = TimeRangeOptions & QueryOptions;
+
+type InternalGetMetricDefinitionOptions = TimeRangeOptions &
+  DataStreamOptions &
+  KibanaClientOptions;
+
+type GetMetricDefinitionOptions = TimeRangeOptions & QueryOptions;
+
+type InternalGetTimeseriesOptions = TimeRangeOptions &
+  Omit<QueryOptions, 'index'> & { metrics: MetricInput[] };
+
+type GetTimeseriesOptions = Omit<TimeRangeOptions, 'index'> &
+  QueryOptions & {
+    metrics: Array<MetricInput & { definitionId: string }>;
+  };
+
+interface Timeseries {
   id: string;
-  source: {
+  label: string;
+  values: Array<{ x: number; y: number | null }>;
+  metricId: string;
+}
+
+type InternalGetDataScopeResult<TAsset extends DynamicDataAsset = DynamicDataAsset> = Array<
+  DataScope<TAsset>
+>;
+
+type InternalGetTimeseriesResult = Timeseries[];
+
+type InternalGetMetricDefinitionResult = Partial<{
+  [key: string]: Omit<MetricDefinition, 'id'>;
+}>;
+
+interface MetricInputOf<
+  TMetricId extends string,
+  TMetricDefinition extends Omit<MetricDefinition, 'id'>
+> {
+  id: TMetricId;
+  properties: TMetricDefinition['properties'];
+  input: FromToolSchema<TMetricDefinition['schema']>;
+}
+
+type InternalGetTimeseriesOptionsOf<
+  TMetricDefinitionResult extends InternalGetMetricDefinitionResult
+> = Omit<InternalGetTimeseriesOptions, 'metrics'> & {
+  metrics: Array<
+    ValuesType<
+      Required<{
+        [TKey in keyof TMetricDefinitionResult & string]: MetricInputOf<
+          TKey,
+          Exclude<TMetricDefinitionResult[TKey], undefined>
+        >;
+      }>
+    >
+  >;
+};
+
+interface StaticDataDefinition extends DataDefinitionBase {
+  getMetricDefinitions: (
+    options: InternalGetMetricDefinitionOptions
+  ) => Promise<InternalGetMetricDefinitionResult>;
+  getTimeseries: (options: InternalGetTimeseriesOptions) => Promise<InternalGetTimeseriesResult>;
+}
+
+interface DynamicDataDefinition extends DataDefinitionBase {
+  id: string;
+  asset: {
     type: string;
     name?: string;
   };
-  getSources: (options: WithScoped<GetSourceOptions>) => Promise<DynamicDataSource[]>;
-  getScopes: (
-    sources: DynamicDataSource[],
-    options: WithScoped<GetDataScopeOptions>
-  ) => GetDynamicDataScopeResult;
-  getMetrics?: (
-    sources: DynamicDataSource[],
-    options: WithScoped<GetMetricDefinitionOptions>
-  ) => GetDynamicMetricDefinitionResult;
-  getTimeseries?: (options: WithScoped<GetTimeseriesOptions>) => Promise<GetTimeseriesResult>;
+  getScopes: (options: InternalGetDataScopeOptions) => Promise<InternalGetDataScopeResult>;
+  getMetricDefinitions?: (
+    options: InternalGetMetricDefinitionOptions,
+    assets?: DynamicDataAsset[]
+  ) => Promise<InternalGetMetricDefinitionResult>;
+  getTimeseries?: (options: InternalGetTimeseriesOptions) => Promise<InternalGetTimeseriesResult>;
 }
 
-export interface DataDefinitionRegistry {
-  registerStaticDataDefinition(
+type DataDefinition = DynamicDataDefinition | StaticDataDefinition;
+
+interface DataDefinitionRegistry {
+  registerStaticDataDefinition<TMetricDefinitionResult extends InternalGetMetricDefinitionResult>(
     metadata: {
       id: string;
     },
-    getScopeCallback: StaticDataDefinition['getScopes']
-  ): void;
-  registerStaticDataDefinition<TMetricDefinitionResult extends GetMetricDefinitionResult>(
-    metadata: {
-      id: string;
-    },
-    getScopes: StaticDataDefinition['getScopes'],
-    getMetrics: (options: GetMetricDefinitionOptions) => Promise<TMetricDefinitionResult>,
+    getMetricDefinitions: (
+      options: InternalGetMetricDefinitionOptions
+    ) => Promise<TMetricDefinitionResult>,
     getTimeseries: (
-      options: GetTimeseriesOptionsOf<TMetricDefinitionResult>
-    ) => Promise<GetTimeseriesResult>
+      options: InternalGetTimeseriesOptionsOf<TMetricDefinitionResult>
+    ) => Promise<InternalGetTimeseriesResult>
   ): void;
-  registerDynamicDataDefinition<TSource extends DynamicDataSource>(
+  registerDynamicDataDefinition<TAsset extends DynamicDataAsset>(
     metadata: {
       id: string;
-      source: {
+      asset: {
         type: string;
         name?: string;
       };
     },
-    getSources: (options: GetSourceOptions) => Promise<TSource[]>,
-    getScopes: (sources: TSource[], options: GetDataScopeOptions) => GetDynamicDataScopeResult
+    getScopes: (options: InternalGetDataScopeOptions) => Promise<InternalGetDataScopeResult>
   ): void;
   registerDynamicDataDefinition<
-    TSource extends DynamicDataSource,
-    TMetricDefinitionResult extends GetMetricDefinitionResult
+    TAsset extends DynamicDataAsset,
+    TMetricDefinitionResult extends InternalGetMetricDefinitionResult
   >(
     metadata: {
       id: string;
-      source: {
+      asset: {
         type: string;
         name?: string;
       };
     },
-    getSources: (options: GetSourceOptions) => Promise<TSource[]>,
-    getScopes: (sources: TSource[], options: GetDataScopeOptions) => GetDynamicDataScopeResult,
-    getMetrics: (
-      sources: TSource[],
-      options: GetMetricDefinitionOptions
-    ) => TMetricDefinitionResult,
+    getScopes: (
+      options: InternalGetDataScopeOptions
+    ) => Promise<InternalGetDataScopeResult<TAsset>>,
+    getMetricDefinitions: (
+      options: InternalGetMetricDefinitionOptions,
+      assets?: TAsset[]
+    ) => Promise<TMetricDefinitionResult>,
     getTimeseries: (
-      options: GetTimeseriesOptionsOf<TMetricDefinitionResult>
-    ) => Promise<GetTimeseriesResult>
+      options: InternalGetTimeseriesOptionsOf<TMetricDefinitionResult>
+    ) => Promise<InternalGetTimeseriesResult>
   ): void;
   getClientWithRequest(request: KibanaRequest): Promise<DataDefinitionRegistryClient>;
 }
 
-export type GetDataScopeResult = Array<
-  ValuesType<GetStaticDataScopeResult> | ValuesType<GetDynamicDataScopeResult>
->;
+type GetDataScopeResult = Array<DataScope & { definitionId: string }>;
 
-export interface DataDefinitionRegistryClient {
-  getScopes: (
-    sources: DynamicDataSource[],
-    options: GetDataScopeOptions
-  ) => Promise<GetDataScopeResult>;
-  getMetrics: (
-    sources: DynamicDataSource[],
-    options: GetMetricDefinitionOptions
-  ) => Promise<ClientGetMetricDefinitionResult>;
-  getTimeseries: (
-    options: Omit<GetTimeseriesOptions, 'metrics'> & {
-      metrics: Array<MetricInput & { definitionId: string }>;
-    }
-  ) => Promise<GetTimeseriesResult>;
+type GetMetricDefinitionResult = {
+  [TMetricId in keyof InternalGetMetricDefinitionResult]: InternalGetMetricDefinitionResult[TMetricId] & {
+    definitionId: string;
+  };
+};
+
+type GetTimeseriesResult = Timeseries[];
+
+interface DataDefinitionRegistryClient {
+  getScopes: (options: GetDataScopeOptions) => Promise<GetDataScopeResult>;
+  getMetricDefinitions: (
+    options: GetMetricDefinitionOptions,
+    assets?: DynamicDataAsset[]
+  ) => Promise<GetMetricDefinitionResult>;
+  getTimeseries: (options: GetTimeseriesOptions) => Promise<GetTimeseriesResult>;
 }
+
+export type {
+  DataDefinition,
+  DataDefinitionRegistry,
+  DataDefinitionRegistryClient,
+  DataScope,
+  DynamicDataAsset,
+  DynamicDataDefinition,
+  GetMetricDefinitionResult,
+  GetDataScopeResult,
+  StaticDataDefinition,
+};

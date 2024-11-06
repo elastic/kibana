@@ -6,6 +6,8 @@
  */
 
 import { z } from '@kbn/zod';
+import { toElasticsearchQuery } from '@kbn/es-query';
+import { fromKueryExpression } from '@kbn/es-query';
 import { createDataDefinitionServerRoute } from '..';
 import type { GetMetricDefinitionResult } from '../../../../data_definition_registry/server/data_definition_registry/types';
 
@@ -15,6 +17,7 @@ const getMetricsRoute = createDataDefinitionServerRoute({
     body: z.object({
       start: z.number(),
       end: z.number(),
+      kuery: z.string().optional(),
       types: z
         .array(z.union([z.literal('slo'), z.literal('rule'), z.literal('visualization')]))
         .optional(),
@@ -32,7 +35,7 @@ const getMetricsRoute = createDataDefinitionServerRoute({
       request,
       plugins: { dataDefinitionRegistry },
       params: {
-        body: { start, end, types = [] },
+        body: { start, end, kuery, types = [] },
       },
     } = context;
 
@@ -40,12 +43,11 @@ const getMetricsRoute = createDataDefinitionServerRoute({
       await dataDefinitionRegistry.start()
     ).getClientWithRequest(request);
 
-    const results = await registryClient.getMetrics([], {
+    const results = await registryClient.getMetricDefinitions({
       start,
       end,
-      query: {
-        match_all: {},
-      },
+      index: ['*', '*:*'],
+      query: kuery ? toElasticsearchQuery(fromKueryExpression(kuery)) : { match_all: {} },
     });
 
     return { results };
