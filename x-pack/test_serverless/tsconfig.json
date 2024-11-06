@@ -76,7 +76,6 @@
     "@kbn/ftr-common-functional-ui-services",
     "@kbn/saved-objects-management-plugin",
     "@kbn/es",
-    "@kbn/infra-forge",
     "@kbn/reporting-common",
     "@kbn/es-query",
     "@kbn/slo-plugin",
