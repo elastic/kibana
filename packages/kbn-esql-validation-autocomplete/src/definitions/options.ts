@@ -38,16 +38,6 @@ export const metadataOption: CommandOptionsDefinition = {
   skipCommonValidation: true,
   validate: (option, command, references) => {
     const messages: ESQLMessage[] = [];
-    // need to test the parent command here
-    if (/\[metadata/i.test(command.text)) {
-      messages.push(
-        getMessageFromId({
-          messageId: 'metadataBracketsDeprecation',
-          values: {},
-          locations: option.location,
-        })
-      );
-    }
     const fields = option.args.filter(isColumnItem);
     const metadataFieldsAvailable = references as unknown as Set<string>;
     if (metadataFieldsAvailable.size > 0) {

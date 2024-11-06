@@ -34,24 +34,26 @@ import { useEmbeddableInspect } from './use_embeddable_inspect';
 import { useVisualizationResponse } from './use_visualization_response';
 import { useInspect } from '../inspect/use_inspect';
 
-const HOVER_ACTIONS_PADDING = 24;
 const DISABLED_ACTIONS = ['ACTION_CUSTOMIZE_PANEL'];
 
 const LensComponentWrapper = styled.div<{
   $height?: number;
   width?: string | number;
-  $addHoverActionsPadding?: boolean;
 }>`
   height: ${({ $height }) => ($height ? `${$height}px` : 'auto')};
   width: ${({ width }) => width ?? 'auto'};
 
-  ${({ $addHoverActionsPadding }) =>
-    $addHoverActionsPadding ? `.embPanel__header { top: ${HOVER_ACTIONS_PADDING * -1}px; }` : ''}
+  .embPanel {
+    outline: none;
+  }
 
-  .embPanel__header {
-    z-index: 2;
-    position: absolute;
-    right: 0;
+  .embPanel__hoverActions.embPanel__hoverActionsRight {
+    border-radius: 6px !important;
+    border-bottom: 1px solid #d3dae6 !important;
+  }
+
+  .embPanel__hoverActionsAnchor .embPanel__hoverActionsWrapper {
+    top: -20px;
   }
 
   .expExpressionRenderer__expression {
@@ -110,10 +112,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
     title: '',
   });
   const preferredSeriesType = (attributes?.state?.visualization as XYState)?.preferredSeriesType;
-  // Avoid hover actions button overlaps with its chart
-  const addHoverActionsPadding =
-    attributes?.visualizationType !== 'lnsLegacyMetric' &&
-    attributes?.visualizationType !== 'lnsPie';
+
   const LensComponent = lens.EmbeddableComponent;
 
   const overrides: TypedLensByValueInput['overrides'] = useMemo(
@@ -255,11 +254,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
   return (
     <>
       {attributes && searchSessionId && (
-        <LensComponentWrapper
-          $height={wrapperHeight}
-          width={wrapperWidth}
-          $addHoverActionsPadding={addHoverActionsPadding}
-        >
+        <LensComponentWrapper $height={wrapperHeight} width={wrapperWidth}>
           <LensComponent
             attributes={attributes}
             disabledActions={DISABLED_ACTIONS}
