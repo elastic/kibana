@@ -15,7 +15,7 @@ import {
   EuiButtonEmpty,
   EuiButtonGroup,
   EuiCallOut,
-  EuiDescribedFormGroup,
+  // EuiDescribedFormGroup,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -250,20 +250,20 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
     if (!CustomSettings) return;
 
     return (
-      <EuiDescribedFormGroup
-        ratio="third"
-        title={
-          <h2>
-            {DataControlEditorStrings.manageControl.controlTypeSettings.getFormGroupTitle(
-              controlFactory.getDisplayName()
-            )}
-          </h2>
-        }
-        description={DataControlEditorStrings.manageControl.controlTypeSettings.getFormGroupDescription(
-          controlFactory.getDisplayName()
-        )}
-        data-test-subj="control-editor-custom-settings"
-      >
+      // <EuiDescribedFormGroup
+      //   ratio="third"
+      //   title={
+      //     <h2>
+      //       {DataControlEditorStrings.manageControl.controlTypeSettings.getFormGroupTitle(
+      //         controlFactory.getDisplayName()
+      //       )}
+      //     </h2>
+      //   }
+      //   description={DataControlEditorStrings.manageControl.controlTypeSettings.getFormGroupDescription(
+      //     controlFactory.getDisplayName()
+      //   )}
+      //   data-test-subj="control-editor-custom-settings"
+      // >
         <CustomSettings
           initialState={initialState}
           field={fieldRegistry[editorState.fieldName].field}
@@ -271,14 +271,14 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
           setControlEditorValid={setControlOptionsValid}
           controlGroupApi={controlGroupApi}
         />
-      </EuiDescribedFormGroup>
+      // </EuiDescribedFormGroup>
     );
   }, [fieldRegistry, controlFactory, initialState, editorState, controlGroupApi]);
 
   return (
     <>
       <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="m">
+        <EuiTitle size="xs">
           <h2>
             {!controlId // if no ID, then we are creating a new control
               ? DataControlEditorStrings.manageControl.getFlyoutCreateTitle()
@@ -288,11 +288,11 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
       </EuiFlyoutHeader>
       <EuiFlyoutBody data-test-subj="control-editor-flyout">
         <EuiForm fullWidth>
-          <EuiDescribedFormGroup
+          {/* <EuiDescribedFormGroup
             ratio="third"
             title={<h2>{DataControlEditorStrings.manageControl.dataSource.getFormGroupTitle()}</h2>}
             description={DataControlEditorStrings.manageControl.dataSource.getFormGroupDescription()}
-          >
+          > */}
             {!editorConfig?.hideDataViewSelector && (
               <EuiFormRow
                 data-test-subj="control-editor-data-view-picker"
@@ -387,14 +387,14 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
                 />
               </div>
             </EuiFormRow>
-          </EuiDescribedFormGroup>
-          <EuiDescribedFormGroup
+          {/* </EuiDescribedFormGroup> */}
+          {/* <EuiDescribedFormGroup
             ratio="third"
             title={
               <h2>{DataControlEditorStrings.manageControl.displaySettings.getFormGroupTitle()}</h2>
             }
             description={DataControlEditorStrings.manageControl.displaySettings.getFormGroupDescription()}
-          >
+          > */}
             <EuiFormRow
               label={DataControlEditorStrings.manageControl.displaySettings.getTitleInputTitle()}
             >
@@ -402,6 +402,7 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
                 data-test-subj="control-editor-title-input"
                 placeholder={defaultPanelTitle}
                 value={panelTitle}
+                compressed
                 onChange={(e) => {
                   setPanelTitle(e.target.value ?? '');
                   setEditorState({
@@ -418,6 +419,8 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
               >
                 <div>
                   <EuiButtonGroup
+                    buttonSize="compressed"
+                    isFullWidth
                     color="primary"
                     legend={DataControlEditorStrings.management.controlWidth.getWidthSwitchLegend()}
                     options={CONTROL_WIDTH_OPTIONS}
@@ -428,6 +431,7 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
                   />
                   <EuiSpacer size="s" />
                   <EuiSwitch
+                    compressed
                     label={DataControlEditorStrings.manageControl.displaySettings.getGrowSwitchTitle()}
                     color="primary"
                     checked={editorState.grow ?? DEFAULT_CONTROL_GROW}
@@ -437,7 +441,7 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
                 </div>
               </EuiFormRow>
             )}
-          </EuiDescribedFormGroup>
+          {/* </EuiDescribedFormGroup> */}
           {!editorConfig?.hideAdditionalSettings && CustomSettingsComponent}
           {controlId && (
             <>
