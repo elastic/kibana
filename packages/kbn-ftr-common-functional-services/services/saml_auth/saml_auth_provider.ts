@@ -93,7 +93,7 @@ export function SamlAuthProvider({ getService }: FtrProviderContext) {
   return {
     /**
      * Returns a Cookie string containing the session token for the specified role.
-     * This string can be used to update browser cookies and login as the designated role.
+     * This string can be used to update browser cookies and login with the designated role.
      *
      * @param role - The SAML role for which the session token is required.
      * @param options - Optional settings to control session behavior, such as forcing a new session.
