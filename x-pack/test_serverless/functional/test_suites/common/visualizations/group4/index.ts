@@ -5,19 +5,21 @@
  * 2.0.
  */
 
-import { EsArchiver } from '@kbn/es-archiver';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { EsArchiver } from '@kbn/es-archiver';
+import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext) => {
   const browser = getService('browser');
   const log = getService('log');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const { timePicker } = getPageObjects(['timePicker']);
+  const PageObjects = getPageObjects(['timePicker', 'svlCommonPage']);
   const config = getService('config');
   let remoteEsArchiver;
 
-  describe('lens app - group 4', () => {
+  describe('lens serverless - group 1', function () {
+    this.tags(['esGate']);
+
     const esArchive = 'x-pack/test/functional/es_archives/logstash_functional';
     const localIndexPatternString = 'logstash-*';
     const remoteIndexPatternString = 'ftr-remote:logstash-*';
@@ -37,7 +39,7 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
     };
     let indexPatternString: string;
     before(async () => {
-      await log.debug('Starting lens before method');
+      log.debug('Starting lens before method');
       await browser.setWindowSize(1280, 1200);
       await kibanaServer.savedObjects.cleanStandardList();
       try {
@@ -53,32 +55,24 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
       }
 
       await esNode.load(esArchive);
-      // changing the timepicker default here saves us from having to set it in Discover (~8s)
-      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.uiSettings.update({
         defaultIndex: indexPatternString,
         'dateFormat:tz': 'UTC',
       });
       await kibanaServer.importExport.load(fixtureDirs.lensBasic);
       await kibanaServer.importExport.load(fixtureDirs.lensDefault);
+      // changing the timepicker default here saves us from having to set it in Discover (~8s)
+      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
     });
 
     after(async () => {
       await esArchiver.unload(esArchive);
-      await timePicker.resetDefaultAbsoluteRangeViaUiSettings();
+      await PageObjects.timePicker.resetDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.importExport.unload(fixtureDirs.lensBasic);
       await kibanaServer.importExport.unload(fixtureDirs.lensDefault);
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
-    // total run time ~16m 30s
-    loadTestFile(require.resolve('./colors')); // 1m 2s
-    loadTestFile(require.resolve('./color_mapping'));
-    loadTestFile(require.resolve('./chart_data')); // 1m 10s
-    loadTestFile(require.resolve('./time_shift')); // 1m
-    loadTestFile(require.resolve('./dashboard')); // 6m 45s
-    loadTestFile(require.resolve('./show_underlying_data')); // 2m
-    loadTestFile(require.resolve('./show_underlying_data_dashboard')); // 2m 10s
-    loadTestFile(require.resolve('./share')); // 1m 20s
+    loadTestFile(require.resolve('./logsdb.ts'));
   });
 };

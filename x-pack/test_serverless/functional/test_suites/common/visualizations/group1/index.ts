@@ -75,7 +75,6 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
 
     loadTestFile(require.resolve('./smokescreen.ts'));
     loadTestFile(require.resolve('./tsdb.ts'));
-    loadTestFile(require.resolve('./logsdb.ts'));
     loadTestFile(require.resolve('./vega_chart.ts'));
   });
 };
