@@ -455,21 +455,6 @@ packages/kbn-reporting/mocks_server @elastic/appex-sharedux
 packages/kbn-reporting/public @elastic/appex-sharedux
 packages/kbn-reporting/server @elastic/appex-sharedux
 packages/kbn-resizable-layout @elastic/kibana-data-discovery
-<<<<<<< HEAD
-examples/resizable_layout_examples @elastic/kibana-data-discovery
-x-pack/test/plugin_functional/plugins/resolver_test @elastic/security-solution
-packages/response-ops/feature_flag_service @elastic/response-ops
-packages/response-ops/rule_form @elastic/response-ops
-packages/response-ops/rule_params @elastic/response-ops
-examples/response_stream @elastic/ml-ui
-||||||| 0aec5a82dbf
-examples/resizable_layout_examples @elastic/kibana-data-discovery
-x-pack/test/plugin_functional/plugins/resolver_test @elastic/security-solution
-packages/response-ops/feature_flag_service @elastic/response-ops
-packages/response-ops/rule_params @elastic/response-ops
-examples/response_stream @elastic/ml-ui
-=======
->>>>>>> upstream/main
 packages/kbn-rison @elastic/kibana-operations
 packages/kbn-router-to-openapispec @elastic/kibana-core
 packages/kbn-router-utils @elastic/obs-ux-logs-team
@@ -569,6 +554,7 @@ packages/react/kibana_context/styled @elastic/appex-sharedux
 packages/react/kibana_context/theme @elastic/appex-sharedux
 packages/react/kibana_mount @elastic/appex-sharedux
 packages/response-ops/feature_flag_service @elastic/response-ops
+packages/response-ops/rule_form @elastic/response-ops
 packages/response-ops/rule_params @elastic/response-ops
 packages/serverless/project_switcher @elastic/appex-sharedux
 packages/serverless/settings/common @elastic/appex-sharedux @elastic/kibana-management
