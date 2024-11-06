@@ -20,6 +20,7 @@ import {
 import { getConversationCreatedEvent } from '../conversations/helpers';
 import { LlmProxy, createLlmProxy } from '../../common/create_llm_proxy';
 import { createProxyActionConnector, deleteActionConnector } from '../../common/action_connectors';
+import { User } from '../../common/users/users';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantAPIClient');
@@ -197,7 +198,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       const userInstructionText =
         'Be polite and use language that is easy to understand. Never disagree with the user.';
 
-      async function getConversationForUser(username: string) {
+      async function getConversationForUser(username: User['username']) {
         const apiClient = getScopedApiClientForUsername(username);
 
         // the user instruction is always created by "editor" user
