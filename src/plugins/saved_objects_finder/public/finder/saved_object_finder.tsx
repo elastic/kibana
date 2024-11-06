@@ -219,28 +219,8 @@ export class SavedObjectFinderUi extends React.Component<
           item.simple.attributes.description !== '' &&
           item.simple.attributes.description !== undefined
       ).length > 0;
-    const getWidth = (type: string) => {
-      if (type === 'type') {
-        return '70px';
-      } else if (type === 'description') {
-        return descriptionsDefined ? '33%' : '0%';
-      } else if (type === 'title') {
-        if (tagColumn || descriptionsDefined) {
-          return '55%';
-        } else if (tagColumn && descriptionsDefined) {
-          return '33%';
-        } else {
-          return '100%';
-        }
-      } else if (type === 'tags') {
-        return descriptionsDefined ? '33%' : '40%';
-      }
-    };
     const taggingApi = this.props.services.savedObjectsTagging;
-    const originalTagColumn = {
-      ...taggingApi?.ui.getTableColumnDefinition(),
-      width: getWidth('tags'),
-    } as EuiTableFieldDataColumnType<SavedObjectCommon>;
+    const originalTagColumn = taggingApi?.ui.getTableColumnDefinition();
     const tagColumn: EuiTableFieldDataColumnType<SavedObjectCommon> | undefined = originalTagColumn
       ? {
           ...originalTagColumn,
@@ -258,7 +238,7 @@ export class SavedObjectFinderUi extends React.Component<
             name: i18n.translate('savedObjectsFinder.typeName', {
               defaultMessage: 'Type',
             }),
-            width: getWidth('type'),
+            width: '70px',
             align: 'center',
             description: i18n.translate('savedObjectsFinder.typeDescription', {
               defaultMessage: 'Type of the saved object',
@@ -295,44 +275,6 @@ export class SavedObjectFinderUi extends React.Component<
             },
           }
         : undefined;
-    const descriptionColumn: EuiTableFieldDataColumnType<SavedObjectFinderItem> | undefined = {
-      field: 'description',
-      name: i18n.translate('savedObjectsFinder.descriptionName', {
-        defaultMessage: 'Description',
-      }),
-      width: getWidth('description'),
-      description: i18n.translate('savedObjectsFinder.descriptionDescription', {
-        defaultMessage: 'Description of the saved object',
-      }),
-      dataType: 'string',
-      'data-test-subj': 'savedObjectFinderDescription',
-      render: (_, item) => {
-        const currentSavedObjectMetaData = savedObjectMetaData.find(
-          (metaData) => metaData.type === item.type
-        )!;
-        const fullName = currentSavedObjectMetaData.getTooltipForSavedObject
-          ? currentSavedObjectMetaData.getTooltipForSavedObject(item.simple)
-          : `${item.name} (${currentSavedObjectMetaData!.name})`;
-
-        if (descriptionsDefined) {
-          return (
-            <EuiLink
-              onClick={
-                onChoose
-                  ? () => {
-                      onChoose(item.id, item.type, fullName, item.simple);
-                    }
-                  : undefined
-              }
-              title={item.simple.attributes.description}
-              data-test-subj={`savedObjectDescription${(item.title || '').split(' ').join('-')}`}
-            >
-              {item.simple.attributes.description}
-            </EuiLink>
-          );
-        }
-      },
-    };
     const columns: Array<EuiTableFieldDataColumnType<SavedObjectFinderItem>> = [
       ...(typeColumn ? [typeColumn] : []),
       {
@@ -340,7 +282,7 @@ export class SavedObjectFinderUi extends React.Component<
         name: i18n.translate('savedObjectsFinder.titleName', {
           defaultMessage: 'Title',
         }),
-        width: getWidth('title'),
+        width: tagColumn ? '55%' : '100%',
         description: i18n.translate('savedObjectsFinder.titleDescription', {
           defaultMessage: 'Title of the saved object',
         }),
@@ -372,18 +314,27 @@ export class SavedObjectFinderUi extends React.Component<
           );
 
           const tooltipText = this.props.getTooltipText?.(item);
-
+          const description = descriptionsDefined && (
+            <EuiText size="s" color="subdued" className="eui-textTruncate">
+              {item.simple.attributes.description}
+            </EuiText>
+          );
           return tooltipText ? (
-            <EuiToolTip position="left" content={tooltipText}>
-              {link}
-            </EuiToolTip>
+            <EuiFlexItem>
+              <EuiToolTip position="left" content={tooltipText}>
+                {link}
+              </EuiToolTip>
+              {description}
+            </EuiFlexItem>
           ) : (
-            link
+            <EuiFlexItem>
+              {link}
+              {description}
+            </EuiFlexItem>
           );
         },
       },
       ...(tagColumn ? [tagColumn] : []),
-      ...(descriptionsDefined ? [descriptionColumn] : []),
     ];
     const pagination = {
       initialPageSize: this.props.initialPageSize || this.props.fixedPageSize || 10,
