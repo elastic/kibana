@@ -142,7 +142,7 @@ Add the sample web logs data that you'll use to create the bar chart, then creat
 
 . <<gs-get-data-into-kibana,Install the web logs sample data set>>.
 
-. Go to *Dashboard*.
+. Go to *Dashboards*.
 
 . On the *Dashboards* page, click *Create dashboard*.
 
