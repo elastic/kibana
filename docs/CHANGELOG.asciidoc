@@ -485,7 +485,6 @@ Elastic Security solution::
 For the Elastic Security 8.15.3 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
 Kibana security::
 * Automatic Import no longer asks the LLM to map fields to reserved ECS fields ({kibana-pull}195168[#195168]).
-* Automatic Import no longer returns an "Invalid ECS field" message when the ECS mapping slightly differs from the expected format. For example `date_format` instead of `date_formats` ({kibana-pull}195167[#195167]).
 * Fixes an issue that was causing the Grok processor to return non-ECS compatible fields when processing structured or unstructured syslog samples in Automatic Import ({kibana-pull}194727[#194727]).
 * Fixes the integrationName when uploading a new version of an existing integration using a ZIP upload ({kibana-pull}194298[#194298]).
 * Fixes a bug that caused the Deploy step of Automatic Import to fail after a pipeline was edited and saved ({kibana-pull}194203[#194203]).
