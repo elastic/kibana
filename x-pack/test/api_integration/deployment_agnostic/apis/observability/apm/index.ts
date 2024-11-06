@@ -10,7 +10,7 @@ import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_cont
 export default function apmApiIntegrationTests({
   loadTestFile,
 }: DeploymentAgnosticFtrProviderContext) {
-  describe('APM API tests', function () {
+  describe('APM', function () {
     loadTestFile(require.resolve('./agent_explorer'));
   });
 }
