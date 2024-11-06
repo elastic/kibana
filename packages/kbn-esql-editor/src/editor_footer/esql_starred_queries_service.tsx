@@ -23,6 +23,22 @@ import {
   getTrimmedQuery,
 } from '../history_local_storage';
 
+/**
+ * EsqlStarredQueriesService is a service that manages the starred queries in the ES|QL editor.
+ * It provides methods to add and remove queries from the starred list.
+ * It also provides a method to render the starred button in the editor list table.
+ *
+ * @param client - The FavoritesClient instance.
+ * @param starredQueries - The list of starred queries.
+ * @param queries$ - The BehaviorSubject that emits the starred queries list.
+ * @method initialize - Initializes the service and retrieves the starred queries from the favoriteService.
+ * @method checkIfQueryIsStarred - Checks if a query is already starred.
+ * @method addStarredQuery - Adds a query to the starred list.
+ * @method removeStarredQuery - Removes a query from the starred list.
+ * @method renderStarredButton - Renders the starred button in the editor list table.
+ * @returns EsqlStarredQueriesService instance.
+ *
+ */
 export interface StarredQueryItem extends QueryHistoryItem {
   id: string;
 }
