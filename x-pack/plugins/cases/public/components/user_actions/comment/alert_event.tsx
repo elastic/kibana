@@ -39,7 +39,9 @@ const RuleLink: React.FC<SingleAlertProps> = memo(
     const ruleDetailsHref = getRuleDetailsHref?.(ruleId);
     const finalRuleName = ruleName ?? i18n.UNKNOWN_RULE;
     const isValidLink = useMemo(() => {
-      if (!onRuleDetailsClick && !ruleDetailsHref) return false;
+      if (!onRuleDetailsClick && !ruleDetailsHref) {
+        return false;
+      }
       return !isEmpty(ruleId);
     }, [onRuleDetailsClick, ruleDetailsHref, ruleId]);
 

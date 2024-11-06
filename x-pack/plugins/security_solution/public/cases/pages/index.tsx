@@ -63,14 +63,7 @@ const CaseContainerComponent: React.FC = () => {
   const onRuleDetailsClick = useCallback(
     (ruleId: string | null | undefined) => {
       if (ruleId) {
-        openFlyout({
-          right: {
-            id: RulePanelKey,
-            params: {
-              ruleId,
-            },
-          },
-        });
+        openFlyout({ right: { id: RulePanelKey, params: { ruleId } } });
       }
     },
     [openFlyout]
