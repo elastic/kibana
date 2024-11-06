@@ -21,7 +21,6 @@ const FieldStatsUnavailableMessage = ({
   title = FIELD_STATS_UNAVAILABLE_TITLE,
 }: {
   id?: string;
-  content: string;
   title?: string;
 }) => {
   return (

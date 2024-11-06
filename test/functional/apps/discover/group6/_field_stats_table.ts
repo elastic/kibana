@@ -66,10 +66,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         it('should not show Field Statistics data in ES|QL mode', async () => {
           await discover.selectTextBaseLang();
-          await discover.waitUntilSearchingHasFinished();
-
-          await testSubjects.missingOrFail('dscViewModeFieldStatsButton');
           await header.waitUntilLoadingHasFinished();
+          await discover.waitUntilSearchingHasFinished();
+          await testSubjects.missingOrFail('dscViewModeFieldStatsButton');
         });
       });
     });

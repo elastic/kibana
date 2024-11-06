@@ -17,7 +17,6 @@ import type { DatePickerDependencies } from '@kbn/ml-date-picker';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { pick } from 'lodash';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import { i18n } from '@kbn/i18n';
 import { getCoreStart, getPluginsStart } from '../../../../kibana_services';
 import type {
   FieldStatisticTableEmbeddableProps,
@@ -46,12 +45,7 @@ const FieldStatisticsWrapperContent = (props: FieldStatisticTableEmbeddableProps
   if (isESQLFieldStatisticTableEmbeddableState(props)) {
     const isEsql = props.esqlQuery && isOfAggregateQueryType(props.esqlQuery);
     return isEsql ? (
-      <FieldStatsUnavailableMessage
-        id={props.id}
-        content={i18n.translate('xpack.dataVisualizer.fieldStats.embeddable.esqlNotSupported', {
-          defaultMessage: 'Field statistics are not available for ES|QL queries.',
-        })}
-      />
+      <FieldStatsUnavailableMessage id={props.id} />
     ) : (
       <EmbeddableESQLFieldStatsTableWrapper
         id={props.id}
