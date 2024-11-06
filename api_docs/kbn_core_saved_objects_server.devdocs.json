@@ -3022,6 +3022,44 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.ISavedObjectsEncryptionExtension.shouldEnforceRandomId",
+            "type": "Function",
+            "tags": [],
+            "label": "shouldEnforceRandomId",
+            "description": [
+              "\nReturns false if ESO type explicitly opts out of highly random UID\n"
+            ],
+            "signature": [
+              "(type: string) => boolean"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/encryption.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-server.ISavedObjectsEncryptionExtension.shouldEnforceRandomId.$1",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [
+                  "the string name of the object type"
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/encryption.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "boolean, true by default unless explicitly set to false"
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
             "id": "def-server.ISavedObjectsEncryptionExtension.decryptOrStripResponseAttributes",
             "type": "Function",
             "tags": [],
@@ -10369,7 +10407,7 @@
             "tags": [],
             "label": "hidden",
             "description": [
-              "\nIs the type hidden by default. If true, repositories will not have access to this type unless explicitly\ndeclared as an `extraType` when creating the repository.\nIt is recommended to hide the type for better backward compatibility.\nThe hidden types will not be automatically exposed via the HTTP API.\nTherefore, that should prevent unexpected behavior in the client code, as all the interactions will be done via the plugin API.\n\nSee {@link SavedObjectsServiceStart.createInternalRepository | createInternalRepository}."
+              "\nIs the type hidden by default. If true, repositories will not have access to this type unless explicitly\ndeclared as an `extraType` when creating the repository.\nIt is recommended to hide the type for better backward compatibility.\nThe hidden types will not be automatically exposed via the HTTP API.\nTherefore, that should prevent unexpected behavior in the client code, as all the interactions will be done via the plugin API.\n\nHidden types must be listed to be accessible by the client.\n\n(await context.core).savedObjects.getClient({ includeHiddenTypes: [MY_PLUGIN_HIDDEN_SAVED_OBJECT_TYPE] })\n\nSee {@link SavedObjectsServiceStart.createInternalRepository | createInternalRepository}.\n"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_type.ts",
             "deprecated": false,

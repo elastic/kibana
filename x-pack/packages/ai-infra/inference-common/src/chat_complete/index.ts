@@ -6,10 +6,12 @@
  */
 
 export type {
-  ChatCompletionResponse,
+  ChatCompleteCompositeResponse,
   ChatCompleteAPI,
   ChatCompleteOptions,
   FunctionCallingMode,
+  ChatCompleteStreamResponse,
+  ChatCompleteResponse,
 } from './api';
 export {
   ChatCompletionEventType,
@@ -18,6 +20,7 @@ export {
   type ChatCompletionEvent,
   type ChatCompletionChunkToolCall,
   type ChatCompletionTokenCountEvent,
+  type ChatCompletionTokenCount,
 } from './events';
 export {
   MessageRole,
