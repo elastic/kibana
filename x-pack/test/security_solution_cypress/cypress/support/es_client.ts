@@ -15,15 +15,13 @@ export const esClient = (
   const isServerless = config.env.IS_SERVERLESS;
   const isCloudServerless = config.env.CLOUD_SERVERLESS;
 
-  const serverlessCloudUser = {
+  const user = {
     username: config.env.ELASTICSEARCH_USERNAME,
     password: config.env.ELASTICSEARCH_PASSWORD,
   };
 
-  let authOverride;
-  if (isServerless) {
-    authOverride = isCloudServerless ? serverlessCloudUser : systemIndicesSuperuser;
-  }
+  const authOverride = isServerless ? (isCloudServerless ? user : systemIndicesSuperuser) : user;
+
   const client = createEsClient({
     url: config.env.ELASTICSEARCH_URL,
     username: authOverride?.username,
