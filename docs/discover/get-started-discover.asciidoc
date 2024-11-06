@@ -174,25 +174,27 @@ image:images/discover-maps.png[Map containing documents]
 
 You can use *Discover* to compare and diff the field values of multiple results or documents in the table.
 
-. Select the rows you want to compare from the Documents or Results tab in Discover.
+. Select the results you want to compare from the Documents or Results tab in Discover.
 
-. From the **Selected** menu in the table toolbar, choose **Compare selected**. The comparison view opens and shows the selected entries next to each other.
+. From the **Selected** menu in the table toolbar, choose **Compare selected**. The comparison view opens and shows the selected results next to each other.
 
-. Compare the values of each field. By default the first entry selected shows as the reference for displaying differences in the other entries. When the value remains the same for a given field, it's displayed in green. When the value differs, it's displayed in red.
+. Compare the values of each field. By default the first result selected shows as the reference for displaying differences in the other results. When the value remains the same for a given field, it's displayed in green. When the value differs, it's displayed in red. 
++
+TIP: You can change the result used as reference by selecting **Pin for comparison** in the contextual menu of any other result.
 +
 image:images/discover-compare-rows.png[Comparison view in Discover]
 
-. Optionally, customize the **Comparison settings** to your liking. You can for example choose to not highlight the differences, to show them more granularly at the line, word, or character level, or even to hide fields where the value matches for all entries.
+. Optionally, customize the **Comparison settings** to your liking. You can for example choose to not highlight the differences, to show them more granularly at the line, word, or character level, or even to hide fields where the value matches for all results.
 
 . Exit the comparison view at any time using the **Exit comparison mode** button.
 
 [float]
 [[copy-row-content]]
-==== Copy rows as text or JSON
+==== Copy results as text or JSON
 
-You can quickly copy the content currently displayed in the table for one or several rows to your clipboard.
+You can quickly copy the content currently displayed in the table for one or several results to your clipboard.
 
-. Select the rows you want to copy.
+. Select the results you want to copy.
 
 . Open the **Selected** menu in the table toolbar, and select **Copy selection as text** or **Copy documents as JSON**.
 
