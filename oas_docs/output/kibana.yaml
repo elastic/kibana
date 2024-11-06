@@ -180,7 +180,7 @@ paths:
                     description: >-
                       Indicates whether the connector is preconfigured. If true,
                       the `config` and `is_missing_secrets` properties are
-                      omitted from the response.
+                      omitted from the response. 
                     type: boolean
                   is_system_action:
                     description: >-
@@ -276,7 +276,7 @@ paths:
                     description: >-
                       Indicates whether the connector is preconfigured. If true,
                       the `config` and `is_missing_secrets` properties are
-                      omitted from the response.
+                      omitted from the response. 
                     type: boolean
                   is_system_action:
                     description: >-
@@ -368,7 +368,7 @@ paths:
                     description: >-
                       Indicates whether the connector is preconfigured. If true,
                       the `config` and `is_missing_secrets` properties are
-                      omitted from the response.
+                      omitted from the response. 
                     type: boolean
                   is_system_action:
                     description: >-
@@ -456,7 +456,7 @@ paths:
                     description: >-
                       Indicates whether the connector is preconfigured. If true,
                       the `config` and `is_missing_secrets` properties are
-                      omitted from the response.
+                      omitted from the response. 
                     type: boolean
                   is_system_action:
                     description: >-
@@ -6869,7 +6869,7 @@ paths:
         - cases
     patch:
       description: >
-        You must have `all` privileges for the **Cases** feature in the
+        You must have `all` privileges for the **Cases** feature in the 
         **Management**, **Observability**, or **Security** section of the
         Kibana  feature privileges, depending on the owner of the case you're
         updating.
@@ -38819,7 +38819,7 @@ paths:
                               members have read access to. A document within the
                               specified data streams and indices must match this
                               query in order for it to be accessible by the role
-                              members.
+                              members. 
                             type: string
                         required:
                           - clusters
@@ -39098,7 +39098,7 @@ paths:
                                     document within the specified data streams
                                     and indices must match this query in order
                                     for it to be accessible by the role
-                                    members.
+                                    members. 
                                   type: string
                               required:
                                 - clusters
@@ -44328,7 +44328,7 @@ components:
           description: >
             The scaling factor to use when encoding values. This property is
             applicable when `type` is `scaled_float`. Values will be multiplied
-            by this factor at index time and rounded to the closest long value.
+            by this factor at index time and rounded to the closest long value. 
           type: integer
         type:
           description: Specifies the data type for the field.
