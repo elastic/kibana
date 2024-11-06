@@ -41,6 +41,8 @@ import {
   useStopEntityEngineMutation,
 } from '../components/entity_store/hooks/use_entity_store';
 import { TECHNICAL_PREVIEW, TECHNICAL_PREVIEW_TOOLTIP } from '../../common/translations';
+import { useEntityEnginePrivileges } from '../components/entity_store/hooks/use_entity_engine_privileges';
+import { MissingPrivilegesCallout } from '../components/entity_store/components/missing_privileges_callout';
 
 const entityStoreEnabledStatuses = ['enabled'];
 const switchDisabledStatuses = ['error', 'loading', 'installing'];
@@ -98,6 +100,8 @@ export const EntityStoreManagementPage = () => {
       initEntityEngineMutation.mutate();
     }
   }, [initEntityEngineMutation, stopEntityEngineMutation, entityStoreStatus]);
+
+  const { data: privileges } = useEntityEnginePrivileges();
 
   if (assetCriticalityIsLoading) {
     // Wait for permission before rendering content to avoid flickering
@@ -284,7 +288,7 @@ export const EntityStoreManagementPage = () => {
         }
         alignItems="center"
         rightSideItems={
-          !isEntityStoreFeatureFlagDisabled
+          !isEntityStoreFeatureFlagDisabled && privileges?.has_all_required
             ? [
                 <EnablementButton
                   isLoading={
@@ -309,6 +313,14 @@ export const EntityStoreManagementPage = () => {
         />
       </EuiText>
       {isEntityStoreFeatureFlagDisabled && <EntityStoreFeatureFlagNotAvailableCallout />}
+      {!privileges || privileges.has_all_required ? null : (
+        <>
+          <EuiSpacer size="l" />
+          <MissingPrivilegesCallout privileges={privileges} />
+          <EuiSpacer size="l" />
+        </>
+      )}
+
       <EuiHorizontalRule />
       <EuiSpacer size="l" />
       <EuiFlexGroup gutterSize="xl">
@@ -349,7 +361,9 @@ export const EntityStoreManagementPage = () => {
             )}
             {callouts}
             <WhatIsAssetCriticalityPanel />
-            {!isEntityStoreFeatureFlagDisabled && canDeleteEntityEngine && <ClearEntityDataPanel />}
+            {!isEntityStoreFeatureFlagDisabled &&
+              privileges?.has_all_required &&
+              canDeleteEntityEngine && <ClearEntityDataPanel />}
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
