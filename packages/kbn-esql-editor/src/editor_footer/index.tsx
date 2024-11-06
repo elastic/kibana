@@ -26,7 +26,7 @@ import {
 import { getLimitFromESQLQuery } from '@kbn/esql-utils';
 import { type MonacoMessage } from '../helpers';
 import { ErrorsWarningsFooterPopover } from './errors_warnings_popover';
-import { QueryHistoryAction, HistoryAndStarredQueriesTabs } from './query_history';
+import { QueryHistoryAction, HistoryAndStarredQueriesTabs } from './history_starred_queries';
 import { SubmitFeedbackComponent } from './feedback_component';
 import { QueryWrapComponent } from './query_wrap_component';
 import type { ESQLEditorDeps } from '../types';

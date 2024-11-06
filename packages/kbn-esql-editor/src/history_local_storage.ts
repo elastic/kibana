@@ -24,7 +24,7 @@ export interface QueryHistoryItem {
   timeZone?: string;
 }
 
-const MAX_QUERIES_NUMBER = 20;
+export const MAX_HISTORY_QUERIES_NUMBER = 20;
 
 export const getTrimmedQuery = (queryString: string) => {
   return queryString.replaceAll('\n', '').trim().replace(/\s\s+/g, ' ');
@@ -58,7 +58,7 @@ export const getCachedQueries = (): QueryHistoryItem[] => {
 // Adding the maxQueriesAllowed here for testing purposes
 export const addQueriesToCache = (
   item: QueryHistoryItem,
-  maxQueriesAllowed = MAX_QUERIES_NUMBER
+  maxQueriesAllowed = MAX_HISTORY_QUERIES_NUMBER
 ) => {
   // if the user is working on multiple tabs
   // the cachedQueries Map might not contain all

@@ -54,7 +54,7 @@ export class ESQLService extends FtrService {
 
   public async clickHistoryItem(rowIndex = 0) {
     const row = await this.getHistoryItem(rowIndex);
-    const toggle = await row.findByTestSubject('ESQLEditor-queryHistory-runQuery-button');
+    const toggle = await row.findByTestSubject('ESQLEditor-history-starred-queries-run-button');
     await toggle.click();
   }
 

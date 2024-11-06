@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { swapArrayElements } from './query_history_helpers';
+import { swapArrayElements } from './history_starred_queries_helpers';
 
 describe('query history helpers', function () {
   it('should swap 2 elements in an array', function () {

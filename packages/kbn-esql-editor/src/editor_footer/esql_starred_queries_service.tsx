@@ -144,7 +144,7 @@ export class EsqlStarredQueriesService {
         aria-label={
           isStarred
             ? i18n.translate('esqlEditor.query.querieshistory.removeFavoriteTitle', {
-                defaultMessage: 'Remove ES|QL query from S`tarred',
+                defaultMessage: 'Remove ES|QL query from Starred',
               })
             : i18n.translate('esqlEditor.query.querieshistory.addFavoriteTitle', {
                 defaultMessage: 'Add ES|QL query to Starred',

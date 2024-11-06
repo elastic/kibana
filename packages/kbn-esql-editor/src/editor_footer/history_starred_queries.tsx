@@ -25,13 +25,20 @@ import {
   EuiTab,
   EuiTabs,
   EuiNotificationBadge,
+  EuiText,
 } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { css, Interpolation, Theme } from '@emotion/react';
-import { type QueryHistoryItem, getHistoryItems } from '../history_local_storage';
+import {
+  type QueryHistoryItem,
+  getHistoryItems,
+  MAX_HISTORY_QUERIES_NUMBER,
+} from '../history_local_storage';
 import type { ESQLEditorDeps } from '../types';
-import { getReducedSpaceStyling, swapArrayElements } from './query_history_helpers';
-import { EsqlStarredQueriesService, StarredQueryItem } from './esql_starred_queries';
+import { getReducedSpaceStyling, swapArrayElements } from './history_starred_queries_helpers';
+import { EsqlStarredQueriesService, StarredQueryItem } from './esql_starred_queries_service';
+
+const ESQL_FAVORITES_LIMIT = 100;
 
 export function QueryHistoryAction({
   toggleHistory,
@@ -255,16 +262,16 @@ export function QueryList({
               <EuiFlexItem grow={false}>
                 <EuiToolTip
                   position="top"
-                  content={i18n.translate('esqlEditor.query.querieshistoryRun', {
+                  content={i18n.translate('esqlEditor.query.esqlQueriesListRun', {
                     defaultMessage: 'Run query',
                   })}
                 >
                   <EuiButtonIcon
                     iconType="play"
-                    aria-label={i18n.translate('esqlEditor.query.querieshistoryRun', {
+                    aria-label={i18n.translate('esqlEditor.query.esqlQueriesListRun', {
                       defaultMessage: 'Run query',
                     })}
-                    data-test-subj="ESQLEditor-queryHistory-runQuery-button"
+                    data-test-subj="ESQLEditor-history-starred-queries-run-button"
                     role="button"
                     iconSize="m"
                     onClick={() => onUpdateAndSubmit(item.queryString)}
@@ -277,7 +284,7 @@ export function QueryList({
               <EuiFlexItem grow={false}>
                 <EuiCopy
                   textToCopy={item.queryString}
-                  content={i18n.translate('esqlEditor.query.querieshistoryCopy', {
+                  content={i18n.translate('esqlEditor.query.esqlQueriesCopy', {
                     defaultMessage: 'Copy query to clipboard',
                   })}
                 >
@@ -289,7 +296,7 @@ export function QueryList({
                       css={css`
                         cursor: pointer;
                       `}
-                      aria-label={i18n.translate('esqlEditor.query.querieshistoryCopy', {
+                      aria-label={i18n.translate('esqlEditor.query.esqlQueriesCopy', {
                         defaultMessage: 'Copy query to clipboard',
                       })}
                     />
@@ -400,7 +407,7 @@ export function QueryColumn({
           onClick={() => {
             setIsRowExpanded(!isRowExpanded);
           }}
-          data-test-subj="ESQLEditor-queryHistory-queryString-expanded"
+          data-test-subj="ESQLEditor-queryList-queryString-expanded"
           aria-label={
             isRowExpanded
               ? i18n.translate('esqlEditor.query.collapseLabel', {
@@ -552,15 +559,46 @@ export function HistoryAndStarredQueriesTabs({
 
   return (
     <>
-      <EuiTabs
-        size="s"
+      <EuiFlexGroup
+        responsive={false}
+        alignItems="center"
+        justifyContent="spaceBetween"
         css={css`
           background-color: ${euiTheme.colors.lightestShade};
           padding-left: ${euiTheme.size.s};
+          padding-right: ${euiTheme.size.s};
+          border-block-end: ${euiTheme.border.thin};
         `}
       >
-        {renderTabs()}
-      </EuiTabs>
+        <EuiTabs bottomBorder={false} size="s">
+          {renderTabs()}
+        </EuiTabs>
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup responsive={false} alignItems="center" gutterSize="s">
+            <EuiText
+              size="xs"
+              color="subdued"
+              data-test-subj="ESQLEditor-history-starred-queries-helpText"
+            >
+              <p>
+                {selectedTabId === 'history-queries-tab'
+                  ? i18n.translate('esqlEditor.history.historyItemslimit', {
+                      defaultMessage: 'Showing last {historyItemsLimit} queries',
+                      values: { historyItemsLimit: MAX_HISTORY_QUERIES_NUMBER },
+                    })
+                  : i18n.translate('esqlEditor.history.starredItemslimit', {
+                      defaultMessage:
+                        'Showing {starredItemsCount} queries (max{starredItemsLimit})',
+                      values: {
+                        starredItemsLimit: ESQL_FAVORITES_LIMIT,
+                        starredItemsCount: starredQueries.length ?? 0,
+                      },
+                    })}
+              </p>
+            </EuiText>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
       {selectedTabContent}
     </>
   );

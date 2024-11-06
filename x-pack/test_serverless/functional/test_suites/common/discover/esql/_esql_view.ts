@@ -418,7 +418,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
         await testSubjects.click('ESQLEditor-toggle-query-history-button');
-        await testSubjects.click('ESQLEditor-queryHistory-runQuery-button');
+        await testSubjects.click('ESQLEditor-history-starred-queries-run-button');
         const historyItem = await esql.getHistoryItem(0);
         await historyItem.findByTestSubject('ESQLEditor-queryHistory-error');
       });

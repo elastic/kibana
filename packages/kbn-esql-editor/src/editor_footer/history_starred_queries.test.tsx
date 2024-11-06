@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { QueryHistoryAction, getTableColumns, QueryColumn } from './query_history';
+import { QueryHistoryAction, getTableColumns, QueryColumn } from './history_starred_queries';
 import { render, screen } from '@testing-library/react';
 
 jest.mock('../history_local_storage', () => {
@@ -51,6 +51,11 @@ describe('QueryHistory', () => {
       const columns = getTableColumns(50, false, []);
       expect(columns).toEqual([
         {
+          'data-test-subj': 'favoriteBtn',
+          render: expect.anything(),
+          width: '30px',
+        },
+        {
           css: {
             height: '100%',
           },
@@ -64,7 +69,7 @@ describe('QueryHistory', () => {
         {
           'data-test-subj': 'queryString',
           field: 'queryString',
-          name: 'Recent queries',
+          name: 'Query',
           render: expect.anything(),
         },
         {
@@ -89,6 +94,11 @@ describe('QueryHistory', () => {
     const columns = getTableColumns(50, true, []);
     expect(columns).toEqual([
       {
+        'data-test-subj': 'favoriteBtn',
+        render: expect.anything(),
+        width: 'auto',
+      },
+      {
         css: {
           height: '100%',
         },
@@ -110,7 +120,7 @@ describe('QueryHistory', () => {
       {
         'data-test-subj': 'queryString',
         field: 'queryString',
-        name: 'Recent queries',
+        name: 'Query',
         render: expect.anything(),
       },
       {
@@ -132,7 +142,7 @@ describe('QueryHistory', () => {
         />
       );
       expect(
-        screen.queryByTestId('ESQLEditor-queryHistory-queryString-expanded')
+        screen.queryByTestId('ESQLEditor-queryList-queryString-expanded')
       ).not.toBeInTheDocument();
     });
 
@@ -152,9 +162,7 @@ describe('QueryHistory', () => {
           isOnReducedSpaceLayout={true}
         />
       );
-      expect(
-        screen.getByTestId('ESQLEditor-queryHistory-queryString-expanded')
-      ).toBeInTheDocument();
+      expect(screen.getByTestId('ESQLEditor-queryList-queryString-expanded')).toBeInTheDocument();
     });
   });
 });
