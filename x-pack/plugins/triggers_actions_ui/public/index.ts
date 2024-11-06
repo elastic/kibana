@@ -92,7 +92,7 @@ export {
   executeAction,
 } from './application/lib';
 
-export { AlertProvidedActionVariables } from '@kbn/alerts-ui-shared/src/action_variables/action_variables';
+export { AlertProvidedActionVariables } from '@kbn/response-ops-rule-form';
 
 export type { ActionGroupWithCondition } from './application/sections';
 
