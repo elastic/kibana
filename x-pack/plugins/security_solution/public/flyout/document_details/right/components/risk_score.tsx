@@ -8,6 +8,7 @@
 import React, { memo } from 'react';
 import { ALERT_RISK_SCORE } from '@kbn/rule-data-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { formatRiskScore } from '../../../../entity_analytics/common';
 import { AlertHeaderBlock } from './alert_header_block';
 import { RISK_SCORE_TITLE_TEST_ID, RISK_SCORE_VALUE_TEST_ID } from './test_ids';
 import { useDocumentDetailsContext } from '../../shared/context';
@@ -25,9 +26,9 @@ export const RiskScore = memo(() => {
 
   let alertRiskScore: string;
   if (typeof fieldsData === 'string') {
-    alertRiskScore = fieldsData;
+    alertRiskScore = formatRiskScore(Number(fieldsData));
   } else if (Array.isArray(fieldsData) && fieldsData.length > 0) {
-    alertRiskScore = fieldsData[0];
+    alertRiskScore = formatRiskScore(Number(fieldsData[0]));
   } else {
     return null;
   }
