@@ -20,7 +20,7 @@ export async function getEntityTypes({
     {
       query: `FROM ${ENTITIES_LATEST_ALIAS}
      | ${getBuiltinEntityDefinitionIdESQLWhereClause()}
-     | STATS BY ${ENTITY_TYPE}
+     | STATS count = COUNT(${ENTITY_TYPE}) BY ${ENTITY_TYPE}
     `,
     }
   );
