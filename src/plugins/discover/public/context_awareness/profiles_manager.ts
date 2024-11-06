@@ -25,7 +25,7 @@ import type {
   DocumentContext,
 } from './profiles';
 import type { ContextWithProfileId } from './profile_service';
-import { DiscoverEBTManager } from '../services/discover_ebt_manager';
+import type { DiscoverEBTManager } from '../services/discover_ebt_manager';
 
 interface SerializedRootProfileParams {
   solutionNavId: RootProfileProviderParams['solutionNavId'];
@@ -79,7 +79,7 @@ export class ProfilesManager {
     const serializedParams = serializeRootProfileParams(params);
 
     if (isEqual(this.prevRootProfileParams, serializedParams)) {
-      return;
+      return { getRenderAppWrapper: this.getRootRenderAppWrapper() };
     }
 
     const abortController = new AbortController();
@@ -95,11 +95,13 @@ export class ProfilesManager {
     }
 
     if (abortController.signal.aborted) {
-      return;
+      return { getRenderAppWrapper: this.getRootRenderAppWrapper() };
     }
 
     this.rootContext$.next(context);
     this.prevRootProfileParams = serializedParams;
+
+    return { getRenderAppWrapper: this.getRootRenderAppWrapper() };
   }
 
   /**
@@ -207,6 +209,11 @@ export class ProfilesManager {
     const dscProfiles = [rootContextProfileId, dataSourceContextProfileId];
 
     this.ebtManager.updateProfilesContextWith(dscProfiles);
+  }
+
+  private getRootRenderAppWrapper() {
+    const rootProfile = this.rootProfileService.getProfile(this.rootContext$.getValue());
+    return rootProfile.getRenderAppWrapper;
   }
 }
 

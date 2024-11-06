@@ -7,14 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  ESQLAstItem,
-  ESQLSingleAstItem,
-  ESQLAst,
-  ESQLFunction,
-  ESQLCommand,
-  ESQLCommandOption,
-  ESQLCommandMode,
+import {
+  type ESQLAstItem,
+  type ESQLSingleAstItem,
+  type ESQLAst,
+  type ESQLFunction,
+  type ESQLCommand,
+  type ESQLCommandOption,
+  type ESQLCommandMode,
+  Walker,
 } from '@kbn/esql-ast';
 import { ENRICH_MODES } from '../definitions/settings';
 import { EDITOR_MARKER } from './constants';
@@ -152,6 +153,20 @@ function isBuiltinFunction(node: ESQLFunction) {
  * * "newCommand": the cursor is at the beginning of a new command (i.e. `command1 | command2 | <here>`)
  */
 export function getAstContext(queryString: string, ast: ESQLAst, offset: number) {
+  let inComment = false;
+
+  Walker.visitComments(ast, (node) => {
+    if (node.location && node.location.min <= offset && node.location.max > offset) {
+      inComment = true;
+    }
+  });
+
+  if (inComment) {
+    return {
+      type: 'comment' as const,
+    };
+  }
+
   const { command, option, setting, node } = findAstPosition(ast, offset);
   if (node) {
     if (node.type === 'literal' && node.literalType === 'keyword') {

@@ -24,6 +24,13 @@ paths:
           required: false
           schema:
             type: string
+        - name: ignoreSecurityLabs
+          in: query
+          description: Indicates whether we should or should not install Security Labs docs when setting up the Knowledge Base
+          required: false
+          schema:
+            type: boolean
+            default: false
       responses:
         200:
           description: Indicates a successful call.
