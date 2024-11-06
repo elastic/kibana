@@ -62,14 +62,14 @@ export function SearchBar() {
     ({ query = { language: 'kuery', query: '' } }, isUpdate) => {
       if (!isUpdate) {
         refreshSubject$.next();
-      } else {
-        setSearchState((state) => ({ ...state, query }));
-
-        registerSearchSubmittedEvent({
-          searchQuery: query,
-          searchIsUpdate: isUpdate,
-        });
       }
+
+      setSearchState((state) => ({ ...state, query }));
+
+      registerSearchSubmittedEvent({
+        searchQuery: query,
+        searchIsUpdate: isUpdate,
+      });
     },
     [setSearchState, registerSearchSubmittedEvent, refreshSubject$]
   );

@@ -25,11 +25,12 @@ const InventorySearchBarContext = createContext<InventorySearchBarContextType>({
 export function InventorySearchBarContextProvider({ children }: { children: ReactChild }) {
   const [isControlPanelsInitiated, setIsControlPanelsInitiated] = useState(false);
   const { dataView } = useAdHocInventoryDataView();
+  const [refreshSubject$] = useState<Subject<void>>(new Subject());
 
   return (
     <InventorySearchBarContext.Provider
       value={{
-        refreshSubject$: new Subject(),
+        refreshSubject$,
         isControlPanelsInitiated,
         setIsControlPanelsInitiated,
         dataView,
