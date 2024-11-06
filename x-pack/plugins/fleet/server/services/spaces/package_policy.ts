@@ -20,6 +20,9 @@ export async function updatePackagePolicySpaces({
 }) {
   const soClientWithoutSpaceExtension =
     appContextService.getInternalUserSOClientWithoutSpaceExtension();
+  if (!soClientWithoutSpaceExtension) {
+    throw new Error('Internal Saved Objects client is not available');
+  }
 
   const results = await soClientWithoutSpaceExtension.updateObjectsSpaces(
     [

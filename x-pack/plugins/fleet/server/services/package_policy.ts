@@ -486,10 +486,13 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     created: PackagePolicy[];
     failed: Array<{ packagePolicy: NewPackagePolicy; error?: Error | SavedObjectError }>;
   }> {
-    const [useSpaceAwareness, savedObjectType, packageInfos] = await Promise.all([
+    const agentPolicyIds = new Set(packagePolicies.flatMap((pkgPolicy) => pkgPolicy.policy_ids));
+
+    const [useSpaceAwareness, savedObjectType, packageInfos, agentPolicies] = await Promise.all([
       isSpaceAwarenessEnabled(),
       getPackagePolicySavedObjectType(),
       getPackageInfoForPackagePolicies(packagePolicies, soClient),
+      agentPolicyService.getByIDs(soClient, [...agentPolicyIds]),
     ]);
 
     await pMap(packagePolicies, async (packagePolicy) => {
@@ -509,9 +512,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       await preflightCheckPackagePolicy(soClient, packagePolicy, basePkgInfo);
     });
 
-    const agentPolicyIds = new Set(packagePolicies.flatMap((pkgPolicy) => pkgPolicy.policy_ids));
-
-    const agentPolicies = await agentPolicyService.getByIDs(soClient, [...agentPolicyIds]);
     const agentPoliciesIndexById = indexBy('id', agentPolicies);
     for (const agentPolicy of agentPolicies) {
       validateIsNotHostedPolicy(agentPolicy, options?.force);
@@ -640,24 +640,22 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     });
 
     if (useSpaceAwareness) {
-      for (const newSo of newSos) {
-        // Do not support multpile spaces for reusable integrations
-        if (newSo.attributes.policy_ids.length > 1) {
-          continue;
-        }
+      const currentSpaceId = soClient.getCurrentNamespace() ?? DEFAULT_SPACE_ID;
+      // Do not support multiple spaces for reusable integrations
+      const soS = newSos.filter((newSo) => newSo.attributes.policy_ids.length === 1);
+      await pMap(soS, async (newSo) => {
         const agentPolicy = agentPoliciesIndexById[newSo.attributes.policy_ids[0]];
         if (agentPolicy && agentPolicy.space_ids && agentPolicy.space_ids.length > 1) {
           await updatePackagePolicySpaces({
+            currentSpaceId,
             packagePolicyId: newSo.id,
-            currentSpaceId: soClient.getCurrentNamespace() ?? DEFAULT_SPACE_ID,
             newSpaceIds: agentPolicy.space_ids,
           });
         }
-      }
+      });
     }
 
     // Assign it to the given agent policy
-
     if (options?.bumpRevision ?? true) {
       for (const agentPolicyId of agentPolicyIds) {
         await agentPolicyService.bumpRevision(soClient, esClient, agentPolicyId, {
@@ -1183,7 +1181,14 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     }>;
   }> {
     const logger = appContextService.getLogger();
-    const savedObjectType = await getPackagePolicySavedObjectType();
+    const [savedObjectType, oldPackagePolicies, packageInfos] = await Promise.all([
+      getPackagePolicySavedObjectType(),
+      this.getByIDs(
+        soClient,
+        packagePolicyUpdates.map((p) => p.id)
+      ),
+      getPackageInfoForPackagePolicies(packagePolicyUpdates, soClient),
+    ]);
     for (const packagePolicy of packagePolicyUpdates) {
       auditLoggingService.writeCustomSoAuditLog({
         action: 'update',
@@ -1191,31 +1196,27 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         savedObjectType,
       });
     }
-    const oldPackagePolicies = await this.getByIDs(
-      soClient,
-      packagePolicyUpdates.map((p) => p.id)
-    );
 
     if (!oldPackagePolicies || oldPackagePolicies.length === 0) {
       throw new PackagePolicyNotFoundError('Package policy not found');
     }
 
-    const packageInfos = await getPackageInfoForPackagePolicies(packagePolicyUpdates, soClient);
     const allSecretsToDelete: PolicySecretReference[] = [];
 
-    const packageInfosandAssetsMap = await getPkgInfoAssetsMap({
-      logger,
-      packageInfos: [...packageInfos.values()],
-      savedObjectsClient: soClient,
-    });
+    const [packageInfosandAssetsMap, secretStorageEnabled] = await Promise.all([
+      getPkgInfoAssetsMap({
+        logger,
+        packageInfos: [...packageInfos.values()],
+        savedObjectsClient: soClient,
+      }),
+      isSecretStorageEnabled(esClient, soClient),
+    ]);
 
     const policiesToUpdate: Array<SavedObjectsBulkUpdateObject<PackagePolicySOAttributes>> = [];
     const failedPolicies: Array<{
       packagePolicy: NewPackagePolicyWithId;
       error: Error | SavedObjectError;
     }> = [];
-
-    const secretStorageEnabled = await isSecretStorageEnabled(esClient, soClient);
 
     await pMap(packagePolicyUpdates, async (packagePolicyUpdate) => {
       try {
