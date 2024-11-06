@@ -682,6 +682,13 @@ Migrations are initiated per index. While the process is neither destructive nor
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
+    entityStoreGetPrivileges(kibanaSpace: string = 'default') {
+      return supertest
+        .get(routeWithNamespace('/internal/entity_store/privileges', kibanaSpace))
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+    },
     /**
       * Export detection rules to an `.ndjson` file. The following configuration items are also included in the `.ndjson` file:
 - Actions
