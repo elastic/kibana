@@ -23,6 +23,8 @@ import { retryTransientEsErrors } from '../utils/retry';
 import { SLORepository } from './slo_repository';
 import { createTempSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
 import { TransformManager } from './transform_manager';
+import { SLODefinition } from '../domain/models';
+import { SecurityException } from '../errors';
 
 export class ResetSLO {
   constructor(
@@ -38,6 +40,8 @@ export class ResetSLO {
 
   public async execute(sloId: string) {
     const slo = await this.repository.findById(sloId);
+
+    await this.assertExpectedIndicatorSourceIndexPrivileges(slo);
 
     const summaryTransformId = getSLOSummaryTransformId(slo.id, slo.revision);
     await this.summaryTransformManager.stop(summaryTransformId);
@@ -111,6 +115,17 @@ export class ResetSLO {
     });
 
     return resetSLOResponseSchema.encode(updatedSlo);
+  }
+
+  private async assertExpectedIndicatorSourceIndexPrivileges(slo: SLODefinition) {
+    const privileges = await this.esClient.security.hasPrivileges({
+      index: [{ names: slo.indicator.params.index, privileges: ['read', 'view_index_metadata'] }],
+    });
+    if (!privileges.has_all_requested) {
+      throw new SecurityException(
+        `Missing ['read', 'view_index_metadata'] privileges on the source index [${slo.indicator.params.index}]`
+      );
+    }
   }
 
   /**
