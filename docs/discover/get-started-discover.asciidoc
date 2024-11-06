@@ -353,4 +353,4 @@ Also check the following blog post: {blog-ref}troubleshooting-guide-common-issue
 
 **Some fields show as empty while they should not be, why is that?**
 
-This unexpected situation can happen with runtime fields and regular keyword fields when the string exceeds the value set for the {ref}/ignore-above.html[ignore_above] setting used when indexing the data into {es}.
+This can happen with runtime fields and regular keyword fields when the string exceeds the value set for the {ref}/ignore-above.html[ignore_above] setting used when indexing the data into {es}.
