@@ -7,9 +7,9 @@
 
 import { from } from 'rxjs';
 import type { HttpStart } from '@kbn/core/public';
-import type { ChatCompleteAPI } from '../../common/chat_complete';
-import type { ChatCompleteRequestBody } from '../../common/chat_complete/request';
-import { httpResponseIntoObservable } from '../util/http_response_into_observable';
+import type { ChatCompleteAPI } from '@kbn/inference-common';
+import type { ChatCompleteRequestBody } from '../common/http_apis';
+import { httpResponseIntoObservable } from './util/http_response_into_observable';
 
 export function createChatCompleteApi({ http }: { http: HttpStart }): ChatCompleteAPI {
   return ({ connectorId, messages, system, toolChoice, tools, functionCalling }) => {
