@@ -120,7 +120,6 @@ export class ServerlessSearchPlugin
       },
     });
 
-
     // register Web crwalers
     const webCrawlersTitle = i18n.translate('xpack.serverlessSearch.app.webCrawlers.title', {
       defaultMessage: 'Web Crawlers',
@@ -176,7 +175,6 @@ export class ServerlessSearchPlugin
         return () => {};
       },
     });
-
 
     setupDeps.discover.showInlineTopNav();
 
