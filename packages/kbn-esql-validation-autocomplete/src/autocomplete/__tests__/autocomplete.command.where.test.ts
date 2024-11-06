@@ -210,7 +210,7 @@ describe('WHERE <expression>', () => {
         'IN $0',
       ]);
       await assertSuggestions('from index | WHERE not /', [
-        ...getFieldNamesByType('boolean'),
+        ...getFieldNamesByType('boolean').map((name) => attachTriggerCommand(`${name} `)),
         ...getFunctionSignaturesByReturnType('eval', 'boolean', { scalar: true }),
       ]);
     });

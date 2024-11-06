@@ -176,6 +176,12 @@ export const getOperatorSuggestions = (
   ).map(getOperatorSuggestion);
 };
 
+export const getSuggestionsAfterNot = (): SuggestionRawDefinition[] => {
+  return builtinFunctions
+    .filter(({ name }) => name === 'like' || name === 'rlike' || name === 'in')
+    .map(getOperatorSuggestion);
+};
+
 export function getSuggestionCommandDefinition(
   command: CommandDefinition<string>
 ): SuggestionRawDefinition {

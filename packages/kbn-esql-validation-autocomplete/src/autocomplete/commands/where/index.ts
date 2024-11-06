@@ -17,7 +17,11 @@ import {
 import { isParameterType, type SupportedDataType } from '../../../definitions/types';
 import { endsInWhitespace, isColumnItem, isFunctionItem } from '../../../shared/helpers';
 import type { GetColumnsByTypeFn, SuggestionRawDefinition } from '../../types';
-import { getFunctionSuggestions, getOperatorSuggestions } from '../../factories';
+import {
+  getFunctionSuggestions,
+  getOperatorSuggestions,
+  getSuggestionsAfterNot,
+} from '../../factories';
 import { getSuggestionsToRightOfOperatorExpression } from '../../helper';
 
 export async function suggest(
@@ -70,6 +74,29 @@ export async function suggest(
       leftParamType: returnType,
       ignored: ['='],
     });
+  }
+
+  /**
+   * Suggest after a NOT keyword
+   *
+   * the NOT function is a special operator that can be used in different ways,
+   * and not all these are mapped within the AST data structure: in particular
+   * <COMMAND> <field> NOT <here>
+   * is an incomplete statement and it results in a missing AST node, so we need to detect
+   * from the query string itself
+   *
+   * TODO - revisit
+   */
+  const endsWithNot = / not$/i.test(innerText.trimEnd());
+  if (endsWithNot) {
+    if (!command.args.some((arg) => isFunctionItem(arg) && arg.name === 'not')) {
+      return getSuggestionsAfterNot();
+    } else {
+      return [
+        ...getFunctionSuggestions({ command: 'where', returnTypes: ['boolean'] }),
+        ...(await getColumnsByType('boolean', [], { advanceCursor: true, openSuggestions: true })),
+      ];
+    }
   }
 
   /**

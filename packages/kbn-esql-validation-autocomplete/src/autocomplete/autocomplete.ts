@@ -57,7 +57,6 @@ import {
   commaCompleteItem,
   getAssignmentDefinitionCompletitionItem,
   getCommandAutocompleteDefinitions,
-  getNextTokenForNot,
   pipeCompleteItem,
   semiColonCompleteItem,
 } from './complete_items';
@@ -79,6 +78,7 @@ import {
   buildFieldsDefinitionsWithMetadata,
   TRIGGER_SUGGESTION_COMMAND,
   getOperatorSuggestions,
+  getSuggestionsAfterNot,
 } from './factories';
 import { EDITOR_MARKER, METADATA_FIELDS } from '../shared/constants';
 import { getAstContext, removeMarkerArgFromArgsList } from '../shared/context';
@@ -559,7 +559,7 @@ async function getExpressionSuggestionsByType(
           // ... | ROW field NOT <suggest>
           // ... | EVAL field NOT <suggest>
           // there's not way to know the type of the field here, so suggest anything
-          suggestions.push(...getNextTokenForNot(command.name, option?.name, 'any'));
+          suggestions.push(...getSuggestionsAfterNot());
         } else {
           // i.e.
           // ... | ROW <suggest>
@@ -781,7 +781,7 @@ async function getExpressionSuggestionsByType(
             // i.e.
             // ... | WHERE field NOT <suggest>
             // there's not way to know the type of the field here, so suggest anything
-            suggestions.push(...getNextTokenForNot(command.name, option?.name, 'any'));
+            suggestions.push(...getSuggestionsAfterNot());
           } else {
             // ... | <COMMAND> <suggest>
             // In this case start suggesting something not strictly based on type

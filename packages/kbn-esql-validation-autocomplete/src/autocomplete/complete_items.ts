@@ -14,7 +14,6 @@ import {
   getOperatorSuggestion,
   getSuggestionCommandDefinition,
   TRIGGER_SUGGESTION_COMMAND,
-  buildConstantsDefinitions,
 } from './factories';
 import { CommandDefinition } from '../definitions/types';
 
@@ -22,33 +21,6 @@ export function getAssignmentDefinitionCompletitionItem() {
   const assignFn = builtinFunctions.find(({ name }) => name === '=')!;
   return getOperatorSuggestion(assignFn);
 }
-
-export const getNextTokenForNot = (
-  command: string,
-  option: string | undefined,
-  argType: string
-): SuggestionRawDefinition[] => {
-  const compatibleFunctions = builtinFunctions.filter(
-    ({ name, supportedCommands, supportedOptions, ignoreAsSuggestion }) =>
-      !ignoreAsSuggestion &&
-      !/not_/.test(name) &&
-      (option ? supportedOptions?.includes(option) : supportedCommands.includes(command))
-  );
-  if (argType === 'string' || argType === 'any') {
-    // suggest IS, LIKE, RLIKE and TRUE/FALSE
-    return compatibleFunctions
-      .filter(({ name }) => name === 'like' || name === 'rlike' || name === 'in')
-      .map(getOperatorSuggestion);
-  }
-  if (argType === 'boolean') {
-    // suggest IS, NOT and TRUE/FALSE
-    return [
-      ...compatibleFunctions.filter(({ name }) => name === 'in').map(getOperatorSuggestion),
-      ...buildConstantsDefinitions(['true', 'false']),
-    ];
-  }
-  return [];
-};
 
 export const getCommandAutocompleteDefinitions = (
   commands: Array<CommandDefinition<string>>
