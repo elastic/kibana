@@ -97,7 +97,7 @@ export function SamlAuthProvider({ getService }: FtrProviderContext) {
      *
      * @param role - The SAML role for which the session token is required.
      * @param options - Optional settings to control session behavior, such as forcing a new session.
-     * @returns An object with the Cookie header for API authentication.
+     * @returns A string with the Cookie token 
      *
      * @throws If the specified role is a custom role without a predefined descriptor.
      */
