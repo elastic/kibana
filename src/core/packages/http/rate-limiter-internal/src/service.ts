@@ -16,9 +16,8 @@ import {
   Subject,
   takeUntil,
 } from 'rxjs';
-import type { Lifecycle, Request } from '@hapi/hapi';
 import type { CoreService } from '@kbn/core-base-server-internal';
-import { isKibanaRequest } from '@kbn/core-http-router-server-internal';
+import type { KibanaRequest, OnPreAuthHandler } from '@kbn/core-http-server';
 import type { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
 import type { EluMetrics } from '@kbn/core-metrics-server';
 import type { InternalMetricsServiceSetup } from '@kbn/core-metrics-server-internal';
@@ -43,25 +42,19 @@ export class HttpRateLimiterService
   private ready$ = new Subject<boolean>();
   private stopped$ = new Subject<boolean>();
 
-  private handler: Lifecycle.Method = (request, toolkit) => {
+  private handler: OnPreAuthHandler = (request, response, toolkit) => {
     if (!this.shouldBeThrottled(request)) {
-      return toolkit.continue;
+      return toolkit.next();
     }
 
-    return toolkit
-      .response({
-        statusCode: 429,
-        body: 'Server is overloaded',
-      })
-      .takeover();
+    return response.customError({
+      statusCode: 429,
+      body: 'Server is overloaded',
+    });
   };
 
-  private shouldBeThrottled(request: Request): boolean {
-    return (
-      isKibanaRequest(request) &&
-      !request.route.options.excludeFromRateLimiter &&
-      this.overloaded$.getValue()
-    );
+  private shouldBeThrottled(request: KibanaRequest): boolean {
+    return !request.route.options.excludeFromRateLimiter && this.overloaded$.getValue();
   }
 
   private watch(metrics$: Observable<EluMetrics>, threshold: number) {
@@ -84,7 +77,7 @@ export class HttpRateLimiterService
     }
 
     this.watch(metrics.getEluMetrics$(), http.rateLimiter.elu);
-    http.server.ext('onRequest', this.handler);
+    http.registerOnPreAuth(this.handler);
   }
 
   public start(): InternalRateLimiterStart {
