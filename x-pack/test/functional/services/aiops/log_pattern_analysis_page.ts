@@ -253,6 +253,22 @@ export function LogPatternAnalysisPageProvider({ getService, getPageObject }: Ft
       });
     },
 
+    async openAttachmentsMenu() {
+      await testSubjects.click('aiopsLogPatternAnalysisAttachmentsMenuButton');
+    },
+
+    async clickAttachToDashboard() {
+      await testSubjects.click('aiopsLogPatternAnalysisAttachToDashboardButton');
+    },
+
+    async clickAttachToCase() {
+      await testSubjects.click('aiopsLogPatternAnalysisAttachToCaseButton');
+    },
+
+    async confirmAttachToDashboard() {
+      await testSubjects.click('aiopsLogPatternAnalysisAttachToDashboardSubmitButton');
+    },
+
     async completeSaveToDashboardForm(createNew?: boolean) {
       const dashboardSelector = await testSubjects.find('add-to-dashboard-options');
       if (createNew) {
@@ -282,15 +298,15 @@ export function LogPatternAnalysisPageProvider({ getService, getPageObject }: Ft
     },
 
     async attachToDashboard() {
-      await testSubjects.click('aiopsLogPatternAnalysisAttachmentsMenuButton');
-      await testSubjects.click('aiopsLogPatternAnalysisAttachToDashboardButton');
-      await testSubjects.click('aiopsLogPatternAnalysisAttachToDashboardSubmitButton');
+      await this.openAttachmentsMenu();
+      await this.clickAttachToDashboard();
+      await this.confirmAttachToDashboard();
       await this.completeSaveToDashboardForm(true);
     },
 
     async attachToCase(params: CreateCaseParams) {
-      await testSubjects.click('aiopsLogPatternAnalysisAttachmentsMenuButton');
-      await testSubjects.click('aiopsLogPatternAnalysisAttachToCaseButton');
+      await this.openAttachmentsMenu();
+      await this.clickAttachToCase();
 
       await cases.create.createCaseFromModal(params);
     },

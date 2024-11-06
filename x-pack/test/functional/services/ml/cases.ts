@@ -88,5 +88,11 @@ export function MachineLearningCasesProvider(
       await testSubjects.existOrFail('aiopsEmbeddablePatternAnalysis');
       await testSubjects.existOrFail('aiopsLogPatternsTable');
     },
+
+    async assertCaseWithChangePointDetectionChartsAttachment(params: CaseParams) {
+      await this.assertBasicCaseProps(params);
+      await testSubjects.existOrFail('comment-persistableState-aiopsChangePointChart');
+      await testSubjects.existOrFail('aiopsEmbeddableChangePointChart');
+    },
   };
 }
