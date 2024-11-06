@@ -16,7 +16,7 @@ import { getSuccessfulRequestTimings } from '../../report_performance_metric_uti
 import { addLog } from '../logger';
 
 function trackContentfulRender(activeData: TableInspectorAdapter, parentApi: unknown) {
-  if (!activeData || !canTrackContentfulRender(parentApi)) {
+  if (!canTrackContentfulRender(parentApi)) {
     return;
   }
 
