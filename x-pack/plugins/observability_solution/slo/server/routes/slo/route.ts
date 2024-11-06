@@ -250,7 +250,7 @@ const deleteSLORoute = createSloServerRoute({
     access: 'public',
   },
   params: deleteSLOParamsSchema,
-  handler: async ({ request, context, params, logger, plugins }) => {
+  handler: async ({ request, response, context, params, logger, plugins }) => {
     await assertPlatinumLicense(plugins);
 
     const spaceId = await getSpaceId(plugins, request);
@@ -291,6 +291,7 @@ const deleteSLORoute = createSloServerRoute({
     );
 
     await deleteSLO.execute(params.path.id);
+    return response.noContent();
   },
 });
 
@@ -325,7 +326,7 @@ const enableSLORoute = createSloServerRoute({
     access: 'public',
   },
   params: manageSLOParamsSchema,
-  handler: async ({ request, context, params, logger, plugins }) => {
+  handler: async ({ request, response, context, params, logger, plugins }) => {
     await assertPlatinumLicense(plugins);
 
     const spaceId = await getSpaceId(plugins, request);
@@ -352,9 +353,9 @@ const enableSLORoute = createSloServerRoute({
 
     const manageSLO = new ManageSLO(repository, transformManager, summaryTransformManager);
 
-    const response = await manageSLO.enable(params.path.id);
+    await manageSLO.enable(params.path.id);
 
-    return response;
+    return response.noContent();
   },
 });
 
@@ -365,7 +366,7 @@ const disableSLORoute = createSloServerRoute({
     access: 'public',
   },
   params: manageSLOParamsSchema,
-  handler: async ({ request, context, params, logger, plugins }) => {
+  handler: async ({ response, request, context, params, logger, plugins }) => {
     await assertPlatinumLicense(plugins);
 
     const spaceId = await getSpaceId(plugins, request);
@@ -392,9 +393,9 @@ const disableSLORoute = createSloServerRoute({
 
     const manageSLO = new ManageSLO(repository, transformManager, summaryTransformManager);
 
-    const response = await manageSLO.disable(params.path.id);
+    await manageSLO.disable(params.path.id);
 
-    return response;
+    return response.noContent();
   },
 });
 
@@ -512,13 +513,15 @@ const deleteSloInstancesRoute = createSloServerRoute({
     access: 'public',
   },
   params: deleteSLOInstancesParamsSchema,
-  handler: async ({ context, params, plugins }) => {
+  handler: async ({ response, context, params, plugins }) => {
     await assertPlatinumLicense(plugins);
 
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
     const deleteSloInstances = new DeleteSLOInstances(esClient);
 
     await deleteSloInstances.execute(params.body);
+
+    return response.noContent();
   },
 });
 
