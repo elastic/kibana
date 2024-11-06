@@ -25,7 +25,7 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import classNames from 'classnames';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { useDragDropContext } from '@kbn/dom-drag-drop';
-import { DataViewField, DataViewType } from '@kbn/data-views-plugin/public';
+import { type DataViewField, DataViewType } from '@kbn/data-views-plugin/public';
 import {
   SEARCH_FIELDS_FROM_SOURCE,
   SHOW_FIELD_STATISTICS,
@@ -256,12 +256,12 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
 
   const onFilter = isEsqlMode ? onPopulateWhereClause : onAddFilter;
 
-  const isBreakdownSupported = useMemo(
+  const canSetBreakdownField = useMemo(
     () => (isOfAggregateQueryType(query) ? !hasTransformationalCommand(query.esql) : true),
     [query]
   );
 
-  const onAddBreakdownField = useCallback(
+  const onSetBreakdownField = useCallback(
     (field: DataViewField | undefined) => {
       stateContainer.appState.update({ breakdownField: field?.name });
     },
@@ -438,7 +438,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
                 additionalFilters={customFilters}
                 columns={currentColumns}
                 documents$={stateContainer.dataState.data$.documents$}
-                onAddBreakdownField={isBreakdownSupported ? onAddBreakdownField : undefined}
+                onAddBreakdownField={canSetBreakdownField ? onSetBreakdownField : undefined}
                 onAddField={onAddColumnWithTracking}
                 onAddFilter={onFilter}
                 onChangeDataView={stateContainer.actions.onChangeDataView}

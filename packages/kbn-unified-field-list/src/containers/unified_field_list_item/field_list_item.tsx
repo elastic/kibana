@@ -16,7 +16,8 @@ import { Draggable } from '@kbn/dom-drag-drop';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { Filter } from '@kbn/es-query';
 import { fieldSupportsBreakdown } from '@kbn/field-utils';
-import { isESQLFieldGroupable } from '@kbn/esql-utils/src/utils/esql_fields_utils';
+import { isESQLColumnGroupable } from '@kbn/esql-utils';
+import { convertDataViewFieldToDatatableColumn } from '@kbn/data-view-utils';
 import type { SearchMode } from '../../types';
 import { FieldItemButton, type FieldItemButtonProps } from '../../components/field_item_button';
 import {
@@ -240,7 +241,9 @@ function UnifiedFieldListItemComponent({
   const [infoIsOpen, setOpen] = useState(false);
 
   const isBreakdownSupported =
-    searchMode === 'documents' ? fieldSupportsBreakdown(field) : isESQLFieldGroupable(field);
+    searchMode === 'documents'
+      ? fieldSupportsBreakdown(field)
+      : isESQLColumnGroupable(convertDataViewFieldToDatatableColumn(field.spec));
 
   const addFilterAndClosePopover: typeof onAddFilter | undefined = useMemo(
     () =>
