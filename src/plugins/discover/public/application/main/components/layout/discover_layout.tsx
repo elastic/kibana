@@ -257,8 +257,11 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
   const onFilter = isEsqlMode ? onPopulateWhereClause : onAddFilter;
 
   const canSetBreakdownField = useMemo(
-    () => (isOfAggregateQueryType(query) ? !hasTransformationalCommand(query.esql) : true),
-    [query]
+    () =>
+      isOfAggregateQueryType(query)
+        ? dataView?.isTimeBased() && !hasTransformationalCommand(query.esql)
+        : true,
+    [dataView, query]
   );
 
   const onSetBreakdownField = useCallback(
