@@ -304,7 +304,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       it('does not add the instruction conversation for other users', async () => {
-        const conversation = await getConversationForUser('secondaryEditor');
+        const conversation = await getConversationForUser('secondary_editor');
         const systemMessage = conversation.messages.find(
           (message) => message.message.role === MessageRole.System
         )!;
