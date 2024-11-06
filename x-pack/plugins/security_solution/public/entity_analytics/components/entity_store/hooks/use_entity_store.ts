@@ -41,9 +41,10 @@ export const useEntityStoreEnablement = () => {
   });
 
   const { initEntityStore } = useEntityStoreRoutes();
-  const { refetch: initialize } = useQuery({
+  const { refetch: initialize, ...query } = useQuery({
     queryKey: [ENTITY_STORE_ENABLEMENT_INIT],
-    queryFn: () => Promise.all([initEntityStore('user'), initEntityStore('host')]),
+    queryFn: async () =>
+      initEntityStore('user').then((usr) => initEntityStore('host').then((host) => [usr, host])),
     enabled: false,
   });
 
@@ -51,10 +52,10 @@ export const useEntityStoreEnablement = () => {
     telemetry?.reportEntityStoreInit({
       timestamp: new Date().toISOString(),
     });
-    initialize().then(() => setPolling(true));
+    return initialize().then(() => setPolling(true));
   }, [initialize, telemetry]);
 
-  return { enable };
+  return { enable, query };
 };
 
 export const INIT_ENTITY_ENGINE_STATUS_KEY = ['POST', 'INIT_ENTITY_ENGINE'];
@@ -79,7 +80,9 @@ export const useInitEntityEngineMutation = (options?: UseMutationOptions<{}>) =>
         timestamp: new Date().toISOString(),
         action: 'start',
       });
-      return Promise.all([initEntityStore('user'), initEntityStore('host')]);
+      return initEntityStore('user').then((usr) =>
+        initEntityStore('host').then((host) => [usr, host])
+      );
     },
     {
       ...options,
@@ -107,7 +110,9 @@ export const useStopEntityEngineMutation = (options?: UseMutationOptions<{}>) =>
         timestamp: new Date().toISOString(),
         action: 'stop',
       });
-      return Promise.all([stopEntityStore('user'), stopEntityStore('host')]);
+      return stopEntityStore('user').then((usr) =>
+        stopEntityStore('host').then((host) => [usr, host])
+      );
     },
     {
       ...options,
@@ -129,7 +134,10 @@ export const useDeleteEntityEngineMutation = (options?: UseMutationOptions<{}>) 
   const invalidateEntityEngineStatusQuery = useInvalidateEntityEngineStatusQuery();
   const { deleteEntityEngine } = useEntityStoreRoutes();
   return useMutation<DeleteEntityEngineResponse[]>(
-    () => Promise.all([deleteEntityEngine('user', true), deleteEntityEngine('host', true)]),
+    () =>
+      deleteEntityEngine('user', true).then((usr) =>
+        deleteEntityEngine('host', true).then((host) => [usr, host])
+      ),
     {
       ...options,
       mutationKey: DELETE_ENTITY_ENGINE_STATUS_KEY,
