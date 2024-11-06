@@ -103,20 +103,27 @@ describe('When using ConsoleManager', () => {
       );
     });
 
-    it('should hide a console by `id`', () => {
+    it('should hide a console by `id`', async () => {
       renderHook();
       const { id: consoleId } = registerNewConsole();
+
+      let consoleClient: ReturnType<ConsoleManagerClient['getOne']>;
+
+      act(() => {
+        consoleClient = renderResult.result.current.getOne(consoleId);
+      });
+
       act(() => {
         renderResult.result.current.show(consoleId);
       });
 
-      expect(renderResult.result.current.getOne(consoleId)!.isVisible()).toBe(true);
+      await waitFor(() => expect(consoleClient!.isVisible()).toBe(true));
 
       act(() => {
         renderResult.result.current.hide(consoleId);
       });
 
-      expect(renderResult.result.current.getOne(consoleId)!.isVisible()).toBe(false);
+      await waitFor(() => expect(consoleClient!.isVisible()).toBe(false));
     });
 
     it('should throw if attempting to hide a console with invalid `id`', () => {
@@ -163,7 +170,9 @@ describe('When using ConsoleManager', () => {
       beforeEach(() => {
         renderHook();
         ({ id: consoleId } = registerNewConsole());
-        registeredConsole = renderResult.result.current.getOne(consoleId)!;
+        act(() => {
+          registeredConsole = renderResult.result.current.getOne(consoleId)!;
+        });
       });
 
       it('should have the expected interface', () => {
@@ -178,20 +187,30 @@ describe('When using ConsoleManager', () => {
       });
 
       it('should display the console when `.show()` is called', async () => {
-        registeredConsole.show();
+        act(() => {
+          registeredConsole.show();
+        });
         await waitFor(() => expect(registeredConsole.isVisible()).toBe(true));
       });
 
       it('should hide the console when `.hide()` is called', async () => {
-        registeredConsole.show();
+        act(() => {
+          registeredConsole.show();
+        });
+
         await waitFor(() => expect(registeredConsole.isVisible()).toBe(true));
 
-        registeredConsole.hide();
+        act(() => {
+          registeredConsole.hide();
+        });
+
         await waitFor(() => expect(registeredConsole.isVisible()).toBe(false));
       });
 
       it('should un-register the console when `.terminate() is called', async () => {
-        registeredConsole.terminate();
+        act(() => {
+          registeredConsole.terminate();
+        });
         await waitFor(() => expect(renderResult.result.current.getOne(consoleId)).toBeUndefined());
       });
     });
