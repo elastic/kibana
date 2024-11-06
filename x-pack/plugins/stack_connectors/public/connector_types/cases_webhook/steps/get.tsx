@@ -55,7 +55,7 @@ export const GetStep: FunctionComponent<Props> = ({ display, readOnly }) => {
               component={Field}
               config={{
                 label: i18n.GET_INCIDENT_METHOD,
-                defaultValue: 'get',
+                defaultValue: WebhookMethods.GET,
                 type: FIELD_TYPES.SELECT,
                 validations: [
                   {
@@ -71,7 +71,7 @@ export const GetStep: FunctionComponent<Props> = ({ display, readOnly }) => {
               componentProps={{
                 euiFieldProps: {
                   'data-test-subj': 'webhookGetIncidentMethodSelect',
-                  options: ['get', 'post'].map((verb) => ({
+                  options: [WebhookMethods.GET, WebhookMethods.POST].map((verb) => ({
                     text: verb.toUpperCase(),
                     value: verb,
                   })),

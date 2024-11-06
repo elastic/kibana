@@ -579,7 +579,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
           expect(proxyHaveBeenCalled).to.equal(false);
         });
 
-        it('should respond with bad JSON error when get case JSON is bad', async () => {
+        it('should respond with bad JSON error when get case POST JSON is bad', async () => {
           const { body } = await supertest
             .post('/api/actions/connector')
             .set('kbn-xsrf', 'foo')
