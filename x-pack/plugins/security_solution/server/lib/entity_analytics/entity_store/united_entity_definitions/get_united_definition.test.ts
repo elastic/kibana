@@ -59,9 +59,19 @@ describe('getUnitedEntityDefinition', () => {
               "type": "keyword",
             },
             "host.name": Object {
+              "fields": Object {
+                "text": Object {
+                  "type": "match_only_text",
+                },
+              },
               "type": "keyword",
             },
             "host.os.name": Object {
+              "fields": Object {
+                "text": Object {
+                  "type": "match_only_text",
+                },
+              },
               "type": "keyword",
             },
             "host.os.type": Object {
@@ -350,6 +360,11 @@ describe('getUnitedEntityDefinition', () => {
               "type": "keyword",
             },
             "user.full_name": Object {
+              "fields": Object {
+                "text": Object {
+                  "type": "match_only_text",
+                },
+              },
               "type": "keyword",
             },
             "user.hash": Object {
@@ -359,6 +374,11 @@ describe('getUnitedEntityDefinition', () => {
               "type": "keyword",
             },
             "user.name": Object {
+              "fields": Object {
+                "text": Object {
+                  "type": "match_only_text",
+                },
+              },
               "type": "keyword",
             },
             "user.risk.calculated_level": Object {
