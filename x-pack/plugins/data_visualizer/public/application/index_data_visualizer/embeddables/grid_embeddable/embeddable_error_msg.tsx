@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { useEuiTheme, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexItem } from '@elastic/eui';
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
@@ -24,8 +24,6 @@ const FieldStatsUnavailableMessage = ({
   content: string;
   title?: string;
 }) => {
-  const { euiTheme } = useEuiTheme();
-
   return (
     <EuiFlexItem
       alignItems="center"
