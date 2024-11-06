@@ -21,8 +21,10 @@ export const installRiskScoresRoute = (router: SecuritySolutionPluginRouter, log
     .post({
       access: 'internal',
       path: INTERNAL_RISK_SCORE_URL,
-      options: {
-        tags: ['access:securitySolution', `access:${APP_ID}-entity-analytics`],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],
+        },
       },
     })
     .addVersion(
