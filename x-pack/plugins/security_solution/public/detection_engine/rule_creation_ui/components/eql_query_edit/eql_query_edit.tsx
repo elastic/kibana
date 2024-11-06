@@ -85,16 +85,23 @@ export function EqlQueryEdit({
           : []),
         {
           validator: debounceAsync(
-            eqlQueryValidatorFactory({
-              dataViewId: dataView.id ?? '',
-              eqlOptions: eqlOptions ?? {},
-            }),
+            eqlQueryValidatorFactory(
+              dataView.id
+                ? {
+                    dataViewId: dataView.id,
+                    eqlOptions: eqlOptions ?? {},
+                  }
+                : {
+                    indexPatterns: dataView.title.split(','),
+                    eqlOptions: eqlOptions ?? {},
+                  }
+            ),
             300
           ),
         },
       ],
     }),
-    [required, dataView.id, eqlOptions]
+    [required, dataView.id, dataView.title, eqlOptions]
   );
 
   return (

@@ -17,18 +17,18 @@ import { isDataViewIdValid } from './data_view_id_validator_factory';
 
 type EqlQueryValidatorFactoryParams =
   | {
-      indexPattern: string[];
+      indexPatterns: string[];
       dataViewId?: never;
       eqlOptions: EqlOptions;
     }
   | {
-      indexPattern?: never;
+      indexPatterns?: never;
       dataViewId: string;
       eqlOptions: EqlOptions;
     };
 
 export function eqlQueryValidatorFactory({
-  indexPattern,
+  indexPatterns,
   dataViewId,
   eqlOptions,
 }: EqlQueryValidatorFactoryParams): ValidationFunc<FormData, string, FieldValueQueryBar> {
@@ -44,7 +44,8 @@ export function eqlQueryValidatorFactory({
       const dataView = isDataViewIdValid(dataViewId)
         ? await data.dataViews.get(dataViewId)
         : undefined;
-      const dataViewTitle = dataView?.getIndexPattern() ?? indexPattern?.join() ?? '';
+
+      const dataViewTitle = dataView?.getIndexPattern() ?? indexPatterns?.join() ?? '';
       const runtimeMappings = dataView?.getRuntimeMappings() ?? {};
 
       const response = await validateEql({

@@ -13,8 +13,13 @@ import { useDiffableRuleDataView } from '../hooks/use_diffable_rule_data_view';
 
 export function EqlQueryEditAdapter({
   finalDiffableRule,
-}: RuleFieldEditComponentProps): JSX.Element {
+}: RuleFieldEditComponentProps): JSX.Element | null {
   const { dataView, isLoading } = useDiffableRuleDataView(finalDiffableRule);
+
+  // Wait for dataView to be defined to trigger validation with the correct index patterns
+  if (!dataView) {
+    return null;
+  }
 
   return (
     <EqlQueryEdit

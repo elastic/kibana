@@ -57,7 +57,7 @@ const schema: FormSchema<TimelineEqlQueryBar> = {
           const { index, eqlOptions } = formData;
 
           return debounceAsync(
-            eqlQueryValidatorFactory({ indexPattern: index, eqlOptions }),
+            eqlQueryValidatorFactory({ indexPatterns: index, eqlOptions }),
             300
           )(...args);
         },
