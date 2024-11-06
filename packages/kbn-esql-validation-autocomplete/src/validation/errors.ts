@@ -189,6 +189,21 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
           }
         ),
       };
+    case 'fnUnsupportedAfterCommand':
+      return {
+        type: 'error',
+        message: i18n.translate(
+          'kbn-esql-validation-autocomplete.esql.validation.unsupportedFunctionforCommandOption',
+          {
+            defaultMessage: '{function} cannot be used after {command}',
+            values: {
+              function: out.function,
+              command: out.command,
+            },
+          }
+        ),
+      };
+
     case 'unknownInterval':
       return {
         message: i18n.translate(

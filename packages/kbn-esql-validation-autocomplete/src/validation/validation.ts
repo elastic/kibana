@@ -949,7 +949,12 @@ const validateMetricsCommand = (
   return messages;
 };
 
-function validateCommand(command: ESQLCommand, references: ReferenceMaps): ESQLMessage[] {
+function validateCommand(
+  command: ESQLCommand,
+  references: ReferenceMaps,
+  ast: ESQLAst[],
+  currentCommandIndex: number
+): ESQLMessage[] {
   const messages: ESQLMessage[] = [];
   if (command.incomplete) {
     return messages;
@@ -973,6 +978,57 @@ function validateCommand(command: ESQLCommand, references: ReferenceMaps): ESQLM
         const wrappedArg = Array.isArray(commandArg) ? commandArg : [commandArg];
         for (const arg of wrappedArg) {
           if (isFunctionItem(arg)) {
+            if (arg.name === 'match') {
+              const hasLimitClausePrior =
+                ast.filter((cmd, idx) => idx <= currentCommandIndex && cmd.name === 'limit')
+                  .length > 0;
+
+              if (hasLimitClausePrior) {
+                messages.push(
+                  getMessageFromId({
+                    messageId: 'fnUnsupportedAfterCommand',
+                    values: {
+                      function: arg.name.toUpperCase(),
+                      command: 'LIMIT',
+                    },
+                    locations: arg.location,
+                  })
+                );
+              }
+            }
+            if (arg.name === 'qstr') {
+              const notSupported = ast.find(
+                (cmd, idx) =>
+                  idx <= currentCommandIndex &&
+                  [
+                    'show',
+                    'row',
+                    'dissect',
+                    'enrich',
+                    'eval',
+                    'grok',
+                    'keep',
+                    'mv_expand',
+                    'rename',
+                    'stats',
+                    'limit',
+                  ].includes(cmd.name)
+              );
+
+              if (notSupported) {
+                messages.push(
+                  getMessageFromId({
+                    messageId: 'fnUnsupportedAfterCommand',
+                    values: {
+                      function: arg.name.toUpperCase(),
+                      command: notSupported.name.toUpperCase(),
+                    },
+                    locations: arg.location,
+                  })
+                );
+              }
+            }
+
             messages.push(...validateFunction(arg, command.name, undefined, references));
           }
 
@@ -1018,6 +1074,9 @@ function validateCommand(command: ESQLCommand, references: ReferenceMaps): ESQLM
     }
   }
 
+  // @TODO: remove
+  console.log(`--@@messages`, messages);
+
   // no need to check for mandatory options passed
   // as they are already validated at syntax level
   return messages;
@@ -1050,6 +1109,7 @@ function validateFieldsShadowing(
       }
     }
   }
+
   return messages;
 }
 
@@ -1145,7 +1205,12 @@ async function validateAst(
   const messages: ESQLMessage[] = [];
 
   const parsingResult = await astProvider(queryString);
+
+  // @TODO: remove
+  console.log(`--@@parsingResult`, parsingResult);
   const { ast } = parsingResult;
+  // @TODO: remove
+  console.log(`--@@ast`, ast);
 
   const [sources, availableFields, availablePolicies] = await Promise.all([
     // retrieve the list of available sources
@@ -1181,7 +1246,7 @@ async function validateAst(
   messages.push(...validateFieldsShadowing(availableFields, variables));
   messages.push(...validateUnsupportedTypeFields(availableFields));
 
-  for (const command of ast) {
+  for (const [index, command] of ast.entries()) {
     const references: ReferenceMaps = {
       sources,
       fields: availableFields,
@@ -1189,7 +1254,7 @@ async function validateAst(
       variables,
       query: queryString,
     };
-    const commandMessages = validateCommand(command, references);
+    const commandMessages = validateCommand(command, references, ast, index);
     messages.push(...commandMessages);
   }
 
