@@ -1,5 +1,7 @@
 {
   "type": "shared-common",
   "id": "@kbn/securitysolution-data-table",
-  "owner": "@elastic/security-threat-hunting-investigations"
+  "owner": "@elastic/security-threat-hunting-investigations",
+  "group": "security",
+  "visibility": "private"
 }
