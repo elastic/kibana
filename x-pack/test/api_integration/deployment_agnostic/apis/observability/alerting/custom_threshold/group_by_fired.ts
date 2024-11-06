@@ -11,31 +11,33 @@
  * 2.0.
  */
 
+import expect from '@kbn/expect';
 import { kbnTestConfig } from '@kbn/test';
 import { cleanup, generate, Dataset, PartialConfig } from '@kbn/data-forge';
 import { Aggregators } from '@kbn/observability-plugin/common/custom_threshold_rule/types';
 import { FIRED_ACTIONS_ID } from '@kbn/observability-plugin/server/lib/rules/custom_threshold/constants';
-import expect from '@kbn/expect';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { COMPARATORS } from '@kbn/alerting-comparators';
-import { FtrProviderContext } from '../../../ftr_provider_context';
-import { ActionDocument } from './typings';
-import type { InternalRequestHeader, RoleCredentials } from '../../../../shared/services';
+import type { InternalRequestHeader, RoleCredentials } from '@kbn/ftr-common-functional-services';
+import { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
+import { ActionDocument } from './types';
 
-export default function ({ getService }: FtrProviderContext) {
+export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const esClient = getService('es');
-  const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
   const logger = getService('log');
   const alertingApi = getService('alertingApi');
   const dataViewApi = getService('dataViewApi');
-  const svlUserManager = getService('svlUserManager');
-  const svlCommonApi = getService('svlCommonApi');
+  const samlAuth = getService('samlAuth');
   let alertId: string;
   let roleAuthc: RoleCredentials;
   let internalReqHeader: InternalRequestHeader;
+  const config = getService('config');
+  const isServerless = config.get('serverless');
+  const expectedConsumer = isServerless ? 'observability' : 'logs';
 
-  describe('Custom Threshold rule - GROUP_BY - FIRED', () => {
+  describe('GROUP_BY - FIRED', () => {
     const CUSTOM_THRESHOLD_RULE_ALERT_INDEX = '.alerts-observability.threshold.alerts-default';
     const DATA_VIEW = 'kbn-data-forge-fake_hosts.fake_hosts-*';
     const ALERT_ACTION_INDEX = 'alert-action-threshold';
@@ -46,8 +48,8 @@ export default function ({ getService }: FtrProviderContext) {
     let ruleId: string;
 
     before(async () => {
-      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
-      internalReqHeader = svlCommonApi.getInternalRequestHeader();
+      roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
+      internalReqHeader = samlAuth.getInternalRequestHeader();
       dataForgeConfig = {
         schedule: [
           {
@@ -74,12 +76,19 @@ export default function ({ getService }: FtrProviderContext) {
         name: DATA_VIEW,
         id: DATA_VIEW_ID,
         title: DATA_VIEW,
+        roleAuthc,
       });
     });
 
     after(async () => {
-      await supertest.delete(`/api/alerting/rule/${ruleId}`).set(internalReqHeader);
-      await supertest.delete(`/api/actions/connector/${actionId}`).set(internalReqHeader);
+      await supertestWithoutAuth
+        .delete(`/api/alerting/rule/${ruleId}`)
+        .set(roleAuthc.apiKeyHeader)
+        .set(internalReqHeader);
+      await supertestWithoutAuth
+        .delete(`/api/actions/connector/${actionId}`)
+        .set(roleAuthc.apiKeyHeader)
+        .set(internalReqHeader);
       await esClient.deleteByQuery({
         index: CUSTOM_THRESHOLD_RULE_ALERT_INDEX,
         query: { term: { 'kibana.alert.rule.uuid': ruleId } },
@@ -92,10 +101,11 @@ export default function ({ getService }: FtrProviderContext) {
       });
       await dataViewApi.delete({
         id: DATA_VIEW_ID,
+        roleAuthc,
       });
       await esDeleteAllIndices([ALERT_ACTION_INDEX, ...dataForgeIndices]);
       await cleanup({ client: esClient, config: dataForgeConfig, logger });
-      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
+      await samlAuth.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
     describe('Rule creation', () => {
@@ -109,7 +119,7 @@ export default function ({ getService }: FtrProviderContext) {
         const createdRule = await alertingApi.createRule({
           roleAuthc,
           tags: ['observability'],
-          consumer: 'observability',
+          consumer: expectedConsumer,
           name: 'Threshold rule',
           ruleTypeId: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
           params: {
@@ -179,7 +189,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should find the created rule with correct information about the consumer', async () => {
         const match = await alertingApi.findInRules(roleAuthc, ruleId);
         expect(match).not.to.be(undefined);
-        expect(match.consumer).to.be('observability');
+        expect(match.consumer).to.be(expectedConsumer);
       });
 
       it('should set correct information in the alert document', async () => {
@@ -193,7 +203,7 @@ export default function ({ getService }: FtrProviderContext) {
           'kibana.alert.rule.category',
           'Custom threshold'
         );
-        expect(resp.hits.hits[0]._source).property('kibana.alert.rule.consumer', 'observability');
+        expect(resp.hits.hits[0]._source).property('kibana.alert.rule.consumer', expectedConsumer);
         expect(resp.hits.hits[0]._source).property('kibana.alert.rule.name', 'Threshold rule');
         expect(resp.hits.hits[0]._source).property('kibana.alert.rule.producer', 'observability');
         expect(resp.hits.hits[0]._source).property('kibana.alert.rule.revision', 0);
