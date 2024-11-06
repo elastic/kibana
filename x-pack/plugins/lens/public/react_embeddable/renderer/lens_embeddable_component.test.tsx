@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { getLensApiMock, getLensInternalApiMock } from '../mocks';
 import { LensApi, LensInternalApi } from '../types';
 import { BehaviorSubject } from 'rxjs';
@@ -37,5 +37,6 @@ describe('Lens Embeddable component', () => {
     });
 
     render(<LensEmbeddableComponent {...props} />);
+    expect(screen.queryByTestId('lens-embeddable')).not.toBeInTheDocument();
   });
 });
