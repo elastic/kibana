@@ -17,6 +17,10 @@ import {
   TOASTER,
 } from '../screens/alerts_detection_rules';
 import type { SAMPLE_PREBUILT_RULE } from './api_calls/prebuilt_rules';
+import {
+  RULE_UPGRADE_TABLE_MODIFICATION_FILTER_BUTTON,
+  RULE_UPGRADE_TABLE_MODIFICATION_FILTER_PANEL,
+} from '../screens/rule_updates';
 
 export const clickAddElasticRulesButton = () => {
   cy.get(ADD_ELASTIC_RULES_BTN).click();
@@ -149,4 +153,10 @@ export const assertRulesNotPresentInRuleUpdatesTable = (
   for (const rule of rules) {
     cy.get(rule['security-rule'].name).should('not.exist');
   }
+};
+
+export const filterPrebuiltRulesUpdateTableByRuleCustomization = (text: string) => {
+  cy.get(RULE_UPGRADE_TABLE_MODIFICATION_FILTER_BUTTON).click();
+  cy.get(RULE_UPGRADE_TABLE_MODIFICATION_FILTER_PANEL).contains(text).click();
+  cy.get(RULE_UPGRADE_TABLE_MODIFICATION_FILTER_BUTTON).click();
 };
