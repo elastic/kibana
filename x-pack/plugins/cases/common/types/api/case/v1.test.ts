@@ -708,7 +708,7 @@ describe('CasePatchRequestRt', () => {
 
     expect(
       PathReporter.report(CasePatchRequestRt.decode({ ...defaultRequest, observables }))
-    ).toContain('The length of the field observables is too long. Array must be of length <= 10.');
+    ).toContain('The length of the field observables is too long. Array must be of length <= 50.');
   });
 
   it('does not throw an error with empty assignees', async () => {

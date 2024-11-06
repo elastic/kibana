@@ -7,22 +7,19 @@
 
 import { AddObservableRequestRt } from './v1';
 
-describe('ObservableRequestRT', () => {
+describe('AddObservableRequestRT', () => {
   it('has expected attributes in request', () => {
     const defaultRequest = {
-      version: '8ae7a250',
-      observables: [
-        {
-          description: undefined,
-          id: undefined,
-          typeKey: 'ef528526-2af9-4345-9b78-046512c5bbd6',
-          value: 'email@example.com',
-          isIoc: false,
-          hasBeenSighted: false,
-          createdAt: '2024-10-03 12:56',
-          updatedAt: '2024-10-03 12:56',
-        },
-      ],
+      observable: {
+        description: undefined,
+        id: undefined,
+        typeKey: 'ef528526-2af9-4345-9b78-046512c5bbd6',
+        value: 'email@example.com',
+        isIoc: false,
+        hasBeenSighted: false,
+        createdAt: '2024-10-03 12:56',
+        updatedAt: '2024-10-03 12:56',
+      },
     };
 
     const query = AddObservableRequestRt.decode(defaultRequest);
