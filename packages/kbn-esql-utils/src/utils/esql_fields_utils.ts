@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataViewField } from '@kbn/data-views-plugin/common';
+import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 
 const SPATIAL_FIELDS = ['geo_point', 'geo_shape', 'point', 'shape'];
@@ -62,6 +62,9 @@ export const isESQLColumnGroupable = (column: DatatableColumn): boolean => {
   return isGroupable(column.meta?.type, column.meta?.esType);
 };
 
-export const isESQLFieldGroupable = (field: DataViewField): boolean => {
-  return isGroupable(field.type, field.esTypes?.[0]);
+export const isESQLFieldGroupable = (field: FieldSpec): boolean => {
+  const isCounterTimeSeries = field.timeSeriesMetric === 'counter';
+  const esType =
+    isCounterTimeSeries && field.esTypes?.[0] ? `counter_${field.esTypes[0]}` : field.esTypes?.[0];
+  return isGroupable(field.type, esType);
 };
