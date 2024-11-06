@@ -13,7 +13,7 @@ import { ChatForm, ChatFormFields, PlaygroundPageMode } from '../../types';
 import { ViewCodeFlyout } from './view_code_flyout';
 
 export const ViewCodeAction: React.FC<{ selectedPageMode: PlaygroundPageMode }> = ({
-  selectedPageMode = 'chat',
+  selectedPageMode = PlaygroundPageMode.chat,
 }) => {
   const { watch } = useFormContext<ChatForm>();
   const [showFlyout, setShowFlyout] = useState(false);

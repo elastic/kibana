@@ -11,7 +11,7 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { Header } from './header';
-import { ChatFormFields } from '../types';
+import { ChatFormFields, PlaygroundPageMode } from '../types';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { EuiForm } from '@elastic/eui';
 import { FormProvider, useForm } from 'react-hook-form';
@@ -63,9 +63,9 @@ describe('Header', () => {
       <IntlProvider locale="en">
         <MockChatForm handleSubmit={() => {}}>
           <Header
-            selectedMode={'chat'}
+            selectedMode={PlaygroundPageMode.chat}
             onModeChange={() => {}}
-            selectedPageMode={'chat'}
+            selectedPageMode={PlaygroundPageMode.chat}
             onSelectPageModeChange={() => {}}
           />
         </MockChatForm>
@@ -83,7 +83,7 @@ describe('Header', () => {
           <Header
             selectedMode="chat"
             onModeChange={() => {}}
-            selectedPageMode={'search'}
+            selectedPageMode={PlaygroundPageMode.search}
             onSelectPageModeChange={() => {}}
           />
         </MockChatForm>

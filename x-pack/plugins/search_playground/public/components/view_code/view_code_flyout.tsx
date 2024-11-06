@@ -99,7 +99,7 @@ export const ViewCodeFlyout: React.FC<ViewCodeFlyoutProps> = ({ onClose, selecte
       <EuiFlyoutBody>
         <EuiFlexGroup direction="column">
           <EuiFlexItem grow={false}>
-            {selectedPageMode === 'chat' && (
+            {selectedPageMode === PlaygroundPageMode.chat && (
               <EuiFlexGroup>
                 <EuiFlexItem>
                   <EuiSelect
@@ -128,10 +128,10 @@ export const ViewCodeFlyout: React.FC<ViewCodeFlyoutProps> = ({ onClose, selecte
               </EuiFlexGroup>
             )}
           </EuiFlexItem>
-          {selectedPageMode === 'chat' && (
+          {selectedPageMode === PlaygroundPageMode.chat && (
             <EuiFlexItem grow={false}>{steps[selectedLanguage]}</EuiFlexItem>
           )}
-          {selectedPageMode === 'search' && (
+          {selectedPageMode === PlaygroundPageMode.search && (
             <EuiFlexItem grow={false}>
               <DevToolsCode />
             </EuiFlexItem>

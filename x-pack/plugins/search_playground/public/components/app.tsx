@@ -30,7 +30,10 @@ export enum ViewMode {
   query = 'query',
 }
 
-export const App: React.FC<AppProps> = ({ showDocs = false, pageMode = 'chat' }) => {
+export const App: React.FC<AppProps> = ({
+  showDocs = false,
+  pageMode = PlaygroundPageMode.chat,
+}) => {
   const { services } = useKibana();
   const [selectedMode, setSelectedMode] = useState<ViewMode>(ViewMode.chat);
   const { data: connectors } = useLoadConnectors();
@@ -54,15 +57,16 @@ export const App: React.FC<AppProps> = ({ showDocs = false, pageMode = 'chat' })
     initialPageMode: pageMode,
   });
 
-  const restrictedWidth = selectedPageMode === 'search' && selectedMode === 'chat';
-  const paddingSize = selectedPageMode === 'search' && selectedMode === 'chat' ? 'xl' : 'none';
+  const restrictedWidth = selectedPageMode === PlaygroundPageMode.search && selectedMode === 'chat';
+  const paddingSize =
+    selectedPageMode === PlaygroundPageMode.search && selectedMode === 'chat' ? 'xl' : 'none';
 
   const getSetupPage = () => {
     return (
       showSetupPage && (
         <>
-          {selectedPageMode === 'chat' && <ChatSetupPage />}
-          {selectedPageMode === 'search' && <SearchPlaygroundSetupPage />}
+          {selectedPageMode === PlaygroundPageMode.chat && <ChatSetupPage />}
+          {selectedPageMode === PlaygroundPageMode.search && <SearchPlaygroundSetupPage />}
         </>
       )
     );
@@ -70,7 +74,7 @@ export const App: React.FC<AppProps> = ({ showDocs = false, pageMode = 'chat' })
   const getQueryBuilderPage = () => {
     return (
       !showSetupPage &&
-      selectedPageMode === 'search' && (
+      selectedPageMode === PlaygroundPageMode.search && (
         <>
           {selectedMode === ViewMode.chat && <SearchMode />}
           {selectedMode === ViewMode.query && <QueryMode />}
@@ -81,7 +85,7 @@ export const App: React.FC<AppProps> = ({ showDocs = false, pageMode = 'chat' })
   const getChatPage = () => {
     return (
       !showSetupPage &&
-      selectedPageMode === 'chat' && (
+      selectedPageMode === PlaygroundPageMode.chat && (
         <>
           {selectedMode === ViewMode.chat && <Chat />}
           {selectedMode === ViewMode.query && <QueryMode />}
@@ -108,7 +112,7 @@ export const App: React.FC<AppProps> = ({ showDocs = false, pageMode = 'chat' })
           position: 'relative',
         }}
         contentProps={
-          selectedPageMode === 'search' && selectedMode === 'chat'
+          selectedPageMode === PlaygroundPageMode.search && selectedMode === 'chat'
             ? undefined
             : { css: { display: 'flex', flexGrow: 1, position: 'absolute', inset: 0 } }
         }

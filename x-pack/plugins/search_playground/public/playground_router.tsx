@@ -11,6 +11,7 @@ import { Redirect } from 'react-router-dom';
 import { PlaygroundOverview } from './playground_overview';
 
 import { ROOT_PATH, SEARCH_PLAYGROUND_CHAT_PATH, SEARCH_PLAYGROUND_SEARCH_PATH } from './routes';
+import { PlaygroundPageMode } from './types';
 import { useSearchPlaygroundFeatureFlag } from './hooks/use_search_playground_feature_flag';
 
 export const PlaygroundRouter: React.FC = () => {
@@ -20,11 +21,11 @@ export const PlaygroundRouter: React.FC = () => {
     <Routes>
       <Redirect exact from={ROOT_PATH} to={SEARCH_PLAYGROUND_CHAT_PATH} />
       <Route path={SEARCH_PLAYGROUND_CHAT_PATH}>
-        <PlaygroundOverview pageMode={'chat'} />
+        <PlaygroundOverview pageMode={PlaygroundPageMode.chat} />
       </Route>
       {isSearchModeEnabled && (
         <Route path={SEARCH_PLAYGROUND_SEARCH_PATH}>
-          <PlaygroundOverview pageMode={'search'} />
+          <PlaygroundOverview pageMode={PlaygroundPageMode.search} />
         </Route>
       )}
     </Routes>
