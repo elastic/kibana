@@ -23,8 +23,8 @@ import type { FieldValueQueryBar } from '../query_bar';
 
 interface EqlQueryEditProps {
   path: string;
-  eqlFieldsComboBoxOptions: EqlFieldsComboBoxOptions;
-  eqlOptions: EqlOptions;
+  eqlFieldsComboBoxOptions?: EqlFieldsComboBoxOptions;
+  eqlOptions?: EqlOptions;
   dataView: DataViewBase;
   required?: boolean;
   loading?: boolean;
@@ -87,7 +87,7 @@ export function EqlQueryEdit({
           validator: debounceAsync(
             eqlQueryValidatorFactory({
               dataViewId: dataView.id ?? '',
-              eqlOptions,
+              eqlOptions: eqlOptions ?? {},
             }),
             300
           ),

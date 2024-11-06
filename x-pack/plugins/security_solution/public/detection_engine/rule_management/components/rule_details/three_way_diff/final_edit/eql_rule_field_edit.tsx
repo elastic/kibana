@@ -10,6 +10,9 @@ import type { UpgradeableEqlFields } from '../../../../model/prebuilt_rule_upgra
 import { DataSourceEditForm } from './fields/data_source';
 import { AlertSuppressionEditForm } from './fields/alert_suppression';
 import { EqlQueryEditForm } from './fields/eql_query';
+import { EventCategoryOverrideEditForm } from './fields/event_category_override';
+import { TimestampFieldEditForm } from './fields/timestamp_field';
+import { TiebreakerFieldEditForm } from './fields/tiebreaker_field';
 
 interface EqlRuleFieldEditProps {
   fieldName: UpgradeableEqlFields;
@@ -23,6 +26,12 @@ export function EqlRuleFieldEdit({ fieldName }: EqlRuleFieldEditProps) {
       return <DataSourceEditForm />;
     case 'alert_suppression':
       return <AlertSuppressionEditForm />;
+    case 'event_category_override':
+      return <EventCategoryOverrideEditForm />;
+    case 'timestamp_field':
+      return <TimestampFieldEditForm />;
+    case 'tiebreaker_field':
+      return <TiebreakerFieldEditForm />;
     default:
       return null; // Will be replaced with `assertUnreachable(fieldName)` once all fields are implemented
   }
