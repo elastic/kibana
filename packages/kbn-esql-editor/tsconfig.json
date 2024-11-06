@@ -29,7 +29,8 @@
     "@kbn/esql-validation-autocomplete",
     "@kbn/esql-utils",
     "@kbn/content-management-favorites-public",
-    "@kbn/usage-collection-plugin"
+    "@kbn/usage-collection-plugin",
+    "@kbn/content-management-favorites-common"
   ],
   "exclude": [
     "target/**/*",
