@@ -13,7 +13,6 @@ import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { createObservabilityRuleTypeRegistryMock } from '@kbn/observability-plugin/public';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import translations from '@kbn/translations-plugin/translations/ja-JP.json';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render as testLibRender } from '@testing-library/react';
 import React from 'react';
@@ -43,7 +42,7 @@ const queryClient = new QueryClient({
 export const render = (component: React.ReactNode) => {
   return testLibRender(
     // @ts-ignore
-    <IntlProvider locale="en-US" messages={translations.messages}>
+    <IntlProvider locale="en-US">
       <KibanaContextProvider
         services={{
           ...core,

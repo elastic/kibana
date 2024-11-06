@@ -13,10 +13,10 @@ import { KnowledgeBaseConfig } from '../../types';
 import { AlertsRange } from '../../../knowledge_base/alerts_range';
 import * as i18n from '../../../knowledge_base/translations';
 
-export const MIN_LATEST_ALERTS = 10;
-export const MAX_LATEST_ALERTS = 100;
-export const TICK_INTERVAL = 10;
-export const RANGE_CONTAINER_WIDTH = 300; // px
+export const MIN_LATEST_ALERTS = 50;
+export const MAX_LATEST_ALERTS = 500;
+export const TICK_INTERVAL = 50;
+export const RANGE_CONTAINER_WIDTH = 600; // px
 const LABEL_WRAPPER_MIN_WIDTH = 95; // px
 
 interface Props {
@@ -28,7 +28,7 @@ const AlertsSettingsComponent = ({ knowledgeBase, setUpdatedKnowledgeBaseSetting
   return (
     <>
       <EuiFormRow
-        display="columnCompressedSwitch"
+        display="columnCompressed"
         label={i18n.ALERTS_LABEL}
         css={css`
           .euiFormRow__labelWrapper {
@@ -52,6 +52,7 @@ const AlertsSettingsComponent = ({ knowledgeBase, setUpdatedKnowledgeBaseSetting
           <AlertsRange
             knowledgeBase={knowledgeBase}
             setUpdatedKnowledgeBaseSettings={setUpdatedKnowledgeBaseSettings}
+            value={knowledgeBase.latestAlerts}
           />
           <EuiSpacer size="s" />
         </EuiFlexItem>

@@ -5869,15 +5869,9 @@
           "StringC",
           "; }>]>; }>, ",
           "APMRouteHandlerResources",
-          ", { transaction: ",
-          {
-            "pluginId": "@kbn/apm-types",
-            "scope": "common",
-            "docId": "kibKbnApmTypesPluginApi",
-            "section": "def-common.Transaction",
-            "text": "Transaction"
-          },
-          "; }, ",
+          ", { transaction?: ",
+          "TransactionDetailRedirectInfo",
+          " | undefined; }, ",
           "APMRouteCreateOptions",
           ">; \"GET /internal/apm/traces/{traceId}/spans/{spanId}\": ",
           {
@@ -5963,7 +5957,7 @@
             "section": "def-common.Transaction",
             "text": "Transaction"
           },
-          ", ",
+          " | undefined, ",
           "APMRouteCreateOptions",
           ">; \"POST /internal/apm/traces/aggregated_critical_path\": ",
           {
@@ -6107,7 +6101,7 @@
           "Type",
           "<number, string, unknown>; }>; }>, ",
           "APMRouteHandlerResources",
-          ", { transaction: ",
+          ", { transaction?: ",
           {
             "pluginId": "@kbn/apm-types",
             "scope": "common",
@@ -6115,7 +6109,7 @@
             "section": "def-common.Transaction",
             "text": "Transaction"
           },
-          "; }, ",
+          " | undefined; }, ",
           "APMRouteCreateOptions",
           ">; \"GET /internal/apm/traces/{traceId}/root_transaction\": ",
           {
@@ -6139,15 +6133,9 @@
           "Type",
           "<number, string, unknown>; }>; }>, ",
           "APMRouteHandlerResources",
-          ", { transaction: ",
-          {
-            "pluginId": "@kbn/apm-types",
-            "scope": "common",
-            "docId": "kibKbnApmTypesPluginApi",
-            "section": "def-common.Transaction",
-            "text": "Transaction"
-          },
-          "; }, ",
+          ", { transaction?: ",
+          "TransactionDetailRedirectInfo",
+          " | undefined; }, ",
           "APMRouteCreateOptions",
           ">; \"GET /internal/apm/traces\": ",
           {

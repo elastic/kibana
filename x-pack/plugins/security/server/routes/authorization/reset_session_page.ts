@@ -12,7 +12,7 @@ export function resetSessionPageRoutes({ httpResources }: RouteDefinitionParams)
     {
       path: '/internal/security/reset_session_page.js',
       validate: false,
-      options: { authRequired: false },
+      options: { authRequired: false, excludeFromOAS: true },
     },
     (context, request, response) => {
       return response.renderJs({

@@ -29,6 +29,7 @@ export class RegistryResponseError extends RegistryError {
 
 // Package errors
 
+export class PackageInvalidDeploymentMode extends FleetError {}
 export class PackageOutdatedError extends FleetError {}
 export class PackageFailedVerificationError extends FleetError {
   constructor(pkgName: string, pkgVersion: string) {
@@ -54,6 +55,16 @@ export class AgentPolicyInvalidError extends FleetError {}
 export class AgentlessAgentCreateError extends FleetError {
   constructor(message: string) {
     super(`Error creating agentless agent in Fleet, ${message}`);
+  }
+}
+export class AgentlessAgentDeleteError extends FleetError {
+  constructor(message: string) {
+    super(`Error deleting agentless agent in Fleet, ${message}`);
+  }
+}
+export class AgentlessAgentConfigError extends FleetError {
+  constructor(message: string) {
+    super(`Error validating Agentless API configuration in Fleet, ${message}`);
   }
 }
 
@@ -94,7 +105,7 @@ export class FleetEncryptedSavedObjectEncryptionKeyRequired extends FleetError {
 export class FleetSetupError extends FleetError {}
 export class GenerateServiceTokenError extends FleetError {}
 export class FleetUnauthorizedError extends FleetError {}
-export class FleetNotFoundError extends FleetError {}
+export class FleetNotFoundError<TMeta = unknown> extends FleetError<TMeta> {}
 export class FleetTooManyRequestsError extends FleetError {}
 
 export class OutputUnauthorizedError extends FleetError {}
@@ -104,7 +115,7 @@ export class DownloadSourceError extends FleetError {}
 export class DeleteUnenrolledAgentsPreconfiguredError extends FleetError {}
 
 // Not found errors
-export class AgentNotFoundError extends FleetNotFoundError {}
+export class AgentNotFoundError extends FleetNotFoundError<{ agentId: string }> {}
 export class AgentPolicyNotFoundError extends FleetNotFoundError {}
 export class AgentActionNotFoundError extends FleetNotFoundError {}
 export class DownloadSourceNotFound extends FleetNotFoundError {}
@@ -114,7 +125,10 @@ export class SigningServiceNotFoundError extends FleetNotFoundError {}
 export class InputNotFoundError extends FleetNotFoundError {}
 export class OutputNotFoundError extends FleetNotFoundError {}
 export class PackageNotFoundError extends FleetNotFoundError {}
-export class PackagePolicyNotFoundError extends FleetNotFoundError {}
+export class PackagePolicyNotFoundError extends FleetNotFoundError<{
+  /** The package policy ID that was not found */
+  packagePolicyId: string;
+}> {}
 export class StreamNotFoundError extends FleetNotFoundError {}
 
 export class FleetServerHostUnauthorizedError extends FleetUnauthorizedError {}

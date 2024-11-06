@@ -8,13 +8,12 @@
 import { mockedDateString } from '../tests/lib';
 import { incrementRevision } from './increment_revision';
 import { SavedObject } from '@kbn/core/server';
-import { RuleTypeParams } from '../../types';
+import { RawRule, RuleTypeParams } from '../../types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import { UpdateRuleData } from '../../application/rule/methods/update';
-import { RuleAttributes } from '../../data/rule/types';
 
 describe('incrementRevision', () => {
-  const currentRule: SavedObject<RuleAttributes> = {
+  const currentRule: SavedObject<RawRule> = {
     id: '1',
     type: RULE_SAVED_OBJECT_TYPE,
     attributes: {

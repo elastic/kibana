@@ -31,8 +31,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useEntityEngineStatus } from '../components/entity_store/hooks/use_entity_engine_status';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { ASSET_CRITICALITY_INDEX_PATTERN } from '../../../common/entity_analytics/asset_criticality';
-import { useUiSetting$, useKibana } from '../../common/lib/kibana';
-import { ENABLE_ASSET_CRITICALITY_SETTING } from '../../../common/constants';
+import { useKibana } from '../../common/lib/kibana';
 import { AssetCriticalityFileUploader } from '../components/asset_criticality_file_uploader/asset_criticality_file_uploader';
 import { useAssetCriticalityPrivileges } from '../components/asset_criticality/use_asset_criticality';
 import { useHasSecurityCapability } from '../../helper_hooks';
@@ -42,6 +41,8 @@ import {
   useStopEntityEngineMutation,
 } from '../components/entity_store/hooks/use_entity_store';
 import { TECHNICAL_PREVIEW, TECHNICAL_PREVIEW_TOOLTIP } from '../../common/translations';
+import { useEntityEnginePrivileges } from '../components/entity_store/hooks/use_entity_engine_privileges';
+import { MissingPrivilegesCallout } from '../components/entity_store/components/missing_privileges_callout';
 
 const entityStoreEnabledStatuses = ['enabled'];
 const switchDisabledStatuses = ['error', 'loading', 'installing'];
@@ -50,7 +51,6 @@ const entityStoreInstallingStatuses = ['installing', 'loading'];
 export const EntityStoreManagementPage = () => {
   const hasEntityAnalyticsCapability = useHasSecurityCapability('entity-analytics');
   const isEntityStoreFeatureFlagDisabled = useIsExperimentalFeatureEnabled('entityStoreDisabled');
-  const [isAssetCriticalityEnabled] = useUiSetting$<boolean>(ENABLE_ASSET_CRITICALITY_SETTING);
   const {
     data: assetCriticalityPrivileges,
     error: assetCriticalityPrivilegesError,
@@ -101,6 +101,8 @@ export const EntityStoreManagementPage = () => {
     }
   }, [initEntityEngineMutation, stopEntityEngineMutation, entityStoreStatus]);
 
+  const { data: privileges } = useEntityEnginePrivileges();
+
   if (assetCriticalityIsLoading) {
     // Wait for permission before rendering content to avoid flickering
     return null;
@@ -110,10 +112,7 @@ export const EntityStoreManagementPage = () => {
     const errorMessage = assetCriticalityPrivilegesError?.body.message ?? (
       <FormattedMessage
         id="xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.advancedSettingDisabledMessage"
-        defaultMessage='Please enable "{ENABLE_ASSET_CRITICALITY_SETTING}" in advanced settings to access this functionality.'
-        values={{
-          ENABLE_ASSET_CRITICALITY_SETTING,
-        }}
+        defaultMessage="The don't have privileges to access Asset Criticality feature. Contact your administrator for further assistance."
       />
     );
 
@@ -218,7 +217,6 @@ export const EntityStoreManagementPage = () => {
   const FileUploadSection: React.FC = () => {
     if (
       !hasEntityAnalyticsCapability ||
-      !isAssetCriticalityEnabled ||
       assetCriticalityPrivilegesError?.body.status_code === 403
     ) {
       return <AssetCriticalityIssueCallout />;
@@ -258,6 +256,21 @@ export const EntityStoreManagementPage = () => {
     stopEntityEngineMutation.isLoading ||
     deleteEntityEngineMutation.isLoading;
 
+  const callouts = entityStoreStatus.errors.map((error) => (
+    <EuiCallOut
+      title={
+        <FormattedMessage
+          id="xpack.securitySolution.entityAnalytics.entityStoreManagementPage.errors.title"
+          defaultMessage={'An error occurred during entity store resource initialization'}
+        />
+      }
+      color="danger"
+      iconType="alert"
+    >
+      <p>{error.message}</p>
+    </EuiCallOut>
+  ));
+
   return (
     <>
       <EuiPageHeader
@@ -275,7 +288,7 @@ export const EntityStoreManagementPage = () => {
         }
         alignItems="center"
         rightSideItems={
-          !isEntityStoreFeatureFlagDisabled
+          !isEntityStoreFeatureFlagDisabled && privileges?.has_all_required
             ? [
                 <EnablementButton
                   isLoading={
@@ -296,18 +309,61 @@ export const EntityStoreManagementPage = () => {
       <EuiText>
         <FormattedMessage
           id="xpack.securitySolution.entityAnalytics.entityStoreManagementPage.subTitle"
-          defaultMessage="Allows comprehensive monitoring of your system's hosts and users."
+          defaultMessage="Store host and user entities observed in events."
         />
       </EuiText>
       {isEntityStoreFeatureFlagDisabled && <EntityStoreFeatureFlagNotAvailableCallout />}
+      {!privileges || privileges.has_all_required ? null : (
+        <>
+          <EuiSpacer size="l" />
+          <MissingPrivilegesCallout privileges={privileges} />
+          <EuiSpacer size="l" />
+        </>
+      )}
+
       <EuiHorizontalRule />
       <EuiSpacer size="l" />
       <EuiFlexGroup gutterSize="xl">
         <FileUploadSection />
         <EuiFlexItem grow={2}>
           <EuiFlexGroup direction="column">
+            {initEntityEngineMutation.isError && (
+              <EuiCallOut
+                title={
+                  <FormattedMessage
+                    id="xpack.securitySolution.entityAnalytics.entityStoreManagementPage.errors.initErrorTitle"
+                    defaultMessage={'There was a problem initializing the entity store'}
+                  />
+                }
+                color="danger"
+                iconType="alert"
+              >
+                <p>
+                  {(initEntityEngineMutation.error as { body: { message: string } }).body.message}
+                </p>
+              </EuiCallOut>
+            )}
+            {deleteEntityEngineMutation.isError && (
+              <EuiCallOut
+                title={
+                  <FormattedMessage
+                    id="xpack.securitySolution.entityAnalytics.entityStoreManagementPage.errors.deleteErrorTitle"
+                    defaultMessage={'There was a problem deleting the entity store'}
+                  />
+                }
+                color="danger"
+                iconType="alert"
+              >
+                <p>
+                  {(deleteEntityEngineMutation.error as { body: { message: string } }).body.message}
+                </p>
+              </EuiCallOut>
+            )}
+            {callouts}
             <WhatIsAssetCriticalityPanel />
-            {!isEntityStoreFeatureFlagDisabled && canDeleteEntityEngine && <ClearEntityDataPanel />}
+            {!isEntityStoreFeatureFlagDisabled &&
+              privileges?.has_all_required &&
+              canDeleteEntityEngine && <ClearEntityDataPanel />}
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -323,6 +379,11 @@ const WhatIsAssetCriticalityPanel: React.FC = () => {
 
   return (
     <EuiPanel hasBorder={true} paddingSize="l" grow={false}>
+      <FormattedMessage
+        id="xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.information.intro"
+        defaultMessage="As part of importing entities using a text file, you are also able to set Asset Criticality for the imported Entities."
+      />
+      <EuiSpacer size="l" />
       <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiIcon type="questionInCircle" size="xl" />
         <EuiTitle size="xxs">

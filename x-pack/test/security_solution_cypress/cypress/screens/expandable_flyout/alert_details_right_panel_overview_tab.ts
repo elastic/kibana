@@ -77,25 +77,29 @@ export const DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_USER_OVERVIEW_LINK = getDataTe
 
 export const DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_THREAT_INTELLIGENCE_HEADER =
   getDataTestSubjectSelector('securitySolutionFlyoutInsightsThreatIntelligenceTitleLink');
-export const DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_THREAT_INTELLIGENCE_VALUES =
-  getDataTestSubjectSelector('securitySolutionFlyoutInsightsThreatIntelligenceValue');
+export const DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_THREAT_INTELLIGENCE_THREAT_MATCHES_VALUE =
+  getDataTestSubjectSelector('securitySolutionFlyoutInsightsThreatIntelligenceThreatMatchesButton');
+export const DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_THREAT_INTELLIGENCE_ENRICHED_WITH_THREAT_INTELLIGENCE_VALUE =
+  getDataTestSubjectSelector(
+    'securitySolutionFlyoutInsightsThreatIntelligenceEnrichedWithThreatIntelligenceButton'
+  );
 
 /* Insights Correlations */
 
 export const DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_CORRELATIONS_HEADER =
   getDataTestSubjectSelector('securitySolutionFlyoutCorrelationsTitleLink');
 export const DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_CORRELATIONS_VALUES_SUPPRESSED_ALERTS =
-  getDataTestSubjectSelector('securitySolutionFlyoutCorrelationsSuppressedAlertsValue');
+  getDataTestSubjectSelector('securitySolutionFlyoutCorrelationsSuppressedAlertsButton');
 export const DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_CORRELATIONS_VALUES_RELATED_ALERTS_BY_ANCESTRY =
-  getDataTestSubjectSelector('securitySolutionFlyoutCorrelationsRelatedAlertsByAncestryValue');
+  getDataTestSubjectSelector('securitySolutionFlyoutCorrelationsRelatedAlertsByAncestryButton');
 export const DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_CORRELATIONS_VALUES_RELATED_ALERTS_BY_SAME_SOURCE_EVENT =
   getDataTestSubjectSelector(
-    'securitySolutionFlyoutCorrelationsRelatedAlertsBySameSourceEventValue'
+    'securitySolutionFlyoutCorrelationsRelatedAlertsBySameSourceEventButton'
   );
 export const DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_CORRELATIONS_VALUES_RELATED_ALERTS_BY_SESSION =
-  getDataTestSubjectSelector('securitySolutionFlyoutCorrelationsRelatedAlertsBySessionValue');
+  getDataTestSubjectSelector('securitySolutionFlyoutCorrelationsRelatedAlertsBySessionButton');
 export const DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_CORRELATIONS_VALUES_RELATED_CASES =
-  getDataTestSubjectSelector('securitySolutionFlyoutCorrelationsRelatedCasesValue');
+  getDataTestSubjectSelector('securitySolutionFlyoutCorrelationsRelatedCasesButton');
 
 /* Insights Prevalence */
 
@@ -116,6 +120,8 @@ export const DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_ANALYZER_PREVIEW_CONTAINER =
   getDataTestSubjectSelector('securitySolutionFlyoutAnalyzerPreviewContent');
 export const DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_SESSION_PREVIEW_CONTAINER =
   getDataTestSubjectSelector('securitySolutionFlyoutSessionPreviewContent');
+export const DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_SESSION_PREVIEW_NO_DATA =
+  getDataTestSubjectSelector('securitySolutionFlyoutSessionViewNoData');
 
 /* Response section */
 

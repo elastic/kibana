@@ -139,46 +139,11 @@ export const getUpdateScript = ({
   entry: UpdateKnowledgeBaseEntrySchema;
   isPatch?: boolean;
 }) => {
+  // Cannot use script for updating documents with semantic_text fields
   return {
-    source: `
-    if (params.assignEmpty == true || params.containsKey('name')) {
-      ctx._source.name = params.name;
-    }
-    if (params.assignEmpty == true || params.containsKey('type')) {
-      ctx._source.type = params.type;
-    }
-    if (params.assignEmpty == true || params.containsKey('users')) {
-      ctx._source.users = params.users;
-    }
-    if (params.assignEmpty == true || params.containsKey('query_description')) {
-      ctx._source.query_description = params.query_description;
-    }
-    if (params.assignEmpty == true || params.containsKey('input_schema')) {
-      ctx._source.input_schema = params.input_schema;
-    }
-    if (params.assignEmpty == true || params.containsKey('output_fields')) {
-      ctx._source.output_fields = params.output_fields;
-    }
-    if (params.assignEmpty == true || params.containsKey('kb_resource')) {
-      ctx._source.kb_resource = params.kb_resource;
-    }
-    if (params.assignEmpty == true || params.containsKey('required')) {
-      ctx._source.required = params.required;
-    }
-    if (params.assignEmpty == true || params.containsKey('source')) {
-      ctx._source.source = params.source;
-    }
-    if (params.assignEmpty == true || params.containsKey('text')) {
-      ctx._source.text = params.text;
-    }
-    ctx._source.updated_at = params.updated_at;
-    ctx._source.updated_by = params.updated_by;
-  `,
-    lang: 'painless',
-    params: {
-      ...entry, // when assigning undefined in painless, it will remove property and wil set it to null
-      // for patch we don't want to remove unspecified value in payload
-      assignEmpty: !(isPatch ?? true),
+    doc: {
+      ...entry,
+      semantic_text: entry.text,
     },
   };
 };
@@ -238,7 +203,7 @@ export const transformToCreateSchema = ({
     required: entry.required ?? false,
     source: entry.source,
     text: entry.text,
-    vector: undefined,
+    semantic_text: entry.text,
   };
 };
 

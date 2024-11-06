@@ -15,7 +15,8 @@ class ContainerEntity extends Serializable<EntityFields> {
     super({
       ...fields,
       'entity.type': 'container',
-      'entity.definitionId': 'latest',
+      'entity.definition_id': 'builtin_containers_from_ecs_data',
+      'entity.identity_fields': ['container.id'],
     });
   }
 }
@@ -23,21 +24,19 @@ class ContainerEntity extends Serializable<EntityFields> {
 export function containerEntity({
   agentName,
   dataStreamType,
-  dataStreamDataset,
   containerId,
   entityId,
 }: {
   agentName: string[];
   dataStreamType: EntityDataStreamType[];
-  dataStreamDataset: string;
   containerId: string;
   entityId: string;
 }) {
   return new ContainerEntity({
     'source_data_stream.type': dataStreamType,
-    'source_data_stream.dataset': dataStreamDataset,
     'agent.name': agentName,
     'container.id': containerId,
+    'entity.display_name': containerId,
     'entity.id': entityId,
   });
 }

@@ -86,3 +86,10 @@ export interface StackTraceFields {
   'error.exception.stacktrace'?: string;
   'error.log.stacktrace'?: string;
 }
+
+export interface SmartFieldGridColumnOptions {
+  type: 'smart-field';
+  smartField: 'content' | 'resource';
+  fallbackFields: string[];
+  width?: number;
+}

@@ -8,9 +8,6 @@
  */
 
 import React, { useState, useRef, useCallback, useMemo, useEffect, KeyboardEvent, FC } from 'react';
-import ReactMonacoEditor, {
-  type MonacoEditorProps as ReactMonacoEditorProps,
-} from 'react-monaco-editor';
 import {
   htmlIdGenerator,
   EuiToolTip,
@@ -34,6 +31,10 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
+import {
+  MonacoEditor as ReactMonacoEditor,
+  type MonacoEditorProps as ReactMonacoEditorProps,
+} from './react_monaco_editor';
 import './register_languages';
 import { remeasureFonts } from './remeasure_fonts';
 
@@ -168,7 +169,7 @@ export interface CodeEditorProps {
 export const CodeEditor: React.FC<CodeEditorProps> = ({
   languageId,
   value,
-  onChange: _onChange,
+  onChange,
   width,
   height,
   options,
@@ -224,8 +225,6 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   const textboxMutationObserver = useRef<MutationObserver | null>(null);
 
   const [isHintActive, setIsHintActive] = useState(true);
-
-  const onChange = useBug175684OnChange(_onChange);
 
   const startEditing = useCallback(() => {
     setIsHintActive(false);
@@ -706,23 +705,6 @@ const useFitToContent = ({
       editor.layout(); // reset the layout that was controlled by the fitToContent
     };
   }, [editor, isFitToContent, minLines, maxLines, isFullScreen]);
-};
-
-// https://github.com/elastic/kibana/issues/175684
-// 'react-monaco-editor' has a bug that it always calls the initial onChange callback, so the closure might become stale
-// we work this around by calling the latest onChange from props
-const useBug175684OnChange = (onChange: CodeEditorProps['onChange']) => {
-  const onChangePropRef = useRef<CodeEditorProps['onChange']>(onChange);
-  useEffect(() => {
-    onChangePropRef.current = onChange;
-  }, [onChange]);
-  const onChangeWrapper = useCallback<NonNullable<CodeEditorProps['onChange']>>((_value, event) => {
-    if (onChangePropRef.current) {
-      onChangePropRef.current(_value, event);
-    }
-  }, []);
-
-  return onChangeWrapper;
 };
 
 const UseBug177756ReBroadcastMouseDown: FC<{ children: React.ReactNode }> = ({ children }) => {

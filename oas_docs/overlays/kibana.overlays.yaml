@@ -4,7 +4,7 @@ info:
   title: Overlays for the Kibana API document
   version: 0.0.1
 actions:
-  # Add an introduction to spaces
+# Add an introduction to spaces
   - target: '$'
     description: Add an extra page about spaces
     update:
@@ -24,7 +24,7 @@ actions:
             If you use the Kibana console to send API requests, it automatically adds the appropriate space identifier.
 
             To learn more, check out [Spaces](https://www.elastic.co/guide/en/kibana/master/xpack-spaces.html).
-  # Add some tag descriptions and displayNames
+# Add some tag descriptions and displayNames
   - target: '$.tags[?(@.name=="alerting")]'
     description: Change tag description and displayName
     update:
@@ -91,7 +91,112 @@ actions:
       x-displayName: "System"
       description: >
         Get information about the system status, resource usage, and installed plugins.
-  # Remove extra tags from operations
+# Remove extra tags from operations
   - target: "$.paths[*][*].tags[1:]"
     description: Remove all but first tag from operations
     remove: true
+# Examples that are not applicable to serverless
+  - target: "$.paths['/api/spaces/_copy_saved_objects']['post']"
+    description: "Add example to copy saved objects to space API"
+    update: 
+      requestBody: 
+        content: 
+          application/json; Elastic-Api-Version=2023-10-31: 
+            examples:
+              copySavedObjectsRequestExample1:
+                $ref: "../examples/copy_saved_objects_request1.yaml"
+              copySavedObjectsRequestExample2:
+                $ref: "../examples/copy_saved_objects_request2.yaml"
+      responses:
+        200: 
+          content: 
+            application/json; Elastic-Api-Version=2023-10-31: 
+              examples:
+                copySavedObjectsResponseExample1:
+                  $ref: "../examples/copy_saved_objects_response1.yaml"
+                copySavedObjectsResponseExample2:
+                  $ref: "../examples/copy_saved_objects_response2.yaml"
+                copySavedObjectsResponseExample3:
+                  $ref: "../examples/copy_saved_objects_response3.yaml"
+                copySavedObjectsResponseExample4:
+                  $ref: "../examples/copy_saved_objects_response4.yaml"
+  - target: "$.paths['/api/spaces/_resolve_copy_saved_objects_errors']['post']"
+    description: "Add example to resolve copy saved objects to space conflicts API"
+    update: 
+      requestBody: 
+        content: 
+          application/json; Elastic-Api-Version=2023-10-31: 
+            examples:
+              resolveCopySavedObjectsRequestExample1:
+                $ref: "../examples/resolve_copy_saved_objects_request1.yaml"
+              resolveCopySavedObjectsRequestExample2:
+                $ref: "../examples/resolve_copy_saved_objects_request2.yaml"
+      responses:
+        200: 
+          content: 
+            application/json; Elastic-Api-Version=2023-10-31: 
+              examples:
+                resolveCopySavedObjectsResponseExample1:
+                  $ref: "../examples/copy_saved_objects_response1.yaml"
+                resolveCopySavedObjectsResponseExample2:
+                  $ref: "../examples/copy_saved_objects_response2.yaml"
+  - target: "$.paths['/api/spaces/_disable_legacy_url_aliases']['post']"
+    description: "Add example to disable legacy URL aliases API"
+    update: 
+      requestBody: 
+        content: 
+          application/json; Elastic-Api-Version=2023-10-31: 
+            examples:
+              disableLegacyURLRequestExample1:
+                $ref: "../examples/disable_legacy_url_request1.yaml"
+  - target: "$.paths['/api/spaces/_update_objects_spaces']['post']"
+    description: "Add example to update saved object spaces API"
+    update: 
+      requestBody: 
+        content: 
+          application/json; Elastic-Api-Version=2023-10-31: 
+            examples:
+              updateObjectSpacesRequestExample1:
+                $ref: "../examples/update_saved_objects_spaces_request1.yaml"
+      responses:
+        200: 
+          content: 
+            application/json; Elastic-Api-Version=2023-10-31: 
+              examples:
+                updateObjectSpacesResponseExample1:
+                  $ref: "../examples/update_saved_objects_spaces_response1.yaml"
+  - target: "$.paths['/api/security/role/{name}']['put']"
+    description: "Add examples to create role API"
+    update: 
+      requestBody:
+        content: 
+          application/json; Elastic-Api-Version=2023-10-31: 
+            examples:
+              createRoleRequest1:
+                $ref: "../examples/create_role_request1.yaml"
+              createRoleRequest2:
+                $ref: "../examples/create_role_request2.yaml"
+              createRoleRequest3:
+                $ref: "../examples/create_role_request3.yaml"
+              createRoleRequest4:
+                $ref: "../examples/create_role_request4.yaml"
+  - target: "$.paths['/api/security/role/{name}']['get']"
+    description: "Add example to get role API"
+    update:
+      responses:
+        200:
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                getRoleResponse1:
+                  $ref: '../examples/get_role_response1.yaml'
+  - target: "$.paths['/api/security/role']['get']"
+    description: "Add example to get roles API"
+    update:
+      responses:
+        200:
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                getRolesResponse1:
+                  $ref: '../examples/get_roles_response1.yaml'
