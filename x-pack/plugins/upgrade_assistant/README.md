@@ -292,6 +292,7 @@ GET kbn:/api/routing_example/d/versioned?apiVersion=2
 
 # Non-versioned routes
 GET kbn:/api/routing_example/d/removed_route
+GET kbn:/api/routing_example/d/deprecated_route
 POST kbn:/api/routing_example/d/migrated_route
 {}
 ```
