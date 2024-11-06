@@ -176,6 +176,9 @@ function case2FeatureSplit(deps: PluginSetupDependencies) {
     app: ['app_one'],
     catalogue: ['cat_one'],
     management: { kibana: ['management_one'] },
+    // In addition to registering the `case_2_feature_b` consumer, we also need to register
+    // `case_2_feature_a` as an additional consumer to ensure that users with either deprecated or
+    // replacement privileges can access the rules, regardless of which one created them.
     alerting: [
       { ruleTypeId: 'alerting_rule_type_one', consumers: ['case_2_feature_a', 'case_2_feature_b'] },
     ],
@@ -245,6 +248,9 @@ function case2FeatureSplit(deps: PluginSetupDependencies) {
     app: ['app_two'],
     catalogue: ['cat_two'],
     management: { kibana: ['management_two'] },
+    // In addition to registering the `case_2_feature_c` consumer, we also need to register
+    // `case_2_feature_a` as an additional consumer to ensure that users with either deprecated or
+    // replacement privileges can access the rules, regardless of which one created them.
     alerting: [
       { ruleTypeId: 'alerting_rule_type_two', consumers: ['case_2_feature_a', 'case_2_feature_c'] },
     ],
