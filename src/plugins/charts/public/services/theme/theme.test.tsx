@@ -39,6 +39,7 @@ describe('ThemeService', () => {
 
       expect(await themeService.darkModeEnabled$.pipe(take(1)).toPromise()).toStrictEqual({
         darkMode: false,
+        version: DEFAULT_THEME_VERSION,
       });
     });
 
@@ -49,6 +50,7 @@ describe('ThemeService', () => {
 
       expect(await themeService.darkModeEnabled$.pipe(take(1)).toPromise()).toStrictEqual({
         darkMode: true,
+        version: DEFAULT_THEME_VERSION,
       });
     });
   });
