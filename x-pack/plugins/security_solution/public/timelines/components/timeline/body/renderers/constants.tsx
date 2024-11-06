@@ -21,5 +21,4 @@ export const SIGNAL_STATUS_FIELD_NAME = 'kibana.alert.workflow_status';
 export const AGENT_STATUS_FIELD_NAME = 'agent.status';
 export const QUARANTINED_PATH_FIELD_NAME = 'quarantined.path';
 export const REASON_FIELD_NAME = 'kibana.alert.reason';
-export const RISK_SCORE = 'kibana.alert.risk_score';
 export const EVENT_SUMMARY_FIELD_NAME = 'eventSummary';

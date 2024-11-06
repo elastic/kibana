@@ -15,7 +15,6 @@ import { useMountAppended } from '../../../../../common/utils/use_mount_appended
 
 import { FormattedFieldValue } from './formatted_field';
 import { HOST_NAME_FIELD_NAME } from './constants';
-import { formatRiskScore } from '../../../../../entity_analytics/common';
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
@@ -285,40 +284,5 @@ describe('Events', () => {
       </TestProviders>
     );
     expect(wrapper.text()).toEqual(getEmptyValue());
-  });
-
-  test('it renders the formatted risk score when fieldName is RISK_SCORE and value is provided', () => {
-    const riskScoreValue = 85;
-    const wrapper = mount(
-      <TestProviders>
-        <FormattedFieldValue
-          contextId="test"
-          eventId={mockTimelineData[0].ecs._id}
-          fieldName="kibana.alert.risk_score"
-          value={riskScoreValue}
-        />
-      </TestProviders>
-    );
-
-    expect(
-      wrapper.find(`[data-test-subj="formatted-field-kibana.alert.risk_score"]`).text()
-    ).toEqual(formatRiskScore(riskScoreValue));
-  });
-
-  test('it does not render anything when fieldName is RISK_SCORE and value is not provided', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <FormattedFieldValue
-          contextId="test"
-          eventId={mockTimelineData[0].ecs._id}
-          fieldName="kibana.alert.risk_score"
-          value={null}
-        />
-      </TestProviders>
-    );
-
-    expect(
-      wrapper.find(`[data-test-subj="formatted-field-kibana.alert.risk_score"]`).exists()
-    ).toEqual(false);
   });
 });

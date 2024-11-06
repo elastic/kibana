@@ -13,7 +13,6 @@ import { isEmpty, isNumber } from 'lodash/fp';
 import React from 'react';
 import { css } from '@emotion/css';
 import type { FieldSpec } from '@kbn/data-plugin/common';
-import { formatRiskScore } from '../../../../../entity_analytics/common';
 import { getAgentTypeForAgentIdField } from '../../../../../common/lib/endpoint/utils/get_agent_type_for_agent_id_field';
 import {
   ALERT_HOST_CRITICALITY,
@@ -40,7 +39,6 @@ import {
   IP_FIELD_TYPE,
   MESSAGE_FIELD_NAME,
   REFERENCE_URL_FIELD_NAME,
-  RISK_SCORE,
   RULE_REFERENCE_FIELD_NAME,
   SIGNAL_RULE_NAME_FIELD_NAME,
   SIGNAL_STATUS_FIELD_NAME,
@@ -241,10 +239,6 @@ const FormattedFieldValueComponent: React.FC<{
         value={value}
       />
     );
-  } else if (fieldName === RISK_SCORE) {
-    return value ? (
-      <span data-test-subj={`formatted-field-${fieldName}`}>{formatRiskScore(Number(value))}</span>
-    ) : null;
   } else if (fieldName === EVENT_MODULE_FIELD_NAME) {
     return renderEventModule({
       contextId,
