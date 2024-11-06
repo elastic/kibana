@@ -27,5 +27,5 @@ Make sure to execute `node scripts/makelogs` *after* {es} is up and running!
 [discrete]
 === CSV upload
 
-You can also use the CSV uploader provided oin the {kib}.
+You can also use the CSV uploader provided on the **Upload file** page available in the list of **Integrations**.
 Navigate to **Add data** > **Upload file** to upload your data from a file.
