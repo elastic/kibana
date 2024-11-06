@@ -125,6 +125,32 @@ describe('<Notes />', () => {
     expect(mockOpenLeftPanel).not.toHaveBeenCalled();
   });
 
+  it('should disabled the Add note button if in rule creation workflow', () => {
+    const contextValue = {
+      ...mockContextValue,
+      isPreview: true,
+    };
+
+    const mockOpenLeftPanel = jest.fn();
+    (useExpandableFlyoutApi as jest.Mock).mockReturnValue({ openLeftPanel: mockOpenLeftPanel });
+
+    const { getByTestId } = render(
+      <TestProviders>
+        <DocumentDetailsContext.Provider value={contextValue}>
+          <Notes />
+        </DocumentDetailsContext.Provider>
+      </TestProviders>
+    );
+
+    const button = getByTestId(NOTES_ADD_NOTE_BUTTON_TEST_ID);
+    expect(button).toBeInTheDocument();
+    expect(button).toBeDisabled();
+
+    button.click();
+
+    expect(mockOpenLeftPanel).not.toHaveBeenCalled();
+  });
+
   it('should render number of notes and plus button', () => {
     const mockOpenLeftPanel = jest.fn();
     (useExpandableFlyoutApi as jest.Mock).mockReturnValue({ openLeftPanel: mockOpenLeftPanel });
@@ -169,6 +195,36 @@ describe('<Notes />', () => {
       ...mockContextValue,
       eventId: '1',
       isPreviewMode: true,
+    };
+
+    const { getByTestId } = render(
+      <TestProviders>
+        <DocumentDetailsContext.Provider value={contextValue}>
+          <Notes />
+        </DocumentDetailsContext.Provider>
+      </TestProviders>
+    );
+
+    expect(getByTestId(NOTES_COUNT_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(NOTES_COUNT_TEST_ID)).toHaveTextContent('1');
+
+    const button = getByTestId(NOTES_ADD_NOTE_ICON_BUTTON_TEST_ID);
+
+    expect(button).toBeInTheDocument();
+    button.click();
+    expect(button).toBeDisabled();
+
+    expect(mockOpenLeftPanel).not.toHaveBeenCalled();
+  });
+
+  it('should disable the plus button if in rule creation workflow', () => {
+    const mockOpenLeftPanel = jest.fn();
+    (useExpandableFlyoutApi as jest.Mock).mockReturnValue({ openLeftPanel: mockOpenLeftPanel });
+
+    const contextValue = {
+      ...mockContextValue,
+      eventId: '1',
+      isPreview: true,
     };
 
     const { getByTestId } = render(
