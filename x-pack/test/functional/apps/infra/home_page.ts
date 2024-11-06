@@ -426,8 +426,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           expect(nodesWithValue).to.eql([
             { name: 'host-5', value: 10, color: '#6092c0' },
             { name: 'host-4', value: 30, color: '#9ab6d5' },
-            { name: 'host-1', value: 50, color: '#f1d9b9' },
-            { name: 'host-2', value: 70, color: '#eba47a' },
+            { name: 'host-1', value: 50, color: '#f6e0b9' },
+            { name: 'host-2', value: 70, color: '#eda77a' },
             { name: 'host-3', value: 90, color: '#e7664c' },
           ]);
         });
