@@ -9,14 +9,12 @@
 
 import React from 'react';
 import { useQuerySubscriber } from '@kbn/unified-field-list/src/hooks/use_query_subscriber';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiIcon, useEuiTheme } from '@elastic/eui';
-import { EuiEmptyPrompt } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { useEuiTheme } from '@elastic/eui';
 import { useAdditionalFieldGroups } from '../../hooks/sidebar/use_additional_field_groups';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { FieldStatisticsTable, type FieldStatisticsTableProps } from './field_stats_table';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
+import { FieldStatsUnavailableMessage } from './field_stats_unavailable';
 
 export const FieldStatisticsTab: React.FC<Omit<FieldStatisticsTableProps, 'query' | 'filters'>> =
   React.memo((props) => {
@@ -29,30 +27,7 @@ export const FieldStatisticsTab: React.FC<Omit<FieldStatisticsTableProps, 'query
     const { euiTheme } = useEuiTheme();
 
     if (!services.dataVisualizer) return null;
-
-    if (isEsql) {
-      return (
-        <EuiEmptyPrompt
-          icon={<EuiIcon size="l" type="warning" color="warning" />}
-          color="plain"
-          paddingSize="m"
-          css={css`
-            margin: ${euiTheme.size.xl} auto;
-          `}
-          title={
-            <h2 data-test-subj="fieldStatsUnavailableCalloutTitle">
-              <FormattedMessage
-                id="discover.fieldStatsNotAvailableForESQLCalloutTitle"
-                defaultMessage="Field statistics are not available for ES|QL queries"
-              />
-            </h2>
-          }
-          titleSize="xs"
-          hasBorder
-        />
-      );
-    }
-
+    if (isEsql) return <FieldStatsUnavailableMessage />;
     return (
       <FieldStatisticsTable
         dataView={props.dataView}
