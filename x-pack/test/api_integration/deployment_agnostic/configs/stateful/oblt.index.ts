@@ -13,6 +13,7 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     loadTestFile(require.resolve('../../apis/observability/alerting'));
     loadTestFile(require.resolve('../../apis/observability/dataset_quality'));
     loadTestFile(require.resolve('../../apis/observability/slo'));
+    loadTestFile(require.resolve('../../apis/observability/infra'));
     loadTestFile(require.resolve('../../apis/observability/apm'));
   });
 }

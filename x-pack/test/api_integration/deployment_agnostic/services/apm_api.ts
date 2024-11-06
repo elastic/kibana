@@ -13,38 +13,58 @@ import type {
 } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { APIEndpoint } from '@kbn/apm-plugin/server';
 import { formatRequest } from '@kbn/server-route-repository';
+import { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import type { DeploymentAgnosticFtrProviderContext } from '../ftr_provider_context';
+
+const INTERNAL_API_REGEX = /^\S+\s(\/)?internal\/[^\s]*$/;
+
+type InternalApi = `${string} /internal/${string}`;
+interface ExternalEndpointParams {
+  roleAuthc: RoleCredentials;
+}
+
+type Options<TEndpoint extends APIEndpoint> = (TEndpoint extends InternalApi
+  ? {}
+  : ExternalEndpointParams) & {
+  type?: 'form-data';
+  endpoint: TEndpoint;
+  spaceId?: string;
+} & APIClientRequestParamsOf<TEndpoint> & {
+    params?: { query?: { _inspect?: boolean } };
+  };
+
+function isPublicApi<TEndpoint extends APIEndpoint>(
+  options: Options<TEndpoint>
+): options is Options<TEndpoint> & ExternalEndpointParams {
+  return !INTERNAL_API_REGEX.test(options.endpoint);
+}
 
 function createApmApiClient({ getService }: DeploymentAgnosticFtrProviderContext, role: string) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const samlAuth = getService('samlAuth');
+  const logger = getService('log');
 
   return async <TEndpoint extends APIEndpoint>(
-    options: {
-      type?: 'form-data';
-      endpoint: TEndpoint;
-      spaceId?: string;
-    } & APIClientRequestParamsOf<TEndpoint> & {
-        params?: { query?: { _inspect?: boolean } };
-      }
+    options: Options<TEndpoint>
   ): Promise<SupertestReturnType<TEndpoint>> => {
     const { endpoint, type } = options;
 
     const params = 'params' in options ? (options.params as Record<string, any>) : {};
 
-    const roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope(role);
+    const credentials = isPublicApi(options)
+      ? options.roleAuthc.apiKeyHeader
+      : await samlAuth.getM2MApiCookieCredentialsWithRoleScope(role);
 
     const headers: Record<string, string> = {
       ...samlAuth.getInternalRequestHeader(),
-      ...roleAuthc.apiKeyHeader,
+      ...credentials,
     };
 
     const { method, pathname, version } = formatRequest(endpoint, params.path);
     const pathnameWithSpaceId = options.spaceId ? `/s/${options.spaceId}${pathname}` : pathname;
     const url = format({ pathname: pathnameWithSpaceId, query: params?.query });
 
-    // eslint-disable-next-line no-console
-    console.debug(`Calling APM API: ${method.toUpperCase()} ${url}`);
+    logger.debug(`Calling APM API: ${method.toUpperCase()} ${url}`);
 
     if (version) {
       headers['Elastic-Api-Version'] = version;
