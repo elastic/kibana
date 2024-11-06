@@ -433,6 +433,7 @@ describe('TaskClaiming', () => {
         tasksConflicted: 0,
         tasksErrors: 0,
         tasksUpdated: 3,
+        staleTasks: 0,
         tasksLeftUnclaimed: 3,
       });
       expect(result.docs.length).toEqual(3);
@@ -529,6 +530,7 @@ describe('TaskClaiming', () => {
         tasksErrors: 0,
         tasksUpdated: 1,
         tasksLeftUnclaimed: 0,
+        staleTasks: 0,
       });
       expect(result.docs.length).toEqual(1);
     });
@@ -640,6 +642,7 @@ describe('TaskClaiming', () => {
         tasksErrors: 0,
         tasksUpdated: 1,
         tasksLeftUnclaimed: 0,
+        staleTasks: 0,
       });
       expect(result.docs.length).toEqual(1);
     });
@@ -737,6 +740,7 @@ describe('TaskClaiming', () => {
         tasksErrors: 0,
         tasksUpdated: 1,
         tasksLeftUnclaimed: 0,
+        staleTasks: 0,
       });
       expect(result.docs.length).toEqual(1);
     });
@@ -792,6 +796,7 @@ describe('TaskClaiming', () => {
         tasksClaimed: 0,
         tasksConflicted: 0,
         tasksUpdated: 0,
+        staleTasks: 0,
       });
       expect(result.docs.length).toEqual(0);
     });
@@ -885,6 +890,7 @@ describe('TaskClaiming', () => {
         tasksErrors: 0,
         tasksUpdated: 2,
         tasksLeftUnclaimed: 0,
+        staleTasks: 0,
       });
       expect(result.docs.length).toEqual(2);
     });
@@ -978,6 +984,7 @@ describe('TaskClaiming', () => {
         tasksErrors: 0,
         tasksUpdated: 2,
         tasksLeftUnclaimed: 0,
+        staleTasks: 0,
       });
       expect(result.docs.length).toEqual(2);
     });
@@ -1031,7 +1038,7 @@ describe('TaskClaiming', () => {
       expect(mockApmTrans.end).toHaveBeenCalledWith('success');
 
       expect(taskManagerLogger.debug).toHaveBeenCalledWith(
-        'task claimer claimed: 2; stale: 1; conflicts: 1; missing: 0; capacity reached: 0; updateErrors: 0; getErrors: 0; removed: 0;',
+        'task claimer claimed: 2; stale: 1; conflicts: 0; missing: 0; capacity reached: 0; updateErrors: 0; getErrors: 0; removed: 0;',
         { tags: ['taskClaiming', 'claimAvailableTasksMget'] }
       );
 
@@ -1067,10 +1074,11 @@ describe('TaskClaiming', () => {
 
       expect(result.stats).toEqual({
         tasksClaimed: 2,
-        tasksConflicted: 1,
+        tasksConflicted: 0,
         tasksErrors: 0,
         tasksUpdated: 2,
         tasksLeftUnclaimed: 0,
+        staleTasks: 1,
       });
       expect(result.docs.length).toEqual(2);
     });
@@ -1197,6 +1205,7 @@ describe('TaskClaiming', () => {
         tasksErrors: 0,
         tasksUpdated: 4,
         tasksLeftUnclaimed: 0,
+        staleTasks: 0,
       });
       expect(result.docs.length).toEqual(4);
     });
@@ -1330,6 +1339,7 @@ describe('TaskClaiming', () => {
         tasksErrors: 1,
         tasksUpdated: 3,
         tasksLeftUnclaimed: 0,
+        staleTasks: 0,
       });
       expect(result.docs.length).toEqual(3);
     });
@@ -1458,6 +1468,7 @@ describe('TaskClaiming', () => {
         tasksErrors: 0,
         tasksUpdated: 4,
         tasksLeftUnclaimed: 0,
+        staleTasks: 0,
       });
       expect(result.docs.length).toEqual(4);
       for (const r of result.docs) {
@@ -1699,6 +1710,7 @@ describe('TaskClaiming', () => {
         tasksErrors: 1,
         tasksUpdated: 3,
         tasksLeftUnclaimed: 0,
+        staleTasks: 0,
       });
       expect(result.docs.length).toEqual(3);
     });
@@ -1829,6 +1841,7 @@ describe('TaskClaiming', () => {
         tasksErrors: 0,
         tasksUpdated: 3,
         tasksLeftUnclaimed: 0,
+        staleTasks: 0,
       });
       expect(result.docs.length).toEqual(3);
     });
