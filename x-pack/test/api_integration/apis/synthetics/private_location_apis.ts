@@ -32,7 +32,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('adds a test legacy private location', async () => {
       const locs = await testPrivateLocations.addLegacyPrivateLocations();
-      expect(locs.attributes.locations.length).to.be(2);
+      expect(locs.length).to.be(2);
     });
 
     it('adds a test private location', async () => {

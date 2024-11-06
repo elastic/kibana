@@ -87,29 +87,32 @@ export class PrivateLocationTestService {
     const fleetPolicy = await this.addFleetPolicy();
     const fleetPolicy2 = await this.addFleetPolicy();
 
-    return await server.savedObjects.create({
+    const locs = [
+      {
+        id: fleetPolicy.body.item.id,
+        agentPolicyId: fleetPolicy.body.item.id,
+        name: 'Test private location 1',
+        lat: 0,
+        lon: 0,
+      },
+      {
+        id: fleetPolicy2.body.item.id,
+        agentPolicyId: fleetPolicy2.body.item.id,
+        name: 'Test private location 2',
+        lat: 0,
+        lon: 0,
+      },
+    ];
+
+    await server.savedObjects.create({
       type: legacyPrivateLocationsSavedObjectName,
       id: legacyPrivateLocationsSavedObjectId,
       attributes: {
-        locations: [
-          {
-            id: fleetPolicy.body.item.id,
-            agentPolicyId: fleetPolicy.body.item.id,
-            name: 'Test private location 1',
-            lat: 0,
-            lon: 0,
-          },
-          {
-            id: fleetPolicy2.body.item.id,
-            agentPolicyId: fleetPolicy2.body.item.id,
-            name: 'Test private location 2',
-            lat: 0,
-            lon: 0,
-          },
-        ],
+        locations: locs,
       },
       overwrite: true,
     });
+    return locs;
   }
 
   async fetchAll() {
