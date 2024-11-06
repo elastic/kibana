@@ -8,13 +8,13 @@ import expect from '@kbn/expect';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import { APIClientRequestParamsOf } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { RecursivePartial } from '@kbn/apm-plugin/typings/common';
+import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import { keyBy } from 'lodash';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 
-export default function ApiTest({ getService }: FtrProviderContext) {
-  const registry = getService('registry');
-  const apmApiClient = getService('apmApiClient');
-  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
+export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
+  const apmApiClient = getService('apmApi');
+  const synthtrace = getService('synthtrace');
 
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
   const end = new Date('2021-01-01T00:15:00.000Z').getTime() - 1;
@@ -42,18 +42,22 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   }
 
-  registry.when('Agent explorer when data is not loaded', { config: 'basic', archives: [] }, () => {
-    it('handles empty state', async () => {
-      const { status, body } = await callApi();
+  describe('Agent explorer', () => {
+    describe('when data is not loaded', () => {
+      it('handles empty state', async () => {
+        const { status, body } = await callApi();
 
-      expect(status).to.be(200);
-      expect(body.items).to.be.empty();
+        expect(status).to.be(200);
+        expect(body.items).to.be.empty();
+      });
     });
-  });
 
-  registry.when('Agent explorer', { config: 'basic', archives: [] }, () => {
     describe('when data is loaded', () => {
+      let apmSynthtraceEsClient: ApmSynthtraceEsClient;
+
       before(async () => {
+        apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
+
         const serviceOtelJava = apm
           .service({
             name: otelJavaServiceName,
