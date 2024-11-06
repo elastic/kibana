@@ -10,6 +10,7 @@
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { mockLoggingSystem } from './config_deprecation.test.mocks';
 import { createRoot } from '@kbn/core-test-helpers-kbn-server';
+import { getFips } from 'crypto';
 
 describe('configuration deprecations', () => {
   let root: ReturnType<typeof createRoot>;
@@ -24,13 +25,19 @@ describe('configuration deprecations', () => {
     }
   });
 
-  it('should not log deprecation warnings for default configuration', async () => {
-    root = createRoot();
+  if (getFips() === 0) {
+    it('should not log deprecation warnings for default configuration', async () => {
+      root = createRoot();
 
-    await root.preboot();
-    await root.setup();
+      await root.preboot();
+      await root.setup();
 
-    const logs = loggingSystemMock.collect(mockLoggingSystem);
-    expect(logs.warn.flat()).toHaveLength(0);
-  });
+      const logs = loggingSystemMock.collect(mockLoggingSystem);
+      expect(logs.warn.flat()).toHaveLength(0);
+    });
+  } else {
+    it('fips is enabled and the default configuration has been overridden', () => {
+      expect(getFips()).toBe(1);
+    });
+  }
 });
