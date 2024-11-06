@@ -51,8 +51,15 @@ export function useAlertSearchBarStateContainer(
 
   useUrlStateSyncEffect(stateContainer, urlStorageKey, replace, defaultState);
 
-  const { setRangeFrom, setRangeTo, setKuery, setStatus, setFilters, setSavedQueryId } =
-    stateContainer.transitions;
+  const {
+    setRangeFrom,
+    setRangeTo,
+    setKuery,
+    setStatus,
+    setFilters,
+    setSavedQueryId,
+    setGroupings,
+  } = stateContainer.transitions;
   const { rangeFrom, rangeTo, kuery, status, filters, savedQueryId, groupings } =
     useContainerSelector(stateContainer, (state) => state);
 
