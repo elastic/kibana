@@ -452,21 +452,20 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       user?: AuthenticatedUser;
       bumpRevision?: boolean;
       force?: true;
+      asyncDeploy?: boolean;
     }
   ): Promise<{
     created: PackagePolicy[];
     failed: Array<{ packagePolicy: NewPackagePolicy; error?: Error | SavedObjectError }>;
   }> {
-    const savedObjectType = await getPackagePolicySavedObjectType();
-    for (const packagePolicy of packagePolicies) {
+    const [savedObjectType, packageInfos] = await Promise.all([
+      getPackagePolicySavedObjectType(),
+      getPackageInfoForPackagePolicies(packagePolicies, soClient),
+    ]);
+
+    await pMap(packagePolicies, async (packagePolicy) => {
       const basePkgInfo = packagePolicy.package
-        ? await getPackageInfo({
-            savedObjectsClient: soClient,
-            pkgName: packagePolicy.package.name,
-            pkgVersion: packagePolicy.package.version,
-            ignoreUnverified: true,
-            prerelease: true,
-          })
+        ? packageInfos.get(`${packagePolicy.package.name}-${packagePolicy.package.version}`)
         : undefined;
       if (!packagePolicy.id) {
         packagePolicy.id = SavedObjectsUtils.generateId();
@@ -479,15 +478,13 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
       this.keepPolicyIdInSync(packagePolicy);
       await preflightCheckPackagePolicy(soClient, packagePolicy, basePkgInfo);
-    }
+    });
 
     const agentPolicyIds = new Set(packagePolicies.flatMap((pkgPolicy) => pkgPolicy.policy_ids));
 
     for (const agentPolicyId of agentPolicyIds) {
       await validateIsNotHostedPolicy(soClient, agentPolicyId, options?.force);
     }
-
-    const packageInfos = await getPackageInfoForPackagePolicies(packagePolicies, soClient);
 
     const isoDate = new Date().toISOString();
 
@@ -607,6 +604,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       for (const agentPolicyId of agentPolicyIds) {
         await agentPolicyService.bumpRevision(soClient, esClient, agentPolicyId, {
           user: options?.user,
+          asyncDeploy: options?.asyncDeploy,
         });
       }
     }
@@ -1098,7 +1096,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     packagePolicyUpdates: Array<NewPackagePolicy & { version?: string; id: string }>,
-    options?: { user?: AuthenticatedUser; force?: boolean }
+    options?: { user?: AuthenticatedUser; force?: boolean; asyncDeploy?: boolean }
   ): Promise<{
     updatedPolicies: PackagePolicy[] | null;
     failedPolicies: Array<{
@@ -1269,6 +1267,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       await agentPolicyService.bumpRevision(soClient, esClient, agentPolicyId, {
         user: options?.user,
         removeProtection,
+        asyncDeploy: options?.asyncDeploy,
       });
     });
 
@@ -2296,6 +2295,7 @@ class PackagePolicyClientWithAuthz extends PackagePolicyClientImpl {
           user?: AuthenticatedUser | undefined;
           bumpRevision?: boolean | undefined;
           force?: true | undefined;
+          asyncDeploy?: boolean;
         }
       | undefined
   ): Promise<{
