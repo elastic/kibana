@@ -9080,7 +9080,7 @@
             "label": "getPackage",
             "description": [],
             "signature": [
-              "(packageName: string, packageVersion: string, options?: { ignoreUnverified?: boolean | undefined; } | undefined) => Promise<{ paths: string[]; packageInfo: ",
+              "(packageName: string, packageVersion: string, options?: { ignoreUnverified?: boolean | undefined; useStreaming?: boolean | undefined; } | undefined) => Promise<{ paths: string[]; packageInfo: ",
               {
                 "pluginId": "fleet",
                 "scope": "common",
@@ -9090,6 +9090,8 @@
               },
               "; assetsMap: ",
               "AssetsMap",
+              "; archiveIterator: ",
+              "ArchiveIterator",
               "; verificationResult?: ",
               "PackageVerificationResult",
               " | undefined; }>"
@@ -9136,7 +9138,7 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  "{ ignoreUnverified?: boolean | undefined; } | undefined"
+                  "{ ignoreUnverified?: boolean | undefined; useStreaming?: boolean | undefined; } | undefined"
                 ],
                 "path": "x-pack/plugins/fleet/server/services/epm/package_service.ts",
                 "deprecated": false,
@@ -9906,7 +9908,7 @@
               },
               " | undefined; bumpRevision?: boolean | undefined; force?: true | undefined; authorizationHeader?: ",
               "HTTPAuthorizationHeader",
-              " | null | undefined; } | undefined) => Promise<{ created: ",
+              " | null | undefined; asyncDeploy?: boolean | undefined; } | undefined) => Promise<{ created: ",
               {
                 "pluginId": "fleet",
                 "scope": "common",
@@ -10068,6 +10070,20 @@
                     "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                     "deprecated": false,
                     "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "fleet",
+                    "id": "def-server.PackagePolicyClient.bulkCreate.$4.asyncDeploy",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "asyncDeploy",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
+                    "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               }
@@ -10114,7 +10130,7 @@
                 "section": "def-common.AuthenticatedUser",
                 "text": "AuthenticatedUser"
               },
-              " | undefined; force?: boolean | undefined; } | undefined, currentVersion?: string | undefined) => Promise<{ updatedPolicies: ",
+              " | undefined; force?: boolean | undefined; asyncDeploy?: boolean | undefined; } | undefined, currentVersion?: string | undefined) => Promise<{ updatedPolicies: ",
               {
                 "pluginId": "fleet",
                 "scope": "common",
@@ -10240,6 +10256,20 @@
                     "type": "CompoundType",
                     "tags": [],
                     "label": "force",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
+                    "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "fleet",
+                    "id": "def-server.PackagePolicyClient.bulkUpdate.$4.asyncDeploy",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "asyncDeploy",
                     "description": [],
                     "signature": [
                       "boolean | undefined"
@@ -10921,7 +10951,7 @@
                 "section": "def-common.AuthenticatedUser",
                 "text": "AuthenticatedUser"
               },
-              " | undefined; skipUnassignFromAgentPolicies?: boolean | undefined; force?: boolean | undefined; } | undefined, context?: ",
+              " | undefined; skipUnassignFromAgentPolicies?: boolean | undefined; force?: boolean | undefined; asyncDeploy?: boolean | undefined; } | undefined, context?: ",
               {
                 "pluginId": "@kbn/core-http-request-handler-context-server",
                 "scope": "server",
@@ -11060,6 +11090,20 @@
                     "type": "CompoundType",
                     "tags": [],
                     "label": "force",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
+                    "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "fleet",
+                    "id": "def-server.PackagePolicyClient.delete.$4.asyncDeploy",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "asyncDeploy",
                     "description": [],
                     "signature": [
                       "boolean | undefined"

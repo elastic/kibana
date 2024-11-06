@@ -1026,7 +1026,9 @@ module.exports = {
      */
     {
       files: ['x-pack/plugins/fleet/**/*.{js,mjs,ts,tsx}'],
+      plugins: ['testing-library'],
       rules: {
+        'testing-library/await-async-utils': 'error',
         '@typescript-eslint/consistent-type-imports': 'error',
         'import/order': [
           'warn',
@@ -1954,6 +1956,16 @@ module.exports = {
       },
     },
 
+    /**
+     * Cloud Security Team overrides
+     */
+    {
+      files: ['x-pack/plugins/cloud_security_posture/**/*.{js,mjs,ts,tsx}'],
+      plugins: ['testing-library'],
+      rules: {
+        'testing-library/await-async-utils': 'error',
+      },
+    },
     /**
      * Code inside .buildkite runs separately from everything else in CI, before bootstrap, with ts-node. It needs a few tweaks because of this.
      */

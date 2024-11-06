@@ -1023,7 +1023,7 @@ packages/kbn-zod-helpers @elastic/security-detection-rule-management
 # The #CC# prefix delineates Code Coverage,
 # used for the 'team' designator within Kibana Stats
 
-/x-pack/test/api_integration/apis/metrics_ui @elastic/obs-ux-logs-team @elastic/obs-ux-infra_services-team
+/x-pack/test/api_integration/apis/metrics_ui @elastic/obs-ux-infra_services-team
 x-pack/test_serverless/api_integration/test_suites/common/platform_security @elastic/kibana-security
 
 # Observability Entities Team (@elastic/obs-entities)
@@ -1157,7 +1157,7 @@ x-pack/test/observability_ai_assistant_api_integration @elastic/obs-ai-assistant
 x-pack/test/observability_ai_assistant_functional @elastic/obs-ai-assistant
 x-pack/test_serverless/**/test_suites/observability/ai_assistant @elastic/obs-ai-assistant
 
-# Infra Monitoring
+# Infra Obs
 ## This plugin mostly contains the codebase for the infra services, but also includes some code for the Logs UI app.
 ## To keep @elastic/obs-ux-logs-team as codeowner of the plugin manifest without requiring a review for all the other code changes
 ## the priority on codeownership will be as follow:
@@ -1188,6 +1188,7 @@ x-pack/test_serverless/**/test_suites/observability/ai_assistant @elastic/obs-ai
 /x-pack/plugins/observability_solution/infra/server/services @elastic/obs-ux-infra_services-team
 /x-pack/plugins/observability_solution/infra/server/usage @elastic/obs-ux-infra_services-team
 /x-pack/plugins/observability_solution/infra/server/utils @elastic/obs-ux-infra_services-team
+/x-pack/test/api_integration/deployment_agnostic/apis/observability/infra @elastic/obs-ux-logs-team
 
 ## Logs UI code exceptions -> @elastic/obs-ux-logs-team
 /x-pack/test_serverless/functional/page_objects/svl_oblt_onboarding_stream_log_file.ts @elastic/obs-ux-logs-team
