@@ -13,7 +13,7 @@ import { INTERNAL_BASE_STACK_CONNECTORS_API_PATH } from '../../../../common';
 import { InferenceProvider } from '../../../../common/inference/types';
 
 export const getProviders = async (http: HttpSetup): Promise<InferenceProvider[]> => {
-  return await http.get(`${INTERNAL_BASE_STACK_CONNECTORS_API_PATH}/_email_config`);
+  return await http.get(`${INTERNAL_BASE_STACK_CONNECTORS_API_PATH}/_inference/_services`);
 };
 
 export const useProviders = (http: HttpSetup, toasts: ToastsStart) => {
