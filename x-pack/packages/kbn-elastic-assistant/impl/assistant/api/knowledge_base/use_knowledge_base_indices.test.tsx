@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react-hooks';
+import { waitFor } from '@testing-library/react';
 import {
   useKnowledgeBaseIndices,
   UseKnowledgeBaseIndicesParams,
@@ -48,10 +49,8 @@ describe('useKnowledgeBaseIndices', () => {
   });
 
   it('should call api to get knowledge base indices', async () => {
-    await act(async () => {
-      const { waitForNextUpdate } = renderHook(() => useKnowledgeBaseIndices(defaultProps));
-      await waitForNextUpdate();
-
+    renderHook(() => useKnowledgeBaseIndices(defaultProps));
+    await waitFor(() => {
       expect(defaultProps.http.fetch).toHaveBeenCalledWith(
         '/internal/elastic_assistant/knowledge_base/_indices',
         {
@@ -65,20 +64,17 @@ describe('useKnowledgeBaseIndices', () => {
   });
 
   it('should return indices response', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useKnowledgeBaseIndices(defaultProps));
-      await waitForNextUpdate();
-
-      await expect(result.current).resolves.toStrictEqual(indicesResponse);
+    const { result } = renderHook(() => useKnowledgeBaseIndices(defaultProps));
+    await waitFor(() => {
+      expect(result.current).resolves.toStrictEqual(indicesResponse);
     });
   });
 
   it('should display error toast when api throws error', async () => {
     getKnowledgeBaseIndicesMock.mockRejectedValue(new Error('this is an error'));
-    await act(async () => {
-      const { waitForNextUpdate } = renderHook(() => useKnowledgeBaseIndices(defaultProps));
-      await waitForNextUpdate();
 
+    renderHook(() => useKnowledgeBaseIndices(defaultProps));
+    await waitFor(() => {
       expect(toasts.addError).toHaveBeenCalled();
     });
   });
