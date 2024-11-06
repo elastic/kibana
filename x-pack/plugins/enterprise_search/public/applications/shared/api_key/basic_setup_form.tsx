@@ -152,7 +152,7 @@ export const BasicSetupForm: React.FC<BasicSetupFormProps> = ({
               defaultMessage: 'days',
             })}
             placeholder="1"
-            defaultValue={expires}
+            value={expires || ''}
             min={1}
             onChange={(e) => onChangeExpires(e.currentTarget.value)}
             data-test-subj="create-api-key-expires-days-number-field"
