@@ -13,8 +13,8 @@ import {
   type Query,
   type TimeRange,
 } from '@kbn/es-query';
-import { NonNullable } from '../helper';
 import type { LensRuntimeState } from '../types';
+import { nonNullable } from '../../utils';
 
 export interface MergedSearchContext {
   now: number;
@@ -54,7 +54,7 @@ export function getMergedSearchContext(
         : timeRange,
     query: isOfAggregateQueryType(attributes.state.query)
       ? []
-      : [attributes.state.query].filter(NonNullable),
+      : [attributes.state.query].filter(nonNullable),
     filters: injectFilterReferences(attributes.state.filters || [], attributes.references),
     disableWarningToasts: true,
   };

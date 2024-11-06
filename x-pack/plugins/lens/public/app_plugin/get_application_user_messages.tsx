@@ -36,7 +36,7 @@ import {
   EDITOR_UNKNOWN_DATASOURCE_TYPE,
   EDITOR_UNKNOWN_VIS_TYPE,
 } from '../user_messages_ids';
-import { NonNullable } from '../react_embeddable/helper';
+import { nonNullable } from '../utils';
 import type { LensPublicCallbacks } from '../react_embeddable/types';
 
 export interface UserMessageGetterProps {
@@ -231,7 +231,7 @@ export const filterAndSortUserMessages = (
   { dimensionId, severity }: UserMessageFilters = {}
 ) => {
   const locationIds = new Set(
-    (Array.isArray(locationId) ? locationId : [locationId]).filter(NonNullable)
+    (Array.isArray(locationId) ? locationId : [locationId]).filter(nonNullable)
   );
 
   const filteredMessages = userMessages.filter((message) => {
