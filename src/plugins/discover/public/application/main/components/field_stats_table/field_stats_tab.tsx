@@ -14,7 +14,6 @@ import { useAdditionalFieldGroups } from '../../hooks/sidebar/use_additional_fie
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { FieldStatisticsTable, type FieldStatisticsTableProps } from './field_stats_table';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
-import { FieldStatsUnavailableMessage } from './field_stats_unavailable';
 
 export const FieldStatisticsTab: React.FC<Omit<FieldStatisticsTableProps, 'query' | 'filters'>> =
   React.memo((props) => {
@@ -27,7 +26,7 @@ export const FieldStatisticsTab: React.FC<Omit<FieldStatisticsTableProps, 'query
     const { euiTheme } = useEuiTheme();
 
     if (!services.dataVisualizer) return null;
-    if (isEsql) return <FieldStatsUnavailableMessage />;
+
     return (
       <FieldStatisticsTable
         dataView={props.dataView}

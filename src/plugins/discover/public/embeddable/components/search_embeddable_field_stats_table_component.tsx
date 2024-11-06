@@ -18,7 +18,7 @@ import { useEuiTheme } from '@elastic/eui';
 import { FieldStatisticsTable } from '../../application/main/components/field_stats_table';
 import { isEsqlMode } from '../initialize_fetch';
 import type { SearchEmbeddableApi, SearchEmbeddableStateManager } from '../types';
-import { FieldStatsUnavailableMessage } from '../../application/main/components/field_stats_table/field_stats_unavailable';
+import { useDiscoverServices } from '../../hooks/use_discover_services';
 
 interface SavedSearchEmbeddableComponentProps {
   api: SearchEmbeddableApi & {
@@ -41,8 +41,10 @@ export function SearchEmbeddablFieldStatsTableComponent({
   );
   const { euiTheme } = useEuiTheme();
   const isEsql = useMemo(() => isEsqlMode(savedSearch), [savedSearch]);
+  const services = useDiscoverServices();
+
   if (isEsql) {
-    return <FieldStatsUnavailableMessage />;
+    return <services.dataVisualizer.FieldStatsUnavailableMessage />;
   }
 
   return (

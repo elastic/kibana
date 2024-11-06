@@ -21,7 +21,6 @@ import type {
   DataVisualizerStartDependencies,
 } from './application/common/types/data_visualizer_plugin';
 import { registerEmbeddables } from './application/index_data_visualizer/embeddables/field_stats';
-import { getReasonIfFieldStatsUnavailableForQuery } from './application/index_data_visualizer/utils/get_reason_fieldstats_unavailable_for_esql_query';
 export type DataVisualizerPluginSetup = ReturnType<DataVisualizerPlugin['setup']>;
 export type DataVisualizerPluginStart = ReturnType<DataVisualizerPlugin['start']>;
 
@@ -78,7 +77,12 @@ export class DataVisualizerPlugin
       getIndexDataVisualizerComponent,
       getDataDriftComponent,
       getMaxBytesFormatted,
-      getReasonIfFieldStatsUnavailableForQuery,
+      FieldStatsUnavailableMessage: dynamic(
+        async () =>
+          import(
+            './application/index_data_visualizer/embeddables/grid_embeddable/embeddable_error_msg'
+          )
+      ),
       FieldStatisticsTable: dynamic(
         async () =>
           import(

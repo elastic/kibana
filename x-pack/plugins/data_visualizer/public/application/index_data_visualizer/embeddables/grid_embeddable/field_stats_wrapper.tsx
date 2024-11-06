@@ -23,7 +23,7 @@ import type {
   FieldStatisticTableEmbeddableProps,
   ESQLDataVisualizerGridEmbeddableState,
 } from './types';
-import { FieldStatsUnavailableMessage } from './embeddable_error_msg';
+import FieldStatsUnavailableMessage from './embeddable_error_msg';
 
 const EmbeddableESQLFieldStatsTableWrapper = dynamic(
   () => import('./embeddable_esql_field_stats_table')

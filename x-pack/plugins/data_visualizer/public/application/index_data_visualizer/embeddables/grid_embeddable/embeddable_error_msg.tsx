@@ -9,7 +9,6 @@ import { useEuiTheme, EuiFlexItem } from '@elastic/eui';
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import type { FieldStatisticTableEmbeddableProps } from './types';
 const FIELD_STATS_UNAVAILABLE_TITLE = i18n.translate(
   'xpack.dataVisualizer.fieldStats.unavailableTitle',
   {
@@ -17,13 +16,15 @@ const FIELD_STATS_UNAVAILABLE_TITLE = i18n.translate(
   }
 );
 
-export const FieldStatsUnavailableMessage = ({
+const FieldStatsUnavailableMessage = ({
   id,
-  content,
   title = FIELD_STATS_UNAVAILABLE_TITLE,
-}: Pick<FieldStatisticTableEmbeddableProps, 'id'> & { content: string; title?: string }) => {
+}: {
+  id?: string;
+  content: string;
+  title?: string;
+}) => {
   const { euiTheme } = useEuiTheme();
-  if (!content) return null;
 
   return (
     <EuiFlexItem
@@ -37,3 +38,7 @@ export const FieldStatsUnavailableMessage = ({
     </EuiFlexItem>
   );
 };
+
+// Default export for lazy loading
+// eslint-disable-next-line import/no-default-export
+export default FieldStatsUnavailableMessage;
