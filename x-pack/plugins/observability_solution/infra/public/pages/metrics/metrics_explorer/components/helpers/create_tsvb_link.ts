@@ -114,7 +114,7 @@ export const createFilterFromOptions = (
     filters.push(options.filterQuery);
   }
   if (options.groupBy) {
-    const id = series.id.replace('"', '\\"');
+    const id = series.id.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
     const groupByFilters = Array.isArray(options.groupBy)
       ? options.groupBy
           .map((field, index) => {
