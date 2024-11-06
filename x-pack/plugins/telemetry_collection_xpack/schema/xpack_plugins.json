@@ -4441,6 +4441,3573 @@
                   }
                 }
               }
+            },
+            "otlp": {
+              "properties": {
+                "agent": {
+                  "properties": {
+                    "version": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "An array of the top 3 agent versions within the last day"
+                        }
+                      }
+                    },
+                    "activation_method": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "An array of the top 3 agent activation methods within the last day"
+                        }
+                      }
+                    }
+                  }
+                },
+                "service": {
+                  "properties": {
+                    "framework": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service framework name  within the last day"
+                            }
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service framework version within the last day"
+                            }
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service framework and version sorted by doc count"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "language": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service language name within the last day"
+                            }
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service language version within the last day"
+                            }
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service language name and version sorted by doc count."
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "runtime": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service runtime name within the last day"
+                            }
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service runtime version within the last day"
+                            }
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service runtime name and version sorted by doc count."
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "opentelemetry": {
+              "properties": {
+                "agent": {
+                  "properties": {
+                    "version": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "An array of the top 3 agent versions within the last day"
+                        }
+                      }
+                    },
+                    "activation_method": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "An array of the top 3 agent activation methods within the last day"
+                        }
+                      }
+                    }
+                  }
+                },
+                "service": {
+                  "properties": {
+                    "framework": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service framework name  within the last day"
+                            }
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service framework version within the last day"
+                            }
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service framework and version sorted by doc count"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "language": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service language name within the last day"
+                            }
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service language version within the last day"
+                            }
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service language name and version sorted by doc count."
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "runtime": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service runtime name within the last day"
+                            }
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service runtime version within the last day"
+                            }
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service runtime name and version sorted by doc count."
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "opentelemetry/cpp": {
+              "properties": {
+                "agent": {
+                  "properties": {
+                    "version": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "An array of the top 3 agent versions within the last day"
+                        }
+                      }
+                    },
+                    "activation_method": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "An array of the top 3 agent activation methods within the last day"
+                        }
+                      }
+                    }
+                  }
+                },
+                "service": {
+                  "properties": {
+                    "framework": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service framework name  within the last day"
+                            }
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service framework version within the last day"
+                            }
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service framework and version sorted by doc count"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "language": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service language name within the last day"
+                            }
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service language version within the last day"
+                            }
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service language name and version sorted by doc count."
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "runtime": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service runtime name within the last day"
+                            }
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service runtime version within the last day"
+                            }
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service runtime name and version sorted by doc count."
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "opentelemetry/dotnet": {
+              "properties": {
+                "agent": {
+                  "properties": {
+                    "version": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "An array of the top 3 agent versions within the last day"
+                        }
+                      }
+                    },
+                    "activation_method": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "An array of the top 3 agent activation methods within the last day"
+                        }
+                      }
+                    }
+                  }
+                },
+                "service": {
+                  "properties": {
+                    "framework": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service framework name  within the last day"
+                            }
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service framework version within the last day"
+                            }
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service framework and version sorted by doc count"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "language": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service language name within the last day"
+                            }
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service language version within the last day"
+                            }
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service language name and version sorted by doc count."
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "runtime": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service runtime name within the last day"
+                            }
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service runtime version within the last day"
+                            }
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service runtime name and version sorted by doc count."
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "opentelemetry/erlang": {
+              "properties": {
+                "agent": {
+                  "properties": {
+                    "version": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "An array of the top 3 agent versions within the last day"
+                        }
+                      }
+                    },
+                    "activation_method": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "An array of the top 3 agent activation methods within the last day"
+                        }
+                      }
+                    }
+                  }
+                },
+                "service": {
+                  "properties": {
+                    "framework": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service framework name  within the last day"
+                            }
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service framework version within the last day"
+                            }
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service framework and version sorted by doc count"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "language": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service language name within the last day"
+                            }
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service language version within the last day"
+                            }
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service language name and version sorted by doc count."
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "runtime": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service runtime name within the last day"
+                            }
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service runtime version within the last day"
+                            }
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service runtime name and version sorted by doc count."
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "opentelemetry/go": {
+              "properties": {
+                "agent": {
+                  "properties": {
+                    "version": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "An array of the top 3 agent versions within the last day"
+                        }
+                      }
+                    },
+                    "activation_method": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "An array of the top 3 agent activation methods within the last day"
+                        }
+                      }
+                    }
+                  }
+                },
+                "service": {
+                  "properties": {
+                    "framework": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service framework name  within the last day"
+                            }
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service framework version within the last day"
+                            }
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service framework and version sorted by doc count"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "language": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service language name within the last day"
+                            }
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service language version within the last day"
+                            }
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service language name and version sorted by doc count."
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "runtime": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service runtime name within the last day"
+                            }
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service runtime version within the last day"
+                            }
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service runtime name and version sorted by doc count."
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "opentelemetry/java": {
+              "properties": {
+                "agent": {
+                  "properties": {
+                    "version": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "An array of the top 3 agent versions within the last day"
+                        }
+                      }
+                    },
+                    "activation_method": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "An array of the top 3 agent activation methods within the last day"
+                        }
+                      }
+                    }
+                  }
+                },
+                "service": {
+                  "properties": {
+                    "framework": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service framework name  within the last day"
+                            }
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service framework version within the last day"
+                            }
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service framework and version sorted by doc count"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "language": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service language name within the last day"
+                            }
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service language version within the last day"
+                            }
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service language name and version sorted by doc count."
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "runtime": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service runtime name within the last day"
+                            }
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service runtime version within the last day"
+                            }
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service runtime name and version sorted by doc count."
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "opentelemetry/nodejs": {
+              "properties": {
+                "agent": {
+                  "properties": {
+                    "version": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "An array of the top 3 agent versions within the last day"
+                        }
+                      }
+                    },
+                    "activation_method": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "An array of the top 3 agent activation methods within the last day"
+                        }
+                      }
+                    }
+                  }
+                },
+                "service": {
+                  "properties": {
+                    "framework": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service framework name  within the last day"
+                            }
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service framework version within the last day"
+                            }
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service framework and version sorted by doc count"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "language": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service language name within the last day"
+                            }
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service language version within the last day"
+                            }
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service language name and version sorted by doc count."
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "runtime": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service runtime name within the last day"
+                            }
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service runtime version within the last day"
+                            }
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service runtime name and version sorted by doc count."
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "opentelemetry/php": {
+              "properties": {
+                "agent": {
+                  "properties": {
+                    "version": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "An array of the top 3 agent versions within the last day"
+                        }
+                      }
+                    },
+                    "activation_method": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "An array of the top 3 agent activation methods within the last day"
+                        }
+                      }
+                    }
+                  }
+                },
+                "service": {
+                  "properties": {
+                    "framework": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service framework name  within the last day"
+                            }
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service framework version within the last day"
+                            }
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service framework and version sorted by doc count"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "language": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service language name within the last day"
+                            }
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service language version within the last day"
+                            }
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service language name and version sorted by doc count."
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "runtime": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service runtime name within the last day"
+                            }
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service runtime version within the last day"
+                            }
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service runtime name and version sorted by doc count."
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "opentelemetry/python": {
+              "properties": {
+                "agent": {
+                  "properties": {
+                    "version": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "An array of the top 3 agent versions within the last day"
+                        }
+                      }
+                    },
+                    "activation_method": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "An array of the top 3 agent activation methods within the last day"
+                        }
+                      }
+                    }
+                  }
+                },
+                "service": {
+                  "properties": {
+                    "framework": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service framework name  within the last day"
+                            }
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service framework version within the last day"
+                            }
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service framework and version sorted by doc count"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "language": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service language name within the last day"
+                            }
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service language version within the last day"
+                            }
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service language name and version sorted by doc count."
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "runtime": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service runtime name within the last day"
+                            }
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service runtime version within the last day"
+                            }
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service runtime name and version sorted by doc count."
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "opentelemetry/ruby": {
+              "properties": {
+                "agent": {
+                  "properties": {
+                    "version": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "An array of the top 3 agent versions within the last day"
+                        }
+                      }
+                    },
+                    "activation_method": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "An array of the top 3 agent activation methods within the last day"
+                        }
+                      }
+                    }
+                  }
+                },
+                "service": {
+                  "properties": {
+                    "framework": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service framework name  within the last day"
+                            }
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service framework version within the last day"
+                            }
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service framework and version sorted by doc count"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "language": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service language name within the last day"
+                            }
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service language version within the last day"
+                            }
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service language name and version sorted by doc count."
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "runtime": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service runtime name within the last day"
+                            }
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service runtime version within the last day"
+                            }
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service runtime name and version sorted by doc count."
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "opentelemetry/rust": {
+              "properties": {
+                "agent": {
+                  "properties": {
+                    "version": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "An array of the top 3 agent versions within the last day"
+                        }
+                      }
+                    },
+                    "activation_method": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "An array of the top 3 agent activation methods within the last day"
+                        }
+                      }
+                    }
+                  }
+                },
+                "service": {
+                  "properties": {
+                    "framework": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service framework name  within the last day"
+                            }
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service framework version within the last day"
+                            }
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service framework and version sorted by doc count"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "language": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service language name within the last day"
+                            }
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service language version within the last day"
+                            }
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service language name and version sorted by doc count."
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "runtime": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service runtime name within the last day"
+                            }
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service runtime version within the last day"
+                            }
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service runtime name and version sorted by doc count."
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "opentelemetry/swift": {
+              "properties": {
+                "agent": {
+                  "properties": {
+                    "version": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "An array of the top 3 agent versions within the last day"
+                        }
+                      }
+                    },
+                    "activation_method": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "An array of the top 3 agent activation methods within the last day"
+                        }
+                      }
+                    }
+                  }
+                },
+                "service": {
+                  "properties": {
+                    "framework": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service framework name  within the last day"
+                            }
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service framework version within the last day"
+                            }
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service framework and version sorted by doc count"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "language": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service language name within the last day"
+                            }
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service language version within the last day"
+                            }
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service language name and version sorted by doc count."
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "runtime": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service runtime name within the last day"
+                            }
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service runtime version within the last day"
+                            }
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service runtime name and version sorted by doc count."
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "opentelemetry/android": {
+              "properties": {
+                "agent": {
+                  "properties": {
+                    "version": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "An array of the top 3 agent versions within the last day"
+                        }
+                      }
+                    },
+                    "activation_method": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "An array of the top 3 agent activation methods within the last day"
+                        }
+                      }
+                    }
+                  }
+                },
+                "service": {
+                  "properties": {
+                    "framework": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service framework name  within the last day"
+                            }
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service framework version within the last day"
+                            }
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service framework and version sorted by doc count"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "language": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service language name within the last day"
+                            }
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service language version within the last day"
+                            }
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service language name and version sorted by doc count."
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "runtime": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service runtime name within the last day"
+                            }
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service runtime version within the last day"
+                            }
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service runtime name and version sorted by doc count."
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "opentelemetry/webjs": {
+              "properties": {
+                "agent": {
+                  "properties": {
+                    "version": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "An array of the top 3 agent versions within the last day"
+                        }
+                      }
+                    },
+                    "activation_method": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "An array of the top 3 agent activation methods within the last day"
+                        }
+                      }
+                    }
+                  }
+                },
+                "service": {
+                  "properties": {
+                    "framework": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service framework name  within the last day"
+                            }
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service framework version within the last day"
+                            }
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service framework and version sorted by doc count"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "language": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service language name within the last day"
+                            }
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service language version within the last day"
+                            }
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service language name and version sorted by doc count."
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "runtime": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service runtime name within the last day"
+                            }
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service runtime version within the last day"
+                            }
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service runtime name and version sorted by doc count."
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "otlp/cpp": {
+              "properties": {
+                "agent": {
+                  "properties": {
+                    "version": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "An array of the top 3 agent versions within the last day"
+                        }
+                      }
+                    },
+                    "activation_method": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "An array of the top 3 agent activation methods within the last day"
+                        }
+                      }
+                    }
+                  }
+                },
+                "service": {
+                  "properties": {
+                    "framework": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service framework name  within the last day"
+                            }
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service framework version within the last day"
+                            }
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service framework and version sorted by doc count"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "language": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service language name within the last day"
+                            }
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service language version within the last day"
+                            }
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service language name and version sorted by doc count."
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "runtime": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service runtime name within the last day"
+                            }
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service runtime version within the last day"
+                            }
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service runtime name and version sorted by doc count."
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "otlp/dotnet": {
+              "properties": {
+                "agent": {
+                  "properties": {
+                    "version": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "An array of the top 3 agent versions within the last day"
+                        }
+                      }
+                    },
+                    "activation_method": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "An array of the top 3 agent activation methods within the last day"
+                        }
+                      }
+                    }
+                  }
+                },
+                "service": {
+                  "properties": {
+                    "framework": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service framework name  within the last day"
+                            }
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service framework version within the last day"
+                            }
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service framework and version sorted by doc count"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "language": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service language name within the last day"
+                            }
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service language version within the last day"
+                            }
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service language name and version sorted by doc count."
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "runtime": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service runtime name within the last day"
+                            }
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service runtime version within the last day"
+                            }
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service runtime name and version sorted by doc count."
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "otlp/erlang": {
+              "properties": {
+                "agent": {
+                  "properties": {
+                    "version": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "An array of the top 3 agent versions within the last day"
+                        }
+                      }
+                    },
+                    "activation_method": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "An array of the top 3 agent activation methods within the last day"
+                        }
+                      }
+                    }
+                  }
+                },
+                "service": {
+                  "properties": {
+                    "framework": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service framework name  within the last day"
+                            }
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service framework version within the last day"
+                            }
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service framework and version sorted by doc count"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "language": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service language name within the last day"
+                            }
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service language version within the last day"
+                            }
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service language name and version sorted by doc count."
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "runtime": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service runtime name within the last day"
+                            }
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service runtime version within the last day"
+                            }
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service runtime name and version sorted by doc count."
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "otlp/go": {
+              "properties": {
+                "agent": {
+                  "properties": {
+                    "version": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "An array of the top 3 agent versions within the last day"
+                        }
+                      }
+                    },
+                    "activation_method": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "An array of the top 3 agent activation methods within the last day"
+                        }
+                      }
+                    }
+                  }
+                },
+                "service": {
+                  "properties": {
+                    "framework": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service framework name  within the last day"
+                            }
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service framework version within the last day"
+                            }
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service framework and version sorted by doc count"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "language": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service language name within the last day"
+                            }
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service language version within the last day"
+                            }
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service language name and version sorted by doc count."
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "runtime": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service runtime name within the last day"
+                            }
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service runtime version within the last day"
+                            }
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service runtime name and version sorted by doc count."
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "otlp/java": {
+              "properties": {
+                "agent": {
+                  "properties": {
+                    "version": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "An array of the top 3 agent versions within the last day"
+                        }
+                      }
+                    },
+                    "activation_method": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "An array of the top 3 agent activation methods within the last day"
+                        }
+                      }
+                    }
+                  }
+                },
+                "service": {
+                  "properties": {
+                    "framework": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service framework name  within the last day"
+                            }
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service framework version within the last day"
+                            }
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service framework and version sorted by doc count"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "language": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service language name within the last day"
+                            }
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service language version within the last day"
+                            }
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service language name and version sorted by doc count."
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "runtime": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service runtime name within the last day"
+                            }
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service runtime version within the last day"
+                            }
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service runtime name and version sorted by doc count."
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "otlp/nodejs": {
+              "properties": {
+                "agent": {
+                  "properties": {
+                    "version": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "An array of the top 3 agent versions within the last day"
+                        }
+                      }
+                    },
+                    "activation_method": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "An array of the top 3 agent activation methods within the last day"
+                        }
+                      }
+                    }
+                  }
+                },
+                "service": {
+                  "properties": {
+                    "framework": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service framework name  within the last day"
+                            }
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service framework version within the last day"
+                            }
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service framework and version sorted by doc count"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "language": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service language name within the last day"
+                            }
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service language version within the last day"
+                            }
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service language name and version sorted by doc count."
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "runtime": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service runtime name within the last day"
+                            }
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service runtime version within the last day"
+                            }
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service runtime name and version sorted by doc count."
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "otlp/php": {
+              "properties": {
+                "agent": {
+                  "properties": {
+                    "version": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "An array of the top 3 agent versions within the last day"
+                        }
+                      }
+                    },
+                    "activation_method": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "An array of the top 3 agent activation methods within the last day"
+                        }
+                      }
+                    }
+                  }
+                },
+                "service": {
+                  "properties": {
+                    "framework": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service framework name  within the last day"
+                            }
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service framework version within the last day"
+                            }
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service framework and version sorted by doc count"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "language": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service language name within the last day"
+                            }
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service language version within the last day"
+                            }
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service language name and version sorted by doc count."
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "runtime": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service runtime name within the last day"
+                            }
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service runtime version within the last day"
+                            }
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service runtime name and version sorted by doc count."
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "otlp/python": {
+              "properties": {
+                "agent": {
+                  "properties": {
+                    "version": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "An array of the top 3 agent versions within the last day"
+                        }
+                      }
+                    },
+                    "activation_method": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "An array of the top 3 agent activation methods within the last day"
+                        }
+                      }
+                    }
+                  }
+                },
+                "service": {
+                  "properties": {
+                    "framework": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service framework name  within the last day"
+                            }
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service framework version within the last day"
+                            }
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service framework and version sorted by doc count"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "language": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service language name within the last day"
+                            }
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service language version within the last day"
+                            }
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service language name and version sorted by doc count."
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "runtime": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service runtime name within the last day"
+                            }
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service runtime version within the last day"
+                            }
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service runtime name and version sorted by doc count."
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "otlp/ruby": {
+              "properties": {
+                "agent": {
+                  "properties": {
+                    "version": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "An array of the top 3 agent versions within the last day"
+                        }
+                      }
+                    },
+                    "activation_method": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "An array of the top 3 agent activation methods within the last day"
+                        }
+                      }
+                    }
+                  }
+                },
+                "service": {
+                  "properties": {
+                    "framework": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service framework name  within the last day"
+                            }
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service framework version within the last day"
+                            }
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service framework and version sorted by doc count"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "language": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service language name within the last day"
+                            }
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service language version within the last day"
+                            }
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service language name and version sorted by doc count."
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "runtime": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service runtime name within the last day"
+                            }
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service runtime version within the last day"
+                            }
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service runtime name and version sorted by doc count."
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "otlp/rust": {
+              "properties": {
+                "agent": {
+                  "properties": {
+                    "version": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "An array of the top 3 agent versions within the last day"
+                        }
+                      }
+                    },
+                    "activation_method": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "An array of the top 3 agent activation methods within the last day"
+                        }
+                      }
+                    }
+                  }
+                },
+                "service": {
+                  "properties": {
+                    "framework": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service framework name  within the last day"
+                            }
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service framework version within the last day"
+                            }
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service framework and version sorted by doc count"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "language": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service language name within the last day"
+                            }
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service language version within the last day"
+                            }
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service language name and version sorted by doc count."
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "runtime": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service runtime name within the last day"
+                            }
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service runtime version within the last day"
+                            }
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service runtime name and version sorted by doc count."
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "otlp/swift": {
+              "properties": {
+                "agent": {
+                  "properties": {
+                    "version": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "An array of the top 3 agent versions within the last day"
+                        }
+                      }
+                    },
+                    "activation_method": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "An array of the top 3 agent activation methods within the last day"
+                        }
+                      }
+                    }
+                  }
+                },
+                "service": {
+                  "properties": {
+                    "framework": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service framework name  within the last day"
+                            }
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service framework version within the last day"
+                            }
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service framework and version sorted by doc count"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "language": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service language name within the last day"
+                            }
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service language version within the last day"
+                            }
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service language name and version sorted by doc count."
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "runtime": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service runtime name within the last day"
+                            }
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service runtime version within the last day"
+                            }
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service runtime name and version sorted by doc count."
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "otlp/android": {
+              "properties": {
+                "agent": {
+                  "properties": {
+                    "version": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "An array of the top 3 agent versions within the last day"
+                        }
+                      }
+                    },
+                    "activation_method": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "An array of the top 3 agent activation methods within the last day"
+                        }
+                      }
+                    }
+                  }
+                },
+                "service": {
+                  "properties": {
+                    "framework": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service framework name  within the last day"
+                            }
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service framework version within the last day"
+                            }
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service framework and version sorted by doc count"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "language": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service language name within the last day"
+                            }
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service language version within the last day"
+                            }
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service language name and version sorted by doc count."
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "runtime": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service runtime name within the last day"
+                            }
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service runtime version within the last day"
+                            }
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service runtime name and version sorted by doc count."
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "otlp/webjs": {
+              "properties": {
+                "agent": {
+                  "properties": {
+                    "version": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "An array of the top 3 agent versions within the last day"
+                        }
+                      }
+                    },
+                    "activation_method": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "An array of the top 3 agent activation methods within the last day"
+                        }
+                      }
+                    }
+                  }
+                },
+                "service": {
+                  "properties": {
+                    "framework": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service framework name  within the last day"
+                            }
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service framework version within the last day"
+                            }
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service framework and version sorted by doc count"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "language": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service language name within the last day"
+                            }
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service language version within the last day"
+                            }
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service language name and version sorted by doc count."
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "runtime": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service runtime name within the last day"
+                            }
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service runtime version within the last day"
+                            }
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service runtime name and version sorted by doc count."
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "ios/swift": {
+              "properties": {
+                "agent": {
+                  "properties": {
+                    "version": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "An array of the top 3 agent versions within the last day"
+                        }
+                      }
+                    },
+                    "activation_method": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "An array of the top 3 agent activation methods within the last day"
+                        }
+                      }
+                    }
+                  }
+                },
+                "service": {
+                  "properties": {
+                    "framework": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service framework name  within the last day"
+                            }
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service framework version within the last day"
+                            }
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service framework and version sorted by doc count"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "language": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service language name within the last day"
+                            }
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service language version within the last day"
+                            }
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service language name and version sorted by doc count."
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "runtime": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service runtime name within the last day"
+                            }
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service runtime version within the last day"
+                            }
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service runtime name and version sorted by doc count."
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
             }
           }
         },

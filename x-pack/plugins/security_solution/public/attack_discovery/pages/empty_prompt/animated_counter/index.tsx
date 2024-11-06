@@ -52,7 +52,7 @@ const AnimatedCounterComponent: React.FC<Props> = ({ animationDurationMs = 1000 
       css={css`
         height: 32px;
         margin-right: ${euiTheme.size.xs};
-        width: ${count < 100 ? 40 : 53}px;
+        width: ${count < 100 ? 40 : 60}px;
       `}
       data-test-subj="animatedCounter"
       ref={d3Ref}

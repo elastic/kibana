@@ -7,12 +7,13 @@
 
 import { EuiFlexGroup, EuiPageHeaderProps } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { entityCentricExperience } from '@kbn/observability-plugin/common';
 import { ObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
 import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
 import React, { useContext } from 'react';
 import { useLocation } from 'react-router-dom';
 import { FeatureFeedbackButton } from '@kbn/observability-shared-plugin/public';
+import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
+import { isLogsSignal } from '../../../../utils/get_signal_type';
 import { useLocalStorage } from '../../../../hooks/use_local_storage';
 import { useDefaultAiAssistantStarterPromptsForAPM } from '../../../../hooks/use_default_ai_assistant_starter_prompts_for_apm';
 import { KibanaEnvironmentContext } from '../../../../context/kibana_environment_context/kibana_environment_context';
@@ -71,12 +72,8 @@ export function ApmMainTemplate({
   const { http, docLinks, observabilityShared, application } = services;
   const { kibanaVersion, isCloudEnv, isServerlessEnv } = kibanaEnvironment;
   const basePath = http?.basePath.get();
-  const { config, core } = useApmPluginContext();
-  const isEntityCentricExperienceSettingEnabled = core.uiSettings.get<boolean>(
-    entityCentricExperience,
-    true
-  );
-
+  const { config } = useApmPluginContext();
+  const { serviceEntitySummary } = useApmServiceContext();
   const { isEntityCentricExperienceEnabled } = useEntityCentricExperienceSetting();
 
   const ObservabilityPageTemplate = observabilityShared.navigation.PageTemplate;
@@ -97,9 +94,14 @@ export function ApmMainTemplate({
     [application?.capabilities.savedObjectsManagement.edit]
   );
 
-  const shouldBypassNoDataScreen = bypassNoDataScreenPaths.some((path) =>
-    location.pathname.includes(path)
-  );
+  const hasLogsData = serviceEntitySummary?.dataStreamTypes
+    ? serviceEntitySummary?.dataStreamTypes?.length > 0 &&
+      isLogsSignal(serviceEntitySummary.dataStreamTypes)
+    : false;
+
+  const shouldBypassNoDataScreen =
+    bypassNoDataScreenPaths.some((path) => location.pathname.includes(path)) ||
+    (isEntityCentricExperienceEnabled && hasLogsData);
 
   const { data: fleetApmPoliciesData, status: fleetApmPoliciesStatus } = useFetcher(
     (callApmApi) => {
@@ -158,7 +160,7 @@ export function ApmMainTemplate({
 
   const showEntitiesInventoryCallout =
     !dismissedEntitiesInventoryCallout &&
-    isEntityCentricExperienceSettingEnabled &&
+    isEntityCentricExperienceEnabled &&
     selectedNavButton !== undefined;
 
   return (
@@ -174,7 +176,7 @@ export function ApmMainTemplate({
             <EuiFlexGroup direction="column">
               {showEntitiesInventoryCallout ? (
                 <EntitiesInventoryCallout
-                  onDissmiss={() => {
+                  onDismiss={() => {
                     setdismissedEntitiesInventoryCallout(true);
                   }}
                 />

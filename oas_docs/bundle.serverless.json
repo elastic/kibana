@@ -344,534 +344,10 @@
   },
   "openapi": "3.0.0",
   "paths": {
-    "/api/actions": {
-      "get": {
-        "deprecated": true,
-        "operationId": "%2Fapi%2Factions#0",
-        "parameters": [
-          {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {},
-        "summary": "Get all connectors",
-        "tags": [
-          "connectors"
-        ]
-      }
-    },
-    "/api/actions/action": {
-      "post": {
-        "deprecated": true,
-        "operationId": "%2Fapi%2Factions%2Faction#0",
-        "parameters": [
-          {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
-            "description": "A required header to protect against CSRF attacks",
-            "in": "header",
-            "name": "kbn-xsrf",
-            "required": true,
-            "schema": {
-              "example": "true",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json; Elastic-Api-Version=2023-10-31": {
-              "schema": {
-                "additionalProperties": false,
-                "properties": {
-                  "actionTypeId": {
-                    "description": "The connector type identifier.",
-                    "type": "string"
-                  },
-                  "config": {
-                    "additionalProperties": {},
-                    "default": {},
-                    "type": "object"
-                  },
-                  "name": {
-                    "description": "The display name for the connector.",
-                    "type": "string"
-                  },
-                  "secrets": {
-                    "additionalProperties": {},
-                    "default": {},
-                    "type": "object"
-                  }
-                },
-                "required": [
-                  "name",
-                  "actionTypeId"
-                ],
-                "type": "object"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
-                "schema": {
-                  "additionalProperties": false,
-                  "properties": {
-                    "config": {
-                      "additionalProperties": {},
-                      "type": "object"
-                    },
-                    "connector_type_id": {
-                      "description": "The connector type identifier.",
-                      "type": "string"
-                    },
-                    "id": {
-                      "description": "The identifier for the connector.",
-                      "type": "string"
-                    },
-                    "is_deprecated": {
-                      "description": "Indicates whether the connector is deprecated.",
-                      "type": "boolean"
-                    },
-                    "is_missing_secrets": {
-                      "description": "Indicates whether the connector is missing secrets.",
-                      "type": "boolean"
-                    },
-                    "is_preconfigured": {
-                      "description": "Indicates whether the connector is preconfigured. If true, the `config` and `is_missing_secrets` properties are omitted from the response. ",
-                      "type": "boolean"
-                    },
-                    "is_system_action": {
-                      "description": "Indicates whether the connector is used for system actions.",
-                      "type": "boolean"
-                    },
-                    "name": {
-                      "description": " The name of the rule.",
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "id",
-                    "name",
-                    "connector_type_id",
-                    "is_preconfigured",
-                    "is_deprecated",
-                    "is_system_action"
-                  ],
-                  "type": "object"
-                }
-              }
-            },
-            "description": "Indicates a successful call."
-          }
-        },
-        "summary": "Create a connector",
-        "tags": [
-          "connectors"
-        ]
-      }
-    },
-    "/api/actions/action/{id}": {
-      "delete": {
-        "deprecated": true,
-        "description": "WARNING: When you delete a connector, it cannot be recovered.",
-        "operationId": "%2Fapi%2Factions%2Faction%2F%7Bid%7D#0",
-        "parameters": [
-          {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
-            "description": "A required header to protect against CSRF attacks",
-            "in": "header",
-            "name": "kbn-xsrf",
-            "required": true,
-            "schema": {
-              "example": "true",
-              "type": "string"
-            }
-          },
-          {
-            "description": "An identifier for the connector.",
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "Indicates a successful call."
-          }
-        },
-        "summary": "Delete a connector",
-        "tags": [
-          "connectors"
-        ]
-      },
-      "get": {
-        "deprecated": true,
-        "operationId": "%2Fapi%2Factions%2Faction%2F%7Bid%7D#1",
-        "parameters": [
-          {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
-            "description": "An identifier for the connector.",
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
-                "schema": {
-                  "additionalProperties": false,
-                  "properties": {
-                    "config": {
-                      "additionalProperties": {},
-                      "type": "object"
-                    },
-                    "connector_type_id": {
-                      "description": "The connector type identifier.",
-                      "type": "string"
-                    },
-                    "id": {
-                      "description": "The identifier for the connector.",
-                      "type": "string"
-                    },
-                    "is_deprecated": {
-                      "description": "Indicates whether the connector is deprecated.",
-                      "type": "boolean"
-                    },
-                    "is_missing_secrets": {
-                      "description": "Indicates whether the connector is missing secrets.",
-                      "type": "boolean"
-                    },
-                    "is_preconfigured": {
-                      "description": "Indicates whether the connector is preconfigured. If true, the `config` and `is_missing_secrets` properties are omitted from the response. ",
-                      "type": "boolean"
-                    },
-                    "is_system_action": {
-                      "description": "Indicates whether the connector is used for system actions.",
-                      "type": "boolean"
-                    },
-                    "name": {
-                      "description": " The name of the rule.",
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "id",
-                    "name",
-                    "connector_type_id",
-                    "is_preconfigured",
-                    "is_deprecated",
-                    "is_system_action"
-                  ],
-                  "type": "object"
-                }
-              }
-            },
-            "description": "Indicates a successful call."
-          }
-        },
-        "summary": "Get connector information",
-        "tags": [
-          "connectors"
-        ]
-      },
-      "put": {
-        "deprecated": true,
-        "operationId": "%2Fapi%2Factions%2Faction%2F%7Bid%7D#2",
-        "parameters": [
-          {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
-            "description": "A required header to protect against CSRF attacks",
-            "in": "header",
-            "name": "kbn-xsrf",
-            "required": true,
-            "schema": {
-              "example": "true",
-              "type": "string"
-            }
-          },
-          {
-            "description": "An identifier for the connector.",
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json; Elastic-Api-Version=2023-10-31": {
-              "schema": {
-                "additionalProperties": false,
-                "properties": {
-                  "config": {
-                    "additionalProperties": {},
-                    "default": {},
-                    "type": "object"
-                  },
-                  "name": {
-                    "type": "string"
-                  },
-                  "secrets": {
-                    "additionalProperties": {},
-                    "default": {},
-                    "type": "object"
-                  }
-                },
-                "required": [
-                  "name"
-                ],
-                "type": "object"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
-                "schema": {
-                  "additionalProperties": false,
-                  "properties": {
-                    "config": {
-                      "additionalProperties": {},
-                      "type": "object"
-                    },
-                    "connector_type_id": {
-                      "description": "The connector type identifier.",
-                      "type": "string"
-                    },
-                    "id": {
-                      "description": "The identifier for the connector.",
-                      "type": "string"
-                    },
-                    "is_deprecated": {
-                      "description": "Indicates whether the connector is deprecated.",
-                      "type": "boolean"
-                    },
-                    "is_missing_secrets": {
-                      "description": "Indicates whether the connector is missing secrets.",
-                      "type": "boolean"
-                    },
-                    "is_preconfigured": {
-                      "description": "Indicates whether the connector is preconfigured. If true, the `config` and `is_missing_secrets` properties are omitted from the response. ",
-                      "type": "boolean"
-                    },
-                    "is_system_action": {
-                      "description": "Indicates whether the connector is used for system actions.",
-                      "type": "boolean"
-                    },
-                    "name": {
-                      "description": " The name of the rule.",
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "id",
-                    "name",
-                    "connector_type_id",
-                    "is_preconfigured",
-                    "is_deprecated",
-                    "is_system_action"
-                  ],
-                  "type": "object"
-                }
-              }
-            },
-            "description": "Indicates a successful call."
-          }
-        },
-        "summary": "Update a connector",
-        "tags": [
-          "connectors"
-        ]
-      }
-    },
-    "/api/actions/action/{id}/_execute": {
-      "post": {
-        "deprecated": true,
-        "operationId": "%2Fapi%2Factions%2Faction%2F%7Bid%7D%2F_execute#0",
-        "parameters": [
-          {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
-            "description": "A required header to protect against CSRF attacks",
-            "in": "header",
-            "name": "kbn-xsrf",
-            "required": true,
-            "schema": {
-              "example": "true",
-              "type": "string"
-            }
-          },
-          {
-            "description": "An identifier for the connector.",
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json; Elastic-Api-Version=2023-10-31": {
-              "schema": {
-                "additionalProperties": false,
-                "properties": {
-                  "params": {
-                    "additionalProperties": {},
-                    "type": "object"
-                  }
-                },
-                "required": [
-                  "params"
-                ],
-                "type": "object"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
-                "schema": {
-                  "additionalProperties": false,
-                  "properties": {
-                    "config": {
-                      "additionalProperties": {},
-                      "type": "object"
-                    },
-                    "connector_type_id": {
-                      "description": "The connector type identifier.",
-                      "type": "string"
-                    },
-                    "id": {
-                      "description": "The identifier for the connector.",
-                      "type": "string"
-                    },
-                    "is_deprecated": {
-                      "description": "Indicates whether the connector is deprecated.",
-                      "type": "boolean"
-                    },
-                    "is_missing_secrets": {
-                      "description": "Indicates whether the connector is missing secrets.",
-                      "type": "boolean"
-                    },
-                    "is_preconfigured": {
-                      "description": "Indicates whether the connector is preconfigured. If true, the `config` and `is_missing_secrets` properties are omitted from the response. ",
-                      "type": "boolean"
-                    },
-                    "is_system_action": {
-                      "description": "Indicates whether the connector is used for system actions.",
-                      "type": "boolean"
-                    },
-                    "name": {
-                      "description": " The name of the rule.",
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "id",
-                    "name",
-                    "connector_type_id",
-                    "is_preconfigured",
-                    "is_deprecated",
-                    "is_system_action"
-                  ],
-                  "type": "object"
-                }
-              }
-            },
-            "description": "Indicates a successful call."
-          }
-        },
-        "summary": "Run a connector",
-        "tags": [
-          "connectors"
-        ]
-      }
-    },
     "/api/actions/connector/{id}": {
       "delete": {
         "description": "WARNING: When you delete a connector, it cannot be recovered.",
-        "operationId": "%2Fapi%2Factions%2Fconnector%2F%7Bid%7D#0",
+        "operationId": "delete-actions-connector-id",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -916,7 +392,7 @@
         ]
       },
       "get": {
-        "operationId": "%2Fapi%2Factions%2Fconnector%2F%7Bid%7D#1",
+        "operationId": "get-actions-connector-id",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -1001,7 +477,7 @@
         ]
       },
       "post": {
-        "operationId": "%2Fapi%2Factions%2Fconnector%2F%7Bid%3F%7D#0",
+        "operationId": "post-actions-connector-id",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -1130,7 +606,7 @@
         ]
       },
       "put": {
-        "operationId": "%2Fapi%2Factions%2Fconnector%2F%7Bid%7D#2",
+        "operationId": "put-actions-connector-id",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -1257,7 +733,7 @@
     "/api/actions/connector/{id}/_execute": {
       "post": {
         "description": "You can use this API to test an action that involves interaction with Kibana services or integrations with third-party systems.",
-        "operationId": "%2Fapi%2Factions%2Fconnector%2F%7Bid%7D%2F_execute#0",
+        "operationId": "post-actions-connector-id-execute",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -1374,7 +850,7 @@
     "/api/actions/connector_types": {
       "get": {
         "description": "You do not need any Kibana feature privileges to run this API.",
-        "operationId": "%2Fapi%2Factions%2Fconnector_types#0",
+        "operationId": "get-actions-connector-types",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -1407,7 +883,7 @@
     },
     "/api/actions/connectors": {
       "get": {
-        "operationId": "%2Fapi%2Factions%2Fconnectors#0",
+        "operationId": "get-actions-connectors",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -1429,34 +905,9 @@
         ]
       }
     },
-    "/api/actions/list_action_types": {
-      "get": {
-        "deprecated": true,
-        "operationId": "%2Fapi%2Factions%2Flist_action_types#0",
-        "parameters": [
-          {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {},
-        "summary": "Get connector types",
-        "tags": [
-          "connectors"
-        ]
-      }
-    },
     "/api/alerting/rule/{id}": {
       "delete": {
-        "operationId": "%2Fapi%2Falerting%2Frule%2F%7Bid%7D#2",
+        "operationId": "delete-alerting-rule-id",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -1510,7 +961,7 @@
         ]
       },
       "get": {
-        "operationId": "%2Fapi%2Falerting%2Frule%2F%7Bid%7D#0",
+        "operationId": "get-alerting-rule-id",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -2002,80 +1453,13 @@
                                     "type": "number"
                                   },
                                   "outcome": {
-                                    "additionalProperties": false,
-                                    "properties": {
-                                      "alerts_count": {
-                                        "additionalProperties": false,
-                                        "properties": {
-                                          "active": {
-                                            "description": "Number of active alerts during last run.",
-                                            "nullable": true,
-                                            "type": "number"
-                                          },
-                                          "ignored": {
-                                            "description": "Number of ignored alerts during last run.",
-                                            "nullable": true,
-                                            "type": "number"
-                                          },
-                                          "new": {
-                                            "description": "Number of new alerts during last run.",
-                                            "nullable": true,
-                                            "type": "number"
-                                          },
-                                          "recovered": {
-                                            "description": "Number of recovered alerts during last run.",
-                                            "nullable": true,
-                                            "type": "number"
-                                          }
-                                        },
-                                        "type": "object"
-                                      },
-                                      "outcome": {
-                                        "description": "Outcome of last run of the rule. Value could be succeeded, warning or failed.",
-                                        "enum": [
-                                          "succeeded",
-                                          "warning",
-                                          "failed"
-                                        ],
-                                        "type": "string"
-                                      },
-                                      "outcome_msg": {
-                                        "items": {
-                                          "description": "Outcome message generated during last rule run.",
-                                          "type": "string"
-                                        },
-                                        "nullable": true,
-                                        "type": "array"
-                                      },
-                                      "outcome_order": {
-                                        "description": "Order of the outcome.",
-                                        "type": "number"
-                                      },
-                                      "warning": {
-                                        "description": "Warning of last rule execution.",
-                                        "enum": [
-                                          "read",
-                                          "decrypt",
-                                          "execute",
-                                          "unknown",
-                                          "license",
-                                          "timeout",
-                                          "disabled",
-                                          "validate",
-                                          "maxExecutableActions",
-                                          "maxAlerts",
-                                          "maxQueuedActions",
-                                          "ruleExecution"
-                                        ],
-                                        "nullable": true,
-                                        "type": "string"
-                                      }
-                                    },
-                                    "required": [
-                                      "outcome",
-                                      "alerts_count"
+                                    "description": "Outcome of last run of the rule. Value could be succeeded, warning or failed.",
+                                    "enum": [
+                                      "succeeded",
+                                      "warning",
+                                      "failed"
                                     ],
-                                    "type": "object"
+                                    "type": "string"
                                   },
                                   "success": {
                                     "description": "Indicates whether the rule run was successful.",
@@ -2242,6 +1626,7 @@
                                   "description": "Indicates hours of the day to recur.",
                                   "type": "number"
                                 },
+                                "nullable": true,
                                 "type": "array"
                               },
                               "byminute": {
@@ -2249,6 +1634,7 @@
                                   "description": "Indicates minutes of the hour to recur.",
                                   "type": "number"
                                 },
+                                "nullable": true,
                                 "type": "array"
                               },
                               "bymonth": {
@@ -2256,6 +1642,7 @@
                                   "description": "Indicates months of the year that this rule should recur.",
                                   "type": "number"
                                 },
+                                "nullable": true,
                                 "type": "array"
                               },
                               "bymonthday": {
@@ -2263,6 +1650,7 @@
                                   "description": "Indicates the days of the month to recur.",
                                   "type": "number"
                                 },
+                                "nullable": true,
                                 "type": "array"
                               },
                               "bysecond": {
@@ -2270,6 +1658,7 @@
                                   "description": "Indicates seconds of the day to recur.",
                                   "type": "number"
                                 },
+                                "nullable": true,
                                 "type": "array"
                               },
                               "bysetpos": {
@@ -2277,6 +1666,7 @@
                                   "description": "A positive or negative integer affecting the nth day of the month. For example, -2 combined with `byweekday` of FR is 2nd to last Friday of the month. It is recommended to not set this manually and just use `byweekday`.",
                                   "type": "number"
                                 },
+                                "nullable": true,
                                 "type": "array"
                               },
                               "byweekday": {
@@ -2291,6 +1681,7 @@
                                   ],
                                   "description": "Indicates the days of the week to recur or else nth-day-of-month strings. For example, \"+2TU\" second Tuesday of month, \"-1FR\" last Friday of the month, which are internally converted to a `byweekday/bysetpos` combination."
                                 },
+                                "nullable": true,
                                 "type": "array"
                               },
                               "byweekno": {
@@ -2298,6 +1689,7 @@
                                   "description": "Indicates number of the week hours to recur.",
                                   "type": "number"
                                 },
+                                "nullable": true,
                                 "type": "array"
                               },
                               "byyearday": {
@@ -2305,6 +1697,7 @@
                                   "description": "Indicates the days of the year that this rule should recur.",
                                   "type": "number"
                                 },
+                                "nullable": true,
                                 "type": "array"
                               },
                               "count": {
@@ -2446,7 +1839,7 @@
         ]
       },
       "post": {
-        "operationId": "%2Fapi%2Falerting%2Frule%2F%7Bid%3F%7D#0",
+        "operationId": "post-alerting-rule-id",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -3240,80 +2633,13 @@
                                     "type": "number"
                                   },
                                   "outcome": {
-                                    "additionalProperties": false,
-                                    "properties": {
-                                      "alerts_count": {
-                                        "additionalProperties": false,
-                                        "properties": {
-                                          "active": {
-                                            "description": "Number of active alerts during last run.",
-                                            "nullable": true,
-                                            "type": "number"
-                                          },
-                                          "ignored": {
-                                            "description": "Number of ignored alerts during last run.",
-                                            "nullable": true,
-                                            "type": "number"
-                                          },
-                                          "new": {
-                                            "description": "Number of new alerts during last run.",
-                                            "nullable": true,
-                                            "type": "number"
-                                          },
-                                          "recovered": {
-                                            "description": "Number of recovered alerts during last run.",
-                                            "nullable": true,
-                                            "type": "number"
-                                          }
-                                        },
-                                        "type": "object"
-                                      },
-                                      "outcome": {
-                                        "description": "Outcome of last run of the rule. Value could be succeeded, warning or failed.",
-                                        "enum": [
-                                          "succeeded",
-                                          "warning",
-                                          "failed"
-                                        ],
-                                        "type": "string"
-                                      },
-                                      "outcome_msg": {
-                                        "items": {
-                                          "description": "Outcome message generated during last rule run.",
-                                          "type": "string"
-                                        },
-                                        "nullable": true,
-                                        "type": "array"
-                                      },
-                                      "outcome_order": {
-                                        "description": "Order of the outcome.",
-                                        "type": "number"
-                                      },
-                                      "warning": {
-                                        "description": "Warning of last rule execution.",
-                                        "enum": [
-                                          "read",
-                                          "decrypt",
-                                          "execute",
-                                          "unknown",
-                                          "license",
-                                          "timeout",
-                                          "disabled",
-                                          "validate",
-                                          "maxExecutableActions",
-                                          "maxAlerts",
-                                          "maxQueuedActions",
-                                          "ruleExecution"
-                                        ],
-                                        "nullable": true,
-                                        "type": "string"
-                                      }
-                                    },
-                                    "required": [
-                                      "outcome",
-                                      "alerts_count"
+                                    "description": "Outcome of last run of the rule. Value could be succeeded, warning or failed.",
+                                    "enum": [
+                                      "succeeded",
+                                      "warning",
+                                      "failed"
                                     ],
-                                    "type": "object"
+                                    "type": "string"
                                   },
                                   "success": {
                                     "description": "Indicates whether the rule run was successful.",
@@ -3480,6 +2806,7 @@
                                   "description": "Indicates hours of the day to recur.",
                                   "type": "number"
                                 },
+                                "nullable": true,
                                 "type": "array"
                               },
                               "byminute": {
@@ -3487,6 +2814,7 @@
                                   "description": "Indicates minutes of the hour to recur.",
                                   "type": "number"
                                 },
+                                "nullable": true,
                                 "type": "array"
                               },
                               "bymonth": {
@@ -3494,6 +2822,7 @@
                                   "description": "Indicates months of the year that this rule should recur.",
                                   "type": "number"
                                 },
+                                "nullable": true,
                                 "type": "array"
                               },
                               "bymonthday": {
@@ -3501,6 +2830,7 @@
                                   "description": "Indicates the days of the month to recur.",
                                   "type": "number"
                                 },
+                                "nullable": true,
                                 "type": "array"
                               },
                               "bysecond": {
@@ -3508,6 +2838,7 @@
                                   "description": "Indicates seconds of the day to recur.",
                                   "type": "number"
                                 },
+                                "nullable": true,
                                 "type": "array"
                               },
                               "bysetpos": {
@@ -3515,6 +2846,7 @@
                                   "description": "A positive or negative integer affecting the nth day of the month. For example, -2 combined with `byweekday` of FR is 2nd to last Friday of the month. It is recommended to not set this manually and just use `byweekday`.",
                                   "type": "number"
                                 },
+                                "nullable": true,
                                 "type": "array"
                               },
                               "byweekday": {
@@ -3529,6 +2861,7 @@
                                   ],
                                   "description": "Indicates the days of the week to recur or else nth-day-of-month strings. For example, \"+2TU\" second Tuesday of month, \"-1FR\" last Friday of the month, which are internally converted to a `byweekday/bysetpos` combination."
                                 },
+                                "nullable": true,
                                 "type": "array"
                               },
                               "byweekno": {
@@ -3536,6 +2869,7 @@
                                   "description": "Indicates number of the week hours to recur.",
                                   "type": "number"
                                 },
+                                "nullable": true,
                                 "type": "array"
                               },
                               "byyearday": {
@@ -3543,6 +2877,7 @@
                                   "description": "Indicates the days of the year that this rule should recur.",
                                   "type": "number"
                                 },
+                                "nullable": true,
                                 "type": "array"
                               },
                               "count": {
@@ -3684,7 +3019,7 @@
         ]
       },
       "put": {
-        "operationId": "%2Fapi%2Falerting%2Frule%2F%7Bid%7D#1",
+        "operationId": "put-alerting-rule-id",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -4461,80 +3796,13 @@
                                     "type": "number"
                                   },
                                   "outcome": {
-                                    "additionalProperties": false,
-                                    "properties": {
-                                      "alerts_count": {
-                                        "additionalProperties": false,
-                                        "properties": {
-                                          "active": {
-                                            "description": "Number of active alerts during last run.",
-                                            "nullable": true,
-                                            "type": "number"
-                                          },
-                                          "ignored": {
-                                            "description": "Number of ignored alerts during last run.",
-                                            "nullable": true,
-                                            "type": "number"
-                                          },
-                                          "new": {
-                                            "description": "Number of new alerts during last run.",
-                                            "nullable": true,
-                                            "type": "number"
-                                          },
-                                          "recovered": {
-                                            "description": "Number of recovered alerts during last run.",
-                                            "nullable": true,
-                                            "type": "number"
-                                          }
-                                        },
-                                        "type": "object"
-                                      },
-                                      "outcome": {
-                                        "description": "Outcome of last run of the rule. Value could be succeeded, warning or failed.",
-                                        "enum": [
-                                          "succeeded",
-                                          "warning",
-                                          "failed"
-                                        ],
-                                        "type": "string"
-                                      },
-                                      "outcome_msg": {
-                                        "items": {
-                                          "description": "Outcome message generated during last rule run.",
-                                          "type": "string"
-                                        },
-                                        "nullable": true,
-                                        "type": "array"
-                                      },
-                                      "outcome_order": {
-                                        "description": "Order of the outcome.",
-                                        "type": "number"
-                                      },
-                                      "warning": {
-                                        "description": "Warning of last rule execution.",
-                                        "enum": [
-                                          "read",
-                                          "decrypt",
-                                          "execute",
-                                          "unknown",
-                                          "license",
-                                          "timeout",
-                                          "disabled",
-                                          "validate",
-                                          "maxExecutableActions",
-                                          "maxAlerts",
-                                          "maxQueuedActions",
-                                          "ruleExecution"
-                                        ],
-                                        "nullable": true,
-                                        "type": "string"
-                                      }
-                                    },
-                                    "required": [
-                                      "outcome",
-                                      "alerts_count"
+                                    "description": "Outcome of last run of the rule. Value could be succeeded, warning or failed.",
+                                    "enum": [
+                                      "succeeded",
+                                      "warning",
+                                      "failed"
                                     ],
-                                    "type": "object"
+                                    "type": "string"
                                   },
                                   "success": {
                                     "description": "Indicates whether the rule run was successful.",
@@ -4701,6 +3969,7 @@
                                   "description": "Indicates hours of the day to recur.",
                                   "type": "number"
                                 },
+                                "nullable": true,
                                 "type": "array"
                               },
                               "byminute": {
@@ -4708,6 +3977,7 @@
                                   "description": "Indicates minutes of the hour to recur.",
                                   "type": "number"
                                 },
+                                "nullable": true,
                                 "type": "array"
                               },
                               "bymonth": {
@@ -4715,6 +3985,7 @@
                                   "description": "Indicates months of the year that this rule should recur.",
                                   "type": "number"
                                 },
+                                "nullable": true,
                                 "type": "array"
                               },
                               "bymonthday": {
@@ -4722,6 +3993,7 @@
                                   "description": "Indicates the days of the month to recur.",
                                   "type": "number"
                                 },
+                                "nullable": true,
                                 "type": "array"
                               },
                               "bysecond": {
@@ -4729,6 +4001,7 @@
                                   "description": "Indicates seconds of the day to recur.",
                                   "type": "number"
                                 },
+                                "nullable": true,
                                 "type": "array"
                               },
                               "bysetpos": {
@@ -4736,6 +4009,7 @@
                                   "description": "A positive or negative integer affecting the nth day of the month. For example, -2 combined with `byweekday` of FR is 2nd to last Friday of the month. It is recommended to not set this manually and just use `byweekday`.",
                                   "type": "number"
                                 },
+                                "nullable": true,
                                 "type": "array"
                               },
                               "byweekday": {
@@ -4750,6 +4024,7 @@
                                   ],
                                   "description": "Indicates the days of the week to recur or else nth-day-of-month strings. For example, \"+2TU\" second Tuesday of month, \"-1FR\" last Friday of the month, which are internally converted to a `byweekday/bysetpos` combination."
                                 },
+                                "nullable": true,
                                 "type": "array"
                               },
                               "byweekno": {
@@ -4757,6 +4032,7 @@
                                   "description": "Indicates number of the week hours to recur.",
                                   "type": "number"
                                 },
+                                "nullable": true,
                                 "type": "array"
                               },
                               "byyearday": {
@@ -4764,6 +4040,7 @@
                                   "description": "Indicates the days of the year that this rule should recur.",
                                   "type": "number"
                                 },
+                                "nullable": true,
                                 "type": "array"
                               },
                               "count": {
@@ -4910,7 +4187,7 @@
     },
     "/api/alerting/rule/{id}/_disable": {
       "post": {
-        "operationId": "%2Fapi%2Falerting%2Frule%2F%7Bid%7D%2F_disable#0",
+        "operationId": "post-alerting-rule-id-disable",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -4984,7 +4261,7 @@
     },
     "/api/alerting/rule/{id}/_enable": {
       "post": {
-        "operationId": "%2Fapi%2Falerting%2Frule%2F%7Bid%7D%2F_enable#0",
+        "operationId": "post-alerting-rule-id-enable",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -5040,7 +4317,7 @@
     },
     "/api/alerting/rule/{id}/_mute_all": {
       "post": {
-        "operationId": "%2Fapi%2Falerting%2Frule%2F%7Bid%7D%2F_mute_all#0",
+        "operationId": "post-alerting-rule-id-mute-all",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -5077,6 +4354,15 @@
         "responses": {
           "204": {
             "description": "Indicates a successful call."
+          },
+          "400": {
+            "description": "Indicates an invalid schema or parameters."
+          },
+          "403": {
+            "description": "Indicates that this call is forbidden."
+          },
+          "404": {
+            "description": "Indicates a rule with the given ID does not exist."
           }
         },
         "summary": "Mute all alerts",
@@ -5087,7 +4373,7 @@
     },
     "/api/alerting/rule/{id}/_unmute_all": {
       "post": {
-        "operationId": "%2Fapi%2Falerting%2Frule%2F%7Bid%7D%2F_unmute_all#0",
+        "operationId": "post-alerting-rule-id-unmute-all",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -5124,6 +4410,15 @@
         "responses": {
           "204": {
             "description": "Indicates a successful call."
+          },
+          "400": {
+            "description": "Indicates an invalid schema or parameters."
+          },
+          "403": {
+            "description": "Indicates that this call is forbidden."
+          },
+          "404": {
+            "description": "Indicates a rule with the given ID does not exist."
           }
         },
         "summary": "Unmute all alerts",
@@ -5134,7 +4429,7 @@
     },
     "/api/alerting/rule/{id}/_update_api_key": {
       "post": {
-        "operationId": "%2Fapi%2Falerting%2Frule%2F%7Bid%7D%2F_update_api_key#0",
+        "operationId": "post-alerting-rule-id-update-api-key",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -5193,7 +4488,7 @@
     },
     "/api/alerting/rule/{rule_id}/alert/{alert_id}/_mute": {
       "post": {
-        "operationId": "%2Fapi%2Falerting%2Frule%2F%7Brule_id%7D%2Falert%2F%7Balert_id%7D%2F_mute#0",
+        "operationId": "post-alerting-rule-rule-id-alert-alert-id-mute",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -5258,7 +4553,7 @@
     },
     "/api/alerting/rule/{rule_id}/alert/{alert_id}/_unmute": {
       "post": {
-        "operationId": "%2Fapi%2Falerting%2Frule%2F%7Brule_id%7D%2Falert%2F%7Balert_id%7D%2F_unmute#0",
+        "operationId": "post-alerting-rule-rule-id-alert-alert-id-unmute",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -5323,7 +4618,7 @@
     },
     "/api/alerting/rules/_find": {
       "get": {
-        "operationId": "%2Fapi%2Falerting%2Frules%2F_find#0",
+        "operationId": "get-alerting-rules-find",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -5948,80 +5243,13 @@
                                     "type": "number"
                                   },
                                   "outcome": {
-                                    "additionalProperties": false,
-                                    "properties": {
-                                      "alerts_count": {
-                                        "additionalProperties": false,
-                                        "properties": {
-                                          "active": {
-                                            "description": "Number of active alerts during last run.",
-                                            "nullable": true,
-                                            "type": "number"
-                                          },
-                                          "ignored": {
-                                            "description": "Number of ignored alerts during last run.",
-                                            "nullable": true,
-                                            "type": "number"
-                                          },
-                                          "new": {
-                                            "description": "Number of new alerts during last run.",
-                                            "nullable": true,
-                                            "type": "number"
-                                          },
-                                          "recovered": {
-                                            "description": "Number of recovered alerts during last run.",
-                                            "nullable": true,
-                                            "type": "number"
-                                          }
-                                        },
-                                        "type": "object"
-                                      },
-                                      "outcome": {
-                                        "description": "Outcome of last run of the rule. Value could be succeeded, warning or failed.",
-                                        "enum": [
-                                          "succeeded",
-                                          "warning",
-                                          "failed"
-                                        ],
-                                        "type": "string"
-                                      },
-                                      "outcome_msg": {
-                                        "items": {
-                                          "description": "Outcome message generated during last rule run.",
-                                          "type": "string"
-                                        },
-                                        "nullable": true,
-                                        "type": "array"
-                                      },
-                                      "outcome_order": {
-                                        "description": "Order of the outcome.",
-                                        "type": "number"
-                                      },
-                                      "warning": {
-                                        "description": "Warning of last rule execution.",
-                                        "enum": [
-                                          "read",
-                                          "decrypt",
-                                          "execute",
-                                          "unknown",
-                                          "license",
-                                          "timeout",
-                                          "disabled",
-                                          "validate",
-                                          "maxExecutableActions",
-                                          "maxAlerts",
-                                          "maxQueuedActions",
-                                          "ruleExecution"
-                                        ],
-                                        "nullable": true,
-                                        "type": "string"
-                                      }
-                                    },
-                                    "required": [
-                                      "outcome",
-                                      "alerts_count"
+                                    "description": "Outcome of last run of the rule. Value could be succeeded, warning or failed.",
+                                    "enum": [
+                                      "succeeded",
+                                      "warning",
+                                      "failed"
                                     ],
-                                    "type": "object"
+                                    "type": "string"
                                   },
                                   "success": {
                                     "description": "Indicates whether the rule run was successful.",
@@ -6188,6 +5416,7 @@
                                   "description": "Indicates hours of the day to recur.",
                                   "type": "number"
                                 },
+                                "nullable": true,
                                 "type": "array"
                               },
                               "byminute": {
@@ -6195,6 +5424,7 @@
                                   "description": "Indicates minutes of the hour to recur.",
                                   "type": "number"
                                 },
+                                "nullable": true,
                                 "type": "array"
                               },
                               "bymonth": {
@@ -6202,6 +5432,7 @@
                                   "description": "Indicates months of the year that this rule should recur.",
                                   "type": "number"
                                 },
+                                "nullable": true,
                                 "type": "array"
                               },
                               "bymonthday": {
@@ -6209,6 +5440,7 @@
                                   "description": "Indicates the days of the month to recur.",
                                   "type": "number"
                                 },
+                                "nullable": true,
                                 "type": "array"
                               },
                               "bysecond": {
@@ -6216,6 +5448,7 @@
                                   "description": "Indicates seconds of the day to recur.",
                                   "type": "number"
                                 },
+                                "nullable": true,
                                 "type": "array"
                               },
                               "bysetpos": {
@@ -6223,6 +5456,7 @@
                                   "description": "A positive or negative integer affecting the nth day of the month. For example, -2 combined with `byweekday` of FR is 2nd to last Friday of the month. It is recommended to not set this manually and just use `byweekday`.",
                                   "type": "number"
                                 },
+                                "nullable": true,
                                 "type": "array"
                               },
                               "byweekday": {
@@ -6237,6 +5471,7 @@
                                   ],
                                   "description": "Indicates the days of the week to recur or else nth-day-of-month strings. For example, \"+2TU\" second Tuesday of month, \"-1FR\" last Friday of the month, which are internally converted to a `byweekday/bysetpos` combination."
                                 },
+                                "nullable": true,
                                 "type": "array"
                               },
                               "byweekno": {
@@ -6244,6 +5479,7 @@
                                   "description": "Indicates number of the week hours to recur.",
                                   "type": "number"
                                 },
+                                "nullable": true,
                                 "type": "array"
                               },
                               "byyearday": {
@@ -6251,6 +5487,7 @@
                                   "description": "Indicates the days of the year that this rule should recur.",
                                   "type": "number"
                                 },
+                                "nullable": true,
                                 "type": "array"
                               },
                               "count": {
@@ -6389,68 +5626,10 @@
         ]
       }
     },
-    "/api/fleet/agent-status": {
-      "get": {
-        "deprecated": true,
-        "operationId": "%2Fapi%2Ffleet%2Fagent-status#0",
-        "parameters": [
-          {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "policyId",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "policyIds",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "items": {
-                    "type": "string"
-                  },
-                  "type": "array"
-                },
-                {
-                  "type": "string"
-                }
-              ]
-            }
-          },
-          {
-            "in": "query",
-            "name": "kuery",
-            "required": false,
-            "schema": {
-              "deprecated": true,
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {},
-        "summary": "",
-        "tags": []
-      }
-    },
     "/api/fleet/agent_download_sources": {
       "get": {
         "description": "List agent binary download sources",
-        "operationId": "%2Fapi%2Ffleet%2Fagent_download_sources#0",
+        "operationId": "get-fleet-agent-download-sources",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -6559,7 +5738,7 @@
       },
       "post": {
         "description": "Create agent binary download source",
-        "operationId": "%2Fapi%2Ffleet%2Fagent_download_sources#1",
+        "operationId": "post-fleet-agent-download-sources",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -6700,7 +5879,7 @@
     "/api/fleet/agent_download_sources/{sourceId}": {
       "delete": {
         "description": "Delete agent binary download source by ID",
-        "operationId": "%2Fapi%2Ffleet%2Fagent_download_sources%2F%7BsourceId%7D#2",
+        "operationId": "delete-fleet-agent-download-sources-sourceid",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -6785,7 +5964,7 @@
       },
       "get": {
         "description": "Get agent binary download source by ID",
-        "operationId": "%2Fapi%2Ffleet%2Fagent_download_sources%2F%7BsourceId%7D#0",
+        "operationId": "get-fleet-agent-download-sources-sourceid",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -6887,7 +6066,7 @@
       },
       "put": {
         "description": "Update agent binary download source by ID",
-        "operationId": "%2Fapi%2Ffleet%2Fagent_download_sources%2F%7BsourceId%7D#1",
+        "operationId": "put-fleet-agent-download-sources-sourceid",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -7036,7 +6215,7 @@
     "/api/fleet/agent_policies": {
       "get": {
         "description": "List agent policies",
-        "operationId": "%2Fapi%2Ffleet%2Fagent_policies#0",
+        "operationId": "get-fleet-agent-policies",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -7103,14 +6282,26 @@
             }
           },
           {
+            "description": "use withAgentCount instead",
             "in": "query",
             "name": "noAgentCount",
+            "required": false,
+            "schema": {
+              "deprecated": true,
+              "type": "boolean"
+            }
+          },
+          {
+            "description": "get policies with agent count",
+            "in": "query",
+            "name": "withAgentCount",
             "required": false,
             "schema": {
               "type": "boolean"
             }
           },
           {
+            "description": "get full policies with package policies populated",
             "in": "query",
             "name": "full",
             "required": false,
@@ -7862,7 +7053,7 @@
       },
       "post": {
         "description": "Create an agent policy",
-        "operationId": "%2Fapi%2Ffleet%2Fagent_policies#1",
+        "operationId": "post-fleet-agent-policies",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -8857,7 +8048,7 @@
     "/api/fleet/agent_policies/_bulk_get": {
       "post": {
         "description": "Bulk get agent policies",
-        "operationId": "%2Fapi%2Ffleet%2Fagent_policies%2F_bulk_get#0",
+        "operationId": "post-fleet-agent-policies-bulk-get",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -9644,7 +8835,7 @@
     "/api/fleet/agent_policies/delete": {
       "post": {
         "description": "Delete agent policy by ID",
-        "operationId": "%2Fapi%2Ffleet%2Fagent_policies%2Fdelete#0",
+        "operationId": "post-fleet-agent-policies-delete",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -9746,10 +8937,195 @@
         ]
       }
     },
+    "/api/fleet/agent_policies/outputs": {
+      "post": {
+        "description": "Get list of outputs associated with agent policies",
+        "operationId": "post-fleet-agent-policies-outputs",
+        "parameters": [
+          {
+            "description": "The version of the API to use",
+            "in": "header",
+            "name": "elastic-api-version",
+            "schema": {
+              "default": "2023-10-31",
+              "enum": [
+                "2023-10-31"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "A required header to protect against CSRF attacks",
+            "in": "header",
+            "name": "kbn-xsrf",
+            "required": true,
+            "schema": {
+              "example": "true",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json; Elastic-Api-Version=2023-10-31": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "ids": {
+                    "description": "list of package policy ids",
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  }
+                },
+                "required": [
+                  "ids"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json; Elastic-Api-Version=2023-10-31": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "items": {
+                      "items": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "agentPolicyId": {
+                            "type": "string"
+                          },
+                          "data": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "integrations": {
+                                "items": {
+                                  "additionalProperties": false,
+                                  "properties": {
+                                    "id": {
+                                      "type": "string"
+                                    },
+                                    "integrationPolicyName": {
+                                      "type": "string"
+                                    },
+                                    "name": {
+                                      "type": "string"
+                                    },
+                                    "pkgName": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "type": "object"
+                                },
+                                "type": "array"
+                              },
+                              "output": {
+                                "additionalProperties": false,
+                                "properties": {
+                                  "id": {
+                                    "type": "string"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "id",
+                                  "name"
+                                ],
+                                "type": "object"
+                              }
+                            },
+                            "required": [
+                              "output"
+                            ],
+                            "type": "object"
+                          },
+                          "monitoring": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "output": {
+                                "additionalProperties": false,
+                                "properties": {
+                                  "id": {
+                                    "type": "string"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "id",
+                                  "name"
+                                ],
+                                "type": "object"
+                              }
+                            },
+                            "required": [
+                              "output"
+                            ],
+                            "type": "object"
+                          }
+                        },
+                        "required": [
+                          "monitoring",
+                          "data"
+                        ],
+                        "type": "object"
+                      },
+                      "type": "array"
+                    }
+                  },
+                  "required": [
+                    "items"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json; Elastic-Api-Version=2023-10-31": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "Generic Error",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "statusCode": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "summary": "",
+        "tags": [
+          "Elastic Agent policies"
+        ]
+      }
+    },
     "/api/fleet/agent_policies/{agentPolicyId}": {
       "get": {
         "description": "Get an agent policy by ID",
-        "operationId": "%2Fapi%2Ffleet%2Fagent_policies%2F%7BagentPolicyId%7D#0",
+        "operationId": "get-fleet-agent-policies-agentpolicyid",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -10500,7 +9876,7 @@
       },
       "put": {
         "description": "Update an agent policy by ID",
-        "operationId": "%2Fapi%2Ffleet%2Fagent_policies%2F%7BagentPolicyId%7D#1",
+        "operationId": "put-fleet-agent-policies-agentpolicyid",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -11507,7 +10883,7 @@
     "/api/fleet/agent_policies/{agentPolicyId}/copy": {
       "post": {
         "description": "Copy an agent policy by ID",
-        "operationId": "%2Fapi%2Ffleet%2Fagent_policies%2F%7BagentPolicyId%7D%2Fcopy#0",
+        "operationId": "post-fleet-agent-policies-agentpolicyid-copy",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -12292,7 +11668,7 @@
     "/api/fleet/agent_policies/{agentPolicyId}/download": {
       "get": {
         "description": "Download an agent policy by ID",
-        "operationId": "%2Fapi%2Ffleet%2Fagent_policies%2F%7BagentPolicyId%7D%2Fdownload#0",
+        "operationId": "get-fleet-agent-policies-agentpolicyid-download",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -12409,7 +11785,7 @@
     "/api/fleet/agent_policies/{agentPolicyId}/full": {
       "get": {
         "description": "Get a full agent policy by ID",
-        "operationId": "%2Fapi%2Ffleet%2Fagent_policies%2F%7BagentPolicyId%7D%2Ffull#0",
+        "operationId": "get-fleet-agent-policies-agentpolicyid-full",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -12908,10 +12284,168 @@
         ]
       }
     },
+    "/api/fleet/agent_policies/{agentPolicyId}/outputs": {
+      "get": {
+        "description": "Get list of outputs associated with agent policy by policy id",
+        "operationId": "get-fleet-agent-policies-agentpolicyid-outputs",
+        "parameters": [
+          {
+            "description": "The version of the API to use",
+            "in": "header",
+            "name": "elastic-api-version",
+            "schema": {
+              "default": "2023-10-31",
+              "enum": [
+                "2023-10-31"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "agentPolicyId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json; Elastic-Api-Version=2023-10-31": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "item": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "agentPolicyId": {
+                          "type": "string"
+                        },
+                        "data": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "integrations": {
+                              "items": {
+                                "additionalProperties": false,
+                                "properties": {
+                                  "id": {
+                                    "type": "string"
+                                  },
+                                  "integrationPolicyName": {
+                                    "type": "string"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  },
+                                  "pkgName": {
+                                    "type": "string"
+                                  }
+                                },
+                                "type": "object"
+                              },
+                              "type": "array"
+                            },
+                            "output": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "id": {
+                                  "type": "string"
+                                },
+                                "name": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "id",
+                                "name"
+                              ],
+                              "type": "object"
+                            }
+                          },
+                          "required": [
+                            "output"
+                          ],
+                          "type": "object"
+                        },
+                        "monitoring": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "output": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "id": {
+                                  "type": "string"
+                                },
+                                "name": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "id",
+                                "name"
+                              ],
+                              "type": "object"
+                            }
+                          },
+                          "required": [
+                            "output"
+                          ],
+                          "type": "object"
+                        }
+                      },
+                      "required": [
+                        "monitoring",
+                        "data"
+                      ],
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "item"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json; Elastic-Api-Version=2023-10-31": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "Generic Error",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "statusCode": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "summary": "",
+        "tags": [
+          "Elastic Agent policies"
+        ]
+      }
+    },
     "/api/fleet/agent_status": {
       "get": {
         "description": "Get agent status summary",
-        "operationId": "%2Fapi%2Ffleet%2Fagent_status#0",
+        "operationId": "get-fleet-agent-status",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -12956,7 +12490,6 @@
             "name": "kuery",
             "required": false,
             "schema": {
-              "deprecated": true,
               "type": "string"
             }
           }
@@ -12995,10 +12528,6 @@
                         "other": {
                           "type": "number"
                         },
-                        "total": {
-                          "deprecated": true,
-                          "type": "number"
-                        },
                         "unenrolled": {
                           "type": "number"
                         },
@@ -13008,7 +12537,6 @@
                       },
                       "required": [
                         "events",
-                        "total",
                         "online",
                         "error",
                         "offline",
@@ -13065,7 +12593,7 @@
     "/api/fleet/agent_status/data": {
       "get": {
         "description": "Get incoming agent data",
-        "operationId": "%2Fapi%2Ffleet%2Fagent_status%2Fdata#0",
+        "operationId": "get-fleet-agent-status-data",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -13181,7 +12709,7 @@
     "/api/fleet/agents": {
       "get": {
         "description": "List agents",
-        "operationId": "%2Fapi%2Ffleet%2Fagents#0",
+        "operationId": "get-fleet-agents",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -13672,394 +13200,6 @@
                       },
                       "type": "array"
                     },
-                    "list": {
-                      "deprecated": true,
-                      "items": {
-                        "additionalProperties": false,
-                        "properties": {
-                          "access_api_key": {
-                            "type": "string"
-                          },
-                          "access_api_key_id": {
-                            "type": "string"
-                          },
-                          "active": {
-                            "type": "boolean"
-                          },
-                          "agent": {
-                            "additionalProperties": true,
-                            "properties": {
-                              "id": {
-                                "type": "string"
-                              },
-                              "version": {
-                                "type": "string"
-                              }
-                            },
-                            "required": [
-                              "id",
-                              "version"
-                            ],
-                            "type": "object"
-                          },
-                          "components": {
-                            "items": {
-                              "additionalProperties": false,
-                              "properties": {
-                                "id": {
-                                  "type": "string"
-                                },
-                                "message": {
-                                  "type": "string"
-                                },
-                                "status": {
-                                  "enum": [
-                                    "STARTING",
-                                    "CONFIGURING",
-                                    "HEALTHY",
-                                    "DEGRADED",
-                                    "FAILED",
-                                    "STOPPING",
-                                    "STOPPED"
-                                  ],
-                                  "type": "string"
-                                },
-                                "type": {
-                                  "type": "string"
-                                },
-                                "units": {
-                                  "items": {
-                                    "additionalProperties": false,
-                                    "properties": {
-                                      "id": {
-                                        "type": "string"
-                                      },
-                                      "message": {
-                                        "type": "string"
-                                      },
-                                      "payload": {
-                                        "additionalProperties": {},
-                                        "type": "object"
-                                      },
-                                      "status": {
-                                        "enum": [
-                                          "STARTING",
-                                          "CONFIGURING",
-                                          "HEALTHY",
-                                          "DEGRADED",
-                                          "FAILED",
-                                          "STOPPING",
-                                          "STOPPED"
-                                        ],
-                                        "type": "string"
-                                      },
-                                      "type": {
-                                        "enum": [
-                                          "input",
-                                          "output"
-                                        ],
-                                        "type": "string"
-                                      }
-                                    },
-                                    "required": [
-                                      "id",
-                                      "type",
-                                      "status",
-                                      "message"
-                                    ],
-                                    "type": "object"
-                                  },
-                                  "type": "array"
-                                }
-                              },
-                              "required": [
-                                "id",
-                                "type",
-                                "status",
-                                "message"
-                              ],
-                              "type": "object"
-                            },
-                            "type": "array"
-                          },
-                          "default_api_key": {
-                            "type": "string"
-                          },
-                          "default_api_key_history": {
-                            "items": {
-                              "additionalProperties": false,
-                              "deprecated": true,
-                              "properties": {
-                                "id": {
-                                  "type": "string"
-                                },
-                                "retired_at": {
-                                  "type": "string"
-                                }
-                              },
-                              "required": [
-                                "id",
-                                "retired_at"
-                              ],
-                              "type": "object"
-                            },
-                            "type": "array"
-                          },
-                          "default_api_key_id": {
-                            "type": "string"
-                          },
-                          "enrolled_at": {
-                            "type": "string"
-                          },
-                          "id": {
-                            "type": "string"
-                          },
-                          "last_checkin": {
-                            "type": "string"
-                          },
-                          "last_checkin_message": {
-                            "type": "string"
-                          },
-                          "last_checkin_status": {
-                            "enum": [
-                              "error",
-                              "online",
-                              "degraded",
-                              "updating",
-                              "starting"
-                            ],
-                            "type": "string"
-                          },
-                          "local_metadata": {
-                            "additionalProperties": {},
-                            "type": "object"
-                          },
-                          "metrics": {
-                            "additionalProperties": false,
-                            "properties": {
-                              "cpu_avg": {
-                                "type": "number"
-                              },
-                              "memory_size_byte_avg": {
-                                "type": "number"
-                              }
-                            },
-                            "type": "object"
-                          },
-                          "namespaces": {
-                            "items": {
-                              "type": "string"
-                            },
-                            "type": "array"
-                          },
-                          "outputs": {
-                            "additionalProperties": {
-                              "additionalProperties": false,
-                              "properties": {
-                                "api_key_id": {
-                                  "type": "string"
-                                },
-                                "to_retire_api_key_ids": {
-                                  "items": {
-                                    "additionalProperties": false,
-                                    "properties": {
-                                      "id": {
-                                        "type": "string"
-                                      },
-                                      "retired_at": {
-                                        "type": "string"
-                                      }
-                                    },
-                                    "required": [
-                                      "id",
-                                      "retired_at"
-                                    ],
-                                    "type": "object"
-                                  },
-                                  "type": "array"
-                                },
-                                "type": {
-                                  "type": "string"
-                                }
-                              },
-                              "required": [
-                                "api_key_id",
-                                "type"
-                              ],
-                              "type": "object"
-                            },
-                            "type": "object"
-                          },
-                          "packages": {
-                            "items": {
-                              "type": "string"
-                            },
-                            "type": "array"
-                          },
-                          "policy_id": {
-                            "type": "string"
-                          },
-                          "policy_revision": {
-                            "nullable": true,
-                            "type": "number"
-                          },
-                          "sort": {
-                            "items": {
-                              "anyOf": [
-                                {
-                                  "type": "number"
-                                },
-                                {
-                                  "type": "string"
-                                },
-                                {
-                                  "enum": [],
-                                  "nullable": true
-                                }
-                              ]
-                            },
-                            "type": "array"
-                          },
-                          "status": {
-                            "enum": [
-                              "offline",
-                              "error",
-                              "online",
-                              "inactive",
-                              "enrolling",
-                              "unenrolling",
-                              "unenrolled",
-                              "updating",
-                              "degraded"
-                            ],
-                            "type": "string"
-                          },
-                          "tags": {
-                            "items": {
-                              "type": "string"
-                            },
-                            "type": "array"
-                          },
-                          "type": {
-                            "enum": [
-                              "PERMANENT",
-                              "EPHEMERAL",
-                              "TEMPORARY"
-                            ],
-                            "type": "string"
-                          },
-                          "unenrolled_at": {
-                            "type": "string"
-                          },
-                          "unenrollment_started_at": {
-                            "type": "string"
-                          },
-                          "unhealthy_reason": {
-                            "items": {
-                              "enum": [
-                                "input",
-                                "output",
-                                "other"
-                              ],
-                              "type": "string"
-                            },
-                            "nullable": true,
-                            "type": "array"
-                          },
-                          "upgrade_details": {
-                            "additionalProperties": false,
-                            "properties": {
-                              "action_id": {
-                                "type": "string"
-                              },
-                              "metadata": {
-                                "additionalProperties": false,
-                                "properties": {
-                                  "download_percent": {
-                                    "type": "number"
-                                  },
-                                  "download_rate": {
-                                    "type": "number"
-                                  },
-                                  "error_msg": {
-                                    "type": "string"
-                                  },
-                                  "failed_state": {
-                                    "enum": [
-                                      "UPG_REQUESTED",
-                                      "UPG_SCHEDULED",
-                                      "UPG_DOWNLOADING",
-                                      "UPG_EXTRACTING",
-                                      "UPG_REPLACING",
-                                      "UPG_RESTARTING",
-                                      "UPG_FAILED",
-                                      "UPG_WATCHING",
-                                      "UPG_ROLLBACK"
-                                    ],
-                                    "type": "string"
-                                  },
-                                  "retry_error_msg": {
-                                    "type": "string"
-                                  },
-                                  "retry_until": {
-                                    "type": "string"
-                                  },
-                                  "scheduled_at": {
-                                    "type": "string"
-                                  }
-                                },
-                                "type": "object"
-                              },
-                              "state": {
-                                "enum": [
-                                  "UPG_REQUESTED",
-                                  "UPG_SCHEDULED",
-                                  "UPG_DOWNLOADING",
-                                  "UPG_EXTRACTING",
-                                  "UPG_REPLACING",
-                                  "UPG_RESTARTING",
-                                  "UPG_FAILED",
-                                  "UPG_WATCHING",
-                                  "UPG_ROLLBACK"
-                                ],
-                                "type": "string"
-                              },
-                              "target_version": {
-                                "type": "string"
-                              }
-                            },
-                            "required": [
-                              "target_version",
-                              "action_id",
-                              "state"
-                            ],
-                            "type": "object"
-                          },
-                          "upgrade_started_at": {
-                            "nullable": true,
-                            "type": "string"
-                          },
-                          "upgraded_at": {
-                            "nullable": true,
-                            "type": "string"
-                          },
-                          "user_provided_metadata": {
-                            "additionalProperties": {},
-                            "type": "object"
-                          }
-                        },
-                        "required": [
-                          "id",
-                          "packages",
-                          "type",
-                          "active",
-                          "enrolled_at",
-                          "local_metadata"
-                        ],
-                        "type": "object"
-                      },
-                      "type": "array"
-                    },
                     "page": {
                       "type": "number"
                     },
@@ -14120,7 +13260,7 @@
       },
       "post": {
         "description": "List agents by action ids",
-        "operationId": "%2Fapi%2Ffleet%2Fagents#1",
+        "operationId": "post-fleet-agents",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -14223,7 +13363,7 @@
     "/api/fleet/agents/action_status": {
       "get": {
         "description": "Get agent action status",
-        "operationId": "%2Fapi%2Ffleet%2Fagents%2Faction_status#0",
+        "operationId": "get-fleet-agents-action-status",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -14459,7 +13599,7 @@
     "/api/fleet/agents/actions/{actionId}/cancel": {
       "post": {
         "description": "Cancel agent action",
-        "operationId": "%2Fapi%2Ffleet%2Fagents%2Factions%2F%7BactionId%7D%2Fcancel#0",
+        "operationId": "post-fleet-agents-actions-actionid-cancel",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -14601,7 +13741,7 @@
     "/api/fleet/agents/available_versions": {
       "get": {
         "description": "Get available agent versions",
-        "operationId": "%2Fapi%2Ffleet%2Fagents%2Favailable_versions#0",
+        "operationId": "get-fleet-agents-available-versions",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -14673,7 +13813,7 @@
     "/api/fleet/agents/bulk_reassign": {
       "post": {
         "description": "Bulk reassign agents",
-        "operationId": "%2Fapi%2Ffleet%2Fagents%2Fbulk_reassign#0",
+        "operationId": "post-fleet-agents-bulk-reassign",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -14791,7 +13931,7 @@
     "/api/fleet/agents/bulk_request_diagnostics": {
       "post": {
         "description": "Bulk request diagnostics from agents",
-        "operationId": "%2Fapi%2Ffleet%2Fagents%2Fbulk_request_diagnostics#0",
+        "operationId": "post-fleet-agents-bulk-request-diagnostics",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -14910,7 +14050,7 @@
     "/api/fleet/agents/bulk_unenroll": {
       "post": {
         "description": "Bulk unenroll agents",
-        "operationId": "%2Fapi%2Ffleet%2Fagents%2Fbulk_unenroll#0",
+        "operationId": "post-fleet-agents-bulk-unenroll",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -15034,7 +14174,7 @@
     "/api/fleet/agents/bulk_update_agent_tags": {
       "post": {
         "description": "Bulk update agent tags",
-        "operationId": "%2Fapi%2Ffleet%2Fagents%2Fbulk_update_agent_tags#0",
+        "operationId": "post-fleet-agents-bulk-update-agent-tags",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -15160,7 +14300,7 @@
     "/api/fleet/agents/bulk_upgrade": {
       "post": {
         "description": "Bulk upgrade agents",
-        "operationId": "%2Fapi%2Ffleet%2Fagents%2Fbulk_upgrade#0",
+        "operationId": "post-fleet-agents-bulk-upgrade",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -15294,7 +14434,7 @@
     "/api/fleet/agents/files/{fileId}": {
       "delete": {
         "description": "Delete file uploaded by agent",
-        "operationId": "%2Fapi%2Ffleet%2Fagents%2Ffiles%2F%7BfileId%7D#0",
+        "operationId": "delete-fleet-agents-files-fileid",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -15385,7 +14525,7 @@
     "/api/fleet/agents/files/{fileId}/{fileName}": {
       "get": {
         "description": "Get file uploaded by agent",
-        "operationId": "%2Fapi%2Ffleet%2Fagents%2Ffiles%2F%7BfileId%7D%2F%7BfileName%7D#0",
+        "operationId": "get-fleet-agents-files-fileid-filename",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -15461,7 +14601,7 @@
     "/api/fleet/agents/setup": {
       "get": {
         "description": "Get agent setup info",
-        "operationId": "%2Fapi%2Ffleet%2Fagents%2Fsetup#0",
+        "operationId": "get-fleet-agents-setup",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -15562,7 +14702,7 @@
       },
       "post": {
         "description": "Initiate agent setup",
-        "operationId": "%2Fapi%2Ffleet%2Fagents%2Fsetup#1",
+        "operationId": "post-fleet-agents-setup",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -15662,7 +14802,7 @@
     "/api/fleet/agents/tags": {
       "get": {
         "description": "List agent tags",
-        "operationId": "%2Fapi%2Ffleet%2Fagents%2Ftags#0",
+        "operationId": "get-fleet-agents-tags",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -15751,7 +14891,7 @@
     "/api/fleet/agents/{agentId}": {
       "delete": {
         "description": "Delete agent by ID",
-        "operationId": "%2Fapi%2Ffleet%2Fagents%2F%7BagentId%7D#2",
+        "operationId": "delete-fleet-agents-agentid",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -15839,7 +14979,7 @@
       },
       "get": {
         "description": "Get agent by ID",
-        "operationId": "%2Fapi%2Ffleet%2Fagents%2F%7BagentId%7D#0",
+        "operationId": "get-fleet-agents-agentid",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -16304,7 +15444,7 @@
       },
       "put": {
         "description": "Update agent by ID",
-        "operationId": "%2Fapi%2Ffleet%2Fagents%2F%7BagentId%7D#1",
+        "operationId": "put-fleet-agents-agentid",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -16794,7 +15934,7 @@
     "/api/fleet/agents/{agentId}/actions": {
       "post": {
         "description": "Create agent action",
-        "operationId": "%2Fapi%2Ffleet%2Fagents%2F%7BagentId%7D%2Factions#0",
+        "operationId": "post-fleet-agents-agentid-actions",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -17011,7 +16151,7 @@
     "/api/fleet/agents/{agentId}/reassign": {
       "post": {
         "description": "Reassign agent",
-        "operationId": "%2Fapi%2Ffleet%2Fagents%2F%7BagentId%7D%2Freassign#1",
+        "operationId": "post-fleet-agents-agentid-reassign",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -17104,69 +16244,12 @@
         "tags": [
           "Elastic Agent actions"
         ]
-      },
-      "put": {
-        "deprecated": true,
-        "operationId": "%2Fapi%2Ffleet%2Fagents%2F%7BagentId%7D%2Freassign#0",
-        "parameters": [
-          {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
-            "description": "A required header to protect against CSRF attacks",
-            "in": "header",
-            "name": "kbn-xsrf",
-            "required": true,
-            "schema": {
-              "example": "true",
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "agentId",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json; Elastic-Api-Version=2023-10-31": {
-              "schema": {
-                "additionalProperties": false,
-                "properties": {
-                  "policy_id": {
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "policy_id"
-                ],
-                "type": "object"
-              }
-            }
-          }
-        },
-        "responses": {},
-        "summary": "",
-        "tags": []
       }
     },
     "/api/fleet/agents/{agentId}/request_diagnostics": {
       "post": {
         "description": "Request agent diagnostics",
-        "operationId": "%2Fapi%2Ffleet%2Fagents%2F%7BagentId%7D%2Frequest_diagnostics#0",
+        "operationId": "post-fleet-agents-agentid-request-diagnostics",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -17275,7 +16358,7 @@
     "/api/fleet/agents/{agentId}/unenroll": {
       "post": {
         "description": "Unenroll agent",
-        "operationId": "%2Fapi%2Ffleet%2Fagents%2F%7BagentId%7D%2Funenroll#0",
+        "operationId": "post-fleet-agents-agentid-unenroll",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -17337,7 +16420,7 @@
     "/api/fleet/agents/{agentId}/upgrade": {
       "post": {
         "description": "Upgrade agent",
-        "operationId": "%2Fapi%2Ffleet%2Fagents%2F%7BagentId%7D%2Fupgrade#0",
+        "operationId": "post-fleet-agents-agentid-upgrade",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -17444,7 +16527,7 @@
     "/api/fleet/agents/{agentId}/uploads": {
       "get": {
         "description": "List agent uploads",
-        "operationId": "%2Fapi%2Ffleet%2Fagents%2F%7BagentId%7D%2Fuploads#0",
+        "operationId": "get-fleet-agents-agentid-uploads",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -17564,7 +16647,7 @@
     "/api/fleet/check-permissions": {
       "get": {
         "description": "Check permissions",
-        "operationId": "%2Fapi%2Ffleet%2Fcheck-permissions#0",
+        "operationId": "get-fleet-check-permissions",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -17649,7 +16732,7 @@
     "/api/fleet/data_streams": {
       "get": {
         "description": "List data streams",
-        "operationId": "%2Fapi%2Ffleet%2Fdata_streams#0",
+        "operationId": "get-fleet-data-streams",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -17804,184 +16887,10 @@
         ]
       }
     },
-    "/api/fleet/enrollment-api-keys": {
-      "get": {
-        "deprecated": true,
-        "operationId": "%2Fapi%2Ffleet%2Fenrollment-api-keys#0",
-        "parameters": [
-          {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "page",
-            "required": false,
-            "schema": {
-              "default": 1,
-              "type": "number"
-            }
-          },
-          {
-            "in": "query",
-            "name": "perPage",
-            "required": false,
-            "schema": {
-              "default": 20,
-              "type": "number"
-            }
-          },
-          {
-            "in": "query",
-            "name": "kuery",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {},
-        "summary": "",
-        "tags": []
-      },
-      "post": {
-        "deprecated": true,
-        "operationId": "%2Fapi%2Ffleet%2Fenrollment-api-keys#1",
-        "parameters": [
-          {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
-            "description": "A required header to protect against CSRF attacks",
-            "in": "header",
-            "name": "kbn-xsrf",
-            "required": true,
-            "schema": {
-              "example": "true",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json; Elastic-Api-Version=2023-10-31": {
-              "schema": {
-                "additionalProperties": false,
-                "properties": {
-                  "expiration": {
-                    "type": "string"
-                  },
-                  "name": {
-                    "type": "string"
-                  },
-                  "policy_id": {
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "policy_id"
-                ],
-                "type": "object"
-              }
-            }
-          }
-        },
-        "responses": {},
-        "summary": "",
-        "tags": []
-      }
-    },
-    "/api/fleet/enrollment-api-keys/{keyId}": {
-      "delete": {
-        "deprecated": true,
-        "operationId": "%2Fapi%2Ffleet%2Fenrollment-api-keys%2F%7BkeyId%7D#1",
-        "parameters": [
-          {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
-            "description": "A required header to protect against CSRF attacks",
-            "in": "header",
-            "name": "kbn-xsrf",
-            "required": true,
-            "schema": {
-              "example": "true",
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "keyId",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {},
-        "summary": "",
-        "tags": []
-      },
-      "get": {
-        "deprecated": true,
-        "operationId": "%2Fapi%2Ffleet%2Fenrollment-api-keys%2F%7BkeyId%7D#0",
-        "parameters": [
-          {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "keyId",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {},
-        "summary": "",
-        "tags": []
-      }
-    },
     "/api/fleet/enrollment_api_keys": {
       "get": {
         "description": "List enrollment API keys",
-        "operationId": "%2Fapi%2Ffleet%2Fenrollment_api_keys#0",
+        "operationId": "get-fleet-enrollment-api-keys",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -18071,49 +16980,6 @@
                       },
                       "type": "array"
                     },
-                    "list": {
-                      "deprecated": true,
-                      "items": {
-                        "additionalProperties": false,
-                        "properties": {
-                          "active": {
-                            "description": "When false, the enrollment API key is revoked and cannot be used for enrolling Elastic Agents.",
-                            "type": "boolean"
-                          },
-                          "api_key": {
-                            "description": "The enrollment API key (token) used for enrolling Elastic Agents.",
-                            "type": "string"
-                          },
-                          "api_key_id": {
-                            "description": "The ID of the API key in the Security API.",
-                            "type": "string"
-                          },
-                          "created_at": {
-                            "type": "string"
-                          },
-                          "id": {
-                            "type": "string"
-                          },
-                          "name": {
-                            "description": "The name of the enrollment API key.",
-                            "type": "string"
-                          },
-                          "policy_id": {
-                            "description": "The ID of the agent policy the Elastic Agent will be enrolled in.",
-                            "type": "string"
-                          }
-                        },
-                        "required": [
-                          "id",
-                          "api_key_id",
-                          "api_key",
-                          "active",
-                          "created_at"
-                        ],
-                        "type": "object"
-                      },
-                      "type": "array"
-                    },
                     "page": {
                       "type": "number"
                     },
@@ -18128,8 +16994,7 @@
                     "items",
                     "total",
                     "page",
-                    "perPage",
-                    "list"
+                    "perPage"
                   ],
                   "type": "object"
                 }
@@ -18169,7 +17034,7 @@
       },
       "post": {
         "description": "Create enrollment API key",
-        "operationId": "%2Fapi%2Ffleet%2Fenrollment_api_keys#1",
+        "operationId": "post-fleet-enrollment-api-keys",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -18315,7 +17180,7 @@
     "/api/fleet/enrollment_api_keys/{keyId}": {
       "delete": {
         "description": "Revoke enrollment API key by ID by marking it as inactive",
-        "operationId": "%2Fapi%2Ffleet%2Fenrollment_api_keys%2F%7BkeyId%7D#1",
+        "operationId": "delete-fleet-enrollment-api-keys-keyid",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -18403,7 +17268,7 @@
       },
       "get": {
         "description": "Get enrollment API key by ID",
-        "operationId": "%2Fapi%2Ffleet%2Fenrollment_api_keys%2F%7BkeyId%7D#0",
+        "operationId": "get-fleet-enrollment-api-keys-keyid",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -18516,7 +17381,7 @@
     "/api/fleet/epm/bulk_assets": {
       "post": {
         "description": "Bulk get assets",
-        "operationId": "%2Fapi%2Ffleet%2Fepm%2Fbulk_assets#0",
+        "operationId": "post-fleet-epm-bulk-assets",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -18667,7 +17532,7 @@
     "/api/fleet/epm/categories": {
       "get": {
         "description": "List package categories",
-        "operationId": "%2Fapi%2Ffleet%2Fepm%2Fcategories#0",
+        "operationId": "get-fleet-epm-categories",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -18816,7 +17681,7 @@
     "/api/fleet/epm/custom_integrations": {
       "post": {
         "description": "Create custom integration",
-        "operationId": "%2Fapi%2Ffleet%2Fepm%2Fcustom_integrations#0",
+        "operationId": "post-fleet-epm-custom-integrations",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -19098,7 +17963,7 @@
     "/api/fleet/epm/data_streams": {
       "get": {
         "description": "List data streams",
-        "operationId": "%2Fapi%2Ffleet%2Fepm%2Fdata_streams#0",
+        "operationId": "get-fleet-epm-data-streams",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -19224,7 +18089,7 @@
     "/api/fleet/epm/packages": {
       "get": {
         "description": "List packages",
-        "operationId": "%2Fapi%2Ffleet%2Fepm%2Fpackages#0",
+        "operationId": "get-fleet-epm-packages",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -20293,7 +19158,7 @@
       },
       "post": {
         "description": "Install package by upload",
-        "operationId": "%2Fapi%2Ffleet%2Fepm%2Fpackages#1",
+        "operationId": "post-fleet-epm-packages",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -20555,7 +19420,7 @@
     "/api/fleet/epm/packages/_bulk": {
       "post": {
         "description": "Bulk install packages",
-        "operationId": "%2Fapi%2Ffleet%2Fepm%2Fpackages%2F_bulk#0",
+        "operationId": "post-fleet-epm-packages-bulk",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -20979,7 +19844,7 @@
     "/api/fleet/epm/packages/installed": {
       "get": {
         "description": "Get installed packages",
-        "operationId": "%2Fapi%2Ffleet%2Fepm%2Fpackages%2Finstalled#0",
+        "operationId": "get-fleet-epm-packages-installed",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -21220,7 +20085,7 @@
     "/api/fleet/epm/packages/limited": {
       "get": {
         "description": "Get limited package list",
-        "operationId": "%2Fapi%2Ffleet%2Fepm%2Fpackages%2Flimited#0",
+        "operationId": "get-fleet-epm-packages-limited",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -21299,7 +20164,7 @@
     "/api/fleet/epm/packages/{pkgName}/stats": {
       "get": {
         "description": "Get package stats",
-        "operationId": "%2Fapi%2Ffleet%2Fepm%2Fpackages%2F%7BpkgName%7D%2Fstats#0",
+        "operationId": "get-fleet-epm-packages-pkgname-stats",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -21385,7 +20250,7 @@
     "/api/fleet/epm/packages/{pkgName}/{pkgVersion}": {
       "delete": {
         "description": "Delete package",
-        "operationId": "%2Fapi%2Ffleet%2Fepm%2Fpackages%2F%7BpkgName%7D%2F%7BpkgVersion%7D#3",
+        "operationId": "delete-fleet-epm-packages-pkgname-pkgversion",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -21647,7 +20512,7 @@
       },
       "get": {
         "description": "Get package",
-        "operationId": "%2Fapi%2Ffleet%2Fepm%2Fpackages%2F%7BpkgName%7D%2F%7BpkgVersion%7D#0",
+        "operationId": "get-fleet-epm-packages-pkgname-pkgversion",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -22911,7 +21776,7 @@
       },
       "post": {
         "description": "Install package from registry",
-        "operationId": "%2Fapi%2Ffleet%2Fepm%2Fpackages%2F%7BpkgName%7D%2F%7BpkgVersion%7D#2",
+        "operationId": "post-fleet-epm-packages-pkgname-pkgversion",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -23206,7 +22071,7 @@
       },
       "put": {
         "description": "Update package settings",
-        "operationId": "%2Fapi%2Ffleet%2Fepm%2Fpackages%2F%7BpkgName%7D%2F%7BpkgVersion%7D#1",
+        "operationId": "put-fleet-epm-packages-pkgname-pkgversion",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -24455,7 +23320,7 @@
     "/api/fleet/epm/packages/{pkgName}/{pkgVersion}/transforms/authorize": {
       "post": {
         "description": "Authorize transforms",
-        "operationId": "%2Fapi%2Ffleet%2Fepm%2Fpackages%2F%7BpkgName%7D%2F%7BpkgVersion%7D%2Ftransforms%2Fauthorize#0",
+        "operationId": "post-fleet-epm-packages-pkgname-pkgversion-transforms-authorize",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -24599,7 +23464,7 @@
     "/api/fleet/epm/packages/{pkgName}/{pkgVersion}/{filePath*}": {
       "get": {
         "description": "Get package file",
-        "operationId": "%2Fapi%2Ffleet%2Fepm%2Fpackages%2F%7BpkgName%7D%2F%7BpkgVersion%7D%2F%7BfilePath*%7D#0",
+        "operationId": "get-fleet-epm-packages-pkgname-pkgversion-filepath",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -24680,8 +23545,7 @@
     },
     "/api/fleet/epm/packages/{pkgkey}": {
       "delete": {
-        "deprecated": true,
-        "operationId": "%2Fapi%2Ffleet%2Fepm%2Fpackages%2F%7Bpkgkey%7D#3",
+        "operationId": "delete-fleet-epm-packages-pkgkey",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -24738,8 +23602,7 @@
         "tags": []
       },
       "get": {
-        "deprecated": true,
-        "operationId": "%2Fapi%2Ffleet%2Fepm%2Fpackages%2F%7Bpkgkey%7D#0",
+        "operationId": "get-fleet-epm-packages-pkgkey",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -24800,8 +23663,7 @@
         "tags": []
       },
       "post": {
-        "deprecated": true,
-        "operationId": "%2Fapi%2Ffleet%2Fepm%2Fpackages%2F%7Bpkgkey%7D#2",
+        "operationId": "post-fleet-epm-packages-pkgkey",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -24884,8 +23746,7 @@
         "tags": []
       },
       "put": {
-        "deprecated": true,
-        "operationId": "%2Fapi%2Ffleet%2Fepm%2Fpackages%2F%7Bpkgkey%7D#1",
+        "operationId": "put-fleet-epm-packages-pkgkey",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -24944,7 +23805,7 @@
     "/api/fleet/epm/templates/{pkgName}/{pkgVersion}/inputs": {
       "get": {
         "description": "Get inputs template",
-        "operationId": "%2Fapi%2Ffleet%2Fepm%2Ftemplates%2F%7BpkgName%7D%2F%7BpkgVersion%7D%2Finputs#0",
+        "operationId": "get-fleet-epm-templates-pkgname-pkgversion-inputs",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -25113,7 +23974,7 @@
     "/api/fleet/epm/verification_key_id": {
       "get": {
         "description": "Get a package signature verification key ID",
-        "operationId": "%2Fapi%2Ffleet%2Fepm%2Fverification_key_id#0",
+        "operationId": "get-fleet-epm-verification-key-id",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -25183,7 +24044,7 @@
     "/api/fleet/fleet_server_hosts": {
       "get": {
         "description": "List Fleet Server hosts",
-        "operationId": "%2Fapi%2Ffleet%2Ffleet_server_hosts#0",
+        "operationId": "get-fleet-fleet-server-hosts",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -25301,7 +24162,7 @@
       },
       "post": {
         "description": "Create Fleet Server host",
-        "operationId": "%2Fapi%2Ffleet%2Ffleet_server_hosts#1",
+        "operationId": "post-fleet-fleet-server-hosts",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -25460,7 +24321,7 @@
     "/api/fleet/fleet_server_hosts/{itemId}": {
       "delete": {
         "description": "Delete Fleet Server host by ID",
-        "operationId": "%2Fapi%2Ffleet%2Ffleet_server_hosts%2F%7BitemId%7D#1",
+        "operationId": "delete-fleet-fleet-server-hosts-itemid",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -25545,7 +24406,7 @@
       },
       "get": {
         "description": "Get Fleet Server host by ID",
-        "operationId": "%2Fapi%2Ffleet%2Ffleet_server_hosts%2F%7BitemId%7D#0",
+        "operationId": "get-fleet-fleet-server-hosts-itemid",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -25656,7 +24517,7 @@
       },
       "put": {
         "description": "Update Fleet Server host by ID",
-        "operationId": "%2Fapi%2Ffleet%2Ffleet_server_hosts%2F%7BitemId%7D#2",
+        "operationId": "put-fleet-fleet-server-hosts-itemid",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -25814,7 +24675,7 @@
     "/api/fleet/health_check": {
       "post": {
         "description": "Check Fleet Server health",
-        "operationId": "%2Fapi%2Ffleet%2Fhealth_check#0",
+        "operationId": "post-fleet-health-check",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -25845,10 +24706,6 @@
               "schema": {
                 "additionalProperties": false,
                 "properties": {
-                  "host": {
-                    "format": "uri",
-                    "type": "string"
-                  },
                   "id": {
                     "type": "string"
                   }
@@ -25868,10 +24725,6 @@
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
-                    "host": {
-                      "deprecated": true,
-                      "type": "string"
-                    },
                     "host_id": {
                       "type": "string"
                     },
@@ -25950,7 +24803,7 @@
     "/api/fleet/kubernetes": {
       "get": {
         "description": "Get full K8s agent manifest",
-        "operationId": "%2Fapi%2Ffleet%2Fkubernetes#0",
+        "operationId": "get-fleet-kubernetes",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -26042,7 +24895,7 @@
     },
     "/api/fleet/kubernetes/download": {
       "get": {
-        "operationId": "%2Fapi%2Ffleet%2Fkubernetes%2Fdownload#0",
+        "operationId": "get-fleet-kubernetes-download",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -26151,7 +25004,7 @@
     "/api/fleet/logstash_api_keys": {
       "post": {
         "description": "Generate Logstash API key",
-        "operationId": "%2Fapi%2Ffleet%2Flogstash_api_keys#0",
+        "operationId": "post-fleet-logstash-api-keys",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -26230,7 +25083,7 @@
     "/api/fleet/message_signing_service/rotate_key_pair": {
       "post": {
         "description": "Rotate fleet message signing key pair",
-        "operationId": "%2Fapi%2Ffleet%2Fmessage_signing_service%2Frotate_key_pair#0",
+        "operationId": "post-fleet-message-signing-service-rotate-key-pair",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -26343,7 +25196,7 @@
     "/api/fleet/outputs": {
       "get": {
         "description": "List outputs",
-        "operationId": "%2Fapi%2Ffleet%2Foutputs#0",
+        "operationId": "get-fleet-outputs",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -27473,7 +26326,7 @@
       },
       "post": {
         "description": "Create output",
-        "operationId": "%2Fapi%2Ffleet%2Foutputs#1",
+        "operationId": "post-fleet-outputs",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -29657,7 +28510,7 @@
     "/api/fleet/outputs/{outputId}": {
       "delete": {
         "description": "Delete output by ID",
-        "operationId": "%2Fapi%2Ffleet%2Foutputs%2F%7BoutputId%7D#2",
+        "operationId": "delete-fleet-outputs-outputid",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -29767,7 +28620,7 @@
       },
       "get": {
         "description": "Get output by ID",
-        "operationId": "%2Fapi%2Ffleet%2Foutputs%2F%7BoutputId%7D#0",
+        "operationId": "get-fleet-outputs-outputid",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -30890,7 +29743,7 @@
       },
       "put": {
         "description": "Update output by ID",
-        "operationId": "%2Fapi%2Ffleet%2Foutputs%2F%7BoutputId%7D#1",
+        "operationId": "put-fleet-outputs-outputid",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -33058,7 +31911,7 @@
     "/api/fleet/outputs/{outputId}/health": {
       "get": {
         "description": "Get latest output health",
-        "operationId": "%2Fapi%2Ffleet%2Foutputs%2F%7BoutputId%7D%2Fhealth#0",
+        "operationId": "get-fleet-outputs-outputid-health",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -33146,7 +31999,7 @@
     "/api/fleet/package_policies": {
       "get": {
         "description": "List package policies",
-        "operationId": "%2Fapi%2Ffleet%2Fpackage_policies#0",
+        "operationId": "get-fleet-package-policies",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -33861,7 +32714,7 @@
       },
       "post": {
         "description": "Create package policy",
-        "operationId": "%2Fapi%2Ffleet%2Fpackage_policies#1",
+        "operationId": "post-fleet-package-policies",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -35135,7 +33988,7 @@
     "/api/fleet/package_policies/_bulk_get": {
       "post": {
         "description": "Bulk get package policies",
-        "operationId": "%2Fapi%2Ffleet%2Fpackage_policies%2F_bulk_get#0",
+        "operationId": "post-fleet-package-policies-bulk-get",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -35833,7 +34686,7 @@
     "/api/fleet/package_policies/delete": {
       "post": {
         "description": "Bulk delete package policies",
-        "operationId": "%2Fapi%2Ffleet%2Fpackage_policies%2Fdelete#0",
+        "operationId": "post-fleet-package-policies-delete",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -36037,7 +34890,7 @@
     "/api/fleet/package_policies/upgrade": {
       "post": {
         "description": "Upgrade package policy to a newer package version",
-        "operationId": "%2Fapi%2Ffleet%2Fpackage_policies%2Fupgrade#0",
+        "operationId": "post-fleet-package-policies-upgrade",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -36162,7 +35015,7 @@
     "/api/fleet/package_policies/upgrade/dryrun": {
       "post": {
         "description": "Dry run package policy upgrade",
-        "operationId": "%2Fapi%2Ffleet%2Fpackage_policies%2Fupgrade%2Fdryrun#0",
+        "operationId": "post-fleet-package-policies-upgrade-dryrun",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -37348,7 +36201,7 @@
     "/api/fleet/package_policies/{packagePolicyId}": {
       "delete": {
         "description": "Delete package policy by ID",
-        "operationId": "%2Fapi%2Ffleet%2Fpackage_policies%2F%7BpackagePolicyId%7D#2",
+        "operationId": "delete-fleet-package-policies-packagepolicyid",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -37441,7 +36294,7 @@
       },
       "get": {
         "description": "Get package policy by ID",
-        "operationId": "%2Fapi%2Ffleet%2Fpackage_policies%2F%7BpackagePolicyId%7D#0",
+        "operationId": "get-fleet-package-policies-packagepolicyid",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -38107,7 +36960,7 @@
       },
       "put": {
         "description": "Update package policy by ID",
-        "operationId": "%2Fapi%2Ffleet%2Fpackage_policies%2F%7BpackagePolicyId%7D#1",
+        "operationId": "put-fleet-package-policies-packagepolicyid",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -39381,7 +38234,7 @@
     "/api/fleet/proxies": {
       "get": {
         "description": "List proxies",
-        "operationId": "%2Fapi%2Ffleet%2Fproxies#0",
+        "operationId": "get-fleet-proxies",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -39513,7 +38366,7 @@
       },
       "post": {
         "description": "Create proxy",
-        "operationId": "%2Fapi%2Ffleet%2Fproxies#1",
+        "operationId": "post-fleet-proxies",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -39700,7 +38553,7 @@
     "/api/fleet/proxies/{itemId}": {
       "delete": {
         "description": "Delete proxy by ID",
-        "operationId": "%2Fapi%2Ffleet%2Fproxies%2F%7BitemId%7D#2",
+        "operationId": "delete-fleet-proxies-itemid",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -39785,7 +38638,7 @@
       },
       "get": {
         "description": "Get proxy by ID",
-        "operationId": "%2Fapi%2Ffleet%2Fproxies%2F%7BitemId%7D#1",
+        "operationId": "get-fleet-proxies-itemid",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -39910,7 +38763,7 @@
       },
       "put": {
         "description": "Update proxy by ID",
-        "operationId": "%2Fapi%2Ffleet%2Fproxies%2F%7BitemId%7D#0",
+        "operationId": "put-fleet-proxies-itemid",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -40097,44 +38950,10 @@
         ]
       }
     },
-    "/api/fleet/service-tokens": {
-      "post": {
-        "deprecated": true,
-        "description": "Create a service token",
-        "operationId": "%2Fapi%2Ffleet%2Fservice-tokens#0",
-        "parameters": [
-          {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
-            "description": "A required header to protect against CSRF attacks",
-            "in": "header",
-            "name": "kbn-xsrf",
-            "required": true,
-            "schema": {
-              "example": "true",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {},
-        "summary": "",
-        "tags": []
-      }
-    },
     "/api/fleet/service_tokens": {
       "post": {
         "description": "Create a service token",
-        "operationId": "%2Fapi%2Ffleet%2Fservice_tokens#0",
+        "operationId": "post-fleet-service-tokens",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -40234,7 +39053,7 @@
     "/api/fleet/settings": {
       "get": {
         "description": "Get settings",
-        "operationId": "%2Fapi%2Ffleet%2Fsettings#0",
+        "operationId": "get-fleet-settings",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -40274,12 +39093,6 @@
                             "is_preconfigured"
                           ],
                           "type": "object"
-                        },
-                        "fleet_server_hosts": {
-                          "items": {
-                            "type": "string"
-                          },
-                          "type": "array"
                         },
                         "has_seen_add_data_notice": {
                           "type": "boolean"
@@ -40385,7 +39198,7 @@
       },
       "put": {
         "description": "Update settings",
-        "operationId": "%2Fapi%2Ffleet%2Fsettings#1",
+        "operationId": "put-fleet-settings",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -40435,13 +39248,6 @@
                     ],
                     "type": "object"
                   },
-                  "fleet_server_hosts": {
-                    "items": {
-                      "format": "uri",
-                      "type": "string"
-                    },
-                    "type": "array"
-                  },
                   "has_seen_add_data_notice": {
                     "type": "boolean"
                   },
@@ -40489,12 +39295,6 @@
                             "is_preconfigured"
                           ],
                           "type": "object"
-                        },
-                        "fleet_server_hosts": {
-                          "items": {
-                            "type": "string"
-                          },
-                          "type": "array"
                         },
                         "has_seen_add_data_notice": {
                           "type": "boolean"
@@ -40602,7 +39402,7 @@
     "/api/fleet/setup": {
       "post": {
         "description": "Initiate Fleet setup",
-        "operationId": "%2Fapi%2Ffleet%2Fsetup#0",
+        "operationId": "post-fleet-setup",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -40721,7 +39521,7 @@
     "/api/fleet/uninstall_tokens": {
       "get": {
         "description": "List metadata for latest uninstall tokens per agent policy",
-        "operationId": "%2Fapi%2Ffleet%2Funinstall_tokens#0",
+        "operationId": "get-fleet-uninstall-tokens",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -40870,7 +39670,7 @@
     "/api/fleet/uninstall_tokens/{uninstallTokenId}": {
       "get": {
         "description": "Get one decrypted uninstall token by its ID",
-        "operationId": "%2Fapi%2Ffleet%2Funinstall_tokens%2F%7BuninstallTokenId%7D#0",
+        "operationId": "get-fleet-uninstall-tokens-uninstalltokenid",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -40975,10 +39775,9 @@
         ]
       }
     },
-    "/api/spaces/space": {
+    "/api/security/role": {
       "get": {
-        "description": "Get all spaces",
-        "operationId": "%2Fapi%2Fspaces%2Fspace#0",
+        "operationId": "get-security-role",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -40993,6 +39792,764 @@
             }
           },
           {
+            "description": "If `true` and the response contains any privileges that are associated with deprecated features, they are omitted in favor of details about the appropriate replacement feature privileges.",
+            "in": "query",
+            "name": "replaceDeprecatedPrivileges",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call."
+          }
+        },
+        "summary": "Get all roles",
+        "tags": [
+          "roles"
+        ]
+      }
+    },
+    "/api/security/role/{name}": {
+      "delete": {
+        "operationId": "delete-security-role-name",
+        "parameters": [
+          {
+            "description": "The version of the API to use",
+            "in": "header",
+            "name": "elastic-api-version",
+            "schema": {
+              "default": "2023-10-31",
+              "enum": [
+                "2023-10-31"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "A required header to protect against CSRF attacks",
+            "in": "header",
+            "name": "kbn-xsrf",
+            "required": true,
+            "schema": {
+              "example": "true",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Indicates a successful call."
+          }
+        },
+        "summary": "Delete a role",
+        "tags": [
+          "roles"
+        ]
+      },
+      "get": {
+        "operationId": "get-security-role-name",
+        "parameters": [
+          {
+            "description": "The version of the API to use",
+            "in": "header",
+            "name": "elastic-api-version",
+            "schema": {
+              "default": "2023-10-31",
+              "enum": [
+                "2023-10-31"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "The role name.",
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "description": "If `true` and the response contains any privileges that are associated with deprecated features, they are omitted in favor of details about the appropriate replacement feature privileges.",
+            "in": "query",
+            "name": "replaceDeprecatedPrivileges",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call."
+          }
+        },
+        "summary": "Get a role",
+        "tags": [
+          "roles"
+        ]
+      },
+      "put": {
+        "description": "Create a new Kibana role or update the attributes of an existing role. Kibana roles are stored in the Elasticsearch native realm.",
+        "operationId": "put-security-role-name",
+        "parameters": [
+          {
+            "description": "The version of the API to use",
+            "in": "header",
+            "name": "elastic-api-version",
+            "schema": {
+              "default": "2023-10-31",
+              "enum": [
+                "2023-10-31"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "A required header to protect against CSRF attacks",
+            "in": "header",
+            "name": "kbn-xsrf",
+            "required": true,
+            "schema": {
+              "example": "true",
+              "type": "string"
+            }
+          },
+          {
+            "description": "The role name.",
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "maxLength": 1024,
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "description": "When true, a role is not overwritten if it already exists.",
+            "in": "query",
+            "name": "createOnly",
+            "required": false,
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json; Elastic-Api-Version=2023-10-31": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "description": {
+                    "description": "A description for the role.",
+                    "maxLength": 2048,
+                    "type": "string"
+                  },
+                  "elasticsearch": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "cluster": {
+                        "items": {
+                          "description": "Cluster privileges that define the cluster level actions that users can perform.",
+                          "type": "string"
+                        },
+                        "type": "array"
+                      },
+                      "indices": {
+                        "items": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "allow_restricted_indices": {
+                              "description": "Restricted indices are a special category of indices that are used internally to store configuration data and should not be directly accessed. Only internal system roles should normally grant privileges over the restricted indices. Toggling this flag is very strongly discouraged because it could effectively grant unrestricted operations on critical data, making the entire system unstable or leaking sensitive information. If for administrative purposes you need to create a role with privileges covering restricted indices, however, you can set this property to true. In that case, the names field covers the restricted indices too.",
+                              "type": "boolean"
+                            },
+                            "field_security": {
+                              "additionalProperties": {
+                                "items": {
+                                  "description": "The document fields that the role members have read access to.",
+                                  "type": "string"
+                                },
+                                "type": "array"
+                              },
+                              "type": "object"
+                            },
+                            "names": {
+                              "items": {
+                                "description": "The data streams, indices, and aliases to which the permissions in this entry apply. It supports wildcards (*).",
+                                "type": "string"
+                              },
+                              "minItems": 1,
+                              "type": "array"
+                            },
+                            "privileges": {
+                              "items": {
+                                "description": "The index level privileges that the role members have for the data streams and indices.",
+                                "type": "string"
+                              },
+                              "minItems": 1,
+                              "type": "array"
+                            },
+                            "query": {
+                              "description": "A search query that defines the documents the role members have read access to. A document within the specified data streams and indices must match this query in order for it to be accessible by the role members.",
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "names",
+                            "privileges"
+                          ],
+                          "type": "object"
+                        },
+                        "type": "array"
+                      },
+                      "remote_cluster": {
+                        "items": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "clusters": {
+                              "items": {
+                                "description": "A list of remote cluster aliases. It supports literal strings as well as wildcards and regular expressions.",
+                                "type": "string"
+                              },
+                              "minItems": 1,
+                              "type": "array"
+                            },
+                            "privileges": {
+                              "items": {
+                                "description": "The cluster level privileges for the remote cluster. The allowed values are a subset of the cluster privileges.",
+                                "type": "string"
+                              },
+                              "minItems": 1,
+                              "type": "array"
+                            }
+                          },
+                          "required": [
+                            "privileges",
+                            "clusters"
+                          ],
+                          "type": "object"
+                        },
+                        "type": "array"
+                      },
+                      "remote_indices": {
+                        "items": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "allow_restricted_indices": {
+                              "description": "Restricted indices are a special category of indices that are used internally to store configuration data and should not be directly accessed. Only internal system roles should normally grant privileges over the restricted indices. Toggling this flag is very strongly discouraged because it could effectively grant unrestricted operations on critical data, making the entire system unstable or leaking sensitive information. If for administrative purposes you need to create a role with privileges covering restricted indices, however, you can set this property to true. In that case, the names field will cover the restricted indices too.",
+                              "type": "boolean"
+                            },
+                            "clusters": {
+                              "items": {
+                                "description": "A list of remote cluster aliases. It supports literal strings as well as wildcards and regular expressions.",
+                                "type": "string"
+                              },
+                              "minItems": 1,
+                              "type": "array"
+                            },
+                            "field_security": {
+                              "additionalProperties": {
+                                "items": {
+                                  "description": "The document fields that the role members have read access to.",
+                                  "type": "string"
+                                },
+                                "type": "array"
+                              },
+                              "type": "object"
+                            },
+                            "names": {
+                              "items": {
+                                "description": "A list of remote aliases, data streams, or indices to which the permissions apply. It supports wildcards (*).",
+                                "type": "string"
+                              },
+                              "minItems": 1,
+                              "type": "array"
+                            },
+                            "privileges": {
+                              "items": {
+                                "description": "The index level privileges that role members have for the specified indices.",
+                                "type": "string"
+                              },
+                              "minItems": 1,
+                              "type": "array"
+                            },
+                            "query": {
+                              "description": "A search query that defines the documents the role members have read access to. A document within the specified data streams and indices must match this query in order for it to be accessible by the role members. ",
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "clusters",
+                            "names",
+                            "privileges"
+                          ],
+                          "type": "object"
+                        },
+                        "type": "array"
+                      },
+                      "run_as": {
+                        "items": {
+                          "description": "A user name that the role member can impersonate.",
+                          "type": "string"
+                        },
+                        "type": "array"
+                      }
+                    },
+                    "type": "object"
+                  },
+                  "kibana": {
+                    "items": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "base": {
+                          "anyOf": [
+                            {
+                              "items": {},
+                              "type": "array"
+                            },
+                            {
+                              "type": "boolean"
+                            },
+                            {
+                              "type": "number"
+                            },
+                            {
+                              "type": "object"
+                            },
+                            {
+                              "type": "string"
+                            }
+                          ],
+                          "nullable": true,
+                          "oneOf": [
+                            {
+                              "items": {
+                                "description": "A base privilege that grants applies to all spaces.",
+                                "type": "string"
+                              },
+                              "type": "array"
+                            },
+                            {
+                              "items": {
+                                "description": "A base privilege that applies to specific spaces.",
+                                "type": "string"
+                              },
+                              "type": "array"
+                            }
+                          ]
+                        },
+                        "feature": {
+                          "additionalProperties": {
+                            "items": {
+                              "description": "The privileges that the role member has for the feature.",
+                              "type": "string"
+                            },
+                            "type": "array"
+                          },
+                          "type": "object"
+                        },
+                        "spaces": {
+                          "anyOf": [
+                            {
+                              "items": {
+                                "enum": [
+                                  "*"
+                                ],
+                                "type": "string"
+                              },
+                              "maxItems": 1,
+                              "minItems": 1,
+                              "type": "array"
+                            },
+                            {
+                              "items": {
+                                "description": "A space that the privilege applies to.",
+                                "type": "string"
+                              },
+                              "type": "array"
+                            }
+                          ],
+                          "default": [
+                            "*"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "base"
+                      ],
+                      "type": "object"
+                    },
+                    "type": "array"
+                  },
+                  "metadata": {
+                    "additionalProperties": {},
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "elasticsearch"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Indicates a successful call."
+          }
+        },
+        "summary": "Create or update a role",
+        "tags": [
+          "roles"
+        ]
+      }
+    },
+    "/api/security/roles": {
+      "post": {
+        "operationId": "post-security-roles",
+        "parameters": [
+          {
+            "description": "The version of the API to use",
+            "in": "header",
+            "name": "elastic-api-version",
+            "schema": {
+              "default": "2023-10-31",
+              "enum": [
+                "2023-10-31"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "A required header to protect against CSRF attacks",
+            "in": "header",
+            "name": "kbn-xsrf",
+            "required": true,
+            "schema": {
+              "example": "true",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json; Elastic-Api-Version=2023-10-31": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "roles": {
+                    "additionalProperties": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "description": {
+                          "description": "A description for the role.",
+                          "maxLength": 2048,
+                          "type": "string"
+                        },
+                        "elasticsearch": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "cluster": {
+                              "items": {
+                                "description": "Cluster privileges that define the cluster level actions that users can perform.",
+                                "type": "string"
+                              },
+                              "type": "array"
+                            },
+                            "indices": {
+                              "items": {
+                                "additionalProperties": false,
+                                "properties": {
+                                  "allow_restricted_indices": {
+                                    "description": "Restricted indices are a special category of indices that are used internally to store configuration data and should not be directly accessed. Only internal system roles should normally grant privileges over the restricted indices. Toggling this flag is very strongly discouraged because it could effectively grant unrestricted operations on critical data, making the entire system unstable or leaking sensitive information. If for administrative purposes you need to create a role with privileges covering restricted indices, however, you can set this property to true. In that case, the names field covers the restricted indices too.",
+                                    "type": "boolean"
+                                  },
+                                  "field_security": {
+                                    "additionalProperties": {
+                                      "items": {
+                                        "description": "The document fields that the role members have read access to.",
+                                        "type": "string"
+                                      },
+                                      "type": "array"
+                                    },
+                                    "type": "object"
+                                  },
+                                  "names": {
+                                    "items": {
+                                      "description": "The data streams, indices, and aliases to which the permissions in this entry apply. It supports wildcards (*).",
+                                      "type": "string"
+                                    },
+                                    "minItems": 1,
+                                    "type": "array"
+                                  },
+                                  "privileges": {
+                                    "items": {
+                                      "description": "The index level privileges that the role members have for the data streams and indices.",
+                                      "type": "string"
+                                    },
+                                    "minItems": 1,
+                                    "type": "array"
+                                  },
+                                  "query": {
+                                    "description": "A search query that defines the documents the role members have read access to. A document within the specified data streams and indices must match this query in order for it to be accessible by the role members.",
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "names",
+                                  "privileges"
+                                ],
+                                "type": "object"
+                              },
+                              "type": "array"
+                            },
+                            "remote_cluster": {
+                              "items": {
+                                "additionalProperties": false,
+                                "properties": {
+                                  "clusters": {
+                                    "items": {
+                                      "description": "A list of remote cluster aliases. It supports literal strings as well as wildcards and regular expressions.",
+                                      "type": "string"
+                                    },
+                                    "minItems": 1,
+                                    "type": "array"
+                                  },
+                                  "privileges": {
+                                    "items": {
+                                      "description": "The cluster level privileges for the remote cluster. The allowed values are a subset of the cluster privileges.",
+                                      "type": "string"
+                                    },
+                                    "minItems": 1,
+                                    "type": "array"
+                                  }
+                                },
+                                "required": [
+                                  "privileges",
+                                  "clusters"
+                                ],
+                                "type": "object"
+                              },
+                              "type": "array"
+                            },
+                            "remote_indices": {
+                              "items": {
+                                "additionalProperties": false,
+                                "properties": {
+                                  "allow_restricted_indices": {
+                                    "description": "Restricted indices are a special category of indices that are used internally to store configuration data and should not be directly accessed. Only internal system roles should normally grant privileges over the restricted indices. Toggling this flag is very strongly discouraged because it could effectively grant unrestricted operations on critical data, making the entire system unstable or leaking sensitive information. If for administrative purposes you need to create a role with privileges covering restricted indices, however, you can set this property to true. In that case, the names field will cover the restricted indices too.",
+                                    "type": "boolean"
+                                  },
+                                  "clusters": {
+                                    "items": {
+                                      "description": "A list of remote cluster aliases. It supports literal strings as well as wildcards and regular expressions.",
+                                      "type": "string"
+                                    },
+                                    "minItems": 1,
+                                    "type": "array"
+                                  },
+                                  "field_security": {
+                                    "additionalProperties": {
+                                      "items": {
+                                        "description": "The document fields that the role members have read access to.",
+                                        "type": "string"
+                                      },
+                                      "type": "array"
+                                    },
+                                    "type": "object"
+                                  },
+                                  "names": {
+                                    "items": {
+                                      "description": "A list of remote aliases, data streams, or indices to which the permissions apply. It supports wildcards (*).",
+                                      "type": "string"
+                                    },
+                                    "minItems": 1,
+                                    "type": "array"
+                                  },
+                                  "privileges": {
+                                    "items": {
+                                      "description": "The index level privileges that role members have for the specified indices.",
+                                      "type": "string"
+                                    },
+                                    "minItems": 1,
+                                    "type": "array"
+                                  },
+                                  "query": {
+                                    "description": "A search query that defines the documents the role members have read access to. A document within the specified data streams and indices must match this query in order for it to be accessible by the role members. ",
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "clusters",
+                                  "names",
+                                  "privileges"
+                                ],
+                                "type": "object"
+                              },
+                              "type": "array"
+                            },
+                            "run_as": {
+                              "items": {
+                                "description": "A user name that the role member can impersonate.",
+                                "type": "string"
+                              },
+                              "type": "array"
+                            }
+                          },
+                          "type": "object"
+                        },
+                        "kibana": {
+                          "items": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "base": {
+                                "anyOf": [
+                                  {
+                                    "items": {},
+                                    "type": "array"
+                                  },
+                                  {
+                                    "type": "boolean"
+                                  },
+                                  {
+                                    "type": "number"
+                                  },
+                                  {
+                                    "type": "object"
+                                  },
+                                  {
+                                    "type": "string"
+                                  }
+                                ],
+                                "nullable": true,
+                                "oneOf": [
+                                  {
+                                    "items": {
+                                      "description": "A base privilege that grants applies to all spaces.",
+                                      "type": "string"
+                                    },
+                                    "type": "array"
+                                  },
+                                  {
+                                    "items": {
+                                      "description": "A base privilege that applies to specific spaces.",
+                                      "type": "string"
+                                    },
+                                    "type": "array"
+                                  }
+                                ]
+                              },
+                              "feature": {
+                                "additionalProperties": {
+                                  "items": {
+                                    "description": "The privileges that the role member has for the feature.",
+                                    "type": "string"
+                                  },
+                                  "type": "array"
+                                },
+                                "type": "object"
+                              },
+                              "spaces": {
+                                "anyOf": [
+                                  {
+                                    "items": {
+                                      "enum": [
+                                        "*"
+                                      ],
+                                      "type": "string"
+                                    },
+                                    "maxItems": 1,
+                                    "minItems": 1,
+                                    "type": "array"
+                                  },
+                                  {
+                                    "items": {
+                                      "description": "A space that the privilege applies to.",
+                                      "type": "string"
+                                    },
+                                    "type": "array"
+                                  }
+                                ],
+                                "default": [
+                                  "*"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "base"
+                            ],
+                            "type": "object"
+                          },
+                          "type": "array"
+                        },
+                        "metadata": {
+                          "additionalProperties": {},
+                          "type": "object"
+                        }
+                      },
+                      "required": [
+                        "elasticsearch"
+                      ],
+                      "type": "object"
+                    },
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "roles"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call."
+          }
+        },
+        "summary": "Create or update roles",
+        "tags": [
+          "roles"
+        ]
+      }
+    },
+    "/api/spaces/space": {
+      "get": {
+        "operationId": "get-spaces-space",
+        "parameters": [
+          {
+            "description": "The version of the API to use",
+            "in": "header",
+            "name": "elastic-api-version",
+            "schema": {
+              "default": "2023-10-31",
+              "enum": [
+                "2023-10-31"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Specifies which authorization checks are applied to the API call. The default value is `any`.",
             "in": "query",
             "name": "purpose",
             "required": false,
@@ -41006,6 +40563,7 @@
             }
           },
           {
+            "description": "When enabled, the API returns any spaces that the user is authorized to access in any capacity and each space will contain the purposes for which the user is authorized. This can be useful to determine which spaces a user can read but not take a specific action in. If the security plugin is not enabled, this parameter has no effect, since no authorization checks take place. This parameter cannot be used in with the `purpose` parameter.",
             "in": "query",
             "name": "include_authorized_purposes",
             "required": true,
@@ -41045,15 +40603,18 @@
             }
           }
         ],
-        "responses": {},
-        "summary": "",
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call."
+          }
+        },
+        "summary": "Get all spaces",
         "tags": [
           "spaces"
         ]
       },
       "post": {
-        "description": "Create a space",
-        "operationId": "%2Fapi%2Fspaces%2Fspace#1",
+        "operationId": "post-spaces-space",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -41088,29 +40649,36 @@
                     "type": "boolean"
                   },
                   "color": {
+                    "description": "The hexadecimal color code used in the space avatar. By default, the color is automatically generated from the space name.",
                     "type": "string"
                   },
                   "description": {
+                    "description": "A description for the space.",
                     "type": "string"
                   },
                   "disabledFeatures": {
                     "default": [],
                     "items": {
+                      "description": "The list of features that are turned off in the space.",
                       "type": "string"
                     },
                     "type": "array"
                   },
                   "id": {
+                    "description": "The space ID that is part of the Kibana URL when inside the space. Space IDs are limited to lowercase alphanumeric, underscore, and hyphen characters (a-z, 0-9, _, and -). You are cannot change the ID with the update operation.",
                     "type": "string"
                   },
                   "imageUrl": {
+                    "description": "The data-URL encoded image to display in the space avatar. If specified, initials will not be displayed and the color will be visible as the background color for transparent images. For best results, your image should be 64x64. Images will not be optimized by this API call, so care should be taken when using custom images.",
                     "type": "string"
                   },
                   "initials": {
+                    "description": "One or two characters that are shown in the space avatar. By default, the initials are automatically generated from the space name.",
                     "maxLength": 2,
                     "type": "string"
                   },
                   "name": {
+                    "description": "The display name for the space. ",
                     "minLength": 1,
                     "type": "string"
                   }
@@ -41124,8 +40692,12 @@
             }
           }
         },
-        "responses": {},
-        "summary": "",
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call."
+          }
+        },
+        "summary": "Create a space",
         "tags": [
           "spaces"
         ]
@@ -41133,8 +40705,8 @@
     },
     "/api/spaces/space/{id}": {
       "delete": {
-        "description": "Delete a space",
-        "operationId": "%2Fapi%2Fspaces%2Fspace%2F%7Bid%7D#2",
+        "description": "When you delete a space, all saved objects that belong to the space are automatically deleted, which is permanent and cannot be undone.",
+        "operationId": "delete-spaces-space-id",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -41159,6 +40731,7 @@
             }
           },
           {
+            "description": "The space identifier.",
             "in": "path",
             "name": "id",
             "required": true,
@@ -41167,15 +40740,21 @@
             }
           }
         ],
-        "responses": {},
-        "summary": "",
+        "responses": {
+          "204": {
+            "description": "Indicates a successful call."
+          },
+          "404": {
+            "description": "Indicates that the request failed."
+          }
+        },
+        "summary": "Delete a space",
         "tags": [
           "spaces"
         ]
       },
       "get": {
-        "description": "Get a space",
-        "operationId": "%2Fapi%2Fspaces%2Fspace%2F%7Bid%7D#0",
+        "operationId": "get-spaces-space-id",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -41190,6 +40769,7 @@
             }
           },
           {
+            "description": "The space identifier.",
             "in": "path",
             "name": "id",
             "required": true,
@@ -41198,15 +40778,18 @@
             }
           }
         ],
-        "responses": {},
-        "summary": "",
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call."
+          }
+        },
+        "summary": "Get a space",
         "tags": [
           "spaces"
         ]
       },
       "put": {
-        "description": "Update a space",
-        "operationId": "%2Fapi%2Fspaces%2Fspace%2F%7Bid%7D#1",
+        "operationId": "put-spaces-space-id",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -41231,6 +40814,7 @@
             }
           },
           {
+            "description": "The space identifier. You are unable to change the ID with the update operation.",
             "in": "path",
             "name": "id",
             "required": true,
@@ -41249,29 +40833,36 @@
                     "type": "boolean"
                   },
                   "color": {
+                    "description": "The hexadecimal color code used in the space avatar. By default, the color is automatically generated from the space name.",
                     "type": "string"
                   },
                   "description": {
+                    "description": "A description for the space.",
                     "type": "string"
                   },
                   "disabledFeatures": {
                     "default": [],
                     "items": {
+                      "description": "The list of features that are turned off in the space.",
                       "type": "string"
                     },
                     "type": "array"
                   },
                   "id": {
+                    "description": "The space ID that is part of the Kibana URL when inside the space. Space IDs are limited to lowercase alphanumeric, underscore, and hyphen characters (a-z, 0-9, _, and -). You are cannot change the ID with the update operation.",
                     "type": "string"
                   },
                   "imageUrl": {
+                    "description": "The data-URL encoded image to display in the space avatar. If specified, initials will not be displayed and the color will be visible as the background color for transparent images. For best results, your image should be 64x64. Images will not be optimized by this API call, so care should be taken when using custom images.",
                     "type": "string"
                   },
                   "initials": {
+                    "description": "One or two characters that are shown in the space avatar. By default, the initials are automatically generated from the space name.",
                     "maxLength": 2,
                     "type": "string"
                   },
                   "name": {
+                    "description": "The display name for the space. ",
                     "minLength": 1,
                     "type": "string"
                   }
@@ -41285,8 +40876,12 @@
             }
           }
         },
-        "responses": {},
-        "summary": "",
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call."
+          }
+        },
+        "summary": "Update a space",
         "tags": [
           "spaces"
         ]
@@ -41294,7 +40889,7 @@
     },
     "/api/status": {
       "get": {
-        "operationId": "%2Fapi%2Fstatus#0",
+        "operationId": "get-status",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -41436,6 +41031,9 @@
     },
     {
       "name": "Message Signing Service"
+    },
+    {
+      "name": "roles"
     },
     {
       "name": "spaces"

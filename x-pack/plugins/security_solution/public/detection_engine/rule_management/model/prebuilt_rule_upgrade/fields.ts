@@ -4,18 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { DiffableCommonFields } from '../../../../../common/api/detection_engine';
-import type {
-  DiffableCustomQueryFields,
-  DiffableEqlFields,
-  DiffableEsqlFields,
-  DiffableMachineLearningFields,
-  DiffableNewTermsFields,
-  DiffableSavedQueryFields,
-  DiffableThreatMatchFields,
-  DiffableThresholdFields,
-  RuleFieldsDiff,
+import {
+  DiffableCommonFields,
+  NON_UPGRADEABLE_DIFFABLE_FIELDS,
+  type DiffableCustomQueryFields,
+  type DiffableEqlFields,
+  type DiffableEsqlFields,
+  type DiffableMachineLearningFields,
+  type DiffableNewTermsFields,
+  type DiffableSavedQueryFields,
+  type DiffableThreatMatchFields,
+  type DiffableThresholdFields,
+  type RuleFieldsDiff,
 } from '../../../../../common/api/detection_engine';
 
 export type NonUpgradeableDiffableFields = (typeof NON_UPGRADEABLE_DIFFABLE_FIELDS)[number];
@@ -60,14 +60,6 @@ export type UpgradeableNewTermsFields = Exclude<
   keyof DiffableNewTermsFields,
   NonUpgradeableDiffableFields
 >;
-
-export const NON_UPGRADEABLE_DIFFABLE_FIELDS = [
-  'author',
-  'license',
-  'rule_id',
-  'type',
-  'version',
-] as const;
 
 export const COMMON_FIELD_NAMES = DiffableCommonFields.keyof().options;
 

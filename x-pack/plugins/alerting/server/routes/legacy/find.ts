@@ -79,6 +79,7 @@ export const findAlertRoute = (
         tags: ['oas-tag:alerting'],
         description:
           'Gets a paginated set of alerts. Alert `params` are stored as a flattened field type and analyzed as keywords. As alerts change in Kibana, the results on each page of the response also change. Use the find API for traditional paginated results, but avoid using it to export large amounts of data.',
+        // @ts-expect-error TODO(https://github.com/elastic/kibana/issues/196095): Replace {RouteDeprecationInfo}
         deprecated: true,
       },
     },

@@ -1,0 +1,15 @@
+type: object
+required:
+  - service
+properties:
+  service:
+    $ref: 'service_object.yaml'
+  etag:
+    type: string
+    description: If etags match then `applied_by_agent` field will be set to `true`
+    example: 0bc3b5ebf18fba8163fe4c96f491e3767a358f85
+  mark_as_applied_by_agent:
+    type: boolean
+    description: |
+      `markAsAppliedByAgent=true` means "force setting it to true regardless of etag".
+      This is needed for Jaeger agent that doesn't have etags

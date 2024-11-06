@@ -9,11 +9,13 @@ import type { ProductFeatureParams } from '../types';
 import { getAssistantBaseKibanaFeature } from './kibana_features';
 import {
   getAssistantBaseKibanaSubFeatureIds,
-  assistantSubFeaturesMap,
+  getAssistantSubFeaturesMap,
 } from './kibana_sub_features';
 
-export const getAssistantFeature = (): ProductFeatureParams<AssistantSubFeatureId> => ({
+export const getAssistantFeature = (
+  experimentalFeatures: Record<string, boolean>
+): ProductFeatureParams<AssistantSubFeatureId> => ({
   baseKibanaFeature: getAssistantBaseKibanaFeature(),
   baseKibanaSubFeatureIds: getAssistantBaseKibanaSubFeatureIds(),
-  subFeaturesMap: assistantSubFeaturesMap,
+  subFeaturesMap: getAssistantSubFeaturesMap(experimentalFeatures),
 });

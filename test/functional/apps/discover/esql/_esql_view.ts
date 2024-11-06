@@ -268,6 +268,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should not show switch modal when switching to a data view while a saved search is open', async () => {
         await discover.selectTextBaseLang();
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
         const testQuery = 'from logstash-* | limit 100 | drop @timestamp';
         await monacoEditor.setCodeEditorValue(testQuery);
         await testSubjects.click('querySubmitButton');
@@ -673,6 +675,94 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(editorValue).to.eql(
           `from logstash-* | sort @timestamp desc | limit 10000 | stats countB = count(bytes) by geo.dest | sort countB | where countB > 0\nAND \`geo.dest\`=="BT"`
         );
+      });
+
+      it('should append a where clause by clicking the table without changing the chart type', async () => {
+        await discover.selectTextBaseLang();
+        const testQuery = `from logstash-* | sort @timestamp desc | limit 10000 | stats countB = count(bytes) by geo.dest | sort countB`;
+        await monacoEditor.setCodeEditorValue(testQuery);
+
+        await testSubjects.click('querySubmitButton');
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
+        await unifiedFieldList.waitUntilSidebarHasLoaded();
+
+        // change the type to line
+        await testSubjects.click('unifiedHistogramEditFlyoutVisualization');
+        await header.waitUntilLoadingHasFinished();
+        await testSubjects.click('lnsChartSwitchPopover');
+        await testSubjects.click('lnsChartSwitchPopover_line');
+        await header.waitUntilLoadingHasFinished();
+        await testSubjects.click('applyFlyoutButton');
+
+        await dataGrid.clickCellFilterForButtonExcludingControlColumns(0, 1);
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
+        await unifiedFieldList.waitUntilSidebarHasLoaded();
+
+        const editorValue = await monacoEditor.getCodeEditorValue();
+        expect(editorValue).to.eql(
+          `from logstash-* | sort @timestamp desc | limit 10000 | stats countB = count(bytes) by geo.dest | sort countB\n| WHERE \`geo.dest\`=="BT"`
+        );
+
+        // check that the type is still line
+        await testSubjects.click('unifiedHistogramEditFlyoutVisualization');
+        await header.waitUntilLoadingHasFinished();
+        const chartSwitcher = await testSubjects.find('lnsChartSwitchPopover');
+        const type = await chartSwitcher.getVisibleText();
+        expect(type).to.be('Line');
+      });
+
+      it('should append a where clause by clicking the table without changing the chart type nor the visualization state', async () => {
+        await discover.selectTextBaseLang();
+        const testQuery = `from logstash-* | sort @timestamp desc | limit 10000 | stats countB = count(bytes) by geo.dest | sort countB`;
+        await monacoEditor.setCodeEditorValue(testQuery);
+
+        await testSubjects.click('querySubmitButton');
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
+        await unifiedFieldList.waitUntilSidebarHasLoaded();
+
+        // change the type to line
+        await testSubjects.click('unifiedHistogramEditFlyoutVisualization');
+        await header.waitUntilLoadingHasFinished();
+        await testSubjects.click('lnsChartSwitchPopover');
+        await testSubjects.click('lnsChartSwitchPopover_line');
+
+        // change the color to red
+        await testSubjects.click('lnsXY_yDimensionPanel');
+        const colorPickerInput = await testSubjects.find('~indexPattern-dimension-colorPicker');
+        await colorPickerInput.clearValueWithKeyboard();
+        await colorPickerInput.type('#ff0000');
+        await common.sleep(1000); // give time for debounced components to rerender
+
+        await header.waitUntilLoadingHasFinished();
+        await testSubjects.click('lns-indexPattern-dimensionContainerClose');
+        await testSubjects.click('applyFlyoutButton');
+
+        await dataGrid.clickCellFilterForButtonExcludingControlColumns(0, 1);
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
+        await unifiedFieldList.waitUntilSidebarHasLoaded();
+
+        const editorValue = await monacoEditor.getCodeEditorValue();
+        expect(editorValue).to.eql(
+          `from logstash-* | sort @timestamp desc | limit 10000 | stats countB = count(bytes) by geo.dest | sort countB\n| WHERE \`geo.dest\`=="BT"`
+        );
+
+        // check that the type is still line
+        await testSubjects.click('unifiedHistogramEditFlyoutVisualization');
+        await header.waitUntilLoadingHasFinished();
+        const chartSwitcher = await testSubjects.find('lnsChartSwitchPopover');
+        const type = await chartSwitcher.getVisibleText();
+        expect(type).to.be('Line');
+
+        // check that the color is still red
+        await testSubjects.click('lnsXY_yDimensionPanel');
+        const colorPickerInputAfterFilter = await testSubjects.find(
+          '~indexPattern-dimension-colorPicker'
+        );
+        expect(await colorPickerInputAfterFilter.getAttribute('value')).to.be('#FF0000');
       });
     });
 

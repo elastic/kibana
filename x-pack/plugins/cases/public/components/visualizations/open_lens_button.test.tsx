@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { set } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
 import React from 'react';
 import { screen } from '@testing-library/react';
 import type { AppMockRenderer } from '../../common/mock';

@@ -4,6 +4,12 @@
 <titleabbrev>Get saved-queries</titleabbrev>
 ++++
 
+.New API Reference
+[sidebar]
+--
+For the most up-to-date API details, refer to {api-kibana}/group/endpoint-security-osquery-api[Osquery APIs].
+--
+
 experimental[] Get saved queries.
 
 

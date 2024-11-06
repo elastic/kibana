@@ -7,6 +7,7 @@
 
 import {
   EuiButtonEmpty,
+  EuiButton,
   EuiCallOut,
   EuiCodeBlock,
   EuiFlexGroup,
@@ -17,7 +18,8 @@ import {
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
-import type { BulkUpsertAssetCriticalityRecordsResponse } from '../../../../../common/entity_analytics/asset_criticality/types';
+import { SecurityPageName } from '@kbn/deeplinks-security';
+import type { BulkUpsertAssetCriticalityRecordsResponse } from '../../../../../common/api/entity_analytics';
 import { buildAnnotationsFromError } from '../helpers';
 import { ScheduleRiskEngineCallout } from './schedule_risk_engine_callout';
 
@@ -61,7 +63,7 @@ export const AssetCriticalityResultStep: React.FC<{
           data-test-subj="asset-criticality-result-step-success"
           title={
             <FormattedMessage
-              defaultMessage="success"
+              defaultMessage="Success"
               id="xpack.securitySolution.entityAnalytics.assetCriticalityResultStep.successTitle"
             />
           }
@@ -69,9 +71,18 @@ export const AssetCriticalityResultStep: React.FC<{
           iconType="checkInCircleFilled"
         >
           <FormattedMessage
-            defaultMessage="Your asset criticality levels have been assigned."
+            defaultMessage="Your asset criticality levels have been assigned. Note that your assignments can take a few moments to populate."
             id="xpack.securitySolution.entityAnalytics.assetCriticalityResultStep.successMessage"
           />
+          <EuiSpacer size="s" />
+          <EuiButton href={SecurityPageName.entityAnalytics} color="success" isDisabled={false}>
+            {
+              <FormattedMessage
+                defaultMessage="View asset criticality assignments."
+                id="xpack.securitySolution.entityAnalytics.assetCriticalityResultStep.viewAssetCriticalityAssignments"
+              />
+            }
+          </EuiButton>
         </EuiCallOut>
         <EuiSpacer size="s" />
         <ScheduleRiskEngineCallout />

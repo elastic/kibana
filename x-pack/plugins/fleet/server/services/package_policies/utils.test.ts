@@ -153,16 +153,41 @@ describe('Package Policy Utils', () => {
       ).rejects.toThrowError('Output type "kafka" is not usable with package "apm"');
     });
 
-    it('should not throw if valid license and valid output_id is provided', async () => {
+    it('should throw if content package is being used', async () => {
       jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
       jest
         .spyOn(outputService, 'get')
         .mockResolvedValueOnce({ id: 'es-output', type: 'elasticsearch' } as any);
       await expect(
-        preflightCheckPackagePolicy(soClient, {
-          ...testPolicy,
-          output_id: 'es-output',
-        })
+        preflightCheckPackagePolicy(
+          soClient,
+          {
+            ...testPolicy,
+            output_id: 'es-output',
+          },
+          {
+            type: 'content',
+          }
+        )
+      ).rejects.toThrowError('Cannot create policy for content only packages');
+    });
+
+    it('should not throw if valid license and valid output_id is provided and is not content package', async () => {
+      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+      jest
+        .spyOn(outputService, 'get')
+        .mockResolvedValueOnce({ id: 'es-output', type: 'elasticsearch' } as any);
+      await expect(
+        preflightCheckPackagePolicy(
+          soClient,
+          {
+            ...testPolicy,
+            output_id: 'es-output',
+          },
+          {
+            type: 'integration',
+          }
+        )
       ).resolves.not.toThrow();
     });
   });

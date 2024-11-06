@@ -11,3 +11,4 @@
  * The timeout used by each request, whenever a timeout can be specified.
  */
 export const TIMEOUT = '30s';
+export const CLUSTER_STAT_TIMEOUT = '60s';

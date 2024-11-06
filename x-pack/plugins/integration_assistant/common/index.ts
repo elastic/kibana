@@ -21,6 +21,8 @@ export {
 } from './api/analyze_logs/analyze_logs_route.gen';
 export { CelInputRequestBody, CelInputResponse } from './api/cel/cel_input_route.gen';
 
+export { partialShuffleArray } from './utils';
+
 export type {
   DataStream,
   InputType,

@@ -73,12 +73,27 @@ const registerHttpRequestMockHelpers = (
   const setParseCsvResponse = (response?: object, error?: ResponseError) =>
     mockResponse('POST', `${API_BASE_PATH}/parse_csv`, response, error);
 
+  const setLoadDatabasesResponse = (response?: object[], error?: ResponseError) =>
+    mockResponse('GET', `${API_BASE_PATH}/databases`, response, error);
+
+  const setDeleteDatabasesResponse = (
+    databaseName: string,
+    response?: object,
+    error?: ResponseError
+  ) => mockResponse('DELETE', `${API_BASE_PATH}/databases/${databaseName}`, response, error);
+
+  const setCreateDatabasesResponse = (response?: object, error?: ResponseError) =>
+    mockResponse('POST', `${API_BASE_PATH}/databases`, response, error);
+
   return {
     setLoadPipelinesResponse,
     setLoadPipelineResponse,
     setDeletePipelineResponse,
     setCreatePipelineResponse,
     setParseCsvResponse,
+    setLoadDatabasesResponse,
+    setDeleteDatabasesResponse,
+    setCreateDatabasesResponse,
   };
 };
 

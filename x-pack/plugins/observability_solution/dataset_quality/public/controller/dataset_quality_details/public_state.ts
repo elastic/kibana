@@ -51,6 +51,7 @@ export const getContextFromPublicState = (
     },
   },
   dataStream: publicState.dataStream,
+  breakdownField: publicState.breakdownField,
   expandedDegradedField: publicState.expandedDegradedField,
   showCurrentQualityIssues:
     publicState.showCurrentQualityIssues ?? DEFAULT_CONTEXT.showCurrentQualityIssues,

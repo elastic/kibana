@@ -11,15 +11,22 @@
 
 import {
   ESQLAstComment,
+  ESQLAstCommentMultiLine,
+  ESQLAstCommentSingleLine,
   ESQLAstQueryExpression,
   ESQLColumn,
   ESQLCommand,
   ESQLCommandOption,
   ESQLDecimalLiteral,
+  ESQLIdentifier,
   ESQLInlineCast,
   ESQLIntegerLiteral,
   ESQLList,
   ESQLLocation,
+  ESQLNamedParamLiteral,
+  ESQLParam,
+  ESQLPositionalParamLiteral,
+  ESQLOrderExpression,
   ESQLSource,
 } from '../types';
 import { AstNodeParserFields, AstNodeTemplate, PartialFields } from './types';
@@ -63,17 +70,17 @@ export namespace Builder {
     };
   };
 
-  export const comment = (
-    subtype: ESQLAstComment['subtype'],
+  export const comment = <S extends ESQLAstComment['subtype']>(
+    subtype: S,
     text: string,
-    location: ESQLLocation
-  ): ESQLAstComment => {
+    location?: ESQLLocation
+  ): S extends 'multi-line' ? ESQLAstCommentMultiLine : ESQLAstCommentSingleLine => {
     return {
       type: 'comment',
       subtype,
       text,
       location,
-    };
+    } as S extends 'multi-line' ? ESQLAstCommentMultiLine : ESQLAstCommentSingleLine;
   };
 
   export namespace expression {
@@ -100,6 +107,23 @@ export namespace Builder {
       };
     };
 
+    export const indexSource = (
+      index: string,
+      cluster?: string,
+      template?: Omit<AstNodeTemplate<ESQLSource>, 'name' | 'index' | 'cluster'>,
+      fromParser?: Partial<AstNodeParserFields>
+    ): ESQLSource => {
+      return {
+        ...template,
+        ...Builder.parserFields(fromParser),
+        index,
+        cluster,
+        name: (cluster ? cluster + ':' : '') + index,
+        sourceType: 'index',
+        type: 'source',
+      };
+    };
+
     export const column = (
       template: Omit<AstNodeTemplate<ESQLColumn>, 'name' | 'quoted'>,
       fromParser?: Partial<AstNodeParserFields>
@@ -110,6 +134,20 @@ export namespace Builder {
         quoted: false,
         name: template.parts.join('.'),
         type: 'column',
+      };
+    };
+
+    export const order = (
+      operand: ESQLColumn,
+      template: Omit<AstNodeTemplate<ESQLOrderExpression>, 'name' | 'args'>,
+      fromParser?: Partial<AstNodeParserFields>
+    ): ESQLOrderExpression => {
+      return {
+        ...template,
+        ...Builder.parserFields(fromParser),
+        name: '',
+        args: [operand],
+        type: 'order',
       };
     };
 
@@ -155,5 +193,66 @@ export namespace Builder {
         };
       };
     }
+  }
+
+  export const identifier = (
+    template: AstNodeTemplate<ESQLIdentifier>,
+    fromParser?: Partial<AstNodeParserFields>
+  ): ESQLIdentifier => {
+    return {
+      ...template,
+      ...Builder.parserFields(fromParser),
+      type: 'identifier',
+    };
+  };
+
+  export namespace param {
+    export const unnamed = (fromParser?: Partial<AstNodeParserFields>): ESQLParam => {
+      const node = {
+        ...Builder.parserFields(fromParser),
+        name: '',
+        value: '',
+        paramType: 'unnamed',
+        type: 'literal',
+        literalType: 'param',
+      };
+
+      return node as ESQLParam;
+    };
+
+    export const named = (
+      template: Omit<AstNodeTemplate<ESQLNamedParamLiteral>, 'name' | 'literalType' | 'paramType'>,
+      fromParser?: Partial<AstNodeParserFields>
+    ): ESQLNamedParamLiteral => {
+      const node: ESQLNamedParamLiteral = {
+        ...template,
+        ...Builder.parserFields(fromParser),
+        name: '',
+        type: 'literal',
+        literalType: 'param',
+        paramType: 'named',
+      };
+
+      return node;
+    };
+
+    export const positional = (
+      template: Omit<
+        AstNodeTemplate<ESQLPositionalParamLiteral>,
+        'name' | 'literalType' | 'paramType'
+      >,
+      fromParser?: Partial<AstNodeParserFields>
+    ): ESQLPositionalParamLiteral => {
+      const node: ESQLPositionalParamLiteral = {
+        ...template,
+        ...Builder.parserFields(fromParser),
+        name: '',
+        type: 'literal',
+        literalType: 'param',
+        paramType: 'positional',
+      };
+
+      return node;
+    };
   }
 }

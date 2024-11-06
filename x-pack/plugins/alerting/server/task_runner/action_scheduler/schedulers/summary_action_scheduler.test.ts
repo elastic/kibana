@@ -13,7 +13,13 @@ import { alertingEventLoggerMock } from '../../../lib/alerting_event_logger/aler
 import { RuleRunMetricsStore } from '../../../lib/rule_run_metrics_store';
 import { mockAAD } from '../../fixtures';
 import { SummaryActionScheduler } from './summary_action_scheduler';
-import { getRule, getRuleType, getDefaultSchedulerContext, generateAlert } from '../test_fixtures';
+import {
+  getRule,
+  getRuleType,
+  getDefaultSchedulerContext,
+  generateAlert,
+  generateRecoveredAlert,
+} from '../test_fixtures';
 import { RuleAction } from '@kbn/alerting-types';
 import { ALERT_UUID } from '@kbn/rule-data-utils';
 import {
@@ -165,6 +171,7 @@ describe('Summary Action Scheduler', () => {
   describe('getActionsToSchedule', () => {
     const newAlert1 = generateAlert({ id: 1 });
     const newAlert2 = generateAlert({ id: 2 });
+    const recoveredAlert = generateRecoveredAlert({ id: 3 });
     const alerts = { ...newAlert1, ...newAlert2 };
 
     const summaryActionWithAlertFilter: RuleAction = {
@@ -217,7 +224,10 @@ describe('Summary Action Scheduler', () => {
 
       const throttledSummaryActions = {};
       const scheduler = new SummaryActionScheduler(getSchedulerContext());
-      const results = await scheduler.getActionsToSchedule({ alerts, throttledSummaryActions });
+      const results = await scheduler.getActionsToSchedule({
+        activeCurrentAlerts: alerts,
+        throttledSummaryActions,
+      });
 
       expect(throttledSummaryActions).toEqual({});
       expect(alertsClient.getSummarizedAlerts).toHaveBeenCalledTimes(2);
@@ -266,7 +276,10 @@ describe('Summary Action Scheduler', () => {
       });
 
       const throttledSummaryActions = {};
-      const results = await scheduler.getActionsToSchedule({ alerts, throttledSummaryActions });
+      const results = await scheduler.getActionsToSchedule({
+        activeCurrentAlerts: alerts,
+        throttledSummaryActions,
+      });
 
       expect(throttledSummaryActions).toEqual({});
       expect(alertsClient.getSummarizedAlerts).toHaveBeenCalledTimes(1);
@@ -307,7 +320,10 @@ describe('Summary Action Scheduler', () => {
       });
 
       const throttledSummaryActions = {};
-      const results = await scheduler.getActionsToSchedule({ alerts, throttledSummaryActions });
+      const results = await scheduler.getActionsToSchedule({
+        activeCurrentAlerts: alerts,
+        throttledSummaryActions,
+      });
 
       expect(throttledSummaryActions).toEqual({ '444-444': { date: '1970-01-01T00:00:00.000Z' } });
       expect(alertsClient.getSummarizedAlerts).toHaveBeenCalledTimes(1);
@@ -340,7 +356,10 @@ describe('Summary Action Scheduler', () => {
       });
 
       const throttledSummaryActions = { '444-444': { date: '1969-12-31T13:00:00.000Z' } };
-      const results = await scheduler.getActionsToSchedule({ alerts, throttledSummaryActions });
+      const results = await scheduler.getActionsToSchedule({
+        activeCurrentAlerts: alerts,
+        throttledSummaryActions,
+      });
 
       expect(throttledSummaryActions).toEqual({ '444-444': { date: '1969-12-31T13:00:00.000Z' } });
       expect(alertsClient.getSummarizedAlerts).not.toHaveBeenCalled();
@@ -374,7 +393,10 @@ describe('Summary Action Scheduler', () => {
       const scheduler = new SummaryActionScheduler(getSchedulerContext());
 
       const throttledSummaryActions = {};
-      const results = await scheduler.getActionsToSchedule({ alerts, throttledSummaryActions });
+      const results = await scheduler.getActionsToSchedule({
+        activeCurrentAlerts: alerts,
+        throttledSummaryActions,
+      });
 
       expect(throttledSummaryActions).toEqual({});
       expect(alertsClient.getSummarizedAlerts).toHaveBeenCalledTimes(2);
@@ -436,7 +458,11 @@ describe('Summary Action Scheduler', () => {
       });
 
       const throttledSummaryActions = {};
-      const results = await scheduler.getActionsToSchedule({ alerts, throttledSummaryActions });
+      const results = await scheduler.getActionsToSchedule({
+        activeCurrentAlerts: alerts,
+        recoveredCurrentAlerts: recoveredAlert,
+        throttledSummaryActions,
+      });
 
       expect(throttledSummaryActions).toEqual({});
       expect(alertsClient.getSummarizedAlerts).toHaveBeenCalledTimes(1);
@@ -449,7 +475,7 @@ describe('Summary Action Scheduler', () => {
       });
       expect(logger.debug).toHaveBeenCalledTimes(1);
       expect(logger.debug).toHaveBeenCalledWith(
-        `(1) alert has been filtered out for: test:333-333`
+        `(2) alerts have been filtered out for: test:333-333`
       );
 
       expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toEqual(1);
@@ -480,7 +506,10 @@ describe('Summary Action Scheduler', () => {
       });
 
       const throttledSummaryActions = {};
-      const results = await scheduler.getActionsToSchedule({ alerts, throttledSummaryActions });
+      const results = await scheduler.getActionsToSchedule({
+        activeCurrentAlerts: alerts,
+        throttledSummaryActions,
+      });
 
       expect(throttledSummaryActions).toEqual({});
       expect(alertsClient.getSummarizedAlerts).toHaveBeenCalledTimes(1);
@@ -507,7 +536,10 @@ describe('Summary Action Scheduler', () => {
       const scheduler = new SummaryActionScheduler(getSchedulerContext());
 
       try {
-        await scheduler.getActionsToSchedule({ alerts, throttledSummaryActions: {} });
+        await scheduler.getActionsToSchedule({
+          activeCurrentAlerts: alerts,
+          throttledSummaryActions: {},
+        });
       } catch (err) {
         expect(err.message).toEqual(`no alerts for you`);
         expect(getErrorSource(err)).toBe(TaskErrorSource.FRAMEWORK);
@@ -533,7 +565,10 @@ describe('Summary Action Scheduler', () => {
           },
         },
       });
-      const results = await scheduler.getActionsToSchedule({ alerts, throttledSummaryActions: {} });
+      const results = await scheduler.getActionsToSchedule({
+        activeCurrentAlerts: alerts,
+        throttledSummaryActions: {},
+      });
 
       expect(alertsClient.getSummarizedAlerts).toHaveBeenCalledTimes(2);
       expect(alertsClient.getSummarizedAlerts).toHaveBeenNthCalledWith(1, {
@@ -587,7 +622,10 @@ describe('Summary Action Scheduler', () => {
           },
         },
       });
-      const results = await scheduler.getActionsToSchedule({ alerts, throttledSummaryActions: {} });
+      const results = await scheduler.getActionsToSchedule({
+        activeCurrentAlerts: alerts,
+        throttledSummaryActions: {},
+      });
 
       expect(alertsClient.getSummarizedAlerts).toHaveBeenCalledTimes(2);
       expect(alertsClient.getSummarizedAlerts).toHaveBeenNthCalledWith(1, {

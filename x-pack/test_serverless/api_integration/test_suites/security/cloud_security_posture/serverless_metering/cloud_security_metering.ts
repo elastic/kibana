@@ -117,16 +117,15 @@ export default function (providerContext: FtrProviderContext) {
 
       let interceptedRequestBody: UsageRecord[] = [];
       await retry.try(async () => {
-        interceptedRequestBody = getInterceptedRequestPayload();
-        expect(interceptedRequestBody.length).to.greaterThan(0);
         if (interceptedRequestBody.length > 0) {
+          interceptedRequestBody = getInterceptedRequestPayload();
+          expect(interceptedRequestBody.length).to.greaterThan(0);
           const usageSubTypes = interceptedRequestBody.map((record) => record.usage.sub_type);
           expect(usageSubTypes).to.contain('cspm');
+          expect(interceptedRequestBody[0].usage.type).to.be('cloud_security');
+          expect(interceptedRequestBody[0].usage.quantity).to.be(billableFindings.length);
         }
       });
-
-      expect(interceptedRequestBody[0].usage.type).to.be('cloud_security');
-      expect(interceptedRequestBody[0].usage.quantity).to.be(billableFindings.length);
     });
 
     it('Should intercept usage API request for KSPM', async () => {
@@ -158,16 +157,15 @@ export default function (providerContext: FtrProviderContext) {
       let interceptedRequestBody: UsageRecord[] = [];
 
       await retry.try(async () => {
-        interceptedRequestBody = getInterceptedRequestPayload();
-        expect(interceptedRequestBody.length).to.greaterThan(0);
         if (interceptedRequestBody.length > 0) {
+          interceptedRequestBody = getInterceptedRequestPayload();
+          expect(interceptedRequestBody.length).to.greaterThan(0);
           const usageSubTypes = interceptedRequestBody.map((record) => record.usage.sub_type);
           expect(usageSubTypes).to.contain('kspm');
+          expect(interceptedRequestBody[0].usage.type).to.be('cloud_security');
+          expect(interceptedRequestBody[0].usage.quantity).to.be(billableFindings.length);
         }
       });
-
-      expect(interceptedRequestBody[0].usage.type).to.be('cloud_security');
-      expect(interceptedRequestBody[0].usage.quantity).to.be(billableFindings.length);
     });
 
     it('Should intercept usage API request for CNVM', async () => {
@@ -198,11 +196,10 @@ export default function (providerContext: FtrProviderContext) {
         if (interceptedRequestBody.length > 0) {
           const usageSubTypes = interceptedRequestBody.map((record) => record.usage.sub_type);
           expect(usageSubTypes).to.contain('cnvm');
+          expect(interceptedRequestBody[0].usage.type).to.be('cloud_security');
+          expect(interceptedRequestBody[0].usage.quantity).to.be(billableFindings.length);
         }
       });
-
-      expect(interceptedRequestBody[0].usage.type).to.be('cloud_security');
-      expect(interceptedRequestBody[0].usage.quantity).to.be(billableFindings.length);
     });
 
     it('Should intercept usage API request for Defend for Containers', async () => {
@@ -236,11 +233,10 @@ export default function (providerContext: FtrProviderContext) {
         if (interceptedRequestBody.length > 0) {
           const usageSubTypes = interceptedRequestBody.map((record) => record.usage.sub_type);
           expect(usageSubTypes).to.contain('cloud_defend');
+          expect(interceptedRequestBody.length).to.be(blockActionEnabledHeartbeats.length);
+          expect(interceptedRequestBody[0].usage.type).to.be('cloud_security');
         }
       });
-
-      expect(interceptedRequestBody.length).to.be(blockActionEnabledHeartbeats.length);
-      expect(interceptedRequestBody[0].usage.type).to.be('cloud_security');
     });
 
     it('Should intercept usage API request with all integrations usage records', async () => {
@@ -328,18 +324,17 @@ export default function (providerContext: FtrProviderContext) {
         expect(usageSubTypes).to.contain('kspm');
         expect(usageSubTypes).to.contain('cnvm');
         expect(usageSubTypes).to.contain('cloud_defend');
+        const totalUsageQuantity = interceptedRequestBody.reduce(
+          (acc, record) => acc + record.usage.quantity,
+          0
+        );
+        expect(totalUsageQuantity).to.be(
+          billableFindingsCSPM.length +
+            billableFindingsKSPM.length +
+            billableFindingsCNVM.length +
+            blockActionEnabledHeartbeats.length
+        );
       });
-
-      const totalUsageQuantity = interceptedRequestBody.reduce(
-        (acc, record) => acc + record.usage.quantity,
-        0
-      );
-      expect(totalUsageQuantity).to.be(
-        billableFindingsCSPM.length +
-          billableFindingsKSPM.length +
-          billableFindingsCNVM.length +
-          blockActionEnabledHeartbeats.length
-      );
     });
   });
 }

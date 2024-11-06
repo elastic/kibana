@@ -133,12 +133,9 @@ const extractDiffableCommonFields = (
     setup: rule.setup ?? '',
     related_integrations: rule.related_integrations ?? [],
     required_fields: addEcsToRequiredFields(rule.required_fields),
-    author: rule.author ?? [],
-    license: rule.license ?? '',
 
     // Other domain fields
     rule_schedule: extractRuleSchedule(rule),
-    exceptions_list: rule.exceptions_list ?? [],
     max_signals: rule.max_signals ?? DEFAULT_MAX_SIGNALS,
 
     // --------------------- OPTIONAL FIELDS

@@ -20,6 +20,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo, useState } from 'react';
 
+import { docLinks } from '../../../common/doc_links';
 import { LEARN_MORE_LABEL } from '../../../common/i18n_string';
 import { PLUGIN_ID } from '../../../common';
 import { useConnectors } from '../hooks/api/use_connectors';
@@ -27,6 +28,7 @@ import { useCreateConnector } from '../hooks/api/use_create_connector';
 import { useKibanaServices } from '../hooks/use_kibana';
 import { EmptyConnectorsPrompt } from './connectors/empty_connectors_prompt';
 import { ConnectorsTable } from './connectors/connectors_table';
+import { ConnectorPrivilegesCallout } from './connectors/connector_config/connector_privileges_callout';
 
 import { BASE_CONNECTORS_PATH, CONNECTORS, ELASTIC_MANAGED_CONNECTOR_PATH } from '../constants';
 
@@ -50,6 +52,8 @@ export const ConnectorsOverview = () => {
     setShowCallOut(false);
     sessionStorage.setItem(CALLOUT_KEY, 'hidden');
   };
+
+  const canManageConnectors = !data || data.canManageConnectors;
 
   return (
     <EuiPageTemplate offset={0} grow restrictWidth data-test-subj="svlSearchConnectorsPage">
@@ -108,6 +112,28 @@ export const ConnectorsOverview = () => {
               ]
             : undefined
         }
+                    </EuiLink>
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiButton
+                data-test-subj="serverlessSearchConnectorsOverviewCreateConnectorButton"
+                disabled={!canManageConnectors}
+                isLoading={isLoading}
+                fill
+                iconType="plusInCircleFilled"
+                onClick={() => createConnector()}
+              >
+                {i18n.translate('xpack.serverlessSearch.connectors.createConnector', {
+                  defaultMessage: 'Create connector',
+                })}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>,
+        ]}
+
       >
         <EuiText>
           <p>
@@ -120,7 +146,7 @@ export const ConnectorsOverview = () => {
                     data-test-subj="serverlessSearchConnectorsOverviewLink"
                     external
                     target="_blank"
-                    href={CONNECTORS.self_managed_docs}
+                    href={docLinks.connectors}
                   >
                     {LEARN_MORE_LABEL}
                   </EuiLink>
@@ -158,15 +184,15 @@ export const ConnectorsOverview = () => {
               </EuiButton>
             </EuiCallOut>
           )}
-
           <EuiSpacer size="m" />
+      <EuiPageTemplate.Section restrictWidth color="subdued">
+        <ConnectorPrivilegesCallout />
+        {connectorsLoading || (data?.connectors || []).length > 0 ? (
           <ConnectorsTable />
-        </EuiPageTemplate.Section>
-      ) : (
-        <EuiPageTemplate.Section restrictWidth color="subdued">
+        ) : (
           <EmptyConnectorsPrompt />
-        </EuiPageTemplate.Section>
-      )}
+        )}
+      </EuiPageTemplate.Section>
       {embeddableConsole}
     </EuiPageTemplate>
   );

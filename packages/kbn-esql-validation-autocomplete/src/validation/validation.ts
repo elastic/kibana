@@ -26,7 +26,6 @@ import {
   CommandModeDefinition,
   CommandOptionsDefinition,
   FunctionParameter,
-  FunctionDefinition,
 } from '../definitions/types';
 import {
   areFieldAndVariableTypesCompatible,
@@ -54,6 +53,7 @@ import {
   isAggFunction,
   getQuotedColumnName,
   isInlineCastItem,
+  getSignaturesWithMatchingArity,
 } from '../shared/helpers';
 import { collectVariables } from '../shared/variables';
 import { getMessageFromId, errors } from './errors';
@@ -74,7 +74,7 @@ import {
   retrieveFieldsFromStringSources,
 } from './resources';
 import { collapseWrongArgumentTypeMessages, getMaxMinNumberOfParams } from './helpers';
-import { getParamAtPosition } from '../autocomplete/helper';
+import { getParamAtPosition } from '../shared/helpers';
 import { METADATA_FIELDS } from '../shared/constants';
 import { compareTypesWithLiterals } from '../shared/esql_types';
 
@@ -88,7 +88,7 @@ function validateFunctionLiteralArg(
   const messages: ESQLMessage[] = [];
   if (isLiteralItem(actualArg)) {
     if (
-      actualArg.literalType === 'string' &&
+      actualArg.literalType === 'keyword' &&
       argDef.acceptedValues &&
       isValidLiteralOption(actualArg, argDef)
     ) {
@@ -112,7 +112,7 @@ function validateFunctionLiteralArg(
           values: {
             name: astFunction.name,
             argType: argDef.type as string,
-            value: typeof actualArg.value === 'number' ? actualArg.value : String(actualArg.value),
+            value: actualArg.text,
             givenType: actualArg.literalType,
           },
           locations: actualArg.location,
@@ -309,21 +309,6 @@ function validateFunctionColumnArg(
   return messages;
 }
 
-function extractCompatibleSignaturesForFunction(
-  fnDef: FunctionDefinition,
-  astFunction: ESQLFunction
-) {
-  return fnDef.signatures.filter((def) => {
-    if (def.minParams) {
-      return astFunction.args.length >= def.minParams;
-    }
-    return (
-      astFunction.args.length >= def.params.filter(({ optional }) => !optional).length &&
-      astFunction.args.length <= def.params.length
-    );
-  });
-}
-
 function removeInlineCasts(arg: ESQLAstItem): ESQLAstItem {
   if (isInlineCastItem(arg)) {
     return removeInlineCasts(arg.value);
@@ -376,7 +361,7 @@ function validateFunction(
       return messages;
     }
   }
-  const matchingSignatures = extractCompatibleSignaturesForFunction(fnDefinition, astFunction);
+  const matchingSignatures = getSignaturesWithMatchingArity(fnDefinition, astFunction);
   if (!matchingSignatures.length) {
     const { max, min } = getMaxMinNumberOfParams(fnDefinition);
     if (max === min) {
@@ -1089,7 +1074,7 @@ function validateUnsupportedTypeFields(fields: Map<string, ESQLRealField>) {
 }
 
 export const ignoreErrorsMap: Record<keyof ESQLCallbacks, ErrorTypes[]> = {
-  getFieldsFor: ['unknownColumn', 'wrongArgumentType', 'unsupportedFieldType'],
+  getColumnsFor: ['unknownColumn', 'wrongArgumentType', 'unsupportedFieldType'],
   getSources: ['unknownIndex'],
   getPolicies: ['unknownPolicy'],
   getPreferences: [],

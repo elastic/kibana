@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { get, set } from 'lodash';
+import { get } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
 import { DefaultPolicyNotificationMessage } from './policy_config';
 import type { PolicyConfig } from '../types';
 import { PolicyOperatingSystem, ProtectionModes, AntivirusRegistrationModes } from '../types';

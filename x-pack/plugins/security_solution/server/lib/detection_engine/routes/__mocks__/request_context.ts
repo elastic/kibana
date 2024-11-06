@@ -42,6 +42,7 @@ import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { detectionRulesClientMock } from '../../rule_management/logic/detection_rules_client/__mocks__/detection_rules_client';
 import { packageServiceMock } from '@kbn/fleet-plugin/server/services/epm/package_service.mock';
 import type { EndpointInternalFleetServicesInterface } from '../../../../endpoint/services/fleet';
+import { siemMigrationsServiceMock } from '../../../siem_migrations/__mocks__/mocks';
 
 export const createMockClients = () => {
   const core = coreMock.createRequestHandlerContext();
@@ -78,6 +79,7 @@ export const createMockClients = () => {
     internalFleetServices: {
       packages: packageServiceMock.createClient(),
     },
+    siemMigrationsClient: siemMigrationsServiceMock.createClient(),
   };
 };
 
@@ -107,6 +109,7 @@ const createRequestContextMock = (
       getListClient: jest.fn(() => clients.lists.listClient),
       getExceptionListClient: jest.fn(() => clients.lists.exceptionListClient),
       getExtensionPointClient: jest.fn(),
+      getInternalListClient: jest.fn(),
     },
   };
 };
@@ -161,7 +164,9 @@ const createSecuritySolutionRequestContextMock = (
     getRiskScoreDataClient: jest.fn(() => clients.riskScoreDataClient),
     getAssetCriticalityDataClient: jest.fn(() => clients.assetCriticalityDataClient),
     getAuditLogger: jest.fn(() => mockAuditLogger),
+    getDataViewsService: jest.fn(),
     getEntityStoreDataClient: jest.fn(() => clients.entityStoreDataClient),
+    getSiemMigrationsClient: jest.fn(() => clients.siemMigrationsClient),
   };
 };
 

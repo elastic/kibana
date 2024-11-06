@@ -12,7 +12,7 @@ export const dataViewRouteHelpersFactory = (
 ) => ({
   create: (name: string) => {
     return supertest
-      .post(`/api/data_views/data_view`)
+      .post(`/s/${namespace}/api/data_views/data_view`)
       .set('kbn-xsrf', 'foo')
       .send({
         data_view: {
@@ -26,13 +26,13 @@ export const dataViewRouteHelpersFactory = (
   },
   delete: (name: string) => {
     return supertest
-      .delete(`/api/data_views/data_view/${name}-${namespace}`)
+      .delete(`/s/${namespace}/api/data_views/data_view/${name}-${namespace}`)
       .set('kbn-xsrf', 'foo')
       .expect(200);
   },
   updateIndexPattern: (name: string, indexPattern: string) => {
     return supertest
-      .post(`/api/data_views/data_view/${name}-${namespace}`)
+      .post(`/s/${namespace}/api/data_views/data_view/${name}-${namespace}`)
       .set('kbn-xsrf', 'foo')
       .send({
         data_view: {

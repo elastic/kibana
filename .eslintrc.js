@@ -643,6 +643,7 @@ module.exports = {
         'x-pack/test/*/*config.*ts',
         'x-pack/test/saved_object_api_integration/*/apis/**/*',
         'x-pack/test/ui_capabilities/*/tests/**/*',
+        'x-pack/test/upgrade_assistant_integration/**/*',
         'x-pack/test/performance/**/*.ts',
         '**/cypress.config.{js,ts}',
         'x-pack/test_serverless/**/config*.ts',
@@ -1014,6 +1015,7 @@ module.exports = {
           'error',
           {
             patterns: ['**/legacy_uptime/*'],
+            paths: RESTRICTED_IMPORTS,
           },
         ],
       },
@@ -1024,7 +1026,9 @@ module.exports = {
      */
     {
       files: ['x-pack/plugins/fleet/**/*.{js,mjs,ts,tsx}'],
+      plugins: ['testing-library'],
       rules: {
+        'testing-library/await-async-utils': 'error',
         '@typescript-eslint/consistent-type-imports': 'error',
         'import/order': [
           'warn',
@@ -1055,6 +1059,7 @@ module.exports = {
           {
             // prevents UI code from importing server side code and then webpack including it when doing builds
             patterns: ['**/server/*'],
+            paths: RESTRICTED_IMPORTS,
           },
         ],
       },
@@ -1113,6 +1118,7 @@ module.exports = {
           {
             // prevents UI code from importing server side code and then webpack including it when doing builds
             patterns: ['**/server/*'],
+            paths: RESTRICTED_IMPORTS,
           },
         ],
       },
@@ -1184,13 +1190,7 @@ module.exports = {
             // to help deprecation and prevent accidental re-use/continued use of code we plan on removing. If you are
             // finding yourself turning this off a lot for "new code" consider renaming the file and functions if it is has valid uses.
             patterns: ['*legacy*'],
-            paths: [
-              {
-                name: 'react-router-dom',
-                importNames: ['Route'],
-                message: "import { Route } from '@kbn/kibana-react-plugin/public'",
-              },
-            ],
+            paths: RESTRICTED_IMPORTS,
           },
         ],
       },
@@ -1348,6 +1348,7 @@ module.exports = {
           {
             // prevents UI code from importing server side code and then webpack including it when doing builds
             patterns: ['**/server/*'],
+            paths: RESTRICTED_IMPORTS,
           },
         ],
       },
@@ -1525,6 +1526,7 @@ module.exports = {
             // to help deprecation and prevent accidental re-use/continued use of code we plan on removing. If you are
             // finding yourself turning this off a lot for "new code" consider renaming the file and functions if it has valid uses.
             patterns: ['*legacy*'],
+            paths: RESTRICTED_IMPORTS,
           },
         ],
       },
@@ -1955,6 +1957,16 @@ module.exports = {
     },
 
     /**
+     * Cloud Security Team overrides
+     */
+    {
+      files: ['x-pack/plugins/cloud_security_posture/**/*.{js,mjs,ts,tsx}'],
+      plugins: ['testing-library'],
+      rules: {
+        'testing-library/await-async-utils': 'error',
+      },
+    },
+    /**
      * Code inside .buildkite runs separately from everything else in CI, before bootstrap, with ts-node. It needs a few tweaks because of this.
      */
     {
@@ -1976,6 +1988,54 @@ module.exports = {
       ],
       rules: {
         'max-classes-per-file': 'off',
+      },
+    },
+    {
+      files: [
+        'packages/kbn-reporting/common/**', // TODO @elastic/appex-sharedux - A package depending on a plugin: @kbn/screenshotting-plugin, can we move theser interfaces to a platform/shared package?
+        'packages/kbn-reporting/export_types/pdf_common/**', // TODO @elastic/appex-sharedux - A package depending on a plugin: @kbn/screenshotting-plugin, can we move theser interfaces to a platform/shared package?
+        'packages/kbn-reporting/export_types/pdf/**', // TODO @elastic/appex-sharedux - A package depending on a plugin: @kbn/screenshotting-plugin, can we move theser interfaces to a platform/shared package?
+        'packages/kbn-reporting/export_types/png_common/**', // TODO @elastic/appex-sharedux - A package depending on a plugin: @kbn/screenshotting-plugin, can we move theser interfaces to a platform/shared package?
+        'packages/kbn-reporting/export_types/png/**', // TODO @elastic/appex-sharedux - A package depending on a plugin: @kbn/screenshotting-plugin, can we move theser interfaces to a platform/shared package?
+        'packages/kbn-reporting/public/**', // TODO @elastic/appex-sharedux - A package depending on a plugin: @kbn/screenshotting-plugin, can we move theser interfaces to a platform/shared package?
+        'packages/kbn-reporting/server/**', // TODO @elastic/appex-sharedux - A package depending on a plugin: @kbn/screenshotting-plugin, can we move theser interfaces to a platform/shared package?
+        'packages/shared-ux/page/analytics_no_data/types/**',
+        'scripts/create_observability_rules.js', // TODO - is importing "@kbn/observability-alerting-test-data" (observability/private)
+        'src/cli_setup/**', // TODO @kibana/operations - is importing "@kbn/interactive-setup-plugin" (platform/private)
+        'src/dev/build/tasks/install_chromium.ts', // TODO @kibana/operations - is importing "@kbn/screenshotting-plugin" (platform/private)
+        'src/plugins/ai_assistant_management/selection/**',
+        'src/plugins/dashboard/**',
+        'src/plugins/discover/**',
+        'test/**',
+        'x-pack/examples/exploratory_view_example/**',
+        'x-pack/examples/screenshotting_example/**',
+        'x-pack/examples/ui_actions_enhanced_examples/**',
+        'x-pack/packages/security-solution/data_table/**',
+        'x-pack/plugins/aiops/**',
+        'x-pack/plugins/data_quality/**',
+        'x-pack/plugins/ingest_pipelines/**',
+        'x-pack/plugins/ml/**',
+        'x-pack/plugins/monitoring/**',
+        'x-pack/plugins/observability_solution/infra/**',
+        'x-pack/plugins/observability_solution/inventory/**',
+        'x-pack/plugins/observability_solution/investigate_app/**',
+        'x-pack/plugins/observability_solution/investigate/**',
+        'x-pack/plugins/observability_solution/logs_shared/**',
+        'x-pack/plugins/observability_solution/metrics_data_access/**',
+        'x-pack/plugins/observability_solution/observability_ai_assistant_app/**',
+        'x-pack/plugins/observability_solution/observability_ai_assistant_management/**',
+        'x-pack/plugins/observability_solution/observability/**',
+        'x-pack/plugins/observability_solution/slo/**',
+        'x-pack/plugins/observability_solution/synthetics/e2e/**',
+        'x-pack/plugins/osquery/**',
+        'x-pack/plugins/search_assistant/**',
+        'x-pack/test_serverless/**',
+        'x-pack/test/**',
+        'x-pack/test/plugin_functional/plugins/resolver_test/**',
+      ],
+      rules: {
+        '@kbn/imports/no_group_crossing_manifests': 'warn',
+        '@kbn/imports/no_group_crossing_imports': 'warn',
       },
     },
   ],

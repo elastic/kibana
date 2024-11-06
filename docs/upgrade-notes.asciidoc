@@ -1019,7 +1019,7 @@ In 8.1.0 and later, {kib} uses the field caps API, by default, to determine the 
 `visualization:visualize:legacyPieChartsLibrary` has been removed from *Advanced Settings*. The setting allowed you to create aggregation-based pie chart visualizations using the legacy charts library. For more information, refer to {kibana-pull}146990[#146990].
 
 *Impact* +
-In 7.14.0 and later, the new aggregation-based pie chart visualization is available by default. For more information, check link:https://www.elastic.co/guide/en/kibana/current/add-aggregation-based-visualization-panels.html[Aggregation-based].
+In 7.14.0 and later, the new aggregation-based pie chart visualization is available by default. For more information, check <<add-aggregation-based-visualization-panels>>.
 ====
 
 [discrete]
@@ -1503,6 +1503,18 @@ The following rule action variables have been deprecated. Use the recommended va
 For more information, refer to ({kibana-pull}161136[#161136]).
 ====
 
+// Discover
+
+[discrete]
+[[deprecation-search-sessions]]
+.[Discover] <<search-sessions,Search sessions>> are deprecated in 8.15.0 and will be removed in a future version. (8.15)
+[%collapsible]
+====
+*Details* +
+Search sessions are now deprecated and will be removed in a future version. By default, queries that take longer than 10 minutes (the default for the advanced setting `search:timeout`) will be canceled. To allow queries to run longer, consider increasing `search:timeout` or setting it to `0` which will allow queries to continue running as long as a user is waiting on-screen for results.
+====
+
+
 // General settings
 
 [discrete]
@@ -1681,6 +1693,30 @@ When you create *Lens* visualization, the default for the *Legend width* is now 
 
 [float]
 ==== Elastic Observability solution
+
+[discrete]
+[[deprecation-192003]]
+* Deprecated the Observability AI Assistant specific advanced setting `observability:aiAssistantLogsIndexPattern`. (8.16)
+[%collapsible]
+====
+*Details* +
+The Observability AI Assistant specific advanced setting for Logs index patterns `observability:aiAssistantLogsIndexPattern` is deprecated and no longer used. The AI Assistant will now use the existing **Log sources** setting `observability:logSources` instead. For more information, refer to ({kibana-pull}192003[#192003]).
+
+//*Impact* +
+//!!TODO!!
+====
+
+[discrete]
+[[deprecation-194519]]
+* The Logs Stream was hidden by default in favor of the Logs Explorer app. (8.16)
+[%collapsible]
+====
+*Details* +
+You can find the Logs Explorer app in the navigation menu under Logs > Explorer, or as a separate tab in Discover. For more information, refer to ({kibana-pull}194519[#194519]).
+
+*Impact* +
+You can still show the Logs Stream app again by navigating to Stack Management > Advanced Settings and by enabling the `observability:enableLogsStream` setting.
+====
 
 
 [discrete]
