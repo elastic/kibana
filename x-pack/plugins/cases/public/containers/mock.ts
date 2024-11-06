@@ -47,6 +47,7 @@ import type {
   CaseUICustomField,
   CasesConfigurationUICustomField,
   CasesConfigurationUITemplate,
+  CasesSimilarResponseUI,
 } from '../../common/ui/types';
 import { CaseMetricsFeature } from '../../common/types/api';
 import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
@@ -465,6 +466,13 @@ export const allCases: CasesFindResponseUI = {
   perPage: 5,
   total: 10,
   ...casesStatus,
+};
+
+export const similarCases: CasesSimilarResponseUI = {
+  cases,
+  page: 1,
+  perPage: 5,
+  total: 10,
 };
 
 export const actionLicenses: ActionLicense[] = [

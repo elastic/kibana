@@ -43,7 +43,6 @@ describe('useGetSimilarCases', () => {
 
     expect(spyOnGetCases).toBeCalledWith({
       caseId: mockCase.id,
-      observables: {},
       signal: abortCtrl.signal,
       pageIndex: 0,
       pageSize: 10,

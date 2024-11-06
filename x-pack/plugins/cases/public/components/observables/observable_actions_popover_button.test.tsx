@@ -18,12 +18,15 @@ import type { CaseUI } from '../../../common';
 import type { Observable } from '../../../common/types/domain/observable/v1';
 import { mockCase } from '../../containers/mock';
 import { usePostObservable } from '../../containers/use_post_observables';
+import { useDeleteObservable } from '../../containers/use_delete_observables';
 
 jest.mock('../../containers/use_post_observables');
+jest.mock('../../containers/use_delete_observables');
 
 describe('ObservableActionsPopoverButton', () => {
   let appMockRender: AppMockRenderer;
-  const mutate = jest.fn().mockResolvedValue({});
+  const addObservable = jest.fn().mockResolvedValue({});
+  const deleteObservable = jest.fn().mockResolvedValue({});
 
   const caseData: CaseUI = { ...mockCase };
   const observable = { id: '05041f40-ac9f-4192-b367-7e6a5dafcee5' } as Observable;
@@ -31,14 +34,19 @@ describe('ObservableActionsPopoverButton', () => {
   beforeEach(() => {
     jest
       .mocked(usePostObservable)
-      .mockReturnValue({ mutateAsync: mutate, isLoading: false } as unknown as ReturnType<
+      .mockReturnValue({ mutateAsync: addObservable, isLoading: false } as unknown as ReturnType<
         typeof usePostObservable
+      >);
+    jest
+      .mocked(useDeleteObservable)
+      .mockReturnValue({ mutateAsync: deleteObservable, isLoading: false } as unknown as ReturnType<
+        typeof useDeleteObservable
       >);
     jest.clearAllMocks();
     appMockRender = createAppMockRenderer();
   });
 
-  it('renders file actions popover button correctly', async () => {
+  it('renders observable actions popover button correctly', async () => {
     appMockRender.render(
       <ObservableActionsPopoverButton caseData={caseData} observable={observable} />
     );
@@ -99,7 +107,7 @@ describe('ObservableActionsPopoverButton', () => {
       expect(await screen.findByTestId('property-actions-confirm-modal')).toBeInTheDocument();
     });
 
-    it('clicking delete button in the confirmation modal calls deleteFileAttachment with proper params', async () => {
+    it('clicking delete button in the confirmation modal calls deleteObservable with proper params', async () => {
       appMockRender.render(
         <ObservableActionsPopoverButton caseData={caseData} observable={observable} />
       );
@@ -117,12 +125,7 @@ describe('ObservableActionsPopoverButton', () => {
       await userEvent.click(await screen.findByTestId('confirmModalConfirmButton'));
 
       await waitFor(() => {
-        expect(mutate).toHaveBeenCalledTimes(1);
-        expect(mutate).toHaveBeenCalledWith({
-          caseId: 'mock-id',
-          version: expect.any(String),
-          observables: [],
-        });
+        expect(deleteObservable).toHaveBeenCalledTimes(1);
       });
     });
 

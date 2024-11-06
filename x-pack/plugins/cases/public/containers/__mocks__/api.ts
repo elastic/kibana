@@ -196,4 +196,4 @@ export const replaceCustomField = async ({
 
 export const getSimilarCases = async () => allCasesSnake;
 
-export const postObservables = async () => {};
+export const postObservable = async () => {};

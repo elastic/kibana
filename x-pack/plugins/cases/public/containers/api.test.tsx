@@ -69,6 +69,7 @@ import {
   basicFileMock,
   customFieldsMock,
   mockCase,
+  similarCases,
 } from './mock';
 
 import { DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from './constants';
@@ -1225,7 +1226,7 @@ describe('Cases API', () => {
         pageSize: 10,
         pageIndex: 0,
       });
-      expect(resp).toEqual(allCases);
+      expect(resp).toEqual(similarCases);
     });
   });
 
@@ -1256,19 +1257,16 @@ describe('Cases API', () => {
       expect(fetchMock).toHaveBeenCalledWith(`${CASES_INTERNAL_URL}/${mockCase.id}/observables`, {
         method: 'POST',
         body: JSON.stringify({
-          version: mockCase.version,
-          observables: [
-            {
-              id: '55d674fb-9a7f-4ebd-8aab-e12b142af20c',
-              typeKey: '18b62f19-8c60-415e-8a08-706d1078c556',
-              value: 'test value',
-              description: '',
-              hasBeenSighted: false,
-              isIoc: false,
-              createdAt: '2024-10-03 11:37',
-              updatedAt: '2024-10-03 11:37',
-            },
-          ],
+          observable: {
+            id: '55d674fb-9a7f-4ebd-8aab-e12b142af20c',
+            typeKey: '18b62f19-8c60-415e-8a08-706d1078c556',
+            value: 'test value',
+            description: '',
+            hasBeenSighted: false,
+            isIoc: false,
+            createdAt: '2024-10-03 11:37',
+            updatedAt: '2024-10-03 11:37',
+          },
         }),
         signal: abortCtrl.signal,
       });

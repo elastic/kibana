@@ -56,10 +56,7 @@ describe('usePostObservables', () => {
 
     await waitForNextUpdate();
 
-    expect(spy).toHaveBeenCalledWith(
-      { observables: [], caseId: mockCase.id, version: mockCase.version },
-      mockCase.id
-    );
+    expect(spy).toHaveBeenCalledWith({ observable: observableMock.observable }, mockCase.id);
   });
 
   it('invalidates the queries correctly', async () => {
