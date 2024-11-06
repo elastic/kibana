@@ -214,7 +214,7 @@ export const getBenchmarkApplicableTo = (benchmarkId: BenchmarksCisId) => {
 };
 
 export const getCloudProviderNameFromAbbreviation = (cloudProvider: string) => {
-  switch (cloudProvider) {
+  switch (cloudProvider.toLowerCase()) {
     case 'azure':
       return CLOUD_PROVIDER_NAMES.AZURE;
     case 'aws':
