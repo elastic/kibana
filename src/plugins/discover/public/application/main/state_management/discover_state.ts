@@ -372,6 +372,13 @@ export function getDiscoverStateContainer({
   };
 
   const transitionFromESQLToDataView = (dataViewId: string) => {
+    const dataView = internalStateContainer.getState().dataView;
+    if (dataView) {
+      // the most recent data view, built behind the scene when using ES|QL
+      // needs to be added to the list of adHocDataViews to be displayed correctly with the right icon
+      const prevAdHocDataViews = internalStateContainer.getState().adHocDataViews;
+      internalStateContainer.transitions.setAdHocDataViews([...prevAdHocDataViews, dataView]);
+    }
     appStateContainer.update({
       query: {
         language: 'kuery',
