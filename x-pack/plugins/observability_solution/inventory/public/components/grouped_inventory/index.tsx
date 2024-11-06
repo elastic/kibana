@@ -8,20 +8,19 @@ import { EuiSpacer } from '@elastic/eui';
 import { ENTITY_TYPE } from '@kbn/observability-shared-plugin/common';
 import React from 'react';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
-import { InventoryGroupAccordion } from './inventory_group_accordion';
+import { useInventorySearchBarContext } from '../../context/inventory_search_bar_context_provider';
 import { useInventoryAbortableAsync } from '../../hooks/use_inventory_abortable_async';
 import { useKibana } from '../../hooks/use_kibana';
+import { useUnifiedSearch } from '../../hooks/use_unified_search';
+import { InventoryGroupAccordion } from './inventory_group_accordion';
 import { InventorySummary } from './inventory_summary';
-import { useInventoryParams } from '../../hooks/use_inventory_params';
-import { useInventorySearchBarContext } from '../../context/inventory_search_bar_context_provider';
 
 export function GroupedInventory() {
   const {
     services: { inventoryAPIClient },
   } = useKibana();
-  const { query } = useInventoryParams('/');
-  const { kuery, entityTypes } = query;
-  const { refreshSubject$ } = useInventorySearchBarContext();
+  const { refreshSubject$, isControlPanelsInitiated } = useInventorySearchBarContext();
+  const { stringifiedEsQuery } = useUnifiedSearch();
 
   const {
     value = { groupBy: ENTITY_TYPE, groups: [], entitiesCount: 0 },
@@ -29,20 +28,19 @@ export function GroupedInventory() {
     loading,
   } = useInventoryAbortableAsync(
     ({ signal }) => {
-      return inventoryAPIClient.fetch('GET /internal/inventory/entities/group_by/{field}', {
-        params: {
-          path: {
-            field: ENTITY_TYPE,
+      if (isControlPanelsInitiated) {
+        return inventoryAPIClient.fetch('GET /internal/inventory/entities/group_by/{field}', {
+          params: {
+            path: {
+              field: ENTITY_TYPE,
+            },
+            query: { esQuery: stringifiedEsQuery },
           },
-          query: {
-            kuery,
-            entityTypes: entityTypes?.length ? JSON.stringify(entityTypes) : undefined,
-          },
-        },
-        signal,
-      });
+          signal,
+        });
+      }
     },
-    [entityTypes, inventoryAPIClient, kuery]
+    [inventoryAPIClient, stringifiedEsQuery, isControlPanelsInitiated]
   );
 
   useEffectOnce(() => {
@@ -58,8 +56,9 @@ export function GroupedInventory() {
       {value.groups.map((group) => (
         <InventoryGroupAccordion
           key={`${value.groupBy}-${group[value.groupBy]}`}
-          group={group}
           groupBy={value.groupBy}
+          groupValue={group[value.groupBy]}
+          groupCount={group.count}
           isLoading={loading}
         />
       ))}

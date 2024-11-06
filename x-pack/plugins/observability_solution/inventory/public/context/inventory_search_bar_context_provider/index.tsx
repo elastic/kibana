@@ -4,26 +4,36 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { createContext, useContext, type ReactChild } from 'react';
+import React, { createContext, useContext, useState, type ReactChild } from 'react';
 import { Subject } from 'rxjs';
+import { DataView } from '@kbn/data-views-plugin/common';
+import { useAdHocInventoryDataView } from '../../hooks/use_adhoc_inventory_data_view';
 
 interface InventorySearchBarContextType {
-  searchBarContentSubject$: Subject<{
-    kuery?: string;
-    entityTypes?: string[];
-  }>;
   refreshSubject$: Subject<void>;
+  isControlPanelsInitiated: boolean;
+  setIsControlPanelsInitiated: React.Dispatch<React.SetStateAction<boolean>>;
+  dataView?: DataView;
 }
 
 const InventorySearchBarContext = createContext<InventorySearchBarContextType>({
-  searchBarContentSubject$: new Subject(),
   refreshSubject$: new Subject(),
+  isControlPanelsInitiated: false,
+  setIsControlPanelsInitiated: () => {},
 });
 
 export function InventorySearchBarContextProvider({ children }: { children: ReactChild }) {
+  const [isControlPanelsInitiated, setIsControlPanelsInitiated] = useState(false);
+  const { dataView } = useAdHocInventoryDataView();
+
   return (
     <InventorySearchBarContext.Provider
-      value={{ searchBarContentSubject$: new Subject(), refreshSubject$: new Subject() }}
+      value={{
+        refreshSubject$: new Subject(),
+        isControlPanelsInitiated,
+        setIsControlPanelsInitiated,
+        dataView,
+      }}
     >
       {children}
     </InventorySearchBarContext.Provider>

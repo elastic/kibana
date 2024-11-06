@@ -19,35 +19,35 @@ import {
 import { useInventoryAbortableAsync } from '../../hooks/use_inventory_abortable_async';
 import { useInventoryParams } from '../../hooks/use_inventory_params';
 import { useInventoryRouter } from '../../hooks/use_inventory_router';
+import { useUnifiedSearch } from '../../hooks/use_unified_search';
 
 interface Props {
-  field: string;
+  groupValue: string;
 }
 
 const paginationDecoder = decodeOrThrow(entityPaginationRt);
 
-export function GroupedEntitiesGrid({ field }: Props) {
+export function GroupedEntitiesGrid({ groupValue }: Props) {
   const { query } = useInventoryParams('/');
-  const { sortField, sortDirection, kuery, pagination: paginationQuery } = query;
+  const { sortField, sortDirection, pagination: paginationQuery } = query;
   const inventoryRoute = useInventoryRouter();
   let pagination: EntityPagination | undefined = {};
+  const { stringifiedEsQuery } = useUnifiedSearch();
   try {
     pagination = paginationDecoder(paginationQuery);
   } catch (error) {
     inventoryRoute.push('/', {
       path: {},
       query: {
-        sortField,
-        sortDirection,
-        kuery,
+        ...query,
         pagination: undefined,
       },
     });
     window.location.reload();
   }
-  const pageIndex = pagination?.[field] ?? 0;
+  const pageIndex = pagination?.[groupValue] ?? 0;
 
-  const { refreshSubject$ } = useInventorySearchBarContext();
+  const { refreshSubject$, isControlPanelsInitiated } = useInventorySearchBarContext();
   const {
     services: { inventoryAPIClient },
   } = useKibana();
@@ -58,19 +58,28 @@ export function GroupedEntitiesGrid({ field }: Props) {
     refresh,
   } = useInventoryAbortableAsync(
     ({ signal }) => {
-      return inventoryAPIClient.fetch('GET /internal/inventory/entities', {
-        params: {
-          query: {
-            sortDirection,
-            sortField,
-            entityTypes: field?.length ? JSON.stringify([field]) : undefined,
-            kuery,
+      if (isControlPanelsInitiated) {
+        return inventoryAPIClient.fetch('GET /internal/inventory/entities', {
+          params: {
+            query: {
+              sortDirection,
+              sortField,
+              esQuery: stringifiedEsQuery,
+              entityTypes: groupValue?.length ? JSON.stringify([groupValue]) : undefined,
+            },
           },
-        },
-        signal,
-      });
+          signal,
+        });
+      }
     },
-    [field, inventoryAPIClient, kuery, sortDirection, sortField]
+    [
+      groupValue,
+      inventoryAPIClient,
+      sortDirection,
+      sortField,
+      isControlPanelsInitiated,
+      stringifiedEsQuery,
+    ]
   );
 
   useEffectOnce(() => {
@@ -86,7 +95,7 @@ export function GroupedEntitiesGrid({ field }: Props) {
         ...query,
         pagination: entityPaginationRt.encode({
           ...pagination,
-          [field]: nextPage,
+          [groupValue]: nextPage,
         }),
       },
     });
@@ -105,12 +114,14 @@ export function GroupedEntitiesGrid({ field }: Props) {
 
   function handleTypeFilter(type: string) {
     const { pagination: _, ...rest } = query;
+
+    // TODO: caue check it
     inventoryRoute.push('/', {
       path: {},
       query: {
         ...rest,
         // Override the current entity types
-        entityTypes: [type],
+        // entityTypes: [type],
       },
     });
   }
