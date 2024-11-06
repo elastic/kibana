@@ -164,7 +164,6 @@ export function useFetchAgentsData() {
       selectedStatus,
     });
   }, [search, selectedAgentPolicies, selectedStatus, selectedTags, selectedPoliciesByOutputs]);
-  console.log('kuery', kuery)
 
   kuery =
     includeUnenrolled && kuery ? `status:* AND (${kuery})` : includeUnenrolled ? `status:*` : kuery;
@@ -431,7 +430,7 @@ export function useFetchAgentsData() {
   // apply the filtering by outputs
   const policiesByOutputsRes = useListPoliciesByOutputs({ ids: selectedOutputs });
   const policiesByOutputs = policiesByOutputsRes?.data?.items ?? [];
-  console.log(policiesByOutputs)
+
   if (!isEqual(policiesByOutputs, selectedPoliciesByOutputs)) {
     setSelectedPoliciesByOutputs(policiesByOutputs);
   }
