@@ -40,6 +40,9 @@ const DEFAULTS_SETTINGS = {
     restrictInternalApis: true,
   },
   logging: {
+    root: {
+      level: 'off',
+    },
     loggers: [
       {
         name: 'root',
