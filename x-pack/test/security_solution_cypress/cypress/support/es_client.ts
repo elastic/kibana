@@ -40,6 +40,13 @@ export const esClient = (
       });
       return null;
     },
+    bulkInsert: async (body) => {
+      await client.bulk({
+        refresh: true,
+        body,
+      });
+      return null;
+    },
   });
 
   return Promise.resolve();

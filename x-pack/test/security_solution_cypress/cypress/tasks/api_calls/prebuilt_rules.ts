@@ -113,6 +113,7 @@ export const createNewRuleAsset = ({
     rule['security-rule'].rule_id
   }?refresh`;
   cy.log('URL', url);
+  cy.log('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA');
   cy.waitUntil(
     () => {
       return cy
@@ -122,7 +123,6 @@ export const createNewRuleAsset = ({
           headers: {
             'Content-Type': 'application/json',
           },
-          failOnStatusCode: false,
           body: rule,
         })
         .then((response) => response.status === 200);
@@ -142,7 +142,6 @@ export const bulkCreateRuleAssets = ({
     'Bulk Install prebuilt rules',
     rules?.map((rule) => rule['security-rule'].rule_id).join(', ')
   );
-  const url = `${Cypress.env('ELASTICSEARCH_URL')}/${index}/_bulk?refresh`;
 
   const bulkIndexRequestBody = rules.reduce((body, rule) => {
     const document = JSON.stringify(rule);
@@ -165,37 +164,8 @@ export const bulkCreateRuleAssets = ({
     return body.concat(indexRuleAsset, indexHistoricalRuleAsset);
   }, '');
 
-  cy.log('BEFORE');
-
   cy.task('putMapping', index);
-
-  cy.log('AFTER');
-
-  /*
-  rootRequest({
-    method: 'PUT',
-    url: `${Cypress.env('ELASTICSEARCH_URL')}/${index}/_mapping`,
-    body: {
-      dynamic: true,
-    },
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  });
-  */
-
-  cy.waitUntil(
-    () => {
-      return rootRequest({
-        method: 'POST',
-        url,
-        headers: { 'Content-Type': 'application/json' },
-        failOnStatusCode: false,
-        body: bulkIndexRequestBody,
-      }).then((response) => response.status === 200);
-    },
-    { interval: 500, timeout: 12000 }
-  );
+  cy.task('bulkInsert', bulkIndexRequestBody);
 };
 
 export const getRuleAssets = (index: string | undefined = '.kibana_security_solution') => {
@@ -206,7 +176,6 @@ export const getRuleAssets = (index: string | undefined = '.kibana_security_solu
     headers: {
       'Content-Type': 'application/json',
     },
-    failOnStatusCode: false,
     body: {
       query: {
         term: { type: { value: 'security-rule' } },
