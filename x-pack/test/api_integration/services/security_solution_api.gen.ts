@@ -32,6 +32,7 @@ import { CopyTimelineRequestBodyInput } from '@kbn/security-solution-plugin/comm
 import { CreateAlertsMigrationRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals_migration/create_signals_migration/create_signals_migration.gen';
 import { CreateAssetCriticalityRecordRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/create_asset_criticality.gen';
 import { CreateRuleRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/crud/create_rule/create_rule_route.gen';
+import { CreateRuleMigrationRequestBodyInput } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rules_migration.gen';
 import { CreateTimelinesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/create_timelines/create_timelines_route.gen';
 import {
   CreateUpdateProtectionUpdatesNoteRequestParamsInput,
@@ -337,6 +338,17 @@ If a record already exists for the specified entity, that record is overwritten 
         .post(routeWithNamespace('/api/detection_engine/rules', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(props.body as object);
+    },
+    /**
+     * Creates a new SIEM rules migration using the original vendor rules provided
+     */
+    createRuleMigration(props: CreateRuleMigrationProps, kibanaSpace: string = 'default') {
+      return supertest
+        .post(routeWithNamespace('/internal/siem_migrations/rules', kibanaSpace))
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
@@ -687,6 +699,13 @@ If a record already exists for the specified entity, that record is overwritten 
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
+    entityStoreGetPrivileges(kibanaSpace: string = 'default') {
+      return supertest
+        .get(routeWithNamespace('/internal/entity_store/privileges', kibanaSpace))
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+    },
     /**
       * Export detection rules to an `.ndjson` file. The following configuration items are also included in the `.ndjson` file:
 - Actions
@@ -918,6 +937,16 @@ finalize it.
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
+    },
+    /**
+     * Retrieves the rule migrations stored in the system
+     */
+    getRuleMigration(kibanaSpace: string = 'default') {
+      return supertest
+        .get(routeWithNamespace('/internal/siem_migrations/rules', kibanaSpace))
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
     /**
      * Get the details of an existing saved Timeline or Timeline template.
@@ -1381,6 +1410,9 @@ export interface CreateAssetCriticalityRecordProps {
 }
 export interface CreateRuleProps {
   body: CreateRuleRequestBodyInput;
+}
+export interface CreateRuleMigrationProps {
+  body: CreateRuleMigrationRequestBodyInput;
 }
 export interface CreateTimelinesProps {
   body: CreateTimelinesRequestBodyInput;

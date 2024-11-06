@@ -9,8 +9,10 @@ import type { CustomFieldBuilderMap } from './types';
 import { CustomFieldTypes } from '../../../common/types/domain';
 import { configureTextCustomFieldFactory } from './text/configure_text_field';
 import { configureToggleCustomFieldFactory } from './toggle/configure_toggle_field';
+import { configureNumberCustomFieldFactory } from './number/configure_number_field';
 
 export const builderMap = Object.freeze({
   [CustomFieldTypes.TEXT]: configureTextCustomFieldFactory,
   [CustomFieldTypes.TOGGLE]: configureToggleCustomFieldFactory,
+  [CustomFieldTypes.NUMBER]: configureNumberCustomFieldFactory,
 } as const) as CustomFieldBuilderMap;

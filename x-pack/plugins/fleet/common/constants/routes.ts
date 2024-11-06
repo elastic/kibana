@@ -81,6 +81,8 @@ export const AGENT_POLICY_API_ROUTES = {
   DELETE_PATTERN: `${AGENT_POLICY_API_ROOT}/delete`,
   FULL_INFO_PATTERN: `${AGENT_POLICY_API_ROOT}/{agentPolicyId}/full`,
   FULL_INFO_DOWNLOAD_PATTERN: `${AGENT_POLICY_API_ROOT}/{agentPolicyId}/download`,
+  LIST_OUTPUTS_PATTERN: `${AGENT_POLICY_API_ROOT}/outputs`,
+  INFO_OUTPUTS_PATTERN: `${AGENT_POLICY_API_ROOT}/{agentPolicyId}/outputs`,
 };
 
 // Kubernetes Manifest API routes
@@ -133,8 +135,6 @@ export const APP_API_ROUTES = {
   CHECK_PERMISSIONS_PATTERN: `${API_ROOT}/check-permissions`,
   GENERATE_SERVICE_TOKEN_PATTERN: `${API_ROOT}/service_tokens`,
   AGENT_POLICIES_SPACES: `${INTERNAL_ROOT}/agent_policies_spaces`,
-  // deprecated since 8.0
-  GENERATE_SERVICE_TOKEN_PATTERN_DEPRECATED: `${API_ROOT}/service-tokens`,
 };
 
 // Agent API routes
@@ -157,8 +157,6 @@ export const AGENT_API_ROUTES = {
   AVAILABLE_VERSIONS_PATTERN: `${API_ROOT}/agents/available_versions`,
   STATUS_PATTERN: `${API_ROOT}/agent_status`,
   DATA_PATTERN: `${API_ROOT}/agent_status/data`,
-  // deprecated since 8.0
-  STATUS_PATTERN_DEPRECATED: `${API_ROOT}/agent-status`,
   UPGRADE_PATTERN: `${API_ROOT}/agents/{agentId}/upgrade`,
   BULK_UPGRADE_PATTERN: `${API_ROOT}/agents/bulk_upgrade`,
   ACTION_STATUS_PATTERN: `${API_ROOT}/agents/action_status`,

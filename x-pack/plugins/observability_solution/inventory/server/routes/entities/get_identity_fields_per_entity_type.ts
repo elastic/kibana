@@ -6,9 +6,9 @@
  */
 
 import { ENTITY_IDENTITY_FIELDS, ENTITY_TYPE } from '@kbn/observability-shared-plugin/common';
-import { Entity, EntityType } from '../../../common/entities';
+import { Entity } from '../../../common/entities';
 
-export type IdentityFieldsPerEntityType = Map<EntityType, string[]>;
+export type IdentityFieldsPerEntityType = Map<string, string[]>;
 
 export const getIdentityFieldsPerEntityType = (entities: Entity[]) => {
   const identityFieldsPerEntityType: IdentityFieldsPerEntityType = new Map();

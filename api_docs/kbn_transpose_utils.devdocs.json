@@ -1,0 +1,177 @@
+{
+  "id": "@kbn/transpose-utils",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/transpose-utils",
+        "id": "def-common.getOriginalId",
+        "type": "Function",
+        "tags": [],
+        "label": "getOriginalId",
+        "description": [],
+        "signature": [
+          "(id: string) => string"
+        ],
+        "path": "packages/kbn-transpose-utils/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/transpose-utils",
+            "id": "def-common.getOriginalId.$1",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-transpose-utils/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/transpose-utils",
+        "id": "def-common.getTransposeId",
+        "type": "Function",
+        "tags": [],
+        "label": "getTransposeId",
+        "description": [],
+        "signature": [
+          "(value: string, columnId: string) => string"
+        ],
+        "path": "packages/kbn-transpose-utils/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/transpose-utils",
+            "id": "def-common.getTransposeId.$1",
+            "type": "string",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-transpose-utils/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/transpose-utils",
+            "id": "def-common.getTransposeId.$2",
+            "type": "string",
+            "tags": [],
+            "label": "columnId",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-transpose-utils/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/transpose-utils",
+        "id": "def-common.isTransposeId",
+        "type": "Function",
+        "tags": [],
+        "label": "isTransposeId",
+        "description": [],
+        "signature": [
+          "(id: string) => boolean"
+        ],
+        "path": "packages/kbn-transpose-utils/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/transpose-utils",
+            "id": "def-common.isTransposeId.$1",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-transpose-utils/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/transpose-utils",
+        "id": "def-common.TRANSPOSE_SEPARATOR",
+        "type": "string",
+        "tags": [],
+        "label": "TRANSPOSE_SEPARATOR",
+        "description": [
+          "\nUsed to delimitate felids of a transposed column id"
+        ],
+        "signature": [
+          "\"---\""
+        ],
+        "path": "packages/kbn-transpose-utils/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/transpose-utils",
+        "id": "def-common.TRANSPOSE_VISUAL_SEPARATOR",
+        "type": "string",
+        "tags": [],
+        "label": "TRANSPOSE_VISUAL_SEPARATOR",
+        "description": [
+          "\nVisual deliminator between felids of a transposed column id\n\nMeant to align with the `MULTI_FIELD_KEY_SEPARATOR` from the data plugin"
+        ],
+        "signature": [
+          "\"›\""
+        ],
+        "path": "packages/kbn-transpose-utils/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

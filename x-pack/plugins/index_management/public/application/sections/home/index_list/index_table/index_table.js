@@ -41,7 +41,7 @@ import {
   reactRouterNavigate,
   attemptToURIDecode,
 } from '../../../../../shared_imports';
-import { getDataStreamDetailsLink, getIndexDetailsLink } from '../../../../services/routing';
+import { getDataStreamDetailsLink, navigateToIndexDetailsPage } from '../../../../services/routing';
 import { documentationService } from '../../../../services/documentation';
 import { AppContextConsumer } from '../../../../app_context';
 import { renderBadges } from '../../../../lib/render_badges';
@@ -73,12 +73,13 @@ const getColumnConfigs = ({
             <EuiLink
               data-test-subj="indexTableIndexNameLink"
               onClick={() => {
-                if (!extensionsService.indexDetailsPageRoute) {
-                  history.push(getIndexDetailsLink(index.name, location.search || ''));
-                } else {
-                  const route = extensionsService.indexDetailsPageRoute.renderRoute(index.name);
-                  application.navigateToUrl(http.basePath.prepend(route));
-                }
+                navigateToIndexDetailsPage(
+                  index.name,
+                  location.search || '',
+                  extensionsService,
+                  application,
+                  http
+                );
               }}
             >
               {index.name}

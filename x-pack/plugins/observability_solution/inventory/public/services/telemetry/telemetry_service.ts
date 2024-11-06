@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
-import type { TelemetryServiceSetupParams, ITelemetryClient, TelemetryEventParams } from './types';
+import type { TelemetryServiceSetupParams, TelemetryEventParams } from './types';
 import { inventoryTelemetryEventBasedTypes } from './telemetry_events';
 import { TelemetryClient } from './telemetry_client';
 
@@ -23,7 +23,7 @@ export class TelemetryService {
     );
   }
 
-  public start(): ITelemetryClient {
+  public start(): TelemetryClient {
     if (!this.analytics) {
       throw new Error(
         'The TelemetryService.setup() method has not been invoked, be sure to call it during the plugin setup.'
