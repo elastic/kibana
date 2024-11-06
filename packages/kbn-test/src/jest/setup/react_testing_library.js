@@ -22,6 +22,8 @@ configure({ testIdAttribute: 'data-test-subj', asyncUtilTimeout: 4500 });
 
 /* eslint-env jest */
 
+// This is a workaround to run tests with React 17 and the latest @testing-library/react
+// Tracking issue to clean this up https://github.com/elastic/kibana/issues/199100
 jest.mock('@testing-library/react', () => {
   const actual = jest.requireActual('@testing-library/react');
 
