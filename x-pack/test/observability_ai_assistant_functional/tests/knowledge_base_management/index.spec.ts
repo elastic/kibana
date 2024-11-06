@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 import { subj as testSubjSelector } from '@kbn/test-subj-selector';
 import {
+  clearKnowledgeBase,
   createKnowledgeBaseModel,
   deleteKnowledgeBaseModel,
 } from '../../../observability_ai_assistant_api_integration/tests/knowledge_base/helpers';
@@ -20,6 +21,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
   const testSubjects = getService('testSubjects');
   const log = getService('log');
   const ml = getService('ml');
+  const es = getService('es');
   const { common } = getPageObjects(['common']);
 
   async function saveKbEntry({
@@ -33,6 +35,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
       endpoint: 'POST /internal/observability_ai_assistant/functions/summarize',
       params: {
         body: {
+          title: 'Favourite color',
           text,
           confidence: 'high',
           is_correction: false,
@@ -45,6 +48,8 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
 
   describe('Knowledge management tab', () => {
     before(async () => {
+      await clearKnowledgeBase(es);
+
       // create a knowledge base model
       await createKnowledgeBaseModel(ml);
 
@@ -60,7 +65,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
     });
 
     after(async () => {
-      await Promise.all([deleteKnowledgeBaseModel(ml), ui.auth.logout()]);
+      await Promise.all([deleteKnowledgeBaseModel(ml), clearKnowledgeBase(es), ui.auth.logout()]);
     });
 
     describe('when the LLM calls the "summarize" function for two different users', () => {
@@ -75,22 +80,22 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
 
         const rows = await Promise.all(
           entryTitleCells.map(async (cell) => {
-            const entryTitleText = await cell.getVisibleText();
+            const title = await cell.getVisibleText();
             const parentRow = await cell.findByXpath('ancestor::tr');
 
-            const author = await parentRow.findByCssSelector(
+            const authorElm = await parentRow.findByCssSelector(
               testSubjSelector(ui.pages.kbManagementTab.tableAuthorCell)
             );
-            const authorText = await author.getVisibleText();
+            const author = await authorElm.getVisibleText();
             const rowText = (await parentRow.getVisibleText()).split('\n');
 
-            return { rowText, authorText, entryTitleText };
+            return { rowText, author, title };
           })
         );
 
         log.debug(`Found ${rows.length} rows in the KB management table: ${JSON.stringify(rows)}`);
 
-        return rows.filter(({ entryTitleText }) => entryTitleText === 'my_fav_color');
+        return rows.filter(({ title }) => title === 'Favourite color');
       }
 
       before(async () => {
@@ -112,7 +117,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
 
       it('shows two different authors', async () => {
         const entries = await getKnowledgeBaseEntries();
-        expect(entries.map(({ authorText }) => authorText)).to.eql(['secondary_editor', 'editor']);
+        expect(entries.map(({ author }) => author)).to.eql(['secondary_editor', 'editor']);
       });
     });
   });
