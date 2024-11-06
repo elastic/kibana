@@ -84,7 +84,7 @@ const useSummaryPanel = () => {
     datasetsActivity,
 
     numberOfDatasets: filteredItems.length,
-    numberOfDocuments: filteredItems.reduce((acc, curr) => acc + curr.degradedDocs.docsCount, 0),
+    numberOfDocuments: filteredItems.reduce((acc, curr) => acc + curr.docsInTimeRange!, 0),
   };
 };
 
