@@ -16887,176 +16887,6 @@
         ]
       }
     },
-    "/api/fleet/enrollment-api-keys": {
-      "get": {
-        "operationId": "get-fleet-enrollment-api-keys-2",
-        "parameters": [
-          {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "page",
-            "required": false,
-            "schema": {
-              "default": 1,
-              "type": "number"
-            }
-          },
-          {
-            "in": "query",
-            "name": "perPage",
-            "required": false,
-            "schema": {
-              "default": 20,
-              "type": "number"
-            }
-          },
-          {
-            "in": "query",
-            "name": "kuery",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {},
-        "summary": "",
-        "tags": []
-      },
-      "post": {
-        "operationId": "post-fleet-enrollment-api-keys-2",
-        "parameters": [
-          {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
-            "description": "A required header to protect against CSRF attacks",
-            "in": "header",
-            "name": "kbn-xsrf",
-            "required": true,
-            "schema": {
-              "example": "true",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json; Elastic-Api-Version=2023-10-31": {
-              "schema": {
-                "additionalProperties": false,
-                "properties": {
-                  "expiration": {
-                    "type": "string"
-                  },
-                  "name": {
-                    "type": "string"
-                  },
-                  "policy_id": {
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "policy_id"
-                ],
-                "type": "object"
-              }
-            }
-          }
-        },
-        "responses": {},
-        "summary": "",
-        "tags": []
-      }
-    },
-    "/api/fleet/enrollment-api-keys/{keyId}": {
-      "delete": {
-        "operationId": "delete-fleet-enrollment-api-keys-keyid-2",
-        "parameters": [
-          {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
-            "description": "A required header to protect against CSRF attacks",
-            "in": "header",
-            "name": "kbn-xsrf",
-            "required": true,
-            "schema": {
-              "example": "true",
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "keyId",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {},
-        "summary": "",
-        "tags": []
-      },
-      "get": {
-        "operationId": "get-fleet-enrollment-api-keys-keyid-2",
-        "parameters": [
-          {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "keyId",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {},
-        "summary": "",
-        "tags": []
-      }
-    },
     "/api/fleet/enrollment_api_keys": {
       "get": {
         "description": "List enrollment API keys",
@@ -17150,49 +16980,6 @@
                       },
                       "type": "array"
                     },
-                    "list": {
-                      "deprecated": true,
-                      "items": {
-                        "additionalProperties": false,
-                        "properties": {
-                          "active": {
-                            "description": "When false, the enrollment API key is revoked and cannot be used for enrolling Elastic Agents.",
-                            "type": "boolean"
-                          },
-                          "api_key": {
-                            "description": "The enrollment API key (token) used for enrolling Elastic Agents.",
-                            "type": "string"
-                          },
-                          "api_key_id": {
-                            "description": "The ID of the API key in the Security API.",
-                            "type": "string"
-                          },
-                          "created_at": {
-                            "type": "string"
-                          },
-                          "id": {
-                            "type": "string"
-                          },
-                          "name": {
-                            "description": "The name of the enrollment API key.",
-                            "type": "string"
-                          },
-                          "policy_id": {
-                            "description": "The ID of the agent policy the Elastic Agent will be enrolled in.",
-                            "type": "string"
-                          }
-                        },
-                        "required": [
-                          "id",
-                          "api_key_id",
-                          "api_key",
-                          "active",
-                          "created_at"
-                        ],
-                        "type": "object"
-                      },
-                      "type": "array"
-                    },
                     "page": {
                       "type": "number"
                     },
@@ -17207,8 +16994,7 @@
                     "items",
                     "total",
                     "page",
-                    "perPage",
-                    "list"
+                    "perPage"
                   ],
                   "type": "object"
                 }
@@ -24920,10 +24706,6 @@
               "schema": {
                 "additionalProperties": false,
                 "properties": {
-                  "host": {
-                    "format": "uri",
-                    "type": "string"
-                  },
                   "id": {
                     "type": "string"
                   }
@@ -24943,10 +24725,6 @@
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
-                    "host": {
-                      "deprecated": true,
-                      "type": "string"
-                    },
                     "host_id": {
                       "type": "string"
                     },
@@ -39316,12 +39094,6 @@
                           ],
                           "type": "object"
                         },
-                        "fleet_server_hosts": {
-                          "items": {
-                            "type": "string"
-                          },
-                          "type": "array"
-                        },
                         "has_seen_add_data_notice": {
                           "type": "boolean"
                         },
@@ -39476,13 +39248,6 @@
                     ],
                     "type": "object"
                   },
-                  "fleet_server_hosts": {
-                    "items": {
-                      "format": "uri",
-                      "type": "string"
-                    },
-                    "type": "array"
-                  },
                   "has_seen_add_data_notice": {
                     "type": "boolean"
                   },
@@ -39530,12 +39295,6 @@
                             "is_preconfigured"
                           ],
                           "type": "object"
-                        },
-                        "fleet_server_hosts": {
-                          "items": {
-                            "type": "string"
-                          },
-                          "type": "array"
                         },
                         "has_seen_add_data_notice": {
                           "type": "boolean"

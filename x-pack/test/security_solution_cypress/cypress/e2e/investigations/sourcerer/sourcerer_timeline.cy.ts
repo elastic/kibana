@@ -64,7 +64,8 @@ describe.skip('Timeline scope', { tags: ['@ess', '@serverless', '@skipInServerle
   });
 
   describe('Modified badge', () => {
-    it('Selecting new data view does not add a modified badge', () => {
+    // failing on main multiple times https://github.com/elastic/kibana/issues/198944#issuecomment-2457665138 and https://github.com/elastic/kibana/issues/198943#issuecomment-2457665072
+    it.skip('Selecting new data view does not add a modified badge', () => {
       openTimelineUsingToggle();
       cy.get(SOURCERER.badgeModified).should(`not.exist`);
       openSourcerer('timeline');
@@ -134,7 +135,8 @@ describe.skip('Timeline scope', { tags: ['@ess', '@serverless', '@skipInServerle
     });
 
     const defaultPatterns = [`auditbeat-*`, `${DEFAULT_ALERTS_INDEX}-default`];
-    it('alerts checkbox behaves as expected', () => {
+    // failing on main multiple times https://github.com/elastic/kibana/issues/198944#issuecomment-2457665138 and https://github.com/elastic/kibana/issues/198943#issuecomment-2457665072
+    it.skip('alerts checkbox behaves as expected', () => {
       isDataViewSelection(siemDataViewTitle);
       defaultPatterns.forEach((pattern) => isSourcererSelection(pattern));
       openDataViewSelection();
