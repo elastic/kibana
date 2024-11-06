@@ -55,6 +55,7 @@ export function useAlertsHistory({
   http,
   instanceId,
 }: Props): UseAlertsHistory {
+  const enabled = !featureIds.length;
   const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data } = useQuery({
     queryKey: ['useAlertsHistory'],
     queryFn: async ({ signal }) => {
@@ -71,13 +72,21 @@ export function useAlertsHistory({
       });
     },
     refetchOnWindowFocus: false,
+    enabled,
   });
-  return {
-    data: isInitialLoading ? EMPTY_ALERTS_HISTORY : data ?? EMPTY_ALERTS_HISTORY,
-    isLoading: isInitialLoading || isLoading || isRefetching,
-    isSuccess,
-    isError,
-  };
+  return enabled
+    ? {
+        data: isInitialLoading ? EMPTY_ALERTS_HISTORY : data ?? EMPTY_ALERTS_HISTORY,
+        isLoading: isInitialLoading || isLoading || isRefetching,
+        isSuccess,
+        isError,
+      }
+    : {
+        data: EMPTY_ALERTS_HISTORY,
+        isLoading: false,
+        isSuccess: false,
+        isError: false,
+      };
 }
 interface AggsESResponse {
   aggregations: {
