@@ -25,6 +25,7 @@ interface EqlQueryEditProps {
   path: string;
   eqlFieldsComboBoxOptions?: EqlFieldsComboBoxOptions;
   eqlOptions?: EqlOptions;
+  showEqlSizeOption?: boolean;
   dataView: DataViewBase;
   required?: boolean;
   loading?: boolean;
@@ -38,6 +39,7 @@ export function EqlQueryEdit({
   path,
   eqlFieldsComboBoxOptions,
   eqlOptions,
+  showEqlSizeOption = false,
   dataView,
   required,
   loading,
@@ -51,7 +53,7 @@ export function EqlQueryEdit({
       eqlFieldsComboBoxOptions,
       eqlOptions,
       onEqlOptionsChange,
-      isSizeOptionDisabled: true,
+      isSizeOptionDisabled: !showEqlSizeOption,
       isDisabled: disabled,
       isLoading: loading,
       indexPattern: dataView,
@@ -64,6 +66,7 @@ export function EqlQueryEdit({
     [
       eqlFieldsComboBoxOptions,
       eqlOptions,
+      showEqlSizeOption,
       onEqlOptionsChange,
       onValidityChange,
       onValiditingChange,
