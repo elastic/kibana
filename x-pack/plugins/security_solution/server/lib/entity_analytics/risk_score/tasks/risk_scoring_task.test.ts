@@ -19,8 +19,11 @@ import {
   startRiskScoringTask,
   removeRiskScoringTask,
   runTask,
+  getRiskScoringTaskStatus,
+  scheduleNow,
 } from './risk_scoring_task';
 import type { ConfigType } from '../../../../config';
+import { TaskStatus } from '@kbn/task-manager-plugin/server';
 
 const ISO_8601_PATTERN = /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
 
@@ -587,6 +590,65 @@ describe('Risk Scoring Task', () => {
           );
         });
       });
+    });
+  });
+
+  describe('getRiskScoringTaskStatus()', () => {
+    it('returns the task status', async () => {
+      const runAt = new Date();
+      const startedAt = new Date();
+      mockTaskManagerStart.get.mockResolvedValueOnce(
+        Promise.resolve({
+          id: '123',
+          scheduledAt: new Date(),
+          attempts: 0,
+          status: TaskStatus.Idle,
+          startedAt,
+          runAt,
+          retryAt: new Date(),
+          ownerId: null,
+          taskType: 'test',
+          params: {},
+          state: {},
+        })
+      );
+
+      const status = await getRiskScoringTaskStatus({
+        taskManager: mockTaskManagerStart,
+        namespace: 'default',
+      });
+
+      expect(status).toEqual({
+        runAt: runAt.toISOString(),
+        status: 'idle',
+        startedAt: startedAt.toISOString(),
+      });
+    });
+  });
+
+  describe('scheduleNow()', () => {
+    it('schedules the task to run now', async () => {
+      await scheduleNow({
+        taskManager: mockTaskManagerStart,
+        logger: mockLogger,
+        namespace: 'default',
+      });
+
+      expect(mockTaskManagerStart.runSoon).toHaveBeenCalledWith(
+        'risk_engine:risk_scoring:default:0.0.1'
+      );
+    });
+
+    it('logs an error if the task could not be scheduled', async () => {
+      mockTaskManagerStart.runSoon.mockRejectedValueOnce(new Error('whoops'));
+
+      await expect(
+        scheduleNow({
+          taskManager: mockTaskManagerStart,
+          logger: mockLogger,
+          namespace: 'default',
+        })
+      ).rejects.toThrowError('whoops');
     });
   });
 });

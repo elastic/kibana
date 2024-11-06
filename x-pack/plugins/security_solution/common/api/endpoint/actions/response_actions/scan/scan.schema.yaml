@@ -5,9 +5,9 @@ info:
 paths:
   /api/endpoint/action/scan:
     post:
-      summary: Scan Action
+      summary: Scan a file or directory
       operationId: EndpointScanAction
-      description: Scan a file or directory
+      description: Scan a specific file or directory on an endpoint for malware.
       x-codegen-enabled: true
       x-labels: [ess, serverless]
       requestBody:

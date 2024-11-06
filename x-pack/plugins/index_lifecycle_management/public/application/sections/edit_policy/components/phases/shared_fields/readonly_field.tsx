@@ -11,6 +11,7 @@ import { EuiTextColor } from '@elastic/eui';
 import { LearnMoreLink } from '../../learn_more_link';
 import { ToggleFieldWithDescribedFormRow } from '../../described_form_row';
 import { useKibana } from '../../../../../../shared_imports';
+import { i18nTexts } from '../../../i18n_texts';
 interface Props {
   phase: 'hot' | 'warm' | 'cold';
 }
@@ -19,14 +20,7 @@ export const ReadonlyField: React.FunctionComponent<Props> = ({ phase }) => {
   const { docLinks } = useKibana().services;
   return (
     <ToggleFieldWithDescribedFormRow
-      title={
-        <h3>
-          <FormattedMessage
-            id="xpack.indexLifecycleMgmt.editPolicy.readonlyTitle"
-            defaultMessage="Read only"
-          />
-        </h3>
-      }
+      title={<h3>{i18nTexts.editPolicy.readonlyLabel}</h3>}
       description={
         <EuiTextColor color="subdued">
           <FormattedMessage

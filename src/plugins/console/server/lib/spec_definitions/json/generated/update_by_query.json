@@ -30,6 +30,7 @@
       "max_docs": "",
       "pipeline": "",
       "preference": "",
+      "q": "",
       "refresh": "__flag__",
       "request_cache": "__flag__",
       "requests_per_second": [

@@ -27,9 +27,18 @@ export function dashboardServiceProvider(dashboardService: DashboardStart) {
       return responses.hits;
     },
     /**
-     * Generates dashboard url with edit mode
+     * Fetch dashboards by id
      */
-    async getDashboardEditUrl(dashboardId: string) {
+    async fetchDashboardsById(ids: string[]) {
+      const findDashboardsService = await dashboardService.findDashboardsService();
+      const responses = await findDashboardsService.findByIds(ids);
+      const existingDashboards = responses.filter(({ status }) => status === 'success');
+      return existingDashboards;
+    },
+    /**
+     * Generates dashboard url
+     */
+    async getDashboardUrl(dashboardId: string, viewMode: ViewMode = ViewMode.EDIT) {
       return await dashboardService.locator?.getUrl({
         dashboardId,
         viewMode: ViewMode.EDIT,

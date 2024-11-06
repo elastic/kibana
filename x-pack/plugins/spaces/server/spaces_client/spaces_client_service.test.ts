@@ -8,6 +8,7 @@
 import * as Rx from 'rxjs';
 
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
+import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 
 import type { ISpacesClient } from './spaces_client';
 import { SpacesClient } from './spaces_client';
@@ -49,7 +50,7 @@ describe('SpacesClientService', () => {
       const service = new SpacesClientService(debugLogger, 'traditional');
       service.setup({ config$: new Rx.Observable<ConfigType>() });
       const coreStart = coreMock.createStart();
-      const start = service.start(coreStart);
+      const start = service.start(coreStart, featuresPluginMock.createStart());
 
       const request = httpServerMock.createKibanaRequest();
 
@@ -64,7 +65,7 @@ describe('SpacesClientService', () => {
         service.setup({ config$: Rx.of(spacesConfig) });
 
         const coreStart = coreMock.createStart();
-        const start = service.start(coreStart);
+        const start = service.start(coreStart, featuresPluginMock.createStart());
 
         const request = httpServerMock.createKibanaRequest();
         const client = start.createSpacesClient(request);
@@ -85,7 +86,7 @@ describe('SpacesClientService', () => {
       setup.setClientRepositoryFactory(customRepositoryFactory);
 
       const coreStart = coreMock.createStart();
-      const start = service.start(coreStart);
+      const start = service.start(coreStart, featuresPluginMock.createStart());
 
       const request = httpServerMock.createKibanaRequest();
       const client = start.createSpacesClient(request);
@@ -107,7 +108,7 @@ describe('SpacesClientService', () => {
       setup.registerClientWrapper(clientWrapper);
 
       const coreStart = coreMock.createStart();
-      const start = service.start(coreStart);
+      const start = service.start(coreStart, featuresPluginMock.createStart());
 
       const request = httpServerMock.createKibanaRequest();
       const client = start.createSpacesClient(request);
@@ -135,7 +136,7 @@ describe('SpacesClientService', () => {
       setup.registerClientWrapper(clientWrapper);
 
       const coreStart = coreMock.createStart();
-      const start = service.start(coreStart);
+      const start = service.start(coreStart, featuresPluginMock.createStart());
 
       const request = httpServerMock.createKibanaRequest();
       const client = start.createSpacesClient(request);

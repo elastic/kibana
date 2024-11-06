@@ -115,6 +115,9 @@ describe('MonitorEditPage', () => {
           locationsLoaded: true,
           loading: false,
         },
+        monitorDetails: {
+          syntheticsMonitorLoading: true,
+        },
       },
     });
 
@@ -173,6 +176,10 @@ describe('MonitorEditPage', () => {
           locationsLoaded: true,
           loading: false,
         },
+        monitorDetails: {
+          syntheticsMonitorLoading: false,
+          syntheticsMonitorError: new Error('test error'),
+        },
       },
     });
 
@@ -220,7 +227,7 @@ describe('MonitorEditPage', () => {
 
       const inputField = getByTestId('syntheticsMonitorConfigName');
       fireEvent.focus(inputField);
-      userEvent.type(inputField, 'any value'); // Hook is made to return duplicate error as true
+      await userEvent.type(inputField, 'any value'); // Hook is made to return duplicate error as true
       fireEvent.blur(inputField);
 
       if (nameAlreadyExists) {

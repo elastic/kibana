@@ -12,9 +12,15 @@ import { KnowledgeBaseEntryRole } from '../../../common/types';
 import type { RecalledEntry } from '../../service/knowledge_base_service';
 import { getSystemMessageFromInstructions } from '../../service/util/get_system_message_from_instructions';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
+import { assistantScopeType } from '../runtime_types';
 
 const getFunctionsRoute = createObservabilityAIAssistantServerRoute({
   endpoint: 'GET /internal/observability_ai_assistant/functions',
+  params: t.type({
+    query: t.partial({
+      scopes: t.union([t.array(assistantScopeType), assistantScopeType]),
+    }),
+  }),
   options: {
     tags: ['access:ai_assistant'],
   },
@@ -24,7 +30,15 @@ const getFunctionsRoute = createObservabilityAIAssistantServerRoute({
     functionDefinitions: FunctionDefinition[];
     systemMessage: string;
   }> => {
-    const { service, request } = resources;
+    const {
+      service,
+      request,
+      params: {
+        query: { scopes: inputScopes },
+      },
+    } = resources;
+
+    const scopes = inputScopes ? (Array.isArray(inputScopes) ? inputScopes : [inputScopes]) : [];
 
     const controller = new AbortController();
     request.events.aborted$.subscribe(() => {
@@ -39,9 +53,10 @@ const getFunctionsRoute = createObservabilityAIAssistantServerRoute({
         resources,
         client,
         screenContexts: [],
+        scopes,
       }),
       // error is caught in client
-      client.fetchUserInstructions(),
+      client.getKnowledgeBaseUserInstructions(),
     ]);
 
     const functionDefinitions = functionClient.getFunctions().map((fn) => fn.definition);
@@ -49,11 +64,11 @@ const getFunctionsRoute = createObservabilityAIAssistantServerRoute({
     const availableFunctionNames = functionDefinitions.map((def) => def.name);
 
     return {
-      functionDefinitions: functionClient.getFunctions().map((fn) => fn.definition),
+      functionDefinitions,
       systemMessage: getSystemMessageFromInstructions({
-        registeredInstructions: functionClient.getInstructions(),
+        applicationInstructions: functionClient.getInstructions(),
         userInstructions,
-        requestInstructions: [],
+        adHocInstructions: functionClient.getAdhocInstructions(),
         availableFunctionNames,
       }),
     };
@@ -111,6 +126,7 @@ const functionSummariseRoute = createObservabilityAIAssistantServerRoute({
       text: nonEmptyStringRt,
       confidence: t.union([t.literal('low'), t.literal('medium'), t.literal('high')]),
       is_correction: toBooleanRt,
+      type: t.union([t.literal('user_instruction'), t.literal('contextual')]),
       public: toBooleanRt,
       labels: t.record(t.string, t.string),
     }),
@@ -129,17 +145,19 @@ const functionSummariseRoute = createObservabilityAIAssistantServerRoute({
       confidence,
       id,
       is_correction: isCorrection,
+      type,
       text,
       public: isPublic,
       labels,
     } = resources.params.body;
 
-    return client.createKnowledgeBaseEntry({
+    return client.addKnowledgeBaseEntry({
       entry: {
         confidence,
         id,
         doc_id: id,
         is_correction: isCorrection,
+        type,
         text,
         public: isPublic,
         labels,

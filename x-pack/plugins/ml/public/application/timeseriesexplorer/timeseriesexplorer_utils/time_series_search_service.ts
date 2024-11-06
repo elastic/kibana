@@ -12,7 +12,7 @@ import { map } from 'rxjs';
 import type { MlEntityField, ES_AGGREGATION } from '@kbn/ml-anomaly-utils';
 import type { Job } from '../../../../common/types/anomaly_detection_jobs';
 import type { ModelPlotOutput } from '../../services/results_service/result_service_rx';
-import type { MlApiServices } from '../../services/ml_api_service';
+import type { MlApi } from '../../services/ml_api_service';
 import { type MlResultsService, mlResultsServiceProvider } from '../../services/results_service';
 import { buildConfigFromDetector } from '../../util/chart_config_builder';
 import {
@@ -29,10 +29,7 @@ interface TimeSeriesExplorerChartDetails {
   };
 }
 
-export function timeSeriesSearchServiceFactory(
-  mlResultsService: MlResultsService,
-  mlApiServices: MlApiServices
-) {
+export function timeSeriesSearchServiceFactory(mlResultsService: MlResultsService, mlApi: MlApi) {
   function getMetricData(
     job: Job,
     detectorIndex: number,
@@ -172,7 +169,7 @@ export function timeSeriesSearchServiceFactory(
         resolve(obj);
       } else {
         const entityFieldNames: string[] = blankEntityFields.map((f) => f.fieldName);
-        mlApiServices
+        mlApi
           .getCardinalityOfFields({
             index: chartConfig.datafeedConfig.indices.join(','),
             fieldNames: entityFieldNames,
@@ -211,15 +208,15 @@ export type MlTimeSeriesSearchService = ReturnType<typeof timeSeriesSearchServic
 export function useTimeSeriesSearchService(): MlTimeSeriesSearchService {
   const {
     services: {
-      mlServices: { mlApiServices },
+      mlServices: { mlApi },
     },
   } = useMlKibana();
 
-  const mlResultsService = mlResultsServiceProvider(mlApiServices);
+  const mlResultsService = mlResultsServiceProvider(mlApi);
 
   const mlForecastService = useMemo(
-    () => timeSeriesSearchServiceFactory(mlResultsService, mlApiServices),
-    [mlApiServices, mlResultsService]
+    () => timeSeriesSearchServiceFactory(mlResultsService, mlApi),
+    [mlApi, mlResultsService]
   );
   return mlForecastService;
 }

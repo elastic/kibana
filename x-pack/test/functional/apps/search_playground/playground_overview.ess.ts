@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type OpenAI from 'openai';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { createOpenAIConnector } from './utils/create_openai_connector';
 import { MachineLearningCommonAPIProvider } from '../../services/ml/common_api';
@@ -111,6 +110,7 @@ export default function (ftrContext: FtrProviderContext) {
         before(async () => {
           await createConnector();
           await createIndex();
+          await pageObjects.searchPlayground.session.setSession();
           await browser.refresh();
         });
 
@@ -142,9 +142,7 @@ export default function (ftrContext: FtrProviderContext) {
           const conversationInterceptor = proxy.intercept(
             'conversation',
             (body) =>
-              (JSON.parse(body) as OpenAI.Chat.ChatCompletionCreateParamsNonStreaming).tools?.find(
-                (fn) => fn.function.name === 'title_conversation'
-              ) === undefined
+              body.tools?.find((fn) => fn.function.name === 'title_conversation') === undefined
           );
 
           await pageObjects.searchPlayground.PlaygroundChatPage.sendQuestion();
@@ -173,6 +171,10 @@ export default function (ftrContext: FtrProviderContext) {
 
         it('save selected fields between modes', async () => {
           await pageObjects.searchPlayground.PlaygroundChatPage.expectSaveFieldsBetweenModes();
+        });
+
+        it('click on manage connector button', async () => {
+          await pageObjects.searchPlayground.PlaygroundChatPage.clickManageButton();
         });
       });
 

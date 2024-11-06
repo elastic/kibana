@@ -248,7 +248,7 @@ export default function ({ getService }: FtrProviderContext) {
               },
             })
             .expect(200);
-          kibanaServer.savedObjects.create({
+          await kibanaServer.savedObjects.create({
             id: syntheticsApiKeyID,
             type: syntheticsApiKeyObjectType,
             overwrite: true,

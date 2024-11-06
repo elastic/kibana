@@ -13,7 +13,6 @@ import {
 } from '../../../../screens/create_new_rule';
 import {
   DEFINITION_DETAILS,
-  DETAILS_TITLE,
   SUPPRESS_BY_DETAILS,
   SUPPRESS_FOR_DETAILS,
   SUPPRESS_MISSING_FIELD,
@@ -42,7 +41,7 @@ import { RULES_MANAGEMENT_URL } from '../../../../urls/rules_management';
 describe(
   'Machine Learning Detection Rules - Editing',
   {
-    tags: ['@ess', '@serverless'],
+    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
   },
   () => {
     let mlRule: ReturnType<typeof getMachineLearningRule>;
@@ -88,9 +87,6 @@ describe(
             'have.text',
             'Suppress and group alerts for events with missing fields'
           );
-
-          // suppression functionality should be under Tech Preview
-          cy.contains(DETAILS_TITLE, SUPPRESS_FOR_DETAILS).contains('Technical Preview');
         });
       });
     });

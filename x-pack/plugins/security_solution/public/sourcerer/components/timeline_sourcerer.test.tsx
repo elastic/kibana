@@ -56,6 +56,7 @@ const { id } = mockGlobalState.sourcerer.defaultDataView;
 const sourcererDataView = {
   indicesExist: true,
   loading: false,
+  sourcererDataView: {},
 };
 
 describe('timeline sourcerer', () => {
@@ -92,9 +93,9 @@ describe('timeline sourcerer', () => {
 
   it('renders "alerts only" checkbox, unchecked', async () => {
     await waitFor(() => {
-      expect(screen.getByTestId('sourcerer-alert-only-checkbox').parentElement).toHaveTextContent(
-        'Show only detection alerts'
-      );
+      expect(
+        screen.getByTestId('sourcerer-alert-only-checkbox').parentElement?.parentElement
+      ).toHaveTextContent('Show only detection alerts');
       expect(screen.getByTestId('sourcerer-alert-only-checkbox')).not.toBeChecked();
     });
 

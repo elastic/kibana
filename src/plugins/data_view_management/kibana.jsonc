@@ -1,12 +1,16 @@
 {
   "type": "plugin",
   "id": "@kbn/data-view-management-plugin",
-  "owner": "@elastic/kibana-data-discovery",
+  "owner": [
+    "@elastic/kibana-data-discovery"
+  ],
+  "group": "platform",
+  "visibility": "shared",
   "description": "Data view management app",
   "plugin": {
     "id": "dataViewManagement",
-    "server": true,
     "browser": true,
+    "server": true,
     "requiredPlugins": [
       "management",
       "data",
@@ -20,6 +24,7 @@
     ],
     "optionalPlugins": [
       "noDataPage",
+      "share",
       "spaces"
     ],
     "requiredBundles": [

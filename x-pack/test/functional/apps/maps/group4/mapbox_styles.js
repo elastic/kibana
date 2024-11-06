@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 
 export default function ({ getPageObjects, getService }) {
-  const PageObjects = getPageObjects(['maps']);
+  const { maps } = getPageObjects(['maps']);
   const inspector = getService('inspector');
   const security = getService('security');
 
@@ -19,8 +19,8 @@ export default function ({ getPageObjects, getService }) {
         ['global_maps_all', 'geoshape_data_reader', 'meta_for_geoshape_data_reader'],
         { skipBrowserRefresh: true }
       );
-      await PageObjects.maps.loadSavedMap('join example');
-      mapboxStyle = await PageObjects.maps.getMapboxStyle();
+      await maps.loadSavedMap('join example');
+      mapboxStyle = await maps.getMapboxStyle();
     });
 
     after(async () => {
@@ -183,7 +183,7 @@ export default function ({ getPageObjects, getService }) {
       });
     });
 
-    it('should style fill layer as expected', async () => {
+    it('should style fill layer as expected again', async () => {
       const layer = mapboxStyle.layers.find((mbLayer) => {
         return mbLayer.id === 'n1t6f_line';
       });

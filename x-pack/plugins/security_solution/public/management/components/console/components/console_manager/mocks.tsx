@@ -9,7 +9,7 @@
 
 import React, { memo, useCallback } from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import userEvent from '@testing-library/user-event';
+import type { UserEvent } from '@testing-library/user-event';
 import { waitFor } from '@testing-library/react';
 import type { AppContextTestRender } from '../../../../../common/mock/endpoint';
 import { getCommandListMock } from '../../mocks';
@@ -37,6 +37,7 @@ export const getNewConsoleRegistrationMock = (
  * @param renderResult
  */
 export const getConsoleManagerMockRenderResultQueriesAndActions = (
+  user: UserEvent,
   renderResult: ReturnType<AppContextTestRender['render']>
 ) => {
   return {
@@ -46,7 +47,7 @@ export const getConsoleManagerMockRenderResultQueriesAndActions = (
     clickOnRegisterNewConsole: async () => {
       const currentRunningCount = renderResult.queryAllByTestId('showRunningConsole').length;
 
-      userEvent.click(renderResult.getByTestId('registerNewConsole'));
+      await user.click(renderResult.getByTestId('registerNewConsole'));
 
       await waitFor(() => {
         expect(renderResult.queryAllByTestId('showRunningConsole')).toHaveLength(
@@ -66,7 +67,7 @@ export const getConsoleManagerMockRenderResultQueriesAndActions = (
         throw new Error(`No registered console found at index [${atIndex}]`);
       }
 
-      userEvent.click(runningConsoleShowButton);
+      await user.click(runningConsoleShowButton);
 
       await waitFor(() => {
         expect(renderResult.getByTestId('consolePageOverlay'));
@@ -74,7 +75,7 @@ export const getConsoleManagerMockRenderResultQueriesAndActions = (
     },
 
     hideOpenedConsole: async () => {
-      userEvent.click(renderResult.getByTestId('consolePageOverlay-header-back-link'));
+      await user.click(renderResult.getByTestId('consolePageOverlay-header-back-link'));
 
       await waitFor(() => {
         expect(renderResult.queryByTestId('consolePageOverlay')).toBeNull();

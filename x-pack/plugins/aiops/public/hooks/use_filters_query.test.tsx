@@ -8,6 +8,7 @@
 import { FilterQueryContextProvider, useFilterQueryUpdates } from './use_filters_query';
 import { act, renderHook } from '@testing-library/react-hooks';
 import { dataPluginMock as mockDataPlugin } from '@kbn/data-plugin/public/mocks';
+import type { TimefilterConfig } from '@kbn/data-plugin/public/query';
 import { Timefilter } from '@kbn/data-plugin/public/query';
 import { useAiopsAppContext } from './use_aiops_app_context';
 import { useReload } from './use_reload';
@@ -43,9 +44,10 @@ describe('useFilterQueryUpdates', () => {
   test('provides correct search bounds for relative time range on each reload', async () => {
     const mockDataContract = mockDataPlugin.createStartContract();
 
-    const mockTimefilterConfig = {
+    const mockTimefilterConfig: TimefilterConfig = {
       timeDefaults: { from: 'now-15m', to: 'now' },
       refreshIntervalDefaults: { pause: false, value: 0 },
+      minRefreshIntervalDefault: 1000,
     };
 
     useAiopsAppContext().data.query.timefilter.timefilter = new Timefilter(

@@ -1,5 +1,235 @@
 [
   {
+    "filePath": "x-pack/packages/kbn-cloud-security-posture-common/utils/helpers.test.ts",
+    "fileName": "helpers.test.ts",
+    "directory": "x-pack/packages/kbn-cloud-security-posture",
+    "tags": [
+      "KBN PACKAGE"
+    ],
+    "lines": [
+      "describe('test helper methods')",
+      "  describe('extractErrorMessage Test')",
+      "    it('should return error message if input is instance of Error')",
+      "    it('should return string if input is string')",
+      "    it('should return fallbackMessage is input is not string nor instance of Error')",
+      "    it('should return default message when input is not string nor instance of Error and fallbackMessage is not provided')",
+      "  describe('buildMutedRulesFilter Test')",
+      "    it('should return an empty array if no rules are muted')",
+      "    it('should return the correct query for a single muted rule')",
+      "    it('should return the correct queries for multiple muted rules')"
+    ],
+    "testSuits": [
+      {
+        "id": "test-helper-methods",
+        "rawLine": "describe('test helper methods', () => {",
+        "line": "describe('test helper methods')",
+        "label": "test helper methods",
+        "indent": 0,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "extracterrormessage-test",
+        "rawLine": "  describe('extractErrorMessage Test', () => {",
+        "line": "  describe('extractErrorMessage Test')",
+        "label": "extractErrorMessage Test",
+        "indent": 2,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "should-return-error-message-if-input-is-instance-of-error",
+        "rawLine": "    it('should return error message if input is instance of Error', () => {",
+        "line": "    it('should return error message if input is instance of Error')",
+        "label": "should return error message if input is instance of Error",
+        "indent": 4,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "should-return-string-if-input-is-string",
+        "rawLine": "    it('should return string if input is string', () => {",
+        "line": "    it('should return string if input is string')",
+        "label": "should return string if input is string",
+        "indent": 4,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "should-return-fallbackmessage-is-input-is-not-string-nor-instance-of-error",
+        "rawLine": "    it('should return fallbackMessage is input is not string nor instance of Error', () => {",
+        "line": "    it('should return fallbackMessage is input is not string nor instance of Error')",
+        "label": "should return fallbackMessage is input is not string nor instance of Error",
+        "indent": 4,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "should-return-default-message-when-input-is-not-string-nor-instance-of-error-and-fallbackmessage-is-not-provided",
+        "rawLine": "    it('should return default message when input is not string nor instance of Error and fallbackMessage is not provided', () => {",
+        "line": "    it('should return default message when input is not string nor instance of Error and fallbackMessage is not provided')",
+        "label": "should return default message when input is not string nor instance of Error and fallbackMessage is not provided",
+        "indent": 4,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "buildmutedrulesfilter-test",
+        "rawLine": "  describe('buildMutedRulesFilter Test', () => {",
+        "line": "  describe('buildMutedRulesFilter Test')",
+        "label": "buildMutedRulesFilter Test",
+        "indent": 2,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "should-return-an-empty-array-if-no-rules-are-muted",
+        "rawLine": "    it('should return an empty array if no rules are muted', () => {",
+        "line": "    it('should return an empty array if no rules are muted')",
+        "label": "should return an empty array if no rules are muted",
+        "indent": 4,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "should-return-the-correct-query-for-a-single-muted-rule",
+        "rawLine": "    it('should return the correct query for a single muted rule', () => {",
+        "line": "    it('should return the correct query for a single muted rule')",
+        "label": "should return the correct query for a single muted rule",
+        "indent": 4,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "should-return-the-correct-queries-for-multiple-muted-rules",
+        "rawLine": "    it('should return the correct queries for multiple muted rules', () => {",
+        "line": "    it('should return the correct queries for multiple muted rules')",
+        "label": "should return the correct queries for multiple muted rules",
+        "indent": 4,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      }
+    ],
+    "tree": [
+      {
+        "id": "test-helper-methods",
+        "rawLine": "describe('test helper methods', () => {",
+        "line": "describe('test helper methods')",
+        "label": "test helper methods",
+        "indent": 0,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false,
+        "children": [
+          {
+            "id": "extracterrormessage-test",
+            "rawLine": "  describe('extractErrorMessage Test', () => {",
+            "line": "  describe('extractErrorMessage Test')",
+            "label": "extractErrorMessage Test",
+            "indent": 2,
+            "type": "describe",
+            "isSkipped": false,
+            "isTodo": false,
+            "children": [
+              {
+                "id": "should-return-error-message-if-input-is-instance-of-error",
+                "rawLine": "    it('should return error message if input is instance of Error', () => {",
+                "line": "    it('should return error message if input is instance of Error')",
+                "label": "should return error message if input is instance of Error",
+                "indent": 4,
+                "type": "it",
+                "isSkipped": false,
+                "isTodo": false
+              },
+              {
+                "id": "should-return-string-if-input-is-string",
+                "rawLine": "    it('should return string if input is string', () => {",
+                "line": "    it('should return string if input is string')",
+                "label": "should return string if input is string",
+                "indent": 4,
+                "type": "it",
+                "isSkipped": false,
+                "isTodo": false
+              },
+              {
+                "id": "should-return-fallbackmessage-is-input-is-not-string-nor-instance-of-error",
+                "rawLine": "    it('should return fallbackMessage is input is not string nor instance of Error', () => {",
+                "line": "    it('should return fallbackMessage is input is not string nor instance of Error')",
+                "label": "should return fallbackMessage is input is not string nor instance of Error",
+                "indent": 4,
+                "type": "it",
+                "isSkipped": false,
+                "isTodo": false
+              },
+              {
+                "id": "should-return-default-message-when-input-is-not-string-nor-instance-of-error-and-fallbackmessage-is-not-provided",
+                "rawLine": "    it('should return default message when input is not string nor instance of Error and fallbackMessage is not provided', () => {",
+                "line": "    it('should return default message when input is not string nor instance of Error and fallbackMessage is not provided')",
+                "label": "should return default message when input is not string nor instance of Error and fallbackMessage is not provided",
+                "indent": 4,
+                "type": "it",
+                "isSkipped": false,
+                "isTodo": false
+              }
+            ]
+          },
+          {
+            "id": "buildmutedrulesfilter-test",
+            "rawLine": "  describe('buildMutedRulesFilter Test', () => {",
+            "line": "  describe('buildMutedRulesFilter Test')",
+            "label": "buildMutedRulesFilter Test",
+            "indent": 2,
+            "type": "describe",
+            "isSkipped": false,
+            "isTodo": false,
+            "children": [
+              {
+                "id": "should-return-an-empty-array-if-no-rules-are-muted",
+                "rawLine": "    it('should return an empty array if no rules are muted', () => {",
+                "line": "    it('should return an empty array if no rules are muted')",
+                "label": "should return an empty array if no rules are muted",
+                "indent": 4,
+                "type": "it",
+                "isSkipped": false,
+                "isTodo": false
+              },
+              {
+                "id": "should-return-the-correct-query-for-a-single-muted-rule",
+                "rawLine": "    it('should return the correct query for a single muted rule', () => {",
+                "line": "    it('should return the correct query for a single muted rule')",
+                "label": "should return the correct query for a single muted rule",
+                "indent": 4,
+                "type": "it",
+                "isSkipped": false,
+                "isTodo": false
+              },
+              {
+                "id": "should-return-the-correct-queries-for-multiple-muted-rules",
+                "rawLine": "    it('should return the correct queries for multiple muted rules', () => {",
+                "line": "    it('should return the correct queries for multiple muted rules')",
+                "label": "should return the correct queries for multiple muted rules",
+                "indent": 4,
+                "type": "it",
+                "isSkipped": false,
+                "isTodo": false
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
     "filePath": "x-pack/plugins/cloud_security_posture/common/utils/detection_rules.test.ts",
     "fileName": "detection_rules.test.ts",
     "directory": "x-pack/plugins/cloud_security_posture",
@@ -1475,106 +1705,6 @@
     ]
   },
   {
-    "filePath": "x-pack/plugins/cloud_security_posture/public/common/utils/get_limit_properties.test.ts",
-    "fileName": "get_limit_properties.test.ts",
-    "directory": "x-pack/plugins/cloud_security_posture",
-    "tags": [
-      "UT"
-    ],
-    "lines": [
-      "describe('getLimitProperties')",
-      "  it('less items than limit')",
-      "  it('more items than limit')",
-      "  it('per page calculations are correct')"
-    ],
-    "testSuits": [
-      {
-        "id": "getlimitproperties",
-        "rawLine": "describe('getLimitProperties', () => {",
-        "line": "describe('getLimitProperties')",
-        "label": "getLimitProperties",
-        "indent": 0,
-        "type": "describe",
-        "isSkipped": false,
-        "isTodo": false
-      },
-      {
-        "id": "less-items-than-limit",
-        "rawLine": "  it('less items than limit', () => {",
-        "line": "  it('less items than limit')",
-        "label": "less items than limit",
-        "indent": 2,
-        "type": "it",
-        "isSkipped": false,
-        "isTodo": false
-      },
-      {
-        "id": "more-items-than-limit",
-        "rawLine": "  it('more items than limit', () => {",
-        "line": "  it('more items than limit')",
-        "label": "more items than limit",
-        "indent": 2,
-        "type": "it",
-        "isSkipped": false,
-        "isTodo": false
-      },
-      {
-        "id": "per-page-calculations-are-correct",
-        "rawLine": "  it('per page calculations are correct', () => {",
-        "line": "  it('per page calculations are correct')",
-        "label": "per page calculations are correct",
-        "indent": 2,
-        "type": "it",
-        "isSkipped": false,
-        "isTodo": false
-      }
-    ],
-    "tree": [
-      {
-        "id": "getlimitproperties",
-        "rawLine": "describe('getLimitProperties', () => {",
-        "line": "describe('getLimitProperties')",
-        "label": "getLimitProperties",
-        "indent": 0,
-        "type": "describe",
-        "isSkipped": false,
-        "isTodo": false,
-        "children": [
-          {
-            "id": "less-items-than-limit",
-            "rawLine": "  it('less items than limit', () => {",
-            "line": "  it('less items than limit')",
-            "label": "less items than limit",
-            "indent": 2,
-            "type": "it",
-            "isSkipped": false,
-            "isTodo": false
-          },
-          {
-            "id": "more-items-than-limit",
-            "rawLine": "  it('more items than limit', () => {",
-            "line": "  it('more items than limit')",
-            "label": "more items than limit",
-            "indent": 2,
-            "type": "it",
-            "isSkipped": false,
-            "isTodo": false
-          },
-          {
-            "id": "per-page-calculations-are-correct",
-            "rawLine": "  it('per page calculations are correct', () => {",
-            "line": "  it('per page calculations are correct')",
-            "label": "per page calculations are correct",
-            "indent": 2,
-            "type": "it",
-            "isSkipped": false,
-            "isTodo": false
-          }
-        ]
-      }
-    ]
-  },
-  {
     "filePath": "x-pack/plugins/cloud_security_posture/public/common/utils/get_vulnerabiltity_colors.test.ts",
     "fileName": "get_vulnerabiltity_colors.test.ts",
     "directory": "x-pack/plugins/cloud_security_posture",
@@ -2053,12 +2183,7 @@
     ],
     "lines": [
       "describe('<CloudPosturePage />')",
-      "  it('renders with license url locator')",
-      "  it('renders no license url locator')",
       "  it('renders children if setup status is indexed')",
-      "  it('renders default loading state when the subscription query is loading')",
-      "  it('renders default error state when the subscription query has an error')",
-      "  it('renders subscription not allowed prompt if subscription is not installed')",
       "  it('renders default loading text when query isLoading')",
       "  it('renders default loading text when query is idle')",
       "  it('renders default error texts when query isError')",
@@ -2079,60 +2204,10 @@
         "isTodo": false
       },
       {
-        "id": "renders-with-license-url-locator",
-        "rawLine": "  it('renders with license url locator', () => {",
-        "line": "  it('renders with license url locator')",
-        "label": "renders with license url locator",
-        "indent": 2,
-        "type": "it",
-        "isSkipped": false,
-        "isTodo": false
-      },
-      {
-        "id": "renders-no-license-url-locator",
-        "rawLine": "  it('renders no license url locator', () => {",
-        "line": "  it('renders no license url locator')",
-        "label": "renders no license url locator",
-        "indent": 2,
-        "type": "it",
-        "isSkipped": false,
-        "isTodo": false
-      },
-      {
         "id": "renders-children-if-setup-status-is-indexed",
         "rawLine": "  it('renders children if setup status is indexed', () => {",
         "line": "  it('renders children if setup status is indexed')",
         "label": "renders children if setup status is indexed",
-        "indent": 2,
-        "type": "it",
-        "isSkipped": false,
-        "isTodo": false
-      },
-      {
-        "id": "renders-default-loading-state-when-the-subscription-query-is-loading",
-        "rawLine": "  it('renders default loading state when the subscription query is loading', () => {",
-        "line": "  it('renders default loading state when the subscription query is loading')",
-        "label": "renders default loading state when the subscription query is loading",
-        "indent": 2,
-        "type": "it",
-        "isSkipped": false,
-        "isTodo": false
-      },
-      {
-        "id": "renders-default-error-state-when-the-subscription-query-has-an-error",
-        "rawLine": "  it('renders default error state when the subscription query has an error', () => {",
-        "line": "  it('renders default error state when the subscription query has an error')",
-        "label": "renders default error state when the subscription query has an error",
-        "indent": 2,
-        "type": "it",
-        "isSkipped": false,
-        "isTodo": false
-      },
-      {
-        "id": "renders-subscription-not-allowed-prompt-if-subscription-is-not-installed",
-        "rawLine": "  it('renders subscription not allowed prompt if subscription is not installed', () => {",
-        "line": "  it('renders subscription not allowed prompt if subscription is not installed')",
-        "label": "renders subscription not allowed prompt if subscription is not installed",
         "indent": 2,
         "type": "it",
         "isSkipped": false,
@@ -2221,60 +2296,10 @@
         "isTodo": false,
         "children": [
           {
-            "id": "renders-with-license-url-locator",
-            "rawLine": "  it('renders with license url locator', () => {",
-            "line": "  it('renders with license url locator')",
-            "label": "renders with license url locator",
-            "indent": 2,
-            "type": "it",
-            "isSkipped": false,
-            "isTodo": false
-          },
-          {
-            "id": "renders-no-license-url-locator",
-            "rawLine": "  it('renders no license url locator', () => {",
-            "line": "  it('renders no license url locator')",
-            "label": "renders no license url locator",
-            "indent": 2,
-            "type": "it",
-            "isSkipped": false,
-            "isTodo": false
-          },
-          {
             "id": "renders-children-if-setup-status-is-indexed",
             "rawLine": "  it('renders children if setup status is indexed', () => {",
             "line": "  it('renders children if setup status is indexed')",
             "label": "renders children if setup status is indexed",
-            "indent": 2,
-            "type": "it",
-            "isSkipped": false,
-            "isTodo": false
-          },
-          {
-            "id": "renders-default-loading-state-when-the-subscription-query-is-loading",
-            "rawLine": "  it('renders default loading state when the subscription query is loading', () => {",
-            "line": "  it('renders default loading state when the subscription query is loading')",
-            "label": "renders default loading state when the subscription query is loading",
-            "indent": 2,
-            "type": "it",
-            "isSkipped": false,
-            "isTodo": false
-          },
-          {
-            "id": "renders-default-error-state-when-the-subscription-query-has-an-error",
-            "rawLine": "  it('renders default error state when the subscription query has an error', () => {",
-            "line": "  it('renders default error state when the subscription query has an error')",
-            "label": "renders default error state when the subscription query has an error",
-            "indent": 2,
-            "type": "it",
-            "isSkipped": false,
-            "isTodo": false
-          },
-          {
-            "id": "renders-subscription-not-allowed-prompt-if-subscription-is-not-installed",
-            "rawLine": "  it('renders subscription not allowed prompt if subscription is not installed', () => {",
-            "line": "  it('renders subscription not allowed prompt if subscription is not installed')",
-            "label": "renders subscription not allowed prompt if subscription is not installed",
             "indent": 2,
             "type": "it",
             "isSkipped": false,
@@ -3104,6 +3129,9 @@
     ],
     "lines": [
       "describe('<CspPolicyTemplateForm />')",
+      "  it('shows license block if subscription is not allowed')",
+      "  it('license block renders with license url locator')",
+      "  it('license block renders without license url locator')",
       "  it('updates package policy namespace to default when it changes')",
       "  it('renders and updates name field')",
       "  it('renders and updates description field')",
@@ -3151,8 +3179,6 @@
       "    it(`renders Google Cloud Shell forms when Setup Access is set to Google Cloud Shell`)",
       "    it(`renders ${CLOUDBEAT_GCP} Credentials File fields`)",
       "    it(`updates ${CLOUDBEAT_GCP} Credentials File fields`)",
-      "    it(`renders ${CLOUDBEAT_GCP} Credentials JSON fields`)",
-      "    it(`updates ${CLOUDBEAT_GCP} Credentials JSON fields`)",
       "    it(`${CLOUDBEAT_GCP} form do not displays upgrade message for supported versions and gcp organization option is enabled`)",
       "    it(`renders ${CLOUDBEAT_GCP} Organization fields when account type is Organization and Setup Access is Google Cloud Shell`)",
       "    it(`renders ${CLOUDBEAT_GCP} Organization fields when account type is Organization and Setup Access is manual`)",
@@ -3166,9 +3192,9 @@
       "    it(`updates ${CLOUDBEAT_AZURE} Service Principal with Client Secret fields`)",
       "  describe('Agentless')",
       "    it('should not render setup technology selector if agentless is not available and CSPM integration supports agentless')",
-      "    it('should render setup technology selector for AWS and allow to select agent-based')",
-      "    it('should render setup technology selector for GCP for organisation account type')",
-      "    it('should render setup technology selector for GCP for single-account')",
+      "    it('should render setup technology selector for AWS and allow to select agentless')",
+      "    it.skip('should render setup technology selector for GCP for organisation account type')",
+      "    it.skip('should render setup technology selector for GCP for single-account')",
       "    it('should render setup technology selector for Azure for Organisation type')",
       "    it('should render setup technology selector for Azure for Single Subscription type')",
       "    it('should not render setup technology selector for KSPM')",
@@ -3187,6 +3213,36 @@
         "label": "<CspPolicyTemplateForm />",
         "indent": 0,
         "type": "describe",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "shows-license-block-if-subscription-is-not-allowed",
+        "rawLine": "  it('shows license block if subscription is not allowed', () => {",
+        "line": "  it('shows license block if subscription is not allowed')",
+        "label": "shows license block if subscription is not allowed",
+        "indent": 2,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "license-block-renders-with-license-url-locator",
+        "rawLine": "  it('license block renders with license url locator', () => {",
+        "line": "  it('license block renders with license url locator')",
+        "label": "license block renders with license url locator",
+        "indent": 2,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "license-block-renders-without-license-url-locator",
+        "rawLine": "  it('license block renders without license url locator', () => {",
+        "line": "  it('license block renders without license url locator')",
+        "label": "license block renders without license url locator",
+        "indent": 2,
+        "type": "it",
         "isSkipped": false,
         "isTodo": false
       },
@@ -3661,26 +3717,6 @@
         "isTodo": false
       },
       {
-        "id": "renders-${cloudbeat_gcp}-credentials-json-fields",
-        "rawLine": "    it(`renders ${CLOUDBEAT_GCP} Credentials JSON fields`, () => {",
-        "line": "    it(`renders ${CLOUDBEAT_GCP} Credentials JSON fields`)",
-        "label": "renders ${CLOUDBEAT_GCP} Credentials JSON fields",
-        "indent": 4,
-        "type": "it",
-        "isSkipped": false,
-        "isTodo": false
-      },
-      {
-        "id": "updates-${cloudbeat_gcp}-credentials-json-fields",
-        "rawLine": "    it(`updates ${CLOUDBEAT_GCP} Credentials JSON fields`, () => {",
-        "line": "    it(`updates ${CLOUDBEAT_GCP} Credentials JSON fields`)",
-        "label": "updates ${CLOUDBEAT_GCP} Credentials JSON fields",
-        "indent": 4,
-        "type": "it",
-        "isSkipped": false,
-        "isTodo": false
-      },
-      {
         "id": "${cloudbeat_gcp}-form-do-not-displays-upgrade-message-for-supported-versions-and-gcp-organization-option-is-enabled",
         "rawLine": "    it(`${CLOUDBEAT_GCP} form do not displays upgrade message for supported versions and gcp organization option is enabled`, () => {",
         "line": "    it(`${CLOUDBEAT_GCP} form do not displays upgrade message for supported versions and gcp organization option is enabled`)",
@@ -3811,10 +3847,10 @@
         "isTodo": false
       },
       {
-        "id": "should-render-setup-technology-selector-for-aws-and-allow-to-select-agent-based",
-        "rawLine": "    it('should render setup technology selector for AWS and allow to select agent-based', async () => {",
-        "line": "    it('should render setup technology selector for AWS and allow to select agent-based')",
-        "label": "should render setup technology selector for AWS and allow to select agent-based",
+        "id": "should-render-setup-technology-selector-for-aws-and-allow-to-select-agentless",
+        "rawLine": "    it('should render setup technology selector for AWS and allow to select agentless', async () => {",
+        "line": "    it('should render setup technology selector for AWS and allow to select agentless')",
+        "label": "should render setup technology selector for AWS and allow to select agentless",
         "indent": 4,
         "type": "it",
         "isSkipped": false,
@@ -3822,22 +3858,22 @@
       },
       {
         "id": "should-render-setup-technology-selector-for-gcp-for-organisation-account-type",
-        "rawLine": "    it('should render setup technology selector for GCP for organisation account type', async () => {",
-        "line": "    it('should render setup technology selector for GCP for organisation account type')",
+        "rawLine": "    it.skip('should render setup technology selector for GCP for organisation account type', async () => {",
+        "line": "    it.skip('should render setup technology selector for GCP for organisation account type')",
         "label": "should render setup technology selector for GCP for organisation account type",
         "indent": 4,
         "type": "it",
-        "isSkipped": false,
+        "isSkipped": true,
         "isTodo": false
       },
       {
         "id": "should-render-setup-technology-selector-for-gcp-for-single-account",
-        "rawLine": "    it('should render setup technology selector for GCP for single-account', async () => {",
-        "line": "    it('should render setup technology selector for GCP for single-account')",
+        "rawLine": "    it.skip('should render setup technology selector for GCP for single-account', async () => {",
+        "line": "    it.skip('should render setup technology selector for GCP for single-account')",
         "label": "should render setup technology selector for GCP for single-account",
         "indent": 4,
         "type": "it",
-        "isSkipped": false,
+        "isSkipped": true,
         "isTodo": false
       },
       {
@@ -3942,6 +3978,36 @@
         "isSkipped": false,
         "isTodo": false,
         "children": [
+          {
+            "id": "shows-license-block-if-subscription-is-not-allowed",
+            "rawLine": "  it('shows license block if subscription is not allowed', () => {",
+            "line": "  it('shows license block if subscription is not allowed')",
+            "label": "shows license block if subscription is not allowed",
+            "indent": 2,
+            "type": "it",
+            "isSkipped": false,
+            "isTodo": false
+          },
+          {
+            "id": "license-block-renders-with-license-url-locator",
+            "rawLine": "  it('license block renders with license url locator', () => {",
+            "line": "  it('license block renders with license url locator')",
+            "label": "license block renders with license url locator",
+            "indent": 2,
+            "type": "it",
+            "isSkipped": false,
+            "isTodo": false
+          },
+          {
+            "id": "license-block-renders-without-license-url-locator",
+            "rawLine": "  it('license block renders without license url locator', () => {",
+            "line": "  it('license block renders without license url locator')",
+            "label": "license block renders without license url locator",
+            "indent": 2,
+            "type": "it",
+            "isSkipped": false,
+            "isTodo": false
+          },
           {
             "id": "updates-package-policy-namespace-to-default-when-it-changes",
             "rawLine": "  it('updates package policy namespace to default when it changes', () => {",
@@ -4421,26 +4487,6 @@
                 "isTodo": false
               },
               {
-                "id": "renders-${cloudbeat_gcp}-credentials-json-fields",
-                "rawLine": "    it(`renders ${CLOUDBEAT_GCP} Credentials JSON fields`, () => {",
-                "line": "    it(`renders ${CLOUDBEAT_GCP} Credentials JSON fields`)",
-                "label": "renders ${CLOUDBEAT_GCP} Credentials JSON fields",
-                "indent": 4,
-                "type": "it",
-                "isSkipped": false,
-                "isTodo": false
-              },
-              {
-                "id": "updates-${cloudbeat_gcp}-credentials-json-fields",
-                "rawLine": "    it(`updates ${CLOUDBEAT_GCP} Credentials JSON fields`, () => {",
-                "line": "    it(`updates ${CLOUDBEAT_GCP} Credentials JSON fields`)",
-                "label": "updates ${CLOUDBEAT_GCP} Credentials JSON fields",
-                "indent": 4,
-                "type": "it",
-                "isSkipped": false,
-                "isTodo": false
-              },
-              {
                 "id": "${cloudbeat_gcp}-form-do-not-displays-upgrade-message-for-supported-versions-and-gcp-organization-option-is-enabled",
                 "rawLine": "    it(`${CLOUDBEAT_GCP} form do not displays upgrade message for supported versions and gcp organization option is enabled`, () => {",
                 "line": "    it(`${CLOUDBEAT_GCP} form do not displays upgrade message for supported versions and gcp organization option is enabled`)",
@@ -4575,10 +4621,10 @@
                 "isTodo": false
               },
               {
-                "id": "should-render-setup-technology-selector-for-aws-and-allow-to-select-agent-based",
-                "rawLine": "    it('should render setup technology selector for AWS and allow to select agent-based', async () => {",
-                "line": "    it('should render setup technology selector for AWS and allow to select agent-based')",
-                "label": "should render setup technology selector for AWS and allow to select agent-based",
+                "id": "should-render-setup-technology-selector-for-aws-and-allow-to-select-agentless",
+                "rawLine": "    it('should render setup technology selector for AWS and allow to select agentless', async () => {",
+                "line": "    it('should render setup technology selector for AWS and allow to select agentless')",
+                "label": "should render setup technology selector for AWS and allow to select agentless",
                 "indent": 4,
                 "type": "it",
                 "isSkipped": false,
@@ -4586,22 +4632,22 @@
               },
               {
                 "id": "should-render-setup-technology-selector-for-gcp-for-organisation-account-type",
-                "rawLine": "    it('should render setup technology selector for GCP for organisation account type', async () => {",
-                "line": "    it('should render setup technology selector for GCP for organisation account type')",
+                "rawLine": "    it.skip('should render setup technology selector for GCP for organisation account type', async () => {",
+                "line": "    it.skip('should render setup technology selector for GCP for organisation account type')",
                 "label": "should render setup technology selector for GCP for organisation account type",
                 "indent": 4,
                 "type": "it",
-                "isSkipped": false,
+                "isSkipped": true,
                 "isTodo": false
               },
               {
                 "id": "should-render-setup-technology-selector-for-gcp-for-single-account",
-                "rawLine": "    it('should render setup technology selector for GCP for single-account', async () => {",
-                "line": "    it('should render setup technology selector for GCP for single-account')",
+                "rawLine": "    it.skip('should render setup technology selector for GCP for single-account', async () => {",
+                "line": "    it.skip('should render setup technology selector for GCP for single-account')",
                 "label": "should render setup technology selector for GCP for single-account",
                 "indent": 4,
                 "type": "it",
-                "isSkipped": false,
+                "isSkipped": true,
                 "isTodo": false
               },
               {
@@ -4711,15 +4757,15 @@
       "describe('useSetupTechnology')",
       "  describe('create page flow')",
       "    it('initializes with AGENT_BASED technology')",
-      "    it('sets to AGENTLESS when agentless is available and AWS cloud')",
-      "    it('sets to AGENTLESS when agentless is available and GCP cloud')",
-      "    it('sets to AGENTLESS when agentless is available and Azure cloud')",
+      "    it('sets to AGENT-BASED when agentless is available and AWS cloud')",
+      "    it('sets to AGENT-BASED when agentless is available and GCP cloud')",
+      "    it('sets to AGENT-BASED when agentless is available and Azure cloud')",
       "    it('sets to AGENT_BASED when agentless is available but input is not supported for agentless')",
       "    it('sets to AGENT_BASED when isAgentlessEnabled is false')",
       "    it('calls handleSetupTechnologyChange when setupTechnology changes')",
       "  describe('edit page flow')",
       "    it('initializes with AGENT_BASED technology')",
-      "    it('initializes with AGENTLESS technology if isAgentlessEnable is true')",
+      "    it('initializes with agentless when is in edit mode and is agentless selected')",
       "    it('should not call handleSetupTechnologyChange when setupTechnology changes')",
       "    it('should not update setupTechnology when agentlessPolicyId becomes available')"
     ],
@@ -4755,30 +4801,30 @@
         "isTodo": false
       },
       {
-        "id": "sets-to-agentless-when-agentless-is-available-and-aws-cloud",
-        "rawLine": "    it('sets to AGENTLESS when agentless is available and AWS cloud', () => {",
-        "line": "    it('sets to AGENTLESS when agentless is available and AWS cloud')",
-        "label": "sets to AGENTLESS when agentless is available and AWS cloud",
+        "id": "sets-to-agent-based-when-agentless-is-available-and-aws-cloud",
+        "rawLine": "    it('sets to AGENT-BASED when agentless is available and AWS cloud', () => {",
+        "line": "    it('sets to AGENT-BASED when agentless is available and AWS cloud')",
+        "label": "sets to AGENT-BASED when agentless is available and AWS cloud",
         "indent": 4,
         "type": "it",
         "isSkipped": false,
         "isTodo": false
       },
       {
-        "id": "sets-to-agentless-when-agentless-is-available-and-gcp-cloud",
-        "rawLine": "    it('sets to AGENTLESS when agentless is available and GCP cloud', () => {",
-        "line": "    it('sets to AGENTLESS when agentless is available and GCP cloud')",
-        "label": "sets to AGENTLESS when agentless is available and GCP cloud",
+        "id": "sets-to-agent-based-when-agentless-is-available-and-gcp-cloud",
+        "rawLine": "    it('sets to AGENT-BASED when agentless is available and GCP cloud', () => {",
+        "line": "    it('sets to AGENT-BASED when agentless is available and GCP cloud')",
+        "label": "sets to AGENT-BASED when agentless is available and GCP cloud",
         "indent": 4,
         "type": "it",
         "isSkipped": false,
         "isTodo": false
       },
       {
-        "id": "sets-to-agentless-when-agentless-is-available-and-azure-cloud",
-        "rawLine": "    it('sets to AGENTLESS when agentless is available and Azure cloud', () => {",
-        "line": "    it('sets to AGENTLESS when agentless is available and Azure cloud')",
-        "label": "sets to AGENTLESS when agentless is available and Azure cloud",
+        "id": "sets-to-agent-based-when-agentless-is-available-and-azure-cloud",
+        "rawLine": "    it('sets to AGENT-BASED when agentless is available and Azure cloud', () => {",
+        "line": "    it('sets to AGENT-BASED when agentless is available and Azure cloud')",
+        "label": "sets to AGENT-BASED when agentless is available and Azure cloud",
         "indent": 4,
         "type": "it",
         "isSkipped": false,
@@ -4835,10 +4881,10 @@
         "isTodo": false
       },
       {
-        "id": "initializes-with-agentless-technology-if-isagentlessenable-is-true",
-        "rawLine": "    it('initializes with AGENTLESS technology if isAgentlessEnable is true', () => {",
-        "line": "    it('initializes with AGENTLESS technology if isAgentlessEnable is true')",
-        "label": "initializes with AGENTLESS technology if isAgentlessEnable is true",
+        "id": "initializes-with-agentless-when-is-in-edit-mode-and-is-agentless-selected",
+        "rawLine": "    it('initializes with agentless when is in edit mode and is agentless selected', () => {",
+        "line": "    it('initializes with agentless when is in edit mode and is agentless selected')",
+        "label": "initializes with agentless when is in edit mode and is agentless selected",
         "indent": 4,
         "type": "it",
         "isSkipped": false,
@@ -4897,30 +4943,30 @@
                 "isTodo": false
               },
               {
-                "id": "sets-to-agentless-when-agentless-is-available-and-aws-cloud",
-                "rawLine": "    it('sets to AGENTLESS when agentless is available and AWS cloud', () => {",
-                "line": "    it('sets to AGENTLESS when agentless is available and AWS cloud')",
-                "label": "sets to AGENTLESS when agentless is available and AWS cloud",
+                "id": "sets-to-agent-based-when-agentless-is-available-and-aws-cloud",
+                "rawLine": "    it('sets to AGENT-BASED when agentless is available and AWS cloud', () => {",
+                "line": "    it('sets to AGENT-BASED when agentless is available and AWS cloud')",
+                "label": "sets to AGENT-BASED when agentless is available and AWS cloud",
                 "indent": 4,
                 "type": "it",
                 "isSkipped": false,
                 "isTodo": false
               },
               {
-                "id": "sets-to-agentless-when-agentless-is-available-and-gcp-cloud",
-                "rawLine": "    it('sets to AGENTLESS when agentless is available and GCP cloud', () => {",
-                "line": "    it('sets to AGENTLESS when agentless is available and GCP cloud')",
-                "label": "sets to AGENTLESS when agentless is available and GCP cloud",
+                "id": "sets-to-agent-based-when-agentless-is-available-and-gcp-cloud",
+                "rawLine": "    it('sets to AGENT-BASED when agentless is available and GCP cloud', () => {",
+                "line": "    it('sets to AGENT-BASED when agentless is available and GCP cloud')",
+                "label": "sets to AGENT-BASED when agentless is available and GCP cloud",
                 "indent": 4,
                 "type": "it",
                 "isSkipped": false,
                 "isTodo": false
               },
               {
-                "id": "sets-to-agentless-when-agentless-is-available-and-azure-cloud",
-                "rawLine": "    it('sets to AGENTLESS when agentless is available and Azure cloud', () => {",
-                "line": "    it('sets to AGENTLESS when agentless is available and Azure cloud')",
-                "label": "sets to AGENTLESS when agentless is available and Azure cloud",
+                "id": "sets-to-agent-based-when-agentless-is-available-and-azure-cloud",
+                "rawLine": "    it('sets to AGENT-BASED when agentless is available and Azure cloud', () => {",
+                "line": "    it('sets to AGENT-BASED when agentless is available and Azure cloud')",
+                "label": "sets to AGENT-BASED when agentless is available and Azure cloud",
                 "indent": 4,
                 "type": "it",
                 "isSkipped": false,
@@ -4979,10 +5025,10 @@
                 "isTodo": false
               },
               {
-                "id": "initializes-with-agentless-technology-if-isagentlessenable-is-true",
-                "rawLine": "    it('initializes with AGENTLESS technology if isAgentlessEnable is true', () => {",
-                "line": "    it('initializes with AGENTLESS technology if isAgentlessEnable is true')",
-                "label": "initializes with AGENTLESS technology if isAgentlessEnable is true",
+                "id": "initializes-with-agentless-when-is-in-edit-mode-and-is-agentless-selected",
+                "rawLine": "    it('initializes with agentless when is in edit mode and is agentless selected', () => {",
+                "line": "    it('initializes with agentless when is in edit mode and is agentless selected')",
+                "label": "initializes with agentless when is in edit mode and is agentless selected",
                 "indent": 4,
                 "type": "it",
                 "isSkipped": false,
@@ -6996,7 +7042,7 @@
     ],
     "lines": [
       "describe('<Findings />')",
-      "  it('renders integrations installation prompt if integration is not installed')",
+      "  it('renders integrations installation prompt if integration is not installed and there are no findings')",
       "  describe('SearchBar')",
       "    it('set search query')",
       "    it('renders no results message and reset button when search query does not match')",
@@ -7019,10 +7065,10 @@
         "isTodo": false
       },
       {
-        "id": "renders-integrations-installation-prompt-if-integration-is-not-installed",
-        "rawLine": "  it('renders integrations installation prompt if integration is not installed', async () => {",
-        "line": "  it('renders integrations installation prompt if integration is not installed')",
-        "label": "renders integrations installation prompt if integration is not installed",
+        "id": "renders-integrations-installation-prompt-if-integration-is-not-installed-and-there-are-no-findings",
+        "rawLine": "  it('renders integrations installation prompt if integration is not installed and there are no findings', async () => {",
+        "line": "  it('renders integrations installation prompt if integration is not installed and there are no findings')",
+        "label": "renders integrations installation prompt if integration is not installed and there are no findings",
         "indent": 2,
         "type": "it",
         "isSkipped": false,
@@ -7131,10 +7177,10 @@
         "isTodo": false,
         "children": [
           {
-            "id": "renders-integrations-installation-prompt-if-integration-is-not-installed",
-            "rawLine": "  it('renders integrations installation prompt if integration is not installed', async () => {",
-            "line": "  it('renders integrations installation prompt if integration is not installed')",
-            "label": "renders integrations installation prompt if integration is not installed",
+            "id": "renders-integrations-installation-prompt-if-integration-is-not-installed-and-there-are-no-findings",
+            "rawLine": "  it('renders integrations installation prompt if integration is not installed and there are no findings', async () => {",
+            "line": "  it('renders integrations installation prompt if integration is not installed and there are no findings')",
+            "label": "renders integrations installation prompt if integration is not installed and there are no findings",
             "indent": 2,
             "type": "it",
             "isSkipped": false,
@@ -8888,41 +8934,6 @@
     ]
   },
   {
-    "filePath": "x-pack/plugins/cloud_security_posture/server/fleet_integration/fleet_integration.test.ts",
-    "fileName": "fleet_integration.test.ts",
-    "directory": "x-pack/plugins/cloud_security_posture",
-    "tags": [
-      "UT"
-    ],
-    "lines": [
-      "describe('is Csp package installed tests')"
-    ],
-    "testSuits": [
-      {
-        "id": "is-csp-package-installed-tests",
-        "rawLine": "describe('is Csp package installed tests', () => {",
-        "line": "describe('is Csp package installed tests')",
-        "label": "is Csp package installed tests",
-        "indent": 0,
-        "type": "describe",
-        "isSkipped": false,
-        "isTodo": false
-      }
-    ],
-    "tree": [
-      {
-        "id": "is-csp-package-installed-tests",
-        "rawLine": "describe('is Csp package installed tests', () => {",
-        "line": "describe('is Csp package installed tests')",
-        "label": "is Csp package installed tests",
-        "indent": 0,
-        "type": "describe",
-        "isSkipped": false,
-        "isTodo": false
-      }
-    ]
-  },
-  {
     "filePath": "x-pack/plugins/cloud_security_posture/server/lib/mapping_field_util.test.ts",
     "fileName": "mapping_field_util.test.ts",
     "directory": "x-pack/plugins/cloud_security_posture",
@@ -9076,7 +9087,6 @@
       "  describe('start()')",
       "    it('should initialize when package installed')",
       "    it('should not initialize when package is not installed')",
-      "    it('should initialize when new package is created')",
       "    it('should not initialize when other package is created')",
       "    it('packagePolicyPostCreate should return the same received policy')"
     ],
@@ -9116,16 +9126,6 @@
         "rawLine": "    it('should not initialize when package is not installed', async () => {",
         "line": "    it('should not initialize when package is not installed')",
         "label": "should not initialize when package is not installed",
-        "indent": 4,
-        "type": "it",
-        "isSkipped": false,
-        "isTodo": false
-      },
-      {
-        "id": "should-initialize-when-new-package-is-created",
-        "rawLine": "    it('should initialize when new package is created', async () => {",
-        "line": "    it('should initialize when new package is created')",
-        "label": "should initialize when new package is created",
         "indent": 4,
         "type": "it",
         "isSkipped": false,
@@ -9188,16 +9188,6 @@
                 "rawLine": "    it('should not initialize when package is not installed', async () => {",
                 "line": "    it('should not initialize when package is not installed')",
                 "label": "should not initialize when package is not installed",
-                "indent": 4,
-                "type": "it",
-                "isSkipped": false,
-                "isTodo": false
-              },
-              {
-                "id": "should-initialize-when-new-package-is-created",
-                "rawLine": "    it('should initialize when new package is created', async () => {",
-                "line": "    it('should initialize when new package is created')",
-                "label": "should initialize when new package is created",
                 "indent": 4,
                 "type": "it",
                 "isSkipped": false,
@@ -11324,6 +11314,151 @@
     ]
   },
   {
+    "filePath": "x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture/serverless_metering/cloud_security_metering.ts",
+    "fileName": "cloud_security_metering.ts",
+    "directory": "x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture",
+    "tags": [
+      "FTR",
+      "SERVERLESS",
+      "API INTEGRATION",
+      "HAS SKIP"
+    ],
+    "lines": [
+      "  describe.skip('Intercept the usage API request sent by the metering background task manager')",
+      "    it('Should intercept usage API request for CSPM')",
+      "    it('Should intercept usage API request for KSPM')",
+      "    it('Should intercept usage API request for CNVM')",
+      "    it('Should intercept usage API request for Defend for Containers')",
+      "    it('Should intercept usage API request with all integrations usage records')"
+    ],
+    "testSuits": [
+      {
+        "id": "intercept-the-usage-api-request-sent-by-the-metering-background-task-manager",
+        "rawLine": "  describe.skip('Intercept the usage API request sent by the metering background task manager', function () {",
+        "line": "  describe.skip('Intercept the usage API request sent by the metering background task manager')",
+        "label": "Intercept the usage API request sent by the metering background task manager",
+        "indent": 2,
+        "type": "describe",
+        "isSkipped": true,
+        "isTodo": false
+      },
+      {
+        "id": "should-intercept-usage-api-request-for-cspm",
+        "rawLine": "    it('Should intercept usage API request for CSPM', async () => {",
+        "line": "    it('Should intercept usage API request for CSPM')",
+        "label": "Should intercept usage API request for CSPM",
+        "indent": 4,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "should-intercept-usage-api-request-for-kspm",
+        "rawLine": "    it('Should intercept usage API request for KSPM', async () => {",
+        "line": "    it('Should intercept usage API request for KSPM')",
+        "label": "Should intercept usage API request for KSPM",
+        "indent": 4,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "should-intercept-usage-api-request-for-cnvm",
+        "rawLine": "    it('Should intercept usage API request for CNVM', async () => {",
+        "line": "    it('Should intercept usage API request for CNVM')",
+        "label": "Should intercept usage API request for CNVM",
+        "indent": 4,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "should-intercept-usage-api-request-for-defend-for-containers",
+        "rawLine": "    it('Should intercept usage API request for Defend for Containers', async () => {",
+        "line": "    it('Should intercept usage API request for Defend for Containers')",
+        "label": "Should intercept usage API request for Defend for Containers",
+        "indent": 4,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "should-intercept-usage-api-request-with-all-integrations-usage-records",
+        "rawLine": "    it('Should intercept usage API request with all integrations usage records', async () => {",
+        "line": "    it('Should intercept usage API request with all integrations usage records')",
+        "label": "Should intercept usage API request with all integrations usage records",
+        "indent": 4,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      }
+    ],
+    "tree": [
+      {
+        "id": "intercept-the-usage-api-request-sent-by-the-metering-background-task-manager",
+        "rawLine": "  describe.skip('Intercept the usage API request sent by the metering background task manager', function () {",
+        "line": "  describe.skip('Intercept the usage API request sent by the metering background task manager')",
+        "label": "Intercept the usage API request sent by the metering background task manager",
+        "indent": 2,
+        "type": "describe",
+        "isSkipped": true,
+        "isTodo": false,
+        "children": [
+          {
+            "id": "should-intercept-usage-api-request-for-cspm",
+            "rawLine": "    it('Should intercept usage API request for CSPM', async () => {",
+            "line": "    it('Should intercept usage API request for CSPM')",
+            "label": "Should intercept usage API request for CSPM",
+            "indent": 4,
+            "type": "it",
+            "isSkipped": true,
+            "isTodo": false
+          },
+          {
+            "id": "should-intercept-usage-api-request-for-kspm",
+            "rawLine": "    it('Should intercept usage API request for KSPM', async () => {",
+            "line": "    it('Should intercept usage API request for KSPM')",
+            "label": "Should intercept usage API request for KSPM",
+            "indent": 4,
+            "type": "it",
+            "isSkipped": true,
+            "isTodo": false
+          },
+          {
+            "id": "should-intercept-usage-api-request-for-cnvm",
+            "rawLine": "    it('Should intercept usage API request for CNVM', async () => {",
+            "line": "    it('Should intercept usage API request for CNVM')",
+            "label": "Should intercept usage API request for CNVM",
+            "indent": 4,
+            "type": "it",
+            "isSkipped": true,
+            "isTodo": false
+          },
+          {
+            "id": "should-intercept-usage-api-request-for-defend-for-containers",
+            "rawLine": "    it('Should intercept usage API request for Defend for Containers', async () => {",
+            "line": "    it('Should intercept usage API request for Defend for Containers')",
+            "label": "Should intercept usage API request for Defend for Containers",
+            "indent": 4,
+            "type": "it",
+            "isSkipped": true,
+            "isTodo": false
+          },
+          {
+            "id": "should-intercept-usage-api-request-with-all-integrations-usage-records",
+            "rawLine": "    it('Should intercept usage API request with all integrations usage records', async () => {",
+            "line": "    it('Should intercept usage API request with all integrations usage records')",
+            "label": "Should intercept usage API request with all integrations usage records",
+            "indent": 4,
+            "type": "it",
+            "isSkipped": true,
+            "isTodo": false
+          }
+        ]
+      }
+    ]
+  },
+  {
     "filePath": "x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture/status/status_indexed.ts",
     "fileName": "status_indexed.ts",
     "directory": "x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture",
@@ -11843,38 +11978,159 @@
     ]
   },
   {
-    "filePath": "x-pack/test_serverless/functional/test_suites/security/ftr/cloud_security_posture/agentless/cis_integration_aws.ts",
-    "fileName": "cis_integration_aws.ts",
+    "filePath": "x-pack/test_serverless/functional/test_suites/security/ftr/cloud_security_posture/agentless_api/create_agent.ts",
+    "fileName": "create_agent.ts",
     "directory": "x-pack/test_serverless/functional/test_suites/security/ftr/cloud_security_posture",
     "tags": [
       "FTR",
       "SERVERLESS"
     ],
     "lines": [
-      "  describe('Agentless CIS Integration Page')",
-      "    describe('Agentless CIS_AWS Single Account Launch Cloud formation')",
-      "      it(`should show CIS_AWS Launch Cloud formation button when credentials selector is direct access keys and package version is ${CLOUD_CREDENTIALS_PACKAGE_VERSION}`)",
-      "      it(`should hide CIS_AWS Launch Cloud formation button when credentials selector is temporary keys and package version is less than ${previousPackageVersion}`)",
-      "    describe('Agentless CIS_AWS ORG Account Launch Cloud formation')",
-      "      it(`should show CIS_AWS Launch Cloud formation button when credentials selector is direct access keys and package version is ${CLOUD_CREDENTIALS_PACKAGE_VERSION}`)",
-      "      it(`should hide CIS_AWS Launch Cloud formation button when credentials selector is temporary keys and package version is less than ${previousPackageVersion}`)"
+      "  describe('Agentless API Serverless')",
+      "    it(`should create agentless-agent`)",
+      "    it(`should create default agent-based agent`)"
     ],
     "testSuits": [
       {
-        "id": "agentless-cis-integration-page",
-        "rawLine": "  describe('Agentless CIS Integration Page', function () {",
-        "line": "  describe('Agentless CIS Integration Page')",
-        "label": "Agentless CIS Integration Page",
+        "id": "agentless-api-serverless",
+        "rawLine": "  describe('Agentless API Serverless', function () {",
+        "line": "  describe('Agentless API Serverless')",
+        "label": "Agentless API Serverless",
         "indent": 2,
         "type": "describe",
         "isSkipped": false,
         "isTodo": false
       },
       {
-        "id": "agentless-cis_aws-single-account-launch-cloud-formation",
-        "rawLine": "    describe('Agentless CIS_AWS Single Account Launch Cloud formation', () => {",
-        "line": "    describe('Agentless CIS_AWS Single Account Launch Cloud formation')",
-        "label": "Agentless CIS_AWS Single Account Launch Cloud formation",
+        "id": "should-create-agentless-agent",
+        "rawLine": "    it(`should create agentless-agent`, async () => {",
+        "line": "    it(`should create agentless-agent`)",
+        "label": "should create agentless-agent",
+        "indent": 4,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "should-create-default-agent-based-agent",
+        "rawLine": "    it(`should create default agent-based agent`, async () => {",
+        "line": "    it(`should create default agent-based agent`)",
+        "label": "should create default agent-based agent",
+        "indent": 4,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      }
+    ],
+    "tree": [
+      {
+        "id": "agentless-api-serverless",
+        "rawLine": "  describe('Agentless API Serverless', function () {",
+        "line": "  describe('Agentless API Serverless')",
+        "label": "Agentless API Serverless",
+        "indent": 2,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false,
+        "children": [
+          {
+            "id": "should-create-agentless-agent",
+            "rawLine": "    it(`should create agentless-agent`, async () => {",
+            "line": "    it(`should create agentless-agent`)",
+            "label": "should create agentless-agent",
+            "indent": 4,
+            "type": "it",
+            "isSkipped": false,
+            "isTodo": false
+          },
+          {
+            "id": "should-create-default-agent-based-agent",
+            "rawLine": "    it(`should create default agent-based agent`, async () => {",
+            "line": "    it(`should create default agent-based agent`)",
+            "label": "should create default agent-based agent",
+            "indent": 4,
+            "type": "it",
+            "isSkipped": false,
+            "isTodo": false
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "filePath": "x-pack/test_serverless/functional/test_suites/security/ftr/cloud_security_posture/agentless_api/index.ts",
+    "fileName": "index.ts",
+    "directory": "x-pack/test_serverless/functional/test_suites/security/ftr/cloud_security_posture",
+    "tags": [
+      "FTR",
+      "SERVERLESS"
+    ],
+    "lines": [
+      "  describe('cloud_security_posture')"
+    ],
+    "testSuits": [
+      {
+        "id": "cloud_security_posture",
+        "rawLine": "  describe('cloud_security_posture', function () {",
+        "line": "  describe('cloud_security_posture')",
+        "label": "cloud_security_posture",
+        "indent": 2,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false
+      }
+    ],
+    "tree": [
+      {
+        "id": "cloud_security_posture",
+        "rawLine": "  describe('cloud_security_posture', function () {",
+        "line": "  describe('cloud_security_posture')",
+        "label": "cloud_security_posture",
+        "indent": 2,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false
+      }
+    ]
+  },
+  {
+    "filePath": "x-pack/test_serverless/functional/test_suites/security/ftr/cloud_security_posture/agentless/cis_integration_aws.ts",
+    "fileName": "cis_integration_aws.ts",
+    "directory": "x-pack/test_serverless/functional/test_suites/security/ftr/cloud_security_posture",
+    "tags": [
+      "FTR",
+      "SERVERLESS",
+      "HAS SKIP"
+    ],
+    "lines": [
+      "  describe('Serverless - Agentless CIS Integration Page')",
+      "    describe('Serverless - Agentless CIS_AWS Single Account Launch Cloud formation')",
+      "      it(`should show CIS_AWS Launch Cloud formation button when credentials selector is direct access keys and package version is ${CLOUD_CREDENTIALS_PACKAGE_VERSION}`)",
+      "      it(`should hide CIS_AWS Launch Cloud formation button when credentials selector is temporary keys and package version is less than ${previousPackageVersion}`)",
+      "    describe('Serverless - Agentless CIS_AWS ORG Account Launch Cloud formation')",
+      "      it.skip(`should show CIS_AWS Launch Cloud formation button when credentials selector is direct access keys and package version is ${CLOUD_CREDENTIALS_PACKAGE_VERSION}`)",
+      "      it(`should hide CIS_AWS Launch Cloud formation button when credentials selector is temporary keys and package version is less than ${previousPackageVersion}`)",
+      "    describe('Serverless - Agentless CIS_AWS edit flow')",
+      "      it(`user should save and edit agentless integration policy`)",
+      "    describe.skip('Serverless - Agentless CIS_AWS Create flow')",
+      "      it(`user should save agentless integration policy when there are no api or validation errors and button is not disabled`)"
+    ],
+    "testSuits": [
+      {
+        "id": "serverless---agentless-cis-integration-page",
+        "rawLine": "  describe('Serverless - Agentless CIS Integration Page', function () {",
+        "line": "  describe('Serverless - Agentless CIS Integration Page')",
+        "label": "Serverless - Agentless CIS Integration Page",
+        "indent": 2,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "serverless---agentless-cis_aws-single-account-launch-cloud-formation",
+        "rawLine": "    describe('Serverless - Agentless CIS_AWS Single Account Launch Cloud formation', () => {",
+        "line": "    describe('Serverless - Agentless CIS_AWS Single Account Launch Cloud formation')",
+        "label": "Serverless - Agentless CIS_AWS Single Account Launch Cloud formation",
         "indent": 4,
         "type": "describe",
         "isSkipped": false,
@@ -11901,10 +12157,10 @@
         "isTodo": false
       },
       {
-        "id": "agentless-cis_aws-org-account-launch-cloud-formation",
-        "rawLine": "    describe('Agentless CIS_AWS ORG Account Launch Cloud formation', () => {",
-        "line": "    describe('Agentless CIS_AWS ORG Account Launch Cloud formation')",
-        "label": "Agentless CIS_AWS ORG Account Launch Cloud formation",
+        "id": "serverless---agentless-cis_aws-org-account-launch-cloud-formation",
+        "rawLine": "    describe('Serverless - Agentless CIS_AWS ORG Account Launch Cloud formation', () => {",
+        "line": "    describe('Serverless - Agentless CIS_AWS ORG Account Launch Cloud formation')",
+        "label": "Serverless - Agentless CIS_AWS ORG Account Launch Cloud formation",
         "indent": 4,
         "type": "describe",
         "isSkipped": false,
@@ -11912,12 +12168,12 @@
       },
       {
         "id": "should-show-cis_aws-launch-cloud-formation-button-when-credentials-selector-is-direct-access-keys-and-package-version-is-${cloud_credentials_package_version}",
-        "rawLine": "      it(`should show CIS_AWS Launch Cloud formation button when credentials selector is direct access keys and package version is ${CLOUD_CREDENTIALS_PACKAGE_VERSION}`, async () => {",
-        "line": "      it(`should show CIS_AWS Launch Cloud formation button when credentials selector is direct access keys and package version is ${CLOUD_CREDENTIALS_PACKAGE_VERSION}`)",
+        "rawLine": "      it.skip(`should show CIS_AWS Launch Cloud formation button when credentials selector is direct access keys and package version is ${CLOUD_CREDENTIALS_PACKAGE_VERSION}`, async () => {",
+        "line": "      it.skip(`should show CIS_AWS Launch Cloud formation button when credentials selector is direct access keys and package version is ${CLOUD_CREDENTIALS_PACKAGE_VERSION}`)",
         "label": "should show CIS_AWS Launch Cloud formation button when credentials selector is direct access keys and package version is ${CLOUD_CREDENTIALS_PACKAGE_VERSION}",
         "indent": 6,
         "type": "it",
-        "isSkipped": false,
+        "isSkipped": true,
         "isTodo": false
       },
       {
@@ -11925,6 +12181,46 @@
         "rawLine": "      it(`should hide CIS_AWS Launch Cloud formation button when credentials selector is temporary keys and package version is less than ${previousPackageVersion}`, async () => {",
         "line": "      it(`should hide CIS_AWS Launch Cloud formation button when credentials selector is temporary keys and package version is less than ${previousPackageVersion}`)",
         "label": "should hide CIS_AWS Launch Cloud formation button when credentials selector is temporary keys and package version is less than ${previousPackageVersion}",
+        "indent": 6,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "serverless---agentless-cis_aws-edit-flow",
+        "rawLine": "    describe('Serverless - Agentless CIS_AWS edit flow', () => {",
+        "line": "    describe('Serverless - Agentless CIS_AWS edit flow')",
+        "label": "Serverless - Agentless CIS_AWS edit flow",
+        "indent": 4,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "user-should-save-and-edit-agentless-integration-policy",
+        "rawLine": "      it(`user should save and edit agentless integration policy`, async () => {",
+        "line": "      it(`user should save and edit agentless integration policy`)",
+        "label": "user should save and edit agentless integration policy",
+        "indent": 6,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "serverless---agentless-cis_aws-create-flow",
+        "rawLine": "    describe.skip('Serverless - Agentless CIS_AWS Create flow', () => {",
+        "line": "    describe.skip('Serverless - Agentless CIS_AWS Create flow')",
+        "label": "Serverless - Agentless CIS_AWS Create flow",
+        "indent": 4,
+        "type": "describe",
+        "isSkipped": true,
+        "isTodo": false
+      },
+      {
+        "id": "user-should-save-agentless-integration-policy-when-there-are-no-api-or-validation-errors-and-button-is-not-disabled",
+        "rawLine": "      it(`user should save agentless integration policy when there are no api or validation errors and button is not disabled`, async () => {",
+        "line": "      it(`user should save agentless integration policy when there are no api or validation errors and button is not disabled`)",
+        "label": "user should save agentless integration policy when there are no api or validation errors and button is not disabled",
         "indent": 6,
         "type": "it",
         "isSkipped": false,
@@ -11933,20 +12229,20 @@
     ],
     "tree": [
       {
-        "id": "agentless-cis-integration-page",
-        "rawLine": "  describe('Agentless CIS Integration Page', function () {",
-        "line": "  describe('Agentless CIS Integration Page')",
-        "label": "Agentless CIS Integration Page",
+        "id": "serverless---agentless-cis-integration-page",
+        "rawLine": "  describe('Serverless - Agentless CIS Integration Page', function () {",
+        "line": "  describe('Serverless - Agentless CIS Integration Page')",
+        "label": "Serverless - Agentless CIS Integration Page",
         "indent": 2,
         "type": "describe",
         "isSkipped": false,
         "isTodo": false,
         "children": [
           {
-            "id": "agentless-cis_aws-single-account-launch-cloud-formation",
-            "rawLine": "    describe('Agentless CIS_AWS Single Account Launch Cloud formation', () => {",
-            "line": "    describe('Agentless CIS_AWS Single Account Launch Cloud formation')",
-            "label": "Agentless CIS_AWS Single Account Launch Cloud formation",
+            "id": "serverless---agentless-cis_aws-single-account-launch-cloud-formation",
+            "rawLine": "    describe('Serverless - Agentless CIS_AWS Single Account Launch Cloud formation', () => {",
+            "line": "    describe('Serverless - Agentless CIS_AWS Single Account Launch Cloud formation')",
+            "label": "Serverless - Agentless CIS_AWS Single Account Launch Cloud formation",
             "indent": 4,
             "type": "describe",
             "isSkipped": false,
@@ -11975,10 +12271,10 @@
             ]
           },
           {
-            "id": "agentless-cis_aws-org-account-launch-cloud-formation",
-            "rawLine": "    describe('Agentless CIS_AWS ORG Account Launch Cloud formation', () => {",
-            "line": "    describe('Agentless CIS_AWS ORG Account Launch Cloud formation')",
-            "label": "Agentless CIS_AWS ORG Account Launch Cloud formation",
+            "id": "serverless---agentless-cis_aws-org-account-launch-cloud-formation",
+            "rawLine": "    describe('Serverless - Agentless CIS_AWS ORG Account Launch Cloud formation', () => {",
+            "line": "    describe('Serverless - Agentless CIS_AWS ORG Account Launch Cloud formation')",
+            "label": "Serverless - Agentless CIS_AWS ORG Account Launch Cloud formation",
             "indent": 4,
             "type": "describe",
             "isSkipped": false,
@@ -11986,12 +12282,12 @@
             "children": [
               {
                 "id": "should-show-cis_aws-launch-cloud-formation-button-when-credentials-selector-is-direct-access-keys-and-package-version-is-${cloud_credentials_package_version}",
-                "rawLine": "      it(`should show CIS_AWS Launch Cloud formation button when credentials selector is direct access keys and package version is ${CLOUD_CREDENTIALS_PACKAGE_VERSION}`, async () => {",
-                "line": "      it(`should show CIS_AWS Launch Cloud formation button when credentials selector is direct access keys and package version is ${CLOUD_CREDENTIALS_PACKAGE_VERSION}`)",
+                "rawLine": "      it.skip(`should show CIS_AWS Launch Cloud formation button when credentials selector is direct access keys and package version is ${CLOUD_CREDENTIALS_PACKAGE_VERSION}`, async () => {",
+                "line": "      it.skip(`should show CIS_AWS Launch Cloud formation button when credentials selector is direct access keys and package version is ${CLOUD_CREDENTIALS_PACKAGE_VERSION}`)",
                 "label": "should show CIS_AWS Launch Cloud formation button when credentials selector is direct access keys and package version is ${CLOUD_CREDENTIALS_PACKAGE_VERSION}",
                 "indent": 6,
                 "type": "it",
-                "isSkipped": false,
+                "isSkipped": true,
                 "isTodo": false
               },
               {
@@ -12002,6 +12298,50 @@
                 "indent": 6,
                 "type": "it",
                 "isSkipped": false,
+                "isTodo": false
+              }
+            ]
+          },
+          {
+            "id": "serverless---agentless-cis_aws-edit-flow",
+            "rawLine": "    describe('Serverless - Agentless CIS_AWS edit flow', () => {",
+            "line": "    describe('Serverless - Agentless CIS_AWS edit flow')",
+            "label": "Serverless - Agentless CIS_AWS edit flow",
+            "indent": 4,
+            "type": "describe",
+            "isSkipped": false,
+            "isTodo": false,
+            "children": [
+              {
+                "id": "user-should-save-and-edit-agentless-integration-policy",
+                "rawLine": "      it(`user should save and edit agentless integration policy`, async () => {",
+                "line": "      it(`user should save and edit agentless integration policy`)",
+                "label": "user should save and edit agentless integration policy",
+                "indent": 6,
+                "type": "it",
+                "isSkipped": false,
+                "isTodo": false
+              }
+            ]
+          },
+          {
+            "id": "serverless---agentless-cis_aws-create-flow",
+            "rawLine": "    describe.skip('Serverless - Agentless CIS_AWS Create flow', () => {",
+            "line": "    describe.skip('Serverless - Agentless CIS_AWS Create flow')",
+            "label": "Serverless - Agentless CIS_AWS Create flow",
+            "indent": 4,
+            "type": "describe",
+            "isSkipped": true,
+            "isTodo": false,
+            "children": [
+              {
+                "id": "user-should-save-agentless-integration-policy-when-there-are-no-api-or-validation-errors-and-button-is-not-disabled",
+                "rawLine": "      it(`user should save agentless integration policy when there are no api or validation errors and button is not disabled`, async () => {",
+                "line": "      it(`user should save agentless integration policy when there are no api or validation errors and button is not disabled`)",
+                "label": "user should save agentless integration policy when there are no api or validation errors and button is not disabled",
+                "indent": 6,
+                "type": "it",
+                "isSkipped": true,
                 "isTodo": false
               }
             ]
@@ -12021,11 +12361,13 @@
     "lines": [
       "  describe('Agentless CIS Integration Page')",
       "    describe('Agentless CIS_GCP Single Account Launch Cloud shell')",
-      "      it(`should show CIS_GCP Launch Cloud Shell button when package version is ${agentlessPreReleaseVersion}`)",
-      "      it(`should hide CIS_GCP Launch Cloud Shell button when package version is less than ${agentlessPreReleaseVersion}`)",
+      "      it(`should show CIS_GCP Launch Cloud Shell button when package version is ${CLOUD_CREDENTIALS_PACKAGE_VERSION}`)",
+      "      it(`should hide CIS_GCP Launch Cloud Shell button when package version is less than ${CLOUD_CREDENTIALS_PACKAGE_VERSION}`)",
       "    describe('Agentless CIS_GCP ORG Account Launch Cloud Shell')",
-      "      it(`should show CIS_GCP Launch Cloud Shell button when package version is ${agentlessPreReleaseVersion}`)",
-      "      it(`should hide CIS_GCP Launch Cloud shell button when package version is ${previousPackageVersion}`)"
+      "      it(`should show CIS_GCP Launch Cloud Shell button when package version is ${CLOUD_CREDENTIALS_PACKAGE_VERSION}`)",
+      "      it(`should hide CIS_GCP Launch Cloud shell button when package version is ${previousPackageVersion}`)",
+      "    describe('Serverless - Agentless CIS_GCP edit flow')",
+      "      it(`user should save and edit agentless integration policy`)"
     ],
     "testSuits": [
       {
@@ -12049,20 +12391,20 @@
         "isTodo": false
       },
       {
-        "id": "should-show-cis_gcp-launch-cloud-shell-button-when-package-version-is-${agentlessprereleaseversion}",
-        "rawLine": "      it(`should show CIS_GCP Launch Cloud Shell button when package version is ${agentlessPreReleaseVersion}`, async () => {",
-        "line": "      it(`should show CIS_GCP Launch Cloud Shell button when package version is ${agentlessPreReleaseVersion}`)",
-        "label": "should show CIS_GCP Launch Cloud Shell button when package version is ${agentlessPreReleaseVersion}",
+        "id": "should-show-cis_gcp-launch-cloud-shell-button-when-package-version-is-${cloud_credentials_package_version}",
+        "rawLine": "      it(`should show CIS_GCP Launch Cloud Shell button when package version is ${CLOUD_CREDENTIALS_PACKAGE_VERSION}`, async () => {",
+        "line": "      it(`should show CIS_GCP Launch Cloud Shell button when package version is ${CLOUD_CREDENTIALS_PACKAGE_VERSION}`)",
+        "label": "should show CIS_GCP Launch Cloud Shell button when package version is ${CLOUD_CREDENTIALS_PACKAGE_VERSION}",
         "indent": 6,
         "type": "it",
         "isSkipped": false,
         "isTodo": false
       },
       {
-        "id": "should-hide-cis_gcp-launch-cloud-shell-button-when-package-version-is-less-than-${agentlessprereleaseversion}",
-        "rawLine": "      it(`should hide CIS_GCP Launch Cloud Shell button when package version is less than ${agentlessPreReleaseVersion}`, async () => {",
-        "line": "      it(`should hide CIS_GCP Launch Cloud Shell button when package version is less than ${agentlessPreReleaseVersion}`)",
-        "label": "should hide CIS_GCP Launch Cloud Shell button when package version is less than ${agentlessPreReleaseVersion}",
+        "id": "should-hide-cis_gcp-launch-cloud-shell-button-when-package-version-is-less-than-${cloud_credentials_package_version}",
+        "rawLine": "      it(`should hide CIS_GCP Launch Cloud Shell button when package version is less than ${CLOUD_CREDENTIALS_PACKAGE_VERSION}`, async () => {",
+        "line": "      it(`should hide CIS_GCP Launch Cloud Shell button when package version is less than ${CLOUD_CREDENTIALS_PACKAGE_VERSION}`)",
+        "label": "should hide CIS_GCP Launch Cloud Shell button when package version is less than ${CLOUD_CREDENTIALS_PACKAGE_VERSION}",
         "indent": 6,
         "type": "it",
         "isSkipped": false,
@@ -12079,10 +12421,10 @@
         "isTodo": false
       },
       {
-        "id": "should-show-cis_gcp-launch-cloud-shell-button-when-package-version-is-${agentlessprereleaseversion}",
-        "rawLine": "      it(`should show CIS_GCP Launch Cloud Shell button when package version is ${agentlessPreReleaseVersion}`, async () => {",
-        "line": "      it(`should show CIS_GCP Launch Cloud Shell button when package version is ${agentlessPreReleaseVersion}`)",
-        "label": "should show CIS_GCP Launch Cloud Shell button when package version is ${agentlessPreReleaseVersion}",
+        "id": "should-show-cis_gcp-launch-cloud-shell-button-when-package-version-is-${cloud_credentials_package_version}",
+        "rawLine": "      it(`should show CIS_GCP Launch Cloud Shell button when package version is ${CLOUD_CREDENTIALS_PACKAGE_VERSION}`, async () => {",
+        "line": "      it(`should show CIS_GCP Launch Cloud Shell button when package version is ${CLOUD_CREDENTIALS_PACKAGE_VERSION}`)",
+        "label": "should show CIS_GCP Launch Cloud Shell button when package version is ${CLOUD_CREDENTIALS_PACKAGE_VERSION}",
         "indent": 6,
         "type": "it",
         "isSkipped": false,
@@ -12093,6 +12435,26 @@
         "rawLine": "      it(`should hide CIS_GCP Launch Cloud shell button when package version is ${previousPackageVersion}`, async () => {",
         "line": "      it(`should hide CIS_GCP Launch Cloud shell button when package version is ${previousPackageVersion}`)",
         "label": "should hide CIS_GCP Launch Cloud shell button when package version is ${previousPackageVersion}",
+        "indent": 6,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "serverless---agentless-cis_gcp-edit-flow",
+        "rawLine": "    describe('Serverless - Agentless CIS_GCP edit flow', () => {",
+        "line": "    describe('Serverless - Agentless CIS_GCP edit flow')",
+        "label": "Serverless - Agentless CIS_GCP edit flow",
+        "indent": 4,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "user-should-save-and-edit-agentless-integration-policy",
+        "rawLine": "      it(`user should save and edit agentless integration policy`, async () => {",
+        "line": "      it(`user should save and edit agentless integration policy`)",
+        "label": "user should save and edit agentless integration policy",
         "indent": 6,
         "type": "it",
         "isSkipped": false,
@@ -12121,20 +12483,20 @@
             "isTodo": false,
             "children": [
               {
-                "id": "should-show-cis_gcp-launch-cloud-shell-button-when-package-version-is-${agentlessprereleaseversion}",
-                "rawLine": "      it(`should show CIS_GCP Launch Cloud Shell button when package version is ${agentlessPreReleaseVersion}`, async () => {",
-                "line": "      it(`should show CIS_GCP Launch Cloud Shell button when package version is ${agentlessPreReleaseVersion}`)",
-                "label": "should show CIS_GCP Launch Cloud Shell button when package version is ${agentlessPreReleaseVersion}",
+                "id": "should-show-cis_gcp-launch-cloud-shell-button-when-package-version-is-${cloud_credentials_package_version}",
+                "rawLine": "      it(`should show CIS_GCP Launch Cloud Shell button when package version is ${CLOUD_CREDENTIALS_PACKAGE_VERSION}`, async () => {",
+                "line": "      it(`should show CIS_GCP Launch Cloud Shell button when package version is ${CLOUD_CREDENTIALS_PACKAGE_VERSION}`)",
+                "label": "should show CIS_GCP Launch Cloud Shell button when package version is ${CLOUD_CREDENTIALS_PACKAGE_VERSION}",
                 "indent": 6,
                 "type": "it",
                 "isSkipped": false,
                 "isTodo": false
               },
               {
-                "id": "should-hide-cis_gcp-launch-cloud-shell-button-when-package-version-is-less-than-${agentlessprereleaseversion}",
-                "rawLine": "      it(`should hide CIS_GCP Launch Cloud Shell button when package version is less than ${agentlessPreReleaseVersion}`, async () => {",
-                "line": "      it(`should hide CIS_GCP Launch Cloud Shell button when package version is less than ${agentlessPreReleaseVersion}`)",
-                "label": "should hide CIS_GCP Launch Cloud Shell button when package version is less than ${agentlessPreReleaseVersion}",
+                "id": "should-hide-cis_gcp-launch-cloud-shell-button-when-package-version-is-less-than-${cloud_credentials_package_version}",
+                "rawLine": "      it(`should hide CIS_GCP Launch Cloud Shell button when package version is less than ${CLOUD_CREDENTIALS_PACKAGE_VERSION}`, async () => {",
+                "line": "      it(`should hide CIS_GCP Launch Cloud Shell button when package version is less than ${CLOUD_CREDENTIALS_PACKAGE_VERSION}`)",
+                "label": "should hide CIS_GCP Launch Cloud Shell button when package version is less than ${CLOUD_CREDENTIALS_PACKAGE_VERSION}",
                 "indent": 6,
                 "type": "it",
                 "isSkipped": false,
@@ -12153,10 +12515,10 @@
             "isTodo": false,
             "children": [
               {
-                "id": "should-show-cis_gcp-launch-cloud-shell-button-when-package-version-is-${agentlessprereleaseversion}",
-                "rawLine": "      it(`should show CIS_GCP Launch Cloud Shell button when package version is ${agentlessPreReleaseVersion}`, async () => {",
-                "line": "      it(`should show CIS_GCP Launch Cloud Shell button when package version is ${agentlessPreReleaseVersion}`)",
-                "label": "should show CIS_GCP Launch Cloud Shell button when package version is ${agentlessPreReleaseVersion}",
+                "id": "should-show-cis_gcp-launch-cloud-shell-button-when-package-version-is-${cloud_credentials_package_version}",
+                "rawLine": "      it(`should show CIS_GCP Launch Cloud Shell button when package version is ${CLOUD_CREDENTIALS_PACKAGE_VERSION}`, async () => {",
+                "line": "      it(`should show CIS_GCP Launch Cloud Shell button when package version is ${CLOUD_CREDENTIALS_PACKAGE_VERSION}`)",
+                "label": "should show CIS_GCP Launch Cloud Shell button when package version is ${CLOUD_CREDENTIALS_PACKAGE_VERSION}",
                 "indent": 6,
                 "type": "it",
                 "isSkipped": false,
@@ -12167,6 +12529,28 @@
                 "rawLine": "      it(`should hide CIS_GCP Launch Cloud shell button when package version is ${previousPackageVersion}`, async () => {",
                 "line": "      it(`should hide CIS_GCP Launch Cloud shell button when package version is ${previousPackageVersion}`)",
                 "label": "should hide CIS_GCP Launch Cloud shell button when package version is ${previousPackageVersion}",
+                "indent": 6,
+                "type": "it",
+                "isSkipped": false,
+                "isTodo": false
+              }
+            ]
+          },
+          {
+            "id": "serverless---agentless-cis_gcp-edit-flow",
+            "rawLine": "    describe('Serverless - Agentless CIS_GCP edit flow', () => {",
+            "line": "    describe('Serverless - Agentless CIS_GCP edit flow')",
+            "label": "Serverless - Agentless CIS_GCP edit flow",
+            "indent": 4,
+            "type": "describe",
+            "isSkipped": false,
+            "isTodo": false,
+            "children": [
+              {
+                "id": "user-should-save-and-edit-agentless-integration-policy",
+                "rawLine": "      it(`user should save and edit agentless integration policy`, async () => {",
+                "line": "      it(`user should save and edit agentless integration policy`)",
+                "label": "user should save and edit agentless integration policy",
                 "indent": 6,
                 "type": "it",
                 "isSkipped": false,
@@ -13315,6 +13699,9 @@
     "lines": [
       "  describe('GET /internal/cloud_security_posture/status')",
       "    describe('STATUS = INDEXED TEST')",
+      "      it(`Return hasMisconfigurationsFindings true when there are latest findings but no installed integrations`)",
+      "      it(`Return hasMisconfigurationsFindings true when there are only findings in third party index`)",
+      "      it(`Return hasMisconfigurationsFindings false when there are no findings`)",
       "      it(`Return kspm status indexed when logs-cloud_security_posture.findings_latest-default contains new kspm documents`)",
       "      it(`Return cspm status indexed when logs-cloud_security_posture.findings_latest-default contains new cspm documents`)",
       "      it(`Return vuln status indexed when logs-cloud_security_posture.vulnerabilities_latest-default contains new documents`)"
@@ -13337,6 +13724,36 @@
         "label": "STATUS = INDEXED TEST",
         "indent": 4,
         "type": "describe",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "return-hasmisconfigurationsfindings-true-when-there-are-latest-findings-but-no-installed-integrations",
+        "rawLine": "      it(`Return hasMisconfigurationsFindings true when there are latest findings but no installed integrations`, async () => {",
+        "line": "      it(`Return hasMisconfigurationsFindings true when there are latest findings but no installed integrations`)",
+        "label": "Return hasMisconfigurationsFindings true when there are latest findings but no installed integrations",
+        "indent": 6,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "return-hasmisconfigurationsfindings-true-when-there-are-only-findings-in-third-party-index",
+        "rawLine": "      it(`Return hasMisconfigurationsFindings true when there are only findings in third party index`, async () => {",
+        "line": "      it(`Return hasMisconfigurationsFindings true when there are only findings in third party index`)",
+        "label": "Return hasMisconfigurationsFindings true when there are only findings in third party index",
+        "indent": 6,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "return-hasmisconfigurationsfindings-false-when-there-are-no-findings",
+        "rawLine": "      it(`Return hasMisconfigurationsFindings false when there are no findings`, async () => {",
+        "line": "      it(`Return hasMisconfigurationsFindings false when there are no findings`)",
+        "label": "Return hasMisconfigurationsFindings false when there are no findings",
+        "indent": 6,
+        "type": "it",
         "isSkipped": false,
         "isTodo": false
       },
@@ -13392,6 +13809,36 @@
             "isSkipped": false,
             "isTodo": false,
             "children": [
+              {
+                "id": "return-hasmisconfigurationsfindings-true-when-there-are-latest-findings-but-no-installed-integrations",
+                "rawLine": "      it(`Return hasMisconfigurationsFindings true when there are latest findings but no installed integrations`, async () => {",
+                "line": "      it(`Return hasMisconfigurationsFindings true when there are latest findings but no installed integrations`)",
+                "label": "Return hasMisconfigurationsFindings true when there are latest findings but no installed integrations",
+                "indent": 6,
+                "type": "it",
+                "isSkipped": false,
+                "isTodo": false
+              },
+              {
+                "id": "return-hasmisconfigurationsfindings-true-when-there-are-only-findings-in-third-party-index",
+                "rawLine": "      it(`Return hasMisconfigurationsFindings true when there are only findings in third party index`, async () => {",
+                "line": "      it(`Return hasMisconfigurationsFindings true when there are only findings in third party index`)",
+                "label": "Return hasMisconfigurationsFindings true when there are only findings in third party index",
+                "indent": 6,
+                "type": "it",
+                "isSkipped": false,
+                "isTodo": false
+              },
+              {
+                "id": "return-hasmisconfigurationsfindings-false-when-there-are-no-findings",
+                "rawLine": "      it(`Return hasMisconfigurationsFindings false when there are no findings`, async () => {",
+                "line": "      it(`Return hasMisconfigurationsFindings false when there are no findings`)",
+                "label": "Return hasMisconfigurationsFindings false when there are no findings",
+                "indent": 6,
+                "type": "it",
+                "isSkipped": false,
+                "isTodo": false
+              },
               {
                 "id": "return-kspm-status-indexed-when-logs-cloud_security_posture.findings_latest-default-contains-new-kspm-documents",
                 "rawLine": "      it(`Return kspm status indexed when logs-cloud_security_posture.findings_latest-default contains new kspm documents`, async () => {",
@@ -13974,13 +14421,17 @@
     "directory": "x-pack/test/cloud_security_posture_api",
     "tags": [
       "FTR",
-      "API INTEGRATION"
+      "API INTEGRATION",
+      "HAS SKIP"
     ],
     "lines": [
       "  describe('GET /internal/cloud_security_posture/benchmarks')",
       "    describe('Get Benchmark API')",
       "      it('Verify cspm benchmark score is updated when muting rules')",
-      "      it('Verify kspm benchmark score is updated when muting rules')"
+      "      it('Verify kspm benchmark score is updated when muting rules')",
+      "    describe('Get Benchmark API')",
+      "      it('Calling Benchmark API as User with no read access to Security')",
+      "      it.skip('Calling Benchmark API as User with read access to Security')"
     ],
     "testSuits": [
       {
@@ -14021,6 +14472,36 @@
         "indent": 6,
         "type": "it",
         "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "get-benchmark-api",
+        "rawLine": "    describe('Get Benchmark API', async () => {",
+        "line": "    describe('Get Benchmark API')",
+        "label": "Get Benchmark API",
+        "indent": 4,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "calling-benchmark-api-as-user-with-no-read-access-to-security",
+        "rawLine": "      it('Calling Benchmark API as User with no read access to Security', async () => {",
+        "line": "      it('Calling Benchmark API as User with no read access to Security')",
+        "label": "Calling Benchmark API as User with no read access to Security",
+        "indent": 6,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "calling-benchmark-api-as-user-with-read-access-to-security",
+        "rawLine": "      it.skip('Calling Benchmark API as User with read access to Security', async () => {",
+        "line": "      it.skip('Calling Benchmark API as User with read access to Security')",
+        "label": "Calling Benchmark API as User with read access to Security",
+        "indent": 6,
+        "type": "it",
+        "isSkipped": true,
         "isTodo": false
       }
     ],
@@ -14066,6 +14547,38 @@
                 "isTodo": false
               }
             ]
+          },
+          {
+            "id": "get-benchmark-api",
+            "rawLine": "    describe('Get Benchmark API', async () => {",
+            "line": "    describe('Get Benchmark API')",
+            "label": "Get Benchmark API",
+            "indent": 4,
+            "type": "describe",
+            "isSkipped": false,
+            "isTodo": false,
+            "children": [
+              {
+                "id": "calling-benchmark-api-as-user-with-no-read-access-to-security",
+                "rawLine": "      it('Calling Benchmark API as User with no read access to Security', async () => {",
+                "line": "      it('Calling Benchmark API as User with no read access to Security')",
+                "label": "Calling Benchmark API as User with no read access to Security",
+                "indent": 6,
+                "type": "it",
+                "isSkipped": false,
+                "isTodo": false
+              },
+              {
+                "id": "calling-benchmark-api-as-user-with-read-access-to-security",
+                "rawLine": "      it.skip('Calling Benchmark API as User with read access to Security', async () => {",
+                "line": "      it.skip('Calling Benchmark API as User with read access to Security')",
+                "label": "Calling Benchmark API as User with read access to Security",
+                "indent": 6,
+                "type": "it",
+                "isSkipped": true,
+                "isTodo": false
+              }
+            ]
           }
         ]
       }
@@ -14087,7 +14600,9 @@
       "    it('mute detection rule successfully')",
       "    it('Expect to mute two benchmark rules and one detection rule')",
       "    it('Expect to save rules states when requesting to update empty object')",
-      "    it('set wrong action input')"
+      "    it('set wrong action input')",
+      "    it('users without read privileges on cloud security should not be able to mute')",
+      "    it('users with all privileges on cloud security should be able to mute')"
     ],
     "testSuits": [
       {
@@ -14165,6 +14680,26 @@
         "rawLine": "    it('set wrong action input', async () => {",
         "line": "    it('set wrong action input')",
         "label": "set wrong action input",
+        "indent": 4,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "users-without-read-privileges-on-cloud-security-should-not-be-able-to-mute",
+        "rawLine": "    it('users without read privileges on cloud security should not be able to mute', async () => {",
+        "line": "    it('users without read privileges on cloud security should not be able to mute')",
+        "label": "users without read privileges on cloud security should not be able to mute",
+        "indent": 4,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "users-with-all-privileges-on-cloud-security-should-be-able-to-mute",
+        "rawLine": "    it('users with all privileges on cloud security should be able to mute', async () => {",
+        "line": "    it('users with all privileges on cloud security should be able to mute')",
+        "label": "users with all privileges on cloud security should be able to mute",
         "indent": 4,
         "type": "it",
         "isSkipped": false,
@@ -14251,6 +14786,26 @@
             "type": "it",
             "isSkipped": false,
             "isTodo": false
+          },
+          {
+            "id": "users-without-read-privileges-on-cloud-security-should-not-be-able-to-mute",
+            "rawLine": "    it('users without read privileges on cloud security should not be able to mute', async () => {",
+            "line": "    it('users without read privileges on cloud security should not be able to mute')",
+            "label": "users without read privileges on cloud security should not be able to mute",
+            "indent": 4,
+            "type": "it",
+            "isSkipped": false,
+            "isTodo": false
+          },
+          {
+            "id": "users-with-all-privileges-on-cloud-security-should-be-able-to-mute",
+            "rawLine": "    it('users with all privileges on cloud security should be able to mute', async () => {",
+            "line": "    it('users with all privileges on cloud security should be able to mute')",
+            "label": "users with all privileges on cloud security should be able to mute",
+            "indent": 4,
+            "type": "it",
+            "isSkipped": false,
+            "isTodo": false
           }
         ]
       }
@@ -14262,12 +14817,15 @@
     "directory": "x-pack/test/cloud_security_posture_api",
     "tags": [
       "FTR",
-      "API INTEGRATION"
+      "API INTEGRATION",
+      "HAS SKIP"
     ],
     "lines": [
       "  describe('Tests get rules states API')",
       "    it('get rules states successfully')",
-      "    it('get empty object when rules states not exists')"
+      "    it('get empty object when rules states not exists')",
+      "    it.skip('GET rules states API with user with read access')",
+      "    it('GET rules states API API with user without read access')"
     ],
     "testSuits": [
       {
@@ -14295,6 +14853,26 @@
         "rawLine": "    it('get empty object when rules states not exists', async () => {",
         "line": "    it('get empty object when rules states not exists')",
         "label": "get empty object when rules states not exists",
+        "indent": 4,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "get-rules-states-api-with-user-with-read-access",
+        "rawLine": "    it.skip('GET rules states API with user with read access', async () => {",
+        "line": "    it.skip('GET rules states API with user with read access')",
+        "label": "GET rules states API with user with read access",
+        "indent": 4,
+        "type": "it",
+        "isSkipped": true,
+        "isTodo": false
+      },
+      {
+        "id": "get-rules-states-api-api-with-user-without-read-access",
+        "rawLine": "    it('GET rules states API API with user without read access', async () => {",
+        "line": "    it('GET rules states API API with user without read access')",
+        "label": "GET rules states API API with user without read access",
         "indent": 4,
         "type": "it",
         "isSkipped": false,
@@ -14331,8 +14909,167 @@
             "type": "it",
             "isSkipped": false,
             "isTodo": false
+          },
+          {
+            "id": "get-rules-states-api-with-user-with-read-access",
+            "rawLine": "    it.skip('GET rules states API with user with read access', async () => {",
+            "line": "    it.skip('GET rules states API with user with read access')",
+            "label": "GET rules states API with user with read access",
+            "indent": 4,
+            "type": "it",
+            "isSkipped": true,
+            "isTodo": false
+          },
+          {
+            "id": "get-rules-states-api-api-with-user-without-read-access",
+            "rawLine": "    it('GET rules states API API with user without read access', async () => {",
+            "line": "    it('GET rules states API API with user without read access')",
+            "label": "GET rules states API API with user without read access",
+            "indent": 4,
+            "type": "it",
+            "isSkipped": false,
+            "isTodo": false
           }
         ]
+      }
+    ]
+  },
+  {
+    "filePath": "x-pack/test/cloud_security_posture_api/routes/get_detection_engine_alerts_count_by_rule_tags.ts",
+    "fileName": "get_detection_engine_alerts_count_by_rule_tags.ts",
+    "directory": "x-pack/test/cloud_security_posture_api",
+    "tags": [
+      "FTR",
+      "API INTEGRATION"
+    ],
+    "lines": [
+      "  describe('/internal/cloud_security_posture/detection_engine_rules/alerts/_status')",
+      "    describe('GET detection_engine_rules API with user that has specific access')",
+      "      it('GET detection_engine_rules API with user with read access')",
+      "      it('GET detection_engine_rules API with user without read access')"
+    ],
+    "testSuits": [
+      {
+        "id": "/internal/cloud_security_posture/detection_engine_rules/alerts/_status",
+        "rawLine": "  describe('/internal/cloud_security_posture/detection_engine_rules/alerts/_status', () => {",
+        "line": "  describe('/internal/cloud_security_posture/detection_engine_rules/alerts/_status')",
+        "label": "/internal/cloud_security_posture/detection_engine_rules/alerts/_status",
+        "indent": 2,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "get-detection_engine_rules-api-with-user-that-has-specific-access",
+        "rawLine": "    describe('GET detection_engine_rules API with user that has specific access', async () => {",
+        "line": "    describe('GET detection_engine_rules API with user that has specific access')",
+        "label": "GET detection_engine_rules API with user that has specific access",
+        "indent": 4,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "get-detection_engine_rules-api-with-user-with-read-access",
+        "rawLine": "      it('GET detection_engine_rules API with user with read access', async () => {",
+        "line": "      it('GET detection_engine_rules API with user with read access')",
+        "label": "GET detection_engine_rules API with user with read access",
+        "indent": 6,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "get-detection_engine_rules-api-with-user-without-read-access",
+        "rawLine": "      it('GET detection_engine_rules API with user without read access', async () => {",
+        "line": "      it('GET detection_engine_rules API with user without read access')",
+        "label": "GET detection_engine_rules API with user without read access",
+        "indent": 6,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      }
+    ],
+    "tree": [
+      {
+        "id": "/internal/cloud_security_posture/detection_engine_rules/alerts/_status",
+        "rawLine": "  describe('/internal/cloud_security_posture/detection_engine_rules/alerts/_status', () => {",
+        "line": "  describe('/internal/cloud_security_posture/detection_engine_rules/alerts/_status')",
+        "label": "/internal/cloud_security_posture/detection_engine_rules/alerts/_status",
+        "indent": 2,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false,
+        "children": [
+          {
+            "id": "get-detection_engine_rules-api-with-user-that-has-specific-access",
+            "rawLine": "    describe('GET detection_engine_rules API with user that has specific access', async () => {",
+            "line": "    describe('GET detection_engine_rules API with user that has specific access')",
+            "label": "GET detection_engine_rules API with user that has specific access",
+            "indent": 4,
+            "type": "describe",
+            "isSkipped": false,
+            "isTodo": false,
+            "children": [
+              {
+                "id": "get-detection_engine_rules-api-with-user-with-read-access",
+                "rawLine": "      it('GET detection_engine_rules API with user with read access', async () => {",
+                "line": "      it('GET detection_engine_rules API with user with read access')",
+                "label": "GET detection_engine_rules API with user with read access",
+                "indent": 6,
+                "type": "it",
+                "isSkipped": false,
+                "isTodo": false
+              },
+              {
+                "id": "get-detection_engine_rules-api-with-user-without-read-access",
+                "rawLine": "      it('GET detection_engine_rules API with user without read access', async () => {",
+                "line": "      it('GET detection_engine_rules API with user without read access')",
+                "label": "GET detection_engine_rules API with user without read access",
+                "indent": 6,
+                "type": "it",
+                "isSkipped": false,
+                "isTodo": false
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "filePath": "x-pack/test/cloud_security_posture_api/routes/index.ts",
+    "fileName": "index.ts",
+    "directory": "x-pack/test/cloud_security_posture_api",
+    "tags": [
+      "FTR",
+      "API INTEGRATION"
+    ],
+    "lines": [
+      "  describe('Cloud Security Posture')"
+    ],
+    "testSuits": [
+      {
+        "id": "cloud-security-posture",
+        "rawLine": "  describe('Cloud Security Posture', function () {",
+        "line": "  describe('Cloud Security Posture')",
+        "label": "Cloud Security Posture",
+        "indent": 2,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false
+      }
+    ],
+    "tree": [
+      {
+        "id": "cloud-security-posture",
+        "rawLine": "  describe('Cloud Security Posture', function () {",
+        "line": "  describe('Cloud Security Posture')",
+        "label": "Cloud Security Posture",
+        "indent": 2,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false
       }
     ]
   },
@@ -14355,7 +15092,12 @@
       "      it('should return KSPM benchmarks V2')",
       "    describe('Compliance dashboard based on enabled rules')",
       "      it('should calculate cspm benchmarks posture score based only on enabled rules')",
-      "      it('should calculate kspm benchmarks posture score based only on enabled rules')"
+      "      it('should calculate kspm benchmarks posture score based only on enabled rules')",
+      "    describe('GET stats API with user that has specific access')",
+      "      it('GET stats API V1 with user with read access')",
+      "      it('GET stats API V1 with user with read access')",
+      "      it('GET stats API V2 with user with read access')",
+      "      it('GET stats API V2 with user without read access')"
     ],
     "testSuits": [
       {
@@ -14463,6 +15205,56 @@
         "rawLine": "      it('should calculate kspm benchmarks posture score based only on enabled rules', async () => {",
         "line": "      it('should calculate kspm benchmarks posture score based only on enabled rules')",
         "label": "should calculate kspm benchmarks posture score based only on enabled rules",
+        "indent": 6,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "get-stats-api-with-user-that-has-specific-access",
+        "rawLine": "    describe('GET stats API with user that has specific access', async () => {",
+        "line": "    describe('GET stats API with user that has specific access')",
+        "label": "GET stats API with user that has specific access",
+        "indent": 4,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "get-stats-api-v1-with-user-with-read-access",
+        "rawLine": "      it('GET stats API V1 with user with read access', async () => {",
+        "line": "      it('GET stats API V1 with user with read access')",
+        "label": "GET stats API V1 with user with read access",
+        "indent": 6,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "get-stats-api-v1-with-user-with-read-access",
+        "rawLine": "      it('GET stats API V1 with user with read access', async () => {",
+        "line": "      it('GET stats API V1 with user with read access')",
+        "label": "GET stats API V1 with user with read access",
+        "indent": 6,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "get-stats-api-v2-with-user-with-read-access",
+        "rawLine": "      it('GET stats API V2 with user with read access', async () => {",
+        "line": "      it('GET stats API V2 with user with read access')",
+        "label": "GET stats API V2 with user with read access",
+        "indent": 6,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "get-stats-api-v2-with-user-without-read-access",
+        "rawLine": "      it('GET stats API V2 with user without read access', async () => {",
+        "line": "      it('GET stats API V2 with user without read access')",
+        "label": "GET stats API V2 with user without read access",
         "indent": 6,
         "type": "it",
         "isSkipped": false,
@@ -14585,6 +15377,161 @@
                 "isTodo": false
               }
             ]
+          },
+          {
+            "id": "get-stats-api-with-user-that-has-specific-access",
+            "rawLine": "    describe('GET stats API with user that has specific access', async () => {",
+            "line": "    describe('GET stats API with user that has specific access')",
+            "label": "GET stats API with user that has specific access",
+            "indent": 4,
+            "type": "describe",
+            "isSkipped": false,
+            "isTodo": false,
+            "children": [
+              {
+                "id": "get-stats-api-v1-with-user-with-read-access",
+                "rawLine": "      it('GET stats API V1 with user with read access', async () => {",
+                "line": "      it('GET stats API V1 with user with read access')",
+                "label": "GET stats API V1 with user with read access",
+                "indent": 6,
+                "type": "it",
+                "isSkipped": false,
+                "isTodo": false
+              },
+              {
+                "id": "get-stats-api-v1-with-user-with-read-access",
+                "rawLine": "      it('GET stats API V1 with user with read access', async () => {",
+                "line": "      it('GET stats API V1 with user with read access')",
+                "label": "GET stats API V1 with user with read access",
+                "indent": 6,
+                "type": "it",
+                "isSkipped": false,
+                "isTodo": false
+              },
+              {
+                "id": "get-stats-api-v2-with-user-with-read-access",
+                "rawLine": "      it('GET stats API V2 with user with read access', async () => {",
+                "line": "      it('GET stats API V2 with user with read access')",
+                "label": "GET stats API V2 with user with read access",
+                "indent": 6,
+                "type": "it",
+                "isSkipped": false,
+                "isTodo": false
+              },
+              {
+                "id": "get-stats-api-v2-with-user-without-read-access",
+                "rawLine": "      it('GET stats API V2 with user without read access', async () => {",
+                "line": "      it('GET stats API V2 with user without read access')",
+                "label": "GET stats API V2 with user without read access",
+                "indent": 6,
+                "type": "it",
+                "isSkipped": false,
+                "isTodo": false
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "filePath": "x-pack/test/cloud_security_posture_api/routes/status.ts",
+    "fileName": "status.ts",
+    "directory": "x-pack/test/cloud_security_posture_api",
+    "tags": [
+      "FTR",
+      "API INTEGRATION"
+    ],
+    "lines": [
+      "  describe('GET /internal/cloud_security_posture/status')",
+      "    describe('GET status API with user that has specific access')",
+      "      it('GET stats API with user with read access')",
+      "      it('GET status API with user without read access')"
+    ],
+    "testSuits": [
+      {
+        "id": "get-/internal/cloud_security_posture/status",
+        "rawLine": "  describe('GET /internal/cloud_security_posture/status', () => {",
+        "line": "  describe('GET /internal/cloud_security_posture/status')",
+        "label": "GET /internal/cloud_security_posture/status",
+        "indent": 2,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "get-status-api-with-user-that-has-specific-access",
+        "rawLine": "    describe('GET status API with user that has specific access', async () => {",
+        "line": "    describe('GET status API with user that has specific access')",
+        "label": "GET status API with user that has specific access",
+        "indent": 4,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "get-stats-api-with-user-with-read-access",
+        "rawLine": "      it('GET stats API with user with read access', async () => {",
+        "line": "      it('GET stats API with user with read access')",
+        "label": "GET stats API with user with read access",
+        "indent": 6,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "get-status-api-with-user-without-read-access",
+        "rawLine": "      it('GET status API with user without read access', async () => {",
+        "line": "      it('GET status API with user without read access')",
+        "label": "GET status API with user without read access",
+        "indent": 6,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      }
+    ],
+    "tree": [
+      {
+        "id": "get-/internal/cloud_security_posture/status",
+        "rawLine": "  describe('GET /internal/cloud_security_posture/status', () => {",
+        "line": "  describe('GET /internal/cloud_security_posture/status')",
+        "label": "GET /internal/cloud_security_posture/status",
+        "indent": 2,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false,
+        "children": [
+          {
+            "id": "get-status-api-with-user-that-has-specific-access",
+            "rawLine": "    describe('GET status API with user that has specific access', async () => {",
+            "line": "    describe('GET status API with user that has specific access')",
+            "label": "GET status API with user that has specific access",
+            "indent": 4,
+            "type": "describe",
+            "isSkipped": false,
+            "isTodo": false,
+            "children": [
+              {
+                "id": "get-stats-api-with-user-with-read-access",
+                "rawLine": "      it('GET stats API with user with read access', async () => {",
+                "line": "      it('GET stats API with user with read access')",
+                "label": "GET stats API with user with read access",
+                "indent": 6,
+                "type": "it",
+                "isSkipped": false,
+                "isTodo": false
+              },
+              {
+                "id": "get-status-api-with-user-without-read-access",
+                "rawLine": "      it('GET status API with user without read access', async () => {",
+                "line": "      it('GET status API with user without read access')",
+                "label": "GET status API with user without read access",
+                "indent": 6,
+                "type": "it",
+                "isSkipped": false,
+                "isTodo": false
+              }
+            ]
           }
         ]
       }
@@ -14601,7 +15548,9 @@
     "lines": [
       "  describe('Vulnerability Dashboard API')",
       "    it('responds with a 200 status code and matching data mock')",
-      "    it('returns a 400 error when necessary indices are nonexistent')"
+      "    it('returns a 400 error when necessary indices are nonexistent')",
+      "    it('GET vulnerabilities dashboard API with users with read access to cloud security posture')",
+      "    it('GET vulnerabilities dashboard API with users without read access to cloud security posture')"
     ],
     "testSuits": [
       {
@@ -14629,6 +15578,26 @@
         "rawLine": "    it('returns a 400 error when necessary indices are nonexistent', async () => {",
         "line": "    it('returns a 400 error when necessary indices are nonexistent')",
         "label": "returns a 400 error when necessary indices are nonexistent",
+        "indent": 4,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "get-vulnerabilities-dashboard-api-with-users-with-read-access-to-cloud-security-posture",
+        "rawLine": "    it('GET vulnerabilities dashboard API with users with read access to cloud security posture', async () => {",
+        "line": "    it('GET vulnerabilities dashboard API with users with read access to cloud security posture')",
+        "label": "GET vulnerabilities dashboard API with users with read access to cloud security posture",
+        "indent": 4,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "get-vulnerabilities-dashboard-api-with-users-without-read-access-to-cloud-security-posture",
+        "rawLine": "    it('GET vulnerabilities dashboard API with users without read access to cloud security posture', async () => {",
+        "line": "    it('GET vulnerabilities dashboard API with users without read access to cloud security posture')",
+        "label": "GET vulnerabilities dashboard API with users without read access to cloud security posture",
         "indent": 4,
         "type": "it",
         "isSkipped": false,
@@ -14661,6 +15630,26 @@
             "rawLine": "    it('returns a 400 error when necessary indices are nonexistent', async () => {",
             "line": "    it('returns a 400 error when necessary indices are nonexistent')",
             "label": "returns a 400 error when necessary indices are nonexistent",
+            "indent": 4,
+            "type": "it",
+            "isSkipped": false,
+            "isTodo": false
+          },
+          {
+            "id": "get-vulnerabilities-dashboard-api-with-users-with-read-access-to-cloud-security-posture",
+            "rawLine": "    it('GET vulnerabilities dashboard API with users with read access to cloud security posture', async () => {",
+            "line": "    it('GET vulnerabilities dashboard API with users with read access to cloud security posture')",
+            "label": "GET vulnerabilities dashboard API with users with read access to cloud security posture",
+            "indent": 4,
+            "type": "it",
+            "isSkipped": false,
+            "isTodo": false
+          },
+          {
+            "id": "get-vulnerabilities-dashboard-api-with-users-without-read-access-to-cloud-security-posture",
+            "rawLine": "    it('GET vulnerabilities dashboard API with users without read access to cloud security posture', async () => {",
+            "line": "    it('GET vulnerabilities dashboard API with users without read access to cloud security posture')",
+            "label": "GET vulnerabilities dashboard API with users without read access to cloud security posture",
             "indent": 4,
             "type": "it",
             "isSkipped": false,
@@ -14814,28 +15803,211 @@
     ]
   },
   {
-    "filePath": "x-pack/test/cloud_security_posture_functional/cloud_tests/basic_ui_sanity.ts",
-    "fileName": "basic_ui_sanity.ts",
+    "filePath": "x-pack/test/cloud_security_posture_functional/agentless/create_agent.ts",
+    "fileName": "create_agent.ts",
     "directory": "x-pack/test/cloud_security_posture_functional",
     "tags": [
       "FTR"
     ],
     "lines": [
-      "  describe('Cloud Posture Dashboard Page')",
-      "    describe('Cloud Dashboard')",
-      "      it('displays compliance score greater than 40')",
-      "      it('displays all compliance scores')",
-      "      it('displays a number of resources evaluated greater than 3000')",
-      "    describe('Kubernetes Dashboard')",
-      "      it('displays compliance score greater than 80')",
-      "      it('displays a number of resources evaluated greater than 150')"
+      "  describe('Agentless cloud')",
+      "    it(`should create agentless-agent`)",
+      "    it(`should create default agent-based agent`)"
     ],
     "testSuits": [
       {
-        "id": "cloud-posture-dashboard-page",
-        "rawLine": "  describe('Cloud Posture Dashboard Page', function () {",
-        "line": "  describe('Cloud Posture Dashboard Page')",
-        "label": "Cloud Posture Dashboard Page",
+        "id": "agentless-cloud",
+        "rawLine": "  describe('Agentless cloud', function () {",
+        "line": "  describe('Agentless cloud')",
+        "label": "Agentless cloud",
+        "indent": 2,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "should-create-agentless-agent",
+        "rawLine": "    it(`should create agentless-agent`, async () => {",
+        "line": "    it(`should create agentless-agent`)",
+        "label": "should create agentless-agent",
+        "indent": 4,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "should-create-default-agent-based-agent",
+        "rawLine": "    it(`should create default agent-based agent`, async () => {",
+        "line": "    it(`should create default agent-based agent`)",
+        "label": "should create default agent-based agent",
+        "indent": 4,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      }
+    ],
+    "tree": [
+      {
+        "id": "agentless-cloud",
+        "rawLine": "  describe('Agentless cloud', function () {",
+        "line": "  describe('Agentless cloud')",
+        "label": "Agentless cloud",
+        "indent": 2,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false,
+        "children": [
+          {
+            "id": "should-create-agentless-agent",
+            "rawLine": "    it(`should create agentless-agent`, async () => {",
+            "line": "    it(`should create agentless-agent`)",
+            "label": "should create agentless-agent",
+            "indent": 4,
+            "type": "it",
+            "isSkipped": false,
+            "isTodo": false
+          },
+          {
+            "id": "should-create-default-agent-based-agent",
+            "rawLine": "    it(`should create default agent-based agent`, async () => {",
+            "line": "    it(`should create default agent-based agent`)",
+            "label": "should create default agent-based agent",
+            "indent": 4,
+            "type": "it",
+            "isSkipped": false,
+            "isTodo": false
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "filePath": "x-pack/test/cloud_security_posture_functional/cloud_tests/benchmark_sanity.ts",
+    "fileName": "benchmark_sanity.ts",
+    "directory": "x-pack/test/cloud_security_posture_functional",
+    "tags": [
+      "FTR"
+    ],
+    "lines": [
+      "  describe('Benchmark Page - Sanity Tests')",
+      "    it('Benchmark table exists')",
+      "    it('Benchmarks count is more than 0')",
+      "    it('For each benchmark, evaluation and complience are not empty')"
+    ],
+    "testSuits": [
+      {
+        "id": "benchmark-page---sanity-tests",
+        "rawLine": "  describe('Benchmark Page - Sanity Tests', function () {",
+        "line": "  describe('Benchmark Page - Sanity Tests')",
+        "label": "Benchmark Page - Sanity Tests",
+        "indent": 2,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "benchmark-table-exists",
+        "rawLine": "    it('Benchmark table exists', async () => {",
+        "line": "    it('Benchmark table exists')",
+        "label": "Benchmark table exists",
+        "indent": 4,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "benchmarks-count-is-more-than-0",
+        "rawLine": "    it('Benchmarks count is more than 0', async () => {",
+        "line": "    it('Benchmarks count is more than 0')",
+        "label": "Benchmarks count is more than 0",
+        "indent": 4,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "for-each-benchmark,-evaluation-and-complience-are-not-empty",
+        "rawLine": "    it('For each benchmark, evaluation and complience are not empty', async () => {",
+        "line": "    it('For each benchmark, evaluation and complience are not empty')",
+        "label": "For each benchmark, evaluation and complience are not empty",
+        "indent": 4,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      }
+    ],
+    "tree": [
+      {
+        "id": "benchmark-page---sanity-tests",
+        "rawLine": "  describe('Benchmark Page - Sanity Tests', function () {",
+        "line": "  describe('Benchmark Page - Sanity Tests')",
+        "label": "Benchmark Page - Sanity Tests",
+        "indent": 2,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false,
+        "children": [
+          {
+            "id": "benchmark-table-exists",
+            "rawLine": "    it('Benchmark table exists', async () => {",
+            "line": "    it('Benchmark table exists')",
+            "label": "Benchmark table exists",
+            "indent": 4,
+            "type": "it",
+            "isSkipped": false,
+            "isTodo": false
+          },
+          {
+            "id": "benchmarks-count-is-more-than-0",
+            "rawLine": "    it('Benchmarks count is more than 0', async () => {",
+            "line": "    it('Benchmarks count is more than 0')",
+            "label": "Benchmarks count is more than 0",
+            "indent": 4,
+            "type": "it",
+            "isSkipped": false,
+            "isTodo": false
+          },
+          {
+            "id": "for-each-benchmark,-evaluation-and-complience-are-not-empty",
+            "rawLine": "    it('For each benchmark, evaluation and complience are not empty', async () => {",
+            "line": "    it('For each benchmark, evaluation and complience are not empty')",
+            "label": "For each benchmark, evaluation and complience are not empty",
+            "indent": 4,
+            "type": "it",
+            "isSkipped": false,
+            "isTodo": false
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "filePath": "x-pack/test/cloud_security_posture_functional/cloud_tests/dashboard_sanity.ts",
+    "fileName": "dashboard_sanity.ts",
+    "directory": "x-pack/test/cloud_security_posture_functional",
+    "tags": [
+      "FTR"
+    ],
+    "lines": [
+      "  describe('Cloud Posture Dashboard Page - Sanity Tests')",
+      "    describe('Cloud Dashboard')",
+      "      it('displays compliance score greater than 40')",
+      "      it('displays all compliance scores')",
+      "      it('displays a number of resources evaluated greater than 1500')",
+      "      it('Compliance By CIS sections have non empty values')",
+      "      it('Navigation to Findings page')",
+      "    describe('Kubernetes Dashboard')",
+      "      it('displays compliance score greater than 80')",
+      "      it('displays a number of resources evaluated greater than 150')",
+      "      it('Compliance By CIS sections have non empty values')",
+      "      it('Navigation to Findings page')"
+    ],
+    "testSuits": [
+      {
+        "id": "cloud-posture-dashboard-page---sanity-tests",
+        "rawLine": "  describe('Cloud Posture Dashboard Page - Sanity Tests', function () {",
+        "line": "  describe('Cloud Posture Dashboard Page - Sanity Tests')",
+        "label": "Cloud Posture Dashboard Page - Sanity Tests",
         "indent": 2,
         "type": "describe",
         "isSkipped": false,
@@ -14872,10 +16044,30 @@
         "isTodo": false
       },
       {
-        "id": "displays-a-number-of-resources-evaluated-greater-than-3000",
-        "rawLine": "      it('displays a number of resources evaluated greater than 3000', async () => {",
-        "line": "      it('displays a number of resources evaluated greater than 3000')",
-        "label": "displays a number of resources evaluated greater than 3000",
+        "id": "displays-a-number-of-resources-evaluated-greater-than-1500",
+        "rawLine": "      it('displays a number of resources evaluated greater than 1500', async () => {",
+        "line": "      it('displays a number of resources evaluated greater than 1500')",
+        "label": "displays a number of resources evaluated greater than 1500",
+        "indent": 6,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "compliance-by-cis-sections-have-non-empty-values",
+        "rawLine": "      it('Compliance By CIS sections have non empty values', async () => {",
+        "line": "      it('Compliance By CIS sections have non empty values')",
+        "label": "Compliance By CIS sections have non empty values",
+        "indent": 6,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "navigation-to-findings-page",
+        "rawLine": "      it('Navigation to Findings page', async () => {",
+        "line": "      it('Navigation to Findings page')",
+        "label": "Navigation to Findings page",
         "indent": 6,
         "type": "it",
         "isSkipped": false,
@@ -14910,14 +16102,34 @@
         "type": "it",
         "isSkipped": false,
         "isTodo": false
+      },
+      {
+        "id": "compliance-by-cis-sections-have-non-empty-values",
+        "rawLine": "      it('Compliance By CIS sections have non empty values', async () => {",
+        "line": "      it('Compliance By CIS sections have non empty values')",
+        "label": "Compliance By CIS sections have non empty values",
+        "indent": 6,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "navigation-to-findings-page",
+        "rawLine": "      it('Navigation to Findings page', async () => {",
+        "line": "      it('Navigation to Findings page')",
+        "label": "Navigation to Findings page",
+        "indent": 6,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
       }
     ],
     "tree": [
       {
-        "id": "cloud-posture-dashboard-page",
-        "rawLine": "  describe('Cloud Posture Dashboard Page', function () {",
-        "line": "  describe('Cloud Posture Dashboard Page')",
-        "label": "Cloud Posture Dashboard Page",
+        "id": "cloud-posture-dashboard-page---sanity-tests",
+        "rawLine": "  describe('Cloud Posture Dashboard Page - Sanity Tests', function () {",
+        "line": "  describe('Cloud Posture Dashboard Page - Sanity Tests')",
+        "label": "Cloud Posture Dashboard Page - Sanity Tests",
         "indent": 2,
         "type": "describe",
         "isSkipped": false,
@@ -14954,10 +16166,30 @@
                 "isTodo": false
               },
               {
-                "id": "displays-a-number-of-resources-evaluated-greater-than-3000",
-                "rawLine": "      it('displays a number of resources evaluated greater than 3000', async () => {",
-                "line": "      it('displays a number of resources evaluated greater than 3000')",
-                "label": "displays a number of resources evaluated greater than 3000",
+                "id": "displays-a-number-of-resources-evaluated-greater-than-1500",
+                "rawLine": "      it('displays a number of resources evaluated greater than 1500', async () => {",
+                "line": "      it('displays a number of resources evaluated greater than 1500')",
+                "label": "displays a number of resources evaluated greater than 1500",
+                "indent": 6,
+                "type": "it",
+                "isSkipped": false,
+                "isTodo": false
+              },
+              {
+                "id": "compliance-by-cis-sections-have-non-empty-values",
+                "rawLine": "      it('Compliance By CIS sections have non empty values', async () => {",
+                "line": "      it('Compliance By CIS sections have non empty values')",
+                "label": "Compliance By CIS sections have non empty values",
+                "indent": 6,
+                "type": "it",
+                "isSkipped": false,
+                "isTodo": false
+              },
+              {
+                "id": "navigation-to-findings-page",
+                "rawLine": "      it('Navigation to Findings page', async () => {",
+                "line": "      it('Navigation to Findings page')",
+                "label": "Navigation to Findings page",
                 "indent": 6,
                 "type": "it",
                 "isSkipped": false,
@@ -14994,6 +16226,26 @@
                 "type": "it",
                 "isSkipped": false,
                 "isTodo": false
+              },
+              {
+                "id": "compliance-by-cis-sections-have-non-empty-values",
+                "rawLine": "      it('Compliance By CIS sections have non empty values', async () => {",
+                "line": "      it('Compliance By CIS sections have non empty values')",
+                "label": "Compliance By CIS sections have non empty values",
+                "indent": 6,
+                "type": "it",
+                "isSkipped": false,
+                "isTodo": false
+              },
+              {
+                "id": "navigation-to-findings-page",
+                "rawLine": "      it('Navigation to Findings page', async () => {",
+                "line": "      it('Navigation to Findings page')",
+                "label": "Navigation to Findings page",
+                "indent": 6,
+                "type": "it",
+                "isSkipped": false,
+                "isTodo": false
               }
             ]
           }
@@ -15002,7 +16254,298 @@
     ]
   },
   {
+    "filePath": "x-pack/test/cloud_security_posture_functional/cloud_tests/findings_sanity.ts",
+    "fileName": "findings_sanity.ts",
+    "directory": "x-pack/test/cloud_security_posture_functional",
+    "tags": [
+      "FTR"
+    ],
+    "lines": [
+      "  describe('Findings Page - Sanity Tests')",
+      "    describe('Findings - Querying data')",
+      "          it(`Querying ${provider} provider data`)",
+      "    describe('Findings - Sorting data')",
+      "          it(`Paginating and sorting data`)"
+    ],
+    "testSuits": [
+      {
+        "id": "findings-page---sanity-tests",
+        "rawLine": "  describe('Findings Page - Sanity Tests', function () {",
+        "line": "  describe('Findings Page - Sanity Tests')",
+        "label": "Findings Page - Sanity Tests",
+        "indent": 2,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "findings---querying-data",
+        "rawLine": "    describe('Findings - Querying data', () => {",
+        "line": "    describe('Findings - Querying data')",
+        "label": "Findings - Querying data",
+        "indent": 4,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "querying-${provider}-provider-data",
+        "rawLine": "          it(`Querying ${provider} provider data`, async () => {",
+        "line": "          it(`Querying ${provider} provider data`)",
+        "label": "Querying ${provider} provider data",
+        "indent": 10,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "findings---sorting-data",
+        "rawLine": "    describe('Findings - Sorting data', () => {",
+        "line": "    describe('Findings - Sorting data')",
+        "label": "Findings - Sorting data",
+        "indent": 4,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "paginating-and-sorting-data",
+        "rawLine": "          it(`Paginating and sorting data`, async () => {",
+        "line": "          it(`Paginating and sorting data`)",
+        "label": "Paginating and sorting data",
+        "indent": 10,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      }
+    ],
+    "tree": [
+      {
+        "id": "findings-page---sanity-tests",
+        "rawLine": "  describe('Findings Page - Sanity Tests', function () {",
+        "line": "  describe('Findings Page - Sanity Tests')",
+        "label": "Findings Page - Sanity Tests",
+        "indent": 2,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false,
+        "children": [
+          {
+            "id": "findings---querying-data",
+            "rawLine": "    describe('Findings - Querying data', () => {",
+            "line": "    describe('Findings - Querying data')",
+            "label": "Findings - Querying data",
+            "indent": 4,
+            "type": "describe",
+            "isSkipped": false,
+            "isTodo": false,
+            "children": [
+              {
+                "id": "querying-${provider}-provider-data",
+                "rawLine": "          it(`Querying ${provider} provider data`, async () => {",
+                "line": "          it(`Querying ${provider} provider data`)",
+                "label": "Querying ${provider} provider data",
+                "indent": 10,
+                "type": "it",
+                "isSkipped": false,
+                "isTodo": false
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "paginating-and-sorting-data",
+        "rawLine": "          it(`Paginating and sorting data`, async () => {",
+        "line": "          it(`Paginating and sorting data`)",
+        "label": "Paginating and sorting data",
+        "indent": 10,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      }
+    ]
+  },
+  {
     "filePath": "x-pack/test/cloud_security_posture_functional/cloud_tests/index.ts",
+    "fileName": "index.ts",
+    "directory": "x-pack/test/cloud_security_posture_functional",
+    "tags": [
+      "FTR"
+    ],
+    "lines": [
+      "  describe('Cloud Security Posture')"
+    ],
+    "testSuits": [
+      {
+        "id": "cloud-security-posture",
+        "rawLine": "  describe('Cloud Security Posture', function () {",
+        "line": "  describe('Cloud Security Posture')",
+        "label": "Cloud Security Posture",
+        "indent": 2,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false
+      }
+    ],
+    "tree": [
+      {
+        "id": "cloud-security-posture",
+        "rawLine": "  describe('Cloud Security Posture', function () {",
+        "line": "  describe('Cloud Security Posture')",
+        "label": "Cloud Security Posture",
+        "indent": 2,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false
+      }
+    ]
+  },
+  {
+    "filePath": "x-pack/test/cloud_security_posture_functional/data_views/data_views.ts",
+    "fileName": "data_views.ts",
+    "directory": "x-pack/test/cloud_security_posture_functional",
+    "tags": [
+      "FTR",
+      "HAS SKIP"
+    ],
+    "lines": [
+      "  describe.skip('Data Views')",
+      "    it('Verify data view is created once user reach the findings page - default space')",
+      "    it('Verify data view is created once user reach the dashboard page - default space')",
+      "    it('Verify data view is created once user reach the findings page -  non default space')",
+      "    it('Verify data view is created once user reach the dashboard page -  non default space')",
+      "    it('Verify data view is created once user with read permissions reach the dashboard page')"
+    ],
+    "testSuits": [
+      {
+        "id": "data-views",
+        "rawLine": "  describe.skip('Data Views', async function () {",
+        "line": "  describe.skip('Data Views')",
+        "label": "Data Views",
+        "indent": 2,
+        "type": "describe",
+        "isSkipped": true,
+        "isTodo": false
+      },
+      {
+        "id": "verify-data-view-is-created-once-user-reach-the-findings-page---default-space",
+        "rawLine": "    it('Verify data view is created once user reach the findings page - default space', async () => {",
+        "line": "    it('Verify data view is created once user reach the findings page - default space')",
+        "label": "Verify data view is created once user reach the findings page - default space",
+        "indent": 4,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "verify-data-view-is-created-once-user-reach-the-dashboard-page---default-space",
+        "rawLine": "    it('Verify data view is created once user reach the dashboard page - default space', async () => {",
+        "line": "    it('Verify data view is created once user reach the dashboard page - default space')",
+        "label": "Verify data view is created once user reach the dashboard page - default space",
+        "indent": 4,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "verify-data-view-is-created-once-user-reach-the-findings-page---non-default-space",
+        "rawLine": "    it('Verify data view is created once user reach the findings page -  non default space', async () => {",
+        "line": "    it('Verify data view is created once user reach the findings page -  non default space')",
+        "label": "Verify data view is created once user reach the findings page -  non default space",
+        "indent": 4,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "verify-data-view-is-created-once-user-reach-the-dashboard-page---non-default-space",
+        "rawLine": "    it('Verify data view is created once user reach the dashboard page -  non default space', async () => {",
+        "line": "    it('Verify data view is created once user reach the dashboard page -  non default space')",
+        "label": "Verify data view is created once user reach the dashboard page -  non default space",
+        "indent": 4,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "verify-data-view-is-created-once-user-with-read-permissions-reach-the-dashboard-page",
+        "rawLine": "    it('Verify data view is created once user with read permissions reach the dashboard page', async () => {",
+        "line": "    it('Verify data view is created once user with read permissions reach the dashboard page')",
+        "label": "Verify data view is created once user with read permissions reach the dashboard page",
+        "indent": 4,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      }
+    ],
+    "tree": [
+      {
+        "id": "data-views",
+        "rawLine": "  describe.skip('Data Views', async function () {",
+        "line": "  describe.skip('Data Views')",
+        "label": "Data Views",
+        "indent": 2,
+        "type": "describe",
+        "isSkipped": true,
+        "isTodo": false,
+        "children": [
+          {
+            "id": "verify-data-view-is-created-once-user-reach-the-findings-page---default-space",
+            "rawLine": "    it('Verify data view is created once user reach the findings page - default space', async () => {",
+            "line": "    it('Verify data view is created once user reach the findings page - default space')",
+            "label": "Verify data view is created once user reach the findings page - default space",
+            "indent": 4,
+            "type": "it",
+            "isSkipped": true,
+            "isTodo": false
+          },
+          {
+            "id": "verify-data-view-is-created-once-user-reach-the-dashboard-page---default-space",
+            "rawLine": "    it('Verify data view is created once user reach the dashboard page - default space', async () => {",
+            "line": "    it('Verify data view is created once user reach the dashboard page - default space')",
+            "label": "Verify data view is created once user reach the dashboard page - default space",
+            "indent": 4,
+            "type": "it",
+            "isSkipped": true,
+            "isTodo": false
+          },
+          {
+            "id": "verify-data-view-is-created-once-user-reach-the-findings-page---non-default-space",
+            "rawLine": "    it('Verify data view is created once user reach the findings page -  non default space', async () => {",
+            "line": "    it('Verify data view is created once user reach the findings page -  non default space')",
+            "label": "Verify data view is created once user reach the findings page -  non default space",
+            "indent": 4,
+            "type": "it",
+            "isSkipped": true,
+            "isTodo": false
+          },
+          {
+            "id": "verify-data-view-is-created-once-user-reach-the-dashboard-page---non-default-space",
+            "rawLine": "    it('Verify data view is created once user reach the dashboard page -  non default space', async () => {",
+            "line": "    it('Verify data view is created once user reach the dashboard page -  non default space')",
+            "label": "Verify data view is created once user reach the dashboard page -  non default space",
+            "indent": 4,
+            "type": "it",
+            "isSkipped": true,
+            "isTodo": false
+          },
+          {
+            "id": "verify-data-view-is-created-once-user-with-read-permissions-reach-the-dashboard-page",
+            "rawLine": "    it('Verify data view is created once user with read permissions reach the dashboard page', async () => {",
+            "line": "    it('Verify data view is created once user with read permissions reach the dashboard page')",
+            "label": "Verify data view is created once user with read permissions reach the dashboard page",
+            "indent": 4,
+            "type": "it",
+            "isSkipped": true,
+            "isTodo": false
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "filePath": "x-pack/test/cloud_security_posture_functional/data_views/index.ts",
     "fileName": "index.ts",
     "directory": "x-pack/test/cloud_security_posture_functional",
     "tags": [
@@ -15191,10 +16734,10 @@
     ],
     "lines": [
       "  describe('Test adding Cloud Security Posture Integrations CNVM')",
-      "    describe.skip('CNVM AWS')",
+      "    describe('CNVM AWS')",
       "      it('Hyperlink on PostInstallation Modal should have the correct URL')",
       "      it('On Add Agent modal there should be modal that has Cloud Formation details as well as button that redirects user to Cloud formation page on AWS upon clicking them ')",
-      "      it('Clicking on Launch CloudFormation on post intall modal should lead user to Cloud Formation page')"
+      "      it.skip('Clicking on Launch CloudFormation on post intall modal should lead user to Cloud Formation page')"
     ],
     "testSuits": [
       {
@@ -15209,12 +16752,12 @@
       },
       {
         "id": "cnvm-aws",
-        "rawLine": "    describe.skip('CNVM AWS', () => {",
-        "line": "    describe.skip('CNVM AWS')",
+        "rawLine": "    describe('CNVM AWS', () => {",
+        "line": "    describe('CNVM AWS')",
         "label": "CNVM AWS",
         "indent": 4,
         "type": "describe",
-        "isSkipped": true,
+        "isSkipped": false,
         "isTodo": false
       },
       {
@@ -15239,12 +16782,12 @@
       },
       {
         "id": "clicking-on-launch-cloudformation-on-post-intall-modal-should-lead-user-to-cloud-formation-page",
-        "rawLine": "      it('Clicking on Launch CloudFormation on post intall modal should lead user to Cloud Formation page', async () => {",
-        "line": "      it('Clicking on Launch CloudFormation on post intall modal should lead user to Cloud Formation page')",
+        "rawLine": "      it.skip('Clicking on Launch CloudFormation on post intall modal should lead user to Cloud Formation page', async () => {",
+        "line": "      it.skip('Clicking on Launch CloudFormation on post intall modal should lead user to Cloud Formation page')",
         "label": "Clicking on Launch CloudFormation on post intall modal should lead user to Cloud Formation page",
         "indent": 6,
         "type": "it",
-        "isSkipped": false,
+        "isSkipped": true,
         "isTodo": false
       }
     ],
@@ -15261,12 +16804,12 @@
         "children": [
           {
             "id": "cnvm-aws",
-            "rawLine": "    describe.skip('CNVM AWS', () => {",
-            "line": "    describe.skip('CNVM AWS')",
+            "rawLine": "    describe('CNVM AWS', () => {",
+            "line": "    describe('CNVM AWS')",
             "label": "CNVM AWS",
             "indent": 4,
             "type": "describe",
-            "isSkipped": true,
+            "isSkipped": false,
             "isTodo": false,
             "children": [
               {
@@ -15276,7 +16819,7 @@
                 "label": "Hyperlink on PostInstallation Modal should have the correct URL",
                 "indent": 6,
                 "type": "it",
-                "isSkipped": true,
+                "isSkipped": false,
                 "isTodo": false
               },
               {
@@ -15286,13 +16829,13 @@
                 "label": "On Add Agent modal there should be modal that has Cloud Formation details as well as button that redirects user to Cloud formation page on AWS upon clicking them ",
                 "indent": 6,
                 "type": "it",
-                "isSkipped": true,
+                "isSkipped": false,
                 "isTodo": false
               },
               {
                 "id": "clicking-on-launch-cloudformation-on-post-intall-modal-should-lead-user-to-cloud-formation-page",
-                "rawLine": "      it('Clicking on Launch CloudFormation on post intall modal should lead user to Cloud Formation page', async () => {",
-                "line": "      it('Clicking on Launch CloudFormation on post intall modal should lead user to Cloud Formation page')",
+                "rawLine": "      it.skip('Clicking on Launch CloudFormation on post intall modal should lead user to Cloud Formation page', async () => {",
+                "line": "      it.skip('Clicking on Launch CloudFormation on post intall modal should lead user to Cloud Formation page')",
                 "label": "Clicking on Launch CloudFormation on post intall modal should lead user to Cloud Formation page",
                 "indent": 6,
                 "type": "it",
@@ -15315,12 +16858,12 @@
     ],
     "lines": [
       "  describe('Test adding Cloud Security Posture Integrations CSPM AWS')",
-      "    describe.skip('CIS_AWS Organization Cloud Formation')",
+      "    describe('CIS_AWS Organization Cloud Formation')",
       "      it('Initial form state, AWS Org account, and CloudFormation should be selected by default')",
       "      it('Hyperlink on PostInstallation Modal should have the correct URL')",
       "      it('On Add Agent modal there should be modal that has Cloud Formation details as well as button that redirects user to Cloud formation page on AWS upon clicking them ')",
       "      it('Clicking on Launch CloudFormation on post intall modal should lead user to Cloud Formation page')",
-      "    describe('CIS_AWS Organization Manual Assume Role')",
+      "    describe.skip('CIS_AWS Organization Manual Assume Role')",
       "      it('CIS_AWS Organization Manual Assume Role Workflow')",
       "    describe('CIS_AWS Organization Manual Direct Access')",
       "      it('CIS_AWS Organization Manual Direct Access Workflow')",
@@ -15352,12 +16895,12 @@
       },
       {
         "id": "cis_aws-organization-cloud-formation",
-        "rawLine": "    describe.skip('CIS_AWS Organization Cloud Formation', () => {",
-        "line": "    describe.skip('CIS_AWS Organization Cloud Formation')",
+        "rawLine": "    describe('CIS_AWS Organization Cloud Formation', () => {",
+        "line": "    describe('CIS_AWS Organization Cloud Formation')",
         "label": "CIS_AWS Organization Cloud Formation",
         "indent": 4,
         "type": "describe",
-        "isSkipped": true,
+        "isSkipped": false,
         "isTodo": false
       },
       {
@@ -15402,12 +16945,12 @@
       },
       {
         "id": "cis_aws-organization-manual-assume-role",
-        "rawLine": "    describe('CIS_AWS Organization Manual Assume Role', () => {",
-        "line": "    describe('CIS_AWS Organization Manual Assume Role')",
+        "rawLine": "    describe.skip('CIS_AWS Organization Manual Assume Role', () => {",
+        "line": "    describe.skip('CIS_AWS Organization Manual Assume Role')",
         "label": "CIS_AWS Organization Manual Assume Role",
         "indent": 4,
         "type": "describe",
-        "isSkipped": false,
+        "isSkipped": true,
         "isTodo": false
       },
       {
@@ -15594,12 +17137,12 @@
         "children": [
           {
             "id": "cis_aws-organization-cloud-formation",
-            "rawLine": "    describe.skip('CIS_AWS Organization Cloud Formation', () => {",
-            "line": "    describe.skip('CIS_AWS Organization Cloud Formation')",
+            "rawLine": "    describe('CIS_AWS Organization Cloud Formation', () => {",
+            "line": "    describe('CIS_AWS Organization Cloud Formation')",
             "label": "CIS_AWS Organization Cloud Formation",
             "indent": 4,
             "type": "describe",
-            "isSkipped": true,
+            "isSkipped": false,
             "isTodo": false,
             "children": [
               {
@@ -15609,7 +17152,7 @@
                 "label": "Initial form state, AWS Org account, and CloudFormation should be selected by default",
                 "indent": 6,
                 "type": "it",
-                "isSkipped": true,
+                "isSkipped": false,
                 "isTodo": false
               },
               {
@@ -15619,7 +17162,7 @@
                 "label": "Hyperlink on PostInstallation Modal should have the correct URL",
                 "indent": 6,
                 "type": "it",
-                "isSkipped": true,
+                "isSkipped": false,
                 "isTodo": false
               },
               {
@@ -15629,7 +17172,7 @@
                 "label": "On Add Agent modal there should be modal that has Cloud Formation details as well as button that redirects user to Cloud formation page on AWS upon clicking them ",
                 "indent": 6,
                 "type": "it",
-                "isSkipped": true,
+                "isSkipped": false,
                 "isTodo": false
               },
               {
@@ -15639,19 +17182,19 @@
                 "label": "Clicking on Launch CloudFormation on post intall modal should lead user to Cloud Formation page",
                 "indent": 6,
                 "type": "it",
-                "isSkipped": true,
+                "isSkipped": false,
                 "isTodo": false
               }
             ]
           },
           {
             "id": "cis_aws-organization-manual-assume-role",
-            "rawLine": "    describe('CIS_AWS Organization Manual Assume Role', () => {",
-            "line": "    describe('CIS_AWS Organization Manual Assume Role')",
+            "rawLine": "    describe.skip('CIS_AWS Organization Manual Assume Role', () => {",
+            "line": "    describe.skip('CIS_AWS Organization Manual Assume Role')",
             "label": "CIS_AWS Organization Manual Assume Role",
             "indent": 4,
             "type": "describe",
-            "isSkipped": false,
+            "isSkipped": true,
             "isTodo": false,
             "children": [
               {
@@ -15661,7 +17204,7 @@
                 "label": "CIS_AWS Organization Manual Assume Role Workflow",
                 "indent": 6,
                 "type": "it",
-                "isSkipped": false,
+                "isSkipped": true,
                 "isTodo": false
               }
             ]
@@ -16244,8 +17787,8 @@
       "HAS SKIP"
     ],
     "lines": [
-      "  describe.skip('Test adding Cloud Security Posture Integrations CSPM GCP')",
-      "    describe('CIS_GCP Organization')",
+      "  describe('Test adding Cloud Security Posture Integrations CSPM GCP')",
+      "    describe.skip('CIS_GCP Organization')",
       "      it('Switch between Manual and Google cloud shell')",
       "      it('Post Installation Google Cloud Shell modal pops up after user clicks on Save button when adding integration, when there are no Project ID or Organization ID provided, it should use default value')",
       "      it('Post Installation Google Cloud Shell modal pops up after user clicks on Save button when adding integration, when there are Project ID or Organization ID provided, it should use that value')",
@@ -16253,11 +17796,11 @@
       "      it('Organization ID field on cloud shell command should only be shown if user chose Google Cloud Shell, if user chose Single Account it shouldn not show up')",
       "      it('Hyperlink on PostInstallation Modal should have the correct URL')",
       "      it('Clicking on Launch CloudShell on post intall modal should lead user to CloudShell page')",
-      "    describe('CIS_GCP Organization Credentials File')",
+      "    describe.skip('CIS_GCP Organization Credentials File')",
       "      it('CIS_GCP Organization Credentials File workflow')",
       "    describe('CIS_GCP Organization Credentials JSON')",
       "      it('CIS_GCP Organization Credentials JSON workflow')",
-      "    describe('CIS_GCP Single')",
+      "    describe.skip('CIS_GCP Single')",
       "      it('Post Installation Google Cloud Shell modal pops up after user clicks on Save button when adding integration, when there are no Project ID, it should use default value')",
       "      it('Post Installation Google Cloud Shell modal pops up after user clicks on Save button when adding integration, when there are Project ID, it should use that value')",
       "      it('Add Agent FLyout - Organization ID field on cloud shell command should only be shown if user chose Google Cloud Shell, if user chose Single Account it shouldn not show up')",
@@ -16270,22 +17813,22 @@
     "testSuits": [
       {
         "id": "test-adding-cloud-security-posture-integrations-cspm-gcp",
-        "rawLine": "  describe.skip('Test adding Cloud Security Posture Integrations CSPM GCP', function () {",
-        "line": "  describe.skip('Test adding Cloud Security Posture Integrations CSPM GCP')",
+        "rawLine": "  describe('Test adding Cloud Security Posture Integrations CSPM GCP', function () {",
+        "line": "  describe('Test adding Cloud Security Posture Integrations CSPM GCP')",
         "label": "Test adding Cloud Security Posture Integrations CSPM GCP",
         "indent": 2,
         "type": "describe",
-        "isSkipped": true,
+        "isSkipped": false,
         "isTodo": false
       },
       {
         "id": "cis_gcp-organization",
-        "rawLine": "    describe('CIS_GCP Organization', () => {",
-        "line": "    describe('CIS_GCP Organization')",
+        "rawLine": "    describe.skip('CIS_GCP Organization', () => {",
+        "line": "    describe.skip('CIS_GCP Organization')",
         "label": "CIS_GCP Organization",
         "indent": 4,
         "type": "describe",
-        "isSkipped": false,
+        "isSkipped": true,
         "isTodo": false
       },
       {
@@ -16360,12 +17903,12 @@
       },
       {
         "id": "cis_gcp-organization-credentials-file",
-        "rawLine": "    describe('CIS_GCP Organization Credentials File', () => {",
-        "line": "    describe('CIS_GCP Organization Credentials File')",
+        "rawLine": "    describe.skip('CIS_GCP Organization Credentials File', () => {",
+        "line": "    describe.skip('CIS_GCP Organization Credentials File')",
         "label": "CIS_GCP Organization Credentials File",
         "indent": 4,
         "type": "describe",
-        "isSkipped": false,
+        "isSkipped": true,
         "isTodo": false
       },
       {
@@ -16400,12 +17943,12 @@
       },
       {
         "id": "cis_gcp-single",
-        "rawLine": "    describe('CIS_GCP Single', () => {",
-        "line": "    describe('CIS_GCP Single')",
+        "rawLine": "    describe.skip('CIS_GCP Single', () => {",
+        "line": "    describe.skip('CIS_GCP Single')",
         "label": "CIS_GCP Single",
         "indent": 4,
         "type": "describe",
-        "isSkipped": false,
+        "isSkipped": true,
         "isTodo": false
       },
       {
@@ -16492,18 +18035,18 @@
     "tree": [
       {
         "id": "test-adding-cloud-security-posture-integrations-cspm-gcp",
-        "rawLine": "  describe.skip('Test adding Cloud Security Posture Integrations CSPM GCP', function () {",
-        "line": "  describe.skip('Test adding Cloud Security Posture Integrations CSPM GCP')",
+        "rawLine": "  describe('Test adding Cloud Security Posture Integrations CSPM GCP', function () {",
+        "line": "  describe('Test adding Cloud Security Posture Integrations CSPM GCP')",
         "label": "Test adding Cloud Security Posture Integrations CSPM GCP",
         "indent": 2,
         "type": "describe",
-        "isSkipped": true,
+        "isSkipped": false,
         "isTodo": false,
         "children": [
           {
             "id": "cis_gcp-organization",
-            "rawLine": "    describe('CIS_GCP Organization', () => {",
-            "line": "    describe('CIS_GCP Organization')",
+            "rawLine": "    describe.skip('CIS_GCP Organization', () => {",
+            "line": "    describe.skip('CIS_GCP Organization')",
             "label": "CIS_GCP Organization",
             "indent": 4,
             "type": "describe",
@@ -16584,8 +18127,8 @@
           },
           {
             "id": "cis_gcp-organization-credentials-file",
-            "rawLine": "    describe('CIS_GCP Organization Credentials File', () => {",
-            "line": "    describe('CIS_GCP Organization Credentials File')",
+            "rawLine": "    describe.skip('CIS_GCP Organization Credentials File', () => {",
+            "line": "    describe.skip('CIS_GCP Organization Credentials File')",
             "label": "CIS_GCP Organization Credentials File",
             "indent": 4,
             "type": "describe",
@@ -16611,7 +18154,7 @@
             "label": "CIS_GCP Organization Credentials JSON",
             "indent": 4,
             "type": "describe",
-            "isSkipped": true,
+            "isSkipped": false,
             "isTodo": false,
             "children": [
               {
@@ -16621,15 +18164,15 @@
                 "label": "CIS_GCP Organization Credentials JSON workflow",
                 "indent": 6,
                 "type": "it",
-                "isSkipped": true,
+                "isSkipped": false,
                 "isTodo": false
               }
             ]
           },
           {
             "id": "cis_gcp-single",
-            "rawLine": "    describe('CIS_GCP Single', () => {",
-            "line": "    describe('CIS_GCP Single')",
+            "rawLine": "    describe.skip('CIS_GCP Single', () => {",
+            "line": "    describe.skip('CIS_GCP Single')",
             "label": "CIS_GCP Single",
             "indent": 4,
             "type": "describe",
@@ -16727,18 +18270,17 @@
     "fileName": "cis_integration_eks.ts",
     "directory": "x-pack/test/cloud_security_posture_functional",
     "tags": [
-      "FTR",
-      "HAS SKIP"
+      "FTR"
     ],
     "lines": [
       "  describe('Test adding Cloud Security Posture Integrations KSPM EKS')",
-      "    describe.skip('KSPM EKS Assume Role')",
+      "    describe('KSPM EKS Assume Role')",
       "      it('KSPM EKS Assume Role workflow')",
-      "    describe.skip('KSPM EKS Direct Access')",
+      "    describe('KSPM EKS Direct Access')",
       "      it('KSPM EKS Direct Access Workflow')",
-      "    describe.skip('KSPM EKS Temporary Keys')",
+      "    describe('KSPM EKS Temporary Keys')",
       "      it('KSPM EKS Temporary Keys Workflow')",
-      "    describe.skip('KSPM EKS Shared Credentials')",
+      "    describe('KSPM EKS Shared Credentials')",
       "      it('KSPM EKS Shared Credentials Workflow')"
     ],
     "testSuits": [
@@ -16754,12 +18296,12 @@
       },
       {
         "id": "kspm-eks-assume-role",
-        "rawLine": "    describe.skip('KSPM EKS Assume Role', async () => {",
-        "line": "    describe.skip('KSPM EKS Assume Role')",
+        "rawLine": "    describe('KSPM EKS Assume Role', async () => {",
+        "line": "    describe('KSPM EKS Assume Role')",
         "label": "KSPM EKS Assume Role",
         "indent": 4,
         "type": "describe",
-        "isSkipped": true,
+        "isSkipped": false,
         "isTodo": false
       },
       {
@@ -16774,12 +18316,12 @@
       },
       {
         "id": "kspm-eks-direct-access",
-        "rawLine": "    describe.skip('KSPM EKS Direct Access', async () => {",
-        "line": "    describe.skip('KSPM EKS Direct Access')",
+        "rawLine": "    describe('KSPM EKS Direct Access', async () => {",
+        "line": "    describe('KSPM EKS Direct Access')",
         "label": "KSPM EKS Direct Access",
         "indent": 4,
         "type": "describe",
-        "isSkipped": true,
+        "isSkipped": false,
         "isTodo": false
       },
       {
@@ -16794,12 +18336,12 @@
       },
       {
         "id": "kspm-eks-temporary-keys",
-        "rawLine": "    describe.skip('KSPM EKS Temporary Keys', () => {",
-        "line": "    describe.skip('KSPM EKS Temporary Keys')",
+        "rawLine": "    describe('KSPM EKS Temporary Keys', () => {",
+        "line": "    describe('KSPM EKS Temporary Keys')",
         "label": "KSPM EKS Temporary Keys",
         "indent": 4,
         "type": "describe",
-        "isSkipped": true,
+        "isSkipped": false,
         "isTodo": false
       },
       {
@@ -16814,12 +18356,12 @@
       },
       {
         "id": "kspm-eks-shared-credentials",
-        "rawLine": "    describe.skip('KSPM EKS Shared Credentials', () => {",
-        "line": "    describe.skip('KSPM EKS Shared Credentials')",
+        "rawLine": "    describe('KSPM EKS Shared Credentials', () => {",
+        "line": "    describe('KSPM EKS Shared Credentials')",
         "label": "KSPM EKS Shared Credentials",
         "indent": 4,
         "type": "describe",
-        "isSkipped": true,
+        "isSkipped": false,
         "isTodo": false
       },
       {
@@ -16846,12 +18388,12 @@
         "children": [
           {
             "id": "kspm-eks-assume-role",
-            "rawLine": "    describe.skip('KSPM EKS Assume Role', async () => {",
-            "line": "    describe.skip('KSPM EKS Assume Role')",
+            "rawLine": "    describe('KSPM EKS Assume Role', async () => {",
+            "line": "    describe('KSPM EKS Assume Role')",
             "label": "KSPM EKS Assume Role",
             "indent": 4,
             "type": "describe",
-            "isSkipped": true,
+            "isSkipped": false,
             "isTodo": false,
             "children": [
               {
@@ -16861,19 +18403,19 @@
                 "label": "KSPM EKS Assume Role workflow",
                 "indent": 6,
                 "type": "it",
-                "isSkipped": true,
+                "isSkipped": false,
                 "isTodo": false
               }
             ]
           },
           {
             "id": "kspm-eks-direct-access",
-            "rawLine": "    describe.skip('KSPM EKS Direct Access', async () => {",
-            "line": "    describe.skip('KSPM EKS Direct Access')",
+            "rawLine": "    describe('KSPM EKS Direct Access', async () => {",
+            "line": "    describe('KSPM EKS Direct Access')",
             "label": "KSPM EKS Direct Access",
             "indent": 4,
             "type": "describe",
-            "isSkipped": true,
+            "isSkipped": false,
             "isTodo": false,
             "children": [
               {
@@ -16883,19 +18425,19 @@
                 "label": "KSPM EKS Direct Access Workflow",
                 "indent": 6,
                 "type": "it",
-                "isSkipped": true,
+                "isSkipped": false,
                 "isTodo": false
               }
             ]
           },
           {
             "id": "kspm-eks-temporary-keys",
-            "rawLine": "    describe.skip('KSPM EKS Temporary Keys', () => {",
-            "line": "    describe.skip('KSPM EKS Temporary Keys')",
+            "rawLine": "    describe('KSPM EKS Temporary Keys', () => {",
+            "line": "    describe('KSPM EKS Temporary Keys')",
             "label": "KSPM EKS Temporary Keys",
             "indent": 4,
             "type": "describe",
-            "isSkipped": true,
+            "isSkipped": false,
             "isTodo": false,
             "children": [
               {
@@ -16905,19 +18447,19 @@
                 "label": "KSPM EKS Temporary Keys Workflow",
                 "indent": 6,
                 "type": "it",
-                "isSkipped": true,
+                "isSkipped": false,
                 "isTodo": false
               }
             ]
           },
           {
             "id": "kspm-eks-shared-credentials",
-            "rawLine": "    describe.skip('KSPM EKS Shared Credentials', () => {",
-            "line": "    describe.skip('KSPM EKS Shared Credentials')",
+            "rawLine": "    describe('KSPM EKS Shared Credentials', () => {",
+            "line": "    describe('KSPM EKS Shared Credentials')",
             "label": "KSPM EKS Shared Credentials",
             "indent": 4,
             "type": "describe",
-            "isSkipped": true,
+            "isSkipped": false,
             "isTodo": false,
             "children": [
               {
@@ -16927,7 +18469,7 @@
                 "label": "KSPM EKS Shared Credentials Workflow",
                 "indent": 6,
                 "type": "it",
-                "isSkipped": true,
+                "isSkipped": false,
                 "isTodo": false
               }
             ]
@@ -17214,10 +18756,11 @@
     "fileName": "findings_alerts.ts",
     "directory": "x-pack/test/cloud_security_posture_functional",
     "tags": [
-      "FTR"
+      "FTR",
+      "HAS SKIP"
     ],
     "lines": [
-      "  describe('Findings Page - Alerts')",
+      "  describe.skip('Findings Page - Alerts')",
       "    describe('Create detection rule')",
       "      it('Creates a detection rule from the Take Action button and navigates to rule page')",
       "      it('Creates a detection rule from the Alerts section and navigates to rule page')",
@@ -17230,12 +18773,12 @@
     "testSuits": [
       {
         "id": "findings-page---alerts",
-        "rawLine": "  describe('Findings Page - Alerts', function () {",
-        "line": "  describe('Findings Page - Alerts')",
+        "rawLine": "  describe.skip('Findings Page - Alerts', function () {",
+        "line": "  describe.skip('Findings Page - Alerts')",
         "label": "Findings Page - Alerts",
         "indent": 2,
         "type": "describe",
-        "isSkipped": false,
+        "isSkipped": true,
         "isTodo": false
       },
       {
@@ -17322,12 +18865,12 @@
     "tree": [
       {
         "id": "findings-page---alerts",
-        "rawLine": "  describe('Findings Page - Alerts', function () {",
-        "line": "  describe('Findings Page - Alerts')",
+        "rawLine": "  describe.skip('Findings Page - Alerts', function () {",
+        "line": "  describe.skip('Findings Page - Alerts')",
         "label": "Findings Page - Alerts",
         "indent": 2,
         "type": "describe",
-        "isSkipped": false,
+        "isSkipped": true,
         "isTodo": false,
         "children": [
           {
@@ -17337,7 +18880,7 @@
             "label": "Create detection rule",
             "indent": 4,
             "type": "describe",
-            "isSkipped": false,
+            "isSkipped": true,
             "isTodo": false,
             "children": [
               {
@@ -17347,7 +18890,7 @@
                 "label": "Creates a detection rule from the Take Action button and navigates to rule page",
                 "indent": 6,
                 "type": "it",
-                "isSkipped": false,
+                "isSkipped": true,
                 "isTodo": false
               },
               {
@@ -17357,7 +18900,7 @@
                 "label": "Creates a detection rule from the Alerts section and navigates to rule page",
                 "indent": 6,
                 "type": "it",
-                "isSkipped": false,
+                "isSkipped": true,
                 "isTodo": false
               }
             ]
@@ -17369,7 +18912,7 @@
             "label": "Rule details",
             "indent": 4,
             "type": "describe",
-            "isSkipped": false,
+            "isSkipped": true,
             "isTodo": false,
             "children": [
               {
@@ -17379,7 +18922,7 @@
                 "label": "The rule page contains the expected matching data",
                 "indent": 6,
                 "type": "it",
-                "isSkipped": false,
+                "isSkipped": true,
                 "isTodo": false
               }
             ]
@@ -17391,7 +18934,7 @@
             "label": "Navigation",
             "indent": 4,
             "type": "describe",
-            "isSkipped": false,
+            "isSkipped": true,
             "isTodo": false,
             "children": [
               {
@@ -17401,7 +18944,7 @@
                 "label": "Clicking on count of Rules should navigate to the rules page with benchmark tags as a filter",
                 "indent": 6,
                 "type": "it",
-                "isSkipped": false,
+                "isSkipped": true,
                 "isTodo": false
               },
               {
@@ -17411,7 +18954,7 @@
                 "label": "Clicking on count of Alerts should navigate to the alerts page",
                 "indent": 6,
                 "type": "it",
-                "isSkipped": false,
+                "isSkipped": true,
                 "isTodo": false
               }
             ]

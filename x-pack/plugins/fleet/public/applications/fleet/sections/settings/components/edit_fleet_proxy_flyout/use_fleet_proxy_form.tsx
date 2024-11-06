@@ -8,7 +8,7 @@ import React, { useCallback, useState, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { safeDump, safeLoad } from 'js-yaml';
+import { dump, load } from 'js-yaml';
 
 import {
   sendPostFleetProxy,
@@ -57,7 +57,7 @@ function validateUrl(value: string) {
 
 function validateProxyHeaders(value: string) {
   if (value && value !== '') {
-    const res = safeLoad(value);
+    const res = load(value);
     if (
       typeof res !== 'object' ||
       Object.values(res).some((val) => {
@@ -94,7 +94,7 @@ export function useFleetProxyForm(fleetProxy: FleetProxy | undefined, onSuccess:
   const nameInput = useInput(fleetProxy?.name ?? '', validateName, isEditDisabled);
   const urlInput = useInput(fleetProxy?.url ?? '', validateUrl, isEditDisabled);
   const proxyHeadersInput = useInput(
-    fleetProxy?.proxy_headers ? safeDump(fleetProxy.proxy_headers) : '',
+    fleetProxy?.proxy_headers ? dump(fleetProxy.proxy_headers) : '',
     validateProxyHeaders,
     isEditDisabled
   );
@@ -143,8 +143,7 @@ export function useFleetProxyForm(fleetProxy: FleetProxy | undefined, onSuccess:
       const data = {
         name: nameInput.value,
         url: urlInput.value,
-        proxy_headers:
-          proxyHeadersInput.value === '' ? undefined : safeLoad(proxyHeadersInput.value),
+        proxy_headers: proxyHeadersInput.value === '' ? undefined : load(proxyHeadersInput.value),
         certificate_authorities: certificateAuthoritiesInput.value,
         certificate: certificateInput.value,
         certificate_key: certificateKeyInput.value,

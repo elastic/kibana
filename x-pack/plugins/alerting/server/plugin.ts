@@ -6,7 +6,14 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { BehaviorSubject, ReplaySubject, Subject } from 'rxjs';
+import {
+  BehaviorSubject,
+  ReplaySubject,
+  Subject,
+  Observable,
+  map,
+  distinctUntilChanged,
+} from 'rxjs';
 import { pick } from 'lodash';
 import { UsageCollectionSetup, UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
@@ -33,6 +40,7 @@ import {
   ServiceStatus,
   SavedObjectsBulkGetObject,
   ServiceStatusLevels,
+  CoreStatus,
 } from '@kbn/core/server';
 import {
   LICENSE_TYPE,
@@ -58,7 +66,11 @@ import { ServerlessPluginSetup } from '@kbn/serverless/server';
 import { RuleTypeRegistry } from './rule_type_registry';
 import { TaskRunnerFactory } from './task_runner';
 import { RulesClientFactory } from './rules_client_factory';
-import { RulesSettingsClientFactory } from './rules_settings_client_factory';
+import {
+  RulesSettingsClientFactory,
+  RulesSettingsService,
+  getRulesSettingsFeature,
+} from './rules_settings';
 import { MaintenanceWindowClientFactory } from './maintenance_window_client_factory';
 import { ILicenseState, LicenseState } from './lib/license_state';
 import { AlertingRequestHandlerContext, ALERTING_FEATURE_ID, RuleAlertData } from './types';
@@ -98,13 +110,13 @@ import {
   type InitializationPromise,
   errorResult,
 } from './alerts_service';
-import { getRulesSettingsFeature } from './rules_settings_feature';
 import { maintenanceWindowFeature } from './maintenance_window_feature';
 import { ConnectorAdapterRegistry } from './connector_adapters/connector_adapter_registry';
 import { ConnectorAdapter, ConnectorAdapterParams } from './connector_adapters/types';
 import { DataStreamAdapter, getDataStreamAdapter } from './alerts_service/lib/data_stream_adapter';
 import { createGetAlertIndicesAliasFn, GetAlertIndicesAlias } from './lib';
 import { BackfillClient } from './backfill_client/backfill_client';
+import { MaintenanceWindowsService } from './task_runner/maintenance_windows';
 
 export const EVENT_LOG_PROVIDER = 'alerting';
 export const EVENT_LOG_ACTIONS = {
@@ -254,6 +266,8 @@ export class AlertingPlugin {
     this.licenseState = new LicenseState(plugins.licensing.license$);
     this.security = plugins.security;
 
+    const elasticsearchAndSOAvailability$ = getElasticsearchAndSOAvailability(core.status.core$);
+
     const useDataStreamForAlerts = !!plugins.serverless;
     this.dataStreamAdapter = getDataStreamAdapter({ useDataStreamForAlerts });
 
@@ -315,6 +329,7 @@ export class AlertingPlugin {
           elasticsearchClientPromise: core
             .getStartServices()
             .then(([{ elasticsearch }]) => elasticsearch.client.asInternalUser),
+          elasticsearchAndSOAvailability$,
         });
       }
     }
@@ -395,6 +410,7 @@ export class AlertingPlugin {
       getAlertIndicesAlias: createGetAlertIndicesAliasFn(this.ruleTypeRegistry!),
       encryptedSavedObjects: plugins.encryptedSavedObjects,
       config$: plugins.unifiedSearch.autocomplete.getInitializerContextConfig().create(),
+      isServerless: !!plugins.serverless,
     });
 
     return {
@@ -577,33 +593,41 @@ export class AlertingPlugin {
     };
 
     taskRunnerFactory.initialize({
-      logger,
-      data: plugins.data,
-      share: plugins.share,
-      dataViews: plugins.dataViews,
-      savedObjects: core.savedObjects,
-      uiSettings: core.uiSettings,
-      elasticsearch: core.elasticsearch,
-      getRulesClientWithRequest,
-      spaceIdToNamespace,
+      actionsConfigMap: getActionsConfigMap(this.config.rules.run.actions),
       actionsPlugin: plugins.actions,
-      encryptedSavedObjectsClient,
+      alertsService: this.alertsService,
+      backfillClient: this.backfillClient!,
       basePathService: core.http.basePath,
+      cancelAlertsOnRuleTimeout: this.config.cancelAlertsOnRuleTimeout,
+      connectorAdapterRegistry: this.connectorAdapterRegistry,
+      data: plugins.data,
+      dataViews: plugins.dataViews,
+      elasticsearch: core.elasticsearch,
+      encryptedSavedObjectsClient,
       eventLogger: this.eventLogger!,
       executionContext: core.executionContext,
-      ruleTypeRegistry: this.ruleTypeRegistry!,
-      alertsService: this.alertsService,
       kibanaBaseUrl: this.kibanaBaseUrl,
-      supportsEphemeralTasks: plugins.taskManager.supportsEphemeralTasks(),
-      maxEphemeralActionsPerRule: this.config.maxEphemeralActionsPerAlert,
-      cancelAlertsOnRuleTimeout: this.config.cancelAlertsOnRuleTimeout,
+      logger,
+      maintenanceWindowsService: new MaintenanceWindowsService({
+        cacheInterval: this.config.rulesSettings.cacheInterval,
+        getMaintenanceWindowClientWithRequest,
+        logger,
+      }),
       maxAlerts: this.config.rules.run.alerts.max,
-      actionsConfigMap: getActionsConfigMap(this.config.rules.run.actions),
+      maxEphemeralActionsPerRule: this.config.maxEphemeralActionsPerAlert,
+      ruleTypeRegistry: this.ruleTypeRegistry!,
+      rulesSettingsService: new RulesSettingsService({
+        cacheInterval: this.config.rulesSettings.cacheInterval,
+        getRulesSettingsClientWithRequest,
+        isServerless: !!plugins.serverless,
+        logger,
+      }),
+      savedObjects: core.savedObjects,
+      share: plugins.share,
+      spaceIdToNamespace,
+      supportsEphemeralTasks: plugins.taskManager.supportsEphemeralTasks(),
+      uiSettings: core.uiSettings,
       usageCounter: this.usageCounter,
-      getRulesSettingsClientWithRequest,
-      getMaintenanceWindowClientWithRequest,
-      backfillClient: this.backfillClient!,
-      connectorAdapterRegistry: this.connectorAdapterRegistry,
     });
 
     this.eventLogService!.registerSavedObjectProvider(RULE_SAVED_OBJECT_TYPE, (request) => {
@@ -652,7 +676,10 @@ export class AlertingPlugin {
         getRulesClient: () => {
           return rulesClientFactory!.create(request, savedObjects);
         },
-        getRulesSettingsClient: () => {
+        getRulesSettingsClient: (withoutAuth?: boolean) => {
+          if (withoutAuth) {
+            return rulesSettingsClientFactory.create(request);
+          }
           return rulesSettingsClientFactory.createWithAuthorization(request);
         },
         getMaintenanceWindowClient: () => {
@@ -676,4 +703,17 @@ export class AlertingPlugin {
     this.pluginStop$.next();
     this.pluginStop$.complete();
   }
+}
+
+export function getElasticsearchAndSOAvailability(
+  core$: Observable<CoreStatus>
+): Observable<boolean> {
+  return core$.pipe(
+    map(
+      ({ elasticsearch, savedObjects }) =>
+        elasticsearch.level === ServiceStatusLevels.available &&
+        savedObjects.level === ServiceStatusLevels.available
+    ),
+    distinctUntilChanged()
+  );
 }

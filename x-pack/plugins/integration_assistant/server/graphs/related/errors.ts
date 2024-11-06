@@ -4,21 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type {
-  ActionsClientChatOpenAI,
-  ActionsClientSimpleChatModel,
-} from '@kbn/langchain/server/language_models';
+
 import { JsonOutputParser } from '@langchain/core/output_parsers';
 import type { Pipeline } from '../../../common';
 import type { RelatedState, SimplifiedProcessors, SimplifiedProcessor } from '../../types';
+import type { RelatedNodeParams } from './types';
 import { combineProcessors } from '../../util/processors';
 import { RELATED_ERROR_PROMPT } from './prompts';
 import { COMMON_ERRORS } from './constants';
 
-export async function handleErrors(
-  state: RelatedState,
-  model: ActionsClientChatOpenAI | ActionsClientSimpleChatModel
-) {
+export async function handleErrors({
+  state,
+  model,
+}: RelatedNodeParams): Promise<Partial<RelatedState>> {
   const relatedErrorPrompt = RELATED_ERROR_PROMPT;
   const outputParser = new JsonOutputParser();
   const relatedErrorGraph = relatedErrorPrompt.pipe(model).pipe(outputParser);

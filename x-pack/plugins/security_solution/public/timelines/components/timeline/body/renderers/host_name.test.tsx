@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { type PropsWithChildren } from 'react';
+import React from 'react';
 import { mount } from 'enzyme';
 import { waitFor } from '@testing-library/react';
 
@@ -14,18 +14,13 @@ import { TimelineId, TimelineTabs } from '../../../../../../common/types/timelin
 import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
 import { createTelemetryServiceMock } from '../../../../../common/lib/telemetry/telemetry_service.mock';
 import { TableId } from '@kbn/securitysolution-data-table';
+import { createExpandableFlyoutApiMock } from '../../../../../common/mock/expandable_flyout';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 
 const mockedTelemetry = createTelemetryServiceMock();
 const mockOpenRightPanel = jest.fn();
 
-jest.mock('@kbn/expandable-flyout', () => {
-  return {
-    useExpandableFlyoutApi: () => ({
-      openRightPanel: mockOpenRightPanel,
-    }),
-    TestProvider: ({ children }: PropsWithChildren<{}>) => <>{children}</>,
-  };
-});
+jest.mock('@kbn/expandable-flyout');
 
 jest.mock('../../../../../common/lib/kibana/kibana_react', () => {
   return {
@@ -46,6 +41,13 @@ jest.mock('../../../../../common/components/draggables', () => ({
 }));
 
 describe('HostName', () => {
+  beforeEach(() => {
+    jest.mocked(useExpandableFlyoutApi).mockReturnValue({
+      ...createExpandableFlyoutApiMock(),
+      openRightPanel: mockOpenRightPanel,
+    });
+  });
+
   afterEach(() => {
     jest.clearAllMocks();
   });

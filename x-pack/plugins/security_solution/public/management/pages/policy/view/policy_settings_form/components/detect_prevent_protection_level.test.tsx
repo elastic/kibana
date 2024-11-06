@@ -12,7 +12,8 @@ import React from 'react';
 import type { DetectPreventProtectionLevelProps } from './detect_prevent_protection_level';
 import { DetectPreventProtectionLevel } from './detect_prevent_protection_level';
 import userEvent from '@testing-library/user-event';
-import { cloneDeep, set } from 'lodash';
+import { cloneDeep } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
 import { ProtectionModes } from '../../../../../../../common/endpoint/types';
 import { expectIsViewOnly, exactMatchText } from '../mocks';
 import { createLicenseServiceMock } from '../../../../../../../common/license/mocks';
@@ -28,8 +29,8 @@ describe('Policy form Detect Prevent Protection level component', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<typeof render>;
 
-  const clickProtection = (level: 'detect' | 'prevent') => {
-    userEvent.click(renderResult.getByTestId(`test-${level}Radio`).querySelector('label')!);
+  const clickProtection = async (level: 'detect' | 'prevent') => {
+    await userEvent.click(renderResult.getByTestId(`test-${level}Radio`).querySelector('label')!);
   };
 
   const isProtectionChecked = (level: 'detect' | 'prevent'): boolean => {
@@ -62,7 +63,7 @@ describe('Policy form Detect Prevent Protection level component', () => {
     expect(getByTestId('test-preventRadio'));
   });
 
-  it('should allow detect mode to be selected', () => {
+  it('should allow detect mode to be selected', async () => {
     const expectedPolicyUpdate = cloneDeep(formProps.policy);
     set(expectedPolicyUpdate, 'windows.malware.mode', ProtectionModes.detect);
     set(expectedPolicyUpdate, 'mac.malware.mode', ProtectionModes.detect);
@@ -74,7 +75,7 @@ describe('Policy form Detect Prevent Protection level component', () => {
 
     expect(isProtectionChecked('prevent')).toBe(true);
 
-    clickProtection('detect');
+    await clickProtection('detect');
 
     expect(formProps.onChange).toHaveBeenCalledWith({
       isValid: true,
@@ -82,7 +83,7 @@ describe('Policy form Detect Prevent Protection level component', () => {
     });
   });
 
-  it('should allow prevent mode to be selected', () => {
+  it('should allow prevent mode to be selected', async () => {
     formProps.osList = ['windows'];
     set(formProps.policy, 'windows.malware.mode', ProtectionModes.detect);
     const expectedPolicyUpdate = cloneDeep(formProps.policy);
@@ -91,7 +92,7 @@ describe('Policy form Detect Prevent Protection level component', () => {
 
     expect(isProtectionChecked('detect')).toBe(true);
 
-    clickProtection('prevent');
+    await clickProtection('prevent');
 
     expect(formProps.onChange).toHaveBeenCalledWith({
       isValid: true,
@@ -111,7 +112,7 @@ describe('Policy form Detect Prevent Protection level component', () => {
       useLicenseMock.mockReturnValue(licenseServiceMocked);
     });
 
-    it('should NOT update user notification options', () => {
+    it('should NOT update user notification options', async () => {
       const expectedPolicyUpdate = cloneDeep(formProps.policy);
       set(expectedPolicyUpdate, 'windows.malware.mode', ProtectionModes.detect);
       set(expectedPolicyUpdate, 'mac.malware.mode', ProtectionModes.detect);
@@ -120,7 +121,7 @@ describe('Policy form Detect Prevent Protection level component', () => {
 
       expect(isProtectionChecked('prevent')).toBe(true);
 
-      clickProtection('detect');
+      await clickProtection('detect');
 
       expect(formProps.onChange).toHaveBeenCalledWith({
         isValid: true,

@@ -17,6 +17,7 @@ import {
   EuiFormLabel,
   EuiLink,
   useEuiTheme,
+  EuiComboBoxOptionOption,
 } from '@elastic/eui';
 import { useDebouncedValue } from '@kbn/visualization-utils';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -227,7 +228,7 @@ export function FormatSelector(props: FormatSelectorProps) {
   );
 
   const onChangeWrapped = useCallback(
-    (choices) => {
+    (choices: Array<EuiComboBoxOptionOption<string>>) => {
       if (choices.length === 0) {
         return;
       }
@@ -366,7 +367,6 @@ export function FormatSelector(props: FormatSelectorProps) {
           <EuiFormRow
             display="columnCompressed"
             hasEmptyLabelSpace
-            label=" "
             helpText={
               <EuiLink
                 href={docLinks.links.indexPatterns.fieldFormattersNumber}

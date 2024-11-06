@@ -464,7 +464,7 @@
                 "section": "def-common.IngestPipeline",
                 "text": "IngestPipeline"
               },
-              ") => Promise<",
+              " | undefined) => Promise<",
               "ImportResponse",
               ">"
             ],
@@ -531,12 +531,13 @@
                     "docId": "kibFileUploadPluginApi",
                     "section": "def-common.IngestPipeline",
                     "text": "IngestPipeline"
-                  }
+                  },
+                  " | undefined"
                 ],
                 "path": "x-pack/plugins/file_upload/public/importer/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": true
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -983,6 +984,20 @@
           },
           {
             "parentPluginId": "fileUpload",
+            "id": "def-common.FindFileStructureResponse.document_type",
+            "type": "string",
+            "tags": [],
+            "label": "document_type",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/file_upload/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fileUpload",
             "id": "def-common.FindFileStructureResponse.field_stats",
             "type": "Object",
             "tags": [],
@@ -1297,6 +1312,26 @@
           },
           {
             "parentPluginId": "fileUpload",
+            "id": "def-common.FindFileStructureResponse.ingest_pipeline",
+            "type": "Object",
+            "tags": [],
+            "label": "ingest_pipeline",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "fileUpload",
+                "scope": "common",
+                "docId": "kibFileUploadPluginApi",
+                "section": "def-common.IngestPipeline",
+                "text": "IngestPipeline"
+              }
+            ],
+            "path": "x-pack/plugins/file_upload/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fileUpload",
             "id": "def-common.FindFileStructureResponse.quote",
             "type": "string",
             "tags": [],
@@ -1517,6 +1552,34 @@
             "path": "x-pack/plugins/file_upload/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fileUpload",
+            "id": "def-common.IngestPipeline.isManaged",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isManaged",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/file_upload/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fileUpload",
+            "id": "def-common.IngestPipeline.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/file_upload/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1551,7 +1614,23 @@
       }
     ],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "fileUpload",
+        "id": "def-common.TIKA_PREVIEW_CHARS",
+        "type": "number",
+        "tags": [],
+        "label": "TIKA_PREVIEW_CHARS",
+        "description": [],
+        "signature": [
+          "100000"
+        ],
+        "path": "x-pack/plugins/file_upload/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   }
 }

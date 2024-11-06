@@ -31,6 +31,11 @@ export const useAlertAssigneesActions = ({
   const { hasIndexWrite } = useAlertsPrivileges();
 
   const alertId = ecsRowData._id;
+  const alertAssignments = useMemo(
+    () => ecsRowData?.kibana?.alert.workflow_assignee_ids ?? [],
+    [ecsRowData?.kibana?.alert.workflow_assignee_ids]
+  );
+
   const alertAssigneeData = useMemo(() => {
     return [
       {
@@ -39,7 +44,7 @@ export const useAlertAssigneesActions = ({
         data: [
           {
             field: ALERT_WORKFLOW_ASSIGNEE_IDS,
-            value: ecsRowData?.kibana?.alert.workflow_assignee_ids ?? [],
+            value: alertAssignments,
           },
         ],
         ecs: {
@@ -48,7 +53,7 @@ export const useAlertAssigneesActions = ({
         },
       },
     ];
-  }, [alertId, ecsRowData._index, ecsRowData?.kibana?.alert.workflow_assignee_ids]);
+  }, [alertId, ecsRowData._index, alertAssignments]);
 
   const onAssigneesUpdate = useCallback(() => {
     closePopover();
@@ -59,6 +64,7 @@ export const useAlertAssigneesActions = ({
 
   const { alertAssigneesItems, alertAssigneesPanels } = useBulkAlertAssigneesItems({
     onAssigneesUpdate,
+    alertAssignments,
   });
 
   const itemsToReturn: AlertTableContextMenuItem[] = useMemo(
@@ -69,6 +75,7 @@ export const useAlertAssigneesActions = ({
         'data-test-subj': item['data-test-subj'],
         key: item.key,
         onClick: () => item.onClick?.(alertAssigneeData, false, noop, noop, noop),
+        disabled: item.disable,
       })),
     [alertAssigneeData, alertAssigneesItems]
   );

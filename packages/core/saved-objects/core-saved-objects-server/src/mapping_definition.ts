@@ -1,14 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type {
   PropertyName as EsPropertyName,
   MappingProperty as EsMappingProperty,
+  MappingPropertyBase as EsMappingPropertyBase,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 /**
@@ -64,19 +66,20 @@ export interface SavedObjectsMappingProperties {
  *
  * @public
  */
-export type SavedObjectsFieldMapping = EsMappingProperty & {
-  /**
-   * The dynamic property of the mapping, either `false` or `'strict'`. If
-   * unspecified `dynamic: 'strict'` will be inherited from the top-level
-   * index mappings.
-   *
-   * Note: To limit the number of mapping fields Saved Object types should
-   * *never* use `dynamic: true`.
-   */
-  dynamic?: false | 'strict';
-  /**
-   * Some mapping types do not accept the `properties` attributes. Explicitly adding it as optional to our type
-   * to avoid type failures on all code using accessing them via `SavedObjectsFieldMapping.properties`.
-   */
-  properties?: Record<EsPropertyName, EsMappingProperty>;
-};
+export type SavedObjectsFieldMapping = EsMappingProperty &
+  EsMappingPropertyBase & {
+    /**
+     * The dynamic property of the mapping, either `false` or `'strict'`. If
+     * unspecified `dynamic: 'strict'` will be inherited from the top-level
+     * index mappings.
+     *
+     * Note: To limit the number of mapping fields Saved Object types should
+     * *never* use `dynamic: true`.
+     */
+    dynamic?: false | 'strict';
+    /**
+     * Some mapping types do not accept the `properties` attributes. Explicitly adding it as optional to our type
+     * to avoid type failures on all code using accessing them via `SavedObjectsFieldMapping.properties`.
+     */
+    properties?: Record<EsPropertyName, EsMappingProperty>;
+  };

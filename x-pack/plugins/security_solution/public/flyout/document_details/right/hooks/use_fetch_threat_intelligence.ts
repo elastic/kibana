@@ -9,7 +9,7 @@ import { useMemo } from 'react';
 import { groupBy } from 'lodash';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import type { CtiEnrichment } from '../../../../../common/search_strategy';
-import { useBasicDataFromDetailsData } from '../../../../timelines/components/side_panel/event_details/helpers';
+import { useBasicDataFromDetailsData } from '../../shared/hooks/use_basic_data_from_details_data';
 import {
   filterDuplicateEnrichments,
   getEnrichmentFields,

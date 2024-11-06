@@ -99,6 +99,6 @@ Integration secrets are only supported by Fleet server 8.10.0 or greater, output
 
 For integration secrets, when performing CRUD on a package policy, we first check the global settings saved object to see if secrets are enabled, if so then secret storage is used.
 
-If secret storage s not enabled, we check all flee tserver versions, if they meet the minimum spec, then we enable secret storage on the global settings saved object and the check is never performed again. 
+If secret storage is not enabled, we check all fleet server versions, if they meet the minimum spec, then we enable secret storage on the global settings saved object and the check is never performed again. 
 
 For output secrets, we do not perform this check as outputs offer a plain text alternative for all secret fields. Instead we warn the user about the version requirements and let them decide. 

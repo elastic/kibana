@@ -35,7 +35,13 @@ export const SuccessSection = React.memo<SectionWrapperProps>(({ integrationName
 
   return (
     <SectionWrapper title={i18n.SUCCESS_TITLE} subtitle={i18n.SUCCESS_DESCRIPTION}>
-      <EuiFlexGroup direction="row" gutterSize="l" alignItems="center" justifyContent="center">
+      <EuiFlexGroup
+        direction="row"
+        gutterSize="l"
+        alignItems="center"
+        justifyContent="center"
+        data-test-subj="integrationSuccessSection"
+      >
         <EuiFlexItem>
           <EuiCard
             paddingSize="l"
@@ -53,7 +59,11 @@ export const SuccessSection = React.memo<SectionWrapperProps>(({ integrationName
             icon={<EuiIcon type="eye" size="l" />}
             title={i18n.VIEW_INTEGRATION_TITLE}
             description={i18n.VIEW_INTEGRATION_DESCRIPTION}
-            footer={<EuiButton href={viewIntegrationUrl}>{i18n.VIEW_INTEGRATION_BUTTON}</EuiButton>}
+            footer={
+              <EuiButton href={viewIntegrationUrl} data-test-subj="viewIntegrationButton">
+                {i18n.VIEW_INTEGRATION_BUTTON}
+              </EuiButton>
+            }
           />
         </EuiFlexItem>
       </EuiFlexGroup>

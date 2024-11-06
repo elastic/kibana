@@ -5,80 +5,67 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useDebouncedValue } from '@kbn/visualization-utils';
 import { ColorPicker } from '@kbn/visualization-ui-components';
 
-import {
-  EuiBadge,
-  EuiButtonGroup,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiSpacer,
-  EuiSwitch,
-  EuiText,
-  htmlIdGenerator,
-} from '@elastic/eui';
-import {
-  PaletteRegistry,
-  ColorMapping,
-  DEFAULT_COLOR_MAPPING_CONFIG,
-  CategoricalColorMapping,
-  PaletteOutput,
-  SPECIAL_TOKENS_STRING_CONVERTION,
-  AVAILABLE_PALETTES,
-  getColorsFromMapping,
-} from '@kbn/coloring';
+import { EuiButtonGroup, EuiFormRow, htmlIdGenerator } from '@elastic/eui';
+import { PaletteRegistry, ColorMapping, PaletteOutput } from '@kbn/coloring';
 import { getColorCategories } from '@kbn/chart-expressions-common';
+import type { ValuesType } from 'utility-types';
 import type { VisualizationDimensionEditorProps } from '../../../types';
 import { State, XYState, XYDataLayerConfig, YConfig, YAxisMode } from '../types';
 import { FormatFactory } from '../../../../common/types';
 import { getSeriesColor, isHorizontalChart } from '../state_helpers';
-import { PalettePanelContainer, PalettePicker } from '../../../shared_components';
 import { getDataLayers } from '../visualization_helpers';
 import { CollapseSetting } from '../../../shared_components/collapse_setting';
 import { getSortedAccessors } from '../to_expression';
 import { getColorAssignments, getAssignedColorConfig } from '../color_assignment';
-import { trackUiCounterEvents } from '../../../lens_ui_telemetry';
-
-type UnwrapArray<T> = T extends Array<infer P> ? P : T;
-
-export function updateLayer(
-  state: State,
-  layer: UnwrapArray<State['layers']>,
-  index: number
-): State {
-  const newLayers = [...state.layers];
-  newLayers[index] = layer;
-
-  return {
-    ...state,
-    layers: newLayers,
-  };
-}
+import { ColorMappingByTerms } from '../../../shared_components/coloring/color_mapping_by_terms';
 
 export const idPrefix = htmlIdGenerator()();
+
+function updateLayer(
+  state: State,
+  index: number,
+  layer: ValuesType<State['layers']>,
+  newLayer: Partial<ValuesType<State['layers']>>
+): State['layers'] {
+  const newLayers = [...state.layers];
+  newLayers[index] = {
+    ...layer,
+    ...newLayer,
+  } as ValuesType<State['layers']>;
+
+  return newLayers;
+}
 
 export function DataDimensionEditor(
   props: VisualizationDimensionEditorProps<State> & {
     formatFactory: FormatFactory;
     paletteService: PaletteRegistry;
-    darkMode: boolean;
+    isDarkMode: boolean;
   }
 ) {
-  const { state, layerId, accessor, darkMode, isInlineEditing } = props;
+  const { state, layerId, accessor, isDarkMode, isInlineEditing } = props;
   const index = state.layers.findIndex((l) => l.layerId === layerId);
   const layer = state.layers[index] as XYDataLayerConfig;
-  const canUseColorMapping = layer.colorMapping ? true : false;
-
-  const [useNewColorMapping, setUseNewColorMapping] = useState(canUseColorMapping);
 
   const { inputValue: localState, handleInputChange: setLocalState } = useDebouncedValue<XYState>({
     value: props.state,
     onChange: props.setState,
   });
+
+  const updateLayerState = useCallback(
+    (layerIndex: number, newLayer: Partial<ValuesType<State['layers']>>) => {
+      setLocalState({
+        ...localState,
+        layers: updateLayer(localState, layerIndex, layer, newLayer),
+      });
+    },
+    [layer, setLocalState, localState]
+  );
 
   const localYConfig = layer?.yConfig?.find((yAxisConfig) => yAxisConfig.forAccessor === accessor);
   const axisMode = localYConfig?.axisMode || 'auto';
@@ -100,22 +87,22 @@ export function DataDimensionEditor(
           ...yConfig,
         });
       }
-      setLocalState(updateLayer(localState, { ...layer, yConfig: newYConfigs }, index));
+      updateLayerState(index, { yConfig: newYConfigs });
     },
-    [accessor, index, localState, layer, setLocalState]
+    [layer.yConfig, updateLayerState, index, accessor]
   );
 
   const setColorMapping = useCallback(
     (colorMapping?: ColorMapping.Config) => {
-      setLocalState(updateLayer(localState, { ...layer, colorMapping }, index));
+      updateLayerState(index, { colorMapping });
     },
-    [index, localState, layer, setLocalState]
+    [updateLayerState, index]
   );
   const setPalette = useCallback(
     (palette: PaletteOutput) => {
-      setLocalState(updateLayer(localState, { ...layer, palette }, index));
+      updateLayerState(index, { palette });
     },
-    [index, localState, layer, setLocalState]
+    [updateLayerState, index]
   );
 
   const overwriteColor = getSeriesColor(layer, accessor);
@@ -143,105 +130,28 @@ export function DataDimensionEditor(
     ).color;
   }, [props.frame, props.paletteService, state.layers, accessor, props.formatFactory, layer]);
 
-  const localLayer: XYDataLayerConfig = layer;
-
-  const colors = layer.colorMapping
-    ? getColorsFromMapping(props.darkMode, layer.colorMapping)
-    : props.paletteService
-        .get(layer.palette?.name || 'default')
-        .getCategoricalColors(10, layer.palette);
-
   const table = props.frame.activeData?.[layer.layerId];
   const { splitAccessor } = layer;
   const splitCategories = getColorCategories(table?.rows ?? [], splitAccessor);
 
-  if (props.groupId === 'breakdown' && !layer.collapseFn) {
-    return (
-      <EuiFormRow
-        display="columnCompressed"
-        label={i18n.translate('xpack.lens.colorMapping.editColorMappingSectionlabel', {
-          defaultMessage: 'Color mapping',
-        })}
-        style={{ alignItems: 'center' }}
-        fullWidth
-      >
-        <PalettePanelContainer
-          palette={colors}
-          siblingRef={props.panelRef}
-          title={
-            useNewColorMapping
-              ? i18n.translate('xpack.lens.colorMapping.editColorMappingTitle', {
-                  defaultMessage: 'Edit colors by term mapping',
-                })
-              : i18n.translate('xpack.lens.colorMapping.editColorsTitle', {
-                  defaultMessage: 'Edit colors',
-                })
-          }
-          isInlineEditing={isInlineEditing}
-        >
-          <div className="lnsPalettePanel__section lnsPalettePanel__section--shaded lnsIndexPatternDimensionEditor--padded">
-            <EuiFlexGroup direction="column" gutterSize="s" justifyContent="flexStart">
-              <EuiFlexItem>
-                <EuiSwitch
-                  label={
-                    <EuiText size="xs">
-                      <span>
-                        {i18n.translate('xpack.lens.colorMapping.tryLabel', {
-                          defaultMessage: 'Use the new Color Mapping feature',
-                        })}{' '}
-                        <EuiBadge color="hollow">
-                          {i18n.translate('xpack.lens.colorMapping.techPreviewLabel', {
-                            defaultMessage: 'Tech preview',
-                          })}
-                        </EuiBadge>
-                      </span>
-                    </EuiText>
-                  }
-                  data-test-subj="lns_colorMappingOrLegacyPalette_switch"
-                  compressed
-                  checked={useNewColorMapping}
-                  onChange={({ target: { checked } }) => {
-                    trackUiCounterEvents(
-                      `color_mapping_switch_${checked ? 'enabled' : 'disabled'}`
-                    );
-                    setColorMapping(checked ? { ...DEFAULT_COLOR_MAPPING_CONFIG } : undefined);
-                    setUseNewColorMapping(checked);
-                  }}
-                />
-                <EuiSpacer size="s" />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                {canUseColorMapping || useNewColorMapping ? (
-                  <CategoricalColorMapping
-                    isDarkMode={darkMode}
-                    model={layer.colorMapping ?? { ...DEFAULT_COLOR_MAPPING_CONFIG }}
-                    onModelUpdate={(model: ColorMapping.Config) => setColorMapping(model)}
-                    palettes={AVAILABLE_PALETTES}
-                    data={{
-                      type: 'categories',
-                      categories: splitCategories,
-                    }}
-                    specialTokens={SPECIAL_TOKENS_STRING_CONVERTION}
-                  />
-                ) : (
-                  <PalettePicker
-                    palettes={props.paletteService}
-                    activePalette={localLayer?.palette}
-                    setPalette={(newPalette) => {
-                      setPalette(newPalette);
-                    }}
-                  />
-                )}
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </div>
-        </PalettePanelContainer>
-      </EuiFormRow>
-    );
+  if (props.groupId === 'breakdown') {
+    return !layer.collapseFn ? (
+      <ColorMappingByTerms
+        isDarkMode={isDarkMode}
+        colorMapping={layer.colorMapping}
+        palette={layer.palette}
+        isInlineEditing={isInlineEditing}
+        setPalette={setPalette}
+        setColorMapping={setColorMapping}
+        paletteService={props.paletteService}
+        panelRef={props.panelRef}
+        categories={splitCategories}
+      />
+    ) : null;
   }
 
   const isHorizontal = isHorizontalChart(state.layers);
-  const disabledMessage = Boolean(!localLayer.collapseFn && localLayer.splitAccessor)
+  const disabledMessage = Boolean(!layer.collapseFn && layer.splitAccessor)
     ? i18n.translate('xpack.lens.xyChart.colorPicker.tooltip.disabled', {
         defaultMessage:
           'You are unable to apply custom colors to individual series when the layer includes a "Break down by" field.',
@@ -329,13 +239,23 @@ export function DataDimensionEditorDataSectionExtra(
     onChange: props.setState,
   });
 
+  const updateLayerState = useCallback(
+    (layerIndex: number, newLayer: Partial<ValuesType<State['layers']>>) => {
+      setLocalState({
+        ...localState,
+        layers: updateLayer(localState, layerIndex, layer, newLayer),
+      });
+    },
+    [layer, setLocalState, localState]
+  );
+
   if (props.groupId === 'breakdown') {
     return (
       <>
         <CollapseSetting
           value={layer.collapseFn || ''}
           onChange={(collapseFn) => {
-            setLocalState(updateLayer(localState, { ...layer, collapseFn }, index));
+            updateLayerState(index, { collapseFn });
           }}
         />
       </>

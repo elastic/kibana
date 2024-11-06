@@ -72,7 +72,7 @@ export class WhereExpression extends Component<Props, State> {
               }
             )}
             uppercase={false}
-            value={expressionValue}
+            value={expressionValue as string}
             data-test-subj="mapJoinWhereExpressionButton"
           />
         }

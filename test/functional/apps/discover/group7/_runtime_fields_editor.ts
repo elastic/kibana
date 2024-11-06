@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -18,7 +19,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const security = getService('security');
   const dataGrid = getService('dataGrid');
   const dataViews = getService('dataViews');
-  const PageObjects = getPageObjects([
+  const { common, discover, header, timePicker, unifiedFieldList } = getPageObjects([
     'common',
     'discover',
     'header',
@@ -37,7 +38,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await fieldEditor.typeScript("emit('abc')");
     await fieldEditor.save();
     await fieldEditor.waitUntilClosed();
-    await PageObjects.header.waitUntilLoadingHasFinished();
+    await header.waitUntilLoadingHasFinished();
   };
 
   describe('discover integration with runtime fields editor', function describeIndexTests() {
@@ -46,8 +47,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
       await kibanaServer.uiSettings.replace(defaultSettings);
-      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
-      await PageObjects.common.navigateToApp('discover');
+      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
+      await common.navigateToApp('discover');
     });
 
     after(async () => {
@@ -58,50 +59,48 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('allows adding custom label to existing fields', async function () {
       const customLabel = 'megabytes';
-      await PageObjects.discover.editField('bytes');
+      await discover.editField('bytes');
       await fieldEditor.enableCustomLabel();
       await fieldEditor.setCustomLabel(customLabel);
       await fieldEditor.save();
       await fieldEditor.waitUntilClosed();
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      expect((await PageObjects.unifiedFieldList.getAllFieldNames()).includes(customLabel)).to.be(
-        true
-      );
-      await PageObjects.unifiedFieldList.clickFieldListItemAdd('bytes');
-      expect(await PageObjects.discover.getDocHeader()).to.have.string(customLabel);
+      await header.waitUntilLoadingHasFinished();
+      expect((await unifiedFieldList.getAllFieldNames()).includes(customLabel)).to.be(true);
+      await unifiedFieldList.clickFieldListItemAdd('bytes');
+      expect(await discover.getDocHeader()).to.have.string(customLabel);
     });
 
     it('allows adding custom description to existing fields', async function () {
       const customDescription = 'custom agent description here';
       const customDescription2 = `${customDescription} updated`;
       // set a custom description
-      await PageObjects.discover.editField('agent');
+      await discover.editField('agent');
       await fieldEditor.enableCustomDescription();
       await fieldEditor.setCustomDescription(customDescription);
       await fieldEditor.save();
       await fieldEditor.waitUntilClosed();
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.unifiedFieldList.clickFieldListItem('agent');
+      await header.waitUntilLoadingHasFinished();
+      await unifiedFieldList.clickFieldListItem('agent');
       await retry.waitFor('field popover text', async () => {
         return (await testSubjects.getVisibleText('fieldDescription-agent')) === customDescription;
       });
-      await PageObjects.unifiedFieldList.clickFieldListItemToggle('agent');
+      await unifiedFieldList.clickFieldListItemToggle('agent');
 
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await header.waitUntilLoadingHasFinished();
+      await discover.waitUntilSearchingHasFinished();
 
       // edit the custom description again
-      await PageObjects.discover.editField('agent');
+      await discover.editField('agent');
       await fieldEditor.enableCustomDescription();
       await fieldEditor.setCustomDescription(customDescription2);
       await fieldEditor.save();
       await fieldEditor.waitUntilClosed();
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.unifiedFieldList.clickFieldListItem('agent');
+      await header.waitUntilLoadingHasFinished();
+      await unifiedFieldList.clickFieldListItem('agent');
       await retry.waitFor('field popover text', async () => {
         return (await testSubjects.getVisibleText('fieldDescription-agent')) === customDescription2;
       });
-      await PageObjects.unifiedFieldList.clickFieldListItemToggle('agent');
+      await unifiedFieldList.clickFieldListItemToggle('agent');
 
       // check it in the doc viewer too
       await dataGrid.clickRowToggle({ rowIndex: 0 });
@@ -114,13 +113,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('allows to replace ECS description with a custom field description', async function () {
-      await PageObjects.unifiedFieldList.clickFieldListItem('@timestamp');
+      await unifiedFieldList.clickFieldListItem('@timestamp');
       await retry.waitFor('field popover text', async () => {
         return (await testSubjects.getVisibleText('fieldDescription-@timestamp')).startsWith(
           'Date'
         );
       });
-      await PageObjects.unifiedFieldList.closeFieldPopover();
+      await unifiedFieldList.closeFieldPopover();
       // check it in the doc viewer too
       await dataGrid.clickRowToggle({ rowIndex: 0 });
       await dataGrid.expandFieldNameCellInFlyout('@timestamp');
@@ -133,19 +132,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       const customDescription = 'custom @timestamp description here';
       // set a custom description
-      await PageObjects.discover.editField('@timestamp');
+      await discover.editField('@timestamp');
       await fieldEditor.enableCustomDescription();
       await fieldEditor.setCustomDescription(customDescription);
       await fieldEditor.save();
       await fieldEditor.waitUntilClosed();
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.unifiedFieldList.clickFieldListItem('@timestamp');
+      await header.waitUntilLoadingHasFinished();
+      await unifiedFieldList.clickFieldListItem('@timestamp');
       await retry.waitFor('field popover text', async () => {
         return (
           (await testSubjects.getVisibleText('fieldDescription-@timestamp')) === customDescription
         );
       });
-      await PageObjects.unifiedFieldList.closeFieldPopover();
+      await unifiedFieldList.closeFieldPopover();
       // check it in the doc viewer too
       await dataGrid.clickRowToggle({ rowIndex: 0 });
       await dataGrid.expandFieldNameCellInFlyout('@timestamp');
@@ -161,7 +160,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should show a validation error when adding a too long custom description to existing fields', async function () {
       const customDescription = 'custom bytes long description here'.repeat(10);
       // set a custom description
-      await PageObjects.discover.editField('bytes');
+      await discover.editField('bytes');
       await fieldEditor.enableCustomDescription();
       await fieldEditor.setCustomDescription(customDescription);
       await fieldEditor.save();
@@ -175,12 +174,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const field = '_runtimefield';
       await createRuntimeField(field);
 
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.discover.waitForDocTableLoadingComplete();
-      await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
+      await header.waitUntilLoadingHasFinished();
+      await discover.waitForDocTableLoadingComplete();
+      await unifiedFieldList.waitUntilSidebarHasLoaded();
 
       await retry.waitFor('fieldNames to include runtimefield', async () => {
-        const fieldNames = await PageObjects.unifiedFieldList.getAllFieldNames();
+        const fieldNames = await unifiedFieldList.getAllFieldNames();
         return fieldNames.includes(field);
       });
     });
@@ -189,17 +188,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const field = '_runtimefield-before-edit';
       await createRuntimeField(field);
       const newFieldName = '_runtimefield-after-edit';
-      await PageObjects.discover.editField(field);
+      await discover.editField(field);
       await fieldEditor.setName(newFieldName, true);
       await fieldEditor.save();
       await fieldEditor.confirmSave();
       await fieldEditor.waitUntilClosed();
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.discover.waitForDocTableLoadingComplete();
-      await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
+      await header.waitUntilLoadingHasFinished();
+      await discover.waitForDocTableLoadingComplete();
+      await unifiedFieldList.waitUntilSidebarHasLoaded();
 
       await retry.waitForWithTimeout('fieldNames to include edits', 5000, async () => {
-        const fieldNames = await PageObjects.unifiedFieldList.getAllFieldNames();
+        const fieldNames = await unifiedFieldList.getAllFieldNames();
         return fieldNames.includes(newFieldName);
       });
     });
@@ -207,26 +206,26 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('allows creation of a new field and use it in a saved search', async function () {
       const fieldName = '_runtimefield-saved-search';
       await createRuntimeField(fieldName);
-      await PageObjects.unifiedFieldList.clickFieldListItemAdd(fieldName);
-      expect(await PageObjects.discover.getDocHeader()).to.have.string(fieldName);
-      expect(await PageObjects.discover.saveSearch('Saved Search with runtimefield'));
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await unifiedFieldList.clickFieldListItemAdd(fieldName);
+      expect(await discover.getDocHeader()).to.have.string(fieldName);
+      expect(await discover.saveSearch('Saved Search with runtimefield'));
+      await header.waitUntilLoadingHasFinished();
 
-      await PageObjects.discover.clickNewSearchButton();
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await discover.clickNewSearchButton();
+      await header.waitUntilLoadingHasFinished();
 
-      await PageObjects.discover.loadSavedSearch('Saved Search with runtimefield');
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      expect(await PageObjects.discover.getDocHeader()).to.have.string(fieldName);
+      await discover.loadSavedSearch('Saved Search with runtimefield');
+      await header.waitUntilLoadingHasFinished();
+      expect(await discover.getDocHeader()).to.have.string(fieldName);
     });
 
     it('deletes a runtime field', async function () {
       const fieldName = '_runtimefield-to-delete';
       await createRuntimeField(fieldName);
-      await PageObjects.discover.removeField(fieldName);
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await discover.removeField(fieldName);
+      await header.waitUntilLoadingHasFinished();
       await retry.waitForWithTimeout('fieldNames to include edits', 5000, async () => {
-        const fieldNames = await PageObjects.unifiedFieldList.getAllFieldNames();
+        const fieldNames = await unifiedFieldList.getAllFieldNames();
         return !fieldNames.includes(fieldName);
       });
     });
@@ -235,8 +234,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // navigate to doc view
       const fieldName = '_runtimefield-doc-view';
       await createRuntimeField(fieldName);
-      const table = await PageObjects.discover.getDocTable();
-      const useLegacyTable = await PageObjects.discover.useLegacyTable();
+      const table = await discover.getDocTable();
+      const useLegacyTable = await discover.useLegacyTable();
       await table.clickRowToggle();
 
       // click the open action

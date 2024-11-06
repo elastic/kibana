@@ -28,7 +28,6 @@ import {
   apmEnableServiceMetrics,
   apmEnableContinuousRollups,
   enableCriticalPath,
-  enableInfrastructureHostsView,
   syntheticsThrottlingEnabled,
   enableLegacyUptimeApp,
   apmEnableProfilingIntegration,
@@ -45,7 +44,7 @@ import {
   enableInfrastructureAssetCustomDashboards,
   apmEnableServiceInventoryTableSearchBar,
   profilingFetchTopNFunctionsFromStacktraces,
-  enableInfrastructureContainerAssetView,
+  searchExcludedDataTiers,
 } from '../common/ui_settings_keys';
 
 const betaLabel = i18n.translate('xpack.observability.uiSettings.betaLabel', {
@@ -231,34 +230,6 @@ export const uiSettings: Record<string, UiSettings> = {
     requiresPageReload: true,
     type: 'boolean',
   },
-  [enableInfrastructureHostsView]: {
-    category: [observabilityFeatureId],
-    name: i18n.translate('xpack.observability.enableInfrastructureHostsView', {
-      defaultMessage: 'Infrastructure Hosts view',
-    }),
-    value: true,
-    description: i18n.translate('xpack.observability.enableInfrastructureHostsViewDescription', {
-      defaultMessage: '{betaLabel} Enable the Hosts view in the Infrastructure app.',
-      values: {
-        betaLabel: `<em>[${betaLabel}]</em>`,
-      },
-    }),
-    schema: schema.boolean(),
-  },
-  [enableInfrastructureContainerAssetView]: {
-    category: [observabilityFeatureId],
-    name: i18n.translate('xpack.observability.enableInfrastructureContainerAssetView', {
-      defaultMessage: 'Container view',
-    }),
-    value: true,
-    description: i18n.translate(
-      'xpack.observability.enableInfrastructureContainerAssetViewDescription',
-      {
-        defaultMessage: 'Enable the Container asset view in the Infrastructure app.',
-      }
-    ),
-    schema: schema.boolean(),
-  },
   [enableInfrastructureProfilingIntegration]: {
     category: [observabilityFeatureId],
     name: i18n.translate('xpack.observability.enableInfrastructureProfilingIntegration', {
@@ -354,7 +325,7 @@ export const uiSettings: Record<string, UiSettings> = {
       },
     }),
     schema: schema.boolean(),
-    value: false,
+    value: true,
     requiresPageReload: true,
     type: 'boolean',
   },
@@ -374,8 +345,8 @@ export const uiSettings: Record<string, UiSettings> = {
       }
     ),
     schema: schema.boolean(),
-    value: false,
-    requiresPageReload: false,
+    value: true,
+    requiresPageReload: true,
     type: 'boolean',
   },
   [apmAWSLambdaPriceFactor]: {
@@ -641,6 +612,25 @@ export const uiSettings: Record<string, UiSettings> = {
     ),
     value: false,
     schema: schema.boolean(),
+    requiresPageReload: false,
+  },
+  [searchExcludedDataTiers]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.searchExcludedDataTiers', {
+      defaultMessage: 'Excluded data tiers from search',
+    }),
+    description: i18n.translate(
+      'xpack.observability.advancedSettings.searchExcludedDataTiersDesc',
+      {
+        defaultMessage: `{technicalPreviewLabel} Specify the data tiers to exclude from search, such as data_cold and/or data_frozen. 
+        When configured, indices allocated in the selected tiers will be ignored from search requests. Affected apps: APM`,
+        values: { technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>` },
+      }
+    ),
+    value: [],
+    schema: schema.arrayOf(
+      schema.oneOf([schema.literal('data_cold'), schema.literal('data_frozen')])
+    ),
     requiresPageReload: false,
   },
 };

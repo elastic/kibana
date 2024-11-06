@@ -6,13 +6,12 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { encode } from '@kbn/rison';
 import {
   FetchData,
   FetchDataParams,
   LogsFetchDataResponse,
 } from '@kbn/observability-plugin/public';
-import { DEFAULT_LOG_VIEW } from '@kbn/logs-shared-plugin/common';
+import { DEFAULT_LOG_VIEW, getLogsLocatorsFromUrlService } from '@kbn/logs-shared-plugin/common';
 import { TIMESTAMP_FIELD } from '../../common/constants';
 import { InfraClientStartDeps, InfraClientStartServicesAccessor } from '../types';
 
@@ -58,7 +57,7 @@ export function getLogsOverviewDataFetcher(
   getStartServices: InfraClientStartServicesAccessor
 ): FetchData<LogsFetchDataResponse> {
   return async (params) => {
-    const [, { data, logsShared }] = await getStartServices();
+    const [, { data, logsShared, share }] = await getStartServices();
     const resolvedLogView = await logsShared.logViews.client.getResolvedLogView(DEFAULT_LOG_VIEW);
 
     const { stats, series } = await fetchLogsOverview(
@@ -68,13 +67,18 @@ export function getLogsOverviewDataFetcher(
       params,
       data
     );
-
+    const { logsLocator } = getLogsLocatorsFromUrlService(share.url);
     const timeSpanInMinutes = (params.absoluteTime.end - params.absoluteTime.start) / (1000 * 60);
 
+    const appLink = logsLocator.getRedirectUrl({
+      timeRange: {
+        startTime: params.absoluteTime.start,
+        endTime: params.absoluteTime.end,
+      },
+    });
+
     return {
-      appLink: `/app/logs/stream?logPosition=(end:${encode(params.relativeTime.end)},start:${encode(
-        params.relativeTime.start
-      )})`,
+      appLink,
       stats: normalizeStats(stats, timeSpanInMinutes),
       series: normalizeSeries(series),
     };

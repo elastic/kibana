@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { set } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
 import { UserRt, UserWithProfileInfoRt, UsersRt, CaseUserProfileRt, CaseAssigneesRt } from './v1';
 
 describe('User', () => {

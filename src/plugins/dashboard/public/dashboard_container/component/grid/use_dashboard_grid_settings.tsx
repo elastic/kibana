@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { useMemo } from 'react';
@@ -11,15 +12,16 @@ import { useMemo } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 
+import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
+import { DashboardPanelMap } from '../../../../common';
 import { DASHBOARD_GRID_COLUMN_COUNT } from '../../../dashboard_constants';
-import { useDashboardContainer } from '../../embeddable/dashboard_container';
+import { useDashboardApi } from '../../../dashboard_api/use_dashboard_api';
 
-export const useDashboardGridSettings = (panelsInOrder: string[]) => {
-  const dashboard = useDashboardContainer();
+export const useDashboardGridSettings = (panelsInOrder: string[], panels: DashboardPanelMap) => {
+  const dashboardApi = useDashboardApi();
   const { euiTheme } = useEuiTheme();
 
-  const panels = dashboard.select((state) => state.explicitInput.panels);
-  const viewMode = dashboard.select((state) => state.explicitInput.viewMode);
+  const viewMode = useStateFromPublishingSubject(dashboardApi.viewMode);
 
   const layouts = useMemo(() => {
     return {

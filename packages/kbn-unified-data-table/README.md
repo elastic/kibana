@@ -13,7 +13,7 @@ Props description:
 | **dataView** | DataView | The used data view. |
 | **loadingState** | DataLoadingState | Determines if data is currently loaded. |
 | **onFilter** | DocViewFilterFn | Function to add a filter in the grid cell or document flyout. |
-| **onResize** | (optional)(colSettings: { columnId: string; width: number }) => void; | Function triggered when a column is resized by the user. |
+| **onResize** | (optional)(colSettings: { columnId: string; width: number | undefind }) => void; | Function triggered when a column is resized by the user, passes `undefined` for auto-width. |
 | **onSetColumns** | (columns: string[], hideTimeColumn: boolean) => void; | Function to set all columns. |
 | **onSort** | (optional)(sort: string[][]) => void; | Function to change sorting of the documents, skipped when isSortEnabled is set to false. |
 | **rows** | (optional)DataTableRecord[] | Array of documents provided by Elasticsearch. |
@@ -50,7 +50,8 @@ Props description:
 | **visibleCellActions** | (optional)number | An optional value for a custom number of the visible cell actions in the table. By default is up to 3. |
 | **externalCustomRenderers** | (optional)Record<string,(props: EuiDataGridCellValueElementProps) => React.ReactNode>; | An optional settings for a specified fields rendering like links. Applied only for the listed fields rendering. |
 | **consumer** | (optional)string | Name of the UnifiedDataTable consumer component or application. |
-| **componentsTourSteps** | (optional)Record<string,string> | Optional key/value pairs to set guided onboarding steps ids for a data table components included to guided tour. |
+| **componentsTourSteps** | (optional)Record<string,string> | Optional key/value pairs to set guided onboarding steps ids for a data table components included to guided tour. |~~~~
+| **onUpdateDataGridDensity** | (optional)(DataGridDensity) => void; | Optional callback when the data grid density configuration is modified. |
 
 *Required **services** list:
 ```
@@ -80,7 +81,7 @@ Usage example:
       onFilter={() => {
         // Add logic to refetch the data when the filter by field was added/removed. Refetch data.
       }}
-      onResize={(colSettings: { columnId: string; width: number }) => {
+      onResize={(colSettings: { columnId: string; width: number | undefined }) => {
         // Update the table state with the new width for the column
       }}
       onSetColumns={(columns: string[], hideTimeColumn: boolean) => {

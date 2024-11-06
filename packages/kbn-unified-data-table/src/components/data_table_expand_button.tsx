@@ -1,16 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { EuiButtonIcon, EuiDataGridCellValueElementProps, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { UnifiedDataTableContext } from '../table_context';
-import { DataTableRowControl, Size } from './data_table_row_control';
 import { useControlColumn } from '../hooks/use_control_column';
 
 /**
@@ -30,7 +30,7 @@ export const ExpandButton = (props: EuiDataGridCellValueElementProps) => {
     defaultMessage: 'Toggle dialog with details',
   });
 
-  const testSubj = record.isAnchor
+  const testSubj = record?.isAnchor
     ? 'docTableExpandToggleColumnAnchor'
     : 'docTableExpandToggleColumn';
 
@@ -43,30 +43,33 @@ export const ExpandButton = (props: EuiDataGridCellValueElementProps) => {
     }
   }, [isCurrentRowExpanded, setPressed, pressed]);
 
-  if (!setExpanded) {
+  if (!setExpanded || !record) {
     return null;
   }
 
   return (
-    <DataTableRowControl size={Size.normal}>
-      <EuiToolTip content={buttonLabel} delay="long" ref={toolTipRef}>
-        <EuiButtonIcon
-          id={rowIndex === 0 ? tourStep : undefined}
-          size="xs"
-          iconSize="s"
-          aria-label={buttonLabel}
-          data-test-subj={testSubj}
-          onClick={() => {
-            const nextHit = isCurrentRowExpanded ? undefined : record;
-            toolTipRef.current?.hideToolTip();
-            setPressed(Boolean(nextHit));
-            setExpanded?.(nextHit);
-          }}
-          color={isCurrentRowExpanded ? 'primary' : 'text'}
-          iconType={isCurrentRowExpanded ? 'minimize' : 'expand'}
-          isSelected={isCurrentRowExpanded}
-        />
-      </EuiToolTip>
-    </DataTableRowControl>
+    <EuiToolTip
+      content={buttonLabel}
+      delay="long"
+      ref={toolTipRef}
+      anchorClassName="unifiedDataTable__rowControl"
+    >
+      <EuiButtonIcon
+        id={rowIndex === 0 ? tourStep : undefined}
+        size="xs"
+        iconSize="s"
+        aria-label={buttonLabel}
+        data-test-subj={testSubj}
+        onClick={() => {
+          const nextHit = isCurrentRowExpanded ? undefined : record;
+          toolTipRef.current?.hideToolTip();
+          setPressed(Boolean(nextHit));
+          setExpanded?.(nextHit);
+        }}
+        color={isCurrentRowExpanded ? 'primary' : 'text'}
+        iconType={isCurrentRowExpanded ? 'minimize' : 'expand'}
+        isSelected={isCurrentRowExpanded}
+      />
+    </EuiToolTip>
   );
 };

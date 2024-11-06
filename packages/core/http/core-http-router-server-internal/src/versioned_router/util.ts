@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { once } from 'lodash';
@@ -15,6 +16,7 @@ import type {
   VersionedRouteResponseValidation,
   VersionedRouteValidation,
 } from '@kbn/core-http-server';
+import { validRouteSecurity } from '../security_route_config_validator';
 
 export function isCustomValidation(
   v: VersionedRouteCustomResponseBodyValidation | VersionedResponseBodyValidation
@@ -69,17 +71,18 @@ function prepareValidation(validation: VersionedRouteValidation<unknown, unknown
 export function prepareVersionedRouteValidation(
   options: AddVersionOpts<unknown, unknown, unknown>
 ): AddVersionOpts<unknown, unknown, unknown> {
-  if (typeof options.validate === 'function') {
-    const validate = options.validate;
-    return {
-      ...options,
-      validate: once(() => prepareValidation(validate())),
-    };
-  } else if (typeof options.validate === 'object' && options.validate !== null) {
-    return {
-      ...options,
-      validate: prepareValidation(options.validate),
-    };
+  const { validate: originalValidate, security, ...rest } = options;
+  let validate = originalValidate;
+
+  if (typeof originalValidate === 'function') {
+    validate = once(() => prepareValidation(originalValidate()));
+  } else if (typeof validate === 'object' && validate !== null) {
+    validate = prepareValidation(validate);
   }
-  return options;
+
+  return {
+    security: validRouteSecurity(security),
+    validate,
+    ...rest,
+  };
 }

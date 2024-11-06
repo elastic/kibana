@@ -18,6 +18,7 @@ import {
 import { AzureRepository, Repository } from '../../../../../common/types';
 import { RepositorySettingsValidation } from '../../../services/validation';
 import { ChunkSizeField, MaxSnapshotsField, MaxRestoreField } from './common';
+import { DisableToolTip, MANAGED_REPOSITORY_TOOLTIP_MESSAGE } from '../../disable_tooltip';
 
 interface Props {
   repository: AzureRepository;
@@ -94,16 +95,22 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
           isInvalid={Boolean(hasErrors && settingErrors.client)}
           error={settingErrors.client}
         >
-          <EuiFieldText
-            defaultValue={client || ''}
-            fullWidth
-            onChange={(e) => {
-              updateRepositorySettings({
-                client: e.target.value,
-              });
-            }}
-            data-test-subj="clientInput"
-            disabled={isManagedRepository}
+          <DisableToolTip
+            isManaged={isManagedRepository}
+            tooltipMessage={MANAGED_REPOSITORY_TOOLTIP_MESSAGE}
+            component={
+              <EuiFieldText
+                defaultValue={client || ''}
+                fullWidth
+                onChange={(e) => {
+                  updateRepositorySettings({
+                    client: e.target.value,
+                  });
+                }}
+                data-test-subj="clientInput"
+                disabled={isManagedRepository}
+              />
+            }
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
@@ -139,16 +146,22 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
           isInvalid={Boolean(hasErrors && settingErrors.container)}
           error={settingErrors.container}
         >
-          <EuiFieldText
-            defaultValue={container || ''}
-            fullWidth
-            onChange={(e) => {
-              updateRepositorySettings({
-                container: e.target.value,
-              });
-            }}
-            data-test-subj="containerInput"
-            disabled={isManagedRepository}
+          <DisableToolTip
+            isManaged={isManagedRepository}
+            tooltipMessage={MANAGED_REPOSITORY_TOOLTIP_MESSAGE}
+            component={
+              <EuiFieldText
+                defaultValue={container || ''}
+                fullWidth
+                onChange={(e) => {
+                  updateRepositorySettings({
+                    container: e.target.value,
+                  });
+                }}
+                data-test-subj="containerInput"
+                disabled={isManagedRepository}
+              />
+            }
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
@@ -184,16 +197,22 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
           isInvalid={Boolean(hasErrors && settingErrors.basePath)}
           error={settingErrors.basePath}
         >
-          <EuiFieldText
-            defaultValue={basePath || ''}
-            fullWidth
-            onChange={(e) => {
-              updateRepositorySettings({
-                basePath: e.target.value,
-              });
-            }}
-            data-test-subj="basePathInput"
-            disabled={isManagedRepository}
+          <DisableToolTip
+            isManaged={isManagedRepository}
+            tooltipMessage={MANAGED_REPOSITORY_TOOLTIP_MESSAGE}
+            component={
+              <EuiFieldText
+                defaultValue={basePath || ''}
+                fullWidth
+                onChange={(e) => {
+                  updateRepositorySettings({
+                    basePath: e.target.value,
+                  });
+                }}
+                data-test-subj="basePathInput"
+                disabled={isManagedRepository}
+              />
+            }
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
@@ -219,7 +238,6 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
         fullWidth
       >
         <EuiFormRow
-          hasEmptyLabelSpace={true}
           fullWidth
           isInvalid={Boolean(hasErrors && settingErrors.compress)}
           error={settingErrors.compress}
@@ -333,7 +351,6 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
         fullWidth
       >
         <EuiFormRow
-          hasEmptyLabelSpace={true}
           fullWidth
           isInvalid={Boolean(hasErrors && settingErrors.readonly)}
           error={settingErrors.readonly}

@@ -29,7 +29,9 @@ const mockResult = jest.fn().mockResolvedValue({
 jest.mock('../graphs/ecs', () => {
   return {
     getEcsGraph: jest.fn().mockResolvedValue({
-      invoke: () => mockResult(),
+      withConfig: () => ({
+        invoke: () => mockResult(),
+      }),
     }),
   };
 });
@@ -46,6 +48,7 @@ describe('registerEcsRoute', () => {
       dataStreamName: 'testStream',
       rawSamples: ['{"ei":0}'],
       connectorId: 'testConnector',
+      samplesFormat: { name: 'json', multiline: false },
     },
   });
 

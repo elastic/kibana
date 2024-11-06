@@ -200,6 +200,18 @@ describe('SyntheticsService', () => {
         isServiceManaged: true,
         status: LocationStatus.EXPERIMENTAL,
       },
+      {
+        geo: {
+          lat: 0,
+          lon: 0,
+        },
+        id: 'dev2',
+        isInvalid: false,
+        isServiceManaged: true,
+        label: 'Dev Service 2',
+        status: 'experimental',
+        url: 'http://localhost',
+      },
     ]);
   });
 
@@ -392,7 +404,7 @@ describe('SyntheticsService', () => {
   describe('getSyntheticsParams', () => {
     it('returns the params for all spaces', async () => {
       const { service } = getMockedService();
-      jest.spyOn(service, 'getSyntheticsParams').mockReset();
+      jest.spyOn(service, 'getSyntheticsParams').mockRestore();
 
       (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({} as AxiosResponse);
 
@@ -416,7 +428,7 @@ describe('SyntheticsService', () => {
 
     it('returns the params for specific space', async () => {
       const { service } = getMockedService();
-      jest.spyOn(service, 'getSyntheticsParams').mockReset();
+      jest.spyOn(service, 'getSyntheticsParams').mockRestore();
 
       serverMock.encryptedSavedObjects = mockEncryptedSO({
         params: [
@@ -440,7 +452,7 @@ describe('SyntheticsService', () => {
     });
     it('returns the space limited params', async () => {
       const { service } = getMockedService();
-      jest.spyOn(service, 'getSyntheticsParams').mockReset();
+      jest.spyOn(service, 'getSyntheticsParams').mockRestore();
 
       serverMock.encryptedSavedObjects = mockEncryptedSO({
         params: [

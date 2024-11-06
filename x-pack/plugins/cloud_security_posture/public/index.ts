@@ -7,7 +7,6 @@
 
 import { CspPlugin } from './plugin';
 export type { CspSecuritySolutionContext } from './types';
-export { CLOUD_SECURITY_POSTURE_BASE_PATH } from './common/navigation/constants';
 export type { CloudSecurityPosturePageId } from './common/navigation/types';
 export { getSecuritySolutionLink } from './common/navigation/security_solution_links';
 

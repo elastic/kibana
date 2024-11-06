@@ -36,6 +36,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           'logs-apm*': { read: true },
           'metrics-apm*': { read: true },
           'traces-apm*': { read: true },
+          'logs-*.otel-*': { read: true },
+          'metrics-*.otel-*': { read: true },
+          'traces-*.otel-*': { read: true },
         });
       });
 
@@ -71,6 +74,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           'logs-apm*': { read: true },
           'metrics-apm*': { read: true },
           'traces-apm*': { read: true },
+          'logs-*.otel-*': { read: true },
+          'metrics-*.otel-*': { read: true },
+          'traces-*.otel-*': { read: true },
         });
       });
 

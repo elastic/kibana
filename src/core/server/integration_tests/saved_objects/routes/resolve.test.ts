@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import supertest from 'supertest';
@@ -108,6 +109,7 @@ describe('GET /api/saved_objects/resolve/{type}/{id}', () => {
 
     const result = await supertest(httpSetup.server.listener)
       .get('/api/saved_objects/resolve/index-pattern/logstash-*')
+      .set('x-elastic-internal-origin', 'kibana')
       .expect(200);
 
     expect(result.body).toEqual(clientResponse);
@@ -116,6 +118,7 @@ describe('GET /api/saved_objects/resolve/{type}/{id}', () => {
   it('calls upon savedObjectClient.resolve', async () => {
     await supertest(httpSetup.server.listener)
       .get('/api/saved_objects/resolve/index-pattern/logstash-*')
+      .set('x-elastic-internal-origin', 'kibana')
       .expect(200);
 
     expect(savedObjectsClient.resolve).toHaveBeenCalled();
@@ -127,6 +130,7 @@ describe('GET /api/saved_objects/resolve/{type}/{id}', () => {
   it('returns with status 400 is a type is hidden from the HTTP APIs', async () => {
     const result = await supertest(httpSetup.server.listener)
       .get('/api/saved_objects/resolve/hidden-from-http/hiddenId')
+      .set('x-elastic-internal-origin', 'kibana')
       .expect(400);
     expect(result.body.message).toContain("Unsupported saved object type: 'hidden-from-http'");
   });
@@ -134,6 +138,7 @@ describe('GET /api/saved_objects/resolve/{type}/{id}', () => {
   it('logs a warning message when called', async () => {
     await supertest(httpSetup.server.listener)
       .get('/api/saved_objects/resolve/index-pattern/logstash-*')
+      .set('x-elastic-internal-origin', 'kibana')
       .expect(200);
     expect(loggerWarnSpy).toHaveBeenCalledTimes(1);
   });

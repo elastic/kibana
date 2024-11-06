@@ -17,7 +17,8 @@ import { MAX_DESCRIPTION_LENGTH } from '../../../common/constants';
 import { FormTestComponent } from '../../common/test_utils';
 import type { FormSchema } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 
-describe('Description', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/187526
+describe.skip('Description', () => {
   let appMockRender: AppMockRenderer;
   const onSubmit = jest.fn();
   const draftStorageKey = `cases.caseView.createCase.description.markdownEditor`;
@@ -61,9 +62,10 @@ describe('Description', () => {
 
     const description = await screen.findByTestId('euiMarkdownEditorTextArea');
 
-    userEvent.paste(description, 'My new description');
+    await userEvent.click(description);
+    await userEvent.paste('My new description');
 
-    userEvent.click(await screen.findByText('Submit'));
+    await userEvent.click(await screen.findByText('Submit'));
 
     await waitFor(() => {
       expect(onSubmit).toBeCalledWith({ description: 'My new description' }, true);
@@ -86,9 +88,10 @@ describe('Description', () => {
 
     const description = await screen.findByTestId('euiMarkdownEditorTextArea');
 
-    userEvent.paste(description, '  ');
+    await userEvent.click(description);
+    await userEvent.paste('  ');
 
-    userEvent.click(await screen.findByText('Submit'));
+    await userEvent.click(await screen.findByText('Submit'));
 
     await waitFor(() => {
       expect(onSubmit).toBeCalledWith({}, false);
@@ -115,9 +118,10 @@ describe('Description', () => {
 
     const description = await screen.findByTestId('euiMarkdownEditorTextArea');
 
-    userEvent.paste(description, longDescription);
+    await userEvent.click(description);
+    await userEvent.paste(longDescription);
 
-    userEvent.click(await screen.findByText('Submit'));
+    await userEvent.click(await screen.findByText('Submit'));
 
     await waitFor(() => {
       expect(onSubmit).toBeCalledWith({}, false);

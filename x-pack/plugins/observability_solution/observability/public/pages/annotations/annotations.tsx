@@ -22,20 +22,24 @@ export const ANNOTATIONS_PAGE_ID = 'annotations-container';
 export function AnnotationsPage() {
   const {
     http: { basePath },
+    serverless,
   } = useKibana().services;
   const { ObservabilityPageTemplate } = usePluginContext();
 
   const checkPrivileges = useAnnotationsPrivileges();
 
-  useBreadcrumbs([
-    {
-      href: basePath.prepend(paths.observability.annotations),
-      text: i18n.translate('xpack.observability.breadcrumbs.annotationsLinkText', {
-        defaultMessage: 'Annotations',
-      }),
-      deepLinkId: 'observability-overview',
-    },
-  ]);
+  useBreadcrumbs(
+    [
+      {
+        href: basePath.prepend(paths.observability.annotations),
+        text: i18n.translate('xpack.observability.breadcrumbs.annotationsLinkText', {
+          defaultMessage: 'Annotations',
+        }),
+        deepLinkId: 'observability-overview',
+      },
+    ],
+    { serverless }
+  );
 
   return (
     <ObservabilityPageTemplate

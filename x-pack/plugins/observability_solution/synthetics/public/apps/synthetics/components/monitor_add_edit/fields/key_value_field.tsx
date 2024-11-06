@@ -172,6 +172,7 @@ export const KeyValuePairsField = ({
                 }
                 startControl={
                   <StyledField
+                    controlOnly
                     aria-label={i18n.translate(
                       'xpack.synthetics.keyValuePairsField.key.ariaLabel',
                       {
@@ -187,6 +188,7 @@ export const KeyValuePairsField = ({
                 }
                 endControl={
                   <StyledField
+                    controlOnly
                     aria-label={i18n.translate(
                       'xpack.synthetics.keyValuePairsField.value.ariaLabel',
                       {

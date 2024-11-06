@@ -6,6 +6,11 @@
  */
 
 import expect from '@kbn/expect';
+import type { UnencryptedTelemetryPayload } from '@kbn/telemetry-plugin/common/types';
+import {
+  ELASTIC_HTTP_VERSION_HEADER,
+  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
+} from '@kbn/core-http-common';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 import {
@@ -162,6 +167,28 @@ export default function ({ getService }: FtrProviderContext) {
 
         response = await api.favorite({ dashboardId: 'fav1', user: interactiveUser3 });
         expect(response.body.favoriteIds).to.eql(['fav1']);
+      });
+
+      // depends on the state from previous test
+      it('reports favorites stats', async () => {
+        const { body }: { body: UnencryptedTelemetryPayload } = await getService('supertest')
+          .post('/internal/telemetry/clusters/_stats')
+          .set('kbn-xsrf', 'xxx')
+          .set(ELASTIC_HTTP_VERSION_HEADER, '2')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+          .send({ unencrypted: true, refreshCache: true })
+          .expect(200);
+
+        // @ts-ignore
+        const favoritesStats = body[0].stats.stack_stats.kibana.plugins.favorites;
+        expect(favoritesStats).to.eql({
+          dashboard: {
+            total: 3,
+            total_users_spaces: 3,
+            avg_per_user_per_space: 1,
+            max_per_user_per_space: 1,
+          },
+        });
       });
     });
   });

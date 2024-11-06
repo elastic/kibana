@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { Logger } from '@kbn/logging';
@@ -20,6 +21,7 @@ import {
   getDefaultSecurityImplementation,
   convertSecurityApi,
   SecurityServiceConfigType,
+  PKCS12ConfigType,
 } from './utils';
 
 export class SecurityService
@@ -49,8 +51,10 @@ export class SecurityService
   public setup(): InternalSecurityServiceSetup {
     const config = this.getConfig();
     const securityConfig: SecurityServiceConfigType = config.get(['xpack', 'security']);
+    const elasticsearchConfig: PKCS12ConfigType = config.get(['elasticsearch']);
+    const serverConfig: PKCS12ConfigType = config.get(['server']);
 
-    checkFipsConfig(securityConfig, this.log);
+    checkFipsConfig(securityConfig, elasticsearchConfig, serverConfig, this.log);
 
     return {
       registerSecurityDelegate: (api) => {

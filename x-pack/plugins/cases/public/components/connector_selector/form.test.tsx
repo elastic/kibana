@@ -19,8 +19,7 @@ jest.mock('../../common/lib/kibana');
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
-// FLAKY: https://github.com/elastic/kibana/issues/189530
-describe.skip('ConnectorSelector', () => {
+describe('ConnectorSelector', () => {
   const handleChange = jest.fn();
   const defaultProps = {
     connectors: [],
@@ -43,6 +42,10 @@ describe.skip('ConnectorSelector', () => {
       actionTypeTitle: 'test',
       iconClass: 'logoSecurity',
     });
+  });
+
+  afterEach(async () => {
+    await appMock.clearQueryCache();
   });
 
   it('should render', async () => {

@@ -306,9 +306,22 @@ export const useColumns = ({
     [columns]
   );
 
+  // remove initialWidth property from the last column to extended it to meet the full page width
+  const columnsWithoutInitialWidthForLastVisibleColumn = useMemo(() => {
+    const lastVisibleColumns = visibleColumns[visibleColumns.length - 1];
+    return columns.map((col) => {
+      if (col.id !== lastVisibleColumns) {
+        return col;
+      }
+
+      const { initialWidth, ...rest } = col;
+      return rest;
+    });
+  }, [columns, visibleColumns]);
+
   return useMemo(
     () => ({
-      columns,
+      columns: columnsWithoutInitialWidthForLastVisibleColumn,
       visibleColumns,
       isBrowserFieldDataLoading: fieldsQuery.isLoading,
       browserFields: selectedAlertsFields,
@@ -319,7 +332,7 @@ export const useColumns = ({
       fields: fieldsToFetch,
     }),
     [
-      columns,
+      columnsWithoutInitialWidthForLastVisibleColumn,
       visibleColumns,
       fieldsQuery.isLoading,
       selectedAlertsFields,

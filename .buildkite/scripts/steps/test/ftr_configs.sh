@@ -57,6 +57,19 @@ while read -r config; do
 
   start=$(date +%s)
 
+  if [[ "${USE_CHROME_BETA:-}" =~ ^(1|true)$ ]]; then
+    echo "USE_CHROME_BETA was set - using google-chrome-beta"
+    export TEST_BROWSER_BINARY_PATH="$(which google-chrome-beta)"
+
+    # download the beta version of chromedriver
+    export CHROMEDRIVER_VERSION=$(curl https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions.json -s | jq -r '.channels.Beta.version')
+    export DETECT_CHROMEDRIVER_VERSION=false
+    node node_modules/chromedriver/install.js --chromedriver-force-download
+
+    # set annotation on the build
+    buildkite-agent annotate --style info --context chrome-beta "This build uses Google Chrome Beta @ ${CHROMEDRIVER_VERSION}"
+  fi
+
   # prevent non-zero exit code from breaking the loop
   set +e;
   node ./scripts/functional_tests \

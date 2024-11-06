@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 import { ListRequestQuery } from './list_metadata.gen';
 import { SuccessResponse } from '../model/schema/common.gen';

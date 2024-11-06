@@ -2,12 +2,8 @@
   margin-top: $euiSizeS;
 }
 
-.lnsConfigPanelNoPadding {
-  padding: 0;
-}
-
-.lnsConfigPanelDate__label {
-  min-width: 56px; // makes both labels ("from" and "to") the same width
+.lnsConfigPanelAnnotations__date .euiFormControlLayout__prepend {
+  min-width: $euiSize * 3.25; // makes both labels ("from" and "to") the same width
 }
 
 .lnsConfigPanelAnnotations__addButton {

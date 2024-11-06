@@ -8,7 +8,11 @@ paths:
       x-labels: [serverless, ess]
       operationId: DeleteList
       x-codegen-enabled: true
-      summary: Deletes a list
+      summary: Delete a list
+      description: |
+        Delete a list using the list ID.
+        > info
+        > When you delete a list, all of its list items are also deleted.
       parameters:
         - name: id
           in: query

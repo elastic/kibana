@@ -10,17 +10,20 @@ import expect from '@kbn/expect';
 import { asyncForEach } from '@kbn/std';
 import getPort from 'get-port';
 import http from 'http';
+import { IValidatedEvent } from '@kbn/event-log-plugin/server';
 
 import { getHttpProxyServer } from '@kbn/alerting-api-integration-helpers';
 import { getServiceNowServer } from '@kbn/actions-simulators-plugin/server/plugin';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 import { MAX_ADDITIONAL_FIELDS_LENGTH } from '@kbn/stack-connectors-plugin/common/servicenow/constants';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import { getEventLog } from '../../../../../common/lib';
 
 // eslint-disable-next-line import/no-default-export
 export default function serviceNowSIRTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const configService = getService('config');
+  const retry = getService('retry');
 
   const mockServiceNowCommon = {
     config: {
@@ -462,12 +465,12 @@ export default function serviceNowSIRTest({ getService }: FtrProviderContext) {
               params: {},
             })
             .then((resp: any) => {
-              expect(Object.keys(resp.body)).to.eql([
-                'status',
+              expect(Object.keys(resp.body).sort()).to.eql([
+                'connector_id',
+                'errorSource',
                 'message',
                 'retry',
-                'errorSource',
-                'connector_id',
+                'status',
               ]);
               expect(resp.body.connector_id).to.eql(simulatedActionId);
               expect(resp.body.status).to.eql('error');
@@ -486,7 +489,7 @@ export default function serviceNowSIRTest({ getService }: FtrProviderContext) {
                 connector_id: simulatedActionId,
                 status: 'error',
                 retry: false,
-                errorSource: TaskErrorSource.FRAMEWORK,
+                errorSource: TaskErrorSource.USER,
                 message:
                   'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subAction]: expected value to equal [pushToService]\n- [4.subAction]: expected value to equal [getChoices]',
               });
@@ -505,7 +508,7 @@ export default function serviceNowSIRTest({ getService }: FtrProviderContext) {
                 connector_id: simulatedActionId,
                 status: 'error',
                 retry: false,
-                errorSource: TaskErrorSource.FRAMEWORK,
+                errorSource: TaskErrorSource.USER,
                 message:
                   'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.incident.short_description]: expected value of type [string] but got [undefined]\n- [4.subAction]: expected value to equal [getChoices]',
               });
@@ -529,7 +532,7 @@ export default function serviceNowSIRTest({ getService }: FtrProviderContext) {
                 connector_id: simulatedActionId,
                 status: 'error',
                 retry: false,
-                errorSource: TaskErrorSource.FRAMEWORK,
+                errorSource: TaskErrorSource.USER,
                 message:
                   'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.incident.short_description]: expected value of type [string] but got [undefined]\n- [4.subAction]: expected value to equal [getChoices]',
               });
@@ -557,7 +560,7 @@ export default function serviceNowSIRTest({ getService }: FtrProviderContext) {
                 connector_id: simulatedActionId,
                 status: 'error',
                 retry: false,
-                errorSource: TaskErrorSource.FRAMEWORK,
+                errorSource: TaskErrorSource.USER,
                 message:
                   'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.comments]: types that failed validation:\n - [subActionParams.comments.0.0.commentId]: expected value of type [string] but got [undefined]\n - [subActionParams.comments.1]: expected value to equal [null]\n- [4.subAction]: expected value to equal [getChoices]',
               });
@@ -585,7 +588,7 @@ export default function serviceNowSIRTest({ getService }: FtrProviderContext) {
                 connector_id: simulatedActionId,
                 status: 'error',
                 retry: false,
-                errorSource: TaskErrorSource.FRAMEWORK,
+                errorSource: TaskErrorSource.USER,
                 message:
                   'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.comments]: types that failed validation:\n - [subActionParams.comments.0.0.comment]: expected value of type [string] but got [undefined]\n - [subActionParams.comments.1]: expected value to equal [null]\n- [4.subAction]: expected value to equal [getChoices]',
               });
@@ -683,7 +686,7 @@ export default function serviceNowSIRTest({ getService }: FtrProviderContext) {
                   connector_id: simulatedActionId,
                   status: 'error',
                   retry: false,
-                  errorSource: TaskErrorSource.FRAMEWORK,
+                  errorSource: TaskErrorSource.USER,
                   message:
                     'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subAction]: expected value to equal [pushToService]\n- [4.subActionParams.fields]: expected value of type [array] but got [undefined]',
                 });
@@ -721,6 +724,23 @@ export default function serviceNowSIRTest({ getService }: FtrProviderContext) {
                 url: `${serviceNowSimulatorURL}/nav_to.do?uri=sn_si_incident.do?sys_id=123`,
               },
             });
+
+            const events: IValidatedEvent[] = await retry.try(async () => {
+              return await getEventLog({
+                getService,
+                spaceId: 'default',
+                type: 'action',
+                id: simulatedActionId,
+                provider: 'actions',
+                actions: new Map([
+                  ['execute-start', { equal: 1 }],
+                  ['execute', { equal: 1 }],
+                ]),
+              });
+            });
+
+            const executeEvent = events[1];
+            expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(645);
           });
         });
 
@@ -768,6 +788,22 @@ export default function serviceNowSIRTest({ getService }: FtrProviderContext) {
                 url: `${serviceNowSimulatorURL}/nav_to.do?uri=sn_si_incident.do?sys_id=123`,
               },
             });
+            const events: IValidatedEvent[] = await retry.try(async () => {
+              return await getEventLog({
+                getService,
+                spaceId: 'default',
+                type: 'action',
+                id: simulatedActionId,
+                provider: 'actions',
+                actions: new Map([
+                  ['execute-start', { equal: 1 }],
+                  ['execute', { equal: 1 }],
+                ]),
+              });
+            });
+
+            const executeEvent = events[1];
+            expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(429);
           });
         });
 
@@ -816,6 +852,23 @@ export default function serviceNowSIRTest({ getService }: FtrProviderContext) {
                 },
               ],
             });
+
+            const events: IValidatedEvent[] = await retry.try(async () => {
+              return await getEventLog({
+                getService,
+                spaceId: 'default',
+                type: 'action',
+                id: simulatedActionId,
+                provider: 'actions',
+                actions: new Map([
+                  ['execute-start', { gte: 2 }],
+                  ['execute', { gte: 2 }],
+                ]),
+              });
+            });
+
+            const executeEvent = events[3];
+            expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(0);
           });
         });
       });

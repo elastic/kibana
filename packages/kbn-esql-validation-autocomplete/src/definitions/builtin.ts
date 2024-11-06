@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
@@ -290,7 +291,7 @@ export const mathFunctions: FunctionDefinition[] = [
   ),
 ];
 
-const comparisonFunctions: FunctionDefinition[] = [
+export const comparisonFunctions: FunctionDefinition[] = [
   {
     name: '==',
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definition.equalToDoc', {
@@ -418,6 +419,20 @@ const likeFunctions: FunctionDefinition[] = [
       {
         params: [
           { name: 'left', type: 'text' as const },
+          { name: 'right', type: 'text' as const },
+        ],
+        returnType: 'boolean',
+      },
+      {
+        params: [
+          { name: 'left', type: 'text' as const },
+          { name: 'right', type: 'keyword' as const },
+        ],
+        returnType: 'boolean',
+      },
+      {
+        params: [
+          { name: 'left', type: 'keyword' as const },
           { name: 'right', type: 'text' as const },
         ],
         returnType: 'boolean',
@@ -608,25 +623,12 @@ const otherDefinitions: FunctionDefinition[] = [
           { name: 'left', type: 'any' },
           { name: 'right', type: 'any' },
         ],
-        returnType: 'void',
+        returnType: 'unknown',
       },
     ],
   },
   {
-    name: 'functions',
-    type: 'builtin',
-    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definition.functionsDoc', {
-      defaultMessage: 'Show ES|QL avaialble functions with signatures',
-    }),
-    supportedCommands: ['meta'],
-    signatures: [
-      {
-        params: [],
-        returnType: 'void',
-      },
-    ],
-  },
-  {
+    // TODO — this shouldn't be a function or an operator...
     name: 'info',
     type: 'builtin',
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definition.infoDoc', {
@@ -636,7 +638,7 @@ const otherDefinitions: FunctionDefinition[] = [
     signatures: [
       {
         params: [],
-        returnType: 'void',
+        returnType: 'unknown', // meaningless
       },
     ],
   },

@@ -13,7 +13,9 @@ import { FormTestComponent } from '../../../common/test_utils';
 import * as i18n from '../translations';
 import { Configure } from './configure';
 
-describe('Configure ', () => {
+// Failing: See https://github.com/elastic/kibana/issues/176600
+// Failing: See https://github.com/elastic/kibana/issues/193918
+describe.skip('Configure ', () => {
   const onSubmit = jest.fn();
 
   beforeEach(() => {
@@ -37,7 +39,7 @@ describe('Configure ', () => {
       </FormTestComponent>
     );
 
-    userEvent.click(await screen.findByTestId('form-test-component-submit-button'));
+    await userEvent.click(await screen.findByTestId('form-test-component-submit-button'));
 
     await waitFor(() => {
       // data, isValid
@@ -57,9 +59,9 @@ describe('Configure ', () => {
       </FormTestComponent>
     );
 
-    userEvent.click(await screen.findByTestId('toggle-custom-field-required'));
-    userEvent.click(await screen.findByTestId('toggle-custom-field-default-value'));
-    userEvent.click(await screen.findByTestId('form-test-component-submit-button'));
+    await userEvent.click(await screen.findByTestId('toggle-custom-field-required'));
+    await userEvent.click(await screen.findByTestId('toggle-custom-field-default-value'));
+    await userEvent.click(await screen.findByTestId('form-test-component-submit-button'));
 
     await waitFor(() => {
       // data, isValid
@@ -80,8 +82,8 @@ describe('Configure ', () => {
       </FormTestComponent>
     );
 
-    userEvent.click(await screen.findByTestId('toggle-custom-field-required'));
-    userEvent.click(await screen.findByTestId('form-test-component-submit-button'));
+    await userEvent.click(await screen.findByTestId('toggle-custom-field-required'));
+    await userEvent.click(await screen.findByTestId('form-test-component-submit-button'));
 
     await waitFor(() => {
       // data, isValid

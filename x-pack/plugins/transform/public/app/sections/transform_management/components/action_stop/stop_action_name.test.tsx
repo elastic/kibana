@@ -15,7 +15,6 @@ import { StopActionName } from './stop_action_name';
 
 import transformListRow from '../../../../common/__mocks__/transform_list_row.json';
 
-jest.mock('../../../../../shared_imports');
 jest.mock('../../../../app_dependencies');
 
 const queryClient = new QueryClient();

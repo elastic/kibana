@@ -7,7 +7,7 @@
 
 import { mapValues } from 'lodash';
 import React, { createContext, useCallback, useMemo, useRef, useState } from 'react';
-import { withRouter } from 'react-router-dom';
+import { withRouter, RouteComponentProps } from 'react-router-dom';
 import { UxLocalUIFilterName, uxLocalUIFilterNames } from '../../../common/ux_ui_filter';
 import { pickKeys } from '../../../common/utils/pick_keys';
 import { UxUIFilters } from '../../../typings/ui_filters';
@@ -41,7 +41,10 @@ const UrlParamsContext = createContext({
   urlParams: {} as UrlParams,
 });
 
-const UrlParamsProvider: React.ComponentClass<{}> = withRouter(({ location, children }) => {
+const UrlParamsProvider: React.ComponentClass = withRouter<
+  React.PropsWithChildren<RouteComponentProps>,
+  React.FC<React.PropsWithChildren<RouteComponentProps>>
+>(({ location, children }) => {
   const refUrlParams = useRef(resolveUrlParams(location, {}));
 
   const { start, end, rangeFrom, rangeTo, exactStart, exactEnd } = refUrlParams.current;

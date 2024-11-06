@@ -73,16 +73,16 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
     },
 
     async openAdvancedEditor() {
-      this.assertAdvancedEditorSwitchExists();
+      await this.assertAdvancedEditorSwitchExists();
       await testSubjects.click('mlAnalyticsCreateJobWizardAdvancedEditorSwitch');
-      this.assertAdvancedEditorSwitchCheckState(true);
-      this.assertAdvancedEditorCodeEditorExists();
+      await this.assertAdvancedEditorSwitchCheckState(true);
+      await this.assertAdvancedEditorCodeEditorExists();
     },
 
     async closeAdvancedEditor() {
-      this.assertAdvancedEditorSwitchExists();
+      await this.assertAdvancedEditorSwitchExists();
       await testSubjects.click('mlAnalyticsCreateJobWizardAdvancedEditorSwitch');
-      this.assertAdvancedEditorSwitchCheckState(false);
+      await this.assertAdvancedEditorSwitchCheckState(false);
       await testSubjects.missingOrFail('mlAnalyticsCreateJobWizardAdvancedEditorCodeEditor');
     },
 
@@ -397,7 +397,7 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
 
     async selectDependentVariable(dependentVariable: string) {
       await this.waitForDependentVariableInputLoaded();
-      await comboBox.set(
+      await mlCommonUI.setOptionsListWithFieldStatsValue(
         '~mlAnalyticsCreateJobWizardDependentVariableSelect > comboBoxInput',
         dependentVariable
       );

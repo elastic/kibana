@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useContext, useState } from 'react';
@@ -51,7 +52,7 @@ export const ConfigInputField: React.FC<ConfigInputFieldProps> = ({
   isLoading,
   validateAndSetConfigValue,
 }) => {
-  const { isValid, required, placeholder, value } = configEntry;
+  const { isValid, required, placeholder, value, label } = configEntry;
   const [innerValue, setInnerValue] = useState(value);
   return (
     <EuiFieldText
@@ -64,6 +65,7 @@ export const ConfigInputField: React.FC<ConfigInputFieldProps> = ({
         validateAndSetConfigValue(event.target.value);
       }}
       placeholder={placeholder}
+      aria-label={label}
     />
   );
 };
@@ -73,7 +75,7 @@ export const ConfigInputTextArea: React.FC<ConfigInputFieldProps> = ({
   configEntry,
   validateAndSetConfigValue,
 }) => {
-  const { isValid, required, placeholder, value } = configEntry;
+  const { isValid, required, placeholder, value, label } = configEntry;
   const [innerValue, setInnerValue] = useState(value);
   return (
     <EuiTextArea
@@ -87,6 +89,7 @@ export const ConfigInputTextArea: React.FC<ConfigInputFieldProps> = ({
         validateAndSetConfigValue(event.target.value);
       }}
       placeholder={placeholder}
+      aria-label={label}
     />
   );
 };
@@ -128,7 +131,7 @@ export const ConfigInputPassword: React.FC<ConfigInputFieldProps> = ({
   configEntry,
   validateAndSetConfigValue,
 }) => {
-  const { required, value } = configEntry;
+  const { required, value, label } = configEntry;
   const [innerValue, setInnerValue] = useState(value);
   return (
     <EuiFieldPassword
@@ -140,6 +143,7 @@ export const ConfigInputPassword: React.FC<ConfigInputFieldProps> = ({
         setInnerValue(event.target.value);
         validateAndSetConfigValue(event.target.value);
       }}
+      aria-label={label}
     />
   );
 };
@@ -169,6 +173,7 @@ export const ConnectorConfigurationField: React.FC<ConnectorConfigurationFieldPr
           onChange={(event) => {
             validateAndSetConfigValue(event.target.value);
           }}
+          aria-label={label}
         />
       ) : (
         <EuiRadioGroup
@@ -179,6 +184,7 @@ export const ConnectorConfigurationField: React.FC<ConnectorConfigurationFieldPr
           onChange={(id) => {
             validateAndSetConfigValue(id);
           }}
+          aria-label={label}
         />
       );
 
@@ -226,6 +232,7 @@ export const ConnectorConfigurationField: React.FC<ConnectorConfigurationFieldPr
                     onChange={(event) => {
                       validateAndSetConfigValue(event.target.checked);
                     }}
+                    aria-label={label}
                   />
                 </EuiFlexItem>
                 {!hasPlatinumLicense && (

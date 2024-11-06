@@ -18,6 +18,7 @@ import DateMath from '@kbn/datemath';
 import { Capabilities } from '@kbn/core/public';
 import { useLinkProps } from '@kbn/observability-shared-plugin/public';
 import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import { useAssetDetailsRedirect } from '@kbn/metrics-data-access-plugin/public';
 import { useMetricsDataViewContext } from '../../../../containers/metrics_source';
 import { AlertFlyout } from '../../../../alerting/metric_threshold/components/alert_flyout';
 import { MetricsExplorerSeries } from '../../../../../common/http_api/metrics_explorer';
@@ -27,7 +28,6 @@ import {
   MetricsExplorerChartOptions,
 } from '../hooks/use_metrics_explorer_options';
 import { createTSVBLink, TSVB_WORKAROUND_INDEX_PATTERN } from './helpers/create_tsvb_link';
-import { useNodeDetailsRedirect } from '../../../link_to';
 import {
   HOST_NAME_FIELD,
   KUBERNETES_POD_UID_FIELD,
@@ -70,7 +70,7 @@ export const MetricsExplorerChartContextMenu: React.FC<Props> = ({
   uiCapabilities,
   chartOptions,
 }: Props) => {
-  const { getNodeDetailUrl } = useNodeDetailsRedirect();
+  const { getAssetDetailUrl } = useAssetDetailsRedirect();
   const [isPopoverOpen, setPopoverState] = useState(false);
   const [flyoutVisible, setFlyoutVisible] = useState(false);
   const { metricsView } = useMetricsDataViewContext();
@@ -107,7 +107,7 @@ export const MetricsExplorerChartContextMenu: React.FC<Props> = ({
   const nodeType = options.groupBy && fieldToNodeType(options.groupBy);
 
   const nodeDetailLinkProps = nodeType
-    ? getNodeDetailUrl({
+    ? getAssetDetailUrl({
         assetType: nodeType,
         assetId: series.id,
         search: {

@@ -9,6 +9,10 @@ import React from 'react';
 import { OverviewPageComponent } from './overview';
 import { render } from '../lib/helper/rtl_helpers';
 
+jest.mock('@kbn/ebt-tools', () => ({
+  usePageReady: jest.fn(),
+}));
+
 describe('MonitorPage', () => {
   it('renders expected elements for valid props', async () => {
     const { findByText } = render(<OverviewPageComponent />);

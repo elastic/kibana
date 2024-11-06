@@ -14,9 +14,9 @@ import { useMlKibana } from '../../../../../contexts/kibana';
 import { useToastNotificationService } from '../../../../../services/toast_notification_service';
 
 import {
-  deleteAnalytics,
-  deleteAnalyticsAndDestIndex,
-  canDeleteIndex,
+  useDeleteAnalytics,
+  useDeleteAnalyticsAndDestIndex,
+  useCanDeleteIndex,
 } from '../../services/analytics_service';
 
 import type {
@@ -56,6 +56,9 @@ export const useDeleteAction = (canDeleteDataFrameAnalytics: boolean) => {
   const indexName = getDestinationIndex(item?.config);
 
   const toastNotificationService = useToastNotificationService();
+  const deleteAnalytics = useDeleteAnalytics();
+  const deleteAnalyticsAndDestIndex = useDeleteAnalyticsAndDestIndex();
+  const canDeleteIndex = useCanDeleteIndex();
 
   const checkDataViewExists = async () => {
     try {
@@ -83,7 +86,7 @@ export const useDeleteAction = (canDeleteDataFrameAnalytics: boolean) => {
   };
   const checkUserIndexPermission = async () => {
     try {
-      const userCanDelete = await canDeleteIndex(indexName, toastNotificationService);
+      const userCanDelete = await canDeleteIndex(indexName);
       if (userCanDelete) {
         setUserCanDeleteIndex(true);
       }
@@ -133,11 +136,10 @@ export const useDeleteAction = (canDeleteDataFrameAnalytics: boolean) => {
         deleteAnalyticsAndDestIndex(
           item.config,
           deleteTargetIndex,
-          dataViewExists && deleteDataView,
-          toastNotificationService
+          dataViewExists && deleteDataView
         );
       } else {
-        deleteAnalytics(item.config, toastNotificationService);
+        deleteAnalytics(item.config);
       }
     }
   };

@@ -14,7 +14,7 @@
  *   version: not applicable
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 /**
  * Rule execution result is an aggregate that groups plain rule execution events by execution UUID. It contains such information as execution UUID, date, status and metrics.

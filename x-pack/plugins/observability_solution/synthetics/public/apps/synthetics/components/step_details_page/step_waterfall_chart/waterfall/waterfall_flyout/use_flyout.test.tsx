@@ -25,6 +25,8 @@ describe('useFlyoutHook', () => {
           value: 'text/html',
         },
       ],
+      showTooltip: false,
+      networkItemTooltipProps: [],
     },
   ];
 

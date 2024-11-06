@@ -48,6 +48,8 @@ jest.mock('../ai_assistant', () => {
   };
 });
 
+jest.mock('../data_view_selector_field/use_data_views');
+
 const mockRedirectLegacyUrl = jest.fn();
 const mockGetLegacyUrlConflict = jest.fn();
 jest.mock('../../../../common/lib/kibana', () => {
@@ -79,104 +81,6 @@ jest.mock('../../../../common/lib/kibana', () => {
           },
         },
         data: {
-          dataViews: {
-            getIdsWithTitle: async () =>
-              Promise.resolve([{ id: 'myfakeid', title: 'hello*,world*,refreshed*' }]),
-            create: async ({ title }: { title: string }) =>
-              Promise.resolve({
-                id: 'myfakeid',
-                matchedIndices: ['hello', 'world', 'refreshed'],
-                fields: [
-                  {
-                    name: 'bytes',
-                    type: 'number',
-                    esTypes: ['long'],
-                    aggregatable: true,
-                    searchable: true,
-                    count: 10,
-                    readFromDocValues: true,
-                    scripted: false,
-                    isMapped: true,
-                  },
-                  {
-                    name: 'ssl',
-                    type: 'boolean',
-                    esTypes: ['boolean'],
-                    aggregatable: true,
-                    searchable: true,
-                    count: 20,
-                    readFromDocValues: true,
-                    scripted: false,
-                    isMapped: true,
-                  },
-                  {
-                    name: '@timestamp',
-                    type: 'date',
-                    esTypes: ['date'],
-                    aggregatable: true,
-                    searchable: true,
-                    count: 30,
-                    readFromDocValues: true,
-                    scripted: false,
-                    isMapped: true,
-                  },
-                ],
-                getIndexPattern: () => 'hello*,world*,refreshed*',
-                getRuntimeMappings: () => ({
-                  myfield: {
-                    type: 'keyword',
-                  },
-                }),
-              }),
-            get: async (dataViewId: string, displayErrors?: boolean, refreshFields = false) =>
-              Promise.resolve({
-                id: dataViewId,
-                matchedIndices: refreshFields
-                  ? ['hello', 'world', 'refreshed']
-                  : ['hello', 'world'],
-                fields: [
-                  {
-                    name: 'bytes',
-                    type: 'number',
-                    esTypes: ['long'],
-                    aggregatable: true,
-                    searchable: true,
-                    count: 10,
-                    readFromDocValues: true,
-                    scripted: false,
-                    isMapped: true,
-                  },
-                  {
-                    name: 'ssl',
-                    type: 'boolean',
-                    esTypes: ['boolean'],
-                    aggregatable: true,
-                    searchable: true,
-                    count: 20,
-                    readFromDocValues: true,
-                    scripted: false,
-                    isMapped: true,
-                  },
-                  {
-                    name: '@timestamp',
-                    type: 'date',
-                    esTypes: ['date'],
-                    aggregatable: true,
-                    searchable: true,
-                    count: 30,
-                    readFromDocValues: true,
-                    scripted: false,
-                    isMapped: true,
-                  },
-                ],
-                getIndexPattern: () => 'hello*,world*,refreshed*',
-                getRuntimeMappings: () => ({
-                  myfield: {
-                    type: 'keyword',
-                  },
-                }),
-              }),
-          },
           search: {
             search: () => ({
               subscribe: () => ({
@@ -625,12 +529,46 @@ describe('StepDefineRule', () => {
   });
 
   describe('AI assistant', () => {
-    it('renders assistant when query is not valid', () => {
-      render(<TestForm formProps={{ isQueryBarValid: false, ruleType: 'query' }} />, {
-        wrapper: TestProviders,
-      });
+    it('renders assistant when query is not valid and not empty', () => {
+      const initialState = {
+        queryBar: {
+          query: { query: '*:*', language: 'kuery' },
+          filters: [],
+          saved_id: null,
+        },
+      };
+      render(
+        <TestForm
+          formProps={{ isQueryBarValid: false, ruleType: 'query' }}
+          initialState={initialState}
+        />,
+        {
+          wrapper: TestProviders,
+        }
+      );
 
       expect(screen.getByTestId('ai-assistant')).toBeInTheDocument();
+    });
+
+    it('does not render assistant when query is not valid and empty', () => {
+      const initialState = {
+        queryBar: {
+          query: { query: '', language: 'kuery' },
+          filters: [],
+          saved_id: null,
+        },
+      };
+      render(
+        <TestForm
+          formProps={{ isQueryBarValid: false, ruleType: 'query' }}
+          initialState={initialState}
+        />,
+        {
+          wrapper: TestProviders,
+        }
+      );
+
+      expect(screen.queryByTestId('ai-assistant')).toBe(null);
     });
 
     it('does not render assistant when query is valid', () => {

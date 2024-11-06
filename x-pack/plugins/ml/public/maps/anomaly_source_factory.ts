@@ -12,7 +12,7 @@ import type { SerializableRecord } from '@kbn/utility-types';
 import { HttpService } from '../application/services/http_service';
 import type { MlPluginStart, MlStartDependencies } from '../plugin';
 import { ML_APP_LOCATOR } from '../../common/constants/locator';
-import type { MlApiServices } from '../application/services/ml_api_service';
+import type { MlApi } from '../application/services/ml_api_service';
 
 export class AnomalySourceFactory {
   public readonly type = SOURCE_TYPES.ES_ML_ANOMALIES;
@@ -22,15 +22,15 @@ export class AnomalySourceFactory {
   ) {}
 
   private async getServices(): Promise<{
-    mlResultsService: MlApiServices['results'];
+    mlResultsService: MlApi['results'];
     mlLocator?: LocatorPublic<SerializableRecord>;
   }> {
     const [coreStart, pluginStart] = await this.getStartServices();
-    const { mlApiServicesProvider } = await import('../application/services/ml_api_service');
+    const { mlApiProvider } = await import('../application/services/ml_api_service');
     const mlLocator = pluginStart.share.url.locators.get(ML_APP_LOCATOR);
 
     const httpService = new HttpService(coreStart.http);
-    const mlResultsService = mlApiServicesProvider(httpService).results;
+    const mlResultsService = mlApiProvider(httpService).results;
 
     return { mlResultsService, mlLocator };
   }

@@ -26,7 +26,7 @@ export function TestNowModeFlyoutContainer() {
   const flyoutOpenTestRun = useTestFlyoutOpen();
 
   const onDone = useCallback(
-    (testRunId) => {
+    (testRunId: any) => {
       dispatch(
         manualTestRunUpdateAction({
           testRunId,
@@ -39,7 +39,7 @@ export function TestNowModeFlyoutContainer() {
   );
 
   const handleFlyoutClose = useCallback(
-    (testRunId) => {
+    (testRunId: any) => {
       dispatch(
         manualTestRunUpdateAction({
           testRunId,

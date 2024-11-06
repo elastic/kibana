@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { ShareMenuRegistry } from './share_menu_registry';
-import { ShareMenuItem, ShareContext } from '../types';
+import { ShareMenuItemV2, ShareContext } from '../types';
 
 describe('ShareActionsRegistry', () => {
   describe('setup', () => {
@@ -33,9 +34,9 @@ describe('ShareActionsRegistry', () => {
       test('returns a flat list of actions returned by all providers', () => {
         const service = new ShareMenuRegistry();
         const registerFunction = service.setup().register;
-        const shareAction1 = {} as ShareMenuItem;
-        const shareAction2 = {} as ShareMenuItem;
-        const shareAction3 = {} as ShareMenuItem;
+        const shareAction1 = {} as ShareMenuItemV2;
+        const shareAction2 = {} as ShareMenuItemV2;
+        const shareAction3 = {} as ShareMenuItemV2;
         const provider1Callback = jest.fn(() => [shareAction1]);
         const provider2Callback = jest.fn(() => [shareAction2, shareAction3]);
         registerFunction({

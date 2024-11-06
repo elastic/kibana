@@ -39,6 +39,7 @@ export const useFindMaintenanceWindows = (props?: UseFindMaintenanceWindowsProps
   const {
     isLoading,
     isFetching,
+    isInitialLoading,
     data = [],
     refetch,
   } = useQuery({
@@ -54,6 +55,7 @@ export const useFindMaintenanceWindows = (props?: UseFindMaintenanceWindowsProps
   return {
     maintenanceWindows: data,
     isLoading: enabled && (isLoading || isFetching),
+    isInitialLoading,
     refetch,
   };
 };

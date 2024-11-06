@@ -37,7 +37,7 @@ import {
   VisualizeESQLUserIntention,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { getLensAttributesFromSuggestion } from '@kbn/visualization-utils';
+import { getLensAttributesFromSuggestion, ChartType } from '@kbn/visualization-utils';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import ReactDOM from 'react-dom';
 import useAsync from 'react-use/lib/useAsync';
@@ -47,19 +47,6 @@ import type {
   VisualizeQueryResponse,
 } from '../../common/functions/visualize_esql';
 import { ObservabilityAIAssistantAppPluginStartDependencies } from '../types';
-
-enum ChartType {
-  XY = 'XY',
-  Bar = 'Bar',
-  Line = 'Line',
-  Area = 'Area',
-  Donut = 'Donut',
-  Heatmap = 'Heat map',
-  Treemap = 'Treemap',
-  Tagcloud = 'Tag cloud',
-  Waffle = 'Waffle',
-  Table = 'Table',
-}
 
 interface VisualizeESQLProps {
   /** Lens start contract, get the ES|QL charts suggestions api */
@@ -419,6 +406,11 @@ export function registerVisualizeQueryRenderFunction({
           ? typedResponse.content.errorMessages
           : [];
 
+      const correctedQuery =
+        'data' in typedResponse && 'correctedQuery' in typedResponse.data
+          ? typedResponse.data.correctedQuery
+          : query;
+
       if ('data' in typedResponse && 'userOverrides' in typedResponse.data) {
         userOverrides = typedResponse.data.userOverrides;
       }
@@ -472,7 +464,7 @@ export function registerVisualizeQueryRenderFunction({
           break;
       }
 
-      const trimmedQuery = query.trim();
+      const trimmedQuery = correctedQuery.trim();
 
       return (
         <VisualizeESQL

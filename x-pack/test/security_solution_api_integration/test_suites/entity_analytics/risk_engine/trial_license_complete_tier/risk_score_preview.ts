@@ -23,7 +23,6 @@ import {
   cleanAssetCriticality,
   createAndSyncRuleAndAlertsFactory,
   deleteAllRiskScores,
-  enableAssetCriticalityAdvancedSetting,
   sanitizeScores,
   waitForAssetCriticalityToBePresent,
 } from '../../utils';
@@ -35,7 +34,6 @@ export default ({ getService }: FtrProviderContext): void => {
   const esArchiver = getService('esArchiver');
   const es = getService('es');
   const log = getService('log');
-  const kibanaServer = getService('kibanaServer');
 
   const createAndSyncRuleAndAlerts = createAndSyncRuleAndAlertsFactory({ supertest, log });
   const previewRiskScores = async ({
@@ -70,10 +68,6 @@ export default ({ getService }: FtrProviderContext): void => {
   };
 
   describe('@ess @serverless Risk Scoring Preview API', () => {
-    before(async () => {
-      enableAssetCriticalityAdvancedSetting(kibanaServer, log);
-    });
-
     context('with auditbeat data', () => {
       const { indexListOfDocuments } = dataGeneratorFactory({
         es,
@@ -258,6 +252,60 @@ export default ({ getService }: FtrProviderContext): void => {
               calculated_score_norm: 19.545732168175455,
               category_1_count: 100,
               category_1_score: 19.545732168175455,
+              id_field: 'host.name',
+              id_value: 'host-1',
+            },
+          ]);
+        });
+
+        it('calculates risk from 5 alerts, all in closed state, all for the same host', async () => {
+          const documentId = uuidv4();
+          const doc = buildDocument(
+            { host: { name: 'host-1' }, kibana: { alert: { workflow_status: 'closed' } } },
+            documentId
+          );
+          await indexListOfDocuments(Array(10).fill(doc));
+
+          const body = await getRiskScoreAfterRuleCreationAndExecution(documentId, {
+            alerts: 5,
+          });
+
+          expect(sanitizeScores(body.scores.host!)).to.eql([
+            {
+              calculated_level: 'Unknown',
+              calculated_score: 41.90206636025764,
+              calculated_score_norm: 16.163426307767953,
+              category_1_count: 10,
+              category_1_score: 16.163426307767953,
+              id_field: 'host.name',
+              id_value: 'host-1',
+            },
+          ]);
+        });
+        it('calculates risk from 10 alerts, some in closed state, some in open state, all for the same host', async () => {
+          const documentId = uuidv4();
+          const docStatusClosed = buildDocument(
+            { host: { name: 'host-1' }, kibana: { alert: { workflow_status: 'closed' } } },
+            documentId
+          );
+          const docStatusOpen = buildDocument(
+            { host: { name: 'host-1' }, kibana: { alert: { workflow_status: 'open' } } },
+            documentId
+          );
+          await indexListOfDocuments(Array(5).fill(docStatusClosed));
+          await indexListOfDocuments(Array(5).fill(docStatusOpen));
+
+          const body = await getRiskScoreAfterRuleCreationAndExecution(documentId, {
+            alerts: 10,
+          });
+
+          expect(sanitizeScores(body.scores.host!)).to.eql([
+            {
+              calculated_level: 'Unknown',
+              calculated_score: 41.90206636025764,
+              calculated_score_norm: 16.163426307767953,
+              category_1_count: 10,
+              category_1_score: 16.163426307767953,
               id_field: 'host.name',
               id_value: 'host-1',
             },

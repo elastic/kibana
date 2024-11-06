@@ -72,6 +72,7 @@ const patternListNoSignals = sortWithExcludesAtEnd(
 const sourcererDataView = {
   indicesExist: true,
   loading: false,
+  sourcererDataView: {},
 };
 
 describe('Sourcerer integration tests', () => {
@@ -109,7 +110,6 @@ describe('Sourcerer integration tests', () => {
 
     (useSourcererDataView as jest.Mock).mockReturnValue({
       ...sourcererDataView,
-      activePatterns: ['myFakebeat-*'],
     });
     jest.clearAllMocks();
   });

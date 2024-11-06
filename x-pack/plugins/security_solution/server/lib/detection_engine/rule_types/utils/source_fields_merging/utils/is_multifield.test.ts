@@ -16,25 +16,23 @@ describe('is_multifield', () => {
     jest.resetAllMocks();
   });
 
-  const dummyValue = ['value'];
-
   test('it returns true if the string "foo.bar" is a multiField', () => {
-    expect(isMultiField('foo.bar', [['foo', dummyValue]])).toEqual(true);
+    expect(isMultiField('foo.bar', ['foo'])).toEqual(true);
   });
 
   test('it returns false if the string "foo" is not a multiField', () => {
-    expect(isMultiField('foo', [['foo', dummyValue]])).toEqual(false);
+    expect(isMultiField('foo', ['foo'])).toEqual(false);
   });
 
   test('it returns false if we have a sibling string and are not a multiField', () => {
-    expect(isMultiField('foo.bar', [['foo.mar', dummyValue]])).toEqual(false);
+    expect(isMultiField('foo.bar', ['foo.mar'])).toEqual(false);
   });
 
   test('it returns true for a 3rd level match of being a sub-object. Runtime fields can have multiple layers of multiFields', () => {
-    expect(isMultiField('foo.mars.bar', [['foo', dummyValue]])).toEqual(true);
+    expect(isMultiField('foo.mars.bar', ['foo'])).toEqual(true);
   });
 
   test('it returns true for a 3rd level match against a 2nd level sub-object. Runtime fields can have multiple layers of multiFields', () => {
-    expect(isMultiField('foo.mars.bar', [['foo.mars', dummyValue]])).toEqual(true);
+    expect(isMultiField('foo.mars.bar', ['foo.mars'])).toEqual(true);
   });
 });

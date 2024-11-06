@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -18,6 +19,7 @@ import {
   pluginStateSavedObjectsType,
 } from '@kbn/guided-onboarding-plugin/server/saved_objects/guided_setup';
 import { API_BASE_PATH } from '@kbn/guided-onboarding-plugin/common';
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import { createPluginState, createGuides } from './helpers';
 
@@ -41,7 +43,10 @@ export default function testGetState({ getService }: FtrProviderContext) {
     });
 
     it('returns the default plugin state if no saved objects', async () => {
-      const response = await supertest.get(getStatePath).expect(200);
+      const response = await supertest
+        .get(getStatePath)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .expect(200);
       expect(response.body.pluginState).not.to.be.empty();
       expect(response.body).to.eql({
         pluginState: mockPluginStateNotStarted,
@@ -58,7 +63,10 @@ export default function testGetState({ getService }: FtrProviderContext) {
         creationDate: new Date().toISOString(),
       });
 
-      const response = await supertest.get(getStatePath).expect(200);
+      const response = await supertest
+        .get(getStatePath)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .expect(200);
       expect(response.body.pluginState).not.to.be.empty();
       expect(response.body).to.eql({
         pluginState: {
@@ -79,7 +87,10 @@ export default function testGetState({ getService }: FtrProviderContext) {
         creationDate: new Date().toISOString(),
       });
 
-      const response = await supertest.get(getStatePath).expect(200);
+      const response = await supertest
+        .get(getStatePath)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .expect(200);
       expect(response.body.pluginState).not.to.be.empty();
       expect(response.body).to.eql({
         pluginState: {
@@ -96,7 +107,10 @@ export default function testGetState({ getService }: FtrProviderContext) {
         creationDate: getDateXDaysAgo(40),
       });
 
-      const response = await supertest.get(getStatePath).expect(200);
+      const response = await supertest
+        .get(getStatePath)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .expect(200);
       expect(response.body.pluginState).not.to.be.empty();
       expect(response.body.pluginState.isActivePeriod).to.eql(false);
     });
@@ -108,7 +122,10 @@ export default function testGetState({ getService }: FtrProviderContext) {
         creationDate: getDateXDaysAgo(20),
       });
 
-      const response = await supertest.get(getStatePath).expect(200);
+      const response = await supertest
+        .get(getStatePath)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .expect(200);
       expect(response.body.pluginState).not.to.be.empty();
       expect(response.body.pluginState.isActivePeriod).to.eql(true);
     });
@@ -123,7 +140,10 @@ export default function testGetState({ getService }: FtrProviderContext) {
         creationDate: new Date().toISOString(),
       });
 
-      const response = await supertest.get(getStatePath).expect(200);
+      const response = await supertest
+        .get(getStatePath)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .expect(200);
       expect(response.body.pluginState.activeGuide.params).to.eql(testGuideParams);
     });
   });

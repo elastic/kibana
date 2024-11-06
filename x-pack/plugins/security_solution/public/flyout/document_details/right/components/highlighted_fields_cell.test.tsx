@@ -26,14 +26,24 @@ import { HostPreviewPanelKey } from '../../../entity_details/host_right';
 import { HOST_PREVIEW_BANNER } from './host_entity_overview';
 import { UserPreviewPanelKey } from '../../../entity_details/user_right';
 import { USER_PREVIEW_BANNER } from './user_entity_overview';
+import { NetworkPanelKey, NETWORK_PREVIEW_BANNER } from '../../../network_details';
+import { createTelemetryServiceMock } from '../../../../common/lib/telemetry/telemetry_service.mock';
 
 jest.mock('../../../../management/hooks');
 jest.mock('../../../../management/hooks/agents/use_get_agent_status');
 
-jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: jest.fn(),
-  ExpandableFlyoutProvider: ({ children }: React.PropsWithChildren<{}>) => <>{children}</>,
-}));
+jest.mock('@kbn/expandable-flyout');
+
+const mockedTelemetry = createTelemetryServiceMock();
+jest.mock('../../../../common/lib/kibana', () => {
+  return {
+    useKibana: () => ({
+      services: {
+        telemetry: mockedTelemetry,
+      },
+    }),
+  };
+});
 
 const useGetAgentStatusMock = useGetAgentStatus as jest.Mock;
 
@@ -64,26 +74,16 @@ describe('<HighlightedFieldsCell />', () => {
   it('should render a basic cell', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <HighlightedFieldsCell values={['value']} field={'field'} />
+        <DocumentDetailsContext.Provider value={panelContextValue}>
+          <HighlightedFieldsCell values={['value']} field={'field'} />
+        </DocumentDetailsContext.Provider>
       </TestProviders>
     );
 
     expect(getByTestId(HIGHLIGHTED_FIELDS_BASIC_CELL_TEST_ID)).toBeInTheDocument();
   });
 
-  it('should render a link cell if field is `host.name`', () => {
-    const { getByTestId } = renderHighlightedFieldsCell(['value'], 'host.name');
-
-    expect(getByTestId(HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID)).toBeInTheDocument();
-  });
-
-  it('should render a link cell if field is `user.name`', () => {
-    const { getByTestId } = renderHighlightedFieldsCell(['value'], 'user.name');
-
-    expect(getByTestId(HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID)).toBeInTheDocument();
-  });
-
-  it('should open left panel when clicking on the link within a a link cell when feature flag is off', () => {
+  it('should open left panel when clicking on the link within a a link cell when preview is disabled', () => {
     const { getByTestId } = renderHighlightedFieldsCell(['value'], 'user.name');
 
     getByTestId(HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID).click();
@@ -98,9 +98,10 @@ describe('<HighlightedFieldsCell />', () => {
     });
   });
 
-  it('should open host preview when click on host when feature flag is on', () => {
+  it('should open host preview when click on host when preview is not disabled', () => {
     mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
     const { getByTestId } = renderHighlightedFieldsCell(['test host'], 'host.name');
+    expect(getByTestId(HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID)).toBeInTheDocument();
 
     getByTestId(HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID).click();
     expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
@@ -113,9 +114,10 @@ describe('<HighlightedFieldsCell />', () => {
     });
   });
 
-  it('should open user preview when click on user when feature flag is on', () => {
+  it('should open user preview when click on user when preview is not disabled', () => {
     mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
     const { getByTestId } = renderHighlightedFieldsCell(['test user'], 'user.name');
+    expect(getByTestId(HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID)).toBeInTheDocument();
 
     getByTestId(HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID).click();
     expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
@@ -128,6 +130,22 @@ describe('<HighlightedFieldsCell />', () => {
     });
   });
 
+  it('should open ip preview when click on ip when preview is not disabled', () => {
+    mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
+    const { getByTestId } = renderHighlightedFieldsCell(['100:XXX:XXX'], 'source.ip');
+    expect(getByTestId(HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID)).toBeInTheDocument();
+
+    getByTestId(HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID).click();
+    expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
+      id: NetworkPanelKey,
+      params: {
+        ip: '100:XXX:XXX',
+        flowTarget: 'source',
+        banner: NETWORK_PREVIEW_BANNER,
+      },
+    });
+  });
+
   it('should render agent status cell if field is `agent.status`', () => {
     useGetAgentStatusMock.mockReturnValue({
       isFetched: true,
@@ -135,7 +153,9 @@ describe('<HighlightedFieldsCell />', () => {
     });
     const { getByTestId } = render(
       <TestProviders>
-        <HighlightedFieldsCell values={['value']} field={'agent.status'} />
+        <DocumentDetailsContext.Provider value={panelContextValue}>
+          <HighlightedFieldsCell values={['value']} field={'agent.status'} />
+        </DocumentDetailsContext.Provider>
       </TestProviders>
     );
 
@@ -150,11 +170,13 @@ describe('<HighlightedFieldsCell />', () => {
 
     const { getByTestId } = render(
       <TestProviders>
-        <HighlightedFieldsCell
-          values={['value']}
-          field={'agent.status'}
-          originalField="observer.serial_number"
-        />
+        <DocumentDetailsContext.Provider value={panelContextValue}>
+          <HighlightedFieldsCell
+            values={['value']}
+            field={'agent.status'}
+            originalField="observer.serial_number"
+          />
+        </DocumentDetailsContext.Provider>
       </TestProviders>
     );
 
@@ -169,11 +191,13 @@ describe('<HighlightedFieldsCell />', () => {
 
     const { getByTestId } = render(
       <TestProviders>
-        <HighlightedFieldsCell
-          values={['value']}
-          field={'agent.status'}
-          originalField="crowdstrike.event.DeviceId"
-        />
+        <DocumentDetailsContext.Provider value={panelContextValue}>
+          <HighlightedFieldsCell
+            values={['value']}
+            field={'agent.status'}
+            originalField="crowdstrike.event.DeviceId"
+          />
+        </DocumentDetailsContext.Provider>
       </TestProviders>
     );
 
@@ -182,7 +206,9 @@ describe('<HighlightedFieldsCell />', () => {
   it('should not render if values is null', () => {
     const { container } = render(
       <TestProviders>
-        <HighlightedFieldsCell values={null} field={'field'} />
+        <DocumentDetailsContext.Provider value={panelContextValue}>
+          <HighlightedFieldsCell values={null} field={'field'} />
+        </DocumentDetailsContext.Provider>
       </TestProviders>
     );
 

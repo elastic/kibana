@@ -7,28 +7,47 @@
 
 import { appContextService } from '..';
 import type { FleetConfigType } from '../../config';
+export { isOnlyAgentlessIntegration } from '../../../common/services/agentless_policy_helper';
 
-export const isAgentlessCloudEnabled = () => {
+export const isAgentlessApiEnabled = () => {
   const cloudSetup = appContextService.getCloud();
-  return Boolean(cloudSetup?.isCloudEnabled && appContextService.getConfig()?.agentless?.enabled);
+  const isHosted = cloudSetup?.isCloudEnabled || cloudSetup?.isServerlessEnabled;
+  return Boolean(isHosted && appContextService.getConfig()?.agentless?.enabled);
 };
-export const isAgentlessServerlessEnabled = () => {
-  const cloudSetup = appContextService.getCloud();
+export const isDefaultAgentlessPolicyEnabled = () => {
+  const cloudSetup = appContextService.getCloud && appContextService.getCloud();
   return Boolean(
     cloudSetup?.isServerlessEnabled && appContextService.getExperimentalFeatures().agentless
   );
 };
 export const isAgentlessEnabled = () => {
-  return isAgentlessCloudEnabled() || isAgentlessServerlessEnabled();
+  return isAgentlessApiEnabled() || isDefaultAgentlessPolicyEnabled();
 };
 
-const AGENTLESS_API_BASE_PATH = '/api/v1/ess';
+const AGENTLESS_ESS_API_BASE_PATH = '/api/v1/ess';
+const AGENTLESS_SERVERLESS_API_BASE_PATH = '/api/v1/serverless';
 
 type AgentlessApiEndpoints = '/deployments' | `/deployments/${string}`;
+
+export interface AgentlessConfig {
+  enabled?: boolean;
+  api?: {
+    url?: string;
+    tls?: {
+      certificate?: string;
+      key?: string;
+      ca?: string;
+    };
+  };
+}
 
 export const prependAgentlessApiBasePathToEndpoint = (
   agentlessConfig: FleetConfigType['agentless'],
   endpoint: AgentlessApiEndpoints
 ) => {
-  return `${agentlessConfig.api.url}${AGENTLESS_API_BASE_PATH}${endpoint}`;
+  const cloudSetup = appContextService.getCloud && appContextService.getCloud();
+  const endpointPrefix = cloudSetup?.isServerlessEnabled
+    ? AGENTLESS_SERVERLESS_API_BASE_PATH
+    : AGENTLESS_ESS_API_BASE_PATH;
+  return `${agentlessConfig.api.url}${endpointPrefix}${endpoint}`;
 };

@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { Fragment, ReactChildren } from 'react';
+import React, { Fragment } from 'react';
 import { EuiFormRow, EuiSpacer, EuiCheckableCard, useGeneratedHtmlId } from '@elastic/eui';
 
 import { FieldHook, getFieldValidityAndErrorMessage } from '../../hook_form_lib';
@@ -16,7 +17,7 @@ interface Props {
   options: Array<{
     label: string;
     value: string;
-    children: ReactChildren;
+    children: React.ReactNode;
     'data-test-subj'?: string;
   }>;
   euiFieldProps?: Record<string, any>;
@@ -38,7 +39,7 @@ export const CardRadioGroupField = ({
     <EuiFormRow
       label={field.label}
       labelType="legend"
-      helpText={typeof field.helpText === 'function' ? field.helpText() : field.helpText}
+      helpText={field.helpText}
       error={errorMessage}
       isInvalid={isInvalid}
       fullWidth

@@ -11,12 +11,12 @@ import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
-import type { MlApiServices } from '../application/services/ml_api_service';
+import type { MlApi } from '../application/services/ml_api_service';
 import { AnomalyJobSelectorEmptyState } from './anomaly_job_selector_empty_state';
 
 interface Props {
   onJobChange: (jobId: string) => void;
-  mlJobsService: MlApiServices['jobs'];
+  mlJobsService: MlApi['jobs'];
   jobsManagementPath?: string;
   canCreateJobs: boolean;
 }

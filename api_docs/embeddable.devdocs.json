@@ -1455,7 +1455,7 @@
                 "section": "def-public.EmbeddableOutput",
                 "text": "EmbeddableOutput"
               },
-              ", any>>(id: string) => Promise<TEmbeddable | ",
+              ", any>>(id: string) => Promise<",
               {
                 "pluginId": "embeddable",
                 "scope": "public",
@@ -1463,7 +1463,7 @@
                 "section": "def-public.ErrorEmbeddable",
                 "text": "ErrorEmbeddable"
               },
-              ">"
+              " | TEmbeddable>"
             ],
             "path": "src/plugins/embeddable/public/lib/containers/container.ts",
             "deprecated": false,
@@ -1822,7 +1822,7 @@
                 "section": "def-common.PanelState",
                 "text": "PanelState"
               },
-              "<{ id: string; version?: string | undefined; }>, otherPanels: TContainerInput[\"panels\"]) => Promise<TEmbeddable | ",
+              "<{ id: string; version?: string | undefined; }>, otherPanels: TContainerInput[\"panels\"]) => Promise<",
               {
                 "pluginId": "embeddable",
                 "scope": "public",
@@ -1830,7 +1830,7 @@
                 "section": "def-public.ErrorEmbeddable",
                 "text": "ErrorEmbeddable"
               },
-              ">"
+              " | TEmbeddable>"
             ],
             "path": "src/plugins/embeddable/public/lib/containers/container.ts",
             "deprecated": false,
@@ -2484,9 +2484,9 @@
               "OperatorFunction",
               "<any, any>[]): ",
               "Observable",
-              "<unknown>; }; observers: ",
-              "Observer",
-              "<",
+              "<unknown>; }; operator: ",
+              "Operator",
+              "<any, ",
               {
                 "pluginId": "@kbn/presentation-publishing",
                 "scope": "public",
@@ -2494,7 +2494,7 @@
                 "section": "def-public.ViewMode",
                 "text": "ViewMode"
               },
-              ">[]; isStopped: boolean; hasError: boolean; thrownError: any; lift: <R>(operator: ",
+              "> | undefined; lift: <R>(operator: ",
               "Operator",
               "<",
               {
@@ -2506,27 +2506,7 @@
               },
               ", R>) => ",
               "Observable",
-              "<R>; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
-              "Observable",
-              "<",
-              {
-                "pluginId": "@kbn/presentation-publishing",
-                "scope": "public",
-                "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-public.ViewMode",
-                "text": "ViewMode"
-              },
-              ">; operator: ",
-              "Operator",
-              "<any, ",
-              {
-                "pluginId": "@kbn/presentation-publishing",
-                "scope": "public",
-                "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-public.ViewMode",
-                "text": "ViewMode"
-              },
-              "> | undefined; subscribe: { (observerOrNext?: Partial<",
+              "<R>; subscribe: { (observerOrNext?: Partial<",
               "Observer",
               "<",
               {
@@ -2580,7 +2560,27 @@
                 "section": "def-public.ViewMode",
                 "text": "ViewMode"
               },
-              " | undefined>; }; }"
+              " | undefined>; }; observers: ",
+              "Observer",
+              "<",
+              {
+                "pluginId": "@kbn/presentation-publishing",
+                "scope": "public",
+                "docId": "kibKbnPresentationPublishingPluginApi",
+                "section": "def-public.ViewMode",
+                "text": "ViewMode"
+              },
+              ">[]; isStopped: boolean; hasError: boolean; thrownError: any; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
+              "Observable",
+              "<",
+              {
+                "pluginId": "@kbn/presentation-publishing",
+                "scope": "public",
+                "docId": "kibKbnPresentationPublishingPluginApi",
+                "section": "def-public.ViewMode",
+                "text": "ViewMode"
+              },
+              ">; }"
             ],
             "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
             "deprecated": false,
@@ -2886,9 +2886,9 @@
               "OperatorFunction",
               "<any, any>[]): ",
               "Observable",
-              "<unknown>; }; observers: ",
-              "Observer",
-              "<",
+              "<unknown>; }; operator: ",
+              "Operator",
+              "<any, ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -2896,7 +2896,7 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
-              "[] | undefined>[]; isStopped: boolean; hasError: boolean; thrownError: any; lift: <R>(operator: ",
+              "[] | undefined> | undefined; lift: <R>(operator: ",
               "Operator",
               "<",
               {
@@ -2908,27 +2908,7 @@
               },
               "[] | undefined, R>) => ",
               "Observable",
-              "<R>; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
-              "Observable",
-              "<",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataView",
-                "text": "DataView"
-              },
-              "[] | undefined>; operator: ",
-              "Operator",
-              "<any, ",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataView",
-                "text": "DataView"
-              },
-              "[] | undefined> | undefined; subscribe: { (observerOrNext?: Partial<",
+              "<R>; subscribe: { (observerOrNext?: Partial<",
               "Observer",
               "<",
               {
@@ -2982,7 +2962,27 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
-              "[] | undefined>; }; }"
+              "[] | undefined>; }; observers: ",
+              "Observer",
+              "<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              "[] | undefined>[]; isStopped: boolean; hasError: boolean; thrownError: any; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
+              "Observable",
+              "<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              "[] | undefined>; }"
             ],
             "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
             "deprecated": false,
@@ -3370,9 +3370,9 @@
               "OperatorFunction",
               "<any, any>[]): ",
               "Observable",
-              "<unknown>; }; observers: ",
-              "Observer",
-              "<",
+              "<unknown>; }; operator: ",
+              "Operator",
+              "<any, ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -3388,7 +3388,7 @@
                 "section": "def-common.AggregateQuery",
                 "text": "AggregateQuery"
               },
-              " | undefined>[]; isStopped: boolean; hasError: boolean; thrownError: any; lift: <R>(operator: ",
+              " | undefined> | undefined; lift: <R>(operator: ",
               "Operator",
               "<",
               {
@@ -3408,43 +3408,7 @@
               },
               " | undefined, R>) => ",
               "Observable",
-              "<R>; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
-              "Observable",
-              "<",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Query",
-                "text": "Query"
-              },
-              " | ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.AggregateQuery",
-                "text": "AggregateQuery"
-              },
-              " | undefined>; operator: ",
-              "Operator",
-              "<any, ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Query",
-                "text": "Query"
-              },
-              " | ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.AggregateQuery",
-                "text": "AggregateQuery"
-              },
-              " | undefined> | undefined; subscribe: { (observerOrNext?: Partial<",
+              "<R>; subscribe: { (observerOrNext?: Partial<",
               "Observer",
               "<",
               {
@@ -3546,7 +3510,43 @@
                 "section": "def-common.AggregateQuery",
                 "text": "AggregateQuery"
               },
-              " | undefined>; }; }"
+              " | undefined>; }; observers: ",
+              "Observer",
+              "<",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.AggregateQuery",
+                "text": "AggregateQuery"
+              },
+              " | undefined>[]; isStopped: boolean; hasError: boolean; thrownError: any; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
+              "Observable",
+              "<",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.AggregateQuery",
+                "text": "AggregateQuery"
+              },
+              " | undefined>; }"
             ],
             "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
             "deprecated": false,
@@ -3694,23 +3694,23 @@
               "OperatorFunction",
               "<any, any>[]): ",
               "Observable",
-              "<unknown>; }; observers: ",
-              "Observer",
-              "<string | undefined>[]; isStopped: boolean; hasError: boolean; thrownError: any; lift: <R>(operator: ",
+              "<unknown>; }; operator: ",
+              "Operator",
+              "<any, string | undefined> | undefined; lift: <R>(operator: ",
               "Operator",
               "<string | undefined, R>) => ",
               "Observable",
-              "<R>; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
-              "Observable",
-              "<string | undefined>; operator: ",
-              "Operator",
-              "<any, string | undefined> | undefined; subscribe: { (observerOrNext?: Partial<",
+              "<R>; subscribe: { (observerOrNext?: Partial<",
               "Observer",
               "<string | undefined>> | ((value: string | undefined) => void) | undefined): ",
               "Subscription",
               "; (next?: ((value: string | undefined) => void) | null | undefined, error?: ((error: any) => void) | null | undefined, complete?: (() => void) | null | undefined): ",
               "Subscription",
-              "; }; toPromise: { (): Promise<string | undefined>; (PromiseCtor: PromiseConstructor): Promise<string | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<string | undefined>; }; }"
+              "; }; toPromise: { (): Promise<string | undefined>; (PromiseCtor: PromiseConstructor): Promise<string | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<string | undefined>; }; observers: ",
+              "Observer",
+              "<string | undefined>[]; isStopped: boolean; hasError: boolean; thrownError: any; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
+              "Observable",
+              "<string | undefined>; }"
             ],
             "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
             "deprecated": false,
@@ -3858,23 +3858,23 @@
               "OperatorFunction",
               "<any, any>[]): ",
               "Observable",
-              "<unknown>; }; observers: ",
-              "Observer",
-              "<boolean | undefined>[]; isStopped: boolean; hasError: boolean; thrownError: any; lift: <R>(operator: ",
+              "<unknown>; }; operator: ",
+              "Operator",
+              "<any, boolean | undefined> | undefined; lift: <R>(operator: ",
               "Operator",
               "<boolean | undefined, R>) => ",
               "Observable",
-              "<R>; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
-              "Observable",
-              "<boolean | undefined>; operator: ",
-              "Operator",
-              "<any, boolean | undefined> | undefined; subscribe: { (observerOrNext?: Partial<",
+              "<R>; subscribe: { (observerOrNext?: Partial<",
               "Observer",
               "<boolean | undefined>> | ((value: boolean | undefined) => void) | undefined): ",
               "Subscription",
               "; (next?: ((value: boolean | undefined) => void) | null | undefined, error?: ((error: any) => void) | null | undefined, complete?: (() => void) | null | undefined): ",
               "Subscription",
-              "; }; toPromise: { (): Promise<boolean | undefined>; (PromiseCtor: PromiseConstructor): Promise<boolean | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<boolean | undefined>; }; }"
+              "; }; toPromise: { (): Promise<boolean | undefined>; (PromiseCtor: PromiseConstructor): Promise<boolean | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<boolean | undefined>; }; observers: ",
+              "Observer",
+              "<boolean | undefined>[]; isStopped: boolean; hasError: boolean; thrownError: any; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
+              "Observable",
+              "<boolean | undefined>; }"
             ],
             "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
             "deprecated": false,
@@ -4142,9 +4142,9 @@
               "OperatorFunction",
               "<any, any>[]): ",
               "Observable",
-              "<unknown>; }; observers: ",
-              "Observer",
-              "<",
+              "<unknown>; }; operator: ",
+              "Operator",
+              "<any, ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -4152,7 +4152,7 @@
                 "section": "def-common.Filter",
                 "text": "Filter"
               },
-              "[] | undefined>[]; isStopped: boolean; hasError: boolean; thrownError: any; lift: <R>(operator: ",
+              "[] | undefined> | undefined; lift: <R>(operator: ",
               "Operator",
               "<",
               {
@@ -4164,27 +4164,7 @@
               },
               "[] | undefined, R>) => ",
               "Observable",
-              "<R>; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
-              "Observable",
-              "<",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[] | undefined>; operator: ",
-              "Operator",
-              "<any, ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[] | undefined> | undefined; subscribe: { (observerOrNext?: Partial<",
+              "<R>; subscribe: { (observerOrNext?: Partial<",
               "Observer",
               "<",
               {
@@ -4238,7 +4218,27 @@
                 "section": "def-common.Filter",
                 "text": "Filter"
               },
-              "[] | undefined>; }; }"
+              "[] | undefined>; }; observers: ",
+              "Observer",
+              "<",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[] | undefined>[]; isStopped: boolean; hasError: boolean; thrownError: any; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
+              "Observable",
+              "<",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[] | undefined>; }"
             ],
             "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
             "deprecated": false,
@@ -4506,9 +4506,9 @@
               "OperatorFunction",
               "<any, any>[]): ",
               "Observable",
-              "<unknown>; }; observers: ",
-              "Observer",
-              "<",
+              "<unknown>; }; operator: ",
+              "Operator",
+              "<any, ",
               {
                 "pluginId": "@kbn/presentation-publishing",
                 "scope": "public",
@@ -4516,7 +4516,7 @@
                 "section": "def-public.PhaseEvent",
                 "text": "PhaseEvent"
               },
-              " | undefined>[]; isStopped: boolean; hasError: boolean; thrownError: any; lift: <R>(operator: ",
+              " | undefined> | undefined; lift: <R>(operator: ",
               "Operator",
               "<",
               {
@@ -4528,27 +4528,7 @@
               },
               " | undefined, R>) => ",
               "Observable",
-              "<R>; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
-              "Observable",
-              "<",
-              {
-                "pluginId": "@kbn/presentation-publishing",
-                "scope": "public",
-                "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-public.PhaseEvent",
-                "text": "PhaseEvent"
-              },
-              " | undefined>; operator: ",
-              "Operator",
-              "<any, ",
-              {
-                "pluginId": "@kbn/presentation-publishing",
-                "scope": "public",
-                "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-public.PhaseEvent",
-                "text": "PhaseEvent"
-              },
-              " | undefined> | undefined; subscribe: { (observerOrNext?: Partial<",
+              "<R>; subscribe: { (observerOrNext?: Partial<",
               "Observer",
               "<",
               {
@@ -4602,7 +4582,27 @@
                 "section": "def-public.PhaseEvent",
                 "text": "PhaseEvent"
               },
-              " | undefined>; }; }"
+              " | undefined>; }; observers: ",
+              "Observer",
+              "<",
+              {
+                "pluginId": "@kbn/presentation-publishing",
+                "scope": "public",
+                "docId": "kibKbnPresentationPublishingPluginApi",
+                "section": "def-public.PhaseEvent",
+                "text": "PhaseEvent"
+              },
+              " | undefined>[]; isStopped: boolean; hasError: boolean; thrownError: any; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
+              "Observable",
+              "<",
+              {
+                "pluginId": "@kbn/presentation-publishing",
+                "scope": "public",
+                "docId": "kibKbnPresentationPublishingPluginApi",
+                "section": "def-public.PhaseEvent",
+                "text": "PhaseEvent"
+              },
+              " | undefined>; }"
             ],
             "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
             "deprecated": false,
@@ -4764,23 +4764,23 @@
               "OperatorFunction",
               "<any, any>[]): ",
               "Observable",
-              "<unknown>; }; observers: ",
-              "Observer",
-              "<Error | undefined>[]; isStopped: boolean; hasError: boolean; thrownError: any; lift: <R>(operator: ",
+              "<unknown>; }; operator: ",
+              "Operator",
+              "<any, Error | undefined> | undefined; lift: <R>(operator: ",
               "Operator",
               "<Error | undefined, R>) => ",
               "Observable",
-              "<R>; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
-              "Observable",
-              "<Error | undefined>; operator: ",
-              "Operator",
-              "<any, Error | undefined> | undefined; subscribe: { (observerOrNext?: Partial<",
+              "<R>; subscribe: { (observerOrNext?: Partial<",
               "Observer",
               "<Error | undefined>> | ((value: Error | undefined) => void) | undefined): ",
               "Subscription",
               "; (next?: ((value: Error | undefined) => void) | null | undefined, error?: ((error: any) => void) | null | undefined, complete?: (() => void) | null | undefined): ",
               "Subscription",
-              "; }; toPromise: { (): Promise<Error | undefined>; (PromiseCtor: PromiseConstructor): Promise<Error | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<Error | undefined>; }; }"
+              "; }; toPromise: { (): Promise<Error | undefined>; (PromiseCtor: PromiseConstructor): Promise<Error | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<Error | undefined>; }; observers: ",
+              "Observer",
+              "<Error | undefined>[]; isStopped: boolean; hasError: boolean; thrownError: any; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
+              "Observable",
+              "<Error | undefined>; }"
             ],
             "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
             "deprecated": false,
@@ -5079,9 +5079,9 @@
               "OperatorFunction",
               "<any, any>[]): ",
               "Observable",
-              "<unknown>; }; observers: ",
-              "Observer",
-              "<",
+              "<unknown>; }; operator: ",
+              "Operator",
+              "<any, ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -5089,7 +5089,7 @@
                 "section": "def-common.TimeRange",
                 "text": "TimeRange"
               },
-              " | undefined>[]; isStopped: boolean; hasError: boolean; thrownError: any; lift: <R>(operator: ",
+              " | undefined> | undefined; lift: <R>(operator: ",
               "Operator",
               "<",
               {
@@ -5101,27 +5101,7 @@
               },
               " | undefined, R>) => ",
               "Observable",
-              "<R>; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
-              "Observable",
-              "<",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.TimeRange",
-                "text": "TimeRange"
-              },
-              " | undefined>; operator: ",
-              "Operator",
-              "<any, ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.TimeRange",
-                "text": "TimeRange"
-              },
-              " | undefined> | undefined; subscribe: { (observerOrNext?: Partial<",
+              "<R>; subscribe: { (observerOrNext?: Partial<",
               "Observer",
               "<",
               {
@@ -5175,7 +5155,27 @@
                 "section": "def-common.TimeRange",
                 "text": "TimeRange"
               },
-              " | undefined>; }; }"
+              " | undefined>; }; observers: ",
+              "Observer",
+              "<",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.TimeRange",
+                "text": "TimeRange"
+              },
+              " | undefined>[]; isStopped: boolean; hasError: boolean; thrownError: any; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
+              "Observable",
+              "<",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.TimeRange",
+                "text": "TimeRange"
+              },
+              " | undefined>; }"
             ],
             "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
             "deprecated": false,
@@ -5323,23 +5323,23 @@
               "OperatorFunction",
               "<any, any>[]): ",
               "Observable",
-              "<unknown>; }; observers: ",
-              "Observer",
-              "<boolean | undefined>[]; isStopped: boolean; hasError: boolean; thrownError: any; lift: <R>(operator: ",
+              "<unknown>; }; operator: ",
+              "Operator",
+              "<any, boolean | undefined> | undefined; lift: <R>(operator: ",
               "Operator",
               "<boolean | undefined, R>) => ",
               "Observable",
-              "<R>; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
-              "Observable",
-              "<boolean | undefined>; operator: ",
-              "Operator",
-              "<any, boolean | undefined> | undefined; subscribe: { (observerOrNext?: Partial<",
+              "<R>; subscribe: { (observerOrNext?: Partial<",
               "Observer",
               "<boolean | undefined>> | ((value: boolean | undefined) => void) | undefined): ",
               "Subscription",
               "; (next?: ((value: boolean | undefined) => void) | null | undefined, error?: ((error: any) => void) | null | undefined, complete?: (() => void) | null | undefined): ",
               "Subscription",
-              "; }; toPromise: { (): Promise<boolean | undefined>; (PromiseCtor: PromiseConstructor): Promise<boolean | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<boolean | undefined>; }; }"
+              "; }; toPromise: { (): Promise<boolean | undefined>; (PromiseCtor: PromiseConstructor): Promise<boolean | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<boolean | undefined>; }; observers: ",
+              "Observer",
+              "<boolean | undefined>[]; isStopped: boolean; hasError: boolean; thrownError: any; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
+              "Observable",
+              "<boolean | undefined>; }"
             ],
             "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
             "deprecated": false,
@@ -5517,23 +5517,23 @@
               "OperatorFunction",
               "<any, any>[]): ",
               "Observable",
-              "<unknown>; }; observers: ",
-              "Observer",
-              "<string | undefined>[]; isStopped: boolean; hasError: boolean; thrownError: any; lift: <R>(operator: ",
+              "<unknown>; }; operator: ",
+              "Operator",
+              "<any, string | undefined> | undefined; lift: <R>(operator: ",
               "Operator",
               "<string | undefined, R>) => ",
               "Observable",
-              "<R>; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
-              "Observable",
-              "<string | undefined>; operator: ",
-              "Operator",
-              "<any, string | undefined> | undefined; subscribe: { (observerOrNext?: Partial<",
+              "<R>; subscribe: { (observerOrNext?: Partial<",
               "Observer",
               "<string | undefined>> | ((value: string | undefined) => void) | undefined): ",
               "Subscription",
               "; (next?: ((value: string | undefined) => void) | null | undefined, error?: ((error: any) => void) | null | undefined, complete?: (() => void) | null | undefined): ",
               "Subscription",
-              "; }; toPromise: { (): Promise<string | undefined>; (PromiseCtor: PromiseConstructor): Promise<string | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<string | undefined>; }; }"
+              "; }; toPromise: { (): Promise<string | undefined>; (PromiseCtor: PromiseConstructor): Promise<string | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<string | undefined>; }; observers: ",
+              "Observer",
+              "<string | undefined>[]; isStopped: boolean; hasError: boolean; thrownError: any; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
+              "Observable",
+              "<string | undefined>; }"
             ],
             "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
             "deprecated": false,
@@ -5702,27 +5702,58 @@
               "OperatorFunction",
               "<any, any>[]): ",
               "Observable",
-              "<unknown>; }; observers: ",
-              "Observer",
-              "<string[] | undefined>[]; isStopped: boolean; hasError: boolean; thrownError: any; lift: <R>(operator: ",
+              "<unknown>; }; operator: ",
+              "Operator",
+              "<any, string[] | undefined> | undefined; lift: <R>(operator: ",
               "Operator",
               "<string[] | undefined, R>) => ",
               "Observable",
-              "<R>; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
-              "Observable",
-              "<string[] | undefined>; operator: ",
-              "Operator",
-              "<any, string[] | undefined> | undefined; subscribe: { (observerOrNext?: Partial<",
+              "<R>; subscribe: { (observerOrNext?: Partial<",
               "Observer",
               "<string[] | undefined>> | ((value: string[] | undefined) => void) | undefined): ",
               "Subscription",
               "; (next?: ((value: string[] | undefined) => void) | null | undefined, error?: ((error: any) => void) | null | undefined, complete?: (() => void) | null | undefined): ",
               "Subscription",
-              "; }; toPromise: { (): Promise<string[] | undefined>; (PromiseCtor: PromiseConstructor): Promise<string[] | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<string[] | undefined>; }; }"
+              "; }; toPromise: { (): Promise<string[] | undefined>; (PromiseCtor: PromiseConstructor): Promise<string[] | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<string[] | undefined>; }; observers: ",
+              "Observer",
+              "<string[] | undefined>[]; isStopped: boolean; hasError: boolean; thrownError: any; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
+              "Observable",
+              "<string[] | undefined>; }"
             ],
             "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.Embeddable.setDisabledActionIds",
+            "type": "Function",
+            "tags": [],
+            "label": "setDisabledActionIds",
+            "description": [],
+            "signature": [
+              "(ids: string[] | undefined) => void"
+            ],
+            "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.Embeddable.setDisabledActionIds.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "ids",
+                "description": [],
+                "signature": [
+                  "string[] | undefined"
+                ],
+                "path": "packages/presentation/presentation_publishing/interfaces/publishes_disabled_action_ids.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           },
           {
             "parentPluginId": "embeddable",
@@ -6053,27 +6084,219 @@
               "OperatorFunction",
               "<any, any>[]): ",
               "Observable",
-              "<unknown>; }; observers: ",
-              "Observer",
-              "<string | undefined>[]; isStopped: boolean; hasError: boolean; thrownError: any; lift: <R>(operator: ",
+              "<unknown>; }; operator: ",
+              "Operator",
+              "<any, string | undefined> | undefined; lift: <R>(operator: ",
               "Operator",
               "<string | undefined, R>) => ",
               "Observable",
-              "<R>; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
-              "Observable",
-              "<string | undefined>; operator: ",
-              "Operator",
-              "<any, string | undefined> | undefined; subscribe: { (observerOrNext?: Partial<",
+              "<R>; subscribe: { (observerOrNext?: Partial<",
               "Observer",
               "<string | undefined>> | ((value: string | undefined) => void) | undefined): ",
               "Subscription",
               "; (next?: ((value: string | undefined) => void) | null | undefined, error?: ((error: any) => void) | null | undefined, complete?: (() => void) | null | undefined): ",
               "Subscription",
-              "; }; toPromise: { (): Promise<string | undefined>; (PromiseCtor: PromiseConstructor): Promise<string | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<string | undefined>; }; }"
+              "; }; toPromise: { (): Promise<string | undefined>; (PromiseCtor: PromiseConstructor): Promise<string | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<string | undefined>; }; observers: ",
+              "Observer",
+              "<string | undefined>[]; isStopped: boolean; hasError: boolean; thrownError: any; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
+              "Observable",
+              "<string | undefined>; }"
             ],
             "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.Embeddable.hasLockedHoverActions$",
+            "type": "Object",
+            "tags": [],
+            "label": "hasLockedHoverActions$",
+            "description": [],
+            "signature": [
+              "{ source: ",
+              "Observable",
+              "<any> | undefined; readonly value: boolean; error: (err: any) => void; forEach: { (next: (value: boolean) => void): Promise<void>; (next: (value: boolean) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; complete: () => void; getValue: () => boolean; closed: boolean; pipe: { (): ",
+              "Observable",
+              "<boolean>; <A>(op1: ",
+              "OperatorFunction",
+              "<boolean, A>): ",
+              "Observable",
+              "<A>; <A, B>(op1: ",
+              "OperatorFunction",
+              "<boolean, A>, op2: ",
+              "OperatorFunction",
+              "<A, B>): ",
+              "Observable",
+              "<B>; <A, B, C>(op1: ",
+              "OperatorFunction",
+              "<boolean, A>, op2: ",
+              "OperatorFunction",
+              "<A, B>, op3: ",
+              "OperatorFunction",
+              "<B, C>): ",
+              "Observable",
+              "<C>; <A, B, C, D>(op1: ",
+              "OperatorFunction",
+              "<boolean, A>, op2: ",
+              "OperatorFunction",
+              "<A, B>, op3: ",
+              "OperatorFunction",
+              "<B, C>, op4: ",
+              "OperatorFunction",
+              "<C, D>): ",
+              "Observable",
+              "<D>; <A, B, C, D, E>(op1: ",
+              "OperatorFunction",
+              "<boolean, A>, op2: ",
+              "OperatorFunction",
+              "<A, B>, op3: ",
+              "OperatorFunction",
+              "<B, C>, op4: ",
+              "OperatorFunction",
+              "<C, D>, op5: ",
+              "OperatorFunction",
+              "<D, E>): ",
+              "Observable",
+              "<E>; <A, B, C, D, E, F>(op1: ",
+              "OperatorFunction",
+              "<boolean, A>, op2: ",
+              "OperatorFunction",
+              "<A, B>, op3: ",
+              "OperatorFunction",
+              "<B, C>, op4: ",
+              "OperatorFunction",
+              "<C, D>, op5: ",
+              "OperatorFunction",
+              "<D, E>, op6: ",
+              "OperatorFunction",
+              "<E, F>): ",
+              "Observable",
+              "<F>; <A, B, C, D, E, F, G>(op1: ",
+              "OperatorFunction",
+              "<boolean, A>, op2: ",
+              "OperatorFunction",
+              "<A, B>, op3: ",
+              "OperatorFunction",
+              "<B, C>, op4: ",
+              "OperatorFunction",
+              "<C, D>, op5: ",
+              "OperatorFunction",
+              "<D, E>, op6: ",
+              "OperatorFunction",
+              "<E, F>, op7: ",
+              "OperatorFunction",
+              "<F, G>): ",
+              "Observable",
+              "<G>; <A, B, C, D, E, F, G, H>(op1: ",
+              "OperatorFunction",
+              "<boolean, A>, op2: ",
+              "OperatorFunction",
+              "<A, B>, op3: ",
+              "OperatorFunction",
+              "<B, C>, op4: ",
+              "OperatorFunction",
+              "<C, D>, op5: ",
+              "OperatorFunction",
+              "<D, E>, op6: ",
+              "OperatorFunction",
+              "<E, F>, op7: ",
+              "OperatorFunction",
+              "<F, G>, op8: ",
+              "OperatorFunction",
+              "<G, H>): ",
+              "Observable",
+              "<H>; <A, B, C, D, E, F, G, H, I>(op1: ",
+              "OperatorFunction",
+              "<boolean, A>, op2: ",
+              "OperatorFunction",
+              "<A, B>, op3: ",
+              "OperatorFunction",
+              "<B, C>, op4: ",
+              "OperatorFunction",
+              "<C, D>, op5: ",
+              "OperatorFunction",
+              "<D, E>, op6: ",
+              "OperatorFunction",
+              "<E, F>, op7: ",
+              "OperatorFunction",
+              "<F, G>, op8: ",
+              "OperatorFunction",
+              "<G, H>, op9: ",
+              "OperatorFunction",
+              "<H, I>): ",
+              "Observable",
+              "<I>; <A, B, C, D, E, F, G, H, I>(op1: ",
+              "OperatorFunction",
+              "<boolean, A>, op2: ",
+              "OperatorFunction",
+              "<A, B>, op3: ",
+              "OperatorFunction",
+              "<B, C>, op4: ",
+              "OperatorFunction",
+              "<C, D>, op5: ",
+              "OperatorFunction",
+              "<D, E>, op6: ",
+              "OperatorFunction",
+              "<E, F>, op7: ",
+              "OperatorFunction",
+              "<F, G>, op8: ",
+              "OperatorFunction",
+              "<G, H>, op9: ",
+              "OperatorFunction",
+              "<H, I>, ...operations: ",
+              "OperatorFunction",
+              "<any, any>[]): ",
+              "Observable",
+              "<unknown>; }; operator: ",
+              "Operator",
+              "<any, boolean> | undefined; lift: <R>(operator: ",
+              "Operator",
+              "<boolean, R>) => ",
+              "Observable",
+              "<R>; subscribe: { (observerOrNext?: Partial<",
+              "Observer",
+              "<boolean>> | ((value: boolean) => void) | undefined): ",
+              "Subscription",
+              "; (next?: ((value: boolean) => void) | null | undefined, error?: ((error: any) => void) | null | undefined, complete?: (() => void) | null | undefined): ",
+              "Subscription",
+              "; }; toPromise: { (): Promise<boolean | undefined>; (PromiseCtor: PromiseConstructor): Promise<boolean | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<boolean | undefined>; }; observers: ",
+              "Observer",
+              "<boolean>[]; isStopped: boolean; hasError: boolean; thrownError: any; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
+              "Observable",
+              "<boolean>; }"
+            ],
+            "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.Embeddable.lockHoverActions",
+            "type": "Function",
+            "tags": [],
+            "label": "lockHoverActions",
+            "description": [],
+            "signature": [
+              "(lock: boolean) => void"
+            ],
+            "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.Embeddable.lockHoverActions.$1",
+                "type": "boolean",
+                "tags": [],
+                "label": "lock",
+                "description": [],
+                "path": "packages/presentation/presentation_publishing/interfaces/can_lock_hover_actions.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           },
           {
             "parentPluginId": "embeddable",
@@ -7471,7 +7694,7 @@
             "label": "render",
             "description": [],
             "signature": [
-              "() => JSX.Element"
+              "() => React.JSX.Element"
             ],
             "path": "src/plugins/embeddable/public/lib/embeddables/error_embeddable.tsx",
             "deprecated": false,
@@ -7961,7 +8184,7 @@
         "signature": [
           "(props: ",
           "EmbeddablePanelProps",
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "src/plugins/embeddable/public/embeddable_panel/embeddable_panel.tsx",
         "deprecated": true,
@@ -8038,7 +8261,7 @@
             "section": "def-public.EmbeddableRendererProps",
             "text": "EmbeddableRendererProps"
           },
-          "<I>) => JSX.Element"
+          "<I>) => React.JSX.Element"
         ],
         "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_renderer.tsx",
         "deprecated": false,
@@ -8080,7 +8303,7 @@
         "label": "EmbeddableRoot",
         "description": [],
         "signature": [
-          "({ embeddable, loading, error, input }: React.PropsWithChildren<Props>) => JSX.Element"
+          "({ embeddable, loading, error, input }: Props) => React.JSX.Element"
         ],
         "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_root.tsx",
         "deprecated": false,
@@ -8089,12 +8312,12 @@
           {
             "parentPluginId": "embeddable",
             "id": "def-public.EmbeddableRoot.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "{ embeddable, loading, error, input }",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<Props>"
+              "Props"
             ],
             "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_root.tsx",
             "deprecated": false,
@@ -8363,9 +8586,7 @@
         "label": "isExplicitInputWithAttributes",
         "description": [],
         "signature": [
-          "(value: ",
-          "ExplicitInputWithAttributes",
-          " | Partial<",
+          "(value: Partial<",
           {
             "pluginId": "embeddable",
             "scope": "common",
@@ -8373,7 +8594,9 @@
             "section": "def-common.EmbeddableInput",
             "text": "EmbeddableInput"
           },
-          ">) => value is ",
+          "> | ",
+          "ExplicitInputWithAttributes",
+          ") => value is ",
           "ExplicitInputWithAttributes"
         ],
         "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_factory.ts",
@@ -8388,8 +8611,7 @@
             "label": "value",
             "description": [],
             "signature": [
-              "ExplicitInputWithAttributes",
-              " | Partial<",
+              "Partial<",
               {
                 "pluginId": "embeddable",
                 "scope": "common",
@@ -8397,7 +8619,8 @@
                 "section": "def-common.EmbeddableInput",
                 "text": "EmbeddableInput"
               },
-              ">"
+              "> | ",
+              "ExplicitInputWithAttributes"
             ],
             "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_factory.ts",
             "deprecated": false,
@@ -8829,8 +9052,8 @@
             "pluginId": "@kbn/presentation-containers",
             "scope": "public",
             "docId": "kibKbnPresentationContainersPluginApi",
-            "section": "def-public.PresentationContainer",
-            "text": "PresentationContainer"
+            "section": "def-public.CanAddNewPanel",
+            "text": "CanAddNewPanel"
           },
           "; onAddPanel?: ((id: string) => void) | undefined; onClose?: (() => void) | undefined; }) => ",
           {
@@ -8868,8 +9091,8 @@
                     "pluginId": "@kbn/presentation-containers",
                     "scope": "public",
                     "docId": "kibKbnPresentationContainersPluginApi",
-                    "section": "def-public.PresentationContainer",
-                    "text": "PresentationContainer"
+                    "section": "def-public.CanAddNewPanel",
+                    "text": "CanAddNewPanel"
                   }
                 ],
                 "path": "src/plugins/embeddable/public/add_panel_flyout/open_add_panel_flyout.tsx",
@@ -8988,7 +9211,7 @@
             "section": "def-public.SerializedPanelState",
             "text": "SerializedPanelState"
           },
-          "<SerializedState>) => void) | undefined; }) => JSX.Element"
+          "<SerializedState>) => void) | undefined; }) => React.JSX.Element"
         ],
         "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_renderer.tsx",
         "deprecated": false,
@@ -9753,6 +9976,22 @@
             "path": "src/plugins/embeddable/public/lib/containers/i_container.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.EmbeddableContainerSettings.untilContainerInitialized",
+            "type": "Function",
+            "tags": [],
+            "label": "untilContainerInitialized",
+            "description": [],
+            "signature": [
+              "(() => Promise<void>) | undefined"
+            ],
+            "path": "src/plugins/embeddable/public/lib/containers/i_container.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -10177,9 +10416,9 @@
                 "section": "def-public.ContainerOutput",
                 "text": "ContainerOutput"
               },
-              "> | undefined) => Promise<Partial<TEmbeddableInput> | ",
+              "> | undefined) => Promise<",
               "ExplicitInputWithAttributes",
-              ">"
+              " | Partial<TEmbeddableInput>>"
             ],
             "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_factory.ts",
             "deprecated": false,
@@ -10275,7 +10514,7 @@
                 "section": "def-public.ContainerOutput",
                 "text": "ContainerOutput"
               },
-              "> | undefined) => Promise<TEmbeddable | ",
+              "> | undefined) => Promise<",
               {
                 "pluginId": "embeddable",
                 "scope": "public",
@@ -10283,7 +10522,7 @@
                 "section": "def-public.ErrorEmbeddable",
                 "text": "ErrorEmbeddable"
               },
-              ">"
+              " | TEmbeddable>"
             ],
             "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_factory.ts",
             "deprecated": false,
@@ -10396,7 +10635,7 @@
                 "section": "def-public.ContainerOutput",
                 "text": "ContainerOutput"
               },
-              "> | undefined) => Promise<TEmbeddable | ",
+              "> | undefined) => Promise<",
               {
                 "pluginId": "embeddable",
                 "scope": "public",
@@ -10404,7 +10643,7 @@
                 "section": "def-public.ErrorEmbeddable",
                 "text": "ErrorEmbeddable"
               },
-              " | undefined>"
+              " | TEmbeddable | undefined>"
             ],
             "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_factory.ts",
             "deprecated": false,
@@ -13362,7 +13601,7 @@
             "section": "def-public.EmbeddableFactory",
             "text": "EmbeddableFactory"
           },
-          "<I, O, E, T>, \"type\" | \"create\" | \"latestVersion\" | \"isEditable\" | \"getDisplayName\"> & Partial<Pick<",
+          "<I, O, E, T>, \"type\" | \"create\" | \"getDisplayName\" | \"latestVersion\" | \"isEditable\"> & Partial<Pick<",
           {
             "pluginId": "embeddable",
             "scope": "public",
@@ -13370,7 +13609,7 @@
             "section": "def-public.EmbeddableFactory",
             "text": "EmbeddableFactory"
           },
-          "<I, O, E, T>, \"telemetry\" | \"inject\" | \"extract\" | \"migrations\" | \"createFromSavedObject\" | \"isContainerType\" | \"getExplicitInput\" | \"savedObjectMetaData\" | \"canCreateNew\" | \"getDefaultInput\" | \"grouping\" | \"getIconType\" | \"getDescription\">>"
+          "<I, O, E, T>, \"telemetry\" | \"inject\" | \"extract\" | \"migrations\" | \"getIconType\" | \"grouping\" | \"createFromSavedObject\" | \"isContainerType\" | \"getExplicitInput\" | \"savedObjectMetaData\" | \"canCreateNew\" | \"getDefaultInput\" | \"getDescription\">>"
         ],
         "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_factory_definition.ts",
         "deprecated": false,
@@ -13717,57 +13956,6 @@
         "children": [
           {
             "parentPluginId": "embeddable",
-            "id": "def-public.COMMON_EMBEDDABLE_GROUPING.legacy",
-            "type": "Object",
-            "tags": [],
-            "label": "legacy",
-            "description": [],
-            "path": "src/plugins/embeddable/public/lib/embeddables/common/constants.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "embeddable",
-                "id": "def-public.COMMON_EMBEDDABLE_GROUPING.legacy.id",
-                "type": "string",
-                "tags": [],
-                "label": "id",
-                "description": [],
-                "path": "src/plugins/embeddable/public/lib/embeddables/common/constants.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "embeddable",
-                "id": "def-public.COMMON_EMBEDDABLE_GROUPING.legacy.getDisplayName",
-                "type": "Function",
-                "tags": [],
-                "label": "getDisplayName",
-                "description": [],
-                "signature": [
-                  "() => string"
-                ],
-                "path": "src/plugins/embeddable/public/lib/embeddables/common/constants.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "children": [],
-                "returnComment": []
-              },
-              {
-                "parentPluginId": "embeddable",
-                "id": "def-public.COMMON_EMBEDDABLE_GROUPING.legacy.order",
-                "type": "number",
-                "tags": [],
-                "label": "order",
-                "description": [],
-                "path": "src/plugins/embeddable/public/lib/embeddables/common/constants.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "embeddable",
             "id": "def-public.COMMON_EMBEDDABLE_GROUPING.annotation",
             "type": "Object",
             "tags": [],
@@ -13803,6 +13991,17 @@
                 "trackAdoption": false,
                 "children": [],
                 "returnComment": []
+              },
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.COMMON_EMBEDDABLE_GROUPING.annotation.order",
+                "type": "number",
+                "tags": [],
+                "label": "order",
+                "description": [],
+                "path": "src/plugins/embeddable/public/lib/embeddables/common/constants.ts",
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -13863,6 +14062,57 @@
               {
                 "parentPluginId": "embeddable",
                 "id": "def-public.COMMON_EMBEDDABLE_GROUPING.other.order",
+                "type": "number",
+                "tags": [],
+                "label": "order",
+                "description": [],
+                "path": "src/plugins/embeddable/public/lib/embeddables/common/constants.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.COMMON_EMBEDDABLE_GROUPING.legacy",
+            "type": "Object",
+            "tags": [],
+            "label": "legacy",
+            "description": [],
+            "path": "src/plugins/embeddable/public/lib/embeddables/common/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.COMMON_EMBEDDABLE_GROUPING.legacy.id",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "path": "src/plugins/embeddable/public/lib/embeddables/common/constants.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.COMMON_EMBEDDABLE_GROUPING.legacy.getDisplayName",
+                "type": "Function",
+                "tags": [],
+                "label": "getDisplayName",
+                "description": [],
+                "signature": [
+                  "() => string"
+                ],
+                "path": "src/plugins/embeddable/public/lib/embeddables/common/constants.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [],
+                "returnComment": []
+              },
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.COMMON_EMBEDDABLE_GROUPING.legacy.order",
                 "type": "number",
                 "tags": [],
                 "label": "order",
@@ -14227,10 +14477,6 @@
           "trackAdoption": false,
           "references": [
             {
-              "plugin": "visualizations",
-              "path": "src/plugins/visualizations/public/plugin.ts"
-            },
-            {
               "plugin": "lens",
               "path": "x-pack/plugins/lens/public/plugin.ts"
             }
@@ -14281,9 +14527,9 @@
                   "signature": [
                     {
                       "pluginId": "@kbn/content-management-utils",
-                      "scope": "common",
+                      "scope": "server",
                       "docId": "kibKbnContentManagementUtilsPluginApi",
-                      "section": "def-common.SOWithMetadata",
+                      "section": "def-server.SOWithMetadata",
                       "text": "SOWithMetadata"
                     },
                     "<TSavedObjectAttributes>"
@@ -14455,32 +14701,8 @@
           "trackAdoption": false,
           "references": [
             {
-              "plugin": "visualizations",
-              "path": "src/plugins/visualizations/public/plugin.ts"
-            },
-            {
               "plugin": "lens",
               "path": "x-pack/plugins/lens/public/plugin.ts"
-            },
-            {
-              "plugin": "controls",
-              "path": "src/plugins/controls/public/plugin.ts"
-            },
-            {
-              "plugin": "controls",
-              "path": "src/plugins/controls/public/plugin.ts"
-            },
-            {
-              "plugin": "controls",
-              "path": "src/plugins/controls/public/plugin.ts"
-            },
-            {
-              "plugin": "controls",
-              "path": "src/plugins/controls/public/plugin.ts"
-            },
-            {
-              "plugin": "dashboard",
-              "path": "src/plugins/dashboard/public/plugin.tsx"
             }
           ],
           "children": [
@@ -14841,24 +15063,8 @@
               "path": "x-pack/plugins/lens/public/embeddable/embeddable_component.tsx"
             },
             {
-              "plugin": "controls",
-              "path": "src/plugins/controls/public/services/embeddable/types.ts"
-            },
-            {
-              "plugin": "controls",
-              "path": "src/plugins/controls/public/services/embeddable/embeddable_service.ts"
-            },
-            {
               "plugin": "dashboard",
-              "path": "src/plugins/dashboard/public/services/dashboard_content_management/lib/migrate_dashboard_input.ts"
-            },
-            {
-              "plugin": "dashboard",
-              "path": "src/plugins/dashboard/public/services/dashboard_content_management/lib/migrate_dashboard_input.ts"
-            },
-            {
-              "plugin": "dashboard",
-              "path": "src/plugins/dashboard/public/dashboard_container/embeddable/create/create_dashboard.ts"
+              "path": "src/plugins/dashboard/public/services/dashboard_content_management_service/lib/migrate_dashboard_input.ts"
             },
             {
               "plugin": "dashboard",
@@ -14867,22 +15073,10 @@
             {
               "plugin": "dashboard",
               "path": "src/plugins/dashboard/public/dashboard_container/embeddable/dashboard_container.tsx"
-            },
-            {
-              "plugin": "dashboard",
-              "path": "src/plugins/dashboard/public/dashboard_container/external_api/dashboard_renderer.tsx"
             },
             {
               "plugin": "investigateApp",
-              "path": "x-pack/plugins/observability_solution/investigate_app/public/widgets/embeddable_widget/register_embeddable_widget.tsx"
-            },
-            {
-              "plugin": "dashboard",
-              "path": "src/plugins/dashboard/public/services/embeddable/embeddable.stub.ts"
-            },
-            {
-              "plugin": "controls",
-              "path": "src/plugins/controls/public/services/embeddable/embeddable.story.ts"
+              "path": "x-pack/plugins/observability_solution/investigate_app/public/items/embeddable_item/register_embeddable_item.tsx"
             },
             {
               "plugin": "dashboard",
@@ -14898,39 +15092,23 @@
             },
             {
               "plugin": "dashboard",
-              "path": "src/plugins/dashboard/public/dashboard_container/embeddable/create/create_dashboard.test.ts"
+              "path": "src/plugins/dashboard/public/services/dashboard_content_management_service/lib/migrate_dashboard_input.test.ts"
             },
             {
               "plugin": "dashboard",
-              "path": "src/plugins/dashboard/public/dashboard_container/embeddable/create/create_dashboard.test.ts"
+              "path": "src/plugins/dashboard/public/services/dashboard_content_management_service/lib/migrate_dashboard_input.test.ts"
             },
             {
               "plugin": "dashboard",
-              "path": "src/plugins/dashboard/public/services/dashboard_content_management/lib/migrate_dashboard_input.test.ts"
+              "path": "src/plugins/dashboard/public/services/dashboard_content_management_service/lib/migrate_dashboard_input.test.ts"
             },
             {
               "plugin": "dashboard",
-              "path": "src/plugins/dashboard/public/services/dashboard_content_management/lib/migrate_dashboard_input.test.ts"
+              "path": "src/plugins/dashboard/public/services/dashboard_content_management_service/lib/migrate_dashboard_input.test.ts"
             },
             {
               "plugin": "dashboard",
-              "path": "src/plugins/dashboard/public/services/dashboard_content_management/lib/migrate_dashboard_input.test.ts"
-            },
-            {
-              "plugin": "dashboard",
-              "path": "src/plugins/dashboard/public/services/dashboard_content_management/lib/migrate_dashboard_input.test.ts"
-            },
-            {
-              "plugin": "dashboard",
-              "path": "src/plugins/dashboard/public/services/dashboard_content_management/lib/migrate_dashboard_input.test.ts"
-            },
-            {
-              "plugin": "dashboard",
-              "path": "src/plugins/dashboard/public/services/dashboard_content_management/lib/migrate_dashboard_input.test.ts"
-            },
-            {
-              "plugin": "dashboard",
-              "path": "src/plugins/dashboard/public/services/embeddable/embeddable.stub.ts"
+              "path": "src/plugins/dashboard/public/services/dashboard_content_management_service/lib/migrate_dashboard_input.test.ts"
             }
           ],
           "children": [
@@ -15030,15 +15208,15 @@
             },
             {
               "plugin": "canvas",
-              "path": "x-pack/plugins/canvas/public/services/kibana/embeddables.ts"
+              "path": "x-pack/plugins/canvas/public/components/workpad_header/editor_menu/editor_menu.tsx"
             },
             {
-              "plugin": "dashboard",
-              "path": "src/plugins/dashboard/public/services/embeddable/embeddable.stub.ts"
+              "plugin": "canvas",
+              "path": "x-pack/plugins/canvas/public/components/embeddable_flyout/flyout.component.tsx"
             },
             {
-              "plugin": "dashboard",
-              "path": "src/plugins/dashboard/public/services/embeddable/embeddable.stub.ts"
+              "plugin": "canvas",
+              "path": "x-pack/plugins/canvas/public/components/embeddable_flyout/flyout.component.tsx"
             }
           ],
           "children": [],

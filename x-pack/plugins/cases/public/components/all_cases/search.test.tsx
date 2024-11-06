@@ -43,7 +43,7 @@ describe('TableSearch', () => {
       <TableSearch filterOptionsSearch="" onFilterOptionsChange={onFilterOptionsChange} />
     );
 
-    userEvent.type(await screen.findByTestId('search-cases'), 'My search{enter}');
+    await userEvent.type(await screen.findByTestId('search-cases'), 'My search{enter}');
 
     expect(onFilterOptionsChange).toHaveBeenCalledWith({ search: 'My search' });
   });
@@ -53,7 +53,7 @@ describe('TableSearch', () => {
       <TableSearch filterOptionsSearch="" onFilterOptionsChange={onFilterOptionsChange} />
     );
 
-    userEvent.type(await screen.findByTestId('search-cases'), '      {enter}');
+    await userEvent.type(await screen.findByTestId('search-cases'), '      {enter}');
 
     expect(onFilterOptionsChange).toHaveBeenCalledWith({ search: '' });
   });
@@ -65,7 +65,7 @@ describe('TableSearch', () => {
 
     await screen.findByDisplayValue('My search');
 
-    userEvent.click(await screen.findByTestId('clearSearchButton'));
+    await userEvent.click(await screen.findByTestId('clearSearchButton'));
 
     expect(onFilterOptionsChange).toHaveBeenCalledWith({ search: '' });
   });

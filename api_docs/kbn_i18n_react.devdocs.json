@@ -29,7 +29,7 @@
           "\nAdded for now while doing the i18n upgrade.\nTODO: remove in a separate PR and update the 200+ test files we have using this to simply\nuse the `I18nProvider` and the `IntlShape` instead of `InjectedIntl`."
         ],
         "signature": [
-          "({ children, }: React.PropsWithChildren<React.PropsWithChildren<{ locale?: string | undefined; messages?: unknown; }>>) => JSX.Element"
+          "({ children, }: React.PropsWithChildren<{ locale?: string | undefined; messages?: unknown; }>) => React.JSX.Element"
         ],
         "path": "packages/kbn-i18n-react/src/compatiblity_layer.tsx",
         "deprecated": false,
@@ -43,7 +43,7 @@
             "label": "{\n  children,\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<React.PropsWithChildren<{ locale?: string | undefined; messages?: unknown; }>>"
+              "React.PropsWithChildren<{ locale?: string | undefined; messages?: unknown; }>"
             ],
             "path": "packages/kbn-i18n-react/src/compatiblity_layer.tsx",
             "deprecated": false,
@@ -74,14 +74,14 @@
           {
             "parentPluginId": "@kbn/i18n-react",
             "id": "def-common.FormattedDate.$1",
-            "type": "CompoundType",
+            "type": "Uncategorized",
             "tags": [],
             "label": "props",
             "description": [],
             "signature": [
-              "P & { children?: React.ReactNode; }"
+              "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -95,7 +95,7 @@
             "signature": [
               "any"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -124,14 +124,14 @@
           {
             "parentPluginId": "@kbn/i18n-react",
             "id": "def-common.FormattedNumber.$1",
-            "type": "CompoundType",
+            "type": "Uncategorized",
             "tags": [],
             "label": "props",
             "description": [],
             "signature": [
-              "P & { children?: React.ReactNode; }"
+              "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -145,7 +145,7 @@
             "signature": [
               "any"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -170,14 +170,14 @@
           {
             "parentPluginId": "@kbn/i18n-react",
             "id": "def-common.FormattedPlural.$1",
-            "type": "CompoundType",
+            "type": "Uncategorized",
             "tags": [],
             "label": "props",
             "description": [],
             "signature": [
-              "P & { children?: React.ReactNode; }"
+              "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -191,7 +191,7 @@
             "signature": [
               "any"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -216,7 +216,7 @@
             "section": "def-common.FormattedRelativeProps",
             "text": "FormattedRelativeProps"
           },
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "packages/kbn-i18n-react/src/compatiblity_layer.tsx",
         "deprecated": false,
@@ -267,14 +267,14 @@
           {
             "parentPluginId": "@kbn/i18n-react",
             "id": "def-common.FormattedRelativeTime.$1",
-            "type": "CompoundType",
+            "type": "Uncategorized",
             "tags": [],
             "label": "props",
             "description": [],
             "signature": [
-              "P & { children?: React.ReactNode; }"
+              "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -288,7 +288,7 @@
             "signature": [
               "any"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -315,14 +315,14 @@
           {
             "parentPluginId": "@kbn/i18n-react",
             "id": "def-common.FormattedTime.$1",
-            "type": "CompoundType",
+            "type": "Uncategorized",
             "tags": [],
             "label": "props",
             "description": [],
             "signature": [
-              "P & { children?: React.ReactNode; }"
+              "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -336,7 +336,7 @@
             "signature": [
               "any"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -353,7 +353,7 @@
           "\nThe library uses the provider pattern to scope an i18n context to a tree\nof components. This component is used to setup the i18n context for a tree.\nIntlProvider should wrap react app's root component (inside each react render method)."
         ],
         "signature": [
-          "({ children }: { children?: React.ReactNode; }) => JSX.Element"
+          "({ children }: { children?: React.ReactNode; }) => React.JSX.Element"
         ],
         "path": "packages/kbn-i18n-react/src/provider.tsx",
         "deprecated": false,
@@ -610,11 +610,11 @@
         "signature": [
           "React.ComponentClass<",
           "Props",
-          "<Record<string, string | number | boolean | {} | Date | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | ",
+          "<Record<string, string | number | boolean | Date | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | ",
           "FormatXMLElementFn",
           "<React.ReactNode, React.ReactNode> | null | undefined>>, any> | React.FunctionComponent<",
           "Props",
-          "<Record<string, string | number | boolean | {} | Date | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | ",
+          "<Record<string, string | number | boolean | Date | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | ",
           "FormatXMLElementFn",
           "<React.ReactNode, React.ReactNode> | null | undefined>>>"
         ],

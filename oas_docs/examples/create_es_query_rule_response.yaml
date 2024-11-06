@@ -1,4 +1,5 @@
-summary: The create rule API returns a JSON object that contains details about the rule.
+summary: Elasticsearch query rule (DSL)
+description: The response for successfully creating an Elasticsearch query rule that uses Elasticsearch query domain specific language (DSL).
 value:
   id: 58148c70-407f-11ee-850e-c71febc4ca7f
   enabled: true

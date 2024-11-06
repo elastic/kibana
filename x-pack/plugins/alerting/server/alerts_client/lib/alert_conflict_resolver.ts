@@ -35,6 +35,9 @@ export interface ResolveAlertConflictsParams {
   logger: Logger;
   bulkRequest: BulkRequest<unknown, unknown>;
   bulkResponse: BulkResponse;
+  ruleId: string;
+  ruleName: string;
+  ruleType: string;
 }
 
 interface NormalizedBulkRequest {
@@ -46,18 +49,24 @@ interface NormalizedBulkRequest {
 // to replace just logging that the error occurred, so we don't want
 // to cause _more_ errors ...
 export async function resolveAlertConflicts(params: ResolveAlertConflictsParams): Promise<void> {
-  const { logger } = params;
+  const { logger, ruleId, ruleType, ruleName } = params;
+  const ruleInfoMessage = `for ${ruleType}:${ruleId} '${ruleName}'`;
+  const logTags = { tags: [ruleType, ruleId, 'resolve-alert-conflicts'] };
+
   try {
     await resolveAlertConflicts_(params);
   } catch (err) {
-    logger.error(`Error resolving alert conflicts: ${err.message}`);
+    logger.error(`Error resolving alert conflicts ${ruleInfoMessage}: ${err.message}`, logTags);
   }
 }
 
 async function resolveAlertConflicts_(params: ResolveAlertConflictsParams): Promise<void> {
-  const { logger, esClient, bulkRequest, bulkResponse } = params;
+  const { logger, esClient, bulkRequest, bulkResponse, ruleId, ruleType, ruleName } = params;
   if (bulkRequest.operations && bulkRequest.operations?.length === 0) return;
   if (bulkResponse.items && bulkResponse.items?.length === 0) return;
+
+  const ruleInfoMessage = `for ${ruleType}:${ruleId} '${ruleName}'`;
+  const logTags = { tags: [ruleType, ruleId, 'resolve-alert-conflicts'] };
 
   // get numbers for a summary log message
   const { success, errors, conflicts, messages } = getResponseStats(bulkResponse);
@@ -65,7 +74,8 @@ async function resolveAlertConflicts_(params: ResolveAlertConflictsParams): Prom
 
   const allMessages = messages.join('; ');
   logger.error(
-    `Error writing alerts: ${success} successful, ${conflicts} conflicts, ${errors} errors: ${allMessages}`
+    `Error writing alerts ${ruleInfoMessage}: ${success} successful, ${conflicts} conflicts, ${errors} errors: ${allMessages}`,
+    logTags
   );
 
   // get a new bulk request for just conflicted docs
@@ -79,14 +89,18 @@ async function resolveAlertConflicts_(params: ResolveAlertConflictsParams): Prom
   await updateOCC(conflictRequest, freshDocs);
   await refreshFieldsInDocs(conflictRequest, freshDocs);
 
-  logger.info(`Retrying bulk update of ${conflictRequest.length} conflicted alerts`);
+  logger.info(
+    `Retrying bulk update of ${conflictRequest.length} conflicted alerts ${ruleInfoMessage}`,
+    logTags
+  );
   const mbrResponse = await makeBulkRequest(params.esClient, params.bulkRequest, conflictRequest);
 
   if (mbrResponse.bulkResponse?.items.length !== conflictRequest.length) {
     const actual = mbrResponse.bulkResponse?.items.length;
     const expected = conflictRequest.length;
     logger.error(
-      `Unexpected number of bulk response items retried; expecting ${expected}, retried ${actual}`
+      `Unexpected number of bulk response items retried; expecting ${expected}, retried ${actual} ${ruleInfoMessage}`,
+      logTags
     );
     return;
   }
@@ -94,16 +108,21 @@ async function resolveAlertConflicts_(params: ResolveAlertConflictsParams): Prom
   if (mbrResponse.error) {
     const index = bulkRequest.index || 'unknown index';
     logger.error(
-      `Error writing ${conflictRequest.length} alerts to ${index} - ${mbrResponse.error.message}`
+      `Error writing ${conflictRequest.length} alerts to ${index} ${ruleInfoMessage} - ${mbrResponse.error.message}`,
+      logTags
     );
     return;
   }
 
   if (mbrResponse.errors === 0) {
-    logger.info(`Retried bulk update of ${conflictRequest.length} conflicted alerts succeeded`);
+    logger.info(
+      `Retried bulk update of ${conflictRequest.length} conflicted alerts succeeded ${ruleInfoMessage}`,
+      logTags
+    );
   } else {
     logger.error(
-      `Retried bulk update of ${conflictRequest.length} conflicted alerts still had ${mbrResponse.errors} conflicts`
+      `Retried bulk update of ${conflictRequest.length} conflicted alerts still had ${mbrResponse.errors} conflicts ${ruleInfoMessage}`,
+      logTags
     );
   }
 }

@@ -8,9 +8,22 @@
 import { useCurrentRoute } from '@kbn/typed-react-router-config';
 import { useContext, useEffect, useRef } from 'react';
 import { castArray } from 'lodash';
+import useObservable from 'react-use/lib/useObservable';
 import { Breadcrumb, BreadcrumbsContext } from './context';
+import { useKibanaEnvironmentContext } from '../kibana_environment_context/use_kibana_environment_context';
+import { useKibana } from '../kibana_context/use_kibana';
 
-export function useBreadcrumb(callback: () => Breadcrumb | Breadcrumb[], fnDeps: any[]) {
+export function useBreadcrumb(
+  callback: () => Breadcrumb | Breadcrumb[],
+  fnDeps: any[],
+  options?: { omitRootOnServerless?: boolean; omitOnServerless?: boolean }
+) {
+  const { isServerlessEnv } = useKibanaEnvironmentContext();
+  const {
+    services: { chrome },
+  } = useKibana();
+  const { omitRootOnServerless = false, omitOnServerless = false } = options || {};
+
   const api = useContext(BreadcrumbsContext);
 
   if (!api) {
@@ -21,7 +34,14 @@ export function useBreadcrumb(callback: () => Breadcrumb | Breadcrumb[], fnDeps:
 
   const matchedRoute = useRef(match?.route);
 
+  const chromeStyle = useObservable(chrome.getChromeStyle$());
+
   useEffect(() => {
+    const isProjectStyle = isServerlessEnv || chromeStyle === 'project';
+    if (isProjectStyle && omitOnServerless) {
+      return;
+    }
+
     if (matchedRoute.current && matchedRoute.current !== match?.route) {
       api.unset(matchedRoute.current);
     }
@@ -29,7 +49,13 @@ export function useBreadcrumb(callback: () => Breadcrumb | Breadcrumb[], fnDeps:
     matchedRoute.current = match?.route;
 
     if (matchedRoute.current) {
-      api.set(matchedRoute.current, castArray(callback()));
+      const breadcrumbs = castArray(callback());
+      api.set(
+        matchedRoute.current,
+        isProjectStyle && omitRootOnServerless && breadcrumbs.length >= 1
+          ? breadcrumbs.slice(1)
+          : breadcrumbs
+      );
     }
 
     return () => {
@@ -38,5 +64,5 @@ export function useBreadcrumb(callback: () => Breadcrumb | Breadcrumb[], fnDeps:
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [match, ...fnDeps]);
+  }, [match, chromeStyle, ...fnDeps]);
 }

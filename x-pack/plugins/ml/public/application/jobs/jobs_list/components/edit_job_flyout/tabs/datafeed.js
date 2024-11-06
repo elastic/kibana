@@ -17,11 +17,12 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 
+import { FormattedMessage } from '@kbn/i18n-react';
+import { parseInterval } from '@kbn/ml-parse-interval';
+
 import { calculateDatafeedFrequencyDefaultSeconds } from '../../../../../../../common/util/job_utils';
 import { getNewJobDefaults } from '../../../../../services/ml_server_info';
-import { parseInterval } from '../../../../../../../common/util/parse_interval';
 import { MLJobEditor, ML_EDITOR_MODE } from '../../ml_job_editor';
-import { FormattedMessage } from '@kbn/i18n-react';
 
 function getDefaults(bucketSpan, jobDefaults) {
   const bucketSpanSeconds = bucketSpan !== undefined ? parseInterval(bucketSpan).asSeconds() : '';

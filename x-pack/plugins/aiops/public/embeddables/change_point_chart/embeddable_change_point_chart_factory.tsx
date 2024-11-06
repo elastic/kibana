@@ -11,7 +11,6 @@ import {
 } from '@kbn/aiops-change-point-detection/constants';
 import type { Reference } from '@kbn/content-management-utils';
 import type { StartServicesAccessor } from '@kbn/core-lifecycle-browser';
-import { type DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
 import type { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
@@ -23,6 +22,7 @@ import {
   initializeTitles,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
+
 import fastIsEqual from 'fast-deep-equal';
 import { cloneDeep } from 'lodash';
 import React, { useMemo } from 'react';
@@ -37,31 +37,7 @@ import type {
   ChangePointEmbeddableState,
 } from './types';
 
-export interface EmbeddableChangePointChartStartServices {
-  data: DataPublicPluginStart;
-}
-
 export type EmbeddableChangePointChartType = typeof EMBEDDABLE_CHANGE_POINT_CHART_TYPE;
-
-export const getDependencies = async (
-  getStartServices: StartServicesAccessor<AiopsPluginStartDeps, AiopsPluginStart>
-) => {
-  const [
-    { http, uiSettings, notifications, ...startServices },
-    { lens, data, usageCollection, fieldFormats },
-  ] = await getStartServices();
-
-  return {
-    http,
-    uiSettings,
-    data,
-    notifications,
-    lens,
-    usageCollection,
-    fieldFormats,
-    ...startServices,
-  };
-};
 
 export const getChangePointChartEmbeddableFactory = (
   getStartServices: StartServicesAccessor<AiopsPluginStartDeps, AiopsPluginStart>
@@ -87,20 +63,6 @@ export const getChangePointChartEmbeddableFactory = (
     buildEmbeddable: async (state, buildApi, uuid, parentApi) => {
       const [coreStart, pluginStart] = await getStartServices();
 
-      const { http, uiSettings, notifications, ...startServices } = coreStart;
-      const { lens, data, usageCollection, fieldFormats } = pluginStart;
-
-      const deps = {
-        http,
-        uiSettings,
-        data,
-        notifications,
-        lens,
-        usageCollection,
-        fieldFormats,
-        ...startServices,
-      };
-
       const {
         api: timeRangeApi,
         comparators: timeRangeComparators,
@@ -119,7 +81,7 @@ export const getChangePointChartEmbeddableFactory = (
       const blockingError = new BehaviorSubject<Error | undefined>(undefined);
 
       const dataViews$ = new BehaviorSubject<DataView[] | undefined>([
-        await deps.data.dataViews.get(state.dataViewId),
+        await pluginStart.data.dataViews.get(state.dataViewId),
       ]);
 
       const api = buildApi(
@@ -231,10 +193,9 @@ export const getChangePointChartEmbeddableFactory = (
           const lastReloadRequestTime = useObservable(reload$, Date.now());
           const timeRange = useObservable(timeRange$, undefined);
 
-          let embeddingOrigin;
-          if (apiHasExecutionContext(parentApi)) {
-            embeddingOrigin = parentApi.executionContext.type;
-          }
+          const embeddingOrigin = apiHasExecutionContext(parentApi)
+            ? parentApi.executionContext.type
+            : undefined;
 
           return (
             <ChangePointDetectionComponent

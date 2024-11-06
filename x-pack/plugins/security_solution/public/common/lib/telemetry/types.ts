@@ -32,6 +32,8 @@ import type {
   ReportAssetCriticalityCsvPreviewGeneratedParams,
   ReportAssetCriticalityFileSelectedParams,
   ReportAssetCriticalityCsvImportedParams,
+  ReportEntityStoreEnablementParams,
+  ReportEntityStoreInitParams,
 } from './events/entity_analytics/types';
 import type {
   AssistantTelemetryEvent,
@@ -72,25 +74,17 @@ import type {
   NotesTelemetryEvents,
   OpenNoteInExpandableFlyoutClickedParams,
 } from './events/notes/types';
+import type { PreviewRuleParams, PreviewRuleTelemetryEvent } from './events/preview_rule/types';
 
 export * from './events/ai_assistant/types';
 export * from './events/alerts_grouping/types';
 export * from './events/data_quality/types';
 export * from './events/onboarding/types';
-export type {
-  ReportEntityAlertsClickedParams,
-  ReportEntityDetailsClickedParams,
-  ReportEntityRiskFilteredParams,
-  ReportRiskInputsExpandedFlyoutOpenedParams,
-  ReportToggleRiskSummaryClickedParams,
-  ReportAddRiskInputToTimelineClickedParams,
-  ReportAssetCriticalityCsvPreviewGeneratedParams,
-  ReportAssetCriticalityFileSelectedParams,
-  ReportAssetCriticalityCsvImportedParams,
-} from './events/entity_analytics/types';
+export * from './events/entity_analytics/types';
 export * from './events/document_details/types';
 export * from './events/manual_rule_run/types';
 export * from './events/event_log/types';
+export * from './events/preview_rule/types';
 
 export interface TelemetryServiceSetupParams {
   analytics: AnalyticsServiceSetup;
@@ -136,6 +130,7 @@ export type TelemetryEventParams =
   | OnboardingHubStepLinkClickedParams
   | ReportManualRuleRunTelemetryEventParams
   | ReportEventLogTelemetryEventParams
+  | PreviewRuleParams
   | NotesTelemetryEventParams;
 
 export interface TelemetryClientStart {
@@ -165,6 +160,9 @@ export interface TelemetryClientStart {
   ): void;
   reportAssetCriticalityCsvImported(params: ReportAssetCriticalityCsvImportedParams): void;
   reportCellActionClicked(params: ReportCellActionClickedParams): void;
+  // Entity Analytics Entity Store
+  reportEntityStoreEnablement(params: ReportEntityStoreEnablementParams): void;
+  reportEntityStoreInit(params: ReportEntityStoreInitParams): void;
 
   reportAnomaliesCountClicked(params: ReportAnomaliesCountClickedParams): void;
   reportDataQualityIndexChecked(params: ReportDataQualityIndexCheckedParams): void;
@@ -194,6 +192,9 @@ export interface TelemetryClientStart {
   // new notes
   reportOpenNoteInExpandableFlyoutClicked(params: OpenNoteInExpandableFlyoutClickedParams): void;
   reportAddNoteFromExpandableFlyoutClicked(params: AddNoteFromExpandableFlyoutClickedParams): void;
+
+  // preview rule
+  reportPreviewRule(params: PreviewRuleParams): void;
 }
 
 export type TelemetryEvent =
@@ -221,4 +222,5 @@ export type TelemetryEvent =
   | OnboardingHubTelemetryEvent
   | ManualRuleRunTelemetryEvent
   | EventLogTelemetryEvent
+  | PreviewRuleTelemetryEvent
   | NotesTelemetryEvents;

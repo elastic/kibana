@@ -45,7 +45,7 @@
           },
           "<",
           "PanelCompatibleComponent",
-          "<ApiType, PropsType> | null>; } & { hidePanelChrome?: boolean | undefined; }) => JSX.Element | null"
+          "<ApiType, PropsType> | null>; } & { hidePanelChrome?: boolean | undefined; }) => React.JSX.Element | null"
         ],
         "path": "src/plugins/presentation_panel/public/panel_component/presentation_panel.tsx",
         "deprecated": false,
@@ -100,7 +100,7 @@
           },
           "; api?: ",
           "DefaultPresentationPanelApi",
-          " | undefined; }) => JSX.Element"
+          " | undefined; }) => React.JSX.Element"
         ],
         "path": "src/plugins/presentation_panel/public/panel_component/presentation_panel_error.tsx",
         "deprecated": false,

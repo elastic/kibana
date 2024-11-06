@@ -16,4 +16,6 @@ export const DYNAMIC_SETTINGS_DEFAULTS: DynamicSettings = {
     cc: [],
     bcc: [],
   },
+  defaultTLSRuleEnabled: true,
+  defaultStatusRuleEnabled: true,
 };

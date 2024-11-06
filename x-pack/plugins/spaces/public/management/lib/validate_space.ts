@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 
 import { isValidSpaceIdentifier } from './space_identifier_utils';
 import { isReservedSpace } from '../../../common/is_reserved_space';
-import type { FormValues } from '../edit_space/manage_space_page';
+import type { CustomizeSpaceFormValues } from '../types';
 
 interface SpaceValidatorOptions {
   shouldValidate?: boolean;
@@ -32,7 +32,7 @@ export class SpaceValidator {
     this.shouldValidate = false;
   }
 
-  public validateSpaceName(space: FormValues) {
+  public validateSpaceName(space: CustomizeSpaceFormValues) {
     if (!this.shouldValidate) {
       return valid();
     }
@@ -56,7 +56,7 @@ export class SpaceValidator {
     return valid();
   }
 
-  public validateSpaceDescription(space: FormValues) {
+  public validateSpaceDescription(space: CustomizeSpaceFormValues) {
     if (!this.shouldValidate) {
       return valid();
     }
@@ -72,7 +72,7 @@ export class SpaceValidator {
     return valid();
   }
 
-  public validateURLIdentifier(space: FormValues) {
+  public validateURLIdentifier(space: CustomizeSpaceFormValues) {
     if (!this.shouldValidate) {
       return valid();
     }
@@ -104,7 +104,7 @@ export class SpaceValidator {
     return valid();
   }
 
-  public validateAvatarInitials(space: FormValues) {
+  public validateAvatarInitials(space: CustomizeSpaceFormValues) {
     if (!this.shouldValidate) {
       return valid();
     }
@@ -129,7 +129,7 @@ export class SpaceValidator {
     return valid();
   }
 
-  public validateAvatarColor(space: FormValues) {
+  public validateAvatarColor(space: CustomizeSpaceFormValues) {
     if (!this.shouldValidate) {
       return valid();
     }
@@ -153,7 +153,7 @@ export class SpaceValidator {
     return valid();
   }
 
-  public validateAvatarImage(space: FormValues) {
+  public validateAvatarImage(space: CustomizeSpaceFormValues) {
     if (!this.shouldValidate) {
       return valid();
     }
@@ -169,11 +169,35 @@ export class SpaceValidator {
     return valid();
   }
 
-  public validateEnabledFeatures(space: FormValues) {
+  public validateSolutionView(
+    space: CustomizeSpaceFormValues,
+    isEditing: boolean,
+    allowSolutionVisibility = true
+  ) {
+    if (!this.shouldValidate || isEditing || !allowSolutionVisibility) {
+      return valid();
+    }
+
+    if (!space.solution) {
+      return invalid(
+        i18n.translate('xpack.spaces.management.validateSpace.requiredSolutionViewErrorMessage', {
+          defaultMessage: 'Select a solution.',
+        })
+      );
+    }
+
     return valid();
   }
 
-  public validateForSave(space: FormValues) {
+  public validateEnabledFeatures(space: CustomizeSpaceFormValues) {
+    return valid();
+  }
+
+  public validateForSave(
+    space: CustomizeSpaceFormValues,
+    isEditing: boolean,
+    allowSolutionVisibility: boolean
+  ) {
     const { isInvalid: isNameInvalid } = this.validateSpaceName(space);
     const { isInvalid: isDescriptionInvalid } = this.validateSpaceDescription(space);
     const { isInvalid: isIdentifierInvalid } = this.validateURLIdentifier(space);
@@ -181,6 +205,11 @@ export class SpaceValidator {
     const { isInvalid: isAvatarColorInvalid } = this.validateAvatarColor(space);
     const { isInvalid: isAvatarImageInvalid } = this.validateAvatarImage(space);
     const { isInvalid: areFeaturesInvalid } = this.validateEnabledFeatures(space);
+    const { isInvalid: isSolutionViewInvalid } = this.validateSolutionView(
+      space,
+      isEditing,
+      allowSolutionVisibility
+    );
 
     if (
       isNameInvalid ||
@@ -189,7 +218,8 @@ export class SpaceValidator {
       isAvatarInitialsInvalid ||
       isAvatarColorInvalid ||
       isAvatarImageInvalid ||
-      areFeaturesInvalid
+      areFeaturesInvalid ||
+      isSolutionViewInvalid
     ) {
       return invalid();
     }

@@ -8,7 +8,7 @@
 import {
   deleteTransformsRequestSchema,
   type DeleteTransformsRequestSchema,
-} from '../../../../common/api_schemas/delete_transforms';
+} from '../../api_schemas/delete_transforms';
 import { addInternalBasePath } from '../../../../common/constants';
 
 import type { RouteDependencies } from '../../../types';
@@ -34,6 +34,13 @@ export function registerRoute(routeDependencies: RouteDependencies) {
     .addVersion<undefined, undefined, DeleteTransformsRequestSchema>(
       {
         version: '1',
+        security: {
+          authz: {
+            enabled: false,
+            reason:
+              'This route is opted out from authorization because permissions will be checked by elasticsearch',
+          },
+        },
         validate: {
           request: {
             body: deleteTransformsRequestSchema,

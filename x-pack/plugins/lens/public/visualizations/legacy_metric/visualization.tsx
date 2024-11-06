@@ -157,6 +157,9 @@ export const getLegacyMetricVisualization = ({
 }): Visualization<LegacyMetricState> => ({
   id: 'lnsLegacyMetric',
 
+  getVisualizationTypeId() {
+    return this.id;
+  },
   visualizationTypes: [
     {
       id: 'lnsLegacyMetric',
@@ -164,8 +167,10 @@ export const getLegacyMetricVisualization = ({
       label: i18n.translate('xpack.lens.legacyMetric.label', {
         defaultMessage: 'Legacy Metric',
       }),
-      groupLabel: i18n.translate('xpack.lens.legacyMetric.groupLabel', {
-        defaultMessage: 'Goal and single value',
+      isDeprecated: true,
+      sortPriority: 100,
+      description: i18n.translate('xpack.lens.legacyMetric.visualizationDescription', {
+        defaultMessage: 'Present individual key metrics or KPIs.',
       }),
     },
   ],
@@ -173,10 +178,6 @@ export const getLegacyMetricVisualization = ({
     return Object.values(frame.datasourceLayers).some(
       (datasource) => datasource && datasource.datasourceId === 'textBased'
     );
-  },
-
-  getVisualizationTypeId() {
-    return 'lnsLegacyMetric';
   },
 
   clearLayer(state) {

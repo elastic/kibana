@@ -256,7 +256,7 @@ export const MimeTypesMap: Record<string, MimeType> = {
   'application/json': MimeType.XHR,
 };
 
-export type SidebarItem = Pick<NetworkEvent, 'url' | 'status' | 'method'> & {
+export type WaterfallNetworkItem = Pick<NetworkEvent, 'url' | 'status' | 'method'> & {
   isHighlighted: boolean;
   index: number;
   offsetIndex: number;
@@ -310,14 +310,14 @@ interface PlotProperties {
   y0: number;
 }
 
-export interface WaterfallDataSeriesConfigProperties {
-  tooltipProps?: Record<string, string | number>;
-  showTooltip: boolean;
-}
-
 export interface WaterfallMetadataItem {
   name: string;
   value?: string;
+}
+
+export interface WaterfallTooltipItem {
+  colour: string;
+  value: string;
 }
 
 export interface WaterfallMetadataEntry {
@@ -326,11 +326,13 @@ export interface WaterfallMetadataEntry {
   requestHeaders?: WaterfallMetadataItem[];
   responseHeaders?: WaterfallMetadataItem[];
   certificates?: WaterfallMetadataItem[];
+  networkItemTooltipProps: WaterfallTooltipItem[];
+  showTooltip: boolean;
   details: WaterfallMetadataItem[];
 }
 
 export type WaterfallDataEntry = PlotProperties & {
-  config: WaterfallDataSeriesConfigProperties & Record<string, unknown>;
+  config: Record<string, unknown>;
 };
 
 export type WaterfallMetadata = WaterfallMetadataEntry[];

@@ -126,7 +126,7 @@ const EditSavedQueryPageComponent = () => {
   );
 
   const handleSubmit = useCallback(
-    async (payload) => {
+    async (payload: any) => {
       await updateSavedQueryMutation.mutateAsync(payload);
     },
     [updateSavedQueryMutation]

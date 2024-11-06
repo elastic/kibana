@@ -123,6 +123,17 @@ export function createGeoPointCombinedField(
   };
 }
 
+export function createSemanticTextCombinedField(
+  sematicTextField: string,
+  originalField: string
+): CombinedField {
+  return {
+    mappingType: 'semantic_text',
+    combinedFieldName: sematicTextField,
+    fieldNames: [originalField],
+  };
+}
+
 export function getNameCollisionMsg(name: string) {
   return i18n.translate('xpack.dataVisualizer.nameCollisionMsg', {
     defaultMessage: '"{name}" already exists, please provide a unique name',

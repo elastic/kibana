@@ -1,14 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { Dictionary, countBy, defaults, uniq } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import { FilterChecked } from '@elastic/eui';
 import {
   TAB_INDEXED_FIELDS,
   TAB_SCRIPTED_FIELDS,
@@ -125,7 +127,11 @@ export function getPath(field: DataViewField, indexPattern: DataView) {
 }
 
 export function convertToEuiFilterOptions(options: string[]) {
-  return uniq(options).map((option) => {
+  return uniq(options).map<{
+    value: string;
+    name: string;
+    checked?: FilterChecked;
+  }>((option) => {
     return {
       value: option,
       name: option,

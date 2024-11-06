@@ -5,23 +5,31 @@
  * 2.0.
  */
 
-import { DataStreamsStatsClient } from './data_streams_stats_client';
 import {
   DataStreamsStatsServiceSetup,
   DataStreamsStatsServiceStartDeps,
   DataStreamsStatsServiceStart,
+  IDataStreamsStatsClient,
 } from './types';
 
 export class DataStreamsStatsService {
-  constructor() {}
+  private client?: IDataStreamsStatsClient;
 
   public setup(): DataStreamsStatsServiceSetup {}
 
   public start({ http }: DataStreamsStatsServiceStartDeps): DataStreamsStatsServiceStart {
-    const client = new DataStreamsStatsClient(http);
-
     return {
-      client,
+      getClient: () => this.getClient({ http }),
     };
+  }
+
+  private async getClient({ http }: DataStreamsStatsServiceStartDeps) {
+    if (!this.client) {
+      const { DataStreamsStatsClient } = await import('./data_streams_stats_client');
+      const client = new DataStreamsStatsClient(http);
+      this.client = client;
+    }
+
+    return this.client;
   }
 }

@@ -65,7 +65,7 @@ export const clickOnEffectedPolicy = async (
   const item = policyElements.item(atIndex);
 
   if (item) {
-    userEvent.click(item);
+    await userEvent.click(item);
   }
 
   return item;

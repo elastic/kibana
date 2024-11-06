@@ -64,7 +64,7 @@ const UncommonProcessTableComponent = React.memo<UncommonProcessTableProps>(
     );
 
     const updateLimitPagination = useCallback(
-      (newLimit) =>
+      (newLimit: number) =>
         dispatch(
           hostsActions.updateTableLimit({
             hostsType: type,
@@ -76,7 +76,7 @@ const UncommonProcessTableComponent = React.memo<UncommonProcessTableProps>(
     );
 
     const updateActivePage = useCallback(
-      (newPage) =>
+      (newPage: number) =>
         dispatch(
           hostsActions.updateTableActivePage({
             activePage: newPage,

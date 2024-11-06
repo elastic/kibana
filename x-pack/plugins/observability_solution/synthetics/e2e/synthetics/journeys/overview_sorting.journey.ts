@@ -13,12 +13,7 @@ import {
 } from './services/add_monitor';
 import { syntheticsAppPageProvider } from '../page_objects/synthetics_app';
 
-const journeySkip =
-  (...params: Parameters<typeof journey>) =>
-  () =>
-    journey(...params);
-// TODO: skipped because failing on main and need to unblock CI
-journeySkip('OverviewSorting', async ({ page, params }) => {
+journey('OverviewSorting', async ({ page, params }) => {
   const syntheticsApp = syntheticsAppPageProvider({ page, kibanaUrl: params.kibanaUrl, params });
   const testMonitor1 = 'acb'; // second alpha, first created
   const testMonitor2 = 'aCd'; // third alpha, second created
@@ -33,7 +28,7 @@ journeySkip('OverviewSorting', async ({ page, params }) => {
     await addTestMonitor(params.kibanaUrl, testMonitor3);
   });
 
-  step('Go to monitor-management', async () => {
+  step('Go to overview page', async () => {
     await syntheticsApp.navigateToOverview(true, 15);
   });
 
@@ -41,7 +36,6 @@ journeySkip('OverviewSorting', async ({ page, params }) => {
     await page.waitForSelector(`[data-test-subj="syntheticsOverviewGridItem"]`);
     await page.click('[data-test-subj="syntheticsOverviewSortButton"]');
     await page.click('button:has-text("Alphabetical")');
-    await page.waitForSelector(`[data-test-subj="syntheticsOverviewMonitorsLoading"]`);
     await page.waitForSelector(`text=${testMonitor1}`);
     await page.waitForSelector(`text=${testMonitor2}`);
     await page.waitForSelector(`text=${testMonitor3}`);

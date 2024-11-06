@@ -40,6 +40,7 @@ describe('listAlertTypesRoute', () => {
     const [config, handler] = router.get.mock.calls[0];
 
     expect(config.path).toMatchInlineSnapshot(`"/api/alerts/list_alert_types"`);
+    expect(config.options?.access).toBe('public');
 
     const listTypes = [
       {
@@ -112,6 +113,18 @@ describe('listAlertTypesRoute', () => {
     expect(res.ok).toHaveBeenCalledWith({
       body: listTypes,
     });
+  });
+
+  it('should have internal access for serverless', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    listAlertTypesRoute(router, licenseState, undefined, true);
+
+    const [config] = router.get.mock.calls[0];
+
+    expect(config.path).toMatchInlineSnapshot(`"/api/alerts/list_alert_types"`);
+    expect(config.options?.access).toBe('internal');
   });
 
   it('ensures the license allows listing alert types', async () => {

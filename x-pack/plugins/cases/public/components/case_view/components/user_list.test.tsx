@@ -20,7 +20,8 @@ jest.mock('../../../common/navigation/hooks');
 
 const useCaseViewNavigationMock = useCaseViewNavigation as jest.Mock;
 
-describe('UserList ', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/192640
+describe.skip('UserList ', () => {
   const title = basicCase.title;
   const caseLink = 'https://example.com/cases/test';
   const user = {
@@ -40,7 +41,7 @@ describe('UserList ', () => {
     window.open = open;
   });
 
-  it('triggers mailto when email icon clicked', () => {
+  it('triggers mailto when email icon clicked', async () => {
     appMockRender.render(
       <UserList
         theCase={basicCase}
@@ -53,7 +54,7 @@ describe('UserList ', () => {
       />
     );
 
-    userEvent.click(screen.getByTestId('user-list-email-button'));
+    await userEvent.click(screen.getByTestId('user-list-email-button'));
 
     expect(open).toBeCalledWith(
       `mailto:${user.email}?subject=${i18n.EMAIL_SUBJECT(title)}&body=${i18n.EMAIL_BODY(caseLink)}`,

@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 import { BooleanFromString } from '@kbn/zod-helpers';
 
 import { RuleResponse } from '../../model/rule_schema/rule_schemas.gen';
@@ -328,8 +328,7 @@ export const BulkActionEditPayloadTimeline = z.object({
   }),
 });
 
-export type BulkActionEditPayload = z.infer<typeof BulkActionEditPayload>;
-export const BulkActionEditPayload = z.union([
+export const BulkActionEditPayloadInternal = z.union([
   BulkActionEditPayloadTags,
   BulkActionEditPayloadIndexPatterns,
   BulkActionEditPayloadInvestigationFields,
@@ -338,6 +337,10 @@ export const BulkActionEditPayload = z.union([
   BulkActionEditPayloadRuleActions,
   BulkActionEditPayloadSchedule,
 ]);
+
+export type BulkActionEditPayload = z.infer<typeof BulkActionEditPayloadInternal>;
+export const BulkActionEditPayload =
+  BulkActionEditPayloadInternal as z.ZodType<BulkActionEditPayload>;
 
 export type BulkEditRules = z.infer<typeof BulkEditRules>;
 export const BulkEditRules = BulkActionBase.merge(

@@ -5,12 +5,17 @@
  * 2.0.
  */
 
-import { assignPodPartitions, getParitionMap } from './assign_pod_partitions';
+import { DEFAULT_KIBANAS_PER_PARTITION } from '../config';
+import { assignPodPartitions, getPartitionMap } from './assign_pod_partitions';
 describe('assignPodPartitions', () => {
   test('two pods', () => {
     const allPods = ['foo', 'bar'];
     const allPartitions = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-    const map = getParitionMap(allPods, allPartitions);
+    const map = getPartitionMap({
+      kibanasPerPartition: DEFAULT_KIBANAS_PER_PARTITION,
+      podNames: allPods,
+      partitions: allPartitions,
+    });
     expect(map).toMatchInlineSnapshot(`
     Object {
       "1": Array [
@@ -60,7 +65,11 @@ describe('assignPodPartitions', () => {
   test('three pods', () => {
     const allPods = ['foo', 'bar', 'quz'];
     const allPartitions = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-    const map = getParitionMap(allPods, allPartitions);
+    const map = getPartitionMap({
+      kibanasPerPartition: DEFAULT_KIBANAS_PER_PARTITION,
+      podNames: allPods,
+      partitions: allPartitions,
+    });
     expect(map).toMatchInlineSnapshot(`
     Object {
       "1": Array [
@@ -105,7 +114,12 @@ describe('assignPodPartitions', () => {
       ],
     }
   `);
-    const fooPartitions = assignPodPartitions('foo', allPods, allPartitions);
+    const fooPartitions = assignPodPartitions({
+      podName: 'foo',
+      podNames: allPods,
+      partitions: allPartitions,
+      kibanasPerPartition: DEFAULT_KIBANAS_PER_PARTITION,
+    });
     expect(fooPartitions).toMatchInlineSnapshot(`
     Array [
       1,
@@ -117,7 +131,12 @@ describe('assignPodPartitions', () => {
       10,
     ]
   `);
-    const barPartitions = assignPodPartitions('bar', allPods, allPartitions);
+    const barPartitions = assignPodPartitions({
+      podName: 'bar',
+      podNames: allPods,
+      partitions: allPartitions,
+      kibanasPerPartition: DEFAULT_KIBANAS_PER_PARTITION,
+    });
     expect(barPartitions).toMatchInlineSnapshot(`
     Array [
       1,
@@ -129,7 +148,12 @@ describe('assignPodPartitions', () => {
       10,
     ]
   `);
-    const quzPartitions = assignPodPartitions('quz', allPods, allPartitions);
+    const quzPartitions = assignPodPartitions({
+      podName: 'quz',
+      podNames: allPods,
+      partitions: allPartitions,
+      kibanasPerPartition: DEFAULT_KIBANAS_PER_PARTITION,
+    });
     expect(quzPartitions).toMatchInlineSnapshot(`
     Array [
       2,

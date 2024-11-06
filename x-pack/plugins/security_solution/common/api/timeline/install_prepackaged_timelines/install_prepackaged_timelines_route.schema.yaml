@@ -2,24 +2,18 @@ openapi: 3.0.0
 info:
   title: Elastic Security - Timeline - Install Prepackaged Timelines API
   version: '2023-10-31'
-servers:
-  - url: 'http://{kibana_host}:{port}'
-    variables:
-      kibana_host:
-        default: localhost
-      port:
-        default: '5601'
 paths:
   /api/timeline/_prepackaged:
     post:
       x-labels: [serverless, ess]
       x-codegen-enabled: true
       operationId: InstallPrepackedTimelines
-      summary: Installs prepackaged timelines.
+      summary: Install prepackaged Timelines
+      description: Install or update prepackaged Timelines.
       tags:
         - access:securitySolution
       requestBody:
-        description: The timelines to install or update.
+        description: The Timelines to install or update.
         required: true
         content:
           application/json:
@@ -40,20 +34,17 @@ paths:
                 prepackagedTimelines:
                   type: array
                   items:
-                    $ref: '../model/components.schema.yaml#/components/schemas/SavedTimeline'
+                    $ref: '../model/components.schema.yaml#/components/schemas/TimelineSavedToReturnObject'
+                    nullable: true
       responses:
         '200':
-          description: Indicates the installation of prepackaged timelines was successful.
+          description: Indicates the installation of prepackaged Timelines was successful.
           content:
             application/json:
               schema:
-                type: object
-                required: [data]
-                properties:
-                  data:
-                    $ref: '../model/components.schema.yaml#/components/schemas/ImportTimelineResult'
+                $ref: '../model/components.schema.yaml#/components/schemas/ImportTimelineResult'
         '500':
-          description: Indicates the installation of prepackaged timelines was unsuccessful.
+          description: Indicates the installation of prepackaged Timelines was unsuccessful.
           content:
             application:json:
               schema:

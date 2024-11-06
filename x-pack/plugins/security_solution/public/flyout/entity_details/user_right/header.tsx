@@ -13,7 +13,7 @@ import { SecurityPageName } from '@kbn/security-solution-navigation';
 import type { UserItem } from '../../../../common/search_strategy';
 import { ManagedUserDatasetKey } from '../../../../common/search_strategy/security_solution/users/managed_details';
 import { getUsersDetailsUrl } from '../../../common/components/link_to/redirect_to_users';
-import type { ManagedUserData } from '../../../timelines/components/side_panel/new_user_detail/types';
+import type { ManagedUserData } from './types';
 
 import { SecuritySolutionLinkAnchor } from '../../../common/components/links';
 import { PreferenceFormattedDate } from '../../../common/components/formatted_date';

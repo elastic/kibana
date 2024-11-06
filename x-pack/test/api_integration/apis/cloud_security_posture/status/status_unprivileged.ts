@@ -6,23 +6,16 @@
  */
 import expect from '@kbn/expect';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
-import type { CspSetupStatus } from '@kbn/cloud-security-posture-plugin/common/types_old';
+import { CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN } from '@kbn/cloud-security-posture-common';
+import type { CspSetupStatus } from '@kbn/cloud-security-posture-common';
 import {
   BENCHMARK_SCORE_INDEX_DEFAULT_NS,
   LATEST_FINDINGS_INDEX_DEFAULT_NS,
-  LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
   FINDINGS_INDEX_PATTERN,
 } from '@kbn/cloud-security-posture-plugin/common/constants';
+import { find, without } from 'lodash';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import {
-  createPackagePolicy,
-  createUser,
-  createCSPOnlyRole,
-  deleteRole,
-  deleteUser,
-  deleteIndex,
-  assertIndexStatus,
-} from '../helper';
+import { createPackagePolicy, createUser, createCSPRole, deleteRole, deleteUser } from '../helper';
 
 const UNPRIVILEGED_ROLE = 'unprivileged_test_role';
 const UNPRIVILEGED_USERNAME = 'unprivileged_test_user';
@@ -32,27 +25,36 @@ export default function (providerContext: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
-  const es = getService('es');
   const kibanaServer = getService('kibanaServer');
   const security = getService('security');
+
+  const allIndices = [
+    LATEST_FINDINGS_INDEX_DEFAULT_NS,
+    FINDINGS_INDEX_PATTERN,
+    BENCHMARK_SCORE_INDEX_DEFAULT_NS,
+    CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
+  ];
 
   describe('GET /internal/cloud_security_posture/status', () => {
     let agentPolicyId: string;
 
     describe('STATUS = UNPRIVILEGED TEST', () => {
       before(async () => {
-        await createCSPOnlyRole(security, UNPRIVILEGED_ROLE, '');
+        await createCSPRole(security, UNPRIVILEGED_ROLE);
         await createUser(security, UNPRIVILEGED_USERNAME, UNPRIVILEGED_ROLE);
+        await esArchiver.loadIfNeeded(
+          'x-pack/test/functional/es_archives/fleet/empty_fleet_server'
+        );
       });
 
       after(async () => {
         await deleteUser(security, UNPRIVILEGED_USERNAME);
         await deleteRole(security, UNPRIVILEGED_ROLE);
+        await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
       });
 
       beforeEach(async () => {
         await kibanaServer.savedObjects.cleanStandardList();
-        await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
 
         const { body: agentPolicyResponse } = await supertest
           .post(`/api/fleet/agent_policies`)
@@ -67,7 +69,6 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       afterEach(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
         await kibanaServer.savedObjects.cleanStandardList();
       });
 
@@ -106,7 +107,6 @@ export default function (providerContext: FtrProviderContext) {
     describe('status = unprivileged test indices', () => {
       beforeEach(async () => {
         await kibanaServer.savedObjects.cleanStandardList();
-        await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
 
         const { body: agentPolicyResponse } = await supertest
           .post(`/api/fleet/agent_policies`)
@@ -124,11 +124,21 @@ export default function (providerContext: FtrProviderContext) {
         await deleteUser(security, UNPRIVILEGED_USERNAME);
         await deleteRole(security, UNPRIVILEGED_ROLE);
         await kibanaServer.savedObjects.cleanStandardList();
+      });
+
+      before(async () => {
+        await esArchiver.loadIfNeeded(
+          'x-pack/test/functional/es_archives/fleet/empty_fleet_server'
+        );
+      });
+
+      after(async () => {
         await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
       });
 
       it(`Return unprivileged when missing access to findings_latest index`, async () => {
-        await createCSPOnlyRole(security, UNPRIVILEGED_ROLE, LATEST_FINDINGS_INDEX_DEFAULT_NS);
+        const privilegedIndices = without(allIndices, LATEST_FINDINGS_INDEX_DEFAULT_NS);
+        await createCSPRole(security, UNPRIVILEGED_ROLE, privilegedIndices);
         await createUser(security, UNPRIVILEGED_USERNAME, UNPRIVILEGED_ROLE);
 
         await createPackagePolicy(
@@ -149,30 +159,30 @@ export default function (providerContext: FtrProviderContext) {
 
         expect(res.kspm.status).to.eql(
           'unprivileged',
-          `expected unprivileged but got ${res.kspm.status} instead`
+          `kspm status expected unprivileged but got ${res.kspm.status} instead`
         );
         expect(res.cspm.status).to.eql(
           'unprivileged',
-          `expected unprivileged but got ${res.cspm.status} instead`
+          `cspm status expected unprivileged but got ${res.cspm.status} instead`
         );
         expect(res.vuln_mgmt.status).to.eql(
-          'unprivileged',
-          `expected unprivileged but got ${res.vuln_mgmt.status} instead`
+          'not-installed',
+          `cnvm status expected not_installed but got ${res.vuln_mgmt.status} instead`
         );
 
-        assertIndexStatus(res.indicesDetails, LATEST_FINDINGS_INDEX_DEFAULT_NS, 'empty');
-        assertIndexStatus(res.indicesDetails, FINDINGS_INDEX_PATTERN, 'empty');
-        assertIndexStatus(res.indicesDetails, BENCHMARK_SCORE_INDEX_DEFAULT_NS, 'unprivileged');
-        assertIndexStatus(
-          res.indicesDetails,
-          LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
+        expect(res).to.have.property('indicesDetails');
+        expect(find(res.indicesDetails, { index: LATEST_FINDINGS_INDEX_DEFAULT_NS })?.status).eql(
           'unprivileged'
         );
+
+        privilegedIndices.forEach((index) => {
+          expect(find(res.indicesDetails, { index })?.status).not.eql('unprivileged');
+        });
       });
 
       it(`Return unprivileged when missing access to score index`, async () => {
-        await deleteIndex(es, [BENCHMARK_SCORE_INDEX_DEFAULT_NS]);
-        await createCSPOnlyRole(security, UNPRIVILEGED_ROLE, BENCHMARK_SCORE_INDEX_DEFAULT_NS);
+        const privilegedIndices = without(allIndices, BENCHMARK_SCORE_INDEX_DEFAULT_NS);
+        await createCSPRole(security, UNPRIVILEGED_ROLE, privilegedIndices);
         await createUser(security, UNPRIVILEGED_USERNAME, UNPRIVILEGED_ROLE);
 
         await createPackagePolicy(
@@ -193,33 +203,33 @@ export default function (providerContext: FtrProviderContext) {
 
         expect(res.kspm.status).to.eql(
           'unprivileged',
-          `expected unprivileged but got ${res.kspm.status} instead`
+          `kspm status expected unprivileged but got ${res.kspm.status} instead`
         );
         expect(res.cspm.status).to.eql(
           'unprivileged',
-          `expected unprivileged but got ${res.cspm.status} instead`
+          `cspm status expected unprivileged but got ${res.cspm.status} instead`
         );
         expect(res.vuln_mgmt.status).to.eql(
           'unprivileged',
-          `expected unprivileged but got ${res.vuln_mgmt.status} instead`
+          `cnvm status expected unprivileged but got ${res.vuln_mgmt.status} instead`
         );
 
-        assertIndexStatus(res.indicesDetails, LATEST_FINDINGS_INDEX_DEFAULT_NS, 'unprivileged');
-        assertIndexStatus(res.indicesDetails, FINDINGS_INDEX_PATTERN, 'empty');
-        assertIndexStatus(res.indicesDetails, BENCHMARK_SCORE_INDEX_DEFAULT_NS, 'empty');
-        assertIndexStatus(
-          res.indicesDetails,
-          LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
+        expect(res).to.have.property('indicesDetails');
+        expect(find(res.indicesDetails, { index: BENCHMARK_SCORE_INDEX_DEFAULT_NS })?.status).eql(
           'unprivileged'
         );
+
+        privilegedIndices.forEach((index) => {
+          expect(find(res.indicesDetails, { index })?.status).not.eql('unprivileged');
+        });
       });
 
       it(`Return unprivileged when missing access to vulnerabilities_latest index`, async () => {
-        await createCSPOnlyRole(
-          security,
-          UNPRIVILEGED_ROLE,
-          LATEST_VULNERABILITIES_INDEX_DEFAULT_NS
+        const privilegedIndices = without(
+          allIndices,
+          CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN
         );
+        await createCSPRole(security, UNPRIVILEGED_ROLE, privilegedIndices);
         await createUser(security, UNPRIVILEGED_USERNAME, UNPRIVILEGED_ROLE);
 
         await createPackagePolicy(
@@ -239,22 +249,27 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
 
         expect(res.kspm.status).to.eql(
-          'unprivileged',
-          `expected unprivileged but got ${res.kspm.status} instead`
+          'not-deployed',
+          `kspm status expected unprivileged but got ${res.kspm.status} instead`
         );
         expect(res.cspm.status).to.eql(
-          'unprivileged',
-          `expected unprivileged but got ${res.cspm.status} instead`
+          'not-installed',
+          `cspm status expected unprivileged but got ${res.cspm.status} instead`
         );
         expect(res.vuln_mgmt.status).to.eql(
           'unprivileged',
-          `expected unprivileged but got ${res.vuln_mgmt.status} instead`
+          `cnvm status expected unprivileged but got ${res.vuln_mgmt.status} instead`
         );
 
-        assertIndexStatus(res.indicesDetails, LATEST_FINDINGS_INDEX_DEFAULT_NS, 'unprivileged');
-        assertIndexStatus(res.indicesDetails, FINDINGS_INDEX_PATTERN, 'empty');
-        assertIndexStatus(res.indicesDetails, BENCHMARK_SCORE_INDEX_DEFAULT_NS, 'unprivileged');
-        assertIndexStatus(res.indicesDetails, LATEST_VULNERABILITIES_INDEX_DEFAULT_NS, 'empty');
+        expect(res).to.have.property('indicesDetails');
+        expect(
+          find(res.indicesDetails, { index: CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN })
+            ?.status
+        ).eql('unprivileged');
+
+        privilegedIndices.forEach((index) => {
+          expect(find(res.indicesDetails, { index })?.status).not.eql('unprivileged');
+        });
       });
     });
   });

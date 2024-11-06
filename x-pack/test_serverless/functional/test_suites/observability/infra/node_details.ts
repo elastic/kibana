@@ -30,7 +30,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     'svlCommonPage',
   ]);
 
-  describe('Node Details', () => {
+  // failing feature flag test, see https://github.com/elastic/kibana/issues/191809
+  describe.skip('Node Details', () => {
     describe('#With Asset Details', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');

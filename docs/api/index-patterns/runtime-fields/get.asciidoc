@@ -4,7 +4,7 @@
 <titleabbrev>Get runtime field</titleabbrev>
 ++++
 
-deprecated::[8.0.0,Use <<data-views-runtime-field-api-get>> instead.]
+deprecated::[8.0.0,Use the {api-kibana}/group/endpoint-data-views[data views API] instead.]
 
 experimental[] Get a runtime field
 

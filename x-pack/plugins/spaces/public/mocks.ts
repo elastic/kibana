@@ -16,6 +16,7 @@ const createApiMock = (hasOnlyDefaultSpace: boolean): jest.Mocked<SpacesApi> => 
   getActiveSpace: jest.fn(),
   ui: createApiUiMock(),
   hasOnlyDefaultSpace,
+  isSolutionViewEnabled: true,
 });
 
 type SpacesApiUiMock = Omit<jest.Mocked<SpacesApiUi>, 'components'> & {

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 const Path = require('path');
@@ -58,6 +59,7 @@ module.exports = (_, argv) => {
         '@babel/runtime/helpers/wrapNativeSuper',
 
         // modules from npm
+        '@elastic/apm-rum-core',
         '@elastic/charts',
         '@elastic/eui',
         '@elastic/eui/optimize/es/components/provider/nested',
@@ -86,7 +88,6 @@ module.exports = (_, argv) => {
         'moment-timezone/moment-timezone',
         'moment-timezone/data/packed/latest.json',
         'moment',
-        'react-ace',
         'react-dom',
         'react-dom/server',
         'react-router-dom',
@@ -99,8 +100,6 @@ module.exports = (_, argv) => {
         'tslib',
         'uuid',
       ],
-      'kbn-ui-shared-deps-npm.v8.dark': ['@elastic/eui/dist/eui_theme_dark.css'],
-      'kbn-ui-shared-deps-npm.v8.light': ['@elastic/eui/dist/eui_theme_light.css'],
     },
     context: __dirname,
     devtool: 'cheap-source-map',

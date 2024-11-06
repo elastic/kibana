@@ -11,10 +11,12 @@ import expect from '@kbn/expect';
 import {
   AGENT_ACTIONS_INDEX,
   AGENT_ACTIONS_RESULTS_INDEX,
-  AGENTS_INDEX,
   AGENT_POLICY_INDEX,
+  AGENTS_INDEX,
+  type FleetServerAgent,
 } from '@kbn/fleet-plugin/common';
 import { ENROLLMENT_API_KEYS_INDEX } from '@kbn/fleet-plugin/common/constants';
+import { asyncForEach } from '@kbn/std';
 
 const ES_INDEX_OPTIONS = { headers: { 'X-elastic-product-origin': 'fleet' } };
 
@@ -50,14 +52,26 @@ export async function cleanFleetIndices(esClient: Client) {
   ]);
 }
 
+export async function cleanFleetAgents(esClient: Client) {
+  await esClient.deleteByQuery({
+    index: AGENTS_INDEX,
+    q: '*',
+    ignore_unavailable: true,
+    refresh: true,
+  });
+}
+
+export async function cleanFleetAgentPolicies(esClient: Client) {
+  await esClient.deleteByQuery({
+    index: AGENT_POLICY_INDEX,
+    q: '*',
+    refresh: true,
+  });
+}
+
 export async function cleanFleetActionIndices(esClient: Client) {
   try {
     await Promise.all([
-      esClient.deleteByQuery({
-        index: AGENT_POLICY_INDEX,
-        q: '*',
-        refresh: true,
-      }),
       esClient.deleteByQuery({
         index: AGENT_ACTIONS_INDEX,
         q: '*',
@@ -78,11 +92,7 @@ export async function cleanFleetActionIndices(esClient: Client) {
   }
 }
 
-export const createFleetAgent = async (
-  esClient: Client,
-  agentPolicyId: string,
-  spaceId?: string
-) => {
+export async function createFleetAgent(esClient: Client, agentPolicyId: string, spaceId?: string) {
   const agentResponse = await esClient.index({
     index: '.fleet-agents',
     refresh: true,
@@ -106,4 +116,28 @@ export const createFleetAgent = async (
   });
 
   return agentResponse._id;
-};
+}
+
+export async function getFleetAgentDoc(esClient: Client, agentId: string) {
+  const agentResponse = await esClient.get<FleetServerAgent>({
+    index: '.fleet-agents',
+    id: agentId,
+  });
+
+  return agentResponse;
+}
+
+export async function makeAgentsUpgradeable(esClient: Client, agentIds: string[], version: string) {
+  await asyncForEach(agentIds, async (agentId) => {
+    await esClient.update({
+      id: agentId,
+      refresh: 'wait_for',
+      index: AGENTS_INDEX,
+      body: {
+        doc: {
+          local_metadata: { elastic: { agent: { upgradeable: true, version } } },
+        },
+      },
+    });
+  });
+}

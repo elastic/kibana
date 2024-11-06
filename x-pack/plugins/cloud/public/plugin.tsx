@@ -12,17 +12,19 @@ import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kb
 import { registerCloudDeploymentMetadataAnalyticsContext } from '../common/register_cloud_deployment_id_analytics_context';
 import { getIsCloudEnabled } from '../common/is_cloud_enabled';
 import { parseDeploymentIdFromDeploymentUrl } from '../common/parse_deployment_id_from_deployment_url';
-import { CLOUD_SNAPSHOTS_PATH } from '../common/constants';
+import { CLOUD_SNAPSHOTS_PATH, ELASTICSEARCH_CONFIG_ROUTE } from '../common/constants';
 import { decodeCloudId, type DecodedCloudId } from '../common/decode_cloud_id';
 import { getFullCloudUrl } from '../common/utils';
 import { parseOnboardingSolution } from '../common/parse_onboarding_default_solution';
-import type { CloudSetup, CloudStart } from './types';
+import type { CloudSetup, CloudStart, PublicElasticsearchConfigType } from './types';
 import { getSupportUrl } from './utils';
+import { ElasticsearchConfigType } from '../common/types';
 
 export interface CloudConfigType {
   id?: string;
   organization_id?: string;
   cname?: string;
+  csp?: string;
   base_url?: string;
   profile_url?: string;
   deployments_url?: string;
@@ -65,12 +67,14 @@ export class CloudPlugin implements Plugin<CloudSetup> {
   private readonly isServerlessEnabled: boolean;
   private readonly contextProviders: Array<FC<PropsWithChildren<unknown>>> = [];
   private readonly logger: Logger;
+  private elasticsearchConfig?: PublicElasticsearchConfigType;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<CloudConfigType>();
     this.isCloudEnabled = getIsCloudEnabled(this.config.id);
     this.isServerlessEnabled = !!this.config.serverless?.project_id;
     this.logger = initializerContext.logger.get();
+    this.elasticsearchConfig = undefined;
   }
 
   public setup(core: CoreSetup): CloudSetup {
@@ -82,6 +86,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       base_url: baseUrl,
       trial_end_date: trialEndDate,
       is_elastic_staff_owned: isElasticStaffOwned,
+      csp,
     } = this.config;
 
     let decodedId: DecodedCloudId | undefined;
@@ -94,9 +99,9 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       organizationId: this.config.organization_id,
       deploymentId: parseDeploymentIdFromDeploymentUrl(this.config.deployment_url),
       cname,
+      csp,
       baseUrl,
       ...this.getCloudUrls(),
-      elasticsearchUrl: decodedId?.elasticsearchUrl,
       kibanaUrl: decodedId?.kibanaUrl,
       cloudHost: decodedId?.host,
       cloudDefaultPort: decodedId?.defaultPort,
@@ -116,6 +121,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       registerCloudService: (contextProvider) => {
         this.contextProviders.push(contextProvider);
       },
+      fetchElasticsearchConfig: this.fetchElasticsearchConfig.bind(this, core.http),
     };
   }
 
@@ -163,7 +169,6 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       profileUrl,
       organizationUrl,
       projectsUrl,
-      elasticsearchUrl: decodedId?.elasticsearchUrl,
       kibanaUrl: decodedId?.kibanaUrl,
       isServerlessEnabled: this.isServerlessEnabled,
       serverless: {
@@ -173,6 +178,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       },
       performanceUrl,
       usersAndRolesUrl,
+      fetchElasticsearchConfig: this.fetchElasticsearchConfig.bind(this, coreStart.http),
     };
   }
 
@@ -212,5 +218,27 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       usersAndRolesUrl: fullCloudUsersAndRolesUrl,
       projectsUrl: fullCloudProjectsUrl,
     };
+  }
+
+  private async fetchElasticsearchConfig(
+    http: CoreStart['http']
+  ): Promise<PublicElasticsearchConfigType> {
+    if (this.elasticsearchConfig !== undefined) {
+      // This config should be fully populated on first fetch, so we should avoid refetching from server
+      return this.elasticsearchConfig;
+    }
+    try {
+      const result = await http.get<ElasticsearchConfigType>(ELASTICSEARCH_CONFIG_ROUTE, {
+        version: '1',
+      });
+
+      this.elasticsearchConfig = { elasticsearchUrl: result.elasticsearch_url || undefined };
+      return this.elasticsearchConfig;
+    } catch {
+      this.logger.error('Failed to fetch Elasticsearch config');
+      return {
+        elasticsearchUrl: undefined,
+      };
+    }
   }
 }

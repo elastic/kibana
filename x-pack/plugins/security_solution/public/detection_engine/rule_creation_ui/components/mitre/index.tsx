@@ -35,14 +35,6 @@ const MitreAttackContainer = styled.div`
   margin-top: 16px;
 `;
 
-const InitialMitreAttackFormRow = styled(EuiFormRow)`
-  .euiFormRow__labelWrapper {
-    .euiText {
-      padding-right: 32px;
-    }
-  }
-`;
-
 interface AddItemProps {
   field: FieldHook;
   dataTestSubj: string; // eslint-disable-line react/no-unused-prop-types
@@ -174,14 +166,14 @@ export const AddMitreAttackThreat = memo(({ field, idAria, isDisabled }: AddItem
       {values.map((threat, index) => (
         <div key={index}>
           {index === 0 ? (
-            <InitialMitreAttackFormRow
+            <EuiFormRow
               fullWidth
               label={`${field.label} ${i18n.THREATS}`}
               labelAppend={field.labelAppend}
               describedByIds={idAria ? [`${idAria} ${i18n.TACTIC}`] : undefined}
             >
               <>{getSelectTactic(threat, index, isDisabled)}</>
-            </InitialMitreAttackFormRow>
+            </EuiFormRow>
           ) : (
             <EuiFormRow
               fullWidth

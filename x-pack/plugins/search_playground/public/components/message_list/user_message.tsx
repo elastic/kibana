@@ -34,7 +34,7 @@ export const UserMessage: React.FC<UserMessageProps> = ({ content, createdAt }) 
       eventColor="subdued"
       css={{
         '.euiCommentEvent__body': {
-          backgroundColor: euiTheme.colors.ghost,
+          backgroundColor: euiTheme.colors.emptyShade,
         },
       }}
       username={i18n.translate('xpack.searchPlayground.chat.message.user.name', {

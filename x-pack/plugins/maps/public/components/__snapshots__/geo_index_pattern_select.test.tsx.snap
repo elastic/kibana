@@ -3,14 +3,9 @@
 exports[`should render 1`] = `
 <Fragment>
   <EuiFormRow
-    describedByIds={Array []}
-    display="row"
     error=""
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
     isInvalid={false}
     label="Data view"
-    labelType="label"
   >
     <MockIndexPatternSelect
       data-test-subj="mapGeoIndexPatternSelect"

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
@@ -27,6 +28,7 @@ import {
   DataViewSpec,
   DataViewAttributes,
   FieldAttrs,
+  FieldAttrsAsObject,
   FieldSpec,
   DataViewFieldMap,
   TypeMeta,
@@ -186,7 +188,7 @@ export interface DataViewsServicePublicMethods {
    * @params fieldAttrs - Field attributes, map by name
    * @returns Field map by name
    */
-  fieldArrayToMap: (fields: FieldSpec[], fieldAttrs?: FieldAttrs | undefined) => DataViewFieldMap;
+  fieldArrayToMap: (fields: FieldSpec[], fieldAttrs?: FieldAttrsAsObject) => DataViewFieldMap;
   /**
    * Search for data views based on title
    * @param search - Search string
@@ -637,6 +639,7 @@ export class DataViewsService {
       allowNoIndex: true,
       indexFilter: options.indexFilter,
       allowHidden: options.allowHidden,
+      forceRefresh: options.forceRefresh,
     });
   };
 
@@ -656,7 +659,8 @@ export class DataViewsService {
     const scripted = this.scriptedFieldsEnabled
       ? indexPattern.getScriptedFields().map((field) => field.spec)
       : [];
-    const fieldAttrs = indexPattern.getFieldAttrs();
+
+    const fieldAttrs = Object.fromEntries(indexPattern.getFieldAttrs().entries());
     const fieldsWithSavedAttrs = Object.values(
       this.fieldArrayToMap([...fields, ...scripted], fieldAttrs)
     );
@@ -719,7 +723,7 @@ export class DataViewsService {
     id: string,
     title: string,
     options: GetFieldsOptions,
-    fieldAttrs: FieldAttrs = {},
+    fieldAttrs: FieldAttrsAsObject = {},
     displayErrors: boolean = true
   ) => {
     const fieldsAsArr = Object.values(fields);
@@ -770,7 +774,7 @@ export class DataViewsService {
    * @param fieldAttrs: FieldAttrs
    * @returns Record<string, FieldSpec>
    */
-  fieldArrayToMap = (fields: FieldSpec[], fieldAttrs?: FieldAttrs) =>
+  fieldArrayToMap = (fields: FieldSpec[], fieldAttrs?: FieldAttrsAsObject) =>
     fields.reduce<DataViewFieldMap>((collector, field) => {
       collector[field.name] = {
         ...field,
@@ -812,7 +816,7 @@ export class DataViewsService {
     const parsedTypeMeta = typeMeta ? JSON.parse(typeMeta) : undefined;
     const parsedFieldFormatMap = fieldFormatMap ? JSON.parse(fieldFormatMap) : {};
     const parsedFields: FieldSpec[] = fields ? JSON.parse(fields) : [];
-    const parsedFieldAttrs: FieldAttrs = fieldAttrs ? JSON.parse(fieldAttrs) : {};
+    const parsedFieldAttrs: FieldAttrsAsObject = fieldAttrs ? JSON.parse(fieldAttrs) : {};
     const parsedRuntimeFieldMap: Record<string, RuntimeField> = runtimeFieldMap
       ? JSON.parse(runtimeFieldMap)
       : {};
@@ -838,21 +842,24 @@ export class DataViewsService {
 
   private getSavedObjectAndInit = async (
     id: string,
-    displayErrors: boolean = true
+    displayErrors: boolean = true,
+    refreshFields: boolean = false
   ): Promise<DataView> => {
     const savedObject = await this.savedObjectsClient.get(id);
 
-    return this.initFromSavedObject(savedObject, displayErrors);
+    return this.initFromSavedObject(savedObject, displayErrors, refreshFields);
   };
 
   private initFromSavedObjectLoadFields = async ({
     savedObjectId,
     spec,
     displayErrors = true,
+    refreshFields = false,
   }: {
     savedObjectId: string;
     spec: DataViewSpec;
     displayErrors?: boolean;
+    refreshFields?: boolean;
   }) => {
     const { title, type, typeMeta, runtimeFieldMap } = spec;
     const { fields, indices, etag } = await this.refreshFieldSpecMap(
@@ -866,19 +873,24 @@ export class DataViewsService {
         rollupIndex: typeMeta?.params?.rollup_index,
         allowNoIndex: spec.allowNoIndex,
         allowHidden: spec.allowHidden,
+        forceRefresh: refreshFields,
       },
       spec.fieldAttrs,
       displayErrors
     );
 
-    const runtimeFieldSpecs = this.getRuntimeFields(runtimeFieldMap, spec.fieldAttrs);
+    const runtimeFieldSpecs = this.getRuntimeFields(
+      runtimeFieldMap,
+      new Map(Object.entries(spec.fieldAttrs || {}))
+    );
     // mapped fields overwrite runtime fields
     return { fields: { ...runtimeFieldSpecs, ...fields }, indices: indices || [], etag };
   };
 
   private initFromSavedObject = async (
     savedObject: SavedObject<DataViewAttributes>,
-    displayErrors: boolean = true
+    displayErrors: boolean = true,
+    refreshFields: boolean = false
   ): Promise<DataView> => {
     const spec = this.savedObjectToSpec(savedObject);
     spec.fieldAttrs = savedObject.attributes.fieldAttrs
@@ -894,6 +906,7 @@ export class DataViewsService {
         savedObjectId: savedObject.id,
         spec,
         displayErrors,
+        refreshFields,
       });
       fields = fieldsAndIndices.fields;
       indices = fieldsAndIndices.indices;
@@ -904,6 +917,7 @@ export class DataViewsService {
           savedObjectId: savedObject.id,
           spec,
           displayErrors,
+          refreshFields,
         });
         fields = fieldsAndIndices.fields;
         indices = fieldsAndIndices.indices;
@@ -937,7 +951,7 @@ export class DataViewsService {
 
   private getRuntimeFields = (
     runtimeFieldMap: Record<string, RuntimeFieldSpec> | undefined = {},
-    fieldAttrs: FieldAttrs | undefined = {}
+    fieldAttrs: FieldAttrs | undefined = new Map()
   ) => {
     const spec: DataViewFieldMap = {};
 
@@ -947,6 +961,7 @@ export class DataViewsService {
       runtimeField: RuntimeFieldSpec,
       parentName?: string
     ) => {
+      const fldAttrs = fieldAttrs.get(name) || {};
       spec[name] = {
         name,
         type: castEsToKbnFieldTypeName(fieldType),
@@ -955,9 +970,9 @@ export class DataViewsService {
         aggregatable: true,
         searchable: true,
         readFromDocValues: false,
-        customLabel: fieldAttrs?.[name]?.customLabel,
-        customDescription: fieldAttrs?.[name]?.customDescription,
-        count: fieldAttrs?.[name]?.count,
+        customLabel: fldAttrs.customLabel,
+        customDescription: fldAttrs.customDescription,
+        count: fldAttrs.count,
       };
 
       if (parentName) {
@@ -1040,7 +1055,7 @@ export class DataViewsService {
     if (dataViewFromCache) {
       indexPatternPromise = dataViewFromCache;
     } else {
-      indexPatternPromise = this.getSavedObjectAndInit(id, displayErrors);
+      indexPatternPromise = this.getSavedObjectAndInit(id, displayErrors, refreshFields);
       this.dataViewCache.set(id, indexPatternPromise);
     }
 

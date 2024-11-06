@@ -42,7 +42,7 @@ export const MlNotificationsContext = React.createContext<{
 export const MlNotificationsContextProvider: FC<PropsWithChildren<unknown>> = ({ children }) => {
   const {
     services: {
-      mlServices: { mlApiServices },
+      mlServices: { mlApi },
       application: { capabilities },
     },
   } = useMlKibana();
@@ -75,7 +75,7 @@ export const MlNotificationsContextProvider: FC<PropsWithChildren<unknown>> = ({
             setLatestRequestedAt(lastCheckedAtQuery);
           }),
           switchMap((lastCheckedAtQuery) =>
-            mlApiServices.notifications.countMessages$({
+            mlApi.notifications.countMessages$({
               lastCheckedAt: lastCheckedAtQuery,
             })
           ),
@@ -89,7 +89,7 @@ export const MlNotificationsContextProvider: FC<PropsWithChildren<unknown>> = ({
         subscription.unsubscribe();
       };
     },
-    [canGetNotifications, lastCheckedAt$, mlApiServices.notifications]
+    [canGetNotifications, lastCheckedAt$, mlApi.notifications]
   );
 
   return (

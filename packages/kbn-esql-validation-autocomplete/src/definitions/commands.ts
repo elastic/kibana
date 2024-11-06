@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
@@ -31,6 +32,10 @@ import {
   withOption,
 } from './options';
 import type { CommandDefinition } from './types';
+import { suggest as suggestForSort } from '../autocomplete/commands/sort';
+import { suggest as suggestForKeep } from '../autocomplete/commands/keep';
+import { suggest as suggestForDrop } from '../autocomplete/commands/drop';
+import { suggest as suggestForStats } from '../autocomplete/commands/stats';
 
 const statsValidator = (command: ESQLCommand) => {
   const messages: ESQLMessage[] = [];
@@ -147,7 +152,7 @@ const statsValidator = (command: ESQLCommand) => {
   }
   return messages;
 };
-export const commandDefinitions: CommandDefinition[] = [
+export const commandDefinitions: Array<CommandDefinition<any>> = [
   {
     name: 'row',
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.rowDoc', {
@@ -172,6 +177,7 @@ export const commandDefinitions: CommandDefinition[] = [
     examples: ['from logs', 'from logs-*', 'from logs_*, events-*'],
     options: [metadataOption],
     modes: [],
+    hasRecommendedQueries: true,
     signature: {
       multipleParams: true,
       params: [{ name: 'index', type: 'source', wildcards: true }],
@@ -235,6 +241,7 @@ export const commandDefinitions: CommandDefinition[] = [
     options: [byOption],
     modes: [],
     validate: statsValidator,
+    suggest: suggestForStats,
   },
   {
     name: 'inlinestats',
@@ -309,6 +316,7 @@ export const commandDefinitions: CommandDefinition[] = [
       defaultMessage: 'Rearranges fields in the input table by applying the keep clauses in fields',
     }),
     examples: ['… | keep a', '… | keep a,b'],
+    suggest: suggestForKeep,
     options: [],
     modes: [],
     signature: {
@@ -328,6 +336,7 @@ export const commandDefinitions: CommandDefinition[] = [
       multipleParams: true,
       params: [{ name: 'column', type: 'column', wildcards: true }],
     },
+    suggest: suggestForDrop,
     validate: (command: ESQLCommand) => {
       const messages: ESQLMessage[] = [];
       const wildcardItems = command.args.filter((arg) => isColumnItem(arg) && arg.name === '*');
@@ -382,13 +391,11 @@ export const commandDefinitions: CommandDefinition[] = [
     modes: [],
     signature: {
       multipleParams: true,
-      params: [
-        { name: 'expression', type: 'any' },
-        { name: 'direction', type: 'string', optional: true, values: ['ASC', 'DESC'] },
-        { name: 'nulls', type: 'string', optional: true, values: ['NULLS FIRST', 'NULLS LAST'] },
-      ],
+      params: [{ name: 'expression', type: 'any' }],
     },
+    suggest: suggestForSort,
   },
+
   {
     name: 'where',
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.whereDoc', {
@@ -466,6 +473,18 @@ export const commandDefinitions: CommandDefinition[] = [
     signature: {
       multipleParams: false,
       params: [{ name: 'policyName', type: 'source', innerTypes: ['policy'] }],
+    },
+  },
+  {
+    name: 'hidden_command',
+    description: 'A test fixture to test hidden-ness',
+    hidden: true,
+    examples: [],
+    modes: [],
+    options: [],
+    signature: {
+      params: [],
+      multipleParams: false,
     },
   },
 ];

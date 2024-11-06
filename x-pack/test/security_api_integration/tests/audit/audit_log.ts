@@ -6,9 +6,11 @@
  */
 
 import Path from 'path';
+
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+
 import { FileWrapper } from './file_wrapper';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');

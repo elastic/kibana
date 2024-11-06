@@ -1,31 +1,24 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import deepEqual from 'fast-deep-equal';
 import { useEffect, useRef } from 'react';
-import { resolveGridRow } from './resolve_grid_row';
+import { resolveGridRow } from './utils/resolve_grid_row';
 import { GridPanelData, GridLayoutStateManager } from './types';
-
-export const isGridDataEqual = (a?: GridPanelData, b?: GridPanelData) => {
-  return (
-    a?.id === b?.id &&
-    a?.column === b?.column &&
-    a?.row === b?.row &&
-    a?.width === b?.width &&
-    a?.height === b?.height
-  );
-};
+import { isGridDataEqual } from './utils/equality_checks';
 
 export const useGridLayoutEvents = ({
   gridLayoutStateManager,
 }: {
   gridLayoutStateManager: GridLayoutStateManager;
 }) => {
-  const dragEnterCount = useRef(0);
+  const mouseClientPosition = useRef({ x: 0, y: 0 });
   const lastRequestedPanelPosition = useRef<GridPanelData | undefined>(undefined);
 
   // -----------------------------------------------------------------------------------------
@@ -33,12 +26,12 @@ export const useGridLayoutEvents = ({
   // -----------------------------------------------------------------------------------------
   useEffect(() => {
     const { runtimeSettings$, interactionEvent$, gridLayout$ } = gridLayoutStateManager;
-    const dragOver = (e: MouseEvent) => {
+    const calculateUserEvent = (e: Event) => {
+      if (!interactionEvent$.value) return;
       e.preventDefault();
       e.stopPropagation();
 
       const gridRowElements = gridLayoutStateManager.rowRefs.current;
-      const previewElement = gridLayoutStateManager.dragPreviewRef.current;
 
       const interactionEvent = interactionEvent$.value;
       const isResize = interactionEvent?.type === 'resize';
@@ -51,17 +44,14 @@ export const useGridLayoutEvents = ({
         }
       })();
 
-      if (
-        !runtimeSettings$.value ||
-        !interactionEvent ||
-        !previewElement ||
-        !gridRowElements ||
-        !currentGridData
-      ) {
+      if (!runtimeSettings$.value || !gridRowElements || !currentGridData) {
         return;
       }
 
-      const mouseTargetPixel = { x: e.clientX, y: e.clientY };
+      const mouseTargetPixel = {
+        x: mouseClientPosition.current.x,
+        y: mouseClientPosition.current.y,
+      };
       const panelRect = interactionEvent.panelDiv.getBoundingClientRect();
       const previewRect = {
         left: isResize ? panelRect.left : mouseTargetPixel.x - interactionEvent.mouseOffsets.left,
@@ -69,7 +59,7 @@ export const useGridLayoutEvents = ({
         bottom: mouseTargetPixel.y - interactionEvent.mouseOffsets.bottom,
         right: mouseTargetPixel.x - interactionEvent.mouseOffsets.right,
       };
-      gridLayoutStateManager.updatePreviewElement(previewRect);
+      gridLayoutStateManager.activePanel$.next({ id: interactionEvent.id, position: previewRect });
 
       // find the grid that the preview rect is over
       const previewBottom =
@@ -122,6 +112,7 @@ export const useGridLayoutEvents = ({
         maxColumn
       );
       const targetRow = Math.max(Math.round(localYCoordinate / (rowHeight + gutterSize)), 0);
+
       const requestedGridData = { ...currentGridData };
       if (isResize) {
         requestedGridData.width = Math.max(targetColumn - requestedGridData.column, 1);
@@ -155,50 +146,22 @@ export const useGridLayoutEvents = ({
           const resolvedOriginGrid = resolveGridRow(originGrid);
           nextLayout[lastRowIndex] = resolvedOriginGrid;
         }
-        gridLayout$.next(nextLayout);
+        if (!deepEqual(currentLayout, nextLayout)) {
+          gridLayout$.next(nextLayout);
+        }
       }
     };
 
-    const onDrop = (e: MouseEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
-      if (!interactionEvent$.value) return;
-
-      interactionEvent$.next(undefined);
-      gridLayoutStateManager.hideDragPreview();
-      dragEnterCount.current = 0;
+    const onMouseMove = (e: MouseEvent) => {
+      mouseClientPosition.current = { x: e.clientX, y: e.clientY };
+      calculateUserEvent(e);
     };
 
-    const onDragEnter = (e: MouseEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
-      if (!interactionEvent$.value) return;
-
-      dragEnterCount.current++;
-    };
-
-    const onDragLeave = (e: MouseEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
-      if (!interactionEvent$.value) return;
-
-      dragEnterCount.current--;
-      if (dragEnterCount.current === 0) {
-        interactionEvent$.next(undefined);
-        gridLayoutStateManager.hideDragPreview();
-        dragEnterCount.current = 0;
-      }
-    };
-
-    window.addEventListener('drop', onDrop);
-    window.addEventListener('dragover', dragOver);
-    window.addEventListener('dragenter', onDragEnter);
-    window.addEventListener('dragleave', onDragLeave);
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('scroll', calculateUserEvent);
     return () => {
-      window.removeEventListener('drop', dragOver);
-      window.removeEventListener('dragover', dragOver);
-      window.removeEventListener('dragenter', onDragEnter);
-      window.removeEventListener('dragleave', onDragLeave);
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('scroll', calculateUserEvent);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

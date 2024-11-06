@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { DataTableRecord } from '@kbn/discover-utils';
@@ -24,6 +25,7 @@ import type {
   DocumentContext,
 } from './profiles';
 import type { ContextWithProfileId } from './profile_service';
+import type { DiscoverEBTManager } from '../services/discover_ebt_manager';
 
 interface SerializedRootProfileParams {
   solutionNavId: RootProfileProviderParams['solutionNavId'];
@@ -38,13 +40,20 @@ interface DataTableRecordWithContext extends DataTableRecord {
   context: ContextWithProfileId<DocumentContext>;
 }
 
+/**
+ * Options for the `getProfiles` method
+ */
 export interface GetProfilesOptions {
+  /**
+   * The data table record to use for the document profile
+   */
   record?: DataTableRecord;
 }
 
 export class ProfilesManager {
   private readonly rootContext$: BehaviorSubject<ContextWithProfileId<RootContext>>;
   private readonly dataSourceContext$: BehaviorSubject<ContextWithProfileId<DataSourceContext>>;
+  private readonly ebtManager: DiscoverEBTManager;
 
   private prevRootProfileParams?: SerializedRootProfileParams;
   private prevDataSourceProfileParams?: SerializedDataSourceProfileParams;
@@ -54,17 +63,23 @@ export class ProfilesManager {
   constructor(
     private readonly rootProfileService: RootProfileService,
     private readonly dataSourceProfileService: DataSourceProfileService,
-    private readonly documentProfileService: DocumentProfileService
+    private readonly documentProfileService: DocumentProfileService,
+    ebtManager: DiscoverEBTManager
   ) {
     this.rootContext$ = new BehaviorSubject(rootProfileService.defaultContext);
     this.dataSourceContext$ = new BehaviorSubject(dataSourceProfileService.defaultContext);
+    this.ebtManager = ebtManager;
   }
 
+  /**
+   * Resolves the root context profile
+   * @param params The root profile provider parameters
+   */
   public async resolveRootProfile(params: RootProfileProviderParams) {
     const serializedParams = serializeRootProfileParams(params);
 
     if (isEqual(this.prevRootProfileParams, serializedParams)) {
-      return;
+      return { getRenderAppWrapper: this.getRootRenderAppWrapper() };
     }
 
     const abortController = new AbortController();
@@ -80,13 +95,19 @@ export class ProfilesManager {
     }
 
     if (abortController.signal.aborted) {
-      return;
+      return { getRenderAppWrapper: this.getRootRenderAppWrapper() };
     }
 
     this.rootContext$.next(context);
     this.prevRootProfileParams = serializedParams;
+
+    return { getRenderAppWrapper: this.getRootRenderAppWrapper() };
   }
 
+  /**
+   * Resolves the data source context profile
+   * @param params The data source profile provider parameters
+   */
   public async resolveDataSourceProfile(
     params: Omit<DataSourceProfileProviderParams, 'rootContext'>
   ) {
@@ -115,10 +136,16 @@ export class ProfilesManager {
       return;
     }
 
+    this.trackActiveProfiles(this.rootContext$.getValue().profileId, context.profileId);
     this.dataSourceContext$.next(context);
     this.prevDataSourceProfileParams = serializedParams;
   }
 
+  /**
+   * Resolves the document context profile for a given data table record
+   * @param params The document profile provider parameters
+   * @returns The data table record with a resolved document context
+   */
   public resolveDocumentProfile(
     params: Omit<DocumentProfileProviderParams, 'rootContext' | 'dataSourceContext'>
   ) {
@@ -149,6 +176,11 @@ export class ProfilesManager {
     });
   }
 
+  /**
+   * Retrieves an array of the resolved profiles
+   * @param options Options for getting the profiles
+   * @returns The resolved profiles
+   */
   public getProfiles({ record }: GetProfilesOptions = {}) {
     return [
       this.rootProfileService.getProfile(this.rootContext$.getValue()),
@@ -159,10 +191,29 @@ export class ProfilesManager {
     ];
   }
 
+  /**
+   * Retrieves an observable of the resolved profiles that emits when the profiles change
+   * @param options Options for getting the profiles
+   * @returns The resolved profiles as an observable
+   */
   public getProfiles$(options: GetProfilesOptions = {}) {
     return combineLatest([this.rootContext$, this.dataSourceContext$]).pipe(
       map(() => this.getProfiles(options))
     );
+  }
+
+  /**
+   * Tracks the active profiles in the EBT context
+   */
+  private trackActiveProfiles(rootContextProfileId: string, dataSourceContextProfileId: string) {
+    const dscProfiles = [rootContextProfileId, dataSourceContextProfileId];
+
+    this.ebtManager.updateProfilesContextWith(dscProfiles);
+  }
+
+  private getRootRenderAppWrapper() {
+    const rootProfile = this.rootProfileService.getProfile(this.rootContext$.getValue());
+    return rootProfile.getRenderAppWrapper;
   }
 }
 

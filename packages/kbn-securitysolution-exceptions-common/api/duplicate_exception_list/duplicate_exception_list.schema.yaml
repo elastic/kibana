@@ -8,7 +8,8 @@ paths:
       x-labels: [serverless, ess]
       operationId: DuplicateExceptionList
       x-codegen-enabled: true
-      summary: Duplicates an exception list
+      summary: Duplicate an exception list
+      description: Duplicate an existing exception list.
       parameters:
         - name: list_id
           in: query

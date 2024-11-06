@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { memo, ReactElement, useMemo } from 'react';
@@ -14,14 +15,16 @@ import { type GroupingAggregation } from '@kbn/grouping';
 import { isNoneGroup } from '@kbn/grouping';
 import type { DynamicGroupingProps } from '@kbn/grouping/src';
 import { parseGroupingQuery } from '@kbn/grouping/src';
+import { ALERT_TIME_RANGE } from '@kbn/rule-data-utils';
 import {
   useGetAlertsGroupAggregationsQuery,
   UseGetAlertsGroupAggregationsQueryProps,
 } from '@kbn/alerts-ui-shared';
-import { AlertsGroupingProps } from '../types';
+import { AlertsGroupingProps, BaseAlertsGroupAggregations } from '../types';
 
-export interface AlertsGroupingLevelProps<T extends Record<string, unknown> = {}>
-  extends AlertsGroupingProps<T> {
+export interface AlertsGroupingLevelProps<
+  T extends BaseAlertsGroupAggregations = BaseAlertsGroupAggregations
+> extends AlertsGroupingProps<T> {
   getGrouping: (
     props: Omit<DynamicGroupingProps<T>, 'groupSelector' | 'pagination'>
   ) => ReactElement;
@@ -40,8 +43,9 @@ const DEFAULT_FILTERS: Filter[] = [];
 /**
  * Renders an alerts grouping level
  */
-export const AlertsGroupingLevel = memo(
-  <T extends Record<string, unknown> = {}>({
+const typedMemo: <T>(c: T) => T = memo;
+export const AlertsGroupingLevel = typedMemo(
+  <T extends BaseAlertsGroupAggregations>({
     featureIds,
     defaultFilters = DEFAULT_FILTERS,
     from,
@@ -92,7 +96,7 @@ export const AlertsGroupingLevel = memo(
           ...filters,
           {
             range: {
-              '@timestamp': {
+              [ALERT_TIME_RANGE]: {
                 gte: from,
                 lte: to,
               },

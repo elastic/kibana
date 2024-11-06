@@ -1,93 +1,104 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState } from 'react';
+import React, { useMemo } from 'react';
+import { Redirect } from 'react-router-dom';
 import ReactDOM from 'react-dom';
-
-import { AppMountParameters } from '@kbn/core-application-browser';
-import {
-  EuiPage,
-  EuiPageBody,
-  EuiPageHeader,
-  EuiPageSection,
-  EuiPageTemplate,
-  EuiSpacer,
-  EuiTab,
-  EuiTabs,
-} from '@elastic/eui';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { AppMountParameters, CoreStart } from '@kbn/core/public';
+import { BrowserRouter as Router, Routes, Route } from '@kbn/shared-ux-router';
+import { EuiPageTemplate, EuiTitle } from '@elastic/eui';
 import { Overview } from './overview';
 import { RegisterEmbeddable } from './register_embeddable';
 import { RenderExamples } from './render_examples';
+import { PresentationContainerExample } from './presentation_container_example/components/presentation_container_example';
+import { StartDeps } from '../plugin';
+import { Sidebar } from './sidebar';
+import { StateManagementExample } from './state_management_example/state_management_example';
 
-const OVERVIEW_TAB_ID = 'overview';
-const REGISTER_EMBEDDABLE_TAB_ID = 'register';
-const RENDER_TAB_ID = 'render';
+const App = ({
+  core,
+  deps,
+  mountParams,
+}: {
+  core: CoreStart;
+  deps: StartDeps;
+  mountParams: AppMountParameters;
+}) => {
+  const pages = useMemo(() => {
+    return [
+      {
+        id: 'overview',
+        title: 'Embeddables overview',
+        component: <Overview />,
+      },
+      {
+        id: 'registerEmbeddable',
+        title: 'Register a new embeddable type',
+        component: <RegisterEmbeddable />,
+      },
+      {
+        id: 'renderEmbeddable',
+        title: 'Render embeddables in your application',
+        component: <RenderExamples />,
+      },
+      {
+        id: 'stateManagement',
+        title: 'Embeddable state management',
+        component: <StateManagementExample uiActions={deps.uiActions} />,
+      },
+      {
+        id: 'presentationContainer',
+        title: 'Create a dashboard like experience with embeddables',
+        component: <PresentationContainerExample uiActions={deps.uiActions} />,
+      },
+    ];
+  }, [deps.uiActions]);
 
-const App = () => {
-  const [selectedTabId, setSelectedTabId] = useState(OVERVIEW_TAB_ID);
-
-  function onSelectedTabChanged(tabId: string) {
-    setSelectedTabId(tabId);
-  }
-
-  function renderTabContent() {
-    if (selectedTabId === RENDER_TAB_ID) {
-      return <RenderExamples />;
-    }
-
-    if (selectedTabId === REGISTER_EMBEDDABLE_TAB_ID) {
-      return <RegisterEmbeddable />;
-    }
-
-    return <Overview />;
-  }
+  const routes = useMemo(() => {
+    return pages.map((page) => (
+      <Route
+        key={page.id}
+        path={`/${page.id}`}
+        render={(props) => (
+          <>
+            <EuiPageTemplate.Header>
+              <EuiTitle size="l">
+                <h1 data-test-subj="responseStreamPageTitle">{page.title}</h1>
+              </EuiTitle>
+            </EuiPageTemplate.Header>
+            <EuiPageTemplate.Section>{page.component}</EuiPageTemplate.Section>
+          </>
+        )}
+      />
+    ));
+  }, [pages]);
 
   return (
-    <EuiPage>
-      <EuiPageBody>
-        <EuiPageSection>
-          <EuiPageHeader pageTitle="Embeddables" />
-        </EuiPageSection>
-        <EuiPageTemplate.Section>
-          <EuiPageSection>
-            <EuiTabs>
-              <EuiTab
-                onClick={() => onSelectedTabChanged(OVERVIEW_TAB_ID)}
-                isSelected={OVERVIEW_TAB_ID === selectedTabId}
-              >
-                Embeddables overview
-              </EuiTab>
-              <EuiTab
-                onClick={() => onSelectedTabChanged(REGISTER_EMBEDDABLE_TAB_ID)}
-                isSelected={REGISTER_EMBEDDABLE_TAB_ID === selectedTabId}
-              >
-                Register new embeddable type
-              </EuiTab>
-              <EuiTab
-                onClick={() => onSelectedTabChanged(RENDER_TAB_ID)}
-                isSelected={RENDER_TAB_ID === selectedTabId}
-              >
-                Rendering embeddables in your application
-              </EuiTab>
-            </EuiTabs>
-
-            <EuiSpacer />
-
-            {renderTabContent()}
-          </EuiPageSection>
-        </EuiPageTemplate.Section>
-      </EuiPageBody>
-    </EuiPage>
+    <KibanaRenderContextProvider i18n={core.i18n} theme={core.theme}>
+      <Router basename={mountParams.appBasePath}>
+        <EuiPageTemplate restrictWidth={true} offset={0}>
+          <EuiPageTemplate.Sidebar sticky={true}>
+            <Sidebar pages={pages} />
+          </EuiPageTemplate.Sidebar>
+          <Routes>
+            {routes}
+            <Redirect to="/overview" />
+          </Routes>
+        </EuiPageTemplate>
+      </Router>
+    </KibanaRenderContextProvider>
   );
 };
 
-export const renderApp = (element: AppMountParameters['element']) => {
-  ReactDOM.render(<App />, element);
+export const renderApp = (core: CoreStart, deps: StartDeps, mountParams: AppMountParameters) => {
+  ReactDOM.render(<App core={core} deps={deps} mountParams={mountParams} />, mountParams.element);
 
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => ReactDOM.unmountComponentAtNode(mountParams.element);
 };

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { isEqual } from 'lodash';
@@ -20,6 +21,7 @@ import {
 
 import { connectToQueryState, DataPublicPluginStart, FilterManager } from '@kbn/data-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/common';
+import { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import { getValidFilters } from '../../../utils/get_valid_filters';
 import { handleSourceColumnState } from '../../../utils/state_helpers';
 
@@ -32,6 +34,10 @@ export interface AppState {
    * Array of filters
    */
   filters: Filter[];
+  /**
+   * Data Grid related state
+   */
+  grid?: DiscoverGridSettings;
   /**
    * Number of records to be fetched before anchor records (newer records)
    */

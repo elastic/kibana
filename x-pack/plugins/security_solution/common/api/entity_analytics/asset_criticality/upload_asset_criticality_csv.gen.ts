@@ -14,7 +14,7 @@
  *   version: 1
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 export type AssetCriticalityCsvUploadErrorItem = z.infer<typeof AssetCriticalityCsvUploadErrorItem>;
 export const AssetCriticalityCsvUploadErrorItem = z.object({

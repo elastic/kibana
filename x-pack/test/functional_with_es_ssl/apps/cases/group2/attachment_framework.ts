@@ -268,8 +268,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         });
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/157642
-      describe.skip('Modal', () => {
+      describe('Modal', () => {
         const createdCases = new Map<string, string>();
 
         const openModal = async () => {
@@ -403,7 +402,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await common.navigateToApp('dashboard');
         await dashboard.preserveCrossAppState();
         await dashboard.loadSavedDashboard(myDashboardName);
-        await dashboardPanelActions.clickContextMenuItem(ADD_TO_EXISTING_CASE_DATA_TEST_SUBJ);
+        await dashboardPanelActions.clickPanelAction(ADD_TO_EXISTING_CASE_DATA_TEST_SUBJ);
         await testSubjects.click('cases-table-add-case-filter-bar');
 
         await cases.create.createCase({
@@ -435,7 +434,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await dashboard.preserveCrossAppState();
         await dashboard.loadSavedDashboard(myDashboardName);
 
-        await dashboardPanelActions.clickContextMenuItem(ADD_TO_EXISTING_CASE_DATA_TEST_SUBJ);
+        await dashboardPanelActions.clickPanelAction(ADD_TO_EXISTING_CASE_DATA_TEST_SUBJ);
 
         await testSubjects.click(`cases-table-row-select-${theCase.id}`);
 

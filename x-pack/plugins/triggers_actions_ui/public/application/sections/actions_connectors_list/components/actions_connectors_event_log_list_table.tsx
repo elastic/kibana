@@ -262,7 +262,7 @@ export const ConnectorEventLogListTable = <T extends ConnectorEventLogListOption
   );
 
   const onSearchChange = useCallback(
-    (e) => {
+    (e: React.ChangeEvent<HTMLInputElement>) => {
       if (e.target.value === '') {
         setSearchText('');
       }
@@ -272,7 +272,7 @@ export const ConnectorEventLogListTable = <T extends ConnectorEventLogListOption
   );
 
   const onKeyUp = useCallback(
-    (e) => {
+    (e: React.KeyboardEvent) => {
       if (e.key === 'Enter') {
         setSearchText(search);
       }
@@ -522,9 +522,9 @@ export const ConnectorEventLogListTable = <T extends ConnectorEventLogListOption
 
   return (
     <EuiFlexGroup gutterSize="none" direction="column">
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup alignItems="center">
-          <EuiFlexItem grow={false}>
+      <EuiFlexItem grow={true}>
+        <EuiFlexGroup gutterSize="m" alignItems="center">
+          <EuiFlexItem grow={true}>
             <EuiFieldSearch
               fullWidth
               isClearable

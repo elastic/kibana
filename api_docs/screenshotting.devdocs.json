@@ -174,7 +174,7 @@
               "\nCollected performance metrics during the screenshotting session along with the PDF generation ones."
             ],
             "signature": [
-              "PdfScreenshotMetrics"
+              "{ cpu?: number | undefined; cpuInPercentage?: number | undefined; memory?: number | undefined; memoryInMegabytes?: number | undefined; }"
             ],
             "path": "x-pack/plugins/screenshotting/server/formats/pdf/index.ts",
             "deprecated": false,

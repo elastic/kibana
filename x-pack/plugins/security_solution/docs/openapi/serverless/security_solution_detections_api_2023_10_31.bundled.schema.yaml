@@ -4,10 +4,10 @@ info:
     You can create rules that automatically turn events and external alerts sent
     to Elastic Security into detection alerts. These alerts are displayed on the
     Detections page.
-  title: Security Solution Detections API (Elastic Cloud Serverless)
+  title: Security Detections API (Elastic Cloud Serverless)
   version: '2023-10-31'
 servers:
-  - url: 'http://{kibana_host}:{port}'
+  - url: http://{kibana_host}:{port}
     variables:
       kibana_host:
         default: localhost
@@ -55,7 +55,7 @@ paths:
           description: Internal server error response
       summary: Returns user privileges for the Kibana space
       tags:
-        - Security Solution Detections API
+        - Security Detections API
         - Privileges API
   /api/detection_engine/rules:
     delete:
@@ -83,7 +83,7 @@ paths:
           description: Indicates a successful call.
       summary: Delete a detection rule
       tags:
-        - Security Solution Detections API
+        - Security Detections API
         - Rules API
     get:
       description: Retrieve a detection rule using the `rule_id` or `id` field.
@@ -110,7 +110,7 @@ paths:
           description: Indicates a successful call.
       summary: Retrieve a detection rule
       tags:
-        - Security Solution Detections API
+        - Security Detections API
         - Rules API
     patch:
       description: >-
@@ -132,7 +132,7 @@ paths:
           description: Indicates a successful call.
       summary: Patch a detection rule
       tags:
-        - Security Solution Detections API
+        - Security Detections API
         - Rules API
     post:
       description: Create a new detection rule.
@@ -152,7 +152,7 @@ paths:
           description: Indicates a successful call.
       summary: Create a detection rule
       tags:
-        - Security Solution Detections API
+        - Security Detections API
         - Rules API
     put:
       description: >
@@ -178,7 +178,7 @@ paths:
           description: Indicates a successful call.
       summary: Update a detection rule
       tags:
-        - Security Solution Detections API
+        - Security Detections API
         - Rules API
   /api/detection_engine/rules/_bulk_action:
     post:
@@ -217,7 +217,7 @@ paths:
           description: OK
       summary: Apply a bulk action to detection rules
       tags:
-        - Security Solution Detections API
+        - Security Detections API
         - Bulk API
   /api/detection_engine/rules/_export:
     post:
@@ -281,7 +281,7 @@ paths:
           description: Indicates a successful call.
       summary: Export detection rules
       tags:
-        - Security Solution Detections API
+        - Security Detections API
         - Import/Export API
   /api/detection_engine/rules/_find:
     get:
@@ -356,7 +356,7 @@ paths:
           description: Successful response
       summary: List all detection rules
       tags:
-        - Security Solution Detections API
+        - Security Detections API
         - Rules API
   /api/detection_engine/rules/_import:
     post:
@@ -471,11 +471,20 @@ paths:
           description: Indicates a successful call.
       summary: Import detection rules
       tags:
-        - Security Solution Detections API
+        - Security Detections API
         - Import/Export API
   /api/detection_engine/rules/preview:
     post:
       operationId: RulePreview
+      parameters:
+        - description: >-
+            Enables logging and returning in response ES queries, performed
+            during rule execution
+          in: query
+          name: enable_logged_requests
+          required: false
+          schema:
+            type: boolean
       requestBody:
         content:
           application/json:
@@ -551,7 +560,7 @@ paths:
           description: Internal server error response
       summary: Preview rule alerts generated on specified time range
       tags:
-        - Security Solution Detections API
+        - Security Detections API
         - Rule preview API
   /api/detection_engine/signals/assignees:
     post:
@@ -583,7 +592,7 @@ paths:
           description: Invalid request.
       summary: Assign and unassign users from detection alerts
       tags:
-        - Security Solution Detections API
+        - Security Detections API
   /api/detection_engine/signals/search:
     post:
       description: Find and/or aggregate detection alerts that match the given query.
@@ -655,7 +664,7 @@ paths:
           description: Internal server error response
       summary: Find and/or aggregate detection alerts
       tags:
-        - Security Solution Detections API
+        - Security Detections API
         - Alerts API
   /api/detection_engine/signals/status:
     post:
@@ -703,7 +712,7 @@ paths:
           description: Internal server error response
       summary: Set a detection alert status
       tags:
-        - Security Solution Detections API
+        - Security Detections API
         - Alerts API
   /api/detection_engine/signals/tags:
     post:
@@ -760,7 +769,7 @@ paths:
           description: Internal server error response
       summary: Add and remove detection alert tags
       tags:
-        - Security Solution Detections API
+        - Security Detections API
         - Alerts API
   /api/detection_engine/tags:
     get:
@@ -775,7 +784,7 @@ paths:
           description: Indicates a successful call
       summary: List all detection rule tags
       tags:
-        - Security Solution Detections API
+        - Security Detections API
         - Tags API
 components:
   schemas:
@@ -1018,12 +1027,12 @@ components:
                 Interval in which the rule runs. For example, `"1h"` means the
                 rule runs every hour.
               example: 1h
-              pattern: '^[1-9]\d*[smh]$'
+              pattern: ^[1-9]\d*[smh]$
               type: string
             lookback:
               description: Lookback time for the rule
               example: 1h
-              pattern: '^[1-9]\d*[smh]$'
+              pattern: ^[1-9]\d*[smh]$
               type: string
           required:
             - interval
@@ -1455,6 +1464,10 @@ components:
               items:
                 $ref: '#/components/schemas/RequiredFieldInput'
               type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/ResponseAction'
+              type: array
             risk_score:
               $ref: '#/components/schemas/RiskScore'
             risk_score_mapping:
@@ -1570,6 +1583,10 @@ components:
               items:
                 $ref: '#/components/schemas/RequiredFieldInput'
               type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/ResponseAction'
+              type: array
             risk_score:
               $ref: '#/components/schemas/RiskScore'
             risk_score_mapping:
@@ -1682,6 +1699,10 @@ components:
               items:
                 $ref: '#/components/schemas/RequiredFieldInput'
               type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/ResponseAction'
+              type: array
             risk_score:
               $ref: '#/components/schemas/RiskScore'
             risk_score_mapping:
@@ -1776,6 +1797,10 @@ components:
             required_fields:
               items:
                 $ref: '#/components/schemas/RequiredFieldInput'
+              type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/ResponseAction'
               type: array
             risk_score:
               $ref: '#/components/schemas/RiskScore'
@@ -1902,6 +1927,10 @@ components:
               items:
                 $ref: '#/components/schemas/RequiredFieldInput'
               type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/ResponseAction'
+              type: array
             risk_score:
               $ref: '#/components/schemas/RiskScore'
             risk_score_mapping:
@@ -2017,6 +2046,10 @@ components:
               items:
                 $ref: '#/components/schemas/RequiredFieldInput'
               type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/ResponseAction'
+              type: array
             risk_score:
               $ref: '#/components/schemas/RiskScore'
             risk_score_mapping:
@@ -2122,6 +2155,10 @@ components:
             required_fields:
               items:
                 $ref: '#/components/schemas/RequiredFieldInput'
+              type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/ResponseAction'
               type: array
             risk_score:
               $ref: '#/components/schemas/RiskScore'
@@ -2239,6 +2276,10 @@ components:
             required_fields:
               items:
                 $ref: '#/components/schemas/RequiredFieldInput'
+              type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/ResponseAction'
               type: array
             risk_score:
               $ref: '#/components/schemas/RiskScore'
@@ -2469,6 +2510,10 @@ components:
               items:
                 $ref: '#/components/schemas/RequiredFieldInput'
               type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/ResponseAction'
+              type: array
             risk_score:
               $ref: '#/components/schemas/RiskScore'
             risk_score_mapping:
@@ -2583,6 +2628,10 @@ components:
             required_fields:
               items:
                 $ref: '#/components/schemas/RequiredFieldInput'
+              type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/ResponseAction'
               type: array
             risk_score:
               $ref: '#/components/schemas/RiskScore'
@@ -2699,6 +2748,10 @@ components:
               items:
                 $ref: '#/components/schemas/RequiredFieldInput'
               type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/ResponseAction'
+              type: array
             risk_score:
               $ref: '#/components/schemas/RiskScore'
             risk_score_mapping:
@@ -2810,6 +2863,10 @@ components:
               items:
                 $ref: '#/components/schemas/RequiredFieldInput'
               type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/ResponseAction'
+              type: array
             risk_score:
               $ref: '#/components/schemas/RiskScore'
             risk_score_mapping:
@@ -2912,6 +2969,10 @@ components:
             required_fields:
               items:
                 $ref: '#/components/schemas/RequiredFieldInput'
+              type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/ResponseAction'
               type: array
             risk_score:
               $ref: '#/components/schemas/RiskScore'
@@ -3028,6 +3089,10 @@ components:
             required_fields:
               items:
                 $ref: '#/components/schemas/RequiredFieldInput'
+              type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/ResponseAction'
               type: array
             risk_score:
               $ref: '#/components/schemas/RiskScore'
@@ -3158,6 +3223,10 @@ components:
               items:
                 $ref: '#/components/schemas/RequiredFieldInput'
               type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/ResponseAction'
+              type: array
             risk_score:
               $ref: '#/components/schemas/RiskScore'
             risk_score_mapping:
@@ -3277,6 +3346,10 @@ components:
             required_fields:
               items:
                 $ref: '#/components/schemas/RequiredFieldInput'
+              type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/ResponseAction'
               type: array
             risk_score:
               $ref: '#/components/schemas/RiskScore'
@@ -3501,6 +3574,10 @@ components:
               items:
                 $ref: '#/components/schemas/RequiredFieldInput'
               type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/ResponseAction'
+              type: array
             risk_score:
               $ref: '#/components/schemas/RiskScore'
             risk_score_mapping:
@@ -3617,6 +3694,10 @@ components:
               items:
                 $ref: '#/components/schemas/RequiredFieldInput'
               type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/ResponseAction'
+              type: array
             risk_score:
               $ref: '#/components/schemas/RiskScore'
             risk_score_mapping:
@@ -3673,10 +3754,6 @@ components:
           $ref: '#/components/schemas/RuleFilterArray'
         index:
           $ref: '#/components/schemas/IndexPatternArray'
-        response_actions:
-          items:
-            $ref: '#/components/schemas/ResponseAction'
-          type: array
         saved_id:
           $ref: '#/components/schemas/SavedQueryId'
     QueryRulePatchFields:
@@ -3747,6 +3824,10 @@ components:
             required_fields:
               items:
                 $ref: '#/components/schemas/RequiredFieldInput'
+              type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/ResponseAction'
               type: array
             risk_score:
               $ref: '#/components/schemas/RiskScore'
@@ -3861,6 +3942,10 @@ components:
             required_fields:
               items:
                 $ref: '#/components/schemas/RequiredFieldInput'
+              type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/ResponseAction'
               type: array
             risk_score:
               $ref: '#/components/schemas/RiskScore'
@@ -4079,6 +4164,7 @@ components:
         - id
         - rule_id
         - immutable
+        - rule_source
         - updated_at
         - updated_by
         - created_at
@@ -4188,9 +4274,9 @@ components:
             - no_actions
             - rule
           type: string
-        - description: 'Time interval in seconds, minutes, hours, or days.'
+        - description: Time interval in seconds, minutes, hours, or days.
           example: 1h
-          pattern: '^[1-9]\d*[smhd]$'
+          pattern: ^[1-9]\d*[smhd]$
           type: string
     RuleAuthorArray:
       items:
@@ -4376,6 +4462,17 @@ components:
         - $ref: '#/components/schemas/MachineLearningRulePatchProps'
         - $ref: '#/components/schemas/NewTermsRulePatchProps'
         - $ref: '#/components/schemas/EsqlRulePatchProps'
+    RulePreviewLoggedRequest:
+      type: object
+      properties:
+        description:
+          $ref: '#/components/schemas/NonEmptyString'
+        duration:
+          type: integer
+        request:
+          $ref: '#/components/schemas/NonEmptyString'
+      required:
+        - request
     RulePreviewLogs:
       type: object
       properties:
@@ -4385,6 +4482,10 @@ components:
         errors:
           items:
             $ref: '#/components/schemas/NonEmptyString'
+          type: array
+        requests:
+          items:
+            $ref: '#/components/schemas/RulePreviewLoggedRequest'
           type: array
         startedAt:
           $ref: '#/components/schemas/NonEmptyString'
@@ -4426,7 +4527,7 @@ components:
       discriminator:
         propertyName: type
     RuleSignatureId:
-      description: 'Could be any string, not necessarily a UUID'
+      description: Could be any string, not necessarily a UUID
       type: string
     RuleSource:
       description: >-
@@ -4531,6 +4632,10 @@ components:
             required_fields:
               items:
                 $ref: '#/components/schemas/RequiredFieldInput'
+              type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/ResponseAction'
               type: array
             risk_score:
               $ref: '#/components/schemas/RiskScore'
@@ -4648,6 +4753,10 @@ components:
               items:
                 $ref: '#/components/schemas/RequiredFieldInput'
               type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/ResponseAction'
+              type: array
             risk_score:
               $ref: '#/components/schemas/RiskScore'
             risk_score_mapping:
@@ -4704,10 +4813,6 @@ components:
           $ref: '#/components/schemas/IndexPatternArray'
         query:
           $ref: '#/components/schemas/RuleQuery'
-        response_actions:
-          items:
-            $ref: '#/components/schemas/ResponseAction'
-          type: array
     SavedQueryRulePatchFields:
       allOf:
         - type: object
@@ -4778,6 +4883,10 @@ components:
             required_fields:
               items:
                 $ref: '#/components/schemas/RequiredFieldInput'
+              type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/ResponseAction'
               type: array
             risk_score:
               $ref: '#/components/schemas/RiskScore'
@@ -4892,6 +5001,10 @@ components:
             required_fields:
               items:
                 $ref: '#/components/schemas/RequiredFieldInput'
+              type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/ResponseAction'
               type: array
             risk_score:
               $ref: '#/components/schemas/RiskScore'
@@ -5133,6 +5246,10 @@ components:
               items:
                 $ref: '#/components/schemas/RequiredFieldInput'
               type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/ResponseAction'
+              type: array
             risk_score:
               $ref: '#/components/schemas/RiskScore'
             risk_score_mapping:
@@ -5248,6 +5365,10 @@ components:
             required_fields:
               items:
                 $ref: '#/components/schemas/RequiredFieldInput'
+              type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/ResponseAction'
               type: array
             risk_score:
               $ref: '#/components/schemas/RiskScore'
@@ -5392,6 +5513,10 @@ components:
               items:
                 $ref: '#/components/schemas/RequiredFieldInput'
               type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/ResponseAction'
+              type: array
             risk_score:
               $ref: '#/components/schemas/RiskScore'
             risk_score_mapping:
@@ -5514,6 +5639,10 @@ components:
             required_fields:
               items:
                 $ref: '#/components/schemas/RequiredFieldInput'
+              type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/ResponseAction'
               type: array
             risk_score:
               $ref: '#/components/schemas/RiskScore'
@@ -5704,6 +5833,10 @@ components:
               items:
                 $ref: '#/components/schemas/RequiredFieldInput'
               type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/ResponseAction'
+              type: array
             risk_score:
               $ref: '#/components/schemas/RiskScore'
             risk_score_mapping:
@@ -5819,6 +5952,10 @@ components:
             required_fields:
               items:
                 $ref: '#/components/schemas/RequiredFieldInput'
+              type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/ResponseAction'
               type: array
             risk_score:
               $ref: '#/components/schemas/RiskScore'
@@ -5949,6 +6086,10 @@ components:
               items:
                 $ref: '#/components/schemas/RequiredFieldInput'
               type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/ResponseAction'
+              type: array
             risk_score:
               $ref: '#/components/schemas/RiskScore'
             risk_score_mapping:
@@ -6066,6 +6207,10 @@ components:
               items:
                 $ref: '#/components/schemas/RequiredFieldInput'
               type: array
+            response_actions:
+              items:
+                $ref: '#/components/schemas/ResponseAction'
+              type: array
             risk_score:
               $ref: '#/components/schemas/RiskScore'
             risk_score_mapping:
@@ -6166,4 +6311,5 @@ tags:
       You can create rules that automatically turn events and external alerts
       sent to Elastic Security into detection alerts. These alerts are displayed
       on the Detections page.
-    name: Security Solution Detections API
+    name: Security Detections API
+    x-displayName: Security detections

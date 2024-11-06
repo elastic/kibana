@@ -78,10 +78,13 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
     }
   }, [edges, error, expired]);
 
-  const renderAgentIdColumn = useCallback((agentId) => <AgentIdToName agentId={agentId} />, []);
-  const renderRowsColumn = useCallback((rowsCount) => rowsCount ?? '-', []);
+  const renderAgentIdColumn = useCallback(
+    (agentId: any) => <AgentIdToName agentId={agentId} />,
+    []
+  );
+  const renderRowsColumn = useCallback((rowsCount: any) => rowsCount ?? '-', []);
   const renderStatusColumn = useCallback(
-    (_, item) => {
+    (_: any, item: any) => {
       if (item.fields['error.skipped']) {
         return i18n.translate('xpack.osquery.liveQueryActionResults.table.skippedStatusText', {
           defaultMessage: 'skipped',

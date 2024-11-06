@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { ComponentMeta } from '@storybook/react';
@@ -36,7 +37,9 @@ interface Props {
   children?: React.ReactNode | (({ isCollapsed }: { isCollapsed: boolean }) => React.ReactNode);
 }
 
-const NavigationWrapper: FC<Props & Partial<EuiCollapsibleNavBetaProps>> = (props) => {
+const NavigationWrapper: FC<Props & Omit<Partial<EuiCollapsibleNavBetaProps>, 'children'>> = (
+  props
+) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   const onCollapseToggle = (nextIsCollapsed: boolean) => {
@@ -88,6 +91,7 @@ const NavigationWrapper: FC<Props & Partial<EuiCollapsibleNavBetaProps>> = (prop
 };
 
 const groupExamplesNavigationTree: NavigationTreeDefinitionUI = {
+  id: 'es',
   body: [
     // My custom project
     {
@@ -254,6 +258,7 @@ export const GroupsExamples = (args: NavigationServices) => {
 };
 
 const navigationTree: NavigationTreeDefinitionUI = {
+  id: 'es',
   body: [
     // My custom project
     {
@@ -565,6 +570,7 @@ const panelContentProvider: ContentProvider = (id: string) => {
 };
 
 const navigationTreeWithPanels: NavigationTreeDefinitionUI = {
+  id: 'es',
   body: [
     // My custom project
     {

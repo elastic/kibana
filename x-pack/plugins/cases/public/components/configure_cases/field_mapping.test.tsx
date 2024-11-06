@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { ReactWrapper } from 'enzyme';
+import type { ComponentType, ReactWrapper } from 'enzyme';
 import { mount } from 'enzyme';
 
 import type { FieldMappingProps } from './field_mapping';
@@ -24,7 +24,9 @@ describe('FieldMappingRow', () => {
   };
 
   beforeAll(() => {
-    wrapper = mount(<FieldMapping {...props} />, { wrappingComponent: TestProviders });
+    wrapper = mount(<FieldMapping {...props} />, {
+      wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
+    });
   });
 
   test('it renders', () => {
@@ -37,7 +39,7 @@ describe('FieldMappingRow', () => {
 
   test('it does not render without mappings', () => {
     const newWrapper = mount(<FieldMapping {...props} mappings={[]} />, {
-      wrappingComponent: TestProviders,
+      wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
     });
     expect(
       newWrapper

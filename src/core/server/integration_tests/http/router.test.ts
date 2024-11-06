@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { captureErrorMock } from './router.test.mocks';
@@ -834,6 +835,82 @@ describe('Handler', () => {
     await supertest(innerServer.listener).post('/').type('json').send('12').expect(200);
 
     expect(body).toEqual(12);
+  });
+
+  it('adds versioned header v2023-10-31 to public, unversioned routes', async () => {
+    const { server: innerServer, createRouter } = await server.setup(setupDeps);
+    const router = createRouter('/');
+
+    router.post(
+      {
+        path: '/public',
+        validate: { body: schema.object({ ok: schema.boolean() }) },
+        options: {
+          access: 'public',
+        },
+      },
+      (context, req, res) => {
+        if (req.body.ok) {
+          return res.ok({ body: 'ok', headers: { test: 'this' } });
+        }
+        return res.customError({ statusCode: 499, body: 'custom error' });
+      }
+    );
+    router.post(
+      {
+        path: '/internal',
+        validate: { body: schema.object({ ok: schema.boolean() }) },
+      },
+      (context, req, res) => {
+        return res.ok({ body: 'ok', headers: { test: 'this' } });
+      }
+    );
+    await server.start();
+
+    // Includes header if validation fails
+    {
+      const { headers } = await supertest(innerServer.listener)
+        .post('/public')
+        .send({ ok: null })
+        .expect(400);
+      expect(headers).toMatchObject({ 'elastic-api-version': '2023-10-31' });
+    }
+
+    // Includes header if custom error
+    {
+      const { headers } = await supertest(innerServer.listener)
+        .post('/public')
+        .send({ ok: false })
+        .expect(499);
+      expect(headers).toMatchObject({ 'elastic-api-version': '2023-10-31' });
+    }
+
+    // Includes header if OK
+    {
+      const { headers } = await supertest(innerServer.listener)
+        .post('/public')
+        .send({ ok: true })
+        .expect(200);
+      expect(headers).toMatchObject({ 'elastic-api-version': '2023-10-31' });
+    }
+
+    // Internal unversioned routes do not include the header for OK
+    {
+      const { headers } = await supertest(innerServer.listener)
+        .post('/internal')
+        .send({ ok: true })
+        .expect(200);
+      expect(headers).not.toMatchObject({ 'elastic-api-version': '2023-10-31' });
+    }
+
+    // Internal unversioned routes do not include the header for validation failures
+    {
+      const { headers } = await supertest(innerServer.listener)
+        .post('/internal')
+        .send({ ok: null })
+        .expect(400);
+      expect(headers).not.toMatchObject({ 'elastic-api-version': '2023-10-31' });
+    }
   });
 });
 

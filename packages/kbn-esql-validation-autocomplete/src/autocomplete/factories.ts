@@ -1,16 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
+import { memoize } from 'lodash';
 import { SuggestionRawDefinition } from './types';
 import { groupingFunctionDefinitions } from '../definitions/grouping';
-import { statsAggregationFunctionDefinitions } from '../definitions/aggs';
-import { evalFunctionDefinitions } from '../definitions/functions';
+import { aggregationFunctionDefinitions } from '../definitions/generated/aggregation_functions';
+import { scalarFunctionDefinitions } from '../definitions/generated/scalar_functions';
 import { getFunctionSignatures, getCommandSignature } from '../definitions/helpers';
 import { timeUnitsToSuggest } from '../definitions/literals';
 import {
@@ -24,12 +26,18 @@ import { buildDocumentation, buildFunctionDocumentation } from './documentation_
 import { DOUBLE_BACKTICK, SINGLE_TICK_REGEX } from '../shared/constants';
 import { ESQLRealField } from '../validation/types';
 import { isNumericType } from '../shared/esql_types';
+import { getTestFunctions } from '../shared/test_functions';
 
-const allFunctions = statsAggregationFunctionDefinitions
-  .concat(evalFunctionDefinitions)
-  .concat(groupingFunctionDefinitions);
+const allFunctions = memoize(
+  () =>
+    aggregationFunctionDefinitions
+      .concat(scalarFunctionDefinitions)
+      .concat(groupingFunctionDefinitions)
+      .concat(getTestFunctions()),
+  () => getTestFunctions()
+);
 
-export const TIME_SYSTEM_PARAMS = ['?t_start', '?t_end'];
+export const TIME_SYSTEM_PARAMS = ['?_tstart', '?_tend'];
 
 export const TRIGGER_SUGGESTION_COMMAND = {
   title: 'Trigger Suggestion Dialog',
@@ -49,10 +57,10 @@ function getSafeInsertSourceText(text: string) {
   return shouldBeQuotedSource(text) ? getQuotedText(text) : text;
 }
 
-export function getSuggestionFunctionDefinition(fn: FunctionDefinition): SuggestionRawDefinition {
+export function getFunctionSuggestion(fn: FunctionDefinition): SuggestionRawDefinition {
   const fullSignatures = getFunctionSignatures(fn, { capitalize: true, withTypes: true });
   return {
-    label: fullSignatures[0].declaration,
+    label: fn.name.toUpperCase(),
     text: `${fn.name.toUpperCase()}($0)`,
     asSnippet: true,
     kind: 'Function',
@@ -83,34 +91,51 @@ export function getSuggestionBuiltinDefinition(fn: FunctionDefinition): Suggesti
   };
 }
 
-export const getCompatibleFunctionDefinition = (
-  command: string,
-  option: string | undefined,
-  returnTypes?: string[],
-  ignored: string[] = []
-): SuggestionRawDefinition[] => {
-  const fnSupportedByCommand = allFunctions
-    .filter(
-      ({ name, supportedCommands, supportedOptions }) =>
-        (option ? supportedOptions?.includes(option) : supportedCommands.includes(command)) &&
-        !ignored.includes(name)
-    )
-    .sort((a, b) => a.name.localeCompare(b.name));
-  if (!returnTypes) {
-    return fnSupportedByCommand.map(getSuggestionFunctionDefinition);
-  }
-  return fnSupportedByCommand
-    .filter((mathDefinition) =>
-      mathDefinition.signatures.some(
-        (signature) =>
-          returnTypes[0] === 'any' || returnTypes.includes(signature.returnType as string)
-      )
-    )
-    .map(getSuggestionFunctionDefinition);
+/**
+ * Builds suggestions for functions based on the provided predicates.
+ *
+ * @param predicates a set of conditions that must be met for a function to be included in the suggestions
+ * @returns
+ */
+export const getFunctionSuggestions = (predicates?: {
+  command?: string;
+  option?: string | undefined;
+  returnTypes?: string[];
+  ignored?: string[];
+}): SuggestionRawDefinition[] => {
+  const functions = allFunctions();
+  const { command, option, returnTypes, ignored = [] } = predicates ?? {};
+  const filteredFunctions: FunctionDefinition[] = functions.filter(
+    ({ name, supportedCommands, supportedOptions, ignoreAsSuggestion, signatures }) => {
+      if (ignoreAsSuggestion) {
+        return false;
+      }
+
+      if (ignored.includes(name)) {
+        return false;
+      }
+
+      if (option && !supportedOptions?.includes(option)) {
+        return false;
+      }
+
+      if (command && !supportedCommands.includes(command)) {
+        return false;
+      }
+
+      if (returnTypes && !returnTypes.includes('any')) {
+        return signatures.some((signature) => returnTypes.includes(signature.returnType as string));
+      }
+
+      return true;
+    }
+  );
+
+  return filteredFunctions.map(getFunctionSuggestion);
 };
 
 export function getSuggestionCommandDefinition(
-  command: CommandDefinition
+  command: CommandDefinition<string>
 ): SuggestionRawDefinition {
   const commandDefinition = getCommandDefinition(command.name);
   const commandSignature = getCommandSignature(commandDefinition);
@@ -132,31 +157,21 @@ export function getSuggestionCommandDefinition(
 
 export const buildFieldsDefinitionsWithMetadata = (
   fields: ESQLRealField[],
-  options?: { advanceCursorAndOpenSuggestions?: boolean; addComma?: boolean }
+  options?: { advanceCursor?: boolean; openSuggestions?: boolean; addComma?: boolean }
 ): SuggestionRawDefinition[] => {
   return fields.map((field) => {
-    const description = field.metadata?.description;
-
     const titleCaseType = field.type.charAt(0).toUpperCase() + field.type.slice(1);
     return {
       label: field.name,
       text:
         getSafeInsertText(field.name) +
         (options?.addComma ? ',' : '') +
-        (options?.advanceCursorAndOpenSuggestions ? ' ' : ''),
+        (options?.advanceCursor ? ' ' : ''),
       kind: 'Variable',
       detail: titleCaseType,
-      documentation: description
-        ? {
-            value: `
----
-
-${description}`,
-          }
-        : undefined,
-      // If there is a description, it is a field from ECS, so it should be sorted to the top
-      sortText: description ? '1D' : 'D',
-      command: options?.advanceCursorAndOpenSuggestions ? TRIGGER_SUGGESTION_COMMAND : undefined,
+      // If detected to be an ECS field, push it up to the top of the list
+      sortText: field.isEcs ? '1D' : 'D',
+      command: options?.openSuggestions ? TRIGGER_SUGGESTION_COMMAND : undefined,
     };
   });
 };
@@ -170,12 +185,13 @@ export const buildFieldsDefinitions = (fields: string[]): SuggestionRawDefinitio
       defaultMessage: `Field specified by the input table`,
     }),
     sortText: 'D',
+    command: TRIGGER_SUGGESTION_COMMAND,
   }));
 };
 export const buildVariablesDefinitions = (variables: string[]): SuggestionRawDefinition[] =>
   variables.map((label) => ({
     label,
-    text: label,
+    text: getSafeInsertText(label),
     kind: 'Variable',
     detail: i18n.translate(
       'kbn-esql-validation-autocomplete.esql.autocomplete.variableDefinition',
@@ -191,7 +207,7 @@ export const buildSourcesDefinitions = (
 ): SuggestionRawDefinition[] =>
   sources.map(({ name, isIntegration, title, type }) => ({
     label: title ?? name,
-    text: getSafeInsertSourceText(name) + (!isIntegration ? ' ' : ''),
+    text: getSafeInsertSourceText(name),
     isSnippet: isIntegration,
     kind: isIntegration ? 'Class' : 'Issue',
     detail: isIntegration
@@ -249,7 +265,7 @@ export const buildValueDefinitions = (
     command: options?.advanceCursorAndOpenSuggestions ? TRIGGER_SUGGESTION_COMMAND : undefined,
   }));
 
-export const buildNewVarDefinition = (label: string): SuggestionRawDefinition => {
+export const getNewVariableSuggestion = (label: string): SuggestionRawDefinition => {
   return {
     label,
     text: `${label} = `,
@@ -267,7 +283,7 @@ export const buildPoliciesDefinitions = (
 ): SuggestionRawDefinition[] =>
   policies.map(({ name: label, sourceIndices }) => ({
     label,
-    text: getSafeInsertText(label, { dashSupported: true }),
+    text: getSafeInsertText(label, { dashSupported: true }) + ' ',
     kind: 'Class',
     detail: i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.policyDefinition', {
       defaultMessage: `Policy defined on {count, plural, one {index} other {indices}}: {indices}`,
@@ -277,6 +293,7 @@ export const buildPoliciesDefinitions = (
       },
     }),
     sortText: 'D',
+    command: TRIGGER_SUGGESTION_COMMAND,
   }));
 
 export const buildMatchingFieldsDefinition = (
@@ -285,7 +302,7 @@ export const buildMatchingFieldsDefinition = (
 ): SuggestionRawDefinition[] =>
   fields.map((label) => ({
     label,
-    text: getSafeInsertText(label),
+    text: getSafeInsertText(label) + ' ',
     kind: 'Variable',
     detail: i18n.translate(
       'kbn-esql-validation-autocomplete.esql.autocomplete.matchingFieldDefinition',
@@ -297,6 +314,7 @@ export const buildMatchingFieldsDefinition = (
       }
     ),
     sortText: 'D',
+    command: TRIGGER_SUGGESTION_COMMAND,
   }));
 
 export const buildOptionDefinition = (
@@ -433,6 +451,20 @@ export function getCompatibleLiterals(
   return suggestions;
 }
 
+export const TIME_SYSTEM_DESCRIPTIONS = {
+  '?_tstart': i18n.translate(
+    'kbn-esql-validation-autocomplete.esql.autocomplete.timeSystemParamStart',
+    {
+      defaultMessage: 'The start time from the date picker',
+    }
+  ),
+  '?_tend': i18n.translate(
+    'kbn-esql-validation-autocomplete.esql.autocomplete.timeSystemParamEnd',
+    {
+      defaultMessage: 'The end time from the date picker',
+    }
+  ),
+};
 export function getDateLiterals(options?: {
   advanceCursorAndOpenSuggestions?: boolean;
   addComma?: boolean;

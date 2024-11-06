@@ -7,12 +7,12 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 
-import { TRANSFORM_ACTIONS } from '../../../../common/types/transform';
-import { TRANSFORM_STATE } from '../../../../common/constants';
 import type {
   StopTransformsRequestSchema,
   StopTransformsResponseSchema,
-} from '../../../../common/api_schemas/stop_transforms';
+} from '../../api_schemas/stop_transforms';
+import { TRANSFORM_ACTIONS } from '../../../../common/types/transform';
+import { TRANSFORM_STATE } from '../../../../common/constants';
 
 import { isRequestTimeout, fillResultsWithTimeouts } from '../../utils/error_utils';
 

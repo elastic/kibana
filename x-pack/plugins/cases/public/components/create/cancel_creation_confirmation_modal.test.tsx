@@ -39,7 +39,7 @@ describe('CancelCreationConfirmationModal', () => {
     const result = appMock.render(<CancelCreationConfirmationModal {...props} />);
 
     expect(result.getByText(props.confirmButtonText)).toBeInTheDocument();
-    userEvent.click(result.getByText(props.confirmButtonText));
+    await userEvent.click(result.getByText(props.confirmButtonText));
 
     expect(props.onConfirm).toHaveBeenCalled();
   });
@@ -48,7 +48,7 @@ describe('CancelCreationConfirmationModal', () => {
     const result = appMock.render(<CancelCreationConfirmationModal {...props} />);
 
     expect(result.getByText(props.cancelButtonText)).toBeInTheDocument();
-    userEvent.click(result.getByText(props.cancelButtonText));
+    await userEvent.click(result.getByText(props.cancelButtonText));
 
     expect(props.onCancel).toHaveBeenCalled();
   });

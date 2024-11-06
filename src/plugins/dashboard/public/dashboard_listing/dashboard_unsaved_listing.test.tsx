@@ -1,21 +1,27 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import React from 'react';
-import { mount } from 'enzyme';
 
+import { ComponentType, mount } from 'enzyme';
+import React from 'react';
+
+import { findTestSubject } from '@elastic/eui/lib/test';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { waitFor } from '@testing-library/react';
-import { findTestSubject } from '@elastic/eui/lib/test';
 
-import { pluginServices } from '../services/plugin_services';
+import {
+  DASHBOARD_PANELS_UNSAVED_ID,
+  getDashboardBackupService,
+} from '../services/dashboard_backup_service';
+import { getDashboardContentManagementService } from '../services/dashboard_content_management_service';
+import { coreServices } from '../services/kibana_services';
 import { DashboardUnsavedListing, DashboardUnsavedListingProps } from './dashboard_unsaved_listing';
-import { DASHBOARD_PANELS_UNSAVED_ID } from '../services/dashboard_backup/dashboard_backup_service';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
 
 const makeDefaultProps = (): DashboardUnsavedListingProps => ({
   goToDashboard: jest.fn(),
@@ -30,17 +36,20 @@ function mountWith({ props: incomingProps }: { props?: Partial<DashboardUnsavedL
   }> = ({ children }) => {
     return <I18nProvider>{children}</I18nProvider>;
   };
-  const component = mount(<DashboardUnsavedListing {...props} />, { wrappingComponent });
+  const component = mount(<DashboardUnsavedListing {...props} />, {
+    wrappingComponent: wrappingComponent as ComponentType<{}>,
+  });
   return { component, props };
 }
 
 describe('Unsaved listing', () => {
+  const dashboardBackupService = getDashboardBackupService();
+  const dashboardContentManagementService = getDashboardContentManagementService();
+
   it('Gets information for each unsaved dashboard', async () => {
     mountWith({});
     await waitFor(() => {
-      expect(
-        pluginServices.getServices().dashboardContentManagement.findDashboards.findByIds
-      ).toHaveBeenCalledTimes(1);
+      expect(dashboardContentManagementService.findDashboards.findByIds).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -49,9 +58,9 @@ describe('Unsaved listing', () => {
     props.unsavedDashboardIds = ['dashboardUnsavedOne', DASHBOARD_PANELS_UNSAVED_ID];
     mountWith({ props });
     await waitFor(() => {
-      expect(
-        pluginServices.getServices().dashboardContentManagement.findDashboards.findByIds
-      ).toHaveBeenCalledWith(['dashboardUnsavedOne']);
+      expect(dashboardContentManagementService.findDashboards.findByIds).toHaveBeenCalledWith([
+        'dashboardUnsavedOne',
+      ]);
     });
   });
 
@@ -90,17 +99,13 @@ describe('Unsaved listing', () => {
     getDiscardButton().simulate('click');
     waitFor(() => {
       component.update();
-      expect(pluginServices.getServices().overlays.openConfirm).toHaveBeenCalled();
-      expect(pluginServices.getServices().dashboardBackup.clearState).toHaveBeenCalledWith(
-        'dashboardUnsavedOne'
-      );
+      expect(coreServices.overlays.openConfirm).toHaveBeenCalled();
+      expect(dashboardBackupService.clearState).toHaveBeenCalledWith('dashboardUnsavedOne');
     });
   });
 
   it('removes unsaved changes from any dashboard which errors on fetch', async () => {
-    (
-      pluginServices.getServices().dashboardContentManagement.findDashboards.findByIds as jest.Mock
-    ).mockResolvedValue([
+    (dashboardContentManagementService.findDashboards.findByIds as jest.Mock).mockResolvedValue([
       {
         id: 'failCase1',
         status: 'error',
@@ -125,17 +130,11 @@ describe('Unsaved listing', () => {
     const { component } = mountWith({ props });
     waitFor(() => {
       component.update();
-      expect(pluginServices.getServices().dashboardBackup.clearState).toHaveBeenCalledWith(
-        'failCase1'
-      );
-      expect(pluginServices.getServices().dashboardBackup.clearState).toHaveBeenCalledWith(
-        'failCase2'
-      );
+      expect(dashboardBackupService.clearState).toHaveBeenCalledWith('failCase1');
+      expect(dashboardBackupService.clearState).toHaveBeenCalledWith('failCase2');
 
       // clearing panels from dashboard with errors should cause getDashboardIdsWithUnsavedChanges to be called again.
-      expect(
-        pluginServices.getServices().dashboardBackup.getDashboardIdsWithUnsavedChanges
-      ).toHaveBeenCalledTimes(2);
+      expect(dashboardBackupService.getDashboardIdsWithUnsavedChanges).toHaveBeenCalledTimes(2);
     });
   });
 });

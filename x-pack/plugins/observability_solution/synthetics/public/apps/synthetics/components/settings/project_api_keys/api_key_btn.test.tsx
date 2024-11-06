@@ -14,11 +14,11 @@ import { render } from '../../../utils/testing';
 describe('<APIKeyButton />', () => {
   const setLoadAPIKey = jest.fn();
 
-  it('calls delete monitor on monitor deletion', () => {
+  it('calls delete monitor on monitor deletion', async () => {
     render(<ApiKeyBtn setLoadAPIKey={setLoadAPIKey} apiKey="" loading={false} />);
 
     expect(screen.getByText('Generate Project API key')).toBeInTheDocument();
-    userEvent.click(screen.getByTestId('uptimeMonitorManagementApiKeyGenerate'));
+    await userEvent.click(screen.getByTestId('uptimeMonitorManagementApiKeyGenerate'));
     expect(setLoadAPIKey).toHaveBeenCalled();
   });
 

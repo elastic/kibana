@@ -26,11 +26,13 @@ export const previewRule = async ({
   rule,
   invocationCount = 1,
   timeframeEnd = new Date(),
+  enableLoggedRequests,
 }: {
   supertest: SuperTest.Agent;
   rule: RuleCreateProps;
   invocationCount?: number;
   timeframeEnd?: Date;
+  enableLoggedRequests?: boolean;
 }): Promise<{
   previewId: string;
   logs: RulePreviewLogs[];
@@ -43,6 +45,7 @@ export const previewRule = async ({
   };
   const response = await supertest
     .post(DETECTION_ENGINE_RULES_PREVIEW)
+    .query(enableLoggedRequests ? { enable_logged_requests: true } : {})
     .set('kbn-xsrf', 'true')
     .set('elastic-api-version', '2023-10-31')
     .send(previewRequest)

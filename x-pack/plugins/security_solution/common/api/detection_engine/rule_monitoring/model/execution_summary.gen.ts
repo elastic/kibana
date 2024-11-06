@@ -14,7 +14,7 @@
  *   version: not applicable
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 import { RuleExecutionStatus, RuleExecutionStatusOrder } from './execution_status.gen';
 import { RuleExecutionMetrics } from './execution_metrics.gen';

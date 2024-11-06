@@ -48,8 +48,17 @@ export const DOCUMENT_DETAILS_FLYOUT_HEADER_RISK_SCORE_VALUE = getDataTestSubjec
   'securitySolutionFlyoutHeaderRiskScoreValue'
 );
 export const DOCUMENT_DETAILS_FLYOUT_HEADER_SEVERITY_VALUE = getDataTestSubjectSelector('severity');
-export const DOCUMENT_DETAILS_FLYOUT_HEADER_ASSIGNEES = getDataTestSubjectSelector(
-  'securitySolutionFlyoutHeaderAssigneesHeader'
+export const DOCUMENT_DETAILS_FLYOUT_HEADER_ASSIGNEES_TITLE = getDataTestSubjectSelector(
+  'securitySolutionFlyoutHeaderAssigneesTitle'
+);
+export const DOCUMENT_DETAILS_FLYOUT_HEADER_ASSIGNEES_VALUE = getDataTestSubjectSelector(
+  'securitySolutionFlyoutHeaderAssignees'
+);
+export const DOCUMENT_DETAILS_FLYOUT_HEADER_NOTES_TITLE = getDataTestSubjectSelector(
+  'securitySolutionFlyoutHeaderNotesTitle'
+);
+export const DOCUMENT_DETAILS_FLYOUT_HEADER_NOTES_VALUE = getDataTestSubjectSelector(
+  'securitySolutionFlyoutHeaderNotesAddNoteButton'
 );
 
 /* Footer */

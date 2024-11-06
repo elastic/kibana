@@ -6,5 +6,13 @@
   "exclude": ["target/**/*"],
   "extends": "../../tsconfig.base.json",
   "include": ["**/*.ts"],
-  "kbn_references": ["@kbn/zod-helpers", "@kbn/openapi-common"]
+  "kbn_references": [
+    "@kbn/zod-helpers",
+    "@kbn/openapi-common",
+    "@kbn/test",
+    "@kbn/tooling-log",
+    "@kbn/core-http-common",
+    "@kbn/securitysolution-utils",
+    "@kbn/zod",
+  ]
 }

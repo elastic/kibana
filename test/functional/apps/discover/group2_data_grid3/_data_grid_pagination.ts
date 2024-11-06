@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -14,8 +15,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const dataGrid = getService('dataGrid');
-  const PageObjects = getPageObjects([
-    'settings',
+  const { common, discover, header, timePicker, dashboard } = getPageObjects([
     'common',
     'discover',
     'header',
@@ -47,10 +47,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     beforeEach(async function () {
-      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
+      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.uiSettings.update(defaultSettings);
-      await PageObjects.common.navigateToApp('discover');
-      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await common.navigateToApp('discover');
+      await discover.waitUntilSearchingHasFinished();
     });
 
     it('should show pagination', async () => {
@@ -104,8 +104,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       // first render is based on settings value
-      await PageObjects.common.navigateToApp('discover');
-      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await common.navigateToApp('discover');
+      await discover.waitUntilSearchingHasFinished();
       expect((await dataGrid.getDocTableRows()).length).to.be(6);
       await dataGrid.checkCurrentRowsPerPageToBe(6);
 
@@ -114,34 +114,34 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // save as a new search
       const savedSearchTitle = 'search with saved rowsPerPage';
-      await PageObjects.discover.saveSearch(savedSearchTitle);
+      await discover.saveSearch(savedSearchTitle);
 
       // start a new search session
       await testSubjects.click('discoverNewButton');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await header.waitUntilLoadingHasFinished();
       expect((await dataGrid.getDocTableRows()).length).to.be(6); // as in settings
       await dataGrid.checkCurrentRowsPerPageToBe(6);
 
       // open the saved search
-      await PageObjects.discover.loadSavedSearch(savedSearchTitle);
-      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await discover.loadSavedSearch(savedSearchTitle);
+      await discover.waitUntilSearchingHasFinished();
       expect((await dataGrid.getDocTableRows()).length).to.be(10); // as in the saved search
       await dataGrid.checkCurrentRowsPerPageToBe(10);
 
       // should use "rowsPerPage" form the saved search on dashboard
-      await PageObjects.common.navigateToApp('dashboard');
-      await PageObjects.dashboard.clickNewDashboard();
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
+      await common.navigateToApp('dashboard');
+      await dashboard.clickNewDashboard();
+      await timePicker.setDefaultAbsoluteRange();
       await dashboardAddPanel.clickOpenAddPanel();
       await dashboardAddPanel.addSavedSearch(savedSearchTitle);
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await header.waitUntilLoadingHasFinished();
       expect((await dataGrid.getDocTableRows()).length).to.be(10); // as in the saved search
       await dataGrid.checkCurrentRowsPerPageToBe(10);
 
       // should use "rowsPerPage" form settings by default on dashboard
       await dashboardPanelActions.removePanelByTitle(savedSearchTitle);
       await dashboardAddPanel.addSavedSearch('A Saved Search');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await header.waitUntilLoadingHasFinished();
       expect((await dataGrid.getDocTableRows()).length).to.be(6); // as in settings
       await dataGrid.checkCurrentRowsPerPageToBe(6);
     });
@@ -155,31 +155,31 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         hideAnnouncements: true,
       });
 
-      await PageObjects.common.navigateToApp('discover');
-      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await common.navigateToApp('discover');
+      await discover.waitUntilSearchingHasFinished();
 
       // expect pagination to be present for data view mode
       expect((await dataGrid.getDocTableRows()).length).to.be(rowsPerPage);
       await dataGrid.checkCurrentRowsPerPageToBe(rowsPerPage);
       await testSubjects.existOrFail('pagination-button-0');
 
-      await PageObjects.discover.selectTextBaseLang();
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await discover.selectTextBaseLang();
+      await header.waitUntilLoadingHasFinished();
+      await discover.waitUntilSearchingHasFinished();
 
       // expect no pagination for ES|QL mode
       expect((await dataGrid.getDocTableRows()).length).to.above(rowsPerPage);
       await testSubjects.missingOrFail('pagination-button-0');
 
-      await PageObjects.discover.saveSearch(savedSearchESQL);
+      await discover.saveSearch(savedSearchESQL);
 
-      await PageObjects.common.navigateToApp('dashboard');
+      await common.navigateToApp('dashboard');
 
-      await PageObjects.dashboard.clickNewDashboard();
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
+      await dashboard.clickNewDashboard();
+      await timePicker.setDefaultAbsoluteRange();
       await dashboardAddPanel.clickOpenAddPanel();
       await dashboardAddPanel.addSavedSearch(savedSearchESQL);
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await header.waitUntilLoadingHasFinished();
 
       // expect no pagination for ES|QL mode on Dashboard
       expect((await dataGrid.getDocTableRows()).length).to.above(rowsPerPage);

@@ -15,6 +15,7 @@ import {
   CreateAgentPolicyResponse,
 } from '@kbn/fleet-plugin/common/types';
 import { ToolingLog } from '@kbn/tooling-log';
+import chalk from 'chalk';
 
 export const DEFAULT_HEADERS = Object.freeze({
   'x-elastic-internal-product': 'security-solution',
@@ -38,10 +39,10 @@ export const getInstalledIntegration = async (kbnClient: KbnClient, integrationN
 export const createAgentPolicy = async (
   kbnClient: KbnClient,
   log: ToolingLog,
-  agentPolicyName = 'Osquery policy'
+  agentPolicyName = 'Osquery policy',
+  integrationName: string = 'osquery_manager'
 ) => {
-  log.info(`Creating "${agentPolicyName}" agent policy`);
-
+  log.info(chalk.bold(`Creating "${agentPolicyName}" agent policy`));
   const {
     data: {
       item: { id: agentPolicyId },
@@ -60,12 +61,26 @@ export const createAgentPolicy = async (
       inactivity_timeout: 1209600,
     },
   });
+  log.indent(4, () => log.info(`Created "${agentPolicyName}" agent policy`));
 
-  log.info(`Adding integration to ${agentPolicyId}`);
+  log.info(
+    chalk.bold(
+      `Adding "${integrationName}" integration to agent policy "${agentPolicyName}" with id ${agentPolicyId}`
+    )
+  );
 
-  await addIntegrationToAgentPolicy(kbnClient, agentPolicyId, agentPolicyName);
+  await addIntegrationToAgentPolicy(kbnClient, agentPolicyId, agentPolicyName, integrationName);
+  log.indent(4, () =>
+    log.info(
+      `Added "${integrationName}" integration to agent policy "${agentPolicyName}" with id ${agentPolicyId}`
+    )
+  );
 
-  log.info('Getting agent enrollment key');
+  log.info(
+    chalk.bold(
+      `Getting agent enrollment key for agent policy "${agentPolicyName}" with id ${agentPolicyId}`
+    )
+  );
   const { data: apiKeys } = await kbnClient.request<GetEnrollmentAPIKeysResponse>({
     method: 'GET',
     headers: {
@@ -73,7 +88,11 @@ export const createAgentPolicy = async (
     },
     path: '/api/fleet/enrollment_api_keys',
   });
-
+  log.indent(4, () =>
+    log.info(
+      `Got agent enrollment key for agent policy "${agentPolicyName}" with id ${agentPolicyId}`
+    )
+  );
   return apiKeys.items[0].api_key;
 };
 
@@ -119,7 +138,7 @@ const isValidArtifactVersion = (version: string) => !!version.match(/^\d+\.\d+\.
 /**
  * Returns the Agent version that is available for install (will check `artifacts-api.elastic.co/v1/versions`)
  * that is equal to or less than `maxVersion`.
- * @param maxVersion
+ * @param kbnClient
  */
 
 export const getLatestAvailableAgentVersion = async (kbnClient: KbnClient): Promise<string> => {

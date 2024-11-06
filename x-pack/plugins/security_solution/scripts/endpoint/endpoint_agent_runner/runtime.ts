@@ -28,6 +28,8 @@ export const startRuntimeServices = async ({
   fleetServerUrl,
   username,
   password,
+  apiKey,
+  spaceId,
   ...otherOptions
 }: StartRuntimeServicesOptions) => {
   const stackServices = await createRuntimeServices({
@@ -36,7 +38,9 @@ export const startRuntimeServices = async ({
     fleetServerUrl,
     username,
     password,
+    apiKey,
     log,
+    spaceId,
     asSuperuser: otherOptions?.asSuperuser,
   });
 

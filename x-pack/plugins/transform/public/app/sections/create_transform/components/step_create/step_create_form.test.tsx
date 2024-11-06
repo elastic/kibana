@@ -12,7 +12,6 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { StepCreateFormProps } from './step_create_form';
 import { StepCreateForm } from './step_create_form';
 
-jest.mock('../../../../../shared_imports');
 jest.mock('../../../../app_dependencies');
 
 describe('Transform: <StepCreateForm />', () => {

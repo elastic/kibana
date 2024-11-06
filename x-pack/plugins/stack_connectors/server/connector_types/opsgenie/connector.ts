@@ -9,6 +9,7 @@ import crypto from 'crypto';
 import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
 import { AxiosError } from 'axios';
 import { isEmpty } from 'lodash';
+import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import { OpsgenieSubActions } from '../../../common';
 import { CreateAlertParamsSchema, CloseAlertParamsSchema, Response } from './schema';
 import { CloseAlertParams, Config, CreateAlertParams, FailureResponseType, Secrets } from './types';
@@ -67,14 +68,20 @@ export class OpsgenieConnector extends SubActionConnector<Config, Secrets> {
     }
   }
 
-  public async createAlert(params: CreateAlertParams) {
-    const res = await this.request({
-      method: 'post',
-      url: this.concatPathToURL('v2/alerts').toString(),
-      data: { ...params, ...OpsgenieConnector.createAliasObj(params.alias) },
-      headers: this.createHeaders(),
-      responseSchema: Response,
-    });
+  public async createAlert(
+    params: CreateAlertParams,
+    connectorUsageCollector: ConnectorUsageCollector
+  ) {
+    const res = await this.request(
+      {
+        method: 'post',
+        url: this.concatPathToURL('v2/alerts').toString(),
+        data: { ...params, ...OpsgenieConnector.createAliasObj(params.alias) },
+        headers: this.createHeaders(),
+        responseSchema: Response,
+      },
+      connectorUsageCollector
+    );
 
     return res.data;
   }
@@ -107,7 +114,10 @@ export class OpsgenieConnector extends SubActionConnector<Config, Secrets> {
     return { Authorization: `GenieKey ${this.secrets.apiKey}` };
   }
 
-  public async closeAlert(params: CloseAlertParams) {
+  public async closeAlert(
+    params: CloseAlertParams,
+    connectorUsageCollector: ConnectorUsageCollector
+  ) {
     const newAlias = OpsgenieConnector.createAlias(params.alias);
 
     const fullURL = this.concatPathToURL(`v2/alerts/${newAlias}/close`);
@@ -115,13 +125,16 @@ export class OpsgenieConnector extends SubActionConnector<Config, Secrets> {
 
     const { alias, ...paramsWithoutAlias } = params;
 
-    const res = await this.request({
-      method: 'post',
-      url: fullURL.toString(),
-      data: paramsWithoutAlias,
-      headers: this.createHeaders(),
-      responseSchema: Response,
-    });
+    const res = await this.request(
+      {
+        method: 'post',
+        url: fullURL.toString(),
+        data: paramsWithoutAlias,
+        headers: this.createHeaders(),
+        responseSchema: Response,
+      },
+      connectorUsageCollector
+    );
 
     return res.data;
   }

@@ -5,8 +5,20 @@
  * 2.0.
  */
 
+import {
+  AssetDetailsLocator,
+  AssetDetailsLocatorParams,
+} from '@kbn/observability-shared-plugin/common';
 import { getInfraContainerHref, getInfraKubernetesHref, getInfraIpHref } from './get_infra_href';
 import { MonitorSummary, makePing, Ping } from '../../../../../common/runtime_types';
+
+const mockAssetDetailsLocator = {
+  getRedirectUrl: jest
+    .fn()
+    .mockImplementation(
+      ({ assetId, assetType }: AssetDetailsLocatorParams) => `/node-mock/${assetType}/${assetId}`
+    ),
+} as unknown as jest.Mocked<AssetDetailsLocator>;
 
 describe('getInfraHref', () => {
   let summary: MonitorSummary;
@@ -38,21 +50,17 @@ describe('getInfraHref', () => {
   });
 
   it('getInfraContainerHref creates a link for valid parameters', () => {
-    const result = getInfraContainerHref(summary, 'foo');
-    expect(result).toMatchInlineSnapshot(
-      `"foo/app/metrics/link-to/container-detail/test-container-id"`
-    );
+    const result = getInfraContainerHref(summary, mockAssetDetailsLocator);
+    expect(result).toMatchInlineSnapshot(`"/node-mock/container/test-container-id"`);
   });
 
-  it('getInfraContainerHref does not specify a base path when none is available', () => {
-    expect(getInfraContainerHref(summary, '')).toMatchInlineSnapshot(
-      `"/app/metrics/link-to/container-detail/test-container-id"`
-    );
+  it('getInfraContainerHref returns undefined when no locator is available', () => {
+    expect(getInfraContainerHref(summary, undefined)).toBeUndefined();
   });
 
   it('getInfraContainerHref returns undefined when no container id is present', () => {
     summary.state.summaryPings = [];
-    expect(getInfraContainerHref(summary, 'foo')).toBeUndefined();
+    expect(getInfraContainerHref(summary, mockAssetDetailsLocator)).toBeUndefined();
   });
 
   it('getInfraContainerHref returns the first item when multiple container ids are supplied', () => {
@@ -74,32 +82,30 @@ describe('getInfraHref', () => {
       container: { id: 'test-container-id-foo' },
     };
     summary.state.summaryPings = [pingTestContainerId, pingTestFooContainerId];
-    expect(getInfraContainerHref(summary, 'bar')).toMatchInlineSnapshot(
-      `"bar/app/metrics/link-to/container-detail/test-container-id"`
+    expect(getInfraContainerHref(summary, mockAssetDetailsLocator)).toMatchInlineSnapshot(
+      `"/node-mock/container/test-container-id"`
     );
   });
 
   it('getInfraContainerHref returns undefined when summaryPings are undefined', () => {
     // @ts-expect-error
     delete summary.state.summaryPings;
-    expect(getInfraContainerHref(summary, '')).toBeUndefined();
+    expect(getInfraContainerHref(summary, mockAssetDetailsLocator)).toBeUndefined();
   });
 
   it('getInfraKubernetesHref creates a link for valid parameters', () => {
-    const result = getInfraKubernetesHref(summary, 'foo');
+    const result = getInfraKubernetesHref(summary, mockAssetDetailsLocator);
     expect(result).not.toBeUndefined();
-    expect(result).toMatchInlineSnapshot(`"foo/app/metrics/link-to/pod-detail/test-pod-uid"`);
+    expect(result).toMatchInlineSnapshot(`"/node-mock/pod/test-pod-uid"`);
   });
 
-  it('getInfraKubernetesHref does not specify a base path when none is available', () => {
-    expect(getInfraKubernetesHref(summary, '')).toMatchInlineSnapshot(
-      `"/app/metrics/link-to/pod-detail/test-pod-uid"`
-    );
+  it('getInfraKubernetesHref return undefined when no locator is available', () => {
+    expect(getInfraKubernetesHref(summary, undefined)).toBeUndefined();
   });
 
   it('getInfraKubernetesHref returns undefined when no pod data is present', () => {
     summary.state.summaryPings = [];
-    expect(getInfraKubernetesHref(summary, 'foo')).toBeUndefined();
+    expect(getInfraKubernetesHref(summary, mockAssetDetailsLocator)).toBeUndefined();
   });
 
   it('getInfraKubernetesHref selects the first pod uid when there are multiple', () => {
@@ -121,20 +127,20 @@ describe('getInfraHref', () => {
       kubernetes: { pod: { uid: 'test-pod-uid-bar' } },
     };
     summary.state.summaryPings = [pingTestPodId, pingTestBarPodId];
-    expect(getInfraKubernetesHref(summary, '')).toMatchInlineSnapshot(
-      `"/app/metrics/link-to/pod-detail/test-pod-uid"`
+    expect(getInfraKubernetesHref(summary, mockAssetDetailsLocator)).toMatchInlineSnapshot(
+      `"/node-mock/pod/test-pod-uid"`
     );
   });
 
   it('getInfraKubernetesHref returns undefined when summaryPings are undefined', () => {
     // @ts-expect-error
     delete summary.state.summaryPings;
-    expect(getInfraKubernetesHref(summary, '')).toBeUndefined();
+    expect(getInfraKubernetesHref(summary, mockAssetDetailsLocator)).toBeUndefined();
   });
 
   it('getInfraKubernetesHref returns undefined when summaryPings are null', () => {
     delete summary.state.summaryPings![0]!.kubernetes!.pod!.uid;
-    expect(getInfraKubernetesHref(summary, '')).toBeUndefined();
+    expect(getInfraKubernetesHref(summary, mockAssetDetailsLocator)).toBeUndefined();
   });
 
   it('getInfraIpHref creates a link for valid parameters', () => {

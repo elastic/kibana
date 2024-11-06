@@ -23,7 +23,7 @@ import {
 
 import { TextEmbeddingInference } from './models/text_embedding';
 
-import { useMlApiContext } from '../../contexts/kibana';
+import { useMlApi } from '../../contexts/kibana';
 import { type TestTrainedModelsContextType } from './test_trained_models_context';
 import { InferenceInputForm } from './models/inference_input_form';
 import type { InferrerType } from './models';
@@ -53,7 +53,7 @@ export const SelectedModel: FC<Props> = ({
   externalPipelineConfig,
   setCurrentContext,
 }) => {
-  const { trainedModels } = useMlApiContext();
+  const { trainedModels } = useMlApi();
 
   const inferrer = useMemo<InferrerType | undefined>(() => {
     const taskType = Object.keys(model.inference_config ?? {})[0];

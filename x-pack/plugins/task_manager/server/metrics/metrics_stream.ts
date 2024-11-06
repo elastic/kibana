@@ -12,6 +12,7 @@ import { Logger } from '@kbn/core/server';
 import { TaskLifecycleEvent, TaskPollingLifecycle } from '../polling_lifecycle';
 import { TaskManagerConfig } from '../config';
 import { AggregatedStatProvider } from '../lib/runtime_statistics_aggregator';
+import { createWrappedLogger } from '../lib/wrapped_logger';
 import {
   isTaskManagerStatEvent,
   isTaskManagerMetricEvent,
@@ -52,7 +53,7 @@ export function createMetricsAggregators({
   taskManagerMetricsCollector,
 }: CreateMetricsAggregatorsOpts): AggregatedStatProvider {
   const aggregators: AggregatedStatProvider[] = [];
-  const debugLogger = logger.get('metrics-debugger');
+  const debugLogger = createWrappedLogger({ logger, tags: ['metrics-debugger'] });
   if (taskPollingLifecycle) {
     aggregators.push(
       createAggregator({

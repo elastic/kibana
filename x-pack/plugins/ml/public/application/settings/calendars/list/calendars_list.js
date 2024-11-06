@@ -12,19 +12,19 @@ import { EuiConfirmModal, EUI_MODAL_CONFIRM_BUTTON } from '@elastic/eui';
 
 import { CalendarsListHeader } from './header';
 import { CalendarsListTable } from './table';
-import { ml } from '../../../services/ml_api_service';
 import { toastNotificationServiceProvider } from '../../../services/toast_notification_service';
 import { mlNodesAvailable } from '../../../ml_nodes_check/check_ml_nodes';
 import { deleteCalendars } from './delete_calendars';
 import { i18n } from '@kbn/i18n';
 import { withKibana } from '@kbn/kibana-react-plugin/public';
-import { getDocLinks } from '../../../util/dependency_cache';
 import { HelpMenu } from '../../../components/help_menu';
+import { isDstCalendar } from '../dst_utils';
 
 export class CalendarsListUI extends Component {
   static propTypes = {
     canCreateCalendar: PropTypes.bool.isRequired,
     canDeleteCalendar: PropTypes.bool.isRequired,
+    isDst: PropTypes.bool.isRequired,
   };
 
   constructor(props) {
@@ -40,10 +40,13 @@ export class CalendarsListUI extends Component {
   }
 
   loadCalendars = async () => {
+    const mlApi = this.props.kibana.services.mlServices.mlApi;
     this.setState({ loading: true });
 
     try {
-      const calendars = await ml.calendars();
+      const calendars = (await mlApi.calendars()).filter(
+        (calendar) => isDstCalendar(calendar) === this.props.isDst
+      );
 
       this.setState({
         calendars,
@@ -82,10 +85,12 @@ export class CalendarsListUI extends Component {
   };
 
   deleteCalendars = () => {
+    const mlApi = this.props.kibana.services.mlServices.mlApi;
+    const toasts = this.props.kibana.services.notifications.toasts;
     const { selectedForDeletion } = this.state;
 
     this.closeDestroyModal();
-    deleteCalendars(selectedForDeletion, this.loadCalendars);
+    deleteCalendars(mlApi, toasts, selectedForDeletion, this.loadCalendars);
   };
 
   addRequiredFieldsToList = (calendarsList = []) => {
@@ -106,7 +111,7 @@ export class CalendarsListUI extends Component {
     const { canCreateCalendar, canDeleteCalendar } = this.props;
     let destroyModal = '';
 
-    const helpLink = getDocLinks().links.ml.calendars;
+    const helpLink = this.props.kibana.services.docLinks.links.ml.calendars;
 
     if (this.state.isDestroyModalVisible) {
       destroyModal = (
@@ -145,6 +150,7 @@ export class CalendarsListUI extends Component {
           <CalendarsListHeader
             totalCount={calendars.length}
             refreshCalendars={this.loadCalendars}
+            isDst={this.props.isDst}
           />
           <CalendarsListTable
             loading={loading}
@@ -155,6 +161,7 @@ export class CalendarsListUI extends Component {
             mlNodesAvailable={nodesAvailable}
             setSelectedCalendarList={this.setSelectedCalendarList}
             itemsSelected={selectedForDeletion.length > 0}
+            isDst={this.props.isDst}
           />
           {destroyModal}
         </div>

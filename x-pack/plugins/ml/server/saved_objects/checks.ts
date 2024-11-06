@@ -404,7 +404,7 @@ export function checksFactory(
       .reduce((acc, cur) => {
         const type = cur.type;
         if (acc[type] === undefined) {
-          acc[type] = {};
+          acc[type] = Object.create(null);
         }
         acc[type][cur.jobId] = cur.namespaces;
         return acc;

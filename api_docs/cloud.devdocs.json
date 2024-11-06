@@ -59,6 +59,20 @@
           },
           {
             "parentPluginId": "cloud",
+            "id": "def-public.CloudConfigType.csp",
+            "type": "string",
+            "tags": [],
+            "label": "csp",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/cloud/public/plugin.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloud",
             "id": "def-public.CloudConfigType.base_url",
             "type": "string",
             "tags": [],
@@ -273,14 +287,14 @@
               {
                 "parentPluginId": "cloud",
                 "id": "def-public.CloudStart.CloudContextProvider.$1",
-                "type": "CompoundType",
+                "type": "Uncategorized",
                 "tags": [],
                 "label": "props",
                 "description": [],
                 "signature": [
-                  "P & { children?: React.ReactNode; }"
+                  "P"
                 ],
-                "path": "node_modules/@types/react/index.d.ts",
+                "path": "node_modules/@types/react/ts5.0/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -294,7 +308,7 @@
                 "signature": [
                   "any"
                 ],
-                "path": "node_modules/@types/react/index.d.ts",
+                "path": "node_modules/@types/react/ts5.0/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -459,19 +473,23 @@
           },
           {
             "parentPluginId": "cloud",
-            "id": "def-public.CloudStart.elasticsearchUrl",
-            "type": "string",
+            "id": "def-public.CloudStart.fetchElasticsearchConfig",
+            "type": "Function",
             "tags": [],
-            "label": "elasticsearchUrl",
+            "label": "fetchElasticsearchConfig",
             "description": [
-              "\nThe full URL to the elasticsearch cluster."
+              "\nFetches the full URL to the elasticsearch cluster."
             ],
             "signature": [
-              "string | undefined"
+              "() => Promise<",
+              "PublicElasticsearchConfigType",
+              ">"
             ],
             "path": "x-pack/plugins/cloud/public/types.ts",
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "cloud",
@@ -602,6 +620,24 @@
         },
         {
           "parentPluginId": "cloud",
+          "id": "def-public.CloudSetup.csp",
+          "type": "string",
+          "tags": [
+            "note"
+          ],
+          "label": "csp",
+          "description": [
+            "\nThe cloud service provider identifier.\n"
+          ],
+          "signature": [
+            "string | undefined"
+          ],
+          "path": "x-pack/plugins/cloud/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "cloud",
           "id": "def-public.CloudSetup.baseUrl",
           "type": "string",
           "tags": [],
@@ -698,19 +734,23 @@
         },
         {
           "parentPluginId": "cloud",
-          "id": "def-public.CloudSetup.elasticsearchUrl",
-          "type": "string",
+          "id": "def-public.CloudSetup.fetchElasticsearchConfig",
+          "type": "Function",
           "tags": [],
-          "label": "elasticsearchUrl",
+          "label": "fetchElasticsearchConfig",
           "description": [
-            "\nThe full URL to the elasticsearch cluster."
+            "\nFetches the full URL to the elasticsearch cluster."
           ],
           "signature": [
-            "string | undefined"
+            "() => Promise<",
+            "PublicElasticsearchConfigType",
+            ">"
           ],
           "path": "x-pack/plugins/cloud/public/types.ts",
           "deprecated": false,
-          "trackAdoption": false
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
         },
         {
           "parentPluginId": "cloud",
@@ -853,11 +893,11 @@
           "signature": [
             "{ defaultSolution?: ",
             {
-              "pluginId": "cloud",
-              "scope": "common",
-              "docId": "kibCloudPluginApi",
-              "section": "def-common.OnBoardingDefaultSolution",
-              "text": "OnBoardingDefaultSolution"
+              "pluginId": "@kbn/core-chrome-browser",
+              "scope": "public",
+              "docId": "kibKbnCoreChromeBrowserPluginApi",
+              "section": "def-public.SolutionId",
+              "text": "SolutionId"
             },
             " | undefined; }"
           ],
@@ -929,6 +969,24 @@
           "label": "cloudId",
           "description": [
             "\nThis is the ID of the Cloud deployment to which the Kibana instance belongs.\n"
+          ],
+          "signature": [
+            "string | undefined"
+          ],
+          "path": "x-pack/plugins/cloud/server/plugin.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "cloud",
+          "id": "def-server.CloudSetup.csp",
+          "type": "string",
+          "tags": [
+            "note"
+          ],
+          "label": "csp",
+          "description": [
+            "\nThe cloud service provider identifier.\n"
           ],
           "signature": [
             "string | undefined"
@@ -1154,11 +1212,11 @@
           "signature": [
             "{ defaultSolution?: ",
             {
-              "pluginId": "cloud",
-              "scope": "common",
-              "docId": "kibCloudPluginApi",
-              "section": "def-common.OnBoardingDefaultSolution",
-              "text": "OnBoardingDefaultSolution"
+              "pluginId": "@kbn/core-chrome-browser",
+              "scope": "public",
+              "docId": "kibKbnCoreChromeBrowserPluginApi",
+              "section": "def-public.SolutionId",
+              "text": "SolutionId"
             },
             " | undefined; }"
           ],
@@ -1269,23 +1327,7 @@
     "functions": [],
     "interfaces": [],
     "enums": [],
-    "misc": [
-      {
-        "parentPluginId": "cloud",
-        "id": "def-common.OnBoardingDefaultSolution",
-        "type": "Type",
-        "tags": [],
-        "label": "OnBoardingDefaultSolution",
-        "description": [],
-        "signature": [
-          "\"security\" | \"es\" | \"oblt\""
-        ],
-        "path": "x-pack/plugins/cloud/common/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      }
-    ],
+    "misc": [],
     "objects": []
   }
 }

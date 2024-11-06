@@ -454,7 +454,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                 );
 
               expect(await menuEntries[0].getVisibleText()).to.be('access');
-              menuEntries[0].click();
+              await menuEntries[0].click();
             });
 
             await retry.try(async () => {
@@ -608,7 +608,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               );
 
             expect(await menuEntries[0].getVisibleText()).to.be(expectedUncategorized[0]);
-            menuEntries[0].click();
+            await menuEntries[0].click();
           });
 
           await retry.try(async () => {
@@ -740,7 +740,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               );
 
             expect(await menuEntries[0].getVisibleText()).to.be(expectedDataViews[0]);
-            menuEntries[0].click();
+            await menuEntries[0].click();
           });
 
           await retry.try(async () => {
@@ -765,7 +765,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               );
 
             expect(await menuEntries[2].getVisibleText()).to.be(expectedDataViews[2]);
-            menuEntries[2].click();
+            await menuEntries[2].click();
           });
 
           await retry.try(async () => {
@@ -860,7 +860,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             const { nodes, integrations } =
               await PageObjects.observabilityLogsExplorer.getIntegrations();
             expect(integrations).to.eql([initialPackageMap.apache]);
-            nodes[0].click();
+            await nodes[0].click();
           });
 
           await retry.try(async () => {
@@ -897,7 +897,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             .then((menu: WebElementWrapper) =>
               PageObjects.observabilityLogsExplorer.getPanelTitle(menu)
             );
-          panelTitleNode.click();
+          await panelTitleNode.click();
 
           await retry.try(async () => {
             const { nodes, integrations } =
@@ -907,7 +907,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             const searchValue = await PageObjects.observabilityLogsExplorer.getSearchFieldValue();
             expect(searchValue).to.eql('apache');
 
-            nodes[0].click();
+            await nodes[0].click();
           });
 
           await retry.try(async () => {

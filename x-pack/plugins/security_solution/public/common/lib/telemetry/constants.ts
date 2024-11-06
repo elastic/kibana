@@ -35,6 +35,8 @@ export enum TELEMETRY_EVENT {
   DASHBOARD = 'navigate_to_dashboard',
   CREATE_DASHBOARD = 'create_dashboard',
 
+  ONBOARDING = 'onboarding',
+
   // value list
   OPEN_VALUE_LIST_MODAL = 'open_value_list_modal',
   CREATE_VALUE_LIST_ITEM = 'create_value_list_item',
@@ -71,6 +73,8 @@ export enum TelemetryEventTypes {
   EntityDetailsClicked = 'Entity Details Clicked',
   EntityAlertsClicked = 'Entity Alerts Clicked',
   EntityRiskFiltered = 'Entity Risk Filtered',
+  EntityStoreEnablementToggleClicked = 'Entity Store Enablement Toggle Clicked',
+  EntityStoreDashboardInitButtonClicked = 'Entity Store Initialization Button Clicked',
   MLJobUpdate = 'ML Job Update',
   AddRiskInputToTimelineClicked = 'Add Risk Input To Timeline Clicked',
   ToggleRiskSummaryClicked = 'Toggle Risk Summary Clicked',
@@ -91,6 +95,7 @@ export enum TelemetryEventTypes {
   EventLogShowSourceEventDateRange = 'Event Log -> Show Source -> Event Date Range',
   OpenNoteInExpandableFlyoutClicked = 'Open Note In Expandable Flyout Clicked',
   AddNoteFromExpandableFlyoutClicked = 'Add Note From Expandable Flyout Clicked',
+  PreviewRule = 'Preview rule',
 }
 
 export enum ML_JOB_TELEMETRY_STATUS {

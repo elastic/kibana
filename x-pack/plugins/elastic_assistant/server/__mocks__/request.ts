@@ -10,7 +10,6 @@ import {
   ATTACK_DISCOVERY_BY_CONNECTOR_ID,
   ATTACK_DISCOVERY_CANCEL_BY_CONNECTOR_ID,
   CAPABILITIES,
-  EVALUATE,
 } from '../../common/constants';
 import {
   AttackDiscoveryPostRequestBody,
@@ -23,11 +22,12 @@ import {
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID,
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID_MESSAGES,
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND,
+  ELASTIC_AI_ASSISTANT_EVALUATE_URL,
+  ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_INDICES_URL,
   ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_URL,
   ELASTIC_AI_ASSISTANT_PROMPTS_URL_BULK_ACTION,
   ELASTIC_AI_ASSISTANT_PROMPTS_URL_FIND,
   PostEvaluateRequestBodyInput,
-  PostEvaluateRequestQueryInput,
 } from '@kbn/elastic-assistant-common';
 import {
   getAppendConversationMessagesSchemaMock,
@@ -46,6 +46,12 @@ import {
 export const requestMock = {
   create: httpServerMock.createKibanaRequest,
 };
+
+export const getGetKnowledgeBaseIndicesRequest = () =>
+  requestMock.create({
+    method: 'get',
+    path: ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_INDICES_URL,
+  });
 
 export const getGetKnowledgeBaseStatusRequest = (resource?: string) =>
   requestMock.create({
@@ -74,18 +80,11 @@ export const getGetCapabilitiesRequest = () =>
     path: CAPABILITIES,
   });
 
-export const getPostEvaluateRequest = ({
-  body,
-  query,
-}: {
-  body: PostEvaluateRequestBodyInput;
-  query: PostEvaluateRequestQueryInput;
-}) =>
+export const getPostEvaluateRequest = ({ body }: { body: PostEvaluateRequestBodyInput }) =>
   requestMock.create({
     body,
     method: 'post',
-    path: EVALUATE,
-    query,
+    path: ELASTIC_AI_ASSISTANT_EVALUATE_URL,
   });
 
 export const getCurrentUserFindRequest = () =>

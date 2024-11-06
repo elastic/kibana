@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import type { MetricsAPIRequest } from '@kbn/metrics-data-access-plugin/common';
 import { createAggregations, createCompositeAggregations } from './create_aggregations';
 import moment from 'moment';
-import { MetricsAPIRequest } from '../../../../common/http_api';
 
 const options: MetricsAPIRequest = {
   timerange: {

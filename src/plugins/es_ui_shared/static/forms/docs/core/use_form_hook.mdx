@@ -261,3 +261,48 @@ With this option you can decide if you want empty string value to be returned by
   "role": ""
 }
 ```
+
+#### stripUnsetFields
+
+**Type:** `boolean`
+**Default:** `false`
+
+Sometimes, we only want to include fields that have a defined initial value or if their value has been set by the user.
+In this case, set `stripUnsetFields` to `true`.
+
+Suppose we have a toggle field `autocompleteEnabled`, which doesn't have a specified default value passed to `useForm`:
+
+```js
+const { form } = useForm({
+  defaultValue: {
+    darkModeEnabled: false,
+    accessibilityEnabled: true,
+    autocompleteEnabled: undefined,
+  },
+  options: { stripUnsetFields: true },
+});
+```
+
+Initially, the form data includes only `darkModeEnabled` and `accessibilityEnabled` because `autocompleteEnabled` is stripped.
+
+```js
+{
+  "darkModeEnabled": false,
+  "accessibilityEnabled": true,
+}
+```
+
+Then the user toggles the `autocompleteEnabled` field to `false`. Now the field is included in the form data:
+
+```js
+{
+  "darkModeEnabled": false,
+  "accessibilityEnabled": true,
+  "autocompleteEnabled": false,
+}
+```
+
+Note: This option only considers the `defaultValue` config passed to `useForm()` to determine if the initial value is
+undefined. If a default value has been specified as a prop to the `<UseField />` component or in the form schema,
+but not in the `defaultValue` config for `useForm()`, the field would initially be populated with the specified default
+value, but it won't be included in the form data until the user explicitly sets its value.

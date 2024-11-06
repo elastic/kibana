@@ -13,3 +13,5 @@ export const CHART_TYPE = {
 } as const;
 
 export type ChartType = (typeof CHART_TYPE)[keyof typeof CHART_TYPE];
+
+export const SCHEDULE_EVENT_MARKER_ENTITY = 'schedule_event_marker_entity';

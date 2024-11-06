@@ -10,7 +10,9 @@ import { useMemo } from 'react';
 import type { ApmRouter } from '../components/routing/apm_route_config';
 import { useApmPluginContext } from '../context/apm_plugin/use_apm_plugin_context';
 
-export function useApmRouter() {
+export function useApmRouter(
+  { prependBasePath }: { prependBasePath?: boolean } = { prependBasePath: true }
+) {
   const router = useRouter();
   const { core } = useApmPluginContext();
 
@@ -18,8 +20,11 @@ export function useApmRouter() {
     () =>
       ({
         ...router,
-        link: (...args: [any]) => core.http.basePath.prepend('/app/apm' + router.link(...args)),
+        link: (...args: [any]) =>
+          prependBasePath
+            ? core.http.basePath.prepend('/app/apm' + router.link(...args))
+            : router.link(...args),
       } as unknown as ApmRouter),
-    [core.http.basePath, router]
+    [core.http.basePath, prependBasePath, router]
   );
 }

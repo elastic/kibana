@@ -8,7 +8,7 @@
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function canvasLensTest({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['canvas', 'header', 'lens']);
+  const { canvas, header, lens } = getPageObjects(['canvas', 'header', 'lens']);
   const esArchiver = getService('esArchiver');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const dashboardPanelActions = getService('dashboardPanelActions');
@@ -25,8 +25,8 @@ export default function canvasLensTest({ getService, getPageObjects }: FtrProvid
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.importExport.load(archives.kbn);
       await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-lens' });
-      await PageObjects.canvas.goToListingPage();
-      await PageObjects.canvas.createNewWorkpad();
+      await canvas.goToListingPage();
+      await canvas.createNewWorkpad();
     });
 
     after(async () => {
@@ -34,65 +34,65 @@ export default function canvasLensTest({ getService, getPageObjects }: FtrProvid
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
+    describe('by-value', () => {
+      it('creates new lens embeddable', async () => {
+        await canvas.createNewVis('lens');
+        await lens.goToTimeRange();
+        await lens.configureDimension({
+          dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
+          operation: 'date_histogram',
+          field: '@timestamp',
+        });
+        await lens.configureDimension({
+          dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+          operation: 'average',
+          field: 'bytes',
+        });
+        await lens.saveAndReturn();
+        await header.waitUntilLoadingHasFinished();
+        await testSubjects.exists('xyVisChart');
+      });
+
+      it('edits lens by-value embeddable', async () => {
+        await header.waitUntilLoadingHasFinished();
+        await dashboardPanelActions.clickEdit();
+        await lens.saveAndReturn();
+        await header.waitUntilLoadingHasFinished();
+        await testSubjects.exists('xyVisChart');
+      });
+    });
+
     describe('by-reference', () => {
       it('adds existing lens embeddable from the visualize library', async () => {
-        await PageObjects.canvas.clickAddFromLibrary();
+        await canvas.goToListingPageViaBreadcrumbs();
+        await canvas.createNewWorkpad();
+        await canvas.clickAddFromLibrary();
         await dashboardAddPanel.addEmbeddable('Artistpreviouslyknownaslens', 'lens');
         await testSubjects.existOrFail('embeddablePanelHeading-Artistpreviouslyknownaslens');
       });
 
       it('edits lens by-reference embeddable', async () => {
         await dashboardPanelActions.editPanelByTitle('Artistpreviouslyknownaslens');
-        await PageObjects.lens.save('Artistpreviouslyknownaslens v2', false, true);
+        await lens.save('Artistpreviouslyknownaslens v2', false, true);
         await testSubjects.existOrFail('embeddablePanelHeading-Artistpreviouslyknownaslensv2');
       });
 
       it('renders lens visualization using savedLens expression', async () => {
         // load test workpad
-        await PageObjects.canvas.goToListingPage();
-        await PageObjects.canvas.loadFirstWorkpad('Test Workpad');
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await canvas.goToListingPage();
+        await canvas.loadFirstWorkpad('Test Workpad');
+        await header.waitUntilLoadingHasFinished();
 
-        await PageObjects.lens.assertLegacyMetric('Maximum of bytes', '16,788');
+        await lens.assertLegacyMetric('Maximum of bytes', '16,788');
       });
     });
 
-    describe('by-value', () => {
-      it('creates new lens embeddable', async () => {
-        await PageObjects.canvas.addNewPage();
-        await PageObjects.canvas.createNewVis('lens');
-        await PageObjects.lens.goToTimeRange();
-        await PageObjects.lens.configureDimension({
-          dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
-          operation: 'date_histogram',
-          field: '@timestamp',
-        });
-        await PageObjects.lens.configureDimension({
-          dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
-          operation: 'average',
-          field: 'bytes',
-        });
-        await PageObjects.lens.saveAndReturn();
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await testSubjects.exists('xyVisChart');
-      });
-
-      it('edits lens by-value embeddable', async () => {
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        const panelHeader = await testSubjects.find('embeddablePanelHeading-');
-        await dashboardPanelActions.openContextMenu(panelHeader);
-        await dashboardPanelActions.clickEdit();
-        await PageObjects.lens.saveAndReturn();
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await testSubjects.exists('xyVisChart');
-      });
-    });
-
-    describe('switch page smoke test', async () => {
+    describe('switch page smoke test', () => {
       it('loads embeddables on page change', async () => {
-        await PageObjects.canvas.goToPreviousPage();
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.lens.assertLegacyMetric('Maximum of bytes', '16,788');
+        await canvas.addNewPage();
+        await canvas.goToPreviousPage();
+        await header.waitUntilLoadingHasFinished();
+        await lens.assertLegacyMetric('Maximum of bytes', '16,788');
       });
     });
   });

@@ -6,6 +6,7 @@
  */
 
 import { validateParams } from '@kbn/actions-plugin/server/lib';
+import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import { Logger } from '@kbn/core/server';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { getConnectorType, ServerLogConnectorType, ServerLogConnectorTypeExecutorOptions } from '.';
@@ -107,6 +108,10 @@ describe('execute()', () => {
       secrets: {},
       configurationUtilities,
       logger: mockedLogger,
+      connectorUsageCollector: new ConnectorUsageCollector({
+        logger: mockedLogger,
+        connectorId: 'test-connector-id',
+      }),
     };
     await connectorType.executor(executorOptions);
     expect(mockedLogger.info).toHaveBeenCalledWith('Server log: message text here');

@@ -46,11 +46,10 @@ function isCapacityEstimationParams(
 
 export function estimateCapacity(
   logger: Logger,
-  capacityStats: CapacityEstimationParams
+  capacityStats: CapacityEstimationParams,
+  assumedKibanaInstances: number
 ): RawMonitoredStat<CapacityEstimationStat> {
   const workload = capacityStats.workload.value;
-  // if there are no active owners right now, assume there's at least 1
-  const assumedKibanaInstances = Math.max(workload.owner_ids, 1);
 
   const {
     load: { p90: averageLoadPercentage },
@@ -262,12 +261,13 @@ function getHealthStatus(
 
 export function withCapacityEstimate(
   logger: Logger,
-  monitoredStats: RawMonitoringStats['stats']
+  monitoredStats: RawMonitoringStats['stats'],
+  assumedKibanaInstances: number
 ): RawMonitoringStats['stats'] {
   if (isCapacityEstimationParams(monitoredStats)) {
     return {
       ...monitoredStats,
-      capacity_estimation: estimateCapacity(logger, monitoredStats),
+      capacity_estimation: estimateCapacity(logger, monitoredStats, assumedKibanaInstances),
     };
   }
   return monitoredStats;

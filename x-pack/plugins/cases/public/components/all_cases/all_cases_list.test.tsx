@@ -213,7 +213,11 @@ describe('AllCasesListGeneric', () => {
 
     appMockRenderer.render(<AllCasesList />);
 
-    userEvent.hover((await screen.findAllByTestId('case-user-profile-avatar-damaged_raccoon'))[0]);
+    await userEvent.hover(
+      (
+        await screen.findAllByTestId('case-user-profile-avatar-damaged_raccoon')
+      )[0]
+    );
 
     expect(await screen.findByText('damaged_raccoon@elastic.co')).toBeInTheDocument();
   });
@@ -221,7 +225,7 @@ describe('AllCasesListGeneric', () => {
   it('should show a tooltip with all tags when hovered', async () => {
     appMockRenderer.render(<AllCasesList />);
 
-    userEvent.hover((await screen.findAllByTestId('case-table-column-tags'))[0]);
+    await userEvent.hover((await screen.findAllByTestId('case-table-column-tags'))[0]);
 
     expect(await screen.findByTestId('case-table-column-tags-tooltip')).toBeTruthy();
   });
@@ -262,12 +266,12 @@ describe('AllCasesListGeneric', () => {
       expect(column[key].querySelector('span')).toHaveTextContent(emptyTag);
     };
 
-    const { result } = renderHook<GetCasesColumn, UseCasesColumnsReturnValue>(
-      () => useCasesColumns(defaultColumnArgs),
-      {
-        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
-      }
-    );
+    const { result } = renderHook<
+      React.PropsWithChildren<GetCasesColumn>,
+      UseCasesColumnsReturnValue
+    >(() => useCasesColumns(defaultColumnArgs), {
+      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+    });
 
     await waitFor(() => {
       result.current.columns.map(
@@ -285,7 +289,7 @@ describe('AllCasesListGeneric', () => {
       },
     });
     appMockRenderer.render(<AllCasesList isSelectorView={false} />);
-    userEvent.click(await screen.findByTestId('cases-table-add-case'));
+    await userEvent.click(await screen.findByTestId('cases-table-add-case'));
     await waitFor(() => {
       expect(onRowClick).not.toHaveBeenCalled();
     });
@@ -294,7 +298,7 @@ describe('AllCasesListGeneric', () => {
   it('should tableHeaderSortButton AllCasesList', async () => {
     appMockRenderer.render(<AllCasesList />);
 
-    userEvent.click((await screen.findAllByTestId('tableHeaderSortButton'))[0]);
+    await userEvent.click((await screen.findAllByTestId('tableHeaderSortButton'))[0]);
 
     await waitFor(() => {
       expect(useGetCasesMock).toBeCalledWith(
@@ -358,7 +362,7 @@ describe('AllCasesListGeneric', () => {
 
   it('should call onRowClick with no cases and isSelectorView=true when create case is clicked', async () => {
     appMockRenderer.render(<AllCasesList isSelectorView={true} onRowClick={onRowClick} />);
-    userEvent.click(await screen.findByTestId('cases-table-add-case-filter-bar'));
+    await userEvent.click(await screen.findByTestId('cases-table-add-case-filter-bar'));
     const isCreateCase = true;
 
     await waitFor(() => {
@@ -372,7 +376,7 @@ describe('AllCasesListGeneric', () => {
 
     appMockRenderer.render(<AllCasesList isSelectorView={true} onRowClick={onRowClick} />);
 
-    userEvent.click(await screen.findByTestId(`cases-table-row-select-${theCase.id}`));
+    await userEvent.click(await screen.findByTestId(`cases-table-row-select-${theCase.id}`));
 
     await waitFor(() => {
       expect(onRowClick).toHaveBeenCalledWith(theCase);
@@ -382,7 +386,7 @@ describe('AllCasesListGeneric', () => {
   it('should NOT call onRowClick when clicking a case with modal=true', async () => {
     appMockRenderer.render(<AllCasesList isSelectorView={false} />);
 
-    userEvent.click(await screen.findByTestId('cases-table-row-1'));
+    await userEvent.click(await screen.findByTestId('cases-table-row-1'));
 
     await waitFor(() => {
       expect(onRowClick).not.toHaveBeenCalled();
@@ -393,7 +397,7 @@ describe('AllCasesListGeneric', () => {
     appMockRenderer.render(<AllCasesList isSelectorView={false} />);
 
     // 0 is the status filter button label
-    userEvent.click((await screen.findAllByTitle('Status'))[1]);
+    await userEvent.click((await screen.findAllByTitle('Status'))[1]);
 
     await waitFor(() => {
       expect(useGetCasesMock).toHaveBeenLastCalledWith(
@@ -422,7 +426,7 @@ describe('AllCasesListGeneric', () => {
     appMockRenderer.render(<AllCasesList isSelectorView={false} />);
 
     // 0 is the severity filter button label
-    userEvent.click((await screen.findAllByTitle('Severity'))[1]);
+    await userEvent.click((await screen.findAllByTitle('Severity'))[1]);
 
     await waitFor(() => {
       expect(useGetCasesMock).toHaveBeenLastCalledWith(
@@ -440,7 +444,7 @@ describe('AllCasesListGeneric', () => {
   it('should sort by title', async () => {
     appMockRenderer.render(<AllCasesList isSelectorView={false} />);
 
-    userEvent.click(await screen.findByTitle('Name'));
+    await userEvent.click(await screen.findByTitle('Name'));
 
     await waitFor(() => {
       expect(useGetCasesMock).toHaveBeenLastCalledWith(
@@ -458,7 +462,7 @@ describe('AllCasesListGeneric', () => {
   it('should sort by updatedOn', async () => {
     appMockRenderer.render(<AllCasesList isSelectorView={false} />);
 
-    userEvent.click(await screen.findByTitle('Updated on'));
+    await userEvent.click(await screen.findByTitle('Updated on'));
 
     await waitFor(() => {
       expect(useGetCasesMock).toHaveBeenLastCalledWith(
@@ -476,7 +480,7 @@ describe('AllCasesListGeneric', () => {
   it('should sort by category', async () => {
     appMockRenderer.render(<AllCasesList isSelectorView={false} />);
 
-    userEvent.click(await screen.findByTitle('Category'));
+    await userEvent.click(await screen.findByTitle('Category'));
 
     await waitFor(() => {
       expect(useGetCasesMock).toHaveBeenLastCalledWith(
@@ -494,9 +498,9 @@ describe('AllCasesListGeneric', () => {
   it('should filter by category', async () => {
     appMockRenderer.render(<AllCasesList isSelectorView={false} />);
 
-    userEvent.click(await screen.findByTestId('options-filter-popover-button-category'));
+    await userEvent.click(await screen.findByTestId('options-filter-popover-button-category'));
     await waitForEuiPopoverOpen();
-    userEvent.click(await screen.findByTestId('options-filter-popover-item-twix'));
+    await userEvent.click(await screen.findByTestId('options-filter-popover-item-twix'));
 
     await waitFor(() => {
       expect(useGetCasesMock).toHaveBeenLastCalledWith({
@@ -513,7 +517,7 @@ describe('AllCasesListGeneric', () => {
   it('should show the correct count on stats', async () => {
     appMockRenderer.render(<AllCasesList isSelectorView={false} />);
 
-    userEvent.click(await screen.findByTestId('options-filter-popover-button-status'));
+    await userEvent.click(await screen.findByTestId('options-filter-popover-button-status'));
 
     expect(await screen.findByTestId('options-filter-popover-item-open')).toHaveTextContent(
       'Open (20)'
@@ -546,14 +550,14 @@ describe('AllCasesListGeneric', () => {
     appMockRenderer.render(<AllCasesList />);
 
     const allCheckbox = await screen.findByTestId('checkboxSelectAll');
-    userEvent.click(allCheckbox);
+    await userEvent.click(allCheckbox);
     const checkboxes = await screen.findAllByRole('checkbox');
 
     for (const checkbox of checkboxes) {
       expect(checkbox).toBeChecked();
     }
 
-    userEvent.click(await screen.findByText('Refresh'));
+    await userEvent.click(await screen.findByText('Refresh'));
     for (const checkbox of checkboxes) {
       expect(checkbox).not.toBeChecked();
     }
@@ -571,16 +575,16 @@ describe('AllCasesListGeneric', () => {
 
     const allCheckbox = await screen.findByTestId('checkboxSelectAll');
 
-    userEvent.click(allCheckbox);
+    await userEvent.click(allCheckbox);
     const checkboxes = await screen.findAllByRole('checkbox');
 
     for (const checkbox of checkboxes) {
       expect(checkbox).toBeChecked();
     }
 
-    userEvent.click(await screen.findByTestId('options-filter-popover-button-status'));
+    await userEvent.click(await screen.findByTestId('options-filter-popover-button-status'));
     await waitForEuiPopoverOpen();
-    userEvent.click(await screen.findByTestId('options-filter-popover-item-open'));
+    await userEvent.click(await screen.findByTestId('options-filter-popover-item-open'));
 
     for (const checkbox of checkboxes) {
       expect(checkbox).not.toBeChecked();
@@ -629,11 +633,11 @@ describe('AllCasesListGeneric', () => {
 
     appMockRenderer.render(<AllCasesList />);
 
-    userEvent.click(await screen.findByTestId('options-filter-popover-button-category'));
+    await userEvent.click(await screen.findByTestId('options-filter-popover-button-category'));
     await waitForEuiPopoverOpen();
-    userEvent.click(await screen.findByTestId('options-filter-popover-item-twix'));
+    await userEvent.click(await screen.findByTestId('options-filter-popover-item-twix'));
 
-    userEvent.click(await screen.findByTestId('all-cases-clear-filters-link-icon'));
+    await userEvent.click(await screen.findByTestId('all-cases-clear-filters-link-icon'));
 
     await waitFor(() => {
       expect(useGetCasesMock).toHaveBeenLastCalledWith(DEFAULT_CASES_TABLE_STATE);
@@ -662,8 +666,8 @@ describe('AllCasesListGeneric', () => {
 
         expect(await screen.findByTestId('cases-table')).toBeInTheDocument();
 
-        userEvent.click(await screen.findByTestId('checkboxSelectAll'));
-        userEvent.click(await screen.findByText('Bulk actions'));
+        await userEvent.click(await screen.findByTestId('checkboxSelectAll'));
+        await userEvent.click(await screen.findByText('Bulk actions'));
 
         expect(await screen.findByTestId('case-bulk-action-status')).toBeInTheDocument();
         expect(await screen.findByTestId('cases-bulk-action-delete')).toBeInTheDocument();
@@ -676,19 +680,19 @@ describe('AllCasesListGeneric', () => {
 
           expect(await screen.findByTestId('cases-table')).toBeInTheDocument();
 
-          userEvent.click(await screen.findByTestId('checkboxSelectAll'));
+          await userEvent.click(await screen.findByTestId('checkboxSelectAll'));
 
-          userEvent.click(await screen.findByText('Bulk actions'));
+          await userEvent.click(await screen.findByText('Bulk actions'));
 
-          userEvent.click(await screen.findByTestId('case-bulk-action-status'), undefined, {
-            skipPointerEventsCheck: true,
+          await userEvent.click(await screen.findByTestId('case-bulk-action-status'), {
+            pointerEventsCheck: 0,
           });
 
           expect(
             await screen.findByTestId(`cases-bulk-action-status-${status}`)
           ).toBeInTheDocument();
 
-          userEvent.click(await screen.findByTestId(`cases-bulk-action-status-${status}`));
+          await userEvent.click(await screen.findByTestId(`cases-bulk-action-status-${status}`));
 
           await waitFor(() => {
             expect(updateCasesSpy).toBeCalledWith({
@@ -712,19 +716,19 @@ describe('AllCasesListGeneric', () => {
 
         expect(await screen.findByTestId('cases-table')).toBeInTheDocument();
 
-        userEvent.click(await screen.findByTestId('checkboxSelectAll'));
+        await userEvent.click(await screen.findByTestId('checkboxSelectAll'));
 
-        userEvent.click(await screen.findByText('Bulk actions'));
+        await userEvent.click(await screen.findByText('Bulk actions'));
 
-        userEvent.click(await screen.findByTestId('case-bulk-action-severity'), undefined, {
-          skipPointerEventsCheck: true,
+        await userEvent.click(await screen.findByTestId('case-bulk-action-severity'), {
+          pointerEventsCheck: 0,
         });
 
         expect(
           await screen.findByTestId(`cases-bulk-action-severity-${severity}`)
         ).toBeInTheDocument();
 
-        userEvent.click(await screen.findByTestId(`cases-bulk-action-severity-${severity}`));
+        await userEvent.click(await screen.findByTestId(`cases-bulk-action-severity-${severity}`));
 
         await waitFor(() => {
           expect(updateCasesSpy).toBeCalledWith({
@@ -742,17 +746,17 @@ describe('AllCasesListGeneric', () => {
 
         expect(await screen.findByTestId('cases-table')).toBeInTheDocument();
 
-        userEvent.click(await screen.findByTestId('checkboxSelectAll'));
+        await userEvent.click(await screen.findByTestId('checkboxSelectAll'));
 
-        userEvent.click(await screen.findByText('Bulk actions'));
+        await userEvent.click(await screen.findByText('Bulk actions'));
 
-        userEvent.click(await screen.findByTestId('cases-bulk-action-delete'), undefined, {
-          skipPointerEventsCheck: true,
+        await userEvent.click(await screen.findByTestId('cases-bulk-action-delete'), {
+          pointerEventsCheck: 0,
         });
 
         expect(await screen.findByTestId('confirm-delete-case-modal')).toBeInTheDocument();
 
-        userEvent.click(await screen.findByTestId('confirmModalConfirmButton'));
+        await userEvent.click(await screen.findByTestId('confirmModalConfirmButton'));
 
         await waitFor(() => {
           expect(deleteCasesSpy).toHaveBeenCalledWith({
@@ -812,17 +816,15 @@ describe('AllCasesListGeneric', () => {
         const inProgressCase = useGetCasesMockState.data.cases[1];
         const theCase = status === CaseStatuses.open ? inProgressCase : openCase;
 
-        userEvent.click(await screen.findByTestId(`case-action-popover-button-${theCase.id}`));
-
-        userEvent.click(
-          await screen.findByTestId(`case-action-status-panel-${theCase.id}`),
-          undefined,
-          {
-            skipPointerEventsCheck: true,
-          }
+        await userEvent.click(
+          await screen.findByTestId(`case-action-popover-button-${theCase.id}`)
         );
 
-        userEvent.click(await screen.findByTestId(`cases-bulk-action-status-${status}`));
+        await userEvent.click(await screen.findByTestId(`case-action-status-panel-${theCase.id}`), {
+          pointerEventsCheck: 0,
+        });
+
+        await userEvent.click(await screen.findByTestId(`cases-bulk-action-status-${status}`));
 
         await waitFor(() => {
           expect(updateCasesSpy).toHaveBeenCalledWith({
@@ -837,17 +839,18 @@ describe('AllCasesListGeneric', () => {
         const mediumCase = useGetCasesMockState.data.cases[1];
         const theCase = severity === CaseSeverity.LOW ? mediumCase : lowCase;
 
-        userEvent.click(await screen.findByTestId(`case-action-popover-button-${theCase.id}`));
+        await userEvent.click(
+          await screen.findByTestId(`case-action-popover-button-${theCase.id}`)
+        );
 
-        userEvent.click(
+        await userEvent.click(
           await screen.findByTestId(`case-action-severity-panel-${theCase.id}`),
-          undefined,
           {
-            skipPointerEventsCheck: true,
+            pointerEventsCheck: 0,
           }
         );
 
-        userEvent.click(await screen.findByTestId(`cases-bulk-action-severity-${severity}`));
+        await userEvent.click(await screen.findByTestId(`cases-bulk-action-severity-${severity}`));
 
         await waitFor(() => {
           expect(updateCasesSpy).toHaveBeenCalledWith({
@@ -860,15 +863,17 @@ describe('AllCasesListGeneric', () => {
         appMockRenderer.render(<AllCasesList />);
         const theCase = defaultGetCases.data.cases[0];
 
-        userEvent.click(await screen.findByTestId(`case-action-popover-button-${theCase.id}`));
+        await userEvent.click(
+          await screen.findByTestId(`case-action-popover-button-${theCase.id}`)
+        );
 
-        userEvent.click(await screen.findByTestId('cases-bulk-action-delete'), undefined, {
-          skipPointerEventsCheck: true,
+        await userEvent.click(await screen.findByTestId('cases-bulk-action-delete'), {
+          pointerEventsCheck: 0,
         });
 
         expect(await screen.findByTestId('confirm-delete-case-modal')).toBeInTheDocument();
 
-        userEvent.click(await screen.findByTestId('confirmModalConfirmButton'));
+        await userEvent.click(await screen.findByTestId('confirmModalConfirmButton'));
 
         await waitFor(() => {
           expect(deleteCasesSpy).toHaveBeenCalledWith({ caseIds: ['basic-case-id'] });
@@ -878,7 +883,7 @@ describe('AllCasesListGeneric', () => {
       it('should disable row actions when bulk selecting all cases', async () => {
         appMockRenderer.render(<AllCasesList />);
 
-        userEvent.click(await screen.findByTestId('checkboxSelectAll'));
+        await userEvent.click(await screen.findByTestId('checkboxSelectAll'));
 
         for (const theCase of defaultGetCases.data.cases) {
           expect(
@@ -891,7 +896,7 @@ describe('AllCasesListGeneric', () => {
         appMockRenderer.render(<AllCasesList />);
         const caseToSelect = defaultGetCases.data.cases[0];
 
-        userEvent.click(await screen.findByTestId(`checkboxSelectRow-${caseToSelect.id}`));
+        await userEvent.click(await screen.findByTestId(`checkboxSelectRow-${caseToSelect.id}`));
 
         for (const theCase of defaultGetCases.data.cases) {
           expect(
@@ -949,16 +954,16 @@ describe('AllCasesListGeneric', () => {
         const assigneesButton = await screen.findByTestId(
           'options-filter-popover-button-assignees'
         );
-        userEvent.click(assigneesButton);
-        userEvent.click(await screen.findByText('Damaged Raccoon'));
+        await userEvent.click(assigneesButton);
+        await userEvent.click(await screen.findByText('Damaged Raccoon'));
         expect(
           await within(assigneesButton).findByLabelText('1 active filters')
         ).toBeInTheDocument();
 
         // Deactivates assignees filter
-        userEvent.click(await screen.findByRole('button', { name: 'More' }));
+        await userEvent.click(await screen.findByRole('button', { name: 'More' }));
         await waitForEuiPopoverOpen();
-        userEvent.click(await screen.findByRole('option', { name: 'Assignees' }));
+        await userEvent.click(await screen.findByRole('option', { name: 'Assignees' }));
 
         expect(useGetCasesMock).toHaveBeenLastCalledWith({
           filterOptions: {
@@ -969,9 +974,9 @@ describe('AllCasesListGeneric', () => {
         });
 
         // Reopens assignees filter
-        userEvent.click(await screen.findByRole('option', { name: 'Assignees' }));
+        await userEvent.click(await screen.findByRole('option', { name: 'Assignees' }));
         // Opens the assignees popup
-        userEvent.click(assigneesButton);
+        await userEvent.click(assigneesButton);
         expect(await screen.findByLabelText('click to filter assignees')).toBeInTheDocument();
         expect(
           within(

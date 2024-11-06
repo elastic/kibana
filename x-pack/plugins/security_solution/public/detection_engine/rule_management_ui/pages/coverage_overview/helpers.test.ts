@@ -20,7 +20,7 @@ describe('helpers', () => {
     it('returns checked options when present', () => {
       const payload = [
         ...ruleActivityFilterDefaultOptions,
-        { ...ruleActivityFilterDefaultOptions[0], checked: 'on' },
+        { ...ruleActivityFilterDefaultOptions[0], checked: 'on' as const },
       ];
       expect(extractSelected(payload)).toEqual([ruleActivityFilterDefaultOptions[0].label]);
     });

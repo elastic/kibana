@@ -23,9 +23,8 @@ interface CustomDataSourceSelectorProps {
 }
 
 export const CustomDataSourceSelector = withProviders(({ logsExplorerControllerStateService }) => {
-  const { dataSourceSelection, handleDataSourceSelectionChange } = useDataSourceSelection(
-    logsExplorerControllerStateService
-  );
+  const { dataSourceSelection, handleDataSourceSelectionChange, allSelection } =
+    useDataSourceSelection(logsExplorerControllerStateService);
 
   const {
     error: integrationsError,
@@ -70,6 +69,7 @@ export const CustomDataSourceSelector = withProviders(({ logsExplorerControllerS
     <DataSourceSelector
       datasets={datasets}
       dataSourceSelection={dataSourceSelection}
+      allSelection={allSelection}
       datasetsError={datasetsError}
       dataViews={dataViews}
       dataViewCount={dataViewCount}

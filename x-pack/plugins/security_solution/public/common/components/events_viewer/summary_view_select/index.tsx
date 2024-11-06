@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EuiSelectableOption } from '@elastic/eui';
+import type { EuiSelectableOption, EuiSelectableProps } from '@elastic/eui';
 import { EuiButtonEmpty, EuiPopover, EuiSelectable, EuiTitle, EuiTextColor } from '@elastic/eui';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -116,7 +116,9 @@ const SummaryViewSelectorComponent = ({ viewSelected, onViewChange }: SummaryVie
     [viewSelected]
   );
 
-  const renderOption = useCallback((option) => {
+  const renderOption = useCallback<
+    NonNullable<EuiSelectableProps<{ meta: Array<{ text: string }> }>['renderOption']>
+  >((option) => {
     return (
       <>
         <EuiTitle size="xxs">

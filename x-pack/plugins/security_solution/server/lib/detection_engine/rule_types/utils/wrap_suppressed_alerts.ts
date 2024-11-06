@@ -23,7 +23,7 @@ import type {
   ThreatRuleParams,
 } from '../../rule_schema';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
-import { buildBulkBody } from '../factories/utils/build_bulk_body';
+import { transformHitToAlert } from '../factories/utils/transform_hit_to_alert';
 import { getSuppressionAlertFields, getSuppressionTerms } from './suppression_utils';
 import { generateId } from './utils';
 
@@ -48,6 +48,7 @@ export const wrapSuppressedAlerts = ({
   publicBaseUrl,
   primaryTimestamp,
   secondaryTimestamp,
+  intendedTimestamp,
 }: {
   events: SignalSourceHit[];
   spaceId: string;
@@ -60,6 +61,7 @@ export const wrapSuppressedAlerts = ({
   publicBaseUrl: string | undefined;
   primaryTimestamp: string;
   secondaryTimestamp?: string;
+  intendedTimestamp: Date | undefined;
 }): Array<WrappedFieldsLatest<BaseFieldsLatest & SuppressionFieldsLatest>> => {
   return events.map((event) => {
     const suppressionTerms = getSuppressionTerms({
@@ -77,20 +79,22 @@ export const wrapSuppressedAlerts = ({
 
     const instanceId = objectHash([suppressionTerms, completeRule.alertId, spaceId]);
 
-    const baseAlert: BaseFieldsLatest = buildBulkBody(
+    const baseAlert: BaseFieldsLatest = transformHitToAlert({
       spaceId,
       completeRule,
-      event,
+      doc: event,
       mergeStrategy,
-      [],
-      true,
+      ignoreFields: {},
+      ignoreFieldsRegexes: [],
+      applyOverrides: true,
       buildReasonMessage,
       indicesToQuery,
       alertTimestampOverride,
       ruleExecutionLogger,
-      id,
-      publicBaseUrl
-    );
+      alertUuid: id,
+      publicBaseUrl,
+      intendedTimestamp,
+    });
 
     return {
       _id: id,

@@ -27,6 +27,9 @@ export const getCaseMetricRoute = createCasesRoute({
       ]),
     }),
   },
+  routerOptions: {
+    access: 'internal',
+  },
   handler: async ({ context, request, response }) => {
     try {
       const caseContext = await context.cases;

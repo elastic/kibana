@@ -40,7 +40,8 @@ import { closeTimeline, openTimelineById } from '../../../tasks/timeline';
 const siemDataViewTitle = 'Security Default Data View';
 const dataViews = ['logs-*', 'metrics-*', '.kibana-event-log-*'];
 
-describe('Timeline scope', { tags: ['@ess', '@serverless', '@skipInServerless'] }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/198943
+describe.skip('Timeline scope', { tags: ['@ess', '@serverless', '@skipInServerless'] }, () => {
   before(() => {
     waitForRulesBootstrap();
   });
@@ -62,9 +63,9 @@ describe('Timeline scope', { tags: ['@ess', '@serverless', '@skipInServerless'] 
     isNotSourcererOption(`${DEFAULT_ALERTS_INDEX}-default`);
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/173854
-  describe.skip('Modified badge', () => {
-    it('Selecting new data view does not add a modified badge', () => {
+  describe('Modified badge', () => {
+    // failing on main multiple times https://github.com/elastic/kibana/issues/198944#issuecomment-2457665138 and https://github.com/elastic/kibana/issues/198943#issuecomment-2457665072
+    it.skip('Selecting new data view does not add a modified badge', () => {
       openTimelineUsingToggle();
       cy.get(SOURCERER.badgeModified).should(`not.exist`);
       openSourcerer('timeline');
@@ -134,7 +135,8 @@ describe('Timeline scope', { tags: ['@ess', '@serverless', '@skipInServerless'] 
     });
 
     const defaultPatterns = [`auditbeat-*`, `${DEFAULT_ALERTS_INDEX}-default`];
-    it('alerts checkbox behaves as expected', () => {
+    // failing on main multiple times https://github.com/elastic/kibana/issues/198944#issuecomment-2457665138 and https://github.com/elastic/kibana/issues/198943#issuecomment-2457665072
+    it.skip('alerts checkbox behaves as expected', () => {
       isDataViewSelection(siemDataViewTitle);
       defaultPatterns.forEach((pattern) => isSourcererSelection(pattern));
       openDataViewSelection();

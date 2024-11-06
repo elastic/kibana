@@ -8,8 +8,7 @@
 import {
   createLiteralValueFromUndefinedRT,
   inRangeFromStringRt,
-  dateRt,
-  datemathStringRt,
+  isoToEpochRt,
 } from '@kbn/io-ts-utils';
 import * as rt from 'io-ts';
 
@@ -17,7 +16,6 @@ export const sizeRT = rt.union([
   inRangeFromStringRt(1, 100),
   createLiteralValueFromUndefinedRT(10),
 ]);
-export const assetDateRT = rt.union([dateRt, datemathStringRt]);
 
 export const servicesFiltersRT = rt.strict({
   ['host.name']: rt.string,
@@ -26,7 +24,7 @@ export const servicesFiltersRT = rt.strict({
 export type ServicesFilter = rt.TypeOf<typeof servicesFiltersRT>;
 
 export const GetServicesRequestQueryRT = rt.intersection([
-  rt.strict({ from: assetDateRT, to: assetDateRT, filters: rt.string }),
+  rt.strict({ from: isoToEpochRt, to: isoToEpochRt, filters: rt.string }),
   rt.partial({
     size: sizeRT,
     validatedFilters: servicesFiltersRT,
@@ -37,8 +35,8 @@ export type GetServicesRequestQuery = rt.TypeOf<typeof GetServicesRequestQueryRT
 
 export interface ServicesAPIRequest {
   filters: ServicesFilter;
-  from: string;
-  to: string;
+  from: number;
+  to: number;
   size?: number;
 }
 

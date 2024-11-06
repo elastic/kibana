@@ -7,7 +7,11 @@
 
 import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ObservabilityTriggerId } from '@kbn/observability-shared-plugin/common';
+import {
+  ASSET_DETAILS_LOCATOR_ID,
+  type AssetDetailsLocatorParams,
+  ObservabilityTriggerId,
+} from '@kbn/observability-shared-plugin/common';
 import {
   ActionMenu,
   ActionMenuDivider,
@@ -127,6 +131,9 @@ function ActionMenuSections({
 
   const infraLinksAvailable = useApmFeatureFlag(ApmFeatureFlagName.InfraUiAvailable);
 
+  const assetDetailsLocator =
+    share.url.locators.get<AssetDetailsLocatorParams>(ASSET_DETAILS_LOCATOR_ID);
+
   const {
     query: { rangeFrom, rangeTo, environment },
   } = useAnyOfApmParams(
@@ -149,6 +156,7 @@ function ActionMenuSections({
     environment,
     logsLocators,
     dataViewId: dataView?.id,
+    assetDetailsLocator,
   });
 
   const externalMenuItems = useAsync(() => {

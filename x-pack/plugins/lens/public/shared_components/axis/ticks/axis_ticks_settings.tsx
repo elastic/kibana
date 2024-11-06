@@ -33,7 +33,7 @@ export const AxisTicksSettings: React.FunctionComponent<AxisTicksSettingsProps> 
   updateTicksVisibilityState,
 }) => {
   const onTicksStatusChange = useCallback(
-    (visible) => updateTicksVisibilityState(visible, axis),
+    (visible: boolean) => updateTicksVisibilityState(visible, axis),
     [axis, updateTicksVisibilityState]
   );
 

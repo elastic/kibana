@@ -46,9 +46,9 @@ export const SearchBarWrapper: FC<SearchBarProps> = ({
 
   const [error, setError] = useState<string | undefined>();
 
-  const onQuerySubmit: SearchBarOwnProps['onQuerySubmit'] = useCallback(
+  const onQuerySubmit = useCallback<NonNullable<SearchBarOwnProps['onQuerySubmit']>>(
     (payload, isUpdate) => {
-      if (payload.query.language === SEARCH_QUERY_LANGUAGE.KUERY) {
+      if (payload.query?.language === SEARCH_QUERY_LANGUAGE.KUERY) {
         try {
           // Validates the query
           fromKueryExpression(payload.query.query);

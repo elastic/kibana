@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 import { RiskQueries } from '../model/factory_query_type';
 import { requestBasicOptionsSchema } from '../model/request_basic_options';
 import { sort } from '../model/sort';

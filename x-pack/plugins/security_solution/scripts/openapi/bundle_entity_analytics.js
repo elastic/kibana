@@ -22,12 +22,13 @@ const ROOT = resolve(__dirname, '../..');
       includeLabels: ['serverless'],
       prototypeDocument: {
         info: {
-          title: 'Security Solution Entity Analytics API (Elastic Cloud Serverless)',
+          title: 'Security Entity Analytics API (Elastic Cloud Serverless)',
           description: '',
         },
         tags: [
           {
-            name: 'Security Solution Entity Analytics API',
+            name: 'Security Entity Analytics API',
+            'x-displayName': 'Security entity analytics',
             description: '',
           },
         ],
@@ -45,12 +46,13 @@ const ROOT = resolve(__dirname, '../..');
       includeLabels: ['ess'],
       prototypeDocument: {
         info: {
-          title: 'Security Solution Entity Analytics API (Elastic Cloud and self-hosted)',
+          title: 'Security Entity Analytics API (Elastic Cloud and self-hosted)',
           description: '',
         },
         tags: [
           {
-            name: 'Security Solution Entity Analytics API',
+            name: 'Security Entity Analytics API',
+            'x-displayName': 'Security entity analytics',
             description: '',
           },
         ],

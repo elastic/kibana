@@ -5,12 +5,18 @@
  * 2.0.
  */
 import React, { useState, useMemo, useEffect } from 'react';
-import compareVersions from 'compare-versions';
 import { EuiSpacer } from '@elastic/eui';
 import { useParams, useHistory, generatePath } from 'react-router-dom';
+import type {
+  CspBenchmarkRule,
+  PageUrlParams,
+  RuleStateAttributes,
+} from '@kbn/cloud-security-posture-common/schema/rules/latest';
+import { extractErrorMessage } from '@kbn/cloud-security-posture-common';
+import semVerCompare from 'semver/functions/compare';
+import semVerCoerce from 'semver/functions/coerce';
 import { benchmarksNavigation } from '../../common/navigation/constants';
 import { buildRuleKey } from '../../../common/utils/rules_states';
-import { extractErrorMessage } from '../../../common/utils/helpers';
 import { RulesTable } from './rules_table';
 import { RulesTableHeader } from './rules_table_header';
 import { useFindCspBenchmarkRule, type RulesQuery } from './use_csp_benchmark_rules';
@@ -18,11 +24,6 @@ import * as TEST_SUBJECTS from './test_subjects';
 import { RuleFlyout } from './rules_flyout';
 import { LOCAL_STORAGE_PAGE_SIZE_RULES_KEY } from '../../common/constants';
 import { usePageSize } from '../../common/hooks/use_page_size';
-import type {
-  CspBenchmarkRule,
-  PageUrlParams,
-  RuleStateAttributes,
-} from '../../../common/types/latest';
 import { useCspGetRulesStates } from './use_csp_rules_state';
 import { RulesCounters } from './rules_counters';
 
@@ -197,7 +198,9 @@ export const RulesContainer = () => {
     return a.localeCompare(b, 'en', { sensitivity: 'base' });
   });
 
-  const cleanedRuleNumberList = [...new Set(ruleNumberList)].sort(compareVersions);
+  const cleanedRuleNumberList = [...new Set(ruleNumberList)].sort((a, b) =>
+    semVerCompare(semVerCoerce(a) ?? '', semVerCoerce(b) ?? '')
+  );
 
   const rulesPageData = useMemo(
     () => getRulesPageData(filteredRulesWithStates, status, error, rulesQuery),

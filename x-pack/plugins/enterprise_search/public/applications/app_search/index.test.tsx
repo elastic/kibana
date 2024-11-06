@@ -79,6 +79,21 @@ describe('AppSearchUnconfigured', () => {
   });
 });
 
+describe('AppSearchConfigured showGateForm is true', () => {
+  let wrapper: ShallowWrapper;
+  const renderHeaderActions = jest.fn();
+
+  beforeAll(() => {
+    setMockValues({ showGateForm: true, myRole: {}, renderHeaderActions });
+    wrapper = shallow(<AppSearchConfigured {...DEFAULT_INITIAL_APP_DATA} />);
+  });
+
+  it('renders engine overview only when showGateForm is true', () => {
+    expect(wrapper.find(EnginesOverview)).toHaveLength(1);
+    expect(wrapper.find(EngineRouter)).toHaveLength(0);
+  });
+});
+
 describe('AppSearchConfigured', () => {
   let wrapper: ShallowWrapper;
   const renderHeaderActions = jest.fn();

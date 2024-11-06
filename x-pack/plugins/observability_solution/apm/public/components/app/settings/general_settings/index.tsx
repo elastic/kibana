@@ -67,10 +67,14 @@ function getApmSettingsKeys(isProfilingIntegrationEnabled: boolean) {
 
 export function GeneralSettings() {
   const trackApmEvent = useUiTracker({ app: 'apm' });
-  const { docLinks, notifications, settings } = useApmPluginContext().core;
+  const { docLinks, notifications, settings, application } = useApmPluginContext().core;
   const isProfilingIntegrationEnabled = useApmFeatureFlag(
     ApmFeatureFlagName.ProfilingIntegrationAvailable
   );
+
+  const canSave =
+    application.capabilities.advancedSettings.save &&
+    (application.capabilities.apm['settings:save'] as boolean);
   const apmSettingsKeys = getApmSettingsKeys(isProfilingIntegrationEnabled);
   const { fields, handleFieldChange, unsavedChanges, saveAll, isSaving, cleanUnsavedChanges } =
     useEditableSettings(apmSettingsKeys);
@@ -114,7 +118,7 @@ export function GeneralSettings() {
           >
             <FieldRow
               field={field}
-              isSavingEnabled={true}
+              isSavingEnabled={canSave}
               onFieldChange={handleFieldChange}
               unsavedChange={unsavedChanges[settingKey]}
             />

@@ -6,7 +6,7 @@
  */
 
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
-import { getKqlFilter } from '../../common';
+import { getSavedObjectKqlFilter } from '../../common';
 import { SyntheticsRestApiRouteFactory } from '../../types';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { monitorAttributes, syntheticsMonitorType } from '../../../../common/types/saved_objects';
@@ -47,7 +47,7 @@ export const getLocationMonitors: SyntheticsRestApiRouteFactory<Payload> = () =>
 
 export const getMonitorsByLocation = async (server: SyntheticsServerSetup, locationId?: string) => {
   const soClient = server.coreStart.savedObjects.createInternalRepository();
-  const locationFilter = getKqlFilter({ field: 'locations.id', values: locationId });
+  const locationFilter = getSavedObjectKqlFilter({ field: 'locations.id', values: locationId });
 
   const locationMonitors = await soClient.find<unknown, ExpectedResponse>({
     type: syntheticsMonitorType,

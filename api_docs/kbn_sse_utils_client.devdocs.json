@@ -1,0 +1,49 @@
+{
+  "id": "@kbn/sse-utils-client",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/sse-utils-client",
+        "id": "def-common.httpResponseIntoObservable",
+        "type": "Function",
+        "tags": [],
+        "label": "httpResponseIntoObservable",
+        "description": [],
+        "signature": [
+          "() => ",
+          "OperatorFunction",
+          "<",
+          "StreamedHttpResponse",
+          ", T>"
+        ],
+        "path": "packages/kbn-sse-utils-client/src/http_response_into_observable.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

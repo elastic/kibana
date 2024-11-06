@@ -14,7 +14,7 @@
  *   version: not applicable
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 export type LogLevel = z.infer<typeof LogLevel>;
 export const LogLevel = z.enum(['trace', 'debug', 'info', 'warn', 'error']);

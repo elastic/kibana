@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -16,7 +17,6 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
-  EuiFormControlLayout,
   EuiFormRow,
   EuiSwitch,
   EuiTextArea,
@@ -127,48 +127,46 @@ export const SavedBookEditor = ({
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <EuiFormControlLayout>
-          <EuiFormRow
-            label={i18n.translate('embeddableExamples.savedBook.editor.authorLabel', {
-              defaultMessage: 'Author',
-            })}
-          >
-            <EuiFieldText
-              value={authorName}
-              onChange={(e) => attributesManager.authorName.next(e.target.value)}
-            />
-          </EuiFormRow>
-          <EuiFormRow
-            label={i18n.translate('embeddableExamples.savedBook.editor.titleLabel', {
-              defaultMessage: 'Title',
-            })}
-          >
-            <EuiFieldText
-              value={bookTitle}
-              onChange={(e) => attributesManager.bookTitle.next(e.target.value)}
-            />
-          </EuiFormRow>
-          <EuiFormRow
-            label={i18n.translate('embeddableExamples.savedBook.editor.pagesLabel', {
-              defaultMessage: 'Number of pages',
-            })}
-          >
-            <EuiFieldNumber
-              value={numberOfPages}
-              onChange={(e) => attributesManager.numberOfPages.next(+e.target.value)}
-            />
-          </EuiFormRow>
-          <EuiFormRow
-            label={i18n.translate('embeddableExamples.savedBook.editor.synopsisLabel', {
-              defaultMessage: 'Synopsis',
-            })}
-          >
-            <EuiTextArea
-              value={synopsis}
-              onChange={(e) => attributesManager.bookSynopsis.next(e.target.value)}
-            />
-          </EuiFormRow>
-        </EuiFormControlLayout>
+        <EuiFormRow
+          label={i18n.translate('embeddableExamples.savedBook.editor.authorLabel', {
+            defaultMessage: 'Author',
+          })}
+        >
+          <EuiFieldText
+            value={authorName ?? ''}
+            onChange={(e) => attributesManager.authorName.next(e.target.value)}
+          />
+        </EuiFormRow>
+        <EuiFormRow
+          label={i18n.translate('embeddableExamples.savedBook.editor.titleLabel', {
+            defaultMessage: 'Title',
+          })}
+        >
+          <EuiFieldText
+            value={bookTitle ?? ''}
+            onChange={(e) => attributesManager.bookTitle.next(e.target.value)}
+          />
+        </EuiFormRow>
+        <EuiFormRow
+          label={i18n.translate('embeddableExamples.savedBook.editor.pagesLabel', {
+            defaultMessage: 'Number of pages',
+          })}
+        >
+          <EuiFieldNumber
+            value={numberOfPages ?? ''}
+            onChange={(e) => attributesManager.numberOfPages.next(+e.target.value)}
+          />
+        </EuiFormRow>
+        <EuiFormRow
+          label={i18n.translate('embeddableExamples.savedBook.editor.synopsisLabel', {
+            defaultMessage: 'Synopsis',
+          })}
+        >
+          <EuiTextArea
+            value={synopsis ?? ''}
+            onChange={(e) => attributesManager.bookSynopsis.next(e.target.value)}
+          />
+        </EuiFormRow>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">

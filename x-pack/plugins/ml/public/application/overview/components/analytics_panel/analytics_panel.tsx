@@ -20,7 +20,7 @@ import {
 import type { MlStorageKey, TMlStorageMapped } from '../../../../../common/types/storage';
 import { ML_OVERVIEW_PANELS } from '../../../../../common/types/storage';
 import { AnalyticsTable } from './table';
-import { getAnalyticsFactory } from '../../../data_frame_analytics/pages/analytics_management/services/analytics_service';
+import { useGetAnalytics } from '../../../data_frame_analytics/pages/analytics_management/services/analytics_service';
 import type { DataFrameAnalyticsListRow } from '../../../data_frame_analytics/pages/analytics_management/components/analytics_list/common';
 import { useMlLink } from '../../../contexts/kibana';
 import { ML_PAGES } from '../../../../../common/constants/locator';
@@ -60,7 +60,7 @@ export const AnalyticsPanel: FC<Props> = ({ setLazyJobCount }) => {
     setAnalyticsStats(result);
   }, []);
 
-  const getAnalytics = getAnalyticsFactory(
+  const getAnalytics = useGetAnalytics(
     setAnalytics,
     setAnalyticsStatsCustom,
     setErrorMessage,

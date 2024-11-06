@@ -8,7 +8,9 @@ import fetch from 'node-fetch';
 
 import * as fleetServerService from '../../services/fleet_server_host';
 
-import { postHealthCheckHandler } from '.';
+import { PostHealthCheckResponseSchema } from '../../types';
+
+import { postHealthCheckHandler } from './handler';
 
 jest.mock('node-fetch');
 
@@ -61,21 +63,6 @@ describe('Fleet server health_check handler', () => {
     });
   });
 
-  it('should return a bad request error if body contains deprecated parameter `host`', async () => {
-    const res = await postHealthCheckHandler(
-      mockContext,
-      { body: { host: 'https://localhost:8220' } } as any,
-      mockResponse as any
-    );
-
-    expect(res).toEqual({
-      body: {
-        message: `Property 'host' is deprecated. Please use id instead.`,
-      },
-      statusCode: 400,
-    });
-  });
-
   it('should return 200 and active status when fetch response is `active`', async () => {
     const activeRes = {
       status: 'ONLINE',
@@ -102,15 +89,18 @@ describe('Fleet server health_check handler', () => {
       mockResponse as any
     );
 
+    const expectedResponse = {
+      host_id: 'default-fleet-server',
+      name: 'Default',
+      status: 'ONLINE',
+    };
     expect(res).toEqual({
-      body: {
-        host: 'https://localhost:8220',
-        host_id: 'default-fleet-server',
-        name: 'Default',
-        status: 'ONLINE',
-      },
+      body: expectedResponse,
       statusCode: 200,
     });
+
+    const validateResp = PostHealthCheckResponseSchema.validate(expectedResponse);
+    expect(validateResp).toEqual(expectedResponse);
   });
 
   it('should return an error when host id is not found', async () => {
@@ -147,12 +137,15 @@ describe('Fleet server health_check handler', () => {
       mockResponse as any
     );
 
+    const expectedResponse = {
+      host_id: 'default-fleet-server',
+      status: 'OFFLINE',
+    };
     expect(res).toEqual({
-      body: {
-        host_id: 'default-fleet-server',
-        status: 'OFFLINE',
-      },
+      body: expectedResponse,
       statusCode: 200,
     });
+    const validateResp = PostHealthCheckResponseSchema.validate(expectedResponse);
+    expect(validateResp).toEqual(expectedResponse);
   });
 });

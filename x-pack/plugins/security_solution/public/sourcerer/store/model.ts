@@ -9,7 +9,6 @@ import type { BrowserFields } from '@kbn/timelines-plugin/common';
 import { EMPTY_BROWSER_FIELDS } from '@kbn/timelines-plugin/common';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { RuntimeFieldSpec, RuntimePrimitiveTypes } from '@kbn/data-views-plugin/common';
-import type { SecuritySolutionDataViewBase } from '../../common/types';
 
 /** Uniquely identifies a Sourcerer Scope */
 export enum SourcererScopeName {
@@ -88,35 +87,17 @@ export interface SelectedDataView {
    */
   browserFields: BrowserFields;
   dataViewId: string | null; // null if legacy pre-8.0 timeline
-  /**
-   * @deprecated use sourcererDataView
-   * DataViewBase with enhanced index fields used in timelines
-   */
-  indexPattern: SecuritySolutionDataViewBase;
   /** do the selected indices exist  */
   indicesExist: boolean;
   /** is an update being made to the data view */
   loading: boolean;
-  /**
-   * @deprecated use sourcererDataView.title or sourcererDataView.matchedIndices
-   * all active & inactive patterns from SourcererDataView['title']
-   */
-  patternList: string[];
-  /**
-   * @deprecated use sourcererDataView.title or sourcererDataView.matchedIndices
-   * all selected patterns from SourcererScope['selectedPatterns'] */
+  /* all selected patterns from SourcererScope['selectedPatterns'] */
   selectedPatterns: SourcererScope['selectedPatterns'];
-  /**
-   * @deprecated use sourcererDataView.title or sourcererDataView.matchedIndices
-   * active patterns when dataViewId == null
-   */
-  activePatterns?: string[];
-
   /**
    * Easier to add this additional data rather than
    * try to extend the SelectedDataView type from DataView.
    */
-  sourcererDataView: DataViewSpec | undefined;
+  sourcererDataView: DataViewSpec;
 }
 
 /**

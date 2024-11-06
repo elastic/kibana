@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useContext } from 'react';
+import React, { useEffect, useContext, memo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import {
@@ -26,6 +27,8 @@ import { DataTablePopoverCellValue } from '../components/data_table_cell_value';
 
 export const CELL_CLASS = 'unifiedDataTable__cellValue';
 
+const IS_JEST_ENVIRONMENT = typeof jest !== 'undefined';
+
 export const getRenderCellValueFn = ({
   dataView,
   rows,
@@ -36,6 +39,7 @@ export const getRenderCellValueFn = ({
   maxEntries,
   externalCustomRenderers,
   isPlainRecord,
+  isCompressed = true,
 }: {
   dataView: DataView;
   rows: DataTableRecord[] | undefined;
@@ -46,8 +50,9 @@ export const getRenderCellValueFn = ({
   maxEntries: number;
   externalCustomRenderers?: CustomCellRenderer;
   isPlainRecord?: boolean;
+  isCompressed?: boolean;
 }) => {
-  return function UnifiedDataTableRenderCellValue({
+  const UnifiedDataTableRenderCellValue = ({
     rowIndex,
     columnId,
     isDetails,
@@ -55,7 +60,7 @@ export const getRenderCellValueFn = ({
     colIndex,
     isExpandable,
     isExpanded,
-  }: EuiDataGridCellValueElementProps) {
+  }: EuiDataGridCellValueElementProps) => {
     const row = rows ? rows[rowIndex] : undefined;
     const field = dataView.fields.getByName(columnId);
     const ctx = useContext(UnifiedDataTableContext);
@@ -95,6 +100,7 @@ export const getRenderCellValueFn = ({
             dataView={dataView}
             fieldFormats={fieldFormats}
             closePopover={closePopover}
+            isCompressed={isCompressed}
           />
         </span>
       );
@@ -134,6 +140,7 @@ export const getRenderCellValueFn = ({
           shouldShowFieldHandler={shouldShowFieldHandler}
           maxEntries={maxEntries}
           isPlainRecord={isPlainRecord}
+          isCompressed={isCompressed}
         />
       );
     }
@@ -149,6 +156,14 @@ export const getRenderCellValueFn = ({
       />
     );
   };
+
+  // When memoizing renderCellValue, the following warning is logged in Jest tests:
+  // Failed prop type: Invalid prop `renderCellValue` supplied to `EuiDataGridCellContent`, expected one of type [function].
+  // This is due to incorrect prop type validation that EUI generates for testing components in Jest,
+  // but is not an actual issue encountered outside of tests
+  return IS_JEST_ENVIRONMENT
+    ? UnifiedDataTableRenderCellValue
+    : memo(UnifiedDataTableRenderCellValue);
 };
 
 /**

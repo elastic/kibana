@@ -24,6 +24,7 @@ import { connect, useDispatch, useSelector } from 'react-redux';
 import { ThemeContext } from 'styled-components';
 import type { Filter } from '@kbn/es-query';
 import type {
+  ColumnHeaderOptions,
   DeprecatedCellValueElementProps,
   DeprecatedRowRenderer,
   Direction,
@@ -179,9 +180,8 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
   const {
     browserFields,
     dataViewId,
-    indexPattern,
-    sourcererDataView,
     selectedPatterns,
+    sourcererDataView,
     dataViewId: selectedDataViewId,
     loading: isLoadingIndexPattern,
   } = useSourcererDataView(sourcererScope);
@@ -249,11 +249,12 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
     sourcererScope,
     editorActionsRef,
     upsertColumn: useCallback(
-      (column, index) => dispatch(dataTableActions.upsertColumn({ column, id: tableId, index })),
+      (column: ColumnHeaderOptions, index: number) =>
+        dispatch(dataTableActions.upsertColumn({ column, id: tableId, index })),
       [dispatch, tableId]
     ),
     removeColumn: useCallback(
-      (columnId) => dispatch(dataTableActions.removeColumn({ columnId, id: tableId })),
+      (columnId: string) => dispatch(dataTableActions.removeColumn({ columnId, id: tableId })),
       [dispatch, tableId]
     ),
   });
@@ -269,12 +270,12 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
         dataProviders: [],
         filters: globalFilters,
         from: start,
-        indexPattern,
+        indexPattern: sourcererDataView,
         kqlMode: 'filter',
         kqlQuery: query,
         to: end,
       }),
-    [esQueryConfig, browserFields, globalFilters, start, indexPattern, query, end]
+    [esQueryConfig, browserFields, globalFilters, start, sourcererDataView, query, end]
   );
 
   const canQueryTimeline = useMemo(
@@ -316,7 +317,7 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
       id: tableId,
       indexNames: indexNames ?? selectedPatterns,
       limit: itemsPerPage,
-      runtimeMappings: sourcererDataView?.runtimeFieldMap as RunTimeMappings,
+      runtimeMappings: sourcererDataView.runtimeFieldMap as RunTimeMappings,
       skip: !canQueryTimeline,
       sort: sortField,
       startDate: start,
@@ -328,7 +329,8 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
   }, [dispatch, tableId, loading]);
 
   const deleteQuery = useCallback(
-    ({ id }) => dispatch(inputsActions.deleteOneQuery({ inputId: InputsModelId.global, id })),
+    ({ id }: { id: string }) =>
+      dispatch(inputsActions.deleteOneQuery({ inputId: InputsModelId.global, id })),
     [dispatch]
   );
 
@@ -375,7 +377,7 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
   }, [nonDeletedEvents, dispatch, tableId]);
 
   const onChangeItemsPerPage = useCallback(
-    (itemsChangedPerPage) => {
+    (itemsChangedPerPage: number) => {
       dispatch(
         dataTableActions.updateItemsPerPage({ id: tableId, itemsPerPage: itemsChangedPerPage })
       );
@@ -384,7 +386,7 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
   );
 
   const onChangePage = useCallback(
-    (page) => {
+    (page: number) => {
       loadPage(page);
     },
     [loadPage]

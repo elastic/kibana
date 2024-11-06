@@ -21,6 +21,7 @@ import {
   SearchInferenceEndpointsPluginSetup,
   SearchInferenceEndpointsPluginStart,
 } from './types';
+import { INFERENCE_ENDPOINTS_UI_FLAG } from '.';
 
 export class SearchInferenceEndpointsPlugin
   implements Plugin<SearchInferenceEndpointsPluginSetup, SearchInferenceEndpointsPluginStart>
@@ -34,8 +35,11 @@ export class SearchInferenceEndpointsPlugin
   public setup(
     core: CoreSetup<AppPluginStartDependencies, SearchInferenceEndpointsPluginStart>
   ): SearchInferenceEndpointsPluginSetup {
-    if (!this.config.ui?.enabled) return {};
-
+    if (
+      !this.config.ui?.enabled &&
+      !core.uiSettings.get<boolean>(INFERENCE_ENDPOINTS_UI_FLAG, false)
+    )
+      return {};
     core.application.register({
       id: PLUGIN_ID,
       appRoute: '/app/search_inference_endpoints',

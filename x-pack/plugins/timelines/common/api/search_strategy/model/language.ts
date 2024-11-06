@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 export const language = z.union([z.literal('kuery'), z.literal('lucene')]);

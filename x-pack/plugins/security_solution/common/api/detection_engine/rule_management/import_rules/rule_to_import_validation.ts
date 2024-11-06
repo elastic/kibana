@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RuleToImport } from './rule_to_import';
+import type { RuleToImport, ValidatedRuleToImport } from './rule_to_import';
 
 /**
  * Additional validation that is implemented outside of the schema itself.
@@ -55,3 +55,6 @@ const validateThreshold = (rule: RuleToImport): string[] => {
   }
   return errors;
 };
+
+export const ruleToImportHasVersion = (rule: RuleToImport): rule is ValidatedRuleToImport =>
+  !!rule.version;

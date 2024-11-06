@@ -74,7 +74,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       it('returns stats correctly', async () => {
-        const stats = await callApiAs('datasetQualityLogsUser');
+        const stats = await callApiAs('datasetQualityMonitorUser');
         expect(stats.body.degradedDocs.length).to.be(2);
 
         const degradedDocsStats = stats.body.degradedDocs.reduce(
@@ -105,7 +105,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
     describe('and there are not log documents', () => {
       it('returns stats correctly', async () => {
-        const stats = await callApiAs('datasetQualityLogsUser');
+        const stats = await callApiAs('datasetQualityMonitorUser');
 
         expect(stats.body.degradedDocs.length).to.be(0);
       });
@@ -154,7 +154,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       it('returns counts and list of datasets correctly', async () => {
-        const stats = await callApiAs('datasetQualityLogsUser');
+        const stats = await callApiAs('datasetQualityMonitorUser');
         expect(stats.body.degradedDocs.length).to.be(18);
 
         const expected = {

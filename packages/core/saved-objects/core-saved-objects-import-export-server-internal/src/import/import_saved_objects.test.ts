@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -18,6 +19,7 @@ import {
 } from './import_saved_objects.test.mock';
 
 import { Readable } from 'stream';
+import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import { v4 as uuidv4 } from 'uuid';
 import type {
   SavedObjectsImportFailure,
@@ -39,8 +41,10 @@ import {
 import type { ImportStateMap } from './lib';
 
 describe('#importSavedObjectsFromStream', () => {
+  let logger: MockedLogger;
   beforeEach(() => {
     jest.clearAllMocks();
+    logger = loggerMock.create();
     // mock empty output of each of these mocked modules so the import doesn't throw an error
     mockCollectSavedObjects.mockResolvedValue({
       errors: [],
@@ -71,7 +75,6 @@ describe('#importSavedObjectsFromStream', () => {
   let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
   let typeRegistry: jest.Mocked<ISavedObjectTypeRegistry>;
   const namespace = 'some-namespace';
-
   const setupOptions = ({
     createNewCopies = false,
     getTypeImpl = (type: string) =>
@@ -101,6 +104,7 @@ describe('#importSavedObjectsFromStream', () => {
       createNewCopies,
       importHooks,
       managed,
+      log: logger,
     };
   };
   const createObject = ({

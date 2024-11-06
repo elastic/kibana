@@ -13,7 +13,7 @@
           "\nLazy-loaded {@link OptInExampleFlyout}"
         ],
         "signature": [
-          "React.ExoticComponent<(",
+          "React.LazyExoticComponent<React.ComponentType<",
           {
             "pluginId": "telemetryManagementSection",
             "scope": "public",
@@ -21,31 +21,7 @@
             "section": "def-public.Props",
             "text": "Props"
           },
-          " & React.RefAttributes<React.Component<",
-          {
-            "pluginId": "telemetryManagementSection",
-            "scope": "public",
-            "docId": "kibTelemetryManagementSectionPluginApi",
-            "section": "def-public.Props",
-            "text": "Props"
-          },
-          ", any, any>>) | (",
-          {
-            "pluginId": "telemetryManagementSection",
-            "scope": "public",
-            "docId": "kibTelemetryManagementSectionPluginApi",
-            "section": "def-public.Props",
-            "text": "Props"
-          },
-          " & { children?: React.ReactNode; })> & { readonly _result: React.ComponentType<",
-          {
-            "pluginId": "telemetryManagementSection",
-            "scope": "public",
-            "docId": "kibTelemetryManagementSectionPluginApi",
-            "section": "def-public.Props",
-            "text": "Props"
-          },
-          ">; }"
+          ">>"
         ],
         "path": "src/plugins/telemetry_management_section/public/components/lazy_opt_in_example_flyout.tsx",
         "deprecated": false,
@@ -62,7 +38,7 @@
             "signature": [
               "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }

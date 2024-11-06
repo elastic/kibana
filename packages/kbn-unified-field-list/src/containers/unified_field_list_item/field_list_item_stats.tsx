@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useMemo } from 'react';
@@ -26,10 +27,11 @@ export interface UnifiedFieldListItemStatsProps {
   dataView: DataView;
   multiFields?: Array<{ field: DataViewField; isSelected: boolean }>;
   onAddFilter: FieldStatsProps['onAddFilter'];
+  additionalFilters?: FieldStatsProps['filters'];
 }
 
 export const UnifiedFieldListItemStats: React.FC<UnifiedFieldListItemStatsProps> = React.memo(
-  ({ stateService, services, field, dataView, multiFields, onAddFilter }) => {
+  ({ stateService, services, field, dataView, multiFields, onAddFilter, additionalFilters }) => {
     const querySubscriberResult = useQuerySubscriber({
       data: services.data,
       timeRangeUpdatesType: stateService.creationOptions.timeRangeUpdatesType,
@@ -54,6 +56,11 @@ export const UnifiedFieldListItemStats: React.FC<UnifiedFieldListItemStatsProps>
       [services]
     );
 
+    const filters = useMemo(
+      () => [...(querySubscriberResult.filters ?? []), ...(additionalFilters ?? [])],
+      [querySubscriberResult.filters, additionalFilters]
+    );
+
     if (!hasQuerySubscriberData(querySubscriberResult)) {
       return null;
     }
@@ -62,7 +69,7 @@ export const UnifiedFieldListItemStats: React.FC<UnifiedFieldListItemStatsProps>
       <FieldStats
         services={statsServices}
         query={querySubscriberResult.query}
-        filters={querySubscriberResult.filters}
+        filters={filters}
         fromDate={querySubscriberResult.fromDate}
         toDate={querySubscriberResult.toDate}
         dataViewOrDataViewId={dataView}

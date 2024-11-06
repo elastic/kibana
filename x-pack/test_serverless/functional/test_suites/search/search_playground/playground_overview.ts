@@ -15,7 +15,12 @@ import { createLlmProxy, LlmProxy } from './utils/create_llm_proxy';
 const esArchiveIndex = 'test/api_integration/fixtures/es_archiver/index_patterns/basic_index';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const pageObjects = getPageObjects(['svlCommonPage', 'svlCommonNavigation', 'searchPlayground']);
+  const pageObjects = getPageObjects([
+    'svlCommonPage',
+    'svlCommonNavigation',
+    'searchPlayground',
+    'embeddedConsole',
+  ]);
   const svlCommonApi = getService('svlCommonApi');
   const svlUserManager = getService('svlUserManager');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
@@ -112,11 +117,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/189314
-      describe.skip('with existing indices', () => {
+      describe('with existing indices', () => {
         before(async () => {
           await createConnector();
           await createIndex();
+          await pageObjects.searchPlayground.session.setSession();
           await browser.refresh();
         });
 
@@ -201,6 +206,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await pageObjects.searchPlayground.PlaygroundChatPage.updateQuestion('i have back pain');
           await pageObjects.searchPlayground.session.expectInSession('prompt', "You're a doctor");
           await pageObjects.searchPlayground.session.expectInSession('question', undefined);
+        });
+
+        it('click on manage connector button', async () => {
+          await pageObjects.searchPlayground.PlaygroundChatPage.clickManageButton();
         });
       });
 

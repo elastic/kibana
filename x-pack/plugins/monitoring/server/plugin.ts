@@ -23,6 +23,7 @@ import {
 import { get } from 'lodash';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { RouteMethod } from '@kbn/core/server';
+import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import {
   KIBANA_MONITORING_LOGGING_TAG,
   KIBANA_STATS_TYPE_MONITORING,
@@ -272,6 +273,7 @@ export class MonitoringPlugin
         defaultMessage: 'Stack Monitoring',
       }),
       category: DEFAULT_APP_CATEGORIES.management,
+      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       app: ['monitoring', 'kibana'],
       catalogue: ['monitoring'],
       privileges: null,

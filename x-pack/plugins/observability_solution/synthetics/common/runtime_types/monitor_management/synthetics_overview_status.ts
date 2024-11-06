@@ -27,28 +27,33 @@ export const OverviewPingCodec = t.intersection([
   t.partial({
     error: PingErrorType,
     tags: t.array(t.string),
+    service: t.type({
+      name: t.string,
+    }),
+    labels: t.record(t.string, t.string),
   }),
 ]);
 
-export const OverviewStatusMetaDataCodec = t.interface({
-  monitorQueryId: t.string,
-  configId: t.string,
-  status: t.string,
-  locationId: t.string,
-  timestamp: t.string,
-  ping: OverviewPingCodec,
-});
-
-export const OverviewPendingStatusMetaDataCodec = t.intersection([
+export const OverviewStatusMetaDataCodec = t.intersection([
   t.interface({
     monitorQueryId: t.string,
     configId: t.string,
     status: t.string,
-    location: t.string,
+    locationId: t.string,
+    locationLabel: t.string,
+    name: t.string,
+    schedule: t.string,
+    isEnabled: t.boolean,
+    tags: t.array(t.string),
+    isStatusAlertEnabled: t.boolean,
+    type: t.string,
   }),
   t.partial({
-    timestamp: t.string,
+    projectId: t.string,
+    updated_at: t.string,
     ping: OverviewPingCodec,
+    timestamp: t.string,
+    spaceId: t.string,
   }),
 ]);
 
@@ -62,21 +67,14 @@ export const OverviewStatusCodec = t.interface({
   disabledCount: t.number,
   upConfigs: t.record(t.string, OverviewStatusMetaDataCodec),
   downConfigs: t.record(t.string, OverviewStatusMetaDataCodec),
-  pendingConfigs: t.record(t.string, OverviewPendingStatusMetaDataCodec),
+  pendingConfigs: t.record(t.string, OverviewStatusMetaDataCodec),
+  disabledConfigs: t.record(t.string, OverviewStatusMetaDataCodec),
   enabledMonitorQueryIds: t.array(t.string),
   disabledMonitorQueryIds: t.array(t.string),
   allIds: t.array(t.string),
 });
 
-export const OverviewStatusStateCodec = t.intersection([
-  OverviewStatusCodec,
-  t.interface({
-    allConfigs: t.record(t.string, OverviewStatusMetaDataCodec),
-  }),
-]);
-
 export type OverviewPing = t.TypeOf<typeof OverviewPingCodec>;
 export type OverviewStatus = t.TypeOf<typeof OverviewStatusCodec>;
-export type OverviewStatusState = t.TypeOf<typeof OverviewStatusStateCodec>;
+export type OverviewStatusState = t.TypeOf<typeof OverviewStatusCodec>;
 export type OverviewStatusMetaData = t.TypeOf<typeof OverviewStatusMetaDataCodec>;
-export type OverviewPendingStatusMetaData = t.TypeOf<typeof OverviewPendingStatusMetaDataCodec>;

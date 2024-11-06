@@ -26,7 +26,7 @@ import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental
 import { useTourContext } from '../../guided_onboarding_tour';
 import { AlertsCasesTourSteps, SecurityStepId } from '../../guided_onboarding_tour/tour_config';
 
-type Props = EuiDataGridCellValueElementProps & {
+export type RowActionProps = EuiDataGridCellValueElementProps & {
   columnHeaders: ColumnHeaderOptions[];
   controlColumn: ControlColumnProps;
   data: TimelineItem;
@@ -67,7 +67,7 @@ const RowActionComponent = ({
   setEventsDeleted,
   width,
   refetch,
-}: Props) => {
+}: RowActionProps) => {
   const { data: timelineNonEcsData, ecs: ecsData, _id: eventId, _index: indexName } = data ?? {};
   const { telemetry } = useKibana().services;
   const { openFlyout } = useExpandableFlyoutApi();
@@ -93,8 +93,8 @@ const RowActionComponent = ({
     [columnHeaders, timelineNonEcsData]
   );
 
-  const securitySolutionNotesEnabled = useIsExperimentalFeatureEnabled(
-    'securitySolutionNotesEnabled'
+  const securitySolutionNotesDisabled = useIsExperimentalFeatureEnabled(
+    'securitySolutionNotesDisabled'
   );
 
   const handleOnEventDetailPanelOpened = useCallback(() => {
@@ -175,12 +175,12 @@ const RowActionComponent = ({
           showCheckboxes={showCheckboxes}
           tabType={tabType}
           timelineId={tableId}
-          toggleShowNotes={securitySolutionNotesEnabled ? toggleShowNotes : undefined}
+          toggleShowNotes={securitySolutionNotesDisabled ? undefined : toggleShowNotes}
           width={width}
           setEventsLoading={setEventsLoading}
           setEventsDeleted={setEventsDeleted}
           refetch={refetch}
-          showNotes={securitySolutionNotesEnabled ? true : false}
+          showNotes={!securitySolutionNotesDisabled}
         />
       )}
     </>

@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { createBrowserHistory } from 'history';
-import { EuiPanel } from '@elastic/eui';
 import { Router } from '@kbn/shared-ux-router';
 import { Subject } from 'rxjs';
 import { Store } from 'redux';
@@ -16,10 +15,12 @@ import { SyntheticsEmbeddableStateContextProvider } from '../synthetics/contexts
 import { getSyntheticsAppProps } from '../synthetics/render_app';
 import { SyntheticsSettingsContextProvider } from '../synthetics/contexts';
 
-export const SyntheticsEmbeddableContext: React.FC<{
-  reload$: Subject<boolean>;
-  reduxStore?: Store;
-}> = ({ reload$, children, reduxStore }) => {
+export const SyntheticsEmbeddableContext: React.FC<
+  React.PropsWithChildren<{
+    reload$: Subject<boolean>;
+    reduxStore?: Store;
+  }>
+> = ({ reload$, children, reduxStore }) => {
   const props = getSyntheticsAppProps();
 
   return (
@@ -27,14 +28,7 @@ export const SyntheticsEmbeddableContext: React.FC<{
       <SyntheticsEmbeddableStateContextProvider>
         <Router history={createBrowserHistory()}>
           <SyntheticsSettingsContextProvider {...props}>
-            <EuiPanel
-              hasShadow={false}
-              css={{
-                width: '100%',
-              }}
-            >
-              {children}
-            </EuiPanel>
+            {children}
           </SyntheticsSettingsContextProvider>
         </Router>
       </SyntheticsEmbeddableStateContextProvider>

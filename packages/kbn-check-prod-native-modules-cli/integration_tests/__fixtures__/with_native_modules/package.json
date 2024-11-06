@@ -1,0 +1,9 @@
+{
+  "name": "with-native-modules-project",
+  "version": "1.0.0",
+  "dependencies": {
+    "native-module": "^1.0.0",
+    "native-module2": "^1.0.0",
+    "package-b": "^2.0.0"
+  }
+}

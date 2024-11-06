@@ -71,7 +71,6 @@ export async function getBulkAssets(
       }
 
       // TODO: Ask for Kibana SOs to have `getInAppUrl()` registered so that the above works safely:
-      //  ml-module
       //  security-rule
       //  csp-rule-template
       //  osquery-pack-asset

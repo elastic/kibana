@@ -25,7 +25,7 @@ import type { ExplorerChartsData } from '../explorer/explorer_charts/explorer_ch
 import type { AppStateSelectedCells } from '../explorer/explorer_utils';
 import { SWIM_LANE_LABEL_WIDTH } from '../explorer/constants';
 
-import type { MlApiServices } from './ml_api_service';
+import type { MlApi } from './ml_api_service';
 import type { MlResultsService } from './results_service';
 
 const MAX_CHARTS_PER_ROW = 4;
@@ -45,7 +45,7 @@ export class AnomalyExplorerChartsService {
 
   constructor(
     private timeFilter: TimefilterContract,
-    private mlApiServices: MlApiServices,
+    private mlApi: MlApi,
     private mlResultsService: MlResultsService
   ) {
     this.timeFilter.enableTimeRangeSelector();
@@ -64,7 +64,7 @@ export class AnomalyExplorerChartsService {
   public async getCombinedJobs(jobIds: string[]): Promise<CombinedJob[]> {
     const combinedResults = await Promise.all(
       // Getting only necessary job config and datafeed config without the stats
-      jobIds.map((jobId) => this.mlApiServices.jobs.jobForCloning(jobId))
+      jobIds.map((jobId) => this.mlApi.jobs.jobForCloning(jobId))
     );
     return combinedResults
       .filter(isDefined)
@@ -139,7 +139,7 @@ export class AnomalyExplorerChartsService {
 
     const maxSeriesToPlot = maxSeries ?? Math.max(chartsPerRow * 2, DEFAULT_MAX_SERIES_TO_PLOT);
 
-    return this.mlApiServices.results
+    return this.mlApi.results
       .getAnomalyCharts$(
         jobIds,
         influencers ?? [],

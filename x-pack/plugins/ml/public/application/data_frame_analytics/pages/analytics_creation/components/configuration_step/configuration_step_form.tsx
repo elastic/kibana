@@ -29,13 +29,15 @@ import {
 } from '@kbn/ml-data-frame-analytics-utils';
 import { DataGrid } from '@kbn/ml-data-grid';
 import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
-import { useMlKibana } from '../../../../../contexts/kibana';
 import {
-  EuiComboBoxWithFieldStats,
+  OptionListWithFieldStats,
   FieldStatsFlyoutProvider,
-} from '../../../../../components/field_stats_flyout';
-import type { FieldForStats } from '../../../../../components/field_stats_flyout/field_stats_info_button';
-import { newJobCapsServiceAnalytics } from '../../../../../services/new_job_capabilities/new_job_capabilities_service_analytics';
+  type FieldForStats,
+} from '@kbn/ml-field-stats-flyout';
+
+import type { DropDownLabel } from '../../../../../jobs/new_job/pages/components/pick_fields_step/components/agg_select';
+import { useMlApi, useMlKibana } from '../../../../../contexts/kibana';
+import { useNewJobCapsServiceAnalytics } from '../../../../../services/new_job_capabilities/new_job_capabilities_service_analytics';
 import { useDataSource } from '../../../../../contexts/ml';
 
 import { getScatterplotMatrixLegendType } from '../../../../common/get_scatterplot_matrix_legend_type';
@@ -44,7 +46,6 @@ import { Messages } from '../shared';
 import type { State } from '../../../analytics_management/hooks/use_create_analytics_form/state';
 import { DEFAULT_MODEL_MEMORY_LIMIT } from '../../../analytics_management/hooks/use_create_analytics_form/state';
 import { handleExplainErrorMessage, shouldAddAsDepVarOption } from './form_options_validation';
-import { getToastNotifications } from '../../../../../util/dependency_cache';
 
 import { ANALYTICS_STEPS } from '../../page';
 import { ContinueButton } from '../continue_button';
@@ -115,6 +116,10 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
   setCurrentStep,
   sourceDataViewTitle,
 }) => {
+  const { services } = useMlKibana();
+  const toastNotifications = services.notifications.toasts;
+  const mlApi = useMlApi();
+  const newJobCapsServiceAnalytics = useNewJobCapsServiceAnalytics();
   const { selectedDataView, selectedSavedSearch } = useDataSource();
   const { savedSearchQuery, savedSearchQueryStr } = useSavedSearch();
 
@@ -166,8 +171,6 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
     query: jobConfigQueryString ?? '',
     language: jobConfigQueryLanguage ?? SEARCH_QUERY_LANGUAGE.KUERY,
   });
-
-  const toastNotifications = getToastNotifications();
 
   const setJobConfigQuery: ExplorationQueryBarProps['setSearchQuery'] = (update) => {
     if (update.query) {
@@ -287,7 +290,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
       fieldSelection,
       errorMessage,
       noDocsContainMappedFields: noDocsWithFields,
-    } = await fetchExplainData(formToUse);
+    } = await fetchExplainData(mlApi, formToUse);
 
     if (success) {
       if (shouldUpdateEstimatedMml) {
@@ -443,7 +446,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
           fieldSelection,
           errorMessage,
           noDocsContainMappedFields: noDocsWithFields,
-        } = await fetchExplainData(formCopy);
+        } = await fetchExplainData(mlApi, formCopy);
         if (success) {
           // update the field selection table
           const hasRequiredFields = fieldSelection.some(
@@ -547,7 +550,6 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [dependentVariableEmpty, jobType, scatterplotMatrixProps.fields.length]
   );
-  const { services } = useMlKibana();
   const fieldStatsServices: FieldStatsServices = useMemo(() => {
     const { uiSettings, data, fieldFormats, charts } = services;
     return {
@@ -574,6 +576,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
       fieldStatsServices={fieldStatsServices}
       timeRangeMs={indexData.timeRangeMs}
       dslQuery={jobConfigQuery}
+      theme={services.theme}
     >
       <Fragment>
         <Messages messages={requestMessages} />
@@ -664,7 +667,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
                   : []),
               ]}
             >
-              <EuiComboBoxWithFieldStats
+              <OptionListWithFieldStats
                 fullWidth
                 aria-label={i18n.translate(
                   'xpack.ml.dataframe.analytics.create.dependentVariableInputAriaLabel',
@@ -693,7 +696,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
                 singleSelection={true}
                 options={dependentVariableOptions}
                 selectedOptions={dependentVariable ? [{ label: dependentVariable }] : []}
-                onChange={(selectedOptions) => {
+                onChange={(selectedOptions: DropDownLabel[]) => {
                   setFormState({
                     dependentVariable: selectedOptions[0].label || '',
                   });

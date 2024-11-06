@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { StartTransformsRequestSchema } from '../../../../common/api_schemas/start_transforms';
-import { reauthorizeTransformsRequestSchema } from '../../../../common/api_schemas/reauthorize_transforms';
+import type { StartTransformsRequestSchema } from '../../api_schemas/start_transforms';
+import { reauthorizeTransformsRequestSchema } from '../../api_schemas/reauthorize_transforms';
 import { addInternalBasePath } from '../../../../common/constants';
 
 import type { RouteDependencies } from '../../../types';
@@ -32,6 +32,13 @@ export function registerRoute(routeDependencies: RouteDependencies) {
     .addVersion<undefined, undefined, StartTransformsRequestSchema>(
       {
         version: '1',
+        security: {
+          authz: {
+            enabled: false,
+            reason:
+              'This route is opted out from authorization because permissions will be checked by elasticsearch',
+          },
+        },
         validate: {
           request: {
             body: reauthorizeTransformsRequestSchema,

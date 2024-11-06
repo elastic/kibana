@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -17,6 +18,7 @@ export default function ({ getService }: FtrProviderContext) {
         await supertest
           .get('/api/saved_objects/space/default')
           .set('kbn-xsrf', 'xxx')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .send()
           .expect(404)
           .then((response: Record<string, any>) => {
@@ -33,6 +35,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should not locate any spaces', async () => {
         await supertest
           .get('/api/saved_objects/_find?type=space')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .set('kbn-xsrf', 'xxx')
           .send()
           .expect(200)
@@ -51,6 +54,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should not allow a space to be created', async () => {
         await supertest
           .post('/api/saved_objects/space/my-space')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .set('kbn-xsrf', 'xxx')
           .send({ attributes: {} })
           .expect(400)
@@ -68,6 +72,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should not allow a space to be updated', async () => {
         await supertest
           .post('/api/saved_objects/space/default')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .set('kbn-xsrf', 'xxx')
           .send({ attributes: {} })
           .expect(400)
@@ -85,6 +90,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should not allow a space to be deleted', async () => {
         await supertest
           .delete('/api/saved_objects/space/default')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .set('kbn-xsrf', 'xxx')
           .send()
           .expect(404)

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFacetButton, EuiFacetGroup } from '@elastic/eui';
+import { EuiFacetButton, EuiFacetGroup, EuiSpacer } from '@elastic/eui';
 import type { IntegrationCategory } from '@kbn/custom-integrations-plugin/common';
 import React from 'react';
 
@@ -78,7 +78,11 @@ export function CategoryFacets({
   const controls = (
     <EuiFacetGroup>
       {isLoading ? (
-        <Loading />
+        <>
+          <EuiSpacer size="m" />
+          <Loading size="l" />
+          <EuiSpacer size="m" />
+        </>
       ) : (
         categories.map((category) => {
           return (

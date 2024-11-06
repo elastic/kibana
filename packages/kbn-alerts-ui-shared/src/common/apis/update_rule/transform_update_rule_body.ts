@@ -1,17 +1,31 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { RewriteResponseCase } from '@kbn/actions-types';
 import { UpdateRuleBody } from './types';
+import { Rule } from '../../types';
+
+const transformUpdateRuleFlapping = (flapping: Rule['flapping']) => {
+  if (!flapping) {
+    return flapping;
+  }
+
+  return {
+    look_back_window: flapping.lookBackWindow,
+    status_change_threshold: flapping.statusChangeThreshold,
+  };
+};
 
 export const transformUpdateRuleBody: RewriteResponseCase<UpdateRuleBody> = ({
   actions = [],
   alertDelay,
+  flapping,
   ...res
 }): any => ({
   ...res,
@@ -40,5 +54,6 @@ export const transformUpdateRuleBody: RewriteResponseCase<UpdateRuleBody> = ({
       ...(uuid && { uuid }),
     };
   }),
-  ...(alertDelay ? { alert_delay: alertDelay } : {}),
+  ...(alertDelay !== undefined ? { alert_delay: alertDelay } : {}),
+  ...(flapping !== undefined ? { flapping: transformUpdateRuleFlapping(flapping) } : {}),
 });

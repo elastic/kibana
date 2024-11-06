@@ -14,7 +14,7 @@
  *   version: 1
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 import { AssetCriticalityLevel } from '../asset_criticality/common.gen';
 
@@ -25,22 +25,10 @@ export const EntityAnalyticsPrivileges = z.object({
   has_write_permissions: z.boolean().optional(),
   privileges: z.object({
     elasticsearch: z.object({
-      cluster: z
-        .object({
-          manage_index_templates: z.boolean().optional(),
-          manage_transform: z.boolean().optional(),
-        })
-        .optional(),
-      index: z
-        .object({})
-        .catchall(
-          z.object({
-            read: z.boolean().optional(),
-            write: z.boolean().optional(),
-          })
-        )
-        .optional(),
+      cluster: z.object({}).catchall(z.boolean()).optional(),
+      index: z.object({}).catchall(z.object({}).catchall(z.boolean())).optional(),
     }),
+    kibana: z.object({}).catchall(z.boolean()).optional(),
   }),
 });
 

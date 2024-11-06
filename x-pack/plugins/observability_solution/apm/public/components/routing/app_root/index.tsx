@@ -20,7 +20,7 @@ import { euiDarkVars, euiLightVars } from '@kbn/ui-theme';
 import React from 'react';
 import { DefaultTheme, ThemeProvider } from 'styled-components';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { useKibanaEnvironmentContextProvider } from '../../../context/kibana_environment_context/use_kibana_environment_context';
+import { KibanaEnvironmentContextProvider } from '../../../context/kibana_environment_context/kibana_environment_context';
 import { AnomalyDetectionJobsContextProvider } from '../../../context/anomaly_detection_jobs/anomaly_detection_jobs_context';
 import {
   ApmPluginContext,
@@ -42,7 +42,6 @@ import { RedirectWithDefaultEnvironment } from './redirect_with_default_environm
 import { RedirectWithOffset } from './redirect_with_offset';
 import { ScrollToTopOnPathChange } from './scroll_to_top_on_path_change';
 import { UpdateExecutionContextOnRouteChange } from './update_execution_context_on_route_change';
-import { EntityManagerEnablementContextProvider } from '../../../context/entity_manager_context/entity_manager_context';
 
 const storage = new Storage(localStorage);
 
@@ -56,7 +55,6 @@ export function ApmAppRoot({
   apmServices: ApmServices;
 }) {
   const { appMountParameters, kibanaEnvironment, core } = apmPluginContextValue;
-  const KibanaEnvironmentContextProvider = useKibanaEnvironmentContextProvider(kibanaEnvironment);
   const { history } = appMountParameters;
   const i18nCore = core.i18n;
 
@@ -84,17 +82,15 @@ export function ApmAppRoot({
                                     <BreadcrumbsContextProvider>
                                       <UrlParamsProvider>
                                         <LicenseProvider>
-                                          <EntityManagerEnablementContextProvider>
-                                            <AnomalyDetectionJobsContextProvider>
-                                              <InspectorContextProvider>
-                                                <ApmThemeProvider>
-                                                  <MountApmHeaderActionMenu />
-                                                  <Route component={ScrollToTopOnPathChange} />
-                                                  <RouteRenderer />
-                                                </ApmThemeProvider>
-                                              </InspectorContextProvider>
-                                            </AnomalyDetectionJobsContextProvider>
-                                          </EntityManagerEnablementContextProvider>
+                                          <AnomalyDetectionJobsContextProvider>
+                                            <InspectorContextProvider>
+                                              <ApmThemeProvider>
+                                                <MountApmHeaderActionMenu />
+                                                <Route component={ScrollToTopOnPathChange} />
+                                                <RouteRenderer />
+                                              </ApmThemeProvider>
+                                            </InspectorContextProvider>
+                                          </AnomalyDetectionJobsContextProvider>
                                         </LicenseProvider>
                                       </UrlParamsProvider>
                                     </BreadcrumbsContextProvider>

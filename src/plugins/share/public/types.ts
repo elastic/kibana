@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { ComponentType, ReactElement } from 'react';
@@ -99,8 +100,14 @@ export type SupportedExportTypes =
 interface ShareMenuItemBase {
   shareMenuItem?: ShareContextMenuPanelItem;
 }
-interface ShareMenuItemLegacy extends ShareMenuItemBase {
+
+export interface ShareMenuItemLegacy extends ShareMenuItemBase {
   panel?: EuiContextMenuPanelDescriptor;
+}
+
+export interface ScreenshotExportOpts {
+  optimizedForPrinting?: boolean;
+  intl: InjectedIntl;
 }
 
 export interface ShareMenuItemV2 extends ShareMenuItemBase {
@@ -111,21 +118,32 @@ export interface ShareMenuItemV2 extends ShareMenuItemBase {
   helpText?: ReactElement;
   copyURLButton?: { id: string; dataTestSubj: string; label: string };
   generateExportButton?: ReactElement;
-  generateExport: (args: {
-    intl: InjectedIntl;
-    optimizedForPrinting?: boolean;
-  }) => Promise<unknown>;
+  /**
+   * Function to trigger an export
+   */
+  generateExport: (args: ScreenshotExportOpts) => Promise<unknown>;
+  /**
+   * Function to generate a URL to be used for automating export
+   * Not applicable for exports that do not call a remote API (i.e Lens CSV export)
+   */
+  generateExportUrl?: (args: ScreenshotExportOpts) => string | undefined;
   theme?: ThemeServiceSetup;
   renderLayoutOptionSwitch?: boolean;
   layoutOption?: 'print';
-  absoluteUrl?: string;
   generateCopyUrl?: URL;
   renderCopyURLButton?: boolean;
+  warnings?: Array<{ title: string; message: string }>;
 }
 
-export type ShareMenuItem = ShareMenuItemLegacy | ShareMenuItemV2;
+export interface ShareMenuProviderV2 {
+  readonly id: string;
+  getShareMenuItems: (context: ShareContext) => ShareMenuItemV2[];
+}
+export interface ShareMenuProviderLegacy {
+  readonly id: string;
+  getShareMenuItemsLegacy: (context: ShareContext) => ShareMenuItemLegacy[];
+}
 
-type ShareMenuItemType = Omit<ShareMenuItem, 'intl'>;
 /**
  * @public
  * A source for additional menu items shown in the share context menu. Any provider
@@ -133,10 +151,7 @@ type ShareMenuItemType = Omit<ShareMenuItem, 'intl'>;
  * menu. Returned `ShareMenuItem`s will be shown in the context menu together with the
  * default built-in share options. Each share provider needs a globally unique id.
  * */
-export interface ShareMenuProvider {
-  readonly id: string;
-  getShareMenuItems: (context: ShareContext) => ShareMenuItemType[];
-}
+export type ShareMenuProvider = ShareMenuProviderV2 | ShareMenuProviderLegacy;
 
 interface UrlParamExtensionProps {
   setParamValue: (values: {}) => void;

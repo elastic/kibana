@@ -5,214 +5,224 @@
  * 2.0.
  */
 
-import { filter, uniqBy } from 'lodash/fp';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import {
   EuiAvatar,
+  EuiComment,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLoadingElastic,
+  EuiPanel,
   EuiSpacer,
   EuiText,
   EuiTitle,
-  EuiPanel,
-  EuiHorizontalRule,
 } from '@elastic/eui';
-
-import React, { Fragment, useCallback, useMemo, useState } from 'react';
-import { useDispatch } from 'react-redux';
-import styled from 'styled-components';
-
-import type { EuiTheme } from '@kbn/react-kibana-context-styled';
-import { timelineActions } from '../../../../store';
+import { css } from '@emotion/react';
+import { useDispatch, useSelector } from 'react-redux';
+import { FormattedRelative } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
+import type { TimelineModel } from '../../../../..';
+import { SaveTimelineCallout } from '../../../notes/save_timeline';
+import { AddNote } from '../../../../../notes/components/add_note';
+import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import {
-  useDeepEqualSelector,
-  useShallowEqualSelector,
-} from '../../../../../common/hooks/use_selector';
+  NOTES_LOADING_TEST_ID,
+  TIMELINE_DESCRIPTION_COMMENT_TEST_ID,
+} from '../../../../../notes/components/test_ids';
+import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
+import { ADDED_A_DESCRIPTION } from '../../../open_timeline/note_previews/translations';
+import { defaultToEmptyTag, getEmptyValue } from '../../../../../common/components/empty_value';
+import { selectTimelineById } from '../../../../store/selectors';
+import {
+  fetchNotesBySavedObjectIds,
+  ReqStatus,
+  selectFetchNotesBySavedObjectIdsError,
+  selectFetchNotesBySavedObjectIdsStatus,
+  selectSortedNotesBySavedObjectId,
+} from '../../../../../notes';
+import type { Note } from '../../../../../../common/api/timeline';
 import { TimelineStatusEnum } from '../../../../../../common/api/timeline';
-import { appSelectors } from '../../../../../common/store/app';
-import { AddNote } from '../../../notes/add_note';
-import { CREATED_BY, NOTES } from '../../../notes/translations';
-import { PARTICIPANTS } from '../../translations';
-import { NotePreviews } from '../../../open_timeline/note_previews';
-import type { TimelineResultNote } from '../../../open_timeline/types';
-import { getTimelineNoteSelector } from './selectors';
+import { NotesList } from '../../../../../notes/components/notes_list';
+import { OldNotes } from '../../../notes/old_notes';
+import { Participants } from '../../../notes/participants';
+import { NOTES } from '../../../notes/translations';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
+import { useShallowEqualSelector } from '../../../../../common/hooks/use_selector';
 import { getScrollToTopSelector } from '../selectors';
 import { useScrollToTop } from '../../../../../common/components/scroll_to_top';
-import { useUserPrivileges } from '../../../../../common/components/user_privileges';
-import { FullWidthFlexGroup, VerticalRule } from '../shared/layout';
+import type { State } from '../../../../../common/store';
 
-const ScrollableDiv = styled.div`
-  overflow-x: hidden;
-  overflow-y: auto;
-  padding-inline: ${({ theme }) => (theme as EuiTheme).eui.euiSizeM};
-  padding-block: ${({ theme }) => (theme as EuiTheme).eui.euiSizeS};
-`;
-
-const StyledPanel = styled(EuiPanel)`
-  border: 0;
-  box-shadow: none;
-`;
-
-const StyledEuiFlexGroup = styled(EuiFlexGroup)`
-  flex: 0;
-`;
-
-const Username = styled(EuiText)`
-  font-weight: bold;
-`;
-
-interface UsernameWithAvatar {
-  username: string;
-}
-
-const UsernameWithAvatarComponent: React.FC<UsernameWithAvatar> = ({ username }) => (
-  <StyledEuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
-    <EuiFlexItem grow={false}>
-      <EuiAvatar data-test-subj="avatar" name={username} size="l" />
-    </EuiFlexItem>
-    <EuiFlexItem>
-      <Username>{username}</Username>
-    </EuiFlexItem>
-  </StyledEuiFlexGroup>
-);
-
-const UsernameWithAvatar = React.memo(UsernameWithAvatarComponent);
-
-interface ParticipantsProps {
-  users: TimelineResultNote[];
-}
-
-const ParticipantsComponent: React.FC<ParticipantsProps> = ({ users }) => {
-  const List = useMemo(
-    () =>
-      users.map((user) => (
-        <Fragment key={user.updatedBy === null ? undefined : user.updatedBy}>
-          <UsernameWithAvatar
-            key={user.updatedBy === null ? undefined : user.updatedBy}
-            username={String(user.updatedBy)}
-          />
-          <EuiSpacer size="s" />
-        </Fragment>
-      )),
-    [users]
-  );
-
-  if (!users.length) {
-    return null;
+export const FETCH_NOTES_ERROR = i18n.translate(
+  'xpack.securitySolution.notes.fetchNotesErrorLabel',
+  {
+    defaultMessage: 'Error fetching notes',
   }
-
-  return (
-    <>
-      <EuiTitle size="xs">
-        <h4>{PARTICIPANTS}</h4>
-      </EuiTitle>
-      <EuiHorizontalRule margin="s" />
-      {List}
-    </>
-  );
-};
-
-ParticipantsComponent.displayName = 'ParticipantsComponent';
-
-const Participants = React.memo(ParticipantsComponent);
+);
+export const NO_NOTES = i18n.translate('xpack.securitySolution.notes.noNotesLabel', {
+  defaultMessage: 'No notes have been created for this Timeline.',
+});
 
 interface NotesTabContentProps {
+  /**
+   * The timeline id
+   */
   timelineId: string;
 }
 
-const NotesTabContentComponent: React.FC<NotesTabContentProps> = ({ timelineId }) => {
+/**
+ * Renders the notes tab content.
+ * At this time the component support the old notes system and the new notes system (via the securitySolutionNotesDisabled feature flag).
+ * The old notes system is deprecated and will be removed in the future.
+ * In both cases, the component fetches the notes for the timeline and renders:
+ * - the timeline description
+ * - the notes list
+ * - the participants list
+ * - the markdown to create a new note and the add note button
+ */
+const NotesTabContentComponent: React.FC<NotesTabContentProps> = React.memo(({ timelineId }) => {
+  const { addError: addErrorToast } = useAppToasts();
   const dispatch = useDispatch();
+
   const { kibanaSecuritySolutionsPrivileges } = useUserPrivileges();
+  const canCreateNotes = kibanaSecuritySolutionsPrivileges.crud;
+
+  const securitySolutionNotesDisabled = useIsExperimentalFeatureEnabled(
+    'securitySolutionNotesDisabled'
+  );
 
   const getScrollToTop = useMemo(() => getScrollToTopSelector(), []);
   const scrollToTop = useShallowEqualSelector((state) => getScrollToTop(state, timelineId));
-
   useScrollToTop('#scrollableNotes', !!scrollToTop);
 
-  const getTimelineNotes = useMemo(() => getTimelineNoteSelector(), []);
-  const {
-    createdBy,
-    eventIdToNoteIds,
-    noteIds,
-    status: timelineStatus,
-  } = useDeepEqualSelector((state) => getTimelineNotes(state, timelineId));
-  const getNotesAsCommentsList = useMemo(
-    () => appSelectors.selectNotesAsCommentsListSelector(),
-    []
+  const timeline: TimelineModel = useSelector((state: State) =>
+    selectTimelineById(state, timelineId)
   );
-  const [newNote, setNewNote] = useState('');
-  const isImmutable = timelineStatus === TimelineStatusEnum.immutable;
-  const appNotes: TimelineResultNote[] = useDeepEqualSelector(getNotesAsCommentsList);
-
-  const allTimelineNoteIds = useMemo(() => {
-    const eventNoteIds = Object.values(eventIdToNoteIds).reduce<string[]>(
-      (acc, v) => [...acc, ...v],
-      []
-    );
-    return [...noteIds, ...eventNoteIds];
-  }, [noteIds, eventIdToNoteIds]);
-
-  const notes = useMemo(
-    () => appNotes.filter((appNote) => allTimelineNoteIds.includes(appNote?.noteId ?? '-1')),
-    [appNotes, allTimelineNoteIds]
+  const timelineSavedObjectId = useMemo(
+    () => timeline.savedObjectId ?? '',
+    [timeline.savedObjectId]
+  );
+  const isTimelineSaved: boolean = useMemo(
+    () => timeline.status === TimelineStatusEnum.active,
+    [timeline.status]
   );
 
-  // filter for savedObjectId to make sure we don't display `elastic` user while saving the note
-  const participants = useMemo(() => uniqBy('updatedBy', filter('savedObjectId', notes)), [notes]);
-
-  const associateNote = useCallback(
-    (noteId: string) => dispatch(timelineActions.addNote({ id: timelineId, noteId })),
-    [dispatch, timelineId]
+  const fetchNotes = useCallback(
+    () => dispatch(fetchNotesBySavedObjectIds({ savedObjectIds: [timelineSavedObjectId] })),
+    [dispatch, timelineSavedObjectId]
   );
 
-  const SidebarContent = useMemo(
-    () => (
+  useEffect(() => {
+    if (isTimelineSaved) {
+      fetchNotes();
+    }
+  }, [fetchNotes, isTimelineSaved]);
+
+  const notes: Note[] = useSelector((state: State) =>
+    selectSortedNotesBySavedObjectId(state, {
+      savedObjectId: timelineSavedObjectId,
+      sort: { field: 'created', direction: 'asc' },
+    })
+  );
+  const fetchStatus = useSelector((state: State) => selectFetchNotesBySavedObjectIdsStatus(state));
+  const fetchError = useSelector((state: State) => selectFetchNotesBySavedObjectIdsError(state));
+
+  // show a toast if the fetch notes call fails
+  useEffect(() => {
+    if (fetchStatus === ReqStatus.Failed && fetchError) {
+      addErrorToast(null, {
+        title: FETCH_NOTES_ERROR,
+      });
+    }
+  }, [addErrorToast, fetchError, fetchStatus]);
+
+  // if timeline was saved with a description, we show it at the very top of the notes tab
+  const timelineDescription = useMemo(() => {
+    if (!timeline?.description) {
+      return null;
+    }
+
+    return (
       <>
-        {createdBy && (
-          <>
-            <EuiTitle size="xs">
-              <h4>{CREATED_BY}</h4>
-            </EuiTitle>
-            <EuiHorizontalRule margin="s" />
-            <UsernameWithAvatar username={createdBy} />
-            <EuiSpacer size="xxl" />
-          </>
-        )}
-        <Participants users={participants} />
+        <EuiComment
+          key={'note-preview-description'}
+          username={defaultToEmptyTag(timeline.updatedBy)}
+          timestamp={
+            <>
+              {timeline.updated ? (
+                <FormattedRelative data-test-subj="updated" value={new Date(timeline.updated)} />
+              ) : (
+                getEmptyValue()
+              )}
+            </>
+          }
+          event={ADDED_A_DESCRIPTION}
+          timelineAvatar={<EuiAvatar size="l" name={timeline.updatedBy || '?'} />}
+          data-test-subj={TIMELINE_DESCRIPTION_COMMENT_TEST_ID}
+        >
+          <EuiText size="s">{timeline.description}</EuiText>
+        </EuiComment>
+        <EuiSpacer />
       </>
-    ),
-    [createdBy, participants]
-  );
+    );
+  }, [timeline.description, timeline.updated, timeline.updatedBy]);
 
   return (
-    <FullWidthFlexGroup gutterSize="none">
-      <EuiFlexItem component={ScrollableDiv} grow={2} id="scrollableNotes">
-        <StyledPanel paddingSize="none">
+    <EuiPanel
+      css={css`
+        height: 100%;
+        overflow: auto;
+      `}
+    >
+      <EuiFlexGroup direction="column">
+        <EuiFlexItem grow={false}>
           <EuiTitle>
             <h3>{NOTES}</h3>
           </EuiTitle>
-          <NotePreviews notes={notes} timelineId={timelineId} showTimelineDescription />
-          <EuiSpacer size="s" />
-          {!isImmutable && kibanaSecuritySolutionsPrivileges.crud === true && (
-            <AddNote
-              associateNote={associateNote}
-              newNote={newNote}
-              updateNewNote={setNewNote}
-              autoFocusDisabled={!!scrollToTop}
-            />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          {securitySolutionNotesDisabled ? (
+            <OldNotes timelineId={timelineId} />
+          ) : (
+            <EuiFlexGroup data-test-subj={'new-notes-screen'}>
+              <EuiFlexItem>
+                {timelineDescription}
+                {fetchStatus === ReqStatus.Loading && (
+                  <EuiLoadingElastic data-test-subj={NOTES_LOADING_TEST_ID} size="xxl" />
+                )}
+                {isTimelineSaved && fetchStatus === ReqStatus.Succeeded && notes.length === 0 ? (
+                  <EuiFlexGroup justifyContent="center">
+                    <EuiFlexItem grow={false}>
+                      <p>{NO_NOTES}</p>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                ) : (
+                  <NotesList notes={notes} options={{ hideTimelineIcon: true }} />
+                )}
+                {canCreateNotes && (
+                  <>
+                    <EuiSpacer />
+                    <AddNote timelineId={timeline.savedObjectId} disableButton={!isTimelineSaved}>
+                      {!isTimelineSaved && <SaveTimelineCallout />}
+                    </AddNote>
+                  </>
+                )}
+              </EuiFlexItem>
+              <EuiFlexItem
+                css={css`
+                  max-width: 350px;
+                `}
+              >
+                <Participants notes={notes} timelineCreatedBy={timeline.createdBy} />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           )}
-        </StyledPanel>
-      </EuiFlexItem>
-      <VerticalRule />
-      <EuiFlexItem component={ScrollableDiv} grow={1}>
-        {SidebarContent}
-      </EuiFlexItem>
-    </FullWidthFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiPanel>
   );
-};
+});
 
 NotesTabContentComponent.displayName = 'NotesTabContentComponent';
 
-const NotesTabContent = React.memo(NotesTabContentComponent);
-
 // eslint-disable-next-line import/no-default-export
-export { NotesTabContent as default };
+export { NotesTabContentComponent as default };

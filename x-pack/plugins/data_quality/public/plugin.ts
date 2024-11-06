@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { Capabilities, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { MANAGEMENT_APP_LOCATOR } from '@kbn/deeplinks-management/constants';
 import { ManagementAppLocatorParams } from '@kbn/management-plugin/common/locator';
+import { Subject } from 'rxjs';
 import {
   DataQualityPluginSetup,
   DataQualityPluginStart,
@@ -16,7 +17,10 @@ import {
   AppPluginSetupDependencies,
 } from './types';
 import { PLUGIN_ID, PLUGIN_NAME } from '../common';
-import { DatasetQualityLocatorDefinition } from '../common/locators';
+import {
+  DatasetQualityLocatorDefinition,
+  DatasetQualityDetailsLocatorDefinition,
+} from '../common/locators';
 
 export class DataQualityPlugin
   implements
@@ -27,6 +31,8 @@ export class DataQualityPlugin
       AppPluginStartDependencies
     >
 {
+  private capabilities$ = new Subject<Capabilities>();
+
   public setup(
     core: CoreSetup<AppPluginStartDependencies, DataQualityPluginStart>,
     plugins: AppPluginSetupDependencies
@@ -34,45 +40,56 @@ export class DataQualityPlugin
     const { management, share } = plugins;
     const useHash = core.uiSettings.get('state:storeInSessionStorage');
 
-    management.sections.section.data.registerApp({
-      id: PLUGIN_ID,
-      title: PLUGIN_NAME,
-      order: 2,
-      keywords: [
-        'data',
-        'quality',
-        'data quality',
-        'datasets',
-        'datasets quality',
-        'data set quality',
-      ],
-      async mount(params: ManagementAppMountParams) {
-        const [{ renderApp }, [coreStart, pluginsStartDeps, pluginStart]] = await Promise.all([
-          import('./application'),
-          core.getStartServices(),
-        ]);
+    this.capabilities$.subscribe((capabilities) => {
+      if (!capabilities.dataQuality.show) return;
 
-        return renderApp(coreStart, pluginsStartDeps, pluginStart, params);
-      },
-      hideFromSidebar: false,
+      management.sections.section.data.registerApp({
+        id: PLUGIN_ID,
+        title: PLUGIN_NAME,
+        order: 2,
+        keywords: [
+          'data',
+          'quality',
+          'data quality',
+          'datasets',
+          'datasets quality',
+          'data set quality',
+        ],
+        async mount(params: ManagementAppMountParams) {
+          const [{ renderApp }, [coreStart, pluginsStartDeps, pluginStart]] = await Promise.all([
+            import('./application'),
+            core.getStartServices(),
+          ]);
+
+          return renderApp(coreStart, pluginsStartDeps, pluginStart, params);
+        },
+        hideFromSidebar: false,
+      });
+
+      const managementLocator =
+        share.url.locators.get<ManagementAppLocatorParams>(MANAGEMENT_APP_LOCATOR);
+
+      if (managementLocator) {
+        share.url.locators.create(
+          new DatasetQualityLocatorDefinition({
+            useHash,
+            managementLocator,
+          })
+        );
+        share.url.locators.create(
+          new DatasetQualityDetailsLocatorDefinition({
+            useHash,
+            managementLocator,
+          })
+        );
+      }
     });
-
-    const managementLocator =
-      share.url.locators.get<ManagementAppLocatorParams>(MANAGEMENT_APP_LOCATOR);
-
-    if (managementLocator) {
-      share.url.locators.create(
-        new DatasetQualityLocatorDefinition({
-          useHash,
-          managementLocator,
-        })
-      );
-    }
 
     return {};
   }
 
-  public start(_core: CoreStart): DataQualityPluginStart {
+  public start(core: CoreStart): DataQualityPluginStart {
+    this.capabilities$.next(core.application.capabilities);
     return {};
   }
 

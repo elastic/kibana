@@ -5,13 +5,14 @@
  * 2.0.
  */
 import * as t from 'io-ts';
+import { allOrAnyStringOrArray } from '../../schema';
 
 const getSLOInstancesParamsSchema = t.type({
   path: t.type({ id: t.string }),
 });
 
 const getSLOInstancesResponseSchema = t.type({
-  groupBy: t.union([t.string, t.array(t.string)]),
+  groupBy: allOrAnyStringOrArray,
   instances: t.array(t.string),
 });
 

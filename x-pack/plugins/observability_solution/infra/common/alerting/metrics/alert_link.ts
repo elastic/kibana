@@ -11,13 +11,14 @@ import { encode } from '@kbn/rison';
 import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common/parse_technical_fields';
 import { type InventoryItemType, findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
+import { SupportedAssetTypes } from '@kbn/observability-shared-plugin/common';
 import {
+  MetricsExplorerLocatorParams,
   type AssetDetailsLocatorParams,
   type InventoryLocatorParams,
 } from '@kbn/observability-shared-plugin/common';
 import { castArray } from 'lodash';
-import { fifteenMinutesInMilliseconds, METRICS_EXPLORER_URL } from '../../constants';
-import { SupportedAssetTypes } from '../../asset_details/types';
+import { fifteenMinutesInMilliseconds } from '../../constants';
 
 const ALERT_RULE_PARAMTERS_INVENTORY_METRIC_ID = `${ALERT_RULE_PARAMETERS}.criteria.metric`;
 export const ALERT_RULE_PARAMETERS_NODE_TYPE = `${ALERT_RULE_PARAMETERS}.nodeType`;
@@ -48,7 +49,7 @@ export const getInventoryViewInAppUrl = ({
   inventoryLocator?: LocatorPublic<InventoryLocatorParams>;
 }): string => {
   if (!assetDetailsLocator || !inventoryLocator) {
-    return '';
+    throw new Error('Locators for Asset Details and Inventory are required');
   }
 
   /* Temporary Solution -> https://github.com/elastic/kibana/issues/137033
@@ -127,13 +128,19 @@ export const getMetricsViewInAppUrl = ({
   fields,
   groupBy,
   assetDetailsLocator,
+  metricsExplorerLocator,
 }: {
   fields: ParsedTechnicalFields & Record<string, any>;
   groupBy?: string[];
   assetDetailsLocator?: LocatorPublic<AssetDetailsLocatorParams>;
+  metricsExplorerLocator?: LocatorPublic<MetricsExplorerLocatorParams>;
 }) => {
-  if (!groupBy || !assetDetailsLocator) {
-    return METRICS_EXPLORER_URL;
+  if (!assetDetailsLocator || !metricsExplorerLocator) {
+    throw new Error('Locators for Asset Details and Metrics Explorer are required');
+  }
+
+  if (!groupBy) {
+    return metricsExplorerLocator.getRedirectUrl({});
   }
 
   // creates an object of asset details supported assetType by their assetId field name
@@ -143,12 +150,19 @@ export const getMetricsViewInAppUrl = ({
   }, {} as Record<string, InventoryItemType>);
 
   // detemines if the groupBy has a field that the asset details supports
-  const supportedAssetId = groupBy?.find((field) => !!assetTypeByAssetId[field]);
+  const supportedAssetId = groupBy.find((field) => !!assetTypeByAssetId[field]);
   // assigns a nodeType if the groupBy field is supported by asset details
   const supportedAssetType = supportedAssetId ? assetTypeByAssetId[supportedAssetId] : undefined;
 
   if (supportedAssetType) {
     const assetId = fields[findInventoryModel(supportedAssetType).fields.id];
+
+    // A supported asset type can still return no id. In such a case, we can't
+    // generate a valid link, so we redirect to Metrics Explorer.
+    if (!assetId) {
+      return metricsExplorerLocator.getRedirectUrl({});
+    }
+
     const timestamp = fields[TIMESTAMP];
 
     return getLinkToAssetDetails({
@@ -158,7 +172,7 @@ export const getMetricsViewInAppUrl = ({
       assetDetailsLocator,
     });
   } else {
-    return METRICS_EXPLORER_URL;
+    return metricsExplorerLocator.getRedirectUrl({});
   }
 };
 

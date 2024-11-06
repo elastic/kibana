@@ -35,7 +35,7 @@ let loadModulesPromise: Promise<LazyLoadedFileUploadModules>;
 export interface LazyLoadedFileUploadModules {
   GeoUploadWizard: React.ComponentType<FileUploadComponentProps>;
   IndexNameForm: React.ComponentType<IndexNameFormProps>;
-  importerFactory: (format: string, options: ImportFactoryOptions) => IImporter | undefined;
+  importerFactory: (format: string, options: ImportFactoryOptions) => IImporter;
   getHttp: () => HttpStart;
 }
 

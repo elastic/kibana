@@ -5,21 +5,33 @@
  * 2.0.
  */
 
-import { MetricsExplorerViewsClient } from './metrics_explorer_views_client';
-import {
+import type {
   MetricsExplorerViewsServiceStartDeps,
   MetricsExplorerViewsServiceSetup,
   MetricsExplorerViewsServiceStart,
+  IMetricsExplorerViewsClient,
 } from './types';
 
 export class MetricsExplorerViewsService {
-  public setup(): MetricsExplorerViewsServiceSetup {}
+  private client?: IMetricsExplorerViewsClient;
+
+  public setup(): MetricsExplorerViewsServiceSetup {
+    return {};
+  }
 
   public start({ http }: MetricsExplorerViewsServiceStartDeps): MetricsExplorerViewsServiceStart {
-    const client = new MetricsExplorerViewsClient(http);
-
     return {
-      client,
+      getClient: () => this.getClient({ http }),
     };
+  }
+
+  private async getClient({ http }: MetricsExplorerViewsServiceStartDeps) {
+    if (!this.client) {
+      const { MetricsExplorerViewsClient } = await import('./metrics_explorer_views_client');
+      const client = new MetricsExplorerViewsClient(http);
+      this.client = client;
+    }
+
+    return this.client;
   }
 }

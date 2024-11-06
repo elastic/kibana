@@ -10,13 +10,13 @@ import { FLEET_INSTALL_FORMAT_VERSION } from '@kbn/fleet-plugin/server/constants
 
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
-import { setupFleetAndAgents } from '../agents/services';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const kibanaServer = getService('kibanaServer');
   const supertest = getService('supertest');
   const es = getService('es');
+  const fleetAndAgents = getService('fleetAndAgents');
   const pkgName = 'all_assets';
   const pkgVersion = '0.1.0';
   const pkgUpdateVersion = '0.2.0';
@@ -34,11 +34,11 @@ export default function (providerContext: FtrProviderContext) {
       .send({ force: true });
   };
 
-  describe('updates all assets when updating a package to a different version', async () => {
+  describe('updates all assets when updating a package to a different version', () => {
     skipIfNoDockerRegistry(providerContext);
-    setupFleetAndAgents(providerContext);
 
     before(async () => {
+      await fleetAndAgents.setup();
       await installPackage(pkgName, pkgVersion);
       await installPackage(pkgName, pkgUpdateVersion);
     });
@@ -418,6 +418,10 @@ export default function (providerContext: FtrProviderContext) {
             type: 'component_template',
           },
           {
+            id: 'logs@custom',
+            type: 'component_template',
+          },
+          {
             id: 'logs-all_assets.test_logs@custom',
             type: 'component_template',
           },
@@ -439,6 +443,11 @@ export default function (providerContext: FtrProviderContext) {
           },
           {
             id: 'metrics-all_assets.test_metrics@package',
+            type: 'component_template',
+          },
+
+          {
+            id: 'metrics@custom',
             type: 'component_template',
           },
           {

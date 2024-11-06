@@ -22,7 +22,7 @@ import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { ChangePointDetectionSharedComponent } from '../shared_components';
 
-import type { LogCategorizationEmbeddableWrapperProps } from '../components/log_categorization/log_categorization_for_embeddable/log_categorization_wrapper';
+import type { LogCategorizationEmbeddableWrapperProps } from '../components/log_categorization/log_categorization_for_embeddable/log_categorization_for_discover_wrapper';
 
 export interface AiopsPluginSetupDeps {
   embeddable: EmbeddableSetup;

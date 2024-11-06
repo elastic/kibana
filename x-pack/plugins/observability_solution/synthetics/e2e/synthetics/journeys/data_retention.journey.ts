@@ -36,7 +36,7 @@ journey(`DataRetentionPage`, async ({ page, params }) => {
     await page.click(':nth-match(:text("365 days + rollover"), 2)');
     await page.click(':nth-match(:text("365 days + rollover"), 3)');
     await page.click(':nth-match(:text("365 days + rollover"), 4)');
-    await page.click('tbody div:has-text("synthetics(opens in a new tab or window)")');
+    await page.click('tbody div:has-text("synthetics(external, opens in a new tab or window)")');
   });
 
   step('validate data sizes', async () => {
@@ -60,7 +60,7 @@ journey(`DataRetentionPage`, async ({ page, params }) => {
     [page1] = await Promise.all([
       page.waitForEvent('popup'),
       page.click(
-        'tbody div:has-text("synthetics-synthetics.browser-default_policy(opens in a new tab or window)")'
+        'tbody div:has-text("synthetics-synthetics.browser-default_policy(external, opens in a new tab or window)")'
       ),
     ]);
     recordVideo(page1, 'data_retention_policy_change');
@@ -98,7 +98,7 @@ journey(`DataRetentionPage`, async ({ page, params }) => {
 
     await page.reload();
 
-    await page.click('tbody div:has-text("synthetics(opens in a new tab or window)")');
+    await page.click('tbody div:has-text("synthetics(external, opens in a new tab or window)")');
     await page1.close();
 
     await assertText({ page, text: '10000 days + rollover' });

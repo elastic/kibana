@@ -192,7 +192,7 @@ export async function deleteEnrollmentApiKeyForAgentPolicyId(
     const { items } = await listEnrollmentApiKeys(esClient, {
       page: page++,
       perPage: 100,
-      kuery: `policy_id:${agentPolicyId}`,
+      kuery: `policy_id:"${agentPolicyId}"`,
     });
 
     if (items.length === 0) {
@@ -218,7 +218,7 @@ export async function generateEnrollmentAPIKey(
   const id = uuidv4();
   const { name: providedKeyName, forceRecreate, agentPolicyId } = data;
   const logger = appContextService.getLogger();
-  logger.debug(`Creating enrollment API key ${data}`);
+  logger.debug(`Creating enrollment API key ${JSON.stringify(data)}`);
 
   const agentPolicy = await retrieveAgentPolicyId(soClient, agentPolicyId);
 
@@ -324,10 +324,17 @@ export async function generateEnrollmentAPIKey(
     refresh: 'wait_for',
   });
 
-  return {
+  const enrollmentAPIKey: EnrollmentAPIKey = {
     id: res._id,
-    ...body,
+    api_key_id: body.api_key_id,
+    api_key: body.api_key,
+    name: body.name,
+    active: body.active,
+    policy_id: body.policy_id,
+    created_at: body.created_at,
   };
+
+  return enrollmentAPIKey;
 }
 
 export async function ensureDefaultEnrollmentAPIKeyForAgentPolicy(
@@ -360,7 +367,14 @@ function getQueryForExistingKeyNameOnPolicy(agentPolicyId: string, providedKeyNa
         },
         {
           bool: {
-            should: [{ query_string: { fields: ['name'], query: `(${providedKeyName}) *` } }],
+            should: [
+              {
+                query_string: {
+                  fields: ['name'],
+                  query: `(${providedKeyName.replace('!', '\\!')}) *`,
+                },
+              },
+            ],
             minimum_should_match: 1,
           },
         },
@@ -412,7 +426,10 @@ function esDocToEnrollmentApiKey(doc: {
 }): EnrollmentAPIKey {
   return {
     id: doc._id,
-    ...doc._source,
+    api_key_id: doc._source.api_key_id,
+    api_key: doc._source.api_key,
+    name: doc._source.name,
+    policy_id: doc._source.policy_id,
     created_at: doc._source.created_at as string,
     active: doc._source.active || false,
   };

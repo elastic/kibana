@@ -29,12 +29,12 @@ describe('<PolicySettings />', () => {
     onChange.mockClear();
   });
 
-  it('allows user to set name of integration', () => {
+  it('allows user to set name of integration', async () => {
     const { getByTestId } = render(<WrappedComponent />);
     const input = getByTestId('cloud-defend-policy-name');
 
     if (input) {
-      userEvent.type(input, '1');
+      await userEvent.type(input, '1');
     } else {
       throw new Error("Can't find input");
     }
@@ -44,12 +44,12 @@ describe('<PolicySettings />', () => {
     expect(updatedPolicy.name).toEqual('some-cloud_defend-policy1');
   });
 
-  it('allows user to set description of integration', () => {
+  it('allows user to set description of integration', async () => {
     const { getByTestId } = render(<WrappedComponent />);
     const input = getByTestId('cloud-defend-policy-description');
 
     if (input) {
-      userEvent.type(input, '1');
+      await userEvent.type(input, '1');
     } else {
       throw new Error("Can't find input");
     }
@@ -69,7 +69,7 @@ describe('<PolicySettings />', () => {
   it('User can disable control features', async () => {
     const { getByTestId } = render(<WrappedComponent />);
 
-    userEvent.click(getByTestId('cloud-defend-controltoggle'));
+    await userEvent.click(getByTestId('cloud-defend-controltoggle'));
 
     const policy = onChange.mock.calls[0][0].updatedPolicy;
     const controlInput = getInputFromPolicy(policy, INPUT_CONTROL);

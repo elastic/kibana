@@ -19,7 +19,7 @@
             "section": "def-public.ControlSliderProps",
             "text": "ControlSliderProps"
           },
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "x-pack/packages/kbn-random-sampling/src/ui/slider_control/index.tsx",
         "deprecated": false,
@@ -66,7 +66,7 @@
             "section": "def-public.RandomSamplingIconProps",
             "text": "RandomSamplingIconProps"
           },
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "x-pack/packages/kbn-random-sampling/src/ui/icon/sampling_icon.tsx",
         "deprecated": false,

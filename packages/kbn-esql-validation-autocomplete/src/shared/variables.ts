@@ -1,24 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLAstItem, ESQLCommand, ESQLCommandOption, ESQLFunction } from '@kbn/esql-ast';
+import type { ESQLAst, ESQLAstItem, ESQLCommand, ESQLFunction } from '@kbn/esql-ast';
+import { Visitor } from '@kbn/esql-ast/src/visitor';
 import type { ESQLVariable, ESQLRealField } from '../validation/types';
-import { DOUBLE_BACKTICK, EDITOR_MARKER, SINGLE_BACKTICK } from './constants';
-import {
-  isColumnItem,
-  isAssignment,
-  isExpression,
-  isOptionItem,
-  isFunctionItem,
-  getFunctionDefinition,
-} from './helpers';
+import { EDITOR_MARKER } from './constants';
+import { isColumnItem, isFunctionItem, getExpressionType } from './helpers';
 
-function addToVariableOccurrencies(variables: Map<string, ESQLVariable[]>, instance: ESQLVariable) {
+function addToVariableOccurrences(variables: Map<string, ESQLVariable[]>, instance: ESQLVariable) {
   if (!variables.has(instance.name)) {
     variables.set(instance.name, []);
   }
@@ -34,41 +29,17 @@ function addToVariables(
 ) {
   if (isColumnItem(oldArg) && isColumnItem(newArg)) {
     const newVariable: ESQLVariable = {
-      name: newArg.name,
+      name: newArg.parts.join('.'),
       type: 'double' /* fallback to number */,
       location: newArg.location,
     };
     // Now workout the exact type
     // it can be a rename of another variable as well
-    const oldRef =
-      fields.get(oldArg.name) || variables.get(oldArg.quoted ? oldArg.text : oldArg.name);
+    const oldRef = fields.get(oldArg.parts.join('.')) || variables.get(oldArg.parts.join('.'));
     if (oldRef) {
-      addToVariableOccurrencies(variables, newVariable);
+      addToVariableOccurrences(variables, newVariable);
       newVariable.type = Array.isArray(oldRef) ? oldRef[0].type : oldRef.type;
     }
-  }
-}
-
-function getAssignRightHandSideType(item: ESQLAstItem, fields: Map<string, ESQLRealField>) {
-  if (Array.isArray(item)) {
-    const firstArg = item[0];
-    if (Array.isArray(firstArg) || !firstArg) {
-      return;
-    }
-    if (firstArg.type === 'literal') {
-      return firstArg.literalType;
-    }
-    if (isColumnItem(firstArg)) {
-      const field = fields.get(firstArg.name);
-      if (field) {
-        return field.type;
-      }
-    }
-    if (isFunctionItem(firstArg)) {
-      const fnDefinition = getFunctionDefinition(firstArg.name);
-      return fnDefinition?.signatures[0].returnType;
-    }
-    return firstArg.type;
   }
 }
 
@@ -89,25 +60,16 @@ export function excludeVariablesFromCurrentCommand(
   return resultVariables;
 }
 
-function extractExpressionAsQuotedVariable(
-  originalQuery: string,
-  location: { min: number; max: number }
-) {
-  const extractExpressionText = originalQuery.substring(location.min, location.max + 1);
-  // now inject quotes and save it as variable
-  return `\`${extractExpressionText.replaceAll(SINGLE_BACKTICK, DOUBLE_BACKTICK)}\``;
-}
-
 function addVariableFromAssignment(
   assignOperation: ESQLFunction,
   variables: Map<string, ESQLVariable[]>,
   fields: Map<string, ESQLRealField>
 ) {
   if (isColumnItem(assignOperation.args[0])) {
-    const rightHandSideArgType = getAssignRightHandSideType(assignOperation.args[1], fields);
-    addToVariableOccurrencies(variables, {
-      name: assignOperation.args[0].name,
-      type: (rightHandSideArgType as string) || 'double' /* fallback to number */,
+    const rightHandSideArgType = getExpressionType(assignOperation.args[1], fields, variables);
+    addToVariableOccurrences(variables, {
+      name: assignOperation.args[0].parts.join('.'),
+      type: rightHandSideArgType /* fallback to number */,
       location: assignOperation.args[0].location,
     });
   }
@@ -116,82 +78,75 @@ function addVariableFromAssignment(
 function addVariableFromExpression(
   expressionOperation: ESQLFunction,
   queryString: string,
-  variables: Map<string, ESQLVariable[]>
+  variables: Map<string, ESQLVariable[]>,
+  fields: Map<string, ESQLRealField>
 ) {
   if (!expressionOperation.text.includes(EDITOR_MARKER)) {
-    // save the variable in its quoted usable way
-    // (a bit of forward thinking here to simplyfy lookups later)
-    const forwardThinkingVariableName = extractExpressionAsQuotedVariable(
-      queryString,
-      expressionOperation.location
+    const expressionText = queryString.substring(
+      expressionOperation.location.min,
+      expressionOperation.location.max + 1
     );
-    const expressionType = 'double';
-    addToVariableOccurrencies(variables, {
-      name: forwardThinkingVariableName,
+    const expressionType = getExpressionType(expressionOperation, fields, variables);
+    addToVariableOccurrences(variables, {
+      name: expressionText,
       type: expressionType,
       location: expressionOperation.location,
     });
   }
 }
 
-export const collectVariablesFromList = (
-  list: ESQLAstItem[],
-  fields: Map<string, ESQLRealField>,
-  queryString: string,
-  variables: Map<string, ESQLVariable[]>
-) => {
-  for (const arg of list) {
-    if (isAssignment(arg)) {
-      addVariableFromAssignment(arg, variables, fields);
-    } else if (isExpression(arg)) {
-      addVariableFromExpression(arg, queryString, variables);
-    }
-  }
-};
-
 export function collectVariables(
-  commands: ESQLCommand[],
+  ast: ESQLAst,
   fields: Map<string, ESQLRealField>,
   queryString: string
 ): Map<string, ESQLVariable[]> {
   const variables = new Map<string, ESQLVariable[]>();
-  for (const command of commands) {
-    if (['row', 'eval', 'stats', 'inlinestats', 'metrics'].includes(command.name)) {
-      collectVariablesFromList(command.args, fields, queryString, variables);
-      if (command.name === 'stats' || command.name === 'inlinestats') {
-        const commandOptionsWithAssignment = command.args.filter(
-          (arg) => isOptionItem(arg) && arg.name === 'by'
-        ) as ESQLCommandOption[];
-        for (const commandOption of commandOptionsWithAssignment) {
-          collectVariablesFromList(commandOption.args, fields, queryString, variables);
-        }
+
+  const visitor = new Visitor()
+    .on('visitLiteralExpression', (ctx) => {
+      // TODO - add these as variables
+    })
+    .on('visitExpression', (_ctx) => {}) // required for the types :shrug:
+    .on('visitRenameExpression', (ctx) => {
+      const [oldArg, newArg] = ctx.node.args;
+      addToVariables(oldArg, newArg, fields, variables);
+    })
+    .on('visitFunctionCallExpression', (ctx) => {
+      if (ctx.node.name === '=') {
+        addVariableFromAssignment(ctx.node, variables, fields);
+      } else {
+        addVariableFromExpression(ctx.node, queryString, variables, fields);
       }
-    }
-    if (command.name === 'enrich') {
-      const commandOptionsWithAssignment = command.args.filter(
-        (arg) => isOptionItem(arg) && arg.name === 'with'
-      ) as ESQLCommandOption[];
-      for (const commandOption of commandOptionsWithAssignment) {
-        // Enrich assignment has some special behaviour, so do not use the version above here...
-        for (const assignFn of commandOption.args) {
+    })
+    .on('visitCommandOption', (ctx) => {
+      if (ctx.node.name === 'by') {
+        return [...ctx.visitArguments()];
+      } else if (ctx.node.name === 'with') {
+        for (const assignFn of ctx.node.args) {
           if (isFunctionItem(assignFn)) {
             const [newArg, oldArg] = assignFn?.args || [];
+            // TODO why is oldArg an array?
             if (Array.isArray(oldArg)) {
               addToVariables(oldArg[0], newArg, fields, variables);
             }
           }
         }
       }
-    }
-    if (command.name === 'rename') {
-      const commandOptionsWithAssignment = command.args.filter(
-        (arg) => isOptionItem(arg) && arg.name === 'as'
-      ) as ESQLCommandOption[];
-      for (const commandOption of commandOptionsWithAssignment) {
-        const [oldArg, newArg] = commandOption.args;
-        addToVariables(oldArg, newArg, fields, variables);
+    })
+    .on('visitCommand', (ctx) => {
+      const ret = [];
+      if (['row', 'eval', 'stats', 'inlinestats', 'metrics', 'rename'].includes(ctx.node.name)) {
+        ret.push(...ctx.visitArgs());
       }
-    }
-  }
+      if (['stats', 'inlinestats', 'enrich'].includes(ctx.node.name)) {
+        // BY and WITH can contain variables
+        ret.push(...ctx.visitOptions());
+      }
+      return ret;
+    })
+    .on('visitQuery', (ctx) => [...ctx.visitCommands()]);
+
+  visitor.visitQuery(ast);
+
   return variables;
 }

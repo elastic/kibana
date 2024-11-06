@@ -7,12 +7,15 @@
 
 import { PayloadAction } from '@reduxjs/toolkit';
 import { call, put, takeEvery, select, takeLatest, debounce } from 'redux-saga/effects';
-import { quietFetchOverviewStatusAction } from '../overview_status';
+import { fetchOverviewStatusAction, quietFetchOverviewStatusAction } from '../overview_status';
 import { enableDefaultAlertingAction } from '../alert_rules';
-import { ConfigKey, EncryptedSyntheticsSavedMonitor } from '../../../../../common/runtime_types';
+import {
+  ConfigKey,
+  EncryptedSyntheticsSavedMonitor,
+  SyntheticsMonitorWithId,
+} from '../../../../../common/runtime_types';
 import { kibanaService } from '../../../../utils/kibana_service';
-import { MonitorOverviewPageState } from '../overview';
-import { quietFetchOverviewAction } from '../overview/actions';
+import { MonitorOverviewPageState, selectOverviewPageState } from '../overview';
 import { selectOverviewState } from '../overview/selectors';
 import { fetchEffectFactory, sendErrorToast, sendSuccessToast } from '../utils/fetch_effect';
 import { serializeHttpFetchError } from '../utils/http_error';
@@ -49,8 +52,14 @@ export function* enableMonitorAlertEffect() {
     function* (action: PayloadAction<UpsertMonitorRequest>): Generator {
       try {
         const response = yield call(fetchUpsertMonitor, action.payload);
-        yield put(enableMonitorAlertAction.success(response as EncryptedSyntheticsSavedMonitor));
+        yield put(enableMonitorAlertAction.success(response as SyntheticsMonitorWithId));
+        const pageState = (yield select(selectOverviewPageState)) as MonitorOverviewPageState;
         sendSuccessToast(action.payload.success);
+        yield put(
+          fetchOverviewStatusAction.get({
+            pageState,
+          })
+        );
         if (
           (response as EncryptedSyntheticsSavedMonitor)[ConfigKey.ALERT_CONFIG]?.status?.enabled
         ) {
@@ -98,7 +107,6 @@ export function* upsertMonitorEffect() {
         if (action.payload.shouldQuietFetchAfterSuccess !== false) {
           const monitorState = yield select(selectOverviewState);
           if (hasPageState(monitorState)) {
-            yield put(quietFetchOverviewAction.get(monitorState.pageState));
             yield put(
               quietFetchOverviewStatusAction.get({
                 pageState: monitorState.pageState,
