@@ -10,7 +10,7 @@
 import React, { ReactElement } from 'react';
 import { shallow, ShallowWrapper } from 'enzyme';
 
-import { Table, TableProps, TableState } from './table';
+import { Table } from './table';
 import { EuiTableFieldDataColumnType, keys } from '@elastic/eui';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { SourceFiltersTableFilter } from '../../types';
@@ -20,10 +20,7 @@ const items: SourceFiltersTableFilter[] = [{ value: 'tim*', clientId: '' }];
 
 const getIndexPatternMock = (mockedFields: any = {}) => ({ ...mockedFields } as DataView);
 
-const getTableColumnRender = (
-  component: ShallowWrapper<TableProps, TableState, Table>,
-  index: number = 0
-) => {
+const getTableColumnRender = (component: ShallowWrapper<typeof Table>, index: number = 0) => {
   const columns =
     component.prop<Array<EuiTableFieldDataColumnType<SourceFiltersTableFilter>>>('columns');
   return {
@@ -48,7 +45,7 @@ describe('Table', () => {
   });
 
   test('should render filter matches', () => {
-    const component = shallow<Table>(
+    const component = shallow<typeof Table>(
       <Table
         indexPattern={getIndexPatternMock({
           getNonScriptedFields: () => [{ name: 'time' }, { name: 'value' }],
@@ -70,10 +67,10 @@ describe('Table', () => {
   describe('editing', () => {
     const saveFilter = jest.fn();
     const clientId = '1';
-    let component: ShallowWrapper<TableProps, TableState, Table>;
+    let component: ShallowWrapper<typeof Table>;
 
     beforeEach(() => {
-      component = shallow<Table>(
+      component = shallow<typeof Table>(
         <Table
           indexPattern={indexPattern}
           items={items}
