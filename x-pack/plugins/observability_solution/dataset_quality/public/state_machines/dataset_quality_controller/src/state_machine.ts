@@ -445,8 +445,8 @@ export const createDatasetQualityControllerStateMachine = ({
         fetchNonAggregatableDatasetsFailedNotifier(toasts, event.data),
       notifyFetchIntegrationsFailed: (_context, event: DoneInvokeEvent<Error>) =>
         fetchIntegrationsFailedNotifier(toasts, event.data),
-      notifyFetchTotalDocsFailed: (_context, event: DoneInvokeEvent<Error>) =>
-        fetchTotalDocsFailedNotifier(toasts, event.data),
+      notifyFetchTotalDocsFailed: (_context, event: DoneInvokeEvent<Error>, meta) =>
+        fetchTotalDocsFailedNotifier(toasts, event.data, meta),
     },
     services: {
       loadDataStreamStats: (context, _event) =>

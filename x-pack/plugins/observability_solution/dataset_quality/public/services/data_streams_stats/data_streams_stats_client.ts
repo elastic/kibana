@@ -67,10 +67,7 @@ export class DataStreamsStatsClient implements IDataStreamsStatsClient {
         },
       })
       .catch((error) => {
-        throw new DatasetQualityError(
-          `Failed to fetch data streams degraded stats: ${error}`,
-          error
-        );
+        throw new DatasetQualityError(`Failed to fetch data streams total docs: ${error}`, error);
       });
 
     const { totalDocs } = decodeOrThrow(
