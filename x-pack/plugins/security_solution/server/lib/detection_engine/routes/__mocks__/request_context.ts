@@ -164,6 +164,7 @@ const createSecuritySolutionRequestContextMock = (
     getRiskScoreDataClient: jest.fn(() => clients.riskScoreDataClient),
     getAssetCriticalityDataClient: jest.fn(() => clients.assetCriticalityDataClient),
     getAuditLogger: jest.fn(() => mockAuditLogger),
+    getDataViewsService: jest.fn(),
     getEntityStoreDataClient: jest.fn(() => clients.entityStoreDataClient),
     getSiemMigrationsClient: jest.fn(() => clients.siemMigrationsClient),
   };

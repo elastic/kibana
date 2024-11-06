@@ -22,7 +22,6 @@ import { getField } from '../shared/utils';
 import { EventKind } from '../shared/constants/event_kinds';
 import { useDocumentDetailsContext } from '../shared/context';
 import type { DocumentDetailsProps } from '../shared/types';
-import { LeftPanelTour } from './components/tour';
 
 export type LeftPanelPaths = 'visualize' | 'insights' | 'investigation' | 'response' | 'notes';
 export const LeftPanelVisualizeTab: LeftPanelPaths = 'visualize';
@@ -85,7 +84,6 @@ export const LeftPanel: FC<Partial<DocumentDetailsProps>> = memo(({ path }) => {
 
   return (
     <>
-      <LeftPanelTour />
       <PanelHeader
         selectedTabId={selectedTabId}
         setSelectedTabId={setSelectedTabId}

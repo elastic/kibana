@@ -144,7 +144,7 @@ export default function (providerContext: FtrProviderContext) {
       if (_attemptsMade >= attempts) {
         throw new Error(
           `Agents not loaded correctly, failing test. All agents: \n: ${JSON.stringify(
-            apiResponse.list,
+            apiResponse.items,
             null,
             2
           )}`
