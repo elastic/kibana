@@ -89,8 +89,13 @@ export const previewRulesRoute = (
     .post({
       path: DETECTION_ENGINE_RULES_PREVIEW,
       access: 'public',
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
       options: {
-        tags: ['access:securitySolution', routeLimitedConcurrencyTag(MAX_ROUTE_CONCURRENCY)],
+        tags: [routeLimitedConcurrencyTag(MAX_ROUTE_CONCURRENCY)],
       },
     })
     .addVersion(
