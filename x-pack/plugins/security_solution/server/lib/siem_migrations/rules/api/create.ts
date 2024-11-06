@@ -25,7 +25,11 @@ export const registerSiemRuleMigrationsCreateRoute = (
     .post({
       path: SIEM_RULE_MIGRATIONS_PATH,
       access: 'internal',
-      options: { tags: ['access:securitySolution'] },
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
     })
     .addVersion(
       {
