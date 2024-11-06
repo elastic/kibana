@@ -57,7 +57,7 @@ You can define different settings for the header row and body rows.
 [[document-explorer-sample-size]]
 ==== Limit the sample size
 
-When the number of results returned by your search query (displayed at the top of the **Documents** or **Results** tab) is greater than the value of <<advanced-options#discover-sample-size,`discover:sampleSize`>>, the number of results displayed in the table is limited to the configured value by default. You can adjust the initial sample size for searches to any number between 10 and `discover:sampleSize` from the **Display options** located in the table toolbar.
+When the number of results returned by your search query (displayed at the top of the **Documents** or **Results** tab) is greater than the value of <<kibana-discover-settings,`discover:sampleSize`>>, the number of results displayed in the table is limited to the configured value by default. You can adjust the initial sample size for searches to any number between 10 and `discover:sampleSize` from the **Display options** located in the table toolbar.
 
 On the last page of the table, a message indicates that you've reached the end of the loaded search results. From that message, you can choose to load more results to continue exploring. 
 
