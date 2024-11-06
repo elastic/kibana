@@ -262,7 +262,7 @@ geoip.country_iso_code : US and products.taxless_price >= 75
 ```
 
 [[filter-in-discover]]
-With the query field, you can filter data using the KQL or Lucene languages. You can also use the **Add filter** function available next to the query field to build your filters manually or edit them as Query DSL.
+With the query input, you can filter data using the KQL or Lucene languages. You can also use the **Add filter** function available next to the query input to build your filters one by one or define them as Query DSL.
 
 For example, exclude results from the ecommerce sample data view where day of week is not Wednesday:
 
