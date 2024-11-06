@@ -26,7 +26,6 @@ export interface TaskClaimerOpts {
   events$: Subject<TaskClaim>;
   taskStore: TaskStore;
   definitions: TaskTypeDictionary;
-  unusedTypes: string[];
   excludedTaskTypes: string[];
   taskMaxAttempts: Record<string, number>;
   logger: Logger;
