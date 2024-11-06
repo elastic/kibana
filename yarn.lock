@@ -5096,6 +5096,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/content-management-favorites-common@link:packages/content-management/favorites/favorites_common":
+  version "0.0.0"
+  uid ""
+
 "@kbn/feature-controls-examples-plugin@link:examples/feature_control_examples":
   version "0.0.0"
   uid ""

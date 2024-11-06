@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/content-management-favorites-common",
+  "owner": "@elastic/appex-sharedux"
+}

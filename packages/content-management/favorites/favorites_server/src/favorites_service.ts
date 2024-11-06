@@ -9,6 +9,7 @@
 
 // eslint-disable-next-line max-classes-per-file
 import type { SavedObject, SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import { FAVORITES_LIMIT } from '@kbn/content-management-favorites-common';
 import { Logger, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { favoritesSavedObjectType, FavoritesSavedObjectAttributes } from './favorites_saved_object';
 import { FavoritesRegistry } from './favorites_registry';
@@ -17,9 +18,6 @@ export interface FavoritesState {
   favoriteIds: string[];
   favoriteMetadata?: Record<string, object>;
 }
-
-// Limit the number of favorites to prevent too large objects due to metadata
-const FAVORITES_LIMIT = 100;
 
 export class FavoritesService {
   constructor(
