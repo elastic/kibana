@@ -16,9 +16,11 @@ import type {
 } from '@kbn/esql-ast';
 import { uniqBy } from 'lodash';
 import {
+  isParameterType,
   type FunctionDefinition,
   type FunctionReturnType,
   type SupportedDataType,
+  isReturnType,
 } from '../definitions/types';
 import {
   findFinalWord,
@@ -536,14 +538,23 @@ export function checkFunctionInvocationComplete(
  *
  * TODO — is this function doing too much?
  */
-export async function getSuggestionsToRightOfOperatorExpression(
-  queryText: string,
-  commandName: string,
-  optionName: string | undefined,
-  operator: ESQLFunction,
-  getExpressionType: (expression: ESQLAstItem) => SupportedDataType | 'unknown',
-  getFieldsByType: GetColumnsByTypeFn
-) {
+export async function getSuggestionsToRightOfOperatorExpression({
+  queryText,
+  commandName,
+  optionName,
+  rootOperator: operator,
+  preferredExpressionType,
+  getExpressionType,
+  getColumnsByType,
+}: {
+  queryText: string;
+  commandName: string;
+  optionName?: string;
+  rootOperator: ESQLFunction;
+  preferredExpressionType?: SupportedDataType;
+  getExpressionType: (expression: ESQLAstItem) => SupportedDataType | 'unknown';
+  getColumnsByType: GetColumnsByTypeFn;
+}) {
   const suggestions = [];
   const isFnComplete = checkFunctionInvocationComplete(operator, getExpressionType);
   if (isFnComplete.complete) {
@@ -602,13 +613,44 @@ export async function getSuggestionsToRightOfOperatorExpression(
             typeToUse,
             commandName,
             optionName,
-            getFieldsByType,
+            getColumnsByType,
             {
               functions: true,
               fields: true,
             }
           ))
         );
+      }
+    }
+
+    /**
+     * If the caller has supplied a preferred expression type, we can suggest operators that
+     * would move the user toward that expression type.
+     *
+     * e.g. if we have a preferred type of boolean and we have `timestamp > "2002" AND doubleField`
+     * this is an incorrect signature for AND because the left side is boolean and the right side is double
+     *
+     * Knowing that we prefer boolean expressions, we suggest operators that would accept doubleField as a left operand
+     * and also return a boolean value.
+     *
+     * I believe this is only used in WHERE and probably bears some rethinking.
+     */
+    if (isFnComplete.reason === 'wrongTypes') {
+      if (leftArgType && preferredExpressionType) {
+        // suggest something to complete the operator
+        if (
+          leftArgType !== preferredExpressionType &&
+          isParameterType(leftArgType) &&
+          isReturnType(preferredExpressionType)
+        ) {
+          suggestions.push(
+            ...getOperatorSuggestions({
+              command: commandName,
+              leftParamType: leftArgType,
+              returnTypes: [preferredExpressionType],
+            })
+          );
+        }
       }
     }
   }

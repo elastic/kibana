@@ -18,7 +18,7 @@ import {
   setup,
 } from './helpers';
 
-describe('WHERE expression', () => {
+describe('WHERE <expression>', () => {
   const allEvalFns = getFunctionSignaturesByReturnType('where', 'any', {
     scalar: true,
   });

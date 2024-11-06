@@ -14,7 +14,7 @@ import {
   type ESQLSingleAstItem,
   type ESQLFunction,
 } from '@kbn/esql-ast';
-import type { SupportedDataType } from '../../../definitions/types';
+import { isParameterType, type SupportedDataType } from '../../../definitions/types';
 import { endsInWhitespace, isColumnItem, isFunctionItem } from '../../../shared/helpers';
 import type { GetColumnsByTypeFn, SuggestionRawDefinition } from '../../types';
 import { getFunctionSuggestions, getOperatorSuggestions } from '../../factories';
@@ -32,9 +32,11 @@ export async function suggest(
   const lastArg = command.args[command.args.length - 1] as ESQLSingleAstItem;
   if (isColumnItem(lastArg) && endsInWhitespace(innerText)) {
     const columnType = getExpressionType(lastArg);
-    if (columnType === 'unknown' || columnType === 'unsupported') {
+
+    if (!isParameterType(columnType)) {
       return [];
     }
+
     // skip assign operator if the column exists so as not to promote shadowing
     const ignoredOperators = columnExists(lastArg.parts.join('.')) ? ['='] : [];
 
@@ -45,6 +47,27 @@ export async function suggest(
     });
   }
 
+  if (
+    isFunctionItem(lastArg) &&
+    lastArg.subtype === 'variadic-call' &&
+    endsInWhitespace(innerText)
+  ) {
+    const returnType = getExpressionType(lastArg);
+
+    if (!isParameterType(returnType)) {
+      return [];
+    }
+
+    return getOperatorSuggestions({
+      command: 'where',
+      leftParamType: returnType,
+      ignored: ['='],
+    });
+  }
+
+  /**
+   * This branch deals with operators
+   */
   if (isFunctionItem(lastArg) && lastArg.subtype !== 'variadic-call') {
     // 1 + 1 /
     // 1 + 1 + /
@@ -62,14 +85,14 @@ export async function suggest(
     });
     walker.walkFunction(lastArg);
 
-    return getSuggestionsToRightOfOperatorExpression(
-      innerText,
-      'where',
-      undefined,
-      rightmostOperator,
+    return getSuggestionsToRightOfOperatorExpression({
+      queryText: innerText,
+      commandName: 'where',
+      rootOperator: rightmostOperator,
+      preferredExpressionType: 'boolean',
       getExpressionType,
-      getColumnsByType
-    );
+      getColumnsByType,
+    });
   }
 
   const columnSuggestions = await getColumnsByType('any', [], {

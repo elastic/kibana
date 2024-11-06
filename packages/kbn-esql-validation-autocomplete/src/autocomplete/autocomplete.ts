@@ -733,15 +733,15 @@ async function getExpressionSuggestionsByType(
               );
             } else {
               suggestions.push(
-                ...(await getSuggestionsToRightOfOperatorExpression(
-                  innerText,
-                  command.name,
-                  option?.name,
-                  nodeArg,
-                  (expression) =>
+                ...(await getSuggestionsToRightOfOperatorExpression({
+                  queryText: innerText,
+                  commandName: command.name,
+                  optionName: option?.name,
+                  rootOperator: nodeArg,
+                  getExpressionType: (expression) =>
                     getExpressionType(expression, references.fields, references.variables),
-                  getFieldsByType
-                ))
+                  getColumnsByType: getFieldsByType,
+                }))
               );
               if (nodeArg.args.some(isTimeIntervalItem)) {
                 const lastFnArg = nodeArg.args[nodeArg.args.length - 1];
@@ -828,15 +828,15 @@ async function getExpressionSuggestionsByType(
                 );
               } else {
                 suggestions.push(
-                  ...(await getSuggestionsToRightOfOperatorExpression(
-                    innerText,
-                    command.name,
-                    option?.name,
-                    nodeArg,
-                    (expression) =>
+                  ...(await getSuggestionsToRightOfOperatorExpression({
+                    queryText: innerText,
+                    commandName: command.name,
+                    optionName: option?.name,
+                    rootOperator: nodeArg,
+                    getExpressionType: (expression) =>
                       getExpressionType(expression, references.fields, references.variables),
-                    getFieldsByType
-                  ))
+                    getColumnsByType: getFieldsByType,
+                  }))
                 );
               }
             } else if (isParameterType(nodeArgType)) {
