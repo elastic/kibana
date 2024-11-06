@@ -74,7 +74,7 @@ export class RuleMigrationsTaskRunner {
 
     const abortController = new AbortController();
 
-    // Await the preparation for the request to make sure the agent is created properly so the task can run
+    // Await the preparation to make sure the agent is created properly so the task can run
     const agent = await this.prepare({ ...params, abortController });
 
     // not awaiting the `run` promise to execute the task in the background
