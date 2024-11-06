@@ -6,6 +6,7 @@
  */
 
 import { BehaviorSubject, Subject } from 'rxjs';
+import deepMerge from 'deepmerge';
 import React from 'react';
 import faker from 'faker';
 import { Query, Filter, AggregateQuery, TimeRange } from '@kbn/es-query';
@@ -18,6 +19,7 @@ import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { ReactExpressionRendererProps } from '@kbn/expressions-plugin/public';
+import { ReactEmbeddableDynamicActionsApi } from '@kbn/embeddable-enhanced-plugin/public/plugin';
 import { DOC_TYPE } from '../../../common/constants';
 import { createEmptyLensState } from '../helper';
 import {
@@ -28,6 +30,7 @@ import {
   LensRendererProps,
   LensRuntimeState,
   LensSerializedState,
+  VisualizationContext,
 } from '../types';
 import {
   createMockDatasource,
@@ -118,6 +121,10 @@ const LensSerializedStateMock: LensSerializedState = createEmptyLensState(
   { query: 'test', language: 'kuery' }
 );
 
+export function getLensAttributesMock(attributes?: Partial<LensRuntimeState['attributes']>) {
+  return deepMerge(LensSerializedStateMock.attributes!, attributes ?? {});
+}
+
 export function getLensApiMock(overrides: Partial<LensApi> = {}) {
   return {
     ...LensApiMock,
@@ -186,6 +193,21 @@ export function makeEmbeddableServices(
     uiActions: {
       ...services.uiActions,
       getTrigger: jest.fn().mockImplementation(() => ({ exec: jest.fn() })),
+    },
+    embeddableEnhanced: {
+      initializeReactEmbeddableDynamicActions: jest.fn(
+        () =>
+          ({
+            dynamicActionsApi: {
+              enhancements: { dynamicActions: {} },
+              setDynamicActions: jest.fn(),
+              dynamicActionsState$: {},
+            },
+            dynamicActionsComparator: jest.fn(),
+            serializeDynamicActions: jest.fn(),
+            startDynamicActions: jest.fn(),
+          } as unknown as ReactEmbeddableDynamicActionsApi)
+      ),
     },
   };
 }
@@ -287,5 +309,39 @@ export function getLensInternalApiMock(overrides: Partial<LensInternalApi> = {})
   return {
     ...LensInternalApiMock,
     ...overrides,
+  };
+}
+
+export function getVisualizationContextHelperMock(
+  attributesOverrides?: Partial<LensRuntimeState['attributes']>,
+  contextOverrides?: Omit<Partial<VisualizationContext>, 'doc'>
+) {
+  return {
+    getVisualizationContext: jest.fn(() => ({
+      mergedSearchContext: {},
+      indexPatterns: {},
+      indexPatternRefs: [],
+      activeVisualizationState: undefined,
+      activeDatasourceState: undefined,
+      activeData: undefined,
+      ...contextOverrides,
+      doc: getLensAttributesMock(attributesOverrides),
+    })),
+    updateVisualizationContext: jest.fn(),
+  };
+}
+
+export function createUnifiedSearchApi(
+  query: Query | AggregateQuery = {
+    query: '',
+    language: 'kuery',
+  },
+  filters: Filter[] = [],
+  timeRange: TimeRange = { from: 'now-7d', to: 'now' }
+) {
+  return {
+    filters$: new BehaviorSubject<Filter[] | undefined>(filters),
+    query$: new BehaviorSubject<Query | AggregateQuery | undefined>(query),
+    timeRange$: new BehaviorSubject<TimeRange | undefined>(timeRange),
   };
 }

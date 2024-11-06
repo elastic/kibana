@@ -26,6 +26,7 @@ export function createEmptyLensState(
   query?: LensSerializedState['query'],
   filters?: LensSerializedState['filters']
 ) {
+  const isTextBased = query && isOfAggregateQueryType(query);
   return {
     attributes: {
       title: title ?? '',
@@ -36,7 +37,7 @@ export function createEmptyLensState(
         query: query || { query: '', language: 'kuery' },
         filters: filters || [],
         internalReferences: [],
-        datasourceStates: {},
+        datasourceStates: { ...(isTextBased ? { text_based: {} } : { form_based: {} }) },
         visualization: {},
       },
     },
@@ -63,10 +64,6 @@ export async function deserializeState(
 
 export function emptySerializer() {
   return {};
-}
-
-export function NonNullable<T>(value: T): value is NonNullable<T> {
-  return value != null;
 }
 
 export type ComparatorType<T extends unknown> = [

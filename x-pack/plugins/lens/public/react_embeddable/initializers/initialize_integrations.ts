@@ -9,11 +9,10 @@ import {
   getAggregateQueryMode,
   getLanguageDisplayName,
   isOfAggregateQueryType,
-  isOfQueryType,
 } from '@kbn/es-query';
 import { noop } from 'lodash';
 import type { HasSerializableState } from '@kbn/presentation-containers';
-import { emptySerializer } from '../helper';
+import { emptySerializer, isTextBasedLanguage } from '../helper';
 import type { GetStateType } from '../types';
 import type { IntegrationCallbacks } from '../types';
 
@@ -32,17 +31,13 @@ export function initializeIntegrations(getLatestState: GetStateType): {
   serialize: () => {};
   comparators: {};
 } {
-  const isTextBasedLanguage = () => {
-    const currentState = getLatestState().attributes;
-    return !isOfQueryType(currentState?.state.query);
-  };
   return {
     api: {
       serializeState: () => ({ rawState: getLatestState(), references: [] }),
       // TODO: workout why we have this duplicated
       getFullAttributes: () => getLatestState().attributes,
       getSavedVis: () => getLatestState().attributes,
-      isTextBasedLanguage,
+      isTextBasedLanguage: () => isTextBasedLanguage(getLatestState()),
       getTextBasedLanguage: () => {
         const query = getLatestState().attributes?.state.query;
         if (!query || !isOfAggregateQueryType(query)) {

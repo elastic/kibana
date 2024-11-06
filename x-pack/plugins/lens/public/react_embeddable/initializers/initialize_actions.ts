@@ -7,16 +7,7 @@
 
 import { Capabilities } from '@kbn/core-capabilities-common';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
-import {
-  AggregateQuery,
-  EsQueryConfig,
-  ExecutionContextSearch,
-  Filter,
-  isOfAggregateQueryType,
-  isOfQueryType,
-  Query,
-  TimeRange,
-} from '@kbn/es-query';
+import { EsQueryConfig, ExecutionContextSearch, Filter, Query, TimeRange } from '@kbn/es-query';
 import {
   PublishingSubject,
   StateComparators,
@@ -32,7 +23,7 @@ import { TableInspectorAdapter } from '../../editor_frame_service/types';
 
 import { Datasource, IndexPatternMap } from '../../types';
 import { getMergedSearchContext } from '../expressions/merged_search_context';
-import { buildObservableVariable, emptySerializer } from '../helper';
+import { buildObservableVariable, emptySerializer, isTextBasedLanguage } from '../helper';
 import type {
   GetStateType,
   LensEmbeddableStartServices,
@@ -88,19 +79,11 @@ function getViewUnderlyingDataArgs({
   if (error || !meta) {
     return;
   }
-  if (isOfAggregateQueryType(query)) {
-    return;
-  }
   const luceneOrKuery: Query[] = [];
-  const aggregateQuery: AggregateQuery[] = [];
 
   if (Array.isArray(query)) {
     query.forEach((q) => {
-      if (isOfQueryType(q)) {
-        luceneOrKuery.push(q);
-      } else {
-        aggregateQuery.push(q);
-      }
+      luceneOrKuery.push(q);
     });
   }
 
@@ -118,7 +101,7 @@ function getViewUnderlyingDataArgs({
     dataViewSpec,
     timeRange,
     filters: newFilters,
-    query: aggregateQuery.length > 0 ? aggregateQuery[0] : newQuery,
+    query: newQuery,
     columns: meta.columns,
   };
 }
@@ -152,6 +135,10 @@ function loadViewUnderlyingDataArgs(
     !activeVisualization ||
     !activeVisualizationState
   ) {
+    return;
+  }
+
+  if (isTextBasedLanguage(state)) {
     return;
   }
 
@@ -256,7 +243,7 @@ export function initializeActionApi(
 
   return {
     api: {
-      ...(dynamicActionsApi?.dynamicActionsApi ?? {}),
+      ...(isTextBasedLanguage(initialState) ? {} : dynamicActionsApi?.dynamicActionsApi ?? {}),
       ...createViewUnderlyingDataApis(
         getLatestState,
         visualizationContextHelper,

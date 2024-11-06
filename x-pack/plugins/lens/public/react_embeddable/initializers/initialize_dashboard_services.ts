@@ -17,7 +17,7 @@ import {
   initializeTitles,
 } from '@kbn/presentation-publishing';
 import { apiPublishesSettings } from '@kbn/presentation-containers';
-import { buildObservableVariable } from '../helper';
+import { buildObservableVariable, isTextBasedLanguage } from '../helper';
 import type {
   LensComponentProps,
   LensPanelProps,
@@ -113,7 +113,8 @@ export function initializeDashboardServices(
           copyOnSave: false,
         });
       },
-      canLinkToLibrary: async () => !getLatestState().savedObjectId,
+      canLinkToLibrary: async () =>
+        !getLatestState().savedObjectId && !isTextBasedLanguage(getLatestState()),
       canUnlinkFromLibrary: async () => Boolean(getLatestState().savedObjectId),
       unlinkFromLibrary: () => {
         // broadcast the change to the main state serializer
