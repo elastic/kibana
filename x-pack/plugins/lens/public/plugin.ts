@@ -64,6 +64,7 @@ import {
   ContentManagementPublicStart,
 } from '@kbn/content-management-plugin/public';
 import { i18n } from '@kbn/i18n';
+import type { ChartType } from '@kbn/visualization-utils';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { EditorFrameService as EditorFrameServiceType } from './editor_frame_service';
@@ -124,7 +125,11 @@ import { EditLensEmbeddableAction } from './trigger_actions/open_lens_config/in_
 import { visualizeFieldAction } from './trigger_actions/visualize_field_actions';
 import { visualizeTSVBAction } from './trigger_actions/visualize_tsvb_actions';
 
-import { LensEmbeddableStartServices, LensSerializedState } from './react_embeddable/types';
+import type {
+  LensEmbeddableStartServices,
+  LensSerializedState,
+  TypedLensByValueInput,
+} from './react_embeddable/types';
 import { getSaveModalComponent } from './app_plugin/shared/saved_modal_lazy';
 import type { SaveModalContainerProps } from './app_plugin/save_modal_container';
 
@@ -141,7 +146,6 @@ import {
   LensSavedObjectAttributes,
 } from '../common/content_management';
 import type { EditLensConfigurationProps } from './app_plugin/shared/edit_on_the_fly/get_edit_lens_configuration';
-import { ChartType } from './lens_suggestions_api';
 import { convertToLensActionFactory } from './trigger_actions/convert_to_lens_action';
 import { LensRenderer } from './react_embeddable/renderer/lens_custom_renderer_component';
 import { deserializeState } from './react_embeddable/helper';
@@ -289,7 +293,8 @@ export type LensSuggestionsApi = (
   context: VisualizeFieldContext | VisualizeEditorContext,
   dataViews: DataView,
   excludedVisualizations?: string[],
-  preferredChartType?: ChartType
+  preferredChartType?: ChartType,
+  preferredVisAttributes?: TypedLensByValueInput['attributes']
 ) => Suggestion[] | undefined;
 
 export class LensPlugin {
@@ -742,7 +747,13 @@ export class LensPlugin {
             visualizationMap,
             datasourceMap
           ),
-          suggestions: (context, dataView, excludedVisualizations, preferredChartType) => {
+          suggestions: (
+            context,
+            dataView,
+            excludedVisualizations,
+            preferredChartType,
+            preferredVisAttributes
+          ) => {
             return suggestionsApi({
               datasourceMap,
               visualizationMap,
@@ -750,6 +761,7 @@ export class LensPlugin {
               dataView,
               excludedVisualizations,
               preferredChartType,
+              preferredVisAttributes,
             });
           },
         };
