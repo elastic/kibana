@@ -7,9 +7,9 @@
 
 import './_explorer_chart_label.scss';
 import PropTypes from 'prop-types';
-import React, { Fragment, useCallback } from 'react';
+import React, { useCallback } from 'react';
 
-import { EuiIconTip } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiText, EuiTextColor } from '@elastic/eui';
 
 import { ExplorerChartLabelBadge } from './explorer_chart_label_badge';
 import { ExplorerChartInfoTooltip } from '../../explorer_chart_info_tooltip';
@@ -19,6 +19,7 @@ export function ExplorerChartLabel({
   detectorLabel,
   entityFields,
   infoTooltip,
+  mode,
   wrapLabel = false,
   onSelectEntity,
 }) {
@@ -48,16 +49,30 @@ export function ExplorerChartLabel({
   const entityFieldBadges = entityFields.map((entity) => {
     const key = `${infoTooltip.chartFunction}-${entity.fieldName}-${entity.fieldType}-${entity.fieldValue}`;
     return (
-      <Fragment key={`badge-wrapper-${key}`}>
-        <ExplorerChartLabelBadge entity={entity} />
+      <EuiFlexGroup gutterSize="none" alignItems="center" key={`badge-wrapper-${key}`}>
+        <EuiFlexItem grow={false}>
+          {mode === 'embeddable' ? (
+            <EuiText size="xs">
+              <EuiTextColor color={'success'} component={'span'}>
+                {`(${entity.fieldName}: ${entity.fieldValue})`}
+              </EuiTextColor>
+            </EuiText>
+          ) : (
+            <ExplorerChartLabelBadge entity={entity} />
+          )}
+        </EuiFlexItem>
+
         {onSelectEntity !== undefined && (
-          <EntityFilter
-            onFilter={applyFilter}
-            influencerFieldName={entity.fieldName}
-            influencerFieldValue={entity.fieldValue}
-          />
+          <EuiFlexItem grow={false}>
+            <EntityFilter
+              mode={mode}
+              onFilter={applyFilter}
+              influencerFieldName={entity.fieldName}
+              influencerFieldValue={entity.fieldValue}
+            />
+          </EuiFlexItem>
         )}
-      </Fragment>
+      </EuiFlexGroup>
     );
   });
 

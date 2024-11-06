@@ -21,10 +21,11 @@ import { CONTROLLED_BY_ANOMALY_CHARTS_FILTER } from './constants';
 export const APPLY_ENTITY_FIELD_FILTERS_ACTION = 'applyEntityFieldFiltersAction';
 
 export function createApplyEntityFieldFiltersAction(
-  getStartServices: MlCoreSetup['getStartServices']
+  getStartServices: MlCoreSetup['getStartServices'],
+  constrolledBy?: string
 ): UiActionsActionDefinition<AnomalyChartsFieldSelectionContext> {
   return {
-    id: 'apply-entity-field-filters',
+    id: constrolledBy ? 'smv-apply-entity-field-filters' : 'apply-entity-field-filters',
     type: APPLY_ENTITY_FIELD_FILTERS_ACTION,
     getIconType(context: AnomalyChartsFieldSelectionContext): string {
       return 'filter';
@@ -60,7 +61,7 @@ export function createApplyEntityFieldFiltersAction(
                     labelValue: `${fieldName}:${fieldValue}`,
                   },
                 }),
-                controlledBy: CONTROLLED_BY_ANOMALY_CHARTS_FILTER,
+                controlledBy: constrolledBy ?? CONTROLLED_BY_ANOMALY_CHARTS_FILTER,
                 negate: operation === ML_ENTITY_FIELD_OPERATIONS.REMOVE,
                 disabled: false,
                 type: 'phrase',

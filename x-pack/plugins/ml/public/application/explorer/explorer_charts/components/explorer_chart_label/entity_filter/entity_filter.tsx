@@ -6,7 +6,7 @@
  */
 import type { FC } from 'react';
 import React from 'react';
-import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { MlEntityFieldOperation } from '@kbn/ml-anomaly-utils';
@@ -22,64 +22,70 @@ interface EntityFilterProps {
   }) => void;
   influencerFieldName: string;
   influencerFieldValue: string;
+  mode?: string;
 }
 export const EntityFilter: FC<EntityFilterProps> = ({
   onFilter,
   influencerFieldName,
   influencerFieldValue,
+  mode,
 }) => {
   return (
-    <React.Fragment>
-      <EuiToolTip
-        content={
-          <FormattedMessage
-            id="xpack.ml.entityFilter.addFilterTooltip"
-            defaultMessage="Add filter for value"
+    <EuiFlexGroup gutterSize="none" alignItems="center">
+      <EuiFlexItem grow={false}>
+        <EuiToolTip
+          content={
+            <FormattedMessage
+              id="xpack.ml.entityFilter.addFilterTooltip"
+              defaultMessage="Filter for"
+            />
+          }
+        >
+          <EuiButtonIcon
+            size="s"
+            className="filter-button"
+            onClick={blurButtonOnClick(() => {
+              onFilter({
+                influencerFieldName,
+                influencerFieldValue,
+                action: ML_ENTITY_FIELD_OPERATIONS.ADD,
+              });
+            })}
+            iconType="plusInCircle"
+            aria-label={i18n.translate('xpack.ml.entityFilter.addFilterAriaLabel', {
+              defaultMessage: 'Add filter for {influencerFieldName} {influencerFieldValue}',
+              values: { influencerFieldName, influencerFieldValue },
+            })}
           />
-        }
-      >
-        <EuiButtonIcon
-          size="s"
-          className="filter-button"
-          onClick={blurButtonOnClick(() => {
-            onFilter({
-              influencerFieldName,
-              influencerFieldValue,
-              action: ML_ENTITY_FIELD_OPERATIONS.ADD,
-            });
-          })}
-          iconType="plusInCircle"
-          aria-label={i18n.translate('xpack.ml.entityFilter.addFilterAriaLabel', {
-            defaultMessage: 'Add filter for {influencerFieldName} {influencerFieldValue}',
-            values: { influencerFieldName, influencerFieldValue },
-          })}
-        />
-      </EuiToolTip>
-      <EuiToolTip
-        content={
-          <FormattedMessage
-            id="xpack.ml.entityFilter.removeFilterTooltip"
-            defaultMessage="Add negate filter for value"
+        </EuiToolTip>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiToolTip
+          content={
+            <FormattedMessage
+              id="xpack.ml.entityFilter.removeFilterTooltip"
+              defaultMessage={mode ? 'Filter out' : 'Remove filter'}
+            />
+          }
+        >
+          <EuiButtonIcon
+            size="s"
+            className="filter-button"
+            onClick={blurButtonOnClick(() => {
+              onFilter({
+                influencerFieldName,
+                influencerFieldValue,
+                action: ML_ENTITY_FIELD_OPERATIONS.REMOVE,
+              });
+            })}
+            iconType="minusInCircle"
+            aria-label={i18n.translate('xpack.ml.entityFilter.removeFilterAriaLabel', {
+              defaultMessage: 'Remove filter for {influencerFieldName} {influencerFieldValue}',
+              values: { influencerFieldName, influencerFieldValue },
+            })}
           />
-        }
-      >
-        <EuiButtonIcon
-          size="s"
-          className="filter-button"
-          onClick={blurButtonOnClick(() => {
-            onFilter({
-              influencerFieldName,
-              influencerFieldValue,
-              action: ML_ENTITY_FIELD_OPERATIONS.REMOVE,
-            });
-          })}
-          iconType="minusInCircle"
-          aria-label={i18n.translate('xpack.ml.entityFilter.removeFilterAriaLabel', {
-            defaultMessage: 'Remove filter for {influencerFieldName} {influencerFieldValue}',
-            values: { influencerFieldName, influencerFieldValue },
-          })}
-        />
-      </EuiToolTip>
-    </React.Fragment>
+        </EuiToolTip>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };

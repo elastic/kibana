@@ -23,6 +23,7 @@ import type { AnomaliesTableData } from '../explorer_utils';
 
 interface ExplorerAnomaliesContainerProps {
   id: string;
+  mode?: string;
   chartsData: ExplorerChartsData;
   showCharts: boolean;
   severity: TableSeverity;
@@ -51,6 +52,7 @@ const tooManyBucketsCalloutMsg = i18n.translate(
 
 export const ExplorerAnomaliesContainer: FC<ExplorerAnomaliesContainerProps> = ({
   id,
+  mode,
   chartsData,
   showCharts,
   severity,
@@ -90,6 +92,7 @@ export const ExplorerAnomaliesContainer: FC<ExplorerAnomaliesContainerProps> = (
         <ExplorerChartsContainer
           {...{
             ...chartsData,
+            mode,
             severity: severity.val,
             mlLocator,
             tableData,

@@ -39,12 +39,12 @@ const FilterButton: FC<{
         isAddFilter ? (
           <FormattedMessage
             id="xpack.ml.timeSeriesExplorer.title.addFilterTooltip"
-            defaultMessage="Add filter for value"
+            defaultMessage="Filter for"
           />
         ) : (
           <FormattedMessage
             id="xpack.ml.timeSeriesExplorer.title.addNegateFilterTooltip"
-            defaultMessage="Add negate filter for value"
+            defaultMessage="Filter out"
           />
         )
       }
@@ -69,10 +69,10 @@ const FilterButton: FC<{
         aria-label={
           isAddFilter
             ? i18n.translate('xpack.ml.timeSeriesExplorer.title.addFilterAriaLabel', {
-                defaultMessage: 'Add filter',
+                defaultMessage: 'Filter for',
               })
             : i18n.translate('xpack.ml.timeSeriesExplorer.title.addNegateFilterAriaLabel', {
-                defaultMessage: 'Add negate filter',
+                defaultMessage: 'Filter out',
               })
         }
       />

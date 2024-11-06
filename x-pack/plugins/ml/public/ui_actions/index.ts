@@ -37,6 +37,7 @@ export { APPLY_TIME_RANGE_SELECTION_ACTION } from './apply_time_range_action';
 export { OPEN_IN_ANOMALY_EXPLORER_ACTION } from './open_in_anomaly_explorer_action';
 export { CREATE_LENS_VIS_TO_ML_AD_JOB_ACTION } from './open_vis_in_ml_action';
 export { SWIM_LANE_SELECTION_TRIGGER };
+import { CONTROLLED_BY_SINGLE_METRIC_VIEWER_FILTER } from './constants';
 /**
  * Register ML UI actions
  */
@@ -55,6 +56,10 @@ export function registerMlUiActions(
   );
   const applyInfluencerFiltersAction = createApplyInfluencerFiltersAction(core.getStartServices);
   const applyEntityFieldFilterAction = createApplyEntityFieldFiltersAction(core.getStartServices);
+  const smvApplyEntityFieldFilterAction = createApplyEntityFieldFiltersAction(
+    core.getStartServices,
+    CONTROLLED_BY_SINGLE_METRIC_VIEWER_FILTER
+  );
   const applyTimeRangeSelectionAction = createApplyTimeRangeSelectionAction(core.getStartServices);
   const clearSelectionAction = createClearSelectionAction(core.getStartServices);
   const visToAdJobAction = createVisToADJobAction(core.getStartServices);
@@ -64,6 +69,7 @@ export function registerMlUiActions(
 
   // Register actions
   uiActions.registerAction(applyEntityFieldFilterAction);
+  uiActions.registerAction(smvApplyEntityFieldFilterAction);
   uiActions.registerAction(applyTimeRangeSelectionAction);
   uiActions.registerAction(categorizationADJobAction);
   uiActions.registerAction(addAnomalyChartsPanelAction);
@@ -89,7 +95,7 @@ export function registerMlUiActions(
   uiActions.addTriggerAction(EXPLORER_ENTITY_FIELD_SELECTION_TRIGGER, applyEntityFieldFilterAction);
   uiActions.addTriggerAction(
     SINGLE_METRIC_VIEWER_ENTITY_FIELD_SELECTION_TRIGGER,
-    applyEntityFieldFilterAction
+    smvApplyEntityFieldFilterAction
   );
   uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, visToAdJobAction);
   uiActions.addTriggerAction(

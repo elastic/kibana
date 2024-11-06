@@ -272,6 +272,7 @@ const AnomalyChartsContainer: FC<AnomalyChartsContainerProps> = ({
           {chartsData !== undefined && isExplorerLoading === false ? (
             <ExplorerAnomaliesContainer
               id={id}
+              mode="embeddable"
               showCharts={true}
               chartsData={chartsData}
               severity={severity}
