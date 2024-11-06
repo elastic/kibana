@@ -6,9 +6,11 @@
  */
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
-import { createMockVisualization, DatasourceMock, createMockDatasource } from './mocks';
-import { DatasourceSuggestion } from './types';
-import { suggestionsApi, ChartType } from './lens_suggestions_api';
+import { ChartType } from '@kbn/visualization-utils';
+import { createMockVisualization, DatasourceMock, createMockDatasource } from '../mocks';
+import { DatasourceSuggestion } from '../types';
+import { suggestionsApi } from '.';
+import type { TypedLensByValueInput } from '../embeddable/embeddable_component';
 
 const generateSuggestion = (state = {}, layerId: string = 'first'): DatasourceSuggestion => ({
   state,
@@ -264,6 +266,9 @@ describe('suggestionsApi', () => {
     datasourceMap.textBased.getDatasourceSuggestionsForVisualizeField.mockReturnValue([
       generateSuggestion(),
     ]);
+    datasourceMap.textBased.getDatasourceSuggestionsFromCurrentState.mockReturnValue([
+      generateSuggestion(),
+    ]);
     const context = {
       dataViewSpec: {
         id: 'index1',
@@ -284,8 +289,7 @@ describe('suggestionsApi', () => {
       preferredChartType: ChartType.Line,
     });
     expect(suggestions?.length).toEqual(1);
-    expect(suggestions?.[0]).toMatchInlineSnapshot(
-      `
+    expect(suggestions?.[0]).toMatchInlineSnapshot(`
       Object {
         "changeType": "unchanged",
         "columns": 0,
@@ -302,8 +306,111 @@ describe('suggestionsApi', () => {
           "preferredSeriesType": "line",
         },
       }
-    `
-    );
+    `);
+  });
+
+  test('returns the suggestion with the preferred attributes ', async () => {
+    const dataView = { id: 'index1' } as unknown as DataView;
+    const visualizationMap = {
+      lnsXY: {
+        ...mockVis,
+        switchVisualizationType(seriesType: string, state: unknown) {
+          return {
+            ...(state as Record<string, unknown>),
+            preferredSeriesType: seriesType,
+          };
+        },
+        getSuggestions: () => [
+          {
+            score: 0.8,
+            title: 'bar',
+            state: {
+              preferredSeriesType: 'bar_stacked',
+              legend: {
+                isVisible: true,
+                position: 'right',
+              },
+            },
+            previewIcon: 'empty',
+            visualizationId: 'lnsXY',
+          },
+          {
+            score: 0.8,
+            title: 'Test2',
+            state: {},
+            previewIcon: 'empty',
+          },
+          {
+            score: 0.8,
+            title: 'Test2',
+            state: {},
+            previewIcon: 'empty',
+            incomplete: true,
+          },
+        ],
+      },
+    };
+    datasourceMap.textBased.getDatasourceSuggestionsForVisualizeField.mockReturnValue([
+      generateSuggestion(),
+    ]);
+    datasourceMap.textBased.getDatasourceSuggestionsFromCurrentState.mockReturnValue([
+      generateSuggestion(),
+    ]);
+    const context = {
+      dataViewSpec: {
+        id: 'index1',
+        title: 'index1',
+        name: 'DataView',
+      },
+      fieldName: '',
+      textBasedColumns: textBasedQueryColumns,
+      query: {
+        esql: 'FROM "index1" | keep field1, field2',
+      },
+    };
+    const suggestions = suggestionsApi({
+      context,
+      dataView,
+      datasourceMap,
+      visualizationMap,
+      preferredChartType: ChartType.XY,
+      preferredVisAttributes: {
+        visualizationType: 'lnsXY',
+        state: {
+          visualization: {
+            preferredSeriesType: 'bar_stacked',
+            legend: {
+              isVisible: false,
+              position: 'left',
+            },
+          },
+          datasourceStates: { textBased: { layers: {} } },
+        },
+      } as unknown as TypedLensByValueInput['attributes'],
+    });
+    expect(suggestions?.length).toEqual(1);
+    expect(suggestions?.[0]).toMatchInlineSnapshot(`
+      Object {
+        "changeType": "unchanged",
+        "columns": 0,
+        "datasourceId": "textBased",
+        "datasourceState": Object {
+          "layers": Object {},
+        },
+        "keptLayerIds": Array [],
+        "previewIcon": "empty",
+        "score": 0.8,
+        "title": undefined,
+        "visualizationId": "lnsXY",
+        "visualizationState": Object {
+          "legend": Object {
+            "isVisible": false,
+            "position": "left",
+          },
+          "preferredSeriesType": "bar_stacked",
+        },
+      }
+    `);
   });
 
   test('filters out the suggestion if exists on excludedVisualizations', async () => {
