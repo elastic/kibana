@@ -263,9 +263,7 @@ The runtime mappings are used to prevent filtering out the data when any of thes
 TODO: Remove the fields below once they are mapped as Keyword in the Third Party integrations, or remove
 the fields from the runtime mappings if they are removed from the Data Table.
 */
-export const CDR_VULNERABILITY_DATA_TABLE_RUNTIME_MAPPING_FIELDS: string[] = [
-  VULNERABILITY_FIELDS.VENDOR,
-];
+export const CDR_VULNERABILITY_DATA_TABLE_RUNTIME_MAPPING_FIELDS: string[] = [];
 export const CDR_MISCONFIGURATION_DATA_TABLE_RUNTIME_MAPPING_FIELDS: string[] = [
   'rule.benchmark.rule_number',
   'rule.section',
@@ -279,9 +277,7 @@ to prevent filtering out the data when grouping by the key field.
 TODO: Remove the fields below once they are mapped as Keyword in the Third Party integrations, or remove
 the fields from the runtime mappings if they are removed from the Data Table.
 */
-export const CDR_VULNERABILITY_GROUPING_RUNTIME_MAPPING_FIELDS: Record<string, string[]> = {
-  [VULNERABILITY_GROUPING_OPTIONS.CLOUD_ACCOUNT_NAME]: [VULNERABILITY_FIELDS.CLOUD_PROVIDER],
-};
+export const CDR_VULNERABILITY_GROUPING_RUNTIME_MAPPING_FIELDS: Record<string, string[]> = {};
 export const CDR_MISCONFIGURATION_GROUPING_RUNTIME_MAPPING_FIELDS: Record<string, string[]> = {
   [FINDINGS_GROUPING_OPTIONS.ORCHESTRATOR_CLUSTER_NAME]: ['orchestrator.cluster.name'],
   [FINDINGS_GROUPING_OPTIONS.CLOUD_ACCOUNT_NAME]: ['cloud.account.name'],

@@ -58,6 +58,7 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = ({
   return (
     <UnifiedDataTable
       showColumnTokens
+      canDragAndDropColumns
       enableComparisonMode
       renderCustomToolbar={renderCustomToolbar}
       getRowIndicator={getRowIndicator}
