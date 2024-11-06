@@ -12,7 +12,7 @@ import type {
 } from '../../../../../../../../../common/api/detection_engine';
 import type { FormData, FormSchema } from '../../../../../../../../shared_imports';
 import { RuleFieldEditFormWrapper } from '../rule_field_edit_form_wrapper';
-import { EventCategoryOverrideEditAdapter } from './event_category_override_edit_adapter';
+import { EventCategoryOverrideEditAdapter } from './evt_cat_field_edit_adapter';
 
 export function EventCategoryOverrideEditForm(): JSX.Element {
   return (

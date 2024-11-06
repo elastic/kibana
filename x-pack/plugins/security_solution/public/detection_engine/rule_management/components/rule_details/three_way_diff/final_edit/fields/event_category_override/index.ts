@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './event_category_override_edit_form';
+export * from './evt_cat_field_edit_form';
