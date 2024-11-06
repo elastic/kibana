@@ -14,7 +14,7 @@ The Jira connector uses the https://developer.atlassian.com/cloud/jira/platform/
 [[jira-compatibility]]
 === Compatibility
 
-We support Jira Cloud and Jira Data Center. Jira on-premise deployments are not supported.
+Jira Cloud and Jira Data Center are supported. Jira on-premise deployments are not supported.
 
 [float]
 [[define-jira-ui]]
