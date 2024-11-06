@@ -1074,9 +1074,6 @@ function validateCommand(
     }
   }
 
-  // @TODO: remove
-  console.log(`--@@messages`, messages);
-
   // no need to check for mandatory options passed
   // as they are already validated at syntax level
   return messages;
@@ -1206,11 +1203,7 @@ async function validateAst(
 
   const parsingResult = await astProvider(queryString);
 
-  // @TODO: remove
-  console.log(`--@@parsingResult`, parsingResult);
   const { ast } = parsingResult;
-  // @TODO: remove
-  console.log(`--@@ast`, ast);
 
   const [sources, availableFields, availablePolicies] = await Promise.all([
     // retrieve the list of available sources
