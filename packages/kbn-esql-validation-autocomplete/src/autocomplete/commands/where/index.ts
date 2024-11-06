@@ -30,6 +30,10 @@ export async function suggest(
   _getPreferences?: () => Promise<{ histogramBarTarget: number } | undefined>
 ): Promise<SuggestionRawDefinition[]> {
   const lastArg = command.args[command.args.length - 1] as ESQLSingleAstItem;
+
+  /**
+   * Suggest after a column name
+   */
   if (isColumnItem(lastArg) && endsInWhitespace(innerText)) {
     const columnType = getExpressionType(lastArg);
 
@@ -47,6 +51,9 @@ export async function suggest(
     });
   }
 
+  /**
+   * Suggest after a complete (non-operator) function call
+   */
   if (
     isFunctionItem(lastArg) &&
     lastArg.subtype === 'variadic-call' &&
@@ -80,7 +87,8 @@ export async function suggest(
     // get rightmost function
     const walker = new Walker({
       visitFunction: (fn: ESQLFunction) => {
-        if (fn.location.min > rightmostOperator.location.min) rightmostOperator = fn;
+        if (fn.location.min > rightmostOperator.location.min && fn.subtype !== 'variadic-call')
+          rightmostOperator = fn;
       },
     });
     walker.walkFunction(lastArg);
