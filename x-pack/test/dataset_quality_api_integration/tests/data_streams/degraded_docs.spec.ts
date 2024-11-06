@@ -67,7 +67,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       it('returns stats correctly', async () => {
         const stats = await callApiAs('datasetQualityMonitorUser');
-        expect(stats.body.degradedDocs.length).to.be(2);
+        expect(stats.body.degradedDocs.length).to.be(1);
 
         const degradedDocsStats = stats.body.degradedDocs.reduce(
           (acc, curr) => ({
@@ -79,9 +79,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           {} as Record<string, { count: number }>
         );
 
-        expect(degradedDocsStats['logs-synth.1-default']).to.eql({
-          count: 0,
-        });
         expect(degradedDocsStats['logs-synth.2-default']).to.eql({
           count: 1,
         });
@@ -144,117 +141,45 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       it('returns counts and list of datasets correctly', async () => {
         const stats = await callApiAs('datasetQualityMonitorUser');
-        expect(stats.body.degradedDocs.length).to.be(18);
+        expect(stats.body.degradedDocs.length).to.be(9);
 
         const expected = {
           degradedDocs: [
             {
-              dataset: 'logs-apache.access-default',
-              count: 0,
-              docsCount: 1,
-              percentage: 0,
-            },
-            {
-              dataset: 'logs-apache.access-space1',
-              count: 0,
-              docsCount: 1,
-              percentage: 0,
-            },
-            {
-              dataset: 'logs-apache.access-space2',
-              count: 0,
-              docsCount: 1,
-              percentage: 0,
-            },
-            {
               dataset: 'logs-apache.error-default',
               count: 1,
-              docsCount: 2,
-              percentage: 50,
             },
             {
               dataset: 'logs-apache.error-space1',
               count: 1,
-              docsCount: 2,
-              percentage: 50,
             },
             {
               dataset: 'logs-apache.error-space2',
               count: 1,
-              docsCount: 2,
-              percentage: 50,
-            },
-            {
-              dataset: 'logs-mysql.access-default',
-              count: 0,
-              docsCount: 1,
-              percentage: 0,
-            },
-            {
-              dataset: 'logs-mysql.access-space1',
-              count: 0,
-              docsCount: 1,
-              percentage: 0,
-            },
-            {
-              dataset: 'logs-mysql.access-space2',
-              count: 0,
-              docsCount: 1,
-              percentage: 0,
             },
             {
               dataset: 'logs-mysql.error-default',
               count: 1,
-              docsCount: 2,
-              percentage: 50,
             },
             {
               dataset: 'logs-mysql.error-space1',
               count: 1,
-              docsCount: 2,
-              percentage: 50,
             },
             {
               dataset: 'logs-mysql.error-space2',
               count: 1,
-              docsCount: 2,
-              percentage: 50,
-            },
-            {
-              dataset: 'logs-nginx.access-default',
-              count: 0,
-              docsCount: 1,
-              percentage: 0,
-            },
-            {
-              dataset: 'logs-nginx.access-space1',
-              count: 0,
-              docsCount: 1,
-              percentage: 0,
-            },
-            {
-              dataset: 'logs-nginx.access-space2',
-              count: 0,
-              docsCount: 1,
-              percentage: 0,
             },
             {
               dataset: 'logs-nginx.error-default',
               count: 1,
-              docsCount: 2,
-              percentage: 50,
             },
             {
               dataset: 'logs-nginx.error-space1',
               count: 1,
-              docsCount: 2,
-              percentage: 50,
             },
             {
               dataset: 'logs-nginx.error-space2',
               count: 1,
-              docsCount: 2,
-              percentage: 50,
             },
           ],
         };
