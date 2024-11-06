@@ -156,7 +156,7 @@ The notation for a combination data view with both raw and rolled up data is
 `rollup_logstash,kibana_sample_data_logs`. In this data view, `rollup_logstash`
 matches the rollup index and `kibana_sample_data_logs` matches the raw data.
 
-. Go to *Dashboard*, then select *Create dashboard*.
+. Go to *Dashboards*, then select *Create dashboard*.
 
 . Set the <<set-time-filter,time filter>> to *Last 90 days*.
 
