@@ -1,6 +1,6 @@
 openapi: 3.0.3
 info:
-  title: SIEM Rules Migration API endpoint
+  title: SIEM Rules Migration API
   version: '1'
 paths:
   /internal/siem_migrations/rules:

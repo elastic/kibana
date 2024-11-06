@@ -6,7 +6,10 @@
  */
 
 import type { FieldMap, SchemaFieldMapKeys } from '@kbn/data-stream-adapter';
-import type { RuleMigration } from '../../../../../common/siem_migrations/model/rule_migration.gen';
+import type {
+  RuleMigration,
+  RuleMigrationResource,
+} from '../../../../../common/siem_migrations/model/rule_migration.gen';
 
 export const ruleMigrationsFieldMap: FieldMap<SchemaFieldMapKeys<RuleMigration>> = {
   '@timestamp': { type: 'date', required: false },
@@ -31,6 +34,16 @@ export const ruleMigrationsFieldMap: FieldMap<SchemaFieldMapKeys<RuleMigration>>
   'elastic_rule.id': { type: 'keyword', required: false },
   translation_result: { type: 'keyword', required: false },
   comments: { type: 'text', array: true, required: false },
+  updated_at: { type: 'date', required: false },
+  updated_by: { type: 'keyword', required: false },
+};
+
+export const ruleMigrationResourcesFieldMap: FieldMap<SchemaFieldMapKeys<RuleMigrationResource>> = {
+  migration_id: { type: 'keyword', required: true },
+  type: { type: 'keyword', required: true },
+  name: { type: 'keyword', required: true },
+  content: { type: 'text', required: true },
+  metadata: { type: 'object', required: false },
   updated_at: { type: 'date', required: false },
   updated_by: { type: 'keyword', required: false },
 };

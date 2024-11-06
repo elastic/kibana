@@ -5,71 +5,65 @@
  * 2.0.
  */
 
+import type { FieldMap } from '@kbn/data-stream-adapter';
 import { DataStreamSpacesAdapter, type InstallParams } from '@kbn/data-stream-adapter';
 import type { AuthenticatedUser, ElasticsearchClient, Logger } from '@kbn/core/server';
-import { ruleMigrationsFieldMap } from './rule_migrations_field_map';
+import {
+  ruleMigrationsFieldMap,
+  ruleMigrationResourcesFieldMap,
+} from './rule_migrations_field_maps';
 import { RuleMigrationsDataClient } from './rule_migrations_data_client';
 
 const TOTAL_FIELDS_LIMIT = 2500;
+const DATA_STREAM_PREFIX = '.kibana-siem-rule-migrations';
 
-const DATA_STREAM_NAME = '.kibana.siem-rule-migrations';
-
-interface RuleMigrationsDataStreamCreateClientParams {
+interface CreateClientParams {
   spaceId: string;
   currentUser: AuthenticatedUser;
   esClient: ElasticsearchClient;
 }
 
 export class RuleMigrationsDataStream {
-  private readonly dataStreamAdapter: DataStreamSpacesAdapter;
-  private installPromise?: Promise<void>;
+  private readonly rulesDataStream: DataStreamSpacesAdapter;
+  private readonly resourcesDataStream: DataStreamSpacesAdapter;
 
-  constructor(private logger: Logger, kibanaVersion: string) {
-    this.dataStreamAdapter = new DataStreamSpacesAdapter(DATA_STREAM_NAME, {
-      kibanaVersion,
-      totalFieldsLimit: TOTAL_FIELDS_LIMIT,
-    });
-    this.dataStreamAdapter.setComponentTemplate({
-      name: DATA_STREAM_NAME,
+  constructor(private logger: Logger, private kibanaVersion: string) {
+    this.rulesDataStream = this.createDataStream({
+      name: `${DATA_STREAM_PREFIX}.rules`,
       fieldMap: ruleMigrationsFieldMap,
     });
-
-    this.dataStreamAdapter.setIndexTemplate({
-      name: DATA_STREAM_NAME,
-      componentTemplateRefs: [DATA_STREAM_NAME],
+    this.resourcesDataStream = this.createDataStream({
+      name: `${DATA_STREAM_PREFIX}.resources`,
+      fieldMap: ruleMigrationResourcesFieldMap,
     });
   }
 
-  async install(params: Omit<InstallParams, 'logger'>) {
-    try {
-      this.installPromise = this.dataStreamAdapter.install({ ...params, logger: this.logger });
-      await this.installPromise;
-    } catch (err) {
-      this.logger.error(`Error installing siem rule migrations data stream. ${err.message}`, err);
-    }
+  private createDataStream({ name, fieldMap }: { name: string; fieldMap: FieldMap }) {
+    const dataStream = new DataStreamSpacesAdapter(name, {
+      kibanaVersion: this.kibanaVersion,
+      totalFieldsLimit: TOTAL_FIELDS_LIMIT,
+    });
+    dataStream.setComponentTemplate({ name, fieldMap });
+    dataStream.setIndexTemplate({ name, componentTemplateRefs: [name] });
+    return dataStream;
   }
 
-  createClient({
-    spaceId,
-    currentUser,
-    esClient,
-  }: RuleMigrationsDataStreamCreateClientParams): RuleMigrationsDataClient {
-    const dataStreamNamePromise = this.installSpace(spaceId);
-    return new RuleMigrationsDataClient(dataStreamNamePromise, currentUser, esClient, this.logger);
+  public install(params: Omit<InstallParams, 'logger'>) {
+    Promise.all([
+      this.rulesDataStream.install({ ...params, logger: this.logger }),
+      this.resourcesDataStream.install({ ...params, logger: this.logger }),
+    ]).catch((err) => {
+      this.logger.error(`Error installing siem rule migrations data streams. ${err.message}`, err);
+    });
   }
 
-  // Installs the data stream for the specific space. it will only install if it hasn't been installed yet.
-  // The adapter stores the data stream name promise, it will return it directly when the data stream is known to be installed.
-  private async installSpace(spaceId: string): Promise<string> {
-    if (!this.installPromise) {
-      throw new Error('Siem rule migrations data stream not installed');
-    }
-    // wait for install to complete, may reject if install failed, routes should handle this
-    await this.installPromise;
-    let dataStreamName = await this.dataStreamAdapter.getInstalledSpaceName(spaceId);
-    if (!dataStreamName) {
-      dataStreamName = await this.dataStreamAdapter.installSpace(spaceId);
-    }
-    return dataStreamName;
+  public createClient({ spaceId, currentUser, esClient }: CreateClientParams) {
+    // installSpace: creates the data stream for the specific space. it will only install if it hasn't been installed yet.
+    // The adapter stores the data stream name promise, it will return it directly when the data stream is known to be installed.
+    const indexNamePromises = {
+      rules: this.rulesDataStream.installSpace(spaceId),
+      resources: this.resourcesDataStream.installSpace(spaceId),
+    };
+    return new RuleMigrationsDataClient(indexNamePromises, currentUser, esClient, this.logger);
   }
 }

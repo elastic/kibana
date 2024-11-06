@@ -20,8 +20,8 @@ import {
 import type { SiemRuleMigrationsCreateClientParams } from './types';
 
 jest.mock('./data_stream/rule_migrations_data_stream');
-jest.mock('./task/rule_migrations_task_runner', () => ({
-  RuleMigrationsTaskRunner: jest.fn(),
+jest.mock('./task/rule_migrations_task_service', () => ({
+  RuleMigrationsTaskService: jest.fn(),
 }));
 
 describe('SiemRuleMigrationsService', () => {

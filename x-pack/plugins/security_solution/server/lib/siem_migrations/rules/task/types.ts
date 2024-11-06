@@ -15,16 +15,19 @@ import type { getRuleMigrationAgent } from './agent';
 
 export type MigrationAgent = ReturnType<typeof getRuleMigrationAgent>;
 
+export interface RuleMigrationTaskCreateClientParams {
+  currentUser: AuthenticatedUser;
+  dataClient: RuleMigrationsDataClient;
+}
+
 export interface RuleMigrationTaskStartParams {
   migrationId: string;
-  currentUser: AuthenticatedUser;
   connectorId: string;
   invocationConfig: RunnableConfig;
   inferenceClient: InferenceClient;
   actionsClient: ActionsClient;
   rulesClient: RulesClient;
   soClient: SavedObjectsClientContract;
-  dataClient: RuleMigrationsDataClient;
 }
 
 export interface RuleMigrationTaskPrepareParams {
@@ -38,25 +41,9 @@ export interface RuleMigrationTaskPrepareParams {
 
 export interface RuleMigrationTaskRunParams {
   migrationId: string;
-  currentUser: AuthenticatedUser;
   invocationConfig: RunnableConfig;
   agent: MigrationAgent;
-  dataClient: RuleMigrationsDataClient;
   abortController: AbortController;
-}
-
-export interface RuleMigrationTaskStopParams {
-  migrationId: string;
-  dataClient: RuleMigrationsDataClient;
-}
-
-export interface RuleMigrationTaskStatsParams {
-  migrationId: string;
-  dataClient: RuleMigrationsDataClient;
-}
-
-export interface RuleMigrationAllTaskStatsParams {
-  dataClient: RuleMigrationsDataClient;
 }
 
 export interface RuleMigrationTaskStartResult {

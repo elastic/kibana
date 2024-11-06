@@ -6,33 +6,32 @@
  */
 
 import assert from 'assert';
-import type { IClusterClient, Logger } from '@kbn/core/server';
+import type { IClusterClient, LoggerFactory, Logger } from '@kbn/core/server';
 import { RuleMigrationsDataStream } from './data_stream/rule_migrations_data_stream';
 import type {
   SiemRulesMigrationsSetupParams,
   SiemRuleMigrationsCreateClientParams,
   SiemRuleMigrationsClient,
 } from './types';
-import { RuleMigrationsTaskRunner } from './task/rule_migrations_task_runner';
+import { RuleMigrationsTaskService } from './task/rule_migrations_task_service';
 
 export class SiemRuleMigrationsService {
   private rulesDataStream: RuleMigrationsDataStream;
   private esClusterClient?: IClusterClient;
-  private taskRunner: RuleMigrationsTaskRunner;
+  private taskRunner: RuleMigrationsTaskService;
+  private logger: Logger;
 
-  constructor(private logger: Logger, kibanaVersion: string) {
+  constructor(logger: LoggerFactory, kibanaVersion: string) {
+    this.logger = logger.get('siemRuleMigrations');
     this.rulesDataStream = new RuleMigrationsDataStream(this.logger, kibanaVersion);
-    this.taskRunner = new RuleMigrationsTaskRunner(this.logger);
+    this.taskRunner = new RuleMigrationsTaskService(this.logger);
   }
 
   setup({ esClusterClient, ...params }: SiemRulesMigrationsSetupParams) {
     this.esClusterClient = esClusterClient;
     const esClient = esClusterClient.asInternalUser;
 
-    this.rulesDataStream.install({ ...params, esClient }).catch((err) => {
-      this.logger.error(`Error installing data stream for rule migrations: ${err.message}`);
-      throw err;
-    });
+    this.rulesDataStream.install({ ...params, esClient });
   }
 
   createClient({
@@ -43,26 +42,13 @@ export class SiemRuleMigrationsService {
     assert(currentUser, 'Current user must be authenticated');
     assert(this.esClusterClient, 'ES client not available, please call setup first');
 
-    const esClient = this.esClusterClient.asScoped(request).asCurrentUser;
-    const dataClient = this.rulesDataStream.createClient({ spaceId, currentUser, esClient });
+    // TODO: change to `esClient = this.esClusterClient.asScoped(request).asCurrentUser;` when the API is made public
+    const esClient = this.esClusterClient.asInternalUser;
 
-    return {
-      data: dataClient,
-      task: {
-        start: (params) => {
-          return this.taskRunner.start({ ...params, currentUser, dataClient });
-        },
-        stop: (migrationId) => {
-          return this.taskRunner.stop({ migrationId, dataClient });
-        },
-        getStats: async (migrationId) => {
-          return this.taskRunner.getStats({ migrationId, dataClient });
-        },
-        getAllStats: async () => {
-          return this.taskRunner.getAllStats({ dataClient });
-        },
-      },
-    };
+    const dataClient = this.rulesDataStream.createClient({ spaceId, currentUser, esClient });
+    const taskClient = this.taskRunner.createClient({ currentUser, dataClient });
+
+    return { data: dataClient, task: taskClient };
   }
 
   stop() {

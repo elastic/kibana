@@ -1,6 +1,6 @@
 openapi: 3.0.3
 info:
-  title: Common Splunk Rules Attributes
+  title: SIEM Rule Migration common components
   version: 'not applicable'
 paths: {}
 components:
@@ -180,3 +180,36 @@ components:
               migration_id:
                 type: string
                 description: The migration id
+
+    RuleMigrationResource:
+      type: object
+      description: The rule migration resource document object.
+      required:
+        - migration_id
+        - type
+        - name
+      properties:
+        migration_id:
+          type: string
+          description: The migration id for with the resource is associated.
+        type:
+          type: string
+          description: The type of the resource.
+          enum:
+            - macro
+            - list
+        name:
+          type: string
+          description: The resource name identifier.
+        content:
+          type: string
+          description: The resource content value.
+        metadata:
+          type: object
+          description: The resource arbitrary metadata.
+        updated_at:
+          type: string
+          description: The moment of the last update
+        updated_by:
+          type: string
+          description: The user who last updated the resource
