@@ -7,7 +7,7 @@
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('Rule exception workflow APIs Authentication - Complete Tier', function () {
+  describe('Alerts APIs Authentication - Essentials Tier', function () {
     loadTestFile(require.resolve('./tier_1_analyst'));
     loadTestFile(require.resolve('./tier_2_analyst'));
     loadTestFile(require.resolve('./threat_intel_analyst'));

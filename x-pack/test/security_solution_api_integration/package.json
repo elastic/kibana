@@ -27,6 +27,9 @@
     "initialize-server:de:basic_essentials": "node ./scripts/index.js server detections_response/detection_engine basic_license_essentials_tier",
     "run-tests:de:basic_essentials": "node ./scripts/index.js runner detections_response/detection_engine basic_license_essentials_tier",
 
+    "initialize-server:de:essentials": "node ./scripts/index.js server detections_response/detection_engine essentials_tier",
+    "run-tests:de:essentials": "node ./scripts/index.js runner detections_response/detection_engine essentials_tier",
+
     "initialize-server:rm": "node ./scripts/index.js server detections_response/rules_management trial_license_complete_tier ",
     "run-tests:rm": "node ./scripts/index.js runner detections_response/rules_management trial_license_complete_tier",
 
@@ -234,10 +237,10 @@
     "actions:server:ess": "npm run initialize-server:de actions ess",
     "actions:runner:ess": "npm run run-tests:de actions ess essEnv",
 
-    "auth_alerts:server:serverless": "npm run initialize-server:de authentication/alerts serverless",
-    "auth_alerts:runner:serverless": "npm run run-tests:de authentication/alerts serverless serverlessEnv",
-    "auth_alerts:qa:serverless": "npm run run-tests:de authentication/alerts serverless qaPeriodicEnv",
-    "auth_alerts:qa:serverless:release": "npm run run-tests:de authentication/alerts serverless qaEnv",
+    "alerts:auth:server:serverless": "npm run initialize-server:de:essentials authorization/alerts serverless",
+    "alerts:auth:runner:serverless": "npm run run-tests:de:essentials authorization/alerts serverless serverlessEnv",
+    "alerts:auth:qa:serverless": "npm run run-tests:de:essentials authorization/alerts serverless qaPeriodicEnv",
+    "alerts:auth:qa:serverless:release": "npm run run-tests:de:essentials authorization/alerts serverless qaEnv",
 
     "auth_exceptions:server:serverless": "npm run initialize-server:de authentication/exceptions serverless",
     "auth_exceptions:runner:serverless": "npm run run-tests:de authentication/exceptions serverless serverlessEnv",

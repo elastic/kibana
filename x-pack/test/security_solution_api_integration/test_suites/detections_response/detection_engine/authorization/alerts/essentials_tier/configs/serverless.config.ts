@@ -10,7 +10,6 @@ import { createTestConfig } from '../../../../../../../config/serverless/config.
 export default createTestConfig({
   testFiles: [require.resolve('..')],
   junit: {
-    reportName:
-      'Detection Engine - Rule Exceptions Workflow Authentication Tests - Serverless Env - Complete Tier',
+    reportName: 'Detection Engine - Alerts Authentication Tests - Serverless Env - Essentials Tier',
   },
 });
