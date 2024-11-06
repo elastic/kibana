@@ -108,8 +108,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         withInternalHeaders: true,
       });
 
-      const version = (await synthtrace.apmSynthtraceKibanaClient.installApmPackage()).version;
-      synthtraceApmClient = await synthtrace.createApmSynthtraceEsClient(version);
+      synthtraceApmClient = await synthtrace.createApmSynthtraceEsClient();
     });
     after(async () => {
       await synthtrace.apmSynthtraceKibanaClient.uninstallApmPackage();
