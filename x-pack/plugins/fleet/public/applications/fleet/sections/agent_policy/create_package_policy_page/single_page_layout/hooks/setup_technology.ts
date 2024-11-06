@@ -78,6 +78,7 @@ export function useSetupTechnology({
   setNewAgentPolicy,
   newAgentPolicy,
   updateAgentPolicies,
+  updatePackagePolicy,
   setSelectedPolicyTab,
   packageInfo,
   packagePolicy,
@@ -87,6 +88,7 @@ export function useSetupTechnology({
   setNewAgentPolicy: (policy: NewAgentPolicy) => void;
   newAgentPolicy: NewAgentPolicy;
   updateAgentPolicies: (policies: AgentPolicy[]) => void;
+  updatePackagePolicy: (policy: Partial<NewPackagePolicy>) => void;
   setSelectedPolicyTab: (tab: SelectedPolicyTab) => void;
   packageInfo?: PackageInfo;
   packagePolicy: NewPackagePolicy;
@@ -130,16 +132,33 @@ export function useSetupTechnology({
         updateAgentPolicies([nextNewAgentlessPolicy] as AgentPolicy[]);
       }
     }
+    if (
+      selectedSetupTechnology === SetupTechnology.AGENTLESS &&
+      !packagePolicy.supports_agentless
+    ) {
+      updatePackagePolicy({
+        supports_agentless: true,
+      });
+    } else if (
+      selectedSetupTechnology !== SetupTechnology.AGENTLESS &&
+      packagePolicy.supports_agentless
+    ) {
+      updatePackagePolicy({
+        supports_agentless: null,
+      });
+    }
   }, [
     isAgentlessApiEnabled,
     isEditPage,
     newAgentlessPolicy,
     packagePolicy.name,
+    packagePolicy.supports_agentless,
     selectedSetupTechnology,
     updateAgentPolicies,
     setNewAgentPolicy,
     agentPolicies,
     setSelectedSetupTechnology,
+    updatePackagePolicy,
   ]);
 
   // tech debt: remove this useEffect when Serverless uses the Agentless API

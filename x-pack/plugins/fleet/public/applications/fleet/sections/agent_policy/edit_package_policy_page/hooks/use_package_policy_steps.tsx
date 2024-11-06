@@ -134,6 +134,7 @@ export function usePackagePolicySteps({
     newAgentPolicy,
     setNewAgentPolicy,
     updateAgentPolicies,
+    updatePackagePolicy,
     setSelectedPolicyTab,
     packagePolicy,
     isEditPage: true,

@@ -601,6 +601,7 @@ export const getSavedObjectTypes = (
           },
           secret_references: { properties: { id: { type: 'keyword' } } },
           overrides: { type: 'flattened', index: false },
+          supports_agentless: { type: 'boolean' },
           revision: { type: 'integer' },
           updated_at: { type: 'date' },
           updated_by: { type: 'keyword' },
@@ -750,6 +751,16 @@ export const getSavedObjectTypes = (
             },
           ],
         },
+        '15': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                supports_agentless: { type: 'boolean' },
+              },
+            },
+          ],
+        },
       },
       migrations: {
         '7.10.0': migratePackagePolicyToV7100,
@@ -805,6 +816,7 @@ export const getSavedObjectTypes = (
           },
           secret_references: { properties: { id: { type: 'keyword' } } },
           overrides: { type: 'flattened', index: false },
+          supports_agentless: { type: 'boolean' },
           revision: { type: 'integer' },
           updated_at: { type: 'date' },
           updated_by: { type: 'keyword' },
@@ -812,6 +824,18 @@ export const getSavedObjectTypes = (
           created_by: { type: 'keyword' },
         },
       },
+      modelVersions: {
+        '1': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                supports_agentless: { type: 'boolean' },
+              },
+            },
+          ],
+        },
+      }
     },
     [PACKAGES_SAVED_OBJECT_TYPE]: {
       name: PACKAGES_SAVED_OBJECT_TYPE,
