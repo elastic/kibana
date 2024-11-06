@@ -10,7 +10,7 @@ image::images/hello-field.png[A view of the Discover app]
 
 [float]
 [[document-explorer-c]]
-=== Hide or resize elements
+=== Hide or resize areas
 
 * You can hide and show the chart and the fields list using the available collapse and expand button in the corresponding area.
 
@@ -43,22 +43,22 @@ Column widths are stored with a saved search.  When you visualize saved searches
 [[document-explorer-density]]
 ==== Customize the table density
 
-You can adjust the density of the table from the **Display options** located at the top of the table. This can be particularly useful for reading and scanning through the table.
+You can adjust the density of the table from the **Display options** located in the table toolbar. This can be particularly useful when scrolling through many results.
 
 [float]
 [[document-explorer-row-height]]
 ==== Adjust the row height
 
 To set the row height to one or more lines, or automatically
-adjust the height to fit the contents, open the **Display options** at the top of the table, and adjust it as you need.
+adjust the height to fit the contents, open the **Display options** in the table toolbar, and adjust it as you need.
 
-You can define different settings for the header and the regular rows of the table.
+You can define different settings for the header row and body rows.
 
 [float]
 [[document-explorer-sample-size]]
 ==== Limit the sample size
 
-When the number of results or documents corresponding to your data view or search query (displayed at the top of the **Documents** or **Results** tab) is greater than 500, the number of results displayed in the table is limited to 500 by default. You can adjust the number of entries initially loaded to any number between 10 and 500 from the **Display options** located at the top of the table.
+When the number of results returned by your search query (displayed at the top of the **Documents** or **Results** tab) is greater than the value of <<advanced-options#discover-sample-size,`discover:sampleSize`>>, the number of results displayed in the table is limited to the configured value by default. You can adjust the initial sample size for searches to any number between 10 and `discover:sampleSize` from the **Display options** located in the table toolbar.
 
 On the last page of the table, a message indicates that you've reached the end of the loaded search results. From that message, you can choose to load more results to continue exploring the entries. 
 
@@ -118,7 +118,7 @@ Narrow your results to a subset of documents so you're comparing just the data o
 [role="screenshot"]
 image::images/document-explorer-compare-data.png[Compare data in the document table, width="40%"]
 
-You can also compare them more in details. Check <<compare-documents-in-discover,Compare documents>>.
+You can also compare individual field values using the <<compare-documents-in-discover,*Compare selected* option>>.
 
 [float]
 [[document-explorer-configure-table]]
