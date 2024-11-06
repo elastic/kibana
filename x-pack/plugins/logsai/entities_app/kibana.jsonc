@@ -1,0 +1,24 @@
+{
+  "type": "plugin",
+  "id": "@kbn/entities-app-plugin",
+  "owner": "@elastic/observability-ui",
+  "plugin": {
+    "id": "entitiesApp",
+    "server": true,
+    "browser": true,
+    "configPath": ["xpack", "entitiesApp"],
+    "requiredPlugins": [
+      "entitiesAPI",
+      "observabilityShared",
+      "data",
+      "dataViews",
+      "unifiedSearch"
+    ],
+    "requiredBundles": [
+      "kibanaReact",
+      "esqlDataGrid"
+    ],
+    "optionalPlugins": [],
+    "extraPublicDirs": []
+  }
+}

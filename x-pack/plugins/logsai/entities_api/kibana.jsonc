@@ -1,0 +1,28 @@
+{
+  "type": "plugin",
+  "id": "@kbn/entities-api-plugin",
+  "owner": "@elastic/observability-ui",
+  "plugin": {
+    "id": "entitiesAPI",
+    "server": true,
+    "browser": true,
+    "configPath": ["xpack", "entitiesAPI"],
+    "requiredPlugins": [
+      "observabilityShared",
+      "inference",
+      "dataViews",
+      "data",
+      "unifiedSearch",
+      "datasetQuality",
+      "share",
+      "alerting",
+      "ruleRegistry",
+      "slo",
+      "spaces"
+    ],
+    "requiredBundles": [
+    ],
+    "optionalPlugins": [],
+    "extraPublicDirs": []
+  }
+}
