@@ -113,7 +113,7 @@ To save the current search:
 . Click *Save* in the toolbar.
 . Enter a name for the search and click *Save*.
 
-To import, export, and delete saved searches, go to the *Saved Objects* management page using the navigation menu or the <<kibana-navigation-search,global search field>>
+To import, export, and delete saved searches, go to the *Saved Objects* management page using the navigation menu or the <<kibana-navigation-search,global search field>>.
 
 ==== Open a saved search
 To load a saved search into Discover:
