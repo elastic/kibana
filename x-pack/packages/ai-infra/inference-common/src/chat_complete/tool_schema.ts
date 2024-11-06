@@ -72,8 +72,14 @@ type FromToolSchemaString<TToolSchemaString extends ToolSchemaTypeString> =
     ? ValuesType<TToolSchemaString['enum']>
     : string;
 
+/**
+ * Defines the schema for a {@link ToolDefinition}
+ */
 export type ToolSchema = ToolSchemaTypeObject;
 
+/**
+ * Utility type to infer the shape of a tool call from its schema.
+ */
 export type FromToolSchema<TToolSchema extends ToolSchemaType> =
   TToolSchema extends ToolSchemaTypeObject
     ? FromToolSchemaObject<TToolSchema>
