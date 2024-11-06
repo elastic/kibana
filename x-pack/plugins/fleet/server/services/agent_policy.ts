@@ -177,7 +177,10 @@ class AgentPolicyService {
       returnUpdatedPolicy: true,
     }
   ): Promise<AgentPolicy> {
-    const savedObjectType = await getAgentPolicySavedObjectType();
+    const [savedObjectType, existingAgentPolicy] = await Promise.all([
+      getAgentPolicySavedObjectType(),
+      this.get(soClient, id, true),
+    ]);
     auditLoggingService.writeCustomSoAuditLog({
       action: 'update',
       id,
@@ -185,8 +188,6 @@ class AgentPolicyService {
     });
     const logger = appContextService.getLogger();
     logger.debug(`Starting update of agent policy ${id}`);
-
-    const existingAgentPolicy = await this.get(soClient, id, true);
 
     if (!existingAgentPolicy) {
       throw new AgentPolicyNotFoundError('Agent policy not found');
@@ -213,7 +214,7 @@ class AgentPolicyService {
         getAllowedOutputTypeForPolicy(existingAgentPolicy)
       );
     }
-    await soClient.update<AgentPolicySOAttributes>(savedObjectType, id, {
+    const newAgentPolicySO = await soClient.update<AgentPolicySOAttributes>(savedObjectType, id, {
       ...agentPolicy,
       ...(options.bumpRevision ? { revision: existingAgentPolicy.revision + 1 } : {}),
       ...(options.removeProtection
@@ -223,7 +224,9 @@ class AgentPolicyService {
       updated_by: user ? user.username : 'system',
     });
 
-    const newAgentPolicy = await this.get(soClient, id, false);
+    const newAgentPolicy = mapAgentPolicySavedObjectToAgentPolicy(
+      newAgentPolicySO as SavedObject<AgentPolicySOAttributes>
+    );
 
     newAgentPolicy!.package_policies = existingAgentPolicy.package_policies;
 
@@ -464,7 +467,17 @@ class AgentPolicyService {
   ): Promise<AgentPolicy | null> {
     const savedObjectType = await getAgentPolicySavedObjectType();
 
-    const agentPolicySO = await soClient.get<AgentPolicySOAttributes>(savedObjectType, id);
+    const getPackagePolicies = async () => {
+      if (withPackagePolicies) {
+        return (await packagePolicyService.findAllForAgentPolicy(soClient, id)) || [];
+      }
+    };
+
+    const [agentPolicySO, packagePolicies] = await Promise.all([
+      soClient.get<AgentPolicySOAttributes>(savedObjectType, id),
+      getPackagePolicies(),
+    ]);
+
     if (!agentPolicySO) {
       return null;
     }
@@ -474,10 +487,8 @@ class AgentPolicyService {
     }
 
     const agentPolicy = mapAgentPolicySavedObjectToAgentPolicy(agentPolicySO);
-
     if (withPackagePolicies) {
-      agentPolicy.package_policies =
-        (await packagePolicyService.findAllForAgentPolicy(soClient, id)) || [];
+      agentPolicy.package_policies = packagePolicies;
     }
 
     auditLoggingService.writeCustomSoAuditLog({
