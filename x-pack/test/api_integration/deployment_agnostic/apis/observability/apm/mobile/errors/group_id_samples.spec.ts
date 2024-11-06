@@ -8,6 +8,7 @@ import expect from '@kbn/expect';
 import { timerange } from '@kbn/apm-synthtrace-client';
 import { service } from '@kbn/apm-synthtrace-client/src/lib/apm/service';
 import { orderBy } from 'lodash';
+import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { getErrorGroupingKey } from '@kbn/apm-synthtrace-client/src/lib/apm/instance';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../../ftr_provider_context';
@@ -20,7 +21,6 @@ type ErrorSampleDetails =
   APIReturnType<'GET /internal/apm/services/{serviceName}/errors/{groupId}/error/{errorId}'>;
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
-  const registry = getService('registry');
   const apmApiClient = getService('apmApi');
   const synthtrace = getService('synthtrace');
 
@@ -67,122 +67,129 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     return response;
   }
 
-  registry.when('when data is not loaded', () => {
+  describe('Group id samples', () => {
     it('handles the empty state', async () => {
       const response = await callErrorGroupSamplesApi({ groupId: 'foo' });
       expect(response.status).to.be(200);
       expect(response.body.occurrencesCount).to.be(0);
     });
-  });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/177654
-  registry.when.skip('when samples data is loaded', () => {
-    const { bananaTransaction } = config;
-    describe('error group id', () => {
-      before(async () => {
-        await generateData({ serviceName, start, end, apmSynthtraceEsClient });
-      });
+    // FLAKY: https://github.com/elastic/kibana/issues/177654
+    describe.skip('when samples data is loaded', () => {
+      const { bananaTransaction } = config;
+      describe('error group id', () => {
+        let apmSynthtraceEsClient: ApmSynthtraceEsClient;
 
-      after(() => apmSynthtraceEsClient.clean());
-
-      describe('return correct data', () => {
-        let errorsSamplesResponse: ErrorGroupSamples;
         before(async () => {
-          const response = await callErrorGroupSamplesApi({
-            groupId: '98b75903135eac35ad42419bd3b45cf8b4270c61cbd0ede0f7e8c8a9ac9fdb03',
-          });
-          errorsSamplesResponse = response.body;
+          apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
+          await generateData({ serviceName, start, end, apmSynthtraceEsClient });
         });
 
-        it('displays correct number of occurrences', () => {
-          const numberOfBuckets = 15;
-          expect(errorsSamplesResponse.occurrencesCount).to.equal(
-            bananaTransaction.failureRate * numberOfBuckets
-          );
-        });
-      });
-    });
-  });
+        after(() => apmSynthtraceEsClient.clean());
 
-  // FLAKY: https://github.com/elastic/kibana/issues/177665
-  registry.when.skip('when error sample data is loaded', () => {
-    describe('error sample id', () => {
-      before(async () => {
-        await generateData({ serviceName, start, end, apmSynthtraceEsClient });
-      });
-
-      after(() => apmSynthtraceEsClient.clean());
-
-      describe('return correct data', () => {
-        let errorSampleDetailsResponse: ErrorSampleDetails;
-        before(async () => {
-          const errorsSamplesResponse = await callErrorGroupSamplesApi({
-            groupId: '98b75903135eac35ad42419bd3b45cf8b4270c61cbd0ede0f7e8c8a9ac9fdb03',
+        describe('return correct data', () => {
+          let errorsSamplesResponse: ErrorGroupSamples;
+          before(async () => {
+            const response = await callErrorGroupSamplesApi({
+              groupId: '98b75903135eac35ad42419bd3b45cf8b4270c61cbd0ede0f7e8c8a9ac9fdb03',
+            });
+            errorsSamplesResponse = response.body;
           });
 
-          const errorId = errorsSamplesResponse.body.errorSampleIds[0];
-
-          const response = await callErrorSampleDetailsApi(errorId);
-          errorSampleDetailsResponse = response.body;
-        });
-
-        it('displays correct error grouping_key', () => {
-          expect(errorSampleDetailsResponse.error.error.grouping_key).to.equal(
-            '98b75903135eac35ad42419bd3b45cf8b4270c61cbd0ede0f7e8c8a9ac9fdb03'
-          );
-        });
-
-        it('displays correct error message', () => {
-          expect(errorSampleDetailsResponse.error.error.exception?.[0].message).to.equal('Error 1');
+          it('displays correct number of occurrences', () => {
+            const numberOfBuckets = 15;
+            expect(errorsSamplesResponse.occurrencesCount).to.equal(
+              bananaTransaction.failureRate * numberOfBuckets
+            );
+          });
         });
       });
     });
 
-    describe('with sampled and unsampled transactions', () => {
-      let errorGroupSamplesResponse: ErrorGroupSamples;
+    // FLAKY: https://github.com/elastic/kibana/issues/177665
+    describe.skip('when error sample data is loaded', () => {
+      describe('error sample id', () => {
+        before(async () => {
+          await generateData({ serviceName, start, end, apmSynthtraceEsClient });
+        });
 
-      before(async () => {
-        const instance = service(serviceName, 'production', 'go').instance('a');
-        const errorMessage = 'Error 1';
-        const groupId = getErrorGroupingKey(errorMessage);
+        after(() => apmSynthtraceEsClient.clean());
 
-        await apmSynthtraceEsClient.index([
-          timerange(start, end)
-            .interval('15m')
-            .rate(1)
-            .generator((timestamp) => {
-              return [
-                instance
-                  .transaction('GET /api/foo')
-                  .duration(100)
-                  .timestamp(timestamp)
-                  .sample(false)
-                  .errors(
-                    instance.error({ message: errorMessage }).timestamp(timestamp),
-                    instance.error({ message: errorMessage }).timestamp(timestamp + 1)
-                  ),
-                instance
-                  .transaction('GET /api/foo')
-                  .duration(100)
-                  .timestamp(timestamp)
-                  .sample(true)
-                  .errors(instance.error({ message: errorMessage }).timestamp(timestamp)),
-              ];
-            }),
-        ]);
+        describe('return correct data', () => {
+          let errorSampleDetailsResponse: ErrorSampleDetails;
+          before(async () => {
+            const errorsSamplesResponse = await callErrorGroupSamplesApi({
+              groupId: '98b75903135eac35ad42419bd3b45cf8b4270c61cbd0ede0f7e8c8a9ac9fdb03',
+            });
 
-        errorGroupSamplesResponse = (await callErrorGroupSamplesApi({ groupId })).body;
+            const errorId = errorsSamplesResponse.body.errorSampleIds[0];
+
+            const response = await callErrorSampleDetailsApi(errorId);
+            errorSampleDetailsResponse = response.body;
+          });
+
+          it('displays correct error grouping_key', () => {
+            expect(errorSampleDetailsResponse.error.error.grouping_key).to.equal(
+              '98b75903135eac35ad42419bd3b45cf8b4270c61cbd0ede0f7e8c8a9ac9fdb03'
+            );
+          });
+
+          it('displays correct error message', () => {
+            expect(errorSampleDetailsResponse.error.error.exception?.[0].message).to.equal(
+              'Error 1'
+            );
+          });
+        });
       });
 
-      after(() => apmSynthtraceEsClient.clean());
+      describe('with sampled and unsampled transactions', () => {
+        let errorGroupSamplesResponse: ErrorGroupSamples;
 
-      it('returns the errors in the correct order (sampled first, then unsampled)', () => {
-        const idsOfErrors = errorGroupSamplesResponse.errorSampleIds.map((id) => parseInt(id, 10));
+        before(async () => {
+          const instance = service(serviceName, 'production', 'go').instance('a');
+          const errorMessage = 'Error 1';
+          const groupId = getErrorGroupingKey(errorMessage);
 
-        // this checks whether the order of indexing is different from the order that is returned
-        // if it is not, scoring/sorting is broken
-        expect(errorGroupSamplesResponse.errorSampleIds.length).to.be(3);
-        expect(idsOfErrors).to.not.eql(orderBy(idsOfErrors));
+          await apmSynthtraceEsClient.index([
+            timerange(start, end)
+              .interval('15m')
+              .rate(1)
+              .generator((timestamp) => {
+                return [
+                  instance
+                    .transaction('GET /api/foo')
+                    .duration(100)
+                    .timestamp(timestamp)
+                    .sample(false)
+                    .errors(
+                      instance.error({ message: errorMessage }).timestamp(timestamp),
+                      instance.error({ message: errorMessage }).timestamp(timestamp + 1)
+                    ),
+                  instance
+                    .transaction('GET /api/foo')
+                    .duration(100)
+                    .timestamp(timestamp)
+                    .sample(true)
+                    .errors(instance.error({ message: errorMessage }).timestamp(timestamp)),
+                ];
+              }),
+          ]);
+
+          errorGroupSamplesResponse = (await callErrorGroupSamplesApi({ groupId })).body;
+        });
+
+        after(() => apmSynthtraceEsClient.clean());
+
+        it('returns the errors in the correct order (sampled first, then unsampled)', () => {
+          const idsOfErrors = errorGroupSamplesResponse.errorSampleIds.map((id) =>
+            parseInt(id, 10)
+          );
+
+          // this checks whether the order of indexing is different from the order that is returned
+          // if it is not, scoring/sorting is broken
+          expect(errorGroupSamplesResponse.errorSampleIds.length).to.be(3);
+          expect(idsOfErrors).to.not.eql(orderBy(idsOfErrors));
+        });
       });
     });
   });

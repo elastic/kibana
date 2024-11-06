@@ -19,7 +19,7 @@ type MobileDetailedStatisticsResponse =
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const apmApiClient = getService('apmApi');
-  const registry = getService('registry');
+
   const synthtrace = getService('synthtrace');
   let apmSynthtraceEsClient: ApmSynthtraceEsClient;
 
@@ -58,25 +58,20 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       .then(({ body }) => body);
   }
 
-  registry.when(
-    'Mobile detailed statistics when data is not loaded',
-
-    () => {
-      describe('when no data', () => {
-        it('handles empty state', async () => {
-          const response = await getMobileDetailedStatisticsByField({
-            serviceName: 'foo',
-            field: 'service.version',
-          });
-          expect(response).to.be.eql({ currentPeriod: {}, previousPeriod: {} });
+  describe('Mobile detailed statistics ', () => {
+    describe('when data is not loaded', () => {
+      it('handles empty state', async () => {
+        const response = await getMobileDetailedStatisticsByField({
+          serviceName: 'foo',
+          field: 'service.version',
         });
+        expect(response).to.be.eql({ currentPeriod: {}, previousPeriod: {} });
       });
-    }
-  );
+    });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/177388
-  registry.when.skip('Mobile detailed statistics when data is loaded', () => {
-    describe('Mobile detailed statistics', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/177388
+
+    describe.skip('when data is loaded', () => {
       before(async () => {
         apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
 

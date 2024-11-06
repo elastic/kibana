@@ -7,8 +7,8 @@
 
 import expect from '@kbn/expect';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
-import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
+import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import { ENVIRONMENT_ALL } from '@kbn/apm-plugin/common/environment_filter_values';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 
@@ -135,8 +135,9 @@ async function generateData({
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const apmApiClient = getService('apmApi');
-  const registry = getService('registry');
+
   const synthtrace = getService('synthtrace');
+  let apmSynthtraceEsClient: ApmSynthtraceEsClient;
 
   const start = new Date('2023-01-01T00:00:00.000Z').getTime();
   const end = new Date('2023-01-01T00:15:00.000Z').getTime() - 1;
@@ -166,7 +167,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       .then(({ body }) => body);
   }
 
-  registry.when('Mobile filters when data is not loaded', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/177389
+  describe.skip('Mobile filters', () => {
     describe('when no data', () => {
       it('handles empty state', async () => {
         const response = await getMobileFilters({ serviceName: 'foo' });
@@ -175,29 +177,24 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
       });
     });
-  });
-
-  // FLAKY: https://github.com/elastic/kibana/issues/177389
-  registry.when.skip('Mobile filters', () => {
-    before(async () => {
-      await generateData({
-        apmSynthtraceEsClient,
-        start,
-        end,
-      });
-    });
-
-    after(() => apmSynthtraceEsClient.clean());
 
     describe('when data is loaded', () => {
-      let response: MobileFilters;
-
       before(async () => {
+        apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
+
+        await generateData({
+          apmSynthtraceEsClient,
+          start,
+          end,
+        });
         response = await getMobileFilters({
           serviceName: 'synth-android',
           environment: 'production',
         });
       });
+
+      after(() => apmSynthtraceEsClient.clean());
+      let response: MobileFilters;
 
       it('returns correct filters for device', () => {
         response.mobileFilters.map(({ key, options }) => {

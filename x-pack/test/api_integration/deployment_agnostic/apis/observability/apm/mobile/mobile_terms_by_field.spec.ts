@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
-import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import { ENVIRONMENT_ALL } from '@kbn/apm-plugin/common/environment_filter_values';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 
@@ -126,8 +126,9 @@ async function generateData({
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const apmApiClient = getService('apmApi');
-  const registry = getService('registry');
+
   const synthtrace = getService('synthtrace');
+  let apmSynthtraceEsClient: ApmSynthtraceEsClient;
 
   const start = new Date('2023-01-01T00:00:00.000Z').getTime();
   const end = new Date('2023-01-01T00:15:00.000Z').getTime() - 1;
@@ -163,7 +164,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       .then(({ body }) => body);
   }
 
-  registry.when('Mobile terms when data is not loaded', () => {
+  describe('Mobile terms', () => {
     describe('when no data', () => {
       it('handles empty state', async () => {
         const response = await getMobileTermsByField({
@@ -183,66 +184,68 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         expect(response.terms).to.eql([]);
       });
     });
-  });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/177498
-  registry.when.skip('Mobile terms', () => {
-    before(async () => {
-      await generateData({
-        apmSynthtraceEsClient,
-        start,
-        end,
-      });
-    });
+    // FLAKY: https://github.com/elastic/kibana/issues/177498
+    describe.skip('Mobile terms', () => {
+      before(async () => {
+        apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
 
-    after(() => apmSynthtraceEsClient.clean());
-
-    describe('when data is loaded', () => {
-      it('returns mobile devices', async () => {
-        const response = await getMobileTermsByField({
-          serviceName: 'synth-android',
-          environment: 'production',
-          fieldName: 'device.model.identifier',
-          size: 10,
+        await generateData({
+          apmSynthtraceEsClient,
+          start,
+          end,
         });
-        expect(response.terms).to.eql([
-          { label: 'HUAWEI P2-0000', count: 3 },
-          { label: 'SM-G973F', count: 3 },
-        ]);
       });
 
-      it('returns mobile versions', async () => {
-        const response = await getMobileTermsByField({
-          serviceName: 'synth-android',
-          environment: 'production',
-          fieldName: 'service.version',
-          size: 10,
-        });
-        expect(response.terms).to.eql([
-          {
-            label: '1.2',
-            count: 3,
-          },
-          {
-            label: '2.3',
-            count: 3,
-          },
-        ]);
-      });
+      after(() => apmSynthtraceEsClient.clean());
 
-      it('return the most used mobile version', async () => {
-        const response = await getMobileTermsByField({
-          serviceName: 'synth-android',
-          environment: 'production',
-          fieldName: 'service.version',
-          size: 1,
+      describe('when data is loaded', () => {
+        it('returns mobile devices', async () => {
+          const response = await getMobileTermsByField({
+            serviceName: 'synth-android',
+            environment: 'production',
+            fieldName: 'device.model.identifier',
+            size: 10,
+          });
+          expect(response.terms).to.eql([
+            { label: 'HUAWEI P2-0000', count: 3 },
+            { label: 'SM-G973F', count: 3 },
+          ]);
         });
-        expect(response.terms).to.eql([
-          {
-            label: '1.2',
-            count: 3,
-          },
-        ]);
+
+        it('returns mobile versions', async () => {
+          const response = await getMobileTermsByField({
+            serviceName: 'synth-android',
+            environment: 'production',
+            fieldName: 'service.version',
+            size: 10,
+          });
+          expect(response.terms).to.eql([
+            {
+              label: '1.2',
+              count: 3,
+            },
+            {
+              label: '2.3',
+              count: 3,
+            },
+          ]);
+        });
+
+        it('return the most used mobile version', async () => {
+          const response = await getMobileTermsByField({
+            serviceName: 'synth-android',
+            environment: 'production',
+            fieldName: 'service.version',
+            size: 1,
+          });
+          expect(response.terms).to.eql([
+            {
+              label: '1.2',
+              count: 3,
+            },
+          ]);
+        });
       });
     });
   });

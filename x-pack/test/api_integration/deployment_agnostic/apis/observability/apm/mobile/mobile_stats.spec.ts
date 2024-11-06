@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
-import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { ENVIRONMENT_ALL } from '@kbn/apm-plugin/common/environment_filter_values';
 import { meanBy, sumBy } from 'lodash';
@@ -136,8 +136,9 @@ async function generateData({
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const apmApiClient = getService('apmApi');
-  const registry = getService('registry');
+
   const synthtrace = getService('synthtrace');
+  let apmSynthtraceEsClient: ApmSynthtraceEsClient;
 
   const start = new Date('2023-01-01T00:00:00.000Z').getTime();
   const end = new Date('2023-01-01T00:15:00.000Z').getTime() - 1;
@@ -170,7 +171,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       .then(({ body }) => body);
   }
 
-  registry.when('Mobile stats when data is not loaded', () => {
+  describe('Mobile stats', () => {
     describe('when no data', () => {
       it('handles empty state', async () => {
         const response = await getMobileStats({ serviceName: 'foo' });
@@ -182,109 +183,111 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         );
       });
     });
-  });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/177392
-  registry.when.skip('Mobile stats', () => {
-    before(async () => {
-      await generateData({
-        apmSynthtraceEsClient,
-        start,
-        end,
-      });
-    });
-
-    after(() => apmSynthtraceEsClient.clean());
-
-    describe('when data is loaded', () => {
-      let response: MobileStats;
-
+    // FLAKY: https://github.com/elastic/kibana/issues/177392
+    describe.skip('Mobile stats', () => {
       before(async () => {
-        response = await getMobileStats({
-          serviceName: 'synth-android',
-          environment: 'production',
+        apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
+
+        await generateData({
+          apmSynthtraceEsClient,
+          start,
+          end,
         });
       });
 
-      it('returns same sessions', () => {
-        const { value, timeseries } = response.currentPeriod.sessions;
-        const timeseriesTotal = sumBy(timeseries, 'y');
-        expect(value).to.be(timeseriesTotal);
-      });
+      after(() => apmSynthtraceEsClient.clean());
 
-      it('returns same requests', () => {
-        const { value, timeseries } = response.currentPeriod.requests;
-        const timeseriesTotal = sumBy(timeseries, 'y');
-        expect(value).to.be(timeseriesTotal);
-      });
+      describe('when data is loaded', () => {
+        let response: MobileStats;
 
-      it('returns same crashes', () => {
-        const { value, timeseries } = response.currentPeriod.crashRate;
-        const timeseriesMean = meanBy(
-          timeseries.filter((bucket) => bucket.y !== 0),
-          'y'
-        );
-        expect(value).to.be(timeseriesMean);
-      });
-      it('returns same launch times', () => {
-        const { value, timeseries } = response.currentPeriod.launchTimes;
-        const timeseriesMean = meanBy(
-          timeseries.filter((bucket) => bucket.y !== null),
-          'y'
-        );
-        expect(value).to.be(timeseriesMean);
-      });
-    });
-
-    describe('when filters are applied', () => {
-      it('returns empty state for filters', async () => {
-        const response = await getMobileStats({
-          serviceName: 'synth-android',
-          environment: 'production',
-          kuery: `app.version:"none"`,
+        before(async () => {
+          response = await getMobileStats({
+            serviceName: 'synth-android',
+            environment: 'production',
+          });
         });
 
-        expect(response.currentPeriod.sessions.value).to.eql(0);
-        expect(response.currentPeriod.requests.value).to.eql(0);
-        expect(response.currentPeriod.crashRate.value).to.eql(0);
-        expect(response.currentPeriod.launchTimes.value).to.eql(null);
-
-        expect(response.currentPeriod.sessions.timeseries.every((item) => item.y === 0)).to.eql(
-          true
-        );
-        expect(response.currentPeriod.requests.timeseries.every((item) => item.y === 0)).to.eql(
-          true
-        );
-        expect(response.currentPeriod.crashRate.timeseries.every((item) => item.y === 0)).to.eql(
-          true
-        );
-        expect(
-          response.currentPeriod.launchTimes.timeseries.every((item) => item.y === null)
-        ).to.eql(true);
-      });
-
-      it('returns the correct values when single filter is applied', async () => {
-        const response = await getMobileStats({
-          serviceName: 'synth-android',
-          environment: 'production',
-          kuery: `service.version:"2.3"`,
+        it('returns same sessions', () => {
+          const { value, timeseries } = response.currentPeriod.sessions;
+          const timeseriesTotal = sumBy(timeseries, 'y');
+          expect(value).to.be(timeseriesTotal);
         });
 
-        expect(response.currentPeriod.sessions.value).to.eql(3);
-        expect(response.currentPeriod.requests.value).to.eql(0);
-        expect(response.currentPeriod.crashRate.value).to.eql(3);
-        expect(response.currentPeriod.launchTimes.value).to.eql(null);
+        it('returns same requests', () => {
+          const { value, timeseries } = response.currentPeriod.requests;
+          const timeseriesTotal = sumBy(timeseries, 'y');
+          expect(value).to.be(timeseriesTotal);
+        });
+
+        it('returns same crashes', () => {
+          const { value, timeseries } = response.currentPeriod.crashRate;
+          const timeseriesMean = meanBy(
+            timeseries.filter((bucket) => bucket.y !== 0),
+            'y'
+          );
+          expect(value).to.be(timeseriesMean);
+        });
+        it('returns same launch times', () => {
+          const { value, timeseries } = response.currentPeriod.launchTimes;
+          const timeseriesMean = meanBy(
+            timeseries.filter((bucket) => bucket.y !== null),
+            'y'
+          );
+          expect(value).to.be(timeseriesMean);
+        });
       });
 
-      it('returns the correct values when multiple filters are applied', async () => {
-        const response = await getMobileStats({
-          serviceName: 'synth-android',
-          kuery: `service.version:"1.2" and service.environment: "production"`,
+      describe('when filters are applied', () => {
+        it('returns empty state for filters', async () => {
+          const response = await getMobileStats({
+            serviceName: 'synth-android',
+            environment: 'production',
+            kuery: `app.version:"none"`,
+          });
+
+          expect(response.currentPeriod.sessions.value).to.eql(0);
+          expect(response.currentPeriod.requests.value).to.eql(0);
+          expect(response.currentPeriod.crashRate.value).to.eql(0);
+          expect(response.currentPeriod.launchTimes.value).to.eql(null);
+
+          expect(response.currentPeriod.sessions.timeseries.every((item) => item.y === 0)).to.eql(
+            true
+          );
+          expect(response.currentPeriod.requests.timeseries.every((item) => item.y === 0)).to.eql(
+            true
+          );
+          expect(response.currentPeriod.crashRate.timeseries.every((item) => item.y === 0)).to.eql(
+            true
+          );
+          expect(
+            response.currentPeriod.launchTimes.timeseries.every((item) => item.y === null)
+          ).to.eql(true);
         });
-        expect(response.currentPeriod.sessions.value).to.eql(3);
-        expect(response.currentPeriod.requests.value).to.eql(3);
-        expect(response.currentPeriod.crashRate.value).to.eql(1);
-        expect(response.currentPeriod.launchTimes.value).to.eql(100);
+
+        it('returns the correct values when single filter is applied', async () => {
+          const response = await getMobileStats({
+            serviceName: 'synth-android',
+            environment: 'production',
+            kuery: `service.version:"2.3"`,
+          });
+
+          expect(response.currentPeriod.sessions.value).to.eql(3);
+          expect(response.currentPeriod.requests.value).to.eql(0);
+          expect(response.currentPeriod.crashRate.value).to.eql(3);
+          expect(response.currentPeriod.launchTimes.value).to.eql(null);
+        });
+
+        it('returns the correct values when multiple filters are applied', async () => {
+          const response = await getMobileStats({
+            serviceName: 'synth-android',
+            kuery: `service.version:"1.2" and service.environment: "production"`,
+          });
+          expect(response.currentPeriod.sessions.value).to.eql(3);
+          expect(response.currentPeriod.requests.value).to.eql(3);
+          expect(response.currentPeriod.crashRate.value).to.eql(1);
+          expect(response.currentPeriod.launchTimes.value).to.eql(100);
+        });
       });
     });
   });

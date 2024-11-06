@@ -18,7 +18,6 @@ type ErrorGroups =
   APIReturnType<'GET /internal/apm/mobile-services/{serviceName}/crashes/groups/main_statistics'>['errorGroups'];
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
-  const registry = getService('registry');
   const apmApiClient = getService('apmApi');
   const synthtrace = getService('synthtrace');
 
@@ -46,115 +45,115 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     });
   }
 
-  registry.when('when data is not loaded', () => {
+  describe('Crash group list', () => {
     it('handles empty state', async () => {
       const response = await callApi();
       expect(response.status).to.be(200);
       expect(response.body.errorGroups).to.empty();
     });
-  });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/177651
-  registry.when.skip('when data is loaded', () => {
-    describe('errors group', () => {
-      let apmSynthtraceEsClient: ApmSynthtraceEsClient;
+    // FLAKY: https://github.com/elastic/kibana/issues/177651
+    describe.skip('when data is loaded', () => {
+      describe('errors group', () => {
+        let apmSynthtraceEsClient: ApmSynthtraceEsClient;
 
-      const appleTransaction = {
-        name: 'GET /apple 🍎 ',
-        successRate: 75,
-        failureRate: 25,
-      };
+        const appleTransaction = {
+          name: 'GET /apple 🍎 ',
+          successRate: 75,
+          failureRate: 25,
+        };
 
-      const bananaTransaction = {
-        name: 'GET /banana 🍌',
-        successRate: 50,
-        failureRate: 50,
-      };
+        const bananaTransaction = {
+          name: 'GET /banana 🍌',
+          successRate: 50,
+          failureRate: 50,
+        };
 
-      before(async () => {
-        const serviceInstance = apm
-          .service({ name: serviceName, environment: 'production', agentName: 'swift' })
-          .instance('instance-a');
-
-        apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
-
-        await apmSynthtraceEsClient.index([
-          timerange(start, end)
-            .interval('1m')
-            .rate(appleTransaction.successRate)
-            .generator((timestamp) =>
-              serviceInstance
-                .transaction({ transactionName: appleTransaction.name })
-                .timestamp(timestamp)
-                .duration(1000)
-                .success()
-            ),
-          timerange(start, end)
-            .interval('1m')
-            .rate(appleTransaction.failureRate)
-            .generator((timestamp) =>
-              serviceInstance
-                .transaction({ transactionName: appleTransaction.name })
-                .errors(
-                  serviceInstance
-                    .crash({
-                      message: 'crash 1',
-                    })
-                    .timestamp(timestamp)
-                )
-                .duration(1000)
-                .timestamp(timestamp)
-                .failure()
-            ),
-          timerange(start, end)
-            .interval('1m')
-            .rate(bananaTransaction.successRate)
-            .generator((timestamp) =>
-              serviceInstance
-                .transaction({ transactionName: bananaTransaction.name })
-                .timestamp(timestamp)
-                .duration(1000)
-                .success()
-            ),
-          timerange(start, end)
-            .interval('1m')
-            .rate(bananaTransaction.failureRate)
-            .generator((timestamp) =>
-              serviceInstance
-                .transaction({ transactionName: bananaTransaction.name })
-                .errors(
-                  serviceInstance
-                    .crash({
-                      message: 'crash 2',
-                    })
-                    .timestamp(timestamp)
-                )
-                .duration(1000)
-                .timestamp(timestamp)
-                .failure()
-            ),
-        ]);
-      });
-
-      after(() => apmSynthtraceEsClient.clean());
-
-      describe('returns the correct data', () => {
-        let errorGroups: ErrorGroups;
         before(async () => {
-          const response = await callApi();
-          errorGroups = response.body.errorGroups;
-        });
-        it('returns correct number of crashes', () => {
-          expect(errorGroups.length).to.equal(2);
-          expect(errorGroups.map((error) => error.name).sort()).to.eql(['crash 1', 'crash 2']);
+          const serviceInstance = apm
+            .service({ name: serviceName, environment: 'production', agentName: 'swift' })
+            .instance('instance-a');
+
+          apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
+
+          await apmSynthtraceEsClient.index([
+            timerange(start, end)
+              .interval('1m')
+              .rate(appleTransaction.successRate)
+              .generator((timestamp) =>
+                serviceInstance
+                  .transaction({ transactionName: appleTransaction.name })
+                  .timestamp(timestamp)
+                  .duration(1000)
+                  .success()
+              ),
+            timerange(start, end)
+              .interval('1m')
+              .rate(appleTransaction.failureRate)
+              .generator((timestamp) =>
+                serviceInstance
+                  .transaction({ transactionName: appleTransaction.name })
+                  .errors(
+                    serviceInstance
+                      .crash({
+                        message: 'crash 1',
+                      })
+                      .timestamp(timestamp)
+                  )
+                  .duration(1000)
+                  .timestamp(timestamp)
+                  .failure()
+              ),
+            timerange(start, end)
+              .interval('1m')
+              .rate(bananaTransaction.successRate)
+              .generator((timestamp) =>
+                serviceInstance
+                  .transaction({ transactionName: bananaTransaction.name })
+                  .timestamp(timestamp)
+                  .duration(1000)
+                  .success()
+              ),
+            timerange(start, end)
+              .interval('1m')
+              .rate(bananaTransaction.failureRate)
+              .generator((timestamp) =>
+                serviceInstance
+                  .transaction({ transactionName: bananaTransaction.name })
+                  .errors(
+                    serviceInstance
+                      .crash({
+                        message: 'crash 2',
+                      })
+                      .timestamp(timestamp)
+                  )
+                  .duration(1000)
+                  .timestamp(timestamp)
+                  .failure()
+              ),
+          ]);
         });
 
-        it('returns correct occurrences', () => {
-          const numberOfBuckets = 15;
-          expect(errorGroups.map((error) => error.occurrences).sort()).to.eql([
-            appleTransaction.failureRate * numberOfBuckets,
-            bananaTransaction.failureRate * numberOfBuckets,
-          ]);
+        after(() => apmSynthtraceEsClient.clean());
+
+        describe('returns the correct data', () => {
+          let errorGroups: ErrorGroups;
+          before(async () => {
+            const response = await callApi();
+            errorGroups = response.body.errorGroups;
+          });
+          it('returns correct number of crashes', () => {
+            expect(errorGroups.length).to.equal(2);
+            expect(errorGroups.map((error) => error.name).sort()).to.eql(['crash 1', 'crash 2']);
+          });
+
+          it('returns correct occurrences', () => {
+            const numberOfBuckets = 15;
+            expect(errorGroups.map((error) => error.occurrences).sort()).to.eql([
+              appleTransaction.failureRate * numberOfBuckets,
+              bananaTransaction.failureRate * numberOfBuckets,
+            ]);
+          });
         });
       });
     });

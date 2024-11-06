@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import expect from '@kbn/expect';
 import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { ENVIRONMENT_ALL } from '@kbn/apm-plugin/common/environment_filter_values';
@@ -16,8 +17,9 @@ type MostUsedCharts =
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const apmApiClient = getService('apmApi');
-  const registry = getService('registry');
+
   const synthtrace = getService('synthtrace');
+  let apmSynthtraceEsClient: ApmSynthtraceEsClient;
 
   const start = new Date('2023-01-01T00:00:00.000Z').getTime();
   const end = new Date('2023-01-01T00:15:00.000Z').getTime() - 1;
@@ -50,55 +52,53 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       .then(({ body }) => body);
   }
 
-  registry.when(
-    'Most used charts when data is not loaded',
-
-    () => {
-      describe('when no data', () => {
-        it('handles empty state', async () => {
-          const response: MostUsedCharts = await getMobileMostUsedCharts({ serviceName: 'foo' });
-          expect(response.mostUsedCharts.length).to.eql(4);
-          expect(response.mostUsedCharts.every((chart) => chart.options.length === 0)).to.eql(true);
-        });
-      });
-    }
-  );
-
-  // FLAKY: https://github.com/elastic/kibana/issues/177394
-  registry.when.skip('Mobile stats', () => {
-    before(async () => {
-      await generateMobileData({
-        apmSynthtraceEsClient,
-        start,
-        end,
+  describe('Most used charts', () => {
+    describe('when no data', () => {
+      it('handles empty state', async () => {
+        const response: MostUsedCharts = await getMobileMostUsedCharts({ serviceName: 'foo' });
+        expect(response.mostUsedCharts.length).to.eql(4);
+        expect(response.mostUsedCharts.every((chart) => chart.options.length === 0)).to.eql(true);
       });
     });
 
-    after(() => apmSynthtraceEsClient.clean());
-
-    describe('when data is loaded', () => {
-      let response: MostUsedCharts;
-
+    // FLAKY: https://github.com/elastic/kibana/issues/177394
+    describe.skip('Mobile stats', () => {
       before(async () => {
-        response = await getMobileMostUsedCharts({
-          serviceName: 'synth-android',
-          environment: 'production',
+        apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
+
+        await generateMobileData({
+          apmSynthtraceEsClient,
+          start,
+          end,
         });
       });
 
-      it('should get the top 5 and the other option only', () => {
-        const deviceOptions = response.mostUsedCharts.find(
-          (chart) => chart.key === 'device'
-        )?.options;
-        expect(deviceOptions?.length).to.eql(6);
-        expect(deviceOptions?.find((option) => option.key === 'other')).to.not.be(undefined);
-      });
+      after(() => apmSynthtraceEsClient.clean());
 
-      it('should get network connection type object from span events', () => {
-        const nctOptions = response.mostUsedCharts.find(
-          (chart) => chart.key === 'netConnectionType'
-        )?.options;
-        expect(nctOptions?.length).to.eql(2);
+      describe('when data is loaded', () => {
+        let response: MostUsedCharts;
+
+        before(async () => {
+          response = await getMobileMostUsedCharts({
+            serviceName: 'synth-android',
+            environment: 'production',
+          });
+        });
+
+        it('should get the top 5 and the other option only', () => {
+          const deviceOptions = response.mostUsedCharts.find(
+            (chart) => chart.key === 'device'
+          )?.options;
+          expect(deviceOptions?.length).to.eql(6);
+          expect(deviceOptions?.find((option) => option.key === 'other')).to.not.be(undefined);
+        });
+
+        it('should get network connection type object from span events', () => {
+          const nctOptions = response.mostUsedCharts.find(
+            (chart) => chart.key === 'netConnectionType'
+          )?.options;
+          expect(nctOptions?.length).to.eql(2);
+        });
       });
     });
   });

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import expect from '@kbn/expect';
 import { ENVIRONMENT_ALL } from '@kbn/apm-plugin/common/environment_filter_values';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
@@ -12,8 +13,9 @@ import { generateMobileData } from './generate_mobile_data';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const apmApiClient = getService('apmApi');
-  const registry = getService('registry');
+
   const synthtrace = getService('synthtrace');
+  let apmSynthtraceEsClient: ApmSynthtraceEsClient;
 
   const start = new Date('2023-01-01T00:00:00.000Z').getTime();
   const end = new Date('2023-01-01T02:00:00.000Z').getTime();
@@ -47,7 +49,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     });
   }
 
-  registry.when.skip('without data loaded', () => {
+  describe.skip('Sessions charts', () => {
     describe('when no data', () => {
       it('handles empty state', async () => {
         const response = await getSessionsChart({ serviceName: 'foo' });
@@ -56,72 +58,76 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         expect(response.status).to.be(200);
       });
     });
-  });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/177393
-  registry.when.skip('with data loaded', () => {
-    before(async () => {
-      await generateMobileData({
-        apmSynthtraceEsClient,
-        start,
-        end,
-      });
-    });
+    // FLAKY: https://github.com/elastic/kibana/issues/177393
+    describe.skip('with data loaded', () => {
+      before(async () => {
+        apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
 
-    after(() => apmSynthtraceEsClient.clean());
-
-    describe('when data is loaded', () => {
-      it('returns timeseries for sessions chart', async () => {
-        const response = await getSessionsChart({ serviceName: 'synth-android', offset: '1d' });
-
-        expect(response.status).to.be(200);
-        expect(response.body.currentPeriod.timeseries.some((item) => item.x && item.y)).to.eql(
-          true
-        );
-
-        expect(response.body.currentPeriod.timeseries[0].y).to.eql(6);
-        expect(response.body.previousPeriod.timeseries[0].y).to.eql(0);
+        await generateMobileData({
+          apmSynthtraceEsClient,
+          start,
+          end,
+        });
       });
 
-      it('returns only current period timeseries when offset is not available', async () => {
-        const response = await getSessionsChart({ serviceName: 'synth-android' });
+      after(() => apmSynthtraceEsClient.clean());
 
-        expect(response.status).to.be(200);
-        expect(response.body.currentPeriod.timeseries.some((item) => item.x && item.y)).to.eql(
-          true
-        );
+      describe('when data is loaded', () => {
+        it('returns timeseries for sessions chart', async () => {
+          const response = await getSessionsChart({ serviceName: 'synth-android', offset: '1d' });
 
-        expect(response.body.currentPeriod.timeseries[0].y).to.eql(6);
-        expect(response.body.previousPeriod.timeseries).to.eql([]);
-      });
-    });
+          expect(response.status).to.be(200);
+          expect(response.body.currentPeriod.timeseries.some((item) => item.x && item.y)).to.eql(
+            true
+          );
 
-    describe('when filters are applied', () => {
-      it('returns empty state for filters', async () => {
-        const response = await getSessionsChart({
-          serviceName: 'synth-android',
-          environment: 'production',
-          kuery: `app.version:"none"`,
+          expect(response.body.currentPeriod.timeseries[0].y).to.eql(6);
+          expect(response.body.previousPeriod.timeseries[0].y).to.eql(0);
         });
 
-        expect(response.body.currentPeriod.timeseries.every((item) => item.y === 0)).to.eql(true);
-        expect(response.body.previousPeriod.timeseries.every((item) => item.y === 0)).to.eql(true);
+        it('returns only current period timeseries when offset is not available', async () => {
+          const response = await getSessionsChart({ serviceName: 'synth-android' });
+
+          expect(response.status).to.be(200);
+          expect(response.body.currentPeriod.timeseries.some((item) => item.x && item.y)).to.eql(
+            true
+          );
+
+          expect(response.body.currentPeriod.timeseries[0].y).to.eql(6);
+          expect(response.body.previousPeriod.timeseries).to.eql([]);
+        });
       });
 
-      it('returns the correct values filter is applied', async () => {
-        const response = await getSessionsChart({
-          serviceName: 'synth-android',
-          environment: 'production',
-          kuery: `transaction.name : "Start View - View Appearing"`,
+      describe('when filters are applied', () => {
+        it('returns empty state for filters', async () => {
+          const response = await getSessionsChart({
+            serviceName: 'synth-android',
+            environment: 'production',
+            kuery: `app.version:"none"`,
+          });
+
+          expect(response.body.currentPeriod.timeseries.every((item) => item.y === 0)).to.eql(true);
+          expect(response.body.previousPeriod.timeseries.every((item) => item.y === 0)).to.eql(
+            true
+          );
         });
 
-        expect(response.status).to.be(200);
-        expect(response.body.currentPeriod.timeseries.some((item) => item.x && item.y)).to.eql(
-          true
-        );
+        it('returns the correct values filter is applied', async () => {
+          const response = await getSessionsChart({
+            serviceName: 'synth-android',
+            environment: 'production',
+            kuery: `transaction.name : "Start View - View Appearing"`,
+          });
 
-        expect(response.body.currentPeriod.timeseries[0].y).to.eql(6);
-        expect(response.body.previousPeriod.timeseries).to.eql([]);
+          expect(response.status).to.be(200);
+          expect(response.body.currentPeriod.timeseries.some((item) => item.x && item.y)).to.eql(
+            true
+          );
+
+          expect(response.body.currentPeriod.timeseries[0].y).to.eql(6);
+          expect(response.body.previousPeriod.timeseries).to.eql([]);
+        });
       });
     });
   });
