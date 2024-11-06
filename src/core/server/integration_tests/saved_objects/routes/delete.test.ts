@@ -61,7 +61,7 @@ describe('DELETE /api/saved_objects/{type}/{id}', () => {
       documentationUrl: 'http://elastic.co',
       severity: 'warning' as const,
       reason: {
-        type: 'remove' as const,
+        type: 'deprecate' as const,
       },
     };
     registerDeleteRoute(router, {

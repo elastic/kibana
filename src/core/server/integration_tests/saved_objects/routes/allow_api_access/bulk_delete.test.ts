@@ -64,7 +64,7 @@ describe('POST /api/saved_objects/_bulk_delete with allowApiAccess as true', () 
       documentationUrl: 'http://elastic.co',
       severity: 'warning' as const,
       reason: {
-        type: 'remove' as const,
+        type: 'deprecate' as const,
       },
     };
     registerBulkDeleteRoute(router, {

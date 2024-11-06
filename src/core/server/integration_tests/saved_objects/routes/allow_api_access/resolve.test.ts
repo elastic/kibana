@@ -84,7 +84,7 @@ describe('GET /api/saved_objects/resolve/{type}/{id} with allowApiAccess true', 
       documentationUrl: 'http://elastic.co',
       severity: 'warning' as const,
       reason: {
-        type: 'remove' as const,
+        type: 'deprecate' as const,
       },
     };
     registerResolveRoute(router, {

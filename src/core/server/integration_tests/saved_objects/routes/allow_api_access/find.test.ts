@@ -75,7 +75,7 @@ describe('GET /api/saved_objects/_find with allowApiAccess true', () => {
       documentationUrl: 'http://elastic.co',
       severity: 'warning' as const,
       reason: {
-        type: 'remove' as const,
+        type: 'deprecate' as const,
       },
     };
     registerFindRoute(router, {

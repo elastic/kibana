@@ -60,7 +60,7 @@ describe('POST /api/saved_objects/_bulk_create with allowApiAccess true', () => 
       documentationUrl: 'http://elastic.co',
       severity: 'warning' as const,
       reason: {
-        type: 'remove' as const,
+        type: 'deprecate' as const,
       },
     };
     registerBulkCreateRoute(router, {
