@@ -14,11 +14,6 @@ export const getEqlOptions = () =>
     (timeline) =>
       timeline?.eqlOptions ?? {
         eventCategoryField: [{ label: 'event.category' }],
-        tiebreakerField: [
-          {
-            label: '',
-          },
-        ],
         timestampField: [
           {
             label: '@timestamp',
