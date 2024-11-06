@@ -249,6 +249,7 @@ import type {
   DeleteEntityEngineRequestParamsInput,
   DeleteEntityEngineResponse,
 } from './entity_analytics/entity_store/engine/delete.gen';
+import type { EntityStoreGetPrivilegesResponse } from './entity_analytics/entity_store/engine/get_privileges.gen';
 import type {
   GetEntityEngineRequestParamsInput,
   GetEntityEngineResponse,
@@ -1125,6 +1126,18 @@ If a record already exists for the specified entity, that record is overwritten 
         },
         method: 'POST',
         body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async entityStoreGetPrivileges() {
+    this.log.info(`${new Date().toISOString()} Calling API EntityStoreGetPrivileges`);
+    return this.kbnClient
+      .request<EntityStoreGetPrivilegesResponse>({
+        path: '/internal/entity_store/privileges',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'GET',
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
