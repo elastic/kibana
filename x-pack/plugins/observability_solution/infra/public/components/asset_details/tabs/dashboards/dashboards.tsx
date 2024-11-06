@@ -137,7 +137,6 @@ export function Dashboards() {
     });
     return Promise.resolve<DashboardCreationOptions>({
       getInitialInput,
-      useControlGroupIntegration: true,
     });
   }, [dateRange.from, dateRange.to]);
 

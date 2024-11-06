@@ -5,113 +5,30 @@
  * 2.0.
  */
 import {
-  EuiButtonIcon,
   EuiDataGrid,
   EuiDataGridCellValueElementProps,
-  EuiDataGridColumn,
   EuiDataGridSorting,
-  EuiLink,
   EuiLoadingSpinner,
   EuiText,
-  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedDate, FormattedMessage, FormattedTime } from '@kbn/i18n-react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { SharePluginStart } from '@kbn/share-plugin/public';
-import {
-  ASSET_DETAILS_LOCATOR_ID,
-  type AssetDetailsLocatorParams,
-  type ServiceOverviewParams,
-} from '@kbn/observability-shared-plugin/common';
-
 import { last } from 'lodash';
-import React, { useCallback, useState } from 'react';
-import { EntityType } from '../../../common/entities';
+import React, { useCallback, useMemo } from 'react';
 import {
   ENTITY_DISPLAY_NAME,
   ENTITY_LAST_SEEN,
   ENTITY_TYPE,
-} from '../../../common/es_fields/entities';
+} from '@kbn/observability-shared-plugin/common';
+import { EntityColumnIds } from '../../../common/entities';
 import { APIReturnType } from '../../api';
-import { getEntityTypeLabel } from '../../utils/get_entity_type_label';
-import { parseServiceParams } from '../../utils/parse_service_params';
 import { BadgeFilterWithPopover } from '../badge_filter_with_popover';
+import { getColumns } from './grid_columns';
+import { AlertsBadge } from '../alerts_badge/alerts_badge';
+import { EntityName } from './entity_name';
 
 type InventoryEntitiesAPIReturnType = APIReturnType<'GET /internal/inventory/entities'>;
-
 type LatestEntities = InventoryEntitiesAPIReturnType['entities'];
-type LatestEntity = LatestEntities extends Array<infer Entity> ? Entity : never;
-
-export type EntityColumnIds =
-  | typeof ENTITY_DISPLAY_NAME
-  | typeof ENTITY_LAST_SEEN
-  | typeof ENTITY_TYPE;
-
-const CustomHeaderCell = ({ title, tooltipContent }: { title: string; tooltipContent: string }) => (
-  <>
-    <span>{title}</span>
-    <EuiToolTip content={tooltipContent}>
-      <EuiButtonIcon
-        data-test-subj="inventoryCustomHeaderCellButton"
-        iconType="questionInCircle"
-        aria-label={tooltipContent}
-        color="primary"
-      />
-    </EuiToolTip>
-  </>
-);
-
-const entityNameLabel = i18n.translate('xpack.inventory.entitiesGrid.euiDataGrid.entityNameLabel', {
-  defaultMessage: 'Entity name',
-});
-const entityTypeLabel = i18n.translate('xpack.inventory.entitiesGrid.euiDataGrid.typeLabel', {
-  defaultMessage: 'Type',
-});
-const entityLastSeenLabel = i18n.translate(
-  'xpack.inventory.entitiesGrid.euiDataGrid.lastSeenLabel',
-  {
-    defaultMessage: 'Last seen',
-  }
-);
-
-const columns: EuiDataGridColumn[] = [
-  {
-    id: ENTITY_DISPLAY_NAME,
-    // keep it for accessibility purposes
-    displayAsText: entityNameLabel,
-    display: (
-      <CustomHeaderCell
-        title={entityNameLabel}
-        tooltipContent="Name of the entity (entity.displayName)"
-      />
-    ),
-    isSortable: true,
-  },
-  {
-    id: ENTITY_TYPE,
-    // keep it for accessibility purposes
-    displayAsText: entityTypeLabel,
-    display: (
-      <CustomHeaderCell title={entityTypeLabel} tooltipContent="Type of entity (entity.type)" />
-    ),
-    isSortable: true,
-  },
-  {
-    id: ENTITY_LAST_SEEN,
-    // keep it for accessibility purposes
-    displayAsText: entityLastSeenLabel,
-    display: (
-      <CustomHeaderCell
-        title={entityLastSeenLabel}
-        tooltipContent="Timestamp of last received data for entity (entity.lastSeenTimestamp)"
-      />
-    ),
-    defaultSortDirection: 'desc',
-    isSortable: true,
-    schema: 'datetime',
-  },
-];
 
 interface Props {
   loading: boolean;
@@ -121,7 +38,7 @@ interface Props {
   pageIndex: number;
   onChangeSort: (sorting: EuiDataGridSorting['columns'][0]) => void;
   onChangePage: (nextPage: number) => void;
-  onFilterByType: (entityType: EntityType) => void;
+  onFilterByType: (entityType: string) => void;
 }
 
 const PAGE_SIZE = 20;
@@ -136,15 +53,6 @@ export function EntitiesGrid({
   onChangeSort,
   onFilterByType,
 }: Props) {
-  const [visibleColumns, setVisibleColumns] = useState(columns.map(({ id }) => id));
-  const { services } = useKibana<{ share?: SharePluginStart }>();
-
-  const assetDetailsLocator =
-    services.share?.url.locators.get<AssetDetailsLocatorParams>(ASSET_DETAILS_LOCATOR_ID);
-
-  const serviceOverviewLocator =
-    services.share?.url.locators.get<ServiceOverviewParams>('serviceOverviewLocator');
-
   const onSort: EuiDataGridSorting['onSort'] = useCallback(
     (newSortingColumns) => {
       const lastItem = last(newSortingColumns);
@@ -155,29 +63,17 @@ export function EntitiesGrid({
     [onChangeSort]
   );
 
-  const getEntityRedirectUrl = useCallback(
-    (entity: LatestEntity) => {
-      const type = entity[ENTITY_TYPE] as EntityType;
+  const showAlertsColumn = useMemo(
+    () => entities?.some((entity) => entity?.alertsCount && entity?.alertsCount > 0),
+    [entities]
+  );
 
-      // Any unrecognised types will always return undefined
-      switch (type) {
-        case 'host':
-        case 'container':
-          return assetDetailsLocator?.getRedirectUrl({
-            assetId: entity[ENTITY_DISPLAY_NAME],
-            assetType: type,
-          });
-
-        case 'service':
-          // For services, the format of the display name is `service.name:service.environment`.
-          // We just want the first part of the name for the locator.
-          // TODO: Replace this with a better approach for handling service names. See https://github.com/elastic/kibana/issues/194131
-          return serviceOverviewLocator?.getRedirectUrl(
-            parseServiceParams(entity[ENTITY_DISPLAY_NAME])
-          );
-      }
-    },
-    [assetDetailsLocator, serviceOverviewLocator]
+  const columnVisibility = useMemo(
+    () => ({
+      visibleColumns: getColumns({ showAlertsColumn }).map(({ id }) => id),
+      setVisibleColumns: () => {},
+    }),
+    [showAlertsColumn]
   );
 
   const renderCellValue = useCallback(
@@ -188,14 +84,18 @@ export function EntitiesGrid({
       }
 
       const columnEntityTableId = columnId as EntityColumnIds;
+      const entityType = entity[ENTITY_TYPE];
+
       switch (columnEntityTableId) {
+        case 'alertsCount':
+          return entity?.alertsCount ? <AlertsBadge entity={entity} /> : null;
+
         case ENTITY_TYPE:
-          const entityType = entity[columnEntityTableId] as EntityType;
           return (
             <BadgeFilterWithPopover
               field={ENTITY_TYPE}
               value={entityType}
-              label={getEntityTypeLabel(entityType)}
+              label={entityType}
               onFilter={() => onFilterByType(entityType)}
             />
           );
@@ -226,20 +126,12 @@ export function EntitiesGrid({
             />
           );
         case ENTITY_DISPLAY_NAME:
-          return (
-            <EuiLink
-              data-test-subj="inventoryCellValueLink"
-              className="eui-textTruncate"
-              href={getEntityRedirectUrl(entity)}
-            >
-              {entity[columnEntityTableId]}
-            </EuiLink>
-          );
+          return <EntityName entity={entity} />;
         default:
           return entity[columnId as EntityColumnIds] || '';
       }
     },
-    [entities, onFilterByType, getEntityRedirectUrl]
+    [entities, onFilterByType]
   );
 
   if (loading) {
@@ -254,8 +146,8 @@ export function EntitiesGrid({
         'xpack.inventory.entitiesGrid.euiDataGrid.inventoryEntitiesGridLabel',
         { defaultMessage: 'Inventory entities grid' }
       )}
-      columns={columns}
-      columnVisibility={{ visibleColumns, setVisibleColumns }}
+      columns={getColumns({ showAlertsColumn })}
+      columnVisibility={columnVisibility}
       rowCount={entities.length}
       renderCellValue={renderCellValue}
       gridStyle={{ border: 'horizontal', header: 'shade' }}

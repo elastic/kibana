@@ -15,10 +15,8 @@ import {
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { KibanaRequest } from '@kbn/core/server';
-import { getKbResource } from './get_kb_resource';
 import { buildResponse } from '../../lib/build_response';
 import { ElasticAssistantPluginRouter } from '../../types';
-import { ESQL_RESOURCE } from './constants';
 import { isV2KnowledgeBaseEnabled } from '../helpers';
 
 /**
@@ -51,9 +49,6 @@ export const getKnowledgeBaseStatusRoute = (router: ElasticAssistantPluginRouter
         const logger = ctx.elasticAssistant.logger;
 
         try {
-          // Use asInternalUser
-          const kbResource = getKbResource(request);
-
           // FF Check for V2 KB
           const v2KnowledgeBaseEnabled = isV2KnowledgeBaseEnabled({ context: ctx, request });
 
@@ -78,9 +73,21 @@ export const getKnowledgeBaseStatusRoute = (router: ElasticAssistantPluginRouter
             pipeline_exists: pipelineExists,
           };
 
-          if (indexExists && isModelDeployed && kbResource === ESQL_RESOURCE) {
-            const esqlExists = await kbDataClient.isESQLDocsLoaded();
-            return response.ok({ body: { ...body, esql_exists: esqlExists } });
+          if (indexExists && isModelDeployed) {
+            const securityLabsExists = v2KnowledgeBaseEnabled
+              ? await kbDataClient.isSecurityLabsDocsLoaded()
+              : true;
+            const userDataExists = v2KnowledgeBaseEnabled
+              ? await kbDataClient.isUserDataExists()
+              : true;
+
+            return response.ok({
+              body: {
+                ...body,
+                security_labs_exists: securityLabsExists,
+                user_data_exists: userDataExists,
+              },
+            });
           }
 
           return response.ok({ body });

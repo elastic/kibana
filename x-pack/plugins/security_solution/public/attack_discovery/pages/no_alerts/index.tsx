@@ -17,8 +17,15 @@ import {
 import React, { useMemo } from 'react';
 
 import * as i18n from './translations';
+import { Generate } from '../generate';
 
-const NoAlertsComponent: React.FC = () => {
+interface Props {
+  isDisabled: boolean;
+  isLoading: boolean;
+  onGenerate: () => void;
+}
+
+const NoAlertsComponent: React.FC<Props> = ({ isDisabled, isLoading, onGenerate }) => {
   const title = useMemo(
     () => (
       <EuiFlexGroup
@@ -82,6 +89,14 @@ const NoAlertsComponent: React.FC = () => {
         >
           {i18n.LEARN_MORE}
         </EuiLink>
+      </EuiFlexItem>
+
+      <EuiFlexItem grow={false}>
+        <EuiSpacer size="m" />
+      </EuiFlexItem>
+
+      <EuiFlexItem grow={false}>
+        <Generate isDisabled={isDisabled} isLoading={isLoading} onGenerate={onGenerate} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

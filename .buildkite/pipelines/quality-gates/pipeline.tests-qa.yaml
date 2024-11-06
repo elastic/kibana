@@ -29,13 +29,15 @@ steps:
         ENVIRONMENT: ${ENVIRONMENT}
       message: "${BUILDKITE_MESSAGE} (triggered by pipeline.tests-qa.yaml)"
 
-  - label: ":rocket: control-plane e2e tests"
-    trigger: "ess-k8s-qa-e2e-tests-daily" # https://buildkite.com/elastic/ess-k8s-qa-e2e-tests-daily
+  - label: ":rocket: Run serverless synthetics check"
+    trigger: "serverless-quality-gates"
     build:
-      env:
-        REGION_ID: aws-eu-west-1
-        NAME_PREFIX: ci_test_kibana-promotion_
       message: "${BUILDKITE_MESSAGE} (triggered by pipeline.tests-qa.yaml)"
+      env:
+        TARGET_ENV: qa
+        SERVICE: kibana
+        CHECK_SYNTHETICS: true
+        CHECK_SYNTHETICS_TAG: serverless-platform-core-validation
 
   - wait: ~
 

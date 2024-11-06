@@ -19,7 +19,8 @@ import { validateIndexPatterns } from '../utils';
 export const createThresholdAlertType = (
   createOptions: CreateRuleOptions
 ): SecurityAlertType<ThresholdRuleParams, ThresholdAlertState, {}, 'default'> => {
-  const { version, licensing, experimentalFeatures } = createOptions;
+  const { version, licensing, experimentalFeatures, scheduleNotificationResponseActionsService } =
+    createOptions;
   return {
     id: THRESHOLD_RULE_TYPE_ID,
     name: 'Threshold Rule',
@@ -102,6 +103,7 @@ export const createThresholdAlertType = (
         runOpts: execOptions.runOpts,
         licensing,
         experimentalFeatures,
+        scheduleNotificationResponseActionsService,
       });
       return result;
     },

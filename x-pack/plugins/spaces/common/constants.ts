@@ -43,3 +43,17 @@ export const SOLUTION_VIEW_CLASSIC = 'classic' as const;
 export const FEATURE_PRIVILEGES_ALL = 'all' as const;
 export const FEATURE_PRIVILEGES_READ = 'read' as const;
 export const FEATURE_PRIVILEGES_CUSTOM = 'custom' as const;
+
+/**
+ * The API version numbers used with the versioned router.
+ */
+export const API_VERSIONS = {
+  public: {
+    v1: '2023-10-31',
+  },
+};
+
+/**
+ * The setting to control whether the Space Solution Tour is shown.
+ */
+export const SHOW_SPACE_SOLUTION_TOUR_SETTING = 'showSpaceSolutionTour';

@@ -593,6 +593,85 @@ ROW (asdf + asdf)::string, 1.2::string, "1234"::integer, (12321342134 + 23412341
 -     "aaaaaaaaaaa")::boolean`);
     });
   });
+
+  describe('list literals', () => {
+    describe('numeric', () => {
+      test('wraps long list literals one line', () => {
+        const query =
+          'ROW [1234567890, 1234567890, 1234567890, 1234567890, 1234567890, 1234567890, 1234567890, 1234567890, 1234567890]';
+        const text = reprint(query).text;
+
+        expect('\n' + text).toBe(`
+ROW
+  [1234567890, 1234567890, 1234567890, 1234567890, 1234567890, 1234567890,
+    1234567890, 1234567890, 1234567890]`);
+      });
+
+      test('wraps long list literals to multiple lines one line', () => {
+        const query = `ROW [1234567890, 1234567890, 1234567890, 1234567890, 1234567890, 1234567890,
+          1234567890, 1234567890, 1234567890, 1234567890, 1234567890, 1234567890,
+          1234567890, 1234567890, 1234567890, 1234567890, 1234567890, 1234567890,
+          1234567890, 1234567890, 1234567890]`;
+        const text = reprint(query).text;
+
+        expect('\n' + text).toBe(`
+ROW
+  [1234567890, 1234567890, 1234567890, 1234567890, 1234567890, 1234567890,
+    1234567890, 1234567890, 1234567890, 1234567890, 1234567890, 1234567890,
+    1234567890, 1234567890, 1234567890, 1234567890, 1234567890, 1234567890,
+    1234567890, 1234567890, 1234567890]`);
+      });
+
+      test('breaks very long values one-per-line', () => {
+        const query = `ROW fn1(fn2(fn3(fn4(fn5(fn6(fn7(fn8([1234567890, 1234567890, 1234567890, 1234567890, 1234567890]))))))))`;
+        const text = reprint(query, { wrap: 40 }).text;
+
+        expect('\n' + text).toBe(`
+ROW
+  FN1(
+    FN2(
+      FN3(
+        FN4(
+          FN5(
+            FN6(
+              FN7(
+                FN8(
+                  [
+                    1234567890,
+                    1234567890,
+                    1234567890,
+                    1234567890,
+                    1234567890]))))))))`);
+      });
+    });
+
+    describe('string', () => {
+      test('wraps long list literals one line', () => {
+        const query =
+          'ROW ["some text", "another text", "one more text literal", "and another one", "and one more", "and one more", "and one more", "and one more", "and one more"]';
+        const text = reprint(query).text;
+
+        expect('\n' + text).toBe(`
+ROW
+  ["some text", "another text", "one more text literal", "and another one",
+    "and one more", "and one more", "and one more", "and one more",
+    "and one more"]`);
+      });
+
+      test('can break very long strings per line', () => {
+        const query =
+          'ROW ["..............................................", "..............................................", ".............................................."]';
+        const text = reprint(query).text;
+
+        expect('\n' + text).toBe(`
+ROW
+  [
+    "..............................................",
+    "..............................................",
+    ".............................................."]`);
+      });
+    });
+  });
 });
 
 test.todo('Idempotence on multiple times pretty printing');

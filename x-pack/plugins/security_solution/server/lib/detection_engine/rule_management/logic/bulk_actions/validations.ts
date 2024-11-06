@@ -90,11 +90,6 @@ export const validateBulkScheduleBackfill = async ({
   experimentalFeatures,
 }: DryRunManualRuleRunBulkActionsValidationArgs) => {
   // check whether "manual rule run" feature is enabled
-  await throwDryRunError(
-    () =>
-      invariant(experimentalFeatures?.manualRuleRunEnabled, 'Manual rule run feature is disabled.'),
-    BulkActionsDryRunErrCode.MANUAL_RULE_RUN_FEATURE
-  );
 
   await throwDryRunError(
     () => invariant(rule.enabled, 'Cannot schedule manual rule run for a disabled rule'),

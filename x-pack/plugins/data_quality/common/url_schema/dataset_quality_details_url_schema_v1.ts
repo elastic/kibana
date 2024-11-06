@@ -19,6 +19,7 @@ export const urlSchemaRT = rt.exact(
       breakdownField: rt.string,
       degradedFields: degradedFieldRT,
       expandedDegradedField: rt.string,
+      showCurrentQualityIssues: rt.boolean,
     }),
   ])
 );

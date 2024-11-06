@@ -15,9 +15,10 @@ import {
   CommandVisitorContext,
   ExpressionVisitorContext,
   FunctionCallExpressionVisitorContext,
+  ListLiteralExpressionVisitorContext,
   Visitor,
 } from '../visitor';
-import { singleItems } from '../visitor/utils';
+import { children, singleItems } from '../visitor/utils';
 import { BasicPrettyPrinter, BasicPrettyPrinterOptions } from './basic_pretty_printer';
 import { getPrettyPrintStats } from './helpers';
 import { LeafPrinter } from './leaf_printer';
@@ -235,7 +236,11 @@ export class WrappingPrettyPrinter {
   }
 
   private printArguments(
-    ctx: CommandVisitorContext | CommandOptionVisitorContext | FunctionCallExpressionVisitorContext,
+    ctx:
+      | CommandVisitorContext
+      | CommandOptionVisitorContext
+      | FunctionCallExpressionVisitorContext
+      | ListLiteralExpressionVisitorContext,
     inp: Input
   ) {
     let txt = '';
@@ -247,7 +252,7 @@ export class WrappingPrettyPrinter {
     let remainingCurrentLine = inp.remaining;
     let oneArgumentPerLine = false;
 
-    for (const child of singleItems(ctx.node.args)) {
+    for (const child of children(ctx.node)) {
       if (getPrettyPrintStats(child).hasLineBreakingDecorations) {
         oneArgumentPerLine = true;
         break;
@@ -489,13 +494,11 @@ export class WrappingPrettyPrinter {
     })
 
     .on('visitListLiteralExpression', (ctx, inp: Input): Output => {
-      let elements = '';
-
-      for (const out of ctx.visitElements(inp)) {
-        elements += (elements ? ', ' : '') + out.txt;
-      }
-
-      const formatted = `[${elements}]${inp.suffix ?? ''}`;
+      const args = this.printArguments(ctx, {
+        indent: inp.indent,
+        remaining: inp.remaining - 1,
+      });
+      const formatted = `[${args.txt}]${inp.suffix ?? ''}`;
       const { txt, indented } = this.decorateWithComments(inp.indent, ctx.node, formatted);
 
       return { txt, indented };

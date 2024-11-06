@@ -18,7 +18,7 @@ const DegradedFieldFlyout = dynamic(() => import('./degraded_field_flyout'));
 // Allow for lazy loading
 // eslint-disable-next-line import/no-default-export
 export default function DatasetQualityDetails() {
-  const { isIndexNotFoundError, dataStream, expandedDegradedField } =
+  const { isIndexNotFoundError, dataStream, isDegradedFieldFlyoutOpen } =
     useDatasetQualityDetailsState();
   const { startTracking } = useDatasetDetailsTelemetry();
 
@@ -38,7 +38,7 @@ export default function DatasetQualityDetails() {
           <Details />
         </EuiFlexItem>
       </EuiFlexGroup>
-      {expandedDegradedField && <DegradedFieldFlyout />}
+      {isDegradedFieldFlyoutOpen && <DegradedFieldFlyout />}
     </>
   );
 }

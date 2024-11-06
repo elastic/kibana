@@ -107,11 +107,11 @@ cd elastic-agent-${agentVersion}-windows-x86_64
 
   const linuxDebCommand = `curl -L -O ${downloadBaseUrl}/beats/elastic-agent/elastic-agent-${agentVersion}-amd64.deb ${curlDownloadSourceProxyArgs}
 sudo dpkg -i elastic-agent-${agentVersion}-amd64.deb
-sudo elastic-agent enroll ${enrollArgs} \nsudo systemctl enable elastic-agent \nsudo systemctl start elastic-agent`;
+sudo systemctl enable elastic-agent \nsudo systemctl start elastic-agent \nsudo elastic-agent enroll ${enrollArgs} \n`;
 
   const linuxRpmCommand = `curl -L -O ${downloadBaseUrl}/beats/elastic-agent/elastic-agent-${agentVersion}-x86_64.rpm ${curlDownloadSourceProxyArgs}
 sudo rpm -vi elastic-agent-${agentVersion}-x86_64.rpm
-sudo elastic-agent enroll ${enrollArgs} \nsudo systemctl enable elastic-agent \nsudo systemctl start elastic-agent`;
+sudo systemctl enable elastic-agent \nsudo systemctl start elastic-agent \nsudo elastic-agent enroll ${enrollArgs} \n`;
 
   const googleCloudShellCommand = `gcloud config set project ${gcpProjectId} && ${
     gcpAccountType === 'organization-account' ? `ORG_ID=${gcpOrganizationId}` : ``

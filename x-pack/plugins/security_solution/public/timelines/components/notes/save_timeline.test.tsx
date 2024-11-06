@@ -11,9 +11,16 @@ import { SaveTimelineCallout } from './save_timeline';
 import { SAVE_TIMELINE_BUTTON_TEST_ID, SAVE_TIMELINE_CALLOUT_TEST_ID } from './test_ids';
 import { createMockStore, mockGlobalState, TestProviders } from '../../../common/mock';
 import { TimelineId } from '../../../../common/types';
+import { useUserPrivileges } from '../../../common/components/user_privileges';
+
+jest.mock('../../../common/components/user_privileges');
 
 describe('SaveTimelineCallout', () => {
   it('should render the callout and save components', () => {
+    (useUserPrivileges as jest.Mock).mockReturnValue({
+      kibanaSecuritySolutionsPrivileges: { crud: true },
+    });
+
     const mockStore = createMockStore({
       ...mockGlobalState,
       timeline: {
@@ -33,11 +40,13 @@ describe('SaveTimelineCallout', () => {
       </TestProviders>
     );
 
-    expect(getByTestId(SAVE_TIMELINE_CALLOUT_TEST_ID)).toBeInTheDocument();
-    expect(getAllByText('Save timeline')).toHaveLength(2);
-    expect(
-      getByText('You need to save your timeline before creating notes for it.')
-    ).toBeInTheDocument();
     expect(getByTestId(SAVE_TIMELINE_BUTTON_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(SAVE_TIMELINE_BUTTON_TEST_ID)).toHaveStyle('background-color: #BD271E');
+    expect(getByTestId(SAVE_TIMELINE_BUTTON_TEST_ID)).toHaveTextContent('Save Timeline');
+    expect(getByTestId(SAVE_TIMELINE_CALLOUT_TEST_ID)).toBeInTheDocument();
+    expect(getAllByText('Save Timeline')).toHaveLength(2);
+    expect(
+      getByText('You must save this Timeline before attaching notes to it.')
+    ).toBeInTheDocument();
   });
 });

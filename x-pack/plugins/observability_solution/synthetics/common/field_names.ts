@@ -12,8 +12,10 @@ export const MONITOR_TYPE = 'monitor.type';
 export const URL_FULL = 'url.full';
 export const URL_PORT = 'url.port';
 export const OBSERVER_NAME = 'observer.name';
+export const SERVICE_NAME = 'service.name';
 export const OBSERVER_GEO_NAME = 'observer.geo.name';
 export const ERROR_MESSAGE = 'error.message';
+export const ERROR_STACK_TRACE = 'error.stack_trace';
 export const STATE_ID = 'monitor.state.id';
 
 export const CERT_COMMON_NAME = 'tls.server.x509.subject.common_name';

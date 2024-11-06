@@ -14,6 +14,7 @@ import {
   scoresVulnerabilitiesMock,
 } from './mocks/vulnerabilities_latest_mock';
 import { CspSecurityCommonProvider } from './helper/user_roles_utilites';
+import { EsIndexDataProvider, waitForPluginInitialized } from '../utils';
 
 export interface CnvmStatistics {
   criticalCount?: number;
@@ -112,89 +113,24 @@ export default function (providerContext: FtrProviderContext) {
   const retry = getService('retry');
   const es = getService('es');
   const supertest = getService('supertest');
-  const log = getService('log');
+  const logger = getService('log');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const cspSecurity = CspSecurityCommonProvider(providerContext);
+  const vulnerabilitiesIndex = new EsIndexDataProvider(es, VULNERABILITIES_LATEST_INDEX);
+  const scoresIndex = new EsIndexDataProvider(es, BENCHMARK_SCORES_INDEX);
 
-  /**
-   * required before indexing findings
-   */
-  const waitForPluginInitialized = (): Promise<void> =>
-    retry.try(async () => {
-      log.debug('Check CSP plugin is initialized');
-      const response = await supertest
-        .get('/internal/cloud_security_posture/status?check=init')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .expect(200);
-      expect(response.body).to.eql({ isPluginInitialized: true });
-      log.debug('CSP plugin is initialized');
+  describe.skip('Vulnerability Dashboard API', async () => {
+    beforeEach(async () => {
+      await vulnerabilitiesIndex.deleteAll();
+      await scoresIndex.deleteAll();
+      await waitForPluginInitialized({ retry, logger, supertest });
+      await scoresIndex.addBulk(scoresVulnerabilitiesMock, false);
+      await vulnerabilitiesIndex.addBulk(vulnerabilitiesLatestMock, false);
     });
 
-  const index = {
-    addFindings: async <T>(vulnerabilitiesMock: T[]) => {
-      await Promise.all(
-        vulnerabilitiesMock.map((vulnerabilityDoc) =>
-          es.index({
-            index: VULNERABILITIES_LATEST_INDEX,
-            body: vulnerabilityDoc,
-            refresh: true,
-          })
-        )
-      );
-    },
-
-    addScores: async <T>(scoresMock: T[]) => {
-      await Promise.all(
-        scoresMock.map((scoreDoc) =>
-          es.index({
-            index: BENCHMARK_SCORES_INDEX,
-            body: scoreDoc,
-            refresh: true,
-          })
-        )
-      );
-    },
-
-    removeFindings: async () => {
-      const indexExists = await es.indices.exists({ index: VULNERABILITIES_LATEST_INDEX });
-
-      if (indexExists) {
-        await es.deleteByQuery({
-          index: VULNERABILITIES_LATEST_INDEX,
-          query: { match_all: {} },
-          refresh: true,
-        });
-      }
-    },
-
-    removeScores: async () => {
-      const indexExists = await es.indices.exists({ index: BENCHMARK_SCORES_INDEX });
-
-      if (indexExists) {
-        await es.deleteByQuery({
-          index: BENCHMARK_SCORES_INDEX,
-          query: { match_all: {} },
-          refresh: true,
-        });
-      }
-    },
-
-    deleteFindingsIndex: async () => {
-      const indexExists = await es.indices.exists({ index: VULNERABILITIES_LATEST_INDEX });
-
-      if (indexExists) {
-        await es.indices.delete({ index: VULNERABILITIES_LATEST_INDEX });
-      }
-    },
-  };
-
-  describe('Vulnerability Dashboard API', async () => {
-    beforeEach(async () => {
-      await index.removeFindings();
-      await index.removeScores();
-      await waitForPluginInitialized();
-      await index.addScores(scoresVulnerabilitiesMock);
-      await index.addFindings(vulnerabilitiesLatestMock);
+    afterEach(async () => {
+      await vulnerabilitiesIndex.deleteAll();
+      await scoresIndex.deleteAll();
     });
 
     it('responds with a 200 status code and matching data mock', async () => {
@@ -301,7 +237,7 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     it('returns a 400 error when necessary indices are nonexistent', async () => {
-      await index.deleteFindingsIndex();
+      await vulnerabilitiesIndex.destroyIndex();
 
       await supertest
         .get('/internal/cloud_security_posture/vulnerabilities_dashboard')

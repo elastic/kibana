@@ -82,7 +82,7 @@ function groupFieldsByOrigin(fields: StyleField[]) {
 
 type Props = {
   fields: StyleField[];
-  selectedFieldName: string;
+  selectedFieldName?: string;
   onChange: ({ field }: { field: StyleField | null }) => void;
   styleName: VECTOR_STYLES;
 } & Omit<

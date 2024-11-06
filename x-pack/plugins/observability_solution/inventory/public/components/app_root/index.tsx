@@ -17,16 +17,19 @@ import { inventoryRouter } from '../../routes/config';
 import { InventoryServices } from '../../services/types';
 import { InventoryStartDependencies } from '../../types';
 import { HeaderActionMenuItems } from './header_action_menu';
+import { KibanaEnvironment } from '../../hooks/use_kibana';
 
 export function AppRoot({
   coreStart,
   pluginsStart,
   services,
   appMountParameters,
+  kibanaEnvironment,
 }: {
   coreStart: CoreStart;
   pluginsStart: InventoryStartDependencies;
   services: InventoryServices;
+  kibanaEnvironment: KibanaEnvironment;
 } & { appMountParameters: AppMountParameters }) {
   const { history } = appMountParameters;
 
@@ -34,6 +37,7 @@ export function AppRoot({
     ...coreStart,
     ...pluginsStart,
     ...services,
+    kibanaEnvironment,
   };
 
   return (

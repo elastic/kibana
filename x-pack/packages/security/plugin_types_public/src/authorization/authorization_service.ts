@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { RolesAPIClient } from '../roles';
 import type { PrivilegesAPIClientPublicContract } from '../privileges';
+import type { RolesAPIClient } from '../roles';
 
 export interface AuthorizationServiceSetup {
   /**

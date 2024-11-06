@@ -5,44 +5,93 @@
  * 2.0.
  */
 
-import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
 import { EntityDefinition } from '@kbn/entities-schema';
+import {
+  QueryDslQueryContainer,
+  TransformPutTransformRequest,
+} from '@elastic/elasticsearch/lib/api/types';
+import { getElasticsearchQueryOrThrow } from '../helpers/get_elasticsearch_query_or_throw';
+import { generateLatestMetricAggregations } from './generate_metric_aggregations';
 import {
   ENTITY_DEFAULT_LATEST_FREQUENCY,
   ENTITY_DEFAULT_LATEST_SYNC_DELAY,
 } from '../../../../common/constants_entities';
 import {
-  generateHistoryIndexName,
-  generateLatestIndexName,
-  generateLatestIngestPipelineId,
   generateLatestTransformId,
+  generateLatestIngestPipelineId,
+  generateLatestIndexName,
 } from '../helpers/generate_component_id';
-import { generateIdentityAggregations } from './generate_identity_aggregations';
 import { generateLatestMetadataAggregations } from './generate_metadata_aggregations';
-import { generateLatestMetricAggregations } from './generate_metric_aggregations';
 
 export function generateLatestTransform(
   definition: EntityDefinition
 ): TransformPutTransformRequest {
+  const filter: QueryDslQueryContainer[] = [];
+
+  if (definition.filter) {
+    filter.push(getElasticsearchQueryOrThrow(definition.filter));
+  }
+
+  definition.identityFields.forEach(({ field }) => {
+    filter.push({ exists: { field } });
+  });
+
+  filter.push({
+    range: {
+      [definition.latest.timestampField]: {
+        gte: `now-${definition.latest.lookbackPeriod}`,
+      },
+    },
+  });
+
+  return generateTransformPutRequest({
+    definition,
+    filter,
+    transformId: generateLatestTransformId(definition),
+    frequency: definition.latest.settings?.frequency ?? ENTITY_DEFAULT_LATEST_FREQUENCY,
+    syncDelay: definition.latest.settings?.syncDelay ?? ENTITY_DEFAULT_LATEST_SYNC_DELAY,
+  });
+}
+
+const generateTransformPutRequest = ({
+  definition,
+  filter,
+  transformId,
+  frequency,
+  syncDelay,
+}: {
+  definition: EntityDefinition;
+  transformId: string;
+  filter: QueryDslQueryContainer[];
+  frequency: string;
+  syncDelay: string;
+}) => {
   return {
-    transform_id: generateLatestTransformId(definition),
+    transform_id: transformId,
     _meta: {
-      definitionVersion: definition.version,
+      definition_version: definition.version,
       managed: definition.managed,
     },
     defer_validation: true,
     source: {
-      index: `${generateHistoryIndexName(definition)}.*`,
+      index: definition.indexPatterns,
+      ...(filter.length > 0 && {
+        query: {
+          bool: {
+            filter,
+          },
+        },
+      }),
     },
     dest: {
       index: `${generateLatestIndexName({ id: 'noop' } as EntityDefinition)}`,
       pipeline: generateLatestIngestPipelineId(definition),
     },
-    frequency: definition.latest?.settings?.frequency ?? ENTITY_DEFAULT_LATEST_FREQUENCY,
+    frequency,
     sync: {
       time: {
-        field: definition.latest?.settings?.syncField ?? 'event.ingested',
-        delay: definition.latest?.settings?.syncDelay ?? ENTITY_DEFAULT_LATEST_SYNC_DELAY,
+        field: definition.latest.settings?.syncField || definition.latest.timestampField,
+        delay: syncDelay,
       },
     },
     settings: {
@@ -51,25 +100,25 @@ export function generateLatestTransform(
     },
     pivot: {
       group_by: {
-        ['entity.id']: {
-          terms: { field: 'entity.id' },
-        },
+        ...definition.identityFields.reduce(
+          (acc, id) => ({
+            ...acc,
+            [`entity.identity.${id.field}`]: {
+              terms: { field: id.field },
+            },
+          }),
+          {}
+        ),
       },
       aggs: {
         ...generateLatestMetricAggregations(definition),
         ...generateLatestMetadataAggregations(definition),
-        ...generateIdentityAggregations(definition),
-        'entity.lastSeenTimestamp': {
+        'entity.last_seen_timestamp': {
           max: {
-            field: 'entity.lastSeenTimestamp',
-          },
-        },
-        'entity.firstSeenTimestamp': {
-          min: {
-            field: '@timestamp',
+            field: definition.latest.timestampField,
           },
         },
       },
     },
   };
-}
+};

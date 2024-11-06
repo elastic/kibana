@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { useMemo } from 'react';
+import { EuiSpacer } from '@elastic/eui';
 import { useKibana } from '../../hooks/use_kibana';
 
 interface SearchIndexDetailsSettingsProps {
@@ -20,5 +21,10 @@ export const SearchIndexDetailsSettings = ({ indexName }: SearchIndexDetailsSett
     [indexManagement, history]
   );
 
-  return <IndexSettingsComponent indexName={indexName} />;
+  return (
+    <>
+      <EuiSpacer />
+      <IndexSettingsComponent indexName={indexName} />
+    </>
+  );
 };

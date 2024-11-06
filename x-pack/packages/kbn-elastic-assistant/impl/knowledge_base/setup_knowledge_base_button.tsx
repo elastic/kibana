@@ -6,17 +6,16 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiButton, EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
+import { EuiButton, EuiButtonIcon, EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { css } from '@emotion/react';
 import { useAssistantContext } from '../..';
 import { useSetupKnowledgeBase } from '../assistant/api/knowledge_base/use_setup_knowledge_base';
 import { useKnowledgeBaseStatus } from '../assistant/api/knowledge_base/use_knowledge_base_status';
 
-export const ESQL_RESOURCE = 'esql';
-
 interface Props {
-  display?: 'mini';
+  display?: 'mini' | 'refresh';
 }
 
 /**
@@ -24,9 +23,13 @@ interface Props {
  *
  */
 export const SetupKnowledgeBaseButton: React.FC<Props> = React.memo(({ display }: Props) => {
-  const { http, toasts } = useAssistantContext();
+  const {
+    http,
+    toasts,
+    assistantAvailability: { isAssistantEnabled },
+  } = useAssistantContext();
 
-  const { data: kbStatus } = useKnowledgeBaseStatus({ http, resource: ESQL_RESOURCE });
+  const { data: kbStatus } = useKnowledgeBaseStatus({ http, enabled: isAssistantEnabled });
   const { mutate: setupKB, isLoading: isSettingUpKB } = useSetupKnowledgeBase({ http, toasts });
 
   const isSetupInProgress = kbStatus?.is_setup_in_progress || isSettingUpKB;
@@ -34,10 +37,10 @@ export const SetupKnowledgeBaseButton: React.FC<Props> = React.memo(({ display }
     kbStatus?.elser_exists &&
     kbStatus?.index_exists &&
     kbStatus?.pipeline_exists &&
-    kbStatus?.esql_exists;
+    kbStatus?.security_labs_exists;
 
   const onInstallKnowledgeBase = useCallback(() => {
-    setupKB(ESQL_RESOURCE);
+    setupKB();
   }, [setupKB]);
 
   if (isSetupComplete) {
@@ -49,6 +52,23 @@ export const SetupKnowledgeBaseButton: React.FC<Props> = React.memo(({ display }
         defaultMessage: 'Knowledge Base unavailable, please see documentation for more details.',
       })
     : undefined;
+
+  if (display === 'refresh') {
+    return (
+      <EuiButtonIcon
+        color="primary"
+        data-test-subj="setup-knowledge-base-button"
+        disabled={!kbStatus?.is_setup_available}
+        isLoading={isSetupInProgress}
+        iconType="refresh"
+        onClick={onInstallKnowledgeBase}
+        size="xs"
+        css={css`
+          margin-left: 8px;
+        `}
+      />
+    );
+  }
 
   return (
     <EuiToolTip position={'bottom'} content={toolTipContent}>

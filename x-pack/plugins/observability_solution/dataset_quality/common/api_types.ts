@@ -103,6 +103,7 @@ export const degradedFieldRt = rt.type({
       y: rt.number,
     })
   ),
+  indexFieldWasLastPresentIn: rt.string,
 });
 
 export type DegradedField = rt.TypeOf<typeof degradedFieldRt>;
@@ -120,7 +121,47 @@ export const degradedFieldValuesRt = rt.type({
 
 export type DegradedFieldValues = rt.TypeOf<typeof degradedFieldValuesRt>;
 
+export const degradedFieldAnalysisRt = rt.intersection([
+  rt.type({
+    isFieldLimitIssue: rt.boolean,
+    fieldCount: rt.number,
+    totalFieldLimit: rt.number,
+  }),
+  rt.partial({
+    ignoreMalformed: rt.boolean,
+    nestedFieldLimit: rt.number,
+    fieldMapping: rt.partial({
+      type: rt.string,
+      ignore_above: rt.number,
+    }),
+    defaultPipeline: rt.string,
+  }),
+]);
+
+export type DegradedFieldAnalysis = rt.TypeOf<typeof degradedFieldAnalysisRt>;
+
+export const updateFieldLimitResponseRt = rt.intersection([
+  rt.type({
+    isComponentTemplateUpdated: rt.union([rt.boolean, rt.undefined]),
+    isLatestBackingIndexUpdated: rt.union([rt.boolean, rt.undefined]),
+    customComponentTemplateName: rt.string,
+  }),
+  rt.partial({
+    error: rt.string,
+  }),
+]);
+
+export type UpdateFieldLimitResponse = rt.TypeOf<typeof updateFieldLimitResponseRt>;
+
+export const dataStreamRolloverResponseRt = rt.type({
+  acknowledged: rt.boolean,
+});
+
+export type DataStreamRolloverResponse = rt.TypeOf<typeof dataStreamRolloverResponseRt>;
+
 export const dataStreamSettingsRt = rt.partial({
+  lastBackingIndexName: rt.string,
+  indexTemplate: rt.string,
   createdOn: rt.union([rt.null, rt.number]), // rt.null is needed because `createdOn` is not available on Serverless
   integration: rt.string,
   datasetUserPrivileges: datasetUserPrivilegesRt,

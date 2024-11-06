@@ -16,9 +16,10 @@ import { useConnector } from '../../hooks/api/use_connector';
 
 interface EditServiceTypeProps {
   connector: Connector;
+  isDisabled?: boolean;
 }
 
-export const EditServiceType: React.FC<EditServiceTypeProps> = ({ connector }) => {
+export const EditServiceType: React.FC<EditServiceTypeProps> = ({ connector, isDisabled }) => {
   const { http } = useKibanaServices();
   const connectorTypes = useConnectorTypes();
   const queryClient = useQueryClient();
@@ -71,7 +72,7 @@ export const EditServiceType: React.FC<EditServiceTypeProps> = ({ connector }) =
     >
       <EuiSuperSelect
         // We only want to allow people to set the service type once to avoid weird conflicts
-        disabled={Boolean(connector.service_type)}
+        disabled={Boolean(connector.service_type) || isDisabled}
         data-test-subj="serverlessSearchEditConnectorTypeChoices"
         isLoading={isLoading}
         onChange={(event) => mutate(event)}

@@ -41,6 +41,7 @@ export const savedRuleMock: RuleResponse = {
   references: [],
   related_integrations: [],
   required_fields: [],
+  rule_source: { type: 'internal' },
   setup: '',
   severity: 'high',
   severity_mapping: [],
@@ -99,6 +100,7 @@ export const rulesMock: FetchRulesResponse = {
       version: 1,
       revision: 1,
       exceptions_list: [],
+      rule_source: { type: 'internal' },
     },
     {
       actions: [],
@@ -138,6 +140,7 @@ export const rulesMock: FetchRulesResponse = {
       version: 1,
       revision: 1,
       exceptions_list: [],
+      rule_source: { type: 'internal' },
     },
   ],
 };

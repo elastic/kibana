@@ -154,6 +154,11 @@ export const jobIdSchema = schema.object({
   ...jobIdSchemaBasic,
 });
 
+export const deleteForecastSchema = schema.object({
+  ...jobIdSchemaBasic,
+  forecastId: schema.string(),
+});
+
 export const getBucketsSchema = schema.object({
   anomaly_score: schema.maybe(schema.number()),
   desc: schema.maybe(schema.boolean()),
@@ -206,7 +211,10 @@ export const updateModelSnapshotBodySchema = schema.object({
   retain: schema.maybe(schema.boolean()),
 });
 
-export const forecastAnomalyDetector = schema.object({ duration: schema.any() });
+export const forecastAnomalyDetector = schema.object({
+  duration: schema.any(),
+  expires_in: schema.maybe(schema.any()),
+});
 
 export const forceQuerySchema = schema.object({
   force: schema.maybe(schema.boolean()),

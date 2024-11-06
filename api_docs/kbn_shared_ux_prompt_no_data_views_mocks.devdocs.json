@@ -141,6 +141,52 @@
                         "trackAdoption": false
                       }
                     ]
+                  },
+                  {
+                    "parentPluginId": "@kbn/shared-ux-prompt-no-data-views-mocks",
+                    "id": "def-public.StorybookMock.serviceArguments.dataViewsDocLink.defaultValue",
+                    "type": "string",
+                    "tags": [],
+                    "label": "defaultValue",
+                    "description": [],
+                    "path": "packages/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              },
+              {
+                "parentPluginId": "@kbn/shared-ux-prompt-no-data-views-mocks",
+                "id": "def-public.StorybookMock.serviceArguments.canTryEsql",
+                "type": "Object",
+                "tags": [],
+                "label": "canTryEsql",
+                "description": [],
+                "path": "packages/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/shared-ux-prompt-no-data-views-mocks",
+                    "id": "def-public.StorybookMock.serviceArguments.canTryEsql.control",
+                    "type": "string",
+                    "tags": [],
+                    "label": "control",
+                    "description": [],
+                    "path": "packages/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/shared-ux-prompt-no-data-views-mocks",
+                    "id": "def-public.StorybookMock.serviceArguments.canTryEsql.defaultValue",
+                    "type": "boolean",
+                    "tags": [],
+                    "label": "defaultValue",
+                    "description": [],
+                    "path": "packages/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               },
@@ -192,35 +238,11 @@
                         "trackAdoption": false
                       }
                     ]
-                  }
-                ]
-              },
-              {
-                "parentPluginId": "@kbn/shared-ux-prompt-no-data-views-mocks",
-                "id": "def-public.StorybookMock.serviceArguments.canTryEsql",
-                "type": "Object",
-                "tags": [],
-                "label": "canTryEsql",
-                "description": [],
-                "path": "packages/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "children": [
-                  {
-                    "parentPluginId": "@kbn/shared-ux-prompt-no-data-views-mocks",
-                    "id": "def-public.StorybookMock.serviceArguments.canTryEsql.control",
-                    "type": "string",
-                    "tags": [],
-                    "label": "control",
-                    "description": [],
-                    "path": "packages/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "@kbn/shared-ux-prompt-no-data-views-mocks",
-                    "id": "def-public.StorybookMock.serviceArguments.canTryEsql.defaultValue",
-                    "type": "boolean",
+                    "id": "def-public.StorybookMock.serviceArguments.esqlDocLink.defaultValue",
+                    "type": "string",
                     "tags": [],
                     "label": "defaultValue",
                     "description": [],

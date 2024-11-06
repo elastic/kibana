@@ -52,6 +52,46 @@ describe('Versioned route', () => {
     jest.clearAllMocks();
   });
 
+  describe('#getRoutes', () => {
+    it('returns the expected metadata', () => {
+      const versionedRouter = CoreVersionedRouter.from({ router });
+      versionedRouter
+        .get({
+          path: '/test/{id}',
+          access: 'public',
+          options: {
+            httpResource: true,
+            availability: {
+              since: '1.0.0',
+              stability: 'experimental',
+            },
+            excludeFromOAS: true,
+            tags: ['1', '2', '3'],
+          },
+          description: 'test',
+          summary: 'test',
+          enableQueryVersion: false,
+        })
+        .addVersion({ version: '2023-10-31', validate: false }, handlerFn);
+
+      expect(versionedRouter.getRoutes()[0].options).toMatchObject({
+        access: 'public',
+        enableQueryVersion: false,
+        description: 'test',
+        summary: 'test',
+        options: {
+          httpResource: true,
+          availability: {
+            since: '1.0.0',
+            stability: 'experimental',
+          },
+          excludeFromOAS: true,
+          tags: ['1', '2', '3'],
+        },
+      });
+    });
+  });
+
   it('can register multiple handlers', () => {
     const versionedRouter = CoreVersionedRouter.from({ router });
     versionedRouter
@@ -133,11 +173,15 @@ describe('Versioned route', () => {
     const opts: Parameters<typeof versionedRouter.post>[0] = {
       path: '/test/{id}',
       access: 'internal',
+      summary: 'test',
+      description: 'test',
       options: {
         authRequired: true,
         tags: ['access:test'],
         timeout: { payload: 60_000, idleSocket: 10_000 },
         xsrfRequired: false,
+        excludeFromOAS: true,
+        httpResource: true,
       },
     };
 
@@ -154,7 +198,7 @@ describe('Versioned route', () => {
     expect(router.post).toHaveBeenCalledWith(
       expect.objectContaining(expectedRouteConfig),
       expect.any(Function),
-      { isVersioned: true }
+      { isVersioned: true, events: false }
     );
   });
 
@@ -548,7 +592,7 @@ describe('Versioned route', () => {
     expect(
       // @ts-expect-error
       versionedRoute.getSecurity({
-        headers: {},
+        headers: { [ELASTIC_HTTP_VERSION_HEADER]: '99' },
       })
     ).toStrictEqual(securityConfigDefault);
 
@@ -569,7 +613,7 @@ describe('Versioned route', () => {
     expect(
       // @ts-expect-error
       versionedRoute.getSecurity({
-        headers: {},
+        headers: { [ELASTIC_HTTP_VERSION_HEADER]: '99' },
       })
     ).toStrictEqual(securityConfigDefault);
     expect(router.get).toHaveBeenCalledTimes(1);

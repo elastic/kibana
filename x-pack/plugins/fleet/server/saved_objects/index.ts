@@ -161,6 +161,12 @@ export const getSavedObjectTypes = (
           output_secret_storage_requirements_met: { type: 'boolean' },
           use_space_awareness_migration_status: { type: 'keyword', index: false },
           use_space_awareness_migration_started_at: { type: 'date', index: false },
+          delete_unenrolled_agents: {
+            properties: {
+              enabled: { type: 'boolean', index: false },
+              is_preconfigured: { type: 'boolean', index: false },
+            },
+          },
         },
       },
       migrations: {
@@ -177,6 +183,21 @@ export const getSavedObjectTypes = (
               addedMappings: {
                 use_space_awareness_migration_status: { type: 'keyword', index: false },
                 use_space_awareness_migration_started_at: { type: 'date', index: false },
+              },
+            },
+          ],
+        },
+        3: {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                delete_unenrolled_agents: {
+                  properties: {
+                    enabled: { type: 'boolean', index: false },
+                    is_preconfigured: { type: 'boolean', index: false },
+                  },
+                },
               },
             },
           ],

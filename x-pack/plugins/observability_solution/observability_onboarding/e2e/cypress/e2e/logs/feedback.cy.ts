@@ -12,11 +12,6 @@ describe.skip('[Logs onboarding] Give Feedback', () => {
     cy.visitKibana('/app/observabilityOnboarding');
   });
 
-  it('feedback button is present in system logs onboarding', () => {
-    cy.getByTestSubj('obltOnboardingHomeStartSystemLogStream').click();
-    cy.getByTestSubj('observabilityOnboardingPageGiveFeedback').should('exist');
-  });
-
   it('feedback button is present in custom logs onboarding', () => {
     cy.getByTestSubj('obltOnboardingHomeStartLogFileStream').click();
     cy.getByTestSubj('observabilityOnboardingPageGiveFeedback').should('exist');

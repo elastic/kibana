@@ -807,6 +807,15 @@ describe('AlertingEventLogger', () => {
 
       expect(eventLogger.logEvent).toHaveBeenCalledWith(event);
     });
+
+    test('should log action event with uuid', () => {
+      alertingEventLogger.initialize({ context: ruleContext, runDate, ruleData });
+      alertingEventLogger.logAction({ ...action, uuid: 'abcdefg' });
+
+      const event = createActionExecuteRecord(ruleContext, ruleData, [alertSO], action);
+
+      expect(eventLogger.logEvent).toHaveBeenCalledWith(event);
+    });
   });
 
   describe('done()', () => {

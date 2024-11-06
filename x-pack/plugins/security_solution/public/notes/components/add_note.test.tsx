@@ -102,6 +102,7 @@ describe('AddNote', () => {
   });
 
   it('should render error toast if create a note fails', () => {
+    const createNoteError = new Error('This error comes from the backend');
     const store = createMockStore({
       ...mockGlobalState,
       notes: {
@@ -112,7 +113,7 @@ describe('AddNote', () => {
         },
         error: {
           ...mockGlobalState.notes.error,
-          createNote: { type: 'http', status: 500 },
+          createNote: createNoteError,
         },
       },
     });
@@ -123,8 +124,24 @@ describe('AddNote', () => {
       </TestProviders>
     );
 
-    expect(mockAddError).toHaveBeenCalledWith(null, {
-      title: CREATE_NOTE_ERROR,
-    });
+    expect(mockAddError).toHaveBeenCalledWith(
+      createNoteError,
+      expect.objectContaining({
+        title: CREATE_NOTE_ERROR,
+      })
+    );
+  });
+
+  it('should call onNodeAdd callback when it is available', async () => {
+    const onNodeAdd = jest.fn();
+
+    const { getByTestId } = render(
+      <TestProviders>
+        <AddNote eventId={'event-id'} onNoteAdd={onNodeAdd} />
+      </TestProviders>
+    );
+    await userEvent.type(getByTestId('euiMarkdownEditorTextArea'), 'new note');
+    getByTestId(ADD_NOTE_BUTTON_TEST_ID).click();
+    expect(onNodeAdd).toHaveBeenCalled();
   });
 });

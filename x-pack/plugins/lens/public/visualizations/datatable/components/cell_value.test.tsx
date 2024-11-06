@@ -8,12 +8,12 @@
 import React from 'react';
 import { DataContext } from './table_basic';
 import { createGridCell } from './cell_value';
+import { getTransposeId } from '@kbn/transpose-utils';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { Datatable } from '@kbn/expressions-plugin/public';
 import { DatatableArgs } from '../../../../common/expressions';
 import { DataContextType } from './types';
 import { render, screen } from '@testing-library/react';
-import { getTransposeId } from '../../../../common/expressions/datatable/transpose_helpers';
 
 describe('datatable cell renderer', () => {
   const innerCellColorFnMock = jest.fn().mockReturnValue('blue');
@@ -54,9 +54,7 @@ describe('datatable cell renderer', () => {
         <DataContext.Provider
           value={{
             table,
-            alignments: {
-              a: 'right',
-            },
+            alignments: new Map([['a', 'right']]),
             ...wrapperProps,
           }}
         >
@@ -217,7 +215,7 @@ describe('datatable cell renderer', () => {
         {
           wrapper: DataContextProviderWrapper({
             table,
-            minMaxByColumnId: { a: { min: 12, max: 155 } },
+            minMaxByColumnId: new Map([['a', { min: 12, max: 155 }]]),
             ...context,
           }),
         }

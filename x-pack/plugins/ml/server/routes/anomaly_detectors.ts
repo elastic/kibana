@@ -13,6 +13,7 @@ import type { RouteInitialization } from '../types';
 import {
   anomalyDetectionJobSchema,
   anomalyDetectionUpdateJobSchema,
+  deleteForecastSchema,
   jobIdSchema,
   getBucketsSchema,
   getOverallBucketsSchema,
@@ -349,27 +350,31 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
     );
 
   router.versioned
-    .post({
-      path: `${ML_INTERNAL_BASE_PATH}/anomaly_detectors/_validate/detector`,
+    .delete({
+      path: `${ML_INTERNAL_BASE_PATH}/anomaly_detectors/{jobId}/_forecast/{forecastId}`,
       access: 'internal',
       options: {
-        tags: ['access:ml:canCreateJob'],
+        tags: ['access:ml:canDeleteForecast'],
       },
-      summary: 'Validates detector',
-      description: 'Validates specified detector.',
+      summary: 'Deletes specified forecast for specified job',
+      description: 'Deletes a specified forecast for the specified anomaly detection job.',
     })
     .addVersion(
       {
         version: '1',
         validate: {
           request: {
-            body: schema.any(),
+            params: deleteForecastSchema,
           },
         },
       },
       routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
         try {
-          const body = await mlClient.validateDetector({ body: request.body });
+          const { jobId, forecastId } = request.params;
+          const body = await mlClient.deleteForecast({
+            job_id: jobId,
+            forecast_id: forecastId,
+          });
           return response.ok({
             body,
           });
@@ -403,11 +408,10 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
       routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
         try {
           const jobId = request.params.jobId;
-          const duration = request.body.duration;
           const body = await mlClient.forecast({
             job_id: jobId,
             body: {
-              duration,
+              ...request.body,
             },
           });
           return response.ok({

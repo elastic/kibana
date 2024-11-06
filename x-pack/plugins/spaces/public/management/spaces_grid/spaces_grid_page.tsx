@@ -63,6 +63,7 @@ interface Props {
   getUrlForApp: ApplicationStart['getUrlForApp'];
   maxSpaces: number;
   allowSolutionVisibility: boolean;
+  isServerless: boolean;
 }
 
 interface State {
@@ -335,7 +336,8 @@ export class SpacesGridPage extends Component<Props, State> {
       },
     ];
 
-    const shouldShowFeaturesColumn = !activeSolution || activeSolution === SOLUTION_VIEW_CLASSIC;
+    const shouldShowFeaturesColumn =
+      !this.props.isServerless && (!activeSolution || activeSolution === SOLUTION_VIEW_CLASSIC);
     if (shouldShowFeaturesColumn) {
       config.push({
         field: 'disabledFeatures',
@@ -428,7 +430,7 @@ export class SpacesGridPage extends Component<Props, State> {
             reactRouterNavigate(this.props.history, this.getEditSpacePath(rowRecord)).href,
           onClick: (rowRecord) =>
             reactRouterNavigate(this.props.history, this.getEditSpacePath(rowRecord)).onClick,
-          'data-test-subj': (rowRecord) => `${rowRecord.name}-editSpace`,
+          'data-test-subj': (rowRecord) => `${rowRecord.id}-editSpace`,
         },
         {
           isPrimary: true,
@@ -436,7 +438,7 @@ export class SpacesGridPage extends Component<Props, State> {
             defaultMessage: 'Switch',
           }),
           description: (rowRecord) =>
-            activeSpace?.name !== rowRecord.name
+            activeSpace?.id !== rowRecord.id
               ? i18n.translate(
                   'xpack.spaces.management.spacesGridPage.switchSpaceActionDescription',
                   {
@@ -460,8 +462,8 @@ export class SpacesGridPage extends Component<Props, State> {
               rowRecord.id,
               `${ENTER_SPACE_PATH}?next=/app/management/kibana/spaces/`
             ),
-          enabled: (rowRecord) => activeSpace?.name !== rowRecord.name,
-          'data-test-subj': (rowRecord) => `${rowRecord.name}-switchSpace`,
+          enabled: (rowRecord) => activeSpace?.id !== rowRecord.id,
+          'data-test-subj': (rowRecord) => `${rowRecord.id}-switchSpace`,
         },
         {
           name: i18n.translate('xpack.spaces.management.spacesGridPage.deleteActionName', {
@@ -485,7 +487,7 @@ export class SpacesGridPage extends Component<Props, State> {
           color: 'danger',
           onClick: (rowRecord: Space) => this.onDeleteSpaceClick(rowRecord),
           enabled: (rowRecord: Space) => !isReservedSpace(rowRecord),
-          'data-test-subj': (rowRecord) => `${rowRecord.name}-deleteSpace`,
+          'data-test-subj': (rowRecord) => `${rowRecord.id}-deleteSpace`,
         },
       ],
     });

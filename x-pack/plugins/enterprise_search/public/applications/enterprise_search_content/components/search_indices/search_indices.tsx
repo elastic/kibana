@@ -38,7 +38,6 @@ import { DefaultSettingsFlyout } from '../settings/default_settings_flyout';
 
 import { DeleteIndexModal } from './delete_index_modal';
 import { IndicesLogic } from './indices_logic';
-import { IndicesStats } from './indices_stats';
 import { IndicesTable } from './indices_table';
 import './search_indices.scss';
 
@@ -176,9 +175,6 @@ export const SearchIndices: React.FC = () => {
         )}
         {!hasNoIndices ? (
           <EuiFlexGroup direction="column">
-            <EuiFlexItem>
-              <IndicesStats />
-            </EuiFlexItem>
             <EuiFlexItem>
               <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
                 <EuiFlexItem grow={false}>

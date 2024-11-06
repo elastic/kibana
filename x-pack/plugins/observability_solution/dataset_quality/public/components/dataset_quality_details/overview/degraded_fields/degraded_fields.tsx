@@ -15,10 +15,13 @@ import {
   useGeneratedHtmlId,
   EuiBadge,
   EuiBetaBadge,
+  EuiSwitch,
 } from '@elastic/eui';
 import {
   overviewDegradedFieldsSectionTitle,
   overviewDegradedFieldsSectionTitleTooltip,
+  overviewDegradedFieldToggleSwitch,
+  overviewDegradedFieldToggleSwitchTooltip,
   overviewQualityIssuesAccordionTechPreviewBadge,
 } from '../../../../../common/translations';
 import { DegradedFieldTable } from './table';
@@ -28,8 +31,25 @@ export function DegradedFields() {
   const accordionId = useGeneratedHtmlId({
     prefix: overviewDegradedFieldsSectionTitle,
   });
+  const toggleTextSwitchId = useGeneratedHtmlId({ prefix: 'toggleTextSwitch' });
 
-  const { totalItemCount } = useDegradedFields();
+  const { totalItemCount, toggleCurrentQualityIssues, showCurrentQualityIssues } =
+    useDegradedFields();
+
+  const latestBackingIndexToggle = (
+    <>
+      <EuiSwitch
+        label={overviewDegradedFieldToggleSwitch}
+        checked={showCurrentQualityIssues}
+        onChange={toggleCurrentQualityIssues}
+        aria-describedby={toggleTextSwitchId}
+        compressed
+        data-test-subj="datasetQualityDetailsOverviewDegradedFieldToggleSwitch"
+        css={{ marginRight: '5px' }}
+      />
+      <EuiIconTip content={overviewDegradedFieldToggleSwitchTooltip} position="top" />
+    </>
+  );
 
   const accordionTitle = (
     <EuiFlexGroup alignItems="center" gutterSize="s" direction="row">
@@ -58,6 +78,7 @@ export function DegradedFields() {
         buttonContent={accordionTitle}
         paddingSize="none"
         initialIsOpen={true}
+        extraAction={latestBackingIndexToggle}
         data-test-subj="datasetQualityDetailsOverviewDocumentTrends"
       >
         <DegradedFieldTable />

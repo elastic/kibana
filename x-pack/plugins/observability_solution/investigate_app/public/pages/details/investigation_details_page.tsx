@@ -13,8 +13,8 @@ import { InvestigationNotFound } from '../../components/investigation_not_found/
 import { useFetchInvestigation } from '../../hooks/use_fetch_investigation';
 import { useKibana } from '../../hooks/use_kibana';
 import { InvestigationDetails } from './components/investigation_details/investigation_details';
-import { InvestigationDetailsPathParams } from './types';
 import { InvestigationProvider } from './contexts/investigation_context';
+import { InvestigationDetailsPathParams } from './types';
 
 export function InvestigationDetailsPage() {
   const {

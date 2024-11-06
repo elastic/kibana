@@ -29,13 +29,11 @@ describe('AlertCountsTool', () => {
   } as unknown as KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
   const isEnabledKnowledgeBase = true;
   const chain = {} as unknown as RetrievalQAChain;
-  const modelExists = true;
   const logger = loggerMock.create();
   const rest = {
     isEnabledKnowledgeBase,
     chain,
     logger,
-    modelExists,
   };
 
   beforeEach(() => {

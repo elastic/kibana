@@ -111,7 +111,7 @@ export async function handleTransformReauthorizeAndStart({
   pkgVersion?: string;
   secondaryAuth?: SecondaryAuthorizationHeader;
   username?: string;
-}) {
+}): Promise<Array<{ transformId: string; success: boolean; error: null | any }>> {
   if (!secondaryAuth) {
     throw Error(
       'A valid secondary authorization with sufficient `manage_transform` permission is needed to re-authorize and start transforms. ' +

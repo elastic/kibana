@@ -243,11 +243,13 @@ import type {
   InternalUploadAssetCriticalityRecordsResponse,
   UploadAssetCriticalityRecordsResponse,
 } from './entity_analytics/asset_criticality/upload_asset_criticality_csv.gen';
+import type { ApplyEntityEngineDataviewIndicesResponse } from './entity_analytics/entity_store/engine/apply_dataview_indices.gen';
 import type {
   DeleteEntityEngineRequestQueryInput,
   DeleteEntityEngineRequestParamsInput,
   DeleteEntityEngineResponse,
 } from './entity_analytics/entity_store/engine/delete.gen';
+import type { EntityStoreGetPrivilegesResponse } from './entity_analytics/entity_store/engine/get_privileges.gen';
 import type {
   GetEntityEngineRequestParamsInput,
   GetEntityEngineResponse,
@@ -360,6 +362,11 @@ import type {
   ResolveTimelineRequestQueryInput,
   ResolveTimelineResponse,
 } from './timeline/resolve_timeline/resolve_timeline_route.gen';
+import type {
+  CreateRuleMigrationRequestBodyInput,
+  CreateRuleMigrationResponse,
+  GetRuleMigrationResponse,
+} from '../siem_migrations/model/api/rules/rules_migration.gen';
 
 export interface ClientOptions {
   kbnClient: KbnClient;
@@ -394,6 +401,18 @@ after 30 days. It also deletes other artifacts specific to the migration impleme
         },
         method: 'DELETE',
         body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async applyEntityEngineDataviewIndices() {
+    this.log.info(`${new Date().toISOString()} Calling API ApplyEntityEngineDataviewIndices`);
+    return this.kbnClient
+      .request<ApplyEntityEngineDataviewIndicesResponse>({
+        path: '/api/entity_store/engines/apply_dataview_indices',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -554,7 +573,7 @@ If asset criticality records already exist for the specified entities, those rec
       .request<CleanUpRiskEngineResponse>({
         path: '/api/risk_score/engine/dangerously_delete_data',
         headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
         method: 'DELETE',
       })
@@ -636,6 +655,22 @@ If a record already exists for the specified entity, that record is overwritten 
         path: '/api/detection_engine/rules',
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Creates a new SIEM rules migration using the original vendor rules provided
+   */
+  async createRuleMigration(props: CreateRuleMigrationProps) {
+    this.log.info(`${new Date().toISOString()} Calling API CreateRuleMigration`);
+    return this.kbnClient
+      .request<CreateRuleMigrationResponse>({
+        path: '/internal/siem_migrations/rules',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'POST',
         body: props.body,
@@ -1085,6 +1120,18 @@ If a record already exists for the specified entity, that record is overwritten 
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  async entityStoreGetPrivileges() {
+    this.log.info(`${new Date().toISOString()} Calling API EntityStoreGetPrivileges`);
+    return this.kbnClient
+      .request<EntityStoreGetPrivilegesResponse>({
+        path: '/internal/entity_store/privileges',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'GET',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
   /**
     * Export detection rules to an `.ndjson` file. The following configuration items are also included in the `.ndjson` file:
 - Actions
@@ -1380,6 +1427,21 @@ finalize it.
         method: 'PUT',
 
         query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Retrieves the rule migrations stored in the system
+   */
+  async getRuleMigration() {
+    this.log.info(`${new Date().toISOString()} Calling API GetRuleMigration`);
+    return this.kbnClient
+      .request<GetRuleMigrationResponse>({
+        path: '/internal/siem_migrations/rules',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'GET',
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -2025,6 +2087,9 @@ export interface CreateAssetCriticalityRecordProps {
 }
 export interface CreateRuleProps {
   body: CreateRuleRequestBodyInput;
+}
+export interface CreateRuleMigrationProps {
+  body: CreateRuleMigrationRequestBodyInput;
 }
 export interface CreateTimelinesProps {
   body: CreateTimelinesRequestBodyInput;

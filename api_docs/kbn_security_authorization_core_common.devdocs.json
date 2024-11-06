@@ -1,0 +1,102 @@
+{
+  "id": "@kbn/security-authorization-core-common",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/security-authorization-core-common",
+        "id": "def-common.getMinimalPrivilegeId",
+        "type": "Function",
+        "tags": [],
+        "label": "getMinimalPrivilegeId",
+        "description": [
+          "\nReturns the minimal privilege ID for the given privilege ID."
+        ],
+        "signature": [
+          "(privilegeId: string) => string"
+        ],
+        "path": "x-pack/packages/security/authorization_core_common/src/privileges/minimal_privileges.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-authorization-core-common",
+            "id": "def-common.getMinimalPrivilegeId.$1",
+            "type": "string",
+            "tags": [],
+            "label": "privilegeId",
+            "description": [
+              "The privilege ID to get the minimal privilege ID for. Only `all` and `read`\nprivileges have \"minimal\" equivalents."
+            ],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/packages/security/authorization_core_common/src/privileges/minimal_privileges.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-authorization-core-common",
+        "id": "def-common.isMinimalPrivilegeId",
+        "type": "Function",
+        "tags": [],
+        "label": "isMinimalPrivilegeId",
+        "description": [
+          "\nMinimal privileges only exist for top-level privileges, as \"minimal\" means a privilege without\nany associated sub-feature privileges. Currently, sub-feature privileges cannot include or be\nassociated with other sub-feature privileges. We use \"minimal\" privileges under the hood when\nadmins customize sub-feature privileges for a given top-level privilege. We have only\n`minimal_all` and `minimal_read` minimal privileges.\n\nFor example, let’s assume we have a feature Alpha with `All` and `Read` top-level privileges, and\n`Sub-alpha-1` and `Sub-alpha-2` sub-feature privileges, which are **by default included** in the\n`All` top-level privilege. When an admin toggles the `All` privilege for feature Alpha and\ndoesn’t change anything else, the resulting role will only have the `feature-alpha.all`\nprivilege, which assumes/includes both `sub-alpha-1` and `sub-alpha-2`. However, if the admin\ndecides to customize sub-feature privileges and toggles off `Sub-alpha-2`, the resulting role\nwill include `feature-alpha.minimal_all` and `feature-alpha.sub-alpha-1` thus excluding\n`feature-alpha.sub-alpha-2` that's included in `feature-alpha.all`, but not in\n`feature-alpha.minimal_all`.\n\nReturns true if the given privilege ID is a minimal feature privilege."
+        ],
+        "signature": [
+          "(privilegeId: string) => boolean"
+        ],
+        "path": "x-pack/packages/security/authorization_core_common/src/privileges/minimal_privileges.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-authorization-core-common",
+            "id": "def-common.isMinimalPrivilegeId.$1",
+            "type": "string",
+            "tags": [],
+            "label": "privilegeId",
+            "description": [
+              "The privilege ID to check."
+            ],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/packages/security/authorization_core_common/src/privileges/minimal_privileges.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

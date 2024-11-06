@@ -11,7 +11,6 @@ pageLoadAssetSize:
   cases: 180037
   charts: 55000
   cloud: 21076
-  cloudChat: 19894
   cloudDataMigration: 19170
   cloudDefend: 18697
   cloudExperiments: 109746
@@ -24,11 +23,11 @@ pageLoadAssetSize:
   core: 564663
   crossClusterReplication: 65408
   customIntegrations: 22034
-  dashboard: 52967
+  dashboard: 68015
   dashboardEnhanced: 65646
   data: 454087
   dataQuality: 19384
-  datasetQuality: 52000
+  datasetQuality: 55000
   dataUsage: 30000
   dataViewEditor: 28082
   dataViewFieldEditor: 42021

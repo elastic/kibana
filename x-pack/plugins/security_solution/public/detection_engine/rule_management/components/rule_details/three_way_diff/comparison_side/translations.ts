@@ -7,6 +7,13 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.upgradeRules.comparisonSide.title',
+  {
+    defaultMessage: 'Diff view',
+  }
+);
+
 export const NO_CHANGES = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.upgradeRules.comparisonSide.noChangesLabel',
   {

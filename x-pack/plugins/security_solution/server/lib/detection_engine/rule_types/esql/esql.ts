@@ -28,8 +28,9 @@ import { rowToDocument } from './utils';
 import { fetchSourceDocuments } from './fetch_source_documents';
 import { buildReasonMessageForEsqlAlert } from '../utils/reason_formatters';
 import type { RulePreviewLoggedRequest } from '../../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
-import type { RunOpts, SignalSource, CreateRuleAdditionalOptions } from '../types';
+import type { CreateRuleOptions, RunOpts, SignalSource } from '../types';
 import { logEsqlRequest } from '../utils/logged_requests';
+import { getDataTierFilter } from '../utils/get_data_tier_filter';
 import * as i18n from '../translations';
 
 import {
@@ -59,6 +60,7 @@ export const esqlExecutor = async ({
     alertTimestampOverride,
     publicBaseUrl,
     alertWithSuppression,
+    intendedTimestamp,
   },
   services,
   state,
@@ -74,7 +76,7 @@ export const esqlExecutor = async ({
   version: string;
   experimentalFeatures: ExperimentalFeatures;
   licensing: LicensingPluginSetup;
-  scheduleNotificationResponseActionsService: CreateRuleAdditionalOptions['scheduleNotificationResponseActionsService'];
+  scheduleNotificationResponseActionsService: CreateRuleOptions['scheduleNotificationResponseActionsService'];
 }) => {
   const loggedRequests: RulePreviewLoggedRequest[] = [];
   const ruleParams = completeRule.ruleParams;
@@ -89,6 +91,10 @@ export const esqlExecutor = async ({
   return withSecuritySpan('esqlExecutor', async () => {
     const result = createSearchAfterReturnType();
     let size = tuple.maxSignals;
+    const dataTiersFilters = await getDataTierFilter({
+      uiSettingsClient: services.uiSettingsClient,
+    });
+
     try {
       while (
         result.createdSignalsCount <= tuple.maxSignals &&
@@ -99,7 +105,7 @@ export const esqlExecutor = async ({
           from: tuple.from.toISOString(),
           to: tuple.to.toISOString(),
           size,
-          filters: [],
+          filters: dataTiersFilters,
           primaryTimestamp,
           secondaryTimestamp,
           exceptionFilter,
@@ -167,6 +173,7 @@ export const esqlExecutor = async ({
             ruleExecutionLogger,
             publicBaseUrl,
             tuple,
+            intendedTimestamp,
           });
 
         const syntheticHits: Array<estypes.SearchHit<SignalSource>> = results.map((document) => {
@@ -194,6 +201,7 @@ export const esqlExecutor = async ({
               primaryTimestamp,
               secondaryTimestamp,
               tuple,
+              intendedTimestamp,
             });
 
           const bulkCreateResult = await bulkCreateSuppressedAlertsInMemory({
@@ -245,13 +253,11 @@ export const esqlExecutor = async ({
           }
         }
 
-        if (scheduleNotificationResponseActionsService) {
-          scheduleNotificationResponseActionsService({
-            signals: result.createdSignals,
-            signalsCount: result.createdSignalsCount,
-            responseActions: completeRule.ruleParams.responseActions,
-          });
-        }
+        scheduleNotificationResponseActionsService({
+          signals: result.createdSignals,
+          signalsCount: result.createdSignalsCount,
+          responseActions: completeRule.ruleParams.responseActions,
+        });
 
         // no more results will be found
         if (response.values.length < size) {

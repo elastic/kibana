@@ -53,6 +53,7 @@ export function getMockInvestigateAppContext(): DeeplyMockedKeys<InvestigateAppK
           });
         }),
     },
+    charts: {} as any,
   };
 
   const core = coreMock.createStart();

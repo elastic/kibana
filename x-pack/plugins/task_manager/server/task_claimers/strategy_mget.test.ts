@@ -8,7 +8,7 @@
 import _ from 'lodash';
 import sinon from 'sinon';
 import { v4 as uuidv4 } from 'uuid';
-import { filter, take, toArray } from 'rxjs';
+import { filter, take } from 'rxjs';
 
 import { CLAIM_STRATEGY_MGET, DEFAULT_KIBANAS_PER_PARTITION } from '../config';
 
@@ -31,7 +31,6 @@ import {
   TaskClaimingOpts,
   TASK_MANAGER_MARK_AS_CLAIMED,
 } from '../queries/task_claiming';
-import { Observable } from 'rxjs';
 import { taskStoreMock } from '../task_store.mock';
 import apm from 'elastic-apm-node';
 import { TASK_MANAGER_TRANSACTION_TYPE } from '../task_running';
@@ -223,21 +222,15 @@ describe('TaskClaiming', () => {
         hits,
       });
 
-      const resultsOrErr = await getAllAsPromise(
-        taskClaiming.claimAvailableTasksIfCapacityIsAvailable(claimingOpts)
-      );
-      for (const resultOrErr of resultsOrErr) {
-        if (!isOk<ClaimOwnershipResult, FillPoolResult>(resultOrErr)) {
-          expect(resultOrErr).toBe(undefined);
-        }
+      const resultOrErr = await taskClaiming.claimAvailableTasksIfCapacityIsAvailable(claimingOpts);
+      if (!isOk<ClaimOwnershipResult, FillPoolResult>(resultOrErr)) {
+        expect(resultOrErr).toBe(undefined);
       }
 
-      const results = resultsOrErr.map((resultOrErr) => {
-        if (!isOk<ClaimOwnershipResult, FillPoolResult>(resultOrErr)) {
-          expect(resultOrErr).toBe(undefined);
-        }
-        return unwrap(resultOrErr) as ClaimOwnershipResult;
-      });
+      if (!isOk<ClaimOwnershipResult, FillPoolResult>(resultOrErr)) {
+        expect(resultOrErr).toBe(undefined);
+      }
+      const result = unwrap(resultOrErr) as ClaimOwnershipResult;
 
       expect(apm.startTransaction).toHaveBeenCalledWith(
         TASK_MANAGER_MARK_AS_CLAIMED,
@@ -247,14 +240,14 @@ describe('TaskClaiming', () => {
 
       expect(store.msearch.mock.calls).toMatchObject({});
       expect(store.getDocVersions.mock.calls).toMatchObject({});
-      return results.map((result, index) => ({
+      return {
         result,
         args: {
-          search: store.msearch.mock.calls[index][0] as SearchOpts[] & {
+          search: store.msearch.mock.calls[0][0] as SearchOpts[] & {
             query: MustNotCondition;
           },
         },
-      }));
+      };
     }
 
     test('makes calls to APM as expected when markAvailableTasksAsClaimed throws error', async () => {
@@ -287,11 +280,9 @@ describe('TaskClaiming', () => {
       store.msearch.mockRejectedValue(new Error('Oh no'));
 
       await expect(
-        getAllAsPromise(
-          taskClaiming.claimAvailableTasksIfCapacityIsAvailable({
-            claimOwnershipUntil: new Date(),
-          })
-        )
+        taskClaiming.claimAvailableTasksIfCapacityIsAvailable({
+          claimOwnershipUntil: new Date(),
+        })
       ).rejects.toMatchInlineSnapshot(`[Error: Oh no]`);
 
       expect(apm.startTransaction).toHaveBeenCalledWith(
@@ -369,9 +360,9 @@ describe('TaskClaiming', () => {
         taskPartitioner,
       });
 
-      const [resultOrErr] = await getAllAsPromise(
-        taskClaiming.claimAvailableTasksIfCapacityIsAvailable({ claimOwnershipUntil: new Date() })
-      );
+      const resultOrErr = await taskClaiming.claimAvailableTasksIfCapacityIsAvailable({
+        claimOwnershipUntil: new Date(),
+      });
 
       if (!isOk<ClaimOwnershipResult, FillPoolResult>(resultOrErr)) {
         expect(resultOrErr).toBe(undefined);
@@ -442,6 +433,7 @@ describe('TaskClaiming', () => {
         tasksConflicted: 0,
         tasksErrors: 0,
         tasksUpdated: 3,
+        staleTasks: 0,
         tasksLeftUnclaimed: 3,
       });
       expect(result.docs.length).toEqual(3);
@@ -479,9 +471,9 @@ describe('TaskClaiming', () => {
         taskPartitioner,
       });
 
-      const [resultOrErr] = await getAllAsPromise(
-        taskClaiming.claimAvailableTasksIfCapacityIsAvailable({ claimOwnershipUntil: new Date() })
-      );
+      const resultOrErr = await taskClaiming.claimAvailableTasksIfCapacityIsAvailable({
+        claimOwnershipUntil: new Date(),
+      });
 
       if (!isOk<ClaimOwnershipResult, FillPoolResult>(resultOrErr)) {
         expect(resultOrErr).toBe(undefined);
@@ -538,6 +530,7 @@ describe('TaskClaiming', () => {
         tasksErrors: 0,
         tasksUpdated: 1,
         tasksLeftUnclaimed: 0,
+        staleTasks: 0,
       });
       expect(result.docs.length).toEqual(1);
     });
@@ -586,9 +579,9 @@ describe('TaskClaiming', () => {
         taskPartitioner,
       });
 
-      const [resultOrErr] = await getAllAsPromise(
-        taskClaiming.claimAvailableTasksIfCapacityIsAvailable({ claimOwnershipUntil: new Date() })
-      );
+      const resultOrErr = await taskClaiming.claimAvailableTasksIfCapacityIsAvailable({
+        claimOwnershipUntil: new Date(),
+      });
 
       if (!isOk<ClaimOwnershipResult, FillPoolResult>(resultOrErr)) {
         expect(resultOrErr).toBe(undefined);
@@ -649,6 +642,7 @@ describe('TaskClaiming', () => {
         tasksErrors: 0,
         tasksUpdated: 1,
         tasksLeftUnclaimed: 0,
+        staleTasks: 0,
       });
       expect(result.docs.length).toEqual(1);
     });
@@ -683,9 +677,9 @@ describe('TaskClaiming', () => {
         taskPartitioner,
       });
 
-      const [resultOrErr] = await getAllAsPromise(
-        taskClaiming.claimAvailableTasksIfCapacityIsAvailable({ claimOwnershipUntil: new Date() })
-      );
+      const resultOrErr = await taskClaiming.claimAvailableTasksIfCapacityIsAvailable({
+        claimOwnershipUntil: new Date(),
+      });
 
       if (!isOk<ClaimOwnershipResult, FillPoolResult>(resultOrErr)) {
         expect(resultOrErr).toBe(undefined);
@@ -746,6 +740,7 @@ describe('TaskClaiming', () => {
         tasksErrors: 0,
         tasksUpdated: 1,
         tasksLeftUnclaimed: 0,
+        staleTasks: 0,
       });
       expect(result.docs.length).toEqual(1);
     });
@@ -771,9 +766,9 @@ describe('TaskClaiming', () => {
         taskPartitioner,
       });
 
-      const [resultOrErr] = await getAllAsPromise(
-        taskClaiming.claimAvailableTasksIfCapacityIsAvailable({ claimOwnershipUntil: new Date() })
-      );
+      const resultOrErr = await taskClaiming.claimAvailableTasksIfCapacityIsAvailable({
+        claimOwnershipUntil: new Date(),
+      });
 
       if (!isOk<ClaimOwnershipResult, FillPoolResult>(resultOrErr)) {
         expect(resultOrErr).toBe(undefined);
@@ -801,6 +796,7 @@ describe('TaskClaiming', () => {
         tasksClaimed: 0,
         tasksConflicted: 0,
         tasksUpdated: 0,
+        staleTasks: 0,
       });
       expect(result.docs.length).toEqual(0);
     });
@@ -837,9 +833,9 @@ describe('TaskClaiming', () => {
         taskPartitioner,
       });
 
-      const [resultOrErr] = await getAllAsPromise(
-        taskClaiming.claimAvailableTasksIfCapacityIsAvailable({ claimOwnershipUntil: new Date() })
-      );
+      const resultOrErr = await taskClaiming.claimAvailableTasksIfCapacityIsAvailable({
+        claimOwnershipUntil: new Date(),
+      });
 
       if (!isOk<ClaimOwnershipResult, FillPoolResult>(resultOrErr)) {
         expect(resultOrErr).toBe(undefined);
@@ -894,6 +890,7 @@ describe('TaskClaiming', () => {
         tasksErrors: 0,
         tasksUpdated: 2,
         tasksLeftUnclaimed: 0,
+        staleTasks: 0,
       });
       expect(result.docs.length).toEqual(2);
     });
@@ -930,9 +927,9 @@ describe('TaskClaiming', () => {
         taskPartitioner,
       });
 
-      const [resultOrErr] = await getAllAsPromise(
-        taskClaiming.claimAvailableTasksIfCapacityIsAvailable({ claimOwnershipUntil: new Date() })
-      );
+      const resultOrErr = await taskClaiming.claimAvailableTasksIfCapacityIsAvailable({
+        claimOwnershipUntil: new Date(),
+      });
 
       if (!isOk<ClaimOwnershipResult, FillPoolResult>(resultOrErr)) {
         expect(resultOrErr).toBe(undefined);
@@ -987,6 +984,7 @@ describe('TaskClaiming', () => {
         tasksErrors: 0,
         tasksUpdated: 2,
         tasksLeftUnclaimed: 0,
+        staleTasks: 0,
       });
       expect(result.docs.length).toEqual(2);
     });
@@ -1023,9 +1021,9 @@ describe('TaskClaiming', () => {
         taskPartitioner,
       });
 
-      const [resultOrErr] = await getAllAsPromise(
-        taskClaiming.claimAvailableTasksIfCapacityIsAvailable({ claimOwnershipUntil: new Date() })
-      );
+      const resultOrErr = await taskClaiming.claimAvailableTasksIfCapacityIsAvailable({
+        claimOwnershipUntil: new Date(),
+      });
 
       if (!isOk<ClaimOwnershipResult, FillPoolResult>(resultOrErr)) {
         expect(resultOrErr).toBe(undefined);
@@ -1040,7 +1038,7 @@ describe('TaskClaiming', () => {
       expect(mockApmTrans.end).toHaveBeenCalledWith('success');
 
       expect(taskManagerLogger.debug).toHaveBeenCalledWith(
-        'task claimer claimed: 2; stale: 1; conflicts: 1; missing: 0; capacity reached: 0; updateErrors: 0; getErrors: 0; removed: 0;',
+        'task claimer claimed: 2; stale: 1; conflicts: 0; missing: 0; capacity reached: 0; updateErrors: 0; getErrors: 0; removed: 0;',
         { tags: ['taskClaiming', 'claimAvailableTasksMget'] }
       );
 
@@ -1076,10 +1074,11 @@ describe('TaskClaiming', () => {
 
       expect(result.stats).toEqual({
         tasksClaimed: 2,
-        tasksConflicted: 1,
+        tasksConflicted: 0,
         tasksErrors: 0,
         tasksUpdated: 2,
         tasksLeftUnclaimed: 0,
+        staleTasks: 1,
       });
       expect(result.docs.length).toEqual(2);
     });
@@ -1122,9 +1121,9 @@ describe('TaskClaiming', () => {
         taskPartitioner,
       });
 
-      const [resultOrErr] = await getAllAsPromise(
-        taskClaiming.claimAvailableTasksIfCapacityIsAvailable({ claimOwnershipUntil: new Date() })
-      );
+      const resultOrErr = await taskClaiming.claimAvailableTasksIfCapacityIsAvailable({
+        claimOwnershipUntil: new Date(),
+      });
 
       if (!isOk<ClaimOwnershipResult, FillPoolResult>(resultOrErr)) {
         expect(resultOrErr).toBe(undefined);
@@ -1206,6 +1205,7 @@ describe('TaskClaiming', () => {
         tasksErrors: 0,
         tasksUpdated: 4,
         tasksLeftUnclaimed: 0,
+        staleTasks: 0,
       });
       expect(result.docs.length).toEqual(4);
     });
@@ -1253,9 +1253,9 @@ describe('TaskClaiming', () => {
         taskPartitioner,
       });
 
-      const [resultOrErr] = await getAllAsPromise(
-        taskClaiming.claimAvailableTasksIfCapacityIsAvailable({ claimOwnershipUntil: new Date() })
-      );
+      const resultOrErr = await taskClaiming.claimAvailableTasksIfCapacityIsAvailable({
+        claimOwnershipUntil: new Date(),
+      });
 
       if (!isOk<ClaimOwnershipResult, FillPoolResult>(resultOrErr)) {
         expect(resultOrErr).toBe(undefined);
@@ -1339,8 +1339,141 @@ describe('TaskClaiming', () => {
         tasksErrors: 1,
         tasksUpdated: 3,
         tasksLeftUnclaimed: 0,
+        staleTasks: 0,
       });
       expect(result.docs.length).toEqual(3);
+    });
+
+    test('should assign startedAt value if bulkGet returns task with null startedAt', async () => {
+      const store = taskStoreMock.create({ taskManagerId: 'test-test' });
+      store.convertToSavedObjectIds.mockImplementation((ids) => ids.map((id) => `task:${id}`));
+
+      const fetchedTasks = [
+        mockInstance({ id: `id-1`, taskType: 'report' }),
+        mockInstance({ id: `id-2`, taskType: 'report' }),
+        mockInstance({ id: `id-3`, taskType: 'yawn' }),
+        mockInstance({ id: `id-4`, taskType: 'report' }),
+      ];
+
+      const { versionMap, docLatestVersions } = getVersionMapsFromTasks(fetchedTasks);
+      store.msearch.mockResolvedValueOnce({ docs: fetchedTasks, versionMap });
+      store.getDocVersions.mockResolvedValueOnce(docLatestVersions);
+      store.bulkPartialUpdate.mockResolvedValueOnce(
+        [fetchedTasks[0], fetchedTasks[1], fetchedTasks[2], fetchedTasks[3]].map(
+          getPartialUpdateResult
+        )
+      );
+      store.bulkGet.mockResolvedValueOnce([
+        asOk({ ...fetchedTasks[0], startedAt: new Date() }),
+        asOk(fetchedTasks[1]),
+        asOk({ ...fetchedTasks[2], startedAt: new Date() }),
+        asOk({ ...fetchedTasks[3], startedAt: new Date() }),
+      ]);
+
+      const taskClaiming = new TaskClaiming({
+        logger: taskManagerLogger,
+        strategy: CLAIM_STRATEGY_MGET,
+        definitions: taskDefinitions,
+        taskStore: store,
+        excludedTaskTypes: [],
+        unusedTypes: [],
+        maxAttempts: 2,
+        getAvailableCapacity: () => 10,
+        taskPartitioner,
+      });
+
+      const resultOrErr = await taskClaiming.claimAvailableTasksIfCapacityIsAvailable({
+        claimOwnershipUntil: new Date(),
+      });
+
+      if (!isOk<ClaimOwnershipResult, FillPoolResult>(resultOrErr)) {
+        expect(resultOrErr).toBe(undefined);
+      }
+
+      const result = unwrap(resultOrErr) as ClaimOwnershipResult;
+
+      expect(apm.startTransaction).toHaveBeenCalledWith(
+        TASK_MANAGER_MARK_AS_CLAIMED,
+        TASK_MANAGER_TRANSACTION_TYPE
+      );
+      expect(mockApmTrans.end).toHaveBeenCalledWith('success');
+
+      expect(taskManagerLogger.debug).toHaveBeenCalledWith(
+        'task claimer claimed: 4; stale: 0; conflicts: 0; missing: 0; capacity reached: 0; updateErrors: 0; getErrors: 0; removed: 0;',
+        { tags: ['taskClaiming', 'claimAvailableTasksMget'] }
+      );
+      expect(taskManagerLogger.warn).toHaveBeenCalledWith(
+        'Task id-2 has a null startedAt value, setting to current time - ownerId null, status idle',
+        { tags: ['taskClaiming', 'claimAvailableTasksMget'] }
+      );
+
+      expect(store.msearch.mock.calls[0][0]?.[0]).toMatchObject({
+        size: 40,
+        seq_no_primary_term: true,
+      });
+      expect(store.getDocVersions).toHaveBeenCalledWith([
+        'task:id-1',
+        'task:id-2',
+        'task:id-3',
+        'task:id-4',
+      ]);
+      expect(store.bulkPartialUpdate).toHaveBeenCalledTimes(1);
+      expect(store.bulkPartialUpdate).toHaveBeenCalledWith([
+        {
+          id: fetchedTasks[0].id,
+          version: fetchedTasks[0].version,
+          scheduledAt: fetchedTasks[0].runAt,
+          attempts: 1,
+          ownerId: 'test-test',
+          retryAt: new Date('1970-01-01T00:05:30.000Z'),
+          status: 'running',
+          startedAt: new Date('1970-01-01T00:00:00.000Z'),
+        },
+        {
+          id: fetchedTasks[1].id,
+          version: fetchedTasks[1].version,
+          scheduledAt: fetchedTasks[1].runAt,
+          attempts: 1,
+          ownerId: 'test-test',
+          retryAt: new Date('1970-01-01T00:05:30.000Z'),
+          status: 'running',
+          startedAt: new Date('1970-01-01T00:00:00.000Z'),
+        },
+        {
+          id: fetchedTasks[2].id,
+          version: fetchedTasks[2].version,
+          scheduledAt: fetchedTasks[2].runAt,
+          attempts: 1,
+          ownerId: 'test-test',
+          retryAt: new Date('1970-01-01T00:05:30.000Z'),
+          status: 'running',
+          startedAt: new Date('1970-01-01T00:00:00.000Z'),
+        },
+        {
+          id: fetchedTasks[3].id,
+          version: fetchedTasks[3].version,
+          scheduledAt: fetchedTasks[3].runAt,
+          attempts: 1,
+          ownerId: 'test-test',
+          retryAt: new Date('1970-01-01T00:05:30.000Z'),
+          status: 'running',
+          startedAt: new Date('1970-01-01T00:00:00.000Z'),
+        },
+      ]);
+      expect(store.bulkGet).toHaveBeenCalledWith(['id-1', 'id-2', 'id-3', 'id-4']);
+
+      expect(result.stats).toEqual({
+        tasksClaimed: 4,
+        tasksConflicted: 0,
+        tasksErrors: 0,
+        tasksUpdated: 4,
+        tasksLeftUnclaimed: 0,
+        staleTasks: 0,
+      });
+      expect(result.docs.length).toEqual(4);
+      for (const r of result.docs) {
+        expect(r.startedAt).not.toBeNull();
+      }
     });
 
     test('should throw when error when bulk getting all full task docs', async () => {
@@ -1377,9 +1510,7 @@ describe('TaskClaiming', () => {
       });
 
       await expect(() =>
-        getAllAsPromise(
-          taskClaiming.claimAvailableTasksIfCapacityIsAvailable({ claimOwnershipUntil: new Date() })
-        )
+        taskClaiming.claimAvailableTasksIfCapacityIsAvailable({ claimOwnershipUntil: new Date() })
       ).rejects.toThrowErrorMatchingInlineSnapshot(`"oh no"`);
 
       expect(apm.startTransaction).toHaveBeenCalledWith(
@@ -1493,9 +1624,9 @@ describe('TaskClaiming', () => {
         taskPartitioner,
       });
 
-      const [resultOrErr] = await getAllAsPromise(
-        taskClaiming.claimAvailableTasksIfCapacityIsAvailable({ claimOwnershipUntil: new Date() })
-      );
+      const resultOrErr = await taskClaiming.claimAvailableTasksIfCapacityIsAvailable({
+        claimOwnershipUntil: new Date(),
+      });
 
       if (!isOk<ClaimOwnershipResult, FillPoolResult>(resultOrErr)) {
         expect(resultOrErr).toBe(undefined);
@@ -1579,6 +1710,7 @@ describe('TaskClaiming', () => {
         tasksErrors: 1,
         tasksUpdated: 3,
         tasksLeftUnclaimed: 0,
+        staleTasks: 0,
       });
       expect(result.docs.length).toEqual(3);
     });
@@ -1626,9 +1758,9 @@ describe('TaskClaiming', () => {
         taskPartitioner,
       });
 
-      const [resultOrErr] = await getAllAsPromise(
-        taskClaiming.claimAvailableTasksIfCapacityIsAvailable({ claimOwnershipUntil: new Date() })
-      );
+      const resultOrErr = await taskClaiming.claimAvailableTasksIfCapacityIsAvailable({
+        claimOwnershipUntil: new Date(),
+      });
 
       if (!isOk<ClaimOwnershipResult, FillPoolResult>(resultOrErr)) {
         expect(resultOrErr).toBe(undefined);
@@ -1709,6 +1841,7 @@ describe('TaskClaiming', () => {
         tasksErrors: 0,
         tasksUpdated: 3,
         tasksLeftUnclaimed: 0,
+        staleTasks: 0,
       });
       expect(result.docs.length).toEqual(3);
     });
@@ -1743,9 +1876,7 @@ describe('TaskClaiming', () => {
       });
 
       await expect(() =>
-        getAllAsPromise(
-          taskClaiming.claimAvailableTasksIfCapacityIsAvailable({ claimOwnershipUntil: new Date() })
-        )
+        taskClaiming.claimAvailableTasksIfCapacityIsAvailable({ claimOwnershipUntil: new Date() })
       ).rejects.toThrowErrorMatchingInlineSnapshot(`"oh no"`);
 
       expect(apm.startTransaction).toHaveBeenCalledWith(
@@ -1833,13 +1964,11 @@ describe('TaskClaiming', () => {
           claimOwnershipUntil: new Date(),
         },
       });
-      const [
-        {
-          args: {
-            search: [{ query }],
-          },
+      const {
+        args: {
+          search: [{ query }],
         },
-      ] = claimedResults;
+      } = claimedResults;
 
       expect(query).toMatchInlineSnapshot(`
         Object {
@@ -1991,13 +2120,11 @@ describe('TaskClaiming', () => {
           claimOwnershipUntil: new Date(),
         },
       });
-      const [
-        {
-          args: {
-            search: [{ query }],
-          },
+      const {
+        args: {
+          search: [{ query }],
         },
-      ] = claimedResults;
+      } = claimedResults;
 
       expect(taskManagerLogger.warn).toHaveBeenCalledWith(
         'Background task node "test" has no assigned partitions, claiming against all partitions',
@@ -2273,11 +2400,9 @@ describe('TaskClaiming', () => {
         )
         .toPromise();
 
-      await getFirstAsPromise(
-        taskClaiming.claimAvailableTasksIfCapacityIsAvailable({
-          claimOwnershipUntil: new Date(),
-        })
-      );
+      await taskClaiming.claimAvailableTasksIfCapacityIsAvailable({
+        claimOwnershipUntil: new Date(),
+      });
 
       const event = await promise;
       expect(event).toMatchObject(
@@ -2295,7 +2420,7 @@ describe('TaskClaiming', () => {
             user: 'dabo',
             scope: ['reporting', 'ceo'],
             ownerId: taskManagerId,
-            startedAt: null,
+            startedAt: new Date(),
             retryAt: null,
             scheduledAt: new Date(),
             traceparent: 'newParent',
@@ -2344,15 +2469,4 @@ function mockInstance(instance: Partial<ConcreteTaskInstance> = {}) {
     },
     instance
   );
-}
-
-function getFirstAsPromise<T>(obs$: Observable<T>): Promise<T> {
-  return new Promise((resolve, reject) => {
-    obs$.subscribe(resolve, reject);
-  });
-}
-function getAllAsPromise<T>(obs$: Observable<T>): Promise<T[]> {
-  return new Promise((resolve, reject) => {
-    obs$.pipe(toArray()).subscribe(resolve, reject);
-  });
 }

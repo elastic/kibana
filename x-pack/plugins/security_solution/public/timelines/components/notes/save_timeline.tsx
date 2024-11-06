@@ -16,19 +16,19 @@ import { SaveTimelineButton } from '../modal/actions/save_timeline_button';
 export const SAVE_TIMELINE_CALLOUT_TITLE = i18n.translate(
   'xpack.securitySolution.timeline.notes.saveTimeline.calloutTitle',
   {
-    defaultMessage: 'Save timeline',
+    defaultMessage: 'Save Timeline',
   }
 );
 export const SAVE_TIMELINE_CALLOUT_CONTENT = i18n.translate(
   'xpack.securitySolution.timeline.notes.saveTimeline.calloutContent',
   {
-    defaultMessage: 'You need to save your timeline before creating notes for it.',
+    defaultMessage: 'You must save this Timeline before attaching notes to it.',
   }
 );
 export const SAVE_TIMELINE_BUTTON = i18n.translate(
-  'xpack.securitySolution.flyout.left.notes.savedTimelineButtonLabel',
+  'xpack.securitySolution.flyout.left.notes.saveTimeline.buttonLabel',
   {
-    defaultMessage: 'Save timeline',
+    defaultMessage: 'Save Timeline',
   }
 );
 
@@ -39,7 +39,7 @@ export const SaveTimelineCallout = memo(() => {
   return (
     <EuiCallOut
       title={SAVE_TIMELINE_CALLOUT_TITLE}
-      color="warning"
+      color="danger"
       iconType="iInCircle"
       data-test-subj={SAVE_TIMELINE_CALLOUT_TEST_ID}
       css={css`
@@ -54,6 +54,7 @@ export const SaveTimelineCallout = memo(() => {
           <SaveTimelineButton
             timelineId={TimelineId.active}
             buttonText={SAVE_TIMELINE_BUTTON}
+            buttonColor="danger"
             data-test-subj={SAVE_TIMELINE_BUTTON_TEST_ID}
           />
         </EuiFlexItem>

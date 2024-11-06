@@ -16,7 +16,6 @@ import { MAX_MANUAL_RULE_RUN_BULK_SIZE } from '../../../../../../common/constant
 import type { TimeRange } from '../../../../rule_gaps/types';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { convertRulesFilterToKQL } from '../../../../../../common/detection_engine/rule_management/rule_filtering';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { DuplicateOptions } from '../../../../../../common/detection_engine/rule_management/constants';
 import type {
   BulkActionEditPayload,
@@ -89,7 +88,6 @@ export const useBulkActions = ({
     actions: { clearRulesSelection, setIsPreflightInProgress },
   } = rulesTableContext;
 
-  const isManualRuleRunEnabled = useIsExperimentalFeatureEnabled('manualRuleRunEnabled');
   const getBulkItemsPopoverContent = useCallback(
     (closePopover: () => void): EuiContextMenuPanelDescriptor[] => {
       const selectedRules = rules.filter(({ id }) => selectedRuleIds.includes(id));
@@ -448,18 +446,14 @@ export const useBulkActions = ({
               onClick: handleExportAction,
               icon: undefined,
             },
-            ...(isManualRuleRunEnabled
-              ? [
-                  {
-                    key: i18n.BULK_ACTION_MANUAL_RULE_RUN,
-                    name: i18n.BULK_ACTION_MANUAL_RULE_RUN,
-                    'data-test-subj': 'scheduleRuleRunBulk',
-                    disabled: containsLoading || (!containsEnabled && !isAllSelected),
-                    onClick: handleScheduleRuleRunAction,
-                    icon: undefined,
-                  },
-                ]
-              : []),
+            {
+              key: i18n.BULK_ACTION_MANUAL_RULE_RUN,
+              name: i18n.BULK_ACTION_MANUAL_RULE_RUN,
+              'data-test-subj': 'scheduleRuleRunBulk',
+              disabled: containsLoading || (!containsEnabled && !isAllSelected),
+              onClick: handleScheduleRuleRunAction,
+              icon: undefined,
+            },
             {
               key: i18n.BULK_ACTION_DISABLE,
               name: i18n.BULK_ACTION_DISABLE,
@@ -600,7 +594,6 @@ export const useBulkActions = ({
       filterOptions,
       completeBulkEditForm,
       startServices,
-      isManualRuleRunEnabled,
     ]
   );
 

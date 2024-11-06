@@ -60,7 +60,7 @@ export const setStubKibanaServices = () => {
     navigation: navigationPluginMock.createStartContract(),
     noDataPage: noDataPagePublicMock.createStart(),
     observabilityAIAssistant: observabilityAIAssistantPluginMock.createStartContract(),
-    presentationUtil: presentationUtilPluginMock.createStartContract(core),
+    presentationUtil: presentationUtilPluginMock.createStartContract(),
     savedObjectsManagement: savedObjectsManagementPluginMock.createStartContract(),
     savedObjectsTaggingOss: savedObjectTaggingOssPluginMock.createStart(),
     screenshotMode: screenshotModePluginMock.createStartContract(),

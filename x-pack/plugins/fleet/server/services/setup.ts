@@ -53,6 +53,10 @@ import { cleanUpOldFileIndices } from './setup/clean_old_fleet_indices';
 import type { UninstallTokenInvalidError } from './security/uninstall_token_service';
 import { ensureAgentPoliciesFleetServerKeysAndPolicies } from './setup/fleet_server_policies_enrollment_keys';
 import { ensureSpaceSettings } from './preconfiguration/space_settings';
+import {
+  ensureDeleteUnenrolledAgentsSetting,
+  getPreconfiguredDeleteUnenrolledAgentsSettingFromConfig,
+} from './preconfiguration/delete_unenrolled_agent_setting';
 
 export interface SetupStatus {
   isInitialized: boolean;
@@ -194,6 +198,12 @@ async function createSetupSideEffects(
 
   logger.debug('Setting up Space settings');
   await ensureSpaceSettings(appContextService.getConfig()?.spaceSettings ?? []);
+
+  logger.debug('Setting up delete unenrolled agents setting');
+  await ensureDeleteUnenrolledAgentsSetting(
+    soClient,
+    getPreconfiguredDeleteUnenrolledAgentsSettingFromConfig(appContextService.getConfig())
+  );
 
   logger.debug('Setting up Fleet outputs');
   await Promise.all([

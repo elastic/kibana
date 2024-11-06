@@ -11,6 +11,12 @@ export const NOTES = i18n.translate('xpack.securitySolution.notes.management.tit
   defaultMessage: 'Notes',
 });
 
+export const ACTIONS_COLUMN = i18n.translate(
+  'xpack.securitySolution.notes.management.actionsColumnTitle',
+  {
+    defaultMessage: 'Actions',
+  }
+);
 export const CREATED_COLUMN = i18n.translate(
   'xpack.securitySolution.notes.management.createdColumnTitle',
   {
@@ -25,20 +31,6 @@ export const CREATED_BY_COLUMN = i18n.translate(
   }
 );
 
-export const EVENT_ID_COLUMN = i18n.translate(
-  'xpack.securitySolution.notes.management.eventIdColumnTitle',
-  {
-    defaultMessage: 'View Document',
-  }
-);
-
-export const TIMELINE_ID_COLUMN = i18n.translate(
-  'xpack.securitySolution.notes.management.timelineColumnTitle',
-  {
-    defaultMessage: 'Timeline',
-  }
-);
-
 export const NOTE_CONTENT_COLUMN = i18n.translate(
   'xpack.securitySolution.notes.management.noteContentColumnTitle',
   {
@@ -49,13 +41,6 @@ export const NOTE_CONTENT_COLUMN = i18n.translate(
 export const DELETE = i18n.translate('xpack.securitySolution.notes.management.deleteAction', {
   defaultMessage: 'Delete',
 });
-
-export const DELETE_SINGLE_NOTE_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.notes.management.deleteDescription',
-  {
-    defaultMessage: 'Delete this note',
-  }
-);
 
 export const TABLE_ERROR = i18n.translate('xpack.securitySolution.notes.management.tableError', {
   defaultMessage: 'Unable to load notes',

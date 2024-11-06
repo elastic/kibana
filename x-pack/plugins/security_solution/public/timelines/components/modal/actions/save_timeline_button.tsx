@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useState } from 'react';
+import type { EuiButtonProps } from '@elastic/eui';
 import { EuiButton, EuiToolTip } from '@elastic/eui';
 import { useSelector } from 'react-redux';
 import { TimelineStatusEnum } from '../../../../../common/api/timeline';
@@ -14,7 +15,6 @@ import { SaveTimelineModal } from './save_timeline_modal';
 import * as i18n from './translations';
 import { selectTimelineById } from '../../../store/selectors';
 import type { State } from '../../../../common/store';
-import { TIMELINE_TOUR_CONFIG_ANCHORS } from '../../timeline/tour/step_config';
 
 export interface SaveTimelineButtonProps {
   /**
@@ -25,6 +25,10 @@ export interface SaveTimelineButtonProps {
    * Ability to customize the text of the button
    */
   buttonText?: string;
+  /**
+   * Ability to customize the color of the button
+   */
+  buttonColor?: EuiButtonProps['color'];
   /**
    * Optional data-test-subj value
    */
@@ -39,6 +43,7 @@ export const SaveTimelineButton = React.memo<SaveTimelineButtonProps>(
   ({
     timelineId,
     buttonText = i18n.SAVE,
+    buttonColor = 'primary',
     'data-test-subj': dataTestSubj = 'timeline-modal-save-timeline',
   }) => {
     const [showEditTimelineOverlay, setShowEditTimelineOverlay] = useState<boolean>(false);
@@ -69,9 +74,9 @@ export const SaveTimelineButton = React.memo<SaveTimelineButtonProps>(
           data-test-subj="timeline-modal-save-timeline-tooltip"
         >
           <EuiButton
-            id={TIMELINE_TOUR_CONFIG_ANCHORS.SAVE_TIMELINE}
             fill
             size="s"
+            color={buttonColor}
             iconType="save"
             isLoading={isSaving}
             disabled={!canSaveTimeline}

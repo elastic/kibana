@@ -5297,7 +5297,7 @@ Object {
     },
     "defaultModel": Object {
       "flags": Object {
-        "default": "gemini-1.5-pro-001",
+        "default": "gemini-1.5-pro-002",
         "error": [Function],
         "presence": "optional",
       },

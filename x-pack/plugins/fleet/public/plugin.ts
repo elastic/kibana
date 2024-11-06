@@ -102,6 +102,7 @@ export interface FleetSetup {}
 export interface FleetStart {
   /** Authorization for the current user */
   authz: FleetAuthz;
+  config: FleetConfigType;
   registerExtension: UIExtensionRegistrationCallback;
   isInitialized: () => Promise<true>;
   hooks: {
@@ -356,7 +357,7 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
     //  capabilities.fleetv2 returns fleet privileges and capabilities.fleet returns integrations privileges
     return {
       authz,
-
+      config: this.config,
       isInitialized: once(async () => {
         const permissionsResponse = await getPermissions();
 

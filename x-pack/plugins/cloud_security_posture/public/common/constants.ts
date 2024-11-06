@@ -38,6 +38,9 @@ export const LOCAL_STORAGE_DASHBOARD_BENCHMARK_SORT_KEY =
   'cloudPosture:complianceDashboard:benchmarkSort';
 export const LOCAL_STORAGE_FINDINGS_LAST_SELECTED_TAB_KEY = 'cloudPosture:findings:lastSelectedTab';
 
+export const LOCAL_STORAGE_3P_INTEGRATIONS_CALLOUT_KEY =
+  'cloudPosture:findings:3pIntegrationsCallout';
+
 export const LOCAL_STORAGE_VULNERABILITIES_GROUPING_KEY = 'cspLatestVulnerabilitiesGrouping';
 export const LOCAL_STORAGE_FINDINGS_GROUPING_KEY = 'cspLatestFindingsGrouping';
 
@@ -230,6 +233,7 @@ export const FINDINGS_GROUPING_OPTIONS = {
   CLOUD_ACCOUNT_NAME: 'cloud.account.name',
   ORCHESTRATOR_CLUSTER_NAME: 'orchestrator.cluster.name',
 };
+
 export const VULNERABILITY_FIELDS = {
   VULNERABILITY_ID: 'vulnerability.id',
   SCORE_BASE: 'vulnerability.score.base',
@@ -242,12 +246,39 @@ export const VULNERABILITY_FIELDS = {
   CLOUD_ACCOUNT_NAME: 'cloud.account.name',
   CLOUD_PROVIDER: 'cloud.provider',
   DESCRIPTION: 'vulnerability.description',
-  SOURCE: 'data_stream.dataset',
+  VENDOR: 'observer.vendor',
 } as const;
+
 export const VULNERABILITY_GROUPING_OPTIONS = {
   NONE: 'none',
   RESOURCE_NAME: VULNERABILITY_FIELDS.RESOURCE_NAME,
   RESOURCE_ID: VULNERABILITY_FIELDS.RESOURCE_ID,
   CLOUD_ACCOUNT_NAME: VULNERABILITY_FIELDS.CLOUD_ACCOUNT_NAME,
   CVE: VULNERABILITY_FIELDS.VULNERABILITY_ID,
+};
+
+/*
+The fields below are default columns of the Cloud Security Data Table that need to have keyword mapping.
+The runtime mappings are used to prevent filtering out the data when any of these columns are sorted in the Data Table.
+TODO: Remove the fields below once they are mapped as Keyword in the Third Party integrations, or remove
+the fields from the runtime mappings if they are removed from the Data Table.
+*/
+export const CDR_VULNERABILITY_DATA_TABLE_RUNTIME_MAPPING_FIELDS: string[] = [];
+export const CDR_MISCONFIGURATION_DATA_TABLE_RUNTIME_MAPPING_FIELDS: string[] = [
+  'rule.benchmark.rule_number',
+  'rule.section',
+  'resource.sub_type',
+];
+
+/*
+The fields below are used to group the data in the Cloud Security Data Table.
+The keys are the fields that are used to group the data, and the values are the fields that need to have keyword mapping
+to prevent filtering out the data when grouping by the key field.
+TODO: Remove the fields below once they are mapped as Keyword in the Third Party integrations, or remove
+the fields from the runtime mappings if they are removed from the Data Table.
+*/
+export const CDR_VULNERABILITY_GROUPING_RUNTIME_MAPPING_FIELDS: Record<string, string[]> = {};
+export const CDR_MISCONFIGURATION_GROUPING_RUNTIME_MAPPING_FIELDS: Record<string, string[]> = {
+  [FINDINGS_GROUPING_OPTIONS.ORCHESTRATOR_CLUSTER_NAME]: ['orchestrator.cluster.name'],
+  [FINDINGS_GROUPING_OPTIONS.CLOUD_ACCOUNT_NAME]: ['cloud.account.name'],
 };

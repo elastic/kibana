@@ -30,7 +30,7 @@ export const useGetScopedSourcererDataView = ({
   const { sourcererDataView } = useSourcererDataView(sourcererScope);
 
   const dataView = useMemo(() => {
-    if (sourcererDataView) {
+    if (Object.keys(sourcererDataView).length) {
       return new DataView({ spec: sourcererDataView, fieldFormats });
     } else {
       return undefined;

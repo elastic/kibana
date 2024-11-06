@@ -11,6 +11,7 @@ import { IScopedClusterClient } from '@kbn/core/server';
 import {
   IndicesDataStream,
   IndicesDataStreamsStatsDataStreamsStatsItem,
+  IndicesGetIndexTemplateIndexTemplateItem,
   SecurityHasPrivilegesResponse,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { MeteringStats } from '../../../lib/types';
@@ -30,15 +31,20 @@ const enhanceDataStreams = ({
   dataStreamsStats,
   meteringStats,
   dataStreamsPrivileges,
+  globalMaxRetention,
+  indexTemplates,
 }: {
   dataStreams: IndicesDataStream[];
   dataStreamsStats?: IndicesDataStreamsStatsDataStreamsStatsItem[];
   meteringStats?: MeteringStats[];
   dataStreamsPrivileges?: SecurityHasPrivilegesResponse;
+  globalMaxRetention?: string;
+  indexTemplates?: IndicesGetIndexTemplateIndexTemplateItem[];
 }): EnhancedDataStreamFromEs[] => {
   return dataStreams.map((dataStream) => {
     const enhancedDataStream: EnhancedDataStreamFromEs = {
       ...dataStream,
+      ...(globalMaxRetention ? { global_max_retention: globalMaxRetention } : {}),
       privileges: {
         delete_index: dataStreamsPrivileges
           ? dataStreamsPrivileges.index[dataStream.name].delete_index
@@ -68,6 +74,16 @@ const enhanceDataStreams = ({
       }
     }
 
+    if (indexTemplates) {
+      const indexTemplate = indexTemplates.find(
+        (template) => template.name === dataStream.template
+      );
+      if (indexTemplate) {
+        enhancedDataStream.index_mode =
+          indexTemplate.index_template?.template?.settings?.index?.mode;
+      }
+    }
+
     return enhancedDataStream;
   });
 };
@@ -76,6 +92,12 @@ const getDataStreams = (client: IScopedClusterClient, name = '*') => {
   return client.asCurrentUser.indices.getDataStream({
     name,
     expand_wildcards: 'all',
+  });
+};
+
+const getDataStreamLifecycle = (client: IScopedClusterClient, name: string) => {
+  return client.asCurrentUser.indices.getDataLifecycle({
+    name,
   });
 };
 
@@ -143,11 +165,15 @@ export function registerGetAllRoute({ router, lib: { handleEsError }, config }: 
           );
         }
 
+        const { index_templates: indexTemplates } =
+          await client.asCurrentUser.indices.getIndexTemplate();
+
         const enhancedDataStreams = enhanceDataStreams({
           dataStreams,
           dataStreamsStats,
           meteringStats,
           dataStreamsPrivileges,
+          indexTemplates,
         });
 
         return response.ok({ body: deserializeDataStreamList(enhancedDataStreams) });
@@ -176,6 +202,10 @@ export function registerGetOneRoute({ router, lib: { handleEsError }, config }: 
       try {
         const { data_streams: dataStreams } = await getDataStreams(client, name);
 
+        const lifecycle = await getDataStreamLifecycle(client, name);
+        // @ts-ignore - TS doesn't know about the `global_retention` property yet
+        const globalMaxRetention = lifecycle?.global_retention?.max_retention;
+
         if (config.isDataStreamStatsEnabled !== false) {
           ({ data_streams: dataStreamsStats } = await getDataStreamsStats(client, name));
         }
@@ -186,9 +216,21 @@ export function registerGetOneRoute({ router, lib: { handleEsError }, config }: 
 
         if (dataStreams[0]) {
           let dataStreamsPrivileges;
+          let indexTemplates;
 
           if (config.isSecurityEnabled()) {
             dataStreamsPrivileges = await getDataStreamsPrivileges(client, [dataStreams[0].name]);
+          }
+
+          if (dataStreams[0].template) {
+            const { index_templates: templates } =
+              await client.asCurrentUser.indices.getIndexTemplate({
+                name: dataStreams[0].template,
+              });
+
+            if (templates) {
+              indexTemplates = templates;
+            }
           }
 
           const enhancedDataStreams = enhanceDataStreams({
@@ -196,6 +238,8 @@ export function registerGetOneRoute({ router, lib: { handleEsError }, config }: 
             dataStreamsStats,
             meteringStats,
             dataStreamsPrivileges,
+            globalMaxRetention,
+            indexTemplates,
           });
           const body = deserializeDataStream(enhancedDataStreams[0]);
           return response.ok({ body });

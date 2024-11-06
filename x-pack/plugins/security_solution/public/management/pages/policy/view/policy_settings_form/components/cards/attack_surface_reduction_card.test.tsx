@@ -17,7 +17,8 @@ import {
   SWITCH_LABEL,
 } from './attack_surface_reduction_card';
 import { useLicense as _useLicense } from '../../../../../../../common/hooks/use_license';
-import { cloneDeep, set } from 'lodash';
+import { cloneDeep } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
 import userEvent from '@testing-library/user-event';
 import { createLicenseServiceMock } from '../../../../../../../../common/license/mocks';
 import { licenseService as licenseServiceMocked } from '../../../../../../../common/hooks/__mocks__/use_license';

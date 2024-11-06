@@ -1051,6 +1051,7 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
                         setForecastId={this.setForecastId}
                         className="forecast-controls"
                         onForecastComplete={onForecastComplete}
+                        selectedForecastId={this.props.selectedForecastId}
                       />
                     </EuiFlexItem>
                   )}

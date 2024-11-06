@@ -18,7 +18,7 @@ properties:
             items:
               type: string
       owner:
-        $ref: 'owners.yaml'
+        $ref: 'owner.yaml'
       rule:
         type: object
         properties:

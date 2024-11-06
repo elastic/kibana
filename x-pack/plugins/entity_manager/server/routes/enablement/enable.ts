@@ -80,8 +80,10 @@ export const enableEntityDiscoveryRoute = createEntityManagerServerRoute({
         });
       }
 
-      const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-      const canEnable = await canEnableEntityDiscovery(esClient);
+      const core = await context.core;
+
+      const esClientAsCurrentUser = core.elasticsearch.client.asCurrentUser;
+      const canEnable = await canEnableEntityDiscovery(esClientAsCurrentUser);
       if (!canEnable) {
         return response.forbidden({
           body: {
@@ -91,7 +93,8 @@ export const enableEntityDiscoveryRoute = createEntityManagerServerRoute({
         });
       }
 
-      const soClient = (await context.core).savedObjects.getClient({
+      logger.info(`Enabling managed entity discovery (installOnly=${params.query.installOnly})`);
+      const soClient = core.savedObjects.getClient({
         includedHiddenTypes: [EntityDiscoveryApiKeyType.name],
       });
       const existingApiKey = await readEntityDiscoveryAPIKey(server);
@@ -117,8 +120,9 @@ export const enableEntityDiscoveryRoute = createEntityManagerServerRoute({
 
       await saveEntityDiscoveryAPIKey(soClient, apiKey);
 
+      const clusterClient = core.elasticsearch.client;
       const installedDefinitions = await installBuiltInEntityDefinitions({
-        esClient,
+        clusterClient,
         soClient,
         logger,
         definitions: builtInDefinitions,
@@ -127,10 +131,11 @@ export const enableEntityDiscoveryRoute = createEntityManagerServerRoute({
       if (!params.query.installOnly) {
         await Promise.all(
           installedDefinitions.map((installedDefinition) =>
-            startTransforms(esClient, installedDefinition, logger)
+            startTransforms(clusterClient.asSecondaryAuthUser, installedDefinition, logger)
           )
         );
       }
+      logger.info('Managed entity discovery is enabled');
 
       return response.ok({ body: { success: true } });
     } catch (err) {
