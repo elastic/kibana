@@ -6,7 +6,7 @@
  */
 import { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { isEqual } from 'lodash';
+import { isEqual, uniq } from 'lodash';
 import { useHistory } from 'react-router-dom';
 
 import { agentStatusesToSummary } from '../../../../../../../common/services';
@@ -26,6 +26,7 @@ import {
   sendBulkGetAgentPolicies,
   sendGetListOutputsForPolicies,
   sendGetOutputs,
+  useListPoliciesByOutputs,
 } from '../../../../hooks';
 import { AgentStatusKueryHelper, ExperimentalFeaturesService } from '../../../../services';
 import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../../../constants';
@@ -124,7 +125,8 @@ export function useFetchAgentsData() {
   ]);
 
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  const [selectedOutputsIds, setSelectedOutputs] = useState<string[]>([]);
+  const [selectedOutputs, setSelectedOutputs] = useState<string[]>([]);
+  const [selectedPoliciesByOutputs, setSelectedPoliciesByOutputs] = useState<string[]>([]);
   const [allOutputs, setOutputs] = useState<Output[]>([]);
 
   const showInactive = useMemo(() => {
@@ -157,11 +159,12 @@ export function useFetchAgentsData() {
     return getKuery({
       search,
       selectedAgentPolicies,
+      selectedPoliciesByOutputs,
       selectedTags,
       selectedStatus,
-      selectedOutputsIds,
     });
-  }, [search, selectedAgentPolicies, selectedOutputsIds, selectedStatus, selectedTags]);
+  }, [search, selectedAgentPolicies, selectedStatus, selectedTags, selectedPoliciesByOutputs]);
+  console.log('kuery', kuery)
 
   kuery =
     includeUnenrolled && kuery ? `status:* AND (${kuery})` : includeUnenrolled ? `status:*` : kuery;
@@ -425,6 +428,14 @@ export function useFetchAgentsData() {
     [agentPoliciesRequest.data]
   );
 
+  // apply the filtering by outputs
+  const policiesByOutputsRes = useListPoliciesByOutputs({ ids: selectedOutputs });
+  const policiesByOutputs = policiesByOutputsRes?.data?.items ?? [];
+  console.log(policiesByOutputs)
+  if (!isEqual(policiesByOutputs, selectedPoliciesByOutputs)) {
+    setSelectedPoliciesByOutputs(policiesByOutputs);
+  }
+
   return {
     allTags,
     setAllTags,
@@ -464,7 +475,7 @@ export function useFetchAgentsData() {
     setLatestAgentActionErrors,
     outputsByPolicyIds,
     allOutputs,
-    selectedOutputs: selectedOutputsIds,
+    selectedOutputs,
     setSelectedOutputs,
   };
 }

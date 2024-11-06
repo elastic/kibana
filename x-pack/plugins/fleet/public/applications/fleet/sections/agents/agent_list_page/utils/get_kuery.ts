@@ -11,12 +11,14 @@ import { AGENTS_PREFIX } from '../../../../constants';
 export const getKuery = ({
   search,
   selectedAgentPolicies,
+  selectedPoliciesByOutputs,
   selectedTags,
   selectedStatus,
   selectedAgentIds,
 }: {
   search?: string;
   selectedAgentPolicies?: string[];
+  selectedPoliciesByOutputs?: string[];
   selectedTags?: string[];
   selectedStatus?: string[];
   selectedAgentIds?: string[];
@@ -31,6 +33,16 @@ export const getKuery = ({
       kueryBuilder = `(${kueryBuilder}) and`;
     }
     kueryBuilder = `${kueryBuilder} ${AGENTS_PREFIX}.policy_id : (${selectedAgentPolicies
+      .map((agentPolicy) => `"${agentPolicy}"`)
+      .join(' or ')})`;
+  }
+
+  // this block it's the same as the previous but it's needed to filter out on agent policies selected by outputs
+  if (selectedPoliciesByOutputs?.length) {
+    if (kueryBuilder) {
+      kueryBuilder = `(${kueryBuilder}) and`;
+    }
+    kueryBuilder = `${kueryBuilder} ${AGENTS_PREFIX}.policy_id : (${selectedPoliciesByOutputs
       .map((agentPolicy) => `"${agentPolicy}"`)
       .join(' or ')})`;
   }
