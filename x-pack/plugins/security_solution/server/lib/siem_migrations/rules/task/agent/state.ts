@@ -12,6 +12,7 @@ import type {
   OriginalRule,
   RuleMigration,
 } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
+import type { SiemMigrationRuleTranslationResult } from '../../../../../../common/siem_migrations/constants';
 
 export const migrateRuleState = Annotation.Root({
   messages: Annotation<BaseMessage[]>({
@@ -22,7 +23,7 @@ export const migrateRuleState = Annotation.Root({
   elastic_rule: Annotation<ElasticRule>({
     reducer: (state, action) => ({ ...state, ...action }),
   }),
-  translation_state: Annotation<RuleMigration['translation_state']>(),
+  translation_result: Annotation<SiemMigrationRuleTranslationResult>(),
   comments: Annotation<RuleMigration['comments']>({
     reducer: (current, value) => (value ? (current ?? []).concat(value) : current),
     default: () => [],

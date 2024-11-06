@@ -171,7 +171,7 @@ export class RuleMigrationsTaskRunner {
               await dataClient.saveFinished({
                 ...ruleMigration,
                 elastic_rule: ruleMigrationResult.elastic_rule,
-                translation_state: ruleMigrationResult.translation_state,
+                translation_result: ruleMigrationResult.translation_result,
                 comments: ruleMigrationResult.comments,
               });
             } catch (error) {
@@ -246,8 +246,8 @@ export class RuleMigrationsTaskRunner {
     if (dataStats.pending === dataStats.total) {
       return 'ready';
     }
-    if (dataStats.finished + dataStats.failed === dataStats.total) {
-      return 'done';
+    if (dataStats.completed + dataStats.failed === dataStats.total) {
+      return 'finished';
     }
     return 'stopped';
   }

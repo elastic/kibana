@@ -10,6 +10,7 @@ import type { InferenceClient } from '@kbn/inference-plugin/server';
 import type { GraphNode } from '../../types';
 import { getEsqlKnowledgeBase } from './esql_knowledge_base_caller';
 import { getEsqlTranslationPrompt } from './prompt';
+import { SiemMigrationRuleTranslationResult } from '../../../../../../../../common/siem_migrations/constants';
 
 interface GetTranslateQueryNodeParams {
   inferenceClient: InferenceClient;
@@ -30,12 +31,12 @@ export const getTranslateQueryNode = ({
     const esqlQuery = response.match(/```esql\n([\s\S]*?)\n```/)?.[1] ?? '';
     const summary = response.match(/## Migration Summary[\s\S]*$/)?.[0] ?? '';
 
-    const translationState = getTranslationState(esqlQuery);
+    const translationResult = getTranslationResult(esqlQuery);
 
     return {
       response,
       comments: [summary],
-      translation_state: translationState,
+      translation_result: translationResult,
       elastic_rule: {
         title: state.original_rule.title,
         description: state.original_rule.description,
@@ -47,9 +48,9 @@ export const getTranslateQueryNode = ({
   };
 };
 
-const getTranslationState = (esqlQuery: string) => {
+const getTranslationResult = (esqlQuery: string): SiemMigrationRuleTranslationResult => {
   if (esqlQuery.match(/\[(macro|lookup):[\s\S]*\]/)) {
-    return 'partial';
+    return SiemMigrationRuleTranslationResult.PARTIAL;
   }
-  return 'complete';
+  return SiemMigrationRuleTranslationResult.FULL;
 };

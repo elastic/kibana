@@ -106,13 +106,13 @@ export const RuleMigration = z.object({
   original_rule: OriginalRule,
   elastic_rule: ElasticRule.optional(),
   /**
-   * The translation state.
+   * The rule translation result.
    */
-  translation_state: z.enum(['complete', 'partial', 'untranslatable']).optional(),
+  translation_result: z.enum(['full', 'partial', 'untranslatable']).optional(),
   /**
-   * The status of the rule migration.
+   * The status of the rule migration process.
    */
-  status: z.enum(['pending', 'processing', 'finished', 'failed']).default('pending'),
+  status: z.enum(['pending', 'processing', 'completed', 'failed']).default('pending'),
   /**
    * The comments for the migration including a summary from the LLM in markdown.
    */
@@ -135,7 +135,7 @@ export const RuleMigrationTaskStats = z.object({
   /**
    * Indicates if the migration task status.
    */
-  status: z.enum(['ready', 'running', 'stopped', 'done']),
+  status: z.enum(['ready', 'running', 'stopped', 'finished']),
   /**
    * The rules migration stats.
    */
@@ -145,17 +145,17 @@ export const RuleMigrationTaskStats = z.object({
      */
     total: z.number().int(),
     /**
-     * The number of rules that have been migrated.
+     * The number of rules that are pending migration.
      */
-    finished: z.number().int(),
+    pending: z.number().int(),
     /**
      * The number of rules that are being migrated.
      */
     processing: z.number().int(),
     /**
-     * The number of rules that are pending migration.
+     * The number of rules that have been migrated successfully.
      */
-    pending: z.number().int(),
+    completed: z.number().int(),
     /**
      * The number of rules that have failed migration.
      */

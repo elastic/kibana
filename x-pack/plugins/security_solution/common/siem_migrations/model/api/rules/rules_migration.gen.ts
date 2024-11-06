@@ -67,8 +67,8 @@ export type StartRuleMigrationRequestParamsInput = z.input<typeof StartRuleMigra
 
 export type StartRuleMigrationRequestBody = z.infer<typeof StartRuleMigrationRequestBody>;
 export const StartRuleMigrationRequestBody = z.object({
-  connectorId: ConnectorId,
-  langSmithOptions: LangSmithOptions.optional(),
+  connector_id: ConnectorId,
+  langsmith_options: LangSmithOptions.optional(),
 });
 export type StartRuleMigrationRequestBodyInput = z.input<typeof StartRuleMigrationRequestBody>;
 

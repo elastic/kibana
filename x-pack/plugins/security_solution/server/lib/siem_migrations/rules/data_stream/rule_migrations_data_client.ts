@@ -17,7 +17,7 @@ import type {
   SearchResponse,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { StoredRuleMigration } from '../types';
-import { SiemMigrationsStatus } from '../../../../../common/siem_migrations/constants';
+import { SiemMigrationStatus } from '../../../../../common/siem_migrations/constants';
 import type {
   RuleMigration,
   RuleMigrationTaskStats,
@@ -46,7 +46,7 @@ export class RuleMigrationsDataClient {
           {
             ...ruleMigration,
             '@timestamp': new Date().toISOString(),
-            status: SiemMigrationsStatus.PENDING,
+            status: SiemMigrationStatus.PENDING,
             created_by: this.currentUser.username,
           },
         ]),
@@ -80,7 +80,7 @@ export class RuleMigrationsDataClient {
    */
   async takePending(migrationId: string, size: number): Promise<StoredRuleMigration[]> {
     const index = await this.dataStreamNamePromise;
-    const query = this.getFilterQuery(migrationId, SiemMigrationsStatus.PENDING);
+    const query = this.getFilterQuery(migrationId, SiemMigrationStatus.PENDING);
 
     const storedRuleMigrations = await this.esClient
       .search<RuleMigration>({ index, query, sort: '_doc', size })
@@ -89,7 +89,7 @@ export class RuleMigrationsDataClient {
         throw error;
       })
       .then((response) =>
-        this.processHits(response.hits.hits, { status: SiemMigrationsStatus.PROCESSING })
+        this.processHits(response.hits.hits, { status: SiemMigrationStatus.PROCESSING })
       );
 
     await this.esClient
@@ -116,18 +116,18 @@ export class RuleMigrationsDataClient {
     return storedRuleMigrations;
   }
 
-  /** Updates one rule migration with the provided data and sets the status to `finished` */
+  /** Updates one rule migration with the provided data and sets the status to `completed` */
   async saveFinished({ _id, _index, ...ruleMigration }: StoredRuleMigration): Promise<void> {
     const doc = {
       ...ruleMigration,
-      status: SiemMigrationsStatus.FINISHED,
+      status: SiemMigrationStatus.COMPLETED,
       updated_by: this.currentUser.username,
       updated_at: new Date().toISOString(),
     };
     await this.esClient
       .update({ index: _index, id: _id, doc, refresh: 'wait_for' })
       .catch((error) => {
-        this.logger.error(`Error updating rule migration status to finished: ${error.message}`);
+        this.logger.error(`Error updating rule migration status to completed: ${error.message}`);
         throw error;
       });
   }
@@ -136,14 +136,14 @@ export class RuleMigrationsDataClient {
   async saveError({ _id, _index, ...ruleMigration }: StoredRuleMigration): Promise<void> {
     const doc = {
       ...ruleMigration,
-      status: SiemMigrationsStatus.FAILED,
+      status: SiemMigrationStatus.FAILED,
       updated_by: this.currentUser.username,
       updated_at: new Date().toISOString(),
     };
     await this.esClient
       .update({ index: _index, id: _id, doc, refresh: 'wait_for' })
       .catch((error) => {
-        this.logger.error(`Error updating rule migration status to finished: ${error.message}`);
+        this.logger.error(`Error updating rule migration status to completed: ${error.message}`);
         throw error;
       });
   }
@@ -151,8 +151,8 @@ export class RuleMigrationsDataClient {
   /** Updates all the rule migration with the provided id with status `processing` back to `pending` */
   async releaseProcessing(migrationId: string): Promise<void> {
     const index = await this.dataStreamNamePromise;
-    const query = this.getFilterQuery(migrationId, SiemMigrationsStatus.PROCESSING);
-    const script = { source: `ctx._source['status'] = '${SiemMigrationsStatus.PENDING}'` };
+    const query = this.getFilterQuery(migrationId, SiemMigrationStatus.PROCESSING);
+    const script = { source: `ctx._source['status'] = '${SiemMigrationStatus.PENDING}'` };
     await this.esClient.updateByQuery({ index, query, script, refresh: false }).catch((error) => {
       this.logger.error(`Error releasing rule migrations status to pending: ${error.message}`);
       throw error;
@@ -163,10 +163,10 @@ export class RuleMigrationsDataClient {
   async releaseProcessable(migrationId: string): Promise<void> {
     const index = await this.dataStreamNamePromise;
     const query = this.getFilterQuery(migrationId, [
-      SiemMigrationsStatus.PROCESSING,
-      SiemMigrationsStatus.FAILED,
+      SiemMigrationStatus.PROCESSING,
+      SiemMigrationStatus.FAILED,
     ]);
-    const script = { source: `ctx._source['status'] = '${SiemMigrationsStatus.PENDING}'` };
+    const script = { source: `ctx._source['status'] = '${SiemMigrationStatus.PENDING}'` };
     await this.esClient.updateByQuery({ index, query, script, refresh: true }).catch((error) => {
       this.logger.error(`Error releasing rule migrations status to pending: ${error.message}`);
       throw error;
@@ -178,10 +178,10 @@ export class RuleMigrationsDataClient {
     const index = await this.dataStreamNamePromise;
     const query = this.getFilterQuery(migrationId);
     const aggregations = {
-      pending: { filter: { term: { status: SiemMigrationsStatus.PENDING } } },
-      processing: { filter: { term: { status: SiemMigrationsStatus.PROCESSING } } },
-      finished: { filter: { term: { status: SiemMigrationsStatus.FINISHED } } },
-      failed: { filter: { term: { status: SiemMigrationsStatus.FAILED } } },
+      pending: { filter: { term: { status: SiemMigrationStatus.PENDING } } },
+      processing: { filter: { term: { status: SiemMigrationStatus.PROCESSING } } },
+      completed: { filter: { term: { status: SiemMigrationStatus.COMPLETED } } },
+      failed: { filter: { term: { status: SiemMigrationStatus.FAILED } } },
       lastUpdatedAt: { max: { field: 'updated_at' } },
     };
     const result = await this.esClient
@@ -191,13 +191,13 @@ export class RuleMigrationsDataClient {
         throw error;
       });
 
-    const { pending, processing, finished, lastUpdatedAt, failed } = result.aggregations ?? {};
+    const { pending, processing, completed, lastUpdatedAt, failed } = result.aggregations ?? {};
     return {
       rules: {
         total: this.getTotalHits(result),
         pending: (pending as AggregationsFilterAggregate)?.doc_count ?? 0,
         processing: (processing as AggregationsFilterAggregate)?.doc_count ?? 0,
-        finished: (finished as AggregationsFilterAggregate)?.doc_count ?? 0,
+        completed: (completed as AggregationsFilterAggregate)?.doc_count ?? 0,
         failed: (failed as AggregationsFilterAggregate)?.doc_count ?? 0,
       },
       last_updated_at: (lastUpdatedAt as AggregationsMaxAggregate)?.value_as_string,
@@ -211,10 +211,10 @@ export class RuleMigrationsDataClient {
       migrationIds: {
         terms: { field: 'migration_id' },
         aggregations: {
-          pending: { filter: { term: { status: SiemMigrationsStatus.PENDING } } },
-          processing: { filter: { term: { status: SiemMigrationsStatus.PROCESSING } } },
-          finished: { filter: { term: { status: SiemMigrationsStatus.FINISHED } } },
-          failed: { filter: { term: { status: SiemMigrationsStatus.FAILED } } },
+          pending: { filter: { term: { status: SiemMigrationStatus.PENDING } } },
+          processing: { filter: { term: { status: SiemMigrationStatus.PROCESSING } } },
+          completed: { filter: { term: { status: SiemMigrationStatus.COMPLETED } } },
+          failed: { filter: { term: { status: SiemMigrationStatus.FAILED } } },
           lastUpdatedAt: { max: { field: 'updated_at' } },
         },
       },
@@ -234,7 +234,7 @@ export class RuleMigrationsDataClient {
         total: bucket.doc_count,
         pending: bucket.pending?.doc_count ?? 0,
         processing: bucket.processing?.doc_count ?? 0,
-        finished: bucket.finished?.doc_count ?? 0,
+        completed: bucket.completed?.doc_count ?? 0,
         failed: bucket.failed?.doc_count ?? 0,
       },
       last_updated_at: bucket.lastUpdatedAt?.value_as_string,
@@ -243,7 +243,7 @@ export class RuleMigrationsDataClient {
 
   private getFilterQuery(
     migrationId: string,
-    status?: SiemMigrationsStatus | SiemMigrationsStatus[]
+    status?: SiemMigrationStatus | SiemMigrationStatus[]
   ): QueryDslQueryContainer {
     const filter: QueryDslQueryContainer[] = [{ term: { migration_id: migrationId } }];
     if (status) {

@@ -98,11 +98,11 @@ paths:
             schema:
               type: object
               required:
-                - connectorId
+                - connector_id
               properties:
-                connectorId:
+                connector_id:
                   $ref: '../common.schema.yaml#/components/schemas/ConnectorId'
-                langSmithOptions:
+                langsmith_options:
                   $ref: '../common.schema.yaml#/components/schemas/LangSmithOptions'
       responses:
         200:

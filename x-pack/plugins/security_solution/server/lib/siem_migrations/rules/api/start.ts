@@ -39,7 +39,7 @@ export const registerSiemRuleMigrationsStartRoute = (
       },
       async (context, req, res): Promise<IKibanaResponse<StartRuleMigrationResponse>> => {
         const migrationId = req.params.migration_id;
-        const { langSmithOptions, connectorId } = req.body;
+        const { langsmith_options: langsmithOptions, connector_id: connectorId } = req.body;
 
         try {
           const ctx = await context.resolve([
@@ -63,8 +63,8 @@ export const registerSiemRuleMigrationsStartRoute = (
 
           const invocationConfig = {
             callbacks: [
-              new APMTracer({ projectName: langSmithOptions?.project_name ?? 'default' }, logger),
-              ...getLangSmithTracer({ ...langSmithOptions, logger }),
+              new APMTracer({ projectName: langsmithOptions?.project_name ?? 'default' }, logger),
+              ...getLangSmithTracer({ ...langsmithOptions, logger }),
             ],
           };
 

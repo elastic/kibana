@@ -96,20 +96,20 @@ components:
           $ref: '#/components/schemas/OriginalRule'
         elastic_rule:
           $ref: '#/components/schemas/ElasticRule'
-        translation_state:
+        translation_result:
           type: string
-          description: The translation state.
-          enum:
-            - complete
+          description: The rule translation result.
+          enum: # should match SiemMigrationRuleTranslationResult enum at ../constants.ts
+            - full
             - partial
             - untranslatable
         status:
           type: string
-          description: The status of the rule migration.
+          description: The status of the rule migration process.
           enum: # should match SiemMigrationsStatus enum at ../constants.ts
             - pending
             - processing
-            - finished
+            - completed
             - failed
           default: pending
         comments:
@@ -138,29 +138,29 @@ components:
             - ready
             - running
             - stopped
-            - done
+            - finished
         rules:
           type: object
           description: The rules migration stats.
           required:
             - total
-            - finished
-            - processing
             - pending
+            - processing
+            - completed
             - failed
           properties:
             total:
               type: integer
               description: The total number of rules to migrate.
-            finished:
-              type: integer
-              description: The number of rules that have been migrated.
-            processing:
-              type: integer
-              description: The number of rules that are being migrated.
             pending:
               type: integer
               description: The number of rules that are pending migration.
+            processing:
+              type: integer
+              description: The number of rules that are being migrated.
+            completed:
+              type: integer
+              description: The number of rules that have been migrated successfully.
             failed:
               type: integer
               description: The number of rules that have failed migration.

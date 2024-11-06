@@ -17,9 +17,15 @@ export const SIEM_RULE_MIGRATIONS_STATS_PATH =
 export const SIEM_RULE_MIGRATIONS_STOP_PATH =
   `${SIEM_RULE_MIGRATIONS_PATH}/{migration_id}/stop` as const;
 
-export enum SiemMigrationsStatus {
+export enum SiemMigrationStatus {
   PENDING = 'pending',
   PROCESSING = 'processing',
-  FINISHED = 'finished',
+  COMPLETED = 'completed',
   FAILED = 'failed',
+}
+
+export enum SiemMigrationRuleTranslationResult {
+  FULL = 'full',
+  PARTIAL = 'partial',
+  UNTRANSLATABLE = 'untranslatable',
 }
