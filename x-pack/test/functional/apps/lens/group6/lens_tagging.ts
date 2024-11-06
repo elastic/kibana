@@ -16,13 +16,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const dashboardPanelActions = getService('dashboardPanelActions');
-  const { tagManagement, header, dashboard, visualize, lens, timePicker } = getPageObjects([
+  const { tagManagement, header, dashboard, visualize, lens } = getPageObjects([
     'tagManagement',
     'header',
     'dashboard',
     'visualize',
     'lens',
-    'timePicker',
   ]);
 
   const lensTag = 'extreme-lens-tag';
@@ -31,14 +30,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('lens tagging', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
-      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await dashboard.navigateToApp();
       await dashboard.preserveCrossAppState();
       await dashboard.clickNewDashboard();
-    });
-
-    after(async () => {
-      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
     });
 
     it('adds a new tag to a Lens visualization', async () => {

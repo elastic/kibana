@@ -8,13 +8,10 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { visualize, lens, timePicker } = getPageObjects(['visualize', 'lens', 'timePicker']);
+export default function ({ getPageObjects }: FtrProviderContext) {
+  const { visualize, lens } = getPageObjects(['visualize', 'lens']);
 
   describe('time shift', () => {
-    before(async () => {
-      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
-    });
     it('should able to configure a shifted metric', async () => {
       await visualize.navigateToNewVisualization();
       await visualize.clickVisType('lens');

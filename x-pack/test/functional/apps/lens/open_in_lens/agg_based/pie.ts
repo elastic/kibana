@@ -13,8 +13,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'visualize',
     'lens',
     'visEditor',
-    'timePicker',
     'header',
+    'timePicker',
   ]);
 
   const pieChart = getService('pieChart');

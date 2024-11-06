@@ -11,12 +11,11 @@ import { range } from 'lodash';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { visualize, lens, timePicker } = getPageObjects(['visualize', 'lens', 'timePicker']);
+  const { visualize, lens } = getPageObjects(['visualize', 'lens']);
   const elasticChart = getService('elasticChart');
 
   describe('lens chart data', () => {
     before(async () => {
-      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await visualize.navigateToNewVisualization();
       await visualize.clickVisType('lens');
       await elasticChart.setNewChartUiDebugFlag(true);
