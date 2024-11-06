@@ -53,13 +53,6 @@ export const prepareEventHandler =
       eventHandler = callbacks.onTableRowClick;
     }
     const currentState = getState();
-    // if the embeddable is located in an app where there is the Unified search bar with the ES|QL editor, then use this query
-    // otherwise use the query from the saved object
-    let esqlQuery: AggregateQuery | Query | undefined;
-    if (isTextBasedLanguage(currentState)) {
-      const query = data.query.queryString.getQuery();
-      esqlQuery = isOfAggregateQueryType(query) ? query : currentState.attributes.state.query;
-    }
 
     eventHandler?.({
       ...event.data,
@@ -70,6 +63,13 @@ export const prepareEventHandler =
 
     if (isLensFilterEvent(event) || isLensMultiFilterEvent(event) || isLensBrushEvent(event)) {
       if (shouldExecuteDefaultTriggers) {
+        // if the embeddable is located in an app where there is the Unified search bar with the ES|QL editor, then use this query
+        // otherwise use the query from the saved object
+        let esqlQuery: AggregateQuery | Query | undefined;
+        if (isTextBasedLanguage(currentState)) {
+          const query = data.query.queryString.getQuery();
+          esqlQuery = isOfAggregateQueryType(query) ? query : currentState.attributes.state.query;
+        }
         uiActions.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
           data: {
             ...event.data,
