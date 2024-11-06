@@ -315,7 +315,7 @@ export class SavedObjectFinderUi extends React.Component<
 
           const tooltipText = this.props.getTooltipText?.(item);
           const description = descriptionsDefined && (
-            <EuiText size="s" color="subdued" className="eui-textTruncate">
+            <EuiText size="xs" color="subdued" className="eui-textTruncate">
               {item.simple.attributes.description}
             </EuiText>
           );
