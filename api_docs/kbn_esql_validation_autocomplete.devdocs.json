@@ -598,120 +598,6 @@
             "section": "def-common.ESQLCommandMode",
             "text": "ESQLCommandMode"
           },
-          " | undefined; } | { type: \"option\"; command: ",
-          {
-            "pluginId": "@kbn/esql-ast",
-            "scope": "common",
-            "docId": "kibKbnEsqlAstPluginApi",
-            "section": "def-common.ESQLCommand",
-            "text": "ESQLCommand"
-          },
-          "<string> | ",
-          {
-            "pluginId": "@kbn/esql-ast",
-            "scope": "common",
-            "docId": "kibKbnEsqlAstPluginApi",
-            "section": "def-common.ESQLAstMetricsCommand",
-            "text": "ESQLAstMetricsCommand"
-          },
-          "; node: ",
-          {
-            "pluginId": "@kbn/esql-ast",
-            "scope": "common",
-            "docId": "kibKbnEsqlAstPluginApi",
-            "section": "def-common.ESQLFunction",
-            "text": "ESQLFunction"
-          },
-          "<",
-          "FunctionSubtype",
-          ", string> | ",
-          {
-            "pluginId": "@kbn/esql-ast",
-            "scope": "common",
-            "docId": "kibKbnEsqlAstPluginApi",
-            "section": "def-common.ESQLCommandOption",
-            "text": "ESQLCommandOption"
-          },
-          " | ",
-          {
-            "pluginId": "@kbn/esql-ast",
-            "scope": "common",
-            "docId": "kibKbnEsqlAstPluginApi",
-            "section": "def-common.ESQLSource",
-            "text": "ESQLSource"
-          },
-          " | ",
-          {
-            "pluginId": "@kbn/esql-ast",
-            "scope": "common",
-            "docId": "kibKbnEsqlAstPluginApi",
-            "section": "def-common.ESQLColumn",
-            "text": "ESQLColumn"
-          },
-          " | ",
-          {
-            "pluginId": "@kbn/esql-ast",
-            "scope": "common",
-            "docId": "kibKbnEsqlAstPluginApi",
-            "section": "def-common.ESQLTimeInterval",
-            "text": "ESQLTimeInterval"
-          },
-          " | ",
-          "ESQLList",
-          " | ",
-          "ESQLDecimalLiteral",
-          " | ",
-          "ESQLIntegerLiteral",
-          " | ",
-          "ESQLBooleanLiteral",
-          " | ",
-          "ESQLNullLiteral",
-          " | ",
-          {
-            "pluginId": "@kbn/esql-ast",
-            "scope": "common",
-            "docId": "kibKbnEsqlAstPluginApi",
-            "section": "def-common.ESQLParamLiteral",
-            "text": "ESQLParamLiteral"
-          },
-          "<string> | ",
-          {
-            "pluginId": "@kbn/esql-ast",
-            "scope": "common",
-            "docId": "kibKbnEsqlAstPluginApi",
-            "section": "def-common.ESQLCommandMode",
-            "text": "ESQLCommandMode"
-          },
-          " | ",
-          "ESQLInlineCast",
-          "<",
-          {
-            "pluginId": "@kbn/esql-ast",
-            "scope": "common",
-            "docId": "kibKbnEsqlAstPluginApi",
-            "section": "def-common.ESQLAstItem",
-            "text": "ESQLAstItem"
-          },
-          "> | ",
-          "ESQLOrderExpression",
-          " | ",
-          "ESQLUnknownItem",
-          "; option: ",
-          {
-            "pluginId": "@kbn/esql-ast",
-            "scope": "common",
-            "docId": "kibKbnEsqlAstPluginApi",
-            "section": "def-common.ESQLCommandOption",
-            "text": "ESQLCommandOption"
-          },
-          " | undefined; setting: ",
-          {
-            "pluginId": "@kbn/esql-ast",
-            "scope": "common",
-            "docId": "kibKbnEsqlAstPluginApi",
-            "section": "def-common.ESQLCommandMode",
-            "text": "ESQLCommandMode"
-          },
           " | undefined; } | { type: \"setting\"; command: ",
           {
             "pluginId": "@kbn/esql-ast",
@@ -736,7 +622,15 @@
             "section": "def-common.ESQLSource",
             "text": "ESQLSource"
           },
-          "; option: undefined; setting: ",
+          "; option: ",
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ESQLCommandOption",
+            "text": "ESQLCommandOption"
+          },
+          " | undefined; setting: ",
           {
             "pluginId": "@kbn/esql-ast",
             "scope": "common",
@@ -755,6 +649,14 @@
           "<",
           "FunctionSubtype",
           ", string> | ",
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ESQLCommandOption",
+            "text": "ESQLCommandOption"
+          },
+          " | ",
           {
             "pluginId": "@kbn/esql-ast",
             "scope": "common",
@@ -797,6 +699,8 @@
             "text": "ESQLParamLiteral"
           },
           "<string> | ",
+          "ESQLIdentifier",
+          " | ",
           {
             "pluginId": "@kbn/esql-ast",
             "scope": "common",
@@ -865,6 +769,14 @@
             "pluginId": "@kbn/esql-ast",
             "scope": "common",
             "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ESQLCommandOption",
+            "text": "ESQLCommandOption"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
             "section": "def-common.ESQLSource",
             "text": "ESQLSource"
           },
@@ -903,6 +815,8 @@
             "text": "ESQLParamLiteral"
           },
           "<string> | ",
+          "ESQLIdentifier",
+          " | ",
           {
             "pluginId": "@kbn/esql-ast",
             "scope": "common",
@@ -979,6 +893,14 @@
             "pluginId": "@kbn/esql-ast",
             "scope": "common",
             "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ESQLCommandOption",
+            "text": "ESQLCommandOption"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
             "section": "def-common.ESQLSource",
             "text": "ESQLSource"
           },
@@ -1017,6 +939,8 @@
             "text": "ESQLParamLiteral"
           },
           "<string> | ",
+          "ESQLIdentifier",
+          " | ",
           {
             "pluginId": "@kbn/esql-ast",
             "scope": "common",
