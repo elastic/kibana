@@ -58,9 +58,12 @@ export class EsqlStarredQueriesService {
       usageCollection: services.usageCollection,
     });
 
-    const { favoriteMetadata } = await client?.getFavorites();
+    const { favoriteMetadata } = (await client?.getFavorites()) || {};
     const retrievedQueries: StarredQueryItem[] = [];
 
+    if (!favoriteMetadata) {
+      return new EsqlStarredQueriesService({ client, starredQueries: [] });
+    }
     Object.keys(favoriteMetadata).forEach((id) => {
       const item = favoriteMetadata[id];
       const { queryString, timeRan } = item;

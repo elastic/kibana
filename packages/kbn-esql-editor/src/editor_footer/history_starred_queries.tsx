@@ -484,6 +484,7 @@ export function HistoryAndStarredQueriesTabs({
         name: i18n.translate('esqlEditor.query.historyQueriesTabLabel', {
           defaultMessage: 'Recent',
         }),
+        dataTestSubj: 'history-queries-tab',
         content: (
           <QueryList
             containerCSS={containerCSS}
@@ -501,6 +502,7 @@ export function HistoryAndStarredQueriesTabs({
       },
       {
         id: 'starred-queries-tab',
+        dataTestSubj: 'starred-queries-tab',
         name: i18n.translate('esqlEditor.query.starredQueriesTabLabel', {
           defaultMessage: 'Starred',
         }),
@@ -551,6 +553,7 @@ export function HistoryAndStarredQueriesTabs({
         onClick={() => onSelectedTabChanged(tab.id)}
         isSelected={tab.id === selectedTabId}
         append={tab.append}
+        data-test-subj={tab.dataTestSubj}
       >
         {tab.name}
       </EuiTab>
@@ -588,7 +591,7 @@ export function HistoryAndStarredQueriesTabs({
                     })
                   : i18n.translate('esqlEditor.history.starredItemslimit', {
                       defaultMessage:
-                        'Showing {starredItemsCount} queries (max{starredItemsLimit})',
+                        'Showing {starredItemsCount} queries (max {starredItemsLimit})',
                       values: {
                         starredItemsLimit: ESQL_FAVORITES_LIMIT,
                         starredItemsCount: starredQueries.length ?? 0,
