@@ -11,6 +11,6 @@ export default createTestConfig({
   testFiles: [require.resolve('..')],
   junit: {
     reportName:
-      'Detection Engine - Exception List Authentication Tests - Serverless Env - Complete Tier',
+      'Detection Engine - Exception List and Items Authentication Tests - Serverless Env - Essentials Tier',
   },
 });
