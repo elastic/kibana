@@ -10,7 +10,6 @@ import { i18n } from '@kbn/i18n';
 import { EuiText } from '@elastic/eui';
 import React from 'react';
 
-import { fromKueryExpression } from '@kbn/es-query';
 import {
   singleEntryThreat,
   containsInvalidItems,
@@ -27,19 +26,16 @@ import {
 } from '../../../../../common/detection_engine/utils';
 import { MAX_NUMBER_OF_NEW_TERMS_FIELDS } from '../../../../../common/constants';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
-import type { FieldValueQueryBar } from '../query_bar';
 import type { ERROR_CODE, FormSchema, ValidationFunc } from '../../../../shared_imports';
 import { FIELD_TYPES, fieldValidators } from '../../../../shared_imports';
+import { debounceAsync } from '../../validators/debounce_async';
 import type { DefineStepRule } from '../../../../detections/pages/detection_engine/rules/types';
 import { DataSourceType } from '../../../../detections/pages/detection_engine/rules/types';
-import { debounceAsync, eqlValidator } from '../eql_query_bar/validators';
 import { esqlValidator } from '../../../rule_creation/logic/esql_validator';
 import { dataViewIdValidatorFactory } from '../../validators/data_view_id_validator_factory';
 import { indexPatternValidatorFactory } from '../../validators/index_pattern_validator_factory';
 import { alertSuppressionFieldsValidatorFactory } from '../../validators/alert_suppression_fields_validator_factory';
 import {
-  CUSTOM_QUERY_REQUIRED,
-  INVALID_CUSTOM_QUERY,
   INDEX_HELPER_TEXT,
   THREAT_MATCH_INDEX_HELPER_TEXT,
   THREAT_MATCH_REQUIRED,
@@ -53,6 +49,10 @@ import {
   ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME,
 } from '../../../rule_creation/components/alert_suppression_edit';
 import * as alertSuppressionEditI81n from '../../../rule_creation/components/alert_suppression_edit/components/translations';
+import { dataViewIdValidatorFactory } from '../../validators/data_view_id_validator_factory';
+import { indexPatternValidatorFactory } from '../../validators/index_pattern_validator_factory';
+import { queryValidatorFactory } from '../../validators/query_validator_factory';
+import { eqlQueryValidatorFactory } from '../../validators/eql_query_validator_factory';
 
 export const schema: FormSchema<DefineStepRule> = {
   index: {
@@ -68,7 +68,7 @@ export const schema: FormSchema<DefineStepRule> = {
     helpText: <EuiText size="xs">{INDEX_HELPER_TEXT}</EuiText>,
     validations: [
       {
-        validator: (...args: Parameters<ValidationFunc>) => {
+        validator: (...args) => {
           const [{ formData }] = args;
 
           if (
@@ -94,7 +94,7 @@ export const schema: FormSchema<DefineStepRule> = {
     fieldsToValidateOnChange: ['dataViewId'],
     validations: [
       {
-        validator: (...args: Parameters<ValidationFunc>) => {
+        validator: (...args) => {
           const [{ formData }] = args;
 
           if (isMlRule(formData.ruleType) || formData.dataSourceType !== DataSourceType.DataView) {
@@ -122,55 +122,43 @@ export const schema: FormSchema<DefineStepRule> = {
     fieldsToValidateOnChange: ['queryBar', ALERT_SUPPRESSION_FIELDS_FIELD_NAME],
     validations: [
       {
-        validator: (
-          ...args: Parameters<ValidationFunc>
-        ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
-          const [{ value, path, formData }] = args;
-          const { query, filters, saved_id: savedId } = value as FieldValueQueryBar;
-          const needsValidation = !isMlRule(formData.ruleType);
-          if (!needsValidation) {
-            return undefined;
-          }
-          const isFieldEmpty = isEmpty(query.query as string) && isEmpty(filters);
-          if (!isFieldEmpty) {
-            return undefined;
-          }
-          if (savedId) {
+        validator: (...args) => {
+          const [{ value, formData }] = args;
+
+          if (isMlRule(formData.ruleType) || value.saved_id) {
             // Ignore field validation error in this case.
             // Instead, we show the error toast when saved query object does not exist.
             // https://github.com/elastic/kibana/issues/159060
-            return undefined;
-          }
-          const message = getQueryRequiredMessage(formData.ruleType);
-          return { code: 'ERR_FIELD_MISSING', path, message };
-        },
-      },
-      {
-        validator: (
-          ...args: Parameters<ValidationFunc>
-        ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
-          const [{ value, path, formData }] = args;
-          const { query } = value as FieldValueQueryBar;
-          const needsValidation = !isMlRule(formData.ruleType);
-          if (!needsValidation) {
             return;
           }
 
-          if (!isEmpty(query.query as string) && query.language === 'kuery') {
-            try {
-              fromKueryExpression(query.query);
-            } catch (err) {
-              return {
-                code: 'ERR_FIELD_FORMAT',
-                path,
-                message: INVALID_CUSTOM_QUERY,
-              };
-            }
-          }
+          return queryValidatorFactory(formData.ruleType)(...args);
         },
       },
       {
-        validator: debounceAsync(eqlValidator, 300),
+        validator: (...args) => {
+          const [{ formData }] = args;
+          const {
+            dataSourceType,
+            dataViewId = '',
+            index,
+            ruleType,
+            eqlOptions,
+          } = formData as DefineStepRule;
+
+          if (!isEqlRule(ruleType)) {
+            return;
+          }
+
+          return debounceAsync(
+            eqlQueryValidatorFactory(
+              dataSourceType === DataSourceType.DataView
+                ? { dataViewId, eqlOptions }
+                : { indexPattern: index, eqlOptions }
+            ),
+            300
+          )(...args);
+        },
       },
       {
         validator: debounceAsync(esqlValidator, 300),
@@ -509,48 +497,13 @@ export const schema: FormSchema<DefineStepRule> = {
     ),
     validations: [
       {
-        validator: (
-          ...args: Parameters<ValidationFunc>
-        ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
+        validator: (...args) => {
           const [{ value, path, formData }] = args;
-          const needsValidation = isThreatMatchRule(formData.ruleType);
-          if (!needsValidation) {
+          if (!isThreatMatchRule(formData.ruleType)) {
             return;
           }
 
-          const { query, filters } = value as FieldValueQueryBar;
-
-          return isEmpty(query.query as string) && isEmpty(filters)
-            ? {
-                code: 'ERR_FIELD_MISSING',
-                path,
-                message: CUSTOM_QUERY_REQUIRED,
-              }
-            : undefined;
-        },
-      },
-      {
-        validator: (
-          ...args: Parameters<ValidationFunc>
-        ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
-          const [{ value, path, formData }] = args;
-          const needsValidation = isThreatMatchRule(formData.ruleType);
-          if (!needsValidation) {
-            return;
-          }
-          const { query } = value as FieldValueQueryBar;
-
-          if (!isEmpty(query.query as string) && query.language === 'kuery') {
-            try {
-              fromKueryExpression(query.query);
-            } catch (err) {
-              return {
-                code: 'ERR_FIELD_FORMAT',
-                path,
-                message: INVALID_CUSTOM_QUERY,
-              };
-            }
-          }
+          return queryValidatorFactory(formData.ruleType)(...args);
         },
       },
     ],

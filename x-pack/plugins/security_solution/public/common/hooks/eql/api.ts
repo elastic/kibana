@@ -31,9 +31,9 @@ interface Params {
   dataViewTitle: string;
   query: string;
   data: DataPublicPluginStart;
-  signal: AbortSignal;
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
-  options: Omit<EqlOptionsSelected, 'query' | 'size'> | undefined;
+  eqlOptions: Omit<EqlOptionsSelected, 'query' | 'size'> | undefined;
+  signal?: AbortSignal;
 }
 
 export interface EqlResponseError {
@@ -51,9 +51,9 @@ export const validateEql = async ({
   data,
   dataViewTitle,
   query,
-  signal,
   runtimeMappings,
-  options,
+  eqlOptions,
+  signal,
 }: Params): Promise<ValidateEqlResponse> => {
   try {
     const { rawResponse: response } = await firstValueFrom(
@@ -62,9 +62,9 @@ export const validateEql = async ({
           params: {
             index: dataViewTitle,
             body: { query, runtime_mappings: runtimeMappings, size: 0 },
-            timestamp_field: options?.timestampField,
-            tiebreaker_field: options?.tiebreakerField || undefined,
-            event_category_field: options?.eventCategoryField,
+            timestamp_field: eqlOptions?.timestampField,
+            tiebreaker_field: eqlOptions?.tiebreakerField,
+            event_category_field: eqlOptions?.eventCategoryField,
           },
           options: { ignore: [400] },
         },
@@ -79,19 +79,23 @@ export const validateEql = async ({
         valid: false,
         error: { code: EQL_ERROR_CODES.INVALID_SYNTAX, messages: getValidationErrors(response) },
       };
-    } else if (isVerificationErrorResponse(response) || isMappingErrorResponse(response)) {
+    }
+
+    if (isVerificationErrorResponse(response) || isMappingErrorResponse(response)) {
       return {
         valid: false,
         error: { code: EQL_ERROR_CODES.INVALID_EQL, messages: getValidationErrors(response) },
       };
-    } else if (isErrorResponse(response)) {
+    }
+
+    if (isErrorResponse(response)) {
       return {
         valid: false,
         error: { code: EQL_ERROR_CODES.FAILED_REQUEST, error: new Error(JSON.stringify(response)) },
       };
-    } else {
-      return { valid: true };
     }
+
+    return { valid: true };
   } catch (error) {
     if (error instanceof Error && error.message.startsWith('index_not_found_exception')) {
       return {
@@ -99,6 +103,7 @@ export const validateEql = async ({
         error: { code: EQL_ERROR_CODES.MISSING_DATA_SOURCE, messages: [error.message] },
       };
     }
+
     return {
       valid: false,
       error: {

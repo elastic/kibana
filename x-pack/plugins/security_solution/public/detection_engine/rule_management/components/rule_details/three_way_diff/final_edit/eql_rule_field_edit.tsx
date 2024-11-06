@@ -9,6 +9,7 @@ import React from 'react';
 import type { UpgradeableEqlFields } from '../../../../model/prebuilt_rule_upgrade/fields';
 import { DataSourceEditForm } from './fields/data_source';
 import { AlertSuppressionEditForm } from './fields/alert_suppression';
+import { EqlQueryEditForm } from './fields/eql_query';
 
 interface EqlRuleFieldEditProps {
   fieldName: UpgradeableEqlFields;
@@ -16,6 +17,8 @@ interface EqlRuleFieldEditProps {
 
 export function EqlRuleFieldEdit({ fieldName }: EqlRuleFieldEditProps) {
   switch (fieldName) {
+    case 'eql_query':
+      return <EqlQueryEditForm />;
     case 'data_source':
       return <DataSourceEditForm />;
     case 'alert_suppression':

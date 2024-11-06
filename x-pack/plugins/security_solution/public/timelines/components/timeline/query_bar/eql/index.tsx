@@ -18,11 +18,8 @@ import { useSourcererDataView } from '../../../../../sourcerer/containers';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
 import { SourcererScopeName } from '../../../../../sourcerer/store/model';
 import { EqlQueryBar } from '../../../../../detection_engine/rule_creation_ui/components/eql_query_bar';
-
-import {
-  debounceAsync,
-  eqlValidator,
-} from '../../../../../detection_engine/rule_creation_ui/components/eql_query_bar/validators';
+import { debounceAsync } from '../../../../../detection_engine/rule_creation_ui/validators/debounce_async';
+import { eqlQueryValidatorFactory } from '../../../../../detection_engine/rule_creation_ui/validators/eql_query_validator_factory';
 import type { FieldValueQueryBar } from '../../../../../detection_engine/rule_creation_ui/components/query_bar';
 
 import type { FormSchema } from '../../../../../shared_imports';
@@ -58,7 +55,15 @@ const schema: FormSchema<TimelineEqlQueryBar> = {
   eqlQueryBar: {
     validations: [
       {
-        validator: debounceAsync(eqlValidator, 300),
+        validator: (...args) => {
+          const [{ formData }] = args;
+          const { index, eqlOptions } = formData;
+
+          return debounceAsync(
+            eqlQueryValidatorFactory({ indexPattern: index, eqlOptions }),
+            300
+          )(...args);
+        },
       },
     ],
   },
