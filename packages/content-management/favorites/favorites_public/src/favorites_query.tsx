@@ -14,8 +14,6 @@ import React from 'react';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { useFavoritesClient, useFavoritesContext } from './favorites_context';
 
-import { useFavoritesClient, useFavoritesContext } from './favorites_context';
-
 const favoritesKeys = {
   all: ['favorites'] as const,
   byType: (type: string) => [...favoritesKeys.all, type] as const,
