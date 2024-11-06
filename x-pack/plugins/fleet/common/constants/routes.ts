@@ -171,11 +171,6 @@ export const ENROLLMENT_API_KEY_ROUTES = {
   LIST_PATTERN: `${API_ROOT}/enrollment_api_keys`,
   INFO_PATTERN: `${API_ROOT}/enrollment_api_keys/{keyId}`,
   DELETE_PATTERN: `${API_ROOT}/enrollment_api_keys/{keyId}`,
-  // deprecated since 8.0
-  CREATE_PATTERN_DEPRECATED: `${API_ROOT}/enrollment-api-keys`,
-  LIST_PATTERN_DEPRECATED: `${API_ROOT}/enrollment-api-keys`,
-  INFO_PATTERN_DEPRECATED: `${API_ROOT}/enrollment-api-keys/{keyId}`,
-  DELETE_PATTERN_DEPRECATED: `${API_ROOT}/enrollment-api-keys/{keyId}`,
 };
 
 export const UNINSTALL_TOKEN_ROUTES = {
