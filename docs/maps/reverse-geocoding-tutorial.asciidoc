@@ -26,7 +26,7 @@ GeoIP is a common way of transforming an IP address to a longitude and latitude.
 
 You’ll use the <<get-started, web logs sample data set>> that comes with Kibana for this tutorial. Web logs sample data set has longitude and latitude. If your web log data does not contain longitude and latitude, use {ref}/geoip-processor.html[GeoIP processor] to transform an IP address into a {ref}/geo-point.html[geo_point] field.
 
-To install web logs sample data set, refer to <<gs-get-data-into-kibana,Add sample data>>.
+To install the web logs sample data set, refer to <<gs-get-data-into-kibana,Add sample data>>.
 
 [float]
 === Step 2: Index Combined Statistical Area (CSA) regions
