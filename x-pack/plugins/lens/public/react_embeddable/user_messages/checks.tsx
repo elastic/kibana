@@ -17,6 +17,7 @@ import type {
 } from '../../types';
 import type { LensApi } from '../types';
 import type { MergedSearchContext } from '../expressions/merged_search_context';
+import { MISSING_TIME_RANGE_ON_EMBEDDABLE, URL_CONFLICT } from '../../user_messages_ids';
 
 export function hasLegacyURLConflict(metaInfo?: SharingSavedObjectProps, spaces?: SpacesApi) {
   return metaInfo?.outcome === 'conflict' && spaces?.ui?.components?.getEmbeddableLegacyUrlConflict;
@@ -28,7 +29,7 @@ export function getLegacyURLConflictsMessage(
 ): UserMessage {
   const LegacyURLConfig = spaces.ui.components.getEmbeddableLegacyUrlConflict;
   return {
-    uniqueId: 'url-conflict',
+    uniqueId: URL_CONFLICT,
     severity: 'error',
     displayLocations: [{ id: 'visualization' }],
     shortMessage: i18n.translate('xpack.lens.legacyURLConflict.shortMessage', {
@@ -57,7 +58,7 @@ export function isSearchContextIncompatibleWithDataViews(
 
 export function getSearchContextIncompatibleMessage(): UserMessage {
   return {
-    uniqueId: 'missing-time-range-on-embeddable',
+    uniqueId: MISSING_TIME_RANGE_ON_EMBEDDABLE,
     severity: 'error',
     fixableInEditor: false,
     displayLocations: [{ id: 'visualization' }],
