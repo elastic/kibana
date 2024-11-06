@@ -121,7 +121,7 @@ export function DiscoverMainRoute({
         const isEsqlQuery = isDataSourceType(dataSource, DataSourceType.Esql);
 
         if (savedSearchId || isEsqlQuery || nextDataView) {
-          // even ES|QL doesn't need a data view, we still need to load the data view list to
+          // Although ES|QL doesn't need a data view, we still need to load the data view list to
           // ensure the data view is available for the user to switch to classic mode
           await stateContainer.actions.loadDataViewList();
           return true;
