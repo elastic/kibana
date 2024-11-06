@@ -32,10 +32,10 @@ describe('getUnitedEntityDefinition', () => {
             "entity.name": Object {
               "fields": Object {
                 "text": Object {
-                  "type": "keyword",
+                  "type": "match_only_text",
                 },
               },
-              "type": "text",
+              "type": "keyword",
             },
             "entity.source": Object {
               "type": "keyword",
@@ -345,10 +345,10 @@ describe('getUnitedEntityDefinition', () => {
             "entity.name": Object {
               "fields": Object {
                 "text": Object {
-                  "type": "keyword",
+                  "type": "match_only_text",
                 },
               },
-              "type": "text",
+              "type": "keyword",
             },
             "entity.source": Object {
               "type": "keyword",
