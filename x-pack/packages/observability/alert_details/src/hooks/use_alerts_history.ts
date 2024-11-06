@@ -55,7 +55,7 @@ export function useAlertsHistory({
   http,
   instanceId,
 }: Props): UseAlertsHistory {
-  const enabled = !featureIds.length;
+  const enabled = !!featureIds.length;
   const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data } = useQuery({
     queryKey: ['useAlertsHistory'],
     queryFn: async ({ signal }) => {
