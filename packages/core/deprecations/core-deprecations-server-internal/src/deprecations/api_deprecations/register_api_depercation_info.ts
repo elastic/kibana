@@ -36,7 +36,6 @@ export const createGetApiDeprecations =
           'routeAccess'
         );
 
-        // buildApiAccessDeprecationDetails
         return [
           buildApiRouteDeprecationDetails({
             apiUsageStats,

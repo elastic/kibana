@@ -36,7 +36,10 @@ export function createRouteDeprecationsHandler({
   coreUsageData: InternalCoreUsageDataSetup;
 }) {
   return (req: CoreKibanaRequest, { deprecated }: { deprecated?: RouteDeprecationInfo }) => {
-    if (deprecated && isObject(deprecated) && req.route.routePath) {
+    const hasRouteDeprecation = deprecated && isObject(deprecated);
+    const hasAccessDeprecation = req.route.options.access === 'internal';
+    const isApiDeprecation = hasAccessDeprecation || hasRouteDeprecation;
+    if (isApiDeprecation && req.route.routePath) {
       const counterName = buildApiDeprecationId({
         routeMethod: req.route.method,
         routePath: req.route.routePath,
