@@ -90,6 +90,8 @@ describe('getOptimizerCacheKey()', () => {
           "optimizerCacheKey": "♻",
           "repoRoot": <absolute path>,
           "themeTags": Array [
+            "borealisdark",
+            "borealislight",
             "v8dark",
             "v8light",
           ],
