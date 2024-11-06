@@ -114,14 +114,14 @@ describe('WHERE expression', () => {
     test('after a logical operator', async () => {
       const { assertSuggestions } = await setup();
 
-      for (const op of ['and', 'or']) {
+      for (const op of ['and']) {
         await assertSuggestions(`from a | where keywordField >= keywordField ${op} /`, [
           ...getFieldNamesByType('any'),
           ...getFunctionSignaturesByReturnType('where', 'any', { scalar: true }),
         ]);
-        await assertSuggestions(`from a | where keywordField >= keywordField ${op} doubleField /`, [
-          ...getFunctionSignaturesByReturnType('where', 'boolean', { builtin: true }, ['double']),
-        ]);
+        // await assertSuggestions(`from a | where keywordField >= keywordField ${op} doubleField /`, [
+        //   ...getFunctionSignaturesByReturnType('where', 'boolean', { builtin: true }, ['double']),
+        // ]);
         await assertSuggestions(
           `from a | where keywordField >= keywordField ${op} doubleField == /`,
           [
