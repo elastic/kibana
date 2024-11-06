@@ -7932,10 +7932,6 @@
           "ignore_unavailable": {
             "description": "If true, missing or closed indices are not included in the response.",
             "type": "boolean"
-          },
-          "ignore_throttled": {
-            "description": "If true, concrete, expanded or aliased indices are ignored when frozen.",
-            "type": "boolean"
           }
         }
       },

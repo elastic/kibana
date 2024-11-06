@@ -27,7 +27,10 @@ export const indicesOptionsSchema = schema.object({
   ),
   ignore_unavailable: schema.maybe(schema.boolean()),
   allow_no_indices: schema.maybe(schema.boolean()),
+  // retaining the deprecated ignore_throttled in case an older jobs are used
+  // we don't want to fail the schema validation if this is present
   ignore_throttled: schema.maybe(schema.boolean()),
+  failure_store: schema.maybe(schema.string()),
 });
 
 export const datafeedConfigSchema = schema.object({
