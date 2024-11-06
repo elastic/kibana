@@ -7,15 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { RequestHandler } from '@kbn/core-http-server';
 import type { IRouter } from '@kbn/core/server';
 import { DEPRECATED_ROUTES } from '../../../common';
-
-const createDummyHandler =
-  (version: string): RequestHandler =>
-  (ctx, req, res) => {
-    return res.ok({ body: { result: `API version ${version}.` } });
-  };
 
 export const registerVersionedDeprecatedRoute = (router: IRouter) => {
   const versionedRoute = router.versioned.get({
@@ -40,7 +33,11 @@ export const registerVersionedDeprecatedRoute = (router: IRouter) => {
       validate: false,
       version: '1',
     },
-    createDummyHandler('1')
+    (ctx, req, res) => {
+      return res.ok({
+        body: { result: 'Called deprecated version of the API. API version 1 -> 2' },
+      });
+    }
   );
 
   versionedRoute.addVersion(
@@ -48,6 +45,8 @@ export const registerVersionedDeprecatedRoute = (router: IRouter) => {
       version: '2',
       validate: false,
     },
-    createDummyHandler('2')
+    (ctx, req, res) => {
+      return res.ok({ body: { result: 'Called API version 2' } });
+    }
   );
 };
