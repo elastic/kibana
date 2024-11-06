@@ -99,7 +99,7 @@ describe('checkActionTypeEnabled', () => {
           }
       `);
   });
-  test('preconfigured connectors: returns isEnabled: true when action tupe is disabled by config', async () => {
+  test('checkActionTypeEnabled returns true when actionType is disabled by config', async () => {
     const actionType: ActionType = {
       id: '1',
       minimumLicenseRequired: 'basic',
