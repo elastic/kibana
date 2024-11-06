@@ -226,6 +226,18 @@ export default function ({ getService }: FtrProviderContext) {
 
       describe('esql_query', () => {
         const type = 'esql_query';
+        const metadata1 = {
+          queryString: 'SELECT * FROM test1',
+          timeRan: '2021-09-01T00:00:00Z',
+          status: 'success',
+        };
+
+        const metadata2 = {
+          queryString: 'SELECT * FROM test2',
+          timeRan: '2023-09-01T00:00:00Z',
+          status: 'success',
+        };
+
         const api = {
           favorite: ({
             queryId,
@@ -296,27 +308,27 @@ export default function ({ getService }: FtrProviderContext) {
           response = await api.favorite({
             queryId: 'fav1',
             user: interactiveUser,
-            metadata: { query: 'q1' },
+            metadata: metadata1,
           });
 
           expect(response.body.favoriteIds).to.eql(['fav1']);
 
           response = await api.list({ user: interactiveUser });
           expect(response.body.favoriteIds).to.eql(['fav1']);
-          expect(response.body.favoriteMetadata).to.eql({ fav1: { query: 'q1' } });
+          expect(response.body.favoriteMetadata).to.eql({ fav1: metadata1 });
 
           response = await api.favorite({
             queryId: 'fav2',
             user: interactiveUser,
-            metadata: { query: 'q2' },
+            metadata: metadata2,
           });
           expect(response.body.favoriteIds).to.eql(['fav1', 'fav2']);
 
           response = await api.list({ user: interactiveUser });
           expect(response.body.favoriteIds).to.eql(['fav1', 'fav2']);
           expect(response.body.favoriteMetadata).to.eql({
-            fav1: { query: 'q1' },
-            fav2: { query: 'q2' },
+            fav1: metadata1,
+            fav2: metadata2,
           });
 
           response = await api.unfavorite({ queryId: 'fav1', user: interactiveUser });
@@ -325,7 +337,7 @@ export default function ({ getService }: FtrProviderContext) {
           response = await api.list({ user: interactiveUser });
           expect(response.body.favoriteIds).to.eql(['fav2']);
           expect(response.body.favoriteMetadata).to.eql({
-            fav2: { query: 'q2' },
+            fav2: metadata2,
           });
 
           response = await api.unfavorite({ queryId: 'fav2', user: interactiveUser });
