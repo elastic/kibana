@@ -18,7 +18,6 @@ import { isOfAggregateQueryType } from '@kbn/es-query';
 import { RenderMode } from '@kbn/expressions-plugin/common';
 import { LensRuntimeState, LensSerializedState } from './types';
 import type { LensAttributesService } from '../lens_attribute_service';
-import type { SharingSavedObjectProps } from '../types';
 
 export function createEmptyLensState(
   visualizationType: null | string = null,
