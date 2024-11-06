@@ -66,6 +66,13 @@ export const createKnowledgeBaseEntry = async ({
         entry: knowledgeBaseEntry as unknown as TransformToLegacyCreateSchemaProps['entry'],
         global,
       });
+  const telemetryPayload = {
+    eventAction: 'create',
+    entryType: body.type,
+    required: body.required ?? false,
+    sharing: body.users.length ? 'private' : 'global',
+    ...(body.type === 'document' ? { source: body.source } : {}),
+  };
   try {
     const response = await esClient.create({
       body,
@@ -82,24 +89,14 @@ export const createKnowledgeBaseEntry = async ({
       user,
     });
 
-    telemetry.reportEvent(KNOWLEDGE_BASE_ENTRY_SUCCESS_EVENT.eventType, {
-      eventAction: 'create',
-      entryType: body.type,
-      required: body.required,
-      sharing: body.users.length ? 'private' : 'global',
-      ...(body.type === 'document' ? { source: body.source } : {}),
-    });
+    telemetry.reportEvent(KNOWLEDGE_BASE_ENTRY_SUCCESS_EVENT.eventType, telemetryPayload);
     return newKnowledgeBaseEntry;
   } catch (err) {
     logger.error(
       `Error creating Knowledge Base Entry: ${err} with kbResource: ${knowledgeBaseEntry.name}`
     );
     telemetry.reportEvent(KNOWLEDGE_BASE_ENTRY_ERROR_EVENT.eventType, {
-      eventAction: 'create',
-      entryType: body.type,
-      required: body.required,
-      sharing: body.users.length ? 'private' : 'global',
-      ...(body.type === 'document' ? { source: body.source } : {}),
+      ...telemetryPayload,
       errorMessage: err.message ?? 'Unknown error',
     });
     throw err;
