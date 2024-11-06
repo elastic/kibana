@@ -8,18 +8,15 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type {
-  CoreVersionedRouter,
-  VersionedRouterRoute,
-} from '@kbn/core-http-router-server-internal';
+import type { CoreVersionedRouter } from '@kbn/core-http-router-server-internal';
 import { get } from 'lodash';
 import { OasConverter } from './oas_converter';
-import { createOperationIdCounter } from './operation_id_counter';
 import {
   processVersionedRouter,
   extractVersionedResponses,
   extractVersionedRequestBodies,
 } from './process_versioned_router';
+import { createOpIdGenerator } from './util';
 
 let oasConverter: OasConverter;
 beforeEach(() => {
@@ -127,7 +124,7 @@ describe('processVersionedRouter', () => {
     const baseCase = processVersionedRouter(
       { getRoutes: () => [createTestRoute()] } as unknown as CoreVersionedRouter,
       new OasConverter(),
-      createOperationIdCounter(),
+      createOpIdGenerator(),
       {}
     );
 
@@ -139,7 +136,7 @@ describe('processVersionedRouter', () => {
     const filteredCase = processVersionedRouter(
       { getRoutes: () => [createTestRoute()] } as unknown as CoreVersionedRouter,
       new OasConverter(),
-      createOperationIdCounter(),
+      createOpIdGenerator(),
       { version: '2023-10-31' }
     );
     expect(Object.keys(get(filteredCase, 'paths["/foo"].get.responses.200.content')!)).toEqual([
@@ -151,7 +148,7 @@ describe('processVersionedRouter', () => {
     const results = processVersionedRouter(
       { getRoutes: () => [createTestRoute()] } as unknown as CoreVersionedRouter,
       new OasConverter(),
-      createOperationIdCounter(),
+      createOpIdGenerator(),
       {}
     );
     expect(results.paths['/foo']).toBeDefined();
@@ -159,14 +156,15 @@ describe('processVersionedRouter', () => {
     expect(results.paths['/foo']!.get).toBeDefined();
 
     expect(results.paths['/foo']!.get!.description).toBe(
-      '[Authz] Route required privileges: ALL of [manage_spaces].'
+      'This is a test route description.<br/><br/>[Required authorization] Route required privileges: ALL of [manage_spaces].'
     );
   });
 });
 
-const createTestRoute: () => VersionedRouterRoute = () => ({
+const createTestRoute: () => any = () => ({
   path: '/foo',
   method: 'get',
+  isVersioned: true,
   options: {
     access: 'public',
     deprecated: true,
@@ -177,6 +175,7 @@ const createTestRoute: () => VersionedRouterRoute = () => ({
         requiredPrivileges: ['manage_spaces'],
       },
     },
+    description: 'This is a test route description.',
   },
   handlers: [
     {

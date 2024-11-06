@@ -17,9 +17,19 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const browser = getService('browser');
   const es = getService('es');
   const log = getService('log');
+  const retry = getService('retry');
 
   describe('space solution tour', () => {
     let version: string | undefined;
+
+    const getGlobalSettings = async () => {
+      const doc = await es.get(
+        { id: `config-global:${version}`, index: '.kibana' },
+        { headers: { 'kbn-xsrf': 'spaces' }, ignore: [404] }
+      );
+      const value = (doc?._source as any)?.['config-global'] || null;
+      return value;
+    };
 
     const removeGlobalSettings = async () => {
       version = version ?? (await kibanaServer.version.get());
@@ -36,6 +46,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           if (error.statusCode === 404) return; // ignore 404 errors
           throw error;
         });
+
+      await retry.tryForTime(3000, async () => {
+        const value = await getGlobalSettings();
+        return value === null;
+      });
     };
 
     before(async () => {
@@ -64,6 +79,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       before(async () => {
         _defaultSpace = await spacesService.get('default');
+        await removeGlobalSettings(); // Make sure we start from a clean state
 
         await PageObjects.common.navigateToUrl('management', 'kibana/spaces', {
           shouldUseHashForSubUrl: false,

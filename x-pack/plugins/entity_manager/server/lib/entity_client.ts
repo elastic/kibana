@@ -40,7 +40,11 @@ export class EntityClient {
     definition: EntityDefinition;
     installOnly?: boolean;
   }) {
+    this.options.logger.info(
+      `Creating definition [${definition.id}] v${definition.version} (installOnly=${installOnly})`
+    );
     const secondaryAuthClient = this.options.clusterClient.asSecondaryAuthUser;
+
     const installedDefinition = await installEntityDefinition({
       definition,
       esClient: secondaryAuthClient,
@@ -62,16 +66,15 @@ export class EntityClient {
     id: string;
     definitionUpdate: EntityDefinitionUpdate;
   }) {
-    const secondaryAuthClient = this.options.clusterClient.asSecondaryAuthUser;
     const definition = await findEntityDefinitionById({
       id,
       soClient: this.options.soClient,
-      esClient: secondaryAuthClient,
+      esClient: this.options.clusterClient.asInternalUser,
       includeState: true,
     });
 
     if (!definition) {
-      const message = `Unable to find entity definition with [${id}]`;
+      const message = `Unable to find entity definition [${id}]`;
       this.options.logger.error(message);
       throw new EntityDefinitionNotFound(message);
     }
@@ -86,25 +89,31 @@ export class EntityClient {
       definition as EntityDefinitionWithState
     ).state.components.transforms.some((transform) => transform.running);
 
+    this.options.logger.info(
+      `Updating definition [${definition.id}] from v${definition.version} to v${definitionUpdate.version}`
+    );
     const updatedDefinition = await reinstallEntityDefinition({
       definition,
       definitionUpdate,
       soClient: this.options.soClient,
-      esClient: secondaryAuthClient,
+      clusterClient: this.options.clusterClient,
       logger: this.options.logger,
     });
 
     if (shouldRestartTransforms) {
-      await startTransforms(secondaryAuthClient, updatedDefinition, this.options.logger);
+      await startTransforms(
+        this.options.clusterClient.asSecondaryAuthUser,
+        updatedDefinition,
+        this.options.logger
+      );
     }
     return updatedDefinition;
   }
 
   async deleteEntityDefinition({ id, deleteData = false }: { id: string; deleteData?: boolean }) {
-    const secondaryAuthClient = this.options.clusterClient.asSecondaryAuthUser;
     const definition = await findEntityDefinitionById({
       id,
-      esClient: secondaryAuthClient,
+      esClient: this.options.clusterClient.asInternalUser,
       soClient: this.options.soClient,
     });
 
@@ -112,9 +121,12 @@ export class EntityClient {
       throw new EntityDefinitionNotFound(`Unable to find entity definition with [${id}]`);
     }
 
+    this.options.logger.info(
+      `Uninstalling definition [${definition.id}] v${definition.version} (deleteData=${deleteData})`
+    );
     await uninstallEntityDefinition({
       definition,
-      esClient: secondaryAuthClient,
+      esClient: this.options.clusterClient.asSecondaryAuthUser,
       soClient: this.options.soClient,
       logger: this.options.logger,
     });
@@ -146,7 +158,7 @@ export class EntityClient {
     builtIn?: boolean;
   }) {
     const definitions = await findEntityDefinitions({
-      esClient: this.options.clusterClient.asSecondaryAuthUser,
+      esClient: this.options.clusterClient.asInternalUser,
       soClient: this.options.soClient,
       page,
       perPage,
@@ -160,6 +172,7 @@ export class EntityClient {
   }
 
   async startEntityDefinition(definition: EntityDefinition) {
+    this.options.logger.info(`Starting transforms for definition [${definition.id}]`);
     return startTransforms(
       this.options.clusterClient.asSecondaryAuthUser,
       definition,
@@ -168,6 +181,7 @@ export class EntityClient {
   }
 
   async stopEntityDefinition(definition: EntityDefinition) {
+    this.options.logger.info(`Stopping transforms for definition [${definition.id}]`);
     return stopTransforms(
       this.options.clusterClient.asSecondaryAuthUser,
       definition,

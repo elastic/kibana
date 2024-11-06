@@ -28,13 +28,13 @@ describe('AlertsBadge', () => {
 
   it('render alerts badge for a host entity', () => {
     const entity: HostEntity = {
-      'entity.lastSeenTimestamp': 'foo',
+      'entity.last_seen_timestamp': 'foo',
       'entity.id': '1',
       'entity.type': 'host',
-      'entity.displayName': 'foo',
-      'entity.identityFields': 'host.name',
+      'entity.display_name': 'foo',
+      'entity.identity_fields': 'host.name',
       'host.name': 'foo',
-      'entity.definitionId': 'host',
+      'entity.definition_id': 'host',
       'cloud.provider': null,
       alertsCount: 1,
     };
@@ -46,14 +46,14 @@ describe('AlertsBadge', () => {
   });
   it('render alerts badge for a service entity', () => {
     const entity: ServiceEntity = {
-      'entity.lastSeenTimestamp': 'foo',
+      'entity.last_seen_timestamp': 'foo',
       'agent.name': 'node',
       'entity.id': '1',
       'entity.type': 'service',
-      'entity.displayName': 'foo',
-      'entity.identityFields': 'service.name',
+      'entity.display_name': 'foo',
+      'entity.identity_fields': 'service.name',
       'service.name': 'bar',
-      'entity.definitionId': 'host',
+      'entity.definition_id': 'host',
       'cloud.provider': null,
       alertsCount: 5,
     };
@@ -65,15 +65,15 @@ describe('AlertsBadge', () => {
   });
   it('render alerts badge for a service entity with multiple identity fields', () => {
     const entity: ServiceEntity = {
-      'entity.lastSeenTimestamp': 'foo',
+      'entity.last_seen_timestamp': 'foo',
       'agent.name': 'node',
       'entity.id': '1',
       'entity.type': 'service',
-      'entity.displayName': 'foo',
-      'entity.identityFields': ['service.name', 'service.environment'],
+      'entity.display_name': 'foo',
+      'entity.identity_fields': ['service.name', 'service.environment'],
       'service.name': 'bar',
       'service.environment': 'prod',
-      'entity.definitionId': 'host',
+      'entity.definition_id': 'host',
       'cloud.provider': null,
       alertsCount: 2,
     };

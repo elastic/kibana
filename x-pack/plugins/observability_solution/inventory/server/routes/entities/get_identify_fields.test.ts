@@ -29,14 +29,14 @@ describe('getIdentityFields', () => {
   it('should return a Map with unique entity types and their respective identity fields', () => {
     const serviceEntity: ServiceEntity = {
       'agent.name': 'node',
-      'entity.identityFields': ['service.name', 'service.environment'],
+      'entity.identity_fields': ['service.name', 'service.environment'],
       'service.name': 'my-service',
       'entity.type': 'service',
       ...commonEntityFields,
     };
 
     const hostEntity: HostEntity = {
-      'entity.identityFields': ['host.name'],
+      'entity.identity_fields': ['host.name'],
       'host.name': 'my-host',
       'entity.type': 'host',
       'cloud.provider': null,
@@ -44,7 +44,7 @@ describe('getIdentityFields', () => {
     };
 
     const containerEntity: ContainerEntity = {
-      'entity.identityFields': 'container.id',
+      'entity.identity_fields': 'container.id',
       'host.name': 'my-host',
       'entity.type': 'container',
       'cloud.provider': null,

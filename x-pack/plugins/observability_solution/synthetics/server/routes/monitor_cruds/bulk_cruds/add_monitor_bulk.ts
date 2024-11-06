@@ -10,10 +10,10 @@ import { SavedObjectsBulkResponse } from '@kbn/core-saved-objects-api-server';
 import { v4 as uuidV4 } from 'uuid';
 import { NewPackagePolicy } from '@kbn/fleet-plugin/common';
 import { SavedObjectError } from '@kbn/core-saved-objects-common';
+import { deleteMonitorBulk } from './delete_monitor_bulk';
 import { SyntheticsServerSetup } from '../../../types';
 import { RouteContext } from '../../types';
 import { formatTelemetryEvent, sendTelemetryEvents } from '../../telemetry/monitor_upgrade_sender';
-import { deleteMonitor } from '../delete_monitor';
 import { formatSecrets } from '../../../synthetics_service/utils';
 import { syntheticsMonitorType } from '../../../../common/types/saved_objects';
 import {
@@ -24,6 +24,7 @@ import {
   SyntheticsMonitor,
   type SyntheticsPrivateLocations,
 } from '../../../../common/runtime_types';
+import { DeleteMonitorAPI } from '../services/delete_monitor_api';
 
 export const createNewSavedObjectMonitorBulk = async ({
   soClient,
@@ -146,15 +147,10 @@ const rollBackNewMonitorBulk = async (
 ) => {
   const { server } = routeContext;
   try {
-    await pMap(
-      monitorsToCreate,
-      async (monitor) =>
-        deleteMonitor({
-          routeContext,
-          monitorId: monitor.id,
-        }),
-      { concurrency: 100, stopOnError: false }
-    );
+    const deleteMonitorAPI = new DeleteMonitorAPI(routeContext);
+    await deleteMonitorAPI.execute({
+      monitorIds: monitorsToCreate.map(({ id }) => id),
+    });
   } catch (e) {
     // ignore errors here
     server.logger.error(e);
@@ -194,11 +190,9 @@ export const deleteMonitorIfCreated = async ({
       newMonitorId
     );
     if (encryptedMonitor) {
-      await savedObjectsClient.delete(syntheticsMonitorType, newMonitorId);
-
-      await deleteMonitor({
+      await deleteMonitorBulk({
+        monitors: [encryptedMonitor],
         routeContext,
-        monitorId: newMonitorId,
       });
     }
   } catch (e) {
