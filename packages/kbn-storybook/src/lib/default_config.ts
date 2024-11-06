@@ -99,7 +99,7 @@ export const defaultConfig: StorybookConfig = {
       },
     },
   ],
-  stories: ['../**/*.stories.tsx', '../**/*.stories.mdx'],
+  stories: ['../**/*.stories.tsx', '../**/*.mdx'],
   framework: {
     name: '@storybook/react-webpack5',
     options: {},
