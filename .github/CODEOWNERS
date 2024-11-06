@@ -755,7 +755,7 @@ src/plugins/saved_objects_finder @elastic/kibana-data-discovery
 test/plugin_functional/plugins/saved_objects_hidden_from_http_apis_type @elastic/kibana-core
 test/plugin_functional/plugins/saved_objects_hidden_type @elastic/kibana-core
 src/plugins/saved_objects_management @elastic/kibana-core
-src/plugins/saved_objects @elastic/kibana-core
+src/plugins/saved_objects @elastic/appex-sharedux
 packages/kbn-saved-objects-settings @elastic/appex-sharedux
 src/plugins/saved_objects_tagging_oss @elastic/appex-sharedux
 x-pack/plugins/saved_objects_tagging @elastic/appex-sharedux
@@ -955,7 +955,7 @@ packages/kbn-triggers-actions-ui-types @elastic/response-ops
 packages/kbn-try-in-console @elastic/search-kibana
 packages/kbn-ts-projects @elastic/kibana-operations
 packages/kbn-ts-type-check-cli @elastic/kibana-operations
-packages/kbn-typed-react-router-config @elastic/obs-knowledge-team @elastic/obs-ux-management-team
+packages/kbn-typed-react-router-config @elastic/obs-knowledge-team @elastic/obs-ux-infra_services-team
 packages/kbn-ui-actions-browser @elastic/appex-sharedux
 x-pack/examples/ui_actions_enhanced_examples @elastic/appex-sharedux
 src/plugins/ui_actions_enhanced @elastic/appex-sharedux
@@ -1024,7 +1024,7 @@ packages/kbn-zod-helpers @elastic/security-detection-rule-management
 # The #CC# prefix delineates Code Coverage,
 # used for the 'team' designator within Kibana Stats
 
-/x-pack/test/api_integration/apis/metrics_ui @elastic/obs-ux-logs-team @elastic/obs-ux-infra_services-team
+/x-pack/test/api_integration/apis/metrics_ui @elastic/obs-ux-infra_services-team
 x-pack/test_serverless/api_integration/test_suites/common/platform_security @elastic/kibana-security
 
 # Observability Entities Team (@elastic/obs-entities)
@@ -1158,7 +1158,7 @@ x-pack/test/observability_ai_assistant_api_integration @elastic/obs-ai-assistant
 x-pack/test/observability_ai_assistant_functional @elastic/obs-ai-assistant
 x-pack/test_serverless/**/test_suites/observability/ai_assistant @elastic/obs-ai-assistant
 
-# Infra Monitoring
+# Infra Obs
 ## This plugin mostly contains the codebase for the infra services, but also includes some code for the Logs UI app.
 ## To keep @elastic/obs-ux-logs-team as codeowner of the plugin manifest without requiring a review for all the other code changes
 ## the priority on codeownership will be as follow:
@@ -1189,6 +1189,7 @@ x-pack/test_serverless/**/test_suites/observability/ai_assistant @elastic/obs-ai
 /x-pack/plugins/observability_solution/infra/server/services @elastic/obs-ux-infra_services-team
 /x-pack/plugins/observability_solution/infra/server/usage @elastic/obs-ux-infra_services-team
 /x-pack/plugins/observability_solution/infra/server/utils @elastic/obs-ux-infra_services-team
+/x-pack/test/api_integration/deployment_agnostic/apis/observability/infra @elastic/obs-ux-logs-team
 
 ## Logs UI code exceptions -> @elastic/obs-ux-logs-team
 /x-pack/test_serverless/functional/page_objects/svl_oblt_onboarding_stream_log_file.ts @elastic/obs-ux-logs-team
@@ -1296,6 +1297,7 @@ x-pack/test_serverless/**/test_suites/observability/ai_assistant @elastic/obs-ai
 ### END Observability Plugins
 
 # Presentation
+/x-pack/test/disable_ems @elastic/kibana-presentation
 /x-pack/test/functional/apps/dashboard @elastic/kibana-presentation
 /x-pack/test/accessibility/apps/group3/maps.ts  @elastic/kibana-presentation
 /x-pack/test/accessibility/apps/group1/dashboard_panel_options.ts  @elastic/kibana-presentation
@@ -1330,6 +1332,7 @@ x-pack/test_serverless/**/test_suites/observability/ai_assistant @elastic/obs-ai
 /x-pack/test/api_integration/services/ml.ts @elastic/ml-ui
 
 # Additional plugins and packages maintained by the ML team.
+/test/examples/response_stream @elastic/ml-ui
 /x-pack/test/accessibility/apps/group2/transform.ts  @elastic/ml-ui
 /x-pack/test/api_integration/apis/aiops/ @elastic/ml-ui
 /x-pack/test/api_integration/apis/transform/ @elastic/ml-ui
@@ -1460,7 +1463,6 @@ x-pack/test/**/deployment_agnostic/ @elastic/appex-qa #temporarily to monitor te
 # AppEx Platform Services Security
 //x-pack/test_serverless/api_integration/test_suites/common/security_response_headers.ts  @elastic/kibana-security
 /x-pack/test/api_integration/apis/es  @elastic/kibana-security
-
 /x-pack/test/api_integration/apis/features  @elastic/kibana-security
 
 # Kibana Telemetry
@@ -1572,14 +1574,18 @@ x-pack/test/api_integration/apis/management/index_management/inference_endpoints
 /x-pack/test/functional_search/ @elastic/search-kibana
 
 # Management Experience - Deployment Management
+/x-pack/test/api_integration/services/index_management.ts @elastic/kibana-management
 /x-pack/test/functional/apps/license_management @elastic/kibana-management
 /x-pack/test/functional/apps/painless_lab @elastic/kibana-management
 /x-pack/test/functional/apps/management @elastic/kibana-management
 /x-pack/test/api_integration/services/index_management.ts @elastic/kibana-management
 /x-pack/test/functional/services/grok_debugger.js @elastic/kibana-management
+/x-pack/test/functional/apps/cross_cluster_replication @elastic/kibana-management
 /x-pack/test/functional/apps/grok_debugger @elastic/kibana-management
 /x-pack/test/functional/apps/index_lifecycle_management @elastic/kibana-management
 /x-pack/test/functional/apps/index_management @elastic/kibana-management
+/x-pack/test/functional/apps/ingest_pipelines @elastic/kibana-management
+/x-pack/test/functional/apps/upgrade_assistant @elastic/kibana-management
 /x-pack/test/api_integration/services/ingest_pipelines @elastic/kibana-management
 /x-pack/test/functional/apps/watcher @elastic/kibana-management
 /x-pack/test/api_integration/apis/watcher @elastic/kibana-management
@@ -2017,6 +2023,9 @@ x-pack/test/profiling_api_integration @elastic/obs-ux-infra_services-team
 x-pack/plugins/observability_solution/observability_shared/public/components/profiling @elastic/obs-ux-infra_services-team
 
 # Shared UX
+/test/api_integration/apis/guided_onboarding @elastic/appex-sharedux
+/test/plugin_functional/test_suites/shared_ux @elastic/appex-sharedux
+/x-pack/test/functional/apps/advanced_settings @elastic/appex-sharedux @elastic/kibana-management
 /test/examples/content_management @elastic/appex-sharedux
 /test/plugin_functional/plugins/kbn_sample_panel_action @elastic/appex-sharedux
 /test/functional/apps/kibana_overview @elastic/appex-sharedux
