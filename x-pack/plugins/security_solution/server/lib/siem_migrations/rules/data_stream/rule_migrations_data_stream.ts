@@ -13,7 +13,6 @@ import { RuleMigrationsDataClient } from './rule_migrations_data_client';
 const TOTAL_FIELDS_LIMIT = 2500;
 
 const DATA_STREAM_NAME = '.kibana.siem-rule-migrations';
-const ECS_COMPONENT_TEMPLATE_NAME = 'ecs';
 
 interface RuleMigrationsDataStreamCreateClientParams {
   spaceId: string;
@@ -37,7 +36,7 @@ export class RuleMigrationsDataStream {
 
     this.dataStreamAdapter.setIndexTemplate({
       name: DATA_STREAM_NAME,
-      componentTemplateRefs: [DATA_STREAM_NAME, ECS_COMPONENT_TEMPLATE_NAME],
+      componentTemplateRefs: [DATA_STREAM_NAME],
     });
   }
 
