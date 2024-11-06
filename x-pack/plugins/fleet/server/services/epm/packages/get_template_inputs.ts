@@ -268,21 +268,7 @@ function addCommentsToYaml(
           pkgInput.description ? `: ${pkgInput.description}` : ''
         }`;
 
-        yamlDoc.visit(inputItem, {
-          Scalar(key, node) {
-            if (node.value) {
-              const val = node.value.toString();
-              for (const varDef of pkgInput.vars ?? []) {
-                const placeholder = getPlaceholder(varDef);
-                if (val.includes(placeholder)) {
-                  node.comment = ` ${varDef.title}${
-                    varDef.description ? `: ${varDef.description}` : ''
-                  }`;
-                }
-              }
-            }
-          },
-        });
+        commentVariablesInYaml(inputItem, pkgInput.vars ?? []);
 
         const yamlStreams = inputItem.get('streams');
         if (!yamlDoc.isCollection(yamlStreams)) {
@@ -300,21 +286,7 @@ function addCommentsToYaml(
               streamItem.commentBefore = ` ${pkgStream.title}${
                 pkgStream.description ? `: ${pkgStream.description}` : ''
               }`;
-              yamlDoc.visit(streamItem, {
-                Scalar(key, node) {
-                  if (node.value) {
-                    const val = node.value.toString();
-                    for (const varDef of pkgStream.vars ?? []) {
-                      const placeholder = getPlaceholder(varDef);
-                      if (val.includes(placeholder)) {
-                        node.comment = ` ${varDef.title}${
-                          varDef.description ? `: ${varDef.description}` : ''
-                        }`;
-                      }
-                    }
-                  }
-                },
-              });
+              commentVariablesInYaml(streamItem, pkgStream.vars ?? []);
             }
           }
         });
@@ -323,4 +295,72 @@ function addCommentsToYaml(
   }
 
   return doc.toString();
+}
+
+function commentVariablesInYaml(rootNode: yamlDoc.Node, vars: RegistryVarsEntry[] = []) {
+  // Node need to be deleted after the end of the visit to be able to visit every node
+  const toDeleteFn: Array<() => void> = [];
+  yamlDoc.visit(rootNode, {
+    Scalar(key, node, path) {
+      if (node.value) {
+        const val = node.value.toString();
+        for (const varDef of vars) {
+          const placeholder = getPlaceholder(varDef);
+          if (val.includes(placeholder)) {
+            node.comment = ` ${varDef.title}${varDef.description ? `: ${varDef.description}` : ''}`;
+
+            const paths = [...path].reverse();
+
+            let prevPart: yamlDoc.Node | yamlDoc.Document | yamlDoc.Pair = node;
+
+            for (const pathPart of paths) {
+              if (yamlDoc.isCollection(pathPart)) {
+                // If only one items in the collection comment the whole collection
+                if (pathPart.items.length === 1) {
+                  continue;
+                }
+              }
+              if (yamlDoc.isSeq(pathPart)) {
+                const commentDoc = new yamlDoc.Document(new yamlDoc.YAMLSeq());
+                commentDoc.add(prevPart);
+                const commentStr = commentDoc.toString().trimEnd();
+                pathPart.comment = pathPart.comment
+                  ? `${pathPart.comment} ${commentStr}`
+                  : ` ${commentStr}`;
+                const keyToDelete = prevPart;
+
+                toDeleteFn.push(() => {
+                  pathPart.items.forEach((item, index) => {
+                    if (item === keyToDelete) {
+                      pathPart.delete(new yamlDoc.Scalar(index));
+                    }
+                  });
+                });
+                return;
+              }
+
+              if (yamlDoc.isMap(pathPart)) {
+                if (yamlDoc.isPair(prevPart)) {
+                  const commentDoc = new yamlDoc.Document(new yamlDoc.YAMLMap());
+                  commentDoc.add(prevPart);
+                  const commentStr = commentDoc.toString().trimEnd();
+
+                  pathPart.comment = pathPart.comment
+                    ? `${pathPart.comment}\n ${commentStr.toString()}`
+                    : ` ${commentStr.toString()}`;
+                  const keyToDelete = prevPart.key;
+                  toDeleteFn.push(() => pathPart.delete(keyToDelete));
+                }
+                return;
+              }
+
+              prevPart = pathPart;
+            }
+          }
+        }
+      }
+    },
+  });
+
+  toDeleteFn.forEach((deleteFn) => deleteFn());
 }
