@@ -9,7 +9,6 @@ import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Rules Management - Rule Patch APIs', function () {
-    loadTestFile(require.resolve('./patch_rules_bulk'));
     loadTestFile(require.resolve('./patch_rules'));
     loadTestFile(require.resolve('./patch_rules_ess'));
   });

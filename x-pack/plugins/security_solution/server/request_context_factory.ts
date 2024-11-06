@@ -135,6 +135,8 @@ export class RequestContextFactory implements IRequestContextFactory {
 
       getAuditLogger,
 
+      getDataViewsService: () => dataViewsService,
+
       getDetectionRulesClient: memoize(() => {
         const mlAuthz = buildMlAuthz({
           license: licensing.license,
@@ -225,6 +227,7 @@ export class RequestContextFactory implements IRequestContextFactory {
           taskManager: startPlugins.taskManager,
           auditLogger: getAuditLogger(),
           kibanaVersion: options.kibanaVersion,
+          config: config.entityAnalytics.entityStore,
           telemetry: core.analytics,
         });
       }),

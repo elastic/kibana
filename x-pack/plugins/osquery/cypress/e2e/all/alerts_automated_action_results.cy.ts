@@ -13,6 +13,8 @@ const UUID_REGEX = '[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-
 
 // FLAKY: https://github.com/elastic/kibana/issues/178404
 // FLAKY: https://github.com/elastic/kibana/issues/197335
+// Failing: See https://github.com/elastic/kibana/issues/197335
+// Failing: See https://github.com/elastic/kibana/issues/178404
 describe.skip('Alert Flyout Automated Action Results', () => {
   let ruleId: string;
 
