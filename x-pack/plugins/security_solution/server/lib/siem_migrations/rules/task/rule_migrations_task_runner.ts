@@ -29,17 +29,12 @@ import type { MigrateRuleState } from './agent/types';
 import { retrievePrebuiltRulesMap } from './util/prebuilt_rules';
 import { ActionsClientChat } from './util/actions_client_chat';
 
-interface MigrationProcessing {
-  abortController: AbortController;
-  user: string;
-}
-
-interface RuleLogger {
+interface TaskLogger {
   info: (msg: string) => void;
   debug: (msg: string) => void;
   error: (msg: string, error: Error) => void;
 }
-const getRuleLogger = (logger: Logger): RuleLogger => {
+const getTaskLogger = (logger: Logger): TaskLogger => {
   const prefix = '[ruleMigrationsTask]: ';
   return {
     info: (msg) => logger.info(`${prefix}${msg}`),
@@ -52,18 +47,18 @@ const ITERATION_BATCH_SIZE = 50 as const;
 const ITERATION_SLEEP_SECONDS = 10 as const;
 
 export class RuleMigrationsTaskRunner {
-  private migrationsExecuting: Map<string, MigrationProcessing>;
-  private taskLogger: RuleLogger;
+  private migrationsRunning: Map<string, { user: string; abortController: AbortController }>;
+  private taskLogger: TaskLogger;
 
   constructor(private logger: Logger) {
-    this.migrationsExecuting = new Map();
-    this.taskLogger = getRuleLogger(logger);
+    this.migrationsRunning = new Map();
+    this.taskLogger = getTaskLogger(logger);
   }
 
   /** Starts a rule migration task */
   async start(params: RuleMigrationTaskStartParams): Promise<RuleMigrationTaskStartResult> {
     const { migrationId, dataClient } = params;
-    if (this.migrationsExecuting.has(migrationId)) {
+    if (this.migrationsRunning.has(migrationId)) {
       return { exists: true, started: false };
     }
     // Just in case some previous execution was interrupted without releasing
@@ -79,7 +74,7 @@ export class RuleMigrationsTaskRunner {
 
     const abortController = new AbortController();
 
-    // Await the preparation to make sure the agent is created properly so the task can run
+    // Await the preparation for the request to make sure the agent is created properly so the task can run
     const agent = await this.prepare({ ...params, abortController });
 
     // not awaiting the `run` promise to execute the task in the background
@@ -125,13 +120,13 @@ export class RuleMigrationsTaskRunner {
     invocationConfig,
     abortController,
   }: RuleMigrationTaskRunParams): Promise<void> {
-    if (this.migrationsExecuting.has(migrationId)) {
+    if (this.migrationsRunning.has(migrationId)) {
       // This should never happen, but just in case
       throw new Error(`Task already running for migration ID:${migrationId} `);
     }
-    this.taskLogger.info(`Starting migration task for ID:${migrationId}`);
+    this.taskLogger.info(`Starting migration ID:${migrationId}`);
 
-    this.migrationsExecuting.set(migrationId, { abortController, user: currentUser.username });
+    this.migrationsRunning.set(migrationId, { user: currentUser.username, abortController });
     const config: RunnableConfig = {
       ...invocationConfig,
       // signal: abortController.signal, // not working properly https://github.com/langchain-ai/langgraphjs/issues/319
@@ -162,10 +157,12 @@ export class RuleMigrationsTaskRunner {
             );
             try {
               const start = Date.now();
-              const ruleMigrationResult: MigrateRuleState = await agent.invoke(
-                { original_rule: ruleMigration.original_rule },
-                config
-              );
+
+              const ruleMigrationResult: MigrateRuleState = await Promise.race([
+                agent.invoke({ original_rule: ruleMigration.original_rule }, config),
+                abortPromise.promise, // workaround for the issue with the langGraph signal
+              ]);
+
               const duration = (Date.now() - start) / 1000;
               this.taskLogger.debug(
                 `Migration of rule "${ruleMigration.original_rule.title}" finished in ${duration}s`
@@ -192,6 +189,7 @@ export class RuleMigrationsTaskRunner {
             }
           })
         );
+
         this.taskLogger.debug(`Batch processed successfully for migration ID:${migrationId}`);
 
         const { rules } = await dataClient.getStats(migrationId);
@@ -201,20 +199,18 @@ export class RuleMigrationsTaskRunner {
         }
       } while (!isDone);
 
-      this.taskLogger.info(`Finished migration task for ID:${migrationId}`);
+      this.taskLogger.info(`Finished migration ID:${migrationId}`);
     } catch (error) {
       await dataClient.releaseProcessing(migrationId);
 
       if (error instanceof AbortError) {
-        this.taskLogger.info(
-          `Abort signal received, stopping task for migration ID:${migrationId}`
-        );
+        this.taskLogger.info(`Abort signal received, stopping migration ID:${migrationId}`);
         return;
       } else {
         this.taskLogger.error(`Error processing migration ID:${migrationId}`, error);
       }
     } finally {
-      this.migrationsExecuting.delete(migrationId);
+      this.migrationsRunning.delete(migrationId);
       abortPromise.cleanup();
     }
   }
@@ -244,7 +240,7 @@ export class RuleMigrationsTaskRunner {
     migrationId: string,
     dataStats: RuleMigrationDataStats['rules']
   ): RuleMigrationTaskStats['status'] {
-    if (this.migrationsExecuting.has(migrationId)) {
+    if (this.migrationsRunning.has(migrationId)) {
       return 'running';
     }
     if (dataStats.pending === dataStats.total) {
@@ -256,15 +252,15 @@ export class RuleMigrationsTaskRunner {
     return 'stopped';
   }
 
-  /** Aborts a running migration */
+  /** Stops one running migration */
   async stop({
     migrationId,
     dataClient,
   }: RuleMigrationTaskStopParams): Promise<RuleMigrationTaskStopResult> {
     try {
-      const migrationProcessing = this.migrationsExecuting.get(migrationId);
-      if (migrationProcessing) {
-        migrationProcessing.abortController.abort();
+      const migrationRunning = this.migrationsRunning.get(migrationId);
+      if (migrationRunning) {
+        migrationRunning.abortController.abort();
         return { exists: true, stopped: true };
       }
 
@@ -281,9 +277,9 @@ export class RuleMigrationsTaskRunner {
 
   /** Stops all running migrations */
   stopAll() {
-    this.migrationsExecuting.forEach((migrationProcessing) => {
-      migrationProcessing.abortController.abort();
+    this.migrationsRunning.forEach((migrationRunning) => {
+      migrationRunning.abortController.abort();
     });
-    this.migrationsExecuting.clear();
+    this.migrationsRunning.clear();
   }
 }
