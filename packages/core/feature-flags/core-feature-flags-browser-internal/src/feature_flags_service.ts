@@ -20,6 +20,7 @@ import { apm } from '@elastic/apm-rum';
 import { type Client, ClientProviderEvents, OpenFeature } from '@openfeature/web-sdk';
 import deepMerge from 'deepmerge';
 import { filter, map, startWith, Subject } from 'rxjs';
+import { get } from 'lodash';
 
 /**
  * setup method dependencies
@@ -172,9 +173,10 @@ export class FeatureFlagsService {
     flagName: string,
     fallbackValue: T
   ): T {
+    const override = get(this.overrides, flagName); // using lodash get because flagName can come with dots and the config parser might structure it in objects.
     const value =
-      typeof this.overrides[flagName] !== 'undefined'
-        ? (this.overrides[flagName] as T)
+      typeof override !== 'undefined'
+        ? (override as T)
         : // We have to bind the evaluation or the client will lose its internal context
           evaluationFn.bind(this.featureFlagsClient)(flagName, fallbackValue);
     apm.addLabels({ [`flag_${flagName}`]: value });

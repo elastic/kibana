@@ -7,7 +7,7 @@
 
 import {
   FIELDS_TO_UPGRADE_TO_CURRENT_VERSION,
-  NON_UPGRADEABLE_DIFFABLE_FIELDS,
+  FIELDS_TO_UPGRADE_TO_TARGET_VERSION,
 } from '../../../../../../common/api/detection_engine';
 import { type PrebuiltRuleAsset } from '../../model/rule_assets/prebuilt_rule_asset';
 import type { RuleTriad } from '../../model/rule_groups/get_rule_groups';
@@ -24,10 +24,10 @@ type GetFieldPredefinedValueReturnType =
  * a predefined value or is customizable), and returns the value if it is predefined.
  *
  * This function checks whether a field can be upgraded via API contract and how it should
- * be handled during the rule upgrade process. It uses the `NON_UPGRADEABLE_DIFFABLE_FIELDS` and
+ * be handled during the rule upgrade process. It uses the `FIELDS_TO_UPGRADE_TO_TARGET_VERSION` and
  * `FIELDS_TO_UPGRADE_TO_CURRENT_VERSION` constants to make this determination.
  *
- * `NON_UPGRADEABLE_DIFFABLE_FIELDS` includes fields that are not upgradeable: 'type', 'rule_id',
+ * `FIELDS_TO_UPGRADE_TO_TARGET_VERSION` includes fields that are not upgradeable: 'type', 'rule_id',
  * 'version', 'author', and 'license', and are always upgraded to the target version.
  *
  * `FIELDS_TO_UPGRADE_TO_CURRENT_VERSION` includes fields that should be updated to their
@@ -46,8 +46,8 @@ export const getFieldPredefinedValue = (
   upgradeableRule: RuleTriad
 ): GetFieldPredefinedValueReturnType => {
   if (
-    NON_UPGRADEABLE_DIFFABLE_FIELDS.includes(
-      fieldName as (typeof NON_UPGRADEABLE_DIFFABLE_FIELDS)[number]
+    FIELDS_TO_UPGRADE_TO_TARGET_VERSION.includes(
+      fieldName as (typeof FIELDS_TO_UPGRADE_TO_TARGET_VERSION)[number]
     )
   ) {
     return {

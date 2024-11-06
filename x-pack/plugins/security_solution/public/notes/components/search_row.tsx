@@ -5,30 +5,45 @@
  * 2.0.
  */
 
-import { EuiComboBox, EuiFlexGroup, EuiFlexItem, EuiSearchBar } from '@elastic/eui';
-import React, { useMemo, useCallback, useState } from 'react';
+import React, { useCallback } from 'react';
+import type { EuiSelectOption } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSearchBar,
+  EuiSelect,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import { useDispatch } from 'react-redux';
-import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { i18n } from '@kbn/i18n';
-import type { EuiComboBoxOptionOption } from '@elastic/eui/src/components/combo_box/types';
-import { SEARCH_BAR_TEST_ID, USER_SELECT_TEST_ID } from './test_ids';
-import { useSuggestUsers } from '../../common/components/user_profiles/use_suggest_users';
-import { userFilterUsers, userSearchedNotes } from '..';
+import { CreatedByFilterDropdown } from './created_by_filter_dropdown';
+import { ASSOCIATED_NOT_SELECT_TEST_ID, SEARCH_BAR_TEST_ID } from './test_ids';
+import { userFilterAssociatedNotes, userSearchedNotes } from '..';
+import { AssociatedFilter } from '../../../common/notes/constants';
 
-export const USERS_DROPDOWN = i18n.translate('xpack.securitySolution.notes.usersDropdownLabel', {
-  defaultMessage: 'Users',
+const ATTACH_FILTER = i18n.translate('xpack.securitySolution.notes.management.attachFilter', {
+  defaultMessage: 'Attached to',
 });
+
+const searchBox = {
+  placeholder: 'Search note contents',
+  incremental: false,
+  'data-test-subj': SEARCH_BAR_TEST_ID,
+};
+const associatedNoteSelectOptions: EuiSelectOption[] = [
+  { value: AssociatedFilter.all, text: 'Anything or nothing' },
+  { value: AssociatedFilter.documentOnly, text: 'Alerts or events only' },
+  { value: AssociatedFilter.savedObjectOnly, text: 'Timelines only' },
+  {
+    value: AssociatedFilter.documentAndSavedObject,
+    text: 'Alerts or events and Timelines only',
+  },
+  { value: AssociatedFilter.orphan, text: 'Nothing' },
+];
 
 export const SearchRow = React.memo(() => {
   const dispatch = useDispatch();
-  const searchBox = useMemo(
-    () => ({
-      placeholder: 'Search note contents',
-      incremental: false,
-      'data-test-subj': SEARCH_BAR_TEST_ID,
-    }),
-    []
-  );
+  const associatedSelectId = useGeneratedHtmlId({ prefix: 'associatedSelectId' });
 
   const onQueryChange = useCallback(
     ({ queryText }: { queryText: string }) => {
@@ -37,22 +52,9 @@ export const SearchRow = React.memo(() => {
     [dispatch]
   );
 
-  const { isLoading: isLoadingSuggestedUsers, data: userProfiles } = useSuggestUsers({
-    searchTerm: '',
-  });
-  const users = useMemo(
-    () =>
-      (userProfiles || []).map((userProfile: UserProfileWithAvatar) => ({
-        label: userProfile.user.full_name || userProfile.user.username,
-      })),
-    [userProfiles]
-  );
-
-  const [selectedUser, setSelectedUser] = useState<Array<EuiComboBoxOptionOption<string>>>();
-  const onChange = useCallback(
-    (user: Array<EuiComboBoxOptionOption<string>>) => {
-      setSelectedUser(user);
-      dispatch(userFilterUsers(user.length > 0 ? user[0].label : ''));
+  const onAssociatedNoteSelectChange = useCallback(
+    (e: React.ChangeEvent<HTMLSelectElement>) => {
+      dispatch(userFilterAssociatedNotes(e.target.value as AssociatedFilter));
     },
     [dispatch]
   );
@@ -63,14 +65,16 @@ export const SearchRow = React.memo(() => {
         <EuiSearchBar box={searchBox} onChange={onQueryChange} defaultQuery="" />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiComboBox
-          prepend={USERS_DROPDOWN}
-          singleSelection={{ asPlainText: true }}
-          options={users}
-          selectedOptions={selectedUser}
-          onChange={onChange}
-          isLoading={isLoadingSuggestedUsers}
-          data-test-subj={USER_SELECT_TEST_ID}
+        <CreatedByFilterDropdown />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiSelect
+          id={associatedSelectId}
+          options={associatedNoteSelectOptions}
+          onChange={onAssociatedNoteSelectChange}
+          prepend={ATTACH_FILTER}
+          aria-label={ATTACH_FILTER}
+          data-test-subj={ASSOCIATED_NOT_SELECT_TEST_ID}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

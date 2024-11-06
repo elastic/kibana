@@ -15,6 +15,7 @@ import { useTheme } from '@kbn/observability-shared-plugin/public';
 import moment from 'moment';
 import { useSelector, useDispatch } from 'react-redux';
 
+import { FlyoutParamProps } from './types';
 import { MetricItemBody } from './metric_item/metric_item_body';
 import {
   selectErrorPopoverState,
@@ -62,7 +63,7 @@ export const MetricItem = ({
 }: {
   monitor: OverviewStatusMetaData;
   style?: React.CSSProperties;
-  onClick: (params: { id: string; configId: string; location: string; locationId: string }) => void;
+  onClick: (params: FlyoutParamProps) => void;
 }) => {
   const trendData = useSelector(selectOverviewTrends)[monitor.configId + monitor.locationId];
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -127,6 +128,7 @@ export const MetricItem = ({
                   id: monitor.configId,
                   location: locationName,
                   locationId: monitor.locationId,
+                  spaceId: monitor.spaceId,
                 });
               }
             }}

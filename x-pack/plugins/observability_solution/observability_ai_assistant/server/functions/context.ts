@@ -115,7 +115,6 @@ export function registerContextFunction({
             subscriber.complete();
           });
       });
-    },
-    ['all']
+    }
   );
 }

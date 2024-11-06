@@ -13,6 +13,7 @@ export interface DataStreamSettingResponse {
   totalFieldLimit: number;
   ignoreDynamicBeyondLimit?: boolean;
   ignoreMalformed?: boolean;
+  defaultPipeline?: string;
 }
 
 const DEFAULT_FIELD_LIMIT = 1000;
@@ -28,16 +29,20 @@ export async function getDataStreamSettings({
   lastBackingIndex: string;
 }): Promise<DataStreamSettingResponse> {
   const settings = await datasetQualityESClient.settings({ index: dataStream });
-  const indexSettings = settings[lastBackingIndex]?.settings?.index?.mapping;
+  const setting = settings[lastBackingIndex]?.settings;
+  const mappingsInsideSettings = setting?.index?.mapping;
 
   return {
-    nestedFieldLimit: indexSettings?.nested_fields?.limit
-      ? Number(indexSettings?.nested_fields?.limit)
+    nestedFieldLimit: mappingsInsideSettings?.nested_fields?.limit
+      ? Number(mappingsInsideSettings?.nested_fields?.limit)
       : DEFAULT_NESTED_FIELD_LIMIT,
-    totalFieldLimit: indexSettings?.total_fields?.limit
-      ? Number(indexSettings?.total_fields?.limit)
+    totalFieldLimit: mappingsInsideSettings?.total_fields?.limit
+      ? Number(mappingsInsideSettings?.total_fields?.limit)
       : DEFAULT_FIELD_LIMIT,
-    ignoreDynamicBeyondLimit: toBoolean(indexSettings?.total_fields?.ignore_dynamic_beyond_limit),
-    ignoreMalformed: toBoolean(indexSettings?.ignore_malformed),
+    ignoreDynamicBeyondLimit: toBoolean(
+      mappingsInsideSettings?.total_fields?.ignore_dynamic_beyond_limit
+    ),
+    ignoreMalformed: toBoolean(mappingsInsideSettings?.ignore_malformed),
+    defaultPipeline: setting?.index?.default_pipeline,
   };
 }

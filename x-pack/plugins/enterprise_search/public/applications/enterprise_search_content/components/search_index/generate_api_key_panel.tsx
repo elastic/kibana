@@ -7,27 +7,20 @@
 
 import React from 'react';
 
-import { useActions, useValues } from 'kea';
+import { useValues } from 'kea';
 
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { GenerateApiKeyModal } from './components/generate_api_key_modal/modal';
-
 import { APIGettingStarted } from './components/getting_started/getting_started';
 import { IndexViewLogic } from './index_view_logic';
-import { OverviewLogic } from './overview.logic';
 
 export const GenerateApiKeyPanel: React.FC = () => {
-  const { isGenerateModalOpen } = useValues(OverviewLogic);
-  const { indexName, isHiddenIndex } = useValues(IndexViewLogic);
-  const { closeGenerateModal } = useActions(OverviewLogic);
+  const { isHiddenIndex } = useValues(IndexViewLogic);
+
   return (
     <>
-      {isGenerateModalOpen && (
-        <GenerateApiKeyModal indexName={indexName} onClose={closeGenerateModal} />
-      )}
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiPanel hasBorder paddingSize="xl">

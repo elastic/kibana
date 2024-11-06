@@ -185,6 +185,27 @@ describe('AgentService', () => {
       () => new AgentServiceImpl(mockEsClient, mockSoClient).asInternalUser
     );
   });
+
+  describe('asInternalScopedUser', () => {
+    it('should throw error if no space id is passed', () => {
+      const agentService = new AgentServiceImpl(
+        elasticsearchServiceMock.createElasticsearchClient(),
+        savedObjectsClientMock.create()
+      );
+
+      expect(() => agentService.asInternalScopedUser('')).toThrowError(TypeError);
+    });
+
+    {
+      const mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
+      const mockSoClient = savedObjectsClientMock.create();
+      expectApisToCallServicesSuccessfully(
+        mockEsClient,
+        () => mockSoClient,
+        () => new AgentServiceImpl(mockEsClient, mockSoClient).asInternalUser
+      );
+    }
+  });
 });
 
 function expectApisToCallServicesSuccessfully(

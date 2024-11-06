@@ -8,39 +8,59 @@
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import type { FleetStartContract } from '@kbn/fleet-plugin/server';
 import { createFleetStartContractMock } from '@kbn/fleet-plugin/server/mocks';
+import type { MockedLogger } from '@kbn/logging-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { SavedObjectsClientFactory } from '../saved_objects';
-import type { EndpointFleetServicesFactoryInterface } from './endpoint_fleet_services_factory';
+import type {
+  EndpointFleetServicesFactoryInterface,
+  EndpointInternalFleetServicesInterface,
+} from './endpoint_fleet_services_factory';
 import { EndpointFleetServicesFactory } from './endpoint_fleet_services_factory';
 import { createSavedObjectsClientFactoryMock } from '../saved_objects/saved_objects_client_factory.mocks';
 
-interface EndpointFleetServicesFactoryInterfaceMocked
+export type EndpointInternalFleetServicesInterfaceMocked =
+  DeeplyMockedKeys<EndpointInternalFleetServicesInterface>;
+
+export interface EndpointFleetServicesFactoryInterfaceMocked
   extends EndpointFleetServicesFactoryInterface {
-  asInternalUser: () => DeeplyMockedKeys<
-    ReturnType<EndpointFleetServicesFactoryInterface['asInternalUser']>
-  >;
+  asInternalUser: () => EndpointInternalFleetServicesInterfaceMocked;
 }
 
-interface CreateEndpointFleetServicesFactoryMockOptions {
+export interface CreateEndpointFleetServicesFactoryMockOptions {
   fleetDependencies: DeeplyMockedKeys<FleetStartContract>;
   savedObjects: SavedObjectsClientFactory;
+  logger: MockedLogger;
+}
+
+export interface CreateEndpointFleetServicesFactoryResponse {
+  service: EndpointFleetServicesFactoryInterfaceMocked;
+  dependencies: CreateEndpointFleetServicesFactoryMockOptions;
 }
 
 export const createEndpointFleetServicesFactoryMock = (
   dependencies: Partial<CreateEndpointFleetServicesFactoryMockOptions> = {}
-): {
-  service: EndpointFleetServicesFactoryInterfaceMocked;
-  dependencies: CreateEndpointFleetServicesFactoryMockOptions;
-} => {
+): CreateEndpointFleetServicesFactoryResponse => {
   const {
     fleetDependencies = createFleetStartContractMock(),
     savedObjects = createSavedObjectsClientFactoryMock().service,
+    logger = loggingSystemMock.createLogger(),
   } = dependencies;
 
+  const serviceFactoryMock = new EndpointFleetServicesFactory(
+    fleetDependencies,
+    savedObjects,
+    logger
+  ) as unknown as EndpointFleetServicesFactoryInterfaceMocked;
+
+  const fleetInternalServicesMocked = serviceFactoryMock.asInternalUser();
+  jest.spyOn(fleetInternalServicesMocked, 'ensureInCurrentSpace');
+  jest.spyOn(fleetInternalServicesMocked, 'getPolicyNamespace');
+
+  const asInternalUserSpy = jest.spyOn(serviceFactoryMock, 'asInternalUser');
+  asInternalUserSpy.mockReturnValue(fleetInternalServicesMocked);
+
   return {
-    service: new EndpointFleetServicesFactory(
-      fleetDependencies,
-      savedObjects
-    ) as unknown as EndpointFleetServicesFactoryInterfaceMocked,
-    dependencies: { fleetDependencies, savedObjects },
+    service: serviceFactoryMock,
+    dependencies: { fleetDependencies, savedObjects, logger },
   };
 };

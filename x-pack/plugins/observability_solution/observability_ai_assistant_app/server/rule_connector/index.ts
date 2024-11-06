@@ -154,12 +154,13 @@ async function executor(
   }
 
   const resources = await initResources(request);
-  const client = await resources.service.getClient({ request, scope: 'observability' });
+  const client = await resources.service.getClient({ request, scopes: ['observability'] });
   const functionClient = await resources.service.getFunctionClient({
     signal: new AbortController().signal,
     resources,
     client,
     screenContexts: [],
+    scopes: ['observability'],
   });
   const actionsClient = await (
     await resources.plugins.actions.start()
@@ -227,9 +228,9 @@ If available, include the link of the conversation at the end of your answer.`
             role: MessageRole.System,
             content: getSystemMessageFromInstructions({
               availableFunctionNames: functionClient.getFunctions().map((fn) => fn.definition.name),
-              applicationInstructions: functionClient.getInstructions('observability'),
+              applicationInstructions: functionClient.getInstructions(),
               userInstructions: [],
-              adHocInstructions: [],
+              adHocInstructions: functionClient.getAdhocInstructions(),
             }),
           },
         },

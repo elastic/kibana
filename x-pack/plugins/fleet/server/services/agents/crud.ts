@@ -415,6 +415,46 @@ export async function getAgentById(
   return agentHit;
 }
 
+/**
+ * Get list of agents by `id`. service method performs space awareness checks.
+ * @param esClient
+ * @param soClient
+ * @param agentIds
+ * @param options
+ *
+ * @throws AgentNotFoundError
+ */
+export const getByIds = async (
+  esClient: ElasticsearchClient,
+  soClient: SavedObjectsClientContract,
+  agentIds: string[],
+  options?: Partial<{ ignoreMissing: boolean }>
+): Promise<Agent[]> => {
+  const agentsHits = await getAgentsById(esClient, soClient, agentIds);
+  const currentNamespace = getCurrentNamespace(soClient);
+  const response: Agent[] = [];
+
+  for (const agentHit of agentsHits) {
+    let throwError = false;
+
+    if ('notFound' in agentHit && !options?.ignoreMissing) {
+      throwError = true;
+    } else if ((await isAgentInNamespace(agentHit as Agent, currentNamespace)) !== true) {
+      throwError = true;
+    }
+
+    if (throwError) {
+      throw new AgentNotFoundError(`Agent ${agentHit.id} not found`, { agentId: agentHit.id });
+    }
+
+    if (!(`notFound` in agentHit)) {
+      response.push(agentHit);
+    }
+  }
+
+  return response;
+};
+
 async function _filterAgents(
   esClient: ElasticsearchClient,
   soClient: SavedObjectsClientContract,

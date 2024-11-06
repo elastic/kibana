@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { IKibanaResponse } from '@kbn/core/server';
-
 import { parseExperimentalConfigValue } from '../../../common/experimental_features';
 
 import { API_VERSIONS } from '../../../common/constants';
@@ -20,32 +18,20 @@ import {
 } from '../../services/security';
 import type { FleetAuthzRouteConfig } from '../../services/security/types';
 
-import type {
-  DeletePackageResponse,
-  GetInfoResponse,
-  InstallPackageResponse,
-  UpdatePackageResponse,
-} from '../../../common/types';
-
 import { EPM_API_ROUTES } from '../../constants';
-import { splitPkgKey } from '../../services/epm/registry';
 import {
   GetCategoriesRequestSchema,
   GetPackagesRequestSchema,
   GetInstalledPackagesRequestSchema,
   GetFileRequestSchema,
   GetInfoRequestSchema,
-  GetInfoRequestSchemaDeprecated,
   GetBulkAssetsRequestSchema,
   InstallPackageFromRegistryRequestSchema,
-  InstallPackageFromRegistryRequestSchemaDeprecated,
   InstallPackageByUploadRequestSchema,
   DeletePackageRequestSchema,
-  DeletePackageRequestSchemaDeprecated,
   BulkInstallPackagesFromRegistryRequestSchema,
   GetStatsRequestSchema,
   UpdatePackageRequestSchema,
-  UpdatePackageRequestSchemaDeprecated,
   ReauthorizeTransformRequestSchema,
   GetDataStreamsRequestSchema,
   CreateCustomIntegrationRequestSchema,
@@ -646,120 +632,6 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
         },
       },
       getBulkAssetsHandler
-    );
-
-  // deprecated since 8.0
-  // This endpoint should be marked as internal but the router selects this endpoint over the new GET one
-  // For now keeping it public
-  router.versioned
-    .get({
-      path: EPM_API_ROUTES.INFO_PATTERN_DEPRECATED,
-      fleetAuthz: (fleetAuthz: FleetAuthz): boolean =>
-        calculateRouteAuthz(
-          fleetAuthz,
-          getRouteRequiredAuthz('get', EPM_API_ROUTES.INFO_PATTERN_DEPRECATED)
-        ).granted,
-      deprecated: true,
-    })
-    .addVersion(
-      {
-        version: API_VERSIONS.public.v1,
-        validate: { request: GetInfoRequestSchemaDeprecated },
-      },
-      async (context, request, response) => {
-        const newRequest = { ...request, params: splitPkgKey(request.params.pkgkey) } as any;
-        const resp: IKibanaResponse<GetInfoResponse> = await getInfoHandler(
-          context,
-          newRequest,
-          response
-        );
-        if (resp.payload?.item) {
-          // returning item as well here, because pkgVersion is optional in new GET endpoint, and if not specified, the router selects the deprecated route
-          return response.ok({ body: { item: resp.payload.item, response: resp.payload.item } });
-        }
-        return resp;
-      }
-    );
-
-  router.versioned
-    .put({
-      path: EPM_API_ROUTES.INFO_PATTERN_DEPRECATED,
-      fleetAuthz: {
-        integrations: { writePackageSettings: true },
-      },
-      deprecated: true,
-    })
-    .addVersion(
-      {
-        version: API_VERSIONS.public.v1,
-        validate: { request: UpdatePackageRequestSchemaDeprecated },
-      },
-      async (context, request, response) => {
-        const newRequest = { ...request, params: splitPkgKey(request.params.pkgkey) } as any;
-        const resp: IKibanaResponse<UpdatePackageResponse> = await updatePackageHandler(
-          context,
-          newRequest,
-          response
-        );
-        if (resp.payload?.item) {
-          return response.ok({ body: { response: resp.payload.item } });
-        }
-        return resp;
-      }
-    );
-
-  // This endpoint should be marked as internal but the router selects this endpoint over the new POST
-  router.versioned
-    .post({
-      path: EPM_API_ROUTES.INSTALL_FROM_REGISTRY_PATTERN_DEPRECATED,
-      fleetAuthz: INSTALL_PACKAGES_AUTHZ,
-      deprecated: true,
-    })
-    .addVersion(
-      {
-        version: API_VERSIONS.public.v1,
-        validate: { request: InstallPackageFromRegistryRequestSchemaDeprecated },
-      },
-      async (context, request, response) => {
-        const newRequest = {
-          ...request,
-          params: splitPkgKey(request.params.pkgkey),
-          query: request.query,
-        } as any;
-        const resp: IKibanaResponse<InstallPackageResponse> =
-          await installPackageFromRegistryHandler(context, newRequest, response);
-        if (resp.payload?.items) {
-          return response.ok({ body: { ...resp.payload, response: resp.payload.items } });
-        }
-        return resp;
-      }
-    );
-
-  router.versioned
-    .delete({
-      path: EPM_API_ROUTES.DELETE_PATTERN_DEPRECATED,
-      fleetAuthz: {
-        integrations: { removePackages: true },
-      },
-      deprecated: true,
-    })
-    .addVersion(
-      {
-        version: API_VERSIONS.public.v1,
-        validate: { request: DeletePackageRequestSchemaDeprecated },
-      },
-      async (context, request, response) => {
-        const newRequest = { ...request, params: splitPkgKey(request.params.pkgkey) } as any;
-        const resp: IKibanaResponse<DeletePackageResponse> = await deletePackageHandler(
-          context,
-          newRequest,
-          response
-        );
-        if (resp.payload?.items) {
-          return response.ok({ body: { response: resp.payload.items } });
-        }
-        return resp;
-      }
     );
 
   // Update transforms with es-secondary-authorization headers,

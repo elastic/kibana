@@ -53,7 +53,7 @@ import { UninstallCommandFlyout } from '../../../../../../components';
 import type { ValidationResults } from '../agent_policy_validation';
 
 import { ExperimentalFeaturesService } from '../../../../services';
-
+import { useAgentPolicyFormContext } from '../agent_policy_form';
 import { policyHasEndpointSecurity as hasElasticDefend } from '../../../../../../../common/services';
 
 import {
@@ -126,6 +126,8 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
   const policyHasElasticDefend = useMemo(() => hasElasticDefend(agentPolicy), [agentPolicy]);
   const isManagedorAgentlessPolicy =
     agentPolicy.is_managed === true || agentPolicy?.supports_agentless === true;
+
+  const agentPolicyFormContect = useAgentPolicyFormContext();
 
   const AgentTamperProtectionSectionContent = useMemo(
     () => (
@@ -325,32 +327,23 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
             />
           }
         >
-          <EuiFormRow
-            fullWidth
-            key="space"
-            error={
-              touchedFields.description && validation.description ? validation.description : null
+          <SpaceSelector
+            isDisabled={disabled || agentPolicy.is_managed === true}
+            value={
+              'space_ids' in agentPolicy && agentPolicy.space_ids
+                ? agentPolicy.space_ids
+                : [spaceId || 'default']
             }
-            isDisabled={disabled}
-            isInvalid={Boolean(touchedFields.description && validation.description)}
-          >
-            <SpaceSelector
-              isDisabled={disabled}
-              value={
-                'space_ids' in agentPolicy && agentPolicy.space_ids
-                  ? agentPolicy.space_ids
-                  : [spaceId || 'default']
+            setInvalidSpaceError={agentPolicyFormContect?.setInvalidSpaceError}
+            onChange={(newValue) => {
+              if (newValue.length === 0) {
+                return;
               }
-              onChange={(newValue) => {
-                if (newValue.length === 0) {
-                  return;
-                }
-                updateAgentPolicy({
-                  space_ids: newValue,
-                });
-              }}
-            />
-          </EuiFormRow>
+              updateAgentPolicy({
+                space_ids: newValue,
+              });
+            }}
+          />
         </EuiDescribedFormGroup>
       ) : null}
       <EuiDescribedFormGroup

@@ -15,7 +15,8 @@ class HostEntity extends Serializable<EntityFields> {
     super({
       ...fields,
       'entity.type': 'host',
-      'entity.definitionId': 'latest',
+      'entity.definition_id': 'builtin_hosts_from_ecs_data',
+      'entity.identity_fields': ['host.name'],
     });
   }
 }
@@ -23,21 +24,19 @@ class HostEntity extends Serializable<EntityFields> {
 export function hostEntity({
   agentName,
   dataStreamType,
-  dataStreamDataset,
   hostName,
   entityId,
 }: {
   agentName: string[];
   dataStreamType: EntityDataStreamType[];
-  dataStreamDataset: string;
   hostName: string;
   entityId: string;
 }) {
   return new HostEntity({
     'source_data_stream.type': dataStreamType,
-    'source_data_stream.dataset': dataStreamDataset,
     'agent.name': agentName,
     'host.name': hostName,
+    'entity.display_name': hostName,
     'entity.id': entityId,
   });
 }

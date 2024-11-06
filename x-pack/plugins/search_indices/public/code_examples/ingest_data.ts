@@ -7,21 +7,27 @@
 
 import { i18n } from '@kbn/i18n';
 import { IngestDataCodeExamples } from '../types';
-import { UPLOAD_VECTORS_TITLE } from './constants';
 
 import { JSServerlessIngestVectorDataExample } from './javascript';
 import { PythonServerlessVectorsIngestDataExample } from './python';
 import { ConsoleVectorsIngestDataExample } from './sense';
 import { CurlVectorsIngestDataExample } from './curl';
+import { INSTALL_INSTRUCTIONS_TITLE, INSTALL_INSTRUCTIONS_DESCRIPTION } from './constants';
 
 export const DenseVectorServerlessCodeExamples: IngestDataCodeExamples = {
-  title: UPLOAD_VECTORS_TITLE,
-  ingestTitle: UPLOAD_VECTORS_TITLE,
-  description: i18n.translate(
-    'xpack.searchIndices.codeExamples.serverless.denseVector.description',
+  installTitle: INSTALL_INSTRUCTIONS_TITLE,
+  installDescription: INSTALL_INSTRUCTIONS_DESCRIPTION,
+  addMappingsTitle: i18n.translate(
+    'xpack.searchIndices.codeExamples.serverless.denseVector.mappingsTitle',
+    {
+      defaultMessage: 'Define field mappings',
+    }
+  ),
+  addMappingsDescription: i18n.translate(
+    'xpack.searchIndices.codeExamples.serverless.denseVector.mappingsDescription',
     {
       defaultMessage:
-        'The following example connects to your Elasticsearch endpoint and uploads vectors to the index.',
+        'This example defines two fields: a 3-dimensional dense vector field and a text field. You can add more field types by modifying the mappings in your API call, or in the mappings tab.',
     }
   ),
   defaultMapping: {
