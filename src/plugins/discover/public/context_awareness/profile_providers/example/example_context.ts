@@ -7,6 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { useProfileAccessor } from './use_profile_accessor';
-export { useRootProfile, BaseAppWrapper } from './use_root_profile';
-export { useAdditionalCellActions } from './use_additional_cell_actions';
+import { createContext, useContext } from 'react';
+
+const exampleContext = createContext<{
+  currentMessage: string | undefined;
+  setCurrentMessage: (message: string | undefined) => void;
+}>({
+  currentMessage: undefined,
+  setCurrentMessage: () => {},
+});
+
+export const ExampleContextProvider = exampleContext.Provider;
+
+export const useExampleContext = () => useContext(exampleContext);
