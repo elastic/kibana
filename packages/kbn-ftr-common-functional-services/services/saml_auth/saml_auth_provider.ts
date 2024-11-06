@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SamlSessionManager } from '@kbn/test';
+import { GetCookieOptions, SamlSessionManager } from '@kbn/test';
 import expect from '@kbn/expect';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { resolve } from 'path';
@@ -91,16 +91,39 @@ export function SamlAuthProvider({ getService }: FtrProviderContext) {
   };
 
   return {
-    async getInteractiveUserSessionCookieWithRoleScope(role: string) {
+    /**
+     * Returns a Cookie string containing the session token for the specified role.
+     * This string can be used to update browser cookies and login with the designated role.
+     *
+     * @param role - The SAML role for which the session token is required.
+     * @param options - Optional settings to control session behavior, such as forcing a new session.
+     * @returns A string with the Cookie token
+     *
+     * @throws If the specified role is a custom role without a predefined descriptor.
+     */
+    async getInteractiveUserSessionCookieWithRoleScope(role: string, options?: GetCookieOptions) {
       // Custom role has no descriptors by default, check if it was added before authentication
       throwIfRoleNotSet(role, CUSTOM_ROLE, supportedRoleDescriptors);
-      return sessionManager.getInteractiveUserSessionCookieWithRoleScope(role);
+      return sessionManager.getInteractiveUserSessionCookieWithRoleScope(role, options);
     },
 
-    async getM2MApiCookieCredentialsWithRoleScope(role: string): Promise<CookieCredentials> {
+    /**
+     * Returns an object containing a Cookie header with the session token for the specified role.
+     * This header can be used for authenticating API requests as the designated role.
+     *
+     * @param role - The SAML role for which the session token is required.
+     * @param options - Optional settings to control session behavior, such as forcing a new session.
+     * @returns An object with the Cookie header for API authentication.
+     *
+     * @throws If the specified role is a custom role without a predefined descriptor.
+     */
+    async getM2MApiCookieCredentialsWithRoleScope(
+      role: string,
+      options?: GetCookieOptions
+    ): Promise<CookieCredentials> {
       // Custom role has no descriptors by default, check if it was added before authentication
       throwIfRoleNotSet(role, CUSTOM_ROLE, supportedRoleDescriptors);
-      return sessionManager.getApiCredentialsForRole(role);
+      return sessionManager.getApiCredentialsForRole(role, options);
     },
 
     async getEmail(role: string) {
@@ -195,7 +218,7 @@ export function SamlAuthProvider({ getService }: FtrProviderContext) {
 
       expect(status).to.be(204);
 
-      // Update descriptors for custome role, it will be used to create API key
+      // Update descriptors for the custom role, it will be used to create API key
       supportedRoleDescriptors.set(CUSTOM_ROLE, customRoleDescriptors);
     },
 
