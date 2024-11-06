@@ -170,7 +170,9 @@ export default ({ getService }: FtrProviderContext): void => {
       await waitForRuleSuccess({ id: rule.id, supertest, log });
     });
 
-    it('should disable rules and migrate actions', async () => {
+    // Flaky test see https://github.com/elastic/kibana/issues/196462
+    // Flakiness reproduced in 8.16 only.
+    it.skip('should disable rules and migrate actions', async () => {
       const ruleId = 'ruleId';
       const [connector, rule] = await Promise.all([
         supertest
