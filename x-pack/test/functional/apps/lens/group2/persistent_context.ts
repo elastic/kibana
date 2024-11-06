@@ -36,6 +36,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async () => {
       await security.testUser.restoreDefaults();
+      await timePicker.resetDefaultAbsoluteRangeViaUiSettings();
     });
 
     describe('Navigation search', () => {

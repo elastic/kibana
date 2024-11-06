@@ -9,16 +9,14 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { dashboard, visualize, lens, timeToVisualize, common, header, timePicker } =
-    getPageObjects([
-      'dashboard',
-      'visualize',
-      'lens',
-      'timeToVisualize',
-      'common',
-      'header',
-      'timePicker',
-    ]);
+  const { dashboard, visualize, lens, timeToVisualize, common, header } = getPageObjects([
+    'dashboard',
+    'visualize',
+    'lens',
+    'timeToVisualize',
+    'common',
+    'header',
+  ]);
   const find = getService('find');
   const listingTable = getService('listingTable');
   const dashboardAddPanel = getService('dashboardAddPanel');
@@ -62,9 +60,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   describe('lens add-to-dashboards tests', () => {
-    before(async () => {
-      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
-    });
     it('should allow new lens to be added by value to a new dashboard', async () => {
       await createNewLens();
       await lens.save('New Lens from Modal', false, false, false, 'new');

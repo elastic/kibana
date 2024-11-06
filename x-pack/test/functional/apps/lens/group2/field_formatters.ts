@@ -10,12 +10,7 @@ import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { visualize, lens, header, timePicker } = getPageObjects([
-    'visualize',
-    'lens',
-    'header',
-    'timePicker',
-  ]);
+  const { visualize, lens, header } = getPageObjects(['visualize', 'lens', 'header']);
   const retry = getService('retry');
   const fieldEditor = getService('fieldEditor');
   const dataViews = getService('dataViews');
@@ -25,7 +20,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       before(async () => {
         await visualize.navigateToNewVisualization();
         await visualize.clickVisType('lens');
-        await timePicker.setDefaultAbsoluteRangeViaUiSettings();
         await lens.switchToVisualization('lnsDatatable');
       });
 

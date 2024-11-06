@@ -50,7 +50,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         ],
         { skipBrowserRefresh: true }
       );
-      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
     });
     after(async () => {
       await security.testUser.restoreDefaults();
