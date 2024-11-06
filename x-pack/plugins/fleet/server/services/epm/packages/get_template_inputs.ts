@@ -128,25 +128,6 @@ export async function getTemplateInputs(
       if (!packageInput) {
         continue;
       }
-
-      for (const [inputVarKey, inputVarValue] of Object.entries(inputWithStreamIds.vars ?? {})) {
-        const varDef = packageInput.vars?.find((_varDef) => _varDef.name === inputVarKey);
-        if (varDef) {
-          addPlaceholderIfNeeded(varDef, inputVarValue);
-        }
-      }
-      for (const stream of inputWithStreamIds.streams) {
-        const packageStream = packageInput.streams[stream.id];
-        if (!packageStream) {
-          continue;
-        }
-        for (const [streamVarKey, streamVarValue] of Object.entries(stream.vars ?? {})) {
-          const varDef = packageStream.vars?.find((_varDef) => _varDef.name === streamVarKey);
-          if (varDef) {
-            addPlaceholderIfNeeded(varDef, streamVarValue);
-          }
-        }
-      }
     }
   }
 
@@ -189,18 +170,6 @@ export async function getTemplateInputs(
 
 function getPlaceholder(varDef: RegistryVarsEntry) {
   return `<${varDef.name.toUpperCase()}>`;
-}
-
-function addPlaceholderIfNeeded(
-  varDef: RegistryVarsEntry,
-  varValue: PackagePolicyConfigRecordEntry
-) {
-  const placeHolder = `<${varDef.name.toUpperCase()}>`;
-  if (varDef && !varValue.value && varDef.type !== 'yaml') {
-    varValue.value = placeHolder;
-  } else if (varDef && varValue.value && varValue.value.length === 0 && varDef.type === 'text') {
-    varValue.value = [placeHolder];
-  }
 }
 
 function buildIndexedPackage(packageInfo: PackageInfo): PackageWithInputAndStreamIndexed {
