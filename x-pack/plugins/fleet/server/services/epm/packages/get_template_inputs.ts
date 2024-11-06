@@ -25,7 +25,6 @@ import type {
   TemplateAgentPolicyInput,
   RegistryVarsEntry,
   RegistryStream,
-  PackagePolicyConfigRecordEntry,
   RegistryInput,
 } from '../../../../common/types';
 import { _sortYamlKeys } from '../../../../common/services/full_agent_policy_to_yaml';
