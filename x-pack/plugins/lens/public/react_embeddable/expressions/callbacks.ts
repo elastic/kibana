@@ -25,7 +25,7 @@ export function prepareCallbacks(
   parentApi: unknown,
   getState: GetStateType,
   services: LensEmbeddableStartServices,
-  getExecutionContext: () => KibanaExecutionContext | undefined,
+  executionContext: KibanaExecutionContext | undefined,
   onDataUpdate: (adapters: Partial<DefaultInspectorAdapters | undefined>) => void,
   dispatchRenderComplete: () => void,
   callbacks: LensPublicCallbacks
@@ -39,7 +39,7 @@ export function prepareCallbacks(
       parentApi,
       getState,
       services,
-      getExecutionContext(),
+      executionContext,
       dispatchRenderComplete
     ),
     onData: (_data: unknown, adapters: Partial<DefaultInspectorAdapters> | undefined) => {
