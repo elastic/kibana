@@ -222,10 +222,9 @@ export function transformServiceMapResponses({
     })
     .filter((connection) => connection.source !== connection.target);
 
-  const nodes = mappedConnections.flatMap((connection) => [
-    connection.sourceData,
-    connection.targetData,
-  ]);
+  const nodes = mappedConnections
+    .flatMap((connection) => [connection.sourceData, connection.targetData])
+    .concat(serviceNodes);
 
   const dedupedNodes: typeof nodes = [];
 
