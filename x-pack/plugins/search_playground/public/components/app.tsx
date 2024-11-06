@@ -22,7 +22,7 @@ import { useKibana } from '../hooks/use_kibana';
 
 export interface AppProps {
   showDocs?: boolean;
-  pageMode?: PlaygroundPageMode;
+  pageMode?: 'chat' | 'search';
 }
 
 export enum ViewMode {
@@ -54,7 +54,7 @@ export const App: React.FC<AppProps> = ({
   } = usePageMode({
     hasSelectedIndices,
     hasConnectors: Boolean(connectors?.length),
-    initialPageMode: pageMode,
+    initialPageMode: pageMode === 'chat' ? PlaygroundPageMode.chat : PlaygroundPageMode.search,
   });
 
   const restrictedWidth = selectedPageMode === PlaygroundPageMode.search && selectedMode === 'chat';
