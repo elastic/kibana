@@ -80,6 +80,7 @@
     "@kbn/apm-utils",
     "@kbn/ml-field-stats-flyout",
     "@kbn/shared-ux-router",
+    "@kbn/core-capabilities-common",
   ],
   "exclude": [
     "target/**/*",
