@@ -1,0 +1,42 @@
+openapi: 3.0.2
+info:
+  title: APM UI
+  version: 1.0.0
+tags:
+  - name: APM agent keys
+    description: >
+      Configure APM agent keys to authorize requests from APM agents to the APM Server.
+  - name: APM agent configuration
+    description: >
+      Adjust APM agent configuration without need to redeploy your application.
+  - name: APM sourcemaps
+    description: Configure APM source maps.
+  - name: APM annotations
+    description: >
+      Annotate visualizations in the APM app with significant events.
+      Annotations enable you to easily see how events are impacting the performance of your applications.
+  - name: APM server schema
+    description: Create APM fleet server schema.
+paths:
+  /api/apm/agent_keys:
+    $ref: 'paths/api@apm@agent_keys.yaml'
+  /api/apm/services/{serviceName}/annotation/search:
+    $ref: 'paths/api@apm@services@{service_name}@annotation@search.yaml'
+  /api/apm/services/{serviceName}/annotation:
+    $ref: 'paths/api@apm@services@{service_name}@annotation.yaml'
+  /api/apm/settings/agent-configuration:
+    $ref: 'paths/api@apm@settings@agent_configuration.yaml'
+  /api/apm/settings/agent-configuration/view:
+    $ref: 'paths/api@apm@settings@agent_configuration@view.yaml'
+  /api/apm/settings/agent-configuration/search:
+    $ref: 'paths/api@apm@settings@agent_configuration@search.yaml'
+  /api/apm/settings/agent-configuration/environments:
+    $ref: 'paths/api@apm@settings@agent_configuration@environments.yaml'
+  /api/apm/settings/agent-configuration/agent_name:
+    $ref: 'paths/api@apm@settings@agent_configuration@agent_name.yaml'
+  /api/apm/sourcemaps:
+    $ref: 'paths/api@apm@sourcemaps.yaml'
+  /api/apm/sourcemaps/{id}:
+    $ref: 'paths/api@apm@sourcemaps@{id}.yaml'
+  /api/apm/fleet/apm_server_schema:
+    $ref: 'paths/api@apm@fleet@apm_server_schema.yaml'

@@ -43,7 +43,7 @@ export const fetchNotes = async ({
   sortField,
   sortOrder,
   filter,
-  userFilter,
+  createdByFilter,
   associatedFilter,
   search,
 }: {
@@ -52,7 +52,7 @@ export const fetchNotes = async ({
   sortField: string;
   sortOrder: string;
   filter: string;
-  userFilter: string;
+  createdByFilter: string;
   associatedFilter: AssociatedFilter;
   search: string;
 }) => {
@@ -63,7 +63,7 @@ export const fetchNotes = async ({
       sortField,
       sortOrder,
       filter,
-      userFilter,
+      createdByFilter,
       associatedFilter,
       search,
     },

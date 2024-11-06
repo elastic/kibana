@@ -823,7 +823,7 @@ const maxDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'text',
+      returnType: 'keyword',
     },
     {
       params: [
@@ -1035,7 +1035,7 @@ const minDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'text',
+      returnType: 'keyword',
     },
     {
       params: [
@@ -1491,7 +1491,7 @@ const topDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'text',
+      returnType: 'keyword',
     },
   ],
   supportedCommands: ['stats', 'inlinestats', 'metrics'],
@@ -1590,7 +1590,7 @@ const valuesDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'text',
+      returnType: 'keyword',
     },
     {
       params: [

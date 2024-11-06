@@ -70,6 +70,7 @@ export class ObservabilityAIAssistantService {
   private readonly logger: Logger;
   private readonly getModelId: () => Promise<string>;
   private kbService?: KnowledgeBaseService;
+  private enableKnowledgeBase: boolean;
 
   private readonly registrations: RegistrationCallback[] = [];
 
@@ -78,36 +79,40 @@ export class ObservabilityAIAssistantService {
     core,
     taskManager,
     getModelId,
+    enableKnowledgeBase,
   }: {
     logger: Logger;
     core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
     taskManager: TaskManagerSetupContract;
     getModelId: () => Promise<string>;
+    enableKnowledgeBase: boolean;
   }) {
     this.core = core;
     this.logger = logger;
     this.getModelId = getModelId;
+    this.enableKnowledgeBase = enableKnowledgeBase;
 
     this.allowInit();
-
-    taskManager.registerTaskDefinitions({
-      [INDEX_QUEUED_DOCUMENTS_TASK_TYPE]: {
-        title: 'Index queued KB articles',
-        description:
-          'Indexes previously registered entries into the knowledge base when it is ready',
-        timeout: '30m',
-        maxAttempts: 2,
-        createTaskRunner: (context) => {
-          return {
-            run: async () => {
-              if (this.kbService) {
-                await this.kbService.processQueue();
-              }
-            },
-          };
+    if (enableKnowledgeBase) {
+      taskManager.registerTaskDefinitions({
+        [INDEX_QUEUED_DOCUMENTS_TASK_TYPE]: {
+          title: 'Index queued KB articles',
+          description:
+            'Indexes previously registered entries into the knowledge base when it is ready',
+          timeout: '30m',
+          maxAttempts: 2,
+          createTaskRunner: (context) => {
+            return {
+              run: async () => {
+                if (this.kbService) {
+                  await this.kbService.processQueue();
+                }
+              },
+            };
+          },
         },
-      },
-    });
+      });
+    }
   }
 
   getKnowledgeBaseStatus() {
@@ -237,6 +242,7 @@ export class ObservabilityAIAssistantService {
         esClient,
         taskManagerStart: pluginsStart.taskManager,
         getModelId: this.getModelId,
+        enabled: this.enableKnowledgeBase,
       });
 
       this.logger.info('Successfully set up index assets');
@@ -331,58 +337,62 @@ export class ObservabilityAIAssistantService {
   }
 
   addToKnowledgeBaseQueue(entries: KnowledgeBaseEntryRequest[]): void {
-    this.init()
-      .then(() => {
-        this.kbService!.queue(
-          entries.flatMap((entry) => {
-            const entryWithSystemProperties = {
-              ...entry,
-              '@timestamp': new Date().toISOString(),
-              doc_id: entry.id,
-              public: true,
-              confidence: 'high' as const,
-              type: 'contextual' as const,
-              is_correction: false,
-              labels: {
-                ...entry.labels,
-              },
-              role: KnowledgeBaseEntryRole.Elastic,
-            };
+    if (this.enableKnowledgeBase) {
+      this.init()
+        .then(() => {
+          this.kbService!.queue(
+            entries.flatMap((entry) => {
+              const entryWithSystemProperties = {
+                ...entry,
+                '@timestamp': new Date().toISOString(),
+                doc_id: entry.id,
+                public: true,
+                confidence: 'high' as const,
+                type: 'contextual' as const,
+                is_correction: false,
+                labels: {
+                  ...entry.labels,
+                },
+                role: KnowledgeBaseEntryRole.Elastic,
+              };
 
-            const operations =
-              'texts' in entryWithSystemProperties
-                ? splitKbText(entryWithSystemProperties)
-                : [
-                    {
-                      type: KnowledgeBaseEntryOperationType.Index,
-                      document: entryWithSystemProperties,
-                    },
-                  ];
+              const operations =
+                'texts' in entryWithSystemProperties
+                  ? splitKbText(entryWithSystemProperties)
+                  : [
+                      {
+                        type: KnowledgeBaseEntryOperationType.Index,
+                        document: entryWithSystemProperties,
+                      },
+                    ];
 
-            return operations;
-          })
-        );
-      })
-      .catch((error) => {
-        this.logger.error(
-          `Could not index ${entries.length} entries because of an initialisation error`
-        );
-        this.logger.error(error);
-      });
+              return operations;
+            })
+          );
+        })
+        .catch((error) => {
+          this.logger.error(
+            `Could not index ${entries.length} entries because of an initialisation error`
+          );
+          this.logger.error(error);
+        });
+    }
   }
 
   addCategoryToKnowledgeBase(categoryId: string, entries: KnowledgeBaseEntryRequest[]) {
-    this.addToKnowledgeBaseQueue(
-      entries.map((entry) => {
-        return {
-          ...entry,
-          labels: {
-            ...entry.labels,
-            category: categoryId,
-          },
-        };
-      })
-    );
+    if (this.enableKnowledgeBase) {
+      this.addToKnowledgeBaseQueue(
+        entries.map((entry) => {
+          return {
+            ...entry,
+            labels: {
+              ...entry.labels,
+              category: categoryId,
+            },
+          };
+        })
+      );
+    }
   }
 
   register(cb: RegistrationCallback) {

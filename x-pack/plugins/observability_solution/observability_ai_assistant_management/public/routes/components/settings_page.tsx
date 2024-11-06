@@ -8,6 +8,7 @@
 import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiTab, EuiTabs, EuiTitle } from '@elastic/eui';
+import { useKnowledgeBase } from '@kbn/ai-assistant';
 import { useAppContext } from '../../hooks/use_app_context';
 import { SettingsTab } from './settings_tab/settings_tab';
 import { KnowledgeBaseTab } from './knowledge_base_tab';
@@ -28,6 +29,7 @@ export function SettingsPage() {
   } = useKibana();
 
   const router = useObservabilityAIAssistantManagementRouter();
+  const knowledgeBase = useKnowledgeBase();
 
   const {
     query: { tab },
@@ -85,6 +87,7 @@ export function SettingsPage() {
         }
       ),
       content: <KnowledgeBaseTab />,
+      disabled: !knowledgeBase.status.value?.enabled,
     },
     {
       id: 'search_connector',

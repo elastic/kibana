@@ -64,128 +64,134 @@ export const farequoteDataViewTestDataWithQuery: TestData = {
         filters: [],
         searchQuery: {
           bool: {
-            filter: [],
-            must_not: [
+            filter: [
               {
                 bool: {
-                  minimum_should_match: 1,
-                  should: [
-                    {
-                      bool: {
-                        minimum_should_match: 1,
-                        should: [
-                          {
-                            term: {
-                              airline: {
-                                value: 'SWR',
+                  must_not: {
+                    bool: {
+                      minimum_should_match: 1,
+                      should: [
+                        {
+                          bool: {
+                            minimum_should_match: 1,
+                            should: [
+                              {
+                                term: {
+                                  airline: {
+                                    value: 'SWR',
+                                  },
+                                },
                               },
-                            },
+                            ],
                           },
-                        ],
-                      },
-                    },
-                    {
-                      bool: {
-                        minimum_should_match: 1,
-                        should: [
-                          {
-                            term: {
-                              airline: {
-                                value: 'ACA',
+                        },
+                        {
+                          bool: {
+                            minimum_should_match: 1,
+                            should: [
+                              {
+                                term: {
+                                  airline: {
+                                    value: 'ACA',
+                                  },
+                                },
                               },
-                            },
+                            ],
                           },
-                        ],
-                      },
-                    },
-                    {
-                      bool: {
-                        minimum_should_match: 1,
-                        should: [
-                          {
-                            term: {
-                              airline: {
-                                value: 'AWE',
+                        },
+                        {
+                          bool: {
+                            minimum_should_match: 1,
+                            should: [
+                              {
+                                term: {
+                                  airline: {
+                                    value: 'AWE',
+                                  },
+                                },
                               },
-                            },
+                            ],
                           },
-                        ],
-                      },
-                    },
-                    {
-                      bool: {
-                        minimum_should_match: 1,
-                        should: [
-                          {
-                            term: {
-                              airline: {
-                                value: 'BAW',
+                        },
+                        {
+                          bool: {
+                            minimum_should_match: 1,
+                            should: [
+                              {
+                                term: {
+                                  airline: {
+                                    value: 'BAW',
+                                  },
+                                },
                               },
-                            },
+                            ],
                           },
-                        ],
-                      },
-                    },
-                    {
-                      bool: {
-                        minimum_should_match: 1,
-                        should: [
-                          {
-                            term: {
-                              airline: {
-                                value: 'JAL',
+                        },
+                        {
+                          bool: {
+                            minimum_should_match: 1,
+                            should: [
+                              {
+                                term: {
+                                  airline: {
+                                    value: 'JAL',
+                                  },
+                                },
                               },
-                            },
+                            ],
                           },
-                        ],
-                      },
-                    },
-                    {
-                      bool: {
-                        minimum_should_match: 1,
-                        should: [
-                          {
-                            term: {
-                              airline: {
-                                value: 'JBU',
+                        },
+                        {
+                          bool: {
+                            minimum_should_match: 1,
+                            should: [
+                              {
+                                term: {
+                                  airline: {
+                                    value: 'JBU',
+                                  },
+                                },
                               },
-                            },
+                            ],
                           },
-                        ],
-                      },
-                    },
-                    {
-                      bool: {
-                        minimum_should_match: 1,
-                        should: [
-                          {
-                            term: {
-                              airline: {
-                                value: 'JZA',
+                        },
+                        {
+                          bool: {
+                            minimum_should_match: 1,
+                            should: [
+                              {
+                                term: {
+                                  airline: {
+                                    value: 'JZA',
+                                  },
+                                },
                               },
-                            },
+                            ],
                           },
-                        ],
-                      },
-                    },
-                    {
-                      bool: {
-                        minimum_should_match: 1,
-                        should: [
-                          {
-                            term: {
-                              airline: {
-                                value: 'KLM',
+                        },
+                        {
+                          bool: {
+                            minimum_should_match: 1,
+                            should: [
+                              {
+                                term: {
+                                  airline: {
+                                    value: 'KLM',
+                                  },
+                                },
                               },
-                            },
+                            ],
                           },
-                        ],
-                      },
+                        },
+                      ],
                     },
-                  ],
+                  },
                 },
               },
             ],
+            must: [],
+            must_not: [],
+            should: [],
           },
         },
         searchQueryLanguage: 'kuery',

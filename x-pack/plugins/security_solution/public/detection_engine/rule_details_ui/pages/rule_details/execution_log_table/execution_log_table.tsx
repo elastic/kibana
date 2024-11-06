@@ -37,6 +37,7 @@ import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 
+import { dataViewSpecToViewBase } from '../../../../../common/lib/kuery';
 import { InputsModelId } from '../../../../../common/store/inputs/constants';
 
 import {
@@ -159,7 +160,7 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
   } = useRuleDetailsContext();
 
   // Index for `add filter` action and toasts for errors
-  const { indexPattern } = useSourcererDataView(SourcererScopeName.detections);
+  const { sourcererDataView } = useSourcererDataView(SourcererScopeName.detections);
   const { addError, addSuccess, remove } = useAppToasts();
 
   // QueryString, Filters, and TimeRange state
@@ -232,9 +233,10 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
   const maxEvents = events?.total ?? 0;
 
   // Cache UUID field from data view as it can be expensive to iterate all data view fields
-  const uuidDataViewField = useMemo(() => {
-    return indexPattern.fields.find((f) => f.name === EXECUTION_UUID_FIELD_NAME);
-  }, [indexPattern]);
+  const uuidDataViewField = useMemo(
+    () => sourcererDataView.fields?.[EXECUTION_UUID_FIELD_NAME],
+    [sourcererDataView]
+  );
 
   // Callbacks
   const onTableChangeCallback = useCallback(
@@ -299,12 +301,18 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
 
   const onFilterByExecutionIdCallback = useCallback(
     (executionId: string, executionStart: string) => {
-      if (uuidDataViewField != null) {
+      const dataViewAsViewBase = dataViewSpecToViewBase(sourcererDataView);
+
+      if (
+        uuidDataViewField != null &&
+        typeof uuidDataViewField !== 'undefined' &&
+        dataViewAsViewBase
+      ) {
         // Update cached global query state with current state as a rollback point
         cachedGlobalQueryState.current = { filters, query, timerange };
         // Create filter & daterange constraints
         const filter = buildFilter(
-          indexPattern,
+          dataViewAsViewBase,
           uuidDataViewField,
           FILTERS.PHRASE,
           false,
@@ -350,18 +358,18 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
       }
     },
     [
-      addError,
-      addSuccess,
+      uuidDataViewField,
+      filters,
+      query,
+      timerange,
+      sourcererDataView,
       dispatch,
       filterManager,
-      filters,
-      indexPattern,
-      query,
-      resetGlobalQueryState,
       selectAlertsTab,
-      timerange,
-      uuidDataViewField,
+      addSuccess,
+      resetGlobalQueryState,
       startServices,
+      addError,
     ]
   );
 

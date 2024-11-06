@@ -8,7 +8,7 @@
  */
 
 import { parse } from '@kbn/esql-ast';
-import { getExpressionType, shouldBeQuotedSource } from './helpers';
+import { getBracketsToClose, getExpressionType, shouldBeQuotedSource } from './helpers';
 import { SupportedDataType } from '../definitions/types';
 import { setTestFunctions } from './test_functions';
 
@@ -225,79 +225,47 @@ describe('getExpressionType', () => {
     });
 
     it('detects the return type of a function', () => {
-      expect(
-        getExpressionType(getASTForExpression('returns_keyword()'), new Map(), new Map())
-      ).toBe('keyword');
+      expect(getExpressionType(getASTForExpression('returns_keyword()'))).toBe('keyword');
     });
 
     it('selects the correct signature based on the arguments', () => {
-      expect(getExpressionType(getASTForExpression('test("foo")'), new Map(), new Map())).toBe(
-        'keyword'
-      );
-      expect(getExpressionType(getASTForExpression('test(1.)'), new Map(), new Map())).toBe(
-        'double'
-      );
-      expect(getExpressionType(getASTForExpression('test(1., "foo")'), new Map(), new Map())).toBe(
-        'long'
-      );
+      expect(getExpressionType(getASTForExpression('test("foo")'))).toBe('keyword');
+      expect(getExpressionType(getASTForExpression('test(1.)'))).toBe('double');
+      expect(getExpressionType(getASTForExpression('test(1., "foo")'))).toBe('long');
     });
 
     it('supports nested functions', () => {
       expect(
-        getExpressionType(
-          getASTForExpression('test(1., test(test(test(returns_keyword()))))'),
-          new Map(),
-          new Map()
-        )
+        getExpressionType(getASTForExpression('test(1., test(test(test(returns_keyword()))))'))
       ).toBe('long');
     });
 
     it('supports functions with casted results', () => {
-      expect(
-        getExpressionType(getASTForExpression('test(1.)::keyword'), new Map(), new Map())
-      ).toBe('keyword');
+      expect(getExpressionType(getASTForExpression('test(1.)::keyword'))).toBe('keyword');
     });
 
     it('handles nulls and string-date casting', () => {
-      expect(getExpressionType(getASTForExpression('test(NULL)'), new Map(), new Map())).toBe(
-        'null'
-      );
-      expect(getExpressionType(getASTForExpression('test(NULL, NULL)'), new Map(), new Map())).toBe(
-        'null'
-      );
-      expect(
-        getExpressionType(getASTForExpression('accepts_dates("", "")'), new Map(), new Map())
-      ).toBe('keyword');
+      expect(getExpressionType(getASTForExpression('test(NULL)'))).toBe('null');
+      expect(getExpressionType(getASTForExpression('test(NULL, NULL)'))).toBe('null');
+      expect(getExpressionType(getASTForExpression('accepts_dates("", "")'))).toBe('keyword');
     });
 
     it('deals with functions that do not exist', () => {
-      expect(getExpressionType(getASTForExpression('does_not_exist()'), new Map(), new Map())).toBe(
-        'unknown'
-      );
+      expect(getExpressionType(getASTForExpression('does_not_exist()'))).toBe('unknown');
     });
 
     it('deals with bad function invocations', () => {
-      expect(
-        getExpressionType(getASTForExpression('test(1., "foo", "bar")'), new Map(), new Map())
-      ).toBe('unknown');
+      expect(getExpressionType(getASTForExpression('test(1., "foo", "bar")'))).toBe('unknown');
 
-      expect(getExpressionType(getASTForExpression('test()'), new Map(), new Map())).toBe(
-        'unknown'
-      );
+      expect(getExpressionType(getASTForExpression('test()'))).toBe('unknown');
 
-      expect(getExpressionType(getASTForExpression('test("foo", 1.)'), new Map(), new Map())).toBe(
-        'unknown'
-      );
+      expect(getExpressionType(getASTForExpression('test("foo", 1.)'))).toBe('unknown');
     });
 
     it('deals with the CASE function', () => {
-      expect(getExpressionType(getASTForExpression('CASE(true, 1, 2)'), new Map(), new Map())).toBe(
-        'integer'
-      );
+      expect(getExpressionType(getASTForExpression('CASE(true, 1, 2)'))).toBe('integer');
 
-      expect(
-        getExpressionType(getASTForExpression('CASE(true, 1., true, 1., 2.)'), new Map(), new Map())
-      ).toBe('double');
+      expect(getExpressionType(getASTForExpression('CASE(true, 1., true, 1., 2.)'))).toBe('double');
 
       expect(
         getExpressionType(
@@ -306,6 +274,20 @@ describe('getExpressionType', () => {
           new Map()
         )
       ).toBe('keyword');
+
+      expect(
+        getExpressionType(
+          getASTForExpression('CASE(true, "", true, "", keywordVar)'),
+          new Map(),
+          new Map([
+            [`keywordVar`, [{ name: 'keywordVar', type: 'keyword', location: { min: 0, max: 0 } }]],
+          ])
+        )
+      ).toBe('keyword');
+    });
+
+    it('supports COUNT(*)', () => {
+      expect(getExpressionType(getASTForExpression('COUNT(*)'))).toBe<SupportedDataType>('long');
     });
   });
 
@@ -340,5 +322,18 @@ describe('getExpressionType', () => {
         expect(getExpressionType(ast)).toBe(expectedType);
       }
     );
+  });
+});
+
+describe('getBracketsToClose', () => {
+  it('returns the number of brackets to close', () => {
+    expect(getBracketsToClose('foo(bar(baz')).toEqual([')', ')']);
+    expect(getBracketsToClose('foo(bar[baz')).toEqual([']', ')']);
+    expect(getBracketsToClose('foo(bar[baz"bap')).toEqual(['"', ']', ')']);
+    expect(
+      getBracketsToClose(
+        'from a | eval case(integerField < 0, "negative", integerField > 0, "positive", '
+      )
+    ).toEqual([')']);
   });
 });
