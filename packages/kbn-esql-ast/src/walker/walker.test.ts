@@ -36,10 +36,10 @@ test('can walk all functions', () => {
 
 test('can find assignment expression', () => {
   const query = 'METRICS source var0 = bucket(bytes, 1 hour)';
-  const { root } = parse(query);
+  const { ast } = parse(query);
   const functions: ESQLFunction[] = [];
 
-  Walker.walk(root, {
+  Walker.walk(ast, {
     visitFunction: (fn) => {
       if (fn.name === '=') {
         functions.push(fn);
@@ -342,7 +342,7 @@ describe('structurally can walk all nodes', () => {
             },
             {
               type: 'literal',
-              literalType: 'keyword',
+              literalType: 'string',
               name: '"foo"',
             },
             {
@@ -375,7 +375,7 @@ describe('structurally can walk all nodes', () => {
             },
             {
               type: 'literal',
-              literalType: 'keyword',
+              literalType: 'string',
               name: '"2"',
             },
             {
@@ -390,7 +390,7 @@ describe('structurally can walk all nodes', () => {
             },
             {
               type: 'literal',
-              literalType: 'double',
+              literalType: 'decimal',
               name: '3.14',
             },
           ]);
@@ -473,7 +473,7 @@ describe('structurally can walk all nodes', () => {
                 values: [
                   {
                     type: 'literal',
-                    literalType: 'double',
+                    literalType: 'decimal',
                     name: '3.3',
                   },
                 ],
@@ -492,7 +492,7 @@ describe('structurally can walk all nodes', () => {
               },
               {
                 type: 'literal',
-                literalType: 'double',
+                literalType: 'decimal',
                 name: '3.3',
               },
             ]);
@@ -600,27 +600,27 @@ describe('structurally can walk all nodes', () => {
             expect(literals).toMatchObject([
               {
                 type: 'literal',
-                literalType: 'keyword',
+                literalType: 'string',
                 name: '"a"',
               },
               {
                 type: 'literal',
-                literalType: 'keyword',
+                literalType: 'string',
                 name: '"b"',
               },
               {
                 type: 'literal',
-                literalType: 'keyword',
+                literalType: 'string',
                 name: '"c"',
               },
               {
                 type: 'literal',
-                literalType: 'keyword',
+                literalType: 'string',
                 name: '"d"',
               },
               {
                 type: 'literal',
-                literalType: 'keyword',
+                literalType: 'string',
                 name: '"e"',
               },
             ]);

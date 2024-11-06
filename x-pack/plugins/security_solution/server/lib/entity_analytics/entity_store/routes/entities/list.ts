@@ -32,10 +32,8 @@ export const listEntitiesRoute = (router: EntityAnalyticsRoutesDeps['router'], l
     .get({
       access: 'public',
       path: LIST_ENTITIES_URL,
-      security: {
-        authz: {
-          requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],
-        },
+      options: {
+        tags: ['access:securitySolution', `access:${APP_ID}-entity-analytics`],
       },
     })
     .addVersion(
@@ -55,7 +53,7 @@ export const listEntitiesRoute = (router: EntityAnalyticsRoutesDeps['router'], l
           const {
             page = 1,
             per_page: perPage = 10,
-            sort_field: sortField = '@timestamp',
+            sort_field: sortField = 'entity.lastSeenTimestamp',
             sort_order: sortOrder = 'desc',
             entities_types: entityTypes,
             filterQuery,

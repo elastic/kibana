@@ -31,18 +31,18 @@ import { postCaseConfigureRoute } from './configure/post_configure';
 import { getAllAlertsAttachedToCaseRoute } from './comments/get_alerts';
 import { findUserActionsRoute } from './user_actions/find_user_actions';
 
-export const getExternalRoutes = ({ isServerless }: { isServerless?: boolean }) =>
+export const getExternalRoutes = () =>
   [
     deleteCaseRoute,
     findCaseRoute,
-    getCaseRoute({ isServerless }),
+    getCaseRoute,
     resolveCaseRoute,
     patchCaseRoute,
     postCaseRoute,
     pushCaseRoute,
     findUserActionsRoute,
-    getUserActionsRoute({ isServerless }),
-    getStatusRoute({ isServerless }),
+    getUserActionsRoute,
+    getStatusRoute,
     getCasesByAlertIdRoute,
     getReportersRoute,
     getTagsRoute,
@@ -50,7 +50,7 @@ export const getExternalRoutes = ({ isServerless }: { isServerless?: boolean }) 
     deleteAllCommentsRoute,
     findCommentsRoute,
     getCommentRoute,
-    getAllCommentsRoute({ isServerless }),
+    getAllCommentsRoute,
     patchCommentRoute,
     postCommentRoute,
     getCaseConfigureRoute,

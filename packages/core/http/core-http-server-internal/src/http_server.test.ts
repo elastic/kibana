@@ -906,7 +906,6 @@ test('exposes route details of incoming request to a route handler', async () =>
     .expect(200, {
       method: 'get',
       path: '/',
-      routePath: '/',
       options: {
         authRequired: true,
         xsrfRequired: false,
@@ -1089,7 +1088,6 @@ test('exposes route details of incoming request to a route handler (POST + paylo
     .expect(200, {
       method: 'post',
       path: '/',
-      routePath: '/',
       options: {
         authRequired: true,
         xsrfRequired: true,

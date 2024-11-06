@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { Route, Routes } from '@kbn/shared-ux-router';
+import { Switch } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import { NoteManagementPage } from './pages/note_management_page';
 import { SpyRoute } from '../common/utils/route/spy_routes';
@@ -25,10 +26,10 @@ const NotesManagementTelemetry = () => (
 
 const NotesManagementContainer: React.FC = React.memo(() => {
   return (
-    <Routes>
+    <Switch>
       <Route path={NOTES_PATH} exact component={NotesManagementTelemetry} />
       <Route component={NotFoundPage} />
-    </Routes>
+    </Switch>
   );
 });
 NotesManagementContainer.displayName = 'NotesManagementContainer';

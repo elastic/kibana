@@ -56,7 +56,6 @@ describe('SAML authentication routes', () => {
       expect(routeConfig.options).toEqual({
         access: 'public',
         authRequired: false,
-        excludeFromOAS: true,
         xsrfRequired: false,
         tags: [ROUTE_TAG_CAN_REDIRECT, ROUTE_TAG_AUTH_FLOW],
       });

@@ -129,9 +129,6 @@ export const riskScoreFieldMap: FieldMap = {
 } as const;
 
 export const mappingComponentName = '.risk-score-mappings';
-export const nameSpaceAwareMappingsComponentName = (namespace: string): string => {
-  return `${mappingComponentName}-${namespace}`;
-};
 export const totalFieldsLimit = 1000;
 
 export const getIndexPatternDataStream = (namespace: string): IIndexPatternString => ({

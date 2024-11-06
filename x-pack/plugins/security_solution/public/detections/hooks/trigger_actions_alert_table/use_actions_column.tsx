@@ -47,10 +47,10 @@ export const getUseActionColumnHook =
     }
 
     // we only want to show the note icon if the new notes system feature flag is enabled
-    const securitySolutionNotesDisabled = useIsExperimentalFeatureEnabled(
-      'securitySolutionNotesDisabled'
+    const securitySolutionNotesEnabled = useIsExperimentalFeatureEnabled(
+      'securitySolutionNotesEnabled'
     );
-    if (securitySolutionNotesDisabled) {
+    if (!securitySolutionNotesEnabled) {
       ACTION_BUTTON_COUNT--;
     }
 

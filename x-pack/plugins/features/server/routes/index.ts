@@ -22,7 +22,7 @@ export function defineRoutes({ router, featureRegistry }: RouteDefinitionParams)
     {
       path: '/api/features',
       options: {
-        tags: ['access:read_features'],
+        tags: ['access:features'],
         access: 'public',
         summary: `Get features`,
       },

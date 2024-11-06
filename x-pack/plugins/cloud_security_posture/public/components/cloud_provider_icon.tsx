@@ -18,7 +18,7 @@ interface Props {
 }
 
 const getCloudProviderIcon = (cloudProvider: string) => {
-  switch (cloudProvider.toLowerCase()) {
+  switch (cloudProvider) {
     case 'azure':
       return 'logoAzure';
     case 'aws':

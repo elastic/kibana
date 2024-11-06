@@ -8,6 +8,7 @@
  */
 
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 
@@ -34,6 +35,15 @@ interface DataViewComponentProps extends InspectorViewProps {
 }
 
 class DataViewComponent extends Component<DataViewComponentProps, DataViewComponentState> {
+  static propTypes = {
+    adapters: PropTypes.object.isRequired,
+    title: PropTypes.string.isRequired,
+    uiSettings: PropTypes.object,
+    uiActions: PropTypes.object.isRequired,
+    fieldFormats: PropTypes.object.isRequired,
+    isFilterable: PropTypes.func.isRequired,
+  };
+
   state = {} as DataViewComponentState;
 
   static getDerivedStateFromProps(
@@ -44,10 +54,9 @@ class DataViewComponent extends Component<DataViewComponentProps, DataViewCompon
       return null;
     }
 
-    const { tables, initialSelectedTable } = nextProps.adapters.tables ?? {};
+    const { tables } = nextProps.adapters.tables;
     const keys = Object.keys(tables);
-    const intialTableKey = keys.includes(initialSelectedTable) ? initialSelectedTable : keys[0];
-    const datatable = keys.length ? tables[intialTableKey] : undefined;
+    const datatable = keys.length ? tables[keys[0]] : undefined;
 
     return {
       adapters: nextProps.adapters,

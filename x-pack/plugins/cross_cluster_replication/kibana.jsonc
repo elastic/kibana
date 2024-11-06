@@ -1,15 +1,11 @@
 {
   "type": "plugin",
   "id": "@kbn/cross-cluster-replication-plugin",
-  "owner": [
-    "@elastic/kibana-management"
-  ],
-  "group": "platform",
-  "visibility": "private",
+  "owner": "@elastic/kibana-management",
   "plugin": {
     "id": "crossClusterReplication",
-    "browser": true,
     "server": true,
+    "browser": true,
     "configPath": [
       "xpack",
       "ccr"

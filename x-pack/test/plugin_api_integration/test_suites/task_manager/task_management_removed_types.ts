@@ -56,11 +56,6 @@ export default function ({ getService }: FtrProviderContext) {
       await esArchiver.unload('x-pack/test/functional/es_archives/task_manager_removed_types');
     });
 
-    afterEach(async () => {
-      // clean up after each test
-      return await request.delete('/api/sample_tasks').set('kbn-xsrf', 'xxx').expect(200);
-    });
-
     function scheduleTask(
       task: Partial<ConcreteTaskInstance | DeprecatedConcreteTaskInstance>
     ): Promise<SerializedConcreteTaskInstance> {
@@ -82,15 +77,11 @@ export default function ({ getService }: FtrProviderContext) {
     }
 
     it('should successfully schedule registered tasks, not claim unregistered tasks and mark removed task types as unrecognized', async () => {
-      const testStart = new Date();
       const scheduledTask = await scheduleTask({
         taskType: 'sampleTask',
         schedule: { interval: `1s` },
         params: {},
       });
-
-      let scheduledTaskRuns = 0;
-      let scheduledTaskInstanceRunAt = scheduledTask.runAt;
 
       await retry.try(async () => {
         const tasks = (await currentTasks()).docs;
@@ -107,16 +98,8 @@ export default function ({ getService }: FtrProviderContext) {
         );
         const removedTaskInstance = tasks.find((task) => task.id === REMOVED_TASK_TYPE_ID);
 
-        if (scheduledTaskInstance && scheduledTaskInstance.runAt !== scheduledTaskInstanceRunAt) {
-          scheduledTaskRuns++;
-          scheduledTaskInstanceRunAt = scheduledTaskInstance.runAt;
-        }
-
-        expect(scheduledTaskRuns).to.be.greaterThan(2);
+        expect(scheduledTaskInstance?.status).to.eql('claiming');
         expect(unregisteredTaskInstance?.status).to.eql('idle');
-        expect(new Date(unregisteredTaskInstance?.runAt || testStart).getTime()).to.be.lessThan(
-          testStart.getTime()
-        );
         expect(removedTaskInstance?.status).to.eql('unrecognized');
       });
     });

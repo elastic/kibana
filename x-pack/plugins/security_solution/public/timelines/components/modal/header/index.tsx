@@ -18,6 +18,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import styled from 'styled-components';
+import { TIMELINE_TOUR_CONFIG_ANCHORS } from '../../timeline/tour/step_config';
 import { NewTimelineButton } from '../actions/new_timeline_button';
 import { OpenTimelineButton } from '../actions/open_timeline_button';
 import { APP_ID } from '../../../../../common';
@@ -70,7 +71,7 @@ interface FlyoutHeaderPanelProps {
 export const TimelineModalHeader = React.memo<FlyoutHeaderPanelProps>(
   ({ timelineId, openToggleRef }) => {
     const dispatch = useDispatch();
-    const { browserFields, sourcererDataView } = useSourcererDataView(SourcererScopeName.timeline);
+    const { browserFields, indexPattern } = useSourcererDataView(SourcererScopeName.timeline);
     const { cases, uiSettings } = useKibana().services;
     const esQueryConfig = useMemo(() => getEsQueryConfig(uiSettings), [uiSettings]);
     const userCasesPermissions = cases.helpers.canUseCases([APP_ID]);
@@ -88,21 +89,13 @@ export const TimelineModalHeader = React.memo<FlyoutHeaderPanelProps>(
         combineQueries({
           config: esQueryConfig,
           dataProviders,
-          indexPattern: sourcererDataView,
+          indexPattern,
           browserFields,
           filters: filters ? filters : [],
           kqlQuery: kqlQueryObj,
           kqlMode,
         }),
-      [
-        browserFields,
-        dataProviders,
-        esQueryConfig,
-        filters,
-        kqlMode,
-        kqlQueryObj,
-        sourcererDataView,
-      ]
+      [browserFields, dataProviders, esQueryConfig, filters, indexPattern, kqlMode, kqlQueryObj]
     );
     const isInspectDisabled = !isDataInTimeline || combinedQueries?.filterQuery === undefined;
 
@@ -132,7 +125,7 @@ export const TimelineModalHeader = React.memo<FlyoutHeaderPanelProps>(
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>
-                <AddToFavoritesButton timelineId={timelineId} />
+                <AddToFavoritesButton timelineId={timelineId} isPartOfGuidedTour />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiText
@@ -150,6 +143,7 @@ export const TimelineModalHeader = React.memo<FlyoutHeaderPanelProps>(
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup
+              id={TIMELINE_TOUR_CONFIG_ANCHORS.ACTION_MENU}
               justifyContent="flexEnd"
               alignItems="center"
               gutterSize="xs"

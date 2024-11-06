@@ -7,22 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  ESQLAstNode,
-  ESQLBinaryExpression,
-  ESQLColumn,
-  ESQLFunction,
-  ESQLIntegerLiteral,
-  ESQLLiteral,
-  ESQLProperNode,
-} from '../types';
+import { ESQLAstNode, ESQLBinaryExpression, ESQLFunction } from '../types';
 import { BinaryExpressionGroup } from './constants';
 
-export const isProperNode = (node: unknown): node is ESQLProperNode =>
-  !!node && typeof node === 'object' && !Array.isArray(node);
-
 export const isFunctionExpression = (node: unknown): node is ESQLFunction =>
-  isProperNode(node) && node.type === 'function';
+  !!node && typeof node === 'object' && !Array.isArray(node) && (node as any).type === 'function';
 
 /**
  * Returns true if the given node is a binary expression, i.e. an operator
@@ -38,18 +27,6 @@ export const isFunctionExpression = (node: unknown): node is ESQLFunction =>
  */
 export const isBinaryExpression = (node: unknown): node is ESQLBinaryExpression =>
   isFunctionExpression(node) && node.subtype === 'binary-expression';
-
-export const isLiteral = (node: unknown): node is ESQLLiteral =>
-  isProperNode(node) && node.type === 'literal';
-
-export const isIntegerLiteral = (node: unknown): node is ESQLIntegerLiteral =>
-  isLiteral(node) && node.literalType === 'integer';
-
-export const isDoubleLiteral = (node: unknown): node is ESQLIntegerLiteral =>
-  isLiteral(node) && node.literalType === 'double';
-
-export const isColumn = (node: unknown): node is ESQLColumn =>
-  isProperNode(node) && node.type === 'column';
 
 /**
  * Returns the group of a binary expression:

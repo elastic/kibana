@@ -32,8 +32,6 @@ import { auditLoggingService } from '../../../../audit_logging';
 
 import type { PackagePolicySOAttributes } from '../../../../../types';
 
-import { createArchiveIteratorFromMap } from '../../../archive/archive_iterator';
-
 import { updateLatestExecutedState } from './update_latest_executed_state';
 
 jest.mock('../../../../audit_logging');
@@ -63,7 +61,6 @@ describe('updateLatestExecutedState', () => {
       logger,
       packageInstallContext: {
         assetsMap: new Map(),
-        archiveIterator: createArchiveIteratorFromMap(new Map()),
         paths: [],
         packageInfo: {
           title: 'title',
@@ -119,7 +116,6 @@ describe('updateLatestExecutedState', () => {
       logger,
       packageInstallContext: {
         assetsMap: new Map(),
-        archiveIterator: createArchiveIteratorFromMap(new Map()),
         paths: [],
         packageInfo: {
           title: 'title',
@@ -157,7 +153,6 @@ describe('updateLatestExecutedState', () => {
       logger,
       packageInstallContext: {
         assetsMap: new Map(),
-        archiveIterator: createArchiveIteratorFromMap(new Map()),
         paths: [],
         packageInfo: {
           title: 'title',
@@ -203,7 +198,6 @@ describe('updateLatestExecutedState', () => {
       logger,
       packageInstallContext: {
         assetsMap: new Map(),
-        archiveIterator: createArchiveIteratorFromMap(new Map()),
         paths: [],
         packageInfo: {
           title: 'title',

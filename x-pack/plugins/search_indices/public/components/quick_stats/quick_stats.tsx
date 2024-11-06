@@ -22,12 +22,10 @@ import { Mappings } from '../../types';
 import { countVectorBasedTypesFromMappings } from './mappings_convertor';
 import { QuickStat } from './quick_stat';
 import { useKibana } from '../../hooks/use_kibana';
-import { IndexDocuments } from '../../hooks/api/use_document_search';
 
 export interface QuickStatsProps {
   index: Index;
   mappings: Mappings;
-  indexDocuments: IndexDocuments;
 }
 
 export const SetupAISearchButton: React.FC = () => {
@@ -62,13 +60,12 @@ export const SetupAISearchButton: React.FC = () => {
   );
 };
 
-export const QuickStats: React.FC<QuickStatsProps> = ({ index, mappings, indexDocuments }) => {
+export const QuickStats: React.FC<QuickStatsProps> = ({ index, mappings }) => {
   const [open, setOpen] = useState<boolean>(false);
   const { euiTheme } = useEuiTheme();
   const mappingStats = useMemo(() => countVectorBasedTypesFromMappings(mappings), [mappings]);
   const vectorFieldCount =
     mappingStats.sparse_vector + mappingStats.dense_vector + mappingStats.semantic_text;
-  const docCount = indexDocuments?.results._meta.page.total ?? 0;
 
   return (
     <EuiPanel
@@ -92,13 +89,13 @@ export const QuickStats: React.FC<QuickStatsProps> = ({ index, mappings, indexDo
               defaultMessage: 'Document count',
             })}
             data-test-subj="QuickStatsDocumentCount"
-            secondaryTitle={<EuiI18nNumber value={docCount ?? 0} />}
+            secondaryTitle={<EuiI18nNumber value={index.documents ?? 0} />}
             stats={[
               {
                 title: i18n.translate('xpack.searchIndices.quickStats.documents.totalTitle', {
                   defaultMessage: 'Total',
                 }),
-                description: <EuiI18nNumber value={docCount ?? 0} />,
+                description: <EuiI18nNumber value={index.documents ?? 0} />,
               },
               {
                 title: i18n.translate('xpack.searchIndices.quickStats.documents.indexSize', {

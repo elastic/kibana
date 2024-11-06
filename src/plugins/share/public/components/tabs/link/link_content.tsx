@@ -54,7 +54,6 @@ export const LinkContent = ({
   const [urlParams] = useState<UrlParams | undefined>(undefined);
   const [isTextCopied, setTextCopied] = useState(false);
   const [shortUrlCache, setShortUrlCache] = useState<string | undefined>(undefined);
-  const [isLoading, setIsLoading] = useState(false);
 
   const getUrlWithUpdatedParams = useCallback(
     (tempUrl: string): string => {
@@ -100,7 +99,6 @@ export const LinkContent = ({
   }, [shareableUrlLocatorParams, urlService.shortUrls, getSnapshotUrl, setShortUrlCache]);
 
   const copyUrlHelper = useCallback(async () => {
-    setIsLoading(true);
     let urlToCopy = url;
 
     if (!urlToCopy || delegatedShareUrlHandler) {
@@ -114,7 +112,6 @@ export const LinkContent = ({
     copyToClipboard(urlToCopy);
     setUrl(urlToCopy);
     setTextCopied(true);
-    setIsLoading(false);
     return urlToCopy;
   }, [url, delegatedShareUrlHandler, allowShortUrl, createShortUrl, getSnapshotUrl]);
 
@@ -138,7 +135,6 @@ export const LinkContent = ({
             <EuiSpacer size="m" />
             <EuiCallOut
               color="warning"
-              iconType="warning"
               title={
                 <FormattedMessage id="share.link.warning.title" defaultMessage="Unsaved changes" />
               }
@@ -168,7 +164,6 @@ export const LinkContent = ({
               onBlur={() => (objectType === 'lens' && isDirty ? null : setTextCopied(false))}
               onClick={copyUrlHelper}
               color={objectType === 'lens' && isDirty ? 'warning' : 'primary'}
-              isLoading={isLoading}
             >
               <FormattedMessage id="share.link.copyLinkButton" defaultMessage="Copy link" />
             </EuiButton>

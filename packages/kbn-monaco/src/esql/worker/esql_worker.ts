@@ -43,7 +43,7 @@ export class ESQLWorker implements BaseWorkerDefinition {
   }
 
   getAst(text: string | undefined) {
-    const rawAst = parse(text, { withFormatting: true });
+    const rawAst = parse(text);
     return {
       ast: rawAst.root.commands,
       errors: rawAst.errors.map(inlineToMonacoErrors),

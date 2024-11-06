@@ -39,6 +39,7 @@ interface BuildUpdatedRecoveredAlertOpts<AlertData extends RuleAlertData> {
 export const buildUpdatedRecoveredAlert = <AlertData extends RuleAlertData>({
   alert,
   legacyRawAlert,
+  rule,
   runTimestamp,
   timestamp,
 }: BuildUpdatedRecoveredAlertOpts<AlertData>): Alert & AlertData => {
@@ -49,6 +50,8 @@ export const buildUpdatedRecoveredAlert = <AlertData extends RuleAlertData>({
   const cleanedAlert = omit(alert, ALERT_SEVERITY_IMPROVING);
 
   const alertUpdates = {
+    // Set latest rule configuration
+    ...rule,
     // Update the timestamp to reflect latest update time
     [TIMESTAMP]: timestamp,
     [ALERT_RULE_EXECUTION_TIMESTAMP]: runTimestamp ?? timestamp,

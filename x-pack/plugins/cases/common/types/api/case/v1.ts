@@ -29,11 +29,7 @@ import {
   NonEmptyString,
   paginationSchema,
 } from '../../../schema';
-import {
-  CaseCustomFieldToggleRt,
-  CustomFieldTextTypeRt,
-  CustomFieldNumberTypeRt,
-} from '../../domain';
+import { CaseCustomFieldToggleRt, CustomFieldTextTypeRt } from '../../domain';
 import {
   CaseRt,
   CaseSettingsRt,
@@ -45,10 +41,7 @@ import {
 import { CaseConnectorRt } from '../../domain/connector/v1';
 import { CaseUserProfileRt, UserRt } from '../../domain/user/v1';
 import { CasesStatusResponseRt } from '../stats/v1';
-import {
-  CaseCustomFieldTextWithValidationValueRt,
-  CaseCustomFieldNumberWithValidationValueRt,
-} from '../custom_field/v1';
+import { CaseCustomFieldTextWithValidationValueRt } from '../custom_field/v1';
 
 const CaseCustomFieldTextWithValidationRt = rt.strict({
   key: rt.string,
@@ -56,17 +49,7 @@ const CaseCustomFieldTextWithValidationRt = rt.strict({
   value: rt.union([CaseCustomFieldTextWithValidationValueRt('value'), rt.null]),
 });
 
-const CaseCustomFieldNumberWithValidationRt = rt.strict({
-  key: rt.string,
-  type: CustomFieldNumberTypeRt,
-  value: rt.union([CaseCustomFieldNumberWithValidationValueRt({ fieldName: 'value' }), rt.null]),
-});
-
-const CustomFieldRt = rt.union([
-  CaseCustomFieldTextWithValidationRt,
-  CaseCustomFieldToggleRt,
-  CaseCustomFieldNumberWithValidationRt,
-]);
+const CustomFieldRt = rt.union([CaseCustomFieldTextWithValidationRt, CaseCustomFieldToggleRt]);
 
 export const CaseRequestCustomFieldsRt = limitedArraySchema({
   codec: CustomFieldRt,

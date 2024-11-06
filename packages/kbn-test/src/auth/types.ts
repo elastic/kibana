@@ -61,8 +61,3 @@ export interface RetryParams {
   attemptsCount: number;
   attemptDelay: number;
 }
-
-export interface GetSessionByRole {
-  role: string;
-  forceNewSession: boolean;
-}

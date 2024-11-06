@@ -21,8 +21,6 @@ import { appContextService } from '../../../../app_context';
 import { createAppContextStartContractMock } from '../../../../../mocks';
 import { saveArchiveEntriesFromAssetsMap, removeArchiveEntries } from '../../../archive/storage';
 
-import { createArchiveIteratorFromMap } from '../../../archive/archive_iterator';
-
 import { stepSaveArchiveEntries, cleanupArchiveEntriesStep } from './step_save_archive_entries';
 
 jest.mock('../../../archive/storage', () => {
@@ -62,7 +60,6 @@ const packageInstallContext = {
       Buffer.from('{"content": "data"}'),
     ],
   ]),
-  archiveIterator: createArchiveIteratorFromMap(new Map()),
 };
 const getMockInstalledPackageSo = (
   installedEs: EsAssetReference[] = []

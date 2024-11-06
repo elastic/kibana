@@ -13,8 +13,6 @@ import type { PaletteOutput } from '@kbn/coloring';
 import type {
   Datatable,
   DatatableColumnMeta,
-  DefaultInspectorAdapters,
-  ExecutionContext,
   ExpressionFunctionDefinition,
 } from '@kbn/expressions-plugin/common';
 import {
@@ -451,15 +449,13 @@ export type XyVisFn = ExpressionFunctionDefinition<
   typeof XY_VIS,
   Datatable,
   XYArgs,
-  Promise<XYRender>,
-  ExecutionContext<DefaultInspectorAdapters>
+  Promise<XYRender>
 >;
 export type LayeredXyVisFn = ExpressionFunctionDefinition<
   typeof LAYERED_XY_VIS,
   Datatable,
   LayeredXYArgs,
-  Promise<XYRender>,
-  ExecutionContext<DefaultInspectorAdapters>
+  Promise<XYRender>
 >;
 
 export type ExtendedDataLayerFn = ExpressionFunctionDefinition<

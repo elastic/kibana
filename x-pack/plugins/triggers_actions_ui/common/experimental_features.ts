@@ -21,10 +21,8 @@ export const allowedExperimentalValues = Object.freeze({
   ruleKqlBar: false,
   isMustacheAutocompleteOn: false,
   showMustacheAutocompleteSwitch: false,
-  isUsingRuleCreateFlyout: false,
+  ruleFormV2: false,
 });
-
-const deprecatedExperimentalValues = new Set(['ruleFormV2']);
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
 type Mutable<T> = { -readonly [P in keyof T]: T[P] };
@@ -58,10 +56,7 @@ export const parseExperimentalConfigValue = (configValue: string[]): Experimenta
 };
 
 export const isValidExperimentalValue = (value: string): boolean => {
-  return (
-    allowedKeys.includes(value as keyof ExperimentalFeatures) ||
-    deprecatedExperimentalValues.has(value)
-  );
+  return allowedKeys.includes(value as keyof ExperimentalFeatures);
 };
 
 export const getExperimentalAllowedValues = (): string[] => [...allowedKeys];

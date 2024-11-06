@@ -16,11 +16,8 @@ export class EndpointAgentStatusClient extends AgentStatusClient {
   protected readonly agentType: ResponseActionAgentType = 'endpoint';
 
   async getAgentStatuses(agentIds: string[]): Promise<AgentStatusRecords> {
-    const soClient = this.options.soClient;
+    const metadataService = this.options.endpointService.getEndpointMetadataService();
     const esClient = this.options.esClient;
-    const metadataService = this.options.endpointService.getEndpointMetadataService(
-      soClient.getCurrentNamespace()
-    );
 
     try {
       const agentIdsKql = agentIds.map((agentId) => `agent.id: ${agentId}`).join(' or ');
@@ -56,9 +53,7 @@ export class EndpointAgentStatusClient extends AgentStatusClient {
       }, {});
     } catch (err) {
       const error = new AgentStatusClientError(
-        `Failed to fetch endpoint agent statuses for agentIds: [${agentIds.join()}], failed with: ${
-          err.message
-        }`,
+        `Failed to fetch endpoint agent statuses for agentIds: [${agentIds}], failed with: ${err.message}`,
         500,
         err
       );

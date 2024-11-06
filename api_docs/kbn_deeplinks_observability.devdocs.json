@@ -497,10 +497,10 @@
             "tags": [],
             "label": "source",
             "description": [
-              "If given, it will load the given onboarding flow\nelse will load the main onboarding screen."
+              "If given, it will load the given map else will load the create a new map page."
             ],
             "signature": [
-              "\"kubernetes\" | \"auto-detect\" | \"customLogs\" | \"otel-logs\" | \"firehose\" | undefined"
+              "\"customLogs\" | \"systemLogs\" | undefined"
             ],
             "path": "packages/deeplinks/observability/locators/observability_onboarding.ts",
             "deprecated": false,

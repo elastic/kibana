@@ -1,22 +1,17 @@
 {
   "type": "plugin",
   "id": "@kbn/dashboard-plugin",
-  "owner": [
-    "@elastic/kibana-presentation"
-  ],
-  "group": "platform",
-  "visibility": "shared",
+  "owner": "@elastic/kibana-presentation",
   "description": "Adds the Dashboard app to Kibana",
   "plugin": {
     "id": "dashboard",
-    "browser": true,
     "server": true,
+    "browser": true,
     "requiredPlugins": [
       "data",
       "dataViews",
       "dataViewEditor",
       "embeddable",
-      "fieldFormats",
       "controls",
       "inspector",
       "navigation",
@@ -29,7 +24,7 @@
       "urlForwarding",
       "presentationUtil",
       "visualizations",
-      "unifiedSearch",
+      "unifiedSearch"
     ],
     "optionalPlugins": [
       "home",
@@ -40,8 +35,7 @@
       "taskManager",
       "serverless",
       "noDataPage",
-      "observabilityAIAssistant",
-      "lens"
+      "observabilityAIAssistant"
     ],
     "requiredBundles": [
       "kibanaReact",

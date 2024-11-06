@@ -63,38 +63,22 @@
           "description": [],
           "signature": [
             "<TToolOptions extends ",
-            {
-              "pluginId": "@kbn/inference-common",
-              "scope": "common",
-              "docId": "kibKbnInferenceCommonPluginApi",
-              "section": "def-common.ToolOptions",
-              "text": "ToolOptions"
-            },
+            "ToolOptions",
             "<string> = ",
+            "ToolOptions",
+            "<string>>(options: { connectorId: string; system?: string | undefined; messages: ",
             {
-              "pluginId": "@kbn/inference-common",
+              "pluginId": "inference",
               "scope": "common",
-              "docId": "kibKbnInferenceCommonPluginApi",
-              "section": "def-common.ToolOptions",
-              "text": "ToolOptions"
+              "docId": "kibInferencePluginApi",
+              "section": "def-common.Message",
+              "text": "Message"
             },
-            "<string>, TStream extends boolean = false>(options: ",
-            {
-              "pluginId": "@kbn/inference-common",
-              "scope": "common",
-              "docId": "kibKbnInferenceCommonPluginApi",
-              "section": "def-common.ChatCompleteOptions",
-              "text": "ChatCompleteOptions"
-            },
-            "<TToolOptions, TStream>) => ",
-            {
-              "pluginId": "@kbn/inference-common",
-              "scope": "common",
-              "docId": "kibKbnInferenceCommonPluginApi",
-              "section": "def-common.ChatCompleteCompositeResponse",
-              "text": "ChatCompleteCompositeResponse"
-            },
-            "<TToolOptions, TStream>"
+            "[]; functionCalling?: ",
+            "FunctionCallingMode",
+            " | undefined; } & TToolOptions) => ",
+            "ChatCompletionResponse",
+            "<TToolOptions>"
           ],
           "path": "x-pack/plugins/inference/public/types.ts",
           "deprecated": false,
@@ -109,25 +93,19 @@
               "label": "options",
               "description": [],
               "signature": [
-                "{ connectorId: string; stream?: TStream | undefined; system?: string | undefined; messages: ",
+                "{ connectorId: string; system?: string | undefined; messages: ",
                 {
-                  "pluginId": "@kbn/inference-common",
+                  "pluginId": "inference",
                   "scope": "common",
-                  "docId": "kibKbnInferenceCommonPluginApi",
+                  "docId": "kibInferencePluginApi",
                   "section": "def-common.Message",
                   "text": "Message"
                 },
                 "[]; functionCalling?: ",
-                {
-                  "pluginId": "@kbn/inference-common",
-                  "scope": "common",
-                  "docId": "kibKbnInferenceCommonPluginApi",
-                  "section": "def-common.FunctionCallingMode",
-                  "text": "FunctionCallingMode"
-                },
+                "FunctionCallingMode",
                 " | undefined; } & TToolOptions"
               ],
-              "path": "x-pack/packages/ai-infra/inference-common/src/chat_complete/api.ts",
+              "path": "x-pack/plugins/inference/common/chat_complete/index.ts",
               "deprecated": false,
               "trackAdoption": false
             }
@@ -141,27 +119,23 @@
           "label": "output",
           "description": [],
           "signature": [
-            "<TId extends string = string, TOutputSchema extends ",
-            "ToolSchemaTypeObject",
-            " | undefined = ",
-            "ToolSchemaTypeObject",
-            " | undefined, TStream extends boolean = false>(options: ",
+            "<TId extends string = string, TOutputSchema extends ToolSchemaTypeObject | undefined = ToolSchemaTypeObject | undefined>(id: TId, options: { connectorId: string; system?: string | undefined; input: string; schema?: TOutputSchema | undefined; previousMessages?: ",
             {
-              "pluginId": "@kbn/inference-common",
+              "pluginId": "inference",
               "scope": "common",
-              "docId": "kibKbnInferenceCommonPluginApi",
-              "section": "def-common.OutputOptions",
-              "text": "OutputOptions"
+              "docId": "kibInferencePluginApi",
+              "section": "def-common.Message",
+              "text": "Message"
             },
-            "<TId, TOutputSchema, TStream>) => ",
-            {
-              "pluginId": "@kbn/inference-common",
-              "scope": "common",
-              "docId": "kibKbnInferenceCommonPluginApi",
-              "section": "def-common.OutputCompositeResponse",
-              "text": "OutputCompositeResponse"
-            },
-            "<TId, TOutputSchema, TStream>"
+            "[] | undefined; functionCalling?: ",
+            "FunctionCallingMode",
+            " | undefined; }) => ",
+            "Observable",
+            "<",
+            "OutputEvent",
+            "<TId, TOutputSchema extends ToolSchemaTypeObject ? ",
+            "FromToolSchema",
+            "<TOutputSchema> : undefined>>"
           ],
           "path": "x-pack/plugins/inference/public/types.ts",
           "deprecated": false,
@@ -171,21 +145,38 @@
             {
               "parentPluginId": "inference",
               "id": "def-public.InferencePublicStart.output.$1",
+              "type": "Uncategorized",
+              "tags": [],
+              "label": "id",
+              "description": [],
+              "signature": [
+                "TId"
+              ],
+              "path": "x-pack/plugins/inference/common/output/index.ts",
+              "deprecated": false,
+              "trackAdoption": false
+            },
+            {
+              "parentPluginId": "inference",
+              "id": "def-public.InferencePublicStart.output.$2",
               "type": "Object",
               "tags": [],
               "label": "options",
               "description": [],
               "signature": [
+                "{ connectorId: string; system?: string | undefined; input: string; schema?: TOutputSchema | undefined; previousMessages?: ",
                 {
-                  "pluginId": "@kbn/inference-common",
+                  "pluginId": "inference",
                   "scope": "common",
-                  "docId": "kibKbnInferenceCommonPluginApi",
-                  "section": "def-common.OutputOptions",
-                  "text": "OutputOptions"
+                  "docId": "kibInferencePluginApi",
+                  "section": "def-common.Message",
+                  "text": "Message"
                 },
-                "<TId, TOutputSchema, TStream>"
+                "[] | undefined; functionCalling?: ",
+                "FunctionCallingMode",
+                " | undefined; }"
               ],
-              "path": "x-pack/packages/ai-infra/inference-common/src/output/api.ts",
+              "path": "x-pack/plugins/inference/common/output/index.ts",
               "deprecated": false,
               "trackAdoption": false
             }
@@ -256,6 +247,69 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "inference",
+        "id": "def-server.withoutChunkEvents",
+        "type": "Function",
+        "tags": [],
+        "label": "withoutChunkEvents",
+        "description": [],
+        "signature": [
+          "() => ",
+          "OperatorFunction",
+          "<T, Exclude<T, ",
+          "ChatCompletionChunkEvent",
+          ">>"
+        ],
+        "path": "x-pack/plugins/inference/common/chat_complete/without_chunk_events.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "inference",
+        "id": "def-server.withoutOutputUpdateEvents",
+        "type": "Function",
+        "tags": [],
+        "label": "withoutOutputUpdateEvents",
+        "description": [],
+        "signature": [
+          "() => ",
+          "OperatorFunction",
+          "<T, Exclude<T, { id: string; content: string; } & { type: ",
+          "OutputEventType",
+          ".OutputUpdate; }>>"
+        ],
+        "path": "x-pack/plugins/inference/common/output/without_output_update_events.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "inference",
+        "id": "def-server.withoutTokenCountEvents",
+        "type": "Function",
+        "tags": [],
+        "label": "withoutTokenCountEvents",
+        "description": [],
+        "signature": [
+          "() => ",
+          "OperatorFunction",
+          "<T, Exclude<T, ",
+          "ChatCompletionTokenCountEvent",
+          ">>"
+        ],
+        "path": "x-pack/plugins/inference/common/chat_complete/without_token_count_events.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [
@@ -281,38 +335,22 @@
             ],
             "signature": [
               "<TToolOptions extends ",
-              {
-                "pluginId": "@kbn/inference-common",
-                "scope": "common",
-                "docId": "kibKbnInferenceCommonPluginApi",
-                "section": "def-common.ToolOptions",
-                "text": "ToolOptions"
-              },
+              "ToolOptions",
               "<string> = ",
+              "ToolOptions",
+              "<string>>(options: { connectorId: string; system?: string | undefined; messages: ",
               {
-                "pluginId": "@kbn/inference-common",
+                "pluginId": "inference",
                 "scope": "common",
-                "docId": "kibKbnInferenceCommonPluginApi",
-                "section": "def-common.ToolOptions",
-                "text": "ToolOptions"
+                "docId": "kibInferencePluginApi",
+                "section": "def-common.Message",
+                "text": "Message"
               },
-              "<string>, TStream extends boolean = false>(options: ",
-              {
-                "pluginId": "@kbn/inference-common",
-                "scope": "common",
-                "docId": "kibKbnInferenceCommonPluginApi",
-                "section": "def-common.ChatCompleteOptions",
-                "text": "ChatCompleteOptions"
-              },
-              "<TToolOptions, TStream>) => ",
-              {
-                "pluginId": "@kbn/inference-common",
-                "scope": "common",
-                "docId": "kibKbnInferenceCommonPluginApi",
-                "section": "def-common.ChatCompleteCompositeResponse",
-                "text": "ChatCompleteCompositeResponse"
-              },
-              "<TToolOptions, TStream>"
+              "[]; functionCalling?: ",
+              "FunctionCallingMode",
+              " | undefined; } & TToolOptions) => ",
+              "ChatCompletionResponse",
+              "<TToolOptions>"
             ],
             "path": "x-pack/plugins/inference/server/types.ts",
             "deprecated": false,
@@ -327,25 +365,19 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  "{ connectorId: string; stream?: TStream | undefined; system?: string | undefined; messages: ",
+                  "{ connectorId: string; system?: string | undefined; messages: ",
                   {
-                    "pluginId": "@kbn/inference-common",
+                    "pluginId": "inference",
                     "scope": "common",
-                    "docId": "kibKbnInferenceCommonPluginApi",
+                    "docId": "kibInferencePluginApi",
                     "section": "def-common.Message",
                     "text": "Message"
                   },
                   "[]; functionCalling?: ",
-                  {
-                    "pluginId": "@kbn/inference-common",
-                    "scope": "common",
-                    "docId": "kibKbnInferenceCommonPluginApi",
-                    "section": "def-common.FunctionCallingMode",
-                    "text": "FunctionCallingMode"
-                  },
+                  "FunctionCallingMode",
                   " | undefined; } & TToolOptions"
                 ],
-                "path": "x-pack/packages/ai-infra/inference-common/src/chat_complete/api.ts",
+                "path": "x-pack/plugins/inference/common/chat_complete/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -361,27 +393,23 @@
               "\n`output` asks the LLM to generate a structured (JSON)\nresponse based on a schema and a prompt or conversation."
             ],
             "signature": [
-              "<TId extends string = string, TOutputSchema extends ",
-              "ToolSchemaTypeObject",
-              " | undefined = ",
-              "ToolSchemaTypeObject",
-              " | undefined, TStream extends boolean = false>(options: ",
+              "<TId extends string = string, TOutputSchema extends ToolSchemaTypeObject | undefined = ToolSchemaTypeObject | undefined>(id: TId, options: { connectorId: string; system?: string | undefined; input: string; schema?: TOutputSchema | undefined; previousMessages?: ",
               {
-                "pluginId": "@kbn/inference-common",
+                "pluginId": "inference",
                 "scope": "common",
-                "docId": "kibKbnInferenceCommonPluginApi",
-                "section": "def-common.OutputOptions",
-                "text": "OutputOptions"
+                "docId": "kibInferencePluginApi",
+                "section": "def-common.Message",
+                "text": "Message"
               },
-              "<TId, TOutputSchema, TStream>) => ",
-              {
-                "pluginId": "@kbn/inference-common",
-                "scope": "common",
-                "docId": "kibKbnInferenceCommonPluginApi",
-                "section": "def-common.OutputCompositeResponse",
-                "text": "OutputCompositeResponse"
-              },
-              "<TId, TOutputSchema, TStream>"
+              "[] | undefined; functionCalling?: ",
+              "FunctionCallingMode",
+              " | undefined; }) => ",
+              "Observable",
+              "<",
+              "OutputEvent",
+              "<TId, TOutputSchema extends ToolSchemaTypeObject ? ",
+              "FromToolSchema",
+              "<TOutputSchema> : undefined>>"
             ],
             "path": "x-pack/plugins/inference/server/types.ts",
             "deprecated": false,
@@ -391,21 +419,38 @@
               {
                 "parentPluginId": "inference",
                 "id": "def-server.InferenceClient.output.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "TId"
+                ],
+                "path": "x-pack/plugins/inference/common/output/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "inference",
+                "id": "def-server.InferenceClient.output.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
                 "description": [],
                 "signature": [
+                  "{ connectorId: string; system?: string | undefined; input: string; schema?: TOutputSchema | undefined; previousMessages?: ",
                   {
-                    "pluginId": "@kbn/inference-common",
+                    "pluginId": "inference",
                     "scope": "common",
-                    "docId": "kibKbnInferenceCommonPluginApi",
-                    "section": "def-common.OutputOptions",
-                    "text": "OutputOptions"
+                    "docId": "kibInferencePluginApi",
+                    "section": "def-common.Message",
+                    "text": "Message"
                   },
-                  "<TId, TOutputSchema, TStream>"
+                  "[] | undefined; functionCalling?: ",
+                  "FunctionCallingMode",
+                  " | undefined; }"
                 ],
-                "path": "x-pack/packages/ai-infra/inference-common/src/output/api.ts",
+                "path": "x-pack/plugins/inference/common/output/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -565,143 +610,6 @@
       },
       {
         "parentPluginId": "inference",
-        "id": "def-common.createOutputApi",
-        "type": "Function",
-        "tags": [],
-        "label": "createOutputApi",
-        "description": [],
-        "signature": [
-          "(chatCompleteApi: ",
-          {
-            "pluginId": "@kbn/inference-common",
-            "scope": "common",
-            "docId": "kibKbnInferenceCommonPluginApi",
-            "section": "def-common.ChatCompleteAPI",
-            "text": "ChatCompleteAPI"
-          },
-          ") => ",
-          {
-            "pluginId": "@kbn/inference-common",
-            "scope": "common",
-            "docId": "kibKbnInferenceCommonPluginApi",
-            "section": "def-common.OutputAPI",
-            "text": "OutputAPI"
-          }
-        ],
-        "path": "x-pack/plugins/inference/common/create_output_api.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "inference",
-            "id": "def-common.createOutputApi.$1",
-            "type": "Function",
-            "tags": [],
-            "label": "chatCompleteApi",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/inference-common",
-                "scope": "common",
-                "docId": "kibKbnInferenceCommonPluginApi",
-                "section": "def-common.ChatCompleteAPI",
-                "text": "ChatCompleteAPI"
-              }
-            ],
-            "path": "x-pack/plugins/inference/common/create_output_api.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "inference",
-        "id": "def-common.createOutputApi",
-        "type": "Function",
-        "tags": [],
-        "label": "createOutputApi",
-        "description": [],
-        "signature": [
-          "(chatCompleteApi: ",
-          {
-            "pluginId": "@kbn/inference-common",
-            "scope": "common",
-            "docId": "kibKbnInferenceCommonPluginApi",
-            "section": "def-common.ChatCompleteAPI",
-            "text": "ChatCompleteAPI"
-          },
-          ") => ({ id, connectorId, input, schema, system, previousMessages, functionCalling, stream, }: ",
-          {
-            "pluginId": "@kbn/inference-common",
-            "scope": "common",
-            "docId": "kibKbnInferenceCommonPluginApi",
-            "section": "def-common.OutputOptions",
-            "text": "OutputOptions"
-          },
-          "<string, ",
-          "ToolSchemaTypeObject",
-          " | undefined, boolean>) => ",
-          "Observable",
-          "<{ type: ",
-          {
-            "pluginId": "@kbn/inference-common",
-            "scope": "common",
-            "docId": "kibKbnInferenceCommonPluginApi",
-            "section": "def-common.OutputEventType",
-            "text": "OutputEventType"
-          },
-          "; id: string; content: string; output?: undefined; } | { id: string; output: ",
-          "AugmentedRequired",
-          "<{ [x: string]: string | number | boolean | ",
-          "AugmentedRequired",
-          "<any, never> | FromToolSchemaArray<ToolSchemaTypeArray> | undefined; }, never> | undefined; content: string; type: ",
-          {
-            "pluginId": "@kbn/inference-common",
-            "scope": "common",
-            "docId": "kibKbnInferenceCommonPluginApi",
-            "section": "def-common.OutputEventType",
-            "text": "OutputEventType"
-          },
-          "; }> | Promise<{ id: string; content: string; output: ",
-          "AugmentedRequired",
-          "<{ [x: string]: string | number | boolean | ",
-          "AugmentedRequired",
-          "<any, never> | FromToolSchemaArray<ToolSchemaTypeArray> | undefined; }, never> | undefined; }>"
-        ],
-        "path": "x-pack/plugins/inference/common/create_output_api.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "inference",
-            "id": "def-common.createOutputApi.$1",
-            "type": "Function",
-            "tags": [],
-            "label": "chatCompleteApi",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/inference-common",
-                "scope": "common",
-                "docId": "kibKbnInferenceCommonPluginApi",
-                "section": "def-common.ChatCompleteAPI",
-                "text": "ChatCompleteAPI"
-              }
-            ],
-            "path": "x-pack/plugins/inference/common/create_output_api.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "inference",
         "id": "def-common.generateFakeToolCallId",
         "type": "Function",
         "tags": [],
@@ -710,10 +618,225 @@
         "signature": [
           "() => string"
         ],
-        "path": "x-pack/plugins/inference/common/utils/generate_fake_tool_call_id.ts",
+        "path": "x-pack/plugins/inference/common/chat_complete/generate_fake_tool_call_id.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "inference",
+        "id": "def-common.isChatCompletionChunkEvent",
+        "type": "Function",
+        "tags": [],
+        "label": "isChatCompletionChunkEvent",
+        "description": [],
+        "signature": [
+          "(event: ",
+          "ChatCompletionEvent",
+          "<",
+          "ToolOptions",
+          "<string>>) => boolean"
+        ],
+        "path": "x-pack/plugins/inference/common/chat_complete/is_chat_completion_chunk_event.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "inference",
+            "id": "def-common.isChatCompletionChunkEvent.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "event",
+            "description": [],
+            "signature": [
+              "ChatCompletionEvent",
+              "<",
+              "ToolOptions",
+              "<string>>"
+            ],
+            "path": "x-pack/plugins/inference/common/chat_complete/is_chat_completion_chunk_event.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "inference",
+        "id": "def-common.isChatCompletionEvent",
+        "type": "Function",
+        "tags": [],
+        "label": "isChatCompletionEvent",
+        "description": [],
+        "signature": [
+          "(event: ",
+          "InferenceTaskEvent",
+          ") => boolean"
+        ],
+        "path": "x-pack/plugins/inference/common/chat_complete/is_chat_completion_event.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "inference",
+            "id": "def-common.isChatCompletionEvent.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "event",
+            "description": [],
+            "signature": [
+              "InferenceTaskEvent"
+            ],
+            "path": "x-pack/plugins/inference/common/chat_complete/is_chat_completion_event.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "inference",
+        "id": "def-common.isChatCompletionMessageEvent",
+        "type": "Function",
+        "tags": [],
+        "label": "isChatCompletionMessageEvent",
+        "description": [],
+        "signature": [
+          "(event: ",
+          "ChatCompletionEvent",
+          "<T>) => boolean"
+        ],
+        "path": "x-pack/plugins/inference/common/chat_complete/is_chat_completion_message_event.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "inference",
+            "id": "def-common.isChatCompletionMessageEvent.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "event",
+            "description": [],
+            "signature": [
+              "ChatCompletionEvent",
+              "<T>"
+            ],
+            "path": "x-pack/plugins/inference/common/chat_complete/is_chat_completion_message_event.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "inference",
+        "id": "def-common.isOutputCompleteEvent",
+        "type": "Function",
+        "tags": [],
+        "label": "isOutputCompleteEvent",
+        "description": [],
+        "signature": [
+          "(event: TOutputEvent) => boolean"
+        ],
+        "path": "x-pack/plugins/inference/common/output/is_output_complete_event.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "inference",
+            "id": "def-common.isOutputCompleteEvent.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "event",
+            "description": [],
+            "signature": [
+              "TOutputEvent"
+            ],
+            "path": "x-pack/plugins/inference/common/output/is_output_complete_event.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "inference",
+        "id": "def-common.isOutputEvent",
+        "type": "Function",
+        "tags": [],
+        "label": "isOutputEvent",
+        "description": [],
+        "signature": [
+          "(event: ",
+          "InferenceTaskEvent",
+          ") => boolean"
+        ],
+        "path": "x-pack/plugins/inference/common/output/is_output_event.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "inference",
+            "id": "def-common.isOutputEvent.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "event",
+            "description": [],
+            "signature": [
+              "InferenceTaskEvent"
+            ],
+            "path": "x-pack/plugins/inference/common/output/is_output_event.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "inference",
+        "id": "def-common.isOutputUpdateEvent",
+        "type": "Function",
+        "tags": [],
+        "label": "isOutputUpdateEvent",
+        "description": [],
+        "signature": [
+          "(event: ",
+          "OutputEvent",
+          "<string, unknown>) => boolean"
+        ],
+        "path": "x-pack/plugins/inference/common/output/is_output_update_event.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "inference",
+            "id": "def-common.isOutputUpdateEvent.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "event",
+            "description": [],
+            "signature": [
+              "OutputEvent",
+              "<string, unknown>"
+            ],
+            "path": "x-pack/plugins/inference/common/output/is_output_update_event.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -751,74 +874,142 @@
         "initialIsOpen": false
       }
     ],
-    "interfaces": [
+    "interfaces": [],
+    "enums": [
       {
         "parentPluginId": "inference",
-        "id": "def-common.GetConnectorsResponseBody",
-        "type": "Interface",
+        "id": "def-common.MessageRole",
+        "type": "Enum",
         "tags": [],
-        "label": "GetConnectorsResponseBody",
+        "label": "MessageRole",
         "description": [],
-        "path": "x-pack/plugins/inference/common/http_apis.ts",
+        "path": "x-pack/plugins/inference/common/chat_complete/index.ts",
         "deprecated": false,
         "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "inference",
-            "id": "def-common.GetConnectorsResponseBody.connectors",
-            "type": "Array",
-            "tags": [],
-            "label": "connectors",
-            "description": [],
-            "signature": [
-              "InferenceConnector",
-              "[]"
-            ],
-            "path": "x-pack/plugins/inference/common/http_apis.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
         "initialIsOpen": false
       }
     ],
-    "enums": [],
     "misc": [
       {
         "parentPluginId": "inference",
-        "id": "def-common.ChatCompleteRequestBody",
+        "id": "def-common.AssistantMessage",
         "type": "Type",
         "tags": [],
-        "label": "ChatCompleteRequestBody",
+        "label": "AssistantMessage",
         "description": [],
         "signature": [
-          "{ connectorId: string; stream?: boolean | undefined; system?: string | undefined; messages: ",
+          "MessageBase<",
           {
-            "pluginId": "@kbn/inference-common",
+            "pluginId": "inference",
             "scope": "common",
-            "docId": "kibKbnInferenceCommonPluginApi",
-            "section": "def-common.Message",
-            "text": "Message"
+            "docId": "kibInferencePluginApi",
+            "section": "def-common.MessageRole",
+            "text": "MessageRole"
           },
-          "[]; functionCalling?: ",
-          {
-            "pluginId": "@kbn/inference-common",
-            "scope": "common",
-            "docId": "kibKbnInferenceCommonPluginApi",
-            "section": "def-common.FunctionCallingMode",
-            "text": "FunctionCallingMode"
-          },
-          " | undefined; } & ",
-          {
-            "pluginId": "@kbn/inference-common",
-            "scope": "common",
-            "docId": "kibKbnInferenceCommonPluginApi",
-            "section": "def-common.ToolOptions",
-            "text": "ToolOptions"
-          },
-          "<string>"
+          ".Assistant> & { content: string | null; toolCalls?: ",
+          "ToolCall",
+          "<string, Record<string, any> | undefined>[] | undefined; }"
         ],
-        "path": "x-pack/plugins/inference/common/http_apis.ts",
+        "path": "x-pack/plugins/inference/common/chat_complete/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "inference",
+        "id": "def-common.Message",
+        "type": "Type",
+        "tags": [],
+        "label": "Message",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "inference",
+            "scope": "common",
+            "docId": "kibInferencePluginApi",
+            "section": "def-common.UserMessage",
+            "text": "UserMessage"
+          },
+          " | ",
+          {
+            "pluginId": "inference",
+            "scope": "common",
+            "docId": "kibInferencePluginApi",
+            "section": "def-common.AssistantMessage",
+            "text": "AssistantMessage"
+          },
+          " | ",
+          {
+            "pluginId": "inference",
+            "scope": "common",
+            "docId": "kibInferencePluginApi",
+            "section": "def-common.ToolMessage",
+            "text": "ToolMessage"
+          },
+          "<unknown>"
+        ],
+        "path": "x-pack/plugins/inference/common/chat_complete/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "inference",
+        "id": "def-common.ToolMessage",
+        "type": "Type",
+        "tags": [],
+        "label": "ToolMessage",
+        "description": [],
+        "signature": [
+          "MessageBase<",
+          {
+            "pluginId": "inference",
+            "scope": "common",
+            "docId": "kibInferencePluginApi",
+            "section": "def-common.MessageRole",
+            "text": "MessageRole"
+          },
+          ".Tool> & { toolCallId: string; response: TToolResponse; }"
+        ],
+        "path": "x-pack/plugins/inference/common/chat_complete/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "inference",
+        "id": "def-common.ToolSchema",
+        "type": "Type",
+        "tags": [],
+        "label": "ToolSchema",
+        "description": [],
+        "signature": [
+          "ToolSchemaTypeObject"
+        ],
+        "path": "x-pack/plugins/inference/common/chat_complete/tool_schema.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "inference",
+        "id": "def-common.UserMessage",
+        "type": "Type",
+        "tags": [],
+        "label": "UserMessage",
+        "description": [],
+        "signature": [
+          "MessageBase<",
+          {
+            "pluginId": "inference",
+            "scope": "common",
+            "docId": "kibInferencePluginApi",
+            "section": "def-common.MessageRole",
+            "text": "MessageRole"
+          },
+          ".User> & { content: string; }"
+        ],
+        "path": "x-pack/plugins/inference/common/chat_complete/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -371,7 +371,7 @@ The following component menus are available:
 
 When creating or editing a visualization, you can customize the way the legend gets displayed, and the data it displays. To do that, look for the image:images/legend-icon.svg[Legend icon] icon.
 
-image::images/legend-popover-8.16.0.png[Menu with options to customize the legend of a visualization, width=50%]
+image::images/legend-popover.png[Menu with options to customize the legend of a visualization, width=40%]
 
 NOTE: The options available can vary based on the type of chart you're setting up. For example, showing additional statistics is only possible for time series charts.
 

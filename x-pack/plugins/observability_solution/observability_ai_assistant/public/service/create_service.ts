@@ -20,13 +20,13 @@ export function createService({
   analytics,
   coreStart,
   enabled,
-  scopes,
+  scope,
   scopeIsMutable,
 }: {
   analytics: AnalyticsServiceStart;
   coreStart: CoreStart;
   enabled: boolean;
-  scopes: [AssistantScope];
+  scope: AssistantScope;
   scopeIsMutable: boolean;
 }): ObservabilityAIAssistantService {
   const apiClient = createCallObservabilityAIAssistantAPI(coreStart);
@@ -36,19 +36,15 @@ export function createService({
   const screenContexts$ = new BehaviorSubject<ObservabilityAIAssistantScreenContext[]>([
     { starterPrompts: defaultStarterPrompts },
   ]);
-  const predefinedConversation$ = new Subject<{
-    messages: Message[];
-    title?: string;
-    hideConversationList?: boolean;
-  }>();
+  const predefinedConversation$ = new Subject<{ messages: Message[]; title?: string }>();
 
-  const scope$ = new BehaviorSubject<AssistantScope[]>(scopes);
+  const scope$ = new BehaviorSubject<AssistantScope>(scope);
 
   const getScreenContexts = () => {
-    const currentScopes = scope$.value;
+    const currentScope = scope$.value;
     const screenContexts = screenContexts$.value.map(({ starterPrompts, ...rest }) => ({
       ...rest,
-      starterPrompts: starterPrompts?.filter(filterScopes(currentScopes)),
+      starterPrompts: starterPrompts?.filter(filterScopes(currentScope)),
     }));
     return screenContexts;
   };
@@ -62,13 +58,7 @@ export function createService({
     },
     start: async ({ signal }) => {
       const mod = await import('./create_chat_service');
-      return await mod.createChatService({
-        analytics,
-        apiClient,
-        signal,
-        registrations,
-        scope$,
-      });
+      return await mod.createChatService({ analytics, apiClient, signal, registrations, scope$ });
     },
     callApi: apiClient,
     getScreenContexts,
@@ -108,25 +98,17 @@ export function createService({
       );
     },
     conversations: {
-      openNewConversation: ({
-        messages,
-        title,
-        hideConversationList = false,
-      }: {
-        messages: Message[];
-        title?: string;
-        hideConversationList?: boolean;
-      }) => {
-        predefinedConversation$.next({ messages, title, hideConversationList });
+      openNewConversation: ({ messages, title }: { messages: Message[]; title?: string }) => {
+        predefinedConversation$.next({ messages, title });
       },
       predefinedConversation$: predefinedConversation$.asObservable(),
     },
-    setScopes: (newScopes: AssistantScope[]) => {
+    setScope: (newScope: AssistantScope) => {
       if (!scopeIsMutable) {
-        scope$.next(newScopes);
+        scope$.next(newScope);
       }
     },
-    getScopes: () => scope$.value,
+    getScope: () => scope$.value,
     scope$,
   };
 }

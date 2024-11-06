@@ -15,6 +15,7 @@ import {
   EuiBadge,
   EuiLink,
 } from '@elastic/eui';
+import { FlyoutHeader, FlyoutTitle } from '@kbn/security-solution-common';
 import { DELETED_RULE } from '../../../detection_engine/rule_details_ui/pages/rule_details/translations';
 import { CreatedBy, UpdatedBy } from '../../../detections/components/rules/rule_info';
 import {
@@ -26,8 +27,6 @@ import {
 } from './test_ids';
 import type { RuleResponse } from '../../../../common/api/detection_engine';
 import { useRuleDetailsLink } from '../../document_details/shared/hooks/use_rule_details_link';
-import { FlyoutHeader } from '../../shared/components/flyout_header';
-import { FlyoutTitle } from '../../shared/components/flyout_title';
 
 export interface PanelHeaderProps {
   /**

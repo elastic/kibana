@@ -20,6 +20,7 @@ function zodMaskFor<T>() {
     return Object.assign({}, ...propObjects);
   };
 }
+
 /**
  * The PrebuiltRuleAsset schema is created based on the rule schema defined in our OpenAPI specs.
  * However, we don't need all the rule schema fields to be present in the PrebuiltRuleAsset.
@@ -38,7 +39,6 @@ const BASE_PROPS_REMOVED_FROM_PREBUILT_RULE_ASSET = zodMaskFor<BaseCreateProps>(
   'outcome',
 ]);
 
-export type PrebuiltAssetBaseProps = z.infer<typeof PrebuiltAssetBaseProps>;
 export const PrebuiltAssetBaseProps = BaseCreateProps.omit(
   BASE_PROPS_REMOVED_FROM_PREBUILT_RULE_ASSET
 );
@@ -65,3 +65,31 @@ export const PrebuiltRuleAsset = PrebuiltAssetBaseProps.and(TypeSpecificCreatePr
     version: RuleVersion,
   })
 );
+
+function createUpgradableRuleFieldsPayloadByType() {
+  const baseFields = Object.keys(PrebuiltAssetBaseProps.shape);
+
+  return new Map(
+    TypeSpecificCreatePropsInternal.options.map((option) => {
+      const typeName = option.shape.type.value;
+      const typeSpecificFieldsForType = Object.keys(option.shape);
+
+      return [typeName, [...baseFields, ...typeSpecificFieldsForType]];
+    })
+  );
+}
+
+/**
+ * Map of the fields payloads to be passed to the `upgradePrebuiltRules()` method during the
+ * Upgrade workflow (`/upgrade/_perform` endpoint) by type.
+ *
+ * Creating this Map dynamically, based on BaseCreateProps and TypeSpecificFields, ensures that we don't need to:
+ *  - manually add rule types to this Map if they are created
+ *  - manually add or remove any fields if they are added or removed to a specific rule type
+ *  - manually add or remove any fields if we decide that they should not be part of the upgradable fields.
+ *
+ * Notice that this Map includes, for each rule type, all fields that are part of the BaseCreateProps and all fields that
+ * are part of the TypeSpecificFields, including those that are not part of RuleUpgradeSpecifierFields schema, where
+ * the user of the /upgrade/_perform endpoint can specify which fields to upgrade during the upgrade workflow.
+ */
+export const UPGRADABLE_FIELDS_PAYLOAD_BY_RULE_TYPE = createUpgradableRuleFieldsPayloadByType();

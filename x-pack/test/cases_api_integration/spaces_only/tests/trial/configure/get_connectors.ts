@@ -77,13 +77,13 @@ export default ({ getService }: FtrProviderContext): void => {
         auth: authSpace1,
       });
 
-      actionsRemover.add(space, sir.id, 'connector', 'actions');
-      actionsRemover.add(space, snConnector.id, 'connector', 'actions');
-      actionsRemover.add(space, snOAuthConnector.id, 'connector', 'actions');
-      actionsRemover.add(space, emailConnector.id, 'connector', 'actions');
-      actionsRemover.add(space, jiraConnector.id, 'connector', 'actions');
-      actionsRemover.add(space, resilientConnector.id, 'connector', 'actions');
-      actionsRemover.add(space, casesWebhookConnector.id, 'connector', 'actions');
+      actionsRemover.add(space, sir.id, 'action', 'actions');
+      actionsRemover.add(space, snConnector.id, 'action', 'actions');
+      actionsRemover.add(space, snOAuthConnector.id, 'action', 'actions');
+      actionsRemover.add(space, emailConnector.id, 'action', 'actions');
+      actionsRemover.add(space, jiraConnector.id, 'action', 'actions');
+      actionsRemover.add(space, resilientConnector.id, 'action', 'actions');
+      actionsRemover.add(space, casesWebhookConnector.id, 'action', 'actions');
 
       const connectors = await getCaseConnectors({
         supertest: supertestWithoutAuth,
@@ -256,12 +256,12 @@ export default ({ getService }: FtrProviderContext): void => {
         auth: authSpace1,
       });
 
-      actionsRemover.add(space, sir.id, 'connector', 'actions');
-      actionsRemover.add(space, snConnector.id, 'connector', 'actions');
-      actionsRemover.add(space, snOAuthConnector.id, 'connector', 'actions');
-      actionsRemover.add(space, emailConnector.id, 'connector', 'actions');
-      actionsRemover.add(space, jiraConnector.id, 'connector', 'actions');
-      actionsRemover.add(space, resilientConnector.id, 'connector', 'actions');
+      actionsRemover.add(space, sir.id, 'action', 'actions');
+      actionsRemover.add(space, snConnector.id, 'action', 'actions');
+      actionsRemover.add(space, snOAuthConnector.id, 'action', 'actions');
+      actionsRemover.add(space, emailConnector.id, 'action', 'actions');
+      actionsRemover.add(space, jiraConnector.id, 'action', 'actions');
+      actionsRemover.add(space, resilientConnector.id, 'action', 'actions');
 
       const connectors = await getCaseConnectors({
         supertest: supertestWithoutAuth,

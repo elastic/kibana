@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { EuiDataGridColumn } from '@elastic/eui';
+import { EuiDataGridColumn, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { LogCategory } from '../../types';
-import { LogCategoryPattern } from '../shared/log_category_pattern';
 
 export const logCategoriesGridPatternColumn = {
   id: 'pattern' as const,
@@ -27,5 +27,34 @@ export interface LogCategoriesGridPatternCellProps {
 export const LogCategoriesGridPatternCell: React.FC<LogCategoriesGridPatternCellProps> = ({
   logCategory,
 }) => {
-  return <LogCategoryPattern logCategory={logCategory} />;
+  const theme = useEuiTheme();
+  const { euiTheme } = theme;
+  const termsList = useMemo(() => logCategory.terms.split(' '), [logCategory.terms]);
+
+  const commonStyle = css`
+    display: inline-block;
+    font-family: ${euiTheme.font.familyCode};
+    margin-right: ${euiTheme.size.xs};
+  `;
+
+  const termStyle = css`
+    ${commonStyle};
+  `;
+
+  const separatorStyle = css`
+    ${commonStyle};
+    color: ${euiTheme.colors.successText};
+  `;
+
+  return (
+    <pre>
+      <div css={separatorStyle}>*</div>
+      {termsList.map((term, index) => (
+        <React.Fragment key={index}>
+          <div css={termStyle}>{term}</div>
+          <div css={separatorStyle}>*</div>
+        </React.Fragment>
+      ))}
+    </pre>
+  );
 };

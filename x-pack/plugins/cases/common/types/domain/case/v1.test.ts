@@ -85,11 +85,6 @@ const basicCase = {
       type: 'toggle',
       value: true,
     },
-    {
-      key: 'third_custom_field_key',
-      type: 'number',
-      value: 0,
-    },
   ],
 };
 
@@ -197,11 +192,6 @@ describe('CaseAttributesRt', () => {
         key: 'second_custom_field_key',
         type: 'toggle',
         value: true,
-      },
-      {
-        key: 'third_custom_field_key',
-        type: 'number',
-        value: 0,
       },
     ],
   };

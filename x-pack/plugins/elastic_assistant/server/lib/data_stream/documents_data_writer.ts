@@ -34,10 +34,7 @@ interface BulkParams<TUpdateParams extends { id: string }, TCreateParams> {
   documentsToCreate?: TCreateParams[];
   documentsToUpdate?: TUpdateParams[];
   documentsToDelete?: string[];
-  getUpdateScript?: (
-    document: TUpdateParams,
-    updatedAt: string
-  ) => { script?: Script; doc?: TUpdateParams };
+  getUpdateScript?: (document: TUpdateParams, updatedAt: string) => Script;
   authenticatedUser?: AuthenticatedUser;
 }
 
@@ -76,7 +73,7 @@ export class DocumentsDataWriter implements DocumentsDataWriter {
           body: await this.buildBulkOperations(params),
         },
         {
-          // Increasing timeout to 2min as KB docs were failing to load after 30s
+          // Increasing timout to 2min as KB docs were failing to load after 30s
           requestTimeout: 120000,
         }
       );
@@ -120,13 +117,8 @@ export class DocumentsDataWriter implements DocumentsDataWriter {
           {
             bool: {
               must_not: {
-                nested: {
-                  path: 'users',
-                  query: {
-                    exists: {
-                      field: 'users',
-                    },
-                  },
+                exists: {
+                  field: 'users',
                 },
               },
             },
@@ -154,10 +146,7 @@ export class DocumentsDataWriter implements DocumentsDataWriter {
 
   private getUpdateDocumentsQuery = async <TUpdateParams extends { id: string }>(
     documentsToUpdate: TUpdateParams[],
-    getUpdateScript: (
-      document: TUpdateParams,
-      updatedAt: string
-    ) => { script?: Script; doc?: TUpdateParams },
+    getUpdateScript: (document: TUpdateParams, updatedAt: string) => Script,
     authenticatedUser?: AuthenticatedUser
   ) => {
     const updatedAt = new Date().toISOString();
@@ -202,7 +191,10 @@ export class DocumentsDataWriter implements DocumentsDataWriter {
           _source: true,
         },
       },
-      getUpdateScript(document, updatedAt),
+      {
+        script: getUpdateScript(document, updatedAt),
+        upsert: { counter: 1 },
+      },
     ]);
   };
 

@@ -60,7 +60,7 @@ export function ChatHeader({
   onCopyConversation: () => void;
   onSaveTitle: (title: string) => void;
   onToggleFlyoutPositionMode?: (newFlyoutPositionMode: FlyoutPositionMode) => void;
-  navigateToConversation?: (nextConversationId?: string) => void;
+  navigateToConversation: (nextConversationId?: string) => void;
 }) {
   const theme = useEuiTheme();
   const breakpoint = useCurrentEuiBreakpoint();
@@ -164,32 +164,31 @@ export function ChatHeader({
                     }
                   />
                 </EuiFlexItem>
-                {navigateToConversation ? (
-                  <EuiFlexItem grow={false}>
-                    <EuiPopover
-                      anchorPosition="downLeft"
-                      button={
-                        <EuiToolTip
-                          content={i18n.translate(
-                            'xpack.aiAssistant.chatHeader.euiToolTip.navigateToConversationsLabel',
+
+                <EuiFlexItem grow={false}>
+                  <EuiPopover
+                    anchorPosition="downLeft"
+                    button={
+                      <EuiToolTip
+                        content={i18n.translate(
+                          'xpack.aiAssistant.chatHeader.euiToolTip.navigateToConversationsLabel',
+                          { defaultMessage: 'Navigate to conversations' }
+                        )}
+                        display="block"
+                      >
+                        <EuiButtonIcon
+                          aria-label={i18n.translate(
+                            'xpack.aiAssistant.chatHeader.euiButtonIcon.navigateToConversationsLabel',
                             { defaultMessage: 'Navigate to conversations' }
                           )}
-                          display="block"
-                        >
-                          <EuiButtonIcon
-                            aria-label={i18n.translate(
-                              'xpack.aiAssistant.chatHeader.euiButtonIcon.navigateToConversationsLabel',
-                              { defaultMessage: 'Navigate to conversations' }
-                            )}
-                            data-test-subj="observabilityAiAssistantChatHeaderButton"
-                            iconType="discuss"
-                            onClick={() => navigateToConversation(conversationId)}
-                          />
-                        </EuiToolTip>
-                      }
-                    />
-                  </EuiFlexItem>
-                ) : null}
+                          data-test-subj="observabilityAiAssistantChatHeaderButton"
+                          iconType="discuss"
+                          onClick={() => navigateToConversation(conversationId)}
+                        />
+                      </EuiToolTip>
+                    }
+                  />
+                </EuiFlexItem>
               </>
             ) : null}
 

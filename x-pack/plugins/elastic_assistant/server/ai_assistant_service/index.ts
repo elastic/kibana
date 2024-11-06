@@ -11,8 +11,7 @@ import type { AuthenticatedUser, Logger, ElasticsearchClient } from '@kbn/core/s
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import { Subject } from 'rxjs';
-import { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
-import { attackDiscoveryFieldMap } from '../lib/attack_discovery/persistence/field_maps_configuration/field_maps_configuration';
+import { attackDiscoveryFieldMap } from '../ai_assistant_data_clients/attack_discovery/field_maps_configuration';
 import { getDefaultAnonymizationFields } from '../../common/anonymization';
 import { AssistantResourceNames, GetElser } from '../types';
 import { AIAssistantConversationsDataClient } from '../ai_assistant_data_clients/conversations';
@@ -35,9 +34,8 @@ import {
   AIAssistantKnowledgeBaseDataClient,
   GetAIAssistantKnowledgeBaseDataClientParams,
 } from '../ai_assistant_data_clients/knowledge_base';
-import { AttackDiscoveryDataClient } from '../lib/attack_discovery/persistence';
+import { AttackDiscoveryDataClient } from '../ai_assistant_data_clients/attack_discovery';
 import { createGetElserId, createPipeline, pipelineExists } from './helpers';
-import { hasAIAssistantLicense } from '../routes/helpers';
 
 const TOTAL_FIELDS_LIMIT = 2500;
 
@@ -58,7 +56,6 @@ export interface CreateAIAssistantClientParams {
   logger: Logger;
   spaceId: string;
   currentUser: AuthenticatedUser | null;
-  licensing: Promise<LicensingApiRequestHandlerContext>;
 }
 
 export type CreateDataStream = (params: {
@@ -100,7 +97,7 @@ export class AIAssistantService {
     this.knowledgeBaseDataStream = this.createDataStream({
       resource: 'knowledgeBase',
       kibanaVersion: options.kibanaVersion,
-      fieldMap: knowledgeBaseFieldMap,
+      fieldMap: knowledgeBaseFieldMap, // TODO: use V2 if FF is enabled
     });
     this.promptsDataStream = this.createDataStream({
       resource: 'prompts',
@@ -154,9 +151,7 @@ export class AIAssistantService {
       name: this.resourceNames.indexTemplate[resource],
       componentTemplateRefs: [this.resourceNames.componentTemplate[resource]],
       // Apply `default_pipeline` if pipeline exists for resource
-      ...(resource in this.resourceNames.pipelines &&
-      // Remove this param and initialization when the `assistantKnowledgeBaseByDefault` feature flag is removed
-      !(resource === 'knowledgeBase' && this.v2KnowledgeBaseEnabled)
+      ...(resource in this.resourceNames.pipelines
         ? {
             template: {
               settings: {
@@ -207,12 +202,7 @@ export class AIAssistantService {
         id: this.resourceNames.pipelines.knowledgeBase,
       });
       // TODO: When FF is removed, ensure pipeline is re-created for those upgrading
-      if (
-        // Install for v1
-        (!this.v2KnowledgeBaseEnabled && !pipelineCreated) ||
-        // Upgrade from v1 to v2
-        (pipelineCreated && this.v2KnowledgeBaseEnabled)
-      ) {
+      if (!pipelineCreated || this.v2KnowledgeBaseEnabled) {
         this.options.logger.debug(
           `Installing ingest pipeline - ${this.resourceNames.pipelines.knowledgeBase}`
         );
@@ -220,7 +210,6 @@ export class AIAssistantService {
           esClient,
           id: this.resourceNames.pipelines.knowledgeBase,
           modelId: await this.getElserId(),
-          v2KnowledgeBaseEnabled: this.v2KnowledgeBaseEnabled,
         });
 
         this.options.logger.debug(`Installed ingest pipeline: ${response}`);
@@ -248,7 +237,7 @@ export class AIAssistantService {
         pluginStop$: this.options.pluginStop$,
       });
     } catch (error) {
-      this.options.logger.warn(`Error initializing AI assistant resources: ${error.message}`);
+      this.options.logger.error(`Error initializing AI assistant resources: ${error.message}`);
       this.initialized = false;
       this.isInitializing = false;
       return errorResult(error.message);
@@ -293,8 +282,6 @@ export class AIAssistantService {
   };
 
   private async checkResourcesInstallation(opts: CreateAIAssistantClientParams) {
-    const licensing = await opts.licensing;
-    if (!hasAIAssistantLicense(licensing.license)) return null;
     // Check if resources installation has succeeded
     const { result: initialized, error } = await this.getSpaceResourcesInitializationPromise(
       opts.spaceId
@@ -405,7 +392,6 @@ export class AIAssistantService {
       setIsKBSetupInProgress: this.setIsKBSetupInProgress.bind(this),
       spaceId: opts.spaceId,
       v2KnowledgeBaseEnabled: opts.v2KnowledgeBaseEnabled ?? false,
-      manageGlobalKnowledgeBaseAIAssistant: opts.manageGlobalKnowledgeBaseAIAssistant ?? false,
     });
   }
 
@@ -515,7 +501,7 @@ export class AIAssistantService {
         await this.createDefaultAnonymizationFields(spaceId);
       }
     } catch (error) {
-      this.options.logger.warn(
+      this.options.logger.error(
         `Error initializing AI assistant namespace level resources: ${error.message}`
       );
       throw error;

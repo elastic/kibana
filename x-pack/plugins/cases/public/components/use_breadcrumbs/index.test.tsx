@@ -54,10 +54,10 @@ describe('useCasesBreadcrumbs', () => {
   describe('set all_cases breadcrumbs', () => {
     it('call setBreadcrumbs with all items', async () => {
       renderHook(() => useCasesBreadcrumbs(CasesDeepLinkId.cases), { wrapper });
-      expect(mockSetBreadcrumbs).toHaveBeenCalledWith(
-        [{ href: '/test', onClick: expect.any(Function), text: 'Test' }, { text: 'Cases' }],
-        { project: { value: [] } }
-      );
+      expect(mockSetBreadcrumbs).toHaveBeenCalledWith([
+        { href: '/test', onClick: expect.any(Function), text: 'Test' },
+        { text: 'Cases' },
+      ]);
       expect(mockSetServerlessBreadcrumbs).toHaveBeenCalledWith([]);
     });
 
@@ -76,14 +76,11 @@ describe('useCasesBreadcrumbs', () => {
   describe('set create_case breadcrumbs', () => {
     it('call setBreadcrumbs with all items', () => {
       renderHook(() => useCasesBreadcrumbs(CasesDeepLinkId.casesCreate), { wrapper });
-      expect(mockSetBreadcrumbs).toHaveBeenCalledWith(
-        [
-          { href: '/test', onClick: expect.any(Function), text: 'Test' },
-          { href: CasesDeepLinkId.cases, onClick: expect.any(Function), text: 'Cases' },
-          { text: 'Create' },
-        ],
-        { project: { value: [] } }
-      );
+      expect(mockSetBreadcrumbs).toHaveBeenCalledWith([
+        { href: '/test', onClick: expect.any(Function), text: 'Test' },
+        { href: CasesDeepLinkId.cases, onClick: expect.any(Function), text: 'Cases' },
+        { text: 'Create' },
+      ]);
       expect(mockSetServerlessBreadcrumbs).toHaveBeenCalledWith([]);
     });
 
@@ -103,14 +100,11 @@ describe('useCasesBreadcrumbs', () => {
     const title = 'Fake Title';
     it('call setBreadcrumbs with title', () => {
       renderHook(() => useCasesTitleBreadcrumbs(title), { wrapper });
-      expect(mockSetBreadcrumbs).toHaveBeenCalledWith(
-        [
-          { href: '/test', onClick: expect.any(Function), text: 'Test' },
-          { href: CasesDeepLinkId.cases, onClick: expect.any(Function), text: 'Cases' },
-          { text: title },
-        ],
-        { project: { value: [{ text: title }] } }
-      );
+      expect(mockSetBreadcrumbs).toHaveBeenCalledWith([
+        { href: '/test', onClick: expect.any(Function), text: 'Test' },
+        { href: CasesDeepLinkId.cases, onClick: expect.any(Function), text: 'Cases' },
+        { text: title },
+      ]);
       expect(mockSetServerlessBreadcrumbs).toHaveBeenCalledWith([{ text: title }]);
     });
 
@@ -129,14 +123,11 @@ describe('useCasesBreadcrumbs', () => {
   describe('set settings breadcrumbs', () => {
     it('call setBreadcrumbs with all items', () => {
       renderHook(() => useCasesBreadcrumbs(CasesDeepLinkId.casesConfigure), { wrapper });
-      expect(mockSetBreadcrumbs).toHaveBeenCalledWith(
-        [
-          { href: '/test', onClick: expect.any(Function), text: 'Test' },
-          { href: CasesDeepLinkId.cases, onClick: expect.any(Function), text: 'Cases' },
-          { text: 'Settings' },
-        ],
-        { project: { value: [] } }
-      );
+      expect(mockSetBreadcrumbs).toHaveBeenCalledWith([
+        { href: '/test', onClick: expect.any(Function), text: 'Test' },
+        { href: CasesDeepLinkId.cases, onClick: expect.any(Function), text: 'Cases' },
+        { text: 'Settings' },
+      ]);
       expect(mockSetServerlessBreadcrumbs).toHaveBeenCalledWith([]);
     });
 

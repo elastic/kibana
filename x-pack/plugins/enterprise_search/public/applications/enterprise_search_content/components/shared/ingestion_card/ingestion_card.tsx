@@ -20,7 +20,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { EuiButtonTo } from '../../../../shared/react_router_helpers';
+import { EuiLinkTo } from '../../../../shared/react_router_helpers';
 
 interface IngestionCardProps {
   buttonIcon: IconType;
@@ -78,25 +78,15 @@ export const IngestionCard: React.FC<IngestionCardProps> = ({
       }
       footer={
         onClick ? (
-          <EuiButton
-            data-test-subj="enterpriseSearchIngestionCardButton"
-            isDisabled={isDisabled}
-            iconType={buttonIcon}
-            onClick={onClick}
-            fullWidth
-          >
+          <EuiButton isDisabled={isDisabled} iconType={buttonIcon} onClick={onClick} fullWidth>
             {buttonLabel}
           </EuiButton>
         ) : (
-          <EuiButtonTo
-            to={href ?? ''}
-            shouldNotCreateHref
-            isDisabled={isDisabled}
-            iconType={buttonIcon}
-            fullWidth
-          >
-            {buttonLabel}
-          </EuiButtonTo>
+          <EuiLinkTo to={href ?? ''} shouldNotCreateHref>
+            <EuiButton isDisabled={isDisabled} iconType={buttonIcon} fullWidth>
+              {buttonLabel}
+            </EuiButton>
+          </EuiLinkTo>
         )
       }
     />

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { type AuthenticatedUser } from '@kbn/core/server';
+
 import { getCurrentUserFindRequest, requestMock } from '../../__mocks__/request';
 import { ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND } from '@kbn/elastic-assistant-common';
 import { serverMock } from '../../__mocks__/server';
@@ -15,6 +15,7 @@ import { findUserConversationsRoute } from './find_route';
 describe('Find user conversations route', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
+
   beforeEach(async () => {
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
@@ -22,13 +23,13 @@ describe('Find user conversations route', () => {
     clients.elasticAssistant.getAIAssistantConversationsDataClient.findDocuments.mockResolvedValue(
       Promise.resolve(getFindConversationsResultWithSingleHit())
     );
-    context.elasticAssistant.getCurrentUser.mockReturnValue({
+    clients.elasticAssistant.getCurrentUser.mockResolvedValue({
       username: 'my_username',
       authentication_realm: {
         type: 'my_realm_type',
         name: 'my_realm_name',
       },
-    } as AuthenticatedUser);
+    });
 
     findUserConversationsRoute(server.router);
   });

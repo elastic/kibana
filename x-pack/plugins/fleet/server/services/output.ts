@@ -705,7 +705,11 @@ class OutputService {
     return outputSavedObjectToOutput(newSo);
   }
 
-  public async bulkGet(ids: string[], { ignoreNotFound = false } = { ignoreNotFound: true }) {
+  public async bulkGet(
+    soClient: SavedObjectsClientContract,
+    ids: string[],
+    { ignoreNotFound = false } = { ignoreNotFound: true }
+  ) {
     const res = await this.encryptedSoClient.bulkGet<OutputSOAttributes>(
       ids.map((id) => ({ id: outputIdToUuid(id), type: SAVED_OBJECT_TYPE }))
     );

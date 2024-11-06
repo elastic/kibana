@@ -15,7 +15,11 @@
     "public/**/*.json",
     "../../../typings/**/*"
   ],
-  "exclude": ["target/**/*", "**/cypress/**", "public/management/cypress.config.ts"],
+  "exclude": [
+    "target/**/*",
+    "**/cypress/**",
+    "public/management/cypress.config.ts"
+  ],
   "kbn_references": [
     "@kbn/core",
     {
@@ -91,6 +95,7 @@
     "@kbn/securitysolution-exceptions-common",
     "@kbn/rison",
     "@kbn/shared-ux-page-kibana-template",
+    "@kbn/saved-objects-tagging-plugin",
     "@kbn/securitysolution-hook-utils",
     "@kbn/test-jest-helpers",
     "@kbn/safer-lodash-set",
@@ -200,11 +205,13 @@
     "@kbn/search-types",
     "@kbn/field-utils",
     "@kbn/core-saved-objects-api-server-mocks",
+    "@kbn/langchain",
     "@kbn/core-analytics-browser",
     "@kbn/core-i18n-browser",
     "@kbn/core-theme-browser",
     "@kbn/integration-assistant-plugin",
     "@kbn/avc-banner",
+    "@kbn/security-solution-common",
     "@kbn/esql-ast",
     "@kbn/esql-validation-autocomplete",
     "@kbn/config",
@@ -215,7 +222,6 @@
     "@kbn/cloud-security-posture",
     "@kbn/security-solution-distribution-bar",
     "@kbn/cloud-security-posture-common",
-    "@kbn/cloud-security-posture-graph",
     "@kbn/presentation-publishing",
     "@kbn/entityManager-plugin",
     "@kbn/entities-schema",
@@ -223,10 +229,5 @@
     "@kbn/core-saved-objects-server-mocks",
     "@kbn/core-http-router-server-internal",
     "@kbn/core-security-server-mocks",
-    "@kbn/serverless",
-    "@kbn/core-user-profile-browser",
-    "@kbn/data-stream-adapter",
-    "@kbn/core-lifecycle-server",
-    "@kbn/core-user-profile-common",
   ]
 }

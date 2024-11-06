@@ -44,7 +44,7 @@ export class PainlessWorker implements BaseWorkerDefinition {
     fields?: PainlessAutocompleteField[]
   ): PainlessCompletionResult {
     // Array of the active line words, e.g., [boolean, isTrue, =, true]
-    const words = currentLineChars.replace(/\t/g, '').split(/\s/);
+    const words = currentLineChars.replace('\t', '').split(' ');
 
     const autocompleteSuggestions: PainlessCompletionResult = getAutocompleteSuggestions(
       context,

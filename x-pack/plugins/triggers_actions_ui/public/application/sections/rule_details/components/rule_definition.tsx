@@ -16,14 +16,13 @@ import {
   EuiLoadingSpinner,
   EuiDescriptionList,
 } from '@elastic/eui';
-import { AlertConsumers, getEditRuleRoute, getRuleDetailsRoute } from '@kbn/rule-data-utils';
+import { AlertConsumers } from '@kbn/rule-data-utils';
 import { i18n } from '@kbn/i18n';
 import { formatDuration } from '@kbn/alerting-plugin/common';
 import { useLoadRuleTypesQuery } from '../../../hooks/use_load_rule_types_query';
 import { RuleDefinitionProps } from '../../../../types';
 import { RuleType } from '../../../..';
 import { useKibana } from '../../../../common/lib/kibana';
-import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 import {
   hasAllPrivilege,
   hasExecuteActionsCapability,
@@ -39,13 +38,10 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = ({
   onEditRule,
   hideEditButton = false,
   filteredRuleTypes = [],
-  useNewRuleForm = false,
 }) => {
   const {
-    application: { capabilities, navigateToApp },
+    application: { capabilities },
   } = useKibana().services;
-
-  const isUsingRuleCreateFlyout = getIsExperimentalFeatureEnabled('isUsingRuleCreateFlyout');
 
   const [editFlyoutVisible, setEditFlyoutVisible] = useState<boolean>(false);
   const [ruleType, setRuleType] = useState<RuleType>();
@@ -107,20 +103,6 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = ({
     return '';
   }, [rule, ruleTypeRegistry]);
 
-  const onEditRuleClick = () => {
-    if (!isUsingRuleCreateFlyout && useNewRuleForm) {
-      navigateToApp('management', {
-        path: `insightsAndAlerting/triggersActions/${getEditRuleRoute(rule.id)}`,
-        state: {
-          returnApp: 'management',
-          returnPath: `insightsAndAlerting/triggersActions/${getRuleDetailsRoute(rule.id)}`,
-        },
-      });
-    } else {
-      setEditFlyoutVisible(true);
-    }
-  };
-
   const ruleDefinitionList = [
     {
       title: i18n.translate('xpack.triggersActionsUI.ruleDetails.ruleType', {
@@ -171,7 +153,7 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = ({
         >
           <EuiFlexItem grow={false}>
             {hasEditButton ? (
-              <EuiButtonEmpty onClick={onEditRuleClick} flush="left">
+              <EuiButtonEmpty onClick={() => setEditFlyoutVisible(true)} flush="left">
                 <EuiText size="s">{getRuleConditionsWording()}</EuiText>
               </EuiButtonEmpty>
             ) : (
@@ -224,7 +206,7 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = ({
                 <EuiButtonEmpty
                   data-test-subj="ruleDetailsEditButton"
                   iconType={'pencil'}
-                  onClick={onEditRuleClick}
+                  onClick={() => setEditFlyoutVisible(true)}
                 />
               </EuiFlexItem>
             )

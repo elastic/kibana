@@ -6,16 +6,15 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiButton, EuiButtonIcon, EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { css } from '@emotion/react';
 import { useAssistantContext } from '../..';
 import { useSetupKnowledgeBase } from '../assistant/api/knowledge_base/use_setup_knowledge_base';
 import { useKnowledgeBaseStatus } from '../assistant/api/knowledge_base/use_knowledge_base_status';
 
 interface Props {
-  display?: 'mini' | 'refresh';
+  display?: 'mini';
 }
 
 /**
@@ -23,13 +22,9 @@ interface Props {
  *
  */
 export const SetupKnowledgeBaseButton: React.FC<Props> = React.memo(({ display }: Props) => {
-  const {
-    http,
-    toasts,
-    assistantAvailability: { isAssistantEnabled },
-  } = useAssistantContext();
+  const { http, toasts } = useAssistantContext();
 
-  const { data: kbStatus } = useKnowledgeBaseStatus({ http, enabled: isAssistantEnabled });
+  const { data: kbStatus } = useKnowledgeBaseStatus({ http });
   const { mutate: setupKB, isLoading: isSettingUpKB } = useSetupKnowledgeBase({ http, toasts });
 
   const isSetupInProgress = kbStatus?.is_setup_in_progress || isSettingUpKB;
@@ -52,23 +47,6 @@ export const SetupKnowledgeBaseButton: React.FC<Props> = React.memo(({ display }
         defaultMessage: 'Knowledge Base unavailable, please see documentation for more details.',
       })
     : undefined;
-
-  if (display === 'refresh') {
-    return (
-      <EuiButtonIcon
-        color="primary"
-        data-test-subj="setup-knowledge-base-button"
-        disabled={!kbStatus?.is_setup_available}
-        isLoading={isSetupInProgress}
-        iconType="refresh"
-        onClick={onInstallKnowledgeBase}
-        size="xs"
-        css={css`
-          margin-left: 8px;
-        `}
-      />
-    );
-  }
 
   return (
     <EuiToolTip position={'bottom'} content={toolTipContent}>

@@ -6,6 +6,7 @@
  */
 
 import { SECURITY_SOLUTION_SHOW_RELATED_INTEGRATIONS_ID } from '@kbn/management-settings-ids';
+import { ENABLE_ASSET_CRITICALITY_SETTING } from '@kbn/security-solution-plugin/common/constants';
 import { rootRequest } from './common';
 
 export const setKibanaSetting = (key: string, value: boolean | number | string) => {
@@ -22,4 +23,8 @@ export const enableRelatedIntegrations = () => {
 
 export const disableRelatedIntegrations = () => {
   setKibanaSetting(SECURITY_SOLUTION_SHOW_RELATED_INTEGRATIONS_ID, false);
+};
+
+export const enableAssetCriticality = () => {
+  setKibanaSetting(ENABLE_ASSET_CRITICALITY_SETTING, true);
 };

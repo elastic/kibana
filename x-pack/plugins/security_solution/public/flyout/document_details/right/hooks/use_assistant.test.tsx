@@ -33,7 +33,6 @@ describe('useAssistant', () => {
       hasConnectorsAllPrivilege: true,
       hasConnectorsReadPrivilege: true,
       hasUpdateAIAssistantAnonymization: true,
-      hasManageGlobalKnowledgeBase: true,
       isAssistantEnabled: true,
     });
     jest
@@ -52,7 +51,6 @@ describe('useAssistant', () => {
       hasConnectorsAllPrivilege: true,
       hasConnectorsReadPrivilege: true,
       hasUpdateAIAssistantAnonymization: true,
-      hasManageGlobalKnowledgeBase: true,
       isAssistantEnabled: true,
     });
     jest
@@ -71,7 +69,6 @@ describe('useAssistant', () => {
       hasConnectorsAllPrivilege: true,
       hasConnectorsReadPrivilege: true,
       hasUpdateAIAssistantAnonymization: true,
-      hasManageGlobalKnowledgeBase: true,
       isAssistantEnabled: true,
     });
     jest

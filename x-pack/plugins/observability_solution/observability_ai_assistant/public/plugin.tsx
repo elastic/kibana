@@ -67,7 +67,7 @@ export class ObservabilityAIAssistantPlugin
         coreStart.application.capabilities.observabilityAIAssistant[
           aiAssistantCapabilities.show
         ] === true,
-      scopes: this.scopeFromConfig ? [this.scopeFromConfig] : ['all'],
+      scope: this.scopeFromConfig || 'observability',
       scopeIsMutable: !!this.scopeFromConfig,
     }));
 

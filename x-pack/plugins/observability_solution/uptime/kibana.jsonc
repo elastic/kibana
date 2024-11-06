@@ -1,20 +1,13 @@
 {
   "type": "plugin",
   "id": "@kbn/uptime-plugin",
-  "owner": [
-    "@elastic/obs-ux-management-team"
-  ],
-  "group": "observability",
-  "visibility": "private",
+  "owner": "@elastic/obs-ux-management-team",
   "description": "This plugin visualizes data from Heartbeat, and integrates with other Observability solutions.",
   "plugin": {
     "id": "uptime",
-    "browser": true,
     "server": true,
-    "configPath": [
-      "xpack",
-      "legacy_uptime"
-    ],
+    "browser": true,
+    "configPath": ["xpack", "legacy_uptime"],
     "requiredPlugins": [
       "actions",
       "alerting",
@@ -40,21 +33,12 @@
       "unifiedSearch",
       "bfetch"
     ],
-    "optionalPlugins": [
-      "cloud",
-      "data",
-      "fleet",
-      "home",
-      "ml",
-      "spaces",
-      "telemetry",
-      "observabilityAIAssistant"
-    ],
+    "optionalPlugins": ["cloud", "data", "fleet", "home", "ml", "spaces", "telemetry", "observabilityAIAssistant"],
     "requiredBundles": [
       "fleet",
       "kibanaReact",
       "kibanaUtils",
-      "observability"
+      "observability",
     ]
   }
 }

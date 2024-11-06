@@ -1,0 +1,377 @@
+[[role-management-api-put-bulk]]
+=== Bulk create or update roles API
+++++
+<titleabbrev>Bulk create or update roles API</titleabbrev>
+++++
+
+preview::["This functionality is in technical preview, and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features."]
+
+experimental[] Create new {kib} roles, or update the attributes of an existing roles. {kib} roles are stored in the
+{es} native realm.
+
+[[role-management-api-put-bulk-request]]
+==== Request
+
+`POST <kibana host>:<port>/api/security/roles`
+
+[[role-management-api-put-bulk-prereqs]]
+==== Prerequisite
+
+To use the bulk create or update roles API, you must have the `manage_security` cluster privilege.
+
+[role="child_attributes"]
+[[role-management-api-bulk-response-body]]
+==== Request body
+
+`roles`::
+  (object) Object that specifies the roles to add as a role name to role map.
+`<role_name>` (required):: (string) The role name.
+`description`::
+  (Optional, string) Description for the role.
+
+`metadata`::
+  (Optional, object) In the `metadata` object, keys that begin with `_` are reserved for system usage.
+
+`elasticsearch`::
+  (Optional, object) {es} cluster and index privileges. Valid keys include
+  `cluster`, `indices`, `remote_indices`, `remote_cluster`, and `run_as`. For more information, see
+  {ref}/defining-roles.html[Defining roles].
+
+`kibana`::
+  (list) Objects that specify the <<kibana-privileges, Kibana privileges>> for the role.
++
+.Properties of `kibana`
+[%collapsible%open]
+=====
+`base` :::
+  (Optional, list) A base privilege. When specified, the base must be `["all"]` or `["read"]`.
+  When the `base` privilege is specified, you are unable to use the `feature` section.
+  "all" grants read/write access to all {kib} features for the specified spaces.
+  "read" grants read-only access to all {kib} features for the specified spaces.
+
+`feature` :::
+  (object) Contains privileges for specific features.
+  When the `feature` privileges are specified, you are unable to use the `base` section.
+  To retrieve a list of available features, use the <<features-api-get, features API>>.
+
+`spaces` :::
+  (list) The spaces to apply the privileges to.
+  To grant access to all spaces, set to `["*"]`, or omit the value.
+=====
+
+[[role-management-api-bulk-put-response-codes]]
+==== Response code
+
+`200`::
+  Indicates a successful call.
+
+==== Examples
+
+Grant access to various features in all spaces:
+
+[source,sh]
+--------------------------------------------------
+$ curl -X POST api/security/roles
+{
+  "roles": {
+    "my_kibana_role_1": {
+      "description": "my_kibana_role_1_description",
+      "metadata": {
+        "version": 1
+      },
+      "elasticsearch": {
+        "cluster": [],
+        "indices": []
+      },
+      "kibana": [
+        {
+          "base": [],
+          "feature": {
+            "discover": ["all"],
+            "visualize": ["all"],
+            "dashboard": ["all"],
+            "dev_tools": ["read"],
+            "advancedSettings": ["read"],
+            "indexPatterns": ["read"],
+            "graph": ["all"],
+            "apm": ["read"],
+            "maps": ["read"],
+            "canvas": ["read"],
+            "infrastructure": ["all"],
+            "logs": ["all"],
+            "uptime": ["all"]
+          },
+          "spaces": ["*"]
+        }
+      ]
+    },
+    "my_kibana_role_2": {
+      "description": "my_kibana_role_2_description",
+      "metadata": {
+        "version": 1
+      },
+      "elasticsearch": {
+        "cluster": [],
+        "indices": []
+      },
+      "kibana": [
+        {
+          "base": [],
+          "feature": {
+            "discover": ["all"],
+            "visualize": ["all"],
+            "dashboard": ["all"],
+            "dev_tools": ["read"],
+            "logs": ["all"],
+            "uptime": ["all"]
+          },
+          "spaces": ["*"]
+        }
+      ]
+    }
+  }
+}
+--------------------------------------------------
+// KIBANA
+
+Grant dashboard-only access to only the Marketing space for `my_kibana_role_1` and dashboard-only access to only Sales space for `my_kibana_role_2`:
+
+[source,sh]
+--------------------------------------------------
+$ curl -X POST api/security/roles
+{
+  "roles": {
+    "my_kibana_role_1": {
+      "description": "Grants dashboard-only access to only the Marketing space.",
+      "metadata": {
+        "version": 1
+      },
+      "elasticsearch": {
+        "cluster": [],
+        "indices": []
+      },
+      "kibana": [
+        {
+          "base": [],
+          "feature": {
+            "dashboard": ["read"]
+          },
+          "spaces": ["marketing"]
+        }
+      ]
+    },
+    "my_kibana_role_2": {
+      "description": "Grants dashboard-only access to only the Sales space.",
+      "metadata": {
+        "version": 1
+      },
+      "elasticsearch": {
+        "cluster": [],
+        "indices": []
+      },
+      "kibana": [
+        {
+          "base": [],
+          "feature": {
+            "dashboard": ["read"]
+          },
+          "spaces": ["sales"]
+        }
+      ]
+    }
+  }
+}
+
+--------------------------------------------------
+// KIBANA
+
+Grant full access to all features in the Default space for `my_kibana_role_1` and `my_kibana_role_2`:
+
+[source,sh]
+--------------------------------------------------
+$ curl -X POST api/security/roles
+{
+  "roles": {
+    "my_kibana_role_1": {
+      "description": "Grants full access to all features in the Default space.",
+      "metadata": {
+        "version": 1
+      },
+      "elasticsearch": {
+        "cluster": [],
+        "indices": []
+      },
+      "kibana": [
+        {
+          "base": ["all"],
+          "feature": {},
+          "spaces": ["default"]
+        }
+      ]
+    },
+    "my_kibana_role_2": {
+      "description": "Grants full access to all features in the Default space.",
+      "metadata": {
+        "version": 1
+      },
+      "elasticsearch": {
+        "cluster": [],
+        "indices": []
+      },
+      "kibana": [
+        {
+          "base": ["all"],
+          "feature": {},
+          "spaces": ["default"]
+        }
+      ]
+    }
+  }
+}
+
+--------------------------------------------------
+// KIBANA
+
+Grant different access to different spaces:
+
+[source,sh]
+--------------------------------------------------
+$ curl -X POST api/security/roles
+{
+  "roles": {
+    "my_kibana_role_1": {
+      "description": "Grants full access to discover and dashboard features in the default space. Grants read access in the marketing, and sales spaces.",
+      "metadata": {
+        "version": 1
+      },
+      "elasticsearch": {
+        "cluster": [],
+        "indices": []
+      },
+      "kibana": [
+        {
+          "base": [],
+          "feature": {
+            "discover": ["all"],
+            "dashboard": ["all"]
+          },
+          "spaces": ["default"]
+        },
+        {
+          "base": ["read"],
+          "spaces": ["marketing", "sales"]
+        }
+      ]
+    },
+    "my_kibana_role_2": {
+      "description": "Grants full access to discover and dashboard features in the default space. Grants read access in the marketing space.",
+      "metadata": {
+        "version": 1
+      },
+      "elasticsearch": {
+        "cluster": [],
+        "indices": []
+      },
+      "kibana": [
+        {
+          "base": [],
+          "feature": {
+            "discover": ["all"],
+            "dashboard": ["all"]
+          },
+          "spaces": ["default"]
+        },
+        {
+          "base": ["read"],
+          "spaces": ["marketing"]
+        }
+      ]
+    }
+  }
+}
+
+--------------------------------------------------
+// KIBANA
+
+Grant access to {kib} and {es}:
+
+[source,sh]
+--------------------------------------------------
+$ curl -X POST api/security/roles
+{
+  "roles": {
+    "my_kibana_role_1": {
+      "description": "Grants all cluster privileges and full access to index1 and index2. Grants full access to remote_index1 and remote_index2, and the monitor_enrich cluster privilege on remote_cluster1. Grants all Kibana privileges in the default space.",
+      "metadata": {
+        "version": 1
+      },
+      "elasticsearch": {
+        "cluster": ["all"],
+        "indices": [
+          {
+            "names": ["index1", "index2"],
+            "privileges": ["all"]
+          }
+        ],
+        "remote_indices": [
+          {
+            "clusters": ["remote_cluster1"],
+            "names": ["remote_index1", "remote_index2"],
+            "privileges": ["all"]
+          }
+        ],
+        "remote_cluster": [
+          {
+            "clusters": ["remote_cluster1"],
+            "privileges": ["monitor_enrich"]
+          }
+        ]
+      },
+      "kibana": [
+        {
+          "base": ["all"],
+          "feature": {},
+          "spaces": ["default"]
+        }
+      ]
+    },
+    "my_kibana_role_2": {
+      "description": "Grants all cluster privileges and full access to index1. Grants full access to remote_index1, and the monitor_enrich cluster privilege on remote_cluster1. Grants all Kibana privileges in the default space.",
+      "metadata": {
+        "version": 1
+      },
+      "elasticsearch": {
+        "cluster": ["all"],
+        "indices": [
+          {
+            "names": ["index1"],
+            "privileges": ["all"]
+          }
+        ],
+        "remote_indices": [
+          {
+            "clusters": ["remote_cluster1"],
+            "names": ["remote_index1"],
+            "privileges": ["all"]
+          }
+        ],
+        "remote_cluster": [
+          {
+            "clusters": ["remote_cluster1"],
+            "privileges": ["monitor_enrich"]
+          }
+        ]
+      },
+      "kibana": [
+        {
+          "base": ["all"],
+          "feature": {},
+          "spaces": ["default"]
+        }
+      ]
+    }
+  }
+}
+
+--------------------------------------------------
+// KIBANA

@@ -31,15 +31,9 @@
     "@kbn/ml-random-sampler-utils",
     "@kbn/zod",
     "@kbn/calculate-auto",
+    "@kbn/discover-plugin",
     "@kbn/es-query",
     "@kbn/router-utils",
     "@kbn/share-plugin",
-    "@kbn/field-formats-plugin",
-    "@kbn/data-service",
-    "@kbn/discover-utils",
-    "@kbn/discover-plugin",
-    "@kbn/unified-data-table",
-    "@kbn/discover-contextual-components",
-    "@kbn/core-lifecycle-browser",
   ]
 }

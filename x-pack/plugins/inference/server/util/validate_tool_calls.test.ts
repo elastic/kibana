@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { ToolChoiceType, isToolValidationError } from '@kbn/inference-common';
+import { isToolValidationError } from '../../common/chat_complete/errors';
+import { ToolChoiceType } from '../../common/chat_complete/tools';
 import { validateToolCalls } from './validate_tool_calls';
 
 describe('validateToolCalls', () => {

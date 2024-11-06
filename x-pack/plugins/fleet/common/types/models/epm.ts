@@ -124,25 +124,10 @@ export type InstallablePackage = RegistryPackage | ArchivePackage;
 
 export type AssetsMap = Map<string, Buffer | undefined>;
 
-export interface ArchiveEntry {
-  path: string;
-  buffer?: Buffer;
-}
-
-export interface ArchiveIterator {
-  traverseEntries: (onEntry: (entry: ArchiveEntry) => Promise<void>) => Promise<void>;
-  getPaths: () => Promise<string[]>;
-}
-
 export interface PackageInstallContext {
   packageInfo: InstallablePackage;
-  /**
-   * @deprecated Use `archiveIterator` to access the package archive entries
-   * without loading them all into memory at once.
-   */
   assetsMap: AssetsMap;
   paths: string[];
-  archiveIterator: ArchiveIterator;
 }
 
 export type ArchivePackage = PackageSpecManifest &
@@ -193,18 +178,12 @@ export interface RegistryImage extends PackageSpecIcon {
   path: string;
 }
 
-export interface DeploymentsModesDefault {
+export interface DeploymentsModesEnablement {
   enabled: boolean;
 }
-
-export interface DeploymentsModesAgentless extends DeploymentsModesDefault {
-  organization?: string;
-  division?: string;
-  team?: string;
-}
 export interface DeploymentsModes {
-  agentless: DeploymentsModesAgentless;
-  default?: DeploymentsModesDefault;
+  agentless: DeploymentsModesEnablement;
+  default?: DeploymentsModesEnablement;
 }
 
 export enum RegistryPolicyTemplateKeys {

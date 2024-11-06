@@ -8,8 +8,13 @@
  */
 
 import { AbortError, abortSignalToPromise, defer } from '@kbn/kibana-utils-plugin/public';
-import type { ItemBufferParams, TimedItemBufferParams } from '@kbn/item-buffer';
-import { createBatchedFunction, ErrorLike, normalizeError } from '../../common';
+import {
+  ItemBufferParams,
+  TimedItemBufferParams,
+  createBatchedFunction,
+  ErrorLike,
+  normalizeError,
+} from '../../common';
 import { fetchStreaming } from '../streaming';
 import { BatchedFunc, BatchItem } from './types';
 

@@ -73,7 +73,6 @@ export default function ({ getService }: FtrProviderContext) {
           health: 'yellow',
           indexTemplateName: testDataStreamName,
           hidden: false,
-          indexMode: 'standard',
         });
       });
 
@@ -121,7 +120,6 @@ export default function ({ getService }: FtrProviderContext) {
           lifecycle: {
             enabled: true,
           },
-          indexMode: 'standard',
         });
       });
 
@@ -160,24 +158,7 @@ export default function ({ getService }: FtrProviderContext) {
           lifecycle: {
             enabled: true,
           },
-          indexMode: 'standard',
         });
-      });
-
-      it('correctly returns index mode property', async () => {
-        const logsdbDataStreamName = 'logsdb-test-data-stream';
-        const indexMode = 'logsdb';
-
-        await createDataStream(logsdbDataStreamName, indexMode);
-
-        const { body: dataStream } = await supertest
-          .get(`${API_BASE_PATH}/data_streams/${logsdbDataStreamName}`)
-          .set('kbn-xsrf', 'xxx')
-          .expect(200);
-
-        expect(dataStream.indexMode).to.eql(indexMode);
-
-        await deleteDataStream(logsdbDataStreamName);
       });
     });
 

@@ -64,10 +64,10 @@ export const LeafPrinter = {
             return '?';
         }
       }
-      case 'keyword': {
+      case 'string': {
         return String(node.value);
       }
-      case 'double': {
+      case 'decimal': {
         const isRounded = node.value % 1 === 0;
 
         if (isRounded) {

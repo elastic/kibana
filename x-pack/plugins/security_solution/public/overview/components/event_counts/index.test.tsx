@@ -10,7 +10,7 @@ import React from 'react';
 
 import type { OverviewHostProps } from '../overview_host';
 import type { OverviewNetworkProps } from '../overview_network';
-import { mockDataViewSpec, TestProviders } from '../../../common/mock';
+import { mockIndexPattern, TestProviders } from '../../../common/mock';
 
 import { EventCounts } from '.';
 
@@ -24,7 +24,7 @@ describe('EventCounts', () => {
     filters: [],
     from,
     indexNames: [],
-    dataViewSpec: mockDataViewSpec,
+    indexPattern: mockIndexPattern,
     setQuery: jest.fn(),
     to,
     query: {

@@ -36,10 +36,8 @@ export const createRuleExceptionsRoute = (router: SecuritySolutionPluginRouter) 
     .post({
       path: CREATE_RULE_EXCEPTIONS_URL,
       access: 'public',
-      security: {
-        authz: {
-          requiredPrivileges: ['securitySolution'],
-        },
+      options: {
+        tags: ['access:securitySolution'],
       },
     })
     .addVersion(

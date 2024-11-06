@@ -57,7 +57,6 @@ export function PackageCard({
   name,
   title,
   version,
-  type,
   icons,
   integration,
   url,
@@ -79,6 +78,7 @@ export function PackageCard({
   maxCardHeight,
 }: PackageCardProps) {
   let releaseBadge: React.ReactNode | null = null;
+
   if (release && release !== 'ga') {
     releaseBadge = (
       <EuiFlexItem grow={false}>
@@ -108,6 +108,7 @@ export function PackageCard({
   }
 
   let hasDeferredInstallationsBadge: React.ReactNode | null = null;
+
   if (isReauthorizationRequired && showLabels) {
     hasDeferredInstallationsBadge = (
       <EuiFlexItem grow={false}>
@@ -126,6 +127,7 @@ export function PackageCard({
   }
 
   let updateAvailableBadge: React.ReactNode | null = null;
+
   if (isUpdateAvailable && showLabels) {
     updateAvailableBadge = (
       <EuiFlexItem grow={false}>
@@ -143,6 +145,7 @@ export function PackageCard({
   }
 
   let collectionButton: React.ReactNode | null = null;
+
   if (isCollectionCard) {
     collectionButton = (
       <EuiFlexItem>
@@ -156,23 +159,6 @@ export function PackageCard({
             defaultMessage="View collection"
           />
         </EuiButton>
-      </EuiFlexItem>
-    );
-  }
-
-  let contentBadge: React.ReactNode | null = null;
-  if (type === 'content') {
-    contentBadge = (
-      <EuiFlexItem grow={false}>
-        <EuiSpacer size="xs" />
-        <span>
-          <EuiBadge color="hollow">
-            <FormattedMessage
-              id="xpack.fleet.packageCard.contentPackageLabel"
-              defaultMessage="Content only"
-            />
-          </EuiBadge>
-        </span>
       </EuiFlexItem>
     );
   }
@@ -249,7 +235,6 @@ export function PackageCard({
             {showLabels && extraLabelsBadges ? extraLabelsBadges : null}
             {verifiedBadge}
             {updateAvailableBadge}
-            {contentBadge}
             {releaseBadge}
             {hasDeferredInstallationsBadge}
             {collectionButton}

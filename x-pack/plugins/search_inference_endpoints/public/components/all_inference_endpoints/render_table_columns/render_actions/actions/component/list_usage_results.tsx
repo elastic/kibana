@@ -34,7 +34,7 @@ export const ListUsageResults: React.FC<ListUsageResultsProps> = ({ list }) => {
       </EuiFlexItem>
       <EuiFlexItem>
         {list
-          .filter((item) => item.id.toLowerCase().includes(term.toLowerCase()))
+          .filter((item) => item.label.toLowerCase().includes(term.toLowerCase()))
           .map((item, id) => (
             <UsageItem usageItem={item} key={id} />
           ))}

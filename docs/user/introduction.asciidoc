@@ -193,8 +193,8 @@ or even give users their very own private space. For example, power users might
 have privileges to create and edit visualizations and dashboards,
 while analysts or executives might have *Dashboard* and *Canvas* with read-only privileges.
 
-The {kib} role management interface allows you to describe these various access
-levels, or you can automate role creation by using {api-kibana}/group/endpoint-roles[role APIs].
+{kib}’s role management interface allows you to describe these various access
+levels, or you can automate role creation via our <<role-management-api,API>>.
 
 [role="screenshot"]
 image::spaces/images/spaces-roles.png[{kib privileges}]

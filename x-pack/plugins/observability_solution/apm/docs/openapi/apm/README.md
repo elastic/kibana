@@ -2,26 +2,16 @@
 
 This directory contains [OpenAPI specifications](https://swagger.io/specification/) for the [APM app API](https://www.elastic.co/guide/en/kibana/current/apm-api.html) in Kibana.
 
-# OpenAPI (Experimental)
+Included: 
 
-The current self-contained spec file is available as `bundled.json` or `bundled.yaml` and can be used for online tools like those found at <https://openapi.tools/>.
-This spec is experimental and may be incomplete or change later.
+* [Agent Configuration API](https://www.elastic.co/guide/en/kibana/current/agent-config-api.html)
+* [Annotation API](https://www.elastic.co/guide/en/kibana/current/apm-annotation-api.html)
 
-A guide about the openApi specification can be found at [https://swagger.io/docs/specification/about/](https://swagger.io/docs/specification/about/).
+Not included:
 
-## The `openapi` folder
+* [APM agent Key API](https://www.elastic.co/guide/en/kibana/current/agent-key-api.html)
+* [RUM source map API](https://www.elastic.co/guide/en/kibana/current/rum-sourcemap-api.html)
 
-* `entrypoint.yaml` is the overview file which pulls together all the paths and components.
-* [Paths](paths/README.md): Defines each endpoint.  A path can have one operation per http method.
-* [Components](components/README.md): Defines reusable components.
+The specifications for the included APIs are in the apm.yaml file in this directory.
 
-## Tools
-
-Generate the `bundled` files by running the following commands:
-
-```bash
-npx @redocly/cli bundle entrypoint.yaml --output bundled.yaml --ext yaml
-npx @redocly/cli bundle entrypoint.yaml --output bundled.json --ext json
-```
-
-Then join these files with the rest of the Kibana APIs per `oas_docs/README.md`
+These specifications are manually written. The missing ones will be included in the future.

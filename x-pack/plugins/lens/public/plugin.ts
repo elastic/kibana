@@ -62,7 +62,6 @@ import {
   ContentManagementPublicStart,
 } from '@kbn/content-management-plugin/public';
 import { i18n } from '@kbn/i18n';
-import type { ChartType } from '@kbn/visualization-utils';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { EditorFrameService as EditorFrameServiceType } from './editor_frame_service';
@@ -138,7 +137,7 @@ import {
 } from '../common/content_management';
 import type { EditLensConfigurationProps } from './app_plugin/shared/edit_on_the_fly/get_edit_lens_configuration';
 import { savedObjectToEmbeddableAttributes } from './lens_attribute_service';
-import type { TypedLensByValueInput } from './embeddable/embeddable_component';
+import { ChartType } from './lens_suggestions_api';
 
 export type { SaveProps } from './app_plugin';
 
@@ -282,8 +281,7 @@ export type LensSuggestionsApi = (
   context: VisualizeFieldContext | VisualizeEditorContext,
   dataViews: DataView,
   excludedVisualizations?: string[],
-  preferredChartType?: ChartType,
-  preferredVisAttributes?: TypedLensByValueInput['attributes']
+  preferredChartType?: ChartType
 ) => Suggestion[] | undefined;
 
 export class LensPlugin {
@@ -715,13 +713,7 @@ export class LensPlugin {
         return {
           formula: createFormulaPublicApi(),
           chartInfo: createChartInfoApi(startDependencies.dataViews, this.editorFrameService),
-          suggestions: (
-            context,
-            dataView,
-            excludedVisualizations,
-            preferredChartType,
-            preferredVisAttributes
-          ) => {
+          suggestions: (context, dataView, excludedVisualizations, preferredChartType) => {
             return suggestionsApi({
               datasourceMap,
               visualizationMap,
@@ -729,7 +721,6 @@ export class LensPlugin {
               dataView,
               excludedVisualizations,
               preferredChartType,
-              preferredVisAttributes,
             });
           },
         };

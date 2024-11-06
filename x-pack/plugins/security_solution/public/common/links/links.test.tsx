@@ -547,7 +547,7 @@ describe('Security links', () => {
   describe('isLinkUiSettingsAllowed', () => {
     const SETTING_KEY = 'test setting';
     const mockedLink: LinkItem = {
-      id: SecurityPageName.entityAnalyticsEntityStoreManagement,
+      id: SecurityPageName.entityAnalyticsAssetClassification,
       title: 'test title',
       path: '/test_path',
     };

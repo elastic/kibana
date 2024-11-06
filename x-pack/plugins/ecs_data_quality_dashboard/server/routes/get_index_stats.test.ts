@@ -152,7 +152,17 @@ describe('getIndexStatsRoute route', () => {
       },
     };
     (fetchMeteringStats as jest.Mock).mockResolvedValue(mockMeteringStatsIndex);
-    (fetchAvailableIndices as jest.Mock).mockResolvedValue(['my-index-000001']);
+    (fetchAvailableIndices as jest.Mock).mockResolvedValue({
+      aggregations: {
+        index: {
+          buckets: [
+            {
+              key: 'my-index-000001',
+            },
+          ],
+        },
+      },
+    });
 
     const response = await server.inject(request, requestContextMock.convertContext(context));
     expect(response.status).toEqual(200);
@@ -188,7 +198,7 @@ describe('getIndexStatsRoute route', () => {
     );
   });
 
-  test('returns an empty object when "availableIndices" indices are empty', async () => {
+  test('returns an empty object when "availableIndices" indices are not available', async () => {
     const request = requestMock.create({
       method: 'get',
       path: GET_INDEX_STATS,
@@ -204,7 +214,9 @@ describe('getIndexStatsRoute route', () => {
 
     const mockIndices = {};
     (fetchMeteringStats as jest.Mock).mockResolvedValue(mockMeteringStatsIndex);
-    (fetchAvailableIndices as jest.Mock).mockResolvedValue([]);
+    (fetchAvailableIndices as jest.Mock).mockResolvedValue({
+      aggregations: undefined,
+    });
 
     const response = await server.inject(request, requestContextMock.convertContext(context));
     expect(response.status).toEqual(200);

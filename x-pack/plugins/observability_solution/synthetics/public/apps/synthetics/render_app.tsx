@@ -66,6 +66,7 @@ export const getSyntheticsAppProps = (): SyntheticsAppProps => {
     setBadge,
     appMountParameters,
     isServerless,
+    setBreadcrumbs: startPlugins.serverless?.setBreadcrumbs ?? coreStart.chrome.setBreadcrumbs,
   };
 };
 

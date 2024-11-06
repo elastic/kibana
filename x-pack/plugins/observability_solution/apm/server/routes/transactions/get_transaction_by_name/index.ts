@@ -6,22 +6,11 @@
  */
 
 import { rangeQuery } from '@kbn/observability-plugin/server';
-import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
-import { maybe } from '../../../../common/utils/maybe';
 import { ApmDocumentType } from '../../../../common/document_type';
-import {
-  AT_TIMESTAMP,
-  SERVICE_NAME,
-  TRACE_ID,
-  TRANSACTION_DURATION,
-  TRANSACTION_ID,
-  TRANSACTION_NAME,
-  TRANSACTION_TYPE,
-} from '../../../../common/es_fields/apm';
+import { SERVICE_NAME, TRANSACTION_NAME } from '../../../../common/es_fields/apm';
 import { RollupInterval } from '../../../../common/rollup';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
-import { TransactionDetailRedirectInfo } from '../get_transaction_by_trace';
 
 export async function getTransactionByName({
   transactionName,
@@ -35,17 +24,7 @@ export async function getTransactionByName({
   apmEventClient: APMEventClient;
   start: number;
   end: number;
-}): Promise<TransactionDetailRedirectInfo | undefined> {
-  const requiredFields = asMutableArray([
-    AT_TIMESTAMP,
-    TRACE_ID,
-    TRANSACTION_ID,
-    TRANSACTION_TYPE,
-    TRANSACTION_NAME,
-    TRANSACTION_DURATION,
-    SERVICE_NAME,
-  ] as const);
-
+}) {
   const resp = await apmEventClient.search('get_transaction', {
     apm: {
       sources: [
@@ -68,9 +47,8 @@ export async function getTransactionByName({
           ]),
         },
       },
-      fields: requiredFields,
     },
   });
 
-  return unflattenKnownApmEventFields(maybe(resp.hits.hits[0])?.fields, requiredFields);
+  return resp.hits.hits[0]?._source;
 }

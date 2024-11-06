@@ -22,7 +22,7 @@ import {
 } from '../clients/create_entities_es_client';
 
 // the official types do not explicitly define sourceIndex in the schema, but it is present in the data at the time of writing this
-type EntitiesLatest = z.infer<typeof entityLatestSchema> & { source_index: string[] };
+type EntitiesLatest = z.infer<typeof entityLatestSchema> & { sourceIndex: string[] };
 
 export async function getEntitiesWithSource({
   serviceEnvironment,
@@ -51,21 +51,21 @@ export async function getEntitiesWithSource({
   for (const response of entityResponses) {
     const processedEntities = await Promise.all(
       response.map(async (entity: EntitiesLatest) => {
-        const sourceIndex = entity?.source_index;
+        const sourceIndex = entity?.sourceIndex;
         if (!sourceIndex || !sourceIndex.length) return null;
 
         const indices = await esClient.indices.get({ index: sourceIndex });
         const sources = await fetchSources(indices);
 
         return {
-          identity_fields: entity?.entity.identity_fields,
+          identityFields: entity?.entity.identityFields,
           id: entity?.entity.id,
-          definition_id: entity?.entity.definition_id,
-          last_seen_timestamp: entity?.entity.last_seen_timestamp,
-          display_name: entity?.entity.display_name,
+          definitionId: entity?.entity.definitionId,
+          lastSeenTimestamp: entity?.entity.lastSeenTimestamp,
+          displayName: entity?.entity.displayName,
           metrics: entity?.entity.metrics,
-          schema_version: entity?.entity.schema_version,
-          definition_version: entity?.entity.definition_version,
+          schemaVersion: entity?.entity.schemaVersion,
+          definitionVersion: entity?.entity.definitionVersion,
           type: entity?.entity.type,
           sources,
         };
@@ -104,7 +104,7 @@ const getFetchEntitiesPromises = ({
   hostName?: string;
   containerId?: string;
   serviceEnvironment?: string;
-}): Array<Promise<Array<{ source_index: string[]; entity: EntitiesLatest['entity'] }>>> => {
+}): Array<Promise<Array<{ sourceIndex: string[]; entity: EntitiesLatest['entity'] }>>> => {
   const shouldFilterForServiceEnvironment =
     serviceEnvironment &&
     serviceName &&
@@ -139,7 +139,7 @@ const getFetchEntitiesPromises = ({
 
   return [containersPromise, hostsPromise, servicesPromise].filter(
     (promise) => promise !== null
-  ) as Array<Promise<Array<{ source_index: string[]; entity: EntitiesLatest['entity'] }>>>;
+  ) as Array<Promise<Array<{ sourceIndex: string[]; entity: EntitiesLatest['entity'] }>>>;
 };
 
 const getFetchEntityPromise = ({
@@ -152,10 +152,10 @@ const getFetchEntityPromise = ({
   shouldFetch: boolean;
   shouldMatch: QueryDslQueryContainer[];
   entitiesEsClient: EntitiesESClient;
-}): Promise<Array<{ source_index: string[]; entity: EntitiesLatest['entity'] }>> | null => {
+}): Promise<Array<{ sourceIndex: string[]; entity: EntitiesLatest['entity'] }>> | null => {
   return shouldFetch
     ? entitiesEsClient
-        .search<{ source_index: string[]; entity: EntitiesLatest['entity'] }>(index, {
+        .search<{ sourceIndex: string[]; entity: EntitiesLatest['entity'] }>(index, {
           body: {
             query: {
               bool: {
@@ -167,7 +167,7 @@ const getFetchEntityPromise = ({
         })
         .then((response) => {
           return response.hits.hits.map((hit) => {
-            return { source_index: hit?._source.source_index, entity: hit._source.entity };
+            return { sourceIndex: hit?._source.sourceIndex, entity: hit._source.entity };
           });
         })
     : null;

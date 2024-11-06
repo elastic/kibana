@@ -22,7 +22,6 @@ import type { CspBenchmarkRulesStates } from '@kbn/cloud-security-posture-common
 import type { FindingsBaseEsQuery } from '@kbn/cloud-security-posture';
 import { useGetCspBenchmarkRulesStatesApi } from '@kbn/cloud-security-posture/src/hooks/use_get_benchmark_rules_state_api';
 import type { RuntimePrimitiveTypes } from '@kbn/data-views-plugin/common';
-import { CDR_MISCONFIGURATION_DATA_TABLE_RUNTIME_MAPPING_FIELDS } from '../../../common/constants';
 import { useKibana } from '../../../common/hooks/use_kibana';
 import { getAggregationCount, getFindingsCountAggQuery } from '../utils/utils';
 
@@ -42,18 +41,17 @@ interface FindingsAggs {
 }
 
 const getRuntimeMappingsFromSort = (sort: string[][]) => {
-  return sort
-    .filter(([field]) => CDR_MISCONFIGURATION_DATA_TABLE_RUNTIME_MAPPING_FIELDS.includes(field))
-    .reduce((acc, [field]) => {
-      const type: RuntimePrimitiveTypes = 'keyword';
+  return sort.reduce((acc, [field]) => {
+    // TODO: Add proper type for all fields available in the field selector
+    const type: RuntimePrimitiveTypes = field === '@timestamp' ? 'date' : 'keyword';
 
-      return {
-        ...acc,
-        [field]: {
-          type,
-        },
-      };
-    }, {});
+    return {
+      ...acc,
+      [field]: {
+        type,
+      },
+    };
+  }, {});
 };
 
 export const getFindingsQuery = (

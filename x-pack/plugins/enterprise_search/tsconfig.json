@@ -82,7 +82,6 @@
     "@kbn/navigation-plugin",
     "@kbn/security-plugin-types-common",
     "@kbn/core-security-server",
-    "@kbn/core-security-server-mocks",
-    "@kbn/unsaved-changes-prompt"
+    "@kbn/core-security-server-mocks"
   ]
 }

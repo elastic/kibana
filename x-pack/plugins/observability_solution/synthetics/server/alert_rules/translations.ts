@@ -80,15 +80,6 @@ export const commonMonitorStateI18: Array<{
     ),
   },
   {
-    name: 'lastErrorStack',
-    description: i18n.translate(
-      'xpack.synthetics.alertRules.monitorStatus.actionVariables.state.lastErrorStack',
-      {
-        defaultMessage: 'Monitor last error stack trace.',
-      }
-    ),
-  },
-  {
     name: 'locationName',
     description: i18n.translate(
       'xpack.synthetics.alertRules.monitorStatus.actionVariables.state.locationName',

@@ -1,15 +1,11 @@
 {
   "type": "plugin",
   "id": "@kbn/global-search-bar-plugin",
-  "owner": [
-    "@elastic/appex-sharedux"
-  ],
-  "group": "platform",
-  "visibility": "private",
+  "owner": "@elastic/appex-sharedux",
   "plugin": {
     "id": "globalSearchBar",
-    "browser": true,
     "server": true,
+    "browser": true,
     "configPath": [
       "xpack",
       "global_search_bar"

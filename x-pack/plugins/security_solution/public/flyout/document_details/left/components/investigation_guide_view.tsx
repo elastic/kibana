@@ -74,7 +74,7 @@ const InvestigationGuideViewComponent: React.FC<InvestigationGuideViewProps> = (
           </EuiText>
         ) : (
           <EuiText size="xs" data-test-subj="investigation-guide-clamped">
-            <LineClamp lineClampHeight="4.5em">
+            <LineClamp lineClampHeight={4.5}>
               <MarkdownRenderer>{ruleNote}</MarkdownRenderer>
             </LineClamp>
           </EuiText>

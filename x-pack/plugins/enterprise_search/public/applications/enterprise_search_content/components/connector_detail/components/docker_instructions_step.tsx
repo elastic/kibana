@@ -7,14 +7,7 @@
 
 import React, { useEffect } from 'react';
 
-import {
-  EuiAccordion,
-  EuiAccordionProps,
-  EuiSpacer,
-  EuiText,
-  EuiLink,
-  EuiCode,
-} from '@elastic/eui';
+import { EuiAccordion, EuiAccordionProps, EuiCode, EuiSpacer, EuiText } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -50,16 +43,6 @@ export const DockerInstructionsStep: React.FC<DockerInstructionsStepProps> = ({
     }
   }, [isWaitingForConnector]);
 
-  const configYamlContent = getConnectorTemplate({
-    apiKeyData,
-    connectorData: { id: connectorId, service_type: serviceType },
-    host: elasticsearchUrl,
-  });
-
-  const escapedConfigYamlContent = configYamlContent.replace(/"/g, '\\"').replace(/\$/g, '\\$');
-
-  const createConfigCommand = `mkdir -p "$HOME/elastic-connectors" && echo "${escapedConfigYamlContent}" > "$HOME/elastic-connectors/config.yml"`;
-
   return (
     <>
       <EuiAccordion
@@ -68,92 +51,67 @@ export const DockerInstructionsStep: React.FC<DockerInstructionsStepProps> = ({
         forceState={isOpen}
         buttonContent={
           <EuiText size="s">
-            <h4>
+            <p>
               {i18n.translate(
-                'xpack.enterpriseSearch.connectorDeployment.dockerInstructionsHeading',
+                'xpack.enterpriseSearch.connectorDeployment.p.downloadConfigurationLabel',
                 {
-                  defaultMessage: 'Docker instructions',
+                  defaultMessage:
+                    'You can either download the configuration file manually or run the following command',
                 }
               )}
-            </h4>
+            </p>
           </EuiText>
         }
       >
         <EuiSpacer />
-        <EuiText size="s">
-          <p>
-            {i18n.translate('xpack.enterpriseSearch.connectorDeployment.p.dockerInstallationNote', {
-              defaultMessage: 'Make sure you have Docker installed on your machine.',
-            })}
-          </p>
-        </EuiText>
-        <EuiSpacer />
-        <EuiText size="s">
-          <h5>
-            {i18n.translate('xpack.enterpriseSearch.connectorDeployment.p.createConfigFileLabel', {
-              defaultMessage: 'Create configuration file',
-            })}
-          </h5>
-          <p>
-            {i18n.translate(
-              'xpack.enterpriseSearch.connectorDeployment.p.createConfigFileInstructions',
-              {
-                defaultMessage:
-                  'You need a configuration file with your Elasticsearch and connector details. In your terminal, run the following command to create the config.yml file:',
-              }
-            )}
-          </p>
-        </EuiText>
-        <EuiSpacer />
-        <CodeBox showTopBar={false} languageType="bash" codeSnippet={createConfigCommand} />
+        <CodeBox
+          showTopBar={false}
+          languageType="bash"
+          codeSnippet={
+            'curl https://raw.githubusercontent.com/elastic/connectors/main/config.yml.example --output </absolute/path/to>/connectors'
+          }
+        />
         <EuiSpacer />
         <EuiText size="s">
           <p>
             <FormattedMessage
-              id="xpack.enterpriseSearch.connectorDeployment.p.configFileExplanation"
-              defaultMessage="This command creates a {configFile} file in the {directory} directory with your specific connector and Elasticsearch details."
+              id="xpack.enterpriseSearch.connectorDeployment.p.changeOutputPathLabel"
+              defaultMessage="Change the {output} argument value to the path where you want to save the configuration file."
               values={{
-                configFile: <EuiCode>config.yml</EuiCode>,
-                directory: <EuiCode>$HOME/elastic-connectors</EuiCode>,
-              }}
-            />
-          </p>
-          <p>
-            <FormattedMessage
-              id="xpack.enterpriseSearch.connectorDeployment.p.exampleConfigFile"
-              defaultMessage="If you want to customize settings later, refer to this {exampleConfigLink}."
-              values={{
-                exampleConfigLink: (
-                  <EuiLink
-                    data-test-subj="enterpriseSearchDockerInstructionsStepExampleConfigFileLink"
-                    href="https://github.com/elastic/connectors/blob/main/config.yml.example"
-                    target="_blank"
-                    external
-                  >
-                    {i18n.translate(
-                      'xpack.enterpriseSearch.connectorDeployment.exampleConfigLinkText',
-                      {
-                        defaultMessage: 'example config file',
-                      }
-                    )}
-                  </EuiLink>
-                ),
+                output: <EuiCode>--output</EuiCode>,
               }}
             />
           </p>
         </EuiText>
         <EuiSpacer />
-        <EuiText size="s">
-          <h5>
-            {i18n.translate('xpack.enterpriseSearch.connectorDeployment.p.runContainerLabel', {
-              defaultMessage: 'Run container',
-            })}
-          </h5>
+        <FormattedMessage
+          id="xpack.enterpriseSearch.connectorDeployment.p.editConfigYamlLabel"
+          defaultMessage="Edit the {configYaml} file and provide the next credentials"
+          values={{
+            configYaml: <EuiCode>config.yml</EuiCode>,
+          }}
+        />
+        <EuiSpacer />
+        <CodeBox
+          showTopBar={false}
+          languageType="yaml"
+          codeSnippet={getConnectorTemplate({
+            apiKeyData,
+            connectorData: {
+              id: connectorId ?? '',
+              service_type: serviceType ?? '',
+            },
+            host: elasticsearchUrl,
+          })}
+        />
+        <EuiSpacer />
+        <EuiText size="m">
           <p>
             {i18n.translate(
               'xpack.enterpriseSearch.connectorDeployment.p.runTheFollowingCommandLabel',
               {
-                defaultMessage: 'Run the following command to start the container:',
+                defaultMessage:
+                  'Run the following command in your terminal. Make sure you have Docker installed on your machine',
               }
             )}
           </p>

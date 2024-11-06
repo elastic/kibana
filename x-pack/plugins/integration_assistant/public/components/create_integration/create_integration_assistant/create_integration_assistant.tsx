@@ -44,9 +44,6 @@ export const CreateIntegrationAssistant = React.memo(() => {
       setIsGenerating: (payload) => {
         dispatch({ type: 'SET_IS_GENERATING', payload });
       },
-      setHasCelInput: (payload) => {
-        dispatch({ type: 'SET_HAS_CEL_INPUT', payload });
-      },
       setResult: (payload) => {
         dispatch({ type: 'SET_GENERATED_RESULT', payload });
       },
@@ -96,7 +93,7 @@ export const CreateIntegrationAssistant = React.memo(() => {
             />
           )}
           {state.step === 5 &&
-            (isGenerateCelEnabled && state.hasCelInput ? (
+            (isGenerateCelEnabled ? (
               <CelInputStep
                 integrationSettings={state.integrationSettings}
                 connector={state.connector}
@@ -110,7 +107,7 @@ export const CreateIntegrationAssistant = React.memo(() => {
               />
             ))}
 
-          {isGenerateCelEnabled && state.celInputResult && state.step === 6 && (
+          {isGenerateCelEnabled && state.step === 6 && (
             <ReviewCelStep
               isGenerating={state.isGenerating}
               celInputResult={state.celInputResult}
@@ -128,7 +125,6 @@ export const CreateIntegrationAssistant = React.memo(() => {
         <Footer
           currentStep={state.step}
           isGenerating={state.isGenerating}
-          hasCelInput={state.hasCelInput}
           isNextStepEnabled={isNextStepEnabled}
         />
       </KibanaPageTemplate>

@@ -8,7 +8,7 @@
  */
 
 export interface Kubernetes {
-  pod?: { uid?: string | null; name?: string };
+  pod?: { uid?: string | null; [key: string]: unknown };
   namespace?: string;
   replicaset?: {
     name?: string;

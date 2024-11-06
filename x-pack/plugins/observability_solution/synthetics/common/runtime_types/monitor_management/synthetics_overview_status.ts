@@ -53,7 +53,6 @@ export const OverviewStatusMetaDataCodec = t.intersection([
     updated_at: t.string,
     ping: OverviewPingCodec,
     timestamp: t.string,
-    spaceId: t.string,
   }),
 ]);
 

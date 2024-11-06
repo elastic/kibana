@@ -20,7 +20,6 @@ import {
   EuiEmptyPrompt,
   EuiButton,
   useEuiTheme,
-  EuiToolTip,
 } from '@elastic/eui';
 import { omit } from 'lodash';
 import { PRODUCER_DISPLAY_NAMES } from '../../common/i18n';
@@ -87,28 +86,6 @@ export const RuleTypeList: React.FC<RuleTypeListProps> = ({
 
   const onClickAll = useCallback(() => onFilterByProducer(null), [onFilterByProducer]);
 
-  const ruleCard = (rule: RuleTypeWithDescription) => (
-    <EuiCard
-      titleSize="xs"
-      textAlign="left"
-      hasBorder
-      title={rule.name}
-      onClick={() => onSelectRuleType(rule.id)}
-      description={rule.description}
-      style={{ marginRight: '8px', flexGrow: 0 }}
-      data-test-subj={`${rule.id}-SelectOption`}
-      isDisabled={!rule.enabledInLicense}
-    >
-      <EuiText
-        color="subdued"
-        size="xs"
-        style={{ textTransform: 'uppercase', fontWeight: euiTheme.font.weight.bold }}
-      >
-        {producerToDisplayName(rule.producer)}
-      </EuiText>
-    </EuiCard>
-  );
-
   return (
     <EuiFlexGroup
       style={{
@@ -174,24 +151,25 @@ export const RuleTypeList: React.FC<RuleTypeListProps> = ({
         )}
         {ruleTypesList.map((rule) => (
           <React.Fragment key={rule.id}>
-            {rule.enabledInLicense ? (
-              ruleCard(rule)
-            ) : (
-              <EuiToolTip
-                position="top"
-                content={i18n.translate(
-                  'alertsUIShared.components.ruleTypeModal.minimumRequiredLicenseMessage',
-                  {
-                    defaultMessage: 'This rule requires a {minimumLicenseRequired} license.',
-                    values: {
-                      minimumLicenseRequired: rule.minimumLicenseRequired,
-                    },
-                  }
-                )}
+            <EuiCard
+              titleSize="xs"
+              textAlign="left"
+              hasBorder
+              title={rule.name}
+              onClick={() => onSelectRuleType(rule.id)}
+              description={rule.description}
+              style={{ marginRight: '8px', flexGrow: 0 }}
+              data-test-subj={`${rule.id}-SelectOption`}
+              isDisabled={rule.enabledInLicense === false}
+            >
+              <EuiText
+                color="subdued"
+                size="xs"
+                style={{ textTransform: 'uppercase', fontWeight: euiTheme.font.weight.bold }}
               >
-                <>{ruleCard(rule)} </>
-              </EuiToolTip>
-            )}
+                {producerToDisplayName(rule.producer)}
+              </EuiText>
+            </EuiCard>
             <EuiSpacer size="s" />
           </React.Fragment>
         ))}

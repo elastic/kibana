@@ -9,7 +9,6 @@ import {
   AggregationsAggregationContainer,
   MappingRuntimeFields,
   Sort,
-  SearchResponse,
 } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 
@@ -28,10 +27,6 @@ interface FindOptions {
   runtimeMappings?: MappingRuntimeFields | undefined;
   logger: Logger;
   aggs?: Record<string, AggregationsAggregationContainer>;
-  mSearch?: {
-    filter: string;
-    perPage: number;
-  };
 }
 
 export interface FindResponse<T> {
@@ -52,7 +47,6 @@ export const findDocuments = async <TSearchSchema>({
   sortOrder,
   logger,
   aggs,
-  mSearch,
 }: FindOptions): Promise<FindResponse<TSearchSchema>> => {
   const query = getQueryFilter({ filter });
   let sort: Sort | undefined;
@@ -67,78 +61,28 @@ export const findDocuments = async <TSearchSchema>({
     };
   }
   try {
-    if (mSearch == null) {
-      const response = await esClient.search<TSearchSchema>({
-        body: {
-          query,
-          track_total_hits: true,
-          sort,
-        },
-        _source: true,
-        from: (page - 1) * perPage,
-        ignore_unavailable: true,
-        index,
-        seq_no_primary_term: true,
-        size: perPage,
-        aggs,
-      });
-
-      return {
-        data: response,
-        page,
-        perPage,
-        total:
-          (typeof response.hits.total === 'number'
-            ? response.hits.total
-            : response.hits.total?.value) ?? 0,
-      };
-    }
-    const mSearchQueryBody = {
-      body: [
-        { index },
-        {
-          query,
-          size: perPage,
-          aggs,
-          seq_no_primary_term: true,
-          from: (page - 1) * perPage,
-          sort,
-          _source: true,
-        },
-        { index },
-        {
-          query: getQueryFilter({ filter: mSearch.filter }),
-          size: mSearch.perPage,
-          aggs,
-          seq_no_primary_term: true,
-          from: (page - 1) * mSearch.perPage,
-          sort,
-          _source: true,
-        },
-      ],
+    const response = await esClient.search<TSearchSchema>({
+      body: {
+        query,
+        track_total_hits: true,
+        sort,
+      },
+      _source: true,
+      from: (page - 1) * perPage,
       ignore_unavailable: true,
       index,
-    };
-    const response = await esClient.msearch<SearchResponse<TSearchSchema>>(mSearchQueryBody);
-    let responseStats: Omit<SearchResponse<TSearchSchema>, 'hits'> = {
-      took: 0,
-      _shards: { total: 0, successful: 0, skipped: 0, failed: 0 },
-      timed_out: false,
-    };
-    // flatten the results of the combined find queries into a single array of hits:
-    const results = response.responses.flatMap((res) => {
-      const mResponse = res as SearchResponse<TSearchSchema>;
-      const { hits, ...responseBody } = mResponse;
-      // assign whatever the last stats are, they are only used for type
-      responseStats = { ...responseStats, ...responseBody };
-      return hits?.hits ?? [];
+      seq_no_primary_term: true,
+      size: perPage,
+      aggs,
     });
-
     return {
-      data: { ...responseStats, hits: { hits: results } },
+      data: response,
       page,
-      perPage: perPage + mSearch.perPage,
-      total: results.length,
+      perPage,
+      total:
+        (typeof response.hits.total === 'number'
+          ? response.hits.total // This format is to be removed in 8.0
+          : response.hits.total?.value) ?? 0,
     };
   } catch (err) {
     logger.error(`Error fetching documents: ${err}`);

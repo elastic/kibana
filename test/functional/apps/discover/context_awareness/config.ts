@@ -25,12 +25,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...baseConfig.kbnTestServer,
       serverArgs: [
         ...baseConfig.kbnTestServer.serverArgs,
-        `--discover.experimental.enabledProfiles=${JSON.stringify([
-          'example-root-profile',
-          'example-solution-view-root-profile',
-          'example-data-source-profile',
-          'example-document-profile',
-        ])}`,
+        '--discover.experimental.enabledProfiles=["example-root-profile","example-data-source-profile","example-document-profile"]',
         `--plugin-path=${path.resolve(
           __dirname,
           '../../../../analytics/plugins/analytics_ftr_helpers'

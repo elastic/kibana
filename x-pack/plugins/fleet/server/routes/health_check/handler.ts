@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import https from 'https';
+
 import type { TypeOf } from '@kbn/config-schema';
 import fetch from 'node-fetch';
 
@@ -20,10 +22,17 @@ export const postHealthCheckHandler: FleetRequestHandler<
   TypeOf<typeof PostHealthCheckRequestSchema.body>
 > = async (context, request, response) => {
   const abortController = new AbortController();
-  const { id } = request.body;
+  const { id, host: deprecatedField } = request.body;
   const coreContext = await context.core;
   const soClient = coreContext.savedObjects.client;
 
+  if (deprecatedField) {
+    return response.badRequest({
+      body: {
+        message: `Property 'host' is deprecated. Please use id instead.`,
+      },
+    });
+  }
   try {
     const fleetServerHost = await getFleetServerHost(soClient, id);
 
@@ -51,10 +60,13 @@ export const postHealthCheckHandler: FleetRequestHandler<
         accept: '*/*',
       },
       method: 'GET',
+      agent: new https.Agent({
+        rejectUnauthorized: false,
+      }),
       signal: abortController.signal,
     });
     const bodyRes = await res.json();
-    const body = { ...bodyRes };
+    const body = { ...bodyRes, host };
 
     return response.ok({ body });
   } catch (error) {

@@ -359,7 +359,7 @@ export default ({ getService }: FtrProviderContext): void => {
           },
         });
 
-        actionsRemover.add('default', newConnector.id, 'connector', 'actions');
+        actionsRemover.add('default', newConnector.id, 'action', 'actions');
         await updateCase({
           supertest,
           params: {
@@ -399,7 +399,7 @@ export default ({ getService }: FtrProviderContext): void => {
           },
         });
 
-        actionsRemover.add('default', connector.id, 'connector', 'actions');
+        actionsRemover.add('default', connector.id, 'action', 'actions');
 
         const postedCase = await createCase(
           supertest,

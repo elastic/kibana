@@ -31,11 +31,11 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should handle bulk_enqueue request appropriately', async () => {
-      const { body: createdConnector } = await supertest
+      const { body: createdAction } = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
         .set('kbn-xsrf', 'foo')
         .send({
-          name: 'My Connector',
+          name: 'My action',
           connector_type_id: 'test.index-record',
           config: {
             unencrypted: `This value shouldn't get encrypted`,
@@ -46,14 +46,14 @@ export default function ({ getService }: FtrProviderContext) {
         })
         .expect(200);
 
-      objectRemover.add(Spaces.space1.id, createdConnector.id, 'connector', 'actions');
+      objectRemover.add(Spaces.space1.id, createdAction.id, 'action', 'actions');
 
-      const reference = `actions-enqueue-1:${Spaces.space1.id}:${createdConnector.id}`;
+      const reference = `actions-enqueue-1:${Spaces.space1.id}:${createdAction.id}`;
 
       const response = await supertest
         .post(
           `${getUrlPrefix(Spaces.space1.id)}/api/alerts_fixture/${
-            createdConnector.id
+            createdAction.id
           }/bulk_enqueue_actions`
         )
         .set('kbn-xsrf', 'foo')

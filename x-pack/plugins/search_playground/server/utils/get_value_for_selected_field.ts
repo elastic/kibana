@@ -6,7 +6,7 @@
  */
 
 import { SearchHit } from '@elastic/elasticsearch/lib/api/types';
-import { get, has } from 'lodash';
+import { get } from 'lodash';
 
 export const getValueForSelectedField = (hit: SearchHit, path: string): string => {
   if (!hit) {
@@ -21,7 +21,5 @@ export const getValueForSelectedField = (hit: SearchHit, path: string): string =
       .join('\n --- \n');
   }
 
-  return has(hit._source, `${path}.text`)
-    ? get(hit._source, `${path}.text`, '')
-    : get(hit._source, path, '');
+  return get(hit._source, path, '');
 };

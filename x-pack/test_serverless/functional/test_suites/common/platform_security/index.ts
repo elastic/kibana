@@ -13,8 +13,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
 
     loadTestFile(require.resolve('./api_keys'));
     loadTestFile(require.resolve('./navigation/avatar_menu'));
-    loadTestFile(require.resolve('./navigation/management_nav_cards'));
     loadTestFile(require.resolve('./user_profiles/user_profiles'));
-    loadTestFile(require.resolve('./roles.ts'));
   });
 }

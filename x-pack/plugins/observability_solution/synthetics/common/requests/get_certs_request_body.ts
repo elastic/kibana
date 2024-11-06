@@ -150,7 +150,7 @@ export const getCertsRequestBody = ({
         'service',
         'labels',
         'tags',
-        'error',
+        'error.message',
       ],
       collapse: {
         field: 'tls.server.hash.sha256',
@@ -222,7 +222,6 @@ export const processCertsResult = (result: CertificatesResults): CertResult => {
       locationId: ping?.observer?.name,
       locationName: ping?.observer?.geo?.name,
       errorMessage: ping?.error?.message,
-      errorStackTrace: ping?.error?.stack_trace,
     };
   });
   const total = result.aggregations?.total?.value ?? 0;

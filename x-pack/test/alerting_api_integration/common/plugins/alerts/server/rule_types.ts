@@ -17,6 +17,7 @@ import {
   RuleTypeState,
   RuleTypeParams,
 } from '@kbn/alerting-plugin/server';
+import { AlertConsumers } from '@kbn/rule-data-utils';
 import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 import { FixtureStartDeps, FixtureSetupDeps } from './plugin';
 
@@ -883,14 +884,33 @@ function getCancellableRuleType() {
   return result;
 }
 
-function getAlwaysFiringAlertAsDataRuleType() {
+function getAlwaysFiringAlertAsDataRuleType(
+  logger: Logger,
+  { ruleRegistry }: Pick<FixtureSetupDeps, 'ruleRegistry'>
+) {
   const paramsSchema = schema.object({
     index: schema.string(),
     reference: schema.string(),
   });
-  type ParamsType = TypeOf<typeof paramsSchema>;
 
-  const result: RuleType<ParamsType, never, {}, {}, {}, 'default'> = {
+  const ruleDataClient = ruleRegistry.ruleDataService.initializeIndex({
+    feature: AlertConsumers.OBSERVABILITY,
+    registrationContext: 'observability.test.alerts',
+    dataset: ruleRegistry.dataset.alerts,
+    componentTemplateRefs: [],
+    componentTemplates: [
+      {
+        name: 'mappings',
+      },
+    ],
+  });
+
+  const createLifecycleRuleType = ruleRegistry.createLifecycleRuleTypeFactory({
+    logger,
+    ruleDataClient,
+  });
+
+  return createLifecycleRuleType({
     id: 'test.always-firing-alert-as-data',
     name: 'Test: Always Firing Alert As Data',
     actionGroups: [{ id: 'default', name: 'Default' }],
@@ -906,8 +926,19 @@ function getAlwaysFiringAlertAsDataRuleType() {
       const { services, params, state, spaceId, namespace, rule } = ruleExecutorOptions;
       const ruleInfo = { spaceId, namespace, ...rule };
 
-      services.alertsClient?.report({ id: '1', actionGroup: 'default' });
-      services.alertsClient?.report({ id: '2', actionGroup: 'default' });
+      services
+        .alertWithLifecycle({
+          id: '1',
+          fields: {},
+        })
+        .scheduleActions('default');
+
+      services
+        .alertWithLifecycle({
+          id: '2',
+          fields: {},
+        })
+        .scheduleActions('default');
 
       await services.scopedClusterClient.asCurrentUser.index({
         index: params.index,
@@ -929,10 +960,8 @@ function getAlwaysFiringAlertAsDataRuleType() {
         fieldMap: {},
       },
       useLegacyAlerts: true,
-      shouldWrite: true,
     },
-  };
-  return result;
+  });
 }
 
 function getWaitingRuleType(logger: Logger) {
@@ -1364,7 +1393,7 @@ export function defineRuleTypes(
   alerting.registerType(getCancellableRuleType());
   alerting.registerType(getPatternSuccessOrFailureRuleType());
   alerting.registerType(getExceedsAlertLimitRuleType());
-  alerting.registerType(getAlwaysFiringAlertAsDataRuleType());
+  alerting.registerType(getAlwaysFiringAlertAsDataRuleType(logger, { ruleRegistry }));
   alerting.registerType(getPatternFiringAutoRecoverFalseRuleType());
   alerting.registerType(getPatternFiringAlertsAsDataRuleType());
   alerting.registerType(getWaitingRuleType(logger));

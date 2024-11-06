@@ -18,17 +18,11 @@ import { AIAssistantService, AIAssistantServiceOpts } from '.';
 import { retryUntil } from './create_resource_installation_helper.test';
 import { mlPluginMock } from '@kbn/ml-plugin/public/mocks';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
-import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 
 jest.mock('../ai_assistant_data_clients/conversations', () => ({
   AIAssistantConversationsDataClient: jest.fn(),
 }));
 
-const licensing = Promise.resolve(
-  licensingMock.createRequestHandlerContext({
-    license: { type: 'enterprise' },
-  })
-);
 let logger: ReturnType<(typeof loggingSystemMock)['createLogger']>;
 const clusterClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
@@ -197,7 +191,6 @@ describe('AI Assistant Service', () => {
         logger,
         spaceId: 'default',
         currentUser: mockUser1,
-        licensing,
       });
 
       expect(AIAssistantConversationsDataClient).toHaveBeenCalledWith({
@@ -228,7 +221,6 @@ describe('AI Assistant Service', () => {
         logger,
         spaceId: 'default',
         currentUser: mockUser1,
-        licensing,
       });
 
       expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalled();
@@ -282,13 +274,11 @@ describe('AI Assistant Service', () => {
           logger,
           spaceId: 'default',
           currentUser: mockUser1,
-          licensing,
         }),
         assistantService.createAIAssistantConversationsDataClient({
           logger,
           spaceId: 'default',
           currentUser: mockUser1,
-          licensing,
         }),
       ]);
 
@@ -350,7 +340,6 @@ describe('AI Assistant Service', () => {
         logger,
         spaceId: 'default',
         currentUser: mockUser1,
-        licensing,
       });
 
       expect(AIAssistantConversationsDataClient).toHaveBeenCalledWith({
@@ -411,7 +400,6 @@ describe('AI Assistant Service', () => {
           logger,
           spaceId: 'default',
           currentUser: mockUser1,
-          licensing,
         });
       };
 
@@ -484,7 +472,6 @@ describe('AI Assistant Service', () => {
           logger,
           spaceId: 'default',
           currentUser: mockUser1,
-          licensing,
         });
       };
 
@@ -526,7 +513,6 @@ describe('AI Assistant Service', () => {
         logger,
         spaceId: 'test',
         currentUser: mockUser1,
-        licensing,
       });
 
       expect(clusterClient.indices.putIndexTemplate).not.toHaveBeenCalled();
@@ -574,7 +560,6 @@ describe('AI Assistant Service', () => {
         logger,
         spaceId: 'test',
         currentUser: mockUser1,
-        licensing,
       });
 
       expect(clusterClient.indices.putIndexTemplate).not.toHaveBeenCalled();
@@ -622,7 +607,6 @@ describe('AI Assistant Service', () => {
         logger,
         spaceId: 'test',
         currentUser: mockUser1,
-        licensing,
       });
 
       expect(AIAssistantConversationsDataClient).not.toHaveBeenCalled();
@@ -768,7 +752,6 @@ describe('AI Assistant Service', () => {
         logger,
         spaceId: 'default',
         currentUser: mockUser1,
-        licensing,
       });
 
       await retryUntil(

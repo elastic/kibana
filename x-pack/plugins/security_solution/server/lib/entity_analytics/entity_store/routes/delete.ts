@@ -28,10 +28,8 @@ export const deleteEntityEngineRoute = (
     .delete({
       access: 'public',
       path: '/api/entity_store/engines/{entityType}',
-      security: {
-        authz: {
-          requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],
-        },
+      options: {
+        tags: ['access:securitySolution', `access:${APP_ID}-entity-analytics`],
       },
     })
     .addVersion(
@@ -58,10 +56,7 @@ export const deleteEntityEngineRoute = (
           const secSol = await context.securitySolution;
           const body = await secSol
             .getEntityStoreDataClient()
-            .delete(request.params.entityType, taskManager, {
-              deleteData: !!request.query.data,
-              deleteEngine: true,
-            });
+            .delete(request.params.entityType, taskManager, !!request.query.data);
 
           return response.ok({ body });
         } catch (e) {

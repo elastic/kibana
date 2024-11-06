@@ -22,10 +22,8 @@ export const setAlertAssigneesRoute = (router: SecuritySolutionPluginRouter) => 
     .post({
       path: DETECTION_ENGINE_ALERT_ASSIGNEES_URL,
       access: 'public',
-      security: {
-        authz: {
-          requiredPrivileges: ['securitySolution'],
-        },
+      options: {
+        tags: ['access:securitySolution'],
       },
     })
     .addVersion(

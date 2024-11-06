@@ -15,7 +15,7 @@ import { plotFunctionFactory } from './plot';
 import { pieFunctionFactory } from './pie';
 
 export interface InitializeArguments {
-  http: CoreSetup['http'];
+  prependBasePath: CoreSetup['http']['basePath']['prepend'];
   paletteService: PaletteRegistry;
   types: ReturnType<CanvasSetupDeps['expressions']['getTypes']>;
   timefilter: CanvasSetupDeps['data']['query']['timefilter']['timefilter'];

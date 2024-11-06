@@ -13,7 +13,7 @@ import type {
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import type { ConnectorTypeFields } from '../../common/types/domain';
-import { ConnectorTypes, CustomFieldTypes } from '../../common/types/domain';
+import { ConnectorTypes } from '../../common/types/domain';
 import type { CasesPublicStartDependencies } from '../types';
 import { connectorValidator as swimlaneConnectorValidator } from './connectors/swimlane/validator';
 import type { CaseActionConnector } from './types';
@@ -234,23 +234,9 @@ export const parseCaseUsers = ({
   return { userProfiles, reporterAsArray };
 };
 
-export const convertCustomFieldValue = ({
-  value,
-  type,
-}: {
-  value: string | number | boolean | null;
-  type: CustomFieldTypes;
-}) => {
+export const convertCustomFieldValue = (value: string | boolean) => {
   if (typeof value === 'string' && isEmpty(value)) {
     return null;
-  }
-
-  if (type === CustomFieldTypes.NUMBER) {
-    if (value !== null && Number.isSafeInteger(Number(value))) {
-      return Number(value);
-    } else {
-      return null;
-    }
   }
 
   return value;
@@ -302,7 +288,7 @@ export const customFieldsFormDeserializer = (
 };
 
 export const customFieldsFormSerializer = (
-  customFields: Record<string, string | boolean | number | null>,
+  customFields: Record<string, string | boolean>,
   selectedCustomFieldsConfiguration: CasesConfigurationUI['customFields']
 ): CaseUI['customFields'] => {
   const transformedCustomFields: CaseUI['customFields'] = [];
@@ -317,7 +303,7 @@ export const customFieldsFormSerializer = (
       transformedCustomFields.push({
         key: configCustomField.key,
         type: configCustomField.type,
-        value: convertCustomFieldValue({ value, type: configCustomField.type }),
+        value: convertCustomFieldValue(value),
       } as CaseUICustomField);
     }
   }

@@ -23,10 +23,8 @@ export const querySignalsRoute = (
     .post({
       path: DETECTION_ENGINE_QUERY_SIGNALS_URL,
       access: 'public',
-      security: {
-        authz: {
-          requiredPrivileges: ['securitySolution'],
-        },
+      options: {
+        tags: ['access:securitySolution'],
       },
     })
     .addVersion(

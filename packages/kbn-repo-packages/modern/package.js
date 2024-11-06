@@ -116,22 +116,6 @@ class Package {
      * @readonly
      */
     this.id = manifest.id;
-
-    const { group, visibility } = this.determineGroupAndVisibility();
-
-    /**
-     * the group to which this package belongs
-     * @type {import('@kbn/repo-info/types').ModuleGroup}
-     * @readonly
-     */
-
-    this.group = group;
-    /**
-     * the visibility of this package, i.e. whether it can be accessed by everybody or only modules in the same group
-     * @type {import('@kbn/repo-info/types').ModuleVisibility}
-     * @readonly
-     */
-    this.visibility = visibility;
   }
 
   /**
@@ -157,24 +141,6 @@ class Package {
   }
 
   /**
-   * Returns the group to which this package belongs
-   * @readonly
-   * @returns {import('@kbn/repo-info/types').ModuleGroup}
-   */
-  getGroup() {
-    return this.group;
-  }
-
-  /**
-   * Returns the package visibility, i.e. whether it can be accessed by everybody or only packages in the same group
-   * @readonly
-   * @returns {import('@kbn/repo-info/types').ModuleVisibility}
-   */
-  getVisibility() {
-    return this.visibility;
-  }
-
-  /**
    * Returns true if the package represents some type of plugin
    * @returns {import('./types').PluginCategoryInfo}
    */
@@ -192,46 +158,11 @@ class Package {
     const oss = !dir.startsWith('x-pack/');
     const example = dir.startsWith('examples/') || dir.startsWith('x-pack/examples/');
     const testPlugin = dir.startsWith('test/') || dir.startsWith('x-pack/test/');
-
     return {
       oss,
       example,
       testPlugin,
     };
-  }
-
-  determineGroupAndVisibility() {
-    const dir = this.normalizedRepoRelativeDir;
-
-    /** @type {import('@kbn/repo-info/types').ModuleGroup} */
-    let group = 'common';
-    /** @type {import('@kbn/repo-info/types').ModuleVisibility} */
-    let visibility = 'shared';
-
-    if (dir.startsWith('src/platform/') || dir.startsWith('x-pack/platform/')) {
-      group = 'platform';
-      visibility =
-        /src\/platform\/[^\/]+\/shared/.test(dir) || /x-pack\/platform\/[^\/]+\/shared/.test(dir)
-          ? 'shared'
-          : 'private';
-    } else if (dir.startsWith('x-pack/solutions/search/')) {
-      group = 'search';
-      visibility = 'private';
-    } else if (dir.startsWith('x-pack/solutions/security/')) {
-      group = 'security';
-      visibility = 'private';
-    } else if (dir.startsWith('x-pack/solutions/observability/')) {
-      group = 'observability';
-      visibility = 'private';
-    } else {
-      group = this.manifest.group ?? 'common';
-      // if the group is 'private-only', enforce it
-      visibility = ['search', 'security', 'observability'].includes(group)
-        ? 'private'
-        : this.manifest.visibility ?? 'shared';
-    }
-
-    return { group, visibility };
   }
 
   /**

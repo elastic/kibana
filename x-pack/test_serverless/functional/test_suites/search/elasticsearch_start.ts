@@ -30,13 +30,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     describe('developer', function () {
       before(async () => {
         await pageObjects.svlCommonPage.loginWithRole('developer');
+        await pageObjects.svlApiKeys.deleteAPIKeys();
       });
       after(async () => {
         await deleteAllTestIndices();
       });
       beforeEach(async () => {
         await deleteAllTestIndices();
-        await pageObjects.svlApiKeys.deleteAPIKeys();
         await svlSearchNavigation.navigateToElasticsearchStartPage();
       });
 
@@ -92,7 +92,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.svlSearchElasticsearchStartPage.expectCreateIndexUIView();
       });
 
-      it('should show the api key in code view', async () => {
+      // Failing: See https://github.com/elastic/kibana/issues/194673
+      it.skip('should show the api key in code view', async () => {
         await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnStartPage();
         await pageObjects.svlSearchElasticsearchStartPage.clickCodeViewButton();
         await pageObjects.svlApiKeys.expectAPIKeyAvailable();
@@ -130,7 +131,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.svlApiKeys.expectAPIKeyAvailable();
       });
 
-      it('Same API Key should be present on start page and index detail view', async () => {
+      // Failing: See https://github.com/elastic/kibana/issues/194673
+      it.skip('Same API Key should be present on start page and index detail view', async () => {
         await pageObjects.svlSearchElasticsearchStartPage.clickCodeViewButton();
         await pageObjects.svlApiKeys.expectAPIKeyAvailable();
         const apiKeyUI = await pageObjects.svlApiKeys.getAPIKeyFromUI();

@@ -337,7 +337,7 @@ export class LimitCommandVisitorContext<
     if (
       arg &&
       arg.type === 'literal' &&
-      (arg.literalType === 'integer' || arg.literalType === 'double')
+      (arg.literalType === 'integer' || arg.literalType === 'decimal')
     ) {
       return arg;
     }

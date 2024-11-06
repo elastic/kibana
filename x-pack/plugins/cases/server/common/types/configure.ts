@@ -39,7 +39,7 @@ type PersistedCustomFieldsConfiguration = Array<{
   type: string;
   label: string;
   required: boolean;
-  defaultValue?: string | number | boolean | null;
+  defaultValue?: string | boolean | null;
 }>;
 
 type PersistedTemplatesConfiguration = Array<{

@@ -1,15 +1,11 @@
 {
   "type": "plugin",
   "id": "@kbn/remote-clusters-plugin",
-  "owner": [
-    "@elastic/kibana-management"
-  ],
-  "group": "platform",
-  "visibility": "private",
+  "owner": "@elastic/kibana-management",
   "plugin": {
     "id": "remoteClusters",
-    "browser": true,
     "server": true,
+    "browser": true,
     "configPath": [
       "xpack",
       "remote_clusters"

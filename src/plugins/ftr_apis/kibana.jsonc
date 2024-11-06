@@ -1,15 +1,11 @@
 {
   "type": "plugin",
   "id": "@kbn/ftr-apis-plugin",
-  "owner": [
-    "@elastic/kibana-core"
-  ],
-  "group": "platform",
-  "visibility": "private",
+  "owner": "@elastic/kibana-core",
   "plugin": {
     "id": "ftrApis",
-    "browser": false,
     "server": true,
+    "browser": false,
     "configPath": [
       "ftr_apis"
     ]

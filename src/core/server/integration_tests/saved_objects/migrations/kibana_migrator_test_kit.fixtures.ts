@@ -81,14 +81,8 @@ export const baselineTypes: Array<SavedObjectsType<any>> = [
   },
 ];
 
-export const getUpToDateBaselineTypes = (filterDeprecated: boolean) => [
-  ...baselineTypes.filter((type) => !filterDeprecated || type.name !== 'deprecated'),
-  // we add a new SO type
-  {
-    ...defaultType,
-    name: 'recent',
-  },
-];
+export const getUpToDateBaselineTypes = (filterDeprecated: boolean) =>
+  baselineTypes.filter((type) => !filterDeprecated || type.name !== 'deprecated');
 
 export const getCompatibleBaselineTypes = (filterDeprecated: boolean) =>
   getUpToDateBaselineTypes(filterDeprecated).map<SavedObjectsType>((type) => {

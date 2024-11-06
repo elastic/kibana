@@ -27,7 +27,7 @@ export const DEFAULT_FREQUENCY = {
   summary: false,
 };
 
-export const getDefaultFormData = ({
+export const GET_DEFAULT_FORM_DATA = ({
   ruleTypeId,
   name,
   consumer,
@@ -50,7 +50,6 @@ export const getDefaultFormData = ({
     ruleTypeId,
     name,
     actions,
-    alertDelay: { active: 1 },
   };
 };
 

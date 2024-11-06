@@ -18,23 +18,16 @@ import {
   EuiHorizontalRule,
   EuiTitle,
 } from '@elastic/eui';
-import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-date-picker';
-import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import type { FieldStatsServices } from '@kbn/unified-field-list/src/components/field_stats';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import { FieldStatsFlyoutProvider } from '@kbn/ml-field-stats-flyout';
-import { useTimefilter } from '@kbn/ml-date-picker';
 import { pick } from 'lodash';
 import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
 import {
-  ChangePointDetectionContextProvider,
   ChangePointDetectionControlsContextProvider,
-  useChangePointDetectionContext,
   useChangePointDetectionControlsContext,
 } from '../../components/change_point_detection/change_point_detection_context';
 import { DEFAULT_AGG_FUNCTION } from '../../components/change_point_detection/constants';
@@ -45,8 +38,7 @@ import { PartitionsSelector } from '../../components/change_point_detection/part
 import { SplitFieldSelector } from '../../components/change_point_detection/split_field_selector';
 import { ViewTypeSelector } from '../../components/change_point_detection/view_type_selector';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
-import { useDataSource, DataSourceContextProvider } from '../../hooks/use_data_source';
-import { FilterQueryContextProvider } from '../../hooks/use_filters_query';
+import { DataSourceContextProvider } from '../../hooks/use_data_source';
 import { DEFAULT_SERIES } from './const';
 import type { ChangePointEmbeddableRuntimeState } from './types';
 
@@ -61,18 +53,11 @@ export const ChangePointChartInitializer: FC<AnomalyChartsInitializerProps> = ({
   onCreate,
   onCancel,
 }) => {
-  const appContextValue = useAiopsAppContext();
   const {
-    data: { dataViews },
     unifiedSearch: {
       ui: { IndexPatternSelect },
     },
-  } = appContextValue;
-
-  const datePickerDeps: DatePickerDependencies = {
-    ...pick(appContextValue, ['data', 'http', 'notifications', 'theme', 'uiSettings', 'i18n']),
-    uiSettingsKeys: UI_SETTINGS,
-  };
+  } = useAiopsAppContext();
 
   const [dataViewId, setDataViewId] = useState(initialInput?.dataViewId ?? '');
   const [viewType, setViewType] = useState(initialInput?.viewType ?? 'charts');
@@ -150,21 +135,15 @@ export const ChangePointChartInitializer: FC<AnomalyChartsInitializerProps> = ({
               }}
             />
           </EuiFormRow>
-          <EuiHorizontalRule margin={'s'} />
-          <DataSourceContextProvider dataViews={dataViews} dataViewId={dataViewId}>
-            <DatePickerContextProvider {...datePickerDeps}>
-              <FilterQueryContextProvider>
-                <ChangePointDetectionContextProvider>
-                  <ChangePointDetectionControlsContextProvider>
-                    <FormControls
-                      formInput={formInput}
-                      onChange={setFormInput}
-                      onValidationChange={setIsFormValid}
-                    />
-                  </ChangePointDetectionControlsContextProvider>
-                </ChangePointDetectionContextProvider>
-              </FilterQueryContextProvider>
-            </DatePickerContextProvider>
+          <DataSourceContextProvider dataViewId={dataViewId}>
+            <EuiHorizontalRule margin={'s'} />
+            <ChangePointDetectionControlsContextProvider>
+              <FormControls
+                formInput={formInput}
+                onChange={setFormInput}
+                onValidationChange={setIsFormValid}
+              />
+            </ChangePointDetectionControlsContextProvider>
           </DataSourceContextProvider>
         </EuiForm>
       </EuiFlyoutBody>
@@ -211,13 +190,7 @@ export const FormControls: FC<{
   onChange: (update: FormControlsProps) => void;
   onValidationChange: (isValid: boolean) => void;
 }> = ({ formInput, onChange, onValidationChange }) => {
-  const { charts, data, fieldFormats, theme, uiSettings } = useAiopsAppContext();
-  const { dataView } = useDataSource();
-  const { combinedQuery } = useChangePointDetectionContext();
   const { metricFieldOptions, splitFieldsOptions } = useChangePointDetectionControlsContext();
-  const timefilter = useTimefilter();
-  const timefilterActiveBounds = timefilter.getActiveBounds();
-
   const prevMetricFieldOptions = usePrevious(metricFieldOptions);
 
   const enableSearch = useMemo<boolean>(() => {
@@ -265,33 +238,10 @@ export const FormControls: FC<{
     [formInput, onChange]
   );
 
-  const fieldStatsServices: FieldStatsServices = useMemo(() => {
-    return {
-      uiSettings,
-      dataViews: data.dataViews,
-      data,
-      fieldFormats,
-      charts,
-    };
-  }, [uiSettings, data, fieldFormats, charts]);
-
   if (!isPopulatedObject(formInput)) return null;
 
   return (
-    <FieldStatsFlyoutProvider
-      fieldStatsServices={fieldStatsServices}
-      dataView={dataView}
-      dslQuery={combinedQuery}
-      timeRangeMs={
-        timefilterActiveBounds
-          ? {
-              from: timefilterActiveBounds.min!.valueOf(),
-              to: timefilterActiveBounds.max!.valueOf(),
-            }
-          : undefined
-      }
-      theme={theme}
-    >
+    <>
       <EuiFormRow
         fullWidth
         label={
@@ -332,6 +282,6 @@ export const FormControls: FC<{
         onChange={(v) => updateCallback({ maxSeriesToPlot: v })}
         onValidationChange={(result) => onValidationChange(result === null)}
       />
-    </FieldStatsFlyoutProvider>
+    </>
   );
 };

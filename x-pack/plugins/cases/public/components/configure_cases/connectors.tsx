@@ -13,8 +13,9 @@ import {
   EuiFlexItem,
   EuiLink,
   EuiText,
-  EuiButtonEmpty,
 } from '@elastic/eui';
+
+import { css } from '@emotion/react';
 
 import { ConnectorsDropdown } from './connectors_dropdown';
 import * as i18n from './translations';
@@ -38,7 +39,6 @@ export interface Props {
   onChangeConnector: (id: string) => void;
   selectedConnector: { id: string; type: ConnectorTypes };
   updateConnectorDisabled: boolean;
-  onAddNewConnector: () => void;
 }
 const ConnectorsComponent: React.FC<Props> = ({
   actionTypes,
@@ -50,10 +50,8 @@ const ConnectorsComponent: React.FC<Props> = ({
   onChangeConnector,
   selectedConnector,
   updateConnectorDisabled,
-  onAddNewConnector,
 }) => {
   const { actions } = useApplicationCapabilities();
-  const canSave = actions.crud;
   const connector = useMemo(
     () => connectors.find((c) => c.id === selectedConnector.id),
     [connectors, selectedConnector.id]
@@ -97,19 +95,13 @@ const ConnectorsComponent: React.FC<Props> = ({
       >
         <EuiFormRow
           fullWidth
+          css={css`
+            label {
+              width: 100%;
+            }
+          `}
           label={dropDownLabel}
           data-test-subj="case-connectors-form-row"
-          labelAppend={
-            canSave ? (
-              <EuiButtonEmpty
-                size="xs"
-                data-test-subj="add-new-connector"
-                onClick={onAddNewConnector}
-              >
-                {i18n.ADD_CONNECTOR}
-              </EuiButtonEmpty>
-            ) : null
-          }
         >
           <EuiFlexGroup direction="column">
             <EuiFlexItem grow={false}>
@@ -121,6 +113,7 @@ const ConnectorsComponent: React.FC<Props> = ({
                   isLoading={isLoading}
                   onChange={onChangeConnector}
                   data-test-subj="case-connectors-dropdown"
+                  appendAddConnectorButton={true}
                 />
               ) : (
                 <EuiText data-test-subj="configure-case-connector-permissions-error-msg" size="s">

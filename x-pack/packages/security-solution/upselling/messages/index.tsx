@@ -46,11 +46,3 @@ export const ALERT_SUPPRESSION_RULE_DETAILS = i18n.translate(
       'Alert suppression is configured but will not be applied due to insufficient licensing',
   }
 );
-
-export const UPGRADE_NOTES_MANAGEMENT_USER_FILTER = (requiredLicense: string) =>
-  i18n.translate('securitySolutionPackages.noteManagement.createdByFilter.upsell', {
-    defaultMessage: 'Upgrade to {requiredLicense} to make use of createdBy filter',
-    values: {
-      requiredLicense,
-    },
-  });

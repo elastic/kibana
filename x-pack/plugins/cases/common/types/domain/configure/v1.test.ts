@@ -16,7 +16,6 @@ import {
   TemplateConfigurationRt,
   TextCustomFieldConfigurationRt,
   ToggleCustomFieldConfigurationRt,
-  NumberCustomFieldConfigurationRt,
 } from './v1';
 
 describe('configure', () => {
@@ -45,13 +44,6 @@ describe('configure', () => {
     key: 'toggle_custom_field',
     label: 'Toggle custom field',
     type: CustomFieldTypes.TOGGLE,
-    required: false,
-  };
-
-  const numberCustomField = {
-    key: 'number_custom_field',
-    label: 'Number custom field',
-    type: CustomFieldTypes.NUMBER,
     required: false,
   };
 
@@ -106,7 +98,7 @@ describe('configure', () => {
     const defaultRequest = {
       connector: resilient,
       closure_type: 'close-by-user',
-      customFields: [textCustomField, toggleCustomField, numberCustomField],
+      customFields: [textCustomField, toggleCustomField],
       templates: [],
       owner: 'cases',
       created_at: '2020-02-19T23:06:33.798Z',
@@ -130,7 +122,7 @@ describe('configure', () => {
         _tag: 'Right',
         right: {
           ...defaultRequest,
-          customFields: [textCustomField, toggleCustomField, numberCustomField],
+          customFields: [textCustomField, toggleCustomField],
         },
       });
     });
@@ -142,7 +134,7 @@ describe('configure', () => {
         _tag: 'Right',
         right: {
           ...defaultRequest,
-          customFields: [textCustomField, toggleCustomField, numberCustomField],
+          customFields: [textCustomField, toggleCustomField],
         },
       });
     });
@@ -150,14 +142,14 @@ describe('configure', () => {
     it('removes foo:bar attributes from custom fields', () => {
       const query = ConfigurationAttributesRt.decode({
         ...defaultRequest,
-        customFields: [{ ...textCustomField, foo: 'bar' }, toggleCustomField, numberCustomField],
+        customFields: [{ ...textCustomField, foo: 'bar' }, toggleCustomField],
       });
 
       expect(query).toStrictEqual({
         _tag: 'Right',
         right: {
           ...defaultRequest,
-          customFields: [textCustomField, toggleCustomField, numberCustomField],
+          customFields: [textCustomField, toggleCustomField],
         },
       });
     });
@@ -351,62 +343,6 @@ describe('configure', () => {
 
     it('removes foo:bar attributes from request', () => {
       const query = ToggleCustomFieldConfigurationRt.decode({ ...defaultRequest, foo: 'bar' });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: { ...defaultRequest },
-      });
-    });
-  });
-
-  describe('NumberCustomFieldConfigurationRt', () => {
-    const defaultRequest = {
-      key: 'my_number_custom_field',
-      label: 'Number Custom Field',
-      type: CustomFieldTypes.NUMBER,
-      required: false,
-    };
-
-    it('has expected attributes in request with required: false', () => {
-      const query = NumberCustomFieldConfigurationRt.decode(defaultRequest);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: { ...defaultRequest },
-      });
-    });
-
-    it('has expected attributes in request with defaultValue and required: true', () => {
-      const query = NumberCustomFieldConfigurationRt.decode({
-        ...defaultRequest,
-        required: true,
-        defaultValue: 0,
-      });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: {
-          ...defaultRequest,
-          required: true,
-          defaultValue: 0,
-        },
-      });
-    });
-
-    it('defaultValue fails if the type is not number', () => {
-      expect(
-        PathReporter.report(
-          NumberCustomFieldConfigurationRt.decode({
-            ...defaultRequest,
-            required: true,
-            defaultValue: 'foobar',
-          })
-        )[0]
-      ).toContain('Invalid value "foobar" supplied');
-    });
-
-    it('removes foo:bar attributes from request', () => {
-      const query = NumberCustomFieldConfigurationRt.decode({ ...defaultRequest, foo: 'bar' });
 
       expect(query).toStrictEqual({
         _tag: 'Right',

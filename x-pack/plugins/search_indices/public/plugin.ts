@@ -17,7 +17,8 @@ import type {
 } from './types';
 import { initQueryClient } from './services/query_client';
 import { INDICES_APP_ID, START_APP_ID } from '../common';
-import { INDICES_APP_BASE, START_APP_BASE, SearchIndexDetailsTabValues } from './routes';
+import { INDICES_APP_BASE, START_APP_BASE } from './routes';
+import { isGlobalEmptyStateEnabled } from './feature_flags';
 
 export class SearchIndicesPlugin
   implements Plugin<SearchIndicesPluginSetup, SearchIndicesPluginStart>
@@ -27,6 +28,13 @@ export class SearchIndicesPlugin
   public setup(
     core: CoreSetup<SearchIndicesAppPluginStartDependencies, SearchIndicesPluginStart>
   ): SearchIndicesPluginSetup {
+    if (!isGlobalEmptyStateEnabled(core.uiSettings)) {
+      return {
+        enabled: this.pluginEnabled,
+        startAppId: START_APP_ID,
+        startRoute: START_APP_BASE,
+      };
+    }
     this.pluginEnabled = true;
 
     const queryClient = initQueryClient(core.notifications.toasts);
@@ -81,12 +89,8 @@ export class SearchIndicesPlugin
     docLinks.setDocLinks(core.docLinks.links);
     if (this.pluginEnabled) {
       indexManagement?.extensionsService.setIndexDetailsPageRoute({
-        renderRoute: (indexName, detailsTabId) => {
-          const route = `/app/elasticsearch/indices/index_details/${indexName}`;
-          if (detailsTabId && SearchIndexDetailsTabValues.includes(detailsTabId)) {
-            return `${route}/${detailsTabId}`;
-          }
-          return route;
+        renderRoute: (indexName) => {
+          return `/app/elasticsearch/indices/index_details/${indexName}`;
         },
       });
     }

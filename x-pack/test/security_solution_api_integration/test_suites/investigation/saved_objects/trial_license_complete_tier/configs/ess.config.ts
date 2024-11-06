@@ -20,7 +20,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--xpack.securitySolution.enableExperimental=${JSON.stringify([])}`,
       ],
     },
-    testFiles: [require.resolve('../../tests')],
+    testFiles: [require.resolve('..')],
     junit: {
       reportName: 'Saved Objects Integration Tests - ESS Env - Basic License',
     },

@@ -137,22 +137,13 @@ export const AgentPolicyActionMenu = memo<{
           const copyPolicyItem = (
             <EuiContextMenuItem
               data-test-subj="agentPolicyActionMenuCopyButton"
-              disabled={!authz.integrations.writeIntegrationPolicies || hasManagedPackagePolicy}
+              disabled={!authz.integrations.writeIntegrationPolicies}
               icon="copy"
               onClick={() => {
                 setIsContextMenuOpen(false);
                 copyAgentPolicyPrompt(agentPolicy, onCopySuccess);
               }}
               key="copyPolicy"
-              toolTipContent={
-                hasManagedPackagePolicy ? (
-                  <FormattedMessage
-                    id="xpack.fleet.policyForm.copyPolicyActionText.disabled"
-                    defaultMessage="Agent policy with managed package policies cannot be copied."
-                    data-test-subj="agentPolicyActionMenuCopyButtonDisabledTooltip"
-                  />
-                ) : undefined
-              }
             >
               <FormattedMessage
                 id="xpack.fleet.agentPolicyActionMenu.copyPolicyActionText"

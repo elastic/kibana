@@ -110,7 +110,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     return seriesType;
   }
 
-  describe('discover lens vis', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/184600
+  describe.skip('discover lens vis', function () {
     before(async () => {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
@@ -288,8 +289,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await header.waitUntilLoadingHasFinished();
       await discover.waitUntilSearchingHasFinished();
 
-      // Line has been retained although the query changed!
-      expect(await getCurrentVisTitle()).to.be('Line');
+      expect(await getCurrentVisTitle()).to.be('Bar');
 
       await checkESQLHistogramVis(defaultTimespanESQL, '100');
 
@@ -568,14 +568,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.existOrFail('partitionVisChart');
       expect(await discover.getVisContextSuggestionType()).to.be('lensSuggestion');
 
-      // reset to histogram
-      await monacoEditor.setCodeEditorValue('from logstash-*');
+      await monacoEditor.setCodeEditorValue(
+        'from logstash-* | stats averageB = avg(bytes) by extension.raw'
+      );
       await testSubjects.click('querySubmitButton');
       await header.waitUntilLoadingHasFinished();
       await discover.waitUntilSearchingHasFinished();
 
       expect(await getCurrentVisTitle()).to.be('Bar');
-      expect(await discover.getVisContextSuggestionType()).to.be('histogramForESQL');
+      expect(await discover.getVisContextSuggestionType()).to.be('lensSuggestion');
 
       await testSubjects.existOrFail('unsavedChangesBadge');
 
@@ -615,8 +616,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await getCurrentVisTitle()).to.be('Pie');
       await testSubjects.existOrFail('partitionVisChart');
 
-      await discover.chooseLensSuggestion('waffle');
-      await changeVisShape('Treemap');
+      await discover.chooseLensSuggestion('barVerticalStacked');
+      await changeVisShape('Line');
 
       await testSubjects.existOrFail('unsavedChangesBadge');
       await discover.saveUnsavedChanges();
@@ -625,8 +626,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await discover.waitUntilSearchingHasFinished();
 
       await testSubjects.missingOrFail('unsavedChangesBadge');
-      expect(await getCurrentVisTitle()).to.be('Treemap');
-      await testSubjects.existOrFail('partitionVisChart');
+      expect(await getCurrentVisTitle()).to.be('Line');
+      await testSubjects.existOrFail('xyVisChart');
     });
 
     it('should close lens flyout on revert changes', async () => {

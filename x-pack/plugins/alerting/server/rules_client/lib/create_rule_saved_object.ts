@@ -8,6 +8,7 @@
 import { SavedObjectReference, SavedObject } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
 import { Rule, RuleWithLegacyId, RawRule, RuleTypeParams } from '../../types';
+import { RuleAttributes } from '../../data/rule/types';
 import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import { SavedObjectOptions } from '../types';
@@ -29,7 +30,7 @@ interface CreateRuleSavedObjectParams {
 
 interface CreateRuleSavedObjectAttributeParams {
   intervalInMs: number;
-  rawRule: RawRule;
+  rawRule: RuleAttributes;
   references: SavedObjectReference[];
   ruleId: string;
   options?: SavedObjectOptions;
@@ -45,11 +46,11 @@ export async function createRuleSavedObject<Params extends RuleTypeParams = neve
 export async function createRuleSavedObject<Params extends RuleTypeParams = never>(
   context: RulesClientContext,
   params: CreateRuleSavedObjectAttributeParams
-): Promise<SavedObject<RawRule>>;
+): Promise<SavedObject<RuleAttributes>>;
 export async function createRuleSavedObject<Params extends RuleTypeParams = never>(
   context: RulesClientContext,
   params: CreateRuleSavedObjectParams | CreateRuleSavedObjectAttributeParams
-): Promise<Rule<Params> | RuleWithLegacyId<Params> | SavedObject<RawRule>> {
+): Promise<Rule<Params> | RuleWithLegacyId<Params> | SavedObject<RuleAttributes>> {
   const { intervalInMs, rawRule, references, ruleId, options, returnRuleAttributes } = params;
 
   context.auditLogger?.log(
@@ -60,13 +61,14 @@ export async function createRuleSavedObject<Params extends RuleTypeParams = neve
     })
   );
 
+  // TODO (http-versioning): Remove casts
   let createdAlert: SavedObject<RawRule>;
   try {
-    createdAlert = await withSpan(
+    createdAlert = (await withSpan(
       { name: 'unsecuredSavedObjectsClient.create', type: 'rules' },
       () =>
         createRuleSo({
-          ruleAttributes: updateMeta(context, rawRule),
+          ruleAttributes: updateMeta(context, rawRule as RawRule) as RuleAttributes,
           savedObjectsClient: context.unsecuredSavedObjectsClient,
           savedObjectsCreateOptions: {
             ...options,
@@ -74,7 +76,7 @@ export async function createRuleSavedObject<Params extends RuleTypeParams = neve
             id: ruleId,
           },
         })
-    );
+    )) as SavedObject<RawRule>;
   } catch (e) {
     // Avoid unused API key
     await bulkMarkApiKeysForInvalidation(
@@ -136,7 +138,7 @@ export async function createRuleSavedObject<Params extends RuleTypeParams = neve
 
   // TODO (http-versioning): Remove casts
   if (returnRuleAttributes) {
-    return createdAlert as SavedObject<RawRule>;
+    return createdAlert as SavedObject<RuleAttributes>;
   }
 
   return getAlertFromRaw<Params>({

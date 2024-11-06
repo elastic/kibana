@@ -76,11 +76,11 @@ export default function ruleTests({ getService }: FtrProviderContext) {
     }
 
     async function createRule(params: CreateRuleParams) {
-      const { body: createdConnector } = await supertest
+      const { body: createdAction } = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
         .set('kbn-xsrf', 'foo')
         .send({
-          name: 'My Connector',
+          name: 'My action',
           connector_type_id: 'test.index-record',
           config: {
             unencrypted: `This value shouldn't get encrypted`,
@@ -90,7 +90,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
           },
         })
         .expect(200);
-      objectRemover.add(Spaces.space1.id, createdConnector.id, 'connector', 'actions');
+      objectRemover.add(Spaces.space1.id, createdAction.id, 'action', 'actions');
 
       const { status, body: createdRule } = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
@@ -104,7 +104,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
           actions: [
             {
               group: 'default',
-              id: createdConnector.id,
+              id: createdAction.id,
               params: {
                 index: ES_TEST_INDEX_NAME,
                 reference: '',
@@ -113,7 +113,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
             },
             {
               group: RecoveredActionGroup.id,
-              id: createdConnector.id,
+              id: createdAction.id,
               params: {
                 index: ES_TEST_INDEX_NAME,
                 reference: '',

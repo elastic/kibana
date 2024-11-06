@@ -31,7 +31,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const theCase = await svlCases.api.getCase(
         {
           caseId: postedCase.id,
-          expectedHttpCode: 200,
+          includeComments: true,
         },
         roleAuthc
       );
@@ -41,22 +41,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const { created_by: _, ...expectedData } = svlCases.api.postCaseResp('securitySolution');
       expect(data).to.eql(expectedData);
       expect(createdBy).to.have.keys('full_name', 'email', 'username');
-    });
-
-    it('should throw a 400 if the query param includeComments is being used', async () => {
-      const postedCase = await svlCases.api.createCase(
-        svlCases.api.getPostCaseRequest('securitySolution'),
-        roleAuthc
-      );
-
-      await svlCases.api.getCase(
-        {
-          caseId: postedCase.id,
-          includeComments: true,
-          expectedHttpCode: 400,
-        },
-        roleAuthc
-      );
+      expect(data.comments?.length).to.eql(0);
     });
   });
 };

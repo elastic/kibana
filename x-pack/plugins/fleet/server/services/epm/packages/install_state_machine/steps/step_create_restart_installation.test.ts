@@ -31,8 +31,6 @@ import { auditLoggingService } from '../../../../audit_logging';
 import { restartInstallation, createInstallation } from '../../install';
 import type { Installation } from '../../../../../../common';
 
-import { createArchiveIteratorFromMap } from '../../../archive/archive_iterator';
-
 import { stepCreateRestartInstallation } from './step_create_restart_installation';
 
 jest.mock('../../../../audit_logging');
@@ -86,7 +84,6 @@ describe('stepCreateRestartInstallation', () => {
         logger,
         packageInstallContext: {
           assetsMap: new Map(),
-          archiveIterator: createArchiveIteratorFromMap(new Map()),
           paths: [],
           packageInfo: {
             title: 'title',
@@ -123,7 +120,6 @@ describe('stepCreateRestartInstallation', () => {
           logger,
           packageInstallContext: {
             assetsMap: new Map(),
-            archiveIterator: createArchiveIteratorFromMap(new Map()),
             paths: [],
             packageInfo: {
               title: 'title',
@@ -168,7 +164,6 @@ describe('stepCreateRestartInstallation', () => {
           logger,
           packageInstallContext: {
             assetsMap: new Map(),
-            archiveIterator: createArchiveIteratorFromMap(new Map()),
             paths: [],
             packageInfo: {
               title: 'title',
@@ -213,7 +208,6 @@ describe('stepCreateRestartInstallation', () => {
           logger,
           packageInstallContext: {
             assetsMap: new Map(),
-            archiveIterator: createArchiveIteratorFromMap(new Map()),
             paths: [],
             packageInfo: {
               title: 'title',

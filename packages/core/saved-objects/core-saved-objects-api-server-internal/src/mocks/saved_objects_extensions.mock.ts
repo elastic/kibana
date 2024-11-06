@@ -17,7 +17,6 @@ const createEncryptionExtension = (): jest.Mocked<ISavedObjectsEncryptionExtensi
   isEncryptableType: jest.fn(),
   decryptOrStripResponseAttributes: jest.fn(),
   encryptAttributes: jest.fn(),
-  shouldEnforceRandomId: jest.fn(),
 });
 
 const createSecurityExtension = (): jest.Mocked<ISavedObjectsSecurityExtension> => ({

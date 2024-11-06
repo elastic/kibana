@@ -59,8 +59,7 @@
     "@kbn/telemetry-plugin",
     "@kbn/usage-collection-plugin",
     "@kbn/rison",
-    "@kbn/task-manager-plugin",
-    "@kbn/core-application-browser"
+    "@kbn/task-manager-plugin"
   ],
   "exclude": [
     "target/**/*"

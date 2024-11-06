@@ -1,16 +1,12 @@
 {
   "type": "plugin",
   "id": "@kbn/links-plugin",
-  "owner": [
-    "@elastic/kibana-presentation"
-  ],
-  "group": "platform",
-  "visibility": "private",
+  "owner": "@elastic/kibana-presentation",
   "description": "A dashboard panel for creating links to dashboards or external links.",
   "plugin": {
     "id": "links",
-    "browser": true,
     "server": true,
+    "browser": true,
     "requiredPlugins": [
       "contentManagement",
       "dashboard",
@@ -22,12 +18,7 @@
       "uiActionsEnhanced",
       "visualizations"
     ],
-    "optionalPlugins": [
-      "triggersActionsUi",
-      "usageCollection"
-    ],
-    "requiredBundles": [
-      "savedObjects"
-    ]
+    "optionalPlugins": ["triggersActionsUi", "usageCollection"],
+    "requiredBundles": ["savedObjects"]
   }
 }

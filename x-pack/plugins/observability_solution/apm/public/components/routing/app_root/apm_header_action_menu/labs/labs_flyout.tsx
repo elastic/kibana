@@ -20,7 +20,6 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
-  EuiToolTip,
 } from '@elastic/eui';
 import { withSuspense } from '@kbn/shared-ux-utility';
 import { i18n } from '@kbn/i18n';
@@ -43,11 +42,7 @@ interface Props {
 
 export function LabsFlyout({ onClose }: Props) {
   const trackApmEvent = useUiTracker({ app: 'apm' });
-  const { docLinks, notifications, application } = useApmPluginContext().core;
-
-  const canSave =
-    application.capabilities.advancedSettings.save &&
-    (application.capabilities.apm['settings:save'] as boolean);
+  const { docLinks, notifications } = useApmPluginContext().core;
 
   const { data, status } = useFetcher(
     (callApmApi) => callApmApi('GET /internal/apm/settings/labs'),
@@ -157,7 +152,7 @@ export function LabsFlyout({ onClose }: Props) {
                   >
                     <FieldRow
                       field={field}
-                      isSavingEnabled={canSave}
+                      isSavingEnabled={true}
                       onFieldChange={handleFieldChange}
                       unsavedChange={unsavedChanges[settingKey]}
                     />
@@ -177,27 +172,16 @@ export function LabsFlyout({ onClose }: Props) {
                 </EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiToolTip
-                  content={
-                    !canSave &&
-                    i18n.translate('xpack.apm.labs.noPermissionTooltipLabel', {
-                      defaultMessage:
-                        "Your user role doesn't have permissions to modify these settings",
-                    })
-                  }
+                <EuiButton
+                  data-test-subj="apmLabsFlyoutReloadToApplyChangesButton"
+                  fill
+                  isLoading={isSaving}
+                  onClick={handleSave}
                 >
-                  <EuiButton
-                    data-test-subj="apmLabsFlyoutReloadToApplyChangesButton"
-                    fill
-                    isLoading={isSaving}
-                    onClick={handleSave}
-                    isDisabled={!canSave}
-                  >
-                    {i18n.translate('xpack.apm.labs.reload', {
-                      defaultMessage: 'Reload to apply changes',
-                    })}
-                  </EuiButton>
-                </EuiToolTip>
+                  {i18n.translate('xpack.apm.labs.reload', {
+                    defaultMessage: 'Reload to apply changes',
+                  })}
+                </EuiButton>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlyoutFooter>

@@ -32,13 +32,9 @@ import { docLinks } from '../../../../../common/doc_links';
 import { DEFAULT_INGESTION_PIPELINE } from '../../../../../common';
 interface ConnectorIndexNameProps {
   connector: Connector;
-  isDisabled?: boolean;
 }
 
-export const ConnectorIndexName: React.FC<ConnectorIndexNameProps> = ({
-  connector,
-  isDisabled,
-}) => {
+export const ConnectorIndexName: React.FC<ConnectorIndexNameProps> = ({ connector }) => {
   const { http } = useKibanaServices();
   const queryClient = useQueryClient();
   const { queryKey } = useConnector(connector.id);
@@ -92,7 +88,6 @@ export const ConnectorIndexName: React.FC<ConnectorIndexNameProps> = ({
       </EuiFlexGroup>
       <EuiSpacer />
       <ConnectorIndexNameForm
-        isDisabled={isDisabled}
         indexName={newIndexName || ''}
         onChange={(name) => setNewIndexname(name)}
       />
@@ -150,7 +145,7 @@ export const ConnectorIndexName: React.FC<ConnectorIndexNameProps> = ({
             <EuiButton
               data-test-subj="serverlessSearchConnectorIndexNameButton"
               color="primary"
-              isDisabled={!isValidIndexName(newIndexName) || isDisabled}
+              isDisabled={!isValidIndexName(newIndexName)}
               isLoading={isLoading}
               onClick={() => mutate({ inputName: newIndexName, sync: false })}
             >
@@ -167,7 +162,7 @@ export const ConnectorIndexName: React.FC<ConnectorIndexNameProps> = ({
                 !(
                   isValidIndexName(newIndexName) &&
                   [ConnectorStatus.CONFIGURED, ConnectorStatus.CONNECTED].includes(connector.status)
-                ) || isDisabled
+                )
               }
               fill
               isLoading={isLoading}

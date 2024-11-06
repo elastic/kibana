@@ -1,16 +1,12 @@
 {
   "type": "plugin",
   "id": "@kbn/event-annotation-listing-plugin",
-  "owner": [
-    "@elastic/kibana-visualizations"
-  ],
-  "group": "platform",
-  "visibility": "private",
+  "owner": "@elastic/kibana-visualizations",
   "description": "The listing page for event annotations.",
   "plugin": {
     "id": "eventAnnotationListing",
-    "browser": true,
     "server": false,
+    "browser": true,
     "requiredPlugins": [
       "savedObjectsManagement",
       "eventAnnotation",
@@ -20,11 +16,11 @@
       "dataViews",
       "unifiedSearch",
       "kibanaUtils",
-      "contentManagement"
+      "contentManagement",
     ],
     "optionalPlugins": [
       "savedObjectsTagging",
-      "lens"
+      "lens",
     ],
     "requiredBundles": [],
     "extraPublicDirs": []

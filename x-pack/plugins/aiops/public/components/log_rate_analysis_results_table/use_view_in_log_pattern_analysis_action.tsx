@@ -32,7 +32,7 @@ const viewInLogPatternAnalysisMessage = i18n.translate(
 export const useViewInLogPatternAnalysisAction = (dataViewId?: string): TableItemAction => {
   const { application, share, data } = useAiopsAppContext();
 
-  const mlLocator = useMemo(() => share?.url.locators.get('ML_APP_LOCATOR'), [share?.url.locators]);
+  const mlLocator = useMemo(() => share.url.locators.get('ML_APP_LOCATOR'), [share.url.locators]);
 
   const generateLogPatternAnalysisUrl = async (
     groupTableItem: GroupTableItem | SignificantItem

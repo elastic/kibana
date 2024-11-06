@@ -26,25 +26,13 @@ export class OtelSynthtraceEsClient extends SynthtraceEsClient<OtelDocument> {
     });
     this.dataStreams = ['metrics-generic.otel*', 'traces-generic.otel*', 'logs-generic.otel*'];
   }
-
-  getDefaultPipeline(
-    {
-      includeSerialization,
-    }: {
-      includeSerialization?: boolean;
-    } = { includeSerialization: true }
-  ) {
-    return otelPipeline(includeSerialization);
-  }
 }
 
-function otelPipeline(includeSerialization: boolean = true) {
-  const serializationTransform = includeSerialization ? [getSerializeTransform()] : [];
+function otelPipeline() {
   return (base: Readable) => {
     return pipeline(
-      // @ts-expect-error see apm_pipeline.ts
       base,
-      ...serializationTransform,
+      getSerializeTransform(),
       getRoutingTransform(),
       getDedotTransform(),
       (err: unknown) => {

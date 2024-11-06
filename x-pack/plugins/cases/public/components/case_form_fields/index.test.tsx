@@ -206,7 +206,6 @@ describe('CaseFormFields', () => {
 
     const textField = customFieldsConfigurationMock[0];
     const toggleField = customFieldsConfigurationMock[1];
-    const numberField = customFieldsConfigurationMock[4];
 
     const textCustomField = await screen.findByTestId(
       `${textField.key}-${textField.type}-create-custom-field`
@@ -220,13 +219,6 @@ describe('CaseFormFields', () => {
       await screen.findByTestId(`${toggleField.key}-${toggleField.type}-create-custom-field`)
     );
 
-    const numberCustomField = await screen.findByTestId(
-      `${numberField.key}-${numberField.type}-create-custom-field`
-    );
-
-    await user.clear(numberCustomField);
-    await user.paste('4321');
-
     await user.click(await screen.findByText('Submit'));
 
     await waitFor(() => {
@@ -238,7 +230,6 @@ describe('CaseFormFields', () => {
             test_key_1: 'My text test value 1',
             test_key_2: false,
             test_key_4: false,
-            test_key_5: '4321',
           },
         },
         true
@@ -277,7 +268,6 @@ describe('CaseFormFields', () => {
             test_key_1: 'Test custom filed value',
             test_key_2: true,
             test_key_4: false,
-            test_key_5: 123,
           },
         },
         true

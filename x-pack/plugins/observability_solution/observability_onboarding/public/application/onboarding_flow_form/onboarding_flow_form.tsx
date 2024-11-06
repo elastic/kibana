@@ -56,7 +56,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
             'Monitor your host and the services running on it, set-up SLO, get alerted, remediate performance issues',
         }
       ),
-      logos: ['opentelemetry', 'apache', 'mysql'],
+      logos: ['kubernetes', 'opentelemetry', 'apache', 'mysql'],
     },
     {
       id: 'kubernetes',
@@ -86,7 +86,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
             'Monitor the frontend and backend application that you have developed, set-up synthetic monitors',
         }
       ),
-      logos: ['opentelemetry', 'java', 'ruby', 'dotnet'],
+      logos: ['opentelemetry', 'java', 'javascript', 'dotnet'],
     },
     {
       id: 'cloud',
@@ -316,34 +316,33 @@ export const OnboardingFlowForm: FunctionComponent = () => {
             flowCategory={searchParams.get('category')}
           />
         </div>
-      </div>
-
-      <div ref={searchResultsRef}>
-        <EuiSpacer size="xxl" />
-        <EuiText size="s" color="subdued">
-          <strong>
-            <FormattedMessage
-              id="xpack.observability_onboarding.experimentalOnboardingFlow.form.searchPromptText"
-              defaultMessage="Search through other ways of ingesting data:"
-            />
-          </strong>
-        </EuiText>
-        <EuiSpacer size="m" />
-        <OnboardingFlowPackageList
-          showSearchBar={true}
-          searchQuery={integrationSearch}
-          flowSearch={integrationSearch}
-          setSearchQuery={setIntegrationSearch}
-          flowCategory={searchParams.get('category')}
-          customCards={customCards
-            ?.filter(
-              // Filter out collection cards and regular integrations that show up via search anyway
-              (card) => card.type === 'virtual' && !card.isCollectionCard
-            )
-            .concat(virtualSearchResults)}
-          excludePackageIdList={searchExcludePackageIdList}
-          joinCardLists
-        />
+        <div ref={searchResultsRef}>
+          <EuiSpacer size="m" />
+          <EuiText size="s" color="subdued">
+            <strong>
+              <FormattedMessage
+                id="xpack.observability_onboarding.experimentalOnboardingFlow.form.searchPromptText"
+                defaultMessage="Search through other ways of ingesting data:"
+              />
+            </strong>
+          </EuiText>
+          <EuiSpacer size="m" />
+          <OnboardingFlowPackageList
+            showSearchBar={true}
+            searchQuery={integrationSearch}
+            flowSearch={integrationSearch}
+            setSearchQuery={setIntegrationSearch}
+            flowCategory={searchParams.get('category')}
+            customCards={customCards
+              ?.filter(
+                // Filter out collection cards and regular integrations that show up via search anyway
+                (card) => card.type === 'virtual' && !card.isCollectionCard
+              )
+              .concat(virtualSearchResults)}
+            excludePackageIdList={searchExcludePackageIdList}
+            joinCardLists
+          />
+        </div>
       </div>
     </EuiPanel>
   );

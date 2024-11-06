@@ -26,14 +26,7 @@ import {
 import { Pipeline } from '../../../../common/types';
 import { useKibana, SectionLoading } from '../../../shared_imports';
 import { UIM_PIPELINES_LIST_LOAD } from '../../constants';
-import {
-  getEditPath,
-  getClonePath,
-  getCreateFromCsvPath,
-  getCreatePath,
-  getManageProcessorsPath,
-} from '../../services/navigation';
-import { useCheckManageProcessorsPrivileges } from '../manage_processors';
+import { getEditPath, getClonePath } from '../../services/navigation';
 
 import { EmptyList } from './empty_list';
 import { PipelineTable } from './table';
@@ -61,7 +54,6 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
 
   const { data, isLoading, error, resendRequest } = services.api.useLoadPipelines();
 
-  const hasManageProcessorsPrivileges = useCheckManageProcessorsPrivileges();
   // Track component loaded
   useEffect(() => {
     services.metric.trackUiMetric(UIM_PIPELINES_LIST_LOAD);
@@ -150,7 +142,7 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
       name: i18n.translate('xpack.ingestPipelines.list.table.createPipelineButtonLabel', {
         defaultMessage: 'New pipeline',
       }),
-      ...reactRouterNavigate(history, getCreatePath()),
+      ...reactRouterNavigate(history, '/create'),
       'data-test-subj': `createNewPipeline`,
     },
     /**
@@ -160,71 +152,10 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
       name: i18n.translate('xpack.ingestPipelines.list.table.createPipelineFromCsvButtonLabel', {
         defaultMessage: 'New pipeline from CSV',
       }),
-      ...reactRouterNavigate(history, getCreateFromCsvPath()),
+      ...reactRouterNavigate(history, '/csv_create'),
       'data-test-subj': `createPipelineFromCsv`,
     },
   ];
-  const titleActionButtons = [
-    <EuiPopover
-      key="createPipelinePopover"
-      isOpen={showPopover}
-      closePopover={() => setShowPopover(false)}
-      button={
-        <EuiButton
-          fill
-          iconSide="right"
-          iconType="arrowDown"
-          data-test-subj="createPipelineDropdown"
-          key="createPipelineDropdown"
-          onClick={() => setShowPopover((previousBool) => !previousBool)}
-        >
-          {i18n.translate('xpack.ingestPipelines.list.table.createPipelineDropdownLabel', {
-            defaultMessage: 'Create pipeline',
-          })}
-        </EuiButton>
-      }
-      panelPaddingSize="none"
-      repositionOnScroll
-    >
-      <EuiContextMenu
-        initialPanelId={0}
-        data-test-subj="autoFollowPatternActionContextMenu"
-        panels={[
-          {
-            id: 0,
-            items: createMenuItems,
-          },
-        ]}
-      />
-    </EuiPopover>,
-  ];
-  if (services.config.enableManageProcessors && hasManageProcessorsPrivileges) {
-    titleActionButtons.push(
-      <EuiButtonEmpty
-        iconType="wrench"
-        data-test-subj="manageProcessorsLink"
-        {...reactRouterNavigate(history, getManageProcessorsPath())}
-      >
-        <FormattedMessage
-          id="xpack.ingestPipelines.list.manageProcessorsLinkText"
-          defaultMessage="Manage processors"
-        />
-      </EuiButtonEmpty>
-    );
-  }
-  titleActionButtons.push(
-    <EuiButtonEmpty
-      href={services.documentation.getIngestNodeUrl()}
-      target="_blank"
-      iconType="help"
-      data-test-subj="documentationLink"
-    >
-      <FormattedMessage
-        id="xpack.ingestPipelines.list.pipelinesDocsLinkText"
-        defaultMessage="Documentation"
-      />
-    </EuiButtonEmpty>
-  );
 
   const renderFlyout = (): React.ReactNode => {
     if (!showFlyout) {
@@ -268,7 +199,51 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
             defaultMessage="Use ingest pipelines to remove or transform fields, extract values from text, and enrich your data before indexing into Elasticsearch."
           />
         }
-        rightSideItems={titleActionButtons}
+        rightSideItems={[
+          <EuiPopover
+            key="createPipelinePopover"
+            isOpen={showPopover}
+            closePopover={() => setShowPopover(false)}
+            button={
+              <EuiButton
+                fill
+                iconSide="right"
+                iconType="arrowDown"
+                data-test-subj="createPipelineDropdown"
+                key="createPipelineDropdown"
+                onClick={() => setShowPopover((previousBool) => !previousBool)}
+              >
+                {i18n.translate('xpack.ingestPipelines.list.table.createPipelineDropdownLabel', {
+                  defaultMessage: 'Create pipeline',
+                })}
+              </EuiButton>
+            }
+            panelPaddingSize="none"
+            repositionOnScroll
+          >
+            <EuiContextMenu
+              initialPanelId={0}
+              data-test-subj="autoFollowPatternActionContextMenu"
+              panels={[
+                {
+                  id: 0,
+                  items: createMenuItems,
+                },
+              ]}
+            />
+          </EuiPopover>,
+          <EuiButtonEmpty
+            href={services.documentation.getIngestNodeUrl()}
+            target="_blank"
+            iconType="help"
+            data-test-subj="documentationLink"
+          >
+            <FormattedMessage
+              id="xpack.ingestPipelines.list.pipelinesDocsLinkText"
+              defaultMessage="Documentation"
+            />
+          </EuiButtonEmpty>,
+        ]}
       />
 
       <EuiSpacer size="l" />

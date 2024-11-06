@@ -25,7 +25,6 @@ export function toStatusOverviewQueryArgs(
     schedules: pageState.schedules,
     monitorTypes: pageState.monitorTypes,
     monitorQueryIds: pageState.monitorQueryIds,
-    showFromAllSpaces: pageState.showFromAllSpaces,
     searchFields: [],
   };
 }

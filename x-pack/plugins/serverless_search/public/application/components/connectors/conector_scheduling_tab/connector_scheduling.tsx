@@ -10,33 +10,26 @@ import { ConnectorSchedulingComponent } from '@kbn/search-connectors/components/
 import { useConnectorScheduling } from '../../../hooks/api/use_update_connector_scheduling';
 
 interface ConnectorSchedulingPanels {
-  canManageConnectors: boolean;
   connector: Connector;
 }
-export const ConnectorScheduling: React.FC<ConnectorSchedulingPanels> = ({
-  canManageConnectors,
-  connector,
-}) => {
+export const ConnectorScheduling: React.FC<ConnectorSchedulingPanels> = ({ connector }) => {
   const [hasChanges, setHasChanges] = useState<boolean>(false);
   const { isLoading, mutate } = useConnectorScheduling(connector.id);
   const hasIncrementalSyncFeature = connector?.features?.incremental_sync ?? false;
   const shouldShowIncrementalSync =
     hasIncrementalSyncFeature && (connector?.features?.incremental_sync?.enabled ?? false);
   return (
-    <>
-      <ConnectorSchedulingComponent
-        connector={connector}
-        isDisabled={!canManageConnectors}
-        dataTelemetryIdPrefix="serverlessSearch"
-        hasChanges={hasChanges}
-        hasIngestionError={connector?.status === ConnectorStatus.ERROR}
-        hasPlatinumLicense={false}
-        setHasChanges={setHasChanges}
-        shouldShowAccessControlSync={false}
-        shouldShowIncrementalSync={shouldShowIncrementalSync}
-        updateConnectorStatus={isLoading}
-        updateScheduling={mutate}
-      />
-    </>
+    <ConnectorSchedulingComponent
+      connector={connector}
+      dataTelemetryIdPrefix="serverlessSearch"
+      hasChanges={hasChanges}
+      hasIngestionError={connector?.status === ConnectorStatus.ERROR}
+      hasPlatinumLicense={false}
+      setHasChanges={setHasChanges}
+      shouldShowAccessControlSync={false}
+      shouldShowIncrementalSync={shouldShowIncrementalSync}
+      updateConnectorStatus={isLoading}
+      updateScheduling={mutate}
+    />
   );
 };

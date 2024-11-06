@@ -37,7 +37,6 @@ export const useInlineActions = <T extends { isDefault?: boolean | undefined }>(
         actions: [
           {
             name: i18n.EDIT_BUTTON,
-            'data-test-subj': 'edit-button',
             description: i18n.EDIT_BUTTON,
             icon: 'pencil',
             type: 'icon',
@@ -49,7 +48,6 @@ export const useInlineActions = <T extends { isDefault?: boolean | undefined }>(
           },
           {
             name: i18n.DELETE_BUTTON,
-            'data-test-subj': 'delete-button',
             description: i18n.DELETE_BUTTON,
             icon: 'trash',
             type: 'icon',

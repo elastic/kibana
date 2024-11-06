@@ -114,11 +114,9 @@ export function useObservabilityAIAssistantContext({
                         },
                         metric: {
                           type: 'object',
-                          properties: {},
                         },
                         gauge: {
                           type: 'object',
-                          properties: {},
                         },
                         pie: {
                           type: 'object',
@@ -160,7 +158,6 @@ export function useObservabilityAIAssistantContext({
                         },
                         table: {
                           type: 'object',
-                          properties: {},
                         },
                         tagcloud: {
                           type: 'object',

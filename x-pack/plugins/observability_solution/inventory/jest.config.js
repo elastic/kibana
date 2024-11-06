@@ -13,6 +13,9 @@ module.exports = {
     '<rootDir>/x-pack/plugins/observability_solution/inventory/common',
     '<rootDir>/x-pack/plugins/observability_solution/inventory/server',
   ],
+  setupFiles: [
+    '<rootDir>/x-pack/plugins/observability_solution/inventory/.storybook/jest_setup.js',
+  ],
   collectCoverage: true,
   collectCoverageFrom: [
     '<rootDir>/x-pack/plugins/observability_solution/inventory/{public,common,server}/**/*.{js,ts,tsx}',

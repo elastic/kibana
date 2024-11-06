@@ -8,26 +8,30 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { MultiselectFilter } from '../../../../common/components/multiselect_filter';
-import { EntitySourceTag } from '../types';
 
 interface SourceFilterProps {
-  selectedItems: EntitySourceTag[];
-  onChange: (selectedItems: EntitySourceTag[]) => void;
+  selectedItems: EntitySource[];
+  onChange: (selectedItems: EntitySource[]) => void;
+}
+
+export enum EntitySource {
+  CSV_UPLOAD = 'CSV upload',
+  EVENTS = 'Events',
 }
 
 export const EntitySourceFilter: React.FC<SourceFilterProps> = ({ selectedItems, onChange }) => {
   return (
-    <MultiselectFilter<EntitySourceTag>
+    <MultiselectFilter<EntitySource>
       title={i18n.translate(
         'xpack.securitySolution.entityAnalytics.entityStore.entitySource.filterTitle',
         {
           defaultMessage: 'Source',
         }
       )}
-      items={Object.values(EntitySourceTag)}
+      items={Object.values(EntitySource)}
       selectedItems={selectedItems}
       onSelectionChange={onChange}
-      width={190}
+      width={140}
     />
   );
 };

@@ -19,6 +19,8 @@ import {
 import React, { memo, useCallback, useRef, useState, useMemo, useEffect } from 'react';
 import styled from 'styled-components';
 
+import type { DataViewListItem } from '@kbn/data-views-plugin/common';
+
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import {
   isMlRule,
@@ -121,7 +123,11 @@ const CreateRulePageComponent: React.FC = () => {
     useListsConfig();
   const { addSuccess } = useAppToasts();
   const { navigateToApp } = useKibana().services.application;
-  const { application, triggersActionsUi } = useKibana().services;
+  const {
+    application,
+    data: { dataViews },
+    triggersActionsUi,
+  } = useKibana().services;
   const loading = userInfoLoading || listsConfigLoading;
   const [activeStep, setActiveStep] = useState<RuleStep>(RuleStep.defineRule);
   const getNextStep = (step: RuleStep): RuleStep | undefined =>
@@ -198,6 +204,7 @@ const CreateRulePageComponent: React.FC = () => {
   const { mutateAsync: createRule, isLoading: isCreateRuleLoading } = useCreateRule();
   const ruleType = defineStepData.ruleType;
   const actionMessageParams = useMemo(() => getActionMessageParams(ruleType), [ruleType]);
+  const [dataViewOptions, setDataViewOptions] = useState<{ [x: string]: DataViewListItem }>({});
   const [isRulePreviewVisible, setIsRulePreviewVisible] = useState(true);
   const collapseFn = useRef<() => void | undefined>();
   const [prevRuleType, setPrevRuleType] = useState<string>();
@@ -249,6 +256,20 @@ const CreateRulePageComponent: React.FC = () => {
 
   const { starting: isStartingJobs, startMlJobs } = useStartMlJobs();
 
+  useEffect(() => {
+    const fetchDV = async () => {
+      const dataViewsRefs = await dataViews.getIdsWithTitle();
+      const dataViewIdIndexPatternMap = dataViewsRefs.reduce(
+        (acc, item) => ({
+          ...acc,
+          [item.id]: item,
+        }),
+        {}
+      );
+      setDataViewOptions(dataViewIdIndexPatternMap);
+    };
+    fetchDV();
+  }, [dataViews]);
   const { indexPattern, isIndexPatternLoading } = useRuleIndexPattern({
     dataSourceType: defineStepData.dataSourceType,
     index: memoizedIndex,
@@ -552,6 +573,7 @@ const CreateRulePageComponent: React.FC = () => {
         >
           <StepDefineRule
             isLoading={isCreateRuleLoading || loading}
+            kibanaDataViews={dataViewOptions}
             indicesConfig={indicesConfig}
             threatIndicesConfig={threatIndicesConfig}
             form={defineStepForm}
@@ -584,6 +606,7 @@ const CreateRulePageComponent: React.FC = () => {
     ),
     [
       activeStep,
+      dataViewOptions,
       defineRuleNextStep,
       defineStepData.dataSourceType,
       defineStepData.groupByFields,
@@ -766,6 +789,7 @@ const CreateRulePageComponent: React.FC = () => {
             isLoading={isCreateRuleLoading || loading || isStartingJobs}
             actionMessageParams={actionMessageParams}
             summaryActionMessageParams={actionMessageParams}
+            ruleType={ruleType}
             form={actionsStepForm}
           />
 
@@ -817,6 +841,7 @@ const CreateRulePageComponent: React.FC = () => {
       isCreateRuleLoading,
       isStartingJobs,
       loading,
+      ruleType,
       submitRuleDisabled,
       submitRuleEnabled,
     ]

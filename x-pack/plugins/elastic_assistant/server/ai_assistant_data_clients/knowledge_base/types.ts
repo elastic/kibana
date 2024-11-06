@@ -27,7 +27,6 @@ export interface EsDocumentEntry {
   required: boolean;
   source: string;
   text: string;
-  semantic_text?: string;
   vector?: {
     tokens: Record<string, number>;
     model_id: string;
@@ -100,7 +99,6 @@ export interface UpdateKnowledgeBaseEntrySchema {
   required?: boolean;
   source?: string;
   text?: string;
-  semantic_text?: string;
   vector?: {
     tokens: Record<string, number>;
     model_id: string;
@@ -137,7 +135,6 @@ export interface CreateKnowledgeBaseEntrySchema {
   required?: boolean;
   source?: string;
   text?: string;
-  semantic_text?: string;
   vector?: {
     tokens: Record<string, number>;
     model_id: string;

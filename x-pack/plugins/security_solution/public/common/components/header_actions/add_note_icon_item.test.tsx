@@ -37,7 +37,7 @@ const renderTestComponent = (props: Partial<ComponentProps<typeof AddEventNoteAc
   const localProps: ComponentProps<typeof AddEventNoteAction> = {
     timelineType: TimelineTypeEnum.default,
     eventId: 'event-1',
-    ariaLabel: 'Add note',
+    ariaLabel: 'Add Note',
     toggleShowNotes: toggleShowNotesMock,
     notesCount: 2,
     ...props,
@@ -76,12 +76,12 @@ describe('AddEventNoteAction', () => {
 
       expect(NotesButtonMock).toHaveBeenCalledWith(
         expect.objectContaining({
-          ariaLabel: 'Add note',
+          ariaLabel: 'Add Note',
           'data-test-subj': 'add-note',
           isDisabled: false,
           timelineType: TimelineTypeEnum.default,
           toggleShowNotes: expect.any(Function),
-          toolTip: '2 notes available. Click to view them and add more.',
+          toolTip: '2 Notes available. Click to view them & add more.',
           eventId: 'event-1',
           notesCount: 2,
         }),
@@ -98,12 +98,12 @@ describe('AddEventNoteAction', () => {
 
       expect(NotesButtonMock).toHaveBeenCalledWith(
         expect.objectContaining({
-          ariaLabel: 'Add note',
+          ariaLabel: 'Add Note',
           'data-test-subj': 'add-note',
           isDisabled: false,
           timelineType: TimelineTypeEnum.default,
           toggleShowNotes: expect.any(Function),
-          toolTip: '1 note available. Click to view it and add more.',
+          toolTip: '1 Note available. Click to view it & add more.',
           eventId: 'event-2',
           notesCount: 1,
         }),
@@ -120,12 +120,12 @@ describe('AddEventNoteAction', () => {
 
       expect(NotesButtonMock).toHaveBeenCalledWith(
         expect.objectContaining({
-          ariaLabel: 'Add note',
+          ariaLabel: 'Add Note',
           'data-test-subj': 'add-note',
           isDisabled: false,
           timelineType: TimelineTypeEnum.default,
           toggleShowNotes: expect.any(Function),
-          toolTip: 'Add note',
+          toolTip: 'Add Note',
           eventId: 'event-3',
           notesCount: 0,
         }),

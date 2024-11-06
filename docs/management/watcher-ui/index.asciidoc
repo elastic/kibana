@@ -39,8 +39,9 @@ and either of these Watcher roles:
 * `watcher_admin`. You can perform all Watcher actions, including create and edit watches.
 * `watcher_user`. You can view watches, but not create or edit them.
 
-To manage roles, open the main menu, then click *Stack Management > Roles*, or use the {api-kibana}/group/endpoint-roles[role APIs].
-Watches are shared between all users with the same role.
+To manage roles, open the main menu, then click *Stack Management > Roles*, or use the
+<<role-management-api, Kibana Role Management API>>. Watches are shared between
+all users with the same role.
 
 NOTE: If you are creating a threshold watch, you must also have the `view_index_metadata` index privilege. See
 {ref}/index-mgmt.html[Index management] for detailed information.

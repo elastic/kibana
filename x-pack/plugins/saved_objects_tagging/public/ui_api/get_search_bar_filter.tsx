@@ -7,12 +7,12 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import type {
+import {
   SavedObjectsTaggingApiUi,
   GetSearchBarFilterOptions,
 } from '@kbn/saved-objects-tagging-oss-plugin/public';
 
-import type { Tag } from '../../common/types';
+import { Tag } from '../../common';
 import { TagSearchBarOption } from '../components';
 
 export interface BuildGetSearchBarFilterOptions {

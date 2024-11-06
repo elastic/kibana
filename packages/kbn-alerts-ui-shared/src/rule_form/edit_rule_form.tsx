@@ -24,19 +24,17 @@ import {
   RuleFormRuleTypeError,
 } from './rule_form_errors';
 import { RULE_EDIT_ERROR_TEXT, RULE_EDIT_SUCCESS_TEXT } from './translations';
-import { getAvailableRuleTypes, parseRuleCircuitBreakerErrorMessage } from './utils';
-import { DEFAULT_VALID_CONSUMERS, getDefaultFormData } from './constants';
+import { parseRuleCircuitBreakerErrorMessage } from './utils';
 
 export interface EditRuleFormProps {
   id: string;
   plugins: RuleFormPlugins;
   showMustacheAutocompleteSwitch?: boolean;
-  onCancel?: () => void;
-  onSubmit?: (ruleId: string) => void;
+  returnUrl: string;
 }
 
 export const EditRuleForm = (props: EditRuleFormProps) => {
-  const { id, plugins, showMustacheAutocompleteSwitch = false, onCancel, onSubmit } = props;
+  const { id, plugins, returnUrl, showMustacheAutocompleteSwitch = false } = props;
   const { http, notifications, docLinks, ruleTypeRegistry, i18n, theme, application } = plugins;
   const { toasts } = notifications;
 
@@ -44,7 +42,6 @@ export const EditRuleForm = (props: EditRuleFormProps) => {
     http,
     onSuccess: ({ name }) => {
       toasts.addSuccess(RULE_EDIT_SUCCESS_TEXT(name));
-      onSubmit?.(id);
     },
     onError: (error) => {
       const message = parseRuleCircuitBreakerErrorMessage(
@@ -65,7 +62,6 @@ export const EditRuleForm = (props: EditRuleFormProps) => {
   const {
     isInitialLoading,
     ruleType,
-    ruleTypes,
     ruleTypeModel,
     uiConfig,
     healthCheckError,
@@ -160,31 +156,17 @@ export const EditRuleForm = (props: EditRuleFormProps) => {
           connectors,
           connectorTypes,
           aadTemplateFields,
-          formData: {
-            ...getDefaultFormData({
-              ruleTypeId: fetchedFormData.ruleTypeId,
-              name: fetchedFormData.name,
-              consumer: fetchedFormData.consumer,
-              actions: fetchedFormData.actions,
-            }),
-            ...fetchedFormData,
-          },
+          formData: fetchedFormData,
           id,
           plugins,
           minimumScheduleInterval: uiConfig?.minimumScheduleInterval,
           selectedRuleType: ruleType,
           selectedRuleTypeModel: ruleTypeModel,
-          availableRuleTypes: getAvailableRuleTypes({
-            consumer: fetchedFormData.consumer,
-            ruleTypes,
-            ruleTypeRegistry,
-          }).map(({ ruleType: rt }) => rt),
           flappingSettings,
-          validConsumers: DEFAULT_VALID_CONSUMERS,
           showMustacheAutocompleteSwitch,
         }}
       >
-        <RulePage isEdit={true} isSaving={isSaving} onSave={onSave} onCancel={onCancel} />
+        <RulePage isEdit={true} isSaving={isSaving} returnUrl={returnUrl} onSave={onSave} />
       </RuleFormStateProvider>
     </div>
   );

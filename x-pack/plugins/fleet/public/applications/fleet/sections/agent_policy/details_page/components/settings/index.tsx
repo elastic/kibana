@@ -90,7 +90,6 @@ export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
       allowedNamespacePrefixes: spaceSettings?.allowedNamespacePrefixes,
     });
     const [hasAdvancedSettingsErrors, setHasAdvancedSettingsErrors] = useState<boolean>(false);
-    const [hasInvalidSpaceError, setInvalidSpaceError] = useState<boolean>(false);
 
     const updateAgentPolicy = (updatedFields: Partial<AgentPolicy>) => {
       setAgentPolicy({
@@ -150,8 +149,8 @@ export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
       if (isFleetEnabled) {
         setIsLoading(true);
         const { data } = await sendGetAgentStatus({ policyId: agentPolicy.id });
-        if (data?.results.active) {
-          setAgentCount(data.results.active);
+        if (data?.results.total) {
+          setAgentCount(data.results.total);
         } else {
           await submitUpdateAgentPolicy();
         }
@@ -184,7 +183,6 @@ export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
           validation={validation}
           isEditing={true}
           updateAdvancedSettingsHasErrors={setHasAdvancedSettingsErrors}
-          setInvalidSpaceError={setInvalidSpaceError}
         />
 
         {hasChanges ? (
@@ -221,8 +219,7 @@ export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
                           isDisabled={
                             isLoading ||
                             Object.keys(validation).length > 0 ||
-                            hasAdvancedSettingsErrors ||
-                            hasInvalidSpaceError
+                            hasAdvancedSettingsErrors
                           }
                           btnProps={{
                             color: 'text',
@@ -245,8 +242,7 @@ export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
                           !hasAllAgentPoliciesPrivileges ||
                           isLoading ||
                           Object.keys(validation).length > 0 ||
-                          hasAdvancedSettingsErrors ||
-                          hasInvalidSpaceError
+                          hasAdvancedSettingsErrors
                         }
                         data-test-subj="agentPolicyDetailsSaveButton"
                         iconType="save"

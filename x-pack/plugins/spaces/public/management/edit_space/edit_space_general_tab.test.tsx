@@ -23,13 +23,12 @@ import { KibanaFeature } from '@kbn/features-plugin/common';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
 import { EditSpaceSettingsTab } from './edit_space_general_tab';
-import { EditSpaceProviderRoot } from './provider/edit_space_provider';
+import { EditSpaceProvider } from './provider/edit_space_provider';
 import type { SolutionView } from '../../../common';
 import { SOLUTION_VIEW_CLASSIC } from '../../../common/constants';
 import { spacesManagerMock } from '../../spaces_manager/spaces_manager.mock';
 import { getPrivilegeAPIClientMock } from '../privilege_api_client.mock';
 import { getRolesAPIClientMock } from '../roles_api_client.mock';
-import { getSecurityLicenseMock } from '../security_license.mock';
 
 const space = { id: 'default', name: 'Default', disabledFeatures: [], _reserved: true };
 const history = scopedHistoryMock.create();
@@ -65,7 +64,7 @@ describe('EditSpaceSettings', () => {
   const TestComponent: React.FC<React.PropsWithChildren> = ({ children }) => {
     return (
       <IntlProvider locale="en">
-        <EditSpaceProviderRoot
+        <EditSpaceProvider
           capabilities={{
             navLinks: {},
             management: {},
@@ -80,15 +79,13 @@ describe('EditSpaceSettings', () => {
           http={http}
           notifications={notifications}
           overlays={overlays}
-          getIsRoleManagementEnabled={() => Promise.resolve(() => undefined)}
           getPrivilegesAPIClient={getPrivilegeAPIClient}
-          getSecurityLicense={getSecurityLicenseMock}
           theme={theme}
           i18n={i18n}
           logger={logger}
         >
           {children}
-        </EditSpaceProviderRoot>
+        </EditSpaceProvider>
       </IntlProvider>
     );
   };

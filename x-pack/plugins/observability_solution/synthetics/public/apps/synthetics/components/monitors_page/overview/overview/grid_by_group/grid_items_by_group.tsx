@@ -10,7 +10,6 @@ import React, { useRef, useState, FC, PropsWithChildren } from 'react';
 import { useSelector } from 'react-redux';
 import { get, invert, orderBy } from 'lodash';
 import styled from 'styled-components';
-import { i18n } from '@kbn/i18n';
 import { OverviewLoader } from '../overview_loader';
 import {
   getSyntheticsFilterDisplayValues,
@@ -61,25 +60,18 @@ export const GridItemsByGroup = ({
         items: monitorTypes,
         values: getSyntheticsFilterDisplayValues(monitorTypes, 'monitorTypes', allLocations),
         otherValues: {
-          label: i18n.translate('xpack.synthetics.monitorsPage.overview.gridItemsByGroup.noType', {
-            defaultMessage: 'Invalid monitor type',
-          }),
+          label: 'Invalid monitor type',
           items: allConfigs?.filter((monitor) => !get(monitor, ConfigKey.MONITOR_TYPE)),
         },
       };
       break;
     case 'locationId':
       selectedGroup = {
-        key: 'locationLabel',
+        key: 'location.label',
         items: locations,
         values: getSyntheticsFilterDisplayValues(locations, 'locations', allLocations),
         otherValues: {
-          label: i18n.translate(
-            'xpack.synthetics.monitorsPage.overview.gridItemsByGroup.noLocations',
-            {
-              defaultMessage: 'Without any location',
-            }
-          ),
+          label: 'Without any location',
           items: allConfigs?.filter((monitor) => !get(monitor, 'location')),
         },
       };
@@ -90,9 +82,7 @@ export const GridItemsByGroup = ({
         items: tags,
         values: getSyntheticsFilterDisplayValues(tags, 'tags', allLocations),
         otherValues: {
-          label: i18n.translate('xpack.synthetics.monitorsPage.overview.gridItemsByGroup.noTags', {
-            defaultMessage: 'Without any tags',
-          }),
+          label: 'Without any tags',
           items: allConfigs?.filter((monitor) => get(monitor, 'tags', []).length === 0),
         },
       };
@@ -103,12 +93,7 @@ export const GridItemsByGroup = ({
         items: projects,
         values: getSyntheticsFilterDisplayValues(projects, 'projects', allLocations),
         otherValues: {
-          label: i18n.translate(
-            'xpack.synthetics.monitorsPage.overview.gridItemsByGroup.uiMonitors',
-            {
-              defaultMessage: 'UI Monitors',
-            }
-          ),
+          label: 'UI Monitors',
           items: allConfigs?.filter((monitor) => !Boolean(monitor.projectId)),
         },
       };
@@ -153,11 +138,11 @@ export const GridItemsByGroup = ({
           </>
         );
       })}
-      {(selectedGroup.otherValues.items ?? []).length > 0 && (
+      {selectedGroup.otherValues.items?.length && (
         <WrappedPanel isFullScreen={fullScreenGroup === selectedGroup.otherValues.label}>
           <GroupGridItem
             groupLabel={selectedGroup.otherValues.label}
-            groupMonitors={selectedGroup.otherValues.items ?? []}
+            groupMonitors={selectedGroup.otherValues.items}
             loaded={loaded}
             setFlyoutConfigCallback={setFlyoutConfigCallback}
             setFullScreenGroup={setFullScreenGroup}

@@ -61,7 +61,7 @@ export const useDiscoverHistogram = ({
   hideChart,
 }: UseDiscoverHistogramProps) => {
   const services = useDiscoverServices();
-  const { main$, documents$, totalHits$ } = stateContainer.dataState.data$;
+  const savedSearchData$ = stateContainer.dataState.data$;
   const savedSearchState = useSavedSearch();
   const isEsqlMode = useIsEsqlMode();
 
@@ -153,7 +153,10 @@ export const useDiscoverHistogram = ({
    * Total hits
    */
 
-  const setTotalHitsError = useMemo(() => sendErrorTo(totalHits$), [totalHits$]);
+  const setTotalHitsError = useMemo(
+    () => sendErrorTo(savedSearchData$.totalHits$),
+    [savedSearchData$.totalHits$]
+  );
 
   useEffect(() => {
     const subscription = createTotalHitsObservable(unifiedHistogram?.state$)?.subscribe(
@@ -169,7 +172,7 @@ export const useDiscoverHistogram = ({
           return;
         }
 
-        const { result: totalHitsResult } = totalHits$.getValue();
+        const { result: totalHitsResult } = savedSearchData$.totalHits$.getValue();
 
         if (
           (status === UnifiedHistogramFetchStatus.loading ||
@@ -181,22 +184,18 @@ export const useDiscoverHistogram = ({
           return;
         }
 
-        const fetchStatus = status.toString() as FetchStatus;
-
-        // Do not sync the loading state since it's already handled by fetchAll
-        if (fetchStatus !== FetchStatus.LOADING) {
-          totalHits$.next({
-            fetchStatus,
-            result,
-          });
-        }
+        // Sync the totalHits$ observable with the unified histogram state
+        savedSearchData$.totalHits$.next({
+          fetchStatus: status.toString() as FetchStatus,
+          result,
+        });
 
         if (status !== UnifiedHistogramFetchStatus.complete || typeof result !== 'number') {
           return;
         }
 
         // Check the hits count to set a partial or no results state
-        checkHitCount(main$, result);
+        checkHitCount(savedSearchData$.main$, result);
       }
     );
 
@@ -205,8 +204,8 @@ export const useDiscoverHistogram = ({
     };
   }, [
     isEsqlMode,
-    main$,
-    totalHits$,
+    savedSearchData$.main$,
+    savedSearchData$.totalHits$,
     setTotalHitsError,
     stateContainer.appState,
     unifiedHistogram?.state$,
@@ -235,7 +234,7 @@ export const useDiscoverHistogram = ({
 
   const [initialEsqlProps] = useState(() =>
     getUnifiedHistogramPropsForEsql({
-      documentsValue: documents$.getValue(),
+      documentsValue: savedSearchData$.documents$.getValue(),
       savedSearch: stateContainer.savedSearchState.getState(),
     })
   );

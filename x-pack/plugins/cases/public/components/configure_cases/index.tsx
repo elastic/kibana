@@ -215,10 +215,6 @@ export const ConfigureCases: React.FC = React.memo(() => {
     []
   );
 
-  const onAddNewConnector = useCallback(() => {
-    setFlyOutVisibility({ type: 'addConnector', visible: true });
-  }, []);
-
   const onChangeConnector = useCallback(
     (id: string) => {
       if (id === 'add-connector') {
@@ -581,7 +577,6 @@ export const ConfigureCases: React.FC = React.memo(() => {
                   onChangeConnector={onChangeConnector}
                   selectedConnector={connector}
                   updateConnectorDisabled={updateConnectorDisabled || !permissions.update}
-                  onAddNewConnector={onAddNewConnector}
                 />
               </div>
               <EuiSpacer size="xl" />

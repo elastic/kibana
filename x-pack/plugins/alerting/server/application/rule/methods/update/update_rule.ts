@@ -37,12 +37,13 @@ import { createRuleSo, getDecryptedRuleSo, getRuleSo } from '../../../../data/ru
 import { validateScheduleLimit, ValidateScheduleLimitResult } from '../get_schedule_frequency';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { updateRuleDataSchema } from './schemas';
+import { RuleAttributes } from '../../../../data/rule/types';
 import { transformRuleAttributesToRuleDomain, transformRuleDomainToRule } from '../../transforms';
 import { ruleDomainSchema } from '../../schemas';
 
 const validateCanUpdateFlapping = (
   isFlappingEnabled: boolean,
-  originalFlapping: RawRule['flapping'],
+  originalFlapping: RuleAttributes['flapping'],
   updateFlapping: UpdateRuleParams['data']['flapping']
 ) => {
   // If flapping is enabled, allow rule flapping to be updated and do nothing
@@ -111,7 +112,7 @@ async function updateWithOCC<Params extends RuleParams = never>(
     throw Boom.badRequest(`Error validating update data - ${error.message}`);
   }
 
-  let originalRuleSavedObject: SavedObject<RawRule>;
+  let originalRuleSavedObject: SavedObject<RuleAttributes>;
 
   try {
     originalRuleSavedObject = await getDecryptedRuleSo({
@@ -295,7 +296,7 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
 }: {
   context: RulesClientContext;
   updateRuleData: UpdateRuleData<Params>;
-  originalRuleSavedObject: SavedObject<RawRule>;
+  originalRuleSavedObject: SavedObject<RuleAttributes>;
   validatedRuleTypeParams: Params;
   shouldIncrementRevision: (params?: Params) => boolean;
   isSystemAction: (connectorId: string) => boolean;
@@ -375,7 +376,7 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
     updatedRuleAttributes.mapped_params = mappedParams;
   }
 
-  let updatedRuleSavedObject: SavedObject<RawRule>;
+  let updatedRuleSavedObject: SavedObject<RuleAttributes>;
 
   const { id, version } = originalRuleSavedObject;
   try {

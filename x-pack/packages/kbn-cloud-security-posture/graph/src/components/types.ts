@@ -10,17 +10,29 @@ import type {
   GroupNodeDataModel,
   LabelNodeDataModel,
   EdgeDataModel,
-  NodeShape,
 } from '@kbn/cloud-security-posture-common/types/graph/latest';
 import type { Node, NodeProps as xyNodeProps } from '@xyflow/react';
 import type { Edge, EdgeProps as xyEdgeProps } from '@xyflow/react';
+
+export interface PositionXY {
+  x: number;
+  y: number;
+}
 
 export interface Size {
   width: number;
   height: number;
 }
 
+export interface GraphMetadata {
+  nodes: { [key: string]: { edgesIn: number; edgesOut: number } };
+  edges: {
+    [key: string]: { source: string; target: string; edgesStacked: number; edges: string[] };
+  };
+}
+
 interface BaseNodeDataViewModel {
+  position: PositionXY;
   interactive?: boolean;
 }
 
@@ -34,7 +46,9 @@ export interface EntityNodeViewModel
 export interface GroupNodeViewModel
   extends Record<string, unknown>,
     GroupNodeDataModel,
-    BaseNodeDataViewModel {}
+    BaseNodeDataViewModel {
+  size?: Size;
+}
 
 export interface LabelNodeViewModel
   extends Record<string, unknown>,
@@ -47,13 +61,10 @@ export type NodeViewModel = EntityNodeViewModel | GroupNodeViewModel | LabelNode
 
 export type NodeProps = xyNodeProps<Node<NodeViewModel>>;
 
-export interface EdgeViewModel extends Record<string, unknown>, EdgeDataModel {}
+export interface EdgeViewModel extends Record<string, unknown>, EdgeDataModel {
+  graphMetadata?: GraphMetadata;
+  interactive?: boolean;
+  onClick?: (e: React.MouseEvent<HTMLElement>, edge: EdgeProps) => void;
+}
 
-export type EdgeProps = xyEdgeProps<
-  Edge<
-    EdgeViewModel & {
-      sourceShape: NodeShape;
-      targetShape: NodeShape;
-    }
-  >
->;
+export type EdgeProps = xyEdgeProps<Edge<EdgeViewModel>>;

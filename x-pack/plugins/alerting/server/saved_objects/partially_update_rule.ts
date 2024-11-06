@@ -22,9 +22,13 @@ import {
   RuleAttributesNotPartiallyUpdatable,
   RULE_SAVED_OBJECT_TYPE,
 } from '.';
+import { RuleAttributes } from '../data/rule/types';
 
+// We have calling code that references both RawRule and RuleAttributes,
+// so we need to support both of these types (they are effectively the same)
 export type PartiallyUpdateableRuleAttributes = Partial<
-  Omit<RawRule, RuleAttributesNotPartiallyUpdatable>
+  | Omit<RawRule, RuleAttributesNotPartiallyUpdatable>
+  | Omit<RuleAttributes, RuleAttributesNotPartiallyUpdatable>
 >;
 
 interface PartiallyUpdateRuleSavedObjectOptions {
@@ -50,7 +54,7 @@ export async function partiallyUpdateRule(
     ...RuleAttributesToEncrypt,
     ...RuleAttributesIncludedInAAD,
   ]);
-  const updateOptions: SavedObjectsUpdateOptions<RawRule> = pick(
+  const updateOptions: SavedObjectsUpdateOptions<RuleAttributes> = pick(
     options,
     'namespace',
     'version',

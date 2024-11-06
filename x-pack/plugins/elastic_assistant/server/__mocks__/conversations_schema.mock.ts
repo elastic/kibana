@@ -60,9 +60,7 @@ export const getConversationSearchEsMock = () => {
   return searchResponse;
 };
 
-export const getCreateConversationSchemaMock = (
-  rest?: Partial<ConversationCreateProps>
-): ConversationCreateProps => ({
+export const getCreateConversationSchemaMock = (): ConversationCreateProps => ({
   title: 'Welcome',
   apiConfig: {
     actionTypeId: '.gen-ai',
@@ -84,7 +82,6 @@ export const getCreateConversationSchemaMock = (
     },
   ],
   category: 'assistant',
-  ...rest,
 });
 
 export const getUpdateConversationSchemaMock = (

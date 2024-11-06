@@ -17,13 +17,9 @@ import { ConnectorIndexNameForm } from './connector_index_name_form';
 
 interface ConnectorIndexNamePanelProps {
   connector: Connector;
-  canManageConnectors: boolean;
 }
 
-export const ConnectorIndexnamePanel: React.FC<ConnectorIndexNamePanelProps> = ({
-  canManageConnectors,
-  connector,
-}) => {
+export const ConnectorIndexnamePanel: React.FC<ConnectorIndexNamePanelProps> = ({ connector }) => {
   const { http } = useKibanaServices();
   const { data, isLoading, isSuccess, mutate, reset } = useMutation({
     mutationFn: async (inputName: string) => {
@@ -52,7 +48,7 @@ export const ConnectorIndexnamePanel: React.FC<ConnectorIndexNamePanelProps> = (
   return (
     <>
       <ConnectorIndexNameForm
-        isDisabled={isLoading || !canManageConnectors}
+        isDisabled={isLoading}
         indexName={newIndexName}
         onChange={(name) => setNewIndexName(name)}
       />

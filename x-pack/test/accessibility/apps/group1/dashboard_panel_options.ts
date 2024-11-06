@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -17,7 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   // Failing: See https://github.com/elastic/kibana/issues/147667
   describe.skip('Dashboard panel options a11y tests', () => {
-    const title = '[Flights] Flight count';
+    let header: WebElementWrapper;
     before(async () => {
       await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
         useActualUrl: true,
@@ -27,6 +28,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.common.navigateToApp('dashboard');
       await testSubjects.click('dashboardListingTitleLink-[Flights]-Global-Flight-Dashboard');
+      header = await dashboardPanelActions.getPanelHeading('[Flights] Flight count');
     });
 
     after(async () => {
@@ -38,13 +40,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     // dashboard panel options in view mode
     it('dashboard panel - open menu', async () => {
-      await dashboardPanelActions.toggleContextMenuByTitle(title);
+      await dashboardPanelActions.toggleContextMenu(header);
       await a11y.testAppSnapshot();
-      await dashboardPanelActions.toggleContextMenuByTitle(title);
+      await dashboardPanelActions.toggleContextMenu(header);
     });
 
     it('dashboard panel - customize time range', async () => {
-      await dashboardPanelActions.toggleContextMenuByTitle(title);
+      await dashboardPanelActions.toggleContextMenu(header);
       await testSubjects.click('embeddablePanelAction-CUSTOM_TIME_RANGE');
       await a11y.testAppSnapshot();
       await testSubjects.click('cancelPerPanelTimeRangeButton');
@@ -77,14 +79,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await inspector.close();
     });
 
+    it('dashboard panel- more options in view mode', async () => {
+      await dashboardPanelActions.openContextMenuMorePanel(header);
+      await a11y.testAppSnapshot();
+    });
+
     it('dashboard panel - maximize', async () => {
+      await dashboardPanelActions.openContextMenuMorePanel(header);
       await dashboardPanelActions.clickExpandPanelToggle();
       await a11y.testAppSnapshot();
+      await dashboardPanelActions.openContextMenuMorePanel(header);
       await dashboardPanelActions.clickExpandPanelToggle();
     });
 
     it('dashboard panel - copy to dashboard', async () => {
-      await dashboardPanelActions.openContextMenuByTitle(title);
+      await dashboardPanelActions.openContextMenuMorePanel(header);
       await testSubjects.click('embeddablePanelAction-copyToDashboard');
       await a11y.testAppSnapshot();
       await testSubjects.click('cancelCopyToButton');
@@ -94,13 +103,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('dashboard panel - clone panel', async () => {
       await testSubjects.click('dashboardEditMode');
-      await dashboardPanelActions.openContextMenuByTitle(title);
+      await dashboardPanelActions.toggleContextMenu(header);
       await testSubjects.click('embeddablePanelAction-clonePanel');
       await toasts.dismissAll();
       await a11y.testAppSnapshot();
     });
 
     it('dashboard panel - edit panel title', async () => {
+      await dashboardPanelActions.toggleContextMenu(header);
       await dashboardPanelActions.customizePanel();
       await a11y.testAppSnapshot();
       await testSubjects.click('customEmbeddablePanelHideTitleSwitch');
@@ -110,7 +120,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('dashboard panel - Create drilldown panel', async () => {
-      await dashboardPanelActions.openContextMenuByTitle(title);
+      await dashboardPanelActions.toggleContextMenu(header);
+      await testSubjects.click('embeddablePanelMore-mainMenu');
       await testSubjects.click('embeddablePanelAction-OPEN_FLYOUT_ADD_DRILLDOWN');
       await a11y.testAppSnapshot();
       await testSubjects.click('actionFactoryItem-DASHBOARD_TO_DASHBOARD_DRILLDOWN');
@@ -125,16 +136,30 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('dashboard panel - manage drilldown', async () => {
-      await dashboardPanelActions.openContextMenuByTitle(title);
+      await dashboardPanelActions.toggleContextMenu(header);
+      await testSubjects.click('embeddablePanelMore-mainMenu');
       await testSubjects.click('embeddablePanelAction-OPEN_FLYOUT_EDIT_DRILLDOWN');
       await a11y.testAppSnapshot();
       await testSubjects.click('euiFlyoutCloseButton');
     });
 
+    it('dashboard panel - more options in edit view', async () => {
+      await dashboardPanelActions.openContextMenuMorePanel(header);
+      await a11y.testAppSnapshot();
+    });
+
     it('dashboard panel - save to library', async () => {
-      await dashboardPanelActions.legacySaveToLibrary('', title);
+      await dashboardPanelActions.openContextMenuMorePanel(header);
+      await testSubjects.click('embeddablePanelAction-saveToLibrary');
       await a11y.testAppSnapshot();
       await testSubjects.click('saveCancelButton');
+    });
+
+    it('dashboard panel - replace panel', async () => {
+      await dashboardPanelActions.openContextMenuMorePanel(header);
+      await testSubjects.click('embeddablePanelAction-replacePanel');
+      await a11y.testAppSnapshot();
+      await testSubjects.click('euiFlyoutCloseButton');
     });
   });
 }

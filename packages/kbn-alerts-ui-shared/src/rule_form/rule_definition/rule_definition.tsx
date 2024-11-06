@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { Suspense, useMemo, useState, useCallback, useEffect } from 'react';
+import React, { Suspense, useMemo, useState, useCallback } from 'react';
 import {
   EuiEmptyPrompt,
   EuiLoadingSpinner,
@@ -47,7 +47,7 @@ import { RuleAlertDelay } from './rule_alert_delay';
 import { RuleConsumerSelection } from './rule_consumer_selection';
 import { RuleSchedule } from './rule_schedule';
 import { useRuleFormState, useRuleFormDispatch } from '../hooks';
-import { ALERTING_FEATURE_ID, MULTI_CONSUMER_RULE_TYPE_IDS } from '../constants';
+import { MULTI_CONSUMER_RULE_TYPE_IDS } from '../constants';
 import { getAuthorizedConsumers } from '../utils';
 import { RuleSettingsFlappingTitleTooltip } from '../../rule_settings/rule_settings_flapping_title_tooltip';
 import { RuleSettingsFlappingForm } from '../../rule_settings/rule_settings_flapping_form';
@@ -62,7 +62,6 @@ export const RuleDefinition = () => {
     metadata,
     selectedRuleType,
     selectedRuleTypeModel,
-    availableRuleTypes,
     validConsumers,
     canShowConsumerSelection = false,
     flappingSettings,
@@ -71,44 +70,29 @@ export const RuleDefinition = () => {
   const { colorMode } = useEuiTheme();
   const dispatch = useRuleFormDispatch();
 
-  useEffect(() => {
-    // Need to do a dry run validating the params because the Missing Monitor Data rule type
-    // does not properly initialize the params
-    if (selectedRuleType.id === 'monitoring_alert_missing_monitoring_data') {
-      dispatch({ type: 'runValidation' });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   const { charts, data, dataViews, unifiedSearch, docLinks, application } = plugins;
 
   const {
     capabilities: { rulesSettings },
   } = application;
 
-  const { readFlappingSettingsUI, writeFlappingSettingsUI } = rulesSettings || {};
+  const { writeFlappingSettingsUI } = rulesSettings || {};
 
-  const { params, schedule, notifyWhen, flapping, consumer, ruleTypeId } = formData;
+  const { params, schedule, notifyWhen, flapping } = formData;
 
   const [isAdvancedOptionsVisible, setIsAdvancedOptionsVisible] = useState<boolean>(false);
 
   const [isFlappingPopoverOpen, setIsFlappingPopoverOpen] = useState<boolean>(false);
 
   const authorizedConsumers = useMemo(() => {
-    if (consumer !== ALERTING_FEATURE_ID) {
-      return [];
-    }
-    const selectedAvailableRuleType = availableRuleTypes.find((ruleType) => {
-      return ruleType.id === selectedRuleType.id;
-    });
-    if (!selectedAvailableRuleType?.authorizedConsumers) {
+    if (!validConsumers?.length) {
       return [];
     }
     return getAuthorizedConsumers({
-      ruleType: selectedAvailableRuleType,
+      ruleType: selectedRuleType,
       validConsumers,
     });
-  }, [consumer, selectedRuleType, availableRuleTypes, validConsumers]);
+  }, [selectedRuleType, validConsumers]);
 
   const shouldShowConsumerSelect = useMemo(() => {
     if (!canShowConsumerSelection) {
@@ -123,8 +107,10 @@ export const RuleDefinition = () => {
     ) {
       return false;
     }
-    return !!(ruleTypeId && MULTI_CONSUMER_RULE_TYPE_IDS.includes(ruleTypeId));
-  }, [ruleTypeId, authorizedConsumers, canShowConsumerSelection]);
+    return (
+      selectedRuleTypeModel.id && MULTI_CONSUMER_RULE_TYPE_IDS.includes(selectedRuleTypeModel.id)
+    );
+  }, [authorizedConsumers, selectedRuleTypeModel, canShowConsumerSelection]);
 
   const RuleParamsExpressionComponent = selectedRuleTypeModel.ruleParamsExpression ?? null;
 
@@ -319,9 +305,8 @@ export const RuleDefinition = () => {
               >
                 <RuleAlertDelay />
               </EuiDescribedFormGroup>
-              {IS_RULE_SPECIFIC_FLAPPING_ENABLED && readFlappingSettingsUI && (
+              {IS_RULE_SPECIFIC_FLAPPING_ENABLED && (
                 <EuiDescribedFormGroup
-                  data-test-subj="ruleDefinitionFlappingFormGroup"
                   fullWidth
                   title={<h4>{ALERT_FLAPPING_DETECTION_TITLE}</h4>}
                   description={

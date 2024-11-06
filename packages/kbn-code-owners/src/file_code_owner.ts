@@ -43,12 +43,11 @@ export function getPathsWithOwnersReversed(): PathWithOwners[] {
 
   const pathsWithOwners: PathWithOwners[] = codeowners.map((c) => {
     const [path, ...ghTeams] = c.split(/\s+/);
-    const cleanedPath = path.replace(/\/$/, ''); // remove trailing slash
     return {
-      path: cleanedPath,
+      path,
       teams: ghTeams.map((t) => t.replace('@', '')).join(),
       // register CODEOWNERS entries with the `ignores` lib for later path matching
-      ignorePattern: ignore().add([cleanedPath]),
+      ignorePattern: ignore().add([path]),
     };
   });
 

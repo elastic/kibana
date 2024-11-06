@@ -65,13 +65,13 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
       );
     });
 
-    it('should return 403 when creating a cases webhook connector', async () => {
+    it('should return 403 when creating a cases webhook action', async () => {
       await supertest
-        .post('/api/actions/connector')
+        .post('/api/actions/action')
         .set('kbn-xsrf', 'foo')
         .send({
-          name: 'A cases webhook connector',
-          connector_type_id: '.cases-webhook',
+          name: 'A cases webhook action',
+          actionTypeId: '.cases-webhook',
           config: {
             ...config,
             createCommentUrl: `${casesWebhookSimulatorURL}/{{{external.system.id}}}/comments`,

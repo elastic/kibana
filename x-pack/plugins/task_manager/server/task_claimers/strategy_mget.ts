@@ -14,7 +14,7 @@
 //   capacity and the cost of each task type to run
 
 import apm, { Logger } from 'elastic-apm-node';
-import { Subject } from 'rxjs';
+import { Subject, Observable } from 'rxjs';
 import { createWrappedLogger } from '../lib/wrapped_logger';
 
 import { TaskTypeDictionary } from '../task_type_dictionary';
@@ -70,9 +70,24 @@ interface OwnershipClaimingOpts {
 
 const SIZE_MULTIPLIER_FOR_TASK_FETCH = 4;
 
-export async function claimAvailableTasksMget(
-  opts: TaskClaimerOpts
-): Promise<ClaimOwnershipResult> {
+export function claimAvailableTasksMget(opts: TaskClaimerOpts): Observable<ClaimOwnershipResult> {
+  const taskClaimOwnership$ = new Subject<ClaimOwnershipResult>();
+
+  claimAvailableTasksApm(opts)
+    .then((result) => {
+      taskClaimOwnership$.next(result);
+    })
+    .catch((err) => {
+      taskClaimOwnership$.error(err);
+    })
+    .finally(() => {
+      taskClaimOwnership$.complete();
+    });
+
+  return taskClaimOwnership$;
+}
+
+async function claimAvailableTasksApm(opts: TaskClaimerOpts): Promise<ClaimOwnershipResult> {
   const apmTrans = apm.startTransaction(
     TASK_MANAGER_MARK_AS_CLAIMED,
     TASK_MANAGER_TRANSACTION_TYPE
@@ -196,7 +211,7 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
 
   // perform the task object updates, deal with errors
   const updatedTaskIds: string[] = [];
-  let conflicts = 0;
+  let conflicts = staleTasks.length;
   let bulkUpdateErrors = 0;
   let bulkGetErrors = 0;
 
@@ -288,7 +303,6 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
       tasksClaimed: fullTasksToRun.length,
       tasksLeftUnclaimed: leftOverTasks.length,
       tasksErrors: bulkUpdateErrors + bulkGetErrors,
-      staleTasks: staleTasks.length,
     },
     docs: fullTasksToRun,
     timing: stopTaskTimer(),
@@ -343,10 +357,7 @@ async function searchAvailableTasks({
       // Task must be enabled
       EnabledTask,
       // a task type that's not excluded (may be removed or not)
-      OneOfTaskTypes(
-        'task.taskType',
-        claimPartitions.unlimitedTypes.concat(Array.from(removedTypes))
-      ),
+      OneOfTaskTypes('task.taskType', claimPartitions.unlimitedTypes),
       // Either a task with idle status and runAt <= now or
       // status running or claiming with a retryAt <= now.
       shouldBeOneOf(IdleTaskWithExpiredRunAt, RunningOrClaimingTaskWithExpiredRetryAt),

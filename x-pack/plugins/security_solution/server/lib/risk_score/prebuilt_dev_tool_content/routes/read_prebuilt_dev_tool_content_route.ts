@@ -53,10 +53,8 @@ export const readPrebuiltDevToolContentRoute = (router: SecuritySolutionPluginRo
     .get({
       access: 'internal',
       path: DEV_TOOL_PREBUILT_CONTENT,
-      security: {
-        authz: {
-          requiredPrivileges: ['securitySolution'],
-        },
+      options: {
+        tags: ['access:securitySolution'],
       },
     })
     .addVersion(

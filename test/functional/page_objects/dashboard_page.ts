@@ -296,13 +296,11 @@ export class DashboardPageObject extends FtrService {
       // if the dashboard is not already in edit mode
       await this.testSubjects.click('dashboardEditMode');
     }
-    // wait until the count of dashboard panels equals the count of drag handles
+    // wait until the count of dashboard panels equals the count of toggle menu icons
     await this.retry.waitFor('in edit mode', async () => {
-      const panels = await this.find.allByCssSelector('.embPanel__hoverActionsWrapper');
-      const dragHandles = await this.find.allByCssSelector(
-        '[data-test-subj="embeddablePanelDragHandle"]'
-      );
-      return panels.length === dragHandles.length;
+      const panels = await this.testSubjects.findAll('embeddablePanel', 2500);
+      const menuIcons = await this.testSubjects.findAll('embeddablePanelToggleMenuIcon', 2500);
+      return panels.length === menuIcons.length;
     });
   }
 

@@ -6,7 +6,6 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { ruleParamsSchemaWithDefaultValueV1 } from '@kbn/response-ops-rule-params';
 import { validateDurationV1, validateHoursV1, validateTimezoneV1 } from '../../../validation';
 import { notifyWhenSchemaV1, alertDelaySchemaV1 } from '../../../response';
 import { alertsFilterQuerySchemaV1 } from '../../../../alerts_filter_query';
@@ -167,7 +166,10 @@ export const createBodySchema = schema.object({
       })
     )
   ),
-  params: ruleParamsSchemaWithDefaultValueV1,
+  params: schema.recordOf(schema.string(), schema.maybe(schema.any()), {
+    defaultValue: {},
+    meta: { description: 'The parameters for the rule.' },
+  }),
   schedule: schema.object(
     {
       interval: schema.string({

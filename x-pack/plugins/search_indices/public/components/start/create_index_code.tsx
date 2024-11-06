@@ -6,6 +6,7 @@
  */
 import React, { useCallback, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { TryInConsoleButton } from '@kbn/try-in-console';
 
 import { useSearchApiKey } from '@kbn/search-api-keys-components';
@@ -78,26 +79,29 @@ export const CreateIndexCodeView = ({
             onSelectLanguage={onSelectLanguage}
           />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <TryInConsoleButton
-            request={selectedCodeExamples.sense.createIndex(codeParams)}
-            application={application}
-            sharePlugin={share}
-            consolePlugin={consolePlugin}
-            telemetryId={`${selectedLanguage}_create_index`}
-            onClick={() => {
-              usageTracker.click([
-                AnalyticsEvents.startCreateIndexRunInConsole,
-                `${AnalyticsEvents.startCreateIndexRunInConsole}_${selectedLanguage}`,
-              ]);
-            }}
-          />
-        </EuiFlexItem>
+        {selectedLanguage === 'curl' && (
+          <EuiFlexItem grow={false}>
+            <TryInConsoleButton
+              request={selectedCodeExamples.sense.createIndex(codeParams)}
+              application={application}
+              sharePlugin={share}
+              consolePlugin={consolePlugin}
+              telemetryId={`${selectedLanguage}_create_index`}
+              onClick={() => {
+                usageTracker.click([
+                  AnalyticsEvents.startCreateIndexRunInConsole,
+                  `${AnalyticsEvents.startCreateIndexRunInConsole}_${selectedLanguage}`,
+                ]);
+              }}
+            />
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
       {selectedCodeExample.installCommand && (
         <CodeSample
-          title={selectedCodeExamples.installTitle}
-          description={selectedCodeExamples.installDescription}
+          title={i18n.translate('xpack.searchIndices.startPage.codeView.installCommand.title', {
+            defaultMessage: 'Install Elasticsearch serverless client',
+          })}
           language="shell"
           code={selectedCodeExample.installCommand}
           onCodeCopyClick={() => {
@@ -110,8 +114,9 @@ export const CreateIndexCodeView = ({
       )}
       <CodeSample
         id="createIndex"
-        title={selectedCodeExamples.createIndexTitle}
-        description={selectedCodeExamples.createIndexDescription}
+        title={i18n.translate('xpack.searchIndices.startPage.codeView.createIndex.title', {
+          defaultMessage: 'Connect and create an index',
+        })}
         language={Languages[selectedLanguage].codeBlockLanguage}
         code={selectedCodeExample.createIndex(codeParams)}
         onCodeCopyClick={() => {

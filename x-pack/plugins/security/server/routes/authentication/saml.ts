@@ -38,7 +38,6 @@ export function defineSAMLRoutes({
         },
         options: {
           access: 'public',
-          excludeFromOAS: true,
           authRequired: false,
           xsrfRequired: false,
           tags: [ROUTE_TAG_CAN_REDIRECT, ROUTE_TAG_AUTH_FLOW],

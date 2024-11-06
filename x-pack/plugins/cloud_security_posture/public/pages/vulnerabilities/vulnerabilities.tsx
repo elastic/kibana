@@ -9,8 +9,6 @@ import { Routes, Route } from '@kbn/shared-ux-router';
 import { findingsNavigation } from '@kbn/cloud-security-posture';
 import { useCspSetupStatusApi } from '@kbn/cloud-security-posture/src/hooks/use_csp_setup_status_api';
 import { useDataView } from '@kbn/cloud-security-posture/src/hooks/use_data_view';
-import { EuiSpacer } from '@elastic/eui';
-import { ThirdPartyIntegrationsCallout } from '../findings/third_party_integrations_callout';
 import { VULNERABILITIES_PAGE } from './test_subjects';
 import { CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX } from '../../../common/constants';
 import { NoVulnerabilitiesStates } from '../../components/no_vulnerabilities_states';
@@ -36,8 +34,6 @@ export const Vulnerabilities = () => {
 
   return (
     <CloudPosturePage query={dataViewQuery}>
-      <EuiSpacer />
-      <ThirdPartyIntegrationsCallout />
       <div data-test-subj={VULNERABILITIES_PAGE}>
         <Routes>
           <Route

@@ -32,7 +32,6 @@ export function registerRouteForBundle(
     {
       path: `${routePath}{path*}`,
       options: {
-        httpResource: true,
         authRequired: false,
         access: 'public',
       },

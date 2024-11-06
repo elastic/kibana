@@ -23,30 +23,26 @@ import { OutdatedSloSearchBar } from './outdated_slo_search_bar';
 export function SlosOutdatedDefinitions() {
   const {
     http: { basePath },
-    serverless,
   } = useKibana().services;
 
   const { data: permissions } = usePermissions();
   const { ObservabilityPageTemplate } = usePluginContext();
   const { hasAtLeast } = useLicense();
 
-  useBreadcrumbs(
-    [
-      {
-        href: basePath.prepend(paths.slos),
-        text: i18n.translate('xpack.slo.breadcrumbs.slosLinkText', {
-          defaultMessage: 'SLOs',
-        }),
-        deepLinkId: 'slo',
-      },
-      {
-        text: i18n.translate('xpack.slo.breadcrumbs.slosOutdatedDefinitions', {
-          defaultMessage: 'Outdated SLO Definitions',
-        }),
-      },
-    ],
-    { serverless }
-  );
+  useBreadcrumbs([
+    {
+      href: basePath.prepend(paths.slos),
+      text: i18n.translate('xpack.slo.breadcrumbs.slosLinkText', {
+        defaultMessage: 'SLOs',
+      }),
+      deepLinkId: 'slo',
+    },
+    {
+      text: i18n.translate('xpack.slo.breadcrumbs.slosOutdatedDefinitions', {
+        defaultMessage: 'Outdated SLO Definitions',
+      }),
+    },
+  ]);
 
   const [search, setSearch] = useState<string>('');
   const [activePage, setActivePage] = useState<number>(0);

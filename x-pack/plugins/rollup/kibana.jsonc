@@ -1,15 +1,11 @@
 {
   "type": "plugin",
   "id": "@kbn/rollup-plugin",
-  "owner": [
-    "@elastic/kibana-management"
-  ],
-  "group": "platform",
-  "visibility": "private",
+  "owner": "@elastic/kibana-management",
   "plugin": {
     "id": "rollup",
-    "browser": true,
     "server": true,
+    "browser": true,
     "configPath": [
       "xpack",
       "rollup"

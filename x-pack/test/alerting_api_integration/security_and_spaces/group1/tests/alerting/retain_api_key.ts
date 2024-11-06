@@ -26,11 +26,11 @@ export default function retainAPIKeyTests({ getService }: FtrProviderContext) {
 
       describe(scenario.id, () => {
         it('should retain the api key when a rule is disabled and then enabled', async () => {
-          const { body: createdConnector } = await supertest
+          const { body: createdAction } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
             .set('kbn-xsrf', 'foo')
             .send({
-              name: 'MY connector',
+              name: 'MY action',
               connector_type_id: 'test.noop',
               config: {},
               secrets: {},
@@ -44,7 +44,7 @@ export default function retainAPIKeyTests({ getService }: FtrProviderContext) {
               getTestRuleData({
                 actions: [
                   {
-                    id: createdConnector.id,
+                    id: createdAction.id,
                     group: 'default',
                     params: {},
                   },
@@ -53,7 +53,7 @@ export default function retainAPIKeyTests({ getService }: FtrProviderContext) {
             )
             .expect(200);
           objectRemover.add(space.id, createdRule.id, 'rule', 'alerting');
-          objectRemover.add(space.id, createdConnector.id, 'connector', 'actions');
+          objectRemover.add(space.id, createdAction.id, 'action', 'actions');
           const {
             body: { apiKey, apiKeyOwner },
           } = await alertUtils.getAPIKeyRequest(createdRule.id);

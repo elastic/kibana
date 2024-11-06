@@ -7,7 +7,6 @@
 
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
-import { AiopsDashboardEmbeddablesProvider } from './dashboard_embeddables';
 import { LogRateAnalysisPageProvider } from './log_rate_analysis_page';
 import { LogRateAnalysisResultsTableProvider } from './log_rate_analysis_results_table';
 import { LogRateAnalysisResultsGroupsTableProvider } from './log_rate_analysis_results_groups_table';
@@ -17,7 +16,6 @@ import { ChangePointDetectionPageProvider } from './change_point_detection_page'
 import { MlTableServiceProvider } from '../ml/common_table_service';
 
 export function AiopsProvider(context: FtrProviderContext) {
-  const dashboardEmbeddables = AiopsDashboardEmbeddablesProvider(context);
   const logRateAnalysisPage = LogRateAnalysisPageProvider(context);
   const logRateAnalysisResultsTable = LogRateAnalysisResultsTableProvider(context);
   const logRateAnalysisResultsGroupsTable = LogRateAnalysisResultsGroupsTableProvider(context);
@@ -29,7 +27,6 @@ export function AiopsProvider(context: FtrProviderContext) {
   const changePointDetectionPage = ChangePointDetectionPageProvider(context, tableService);
 
   return {
-    dashboardEmbeddables,
     changePointDetectionPage,
     logRateAnalysisPage,
     logRateAnalysisResultsTable,

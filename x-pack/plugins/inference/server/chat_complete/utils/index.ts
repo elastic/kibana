@@ -12,4 +12,3 @@ export {
   type InferenceExecutor,
 } from './inference_executor';
 export { chunksIntoMessage } from './chunks_into_message';
-export { streamToResponse } from './stream_to_response';

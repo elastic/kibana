@@ -17,7 +17,6 @@ import type {
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { IndexManagementPluginStart } from '@kbn/index-management-shared-types';
 import type { AppDeepLinkId } from '@kbn/core-chrome-browser';
-import { ServerlessPluginStart } from '@kbn/serverless/public';
 
 export interface SearchIndicesPluginSetup {
   enabled: boolean;
@@ -51,7 +50,6 @@ export type SearchIndicesServicesContext = CoreStart &
   SearchIndicesAppPluginStartDependencies & {
     history: AppMountParameters['history'];
     indexManagement: IndexManagementPluginStart;
-    serverless: ServerlessPluginStart;
   };
 
 export interface AppUsageTracker {
@@ -88,10 +86,6 @@ export interface CreateIndexCodeDefinition {
 
 export interface CreateIndexCodeExamples {
   exampleType: string;
-  installTitle: string;
-  installDescription: string;
-  createIndexTitle: string;
-  createIndexDescription: string;
   sense: CreateIndexCodeDefinition;
   curl: CreateIndexCodeDefinition;
   python: CreateIndexCodeDefinition;
@@ -100,7 +94,7 @@ export interface CreateIndexCodeExamples {
 
 export interface IngestCodeSnippetParameters extends CodeSnippetParameters {
   indexName: string;
-  sampleDocuments: object[];
+  sampleDocument: object;
   mappingProperties: Record<string, MappingProperty>;
 }
 
@@ -113,10 +107,9 @@ export interface IngestDataCodeDefinition {
 }
 
 export interface IngestDataCodeExamples {
-  addMappingsTitle: string;
-  addMappingsDescription: string;
-  installTitle: string;
-  installDescription: string;
+  title: string;
+  ingestTitle: string;
+  description: string;
   defaultMapping: Record<string, MappingProperty>;
   sense: IngestDataCodeDefinition;
   curl: IngestDataCodeDefinition;

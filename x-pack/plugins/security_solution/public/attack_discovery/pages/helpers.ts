@@ -75,14 +75,11 @@ export const getErrorToastText = (
 
 export const showNoAlertsPrompt = ({
   alertsContextCount,
-  connectorId,
   isLoading,
 }: {
   alertsContextCount: number | null;
-  connectorId: string | undefined;
   isLoading: boolean;
-}): boolean =>
-  connectorId != null && !isLoading && alertsContextCount != null && alertsContextCount === 0;
+}): boolean => !isLoading && alertsContextCount != null && alertsContextCount === 0;
 
 export const showWelcomePrompt = ({
   aiConnectorsCount,
@@ -114,26 +111,12 @@ export const showLoading = ({
   loadingConnectorId: string | null;
 }): boolean => isLoading && (loadingConnectorId === connectorId || attackDiscoveriesCount === 0);
 
-export const showSummary = (attackDiscoveriesCount: number) => attackDiscoveriesCount > 0;
-
-export const showFailurePrompt = ({
+export const showSummary = ({
   connectorId,
-  failureReason,
-  isLoading,
+  attackDiscoveriesCount,
+  loadingConnectorId,
 }: {
   connectorId: string | undefined;
-  failureReason: string | null;
-  isLoading: boolean;
-}): boolean => connectorId != null && !isLoading && failureReason != null;
-
-export const getSize = ({
-  defaultMaxAlerts,
-  localStorageAttackDiscoveryMaxAlerts,
-}: {
-  defaultMaxAlerts: number;
-  localStorageAttackDiscoveryMaxAlerts: string | undefined;
-}): number => {
-  const size = Number(localStorageAttackDiscoveryMaxAlerts);
-
-  return isNaN(size) || size <= 0 ? defaultMaxAlerts : size;
-};
+  attackDiscoveriesCount: number;
+  loadingConnectorId: string | null;
+}): boolean => loadingConnectorId !== connectorId && attackDiscoveriesCount > 0;

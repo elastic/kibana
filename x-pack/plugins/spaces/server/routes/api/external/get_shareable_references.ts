@@ -19,9 +19,7 @@ export function initGetShareableReferencesApi(deps: ExternalRouteDeps) {
       path: '/api/spaces/_get_shareable_references',
       options: {
         access: isServerless ? 'internal' : 'public',
-        summary: `Get shareable references`,
-        tags: ['oas-tag:spaces'],
-        description: 'Collect references and space contexts for saved objects.',
+        description: `Get shareable references`,
       },
       validate: {
         body: schema.object({

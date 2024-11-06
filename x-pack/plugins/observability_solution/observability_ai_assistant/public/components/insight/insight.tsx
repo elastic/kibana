@@ -56,7 +56,7 @@ function ChatContent({
 }) {
   const service = useObservabilityAIAssistant();
   const chatService = useObservabilityAIAssistantChatService();
-  const scopes = chatService.getScopes();
+  const scope = chatService.getScope();
 
   const initialMessagesRef = useRef(initialMessages);
 
@@ -69,7 +69,7 @@ function ChatContent({
     initialMessages,
     persist: false,
     disableFunctions: true,
-    scopes,
+    scope,
   });
 
   const lastAssistantResponse = getLastMessageOfType(
@@ -128,7 +128,6 @@ function ChatContent({
                     service.conversations.openNewConversation({
                       messages,
                       title: defaultTitle,
-                      hideConversationList: true,
                     });
                   }}
                 />

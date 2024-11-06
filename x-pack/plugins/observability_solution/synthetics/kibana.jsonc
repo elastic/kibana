@@ -1,20 +1,13 @@
 {
   "type": "plugin",
   "id": "@kbn/synthetics-plugin",
-  "owner": [
-    "@elastic/obs-ux-management-team"
-  ],
-  "group": "observability",
-  "visibility": "private",
+  "owner": "@elastic/obs-ux-management-team",
   "description": "This plugin visualizes data from Synthetics and Heartbeat, and integrates with other Observability solutions.",
   "plugin": {
     "id": "synthetics",
-    "browser": true,
     "server": true,
-    "configPath": [
-      "xpack",
-      "uptime"
-    ],
+    "browser": true,
+    "configPath": ["xpack", "uptime"],
     "requiredPlugins": [
       "actions",
       "alerting",
@@ -64,7 +57,7 @@
       "observability",
       "spaces",
       "indexLifecycleManagement",
-      "unifiedDocViewer"
+      "unifiedDocViewer",
     ]
   }
 }

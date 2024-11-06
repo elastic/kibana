@@ -20,9 +20,3 @@ export { registerSimulateRoute } from './simulate';
 export { registerDocumentsRoute } from './documents';
 
 export { registerParseCsvRoute } from './parse_csv';
-
-export {
-  registerListDatabaseRoute,
-  registerCreateDatabaseRoute,
-  registerDeleteDatabaseRoute,
-} from './database';

@@ -59,7 +59,7 @@ export const getAgentPoliciesRoute = (router: IRouter, osqueryContext: OsqueryAp
             (agentPolicy: GetAgentPoliciesResponseItem) =>
               agentService?.asInternalUser
                 .getAgentStatusForAgentPolicy(agentPolicy.id)
-                .then(({ active: agentTotal }) => (agentPolicy.agents = agentTotal)),
+                .then(({ total: agentTotal }) => (agentPolicy.agents = agentTotal)),
             { concurrency: 10 }
           );
         }

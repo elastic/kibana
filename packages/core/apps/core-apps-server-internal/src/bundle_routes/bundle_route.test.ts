@@ -45,7 +45,6 @@ describe('registerRouteForBundle', () => {
         options: {
           access: 'public',
           authRequired: false,
-          httpResource: true,
         },
         validate: expect.any(Object),
       },

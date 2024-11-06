@@ -32,9 +32,13 @@ export function generateLatestTransform(
     filter.push(getElasticsearchQueryOrThrow(definition.filter));
   }
 
-  definition.identityFields.forEach(({ field }) => {
-    filter.push({ exists: { field } });
-  });
+  if (definition.identityFields.some(({ optional }) => !optional)) {
+    definition.identityFields
+      .filter(({ optional }) => !optional)
+      .forEach(({ field }) => {
+        filter.push({ exists: { field } });
+      });
+  }
 
   filter.push({
     range: {
@@ -69,7 +73,7 @@ const generateTransformPutRequest = ({
   return {
     transform_id: transformId,
     _meta: {
-      definition_version: definition.version,
+      definitionVersion: definition.version,
       managed: definition.managed,
     },
     defer_validation: true,
@@ -104,7 +108,7 @@ const generateTransformPutRequest = ({
           (acc, id) => ({
             ...acc,
             [`entity.identity.${id.field}`]: {
-              terms: { field: id.field },
+              terms: { field: id.field, missing_bucket: id.optional },
             },
           }),
           {}
@@ -113,7 +117,7 @@ const generateTransformPutRequest = ({
       aggs: {
         ...generateLatestMetricAggregations(definition),
         ...generateLatestMetadataAggregations(definition),
-        'entity.last_seen_timestamp': {
+        'entity.lastSeenTimestamp': {
           max: {
             field: definition.latest.timestampField,
           },

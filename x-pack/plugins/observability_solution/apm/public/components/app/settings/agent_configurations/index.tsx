@@ -69,7 +69,7 @@ function CreateConfigurationButton() {
 
   const { core } = useApmPluginContext();
 
-  const canSave = core.application.capabilities.apm['settings:save'];
+  const canSave = core.application.capabilities.apm.save;
   return (
     <EuiFlexItem>
       <EuiFlexGroup alignItems="center" justifyContent="flexEnd">

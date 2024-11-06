@@ -1650,7 +1650,7 @@
             "section": "def-common.KibanaRoleDescriptors",
             "text": "KibanaRoleDescriptors"
           },
-          "): Promise<void>; deleteCustomRole(): Promise<void>; getCommonRequestHeader(): { 'kbn-xsrf': string; }; getInternalRequestHeader(): ",
+          "): Promise<void>; getCommonRequestHeader(): { 'kbn-xsrf': string; }; getInternalRequestHeader(): ",
           {
             "pluginId": "@kbn/ftr-common-functional-services",
             "scope": "common",
@@ -1846,7 +1846,7 @@
             "section": "def-common.KibanaRoleDescriptors",
             "text": "KibanaRoleDescriptors"
           },
-          "): Promise<void>; deleteCustomRole(): Promise<void>; getCommonRequestHeader(): { 'kbn-xsrf': string; }; getInternalRequestHeader(): ",
+          "): Promise<void>; getCommonRequestHeader(): { 'kbn-xsrf': string; }; getInternalRequestHeader(): ",
           {
             "pluginId": "@kbn/ftr-common-functional-services",
             "scope": "common",
@@ -1901,7 +1901,7 @@
         "label": "InternalRequestHeader",
         "description": [],
         "signature": [
-          "{ 'x-elastic-internal-origin': string; 'kbn-xsrf': string; } | { 'x-elastic-internal-origin': string; 'kbn-xsrf': string; }"
+          "{ 'kbn-xsrf': string; } | { 'x-elastic-internal-origin': string; 'kbn-xsrf': string; }"
         ],
         "path": "packages/kbn-ftr-common-functional-services/services/saml_auth/default_request_headers.ts",
         "deprecated": false,
@@ -1979,7 +1979,7 @@
             "section": "def-common.KibanaRoleDescriptors",
             "text": "KibanaRoleDescriptors"
           },
-          "): Promise<void>; deleteCustomRole(): Promise<void>; getCommonRequestHeader(): { 'kbn-xsrf': string; }; getInternalRequestHeader(): ",
+          "): Promise<void>; getCommonRequestHeader(): { 'kbn-xsrf': string; }; getInternalRequestHeader(): ",
           {
             "pluginId": "@kbn/ftr-common-functional-services",
             "scope": "common",
@@ -2220,7 +2220,7 @@
                     "section": "def-common.KibanaRoleDescriptors",
                     "text": "KibanaRoleDescriptors"
                   },
-                  "): Promise<void>; deleteCustomRole(): Promise<void>; getCommonRequestHeader(): { 'kbn-xsrf': string; }; getInternalRequestHeader(): ",
+                  "): Promise<void>; getCommonRequestHeader(): { 'kbn-xsrf': string; }; getInternalRequestHeader(): ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -2416,7 +2416,7 @@
                     "section": "def-common.KibanaRoleDescriptors",
                     "text": "KibanaRoleDescriptors"
                   },
-                  "): Promise<void>; deleteCustomRole(): Promise<void>; getCommonRequestHeader(): { 'kbn-xsrf': string; }; getInternalRequestHeader(): ",
+                  "): Promise<void>; getCommonRequestHeader(): { 'kbn-xsrf': string; }; getInternalRequestHeader(): ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -2665,7 +2665,7 @@
                     "section": "def-common.KibanaRoleDescriptors",
                     "text": "KibanaRoleDescriptors"
                   },
-                  "): Promise<void>; deleteCustomRole(): Promise<void>; getCommonRequestHeader(): { 'kbn-xsrf': string; }; getInternalRequestHeader(): ",
+                  "): Promise<void>; getCommonRequestHeader(): { 'kbn-xsrf': string; }; getInternalRequestHeader(): ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -2861,7 +2861,7 @@
                     "section": "def-common.KibanaRoleDescriptors",
                     "text": "KibanaRoleDescriptors"
                   },
-                  "): Promise<void>; deleteCustomRole(): Promise<void>; getCommonRequestHeader(): { 'kbn-xsrf': string; }; getInternalRequestHeader(): ",
+                  "): Promise<void>; getCommonRequestHeader(): { 'kbn-xsrf': string; }; getInternalRequestHeader(): ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -3110,7 +3110,7 @@
                     "section": "def-common.KibanaRoleDescriptors",
                     "text": "KibanaRoleDescriptors"
                   },
-                  "): Promise<void>; deleteCustomRole(): Promise<void>; getCommonRequestHeader(): { 'kbn-xsrf': string; }; getInternalRequestHeader(): ",
+                  "): Promise<void>; getCommonRequestHeader(): { 'kbn-xsrf': string; }; getInternalRequestHeader(): ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -3306,7 +3306,7 @@
                     "section": "def-common.KibanaRoleDescriptors",
                     "text": "KibanaRoleDescriptors"
                   },
-                  "): Promise<void>; deleteCustomRole(): Promise<void>; getCommonRequestHeader(): { 'kbn-xsrf': string; }; getInternalRequestHeader(): ",
+                  "): Promise<void>; getCommonRequestHeader(): { 'kbn-xsrf': string; }; getInternalRequestHeader(): ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -3590,7 +3590,7 @@
                     "section": "def-common.KibanaRoleDescriptors",
                     "text": "KibanaRoleDescriptors"
                   },
-                  "): Promise<void>; deleteCustomRole(): Promise<void>; getCommonRequestHeader(): { 'kbn-xsrf': string; }; getInternalRequestHeader(): ",
+                  "): Promise<void>; getCommonRequestHeader(): { 'kbn-xsrf': string; }; getInternalRequestHeader(): ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -3786,7 +3786,7 @@
                     "section": "def-common.KibanaRoleDescriptors",
                     "text": "KibanaRoleDescriptors"
                   },
-                  "): Promise<void>; deleteCustomRole(): Promise<void>; getCommonRequestHeader(): { 'kbn-xsrf': string; }; getInternalRequestHeader(): ",
+                  "): Promise<void>; getCommonRequestHeader(): { 'kbn-xsrf': string; }; getInternalRequestHeader(): ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -4049,7 +4049,7 @@
                     "section": "def-common.KibanaRoleDescriptors",
                     "text": "KibanaRoleDescriptors"
                   },
-                  "): Promise<void>; deleteCustomRole(): Promise<void>; getCommonRequestHeader(): { 'kbn-xsrf': string; }; getInternalRequestHeader(): ",
+                  "): Promise<void>; getCommonRequestHeader(): { 'kbn-xsrf': string; }; getInternalRequestHeader(): ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -4245,7 +4245,7 @@
                     "section": "def-common.KibanaRoleDescriptors",
                     "text": "KibanaRoleDescriptors"
                   },
-                  "): Promise<void>; deleteCustomRole(): Promise<void>; getCommonRequestHeader(): { 'kbn-xsrf': string; }; getInternalRequestHeader(): ",
+                  "): Promise<void>; getCommonRequestHeader(): { 'kbn-xsrf': string; }; getInternalRequestHeader(): ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -4414,7 +4414,7 @@
                 "section": "def-common.KibanaRoleDescriptors",
                 "text": "KibanaRoleDescriptors"
               },
-              "): Promise<void>; deleteCustomRole(): Promise<void>; getCommonRequestHeader(): { 'kbn-xsrf': string; }; getInternalRequestHeader(): ",
+              "): Promise<void>; getCommonRequestHeader(): { 'kbn-xsrf': string; }; getInternalRequestHeader(): ",
               {
                 "pluginId": "@kbn/ftr-common-functional-services",
                 "scope": "common",
@@ -4600,7 +4600,7 @@
                     "section": "def-common.KibanaRoleDescriptors",
                     "text": "KibanaRoleDescriptors"
                   },
-                  "): Promise<void>; deleteCustomRole(): Promise<void>; getCommonRequestHeader(): { 'kbn-xsrf': string; }; getInternalRequestHeader(): ",
+                  "): Promise<void>; getCommonRequestHeader(): { 'kbn-xsrf': string; }; getInternalRequestHeader(): ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -4796,7 +4796,7 @@
                     "section": "def-common.KibanaRoleDescriptors",
                     "text": "KibanaRoleDescriptors"
                   },
-                  "): Promise<void>; deleteCustomRole(): Promise<void>; getCommonRequestHeader(): { 'kbn-xsrf': string; }; getInternalRequestHeader(): ",
+                  "): Promise<void>; getCommonRequestHeader(): { 'kbn-xsrf': string; }; getInternalRequestHeader(): ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -5039,7 +5039,7 @@
                     "section": "def-common.KibanaRoleDescriptors",
                     "text": "KibanaRoleDescriptors"
                   },
-                  "): Promise<void>; deleteCustomRole(): Promise<void>; getCommonRequestHeader(): { 'kbn-xsrf': string; }; getInternalRequestHeader(): ",
+                  "): Promise<void>; getCommonRequestHeader(): { 'kbn-xsrf': string; }; getInternalRequestHeader(): ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -5235,7 +5235,7 @@
                     "section": "def-common.KibanaRoleDescriptors",
                     "text": "KibanaRoleDescriptors"
                   },
-                  "): Promise<void>; deleteCustomRole(): Promise<void>; getCommonRequestHeader(): { 'kbn-xsrf': string; }; getInternalRequestHeader(): ",
+                  "): Promise<void>; getCommonRequestHeader(): { 'kbn-xsrf': string; }; getInternalRequestHeader(): ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -5478,7 +5478,7 @@
                     "section": "def-common.KibanaRoleDescriptors",
                     "text": "KibanaRoleDescriptors"
                   },
-                  "): Promise<void>; deleteCustomRole(): Promise<void>; getCommonRequestHeader(): { 'kbn-xsrf': string; }; getInternalRequestHeader(): ",
+                  "): Promise<void>; getCommonRequestHeader(): { 'kbn-xsrf': string; }; getInternalRequestHeader(): ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -5674,7 +5674,7 @@
                     "section": "def-common.KibanaRoleDescriptors",
                     "text": "KibanaRoleDescriptors"
                   },
-                  "): Promise<void>; deleteCustomRole(): Promise<void>; getCommonRequestHeader(): { 'kbn-xsrf': string; }; getInternalRequestHeader(): ",
+                  "): Promise<void>; getCommonRequestHeader(): { 'kbn-xsrf': string; }; getInternalRequestHeader(): ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -5920,7 +5920,7 @@
                     "section": "def-common.KibanaRoleDescriptors",
                     "text": "KibanaRoleDescriptors"
                   },
-                  "): Promise<void>; deleteCustomRole(): Promise<void>; getCommonRequestHeader(): { 'kbn-xsrf': string; }; getInternalRequestHeader(): ",
+                  "): Promise<void>; getCommonRequestHeader(): { 'kbn-xsrf': string; }; getInternalRequestHeader(): ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -6116,7 +6116,7 @@
                     "section": "def-common.KibanaRoleDescriptors",
                     "text": "KibanaRoleDescriptors"
                   },
-                  "): Promise<void>; deleteCustomRole(): Promise<void>; getCommonRequestHeader(): { 'kbn-xsrf': string; }; getInternalRequestHeader(): ",
+                  "): Promise<void>; getCommonRequestHeader(): { 'kbn-xsrf': string; }; getInternalRequestHeader(): ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",

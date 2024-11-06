@@ -8,13 +8,13 @@
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
-import React, { useMemo } from 'react';
-import type { ResolvedIndexNameLogsSourceConfiguration } from '../../utils/logs_source';
+import React from 'react';
+import type { IndexNameLogsSourceConfiguration } from '../../utils/logs_source';
 import { DiscoverLink } from '../discover_link';
 
 export interface LogCategoriesControlBarProps {
   documentFilters?: QueryDslQueryContainer[];
-  logsSource: ResolvedIndexNameLogsSourceConfiguration;
+  logsSource: IndexNameLogsSourceConfiguration;
   timeRange: {
     start: string;
     end: string;
@@ -28,17 +28,12 @@ export interface LogCategoriesControlBarDependencies {
 
 export const LogCategoriesControlBar: React.FC<LogCategoriesControlBarProps> = React.memo(
   ({ dependencies, documentFilters, logsSource, timeRange }) => {
-    const linkFilters = useMemo(
-      () => documentFilters?.map((filter) => ({ filter })),
-      [documentFilters]
-    );
-
     return (
       <EuiFlexGroup direction="row" justifyContent="flexEnd" alignItems="center" gutterSize="s">
         <EuiFlexItem grow={false}>
           <DiscoverLink
             dependencies={dependencies}
-            documentFilters={linkFilters}
+            documentFilters={documentFilters}
             logsSource={logsSource}
             timeRange={timeRange}
           />

@@ -70,9 +70,6 @@ const appServices = {
   },
   overlays: overlayServiceMock.createStartContract(),
   http: httpServiceMock.createStartContract({ basePath: '/mock' }),
-  config: {
-    enableManageProcessors: true,
-  },
 };
 
 export const setupEnvironment = () => {

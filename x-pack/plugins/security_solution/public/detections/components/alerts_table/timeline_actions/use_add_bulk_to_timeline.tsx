@@ -67,6 +67,7 @@ export const useAddBulkToTimelineAction = ({
   const {
     browserFields,
     dataViewId,
+    indexPattern,
     sourcererDataView,
     // important to get selectedPatterns from useSourcererDataView
     // in order to include the exclude filters in the search that are not stored in the timeline
@@ -95,13 +96,13 @@ export const useAddBulkToTimelineAction = ({
     return combineQueries({
       config: esQueryConfig,
       dataProviders: [],
-      indexPattern: sourcererDataView,
+      indexPattern,
       filters: combinedFilters,
       kqlQuery: { query: '', language: 'kuery' },
       browserFields,
       kqlMode: 'filter',
     });
-  }, [esQueryConfig, sourcererDataView, combinedFilters, browserFields]);
+  }, [esQueryConfig, indexPattern, combinedFilters, browserFields]);
 
   const filterQuery = useMemo(() => {
     if (!combinedQuery) return '';
@@ -119,7 +120,7 @@ export const useAddBulkToTimelineAction = ({
     sort: timelineQuerySortField,
     indexNames: selectedPatterns,
     filterQuery,
-    runtimeMappings: sourcererDataView.runtimeFieldMap as RunTimeMappings,
+    runtimeMappings: sourcererDataView?.runtimeFieldMap as RunTimeMappings,
     limit: Math.min(BULK_ADD_TO_TIMELINE_LIMIT, totalCount),
     timerangeKind: 'absolute',
   });

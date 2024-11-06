@@ -56,7 +56,7 @@ export const getSummarizedAlerts = async <
    * yet (the update call uses refresh: false). So we need to rely on the in
    * memory alerts to do this.
    */
-  const newAlertsInMemory = Object.values(alertsClient.getProcessedAlerts('new'));
+  const newAlertsInMemory = Object.values(alertsClient.getProcessedAlerts('new') || {}) || [];
 
   const newAlertsWithMaintenanceWindowIds = newAlertsInMemory.reduce<string[]>((result, alert) => {
     if (alert.getMaintenanceWindowIds().length > 0) {

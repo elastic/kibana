@@ -98,10 +98,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const summaryTabContent = await testSubjects.exists('summaryTabContent');
         expect(summaryTabContent).to.be(true);
 
-        // Verify that index mode is set to "Standard"
-        expect(await testSubjects.exists('indexModeTitle')).to.be(true);
-        expect(await testSubjects.getVisibleText('indexModeValue')).to.be('Standard');
-
         // Click Create template
         await pageObjects.indexManagement.clickNextButton();
       });

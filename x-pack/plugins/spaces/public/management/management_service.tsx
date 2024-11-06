@@ -5,15 +5,30 @@
  * 2.0.
  */
 
+import type { StartServicesAccessor } from '@kbn/core/public';
+import type { Logger } from '@kbn/logging';
 import type { ManagementApp, ManagementSetup } from '@kbn/management-plugin/public';
+import type {
+  PrivilegesAPIClientPublicContract,
+  RolesAPIClient,
+} from '@kbn/security-plugin-types-public';
 
-import {
-  spacesManagementApp,
-  type CreateParams as SpacesManagementAppCreateParams,
-} from './spaces_management_app';
+import { spacesManagementApp } from './spaces_management_app';
+import type { EventTracker } from '../analytics';
+import type { ConfigType } from '../config';
+import type { PluginsStart } from '../plugin';
+import type { SpacesManager } from '../spaces_manager';
 
-interface SetupDeps extends SpacesManagementAppCreateParams {
+interface SetupDeps {
   management: ManagementSetup;
+  getStartServices: StartServicesAccessor<PluginsStart>;
+  spacesManager: SpacesManager;
+  config: ConfigType;
+  getRolesAPIClient: () => Promise<RolesAPIClient>;
+  eventTracker: EventTracker;
+  getPrivilegesAPIClient: () => Promise<PrivilegesAPIClientPublicContract>;
+  logger: Logger;
+  isServerless: boolean;
 }
 
 export class ManagementService {
@@ -25,12 +40,10 @@ export class ManagementService {
     spacesManager,
     config,
     logger,
-    getIsRoleManagementEnabled,
     getRolesAPIClient,
     eventTracker,
     getPrivilegesAPIClient,
     isServerless,
-    getSecurityLicense,
   }: SetupDeps) {
     this.registeredSpacesManagementApp = management.sections.section.kibana.registerApp(
       spacesManagementApp.create({
@@ -38,12 +51,10 @@ export class ManagementService {
         spacesManager,
         config,
         logger,
-        getIsRoleManagementEnabled,
         getRolesAPIClient,
         eventTracker,
         getPrivilegesAPIClient,
         isServerless,
-        getSecurityLicense,
       })
     );
   }

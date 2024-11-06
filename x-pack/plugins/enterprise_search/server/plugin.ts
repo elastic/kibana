@@ -182,7 +182,12 @@ export class EnterpriseSearchPlugin implements Plugin {
     const isCloud = !!cloud?.cloudId;
 
     if (customIntegrations) {
-      registerEnterpriseSearchIntegrations(config, customIntegrations);
+      registerEnterpriseSearchIntegrations(
+        config,
+        customIntegrations,
+        isCloud,
+        searchConnectors?.getConnectorTypes() || []
+      );
     }
 
     /*

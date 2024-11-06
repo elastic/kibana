@@ -50,18 +50,16 @@ export const MemoryUsagePage: FC = () => {
 
       {showNodeInfo ? (
         <>
-          <EuiTabs data-test-subj="mlMemoryUsageTabs">
+          <EuiTabs>
             <EuiTab
               isSelected={selectedTab === TAB.NODES}
               onClick={() => setSelectedTab(TAB.NODES)}
-              data-test-subj="mlMemoryUsageTab-nodes"
             >
               <FormattedMessage id="xpack.ml.memoryUsage.nodesTab" defaultMessage="Nodes" />
             </EuiTab>
             <EuiTab
               isSelected={selectedTab === TAB.MEMORY_USAGE}
               onClick={() => setSelectedTab(TAB.MEMORY_USAGE)}
-              data-test-subj="mlMemoryUsageTab-memory-usage"
             >
               <FormattedMessage id="xpack.ml.memoryUsage.memoryTab" defaultMessage="Memory usage" />
             </EuiTab>

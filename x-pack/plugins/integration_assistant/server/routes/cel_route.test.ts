@@ -22,9 +22,7 @@ const mockResult = jest.fn().mockResolvedValue({
 jest.mock('../graphs/cel', () => {
   return {
     getCelGraph: jest.fn().mockResolvedValue({
-      withConfig: () => ({
-        invoke: () => mockResult(),
-      }),
+      invoke: () => mockResult(),
     }),
   };
 });

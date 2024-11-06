@@ -5,15 +5,12 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
+import type { IScopedClusterClient, KibanaRequest } from '@kbn/core/server';
 import type { Agent } from '@kbn/fleet-plugin/common/types/models';
 import type { ISearchRequestParams } from '@kbn/search-types';
-import type { EndpointFleetServicesInterface } from '../../services/fleet';
-import { policyIndexPattern } from '../../../../common/endpoint/constants';
-import { catchAndWrapError } from '../../utils';
-import type { EndpointAppContext } from '../../types';
-import { INITIAL_POLICY_ID } from '.';
 import type { GetHostPolicyResponse, HostPolicyResponse } from '../../../../common/endpoint/types';
+import { INITIAL_POLICY_ID } from '.';
+import type { EndpointAppContext } from '../../types';
 
 export const getESQueryPolicyResponseByAgentID = (
   agentID: string,
@@ -49,17 +46,14 @@ export const getESQueryPolicyResponseByAgentID = (
 };
 
 export async function getPolicyResponseByAgentId(
+  index: string,
   agentID: string,
-  esClient: ElasticsearchClient,
-  fleetServices: EndpointFleetServicesInterface
+  dataClient: IScopedClusterClient
 ): Promise<GetHostPolicyResponse | undefined> {
-  const query = getESQueryPolicyResponseByAgentID(agentID, policyIndexPattern);
-  const response = await esClient.search<HostPolicyResponse>(query).catch(catchAndWrapError);
+  const query = getESQueryPolicyResponseByAgentID(agentID, index);
+  const response = await dataClient.asInternalUser.search<HostPolicyResponse>(query);
 
   if (response.hits.hits.length > 0 && response.hits.hits[0]._source != null) {
-    // Ensure agent is in the current space id. Call to fleet will Error if agent is not in current space
-    await fleetServices.ensureInCurrentSpace({ agentIds: [agentID] });
-
     return {
       policy_response: response.hits.hits[0]._source,
     };

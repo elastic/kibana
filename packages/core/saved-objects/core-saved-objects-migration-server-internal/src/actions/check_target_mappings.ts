@@ -11,7 +11,7 @@ import * as Either from 'fp-ts/lib/Either';
 import * as TaskEither from 'fp-ts/lib/TaskEither';
 
 import type { IndexMapping, VirtualVersionMap } from '@kbn/core-saved-objects-base-server-internal';
-import { getNewAndUpdatedTypes } from '../core/compare_mappings';
+import { getUpdatedTypes } from '../core/compare_mappings';
 
 /** @internal */
 export interface CheckTargetTypesMappingsParams {
@@ -38,12 +38,6 @@ export interface TypesChanged {
   updatedTypes: string[];
 }
 
-/** @internal */
-export interface TypesAdded {
-  type: 'types_added';
-  newTypes: string[];
-}
-
 export const checkTargetTypesMappings =
   ({
     indexTypes,
@@ -52,7 +46,7 @@ export const checkTargetTypesMappings =
     latestMappingsVersions,
     hashToVersionMap = {},
   }: CheckTargetTypesMappingsParams): TaskEither.TaskEither<
-    IndexMappingsIncomplete | TypesChanged | TypesAdded,
+    IndexMappingsIncomplete | TypesChanged,
     TypesMatch
   > =>
   async () => {
@@ -64,7 +58,7 @@ export const checkTargetTypesMappings =
       return Either.left({ type: 'index_mappings_incomplete' as const });
     }
 
-    const { newTypes, updatedTypes } = getNewAndUpdatedTypes({
+    const updatedTypes = getUpdatedTypes({
       indexTypes,
       indexMeta: indexMappings?._meta,
       latestMappingsVersions,
@@ -75,11 +69,6 @@ export const checkTargetTypesMappings =
       return Either.left({
         type: 'types_changed' as const,
         updatedTypes,
-      });
-    } else if (newTypes.length) {
-      return Either.left({
-        type: 'types_added' as const,
-        newTypes,
       });
     } else {
       return Either.right({ type: 'types_match' as const });

@@ -14,7 +14,7 @@ import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 export default function slackTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
-  describe('slack connector', () => {
+  describe('slack action', () => {
     let slackSimulatorURL: string = '';
     let slackServer: http.Server;
 
@@ -25,13 +25,13 @@ export default function slackTest({ getService }: FtrProviderContext) {
       slackSimulatorURL = `http://localhost:${availablePort}`;
     });
 
-    it('should return 403 when creating a slack connector', async () => {
+    it('should return 403 when creating a slack action', async () => {
       await supertest
-        .post('/api/actions/connector')
+        .post('/api/actions/action')
         .set('kbn-xsrf', 'foo')
         .send({
-          name: 'A slack connector',
-          connector_type_id: '.slack',
+          name: 'A slack action',
+          actionTypeId: '.slack',
           secrets: {
             webhookUrl: slackSimulatorURL,
           },

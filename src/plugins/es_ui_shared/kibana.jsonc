@@ -1,15 +1,11 @@
 {
   "type": "plugin",
   "id": "@kbn/es-ui-shared-plugin",
-  "owner": [
-    "@elastic/kibana-management"
-  ],
-  "group": "platform",
-  "visibility": "shared",
+  "owner": "@elastic/kibana-management",
   "plugin": {
     "id": "esUiShared",
-    "browser": true,
     "server": true,
+    "browser": true,
     "requiredBundles": [
       "dataViews"
     ],

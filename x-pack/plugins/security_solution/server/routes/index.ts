@@ -61,7 +61,6 @@ import { suggestUserProfilesRoute } from '../lib/detection_engine/routes/users/s
 import { registerTimelineRoutes } from '../lib/timeline/routes';
 import { getFleetManagedIndexTemplatesRoute } from '../lib/security_integrations/cribl/routes';
 import { registerEntityAnalyticsRoutes } from '../lib/entity_analytics/register_entity_analytics_routes';
-import { registerSiemMigrationsRoutes } from '../lib/siem_migrations/routes';
 
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -100,7 +99,7 @@ export const initRoutes = (
 
   registerResolverRoutes(router, getStartServices, config);
 
-  registerTimelineRoutes(router, config, getStartServices);
+  registerTimelineRoutes(router, config);
 
   // Detection Engine Signals routes that have the REST endpoints of /api/detection_engine/signals
   // POST /api/detection_engine/signals/status
@@ -139,17 +138,13 @@ export const initRoutes = (
   // Dashboards
   registerDashboardsRoutes(router, logger);
   registerTagsRoutes(router, logger);
-
   const { previewTelemetryUrlEnabled } = config.experimentalFeatures;
-
   if (previewTelemetryUrlEnabled) {
     // telemetry preview endpoint for e2e integration tests only at the moment.
     telemetryDetectionRulesPreviewRoute(router, logger, previewTelemetryReceiver, telemetrySender);
   }
 
   registerEntityAnalyticsRoutes({ router, config, getStartServices, logger });
-  registerSiemMigrationsRoutes(router, config, logger);
-
   // Security Integrations
   getFleetManagedIndexTemplatesRoute(router);
 };

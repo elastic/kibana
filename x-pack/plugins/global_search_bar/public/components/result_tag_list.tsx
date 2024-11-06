@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { type FC } from 'react';
+import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiBadge } from '@elastic/eui';
-import type { Tag } from '@kbn/saved-objects-tagging-oss-plugin/common';
+import type { Tag } from '@kbn/saved-objects-tagging-plugin/public';
 
 const MAX_TAGS_TO_SHOW = 3;
 

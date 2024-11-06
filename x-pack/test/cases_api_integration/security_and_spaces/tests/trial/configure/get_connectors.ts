@@ -48,13 +48,13 @@ export default ({ getService }: FtrProviderContext): void => {
         req: getCasesWebhookConnector(),
       });
 
-      actionsRemover.add('default', sir.id, 'connector', 'actions');
-      actionsRemover.add('default', snConnector.id, 'connector', 'actions');
-      actionsRemover.add('default', snOAuthConnector.id, 'connector', 'actions');
-      actionsRemover.add('default', emailConnector.id, 'connector', 'actions');
-      actionsRemover.add('default', jiraConnector.id, 'connector', 'actions');
-      actionsRemover.add('default', resilientConnector.id, 'connector', 'actions');
-      actionsRemover.add('default', casesWebhookConnector.id, 'connector', 'actions');
+      actionsRemover.add('default', sir.id, 'action', 'actions');
+      actionsRemover.add('default', snConnector.id, 'action', 'actions');
+      actionsRemover.add('default', snOAuthConnector.id, 'action', 'actions');
+      actionsRemover.add('default', emailConnector.id, 'action', 'actions');
+      actionsRemover.add('default', jiraConnector.id, 'action', 'actions');
+      actionsRemover.add('default', resilientConnector.id, 'action', 'actions');
+      actionsRemover.add('default', casesWebhookConnector.id, 'action', 'actions');
 
       const connectors = await getCaseConnectors({ supertest });
       const sortedConnectors = connectors.sort((a, b) => a.name.localeCompare(b.name));

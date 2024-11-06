@@ -15,7 +15,7 @@ import { Conversation } from '../../../assistant_context/types';
 
 export interface FetchConversationsResponse {
   page: number;
-  per_page: number;
+  perPage: number;
   total: number;
   data: Conversation[];
 }
@@ -40,13 +40,13 @@ export interface UseFetchCurrentUserConversationsParams {
  */
 const query = {
   page: 1,
-  per_page: 99,
+  perPage: 100,
 };
 
 export const CONVERSATIONS_QUERY_KEYS = [
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND,
   query.page,
-  query.per_page,
+  query.perPage,
   API_VERSIONS.public.v1,
 ];
 
@@ -69,7 +69,7 @@ export const useFetchCurrentUserConversations = ({
     {
       select: (data) => onFetch(data),
       keepPreviousData: true,
-      initialData: { ...query, total: 0, data: [] },
+      initialData: { page: 1, perPage: 100, total: 0, data: [] },
       refetchOnWindowFocus,
       enabled: isAssistantEnabled,
     }

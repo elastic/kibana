@@ -18,7 +18,6 @@ jest.mock('../../sourcerer/containers', () => ({
     selectedPatterns: ['auditbeat-mytest-*'],
     dataViewId: 'security-solution-my-test',
     indicesExist: true,
-    sourcererDataView: {},
   }),
 }));
 

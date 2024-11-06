@@ -12,11 +12,11 @@ import { render, screen, fireEvent } from '@testing-library/react';
 describe('ListUsageResults', () => {
   const items = [
     {
-      id: 'index-1',
+      label: 'index-1',
       type: 'Index',
     },
     {
-      id: 'pipeline-1',
+      label: 'pipeline-1',
       type: 'Pipeline',
     },
   ];

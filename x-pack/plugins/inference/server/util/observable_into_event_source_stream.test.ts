@@ -8,7 +8,7 @@
 import { createParser } from 'eventsource-parser';
 import { partition } from 'lodash';
 import { merge, of, throwError } from 'rxjs';
-import type { InferenceTaskEvent } from '@kbn/inference-common';
+import type { InferenceTaskEvent } from '../../common/inference_task';
 import { observableIntoEventSourceStream } from './observable_into_event_source_stream';
 import type { Logger } from '@kbn/logging';
 

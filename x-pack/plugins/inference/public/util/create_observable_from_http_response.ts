@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { createParser } from 'eventsource-parser';
 import { Observable, throwError } from 'rxjs';
-import { createInferenceInternalError } from '@kbn/inference-common';
+import { createInferenceInternalError } from '../../common/errors';
 
 export interface StreamedHttpResponse {
   response?: { body: ReadableStream<Uint8Array> | null | undefined };

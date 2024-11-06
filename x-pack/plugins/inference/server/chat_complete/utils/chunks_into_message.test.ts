@@ -4,14 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { lastValueFrom, of } from 'rxjs';
 import {
-  ToolChoiceType,
   ChatCompletionChunkEvent,
   ChatCompletionEventType,
   ChatCompletionTokenCountEvent,
-} from '@kbn/inference-common';
+} from '../../../common/chat_complete';
+import { ToolChoiceType } from '../../../common/chat_complete/tools';
 import { chunksIntoMessage } from './chunks_into_message';
 import type { Logger } from '@kbn/logging';
 

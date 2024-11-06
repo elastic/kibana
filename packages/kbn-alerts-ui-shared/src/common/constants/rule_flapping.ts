@@ -8,4 +8,4 @@
  */
 
 // Feature flag for frontend rule specific flapping in rule flyout
-export const IS_RULE_SPECIFIC_FLAPPING_ENABLED = true;
+export const IS_RULE_SPECIFIC_FLAPPING_ENABLED = false;

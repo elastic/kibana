@@ -16,7 +16,7 @@ export default createTestConfig({
       { product_line: 'cloud', product_tier: 'complete' },
     ])}`,
   ],
-  testFiles: [require.resolve('../../tests')],
+  testFiles: [require.resolve('..')],
   junit: {
     reportName: 'Saved Objects Integration Tests - Serverless Env - Complete Tier',
   },

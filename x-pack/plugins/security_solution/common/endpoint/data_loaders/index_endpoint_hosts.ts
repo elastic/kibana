@@ -42,12 +42,7 @@ import {
   indexFleetEndpointPolicy,
 } from './index_fleet_endpoint_policy';
 import { metadataCurrentIndexPattern } from '../constants';
-import {
-  EndpointDataLoadingError,
-  fetchActiveSpaceId,
-  mergeAndAppendArrays,
-  wrapErrorAndRejectPromise,
-} from './utils';
+import { EndpointDataLoadingError, mergeAndAppendArrays, wrapErrorAndRejectPromise } from './utils';
 
 export interface IndexedHostsResponse
   extends IndexedFleetAgentResponse,
@@ -117,7 +112,6 @@ export const indexEndpointHostDocs = usageTracker.track(
     const timeBetweenDocs = 6 * 3600 * 1000; // 6 hours between metadata documents
     const timestamp = new Date().getTime();
     const kibanaVersion = await fetchKibanaVersion(kbnClient);
-    const activeSpaceId = await fetchActiveSpaceId(kbnClient);
     const response: IndexedHostsResponse = {
       hosts: [],
       agents: [],
@@ -143,7 +137,7 @@ export const indexEndpointHostDocs = usageTracker.track(
 
     for (let j = 0; j < numDocs; j++) {
       generator.updateHostData();
-      generator.updateHostPolicyData({ excludeInitialPolicy: true });
+      generator.updateHostPolicyData();
 
       hostMetadata = generator.generateHostMetadata(
         timestamp - timeBetweenDocs * (numDocs - j - 1),
@@ -184,7 +178,6 @@ export const indexEndpointHostDocs = usageTracker.track(
             const { agents, fleetAgentsIndex, operations } = buildFleetAgentBulkCreateOperations({
               endpoints: [hostMetadata],
               agentPolicyId: policyId,
-              spaceId: activeSpaceId,
               kibanaVersion,
             });
 

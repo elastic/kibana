@@ -11,7 +11,7 @@ import { getUrlPrefix, ObjectRemover } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
-export default function getConnectorTests({ getService }: FtrProviderContext) {
+export default function getActionTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
@@ -23,12 +23,12 @@ export default function getConnectorTests({ getService }: FtrProviderContext) {
     for (const scenario of UserAtSpaceScenarios) {
       const { user, space } = scenario;
       describe(scenario.id, () => {
-        it('should handle get connector request appropriately', async () => {
-          const { body: createdConnector } = await supertest
+        it('should handle get action request appropriately', async () => {
+          const { body: createdAction } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
             .set('kbn-xsrf', 'foo')
             .send({
-              name: 'My Connector',
+              name: 'My action',
               connector_type_id: 'test.index-record',
               config: {
                 unencrypted: `This value shouldn't get encrypted`,
@@ -38,10 +38,10 @@ export default function getConnectorTests({ getService }: FtrProviderContext) {
               },
             })
             .expect(200);
-          objectRemover.add(space.id, createdConnector.id, 'connector', 'actions');
+          objectRemover.add(space.id, createdAction.id, 'action', 'actions');
 
           const response = await supertestWithoutAuth
-            .get(`${getUrlPrefix(space.id)}/api/actions/connector/${createdConnector.id}`)
+            .get(`${getUrlPrefix(space.id)}/api/actions/connector/${createdAction.id}`)
             .auth(user.username, user.password);
 
           switch (scenario.id) {
@@ -61,13 +61,13 @@ export default function getConnectorTests({ getService }: FtrProviderContext) {
             case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(200);
               expect(response.body).to.eql({
-                id: createdConnector.id,
+                id: createdAction.id,
                 is_preconfigured: false,
                 is_system_action: false,
                 connector_type_id: 'test.index-record',
                 is_deprecated: false,
                 is_missing_secrets: false,
-                name: 'My Connector',
+                name: 'My action',
                 config: {
                   unencrypted: `This value shouldn't get encrypted`,
                 },
@@ -78,12 +78,12 @@ export default function getConnectorTests({ getService }: FtrProviderContext) {
           }
         });
 
-        it(`connector shouldn't be acessible from another space`, async () => {
-          const { body: createdConnector } = await supertest
+        it(`action shouldn't be acessible from another space`, async () => {
+          const { body: createdAction } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
             .set('kbn-xsrf', 'foo')
             .send({
-              name: 'My Connector',
+              name: 'My action',
               connector_type_id: 'test.index-record',
               config: {
                 unencrypted: `This value shouldn't get encrypted`,
@@ -93,10 +93,10 @@ export default function getConnectorTests({ getService }: FtrProviderContext) {
               },
             })
             .expect(200);
-          objectRemover.add(space.id, createdConnector.id, 'connector', 'actions');
+          objectRemover.add(space.id, createdAction.id, 'action', 'actions');
 
           const response = await supertestWithoutAuth
-            .get(`${getUrlPrefix('other')}/api/actions/connector/${createdConnector.id}`)
+            .get(`${getUrlPrefix('other')}/api/actions/connector/${createdAction.id}`)
             .auth(user.username, user.password);
 
           switch (scenario.id) {
@@ -118,7 +118,7 @@ export default function getConnectorTests({ getService }: FtrProviderContext) {
               expect(response.body).to.eql({
                 statusCode: 404,
                 error: 'Not Found',
-                message: `Saved object [action/${createdConnector.id}] not found`,
+                message: `Saved object [action/${createdAction.id}] not found`,
               });
               break;
             default:
@@ -126,7 +126,7 @@ export default function getConnectorTests({ getService }: FtrProviderContext) {
           }
         });
 
-        it('should handle get preconfigured connector request appropriately', async () => {
+        it('should handle get preconfigured action request appropriately', async () => {
           const response = await supertestWithoutAuth
             .get(`${getUrlPrefix(space.id)}/api/actions/connector/my-slack1`)
             .auth(user.username, user.password);

@@ -23,10 +23,8 @@ export const getEntityEngineRoute = (
     .get({
       access: 'public',
       path: '/api/entity_store/engines/{entityType}',
-      security: {
-        authz: {
-          requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],
-        },
+      options: {
+        tags: ['access:securitySolution', `access:${APP_ID}-entity-analytics`],
       },
     })
     .addVersion(

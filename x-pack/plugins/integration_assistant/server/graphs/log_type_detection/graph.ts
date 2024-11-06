@@ -118,14 +118,8 @@ export async function getLogFormatDetectionGraph({ model, client }: LogDetection
     .addNode('handleLogFormatDetection', (state: LogFormatDetectionState) =>
       handleLogFormatDetection({ state, model, client })
     )
-    .addNode(
-      'handleKVGraph',
-      (await getKVGraph({ model, client })).withConfig({ runName: 'Key-Value' })
-    )
-    .addNode(
-      'handleUnstructuredGraph',
-      (await getUnstructuredGraph({ model, client })).withConfig({ runName: 'Unstructured' })
-    )
+    .addNode('handleKVGraph', await getKVGraph({ model, client }))
+    .addNode('handleUnstructuredGraph', await getUnstructuredGraph({ model, client }))
     .addNode('handleCSV', (state: LogFormatDetectionState) => handleCSV({ state, model, client }))
     .addEdge(START, 'modelInput')
     .addEdge('modelInput', 'handleLogFormatDetection')
@@ -144,6 +138,6 @@ export async function getLogFormatDetectionGraph({ model, client }: LogDetection
       }
     );
 
-  const compiledLogFormatDetectionGraph = workflow.compile();
+  const compiledLogFormatDetectionGraph = workflow.compile().withConfig({ runName: 'Log Format' });
   return compiledLogFormatDetectionGraph;
 }

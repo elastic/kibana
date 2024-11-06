@@ -36,7 +36,6 @@ describe('generateNavLink', () => {
     navItem.onClick({ preventDefault: jest.fn() } as any);
     expect(mockKibanaValues.navigateToUrl).toHaveBeenCalledWith('/test', {
       shouldNotCreateHref: false,
-      shouldNotPrepend: false,
     });
   });
 

@@ -8,7 +8,7 @@ import expect from '@kbn/expect';
 import epct from 'expect';
 import moment from 'moment/moment';
 import { v4 as uuidv4 } from 'uuid';
-import { omit, omitBy } from 'lodash';
+import { omit } from 'lodash';
 import {
   ConfigKey,
   MonitorTypeEnum,
@@ -23,10 +23,7 @@ import { format as formatUrl } from 'url';
 import supertest from 'supertest';
 import { getServiceApiKeyPrivileges } from '@kbn/synthetics-plugin/server/synthetics_service/get_api_key';
 import { syntheticsMonitorType } from '@kbn/synthetics-plugin/common/types/saved_objects';
-import {
-  removeMonitorEmptyValues,
-  transformPublicKeys,
-} from '@kbn/synthetics-plugin/server/routes/monitor_cruds/formatters/saved_object_to_monitor';
+import { transformPublicKeys } from '@kbn/synthetics-plugin/server/routes/monitor_cruds/formatters/saved_object_to_monitor';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helper/get_fixture_json';
 import { SyntheticsMonitorTestService } from './services/synthetics_monitor_test_service';
@@ -54,17 +51,10 @@ export const addMonitorAPIHelper = async (supertestAPI: any, monitor: any, statu
   return result.body;
 };
 
-export const keyToOmitList = [
-  'created_at',
-  'updated_at',
-  'id',
-  'config_id',
-  'form_monitor_type',
-  'spaceId',
-];
+export const keyToOmitList = ['created_at', 'updated_at', 'id', 'config_id', 'form_monitor_type'];
 
 export const omitMonitorKeys = (monitor: any) => {
-  return omitBy(omit(transformPublicKeys(monitor), keyToOmitList), removeMonitorEmptyValues);
+  return omit(transformPublicKeys(monitor), keyToOmitList);
 };
 
 export default function ({ getService }: FtrProviderContext) {

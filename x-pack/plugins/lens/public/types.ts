@@ -64,7 +64,6 @@ import type { LensInspector } from './lens_inspector_service';
 import type { DataViewsState } from './state_management/types';
 import type { IndexPatternServiceAPI } from './data_views_service/service';
 import type { Document } from './persistence/saved_object_store';
-import { TableInspectorAdapter } from './editor_frame_service/types';
 
 export type StartServices = Pick<
   CoreStart,
@@ -1352,13 +1351,9 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
    */
   getReportingLayout?: (state: T) => { height: number; width: number };
   /**
-   * Get all datatables to be exported as csv
+   * A visualization can share how columns are visually sorted
    */
-  getExportDatatables?: (
-    state: T,
-    datasourceLayers?: DatasourceLayers,
-    activeData?: TableInspectorAdapter
-  ) => Datatable[];
+  getSortedColumns?: (state: T, datasourceLayers?: DatasourceLayers) => string[];
   /**
    * returns array of telemetry events for the visualization on save
    */

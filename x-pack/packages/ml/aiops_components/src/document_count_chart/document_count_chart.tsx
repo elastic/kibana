@@ -426,12 +426,7 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
     <>
       {isBrushVisible && (
         <div className="aiopsHistogramBrushes" data-test-subj={'aiopsHistogramBrushes'}>
-          {/**
-           * We need position:relative on this parent container of the BrushBadges,
-           * because of the absolute positioning of the BrushBadges. Without it, the
-           * BrushBadges would not be positioned correctly when used in embedded panels.
-           */}
-          <div css={{ height: BADGE_HEIGHT, position: 'relative' }}>
+          <div css={{ height: BADGE_HEIGHT }}>
             <BrushBadge
               label={
                 baselineBrush.label ??

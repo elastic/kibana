@@ -88,17 +88,12 @@ const convertObjectMembersToParameterObjects = (
   knownParameters: KnownParameters = {},
   isPathParameter = false
 ) => {
-  let properties: OpenAPIV3.SchemaObject['properties'];
+  let properties: Exclude<OpenAPIV3.SchemaObject['properties'], undefined>;
   const required = new Map<string, boolean>();
   if (isNullableObjectType(schema)) {
     const { result } = parse({ schema, ctx });
-    if (result.anyOf) {
-      properties = result.anyOf.find(
-        (s): s is OpenAPIV3.SchemaObject => !isReferenceObject(s) && s.type === 'object'
-      )?.properties;
-    } else if (result.type === 'object') {
-      properties = result.properties;
-    }
+    const anyOf = (result as OpenAPIV3.SchemaObject).anyOf as OpenAPIV3.SchemaObject[];
+    properties = anyOf.find((s) => s.type === 'object')!.properties!;
   } else if (isObjectType(schema)) {
     const { result } = parse({ schema, ctx });
     if ('$ref' in result)
@@ -111,10 +106,6 @@ const convertObjectMembersToParameterObjects = (
     return [];
   } else {
     throw createError(`Expected record, object or nullable object type, but got '${schema.type}'`);
-  }
-
-  if (!properties) {
-    throw createError(`Could not extract properties from ${schema.describe()}`);
   }
 
   return Object.entries(properties).map(([schemaKey, schemaObject]) => {

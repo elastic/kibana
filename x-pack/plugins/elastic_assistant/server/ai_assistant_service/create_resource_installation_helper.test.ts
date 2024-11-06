@@ -141,7 +141,7 @@ describe('createResourceInstallationHelper', () => {
       async () => (await getContextInitialized(helper)) === false
     );
 
-    expect(logger.warn).toHaveBeenCalledWith(`Error initializing resources test1 - fail`);
+    expect(logger.error).toHaveBeenCalledWith(`Error initializing resources test1 - fail`);
     expect(await helper.getInitializedResources('test1')).toEqual({
       result: false,
       error: `fail`,
@@ -204,7 +204,7 @@ describe('createResourceInstallationHelper', () => {
       async () => (await getContextInitialized(helper)) === false
     );
 
-    expect(logger.warn).toHaveBeenCalledWith(`Error initializing resources default - first error`);
+    expect(logger.error).toHaveBeenCalledWith(`Error initializing resources default - first error`);
     expect(await helper.getInitializedResources(DEFAULT_NAMESPACE_STRING)).toEqual({
       result: false,
       error: `first error`,
@@ -221,7 +221,9 @@ describe('createResourceInstallationHelper', () => {
       return logger.error.mock.calls.length === 1;
     });
 
-    expect(logger.warn).toHaveBeenCalledWith(`Error initializing resources default - second error`);
+    expect(logger.error).toHaveBeenCalledWith(
+      `Error initializing resources default - second error`
+    );
 
     // the second retry is throttled so this is never called
     expect(logger.info).not.toHaveBeenCalledWith('test1_default successfully retried');

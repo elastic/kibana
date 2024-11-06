@@ -11,6 +11,8 @@ import { first } from 'lodash';
 import { EuiPopover, EuiToolTip } from '@elastic/eui';
 import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { useBoolean } from '@kbn/react-hooks';
+import { useUiSetting } from '@kbn/kibana-react-plugin/public';
+import { enableInfrastructureContainerAssetView } from '@kbn/observability-plugin/common';
 import {
   InfraWaffleMapBounds,
   InfraWaffleMapNode,
@@ -53,7 +55,9 @@ export const Node = ({
   const color = colorFromValue(options.legend, rawValue, bounds);
   const value = formatter(rawValue);
 
-  const isFlyoutMode = nodeType === 'host' || nodeType === 'container';
+  const isContainerAssetViewEnabled = useUiSetting(enableInfrastructureContainerAssetView);
+  const showContainerAssetDetailPage = nodeType === 'container' && isContainerAssetViewEnabled;
+  const isFlyoutMode = nodeType === 'host' || showContainerAssetDetailPage;
 
   const toggleAssetPopover = () => {
     if (isFlyoutMode) {

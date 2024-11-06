@@ -17,6 +17,7 @@ import type { DocumentDetailsProps } from '../shared/types';
 import { PanelNavigation } from './navigation';
 import { PanelHeader } from './header';
 import { PanelContent } from './content';
+import { RightPanelTour } from './components/tour';
 import type { RightPanelTabType } from './tabs';
 import { PanelFooter } from './footer';
 import { useFlyoutIsExpandable } from './hooks/use_flyout_is_expandable';
@@ -75,6 +76,7 @@ export const RightPanel: FC<Partial<DocumentDetailsProps>> = memo(({ path }) => 
 
   return (
     <>
+      {flyoutIsExpandable && <RightPanelTour />}
       <PanelNavigation flyoutIsExpandable={flyoutIsExpandable} />
       <PanelHeader
         tabs={tabsDisplayed}

@@ -6,11 +6,10 @@
  */
 
 import { AxiosError } from 'axios';
-import { EndpointError } from './errors';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-export class FormattedAxiosError extends EndpointError {
+export class FormattedAxiosError extends Error {
   public readonly request: {
     method: string;
     url: string;
@@ -29,8 +28,7 @@ export class FormattedAxiosError extends EndpointError {
     super(
       `${axiosError.message}${
         axiosError?.response?.data ? `: ${JSON.stringify(axiosError?.response?.data)}` : ''
-      }${url ? `\n(Request: ${method} ${url})` : ''}`,
-      axiosError
+      }${url ? `\n(Request: ${method} ${url})` : ''}`
     );
 
     this.request = {

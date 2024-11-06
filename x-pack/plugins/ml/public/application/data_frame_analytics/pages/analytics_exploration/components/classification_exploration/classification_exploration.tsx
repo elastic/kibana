@@ -19,16 +19,18 @@ interface Props {
 }
 
 export const ClassificationExploration: FC<Props> = ({ jobId }) => (
-  <ExplorationPageWrapper
-    jobId={jobId}
-    title={i18n.translate(
-      'xpack.ml.dataframe.analytics.classificationExploration.tableJobIdTitle',
-      {
-        defaultMessage: 'Destination index for classification job ID {jobId}',
-        values: { jobId },
-      }
-    )}
-    EvaluatePanel={EvaluatePanel}
-    FeatureImportanceSummaryPanel={FeatureImportanceSummaryPanel}
-  />
+  <div className="mlDataFrameAnalyticsClassification">
+    <ExplorationPageWrapper
+      jobId={jobId}
+      title={i18n.translate(
+        'xpack.ml.dataframe.analytics.classificationExploration.tableJobIdTitle',
+        {
+          defaultMessage: 'Destination index for classification job ID {jobId}',
+          values: { jobId },
+        }
+      )}
+      EvaluatePanel={EvaluatePanel}
+      FeatureImportanceSummaryPanel={FeatureImportanceSummaryPanel}
+    />
+  </div>
 );

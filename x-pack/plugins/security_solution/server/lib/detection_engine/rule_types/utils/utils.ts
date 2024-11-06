@@ -9,7 +9,6 @@ import { chunk, get, invert, isEmpty, partition } from 'lodash';
 import moment from 'moment';
 
 import dateMath from '@kbn/datemath';
-import { isCCSRemoteIndexName } from '@kbn/es-query';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { TransportResult } from '@elastic/elasticsearch';
 import { ALERT_UUID, ALERT_RULE_UUID, ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
@@ -83,9 +82,7 @@ export const hasReadIndexPrivileges = async (args: {
   const indexNames = Object.keys(privileges.index);
   const filteredIndexNames = isCcsPermissionWarningEnabled
     ? indexNames
-    : indexNames.filter((indexName) => {
-        return !isCCSRemoteIndexName(indexName);
-      });
+    : indexNames.filter((indexName) => !indexName.includes(':')); // Cross cluster indices uniquely contain `:` in their name
 
   const [, indexesWithNoReadPrivileges] = partition(
     filteredIndexNames,

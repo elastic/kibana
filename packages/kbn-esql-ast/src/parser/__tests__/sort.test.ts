@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { parse } from '..';
+import { getAstAndSyntaxErrors as parse } from '..';
 
 describe('SORT', () => {
   describe('correctly formatted', () => {

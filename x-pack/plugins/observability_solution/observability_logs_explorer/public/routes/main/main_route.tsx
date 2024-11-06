@@ -21,17 +21,26 @@ import {
 } from '../../state_machines/observability_logs_explorer/src';
 import { LazyOriginInterpreter } from '../../state_machines/origin_interpreter/src/lazy_component';
 import { ObservabilityLogsExplorerHistory } from '../../types';
-import { useBreadcrumbs } from '../../utils/breadcrumbs';
+import { noBreadcrumbs, useBreadcrumbs } from '../../utils/breadcrumbs';
 import { useKbnUrlStateStorageFromRouterContext } from '../../utils/kbn_url_state_context';
 import { useKibanaContextForPlugin } from '../../utils/use_kibana';
 
 export const ObservabilityLogsExplorerMainRoute = () => {
   const { services } = useKibanaContextForPlugin();
-  const { logsExplorer, notifications, appParams, analytics, i18n, theme, logsDataAccess } =
-    services;
+  const {
+    logsExplorer,
+    serverless,
+    chrome,
+    notifications,
+    appParams,
+    analytics,
+    i18n,
+    theme,
+    logsDataAccess,
+  } = services;
   const { history } = appParams;
 
-  useBreadcrumbs();
+  useBreadcrumbs(noBreadcrumbs, chrome, serverless);
 
   const urlStateStorageContainer = useKbnUrlStateStorageFromRouterContext();
 

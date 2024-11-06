@@ -6,7 +6,7 @@
  */
 
 import { Action as EuiTableAction } from '@elastic/eui/src/components/basic_table/action_types';
-import { TagWithRelations } from '../../../common/types';
+import { TagWithRelations } from '../../../common';
 
 export type TagAction = EuiTableAction<TagWithRelations> & {
   id: string;

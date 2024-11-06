@@ -12,7 +12,7 @@ import * as i18n from './settings_translations';
 
 const ENTITY_ANALYTICS_LINKS = [
   SecurityPageName.entityAnalyticsManagement,
-  SecurityPageName.entityAnalyticsEntityStoreManagement,
+  SecurityPageName.entityAnalyticsAssetClassification,
 ];
 
 export const createSettingsLinksFromManage = (manageLink: LinkItem): LinkItem[] => {

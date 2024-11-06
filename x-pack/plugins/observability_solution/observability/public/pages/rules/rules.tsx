@@ -42,7 +42,6 @@ export function RulesPage({ activeTab = RULES_TAB_NAME }: RulesPageProps) {
       getAddRuleFlyout: AddRuleFlyout,
       getRulesSettingsLink: RulesSettingsLink,
     },
-    serverless,
   } = useKibana().services;
   const { ObservabilityPageTemplate } = usePluginContext();
   const history = useHistory();
@@ -51,23 +50,20 @@ export function RulesPage({ activeTab = RULES_TAB_NAME }: RulesPageProps) {
   const [addRuleFlyoutVisibility, setAddRuleFlyoutVisibility] = useState(false);
   const [stateRefresh, setRefresh] = useState(new Date());
 
-  useBreadcrumbs(
-    [
-      {
-        text: i18n.translate('xpack.observability.breadcrumbs.alertsLinkText', {
-          defaultMessage: 'Alerts',
-        }),
-        href: http.basePath.prepend('/app/observability/alerts'),
-        deepLinkId: 'observability-overview:alerts',
-      },
-      {
-        text: i18n.translate('xpack.observability.breadcrumbs.rulesLinkText', {
-          defaultMessage: 'Rules',
-        }),
-      },
-    ],
-    { serverless }
-  );
+  useBreadcrumbs([
+    {
+      text: i18n.translate('xpack.observability.breadcrumbs.alertsLinkText', {
+        defaultMessage: 'Alerts',
+      }),
+      href: http.basePath.prepend('/app/observability/alerts'),
+      deepLinkId: 'observability-overview:alerts',
+    },
+    {
+      text: i18n.translate('xpack.observability.breadcrumbs.rulesLinkText', {
+        defaultMessage: 'Rules',
+      }),
+    },
+  ]);
 
   const filteredRuleTypes = useGetFilteredRuleTypes();
   const {

@@ -7,11 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import deepEqual from 'fast-deep-equal';
 import { useEffect, useRef } from 'react';
-import { resolveGridRow } from './utils/resolve_grid_row';
+import { resolveGridRow } from './resolve_grid_row';
 import { GridPanelData, GridLayoutStateManager } from './types';
-import { isGridDataEqual } from './utils/equality_checks';
+
+export const isGridDataEqual = (a?: GridPanelData, b?: GridPanelData) => {
+  return (
+    a?.id === b?.id &&
+    a?.column === b?.column &&
+    a?.row === b?.row &&
+    a?.width === b?.width &&
+    a?.height === b?.height
+  );
+};
 
 export const useGridLayoutEvents = ({
   gridLayoutStateManager,
@@ -32,6 +40,7 @@ export const useGridLayoutEvents = ({
       e.stopPropagation();
 
       const gridRowElements = gridLayoutStateManager.rowRefs.current;
+      const previewElement = gridLayoutStateManager.dragPreviewRef.current;
 
       const interactionEvent = interactionEvent$.value;
       const isResize = interactionEvent?.type === 'resize';
@@ -44,7 +53,7 @@ export const useGridLayoutEvents = ({
         }
       })();
 
-      if (!runtimeSettings$.value || !gridRowElements || !currentGridData) {
+      if (!runtimeSettings$.value || !previewElement || !gridRowElements || !currentGridData) {
         return;
       }
 
@@ -59,7 +68,7 @@ export const useGridLayoutEvents = ({
         bottom: mouseTargetPixel.y - interactionEvent.mouseOffsets.bottom,
         right: mouseTargetPixel.x - interactionEvent.mouseOffsets.right,
       };
-      gridLayoutStateManager.activePanel$.next({ id: interactionEvent.id, position: previewRect });
+      gridLayoutStateManager.updatePreviewElement(previewRect);
 
       // find the grid that the preview rect is over
       const previewBottom =
@@ -112,7 +121,6 @@ export const useGridLayoutEvents = ({
         maxColumn
       );
       const targetRow = Math.max(Math.round(localYCoordinate / (rowHeight + gutterSize)), 0);
-
       const requestedGridData = { ...currentGridData };
       if (isResize) {
         requestedGridData.width = Math.max(targetColumn - requestedGridData.column, 1);
@@ -146,10 +154,17 @@ export const useGridLayoutEvents = ({
           const resolvedOriginGrid = resolveGridRow(originGrid);
           nextLayout[lastRowIndex] = resolvedOriginGrid;
         }
-        if (!deepEqual(currentLayout, nextLayout)) {
-          gridLayout$.next(nextLayout);
-        }
+        gridLayout$.next(nextLayout);
       }
+    };
+
+    const onMouseUp = (e: MouseEvent) => {
+      if (!interactionEvent$.value) return;
+      e.preventDefault();
+      e.stopPropagation();
+
+      interactionEvent$.next(undefined);
+      gridLayoutStateManager.hideDragPreview();
     };
 
     const onMouseMove = (e: MouseEvent) => {
@@ -157,9 +172,11 @@ export const useGridLayoutEvents = ({
       calculateUserEvent(e);
     };
 
+    document.addEventListener('mouseup', onMouseUp);
     document.addEventListener('mousemove', onMouseMove);
     document.addEventListener('scroll', calculateUserEvent);
     return () => {
+      document.removeEventListener('mouseup', onMouseUp);
       document.removeEventListener('mousemove', onMouseMove);
       document.removeEventListener('scroll', calculateUserEvent);
     };

@@ -194,7 +194,6 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
     const {
       submit,
       isSubmitted,
-      isSubmitting,
       isValid: isFormValid,
       getErrors: getFormErrors,
       getFormData,
@@ -276,7 +275,7 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
 
         <Form
           form={form}
-          isInvalid={isSubmitted && !isSubmitting && !isFormValid}
+          isInvalid={isSubmitted && !isFormValid}
           error={getFormErrors()}
           data-test-subj="stepLogistics"
         >

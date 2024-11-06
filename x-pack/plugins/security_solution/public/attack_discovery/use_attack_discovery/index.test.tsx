@@ -106,8 +106,6 @@ const mockAttackDiscoveries = [
 const setLoadingConnectorId = jest.fn();
 const setStatus = jest.fn();
 
-const SIZE = 20;
-
 describe('useAttackDiscovery', () => {
   const mockPollApi = {
     cancelAttackDiscovery: jest.fn(),
@@ -128,11 +126,7 @@ describe('useAttackDiscovery', () => {
 
   it('initializes with correct default values', () => {
     const { result } = renderHook(() =>
-      useAttackDiscovery({
-        connectorId: 'test-id',
-        setLoadingConnectorId,
-        size: 20,
-      })
+      useAttackDiscovery({ connectorId: 'test-id', setLoadingConnectorId })
     );
 
     expect(result.current.alertsContextCount).toBeNull();
@@ -150,15 +144,14 @@ describe('useAttackDiscovery', () => {
   it('fetches attack discoveries and updates state correctly', async () => {
     (mockedUseKibana.services.http.fetch as jest.Mock).mockResolvedValue(mockAttackDiscoveryPost);
 
-    const { result } = renderHook(() => useAttackDiscovery({ connectorId: 'test-id', size: SIZE }));
-
+    const { result } = renderHook(() => useAttackDiscovery({ connectorId: 'test-id' }));
     await act(async () => {
       await result.current.fetchAttackDiscoveries();
     });
     expect(mockedUseKibana.services.http.fetch).toHaveBeenCalledWith(
       '/internal/elastic_assistant/attack_discovery',
       {
-        body: `{"alertsIndexPattern":"alerts-index-pattern","anonymizationFields":[],"replacements":{},"size":${SIZE},"subAction":"invokeAI","apiConfig":{"connectorId":"test-id","actionTypeId":".gen-ai"}}`,
+        body: '{"alertsIndexPattern":"alerts-index-pattern","anonymizationFields":[],"size":20,"replacements":{},"subAction":"invokeAI","apiConfig":{"connectorId":"test-id","actionTypeId":".gen-ai"}}',
         method: 'POST',
         version: '1',
       }
@@ -174,7 +167,7 @@ describe('useAttackDiscovery', () => {
     const error = new Error(errorMessage);
     (mockedUseKibana.services.http.fetch as jest.Mock).mockRejectedValue(error);
 
-    const { result } = renderHook(() => useAttackDiscovery({ connectorId: 'test-id', size: SIZE }));
+    const { result } = renderHook(() => useAttackDiscovery({ connectorId: 'test-id' }));
 
     await act(async () => {
       await result.current.fetchAttackDiscoveries();
@@ -191,11 +184,7 @@ describe('useAttackDiscovery', () => {
   it('sets loading state based on poll status', async () => {
     (usePollApi as jest.Mock).mockReturnValue({ ...mockPollApi, status: 'running' });
     const { result } = renderHook(() =>
-      useAttackDiscovery({
-        connectorId: 'test-id',
-        setLoadingConnectorId,
-        size: SIZE,
-      })
+      useAttackDiscovery({ connectorId: 'test-id', setLoadingConnectorId })
     );
 
     expect(result.current.isLoading).toBe(true);
@@ -213,7 +202,7 @@ describe('useAttackDiscovery', () => {
       },
       status: 'succeeded',
     });
-    const { result } = renderHook(() => useAttackDiscovery({ connectorId: 'test-id', size: SIZE }));
+    const { result } = renderHook(() => useAttackDiscovery({ connectorId: 'test-id' }));
 
     expect(result.current.alertsContextCount).toEqual(20);
     // this is set from usePollApi
@@ -238,7 +227,7 @@ describe('useAttackDiscovery', () => {
       },
       status: 'failed',
     });
-    const { result } = renderHook(() => useAttackDiscovery({ connectorId: 'test-id', size: SIZE }));
+    const { result } = renderHook(() => useAttackDiscovery({ connectorId: 'test-id' }));
 
     expect(result.current.failureReason).toEqual('something bad');
     expect(result.current.isLoading).toBe(false);
@@ -252,13 +241,7 @@ describe('useAttackDiscovery', () => {
         data: [], // <-- zero connectors configured
       });
 
-      renderHook(() =>
-        useAttackDiscovery({
-          connectorId: 'test-id',
-          setLoadingConnectorId,
-          size: SIZE,
-        })
-      );
+      renderHook(() => useAttackDiscovery({ connectorId: 'test-id', setLoadingConnectorId }));
     });
 
     afterEach(() => {

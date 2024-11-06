@@ -25,7 +25,6 @@ import { handleReview } from './review';
 import { handleCategorization } from './categorization';
 import { handleErrors } from './errors';
 import { handleInvalidCategorization } from './invalid';
-import { handleUpdateStableSamples } from './stable';
 import { testPipeline, combineProcessors } from '../../util';
 import {
   ActionsClientChatOpenAI,
@@ -40,7 +39,6 @@ jest.mock('./errors');
 jest.mock('./review');
 jest.mock('./categorization');
 jest.mock('./invalid');
-jest.mock('./stable');
 
 jest.mock('../../util/pipeline', () => ({
   testPipeline: jest.fn(),
@@ -76,8 +74,7 @@ describe('runCategorizationGraph', () => {
       return {
         currentPipeline,
         currentProcessors,
-        stableSamples: [],
-        reviewCount: 0,
+        reviewed: false,
         finalized: false,
         lastExecutedChain: 'categorization',
       };
@@ -93,8 +90,7 @@ describe('runCategorizationGraph', () => {
       return {
         currentPipeline,
         currentProcessors,
-        stableSamples: [],
-        reviewCount: 0,
+        reviewed: false,
         finalized: false,
         lastExecutedChain: 'error',
       };
@@ -110,8 +106,7 @@ describe('runCategorizationGraph', () => {
       return {
         currentPipeline,
         currentProcessors,
-        stableSamples: [],
-        reviewCount: 0,
+        reviewed: false,
         finalized: false,
         lastExecutedChain: 'invalidCategorization',
       };
@@ -127,29 +122,11 @@ describe('runCategorizationGraph', () => {
       return {
         currentProcessors,
         currentPipeline,
-        stableSamples: [],
-        reviewCount: 0,
+        reviewed: true,
         finalized: false,
         lastExecutedChain: 'review',
       };
     });
-    // After the review it should route to modelOutput and finish.
-    (handleUpdateStableSamples as jest.Mock)
-      .mockResolvedValueOnce({
-        stableSamples: [],
-        finalized: false,
-        lastExecutedChain: 'handleUpdateStableSamples',
-      })
-      .mockResolvedValueOnce({
-        stableSamples: [],
-        finalized: false,
-        lastExecutedChain: 'handleUpdateStableSamples',
-      })
-      .mockResolvedValueOnce({
-        stableSamples: [0],
-        finalized: false,
-        lastExecutedChain: 'handleUpdateStableSamples',
-      });
   });
 
   it('Ensures that the graph compiles', async () => {

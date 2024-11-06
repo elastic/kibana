@@ -76,7 +76,6 @@ export const ApiKeyPanel: React.FC = () => {
                 <EuiCopy textToCopy={elasticsearchEndpoint || ''} afterMessage={COPIED_LABEL}>
                   {(copy) => (
                     <EuiButtonIcon
-                      data-test-subj="enterpriseSearchApiKeyPanelButton"
                       onClick={copy}
                       iconType="copyClipboard"
                       aria-label={i18n.translate(
@@ -114,7 +113,6 @@ export const ApiKeyPanel: React.FC = () => {
                     <EuiCopy textToCopy={cloudId || ''} afterMessage={COPIED_LABEL}>
                       {(copy) => (
                         <EuiButtonIcon
-                          data-test-subj="enterpriseSearchApiKeyPanelButton"
                           onClick={copy}
                           iconType="copyClipboard"
                           aria-label={i18n.translate(
@@ -135,18 +133,26 @@ export const ApiKeyPanel: React.FC = () => {
         <EuiSplitPanel.Inner color="subdued">
           <EuiFlexGroup direction="row" alignItems="center" justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
-              <EuiBadge
-                color={apiKeys.length > 0 ? 'success' : 'warning'}
-                data-test-subj="api-keys-count-badge"
-              >
-                <FormattedMessage
-                  id="xpack.enterpriseSearch.apiKey.activeKeys"
-                  defaultMessage="{number} active API keys."
-                  values={{
-                    number: apiKeys.length,
-                  }}
-                />
-              </EuiBadge>
+              <EuiFlexGroup gutterSize="s">
+                <EuiFlexItem>
+                  <EuiText size="xs" color="subdued">
+                    <FormattedMessage
+                      id="xpack.enterpriseSearch.apiKey.activeKeys"
+                      defaultMessage="{number} active API keys."
+                      values={{
+                        number: (
+                          <EuiBadge
+                            color={apiKeys.length > 0 ? 'success' : 'warning'}
+                            data-test-subj="api-keys-count-badge"
+                          >
+                            {apiKeys.length}
+                          </EuiBadge>
+                        ),
+                      }}
+                    />
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <span>

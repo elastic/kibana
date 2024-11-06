@@ -9,6 +9,4 @@ import type { ActionConnector } from '@kbn/alerts-ui-shared';
 
 export interface AssistantCardMetadata {
   connectors: ActionConnector[];
-  canExecuteConnectors: boolean;
-  canCreateConnectors: boolean;
 }

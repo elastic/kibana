@@ -5,17 +5,18 @@
  * 2.0.
  */
 
+import expect from '@kbn/expect';
 import { INTERNAL_ROUTES } from '@kbn/reporting-common';
 import type { ReportingJobResponse } from '@kbn/reporting-plugin/server/types';
 import rison from '@kbn/rison';
-import { CookieCredentials } from '@kbn/ftr-common-functional-services';
 import { FtrProviderContext } from '../../functional/ftr_provider_context';
+import { RoleCredentials } from '.';
 import { InternalRequestHeader } from '.';
 
 const API_HEADER: [string, string] = ['kbn-xsrf', 'reporting'];
 
 /**
- * Services to handle report job lifecycle phases for tests
+ * Services to create roles and users for security testing
  */
 export function SvlReportingServiceProvider({ getService }: FtrProviderContext) {
   const log = getService('log');
@@ -30,34 +31,32 @@ export function SvlReportingServiceProvider({ getService }: FtrProviderContext) 
     async createReportJobInternal(
       jobType: string,
       job: object,
-      cookieCredentials: CookieCredentials,
+      roleAuthc: RoleCredentials,
       internalReqHeader: InternalRequestHeader
     ) {
       const requestPath = `${INTERNAL_ROUTES.GENERATE_PREFIX}/${jobType}`;
       log.debug(`POST request to ${requestPath}`);
 
-      const { body }: { status: number; body: ReportingJobResponse } = await supertestWithoutAuth
+      const { status, body } = await supertestWithoutAuth
         .post(requestPath)
         .set(internalReqHeader)
-        .set(cookieCredentials)
-        .send({ jobParams: rison.encode(job) })
-        .expect(200);
+        .set(roleAuthc.apiKeyHeader)
+        .send({ jobParams: rison.encode(job) });
 
-      log.info(`ReportingAPI.createReportJobInternal created report job` + ` ${body.job.id}`);
+      expect(status).to.be(200);
 
       return {
-        job: body.job,
-        path: body.path,
+        job: (body as ReportingJobResponse).job,
+        path: (body as ReportingJobResponse).path,
       };
     },
 
     /*
-     * If a test requests a report, it must wait for the job to finish before deleting the report.
-     * Otherwise, report task success metrics will be affected.
+     * This function is only used in the API tests
      */
     async waitForJobToFinish(
       downloadReportPath: string,
-      cookieCredentials: CookieCredentials,
+      roleAuthc: RoleCredentials,
       internalReqHeader: InternalRequestHeader,
       options?: { timeout?: number }
     ) {
@@ -70,7 +69,7 @@ export function SvlReportingServiceProvider({ getService }: FtrProviderContext) 
             .responseType('blob')
             .set(...API_HEADER)
             .set(internalReqHeader)
-            .set(cookieCredentials);
+            .set(roleAuthc.apiKeyHeader);
 
           if (response.status === 500) {
             throw new Error(`Report at path ${downloadReportPath} has failed`);
@@ -102,13 +101,13 @@ export function SvlReportingServiceProvider({ getService }: FtrProviderContext) 
      */
     async getCompletedJobOutput(
       downloadReportPath: string,
-      cookieCredentials: CookieCredentials,
+      roleAuthc: RoleCredentials,
       internalReqHeader: InternalRequestHeader
     ) {
       const response = await supertestWithoutAuth
         .get(`${downloadReportPath}?elasticInternalOrigin=true`)
         .set(internalReqHeader)
-        .set(cookieCredentials);
+        .set(roleAuthc.apiKeyHeader);
       return response.text as unknown;
     },
 
@@ -117,14 +116,14 @@ export function SvlReportingServiceProvider({ getService }: FtrProviderContext) 
      */
     async deleteReport(
       reportId: string,
-      cookieCredentials: CookieCredentials,
+      roleAuthc: RoleCredentials,
       internalReqHeader: InternalRequestHeader
     ) {
       log.debug(`ReportingAPI.deleteReport ${INTERNAL_ROUTES.JOBS.DELETE_PREFIX}/${reportId}`);
       const response = await supertestWithoutAuth
         .delete(INTERNAL_ROUTES.JOBS.DELETE_PREFIX + `/${reportId}`)
         .set(internalReqHeader)
-        .set(cookieCredentials)
+        .set(roleAuthc.apiKeyHeader)
         .set('kbn-xsrf', 'xxx')
         .expect(200);
       return response.text as unknown;

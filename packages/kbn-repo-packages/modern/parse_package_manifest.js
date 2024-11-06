@@ -225,20 +225,16 @@ function validatePackageManifest(parsed, repoRoot, path) {
     type,
     id,
     owner,
-    group,
-    visibility,
     devOnly,
+    plugin,
+    sharedBrowserBundle,
     build,
     description,
     serviceFolders,
     ...extra
-  } = /** @type {import('./types').PackageManifestBaseFields} */ (/** @type {unknown} */ (parsed));
+  } = parsed;
 
-  const { plugin, sharedBrowserBundle } = parsed;
-
-  const extraKeys = Object.keys(extra).filter(
-    (key) => !['plugin', 'sharedBrowserBundle'].includes(key)
-  );
+  const extraKeys = Object.keys(extra);
   if (extraKeys.length) {
     throw new Error(`unexpected keys in package manifest [${extraKeys.join(', ')}]`);
   }
@@ -262,25 +258,6 @@ function validatePackageManifest(parsed, repoRoot, path) {
     );
   }
 
-  if (
-    group !== undefined &&
-    (!isSomeString(group) ||
-      !['platform', 'search', 'security', 'observability', 'common'].includes(group))
-  ) {
-    throw err(
-      `plugin.group`,
-      group,
-      `must have a valid value ("platform" | "search" | "security" | "observability" | "common")`
-    );
-  }
-
-  if (
-    visibility !== undefined &&
-    (!isSomeString(visibility) || !['private', 'shared'].includes(visibility))
-  ) {
-    throw err(`plugin.visibility`, visibility, `must have a valid value ("private" | "shared")`);
-  }
-
   if (devOnly !== undefined && typeof devOnly !== 'boolean') {
     throw err(`devOnly`, devOnly, `must be a boolean when defined`);
   }
@@ -296,8 +273,6 @@ function validatePackageManifest(parsed, repoRoot, path) {
   const base = {
     id,
     owner: Array.isArray(owner) ? owner : [owner],
-    group,
-    visibility,
     devOnly,
     build: validatePackageManifestBuild(build),
     description,

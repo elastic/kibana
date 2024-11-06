@@ -6,13 +6,9 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core/server';
-import {
-  MONITOR_CLUSTER,
-  INDEX_LOGS_AND_METRICS,
-  INDEX_LOGS_METRICS_AND_TRACES,
-} from './privileges';
+import { cluster, indices } from './monitoring_config';
 
-export function createShipperApiKey(esClient: ElasticsearchClient, name: string, withAPM = false) {
+export function createShipperApiKey(esClient: ElasticsearchClient, name: string) {
   // Based on https://www.elastic.co/guide/en/fleet/master/grant-access-to-elasticsearch.html#create-api-key-standalone-agent
   return esClient.security.createApiKey({
     body: {
@@ -23,8 +19,8 @@ export function createShipperApiKey(esClient: ElasticsearchClient, name: string,
       },
       role_descriptors: {
         standalone_agent: {
-          cluster: [MONITOR_CLUSTER],
-          indices: [withAPM ? INDEX_LOGS_METRICS_AND_TRACES : INDEX_LOGS_AND_METRICS],
+          cluster,
+          indices,
         },
       },
     },

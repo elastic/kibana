@@ -9,11 +9,8 @@
 
 import { useEffect, useMemo, useRef } from 'react';
 import { BehaviorSubject, debounceTime } from 'rxjs';
-
 import useResizeObserver, { type ObservedSize } from 'use-resize-observer/polyfilled';
-
 import {
-  ActivePanel,
   GridLayoutData,
   GridLayoutStateManager,
   GridSettings,
@@ -30,7 +27,7 @@ export const useGridLayoutState = ({
   setDimensionsRef: (instance: HTMLDivElement | null) => void;
 } => {
   const rowRefs = useRef<Array<HTMLDivElement | null>>([]);
-  const panelRefs = useRef<Array<{ [id: string]: HTMLDivElement | null }>>([]);
+  const dragPreviewRef = useRef<HTMLDivElement | null>(null);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const { initialLayout, gridSettings } = useMemo(() => getCreationOptions(), []);
@@ -39,46 +36,57 @@ export const useGridLayoutState = ({
     const gridLayout$ = new BehaviorSubject<GridLayoutData>(initialLayout);
     const gridDimensions$ = new BehaviorSubject<ObservedSize>({ width: 0, height: 0 });
     const interactionEvent$ = new BehaviorSubject<PanelInteractionEvent | undefined>(undefined);
-    const activePanel$ = new BehaviorSubject<ActivePanel | undefined>(undefined);
     const runtimeSettings$ = new BehaviorSubject<RuntimeGridSettings>({
       ...gridSettings,
       columnPixelWidth: 0,
     });
-    const panelIds$ = new BehaviorSubject<string[][]>(
-      initialLayout.map(({ panels }) => Object.keys(panels))
-    );
 
     return {
       rowRefs,
-      panelRefs,
-      panelIds$,
       gridLayout$,
-      activePanel$,
+      dragPreviewRef,
       gridDimensions$,
       runtimeSettings$,
       interactionEvent$,
+      updatePreviewElement: (previewRect: {
+        top: number;
+        bottom: number;
+        left: number;
+        right: number;
+      }) => {
+        if (!dragPreviewRef.current) return;
+        dragPreviewRef.current.style.opacity = '1';
+        dragPreviewRef.current.style.left = `${previewRect.left}px`;
+        dragPreviewRef.current.style.top = `${previewRect.top}px`;
+        dragPreviewRef.current.style.width = `${Math.max(
+          previewRect.right - previewRect.left,
+          runtimeSettings$.value.columnPixelWidth
+        )}px`;
+        dragPreviewRef.current.style.height = `${Math.max(
+          previewRect.bottom - previewRect.top,
+          runtimeSettings$.value.rowHeight
+        )}px`;
+      },
+      hideDragPreview: () => {
+        if (!dragPreviewRef.current) return;
+        dragPreviewRef.current.style.opacity = '0';
+      },
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
-    /**
-     * debounce width changes to avoid unnecessary column width recalculation.
-     */
-    const resizeSubscription = gridLayoutStateManager.gridDimensions$
+    // debounce width changes to avoid unnecessary column width recalculation.
+    const subscription = gridLayoutStateManager.gridDimensions$
       .pipe(debounceTime(250))
       .subscribe((dimensions) => {
         const elementWidth = dimensions.width ?? 0;
         const columnPixelWidth =
           (elementWidth - gridSettings.gutterSize * (gridSettings.columnCount - 1)) /
           gridSettings.columnCount;
-
         gridLayoutStateManager.runtimeSettings$.next({ ...gridSettings, columnPixelWidth });
       });
-
-    return () => {
-      resizeSubscription.unsubscribe();
-    };
+    return () => subscription.unsubscribe();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

@@ -93,7 +93,6 @@ export const enableEntityDiscoveryRoute = createEntityManagerServerRoute({
         });
       }
 
-      logger.info(`Enabling managed entity discovery (installOnly=${params.query.installOnly})`);
       const soClient = core.savedObjects.getClient({
         includedHiddenTypes: [EntityDiscoveryApiKeyType.name],
       });
@@ -120,9 +119,9 @@ export const enableEntityDiscoveryRoute = createEntityManagerServerRoute({
 
       await saveEntityDiscoveryAPIKey(soClient, apiKey);
 
-      const clusterClient = core.elasticsearch.client;
+      const esClient = core.elasticsearch.client.asSecondaryAuthUser;
       const installedDefinitions = await installBuiltInEntityDefinitions({
-        clusterClient,
+        esClient,
         soClient,
         logger,
         definitions: builtInDefinitions,
@@ -131,11 +130,10 @@ export const enableEntityDiscoveryRoute = createEntityManagerServerRoute({
       if (!params.query.installOnly) {
         await Promise.all(
           installedDefinitions.map((installedDefinition) =>
-            startTransforms(clusterClient.asSecondaryAuthUser, installedDefinition, logger)
+            startTransforms(esClient, installedDefinition, logger)
           )
         );
       }
-      logger.info('Managed entity discovery is enabled');
 
       return response.ok({ body: { success: true } });
     } catch (err) {

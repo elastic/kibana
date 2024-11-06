@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { RawRule } from '../../types';
+import { RuleAttributes } from '../../data/rule/types';
 import { RulesClientContext } from '../types';
 
-export function updateMetaAttributes<T extends Partial<RawRule>>(
+export function updateMetaAttributes<T extends Partial<RuleAttributes>>(
   context: RulesClientContext,
   alertAttributes: T
 ): T {

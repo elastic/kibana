@@ -52,16 +52,12 @@ export const useChatSend = ({
   setSelectedPromptContexts,
   setCurrentConversation,
 }: UseChatSendProps): UseChatSend => {
-  const {
-    assistantTelemetry,
-    toasts,
-    assistantAvailability: { isAssistantEnabled },
-  } = useAssistantContext();
+  const { assistantTelemetry, toasts } = useAssistantContext();
   const [userPrompt, setUserPrompt] = useState<string | null>(null);
 
   const { isLoading, sendMessage, abortStream } = useSendMessage();
   const { clearConversation, removeLastMessage } = useConversation();
-  const { data: kbStatus } = useKnowledgeBaseStatus({ http, enabled: isAssistantEnabled });
+  const { data: kbStatus } = useKnowledgeBaseStatus({ http });
   const isSetupComplete =
     kbStatus?.elser_exists &&
     kbStatus?.index_exists &&

@@ -240,7 +240,7 @@ describe('Histogram', () => {
       onLoad(false, adapters);
     });
     expect(props.onTotalHitsChange).toHaveBeenLastCalledWith(
-      UnifiedHistogramFetchStatus.error,
+      UnifiedHistogramFetchStatus.complete,
       100
     );
     expect(props.onChartLoad).toHaveBeenLastCalledWith({ adapters });

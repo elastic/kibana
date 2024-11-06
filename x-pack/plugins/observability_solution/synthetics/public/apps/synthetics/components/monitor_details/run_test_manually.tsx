@@ -9,7 +9,6 @@ import { EuiButton, EuiToolTip } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { useDispatch, useSelector } from 'react-redux';
-import { useKibanaSpace } from '../../../../hooks/use_kibana_space';
 import { CANNOT_PERFORM_ACTION_PUBLIC_LOCATIONS } from '../common/components/permissions';
 import { useCanUsePublicLocations } from '../../../../hooks/use_capabilities';
 import { ConfigKey } from '../../../../../common/constants/monitor_management';
@@ -28,8 +27,6 @@ export const RunTestManually = () => {
 
   const canUsePublicLocations = useCanUsePublicLocations(monitor?.[ConfigKey.LOCATIONS]);
 
-  const { space } = useKibanaSpace();
-
   const content = !canUsePublicLocations
     ? CANNOT_PERFORM_ACTION_PUBLIC_LOCATIONS
     : testInProgress
@@ -46,13 +43,8 @@ export const RunTestManually = () => {
         isDisabled={!canUsePublicLocations}
         onClick={() => {
           if (monitor) {
-            const spaceId = 'spaceId' in monitor ? (monitor.spaceId as string) : undefined;
             dispatch(
-              manualTestMonitorAction.get({
-                configId: monitor.config_id,
-                name: monitor.name,
-                ...(spaceId && spaceId !== space?.id ? { spaceId } : {}),
-              })
+              manualTestMonitorAction.get({ configId: monitor.config_id, name: monitor.name })
             );
           }
         }}

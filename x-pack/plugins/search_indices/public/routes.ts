@@ -14,6 +14,5 @@ export enum SearchIndexDetailsTabs {
   SETTINGS = 'settings',
 }
 
-export const SearchIndexDetailsTabValues: string[] = Object.values(SearchIndexDetailsTabs);
 export const START_APP_BASE = '/app/elasticsearch/start';
 export const INDICES_APP_BASE = '/app/elasticsearch/indices';

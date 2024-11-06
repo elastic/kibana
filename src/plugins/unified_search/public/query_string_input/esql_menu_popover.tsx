@@ -145,6 +145,7 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
       },
       {
         id: 1,
+        initialFocusedItemIndex: 1,
         title: i18n.translate('unifiedSearch.query.queryBar.esqlMenu.exampleQueries', {
           defaultMessage: 'Recommended queries',
         }),

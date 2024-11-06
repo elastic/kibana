@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SolutionId } from '@kbn/core-chrome-browser';
+import type { OnBoardingDefaultSolution } from './types';
 
 /**
  * Cloud does not type the value of the "use case" that is set during onboarding for a deployment. Any string can
@@ -14,17 +14,13 @@ import type { SolutionId } from '@kbn/core-chrome-browser';
  * @param value The solution value set by Cloud.
  * @returns The default solution value for onboarding that matches Kibana naming.
  */
-export function parseOnboardingSolution(value?: string): SolutionId | undefined {
+export function parseOnboardingSolution(value?: string): OnBoardingDefaultSolution | undefined {
   if (!value) return;
 
   const solutions: Array<{
-    cloudValue: 'search' | 'elasticsearch' | 'observability' | 'security';
-    kibanaValue: SolutionId;
+    cloudValue: 'elasticsearch' | 'observability' | 'security';
+    kibanaValue: OnBoardingDefaultSolution;
   }> = [
-    {
-      cloudValue: 'search',
-      kibanaValue: 'es',
-    },
     {
       cloudValue: 'elasticsearch',
       kibanaValue: 'es',

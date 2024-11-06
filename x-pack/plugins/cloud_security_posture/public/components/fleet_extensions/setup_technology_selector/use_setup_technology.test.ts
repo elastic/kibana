@@ -64,14 +64,10 @@ describe('useSetupTechnology', () => {
     });
 
     it('calls handleSetupTechnologyChange when setupTechnology changes', () => {
-      const inputPackage = {
-        type: 'someType',
-        policy_template: 'somePolicyTemplate',
-      } as NewPackagePolicyInput;
       const handleSetupTechnologyChangeMock = jest.fn();
       const { result } = renderHook(() =>
         useSetupTechnology({
-          input: inputPackage,
+          input: { type: 'someType' } as NewPackagePolicyInput,
           handleSetupTechnologyChange: handleSetupTechnologyChangeMock,
         })
       );
@@ -83,10 +79,7 @@ describe('useSetupTechnology', () => {
       });
 
       expect(result.current.setupTechnology).toBe(SetupTechnology.AGENTLESS);
-      expect(handleSetupTechnologyChangeMock).toHaveBeenCalledWith(
-        SetupTechnology.AGENTLESS,
-        inputPackage.policy_template
-      );
+      expect(handleSetupTechnologyChangeMock).toHaveBeenCalledWith(SetupTechnology.AGENTLESS);
     });
   });
 

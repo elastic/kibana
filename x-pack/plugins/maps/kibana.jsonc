@@ -1,15 +1,11 @@
 {
   "type": "plugin",
   "id": "@kbn/maps-plugin",
-  "owner": [
-    "@elastic/kibana-presentation"
-  ],
-  "group": "platform",
-  "visibility": "shared",
+  "owner": "@elastic/kibana-presentation",
   "plugin": {
     "id": "maps",
-    "browser": true,
     "server": true,
+    "browser": true,
     "configPath": [
       "xpack",
       "maps"
@@ -54,7 +50,7 @@
       "unifiedSearch",
       "fieldFormats",
       "esql",
-      "savedObjects"
+      "savedObjects",
     ],
     "extraPublicDirs": [
       "common"

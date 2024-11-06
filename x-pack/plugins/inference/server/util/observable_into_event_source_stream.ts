@@ -9,11 +9,11 @@ import { catchError, map, Observable, of } from 'rxjs';
 import { PassThrough } from 'stream';
 import type { Logger } from '@kbn/logging';
 import {
-  InferenceTaskEventType,
   InferenceTaskErrorCode,
   InferenceTaskErrorEvent,
   isInferenceError,
-} from '@kbn/inference-common';
+} from '../../common/errors';
+import { InferenceTaskEventType } from '../../common/inference_task';
 
 export function observableIntoEventSourceStream(
   source$: Observable<unknown>,

@@ -6,25 +6,23 @@
  */
 import React, { createContext, useContext, type ReactChild } from 'react';
 import { Subject } from 'rxjs';
+import { EntityType } from '../../../common/entities';
 
 interface InventorySearchBarContextType {
   searchBarContentSubject$: Subject<{
     kuery?: string;
-    entityTypes?: string[];
+    entityTypes?: EntityType[];
+    refresh: boolean;
   }>;
-  refreshSubject$: Subject<void>;
 }
 
 const InventorySearchBarContext = createContext<InventorySearchBarContextType>({
   searchBarContentSubject$: new Subject(),
-  refreshSubject$: new Subject(),
 });
 
 export function InventorySearchBarContextProvider({ children }: { children: ReactChild }) {
   return (
-    <InventorySearchBarContext.Provider
-      value={{ searchBarContentSubject$: new Subject(), refreshSubject$: new Subject() }}
-    >
+    <InventorySearchBarContext.Provider value={{ searchBarContentSubject$: new Subject() }}>
       {children}
     </InventorySearchBarContext.Provider>
   );

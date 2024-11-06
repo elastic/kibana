@@ -6,14 +6,12 @@
  */
 import { renderHook } from '@testing-library/react-hooks';
 import { useIntegrationCardList } from './use_integration_card_list';
-import { trackOnboardingLinkClick } from '../../../../common/lib/telemetry';
 
-jest.mock('../../../../common/lib/telemetry');
 jest.mock('../../../../../common/lib/kibana', () => ({
   ...jest.requireActual('../../../../../common/lib/kibana'),
   useNavigation: jest.fn().mockReturnValue({
     navigateTo: jest.fn(),
-    getAppUrl: jest.fn().mockReturnValue(''),
+    getAppUrl: jest.fn(),
   }),
 }));
 
@@ -74,18 +72,5 @@ describe('useIntegrationCardList', () => {
     );
 
     expect(result.current).toEqual([mockFilteredCards.featuredCards['epr:endpoint']]);
-  });
-
-  it('tracks integration card click', () => {
-    const { result } = renderHook(() =>
-      useIntegrationCardList({
-        integrationsList: mockIntegrationsList,
-      })
-    );
-
-    const card = result.current[0];
-    card.onCardClick?.();
-
-    expect(trackOnboardingLinkClick).toHaveBeenCalledWith('card_epr:endpoint');
   });
 });

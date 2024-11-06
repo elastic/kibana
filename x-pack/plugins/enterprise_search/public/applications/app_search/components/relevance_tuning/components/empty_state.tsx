@@ -10,7 +10,7 @@ import React from 'react';
 import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { docLinks } from '../../../../shared/doc_links';
+import { RELEVANCE_DOCS_URL } from '../../../routes';
 
 export const EmptyState: React.FC = () => (
   <EuiEmptyPrompt
@@ -30,7 +30,7 @@ export const EmptyState: React.FC = () => (
       }
     )}
     actions={
-      <EuiButton size="s" target="_blank" iconType="popout" href={docLinks.appSearchRelevance}>
+      <EuiButton size="s" target="_blank" iconType="popout" href={RELEVANCE_DOCS_URL}>
         {i18n.translate(
           'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.empty.buttonLabel',
           { defaultMessage: 'Read the relevance tuning guide' }

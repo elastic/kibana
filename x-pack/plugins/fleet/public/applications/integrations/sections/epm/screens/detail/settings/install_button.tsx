@@ -13,36 +13,22 @@ import type { PackageInfo, UpgradePackagePolicyDryRunResponse } from '../../../.
 import { InstallStatus } from '../../../../../types';
 import { useAuthz, useGetPackageInstallStatus, useInstallPackage } from '../../../../../hooks';
 
-import { getNumTransformAssets } from '../../../../../../../components/transform_install_as_current_user_callout';
-
 import { ConfirmPackageInstall } from './confirm_package_install';
-
-type InstallationButtonProps = Pick<PackageInfo, 'name' | 'title' | 'version' | 'assets'> & {
+type InstallationButtonProps = Pick<PackageInfo, 'name' | 'title' | 'version'> & {
   disabled?: boolean;
   dryRunData?: UpgradePackagePolicyDryRunResponse | null;
   isUpgradingPackagePolicies?: boolean;
   latestVersion?: string;
+  numOfAssets: number;
   packagePolicyIds?: string[];
   setIsUpgradingPackagePolicies?: React.Dispatch<React.SetStateAction<boolean>>;
 };
 export function InstallButton(props: InstallationButtonProps) {
-  const { name, title, version, assets } = props;
-
+  const { name, numOfAssets, title, version } = props;
   const canInstallPackages = useAuthz().integrations.installPackages;
   const installPackage = useInstallPackage();
   const getPackageInstallStatus = useGetPackageInstallStatus();
   const { status: installationStatus } = getPackageInstallStatus(name);
-
-  const numOfAssets = Object.entries(assets).reduce(
-    (acc, [serviceName, serviceNameValue]) =>
-      acc +
-      Object.entries(serviceNameValue || {}).reduce(
-        (acc2, [assetName, assetNameValue]) => acc2 + assetNameValue.length,
-        0
-      ),
-    0
-  );
-  const numOfTransformAssets = getNumTransformAssets(assets);
 
   const isInstalling = installationStatus === InstallStatus.installing;
   const [isInstallModalVisible, setIsInstallModalVisible] = useState<boolean>(false);
@@ -58,7 +44,6 @@ export function InstallButton(props: InstallationButtonProps) {
   const installModal = (
     <ConfirmPackageInstall
       numOfAssets={numOfAssets}
-      numOfTransformAssets={numOfTransformAssets}
       packageName={title}
       onCancel={toggleInstallModal}
       onConfirm={handleClickInstall}
@@ -76,7 +61,7 @@ export function InstallButton(props: InstallationButtonProps) {
         {isInstalling ? (
           <FormattedMessage
             id="xpack.fleet.integrations.installPackage.installingPackageButtonLabel"
-            defaultMessage="Installing {title}"
+            defaultMessage="Installing {title} assets"
             values={{
               title,
             }}
@@ -84,7 +69,7 @@ export function InstallButton(props: InstallationButtonProps) {
         ) : (
           <FormattedMessage
             id="xpack.fleet.integrations.installPackage.installPackageButtonLabel"
-            defaultMessage="Install {title}"
+            defaultMessage="Install {title} assets"
             values={{
               title,
             }}

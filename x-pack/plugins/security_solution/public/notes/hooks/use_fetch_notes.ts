@@ -22,19 +22,19 @@ export interface UseFetchNotesResult {
  */
 export const useFetchNotes = (): UseFetchNotesResult => {
   const dispatch = useDispatch();
-  const securitySolutionNotesDisabled = useIsExperimentalFeatureEnabled(
-    'securitySolutionNotesDisabled'
+  const securitySolutionNotesEnabled = useIsExperimentalFeatureEnabled(
+    'securitySolutionNotesEnabled'
   );
   const onLoad = useCallback(
     (events: Array<Partial<{ _id: string }>>) => {
-      if (securitySolutionNotesDisabled || events.length === 0) return;
+      if (!securitySolutionNotesEnabled || events.length === 0) return;
 
       const eventIds: string[] = events
         .map((event) => event._id)
         .filter((id) => id != null) as string[];
       dispatch(fetchNotesByDocumentIds({ documentIds: eventIds }));
     },
-    [dispatch, securitySolutionNotesDisabled]
+    [dispatch, securitySolutionNotesEnabled]
   );
 
   return { onLoad };

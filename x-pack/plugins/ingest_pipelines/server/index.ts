@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from '@kbn/core/server';
-
-export { config } from './config';
-
-export async function plugin(context: PluginInitializerContext) {
+export async function plugin() {
   const { IngestPipelinesPlugin } = await import('./plugin');
-  return new IngestPipelinesPlugin(context);
+  return new IngestPipelinesPlugin();
 }

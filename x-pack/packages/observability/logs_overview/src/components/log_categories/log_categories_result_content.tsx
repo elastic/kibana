@@ -9,14 +9,8 @@ import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/type
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { StateFrom } from 'xstate5';
-import { categoryDetailsService } from '../../services/category_details_service';
 import { LogCategory } from '../../types';
-import { ResolvedIndexNameLogsSourceConfiguration } from '../../utils/logs_source';
-import {
-  LogCategoriesFlyoutDependencies,
-  LogCategoryDetailsFlyout,
-} from '../log_category_details/log_category_details_flyout';
+import { IndexNameLogsSourceConfiguration } from '../../utils/logs_source';
 import {
   LogCategoriesControlBar,
   LogCategoriesControlBarDependencies,
@@ -27,19 +21,15 @@ export interface LogCategoriesResultContentProps {
   dependencies: LogCategoriesResultContentDependencies;
   documentFilters?: QueryDslQueryContainer[];
   logCategories: LogCategory[];
-  logsSource: ResolvedIndexNameLogsSourceConfiguration;
+  logsSource: IndexNameLogsSourceConfiguration;
   timeRange: {
     start: string;
     end: string;
   };
-  categoryDetailsServiceState: StateFrom<typeof categoryDetailsService>;
-  onCloseFlyout: () => void;
-  onOpenFlyout: (category: LogCategory, rowIndex: number) => void;
 }
 
 export type LogCategoriesResultContentDependencies = LogCategoriesControlBarDependencies &
-  LogCategoriesGridDependencies &
-  LogCategoriesFlyoutDependencies;
+  LogCategoriesGridDependencies;
 
 export const LogCategoriesResultContent: React.FC<LogCategoriesResultContentProps> = ({
   dependencies,
@@ -47,9 +37,6 @@ export const LogCategoriesResultContent: React.FC<LogCategoriesResultContentProp
   logCategories,
   logsSource,
   timeRange,
-  categoryDetailsServiceState,
-  onCloseFlyout,
-  onOpenFlyout,
 }) => {
   if (logCategories.length === 0) {
     return <LogCategoriesEmptyResultContent />;
@@ -65,24 +52,7 @@ export const LogCategoriesResultContent: React.FC<LogCategoriesResultContentProp
           />
         </EuiFlexItem>
         <EuiFlexItem grow>
-          <LogCategoriesGrid
-            dependencies={dependencies}
-            logCategories={logCategories}
-            expandedRowIndex={categoryDetailsServiceState.context.expandedRowIndex}
-            onOpenFlyout={onOpenFlyout}
-            onCloseFlyout={onCloseFlyout}
-          />
-          {categoryDetailsServiceState.context.expandedCategory && (
-            <LogCategoryDetailsFlyout
-              logCategory={categoryDetailsServiceState.context.expandedCategory}
-              onCloseFlyout={onCloseFlyout}
-              categoryDetailsServiceState={categoryDetailsServiceState}
-              logsSource={logsSource}
-              dependencies={dependencies}
-              documentFilters={documentFilters}
-              timeRange={timeRange}
-            />
-          )}
+          <LogCategoriesGrid dependencies={dependencies} logCategories={logCategories} />
         </EuiFlexItem>
       </EuiFlexGroup>
     );

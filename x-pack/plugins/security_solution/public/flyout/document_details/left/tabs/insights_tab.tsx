@@ -14,8 +14,10 @@ import { useExpandableFlyoutApi, useExpandableFlyoutState } from '@kbn/expandabl
 import { useKibana } from '../../../../common/lib/kibana';
 import {
   INSIGHTS_TAB_BUTTON_GROUP_TEST_ID,
+  INSIGHTS_TAB_ENTITIES_BUTTON_LABEL_TEST_ID,
   INSIGHTS_TAB_ENTITIES_BUTTON_TEST_ID,
   INSIGHTS_TAB_THREAT_INTELLIGENCE_BUTTON_TEST_ID,
+  INSIGHTS_TAB_PREVALENCE_BUTTON_LABEL_TEST_ID,
   INSIGHTS_TAB_PREVALENCE_BUTTON_TEST_ID,
   INSIGHTS_TAB_CORRELATIONS_BUTTON_TEST_ID,
 } from './test_ids';
@@ -38,10 +40,12 @@ const insightsButtons: EuiButtonGroupOptionProps[] = [
   {
     id: ENTITIES_TAB_ID,
     label: (
-      <FormattedMessage
-        id="xpack.securitySolution.flyout.left.insights.entitiesButtonLabel"
-        defaultMessage="Entities"
-      />
+      <div data-test-subj={INSIGHTS_TAB_ENTITIES_BUTTON_LABEL_TEST_ID}>
+        <FormattedMessage
+          id="xpack.securitySolution.flyout.left.insights.entitiesButtonLabel"
+          defaultMessage="Entities"
+        />
+      </div>
     ),
     'data-test-subj': INSIGHTS_TAB_ENTITIES_BUTTON_TEST_ID,
   },
@@ -58,10 +62,12 @@ const insightsButtons: EuiButtonGroupOptionProps[] = [
   {
     id: PREVALENCE_TAB_ID,
     label: (
-      <FormattedMessage
-        id="xpack.securitySolution.flyout.left.insights.prevalenceButtonLabel"
-        defaultMessage="Prevalence"
-      />
+      <div data-test-subj={INSIGHTS_TAB_PREVALENCE_BUTTON_LABEL_TEST_ID}>
+        <FormattedMessage
+          id="xpack.securitySolution.flyout.left.insights.prevalenceButtonLabel"
+          defaultMessage="Prevalence"
+        />
+      </div>
     ),
     'data-test-subj': INSIGHTS_TAB_PREVALENCE_BUTTON_TEST_ID,
   },

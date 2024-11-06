@@ -8,7 +8,6 @@
  */
 
 import type { ESQLCommand, ESQLCommandOption, ESQLFunction, ESQLMessage } from '@kbn/esql-ast';
-import { GetColumnsByTypeFn, SuggestionRawDefinition } from '../autocomplete/types';
 
 /**
  * All supported field types in ES|QL. This is all the types
@@ -101,14 +100,12 @@ export const isParameterType = (str: string | undefined): str is FunctionParamet
 
 /**
  * This is the return type of a function definition.
- *
- * TODO: remove `any`
  */
-export type FunctionReturnType = Exclude<SupportedDataType, 'unsupported'> | 'unknown' | 'any';
+export type FunctionReturnType = Exclude<SupportedDataType, 'unsupported'> | 'any' | 'void';
 
 export const isReturnType = (str: string | FunctionParameterType): str is FunctionReturnType =>
   str !== 'unsupported' &&
-  (dataTypes.includes(str as SupportedDataType) || str === 'unknown' || str === 'any');
+  (dataTypes.includes(str as SupportedDataType) || str === 'any' || str === 'void');
 
 export interface FunctionDefinition {
   type: 'builtin' | 'agg' | 'eval';
@@ -159,23 +156,14 @@ export interface FunctionDefinition {
   validate?: (fnDef: ESQLFunction) => ESQLMessage[];
 }
 
-export interface CommandBaseDefinition<CommandName extends string> {
-  name: CommandName;
+export interface CommandBaseDefinition {
+  name: string;
   alias?: string;
   description: string;
   /**
    * Whether to show or hide in autocomplete suggestion list
    */
   hidden?: boolean;
-  suggest?: (
-    innerText: string,
-    command: ESQLCommand<CommandName>,
-    getColumnsByType: GetColumnsByTypeFn,
-    columnExists: (column: string) => boolean,
-    getSuggestedVariableName: () => string,
-    getPreferences?: () => Promise<{ histogramBarTarget: number } | undefined>
-  ) => Promise<SuggestionRawDefinition[]>;
-  /** @deprecated this property will disappear in the future */
   signature: {
     multipleParams: boolean;
     // innerTypes here is useful to drill down the type in case of "column"
@@ -193,8 +181,7 @@ export interface CommandBaseDefinition<CommandName extends string> {
   };
 }
 
-export interface CommandOptionsDefinition<CommandName extends string = string>
-  extends CommandBaseDefinition<CommandName> {
+export interface CommandOptionsDefinition extends CommandBaseDefinition {
   wrapped?: string[];
   optional: boolean;
   skipCommonValidation?: boolean;
@@ -212,15 +199,12 @@ export interface CommandModeDefinition {
   prefix?: string;
 }
 
-export interface CommandDefinition<CommandName extends string>
-  extends CommandBaseDefinition<CommandName> {
+export interface CommandDefinition extends CommandBaseDefinition {
+  options: CommandOptionsDefinition[];
   examples: string[];
   validate?: (option: ESQLCommand) => ESQLMessage[];
-  hasRecommendedQueries?: boolean;
-  /** @deprecated this property will disappear in the future */
   modes: CommandModeDefinition[];
-  /** @deprecated this property will disappear in the future */
-  options: CommandOptionsDefinition[];
+  hasRecommendedQueries?: boolean;
 }
 
 export interface Literals {

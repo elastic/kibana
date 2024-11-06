@@ -68,6 +68,7 @@ FROM : 'from'                 -> pushMode(FROM_MODE);
 GROK : 'grok'                 -> pushMode(EXPRESSION_MODE);
 KEEP : 'keep'                 -> pushMode(PROJECT_MODE);
 LIMIT : 'limit'               -> pushMode(EXPRESSION_MODE);
+META : 'meta'                 -> pushMode(META_MODE);
 MV_EXPAND : 'mv_expand'       -> pushMode(MVEXPAND_MODE);
 RENAME : 'rename'             -> pushMode(RENAME_MODE);
 ROW : 'row'                   -> pushMode(EXPRESSION_MODE);
@@ -88,6 +89,7 @@ WHERE : 'where'               -> pushMode(EXPRESSION_MODE);
 // MYCOMMAND : 'mycommand' -> ...
 DEV_INLINESTATS : {this.isDevVersion()}? 'inlinestats'   -> pushMode(EXPRESSION_MODE);
 DEV_LOOKUP :      {this.isDevVersion()}? 'lookup'        -> pushMode(LOOKUP_MODE);
+DEV_MATCH :       {this.isDevVersion()}? 'match'         -> pushMode(EXPRESSION_MODE);
 DEV_METRICS :     {this.isDevVersion()}? 'metrics'       -> pushMode(METRICS_MODE);
 
 //
@@ -210,8 +212,8 @@ ASTERISK : '*';
 SLASH : '/';
 PERCENT : '%';
 
-MATCH : 'match';
-NESTED_WHERE : WHERE -> type(WHERE);
+// move it in the main section if the feature gets promoted
+DEV_MATCH_OP : {this.isDevVersion()}? DEV_MATCH -> type(DEV_MATCH);
 
 NAMED_OR_POSITIONAL_PARAM
     : PARAM (LETTER | UNDERSCORE) UNQUOTED_ID_BODY*
@@ -307,8 +309,6 @@ mode PROJECT_MODE;
 PROJECT_PIPE : PIPE -> type(PIPE), popMode;
 PROJECT_DOT: DOT -> type(DOT);
 PROJECT_COMMA : COMMA -> type(COMMA);
-PROJECT_PARAM : {this.isDevVersion()}? PARAM -> type(PARAM);
-PROJECT_NAMED_OR_POSITIONAL_PARAM : {this.isDevVersion()}? NAMED_OR_POSITIONAL_PARAM -> type(NAMED_OR_POSITIONAL_PARAM);
 
 fragment UNQUOTED_ID_BODY_WITH_PATTERN
     : (LETTER | DIGIT | UNDERSCORE | ASTERISK)
@@ -342,8 +342,6 @@ RENAME_PIPE : PIPE -> type(PIPE), popMode;
 RENAME_ASSIGN : ASSIGN -> type(ASSIGN);
 RENAME_COMMA : COMMA -> type(COMMA);
 RENAME_DOT: DOT -> type(DOT);
-RENAME_PARAM : {this.isDevVersion()}? PARAM -> type(PARAM);
-RENAME_NAMED_OR_POSITIONAL_PARAM : {this.isDevVersion()}? NAMED_OR_POSITIONAL_PARAM -> type(NAMED_OR_POSITIONAL_PARAM);
 
 AS : 'as';
 
@@ -415,9 +413,6 @@ ENRICH_FIELD_QUOTED_IDENTIFIER
     : QUOTED_IDENTIFIER -> type(QUOTED_IDENTIFIER)
     ;
 
-ENRICH_FIELD_PARAM : {this.isDevVersion()}? PARAM -> type(PARAM);
-ENRICH_FIELD_NAMED_OR_POSITIONAL_PARAM : {this.isDevVersion()}? NAMED_OR_POSITIONAL_PARAM -> type(NAMED_OR_POSITIONAL_PARAM);
-
 ENRICH_FIELD_LINE_COMMENT
     : LINE_COMMENT -> channel(HIDDEN)
     ;
@@ -433,8 +428,6 @@ ENRICH_FIELD_WS
 mode MVEXPAND_MODE;
 MVEXPAND_PIPE : PIPE -> type(PIPE), popMode;
 MVEXPAND_DOT: DOT -> type(DOT);
-MVEXPAND_PARAM : {this.isDevVersion()}? PARAM -> type(PARAM);
-MVEXPAND_NAMED_OR_POSITIONAL_PARAM : {this.isDevVersion()}? NAMED_OR_POSITIONAL_PARAM -> type(NAMED_OR_POSITIONAL_PARAM);
 
 MVEXPAND_QUOTED_IDENTIFIER
     : QUOTED_IDENTIFIER -> type(QUOTED_IDENTIFIER)
@@ -473,6 +466,26 @@ SHOW_MULTILINE_COMMENT
     ;
 
 SHOW_WS
+    : WS -> channel(HIDDEN)
+    ;
+
+//
+// META commands
+//
+mode META_MODE;
+META_PIPE : PIPE -> type(PIPE), popMode;
+
+FUNCTIONS : 'functions';
+
+META_LINE_COMMENT
+    : LINE_COMMENT -> channel(HIDDEN)
+    ;
+
+META_MULTILINE_COMMENT
+    : MULTILINE_COMMENT -> channel(HIDDEN)
+    ;
+
+META_WS
     : WS -> channel(HIDDEN)
     ;
 

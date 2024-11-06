@@ -12,12 +12,12 @@ import {
   EVENT_SUMMARY_COLUMN,
   ALERT_RENDERER_HOST_NAME,
   SHOW_TOP_N_HEADER,
-  HOVER_ACTIONS,
 } from '../../../screens/alerts';
 import {
   DATA_GRID_COLUMN_ORDER_BTN,
   DATA_GRID_FIELD_SORT_BTN,
 } from '../../../screens/common/data_grid';
+import { HOVER_ACTIONS } from '../../../screens/timeline';
 import {
   showHoverActionsEventRenderedView,
   switchAlertTableToEventRenderedView,
@@ -33,8 +33,7 @@ import {
   XY_CHART,
 } from '../../../screens/shared';
 
-// skipping as this test is also failing on main (see https://github.com/elastic/security-team/issues/10874)
-describe.skip(`Event Rendered View`, { tags: ['@ess', '@serverless'] }, () => {
+describe(`Event Rendered View`, { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     login();
     createRule(getNewRule());
@@ -44,12 +43,12 @@ describe.skip(`Event Rendered View`, { tags: ['@ess', '@serverless'] }, () => {
     waitForAlerts();
   });
 
-  it('should show Event Summary column correctly', () => {
+  it('Event Summary Column', () => {
     cy.get(EVENT_SUMMARY_COLUMN).should('be.visible');
     cy.get(EVENT_SUMMARY_ALERT_RENDERER_CONTENT).should('be.visible');
   });
 
-  it('should show TopN in Event Summary column', () => {
+  it('Hover Action TopN in event summary column', () => {
     showHoverActionsEventRenderedView(ALERT_RENDERER_HOST_NAME);
     cy.get(HOVER_ACTIONS.SHOW_TOP).trigger('click');
     cy.get(TOP_N_ALERT_HISTOGRAM).should('be.visible');
@@ -65,15 +64,15 @@ describe.skip(`Event Rendered View`, { tags: ['@ess', '@serverless'] }, () => {
    * This test main checks if Alert Table controls are rendered properly.
    *
    * */
-  it('should not show Field Browser', () => {
+  it('Field Browser is not visible', () => {
     cy.get(FIELDS_BROWSER_BTN).should('not.exist');
   });
 
-  it('should now show Sorting Control', () => {
+  it('Sorting control is not visible', () => {
     cy.get(DATA_GRID_FIELD_SORT_BTN).should('not.exist');
   });
 
-  it('should not show column order control', () => {
+  it('Column Order button is not visible', () => {
     cy.get(DATA_GRID_COLUMN_ORDER_BTN).should('not.exist');
   });
 });

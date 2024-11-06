@@ -750,7 +750,6 @@ export const RulesListTable = (props: RulesListTableProps) => {
                           'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.editAriaLabel',
                           { defaultMessage: 'Edit' }
                         )}
-                        disabled={!rule.enabledInLicense}
                       />
                     </EuiFlexItem>
                   ) : null}

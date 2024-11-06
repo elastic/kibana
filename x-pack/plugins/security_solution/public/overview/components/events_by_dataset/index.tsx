@@ -9,10 +9,9 @@ import { Position } from '@elastic/charts';
 import numeral from '@elastic/numeral';
 import React, { useEffect, useMemo, useCallback } from 'react';
 
-import type { Filter, Query } from '@kbn/es-query';
+import type { DataViewBase, Filter, Query } from '@kbn/es-query';
 import styled from 'styled-components';
 import { EuiButton } from '@elastic/eui';
-import type { DataViewSpec } from '@kbn/data-plugin/common';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { DEFAULT_NUMBER_FORMAT, APP_UI_ID } from '../../../../common/constants';
 import { SHOWING, UNIT } from '../../../common/components/events_viewer/translations';
@@ -47,7 +46,7 @@ interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery' | 'se
   filterQuery?: string;
   filters: Filter[];
   headerChildren?: React.ReactNode;
-  dataViewSpec?: DataViewSpec;
+  indexPattern: DataViewBase;
   onlyField?: string;
   paddingSize?: 's' | 'm' | 'l' | 'none';
   query: Query;
@@ -78,7 +77,7 @@ const EventsByDatasetComponent: React.FC<Props> = ({
   filters,
   from,
   headerChildren,
-  dataViewSpec,
+  indexPattern,
   onlyField,
   paddingSize,
   query,
@@ -133,13 +132,13 @@ const EventsByDatasetComponent: React.FC<Props> = ({
     if (filterQueryFromProps == null) {
       return convertToBuildEsQuery({
         config: getEsQueryConfig(kibana.services.uiSettings),
-        dataViewSpec,
+        indexPattern,
         queries: [query],
         filters,
       });
     }
     return [filterQueryFromProps];
-  }, [filterQueryFromProps, kibana.services.uiSettings, dataViewSpec, query, filters]);
+  }, [filterQueryFromProps, kibana, indexPattern, query, filters]);
 
   useInvalidFilterQuery({
     id: uniqueQueryId,

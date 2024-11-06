@@ -9,7 +9,10 @@ import moment from 'moment';
 import expect from '@kbn/expect';
 import rison from '@kbn/rison';
 import { InfraSynthtraceEsClient } from '@kbn/apm-synthtrace';
-import { enableInfrastructureProfilingIntegration } from '@kbn/observability-plugin/common';
+import {
+  enableInfrastructureContainerAssetView,
+  enableInfrastructureProfilingIntegration,
+} from '@kbn/observability-plugin/common';
 import {
   ALERT_STATUS_ACTIVE,
   ALERT_STATUS_RECOVERED,
@@ -128,6 +131,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   const setInfrastructureProfilingIntegrationUiSetting = async (value: boolean = true) => {
     await kibanaServer.uiSettings.update({ [enableInfrastructureProfilingIntegration]: value });
+    await browser.refresh();
+    await pageObjects.header.waitUntilLoadingHasFinished();
+  };
+
+  const setInfrastructureContainerAssetViewUiSetting = async (value: boolean = true) => {
+    await kibanaServer.uiSettings.update({ [enableInfrastructureContainerAssetView]: value });
     await browser.refresh();
     await pageObjects.header.waitUntilLoadingHasFinished();
   };
@@ -395,9 +404,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             await pageObjects.assetDetails.clickProcessesTab();
             const processesTotalValue =
               await pageObjects.assetDetails.getProcessesTabContentTotalValue();
-            await retry.tryForTime(5000, async () => {
-              expect(await processesTotalValue.getVisibleText()).to.eql('N/A');
-            });
+            const processValue = await processesTotalValue.getVisibleText();
+            expect(processValue).to.eql('N/A');
           });
         });
       });
@@ -502,9 +510,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         it('should render processes tab and with Total Value summary', async () => {
           const processesTotalValue =
             await pageObjects.assetDetails.getProcessesTabContentTotalValue();
-          await retry.tryForTime(5000, async () => {
-            expect(await processesTotalValue.getVisibleText()).to.eql('313');
-          });
+          const processValue = await processesTotalValue.getVisibleText();
+          expect(processValue).to.eql('313');
         });
 
         it('should expand processes table row', async () => {
@@ -792,8 +799,25 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       after(() => synthEsClient.clean());
 
-      describe('when navigating to container asset view', () => {
+      describe('when container asset view is disabled', () => {
         before(async () => {
+          await setInfrastructureContainerAssetViewUiSetting(false);
+          await navigateToNodeDetails('container-id-0', 'container', { name: 'container-id-0' });
+          await pageObjects.header.waitUntilLoadingHasFinished();
+          await pageObjects.timePicker.setAbsoluteRange(
+            START_CONTAINER_DATE.format(DATE_PICKER_FORMAT),
+            END_CONTAINER_DATE.format(DATE_PICKER_FORMAT)
+          );
+        });
+
+        it('should show old view of container details', async () => {
+          await testSubjects.find('metricsEmptyViewState');
+        });
+      });
+
+      describe('when container asset view is enabled', () => {
+        before(async () => {
+          await setInfrastructureContainerAssetViewUiSetting(true);
           await navigateToNodeDetails('container-id-0', 'container', { name: 'container-id-0' });
           await pageObjects.header.waitUntilLoadingHasFinished();
           await pageObjects.timePicker.setAbsoluteRange(

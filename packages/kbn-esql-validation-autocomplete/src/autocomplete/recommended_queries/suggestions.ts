@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SuggestionRawDefinition, GetColumnsByTypeFn } from '../types';
+import type { SuggestionRawDefinition, GetFieldsByTypeFn } from '../types';
 import { getRecommendedQueries } from './templates';
 
 export const getRecommendedQueriesSuggestions = async (
-  getFieldsByType: GetColumnsByTypeFn,
+  getFieldsByType: GetFieldsByTypeFn,
   fromCommand: string = ''
 ): Promise<SuggestionRawDefinition[]> => {
   const fieldSuggestions = await getFieldsByType('date', [], {

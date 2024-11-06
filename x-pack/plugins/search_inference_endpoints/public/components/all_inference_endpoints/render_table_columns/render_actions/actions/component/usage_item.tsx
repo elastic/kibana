@@ -14,15 +14,11 @@ import {
   EuiText,
   EuiTextTruncate,
   EuiIcon,
-  EuiSpacer,
 } from '@elastic/eui';
 import React from 'react';
-import { ENTERPRISE_SEARCH_CONTENT_APP_ID } from '@kbn/deeplinks-search';
-import { MANAGEMENT_APP_ID } from '@kbn/deeplinks-management/constants';
 
 import { useKibana } from '../../../../../../hooks/use_kibana';
 import { InferenceUsageInfo } from '../../../../types';
-import { PIPELINE_URL } from '../../../../constants';
 
 interface UsageProps {
   usageItem: InferenceUsageInfo;
@@ -33,27 +29,27 @@ export const UsageItem: React.FC<UsageProps> = ({ usageItem }) => {
   } = useKibana();
   const handleNavigateToIndex = () => {
     if (usageItem.type === 'Index') {
-      application?.navigateToApp(ENTERPRISE_SEARCH_CONTENT_APP_ID, {
-        path: `search_indices/${usageItem.id}`,
+      application?.navigateToApp('enterprise_search', {
+        path: `content/search_indices/${usageItem.label}`,
         openInNewTab: true,
       });
     } else if (usageItem.type === 'Pipeline') {
-      application?.navigateToApp(MANAGEMENT_APP_ID, {
-        path: `${PIPELINE_URL}?pipeline=${usageItem.id}`,
+      application?.navigateToApp('management', {
+        path: `ingest/ingest_pipelines?pipeline=${usageItem.label}`,
         openInNewTab: true,
       });
     }
   };
 
   return (
-    <EuiFlexGroup gutterSize="s" direction="column" data-test-subj="usageItem">
+    <EuiFlexGroup gutterSize="xs" direction="column" data-test-subj="usageItem">
       <EuiFlexItem grow={false}>
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiFlexGroup gutterSize="xs" justifyContent="spaceBetween">
               <EuiFlexItem>
                 <EuiText size="s">
-                  <EuiTextTruncate text={usageItem.id} />
+                  <EuiTextTruncate text={usageItem.label} />
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
@@ -62,7 +58,7 @@ export const UsageItem: React.FC<UsageProps> = ({ usageItem }) => {
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiLink data-test-subj="navigateToIndexPage" onClick={handleNavigateToIndex}>
+            <EuiLink onClick={handleNavigateToIndex}>
               <EuiIcon size="s" type="popout" />
             </EuiLink>
           </EuiFlexItem>
@@ -70,7 +66,6 @@ export const UsageItem: React.FC<UsageProps> = ({ usageItem }) => {
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiHorizontalRule margin="none" />
-        <EuiSpacer size="s" />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

@@ -20,7 +20,7 @@ export interface ViewRouteDeps {
 
 export function initSpacesViewsRoutes(deps: ViewRouteDeps) {
   deps.httpResources.register(
-    { path: '/spaces/space_selector', validate: false, options: { excludeFromOAS: true } },
+    { path: '/spaces/space_selector', validate: false },
     (context, request, response) => response.renderCoreApp()
   );
 
@@ -32,7 +32,6 @@ export function initSpacesViewsRoutes(deps: ViewRouteDeps) {
           schema.object({ next: schema.maybe(schema.string()) }, { unknowns: 'ignore' })
         ),
       },
-      options: { excludeFromOAS: true },
     },
     async (context, request, response) => {
       try {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import {
   EuiAccordion,
@@ -148,21 +148,18 @@ const RiskEnginePreview = () => {
     bool: { must: [], filter: [], should: [], must_not: [] },
   });
 
-  const [dataViewsArray, setDataViewsArray] = useState<DataView[]>([]);
-
   const {
     unifiedSearch: {
       ui: { SearchBar },
     },
-    dataViews,
   } = useKibana().services;
 
   const { addError } = useAppToasts();
 
-  const { sourcererDataView } = useSourcererDataView(SourcererScopeName.detections);
+  const { indexPattern } = useSourcererDataView(SourcererScopeName.detections);
 
   const { data, isLoading, refetch, isError } = useRiskScorePreview({
-    data_view_id: sourcererDataView.title,
+    data_view_id: indexPattern.title, // TODO @nkhristinin verify this is correct
     filter: filters,
     range: {
       start: dateRange.from,
@@ -193,10 +190,6 @@ const RiskEnginePreview = () => {
     [addError, setDateRange, setFilters]
   );
 
-  useEffect(() => {
-    dataViews.create(sourcererDataView).then((dataView) => setDataViewsArray([dataView]));
-  }, [dataViews, sourcererDataView]);
-
   if (isError) {
     return (
       <EuiCallOut
@@ -222,19 +215,21 @@ const RiskEnginePreview = () => {
       <EuiText>{i18n.PREVIEW_DESCRIPTION}</EuiText>
       <EuiSpacer />
       <EuiFormRow fullWidth data-test-subj="risk-score-preview-search-bar">
-        <SearchBar
-          appName="siem"
-          isLoading={isLoading}
-          indexPatterns={dataViewsArray}
-          dateRangeFrom={dateRange.from}
-          dateRangeTo={dateRange.to}
-          onQuerySubmit={onQuerySubmit}
-          showFilterBar={false}
-          showDatePicker={true}
-          displayStyle={'inPage'}
-          submitButtonStyle={'iconOnly'}
-          dataTestSubj="risk-score-preview-search-bar-input"
-        />
+        {indexPattern && (
+          <SearchBar
+            appName="siem"
+            isLoading={isLoading}
+            indexPatterns={[indexPattern] as DataView[]}
+            dateRangeFrom={dateRange.from}
+            dateRangeTo={dateRange.to}
+            onQuerySubmit={onQuerySubmit}
+            showFilterBar={false}
+            showDatePicker={true}
+            displayStyle={'inPage'}
+            submitButtonStyle={'iconOnly'}
+            dataTestSubj="risk-score-preview-search-bar-input"
+          />
+        )}
       </EuiFormRow>
 
       <EuiSpacer />

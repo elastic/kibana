@@ -1,14 +1,10 @@
 {
   "type": "plugin",
   "id": "@kbn/screenshot-mode-plugin",
-  "owner": [
-    "@elastic/appex-sharedux"
-  ],
-  "group": "platform",
-  "visibility": "shared",
+  "owner": "@elastic/appex-sharedux",
   "plugin": {
     "id": "screenshotMode",
-    "browser": true,
-    "server": true
+    "server": true,
+    "browser": true
   }
 }

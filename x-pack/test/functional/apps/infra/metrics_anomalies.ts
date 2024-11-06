@@ -12,13 +12,7 @@ import { HOSTS_VIEW_PATH, ML_JOB_IDS } from './constants';
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const pageObjects = getPageObjects([
-    'assetDetails',
-    'common',
-    'infraHome',
-    'infraHostsView',
-    'header',
-  ]);
+  const pageObjects = getPageObjects(['assetDetails', 'common', 'infraHome', 'infraHostsView']);
   const infraSourceConfigurationForm = getService('infraSourceConfigurationForm');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
@@ -150,7 +144,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await pageObjects.infraHome.setAnomaliesDate('Apr 21, 2021 @ 00:00:00.000');
           const hostName = await pageObjects.infraHome.getAnomalyHostName();
           await pageObjects.infraHome.clickShowAffectedHostsButton();
-          await pageObjects.header.waitUntilLoadingHasFinished();
           const currentUrl = await browser.getCurrentUrl();
           expect(currentUrl).to.contain(
             encodeURIComponent(`query:(terms:(host.name:!(${hostName})))`)

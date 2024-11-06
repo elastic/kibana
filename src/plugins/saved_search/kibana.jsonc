@@ -1,29 +1,15 @@
 {
   "type": "plugin",
   "id": "@kbn/saved-search-plugin",
-  "owner": [
-    "@elastic/kibana-data-discovery"
-  ],
-  "group": "platform",
-  "visibility": "shared",
+  "owner": "@elastic/kibana-data-discovery",
   "description": "This plugin contains the definition and helper methods around saved searches, used by discover and visualizations.",
   "plugin": {
     "id": "savedSearch",
-    "browser": true,
     "server": true,
-    "requiredPlugins": [
-      "data",
-      "contentManagement",
-      "embeddable",
-      "expressions"
-    ],
-    "optionalPlugins": [
-      "spaces",
-      "savedObjectsTaggingOss"
-    ],
+    "browser": true,
+    "requiredPlugins": ["data", "contentManagement", "embeddable", "expressions"],
+    "optionalPlugins": ["spaces", "savedObjectsTaggingOss"],
     "requiredBundles": [],
-    "extraPublicDirs": [
-      "common"
-    ]
+    "extraPublicDirs": ["common"]
   }
 }

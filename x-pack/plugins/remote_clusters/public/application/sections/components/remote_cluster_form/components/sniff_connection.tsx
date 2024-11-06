@@ -28,15 +28,13 @@ export const SniffConnection: FunctionComponent<Props> = ({
 }) => {
   const [localSeedErrors, setLocalSeedErrors] = useState<JSX.Element[]>([]);
   const { seeds = [], nodeConnections } = fields;
-  const { seeds: seedsError, nodeConnections: nodeError } = fieldsErrors;
+  const { seeds: seedsError } = fieldsErrors;
   // Show errors if there is a general form error or local errors.
   const areFormErrorsVisible = Boolean(areErrorsVisible && seedsError);
-  const showLocalSeedErrors = areFormErrorsVisible || localSeedErrors.length !== 0;
-  const errorsInLocalSeeds =
+  const showErrors = areFormErrorsVisible || localSeedErrors.length !== 0;
+  const errors =
     areFormErrorsVisible && seedsError ? localSeedErrors.concat(seedsError) : localSeedErrors;
   const formattedSeeds: EuiComboBoxOptionOption[] = seeds.map((seed: string) => ({ label: seed }));
-
-  const showNodeConnectionErrors = Boolean(nodeError);
 
   const onCreateSeed = (newSeed?: string) => {
     // If the user just hit enter without typing anything, treat it as a no-op.
@@ -109,8 +107,8 @@ export const SniffConnection: FunctionComponent<Props> = ({
             }}
           />
         }
-        isInvalid={showLocalSeedErrors}
-        error={errorsInLocalSeeds}
+        isInvalid={showErrors}
+        error={errors}
         fullWidth
       >
         <EuiComboBox
@@ -127,7 +125,7 @@ export const SniffConnection: FunctionComponent<Props> = ({
             onFieldsChange({ seeds: options.map(({ label }) => label) })
           }
           onSearchChange={onSeedsInputChange}
-          isInvalid={showLocalSeedErrors}
+          isInvalid={showErrors}
           fullWidth
           data-test-subj="remoteClusterFormSeedsInput"
         />
@@ -148,15 +146,11 @@ export const SniffConnection: FunctionComponent<Props> = ({
           />
         }
         fullWidth
-        isInvalid={showNodeConnectionErrors}
-        error={nodeError}
       >
         <EuiFieldNumber
           value={nodeConnections || ''}
           onChange={(e) => onFieldsChange({ nodeConnections: Number(e.target.value) })}
-          isInvalid={showNodeConnectionErrors}
           fullWidth
-          data-test-subj="remoteClusterFormNodeConnectionsInput"
         />
       </EuiFormRow>
     </>

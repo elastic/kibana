@@ -36,7 +36,6 @@ export const useIndexDocumentSearch = (indexName: string) => {
       http.post<IndexDocuments>(`/internal/serverless_search/indices/${indexName}/search`, {
         body: JSON.stringify({
           searchQuery: '',
-          trackTotalHits: true,
         }),
         query: {
           page: 0,

@@ -22,8 +22,6 @@ import { appContextService } from '../../../../app_context';
 import { createAppContextStartContractMock } from '../../../../../mocks';
 import { updateCurrentWriteIndices } from '../../../elasticsearch/template/template';
 
-import { createArchiveIteratorFromMap } from '../../../archive/archive_iterator';
-
 import { stepUpdateCurrentWriteIndices } from './step_update_current_write_indices';
 
 jest.mock('../../../elasticsearch/template/template');
@@ -88,7 +86,6 @@ describe('stepUpdateCurrentWriteIndices', () => {
     } as any,
     paths: ['some/path/1', 'some/path/2'],
     assetsMap: new Map(),
-    archiveIterator: createArchiveIteratorFromMap(new Map()),
   };
   appContextService.start(
     createAppContextStartContractMock({

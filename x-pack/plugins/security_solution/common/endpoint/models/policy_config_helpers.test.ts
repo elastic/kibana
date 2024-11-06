@@ -17,8 +17,7 @@ import {
   checkIfPopupMessagesContainCustomNotifications,
   resetCustomNotifications,
 } from './policy_config_helpers';
-import { get, merge } from 'lodash';
-import { set } from '@kbn/safer-lodash-set';
+import { get, merge, set } from 'lodash';
 
 describe('Policy Config helpers', () => {
   describe('disableProtections', () => {

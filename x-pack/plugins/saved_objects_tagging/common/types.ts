@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObject } from '@kbn/core/types';
+import { SavedObject } from '@kbn/core/types';
 import type { Tag, TagAttributes } from '@kbn/saved-objects-tagging-oss-plugin/common';
 
 export type TagSavedObject = SavedObject<TagAttributes>;
@@ -20,7 +20,6 @@ export type TagWithRelations = Tag & {
 // re-export types from oss definition
 export type {
   Tag,
-  CreateTagOptions,
   TagAttributes,
   TagWithOptionalId,
   GetAllTagsOptions,

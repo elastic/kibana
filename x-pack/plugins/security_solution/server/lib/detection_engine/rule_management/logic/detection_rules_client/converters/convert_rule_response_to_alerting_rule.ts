@@ -73,7 +73,7 @@ export const convertRuleResponseToAlertingRule = (
       from: rule.from,
       investigationFields: rule.investigation_fields,
       immutable: rule.immutable,
-      ruleSource: rule.rule_source ? convertObjectKeysToCamelCase(rule.rule_source) : undefined,
+      ruleSource: convertObjectKeysToCamelCase(rule.rule_source),
       license: rule.license,
       outputIndex: rule.output_index ?? '',
       timelineId: rule.timeline_id,
@@ -122,9 +122,7 @@ const typeSpecificSnakeToCamel = (params: TypeSpecificCreateProps): TypeSpecific
         timestampField: params.timestamp_field,
         eventCategoryOverride: params.event_category_override,
         tiebreakerField: params.tiebreaker_field,
-        alertSuppression: params.alert_suppression
-          ? convertObjectKeysToCamelCase(params.alert_suppression)
-          : undefined,
+        alertSuppression: convertObjectKeysToCamelCase(params.alert_suppression),
       };
     }
     case 'esql': {
@@ -132,9 +130,7 @@ const typeSpecificSnakeToCamel = (params: TypeSpecificCreateProps): TypeSpecific
         type: params.type,
         language: params.language,
         query: params.query,
-        alertSuppression: params.alert_suppression
-          ? convertObjectKeysToCamelCase(params.alert_suppression)
-          : undefined,
+        alertSuppression: convertObjectKeysToCamelCase(params.alert_suppression),
       };
     }
     case 'threat_match': {
@@ -154,9 +150,7 @@ const typeSpecificSnakeToCamel = (params: TypeSpecificCreateProps): TypeSpecific
         threatIndicatorPath: params.threat_indicator_path,
         concurrentSearches: params.concurrent_searches,
         itemsPerSearch: params.items_per_search,
-        alertSuppression: params.alert_suppression
-          ? convertObjectKeysToCamelCase(params.alert_suppression)
-          : undefined,
+        alertSuppression: convertObjectKeysToCamelCase(params.alert_suppression),
       };
     }
     case 'query': {
@@ -168,9 +162,7 @@ const typeSpecificSnakeToCamel = (params: TypeSpecificCreateProps): TypeSpecific
         query: params.query ?? '',
         filters: params.filters,
         savedId: params.saved_id,
-        alertSuppression: params.alert_suppression
-          ? convertObjectKeysToCamelCase(params.alert_suppression)
-          : undefined,
+        alertSuppression: convertObjectKeysToCamelCase(params.alert_suppression),
       };
     }
     case 'saved_query': {
@@ -182,9 +174,7 @@ const typeSpecificSnakeToCamel = (params: TypeSpecificCreateProps): TypeSpecific
         filters: params.filters,
         savedId: params.saved_id,
         dataViewId: params.data_view_id,
-        alertSuppression: params.alert_suppression
-          ? convertObjectKeysToCamelCase(params.alert_suppression)
-          : undefined,
+        alertSuppression: convertObjectKeysToCamelCase(params.alert_suppression),
       };
     }
     case 'threshold': {
@@ -207,9 +197,7 @@ const typeSpecificSnakeToCamel = (params: TypeSpecificCreateProps): TypeSpecific
         type: params.type,
         anomalyThreshold: params.anomaly_threshold,
         machineLearningJobId: normalizeMachineLearningJobIds(params.machine_learning_job_id),
-        alertSuppression: params.alert_suppression
-          ? convertObjectKeysToCamelCase(params.alert_suppression)
-          : undefined,
+        alertSuppression: convertObjectKeysToCamelCase(params.alert_suppression),
       };
     }
     case 'new_terms': {
@@ -222,9 +210,7 @@ const typeSpecificSnakeToCamel = (params: TypeSpecificCreateProps): TypeSpecific
         filters: params.filters,
         language: params.language ?? 'kuery',
         dataViewId: params.data_view_id,
-        alertSuppression: params.alert_suppression
-          ? convertObjectKeysToCamelCase(params.alert_suppression)
-          : undefined,
+        alertSuppression: convertObjectKeysToCamelCase(params.alert_suppression),
       };
     }
     default: {

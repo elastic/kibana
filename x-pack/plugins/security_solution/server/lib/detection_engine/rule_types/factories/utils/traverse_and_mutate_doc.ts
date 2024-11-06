@@ -8,8 +8,7 @@
 import { ecsFieldMap } from '@kbn/alerts-as-data-utils';
 import { flattenWithPrefix } from '@kbn/securitysolution-rules';
 
-import { isPlainObject, isArray } from 'lodash';
-import { set } from '@kbn/safer-lodash-set';
+import { isPlainObject, isArray, set } from 'lodash';
 
 import type { SearchTypes } from '../../../../../../common/detection_engine/types';
 import { isValidIpType } from './ecs_types_validators/is_valid_ip_type';

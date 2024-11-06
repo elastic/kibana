@@ -36,7 +36,6 @@ function toMonitorManagementListQueryArgs(
     monitorQueryIds: pageState.monitorQueryIds,
     searchFields: [],
     internal: true,
-    showFromAllSpaces: pageState.showFromAllSpaces,
   };
 }
 
@@ -51,18 +50,10 @@ export const fetchMonitorManagementList = async (
   });
 };
 
-export const fetchDeleteMonitor = async ({
-  configIds,
-  spaceId,
-}: {
-  configIds: string[];
-  spaceId?: string;
-}): Promise<void> => {
-  const baseUrl = SYNTHETICS_API_URLS.SYNTHETICS_MONITORS;
-
+export const fetchDeleteMonitor = async ({ configIds }: { configIds: string[] }): Promise<void> => {
   return await apiService.delete(
-    baseUrl,
-    { version: INITIAL_REST_VERSION, spaceId },
+    SYNTHETICS_API_URLS.SYNTHETICS_MONITORS,
+    { version: INITIAL_REST_VERSION },
     {
       ids: configIds,
     }
@@ -101,10 +92,6 @@ export const createGettingStartedMonitor = async ({
   });
 };
 
-export const fetchMonitorFilters = async ({
-  showFromAllSpaces = false,
-}: {
-  showFromAllSpaces?: boolean;
-}): Promise<MonitorFiltersResult> => {
-  return await apiService.get(SYNTHETICS_API_URLS.FILTERS, { showFromAllSpaces });
+export const fetchMonitorFilters = async (): Promise<MonitorFiltersResult> => {
+  return await apiService.get(SYNTHETICS_API_URLS.FILTERS);
 };

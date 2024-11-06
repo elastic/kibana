@@ -11,8 +11,7 @@ import type { RouteDefinitionParams } from '..';
  * Defines routes required for the Account Management view.
  */
 export function defineAccountManagementRoutes({ httpResources }: RouteDefinitionParams) {
-  httpResources.register(
-    { path: '/security/account', validate: false, options: { excludeFromOAS: true } },
-    (context, req, res) => res.renderCoreApp()
+  httpResources.register({ path: '/security/account', validate: false }, (context, req, res) =>
+    res.renderCoreApp()
   );
 }

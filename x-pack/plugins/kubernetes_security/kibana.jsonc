@@ -1,15 +1,11 @@
 {
   "type": "plugin",
   "id": "@kbn/kubernetes-security-plugin",
-  "owner": [
-    "@elastic/kibana-cloud-security-posture"
-  ],
-  "group": "security",
-  "visibility": "private",
+  "owner": "@elastic/kibana-cloud-security-posture",
   "plugin": {
     "id": "kubernetesSecurity",
-    "browser": true,
     "server": true,
+    "browser": true,
     "requiredPlugins": [
       "data",
       "timelines",

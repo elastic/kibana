@@ -63,11 +63,11 @@ describe('checkRuleExceptionReferences', () => {
       [
         {
           error: {
-            ruleId: 'rule-1',
             message:
               'Rule with rule_id: "rule-1" references a non existent exception list of list_id: "my-list". Reference has been removed.',
-            type: 'unknown',
+            status_code: 400,
           },
+          rule_id: 'rule-1',
         },
       ],
       [],
@@ -94,11 +94,11 @@ describe('checkRuleExceptionReferences', () => {
       [
         {
           error: {
-            ruleId: 'rule-1',
             message:
               'Rule with rule_id: "rule-1" references a non existent exception list of list_id: "my-list". Reference has been removed.',
-            type: 'unknown',
+            status_code: 400,
           },
+          rule_id: 'rule-1',
         },
       ],
       [],
@@ -127,9 +127,9 @@ describe('checkRuleExceptionReferences', () => {
           error: {
             message:
               'Rule with rule_id: "rule-1" references a non existent exception list of list_id: "my-list". Reference has been removed.',
-            ruleId: 'rule-1',
-            type: 'unknown',
+            status_code: 400,
           },
+          rule_id: 'rule-1',
         },
       ],
       [],

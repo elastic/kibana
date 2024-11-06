@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { PluginInitializerContext } from '@kbn/core/server';
+import { PluginInitializerContext } from '@kbn/core/server';
 
 export { config } from './config';
 export type {
@@ -14,6 +14,7 @@ export type {
   CreateTagClientOptions,
 } from './types';
 export type { IAssignmentService } from './services';
+export type { ITagsClient } from '../common';
 
 export const plugin = async (initializerContext: PluginInitializerContext) => {
   const { SavedObjectTaggingPlugin } = await import('./plugin');

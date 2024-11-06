@@ -8,6 +8,8 @@
 import { useMemo } from 'react';
 import { SourcererScopeName } from '../../../../../sourcerer/store/model';
 import { useSourcererDataView } from '../../../../../sourcerer/containers';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
+import { defaultHeaders } from '../../body/column_headers/default_headers';
 import { requiredFieldsForActions } from '../../../../../detections/components/alerts_table/default_config';
 import { defaultUdtHeaders } from '../../unified_components/default_headers';
 import type { ColumnHeaderOptions } from '../../../../../../common/types';
@@ -16,7 +18,16 @@ import { memoizedGetTimelineColumnHeaders } from './utils';
 export const useTimelineColumns = (columns: ColumnHeaderOptions[]) => {
   const { browserFields } = useSourcererDataView(SourcererScopeName.timeline);
 
-  const localColumns = useMemo(() => columns ?? defaultUdtHeaders, [columns]);
+  const unifiedComponentsInTimelineDisabled = useIsExperimentalFeatureEnabled(
+    'unifiedComponentsInTimelineDisabled'
+  );
+
+  const defaultColumns = useMemo(
+    () => (!unifiedComponentsInTimelineDisabled ? defaultUdtHeaders : defaultHeaders),
+    [unifiedComponentsInTimelineDisabled]
+  );
+
+  const localColumns = useMemo(() => columns ?? defaultColumns, [columns, defaultColumns]);
 
   const augmentedColumnHeaders = memoizedGetTimelineColumnHeaders(
     localColumns,
@@ -32,11 +43,11 @@ export const useTimelineColumns = (columns: ColumnHeaderOptions[]) => {
 
   return useMemo(
     () => ({
-      defaultColumns: defaultUdtHeaders,
+      defaultColumns,
       localColumns,
       augmentedColumnHeaders,
       timelineQueryFieldsFromColumns,
     }),
-    [augmentedColumnHeaders, timelineQueryFieldsFromColumns, localColumns]
+    [augmentedColumnHeaders, defaultColumns, timelineQueryFieldsFromColumns, localColumns]
   );
 };

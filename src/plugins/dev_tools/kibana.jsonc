@@ -1,15 +1,11 @@
 {
   "type": "plugin",
   "id": "@kbn/dev-tools-plugin",
-  "owner": [
-    "@elastic/kibana-management"
-  ],
-  "group": "platform",
-  "visibility": "shared",
+  "owner": "@elastic/kibana-management",
   "plugin": {
     "id": "devTools",
-    "browser": true,
     "server": true,
+    "browser": true,
     "requiredPlugins": [
       "urlForwarding"
     ],

@@ -42,6 +42,7 @@ import {
   QUICK_PROMPT_BADGE,
   ADD_NEW_CONNECTOR,
   SHOW_ANONYMIZED_BUTTON,
+  ASSISTANT_SETTINGS_BUTTON,
   SEND_TO_TIMELINE_BUTTON,
 } from '../screens/ai_assistant';
 import { TOASTER } from '../screens/alerts_detection_rules';
@@ -223,4 +224,5 @@ export const assertConversationReadOnly = () => {
   cy.get(CHAT_CONTEXT_MENU).should('be.disabled');
   cy.get(FLYOUT_NAV_TOGGLE).should('be.disabled');
   cy.get(NEW_CHAT).should('be.disabled');
+  cy.get(ASSISTANT_SETTINGS_BUTTON).should('be.disabled');
 };

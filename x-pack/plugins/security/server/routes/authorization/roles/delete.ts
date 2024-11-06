@@ -29,11 +29,6 @@ export function defineDeleteRolesRoutes({ router }: RouteDefinitionParams) {
           request: {
             params: schema.object({ name: schema.string({ minLength: 1 }) }),
           },
-          response: {
-            204: {
-              description: 'Indicates a successful call.',
-            },
-          },
         },
       },
       createLicensedRouteHandler(async (context, request, response) => {

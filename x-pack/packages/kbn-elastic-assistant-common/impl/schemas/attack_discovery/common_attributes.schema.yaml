@@ -12,7 +12,9 @@ components:
       required:
         - 'alertIds'
         - 'detailsMarkdown'
+        - 'entitySummaryMarkdown'
         - 'summaryMarkdown'
+        - 'timestamp'
         - 'title'
       properties:
         alertIds:

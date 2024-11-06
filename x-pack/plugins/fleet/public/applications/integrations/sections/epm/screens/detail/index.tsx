@@ -90,7 +90,6 @@ import { Configs } from './configs';
 
 import './index.scss';
 import type { InstallPkgRouteOptions } from './utils/get_install_route_options';
-import { InstallButton } from './settings/install_button';
 
 export type DetailViewPanelName =
   | 'overview'
@@ -363,23 +362,13 @@ export function Detail() {
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiFlexGroup gutterSize="xs">
-                    {packageInfo?.type === 'content' ? (
-                      <EuiFlexItem grow={false}>
-                        <EuiBadge color="default">
-                          {i18n.translate('xpack.fleet.epm.contentPackageBadgeLabel', {
-                            defaultMessage: 'Content only',
-                          })}
-                        </EuiBadge>
-                      </EuiFlexItem>
-                    ) : (
-                      <EuiFlexItem grow={false}>
-                        <EuiBadge color="default">
-                          {i18n.translate('xpack.fleet.epm.elasticAgentBadgeLabel', {
-                            defaultMessage: 'Elastic Agent',
-                          })}
-                        </EuiBadge>
-                      </EuiFlexItem>
-                    )}
+                    <EuiFlexItem grow={false}>
+                      <EuiBadge color="default">
+                        {i18n.translate('xpack.fleet.epm.elasticAgentBadgeLabel', {
+                          defaultMessage: 'Elastic Agent',
+                        })}
+                      </EuiBadge>
+                    </EuiFlexItem>
                     {packageInfo?.release && packageInfo.release !== 'ga' ? (
                       <EuiFlexItem grow={false}>
                         <HeaderReleaseBadge release={getPackageReleaseLabel(packageInfo.version)} />
@@ -531,7 +520,7 @@ export function Detail() {
                   </EuiFlexGroup>
                 ),
               },
-              ...(isInstalled && packageInfo.type !== 'content'
+              ...(isInstalled
                 ? [
                     { isDivider: true },
                     {
@@ -543,37 +532,31 @@ export function Detail() {
                     },
                   ]
                 : []),
-              ...(packageInfo.type === 'content'
-                ? !isInstalled
-                  ? [{ isDivider: true }, { content: <InstallButton {...packageInfo} /> }]
-                  : [] // if content package is already installed, don't show install button in header
-                : [
-                    { isDivider: true },
-                    {
-                      content: (
-                        <WithGuidedOnboardingTour
-                          packageKey={pkgkey}
-                          tourType={'addIntegrationButton'}
-                          isTourVisible={isOverviewPage && isGuidedOnboardingActive}
-                          tourOffset={10}
-                        >
-                          <AddIntegrationButton
-                            userCanInstallPackages={userCanInstallPackages}
-                            href={getHref('add_integration_to_policy', {
-                              pkgkey,
-                              ...(integration ? { integration } : {}),
-                              ...(agentPolicyIdFromContext
-                                ? { agentPolicyId: agentPolicyIdFromContext }
-                                : {}),
-                            })}
-                            missingSecurityConfiguration={missingSecurityConfiguration}
-                            packageName={integrationInfo?.title || packageInfo.title}
-                            onClick={handleAddIntegrationPolicyClick}
-                          />
-                        </WithGuidedOnboardingTour>
-                      ),
-                    },
-                  ]),
+              { isDivider: true },
+              {
+                content: (
+                  <WithGuidedOnboardingTour
+                    packageKey={pkgkey}
+                    tourType={'addIntegrationButton'}
+                    isTourVisible={isOverviewPage && isGuidedOnboardingActive}
+                    tourOffset={10}
+                  >
+                    <AddIntegrationButton
+                      userCanInstallPackages={userCanInstallPackages}
+                      href={getHref('add_integration_to_policy', {
+                        pkgkey,
+                        ...(integration ? { integration } : {}),
+                        ...(agentPolicyIdFromContext
+                          ? { agentPolicyId: agentPolicyIdFromContext }
+                          : {}),
+                      })}
+                      missingSecurityConfiguration={missingSecurityConfiguration}
+                      packageName={integrationInfo?.title || packageInfo.title}
+                      onClick={handleAddIntegrationPolicyClick}
+                    />
+                  </WithGuidedOnboardingTour>
+                ),
+              },
             ].map((item, index) => (
               <EuiFlexItem grow={false} key={index} data-test-subj={item['data-test-subj']}>
                 {item.isDivider ?? false ? (
@@ -636,7 +619,7 @@ export function Detail() {
       },
     ];
 
-    if (canReadIntegrationPolicies && isInstalled && packageInfo.type !== 'content') {
+    if (canReadIntegrationPolicies && isInstalled) {
       tabs.push({
         id: 'policies',
         name: (

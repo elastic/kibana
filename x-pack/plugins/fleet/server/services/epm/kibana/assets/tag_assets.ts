@@ -9,8 +9,7 @@ import { v5 as uuidv5 } from 'uuid';
 import { uniqBy } from 'lodash';
 import type { SavedObjectsImportSuccess } from '@kbn/core-saved-objects-common';
 import { taggableTypes } from '@kbn/saved-objects-tagging-plugin/common/constants';
-import type { IAssignmentService } from '@kbn/saved-objects-tagging-plugin/server';
-import type { ITagsClient } from '@kbn/saved-objects-tagging-plugin/common/types';
+import type { IAssignmentService, ITagsClient } from '@kbn/saved-objects-tagging-plugin/server';
 
 import type { KibanaAssetType } from '../../../../../common';
 import type { PackageSpecTags } from '../../../../types';

@@ -101,6 +101,12 @@ export const rolloverThresholdsValidator: ValidationFunc = ({ form, path }) => {
   }
 };
 
+export const integerValidator: ValidationFunc<FormInternal, string, string> = (arg) => {
+  if (!Number.isInteger(Number(arg.value ?? ''))) {
+    return { message: i18nTexts.editPolicy.errors.integerRequired };
+  }
+};
+
 export const createPolicyNameValidations = ({
   policies,
   isClonedPolicy,

@@ -70,7 +70,8 @@ const ProjectTopNav = () => {
         <EuiHeaderSectionItem>
           <EuiHeaderLinks gutterSize="xs">
             <ConnectedDiscoverLink />
-            <ConditionalVerticalRule Component={ConnectedDatasetQualityLink()} />
+            <VerticalRule />
+            <ConnectedDatasetQualityLink />
             <VerticalRule />
             <FeedbackLink />
             <VerticalRule />
@@ -146,7 +147,8 @@ const ClassicTopNav = () => {
         <EuiHeaderSectionItem>
           <EuiHeaderLinks gutterSize="xs">
             <ConnectedDiscoverLink />
-            <ConditionalVerticalRule Component={ConnectedDatasetQualityLink()} />
+            <VerticalRule />
+            <ConnectedDatasetQualityLink />
             <VerticalRule />
             <AlertsPopover />
             <VerticalRule />
@@ -163,11 +165,3 @@ const VerticalRule = styled.span`
   height: 20px;
   background-color: ${euiThemeVars.euiColorLightShade};
 `;
-
-const ConditionalVerticalRule = ({ Component }: { Component: JSX.Element | null }) =>
-  Component && (
-    <>
-      <VerticalRule />
-      {Component}
-    </>
-  );

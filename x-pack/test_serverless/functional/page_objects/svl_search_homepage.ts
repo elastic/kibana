@@ -64,8 +64,5 @@ export function SvlSearchHomePageProvider({ getService }: FtrProviderContext) {
         keyName
       );
     },
-    async expectAIAssistantToExist() {
-      await testSubjects.existOrFail('AiAssistantAppNavControlButton');
-    },
   };
 }

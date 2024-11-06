@@ -14,11 +14,8 @@ import type { AssistantCardMetadata } from './types';
 
 export const checkAssistantCardComplete: OnboardingCardCheckComplete<
   AssistantCardMetadata
-> = async ({ http, application }) => {
+> = async ({ http }) => {
   const allConnectors = await loadConnectors({ http });
-  const {
-    capabilities: { actions },
-  } = application;
 
   const aiConnectors = allConnectors.reduce((acc: AIConnector[], connector) => {
     if (!connector.isMissingSecrets && AllowedActionTypeIds.includes(connector.actionTypeId)) {
@@ -40,8 +37,6 @@ export const checkAssistantCardComplete: OnboardingCardCheckComplete<
     completeBadgeText,
     metadata: {
       connectors: aiConnectors,
-      canExecuteConnectors: Boolean(actions?.show && actions?.execute),
-      canCreateConnectors: Boolean(actions?.save),
     },
   };
 };

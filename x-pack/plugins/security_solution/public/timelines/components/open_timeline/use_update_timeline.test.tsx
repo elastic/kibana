@@ -116,7 +116,7 @@ describe('dispatchUpdateTimeline', () => {
           ...mockTimelineModel,
           version: null,
           updated: undefined,
-          changed: true,
+          changed: undefined,
         },
       });
     });

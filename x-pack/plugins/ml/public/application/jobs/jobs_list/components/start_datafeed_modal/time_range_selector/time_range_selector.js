@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import './_time_range_selector.scss';
 import PropTypes from 'prop-types';
 import React, { Component, useState, useEffect } from 'react';
 
@@ -15,7 +16,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { TIME_FORMAT } from '@kbn/ml-date-utils';
 import { ManagedJobsWarningCallout } from '../../confirm_modals/managed_jobs_warning_callout';
-import { TimeRangeSelectorWrapper } from './time_range_selector_wrapper';
 
 export class TimeRangeSelector extends Component {
   constructor(props) {
@@ -166,7 +166,7 @@ export class TimeRangeSelector extends Component {
   render() {
     const { startItems, endItems } = this.getTabItems();
     return (
-      <TimeRangeSelectorWrapper>
+      <div className="time-range-selector">
         {this.props.hasManagedJob === true && this.state.endTab !== 0 ? (
           <>
             <ManagedJobsWarningCallout
@@ -213,7 +213,7 @@ export class TimeRangeSelector extends Component {
             />
           </EuiFlexItem>
         </EuiFlexGroup>
-      </TimeRangeSelectorWrapper>
+      </div>
     );
   }
 }

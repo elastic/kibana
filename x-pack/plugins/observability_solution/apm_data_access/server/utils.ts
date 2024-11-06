@@ -15,4 +15,3 @@ export {
 } from './lib/helpers';
 
 export { withApmSpan } from './utils/with_apm_span';
-export { unflattenKnownApmEventFields } from './utils/unflatten_known_fields';

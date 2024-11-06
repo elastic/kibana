@@ -7,7 +7,7 @@
 
 import moment from 'moment';
 import type { ObjectRemover } from './object_remover';
-import { getTestAlertData, getTestConnectorData } from './get_test_data';
+import { getTestAlertData, getTestActionData } from './get_test_data';
 
 export async function createAlertManualCleanup({
   supertest,
@@ -55,7 +55,7 @@ export async function createAlert({
   return createdAlert;
 }
 
-export async function createConnector({
+export async function createAction({
   supertest,
   objectRemover,
   overwrites = {},
@@ -67,9 +67,9 @@ export async function createConnector({
   const { body: createdAction } = await supertest
     .post('/api/actions/connector')
     .set('kbn-xsrf', 'foo')
-    .send(getTestConnectorData(overwrites))
+    .send(getTestActionData(overwrites))
     .expect(200);
-  objectRemover.add(createdAction.id, 'connector', 'actions');
+  objectRemover.add(createdAction.id, 'action', 'actions');
   return createdAction;
 }
 

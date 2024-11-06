@@ -10,6 +10,7 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiInMemoryTable } from '@elastic/eui';
 import type { RelatedCase } from '@kbn/cases-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { ExpandablePanel } from '@kbn/security-solution-common';
 import { CellTooltipWrapper } from '../../shared/components/cell_tooltip_wrapper';
 import { CaseDetailsLink } from '../../../../common/components/links';
 import {
@@ -17,7 +18,6 @@ import {
   CORRELATIONS_DETAILS_CASES_SECTION_TEST_ID,
 } from './test_ids';
 import { useFetchRelatedCases } from '../../shared/hooks/use_fetch_related_cases';
-import { ExpandablePanel } from '../../../shared/components/expandable_panel';
 
 const ICON = 'warning';
 

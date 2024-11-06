@@ -40,13 +40,13 @@ export const getTopNavBadges = ({
     });
 
   const defaultBadges = topNavCustomization?.defaultBadges;
-  const entries: TopNavMenuBadgeProps[] = [];
+  const entries = [...(topNavCustomization?.getBadges?.() ?? [])];
 
   const isManaged = stateContainer.savedSearchState.getState().managed;
 
   if (hasUnsavedChanges && !defaultBadges?.unsavedChangesBadge?.disabled) {
-    entries.push(
-      getTopNavUnsavedChangesBadge({
+    entries.push({
+      data: getTopNavUnsavedChangesBadge({
         onRevert: async () => {
           dismissFlyouts([DiscoverFlyouts.lensEdit]);
           await stateContainer.actions.undoSavedSearchChanges();
@@ -62,20 +62,22 @@ export const getTopNavBadges = ({
               await saveSearch(true);
             }
           : undefined,
-      })
-    );
+      }),
+      order: defaultBadges?.unsavedChangesBadge?.order ?? 100,
+    });
   }
 
   if (isManaged) {
-    entries.push(
-      getManagedContentBadge(
+    entries.push({
+      data: getManagedContentBadge(
         i18n.translate('discover.topNav.managedContentLabel', {
           defaultMessage:
             'This saved search is managed by Elastic. Changes here must be saved to a new saved search.',
         })
-      )
-    );
+      ),
+      order: 101,
+    });
   }
 
-  return entries;
+  return entries.sort((a, b) => a.order - b.order).map((entry) => entry.data);
 };

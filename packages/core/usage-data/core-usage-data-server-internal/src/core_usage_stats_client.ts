@@ -37,7 +37,6 @@ import {
   takeUntil,
   tap,
 } from 'rxjs';
-import type { DeprecatedApiUsageFetcher } from '@kbn/core-usage-data-server';
 
 export const BULK_CREATE_STATS_PREFIX = 'apiCalls.savedObjectsBulkCreate';
 export const BULK_GET_STATS_PREFIX = 'apiCalls.savedObjectsBulkGet';
@@ -109,16 +108,6 @@ export interface CoreUsageEvent {
   types?: string[];
 }
 
-/**
- * Interface that models core events triggered by API deprecations. (e.g. SO HTTP API calls)
- * @internal
- */
-export interface CoreUsageDeprecatedApiEvent {
-  id: string;
-  resolved: boolean;
-  incrementBy: number;
-}
-
 /** @internal */
 export interface CoreUsageStatsClientParams {
   debugLogger: (message: string) => void;
@@ -127,7 +116,6 @@ export interface CoreUsageStatsClientParams {
   stop$: Observable<void>;
   incrementUsageCounter: (params: CoreIncrementCounterParams) => void;
   bufferTimeMs?: number;
-  fetchDeprecatedUsageStats: DeprecatedApiUsageFetcher;
 }
 
 /** @internal */
@@ -138,8 +126,6 @@ export class CoreUsageStatsClient implements ICoreUsageStatsClient {
   private readonly fieldsToIncrement$ = new Subject<string[]>();
   private readonly flush$ = new Subject<void>();
   private readonly coreUsageEvents$ = new Subject<CoreUsageEvent>();
-  private readonly coreUsageDeprecatedApiCalls$ = new Subject<CoreUsageDeprecatedApiEvent>();
-  private readonly fetchDeprecatedUsageStats: DeprecatedApiUsageFetcher;
 
   constructor({
     debugLogger,
@@ -148,12 +134,10 @@ export class CoreUsageStatsClient implements ICoreUsageStatsClient {
     stop$,
     incrementUsageCounter,
     bufferTimeMs = DEFAULT_BUFFER_TIME_MS,
-    fetchDeprecatedUsageStats,
   }: CoreUsageStatsClientParams) {
     this.debugLogger = debugLogger;
     this.basePath = basePath;
     this.repositoryPromise = repositoryPromise;
-    this.fetchDeprecatedUsageStats = fetchDeprecatedUsageStats;
     this.fieldsToIncrement$
       .pipe(
         takeUntil(stop$),
@@ -196,28 +180,6 @@ export class CoreUsageStatsClient implements ICoreUsageStatsClient {
       )
       .subscribe();
 
-    this.coreUsageDeprecatedApiCalls$
-      .pipe(
-        takeUntil(stop$),
-        tap(({ id, incrementBy, resolved }) => {
-          incrementUsageCounter({
-            counterName: id,
-            counterType: `deprecated_api_call:${resolved ? 'resolved' : 'total'}`,
-            incrementBy,
-          });
-
-          if (resolved) {
-            // increment number of times the marked_as_resolve has been called
-            incrementUsageCounter({
-              counterName: id,
-              counterType: 'deprecated_api_call:marked_as_resolved',
-              incrementBy: 1,
-            });
-          }
-        })
-      )
-      .subscribe();
-
     this.coreUsageEvents$
       .pipe(
         takeUntil(stop$),
@@ -251,20 +213,6 @@ export class CoreUsageStatsClient implements ICoreUsageStatsClient {
       // do nothing
     }
     return coreUsageStats;
-  }
-
-  public async incrementDeprecatedApi(
-    id: string,
-    { resolved = false, incrementBy = 1 }: { resolved: boolean; incrementBy: number }
-  ) {
-    const deprecatedField = resolved ? 'deprecated_api_calls_resolved' : 'deprecated_api_calls';
-    this.coreUsageDeprecatedApiCalls$.next({ id, resolved, incrementBy });
-    this.fieldsToIncrement$.next([`${deprecatedField}.total`]);
-  }
-
-  public async getDeprecatedApiUsageStats() {
-    const repository = await this.repositoryPromise;
-    return await this.fetchDeprecatedUsageStats({ soClient: repository });
   }
 
   public async incrementSavedObjectsBulkCreate(options: BaseIncrementOptions) {

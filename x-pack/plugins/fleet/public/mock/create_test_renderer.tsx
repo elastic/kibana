@@ -59,17 +59,7 @@ export interface TestRenderer {
   setHeaderActionMenu: Function;
 }
 
-// disable retries to avoid test flakiness
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: false,
-    },
-    mutations: {
-      retry: false,
-    },
-  },
-});
+const queryClient = new QueryClient();
 
 export const createFleetTestRendererMock = (): TestRenderer => {
   const basePath = '/mock';

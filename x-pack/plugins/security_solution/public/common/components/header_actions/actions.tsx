@@ -255,8 +255,8 @@ const ActionsComponent: React.FC<ActionProps> = ({
     onEventDetailsPanelOpened();
   }, [activeStep, incrementStep, isTourAnchor, isTourShown, onEventDetailsPanelOpened]);
 
-  const securitySolutionNotesDisabled = useIsExperimentalFeatureEnabled(
-    'securitySolutionNotesDisabled'
+  const securitySolutionNotesEnabled = useIsExperimentalFeatureEnabled(
+    'securitySolutionNotesEnabled'
   );
 
   /* only applicable for new event based notes */
@@ -270,7 +270,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
 
   /* note ids associated with the document AND attached to the current timeline, used for pinning */
   const timelineNoteIds = useMemo(() => {
-    if (!securitySolutionNotesDisabled) {
+    if (securitySolutionNotesEnabled) {
       // if timeline is unsaved, there is no notes associated to timeline yet
       return savedObjectId ? documentBasedNotesInTimeline.map((note) => note.noteId) : [];
     }
@@ -280,13 +280,13 @@ const ActionsComponent: React.FC<ActionProps> = ({
     eventId,
     documentBasedNotesInTimeline,
     savedObjectId,
-    securitySolutionNotesDisabled,
+    securitySolutionNotesEnabled,
   ]);
 
   /* note count of the document */
   const notesCount = useMemo(
-    () => (securitySolutionNotesDisabled ? timelineNoteIds.length : documentBasedNotes.length),
-    [documentBasedNotes, timelineNoteIds, securitySolutionNotesDisabled]
+    () => (securitySolutionNotesEnabled ? documentBasedNotes.length : timelineNoteIds.length),
+    [documentBasedNotes, timelineNoteIds, securitySolutionNotesEnabled]
   );
 
   // we hide the analyzer icon if the data is not available for the resolver

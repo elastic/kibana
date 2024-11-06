@@ -25,12 +25,8 @@ import {
 import {
   ActionSchedulerOptions,
   ActionsToSchedule,
-  AddSummarizedAlertsOpts,
   GetActionsToScheduleOpts,
-  HelperOpts,
   IActionScheduler,
-  IsExecutableActiveAlertOpts,
-  IsExecutableAlertOpts,
 } from '../types';
 import { TransformActionParamsOptions, transformActionParams } from '../../transform_action_params';
 import { injectActionParams } from '../../inject_action_params';
@@ -100,8 +96,7 @@ export class PerAlertActionScheduler<
   }
 
   public async getActionsToSchedule({
-    activeCurrentAlerts,
-    recoveredCurrentAlerts,
+    alerts,
   }: GetActionsToScheduleOpts<State, Context, ActionGroupIds, RecoveryActionGroupId>): Promise<
     ActionsToSchedule[]
   > {
@@ -111,9 +106,7 @@ export class PerAlertActionScheduler<
     }> = [];
     const results: ActionsToSchedule[] = [];
 
-    const activeCurrentAlertsArray = Object.values(activeCurrentAlerts || {});
-    const recoveredCurrentAlertsArray = Object.values(recoveredCurrentAlerts || {});
-
+    const alertsArray = Object.entries(alerts);
     for (const action of this.actions) {
       let summarizedAlerts = null;
 
@@ -140,26 +133,61 @@ export class PerAlertActionScheduler<
 
         logNumberOfFilteredAlerts({
           logger: this.context.logger,
-          numberOfAlerts: activeCurrentAlertsArray.length + recoveredCurrentAlertsArray.length,
+          numberOfAlerts: Object.entries(alerts).length,
           numberOfSummarizedAlerts: summarizedAlerts.all.count,
           action,
         });
       }
 
-      for (const alert of activeCurrentAlertsArray) {
-        if (
-          this.isExecutableAlert({ alert, action, summarizedAlerts }) &&
-          this.isExecutableActiveAlert({ alert, action })
-        ) {
-          this.addSummarizedAlerts({ alert, summarizedAlerts });
-          executables.push({ action, alert });
+      for (const [alertId, alert] of alertsArray) {
+        const alertMaintenanceWindowIds = alert.getMaintenanceWindowIds();
+        if (alertMaintenanceWindowIds.length !== 0) {
+          this.context.logger.debug(
+            `no scheduling of summary actions "${action.id}" for rule "${
+              this.context.rule.id
+            }": has active maintenance windows ${alertMaintenanceWindowIds.join(', ')}.`
+          );
+          continue;
         }
-      }
 
-      if (this.isRecoveredAction(action.group)) {
-        for (const alert of recoveredCurrentAlertsArray) {
-          if (this.isExecutableAlert({ alert, action, summarizedAlerts })) {
-            this.addSummarizedAlerts({ alert, summarizedAlerts });
+        if (alert.isFilteredOut(summarizedAlerts)) {
+          continue;
+        }
+
+        const actionGroup =
+          alert.getScheduledActionOptions()?.actionGroup ||
+          this.context.ruleType.recoveryActionGroup.id;
+
+        if (!this.ruleTypeActionGroups!.has(actionGroup)) {
+          this.context.logger.error(
+            `Invalid action group "${actionGroup}" for rule "${this.context.ruleType.id}".`
+          );
+          continue;
+        }
+
+        // only actions with notifyWhen set to "on status change" should return
+        // notifications for flapping pending recovered alerts
+        if (
+          alert.getPendingRecoveredCount() > 0 &&
+          action?.frequency?.notifyWhen !== RuleNotifyWhen.CHANGE
+        ) {
+          continue;
+        }
+
+        if (summarizedAlerts) {
+          const alertAsData = summarizedAlerts.all.data.find(
+            (alertHit: AlertHit) => alertHit._id === alert.getUuid()
+          );
+          if (alertAsData) {
+            alert.setAlertAsData(alertAsData);
+          }
+        }
+
+        if (action.group === actionGroup && !this.isAlertMuted(alertId)) {
+          if (
+            this.isRecoveredAlert(action.group) ||
+            this.isExecutableActiveAlert({ alert, action })
+          ) {
             executables.push({ action, alert });
           }
         }
@@ -257,7 +285,7 @@ export class PerAlertActionScheduler<
         },
       });
 
-      if (!this.isRecoveredAction(actionGroup)) {
+      if (!this.isRecoveredAlert(actionGroup)) {
         if (isActionOnInterval(action)) {
           alert.updateLastScheduledActions(
             action.group as ActionGroupIds,
@@ -274,34 +302,30 @@ export class PerAlertActionScheduler<
     return results;
   }
 
-  private isExecutableAlert({
-    alert,
-    action,
-    summarizedAlerts,
-  }: IsExecutableAlertOpts<ActionGroupIds, RecoveryActionGroupId>) {
-    return (
-      !this.hasActiveMaintenanceWindow({ alert, action }) &&
-      !this.isAlertMuted(alert) &&
-      !this.hasPendingCountButNotNotifyOnChange({ alert, action }) &&
-      !alert.isFilteredOut(summarizedAlerts)
-    );
+  private isAlertMuted(alertId: string) {
+    const muted = this.mutedAlertIdsSet.has(alertId);
+    if (muted) {
+      if (
+        !this.skippedAlerts[alertId] ||
+        (this.skippedAlerts[alertId] && this.skippedAlerts[alertId].reason !== Reasons.MUTED)
+      ) {
+        this.context.logger.debug(
+          `skipping scheduling of actions for '${alertId}' in rule ${this.context.ruleLabel}: rule is muted`
+        );
+      }
+      this.skippedAlerts[alertId] = { reason: Reasons.MUTED };
+      return true;
+    }
+    return false;
   }
 
-  private isExecutableActiveAlert({ alert, action }: IsExecutableActiveAlertOpts<ActionGroupIds>) {
-    if (!alert.hasScheduledActions()) {
-      return false;
-    }
-
-    const alertsActionGroup = alert.getScheduledActionOptions()?.actionGroup;
-
-    if (!this.isValidActionGroup(alertsActionGroup as ActionGroupIds)) {
-      return false;
-    }
-
-    if (action.group !== alertsActionGroup) {
-      return false;
-    }
-
+  private isExecutableActiveAlert({
+    alert,
+    action,
+  }: {
+    alert: Alert<AlertInstanceState, AlertInstanceContext, ActionGroupIds | RecoveryActionGroupId>;
+    action: RuleAction;
+  }) {
     const alertId = alert.getId();
     const {
       context: { rule, logger, ruleLabel },
@@ -345,86 +369,10 @@ export class PerAlertActionScheduler<
       }
     }
 
-    return true;
+    return alert.hasScheduledActions();
   }
 
-  private isRecoveredAction(actionGroup: string) {
+  private isRecoveredAlert(actionGroup: string) {
     return actionGroup === this.context.ruleType.recoveryActionGroup.id;
-  }
-
-  private isAlertMuted(
-    alert: Alert<AlertInstanceState, AlertInstanceContext, ActionGroupIds | RecoveryActionGroupId>
-  ) {
-    const alertId = alert.getId();
-    const muted = this.mutedAlertIdsSet.has(alertId);
-    if (muted) {
-      if (
-        !this.skippedAlerts[alertId] ||
-        (this.skippedAlerts[alertId] && this.skippedAlerts[alertId].reason !== Reasons.MUTED)
-      ) {
-        this.context.logger.debug(
-          `skipping scheduling of actions for '${alertId}' in rule ${this.context.ruleLabel}: rule is muted`
-        );
-      }
-      this.skippedAlerts[alertId] = { reason: Reasons.MUTED };
-      return true;
-    }
-    return false;
-  }
-
-  private isValidActionGroup(actionGroup: ActionGroupIds | RecoveryActionGroupId) {
-    if (!this.ruleTypeActionGroups!.has(actionGroup)) {
-      this.context.logger.error(
-        `Invalid action group "${actionGroup}" for rule "${this.context.ruleType.id}".`
-      );
-      return false;
-    }
-    return true;
-  }
-
-  private hasActiveMaintenanceWindow({
-    alert,
-    action,
-  }: HelperOpts<ActionGroupIds, RecoveryActionGroupId>) {
-    const alertMaintenanceWindowIds = alert.getMaintenanceWindowIds();
-    if (alertMaintenanceWindowIds.length !== 0) {
-      this.context.logger.debug(
-        `no scheduling of summary actions "${action.id}" for rule "${
-          this.context.rule.id
-        }": has active maintenance windows ${alertMaintenanceWindowIds.join(', ')}.`
-      );
-      return true;
-    }
-
-    return false;
-  }
-
-  private addSummarizedAlerts({
-    alert,
-    summarizedAlerts,
-  }: AddSummarizedAlertsOpts<ActionGroupIds, RecoveryActionGroupId>) {
-    if (summarizedAlerts) {
-      const alertAsData = summarizedAlerts.all.data.find(
-        (alertHit: AlertHit) => alertHit._id === alert.getUuid()
-      );
-      if (alertAsData) {
-        alert.setAlertAsData(alertAsData);
-      }
-    }
-  }
-
-  private hasPendingCountButNotNotifyOnChange({
-    alert,
-    action,
-  }: HelperOpts<ActionGroupIds, RecoveryActionGroupId>) {
-    // only actions with notifyWhen set to "on status change" should return
-    // notifications for flapping pending recovered alerts
-    if (
-      alert.getPendingRecoveredCount() > 0 &&
-      action?.frequency?.notifyWhen !== RuleNotifyWhen.CHANGE
-    ) {
-      return true;
-    }
-    return false;
   }
 }

@@ -30,7 +30,7 @@ authentication and built-in users, see
 === Roles
 
 To manage roles, open the main menu, then click *Stack Management > Roles*, or use
-the {api-kibana}/group/endpoint-roles[role APIs]. For more information on configuring roles for {kib}, see <<xpack-security-authorization,Granting access to {kib}>>.
+the <<role-management-api>>. For more information on configuring roles for {kib}, see <<xpack-security-authorization, Granting access to {kib}>>.
 
 For a more holistic overview of configuring roles for the entire stack,
 see {ref}/authorization.html[User authorization].
@@ -43,7 +43,7 @@ cause Kibana's authorization to behave unexpectedly.
 ============================================================================
 
 include::authorization/index.asciidoc[]
-include::authorization/kibana-privileges.asciidoc[leveloffset=+2]
+include::authorization/kibana-privileges.asciidoc[]
 include::api-keys/index.asciidoc[]
 include::role-mappings/index.asciidoc[]
 include::fips-140-2.asciidoc[]

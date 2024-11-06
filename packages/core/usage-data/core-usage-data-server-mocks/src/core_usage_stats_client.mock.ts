@@ -12,7 +12,6 @@ import type { ICoreUsageStatsClient } from '@kbn/core-usage-data-base-server-int
 const createUsageStatsClientMock = () =>
   ({
     getUsageStats: jest.fn().mockResolvedValue({}),
-    getDeprecatedApiUsageStats: jest.fn().mockResolvedValue([]),
     incrementSavedObjectsBulkCreate: jest.fn().mockResolvedValue(null),
     incrementSavedObjectsBulkGet: jest.fn().mockResolvedValue(null),
     incrementSavedObjectsBulkResolve: jest.fn().mockResolvedValue(null),

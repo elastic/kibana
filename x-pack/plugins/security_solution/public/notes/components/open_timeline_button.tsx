@@ -8,6 +8,7 @@
 import React, { memo, useCallback } from 'react';
 import { EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { useQueryTimelineById } from '../../timelines/components/open_timeline/helpers';
 import { OPEN_TIMELINE_BUTTON_TEST_ID } from './test_ids';
 import type { Note } from '../../../common/api/timeline';
@@ -31,6 +32,10 @@ export interface OpenTimelineButtonIconProps {
  * Renders a button to open the timeline associated with a note
  */
 export const OpenTimelineButtonIcon = memo(({ note, index }: OpenTimelineButtonIconProps) => {
+  const unifiedComponentsInTimelineDisabled = useIsExperimentalFeatureEnabled(
+    'unifiedComponentsInTimelineDisabled'
+  );
+
   const queryTimelineById = useQueryTimelineById();
   const openTimeline = useCallback(
     ({ timelineId }: { timelineId: string }) =>
@@ -39,8 +44,9 @@ export const OpenTimelineButtonIcon = memo(({ note, index }: OpenTimelineButtonI
         onOpenTimeline: undefined,
         timelineId,
         timelineType: undefined,
+        unifiedComponentsInTimelineDisabled,
       }),
-    [queryTimelineById]
+    [queryTimelineById, unifiedComponentsInTimelineDisabled]
   );
 
   return (

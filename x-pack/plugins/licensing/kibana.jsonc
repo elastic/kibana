@@ -1,15 +1,11 @@
 {
   "type": "plugin",
   "id": "@kbn/licensing-plugin",
-  "owner": [
-    "@elastic/kibana-core"
-  ],
-  "group": "platform",
-  "visibility": "shared",
+  "owner": "@elastic/kibana-core",
   "plugin": {
     "id": "licensing",
-    "browser": true,
     "server": true,
+    "browser": true,
     "configPath": [
       "xpack",
       "licensing"

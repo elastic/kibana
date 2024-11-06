@@ -33,9 +33,3 @@ export const RANDOM_SAMPLER_SEED = 3867412;
 
 /** Highlighting color for charts */
 export const LOG_RATE_ANALYSIS_HIGHLIGHT_COLOR = 'orange';
-
-/**  */
-export const EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE = 'aiopsLogRateAnalysisEmbeddable' as const;
-
-/**  */
-export const LOG_RATE_ANALYSIS_DATA_VIEW_REF_NAME = 'aiopsLogRateAnalysisEmbeddableDataViewId';

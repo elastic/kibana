@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { ENTITY_DEFINITION_ID } from '@kbn/observability-shared-plugin/common';
+import { ENTITY_DEFINITION_ID, ENTITY_TYPE } from '@kbn/observability-shared-plugin/common';
+import { EntityType, defaultEntityTypes, defaultEntityDefinitions } from '../../../common/entities';
 
-export const getBuiltinEntityDefinitionIdESQLWhereClause = () =>
-  `WHERE ${ENTITY_DEFINITION_ID} LIKE "builtin_*"`;
+export const getEntityTypesWhereClause = (entityTypes: EntityType[] = defaultEntityTypes) =>
+  `WHERE ${ENTITY_TYPE} IN (${entityTypes.map((entityType) => `"${entityType}"`).join()})`;
+
+export const getEntityDefinitionIdWhereClause = () =>
+  `WHERE ${ENTITY_DEFINITION_ID} IN (${[...defaultEntityDefinitions]
+    .map((buildin) => `"${buildin}"`)
+    .join()})`;

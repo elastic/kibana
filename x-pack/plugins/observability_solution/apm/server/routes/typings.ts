@@ -52,7 +52,6 @@ export interface APMRouteCreateOptions {
     tags: Array<
       | 'access:apm'
       | 'access:apm_write'
-      | 'access:apm_settings_write'
       | 'access:ml:canGetJobs'
       | 'access:ml:canCreateJob'
       | 'access:ml:canCloseJob'

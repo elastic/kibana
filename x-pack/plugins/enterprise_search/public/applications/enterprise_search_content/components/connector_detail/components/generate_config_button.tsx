@@ -12,15 +12,13 @@ import { i18n } from '@kbn/i18n';
 
 export interface GenerateConfigButtonProps {
   connectorId: string;
-  disabled?: boolean;
   generateConfiguration: (params: { connectorId: string }) => void;
   isGenerateLoading: boolean;
 }
 export const GenerateConfigButton: React.FC<GenerateConfigButtonProps> = ({
   connectorId,
-  disabled,
   generateConfiguration,
-  isGenerateLoading = false,
+  isGenerateLoading,
 }) => {
   return (
     <EuiFlexGroup direction="row" gutterSize="xs" responsive={false} alignItems="center">
@@ -28,7 +26,6 @@ export const GenerateConfigButton: React.FC<GenerateConfigButtonProps> = ({
         <EuiButton
           data-test-subj="entSearchContent-connector-configuration-generateConfigButton"
           data-telemetry-id="entSearchContent-connector-configuration-generateConfigButton"
-          disabled={disabled}
           fill
           iconType="sparkles"
           isLoading={isGenerateLoading}

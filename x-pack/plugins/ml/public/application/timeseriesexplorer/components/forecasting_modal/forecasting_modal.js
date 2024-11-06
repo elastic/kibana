@@ -53,7 +53,6 @@ function getDefaultState() {
     newForecastDuration: '1d',
     isNewForecastDurationValid: true,
     newForecastDurationErrors: [],
-    neverExpires: false,
     messages: [],
   };
 }
@@ -108,12 +107,6 @@ export class ForecastingModal extends Component {
       this.props.onForecastComplete(forecastToView.forecast_end_timestamp);
     }
     this.closeModal();
-  };
-
-  onNeverExpiresChange = (event) => {
-    this.setState({
-      neverExpires: event.target.checked,
-    });
   };
 
   onNewForecastDurationChange = (event) => {
@@ -270,7 +263,7 @@ export class ForecastingModal extends Component {
     const durationInSeconds = parseInterval(this.state.newForecastDuration).asSeconds();
 
     this.mlForecastService
-      .runForecast(this.props.job.job_id, `${durationInSeconds}s`, this.state.neverExpires)
+      .runForecast(this.props.job.job_id, `${durationInSeconds}s`)
       .then((resp) => {
         // Endpoint will return { acknowledged:true, id: <now timestamp> } before forecast is complete.
         // So wait for results and then refresh the dashboard to the end of the forecast.
@@ -558,8 +551,6 @@ export class ForecastingModal extends Component {
             runForecast={this.checkJobStateAndRunForecast}
             newForecastDuration={this.state.newForecastDuration}
             onNewForecastDurationChange={this.onNewForecastDurationChange}
-            onNeverExpiresChange={this.onNeverExpiresChange}
-            neverExpires={this.state.neverExpires}
             isNewForecastDurationValid={this.state.isNewForecastDurationValid}
             newForecastDurationErrors={this.state.newForecastDurationErrors}
             isForecastRequested={this.state.isForecastRequested}

@@ -7,7 +7,6 @@
 
 import { schema } from '@kbn/config-schema';
 import { rawRuleSchema as rawRuleSchemaV1 } from './v1';
-export * from './v1';
 
 export const flappingSchema = schema.object({
   lookBackWindow: schema.number(),

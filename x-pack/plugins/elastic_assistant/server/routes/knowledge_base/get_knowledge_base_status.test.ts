@@ -38,7 +38,6 @@ describe('Get Knowledge Base Status Route', () => {
       isModelDeployed: jest.fn().mockResolvedValue(true),
       isSetupInProgress: false,
       isSecurityLabsDocsLoaded: jest.fn().mockResolvedValue(true),
-      isUserDataExists: jest.fn().mockResolvedValue(true),
     });
 
     getKnowledgeBaseStatusRoute(server.router);
@@ -59,7 +58,6 @@ describe('Get Knowledge Base Status Route', () => {
         is_setup_available: true,
         pipeline_exists: true,
         security_labs_exists: true,
-        user_data_exists: true,
       });
     });
   });

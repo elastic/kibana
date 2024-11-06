@@ -54,7 +54,7 @@ export interface ObservabilityAIAssistantChatService {
       functions?: Array<Pick<FunctionDefinition, 'name' | 'description' | 'parameters'>>;
       functionCall?: string;
       signal: AbortSignal;
-      scopes: AssistantScope[];
+      scope: AssistantScope;
     }
   ) => Observable<ChatCompletionChunkEvent>;
   complete: (options: {
@@ -70,12 +70,12 @@ export interface ObservabilityAIAssistantChatService {
         };
     signal: AbortSignal;
     instructions?: AdHocInstruction[];
-    scopes: AssistantScope[];
+    scope: AssistantScope;
   }) => Observable<StreamingChatResponseEventWithoutError>;
   getFunctions: (options?: {
     contexts?: string[];
     filter?: string;
-    scopes: AssistantScope[];
+    scope: AssistantScope;
   }) => FunctionDefinition[];
   functions$: BehaviorSubject<FunctionDefinition[]>;
   hasFunction: (name: string) => boolean;
@@ -87,20 +87,12 @@ export interface ObservabilityAIAssistantChatService {
     response: { data?: string; content?: string },
     onActionClick: ChatActionClickHandler
   ) => React.ReactNode;
-  getScopes: () => AssistantScope[];
+  getScope: () => AssistantScope;
 }
 
 export interface ObservabilityAIAssistantConversationService {
-  openNewConversation: ({}: {
-    messages: Message[];
-    title?: string;
-    hideConversationList?: boolean;
-  }) => void;
-  predefinedConversation$: Observable<{
-    messages: Message[];
-    title?: string;
-    hideConversationList?: boolean;
-  }>;
+  openNewConversation: ({}: { messages: Message[]; title?: string }) => void;
+  predefinedConversation$: Observable<{ messages: Message[]; title?: string }>;
 }
 
 export interface ObservabilityAIAssistantService {
@@ -112,9 +104,9 @@ export interface ObservabilityAIAssistantService {
   getScreenContexts: () => ObservabilityAIAssistantScreenContext[];
   conversations: ObservabilityAIAssistantConversationService;
   navigate: (callback: () => void) => Promise<Observable<MessageAddEvent>>;
-  scope$: BehaviorSubject<AssistantScope[]>;
-  setScopes: (scope: AssistantScope[]) => void;
-  getScopes: () => AssistantScope[];
+  scope$: BehaviorSubject<AssistantScope>;
+  setScope: (scope: AssistantScope) => void;
+  getScope: () => AssistantScope;
 }
 
 export type RenderFunction<TArguments, TResponse extends FunctionResponse> = (options: {

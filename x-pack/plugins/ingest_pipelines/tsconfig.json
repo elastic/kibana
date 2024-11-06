@@ -36,9 +36,7 @@
     "@kbn/react-kibana-context-theme",
     "@kbn/unsaved-changes-prompt",
     "@kbn/core-http-browser-mocks",
-    "@kbn/shared-ux-table-persist",
-    "@kbn/core-http-browser",
-    "@kbn/core-plugins-server"
+    "@kbn/shared-ux-table-persist"
   ],
   "exclude": [
     "target/**/*",

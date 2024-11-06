@@ -206,6 +206,8 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           enableNestedVirtualization: true
+          localSsds: 1
+          localSsdInterface: nvme
           machineType: n2-standard-4
         depends_on: build
         timeout_in_minutes: 60
@@ -216,7 +218,7 @@ steps:
               limit: 1
 
       - command: .buildkite/scripts/steps/functional/security_serverless_osquery.sh
-        label: "Osquery Cypress Tests on Serverless"
+        label: "Serverless Osquery Cypress Tests"
         if: "build.env('SKIP_CYPRESS') != '1' && build.env('SKIP_CYPRESS') != 'true'"
         agents:
           image: family/kibana-ubuntu-2004

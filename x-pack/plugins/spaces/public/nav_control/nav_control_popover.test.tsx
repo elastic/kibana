@@ -8,6 +8,7 @@
 import {
   EuiFieldSearch,
   EuiHeaderSectionItemButton,
+  EuiPopover,
   EuiSelectable,
   EuiSelectableListItem,
 } from '@elastic/eui';
@@ -17,7 +18,7 @@ import * as Rx from 'rxjs';
 
 import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
 
-import { NavControlPopover, type Props as NavControlPopoverProps } from './nav_control_popover';
+import { NavControlPopover } from './nav_control_popover';
 import type { Space } from '../../common';
 import { EventTracker } from '../analytics';
 import { SpaceAvatarInternal } from '../space_avatar/space_avatar_internal';
@@ -48,12 +49,7 @@ const reportEvent = jest.fn();
 const eventTracker = new EventTracker({ reportEvent });
 
 describe('NavControlPopover', () => {
-  async function setup(
-    spaces: Space[],
-    allowSolutionVisibility = false,
-    activeSpace?: Space,
-    props?: Partial<NavControlPopoverProps>
-  ) {
+  async function setup(spaces: Space[], allowSolutionVisibility = false, activeSpace?: Space) {
     const spacesManager = spacesManagerMock.create();
     spacesManager.getSpaces = jest.fn().mockResolvedValue(spaces);
 
@@ -72,9 +68,6 @@ describe('NavControlPopover', () => {
         navigateToUrl={jest.fn()}
         allowSolutionVisibility={allowSolutionVisibility}
         eventTracker={eventTracker}
-        showTour$={Rx.of(false)}
-        onFinishTour={jest.fn()}
-        {...props}
       />
     );
 
@@ -88,7 +81,7 @@ describe('NavControlPopover', () => {
   it('renders without crashing', () => {
     const spacesManager = spacesManagerMock.create();
 
-    const { baseElement, queryByTestId } = render(
+    const { baseElement } = render(
       <NavControlPopover
         spacesManager={spacesManager as unknown as SpacesManager}
         serverBasePath={'/server-base-path'}
@@ -98,12 +91,9 @@ describe('NavControlPopover', () => {
         navigateToUrl={jest.fn()}
         allowSolutionVisibility={false}
         eventTracker={eventTracker}
-        showTour$={Rx.of(false)}
-        onFinishTour={jest.fn()}
       />
     );
     expect(baseElement).toMatchSnapshot();
-    expect(queryByTestId('spaceSolutionTour')).toBeNull();
   });
 
   it('renders a SpaceAvatar with the active space', async () => {
@@ -127,8 +117,6 @@ describe('NavControlPopover', () => {
         navigateToUrl={jest.fn()}
         allowSolutionVisibility={false}
         eventTracker={eventTracker}
-        showTour$={Rx.of(false)}
-        onFinishTour={jest.fn()}
       />
     );
 
@@ -235,29 +223,20 @@ describe('NavControlPopover', () => {
   });
 
   it('can close its popover', async () => {
-    jest.useFakeTimers();
     const wrapper = await setup(mockSpaces);
 
-    expect(findTestSubject(wrapper, 'spaceMenuPopoverPanel').exists()).toEqual(false); // closed
-
-    // Open the popover
     await act(async () => {
       wrapper.find(EuiHeaderSectionItemButton).find('button').simulate('click');
     });
     wrapper.update();
-    expect(findTestSubject(wrapper, 'spaceMenuPopoverPanel').exists()).toEqual(true); // open
+    expect(wrapper.find(EuiPopover).props().isOpen).toEqual(true);
 
-    // Close the popover
     await act(async () => {
-      wrapper.find(EuiHeaderSectionItemButton).find('button').simulate('click');
-    });
-    act(() => {
-      jest.runAllTimers();
+      wrapper.find(EuiPopover).props().closePopover();
     });
     wrapper.update();
-    expect(findTestSubject(wrapper, 'spaceMenuPopoverPanel').exists()).toEqual(false); // closed
 
-    jest.useRealTimers();
+    expect(wrapper.find(EuiPopover).props().isOpen).toEqual(false);
   });
 
   it('should render solution for spaces', async () => {
@@ -321,43 +300,5 @@ describe('NavControlPopover', () => {
       space_id: 'space-2',
       space_id_prev: 'space-1',
     });
-  });
-
-  it('should show the solution view tour', async () => {
-    jest.useFakeTimers(); // the underlying EUI tour component has a timeout that needs to be flushed for the test to pass
-
-    const spaces: Space[] = [
-      {
-        id: 'space-1',
-        name: 'Space-1',
-        disabledFeatures: [],
-        solution: 'es',
-      },
-    ];
-
-    const activeSpace = spaces[0];
-    const showTour$ = new Rx.BehaviorSubject(true);
-    const onFinishTour = jest.fn().mockImplementation(() => {
-      showTour$.next(false);
-    });
-
-    const wrapper = await setup(spaces, true /** allowSolutionVisibility **/, activeSpace, {
-      showTour$,
-      onFinishTour,
-    });
-
-    expect(findTestSubject(wrapper, 'spaceSolutionTour').exists()).toBe(true);
-
-    act(() => {
-      findTestSubject(wrapper, 'closeTourBtn').simulate('click');
-    });
-    act(() => {
-      jest.runAllTimers();
-    });
-    wrapper.update();
-
-    expect(findTestSubject(wrapper, 'spaceSolutionTour').exists()).toBe(false);
-
-    jest.useRealTimers();
   });
 });

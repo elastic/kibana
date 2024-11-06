@@ -59,7 +59,6 @@ describe('TimelineModalHeader', () => {
     (useSourcererDataView as jest.Mock).mockReturnValue({
       browserFields: {},
       indexPattern: { fields: [], title: '' },
-      sourcererDataView: {},
     });
 
     const { getByTestId, getByText } = renderTimelineModalHeader();
@@ -79,7 +78,6 @@ describe('TimelineModalHeader', () => {
     (useSourcererDataView as jest.Mock).mockReturnValue({
       browserFields: {},
       indexPattern: { fields: [], title: '' },
-      sourcererDataView: {},
     });
     (useKibana as jest.Mock).mockReturnValue({
       services: {
@@ -109,7 +107,6 @@ describe('TimelineModalHeader', () => {
     (useSourcererDataView as jest.Mock).mockReturnValue({
       browserFields: {},
       indexPattern: { fields: [], title: '' },
-      sourcererDataView: {},
     });
 
     const spy = jest.spyOn(timelineActions, 'showTimeline');

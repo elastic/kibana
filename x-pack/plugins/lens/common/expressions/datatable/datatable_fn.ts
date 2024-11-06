@@ -10,17 +10,9 @@ import { i18n } from '@kbn/i18n';
 import { prepareLogTable } from '@kbn/visualizations-plugin/common/utils';
 import type { Datatable, ExecutionContext } from '@kbn/expressions-plugin/common';
 import { FormatFactory } from '../../types';
+import { transposeTable } from './transpose_helpers';
 import { computeSummaryRowForColumn } from './summary';
 import type { DatatableExpressionFunction } from './types';
-import { transposeTable } from './transpose_helpers';
-
-/**
- * Available datatables logged to inspector
- */
-export const DatatableInspectorTables = {
-  Default: 'default',
-  Transpose: 'transpose',
-};
 
 export const datatableFn =
   (
@@ -44,7 +36,7 @@ export const datatableFn =
         true
       );
 
-      context.inspectorAdapters.tables.logDatatable(DatatableInspectorTables.Default, logTable);
+      context.inspectorAdapters.tables.logDatatable('default', logTable);
     }
 
     let untransposedData: Datatable | undefined;
@@ -60,29 +52,8 @@ export const datatableFn =
     if (hasTransposedColumns) {
       // store original shape of data separately
       untransposedData = cloneDeep(table);
-      // transposes table and args in-place
+      // transposes table and args inplace
       transposeTable(args, table, formatters);
-
-      if (context?.inspectorAdapters?.tables) {
-        const logTransposedTable = prepareLogTable(
-          table,
-          [
-            [
-              args.columns.map((column) => column.columnId),
-              i18n.translate('xpack.lens.datatable.column.help', {
-                defaultMessage: 'Datatable column',
-              }),
-            ],
-          ],
-          true
-        );
-
-        context.inspectorAdapters.tables.logDatatable(
-          DatatableInspectorTables.Transpose,
-          logTransposedTable
-        );
-        context.inspectorAdapters.tables.initialSelectedTable = DatatableInspectorTables.Transpose;
-      }
     }
 
     const columnsWithSummary = args.columns.filter((c) => c.summaryRow);

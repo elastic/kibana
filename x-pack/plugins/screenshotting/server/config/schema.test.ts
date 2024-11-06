@@ -74,6 +74,7 @@ describe('ConfigSchema', () => {
         "browser": Object {
           "autoDownload": false,
           "chromium": Object {
+            "inspect": false,
             "proxy": Object {
               "enabled": false,
             },

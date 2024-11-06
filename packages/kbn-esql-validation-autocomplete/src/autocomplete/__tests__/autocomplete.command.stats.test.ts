@@ -9,8 +9,8 @@
 
 import { FieldType, FunctionReturnType } from '../../definitions/types';
 import { ESQL_COMMON_NUMERIC_TYPES, ESQL_NUMBER_TYPES } from '../../shared/esql_types';
-import { getDateHistogramCompletionItem } from '../commands/stats/util';
 import { allStarConstant } from '../complete_items';
+import { getAddDateHistogramSnippet } from '../factories';
 import { roundParameterTypes } from './constants';
 import {
   setup,
@@ -71,7 +71,7 @@ describe('autocomplete.suggest', () => {
       test('on space after aggregate field', async () => {
         const { assertSuggestions } = await setup();
 
-        await assertSuggestions('from a | stats a=min(b) /', ['BY ', ', ', '| ']);
+        await assertSuggestions('from a | stats a=min(b) /', ['BY $0', ',', '| ']);
       });
 
       test('on space after aggregate field with comma', async () => {
@@ -184,7 +184,7 @@ describe('autocomplete.suggest', () => {
       test('when typing right paren', async () => {
         const { assertSuggestions } = await setup();
 
-        await assertSuggestions('from a | stats a = min(b)/ | sort b', ['BY ', ', ', '| ']);
+        await assertSuggestions('from a | stats a = min(b)/ | sort b', ['BY $0', ',', '| ']);
       });
 
       test('increments suggested variable name counter', async () => {
@@ -192,8 +192,9 @@ describe('autocomplete.suggest', () => {
 
         await assertSuggestions('from a | eval var0=round(b), var1=round(c) | stats /', [
           'var2 = ',
-          // TODO verify that this change is ok
           ...allAggFunctions,
+          'var0',
+          'var1',
           ...allEvaFunctions,
         ]);
         await assertSuggestions('from a | stats var0=min(b),var1=c,/', [
@@ -209,7 +210,7 @@ describe('autocomplete.suggest', () => {
         const { assertSuggestions } = await setup();
         const expected = [
           'var0 = ',
-          getDateHistogramCompletionItem(),
+          getAddDateHistogramSnippet(),
           ...getFieldNamesByType('any').map((field) => `${field} `),
           ...allEvaFunctions,
           ...allGroupingFunctions,
@@ -223,7 +224,7 @@ describe('autocomplete.suggest', () => {
       test('on space after grouping field', async () => {
         const { assertSuggestions } = await setup();
 
-        await assertSuggestions('from a | stats a=c by d /', [', ', '| ']);
+        await assertSuggestions('from a | stats a=c by d /', [',', '| ']);
       });
 
       test('after comma "," in grouping fields', async () => {
@@ -232,7 +233,7 @@ describe('autocomplete.suggest', () => {
         const fields = getFieldNamesByType('any').map((field) => `${field} `);
         await assertSuggestions('from a | stats a=c by d, /', [
           'var0 = ',
-          getDateHistogramCompletionItem(),
+          getAddDateHistogramSnippet(),
           ...fields,
           ...allEvaFunctions,
           ...allGroupingFunctions,
@@ -244,7 +245,7 @@ describe('autocomplete.suggest', () => {
         ]);
         await assertSuggestions('from a | stats avg(b) by c, /', [
           'var0 = ',
-          getDateHistogramCompletionItem(),
+          getAddDateHistogramSnippet(),
           ...fields,
           ...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true }),
           ...allGroupingFunctions,
@@ -258,19 +259,21 @@ describe('autocomplete.suggest', () => {
           ...getFieldNamesByType('integer'),
           ...getFieldNamesByType('double'),
           ...getFieldNamesByType('long'),
+          '`avg(b)`',
           ...getFunctionSignaturesByReturnType('eval', ['integer', 'double', 'long'], {
             scalar: true,
           }),
+
           ...allGroupingFunctions,
         ]);
         await assertSuggestions('from a | stats avg(b) by var0 = /', [
-          getDateHistogramCompletionItem(),
+          getAddDateHistogramSnippet(),
           ...getFieldNamesByType('any').map((field) => `${field} `),
           ...allEvaFunctions,
           ...allGroupingFunctions,
         ]);
         await assertSuggestions('from a | stats avg(b) by c, var0 = /', [
-          getDateHistogramCompletionItem(),
+          getAddDateHistogramSnippet(),
           ...getFieldNamesByType('any').map((field) => `${field} `),
           ...allEvaFunctions,
           ...allGroupingFunctions,
@@ -280,17 +283,13 @@ describe('autocomplete.suggest', () => {
       test('on space after expression right hand side operand', async () => {
         const { assertSuggestions } = await setup();
 
-        await assertSuggestions('from a | stats avg(b) by doubleField % 2 /', [', ', '| '], {
-          triggerCharacter: ' ',
-        });
+        await assertSuggestions('from a | stats avg(b) by doubleField % 2 /', [',', '| ']);
 
         await assertSuggestions(
-          'from a | stats var0 = AVG(doubleField) BY var1 = BUCKET(dateField, 1 day) /',
-          [', ', '| '],
-          { triggerCharacter: ' ' }
+          'from a | stats var0 = AVG(doubleField) BY var1 = BUCKET(dateField, 1 day)/',
+          [',', '| ', '+ $0', '- $0']
         );
       });
-
       test('on space within bucket()', async () => {
         const { assertSuggestions } = await setup();
         await assertSuggestions('from a | stats avg(b) by BUCKET(/, 50, ?_tstart, ?_tend)', [
@@ -323,29 +322,6 @@ describe('autocomplete.suggest', () => {
         const { suggest } = await setup();
         const suggestions = await suggest('from a | stats count(/)');
         expect(suggestions).toContain(allStarConstant);
-      });
-
-      describe('date histogram snippet', () => {
-        test('uses histogramBarTarget preference when available', async () => {
-          const { suggest } = await setup();
-          const histogramBarTarget = Math.random() * 100;
-          const expectedCompletionItem = getDateHistogramCompletionItem(histogramBarTarget);
-
-          const suggestions = await suggest('FROM a | STATS BY /', {
-            callbacks: { getPreferences: () => Promise.resolve({ histogramBarTarget }) },
-          });
-
-          expect(suggestions).toContainEqual(expectedCompletionItem);
-        });
-
-        test('defaults gracefully', async () => {
-          const { suggest } = await setup();
-          const expectedCompletionItem = getDateHistogramCompletionItem();
-
-          const suggestions = await suggest('FROM a | STATS BY /');
-
-          expect(suggestions).toContainEqual(expectedCompletionItem);
-        });
       });
     });
   });

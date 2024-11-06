@@ -576,7 +576,6 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
       fieldStatsServices={fieldStatsServices}
       timeRangeMs={indexData.timeRangeMs}
       dslQuery={jobConfigQuery}
-      theme={services.theme}
     >
       <Fragment>
         <Messages messages={requestMessages} />

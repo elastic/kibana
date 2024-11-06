@@ -26,6 +26,7 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import { SharePluginStart } from '@kbn/share-plugin/server';
 import type { DefaultAlert, FieldMap } from '@kbn/alerts-as-data-utils';
 import { Alert } from '@kbn/alerts-as-data-utils';
+import { Filter } from '@kbn/es-query';
 import { ActionsApiRequestHandlerContext } from '@kbn/actions-plugin/server';
 import { AlertsHealth } from '@kbn/alerting-types';
 import { RuleTypeRegistry as OrigruleTypeRegistry } from './rule_type_registry';
@@ -42,14 +43,28 @@ import {
   Rule,
   RuleTypeParams,
   RuleTypeState,
+  RuleActionParams,
+  RuleExecutionStatuses,
+  RuleExecutionStatusErrorReasons,
+  RuleExecutionStatusWarningReasons,
+  RuleNotifyWhenType,
   ActionGroup,
   AlertInstanceContext,
   AlertInstanceState,
   WithoutReservedActionGroups,
   ActionVariable,
   SanitizedRuleConfig,
+  RuleMonitoring,
+  MappedParams,
+  RuleSnooze,
+  IntervalSchedule,
+  RuleLastRun,
   SanitizedRule,
+  AlertsFilter,
+  AlertsFilterTimeframe,
   RuleAlertData,
+  AlertDelay,
+  Flapping,
 } from '../common';
 import { PublicAlertFactory } from './alert/create_alert_factory';
 import { RulesSettingsFlappingProperties } from '../common/rules_settings';
@@ -411,13 +426,87 @@ export type PublicRuleMonitoringService = PublicMetricsSetters;
 
 export type PublicRuleResultService = PublicLastRunSetters;
 
-export type {
-  RawRule,
-  RawRuleAction,
-  RawRuleExecutionStatus,
-  RawRuleAlertsFilter,
-  RawRuleLastRun,
-  RawRuleMonitoring,
-} from './saved_objects/schemas/raw_rule';
+export interface RawRuleLastRun extends SavedObjectAttributes, RuleLastRun {}
+export interface RawRuleMonitoring extends SavedObjectAttributes, RuleMonitoring {}
+
+export interface RawRuleAlertsFilter extends AlertsFilter {
+  query?: {
+    kql: string;
+    filters: Filter[];
+    dsl: string;
+  };
+  timeframe?: AlertsFilterTimeframe;
+}
+
+export interface RawRuleAction extends SavedObjectAttributes {
+  uuid: string;
+  group?: string;
+  actionRef: string;
+  actionTypeId: string;
+  params: RuleActionParams;
+  frequency?: {
+    summary: boolean;
+    notifyWhen: RuleNotifyWhenType;
+    throttle: string | null;
+  };
+  alertsFilter?: RawRuleAlertsFilter;
+  useAlertDataAsTemplate?: boolean;
+}
+
+// note that the `error` property is "null-able", as we're doing a partial
+// update on the rule when we update this data, but need to ensure we
+// delete any previous error if the current status has no error
+export interface RawRuleExecutionStatus extends SavedObjectAttributes {
+  status: RuleExecutionStatuses;
+  lastExecutionDate: string;
+  lastDuration?: number;
+  error: null | {
+    reason: RuleExecutionStatusErrorReasons;
+    message: string;
+  };
+  warning: null | {
+    reason: RuleExecutionStatusWarningReasons;
+    message: string;
+  };
+}
+
+/**
+ * @deprecated in favor of Rule
+ */
+export interface RawRule extends SavedObjectAttributes {
+  enabled: boolean;
+  name: string;
+  tags: string[];
+  alertTypeId: string; // this cannot be renamed since it is in the saved object
+  consumer: string;
+  legacyId: string | null;
+  schedule: IntervalSchedule;
+  actions: RawRuleAction[];
+  params: SavedObjectAttributes;
+  mapped_params?: MappedParams;
+  scheduledTaskId?: string | null;
+  createdBy: string | null;
+  updatedBy: string | null;
+  createdAt: string;
+  updatedAt: string;
+  apiKey: string | null;
+  apiKeyOwner: string | null;
+  apiKeyCreatedByUser?: boolean | null;
+  throttle?: string | null;
+  notifyWhen?: RuleNotifyWhenType | null;
+  muteAll: boolean;
+  mutedInstanceIds: string[];
+  meta?: RuleMeta;
+  executionStatus: RawRuleExecutionStatus;
+  monitoring?: RawRuleMonitoring;
+  snoozeSchedule?: RuleSnooze; // Remove ? when this parameter is made available in the public API
+  isSnoozedUntil?: string | null;
+  lastRun?: RawRuleLastRun | null;
+  nextRun?: string | null;
+  revision: number;
+  running?: boolean | null;
+  alertDelay?: AlertDelay;
+  flapping?: Flapping | null;
+}
 
 export type { DataStreamAdapter } from './alerts_service/lib/data_stream_adapter';

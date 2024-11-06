@@ -430,7 +430,7 @@ export class SpacesGridPage extends Component<Props, State> {
             reactRouterNavigate(this.props.history, this.getEditSpacePath(rowRecord)).href,
           onClick: (rowRecord) =>
             reactRouterNavigate(this.props.history, this.getEditSpacePath(rowRecord)).onClick,
-          'data-test-subj': (rowRecord) => `${rowRecord.id}-editSpace`,
+          'data-test-subj': (rowRecord) => `${rowRecord.name}-editSpace`,
         },
         {
           isPrimary: true,
@@ -438,7 +438,7 @@ export class SpacesGridPage extends Component<Props, State> {
             defaultMessage: 'Switch',
           }),
           description: (rowRecord) =>
-            activeSpace?.id !== rowRecord.id
+            activeSpace?.name !== rowRecord.name
               ? i18n.translate(
                   'xpack.spaces.management.spacesGridPage.switchSpaceActionDescription',
                   {
@@ -462,8 +462,8 @@ export class SpacesGridPage extends Component<Props, State> {
               rowRecord.id,
               `${ENTER_SPACE_PATH}?next=/app/management/kibana/spaces/`
             ),
-          enabled: (rowRecord) => activeSpace?.id !== rowRecord.id,
-          'data-test-subj': (rowRecord) => `${rowRecord.id}-switchSpace`,
+          enabled: (rowRecord) => activeSpace?.name !== rowRecord.name,
+          'data-test-subj': (rowRecord) => `${rowRecord.name}-switchSpace`,
         },
         {
           name: i18n.translate('xpack.spaces.management.spacesGridPage.deleteActionName', {
@@ -487,7 +487,7 @@ export class SpacesGridPage extends Component<Props, State> {
           color: 'danger',
           onClick: (rowRecord: Space) => this.onDeleteSpaceClick(rowRecord),
           enabled: (rowRecord: Space) => !isReservedSpace(rowRecord),
-          'data-test-subj': (rowRecord) => `${rowRecord.id}-deleteSpace`,
+          'data-test-subj': (rowRecord) => `${rowRecord.name}-deleteSpace`,
         },
       ],
     });

@@ -24,10 +24,8 @@ export const startEntityEngineRoute = (
     .post({
       access: 'public',
       path: '/api/entity_store/engines/{entityType}/start',
-      security: {
-        authz: {
-          requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],
-        },
+      options: {
+        tags: ['access:securitySolution', `access:${APP_ID}-entity-analytics`],
       },
     })
     .addVersion(

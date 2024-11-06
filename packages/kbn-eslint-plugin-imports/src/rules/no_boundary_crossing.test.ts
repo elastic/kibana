@@ -9,9 +9,8 @@
 
 import { RuleTester } from 'eslint';
 import { NoBoundaryCrossingRule } from './no_boundary_crossing';
-import type { ModuleType } from '@kbn/repo-source-classifier';
+import { ModuleType } from '@kbn/repo-source-classifier';
 import dedent from 'dedent';
-import { formatSuggestions } from '../helpers/report';
 
 const make = (from: ModuleType, to: ModuleType, imp = 'import') => ({
   filename: `${from}.ts`,
@@ -108,12 +107,13 @@ for (const [name, tester] of [tsTester, babelTester]) {
               data: {
                 importedType: 'server package',
                 ownType: 'common package',
-                suggestion: formatSuggestions([
-                  'Remove the import statement.',
-                  'Limit your imports to "common package" or "static" code.',
-                  'Covert to a type-only import.',
-                  'Reach out to #kibana-operations for help.',
-                ]),
+                suggestion: ` ${dedent`
+                  Suggestions:
+                   - Remove the import statement.
+                   - Limit your imports to "common package" or "static" code.
+                   - Covert to a type-only import.
+                   - Reach out to #kibana-operations for help.
+                `}`,
               },
             },
           ],

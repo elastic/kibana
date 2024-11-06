@@ -13,22 +13,18 @@ import { from, map, switchMap, throwError } from 'rxjs';
 import { UrlObject, format, parse } from 'url';
 import { inspect } from 'util';
 import { isReadable } from 'stream';
+import type { ChatCompleteAPI, ChatCompletionEvent } from '../../common/chat_complete';
+import { ChatCompleteRequestBody } from '../../common/chat_complete/request';
+import type { InferenceConnector } from '../../common/connectors';
 import {
-  ChatCompleteAPI,
-  ChatCompleteCompositeResponse,
-  OutputAPI,
-  ChatCompletionEvent,
   InferenceTaskError,
   InferenceTaskErrorEvent,
-  InferenceTaskEventType,
   createInferenceInternalError,
-  withoutOutputUpdateEvents,
-  type ToolOptions,
-  ChatCompleteOptions,
-} from '@kbn/inference-common';
-import type { ChatCompleteRequestBody } from '../../common/http_apis';
-import type { InferenceConnector } from '../../common/connectors';
-import { createOutputApi } from '../../common/create_output_api';
+} from '../../common/errors';
+import { InferenceTaskEventType } from '../../common/inference_task';
+import type { OutputAPI } from '../../common/output';
+import { createOutputApi } from '../../common/output/create_output_api';
+import { withoutOutputUpdateEvents } from '../../common/output/without_output_update_events';
 import { eventSourceStreamIntoObservable } from '../../server/util/event_source_stream_into_observable';
 
 // eslint-disable-next-line spaced-comment
@@ -157,7 +153,7 @@ export class KibanaClient {
   }
 
   createInferenceClient({ connectorId }: { connectorId: string }): ScriptInferenceClient {
-    function streamResponse(responsePromise: Promise<AxiosResponse>) {
+    function stream(responsePromise: Promise<AxiosResponse>) {
       return from(responsePromise).pipe(
         switchMap((response) => {
           if (isReadable(response.data)) {
@@ -177,18 +173,14 @@ export class KibanaClient {
       );
     }
 
-    const chatCompleteApi: ChatCompleteAPI = <
-      TToolOptions extends ToolOptions = ToolOptions,
-      TStream extends boolean = false
-    >({
+    const chatCompleteApi: ChatCompleteAPI = ({
       connectorId: chatCompleteConnectorId,
       messages,
       system,
       toolChoice,
       tools,
       functionCalling,
-      stream,
-    }: ChatCompleteOptions<TToolOptions, TStream>) => {
+    }) => {
       const body: ChatCompleteRequestBody = {
         connectorId: chatCompleteConnectorId,
         system,
@@ -198,29 +190,15 @@ export class KibanaClient {
         functionCalling,
       };
 
-      if (stream) {
-        return streamResponse(
-          this.axios.post(
-            this.getUrl({
-              pathname: `/internal/inference/chat_complete/stream`,
-            }),
-            body,
-            { responseType: 'stream', timeout: NaN }
-          )
-        ) as ChatCompleteCompositeResponse<TToolOptions, TStream>;
-      } else {
-        return this.axios
-          .post(
-            this.getUrl({
-              pathname: `/internal/inference/chat_complete/stream`,
-            }),
-            body,
-            { responseType: 'stream', timeout: NaN }
-          )
-          .then((response) => {
-            return response.data;
-          }) as ChatCompleteCompositeResponse<TToolOptions, TStream>;
-      }
+      return stream(
+        this.axios.post(
+          this.getUrl({
+            pathname: `/internal/inference/chat_complete`,
+          }),
+          body,
+          { responseType: 'stream', timeout: NaN }
+        )
+      );
     };
 
     const outputApi: OutputAPI = createOutputApi(chatCompleteApi);
@@ -232,13 +210,8 @@ export class KibanaClient {
           ...options,
         });
       },
-      output: (options) => {
-        const response = outputApi({ ...options });
-        if (options.stream) {
-          return (response as any).pipe(withoutOutputUpdateEvents());
-        } else {
-          return response;
-        }
+      output: (id, options) => {
+        return outputApi(id, { ...options }).pipe(withoutOutputUpdateEvents());
       },
     };
   }

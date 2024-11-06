@@ -228,7 +228,7 @@ const DefaultAttributes = {
 
 const ExtraneousAttributes = { ...DefaultAttributes, foo: 'bar' };
 
-const DefaultAttributesForEsUpdate: PartiallyUpdateableRuleAttributes = {
+const DefaultAttributesForEsUpdate = {
   running: false,
   executionStatus: {
     status: 'active' as RuleExecutionStatuses,
@@ -247,7 +247,7 @@ const DefaultAttributesForEsUpdate: PartiallyUpdateableRuleAttributes = {
           success: true,
           timestamp: 1640991880000,
           duration: 12,
-          outcome: 'succeeded',
+          outcome: 'success',
         },
       ],
       last_run: {

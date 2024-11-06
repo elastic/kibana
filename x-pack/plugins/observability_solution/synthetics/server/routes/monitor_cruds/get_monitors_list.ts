@@ -42,16 +42,12 @@ export const getAllSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =>
 
     return {
       ...rest,
-      monitors: savedObjects.map((monitor) => {
-        const mon = mapSavedObjectToMonitor({
+      monitors: savedObjects.map((monitor) =>
+        mapSavedObjectToMonitor({
           monitor,
           internal: request.query?.internal,
-        });
-        return {
-          spaceId: monitor.namespaces?.[0],
-          ...mon,
-        };
-      }),
+        })
+      ),
       absoluteTotal,
       perPage: perPageT,
       syncErrors: syntheticsMonitorClient.syntheticsService.syncErrors,

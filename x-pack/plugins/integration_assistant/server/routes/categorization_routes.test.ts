@@ -23,9 +23,7 @@ const mockResult = jest.fn().mockResolvedValue({
 jest.mock('../graphs/categorization', () => {
   return {
     getCategorizationGraph: jest.fn().mockResolvedValue({
-      withConfig: () => ({
-        invoke: () => mockResult(),
-      }),
+      invoke: () => mockResult(),
     }),
   };
 });

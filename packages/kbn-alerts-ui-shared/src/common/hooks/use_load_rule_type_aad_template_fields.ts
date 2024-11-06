@@ -17,11 +17,10 @@ export interface UseLoadRuleTypeAadTemplateFieldProps {
   http: HttpStart;
   ruleTypeId?: string;
   enabled: boolean;
-  cacheTime?: number;
 }
 
 export const useLoadRuleTypeAadTemplateField = (props: UseLoadRuleTypeAadTemplateFieldProps) => {
-  const { http, ruleTypeId, enabled, cacheTime } = props;
+  const { http, ruleTypeId, enabled } = props;
 
   const queryFn = () => {
     if (!ruleTypeId) {
@@ -44,7 +43,6 @@ export const useLoadRuleTypeAadTemplateField = (props: UseLoadRuleTypeAadTemplat
         description: getDescription(d.name, EcsFlat),
       }));
     },
-    cacheTime,
     refetchOnWindowFocus: false,
     enabled,
   });

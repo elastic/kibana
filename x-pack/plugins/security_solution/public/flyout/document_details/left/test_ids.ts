@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PREFIX } from '../../shared/test_ids';
+import { PREFIX } from '@kbn/security-solution-common';
 
 export const VISUALIZE_TAB_TEST_ID = `${PREFIX}VisualizeTab` as const;
 export const INSIGHTS_TAB_TEST_ID = `${PREFIX}InsightsTab` as const;

@@ -18,7 +18,7 @@ import type { FileUploadPluginStart } from '@kbn/file-upload-plugin/public';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 
 import { KibanaContextProvider, KibanaRenderContextProvider } from '../shared_imports';
-import type { Config, ILicense } from '../types';
+import { ILicense } from '../types';
 
 import { API_BASE_PATH } from '../../common/constants';
 
@@ -50,7 +50,6 @@ export interface AppServices {
   consolePlugin?: ConsolePluginStart;
   overlays: OverlayStart;
   http: HttpStart;
-  config: Config;
 }
 
 type StartServices = Pick<CoreStart, 'analytics' | 'i18n' | 'theme'>;
@@ -67,7 +66,7 @@ export const renderApp = (
   render(
     <KibanaRenderContextProvider {...coreServices}>
       <AuthorizationProvider
-        privilegesEndpoint={`${API_BASE_PATH}/privileges/ingest_pipelines`}
+        privilegesEndpoint={`${API_BASE_PATH}/privileges`}
         httpClient={coreServices.http}
       >
         <KibanaContextProvider services={services}>

@@ -20,7 +20,6 @@ import { useAIAssistantAppService } from './use_ai_assistant_app_service';
 export interface UseKnowledgeBaseResult {
   status: AbortableAsyncState<{
     ready: boolean;
-    enabled: boolean;
     error?: any;
     deployment_state?: MlDeploymentState;
     allocation_state?: MlDeploymentAllocationState;

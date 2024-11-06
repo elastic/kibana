@@ -188,6 +188,7 @@ export class SecurityUsageReportingTask {
             usageRecords.length
           }) usage records starting from ${lastSuccessfulReport.toISOString()}: ${err} `
         );
+        shouldRunAgain = true;
       }
     }
 

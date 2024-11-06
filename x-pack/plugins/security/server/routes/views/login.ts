@@ -39,7 +39,7 @@ export function defineLoginRoutes({
           { unknowns: 'allow' }
         ),
       },
-      options: { authRequired: 'optional', excludeFromOAS: true },
+      options: { authRequired: 'optional' },
     },
     async (context, request, response) => {
       // Default to true if license isn't available or it can't be resolved for some reason.

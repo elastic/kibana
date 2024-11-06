@@ -6,8 +6,9 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { EuiFilterGroup, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFilterGroup, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { noop } from 'lodash/fp';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useErrorToast } from '../../../common/hooks/use_error_toast';
 import type { CriticalityLevels } from '../../../../common/constants';
@@ -20,13 +21,13 @@ import { EntityType } from '../../../../common/api/entity_analytics/entity_store
 import type { Criteria } from '../../../explore/components/paginated_table';
 import { PaginatedTable } from '../../../explore/components/paginated_table';
 import { SeverityFilter } from '../severity/severity_filter';
+import type { EntitySource } from './components/entity_source_filter';
 import { EntitySourceFilter } from './components/entity_source_filter';
 import { useEntitiesListFilters } from './hooks/use_entities_list_filters';
 import { AssetCriticalityFilter } from '../asset_criticality/asset_criticality_filter';
 import { useEntitiesListQuery } from './hooks/use_entities_list_query';
 import { ENTITIES_LIST_TABLE_ID, rowItems } from './constants';
 import { useEntitiesListColumns } from './hooks/use_entities_list_columns';
-import type { EntitySourceTag } from './types';
 
 export const EntitiesList: React.FC = () => {
   const { deleteQuery, setQuery, isInitializing, from, to } = useGlobalTime();
@@ -34,13 +35,13 @@ export const EntitiesList: React.FC = () => {
   const [limit, setLimit] = useState(10);
   const { toggleStatus } = useQueryToggle(ENTITIES_LIST_TABLE_ID);
   const [sorting, setSorting] = useState({
-    field: '@timestamp',
+    field: 'entity.lastSeenTimestamp',
     direction: Direction.desc,
   });
 
   const [selectedSeverities, setSelectedSeverities] = useState<RiskSeverity[]>([]);
   const [selectedCriticalities, setSelectedCriticalities] = useState<CriticalityLevels[]>([]);
-  const [selectedSources, setSelectedSources] = useState<EntitySourceTag[]>([]);
+  const [selectedSources, setSelectedSources] = useState<EntitySource[]>([]);
 
   const filter = useEntitiesListFilters({
     selectedSeverities,
@@ -94,11 +95,6 @@ export const EntitiesList: React.FC = () => {
     inspect: data?.inspect ?? null,
   });
 
-  // Reset the active page when the search criteria changes
-  useEffect(() => {
-    setActivePage(0);
-  }, [sorting, limit, filter]);
-
   const columns = useEntitiesListColumns();
 
   // Force a refetch when "refresh" button is clicked.
@@ -117,22 +113,19 @@ export const EntitiesList: React.FC = () => {
   return (
     <PaginatedTable
       id={ENTITIES_LIST_TABLE_ID}
-      activePage={activePage}
+      activePage={(data?.page ?? 1) - 1}
       columns={columns}
       headerCount={data?.total ?? 0}
-      titleSize="s"
-      headerTitle={i18n.translate(
-        'xpack.securitySolution.entityAnalytics.entityStore.entitiesList.tableTitle',
-        {
-          defaultMessage: 'Entities',
-        }
-      )}
-      headerTooltip={i18n.translate(
-        'xpack.securitySolution.entityAnalytics.entityStore.entitiesList.tableTooltip',
-        {
-          defaultMessage: 'Entity data can take a couple of minutes to appear',
-        }
-      )}
+      headerTitle={
+        <EuiTitle size="s">
+          <h2>
+            <FormattedMessage
+              id="xpack.securitySolution.entityAnalytics.entityStore.entitiesList.tableTitle"
+              defaultMessage="Entities"
+            />
+          </h2>
+        </EuiTitle>
+      }
       limit={limit}
       loading={isLoading || isRefetching}
       isInspect={false}

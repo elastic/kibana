@@ -18,7 +18,7 @@ import {
   openKibanaNavigation,
 } from '../../../tasks/kibana_navigation';
 import { login } from '../../../tasks/login';
-import { visit, visitWithTimeRange } from '../../../tasks/navigation';
+import { visitWithTimeRange } from '../../../tasks/navigation';
 import {
   closeTimelineUsingCloseButton,
   openTimelineUsingToggle,
@@ -32,14 +32,13 @@ import {
 } from '../../../tasks/serverless/navigation';
 import {
   addNameToTimelineAndSave,
-  closeTimeline,
   createNewTimeline,
-  duplicateFirstTimeline,
   populateTimeline,
 } from '../../../tasks/timeline';
-import { EXPLORE_URL, hostsUrl, MANAGE_URL, TIMELINES_URL } from '../../../urls/navigation';
+import { EXPLORE_URL, hostsUrl, MANAGE_URL } from '../../../urls/navigation';
 
-describe('[ESS] Save Timeline Prompts', { tags: ['@ess'] }, () => {
+// FLAKY: https://github.com/elastic/kibana/issues/174068
+describe.skip('[ESS] Save Timeline Prompts', { tags: ['@ess'] }, () => {
   beforeEach(() => {
     login();
     visitWithTimeRange(hostsUrl('allHosts'));
@@ -119,17 +118,6 @@ describe('[ESS] Save Timeline Prompts', { tags: ['@ess'] }, () => {
     // should not be manage page i.e. successfull navigation
     cy.get(TIMELINE_SAVE_MODAL).should('not.exist');
     cy.url().should('not.contain', MANAGE_URL);
-  });
-
-  it('should prompt when a timeline is duplicated but not saved', () => {
-    addNameToTimelineAndSave('Original');
-    closeTimeline();
-    visit(TIMELINES_URL);
-    duplicateFirstTimeline();
-    closeTimeline();
-    openKibanaNavigation();
-    navigateFromKibanaCollapsibleTo(MANAGE_PAGE);
-    cy.get(APP_LEAVE_CONFIRM_MODAL).should('be.visible');
   });
 });
 
@@ -212,15 +200,5 @@ describe('[serverless] Save Timeline Prompts', { tags: ['@serverless'] }, () => 
     addNameToTimelineAndSave('Test');
     navigateToExploreUsingBreadcrumb(); // explore has timelines disabled
     cy.get(APP_LEAVE_CONFIRM_MODAL).should('not.exist');
-  });
-
-  it('should prompt when a timeline is duplicated but not saved', () => {
-    addNameToTimelineAndSave('Original');
-    closeTimeline();
-    visit(TIMELINES_URL);
-    duplicateFirstTimeline();
-    closeTimeline();
-    navigateToExplorePageInServerless(); // security page with timelines disabled
-    cy.get(APP_LEAVE_CONFIRM_MODAL).should('be.visible');
   });
 });

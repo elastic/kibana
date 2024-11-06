@@ -9,6 +9,7 @@ import React, { memo, useCallback, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiLink } from '@elastic/eui';
 import { ALERT_WORKFLOW_ASSIGNEE_IDS } from '@kbn/rule-data-utils';
 import { i18n } from '@kbn/i18n';
+import { FlyoutTitle } from '@kbn/security-solution-common';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { Notes } from './notes';
 import { useRuleDetailsLink } from '../../shared/hooks/use_rule_details_link';
@@ -21,7 +22,6 @@ import { useDocumentDetailsContext } from '../../shared/context';
 import { PreferenceFormattedDate } from '../../../../common/components/formatted_date';
 import { FLYOUT_ALERT_HEADER_TITLE_TEST_ID, ALERT_SUMMARY_PANEL_TEST_ID } from './test_ids';
 import { Assignees } from './assignees';
-import { FlyoutTitle } from '../../../shared/components/flyout_title';
 
 // minWidth for each block, allows to switch for a 1 row 4 blocks to 2 rows with 2 block each
 const blockStyles = {
@@ -40,8 +40,8 @@ export const AlertHeaderTitle = memo(() => {
     refetchFlyoutData,
     getFieldsData,
   } = useDocumentDetailsContext();
-  const securitySolutionNotesDisabled = useIsExperimentalFeatureEnabled(
-    'securitySolutionNotesDisabled'
+  const securitySolutionNotesEnabled = useIsExperimentalFeatureEnabled(
+    'securitySolutionNotesEnabled'
   );
 
   const { isAlert, ruleName, timestamp, ruleId } = useBasicDataFromDetailsData(
@@ -98,30 +98,7 @@ export const AlertHeaderTitle = memo(() => {
         />
       )}
       <EuiSpacer size="m" />
-      {securitySolutionNotesDisabled ? (
-        <EuiFlexGroup
-          direction="row"
-          gutterSize="s"
-          responsive={false}
-          wrap
-          data-test-subj={ALERT_SUMMARY_PANEL_TEST_ID}
-        >
-          <EuiFlexItem>
-            <DocumentStatus />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <RiskScore />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <Assignees
-              eventId={eventId}
-              assignedUserIds={alertAssignees}
-              onAssigneesUpdated={onAssigneesUpdated}
-              isPreview={isPreview}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ) : (
+      {securitySolutionNotesEnabled ? (
         <EuiFlexGroup
           direction="row"
           gutterSize="s"
@@ -153,6 +130,29 @@ export const AlertHeaderTitle = memo(() => {
                 <Notes />
               </EuiFlexItem>
             </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ) : (
+        <EuiFlexGroup
+          direction="row"
+          gutterSize="s"
+          responsive={false}
+          wrap
+          data-test-subj={ALERT_SUMMARY_PANEL_TEST_ID}
+        >
+          <EuiFlexItem>
+            <DocumentStatus />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <RiskScore />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <Assignees
+              eventId={eventId}
+              assignedUserIds={alertAssignees}
+              onAssigneesUpdated={onAssigneesUpdated}
+              isPreview={isPreview}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       )}

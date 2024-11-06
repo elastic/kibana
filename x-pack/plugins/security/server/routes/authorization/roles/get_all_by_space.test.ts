@@ -149,7 +149,7 @@ describe('GET all roles by space id', () => {
 
     const paramsSchema = (config.validate as any).params;
 
-    expect(config.security?.authz).toEqual({ requiredPrivileges: ['manage_spaces'] });
+    expect(config.options).toEqual({ tags: ['access:manageSpaces'] });
     expect(() => paramsSchema.validate({})).toThrowErrorMatchingInlineSnapshot(
       `"[spaceId]: expected value of type [string] but got [undefined]"`
     );

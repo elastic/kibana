@@ -47,9 +47,6 @@ export const updateManagementPageStateAction = createAction<Partial<MonitorListP
 
 export const cleanMonitorListState = createAction('cleanMonitorListState');
 
-export const fetchMonitorFiltersAction = createAsyncAction<
-  {
-    showFromAllSpaces?: boolean;
-  },
-  MonitorFiltersResult
->('fetchMonitorFiltersAction');
+export const fetchMonitorFiltersAction = createAsyncAction<void, MonitorFiltersResult>(
+  'fetchMonitorFiltersAction'
+);

@@ -18,19 +18,12 @@ import {
   MAX_TEMPLATE_TAG_LENGTH,
 } from '../../../constants';
 import { limitedArraySchema, limitedStringSchema, regexStringRt } from '../../../schema';
-import {
-  CustomFieldTextTypeRt,
-  CustomFieldToggleTypeRt,
-  CustomFieldNumberTypeRt,
-} from '../../domain';
+import { CustomFieldTextTypeRt, CustomFieldToggleTypeRt } from '../../domain';
 import type { Configurations, Configuration } from '../../domain/configure/v1';
 import { ConfigurationBasicWithoutOwnerRt, ClosureTypeRt } from '../../domain/configure/v1';
 import { CaseConnectorRt } from '../../domain/connector/v1';
 import { CaseBaseOptionalFieldsRequestRt } from '../case/v1';
-import {
-  CaseCustomFieldTextWithValidationValueRt,
-  CaseCustomFieldNumberWithValidationValueRt,
-} from '../custom_field/v1';
+import { CaseCustomFieldTextWithValidationValueRt } from '../custom_field/v1';
 
 export const CustomFieldConfigurationWithoutTypeRt = rt.strict({
   /**
@@ -71,25 +64,8 @@ export const ToggleCustomFieldConfigurationRt = rt.intersection([
   ),
 ]);
 
-export const NumberCustomFieldConfigurationRt = rt.intersection([
-  rt.strict({ type: CustomFieldNumberTypeRt }),
-  CustomFieldConfigurationWithoutTypeRt,
-  rt.exact(
-    rt.partial({
-      defaultValue: rt.union([
-        CaseCustomFieldNumberWithValidationValueRt({ fieldName: 'defaultValue' }),
-        rt.null,
-      ]),
-    })
-  ),
-]);
-
 export const CustomFieldsConfigurationRt = limitedArraySchema({
-  codec: rt.union([
-    TextCustomFieldConfigurationRt,
-    ToggleCustomFieldConfigurationRt,
-    NumberCustomFieldConfigurationRt,
-  ]),
+  codec: rt.union([TextCustomFieldConfigurationRt, ToggleCustomFieldConfigurationRt]),
   min: 0,
   max: MAX_CUSTOM_FIELDS_PER_CASE,
   fieldName: 'customFields',

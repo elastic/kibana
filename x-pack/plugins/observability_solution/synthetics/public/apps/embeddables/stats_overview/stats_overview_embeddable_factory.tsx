@@ -80,9 +80,6 @@ export const getStatsOverviewEmbeddableFactory = (
                 initialState: {
                   filters: filters$.getValue(),
                 },
-                title: i18n.translate('xpack.synthetics.editSloOverviewEmbeddableTitle.title', {
-                  defaultMessage: 'Create monitor stats',
-                }),
               });
               filters$.next(result.filters);
             } catch (e) {

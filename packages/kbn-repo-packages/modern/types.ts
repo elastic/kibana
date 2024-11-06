@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ModuleGroup, ModuleVisibility } from '@kbn/repo-info/types';
 import type { Package } from './package';
 import type { PLUGIN_CATEGORY } from './plugin_category_info';
 
@@ -45,7 +44,7 @@ export type KibanaPackageType =
   | 'functional-tests'
   | 'test-helper';
 
-export interface PackageManifestBaseFields {
+interface PackageManifestBaseFields {
   /**
    * The type of this package. Package types define how a package can and should
    * be used/built. Some package types also change the way that packages are
@@ -92,14 +91,6 @@ export interface PackageManifestBaseFields {
    * @deprecated
    */
   serviceFolders?: string[];
-  /**
-   * Specifies the group to which this package belongs
-   */
-  group?: ModuleGroup;
-  /**
-   * Specifies the package visibility, i.e. whether it can be accessed by everybody or only packages in the same group
-   */
-  visibility?: ModuleVisibility;
 }
 
 export interface PluginPackageManifest extends PackageManifestBaseFields {

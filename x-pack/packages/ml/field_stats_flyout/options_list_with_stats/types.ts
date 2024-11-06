@@ -9,9 +9,8 @@ import type { EuiComboBoxOptionOption, EuiSelectableOption } from '@elastic/eui'
 import type { Aggregation, Field } from '@kbn/ml-anomaly-utils';
 
 interface BaseOption<T> {
-  label: string | React.ReactNode;
   key?: string;
-  value?: string | number | string[];
+  label: string | React.ReactNode;
   isEmpty?: boolean;
   hideTrigger?: boolean;
   'data-is-empty'?: boolean;

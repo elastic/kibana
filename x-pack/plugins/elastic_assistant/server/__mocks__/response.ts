@@ -16,7 +16,7 @@ import { getPromptsSearchEsMock } from './prompts_schema.mock';
 import { EsAnonymizationFieldsSchema } from '../ai_assistant_data_clients/anonymization_fields/types';
 import { getAnonymizationFieldsSearchEsMock } from './anonymization_fields_schema.mock';
 import { getAttackDiscoverySearchEsMock } from './attack_discovery_schema.mock';
-import { EsAttackDiscoverySchema } from '../lib/attack_discovery/persistence/types';
+import { EsAttackDiscoverySchema } from '../ai_assistant_data_clients/attack_discovery/types';
 
 export const responseMock = {
   create: httpServerMock.createResponseFactory,

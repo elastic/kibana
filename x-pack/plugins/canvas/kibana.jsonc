@@ -1,16 +1,12 @@
 {
   "type": "plugin",
   "id": "@kbn/canvas-plugin",
-  "owner": [
-    "@elastic/kibana-presentation"
-  ],
-  "group": "platform",
-  "visibility": "private",
+  "owner": "@elastic/kibana-presentation",
   "description": "Adds Canvas application to Kibana",
   "plugin": {
     "id": "canvas",
-    "browser": true,
     "server": true,
+    "browser": true,
     "configPath": [
       "xpack",
       "canvas"
@@ -40,7 +36,7 @@
       "home",
       "reporting",
       "spaces",
-      "usageCollection"
+      "usageCollection",
     ],
     "requiredBundles": [
       "kibanaReact",
@@ -49,6 +45,6 @@
       "maps",
       "visualizations",
       "fieldFormats"
-    ]
+    ],
   }
 }

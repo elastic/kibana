@@ -35,7 +35,7 @@ export const getPersistentControlsHook = (tableId: TableId) => {
       services: { telemetry },
     } = useKibana();
 
-    const { sourcererDataView } = useSourcererDataView(SourcererScopeName.detections);
+    const { indexPattern } = useSourcererDataView(SourcererScopeName.detections);
     const groupId = useMemo(() => groupIdSelector(), []);
     const { options } = useDeepEqualSelector((state) => groupId(state, tableId)) ?? {
       options: [],
@@ -60,14 +60,10 @@ export const getPersistentControlsHook = (tableId: TableId) => {
       [dispatch, trackGroupChange]
     );
 
-    const fields = useMemo(() => {
-      return Object.values(sourcererDataView.fields || {});
-    }, [sourcererDataView.fields]);
-
     const groupSelector = useGetGroupSelectorStateless({
       groupingId: tableId,
       onGroupChange,
-      fields,
+      fields: indexPattern.fields,
       defaultGroupingOptions: options,
       maxGroupingLevels: 3,
     });

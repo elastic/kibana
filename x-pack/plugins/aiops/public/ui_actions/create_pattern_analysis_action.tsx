@@ -12,15 +12,12 @@ import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { EMBEDDABLE_PATTERN_ANALYSIS_TYPE } from '@kbn/aiops-log-pattern-analysis/constants';
-import { AIOPS_EMBEDDABLE_GROUPING } from '@kbn/aiops-common/constants';
-
 import type { AiopsPluginStartDeps } from '../types';
+import type { PatternAnalysisActionContext } from './pattern_analysis_action_context';
 import type {
   PatternAnalysisEmbeddableApi,
   PatternAnalysisEmbeddableInitialState,
 } from '../embeddables/pattern_analysis/types';
-
-import type { PatternAnalysisActionContext } from './pattern_analysis_action_context';
 
 const parentApiIsCompatible = async (
   parentApi: unknown
@@ -36,7 +33,16 @@ export function createAddPatternAnalysisEmbeddableAction(
 ): UiActionsActionDefinition<PatternAnalysisActionContext> {
   return {
     id: 'create-pattern-analysis-embeddable',
-    grouping: AIOPS_EMBEDDABLE_GROUPING,
+    grouping: [
+      {
+        id: 'ml',
+        getDisplayName: () =>
+          i18n.translate('xpack.aiops.navMenu.mlAppNameText', {
+            defaultMessage: 'Machine Learning and Analytics',
+          }),
+        getIconType: () => 'logPatternAnalysis',
+      },
+    ],
     getIconType: () => 'logPatternAnalysis',
     getDisplayName: () =>
       i18n.translate('xpack.aiops.embeddablePatternAnalysisDisplayName', {

@@ -17,10 +17,8 @@ export const deleteStoredScriptRoute = (router: SecuritySolutionPluginRouter) =>
     .delete({
       access: 'internal',
       path: RISK_SCORE_DELETE_STORED_SCRIPT,
-      security: {
-        authz: {
-          requiredPrivileges: ['securitySolution'],
-        },
+      options: {
+        tags: ['access:securitySolution'],
       },
     })
     .addVersion(

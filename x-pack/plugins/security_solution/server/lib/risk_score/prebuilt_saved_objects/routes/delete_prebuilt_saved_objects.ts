@@ -21,10 +21,8 @@ export const deletePrebuiltSavedObjectsRoute = (router: SecuritySolutionPluginRo
     .post({
       access: 'internal',
       path: PREBUILT_SAVED_OBJECTS_BULK_DELETE,
-      security: {
-        authz: {
-          requiredPrivileges: ['securitySolution'],
-        },
+      options: {
+        tags: ['access:securitySolution'],
       },
     })
     .addVersion(

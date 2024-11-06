@@ -52,7 +52,7 @@ function getSuggestion(
 
   return {
     title,
-    hide: true,
+    hide: datasourceId === 'textBased',
     score: 0.1,
     previewIcon: IconChartMetric,
     state: {

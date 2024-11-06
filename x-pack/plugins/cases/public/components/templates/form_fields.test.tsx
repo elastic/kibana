@@ -311,7 +311,6 @@ describe('form fields', () => {
 
     const textField = customFieldsConfigurationMock[0];
     const toggleField = customFieldsConfigurationMock[1];
-    const numberField = customFieldsConfigurationMock[4];
 
     const textCustomField = await screen.findByTestId(
       `${textField.key}-${textField.type}-create-custom-field`
@@ -325,14 +324,6 @@ describe('form fields', () => {
       await screen.findByTestId(`${toggleField.key}-${toggleField.type}-create-custom-field`)
     );
 
-    const numberCustomField = await screen.findByTestId(
-      `${numberField.key}-${numberField.type}-create-custom-field`
-    );
-
-    await userEvent.clear(numberCustomField);
-    await userEvent.click(numberCustomField);
-    await userEvent.paste('987');
-
     await userEvent.click(screen.getByText('Submit'));
 
     await waitFor(() => {
@@ -345,7 +336,6 @@ describe('form fields', () => {
             test_key_1: 'My text test value 1',
             test_key_2: false,
             test_key_4: false,
-            test_key_5: '987',
           },
           syncAlerts: true,
           templateTags: [],

@@ -17,7 +17,6 @@ import { coreUsageStatsClientMock } from './core_usage_stats_client.mock';
 const createSetupContractMock = (usageStatsClient = coreUsageStatsClientMock.create()) => {
   const setupContract: jest.Mocked<InternalCoreUsageDataSetup> = {
     registerType: jest.fn(),
-    registerDeprecatedUsageFetch: jest.fn(),
     getClient: jest.fn().mockReturnValue(usageStatsClient),
     registerUsageCounter: jest.fn(),
     incrementUsageCounter: jest.fn(),

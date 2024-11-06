@@ -16,12 +16,14 @@ import {
 import {
   ASSET_CRITICALITY_PUBLIC_URL,
   APP_ID,
+  ENABLE_ASSET_CRITICALITY_SETTING,
   API_VERSIONS,
 } from '../../../../../common/constants';
 import { checkAndInitAssetCriticalityResources } from '../check_and_init_asset_criticality_resources';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { AssetCriticalityAuditActions } from '../audit';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';
+import { assertAdvancedSettingsEnabled } from '../../utils/assert_advanced_setting_enabled';
 
 export const assetCriticalityPublicUpsertRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -31,10 +33,8 @@ export const assetCriticalityPublicUpsertRoute = (
     .post({
       access: 'public',
       path: ASSET_CRITICALITY_PUBLIC_URL,
-      security: {
-        authz: {
-          requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],
-        },
+      options: {
+        tags: ['access:securitySolution', `access:${APP_ID}-entity-analytics`],
       },
     })
     .addVersion(
@@ -53,6 +53,7 @@ export const assetCriticalityPublicUpsertRoute = (
       ): Promise<IKibanaResponse<CreateAssetCriticalityRecordResponse>> => {
         const siemResponse = buildSiemResponse(response);
         try {
+          await assertAdvancedSettingsEnabled(await context.core, ENABLE_ASSET_CRITICALITY_SETTING);
           await checkAndInitAssetCriticalityResources(context, logger);
 
           const securitySolution = await context.securitySolution;

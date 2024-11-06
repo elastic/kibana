@@ -28,6 +28,7 @@ import {
   DATA_PROVIDER_HIDDEN_POPULATED,
   DATA_PROVIDER_VISIBLE,
 } from './translations';
+import { TIMELINE_TOUR_CONFIG_ANCHORS } from '../tour/step_config';
 
 interface Props {
   dataProviders: DataProvider[];
@@ -111,7 +112,7 @@ export const SearchOrFilter = React.memo<Props>(
             alignItems="flexStart"
             responsive={false}
           >
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem grow={false} id={TIMELINE_TOUR_CONFIG_ANCHORS.DATA_VIEW}>
               <Sourcerer scope={SourcererScopeName.timeline} />
             </EuiFlexItem>
             <EuiFlexItem data-test-subj="timeline-search-or-filter-search-container" grow={1}>
@@ -142,6 +143,7 @@ export const SearchOrFilter = React.memo<Props>(
                 <EuiFlexItem grow={false}>
                   <EuiToolTip content={dataProviderIconTooltipContent}>
                     <EuiButtonIcon
+                      id={TIMELINE_TOUR_CONFIG_ANCHORS.DATA_PROVIDER}
                       color={buttonColor}
                       isSelected={isDataProviderVisible}
                       iconType="timeline"

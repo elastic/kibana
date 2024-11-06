@@ -9,14 +9,12 @@
 
 import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
 import { getBaseMappings } from './build_active_mappings';
-import { getUpdatedRootFields, getNewAndUpdatedTypes } from './compare_mappings';
+import { getUpdatedRootFields, getUpdatedTypes } from './compare_mappings';
 import { diffMappings } from './diff_mappings';
 
 jest.mock('./compare_mappings');
 const getUpdatedRootFieldsMock = getUpdatedRootFields as jest.MockedFn<typeof getUpdatedRootFields>;
-const getNewAndUpdatedTypesMock = getNewAndUpdatedTypes as jest.MockedFn<
-  typeof getNewAndUpdatedTypes
->;
+const getUpdatedTypesMock = getUpdatedTypes as jest.MockedFn<typeof getUpdatedTypes>;
 
 const dummyMappings: IndexMapping = {
   _meta: {
@@ -58,7 +56,7 @@ const dummyHashToVersionMap = {
 describe('diffMappings', () => {
   beforeEach(() => {
     getUpdatedRootFieldsMock.mockReset();
-    getNewAndUpdatedTypesMock.mockReset();
+    getUpdatedTypesMock.mockReset();
   });
 
   test('is different if dynamic is different', () => {
@@ -116,17 +114,14 @@ describe('diffMappings', () => {
 
       expect(getUpdatedRootFieldsMock).toHaveBeenCalledTimes(1);
       expect(getUpdatedRootFieldsMock).toHaveBeenCalledWith(initialMappings);
-      expect(getNewAndUpdatedTypesMock).not.toHaveBeenCalled();
+      expect(getUpdatedTypesMock).not.toHaveBeenCalled();
     });
   });
 
-  describe('if there are new or updated types', () => {
+  describe('if some types have changed', () => {
     test('returns a changed type', () => {
       getUpdatedRootFieldsMock.mockReturnValueOnce([]);
-      getNewAndUpdatedTypesMock.mockReturnValueOnce({
-        newTypes: ['baz'],
-        updatedTypes: ['foo'],
-      });
+      getUpdatedTypesMock.mockReturnValueOnce(['foo', 'bar']);
 
       expect(
         diffMappings({
@@ -142,8 +137,8 @@ describe('diffMappings', () => {
 
       expect(getUpdatedRootFieldsMock).toHaveBeenCalledTimes(1);
       expect(getUpdatedRootFieldsMock).toHaveBeenCalledWith(initialMappings);
-      expect(getNewAndUpdatedTypesMock).toHaveBeenCalledTimes(1);
-      expect(getNewAndUpdatedTypesMock).toHaveBeenCalledWith({
+      expect(getUpdatedTypesMock).toHaveBeenCalledTimes(1);
+      expect(getUpdatedTypesMock).toHaveBeenCalledWith({
         indexTypes: ['foo', 'bar', 'baz'],
         indexMeta: initialMappings._meta,
         latestMappingsVersions: {
@@ -157,10 +152,7 @@ describe('diffMappings', () => {
   describe('if no root field or types have changed', () => {
     test('returns undefined', () => {
       getUpdatedRootFieldsMock.mockReturnValueOnce([]);
-      getNewAndUpdatedTypesMock.mockReturnValueOnce({
-        newTypes: [],
-        updatedTypes: [],
-      });
+      getUpdatedTypesMock.mockReturnValueOnce([]);
 
       expect(
         diffMappings({

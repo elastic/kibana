@@ -4,12 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  ApmSynthtraceEsClient,
-  OtelSynthtraceEsClient,
-  createLogger,
-  LogLevel,
-} from '@kbn/apm-synthtrace';
+import { ApmSynthtraceEsClient, createLogger, LogLevel } from '@kbn/apm-synthtrace';
 import { createEsClientForTesting } from '@kbn/test';
 // eslint-disable-next-line @kbn/imports/no_unresolvable_imports
 import { initPlugin } from '@frsource/cypress-plugin-visual-regression-diff/plugins';
@@ -33,18 +28,8 @@ export function setupNodeEvents(on: Cypress.PluginEvents, config: Cypress.Plugin
     version: config.env.APM_PACKAGE_VERSION,
   });
 
-  const synthtraceOtelEsClient = new OtelSynthtraceEsClient({
-    client,
-    logger,
-    refreshAfterIndex: true,
-  });
-
   synthtraceEsClient.pipeline(
     synthtraceEsClient.getDefaultPipeline({ includeSerialization: false })
-  );
-
-  synthtraceOtelEsClient.pipeline(
-    synthtraceOtelEsClient.getDefaultPipeline({ includeSerialization: false })
   );
 
   initPlugin(on, config);
@@ -63,14 +48,6 @@ export function setupNodeEvents(on: Cypress.PluginEvents, config: Cypress.Plugin
     },
     async 'synthtrace:clean'() {
       await synthtraceEsClient.clean();
-      return null;
-    },
-    async 'synthtraceOtel:index'(events: Array<Record<string, any>>) {
-      await synthtraceOtelEsClient.index(Readable.from(events));
-      return null;
-    },
-    async 'synthtraceOtel:clean'() {
-      await synthtraceOtelEsClient.clean();
       return null;
     },
   });

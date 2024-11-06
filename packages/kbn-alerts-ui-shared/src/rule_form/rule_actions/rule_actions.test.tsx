@@ -117,18 +117,12 @@ describe('ruleActions', () => {
       getActionTypeModel('1', {
         id: 'actionType-1',
         validateParams: mockValidate,
-        defaultActionParams: {
-          key: 'value',
-        },
       })
     );
     actionTypeRegistry.register(
       getActionTypeModel('2', {
         id: 'actionType-2',
         validateParams: mockValidate,
-        defaultActionParams: {
-          key: 'value',
-        },
       })
     );
 
@@ -156,10 +150,6 @@ describe('ruleActions', () => {
       selectedRuleType: {
         id: 'selectedRuleTypeId',
         defaultActionGroupId: 'test',
-        recoveryActionGroup: {
-          id: 'test-recovery-group-id',
-          name: 'test-recovery-group',
-        },
         producer: 'stackAlerts',
       },
       connectors: mockConnectors,
@@ -232,7 +222,7 @@ describe('ruleActions', () => {
         frequency: { notifyWhen: 'onActionGroupChange', summary: false, throttle: null },
         group: 'test',
         id: 'connector-1',
-        params: { key: 'value' },
+        params: {},
         uuid: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
       },
       type: 'addAction',

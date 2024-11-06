@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import dedent from 'dedent';
-
 import {
   ENTERPRISE_SEARCH_APP_ID,
   ENTERPRISE_SEARCH_CONTENT_APP_ID,
@@ -15,10 +13,6 @@ import {
   ENTERPRISE_SEARCH_ANALYTICS_APP_ID,
   ENTERPRISE_SEARCH_APPSEARCH_APP_ID,
   ENTERPRISE_SEARCH_WORKPLACESEARCH_APP_ID,
-  SEARCH_ELASTICSEARCH,
-  SEARCH_VECTOR_SEARCH,
-  SEARCH_SEMANTIC_SEARCH,
-  SEARCH_AI_SEARCH,
 } from '@kbn/deeplinks-search';
 import { i18n } from '@kbn/i18n';
 
@@ -62,7 +56,7 @@ export const ENTERPRISE_SEARCH_CONTENT_PLUGIN = {
 };
 
 export const AI_SEARCH_PLUGIN = {
-  ID: SEARCH_AI_SEARCH,
+  ID: 'enterpriseSearchAISearch',
   NAME: i18n.translate('xpack.enterpriseSearch.aiSearch.productName', {
     defaultMessage: 'AI Search',
   }),
@@ -95,7 +89,7 @@ export const ANALYTICS_PLUGIN = {
 };
 
 export const ELASTICSEARCH_PLUGIN = {
-  ID: SEARCH_ELASTICSEARCH,
+  ID: 'enterpriseSearchElasticsearch',
   NAME: i18n.translate('xpack.enterpriseSearch.elasticsearch.productName', {
     defaultMessage: 'Elasticsearch',
   }),
@@ -171,7 +165,7 @@ export const VECTOR_SEARCH_PLUGIN = {
     defaultMessage:
       'Elasticsearch can be used as a vector database, which enables vector search and semantic search use cases.',
   }),
-  ID: SEARCH_VECTOR_SEARCH,
+  ID: 'enterpriseSearchVectorSearch',
   LOGO: 'logoEnterpriseSearch',
   NAME: i18n.translate('xpack.enterpriseSearch.vectorSearch.productName', {
     defaultMessage: 'Vector Search',
@@ -188,7 +182,7 @@ export const SEMANTIC_SEARCH_PLUGIN = {
     defaultMessage:
       'Easily add semantic search to Elasticsearch with inference endpoints and the semantic_text field type, to boost search relevance.',
   }),
-  ID: SEARCH_SEMANTIC_SEARCH,
+  ID: 'enterpriseSearchSemanticSearch',
   LOGO: 'logoEnterpriseSearch',
   NAME: i18n.translate('xpack.enterpriseSearch.SemanticSearch.productName', {
     defaultMessage: 'Semantic Search',
@@ -214,14 +208,6 @@ export const SEARCH_RELEVANCE_PLUGIN = {
   URL: '/app/enterprise_search/relevance',
   LOGO: 'logoEnterpriseSearch',
   SUPPORT_URL: 'https://discuss.elastic.co/c/enterprise-search/',
-};
-
-export const CREATE_CONNECTOR_PLUGIN = {
-  CLI_SNIPPET: dedent`./bin/connectors connector create
-  --index-name my-index
-  --index-language en
-  --from-file config.yml
-  `,
 };
 
 export const LICENSED_SUPPORT_URL = 'https://support.elastic.co';
@@ -301,14 +287,3 @@ export const CRAWLER = {
 
 // TODO remove this once the connector service types are no longer in "example" state
 export const EXAMPLE_CONNECTOR_SERVICE_TYPES = ['opentext_documentum'];
-
-export const GETTING_STARTED_TITLE = i18n.translate('xpack.enterpriseSearch.gettingStarted.title', {
-  defaultMessage: 'Getting started',
-});
-
-export const SEARCH_APPS_BREADCRUMB = i18n.translate(
-  'xpack.enterpriseSearch.searchApplications.breadcrumb',
-  {
-    defaultMessage: 'Search Applications',
-  }
-);

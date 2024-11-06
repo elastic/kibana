@@ -50,6 +50,12 @@ export const ConfigSchema = schema.object({
       schema.boolean({ defaultValue: true })
     ),
     chromium: schema.object({
+      inspect: schema.conditional(
+        schema.contextRef('dist'),
+        true,
+        schema.boolean({ defaultValue: false }),
+        schema.maybe(schema.never())
+      ),
       disableSandbox: schema.maybe(schema.boolean()), // default value is dynamic in createConfig
       proxy: schema.object({
         enabled: schema.boolean({ defaultValue: false }),

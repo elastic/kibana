@@ -8,14 +8,13 @@
  */
 
 import { Plugin, CoreSetup, CoreStart } from '@kbn/core/server';
-import { registerRoutes, registerDeprecatedRoutes } from './routes';
+import { registerRoutes } from './routes';
 
 export class RoutingExamplePlugin implements Plugin<{}, {}> {
   public setup(core: CoreSetup) {
     const router = core.http.createRouter();
 
     registerRoutes(router);
-    registerDeprecatedRoutes(router);
 
     return {};
   }

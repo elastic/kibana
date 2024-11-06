@@ -1,16 +1,12 @@
 {
   "type": "plugin",
   "id": "@kbn/vis-type-markdown-plugin",
-  "owner": [
-    "@elastic/kibana-presentation"
-  ],
-  "group": "platform",
-  "visibility": "private",
+  "owner": "@elastic/kibana-presentation",
   "description": "Adds a markdown visualization type",
   "plugin": {
     "id": "visTypeMarkdown",
-    "browser": true,
     "server": true,
+    "browser": true,
     "requiredPlugins": [
       "expressions",
       "visualizations"

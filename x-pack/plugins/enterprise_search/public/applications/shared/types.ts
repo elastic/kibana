@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import type { ReactNode } from 'react';
-
-import type { AppDeepLinkId, EuiSideNavItemTypeEnhanced } from '@kbn/core-chrome-browser';
-
 import { APP_SEARCH_PLUGIN, WORKPLACE_SEARCH_PLUGIN } from '../../../common/constants';
-import type { ProductAccess } from '../../../common/types';
 
 import { ADD, UPDATE } from './constants/operations';
 
@@ -61,38 +56,4 @@ export interface SingleUserRoleMapping<T> {
   elasticsearchUser: ElasticsearchUser;
   roleMapping: T;
   hasEnterpriseSearchRole?: boolean;
-}
-
-export interface ReactRouterProps {
-  to: string;
-  onClick?(): void;
-  // Used to navigate outside of the React Router plugin basename but still within Kibana,
-  // e.g. if we need to go from Enterprise Search to App Search
-  shouldNotCreateHref?: boolean;
-  // Used if to is already a fully qualified URL that doesn't need basePath prepended
-  shouldNotPrepend?: boolean;
-}
-
-export type GenerateNavLinkParameters = {
-  items?: Array<EuiSideNavItemTypeEnhanced<unknown>>; // Primarily passed if using `items` to determine isSelected - if not, you can just set `items` outside of this helper
-  shouldShowActiveForSubroutes?: boolean;
-  to: string;
-} & ReactRouterProps;
-
-export interface GenerateNavLinkFromDeepLinkParameters {
-  link: AppDeepLinkId;
-  shouldShowActiveForSubroutes?: boolean;
-}
-
-export interface BuildClassicNavParameters {
-  productAccess: ProductAccess;
-}
-
-export interface ClassicNavItem {
-  'data-test-subj'?: string;
-  deepLink?: GenerateNavLinkFromDeepLinkParameters;
-  iconToString?: string;
-  id: string;
-  items?: ClassicNavItem[];
-  name?: ReactNode;
 }

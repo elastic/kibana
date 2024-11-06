@@ -10,7 +10,7 @@
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { visualize, visualBuilder } = getPageObjects(['visualize', 'visualBuilder']);
+  const { visualize, visEditor } = getPageObjects(['visualize', 'visEditor']);
   const listingTable = getService('listingTable');
 
   describe('visualize listing page', function describeIndexTests() {
@@ -24,18 +24,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('create new viz', async function () {
-        // type tsvb is used for simplicity
-        await visualize.createSimpleTSVBViz(vizName);
+        // type markdown is used for simplicity
+        await visualize.createSimpleMarkdownViz(vizName);
         await visualize.gotoVisualizationLandingPage();
         await listingTable.expectItemsCount('visualize', 1);
       });
 
       it('delete all viz', async function () {
-        await visualize.createSimpleTSVBViz(vizName + '1');
+        await visualize.createSimpleMarkdownViz(vizName + '1');
         await visualize.gotoVisualizationLandingPage();
         await listingTable.expectItemsCount('visualize', 2);
 
-        await visualize.createSimpleTSVBViz(vizName + '2');
+        await visualize.createSimpleMarkdownViz(vizName + '2');
         await visualize.gotoVisualizationLandingPage();
         await listingTable.expectItemsCount('visualize', 3);
 
@@ -48,8 +48,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       before(async function () {
         // create one new viz
         await visualize.navigateToNewVisualization();
-        await visualize.clickVisualBuilder();
-        await visualBuilder.checkVisualBuilderIsPresent();
+        await visualize.clickMarkdownWidget();
+        await visEditor.setMarkdownTxt('HELLO');
+        await visEditor.clickGo();
         await visualize.saveVisualization('Hello World');
         await visualize.gotoVisualizationLandingPage();
       });

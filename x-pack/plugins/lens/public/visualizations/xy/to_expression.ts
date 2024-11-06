@@ -35,8 +35,6 @@ import {
   XYCurveType,
   YAxisConfigFn,
 } from '@kbn/expression-xy-plugin/common';
-
-import { FittingFunctions } from '@kbn/expression-xy-plugin/public';
 import type { EventAnnotationConfig } from '@kbn/event-annotation-common';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { SystemPaletteExpressionFunctionDefinition } from '@kbn/charts-plugin/common';
@@ -338,9 +336,9 @@ export const buildXYExpression = (
 
   const layeredXyVisFn = buildExpressionFunction<LayeredXyVisFn>('layeredXyVis', {
     legend: buildExpression([legendConfigFn]).toAst(),
-    fittingFunction: state.fittingFunction ?? FittingFunctions.LINEAR,
+    fittingFunction: state.fittingFunction ?? 'None',
     endValue: state.endValue ?? 'None',
-    emphasizeFitting: state.emphasizeFitting ?? true,
+    emphasizeFitting: state.emphasizeFitting ?? false,
     minBarHeight: state.minBarHeight ?? 1,
     fillOpacity: state.fillOpacity ?? 0.3,
     valueLabels: state.valueLabels ?? 'hide',

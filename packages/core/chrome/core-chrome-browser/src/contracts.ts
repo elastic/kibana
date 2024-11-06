@@ -13,11 +13,7 @@ import type { ChromeRecentlyAccessed } from './recently_accessed';
 import type { ChromeDocTitle } from './doc_title';
 import type { ChromeHelpMenuLink, ChromeNavControls } from './nav_controls';
 import type { ChromeHelpExtension } from './help_extension';
-import type {
-  ChromeBreadcrumb,
-  ChromeBreadcrumbsAppendExtension,
-  ChromeSetBreadcrumbsParams,
-} from './breadcrumb';
+import type { ChromeBreadcrumb, ChromeBreadcrumbsAppendExtension } from './breadcrumb';
 import type { ChromeBadge, ChromeStyle, ChromeUserBanner } from './types';
 import type { ChromeGlobalHelpExtensionMenuLink } from './help_extension';
 import type { PanelSelectedNode } from './project_navigation';
@@ -88,7 +84,7 @@ export interface ChromeStart {
   /**
    * Override the current set of breadcrumbs
    */
-  setBreadcrumbs(newBreadcrumbs: ChromeBreadcrumb[], params?: ChromeSetBreadcrumbsParams): void;
+  setBreadcrumbs(newBreadcrumbs: ChromeBreadcrumb[]): void;
 
   /**
    * Get an observable of the current extension appended to breadcrumbs

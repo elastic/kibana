@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { ObjectRemover } from '../../lib/object_remover';
-import { getTestAlertData, getTestConnectorData } from '../../lib/get_test_data';
+import { getTestAlertData, getTestActionData } from '../../lib/get_test_data';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
@@ -84,12 +84,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
 
         it('navigates to an alert details page', async () => {
-          const { body: createdConnector } = await supertest
+          const { body: createdAction } = await supertest
             .post(`/api/actions/connector`)
             .set('kbn-xsrf', 'foo')
-            .send(getTestConnectorData())
+            .send(getTestActionData())
             .expect(200);
-          objectRemover.add(createdConnector.id, 'connector', 'actions');
+          objectRemover.add(createdAction.id, 'action', 'actions');
 
           const { body: createdAlert } = await supertest
             .post(`/api/alerting/rule`)

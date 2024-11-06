@@ -30,7 +30,7 @@ import {
   HOST_DETAILS_VULNERABILITIES_TEST_ID,
   HOST_DETAILS_ALERT_COUNT_TEST_ID,
 } from './test_ids';
-import { EXPANDABLE_PANEL_CONTENT_TEST_ID } from '../../../shared/components/test_ids';
+import { EXPANDABLE_PANEL_CONTENT_TEST_ID } from '@kbn/security-solution-common';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
 import { mockContextValue } from '../../shared/mocks/mock_context';
 import { mockFlyoutApi } from '../../shared/mocks/mock_flyout_context';
@@ -88,9 +88,7 @@ jest.mock('../../../../helper_hooks', () => ({
 }));
 
 jest.mock('../../../../sourcerer/containers', () => ({
-  useSourcererDataView: jest
-    .fn()
-    .mockReturnValue({ selectedPatterns: ['index'], sourcererDataView: {} }),
+  useSourcererDataView: jest.fn().mockReturnValue({ selectedPatterns: ['index'] }),
 }));
 
 jest.mock('../../../../common/components/ml/anomaly/anomaly_table_provider', () => ({

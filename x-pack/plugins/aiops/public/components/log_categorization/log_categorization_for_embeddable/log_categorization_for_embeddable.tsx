@@ -10,7 +10,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import type { Filter } from '@kbn/es-query';
-import { buildEmptyFilter, buildEsQuery } from '@kbn/es-query';
+import { buildEmptyFilter } from '@kbn/es-query';
 import type { FieldValidationResults } from '@kbn/ml-category-validator';
 
 import type { Category } from '@kbn/aiops-log-pattern-analysis/types';
@@ -21,11 +21,11 @@ import { useTableState } from '@kbn/ml-in-memory-table/hooks/use_table_state';
 import { AIOPS_ANALYSIS_RUN_ORIGIN } from '@kbn/aiops-common/constants';
 import datemath from '@elastic/datemath';
 import useMountedState from 'react-use/lib/useMountedState';
-import { getEsQueryConfig } from '@kbn/data-service';
 import { useFilterQueryUpdates } from '../../../hooks/use_filters_query';
 import type { PatternAnalysisProps } from '../../../shared_components/pattern_analysis';
 import { useSearch } from '../../../hooks/use_search';
 import { getDefaultLogCategorizationAppState } from '../../../application/url_state/log_pattern_analysis';
+import { createMergedEsQuery } from '../../../application/utils/search_utils';
 import { useData } from '../../../hooks/use_data';
 import { useAiopsAppContext } from '../../../hooks/use_aiops_app_context';
 
@@ -86,12 +86,7 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
   });
 
   const appState = getDefaultLogCategorizationAppState({
-    searchQuery: buildEsQuery(
-      dataView,
-      query ?? [],
-      filters ?? [],
-      uiSettings ? getEsQueryConfig(uiSettings) : undefined
-    ),
+    searchQuery: createMergedEsQuery(query, filters, dataView, uiSettings),
     filters,
   });
   const { searchQuery } = useSearch({ dataView, savedSearch: savedSearch ?? null }, appState, true);

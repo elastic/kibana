@@ -33,7 +33,6 @@ export const AlertsCount = ({ count }: { count: number }) => {
         border-right: ${euiTheme.border.thin};
         margin-right: ${euiTheme.size.s};
         padding-right: ${euiTheme.size.m};
-        align-self: center;
       `}
     >
       {alertCountText}

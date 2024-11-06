@@ -18,7 +18,7 @@ import {
 } from '@kbn/core/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { Space } from '@kbn/spaces-plugin/public';
-import type { SolutionId, SolutionNavigationDefinition } from '@kbn/core-chrome-browser';
+import type { SolutionNavigationDefinition } from '@kbn/core-chrome-browser';
 import { InternalChromeStart } from '@kbn/core-chrome-browser-internal';
 import type { PanelContentProvider } from '@kbn/shared-ux-chrome-navigation';
 import type {
@@ -195,7 +195,7 @@ export class NavigationPublicPlugin
       }
     }
 
-    if (isProjectNav && solutionView !== 'classic') {
+    if (isProjectNav) {
       chrome.project.changeActiveSolutionNavigation(solutionView!);
     }
   }
@@ -210,6 +210,6 @@ function getIsProjectNav(solutionView?: string) {
   return Boolean(solutionView) && isKnownSolutionView(solutionView);
 }
 
-function isKnownSolutionView(solution?: string): solution is SolutionId {
+function isKnownSolutionView(solution?: string) {
   return Boolean(solution) && ['oblt', 'es', 'security'].includes(solution!);
 }

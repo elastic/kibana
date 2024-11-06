@@ -250,7 +250,7 @@ export interface UseDataGridReturnType {
   /**
    * Setter function for the row count info.
    */
-  setRowCountInfo: (info: RowCountInfo) => void;
+  setRowCountInfo: Dispatch<SetStateAction<RowCountInfo>>;
   /**
    * Setter function for the sorting columns.
    */

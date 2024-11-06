@@ -11,6 +11,7 @@ import {
   IndicesPutIndexTemplateRequest,
 } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { entitiesHistoryBaseComponentTemplateConfig } from '../templates/components/base_history';
 import { entitiesLatestBaseComponentTemplateConfig } from '../templates/components/base_latest';
 import { entitiesEntityComponentTemplateConfig } from '../templates/components/entity';
 import { entitiesEventComponentTemplateConfig } from '../templates/components/event';
@@ -37,6 +38,11 @@ export const installEntityManagerTemplates = async ({
   logger: Logger;
 }) => {
   await Promise.all([
+    upsertComponent({
+      esClient,
+      logger,
+      component: entitiesHistoryBaseComponentTemplateConfig,
+    }),
     upsertComponent({
       esClient,
       logger,

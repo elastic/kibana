@@ -7,10 +7,9 @@
 
 import expect from '@kbn/expect';
 import { log, timerange } from '@kbn/apm-synthtrace-client';
-import { LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import { SupertestWithRoleScopeType } from '../../../services';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
-import { createBackingIndexNameWithoutVersion, setDataStreamSettings } from './utils/es_utils';
+import { createBackingIndexNameWithoutVersion, setDataStreamSettings } from './es_utils';
 import { logsSynthMappings } from './custom_mappings/custom_synth_mappings';
 
 const MORE_THAN_1024_CHARS =
@@ -18,7 +17,7 @@ const MORE_THAN_1024_CHARS =
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
-  const synthtrace = getService('synthtrace');
+  const synthtrace = getService('logsSynthtraceEsClient');
   const esClient = getService('es');
   const start = '2024-09-20T11:00:00.000Z';
   const end = '2024-09-20T11:01:00.000Z';
@@ -51,7 +50,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
   describe('Degraded field analyze', function () {
     let supertestAdminWithCookieCredentials: SupertestWithRoleScopeType;
-    let synthtraceLogsEsClient: LogsSynthtraceEsClient;
 
     before(async () => {
       supertestAdminWithCookieCredentials = await roleScopedSupertest.getSupertestWithRoleScope(
@@ -65,8 +63,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     describe('gets limit analysis for a given datastream and degraded field', () => {
       before(async () => {
-        synthtraceLogsEsClient = await synthtrace.createLogsSynthtraceEsClient();
-        await synthtraceLogsEsClient.createComponentTemplate(
+        await synthtrace.createComponentTemplate(
           customComponentTemplateName,
           logsSynthMappings(dataset)
         );
@@ -89,7 +86,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             hidden: false,
           },
         });
-        await synthtraceLogsEsClient.index([
+        await synthtrace.index([
           timerange(start, end)
             .interval('1m')
             .rate(1)
@@ -136,7 +133,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await setDataStreamSettings(esClient, dataStreamName, {
           'mapping.total_fields.limit': 25,
         });
-        await synthtraceLogsEsClient.index([
+        await synthtrace.index([
           timerange(start, end)
             .interval('1m')
             .rate(1)
@@ -179,9 +176,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       after(async () => {
-        await synthtraceLogsEsClient.clean();
+        await synthtrace.clean();
         await esClient.indices.deleteIndexTemplate({ name: dataStreamName });
-        await synthtraceLogsEsClient.deleteComponentTemplate(customComponentTemplateName);
+        await synthtrace.deleteComponentTemplate(customComponentTemplateName);
       });
     });
   });

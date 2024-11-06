@@ -25,7 +25,7 @@ export function getTestAlertData(overwrites = {}) {
   };
 }
 
-export function getTestConnectorData(overwrites = {}) {
+export function getTestActionData(overwrites = {}) {
   return {
     name: `slack-${Date.now()}`,
     connector_type_id: '.slack',

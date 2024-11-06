@@ -1,15 +1,11 @@
 {
   "type": "plugin",
   "id": "@kbn/translations-plugin",
-  "owner": [
-    "@elastic/kibana-localization"
-  ],
-  "group": "platform",
-  "visibility": "private",
+  "owner": "@elastic/kibana-localization",
   "plugin": {
     "id": "translations",
-    "browser": false,
     "server": true,
+    "browser": false,
     "configPath": [
       "x-pack",
       "translations"

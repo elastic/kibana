@@ -5,8 +5,7 @@
     "types": [
       "jest",
       "node",
-      "react",
-      "@kbn/ambient-ui-types"
+      "react"
     ]
   },
   "include": [
@@ -32,6 +31,5 @@
     "@kbn/core",
     "@kbn/zod",
     "@kbn/data-views-plugin",
-    "@kbn/user-profile-components",
   ]
 }

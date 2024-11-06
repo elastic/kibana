@@ -61,7 +61,6 @@ export const updateAlertRoute = (
         access: isServerless ? 'internal' : 'public',
         summary: 'Update an alert',
         tags: ['oas-tag:alerting'],
-        // @ts-expect-error TODO(https://github.com/elastic/kibana/issues/196095): Replace {RouteDeprecationInfo}
         deprecated: true,
       },
     },

@@ -36,10 +36,6 @@ export const firstItem = (items: ESQLAstItem[]): ESQLSingleAstItem | undefined =
   }
 };
 
-export const resolveItem = (items: ESQLAstItem | ESQLAstItem[]): ESQLAstItem => {
-  return Array.isArray(items) ? resolveItem(items[0]) : items;
-};
-
 /**
  * Returns the last normalized "single item" from the "item" list.
  *

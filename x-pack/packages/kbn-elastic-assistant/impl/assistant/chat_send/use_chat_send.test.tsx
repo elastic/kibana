@@ -57,9 +57,6 @@ describe('use chat send', () => {
       assistantTelemetry: {
         reportAssistantMessageSent,
       },
-      assistantAvailability: {
-        isAssistantEnabled: true,
-      },
     });
   });
   it('handleOnChatCleared clears the conversation', async () => {

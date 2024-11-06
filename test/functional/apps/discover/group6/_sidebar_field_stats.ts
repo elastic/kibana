@@ -148,7 +148,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await discover.selectTextBaseLang();
 
-        const testQuery = `from logstash-* METADATA _index, _id | sort @timestamp desc | limit 500`;
+        const testQuery = `from logstash-* [METADATA _index, _id] | sort @timestamp desc | limit 500`;
         await monacoEditor.setCodeEditorValue(testQuery);
         await testSubjects.click('querySubmitButton');
         await header.waitUntilLoadingHasFinished();
@@ -168,7 +168,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await unifiedFieldList.clickFieldListPlusFilter('bytes', '0');
         const editorValue = await monacoEditor.getCodeEditorValue();
         expect(editorValue).to.eql(
-          `from logstash-* METADATA _index, _id | sort @timestamp desc | limit 500\n| WHERE \`bytes\`==0`
+          `from logstash-* [METADATA _index, _id] | sort @timestamp desc | limit 500\n| WHERE \`bytes\`==0`
         );
         await unifiedFieldList.closeFieldPopover();
       });
@@ -188,7 +188,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await unifiedFieldList.clickFieldListPlusFilter('extension.raw', 'css');
         const editorValue = await monacoEditor.getCodeEditorValue();
         expect(editorValue).to.eql(
-          `from logstash-* METADATA _index, _id | sort @timestamp desc | limit 500\n| WHERE \`extension.raw\`=="css"`
+          `from logstash-* [METADATA _index, _id] | sort @timestamp desc | limit 500\n| WHERE \`extension.raw\`=="css"`
         );
 
         await unifiedFieldList.closeFieldPopover();
@@ -209,7 +209,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await unifiedFieldList.clickFieldListPlusFilter('clientip', '216.126.255.31');
         const editorValue = await monacoEditor.getCodeEditorValue();
         expect(editorValue).to.eql(
-          `from logstash-* METADATA _index, _id | sort @timestamp desc | limit 500\n| WHERE \`clientip\`::string=="216.126.255.31"`
+          `from logstash-* [METADATA _index, _id] | sort @timestamp desc | limit 500\n| WHERE \`clientip\`::string=="216.126.255.31"`
         );
 
         await unifiedFieldList.closeFieldPopover();
@@ -234,7 +234,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await unifiedFieldList.clickFieldListExistsFilter('@timestamp');
         const editorValue = await monacoEditor.getCodeEditorValue();
         expect(editorValue).to.eql(
-          `from logstash-* METADATA _index, _id | sort @timestamp desc | limit 500\n| WHERE \`@timestamp\` is not null`
+          `from logstash-* [METADATA _index, _id] | sort @timestamp desc | limit 500\n| WHERE \`@timestamp\` is not null`
         );
         await testSubjects.missingOrFail('dscFieldStats-statsFooter');
         await unifiedFieldList.closeFieldPopover();
@@ -269,7 +269,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await unifiedFieldList.clickFieldListPlusFilter('extension', 'css');
         const editorValue = await monacoEditor.getCodeEditorValue();
         expect(editorValue).to.eql(
-          `from logstash-* METADATA _index, _id | sort @timestamp desc | limit 500\n| WHERE \`extension\`=="css"`
+          `from logstash-* [METADATA _index, _id] | sort @timestamp desc | limit 500\n| WHERE \`extension\`=="css"`
         );
 
         await unifiedFieldList.closeFieldPopover();

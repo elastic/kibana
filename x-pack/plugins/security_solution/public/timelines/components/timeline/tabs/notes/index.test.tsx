@@ -70,14 +70,14 @@ const mockGlobalStateWithUnSavedTimeline: State = {
 describe('NotesTabContentComponent', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
+    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
     (useUserPrivileges as jest.Mock).mockReturnValue({
       kibanaSecuritySolutionsPrivileges: { crud: true },
     });
   });
 
   it('should show the old note system', () => {
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
+    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
 
     const { getByTestId, queryByTestId } = render(
       <TestProviders>

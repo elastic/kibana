@@ -22,6 +22,7 @@ import { getField } from '../shared/utils';
 import { EventKind } from '../shared/constants/event_kinds';
 import { useDocumentDetailsContext } from '../shared/context';
 import type { DocumentDetailsProps } from '../shared/types';
+import { LeftPanelTour } from './components/tour';
 
 export type LeftPanelPaths = 'visualize' | 'insights' | 'investigation' | 'response' | 'notes';
 export const LeftPanelVisualizeTab: LeftPanelPaths = 'visualize';
@@ -35,8 +36,8 @@ export const LeftPanel: FC<Partial<DocumentDetailsProps>> = memo(({ path }) => {
   const { openLeftPanel } = useExpandableFlyoutApi();
   const { eventId, indexName, scopeId, getFieldsData, isPreview } = useDocumentDetailsContext();
   const eventKind = getField(getFieldsData('event.kind'));
-  const securitySolutionNotesDisabled = useIsExperimentalFeatureEnabled(
-    'securitySolutionNotesDisabled'
+  const securitySolutionNotesEnabled = useIsExperimentalFeatureEnabled(
+    'securitySolutionNotesEnabled'
   );
 
   const [visualizationInFlyoutEnabled] = useUiSetting$<boolean>(
@@ -48,14 +49,14 @@ export const LeftPanel: FC<Partial<DocumentDetailsProps>> = memo(({ path }) => {
       eventKind === EventKind.signal
         ? [tabs.insightsTab, tabs.investigationTab, tabs.responseTab]
         : [tabs.insightsTab];
-    if (!securitySolutionNotesDisabled && !isPreview) {
+    if (securitySolutionNotesEnabled && !isPreview) {
       tabList.push(tabs.notesTab);
     }
     if (visualizationInFlyoutEnabled && !isPreview) {
       return [tabs.visualizeTab, ...tabList];
     }
     return tabList;
-  }, [eventKind, isPreview, securitySolutionNotesDisabled, visualizationInFlyoutEnabled]);
+  }, [eventKind, isPreview, securitySolutionNotesEnabled, visualizationInFlyoutEnabled]);
 
   const selectedTabId = useMemo(() => {
     const defaultTab = tabsDisplayed[0].id;
@@ -84,6 +85,7 @@ export const LeftPanel: FC<Partial<DocumentDetailsProps>> = memo(({ path }) => {
 
   return (
     <>
+      <LeftPanelTour />
       <PanelHeader
         selectedTabId={selectedTabId}
         setSelectedTabId={setSelectedTabId}

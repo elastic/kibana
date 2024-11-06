@@ -27,17 +27,11 @@ exports[`NavControlPopover renders without crashing 1`] = `
             <span
               class="euiHeaderSectionItemButton__content emotion-euiHeaderSectionItemButton__content"
             >
-              <div
-                aria-busy="true"
-                data-test-subj="euiSkeletonLoadingAriaWrapper"
-              >
-                <div
-                  aria-label="Loading Loading spaces navigation"
-                  class="euiSkeletonRectangle emotion-euiSkeletonGradientAnimation-euiSkeletonRectangle-m"
-                  role="progressbar"
-                  style="inline-size: 24px; block-size: 24px;"
-                />
-              </div>
+              <span
+                aria-label="Loading"
+                class="euiLoadingSpinner eui-alignMiddle emotion-euiLoadingSpinner-m"
+                role="progressbar"
+              />
               <p
                 hidden=""
                 id="spacesNavDetails"

@@ -9851,10 +9851,6 @@ Object {
       "required": false,
       "type": "text",
     },
-    "error.stack_trace": Object {
-      "required": false,
-      "type": "wildcard",
-    },
     "host.name": Object {
       "required": false,
       "type": "keyword",
@@ -9994,10 +9990,6 @@ Object {
     "error.message": Object {
       "required": false,
       "type": "text",
-    },
-    "error.stack_trace": Object {
-      "required": false,
-      "type": "wildcard",
     },
     "host.name": Object {
       "required": false,
@@ -10139,10 +10131,6 @@ Object {
       "required": false,
       "type": "text",
     },
-    "error.stack_trace": Object {
-      "required": false,
-      "type": "wildcard",
-    },
     "host.name": Object {
       "required": false,
       "type": "keyword",
@@ -10282,10 +10270,6 @@ Object {
     "error.message": Object {
       "required": false,
       "type": "text",
-    },
-    "error.stack_trace": Object {
-      "required": false,
-      "type": "wildcard",
     },
     "host.name": Object {
       "required": false,
@@ -10432,10 +10416,6 @@ Object {
     "error.message": Object {
       "required": false,
       "type": "text",
-    },
-    "error.stack_trace": Object {
-      "required": false,
-      "type": "wildcard",
     },
     "host.name": Object {
       "required": false,

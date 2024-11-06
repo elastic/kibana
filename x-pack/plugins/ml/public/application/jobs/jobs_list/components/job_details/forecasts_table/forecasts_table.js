@@ -350,14 +350,7 @@ export class ForecastsTable extends Component {
         name: i18n.translate('xpack.ml.jobsList.jobDetails.forecastsTable.expiresLabel', {
           defaultMessage: 'Expires',
         }),
-        render: (value) => {
-          if (value === undefined) {
-            return i18n.translate('xpack.ml.jobsList.jobDetails.forecastsTable.neverExpiresLabel', {
-              defaultMessage: 'Never expires',
-            });
-          }
-          return timeFormatter(value);
-        },
+        render: timeFormatter,
         textOnly: true,
         sortable: true,
       },

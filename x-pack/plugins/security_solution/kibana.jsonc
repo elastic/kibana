@@ -1,15 +1,11 @@
 {
   "type": "plugin",
   "id": "@kbn/security-solution-plugin",
-  "owner": [
-    "@elastic/security-solution"
-  ],
-  "group": "security",
-  "visibility": "private",
+  "owner": "@elastic/security-solution",
   "plugin": {
     "id": "securitySolution",
-    "browser": true,
     "server": true,
+    "browser": true,
     "configPath": [
       "xpack",
       "securitySolution"
@@ -75,8 +71,7 @@
       "osquery",
       "savedObjectsTaggingOss",
       "guidedOnboarding",
-      "integrationAssistant",
-      "serverless"
+      "integrationAssistant"
     ],
     "requiredBundles": [
       "esUiShared",

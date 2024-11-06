@@ -107,9 +107,7 @@ export const OptionsListPopover = ({
 }: OptionsListPopoverProps) => {
   const { populatedFields } = useFieldStatsFlyoutContext();
 
-  const [showEmptyFields, setShowEmptyFields] = useState(
-    populatedFields ? !(populatedFields.size > 0) : true
-  );
+  const [showEmptyFields, setShowEmptyFields] = useState(false);
   const id = useMemo(() => htmlIdGenerator()(), []);
 
   const filteredOptions = useMemo(() => {

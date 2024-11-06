@@ -18,7 +18,6 @@ import {
   EuiAutoSizer,
   EuiAutoSize,
 } from '@elastic/eui';
-import { ShowAllSpaces } from '../../common/show_all_spaces';
 import { OverviewStatusMetaData } from '../../../../../../../common/runtime_types';
 import { quietFetchOverviewStatusAction } from '../../../../state/overview_status';
 import type { TrendRequest } from '../../../../../../../common/types';
@@ -135,10 +134,6 @@ export const OverviewGrid = memo(() => {
         <EuiFlexItem grow={true}>
           <OverviewPaginationInfo total={status ? monitorsSortedByStatus.length : undefined} />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <ShowAllSpaces />
-        </EuiFlexItem>
-
         <EuiFlexItem grow={false}>
           <AddToDashboard type={SYNTHETICS_MONITORS_EMBEDDABLE} asButton />
         </EuiFlexItem>
@@ -258,7 +253,6 @@ export const OverviewGrid = memo(() => {
           id={flyoutConfig.id}
           location={flyoutConfig.location}
           locationId={flyoutConfig.locationId}
-          spaceId={flyoutConfig.spaceId}
           onClose={hideFlyout}
           onEnabledChange={forceRefreshCallback}
           onLocationChange={setFlyoutConfigCallback}

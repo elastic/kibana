@@ -25,7 +25,7 @@ export async function createAndInstallIngestPipelines(
           id: latestId,
           processors: latestProcessors,
           _meta: {
-            definition_version: definition.version,
+            definitionVersion: definition.version,
             managed: definition.managed,
           },
         }),

@@ -103,12 +103,9 @@ export function NavControl() {
     };
   }, [service.conversations.predefinedConversation$]);
 
-  const { messages, title, hideConversationList } = useObservable(
-    service.conversations.predefinedConversation$
-  ) ?? {
+  const { messages, title } = useObservable(service.conversations.predefinedConversation$) ?? {
     messages: [],
     title: undefined,
-    hideConversationList: false,
   };
 
   const theme = useTheme();
@@ -167,14 +164,13 @@ export function NavControl() {
             onClose={() => {
               setIsOpen(false);
             }}
-            navigateToConversation={(conversationId?: string) => {
+            navigateToConversation={(conversationId: string) => {
               application.navigateToUrl(
                 http.basePath.prepend(
                   `/app/observabilityAIAssistant/conversations/${conversationId || ''}`
                 )
               );
             }}
-            hideConversationList={hideConversationList}
           />
         </ObservabilityAIAssistantChatServiceContext.Provider>
       ) : undefined}

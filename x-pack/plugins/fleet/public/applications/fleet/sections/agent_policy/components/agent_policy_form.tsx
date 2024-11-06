@@ -45,14 +45,12 @@ interface Props {
   isEditing?: boolean;
   // form error state is passed up to the form
   updateAdvancedSettingsHasErrors: (hasErrors: boolean) => void;
-  setInvalidSpaceError: (hasErrors: boolean) => void;
 }
 const AgentPolicyFormContext = React.createContext<
   | {
       agentPolicy: Partial<NewAgentPolicy | AgentPolicy> & { [key: string]: any };
       updateAgentPolicy: (u: Partial<NewAgentPolicy | AgentPolicy>) => void;
       updateAdvancedSettingsHasErrors: (hasErrors: boolean) => void;
-      setInvalidSpaceError: (hasErrors: boolean) => void;
     }
   | undefined
 >(undefined);
@@ -69,7 +67,6 @@ export const AgentPolicyForm: React.FunctionComponent<Props> = ({
   validation,
   isEditing = false,
   updateAdvancedSettingsHasErrors,
-  setInvalidSpaceError,
 }) => {
   const authz = useAuthz();
   const isDisabled = !authz.fleet.allAgentPolicies;
@@ -100,12 +97,7 @@ export const AgentPolicyForm: React.FunctionComponent<Props> = ({
 
   return (
     <AgentPolicyFormContext.Provider
-      value={{
-        agentPolicy,
-        updateAgentPolicy,
-        updateAdvancedSettingsHasErrors,
-        setInvalidSpaceError,
-      }}
+      value={{ agentPolicy, updateAgentPolicy, updateAdvancedSettingsHasErrors }}
     >
       <EuiForm>
         {!isEditing ? (

@@ -56,7 +56,7 @@ export const policies = [
 
 export function getCallbackMocks() {
   return {
-    getColumnsFor: jest.fn(async ({ query }) => {
+    getFieldsFor: jest.fn(async ({ query }) => {
       if (/enrich/.test(query)) {
         return enrichFields;
       }

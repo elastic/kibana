@@ -14,7 +14,6 @@ import {
 } from './create_managed_configuration';
 import { mockLogger } from '../test_utils';
 import { CLAIM_STRATEGY_UPDATE_BY_QUERY, CLAIM_STRATEGY_MGET, TaskManagerConfig } from '../config';
-import { MsearchError } from './msearch_error';
 
 describe('createManagedConfiguration()', () => {
   let clock: sinon.SinonFakeTimers;
@@ -185,28 +184,6 @@ describe('createManagedConfiguration()', () => {
         expect(subscription).toHaveBeenNthCalledWith(2, 8);
       });
 
-      test('should decrease configuration at the next interval when a 500 error is emitted', async () => {
-        const { subscription, errors$ } = setupScenario(10);
-        errors$.next(SavedObjectsErrorHelpers.decorateGeneralError(new Error('a'), 'b'));
-        clock.tick(ADJUST_THROUGHPUT_INTERVAL - 1);
-        expect(subscription).toHaveBeenCalledTimes(1);
-        expect(subscription).toHaveBeenNthCalledWith(1, 10);
-        clock.tick(1);
-        expect(subscription).toHaveBeenCalledTimes(2);
-        expect(subscription).toHaveBeenNthCalledWith(2, 8);
-      });
-
-      test('should decrease configuration at the next interval when a 503 error is emitted', async () => {
-        const { subscription, errors$ } = setupScenario(10);
-        errors$.next(SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError('a', 'b'));
-        clock.tick(ADJUST_THROUGHPUT_INTERVAL - 1);
-        expect(subscription).toHaveBeenCalledTimes(1);
-        expect(subscription).toHaveBeenNthCalledWith(1, 10);
-        clock.tick(1);
-        expect(subscription).toHaveBeenCalledTimes(2);
-        expect(subscription).toHaveBeenNthCalledWith(2, 8);
-      });
-
       test('should log a warning when the configuration changes from the starting value', async () => {
         const { errors$ } = setupScenario(10);
         errors$.next(SavedObjectsErrorHelpers.createTooManyRequestsError('a', 'b'));
@@ -247,52 +224,20 @@ describe('createManagedConfiguration()', () => {
     });
 
     describe('mget claim strategy', () => {
-      test('should decrease configuration at the next interval when an msearch 429 error is emitted', async () => {
-        const { subscription, errors$ } = setupScenario(10);
-        errors$.next(new MsearchError(429));
+      test('should decrease configuration at the next interval when an error is emitted', async () => {
+        const { subscription, errors$ } = setupScenario(10, CLAIM_STRATEGY_MGET);
+        errors$.next(SavedObjectsErrorHelpers.createTooManyRequestsError('a', 'b'));
         clock.tick(ADJUST_THROUGHPUT_INTERVAL - 1);
         expect(subscription).toHaveBeenCalledTimes(1);
         expect(subscription).toHaveBeenNthCalledWith(1, 10);
         clock.tick(1);
         expect(subscription).toHaveBeenCalledTimes(2);
         expect(subscription).toHaveBeenNthCalledWith(2, 8);
-      });
-
-      test('should decrease configuration at the next interval when an msearch 500 error is emitted', async () => {
-        const { subscription, errors$ } = setupScenario(10);
-        errors$.next(new MsearchError(500));
-        clock.tick(ADJUST_THROUGHPUT_INTERVAL - 1);
-        expect(subscription).toHaveBeenCalledTimes(1);
-        expect(subscription).toHaveBeenNthCalledWith(1, 10);
-        clock.tick(1);
-        expect(subscription).toHaveBeenCalledTimes(2);
-        expect(subscription).toHaveBeenNthCalledWith(2, 8);
-      });
-
-      test('should decrease configuration at the next interval when an msearch 503 error is emitted', async () => {
-        const { subscription, errors$ } = setupScenario(10);
-        errors$.next(new MsearchError(503));
-        clock.tick(ADJUST_THROUGHPUT_INTERVAL - 1);
-        expect(subscription).toHaveBeenCalledTimes(1);
-        expect(subscription).toHaveBeenNthCalledWith(1, 10);
-        clock.tick(1);
-        expect(subscription).toHaveBeenCalledTimes(2);
-        expect(subscription).toHaveBeenNthCalledWith(2, 8);
-      });
-
-      test('should not change configuration at the next interval when other msearch error is emitted', async () => {
-        const { subscription, errors$ } = setupScenario(10);
-        errors$.next(new MsearchError(404));
-        clock.tick(ADJUST_THROUGHPUT_INTERVAL - 1);
-        expect(subscription).toHaveBeenCalledTimes(1);
-        expect(subscription).toHaveBeenNthCalledWith(1, 10);
-        clock.tick(1);
-        expect(subscription).toHaveBeenCalledTimes(1);
       });
 
       test('should log a warning when the configuration changes from the starting value', async () => {
         const { errors$ } = setupScenario(10, CLAIM_STRATEGY_MGET);
-        errors$.next(new MsearchError(429));
+        errors$.next(SavedObjectsErrorHelpers.createTooManyRequestsError('a', 'b'));
         clock.tick(ADJUST_THROUGHPUT_INTERVAL);
         expect(logger.warn).toHaveBeenCalledWith(
           'Capacity configuration is temporarily reduced after Elasticsearch returned 1 "too many request" and/or "execute [inline] script" error(s).'
@@ -301,7 +246,7 @@ describe('createManagedConfiguration()', () => {
 
       test('should increase configuration back to normal incrementally after an error is emitted', async () => {
         const { subscription, errors$ } = setupScenario(10, CLAIM_STRATEGY_MGET);
-        errors$.next(new MsearchError(429));
+        errors$.next(SavedObjectsErrorHelpers.createTooManyRequestsError('a', 'b'));
         clock.tick(ADJUST_THROUGHPUT_INTERVAL * 10);
         expect(subscription).toHaveBeenNthCalledWith(1, 10);
         expect(subscription).toHaveBeenNthCalledWith(2, 8);
@@ -314,7 +259,7 @@ describe('createManagedConfiguration()', () => {
       test('should keep reducing configuration when errors keep emitting until it reaches minimum', async () => {
         const { subscription, errors$ } = setupScenario(10, CLAIM_STRATEGY_MGET);
         for (let i = 0; i < 20; i++) {
-          errors$.next(new MsearchError(429));
+          errors$.next(SavedObjectsErrorHelpers.createTooManyRequestsError('a', 'b'));
           clock.tick(ADJUST_THROUGHPUT_INTERVAL);
         }
         expect(subscription).toHaveBeenNthCalledWith(1, 10);
@@ -353,26 +298,6 @@ describe('createManagedConfiguration()', () => {
     test('should increase configuration at the next interval when an error is emitted', async () => {
       const { subscription, errors$ } = setupScenario(100);
       errors$.next(SavedObjectsErrorHelpers.createTooManyRequestsError('a', 'b'));
-      clock.tick(ADJUST_THROUGHPUT_INTERVAL - 1);
-      expect(subscription).toHaveBeenCalledTimes(1);
-      clock.tick(1);
-      expect(subscription).toHaveBeenCalledTimes(2);
-      expect(subscription).toHaveBeenNthCalledWith(2, 120);
-    });
-
-    test('should increase configuration at the next interval when a 500 error is emitted', async () => {
-      const { subscription, errors$ } = setupScenario(100);
-      errors$.next(SavedObjectsErrorHelpers.decorateGeneralError(new Error('a'), 'b'));
-      clock.tick(ADJUST_THROUGHPUT_INTERVAL - 1);
-      expect(subscription).toHaveBeenCalledTimes(1);
-      clock.tick(1);
-      expect(subscription).toHaveBeenCalledTimes(2);
-      expect(subscription).toHaveBeenNthCalledWith(2, 120);
-    });
-
-    test('should increase configuration at the next interval when a 503 error is emitted', async () => {
-      const { subscription, errors$ } = setupScenario(100);
-      errors$.next(SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError('a', 'b'));
       clock.tick(ADJUST_THROUGHPUT_INTERVAL - 1);
       expect(subscription).toHaveBeenCalledTimes(1);
       clock.tick(1);

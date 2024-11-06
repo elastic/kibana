@@ -35,8 +35,7 @@ export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
   const utils = getService('securitySolutionUtils');
 
-  // TODO: https://github.com/elastic/kibana/issues/193184 Delete this file and clean up the code
-  describe.skip('@ess @serverless @skipInServerlessMKI update_rules_bulk', () => {
+  describe('@ess @serverless @skipInServerlessMKI update_rules_bulk', () => {
     describe('update rules bulk', () => {
       beforeEach(async () => {
         await createAlertsIndex(supertest, log);

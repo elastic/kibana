@@ -285,4 +285,21 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
       },
       generateServiceTokenHandler
     );
+
+  router.versioned
+    .post({
+      path: APP_API_ROUTES.GENERATE_SERVICE_TOKEN_PATTERN_DEPRECATED,
+      fleetAuthz: {
+        fleet: { allAgents: true },
+      },
+      description: `Create a service token`,
+      deprecated: true,
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: {},
+      },
+      generateServiceTokenHandler
+    );
 };

@@ -1,16 +1,12 @@
 {
   "type": "plugin",
   "id": "@kbn/files-plugin",
-  "owner": [
-    "@elastic/appex-sharedux"
-  ],
-  "group": "platform",
-  "visibility": "shared",
+  "owner": "@elastic/appex-sharedux",
   "description": "File upload, download, sharing, and serving over HTTP implementation in Kibana.",
   "plugin": {
     "id": "files",
-    "browser": true,
     "server": true,
+    "browser": true,
     "optionalPlugins": [
       "security",
       "usageCollection"

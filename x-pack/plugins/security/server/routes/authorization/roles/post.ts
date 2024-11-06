@@ -62,11 +62,6 @@ export function defineBulkCreateOrUpdateRolesRoutes({
               };
             }),
           },
-          response: {
-            200: {
-              description: 'Indicates a successful call.',
-            },
-          },
         },
       },
       createLicensedRouteHandler(async (context, request, response) => {

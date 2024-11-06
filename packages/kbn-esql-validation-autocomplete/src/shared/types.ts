@@ -39,7 +39,7 @@ export interface ESQLSourceResult {
 
 export interface ESQLCallbacks {
   getSources?: CallbackFn<{}, ESQLSourceResult>;
-  getColumnsFor?: CallbackFn<{ query: string }, ESQLRealField>;
+  getFieldsFor?: CallbackFn<{ query: string }, ESQLRealField>;
   getPolicies?: CallbackFn<
     {},
     { name: string; sourceIndices: string[]; matchField: string; enrichFields: string[] }

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { SolutionId } from '@kbn/core-chrome-browser';
+import type { OnBoardingDefaultSolution } from '@kbn/cloud-plugin/common';
 
 import type { SOLUTION_VIEW_CLASSIC } from '../../constants';
 
-export type SolutionView = SolutionId | typeof SOLUTION_VIEW_CLASSIC;
+export type SolutionView = OnBoardingDefaultSolution | typeof SOLUTION_VIEW_CLASSIC;
 
 /**
  * A Space.

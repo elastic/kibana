@@ -11,7 +11,7 @@ import {
   ChatCompletionTokenCountEvent,
   ChatCompletionChunkToolCall,
   ChatCompletionEventType,
-} from '@kbn/inference-common';
+} from '../../../../common/chat_complete';
 import type { CompletionChunk, MessageStopChunk } from './types';
 
 export function processCompletionChunks() {

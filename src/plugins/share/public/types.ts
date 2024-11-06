@@ -132,12 +132,11 @@ export interface ShareMenuItemV2 extends ShareMenuItemBase {
   layoutOption?: 'print';
   generateCopyUrl?: URL;
   renderCopyURLButton?: boolean;
-  warnings?: Array<{ title: string; message: string }>;
 }
 
 export interface ShareMenuProviderV2 {
   readonly id: string;
-  getShareMenuItems: (context: ShareContext) => ShareMenuItemV2[];
+  getShareMenuItems: (context: ShareContext) => Array<Omit<ShareMenuItemV2, 'intl'>>;
 }
 export interface ShareMenuProviderLegacy {
   readonly id: string;

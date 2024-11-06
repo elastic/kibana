@@ -12,7 +12,7 @@ import { tap } from 'rxjs';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { Logger, ExecutionContextStart } from '@kbn/core/server';
 
-import { Result, asErr, mapErr, asOk, map, mapOk, isOk } from './lib/result_type';
+import { Result, asErr, mapErr, asOk, map, mapOk } from './lib/result_type';
 import { ManagedConfiguration } from './lib/create_managed_configuration';
 import { TaskManagerConfig, CLAIM_STRATEGY_UPDATE_BY_QUERY } from './config';
 
@@ -246,19 +246,18 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
   private pollForWork = async (): Promise<TimedFillPoolResult> => {
     return fillPool(
       // claim available tasks
-      async () => {
-        const result = await claimAvailableTasks(this.taskClaiming, this.logger);
-
-        if (isOk(result) && result.value.timing) {
-          this.emitEvent(
-            asTaskManagerStatEvent(
-              'claimDuration',
-              asOk(result.value.timing.stop - result.value.timing.start)
-            )
-          );
-        }
-
-        return result;
+      () => {
+        return claimAvailableTasks(this.taskClaiming, this.logger).pipe(
+          tap(
+            mapOk(({ timing }: ClaimOwnershipResult) => {
+              if (timing) {
+                this.emitEvent(
+                  asTaskManagerStatEvent('claimDuration', asOk(timing.stop - timing.start))
+                );
+              }
+            })
+          )
+        );
       },
       // wrap each task in a Task Runner
       this.createTaskRunnerForTask,
@@ -353,23 +352,39 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
   }
 }
 
-export async function claimAvailableTasks(
+export function claimAvailableTasks(
   taskClaiming: TaskClaiming,
   logger: Logger
-): Promise<Result<ClaimOwnershipResult, FillPoolResult>> {
-  try {
-    return taskClaiming.claimAvailableTasksIfCapacityIsAvailable({
-      claimOwnershipUntil: intervalFromNow('30s')!,
-    });
-  } catch (err) {
-    // if we can identify the reason for the error, emit a FillPoolResult error
-    if (isEsCannotExecuteScriptError(err)) {
-      logger.warn(`Task Manager cannot operate when inline scripts are disabled in Elasticsearch`);
-      return asErr(FillPoolResult.Failed);
-    } else {
-      const esError = identifyEsError(err);
-      // as we could't identify the reason - propagate the error
-      throw esError.length > 0 ? esError : err;
-    }
-  }
+): Observable<Result<ClaimOwnershipResult, FillPoolResult>> {
+  return new Observable((observer) => {
+    taskClaiming
+      .claimAvailableTasksIfCapacityIsAvailable({
+        claimOwnershipUntil: intervalFromNow('30s')!,
+      })
+      .subscribe(
+        (claimResult) => {
+          observer.next(claimResult);
+        },
+        (ex) => {
+          // if the `taskClaiming` stream errors out we want to catch it and see if
+          // we can identify the reason
+          // if we can - we emit an FillPoolResult error rather than erroring out the wrapping Observable
+          // returned by `claimAvailableTasks`
+          if (isEsCannotExecuteScriptError(ex)) {
+            logger.warn(
+              `Task Manager cannot operate when inline scripts are disabled in Elasticsearch`
+            );
+            observer.next(asErr(FillPoolResult.Failed));
+            observer.complete();
+          } else {
+            const esError = identifyEsError(ex);
+            // as we could't identify the reason - we'll error out the wrapping Observable too
+            observer.error(esError.length > 0 ? esError : ex);
+          }
+        },
+        () => {
+          observer.complete();
+        }
+      );
+  });
 }

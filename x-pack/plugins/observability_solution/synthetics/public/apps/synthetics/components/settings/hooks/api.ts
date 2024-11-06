@@ -22,10 +22,9 @@ export const getDslPolicies = async (): Promise<{ data: DataStream[] }> => {
       includeStats: true,
     },
     undefined,
+    undefined,
     {
-      headers: {
-        'X-Elastic-Internal-Origin': 'Kibana',
-      },
+      'X-Elastic-Internal-Origin': 'Kibana',
     }
   );
 };

@@ -48,20 +48,6 @@ export const MANIFEST_V2: JSONSchema = {
         For additional codeowners, the value can be an array of user/team names.
       `,
     },
-    group: {
-      enum: ['common', 'platform', 'observability', 'security', 'search'],
-      description: desc`
-        Specifies the group to which this module pertains.
-      `,
-      default: 'common',
-    },
-    visibility: {
-      enum: ['private', 'shared'],
-      description: desc`
-        Specifies the visibility of this module, i.e. whether it can be accessed by everybody or only modules in the same group
-      `,
-      default: 'shared',
-    },
     devOnly: {
       type: 'boolean',
       description: desc`

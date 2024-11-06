@@ -40,6 +40,7 @@ import {
   DEFAULT_ALERT_TAGS_VALUE,
   EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER,
   EXCLUDED_DATA_TIERS_FOR_RULE_EXECUTION,
+  ENABLE_ASSET_CRITICALITY_SETTING,
   ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING,
 } from '../common/constants';
 import type { ExperimentalFeatures } from '../common/experimental_features';
@@ -174,6 +175,24 @@ export const initUiSettings = (
         defaultMessage: '<p>Enables the News feed</p>',
         values: { p: (chunks) => `<p>${chunks}</p>` },
       }),
+      type: 'boolean',
+      category: [APP_ID],
+      requiresPageReload: true,
+      schema: schema.boolean(),
+    },
+    [ENABLE_ASSET_CRITICALITY_SETTING]: {
+      name: i18n.translate('xpack.securitySolution.uiSettings.enableAssetCriticalityTitle', {
+        defaultMessage: 'Asset Criticality',
+      }),
+      value: false,
+      description: i18n.translate(
+        'xpack.securitySolution.uiSettings.enableAssetCriticalityDescription',
+        {
+          defaultMessage:
+            '<p>Enables asset criticality assignment workflows and its contributions to entity risk </p>',
+          values: { p: (chunks) => `<p>${chunks}</p>` },
+        }
+      ),
       type: 'boolean',
       category: [APP_ID],
       requiresPageReload: true,
@@ -343,7 +362,6 @@ export const initUiSettings = (
         max: 1000,
         defaultValue: DEFAULT_MAX_UNASSOCIATED_NOTES,
       }),
-      category: [APP_ID],
       requiresPageReload: false,
     },
     [EXCLUDED_DATA_TIERS_FOR_RULE_EXECUTION]: {

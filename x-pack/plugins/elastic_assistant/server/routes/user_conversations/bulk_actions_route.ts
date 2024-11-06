@@ -35,7 +35,7 @@ import {
   transformToUpdateScheme,
 } from '../../ai_assistant_data_clients/conversations/update_conversation';
 import { EsConversationSchema } from '../../ai_assistant_data_clients/conversations/types';
-import { performChecks } from '../helpers';
+import { UPGRADE_LICENSE_MESSAGE, hasAIAssistantLicense } from '../helpers';
 
 export interface BulkOperationError {
   message: string;
@@ -156,17 +156,23 @@ export const bulkActionConversationsRoute = (
         request.events.completed$.subscribe(() => abortController.abort());
         try {
           const ctx = await context.resolve(['core', 'elasticAssistant', 'licensing']);
-          const checkResponse = performChecks({
-            context: ctx,
-            request,
-            response,
-          });
-          if (!checkResponse.isSuccess) {
-            return checkResponse.response;
+          const license = ctx.licensing.license;
+          if (!hasAIAssistantLicense(license)) {
+            return response.forbidden({
+              body: {
+                message: UPGRADE_LICENSE_MESSAGE,
+              },
+            });
           }
-          const authenticatedUser = checkResponse.currentUser;
           const dataClient = await ctx.elasticAssistant.getAIAssistantConversationsDataClient();
           const spaceId = ctx.elasticAssistant.getSpaceId();
+          const authenticatedUser = ctx.elasticAssistant.getCurrentUser();
+          if (authenticatedUser == null) {
+            return assistantResponse.error({
+              body: `Authenticated user not found`,
+              statusCode: 401,
+            });
+          }
 
           if (body.create && body.create.length > 0) {
             const userFilter = authenticatedUser?.username

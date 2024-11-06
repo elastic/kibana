@@ -83,7 +83,7 @@ export type LogCategoriesGridColumnId = (typeof logCategoriesGridColumns)[number
 
 const cellContextKey = 'cellContext';
 
-export const getCellContext = (cellContext: object): LogCategoriesGridCellContext =>
+const getCellContext = (cellContext: object): LogCategoriesGridCellContext =>
   (cellContextKey in cellContext
     ? cellContext[cellContextKey]
     : {}) as LogCategoriesGridCellContext;

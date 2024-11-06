@@ -9,6 +9,7 @@ import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { encode } from '@kbn/rison';
 
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import {
   RULE_FROM_EQL_URL_PARAM,
   RULE_FROM_TIMELINE_URL_PARAM,
@@ -23,6 +24,8 @@ import { timelineSelectors } from '../../store';
 import { createTimeline as dispatchCreateNewTimeline } from '../../store/actions';
 
 import { useGetAllTimeline } from '../../containers/all';
+
+import { defaultHeaders } from '../timeline/body/column_headers/default_headers';
 
 import { OpenTimeline } from './open_timeline';
 import { OPEN_TIMELINE_CLASS_NAME, useQueryTimelineById } from './helpers';
@@ -157,6 +160,9 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
     );
 
     const { dataViewId, selectedPatterns } = useSourcererDataView(SourcererScopeName.timeline);
+    const unifiedComponentsInTimelineDisabled = useIsExperimentalFeatureEnabled(
+      'unifiedComponentsInTimelineDisabled'
+    );
 
     const {
       customTemplateTimelineCount,
@@ -245,11 +251,13 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
           dispatch(
             dispatchCreateNewTimeline({
               id: TimelineId.active,
-              columns: defaultUdtHeaders,
+              columns: !unifiedComponentsInTimelineDisabled ? defaultUdtHeaders : defaultHeaders,
               dataViewId,
               indexNames: selectedPatterns,
               show: false,
-              excludedRowRendererIds: timelineDefaults.excludedRowRendererIds,
+              excludedRowRendererIds: !unifiedComponentsInTimelineDisabled
+                ? timelineDefaults.excludedRowRendererIds
+                : [],
             })
           );
         }
@@ -257,7 +265,15 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
         await deleteTimelinesByIds(timelineIds, searchIds);
         refetch();
       },
-      [startTransaction, timelineSavedObjectId, refetch, dispatch, dataViewId, selectedPatterns]
+      [
+        startTransaction,
+        timelineSavedObjectId,
+        refetch,
+        dispatch,
+        dataViewId,
+        selectedPatterns,
+        unifiedComponentsInTimelineDisabled,
+      ]
     );
 
     const onDeleteOneTimeline: OnDeleteOneTimeline = useCallback(
@@ -358,6 +374,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
           onOpenTimeline,
           timelineId,
           timelineType: timelineTypeToOpen,
+          unifiedComponentsInTimelineDisabled,
         });
       },
       // eslint-disable-next-line react-hooks/exhaustive-deps

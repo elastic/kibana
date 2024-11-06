@@ -6,20 +6,19 @@
  */
 
 import { rangeQuery } from '@kbn/observability-plugin/server';
-import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
-import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import {
   CONTAINER_ID,
   CONTAINER_IMAGE,
   KUBERNETES,
   KUBERNETES_POD_NAME,
   KUBERNETES_POD_UID,
+} from '../../../common/es_fields/apm';
+import {
   KUBERNETES_CONTAINER_NAME,
+  KUBERNETES_NAMESPACE,
   KUBERNETES_REPLICASET_NAME,
   KUBERNETES_DEPLOYMENT_NAME,
-  KUBERNETES_CONTAINER_ID,
-  KUBERNETES_NAMESPACE,
-} from '../../../common/es_fields/apm';
+} from '../../../common/es_fields/infra_metrics';
 import { Kubernetes } from '../../../typings/es_schemas/raw/fields/kubernetes';
 import { maybe } from '../../../common/utils/maybe';
 import { InfraMetricsClient } from '../../lib/helpers/create_es_client/create_infra_metrics_client/create_infra_metrics_client';
@@ -52,21 +51,9 @@ export const getServiceInstanceContainerMetadata = async ({
     { exists: { field: KUBERNETES_DEPLOYMENT_NAME } },
   ];
 
-  const fields = asMutableArray([
-    KUBERNETES_POD_NAME,
-    KUBERNETES_POD_UID,
-    KUBERNETES_DEPLOYMENT_NAME,
-    KUBERNETES_CONTAINER_ID,
-    KUBERNETES_CONTAINER_NAME,
-    KUBERNETES_NAMESPACE,
-    KUBERNETES_REPLICASET_NAME,
-    KUBERNETES_DEPLOYMENT_NAME,
-  ] as const);
-
   const response = await infraMetricsClient.search({
     size: 1,
     track_total_hits: false,
-    fields,
     query: {
       bool: {
         filter: [
@@ -82,7 +69,7 @@ export const getServiceInstanceContainerMetadata = async ({
     },
   });
 
-  const sample = unflattenKnownApmEventFields(maybe(response.hits.hits[0])?.fields);
+  const sample = maybe(response.hits.hits[0])?._source as ServiceInstanceContainerMetadataDetails;
 
   return {
     kubernetes: {

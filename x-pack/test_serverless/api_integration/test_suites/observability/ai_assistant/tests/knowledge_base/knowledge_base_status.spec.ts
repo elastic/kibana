@@ -69,7 +69,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       expect(res.body).to.eql({
         ready: false,
         model_name: TINY_ELSER.id,
-        enabled: true,
       });
     });
   });

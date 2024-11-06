@@ -40,10 +40,6 @@ export class SavedObjectsEncryptionExtension implements ISavedObjectsEncryptionE
     return this._service.isRegistered(type);
   }
 
-  shouldEnforceRandomId(type: string) {
-    return this._service.shouldEnforceRandomId(type);
-  }
-
   async decryptOrStripResponseAttributes<T, R extends SavedObject<T>>(
     response: R,
     originalAttributes?: T

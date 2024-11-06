@@ -32,7 +32,6 @@ jest.mock('../../../../../../sourcerer/containers', () => ({
     dataViewId: 'security-solution-my-test',
     indicesExist: true,
     selectedPatterns: ['signal-index'],
-    sourcererDataView: {},
   }),
 }));
 

@@ -842,7 +842,7 @@ describe('XYChart component', () => {
       const lineArea = dataLayers.find(LineSeries).at(0);
       const expectedSeriesStyle = expect.objectContaining({
         point: expect.objectContaining({
-          visible: showPoints ? 'always' : 'auto',
+          visible: showPoints ? 'always' : 'never',
         }),
       });
       expect(lineArea.prop('areaSeriesStyle')).toEqual(expectedSeriesStyle);

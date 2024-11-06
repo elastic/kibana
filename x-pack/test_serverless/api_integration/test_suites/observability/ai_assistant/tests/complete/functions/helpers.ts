@@ -36,12 +36,12 @@ export async function invokeChatCompleteWithFunctionRequest({
   functionCall,
   roleAuthc,
   internalReqHeader,
-  scopes,
+  scope,
 }: {
   connectorId: string;
   observabilityAIAssistantAPIClient: ObservabilityAIAssistantApiClient;
   functionCall: Message['message']['function_call'];
-  scopes?: AssistantScope[];
+  scope?: AssistantScope;
   roleAuthc: RoleCredentials;
   internalReqHeader: InternalRequestHeader;
 }) {
@@ -65,7 +65,7 @@ export async function invokeChatCompleteWithFunctionRequest({
           connectorId,
           persist: false,
           screenContexts: [],
-          scopes: scopes || (['observability'] as AssistantScope[]),
+          scope: 'observability',
         },
       },
     })

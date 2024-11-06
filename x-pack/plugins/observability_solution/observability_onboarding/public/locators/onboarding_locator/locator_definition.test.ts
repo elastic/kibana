@@ -21,11 +21,11 @@ describe('Observability onboarding locator', () => {
 
   test('should create a link to specified log source onboarding', async () => {
     const locator = new ObservabilityOnboardingLocatorDefinition();
-    const systemLocation = await locator.getLocation({ source: 'customLogs' });
+    const systemLocation = await locator.getLocation({ source: 'systemLogs' });
 
     expect(systemLocation).toMatchObject({
       app: 'observabilityOnboarding',
-      path: '/customLogs',
+      path: '/systemLogs',
       state: {},
     });
   });

@@ -10,12 +10,9 @@ import type {
   RuleUpdateProps,
   RulePatchProps,
   RuleObjectId,
-  RuleResponse,
   RuleToImport,
-  RuleSource,
+  RuleResponse,
 } from '../../../../../../common/api/detection_engine';
-import type { IRuleSourceImporter } from '../import/rule_source_importer';
-import type { RuleImportErrorObject } from '../import/errors';
 import type { PrebuiltRuleAsset } from '../../../prebuilt_rules';
 
 export interface IDetectionRulesClient {
@@ -26,7 +23,6 @@ export interface IDetectionRulesClient {
   deleteRule: (args: DeleteRuleArgs) => Promise<void>;
   upgradePrebuiltRule: (args: UpgradePrebuiltRuleArgs) => Promise<RuleResponse>;
   importRule: (args: ImportRuleArgs) => Promise<RuleResponse>;
-  importRules: (args: ImportRulesArgs) => Promise<Array<RuleResponse | RuleImportErrorObject>>;
 }
 
 export interface CreateCustomRuleArgs {
@@ -55,14 +51,6 @@ export interface UpgradePrebuiltRuleArgs {
 
 export interface ImportRuleArgs {
   ruleToImport: RuleToImport;
-  overrideFields?: { rule_source: RuleSource; immutable: boolean };
   overwriteRules?: boolean;
-  allowMissingConnectorSecrets?: boolean;
-}
-
-export interface ImportRulesArgs {
-  rules: RuleToImport[];
-  overwriteRules: boolean;
-  ruleSourceImporter: IRuleSourceImporter;
   allowMissingConnectorSecrets?: boolean;
 }

@@ -7,7 +7,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import useDebounce from 'react-use/lib/useDebounce';
+import { useDebounce } from 'react-use';
 import { useLocation } from 'react-router-dom';
 
 import { useSyntheticsRefreshContext } from '../../../contexts/synthetics_refresh_context';
@@ -28,7 +28,6 @@ import {
   quietGetMonitorStatusHeatmapAction,
   selectHeatmap,
 } from '../../../state/status_heatmap';
-import type { MonitorStatusHeatmapBucket } from '../../../../../../common/runtime_types';
 
 type Props = Pick<MonitorStatusPanelProps, 'from' | 'to'> & {
   initialSizeRef?: React.MutableRefObject<HTMLDivElement | null>;
@@ -100,36 +99,7 @@ export const useMonitorStatusData = ({ from, to, initialSizeRef }: Props) => {
     [binsAvailableByWidth]
   );
 
-  const { timeBins, timeBinMap, xDomain } = useBins({
-    fromMillis,
-    toMillis,
-    dateHistogram,
-    minsPerBin,
-  });
-
-  return {
-    loading,
-    minsPerBin,
-    timeBins,
-    getTimeBinByXValue: (xValue: number | undefined) =>
-      xValue === undefined ? undefined : timeBinMap.get(xValue),
-    xDomain,
-    handleResize,
-  };
-};
-
-export const useBins = ({
-  minsPerBin,
-  fromMillis,
-  toMillis,
-  dateHistogram,
-}: {
-  minsPerBin: number | null;
-  fromMillis: number;
-  toMillis: number;
-  dateHistogram?: MonitorStatusHeatmapBucket[];
-}) =>
-  useMemo((): {
+  const { timeBins, timeBinMap, xDomain } = useMemo((): {
     timeBins: MonitorStatusTimeBin[];
     timeBinMap: Map<number, MonitorStatusTimeBin>;
     xDomain: { min: number; max: number };
@@ -155,3 +125,14 @@ export const useBins = ({
       },
     };
   }, [minsPerBin, fromMillis, toMillis, dateHistogram]);
+
+  return {
+    loading,
+    minsPerBin,
+    timeBins,
+    getTimeBinByXValue: (xValue: number | undefined) =>
+      xValue === undefined ? undefined : timeBinMap.get(xValue),
+    xDomain,
+    handleResize,
+  };
+};

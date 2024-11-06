@@ -11,14 +11,14 @@ import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 export default function emailTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
-  describe('create email connector', () => {
-    it('should return 403 when creating an email connector', async () => {
+  describe('create email action', () => {
+    it('should return 403 when creating an email action', async () => {
       await supertest
-        .post('/api/actions/connector')
+        .post('/api/actions/action')
         .set('kbn-xsrf', 'foo')
         .send({
-          name: 'An email connector',
-          connector_type_id: '.email',
+          name: 'An email action',
+          actionTypeId: '.email',
           config: {
             service: '__json',
             from: 'bob@example.com',

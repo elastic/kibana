@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import type { SavedObject, SavedObjectReference } from '@kbn/core/types';
-import type { SavedObjectsFindOptionsReference } from '@kbn/core/public';
-import type { Tag } from '../common/types';
-import { tagSavedObjectTypeName } from '../common';
+import { SavedObject, SavedObjectReference } from '@kbn/core/types';
+import { SavedObjectsFindOptionsReference } from '@kbn/core/public';
+import { Tag, tagSavedObjectTypeName } from '../common';
 
 type SavedObjectReferenceLike = SavedObjectReference | SavedObjectsFindOptionsReference;
 
@@ -46,7 +45,7 @@ export const getTagsFromReferences = (references: SavedObjectReference[], allTag
 };
 
 export const convertTagNameToId = (tagName: string, allTags: Tag[]): string | undefined => {
-  const found = allTags.find((tag) => tag.name.toLowerCase() === tagName.toLowerCase());
+  const found = allTags.find((tag) => tag.name === tagName);
   return found?.id;
 };
 

@@ -31,7 +31,6 @@ export default function bulkUntrackByQueryTests({ getService }: FtrProviderConte
           match_all: {},
         },
         conflicts: 'proceed',
-        ignore_unavailable: true,
       });
       await objectRemover.removeAll();
     });

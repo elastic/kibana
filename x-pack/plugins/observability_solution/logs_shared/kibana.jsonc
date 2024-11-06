@@ -11,7 +11,6 @@
     "requiredPlugins": [
       "charts",
       "data",
-      "fieldFormats", 
       "dataViews",
       "discoverShared",
       "logsDataAccess",
@@ -22,7 +21,7 @@
     "optionalPlugins": [
       "observabilityAIAssistant",
     ],
-    "requiredBundles": ["kibanaUtils", "kibanaReact", "unifiedDocViewer"],
+    "requiredBundles": ["kibanaUtils", "kibanaReact"],
     "extraPublicDirs": ["common"]
   }
 }

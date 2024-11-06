@@ -16,7 +16,6 @@ import { ThemeProvider } from 'styled-components';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Theme } from '@elastic/charts';
 
-import { UserProfileService } from '@kbn/core/public';
 import { DataQualityProvider, DataQualityProviderProps } from '../../data_quality_context';
 import { ResultsRollupContext } from '../../contexts/results_rollup_context';
 import { IndicesCheckContext } from '../../contexts/indices_check_context';
@@ -49,7 +48,6 @@ const TestExternalProvidersComponent: React.FC<TestExternalProvidersProps> = ({ 
     hasConnectorsAllPrivilege: true,
     hasConnectorsReadPrivilege: true,
     hasUpdateAIAssistantAnonymization: true,
-    hasManageGlobalKnowledgeBase: true,
     isAssistantEnabled: true,
   };
   const queryClient = new QueryClient({
@@ -83,7 +81,6 @@ const TestExternalProvidersComponent: React.FC<TestExternalProvidersProps> = ({ 
             baseConversations={{}}
             navigateToApp={mockNavigateToApp}
             currentAppId={'securitySolutionUI'}
-            userProfileService={jest.fn() as unknown as UserProfileService}
           >
             {children}
           </AssistantProvider>

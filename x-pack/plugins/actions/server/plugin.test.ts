@@ -30,7 +30,6 @@ import {
   DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
   DEFAULT_MICROSOFT_GRAPH_API_URL,
 } from '../common';
-import { cloudMock } from '@kbn/cloud-plugin/server/mocks';
 
 const executor: ExecutorType<{}, {}, {}, void> = async (options) => {
   return { status: 'ok', actionId: options.actionId };
@@ -50,17 +49,16 @@ function getConfig(overrides = {}) {
         secrets: {},
       },
     },
+    proxyRejectUnauthorizedCertificates: true,
     proxyBypassHosts: undefined,
     proxyOnlyHosts: undefined,
+    rejectUnauthorized: true,
     maxResponseContentLength: new ByteSizeValue(1000000),
     responseTimeout: moment.duration('60s'),
     enableFooterInEmail: true,
     microsoftGraphApiUrl: DEFAULT_MICROSOFT_GRAPH_API_URL,
     microsoftGraphApiScope: DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
     microsoftExchangeUrl: DEFAULT_MICROSOFT_EXCHANGE_URL,
-    usage: {
-      url: 'ca.path',
-    },
     ...overrides,
   };
 }
@@ -78,15 +76,14 @@ describe('Actions Plugin', () => {
         allowedHosts: ['*'],
         preconfiguredAlertHistoryEsIndex: false,
         preconfigured: {},
+        proxyRejectUnauthorizedCertificates: true,
+        rejectUnauthorized: true,
         maxResponseContentLength: new ByteSizeValue(1000000),
         responseTimeout: moment.duration(60000),
         enableFooterInEmail: true,
         microsoftGraphApiUrl: DEFAULT_MICROSOFT_GRAPH_API_URL,
         microsoftGraphApiScope: DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
         microsoftExchangeUrl: DEFAULT_MICROSOFT_EXCHANGE_URL,
-        usage: {
-          url: 'ca.path',
-        },
       });
       plugin = new ActionsPlugin(context);
       coreSetup = coreMock.createSetup();
@@ -98,7 +95,6 @@ describe('Actions Plugin', () => {
         eventLog: eventLogMock.createSetup(),
         usageCollection: usageCollectionPluginMock.createSetupContract(),
         features: featuresPluginMock.createSetup(),
-        cloud: cloudMock.createSetup(),
       };
       coreSetup.getStartServices.mockResolvedValue([
         coreMock.createStart(),
@@ -351,7 +347,6 @@ describe('Actions Plugin', () => {
           eventLog: eventLogMock.createSetup(),
           usageCollection: usageCollectionPluginMock.createSetupContract(),
           features: featuresPluginMock.createSetup(),
-          cloud: cloudMock.createSetup(),
         };
       }
 
@@ -379,7 +374,6 @@ describe('Actions Plugin', () => {
           usageCollection: usageCollectionPluginMock.createSetupContract(),
           features: featuresPluginMock.createSetup(),
           serverless: serverlessPluginMock.createSetupContract(),
-          cloud: cloudMock.createSetup(),
         };
       }
 
@@ -583,15 +577,14 @@ describe('Actions Plugin', () => {
             secrets: {},
           },
         },
+        proxyRejectUnauthorizedCertificates: true,
+        rejectUnauthorized: true,
         maxResponseContentLength: new ByteSizeValue(1000000),
         responseTimeout: moment.duration(60000),
         enableFooterInEmail: true,
         microsoftGraphApiUrl: DEFAULT_MICROSOFT_GRAPH_API_URL,
         microsoftGraphApiScope: DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
         microsoftExchangeUrl: DEFAULT_MICROSOFT_EXCHANGE_URL,
-        usage: {
-          url: 'ca.path',
-        },
       });
       plugin = new ActionsPlugin(context);
       coreSetup = coreMock.createSetup();
@@ -603,7 +596,6 @@ describe('Actions Plugin', () => {
         eventLog: eventLogMock.createSetup(),
         usageCollection: usageCollectionPluginMock.createSetupContract(),
         features: featuresPluginMock.createSetup(),
-        cloud: cloudMock.createSetup(),
       };
       pluginsStart = {
         licensing: licensingMock.createStart(),
@@ -688,7 +680,6 @@ describe('Actions Plugin', () => {
           eventLog: eventLogMock.createSetup(),
           usageCollection: usageCollectionPluginMock.createSetupContract(),
           features: featuresPluginMock.createSetup(),
-          cloud: cloudMock.createSetup(),
         };
         pluginsStart = {
           licensing: licensingMock.createStart(),

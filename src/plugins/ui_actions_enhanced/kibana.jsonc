@@ -1,16 +1,12 @@
 {
   "type": "plugin",
   "id": "@kbn/ui-actions-enhanced-plugin",
-  "owner": [
-    "@elastic/appex-sharedux"
-  ],
-  "group": "platform",
-  "visibility": "shared",
+  "owner": "@elastic/appex-sharedux",
   "description": "Extends UI Actions plugin with more functionality",
   "plugin": {
     "id": "uiActionsEnhanced",
-    "browser": true,
     "server": true,
+    "browser": true,
     "configPath": [
       "src",
       "ui_actions_enhanced"

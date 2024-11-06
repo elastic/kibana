@@ -7,7 +7,6 @@
 import { useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
-import { useKibanaSpace } from '../../../../../hooks/use_kibana_space';
 import { ConfigKey } from '../../../../../../common/runtime_types';
 import { useSyntheticsRefreshContext } from '../../../contexts';
 import {
@@ -17,13 +16,10 @@ import {
   selectorMonitorDetailsState,
   selectorError,
 } from '../../../state';
-import { useGetUrlParams } from '../../../hooks';
 
 export const useSelectedMonitor = (monId?: string) => {
   let monitorId = monId;
   const { monitorId: urlMonitorId } = useParams<{ monitorId: string }>();
-  const { space } = useKibanaSpace();
-  const { spaceId } = useGetUrlParams();
   if (!monitorId) {
     monitorId = urlMonitorId;
   }
@@ -57,22 +53,9 @@ export const useSelectedMonitor = (monId?: string) => {
 
   useEffect(() => {
     if (monitorId && !availableMonitor && !syntheticsMonitorLoading && !isMonitorMissing) {
-      dispatch(
-        getMonitorAction.get({
-          monitorId,
-          ...(spaceId && spaceId !== space?.id ? { spaceId } : {}),
-        })
-      );
+      dispatch(getMonitorAction.get({ monitorId }));
     }
-  }, [
-    dispatch,
-    monitorId,
-    availableMonitor,
-    syntheticsMonitorLoading,
-    isMonitorMissing,
-    spaceId,
-    space?.id,
-  ]);
+  }, [dispatch, monitorId, availableMonitor, syntheticsMonitorLoading, isMonitorMissing]);
 
   useEffect(() => {
     // Only perform periodic refresh if the last dispatch was earlier enough
@@ -83,12 +66,7 @@ export const useSelectedMonitor = (monId?: string) => {
       syntheticsMonitorDispatchedAt > 0 &&
       Date.now() - syntheticsMonitorDispatchedAt > refreshInterval * 1000
     ) {
-      dispatch(
-        getMonitorAction.get({
-          monitorId,
-          ...(spaceId && spaceId !== space?.id ? { spaceId } : {}),
-        })
-      );
+      dispatch(getMonitorAction.get({ monitorId }));
     }
   }, [
     dispatch,
@@ -98,8 +76,6 @@ export const useSelectedMonitor = (monId?: string) => {
     monitorListLoading,
     syntheticsMonitorLoading,
     syntheticsMonitorDispatchedAt,
-    spaceId,
-    space?.id,
   ]);
 
   return {

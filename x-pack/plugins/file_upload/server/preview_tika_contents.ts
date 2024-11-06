@@ -7,7 +7,6 @@
 
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { PreviewTikaResponse } from '../common/types';
-import { TIKA_PREVIEW_CHARS } from '../common/constants';
 
 /**
  * Returns the contents of a file using the attachment ingest processor
@@ -25,7 +24,6 @@ export async function previewTikaContents(
         attachment: {
           field: 'data',
           remove_binary: true,
-          indexed_chars: TIKA_PREVIEW_CHARS,
         },
       },
     ],

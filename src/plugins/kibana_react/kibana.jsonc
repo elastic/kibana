@@ -1,15 +1,11 @@
 {
   "type": "plugin",
   "id": "@kbn/kibana-react-plugin",
-  "owner": [
-    "@elastic/appex-sharedux"
-  ],
-  "group": "platform",
-  "visibility": "shared",
+  "owner": "@elastic/appex-sharedux",
   "plugin": {
     "id": "kibanaReact",
-    "browser": true,
     "server": false,
+    "browser": true,
     "extraPublicDirs": [
       "common"
     ]

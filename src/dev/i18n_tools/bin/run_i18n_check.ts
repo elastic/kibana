@@ -9,6 +9,7 @@
 
 import { Listr } from 'listr2';
 import { run } from '@kbn/dev-cli-runner';
+import { ToolingLog } from '@kbn/tooling-log';
 import { getTimeReporter } from '@kbn/ci-stats-reporter';
 import { isFailError } from '@kbn/dev-cli-errors';
 import { I18nCheckTaskContext, MessageDescriptor } from '../types';
@@ -23,7 +24,13 @@ import {
 import { TaskReporter } from '../utils/task_reporter';
 import { flagFailError, isDefined, undefinedOrBoolean } from '../utils/verify_bin_flags';
 
+const toolingLog = new ToolingLog({
+  level: 'info',
+  writeTo: process.stdout,
+});
+
 const runStartTime = Date.now();
+const reportTime = getTimeReporter(toolingLog, 'scripts/i18n_check');
 
 const skipOnNoTranslations = ({ config }: I18nCheckTaskContext) =>
   !config?.translations.length && 'No translations found.';
@@ -43,13 +50,9 @@ run(
       namespace: namespace,
       fix = false,
       path,
-      silent,
-      quiet,
     },
     log,
   }) => {
-    const reportTime = getTimeReporter(log, 'scripts/i18n_check');
-
     if (
       fix &&
       (isDefined(ignoreIncompatible) ||
@@ -128,15 +131,13 @@ run(
       {
         concurrent: false,
         exitOnError: true,
-        forceTTY: false,
-        renderer:
-          ((silent || quiet) && 'silent') || (process.env.CI ? 'verbose' : ('default' as any)),
+        renderer: process.env.CI ? 'verbose' : ('default' as any),
       }
     );
 
     try {
       const messages: Map<string, MessageDescriptor[]> = new Map();
-      const taskReporter = new TaskReporter({ toolingLog: log });
+      const taskReporter = new TaskReporter({ toolingLog });
       await list.run({ messages, taskReporter });
 
       reportTime(runStartTime, 'total', {
@@ -149,7 +150,6 @@ run(
         reportTime(runStartTime, 'error', {
           success: false,
         });
-        log.error(error);
       } else {
         log.error('Unhandled exception!');
         log.error(error);

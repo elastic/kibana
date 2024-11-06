@@ -52,30 +52,25 @@ export interface ObservabilityOnboardingRouteCreateOptions {
   };
 }
 
-export const IntegrationRT = t.intersection([
-  t.type({
-    installSource: t.union([t.literal('registry'), t.literal('custom')]),
-    pkgName: t.string,
-    pkgVersion: t.string,
-    title: t.string,
-    config: t.string,
-    dataStreams: t.array(
-      t.type({
-        type: t.string,
-        dataset: t.string,
-      })
-    ),
-    kibanaAssets: t.array(
-      t.type({
-        type: t.string,
-        id: t.string,
-      })
-    ),
-  }),
-  t.partial({
-    metadata: t.type({ hostname: t.string }),
-  }),
-]);
+export const IntegrationRT = t.type({
+  installSource: t.union([t.literal('registry'), t.literal('custom')]),
+  pkgName: t.string,
+  pkgVersion: t.string,
+  title: t.string,
+  inputs: t.array(t.unknown),
+  dataStreams: t.array(
+    t.type({
+      type: t.string,
+      dataset: t.string,
+    })
+  ),
+  kibanaAssets: t.array(
+    t.type({
+      type: t.string,
+      id: t.string,
+    })
+  ),
+});
 
 export type InstalledIntegration = t.TypeOf<typeof IntegrationRT>;
 

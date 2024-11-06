@@ -99,8 +99,7 @@ export const getUpdateScript = ({
   isPatch?: boolean;
 }) => {
   return {
-    script: {
-      source: `
+    source: `
     if (params.assignEmpty == true || params.containsKey('allowed')) {
       ctx._source.allowed = params.allowed;
     }
@@ -109,12 +108,11 @@ export const getUpdateScript = ({
     }
     ctx._source.updated_at = params.updated_at;
   `,
-      lang: 'painless',
-      params: {
-        ...anonymizationField, // when assigning undefined in painless, it will remove property and wil set it to null
-        // for patch we don't want to remove unspecified value in payload
-        assignEmpty: !(isPatch ?? true),
-      },
+    lang: 'painless',
+    params: {
+      ...anonymizationField, // when assigning undefined in painless, it will remove property and wil set it to null
+      // for patch we don't want to remove unspecified value in payload
+      assignEmpty: !(isPatch ?? true),
     },
   };
 };

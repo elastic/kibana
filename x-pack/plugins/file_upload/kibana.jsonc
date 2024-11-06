@@ -1,17 +1,12 @@
 {
   "type": "plugin",
   "id": "@kbn/file-upload-plugin",
-  "owner": [
-    "@elastic/kibana-presentation",
-    "@elastic/ml-ui"
-  ],
-  "group": "platform",
-  "visibility": "private",
+  "owner": ["@elastic/kibana-presentation", "@elastic/ml-ui"],
   "description": "The file upload plugin contains components and services for uploading a file, analyzing its data, and then importing the data into an Elasticsearch index. Supported file types include CSV, TSV, newline-delimited JSON and GeoJSON.",
   "plugin": {
     "id": "fileUpload",
-    "browser": true,
     "server": true,
+    "browser": true,
     "requiredPlugins": [
       "data",
       "usageCollection"

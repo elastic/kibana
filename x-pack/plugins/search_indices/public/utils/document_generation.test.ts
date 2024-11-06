@@ -22,21 +22,7 @@ describe('document generation util', () => {
     expect(result).toEqual({
       title: 'Sample text for title',
       tags: 'sample-keyword-tags',
-      body: 'Sample text for body',
-    });
-  });
-
-  it('should support providing sample text', () => {
-    const mapping: Record<string, MappingProperty> = {
-      body: { type: 'semantic_text', inference_id: '.elser_model_2' },
-      title: { type: 'text' },
-    };
-
-    const result = generateSampleDocument(mapping, 'Testing sample text!');
-
-    expect(result).toEqual({
-      title: 'Testing sample text!',
-      body: 'Testing sample text!',
+      body: 'Hello World',
     });
   });
 
@@ -127,8 +113,8 @@ describe('document generation util', () => {
     const result = generateSampleDocument(mapping);
 
     expect(Array.isArray(result.embedding)).toBe(true);
-    expect((result.embedding as number[]).length!).toBe(11);
-    expect((result.embedding as number[])[10]).toBe('...');
+    expect((result.embedding as number[]).length!).toBe(21);
+    expect((result.embedding as number[])[20]).toBe('...');
   });
 
   it('should generate a sample document for sparse_vector fields', () => {

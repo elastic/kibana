@@ -14,7 +14,7 @@ import { ES_CLIENT_TOTAL_HITS_RELATION } from '@kbn/ml-query-utils';
 import { INDEX_STATUS } from '../lib/common';
 import type { ChartData } from '../lib/field_histograms';
 import { ColumnChart } from '../components/column_chart';
-import { MAX_ROW_COUNT, INIT_MAX_COLUMNS } from '../lib/common';
+import { COLUMN_CHART_DEFAULT_VISIBILITY_ROWS_THRESHOLD, INIT_MAX_COLUMNS } from '../lib/common';
 import type {
   ChartsVisible,
   ColumnId,
@@ -61,11 +61,6 @@ export const useDataGrid = (
   const [chartsVisible, setChartsVisible] = useState<ChartsVisible>(undefined);
 
   const { rowCount, rowCountRelation } = rowCountInfo;
-
-  const setLimitedRowCountInfo = useCallback((info: RowCountInfo) => {
-    const limitedRowCount = Math.min(info.rowCount, MAX_ROW_COUNT);
-    setRowCountInfo({ rowCount: limitedRowCount, rowCountRelation: info.rowCountRelation });
-  }, []);
 
   const toggleChartVisibility = () => {
     if (chartsVisible !== undefined) {
@@ -166,7 +161,10 @@ export const useDataGrid = (
   // we decide whether to show or hide the charts by default.
   useEffect(() => {
     if (chartsVisible === undefined && rowCount > 0 && rowCountRelation !== undefined) {
-      setChartsVisible(rowCountRelation !== ES_CLIENT_TOTAL_HITS_RELATION.GTE);
+      setChartsVisible(
+        rowCount <= COLUMN_CHART_DEFAULT_VISIBILITY_ROWS_THRESHOLD &&
+          rowCountRelation !== ES_CLIENT_TOTAL_HITS_RELATION.GTE
+      );
     }
   }, [chartsVisible, rowCount, rowCountRelation]);
 
@@ -191,7 +189,7 @@ export const useDataGrid = (
       setErrorMessage,
       setNoDataMessage,
       setPagination,
-      setRowCountInfo: setLimitedRowCountInfo,
+      setRowCountInfo,
       setSortingColumns,
       setStatus,
       setTableItems,

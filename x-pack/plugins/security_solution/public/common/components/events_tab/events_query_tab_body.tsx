@@ -75,10 +75,10 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
   const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
   const isEnterprisePlus = useLicense().isEnterprise();
   let ACTION_BUTTON_COUNT = isEnterprisePlus ? 6 : 5;
-  const securitySolutionNotesDisabled = useIsExperimentalFeatureEnabled(
-    'securitySolutionNotesDisabled'
+  const securitySolutionNotesEnabled = useIsExperimentalFeatureEnabled(
+    'securitySolutionNotesEnabled'
   );
-  if (securitySolutionNotesDisabled) {
+  if (!securitySolutionNotesEnabled) {
     ACTION_BUTTON_COUNT--;
   }
   const leadingControlColumns = useMemo(

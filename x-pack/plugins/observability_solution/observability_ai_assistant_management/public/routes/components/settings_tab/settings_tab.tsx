@@ -8,7 +8,6 @@
 import React from 'react';
 import { EuiButton, EuiDescribedFormGroup, EuiFormRow, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useAppContext } from '../../../hooks/use_app_context';
 import { useKibana } from '../../../hooks/use_kibana';
 import { UISettings } from './ui_settings';
 
@@ -16,7 +15,6 @@ export function SettingsTab() {
   const {
     application: { navigateToApp },
   } = useKibana().services;
-  const { config } = useAppContext();
 
   const handleNavigateToConnectors = () => {
     navigateToApp('management', {
@@ -32,46 +30,44 @@ export function SettingsTab() {
 
   return (
     <EuiPanel hasBorder grow={false}>
-      {config.spacesEnabled && (
-        <EuiDescribedFormGroup
-          fullWidth
-          title={
-            <h3>
-              {i18n.translate(
-                'xpack.observabilityAiAssistantManagement.settingsPage.showAIAssistantButtonLabel',
-                {
-                  defaultMessage:
-                    'Show AI Assistant button and Contextual Insights in Observability apps',
-                }
-              )}
-            </h3>
-          }
-          description={
-            <p>
-              {i18n.translate(
-                'xpack.observabilityAiAssistantManagement.settingsPage.showAIAssistantDescriptionLabel',
-                {
-                  defaultMessage:
-                    'Toggle the AI Assistant button and Contextual Insights on or off in Observability apps by checking or unchecking the AI Assistant feature in Spaces > <your space> > Features.',
-                  ignoreTag: true,
-                }
-              )}
-            </p>
-          }
-        >
-          <EuiFormRow fullWidth>
-            <EuiButton
-              data-test-subj="settingsTabGoToSpacesButton"
-              onClick={handleNavigateToSpacesConfiguration}
-            >
-              {i18n.translate(
-                'xpack.observabilityAiAssistantManagement.settingsPage.goToFeatureControlsButtonLabel',
-                { defaultMessage: 'Go to Spaces' }
-              )}
-            </EuiButton>
-          </EuiFormRow>
-        </EuiDescribedFormGroup>
-      )}
+      <EuiDescribedFormGroup
+        fullWidth
+        title={
+          <h3>
+            {i18n.translate(
+              'xpack.observabilityAiAssistantManagement.settingsPage.showAIAssistantButtonLabel',
+              {
+                defaultMessage:
+                  'Show AI Assistant button and Contextual Insights in Observability apps',
+              }
+            )}
+          </h3>
+        }
+        description={
+          <p>
+            {i18n.translate(
+              'xpack.observabilityAiAssistantManagement.settingsPage.showAIAssistantDescriptionLabel',
+              {
+                defaultMessage:
+                  'Toggle the AI Assistant button and Contextual Insights on or off in Observability apps by checking or unchecking the AI Assistant feature in Spaces > <your space> > Features.',
+                ignoreTag: true,
+              }
+            )}
+          </p>
+        }
+      >
+        <EuiFormRow fullWidth>
+          <EuiButton
+            data-test-subj="settingsTabGoToSpacesButton"
+            onClick={handleNavigateToSpacesConfiguration}
+          >
+            {i18n.translate(
+              'xpack.observabilityAiAssistantManagement.settingsPage.goToFeatureControlsButtonLabel',
+              { defaultMessage: 'Go to Spaces' }
+            )}
+          </EuiButton>
+        </EuiFormRow>
+      </EuiDescribedFormGroup>
 
       <EuiDescribedFormGroup
         fullWidth
@@ -89,7 +85,7 @@ export function SettingsTab() {
           'xpack.observabilityAiAssistantManagement.settingsPage.euiDescribedFormGroup.inOrderToUseLabel',
           {
             defaultMessage:
-              'In order to use the AI Assistant you must set up a Generative AI connector.',
+              'In order to use the Observability AI Assistant you must set up a Generative AI connector.',
           }
         )}
       >

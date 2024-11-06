@@ -95,7 +95,6 @@ describe('Action Scheduler', () => {
     );
     ruleRunMetricsStore = new RuleRunMetricsStore();
     actionsClient.bulkEnqueueExecution.mockResolvedValue(defaultExecutionResponse);
-    alertsClient.getProcessedAlerts.mockReturnValue({});
   });
   beforeAll(() => {
     clock = sinon.useFakeTimers();
@@ -105,7 +104,7 @@ describe('Action Scheduler', () => {
   test('schedules execution per selected action', async () => {
     const alerts = generateAlert({ id: 1 });
     const actionScheduler = new ActionScheduler(getSchedulerContext());
-    await actionScheduler.run({ activeCurrentAlerts: alerts, recoveredCurrentAlerts: {} });
+    await actionScheduler.run(alerts);
 
     expect(ruleRunMetricsStore.getNumberOfTriggeredActions()).toBe(1);
     expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toBe(1);
@@ -205,10 +204,7 @@ describe('Action Scheduler', () => {
       })
     );
 
-    await actionScheduler.run({
-      activeCurrentAlerts: generateAlert({ id: 1 }),
-      recoveredCurrentAlerts: {},
-    });
+    await actionScheduler.run(generateAlert({ id: 1 }));
     expect(ruleRunMetricsStore.getNumberOfTriggeredActions()).toBe(1);
     expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toBe(2);
     expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
@@ -273,10 +269,7 @@ describe('Action Scheduler', () => {
       })
     );
 
-    await actionScheduler.run({
-      activeCurrentAlerts: generateAlert({ id: 2 }),
-      recoveredCurrentAlerts: {},
-    });
+    await actionScheduler.run(generateAlert({ id: 2 }));
 
     expect(ruleRunMetricsStore.getNumberOfTriggeredActions()).toBe(0);
     expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toBe(2);
@@ -288,10 +281,7 @@ describe('Action Scheduler', () => {
       ruleRunMetricsStore,
     });
 
-    await actionSchedulerForPreconfiguredAction.run({
-      activeCurrentAlerts: generateAlert({ id: 2 }),
-      recoveredCurrentAlerts: {},
-    });
+    await actionSchedulerForPreconfiguredAction.run(generateAlert({ id: 2 }));
     expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
   });
 
@@ -331,10 +321,7 @@ describe('Action Scheduler', () => {
     );
 
     try {
-      await actionScheduler.run({
-        activeCurrentAlerts: generateAlert({ id: 2, state: { value: 'state-val' } }),
-        recoveredCurrentAlerts: {},
-      });
+      await actionScheduler.run(generateAlert({ id: 2, state: { value: 'state-val' } }));
     } catch (err) {
       expect(getErrorSource(err)).toBe(TaskErrorSource.USER);
     }
@@ -342,10 +329,7 @@ describe('Action Scheduler', () => {
 
   test('limits actionsPlugin.execute per action group', async () => {
     const actionScheduler = new ActionScheduler(getSchedulerContext());
-    await actionScheduler.run({
-      activeCurrentAlerts: generateAlert({ id: 2, group: 'other-group' }),
-      recoveredCurrentAlerts: {},
-    });
+    await actionScheduler.run(generateAlert({ id: 2, group: 'other-group' }));
     expect(ruleRunMetricsStore.getNumberOfTriggeredActions()).toBe(0);
     expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toBe(0);
     expect(actionsClient.bulkEnqueueExecution).not.toHaveBeenCalled();
@@ -353,10 +337,7 @@ describe('Action Scheduler', () => {
 
   test('context attribute gets parameterized', async () => {
     const actionScheduler = new ActionScheduler(getSchedulerContext());
-    await actionScheduler.run({
-      activeCurrentAlerts: generateAlert({ id: 2, context: { value: 'context-val' } }),
-      recoveredCurrentAlerts: {},
-    });
+    await actionScheduler.run(generateAlert({ id: 2, context: { value: 'context-val' } }));
     expect(ruleRunMetricsStore.getNumberOfTriggeredActions()).toBe(1);
     expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toBe(1);
     expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
@@ -400,10 +381,7 @@ describe('Action Scheduler', () => {
 
   test('state attribute gets parameterized', async () => {
     const actionScheduler = new ActionScheduler(getSchedulerContext());
-    await actionScheduler.run({
-      activeCurrentAlerts: generateAlert({ id: 2, state: { value: 'state-val' } }),
-      recoveredCurrentAlerts: {},
-    });
+    await actionScheduler.run(generateAlert({ id: 2, state: { value: 'state-val' } }));
     expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
     expect(actionsClient.bulkEnqueueExecution.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
@@ -445,13 +423,9 @@ describe('Action Scheduler', () => {
 
   test(`logs an error when action group isn't part of actionGroups available for the ruleType`, async () => {
     const actionScheduler = new ActionScheduler(getSchedulerContext());
-    await actionScheduler.run({
-      activeCurrentAlerts: generateAlert({
-        id: 2,
-        group: 'invalid-group' as 'default' | 'other-group',
-      }),
-      recoveredCurrentAlerts: {},
-    });
+    await actionScheduler.run(
+      generateAlert({ id: 2, group: 'invalid-group' as 'default' | 'other-group' })
+    );
 
     expect(defaultSchedulerContext.logger.error).toHaveBeenCalledWith(
       'Invalid action group "invalid-group" for rule "test".'
@@ -529,10 +503,7 @@ describe('Action Scheduler', () => {
         },
       })
     );
-    await actionScheduler.run({
-      activeCurrentAlerts: generateAlert({ id: 2, state: { value: 'state-val' } }),
-      recoveredCurrentAlerts: {},
-    });
+    await actionScheduler.run(generateAlert({ id: 2, state: { value: 'state-val' } }));
 
     expect(ruleRunMetricsStore.getNumberOfTriggeredActions()).toBe(2);
     expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toBe(3);
@@ -633,10 +604,7 @@ describe('Action Scheduler', () => {
         },
       })
     );
-    await actionScheduler.run({
-      activeCurrentAlerts: generateAlert({ id: 2, state: { value: 'state-val' } }),
-      recoveredCurrentAlerts: {},
-    });
+    await actionScheduler.run(generateAlert({ id: 2, state: { value: 'state-val' } }));
 
     expect(ruleRunMetricsStore.getNumberOfTriggeredActions()).toBe(4);
     expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toBe(5);
@@ -720,10 +688,7 @@ describe('Action Scheduler', () => {
         },
       })
     );
-    await actionScheduler.run({
-      activeCurrentAlerts: generateAlert({ id: 2, state: { value: 'state-val' } }),
-      recoveredCurrentAlerts: {},
-    });
+    await actionScheduler.run(generateAlert({ id: 2, state: { value: 'state-val' } }));
 
     expect(ruleRunMetricsStore.getNumberOfTriggeredActions()).toBe(2);
     expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toBe(3);
@@ -757,10 +722,7 @@ describe('Action Scheduler', () => {
         },
       })
     );
-    await actionScheduler.run({
-      activeCurrentAlerts: {},
-      recoveredCurrentAlerts: generateRecoveredAlert({ id: 1 }),
-    });
+    await actionScheduler.run(generateRecoveredAlert({ id: 1 }));
 
     expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
     expect(actionsClient.bulkEnqueueExecution.mock.calls[0]).toMatchInlineSnapshot(`
@@ -825,10 +787,7 @@ describe('Action Scheduler', () => {
         },
       })
     );
-    await actionScheduler.run({
-      activeCurrentAlerts: {},
-      recoveredCurrentAlerts: generateRecoveredAlert({ id: 1 }),
-    });
+    await actionScheduler.run(generateRecoveredAlert({ id: 1 }));
 
     expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(0);
     expect(defaultSchedulerContext.logger.debug).nthCalledWith(
@@ -848,10 +807,7 @@ describe('Action Scheduler', () => {
         },
       })
     );
-    await actionScheduler.run({
-      activeCurrentAlerts: generateAlert({ id: 1 }),
-      recoveredCurrentAlerts: {},
-    });
+    await actionScheduler.run(generateAlert({ id: 1 }));
 
     clock.tick(30000);
 
@@ -881,13 +837,12 @@ describe('Action Scheduler', () => {
         },
       })
     );
-    await actionScheduler.run({
-      activeCurrentAlerts: generateAlert({
+    await actionScheduler.run(
+      generateAlert({
         id: 1,
         throttledActions: { '111-111': { date: new Date(DATE_1970).toISOString() } },
-      }),
-      recoveredCurrentAlerts: {},
-    });
+      })
+    );
 
     clock.tick(30000);
 
@@ -917,10 +872,7 @@ describe('Action Scheduler', () => {
         },
       })
     );
-    await actionScheduler.run({
-      activeCurrentAlerts: generateAlert({ id: 1, lastScheduledActionsGroup: 'recovered' }),
-      recoveredCurrentAlerts: {},
-    });
+    await actionScheduler.run(generateAlert({ id: 1, lastScheduledActionsGroup: 'recovered' }));
 
     clock.tick(30000);
 
@@ -938,10 +890,7 @@ describe('Action Scheduler', () => {
         },
       })
     );
-    await actionScheduler.run({
-      activeCurrentAlerts: generateAlert({ id: 1 }),
-      recoveredCurrentAlerts: {},
-    });
+    await actionScheduler.run(generateAlert({ id: 1 }));
 
     expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(0);
     expect(defaultSchedulerContext.logger.debug).nthCalledWith(
@@ -996,10 +945,7 @@ describe('Action Scheduler', () => {
       })
     );
 
-    await actionScheduler.run({
-      activeCurrentAlerts: generateAlert({ id: 1 }),
-      recoveredCurrentAlerts: {},
-    });
+    await actionScheduler.run(generateAlert({ id: 1 }));
 
     expect(alertsClient.getSummarizedAlerts).toHaveBeenCalledWith({
       executionUuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -1080,10 +1026,7 @@ describe('Action Scheduler', () => {
       })
     );
 
-    await actionScheduler.run({
-      activeCurrentAlerts: {},
-      recoveredCurrentAlerts: {},
-    });
+    await actionScheduler.run({});
 
     expect(actionsClient.bulkEnqueueExecution).not.toHaveBeenCalled();
     expect(alertingEventLogger.logAction).not.toHaveBeenCalled();
@@ -1135,10 +1078,7 @@ describe('Action Scheduler', () => {
       })
     );
 
-    const result = await actionScheduler.run({
-      activeCurrentAlerts: {},
-      recoveredCurrentAlerts: {},
-    });
+    const result = await actionScheduler.run({});
 
     expect(alertsClient.getSummarizedAlerts).toHaveBeenCalledWith({
       start: new Date('1969-12-31T00:01:30.000Z'),
@@ -1234,10 +1174,7 @@ describe('Action Scheduler', () => {
       })
     );
 
-    await actionScheduler.run({
-      activeCurrentAlerts: {},
-      recoveredCurrentAlerts: {},
-    });
+    await actionScheduler.run({});
     expect(defaultSchedulerContext.logger.debug).toHaveBeenCalledTimes(1);
     expect(defaultSchedulerContext.logger.debug).toHaveBeenCalledWith(
       "skipping scheduling the action 'testActionTypeId:1', summary action is still being throttled"
@@ -1299,10 +1236,7 @@ describe('Action Scheduler', () => {
       })
     );
 
-    const result = await actionScheduler.run({
-      activeCurrentAlerts: {},
-      recoveredCurrentAlerts: {},
-    });
+    const result = await actionScheduler.run({});
     expect(result).toEqual({
       throttledSummaryActions: {
         '111-111': {
@@ -1337,10 +1271,7 @@ describe('Action Scheduler', () => {
         },
       })
     );
-    await actionScheduler.run({
-      activeCurrentAlerts: generateAlert({ id: 2 }),
-      recoveredCurrentAlerts: {},
-    });
+    await actionScheduler.run(generateAlert({ id: 2 }));
 
     expect(defaultSchedulerContext.logger.error).toHaveBeenCalledWith(
       'Skipping action "1" for rule "1" because the rule type "Test" does not support alert-as-data.'
@@ -1401,10 +1332,7 @@ describe('Action Scheduler', () => {
         },
       })
     );
-    await actionScheduler.run({
-      activeCurrentAlerts: {},
-      recoveredCurrentAlerts: generateRecoveredAlert({ id: 1 }),
-    });
+    await actionScheduler.run(generateRecoveredAlert({ id: 1 }));
 
     expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
     expect(actionsClient.bulkEnqueueExecution.mock.calls[0]).toMatchInlineSnapshot(`
@@ -1527,11 +1455,8 @@ describe('Action Scheduler', () => {
     );
 
     await actionScheduler.run({
-      activeCurrentAlerts: {
-        ...generateAlert({ id: 1 }),
-        ...generateAlert({ id: 2 }),
-      },
-      recoveredCurrentAlerts: {},
+      ...generateAlert({ id: 1 }),
+      ...generateAlert({ id: 2 }),
     });
 
     expect(alertsClient.getSummarizedAlerts).toHaveBeenCalledWith({
@@ -1604,11 +1529,8 @@ describe('Action Scheduler', () => {
     );
 
     await actionScheduler.run({
-      activeCurrentAlerts: {
-        ...generateAlert({ id: 1 }),
-        ...generateAlert({ id: 2 }),
-      },
-      recoveredCurrentAlerts: {},
+      ...generateAlert({ id: 1 }),
+      ...generateAlert({ id: 2 }),
     });
 
     expect(alertsClient.getSummarizedAlerts).toHaveBeenCalledWith({
@@ -1675,12 +1597,9 @@ describe('Action Scheduler', () => {
     );
 
     await actionScheduler.run({
-      activeCurrentAlerts: {
-        ...generateAlert({ id: 1 }),
-        ...generateAlert({ id: 2 }),
-        ...generateAlert({ id: 3 }),
-      },
-      recoveredCurrentAlerts: {},
+      ...generateAlert({ id: 1 }),
+      ...generateAlert({ id: 2 }),
+      ...generateAlert({ id: 3 }),
     });
 
     expect(alertsClient.getSummarizedAlerts).toHaveBeenCalledWith({
@@ -1787,12 +1706,9 @@ describe('Action Scheduler', () => {
     );
 
     await actionScheduler.run({
-      activeCurrentAlerts: {
-        ...generateAlert({ id: 1, maintenanceWindowIds: ['test-id-1'] }),
-        ...generateAlert({ id: 2, maintenanceWindowIds: ['test-id-2'] }),
-        ...generateAlert({ id: 3, maintenanceWindowIds: ['test-id-3'] }),
-      },
-      recoveredCurrentAlerts: {},
+      ...generateAlert({ id: 1, maintenanceWindowIds: ['test-id-1'] }),
+      ...generateAlert({ id: 2, maintenanceWindowIds: ['test-id-2'] }),
+      ...generateAlert({ id: 3, maintenanceWindowIds: ['test-id-3'] }),
     });
 
     expect(actionsClient.bulkEnqueueExecution).not.toHaveBeenCalled();
@@ -1839,12 +1755,9 @@ describe('Action Scheduler', () => {
     );
 
     await actionScheduler.run({
-      activeCurrentAlerts: {
-        ...generateAlert({ id: 1, maintenanceWindowIds: ['test-id-1'] }),
-        ...generateAlert({ id: 2, maintenanceWindowIds: ['test-id-2'] }),
-        ...generateAlert({ id: 3, maintenanceWindowIds: ['test-id-3'] }),
-      },
-      recoveredCurrentAlerts: {},
+      ...generateAlert({ id: 1, maintenanceWindowIds: ['test-id-1'] }),
+      ...generateAlert({ id: 2, maintenanceWindowIds: ['test-id-2'] }),
+      ...generateAlert({ id: 3, maintenanceWindowIds: ['test-id-3'] }),
     });
 
     expect(actionsClient.bulkEnqueueExecution).not.toHaveBeenCalled();
@@ -1860,12 +1773,9 @@ describe('Action Scheduler', () => {
     const actionScheduler = new ActionScheduler(getSchedulerContext());
 
     await actionScheduler.run({
-      activeCurrentAlerts: {
-        ...generateAlert({ id: 1, maintenanceWindowIds: ['test-id-1'] }),
-        ...generateAlert({ id: 2, maintenanceWindowIds: ['test-id-2'] }),
-        ...generateAlert({ id: 3, maintenanceWindowIds: ['test-id-3'] }),
-      },
-      recoveredCurrentAlerts: {},
+      ...generateAlert({ id: 1, maintenanceWindowIds: ['test-id-1'] }),
+      ...generateAlert({ id: 2, maintenanceWindowIds: ['test-id-2'] }),
+      ...generateAlert({ id: 3, maintenanceWindowIds: ['test-id-3'] }),
     });
 
     expect(actionsClient.bulkEnqueueExecution).not.toHaveBeenCalled();
@@ -1903,24 +1813,9 @@ describe('Action Scheduler', () => {
     );
 
     await actionScheduler.run({
-      activeCurrentAlerts: {
-        ...generateAlert({
-          id: 1,
-          pendingRecoveredCount: 1,
-          lastScheduledActionsGroup: 'recovered',
-        }),
-        ...generateAlert({
-          id: 2,
-          pendingRecoveredCount: 1,
-          lastScheduledActionsGroup: 'recovered',
-        }),
-        ...generateAlert({
-          id: 3,
-          pendingRecoveredCount: 1,
-          lastScheduledActionsGroup: 'recovered',
-        }),
-      },
-      recoveredCurrentAlerts: {},
+      ...generateAlert({ id: 1, pendingRecoveredCount: 1, lastScheduledActionsGroup: 'recovered' }),
+      ...generateAlert({ id: 2, pendingRecoveredCount: 1, lastScheduledActionsGroup: 'recovered' }),
+      ...generateAlert({ id: 3, pendingRecoveredCount: 1, lastScheduledActionsGroup: 'recovered' }),
     });
 
     expect(actionsClient.bulkEnqueueExecution).not.toHaveBeenCalled();
@@ -1947,24 +1842,9 @@ describe('Action Scheduler', () => {
     );
 
     await actionScheduler.run({
-      activeCurrentAlerts: {
-        ...generateAlert({
-          id: 1,
-          pendingRecoveredCount: 1,
-          lastScheduledActionsGroup: 'recovered',
-        }),
-        ...generateAlert({
-          id: 2,
-          pendingRecoveredCount: 1,
-          lastScheduledActionsGroup: 'recovered',
-        }),
-        ...generateAlert({
-          id: 3,
-          pendingRecoveredCount: 1,
-          lastScheduledActionsGroup: 'recovered',
-        }),
-      },
-      recoveredCurrentAlerts: {},
+      ...generateAlert({ id: 1, pendingRecoveredCount: 1, lastScheduledActionsGroup: 'recovered' }),
+      ...generateAlert({ id: 2, pendingRecoveredCount: 1, lastScheduledActionsGroup: 'recovered' }),
+      ...generateAlert({ id: 3, pendingRecoveredCount: 1, lastScheduledActionsGroup: 'recovered' }),
     });
 
     expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
@@ -2111,11 +1991,7 @@ describe('Action Scheduler', () => {
       };
 
       const actionScheduler = new ActionScheduler(getSchedulerContext(execParams));
-
-      await actionScheduler.run({
-        activeCurrentAlerts: generateAlert({ id: 1 }),
-        recoveredCurrentAlerts: {},
-      });
+      await actionScheduler.run(generateAlert({ id: 1 }));
 
       expect(injectActionParamsMock.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
@@ -2148,10 +2024,7 @@ describe('Action Scheduler', () => {
       };
 
       const actionScheduler = new ActionScheduler(getSchedulerContext(execParams));
-      await actionScheduler.run({
-        activeCurrentAlerts: generateAlert({ id: 1 }),
-        recoveredCurrentAlerts: {},
-      });
+      await actionScheduler.run(generateAlert({ id: 1 }));
 
       expect(injectActionParamsMock.mock.calls[0][0].actionParams).toEqual({
         val: 'rule url: http://localhost:12345/kbn/s/test1/app/management/insightsAndAlerting/triggersActions/rule/1',
@@ -2191,10 +2064,8 @@ describe('Action Scheduler', () => {
       };
 
       const actionScheduler = new ActionScheduler(getSchedulerContext(execParams));
-      await actionScheduler.run({
-        activeCurrentAlerts: generateAlert({ id: 1 }),
-        recoveredCurrentAlerts: {},
-      });
+      await actionScheduler.run(generateAlert({ id: 1 }));
+
       expect(injectActionParamsMock.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {
@@ -2229,10 +2100,8 @@ describe('Action Scheduler', () => {
       };
 
       const actionScheduler = new ActionScheduler(getSchedulerContext(execParams));
-      await actionScheduler.run({
-        activeCurrentAlerts: generateAlert({ id: 1 }),
-        recoveredCurrentAlerts: {},
-      });
+      await actionScheduler.run(generateAlert({ id: 1 }));
+
       expect(injectActionParamsMock.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {
@@ -2264,10 +2133,8 @@ describe('Action Scheduler', () => {
       };
 
       const actionScheduler = new ActionScheduler(getSchedulerContext(execParams));
-      await actionScheduler.run({
-        activeCurrentAlerts: generateAlert({ id: 1 }),
-        recoveredCurrentAlerts: {},
-      });
+      await actionScheduler.run(generateAlert({ id: 1 }));
+
       expect(injectActionParamsMock.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {
@@ -2299,10 +2166,8 @@ describe('Action Scheduler', () => {
       };
 
       const actionScheduler = new ActionScheduler(getSchedulerContext(execParams));
-      await actionScheduler.run({
-        activeCurrentAlerts: generateAlert({ id: 1 }),
-        recoveredCurrentAlerts: {},
-      });
+      await actionScheduler.run(generateAlert({ id: 1 }));
+
       expect(injectActionParamsMock.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {
@@ -2331,10 +2196,8 @@ describe('Action Scheduler', () => {
       };
 
       const actionScheduler = new ActionScheduler(getSchedulerContext(execParams));
-      await actionScheduler.run({
-        activeCurrentAlerts: generateAlert({ id: 1 }),
-        recoveredCurrentAlerts: {},
-      });
+      await actionScheduler.run(generateAlert({ id: 1 }));
+
       expect(injectActionParamsMock.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {
@@ -2363,10 +2226,8 @@ describe('Action Scheduler', () => {
       };
 
       const actionScheduler = new ActionScheduler(getSchedulerContext(execParams));
-      await actionScheduler.run({
-        activeCurrentAlerts: generateAlert({ id: 1 }),
-        recoveredCurrentAlerts: {},
-      });
+      await actionScheduler.run(generateAlert({ id: 1 }));
+
       expect(injectActionParamsMock.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {
@@ -2398,10 +2259,8 @@ describe('Action Scheduler', () => {
       };
 
       const actionScheduler = new ActionScheduler(getSchedulerContext(execParams));
-      await actionScheduler.run({
-        activeCurrentAlerts: generateAlert({ id: 1 }),
-        recoveredCurrentAlerts: {},
-      });
+      await actionScheduler.run(generateAlert({ id: 1 }));
+
       expect(injectActionParamsMock.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {
@@ -2469,10 +2328,8 @@ describe('Action Scheduler', () => {
 
       const actionScheduler = new ActionScheduler(getSchedulerContext(executorParams));
 
-      const res = await actionScheduler.run({
-        activeCurrentAlerts: generateAlert({ id: 1 }),
-        recoveredCurrentAlerts: {},
-      });
+      const res = await actionScheduler.run(generateAlert({ id: 1 }));
+
       /**
        * Verifies that system actions are not throttled
        */
@@ -2594,10 +2451,7 @@ describe('Action Scheduler', () => {
 
       const actionScheduler = new ActionScheduler(getSchedulerContext(executorParams));
 
-      const res = await actionScheduler.run({
-        activeCurrentAlerts: generateAlert({ id: 1 }),
-        recoveredCurrentAlerts: {},
-      });
+      const res = await actionScheduler.run(generateAlert({ id: 1 }));
 
       /**
        * Verifies that system actions are not throttled
@@ -2654,10 +2508,7 @@ describe('Action Scheduler', () => {
 
       const actionScheduler = new ActionScheduler(getSchedulerContext(executorParams));
 
-      const res = await actionScheduler.run({
-        activeCurrentAlerts: generateAlert({ id: 1 }),
-        recoveredCurrentAlerts: {},
-      });
+      const res = await actionScheduler.run(generateAlert({ id: 1 }));
 
       expect(res).toEqual({ throttledSummaryActions: {} });
       expect(buildActionParams).not.toHaveBeenCalled();
@@ -2696,10 +2547,7 @@ describe('Action Scheduler', () => {
 
       const actionScheduler = new ActionScheduler(getSchedulerContext(executorParams));
 
-      await actionScheduler.run({
-        activeCurrentAlerts: generateAlert({ id: 1 }),
-        recoveredCurrentAlerts: {},
-      });
+      await actionScheduler.run(generateAlert({ id: 1 }));
 
       expect(alertsClient.getSummarizedAlerts).not.toHaveBeenCalled();
       expect(buildActionParams).not.toHaveBeenCalled();

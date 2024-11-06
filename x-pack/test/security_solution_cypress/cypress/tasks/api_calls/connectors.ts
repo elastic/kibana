@@ -11,12 +11,12 @@ import { rootRequest } from './common';
 export const createConnector = (connector: Record<string, unknown>) =>
   rootRequest<Connector>({
     method: 'POST',
-    url: '/api/actions/connector',
+    url: '/api/actions/action',
     body: connector,
   });
 
 const slackConnectorAPIPayload = {
-  connector_type_id: '.slack',
+  actionTypeId: '.slack',
   secrets: {
     webhookUrl: 'http://localhost:123',
   },
@@ -24,7 +24,7 @@ const slackConnectorAPIPayload = {
 };
 
 export const azureConnectorAPIPayload = {
-  connector_type_id: '.gen-ai',
+  actionTypeId: '.gen-ai',
   secrets: {
     apiKey: '123',
   },
@@ -37,7 +37,7 @@ export const azureConnectorAPIPayload = {
 };
 
 export const bedrockConnectorAPIPayload = {
-  connector_type_id: '.bedrock',
+  actionTypeId: '.bedrock',
   secrets: {
     accessKey: '123',
     secret: '123',

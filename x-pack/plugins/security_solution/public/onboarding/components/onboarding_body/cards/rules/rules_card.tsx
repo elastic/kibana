@@ -6,16 +6,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiLink,
-  EuiSpacer,
-  EuiText,
-  useEuiTheme,
-  COLOR_MODES_STANDARD,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { SecuritySolutionLinkButton } from '../../../../../common/components/links';
 import { OnboardingCardId } from '../../../../constants';
@@ -26,9 +17,6 @@ import rulesImageSrc from './images/rules.png';
 import * as i18n from './translations';
 
 export const RulesCard: OnboardingCardComponent = ({ isCardComplete, setExpandedCardId }) => {
-  const { colorMode } = useEuiTheme();
-  const isDarkMode = colorMode === COLOR_MODES_STANDARD.dark;
-
   const isIntegrationsCardComplete = useMemo(
     () => isCardComplete(OnboardingCardId.integrations),
     [isCardComplete]
@@ -47,11 +35,7 @@ export const RulesCard: OnboardingCardComponent = ({ isCardComplete, setExpanded
         alignItems="flexStart"
       >
         <EuiFlexItem grow={false}>
-          <EuiText
-            data-test-subj="rulesCardDescription"
-            size="s"
-            color={isDarkMode ? 'text' : 'subdued'}
-          >
+          <EuiText data-test-subj="rulesCardDescription" size="s" color="subdued">
             {i18n.RULES_CARD_DESCRIPTION}
           </EuiText>
           {!isIntegrationsCardComplete && (

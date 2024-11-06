@@ -7,7 +7,6 @@
 import dedent from 'dedent';
 import { ChatFunctionClient, GET_DATA_ON_SCREEN_FUNCTION_NAME } from '.';
 import { FunctionVisibility } from '../../../common/functions/types';
-import { AdHocInstruction } from '../../../common/types';
 
 describe('chatFunctionClient', () => {
   describe('when executing a function with invalid arguments', () => {
@@ -35,7 +34,8 @@ describe('chatFunctionClient', () => {
             required: ['foo'],
           },
         },
-        respondFn
+        respondFn,
+        ['all']
       );
     });
 
@@ -87,7 +87,6 @@ describe('chatFunctionClient', () => {
       ]);
 
       const functions = client.getFunctions();
-      const adHocInstructions = client.getAdhocInstructions();
 
       expect(functions[0]).toEqual({
         definition: {
@@ -99,7 +98,7 @@ describe('chatFunctionClient', () => {
         respond: expect.any(Function),
       });
 
-      expect(adHocInstructions[0].text).toContain(
+      expect(functions[0].definition.description).toContain(
         dedent(`my_dummy_data: My dummy data
         my_other_dummy_data: My other dummy data
         `)
@@ -127,54 +126,6 @@ describe('chatFunctionClient', () => {
             ],
           },
         ],
-      });
-    });
-  });
-
-  describe('when adhoc instructions are provided', () => {
-    let client: ChatFunctionClient;
-
-    beforeEach(() => {
-      client = new ChatFunctionClient([]);
-    });
-
-    describe('register an adhoc Instruction', () => {
-      it('should register a new adhoc instruction', () => {
-        const adhocInstruction: AdHocInstruction = {
-          text: 'Test adhoc instruction',
-          instruction_type: 'application_instruction',
-        };
-
-        client.registerAdhocInstruction(adhocInstruction);
-
-        expect(client.getAdhocInstructions()).toContainEqual(adhocInstruction);
-      });
-    });
-
-    describe('retrieve adHoc instructions', () => {
-      it('should return all registered adhoc instructions', () => {
-        const firstAdhocInstruction: AdHocInstruction = {
-          text: 'First adhoc instruction',
-          instruction_type: 'application_instruction',
-        };
-
-        const secondAdhocInstruction: AdHocInstruction = {
-          text: 'Second adhoc instruction',
-          instruction_type: 'application_instruction',
-        };
-
-        client.registerAdhocInstruction(firstAdhocInstruction);
-        client.registerAdhocInstruction(secondAdhocInstruction);
-
-        const adhocInstructions = client.getAdhocInstructions();
-
-        expect(adhocInstructions).toEqual([firstAdhocInstruction, secondAdhocInstruction]);
-      });
-
-      it('should return an empty array if no adhoc instructions are registered', () => {
-        const adhocInstructions = client.getAdhocInstructions();
-
-        expect(adhocInstructions).toEqual([]);
       });
     });
   });

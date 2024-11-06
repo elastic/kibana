@@ -6,9 +6,8 @@
  */
 
 import { type ElasticsearchClient, RequestHandler } from '@kbn/core/server';
-import { DataUsageRequestHandlerContext } from '../../types';
+import { DataUsageContext, DataUsageRequestHandlerContext } from '../../types';
 import { errorHandler } from '../error_handler';
-import { DataUsageService } from '../../services';
 
 export interface MeteringStats {
   name: string;
@@ -28,9 +27,9 @@ const getMeteringStats = (client: ElasticsearchClient) => {
 };
 
 export const getDataStreamsHandler = (
-  dataUsageService: DataUsageService
+  dataUsageContext: DataUsageContext
 ): RequestHandler<never, unknown, DataUsageRequestHandlerContext> => {
-  const logger = dataUsageService.getLogger('dataStreamsRoute');
+  const logger = dataUsageContext.logFactory.get('dataStreamsRoute');
 
   return async (context, _, response) => {
     logger.debug('Retrieving user data streams');
@@ -45,7 +44,7 @@ export const getDataStreamsHandler = (
         .sort((a, b) => b.size_in_bytes - a.size_in_bytes)
         .map((stat) => ({
           name: stat.name,
-          storageSizeBytes: stat.size_in_bytes ?? 0,
+          storageSizeBytes: stat.size_in_bytes,
         }));
 
       return response.ok({

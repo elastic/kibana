@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import useObservable from 'react-use/lib/useObservable';
+import { useObservable } from 'react-use';
 
 import { useOnboardingService } from '../../../../../hooks/use_onboarding_service';
 import { AgentlessAvailableCallout } from './agentless_available_callout';

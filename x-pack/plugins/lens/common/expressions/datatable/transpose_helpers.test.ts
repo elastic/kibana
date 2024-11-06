@@ -7,10 +7,11 @@
 
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import type { Datatable } from '@kbn/expressions-plugin/common';
-import { DatatableArgs } from '..';
+import { DatatableArgs } from './datatable';
+
 import { transposeTable } from './transpose_helpers';
 
-describe('transpose helpers', () => {
+describe('transpose_helpers', () => {
   function buildTable(): Datatable {
     // 3 buckets, 2 metrics
     // first bucket goes A/B/C
@@ -119,10 +120,10 @@ describe('transpose helpers', () => {
       'bucket2',
       'bucket3',
       'A---metric1',
-      'A---metric2',
       'B---metric1',
-      'B---metric2',
       'C---metric1',
+      'A---metric2',
+      'B---metric2',
       'C---metric2',
     ]);
 
@@ -178,22 +179,22 @@ describe('transpose helpers', () => {
     expect(table.columns.map((c) => c.id)).toEqual([
       'bucket3',
       'A---D---metric1',
-      'A---D---metric2',
-      'A---E---metric1',
-      'A---E---metric2',
-      'A---F---metric1',
-      'A---F---metric2',
       'B---D---metric1',
-      'B---D---metric2',
-      'B---E---metric1',
-      'B---E---metric2',
-      'B---F---metric1',
-      'B---F---metric2',
       'C---D---metric1',
-      'C---D---metric2',
+      'A---E---metric1',
+      'B---E---metric1',
       'C---E---metric1',
-      'C---E---metric2',
+      'A---F---metric1',
+      'B---F---metric1',
       'C---F---metric1',
+      'A---D---metric2',
+      'B---D---metric2',
+      'C---D---metric2',
+      'A---E---metric2',
+      'B---E---metric2',
+      'C---E---metric2',
+      'A---F---metric2',
+      'B---F---metric2',
       'C---F---metric2',
     ]);
 

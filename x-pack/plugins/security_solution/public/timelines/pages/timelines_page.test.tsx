@@ -39,7 +39,6 @@ describe('TimelinesPage', () => {
   it('should render landing page if no indicesExist', () => {
     (useSourcererDataView as unknown as jest.Mock).mockReturnValue({
       indicesExist: false,
-      sourcererDataView: {},
     });
     (useKibana as unknown as jest.Mock).mockReturnValue({});
 
@@ -53,7 +52,6 @@ describe('TimelinesPage', () => {
   it('should show the correct elements if user has crud', () => {
     (useSourcererDataView as unknown as jest.Mock).mockReturnValue({
       indicesExist: true,
-      sourcererDataView: {},
     });
     (useKibana as unknown as jest.Mock).mockReturnValue({
       services: {

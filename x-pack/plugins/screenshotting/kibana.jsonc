@@ -1,16 +1,12 @@
 {
   "type": "plugin",
   "id": "@kbn/screenshotting-plugin",
-  "owner": [
-    "@elastic/kibana-reporting-services"
-  ],
-  "group": "platform",
-  "visibility": "private",
+  "owner": "@elastic/kibana-reporting-services",
   "description": "Kibana Screenshotting Plugin",
   "plugin": {
     "id": "screenshotting",
-    "browser": true,
     "server": true,
+    "browser": true,
     "configPath": [
       "xpack",
       "screenshotting"

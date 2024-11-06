@@ -13,7 +13,6 @@ import {
   limitedStringSchema,
   NonEmptyString,
   paginationSchema,
-  limitedNumberAsIntegerSchema,
 } from '.';
 import { MAX_DOCS_PER_PAGE } from '../constants';
 
@@ -318,71 +317,6 @@ describe('schema', () => {
           "The foo field cannot be more than 2.",
         ]
       `);
-    });
-  });
-
-  describe('limitedNumberAsIntegerSchema', () => {
-    it('works correctly the number is safe integer', () => {
-      expect(PathReporter.report(limitedNumberAsIntegerSchema({ fieldName: 'foo' }).decode(1)))
-        .toMatchInlineSnapshot(`
-          Array [
-            "No errors!",
-          ]
-        `);
-    });
-
-    it('fails when given a number that is lower than the minimum', () => {
-      expect(
-        PathReporter.report(
-          limitedNumberAsIntegerSchema({ fieldName: 'foo' }).decode(Number.MIN_SAFE_INTEGER - 1)
-        )
-      ).toMatchInlineSnapshot(`
-        Array [
-          "The foo field should be an integer between -(2^53 - 1) and 2^53 - 1, inclusive.",
-        ]
-      `);
-    });
-
-    it('fails when given a number that is higher than the maximum', () => {
-      expect(
-        PathReporter.report(
-          limitedNumberAsIntegerSchema({ fieldName: 'foo' }).decode(Number.MAX_SAFE_INTEGER + 1)
-        )
-      ).toMatchInlineSnapshot(`
-        Array [
-          "The foo field should be an integer between -(2^53 - 1) and 2^53 - 1, inclusive.",
-        ]
-      `);
-    });
-
-    it('fails when given a null instead of a number', () => {
-      expect(PathReporter.report(limitedNumberAsIntegerSchema({ fieldName: 'foo' }).decode(null)))
-        .toMatchInlineSnapshot(`
-          Array [
-            "Invalid value null supplied to : LimitedNumberAsInteger",
-          ]
-        `);
-    });
-
-    it('fails when given a string instead of a number', () => {
-      expect(
-        PathReporter.report(
-          limitedNumberAsIntegerSchema({ fieldName: 'foo' }).decode('some string')
-        )
-      ).toMatchInlineSnapshot(`
-          Array [
-            "Invalid value \\"some string\\" supplied to : LimitedNumberAsInteger",
-          ]
-        `);
-    });
-
-    it('fails when given a float number instead of an safe integer number', () => {
-      expect(PathReporter.report(limitedNumberAsIntegerSchema({ fieldName: 'foo' }).decode(1.2)))
-        .toMatchInlineSnapshot(`
-          Array [
-            "The foo field should be an integer between -(2^53 - 1) and 2^53 - 1, inclusive.",
-          ]
-        `);
     });
   });
 });

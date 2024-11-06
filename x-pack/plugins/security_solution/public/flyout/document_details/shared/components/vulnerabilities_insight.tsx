@@ -6,16 +6,12 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiFlexItem, type EuiFlexGroupProps, useEuiTheme } from '@elastic/eui';
+import { EuiFlexItem, type EuiFlexGroupProps } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { css } from '@emotion/css';
 import { useVulnerabilitiesPreview } from '@kbn/cloud-security-posture/src/hooks/use_vulnerabilities_preview';
 import { buildEntityFlyoutPreviewQuery } from '@kbn/cloud-security-posture-common';
 import { getVulnerabilityStats, hasVulnerabilitiesData } from '@kbn/cloud-security-posture';
 import { InsightDistributionBar } from './insight_distribution_bar';
-import { FormattedCount } from '../../../../common/components/formatted_number';
-import { PreviewLink } from '../../../shared/components/preview_link';
-import { useDocumentDetailsContext } from '../context';
 
 interface VulnerabilitiesInsightProps {
   /**
@@ -33,15 +29,13 @@ interface VulnerabilitiesInsightProps {
 }
 
 /*
- * Displays a distribution bar and the total vulnerabilities count for a given host
+ * Displays a distribution bar with the count of critical vulnerabilities for a given host
  */
 export const VulnerabilitiesInsight: React.FC<VulnerabilitiesInsightProps> = ({
   hostName,
   direction,
   'data-test-subj': dataTestSubj,
 }) => {
-  const { scopeId, isPreview } = useDocumentDetailsContext();
-  const { euiTheme } = useEuiTheme();
   const { data } = useVulnerabilitiesPreview({
     query: buildEntityFlyoutPreviewQuery('host.name', hostName),
     sort: [],
@@ -50,11 +44,6 @@ export const VulnerabilitiesInsight: React.FC<VulnerabilitiesInsightProps> = ({
   });
 
   const { CRITICAL = 0, HIGH = 0, MEDIUM = 0, LOW = 0, NONE = 0 } = data?.count || {};
-  const totalVulnerabilities = useMemo(
-    () => CRITICAL + HIGH + MEDIUM + LOW + NONE,
-    [CRITICAL, HIGH, MEDIUM, LOW, NONE]
-  );
-
   const hasVulnerabilitiesFindings = useMemo(
     () =>
       hasVulnerabilitiesData({
@@ -79,28 +68,6 @@ export const VulnerabilitiesInsight: React.FC<VulnerabilitiesInsightProps> = ({
     [CRITICAL, HIGH, MEDIUM, LOW, NONE]
   );
 
-  const count = useMemo(
-    () => (
-      <div
-        css={css`
-          margin-top: ${euiTheme.size.xs};
-          margin-bottom: ${euiTheme.size.xs};
-        `}
-      >
-        <PreviewLink
-          field={'host.name'}
-          value={hostName}
-          scopeId={scopeId}
-          isPreview={isPreview}
-          data-test-subj={`${dataTestSubj}-count`}
-        >
-          <FormattedCount count={totalVulnerabilities} />
-        </PreviewLink>
-      </div>
-    ),
-    [totalVulnerabilities, hostName, scopeId, isPreview, dataTestSubj, euiTheme.size]
-  );
-
   if (!hasVulnerabilitiesFindings) return null;
 
   return (
@@ -113,7 +80,7 @@ export const VulnerabilitiesInsight: React.FC<VulnerabilitiesInsightProps> = ({
           />
         }
         stats={vulnerabilitiesStats}
-        count={count}
+        count={CRITICAL}
         direction={direction}
         data-test-subj={`${dataTestSubj}-distribution-bar`}
       />

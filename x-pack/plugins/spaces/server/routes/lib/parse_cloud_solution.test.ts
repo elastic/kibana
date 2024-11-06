@@ -13,10 +13,6 @@ describe('parseCloudSolution', () => {
     expect(parseCloudSolution('elasticsearch')).toBe('es');
   });
 
-  it('should return "es" for "search"', () => {
-    expect(parseCloudSolution('search')).toBe('es');
-  });
-
   it('should return "oblt" for "observability"', () => {
     expect(parseCloudSolution('observability')).toBe('oblt');
   });
@@ -28,10 +24,6 @@ describe('parseCloudSolution', () => {
   // Test case insensitivity
   it('should return "es" for "ELASTICSEARCH"', () => {
     expect(parseCloudSolution('ELASTICSEARCH')).toBe('es');
-  });
-
-  it('should return "es" for "SEARCH"', () => {
-    expect(parseCloudSolution('SEARCH')).toBe('es');
   });
 
   it('should return "oblt" for "OBSERVABILITY"', () => {

@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { CORRELATIONS_TAB_ID } from '../../left/components/correlations_details';
 import { useFetchRelatedAlertsByAncestry } from '../../shared/hooks/use_fetch_related_alerts_by_ancestry';
 import { InsightsSummaryRow } from './insights_summary_row';
 import { CORRELATIONS_RELATED_ALERTS_BY_ANCESTRY_TEST_ID } from './test_ids';
+
+const ICON = 'warning';
 
 export interface RelatedAlertsByAncestryProps {
   /**
@@ -40,25 +41,21 @@ export const RelatedAlertsByAncestry: React.VFC<RelatedAlertsByAncestryProps> = 
     indices,
     scopeId,
   });
-
-  const text = useMemo(
-    () => (
-      <FormattedMessage
-        id="xpack.securitySolution.flyout.right.insights.correlations.ancestryAlertsLabel"
-        defaultMessage="{count, plural, one {Alert} other {Alerts}} related by ancestry"
-        values={{ count: dataCount }}
-      />
-    ),
-    [dataCount]
+  const text = (
+    <FormattedMessage
+      id="xpack.securitySolution.flyout.right.insights.correlations.ancestryAlertsLabel"
+      defaultMessage="{count, plural, one {alert} other {alerts}} related by ancestry"
+      values={{ count: dataCount }}
+    />
   );
 
   return (
     <InsightsSummaryRow
       loading={loading}
       error={error}
-      text={text}
+      icon={ICON}
       value={dataCount}
-      expandedSubTab={CORRELATIONS_TAB_ID}
+      text={text}
       data-test-subj={CORRELATIONS_RELATED_ALERTS_BY_ANCESTRY_TEST_ID}
       key={`correlation-row-${text}`}
     />

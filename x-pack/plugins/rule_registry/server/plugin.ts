@@ -29,6 +29,7 @@ import type {
   PluginSetup as DataPluginSetup,
 } from '@kbn/data-plugin/server';
 
+import { createLifecycleRuleTypeFactory } from './utils/create_lifecycle_rule_type_factory';
 import type { RuleRegistryPluginConfig } from './config';
 import { type IRuleDataService, RuleDataService, Dataset } from './rule_data_plugin_service';
 import { AlertsClientFactory } from './alert_data_client/alerts_client_factory';
@@ -51,6 +52,7 @@ export interface RuleRegistryPluginStartDependencies {
 
 export interface RuleRegistryPluginSetupContract {
   ruleDataService: IRuleDataService;
+  createLifecycleRuleTypeFactory: typeof createLifecycleRuleTypeFactory;
   dataset: typeof Dataset;
 }
 
@@ -151,6 +153,7 @@ export class RuleRegistryPlugin
 
     return {
       ruleDataService: this.ruleDataService,
+      createLifecycleRuleTypeFactory,
       dataset: Dataset,
     };
   }

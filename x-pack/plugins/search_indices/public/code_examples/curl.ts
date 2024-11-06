@@ -48,19 +48,18 @@ export const CurlCreateIndexExamples: CreateIndexLanguageExamples = {
 };
 
 export const CurlVectorsIngestDataExample: IngestDataCodeDefinition = {
-  ingestCommand: ({ elasticsearchURL, apiKey, indexName, sampleDocuments }) => {
-    let result = `curl -X POST "${elasticsearchURL}/_bulk?pretty" \
+  ingestCommand: ({
+    elasticsearchURL,
+    apiKey,
+    indexName,
+    sampleDocument,
+  }) => `curl -X POST "${elasticsearchURL}/_bulk?pretty" \
 --header 'Authorization: ApiKey ${apiKey ?? API_KEY_PLACEHOLDER}' \
 --header 'Content-Type: application/json' \
--d'`;
-    sampleDocuments.forEach((document) => {
-      result += `
-{ "index" : { "_index" : "${indexName}" } }
-${JSON.stringify(document)}`;
-    });
-    result += "\n'";
-    return result;
-  },
+-d'
+{ "index": { "_index": "${indexName}" } }
+${JSON.stringify(sampleDocument)}
+`,
   updateMappingsCommand: ({
     elasticsearchURL,
     apiKey,

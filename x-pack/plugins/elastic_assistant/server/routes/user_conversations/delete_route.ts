@@ -14,7 +14,7 @@ import {
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { ElasticAssistantPluginRouter } from '../../types';
 import { buildResponse } from '../utils';
-import { performChecks } from '../helpers';
+import { UPGRADE_LICENSE_MESSAGE, hasAIAssistantLicense } from '../helpers';
 
 export const deleteConversationRoute = (router: ElasticAssistantPluginRouter) => {
   router.versioned
@@ -40,18 +40,23 @@ export const deleteConversationRoute = (router: ElasticAssistantPluginRouter) =>
           const { id } = request.params;
 
           const ctx = await context.resolve(['core', 'elasticAssistant', 'licensing']);
-          const checkResponse = performChecks({
-            context: ctx,
-            request,
-            response,
-          });
-          if (!checkResponse.isSuccess) {
-            return checkResponse.response;
+          const license = ctx.licensing.license;
+          if (!hasAIAssistantLicense(license)) {
+            return response.forbidden({
+              body: {
+                message: UPGRADE_LICENSE_MESSAGE,
+              },
+            });
           }
           const dataClient = await ctx.elasticAssistant.getAIAssistantConversationsDataClient();
 
-          const authenticatedUser = checkResponse.currentUser;
-
+          const authenticatedUser = ctx.elasticAssistant.getCurrentUser();
+          if (authenticatedUser == null) {
+            return assistantResponse.error({
+              body: `Authenticated user not found`,
+              statusCode: 401,
+            });
+          }
           const existingConversation = await dataClient?.getConversation({ id, authenticatedUser });
           if (existingConversation == null) {
             return assistantResponse.error({

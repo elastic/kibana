@@ -56,12 +56,6 @@ const i18nTexts = {
       defaultMessage: 'Feature',
     }
   ),
-  apiDeprecationTypeCellLabel: i18n.translate(
-    'xpack.upgradeAssistant.kibanaDeprecations.table.apiDeprecationTypeCellLabel',
-    {
-      defaultMessage: 'API',
-    }
-  ),
   unknownDeprecationTypeCellLabel: i18n.translate(
     'xpack.upgradeAssistant.kibanaDeprecations.table.unknownDeprecationTypeCellLabel',
     {
@@ -92,14 +86,14 @@ interface Props {
   deprecations?: KibanaDeprecationDetails[];
   reload: () => void;
   toggleFlyout: (newFlyoutContent?: KibanaDeprecationDetails) => void;
-  deprecationResolutionStates: Record<string, DeprecationResolutionState>;
+  deprecationResolutionState?: DeprecationResolutionState;
 }
 
 export const KibanaDeprecationsTable: React.FunctionComponent<Props> = ({
   deprecations,
   reload,
   toggleFlyout,
-  deprecationResolutionStates,
+  deprecationResolutionState,
 }) => {
   const columns: Array<EuiBasicTableColumn<KibanaDeprecationDetails>> = [
     {
@@ -141,8 +135,6 @@ export const KibanaDeprecationsTable: React.FunctionComponent<Props> = ({
             return i18nTexts.configDeprecationTypeCellLabel;
           case 'feature':
             return i18nTexts.featureDeprecationTypeCellLabel;
-          case 'api':
-            return i18nTexts.apiDeprecationTypeCellLabel;
           case 'uncategorized':
           default:
             return i18nTexts.unknownDeprecationTypeCellLabel;
@@ -163,8 +155,7 @@ export const KibanaDeprecationsTable: React.FunctionComponent<Props> = ({
           <ResolutionTableCell
             deprecationId={deprecation.id}
             isAutomated={Boolean(correctiveActions?.api)}
-            canBeMarkedAsResolved={Boolean(correctiveActions?.mark_as_resolved_api)}
-            deprecationResolutionState={deprecationResolutionStates[deprecation.id]}
+            deprecationResolutionState={deprecationResolutionState}
           />
         );
       },
@@ -199,10 +190,6 @@ export const KibanaDeprecationsTable: React.FunctionComponent<Props> = ({
           {
             value: 'feature',
             name: i18nTexts.featureDeprecationTypeCellLabel,
-          },
-          {
-            value: 'api',
-            name: i18nTexts.apiDeprecationTypeCellLabel,
           },
           {
             value: 'uncategorized',

@@ -1,5 +1,0 @@
-{
-  "type": "shared-common",
-  "id": "@kbn/item-buffer",
-  "owner": "@elastic/appex-sharedux"
-}

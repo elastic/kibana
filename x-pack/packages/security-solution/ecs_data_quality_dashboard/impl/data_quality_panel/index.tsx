@@ -104,6 +104,7 @@ const DataQualityPanelComponent: React.FC<Props> = ({
   );
 
   const resultsRollupHookReturnValue = useResultsRollup({
+    ilmPhases,
     patterns,
     httpFetch,
     toasts,

@@ -15,8 +15,9 @@ import {
 } from '../../common/endpoint/service/authz';
 import {
   BLOCKLIST_PATH,
+  ENABLE_ASSET_CRITICALITY_SETTING,
   ENDPOINTS_PATH,
-  ENTITY_ANALYTICS_ENTITY_STORE_MANAGEMENT_PATH,
+  ENTITY_ANALYTICS_ASSET_CRITICALITY_PATH,
   ENTITY_ANALYTICS_MANAGEMENT_PATH,
   EVENT_FILTERS_PATH,
   HOST_ISOLATION_EXCEPTIONS_PATH,
@@ -38,8 +39,8 @@ import {
   RESPONSE_ACTIONS_HISTORY,
   TRUSTED_APPLICATIONS,
   ENTITY_ANALYTICS_RISK_SCORE,
+  ASSET_CRITICALITY,
   NOTES,
-  ENTITY_STORE,
 } from '../app/translations';
 import { licenseService } from '../common/hooks/use_license';
 import type { LinkItem } from '../common/links/types';
@@ -63,7 +64,7 @@ const categories = [
     }),
     linkIds: [
       SecurityPageName.entityAnalyticsManagement,
-      SecurityPageName.entityAnalyticsEntityStoreManagement,
+      SecurityPageName.entityAnalyticsAssetClassification,
     ],
   },
   {
@@ -195,16 +196,20 @@ export const links: LinkItem = {
       licenseType: 'platinum',
     },
     {
-      id: SecurityPageName.entityAnalyticsEntityStoreManagement,
-      title: ENTITY_STORE,
-      description: i18n.translate('xpack.securitySolution.appLinks.entityStoreDescription', {
-        defaultMessage: 'Store host and user entities observed in events.',
-      }),
+      id: SecurityPageName.entityAnalyticsAssetClassification,
+      title: ASSET_CRITICALITY,
+      description: i18n.translate(
+        'xpack.securitySolution.appLinks.assetClassificationDescription',
+        {
+          defaultMessage: 'Represents the criticality of an asset to your business infrastructure.',
+        }
+      ),
       landingIcon: IconAssetCriticality,
-      path: ENTITY_ANALYTICS_ENTITY_STORE_MANAGEMENT_PATH,
+      path: ENTITY_ANALYTICS_ASSET_CRITICALITY_PATH,
       skipUrlState: true,
       hideTimeline: true,
       capabilities: [`${SERVER_APP_ID}.entity-analytics`],
+      uiSettingRequired: ENABLE_ASSET_CRITICALITY_SETTING,
     },
     {
       id: SecurityPageName.responseActionsHistory,
@@ -223,14 +228,13 @@ export const links: LinkItem = {
       title: NOTES,
       description: i18n.translate('xpack.securitySolution.appLinks.notesDescription', {
         defaultMessage:
-          'Oversee, revise, and revisit the notes attached to alerts, events and Timelines.',
+          'Oversee, revise and revisit the annotations within each document and timeline.',
       }),
       landingIcon: 'filebeatApp',
       path: NOTES_PATH,
       skipUrlState: true,
       hideTimeline: true,
-      hideWhenExperimentalKey: 'securitySolutionNotesDisabled',
-      globalSearchDisabled: true,
+      experimentalKey: 'securitySolutionNotesEnabled',
     },
   ],
 };

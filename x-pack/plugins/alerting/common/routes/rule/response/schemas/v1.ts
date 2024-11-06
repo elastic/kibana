@@ -6,7 +6,6 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { ruleParamsSchemaV1 } from '@kbn/response-ops-rule-params';
 import { rRuleResponseSchemaV1 } from '../../../r_rule';
 import { alertsFilterQuerySchemaV1 } from '../../../alerts_filter_query';
 import {
@@ -19,6 +18,9 @@ import {
 import { validateNotifyWhenV1 } from '../../validation';
 import { flappingSchemaV1 } from '../../common';
 
+export const ruleParamsSchema = schema.recordOf(schema.string(), schema.maybe(schema.any()), {
+  meta: { description: 'The parameters for the rule.' },
+});
 export const actionParamsSchema = schema.recordOf(schema.string(), schema.maybe(schema.any()), {
   meta: {
     description:
@@ -224,21 +226,20 @@ export const ruleExecutionStatusSchema = schema.object({
   ),
 });
 
-export const outcome = schema.oneOf(
-  [
-    schema.literal(ruleLastRunOutcomeValuesV1.SUCCEEDED),
-    schema.literal(ruleLastRunOutcomeValuesV1.WARNING),
-    schema.literal(ruleLastRunOutcomeValuesV1.FAILED),
-  ],
-  {
-    meta: {
-      description: 'Outcome of last run of the rule. Value could be succeeded, warning or failed.',
-    },
-  }
-);
-
 export const ruleLastRunSchema = schema.object({
-  outcome,
+  outcome: schema.oneOf(
+    [
+      schema.literal(ruleLastRunOutcomeValuesV1.SUCCEEDED),
+      schema.literal(ruleLastRunOutcomeValuesV1.WARNING),
+      schema.literal(ruleLastRunOutcomeValuesV1.FAILED),
+    ],
+    {
+      meta: {
+        description:
+          'Outcome of last run of the rule. Value could be succeeded, warning or failed.',
+      },
+    }
+  ),
   outcome_order: schema.maybe(
     schema.number({
       meta: {
@@ -335,7 +336,7 @@ export const monitoringSchema = schema.object(
             duration: schema.maybe(
               schema.number({ meta: { description: 'Duration of the rule run.' } })
             ),
-            outcome: schema.maybe(outcome),
+            outcome: schema.maybe(ruleLastRunSchema),
           }),
           { meta: { description: 'History of the rule run.' } }
         ),
@@ -496,7 +497,7 @@ export const ruleResponseSchema = schema.object({
   }),
   schedule: intervalScheduleSchema,
   actions: schema.arrayOf(actionSchema),
-  params: ruleParamsSchemaV1,
+  params: ruleParamsSchema,
   mapped_params: schema.maybe(mappedParamsSchema),
   scheduled_task_id: schema.maybe(
     schema.string({

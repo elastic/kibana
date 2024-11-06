@@ -375,6 +375,20 @@
           },
           {
             "parentPluginId": "@kbn/doc-links",
+            "id": "def-common.DocLinks.functionbeat",
+            "type": "Object",
+            "tags": [],
+            "label": "functionbeat",
+            "description": [],
+            "signature": [
+              "{ readonly base: string; }"
+            ],
+            "path": "packages/kbn-doc-links/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/doc-links",
             "id": "def-common.DocLinks.winlogbeat",
             "type": "Object",
             "tags": [],

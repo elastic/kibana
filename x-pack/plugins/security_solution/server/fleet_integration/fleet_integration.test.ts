@@ -7,7 +7,6 @@
 
 import type { ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
 
-import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import {
   elasticsearchServiceMock,
   httpServerMock,
@@ -39,10 +38,7 @@ import {
 import { requestContextMock } from '../lib/detection_engine/routes/__mocks__';
 import { requestContextFactoryMock } from '../request_context_factory.mock';
 import type { EndpointAppContextServiceStartContract } from '../endpoint/endpoint_app_context_services';
-import {
-  createMockEndpointAppContextService,
-  createMockEndpointAppContextServiceStartContract,
-} from '../endpoint/mocks';
+import { createMockEndpointAppContextServiceStartContract } from '../endpoint/mocks';
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 import { LicenseService } from '../../common/license';
 import { Subject } from 'rxjs';
@@ -77,30 +73,16 @@ import { createProductFeaturesServiceMock } from '../lib/product_features_servic
 import * as moment from 'moment';
 import type {
   PostAgentPolicyCreateCallback,
-  PostPackagePolicyPostCreateCallback,
   PutPackagePolicyUpdateCallback,
 } from '@kbn/fleet-plugin/server/types';
 import type { EndpointMetadataService } from '../endpoint/services/metadata';
 import { createEndpointMetadataServiceTestContextMock } from '../endpoint/services/metadata/mocks';
-import { createPolicyDataStreamsIfNeeded as _createPolicyDataStreamsIfNeeded } from './handlers/create_policy_datastreams';
 
 jest.mock('uuid', () => ({
   v4: (): string => 'NEW_UUID',
 }));
 
-jest.mock('./handlers/create_policy_datastreams', () => {
-  const actualModule = jest.requireActual('./handlers/create_policy_datastreams');
-
-  return {
-    ...actualModule,
-    createPolicyDataStreamsIfNeeded: jest.fn(async () => {}),
-  };
-});
-
-const createPolicyDataStreamsIfNeededMock =
-  _createPolicyDataStreamsIfNeeded as unknown as jest.Mock;
-
-describe('Fleet integrations', () => {
+describe('ingest_integration tests ', () => {
   let endpointAppContextStartContract: EndpointAppContextServiceStartContract;
   let req: KibanaRequest;
   let ctx: ReturnType<typeof requestContextMock.create>;
@@ -368,20 +350,10 @@ describe('Fleet integrations', () => {
   });
 
   describe('package policy post create callback', () => {
-    let soClient: ReturnType<typeof savedObjectsClientMock.create>;
-    let esClient: ElasticsearchClientMock;
-    let callback: PostPackagePolicyPostCreateCallback;
-    let policyConfig: PackagePolicy;
-    let endpointAppContextServiceMock: ReturnType<typeof createMockEndpointAppContextService>;
-
-    beforeEach(() => {
-      soClient = savedObjectsClientMock.create();
-      esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-      endpointAppContextServiceMock = createMockEndpointAppContextService();
-      endpointAppContextServiceMock.getExceptionListsClient.mockReturnValue(exceptionListClient);
-      callback = getPackagePolicyPostCreateCallback(endpointAppContextServiceMock);
-      policyConfig = generator.generatePolicyPackagePolicy() as PackagePolicy;
-    });
+    const soClient = savedObjectsClientMock.create();
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    const callback = getPackagePolicyPostCreateCallback(logger, exceptionListClient);
+    const policyConfig = generator.generatePolicyPackagePolicy() as PackagePolicy;
 
     it('should create the Endpoint Event Filters List and add the correct Event Filters List Item attached to the policy given nonInteractiveSession parameter on integration config eventFilters', async () => {
       const integrationConfig = {
@@ -402,11 +374,11 @@ describe('Fleet integrations', () => {
         req
       );
 
-      expect(exceptionListClient.createExceptionList).toHaveBeenCalledWith(
+      expect(await exceptionListClient.createExceptionList).toHaveBeenCalledWith(
         expect.objectContaining({ listId: ENDPOINT_EVENT_FILTERS_LIST_ID })
       );
 
-      expect(exceptionListClient.createExceptionListItem).toHaveBeenCalledWith(
+      expect(await exceptionListClient.createExceptionListItem).toHaveBeenCalledWith(
         expect.objectContaining({
           listId: ENDPOINT_EVENT_FILTERS_LIST_ID,
           tags: [`policy:${postCreatedPolicyConfig.id}`],
@@ -441,19 +413,13 @@ describe('Fleet integrations', () => {
         req
       );
 
-      expect(exceptionListClient.createExceptionList).not.toHaveBeenCalled();
+      expect(await exceptionListClient.createExceptionList).not.toHaveBeenCalled();
 
-      expect(exceptionListClient.createExceptionListItem).not.toHaveBeenCalled();
+      expect(await exceptionListClient.createExceptionListItem).not.toHaveBeenCalled();
 
       expect(postCreatedPolicyConfig.inputs[0]!.config!.integration_config.value).toEqual(
         integrationConfig
       );
-    });
-
-    it('should call `createPolicyDatastreamsIfNeeded`', async () => {
-      await callback(policyConfig, soClient, esClient, requestContextMock.convertContext(ctx), req);
-
-      expect(createPolicyDataStreamsIfNeededMock).toHaveBeenCalled();
     });
   });
 

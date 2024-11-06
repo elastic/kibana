@@ -16,7 +16,6 @@ export const hideTestNowFlyoutAction = createAction('HIDE ALL TEST NOW FLYOUT AC
 export interface TestNowPayload {
   configId: string;
   name: string;
-  spaceId?: string;
 }
 export const manualTestMonitorAction = createAsyncAction<
   TestNowPayload,

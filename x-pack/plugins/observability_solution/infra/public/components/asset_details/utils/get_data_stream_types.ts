@@ -10,7 +10,3 @@ import { EntityDataStreamType } from '@kbn/observability-shared-plugin/common';
 export function isMetricsSignal(dataStreamTypes: EntityDataStreamType[] = []) {
   return dataStreamTypes?.includes(EntityDataStreamType.METRICS);
 }
-
-export function isLogsSignal(dataStreamTypes: EntityDataStreamType[] = []) {
-  return dataStreamTypes?.includes(EntityDataStreamType.LOGS);
-}

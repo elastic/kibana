@@ -18,7 +18,7 @@ export function MachineLearningLensVisualizationsProvider(
 
   return {
     async clickCreateMLJobMenuAction(title = '') {
-      await dashboardPanelActions.clickPanelActionByTitle(
+      await dashboardPanelActions.clickContextMenuItemByTitle(
         'embeddablePanelAction-create-ml-ad-job-action',
         title
       );

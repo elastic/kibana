@@ -9,39 +9,31 @@ import { last } from 'lodash';
 import { defer, switchMap, throwError } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import {
-  type ChatCompleteAPI,
-  type ChatCompleteCompositeResponse,
-  createInferenceRequestError,
-  type ToolOptions,
-  ChatCompleteOptions,
-} from '@kbn/inference-common';
+import type { ChatCompleteAPI, ChatCompletionResponse } from '../../common/chat_complete';
+import { createInferenceRequestError } from '../../common/errors';
 import type { InferenceStartDependencies } from '../types';
 import { getConnectorById } from '../util/get_connector_by_id';
 import { getInferenceAdapter } from './adapters';
-import { createInferenceExecutor, chunksIntoMessage, streamToResponse } from './utils';
+import { createInferenceExecutor, chunksIntoMessage } from './utils';
 
-interface CreateChatCompleteApiOptions {
+export function createChatCompleteApi({
+  request,
+  actions,
+  logger,
+}: {
   request: KibanaRequest;
   actions: InferenceStartDependencies['actions'];
   logger: Logger;
-}
-
-export function createChatCompleteApi(options: CreateChatCompleteApiOptions): ChatCompleteAPI;
-export function createChatCompleteApi({ request, actions, logger }: CreateChatCompleteApiOptions) {
-  return ({
+}) {
+  const chatCompleteAPI: ChatCompleteAPI = ({
     connectorId,
     messages,
     toolChoice,
     tools,
     system,
     functionCalling,
-    stream,
-  }: ChatCompleteOptions<ToolOptions, boolean>): ChatCompleteCompositeResponse<
-    ToolOptions,
-    boolean
-  > => {
-    const obs$ = defer(async () => {
+  }): ChatCompletionResponse => {
+    return defer(async () => {
       const actionsClient = await actions.getActionsClientWithRequest(request);
       const connector = await getConnectorById({ connectorId, actionsClient });
       const executor = createInferenceExecutor({ actionsClient, connector });
@@ -78,11 +70,7 @@ export function createChatCompleteApi({ request, actions, logger }: CreateChatCo
         logger,
       })
     );
-
-    if (stream) {
-      return obs$;
-    } else {
-      return streamToResponse(obs$);
-    }
   };
+
+  return chatCompleteAPI;
 }

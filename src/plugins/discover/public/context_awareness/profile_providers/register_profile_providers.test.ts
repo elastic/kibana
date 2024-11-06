@@ -9,7 +9,7 @@
 
 import { createEsqlDataSource } from '../../../common/data_sources';
 import { createContextAwarenessMocks } from '../__mocks__';
-import { createExampleRootProfileProvider } from './example/example_root_profile';
+import { createExampleRootProfileProvider } from './example/example_root_pofile';
 import { createExampleDataSourceProfileProvider } from './example/example_data_source_profile/profile';
 import { createExampleDocumentProfileProvider } from './example/example_document_profile';
 

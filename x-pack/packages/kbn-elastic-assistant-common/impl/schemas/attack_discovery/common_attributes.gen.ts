@@ -39,7 +39,7 @@ export const AttackDiscovery = z.object({
   /**
    * A short (no more than a sentence) summary of the attack discovery featuring only the host.name and user.name fields (when they are applicable), using the same syntax
    */
-  entitySummaryMarkdown: z.string().optional(),
+  entitySummaryMarkdown: z.string(),
   /**
    * An array of MITRE ATT&CK tactic for the attack discovery
    */
@@ -55,7 +55,7 @@ export const AttackDiscovery = z.object({
   /**
    * The time the attack discovery was generated
    */
-  timestamp: NonEmptyString.optional(),
+  timestamp: NonEmptyString,
 });
 
 /**

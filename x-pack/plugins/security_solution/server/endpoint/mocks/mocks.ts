@@ -50,7 +50,6 @@ import { unsecuredActionsClientMock } from '@kbn/actions-plugin/server/unsecured
 import type { PluginStartContract as ActionPluginStartContract } from '@kbn/actions-plugin/server';
 import type { Mutable } from 'utility-types';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
-import { createSavedObjectsClientFactoryMock } from '../services/saved_objects/saved_objects_client_factory.mocks';
 import { EndpointMetadataService } from '../services/metadata';
 import { createEndpointFleetServicesFactoryMock } from '../services/fleet/endpoint_fleet_services_factory.mocks';
 import type { ProductFeaturesService } from '../../lib/product_features_service';
@@ -76,7 +75,6 @@ import type { EndpointAuthz } from '../../../common/endpoint/types/authz';
 import { createLicenseServiceMock } from '../../../common/license/mocks';
 import { createFeatureUsageServiceMock } from '../services/feature_usage/mocks';
 import { createProductFeaturesServiceMock } from '../../lib/product_features_service/mocks';
-import type { ConfigType } from '../../config';
 
 /**
  * Creates a mocked EndpointAppContext.
@@ -101,8 +99,7 @@ export const createMockEndpointAppContext = (
 export const createMockEndpointAppContextService = (
   mockManifestManager?: ManifestManager
 ): jest.Mocked<EndpointAppContextService> => {
-  const { esClient, fleetStartServices, savedObjectsServiceStart } =
-    createMockEndpointAppContextServiceStartContract();
+  const { esClient, fleetStartServices } = createMockEndpointAppContextServiceStartContract();
   const fleetServices = createEndpointFleetServicesFactoryMock({
     fleetDependencies: fleetStartServices,
   }).service.asInternalUser();
@@ -144,9 +141,6 @@ export const createMockEndpointAppContextService = (
     getInternalResponseActionsClient: jest.fn(() => {
       return responseActionsClientMock.create();
     }),
-    savedObjects: createSavedObjectsClientFactoryMock({ savedObjectsServiceStart }).service,
-    isServerless: jest.fn().mockReturnValue(false),
-    getInternalEsClient: jest.fn().mockReturnValue(esClient),
   } as unknown as jest.Mocked<EndpointAppContextService>;
 };
 
@@ -164,15 +158,11 @@ export const createMockEndpointAppContextServiceSetupContract =
     };
   };
 
-type CreateMockEndpointAppContextServiceStartContractType = Omit<
-  DeeplyMockedKeys<EndpointAppContextServiceStartContract>,
-  'config'
-> & { config: ConfigType }; // DeeplyMockedKeys doesn't support moment.Duration
 /**
  * Creates a mocked input contract for the `EndpointAppContextService#start()` method
  */
 export const createMockEndpointAppContextServiceStartContract =
-  (): CreateMockEndpointAppContextServiceStartContractType => {
+  (): DeeplyMockedKeys<EndpointAppContextServiceStartContract> => {
     const config = createMockConfig();
 
     const logger = loggingSystemMock.create().get('mock_endpoint_app_context');
@@ -194,7 +184,7 @@ export const createMockEndpointAppContextServiceStartContract =
       securityMock.createMockAuthenticatedUser({ roles: ['superuser'] })
     );
 
-    const startContract: CreateMockEndpointAppContextServiceStartContractType = {
+    const startContract: DeeplyMockedKeys<EndpointAppContextServiceStartContract> = {
       security,
       config,
       productFeaturesService: createProductFeaturesServiceMock(

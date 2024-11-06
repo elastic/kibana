@@ -64,7 +64,6 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
         <EuiTab
           isSelected={selectedTab === TAB.DETAILS}
           onClick={() => setSelectedTab(TAB.DETAILS)}
-          data-test-subj="mlNodesOverviewPanelDetailsTab"
         >
           <FormattedMessage
             id="xpack.ml.trainedModels.nodesList.expandedRow.detailsTabTitle"
@@ -74,7 +73,6 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
         <EuiTab
           isSelected={selectedTab === TAB.MEMORY_USAGE}
           onClick={() => setSelectedTab(TAB.MEMORY_USAGE)}
-          data-test-subj="mlNodesOverviewPanelMemoryTab"
         >
           <FormattedMessage
             id="xpack.ml.trainedModels.nodesList.expandedRow.memoryTabTitle"
@@ -87,7 +85,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
         <>
           <EuiSpacer size="s" />
           <EuiFlexGrid columns={2} gutterSize={'s'}>
-            <EuiFlexItem data-test-subj="mlNodesTableRowDetailsPanel">
+            <EuiFlexItem>
               <EuiPanel hasShadow={false}>
                 <EuiTitle size={'xs'}>
                   <h5>
@@ -106,7 +104,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
               </EuiPanel>
             </EuiFlexItem>
 
-            <EuiFlexItem data-test-subj="mlNodesTableRowDetailsAttributesPanel">
+            <EuiFlexItem>
               <EuiPanel hasShadow={false}>
                 <EuiTitle size={'xs'}>
                   <h5>

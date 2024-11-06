@@ -66,7 +66,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it('opens and closes the connectors flyout correctly', async () => {
-        await common.clickAndValidate('add-new-connector', 'euiFlyoutCloseButton');
+        await common.clickAndValidate('dropdown-connectors', 'dropdown-connector-add-connector');
+        await common.clickAndValidate('dropdown-connector-add-connector', 'euiFlyoutCloseButton');
         await testSubjects.click('euiFlyoutCloseButton');
         expect(await testSubjects.exists('euiFlyoutCloseButton')).to.be(false);
       });

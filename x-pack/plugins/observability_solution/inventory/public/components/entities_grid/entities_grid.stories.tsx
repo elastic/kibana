@@ -5,68 +5,51 @@
  * 2.0.
  */
 
-import { EuiButton, EuiDataGridSorting, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiDataGridSorting, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import { Meta, Story } from '@storybook/react';
 import { orderBy } from 'lodash';
 import React, { useMemo, useState } from 'react';
 import { ENTITY_LAST_SEEN, ENTITY_TYPE } from '@kbn/observability-shared-plugin/common';
-import { useArgs } from '@storybook/addons';
 import { EntitiesGrid } from '.';
+import { EntityType } from '../../../common/entities';
 import { entitiesMock } from './mock/entities_mock';
 
-interface EntityGridStoriesArgs {
-  entityType?: string;
-}
-
-const entityTypeOptions = ['host', 'container', 'service'];
-
-const stories: Meta<EntityGridStoriesArgs> = {
+const stories: Meta<{}> = {
   title: 'app/inventory/entities_grid',
   component: EntitiesGrid,
-  argTypes: {
-    entityType: {
-      options: entityTypeOptions,
-      name: 'Entity type',
-      control: {
-        type: 'select',
-      },
-    },
-  },
-  args: { entityType: undefined },
 };
+export default stories;
 
-export const Grid: Story<EntityGridStoriesArgs> = (args) => {
+export const Example: Story<{}> = () => {
   const [pageIndex, setPageIndex] = useState(0);
-  const [{ entityType }, updateArgs] = useArgs();
   const [sort, setSort] = useState<EuiDataGridSorting['columns'][0]>({
     id: ENTITY_LAST_SEEN,
     direction: 'desc',
   });
+  const [selectedEntityType, setSelectedEntityType] = useState<EntityType | undefined>();
   const filteredAndSortedItems = useMemo(
     () =>
       orderBy(
-        entityType ? entitiesMock.filter((mock) => mock[ENTITY_TYPE] === entityType) : entitiesMock,
+        selectedEntityType
+          ? entitiesMock.filter((mock) => mock[ENTITY_TYPE] === selectedEntityType)
+          : entitiesMock,
         sort.id,
         sort.direction
       ),
-    [entityType, sort.direction, sort.id]
+    [selectedEntityType, sort.direction, sort.id]
   );
 
   return (
     <EuiFlexGroup direction="column">
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup direction="column" alignItems="flexStart">
-          <EuiFlexItem grow={false}>{`Entity filter: ${entityType || 'N/A'}`}</EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              disabled={!entityType}
-              data-test-subj="inventoryExampleClearFilterButton"
-              onClick={() => updateArgs({ entityType: undefined })}
-            >
-              Clear filter
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        {`Entity filter: ${selectedEntityType || 'N/A'}`}
+        <EuiLink
+          disabled={!selectedEntityType}
+          data-test-subj="inventoryExampleClearFilterButton"
+          onClick={() => setSelectedEntityType(undefined)}
+        >
+          Clear filter
+        </EuiLink>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EntitiesGrid
@@ -77,14 +60,14 @@ export const Grid: Story<EntityGridStoriesArgs> = (args) => {
           onChangePage={setPageIndex}
           onChangeSort={setSort}
           pageIndex={pageIndex}
-          onFilterByType={(selectedEntityType) => updateArgs({ entityType: selectedEntityType })}
+          onFilterByType={setSelectedEntityType}
         />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
 };
 
-export const EmptyGrid: Story<EntityGridStoriesArgs> = (args) => {
+export const EmptyGridExample: Story<{}> = () => {
   const [pageIndex, setPageIndex] = useState(0);
   const [sort, setSort] = useState<EuiDataGridSorting['columns'][0]>({
     id: ENTITY_LAST_SEEN,
@@ -104,5 +87,3 @@ export const EmptyGrid: Story<EntityGridStoriesArgs> = (args) => {
     />
   );
 };
-
-export default stories;

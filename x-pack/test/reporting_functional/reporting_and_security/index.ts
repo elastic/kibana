@@ -19,7 +19,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await reportingFunctional.createTestReportingUser();
     });
 
-    loadTestFile(require.resolve('./download')); // uses `test_user` login: must be first suite
     loadTestFile(require.resolve('./security_roles_privileges'));
     loadTestFile(require.resolve('./management'));
   });

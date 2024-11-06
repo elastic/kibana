@@ -58,7 +58,7 @@ const expandAgentQueue = (queueName: string = 'n2-4-spot') => {
   const additionalProps =
     {
       spot: { preemptible: true },
-      virt: { enableNestedVirtualization: true },
+      virt: { localSsdInterface: 'nvme', enableNestedVirtualization: true, localSsds: 1 },
     }[addition] || {};
 
   return {

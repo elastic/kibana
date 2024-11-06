@@ -121,7 +121,6 @@ export default ({ getService }: FtrProviderContext) => {
               },
             },
           },
-          kibana: {},
         });
       });
       it('returns has_all_required false for user with no write access to risk indices', async () => {
@@ -140,7 +139,6 @@ export default ({ getService }: FtrProviderContext) => {
               },
             },
           },
-          kibana: {},
         });
       });
       it('returns has_all_required false for user with no read access to risk indices', async () => {
@@ -159,7 +157,6 @@ export default ({ getService }: FtrProviderContext) => {
               },
             },
           },
-          kibana: {},
         });
       });
       it('returns has_all_required false for user with no cluster manage transform privilege', async () => {
@@ -178,7 +175,6 @@ export default ({ getService }: FtrProviderContext) => {
               },
             },
           },
-          kibana: {},
         });
       });
       it('returns has_all_required false for user with no cluster manage index templates privilege', async () => {
@@ -197,7 +193,6 @@ export default ({ getService }: FtrProviderContext) => {
               },
             },
           },
-          kibana: {},
         });
       });
     });

@@ -9,20 +9,17 @@
 
 import type { IndexMappingMeta } from '@kbn/core-saved-objects-base-server-internal';
 import { getBaseMappings } from './build_active_mappings';
-import { getUpdatedRootFields, getNewAndUpdatedTypes } from './compare_mappings';
+import { getUpdatedTypes, getUpdatedRootFields } from './compare_mappings';
 
-describe('getNewAndUpdatedTypes', () => {
+describe('getUpdatedTypes', () => {
   test('returns all types if _meta is missing in indexMappings', () => {
     const indexTypes = ['foo', 'bar'];
     const latestMappingsVersions = {};
 
-    const { newTypes, updatedTypes } = getNewAndUpdatedTypes({
-      indexTypes,
-      indexMeta: undefined,
-      latestMappingsVersions,
-    });
-    expect(newTypes).toEqual([]);
-    expect(updatedTypes).toEqual(['foo', 'bar']);
+    expect(getUpdatedTypes({ indexTypes, indexMeta: undefined, latestMappingsVersions })).toEqual([
+      'foo',
+      'bar',
+    ]);
   });
 
   test('returns all types if migrationMappingPropertyHashes and mappingVersions are missing in indexMappings', () => {
@@ -30,17 +27,14 @@ describe('getNewAndUpdatedTypes', () => {
     const indexMeta: IndexMappingMeta = {};
     const latestMappingsVersions = {};
 
-    const { newTypes, updatedTypes } = getNewAndUpdatedTypes({
-      indexTypes,
-      indexMeta,
-      latestMappingsVersions,
-    });
-    expect(newTypes).toEqual([]);
-    expect(updatedTypes).toEqual(['foo', 'bar']);
+    expect(getUpdatedTypes({ indexTypes, indexMeta, latestMappingsVersions })).toEqual([
+      'foo',
+      'bar',
+    ]);
   });
 
   describe('when ONLY migrationMappingPropertyHashes exists in indexMappings', () => {
-    test('uses the provided hashToVersionMap to compare changes and return new types and types that have changed', async () => {
+    test('uses the provided hashToVersionMap to compare changes and return only the types that have changed', async () => {
       const indexTypes = ['type1', 'type2', 'type4'];
       const indexMeta: IndexMappingMeta = {
         migrationMappingPropertyHashes: {
@@ -62,19 +56,14 @@ describe('getNewAndUpdatedTypes', () => {
         type4: '10.5.0', // new type, no need to pick it up
       };
 
-      const { newTypes, updatedTypes } = getNewAndUpdatedTypes({
-        indexTypes,
-        indexMeta,
-        latestMappingsVersions,
-        hashToVersionMap,
-      });
-      expect(newTypes).toEqual(['type4']);
-      expect(updatedTypes).toEqual(['type2']);
+      expect(
+        getUpdatedTypes({ indexTypes, indexMeta, latestMappingsVersions, hashToVersionMap })
+      ).toEqual(['type2']);
     });
   });
 
   describe('when mappingVersions exist in indexMappings', () => {
-    test('compares the modelVersions and returns new types and types that have changed', async () => {
+    test('compares the modelVersions and returns only the types that have changed', async () => {
       const indexTypes = ['type1', 'type2', 'type4'];
 
       const indexMeta: IndexMappingMeta = {
@@ -101,14 +90,9 @@ describe('getNewAndUpdatedTypes', () => {
         // empty on purpose, not used as mappingVersions is present in indexMappings
       };
 
-      const { newTypes, updatedTypes } = getNewAndUpdatedTypes({
-        indexTypes,
-        indexMeta,
-        latestMappingsVersions,
-        hashToVersionMap,
-      });
-      expect(newTypes).toEqual(['type4']);
-      expect(updatedTypes).toEqual(['type2']);
+      expect(
+        getUpdatedTypes({ indexTypes, indexMeta, latestMappingsVersions, hashToVersionMap })
+      ).toEqual(['type2']);
     });
   });
 });

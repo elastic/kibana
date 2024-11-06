@@ -52,7 +52,6 @@ export const updateSearchSource = (
 ) => {
   const { sortDir } = defaults;
   searchSource.setField('size', sampleSize);
-  searchSource.setField('highlightAll', true);
   searchSource.setField(
     'sort',
     getSortForSearchSource({

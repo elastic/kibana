@@ -23,7 +23,6 @@ import {
   EuiSpacer,
   EuiText,
   EuiToolTip,
-  useEuiTheme,
 } from '@elastic/eui';
 
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -143,9 +142,6 @@ export const ExpandableSectionResults: FC<ExpandableSectionResultsProps> = ({
       notifications: { toasts },
     },
   } = useMlKibana();
-  const {
-    euiTheme: { size },
-  } = useEuiTheme();
 
   const dataViewId = dataView?.id;
 
@@ -375,12 +371,14 @@ export const ExpandableSectionResults: FC<ExpandableSectionResultsProps> = ({
   const resultsSectionContent = (
     <>
       {jobConfig !== undefined && needsDestDataView && (
-        <DataViewPrompt destIndex={jobConfig.dest.index} />
+        <div className="mlExpandableSection-contentPadding">
+          <DataViewPrompt destIndex={jobConfig.dest.index} />
+        </div>
       )}
       {jobConfig !== undefined &&
         (isRegressionAnalysis(jobConfig.analysis) ||
           isClassificationAnalysis(jobConfig.analysis)) && (
-          <EuiText size="xs" color="subdued" css={{ padding: `${size.s}` }}>
+          <EuiText size="xs" color="subdued" className="mlExpandableSection-contentPadding">
             {tableItems.length === SEARCH_SIZE ? showingFirstDocs : showingDocs}
           </EuiText>
         )}

@@ -10,14 +10,8 @@ import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 
 export const APP_NAME = 'cloud-security';
 
-export const ENTITY_FLYOUT_WITH_MISCONFIGURATION_VISIT =
-  'entity-flyout-with-misconfiguration-visits';
-export const ENTITY_FLYOUT_WITH_VULNERABILITY_PREVIEW =
-  'entity-flyout-with-vulnerability-preview-visits';
-export const ENTITY_FLYOUT_EXPAND_MISCONFIGURATION_VIEW_VISITS =
-  'entity-flyout-expand-misconfiguration-view-visits';
-export const ENTITY_FLYOUT_EXPAND_VULNERABILITY_VIEW_VISITS =
-  'entity-flyout-expand-vulnerability-view-visits';
+export const ENTITY_FLYOUT_MISCONFIGURATION_VIEW_VISITS =
+  'entity-flyout-misconfiguration-view-visits';
 export const NAV_TO_FINDINGS_BY_HOST_NAME_FRPOM_ENTITY_FLYOUT =
   'nav-to-findings-by-host-name-from-entity-flyout';
 export const NAV_TO_FINDINGS_BY_RULE_NAME_FRPOM_ENTITY_FLYOUT =
@@ -28,19 +22,18 @@ export const VULNERABILITIES_FLYOUT_VISITS = 'vulnerabilities-flyout-visits';
 export const OPEN_FINDINGS_FLYOUT = 'open-findings-flyout';
 export const GROUP_BY_CLICK = 'group-by-click';
 export const CHANGE_RULE_STATE = 'change-rule-state';
+export const ENTITY_FLYOUT_VULNERABILITY_VIEW_VISITS = 'entity-flyout-vulnerability-view-visits';
 
 type CloudSecurityUiCounters =
-  | typeof ENTITY_FLYOUT_WITH_MISCONFIGURATION_VISIT
-  | typeof ENTITY_FLYOUT_WITH_VULNERABILITY_PREVIEW
-  | typeof ENTITY_FLYOUT_EXPAND_MISCONFIGURATION_VIEW_VISITS
-  | typeof ENTITY_FLYOUT_EXPAND_VULNERABILITY_VIEW_VISITS
+  | typeof ENTITY_FLYOUT_MISCONFIGURATION_VIEW_VISITS
   | typeof NAV_TO_FINDINGS_BY_HOST_NAME_FRPOM_ENTITY_FLYOUT
-  | typeof NAV_TO_FINDINGS_BY_RULE_NAME_FRPOM_ENTITY_FLYOUT
   | typeof VULNERABILITIES_FLYOUT_VISITS
+  | typeof NAV_TO_FINDINGS_BY_RULE_NAME_FRPOM_ENTITY_FLYOUT
   | typeof OPEN_FINDINGS_FLYOUT
   | typeof CREATE_DETECTION_RULE_FROM_FLYOUT
   | typeof CREATE_DETECTION_FROM_TABLE_ROW_ACTION
   | typeof GROUP_BY_CLICK
+  | typeof ENTITY_FLYOUT_VULNERABILITY_VIEW_VISITS
   | typeof CHANGE_RULE_STATE;
 
 export class UiMetricService {

@@ -70,11 +70,6 @@ export const render = (
 
   const appContextValue = mocks?.appContextValue ?? {
     setBreadcrumbs: () => {},
-    config: {
-      logSourcesEnabled: true,
-      spacesEnabled: true,
-      visibilityEnabled: true,
-    },
   };
 
   return testLibRender(

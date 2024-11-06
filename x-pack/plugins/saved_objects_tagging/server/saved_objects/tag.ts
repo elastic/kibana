@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { SavedObject, SavedObjectsType } from '@kbn/core/server';
-import type { TagAttributes } from '../../common/types';
-import { tagSavedObjectTypeName } from '../../common';
+import { SavedObject, SavedObjectsType } from '@kbn/core/server';
+import { tagSavedObjectTypeName, TagAttributes } from '../../common';
 
 export const tagType: SavedObjectsType = {
   name: tagSavedObjectTypeName,

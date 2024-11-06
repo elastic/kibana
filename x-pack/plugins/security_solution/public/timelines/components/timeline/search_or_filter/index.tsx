@@ -73,7 +73,7 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
       services: { data },
     } = useKibana();
 
-    const { sourcererDataView } = useSourcererDataView(SourcererScopeName.timeline);
+    const { indexPattern } = useSourcererDataView(SourcererScopeName.timeline);
 
     const getIsDataProviderVisible = useMemo(
       () => timelineSelectors.dataProviderVisibilitySelector(),
@@ -86,22 +86,25 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
 
     useEffect(() => {
       let dv: DataView;
-      const createDataView = async () => {
-        try {
-          dv = await data.dataViews.create(sourcererDataView);
-          setDataView(dv);
-        } catch (error) {
-          addError(error, { title: i18n.ERROR_PROCESSING_INDEX_PATTERNS });
-        }
-      };
-      createDataView();
-
+      if (isDataView(indexPattern)) {
+        setDataView(indexPattern);
+      } else if (!filterQuery) {
+        const createDataView = async () => {
+          try {
+            dv = await data.dataViews.create({ title: indexPattern.title });
+            setDataView(dv);
+          } catch (error) {
+            addError(error, { title: i18n.ERROR_PROCESSING_INDEX_PATTERNS });
+          }
+        };
+        createDataView();
+      }
       return () => {
         if (dv?.id) {
           data.dataViews.clearInstanceCache(dv?.id);
         }
       };
-    }, [data.dataViews, filterQuery, addError, sourcererDataView]);
+    }, [data.dataViews, indexPattern, filterQuery, addError]);
 
     const arrDataView = useMemo(() => (dataView != null ? [dataView] : []), [dataView]);
 

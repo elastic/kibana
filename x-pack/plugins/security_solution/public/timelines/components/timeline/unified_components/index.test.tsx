@@ -67,6 +67,9 @@ jest.mock('react-router-dom', () => ({
 }));
 
 const useIsExperimentalFeatureEnabledMock = jest.fn((feature: keyof ExperimentalFeatures) => {
+  if (feature === 'unifiedComponentsInTimelineDisabled') {
+    return false;
+  }
   return allowedExperimentalValues[feature];
 });
 

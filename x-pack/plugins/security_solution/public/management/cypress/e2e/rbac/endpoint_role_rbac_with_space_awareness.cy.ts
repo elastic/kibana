@@ -23,7 +23,8 @@ import {
   setSecuritySolutionEndpointGroupPrivilege,
 } from '../../screens/stack_management/role_page';
 
-describe(
+// FLAKY: https://github.com/elastic/kibana/issues/195477
+describe.skip(
   'When defining a kibana role for Endpoint security access with space awareness enabled',
   {
     // TODO:PR Remove `'@skipInServerlessMKI` once PR merges to `main`

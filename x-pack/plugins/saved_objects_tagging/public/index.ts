@@ -9,6 +9,7 @@ import { PluginInitializerContext } from '@kbn/core/public';
 import { SavedObjectTaggingPlugin } from './plugin';
 
 export type { SavedObjectTaggingPluginStart } from './types';
+export type { Tag } from '../common';
 
 export const plugin = (initializerContext: PluginInitializerContext) =>
   new SavedObjectTaggingPlugin(initializerContext);

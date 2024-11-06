@@ -11,8 +11,6 @@ import { $Values } from '@kbn/utility-types';
 import type { PaletteOutput, CustomPaletteParams } from '@kbn/coloring';
 import {
   Datatable,
-  DefaultInspectorAdapters,
-  ExecutionContext,
   ExpressionFunctionDefinition,
   ExpressionValueRender,
 } from '@kbn/expressions-plugin/common';
@@ -88,8 +86,7 @@ export type GaugeExpressionFunctionDefinition = ExpressionFunctionDefinition<
   typeof EXPRESSION_GAUGE_NAME,
   GaugeInput,
   GaugeArguments,
-  ExpressionValueRender<GaugeExpressionProps>,
-  ExecutionContext<DefaultInspectorAdapters>
+  ExpressionValueRender<GaugeExpressionProps>
 >;
 
 export interface Accessors {

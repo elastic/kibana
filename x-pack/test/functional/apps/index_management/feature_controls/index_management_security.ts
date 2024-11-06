@@ -40,15 +40,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       describe('"Data" section', function () {
         this.tags('skipFIPS');
-        it('should render only data_quality section', async () => {
+        it('should not render', async () => {
           await PageObjects.common.navigateToApp('management');
-          const sections = await managementMenu.getSections();
-
-          const sectionIds = sections.map((section) => section.sectionId);
-          expect(sectionIds).to.eql(['data', 'insightsAndAlerting', 'kibana']);
-
-          const dataSection = sections.find((section) => section.sectionId === 'data');
-          expect(dataSection?.sectionLinks).to.eql(['data_quality']);
+          const sections = (await managementMenu.getSections()).map((section) => section.sectionId);
+          expect(sections).to.eql(['insightsAndAlerting', 'kibana']);
         });
       });
     });
@@ -76,7 +71,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           expect(sections).to.have.length(2);
           expect(sections[0]).to.eql({
             sectionId: 'data',
-            sectionLinks: ['index_management', 'transform'],
+            sectionLinks: ['index_management', 'data_quality', 'transform'],
           });
         });
       });

@@ -163,10 +163,7 @@ export const RuleActionsConnectorsModal = (props: RuleActionsConnectorsModalProp
 
   const connectorFacetButtons = useMemo(() => {
     return (
-      <EuiFacetGroup
-        data-test-subj="ruleActionsConnectorsModalFilterButtonGroup"
-        style={{ overflow: 'auto' }}
-      >
+      <EuiFacetGroup data-test-subj="ruleActionsConnectorsModalFilterButtonGroup">
         <EuiFacetButton
           data-test-subj="ruleActionsConnectorsModalFilterButton"
           key="all"

@@ -1,16 +1,12 @@
 {
   "type": "plugin",
   "id": "@kbn/observability-logs-explorer-plugin",
-  "owner": [
-    "@elastic/obs-ux-logs-team"
-  ],
-  "group": "observability",
-  "visibility": "private",
+  "owner": "@elastic/obs-ux-logs-team",
   "description": "This plugin exposes and registers observability log consumption features.",
   "plugin": {
     "id": "observabilityLogsExplorer",
-    "browser": true,
     "server": true,
+    "browser": true,
     "configPath": [
       "xpack",
       "observabilityLogsExplorer"

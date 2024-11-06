@@ -8,19 +8,12 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { tableHasFormulas } from '@kbn/data-plugin/common';
-import { downloadMultipleAs } from '@kbn/share-plugin/public';
+import { downloadMultipleAs, ShareContext, ShareMenuProvider } from '@kbn/share-plugin/public';
 import { exporters } from '@kbn/data-plugin/public';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { Datatable } from '@kbn/expressions-plugin/common';
-import { ShareMenuItemV2, ShareMenuProviderV2 } from '@kbn/share-plugin/public/types';
 import { FormatFactory } from '../../../common/types';
-
-export interface CSVSharingData {
-  title: string;
-  datatables: Datatable[];
-  csvEnabled: boolean;
-}
+import { TableInspectorAdapter } from '../../editor_frame_service/types';
 
 declare global {
   interface Window {
@@ -33,21 +26,25 @@ declare global {
 }
 
 async function downloadCSVs({
+  activeData,
   title,
-  datatables,
   formatFactory,
   uiSettings,
+  columnsSorting,
 }: {
+  title: string;
+  activeData: TableInspectorAdapter;
   formatFactory: FormatFactory;
   uiSettings: IUiSettingsClient;
-} & Pick<CSVSharingData, 'title' | 'datatables'>) {
-  if (datatables.length === 0) {
+  columnsSorting?: string[];
+}) {
+  if (!activeData) {
     if (window.ELASTIC_LENS_CSV_DOWNLOAD_DEBUG) {
       window.ELASTIC_LENS_CSV_CONTENT = undefined;
     }
     return;
   }
-
+  const datatables = Object.values(activeData);
   const content = datatables.reduce<Record<string, { content: string; type: string }>>(
     (memo, datatable, i) => {
       // skip empty datatables
@@ -60,6 +57,7 @@ async function downloadCSVs({
             quoteValues: uiSettings.get('csv:quoteValues', true),
             formatFactory,
             escapeFormulaValues: false,
+            columnsSorting,
           }),
           type: exporters.CSV_MIME_TYPE,
         };
@@ -68,35 +66,31 @@ async function downloadCSVs({
     },
     {}
   );
-
   if (window.ELASTIC_LENS_CSV_DOWNLOAD_DEBUG) {
     window.ELASTIC_LENS_CSV_CONTENT = content;
   }
-
   if (content) {
     downloadMultipleAs(content);
   }
 }
 
-function getWarnings(datatables: Datatable[]) {
-  const warnings: Array<{ title: string; message: string }> = [];
-
-  const formulaDetected = datatables.some((datatable) => {
-    return tableHasFormulas(datatable.columns, datatable.rows);
-  });
-  if (formulaDetected) {
-    warnings.push({
-      title: i18n.translate('xpack.lens.app.downloadButtonFormulasWarningTitle', {
-        defaultMessage: 'Formulas detected',
-      }),
-      message: i18n.translate('xpack.lens.app.downloadButtonFormulasWarningMessage', {
-        defaultMessage:
-          'Your CSV contains characters that spreadsheet applications might interpret as formulas.',
-      }),
+function getWarnings(activeData: TableInspectorAdapter) {
+  const messages: string[] = [];
+  if (activeData) {
+    const datatables = Object.values(activeData);
+    const formulaDetected = datatables.some((datatable) => {
+      return tableHasFormulas(datatable.columns, datatable.rows);
     });
+    if (formulaDetected) {
+      messages.push(
+        i18n.translate('xpack.lens.app.downloadButtonFormulasWarning', {
+          defaultMessage:
+            'Your CSV contains characters that spreadsheet applications might interpret as formulas.',
+        })
+      );
+    }
   }
-
-  return warnings;
+  return messages;
 }
 
 interface DownloadPanelShareOpts {
@@ -109,17 +103,18 @@ export const downloadCsvShareProvider = ({
   uiSettings,
   formatFactoryFn,
   atLeastGold,
-}: DownloadPanelShareOpts): ShareMenuProviderV2 => {
-  const getShareMenuItems: ShareMenuProviderV2['getShareMenuItems'] = ({
-    objectType,
-    sharingData,
-  }) => {
+}: DownloadPanelShareOpts): ShareMenuProvider => {
+  const getShareMenuItems = ({ objectType, sharingData }: ShareContext) => {
     if ('lens' !== objectType) {
       return [];
     }
 
-    // TODO fix sharingData types
-    const { title, datatables, csvEnabled } = sharingData as unknown as CSVSharingData;
+    const { title, activeData, csvEnabled, columnsSorting } = sharingData as {
+      title: string;
+      activeData: TableInspectorAdapter;
+      csvEnabled: boolean;
+      columnsSorting?: string[];
+    };
 
     const panelTitle = i18n.translate(
       'xpack.lens.reporting.shareContextMenu.csvReportsButtonLabel',
@@ -128,33 +123,48 @@ export const downloadCsvShareProvider = ({
       }
     );
 
+    const menuItemMetadata = {
+      shareMenuItem: {
+        name: panelTitle,
+        icon: 'document',
+        disabled: !csvEnabled,
+        sortOrder: 1,
+      },
+    };
+
     const downloadCSVHandler = () =>
       downloadCSVs({
         title,
         formatFactory: formatFactoryFn(),
-        datatables,
+        activeData,
         uiSettings,
+        columnsSorting,
       });
 
     return [
       {
-        shareMenuItem: {
-          name: panelTitle,
-          icon: 'document',
-          disabled: !csvEnabled,
-          sortOrder: 1,
-        },
+        ...menuItemMetadata,
         label: 'CSV' as const,
         reportType: 'lens_csv' as const,
         generateExport: downloadCSVHandler,
-        warnings: getWarnings(datatables),
         ...(atLeastGold()
           ? {
-              disabled: !csvEnabled,
+              helpText: (
+                <FormattedMessage
+                  id="xpack.lens.share.helpText"
+                  defaultMessage="Export a CSV of this visualization."
+                />
+              ),
+              generateExportButton: (
+                <FormattedMessage id="xpack.lens.share.export" defaultMessage="Export file" />
+              ),
               renderLayoutOptionSwitch: false,
               getJobParams: undefined,
+              showRadios: true,
             }
           : {
+              isDisabled: !csvEnabled,
+              warnings: getWarnings(activeData),
               helpText: (
                 <FormattedMessage
                   id="xpack.lens.application.csvPanelContent.generationDescription"
@@ -164,8 +174,9 @@ export const downloadCsvShareProvider = ({
               generateExportButton: (
                 <FormattedMessage id="xpack.lens.share.csvButton" defaultMessage="Download CSV" />
               ),
+              showRadios: false,
             }),
-      } satisfies ShareMenuItemV2,
+      },
     ];
   };
 

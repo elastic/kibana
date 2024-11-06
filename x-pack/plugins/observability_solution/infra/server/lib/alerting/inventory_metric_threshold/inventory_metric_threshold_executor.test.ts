@@ -6,7 +6,14 @@
  */
 
 import rison from '@kbn/rison';
+import {
+  AlertInstanceContext as AlertContext,
+  AlertInstanceState as AlertState,
+} from '@kbn/alerting-plugin/server';
 import { RuleExecutorServicesMock, alertsMock } from '@kbn/alerting-plugin/server/mocks';
+import { LifecycleAlertServices } from '@kbn/rule-registry-plugin/server';
+import { ruleRegistryMocks } from '@kbn/rule-registry-plugin/server/mocks';
+import { createLifecycleRuleExecutorMock } from '@kbn/rule-registry-plugin/server/utils/create_lifecycle_rule_executor_mock';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import { Aggregators, InventoryMetricConditions } from '../../../../common/alerting/metrics';
 import type { LogMeta, Logger } from '@kbn/logging';
@@ -143,7 +150,9 @@ const mockLibs = {
     infraPluginMock.createStartContract(),
   ],
   configuration: createMockStaticConfiguration({}),
-  metricsRules: {},
+  metricsRules: {
+    createLifecycleRuleExecutor: createLifecycleRuleExecutorMock,
+  },
   basePath: {
     publicBaseUrl: 'http://localhost:5601',
     prepend: (path: string) => path,
@@ -156,10 +165,14 @@ const mockLibs = {
   logger,
 } as unknown as InfraBackendLibs;
 const alerts = new Map<string, AlertTestInstance>();
-let services: RuleExecutorServicesMock;
+let services: RuleExecutorServicesMock & LifecycleAlertServices<AlertState, AlertContext, string>;
 
 const setup = () => {
-  services = alertsMock.createRuleExecutorServices();
+  const alertsServices = alertsMock.createRuleExecutorServices();
+  services = {
+    ...alertsServices,
+    ...ruleRegistryMocks.createLifecycleAlertServices(alertsServices),
+  };
 
   services.alertsClient.report.mockImplementation((params: any) => {
     alerts.set(params.id, { actionGroup: params.actionGroup, context: [], payload: [] });

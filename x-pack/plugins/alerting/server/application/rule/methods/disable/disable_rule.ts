@@ -13,6 +13,7 @@ import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import { RulesClientContext } from '../../../../rules_client/types';
 import { untrackRuleAlerts, updateMeta, migrateLegacyActions } from '../../../../rules_client/lib';
+import { RuleAttributes } from '../../../../data/rule/types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { DisableRuleParams } from './types';
 import { disableRuleParamsSchema } from './schemas';
@@ -85,7 +86,7 @@ async function disableWithOCC(
   }
 
   if (untrack) {
-    await untrackRuleAlerts(context, id, attributes);
+    await untrackRuleAlerts(context, id, attributes as RuleAttributes);
   }
 
   context.auditLogger?.log(

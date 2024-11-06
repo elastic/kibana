@@ -151,7 +151,7 @@ describe('saveSettings', () => {
       const soClient = savedObjectsClientMock.create();
 
       const newData: Partial<Omit<Settings, 'id'>> = {
-        output_secret_storage_requirements_met: true,
+        fleet_server_hosts: ['http://localhost:8220'],
       };
 
       soClient.find.mockResolvedValueOnce({
@@ -205,7 +205,7 @@ describe('saveSettings', () => {
         const soClient = savedObjectsClientMock.create();
 
         const newData: Partial<Omit<Settings, 'id'>> = {
-          output_secret_storage_requirements_met: true,
+          fleet_server_hosts: ['http://localhost:8220'],
         };
 
         soClient.find.mockRejectedValueOnce(Boom.notFound('not found'));

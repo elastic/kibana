@@ -22,7 +22,7 @@ export function initPostSpacesApi(deps: ExternalRouteDeps) {
     .post({
       path: '/api/spaces/space',
       access: 'public',
-      summary: `Create a space`,
+      description: `Create a space`,
       options: {
         tags: ['oas-tag:spaces'],
       },
@@ -33,11 +33,6 @@ export function initPostSpacesApi(deps: ExternalRouteDeps) {
         validate: {
           request: {
             body: getSpaceSchema(isServerless),
-          },
-          response: {
-            200: {
-              description: 'Indicates a successful call.',
-            },
           },
         },
       },

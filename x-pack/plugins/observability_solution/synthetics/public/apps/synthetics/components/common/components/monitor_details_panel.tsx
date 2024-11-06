@@ -19,7 +19,6 @@ import { i18n } from '@kbn/i18n';
 import { useDispatch } from 'react-redux';
 import { TagsList } from '@kbn/observability-shared-plugin/public';
 import { isEmpty } from 'lodash';
-import { useKibanaSpace } from '../../../../../hooks/use_kibana_space';
 import { PanelWithTitle } from './panel_with_title';
 import { MonitorEnabled } from '../../monitors_page/management/monitor_list_table/monitor_enabled';
 import { getMonitorAction } from '../../../state';
@@ -33,7 +32,6 @@ import {
 } from '../../../../../../common/runtime_types';
 import { MonitorTypeBadge } from './monitor_type_badge';
 import { useDateFormat } from '../../../../../hooks/use_date_format';
-import { useGetUrlParams } from '../../../hooks';
 
 export interface MonitorDetailsPanelProps {
   latestPing?: Ping;
@@ -55,8 +53,6 @@ export const MonitorDetailsPanel = ({
   hasBorder = true,
 }: MonitorDetailsPanelProps) => {
   const dispatch = useDispatch();
-  const { space } = useKibanaSpace();
-  const { spaceId } = useGetUrlParams();
 
   if (!monitor) {
     return <EuiSkeletonText lines={8} />;
@@ -85,12 +81,7 @@ export const MonitorDetailsPanel = ({
                   configId={configId}
                   monitor={monitor}
                   reloadPage={() => {
-                    dispatch(
-                      getMonitorAction.get({
-                        monitorId: configId,
-                        ...(spaceId && spaceId !== space?.id ? { spaceId } : {}),
-                      })
-                    );
+                    dispatch(getMonitorAction.get({ monitorId: configId }));
                   }}
                 />
               )}

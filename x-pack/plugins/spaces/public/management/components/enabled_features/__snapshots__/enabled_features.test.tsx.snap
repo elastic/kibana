@@ -29,10 +29,12 @@ exports[`EnabledFeatures renders as expected 1`] = `
             id="xpack.spaces.management.enabledSpaceFeatures.chooseFeaturesToDisplayMessage"
             values={
               Object {
-                "solutionView": <Memo(MemoizedFormattedMessage)
-                  defaultMessage="Solution view"
-                  id="xpack.spaces.management.enabledSpaceFeatures.chooseFeaturesToDisplaySolutionViewText"
-                />,
+                "solutionView": <strong>
+                  <Memo(MemoizedFormattedMessage)
+                    defaultMessage="Solution view"
+                    id="xpack.spaces.management.enabledSpaceFeatures.chooseFeaturesToDisplaySolutionViewText"
+                  />
+                </strong>,
               }
             }
           />

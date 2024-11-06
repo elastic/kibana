@@ -39,7 +39,7 @@ function throwNotFoundIfAgentConfigNotAvailable(featureFlags: ApmFeatureFlags): 
 // get list of configurations
 const agentConfigurationRoute = createApmServerRoute({
   endpoint: 'GET /api/apm/settings/agent-configuration 2023-10-31',
-  options: { tags: ['access:apm'], access: 'public' },
+  options: { tags: ['access:apm'] },
   handler: async (
     resources
   ): Promise<{
@@ -68,7 +68,7 @@ const getSingleAgentConfigurationRoute = createApmServerRoute({
   params: t.partial({
     query: serviceRt,
   }),
-  options: { tags: ['access:apm'], access: 'public' },
+  options: { tags: ['access:apm'] },
   handler: async (resources): Promise<AgentConfiguration> => {
     throwNotFoundIfAgentConfigNotAvailable(resources.featureFlags);
 
@@ -99,8 +99,7 @@ const getSingleAgentConfigurationRoute = createApmServerRoute({
 const deleteAgentConfigurationRoute = createApmServerRoute({
   endpoint: 'DELETE /api/apm/settings/agent-configuration 2023-10-31',
   options: {
-    tags: ['access:apm', 'access:apm_settings_write'],
-    access: 'public',
+    tags: ['access:apm', 'access:apm_write'],
   },
   params: t.type({
     body: t.type({
@@ -156,8 +155,7 @@ const deleteAgentConfigurationRoute = createApmServerRoute({
 const createOrUpdateAgentConfigurationRoute = createApmServerRoute({
   endpoint: 'PUT /api/apm/settings/agent-configuration 2023-10-31',
   options: {
-    tags: ['access:apm', 'access:apm_settings_write'],
-    access: 'public',
+    tags: ['access:apm', 'access:apm_write'],
   },
   params: t.intersection([
     t.partial({ query: t.partial({ overwrite: toBooleanRt }) }),
@@ -226,7 +224,7 @@ const agentConfigurationSearchRoute = createApmServerRoute({
   params: t.type({
     body: searchParamsRt,
   }),
-  options: { tags: ['access:apm'], disableTelemetry: true, access: 'public' },
+  options: { tags: ['access:apm'], disableTelemetry: true },
   handler: async (
     resources
   ): Promise<SearchHit<AgentConfiguration, undefined, undefined> | null> => {
@@ -288,7 +286,7 @@ const listAgentConfigurationEnvironmentsRoute = createApmServerRoute({
   params: t.partial({
     query: t.partial({ serviceName: t.string }),
   }),
-  options: { tags: ['access:apm'], access: 'public' },
+  options: { tags: ['access:apm'] },
   handler: async (
     resources
   ): Promise<{
@@ -329,7 +327,7 @@ const agentConfigurationAgentNameRoute = createApmServerRoute({
   params: t.type({
     query: t.type({ serviceName: t.string }),
   }),
-  options: { tags: ['access:apm'], access: 'public' },
+  options: { tags: ['access:apm'] },
   handler: async (resources): Promise<{ agentName: string | undefined }> => {
     throwNotFoundIfAgentConfigNotAvailable(resources.featureFlags);
 

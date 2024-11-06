@@ -21,8 +21,6 @@ import {
   assetCriticalityCsvPreviewGeneratedEvent,
   assetCriticalityFileSelectedEvent,
   assetCriticalityCsvImportedEvent,
-  entityStoreEnablementEvent,
-  entityStoreInitEvent,
 } from './entity_analytics';
 import {
   assistantInvokedEvent,
@@ -174,8 +172,6 @@ export const telemetryEvents = [
   assetCriticalityCsvPreviewGeneratedEvent,
   assetCriticalityFileSelectedEvent,
   assetCriticalityCsvImportedEvent,
-  entityStoreEnablementEvent,
-  entityStoreInitEvent,
   toggleRiskSummaryClickedEvent,
   RiskInputsExpandedFlyoutOpenedEvent,
   addRiskInputToTimelineClickedEvent,

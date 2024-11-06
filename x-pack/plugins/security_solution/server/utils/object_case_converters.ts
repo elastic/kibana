@@ -8,10 +8,20 @@ import camelcaseKeys from 'camelcase-keys';
 import snakecaseKeys from 'snakecase-keys';
 import type { CamelCasedPropertiesDeep, SnakeCasedPropertiesDeep } from 'type-fest';
 
-export const convertObjectKeysToCamelCase = <T extends Record<string, unknown>>(obj: T) => {
-  return camelcaseKeys(obj, { deep: true }) as CamelCasedPropertiesDeep<T>;
+export const convertObjectKeysToCamelCase = <T extends Record<string, unknown>>(
+  obj: T | undefined
+) => {
+  if (obj == null) {
+    return obj;
+  }
+  return camelcaseKeys(obj, { deep: true }) as unknown as CamelCasedPropertiesDeep<T>;
 };
 
-export const convertObjectKeysToSnakeCase = <T extends Record<string, unknown>>(obj: T) => {
+export const convertObjectKeysToSnakeCase = <T extends Record<string, unknown>>(
+  obj: T | undefined
+) => {
+  if (obj == null) {
+    return obj;
+  }
   return snakecaseKeys(obj, { deep: true }) as SnakeCasedPropertiesDeep<T>;
 };

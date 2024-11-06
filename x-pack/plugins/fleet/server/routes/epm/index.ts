@@ -659,7 +659,6 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
           fleetAuthz,
           getRouteRequiredAuthz('get', EPM_API_ROUTES.INFO_PATTERN_DEPRECATED)
         ).granted,
-      // @ts-expect-error TODO(https://github.com/elastic/kibana/issues/196095): Replace {RouteDeprecationInfo}
       deprecated: true,
     })
     .addVersion(
@@ -688,7 +687,6 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
       fleetAuthz: {
         integrations: { writePackageSettings: true },
       },
-      // @ts-expect-error TODO(https://github.com/elastic/kibana/issues/196095): Replace {RouteDeprecationInfo}
       deprecated: true,
     })
     .addVersion(
@@ -715,7 +713,6 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
     .post({
       path: EPM_API_ROUTES.INSTALL_FROM_REGISTRY_PATTERN_DEPRECATED,
       fleetAuthz: INSTALL_PACKAGES_AUTHZ,
-      // @ts-expect-error TODO(https://github.com/elastic/kibana/issues/196095): Replace {RouteDeprecationInfo}
       deprecated: true,
     })
     .addVersion(
@@ -744,7 +741,6 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
       fleetAuthz: {
         integrations: { removePackages: true },
       },
-      // @ts-expect-error TODO(https://github.com/elastic/kibana/issues/196095): Replace {RouteDeprecationInfo}
       deprecated: true,
     })
     .addVersion(

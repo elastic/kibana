@@ -1,15 +1,11 @@
 {
   "type": "plugin",
   "id": "@kbn/snapshot-restore-plugin",
-  "owner": [
-    "@elastic/kibana-management"
-  ],
-  "group": "platform",
-  "visibility": "private",
+  "owner": "@elastic/kibana-management",
   "plugin": {
     "id": "snapshotRestore",
-    "browser": true,
     "server": true,
+    "browser": true,
     "configPath": [
       "xpack",
       "snapshot_restore"

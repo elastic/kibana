@@ -13,9 +13,6 @@ import {
   riskEngineRouteHelpersFactory,
   waitForRiskScoresToBePresent,
   createAndSyncRuleAndAlertsFactory,
-  waitForRiskEngineTaskToBeGone,
-  waitForSavedObjectToBeGone,
-  waitForRiskScoresToBeGone,
 } from '../../utils';
 import { dataGeneratorFactory } from '../../../detections_response/utils';
 
@@ -25,7 +22,6 @@ export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
   const log = getService('log');
   const esArchiver = getService('esArchiver');
-  const kibanaServer = getService('kibanaServer');
 
   describe('@ess @ serverless @serverless QA risk_engine_cleanup_api', () => {
     const createAndSyncRuleAndAlerts = createAndSyncRuleAndAlertsFactory({ supertest, log });
@@ -62,10 +58,6 @@ export default ({ getService }: FtrProviderContext) => {
       expect(response.body).to.eql({
         cleanup_successful: true,
       });
-
-      await waitForRiskEngineTaskToBeGone({ es, log });
-      await waitForSavedObjectToBeGone({ log, kibanaServer });
-      await waitForRiskScoresToBeGone({ es, log });
 
       const status3 = await riskEngineRoutes.getStatus();
       expect(status3.body.risk_engine_status).to.be('NOT_INSTALLED');

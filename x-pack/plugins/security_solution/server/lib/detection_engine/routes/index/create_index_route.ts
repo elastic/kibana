@@ -40,10 +40,8 @@ export const createIndexRoute = (router: SecuritySolutionPluginRouter) => {
     .post({
       path: DETECTION_ENGINE_INDEX_URL,
       access: 'public',
-      security: {
-        authz: {
-          requiredPrivileges: ['securitySolution'],
-        },
+      options: {
+        tags: ['access:securitySolution'],
       },
     })
     .addVersion(

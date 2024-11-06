@@ -40,12 +40,17 @@ import { isEmpty, some } from 'lodash';
 import { css } from '@emotion/react';
 import { SavedObjectAttribute } from '@kbn/core/types';
 import { useRuleFormDispatch, useRuleFormState } from '../hooks';
-import { ActionConnector, RuleFormParamsErrors } from '../../common/types';
+import {
+  ActionConnector,
+  ActionTypeModel,
+  RuleFormParamsErrors,
+  RuleTypeWithDescription,
+} from '../../common/types';
 import { getAvailableActionVariables } from '../../action_variables';
 import { validateAction, validateParamsForWarnings } from '../validation';
 
 import { RuleActionsSettings } from './rule_actions_settings';
-import { getDefaultParams, getSelectedActionGroup } from '../utils';
+import { getSelectedActionGroup } from '../utils';
 import { RuleActionsMessage } from './rule_actions_message';
 import {
   ACTION_ERROR_TOOLTIP,
@@ -55,7 +60,6 @@ import {
   TECH_PREVIEW_DESCRIPTION,
   TECH_PREVIEW_LABEL,
 } from '../translations';
-import { checkActionFormActionTypeEnabled } from '../utils/check_action_type_enabled';
 
 const SUMMARY_GROUP_TITLE = i18n.translate('alertsUIShared.ruleActionsItem.summaryGroupTitle', {
   defaultMessage: 'Summary of alerts',
@@ -78,6 +82,22 @@ const ACTION_TITLE = (connector: ActionConnector) =>
       }`,
     },
   });
+
+const getDefaultParams = ({
+  group,
+  ruleType,
+  actionTypeModel,
+}: {
+  group: string;
+  actionTypeModel: ActionTypeModel;
+  ruleType: RuleTypeWithDescription;
+}) => {
+  if (group === ruleType.recoveryActionGroup.id) {
+    return actionTypeModel.defaultRecoveredActionParams;
+  } else {
+    return actionTypeModel.defaultActionParams;
+  }
+};
 
 export interface RuleActionsItemProps {
   action: RuleAction;
@@ -157,16 +177,6 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
   const templateFields = action.useAlertDataForTemplate
     ? aadTemplateFields
     : availableActionVariables;
-
-  const checkEnabledResult = useMemo(() => {
-    if (!actionType) {
-      return null;
-    }
-    return checkActionFormActionTypeEnabled(
-      actionType,
-      connectors.filter((c) => c.isPreconfigured)
-    );
-  }, [actionType, connectors]);
 
   const onDelete = (id: string) => {
     dispatch({ type: 'removeAction', payload: { uuid: id } });
@@ -371,24 +381,16 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
         ...action.alertsFilter,
         query,
       };
-
-      if (!newAlertsFilter.query) {
-        delete newAlertsFilter.query;
-      }
-
-      const alertsFilter = isEmpty(newAlertsFilter) ? undefined : newAlertsFilter;
-
       const newAction = {
         ...action,
-        alertsFilter,
+        alertsFilter: newAlertsFilter,
       };
-
       dispatch({
         type: 'setActionProperty',
         payload: {
           uuid: action.uuid!,
           key: 'alertsFilter',
-          value: alertsFilter,
+          value: newAlertsFilter,
         },
       });
       validateActionBase(newAction);
@@ -398,33 +400,19 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
 
   const onTimeframeChange = useCallback(
     (timeframe?: AlertsFilterTimeframe) => {
-      const newAlertsFilter = {
-        ...action.alertsFilter,
-        timeframe,
-      };
-
-      if (!newAlertsFilter.timeframe) {
-        delete newAlertsFilter.timeframe;
-      }
-
-      const alertsFilter = isEmpty(newAlertsFilter) ? undefined : newAlertsFilter;
-
-      const newAction = {
-        ...action,
-        alertsFilter,
-      };
-
       dispatch({
         type: 'setActionProperty',
         payload: {
           uuid: action.uuid!,
           key: 'alertsFilter',
-          value: alertsFilter,
+          value: {
+            ...action.alertsFilter,
+            timeframe,
+          },
         },
       });
-      validateActionBase(newAction);
     },
-    [action, dispatch, validateActionBase]
+    [action, dispatch]
   );
 
   const onUseAadTemplateFieldsChange = useCallback(() => {
@@ -455,25 +443,9 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
   }, [action, storedActionParamsForAadToggle, dispatch]);
 
   const accordionContent = useMemo(() => {
-    if (!connector || !checkEnabledResult) {
+    if (!connector) {
       return null;
     }
-
-    if (!checkEnabledResult.isEnabled) {
-      return (
-        <EuiFlexGroup
-          direction="column"
-          style={{
-            padding: euiTheme.size.l,
-            backgroundColor: plain,
-            borderRadius: euiTheme.border.radius.medium,
-          }}
-        >
-          <EuiFlexItem>{checkEnabledResult.messageCard}</EuiFlexItem>
-        </EuiFlexGroup>
-      );
-    }
-
     return (
       <EuiFlexGroup
         direction="column"
@@ -532,7 +504,6 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
     templateFields,
     useDefaultMessage,
     warning,
-    checkEnabledResult,
     onNotifyWhenChange,
     onActionGroupChange,
     onAlertsFilterChange,

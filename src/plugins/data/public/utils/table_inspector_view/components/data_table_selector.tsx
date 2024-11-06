@@ -9,6 +9,7 @@
 
 import React, { Component } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import PropTypes from 'prop-types';
 import {
   EuiButtonEmpty,
   EuiContextMenuPanel,
@@ -26,10 +27,16 @@ interface TableSelectorState {
 interface TableSelectorProps {
   tables: Datatable[];
   selectedTable: Datatable;
-  onTableChanged: (table: Datatable) => void;
+  onTableChanged: Function;
 }
 
 export class TableSelector extends Component<TableSelectorProps, TableSelectorState> {
+  static propTypes = {
+    tables: PropTypes.array.isRequired,
+    selectedTable: PropTypes.object.isRequired,
+    onTableChanged: PropTypes.func,
+  };
+
   state = {
     isPopoverOpen: false,
   };
@@ -78,37 +85,35 @@ export class TableSelector extends Component<TableSelectorProps, TableSelectorSt
             />
           </strong>
         </EuiFlexItem>
-        <EuiFlexItem>
-          <div>
-            <EuiPopover
-              id="inspectorTableChooser"
-              button={
-                <EuiButtonEmpty
-                  iconType="arrowDown"
-                  iconSide="right"
-                  size="s"
-                  onClick={this.togglePopover}
-                  data-test-subj="inspectorTableChooser"
-                >
-                  <FormattedMessage
-                    id="data.inspector.table.inspectorTableChooserButton"
-                    defaultMessage="Table {index}"
-                    values={{ index: currentIndex + 1 }}
-                  />
-                </EuiButtonEmpty>
-              }
-              isOpen={this.state.isPopoverOpen}
-              closePopover={this.closePopover}
-              panelPaddingSize="none"
-              anchorPosition="downLeft"
-              repositionOnScroll
-            >
-              <EuiContextMenuPanel
-                items={this.props.tables.map(this.renderTableDropdownItem)}
-                data-test-subj="inspectorTableChooserMenuPanel"
-              />
-            </EuiPopover>
-          </div>
+        <EuiFlexItem grow={true}>
+          <EuiPopover
+            id="inspectorTableChooser"
+            button={
+              <EuiButtonEmpty
+                iconType="arrowDown"
+                iconSide="right"
+                size="s"
+                onClick={this.togglePopover}
+                data-test-subj="inspectorTableChooser"
+              >
+                <FormattedMessage
+                  id="data.inspector.table.inspectorTableChooserButton"
+                  defaultMessage="Table {index}"
+                  values={{ index: currentIndex + 1 }}
+                />
+              </EuiButtonEmpty>
+            }
+            isOpen={this.state.isPopoverOpen}
+            closePopover={this.closePopover}
+            panelPaddingSize="none"
+            anchorPosition="downLeft"
+            repositionOnScroll
+          >
+            <EuiContextMenuPanel
+              items={this.props.tables.map(this.renderTableDropdownItem)}
+              data-test-subj="inspectorTableChooserMenuPanel"
+            />
+          </EuiPopover>
         </EuiFlexItem>
       </EuiFlexGroup>
     );

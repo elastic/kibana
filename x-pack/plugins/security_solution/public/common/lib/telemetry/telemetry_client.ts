@@ -45,8 +45,6 @@ import type {
   ReportEventLogShowSourceEventDateRangeParams,
   ReportEventLogFilterByRunTypeParams,
   PreviewRuleParams,
-  ReportEntityStoreEnablementParams,
-  ReportEntityStoreInitParams,
 } from './types';
 import { TelemetryEventTypes } from './constants';
 
@@ -217,13 +215,5 @@ export class TelemetryClient implements TelemetryClientStart {
 
   public reportPreviewRule = (params: PreviewRuleParams) => {
     this.analytics.reportEvent(TelemetryEventTypes.PreviewRule, params);
-  };
-
-  public reportEntityStoreEnablement = (params: ReportEntityStoreEnablementParams) => {
-    this.analytics.reportEvent(TelemetryEventTypes.EntityStoreEnablementToggleClicked, params);
-  };
-
-  public reportEntityStoreInit = (params: ReportEntityStoreInitParams) => {
-    this.analytics.reportEvent(TelemetryEventTypes.EntityStoreDashboardInitButtonClicked, params);
   };
 }

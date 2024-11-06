@@ -10,7 +10,7 @@ import {
   ChatCompletionChunkEvent,
   ChatCompletionTokenCountEvent,
   ChatCompletionEventType,
-} from '@kbn/inference-common';
+} from '../../../../common/chat_complete';
 import { generateFakeToolCallId } from '../../../../common';
 import type { GenerateContentResponseChunk } from './types';
 

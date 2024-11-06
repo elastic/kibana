@@ -1,19 +1,15 @@
 {
   "type": "plugin",
   "id": "@kbn/vis-default-editor-plugin",
-  "owner": [
-    "@elastic/kibana-visualizations"
-  ],
-  "group": "platform",
-  "visibility": "private",
+  "owner": "@elastic/kibana-visualizations",
   "description": "The default editor used in most aggregation-based visualizations.",
   "plugin": {
     "id": "visDefaultEditor",
-    "browser": true,
     "server": false,
+    "browser": true,
     "requiredPlugins": [
       "dataViews",
-      "unifiedSearch"
+      "unifiedSearch",
     ],
     "optionalPlugins": [
       "visualizations"

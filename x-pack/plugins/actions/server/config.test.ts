@@ -35,10 +35,9 @@ describe('config validation', () => {
         "microsoftGraphApiUrl": "https://graph.microsoft.com/v1.0",
         "preconfigured": Object {},
         "preconfiguredAlertHistoryEsIndex": false,
+        "proxyRejectUnauthorizedCertificates": true,
+        "rejectUnauthorized": true,
         "responseTimeout": "PT1M",
-        "usage": Object {
-          "url": "https://usage-api.usage-api/api/v1/usage",
-        },
       }
     `);
   });
@@ -54,6 +53,8 @@ describe('config validation', () => {
           },
         },
       },
+      proxyRejectUnauthorizedCertificates: false,
+      rejectUnauthorized: false,
     };
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
@@ -81,10 +82,9 @@ describe('config validation', () => {
           },
         },
         "preconfiguredAlertHistoryEsIndex": false,
+        "proxyRejectUnauthorizedCertificates": false,
+        "rejectUnauthorized": false,
         "responseTimeout": "PT1M",
-        "usage": Object {
-          "url": "https://usage-api.usage-api/api/v1/usage",
-        },
       }
     `);
   });
@@ -218,13 +218,12 @@ describe('config validation', () => {
         "microsoftGraphApiUrl": "https://graph.microsoft.com/v1.0",
         "preconfigured": Object {},
         "preconfiguredAlertHistoryEsIndex": false,
+        "proxyRejectUnauthorizedCertificates": true,
+        "rejectUnauthorized": true,
         "responseTimeout": "PT1M",
         "ssl": Object {
           "proxyVerificationMode": "none",
           "verificationMode": "none",
-        },
-        "usage": Object {
-          "url": "https://usage-api.usage-api/api/v1/usage",
         },
       }
     `);

@@ -9,6 +9,7 @@ import React from 'react';
 import { ALL_VALUE, HistoricalSummaryResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import {
   Chart,
+  DARK_THEME,
   isMetricElementEvent,
   Metric,
   MetricTrendShape,
@@ -72,17 +73,11 @@ const getSloChartData = ({
   };
 };
 
-const ROW_HEIGHT = 220;
-const ITEMS_PER_ROW = 4;
-
 export function SloCardChartList({ sloId }: { sloId: string }) {
   const {
     http: { basePath },
     uiSettings,
-    charts,
   } = useKibana().services;
-
-  const baseTheme = charts.theme.useChartsBaseTheme();
 
   const [selectedSlo, setSelectedSlo] = React.useState<SLOWithSummaryResponse | null>(null);
 
@@ -94,7 +89,6 @@ export function SloCardChartList({ sloId }: { sloId: string }) {
 
   const { data: activeAlertsBySlo } = useFetchActiveAlerts({
     sloIdsAndInstanceIds: [[sloId, ALL_VALUE]],
-    rangeFrom: 'now-24h',
   });
 
   const { data: rulesBySlo } = useFetchRulesForSlo({
@@ -157,24 +151,16 @@ export function SloCardChartList({ sloId }: { sloId: string }) {
     );
   }
 
-  const height = sloList?.results
-    ? ROW_HEIGHT * Math.ceil(sloList.results.length / ITEMS_PER_ROW)
-    : ROW_HEIGHT;
-
   return (
     <>
-      <div data-shared-item="" style={{ width: '100%', overflow: 'auto' }}>
-        <Chart
-          size={{
-            height,
-          }}
-        >
+      <div data-shared-item="" style={{ width: '100%' }}>
+        <Chart>
           <Settings
-            baseTheme={baseTheme}
+            baseTheme={DARK_THEME}
             onElementClick={([d]) => {
               if (isMetricElementEvent(d)) {
                 const { columnIndex, rowIndex } = d;
-                const slo = sloList?.results[rowIndex * ITEMS_PER_ROW + columnIndex];
+                const slo = sloList?.results[rowIndex * 4 + columnIndex];
                 setSelectedSlo(slo ?? null);
               }
             }}

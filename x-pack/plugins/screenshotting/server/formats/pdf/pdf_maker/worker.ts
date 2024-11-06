@@ -34,43 +34,22 @@ export interface GeneratePdfRequest {
   data: GenerateReportRequestData;
 }
 
-export interface GeneratePdfData {
-  buffer: Uint8Array;
-  metrics: {
-    pages: number;
+export type GeneratePdfResponse = SuccessResponse | ErrorResponse;
+
+export interface SuccessResponse {
+  error?: undefined;
+  data: {
+    buffer: Uint8Array;
+    metrics: {
+      pages: number;
+    };
   };
 }
 
-export enum GeneratePdfResponseType {
-  Log,
-  Data,
-  Error,
+export interface ErrorResponse {
+  error: string;
+  data: null;
 }
-
-interface GeneratePdfLogResponse {
-  type: GeneratePdfResponseType.Log;
-  data?: GeneratePdfData;
-  error?: string;
-  message?: string;
-}
-
-interface GeneratePdfDataResponse {
-  type: GeneratePdfResponseType.Data;
-  data?: GeneratePdfData;
-  error?: string;
-  message?: string;
-}
-
-interface GeneratePdfErrorResponse {
-  type: GeneratePdfResponseType.Error;
-  data?: GeneratePdfData;
-  error?: string;
-  message?: string;
-}
-export type GeneratePdfResponse =
-  | GeneratePdfLogResponse
-  | GeneratePdfDataResponse
-  | GeneratePdfErrorResponse;
 
 if (!isMainThread) {
   const { port } = workerData as WorkerData;
@@ -89,11 +68,6 @@ const getPageCount = (pdfDoc: PDFKit.PDFDocument): number => {
 
 async function execute({ data: { layout, logo, title, content } }: GeneratePdfRequest) {
   const { port } = workerData as WorkerData;
-  port.postMessage({
-    type: GeneratePdfResponseType.Log,
-    message: 'Starting execution',
-  });
-
   try {
     const tableBorderWidth = 1;
 
@@ -115,11 +89,6 @@ async function execute({ data: { layout, logo, title, content } }: GeneratePdfRe
       },
     };
 
-    port.postMessage({
-      type: GeneratePdfResponseType.Log,
-      message: 'Initializing PDF printer',
-    });
-
     const printer = new Printer(fonts);
 
     const docDefinition = _.assign(getTemplate(layout, logo, title, tableBorderWidth, assetPath), {
@@ -132,11 +101,6 @@ async function execute({ data: { layout, logo, title, content } }: GeneratePdfRe
           ? Buffer.from(value.buffer, value.byteOffset, value.byteLength)
           : undefined
       ),
-    });
-
-    port.postMessage({
-      type: GeneratePdfResponseType.Log,
-      message: 'Generating document stream',
     });
 
     const pdfDoc = printer.createPdfKitDocument(docDefinition, {
@@ -157,11 +121,6 @@ async function execute({ data: { layout, logo, title, content } }: GeneratePdfRe
       throw new Error('Document stream has not been generated');
     }
 
-    port.postMessage({
-      type: GeneratePdfResponseType.Log,
-      message: 'Document stream has been generated',
-    });
-
     const buffer = await new Promise<Buffer>((resolve, reject) => {
       const buffers: Buffer[] = [];
       pdfDoc.on('error', reject);
@@ -174,13 +133,7 @@ async function execute({ data: { layout, logo, title, content } }: GeneratePdfRe
       pdfDoc.end();
     });
 
-    port.postMessage({
-      type: GeneratePdfResponseType.Log,
-      message: 'PDF buffer has been generated',
-    });
-
-    const successResponse: GeneratePdfResponse = {
-      type: GeneratePdfResponseType.Data,
+    const successResponse: SuccessResponse = {
       data: {
         buffer,
         metrics: {
@@ -190,10 +143,7 @@ async function execute({ data: { layout, logo, title, content } }: GeneratePdfRe
     };
     port.postMessage(successResponse, [buffer.buffer /* Transfer buffer instead of copying */]);
   } catch (error) {
-    const errorResponse: GeneratePdfResponse = {
-      type: GeneratePdfResponseType.Error,
-      error: error.message,
-    };
+    const errorResponse: ErrorResponse = { error: error.message, data: null };
     port.postMessage(errorResponse);
   } finally {
     process.nextTick(() => {

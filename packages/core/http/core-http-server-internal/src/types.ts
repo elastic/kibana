@@ -16,10 +16,7 @@ import type {
   IContextContainer,
   HttpServiceSetup,
   HttpServiceStart,
-  RouterDeprecatedRouteDetails,
 } from '@kbn/core-http-server';
-import { CoreKibanaRequest } from '@kbn/core-http-router-server-internal';
-import { RouteDeprecationInfo } from '@kbn/core-http-server/src/router/route';
 import type { HttpServerSetup } from './http_server';
 import type { ExternalUrlConfig } from './external_url';
 import type { InternalStaticAssets } from './static_assets';
@@ -57,9 +54,6 @@ export interface InternalHttpServiceSetup
     path: string,
     plugin?: PluginOpaqueId
   ) => IRouter<Context>;
-  registerOnPostValidation(
-    cb: (req: CoreKibanaRequest, metadata: { deprecated: RouteDeprecationInfo }) => void
-  ): void;
   registerRouterAfterListening: (router: IRouter) => void;
   registerStaticDir: (path: string, dirPath: string) => void;
   authRequestHeaders: IAuthHeadersStorage;
@@ -71,7 +65,6 @@ export interface InternalHttpServiceSetup
     contextName: ContextName,
     provider: IContextProvider<Context, ContextName>
   ) => IContextContainer;
-  getRegisteredDeprecatedApis: () => RouterDeprecatedRouteDetails[];
 }
 
 /** @internal */

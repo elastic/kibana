@@ -54,17 +54,44 @@ export const NewConnectorTemplate: React.FC<Props> = ({
   type,
   isBeta,
 }) => {
-  const { connectorName, rawName } = useValues(NewConnectorLogic);
+  const { fullIndexName, fullIndexNameExists, fullIndexNameIsValid, rawName } =
+    useValues(NewConnectorLogic);
   const { setRawName } = useActions(NewConnectorLogic);
 
   const handleNameChange = (e: ChangeEvent<HTMLInputElement>) => {
     setRawName(e.target.value);
     if (onNameChange) {
-      onNameChange(connectorName);
+      onNameChange(fullIndexName);
     }
   };
 
-  const formInvalid = !!error;
+  const formInvalid = !!error || fullIndexNameExists || !fullIndexNameIsValid;
+
+  const formError = () => {
+    if (fullIndexNameExists) {
+      return i18n.translate(
+        'xpack.enterpriseSearch.content.newConnector.newConnectorTemplate.alreadyExists.error',
+        {
+          defaultMessage: 'A connector with the name {connectorName} already exists',
+          values: {
+            connectorName: fullIndexName,
+          },
+        }
+      );
+    }
+    if (!fullIndexNameIsValid) {
+      return i18n.translate(
+        'xpack.enterpriseSearch.content.newConnector.newConnectorTemplate.isInvalid.error',
+        {
+          defaultMessage: '{connectorName} is an invalid connector name',
+          values: {
+            connectorName: fullIndexName,
+          },
+        }
+      );
+    }
+    return error;
+  };
 
   return (
     <>
@@ -73,7 +100,7 @@ export const NewConnectorTemplate: React.FC<Props> = ({
         id="enterprise-search-create-connector"
         onSubmit={(event) => {
           event.preventDefault();
-          onSubmit(connectorName);
+          onSubmit(fullIndexName);
         }}
       >
         <EuiFlexGroup direction="column">
@@ -104,10 +131,10 @@ export const NewConnectorTemplate: React.FC<Props> = ({
                     }
                   )}
                   isInvalid={formInvalid}
+                  error={formError()}
                   fullWidth
                 >
                   <EuiFieldText
-                    data-test-subj="enterpriseSearchNewConnectorTemplateFieldText"
                     data-telemetry-id={`entSearchContent-${type}-newConnector-editName`}
                     placeholder={i18n.translate(
                       'xpack.enterpriseSearch.content.newConnector.newConnectorTemplate.nameInputPlaceholder',
@@ -140,11 +167,7 @@ export const NewConnectorTemplate: React.FC<Props> = ({
         <EuiFlexGroup direction="column" gutterSize="xs">
           {type === INGESTION_METHOD_IDS.CONNECTOR && (
             <EuiFlexItem grow={false}>
-              <EuiLink
-                data-test-subj="enterpriseSearchNewConnectorTemplateLearnMoreAboutConnectorsLink"
-                target="_blank"
-                href={docLinks.connectors}
-              >
+              <EuiLink target="_blank" href={docLinks.connectors}>
                 {i18n.translate(
                   'xpack.enterpriseSearch.content.newConnector.newConnectorTemplate.learnMoreConnectors.linkText',
                   {
@@ -159,7 +182,6 @@ export const NewConnectorTemplate: React.FC<Props> = ({
         <EuiFlexGroup direction="row" alignItems="center" justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiButton
-              data-test-subj="enterpriseSearchNewConnectorTemplateButton"
               data-telemetry-id={`entSearchContent-${type}-newConnector-goBack`}
               isDisabled={buttonLoading}
               onClick={() => history.back()}

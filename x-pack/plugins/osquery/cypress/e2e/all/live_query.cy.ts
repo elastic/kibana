@@ -19,7 +19,8 @@ import { LIVE_QUERY_EDITOR } from '../../screens/live_query';
 import { getAdvancedButton } from '../../screens/integrations';
 import { ServerlessRoleName } from '../../support/roles';
 
-describe('ALL - Live Query', { tags: ['@ess', '@serverless'] }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/171435
+describe.skip('ALL - Live Query', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     cy.login(ServerlessRoleName.SOC_MANAGER);
     navigateTo('/app/osquery');

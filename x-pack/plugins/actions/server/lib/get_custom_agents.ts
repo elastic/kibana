@@ -59,7 +59,10 @@ export function getCustomAgents(
       agentOptions.ca = sslSettings.certificateAuthoritiesData;
     }
 
-    const sslSettingsFromConfig = getSSLSettingsFromConfig(sslSettings.verificationMode);
+    const sslSettingsFromConfig = getSSLSettingsFromConfig(
+      sslSettings.verificationMode,
+      sslSettings.rejectUnauthorized
+    );
     // see: src/core/server/elasticsearch/legacy/elasticsearch_client_config.ts
     // This is where the global rejectUnauthorized is overridden by a custom host
     const customHostNodeSSLOptions = getNodeSSLOptions(

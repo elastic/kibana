@@ -105,12 +105,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           const firstCell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
           const lastCell = await dataGrid.getCellElementExcludingControlColumns(2, 0);
-          const firstServiceNameCell = await firstCell.findByTestSubject(
-            'dataTableCellActionsPopover_service.name'
-          );
-          const lastServiceNameCell = await lastCell.findByTestSubject(
-            'dataTableCellActionsPopover_service.name'
-          );
+          const firstServiceNameCell = await firstCell.findByTestSubject('serviceNameCell-java');
+          const lastServiceNameCell = await lastCell.findByTestSubject('serviceNameCell-unknown');
           expect(await firstServiceNameCell.getVisibleText()).to.be('product');
           expect(await lastServiceNameCell.getVisibleText()).to.be('accounting');
         });
@@ -134,7 +130,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await retry.try(async () => {
             const firstCell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
             expect(await firstCell.getVisibleText()).to.be('product');
-            await testSubjects.missingOrFail('dataTableCellActionsPopover_service.name');
+            await testSubjects.missingOrFail('*serviceNameCell*');
           });
         });
       });
@@ -281,12 +277,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await retry.try(async () => {
             firstCell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
             lastCell = await dataGrid.getCellElementExcludingControlColumns(2, 1);
-            const firstServiceNameCell = await firstCell.findByTestSubject(
-              'dataTableCellActionsPopover_service.name'
-            );
-            const lastServiceNameCell = await lastCell.findByTestSubject(
-              'dataTableCellActionsPopover_service.name'
-            );
+            const firstServiceNameCell = await firstCell.findByTestSubject('serviceNameCell-java');
+            const lastServiceNameCell = await lastCell.findByTestSubject('serviceNameCell-unknown');
             expect(await firstServiceNameCell.getVisibleText()).to.be('product');
             expect(await lastServiceNameCell.getVisibleText()).to.be('accounting');
           });
@@ -316,7 +308,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
             expect(await firstCell.getVisibleText()).to.be('product');
             expect(await lastCell.getVisibleText()).to.be('accounting');
-            await testSubjects.missingOrFail('dataTableCellActionsPopover_service.name');
+            await testSubjects.missingOrFail('*serviceNameCell*');
           });
         });
       });

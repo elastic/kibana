@@ -1,15 +1,11 @@
 {
   "type": "plugin",
   "id": "@kbn/triggers-actions-ui-plugin",
-  "owner": [
-    "@elastic/response-ops"
-  ],
-  "group": "platform",
-  "visibility": "shared",
+  "owner": "@elastic/response-ops",
   "plugin": {
     "id": "triggersActionsUi",
-    "browser": true,
     "server": true,
+    "browser": true,
     "configPath": [
       "xpack",
       "trigger_actions_ui"
@@ -49,7 +45,7 @@
     ],
     "extraPublicDirs": [
       "public/common",
-      "public/common/constants"
+      "public/common/constants",
     ]
   }
 }

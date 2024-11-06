@@ -20,7 +20,7 @@ export function initGetSpaceApi(deps: ExternalRouteDeps) {
     .get({
       path: '/api/spaces/space/{id}',
       access: 'public',
-      summary: `Get a space`,
+      description: `Get a space`,
       options: {
         tags: ['oas-tag:spaces'],
       },
@@ -31,13 +31,8 @@ export function initGetSpaceApi(deps: ExternalRouteDeps) {
         validate: {
           request: {
             params: schema.object({
-              id: schema.string({ meta: { description: 'The space identifier.' } }),
+              id: schema.string(),
             }),
-          },
-          response: {
-            200: {
-              description: 'Indicates a successful call.',
-            },
           },
         },
       },

@@ -18,7 +18,7 @@ import { AdvancedSection } from './advanced_section';
 import userEvent from '@testing-library/user-event';
 import { AdvancedPolicySchema } from '../../../models/advanced_policy_schema';
 import { within } from '@testing-library/react';
-import { set } from '@kbn/safer-lodash-set';
+import { set } from 'lodash';
 
 jest.mock('../../../../../../common/hooks/use_license');
 

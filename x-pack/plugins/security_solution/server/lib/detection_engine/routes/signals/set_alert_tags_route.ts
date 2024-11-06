@@ -22,10 +22,8 @@ export const setAlertTagsRoute = (router: SecuritySolutionPluginRouter) => {
     .post({
       path: DETECTION_ENGINE_ALERT_TAGS_URL,
       access: 'public',
-      security: {
-        authz: {
-          requiredPrivileges: ['securitySolution'],
-        },
+      options: {
+        tags: ['access:securitySolution'],
       },
     })
     .addVersion(

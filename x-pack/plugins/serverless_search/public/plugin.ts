@@ -73,6 +73,10 @@ export class ServerlessSearchPlugin
     const homeTitle = i18n.translate('xpack.serverlessSearch.app.home.title', {
       defaultMessage: 'Home',
     });
+    const useGlobalEmptyState = setupDeps.searchIndices?.enabled ?? false;
+    const serverlessElasticsearchAppRoute = useGlobalEmptyState
+      ? '/app/elasticsearch/getting_started'
+      : '/app/elasticsearch';
 
     core.application.register({
       id: 'serverlessElasticsearch',
@@ -81,7 +85,7 @@ export class ServerlessSearchPlugin
       }),
       euiIconType: 'logoElastic',
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
-      appRoute: '/app/elasticsearch/getting_started',
+      appRoute: serverlessElasticsearchAppRoute,
       async mount({ element, history }: AppMountParameters) {
         const { renderApp } = await import('./application/elasticsearch');
         const [coreStart, services] = await core.getStartServices();
@@ -159,23 +163,6 @@ export class ServerlessSearchPlugin
         },
       });
     }
-
-    const { searchIndices } = setupDeps;
-    core.application.register({
-      id: 'serverlessHomeRedirect',
-      title: homeTitle,
-      appRoute: '/app/elasticsearch',
-      euiIconType: 'logoElastic',
-      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
-      visibleIn: [],
-      async mount({}: AppMountParameters) {
-        const [coreStart] = await core.getStartServices();
-        coreStart.chrome.docTitle.change(homeTitle);
-        coreStart.application.navigateToApp(searchIndices.startAppId);
-        return () => {};
-      },
-    });
-
     setupDeps.discover.showInlineTopNav();
 
     return {};
@@ -186,10 +173,19 @@ export class ServerlessSearchPlugin
     services: ServerlessSearchPluginStartDependencies
   ): ServerlessSearchPluginStart {
     const { serverless, management, indexManagement, security } = services;
-    serverless.setProjectHome(services.searchIndices.startRoute);
+    const useGlobalEmptyState = services.searchIndices?.enabled ?? false;
+    const homeRoute = useGlobalEmptyState
+      ? services.searchIndices!.startRoute
+      : '/app/elasticsearch';
+    serverless.setProjectHome(homeRoute);
 
-    const navigationTree$ = of(navigationTree());
-    serverless.initNavigation('es', navigationTree$, { dataTestSubj: 'svlSearchSideNav' });
+    const navigationTree$ = of(
+      navigationTree(
+        useGlobalEmptyState ? services.searchIndices?.startAppId : undefined,
+        useGlobalEmptyState
+      )
+    );
+    serverless.initNavigation('search', navigationTree$, { dataTestSubj: 'svlSearchSideNav' });
 
     const extendCardNavDefinitions = serverless.getNavigationCards(
       security.authz.isRoleManagementEnabled()

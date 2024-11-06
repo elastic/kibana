@@ -38,20 +38,6 @@ Cypress.Commands.add('loginAsApmManageOwnAndCreateAgentKeys', () => {
   });
 });
 
-Cypress.Commands.add('loginAsApmAllPrivilegesWithoutWriteSettingsUser', () => {
-  return cy.loginAs({
-    username: ApmUsername.apmAllPrivilegesWithoutWriteSettings,
-    password: 'changeme',
-  });
-});
-
-Cypress.Commands.add('loginAsApmReadPrivilegesWithWriteSettingsUser', () => {
-  return cy.loginAs({
-    username: ApmUsername.apmReadPrivilegesWithWriteSettings,
-    password: 'changeme',
-  });
-});
-
 Cypress.Commands.add(
   'loginAs',
   ({ username, password }: { username: string; password: string }) => {

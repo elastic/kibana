@@ -1,15 +1,11 @@
 {
   "type": "plugin",
   "id": "@kbn/saved-objects-tagging-plugin",
-  "owner": [
-    "@elastic/appex-sharedux"
-  ],
-  "group": "platform",
-  "visibility": "private",
+  "owner": "@elastic/appex-sharedux",
   "plugin": {
     "id": "savedObjectsTagging",
-    "browser": true,
     "server": true,
+    "browser": true,
     "configPath": [
       "xpack",
       "saved_object_tagging"

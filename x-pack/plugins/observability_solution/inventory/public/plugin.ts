@@ -49,7 +49,6 @@ export class InventoryPlugin
     this.kibanaVersion = context.env.packageInfo.version;
     this.isServerlessEnv = context.env.packageInfo.buildFlavor === 'serverless';
   }
-
   setup(
     coreSetup: CoreSetup<InventoryStartDependencies, InventoryPublicStart>,
     pluginsSetup: InventorySetupDependencies
@@ -59,13 +58,6 @@ export class InventoryPlugin
       'observability:entityCentricExperience',
       true
     );
-
-    this.telemetry.setup({
-      analytics: coreSetup.analytics,
-    });
-
-    const telemetry = this.telemetry.start();
-
     const getStartServices = coreSetup.getStartServices();
 
     const hideInventory$ = from(getStartServices).pipe(
@@ -113,6 +105,9 @@ export class InventoryPlugin
 
     pluginsSetup.observabilityShared.navigation.registerSections(sections$);
 
+    this.telemetry.setup({ analytics: coreSetup.analytics });
+    const telemetry = this.telemetry.start();
+
     const isCloudEnv = !!pluginsSetup.cloud?.isCloudEnabled;
     const isServerlessEnv = pluginsSetup.cloud?.isServerlessEnabled || this.isServerlessEnv;
 
@@ -122,7 +117,7 @@ export class InventoryPlugin
         defaultMessage: 'Inventory',
       }),
       euiIconType: 'logoObservability',
-      appRoute: '/app/inventory',
+      appRoute: '/app/observability/inventory',
       category: DEFAULT_APP_CATEGORIES.observability,
       visibleIn: ['sideNav', 'globalSearch'],
       order: 8200,

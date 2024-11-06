@@ -33,7 +33,6 @@ export interface EncryptedSavedObjectTypeRegistration {
   readonly type: string;
   readonly attributesToEncrypt: ReadonlySet<string | AttributeToEncrypt>;
   readonly attributesToIncludeInAAD?: ReadonlySet<string>;
-  readonly enforceRandomId?: boolean;
 }
 
 /**
@@ -151,16 +150,6 @@ export class EncryptedSavedObjectsService {
    */
   public isRegistered(type: string) {
     return this.typeDefinitions.has(type);
-  }
-
-  /**
-   * Checks whether the ESO type has explicitly opted out of enforcing random IDs.
-   * @param type Saved object type.
-   * @returns boolean - true unless explicitly opted out by setting enforceRandomId to false
-   */
-  public shouldEnforceRandomId(type: string) {
-    const typeDefinition = this.typeDefinitions.get(type);
-    return typeDefinition?.enforceRandomId !== false;
   }
 
   /**

@@ -36,7 +36,6 @@ import { humanizeTimeStamp } from '../humanize_time_stamp';
 import { DataStreamsBadges } from '../data_stream_badges';
 import { ConditionalWrap } from '../data_stream_detail_panel';
 import { isDataStreamFullyManagedByILM } from '../../../../lib/data_streams';
-import { getIndexModeLabel } from '../../../../lib/index_mode_labels';
 import { FilterListButton, Filters } from '../../components';
 import { type DataStreamFilterName } from '../data_stream_list';
 
@@ -183,16 +182,6 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
         {indices.length}
       </EuiLink>
     ),
-  });
-
-  columns.push({
-    field: 'indexMode',
-    name: i18n.translate('xpack.idxMgmt.dataStreamList.table.indexModeColumnTitle', {
-      defaultMessage: 'Index mode',
-    }),
-    truncateText: true,
-    sortable: true,
-    render: (indexMode: DataStream['indexMode']) => getIndexModeLabel(indexMode),
   });
 
   columns.push({

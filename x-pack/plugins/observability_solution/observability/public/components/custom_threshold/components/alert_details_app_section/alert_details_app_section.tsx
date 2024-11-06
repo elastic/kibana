@@ -20,14 +20,9 @@ import {
   useEuiTheme,
   transparentize,
 } from '@elastic/eui';
+import { RuleTypeParams } from '@kbn/alerting-plugin/common';
 import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
-import {
-  ALERT_END,
-  ALERT_START,
-  ALERT_EVALUATION_VALUES,
-  ALERT_GROUP,
-  ALERT_RULE_PARAMETERS,
-} from '@kbn/rule-data-utils';
+import { ALERT_END, ALERT_START, ALERT_EVALUATION_VALUES, ALERT_GROUP } from '@kbn/rule-data-utils';
 import { DataView } from '@kbn/data-views-plugin/common';
 import type {
   EventAnnotationConfig,
@@ -38,11 +33,13 @@ import moment from 'moment';
 import { LOGS_EXPLORER_LOCATOR_ID, LogsExplorerLocatorParams } from '@kbn/deeplinks-observability';
 import { TimeRange } from '@kbn/es-query';
 import { getGroupFilters } from '../../../../../common/custom_threshold_rule/helpers/get_group';
+import { getRelatedAlertKuery } from '../../../../../common/utils/alerting/get_related_alerts_query';
 import { useLicense } from '../../../../hooks/use_license';
 import { useKibana } from '../../../../utils/kibana_react';
 import { metricValueFormatter } from '../../../../../common/custom_threshold_rule/metric_value_formatter';
+import { AlertParams } from '../../types';
 import { Threshold } from '../threshold';
-import { CustomThresholdAlert } from '../types';
+import { CustomThresholdRule, CustomThresholdAlert } from '../types';
 import { LogRateAnalysis } from './log_rate_analysis';
 import { RuleConditionChart } from '../../../rule_condition_chart/rule_condition_chart';
 import { getViewInAppUrl } from '../../../../../common/custom_threshold_rule/get_view_in_app_url';
@@ -51,10 +48,16 @@ import { generateChartTitleAndTooltip } from './helpers/generate_chart_title_and
 
 interface AppSectionProps {
   alert: CustomThresholdAlert;
+  rule: CustomThresholdRule;
+  setRelatedAlertsKuery: React.Dispatch<React.SetStateAction<string | undefined>>;
 }
 
 // eslint-disable-next-line import/no-default-export
-export default function AlertDetailsAppSection({ alert }: AppSectionProps) {
+export default function AlertDetailsAppSection({
+  alert,
+  rule,
+  setRelatedAlertsKuery,
+}: AppSectionProps) {
   const services = useKibana().services;
   const {
     charts,
@@ -69,13 +72,14 @@ export default function AlertDetailsAppSection({ alert }: AppSectionProps) {
   const [dataView, setDataView] = useState<DataView>();
   const [, setDataViewError] = useState<Error>();
   const [timeRange, setTimeRange] = useState<TimeRange>({ from: 'now-15m', to: 'now' });
+  const ruleParams = rule.params as RuleTypeParams & AlertParams;
   const chartProps = {
     baseTheme: charts.theme.useChartsBaseTheme(),
   };
-  const ruleParams = alert.fields[ALERT_RULE_PARAMETERS];
   const alertStart = alert.fields[ALERT_START];
   const alertEnd = alert.fields[ALERT_END];
   const groups = alert.fields[ALERT_GROUP];
+  const tags = alert.fields.tags;
 
   const chartTitleAndTooltip: Array<{ title: string; tooltip: string }> = [];
 
@@ -107,6 +111,10 @@ export default function AlertDetailsAppSection({ alert }: AppSectionProps) {
   };
   const annotations: EventAnnotationConfig[] = [];
   annotations.push(alertStartAnnotation, alertRangeAnnotation);
+
+  useEffect(() => {
+    setRelatedAlertsKuery(getRelatedAlertKuery(tags, groups));
+  }, [groups, setRelatedAlertsKuery, tags]);
 
   useEffect(() => {
     setTimeRange(getPaddedAlertTimeRange(alertStart!, alertEnd));
@@ -216,7 +224,7 @@ export default function AlertDetailsAppSection({ alert }: AppSectionProps) {
         );
       })}
       {hasLogRateAnalysisLicense && (
-        <LogRateAnalysis alert={alert} dataView={dataView} services={services} />
+        <LogRateAnalysis alert={alert} dataView={dataView} rule={rule} services={services} />
       )}
     </EuiFlexGroup>
   );

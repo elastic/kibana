@@ -23,5 +23,3 @@ export const FILE_FORMATS = {
   SEMI_STRUCTURED_TEXT: 'semi_structured_text',
   TIKA: 'tika',
 };
-
-export const TIKA_PREVIEW_CHARS = 100000;

@@ -19,7 +19,6 @@ import {
   EuiIcon,
   EuiSpacer,
   EuiText,
-  EuiLink,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -55,102 +54,65 @@ export const RunFromSourceStep: React.FC<RunFromSourceStepProps> = ({
 
   return (
     <>
+      <EuiText size="m">
+        <p>
+          {i18n.translate(
+            'xpack.enterpriseSearch.connectorDeployment.p.addTheFollowingConfigurationLabel',
+            {
+              defaultMessage: 'Clone or download the repo to your local machine',
+            }
+          )}
+        </p>
+      </EuiText>
+      <EuiSpacer size="s" />
+      <EuiCode>git clone https://github.com/elastic/connectors</EuiCode>&nbsp;&nbsp;&nbsp;
+      {i18n.translate('xpack.enterpriseSearch.connectorDeployment.orLabel', {
+        defaultMessage: 'or',
+      })}
+      &nbsp;&nbsp;&nbsp;
+      <EuiButton
+        data-test-subj="enterpriseSearchConnectorDeploymentGoToSourceButton"
+        iconType="logoGithub"
+        href="https://github.com/elastic/connectors"
+        target="_blank"
+      >
+        <EuiFlexGroup responsive={false} gutterSize="xs">
+          <EuiFlexItem>
+            {i18n.translate('xpack.enterpriseSearch.connectorDeployment.goToSourceButtonLabel', {
+              defaultMessage: 'Go to Source',
+            })}
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="popout" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiButton>
+      <EuiSpacer size="s" />
       <EuiAccordion
-        id="runFromSourceAccordion"
+        id="collapsibleAccordion"
         onToggle={() => setIsOpen(isOpen === 'closed' ? 'open' : 'closed')}
         forceState={isOpen}
         buttonContent={
-          <EuiText size="m">
-            <h5>
-              {i18n.translate('xpack.enterpriseSearch.connectorDeployment.runFromSourceTitle', {
-                defaultMessage: 'Run connector service from source',
-              })}
-            </h5>
+          <EuiText size="s">
+            <p>
+              <FormattedMessage
+                id="xpack.enterpriseSearch.connectorDeployment.p.editConfigLabel"
+                defaultMessage="Edit the {configYaml} file and provide the following configuration"
+                values={{
+                  configYaml: (
+                    <EuiCode>
+                      {i18n.translate(
+                        'xpack.enterpriseSearch.connectorDeployment.configYamlCodeBlockLabel',
+                        { defaultMessage: 'config.yml' }
+                      )}
+                    </EuiCode>
+                  ),
+                }}
+              />
+            </p>
           </EuiText>
         }
       >
-        <EuiSpacer size="s" />
-        <EuiText size="s">
-          <h5>
-            {i18n.translate('xpack.enterpriseSearch.connectorDeployment.p.cloneRepositoryLabel', {
-              defaultMessage: 'Clone the repository',
-            })}
-          </h5>
-          <p>
-            {i18n.translate(
-              'xpack.enterpriseSearch.connectorDeployment.p.addTheFollowingConfigurationLabel',
-              {
-                defaultMessage: 'First, you need to clone or download the repo:',
-              }
-            )}
-          </p>
-        </EuiText>
-        <EuiSpacer size="s" />
-        <EuiCode>git clone https://github.com/elastic/connectors</EuiCode>&nbsp;&nbsp;&nbsp;
-        {i18n.translate('xpack.enterpriseSearch.connectorDeployment.orLabel', {
-          defaultMessage: 'or',
-        })}
-        &nbsp;&nbsp;&nbsp;
-        <EuiButton
-          data-test-subj="enterpriseSearchConnectorDeploymentGoToSourceButton"
-          iconType="logoGithub"
-          href="https://github.com/elastic/connectors"
-          target="_blank"
-        >
-          <EuiFlexGroup responsive={false} gutterSize="xs">
-            <EuiFlexItem>
-              {i18n.translate('xpack.enterpriseSearch.connectorDeployment.goToSourceButtonLabel', {
-                defaultMessage: 'Download source',
-              })}
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiIcon type="popout" />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiButton>
-        <EuiText size="s">
-          <h5>
-            {i18n.translate('xpack.enterpriseSearch.connectorDeployment.p.createConfigFileLabel', {
-              defaultMessage: 'Create configuration file',
-            })}
-          </h5>
-          <p>
-            {i18n.translate('xpack.enterpriseSearch.connectorDeployment.p.navigateToRootLabel', {
-              defaultMessage:
-                'Navigate to the root of your cloned repository and create a configuration file:',
-            })}
-          </p>
-        </EuiText>
-        <EuiSpacer size="s" />
-        <CodeBox
-          showTopBar={false}
-          languageType="bash"
-          codeSnippet="cd connectors && touch config.yml"
-        />
-        <EuiSpacer size="s" />
-        <EuiText size="s">
-          <h5>
-            {i18n.translate('xpack.enterpriseSearch.connectorDeployment.p.populateConfigLabel', {
-              defaultMessage: 'Populate configuration file',
-            })}
-          </h5>
-          <p>
-            <FormattedMessage
-              id="xpack.enterpriseSearch.connectorDeployment.p.createConfigLabel"
-              defaultMessage="The previous command creates a {configYaml} file. Copy and paste the following configuration into that file:"
-              values={{
-                configYaml: (
-                  <EuiCode>
-                    {i18n.translate(
-                      'xpack.enterpriseSearch.connectorDeployment.configYamlCodeBlockLabel',
-                      { defaultMessage: 'config.yml' }
-                    )}
-                  </EuiCode>
-                ),
-              }}
-            />
-          </p>
-        </EuiText>
         <EuiSpacer size="s" />
         <CodeBox
           showTopBar={false}
@@ -164,47 +126,15 @@ export const RunFromSourceStep: React.FC<RunFromSourceStepProps> = ({
             host: elasticsearchUrl,
           })}
         />
-        <EuiSpacer size="s" />
+        <EuiSpacer />
         <EuiText size="s">
           <p>
-            <FormattedMessage
-              id="xpack.enterpriseSearch.connectorDeployment.customizeSettingsLabel"
-              defaultMessage="If you want to customize settings later, refer to this {exampleFile}."
-              values={{
-                exampleFile: (
-                  <EuiLink
-                    data-test-subj="enterpriseSearchRunFromSourceStepExampleFileLink"
-                    href="https://github.com/elastic/connectors/blob/main/config.yml.example"
-                    target="_blank"
-                    external
-                  >
-                    {i18n.translate(
-                      'xpack.enterpriseSearch.connectorDeployment.exampleConfigFileLinkLabel',
-                      { defaultMessage: 'example file' }
-                    )}
-                  </EuiLink>
-                ),
-              }}
-            />
-          </p>
-        </EuiText>
-        <EuiSpacer size="m" />
-        <EuiText size="s">
-          <h5>
-            {i18n.translate('xpack.enterpriseSearch.connectorDeployment.p.compileAndRunTitle', {
-              defaultMessage: 'Run the connector service',
+            {i18n.translate('xpack.enterpriseSearch.connectorDeployment.p.compileAndRunLabel', {
+              defaultMessage: 'Compile and run',
             })}
-          </h5>
-          <p>
-            {i18n.translate(
-              'xpack.enterpriseSearch.connectorDeployment.p.compileAndRunInstructions',
-              {
-                defaultMessage: 'Finally, compile and run the connector service source code:',
-              }
-            )}
           </p>
         </EuiText>
-        <EuiSpacer size="s" />
+        <EuiSpacer />
         <CodeBox
           showTopBar={false}
           languageType="bash"
@@ -213,7 +143,6 @@ export const RunFromSourceStep: React.FC<RunFromSourceStepProps> = ({
                               make run
                               `}
         />
-        <EuiSpacer size="s" />
       </EuiAccordion>
     </>
   );

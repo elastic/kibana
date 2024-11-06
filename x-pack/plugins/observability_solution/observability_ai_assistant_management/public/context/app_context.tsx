@@ -7,11 +7,9 @@
 
 import React, { createContext } from 'react';
 import type { ChromeBreadcrumb } from '@kbn/core-chrome-browser';
-import { ConfigSchema } from '../plugin';
 
 export interface AppContextValue {
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
-  config: ConfigSchema;
 }
 
 export const AppContext = createContext<AppContextValue>(null as any);

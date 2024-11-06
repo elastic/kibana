@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import './expanded_row_details_pane.scss';
+
 import type { FC, ReactElement } from 'react';
 import React from 'react';
-import { i18n } from '@kbn/i18n';
 
 import {
   EuiBasicTable,
@@ -20,7 +21,6 @@ import {
   EuiText,
   EuiTitle,
   EuiSpacer,
-  useEuiTheme,
 } from '@elastic/eui';
 
 export interface SectionItem {
@@ -106,21 +106,11 @@ export const Section: FC<SectionProps> = ({ section }) => {
   const columns = [
     {
       field: 'title',
-      name: i18n.translate(
-        'xpack.ml.dataframe.analytics.expandedRowDetails.analysisStatsHeaderField',
-        {
-          defaultMessage: 'Field',
-        }
-      ),
+      name: '',
     },
     {
       field: 'description',
-      name: i18n.translate(
-        'xpack.ml.dataframe.analytics.expandedRowDetails.analysisStatsHeaderValue',
-        {
-          defaultMessage: 'Value',
-        }
-      ),
+      name: '',
       render: (v: SectionItem['description']) => <>{v}</>,
     },
   ];
@@ -136,6 +126,7 @@ export const Section: FC<SectionProps> = ({ section }) => {
         columns={columns}
         tableCaption={section.title}
         tableLayout="auto"
+        className="mlExpandedRowDetailsSection"
         data-test-subj={`${section.dataTestSubj}-table`}
       />
     </div>
@@ -159,16 +150,12 @@ export const ExpandedRowDetailsPane: FC<ExpandedRowDetailsPaneProps> = ({
   progress,
   dataTestSubj,
 }) => {
-  const {
-    euiTheme: { size },
-  } = useEuiTheme();
-
   return (
     <>
       <EuiSpacer />
       <EuiFlexGroup
         direction="column"
-        css={{ padding: `${size.s} ${size.base} ${size.base}` }}
+        className="mlExpandedRowDetails"
         data-test-subj={dataTestSubj}
         gutterSize="s"
       >

@@ -8,7 +8,7 @@
  */
 
 import type { IndexMapping, VirtualVersionMap } from '@kbn/core-saved-objects-base-server-internal';
-import { getNewAndUpdatedTypes, getUpdatedRootFields } from './compare_mappings';
+import { getUpdatedRootFields, getUpdatedTypes } from './compare_mappings';
 
 /**
  * Diffs the stored vs app mappings.
@@ -56,9 +56,8 @@ export function diffMappings({
 }
 
 /**
- * Finds a property (either a root field or a SO type) that either:
- * - is new (did not exist in the current mappings)
- * - has changed its schema with respect to the mappings stored in the SO index
+ * Finds a property that has changed its schema with respect to the mappings stored in the SO index
+ * It can either be a root field or a SO type
  * @returns the name of the property (if any)
  */
 function findChangedProp({
@@ -77,7 +76,7 @@ function findChangedProp({
     return updatedFields[0];
   }
 
-  const { newTypes, updatedTypes } = getNewAndUpdatedTypes({
+  const updatedTypes = getUpdatedTypes({
     indexMeta: indexMappings._meta,
     indexTypes,
     latestMappingsVersions,
@@ -85,8 +84,6 @@ function findChangedProp({
   });
   if (updatedTypes.length) {
     return updatedTypes[0];
-  } else if (newTypes.length) {
-    return newTypes[0];
   }
 
   return undefined;

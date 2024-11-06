@@ -14,7 +14,6 @@ export type UrlDrilldownConfig = {
 /**
  * User-configurable options for URL drilldowns
  */
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type UrlDrilldownOptions = {
   openInNewTab: boolean;
   encodeUrl: boolean;

@@ -1,15 +1,11 @@
 {
   "type": "plugin",
   "id": "@kbn/saved-objects-plugin",
-  "owner": [
-    "@elastic/appex-sharedux"
-  ],
-  "group": "platform",
-  "visibility": "shared",
+  "owner": "@elastic/kibana-core",
   "plugin": {
     "id": "savedObjects",
-    "browser": true,
     "server": false,
+    "browser": true,
     "requiredPlugins": [
       "data",
       "dataViews"

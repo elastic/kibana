@@ -97,15 +97,6 @@ paths:
           schema:
             nullable: true
             type: string
-        - in: query
-          name: createdByFilter
-          schema:
-            nullable: true
-            type: string
-        - in: query
-          name: associatedFilter
-          schema:
-            $ref: '#/components/schemas/AssociatedFilterType'
       responses:
         '200':
           content:
@@ -925,15 +916,6 @@ paths:
         - access:securitySolution
 components:
   schemas:
-    AssociatedFilterType:
-      description: Filter notes based on their association with a document or saved object.
-      enum:
-        - all
-        - document_only
-        - saved_object_only
-        - document_and_saved_object
-        - orphan
-      type: string
     BareNote:
       type: object
       properties:

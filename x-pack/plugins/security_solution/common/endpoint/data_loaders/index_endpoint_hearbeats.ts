@@ -7,7 +7,7 @@
 
 import type { Client, estypes } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
-
+import { ENDPOINT_HEARTBEAT_INDEX } from '../constants';
 import { createToolingLogger } from './utils';
 
 export interface IndexedEndpointHeartbeats {
@@ -79,8 +79,7 @@ export const indexEndpointHeartbeats = async (
   const operations = docs.concat(unbilledDocs).flatMap((doc) => [
     {
       index: {
-        // simulating different namespaces
-        _index: `.logs-endpoint.heartbeat-${doc.agent.id.slice(-1)}`,
+        _index: ENDPOINT_HEARTBEAT_INDEX,
         op_type: 'create',
       },
     },

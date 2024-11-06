@@ -6,7 +6,9 @@
  */
 
 import { remove } from 'lodash';
-import type { OutputAPI } from '@kbn/inference-common';
+import { lastValueFrom } from 'rxjs';
+import type { OutputAPI } from '../../common/output';
+import { withoutOutputUpdateEvents } from '../../common/output/without_output_update_events';
 import type { EvaluationResult } from './types';
 
 export interface InferenceEvaluationClient {
@@ -66,12 +68,11 @@ export function createInferenceEvaluationClient({
     output: outputApi,
     getEvaluationConnectorId: () => evaluationConnectorId,
     evaluate: async ({ input, criteria = [], system }) => {
-      const evaluation = await outputApi({
-        id: 'evaluate',
-        stream: false,
-        connectorId,
-        system: withAdditionalSystemContext(
-          `You are a helpful, respected assistant for evaluating task
+      const evaluation = await lastValueFrom(
+        outputApi('evaluate', {
+          connectorId,
+          system: withAdditionalSystemContext(
+            `You are a helpful, respected assistant for evaluating task
             inputs and outputs in the Elastic Platform.
 
             Your goal is to verify whether the output of a task
@@ -84,10 +85,10 @@ export function createInferenceEvaluationClient({
             quoting what the assistant did wrong, where it could improve,
             and what the root cause was in case of a failure.
             `,
-          system
-        ),
+            system
+          ),
 
-        input: `
+          input: `
             ## Criteria
 
             ${criteria
@@ -99,36 +100,37 @@ export function createInferenceEvaluationClient({
             ## Input
 
             ${input}`,
-        schema: {
-          type: 'object',
-          properties: {
-            criteria: {
-              type: 'array',
-              items: {
-                type: 'object',
-                properties: {
-                  index: {
-                    type: 'number',
-                    description: 'The number of the criterion',
+          schema: {
+            type: 'object',
+            properties: {
+              criteria: {
+                type: 'array',
+                items: {
+                  type: 'object',
+                  properties: {
+                    index: {
+                      type: 'number',
+                      description: 'The number of the criterion',
+                    },
+                    score: {
+                      type: 'number',
+                      description:
+                        'The score you calculated for the criterion, between 0 (criterion fully failed) and 1 (criterion fully succeeded).',
+                    },
+                    reasoning: {
+                      type: 'string',
+                      description:
+                        'Your reasoning for the score. Explain your score by mentioning what you expected to happen and what did happen.',
+                    },
                   },
-                  score: {
-                    type: 'number',
-                    description:
-                      'The score you calculated for the criterion, between 0 (criterion fully failed) and 1 (criterion fully succeeded).',
-                  },
-                  reasoning: {
-                    type: 'string',
-                    description:
-                      'Your reasoning for the score. Explain your score by mentioning what you expected to happen and what did happen.',
-                  },
+                  required: ['index', 'score', 'reasoning'],
                 },
-                required: ['index', 'score', 'reasoning'],
               },
             },
-          },
-          required: ['criteria'],
-        } as const,
-      });
+            required: ['criteria'],
+          } as const,
+        }).pipe(withoutOutputUpdateEvents())
+      );
 
       const scoredCriteria = evaluation.output.criteria;
 

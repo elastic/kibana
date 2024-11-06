@@ -11,8 +11,7 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 
 export function generateSampleDocument(
-  mappingProperties: Record<string, MappingProperty>,
-  sampleText?: string
+  mappingProperties: Record<string, MappingProperty>
 ): Record<string, unknown> {
   const sampleDocument: Record<string, unknown> = {};
 
@@ -20,13 +19,13 @@ export function generateSampleDocument(
     if ('type' in mapping) {
       switch (mapping.type) {
         case 'text':
-          sampleDocument[field] = sampleText ?? `Sample text for ${field}`;
+          sampleDocument[field] = `Sample text for ${field}`;
           break;
         case 'keyword':
           sampleDocument[field] = `sample-keyword-${field}`;
           break;
         case 'semantic_text':
-          sampleDocument[field] = sampleText ?? `Sample text for ${field}`;
+          sampleDocument[field] = 'Hello World';
           break;
         case 'integer':
         case 'long':
@@ -75,9 +74,9 @@ export function generateSampleDocument(
   return sampleDocument;
 }
 
-function generateDenseVector(mapping: MappingDenseVectorProperty, maxDisplayDims = 10) {
+function generateDenseVector(mapping: MappingDenseVectorProperty, maxDisplayDims = 20) {
   // Limit the dimensions for better UI display
-  const dimension = Math.min(mapping?.dims ?? 10, maxDisplayDims);
+  const dimension = Math.min(mapping?.dims ?? 20, maxDisplayDims);
 
   // Generate an array of random floating-point numbers
   const denseVector: Array<number | string> = Array.from({ length: dimension }, () =>

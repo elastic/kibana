@@ -37,10 +37,8 @@ export const setSignalsStatusRoute = (
     .post({
       path: DETECTION_ENGINE_SIGNALS_STATUS_URL,
       access: 'public',
-      security: {
-        authz: {
-          requiredPrivileges: ['securitySolution'],
-        },
+      options: {
+        tags: ['access:securitySolution'],
       },
     })
     .addVersion(

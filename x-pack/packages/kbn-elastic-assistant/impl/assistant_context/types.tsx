@@ -69,8 +69,6 @@ export interface AssistantAvailability {
   hasConnectorsReadPrivilege: boolean;
   // When true, user has `Edit` privilege for `AnonymizationFields`
   hasUpdateAIAssistantAnonymization: boolean;
-  // When true, user has `Edit` privilege for `Global Knowledge Base`
-  hasManageGlobalKnowledgeBase: boolean;
 }
 
 export type GetAssistantMessages = (commentArgs: {

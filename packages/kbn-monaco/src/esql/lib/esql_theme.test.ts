@@ -91,6 +91,7 @@ describe('ESQL Theme', () => {
       'lookup_ws',
       'lookup_field_ws',
       'show_ws',
+      'meta_ws',
       'setting',
       'setting_ws',
       'metrics_ws',

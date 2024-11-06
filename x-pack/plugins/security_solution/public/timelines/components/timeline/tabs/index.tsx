@@ -253,8 +253,8 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
     selectTimelineESQLSavedSearchId(state, timelineId)
   );
 
-  const securitySolutionNotesDisabled = useIsExperimentalFeatureEnabled(
-    'securitySolutionNotesDisabled'
+  const securitySolutionNotesEnabled = useIsExperimentalFeatureEnabled(
+    'securitySolutionNotesEnabled'
   );
 
   const [visualizationInFlyoutEnabled] = useUiSetting$<boolean>(
@@ -320,20 +320,16 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
     }
   }, [fetchNotes, isTimelineSaved]);
 
-  const notesNewSystem = useSelector((state: State) =>
+  const numberOfNotesNewSystem = useSelector((state: State) =>
     selectSortedNotesBySavedObjectId(state, {
       savedObjectId: timelineSavedObjectId,
       sort: { field: 'created', direction: 'asc' },
     })
   );
-  const numberOfNotesNewSystem = useMemo(
-    () => notesNewSystem.length + (isEmpty(timelineDescription) ? 0 : 1),
-    [notesNewSystem, timelineDescription]
-  );
 
   const numberOfNotes = useMemo(
-    () => (securitySolutionNotesDisabled ? numberOfNotesOldSystem : numberOfNotesNewSystem),
-    [numberOfNotesNewSystem, numberOfNotesOldSystem, securitySolutionNotesDisabled]
+    () => (securitySolutionNotesEnabled ? numberOfNotesNewSystem.length : numberOfNotesOldSystem),
+    [numberOfNotesNewSystem, numberOfNotesOldSystem, securitySolutionNotesEnabled]
   );
 
   const setActiveTab = useCallback(
@@ -450,7 +446,9 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
           >
             <span>{i18n.NOTES_TAB}</span>
             {showTimeline && numberOfNotes > 0 && timelineType === TimelineTypeEnum.default && (
-              <CountBadge>{numberOfNotes}</CountBadge>
+              <div>
+                <CountBadge>{numberOfNotes}</CountBadge>
+              </div>
             )}
           </StyledEuiTab>
           <StyledEuiTab
@@ -464,7 +462,9 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
             {showTimeline &&
               numberOfPinnedEvents > 0 &&
               timelineType === TimelineTypeEnum.default && (
-                <CountBadge>{numberOfPinnedEvents}</CountBadge>
+                <div>
+                  <CountBadge>{numberOfPinnedEvents}</CountBadge>
+                </div>
               )}
           </StyledEuiTab>
         </StyledEuiTabs>

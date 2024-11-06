@@ -8,11 +8,7 @@
  */
 
 import { QueryPointEventAnnotationOutput } from '@kbn/event-annotation-plugin/common';
-import {
-  Datatable,
-  DefaultInspectorAdapters,
-  ExecutionContext,
-} from '@kbn/expressions-plugin/common';
+import { Datatable, ExecutionContext } from '@kbn/expressions-plugin/common';
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 import { Dimension, prepareLogTable } from '@kbn/visualizations-plugin/common/utils';
 import { LayerTypes, REFERENCE_LINE } from '../constants';
@@ -27,7 +23,7 @@ import {
 
 export const logDatatables = (
   layers: CommonXYLayerConfig[],
-  handlers: ExecutionContext<DefaultInspectorAdapters>,
+  handlers: ExecutionContext,
   splitColumnAccessor?: string | ExpressionValueVisDimension,
   splitRowAccessor?: string | ExpressionValueVisDimension,
   annotations?: ExpressionAnnotationResult
@@ -92,7 +88,7 @@ const getLogAnnotationTable = (data: Datatable, layer: AnnotationLayerConfigResu
 export const logDatatable = (
   data: Datatable,
   layers: CommonXYLayerConfig[],
-  handlers: ExecutionContext<DefaultInspectorAdapters>,
+  handlers: ExecutionContext,
   splitColumnAccessor?: string | ExpressionValueVisDimension,
   splitRowAccessor?: string | ExpressionValueVisDimension
 ) => {

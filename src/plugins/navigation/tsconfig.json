@@ -27,7 +27,6 @@
     "@kbn/config-schema",
     "@kbn/i18n",
     "@kbn/std",
-    "@kbn/ui-theme",
   ],
   "exclude": [
     "target/**/*",

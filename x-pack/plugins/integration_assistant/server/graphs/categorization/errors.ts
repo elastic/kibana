@@ -39,6 +39,7 @@ export async function handleErrors({
   return {
     currentPipeline,
     currentProcessors,
+    reviewed: false,
     lastExecutedChain: 'error',
   };
 }

@@ -9,35 +9,17 @@ import Boom from '@hapi/boom';
 import { MaintenanceWindowClientContext } from '../../../../../common';
 import { transformMaintenanceWindowAttributesToMaintenanceWindow } from '../../transforms';
 import { findMaintenanceWindowSo } from '../../../../data/maintenance_window';
-import type { FindMaintenanceWindowsResult, FindMaintenanceWindowsParams } from './types';
-import { findMaintenanceWindowsParamsSchema } from './schemas';
+import type { FindMaintenanceWindowsResult } from './types';
 
 export async function findMaintenanceWindows(
-  context: MaintenanceWindowClientContext,
-  params?: FindMaintenanceWindowsParams
+  context: MaintenanceWindowClientContext
 ): Promise<FindMaintenanceWindowsResult> {
   const { savedObjectsClient, logger } = context;
 
   try {
-    if (params) {
-      findMaintenanceWindowsParamsSchema.validate(params);
-    }
-  } catch (error) {
-    throw Boom.badRequest(`Error validating find maintenance windows data - ${error.message}`);
-  }
-
-  try {
-    const result = await findMaintenanceWindowSo({
-      savedObjectsClient,
-      ...(params
-        ? { savedObjectsFindOptions: { page: params.page, perPage: params.perPage } }
-        : {}),
-    });
+    const result = await findMaintenanceWindowSo({ savedObjectsClient });
 
     return {
-      page: result.page,
-      perPage: result.per_page,
-      total: result.total,
       data: result.saved_objects.map((so) =>
         transformMaintenanceWindowAttributesToMaintenanceWindow({
           attributes: so.attributes,

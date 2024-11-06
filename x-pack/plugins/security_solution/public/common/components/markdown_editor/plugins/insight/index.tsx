@@ -281,7 +281,7 @@ const InsightEditorComponent = ({
   onCancel,
 }: EuiMarkdownEditorUiPluginEditorProps<InsightComponentProps & { relativeTimerange: string }>) => {
   const isEditMode = node != null;
-  const { sourcererDataView } = useSourcererDataView(SourcererScopeName.default);
+  const { indexPattern } = useSourcererDataView(SourcererScopeName.default);
   const {
     unifiedSearch: {
       ui: { FiltersBuilderLazy },
@@ -400,7 +400,7 @@ const InsightEditorComponent = ({
     );
   }, [labelController.field.value, providers, dataView]);
   const filtersStub = useMemo(() => {
-    const index = sourcererDataView.name ?? '*';
+    const index = indexPattern && indexPattern.getName ? indexPattern.getName() : '*';
     return [
       {
         $state: {
@@ -414,7 +414,7 @@ const InsightEditorComponent = ({
         },
       },
     ];
-  }, [sourcererDataView]);
+  }, [indexPattern]);
   const isPlatinum = useLicense().isAtLeast('platinum');
 
   return (

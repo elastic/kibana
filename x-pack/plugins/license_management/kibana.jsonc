@@ -1,15 +1,11 @@
 {
   "type": "plugin",
   "id": "@kbn/license-management-plugin",
-  "owner": [
-    "@elastic/kibana-management"
-  ],
-  "group": "platform",
-  "visibility": "shared",
+  "owner": "@elastic/kibana-management",
   "plugin": {
     "id": "licenseManagement",
-    "browser": true,
     "server": true,
+    "browser": true,
     "configPath": [
       "xpack",
       "license_management"

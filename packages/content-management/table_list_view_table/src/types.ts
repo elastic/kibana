@@ -27,10 +27,3 @@ export type RowActions = {
 export interface TableItemsRowActions {
   [id: string]: RowActions | undefined;
 }
-
-export interface SearchQueryError {
-  message: string;
-  name: string;
-  queryText: string;
-  containsForbiddenChars: boolean;
-}

@@ -22,8 +22,6 @@ import { createAppContextStartContractMock } from '../../../../../mocks';
 import { installTransforms } from '../../../elasticsearch/transform/install';
 import { cleanupTransforms } from '../../remove';
 
-import { createArchiveIteratorFromMap } from '../../../archive/archive_iterator';
-
 import { stepInstallTransforms, cleanupTransformsStep } from './step_install_transforms';
 
 jest.mock('../../../elasticsearch/transform/install');
@@ -54,7 +52,6 @@ const packageInstallContext = {
   } as any,
   paths: ['some/path/1', 'some/path/2'],
   assetsMap: new Map(),
-  archiveIterator: createArchiveIteratorFromMap(new Map()),
 };
 
 describe('stepInstallTransforms', () => {

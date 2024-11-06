@@ -36,7 +36,6 @@
     "@kbn/analytics-collection-utils",
     "@kbn/react-kibana-mount",
     "@kbn/core-node-server",
-    "@kbn/security-plugin-types-server",
   ],
   "exclude": [
     "target/**/*",

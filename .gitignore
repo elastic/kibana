@@ -158,4 +158,3 @@ x-pack/test/security_solution_playwright/blob-report/
 x-pack/test/security_solution_playwright/playwright/.cache/
 x-pack/test/security_solution_playwright/.auth/
 x-pack/test/security_solution_playwright/.env
-.codeql

@@ -1,15 +1,11 @@
 {
   "type": "plugin",
   "id": "@kbn/event-log-plugin",
-  "owner": [
-    "@elastic/response-ops"
-  ],
-  "group": "platform",
-  "visibility": "shared",
+  "owner": "@elastic/response-ops",
   "plugin": {
     "id": "eventLog",
-    "browser": false,
     "server": true,
+    "browser": false,
     "configPath": [
       "xpack",
       "eventLog"

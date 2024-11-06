@@ -393,35 +393,3 @@ export const FullAgentPolicyResponseSchema = schema.object({
     })
   ),
 });
-const MinimalOutputSchema = schema.object({
-  id: schema.string(),
-  name: schema.string(),
-});
-
-const IntegrationsOutputSchema = schema.arrayOf(
-  schema.object({
-    pkgName: schema.maybe(schema.string()),
-    integrationPolicyName: schema.maybe(schema.string()),
-    id: schema.maybe(schema.string()),
-    name: schema.maybe(schema.string()),
-  })
-);
-
-const OutputsForAgentPolicySchema = schema.object({
-  agentPolicyId: schema.maybe(schema.string()),
-  monitoring: schema.object({
-    output: MinimalOutputSchema,
-  }),
-  data: schema.object({
-    output: MinimalOutputSchema,
-    integrations: schema.maybe(IntegrationsOutputSchema),
-  }),
-});
-
-export const GetAgentPolicyOutputsResponseSchema = schema.object({
-  item: OutputsForAgentPolicySchema,
-});
-
-export const GetListAgentPolicyOutputsResponseSchema = schema.object({
-  items: schema.arrayOf(OutputsForAgentPolicySchema),
-});

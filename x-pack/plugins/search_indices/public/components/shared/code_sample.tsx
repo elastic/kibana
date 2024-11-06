@@ -13,7 +13,6 @@ import {
   EuiFlexItem,
   EuiPanel,
   EuiSpacer,
-  EuiTitle,
   EuiText,
   EuiThemeProvider,
 } from '@elastic/eui';
@@ -21,20 +20,12 @@ import {
 export interface CodeSampleProps {
   id?: string;
   title: string;
-  description?: string;
   language: string;
   code: string;
   onCodeCopyClick?: React.MouseEventHandler<HTMLElement>;
 }
 
-export const CodeSample = ({
-  id,
-  title,
-  language,
-  code,
-  onCodeCopyClick,
-  description,
-}: CodeSampleProps) => {
+export const CodeSample = ({ id, title, language, code, onCodeCopyClick }: CodeSampleProps) => {
   const onCodeClick = React.useCallback(
     (e: React.MouseEvent<HTMLElement, MouseEvent>) => {
       if (onCodeCopyClick === undefined) return;
@@ -49,18 +40,10 @@ export const CodeSample = ({
 
   return (
     <EuiFlexItem id={id}>
-      <EuiTitle size="xs">
-        <h3>{title}</h3>
-      </EuiTitle>
-      {description && (
-        <>
-          <EuiSpacer size="xs" />
-          <EuiText size="s" grow={false}>
-            <p>{description}</p>
-          </EuiText>
-        </>
-      )}
-      <EuiSpacer size="m" />
+      <EuiText size="s">
+        <strong>{title}</strong>
+      </EuiText>
+      <EuiSpacer size="s" />
       <EuiThemeProvider colorMode="dark">
         <EuiPanel color="subdued" paddingSize="none" hasShadow={false}>
           <div onClick={onCodeClick}>
@@ -71,11 +54,6 @@ export const CodeSample = ({
               paddingSize="m"
               isCopyable
               transparentBackground
-              css={{
-                '*::selection': {
-                  backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                },
-              }}
             >
               {code}
             </EuiCodeBlock>

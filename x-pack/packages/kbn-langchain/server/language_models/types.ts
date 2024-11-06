@@ -11,10 +11,7 @@ import type OpenAI from 'openai';
 export interface InvokeAIActionParamsSchema {
   messages: Array<{
     role: string;
-    content:
-      | string
-      | OpenAI.ChatCompletionContentPart[]
-      | Array<OpenAI.ChatCompletionContentPartText | OpenAI.ChatCompletionContentPartRefusal>;
+    content: string | OpenAI.ChatCompletionContentPart[];
     name?: string;
     function_call?: {
       arguments: string;

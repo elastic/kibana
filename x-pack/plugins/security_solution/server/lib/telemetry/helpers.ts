@@ -8,8 +8,7 @@
 import moment from 'moment';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common/types/models/package_policy';
-import { merge } from 'lodash';
-import { set } from '@kbn/safer-lodash-set';
+import { merge, set } from 'lodash';
 import type { Logger, LogMeta } from '@kbn/core/server';
 import { sha256 } from 'js-sha256';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';

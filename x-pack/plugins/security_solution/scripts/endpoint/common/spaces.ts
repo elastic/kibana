@@ -27,12 +27,8 @@ export const ensureSpaceIdExists = async (
     return;
   }
 
-  const alreadyExists = await kbnClient
-    .request({
-      method: 'GET',
-      path: `/api/spaces/space/${spaceId}`,
-      headers: { 'elastic-api-version': '2023-10-31' },
-    })
+  const alreadyExists = await kbnClient.spaces
+    .get(spaceId)
     .then(() => {
       log.debug(`Space id [${spaceId}] already exists. Nothing to do.`);
       return true;
@@ -49,20 +45,12 @@ export const ensureSpaceIdExists = async (
   if (!alreadyExists) {
     log.info(`Creating space id [${spaceId}]`);
 
-    await kbnClient
-      .request({
-        method: 'POST',
-        path: `/api/spaces/space`,
-        headers: { 'elastic-api-version': '2023-10-31' },
-        body: {
-          name: spaceId,
-          id: spaceId,
-        },
+    await kbnClient.spaces
+      .create({
+        name: spaceId,
+        id: spaceId,
       })
-      .catch(catchAxiosErrorFormatAndThrow)
-      .then((response) => {
-        log.verbose(`space created:\n${JSON.stringify(response.data, null, 2)}`);
-      });
+      .catch(catchAxiosErrorFormatAndThrow);
   }
 };
 

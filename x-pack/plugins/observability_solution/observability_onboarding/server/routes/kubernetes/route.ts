@@ -45,7 +45,7 @@ const createKubernetesOnboardingFlowRoute = createObservabilityOnboardingServerR
       elasticsearch: { client },
     } = await context.core;
 
-    const hasPrivileges = await hasLogMonitoringPrivileges(client.asCurrentUser, true);
+    const hasPrivileges = await hasLogMonitoringPrivileges(client.asCurrentUser);
 
     if (!hasPrivileges) {
       throw Boom.forbidden(
@@ -57,7 +57,7 @@ const createKubernetesOnboardingFlowRoute = createObservabilityOnboardingServerR
     const packageClient = fleetPluginStart.packageService.asScoped(request);
 
     const [{ encoded: apiKeyEncoded }, elasticAgentVersion] = await Promise.all([
-      createShipperApiKey(client.asCurrentUser, `${params.body.pkgName}_onboarding`, true),
+      createShipperApiKey(client.asCurrentUser, 'kubernetes_onboarding'),
       getAgentVersion(fleetPluginStart, kibanaVersion),
       // System package is always required
       packageClient.ensureInstalledPackage({ pkgName: 'system' }),

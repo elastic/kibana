@@ -28,7 +28,6 @@ import { ConnectorIndexName } from './connector_index_name';
 import { ConnectorConfigurationPanels } from './connector_config_panels';
 import { ConnectorOverview } from './connector_overview';
 import { ConnectorScheduling } from '../conector_scheduling_tab/connector_scheduling';
-import { useConnectors } from '../../../hooks/api/use_connectors';
 
 interface ConnectorConfigurationProps {
   connector: Connector;
@@ -37,8 +36,6 @@ interface ConnectorConfigurationProps {
 type ConnectorConfigurationStep = 'link' | 'configure' | 'connect' | 'connected';
 
 export const ConnectorConfiguration: React.FC<ConnectorConfigurationProps> = ({ connector }) => {
-  const { data } = useConnectors();
-  const { canManageConnectors } = data || { canManageConnectors: false };
   const [currentStep, setCurrentStep] = useState<ConnectorConfigurationStep>('link');
   useEffect(() => {
     let step: ConnectorConfigurationStep = 'link';
@@ -102,9 +99,7 @@ export const ConnectorConfiguration: React.FC<ConnectorConfigurationProps> = ({ 
 
   const tabs: EuiTabbedContentTab[] = [
     {
-      content: (
-        <ConnectorOverview canManageConnectors={canManageConnectors} connector={connector} />
-      ),
+      content: <ConnectorOverview connector={connector} />,
       id: 'overview',
       name: OVERVIEW_LABEL,
     },
@@ -112,10 +107,7 @@ export const ConnectorConfiguration: React.FC<ConnectorConfigurationProps> = ({ 
       content: (
         <>
           <EuiSpacer />
-          <ConnectorConfigurationPanels
-            canManageConnectors={canManageConnectors}
-            connector={connector}
-          />
+          <ConnectorConfigurationPanels connector={connector} />
         </>
       ),
       id: 'configuration',
@@ -125,7 +117,7 @@ export const ConnectorConfiguration: React.FC<ConnectorConfigurationProps> = ({ 
       content: (
         <>
           <EuiSpacer />
-          <ConnectorScheduling canManageConnectors={canManageConnectors} connector={connector} />
+          <ConnectorScheduling connector={connector} />
         </>
       ),
       id: 'scheduling',
@@ -148,12 +140,8 @@ export const ConnectorConfiguration: React.FC<ConnectorConfigurationProps> = ({ 
             status={connector.status}
           />
         )}
-        {currentStep === 'configure' && (
-          <ConnectorConfigFields connector={connector} isDisabled={!canManageConnectors} />
-        )}
-        {currentStep === 'connect' && (
-          <ConnectorIndexName isDisabled={!canManageConnectors} connector={connector} />
-        )}
+        {currentStep === 'configure' && <ConnectorConfigFields connector={connector} />}
+        {currentStep === 'connect' && <ConnectorIndexName connector={connector} />}
       </EuiFlexItem>
     </EuiFlexGroup>
   );

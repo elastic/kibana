@@ -11,8 +11,6 @@ import { combineProcessors } from '../../util/processors';
 import { CATEGORIZATION_EXAMPLE_PROCESSORS } from './constants';
 import { CATEGORIZATION_MAIN_PROMPT } from './prompts';
 import type { CategorizationNodeParams } from './types';
-import { selectResults } from './util';
-import { CATEGORIZATION_INITIAL_BATCH_SIZE } from '../../../common/constants';
 
 export async function handleCategorization({
   state,
@@ -21,15 +19,8 @@ export async function handleCategorization({
   const categorizationMainPrompt = CATEGORIZATION_MAIN_PROMPT;
   const outputParser = new JsonOutputParser();
   const categorizationMainGraph = categorizationMainPrompt.pipe(model).pipe(outputParser);
-
-  const [pipelineResults, _] = selectResults(
-    state.pipelineResults,
-    CATEGORIZATION_INITIAL_BATCH_SIZE,
-    new Set(state.stableSamples)
-  );
-
   const currentProcessors = (await categorizationMainGraph.invoke({
-    pipeline_results: JSON.stringify(pipelineResults, null, 2),
+    pipeline_results: JSON.stringify(state.pipelineResults, null, 2),
     example_processors: CATEGORIZATION_EXAMPLE_PROCESSORS,
     ex_answer: state?.exAnswer,
     ecs_categories: state?.ecsCategories,
@@ -45,7 +36,7 @@ export async function handleCategorization({
   return {
     currentPipeline,
     currentProcessors,
-    lastReviewedSamples: [],
+    hasTriedOnce: true,
     lastExecutedChain: 'categorization',
   };
 }

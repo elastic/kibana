@@ -21,7 +21,6 @@ import {
 } from '@kbn/security-solution-plugin/common/endpoint/constants';
 import {
   deleteIndexedHostsAndAlerts,
-  DeleteIndexedHostsAndAlertsResponse,
   IndexedHostsAndAlertsResponse,
   indexHostsAndAlerts,
 } from '@kbn/security-solution-plugin/common/endpoint/index_data';
@@ -41,17 +40,11 @@ import seedrandom from 'seedrandom';
 import { fetchFleetLatestAvailableAgentVersion } from '@kbn/security-solution-plugin/common/endpoint/utils/fetch_fleet_version';
 import { KbnClient } from '@kbn/test';
 import { isServerlessKibanaFlavor } from '@kbn/security-solution-plugin/common/endpoint/utils/kibana_status';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
-import { createKbnClient } from '@kbn/security-solution-plugin/scripts/endpoint/common/stack_services';
 import { FtrService } from '../../functional/ftr_provider_context';
-
-export type IndexedHostsAndAlertsResponseExtended = IndexedHostsAndAlertsResponse & {
-  unloadEndpointData(): Promise<DeleteIndexedHostsAndAlertsResponse>;
-  spaceId: string;
-};
 
 // Document Generator override that uses a custom Endpoint Metadata generator and sets the
 // `agent.version` to the current version
+
 const createDocGeneratorClass = async (kbnClient: KbnClient, isServerless: boolean) => {
   let version = kibanaPackageJson.version;
   if (isServerless) {
@@ -80,26 +73,6 @@ export class EndpointTestResources extends FtrService {
   private readonly config = this.ctx.getService('config');
   private readonly supertest = this.ctx.getService('supertest');
   private readonly log = this.ctx.getService('log');
-
-  public getScopedKbnClient(spaceId: string = DEFAULT_SPACE_ID): KbnClient {
-    if (!spaceId || spaceId === DEFAULT_SPACE_ID) {
-      return this.kbnClient;
-    }
-
-    const kbnClientOptions: Parameters<typeof createKbnClient>[0] = {
-      url: this.kbnClient.resolveUrl('/'),
-      username: this.config.get('servers.elasticsearch.username'),
-      password: this.config.get('servers.elasticsearch.password'),
-      spaceId,
-    };
-
-    this.log.info(`creating new KbnClient with:\n${JSON.stringify(kbnClientOptions, null, 2)}`);
-
-    // Was not included above in order to keep the output of the log.info() above clean in the output
-    kbnClientOptions.log = this.log;
-
-    return createKbnClient(kbnClientOptions);
-  }
 
   async stopTransform(transformId: string) {
     const stopRequest = {
@@ -147,9 +120,8 @@ export class EndpointTestResources extends FtrService {
       waitUntilTransformed: boolean;
       waitTimeout: number;
       customIndexFn: () => Promise<IndexedHostsAndAlertsResponse>;
-      spaceId: string;
     }> = {}
-  ): Promise<IndexedHostsAndAlertsResponseExtended> {
+  ): Promise<IndexedHostsAndAlertsResponse> {
     const {
       numHosts = 1,
       numHostDocs = 1,
@@ -159,16 +131,12 @@ export class EndpointTestResources extends FtrService {
       waitUntilTransformed = true,
       waitTimeout = 120000,
       customIndexFn,
-      spaceId = DEFAULT_SPACE_ID,
     } = options;
-
-    const kbnClient = this.getScopedKbnClient(spaceId);
 
     let currentTransformName = metadataTransformPrefix;
     let unitedTransformName = METADATA_UNITED_TRANSFORM;
-
     if (waitUntilTransformed && customIndexFn) {
-      const endpointPackage = await getEndpointPackageInfo(kbnClient);
+      const endpointPackage = await getEndpointPackageInfo(this.kbnClient);
       const isV2 = isEndpointPackageV2(endpointPackage.version);
 
       if (isV2) {
@@ -184,15 +152,18 @@ export class EndpointTestResources extends FtrService {
       await this.stopTransform(unitedTransformName);
     }
 
-    const isServerless = await isServerlessKibanaFlavor(kbnClient);
-    const CurrentKibanaVersionDocGenerator = await createDocGeneratorClass(kbnClient, isServerless);
+    const isServerless = await isServerlessKibanaFlavor(this.kbnClient);
+    const CurrentKibanaVersionDocGenerator = await createDocGeneratorClass(
+      this.kbnClient,
+      isServerless
+    );
 
     // load data into the system
     const indexedData = customIndexFn
       ? await customIndexFn()
       : await indexHostsAndAlerts(
           this.esClient as Client,
-          kbnClient,
+          this.kbnClient,
           generatorSeed,
           numHosts,
           numHostDocs,
@@ -223,29 +194,15 @@ export class EndpointTestResources extends FtrService {
       await this.waitForUnitedEndpoints(agentIds, waitTimeout);
     }
 
-    return {
-      ...indexedData,
-      spaceId,
-      unloadEndpointData: (): Promise<DeleteIndexedHostsAndAlertsResponse> => {
-        return this.unloadEndpointData(indexedData, { spaceId });
-      },
-    };
+    return indexedData;
   }
 
   /**
    * Deletes the loaded data created via `loadEndpointData()`
    * @param indexedData
-   * @param options
    */
-  async unloadEndpointData(
-    indexedData: IndexedHostsAndAlertsResponse,
-    { spaceId = DEFAULT_SPACE_ID }: { spaceId?: string } = {}
-  ): Promise<DeleteIndexedHostsAndAlertsResponse> {
-    return deleteIndexedHostsAndAlerts(
-      this.esClient as Client,
-      this.getScopedKbnClient(spaceId),
-      indexedData
-    );
+  async unloadEndpointData(indexedData: IndexedHostsAndAlertsResponse) {
+    return deleteIndexedHostsAndAlerts(this.esClient as Client, this.kbnClient, indexedData);
   }
 
   private async waitForIndex(
@@ -358,10 +315,10 @@ export class EndpointTestResources extends FtrService {
    * installs (or upgrades) the Endpoint Fleet package
    * (NOTE: ensure that fleet is setup first before calling this function)
    */
-  async installOrUpgradeEndpointFleetPackage(
-    spaceId: string = DEFAULT_SPACE_ID
-  ): ReturnType<typeof installOrUpgradeEndpointFleetPackage> {
-    return installOrUpgradeEndpointFleetPackage(this.getScopedKbnClient(spaceId), this.log);
+  async installOrUpgradeEndpointFleetPackage(): ReturnType<
+    typeof installOrUpgradeEndpointFleetPackage
+  > {
+    return installOrUpgradeEndpointFleetPackage(this.kbnClient, this.log);
   }
 
   /**
@@ -426,8 +383,8 @@ export class EndpointTestResources extends FtrService {
     return response;
   }
 
-  async isEndpointPackageV2(spaceId: string = DEFAULT_SPACE_ID): Promise<boolean> {
-    const endpointPackage = await getEndpointPackageInfo(this.getScopedKbnClient(spaceId));
+  async isEndpointPackageV2(): Promise<boolean> {
+    const endpointPackage = await getEndpointPackageInfo(this.kbnClient);
     return isEndpointPackageV2(endpointPackage.version);
   }
 }

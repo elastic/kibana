@@ -35,13 +35,6 @@ export const defineRoute = (
     .addVersion(
       {
         version: '1',
-        security: {
-          authz: {
-            enabled: false,
-            reason:
-              'This route is opted out from authorization because permissions will be checked by elasticsearch',
-          },
-        },
         validate: {
           request: {
             body: aiopsLogRateAnalysisSchemaV3,

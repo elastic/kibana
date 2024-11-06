@@ -15,12 +15,13 @@ export const removeEntityDefinitionFieldsStep = (): IngestProcessorContainer => 
   remove: {
     ignore_failure: true,
     field: [
-      'entity.last_seen_timestamp',
-      'entity.schema_version',
-      'entity.definition_version',
-      'entity.identity_fields',
-      'entity.definition_id',
-      'entity.display_name',
+      'entity.lastSeenTimestamp',
+      'entity.schemaVersion',
+      'entity.definitionVersion',
+      'entity.identityFields',
+      'entity.definitionId',
+      'entity.displayName',
+      'entity.firstSeenTimestamp',
     ],
   },
 });

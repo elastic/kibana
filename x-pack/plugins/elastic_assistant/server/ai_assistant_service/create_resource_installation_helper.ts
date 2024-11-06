@@ -65,7 +65,7 @@ export function createResourceInstallationHelper(
         return errorResult(commonInitError);
       }
     } catch (err) {
-      logger.warn(`Error initializing resources ${namespace} - ${err.message}`);
+      logger.error(`Error initializing resources ${namespace} - ${err.message}`);
       return errorResult(err.message);
     }
   };
@@ -113,7 +113,7 @@ export function createResourceInstallationHelper(
       const key = namespace;
       return (
         initializedResources.has(key)
-          ? await initializedResources.get(key)
+          ? initializedResources.get(key)
           : errorResult(`Unrecognized spaceId ${key}`)
       ) as InitializationPromise;
     },

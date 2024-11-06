@@ -188,24 +188,6 @@ describe('Routing versioned requests', () => {
     ).resolves.toMatchObject({ 'elastic-api-version': '2023-10-31' });
   });
 
-  it('returns the version in response headers, even for HTTP resources', async () => {
-    router.versioned
-      .get({ path: '/my-path', access: 'public', options: { httpResource: true } })
-      .addVersion({ validate: false, version: '2023-10-31' }, async (ctx, req, res) => {
-        return res.ok({ body: { foo: 'bar' } });
-      });
-
-    await server.start();
-
-    await expect(
-      supertest
-        .get('/my-path')
-        .set('Elastic-Api-Version', '2023-10-31')
-        .expect(200)
-        .then(({ header }) => header)
-    ).resolves.toMatchObject({ 'elastic-api-version': '2023-10-31' });
-  });
-
   it('runs response validation when in dev', async () => {
     router.versioned
       .get({ path: '/my-path', access: 'internal' })

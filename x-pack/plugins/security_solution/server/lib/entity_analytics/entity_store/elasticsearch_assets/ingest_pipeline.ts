@@ -67,7 +67,7 @@ const buildIngestPipeline = ({
     {
       set: {
         field: '@timestamp',
-        value: '{{entity.last_seen_timestamp}}',
+        value: '{{entity.lastSeenTimestamp}}',
       },
     },
     {
@@ -125,7 +125,7 @@ export const createPlatformPipeline = async ({
         managed_by: 'entity_store',
         managed: true,
       },
-      description: `Ingest pipeline for entity definition ${entityManagerDefinition.id}`,
+      description: `Ingest pipeline for entity defiinition ${entityManagerDefinition.id}`,
       processors: buildIngestPipeline({
         namespace: unitedDefinition.namespace,
         version: unitedDefinition.version,

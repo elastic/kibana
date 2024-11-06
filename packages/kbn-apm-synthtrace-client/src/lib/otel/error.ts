@@ -21,7 +21,6 @@ export interface OtelErrorDocument extends OtelDocument {
     'timestamp.us'?: number;
     'event.name'?: string;
     'error.id'?: string;
-    'error.grouping_key'?: string;
   };
 }
 

@@ -67,16 +67,9 @@ export function routes(coreSetup: CoreSetup<StartDeps, unknown>, logger: Logger)
       }
     );
 
-  /**
-   * @apiGroup DataVisualizer
-   *
-   * @api {get} /internal/data_visualizer/inference_endpoints Returns a list of inference endpoints which are currently deployed
-   * @apiName inferenceEndpoints
-   * @apiDescription Returns a list of inference endpoints where the underlying model is currently deployed
-   */
   router.versioned
     .get({
-      path: '/internal/data_visualizer/inference_endpoints',
+      path: '/internal/data_visualizer/inference_services',
       access: 'internal',
       options: {
         tags: ['access:fileUpload:analyzeFile'],
@@ -94,15 +87,7 @@ export function routes(coreSetup: CoreSetup<StartDeps, unknown>, logger: Logger)
             inference_id: '_all',
           });
 
-          const filteredInferenceEndpoints = endpoints.filter((endpoint) => {
-            return (
-              (endpoint.task_type === 'sparse_embedding' ||
-                endpoint.task_type === 'text_embedding') &&
-              endpoint.service_settings.num_allocations >= 0
-            );
-          });
-
-          return response.ok({ body: filteredInferenceEndpoints });
+          return response.ok({ body: endpoints });
         } catch (e) {
           return response.customError(wrapError(e));
         }

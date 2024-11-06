@@ -22,7 +22,6 @@ import { FormProvider } from 'react-hook-form';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { useDispatch, useSelector } from 'react-redux';
-import { isEmpty } from 'lodash';
 import { NoPermissionsTooltip } from '../../common/components/permissions';
 import {
   addNewGlobalParamAction,
@@ -81,29 +80,18 @@ export const AddParamFlyout = ({
   const onSubmit = (formData: SyntheticsParams) => {
     const { namespaces, ...paramRequest } = formData;
     const shareAcrossSpaces = namespaces?.includes(ALL_SPACES_ID);
-    const newParamData = {
-      ...paramRequest,
-    };
-
-    if (isEditingItem && id) {
-      // omit value if it's empty
-      if (isEmpty(newParamData.value)) {
-        // @ts-ignore this is a valid check
-        delete newParamData.value;
-      }
-    }
 
     if (isEditingItem && id) {
       dispatch(
         editGlobalParamAction.get({
           id,
-          paramRequest,
+          paramRequest: { ...paramRequest, share_across_spaces: shareAcrossSpaces },
         })
       );
     } else {
       dispatch(
         addNewGlobalParamAction.get({
-          ...newParamData,
+          ...paramRequest,
           share_across_spaces: shareAcrossSpaces,
         })
       );

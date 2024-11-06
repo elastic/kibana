@@ -76,7 +76,7 @@ describe('Active node', () => {
     ];
 
     const { findByTestId } = renderNavigation({
-      navTreeDef: of({ id: 'es', body: navigationBody }),
+      navTreeDef: of({ body: navigationBody }),
       services: { activeNodes$: getActiveNodes$() },
     });
 

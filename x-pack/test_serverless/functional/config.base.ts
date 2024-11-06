@@ -36,11 +36,10 @@ export function createTestConfig(options: CreateTestConfigOptions) {
         serverArgs: [
           ...svlSharedConfig.get('kbnTestServer.serverArgs'),
           `--serverless=${options.serverlessProject}`,
-          // Ensures the existing E2E tests are backwards compatible with the old rule create flyout
-          // Remove this experiment once all of the migration has been completed
-          `--xpack.trigger_actions_ui.enableExperimental=${JSON.stringify([
-            'isUsingRuleCreateFlyout',
-          ])}`,
+          // custom native roles are enabled only for search and security projects
+          ...(options.serverlessProject !== 'oblt'
+            ? ['--xpack.security.roleManagementEnabled=true']
+            : []),
           ...(options.kbnServerArgs ?? []),
         ],
       },

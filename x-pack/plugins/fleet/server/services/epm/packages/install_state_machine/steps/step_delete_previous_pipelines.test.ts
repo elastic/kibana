@@ -24,8 +24,6 @@ import {
   deletePreviousPipelines,
 } from '../../../elasticsearch/ingest_pipeline';
 
-import { createArchiveIteratorFromMap } from '../../../archive/archive_iterator';
-
 import { stepDeletePreviousPipelines } from './step_delete_previous_pipelines';
 
 jest.mock('../../../elasticsearch/ingest_pipeline');
@@ -86,7 +84,6 @@ describe('stepDeletePreviousPipelines', () => {
         owner: { github: 'elastic/fleet' },
       } as any,
       assetsMap: new Map(),
-      archiveIterator: createArchiveIteratorFromMap(new Map()),
       paths: [],
     };
     appContextService.start(
@@ -279,7 +276,6 @@ describe('stepDeletePreviousPipelines', () => {
         owner: { github: 'elastic/fleet' },
       } as any,
       assetsMap: new Map(),
-      archiveIterator: createArchiveIteratorFromMap(new Map()),
       paths: [],
     };
     appContextService.start(

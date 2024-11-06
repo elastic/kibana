@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import useObservable from 'react-use/lib/useObservable';
+import { useObservable } from 'react-use';
 import { MINIMUM_LICENSE_TYPE } from '../../../common/constants';
 import { useKibana } from './use_kibana';
 import type { RenderUpselling } from '../../services';

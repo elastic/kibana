@@ -21,6 +21,7 @@ import { createNewAPIKeySet, createRuleSavedObject } from '../../../../rules_cli
 import { RulesClientContext } from '../../../../rules_client/types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { CloneRuleParams } from './types';
+import { RuleAttributes } from '../../../../data/rule/types';
 import { RuleDomain, RuleParams } from '../../types';
 import { getDecryptedRuleSo, getRuleSo } from '../../../../data/rule';
 import { transformRuleAttributesToRuleDomain, transformRuleDomainToRule } from '../../transforms';
@@ -39,7 +40,7 @@ export async function cloneRule<Params extends RuleParams = never>(
     throw Boom.badRequest(`Error validating clone data - ${error.message}`);
   }
 
-  let ruleSavedObject: SavedObject<RawRule>;
+  let ruleSavedObject: SavedObject<RuleAttributes>;
 
   try {
     ruleSavedObject = await withSpan(
@@ -77,7 +78,8 @@ export async function cloneRule<Params extends RuleParams = never>(
    * functionality until we resolve our difference
    */
   if (
-    isDetectionEngineAADRuleType(ruleSavedObject) ||
+    // TODO (http-versioning): Remove this cast to RawRule
+    isDetectionEngineAADRuleType(ruleSavedObject as SavedObject<RawRule>) ||
     ruleSavedObject.attributes.consumer === AlertConsumers.SIEM
   ) {
     throw Boom.badRequest(
@@ -124,7 +126,7 @@ export async function cloneRule<Params extends RuleParams = never>(
     errorMessage: 'Error creating rule: could not create API key',
   });
 
-  const ruleAttributes: RawRule = {
+  const ruleAttributes: RuleAttributes = {
     ...ruleSavedObject.attributes,
     name: ruleName,
     ...apiKeyAttributes,
@@ -137,7 +139,10 @@ export async function cloneRule<Params extends RuleParams = never>(
     muteAll: false,
     mutedInstanceIds: [],
     executionStatus: getRuleExecutionStatusPendingAttributes(lastRunTimestamp.toISOString()),
-    monitoring: getDefaultMonitoring(lastRunTimestamp.toISOString()),
+    // TODO (http-versioning): Remove this cast to RuleAttributes
+    monitoring: getDefaultMonitoring(
+      lastRunTimestamp.toISOString()
+    ) as RuleAttributes['monitoring'],
     revision: 0,
     scheduledTaskId: null,
     running: false,
@@ -163,7 +168,7 @@ export async function cloneRule<Params extends RuleParams = never>(
       })
   );
 
-  // Convert ES RawRule back to domain rule object
+  // Convert ES RuleAttributes back to domain rule object
   const ruleDomain: RuleDomain<Params> = transformRuleAttributesToRuleDomain<Params>(
     clonedRuleAttributes.attributes,
     {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { IconType } from '@elastic/eui';
-import type { ToolSchema } from '@kbn/inference-common';
+import type { ToolSchema } from '@kbn/inference-plugin/common';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
 import type { ObservabilityAIAssistantChatService } from '../public';
 import type { FunctionResponse } from './functions/types';

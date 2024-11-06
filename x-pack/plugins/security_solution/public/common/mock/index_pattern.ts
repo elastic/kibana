@@ -110,8 +110,3 @@ export const mockIndexPattern: SecuritySolutionDataViewBase = {
 };
 
 export const mockIndexNames = ['filebeat-*', 'auditbeat-*', 'packetbeat-*'];
-
-export const mockDataViewSpec = {
-  fields: Object.fromEntries(mockIndexPattern.fields.map((f) => [f.name, f])),
-  title: 'filebeat-*,auditbeat-*,packetbeat-*',
-};

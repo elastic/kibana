@@ -16,4 +16,3 @@ export {
   validateCloudRemoteAddress,
   convertCloudRemoteAddressToProxyConnection,
 } from './validate_cloud_url';
-export { validateNodeConnections } from './validate_node_connections';

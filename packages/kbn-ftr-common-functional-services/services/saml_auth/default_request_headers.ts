@@ -14,7 +14,6 @@ export const COMMON_REQUEST_HEADERS = {
 // possible change in 9.0 to match serverless
 const STATEFUL_INTERNAL_REQUEST_HEADERS = {
   ...COMMON_REQUEST_HEADERS,
-  'x-elastic-internal-origin': 'kibana',
 };
 
 const SERVERLESS_INTERNAL_REQUEST_HEADERS = {

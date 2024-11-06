@@ -10,7 +10,8 @@ import { SavedObjectReference } from '@kbn/core/server';
 import { ruleExecutionStatusValues } from '../constants';
 import { getRuleSnoozeEndTime } from '../../../lib';
 import { RuleDomain, Monitoring, RuleParams } from '../types';
-import { PartialRule, RawRule, RawRuleExecutionStatus, SanitizedRule } from '../../../types';
+import { PartialRule, SanitizedRule } from '../../../types';
+import { RuleAttributes, RuleExecutionStatusAttributes } from '../../../data/rule/types';
 import { UntypedNormalizedRuleType } from '../../../rule_type_registry';
 import { injectReferencesIntoParams } from '../../../rules_client/common';
 import { getActiveScheduledSnoozes } from '../../../lib/is_rule_snoozed';
@@ -31,7 +32,7 @@ const INITIAL_LAST_RUN_METRICS = {
 const transformEsExecutionStatus = (
   logger: Logger,
   ruleId: string,
-  esRuleExecutionStatus: RawRuleExecutionStatus
+  esRuleExecutionStatus: RuleExecutionStatusAttributes
 ): RuleDomain['executionStatus'] => {
   const {
     lastExecutionDate,
@@ -88,7 +89,7 @@ export const updateMonitoring = ({
 const transformEsMonitoring = (
   logger: Logger,
   ruleId: string,
-  monitoring?: RawRule['monitoring']
+  monitoring?: RuleAttributes['monitoring']
 ): Monitoring | undefined => {
   if (!monitoring) {
     return undefined;
@@ -119,7 +120,7 @@ interface TransformEsToRuleParams {
 }
 
 export const transformRuleAttributesToRuleDomain = <Params extends RuleParams = never>(
-  esRule: RawRule,
+  esRule: RuleAttributes,
   transformParams: TransformEsToRuleParams,
   isSystemAction: (connectorId: string) => boolean
 ): RuleDomain<Params> => {
@@ -250,6 +251,5 @@ export const transformRuleAttributesToRuleDomain = <Params extends RuleParams = 
     }
   }
 
-  // nullable rrule bymonth?
   return rule;
 };

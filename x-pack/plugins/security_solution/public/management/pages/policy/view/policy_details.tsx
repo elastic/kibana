@@ -60,7 +60,7 @@ export const PolicyDetails = React.memo(() => {
 
   const headerRightContent = (
     <AgentsSummary
-      total={policyAgentStatusSummary?.active ?? 0}
+      total={policyAgentStatusSummary?.total ?? 0}
       online={policyAgentStatusSummary?.online ?? 0}
       offline={policyAgentStatusSummary?.offline ?? 0}
       error={policyAgentStatusSummary?.error ?? 0}

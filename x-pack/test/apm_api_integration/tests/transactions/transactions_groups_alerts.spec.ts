@@ -137,8 +137,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       after(() => apmSynthtraceEsClient.clean());
 
-      // FLAKY: https://github.com/elastic/kibana/issues/198866
-      describe.skip('Transaction groups with avg transaction duration alerts', () => {
+      describe('Transaction groups with avg transaction duration alerts', () => {
         let ruleId: string;
         let alerts: ApmAlertFields[];
 

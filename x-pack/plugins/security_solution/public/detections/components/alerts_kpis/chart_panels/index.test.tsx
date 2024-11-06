@@ -156,7 +156,6 @@ describe('ChartPanels', () => {
       indicesExist: true,
       indexPattern: {},
       browserFields: mockBrowserFields,
-      sourcererDataView: {},
     });
 
     (useAlertsLocalStorage as jest.Mock).mockReturnValue({

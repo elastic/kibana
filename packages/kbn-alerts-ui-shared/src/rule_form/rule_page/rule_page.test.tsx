@@ -61,8 +61,6 @@ const formDataMock: RuleFormData = {
   },
 };
 
-const onCancel = jest.fn();
-
 useRuleFormState.mockReturnValue({
   plugins: {
     application: {
@@ -86,6 +84,7 @@ useRuleFormState.mockReturnValue({
 });
 
 const onSave = jest.fn();
+const returnUrl = 'management';
 
 describe('rulePage', () => {
   afterEach(() => {
@@ -93,7 +92,7 @@ describe('rulePage', () => {
   });
 
   test('renders correctly', () => {
-    render(<RulePage onCancel={onCancel} onSave={onSave} />);
+    render(<RulePage returnUrl={returnUrl} onSave={onSave} />);
 
     expect(screen.getByText(RULE_FORM_PAGE_RULE_DEFINITION_TITLE)).toBeInTheDocument();
     expect(screen.getByText(RULE_FORM_PAGE_RULE_ACTIONS_TITLE)).toBeInTheDocument();
@@ -101,7 +100,7 @@ describe('rulePage', () => {
   });
 
   test('should call onSave when save button is pressed', () => {
-    render(<RulePage onCancel={onCancel} onSave={onSave} />);
+    render(<RulePage returnUrl={returnUrl} onSave={onSave} />);
 
     fireEvent.click(screen.getByTestId('rulePageFooterSaveButton'));
     fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
@@ -113,16 +112,16 @@ describe('rulePage', () => {
   });
 
   test('should call onCancel when the cancel button is clicked', () => {
-    render(<RulePage onCancel={onCancel} onSave={onSave} />);
+    render(<RulePage returnUrl={returnUrl} onSave={onSave} />);
 
     fireEvent.click(screen.getByTestId('rulePageFooterCancelButton'));
-    expect(onCancel).toHaveBeenCalled();
+    expect(navigateToUrl).toHaveBeenCalledWith('management');
   });
 
   test('should call onCancel when the return button is clicked', () => {
-    render(<RulePage onCancel={onCancel} onSave={onSave} />);
+    render(<RulePage returnUrl={returnUrl} onSave={onSave} />);
 
     fireEvent.click(screen.getByTestId('rulePageReturnButton'));
-    expect(onCancel).toHaveBeenCalled();
+    expect(navigateToUrl).toHaveBeenCalledWith('management');
   });
 });

@@ -9,7 +9,6 @@ import type {
   EuiBasicTableProps,
   EuiGlobalToastListToast as Toast,
   EuiTableRowCellProps,
-  EuiTitleSize,
 } from '@elastic/eui';
 import {
   EuiBasicTable,
@@ -108,7 +107,6 @@ export interface BasicTableProps<T> {
   dataTestSubj?: string;
   headerCount: number;
   headerFilters?: string | React.ReactNode;
-  titleSize?: EuiTitleSize;
   headerSupplement?: React.ReactElement;
   headerTitle: string | React.ReactElement;
   headerTooltip?: string;
@@ -140,7 +138,7 @@ export interface Columns<T, U = T> {
   name: string | React.ReactNode;
   render?: (item: T, node: U) => React.ReactNode;
   sortable?: boolean | Func<T>;
-  truncateText?: boolean | { lines: number };
+  truncateText?: boolean;
   width?: string;
 }
 
@@ -150,7 +148,6 @@ const PaginatedTableComponent: FC<SiemTables> = ({
   dataTestSubj = DEFAULT_DATA_TEST_SUBJ,
   headerCount,
   headerFilters,
-  titleSize,
   headerSupplement,
   headerTitle,
   headerTooltip,
@@ -280,7 +277,6 @@ const PaginatedTableComponent: FC<SiemTables> = ({
     <InspectButtonContainer show={!loadingInitial}>
       <Panel data-test-subj={`${dataTestSubj}-loading-${loading}`} loading={loading}>
         <HeaderSection
-          titleSize={titleSize}
           toggleStatus={toggleStatus}
           toggleQuery={toggleQuery}
           headerFilters={headerFilters}

@@ -31,10 +31,10 @@ describe('AlertsSettings', () => {
     );
 
     const rangeSlider = screen.getByTestId('alertsRange');
-    fireEvent.change(rangeSlider, { target: { value: '90' } });
+    fireEvent.change(rangeSlider, { target: { value: '10' } });
 
     expect(setUpdatedKnowledgeBaseSettings).toHaveBeenCalledWith({
-      latestAlerts: 90,
+      latestAlerts: 10,
     });
   });
 });

@@ -268,12 +268,6 @@ export default ({ getService }: FtrProviderContext): void => {
           type: CustomFieldTypes.TOGGLE,
           required: false,
         },
-        {
-          key: 'number_field_1',
-          label: 'Number field 1',
-          type: CustomFieldTypes.NUMBER,
-          required: false,
-        },
       ];
 
       const templates = [
@@ -298,11 +292,6 @@ export default ({ getService }: FtrProviderContext): void => {
                 key: 'toggle_field_1',
                 value: true,
                 type: CustomFieldTypes.TOGGLE,
-              },
-              {
-                key: 'number_field_1',
-                value: 123,
-                type: CustomFieldTypes.NUMBER,
               },
             ],
             connector: {

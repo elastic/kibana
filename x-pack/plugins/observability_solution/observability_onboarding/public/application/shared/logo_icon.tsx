@@ -27,7 +27,6 @@ export type SupportedLogo =
   | 'mysql'
   | 'postgresql'
   | 'redis'
-  | 'ruby'
   | 'haproxy'
   | 'rabbitmq'
   | 'kafka'
@@ -55,7 +54,6 @@ export function isSupportedLogo(logo: string): logo is SupportedLogo {
     'mysql',
     'postgresql',
     'redis',
-    'ruby',
     'haproxy',
     'rabbitmq',
     'kafka',

@@ -14,10 +14,9 @@ export const setMonitorDetailsLocationAction = createAction<string>(
   '[MONITOR SUMMARY] SET LOCATION'
 );
 
-export const getMonitorAction = createAsyncAction<
-  { monitorId: string; spaceId?: string },
-  SyntheticsMonitorWithId
->('[MONITOR DETAILS] GET MONITOR');
+export const getMonitorAction = createAsyncAction<{ monitorId: string }, SyntheticsMonitorWithId>(
+  '[MONITOR DETAILS] GET MONITOR'
+);
 
 export const getMonitorLastRunAction = createAsyncAction<
   { monitorId: string; locationId: string },

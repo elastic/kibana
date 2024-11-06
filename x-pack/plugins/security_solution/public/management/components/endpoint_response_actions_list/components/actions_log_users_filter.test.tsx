@@ -27,7 +27,7 @@ describe('Users filter', () => {
   const filterPrefix = 'users-filter';
   let onChangeUsersFilter: jest.Mock;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     onChangeUsersFilter = jest.fn();
     mockedContext = createAppRootMockRenderer();
     ({ history } = mockedContext);
@@ -56,8 +56,8 @@ describe('Users filter', () => {
     render();
 
     const searchInput = renderResult.getByTestId(`${testPrefix}-${filterPrefix}-search`);
-    await userEvent.type(searchInput, 'usernameX', { delay: 10 });
-    await userEvent.keyboard('{enter}');
+    await userEvent.type(searchInput, 'usernameX');
+    await userEvent.type(searchInput, '{enter}');
     expect(onChangeUsersFilter).toHaveBeenCalledWith(['usernameX']);
   });
 
@@ -65,8 +65,8 @@ describe('Users filter', () => {
     render();
 
     const searchInput = renderResult.getByTestId(`${testPrefix}-${filterPrefix}-search`);
-    await userEvent.type(searchInput, 'usernameX,usernameY,usernameZ', { delay: 10 });
-    await userEvent.keyboard('{enter}');
+    await userEvent.type(searchInput, 'usernameX,usernameY,usernameZ');
+    await userEvent.type(searchInput, '{enter}');
     expect(onChangeUsersFilter).toHaveBeenCalledWith(['usernameX', 'usernameY', 'usernameZ']);
   });
 
@@ -74,8 +74,8 @@ describe('Users filter', () => {
     render();
 
     const searchInput = renderResult.getByTestId(`${testPrefix}-${filterPrefix}-search`);
-    await userEvent.type(searchInput, '   usernameX   ', { delay: 10 });
-    await userEvent.keyboard('{enter}');
+    await userEvent.type(searchInput, '   usernameX   ');
+    await userEvent.type(searchInput, '{enter}');
     expect(onChangeUsersFilter).toHaveBeenCalledWith(['usernameX']);
   });
 
@@ -83,8 +83,8 @@ describe('Users filter', () => {
     render();
 
     const searchInput = renderResult.getByTestId(`${testPrefix}-${filterPrefix}-search`);
-    await userEvent.type(searchInput, '   , usernameX ,usernameY    ,       ', { delay: 10 });
-    await userEvent.keyboard('{enter}');
+    await userEvent.type(searchInput, '   , usernameX ,usernameY    ,       ');
+    await userEvent.type(searchInput, '{enter}');
     expect(onChangeUsersFilter).toHaveBeenCalledWith(['usernameX', 'usernameY']);
   });
 });

@@ -403,7 +403,7 @@ export async function getActions(
   const { getPolicies, getPolicyFields } = getPolicyRetriever(resourceRetriever);
 
   const callbacks = {
-    getFieldsByType: resourceRetriever?.getColumnsFor ? getFieldsByType : undefined,
+    getFieldsByType: resourceRetriever?.getFieldsFor ? getFieldsByType : undefined,
     getSources: resourceRetriever?.getSources ? getSources : undefined,
     getPolicies: resourceRetriever?.getPolicies ? getPolicies : undefined,
     getPolicyFields: resourceRetriever?.getPolicies ? getPolicyFields : undefined,

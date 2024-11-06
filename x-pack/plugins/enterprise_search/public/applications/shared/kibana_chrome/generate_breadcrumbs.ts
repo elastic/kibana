@@ -22,8 +22,6 @@ import {
   VECTOR_SEARCH_PLUGIN,
   WORKPLACE_SEARCH_PLUGIN,
   SEMANTIC_SEARCH_PLUGIN,
-  APPLICATIONS_PLUGIN,
-  GETTING_STARTED_TITLE,
 } from '../../../../common/constants';
 
 import { stripLeadingSlash } from '../../../../common/strip_slashes';
@@ -128,11 +126,7 @@ export const useEnterpriseSearchBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
   ]);
 
 export const useAnalyticsBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
-  useSearchBreadcrumbs([
-    { text: APPLICATIONS_PLUGIN.NAV_TITLE },
-    { text: ANALYTICS_PLUGIN.NAME, path: '/' },
-    ...breadcrumbs,
-  ]);
+  useSearchBreadcrumbs([{ text: ANALYTICS_PLUGIN.NAME, path: '/' }, ...breadcrumbs]);
 
 export const useElasticsearchBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
   useSearchBreadcrumbs([
@@ -167,25 +161,13 @@ export const useSearchExperiencesBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =
   useSearchBreadcrumbs([{ text: SEARCH_EXPERIENCES_PLUGIN.NAV_TITLE, path: '/' }, ...breadcrumbs]);
 
 export const useEnterpriseSearchApplicationsBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
-  useSearchBreadcrumbs([{ text: APPLICATIONS_PLUGIN.NAV_TITLE }, ...breadcrumbs]);
+  useSearchBreadcrumbs(breadcrumbs);
 
 export const useAiSearchBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
-  useSearchBreadcrumbs([
-    { text: GETTING_STARTED_TITLE },
-    { text: AI_SEARCH_PLUGIN.NAME, path: '/' },
-    ...breadcrumbs,
-  ]);
+  useSearchBreadcrumbs([{ text: AI_SEARCH_PLUGIN.NAME, path: '/' }, ...breadcrumbs]);
 
 export const useVectorSearchBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
-  useSearchBreadcrumbs([
-    { text: GETTING_STARTED_TITLE },
-    { text: VECTOR_SEARCH_PLUGIN.NAV_TITLE, path: '/' },
-    ...breadcrumbs,
-  ]);
+  useSearchBreadcrumbs([{ text: VECTOR_SEARCH_PLUGIN.NAV_TITLE, path: '/' }, ...breadcrumbs]);
 
 export const useSemanticSearchBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
-  useSearchBreadcrumbs([
-    { text: GETTING_STARTED_TITLE },
-    { text: SEMANTIC_SEARCH_PLUGIN.NAME, path: '/' },
-    ...breadcrumbs,
-  ]);
+  useSearchBreadcrumbs([{ text: SEMANTIC_SEARCH_PLUGIN.NAME, path: '/' }, ...breadcrumbs]);

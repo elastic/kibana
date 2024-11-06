@@ -8,4 +8,3 @@
  */
 
 export { registerCoreUsageCollector } from './core_usage_collector';
-export { fetchDeprecatedApiCounterStats } from './fetch_deprecated_api_counters';

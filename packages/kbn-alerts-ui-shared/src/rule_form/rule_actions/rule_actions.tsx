@@ -18,7 +18,6 @@ import { ActionConnector, RuleAction, RuleFormParamsErrors } from '../../common/
 import { DEFAULT_FREQUENCY, MULTI_CONSUMER_RULE_TYPE_IDS } from '../constants';
 import { RuleActionsItem } from './rule_actions_item';
 import { RuleActionsSystemActionsItem } from './rule_actions_system_actions_item';
-import { getDefaultParams } from '../utils';
 
 export const RuleActions = () => {
   const [isConnectorModalOpen, setIsConnectorModalOpen] = useState<boolean>(false);
@@ -45,15 +44,7 @@ export const RuleActions = () => {
     async (connector: ActionConnector) => {
       const { id, actionTypeId } = connector;
       const uuid = uuidv4();
-      const group = selectedRuleType.defaultActionGroupId;
-      const actionTypeModel = actionTypeRegistry.get(actionTypeId);
-
-      const params =
-        getDefaultParams({
-          group,
-          ruleType: selectedRuleType,
-          actionTypeModel,
-        }) || {};
+      const params = {};
 
       dispatch({
         type: 'addAction',
@@ -62,7 +53,7 @@ export const RuleActions = () => {
           actionTypeId,
           uuid,
           params,
-          group,
+          group: selectedRuleType.defaultActionGroupId,
           frequency: DEFAULT_FREQUENCY,
         },
       });

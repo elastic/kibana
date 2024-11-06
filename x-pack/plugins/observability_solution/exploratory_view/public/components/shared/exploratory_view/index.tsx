@@ -60,7 +60,7 @@ export function ExploratoryViewPage({
         }),
       },
     ],
-    { app, classicOnly: true }
+    { app }
   );
 
   const kbnUrlStateStorage = useSessionStorage

@@ -6,28 +6,7 @@
  */
 
 import { rangeQuery, kqlQuery } from '@kbn/observability-plugin/server';
-import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
-import { asMutableArray } from '../../../../common/utils/as_mutable_array';
-import { maybe } from '../../../../common/utils/maybe';
-import {
-  AGENT_NAME,
-  AGENT_VERSION,
-  AT_TIMESTAMP,
-  ERROR_EXCEPTION,
-  ERROR_GROUP_ID,
-  ERROR_ID,
-  ERROR_EXC_MESSAGE,
-  ERROR_EXC_HANDLED,
-  ERROR_EXC_TYPE,
-  PROCESSOR_EVENT,
-  PROCESSOR_NAME,
-  SERVICE_NAME,
-  TIMESTAMP_US,
-  TRACE_ID,
-  TRANSACTION_ID,
-  ERROR_STACK_TRACE,
-  SPAN_ID,
-} from '../../../../common/es_fields/apm';
+import { ERROR_ID, SERVICE_NAME } from '../../../../common/es_fields/apm';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { ApmDocumentType } from '../../../../common/document_type';
 import { RollupInterval } from '../../../../common/rollup';
@@ -38,15 +17,7 @@ import { APMError } from '../../../../typings/es_schemas/ui/apm_error';
 
 export interface ErrorSampleDetailsResponse {
   transaction: Transaction | undefined;
-  error: Omit<APMError, 'transaction' | 'error'> & {
-    transaction?: { id?: string; type?: string };
-    error: {
-      id: string;
-    } & Omit<APMError['error'], 'exception' | 'log'> & {
-        exception?: APMError['error']['exception'];
-        log?: APMError['error']['log'];
-      };
-  };
+  error: APMError;
 }
 
 export async function getErrorSampleDetails({
@@ -65,29 +36,7 @@ export async function getErrorSampleDetails({
   apmEventClient: APMEventClient;
   start: number;
   end: number;
-}): Promise<Partial<ErrorSampleDetailsResponse>> {
-  const requiredFields = asMutableArray([
-    AGENT_NAME,
-    PROCESSOR_EVENT,
-    TRACE_ID,
-    TIMESTAMP_US,
-    AT_TIMESTAMP,
-    SERVICE_NAME,
-    ERROR_ID,
-    ERROR_GROUP_ID,
-  ] as const);
-
-  const optionalFields = asMutableArray([
-    TRANSACTION_ID,
-    SPAN_ID,
-    AGENT_VERSION,
-    PROCESSOR_NAME,
-    ERROR_STACK_TRACE,
-    ERROR_EXC_MESSAGE,
-    ERROR_EXC_HANDLED,
-    ERROR_EXC_TYPE,
-  ] as const);
-
+}): Promise<ErrorSampleDetailsResponse> {
   const params = {
     apm: {
       sources: [
@@ -111,29 +60,15 @@ export async function getErrorSampleDetails({
           ],
         },
       },
-      fields: [...requiredFields, ...optionalFields],
-      _source: [ERROR_EXCEPTION, 'error.log'],
     },
   };
 
   const resp = await apmEventClient.search('get_error_sample_details', params);
-  const hit = maybe(resp.hits.hits[0]);
+  const error = resp.hits.hits[0]?._source;
+  const transactionId = error?.transaction?.id;
+  const traceId = error?.trace?.id;
 
-  if (!hit) {
-    return {
-      transaction: undefined,
-      error: undefined,
-    };
-  }
-
-  const source = 'error' in hit._source ? hit._source : undefined;
-
-  const errorFromFields = unflattenKnownApmEventFields(hit.fields, requiredFields);
-
-  const transactionId = errorFromFields.transaction?.id ?? errorFromFields.span?.id;
-  const traceId = errorFromFields.trace.id;
-
-  let transaction: Transaction | undefined;
+  let transaction;
   if (transactionId && traceId) {
     transaction = await getTransaction({
       transactionId,
@@ -146,20 +81,6 @@ export async function getErrorSampleDetails({
 
   return {
     transaction,
-    error: {
-      ...errorFromFields,
-      processor: {
-        name: errorFromFields.processor.name as 'error',
-        event: errorFromFields.processor.event as 'error',
-      },
-      error: {
-        ...errorFromFields.error,
-        exception:
-          (source?.error.exception?.length ?? 0) > 1
-            ? source?.error.exception
-            : errorFromFields?.error.exception && [errorFromFields.error.exception],
-        log: source?.error?.log,
-      },
-    },
+    error,
   };
 }

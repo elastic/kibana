@@ -9,7 +9,6 @@
 
 export {
   SamlSessionManager,
-  type GetCookieOptions,
-  type HostOptions,
   type SamlSessionManagerOptions,
+  type HostOptions,
 } from './session_manager';

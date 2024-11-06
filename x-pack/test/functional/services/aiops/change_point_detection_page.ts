@@ -131,12 +131,6 @@ export function ChangePointDetectionPageProvider(
     },
 
     async openPanelContextMenu(panelIndex: number) {
-      // Check if already open
-      const isOpen = await testSubjects.exists('aiopsChangePointDetectionAttachButton');
-      if (isOpen) {
-        return;
-      }
-
       await testSubjects.click(
         `aiopsChangePointPanel_${panelIndex} > aiopsChangePointDetectionContextMenuButton`
       );

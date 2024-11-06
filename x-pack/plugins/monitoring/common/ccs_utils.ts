@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { isCCSRemoteIndexName } from '@kbn/es-query';
 import type { MonitoringConfig } from '../server/config';
 
 /**
@@ -68,11 +67,13 @@ export function prefixIndexPatternWithCcs(
  * @return {String} {@code null} if none. Otherwise the cluster prefix.
  */
 export function parseCrossClusterPrefix(indexName: string): string | null {
-  const isCcs = isCCSRemoteIndexName(indexName);
-  if (!isCcs) {
+  const colonIndex = indexName.indexOf(':');
+
+  if (colonIndex === -1) {
     return null;
   }
 
-  const colonIndex = indexName.indexOf(':');
+  // if we found a : in the index name, then cross-cluster search (CCS) was used to find the cluster
+  // and we _should_ use it when we search explicitly for this cluster (to avoid inefficiently checking other monitoring _clusters_)
   return indexName.substr(0, colonIndex);
 }

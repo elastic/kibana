@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { get, has, omit, isObject, toString as fpToString } from 'lodash/fp';
-import { set } from '@kbn/safer-lodash-set/fp';
+import { get, has, set, omit, isObject, toString as fpToString } from 'lodash/fp';
 import type { Action, Middleware } from 'redux';
 import type { CoreStart } from '@kbn/core/public';
 import type { Filter, MatchAllFilter } from '@kbn/es-query';

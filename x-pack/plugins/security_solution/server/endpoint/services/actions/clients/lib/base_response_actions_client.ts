@@ -20,7 +20,7 @@ import {
 } from '../../../../../lib/telemetry/event_based/events';
 import { NotFoundError } from '../../../../errors';
 import { fetchActionRequestById } from '../../utils/fetch_action_request_by_id';
-import { SimpleMemCache } from '../../../../lib/simple_mem_cache';
+import { SimpleMemCache } from './simple_mem_cache';
 import {
   fetchActionResponses,
   fetchEndpointActionResponses,
@@ -581,10 +581,6 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
   >(
     options: ResponseActionsClientWriteActionResponseToEndpointIndexOptions<TOutputContent>
   ): Promise<LogsEndpointActionResponse<TOutputContent>> {
-    // FIXME:PT need to ensure we use a index below that has the proper `namespace` when agent type is Endpoint
-    //        Background: Endpoint responses require that the document be written to an index that has the
-    //        correct `namespace` as defined by the Integration/Agent policy and that logic is not currently implemented.
-
     const doc = this.buildActionResponseEsDoc(options);
 
     this.log.debug(() => `Writing response action response:\n${stringify(doc)}`);
@@ -598,7 +594,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
       .catch((err) => {
         throw new ResponseActionsClientError(
           `Failed to create action response document: ${err.message}`,
-          500,
+          err.statusCode ?? 500,
           err
         );
       });

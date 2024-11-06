@@ -115,8 +115,7 @@ export class TaskRunnerFactory {
         } = await getActionTaskParams(
           actionTaskExecutorParams,
           encryptedSavedObjectsClient,
-          spaceIdToNamespace,
-          logger
+          spaceIdToNamespace
         );
 
         const { spaceId } = actionTaskExecutorParams;
@@ -140,18 +139,12 @@ export class TaskRunnerFactory {
             ...getSource(references, source),
           });
         } catch (e) {
-          const errorSource =
-            e instanceof ActionTypeDisabledError
-              ? TaskErrorSource.USER
-              : getErrorSource(e) || TaskErrorSource.FRAMEWORK;
-          logger.error(`Action '${actionId}' failed: ${e.message}`, {
-            tags: ['connector-run-failed', `${errorSource}-error`],
-          });
+          logger.error(`Action '${actionId}' failed: ${e.message}`);
           if (e instanceof ActionTypeDisabledError) {
             // We'll stop re-trying due to action being forbidden
-            throwUnrecoverableError(createTaskRunError(e, errorSource));
+            throwUnrecoverableError(createTaskRunError(e, TaskErrorSource.USER));
           }
-          throw createTaskRunError(e, errorSource);
+          throw createTaskRunError(e, getErrorSource(e) || TaskErrorSource.FRAMEWORK);
         }
 
         inMemoryMetrics.increment(IN_MEMORY_METRICS.ACTION_EXECUTIONS);
@@ -162,9 +155,7 @@ export class TaskRunnerFactory {
           if (executorResult.serviceMessage) {
             message = `${message}: ${executorResult.serviceMessage}`;
           }
-          logger.error(`Action '${actionId}' failed: ${message}`, {
-            tags: ['connector-run-failed', `${executorResult.errorSource}-error`],
-          });
+          logger.error(`Action '${actionId}' failed: ${message}`);
 
           // Task manager error handler only kicks in when an error thrown (at this time)
           // So what we have to do is throw when the return status is `error`.
@@ -184,8 +175,7 @@ export class TaskRunnerFactory {
         } = await getActionTaskParams(
           actionTaskExecutorParams,
           encryptedSavedObjectsClient,
-          spaceIdToNamespace,
-          logger
+          spaceIdToNamespace
         );
 
         const request = getFakeRequest(apiKey);
@@ -249,8 +239,7 @@ function getFakeRequest(apiKey?: string) {
 async function getActionTaskParams(
   executorParams: ActionTaskExecutorParams,
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient,
-  spaceIdToNamespace: SpaceIdToNamespaceFunction,
-  logger: Logger
+  spaceIdToNamespace: SpaceIdToNamespaceFunction
 ): Promise<TaskParams> {
   const { spaceId } = executorParams;
   const namespace = spaceIdToNamespace(spaceId);
@@ -279,17 +268,10 @@ async function getActionTaskParams(
         },
       };
     } catch (e) {
-      const errorSource = SavedObjectsErrorHelpers.isNotFoundError(e)
-        ? TaskErrorSource.USER
-        : TaskErrorSource.FRAMEWORK;
-      logger.error(
-        `Failed to load action task params ${executorParams.actionTaskParamsId}: ${e.message}`,
-        { tags: ['connector-run-failed', `${errorSource}-error`] }
-      );
       if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
-        throw createRetryableError(createTaskRunError(e, errorSource), true);
+        throw createRetryableError(createTaskRunError(e, TaskErrorSource.USER), true);
       }
-      throw createRetryableError(createTaskRunError(e, errorSource), true);
+      throw createRetryableError(createTaskRunError(e, TaskErrorSource.FRAMEWORK), true);
     }
   } else {
     return { attributes: executorParams.taskParams, references: executorParams.references ?? [] };

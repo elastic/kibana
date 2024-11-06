@@ -10,10 +10,6 @@ import type { Services } from '../common/services';
 export const subscribeBreadcrumbs = (services: Services) => {
   const { securitySolution, chrome } = services;
   securitySolution.getBreadcrumbsNav$().subscribe((breadcrumbsNav) => {
-    chrome.setBreadcrumbs([...breadcrumbsNav.leading, ...breadcrumbsNav.trailing], {
-      project: {
-        value: breadcrumbsNav.trailing,
-      },
-    });
+    chrome.setBreadcrumbs([...breadcrumbsNav.leading, ...breadcrumbsNav.trailing]);
   });
 };

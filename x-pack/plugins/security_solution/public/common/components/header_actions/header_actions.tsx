@@ -6,12 +6,13 @@
  */
 
 import React, { useMemo, useCallback, memo } from 'react';
-import { EuiButtonIcon, EuiToolTip, EuiCheckbox } from '@elastic/eui';
+import type { EuiDataGridSorting, EuiDataGridSchemaDetector } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip, useDataGridColumnSorting, EuiCheckbox } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 
 import styled from 'styled-components';
-import type { HeaderActionProps } from '../../../../common/types';
-import { TimelineId } from '../../../../common/types';
+import type { HeaderActionProps, SortDirection } from '../../../../common/types';
+import { TimelineTabs, TimelineId } from '../../../../common/types';
 import { isFullScreen } from '../../../timelines/components/timeline/body/column_headers';
 import { isActiveTimeline } from '../../../helpers';
 import { getColumnHeader } from '../../../timelines/components/timeline/body/column_headers/helpers';
@@ -20,11 +21,27 @@ import { useGlobalFullScreen, useTimelineFullScreen } from '../../containers/use
 import { useKibana } from '../../lib/kibana';
 import { DEFAULT_ACTION_BUTTON_WIDTH } from '.';
 import { EventsTh, EventsThContent } from '../../../timelines/components/timeline/styles';
+import { StatefulRowRenderersBrowser } from '../../../timelines/components/row_renderers_browser';
 import { EXIT_FULL_SCREEN } from '../exit_full_screen/translations';
 import { EventsSelect } from '../../../timelines/components/timeline/body/column_headers/events_select';
 import * as i18n from './translations';
+import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { selectTimelineById } from '../../../timelines/store/selectors';
+
+const SortingColumnsContainer = styled.div`
+  button {
+    color: ${({ theme }) => theme.eui.euiColorPrimary};
+  }
+
+  .euiPopover .euiButtonEmpty {
+    padding: 0;
+
+    .euiButtonEmpty__text {
+      display: none;
+    }
+  }
+`;
 
 const FieldBrowserContainer = styled.div`
   .euiToolTipAnchor {
@@ -49,15 +66,23 @@ const ActionsContainer = styled.div`
   display: flex;
 `;
 
+// Defined statically to reduce rerenders
+const emptySchema = {};
+const emptySchemaDetectors: EuiDataGridSchemaDetector[] = [];
+
 const HeaderActionsComponent: React.FC<HeaderActionProps> = memo(
   ({
+    width,
     browserFields,
     columnHeaders,
+    isEventViewer = false,
     isSelectAllChecked,
     onSelectAll,
     showEventsSelect,
     showSelectAllCheckbox,
     showFullScreenToggle = true,
+    sort,
+    tabType,
     timelineId,
     fieldBrowserOptions,
   }) => {
@@ -65,6 +90,10 @@ const HeaderActionsComponent: React.FC<HeaderActionProps> = memo(
     const { globalFullScreen, setGlobalFullScreen } = useGlobalFullScreen();
     const { timelineFullScreen, setTimelineFullScreen } = useTimelineFullScreen();
     const dispatch = useDispatch();
+
+    const unifiedComponentsInTimelineDisabled = useIsExperimentalFeatureEnabled(
+      'unifiedComponentsInTimelineDisabled'
+    );
 
     const { defaultColumns } = useDeepEqualSelector((state) =>
       selectTimelineById(state, timelineId)
@@ -100,6 +129,57 @@ const HeaderActionsComponent: React.FC<HeaderActionProps> = memo(
       [onSelectAll]
     );
 
+    const onSortColumns = useCallback(
+      (cols: EuiDataGridSorting['columns']) =>
+        dispatch(
+          timelineActions.updateSort({
+            id: timelineId,
+            sort: cols.map(({ id, direction }) => {
+              const columnHeader = columnHeaders.find((ch) => ch.id === id);
+              const columnType = columnHeader?.type ?? '';
+              const esTypes = columnHeader?.esTypes ?? [];
+
+              return {
+                columnId: id,
+                columnType,
+                esTypes,
+                sortDirection: direction as SortDirection,
+              };
+            }),
+          })
+        ),
+      [columnHeaders, dispatch, timelineId]
+    );
+
+    const sortedColumns = useMemo(
+      () => ({
+        onSort: onSortColumns,
+        columns:
+          sort?.map<{ id: string; direction: 'asc' | 'desc' }>(({ columnId, sortDirection }) => ({
+            id: columnId,
+            direction: sortDirection as 'asc' | 'desc',
+          })) ?? [],
+      }),
+      [onSortColumns, sort]
+    );
+    const displayValues = useMemo(
+      () =>
+        columnHeaders?.reduce((acc, ch) => ({ ...acc, [ch.id]: ch.displayAsText ?? ch.id }), {}) ??
+        {},
+      [columnHeaders]
+    );
+
+    const myColumns = useMemo(
+      () =>
+        columnHeaders?.map(({ aggregatable, displayAsText, id, type }) => ({
+          id,
+          isSortable: aggregatable,
+          displayAsText,
+          schema: type,
+        })) ?? [],
+      [columnHeaders]
+    );
+
     const onResetColumns = useCallback(() => {
       dispatch(timelineActions.updateColumns({ id: timelineId, columns: defaultColumns }));
     }, [defaultColumns, dispatch, timelineId]);
@@ -125,6 +205,14 @@ const HeaderActionsComponent: React.FC<HeaderActionProps> = memo(
       },
       [columnHeaders, dispatch, timelineId, defaultColumns]
     );
+
+    const ColumnSorting = useDataGridColumnSorting({
+      columns: myColumns,
+      sorting: sortedColumns,
+      schema: emptySchema,
+      schemaDetectors: emptySchemaDetectors,
+      displayValues,
+    });
 
     return (
       <ActionsContainer data-test-subj="header-actions-container">
@@ -154,6 +242,11 @@ const HeaderActionsComponent: React.FC<HeaderActionProps> = memo(
           </EventsTh>
         )}
 
+        {unifiedComponentsInTimelineDisabled && (
+          <EventsTh role="button">
+            <StatefulRowRenderersBrowser timelineId={timelineId} />
+          </EventsTh>
+        )}
         {showFullScreenToggle && (
           <EventsTh role="button">
             <EventsThContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>
@@ -178,6 +271,15 @@ const HeaderActionsComponent: React.FC<HeaderActionProps> = memo(
                   iconType="fullScreen"
                   onClick={toggleFullScreen}
                 />
+              </EuiToolTip>
+            </EventsThContent>
+          </EventsTh>
+        )}
+        {tabType !== TimelineTabs.eql && unifiedComponentsInTimelineDisabled && (
+          <EventsTh role="button" data-test-subj="timeline-sorting-fields">
+            <EventsThContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>
+              <EuiToolTip content={i18n.SORT_FIELDS}>
+                <SortingColumnsContainer>{ColumnSorting}</SortingColumnsContainer>
               </EuiToolTip>
             </EventsThContent>
           </EventsTh>

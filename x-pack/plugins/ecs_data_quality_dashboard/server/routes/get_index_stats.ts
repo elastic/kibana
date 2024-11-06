@@ -26,11 +26,7 @@ export const getIndexStatsRoute = (router: IRouter, logger: Logger) => {
     .get({
       path: GET_INDEX_STATS,
       access: 'internal',
-      security: {
-        authz: {
-          requiredPrivileges: ['securitySolution'],
-        },
-      },
+      options: { tags: ['access:securitySolution'] },
     })
     .addVersion(
       {
@@ -90,7 +86,7 @@ export const getIndexStatsRoute = (router: IRouter, logger: Logger) => {
               endDate: decodedEndDate,
             });
 
-            if (availableIndices.length === 0) {
+            if (!availableIndices.aggregations?.index?.buckets) {
               logger.warn(
                 `No available indices found under pattern: ${decodedIndexName}, in the given date range: ${decodedStartDate} - ${decodedEndDate}`
               );
@@ -99,7 +95,10 @@ export const getIndexStatsRoute = (router: IRouter, logger: Logger) => {
               });
             }
 
-            const indices = pickAvailableMeteringStats(availableIndices, meteringStatsIndices);
+            const indices = pickAvailableMeteringStats(
+              availableIndices.aggregations.index.buckets,
+              meteringStatsIndices
+            );
 
             return response.ok({
               body: indices,

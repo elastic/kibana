@@ -54,7 +54,6 @@ describe('_formatPrivileges', () => {
           },
         },
       },
-      kibana: {},
     });
   });
 
@@ -85,7 +84,6 @@ describe('_formatPrivileges', () => {
           monitor: true,
         },
       },
-      kibana: {},
     });
   });
 
@@ -147,7 +145,6 @@ describe('_formatPrivileges', () => {
           },
         },
       },
-      kibana: {},
     });
   });
 

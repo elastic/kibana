@@ -7,20 +7,25 @@
 
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { EntityDefinition } from '@kbn/entities-schema';
-import { generateLatestIndexName } from './helpers/generate_component_id';
+import { generateHistoryIndexName, generateLatestIndexName } from './helpers/generate_component_id';
 
 export async function deleteIndices(
   esClient: ElasticsearchClient,
   definition: EntityDefinition,
   logger: Logger
 ) {
-  const index = generateLatestIndexName(definition);
   try {
-    await esClient.indices.delete({ index, ignore_unavailable: true });
+    const { indices: historyIndices } = await esClient.indices.resolveIndex({
+      name: `${generateHistoryIndexName(definition)}.*`,
+      expand_wildcards: 'all',
+    });
+    const indices = [
+      ...historyIndices.map(({ name }) => name),
+      generateLatestIndexName(definition),
+    ];
+    await esClient.indices.delete({ index: indices, ignore_unavailable: true });
   } catch (e) {
-    logger.error(
-      `Unable to remove entity definition index ${index} for definition [${definition.id}]`
-    );
+    logger.error(`Unable to remove entity definition index [${definition.id}}]`);
     throw e;
   }
 }

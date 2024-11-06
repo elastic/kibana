@@ -19,6 +19,5 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
     });
 
     loadTestFile(require.resolve('./entries'));
-    loadTestFile(require.resolve('./semntic_text_indices'));
   });
 }

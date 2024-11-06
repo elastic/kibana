@@ -14,7 +14,6 @@ import {
 } from '@kbn/es-query';
 import { get, isEmpty } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
-import type { DataViewSpec } from '@kbn/data-plugin/common';
 import { prepareKQLParam } from '../../../../common/utils/kql';
 import type { BrowserFields } from '../../../../common/search_strategy';
 import type { DataProvider, DataProvidersAnd } from '../../../../common/types';
@@ -30,7 +29,7 @@ export type PrimitiveOrArrayOfPrimitives =
 export interface CombineQueries {
   config: EsQueryConfig;
   dataProviders: DataProvider[];
-  indexPattern?: DataViewSpec;
+  indexPattern: DataViewBase;
   browserFields: BrowserFields;
   filters: Filter[];
   kqlQuery: Query;
@@ -200,18 +199,14 @@ export const isDataProviderEmpty = (dataProviders: DataProvider[]) => {
   return isEmpty(dataProviders) || isEmpty(dataProviders.filter((d) => d.enabled === true));
 };
 
-export const dataViewSpecToViewBase = (dataViewSpec?: DataViewSpec): DataViewBase => {
-  return { title: dataViewSpec?.title || '', fields: Object.values(dataViewSpec?.fields || {}) };
-};
-
 export const convertToBuildEsQuery = ({
   config,
-  dataViewSpec,
+  indexPattern,
   queries,
   filters,
 }: {
   config: EsQueryConfig;
-  dataViewSpec: DataViewSpec | undefined;
+  indexPattern: DataViewBase | undefined;
   queries: Query[];
   filters: Filter[];
 }): [string, undefined] | [undefined, Error] => {
@@ -219,7 +214,7 @@ export const convertToBuildEsQuery = ({
     return [
       JSON.stringify(
         buildEsQuery(
-          dataViewSpecToViewBase(dataViewSpec),
+          indexPattern,
           queries,
           filters.filter((f) => f.meta.disabled === false),
           {
@@ -258,7 +253,7 @@ export const combineQueries = ({
     const [filterQuery, kqlError] = convertToBuildEsQuery({
       config,
       queries: [kuery],
-      dataViewSpec: indexPattern,
+      indexPattern,
       filters,
     });
 
@@ -286,7 +281,7 @@ export const combineQueries = ({
   const [filterQuery, kqlError] = convertToBuildEsQuery({
     config,
     queries: [kuery],
-    dataViewSpec: indexPattern,
+    indexPattern,
     filters,
   });
 

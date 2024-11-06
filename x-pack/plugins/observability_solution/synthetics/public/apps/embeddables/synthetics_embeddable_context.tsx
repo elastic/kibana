@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { createBrowserHistory } from 'history';
+import { EuiPanel } from '@elastic/eui';
 import { Router } from '@kbn/shared-ux-router';
 import { Subject } from 'rxjs';
 import { Store } from 'redux';
@@ -28,7 +29,14 @@ export const SyntheticsEmbeddableContext: React.FC<
       <SyntheticsEmbeddableStateContextProvider>
         <Router history={createBrowserHistory()}>
           <SyntheticsSettingsContextProvider {...props}>
-            {children}
+            <EuiPanel
+              hasShadow={false}
+              css={{
+                width: '100%',
+              }}
+            >
+              {children}
+            </EuiPanel>
           </SyntheticsSettingsContextProvider>
         </Router>
       </SyntheticsEmbeddableStateContextProvider>

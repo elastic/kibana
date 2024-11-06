@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { RuleFieldEditFormWrapper } from './fields/rule_field_edit_form_wrapper';
+import { FieldFormWrapper } from './field_form_wrapper';
 import { NameEdit, nameSchema } from './fields/name';
 import type { UpgradeableCommonFields } from '../../../../model/prebuilt_rule_upgrade/fields';
 interface CommonRuleFieldEditProps {
@@ -16,7 +16,7 @@ interface CommonRuleFieldEditProps {
 export function CommonRuleFieldEdit({ fieldName }: CommonRuleFieldEditProps) {
   switch (fieldName) {
     case 'name':
-      return <RuleFieldEditFormWrapper component={NameEdit} ruleFieldFormSchema={nameSchema} />;
+      return <FieldFormWrapper component={NameEdit} fieldFormSchema={nameSchema} />;
     default:
       return null; // Will be replaced with `assertUnreachable(fieldName)` once all fields are implemented
   }

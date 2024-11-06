@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import type {
-  Datatable,
-  DefaultInspectorAdapters,
-  ExecutionContext,
-  ExpressionFunctionDefinition,
-} from '@kbn/expressions-plugin/common';
+import type { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import type { DatatableArgs } from './datatable';
 
 export interface DatatableProps {
@@ -30,6 +25,5 @@ export type DatatableExpressionFunction = ExpressionFunctionDefinition<
   'lens_datatable',
   Datatable,
   DatatableArgs,
-  Promise<DatatableRender>,
-  ExecutionContext<DefaultInspectorAdapters>
+  Promise<DatatableRender>
 >;

@@ -25,14 +25,10 @@ import {
   logCategoriesGridColumns,
   renderLogCategoriesGridCell,
 } from './log_categories_grid_cell';
-import { createLogCategoriesGridControlColumns } from './log_categories_grid_control_columns';
 
 export interface LogCategoriesGridProps {
   dependencies: LogCategoriesGridDependencies;
   logCategories: LogCategory[];
-  expandedRowIndex: number | null;
-  onOpenFlyout: (category: LogCategory, rowIndex: number) => void;
-  onCloseFlyout: () => void;
 }
 
 export type LogCategoriesGridDependencies = LogCategoriesGridCellDependencies;
@@ -40,9 +36,6 @@ export type LogCategoriesGridDependencies = LogCategoriesGridCellDependencies;
 export const LogCategoriesGrid: React.FC<LogCategoriesGridProps> = ({
   dependencies,
   logCategories,
-  expandedRowIndex,
-  onOpenFlyout,
-  onCloseFlyout,
 }) => {
   const [gridState, dispatchGridEvent] = useMachine(gridStateService, {
     input: {
@@ -100,11 +93,6 @@ export const LogCategoriesGrid: React.FC<LogCategoriesGridProps> = ({
         onSort: (sortingColumns) =>
           dispatchGridEvent({ type: 'changeSortingColumns', sortingColumns }),
       }}
-      leadingControlColumns={createLogCategoriesGridControlColumns({
-        expandedRowIndex,
-        onOpenFlyout,
-        onCloseFlyout,
-      })}
     />
   );
 };

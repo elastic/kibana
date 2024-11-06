@@ -61,7 +61,6 @@ export function RuleDetailsPage() {
       getRuleDefinition: RuleDefinition,
       getRuleStatusPanel: RuleStatusPanel,
     },
-    serverless,
   } = useKibana().services;
   const { ObservabilityPageTemplate } = usePluginContext();
 
@@ -73,27 +72,24 @@ export function RuleDetailsPage() {
     filterByRuleTypeIds: filteredRuleTypes,
   });
 
-  useBreadcrumbs(
-    [
-      {
-        text: i18n.translate('xpack.observability.breadcrumbs.alertsLinkText', {
-          defaultMessage: 'Alerts',
-        }),
-        href: basePath.prepend(paths.observability.alerts),
-        deepLinkId: 'observability-overview:alerts',
-      },
-      {
-        href: basePath.prepend(paths.observability.rules),
-        text: i18n.translate('xpack.observability.breadcrumbs.rulesLinkText', {
-          defaultMessage: 'Rules',
-        }),
-      },
-      {
-        text: rule && rule.name,
-      },
-    ],
-    { serverless }
-  );
+  useBreadcrumbs([
+    {
+      text: i18n.translate('xpack.observability.breadcrumbs.alertsLinkText', {
+        defaultMessage: 'Alerts',
+      }),
+      href: basePath.prepend(paths.observability.alerts),
+      deepLinkId: 'observability-overview:alerts',
+    },
+    {
+      href: basePath.prepend(paths.observability.rules),
+      text: i18n.translate('xpack.observability.breadcrumbs.rulesLinkText', {
+        defaultMessage: 'Rules',
+      }),
+    },
+    {
+      text: rule && rule.name,
+    },
+  ]);
 
   const [activeTabId, setActiveTabId] = useState<TabId>(() => {
     const searchParams = new URLSearchParams(search);

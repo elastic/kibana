@@ -5,14 +5,9 @@
  * 2.0.
  */
 
-export {
-  EditSpaceProviderRoot,
-  EditSpaceProvider,
-  useEditSpaceServices,
-  useEditSpaceStore,
-} from './edit_space_provider';
+export { EditSpaceProvider, useEditSpaceServices, useEditSpaceStore } from './edit_space_provider';
 export type {
-  EditSpaceProviderRootProps,
+  EditSpaceProviderProps,
   EditSpaceServices,
   EditSpaceStore,
 } from './edit_space_provider';

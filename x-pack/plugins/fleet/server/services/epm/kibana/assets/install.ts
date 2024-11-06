@@ -325,16 +325,16 @@ export async function deleteKibanaAssetsAndReferencesForSpace({
   await saveKibanaAssetsRefs(savedObjectsClient, pkgName, [], true);
 }
 
-const kibanaAssetTypes = Object.values(KibanaAssetType);
-export const isKibanaAssetType = (path: string) => {
-  const parts = getPathParts(path);
-
-  return parts.service === 'kibana' && (kibanaAssetTypes as string[]).includes(parts.type);
-};
-
 export function getKibanaAssets(
   packageInstallContext: PackageInstallContext
 ): Record<KibanaAssetType, ArchiveAsset[]> {
+  const kibanaAssetTypes = Object.values(KibanaAssetType);
+  const isKibanaAssetType = (path: string) => {
+    const parts = getPathParts(path);
+
+    return parts.service === 'kibana' && (kibanaAssetTypes as string[]).includes(parts.type);
+  };
+
   const result = Object.fromEntries<ArchiveAsset[]>(
     kibanaAssetTypes.map((type) => [type, []])
   ) as Record<KibanaAssetType, ArchiveAsset[]>;

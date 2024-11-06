@@ -62,31 +62,30 @@ export const ConnectorDeployment: React.FC = () => {
   >('search:connector-ui-options', {});
 
   useEffect(() => {
-    if (connectorId && connector && connector.api_key_id) {
-      getApiKeyById(connector.api_key_id);
-    }
-  }, [connector, connectorId]);
-
-  const selectDeploymentMethod = (deploymentMethod: 'docker' | 'source') => {
-    if (connector) {
-      setSelectedDeploymentMethod(deploymentMethod);
-      setConnectorUiOptions({
-        ...connectorUiOptions,
-        [connector.id]: { deploymentMethod },
-      });
-    }
-  };
-
-  useEffect(() => {
     if (connectorUiOptions && connectorId && connectorUiOptions[connectorId]) {
       setSelectedDeploymentMethod(connectorUiOptions[connectorId].deploymentMethod);
     } else {
       selectDeploymentMethod('docker');
     }
   }, [connectorUiOptions, connectorId]);
+
+  useEffect(() => {
+    if (connectorId && connector && connector.api_key_id) {
+      getApiKeyById(connector.api_key_id);
+    }
+  }, [connector, connectorId]);
+
   if (!connector || connector.is_native) {
     return <></>;
   }
+
+  const selectDeploymentMethod = (deploymentMethod: 'docker' | 'source') => {
+    setSelectedDeploymentMethod(deploymentMethod);
+    setConnectorUiOptions({
+      ...connectorUiOptions,
+      [connector.id]: { deploymentMethod },
+    });
+  };
 
   const hasApiKey = !!(connector.api_key_id ?? generatedData?.apiKey);
 
@@ -134,7 +133,7 @@ export const ConnectorDeployment: React.FC = () => {
                       <EuiText size="s">
                         <FormattedMessage
                           id="xpack.enterpriseSearch.content.connector_detail.configurationConnector.steps.configureIndexAndApiKey.description.source"
-                          defaultMessage="We automatically generate a connector configuration, an API key, and create a new Elasticsearch index. Connector information and API key will be added to the {configYaml} file of your connector. You can also use an existing API key."
+                          defaultMessage="Generate a connector configuration with the attached index and a new API key. This information will be added to the {configYaml} file of your connector. Alternatively use an existing API key. "
                           values={{
                             configYaml: (
                               <EuiCode>
@@ -176,7 +175,7 @@ export const ConnectorDeployment: React.FC = () => {
                   title: i18n.translate(
                     'xpack.enterpriseSearch.content.connector_detail.configurationConnector.steps.generateApiKey.title',
                     {
-                      defaultMessage: 'Create index and generate API key',
+                      defaultMessage: 'Configure index and API key',
                     }
                   ),
                   titleSize: 'xs',

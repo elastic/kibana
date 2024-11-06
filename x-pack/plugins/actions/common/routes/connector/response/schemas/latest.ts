@@ -8,4 +8,3 @@
 export { connectorResponseSchema } from './v1';
 export { allConnectorsResponseSchema } from './v1';
 export { connectorTypesResponseSchema } from './v1';
-export { connectorExecuteResponseSchema } from './v1';

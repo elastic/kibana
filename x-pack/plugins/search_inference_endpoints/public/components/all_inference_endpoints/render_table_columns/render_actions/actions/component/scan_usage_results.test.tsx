@@ -19,11 +19,11 @@ const mockOnCheckboxChange = jest.fn();
 describe('ScanUsageResults', () => {
   const items = [
     {
-      id: 'index-1',
+      label: 'index-1',
       type: 'Index',
     },
     {
-      id: 'pipeline-1',
+      label: 'pipeline-1',
       type: 'Pipeline',
     },
   ];
@@ -40,7 +40,7 @@ describe('ScanUsageResults', () => {
       <ScanUsageResults
         list={items}
         ignoreWarningCheckbox={false}
-        onIgnoreWarningCheckboxChange={mockOnCheckboxChange}
+        onCheckboxChange={mockOnCheckboxChange}
       />
     );
   });
@@ -58,9 +58,9 @@ describe('ScanUsageResults', () => {
 
   it('opens index management in a new tab', () => {
     fireEvent.click(screen.getByTestId('inferenceManagementOpenIndexManagement'));
-    expect(mockNavigateToApp).toHaveBeenCalledWith('enterpriseSearchContent', {
+    expect(mockNavigateToApp).toHaveBeenCalledWith('enterprise_search', {
       openInNewTab: true,
-      path: 'search_indices',
+      path: 'content/search_indices',
     });
   });
 

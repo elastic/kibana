@@ -16,13 +16,8 @@ export function updateMeta<T extends Partial<RawRule>>(
   alertAttributes: T
 ): T {
   if (Object.hasOwn(alertAttributes, 'apiKey') || Object.hasOwn(alertAttributes, 'apiKeyOwner')) {
-    return {
-      ...alertAttributes,
-      meta: {
-        ...(alertAttributes.meta ?? {}),
-        versionApiKeyLastmodified: context.kibanaVersion,
-      },
-    };
+    alertAttributes.meta = alertAttributes.meta ?? {};
+    alertAttributes.meta.versionApiKeyLastmodified = context.kibanaVersion;
   }
   return alertAttributes;
 }

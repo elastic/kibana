@@ -13,7 +13,7 @@ import { ATTACK_DISCOVERY_ONLY, LEARN_MORE, NO_ALERTS_TO_ANALYZE } from './trans
 
 describe('NoAlerts', () => {
   beforeEach(() => {
-    render(<NoAlerts isDisabled={false} isLoading={false} onGenerate={jest.fn()} />);
+    render(<NoAlerts />);
   });
 
   it('renders the avatar', () => {

@@ -247,7 +247,7 @@ describe('config schema', () => {
         },
         "loginAssistanceMessage": "",
         "public": Object {},
-        "roleManagementEnabled": true,
+        "roleManagementEnabled": false,
         "secureCookies": false,
         "session": Object {
           "cleanupInterval": "PT1H",

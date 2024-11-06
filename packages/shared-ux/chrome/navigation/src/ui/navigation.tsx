@@ -52,8 +52,7 @@ const NavigationComp: FC<Props> = ({ navigationTree$, dataTestSubj, panelContent
     useNavigationService();
 
   const activeNodes = useObservable(activeNodes$, []);
-  const navigationTree = useObservable(navigationTree$, { id: 'es', body: [] });
-  const { id: solutionId } = navigationTree;
+  const navigationTree = useObservable(navigationTree$, { body: [] });
   const isFeedbackBtnVisible = useObservable(isFeedbackBtnVisible$, false);
 
   const contextValue = useMemo<Context>(
@@ -96,7 +95,7 @@ const NavigationComp: FC<Props> = ({ navigationTree$, dataTestSubj, panelContent
             <EuiFlexItem>{renderNodes(navigationTree.body)}</EuiFlexItem>
             {isFeedbackBtnVisible && (
               <EuiFlexItem grow={false}>
-                <FeedbackBtn solutionId={solutionId} />
+                <FeedbackBtn />
               </EuiFlexItem>
             )}
           </EuiFlexGroup>

@@ -48,14 +48,15 @@ export const getEvaluateRoute = (router: IRouter<ElasticAssistantRequestHandlerC
 
         // Perform license, authenticated user and evaluation FF checks
         const checkResponse = performChecks({
+          authenticatedUser: true,
           capability: 'assistantModelEvaluation',
           context: ctx,
+          license: true,
           request,
           response,
         });
-
-        if (!checkResponse.isSuccess) {
-          return checkResponse.response;
+        if (checkResponse) {
+          return checkResponse;
         }
 
         // Fetch datasets from LangSmith // TODO: plumb apiKey so this will work in cloud w/o env vars

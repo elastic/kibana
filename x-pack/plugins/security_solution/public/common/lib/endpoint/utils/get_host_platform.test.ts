@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { set } from '@kbn/safer-lodash-set';
+import { set } from 'lodash';
 import { getHostPlatform } from './get_host_platform';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 

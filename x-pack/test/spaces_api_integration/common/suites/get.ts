@@ -84,6 +84,7 @@ export function getTestSuiteFactory(esArchiver: any, supertest: SuperAgent<any>)
           'infrastructure',
           'inventory',
           'logs',
+          'observabilityAIAssistant',
           'observabilityCases',
           'securitySolutionAssistant',
           'securitySolutionAttackDiscovery',

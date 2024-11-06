@@ -191,7 +191,7 @@ export default function ({ getService, getPageObjects }) {
       it('should lose its connection to the dashboard when creating new visualization', async () => {
         await visualize.gotoVisualizationLandingPage();
         await visualize.clickNewVisualization();
-        await visualize.clickVisualBuilder();
+        await visualize.clickMarkdownWidget();
         await visualize.notLinkedToOriginatingApp();
 
         // return to origin should not be present in save modal

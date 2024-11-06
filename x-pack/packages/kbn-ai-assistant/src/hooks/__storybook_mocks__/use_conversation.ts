@@ -15,6 +15,6 @@ export function useConversation() {
     stop: () => {},
     messages: [],
     saveTitle: () => {},
-    scopes: ['all'],
+    scope: 'all',
   };
 }

@@ -45,16 +45,18 @@ export const updateConversationRoute = (router: ElasticAssistantPluginRouter) =>
         const { id } = request.params;
         try {
           const ctx = await context.resolve(['core', 'elasticAssistant', 'licensing']);
+          const authenticatedUser = ctx.elasticAssistant.getCurrentUser();
           // Perform license and authenticated user checks
           const checkResponse = performChecks({
+            authenticatedUser: true,
             context: ctx,
+            license: true,
             request,
             response,
           });
-          if (!checkResponse.isSuccess) {
-            return checkResponse.response;
+          if (checkResponse) {
+            return checkResponse;
           }
-          const authenticatedUser = checkResponse.currentUser;
 
           const dataClient = await ctx.elasticAssistant.getAIAssistantConversationsDataClient();
 

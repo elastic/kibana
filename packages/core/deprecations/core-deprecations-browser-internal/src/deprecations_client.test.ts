@@ -135,7 +135,7 @@ describe('DeprecationsClient', () => {
 
       expect(result).toMatchInlineSnapshot(`
         Object {
-          "reason": "This deprecation cannot be resolved automatically or marked as resolved.",
+          "reason": "This deprecation cannot be resolved automatically.",
           "status": "fail",
         }
       `);

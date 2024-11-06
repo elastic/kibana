@@ -76,7 +76,7 @@ export const updateConversation = async ({
         },
       },
       refresh: true,
-      script: getUpdateScript({ conversation: params, isPatch }).script,
+      script: getUpdateScript({ conversation: params, isPatch }),
     });
 
     if (response.failures && response.failures.length > 0) {

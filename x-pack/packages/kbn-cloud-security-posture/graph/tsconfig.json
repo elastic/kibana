@@ -13,6 +13,6 @@
   "kbn_references": [
     "@kbn/cloud-security-posture-common",
     "@kbn/utility-types",
-    "@kbn/ui-theme",
+    "@kbn/storybook"
   ]
 }

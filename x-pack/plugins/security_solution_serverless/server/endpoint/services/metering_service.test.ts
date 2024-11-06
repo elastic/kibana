@@ -5,18 +5,16 @@
  * 2.0.
  */
 
-import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { type ElasticsearchClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type { AggregationsAggregate, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { EndpointHeartbeat } from '@kbn/security-solution-plugin/common/endpoint/types';
-
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import { ENDPOINT_HEARTBEAT_INDEX_PATTERN } from '@kbn/security-solution-plugin/common/endpoint/constants';
-import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-
-import type { ServerlessSecurityConfig } from '../../config';
+import { ENDPOINT_HEARTBEAT_INDEX } from '@kbn/security-solution-plugin/common/endpoint/constants';
 
 import { ProductLine, ProductTier } from '../../../common/product';
+
+import type { ServerlessSecurityConfig } from '../../config';
 import { METERING_TASK } from '../constants/metering';
 
 import { EndpointMeteringService } from './metering_service';
@@ -61,7 +59,7 @@ describe('EndpointMeteringService', () => {
       hits: {
         hits: [
           {
-            _index: ENDPOINT_HEARTBEAT_INDEX_PATTERN,
+            _index: ENDPOINT_HEARTBEAT_INDEX,
             _id: 'test-heartbeat-doc-id',
             _source: {
               agent: {

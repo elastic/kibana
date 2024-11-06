@@ -26,8 +26,7 @@ export interface EditSpaceTab {
 
 export interface GetTabsProps {
   space: Space;
-  rolesCount?: number;
-  isRoleManagementEnabled: boolean;
+  rolesCount: number;
   features: KibanaFeature[];
   history: ScopedHistory;
   capabilities: Capabilities & {
@@ -67,9 +66,10 @@ export const getTabs = ({
   history,
   capabilities,
   rolesCount,
-  isRoleManagementEnabled,
   ...props
 }: GetTabsProps): EditSpaceTab[] => {
+  const canUserViewRoles = Boolean(capabilities?.roles?.view);
+  const canUserModifyRoles = Boolean(capabilities?.roles?.save);
   const reloadWindow = () => {
     window.location.reload();
   };
@@ -92,9 +92,7 @@ export const getTabs = ({
     },
   ];
 
-  const canUserViewRoles = Boolean(capabilities?.roles?.view);
-  const canUserModifyRoles = Boolean(capabilities?.roles?.save);
-  if (canUserViewRoles && isRoleManagementEnabled) {
+  if (canUserViewRoles) {
     tabsDefinition.push({
       id: TAB_ID_ROLES,
       name: i18n.translate('xpack.spaces.management.spaceDetails.contentTabs.roles.heading', {
@@ -102,7 +100,7 @@ export const getTabs = ({
       }),
       append: (
         <EuiNotificationBadge className="eui-alignCenter" color="subdued" size="m">
-          {rolesCount ?? 0}
+          {rolesCount}
         </EuiNotificationBadge>
       ),
       content: (

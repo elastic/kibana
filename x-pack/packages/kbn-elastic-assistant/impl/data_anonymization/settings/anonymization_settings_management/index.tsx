@@ -5,19 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiModal,
-  EuiModalBody,
-  EuiModalFooter,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
-  EuiPanel,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
 
 import { euiThemeVars } from '@kbn/ui-theme';
@@ -37,23 +25,13 @@ import {
 import { useFetchAnonymizationFields } from '../../../assistant/api/anonymization_fields/use_fetch_anonymization_fields';
 import { AssistantSettingsBottomBar } from '../../../assistant/settings/assistant_settings_bottom_bar';
 import { useAssistantContext } from '../../../assistant_context';
-import {
-  CANCEL,
-  SAVE,
-  SETTINGS_UPDATED_TOAST_TITLE,
-} from '../../../assistant/settings/translations';
+import { SETTINGS_UPDATED_TOAST_TITLE } from '../../../assistant/settings/translations';
 
 export interface Props {
   defaultPageSize?: number;
-  modalMode?: boolean;
-  onClose?: () => void;
 }
 
-const AnonymizationSettingsManagementComponent: React.FC<Props> = ({
-  defaultPageSize = 5,
-  modalMode = false,
-  onClose,
-}) => {
+const AnonymizationSettingsManagementComponent: React.FC<Props> = ({ defaultPageSize = 5 }) => {
   const { toasts } = useAssistantContext();
   const { data: anonymizationFields } = useFetchAnonymizationFields();
   const [hasPendingChanges, setHasPendingChanges] = useState(false);
@@ -74,10 +52,9 @@ const AnonymizationSettingsManagementComponent: React.FC<Props> = ({
   );
 
   const onCancelClick = useCallback(() => {
-    onClose?.();
     resetSettings();
     setHasPendingChanges(false);
-  }, [onClose, resetSettings]);
+  }, [resetSettings]);
 
   const handleSave = useCallback(
     async (param?: { callback?: () => void }) => {
@@ -94,8 +71,7 @@ const AnonymizationSettingsManagementComponent: React.FC<Props> = ({
 
   const onSaveButtonClicked = useCallback(() => {
     handleSave();
-    onClose?.();
-  }, [handleSave, onClose]);
+  }, [handleSave]);
 
   const handleAnonymizationFieldsBulkActions = useCallback<
     UseAnonymizationListUpdateProps['setAnonymizationFieldsBulkActions']
@@ -123,47 +99,6 @@ const AnonymizationSettingsManagementComponent: React.FC<Props> = ({
     setAnonymizationFieldsBulkActions: handleAnonymizationFieldsBulkActions,
     setUpdatedAnonymizationData: handleUpdatedAnonymizationData,
   });
-
-  if (modalMode) {
-    return (
-      <EuiModal onClose={onCancelClick}>
-        <EuiModalHeader>
-          <EuiModalHeaderTitle>{i18n.SETTINGS_TITLE}</EuiModalHeaderTitle>
-        </EuiModalHeader>
-        <EuiModalBody>
-          <EuiText size="m">{i18n.SETTINGS_DESCRIPTION}</EuiText>
-
-          <EuiSpacer size="m" />
-
-          <EuiFlexGroup alignItems="center" data-test-subj="summary" gutterSize="none">
-            <Stats
-              isDataAnonymizable={true}
-              anonymizationFields={updatedAnonymizationData.data}
-              titleSize="m"
-              gap={euiThemeVars.euiSizeS}
-            />
-          </EuiFlexGroup>
-
-          <EuiSpacer size="m" />
-
-          <ContextEditor
-            anonymizationFields={updatedAnonymizationData}
-            compressed={false}
-            onListUpdated={onListUpdated}
-            rawData={null}
-            pageSize={defaultPageSize}
-          />
-        </EuiModalBody>
-        <EuiModalFooter>
-          <EuiButtonEmpty onClick={onCancelClick}>{CANCEL}</EuiButtonEmpty>
-          <EuiButton type="submit" onClick={onSaveButtonClicked} fill disabled={!hasPendingChanges}>
-            {SAVE}
-          </EuiButton>
-        </EuiModalFooter>
-      </EuiModal>
-    );
-  }
-
   return (
     <>
       <EuiPanel hasShadow={false} hasBorder paddingSize="l">

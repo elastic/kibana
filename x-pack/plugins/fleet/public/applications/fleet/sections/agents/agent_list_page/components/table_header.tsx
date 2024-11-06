@@ -21,7 +21,6 @@ export const AgentTableHeader: React.FunctionComponent<{
   agentStatus?: { [k in SimplifiedAgentStatus]: number };
   totalAgents: number;
   selectableAgents: number;
-  totalManagedAgents: number;
   managedAgentsOnCurrentPage: number;
   selectionMode: SelectionMode;
   setSelectionMode: (mode: SelectionMode) => void;
@@ -32,7 +31,6 @@ export const AgentTableHeader: React.FunctionComponent<{
 }> = ({
   agentStatus,
   totalAgents,
-  totalManagedAgents,
   selectableAgents,
   managedAgentsOnCurrentPage,
   selectionMode,
@@ -49,7 +47,6 @@ export const AgentTableHeader: React.FunctionComponent<{
           <EuiFlexItem grow={false}>
             <AgentsSelectionStatus
               totalAgents={totalAgents}
-              totalManagedAgents={totalManagedAgents}
               selectableAgents={selectableAgents}
               managedAgentsOnCurrentPage={managedAgentsOnCurrentPage}
               selectionMode={selectionMode}

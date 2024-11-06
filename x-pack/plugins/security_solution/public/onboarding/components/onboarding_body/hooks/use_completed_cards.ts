@@ -114,17 +114,9 @@ export const useCompletedCards = (cardsGroupConfig: OnboardingGroupConfig[]) => 
       const cardConfig = cardsWithAutoCheck.find(({ id }) => id === cardId);
 
       if (cardConfig) {
-        cardConfig
-          .checkComplete?.(services)
-          .catch((err: Error) => {
-            services.notifications.toasts.addError(err, { title: cardConfig.title });
-            return {
-              isComplete: false,
-            };
-          })
-          .then((checkCompleteResult) => {
-            processCardCheckCompleteResult(cardId, checkCompleteResult);
-          });
+        cardConfig.checkComplete?.(services).then((checkCompleteResult) => {
+          processCardCheckCompleteResult(cardId, checkCompleteResult);
+        });
       }
     },
     [cardsWithAutoCheck, processCardCheckCompleteResult, services]
@@ -137,17 +129,9 @@ export const useCompletedCards = (cardsGroupConfig: OnboardingGroupConfig[]) => 
     }
     autoCheckCompletedRef.current = true;
     cardsWithAutoCheck.map((card) =>
-      card
-        .checkComplete?.(services)
-        .catch((err: Error) => {
-          services.notifications.toasts.addError(err, { title: card.title });
-          return {
-            isComplete: false,
-          };
-        })
-        .then((checkCompleteResult) => {
-          processCardCheckCompleteResult(card.id, checkCompleteResult);
-        })
+      card.checkComplete?.(services).then((checkCompleteResult) => {
+        processCardCheckCompleteResult(card.id, checkCompleteResult);
+      })
     );
   }, [cardsWithAutoCheck, processCardCheckCompleteResult, services]);
 

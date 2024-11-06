@@ -19,7 +19,7 @@ export function defineCaptureURLRoutes({ httpResources }: RouteDefinitionParams)
       validate: {
         query: schema.object({ next: schema.maybe(schema.string()) }, { unknowns: 'ignore' }),
       },
-      options: { authRequired: false, excludeFromOAS: true },
+      options: { authRequired: false },
     },
     (context, request, response) => response.renderAnonymousCoreApp()
   );

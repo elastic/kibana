@@ -934,6 +934,42 @@
       },
       {
         "parentPluginId": "@kbn/data-stream-adapter",
+        "id": "def-common.FieldMap",
+        "type": "Interface",
+        "tags": [],
+        "label": "FieldMap",
+        "description": [],
+        "path": "packages/kbn-data-stream-adapter/src/field_maps/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/data-stream-adapter",
+            "id": "def-common.FieldMap.Unnamed",
+            "type": "IndexSignature",
+            "tags": [],
+            "label": "[key: string]: { type: string; required: boolean; array?: boolean | undefined; doc_values?: boolean | undefined; enabled?: boolean | undefined; format?: string | undefined; ignore_above?: number | undefined; ... 5 more ...; properties?: Record<...> | undefined; }",
+            "description": [],
+            "signature": [
+              "[key: string]:  { type: string; required: boolean; array?: boolean | undefined; doc_values?: boolean | undefined; enabled?: boolean | undefined; format?: string | undefined; ignore_above?: number | undefined; multi_fields?: ",
+              {
+                "pluginId": "@kbn/data-stream-adapter",
+                "scope": "common",
+                "docId": "kibKbnDataStreamAdapterPluginApi",
+                "section": "def-common.MultiField",
+                "text": "MultiField"
+              },
+              "[] | undefined; index?: boolean | undefined; path?: string | undefined; scaling_factor?: number | undefined; dynamic?: boolean | \"strict\" | undefined; properties?: Record<string, { type: string; }> | undefined; }"
+            ],
+            "path": "packages/kbn-data-stream-adapter/src/field_maps/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/data-stream-adapter",
         "id": "def-common.InstallParams",
         "type": "Interface",
         "tags": [],
@@ -1101,15 +1137,13 @@
             "label": "fieldMap",
             "description": [],
             "signature": [
-              "{ [x: string]: { type: string; required: boolean; array?: boolean | undefined; doc_values?: boolean | undefined; enabled?: boolean | undefined; format?: string | undefined; ignore_above?: number | undefined; multi_fields?: ",
               {
                 "pluginId": "@kbn/data-stream-adapter",
                 "scope": "common",
                 "docId": "kibKbnDataStreamAdapterPluginApi",
-                "section": "def-common.MultiField",
-                "text": "MultiField"
-              },
-              "[] | undefined; index?: boolean | undefined; path?: string | undefined; scaling_factor?: number | undefined; dynamic?: boolean | \"strict\" | undefined; properties?: Record<string, { type: string; }> | undefined; inference_id?: string | undefined; copy_to?: string | undefined; }; }"
+                "section": "def-common.FieldMap",
+                "text": "FieldMap"
+              }
             ],
             "path": "packages/kbn-data-stream-adapter/src/data_stream_adapter.ts",
             "deprecated": false,
@@ -1240,63 +1274,15 @@
         "label": "EcsFieldMap",
         "description": [],
         "signature": [
-          "{ [x: string]: { type: string; required: boolean; array?: boolean | undefined; doc_values?: boolean | undefined; enabled?: boolean | undefined; format?: string | undefined; ignore_above?: number | undefined; multi_fields?: ",
           {
             "pluginId": "@kbn/data-stream-adapter",
             "scope": "common",
             "docId": "kibKbnDataStreamAdapterPluginApi",
-            "section": "def-common.MultiField",
-            "text": "MultiField"
-          },
-          "[] | undefined; index?: boolean | undefined; path?: string | undefined; scaling_factor?: number | undefined; dynamic?: boolean | \"strict\" | undefined; properties?: Record<string, { type: string; }> | undefined; inference_id?: string | undefined; copy_to?: string | undefined; }; }"
+            "section": "def-common.FieldMap",
+            "text": "FieldMap"
+          }
         ],
         "path": "packages/kbn-data-stream-adapter/src/field_maps/ecs_field_map.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/data-stream-adapter",
-        "id": "def-common.FieldMap",
-        "type": "Type",
-        "tags": [],
-        "label": "FieldMap",
-        "description": [],
-        "signature": [
-          "{ [P in T]: { type: string; required: boolean; array?: boolean | undefined; doc_values?: boolean | undefined; enabled?: boolean | undefined; format?: string | undefined; ignore_above?: number | undefined; multi_fields?: ",
-          {
-            "pluginId": "@kbn/data-stream-adapter",
-            "scope": "common",
-            "docId": "kibKbnDataStreamAdapterPluginApi",
-            "section": "def-common.MultiField",
-            "text": "MultiField"
-          },
-          "[] | undefined; index?: boolean | undefined; path?: string | undefined; scaling_factor?: number | undefined; dynamic?: boolean | \"strict\" | undefined; properties?: Record<string, { type: string; }> | undefined; inference_id?: string | undefined; copy_to?: string | undefined; }; }"
-        ],
-        "path": "packages/kbn-data-stream-adapter/src/field_maps/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/data-stream-adapter",
-        "id": "def-common.SchemaFieldMapKeys",
-        "type": "Type",
-        "tags": [],
-        "label": "SchemaFieldMapKeys",
-        "description": [],
-        "signature": [
-          "Key extends string ? NonNullable<T[Key]> extends Record<string, unknown> ? `${Key}` | `${Key}.${",
-          {
-            "pluginId": "@kbn/data-stream-adapter",
-            "scope": "common",
-            "docId": "kibKbnDataStreamAdapterPluginApi",
-            "section": "def-common.SchemaFieldMapKeys",
-            "text": "SchemaFieldMapKeys"
-          },
-          "<NonNullable<T[Key]>, keyof NonNullable<T[Key]>>}` : `${Key}` : never"
-        ],
-        "path": "packages/kbn-data-stream-adapter/src/field_maps/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1311,15 +1297,13 @@
         "label": "ecsFieldMap",
         "description": [],
         "signature": [
-          "{ [x: string]: { type: string; required: boolean; array?: boolean | undefined; doc_values?: boolean | undefined; enabled?: boolean | undefined; format?: string | undefined; ignore_above?: number | undefined; multi_fields?: ",
           {
             "pluginId": "@kbn/data-stream-adapter",
             "scope": "common",
             "docId": "kibKbnDataStreamAdapterPluginApi",
-            "section": "def-common.MultiField",
-            "text": "MultiField"
-          },
-          "[] | undefined; index?: boolean | undefined; path?: string | undefined; scaling_factor?: number | undefined; dynamic?: boolean | \"strict\" | undefined; properties?: Record<string, { type: string; }> | undefined; inference_id?: string | undefined; copy_to?: string | undefined; }; }"
+            "section": "def-common.FieldMap",
+            "text": "FieldMap"
+          }
         ],
         "path": "packages/kbn-data-stream-adapter/src/field_maps/ecs_field_map.ts",
         "deprecated": false,

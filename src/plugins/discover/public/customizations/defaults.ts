@@ -10,6 +10,7 @@
 import { DiscoverCustomizationContext } from './types';
 
 export const defaultCustomizationContext: DiscoverCustomizationContext = {
+  solutionNavId: null,
   displayMode: 'standalone',
   inlineTopNav: {
     enabled: false,

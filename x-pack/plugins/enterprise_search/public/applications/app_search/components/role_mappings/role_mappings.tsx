@@ -12,7 +12,6 @@ import { useActions, useValues } from 'kea';
 import { EuiSpacer } from '@elastic/eui';
 
 import { APP_SEARCH_PLUGIN } from '../../../../../common/constants';
-import { docLinks } from '../../../shared/doc_links';
 import {
   RoleMappingsTable,
   RoleMappingsHeading,
@@ -23,6 +22,7 @@ import {
 } from '../../../shared/role_mapping';
 import { ROLE_MAPPINGS_TITLE } from '../../../shared/role_mapping/constants';
 
+import { SECURITY_DOCS_URL } from '../../routes';
 import { AppSearchPageTemplate } from '../layout';
 
 import { ROLE_MAPPINGS_ENGINE_ACCESS_HEADING } from './constants';
@@ -57,7 +57,7 @@ export const RoleMappings: React.FC = () => {
   const rolesEmptyState = (
     <RolesEmptyPrompt
       productName={APP_SEARCH_PLUGIN.NAME}
-      docsLink={docLinks.appSearchSecurity}
+      docsLink={SECURITY_DOCS_URL}
       onEnable={enableRoleBasedAccess}
     />
   );
@@ -66,7 +66,7 @@ export const RoleMappings: React.FC = () => {
     <section>
       <RoleMappingsHeading
         productName={APP_SEARCH_PLUGIN.NAME}
-        docsLink={docLinks.appSearchSecurity}
+        docsLink={SECURITY_DOCS_URL}
         onClick={() => initializeRoleMapping()}
       />
       <RoleMappingsTable

@@ -39,6 +39,7 @@ export async function handleInvalidCategorization({
   return {
     currentPipeline,
     currentProcessors,
+    reviewed: false,
     lastExecutedChain: 'invalidCategorization',
   };
 }

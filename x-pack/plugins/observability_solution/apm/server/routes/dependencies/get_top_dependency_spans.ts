@@ -8,11 +8,8 @@
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { kqlQuery, rangeQuery, termQuery, termsQuery } from '@kbn/observability-plugin/server';
 import { keyBy } from 'lodash';
-import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
-import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import {
   AGENT_NAME,
-  AT_TIMESTAMP,
   EVENT_OUTCOME,
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
@@ -41,7 +38,7 @@ export interface DependencySpan {
   serviceName: string;
   agentName: AgentName;
   traceId: string;
-  transactionId?: string;
+  transactionId: string;
   transactionType?: string;
   transactionName?: string;
   duration: number;
@@ -69,18 +66,6 @@ export async function getTopDependencySpans({
   sampleRangeFrom?: number;
   sampleRangeTo?: number;
 }): Promise<DependencySpan[]> {
-  const topDedsRequiredFields = asMutableArray([
-    SPAN_ID,
-    TRACE_ID,
-    SPAN_NAME,
-    SERVICE_NAME,
-    SERVICE_ENVIRONMENT,
-    AGENT_NAME,
-    SPAN_DURATION,
-    EVENT_OUTCOME,
-    AT_TIMESTAMP,
-  ] as const);
-
   const spans = (
     await apmEventClient.search('get_top_dependency_spans', {
       apm: {
@@ -97,6 +82,7 @@ export async function getTopDependencySpans({
               ...kqlQuery(kuery),
               ...termQuery(SPAN_DESTINATION_SERVICE_RESOURCE, dependencyName),
               ...termQuery(SPAN_NAME, spanName),
+              { exists: { field: TRANSACTION_ID } },
               ...((sampleRangeFrom ?? 0) >= 0 && (sampleRangeTo ?? 0) > 0
                 ? [
                     {
@@ -112,19 +98,23 @@ export async function getTopDependencySpans({
             ],
           },
         },
-        fields: topDedsRequiredFields,
+        _source: [
+          SPAN_ID,
+          TRACE_ID,
+          TRANSACTION_ID,
+          SPAN_NAME,
+          SERVICE_NAME,
+          SERVICE_ENVIRONMENT,
+          AGENT_NAME,
+          SPAN_DURATION,
+          EVENT_OUTCOME,
+          '@timestamp',
+        ],
       },
     })
-  ).hits.hits.map((hit) => unflattenKnownApmEventFields(hit.fields, topDedsRequiredFields));
+  ).hits.hits.map((hit) => hit._source);
 
-  const traceIds = spans.map((span) => span.trace.id);
-
-  const txRequiredFields = asMutableArray([
-    TRACE_ID,
-    TRANSACTION_ID,
-    TRANSACTION_TYPE,
-    TRANSACTION_NAME,
-  ] as const);
+  const transactionIds = spans.map((span) => span.transaction!.id);
 
   const transactions = (
     await apmEventClient.search('get_transactions_for_dependency_spans', {
@@ -133,24 +123,24 @@ export async function getTopDependencySpans({
       },
       body: {
         track_total_hits: false,
-        size: traceIds.length,
+        size: transactionIds.length,
         query: {
           bool: {
-            filter: [...termsQuery(TRACE_ID, ...traceIds), { exists: { field: TRANSACTION_ID } }],
+            filter: [...termsQuery(TRANSACTION_ID, ...transactionIds)],
           },
         },
-        fields: txRequiredFields,
+        _source: [TRANSACTION_ID, TRANSACTION_TYPE, TRANSACTION_NAME],
         sort: {
           '@timestamp': 'desc',
         },
       },
     })
-  ).hits.hits.map((hit) => unflattenKnownApmEventFields(hit.fields, txRequiredFields));
+  ).hits.hits.map((hit) => hit._source);
 
-  const transactionsByTraceId = keyBy(transactions, (transaction) => transaction.trace.id);
+  const transactionsById = keyBy(transactions, (transaction) => transaction.transaction.id);
 
   return spans.map((span): DependencySpan => {
-    const transaction = maybe(transactionsByTraceId[span.trace!.id]);
+    const transaction = maybe(transactionsById[span.transaction!.id]);
 
     return {
       '@timestamp': new Date(span['@timestamp']).getTime(),
@@ -161,7 +151,7 @@ export async function getTopDependencySpans({
       duration: span.span.duration.us,
       traceId: span.trace.id,
       outcome: (span.event?.outcome || EventOutcome.unknown) as EventOutcome,
-      transactionId: transaction?.transaction.id,
+      transactionId: span.transaction!.id,
       transactionType: transaction?.transaction.type,
       transactionName: transaction?.transaction.name,
     };

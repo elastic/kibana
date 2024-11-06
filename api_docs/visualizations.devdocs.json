@@ -6848,7 +6848,7 @@
             "section": "def-public.ViewMode",
             "text": "ViewMode"
           },
-          ">; uuid: string; readonly parent?: ",
+          ">; uuid: string; destroy: () => void; readonly parent?: ",
           {
             "pluginId": "embeddable",
             "scope": "public",
@@ -6872,7 +6872,7 @@
             "section": "def-public.ContainerOutput",
             "text": "ContainerOutput"
           },
-          "> | undefined; destroy: () => void; dataViews: ",
+          "> | undefined; dataViews: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -6976,15 +6976,7 @@
             "section": "def-public.PublishesViewMode",
             "text": "PublishesViewMode"
           },
-          ">) | undefined; hasLockedHoverActions$: ",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.PublishingSubject",
-            "text": "PublishingSubject"
-          },
-          "<boolean>; lockHoverActions: (lock: boolean) => void; disableTriggers: boolean; timeRange$: ",
+          ">) | undefined; disableTriggers: boolean; timeRange$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -13870,7 +13862,7 @@
             "label": "fittingFunction",
             "description": [],
             "signature": [
-              "\"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined"
+              "\"None\" | \"Average\" | \"Zero\" | \"Nearest\" | \"Linear\" | \"Carry\" | \"Lookahead\" | undefined"
             ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,

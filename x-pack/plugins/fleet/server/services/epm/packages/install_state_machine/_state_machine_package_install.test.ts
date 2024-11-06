@@ -38,8 +38,6 @@ import { updateCurrentWriteIndices } from '../../elasticsearch/template/template
 
 import { installIndexTemplatesAndPipelines } from '../install_index_template_pipeline';
 
-import { createArchiveIteratorFromMap } from '../../archive/archive_iterator';
-
 import { handleState } from './state_machine';
 import { _stateMachineInstallPackage } from './_state_machine_package_install';
 import { cleanupLatestExecutedState } from './steps';
@@ -112,7 +110,6 @@ describe('_stateMachineInstallPackage', () => {
       logger: loggerMock.create(),
       packageInstallContext: {
         assetsMap: new Map(),
-        archiveIterator: createArchiveIteratorFromMap(new Map()),
         paths: [],
         packageInfo: {
           title: 'title',
@@ -175,7 +172,6 @@ describe('_stateMachineInstallPackage', () => {
         logger: loggerMock.create(),
         packageInstallContext: {
           assetsMap: new Map(),
-          archiveIterator: createArchiveIteratorFromMap(new Map()),
           paths: [],
           packageInfo: {
             title: 'title',
@@ -212,7 +208,6 @@ describe('_stateMachineInstallPackage', () => {
         logger: loggerMock.create(),
         packageInstallContext: {
           assetsMap: new Map(),
-          archiveIterator: createArchiveIteratorFromMap(new Map()),
           paths: [],
           packageInfo: {
             title: 'title',
@@ -262,7 +257,6 @@ describe('_stateMachineInstallPackage', () => {
         logger: loggerMock.create(),
         packageInstallContext: {
           assetsMap: new Map(),
-          archiveIterator: createArchiveIteratorFromMap(new Map()),
           paths: [],
           packageInfo: {
             title: 'title',
@@ -342,7 +336,6 @@ describe('_stateMachineInstallPackage', () => {
           owner: { github: 'elastic/fleet' },
         } as any,
         assetsMap: new Map(),
-        archiveIterator: createArchiveIteratorFromMap(new Map()),
         paths: [],
       },
       installType: 'install',

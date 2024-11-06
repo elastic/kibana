@@ -30,7 +30,6 @@ import { mockLogger } from './test_utils';
 import { AdHocTaskCounter } from './lib/adhoc_task_counter';
 import { asErr, asOk } from './lib/result_type';
 import { UpdateByQueryResponse } from '@elastic/elasticsearch/lib/api/types';
-import { MsearchError } from './lib/msearch_error';
 
 const mockGetValidatedTaskInstanceFromReading = jest.fn();
 const mockGetValidatedTaskInstanceForUpdating = jest.fn();
@@ -491,14 +490,9 @@ describe('TaskStore', () => {
           },
         ],
       } as estypes.MsearchResponse);
-
-      try {
-        await store.msearch([{}]);
-        throw new Error('should have thrown');
-      } catch (err) {
-        expect(err instanceof MsearchError).toBe(true);
-        expect(err.statusCode).toEqual(429);
-      }
+      await expect(store.msearch([{}])).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Unexpected status code from taskStore::msearch: 429"`
+      );
       expect(await firstErrorPromise).toMatchInlineSnapshot(
         `[Error: Unexpected status code from taskStore::msearch: 429]`
       );

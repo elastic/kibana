@@ -1,21 +1,13 @@
 {
   "type": "plugin",
   "id": "@kbn/metrics-data-access-plugin",
-  "owner": [
-    "@elastic/obs-knowledge-team",
-    "@elastic/obs-ux-infra_services-team"
-  ],
-  "group": "observability",
-  "visibility": "private",
+  "owner": ["@elastic/obs-knowledge-team", "@elastic/obs-ux-infra_services-team"],
   "description": "Exposes utilities for accessing metrics data",
   "plugin": {
     "id": "metricsDataAccess",
-    "browser": true,
     "server": true,
-    "configPath": [
-      "xpack",
-      "metrics_data_access"
-    ],
+    "browser": true,
+    "configPath": ["xpack", "metrics_data_access"],
     "requiredPlugins": [
       "data",
       "observabilityShared"
@@ -23,8 +15,6 @@
     "requiredBundles": [
       "kibanaReact"
     ],
-    "extraPublicDirs": [
-      "common"
-    ]
+    "extraPublicDirs": ["common"]
   }
 }

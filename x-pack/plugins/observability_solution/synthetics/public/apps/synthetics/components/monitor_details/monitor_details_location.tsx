@@ -8,7 +8,6 @@ import React, { useCallback } from 'react';
 
 import { useParams, useRouteMatch } from 'react-router-dom';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useKibanaSpace } from '../../../../hooks/use_kibana_space';
 import { useGetUrlParams } from '../../hooks';
 import {
   MONITOR_ALERTS_ROUTE,
@@ -35,14 +34,7 @@ export const MonitorDetailsLocation = ({ isDisabled }: { isDisabled?: boolean })
   const isHistoryTab = useRouteMatch(MONITOR_HISTORY_ROUTE);
   const isAlertsTab = useRouteMatch(MONITOR_ALERTS_ROUTE);
 
-  const { space } = useKibanaSpace();
-  const { spaceId } = useGetUrlParams();
-
-  let params = `&dateRangeStart=${dateRangeStart}&dateRangeEnd=${dateRangeEnd}`;
-
-  if (spaceId && spaceId !== space?.id) {
-    params += `&spaceId=${spaceId}`;
-  }
+  const params = `&dateRangeStart=${dateRangeStart}&dateRangeEnd=${dateRangeEnd}`;
 
   return (
     <MonitorLocationSelect

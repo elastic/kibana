@@ -1,16 +1,12 @@
 {
   "type": "plugin",
   "id": "@kbn/expression-tagcloud-plugin",
-  "owner": [
-    "@elastic/kibana-visualizations"
-  ],
-  "group": "platform",
-  "visibility": "shared",
+  "owner": "@elastic/kibana-visualizations",
   "description": "Expression Tagcloud plugin adds a `tagcloud` renderer and function to the expression plugin. The renderer will display the `Wordcloud` chart.",
   "plugin": {
     "id": "expressionTagcloud",
-    "browser": true,
     "server": true,
+    "browser": true,
     "requiredPlugins": [
       "data",
       "expressions",

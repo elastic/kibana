@@ -50,13 +50,13 @@ export default function jiraTest({ getService }: FtrProviderContext) {
       );
     });
 
-    it('should return 403 when creating a jira connector', async () => {
+    it('should return 403 when creating a jira action', async () => {
       await supertest
-        .post('/api/actions/connector')
+        .post('/api/actions/action')
         .set('kbn-xsrf', 'foo')
         .send({
-          name: 'A jira connector',
-          connector_type_id: '.jira',
+          name: 'A jira action',
+          actionTypeId: '.jira',
           config: {
             apiUrl: jiraSimulatorURL,
             projectKey: 'CK',

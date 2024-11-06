@@ -20,8 +20,7 @@ import {
   NotifyUserOption,
 } from './notify_user_option';
 import { expectIsViewOnly, exactMatchText } from '../mocks';
-import { cloneDeep } from 'lodash';
-import { set } from '@kbn/safer-lodash-set';
+import { cloneDeep, set } from 'lodash';
 import { ProtectionModes } from '../../../../../../../common/endpoint/types';
 import userEvent from '@testing-library/user-event';
 

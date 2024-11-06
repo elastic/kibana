@@ -40,7 +40,7 @@ export const createStorybookChatService = (): ObservabilityAIAssistantChatServic
   functions$: new BehaviorSubject<FunctionDefinition[]>(
     []
   ) as ObservabilityAIAssistantChatService['functions$'],
-  getScopes: () => ['all'],
+  getScope: () => 'all',
 });
 
 export const createStorybookService = (): ObservabilityAIAssistantService => ({
@@ -57,9 +57,7 @@ export const createStorybookService = (): ObservabilityAIAssistantService => ({
     predefinedConversation$: new Observable(),
   },
   navigate: async () => of(),
-  scope$: new BehaviorSubject<AssistantScope[]>([
-    'all',
-  ]) as ObservabilityAIAssistantService['scope$'],
-  getScopes: () => ['all'],
-  setScopes: () => {},
+  scope$: new BehaviorSubject<AssistantScope>('all') as ObservabilityAIAssistantService['scope$'],
+  getScope: () => 'all',
+  setScope: () => {},
 });

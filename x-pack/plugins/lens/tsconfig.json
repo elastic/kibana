@@ -113,7 +113,6 @@
     "@kbn/react-kibana-mount",
     "@kbn/es-types",
     "@kbn/esql-datagrid",
-    "@kbn/transpose-utils",
   ],
   "exclude": ["target/**/*"]
 }

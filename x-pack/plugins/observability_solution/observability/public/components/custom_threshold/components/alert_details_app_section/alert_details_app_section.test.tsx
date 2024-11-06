@@ -9,7 +9,6 @@ import React from 'react';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { coreMock as mockCoreMock } from '@kbn/core/public/mocks';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
 import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import { render } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -77,6 +76,7 @@ jest.mock('../../../../utils/kibana_react', () => ({
 
 describe('AlertDetailsAppSection', () => {
   const queryClient = new QueryClient();
+  const mockedSetRelatedAlertsKuery = jest.fn();
 
   const renderComponent = (
     alert: Partial<CustomThresholdAlert> = {},
@@ -86,10 +86,9 @@ describe('AlertDetailsAppSection', () => {
       <IntlProvider locale="en">
         <QueryClientProvider client={queryClient}>
           <AlertDetailsAppSection
-            alert={buildCustomThresholdAlert(alert, {
-              [ALERT_RULE_PARAMETERS]: buildCustomThresholdRule().params,
-              ...alertFields,
-            })}
+            alert={buildCustomThresholdAlert(alert, alertFields)}
+            rule={buildCustomThresholdRule()}
+            setRelatedAlertsKuery={mockedSetRelatedAlertsKuery}
           />
         </QueryClientProvider>
       </IntlProvider>
@@ -117,6 +116,15 @@ describe('AlertDetailsAppSection', () => {
 
     expect(alertDetailsAppSectionComponent.getAllByTestId('RuleConditionChart').length).toBe(6);
     expect(mockedRuleConditionChart.mock.calls[0]).toMatchSnapshot();
+  });
+
+  it('should set relatedAlertsKuery', async () => {
+    renderComponent();
+
+    expect(mockedSetRelatedAlertsKuery).toBeCalledTimes(1);
+    expect(mockedSetRelatedAlertsKuery).toHaveBeenLastCalledWith(
+      '(tags: "tag 1" or tags: "tag 2") or (host.name: "host-1" or kibana.alert.group.value: "host-1")'
+    );
   });
 
   it('should render title on condition charts', async () => {

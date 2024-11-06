@@ -7,15 +7,14 @@
 
 import { last, map, merge, OperatorFunction, scan, share } from 'rxjs';
 import type { Logger } from '@kbn/logging';
+import type { UnvalidatedToolCall, ToolOptions } from '../../../common/chat_complete/tools';
 import {
-  UnvalidatedToolCall,
-  ToolOptions,
   ChatCompletionChunkEvent,
   ChatCompletionEventType,
   ChatCompletionMessageEvent,
   ChatCompletionTokenCountEvent,
-  withoutTokenCountEvents,
-} from '@kbn/inference-common';
+} from '../../../common/chat_complete';
+import { withoutTokenCountEvents } from '../../../common/chat_complete/without_token_count_events';
 import { validateToolCalls } from '../../util/validate_tool_calls';
 
 export function chunksIntoMessage<TToolOptions extends ToolOptions>({

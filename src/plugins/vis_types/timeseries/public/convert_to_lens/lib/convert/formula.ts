@@ -66,7 +66,7 @@ const convertFormulaScriptForPercentileAggs = (
 ) => {
   variables.forEach((variable) => {
     const [_, meta] = variable?.field?.split('[') ?? [];
-    const metaValue = Number(meta?.replace(/\]/g, ''));
+    const metaValue = Number(meta?.replace(']', ''));
     if (!metaValue) {
       return;
     }
@@ -163,7 +163,7 @@ export const convertOtherAggsToFormulaColumn = (
   const metric = metrics[metrics.length - 1];
   const [fieldId, meta] = metric?.field?.split('[') ?? [];
   const subFunctionMetric = metrics.find(({ id }) => id === fieldId);
-  const metaValue = meta ? Number(meta?.replace(/\]/g, '')) : undefined;
+  const metaValue = meta ? Number(meta?.replace(']', '')) : undefined;
 
   if (!subFunctionMetric) {
     return null;

@@ -14,7 +14,7 @@ describe('config validation', () => {
       Object {
         "allow_reading_invalid_state": true,
         "auto_calculate_default_ech_capacity": false,
-        "claim_strategy": "mget",
+        "claim_strategy": "update_by_query",
         "discovery": Object {
           "active_nodes_lookback": "30s",
           "interval": 10000,
@@ -45,7 +45,7 @@ describe('config validation', () => {
             "warn_threshold": 80,
           },
         },
-        "poll_interval": 500,
+        "poll_interval": 3000,
         "request_capacity": 1000,
         "request_timeouts": Object {
           "update_by_query": 30000,
@@ -67,7 +67,7 @@ describe('config validation', () => {
     expect(() => {
       configSchema.validate(config);
     }).toThrowErrorMatchingInlineSnapshot(
-      `"The specified monitored_stats_required_freshness (100) is invalid, as it is below the poll_interval (500)"`
+      `"The specified monitored_stats_required_freshness (100) is invalid, as it is below the poll_interval (3000)"`
     );
   });
 
@@ -77,7 +77,7 @@ describe('config validation', () => {
       Object {
         "allow_reading_invalid_state": true,
         "auto_calculate_default_ech_capacity": false,
-        "claim_strategy": "mget",
+        "claim_strategy": "update_by_query",
         "discovery": Object {
           "active_nodes_lookback": "30s",
           "interval": 10000,
@@ -108,7 +108,7 @@ describe('config validation', () => {
             "warn_threshold": 80,
           },
         },
-        "poll_interval": 500,
+        "poll_interval": 3000,
         "request_capacity": 1000,
         "request_timeouts": Object {
           "update_by_query": 30000,
@@ -138,7 +138,7 @@ describe('config validation', () => {
       Object {
         "allow_reading_invalid_state": true,
         "auto_calculate_default_ech_capacity": false,
-        "claim_strategy": "mget",
+        "claim_strategy": "update_by_query",
         "discovery": Object {
           "active_nodes_lookback": "30s",
           "interval": 10000,
@@ -174,7 +174,7 @@ describe('config validation', () => {
             "warn_threshold": 80,
           },
         },
-        "poll_interval": 500,
+        "poll_interval": 3000,
         "request_capacity": 1000,
         "request_timeouts": Object {
           "update_by_query": 30000,

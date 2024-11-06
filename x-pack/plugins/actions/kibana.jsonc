@@ -1,15 +1,11 @@
 {
   "type": "plugin",
   "id": "@kbn/actions-plugin",
-  "owner": [
-    "@elastic/response-ops"
-  ],
-  "group": "platform",
-  "visibility": "shared",
+  "owner": "@elastic/response-ops",
   "plugin": {
     "id": "actions",
-    "browser": true,
     "server": true,
+    "browser": true,
     "configPath": [
       "xpack",
       "actions"
@@ -26,8 +22,7 @@
       "spaces",
       "security",
       "monitoringCollection",
-      "serverless",
-      "cloud"
+      "serverless"
     ],
     "extraPublicDirs": [
       "common"

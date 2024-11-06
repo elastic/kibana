@@ -23,7 +23,7 @@ import { once } from 'lodash/fp';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import type { Message } from '@kbn/elastic-assistant-common';
 import { loadAllActions as loadConnectors } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
-import useObservable from 'react-use/lib/useObservable';
+import { useObservable } from 'react-use';
 import { APP_ID } from '../../common';
 import { useBasePath, useKibana } from '../common/lib/kibana';
 import { useAssistantTelemetry } from './use_assistant_telemetry';
@@ -142,7 +142,6 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
     storage,
     triggersActionsUi: { actionTypeRegistry },
     docLinks: { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION },
-    userProfile,
   } = useKibana().services;
   const basePath = useBasePath();
 
@@ -226,7 +225,6 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
       title={ASSISTANT_TITLE}
       toasts={toasts}
       currentAppId={currentAppId ?? 'securitySolutionUI'}
-      userProfileService={userProfile}
     >
       {children}
     </ElasticAssistantProvider>

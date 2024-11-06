@@ -48,9 +48,6 @@ Array [
       test
     </span>,
     "displayAsText": "extension",
-    "displayHeaderCellProps": Object {
-      "className": "unifiedDataTable__headerCell",
-    },
     "id": "extension",
     "isSortable": true,
     "schema": "string",
@@ -335,9 +332,6 @@ Array [
       headerRowHeight={5}
     />,
     "displayAsText": "message",
-    "displayHeaderCellProps": Object {
-      "className": "unifiedDataTable__headerCell",
-    },
     "id": "message",
     "isSortable": true,
     "schema": "string",
@@ -595,9 +589,6 @@ Array [
       headerRowHeight={5}
     />,
     "displayAsText": "timestamp",
-    "displayHeaderCellProps": Object {
-      "className": "unifiedDataTable__headerCell",
-    },
     "id": "timestamp",
     "initialWidth": 212,
     "isSortable": true,
@@ -846,9 +837,6 @@ Array [
       showColumnTokens={true}
     />,
     "displayAsText": "extension",
-    "displayHeaderCellProps": Object {
-      "className": "unifiedDataTable__headerCell",
-    },
     "id": "extension",
     "isSortable": false,
     "schema": "string",
@@ -1094,9 +1082,6 @@ Array [
       showColumnTokens={true}
     />,
     "displayAsText": "message",
-    "displayHeaderCellProps": Object {
-      "className": "unifiedDataTable__headerCell",
-    },
     "id": "message",
     "isSortable": false,
     "schema": "string",
@@ -1387,9 +1372,6 @@ Array [
       showColumnTokens={true}
     />,
     "displayAsText": "extension",
-    "displayHeaderCellProps": Object {
-      "className": "unifiedDataTable__headerCell",
-    },
     "id": "extension",
     "isSortable": false,
     "schema": "string",
@@ -1673,9 +1655,6 @@ Array [
       showColumnTokens={true}
     />,
     "displayAsText": "message",
-    "displayHeaderCellProps": Object {
-      "className": "unifiedDataTable__headerCell",
-    },
     "id": "message",
     "isSortable": false,
     "schema": "string",
@@ -1840,9 +1819,6 @@ Array [
       headerRowHeight={5}
     />,
     "displayAsText": "extension",
-    "displayHeaderCellProps": Object {
-      "className": "unifiedDataTable__headerCell",
-    },
     "id": "extension",
     "isSortable": false,
     "schema": "string",
@@ -2000,9 +1976,6 @@ Array [
       headerRowHeight={5}
     />,
     "displayAsText": "message",
-    "displayHeaderCellProps": Object {
-      "className": "unifiedDataTable__headerCell",
-    },
     "id": "message",
     "isSortable": false,
     "schema": "string",
@@ -2218,9 +2191,6 @@ Array [
       headerRowHeight={5}
     />,
     "displayAsText": "timestamp",
-    "displayHeaderCellProps": Object {
-      "className": "unifiedDataTable__headerCell",
-    },
     "id": "timestamp",
     "initialWidth": 212,
     "isSortable": true,
@@ -2426,9 +2396,6 @@ Array [
       headerRowHeight={5}
     />,
     "displayAsText": "extension",
-    "displayHeaderCellProps": Object {
-      "className": "unifiedDataTable__headerCell",
-    },
     "id": "extension",
     "isSortable": false,
     "schema": "string",
@@ -2631,9 +2598,6 @@ Array [
       headerRowHeight={5}
     />,
     "displayAsText": "message",
-    "displayHeaderCellProps": Object {
-      "className": "unifiedDataTable__headerCell",
-    },
     "id": "message",
     "isSortable": false,
     "schema": "string",
@@ -2859,9 +2823,6 @@ Array [
       headerRowHeight={5}
     />,
     "displayAsText": "timestamp",
-    "displayHeaderCellProps": Object {
-      "className": "unifiedDataTable__headerCell",
-    },
     "id": "timestamp",
     "initialWidth": 212,
     "isSortable": true,
@@ -3082,9 +3043,6 @@ Array [
       headerRowHeight={5}
     />,
     "displayAsText": "extension",
-    "displayHeaderCellProps": Object {
-      "className": "unifiedDataTable__headerCell",
-    },
     "id": "extension",
     "isSortable": true,
     "schema": "string",
@@ -3304,9 +3262,6 @@ Array [
       headerRowHeight={5}
     />,
     "displayAsText": "message",
-    "displayHeaderCellProps": Object {
-      "className": "unifiedDataTable__headerCell",
-    },
     "id": "message",
     "isSortable": true,
     "schema": "string",

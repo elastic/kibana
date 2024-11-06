@@ -47,7 +47,6 @@ import { TaskValidator } from './task_validator';
 import { claimSort } from './queries/mark_available_tasks_as_claimed';
 import { MAX_PARTITIONS } from './lib/task_partitioner';
 import { ErrorOutput } from './lib/bulk_operation_buffer';
-import { MsearchError } from './lib/msearch_error';
 
 export interface StoreOpts {
   esClient: ElasticsearchClient;
@@ -576,7 +575,7 @@ export class TaskStore {
 
     for (const response of responses) {
       if (response.status !== 200) {
-        const err = new MsearchError(response.status);
+        const err = new Error(`Unexpected status code from taskStore::msearch: ${response.status}`);
         this.errors$.next(err);
         throw err;
       }

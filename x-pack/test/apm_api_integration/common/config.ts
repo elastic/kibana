@@ -11,7 +11,7 @@ import {
   ApmSynthtraceEsClient,
   ApmSynthtraceKibanaClient,
   LogsSynthtraceEsClient,
-  EntitiesSynthtraceEsClient,
+  AssetsSynthtraceEsClient,
   createLogger,
   LogLevel,
 } from '@kbn/apm-synthtrace';
@@ -52,7 +52,7 @@ async function getApmApiClient({
 
 export type CreateTestConfig = ReturnType<typeof createTestConfig>;
 
-export type ApmApiClientKey =
+type ApmApiClientKey =
   | 'noAccessUser'
   | 'readUser'
   | 'adminUser'
@@ -62,13 +62,7 @@ export type ApmApiClientKey =
   | 'manageOwnAgentKeysUser'
   | 'createAndAllAgentKeysUser'
   | 'monitorClusterAndIndicesUser'
-  | 'manageServiceAccount'
-  | 'apmAllPrivilegesWithoutWriteSettingsUser'
-  | 'apmReadPrivilegesWithWriteSettingsUser';
-
-export interface UserApiClient {
-  user: ApmApiClientKey;
-}
+  | 'manageServiceAccount';
 
 export type ApmApiClient = Record<ApmApiClientKey, Awaited<ReturnType<typeof getApmApiClient>>>;
 
@@ -83,9 +77,9 @@ export interface CreateTest {
       context: InheritedFtrProviderContext
     ) => Promise<LogsSynthtraceEsClient>;
     synthtraceEsClient: (context: InheritedFtrProviderContext) => Promise<ApmSynthtraceEsClient>;
-    entitiesSynthtraceEsClient: (
+    assetsSynthtraceEsClient: (
       context: InheritedFtrProviderContext
-    ) => Promise<EntitiesSynthtraceEsClient>;
+    ) => Promise<AssetsSynthtraceEsClient>;
     apmSynthtraceEsClient: (context: InheritedFtrProviderContext) => Promise<ApmSynthtraceEsClient>;
     synthtraceKibanaClient: (
       context: InheritedFtrProviderContext
@@ -132,8 +126,8 @@ export function createTestConfig(
             logger: createLogger(LogLevel.info),
             refreshAfterIndex: true,
           }),
-        entitiesSynthtraceEsClient: (context: InheritedFtrProviderContext) =>
-          new EntitiesSynthtraceEsClient({
+        assetsSynthtraceEsClient: (context: InheritedFtrProviderContext) =>
+          new AssetsSynthtraceEsClient({
             client: context.getService('es'),
             logger: createLogger(LogLevel.info),
             refreshAfterIndex: true,
@@ -189,14 +183,6 @@ export function createTestConfig(
             manageServiceAccount: await getApmApiClient({
               kibanaServer,
               username: ApmUsername.apmManageServiceAccount,
-            }),
-            apmAllPrivilegesWithoutWriteSettingsUser: await getApmApiClient({
-              kibanaServer,
-              username: ApmUsername.apmAllPrivilegesWithoutWriteSettings,
-            }),
-            apmReadPrivilegesWithWriteSettingsUser: await getApmApiClient({
-              kibanaServer,
-              username: ApmUsername.apmReadPrivilegesWithWriteSettings,
             }),
           };
         },

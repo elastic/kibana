@@ -39,11 +39,11 @@ export default function ({ getService }: FtrProviderContext) {
       it(`should handle enqueue request appropriately: ${scenario.id}`, async () => {
         const startDate = new Date().toISOString();
 
-        const { body: createdConnector } = await supertest
+        const { body: createdAction } = await supertest
           .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
           .set('kbn-xsrf', 'foo')
           .send({
-            name: 'My Connector',
+            name: 'My action',
             connector_type_id: 'test.index-record',
             config: {
               unencrypted: `This value shouldn't get encrypted`,
@@ -54,10 +54,10 @@ export default function ({ getService }: FtrProviderContext) {
           })
           .expect(200);
 
-        objectRemover.add(space.id, createdConnector.id, 'connector', 'actions');
+        objectRemover.add(space.id, createdAction.id, 'action', 'actions');
 
-        const connectorId = createdConnector.id;
-        const name = 'My Connector';
+        const connectorId = createdAction.id;
+        const name = 'My action';
         const reference = `actions-enqueue-${scenario.id}:${space.id}:${connectorId}`;
 
         const response = await supertestWithoutAuth

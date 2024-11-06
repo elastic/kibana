@@ -61,7 +61,7 @@ export class ServerlessPlugin
       const { currentType } = developer.projectSwitcher;
 
       core.chrome.navControls.registerRight({
-        order: 5000,
+        order: 500,
         mount: (target) => this.mountProjectSwitcher(target, core, currentType),
       });
     }
@@ -125,7 +125,7 @@ export class ServerlessPlugin
       getNavigationCards: (roleManagementEnabled, extendCardNavDefinitions) => {
         if (!roleManagementEnabled) return extendCardNavDefinitions;
 
-        const manageOrgMembersNavCard = generateManageOrgMembersNavCard(cloud.usersAndRolesUrl);
+        const manageOrgMembersNavCard = generateManageOrgMembersNavCard(cloud.organizationUrl);
         if (extendCardNavDefinitions) {
           extendCardNavDefinitions[manageOrgMembersNavCardName] = manageOrgMembersNavCard;
           return extendCardNavDefinitions;

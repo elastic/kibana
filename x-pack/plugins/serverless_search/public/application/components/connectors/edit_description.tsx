@@ -25,11 +25,10 @@ import { useKibanaServices } from '../../hooks/use_kibana';
 import { useConnector } from '../../hooks/api/use_connector';
 
 interface EditDescriptionProps {
-  isDisabled?: boolean;
   connector: Connector;
 }
 
-export const EditDescription: React.FC<EditDescriptionProps> = ({ connector, isDisabled }) => {
+export const EditDescription: React.FC<EditDescriptionProps> = ({ connector }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [newDescription, setNewDescription] = useState(connector.description || '');
   const { http } = useKibanaServices();
@@ -67,17 +66,15 @@ export const EditDescription: React.FC<EditDescriptionProps> = ({ connector, isD
         defaultMessage: 'Description',
       })}
       labelAppend={
-        isDisabled ? undefined : (
-          <EuiText size="xs">
-            <EuiLink
-              data-test-subj="serverlessSearchEditDescriptionButton"
-              onClick={() => setIsEditing(true)}
-              role="button"
-            >
-              {EDIT_LABEL}
-            </EuiLink>
-          </EuiText>
-        )
+        <EuiText size="xs">
+          <EuiLink
+            data-test-subj="serverlessSearchEditDescriptionButton"
+            onClick={() => setIsEditing(true)}
+            role="button"
+          >
+            {EDIT_LABEL}
+          </EuiLink>
+        </EuiText>
       }
       fullWidth
     >

@@ -8,9 +8,9 @@
 import React, { useMemo } from 'react';
 import type { FlyoutPanelProps, PanelPath } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { FlyoutLoading } from '@kbn/security-solution-common';
 import { useManagedUser } from '../shared/hooks/use_managed_user';
 import { useTabs } from './tabs';
-import { FlyoutLoading } from '../../shared/components/flyout_loading';
 import type {
   EntityDetailsLeftPanelTab,
   LeftPanelTabsType,

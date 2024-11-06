@@ -6,9 +6,6 @@
  */
 
 import { rangeQuery } from '@kbn/observability-plugin/server';
-import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
-import { asMutableArray } from '../../../../common/utils/as_mutable_array';
-import { maybe } from '../../../../common/utils/maybe';
 import { ApmDocumentType } from '../../../../common/document_type';
 import { termQuery } from '../../../../common/utils/term_query';
 import {
@@ -30,7 +27,6 @@ export async function getDownstreamServiceResource({
   end: number;
   apmEventClient: APMEventClient;
 }) {
-  const requiredFields = asMutableArray([SPAN_DESTINATION_SERVICE_RESOURCE] as const);
   const response = await apmEventClient.search('get_error_group_main_statistics', {
     apm: {
       sources: [
@@ -54,11 +50,9 @@ export async function getDownstreamServiceResource({
           ],
         },
       },
-      fields: requiredFields,
     },
   });
 
-  const event = unflattenKnownApmEventFields(maybe(response.hits.hits[0])?.fields, requiredFields);
-
-  return event?.span.destination.service.resource;
+  const hit = response.hits.hits[0];
+  return hit?._source?.span.destination?.service.resource;
 }

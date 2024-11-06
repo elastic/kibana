@@ -5,16 +5,13 @@
  * 2.0.
  */
 
-import { EuiSkeletonRectangle } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import React, { lazy, Suspense } from 'react';
 import ReactDOM from 'react-dom';
 
 import type { CoreStart } from '@kbn/core/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { euiThemeVars } from '@kbn/ui-theme';
 
-import { initTour } from './solution_view_tour';
 import type { EventTracker } from '../analytics';
 import type { ConfigType } from '../config';
 import type { SpacesManager } from '../spaces_manager';
@@ -25,8 +22,6 @@ export function initSpacesNavControl(
   config: ConfigType,
   eventTracker: EventTracker
 ) {
-  const { showTour$, onFinishTour } = initTour(core, spacesManager);
-
   core.chrome.navControls.registerLeft({
     order: 1000,
     mount(targetDomElement: HTMLElement) {
@@ -42,17 +37,7 @@ export function initSpacesNavControl(
 
       ReactDOM.render(
         <KibanaRenderContextProvider {...core}>
-          <Suspense
-            fallback={
-              <EuiSkeletonRectangle
-                css={css`
-                  margin-inline: ${euiThemeVars.euiSizeS};
-                `}
-                borderRadius="m"
-                contentAriaLabel="Loading navigation"
-              />
-            }
-          >
+          <Suspense fallback={<EuiLoadingSpinner />}>
             <LazyNavControlPopover
               spacesManager={spacesManager}
               serverBasePath={core.http.basePath.serverBasePath}
@@ -62,8 +47,6 @@ export function initSpacesNavControl(
               navigateToUrl={core.application.navigateToUrl}
               allowSolutionVisibility={config.allowSolutionVisibility}
               eventTracker={eventTracker}
-              showTour$={showTour$}
-              onFinishTour={onFinishTour}
             />
           </Suspense>
         </KibanaRenderContextProvider>,

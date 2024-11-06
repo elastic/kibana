@@ -31,9 +31,7 @@
     "@kbn/test-jest-helpers",
     "@kbn/kibana-utils-plugin",
     "@kbn/features-plugin",
-    "@kbn/ui-theme",
-    "@kbn/deeplinks-search",
-    "@kbn/deeplinks-management"
+    "@kbn/ui-theme"
   ],
   "exclude": [
     "target/**/*",

@@ -16,8 +16,7 @@ import { useCaseViewNavigation } from '../../common/navigation/hooks';
 
 jest.mock('../../common/navigation/hooks');
 
-// FLAKY: https://github.com/elastic/kibana/issues/196189
-describe.skip('Configuration button', () => {
+describe('Configuration button', () => {
   const props: ConfigureCaseButtonProps = {
     label: 'My label',
     msgTooltip: <></>,

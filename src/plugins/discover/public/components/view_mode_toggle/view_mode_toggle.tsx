@@ -130,14 +130,7 @@ export const DocumentViewModeToggle = ({
               onClick={() => setDiscoverViewMode(VIEW_MODE.DOCUMENT_LEVEL)}
               data-test-subj="dscViewModeDocumentButton"
             >
-              {isEsqlMode ? (
-                <FormattedMessage id="discover.viewModes.esql.label" defaultMessage="Results" />
-              ) : (
-                <FormattedMessage
-                  id="discover.viewModes.document.label"
-                  defaultMessage="Documents"
-                />
-              )}
+              <FormattedMessage id="discover.viewModes.document.label" defaultMessage="Documents" />
               <HitsCounter mode={HitsCounterMode.appended} stateContainer={stateContainer} />
             </EuiTab>
 

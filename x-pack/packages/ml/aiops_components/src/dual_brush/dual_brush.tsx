@@ -6,9 +6,7 @@
  */
 
 import { isEqual } from 'lodash';
-import React, { useEffect, useMemo, useRef, type FC } from 'react';
-
-import { htmlIdGenerator } from '@elastic/eui';
+import React, { useEffect, useRef, type FC } from 'react';
 
 import * as d3Brush from 'd3-brush';
 import * as d3Scale from 'd3-scale';
@@ -102,10 +100,6 @@ export const DualBrush: FC<DualBrushProps> = (props) => {
   const d3BrushContainer = useRef(null);
   const brushes = useRef<DualBrush[]>([]);
 
-  // id to prefix html ids for the brushes since this component can be used
-  // multiple times within dashboard and embedded charts.
-  const htmlId = useMemo(() => htmlIdGenerator()(), []);
-
   // We need to pass props to refs here because the d3-brush code doesn't consider
   // native React prop changes. The brush code does its own check whether these props changed then.
   // The initialized brushes might otherwise act on stale data.
@@ -141,10 +135,10 @@ export const DualBrush: FC<DualBrushProps> = (props) => {
           const xMax = x(maxRef.current) ?? 0;
           const minExtentPx = Math.round((xMax - xMin) / 100);
 
-          const baselineBrush = d3.select(`#aiops-brush-baseline-${htmlId}`);
+          const baselineBrush = d3.select('#aiops-brush-baseline');
           const baselineSelection = d3.brushSelection(baselineBrush.node() as SVGGElement);
 
-          const deviationBrush = d3.select(`#aiops-brush-deviation-${htmlId}`);
+          const deviationBrush = d3.select('#aiops-brush-deviation');
           const deviationSelection = d3.brushSelection(deviationBrush.node() as SVGGElement);
 
           if (!isBrushXSelection(deviationSelection) || !isBrushXSelection(baselineSelection)) {
@@ -266,7 +260,7 @@ export const DualBrush: FC<DualBrushProps> = (props) => {
           .insert('g', '.brush')
           .attr('class', 'brush')
           .attr('id', (b: DualBrush) => {
-            return `aiops-brush-${b.id}-${htmlId}`;
+            return 'aiops-brush-' + b.id;
           })
           .attr('data-test-subj', (b: DualBrush) => {
             // Uppercase the first character of the `id` so we get aiopsBrushBaseline/aiopsBrushDeviation.
@@ -345,7 +339,6 @@ export const DualBrush: FC<DualBrushProps> = (props) => {
       drawBrushes();
     }
   }, [
-    htmlId,
     min,
     max,
     width,

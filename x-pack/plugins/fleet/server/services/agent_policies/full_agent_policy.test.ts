@@ -109,7 +109,7 @@ jest.mock('../output', () => {
       getDefaultDataOutputId: async () => 'test-id',
       getDefaultMonitoringOutputId: async () => 'test-id',
       get: (soClient: any, id: string): Output => OUTPUTS[id] || OUTPUTS['test-id'],
-      bulkGet: async (ids: string[]): Promise<Output[]> => {
+      bulkGet: async (soClient: any, ids: string[]): Promise<Output[]> => {
         return ids.map((id) => OUTPUTS[id] || OUTPUTS['test-id']);
       },
     },

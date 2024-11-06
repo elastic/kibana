@@ -14,8 +14,8 @@ import { KBN_CERT_PATH, KBN_KEY_PATH, CA_CERT_PATH } from '@kbn/dev-utils';
 import type { UsageApiConfigSchema } from '../../config';
 import type { UsageRecord } from '../../types';
 
-import { USAGE_REPORTING_ENDPOINT } from '../../constants';
 import { UsageReportingService } from './usage_reporting_service';
+import { USAGE_REPORTING_ENDPOINT, USAGE_SERVICE_USAGE_URL } from '../../constants';
 
 jest.mock('node-fetch');
 const { Response } = jest.requireActual('node-fetch');
@@ -23,8 +23,6 @@ const { Response } = jest.requireActual('node-fetch');
 describe('UsageReportingService', () => {
   let usageApiConfig: UsageApiConfigSchema;
   let service: UsageReportingService;
-
-  const kibanaVersion = '8.16.0';
 
   function generateUsageApiConfig(overrides?: Partial<UsageApiConfigSchema>): UsageApiConfigSchema {
     const DEFAULT_USAGE_API_CONFIG = { enabled: false };
@@ -36,7 +34,7 @@ describe('UsageReportingService', () => {
   function setupService(
     usageApi: UsageApiConfigSchema = generateUsageApiConfig()
   ): UsageReportingService {
-    service = new UsageReportingService(usageApi, kibanaVersion);
+    service = new UsageReportingService(usageApi);
     return service;
   }
 
@@ -61,6 +59,44 @@ describe('UsageReportingService', () => {
       setupService();
     });
 
+    it('should still work if usageApi.url is not provided', async () => {
+      const usageRecord = generateUsageRecord();
+      const records: UsageRecord[] = [usageRecord];
+      const mockResponse = new Response(null, { status: 200 });
+      (fetch as jest.MockedFunction<typeof fetch>).mockResolvedValueOnce(mockResponse);
+
+      const response = await service.reportUsage(records);
+
+      expect(fetch).toHaveBeenCalledTimes(1);
+      expect(fetch).toHaveBeenCalledWith(USAGE_SERVICE_USAGE_URL, {
+        method: 'post',
+        body: JSON.stringify(records),
+        headers: { 'Content-Type': 'application/json' },
+        agent: expect.any(https.Agent),
+      });
+      expect(response).toBe(mockResponse);
+    });
+
+    it('should use an agent with rejectUnauthorized false if config.enabled is false', async () => {
+      const usageRecord = generateUsageRecord();
+      const records: UsageRecord[] = [usageRecord];
+      const mockResponse = new Response(null, { status: 200 });
+      (fetch as jest.MockedFunction<typeof fetch>).mockResolvedValueOnce(mockResponse);
+
+      const response = await service.reportUsage(records);
+
+      expect(fetch).toHaveBeenCalledTimes(1);
+      expect(fetch).toHaveBeenCalledWith(USAGE_SERVICE_USAGE_URL, {
+        method: 'post',
+        body: JSON.stringify(records),
+        headers: { 'Content-Type': 'application/json' },
+        agent: expect.objectContaining({
+          options: expect.objectContaining({ rejectUnauthorized: false }),
+        }),
+      });
+      expect(response).toBe(mockResponse);
+    });
+
     it('should not set agent if the URL is not https', async () => {
       const url = 'http://usage-api.example';
       setupService(generateUsageApiConfig({ url }));
@@ -75,28 +111,9 @@ describe('UsageReportingService', () => {
       expect(fetch).toHaveBeenCalledWith(`${url}${USAGE_REPORTING_ENDPOINT}`, {
         method: 'post',
         body: JSON.stringify(records),
-        headers: {
-          'Content-Type': 'application/json',
-          'User-Agent': `Kibana/${kibanaVersion} node-fetch`,
-        },
+        headers: { 'Content-Type': 'application/json' },
       });
       expect(response).toBe(mockResponse);
-    });
-
-    it('should throw if url not provided', async () => {
-      const usageRecord = generateUsageRecord();
-      const records: UsageRecord[] = [usageRecord];
-      await expect(service.reportUsage(records)).rejects.toThrowError('usage-api url not provided');
-    });
-
-    it('should throw if TLS configs not provided', async () => {
-      const url = 'https://some-url';
-      setupService(generateUsageApiConfig({ url }));
-      const usageRecord = generateUsageRecord();
-      const records: UsageRecord[] = [usageRecord];
-      await expect(service.reportUsage(records)).rejects.toThrowError(
-        'usage-api TLS configs not provided'
-      );
     });
   });
 
@@ -115,7 +132,7 @@ describe('UsageReportingService', () => {
       setupService(generateUsageApiConfig(DEFAULT_CONFIG));
     });
 
-    it('should correctly use usageApi.url', async () => {
+    it('should use usageApi.url if provided', async () => {
       const usageRecord = generateUsageRecord();
       const records: UsageRecord[] = [usageRecord];
       const mockResponse = new Response(null, { status: 200 });
@@ -128,10 +145,7 @@ describe('UsageReportingService', () => {
       expect(fetch).toHaveBeenCalledWith(url, {
         method: 'post',
         body: JSON.stringify(records),
-        headers: {
-          'Content-Type': 'application/json',
-          'User-Agent': `Kibana/${kibanaVersion} node-fetch`,
-        },
+        headers: { 'Content-Type': 'application/json' },
         agent: expect.any(https.Agent),
       });
       expect(response).toBe(mockResponse);
@@ -150,10 +164,7 @@ describe('UsageReportingService', () => {
       expect(fetch).toHaveBeenCalledWith(url, {
         method: 'post',
         body: JSON.stringify(records),
-        headers: {
-          'Content-Type': 'application/json',
-          'User-Agent': `Kibana/${kibanaVersion} node-fetch`,
-        },
+        headers: { 'Content-Type': 'application/json' },
         agent: expect.objectContaining({
           options: expect.objectContaining({
             cert: expect.any(String),

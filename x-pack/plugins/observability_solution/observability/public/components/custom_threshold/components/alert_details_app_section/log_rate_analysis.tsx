@@ -19,14 +19,17 @@ import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Message } from '@kbn/observability-ai-assistant-plugin/public';
-import { ALERT_END, ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
-import { CustomThresholdAlert } from '../types';
+import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
+import { ALERT_END } from '@kbn/rule-data-utils';
+import { CustomThresholdRuleTypeParams } from '../../types';
+import { TopAlert } from '../../../..';
 import { Color, colorTransformer } from '../../../../../common/custom_threshold_rule/color_palette';
 import { getLogRateAnalysisEQQuery } from './helpers/log_rate_analysis_query';
 
 export interface AlertDetailsLogRateAnalysisProps {
-  alert: CustomThresholdAlert;
+  alert: TopAlert<Record<string, any>>;
   dataView: any;
+  rule: Rule<CustomThresholdRuleTypeParams>;
   services: any;
 }
 
@@ -37,7 +40,12 @@ interface SignificantFieldValue {
   pValue: number | null;
 }
 
-export function LogRateAnalysis({ alert, dataView, services }: AlertDetailsLogRateAnalysisProps) {
+export function LogRateAnalysis({
+  alert,
+  dataView,
+  rule,
+  services,
+}: AlertDetailsLogRateAnalysisProps) {
   const {
     observabilityAIAssistant: {
       ObservabilityAIAssistantContextualInsight,
@@ -49,23 +57,22 @@ export function LogRateAnalysis({ alert, dataView, services }: AlertDetailsLogRa
     | { logRateAnalysisType: LogRateAnalysisType; significantFieldValues: SignificantFieldValue[] }
     | undefined
   >();
-  const ruleParams = alert.fields[ALERT_RULE_PARAMETERS];
 
   useEffect(() => {
-    const esSearchRequest = getLogRateAnalysisEQQuery(alert);
+    const esSearchRequest = getLogRateAnalysisEQQuery(alert, rule.params);
 
     if (esSearchRequest) {
       setEsSearchQuery(esSearchRequest);
     }
-  }, [alert]);
+  }, [alert, rule.params]);
 
   const { timeRange, windowParameters } = useMemo(() => {
     const alertStartedAt = moment(alert.start).toISOString();
     const alertEndedAt = alert.fields[ALERT_END]
       ? moment(alert.fields[ALERT_END]).toISOString()
       : undefined;
-    const timeSize = ruleParams.criteria[0]?.timeSize as number | undefined;
-    const timeUnit = ruleParams.criteria[0]?.timeUnit as
+    const timeSize = rule.params.criteria[0]?.timeSize as number | undefined;
+    const timeUnit = rule.params.criteria[0]?.timeUnit as
       | moment.unitOfTime.DurationConstructor
       | undefined;
 
@@ -75,7 +82,7 @@ export function LogRateAnalysis({ alert, dataView, services }: AlertDetailsLogRa
       timeSize,
       timeUnit,
     });
-  }, [alert.fields, alert.start, ruleParams.criteria]);
+  }, [alert, rule]);
 
   const logRateAnalysisTitle = i18n.translate(
     'xpack.observability.customThreshold.alertDetails.logRateAnalysisTitle',

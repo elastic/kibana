@@ -9,7 +9,8 @@
  * This module contains helpers for managing the task manager storage layer.
  */
 import apm from 'elastic-apm-node';
-import { Subject } from 'rxjs';
+import { Subject, Observable, from, of } from 'rxjs';
+import { mergeScan } from 'rxjs';
 import { groupBy, pick } from 'lodash';
 
 import { asOk } from '../lib/result_type';
@@ -56,47 +57,52 @@ interface OwnershipClaimingOpts {
   taskMaxAttempts: Record<string, number>;
 }
 
-export async function claimAvailableTasksUpdateByQuery(
+export function claimAvailableTasksUpdateByQuery(
   opts: TaskClaimerOpts
-): Promise<ClaimOwnershipResult> {
+): Observable<ClaimOwnershipResult> {
   const { getCapacity, claimOwnershipUntil, batches, events$, taskStore } = opts;
   const { definitions, unusedTypes, excludedTaskTypes, taskMaxAttempts } = opts;
   const initialCapacity = getCapacity();
-
-  let accumulatedResult = getEmptyClaimOwnershipResult();
-  const stopTaskTimer = startTaskTimer();
-  for (const batch of batches) {
-    const capacity = Math.min(
-      initialCapacity - accumulatedResult.stats.tasksClaimed,
-      isLimited(batch) ? getCapacity(batch.tasksTypes) : getCapacity()
-    );
-
-    // if we have no more capacity, short circuit here
-    if (capacity <= 0) {
-      return accumulatedResult;
-    }
-
-    const result = await executeClaimAvailableTasks({
-      claimOwnershipUntil,
-      size: capacity,
-      events$,
-      taskTypes: isLimited(batch) ? new Set([batch.tasksTypes]) : batch.tasksTypes,
-      taskStore,
-      definitions,
-      unusedTypes,
-      excludedTaskTypes,
-      taskMaxAttempts,
-    });
-
-    accumulatedResult = accumulateClaimOwnershipResults(accumulatedResult, result);
-    accumulatedResult.stats.tasksConflicted = correctVersionConflictsForContinuation(
-      accumulatedResult.stats.tasksClaimed,
-      accumulatedResult.stats.tasksConflicted,
-      initialCapacity
-    );
-  }
-
-  return { ...accumulatedResult, timing: stopTaskTimer() };
+  return from(batches).pipe(
+    mergeScan(
+      (accumulatedResult, batch) => {
+        const stopTaskTimer = startTaskTimer();
+        const capacity = Math.min(
+          initialCapacity - accumulatedResult.stats.tasksClaimed,
+          isLimited(batch) ? getCapacity(batch.tasksTypes) : getCapacity()
+        );
+        // if we have no more capacity, short circuit here
+        if (capacity <= 0) {
+          return of(accumulatedResult);
+        }
+        return from(
+          executeClaimAvailableTasks({
+            claimOwnershipUntil,
+            size: capacity,
+            events$,
+            taskTypes: isLimited(batch) ? new Set([batch.tasksTypes]) : batch.tasksTypes,
+            taskStore,
+            definitions,
+            unusedTypes,
+            excludedTaskTypes,
+            taskMaxAttempts,
+          }).then((result) => {
+            const { stats, docs } = accumulateClaimOwnershipResults(accumulatedResult, result);
+            stats.tasksConflicted = correctVersionConflictsForContinuation(
+              stats.tasksClaimed,
+              stats.tasksConflicted,
+              initialCapacity
+            );
+            return { stats, docs, timing: stopTaskTimer() };
+          })
+        );
+      },
+      // initialise the accumulation with no results
+      accumulateClaimOwnershipResults(),
+      // only run one batch at a time
+      1
+    )
+  );
 }
 
 async function executeClaimAvailableTasks(
@@ -224,7 +230,7 @@ function accumulateClaimOwnershipResults(
         tasksConflicted: stats.tasksConflicted + prev.stats.tasksConflicted,
         tasksClaimed: stats.tasksClaimed + prev.stats.tasksClaimed,
       },
-      docs: [...prev.docs, ...docs],
+      docs,
       timing,
     };
     return res;

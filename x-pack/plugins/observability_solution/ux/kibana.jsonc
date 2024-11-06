@@ -1,19 +1,12 @@
 {
   "type": "plugin",
   "id": "@kbn/ux-plugin",
-  "owner": [
-    "@elastic/obs-ux-infra_services-team"
-  ],
-  "group": "observability",
-  "visibility": "private",
+  "owner": "@elastic/obs-ux-infra_services-team",
   "plugin": {
     "id": "ux",
-    "browser": true,
     "server": true,
-    "configPath": [
-      "xpack",
-      "ux"
-    ],
+    "browser": true,
+    "configPath": ["xpack", "ux"],
     "requiredPlugins": [
       "features",
       "data",

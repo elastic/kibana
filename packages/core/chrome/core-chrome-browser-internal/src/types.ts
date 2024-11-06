@@ -9,8 +9,8 @@
 
 import type {
   ChromeStart,
-  ChromeBreadcrumb,
   SideNavComponent,
+  ChromeProjectBreadcrumb,
   ChromeSetProjectBreadcrumbsParams,
   ChromeProjectNavigationNode,
   AppDeepLinkId,
@@ -18,7 +18,6 @@ import type {
   NavigationTreeDefinitionUI,
   CloudURLs,
   SolutionNavigationDefinitions,
-  SolutionId,
 } from '@kbn/core-chrome-browser';
 import type { Observable } from 'rxjs';
 
@@ -67,7 +66,7 @@ export interface InternalChromeStart extends ChromeStart {
       Id extends string = string,
       ChildrenId extends string = Id
     >(
-      id: SolutionId,
+      id: string,
       navigationTree$: Observable<NavigationTreeDefinition<LinkId, Id, ChildrenId>>
     ): void;
 
@@ -88,9 +87,6 @@ export interface InternalChromeStart extends ChromeStart {
      */
     setSideNavComponent(component: SideNavComponent | null): void;
 
-    /** Get an Observable of the current project breadcrumbs */
-    getBreadcrumbs$(): Observable<ChromeBreadcrumb[]>;
-
     /**
      * Set project breadcrumbs
      * @param breadcrumbs
@@ -99,7 +95,7 @@ export interface InternalChromeStart extends ChromeStart {
      * Use {@link ServerlessPluginStart.setBreadcrumbs} to set project breadcrumbs.
      */
     setBreadcrumbs(
-      breadcrumbs: ChromeBreadcrumb[] | ChromeBreadcrumb,
+      breadcrumbs: ChromeProjectBreadcrumb[] | ChromeProjectBreadcrumb,
       params?: Partial<ChromeSetProjectBreadcrumbsParams>
     ): void;
 
@@ -118,6 +114,6 @@ export interface InternalChromeStart extends ChromeStart {
      * @param id The id of the active solution navigation. If `null` is provided, the solution navigation
      * will be replaced with the legacy Kibana navigation.
      */
-    changeActiveSolutionNavigation(id: SolutionId | null): void;
+    changeActiveSolutionNavigation(id: string | null): void;
   };
 }

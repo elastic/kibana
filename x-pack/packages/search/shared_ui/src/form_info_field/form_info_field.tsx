@@ -73,7 +73,6 @@ export const FormInfoField: React.FC<FormInfoFieldProps> = ({
             <EuiButtonIcon
               onClick={copy}
               iconType="copy"
-              color="text"
               data-test-subj={copyValueDataTestSubj}
               aria-label={i18n.translate('xpack.searchSharedUI.formInfoField.copyMessage', {
                 defaultMessage: 'Copy to clipboard',

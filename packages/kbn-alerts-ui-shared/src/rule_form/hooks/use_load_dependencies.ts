@@ -20,6 +20,7 @@ import {
   useLoadUiConfig,
   useResolveRule,
 } from '../../common/hooks';
+import { getAvailableRuleTypes } from '../utils';
 import { RuleTypeRegistryContract } from '../../common';
 import { useFetchFlappingSettings } from '../../common/hooks/use_fetch_flapping_settings';
 import { IS_RULE_SPECIFIC_FLAPPING_ENABLED } from '../../common/constants/rule_flapping';
@@ -42,6 +43,8 @@ export const useLoadDependencies = (props: UseLoadDependencies) => {
     http,
     toasts,
     ruleTypeRegistry,
+    consumer,
+    validConsumers,
     id,
     ruleTypeId,
     capabilities,
@@ -66,7 +69,7 @@ export const useLoadDependencies = (props: UseLoadDependencies) => {
     data: fetchedFormData,
     isLoading: isLoadingRule,
     isInitialLoading: isInitialLoadingRule,
-  } = useResolveRule({ http, id, cacheTime: 0 });
+  } = useResolveRule({ http, id });
 
   const {
     ruleTypesState: {
@@ -97,7 +100,6 @@ export const useLoadDependencies = (props: UseLoadDependencies) => {
     http,
     includeSystemActions: true,
     enabled: canReadConnectors,
-    cacheTime: 0,
   });
 
   const computedRuleTypeId = useMemo(() => {
@@ -123,22 +125,28 @@ export const useLoadDependencies = (props: UseLoadDependencies) => {
     http,
     ruleTypeId: computedRuleTypeId,
     enabled: !!computedRuleTypeId && canReadConnectors,
-    cacheTime: 0,
   });
 
-  const ruleType = useMemo(() => {
-    if (!computedRuleTypeId || !ruleTypeIndex) {
-      return null;
+  const authorizedRuleTypeItems = useMemo(() => {
+    const computedConsumer = consumer || fetchedFormData?.consumer;
+    if (!computedConsumer) {
+      return [];
     }
-    return ruleTypeIndex.get(computedRuleTypeId);
-  }, [computedRuleTypeId, ruleTypeIndex]);
+    return getAvailableRuleTypes({
+      consumer: computedConsumer,
+      ruleTypes: [...ruleTypeIndex.values()],
+      ruleTypeRegistry,
+      validConsumers,
+    });
+  }, [consumer, ruleTypeIndex, ruleTypeRegistry, validConsumers, fetchedFormData]);
 
-  const ruleTypeModel = useMemo(() => {
-    if (!computedRuleTypeId) {
-      return null;
-    }
-    return ruleTypeRegistry.get(computedRuleTypeId);
-  }, [computedRuleTypeId, ruleTypeRegistry]);
+  const [ruleType, ruleTypeModel] = useMemo(() => {
+    const item = authorizedRuleTypeItems.find(({ ruleType: rt }) => {
+      return rt.id === computedRuleTypeId;
+    });
+
+    return [item?.ruleType, item?.ruleTypeModel];
+  }, [authorizedRuleTypeItems, computedRuleTypeId]);
 
   const isLoading = useMemo(() => {
     // Create Mode
@@ -219,7 +227,6 @@ export const useLoadDependencies = (props: UseLoadDependencies) => {
     isInitialLoading: !!isInitialLoading,
     ruleType,
     ruleTypeModel,
-    ruleTypes: [...ruleTypeIndex.values()],
     uiConfig,
     healthCheckError,
     fetchedFormData,

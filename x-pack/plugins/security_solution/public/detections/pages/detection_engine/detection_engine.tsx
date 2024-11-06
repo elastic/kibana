@@ -151,9 +151,11 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ()
     FilterGroupHandler | undefined
   >();
 
-  const { sourcererDataView, loading: isLoadingIndexPattern } = useSourcererDataView(
-    SourcererScopeName.detections
-  );
+  const {
+    sourcererDataView,
+    loading: isLoadingIndexPattern,
+    indexPattern,
+  } = useSourcererDataView(SourcererScopeName.detections);
 
   const { formatUrl } = useFormatUrl(SecurityPageName.rules);
 
@@ -312,10 +314,10 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ()
           mode: 'absolute',
         }}
         onInit={setDetectionPageFilterHandler}
-        dataViewSpec={sourcererDataView}
+        indexPattern={indexPattern}
       />
     ),
-    [from, sourcererDataView, onFilterControlsChange, query, to, topLevelFilters]
+    [from, indexPattern, onFilterControlsChange, query, to, topLevelFilters]
   );
 
   const renderAlertTable = useCallback(
@@ -417,7 +419,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ()
                 alertsDefaultFilters={alertsDefaultFilters}
                 isLoadingIndexPattern={isChartPanelLoading}
                 query={query}
-                runtimeMappings={sourcererDataView.runtimeFieldMap as RunTimeMappings}
+                runtimeMappings={sourcererDataView?.runtimeFieldMap as RunTimeMappings}
                 signalIndexName={signalIndexName}
                 updateDateRangeCallback={updateDateRangeCallback}
               />
@@ -433,7 +435,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ()
               hasIndexWrite={hasIndexWrite ?? false}
               loading={isAlertTableLoading}
               renderChildComponent={renderAlertTable}
-              runtimeMappings={sourcererDataView.runtimeFieldMap as RunTimeMappings}
+              runtimeMappings={sourcererDataView?.runtimeFieldMap as RunTimeMappings}
               signalIndexName={signalIndexName}
               tableId={TableId.alertsOnAlertsPage}
               to={to}

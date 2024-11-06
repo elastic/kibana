@@ -7,10 +7,7 @@
 import { Sort, QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
-import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
-import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import {
-  AT_TIMESTAMP,
   SERVICE_NAME,
   TRACE_ID,
   TRANSACTION_ID,
@@ -80,8 +77,6 @@ export async function getTraceSamples({
       });
     }
 
-    const requiredFields = asMutableArray([TRANSACTION_ID, TRACE_ID, AT_TIMESTAMP] as const);
-
     const response = await apmEventClient.search('get_trace_samples_hits', {
       apm: {
         events: [ProcessorEvent.transaction],
@@ -99,7 +94,6 @@ export async function getTraceSamples({
           },
         },
         size: TRACE_SAMPLES_SIZE,
-        fields: requiredFields,
         sort: [
           {
             _score: {
@@ -107,7 +101,7 @@ export async function getTraceSamples({
             },
           },
           {
-            [AT_TIMESTAMP]: {
+            '@timestamp': {
               order: 'desc',
             },
           },
@@ -115,15 +109,12 @@ export async function getTraceSamples({
       },
     });
 
-    const traceSamples = response.hits.hits.map((hit) => {
-      const event = unflattenKnownApmEventFields(hit.fields, requiredFields);
-      return {
-        score: hit._score,
-        timestamp: event[AT_TIMESTAMP],
-        transactionId: event.transaction.id,
-        traceId: event.trace.id,
-      };
-    });
+    const traceSamples = response.hits.hits.map((hit) => ({
+      score: hit._score,
+      timestamp: hit._source['@timestamp'],
+      transactionId: hit._source.transaction.id,
+      traceId: hit._source.trace.id,
+    }));
 
     return { traceSamples };
   });

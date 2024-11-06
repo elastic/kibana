@@ -7,7 +7,6 @@
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
-import { validateSpaceId } from './services/validate_space_id';
 import { RouteContext, SyntheticsRestApiRouteFactory } from '../types';
 import { ProjectMonitor } from '../../../common/runtime_types';
 
@@ -47,7 +46,9 @@ export const addSyntheticsProjectMonitorRoute: SyntheticsRestApiRouteFactory = (
     }
 
     try {
-      const spaceId = await validateSpaceId(routeContext);
+      const { id: spaceId } = (await server.spaces?.spacesService.getActiveSpace(request)) ?? {
+        id: DEFAULT_SPACE_ID,
+      };
 
       const permissionError = await validatePermissions(routeContext, monitors);
 

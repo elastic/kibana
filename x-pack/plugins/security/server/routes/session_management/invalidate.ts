@@ -12,11 +12,7 @@ import type { RouteDefinitionParams } from '..';
 /**
  * Defines routes required for session invalidation.
  */
-export function defineInvalidateSessionsRoutes({
-  router,
-  getSession,
-  buildFlavor,
-}: RouteDefinitionParams) {
+export function defineInvalidateSessionsRoutes({ router, getSession }: RouteDefinitionParams) {
   router.post(
     {
       path: '/api/security/session/_invalidate',
@@ -37,19 +33,9 @@ export function defineInvalidateSessionsRoutes({
           ),
         }),
       },
-      security: {
-        authz: {
-          requiredPrivileges: ['sessionManagement'],
-        },
-      },
       options: {
-        // The invalidate session API was introduced to address situations where the session index
-        // could grow rapidly - when session timeouts are disabled, or with anonymous access.
-        // In the serverless environment, sessions timeouts are always be enabled, and there is no
-        // anonymous access. However, keeping this endpoint available internally in serverless would
-        // be useful in situations where we need to batch-invalidate user sessions.
-        access: buildFlavor === 'serverless' ? 'internal' : 'public',
-
+        access: 'public',
+        tags: ['access:sessionManagement'],
         summary: `Invalidate user sessions`,
       },
     },

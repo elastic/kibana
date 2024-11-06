@@ -1,3 +1,0 @@
-errors:
-  exclude_checks:
-    - PSR00002 # Allow to use non-GA features.

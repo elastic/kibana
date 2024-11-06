@@ -10,6 +10,7 @@ NODE_VERSION="$(cat "$KIBANA_DIR/.node-version")"
 export NODE_VERSION
 export NODE_DIR="$CACHE_DIR/node/$NODE_VERSION"
 export NODE_BIN_DIR="$NODE_DIR/bin"
+export YARN_OFFLINE_CACHE="$CACHE_DIR/yarn-offline-cache"
 
 ## Install node for whatever the current os/arch are
 hostArch="$(command uname -m)"
@@ -75,6 +76,8 @@ export YARN_VERSION
 if [[ ! $(which yarn) || $(yarn --version) != "$YARN_VERSION" ]]; then
   npm_install_global yarn "^$YARN_VERSION"
 fi
+
+yarn config set yarn-offline-mirror "$YARN_OFFLINE_CACHE"
 
 YARN_GLOBAL_BIN=$(yarn global bin)
 export YARN_GLOBAL_BIN

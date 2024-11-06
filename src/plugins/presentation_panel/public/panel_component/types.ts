@@ -9,7 +9,6 @@
 
 import { PresentationContainer } from '@kbn/presentation-containers';
 import {
-  CanLockHoverActions,
   HasParentApi,
   HasUniqueId,
   PublishesBlockingError,
@@ -75,8 +74,7 @@ export interface DefaultPresentationPanelApi
         HasParentApi<
           PresentationContainer &
             Partial<Pick<PublishesPanelTitle, 'hidePanelTitle'> & PublishesViewMode>
-        > &
-        CanLockHoverActions
+        >
     > {}
 
 export type PresentationPanelProps<

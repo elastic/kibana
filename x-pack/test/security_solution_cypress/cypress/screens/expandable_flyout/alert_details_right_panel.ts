@@ -55,10 +55,10 @@ export const DOCUMENT_DETAILS_FLYOUT_HEADER_ASSIGNEES_VALUE = getDataTestSubject
   'securitySolutionFlyoutHeaderAssignees'
 );
 export const DOCUMENT_DETAILS_FLYOUT_HEADER_NOTES_TITLE = getDataTestSubjectSelector(
-  'securitySolutionFlyoutHeaderNotesTitle'
+  'securitySolutionFlyoutHeaderAssigneesTitle'
 );
 export const DOCUMENT_DETAILS_FLYOUT_HEADER_NOTES_VALUE = getDataTestSubjectSelector(
-  'securitySolutionFlyoutHeaderNotesAddNoteButton'
+  'securitySolutionFlyoutHeaderAssigneesValue'
 );
 
 /* Footer */

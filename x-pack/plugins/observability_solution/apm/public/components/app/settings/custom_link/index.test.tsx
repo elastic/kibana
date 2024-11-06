@@ -34,7 +34,7 @@ function getMockAPMContext({ canSave }: { canSave: boolean }) {
     ...mockApmPluginContextValue,
     core: {
       ...mockApmPluginContextValue.core,
-      application: { capabilities: { apm: { 'settings:save': canSave }, ml: {} } },
+      application: { capabilities: { apm: { save: canSave }, ml: {} } },
     },
   } as unknown as ApmPluginContextValue;
 }

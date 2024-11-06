@@ -112,15 +112,10 @@ export const HistoricalResultsComponent: FC<Props> = ({ indexName }) => {
     <div data-test-subj="historicalResults">
       <EuiFlexGroup justifyContent="spaceBetween">
         <StyledFilterGroupFlexItem grow={false}>
-          <EuiFilterGroup
-            data-test-subj="historicalResultsOutcomeFilterGroup"
-            role="radiogroup"
-            aria-label={FILTER_RESULTS_BY_OUTCOME}
-          >
+          <EuiFilterGroup role="radiogroup" aria-label={FILTER_RESULTS_BY_OUTCOME}>
             <EuiFilterButton
               hasActiveFilters={isShowAll}
               role="radio"
-              data-test-subj="historicalResultsOutcomeFilterAll"
               aria-checked={isShowAll}
               onClick={handleDefaultOutcome}
             >
@@ -129,7 +124,6 @@ export const HistoricalResultsComponent: FC<Props> = ({ indexName }) => {
             <EuiFilterButton
               hasActiveFilters={isShowPass}
               role="radio"
-              data-test-subj="historicalResultsOutcomeFilterPass"
               aria-checked={isShowPass}
               onClick={handlePassOutcome}
             >
@@ -138,7 +132,6 @@ export const HistoricalResultsComponent: FC<Props> = ({ indexName }) => {
             <EuiFilterButton
               hasActiveFilters={isShowFail}
               role="radio"
-              data-test-subj="historicalResultsOutcomeFilterFail"
               aria-checked={isShowFail}
               onClick={handleFailOutcome}
             >
@@ -163,7 +156,6 @@ export const HistoricalResultsComponent: FC<Props> = ({ indexName }) => {
         aria-live="polite"
         // because it's not inferred in accessibility tree
         aria-label={totalChecksText}
-        data-test-subj="historicalResultsTotalChecks"
         aria-describedby={historicalResultsListId}
       >
         {totalChecksText}

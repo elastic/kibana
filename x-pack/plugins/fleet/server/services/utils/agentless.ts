@@ -7,7 +7,6 @@
 
 import { appContextService } from '..';
 import type { FleetConfigType } from '../../config';
-export { isOnlyAgentlessIntegration } from '../../../common/services/agentless_policy_helper';
 
 export const isAgentlessApiEnabled = () => {
   const cloudSetup = appContextService.getCloud();
@@ -15,7 +14,7 @@ export const isAgentlessApiEnabled = () => {
   return Boolean(isHosted && appContextService.getConfig()?.agentless?.enabled);
 };
 export const isDefaultAgentlessPolicyEnabled = () => {
-  const cloudSetup = appContextService.getCloud && appContextService.getCloud();
+  const cloudSetup = appContextService.getCloud();
   return Boolean(
     cloudSetup?.isServerlessEnabled && appContextService.getExperimentalFeatures().agentless
   );
@@ -45,7 +44,7 @@ export const prependAgentlessApiBasePathToEndpoint = (
   agentlessConfig: FleetConfigType['agentless'],
   endpoint: AgentlessApiEndpoints
 ) => {
-  const cloudSetup = appContextService.getCloud && appContextService.getCloud();
+  const cloudSetup = appContextService.getCloud();
   const endpointPrefix = cloudSetup?.isServerlessEnabled
     ? AGENTLESS_SERVERLESS_API_BASE_PATH
     : AGENTLESS_ESS_API_BASE_PATH;

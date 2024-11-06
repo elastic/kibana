@@ -16,7 +16,6 @@
       "features",
       "unifiedSearch",
       "data",
-      "ruleRegistry",
       "share"
     ],
     "requiredBundles": ["kibanaReact"],

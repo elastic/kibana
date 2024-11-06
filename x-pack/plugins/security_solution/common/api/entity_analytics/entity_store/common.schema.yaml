@@ -30,8 +30,6 @@ components:
           type: string
         fieldHistoryLength:
           type: integer
-        error:
-          type: object
 
     EngineStatus:
       type: string
@@ -40,7 +38,6 @@ components:
         - started
         - stopped
         - updating
-        - error
 
     IndexPattern:
       type: string

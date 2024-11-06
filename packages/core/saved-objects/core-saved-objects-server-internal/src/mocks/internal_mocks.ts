@@ -36,7 +36,6 @@ export const createCoreUsageDataSetupMock = () => {
     getClient: jest.fn(),
     registerUsageCounter: jest.fn(),
     incrementUsageCounter: jest.fn(),
-    registerDeprecatedUsageFetch: jest.fn(),
   };
   return setupContract;
 };

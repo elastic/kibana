@@ -51,9 +51,7 @@ const convertType = (type: string): SavedObjectManagementTypeInfo => ({
   namespaceType: 'single',
 });
 
-const allowedTypes = ['index-pattern', 'visualization', 'dashboard', 'search', 'tag'].map(
-  convertType
-);
+const allowedTypes = ['index-pattern', 'visualization', 'dashboard', 'search'].map(convertType);
 
 const allSavedObjects = [
   {
@@ -82,13 +80,6 @@ const allSavedObjects = [
     type: 'visualization',
     attributes: {
       title: `MyViz`,
-    },
-  },
-  {
-    id: '5',
-    type: 'tag',
-    attributes: {
-      title: `HelloWorldTag`,
     },
   },
 ];
@@ -138,7 +129,6 @@ describe('SavedObjectsTable', () => {
       visualization: 0,
       dashboard: 0,
       search: 0,
-      tag: 0,
     });
 
     defaultProps = {
@@ -158,7 +148,7 @@ describe('SavedObjectsTable', () => {
     };
 
     findObjectsMock.mockImplementation(() => ({
-      total: 5,
+      total: 4,
       saved_objects: [
         {
           id: '1',
@@ -207,14 +197,6 @@ describe('SavedObjectsTable', () => {
               path: '/edit/4',
               uiCapabilitiesPath: 'visualize.show',
             },
-          },
-        },
-        {
-          id: '5',
-          type: 'tag',
-          meta: {
-            title: `HelloWorldTag`,
-            icon: 'tag',
           },
         },
       ],
@@ -469,7 +451,7 @@ describe('SavedObjectsTable', () => {
       component.update();
 
       await component.instance().getRelationships('search', '1');
-      const savedObjectTypes = ['index-pattern', 'visualization', 'dashboard', 'search', 'tag'];
+      const savedObjectTypes = ['index-pattern', 'visualization', 'dashboard', 'search'];
       expect(getRelationshipsMock).toHaveBeenCalledWith(http, 'search', '1', savedObjectTypes);
     });
 

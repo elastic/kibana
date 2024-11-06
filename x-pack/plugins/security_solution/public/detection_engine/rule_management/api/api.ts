@@ -241,12 +241,12 @@ export const fetchRulesSnoozeSettings = async ({
   const response = await KibanaServices.get().http.fetch<RulesSnoozeSettingsBatchResponse>(
     INTERNAL_ALERTING_API_FIND_RULES_PATH,
     {
-      method: 'POST',
-      body: JSON.stringify({
+      method: 'GET',
+      query: {
         filter: ids.map((x) => `alert.id:"alert:${x}"`).join(' or '),
         fields: JSON.stringify(['muteAll', 'activeSnoozes', 'isSnoozedUntil', 'snoozeSchedule']),
         per_page: ids.length,
-      }),
+      },
       signal,
     }
   );

@@ -31,7 +31,7 @@ export interface IndexBadge {
   color: EuiBadgeProps['color'];
 }
 export interface IndexDetailsPageRoute {
-  renderRoute: (indexName: string, detailsTabId?: string) => string;
+  renderRoute: (indexName: string) => string;
 }
 
 export interface EmptyListContent {
@@ -72,5 +72,5 @@ export interface ExtensionsSetup {
   // sets content to render below the docs link on the mappings tab of the index page
   setIndexMappingsContent(content: IndexContent): void;
   // sets index details page route
-  setIndexDetailsPageRoute(route: IndexDetailsPageRoute, detailsTabId?: string): void;
+  setIndexDetailsPageRoute(route: IndexDetailsPageRoute): void;
 }

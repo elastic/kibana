@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useCallback, useMemo } from 'react';
-
+import numeral from '@elastic/numeral';
 import { EuiFlexItem, EuiPanel, EuiTitle, useEuiTheme } from '@elastic/eui';
 import {
   Chart,
@@ -20,7 +20,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { LegendAction } from './legend_action';
 import { MetricTypes, MetricSeries } from '../../../common/rest_types';
-import { formatBytes } from '../../utils/format_bytes';
 
 // TODO: Remove this when we have a title for each metric type
 type ChartKey = Extract<MetricTypes, 'ingest_rate' | 'storage_retained'>;
@@ -118,4 +117,8 @@ export const ChartPanel: React.FC<ChartPanelProps> = ({
       </EuiPanel>
     </EuiFlexItem>
   );
+};
+
+const formatBytes = (bytes: number) => {
+  return numeral(bytes).format('0.0 b');
 };

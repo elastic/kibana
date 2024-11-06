@@ -262,7 +262,7 @@ export default function (providerContext: FtrProviderContext) {
       },
       {
         method: 'GET',
-        path: '/api/fleet/agent_status',
+        path: '/api/fleet/agent-status',
         scenarios: READ_SCENARIOS,
       },
       {

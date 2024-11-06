@@ -34,6 +34,7 @@ query
 sourceCommand
     : explainCommand
     | fromCommand
+    | metaCommand
     | rowCommand
     | showCommand
     // in development
@@ -79,7 +80,7 @@ regexBooleanExpression
     ;
 
 matchBooleanExpression
-    : valueExpression MATCH queryString=string
+    : valueExpression DEV_MATCH queryString=string
     ;
 
 valueExpression
@@ -103,13 +104,7 @@ primaryExpression
     ;
 
 functionExpression
-    : functionName LP (ASTERISK | (booleanExpression (COMMA booleanExpression)*))? RP
-    ;
-
-functionName
-    // Additional function identifiers that are already a reserved word in the language
-    : MATCH
-    | identifierOrParameter
+    : identifier LP (ASTERISK | (booleanExpression (COMMA booleanExpression)*))? RP
     ;
 
 dataType
@@ -125,7 +120,8 @@ fields
     ;
 
 field
-    : (qualifiedName ASSIGN)? booleanExpression
+    : booleanExpression
+    | qualifiedName ASSIGN booleanExpression
     ;
 
 fromCommand
@@ -133,7 +129,8 @@ fromCommand
     ;
 
 indexPattern
-    : (clusterString COLON)? indexString
+    : clusterString COLON indexString
+    | indexString
     ;
 
 clusterString
@@ -159,7 +156,7 @@ deprecated_metadata
     ;
 
 metricsCommand
-    : DEV_METRICS indexPattern (COMMA indexPattern)* aggregates=aggFields? (BY grouping=fields)?
+    : DEV_METRICS indexPattern (COMMA indexPattern)* aggregates=fields? (BY grouping=fields)?
     ;
 
 evalCommand
@@ -167,19 +164,11 @@ evalCommand
     ;
 
 statsCommand
-    : STATS stats=aggFields? (BY grouping=fields)?
-    ;
-
-aggFields
-    : aggField (COMMA aggField)*
-    ;
-
-aggField
-    : field (WHERE booleanExpression)?
+    : STATS stats=fields? (BY grouping=fields)?
     ;
 
 qualifiedName
-    : identifierOrParameter (DOT identifierOrParameter)*
+    : identifier (DOT identifier)*
     ;
 
 qualifiedNamePattern
@@ -197,7 +186,6 @@ identifier
 
 identifierPattern
     : ID_PATTERN
-    | {this.isDevVersion()}? parameter
     ;
 
 constant
@@ -206,21 +194,16 @@ constant
     | decimalValue                                                                      #decimalLiteral
     | integerValue                                                                      #integerLiteral
     | booleanValue                                                                      #booleanLiteral
-    | parameter                                                                         #inputParameter
+    | params                                                                            #inputParams
     | string                                                                            #stringLiteral
     | OPENING_BRACKET numericValue (COMMA numericValue)* CLOSING_BRACKET                #numericArrayLiteral
     | OPENING_BRACKET booleanValue (COMMA booleanValue)* CLOSING_BRACKET                #booleanArrayLiteral
     | OPENING_BRACKET string (COMMA string)* CLOSING_BRACKET                            #stringArrayLiteral
     ;
 
-parameter
+params
     : PARAM                        #inputParam
     | NAMED_OR_POSITIONAL_PARAM    #inputNamedOrPositionalParam
-    ;
-
-identifierOrParameter
-    : identifier
-    | {this.isDevVersion()}? parameter
     ;
 
 limitCommand
@@ -308,6 +291,10 @@ showCommand
     : SHOW INFO                                                           #showInfo
     ;
 
+metaCommand
+    : META FUNCTIONS                                                      #metaFunctions
+    ;
+
 enrichCommand
     : ENRICH policyName=ENRICH_POLICY_NAME (ON matchField=qualifiedNamePattern)? (WITH enrichWithClause (COMMA enrichWithClause)*)?
     ;
@@ -324,5 +311,5 @@ lookupCommand
     ;
 
 inlinestatsCommand
-    : DEV_INLINESTATS stats=aggFields (BY grouping=fields)?
+    : DEV_INLINESTATS stats=fields (BY grouping=fields)?
     ;

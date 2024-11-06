@@ -59,10 +59,11 @@ export const getSuggestions: Visualization<MetricVisualizationState>['getSuggest
       layerId: table.layerId,
       layerType: LayerTypes.DATA,
     },
-    title: metricColumns[0]?.operation.label || metricLabel,
+    title: metricLabel,
     previewIcon: IconChartMetric,
     score: 0.5,
-    hide: !!bucketedColumns.length,
+    // don't show suggestions since we're in tech preview
+    hide: true,
   };
 
   const accessorMappings: Pick<MetricVisualizationState, 'metricAccessor' | 'breakdownByAccessor'> =
@@ -71,11 +72,7 @@ export const getSuggestions: Visualization<MetricVisualizationState>['getSuggest
       breakdownByAccessor: bucketedColumns[0]?.columnId,
     };
 
-  baseSuggestion.score = Number(
-    (baseSuggestion.score + 0.01 * Object.values(accessorMappings).filter(Boolean).length).toFixed(
-      2
-    )
-  );
+  baseSuggestion.score += 0.01 * Object.values(accessorMappings).filter(Boolean).length;
 
   const suggestion = {
     ...baseSuggestion,

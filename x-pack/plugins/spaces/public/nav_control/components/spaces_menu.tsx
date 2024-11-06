@@ -43,7 +43,6 @@ interface Props {
   spaces: Space[];
   serverBasePath: string;
   toggleSpaceSelector: () => void;
-  onClickManageSpaceBtn: () => void;
   intl: InjectedIntl;
   capabilities: Capabilities;
   navigateToApp: ApplicationStart['navigateToApp'];
@@ -219,7 +218,7 @@ class SpacesMenuUI extends Component<Props> {
         key="manageSpacesButton"
         className="spcMenu__manageButton"
         size="s"
-        onClick={this.props.onClickManageSpaceBtn}
+        onClick={this.props.toggleSpaceSelector}
         capabilities={this.props.capabilities}
         navigateToApp={this.props.navigateToApp}
       />

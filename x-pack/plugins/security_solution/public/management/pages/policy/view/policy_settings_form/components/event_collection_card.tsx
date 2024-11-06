@@ -19,8 +19,7 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import { cloneDeep, get } from 'lodash';
-import { set } from '@kbn/safer-lodash-set';
+import { cloneDeep, get, set } from 'lodash';
 import type { EuiCheckboxProps } from '@elastic/eui';
 import { getEmptyValue } from '../../../../../../common/components/empty_value';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';

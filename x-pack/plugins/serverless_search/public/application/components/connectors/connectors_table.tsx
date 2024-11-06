@@ -211,12 +211,7 @@ export const ConnectorsTable: React.FC = () => {
           onClick: (connector: Connector) => copyToClipboard(connector.id),
         },
         {
-          render: (connector: Connector) => (
-            <DeleteConnectorModalAction
-              connector={connector}
-              disabled={!data?.canManageConnectors}
-            />
-          ),
+          render: (connector: Connector) => <DeleteConnectorModalAction connector={connector} />,
         },
       ],
       name: i18n.translate('xpack.serverlessSearch.connectors.actionsLabel', {
@@ -292,10 +287,7 @@ export const ConnectorsTable: React.FC = () => {
   );
 };
 
-const DeleteConnectorModalAction: React.FC<{ connector: Connector; disabled: boolean }> = ({
-  connector,
-  disabled,
-}) => {
+const DeleteConnectorModalAction: React.FC<{ connector: Connector }> = ({ connector }) => {
   const [modalIsOpen, setModalIsOpen] = useState(false);
 
   return (
@@ -309,7 +301,6 @@ const DeleteConnectorModalAction: React.FC<{ connector: Connector; disabled: boo
       )}
       <EuiToolTip content={DELETE_CONNECTOR_LABEL}>
         <EuiButtonIcon
-          disabled={disabled}
           data-test-subj="serverlessSearchDeleteConnectorModalActionButton"
           aria-label={DELETE_CONNECTOR_LABEL}
           onClick={() => setModalIsOpen(true)}

@@ -19,7 +19,7 @@ import { i18n } from '@kbn/i18n';
 
 import type { DeprecationResolutionState } from './kibana_deprecations';
 
-const manualI18nTexts = {
+const i18nTexts = {
   manualCellLabel: i18n.translate(
     'xpack.upgradeAssistant.kibanaDeprecations.table.manualCellLabel',
     {
@@ -32,34 +32,31 @@ const manualI18nTexts = {
       defaultMessage: 'This issue needs to be resolved manually.',
     }
   ),
-};
-
-const automatedI18nTexts = {
-  resolutionTypeCellLabel: i18n.translate(
+  automatedCellLabel: i18n.translate(
     'xpack.upgradeAssistant.kibanaDeprecations.table.automatedCellLabel',
     {
       defaultMessage: 'Automated',
     }
   ),
-  resolutionProgressCellLabel: i18n.translate(
+  automationInProgressCellLabel: i18n.translate(
     'xpack.upgradeAssistant.kibanaDeprecations.table.automationInProgressCellLabel',
     {
       defaultMessage: 'Resolution in progress…',
     }
   ),
-  resolutionCompleteCellLabel: i18n.translate(
+  automationCompleteCellLabel: i18n.translate(
     'xpack.upgradeAssistant.kibanaDeprecations.table.automationCompleteCellLabel',
     {
       defaultMessage: 'Resolved',
     }
   ),
-  resolutionFailedCellLabel: i18n.translate(
+  automationFailedCellLabel: i18n.translate(
     'xpack.upgradeAssistant.kibanaDeprecations.table.automationFailedCellLabel',
     {
       defaultMessage: 'Resolution failed',
     }
   ),
-  resolutionCellTooltipLabel: i18n.translate(
+  automatedCellTooltipLabel: i18n.translate(
     'xpack.upgradeAssistant.kibanaDeprecations.table.automatedCellTooltipLabel',
     {
       defaultMessage: 'This issue can be resolved automatically.',
@@ -67,56 +64,18 @@ const automatedI18nTexts = {
   ),
 };
 
-const markAsResolvedI18nTexts = {
-  resolutionTypeCellLabel: i18n.translate(
-    'xpack.upgradeAssistant.kibanaDeprecations.table.markAsResolvedCellLabel',
-    {
-      defaultMessage: 'Mark as resolved',
-    }
-  ),
-  resolutionProgressCellLabel: i18n.translate(
-    'xpack.upgradeAssistant.kibanaDeprecations.table.markAsResolvedInProgressCellLabel',
-    {
-      defaultMessage: 'Marking as resolved…',
-    }
-  ),
-  resolutionCompleteCellLabel: i18n.translate(
-    'xpack.upgradeAssistant.kibanaDeprecations.table.markAsResolvedCompleteCellLabel',
-    {
-      defaultMessage: 'Marked as resolved',
-    }
-  ),
-  resolutionFailedCellLabel: i18n.translate(
-    'xpack.upgradeAssistant.kibanaDeprecations.table.markAsResolvedFailedCellLabel',
-    {
-      defaultMessage: 'Failed to mark as resolved',
-    }
-  ),
-  resolutionCellTooltipLabel: i18n.translate(
-    'xpack.upgradeAssistant.kibanaDeprecations.table.markAsResolvedCellTooltipLabel',
-    {
-      defaultMessage: 'This issue can be marked as resolved.',
-    }
-  ),
-};
-
 interface Props {
   deprecationId: string;
   isAutomated: boolean;
-  canBeMarkedAsResolved: boolean;
   deprecationResolutionState?: DeprecationResolutionState;
 }
 
 export const ResolutionTableCell: React.FunctionComponent<Props> = ({
   deprecationId,
   isAutomated,
-  canBeMarkedAsResolved,
   deprecationResolutionState,
 }) => {
-  if (isAutomated || canBeMarkedAsResolved) {
-    const resolutionI18nTexts = isAutomated ? automatedI18nTexts : markAsResolvedI18nTexts;
-    const euiIconType = isAutomated ? 'indexSettings' : 'clickLeft';
-
+  if (isAutomated) {
     if (deprecationResolutionState?.id === deprecationId) {
       const { resolveDeprecationStatus } = deprecationResolutionState;
 
@@ -128,7 +87,7 @@ export const ResolutionTableCell: React.FunctionComponent<Props> = ({
                 <EuiLoadingSpinner size="m" />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiText size="s">{resolutionI18nTexts.resolutionProgressCellLabel}</EuiText>
+                <EuiText size="s">{i18nTexts.automationInProgressCellLabel}</EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
           );
@@ -139,7 +98,7 @@ export const ResolutionTableCell: React.FunctionComponent<Props> = ({
                 <EuiIcon type="warning" color="danger" />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiText size="s">{resolutionI18nTexts.resolutionFailedCellLabel}</EuiText>
+                <EuiText size="s">{i18nTexts.automationFailedCellLabel}</EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
           );
@@ -151,7 +110,7 @@ export const ResolutionTableCell: React.FunctionComponent<Props> = ({
                 <EuiIcon type="check" color="success" />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiText size="s">{resolutionI18nTexts.resolutionCompleteCellLabel}</EuiText>
+                <EuiText size="s">{i18nTexts.automationCompleteCellLabel}</EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
           );
@@ -159,13 +118,13 @@ export const ResolutionTableCell: React.FunctionComponent<Props> = ({
     }
 
     return (
-      <EuiToolTip position="top" content={resolutionI18nTexts.resolutionCellTooltipLabel}>
+      <EuiToolTip position="top" content={i18nTexts.automatedCellTooltipLabel}>
         <EuiFlexGroup gutterSize="s" alignItems="center" data-test-subj="resolutionStatusCell">
           <EuiFlexItem grow={false}>
-            <EuiIcon type={euiIconType} />
+            <EuiIcon type="indexSettings" />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiText size="s">{resolutionI18nTexts.resolutionTypeCellLabel}</EuiText>
+            <EuiText size="s">{i18nTexts.automatedCellLabel}</EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiToolTip>
@@ -175,11 +134,11 @@ export const ResolutionTableCell: React.FunctionComponent<Props> = ({
   return (
     <EuiToolTip
       position="top"
-      content={manualI18nTexts.manualCellTooltipLabel}
+      content={i18nTexts.manualCellTooltipLabel}
       data-test-subj="resolutionStatusCell"
     >
       <EuiText size="s" color="subdued">
-        {manualI18nTexts.manualCellLabel}
+        {i18nTexts.manualCellLabel}
       </EuiText>
     </EuiToolTip>
   );

@@ -30,6 +30,8 @@ export {
   apmServiceGroupMaxNumberOfServices,
   apmTraceExplorerTab,
   apmLabsButton,
+  enableInfrastructureHostsView,
+  enableInfrastructureContainerAssetView,
   enableInfrastructureProfilingIntegration,
   enableInfrastructureAssetCustomDashboards,
   enableAwsLambdaMetrics,

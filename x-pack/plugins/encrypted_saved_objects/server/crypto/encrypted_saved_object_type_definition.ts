@@ -16,7 +16,6 @@ export class EncryptedSavedObjectAttributesDefinition {
   public readonly attributesToEncrypt: ReadonlySet<string>;
   private readonly attributesToIncludeInAAD: ReadonlySet<string> | undefined;
   private readonly attributesToStrip: ReadonlySet<string>;
-  public readonly enforceRandomId: boolean;
 
   constructor(typeRegistration: EncryptedSavedObjectTypeRegistration) {
     if (typeRegistration.attributesToIncludeInAAD) {
@@ -49,8 +48,6 @@ export class EncryptedSavedObjectAttributesDefinition {
         }
       }
     }
-
-    this.enforceRandomId = typeRegistration.enforceRandomId !== false;
 
     this.attributesToEncrypt = attributesToEncrypt;
     this.attributesToStrip = attributesToStrip;

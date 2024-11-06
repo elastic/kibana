@@ -7,7 +7,7 @@
 
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { getTagConnectionsUrl } from './get_tag_connections_url';
-import type { TagWithRelations } from '../../../common/types';
+import { TagWithRelations } from '../../../common/types';
 
 const createTag = (name: string): TagWithRelations => ({
   id: 'tag-id',

@@ -10,13 +10,12 @@ import { AllowUnknownProperties } from '../../typings/common';
 import { APMError } from '../../typings/es_schemas/ui/apm_error';
 import { Span } from '../../typings/es_schemas/ui/span';
 import { Transaction } from '../../typings/es_schemas/ui/transaction';
-import * as allApmFieldNames from './apm';
-import * as infraMetricsFieldNames from './infra_metrics';
+import * as apmFieldnames from './apm';
+import * as infraMetricsFieldnames from './infra_metrics';
 
-const { AT_TIMESTAMP, ...apmFieldNames } = allApmFieldNames;
 const fieldnames = {
-  ...apmFieldNames,
-  ...infraMetricsFieldNames,
+  ...apmFieldnames,
+  ...infraMetricsFieldnames,
 };
 
 describe('Transaction', () => {

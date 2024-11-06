@@ -22,32 +22,24 @@ import {
 } from '@kbn/search-connectors';
 import { DEFAULT_INGESTION_PIPELINE } from '../../common';
 import { RouteDependencies } from '../plugin';
-import { errorHandler } from '../utils/error_handler';
 
-export const registerConnectorsRoutes = ({ logger, http, router }: RouteDependencies) => {
+export const registerConnectorsRoutes = ({ http, router }: RouteDependencies) => {
   router.get(
     {
       path: '/internal/serverless_search/connectors',
       validate: {},
     },
-    errorHandler(logger)(async (context, request, response) => {
+    async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
-      const privileges = await client.asCurrentUser.security.hasPrivileges({
-        index: [{ names: ['.elastic-connectors'], privileges: ['read', 'write'] }],
-      });
-      const canManageConnectors = privileges.index['.elastic-connectors'].write;
-      const canReadConnectors = privileges.index['.elastic-connectors'].read;
-
-      const connectors = canReadConnectors ? await fetchConnectors(client.asCurrentUser) : [];
+      const connectors = await fetchConnectors(client.asCurrentUser);
 
       return response.ok({
         body: {
           connectors,
-          canManageConnectors,
-          canReadConnectors,
         },
+        headers: { 'content-type': 'application/json' },
       });
-    })
+    }
   );
 
   router.get(
@@ -59,7 +51,7 @@ export const registerConnectorsRoutes = ({ logger, http, router }: RouteDependen
         }),
       },
     },
-    errorHandler(logger)(async (context, request, response) => {
+    async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
       const connector = await fetchConnectorById(client.asCurrentUser, request.params.connectorId);
 
@@ -71,7 +63,7 @@ export const registerConnectorsRoutes = ({ logger, http, router }: RouteDependen
             headers: { 'content-type': 'application/json' },
           })
         : response.notFound();
-    })
+    }
   );
 
   router.post(
@@ -79,7 +71,7 @@ export const registerConnectorsRoutes = ({ logger, http, router }: RouteDependen
       path: '/internal/serverless_search/connectors',
       validate: {},
     },
-    errorHandler(logger)(async (context, request, response) => {
+    async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
       const defaultPipeline: IngestPipelineParams = {
         name: DEFAULT_INGESTION_PIPELINE,
@@ -100,7 +92,7 @@ export const registerConnectorsRoutes = ({ logger, http, router }: RouteDependen
         },
         headers: { 'content-type': 'application/json' },
       });
-    })
+    }
   );
 
   router.post(
@@ -115,7 +107,7 @@ export const registerConnectorsRoutes = ({ logger, http, router }: RouteDependen
         }),
       },
     },
-    errorHandler(logger)(async (context, request, response) => {
+    async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
       const result = await updateConnectorNameAndDescription(
         client.asCurrentUser,
@@ -131,7 +123,7 @@ export const registerConnectorsRoutes = ({ logger, http, router }: RouteDependen
         },
         headers: { 'content-type': 'application/json' },
       });
-    })
+    }
   );
 
   router.post(
@@ -146,7 +138,7 @@ export const registerConnectorsRoutes = ({ logger, http, router }: RouteDependen
         }),
       },
     },
-    errorHandler(logger)(async (context, request, response) => {
+    async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
       const result = await updateConnectorNameAndDescription(
         client.asCurrentUser,
@@ -162,7 +154,7 @@ export const registerConnectorsRoutes = ({ logger, http, router }: RouteDependen
         },
         headers: { 'content-type': 'application/json' },
       });
-    })
+    }
   );
 
   router.post(
@@ -177,7 +169,7 @@ export const registerConnectorsRoutes = ({ logger, http, router }: RouteDependen
         }),
       },
     },
-    errorHandler(logger)(async (context, request, response) => {
+    async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
       try {
         const result = await updateConnectorIndexName(
@@ -194,7 +186,7 @@ export const registerConnectorsRoutes = ({ logger, http, router }: RouteDependen
       } catch (e) {
         return response.conflict({ body: e });
       }
-    })
+    }
   );
 
   router.post(
@@ -209,7 +201,7 @@ export const registerConnectorsRoutes = ({ logger, http, router }: RouteDependen
         }),
       },
     },
-    errorHandler(logger)(async (context, request, response) => {
+    async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
       const result = await updateConnectorServiceType(
         client.asCurrentUser,
@@ -223,7 +215,7 @@ export const registerConnectorsRoutes = ({ logger, http, router }: RouteDependen
         },
         headers: { 'content-type': 'application/json' },
       });
-    })
+    }
   );
 
   router.delete(
@@ -235,7 +227,7 @@ export const registerConnectorsRoutes = ({ logger, http, router }: RouteDependen
         }),
       },
     },
-    errorHandler(logger)(async (context, request, response) => {
+    async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
       const result = await deleteConnectorById(client.asCurrentUser, request.params.connectorId);
       return response.ok({
@@ -244,7 +236,7 @@ export const registerConnectorsRoutes = ({ logger, http, router }: RouteDependen
         },
         headers: { 'content-type': 'application/json' },
       });
-    })
+    }
   );
 
   router.post(
@@ -262,7 +254,7 @@ export const registerConnectorsRoutes = ({ logger, http, router }: RouteDependen
         }),
       },
     },
-    errorHandler(logger)(async (context, request, response) => {
+    async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
       const result = await updateConnectorConfiguration(
         client.asCurrentUser,
@@ -274,7 +266,7 @@ export const registerConnectorsRoutes = ({ logger, http, router }: RouteDependen
         body: result,
         headers: { 'content-type': 'application/json' },
       });
-    })
+    }
   );
 
   router.post(
@@ -286,7 +278,7 @@ export const registerConnectorsRoutes = ({ logger, http, router }: RouteDependen
         }),
       },
     },
-    errorHandler(logger)(async (context, request, response) => {
+    async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
       const result = await startConnectorSync(client.asCurrentUser, {
         connectorId: request.params.connectorId,
@@ -296,7 +288,7 @@ export const registerConnectorsRoutes = ({ logger, http, router }: RouteDependen
         body: result,
         headers: { 'content-type': 'application/json' },
       });
-    })
+    }
   );
 
   router.get(
@@ -313,7 +305,7 @@ export const registerConnectorsRoutes = ({ logger, http, router }: RouteDependen
         }),
       },
     },
-    errorHandler(logger)(async (context, request, response) => {
+    async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
       const result = await fetchSyncJobs(
         client.asCurrentUser,
@@ -327,7 +319,7 @@ export const registerConnectorsRoutes = ({ logger, http, router }: RouteDependen
         body: result,
         headers: { 'content-type': 'application/json' },
       });
-    })
+    }
   );
   router.post(
     {
@@ -343,7 +335,7 @@ export const registerConnectorsRoutes = ({ logger, http, router }: RouteDependen
         }),
       },
     },
-    errorHandler(logger)(async (context, request, response) => {
+    async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
       await updateConnectorScheduling(
         client.asCurrentUser,
@@ -351,6 +343,6 @@ export const registerConnectorsRoutes = ({ logger, http, router }: RouteDependen
         request.body
       );
       return response.ok();
-    })
+    }
   );
 };

@@ -7,8 +7,6 @@
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { isEmpty } from 'lodash';
-import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
-import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import {
   PROCESSOR_EVENT,
   SPAN_ID,
@@ -18,6 +16,8 @@ import {
   TRACE_ID,
   TRANSACTION_ID,
 } from '../../../common/es_fields/apm';
+import type { SpanRaw } from '../../../typings/es_schemas/raw/span_raw';
+import type { TransactionRaw } from '../../../typings/es_schemas/raw/transaction_raw';
 import { getBufferedTimerange } from './utils';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
@@ -39,16 +39,12 @@ async function fetchLinkedChildrenOfSpan({
     end,
   });
 
-  const requiredFields = asMutableArray([TRACE_ID, PROCESSOR_EVENT] as const);
-  const optionalFields = asMutableArray([SPAN_ID, TRANSACTION_ID] as const);
-
   const response = await apmEventClient.search('fetch_linked_children_of_span', {
     apm: {
       events: [ProcessorEvent.span, ProcessorEvent.transaction],
     },
-    _source: [SPAN_LINKS],
+    _source: [SPAN_LINKS, TRACE_ID, SPAN_ID, PROCESSOR_EVENT, TRANSACTION_ID],
     body: {
-      fields: [...requiredFields, ...optionalFields],
       track_total_hits: false,
       size: 1000,
       query: {
@@ -62,32 +58,19 @@ async function fetchLinkedChildrenOfSpan({
       },
     },
   });
-
-  const linkedChildren = response.hits.hits.map((hit) => {
-    const source = 'span' in hit._source ? hit._source : undefined;
-    const event = unflattenKnownApmEventFields(hit.fields, requiredFields);
-
-    return {
-      ...event,
-      span: {
-        ...event.span,
-        links: source?.span?.links ?? [],
-      },
-    };
-  });
   // Filter out documents that don't have any span.links that match the combination of traceId and spanId
-  return linkedChildren.filter((linkedChild) => {
-    const spanLinks = linkedChild?.span?.links?.filter((spanLink) => {
+  return response.hits.hits.filter(({ _source: source }) => {
+    const spanLinks = source.span?.links?.filter((spanLink) => {
       return spanLink.trace.id === traceId && (spanId ? spanLink.span.id === spanId : true);
     });
     return !isEmpty(spanLinks);
   });
 }
 
-function getSpanId(
-  linkedChild: Awaited<ReturnType<typeof fetchLinkedChildrenOfSpan>>[number]
-): string {
-  return (linkedChild.span.id ?? linkedChild.transaction?.id) as string;
+function getSpanId(source: TransactionRaw | SpanRaw) {
+  return source.processor.event === ProcessorEvent.span
+    ? (source as SpanRaw).span.id
+    : (source as TransactionRaw).transaction?.id;
 }
 
 export async function getSpanLinksCountById({
@@ -107,9 +90,8 @@ export async function getSpanLinksCountById({
     start,
     end,
   });
-
-  return linkedChildren.reduce<Record<string, number>>((acc, item) => {
-    item.span?.links?.forEach((link) => {
+  return linkedChildren.reduce<Record<string, number>>((acc, { _source: source }) => {
+    source.span?.links?.forEach((link) => {
       // Ignores span links that don't belong to this trace
       if (link.trace.id === traceId) {
         acc[link.span.id] = (acc[link.span.id] || 0) + 1;
@@ -140,10 +122,10 @@ export async function getLinkedChildrenOfSpan({
     end,
   });
 
-  return linkedChildren.map((item) => {
+  return linkedChildren.map(({ _source: source }) => {
     return {
-      trace: { id: item.trace.id },
-      span: { id: getSpanId(item) },
+      trace: { id: source.trace.id },
+      span: { id: getSpanId(source) },
     };
   });
 }

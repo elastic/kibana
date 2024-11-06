@@ -76,10 +76,10 @@ export const NetworkDetails = ({
     services: { uiSettings },
   } = useKibana();
 
-  const { indicesExist, sourcererDataView, selectedPatterns } = useSourcererDataView();
+  const { indicesExist, indexPattern, selectedPatterns } = useSourcererDataView();
   const [filterQuery, kqlError] = convertToBuildEsQuery({
     config: getEsQueryConfig(uiSettings),
-    dataViewSpec: sourcererDataView,
+    indexPattern,
     queries: [query],
     filters,
   });

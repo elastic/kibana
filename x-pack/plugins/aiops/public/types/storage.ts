@@ -19,12 +19,14 @@ export const AIOPS_RANDOM_SAMPLING_PROBABILITY_PREFERENCE =
   'aiops.randomSamplingProbabilityPreference';
 export const AIOPS_PATTERN_ANALYSIS_MINIMUM_TIME_RANGE_PREFERENCE =
   'aiops.patternAnalysisMinimumTimeRangePreference';
+export const AIOPS_LOG_RATE_ANALYSIS_RESULT_COLUMNS = 'aiops.logRateAnalysisResultColumns';
 
 export type AiOps = Partial<{
   [AIOPS_FROZEN_TIER_PREFERENCE]: FrozenTierPreference;
   [AIOPS_RANDOM_SAMPLING_MODE_PREFERENCE]: RandomSamplerOption;
   [AIOPS_RANDOM_SAMPLING_PROBABILITY_PREFERENCE]: number;
   [AIOPS_PATTERN_ANALYSIS_MINIMUM_TIME_RANGE_PREFERENCE]: MinimumTimeRangeOption;
+  [AIOPS_LOG_RATE_ANALYSIS_RESULT_COLUMNS]: string[];
 }> | null;
 
 export type AiOpsKey = keyof Exclude<AiOps, null>;
@@ -37,6 +39,8 @@ export type AiOpsStorageMapped<T extends AiOpsKey> = T extends typeof AIOPS_FROZ
   ? RandomSamplerProbability
   : T extends typeof AIOPS_PATTERN_ANALYSIS_MINIMUM_TIME_RANGE_PREFERENCE
   ? MinimumTimeRangeOption
+  : T extends typeof AIOPS_LOG_RATE_ANALYSIS_RESULT_COLUMNS
+  ? string[]
   : null;
 
 export const AIOPS_STORAGE_KEYS = [
@@ -44,4 +48,5 @@ export const AIOPS_STORAGE_KEYS = [
   AIOPS_RANDOM_SAMPLING_MODE_PREFERENCE,
   AIOPS_RANDOM_SAMPLING_PROBABILITY_PREFERENCE,
   AIOPS_PATTERN_ANALYSIS_MINIMUM_TIME_RANGE_PREFERENCE,
+  AIOPS_LOG_RATE_ANALYSIS_RESULT_COLUMNS,
 ] as const;

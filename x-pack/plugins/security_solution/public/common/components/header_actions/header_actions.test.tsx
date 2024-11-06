@@ -14,6 +14,7 @@ import { TimelineTabs } from '../../../../common/types';
 import { HeaderActions } from './header_actions';
 import { timelineActions } from '../../../timelines/store';
 import { getColumnHeader } from '../../../timelines/components/timeline/body/column_headers/helpers';
+import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 
 jest.mock('../../hooks/use_experimental_features', () => ({
   useIsExperimentalFeatureEnabled: jest.fn(),
@@ -140,23 +141,51 @@ describe('HeaderActions', () => {
     });
   });
 
-  describe('Controls', () => {
-    it('should not show the event renderer settings', () => {
-      const result = render(
-        <TestProviders>
-          <HeaderActions {...defaultProps} />
-        </TestProviders>
-      );
-      expect(result.queryByTestId('show-row-renderers-gear')).toBeNull();
+  describe('conditional components based on unifiedComponentsInTimelineDisabled', () => {
+    describe('when unifiedComponentsInTimelineDisabled is false', () => {
+      beforeEach(() => {
+        (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
+      });
+      it('should not show the event renderer settings', () => {
+        const result = render(
+          <TestProviders>
+            <HeaderActions {...defaultProps} />
+          </TestProviders>
+        );
+        expect(result.queryByTestId('show-row-renderers-gear')).toBeNull();
+      });
+
+      it('should not show the sorting settings', () => {
+        const result = render(
+          <TestProviders>
+            <HeaderActions {...defaultProps} />
+          </TestProviders>
+        );
+        expect(result.queryByTestId('timeline-sorting-fields')).toBeNull();
+      });
     });
 
-    it('should not show the sorting settings', () => {
-      const result = render(
-        <TestProviders>
-          <HeaderActions {...defaultProps} />
-        </TestProviders>
-      );
-      expect(result.queryByTestId('timeline-sorting-fields')).toBeNull();
+    describe('when unifiedComponentsInTimelineDisabled is true', () => {
+      beforeEach(() => {
+        (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
+      });
+      it('should show the event renderer settings', () => {
+        const result = render(
+          <TestProviders>
+            <HeaderActions {...defaultProps} />
+          </TestProviders>
+        );
+        result.getByTestId('show-row-renderers-gear');
+      });
+
+      it('should show the sorting settings', () => {
+        const result = render(
+          <TestProviders>
+            <HeaderActions {...defaultProps} />
+          </TestProviders>
+        );
+        result.getByTestId('timeline-sorting-fields');
+      });
     });
   });
 });

@@ -30,7 +30,6 @@ import {
   applyDocOnlyValueToMapping,
   forEachMappings,
 } from '../experimental_datastream_features_helper';
-import { createArchiveIteratorFromMap } from '../epm/archive/archive_iterator';
 
 export async function handleExperimentalDatastreamFeatureOptIn({
   soClient,
@@ -76,7 +75,6 @@ export async function handleExperimentalDatastreamFeatureOptIn({
       return prepareTemplate({
         packageInstallContext: {
           assetsMap,
-          archiveIterator: createArchiveIteratorFromMap(assetsMap),
           packageInfo,
           paths,
         },

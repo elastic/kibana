@@ -1,16 +1,12 @@
 {
   "type": "plugin",
   "id": "@kbn/aiops-plugin",
-  "owner": [
-    "@elastic/ml-ui"
-  ],
-  "group": "platform",
-  "visibility": "shared",
+  "owner": "@elastic/ml-ui",
   "description": "AIOps plugin maintained by ML team.",
   "plugin": {
     "id": "aiops",
-    "browser": true,
     "server": true,
+    "browser": true,
     "requiredPlugins": [
       "charts",
       "data",
@@ -35,7 +31,7 @@
       "kibanaReact",
       "kibanaUtils",
       "embeddable",
-      "cases"
+      "cases",
     ]
   }
 }

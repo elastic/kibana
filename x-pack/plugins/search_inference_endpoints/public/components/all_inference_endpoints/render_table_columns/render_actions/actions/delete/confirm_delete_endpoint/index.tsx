@@ -37,7 +37,7 @@ export const ConfirmDeleteEndpointModal: React.FC<ConfirmDeleteEndpointModalProp
     id: inferenceEndpoint.endpoint,
   });
 
-  const onIgnoreWarningCheckboxChange = (state: boolean) => {
+  const onCheckboxChange = (state: boolean) => {
     setIgnoreWarningCheckbox(state);
     if (state) {
       setDeleteDisabled(false);
@@ -50,11 +50,8 @@ export const ConfirmDeleteEndpointModal: React.FC<ConfirmDeleteEndpointModalProp
     if (!data) return;
     setIsFetching(false);
 
-    const indices = data.indexes.map((index, id) => ({ id: index, type: 'Index' }));
-    const pipelines = data.pipelines.map((pipeline, id) => ({
-      id: pipeline,
-      type: 'Pipeline',
-    }));
+    const indices = data.indexes.map((index, id) => ({ label: index, type: 'Index' }));
+    const pipelines = data.pipelines.map((pipeline, id) => ({ label: pipeline, type: 'Pipeline' }));
     const usages: InferenceUsageInfo[] = [...indices, ...pipelines];
     if (usages.length > 0) {
       setDeleteDisabled(true);
@@ -75,7 +72,6 @@ export const ConfirmDeleteEndpointModal: React.FC<ConfirmDeleteEndpointModalProp
       onConfirm={onConfirm}
       title={i18n.DELETE_TITLE}
       confirmButtonDisabled={deleteDisabled}
-      data-test-subj="deleteModalForInferenceUI"
     >
       <EuiFlexGroup gutterSize="l" direction="column">
         <EuiFlexItem grow={false}>{i18n.CONFIRM_DELETE_WARNING}</EuiFlexItem>
@@ -110,7 +106,7 @@ export const ConfirmDeleteEndpointModal: React.FC<ConfirmDeleteEndpointModalProp
             <ScanUsageResults
               list={listOfUsages}
               ignoreWarningCheckbox={ignoreWarningCheckbox}
-              onIgnoreWarningCheckboxChange={onIgnoreWarningCheckboxChange}
+              onCheckboxChange={onCheckboxChange}
             />
           )}
         </EuiFlexItem>

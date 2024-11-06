@@ -59,7 +59,7 @@ export const FETCH_NOTES_ERROR = i18n.translate(
   }
 );
 export const NO_NOTES = i18n.translate('xpack.securitySolution.notes.noNotesLabel', {
-  defaultMessage: 'No notes have been created for this Timeline.',
+  defaultMessage: 'No notes have yet been created for this timeline',
 });
 
 interface NotesTabContentProps {
@@ -71,7 +71,7 @@ interface NotesTabContentProps {
 
 /**
  * Renders the notes tab content.
- * At this time the component support the old notes system and the new notes system (via the securitySolutionNotesDisabled feature flag).
+ * At this time the component support the old notes system and the new notes system (via the securitySolutionNotesEnabled feature flag).
  * The old notes system is deprecated and will be removed in the future.
  * In both cases, the component fetches the notes for the timeline and renders:
  * - the timeline description
@@ -86,8 +86,8 @@ const NotesTabContentComponent: React.FC<NotesTabContentProps> = React.memo(({ t
   const { kibanaSecuritySolutionsPrivileges } = useUserPrivileges();
   const canCreateNotes = kibanaSecuritySolutionsPrivileges.crud;
 
-  const securitySolutionNotesDisabled = useIsExperimentalFeatureEnabled(
-    'securitySolutionNotesDisabled'
+  const securitySolutionNotesEnabled = useIsExperimentalFeatureEnabled(
+    'securitySolutionNotesEnabled'
   );
 
   const getScrollToTop = useMemo(() => getScrollToTopSelector(), []);
@@ -180,9 +180,7 @@ const NotesTabContentComponent: React.FC<NotesTabContentProps> = React.memo(({ t
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem>
-          {securitySolutionNotesDisabled ? (
-            <OldNotes timelineId={timelineId} />
-          ) : (
+          {securitySolutionNotesEnabled ? (
             <EuiFlexGroup data-test-subj={'new-notes-screen'}>
               <EuiFlexItem>
                 {timelineDescription}
@@ -215,6 +213,8 @@ const NotesTabContentComponent: React.FC<NotesTabContentProps> = React.memo(({ t
                 <Participants notes={notes} timelineCreatedBy={timeline.createdBy} />
               </EuiFlexItem>
             </EuiFlexGroup>
+          ) : (
+            <OldNotes timelineId={timelineId} />
           )}
         </EuiFlexItem>
       </EuiFlexGroup>

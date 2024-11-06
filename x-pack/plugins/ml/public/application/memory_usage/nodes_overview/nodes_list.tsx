@@ -185,7 +185,6 @@ export const NodesList: FC<NodesListProps> = ({ compactView = false }) => {
     },
     box: {
       incremental: true,
-      'data-test-subj': 'mlNodesTableSearchInput',
     },
   };
 

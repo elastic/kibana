@@ -12,6 +12,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
+import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
 import { Router } from '@kbn/shared-ux-router';
 import React from 'react';
 import ReactDOM from 'react-dom';
@@ -53,6 +54,8 @@ export function ObservabilityOnboardingAppRoot({
     context,
   };
 
+  const renderFeedbackLinkAsPortal = !config.serverless.enabled;
+
   core.analytics.reportEvent(OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT.eventType, {
     uses_legacy_onboarding_page: false,
   });
@@ -77,10 +80,11 @@ export function ObservabilityOnboardingAppRoot({
             >
               <Router history={history}>
                 <EuiErrorBoundary>
-                  <ObservabilityOnboardingHeaderActionMenu
-                    setHeaderActionMenu={setHeaderActionMenu}
-                    theme$={theme$}
-                  />
+                  {renderFeedbackLinkAsPortal && (
+                    <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>
+                      <ObservabilityOnboardingHeaderActionMenu />
+                    </HeaderMenuPortal>
+                  )}
                   <ObservabilityOnboardingFlow />
                 </EuiErrorBoundary>
               </Router>

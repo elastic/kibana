@@ -11,7 +11,6 @@ import { EuiFormRow, EuiSwitch, EuiButtonGroup, htmlIdGenerator } from '@elastic
 import { PaletteRegistry, getFallbackDataBounds } from '@kbn/coloring';
 import { getColorCategories } from '@kbn/chart-expressions-common';
 import { useDebouncedValue } from '@kbn/visualization-utils';
-import { getOriginalId } from '@kbn/transpose-utils';
 import type { VisualizationDimensionEditorProps } from '../../../types';
 import type { DatatableVisualizationState } from '../visualization';
 
@@ -21,6 +20,7 @@ import {
   findMinMaxByColumnId,
   shouldColorByTerms,
 } from '../../../shared_components';
+import { getOriginalId } from '../../../../common/expressions/datatable/transpose_helpers';
 
 import './dimension_editor.scss';
 import { CollapseSetting } from '../../../shared_components/collapse_setting';
@@ -31,7 +31,6 @@ import {
   getFieldMetaFromDatatable,
   isNumericField,
 } from '../../../../common/expressions/datatable/utils';
-import { DatatableInspectorTables } from '../../../../common/expressions/datatable/datatable_fn';
 
 const idPrefix = htmlIdGenerator()();
 
@@ -79,8 +78,7 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
   if (!column) return null;
   if (column.isTransposed) return null;
 
-  const currentData =
-    frame.activeData?.[localState.layerId] ?? frame.activeData?.[DatatableInspectorTables.Default];
+  const currentData = frame.activeData?.[localState.layerId];
   const datasource = frame.datasourceLayers?.[localState.layerId];
   const { isBucketed } = datasource?.getOperationForColumnId(accessor) ?? {};
   const meta = getFieldMetaFromDatatable(currentData, accessor);
@@ -96,7 +94,7 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
     ? currentData?.columns.filter(({ id }) => getOriginalId(id) === accessor).map(({ id }) => id) ||
       []
     : [accessor];
-  const minMaxByColumnId = findMinMaxByColumnId(columnsToCheck, currentData);
+  const minMaxByColumnId = findMinMaxByColumnId(columnsToCheck, currentData, getOriginalId);
   const currentMinMax = minMaxByColumnId.get(accessor) ?? getFallbackDataBounds();
 
   const activePalette = column?.palette ?? {

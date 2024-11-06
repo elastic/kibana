@@ -11,12 +11,10 @@ import { ApmSynthtraceKibanaClient, createLogger, LogLevel } from '@kbn/apm-synt
 
 const getKibanaServerUrlWithAuth = () => {
   const kibanaServerUrl = url.format(kbnTestConfig.getUrlParts() as url.UrlObject);
-
-  const { username, password } = kbnTestConfig.getUrlParts();
   const kibanaServerUrlWithAuth = url
     .format({
       ...url.parse(kibanaServerUrl),
-      auth: `${username}:${password}`,
+      auth: `elastic:${kbnTestConfig.getUrlParts().password}`,
     })
     .slice(0, -1);
   return kibanaServerUrlWithAuth;

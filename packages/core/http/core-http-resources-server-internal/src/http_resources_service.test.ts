@@ -61,25 +61,6 @@ describe('HttpResources service', () => {
           expect(registeredRouteConfig.options?.access).toBe('public');
         });
 
-        it('registration does not allow changing "httpResource"', () => {
-          register(
-            { ...routeConfig, options: { ...routeConfig.options, httpResource: undefined } },
-            async (ctx, req, res) => res.ok()
-          );
-          register(
-            { ...routeConfig, options: { ...routeConfig.options, httpResource: true } },
-            async (ctx, req, res) => res.ok()
-          );
-          register(
-            { ...routeConfig, options: { ...routeConfig.options, httpResource: false } },
-            async (ctx, req, res) => res.ok()
-          );
-          const [[first], [second], [third]] = router.get.mock.calls;
-          expect(first.options?.httpResource).toBe(true);
-          expect(second.options?.httpResource).toBe(true);
-          expect(third.options?.httpResource).toBe(true);
-        });
-
         it('registration can set access to "internal"', () => {
           register({ ...routeConfig, options: { access: 'internal' } }, async (ctx, req, res) =>
             res.ok()

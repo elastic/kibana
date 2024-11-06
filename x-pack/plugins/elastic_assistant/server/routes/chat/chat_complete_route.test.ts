@@ -32,17 +32,7 @@ const actionsClient = actionsClientMock.create();
 jest.mock('../../lib/build_response', () => ({
   buildResponse: jest.fn().mockImplementation((x) => x),
 }));
-
-jest.mock('../helpers', () => {
-  const original = jest.requireActual('../helpers');
-
-  return {
-    ...original,
-    appendAssistantMessageToConversation: jest.fn(),
-    createConversationWithUserInput: jest.fn(),
-    langChainExecute: jest.fn(),
-  };
-});
+jest.mock('../helpers');
 const mockAppendAssistantMessageToConversation = appendAssistantMessageToConversation as jest.Mock;
 
 const mockLangChainExecute = langChainExecute as jest.Mock;
@@ -290,7 +280,6 @@ describe('chatCompleteRoute', () => {
                 actionTypeId: '.gen-ai',
                 model: 'gpt-4',
                 assistantStreamingEnabled: false,
-                isEnabledKnowledgeBase: false,
               });
             }),
           };

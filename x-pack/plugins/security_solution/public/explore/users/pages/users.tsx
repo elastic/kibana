@@ -98,26 +98,27 @@ const UsersComponent = () => {
     return globalFilters;
   }, [severitySelection, tabName, globalFilters]);
 
-  const { indicesExist, selectedPatterns, sourcererDataView } = useSourcererDataView();
+  const { indicesExist, indexPattern, selectedPatterns, sourcererDataView } =
+    useSourcererDataView();
   const [globalFiltersQuery, kqlError] = useMemo(
     () =>
       convertToBuildEsQuery({
         config: getEsQueryConfig(uiSettings),
-        dataViewSpec: sourcererDataView,
+        indexPattern,
         queries: [query],
         filters: globalFilters,
       }),
-    [globalFilters, sourcererDataView, uiSettings, query]
+    [globalFilters, indexPattern, uiSettings, query]
   );
   const [tabsFilterQuery] = useMemo(
     () =>
       convertToBuildEsQuery({
         config: getEsQueryConfig(uiSettings),
-        dataViewSpec: sourcererDataView,
+        indexPattern,
         queries: [query],
         filters: tabsFilters,
       }),
-    [sourcererDataView, query, tabsFilters, uiSettings]
+    [indexPattern, query, tabsFilters, uiSettings]
   );
 
   useInvalidFilterQuery({

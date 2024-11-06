@@ -17,7 +17,6 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
       error: undefined,
       value: {
         ready: true,
-        enabled: true,
       },
     },
   };

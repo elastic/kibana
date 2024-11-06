@@ -16,12 +16,10 @@ import { getFetchAgent } from '../../../cli/utils/ssl';
 export class ApmSynthtraceKibanaClient {
   private readonly logger: Logger;
   private target: string;
-  private headers: Record<string, string>;
 
-  constructor(options: { logger: Logger; target: string; headers?: Record<string, string> }) {
+  constructor(options: { logger: Logger; target: string }) {
     this.logger = options.logger;
     this.target = options.target;
-    this.headers = { ...kibanaHeaders(), ...(options.headers ?? {}) };
   }
 
   getFleetApmPackagePath(packageVersion?: string): string {
@@ -41,7 +39,7 @@ export class ApmSynthtraceKibanaClient {
 
       const response = await fetch(url, {
         method: 'GET',
-        headers: this.headers,
+        headers: kibanaHeaders(),
         agent: getFetchAgent(url),
       });
 
@@ -81,7 +79,7 @@ export class ApmSynthtraceKibanaClient {
       async () => {
         const res = await fetch(url, {
           method: 'POST',
-          headers: this.headers,
+          headers: kibanaHeaders(),
           body: '{"force":true}',
           agent: getFetchAgent(url),
         });
@@ -129,7 +127,7 @@ export class ApmSynthtraceKibanaClient {
       async () => {
         const res = await fetch(url, {
           method: 'DELETE',
-          headers: this.headers,
+          headers: kibanaHeaders(),
           body: '{"force":true}',
           agent: getFetchAgent(url),
         });

@@ -29,9 +29,7 @@ const mockResult = jest.fn().mockResolvedValue({
 jest.mock('../graphs/ecs', () => {
   return {
     getEcsGraph: jest.fn().mockResolvedValue({
-      withConfig: () => ({
-        invoke: () => mockResult(),
-      }),
+      invoke: () => mockResult(),
     }),
   };
 });

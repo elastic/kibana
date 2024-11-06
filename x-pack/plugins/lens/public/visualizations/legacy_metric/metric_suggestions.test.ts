@@ -171,7 +171,7 @@ describe('metric_suggestions', () => {
     expect(rest).toHaveLength(0);
     expect(suggestion).toMatchInlineSnapshot(`
       Object {
-        "hide": true,
+        "hide": false,
         "previewIcon": [Function],
         "score": 0.1,
         "state": Object {
@@ -207,7 +207,7 @@ describe('metric_suggestions', () => {
     expect(rest).toHaveLength(0);
     expect(suggestion).toMatchInlineSnapshot(`
       Object {
-        "hide": true,
+        "hide": false,
         "previewIcon": [Function],
         "score": 0.1,
         "state": Object {

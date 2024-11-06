@@ -1,16 +1,12 @@
 {
   "type": "plugin",
   "id": "@kbn/vis-type-table-plugin",
-  "owner": [
-    "@elastic/kibana-visualizations"
-  ],
-  "group": "platform",
-  "visibility": "private",
+  "owner": "@elastic/kibana-visualizations",
   "description": "Registers the datatable aggregation-based visualization.",
   "plugin": {
     "id": "visTypeTable",
-    "browser": true,
     "server": true,
+    "browser": true,
     "requiredPlugins": [
       "expressions",
       "visualizations",

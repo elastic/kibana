@@ -24,8 +24,6 @@ type OpenTelemetryAgentName =
   | 'otlp'
   | 'opentelemetry/cpp'
   | 'opentelemetry/dotnet'
-  | 'opentelemetry/dotnet/opentelemetry-dotnet-instrumentation'
-  | 'opentelemetry/dotnet/elastic'
   | 'opentelemetry/erlang'
   | 'opentelemetry/go'
   | 'opentelemetry/java'

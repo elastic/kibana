@@ -17,7 +17,6 @@ export const defaultInitialState: State = {
   connector: undefined,
   integrationSettings: undefined,
   isGenerating: false,
-  hasCelInput: false,
   result: undefined,
 };
 const mockInitialState = jest.fn((): State => defaultInitialState);
@@ -169,9 +168,9 @@ describe('CreateIntegration with generateCel enabled', () => {
     } as never);
   });
 
-  describe('when step is 5 and has celInput', () => {
+  describe('when step is 5', () => {
     beforeEach(() => {
-      mockInitialState.mockReturnValueOnce({ ...defaultInitialState, step: 5, hasCelInput: true });
+      mockInitialState.mockReturnValueOnce({ ...defaultInitialState, step: 5 });
     });
 
     it('should render cel input', () => {
@@ -185,24 +184,9 @@ describe('CreateIntegration with generateCel enabled', () => {
     });
   });
 
-  describe('when step is 5 and does not have celInput', () => {
-    beforeEach(() => {
-      mockInitialState.mockReturnValueOnce({ ...defaultInitialState, step: 5 });
-    });
-
-    it('should render deploy', () => {
-      const result = renderIntegrationAssistant();
-      expect(result.queryByTestId('deployStepMock')).toBeInTheDocument();
-    });
-  });
-
   describe('when step is 6', () => {
     beforeEach(() => {
-      mockInitialState.mockReturnValueOnce({
-        ...defaultInitialState,
-        step: 6,
-        celInputResult: { program: 'program', stateSettings: {}, redactVars: [] },
-      });
+      mockInitialState.mockReturnValueOnce({ ...defaultInitialState, step: 6 });
     });
 
     it('should render review', () => {

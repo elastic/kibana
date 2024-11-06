@@ -97,7 +97,7 @@ export function ServiceOverview() {
                   <EuiFlexItem>
                     <ServiceTabEmptyState
                       id="serviceOverview"
-                      onDismiss={() => setDismissedLogsOnlyEmptyState(true)}
+                      onDissmiss={() => setDismissedLogsOnlyEmptyState(true)}
                     />
                   </EuiFlexItem>
                 )}

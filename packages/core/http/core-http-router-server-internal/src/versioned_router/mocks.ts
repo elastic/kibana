@@ -20,7 +20,6 @@ export function createRouter(opts: CreateMockRouterOptions = {}) {
     put: jest.fn(),
     getRoutes: jest.fn(),
     handleLegacyErrors: jest.fn(),
-    emitPostValidate: jest.fn(),
     patch: jest.fn(),
     routerPath: '',
     versioned: {} as any,

@@ -8,6 +8,8 @@ import expect from 'expect';
 import {
   assetCriticalityRouteHelpersFactory,
   cleanAssetCriticality,
+  disableAssetCriticalityAdvancedSetting,
+  enableAssetCriticalityAdvancedSetting,
   getAssetCriticalityDoc,
 } from '../../utils';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
@@ -16,6 +18,7 @@ export default ({ getService }: FtrProviderContext) => {
     const esClient = getService('es');
     const supertest = getService('supertest');
     const assetCriticalityRoutes = assetCriticalityRouteHelpersFactory(supertest);
+    const kibanaServer = getService('kibanaServer');
     const log = getService('log');
     const expectAssetCriticalityDocMatching = async (expectedDoc: {
       id_field: string;
@@ -32,6 +35,10 @@ export default ({ getService }: FtrProviderContext) => {
 
     before(async () => {
       await cleanAssetCriticality({ es: esClient, namespace: 'default', log });
+    });
+
+    beforeEach(async () => {
+      await enableAssetCriticalityAdvancedSetting(kibanaServer, log);
     });
 
     after(async () => {
@@ -179,6 +186,14 @@ export default ({ getService }: FtrProviderContext) => {
         total: 0,
         successful: 0,
         failed: 0,
+      });
+    });
+
+    it('should return 403 if the advanced setting is disabled', async () => {
+      await disableAssetCriticalityAdvancedSetting(kibanaServer, log);
+
+      await assetCriticalityRoutes.uploadCsv('host,host-1,low_impact', {
+        expectStatusCode: 403,
       });
     });
   });

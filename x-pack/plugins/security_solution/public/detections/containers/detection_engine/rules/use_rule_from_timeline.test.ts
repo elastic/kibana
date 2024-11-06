@@ -112,7 +112,6 @@ describe('useRuleFromTimeline', () => {
         ...mockSourcererScope,
         dataViewId: 'custom-data-view-id',
         selectedPatterns: ['awesome-*'],
-        sourcererDataView: {},
       });
     });
 

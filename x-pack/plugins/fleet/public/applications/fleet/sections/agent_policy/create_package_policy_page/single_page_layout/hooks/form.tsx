@@ -391,7 +391,7 @@ export function useOnSubmit({
 
       // Check if agentless is configured in ESS and Serverless until Agentless API migrates to Serverless
       const isAgentlessConfigured =
-        isAgentlessAgentPolicy(createdPolicy) || (data && isAgentlessPackagePolicy(data.item));
+        isAgentlessAgentPolicy(createdPolicy) || isAgentlessPackagePolicy(data!.item);
 
       // Removing this code will disabled the Save and Continue button. We need code below update form state and trigger correct modal depending on agent count
       if (hasFleetAddAgentsPrivileges && !isAgentlessConfigured) {

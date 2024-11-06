@@ -3,7 +3,6 @@
   "paths": {
     "xpack.actions": "plugins/actions",
     "xpack.aiops": [
-      "packages/ml/aiops_common",
       "packages/ml/aiops_components",
       "packages/ml/aiops_log_pattern_analysis",
       "packages/ml/aiops_log_rate_analysis",

@@ -16,8 +16,6 @@ describe('parseOnboardingSolution', () => {
     [
       ['elasticsearch', 'es'],
       ['Elasticsearch', 'es'],
-      ['search', 'es'],
-      ['Search', 'es'],
       ['observability', 'oblt'],
       ['Observability', 'oblt'],
       ['security', 'security'],

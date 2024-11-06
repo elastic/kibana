@@ -1,16 +1,12 @@
 {
   "type": "plugin",
   "id": "@kbn/data-visualizer-plugin",
-  "owner": [
-    "@elastic/ml-ui"
-  ],
-  "group": "platform",
-  "visibility": "private",
+  "owner": "@elastic/ml-ui",
   "description": "The Data Visualizer tools help you understand your data, by analyzing the metrics and fields in a log file or an existing Elasticsearch index.",
   "plugin": {
     "id": "dataVisualizer",
-    "browser": true,
     "server": true,
+    "browser": true,
     "requiredPlugins": [
       "data",
       "usageCollection",

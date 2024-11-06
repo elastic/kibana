@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { omit } from 'lodash';
 import type { Client } from '@elastic/elasticsearch';
 import { DeleteByQueryRequest } from '@elastic/elasticsearch/lib/api/types';
 
@@ -62,9 +61,6 @@ export class ESTestIndexTool {
               group: {
                 type: 'keyword',
               },
-              '@timestamp': {
-                type: 'date',
-              },
               host: {
                 properties: {
                   hostname: {
@@ -113,7 +109,6 @@ export class ESTestIndexTool {
   async search(source: string, reference?: string) {
     const body = reference
       ? {
-          sort: [{ '@timestamp': 'asc' }],
           query: {
             bool: {
               must: [
@@ -132,7 +127,6 @@ export class ESTestIndexTool {
           },
         }
       : {
-          sort: [{ '@timestamp': 'asc' }],
           query: {
             term: {
               source,
@@ -144,16 +138,7 @@ export class ESTestIndexTool {
       size: 1000,
       body,
     };
-    const result = await this.es.search(params, { meta: true });
-    result.body.hits.hits = result.body.hits.hits.map((hit) => {
-      return {
-        ...hit,
-        // Easier to remove @timestamp than to have all the downstream code ignore it
-        // in their assertions
-        _source: omit(hit._source as Record<string, unknown>, '@timestamp'),
-      };
-    });
-    return result;
+    return await this.es.search(params, { meta: true });
   }
 
   async getAll(size: number = 10) {

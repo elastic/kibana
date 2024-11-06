@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { schema } from '@kbn/config-schema';
 import { SyntheticsRestApiRouteFactory } from '../types';
 import { syntheticsMonitorType } from '../../../common/types/saved_objects';
 import { ConfigKey, MonitorFiltersResult } from '../../../common/runtime_types';
@@ -36,18 +35,12 @@ interface AggsResponse {
 export const getSyntheticsFilters: SyntheticsRestApiRouteFactory<MonitorFiltersResult> = () => ({
   method: 'GET',
   path: SYNTHETICS_API_URLS.FILTERS,
-  validate: {
-    query: schema.object({
-      showFromAllSpaces: schema.maybe(schema.boolean()),
-    }),
-  },
-  handler: async ({ savedObjectsClient, request }): Promise<any> => {
-    const showFromAllSpaces = request.query?.showFromAllSpaces;
+  validate: {},
+  handler: async ({ savedObjectsClient }): Promise<any> => {
     const data = await savedObjectsClient.find({
       type: syntheticsMonitorType,
       perPage: 0,
       aggs,
-      ...(showFromAllSpaces ? { namespaces: ['*'] } : {}),
     });
 
     const { monitorTypes, tags, locations, projects, schedules } =

@@ -19,7 +19,7 @@
 .dshLayout--editing {
   .react-resizable-handle {
     @include size($euiSizeL);
-    z-index: $euiZLevel2; /* 1 */
+    z-index: $euiZLevel1; /* 1 */
     right: 0;
     bottom: 0;
     padding-right: $euiSizeS;
@@ -33,10 +33,6 @@
  */
 .dshLayout-isMaximizedPanel {
   height: 100% !important; /* 1. */
-
-  .embPanel__hoverActionsLeft {
-    visibility: hidden;
-  }
 }
 
 /**
@@ -44,7 +40,8 @@
  * Shifting the rendered panels offscreen prevents a quick flash when redrawing the panels on minimize
  */
 .dshDashboardGrid__item--hidden {
-  transform: translate(-9999px, -9999px);
+  top: -9999px;
+  left: -9999px;
 }
 
 /**
@@ -101,26 +98,13 @@
    */
   &.resizing,
   &.react-draggable-dragging {
-    z-index: $euiZLevel3 !important;
+    z-index: $euiZLevel2 !important;
   }
 
   &.react-draggable-dragging {
     transition: box-shadow $euiAnimSpeedFast $euiAnimSlightResistance;
     @include euiBottomShadowLarge;
     border-radius: $euiBorderRadius; // keeps shadow within bounds
-
-    .embPanel__hoverActionsWrapper {
-      z-index: $euiZLevel9;
-      top: -$euiSizeXL;
-
-      .embPanel__hoverActions:has(.embPanel--dragHandle) {
-        opacity: 1;
-      }
-
-      .embPanel__hoverActions:not(:has(.embPanel--dragHandle)) {
-        opacity: 0;
-      }
-    }
   }
 
   /**

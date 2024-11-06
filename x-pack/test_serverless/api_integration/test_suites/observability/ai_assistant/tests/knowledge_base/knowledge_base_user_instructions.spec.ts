@@ -266,7 +266,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 connectorId,
                 persist: true,
                 screenContexts: [],
-                scopes: ['observability'],
+                scope: 'observability',
               },
             },
             roleAuthc,

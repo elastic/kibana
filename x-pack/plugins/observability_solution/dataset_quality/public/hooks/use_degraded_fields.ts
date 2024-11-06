@@ -104,25 +104,20 @@ export function useDegradedFields() {
   }, [service]);
 
   const degradedFieldValues = useSelector(service, (state) =>
-    state.matches('initializing.degradedFieldFlyout.open.initialized.ignoredValues.done')
+    state.matches('initializing.degradedFieldFlyout.open.ignoredValues.done')
       ? state.context.degradedFieldValues
       : undefined
   );
 
   const degradedFieldAnalysis = useSelector(service, (state) =>
-    state.matches('initializing.degradedFieldFlyout.open.initialized.mitigation.analyzed') ||
-    state.matches('initializing.degradedFieldFlyout.open.initialized.mitigation.mitigating') ||
-    state.matches(
-      'initializing.degradedFieldFlyout.open.initialized.mitigation.askingForRollover'
-    ) ||
-    state.matches('initializing.degradedFieldFlyout.open.initialized.mitigation.rollingOver') ||
-    state.matches('initializing.degradedFieldFlyout.open.initialized.mitigation.success') ||
-    state.matches('initializing.degradedFieldFlyout.open.initialized.mitigation.error')
+    state.matches('initializing.degradedFieldFlyout.open.analyze.done')
       ? state.context.degradedFieldAnalysis
       : undefined
   );
 
-  const degradedFieldAnalysisFormattedResult = useMemo(() => {
+  // This piece only cater field limit issue at the moment.
+  // In future this will cater the other 2 reasons as well
+  const degradedFieldAnalysisResult = useMemo(() => {
     if (!degradedFieldAnalysis) {
       return undefined;
     }
@@ -132,8 +127,8 @@ export function useDegradedFields() {
       return {
         potentialCause: degradedFieldCauseFieldLimitExceeded,
         tooltipContent: degradedFieldCauseFieldLimitExceededTooltip,
-        shouldDisplayIgnoredValuesAndLimit: false,
-        identifiedUsingHeuristics: true,
+        shouldDisplayMitigation: true,
+        shouldDisplayValues: false,
       };
     }
 
@@ -148,8 +143,8 @@ export function useDegradedFields() {
         return {
           potentialCause: degradedFieldCauseFieldIgnored,
           tooltipContent: degradedFieldCauseFieldIgnoredTooltip,
-          shouldDisplayIgnoredValuesAndLimit: true,
-          identifiedUsingHeuristics: true,
+          shouldDisplayMitigation: false,
+          shouldDisplayValues: true,
         };
       }
     }
@@ -158,58 +153,18 @@ export function useDegradedFields() {
     return {
       potentialCause: degradedFieldCauseFieldMalformed,
       tooltipContent: degradedFieldCauseFieldMalformedTooltip,
-      shouldDisplayIgnoredValuesAndLimit: false,
-      identifiedUsingHeuristics: false, // TODO: Add heuristics to identify ignore_malformed issues
+      shouldDisplayMitigation: false,
+      shouldDisplayValues: false,
     };
   }, [degradedFieldAnalysis, degradedFieldValues]);
 
   const isDegradedFieldsValueLoading = useSelector(service, (state) => {
-    return state.matches(
-      'initializing.degradedFieldFlyout.open.initialized.ignoredValues.fetching'
-    );
-  });
-
-  const isRolloverRequired = useSelector(service, (state) => {
-    return state.matches(
-      'initializing.degradedFieldFlyout.open.initialized.mitigation.askingForRollover'
-    );
-  });
-
-  const isMitigationAppliedSuccessfully = useSelector(service, (state) => {
-    return state.matches('initializing.degradedFieldFlyout.open.initialized.mitigation.success');
+    return state.matches('initializing.degradedFieldFlyout.open.ignoredValues.fetching');
   });
 
   const isAnalysisInProgress = useSelector(service, (state) => {
-    return state.matches('initializing.degradedFieldFlyout.open.initialized.mitigation.analyzing');
+    return state.matches('initializing.degradedFieldFlyout.open.analyze.fetching');
   });
-
-  const isRolloverInProgress = useSelector(service, (state) => {
-    return state.matches(
-      'initializing.degradedFieldFlyout.open.initialized.mitigation.rollingOver'
-    );
-  });
-
-  const updateNewFieldLimit = useCallback(
-    (newFieldLimit: number) => {
-      service.send({ type: 'SET_NEW_FIELD_LIMIT', newFieldLimit });
-    },
-    [service]
-  );
-
-  const isMitigationInProgress = useSelector(service, (state) => {
-    return state.matches('initializing.degradedFieldFlyout.open.initialized.mitigation.mitigating');
-  });
-
-  const newFieldLimitData = useSelector(service, (state) =>
-    state.matches('initializing.degradedFieldFlyout.open.initialized.mitigation.success') ||
-    state.matches('initializing.degradedFieldFlyout.open.initialized.mitigation.error')
-      ? state.context.fieldLimit
-      : undefined
-  );
-
-  const triggerRollover = useCallback(() => {
-    service.send('ROLLOVER_DATA_STREAM');
-  }, [service]);
 
   return {
     isDegradedFieldsLoading,
@@ -226,16 +181,9 @@ export function useDegradedFields() {
     isDegradedFieldsValueLoading,
     isAnalysisInProgress,
     degradedFieldAnalysis,
-    degradedFieldAnalysisFormattedResult,
+    degradedFieldAnalysisResult,
     toggleCurrentQualityIssues,
     showCurrentQualityIssues,
     expandedRenderedItem,
-    updateNewFieldLimit,
-    isMitigationInProgress,
-    isRolloverInProgress,
-    newFieldLimitData,
-    isRolloverRequired,
-    isMitigationAppliedSuccessfully,
-    triggerRollover,
   };
 }

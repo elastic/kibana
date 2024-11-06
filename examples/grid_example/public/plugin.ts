@@ -26,11 +26,8 @@ export class GridExamplePlugin
       title: gridExampleTitle,
       visibleIn: [],
       async mount(params: AppMountParameters) {
-        const [{ renderGridExampleApp }, [coreStart]] = await Promise.all([
-          import('./app'),
-          core.getStartServices(),
-        ]);
-        return renderGridExampleApp(params.element, coreStart);
+        const { renderGridExampleApp } = await import('./app');
+        return renderGridExampleApp(params.element);
       },
     });
     developerExamples.register({

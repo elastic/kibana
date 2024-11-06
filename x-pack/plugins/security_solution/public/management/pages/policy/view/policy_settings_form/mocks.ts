@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { set } from '@kbn/safer-lodash-set';
+import { set } from 'lodash';
 import type { PolicyConfig } from '../../../../../../common/endpoint/types';
 import {
   AntivirusRegistrationModes,

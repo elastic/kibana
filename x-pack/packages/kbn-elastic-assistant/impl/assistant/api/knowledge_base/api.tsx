@@ -11,9 +11,7 @@ import {
   CreateKnowledgeBaseResponse,
   DeleteKnowledgeBaseRequestParams,
   DeleteKnowledgeBaseResponse,
-  ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_INDICES_URL,
   ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_URL,
-  GetKnowledgeBaseIndicesResponse,
   ReadKnowledgeBaseRequestParams,
   ReadKnowledgeBaseResponse,
 } from '@kbn/elastic-assistant-common';
@@ -106,35 +104,6 @@ export const deleteKnowledgeBase = async ({
     });
 
     return response as DeleteKnowledgeBaseResponse;
-  } catch (error) {
-    return error as IHttpFetchError;
-  }
-};
-
-/**
- * API call for getting indices that have fields of `semantic_text` type.
- *
- * @param {Object} options - The options object.
- * @param {HttpSetup} options.http - HttpSetup
- * @param {AbortSignal} [options.signal] - AbortSignal
- *
- * @returns {Promise<GetKnowledgeBaseIndicesResponse | IHttpFetchError>}
- */
-export const getKnowledgeBaseIndices = async ({
-  http,
-  signal,
-}: {
-  http: HttpSetup;
-  signal?: AbortSignal | undefined;
-}): Promise<GetKnowledgeBaseIndicesResponse | IHttpFetchError> => {
-  try {
-    const response = await http.fetch(ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_INDICES_URL, {
-      method: 'GET',
-      signal,
-      version: API_VERSIONS.internal.v1,
-    });
-
-    return response as GetKnowledgeBaseIndicesResponse;
   } catch (error) {
     return error as IHttpFetchError;
   }

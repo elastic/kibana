@@ -21,7 +21,7 @@ jest.mock('../../../../../common/hooks/use_license', () => ({
 
 const useLicenseMock = useLicense as jest.Mock;
 
-describe('useTimelineControlColumns', () => {
+describe('useTimelineColumns', () => {
   const mockColumns: ColumnHeaderOptions[] = [
     {
       columnHeaderType: 'not-filtered',

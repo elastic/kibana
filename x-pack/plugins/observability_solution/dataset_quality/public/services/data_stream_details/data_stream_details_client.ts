@@ -8,8 +8,6 @@
 import { HttpStart } from '@kbn/core/public';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
 import {
-  DataStreamRolloverResponse,
-  dataStreamRolloverResponseRt,
   DegradedFieldAnalysis,
   degradedFieldAnalysisRt,
   DegradedFieldValues,
@@ -21,8 +19,6 @@ import {
   IntegrationDashboardsResponse,
   integrationDashboardsRT,
   IntegrationResponse,
-  UpdateFieldLimitResponse,
-  updateFieldLimitResponseRt,
 } from '../../../common/api_types';
 import {
   DataStreamDetails,
@@ -41,7 +37,6 @@ import { Integration } from '../../../common/data_streams_stats/integration';
 import {
   AnalyzeDegradedFieldsParams,
   GetDataStreamIntegrationParams,
-  UpdateFieldLimitParams,
 } from '../../../common/data_stream_details/types';
 import { DatasetQualityError } from '../../../common/errors';
 
@@ -199,48 +194,6 @@ export class DataStreamDetailsClient implements IDataStreamDetailsClient {
       degradedFieldAnalysisRt,
       (message: string) =>
         new DatasetQualityError(`Failed to decode the analysis response: ${message}`)
-    )(response);
-  }
-
-  public async setNewFieldLimit({
-    dataStream,
-    newFieldLimit,
-  }: UpdateFieldLimitParams): Promise<UpdateFieldLimitResponse> {
-    const response = await this.http
-      .put<UpdateFieldLimitResponse>(
-        `/internal/dataset_quality/data_streams/${dataStream}/update_field_limit`,
-        { body: JSON.stringify({ newFieldLimit }) }
-      )
-      .catch((error) => {
-        throw new DatasetQualityError(`Failed to set new Limit: ${error.message}`, error);
-      });
-
-    const decodedResponse = decodeOrThrow(
-      updateFieldLimitResponseRt,
-      (message: string) =>
-        new DatasetQualityError(`Failed to decode setting of new limit response: ${message}"`)
-    )(response);
-
-    return decodedResponse;
-  }
-
-  public async rolloverDataStream({
-    dataStream,
-  }: {
-    dataStream: string;
-  }): Promise<DataStreamRolloverResponse> {
-    const response = await this.http
-      .post<DataStreamRolloverResponse>(
-        `/internal/dataset_quality/data_streams/${dataStream}/rollover`
-      )
-      .catch((error) => {
-        throw new DatasetQualityError(`Failed to rollover datastream": ${error}`, error);
-      });
-
-    return decodeOrThrow(
-      dataStreamRolloverResponseRt,
-      (message: string) =>
-        new DatasetQualityError(`Failed to decode rollover response: ${message}"`)
     )(response);
   }
 }

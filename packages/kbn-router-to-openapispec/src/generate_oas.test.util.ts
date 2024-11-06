@@ -10,7 +10,6 @@
 import type { ZodType } from '@kbn/zod';
 import { schema, Type } from '@kbn/config-schema';
 import type { CoreVersionedRouter, Router } from '@kbn/core-http-router-server-internal';
-import type { RouterRoute, VersionedRouterRoute } from '@kbn/core-http-server';
 import { createLargeSchema } from './oas_converter/kbn_config_schema/lib.test.util';
 
 type RoutesMeta = ReturnType<Router['getRoutes']>[number];
@@ -28,7 +27,7 @@ export const createVersionedRouter = (args: { routes: VersionedRoutesMeta[] }) =
   } as unknown as CoreVersionedRouter;
 };
 
-export const getRouterDefaults = (bodySchema?: RuntimeSchema): RouterRoute => ({
+export const getRouterDefaults = (bodySchema?: RuntimeSchema) => ({
   isVersioned: false,
   path: '/foo/{id}/{path*}',
   method: 'get',
@@ -58,29 +57,22 @@ export const getRouterDefaults = (bodySchema?: RuntimeSchema): RouterRoute => ({
   handler: jest.fn(),
 });
 
-export const getVersionedRouterDefaults = (bodySchema?: RuntimeSchema): VersionedRouterRoute => ({
+export const getVersionedRouterDefaults = (bodySchema?: RuntimeSchema) => ({
   method: 'get',
   path: '/bar',
   options: {
     summary: 'versioned route',
     access: 'public',
+    deprecated: true,
     discontinued: 'route discontinued version or date',
     options: {
       tags: ['ignore-me', 'oas-tag:versioned'],
     },
   },
-  isVersioned: true,
   handlers: [
     {
       fn: jest.fn(),
       options: {
-        options: {
-          deprecated: {
-            documentationUrl: 'https://fake-url',
-            reason: { type: 'remove' },
-            severity: 'critical',
-          },
-        },
         validate: {
           request: {
             body:

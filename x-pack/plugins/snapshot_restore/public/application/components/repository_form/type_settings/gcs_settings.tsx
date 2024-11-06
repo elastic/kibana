@@ -12,7 +12,6 @@ import { EuiDescribedFormGroup, EuiFieldText, EuiFormRow, EuiSwitch, EuiTitle } 
 import { GCSRepository, Repository } from '../../../../../common/types';
 import { RepositorySettingsValidation } from '../../../services/validation';
 import { ChunkSizeField, MaxSnapshotsField, MaxRestoreField } from './common';
-import { DisableToolTip, MANAGED_REPOSITORY_TOOLTIP_MESSAGE } from '../../disable_tooltip';
 
 interface Props {
   repository: GCSRepository;
@@ -83,22 +82,16 @@ export const GCSSettings: React.FunctionComponent<Props> = ({
           isInvalid={Boolean(hasErrors && settingErrors.client)}
           error={settingErrors.client}
         >
-          <DisableToolTip
-            isManaged={isManagedRepository}
-            tooltipMessage={MANAGED_REPOSITORY_TOOLTIP_MESSAGE}
-            component={
-              <EuiFieldText
-                defaultValue={client || ''}
-                fullWidth
-                onChange={(e) => {
-                  updateRepositorySettings({
-                    client: e.target.value,
-                  });
-                }}
-                data-test-subj="clientInput"
-                disabled={isManagedRepository}
-              />
-            }
+          <EuiFieldText
+            defaultValue={client || ''}
+            fullWidth
+            onChange={(e) => {
+              updateRepositorySettings({
+                client: e.target.value,
+              });
+            }}
+            data-test-subj="clientInput"
+            disabled={isManagedRepository}
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
@@ -134,22 +127,16 @@ export const GCSSettings: React.FunctionComponent<Props> = ({
           isInvalid={Boolean(hasErrors && settingErrors.bucket)}
           error={settingErrors.bucket}
         >
-          <DisableToolTip
-            isManaged={isManagedRepository}
-            tooltipMessage={MANAGED_REPOSITORY_TOOLTIP_MESSAGE}
-            component={
-              <EuiFieldText
-                defaultValue={bucket || ''}
-                fullWidth
-                onChange={(e) => {
-                  updateRepositorySettings({
-                    bucket: e.target.value,
-                  });
-                }}
-                data-test-subj="bucketInput"
-                disabled={isManagedRepository}
-              />
-            }
+          <EuiFieldText
+            defaultValue={bucket || ''}
+            fullWidth
+            onChange={(e) => {
+              updateRepositorySettings({
+                bucket: e.target.value,
+              });
+            }}
+            data-test-subj="bucketInput"
+            disabled={isManagedRepository}
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
@@ -185,22 +172,16 @@ export const GCSSettings: React.FunctionComponent<Props> = ({
           isInvalid={Boolean(hasErrors && settingErrors.basePath)}
           error={settingErrors.basePath}
         >
-          <DisableToolTip
-            isManaged={isManagedRepository}
-            tooltipMessage={MANAGED_REPOSITORY_TOOLTIP_MESSAGE}
-            component={
-              <EuiFieldText
-                defaultValue={basePath || ''}
-                fullWidth
-                onChange={(e) => {
-                  updateRepositorySettings({
-                    basePath: e.target.value,
-                  });
-                }}
-                data-test-subj="basePathInput"
-                disabled={isManagedRepository}
-              />
-            }
+          <EuiFieldText
+            defaultValue={basePath || ''}
+            fullWidth
+            onChange={(e) => {
+              updateRepositorySettings({
+                basePath: e.target.value,
+              });
+            }}
+            data-test-subj="basePathInput"
+            disabled={isManagedRepository}
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>

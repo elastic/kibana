@@ -345,26 +345,27 @@ export function DiscoverMainRoute({
     stateContainer,
   ]);
 
-  const rootProfileState = useRootProfile();
+  const { solutionNavId } = customizationContext;
+  const { rootProfileLoading } = useRootProfile({ solutionNavId });
 
   if (error) {
     return <DiscoverError error={error} />;
   }
 
-  if (!customizationService || rootProfileState.rootProfileLoading) {
+  if (!customizationService || rootProfileLoading) {
     return loadingIndicator;
   }
 
   return (
     <DiscoverCustomizationProvider value={customizationService}>
       <DiscoverMainProvider value={stateContainer}>
-        <rootProfileState.AppWrapper>
+        <>
           <DiscoverTopNavInline
             stateContainer={stateContainer}
             hideNavMenuItems={loading || noDataState.showNoDataPage}
           />
           {mainContent}
-        </rootProfileState.AppWrapper>
+        </>
       </DiscoverMainProvider>
     </DiscoverCustomizationProvider>
   );

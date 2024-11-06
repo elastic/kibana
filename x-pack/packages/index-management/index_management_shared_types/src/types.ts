@@ -17,21 +17,10 @@ import type { LocatorPublic } from '@kbn/share-plugin/public';
 import { ExtensionsSetup } from './services/extensions_service';
 import { PublicApiServiceSetup } from './services/public_api_service';
 
-export type IndexManagementLocatorParams = SerializableRecord &
-  (
-    | {
-        page: 'data_streams_details';
-        dataStreamName?: string;
-      }
-    | {
-        page: 'index_template';
-        indexTemplate: string;
-      }
-    | {
-        page: 'component_template';
-        componentTemplate: string;
-      }
-  );
+export interface IndexManagementLocatorParams extends SerializableRecord {
+  page: 'data_streams_details';
+  dataStreamName?: string;
+}
 
 export type IndexManagementLocator = LocatorPublic<IndexManagementLocatorParams>;
 

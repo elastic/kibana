@@ -1,15 +1,11 @@
 {
   "type": "plugin",
   "id": "@kbn/saved-objects-management-plugin",
-  "owner": [
-    "@elastic/kibana-core"
-  ],
-  "group": "platform",
-  "visibility": "shared",
+  "owner": "@elastic/kibana-core",
   "plugin": {
     "id": "savedObjectsManagement",
-    "browser": true,
     "server": true,
+    "browser": true,
     "requiredPlugins": [
       "management",
       "data",

@@ -28,7 +28,6 @@ const getKnowledgeBaseStatus = createObservabilityAIAssistantServerRoute({
   handler: async (
     resources
   ): Promise<{
-    enabled: boolean;
     ready: boolean;
     error?: any;
     deployment_state?: MlDeploymentState;

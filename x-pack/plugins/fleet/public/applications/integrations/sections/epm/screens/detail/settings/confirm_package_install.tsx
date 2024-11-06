@@ -14,13 +14,9 @@ interface ConfirmPackageInstallProps {
   onConfirm: () => void;
   packageName: string;
   numOfAssets: number;
-  numOfTransformAssets: number;
 }
-
-import { TransformInstallWithCurrentUserPermissionCallout } from '../../../../../../../components/transform_install_as_current_user_callout';
-
 export const ConfirmPackageInstall = (props: ConfirmPackageInstallProps) => {
-  const { onCancel, onConfirm, packageName, numOfAssets, numOfTransformAssets } = props;
+  const { onCancel, onConfirm, packageName, numOfAssets } = props;
   return (
     <EuiConfirmModal
       title={
@@ -57,12 +53,6 @@ export const ConfirmPackageInstall = (props: ConfirmPackageInstallProps) => {
           />
         }
       />
-      {numOfTransformAssets > 0 ? (
-        <>
-          <EuiSpacer size="m" />
-          <TransformInstallWithCurrentUserPermissionCallout count={numOfTransformAssets} />
-        </>
-      ) : null}
       <EuiSpacer size="l" />
       <p>
         <FormattedMessage

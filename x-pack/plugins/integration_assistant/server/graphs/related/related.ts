@@ -11,7 +11,6 @@ import type { RelatedState, SimplifiedProcessor, SimplifiedProcessors } from '..
 import { combineProcessors } from '../../util/processors';
 import { RELATED_MAIN_PROMPT } from './prompts';
 import type { RelatedNodeParams } from './types';
-import { deepCopySkipArrays } from './util';
 
 export async function handleRelated({
   state,
@@ -22,7 +21,7 @@ export async function handleRelated({
   const relatedMainGraph = relatedMainPrompt.pipe(model).pipe(outputParser);
 
   const currentProcessors = (await relatedMainGraph.invoke({
-    pipeline_results: JSON.stringify(state.pipelineResults.map(deepCopySkipArrays), null, 2),
+    pipeline_results: JSON.stringify(state.pipelineResults, null, 2),
     ex_answer: state.exAnswer,
     ecs: state.ecs,
   })) as SimplifiedProcessor[];

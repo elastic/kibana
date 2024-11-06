@@ -23,7 +23,6 @@ import { has } from 'lodash';
 import { ScopedHistory } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { isBiggerThanGlobalMaxRetention } from './validations';
 import {
   useForm,
   useFormData,
@@ -35,7 +34,6 @@ import {
   UseField,
   ToggleField,
   NumericField,
-  fieldValidators,
 } from '../../../../../shared_imports';
 
 import { reactRouterNavigate } from '../../../../../shared_imports';
@@ -43,7 +41,7 @@ import { getIndexListUri } from '../../../../services/routing';
 import { documentationService } from '../../../../services/documentation';
 import { splitSizeAndUnits, DataStream } from '../../../../../../common';
 import { timeUnits } from '../../../../constants/time_units';
-import { deserializeGlobalMaxRetention, isDSLWithILMIndices } from '../../../../lib/data_streams';
+import { isDSLWithILMIndices } from '../../../../lib/data_streams';
 import { useAppContext } from '../../../../app_context';
 import { UnitField } from '../../../../components/shared';
 import { updateDataRetention } from '../../../../services/api';
@@ -54,6 +52,35 @@ interface Props {
   ilmPolicyLink: string;
   onClose: (data?: { hasUpdatedDataRetention: boolean }) => void;
 }
+
+const convertToMinutes = (value: string) => {
+  const { size, unit } = splitSizeAndUnits(value);
+  const sizeNum = parseInt(size, 10);
+
+  switch (unit) {
+    case 'd':
+      // days to minutes
+      return sizeNum * 24 * 60;
+    case 'h':
+      // hours to minutes
+      return sizeNum * 60;
+    case 'm':
+      // minutes to minutes
+      return sizeNum;
+    case 's':
+      // seconds to minutes
+      return sizeNum / 60;
+    default:
+      throw new Error(`Unknown unit: ${unit}`);
+  }
+};
+
+const isRetentionBiggerThan = (valueA: string, valueB: string) => {
+  const minutesA = convertToMinutes(valueA);
+  const minutesB = convertToMinutes(valueB);
+
+  return minutesA > minutesB;
+};
 
 const configurationFormSchema: FormSchema = {
   dataRetention: {
@@ -67,57 +94,50 @@ const configurationFormSchema: FormSchema = {
     formatters: [fieldFormatters.toInt],
     validations: [
       {
-        validator: fieldValidators.isInteger({
-          message: i18n.translate(
-            'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.dataRetentionFieldIntegerError',
-            {
-              defaultMessage: 'Only integers are allowed.',
-            }
-          ),
-        }),
-      },
-      {
         validator: ({ value, formData, customData }) => {
-          // We only need to validate the data retention field if infiniteRetentionPeriod is set to false
-          if (!formData.infiniteRetentionPeriod) {
-            // If project level data retention is enabled, we need to enforce the global max retention
-            const { globalMaxRetention, enableProjectLevelRetentionChecks } =
-              customData.value as any;
-            if (enableProjectLevelRetentionChecks) {
-              return isBiggerThanGlobalMaxRetention(value, formData.timeUnit, globalMaxRetention);
+          // If infiniteRetentionPeriod is set, we dont need to validate the data retention field
+          if (formData.infiniteRetentionPeriod) {
+            return undefined;
+          }
+
+          // If project level data retention is enabled, we need to enforce the global max retention
+          const { globalMaxRetention, enableProjectLevelRetentionChecks } = customData.value as any;
+          if (enableProjectLevelRetentionChecks) {
+            const currentValue = `${value}${formData.timeUnit}`;
+            if (globalMaxRetention && isRetentionBiggerThan(currentValue, globalMaxRetention)) {
+              return {
+                message: i18n.translate(
+                  'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.dataRetentionFieldMaxError',
+                  {
+                    defaultMessage:
+                      'Maximum data retention period on this project is {maxRetention} days.',
+                    // Remove the unit from the globalMaxRetention value
+                    values: { maxRetention: globalMaxRetention.slice(0, -1) },
+                  }
+                ),
+              };
             }
           }
-        },
-      },
-      {
-        validator: (args) => {
-          // We only need to validate the data retention field if infiniteRetentionPeriod is set to false
-          if (!args.formData.infiniteRetentionPeriod) {
-            return fieldValidators.emptyField(
-              i18n.translate(
+
+          if (!value) {
+            return {
+              message: i18n.translate(
                 'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.dataRetentionFieldRequiredError',
                 {
                   defaultMessage: 'A data retention value is required.',
                 }
-              )
-            )(args);
+              ),
+            };
           }
-        },
-      },
-      {
-        validator: (args) => {
-          // We only need to validate the data retention field if infiniteRetentionPeriod is set to false
-          if (!args.formData.infiniteRetentionPeriod) {
-            return fieldValidators.numberGreaterThanField({
-              than: 0,
-              allowEquality: false,
+          if (value <= 0) {
+            return {
               message: i18n.translate(
                 'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.dataRetentionFieldNonNegativeError',
                 {
                   defaultMessage: `A positive value is required.`,
                 }
               ),
-            })(args);
+            };
           }
         },
       },
@@ -214,7 +234,6 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
   const { history } = useAppContext();
   const dslWithIlmIndices = isDSLWithILMIndices(dataStream);
   const { size, unit } = splitSizeAndUnits(lifecycle?.data_retention as string);
-  const globalMaxRetention = deserializeGlobalMaxRetention(lifecycle?.globalMaxRetention);
   const {
     services: { notificationService },
     config: { enableTogglingDataRetention, enableProjectLevelRetentionChecks },
@@ -239,11 +258,11 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
   const formHasErrors = form.getErrors().length > 0;
   const disableSubmit = formHasErrors || !isDirty || form.isValid === false;
 
-  // Whenever the timeUnit field changes, we need to re-validate
-  // the dataRetention field
+  // Whenever the formData changes, we need to re-validate the dataRetention field
+  // as it depends on the timeUnit field.
   useEffect(() => {
     form.validateFields(['dataRetention']);
-  }, [formData.timeUnit, form]);
+  }, [formData, form]);
 
   const onSubmitForm = async () => {
     const { isValid, data } = await form.submit();
@@ -332,11 +351,8 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
             <>
               <FormattedMessage
                 id="xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.modalTitleText"
-                defaultMessage="Maximum data retention period is {maxRetention} {unitText}"
-                values={{
-                  maxRetention: globalMaxRetention.size,
-                  unitText: globalMaxRetention.unitText,
-                }}
+                defaultMessage="Maximum data retention period is {maxRetention} days"
+                values={{ maxRetention: lifecycle?.globalMaxRetention.slice(0, -1) }}
               />
               <EuiSpacer />
             </>

@@ -6,9 +6,7 @@
  */
 
 import React from 'react';
-import { waitFor } from '@testing-library/react';
-
-import { userEvent } from '@testing-library/user-event';
+import { act, fireEvent, waitFor } from '@testing-library/react';
 
 import type { TestRenderer } from '../../../../../../../mock';
 import { createFleetTestRendererMock } from '../../../../../../../mock';
@@ -110,23 +108,22 @@ describe('StepSelectHosts', () => {
     testRenderer = createFleetTestRendererMock();
   });
 
-  it('should display create form when no agent policies', async () => {
+  it('should display create form when no agent policies', () => {
     (useGetAgentPolicies as jest.MockedFunction<any>).mockReturnValue({
       data: {
         items: [],
       },
     });
-    (useAllNonManagedAgentPolicies as jest.MockedFunction<any>).mockReturnValue([]);
 
     render();
 
-    await waitFor(() => {
-      expect(renderResult.getByText('New agent policy name')).toBeInTheDocument();
+    waitFor(() => {
+      expect(renderResult.getByText('Agent policy 1')).toBeInTheDocument();
     });
     expect(renderResult.queryByRole('tablist')).not.toBeInTheDocument();
   });
 
-  it('should display tabs with New hosts selected when agent policies exist', async () => {
+  it('should display tabs with New hosts selected when agent policies exist', () => {
     (useGetAgentPolicies as jest.MockedFunction<any>).mockReturnValue({
       data: {
         items: [{ id: '1', name: 'Agent policy 1', namespace: 'default' }],
@@ -138,7 +135,10 @@ describe('StepSelectHosts', () => {
 
     render();
 
-    expect(renderResult.getByRole('tablist')).toBeInTheDocument();
+    waitFor(() => {
+      expect(renderResult.getByRole('tablist')).toBeInTheDocument();
+      expect(renderResult.getByText('Agent policy 3')).toBeInTheDocument();
+    });
     expect(renderResult.getByText('New hosts').closest('button')).toHaveAttribute(
       'aria-selected',
       'true'
@@ -157,15 +157,16 @@ describe('StepSelectHosts', () => {
 
     render();
 
-    expect(renderResult.getByRole('tablist')).toBeInTheDocument();
-
-    await userEvent.click(renderResult.getByText('Existing hosts').closest('button')!);
-
-    await waitFor(() => {
-      expect(
-        renderResult.container.querySelector('[data-test-subj="agentPolicySelect"]')?.textContent
-      ).toContain('Agent policy 1');
+    waitFor(() => {
+      expect(renderResult.getByRole('tablist')).toBeInTheDocument();
     });
+    act(() => {
+      fireEvent.click(renderResult.getByText('Existing hosts').closest('button')!);
+    });
+
+    expect(
+      renderResult.container.querySelector('[data-test-subj="agentPolicySelect"]')?.textContent
+    ).toContain('Agent policy 1');
   });
 
   it('should display dropdown without preselected value when Existing hosts selected with mulitple agent policies', async () => {
@@ -184,11 +185,14 @@ describe('StepSelectHosts', () => {
 
     render();
 
-    expect(renderResult.getByRole('tablist')).toBeInTheDocument();
+    waitFor(() => {
+      expect(renderResult.getByRole('tablist')).toBeInTheDocument();
+    });
+    act(() => {
+      fireEvent.click(renderResult.getByText('Existing hosts').closest('button')!);
+    });
 
-    await userEvent.click(renderResult.getByText('Existing hosts').closest('button')!);
-
-    await waitFor(() => {
+    await act(async () => {
       const select = renderResult.container.querySelector('[data-test-subj="agentPolicySelect"]');
       expect((select as any)?.value).toEqual('');
     });

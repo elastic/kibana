@@ -60,14 +60,6 @@ export type PutPackagePolicyUpdateCallback = (
   request?: KibanaRequest
 ) => Promise<UpdatePackagePolicy>;
 
-export type PutPackagePolicyPostUpdateCallback = (
-  packagePolicy: PackagePolicy,
-  soClient: SavedObjectsClientContract,
-  esClient: ElasticsearchClient,
-  context?: RequestHandlerContext,
-  request?: KibanaRequest
-) => Promise<PackagePolicy>;
-
 export type PostAgentPolicyCreateCallback = (
   agentPolicy: NewAgentPolicy
 ) => Promise<NewAgentPolicy>;
@@ -75,8 +67,6 @@ export type PostAgentPolicyCreateCallback = (
 export type PostAgentPolicyUpdateCallback = (
   agentPolicy: Partial<AgentPolicy>
 ) => Promise<Partial<AgentPolicy>>;
-
-export type PostAgentPolicyPostUpdateCallback = (agentPolicy: AgentPolicy) => Promise<AgentPolicy>;
 
 export type ExternalCallbackCreate = ['packagePolicyCreate', PostPackagePolicyCreateCallback];
 export type ExternalCallbackPostCreate = [
@@ -89,12 +79,7 @@ export type ExternalCallbackPostDelete = [
   'packagePolicyPostDelete',
   PostPackagePolicyPostDeleteCallback
 ];
-
 export type ExternalCallbackUpdate = ['packagePolicyUpdate', PutPackagePolicyUpdateCallback];
-export type ExternalCallbackPostUpdate = [
-  'packagePolicyPostUpdate',
-  PutPackagePolicyPostUpdateCallback
-];
 
 export type ExternalCallbackAgentPolicyCreate = [
   'agentPolicyCreate',
@@ -103,10 +88,6 @@ export type ExternalCallbackAgentPolicyCreate = [
 export type ExternalCallbackAgentPolicyUpdate = [
   'agentPolicyUpdate',
   PostAgentPolicyUpdateCallback
-];
-export type ExternalCallbackAgentPolicyPostUpdate = [
-  'agentPolicyPostUpdate',
-  PostAgentPolicyPostUpdateCallback
 ];
 
 /**
@@ -118,9 +99,7 @@ export type ExternalCallback =
   | ExternalCallbackDelete
   | ExternalCallbackPostDelete
   | ExternalCallbackUpdate
-  | ExternalCallbackPostUpdate
   | ExternalCallbackAgentPolicyCreate
-  | ExternalCallbackAgentPolicyUpdate
-  | ExternalCallbackAgentPolicyPostUpdate;
+  | ExternalCallbackAgentPolicyUpdate;
 
 export type ExternalCallbacksStorage = Map<ExternalCallback[0], Set<ExternalCallback[1]>>;

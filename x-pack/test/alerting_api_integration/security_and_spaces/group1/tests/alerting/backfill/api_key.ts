@@ -125,7 +125,7 @@ export default function apiKeyBackfillTests({ getService }: FtrProviderContext) 
     }
 
     it('should wait to invalidate API key until backfill for rule is complete', async () => {
-      const start = moment().utc().startOf('day').subtract(13, 'days').toISOString();
+      const start = moment().utc().startOf('day').subtract(7, 'days').toISOString();
       const end = moment().utc().startOf('day').subtract(4, 'day').toISOString();
       const spaceId = SuperuserAtSpace1.space.id;
 
@@ -251,17 +251,6 @@ export default function apiKeyBackfillTests({ getService }: FtrProviderContext) 
       for (const e of executeBackfillEvents) {
         expect(e?.event?.outcome).to.eql('success');
       }
-
-      // wait for all the ad hoc run SO to be deleted
-      await retry.try(async () => {
-        try {
-          // throws when not found
-          await getAdHocRunSO(backfillId);
-          throw new Error('should have thrown');
-        } catch (e) {
-          expect(e.message).not.to.eql('should have thrown');
-        }
-      });
 
       // invoke the invalidate task
       await runInvalidateTask();

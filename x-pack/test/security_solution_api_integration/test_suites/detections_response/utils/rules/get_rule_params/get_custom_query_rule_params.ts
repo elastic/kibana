@@ -30,7 +30,6 @@ export function getCustomQueryRuleParams(
     interval: '100m',
     from: 'now-6m',
     author: [],
-    license: 'Elastic License v2',
     enabled: false,
     ...rewrites,
   };

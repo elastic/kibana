@@ -11,20 +11,20 @@ import {
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkResponse,
 } from '@kbn/core/server';
-import { RawRule } from '../../../types';
+import { RuleAttributes } from '../types';
 
 export interface BulkCreateRulesSoParams {
   savedObjectsClient: SavedObjectsClientContract;
-  bulkCreateRuleAttributes: Array<SavedObjectsBulkCreateObject<RawRule>>;
+  bulkCreateRuleAttributes: Array<SavedObjectsBulkCreateObject<RuleAttributes>>;
   savedObjectsBulkCreateOptions?: SavedObjectsCreateOptions;
 }
 
 export const bulkCreateRulesSo = (
   params: BulkCreateRulesSoParams
-): Promise<SavedObjectsBulkResponse<RawRule>> => {
+): Promise<SavedObjectsBulkResponse<RuleAttributes>> => {
   const { savedObjectsClient, bulkCreateRuleAttributes, savedObjectsBulkCreateOptions } = params;
 
-  return savedObjectsClient.bulkCreate<RawRule>(
+  return savedObjectsClient.bulkCreate<RuleAttributes>(
     bulkCreateRuleAttributes,
     savedObjectsBulkCreateOptions
   );

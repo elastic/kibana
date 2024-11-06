@@ -59,7 +59,7 @@ describe('Space Selector view routes', () => {
   });
 
   it('correctly defines route.', () => {
-    expect(routeConfig.options).toEqual({ excludeFromOAS: true });
+    expect(routeConfig.options).toBeUndefined();
     expect(routeConfig.validate).toBe(false);
   });
 

@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import React, { memo, useEffect, useState } from 'react';
+import React, { memo, useState } from 'react';
 import type { Criteria, EuiBasicTableColumn } from '@elastic/eui';
-import { EuiSpacer, EuiPanel, EuiText, EuiBasicTable, EuiIcon } from '@elastic/eui';
+import { EuiSpacer, EuiIcon, EuiPanel, EuiLink, EuiText, EuiBasicTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { VulnSeverity } from '@kbn/cloud-security-posture-common';
 import { buildEntityFlyoutPreviewQuery } from '@kbn/cloud-security-posture-common';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
+import { useNavigateVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_navigate_findings';
 import { useVulnerabilitiesFindings } from '@kbn/cloud-security-posture/src/hooks/use_vulnerabilities_findings';
 import type {
   CspVulnerabilityFinding,
@@ -23,14 +24,11 @@ import {
   SeverityStatusBadge,
 } from '@kbn/cloud-security-posture';
 import {
-  ENTITY_FLYOUT_EXPAND_VULNERABILITY_VIEW_VISITS,
+  ENTITY_FLYOUT_VULNERABILITY_VIEW_VISITS,
   NAV_TO_FINDINGS_BY_HOST_NAME_FRPOM_ENTITY_FLYOUT,
   uiMetricService,
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { SecurityPageName } from '@kbn/deeplinks-security';
-import { useGetNavigationUrlParams } from '@kbn/cloud-security-posture/src/hooks/use_get_navigation_url_params';
-import { SecuritySolutionLinkAnchor } from '../../../common/components/links';
 
 type VulnerabilitiesFindingDetailFields = Pick<
   CspVulnerabilityFinding,
@@ -40,18 +38,11 @@ type VulnerabilitiesFindingDetailFields = Pick<
 interface VulnerabilitiesPackage extends Vulnerability {
   package: {
     name: string;
-    version: string;
   };
 }
 
 export const VulnerabilitiesFindingsDetailsTable = memo(({ queryName }: { queryName: string }) => {
-  useEffect(() => {
-    uiMetricService.trackUiMetric(
-      METRIC_TYPE.COUNT,
-      ENTITY_FLYOUT_EXPAND_VULNERABILITY_VIEW_VISITS
-    );
-  }, []);
-
+  uiMetricService.trackUiMetric(METRIC_TYPE.COUNT, ENTITY_FLYOUT_VULNERABILITY_VIEW_VISITS);
   const { data } = useVulnerabilitiesFindings({
     query: buildEntityFlyoutPreviewQuery('host.name', queryName),
     sort: [],
@@ -97,27 +88,20 @@ export const VulnerabilitiesFindingsDetailsTable = memo(({ queryName }: { queryN
     }
   };
 
-  const getNavUrlParams = useGetNavigationUrlParams();
+  const navToVulnerabilities = useNavigateVulnerabilities();
 
-  const getVulnerabilityUrl = (name: string, queryField: 'host.name' | 'user.name') => {
-    return getNavUrlParams({ [queryField]: name }, 'vulnerabilities');
+  const navToVulnerabilitiesByName = (name: string, queryField: 'host.name' | 'user.name') => {
+    navToVulnerabilities({ [queryField]: name });
   };
 
-  const getVulnerabilityUrlFilteredByVulnerabilityAndResourceId = (
+  const navToVulnerabilityByVulnerabilityAndResourceId = (
     vulnerabilityId: string,
-    resourceId: string,
-    vulnerabilityPackageName: string,
-    vulnerabilityPackageVersion: string
+    resourceId: string
   ) => {
-    return getNavUrlParams(
-      {
-        'vulnerability.id': vulnerabilityId,
-        'resource.id': resourceId,
-        'vulnerability.package.name': vulnerabilityPackageName,
-        'vulnerability.package.version': vulnerabilityPackageVersion,
-      },
-      'vulnerabilities'
-    );
+    navToVulnerabilities({
+      'vulnerability.id': vulnerabilityId,
+      'resource.id': resourceId,
+    });
   };
 
   const columns: Array<EuiBasicTableColumn<VulnerabilitiesFindingDetailFields>> = [
@@ -129,19 +113,16 @@ export const VulnerabilitiesFindingsDetailsTable = memo(({ queryName }: { queryN
         vulnerability: VulnerabilitiesPackage,
         finding: VulnerabilitiesFindingDetailFields
       ) => (
-        <SecuritySolutionLinkAnchor
-          deepLinkId={SecurityPageName.cloudSecurityPostureFindings}
-          path={`${getVulnerabilityUrlFilteredByVulnerabilityAndResourceId(
-            vulnerability?.id,
-            finding?.resource?.id || '',
-            vulnerability?.package?.name,
-            vulnerability?.package?.version
-          )}`}
-          target={'_blank'}
-          external={false}
+        <EuiLink
+          onClick={() => {
+            navToVulnerabilityByVulnerabilityAndResourceId(
+              vulnerability?.id,
+              finding?.resource?.id || ''
+            );
+          }}
         >
           <EuiIcon type={'popout'} />
-        </SecuritySolutionLinkAnchor>
+        </EuiLink>
       ),
     },
     {
@@ -167,7 +148,7 @@ export const VulnerabilitiesFindingsDetailsTable = memo(({ queryName }: { queryN
         'xpack.securitySolution.flyout.left.insights.vulnerability.table.ruleColumnName',
         { defaultMessage: 'CVSS' }
       ),
-      width: '15%',
+      width: '12.5%',
     },
     {
       field: 'vulnerability',
@@ -184,7 +165,7 @@ export const VulnerabilitiesFindingsDetailsTable = memo(({ queryName }: { queryN
         'xpack.securitySolution.flyout.left.insights.vulnerability.table.ruleColumnName',
         { defaultMessage: 'Severity' }
       ),
-      width: '20%',
+      width: '12.5%',
     },
     {
       field: 'vulnerability',
@@ -195,30 +176,27 @@ export const VulnerabilitiesFindingsDetailsTable = memo(({ queryName }: { queryN
         'xpack.securitySolution.flyout.left.insights.vulnerability.table.ruleColumnName',
         { defaultMessage: 'Package' }
       ),
-      width: '40%',
+      width: '50%',
     },
   ];
 
   return (
     <>
       <EuiPanel hasShadow={false}>
-        <SecuritySolutionLinkAnchor
-          deepLinkId={SecurityPageName.cloudSecurityPostureFindings}
-          path={`${getVulnerabilityUrl(queryName, 'host.name')}`}
-          target={'_blank'}
-          external={false}
+        <EuiLink
           onClick={() => {
             uiMetricService.trackUiMetric(
               METRIC_TYPE.CLICK,
               NAV_TO_FINDINGS_BY_HOST_NAME_FRPOM_ENTITY_FLYOUT
             );
+            navToVulnerabilitiesByName(queryName, 'host.name');
           }}
         >
           {i18n.translate('xpack.securitySolution.flyout.left.insights.vulnerability.tableTitle', {
             defaultMessage: 'Vulnerability ',
           })}
           <EuiIcon type={'popout'} />
-        </SecuritySolutionLinkAnchor>
+        </EuiLink>
         <EuiSpacer size="xl" />
         <DistributionBar
           stats={getVulnerabilityStats({

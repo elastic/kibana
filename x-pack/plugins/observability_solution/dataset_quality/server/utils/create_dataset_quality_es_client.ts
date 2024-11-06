@@ -8,16 +8,11 @@
 import { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
 import { ElasticsearchClient } from '@kbn/core/server';
 import {
-  ClusterPutComponentTemplateRequest,
-  ClusterPutComponentTemplateResponse,
   FieldCapsRequest,
   FieldCapsResponse,
   Indices,
   IndicesGetMappingResponse,
   IndicesGetSettingsResponse,
-  IndicesPutSettingsRequest,
-  IndicesPutSettingsResponse,
-  IndicesRolloverResponse,
 } from '@elastic/elasticsearch/lib/api/types';
 
 type DatasetQualityESSearchParams = ESSearchRequest & {
@@ -28,12 +23,12 @@ export type DatasetQualityESClient = ReturnType<typeof createDatasetQualityESCli
 
 export function createDatasetQualityESClient(esClient: ElasticsearchClient) {
   return {
-    search<TDocument, TParams extends DatasetQualityESSearchParams>(
+    async search<TDocument, TParams extends DatasetQualityESSearchParams>(
       searchParams: TParams
     ): Promise<InferSearchResponseOf<TDocument, TParams>> {
       return esClient.search<TDocument>(searchParams) as Promise<any>;
     },
-    msearch<TDocument, TParams extends DatasetQualityESSearchParams>(
+    async msearch<TDocument, TParams extends DatasetQualityESSearchParams>(
       index = {} as { index?: Indices },
       searches: TParams[]
     ): Promise<{
@@ -43,25 +38,14 @@ export function createDatasetQualityESClient(esClient: ElasticsearchClient) {
         searches: searches.map((search) => [index, search]).flat(),
       }) as Promise<any>;
     },
-    fieldCaps(params: FieldCapsRequest): Promise<FieldCapsResponse> {
-      return esClient.fieldCaps(params);
+    async fieldCaps(params: FieldCapsRequest): Promise<FieldCapsResponse> {
+      return esClient.fieldCaps(params) as Promise<any>;
     },
-    mappings(params: { index: string }): Promise<IndicesGetMappingResponse> {
+    async mappings(params: { index: string }): Promise<IndicesGetMappingResponse> {
       return esClient.indices.getMapping(params);
     },
-    settings(params: { index: string }): Promise<IndicesGetSettingsResponse> {
+    async settings(params: { index: string }): Promise<IndicesGetSettingsResponse> {
       return esClient.indices.getSettings(params);
-    },
-    updateComponentTemplate(
-      params: ClusterPutComponentTemplateRequest
-    ): Promise<ClusterPutComponentTemplateResponse> {
-      return esClient.cluster.putComponentTemplate(params);
-    },
-    updateSettings(params: IndicesPutSettingsRequest): Promise<IndicesPutSettingsResponse> {
-      return esClient.indices.putSettings(params);
-    },
-    rollover(params: { alias: string }): Promise<IndicesRolloverResponse> {
-      return esClient.indices.rollover(params);
     },
   };
 }

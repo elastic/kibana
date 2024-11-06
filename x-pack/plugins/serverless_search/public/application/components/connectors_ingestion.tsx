@@ -19,12 +19,9 @@ import { GithubLink } from '@kbn/search-api-panels';
 
 import React from 'react';
 import { useCreateConnector } from '../hooks/api/use_create_connector';
-import { useConnectors } from '../hooks/api/use_connectors';
 
 export const ConnectorIngestionPanel: React.FC<{ assetBasePath: string }> = ({ assetBasePath }) => {
   const { createConnector } = useCreateConnector();
-  const { data } = useConnectors();
-
   return (
     <EuiFlexGroup direction="column" justifyContent="spaceEvenly" gutterSize="s">
       <EuiFlexItem grow={false}>
@@ -52,21 +49,19 @@ export const ConnectorIngestionPanel: React.FC<{ assetBasePath: string }> = ({ a
         </EuiText>
       </EuiFlexItem>
       <EuiFlexGroup direction="row" justifyContent="flexStart" alignItems="center">
-        {Boolean(data?.canManageConnectors) && (
-          <EuiFlexItem grow={false}>
-            <EuiLink
-              data-test-subj="serverlessSearchConnectorIngestionPanelSetUpAConnectorLink"
-              onClick={() => createConnector()}
-            >
-              {i18n.translate(
-                'xpack.serverlessSearch.ingestData.alternativeOptions.setupConnectorLabel',
-                {
-                  defaultMessage: 'Set up a connector',
-                }
-              )}
-            </EuiLink>
-          </EuiFlexItem>
-        )}
+        <EuiFlexItem grow={false}>
+          <EuiLink
+            data-test-subj="serverlessSearchConnectorIngestionPanelSetUpAConnectorLink"
+            onClick={() => createConnector()}
+          >
+            {i18n.translate(
+              'xpack.serverlessSearch.ingestData.alternativeOptions.setupConnectorLabel',
+              {
+                defaultMessage: 'Set up a connector',
+              }
+            )}
+          </EuiLink>
+        </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <GithubLink
             href="https://github.com/elastic/connectors"

@@ -50,7 +50,8 @@ const OverviewComponent = () => {
   const filters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
 
   const { from, deleteQuery, setQuery, to } = useGlobalTime();
-  const { indicesExist, sourcererDataView, selectedPatterns } = useSourcererDataView();
+  const { indicesExist, sourcererDataView, indexPattern, selectedPatterns } =
+    useSourcererDataView();
 
   const endpointMetadataIndex = useMemo<string[]>(() => {
     return [ENDPOINT_METADATA_INDEX];
@@ -113,7 +114,7 @@ const OverviewComponent = () => {
                       deleteQuery={deleteQuery}
                       filters={filters}
                       from={from}
-                      dataViewSpec={sourcererDataView}
+                      indexPattern={indexPattern}
                       query={query}
                       queryType="overview"
                       setQuery={setQuery}
@@ -126,7 +127,7 @@ const OverviewComponent = () => {
                       filters={filters}
                       from={from}
                       indexNames={selectedPatterns}
-                      dataViewSpec={sourcererDataView}
+                      indexPattern={indexPattern}
                       query={query}
                       setQuery={setQuery}
                       to={to}

@@ -221,6 +221,14 @@ export class SyntheticsServices {
     }
   }
 
+  async getRules() {
+    const response = await axios.get(this.kibanaUrl + '/internal/alerting/rules/_find', {
+      auth: { username: 'elastic', password: 'changeme' },
+      headers: { 'kbn-xsrf': 'true' },
+    });
+    return response.data.data;
+  }
+
   async setupTestConnector() {
     const indexConnector = {
       name: 'test index',

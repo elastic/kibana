@@ -16,8 +16,7 @@ import type { ProtectionSettingCardSwitchProps } from './protection_setting_card
 import { ProtectionSettingCardSwitch } from './protection_setting_card_switch';
 import { exactMatchText, expectIsViewOnly, setMalwareMode } from '../mocks';
 import { ProtectionModes } from '../../../../../../../common/endpoint/types';
-import { cloneDeep } from 'lodash';
-import { set } from '@kbn/safer-lodash-set';
+import { cloneDeep, set } from 'lodash';
 import userEvent from '@testing-library/user-event';
 
 jest.mock('../../../../../../common/hooks/use_license');

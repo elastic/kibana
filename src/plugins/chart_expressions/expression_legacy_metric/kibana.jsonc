@@ -1,16 +1,12 @@
 {
   "type": "plugin",
   "id": "@kbn/expression-legacy-metric-vis-plugin",
-  "owner": [
-    "@elastic/kibana-visualizations"
-  ],
-  "group": "platform",
-  "visibility": "shared",
+  "owner": "@elastic/kibana-visualizations",
   "description": "Adds a `metric` renderer and function to the expression plugin. The renderer will display the `legacy metric` chart.",
   "plugin": {
     "id": "expressionLegacyMetricVis",
-    "browser": true,
     "server": true,
+    "browser": true,
     "requiredPlugins": [
       "expressions",
       "fieldFormats",

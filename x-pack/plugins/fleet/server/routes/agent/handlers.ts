@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { omit, uniq } from 'lodash';
+import { uniq } from 'lodash';
 import { type RequestHandler, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
@@ -13,6 +13,7 @@ import type {
   GetAgentsResponse,
   GetOneAgentResponse,
   GetAgentStatusResponse,
+  PutAgentReassignResponse,
   GetAgentTagsResponse,
   GetAvailableVersionsResponse,
   GetActionStatusResponse,
@@ -29,6 +30,7 @@ import type {
   DeleteAgentRequestSchema,
   GetAgentStatusRequestSchema,
   GetAgentDataRequestSchema,
+  PutAgentReassignRequestSchemaDeprecated,
   PostAgentReassignRequestSchema,
   PostBulkAgentReassignRequestSchema,
   PostBulkUpdateAgentTagsRequestSchema,
@@ -205,6 +207,7 @@ export const getAgentsHandler: FleetRequestHandler<
     }
 
     const body: GetAgentsResponse = {
+      list: agents, // deprecated
       items: agents,
       total,
       page,
@@ -234,6 +237,29 @@ export const getAgentTagsHandler: RequestHandler<
     const body: GetAgentTagsResponse = {
       items: tags,
     };
+    return response.ok({ body });
+  } catch (error) {
+    return defaultFleetErrorHandler({ error, response });
+  }
+};
+
+export const putAgentsReassignHandlerDeprecated: RequestHandler<
+  TypeOf<typeof PutAgentReassignRequestSchemaDeprecated.params>,
+  undefined,
+  TypeOf<typeof PutAgentReassignRequestSchemaDeprecated.body>
+> = async (context, request, response) => {
+  const coreContext = await context.core;
+  const soClient = coreContext.savedObjects.client;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
+  try {
+    await AgentService.reassignAgent(
+      soClient,
+      esClient,
+      request.params.agentId,
+      request.body.policy_id
+    );
+
+    const body: PutAgentReassignResponse = {};
     return response.ok({ body });
   } catch (error) {
     return defaultFleetErrorHandler({ error, response });
@@ -315,7 +341,7 @@ export const getAgentStatusForAgentPolicyHandler: FleetRequestHandler<
       parsePolicyIds(request.query.policyIds)
     );
 
-    const body: GetAgentStatusResponse = { results: omit(results, 'total') };
+    const body: GetAgentStatusResponse = { results };
 
     return response.ok({ body });
   } catch (error) {

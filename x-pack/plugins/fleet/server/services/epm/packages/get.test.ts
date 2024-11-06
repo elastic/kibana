@@ -27,8 +27,6 @@ import { auditLoggingService } from '../../audit_logging';
 
 import * as Registry from '../registry';
 
-import { createArchiveIteratorFromMap } from '../archive/archive_iterator';
-
 import { getInstalledPackages, getPackageInfo, getPackages, getPackageUsageStats } from './get';
 
 jest.mock('../registry');
@@ -917,7 +915,6 @@ owner: elastic`,
       MockRegistry.getPackage.mockResolvedValue({
         paths: [],
         assetsMap: new Map(),
-        archiveIterator: createArchiveIteratorFromMap(new Map()),
         packageInfo: {
           name: 'my-package',
           version: '1.0.0',

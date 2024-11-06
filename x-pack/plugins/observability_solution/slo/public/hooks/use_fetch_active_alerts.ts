@@ -20,7 +20,6 @@ type SloIdAndInstanceId = [string, string];
 interface Params {
   sloIdsAndInstanceIds: SloIdAndInstanceId[];
   shouldRefetch?: boolean;
-  rangeFrom?: string;
 }
 
 export interface UseFetchActiveAlerts {
@@ -47,7 +46,6 @@ const EMPTY_ACTIVE_ALERTS_MAP = new ActiveAlerts();
 export function useFetchActiveAlerts({
   sloIdsAndInstanceIds = [],
   shouldRefetch = false,
-  rangeFrom = 'now-5m/m',
 }: Params): UseFetchActiveAlerts {
   const { http } = useKibana().services;
 
@@ -65,7 +63,7 @@ export function useFetchActiveAlerts({
                   {
                     range: {
                       '@timestamp': {
-                        gte: rangeFrom,
+                        gte: 'now-5m/m',
                       },
                     },
                   },

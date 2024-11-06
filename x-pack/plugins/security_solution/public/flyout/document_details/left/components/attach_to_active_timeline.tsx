@@ -26,31 +26,31 @@ const timelineCheckBoxId = 'xpack.securitySolution.flyout.notes.attachToTimeline
 export const ATTACH_TO_TIMELINE_CALLOUT_TITLE = i18n.translate(
   'xpack.securitySolution.flyout.left.notes.attachToTimeline.calloutTitle',
   {
-    defaultMessage: 'Attach to current Timeline',
+    defaultMessage: 'Attach to timeline',
   }
 );
 export const SAVED_TIMELINE_CALLOUT_CONTENT = i18n.translate(
   'xpack.securitySolution.flyout.left.notes.attachToTimeline.calloutContent',
   {
-    defaultMessage: 'Also attach this note to the current Timeline.',
+    defaultMessage: 'You can associate the newly created note to the active timeline.',
   }
 );
 export const UNSAVED_TIMELINE_CALLOUT_CONTENT = i18n.translate(
   'xpack.securitySolution.flyout.left.notes.attachToTimeline.calloutContent',
   {
-    defaultMessage: 'You must save the current Timeline before attaching notes to it.',
+    defaultMessage: 'Before attaching a note to the timeline, you need to save the timeline first.',
   }
 );
 export const ATTACH_TO_TIMELINE_CHECKBOX = i18n.translate(
   'xpack.securitySolution.flyout.left.notes.attachToTimeline.checkboxLabel',
   {
-    defaultMessage: 'Attach to current Timeline',
+    defaultMessage: 'Attach to active timeline',
   }
 );
 export const SAVE_TIMELINE_BUTTON = i18n.translate(
-  'xpack.securitySolution.flyout.left.notes.attachToTimeline.savedTimelineButtonLabel',
+  'xpack.securitySolution.flyout.left.notes.savedTimelineButtonLabel',
   {
-    defaultMessage: 'Save current Timeline',
+    defaultMessage: 'Save timeline',
   }
 );
 

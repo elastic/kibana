@@ -83,6 +83,7 @@ const mockUseKibana = useKibana as jest.Mock;
 describe('Discover topnav component', () => {
   beforeEach(() => {
     mockTopNavCustomization.defaultMenu = undefined;
+    mockTopNavCustomization.getMenuItems = undefined;
     mockUseCustomizations = false;
     jest.clearAllMocks();
 
@@ -115,7 +116,7 @@ describe('Discover topnav component', () => {
     );
     const topNavMenu = component.find(TopNavMenu);
     const topMenuConfig = topNavMenu.props().config?.map((obj: TopNavMenuData) => obj.id);
-    expect(topMenuConfig).toEqual(['inspect', 'new', 'open', 'share', 'save']);
+    expect(topMenuConfig).toEqual(['new', 'open', 'share', 'inspect', 'save']);
   });
 
   test('generated config of TopNavMenu config is correct when no discover save permissions are assigned', () => {
@@ -127,7 +128,7 @@ describe('Discover topnav component', () => {
     );
     const topNavMenu = component.find(TopNavMenu).props();
     const topMenuConfig = topNavMenu.config?.map((obj: TopNavMenuData) => obj.id);
-    expect(topMenuConfig).toEqual(['inspect', 'new', 'open', 'share']);
+    expect(topMenuConfig).toEqual(['new', 'open', 'share', 'inspect']);
   });
 
   test('top nav is correct when discover saveQuery permission is granted', () => {
@@ -157,6 +158,31 @@ describe('Discover topnav component', () => {
   });
 
   describe('top nav customization', () => {
+    it('should call getMenuItems', () => {
+      mockUseCustomizations = true;
+      mockTopNavCustomization.getMenuItems = jest.fn(() => [
+        {
+          data: {
+            id: 'test',
+            label: 'Test',
+            testId: 'testButton',
+            run: () => {},
+          },
+          order: 350,
+        },
+      ]);
+      const props = getProps();
+      const component = mountWithIntl(
+        <DiscoverMainProvider value={props.stateContainer}>
+          <DiscoverTopNav {...props} />
+        </DiscoverMainProvider>
+      );
+      expect(mockTopNavCustomization.getMenuItems).toHaveBeenCalledTimes(1);
+      const topNavMenu = component.find(TopNavMenu);
+      const topMenuConfig = topNavMenu.props().config?.map((obj: TopNavMenuData) => obj.id);
+      expect(topMenuConfig).toEqual(['new', 'open', 'share', 'test', 'inspect', 'save']);
+    });
+
     it('should allow disabling default menu items', () => {
       mockUseCustomizations = true;
       mockTopNavCustomization.defaultMenu = {
@@ -176,6 +202,27 @@ describe('Discover topnav component', () => {
       const topNavMenu = component.find(TopNavMenu);
       const topMenuConfig = topNavMenu.props().config?.map((obj: TopNavMenuData) => obj.id);
       expect(topMenuConfig).toEqual([]);
+    });
+
+    it('should allow reordering default menu items', () => {
+      mockUseCustomizations = true;
+      mockTopNavCustomization.defaultMenu = {
+        newItem: { order: 6 },
+        openItem: { order: 5 },
+        shareItem: { order: 4 },
+        alertsItem: { order: 3 },
+        inspectItem: { order: 2 },
+        saveItem: { order: 1 },
+      };
+      const props = getProps();
+      const component = mountWithIntl(
+        <DiscoverMainProvider value={props.stateContainer}>
+          <DiscoverTopNav {...props} />
+        </DiscoverMainProvider>
+      );
+      const topNavMenu = component.find(TopNavMenu);
+      const topMenuConfig = topNavMenu.props().config?.map((obj: TopNavMenuData) => obj.id);
+      expect(topMenuConfig).toEqual(['save', 'inspect', 'share', 'open', 'new']);
     });
   });
 

@@ -38,6 +38,16 @@ export const metadataOption: CommandOptionsDefinition = {
   skipCommonValidation: true,
   validate: (option, command, references) => {
     const messages: ESQLMessage[] = [];
+    // need to test the parent command here
+    if (/\[metadata/i.test(command.text)) {
+      messages.push(
+        getMessageFromId({
+          messageId: 'metadataBracketsDeprecation',
+          values: {},
+          locations: option.location,
+        })
+      );
+    }
     const fields = option.args.filter(isColumnItem);
     const metadataFieldsAvailable = references as unknown as Set<string>;
     if (metadataFieldsAvailable.size > 0) {
@@ -119,7 +129,7 @@ export const appendSeparatorOption: CommandOptionsDefinition = {
     const [firstArg] = option.args;
     if (
       !Array.isArray(firstArg) &&
-      (!isLiteralItem(firstArg) || firstArg.literalType !== 'keyword')
+      (!isLiteralItem(firstArg) || firstArg.literalType !== 'string')
     ) {
       const value =
         'value' in firstArg && !isInlineCastItem(firstArg) ? firstArg.value : firstArg.name;

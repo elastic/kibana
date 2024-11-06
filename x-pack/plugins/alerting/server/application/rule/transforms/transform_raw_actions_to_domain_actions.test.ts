@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { RawRuleAction } from '../../../types';
+import { RuleActionAttributes } from '../../../data/rule/types';
 import {
   transformRawActionsToDomainActions,
   transformRawActionsToDomainSystemActions,
 } from './transform_raw_actions_to_domain_actions';
 
-const defaultAction: RawRuleAction = {
+const defaultAction: RuleActionAttributes = {
   group: 'default',
   uuid: '1',
   actionRef: 'default-action-ref',
@@ -25,7 +25,7 @@ const defaultAction: RawRuleAction = {
   alertsFilter: { query: { kql: 'test:1', dsl: '{}', filters: [] } },
 };
 
-const systemAction: RawRuleAction = {
+const systemAction: RuleActionAttributes = {
   actionRef: 'system_action:my-system-action-id',
   uuid: '123',
   actionTypeId: '.test-system-action',

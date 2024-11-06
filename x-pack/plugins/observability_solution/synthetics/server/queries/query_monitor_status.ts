@@ -295,6 +295,5 @@ const getMonitorMeta = (monitor: SavedObjectsFindResult<EncryptedSyntheticsMonit
     projectId: monitor.attributes[ConfigKey.PROJECT_ID],
     isStatusAlertEnabled: isStatusEnabled(monitor.attributes[ConfigKey.ALERT_CONFIG]),
     updated_at: monitor.updated_at,
-    spaceId: monitor.namespaces?.[0],
   };
 };

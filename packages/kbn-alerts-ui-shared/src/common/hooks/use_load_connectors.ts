@@ -15,11 +15,10 @@ export interface UseLoadConnectorsProps {
   http: HttpStart;
   includeSystemActions?: boolean;
   enabled?: boolean;
-  cacheTime?: number;
 }
 
 export const useLoadConnectors = (props: UseLoadConnectorsProps) => {
-  const { http, includeSystemActions = false, enabled = true, cacheTime } = props;
+  const { http, includeSystemActions = false, enabled = true } = props;
 
   const queryFn = () => {
     return fetchConnectors({ http, includeSystemActions });
@@ -28,7 +27,6 @@ export const useLoadConnectors = (props: UseLoadConnectorsProps) => {
   const { data, isLoading, isFetching, isInitialLoading } = useQuery({
     queryKey: ['useLoadConnectors', includeSystemActions],
     queryFn,
-    cacheTime,
     refetchOnWindowFocus: false,
     enabled,
   });

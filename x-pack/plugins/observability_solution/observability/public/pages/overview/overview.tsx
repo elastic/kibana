@@ -56,18 +56,13 @@ export function OverviewPage() {
 
   const { ObservabilityPageTemplate, observabilityRuleTypeRegistry } = usePluginContext();
 
-  useBreadcrumbs(
-    [
-      {
-        text: i18n.translate('xpack.observability.breadcrumbs.overviewLinkText', {
-          defaultMessage: 'Overview',
-        }),
-      },
-    ],
+  useBreadcrumbs([
     {
-      classicOnly: true,
-    }
-  );
+      text: i18n.translate('xpack.observability.breadcrumbs.overviewLinkText', {
+        defaultMessage: 'Overview',
+      }),
+    },
+  ]);
 
   const { data: newsFeed } = useFetcher(
     () => getNewsFeed({ http, kibanaVersion }),

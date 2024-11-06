@@ -27,8 +27,6 @@ import type { Agent } from '@kbn/fleet-plugin/common/types/models';
 import type { AgentClient } from '@kbn/fleet-plugin/server/services';
 import { get } from 'lodash';
 import type { ScopedClusterClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import type { TypeOf } from '@kbn/config-schema';
-import type { GetPolicyResponseSchema } from '../../../../common/api/endpoint';
 
 describe('test policy response handler', () => {
   let endpointAppContextService: EndpointAppContextService;
@@ -50,15 +48,11 @@ describe('test policy response handler', () => {
 
     it('should return the latest policy response for a host', async () => {
       const response = createSearchResponse(new EndpointDocGenerator().generatePolicyResponse());
-      const hostPolicyResponseHandler = getHostPolicyResponseHandler(endpointAppContextService);
+      const hostPolicyResponseHandler = getHostPolicyResponseHandler();
 
       mockScopedClient.asInternalUser.search.mockResponseOnce(response);
-      const mockRequest = httpServerMock.createKibanaRequest<
-        never,
-        TypeOf<typeof GetPolicyResponseSchema.query>,
-        never
-      >({
-        query: { agentId: 'id' },
+      const mockRequest = httpServerMock.createKibanaRequest({
+        params: { agentId: 'id' },
       });
 
       await hostPolicyResponseHandler(
@@ -77,16 +71,12 @@ describe('test policy response handler', () => {
     });
 
     it('should return not found when there is no response policy for host', async () => {
-      const hostPolicyResponseHandler = getHostPolicyResponseHandler(endpointAppContextService);
+      const hostPolicyResponseHandler = getHostPolicyResponseHandler();
 
       mockScopedClient.asInternalUser.search.mockResponseOnce(createSearchResponse());
 
-      const mockRequest = httpServerMock.createKibanaRequest<
-        never,
-        TypeOf<typeof GetPolicyResponseSchema.query>,
-        never
-      >({
-        query: { agentId: 'foo' },
+      const mockRequest = httpServerMock.createKibanaRequest({
+        params: { agentId: 'id' },
       });
 
       await hostPolicyResponseHandler(
@@ -97,34 +87,9 @@ describe('test policy response handler', () => {
         mockResponse
       );
 
-      expect(mockResponse.notFound).toHaveBeenCalledWith({
-        body: expect.objectContaining({
-          message: 'Policy response for endpoint id [foo] not found',
-        }),
-      });
-    });
-
-    it('should retrieve internal fleet services using space id', async () => {
-      mockScopedClient.asInternalUser.search.mockResponseOnce(createSearchResponse());
-      const getInternalFleetServicesSpy = jest.spyOn(
-        endpointAppContextService,
-        'getInternalFleetServices'
-      );
-      const hostPolicyResponseHandler = getHostPolicyResponseHandler(endpointAppContextService);
-      const mockRequest = httpServerMock.createKibanaRequest<
-        never,
-        TypeOf<typeof GetPolicyResponseSchema.query>,
-        never
-      >({
-        query: { agentId: 'foo' },
-      });
-      const mockContext = requestContextMock.convertContext(
-        createRouteHandlerContext(mockScopedClient, mockSavedObjectClient)
-      );
-      ((await mockContext.securitySolution).getSpaceId as jest.Mock).mockReturnValue('foo');
-      await hostPolicyResponseHandler(mockContext, mockRequest, mockResponse);
-
-      expect(getInternalFleetServicesSpy).toHaveBeenCalledWith('foo');
+      expect(mockResponse.notFound).toBeCalled();
+      const message = mockResponse.notFound.mock.calls[0][0]?.body;
+      expect(message).toEqual('Policy Response Not Found');
     });
   });
 

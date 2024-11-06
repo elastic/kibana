@@ -26,7 +26,6 @@ import { MalwareProtectionsCard } from './components/cards/malware_protections_c
 import type { PolicyFormComponentCommonProps } from './types';
 import { AdvancedSection } from './components/advanced_section';
 import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
-import { ALLOW_SHOWING_EVENT_MERGING_BANNER } from './constants';
 
 const PROTECTIONS_SECTION_TITLE = i18n.translate(
   'xpack.securitySolution.endpoint.policy.details.protections',
@@ -46,8 +45,7 @@ export const PolicySettingsForm = memo<PolicySettingsFormProps>((props) => {
 
   const { storage } = useKibana().services;
   const [showEventMergingBanner, setShowEventMergingBanner] = useState(
-    ALLOW_SHOWING_EVENT_MERGING_BANNER &&
-      (storage.get('securitySolution.showEventMergingBanner') ?? true)
+    storage.get('securitySolution.showEventMergingBanner') ?? true
   );
   const onBannerDismiss = useCallback(() => {
     setShowEventMergingBanner(false);

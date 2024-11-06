@@ -46,7 +46,7 @@ import {
   FEATURE_PRIVILEGES_CUSTOM,
   FEATURE_PRIVILEGES_READ,
 } from '../../../../../common/constants';
-import { useEditSpaceServices, useEditSpaceStore } from '../../provider';
+import { type EditSpaceServices, type EditSpaceStore, useEditSpaceServices } from '../../provider';
 
 type KibanaRolePrivilege =
   | keyof NonNullable<KibanaFeatureConfig['privileges']>
@@ -62,6 +62,9 @@ interface PrivilegesRolesFormProps {
    * this is useful when the form is opened in edit mode
    */
   defaultSelected?: Role[];
+  storeDispatch: EditSpaceStore['dispatch'];
+  spacesClientsInvocator: EditSpaceServices['invokeClient'];
+  getUrlForApp: EditSpaceServices['getUrlForApp'];
 }
 
 const createRolesComboBoxOptions = (roles: Role[]): Array<EuiComboBoxOptionOption<Role>> =>
@@ -71,9 +74,17 @@ const createRolesComboBoxOptions = (roles: Role[]): Array<EuiComboBoxOptionOptio
   }));
 
 export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
-  const { space, onSaveCompleted, closeFlyout, features, defaultSelected = [] } = props;
-  const { logger, notifications, license, invokeClient, getUrlForApp } = useEditSpaceServices();
-  const { dispatch: storeDispatch } = useEditSpaceStore();
+  const {
+    space,
+    onSaveCompleted,
+    closeFlyout,
+    features,
+    defaultSelected = [],
+    spacesClientsInvocator,
+    storeDispatch,
+    getUrlForApp,
+  } = props;
+  const { logger, notifications } = useEditSpaceServices();
   const [assigningToRole, setAssigningToRole] = useState(false);
   const [fetchingDataDeps, setFetchingDataDeps] = useState(false);
   const [kibanaPrivileges, setKibanaPrivileges] = useState<RawKibanaPrivileges | null>(null);
@@ -87,7 +98,7 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
     async function fetchRequiredData(spaceId: string) {
       setFetchingDataDeps(true);
 
-      const [systemRoles, _kibanaPrivileges] = await invokeClient((clients) =>
+      const [systemRoles, _kibanaPrivileges] = await spacesClientsInvocator((clients) =>
         Promise.all([
           clients.rolesClient.getRoles(),
           clients.privilegesClient.getAll({ includeActions: true, respectLicenseLevel: false }),
@@ -112,7 +123,7 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
     }
 
     fetchRequiredData(space.id!).finally(() => setFetchingDataDeps(false));
-  }, [invokeClient, space.id]);
+  }, [space.id, spacesClientsInvocator]);
 
   const selectedRolesCombinedPrivileges = useMemo(() => {
     const combinedPrivilege = new Set(
@@ -304,7 +315,7 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
         return selectedRole.value!;
       });
 
-      await invokeClient((clients) =>
+      await spacesClientsInvocator((clients) =>
         clients.rolesClient.bulkUpdateRoles({ rolesUpdate: updatedRoles }).then((response) => {
           setAssigningToRole(false);
           onSaveCompleted(response);
@@ -327,14 +338,13 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
       });
     }
   }, [
-    roleSpacePrivilege,
-    roleCustomizationAnchor.value?.kibana,
-    roleCustomizationAnchor.privilegeIndex,
     selectedRoles,
-    invokeClient,
+    spacesClientsInvocator,
     storeDispatch,
-    space.id,
     onSaveCompleted,
+    space.id,
+    roleSpacePrivilege,
+    roleCustomizationAnchor,
     logger,
     notifications.toasts,
   ]);
@@ -561,9 +571,7 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
                           )
                         }
                         allSpacesSelected={false}
-                        canCustomizeSubFeaturePrivileges={
-                          license?.getFeatures().allowSubFeaturePrivileges ?? false
-                        }
+                        canCustomizeSubFeaturePrivileges={false}
                       />
                     )}
                   </React.Fragment>

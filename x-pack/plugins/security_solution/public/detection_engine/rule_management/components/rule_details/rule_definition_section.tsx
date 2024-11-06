@@ -58,7 +58,7 @@ import {
   useRequiredFieldsStyles,
 } from './rule_definition_section.styles';
 import { getQueryLanguageLabel } from './helpers';
-import { useDefaultIndexPattern } from '../../hooks/use_default_index_pattern';
+import { useDefaultIndexPattern } from './use_default_index_pattern';
 
 interface SavedQueryNameProps {
   savedQueryName: string;

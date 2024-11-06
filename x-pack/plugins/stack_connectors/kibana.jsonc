@@ -1,15 +1,11 @@
 {
   "type": "plugin",
   "id": "@kbn/stack-connectors-plugin",
-  "owner": [
-    "@elastic/response-ops"
-  ],
-  "group": "platform",
-  "visibility": "shared",
+  "owner": "@elastic/response-ops",
   "plugin": {
     "id": "stackConnectors",
-    "browser": true,
     "server": true,
+    "browser": true,
     "configPath": [
       "xpack",
       "stack_connectors"

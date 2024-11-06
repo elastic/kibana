@@ -676,13 +676,13 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
 
 function useReportingState(errors: UserMessage[]): {
   isRenderComplete: boolean;
-  hasRequestError: boolean;
-  setHasRequestError: (state: boolean) => void;
+  hasDynamicError: boolean;
   setIsRenderComplete: (state: boolean) => void;
+  setDynamicError: (state: boolean) => void;
   nodeRef: React.RefObject<HTMLDivElement>;
 } {
   const [isRenderComplete, setIsRenderComplete] = useState(Boolean(errors?.length));
-  const [hasRequestError, setHasRequestError] = useState(false);
+  const [hasDynamicError, setDynamicError] = useState(false);
   const nodeRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -691,12 +691,8 @@ function useReportingState(errors: UserMessage[]): {
     }
   }, [isRenderComplete, errors]);
 
-  return { isRenderComplete, setIsRenderComplete, hasRequestError, setHasRequestError, nodeRef };
+  return { isRenderComplete, setIsRenderComplete, hasDynamicError, setDynamicError, nodeRef };
 }
-
-const dataLoadingErrorTitle = i18n.translate('xpack.lens.editorFrame.dataFailure', {
-  defaultMessage: `An error occurred when loading data`,
-});
 
 export const VisualizationWrapper = ({
   expression,
@@ -734,14 +730,13 @@ export const VisualizationWrapper = ({
 
   const searchContext = useLensSelector(selectExecutionContextSearch);
   // Used for reporting
-  const { isRenderComplete, hasRequestError, setIsRenderComplete, setHasRequestError, nodeRef } =
+  const { isRenderComplete, hasDynamicError, setIsRenderComplete, setDynamicError, nodeRef } =
     useReportingState(errors);
 
   const onRenderHandler = useCallback(() => {
-    setHasRequestError(false);
     setIsRenderComplete(true);
     onRender$();
-  }, [onRender$, setHasRequestError, setIsRenderComplete]);
+  }, [setIsRenderComplete, onRender$]);
 
   const searchSessionId = useLensSelector(selectSearchSessionId);
 
@@ -764,13 +759,17 @@ export const VisualizationWrapper = ({
     );
   }
 
+  const dataLoadingErrorTitle = i18n.translate('xpack.lens.editorFrame.dataFailure', {
+    defaultMessage: `An error occurred when loading data`,
+  });
+
   return (
     <div
       className="lnsExpressionRenderer"
       data-shared-items-container
       data-render-complete={isRenderComplete}
       data-shared-item=""
-      data-render-error={hasRequestError ? dataLoadingErrorTitle : undefined}
+      data-render-error={hasDynamicError ? dataLoadingErrorTitle : undefined}
       ref={nodeRef}
     >
       <ExpressionRendererComponent
@@ -796,13 +795,11 @@ export const VisualizationWrapper = ({
             ? [errorMessage]
             : [];
 
-          return (
-            <WorkspaceErrors
-              errors={visibleErrorMessages}
-              title={dataLoadingErrorTitle}
-              onRender={() => setHasRequestError(true)}
-            />
-          );
+          if (!hasDynamicError) {
+            setDynamicError(true);
+          }
+
+          return <WorkspaceErrors errors={visibleErrorMessages} title={dataLoadingErrorTitle} />;
         }}
       />
     </div>

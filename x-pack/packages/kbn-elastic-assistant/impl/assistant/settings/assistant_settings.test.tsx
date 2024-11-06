@@ -38,7 +38,7 @@ const mockContext = {
   basePromptContexts: MOCK_QUICK_PROMPTS,
   setSelectedSettingsTab,
   http: {},
-  assistantFeatures: { assistantModelEvaluation: true, assistantKnowledgeBaseByDefault: false },
+  assistantFeatures: { assistantModelEvaluation: true },
   selectedSettingsTab: 'CONVERSATIONS_TAB',
   assistantAvailability: {
     isAssistantEnabled: true,
@@ -64,12 +64,12 @@ jest.mock('../../assistant_context');
 
 jest.mock('.', () => {
   return {
-    AnonymizationSettings: () => <span data-test-subj="anonymization-tab" />,
-    ConversationSettings: () => <span data-test-subj="conversations-tab" />,
-    EvaluationSettings: () => <span data-test-subj="evaluation-tab" />,
-    KnowledgeBaseSettings: () => <span data-test-subj="knowledge_base-tab" />,
-    QuickPromptSettings: () => <span data-test-subj="quick_prompts-tab" />,
-    SystemPromptSettings: () => <span data-test-subj="system_prompts-tab" />,
+    AnonymizationSettings: () => <span data-test-subj="ANONYMIZATION_TAB-tab" />,
+    ConversationSettings: () => <span data-test-subj="CONVERSATIONS_TAB-tab" />,
+    EvaluationSettings: () => <span data-test-subj="EVALUATION_TAB-tab" />,
+    KnowledgeBaseSettings: () => <span data-test-subj="KNOWLEDGE_BASE_TAB-tab" />,
+    QuickPromptSettings: () => <span data-test-subj="QUICK_PROMPTS_TAB-tab" />,
+    SystemPromptSettings: () => <span data-test-subj="SYSTEM_PROMPTS_TAB-tab" />,
   };
 });
 

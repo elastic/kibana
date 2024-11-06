@@ -43,10 +43,8 @@ function entryToDisplaylistItem(entry: ConfigEntryView): { description: string; 
 interface ConnectorConfigurationProps {
   connector: Connector;
   hasPlatinumLicense: boolean;
-  isDisabled?: boolean;
   isLoading: boolean;
   saveConfig: (configuration: Record<string, string | number | boolean | null>) => void;
-  saveAndSync?: (configuration: Record<string, string | number | boolean | null>) => void;
   stackManagementLink?: string;
   subscriptionLink?: string;
   children?: React.ReactNode;
@@ -90,10 +88,8 @@ export const ConnectorConfigurationComponent: FC<
   children,
   connector,
   hasPlatinumLicense,
-  isDisabled,
   isLoading,
   saveConfig,
-  saveAndSync,
   subscriptionLink,
   stackManagementLink,
 }) => {
@@ -170,12 +166,6 @@ export const ConnectorConfigurationComponent: FC<
                 saveConfig(config);
                 setIsEditing(false);
               }}
-              {...(saveAndSync && {
-                saveAndSync: (config) => {
-                  saveAndSync(config);
-                  setIsEditing(false);
-                },
-              })}
             />
           ) : (
             uncategorizedDisplayList.length > 0 && (
@@ -209,7 +199,6 @@ export const ConnectorConfigurationComponent: FC<
                         data-test-subj="entSearchContent-connector-configuration-editConfiguration"
                         data-telemetry-id="entSearchContent-connector-overview-configuration-editConfiguration"
                         onClick={() => setIsEditing(!isEditing)}
-                        isDisabled={isDisabled}
                       >
                         {i18n.translate(
                           'searchConnectors.configurationConnector.config.editButton.title',

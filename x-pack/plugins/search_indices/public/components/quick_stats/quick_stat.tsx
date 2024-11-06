@@ -14,7 +14,6 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiPanel,
-  EuiTitle,
   EuiText,
   useEuiTheme,
   useGeneratedHtmlId,
@@ -84,14 +83,12 @@ export const QuickStat: React.FC<BaseQuickStatProps> = ({
               <EuiIcon type={icon} color={iconColor} />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiTitle size="xxs">
+              <EuiText>
                 <h4>{title}</h4>
-              </EuiTitle>
+              </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiText size="s" color="subdued">
-                {secondaryTitle}
-              </EuiText>
+              <EuiText color="subdued">{secondaryTitle}</EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPanel>

@@ -76,8 +76,6 @@ export function createCoreSetupMock({
     userProfile: userProfileServiceMock.createSetup(),
     coreUsageData: {
       registerUsageCounter: coreUsageDataServiceMock.createSetupContract().registerUsageCounter,
-      registerDeprecatedUsageFetch:
-        coreUsageDataServiceMock.createSetupContract().registerDeprecatedUsageFetch,
     },
     plugins: {
       onSetup: jest.fn(),

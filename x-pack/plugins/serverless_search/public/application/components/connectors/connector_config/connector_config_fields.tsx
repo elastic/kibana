@@ -17,13 +17,9 @@ import { useEditConnectorConfiguration } from '../../../hooks/api/use_connector_
 
 interface ConnectorConfigFieldsProps {
   connector: Connector;
-  isDisabled: boolean;
 }
 
-export const ConnectorConfigFields: React.FC<ConnectorConfigFieldsProps> = ({
-  connector,
-  isDisabled,
-}) => {
+export const ConnectorConfigFields: React.FC<ConnectorConfigFieldsProps> = ({ connector }) => {
   const { data, isLoading, isSuccess, mutate, reset } = useEditConnectorConfiguration(connector.id);
   const { queryKey } = useConnector(connector.id);
   const queryClient = useQueryClient();
@@ -57,7 +53,6 @@ export const ConnectorConfigFields: React.FC<ConnectorConfigFieldsProps> = ({
         <ConnectorConfigurationComponent
           connector={connector}
           hasPlatinumLicense={false}
-          isDisabled={isDisabled}
           isLoading={isLoading}
           saveConfig={mutate}
         />

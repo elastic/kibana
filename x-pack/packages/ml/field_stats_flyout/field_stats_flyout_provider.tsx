@@ -7,8 +7,9 @@
 
 import type { PropsWithChildren, FC } from 'react';
 import React, { useCallback, useState } from 'react';
-import type { ThemeServiceStart } from '@kbn/core-theme-browser';
+import type { CoreStart } from '@kbn/core/public';
 import type { DataView } from '@kbn/data-plugin/common';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FieldStatsServices } from '@kbn/unified-field-list/src/components/field_stats';
 import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 import type { FieldStatsProps } from '@kbn/unified-field-list/src/components/field_stats';
@@ -17,10 +18,25 @@ import { getProcessedFields } from '@kbn/ml-data-grid';
 import { stringHash } from '@kbn/ml-string-hash';
 import { lastValueFrom } from 'rxjs';
 import { useRef } from 'react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { getMergedSampleDocsForPopulatedFieldsQuery } from './populated_fields/get_merged_populated_fields_query';
 import { FieldStatsFlyout } from './field_stats_flyout';
 import { MLFieldStatsFlyoutContext } from './use_field_stats_flyout_context';
 import { PopulatedFieldsCacheManager } from './populated_fields/populated_fields_cache_manager';
+
+type Services = CoreStart & {
+  data: DataPublicPluginStart;
+};
+
+function useDataSearch() {
+  const { data } = useKibana<Services>().services;
+
+  if (!data) {
+    throw new Error('Kibana data service not available.');
+  }
+
+  return data.search;
+}
 
 /**
  * Props for the FieldStatsFlyoutProvider component.
@@ -28,7 +44,6 @@ import { PopulatedFieldsCacheManager } from './populated_fields/populated_fields
  * @typedef {Object} FieldStatsFlyoutProviderProps
  * @property dataView - The data view object.
  * @property fieldStatsServices - Services required for field statistics.
- * @property theme - The EUI theme service.
  * @property [timeRangeMs] - Optional time range in milliseconds.
  * @property [dslQuery] - Optional DSL query for filtering field statistics.
  * @property [disablePopulatedFields] - Optional flag to disable populated fields.
@@ -36,7 +51,6 @@ import { PopulatedFieldsCacheManager } from './populated_fields/populated_fields
 export type FieldStatsFlyoutProviderProps = PropsWithChildren<{
   dataView: DataView;
   fieldStatsServices: FieldStatsServices;
-  theme: ThemeServiceStart;
   timeRangeMs?: TimeRangeMs;
   dslQuery?: FieldStatsProps['dslQuery'];
   disablePopulatedFields?: boolean;
@@ -65,13 +79,12 @@ export const FieldStatsFlyoutProvider: FC<FieldStatsFlyoutProviderProps> = (prop
   const {
     dataView,
     fieldStatsServices,
-    theme,
     timeRangeMs,
     dslQuery,
     disablePopulatedFields = false,
     children,
   } = props;
-  const { search } = fieldStatsServices.data;
+  const search = useDataSearch();
   const [isFieldStatsFlyoutVisible, setFieldStatsIsFlyoutVisible] = useState(false);
   const [fieldName, setFieldName] = useState<string | undefined>();
   const [fieldValue, setFieldValue] = useState<string | number | undefined>();
@@ -174,7 +187,6 @@ export const FieldStatsFlyoutProvider: FC<FieldStatsFlyoutProviderProps> = (prop
         fieldValue,
         timeRangeMs,
         populatedFields,
-        theme,
       }}
     >
       <FieldStatsFlyout

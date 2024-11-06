@@ -5,11 +5,7 @@
       "filter_path": [],
       "human": "__flag__",
       "pretty": "__flag__",
-      "categories": [
-        "build",
-        "features",
-        "license"
-      ],
+      "categories": "",
       "accept_enterprise": "__flag__"
     },
     "methods": [

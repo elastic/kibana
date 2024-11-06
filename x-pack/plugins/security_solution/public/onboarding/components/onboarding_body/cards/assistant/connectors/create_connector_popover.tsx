@@ -8,16 +8,14 @@ import React, { useCallback, useState } from 'react';
 import { css } from '@emotion/css';
 import { EuiPopover, EuiLink, EuiText } from '@elastic/eui';
 import { ConnectorSetup } from './connector_setup';
-import * as i18n from './translations';
-import { MissingPrivilegesTooltip } from './missing_privileges_tooltip';
+import * as i18n from '../translations';
 
 interface CreateConnectorPopoverProps {
   onConnectorSaved: () => void;
-  canCreateConnectors?: boolean;
 }
 
 export const CreateConnectorPopover = React.memo<CreateConnectorPopoverProps>(
-  ({ onConnectorSaved, canCreateConnectors }) => {
+  ({ onConnectorSaved }) => {
     const [isOpen, setIsPopoverOpen] = useState(false);
     const closePopover = useCallback(() => setIsPopoverOpen(false), []);
 
@@ -25,15 +23,6 @@ export const CreateConnectorPopover = React.memo<CreateConnectorPopoverProps>(
       () => setIsPopoverOpen((isPopoverOpen) => !isPopoverOpen),
       []
     );
-    if (!canCreateConnectors) {
-      return (
-        <MissingPrivilegesTooltip>
-          <EuiLink data-test-subj="createConnectorPopoverButton" onClick={onButtonClick} disabled>
-            {i18n.ASSISTANT_CARD_CREATE_NEW_CONNECTOR_POPOVER}
-          </EuiLink>
-        </MissingPrivilegesTooltip>
-      );
-    }
 
     return (
       <EuiPopover

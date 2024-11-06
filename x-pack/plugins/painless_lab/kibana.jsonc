@@ -1,15 +1,11 @@
 {
   "type": "plugin",
   "id": "@kbn/painless-lab-plugin",
-  "owner": [
-    "@elastic/kibana-management"
-  ],
-  "group": "platform",
-  "visibility": "private",
+  "owner": "@elastic/kibana-management",
   "plugin": {
     "id": "painlessLab",
-    "browser": true,
     "server": true,
+    "browser": true,
     "configPath": [
       "xpack",
       "painless_lab"

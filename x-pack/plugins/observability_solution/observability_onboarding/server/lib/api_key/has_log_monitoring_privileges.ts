@@ -6,17 +6,13 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core/server';
-import {
-  MONITOR_CLUSTER,
-  INDEX_LOGS_AND_METRICS,
-  INDEX_LOGS_METRICS_AND_TRACES,
-} from './privileges';
+import { cluster, indices } from './monitoring_config';
 
-export async function hasLogMonitoringPrivileges(esClient: ElasticsearchClient, withAPM = false) {
+export async function hasLogMonitoringPrivileges(esClient: ElasticsearchClient) {
   const res = await esClient.security.hasPrivileges({
     body: {
-      cluster: [MONITOR_CLUSTER, 'manage_own_api_key'],
-      index: [withAPM ? INDEX_LOGS_METRICS_AND_TRACES : INDEX_LOGS_AND_METRICS],
+      index: indices,
+      cluster: [...cluster, 'manage_own_api_key'],
     },
   });
 

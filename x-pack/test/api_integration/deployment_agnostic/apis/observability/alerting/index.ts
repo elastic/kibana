@@ -8,9 +8,7 @@
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext) {
-  describe('Observability Alerting', () => {
+  describe('Slo - Burn rate rule', () => {
     loadTestFile(require.resolve('./burn_rate_rule'));
-    loadTestFile(require.resolve('./es_query_rule'));
-    loadTestFile(require.resolve('./custom_threshold'));
   });
 }

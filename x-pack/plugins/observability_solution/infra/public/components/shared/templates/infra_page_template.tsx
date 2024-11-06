@@ -20,7 +20,7 @@ import { OnboardingFlow, getNoDataConfig } from './no_data_config';
 export const InfraPageTemplate = ({
   'data-test-subj': _dataTestSubj,
   dataAvailabilityModules,
-  onboardingFlow,
+  onboardingFlow = OnboardingFlow.Infra,
   ...pageTemplateProps
 }: Omit<LazyObservabilityPageTemplateProps, 'noDataConfig'> & {
   dataAvailabilityModules?: string[];
@@ -41,18 +41,14 @@ export const InfraPageTemplate = ({
   const { error: dataViewLoadError, refetch: loadDataView } = useMetricsDataViewContext();
   const { remoteClustersExist } = source?.status ?? {};
 
-  const { data, status } = useFetcher(
-    async (callApi) => {
-      if (!onboardingFlow) return;
-      return await callApi<GetHasDataResponse>('/api/metrics/source/hasData', {
-        method: 'GET',
-        query: {
-          modules: dataAvailabilityModules,
-        },
-      });
-    },
-    [onboardingFlow, dataAvailabilityModules]
-  );
+  const { data, status } = useFetcher(async (callApi) => {
+    return await callApi<GetHasDataResponse>('/api/metrics/source/hasData', {
+      method: 'GET',
+      query: {
+        modules: dataAvailabilityModules,
+      },
+    });
+  });
 
   const hasData = !!data?.hasData;
   const noDataConfig = getNoDataConfig({

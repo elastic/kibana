@@ -5,14 +5,17 @@
  * 2.0.
  */
 
+import { CASE_COMMENT_SAVED_OBJECT } from '../../../common/constants';
 import type { CasesTelemetry, CollectTelemetryDataParams } from '../types';
-import { getCountsAndMaxAlertsData } from './utils';
+import { getCountsAndMaxData, getOnlyAlertsCommentsFilter } from './utils';
 
 export const getAlertsTelemetryData = async ({
   savedObjectsClient,
 }: CollectTelemetryDataParams): Promise<CasesTelemetry['comments']> => {
-  const res = await getCountsAndMaxAlertsData({
+  const res = await getCountsAndMaxData({
     savedObjectsClient,
+    savedObjectType: CASE_COMMENT_SAVED_OBJECT,
+    filter: getOnlyAlertsCommentsFilter(),
   });
 
   return res;

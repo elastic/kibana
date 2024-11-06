@@ -23,7 +23,7 @@ import { SyntheticsMonitorTestService } from './services/synthetics_monitor_test
 import { LOCAL_LOCATION } from './get_filters';
 
 export default function ({ getService }: FtrProviderContext) {
-  describe('EditMonitorAPI', function () {
+  describe('EditMonitor', function () {
     this.tags('skipCloud');
 
     const supertest = getService('supertest');

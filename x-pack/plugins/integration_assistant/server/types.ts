@@ -42,6 +42,7 @@ export interface SimplifiedProcessors {
 export interface CategorizationState {
   rawSamples: string[];
   samples: string[];
+  formattedSamples: string;
   ecsTypes: string;
   ecsCategories: string;
   exAnswer: string;
@@ -51,11 +52,9 @@ export interface CategorizationState {
   errors: object;
   previousError: string;
   pipelineResults: object[];
-  previousPipelineResults: object[];
-  lastReviewedSamples: number[]; // Filled when reviewing.
-  stableSamples: number[]; // Samples that did not change due to a review.
-  reviewCount: number;
   finalized: boolean;
+  reviewed: boolean;
+  hasTriedOnce: boolean;
   currentPipeline: object;
   currentProcessors: object[];
   invalidCategorization: object[];
@@ -155,6 +154,7 @@ export interface UnstructuredLogState {
 export interface RelatedState {
   rawSamples: string[];
   samples: string[];
+  formattedSamples: string;
   ecs: string;
   exAnswer: string;
   packageName: string;

@@ -23,6 +23,7 @@ import {
   typeAndSendMessage,
   assertErrorResponse,
   selectRule,
+  assertErrorToastShown,
   updateConversationTitle,
 } from '../../tasks/assistant';
 import { deleteConversations } from '../../tasks/api_calls/assistant';
@@ -145,7 +146,7 @@ describe('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, () => 
       assertConnectorSelected(bedrockConnectorAPIPayload.name);
       assertMessageSent('goodbye');
     });
-    it('Correctly creates and titles new conversations, and allows title updates', () => {
+    it('Correctly titles new conversations, and only allows one conversation called "New chat" at a time', () => {
       visitGetStartedPage();
       openAssistant();
       createNewChat();
@@ -154,7 +155,14 @@ describe('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, () => 
       typeAndSendMessage('hello');
       assertMessageSent('hello');
       assertConversationTitle('Unexpected API Error:  - Connection error.');
-      updateConversationTitle('Something else');
+      updateConversationTitle('New chat');
+      selectConversation('Welcome');
+      createNewChat();
+      assertErrorToastShown('Error creating conversation with title New chat');
+      selectConversation('New chat');
+      updateConversationTitle('My other chat');
+      createNewChat();
+      assertNewConversation(false, 'New chat');
     });
   });
 });

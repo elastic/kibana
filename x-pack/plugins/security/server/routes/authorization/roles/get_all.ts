@@ -36,22 +36,8 @@ export function defineGetAllRolesRoutes({
         validate: {
           request: {
             query: schema.maybe(
-              schema.object({
-                replaceDeprecatedPrivileges: schema.maybe(
-                  schema.boolean({
-                    meta: {
-                      description:
-                        'If `true` and the response contains any privileges that are associated with deprecated features, they are omitted in favor of details about the appropriate replacement feature privileges.',
-                    },
-                  })
-                ),
-              })
+              schema.object({ replaceDeprecatedPrivileges: schema.maybe(schema.boolean()) })
             ),
-          },
-          response: {
-            200: {
-              description: 'Indicates a successful call.',
-            },
           },
         },
       },

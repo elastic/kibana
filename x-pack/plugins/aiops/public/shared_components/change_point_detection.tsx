@@ -11,6 +11,7 @@ import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { UI_SETTINGS } from '@kbn/data-service';
 import type { TimeRange } from '@kbn/es-query';
 import { DatePickerContextProvider } from '@kbn/ml-date-picker';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { pick } from 'lodash';
 import React, { useEffect, useMemo, useState, type FC } from 'react';
 import type { Observable } from 'rxjs';
@@ -140,34 +141,33 @@ const ChangePointDetectionWrapper: FC<ChangePointDetectionPropsWithDeps> = ({
         width: 100%;
       `}
     >
-      <AiopsAppContext.Provider value={aiopsAppContextValue}>
-        <DatePickerContextProvider {...datePickerDeps}>
-          <ReloadContextProvider reload$={resultObservable$}>
-            <DataSourceContextProvider
-              dataViews={pluginStart.data.dataViews}
-              dataViewId={dataViewId}
-            >
-              <FilterQueryContextProvider timeRange={timeRange}>
-                <ChangePointDetectionControlsContextProvider>
-                  <ChartGridEmbeddableWrapper
-                    viewType={viewType}
-                    timeRange={timeRange}
-                    fn={fn}
-                    metricField={metricField}
-                    splitField={splitField}
-                    maxSeriesToPlot={maxSeriesToPlot}
-                    dataViewId={dataViewId}
-                    partitions={partitions}
-                    onLoading={onLoading}
-                    onRenderComplete={onRenderComplete}
-                    onError={onError}
-                  />
-                </ChangePointDetectionControlsContextProvider>
-              </FilterQueryContextProvider>
-            </DataSourceContextProvider>
-          </ReloadContextProvider>
-        </DatePickerContextProvider>
-      </AiopsAppContext.Provider>
+      <KibanaRenderContextProvider {...coreStart}>
+        <AiopsAppContext.Provider value={aiopsAppContextValue}>
+          <DatePickerContextProvider {...datePickerDeps}>
+            <ReloadContextProvider reload$={resultObservable$}>
+              <DataSourceContextProvider dataViewId={dataViewId}>
+                <FilterQueryContextProvider timeRange={timeRange}>
+                  <ChangePointDetectionControlsContextProvider>
+                    <ChartGridEmbeddableWrapper
+                      viewType={viewType}
+                      timeRange={timeRange}
+                      fn={fn}
+                      metricField={metricField}
+                      splitField={splitField}
+                      maxSeriesToPlot={maxSeriesToPlot}
+                      dataViewId={dataViewId}
+                      partitions={partitions}
+                      onLoading={onLoading}
+                      onRenderComplete={onRenderComplete}
+                      onError={onError}
+                    />
+                  </ChangePointDetectionControlsContextProvider>
+                </FilterQueryContextProvider>
+              </DataSourceContextProvider>
+            </ReloadContextProvider>
+          </DatePickerContextProvider>
+        </AiopsAppContext.Provider>
+      </KibanaRenderContextProvider>
     </div>
   );
 };

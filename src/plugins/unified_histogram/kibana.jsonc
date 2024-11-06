@@ -1,16 +1,12 @@
 {
   "type": "plugin",
   "id": "@kbn/unified-histogram-plugin",
-  "owner": [
-    "@elastic/kibana-data-discovery"
-  ],
-  "group": "platform",
-  "visibility": "shared",
+  "owner": "@elastic/kibana-data-discovery",
   "description": "The `unifiedHistogram` plugin provides UI components to create a layout including a resizable histogram and a main display.",
   "plugin": {
     "id": "unifiedHistogram",
-    "browser": true,
     "server": false,
+    "browser": true,
     "requiredBundles": [
       "data",
       "dataViews",

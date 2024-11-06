@@ -86,18 +86,17 @@ export const PreviewPanel = ({ type, allowHidden, title = '', matchedIndices$ }:
         query={title}
       />
       <EuiSpacer size="m" />
-      {Boolean(title) &&
-        (matched.exactMatchedIndices.length > 0 || matched.partialMatchedIndices.length > 0) && (
-          <EuiButtonGroup
-            isFullWidth
-            legend={i18n.translate('indexPatternEditor.previewPanel.viewModeGroup.legend', {
-              defaultMessage: 'Visible sources',
-            })}
-            options={viewModeButtons}
-            idSelected={currentViewMode}
-            onChange={(id: string) => setViewMode(id as ViewMode)}
-          />
-        )}
+      {Boolean(title) && currentlyVisibleIndices.length > 0 && (
+        <EuiButtonGroup
+          isFullWidth
+          legend={i18n.translate('indexPatternEditor.previewPanel.viewModeGroup.legend', {
+            defaultMessage: 'Visible sources',
+          })}
+          options={viewModeButtons}
+          idSelected={currentViewMode}
+          onChange={(id: string) => setViewMode(id as ViewMode)}
+        />
+      )}
       {indicesListContent}
     </>
   );

@@ -25,7 +25,6 @@ import { renderTemplate } from '../utils/render_template';
 import { AssistClient } from '../utils/assist';
 import { getCitations } from '../utils/get_citations';
 import { getTokenEstimate, getTokenEstimateFromMessages } from './token_tracking';
-import { ContextLimitError } from './errors';
 
 interface RAGOptions {
   index: string;
@@ -89,26 +88,37 @@ position: ${i + 1}
   return serializedDocs.join('\n');
 };
 
-export function contextLimitCheck(
+export function clipContext(
   modelLimit: number | undefined,
-  prompt: ChatPromptTemplate
+  prompt: ChatPromptTemplate,
+  data: experimental_StreamData
 ): (input: ContextInputs) => Promise<ContextInputs> {
   return async (input) => {
     if (!modelLimit) return input;
+    let context = input.context;
+    const clippedContext = [];
 
-    const stringPrompt = await prompt.format(input);
-    const approxPromptTokens = getTokenEstimate(stringPrompt);
-    const aboveContextLimit = approxPromptTokens > modelLimit;
-
-    if (aboveContextLimit) {
-      throw new ContextLimitError(
-        'Context exceeds the model limit',
-        modelLimit,
-        approxPromptTokens
-      );
+    while (
+      getTokenEstimate(await prompt.format({ ...input, context })) > modelLimit &&
+      context.length > 0
+    ) {
+      // remove the last paragraph
+      const lines = context.split('\n');
+      clippedContext.push(lines.pop());
+      context = lines.join('\n');
     }
 
-    return input;
+    if (clippedContext.length > 0) {
+      data.appendMessageAnnotation({
+        type: 'context_clipped',
+        count: getTokenEstimate(clippedContext.join('\n')),
+      });
+    }
+
+    return {
+      ...input,
+      context,
+    };
   };
 }
 
@@ -195,7 +205,7 @@ class ConversationalChainFn {
         });
         return inputs;
       }),
-      RunnableLambda.from(contextLimitCheck(this.options?.rag?.inputTokensLimit, prompt)),
+      RunnableLambda.from(clipContext(this.options?.rag?.inputTokensLimit, prompt, data)),
       RunnableLambda.from(registerContextTokenCounts(data)),
       prompt,
       this.options.model.withConfig({ metadata: { type: 'question_answer_qa' } }),

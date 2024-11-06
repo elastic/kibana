@@ -35,6 +35,5 @@
     "@kbn/ui-theme",
     "@kbn/i18n-react",
     "@kbn/rison",
-    "@kbn/core-lifecycle-browser",
   ]
 }

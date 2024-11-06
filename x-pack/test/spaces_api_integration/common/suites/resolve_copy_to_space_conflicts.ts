@@ -252,8 +252,7 @@ export function resolveCopyToSpaceConflictsSuite(context: FtrProviderContext) {
     expect(resp.body).to.eql({
       statusCode: 403,
       error: 'Forbidden',
-      message:
-        'API [POST /api/spaces/_resolve_copy_saved_objects_errors] is unauthorized for user, this action is granted by the Kibana privileges [copySavedObjectsToSpaces]',
+      message: 'Forbidden',
     });
   };
 

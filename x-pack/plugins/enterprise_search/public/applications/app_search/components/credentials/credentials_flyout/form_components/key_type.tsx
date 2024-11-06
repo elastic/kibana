@@ -12,10 +12,8 @@ import { useValues, useActions } from 'kea';
 import { EuiFormRow, EuiSelect, EuiText, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { docLinks } from '../../../../../shared/doc_links';
-
 import { AppLogic } from '../../../../app_logic';
-import { TOKEN_TYPE_DESCRIPTION, TOKEN_TYPE_INFO } from '../../constants';
+import { TOKEN_TYPE_DESCRIPTION, TOKEN_TYPE_INFO, DOCS_HREF } from '../../constants';
 import { CredentialsLogic } from '../../credentials_logic';
 
 export const FormKeyType: React.FC = () => {
@@ -38,7 +36,7 @@ export const FormKeyType: React.FC = () => {
         <EuiText size="xs">
           <p>
             <strong>{tokenDescription}</strong>{' '}
-            <EuiLink target="_blank" href={docLinks.appSearchAuthentication}>
+            <EuiLink href={DOCS_HREF}>
               {i18n.translate('xpack.enterpriseSearch.appSearch.credentials.documentationLink1', {
                 defaultMessage: 'Visit the documentation',
               })}

@@ -130,7 +130,6 @@ describe('<NodeEventsListItem />', () => {
             '@timestamp': 1726589803115,
             event: {
               id: 'event id',
-              kind: 'signal',
             },
           }}
         />
@@ -142,7 +141,6 @@ describe('<NodeEventsListItem />', () => {
       documentId: 'test _id',
       indexName: '_index',
       scopeId: 'test',
-      isAlert: true,
     });
   });
 });

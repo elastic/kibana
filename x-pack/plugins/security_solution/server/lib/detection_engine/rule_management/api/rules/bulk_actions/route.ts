@@ -281,8 +281,7 @@ export const performBulkActionRoute = (
                 rules.map(({ params }) => params.ruleId),
                 exporter,
                 request,
-                actionsClient,
-                config.experimentalFeatures.prebuiltRulesCustomizationEnabled
+                actionsClient
               );
 
               const responseBody = `${exported.rulesNdjson}${exported.exceptionLists}${exported.actionConnectors}${exported.exportDetails}`;

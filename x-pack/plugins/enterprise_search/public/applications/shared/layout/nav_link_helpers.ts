@@ -5,32 +5,27 @@
  * 2.0.
  */
 
-import { EuiSideNavItemTypeEnhanced } from '@kbn/core-chrome-browser';
+import { EuiSideNavItemType } from '@elastic/eui';
 
 import { stripTrailingSlash } from '../../../../common/strip_slashes';
 
 import { KibanaLogic } from '../kibana';
-import {
-  type GeneratedReactRouterProps,
-  generateReactRouterProps,
-} from '../react_router_helpers/generate_react_router_props';
-import { ReactRouterProps } from '../types';
+import { generateReactRouterProps, ReactRouterProps } from '../react_router_helpers';
+import { GeneratedReactRouterProps } from '../react_router_helpers/generate_react_router_props';
 
 interface Params {
-  items?: Array<EuiSideNavItemTypeEnhanced<unknown>>; // Primarily passed if using `items` to determine isSelected - if not, you can just set `items` outside of this helper
+  items?: Array<EuiSideNavItemType<unknown>>; // Primarily passed if using `items` to determine isSelected - if not, you can just set `items` outside of this helper
   shouldShowActiveForSubroutes?: boolean;
   to: string;
 }
 
 type NavLinkProps<T> = GeneratedReactRouterProps<T> &
-  Pick<EuiSideNavItemTypeEnhanced<T>, 'isSelected' | 'items'>;
-
-export type GenerateNavLinkParameters = Params & ReactRouterProps;
+  Pick<EuiSideNavItemType<T>, 'isSelected' | 'items'>;
 
 export const generateNavLink = ({
   items,
   ...rest
-}: GenerateNavLinkParameters): NavLinkProps<unknown> => {
+}: Params & ReactRouterProps): NavLinkProps<unknown> => {
   const linkProps = {
     ...generateReactRouterProps({ ...rest }),
     isSelected: getNavLinkActive({ items, ...rest }),
@@ -43,15 +38,14 @@ export const getNavLinkActive = ({
   shouldShowActiveForSubroutes = false,
   items = [],
   shouldNotCreateHref = false,
-  shouldNotPrepend = false,
-}: GenerateNavLinkParameters): boolean => {
+}: Params & ReactRouterProps): boolean => {
   const { pathname } = KibanaLogic.values.history.location;
   const currentPath = stripTrailingSlash(pathname);
   const { href: currentPathHref } = generateReactRouterProps({
     shouldNotCreateHref: false,
     to: currentPath,
   });
-  const { href: toHref } = generateReactRouterProps({ shouldNotCreateHref, shouldNotPrepend, to });
+  const { href: toHref } = generateReactRouterProps({ shouldNotCreateHref, to });
 
   if (currentPathHref === toHref) return true;
 

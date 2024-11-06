@@ -5,53 +5,13 @@
  * 2.0.
  */
 
-import {
-  EuiAccordion,
-  EuiCodeBlock,
-  EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
-  EuiText,
-} from '@elastic/eui';
+import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useMemo } from 'react';
+import React from 'react';
 
 import * as i18n from './translations';
 
-interface Props {
-  failureReason: string | null | undefined;
-}
-
-const FailureComponent: React.FC<Props> = ({ failureReason }) => {
-  const Failures = useMemo(() => {
-    const failures = failureReason != null ? failureReason.split('\n') : '';
-    const [firstFailure, ...restFailures] = failures;
-
-    return (
-      <>
-        <p>{firstFailure}</p>
-
-        {restFailures.length > 0 && (
-          <EuiAccordion
-            id="failuresFccordion"
-            buttonContent={i18n.DETAILS}
-            data-test-subj="failuresAccordion"
-            paddingSize="s"
-          >
-            <>
-              {restFailures.map((failure, i) => (
-                <EuiCodeBlock fontSize="m" key={i} paddingSize="m">
-                  {failure}
-                </EuiCodeBlock>
-              ))}
-            </>
-          </EuiAccordion>
-        )}
-      </>
-    );
-  }, [failureReason]);
-
+const FailureComponent: React.FC<{ failureReason: string }> = ({ failureReason }) => {
   return (
     <EuiFlexGroup alignItems="center" data-test-subj="failure" direction="column">
       <EuiFlexItem data-test-subj="emptyPromptContainer" grow={false}>
@@ -66,7 +26,7 @@ const FailureComponent: React.FC<Props> = ({ failureReason }) => {
               `}
               data-test-subj="bodyText"
             >
-              {Failures}
+              {failureReason}
             </EuiText>
           }
           title={<h2 data-test-subj="failureTitle">{i18n.FAILURE_TITLE}</h2>}

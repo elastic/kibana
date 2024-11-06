@@ -11,7 +11,7 @@ import {
   SavedObjectsFindResponse,
 } from '@kbn/core/server';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
-import { RawRule } from '../../../types';
+import { RuleAttributes } from '../types';
 
 export interface FindRulesSoParams {
   savedObjectsClient: SavedObjectsClientContract;
@@ -20,10 +20,10 @@ export interface FindRulesSoParams {
 
 export const findRulesSo = <RuleAggregation = Record<string, unknown>>(
   params: FindRulesSoParams
-): Promise<SavedObjectsFindResponse<RawRule, RuleAggregation>> => {
+): Promise<SavedObjectsFindResponse<RuleAttributes, RuleAggregation>> => {
   const { savedObjectsClient, savedObjectsFindOptions } = params;
 
-  return savedObjectsClient.find<RawRule, RuleAggregation>({
+  return savedObjectsClient.find<RuleAttributes, RuleAggregation>({
     ...savedObjectsFindOptions,
     type: RULE_SAVED_OBJECT_TYPE,
   });

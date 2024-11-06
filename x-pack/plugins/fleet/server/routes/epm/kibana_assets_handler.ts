@@ -22,7 +22,6 @@ import type {
   FleetRequestHandler,
   InstallKibanaAssetsRequestSchema,
 } from '../../types';
-import { createArchiveIteratorFromMap } from '../../services/epm/archive/archive_iterator';
 
 export const installPackageKibanaAssetsHandler: FleetRequestHandler<
   TypeOf<typeof InstallKibanaAssetsRequestSchema.params>,
@@ -70,7 +69,6 @@ export const installPackageKibanaAssetsHandler: FleetRequestHandler<
         packageInfo,
         paths: installedPkgWithAssets.paths,
         assetsMap: installedPkgWithAssets.assetsMap,
-        archiveIterator: createArchiveIteratorFromMap(installedPkgWithAssets.assetsMap),
       },
     });
 

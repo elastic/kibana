@@ -110,7 +110,6 @@ export default function (ftrContext: FtrProviderContext) {
         before(async () => {
           await createConnector();
           await createIndex();
-          await pageObjects.searchPlayground.session.setSession();
           await browser.refresh();
         });
 

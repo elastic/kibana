@@ -7,16 +7,13 @@
 
 import React, { useMemo } from 'react';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { APMError, AT_TIMESTAMP } from '@kbn/apm-types';
+import { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
 import { getSectionsFromFields } from '../helper';
 import { MetadataTable } from '..';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 
 interface Props {
-  error: {
-    [AT_TIMESTAMP]: string;
-    error: Pick<APMError['error'], 'id'>;
-  };
+  error: APMError;
 }
 
 export function ErrorMetadata({ error }: Props) {
@@ -29,8 +26,8 @@ export function ErrorMetadata({ error }: Props) {
             id: error.error.id,
           },
           query: {
-            start: error[AT_TIMESTAMP],
-            end: error[AT_TIMESTAMP],
+            start: error['@timestamp'],
+            end: error['@timestamp'],
           },
         },
       });

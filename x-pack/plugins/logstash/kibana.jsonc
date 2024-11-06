@@ -1,15 +1,11 @@
 {
   "type": "plugin",
   "id": "@kbn/logstash-plugin",
-  "owner": [
-    "@elastic/logstash"
-  ],
-  "group": "observability",
-  "visibility": "private",
+  "owner": "@elastic/logstash",
   "plugin": {
     "id": "logstash",
-    "browser": true,
     "server": true,
+    "browser": true,
     "configPath": [
       "xpack",
       "logstash"

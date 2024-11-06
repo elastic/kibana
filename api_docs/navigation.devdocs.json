@@ -368,7 +368,15 @@
         "label": "TopNavMenuItems",
         "description": [],
         "signature": [
-          "({ config, className, popoverBreakpoints, }: TopNavMenuItemsProps) => React.JSX.Element | null"
+          "({ config, className, }: { config: ",
+          {
+            "pluginId": "navigation",
+            "scope": "public",
+            "docId": "kibNavigationPluginApi",
+            "section": "def-public.TopNavMenuData",
+            "text": "TopNavMenuData"
+          },
+          "[] | undefined; className?: string | undefined; }) => React.JSX.Element | null"
         ],
         "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_items.tsx",
         "deprecated": false,
@@ -379,15 +387,48 @@
             "id": "def-public.TopNavMenuItems.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  config,\n  className,\n  popoverBreakpoints = POPOVER_BREAKPOINTS,\n}",
+            "label": "{\n  config,\n  className,\n}",
             "description": [],
-            "signature": [
-              "TopNavMenuItemsProps"
-            ],
             "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_items.tsx",
             "deprecated": false,
             "trackAdoption": false,
-            "isRequired": true
+            "children": [
+              {
+                "parentPluginId": "navigation",
+                "id": "def-public.TopNavMenuItems.$1.config",
+                "type": "Array",
+                "tags": [],
+                "label": "config",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "navigation",
+                    "scope": "public",
+                    "docId": "kibNavigationPluginApi",
+                    "section": "def-public.TopNavMenuData",
+                    "text": "TopNavMenuData"
+                  },
+                  "[] | undefined"
+                ],
+                "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_items.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "navigation",
+                "id": "def-public.TopNavMenuItems.$1.className",
+                "type": "string",
+                "tags": [],
+                "label": "className",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_items.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           }
         ],
         "returnComment": [],
@@ -782,20 +823,6 @@
           },
           {
             "parentPluginId": "navigation",
-            "id": "def-public.TopNavMenuData.iconOnly",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "iconOnly",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "navigation",
             "id": "def-public.TopNavMenuData.target",
             "type": "string",
             "tags": [],
@@ -949,7 +976,7 @@
             "section": "def-public.MountPoint",
             "text": "MountPoint"
           },
-          "<HTMLElement> | undefined) => void) | undefined; popoverBreakpoints?: string[] | undefined; }"
+          "<HTMLElement> | undefined) => void) | undefined; }"
         ],
         "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu.tsx",
         "deprecated": false,

@@ -21,6 +21,8 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       enableNestedVirtualization: true
+      localSsds: 1
+      localSsdInterface: nvme
       machineType: n2-standard-4
     timeout_in_minutes: 30
     retry:
@@ -35,6 +37,8 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       enableNestedVirtualization: true
+      localSsds: 1
+      localSsdInterface: nvme
       machineType: n2-standard-4
     timeout_in_minutes: 30
     retry:
@@ -49,6 +53,8 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       enableNestedVirtualization: true
+      localSsds: 1
+      localSsdInterface: nvme
       machineType: n2-standard-4
     timeout_in_minutes: 30
     retry:
@@ -62,6 +68,8 @@ steps:
       image: family/kibana-ubuntu-2004
       imageProject: elastic-images-prod
       provider: gcp
+      localSsds: 1
+      localSsdInterface: nvme
       machineType: n2-standard-2
     timeout_in_minutes: 30
     retry:
@@ -75,6 +83,8 @@ steps:
       image: family/kibana-ubuntu-2004
       imageProject: elastic-images-prod
       provider: gcp
+      localSsds: 1
+      localSsdInterface: nvme
       machineType: n2-standard-2
     timeout_in_minutes: 30
     retry:
@@ -101,6 +111,8 @@ steps:
       image: family/kibana-ubuntu-2004
       imageProject: elastic-images-prod
       provider: gcp
+      localSsds: 1
+      localSsdInterface: nvme
       machineType: n2-standard-2
     timeout_in_minutes: 30
     retry:
@@ -117,6 +129,8 @@ steps:
       image: family/kibana-ubuntu-2004
       imageProject: elastic-images-prod
       provider: gcp
+      localSsds: 1
+      localSsdInterface: nvme
       machineType: n2-standard-2
     timeout_in_minutes: 60
     if: "build.env('RELEASE_BUILD') == null || build.env('RELEASE_BUILD') == '' || build.env('RELEASE_BUILD') == 'false'"
@@ -142,5 +156,7 @@ steps:
       image: family/kibana-ubuntu-2004
       imageProject: elastic-images-prod
       provider: gcp
+      localSsds: 1
+      localSsdInterface: nvme
       machineType: n2-standard-2
     timeout_in_minutes: 30

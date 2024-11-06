@@ -14,7 +14,6 @@ import type {
   AddVersionOpts,
   RequestHandler,
   KibanaResponseFactory,
-  VersionedRouterRoute,
 } from '@kbn/core-http-server';
 
 export type MockedVersionedRoute = jest.Mocked<VersionedRoute>;
@@ -25,16 +24,14 @@ const createMockVersionedRoute = (): MockedVersionedRoute => {
   return api;
 };
 
-type VersionedRouterMethods = keyof Omit<VersionedRouter, 'getRoutes'>;
-
 export type MockedVersionedRouter = jest.Mocked<VersionedRouter<any>> & {
-  getRoute: (method: VersionedRouterMethods, path: string) => RegisteredVersionedRoute;
+  getRoute: (method: keyof VersionedRouter, path: string) => RegisteredVersionedRoute;
 };
 
 const createMethodHandler = () => jest.fn((_) => createMockVersionedRoute());
-const createMockGetRoutes = () => jest.fn(() => [] as VersionedRouterRoute[]);
+
 export const createVersionedRouterMock = (): MockedVersionedRouter => {
-  const router: Omit<MockedVersionedRouter, 'getRoute' | 'getRoutes'> = {
+  const router: Omit<MockedVersionedRouter, 'getRoute'> = {
     delete: createMethodHandler(),
     get: createMethodHandler(),
     patch: createMethodHandler(),
@@ -45,7 +42,6 @@ export const createVersionedRouterMock = (): MockedVersionedRouter => {
   return {
     ...router,
     getRoute: getRoute.bind(null, router),
-    getRoutes: createMockGetRoutes(),
   };
 };
 
@@ -58,10 +54,9 @@ export interface RegisteredVersionedRoute {
     };
   };
 }
-
 const getRoute = (
-  router: Omit<MockedVersionedRouter, 'getRoute' | 'getRoutes'>,
-  method: VersionedRouterMethods,
+  router: Omit<MockedVersionedRouter, 'getRoute'>,
+  method: keyof VersionedRouter,
   path: string
 ): RegisteredVersionedRoute => {
   if (!router[method].mock.calls.length) {

@@ -1,15 +1,11 @@
 {
   "type": "plugin",
   "id": "@kbn/grokdebugger-plugin",
-  "owner": [
-    "@elastic/kibana-management"
-  ],
-  "group": "platform",
-  "visibility": "private",
+  "owner": "@elastic/kibana-management",
   "plugin": {
     "id": "grokdebugger",
-    "browser": true,
     "server": true,
+    "browser": true,
     "configPath": [
       "xpack",
       "grokdebugger"

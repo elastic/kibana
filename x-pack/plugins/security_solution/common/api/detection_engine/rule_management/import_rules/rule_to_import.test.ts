@@ -550,7 +550,7 @@ describe('RuleToImport', () => {
     );
   });
 
-  test('You cannot set immutable to a number', () => {
+  test('You cannot set the immutable to a number when trying to create a rule', () => {
     const payload = getImportRulesSchemaMock({
       // @ts-expect-error assign unsupported value
       immutable: 5,
@@ -560,11 +560,11 @@ describe('RuleToImport', () => {
     expectParseError(result);
 
     expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-      `"immutable: Expected boolean, received number"`
+      `"immutable: Invalid literal value, expected false"`
     );
   });
 
-  test('You can optionally set immutable to false', () => {
+  test('You can optionally set the immutable to be false', () => {
     const payload: RuleToImportInput = getImportRulesSchemaMock({
       immutable: false,
     });
@@ -574,14 +574,32 @@ describe('RuleToImport', () => {
     expectParseSuccess(result);
   });
 
-  test('You can optionally set immutable to true', () => {
+  test('You cannot set the immutable to be true', () => {
     const payload = getImportRulesSchemaMock({
+      // @ts-expect-error assign unsupported value
       immutable: true,
     });
 
     const result = RuleToImport.safeParse(payload);
+    expectParseError(result);
 
-    expectParseSuccess(result);
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+      `"immutable: Invalid literal value, expected false"`
+    );
+  });
+
+  test('You cannot set the immutable to be a number', () => {
+    const payload = getImportRulesSchemaMock({
+      // @ts-expect-error assign unsupported value
+      immutable: 5,
+    });
+
+    const result = RuleToImport.safeParse(payload);
+    expectParseError(result);
+
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+      `"immutable: Invalid literal value, expected false"`
+    );
   });
 
   test('You cannot set the risk_score to 101', () => {
@@ -1072,17 +1090,6 @@ describe('RuleToImport', () => {
       const result = RuleToImport.safeParse(payload);
       expectParseSuccess(result);
       expect(result.data).toEqual(payload);
-    });
-
-    describe('backwards compatibility', () => {
-      it('allows version to be absent', () => {
-        const payload = getImportRulesSchemaMock();
-        delete payload.version;
-
-        const result = RuleToImport.safeParse(payload);
-        expectParseSuccess(result);
-        expect(result.data).toEqual(payload);
-      });
     });
   });
 });

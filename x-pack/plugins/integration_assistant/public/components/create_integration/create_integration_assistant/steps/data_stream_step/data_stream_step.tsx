@@ -53,8 +53,7 @@ interface DataStreamStepProps {
 }
 export const DataStreamStep = React.memo<DataStreamStepProps>(
   ({ integrationSettings, connector, isGenerating }) => {
-    const { setIntegrationSettings, setIsGenerating, setHasCelInput, setStep, setResult } =
-      useActions();
+    const { setIntegrationSettings, setIsGenerating, setStep, setResult } = useActions();
     const { isLoading: isLoadingPackageNames, packageNames } = useLoadPackageNames(); // this is used to avoid duplicate names
 
     const [name, setName] = useState<string>(integrationSettings?.name ?? '');
@@ -100,13 +99,9 @@ export const DataStreamStep = React.memo<DataStreamStepProps>(
           setIntegrationValues({ dataStreamDescription: e.target.value }),
         inputTypes: (options: EuiComboBoxOptionOption[]) => {
           setIntegrationValues({ inputTypes: options.map((option) => option.value as InputType) });
-          setHasCelInput(
-            // the cel value here comes from the input type options defined above
-            options.map((option) => option.value as InputType).includes('cel' as InputType)
-          );
         },
       };
-    }, [setIntegrationValues, setInvalidFields, setHasCelInput, packageNames]);
+    }, [setIntegrationValues, setInvalidFields, packageNames]);
 
     useEffect(() => {
       // Pre-populates the name from the title set in the previous step.

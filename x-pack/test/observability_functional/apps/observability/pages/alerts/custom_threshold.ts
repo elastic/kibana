@@ -18,8 +18,7 @@ export default ({ getService }: FtrProviderContext) => {
   const logger = getService('log');
   const retry = getService('retry');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/196766
-  describe.skip('Custom threshold rule', function () {
+  describe('Custom threshold rule', function () {
     this.tags('includeFirefox');
 
     const observability = getService('observability');
@@ -210,10 +209,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('saved the rule correctly', async () => {
-      const { body: rules } = await supertest
-        .post('/internal/alerting/rules/_find')
-        .set('kbn-xsrf', 'kibana')
-        .send({});
+      const { body: rules } = await supertest.get('/internal/alerting/rules/_find');
 
       expect(rules.data.length).toEqual(1);
       expect(rules.data[0]).toEqual(

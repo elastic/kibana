@@ -24,15 +24,9 @@ const genLensEqForCustomThresholdRule = (criterion: MetricExpression) => {
 
   criterion.metrics.forEach((metric: CustomThresholdExpressionMetric) => {
     const metricFilter = metric.filter ? `kql='${metric.filter}'` : '';
-    if (metric.aggType === 'rate') {
-      metricNameResolver[metric.name] = `counter_rate(max(${
-        metric.field ? metric.field : metricFilter
-      }))`;
-    } else {
-      metricNameResolver[metric.name] = `${
-        AggMappingForLens[metric.aggType] ? AggMappingForLens[metric.aggType] : metric.aggType
-      }(${metric.field ? metric.field : metricFilter})`;
-    }
+    metricNameResolver[metric.name] = `${
+      AggMappingForLens[metric.aggType] ? AggMappingForLens[metric.aggType] : metric.aggType
+    }(${metric.field ? metric.field : metricFilter})`;
   });
 
   let equation = criterion.equation

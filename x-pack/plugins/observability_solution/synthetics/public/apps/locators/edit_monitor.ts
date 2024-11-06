@@ -7,10 +7,10 @@
 
 import { syntheticsEditMonitorLocatorID } from '@kbn/observability-plugin/common';
 
-async function navigate({ configId, spaceId }: { configId: string; spaceId?: string }) {
+async function navigate({ configId }: { configId: string }) {
   return {
     app: 'synthetics',
-    path: `/edit-monitor/${configId}` + (spaceId ? `?spaceId=${spaceId}` : ''),
+    path: `/edit-monitor/${configId}`,
     state: {},
   };
 }

@@ -60,6 +60,7 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
         return null;
       },
       sortable: true,
+      truncateText: true,
       width: '300px',
     },
     {

@@ -365,9 +365,7 @@
           "CustomFieldTypes",
           ".TOGGLE; value: boolean | null; } | { key: string; type: ",
           "CustomFieldTypes",
-          ".TEXT; value: string | null; } | { key: string; type: ",
-          "CustomFieldTypes",
-          ".NUMBER; value: number | null; })[] | undefined; }, \"title\" | \"description\"> | undefined; }"
+          ".TEXT; value: string | null; })[] | undefined; }, \"title\" | \"description\"> | undefined; }"
         ],
         "path": "x-pack/plugins/cases/public/client/ui/get_create_case_flyout.tsx",
         "deprecated": false,
@@ -587,9 +585,7 @@
             "CustomFieldTypes",
             ".TEXT; value: string | null; } | { key: string; type: ",
             "CustomFieldTypes",
-            ".TOGGLE; value: boolean | null; } | { key: string; type: ",
-            "CustomFieldTypes",
-            ".NUMBER; value: number | null; })[]; settings: { syncAlerts: boolean; }; status: ",
+            ".TOGGLE; value: boolean | null; })[]; settings: { syncAlerts: boolean; }; status: ",
             {
               "pluginId": "@kbn/cases-components",
               "scope": "common",
@@ -1966,9 +1962,7 @@
           "CustomFieldTypes",
           ".TEXT; value: string | null; } | { key: string; type: ",
           "CustomFieldTypes",
-          ".TOGGLE; value: boolean | null; } | { key: string; type: ",
-          "CustomFieldTypes",
-          ".NUMBER; value: number | null; })[]; settings: { syncAlerts: boolean; }; status: ",
+          ".TOGGLE; value: boolean | null; })[]; settings: { syncAlerts: boolean; }; status: ",
           {
             "pluginId": "@kbn/cases-components",
             "scope": "common",
@@ -2170,9 +2164,7 @@
           "CustomFieldTypes",
           ".TOGGLE; value: boolean | null; } | { key: string; type: ",
           "CustomFieldTypes",
-          ".TEXT; value: string | null; } | { key: string; type: ",
-          "CustomFieldTypes",
-          ".NUMBER; value: number | null; })[] | undefined; }"
+          ".TEXT; value: string | null; })[] | undefined; }"
         ],
         "path": "x-pack/plugins/cases/common/types/api/case/v1.ts",
         "deprecated": false,
@@ -2263,9 +2255,7 @@
           "CustomFieldTypes",
           ".TEXT; value: string | null; } | { key: string; type: ",
           "CustomFieldTypes",
-          ".TOGGLE; value: boolean | null; } | { key: string; type: ",
-          "CustomFieldTypes",
-          ".NUMBER; value: number | null; })[]; settings: { syncAlerts: boolean; }; status: ",
+          ".TOGGLE; value: boolean | null; })[]; settings: { syncAlerts: boolean; }; status: ",
           {
             "pluginId": "@kbn/cases-components",
             "scope": "common",
@@ -2499,9 +2489,7 @@
           "CustomFieldTypes",
           ".TEXT; value: string | null; } | { key: string; type: ",
           "CustomFieldTypes",
-          ".TOGGLE; value: boolean | null; } | { key: string; type: ",
-          "CustomFieldTypes",
-          ".NUMBER; value: number | null; })[]; settings: { syncAlerts: boolean; }; status: ",
+          ".TOGGLE; value: boolean | null; })[]; settings: { syncAlerts: boolean; }; status: ",
           {
             "pluginId": "@kbn/cases-components",
             "scope": "common",
@@ -2688,9 +2676,7 @@
           "CustomFieldTypes",
           ".TEXT; value: string | null; } | { key: string; type: ",
           "CustomFieldTypes",
-          ".TOGGLE; value: boolean | null; } | { key: string; type: ",
-          "CustomFieldTypes",
-          ".NUMBER; value: number | null; })[]; settings: { syncAlerts: boolean; }; status: ",
+          ".TOGGLE; value: boolean | null; })[]; settings: { syncAlerts: boolean; }; status: ",
           {
             "pluginId": "@kbn/cases-components",
             "scope": "common",
@@ -2913,9 +2899,7 @@
           "CustomFieldTypes",
           ".TEXT; value: string | null; } | { key: string; type: ",
           "CustomFieldTypes",
-          ".TOGGLE; value: boolean | null; } | { key: string; type: ",
-          "CustomFieldTypes",
-          ".NUMBER; value: number | null; })[]; settings: { syncAlerts: boolean; }; status: ",
+          ".TOGGLE; value: boolean | null; })[]; settings: { syncAlerts: boolean; }; status: ",
           {
             "pluginId": "@kbn/cases-components",
             "scope": "common",
@@ -3320,9 +3304,7 @@
           "CustomFieldTypes",
           ".TEXT; value: string | null; } | { key: string; type: ",
           "CustomFieldTypes",
-          ".TOGGLE; value: boolean | null; } | { key: string; type: ",
-          "CustomFieldTypes",
-          ".NUMBER; value: number | null; })[]; }; } | { type: \"comment\"; payload: { comment: { type: ",
+          ".TOGGLE; value: boolean | null; })[]; }; } | { type: \"comment\"; payload: { comment: { type: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -3478,9 +3460,7 @@
           "CustomFieldTypes",
           ".TEXT; value: string | null; } | { key: string; type: ",
           "CustomFieldTypes",
-          ".TOGGLE; value: boolean | null; } | { key: string; type: ",
-          "CustomFieldTypes",
-          ".NUMBER; value: number | null; })[] | undefined; }; }) | { type: \"connector\"; payload: { connector: { id: string; } & (({ type: ",
+          ".TOGGLE; value: boolean | null; })[] | undefined; }; }) | { type: \"connector\"; payload: { connector: { id: string; } & (({ type: ",
           {
             "pluginId": "cases",
             "scope": "common",

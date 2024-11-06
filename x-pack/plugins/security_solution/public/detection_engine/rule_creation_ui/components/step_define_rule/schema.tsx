@@ -44,8 +44,6 @@ import {
   EQL_SEQUENCE_SUPPRESSION_GROUPBY_VALIDATION_TEXT,
 } from './translations';
 import { getQueryRequiredMessage } from './utils';
-import { dataViewIdValidatorFactory } from '../../validators/data_view_id_validator_factory';
-import { indexPatternValidatorFactory } from '../../validators/index_pattern_validator_factory';
 
 export const schema: FormSchema<DefineStepRule> = {
   index: {
@@ -61,18 +59,27 @@ export const schema: FormSchema<DefineStepRule> = {
     helpText: <EuiText size="xs">{INDEX_HELPER_TEXT}</EuiText>,
     validations: [
       {
-        validator: (...args: Parameters<ValidationFunc>) => {
+        validator: (
+          ...args: Parameters<ValidationFunc>
+        ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
           const [{ formData }] = args;
-
-          if (
+          const skipValidation =
             isMlRule(formData.ruleType) ||
             isEsqlRule(formData.ruleType) ||
-            formData.dataSourceType !== DataSourceType.IndexPatterns
-          ) {
+            formData.dataSourceType !== DataSourceType.IndexPatterns;
+
+          if (skipValidation) {
             return;
           }
 
-          return indexPatternValidatorFactory()(...args);
+          return fieldValidators.emptyField(
+            i18n.translate(
+              'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.outputIndiceNameFieldRequiredError',
+              {
+                defaultMessage: 'A minimum of one index pattern is required.',
+              }
+            )
+          )(...args);
         },
       },
     ],
@@ -87,14 +94,32 @@ export const schema: FormSchema<DefineStepRule> = {
     fieldsToValidateOnChange: ['dataViewId'],
     validations: [
       {
-        validator: (...args: Parameters<ValidationFunc>) => {
-          const [{ formData }] = args;
+        validator: (
+          ...args: Parameters<ValidationFunc>
+        ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
+          const [{ path, formData }] = args;
+          // the dropdown defaults the dataViewId to an empty string somehow on render..
+          // need to figure this out.
+          const notEmptyDataViewId = formData.dataViewId != null && formData.dataViewId !== '';
 
-          if (isMlRule(formData.ruleType) || formData.dataSourceType !== DataSourceType.DataView) {
+          const skipValidation =
+            isMlRule(formData.ruleType) ||
+            notEmptyDataViewId ||
+            formData.dataSourceType !== DataSourceType.DataView;
+
+          if (skipValidation) {
             return;
           }
 
-          return dataViewIdValidatorFactory()(...args);
+          return {
+            path,
+            message: i18n.translate(
+              'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.dataViewSelectorFieldRequired',
+              {
+                defaultMessage: 'Please select an available Data View or Index Pattern.',
+              }
+            ),
+          };
         },
       },
     ],

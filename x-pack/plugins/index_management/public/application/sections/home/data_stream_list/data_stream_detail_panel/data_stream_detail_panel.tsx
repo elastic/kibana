@@ -34,7 +34,6 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { getIndexModeLabel } from '../../../../lib/index_mode_labels';
 import { DiscoverLink } from '../../../../lib/discover_link';
 import { getLifecycleValue } from '../../../../lib/data_streams';
 import { SectionLoading, reactRouterNavigate } from '../../../../../shared_imports';
@@ -167,7 +166,6 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
       meteringStorageSize,
       meteringDocsCount,
       lifecycle,
-      indexMode,
     } = dataStream;
 
     const getManagementDetails = () => {
@@ -346,17 +344,6 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
           </EuiLink>
         ),
         dataTestSubj: 'indexTemplateDetail',
-      },
-      {
-        name: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.indexModeTitle', {
-          defaultMessage: 'Index mode',
-        }),
-        toolTip: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.indexModeToolTip', {
-          defaultMessage:
-            "The index mode applied to the data stream's backing indices, as defined in its associated index template.",
-        }),
-        content: getIndexModeLabel(indexMode),
-        dataTestSubj: 'indexModeDetail',
       },
       {
         name: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.dataRetentionTitle', {

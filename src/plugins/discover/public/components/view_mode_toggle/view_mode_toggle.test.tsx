@@ -94,7 +94,6 @@ describe('Document view mode toggle component', () => {
     expect(findTestSubject(component, 'dscViewModeDocumentButton').exists()).toBe(true);
     expect(findTestSubject(component, 'dscViewModePatternAnalysisButton').exists()).toBe(true);
     expect(findTestSubject(component, 'dscViewModeFieldStatsButton').exists()).toBe(true);
-    expect(findTestSubject(component, 'dscViewModeDocumentButton').text()).toBe('Documents (10)');
   });
 
   it('should not render if SHOW_FIELD_STATISTICS is false', async () => {
@@ -115,7 +114,6 @@ describe('Document view mode toggle component', () => {
     expect(findTestSubject(component, 'dscViewModeDocumentButton').exists()).toBe(true);
     expect(findTestSubject(component, 'dscViewModePatternAnalysisButton').exists()).toBe(false);
     expect(findTestSubject(component, 'dscViewModeFieldStatsButton').exists()).toBe(true);
-    expect(findTestSubject(component, 'dscViewModeDocumentButton').text()).toBe('Results (10)');
   });
 
   it('should set the view mode to VIEW_MODE.DOCUMENT_LEVEL when dscViewModeDocumentButton is clicked', async () => {

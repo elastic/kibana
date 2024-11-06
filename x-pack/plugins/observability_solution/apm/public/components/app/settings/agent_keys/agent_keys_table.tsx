@@ -15,10 +15,9 @@ import { ConfirmDeleteModal } from './confirm_delete_modal';
 interface Props {
   agentKeys: ApiKey[];
   onKeyDelete: () => void;
-  canManage: boolean;
 }
 
-export function AgentKeysTable({ agentKeys, onKeyDelete, canManage }: Props) {
+export function AgentKeysTable({ agentKeys, onKeyDelete }: Props) {
   const [agentKeyToBeDeleted, setAgentKeyToBeDeleted] = useState<ApiKey>();
 
   const columns: Array<EuiBasicTableColumn<ApiKey>> = [
@@ -55,10 +54,7 @@ export function AgentKeysTable({ agentKeys, onKeyDelete, canManage }: Props) {
       },
       render: (date: number) => <TimestampTooltip time={date} />,
     },
-  ];
-
-  if (canManage) {
-    columns.push({
+    {
       actions: [
         {
           name: i18n.translate('xpack.apm.settings.agentKeys.table.deleteActionTitle', {
@@ -76,8 +72,8 @@ export function AgentKeysTable({ agentKeys, onKeyDelete, canManage }: Props) {
           onClick: (agentKey: ApiKey) => setAgentKeyToBeDeleted(agentKey),
         },
       ],
-    });
-  }
+    },
+  ];
 
   const search: EuiInMemoryTableProps<ApiKey>['search'] = {
     box: {

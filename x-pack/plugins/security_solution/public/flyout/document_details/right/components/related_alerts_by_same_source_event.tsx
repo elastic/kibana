@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { CORRELATIONS_TAB_ID } from '../../left/components/correlations_details';
-import { CORRELATIONS_RELATED_ALERTS_BY_SAME_SOURCE_EVENT_TEST_ID } from './test_ids';
-import { InsightsSummaryRow } from './insights_summary_row';
 import { useFetchRelatedAlertsBySameSourceEvent } from '../../shared/hooks/use_fetch_related_alerts_by_same_source_event';
+import { InsightsSummaryRow } from './insights_summary_row';
+import { CORRELATIONS_RELATED_ALERTS_BY_SAME_SOURCE_EVENT_TEST_ID } from './test_ids';
+
+const ICON = 'warning';
 
 export interface RelatedAlertsBySameSourceEventProps {
   /**
@@ -34,24 +35,20 @@ export const RelatedAlertsBySameSourceEvent: React.VFC<RelatedAlertsBySameSource
     originalEventId,
     scopeId,
   });
-
-  const text = useMemo(
-    () => (
-      <FormattedMessage
-        id="xpack.securitySolution.flyout.right.insights.correlations.sourceAlertsLabel"
-        defaultMessage="{count, plural, one {Alert} other {Alerts}} related by source event"
-        values={{ count: dataCount }}
-      />
-    ),
-    [dataCount]
+  const text = (
+    <FormattedMessage
+      id="xpack.securitySolution.flyout.right.insights.correlations.sourceAlertsLabel"
+      defaultMessage="{count, plural, one {alert} other {alerts}} related by source event"
+      values={{ count: dataCount }}
+    />
   );
 
   return (
     <InsightsSummaryRow
       loading={loading}
-      text={text}
+      icon={ICON}
       value={dataCount}
-      expandedSubTab={CORRELATIONS_TAB_ID}
+      text={text}
       data-test-subj={CORRELATIONS_RELATED_ALERTS_BY_SAME_SOURCE_EVENT_TEST_ID}
       key={`correlation-row-${text}`}
     />

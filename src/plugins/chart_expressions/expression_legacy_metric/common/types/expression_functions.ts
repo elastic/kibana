@@ -10,8 +10,6 @@
 import type { PaletteOutput } from '@kbn/coloring';
 import {
   Datatable,
-  DefaultInspectorAdapters,
-  ExecutionContext,
   ExpressionFunctionDefinition,
   ExpressionValueRender,
   Style,
@@ -49,6 +47,5 @@ export type MetricVisExpressionFunctionDefinition = ExpressionFunctionDefinition
   typeof EXPRESSION_METRIC_NAME,
   MetricInput,
   MetricArguments,
-  ExpressionValueRender<MetricVisRenderConfig>,
-  ExecutionContext<DefaultInspectorAdapters>
+  ExpressionValueRender<MetricVisRenderConfig>
 >;

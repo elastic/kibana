@@ -140,6 +140,7 @@ export const testPipelineValidResult: { pipelineResults: object[]; errors: objec
 export const relatedTestState = {
   rawSamples: ['{"test1": "test1"}'],
   samples: ['{ "test1": "test1" }'],
+  formattedSamples: '{"test1": "test1"}',
   ecs: 'testtypes',
   exAnswer: 'testanswer',
   packageName: 'testpackage',

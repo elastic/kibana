@@ -5,30 +5,102 @@
  * 2.0.
  */
 import {
+  EuiButtonIcon,
   EuiDataGrid,
   EuiDataGridCellValueElementProps,
+  EuiDataGridColumn,
   EuiDataGridSorting,
   EuiLoadingSpinner,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedDate, FormattedMessage, FormattedTime } from '@kbn/i18n-react';
 import { last } from 'lodash';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   ENTITY_DISPLAY_NAME,
   ENTITY_LAST_SEEN,
   ENTITY_TYPE,
 } from '@kbn/observability-shared-plugin/common';
-import { EntityColumnIds } from '../../../common/entities';
 import { APIReturnType } from '../../api';
 import { BadgeFilterWithPopover } from '../badge_filter_with_popover';
-import { getColumns } from './grid_columns';
-import { AlertsBadge } from '../alerts_badge/alerts_badge';
 import { EntityName } from './entity_name';
+import { EntityType } from '../../../common/entities';
+import { getEntityTypeLabel } from '../../utils/get_entity_type_label';
 
 type InventoryEntitiesAPIReturnType = APIReturnType<'GET /internal/inventory/entities'>;
 type LatestEntities = InventoryEntitiesAPIReturnType['entities'];
+
+export type EntityColumnIds =
+  | typeof ENTITY_DISPLAY_NAME
+  | typeof ENTITY_LAST_SEEN
+  | typeof ENTITY_TYPE;
+
+const CustomHeaderCell = ({ title, tooltipContent }: { title: string; tooltipContent: string }) => (
+  <>
+    <span>{title}</span>
+    <EuiToolTip content={tooltipContent}>
+      <EuiButtonIcon
+        data-test-subj="inventoryCustomHeaderCellButton"
+        iconType="questionInCircle"
+        aria-label={tooltipContent}
+        color="primary"
+      />
+    </EuiToolTip>
+  </>
+);
+
+const entityNameLabel = i18n.translate('xpack.inventory.entitiesGrid.euiDataGrid.entityNameLabel', {
+  defaultMessage: 'Entity name',
+});
+const entityTypeLabel = i18n.translate('xpack.inventory.entitiesGrid.euiDataGrid.typeLabel', {
+  defaultMessage: 'Type',
+});
+const entityLastSeenLabel = i18n.translate(
+  'xpack.inventory.entitiesGrid.euiDataGrid.lastSeenLabel',
+  {
+    defaultMessage: 'Last seen',
+  }
+);
+
+const columns: EuiDataGridColumn[] = [
+  {
+    id: ENTITY_DISPLAY_NAME,
+    // keep it for accessibility purposes
+    displayAsText: entityNameLabel,
+    display: (
+      <CustomHeaderCell
+        title={entityNameLabel}
+        tooltipContent="Name of the entity (entity.displayName)"
+      />
+    ),
+    isSortable: true,
+  },
+  {
+    id: ENTITY_TYPE,
+    // keep it for accessibility purposes
+    displayAsText: entityTypeLabel,
+    display: (
+      <CustomHeaderCell title={entityTypeLabel} tooltipContent="Type of entity (entity.type)" />
+    ),
+    isSortable: true,
+  },
+  {
+    id: ENTITY_LAST_SEEN,
+    // keep it for accessibility purposes
+    displayAsText: entityLastSeenLabel,
+    display: (
+      <CustomHeaderCell
+        title={entityLastSeenLabel}
+        tooltipContent="Timestamp of last received data for entity (entity.lastSeenTimestamp)"
+      />
+    ),
+    defaultSortDirection: 'desc',
+    isSortable: true,
+    schema: 'datetime',
+  },
+];
 
 interface Props {
   loading: boolean;
@@ -38,7 +110,7 @@ interface Props {
   pageIndex: number;
   onChangeSort: (sorting: EuiDataGridSorting['columns'][0]) => void;
   onChangePage: (nextPage: number) => void;
-  onFilterByType: (entityType: string) => void;
+  onFilterByType: (entityType: EntityType) => void;
 }
 
 const PAGE_SIZE = 20;
@@ -53,6 +125,8 @@ export function EntitiesGrid({
   onChangeSort,
   onFilterByType,
 }: Props) {
+  const [visibleColumns, setVisibleColumns] = useState(columns.map(({ id }) => id));
+
   const onSort: EuiDataGridSorting['onSort'] = useCallback(
     (newSortingColumns) => {
       const lastItem = last(newSortingColumns);
@@ -63,19 +137,6 @@ export function EntitiesGrid({
     [onChangeSort]
   );
 
-  const showAlertsColumn = useMemo(
-    () => entities?.some((entity) => entity?.alertsCount && entity?.alertsCount > 0),
-    [entities]
-  );
-
-  const columnVisibility = useMemo(
-    () => ({
-      visibleColumns: getColumns({ showAlertsColumn }).map(({ id }) => id),
-      setVisibleColumns: () => {},
-    }),
-    [showAlertsColumn]
-  );
-
   const renderCellValue = useCallback(
     ({ rowIndex, columnId }: EuiDataGridCellValueElementProps) => {
       const entity = entities[rowIndex];
@@ -84,18 +145,14 @@ export function EntitiesGrid({
       }
 
       const columnEntityTableId = columnId as EntityColumnIds;
-      const entityType = entity[ENTITY_TYPE];
-
       switch (columnEntityTableId) {
-        case 'alertsCount':
-          return entity?.alertsCount ? <AlertsBadge entity={entity} /> : null;
-
         case ENTITY_TYPE:
+          const entityType = entity[columnEntityTableId];
           return (
             <BadgeFilterWithPopover
               field={ENTITY_TYPE}
               value={entityType}
-              label={entityType}
+              label={getEntityTypeLabel(entityType)}
               onFilter={() => onFilterByType(entityType)}
             />
           );
@@ -146,8 +203,8 @@ export function EntitiesGrid({
         'xpack.inventory.entitiesGrid.euiDataGrid.inventoryEntitiesGridLabel',
         { defaultMessage: 'Inventory entities grid' }
       )}
-      columns={getColumns({ showAlertsColumn })}
-      columnVisibility={columnVisibility}
+      columns={columns}
+      columnVisibility={{ visibleColumns, setVisibleColumns }}
       rowCount={entities.length}
       renderCellValue={renderCellValue}
       gridStyle={{ border: 'horizontal', header: 'shade' }}

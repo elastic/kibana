@@ -40,18 +40,12 @@ export const useDeleteDocument = (indexName: string) => {
         queryClient.setQueryData(
           [QueryKeys.SearchDocuments, indexName],
           (snapshot: IndexDocuments | undefined) => {
-            const oldData = snapshot ?? { results: { data: [], _meta: { page: { total: 0 } } } };
+            const oldData = snapshot ?? { results: { data: [] } };
             return {
               ...oldData,
               results: {
                 ...oldData.results,
                 data: oldData.results.data.filter((doc: SearchHit) => doc._id !== id),
-                _meta: {
-                  page: {
-                    ...oldData.results._meta.page,
-                    total: oldData.results._meta.page.total - 1,
-                  },
-                },
               },
             } as IndexDocuments;
           }

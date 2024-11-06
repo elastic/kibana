@@ -17,20 +17,19 @@ describe('alerts', () => {
     const telemetrySavedObjectsClient = new TelemetrySavedObjectsClient(savedObjectsClient);
 
     savedObjectsClient.find.mockResolvedValue({
-      total: 3,
+      total: 5,
       saved_objects: [],
       per_page: 1,
       page: 1,
       aggregations: {
         counts: {
           buckets: [
-            { topAlertsPerBucket: { value: 12 } },
-            { topAlertsPerBucket: { value: 5 } },
-            { topAlertsPerBucket: { value: 3 } },
+            { doc_count: 1, key: 1 },
+            { doc_count: 2, key: 2 },
+            { doc_count: 3, key: 3 },
           ],
         },
         references: { cases: { max: { value: 1 } } },
-        uniqueAlertCommentsCount: { value: 5 },
       },
     });
 
@@ -43,13 +42,12 @@ describe('alerts', () => {
         savedObjectsClient: telemetrySavedObjectsClient,
         logger,
       });
-
       expect(res).toEqual({
         all: {
           total: 5,
           daily: 3,
-          weekly: 5,
-          monthly: 12,
+          weekly: 2,
+          monthly: 1,
           maxOnACase: 1,
         },
       });
@@ -78,13 +76,6 @@ describe('alerts', () => {
                 },
               ],
             },
-            aggregations: {
-              topAlertsPerBucket: {
-                cardinality: {
-                  field: 'cases-comments.attributes.alertId',
-                },
-              },
-            },
           },
           references: {
             aggregations: {
@@ -94,22 +85,10 @@ describe('alerts', () => {
                     terms: {
                       field: 'cases-comments.references.id',
                     },
-                    aggregations: {
-                      reverse: {
-                        reverse_nested: {},
-                        aggregations: {
-                          topAlerts: {
-                            cardinality: {
-                              field: 'cases-comments.attributes.alertId',
-                            },
-                          },
-                        },
-                      },
-                    },
                   },
                   max: {
                     max_bucket: {
-                      buckets_path: 'ids>reverse.topAlerts',
+                      buckets_path: 'ids._count',
                     },
                   },
                 },
@@ -122,11 +101,6 @@ describe('alerts', () => {
             },
             nested: {
               path: 'cases-comments.references',
-            },
-          },
-          uniqueAlertCommentsCount: {
-            cardinality: {
-              field: 'cases-comments.attributes.alertId',
             },
           },
         },

@@ -1,16 +1,12 @@
 {
   "type": "plugin",
   "id": "@kbn/serverless-observability",
-  "owner": [
-    "@elastic/obs-ux-management-team"
-  ],
-  "group": "observability",
-  "visibility": "private",
+  "owner": "@elastic/obs-ux-management-team",
   "description": "Serverless customizations for observability.",
   "plugin": {
     "id": "serverlessObservability",
-    "browser": true,
     "server": true,
+    "browser": true,
     "configPath": [
       "xpack",
       "serverless",
@@ -23,7 +19,7 @@
       "observabilityShared",
       "management",
       "discover",
-      "security"
+      "security",
     ],
     "optionalPlugins": [],
     "requiredBundles": []

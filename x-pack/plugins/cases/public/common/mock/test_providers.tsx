@@ -89,20 +89,22 @@ const TestProvidersComponent: React.FC<TestProviderProps> = ({
   });
 
   const getFilesClient = mockGetFilesClient();
-  const casesProviderValue = {
-    externalReferenceAttachmentTypeRegistry,
-    persistableStateAttachmentTypeRegistry,
-    features,
-    owner,
-    permissions,
-    getFilesClient,
-  };
 
   return (
     <KibanaRenderContextProvider i18n={coreStart.i18n} theme={coreStart.theme}>
       <KibanaContextProvider services={services}>
         <MemoryRouter>
-          <CasesProvider value={casesProviderValue} queryClient={queryClient}>
+          <CasesProvider
+            value={{
+              externalReferenceAttachmentTypeRegistry,
+              persistableStateAttachmentTypeRegistry,
+              features,
+              owner,
+              permissions,
+              getFilesClient,
+            }}
+            queryClient={queryClient}
+          >
             <FilesContext client={createMockFilesClient()}>{children}</FilesContext>
           </CasesProvider>
         </MemoryRouter>
@@ -168,20 +170,23 @@ export const createAppMockRenderer = ({
   });
 
   const getFilesClient = mockGetFilesClient();
-  const casesProviderValue = {
-    externalReferenceAttachmentTypeRegistry,
-    persistableStateAttachmentTypeRegistry,
-    features,
-    owner,
-    permissions,
-    releasePhase,
-    getFilesClient,
-  };
+
   const AppWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
     <KibanaRenderContextProvider i18n={coreStart.i18n} theme={coreStart.theme}>
       <KibanaContextProvider services={services}>
         <MemoryRouter>
-          <CasesProvider value={casesProviderValue} queryClient={queryClient}>
+          <CasesProvider
+            value={{
+              externalReferenceAttachmentTypeRegistry,
+              persistableStateAttachmentTypeRegistry,
+              features,
+              owner,
+              permissions,
+              releasePhase,
+              getFilesClient,
+            }}
+            queryClient={queryClient}
+          >
             {children}
           </CasesProvider>
         </MemoryRouter>
@@ -190,11 +195,10 @@ export const createAppMockRenderer = ({
   );
 
   AppWrapper.displayName = 'AppWrapper';
-  const memoizedAppWrapper = React.memo(AppWrapper);
 
   const render: UiRender = (ui, options) => {
     return reactRender(ui, {
-      wrapper: memoizedAppWrapper,
+      wrapper: AppWrapper,
       ...options,
     });
   };

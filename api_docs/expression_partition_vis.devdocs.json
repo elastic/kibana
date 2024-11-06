@@ -1199,11 +1199,11 @@
           },
           "<",
           {
-            "pluginId": "expressions",
+            "pluginId": "inspector",
             "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.DefaultInspectorAdapters",
-            "text": "DefaultInspectorAdapters"
+            "docId": "kibInspectorPluginApi",
+            "section": "def-common.Adapters",
+            "text": "Adapters"
           },
           ">>"
         ],
@@ -1364,11 +1364,11 @@
           },
           "<",
           {
-            "pluginId": "expressions",
+            "pluginId": "inspector",
             "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.DefaultInspectorAdapters",
-            "text": "DefaultInspectorAdapters"
+            "docId": "kibInspectorPluginApi",
+            "section": "def-common.Adapters",
+            "text": "Adapters"
           },
           ">>"
         ],
@@ -1473,11 +1473,11 @@
           },
           "<",
           {
-            "pluginId": "expressions",
+            "pluginId": "inspector",
             "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.DefaultInspectorAdapters",
-            "text": "DefaultInspectorAdapters"
+            "docId": "kibInspectorPluginApi",
+            "section": "def-common.Adapters",
+            "text": "Adapters"
           },
           ">>"
         ],
@@ -1552,11 +1552,11 @@
           },
           "<",
           {
-            "pluginId": "expressions",
+            "pluginId": "inspector",
             "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.DefaultInspectorAdapters",
-            "text": "DefaultInspectorAdapters"
+            "docId": "kibInspectorPluginApi",
+            "section": "def-common.Adapters",
+            "text": "Adapters"
           },
           ">>"
         ],

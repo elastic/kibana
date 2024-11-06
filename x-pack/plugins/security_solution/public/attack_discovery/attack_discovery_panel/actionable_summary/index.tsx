@@ -6,11 +6,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
-import {
-  replaceAnonymizedValuesWithOriginalValues,
-  type AttackDiscovery,
-  type Replacements,
-} from '@kbn/elastic-assistant-common';
+import type { AttackDiscovery, Replacements } from '@kbn/elastic-assistant-common';
 import React, { useMemo } from 'react';
 
 import { AttackDiscoveryMarkdownFormatter } from '../../attack_discovery_markdown_formatter';
@@ -27,33 +23,14 @@ const ActionableSummaryComponent: React.FC<Props> = ({
   replacements,
   showAnonymized = false,
 }) => {
-  const entitySummary = useMemo(
+  const entitySummaryMarkdownWithReplacements = useMemo(
     () =>
-      showAnonymized
-        ? attackDiscovery.entitySummaryMarkdown
-        : replaceAnonymizedValuesWithOriginalValues({
-            messageContent: attackDiscovery.entitySummaryMarkdown ?? '',
-            replacements: { ...replacements },
-          }),
-
-    [attackDiscovery.entitySummaryMarkdown, replacements, showAnonymized]
+      Object.entries(replacements ?? {}).reduce(
+        (acc, [key, value]) => acc.replace(key, value),
+        attackDiscovery.entitySummaryMarkdown
+      ),
+    [attackDiscovery.entitySummaryMarkdown, replacements]
   );
-
-  // title will be used as a fallback if entitySummaryMarkdown is empty
-  const title = useMemo(
-    () =>
-      showAnonymized
-        ? attackDiscovery.title
-        : replaceAnonymizedValuesWithOriginalValues({
-            messageContent: attackDiscovery.title,
-            replacements: { ...replacements },
-          }),
-
-    [attackDiscovery.title, replacements, showAnonymized]
-  );
-
-  const entitySummaryOrTitle =
-    entitySummary != null && entitySummary.length > 0 ? entitySummary : title;
 
   return (
     <EuiPanel color="subdued" data-test-subj="actionableSummary">
@@ -61,7 +38,11 @@ const ActionableSummaryComponent: React.FC<Props> = ({
         <EuiFlexItem data-test-subj="entitySummaryMarkdown" grow={false}>
           <AttackDiscoveryMarkdownFormatter
             disableActions={showAnonymized}
-            markdown={entitySummaryOrTitle}
+            markdown={
+              showAnonymized
+                ? attackDiscovery.entitySummaryMarkdown
+                : entitySummaryMarkdownWithReplacements
+            }
           />
         </EuiFlexItem>
 

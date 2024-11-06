@@ -1,15 +1,11 @@
 {
   "type": "plugin",
   "id": "@kbn/task-manager-plugin",
-  "owner": [
-    "@elastic/response-ops"
-  ],
-  "group": "platform",
-  "visibility": "shared",
+  "owner": "@elastic/response-ops",
   "plugin": {
     "id": "taskManager",
-    "browser": false,
     "server": true,
+    "browser": false,
     "configPath": [
       "xpack",
       "task_manager"

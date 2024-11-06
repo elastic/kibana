@@ -785,8 +785,6 @@ components:
     EngineDescriptor:
       type: object
       properties:
-        error:
-          type: object
         fieldHistoryLength:
           type: integer
         filter:
@@ -808,7 +806,6 @@ components:
         - started
         - stopped
         - updating
-        - error
       type: string
     Entity:
       oneOf:
@@ -927,7 +924,9 @@ components:
             name:
               type: string
             source:
-              type: string
+              items:
+                type: string
+              type: array
           required:
             - name
             - source
@@ -1077,7 +1076,9 @@ components:
             name:
               type: string
             source:
-              type: string
+              items:
+                type: string
+              type: array
           required:
             - name
             - source

@@ -10,12 +10,10 @@ import { omit } from 'lodash/fp';
 import React, { useCallback, useMemo, useState, useRef } from 'react';
 import type { IToasts } from '@kbn/core-notifications-browser';
 import { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
-import useLocalStorage from 'react-use/lib/useLocalStorage';
-import useSessionStorage from 'react-use/lib/useSessionStorage';
+import { useLocalStorage, useSessionStorage } from 'react-use';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import { AssistantFeatures, defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
-import { NavigateToAppOptions, UserProfileService } from '@kbn/core/public';
-import { useQuery } from '@tanstack/react-query';
+import { NavigateToAppOptions } from '@kbn/core/public';
 import { updatePromptContexts } from './helpers';
 import type {
   PromptContext,
@@ -76,7 +74,6 @@ export interface AssistantProviderProps {
   title?: string;
   toasts?: IToasts;
   currentAppId: string;
-  userProfileService: UserProfileService;
 }
 
 export interface UserAvatar {
@@ -110,6 +107,7 @@ export interface UseAssistantContext {
   registerPromptContext: RegisterPromptContext;
   selectedSettingsTab: SettingsTabs | null;
   setAssistantStreamingEnabled: React.Dispatch<React.SetStateAction<boolean | undefined>>;
+  setCurrentUserAvatar: React.Dispatch<React.SetStateAction<UserAvatar | undefined>>;
   setKnowledgeBase: React.Dispatch<React.SetStateAction<KnowledgeBaseConfig | undefined>>;
   setLastConversationId: React.Dispatch<React.SetStateAction<string | undefined>>;
   setSelectedSettingsTab: React.Dispatch<React.SetStateAction<SettingsTabs | null>>;
@@ -127,7 +125,6 @@ export interface UseAssistantContext {
   unRegisterPromptContext: UnRegisterPromptContext;
   currentAppId: string;
   codeBlockRef: React.MutableRefObject<(codeBlock: string) => void>;
-  userProfileService: UserProfileService;
 }
 
 const AssistantContext = React.createContext<UseAssistantContext | undefined>(undefined);
@@ -150,7 +147,6 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   title = DEFAULT_ASSISTANT_TITLE,
   toasts,
   currentAppId,
-  userProfileService,
 }) => {
   /**
    * Session storage for traceOptions, including APM URL and LangSmith Project/API Key
@@ -227,18 +223,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   /**
    * Current User Avatar
    */
-  const { data: currentUserAvatar } = useQuery({
-    queryKey: ['currentUserAvatar'],
-    queryFn: async () =>
-      userProfileService.getCurrent<{ avatar: UserAvatar }>({
-        dataPath: 'avatar',
-      }),
-    select: (data) => {
-      return data.data.avatar;
-    },
-    keepPreviousData: true,
-    refetchOnWindowFocus: false,
-  });
+  const [currentUserAvatar, setCurrentUserAvatar] = useState<UserAvatar>();
 
   /**
    * Settings State
@@ -276,10 +261,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       docLinks,
       getComments,
       http,
-      knowledgeBase: {
-        ...DEFAULT_KNOWLEDGE_BASE_SETTINGS,
-        ...localStorageKnowledgeBase,
-      },
+      knowledgeBase: { ...DEFAULT_KNOWLEDGE_BASE_SETTINGS, ...localStorageKnowledgeBase },
       promptContexts,
       navigateToApp,
       nameSpace,
@@ -289,6 +271,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       assistantStreamingEnabled: localStorageStreaming ?? true,
       setAssistantStreamingEnabled: setLocalStorageStreaming,
       setKnowledgeBase: setLocalStorageKnowledgeBase,
+      setCurrentUserAvatar,
       setSelectedSettingsTab,
       setShowAssistantOverlay,
       setTraceOptions: setSessionStorageTraceOptions,
@@ -302,7 +285,6 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       baseConversations,
       currentAppId,
       codeBlockRef,
-      userProfileService,
     }),
     [
       actionTypeRegistry,
@@ -337,7 +319,6 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       baseConversations,
       currentAppId,
       codeBlockRef,
-      userProfileService,
     ]
   );
 

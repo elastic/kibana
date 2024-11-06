@@ -41,28 +41,8 @@ export class EngineDescriptorClient {
   ) {
     const engineDescriptor = await this.find(entityType);
 
-    if (engineDescriptor.total > 1) {
-      throw new Error(`Found multiple engine descriptors for entity type ${entityType}`);
-    }
-
-    if (engineDescriptor.total === 1) {
-      const old = engineDescriptor.saved_objects[0].attributes;
-      const update = {
-        ...old,
-        status: ENGINE_STATUS.INSTALLING,
-        filter,
-        fieldHistoryLength,
-        indexPattern,
-      };
-      await this.deps.soClient.update<EngineDescriptor>(
-        entityEngineDescriptorTypeName,
-        this.getSavedObjectId(entityType),
-        update,
-        { refresh: 'wait_for' }
-      );
-
-      return update;
-    }
+    if (engineDescriptor.total > 0)
+      throw new Error(`Entity engine for ${entityType} already exists`);
 
     const { attributes } = await this.deps.soClient.create<EngineDescriptor>(
       entityEngineDescriptorTypeName,
@@ -78,19 +58,15 @@ export class EngineDescriptorClient {
     return attributes;
   }
 
-  async update(entityType: EntityType, engine: Partial<EngineDescriptor>) {
+  async update(entityType: EntityType, status: EngineStatus) {
     const id = this.getSavedObjectId(entityType);
     const { attributes } = await this.deps.soClient.update<EngineDescriptor>(
       entityEngineDescriptorTypeName,
       id,
-      engine,
+      { status },
       { refresh: 'wait_for' }
     );
     return attributes;
-  }
-
-  async updateStatus(entityType: EntityType, status: EngineStatus) {
-    return this.update(entityType, { status });
   }
 
   async find(entityType: EntityType): Promise<SavedObjectsFindResponse<EngineDescriptor>> {

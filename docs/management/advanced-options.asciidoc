@@ -330,6 +330,9 @@ the minimum and maximum values of a numeric field or a map of a geo field.
 [[discover:showMultiFields]]`discover:showMultiFields`::
 Controls the display of multi-fields in the expanded document view.
 
+[[discover:showLegacyFieldTopValues]]`discover:showLegacyFieldTopValues`::
+To calculate the top values for a field in the sidebar using 500 instead of 5,000 records per shard, turn on this option.
+
 [[discover-sort-defaultorder]]`discover:sort:defaultOrder`::
 The default sort direction for time-based data views.
 

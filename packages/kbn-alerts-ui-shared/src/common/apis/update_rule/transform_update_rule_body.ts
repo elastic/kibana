@@ -54,6 +54,6 @@ export const transformUpdateRuleBody: RewriteResponseCase<UpdateRuleBody> = ({
       ...(uuid && { uuid }),
     };
   }),
-  ...(alertDelay !== undefined ? { alert_delay: alertDelay } : {}),
+  ...(alertDelay ? { alert_delay: alertDelay } : {}),
   ...(flapping !== undefined ? { flapping: transformUpdateRuleFlapping(flapping) } : {}),
 });

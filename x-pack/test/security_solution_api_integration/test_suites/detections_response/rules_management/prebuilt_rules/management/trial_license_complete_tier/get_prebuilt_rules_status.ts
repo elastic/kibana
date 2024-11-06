@@ -14,7 +14,7 @@ import {
   createRuleAssetSavedObject,
   createPrebuiltRuleAssetSavedObjects,
   installPrebuiltRules,
-  performUpgradePrebuiltRules,
+  upgradePrebuiltRules,
   createHistoricalPrebuiltRuleAssetSavedObjects,
   getPrebuiltRulesAndTimelinesStatus,
   installPrebuiltRulesAndTimelines,
@@ -136,11 +136,8 @@ export default ({ getService }: FtrProviderContext): void => {
           // Increment the version of one of the installed rules and create the new rule assets
           ruleAssetSavedObjects[0]['security-rule'].version += 1;
           await createPrebuiltRuleAssetSavedObjects(es, ruleAssetSavedObjects);
-          // Upgrade all rules to target version
-          await performUpgradePrebuiltRules(es, supertest, {
-            mode: 'ALL_RULES',
-            pick_version: 'TARGET',
-          });
+          // Upgrade all rules
+          await upgradePrebuiltRules(es, supertest);
 
           const { stats } = await getPrebuiltRulesStatus(es, supertest);
           expect(stats).toMatchObject({
@@ -273,11 +270,8 @@ export default ({ getService }: FtrProviderContext): void => {
             createRuleAssetSavedObject({ rule_id: 'rule-1', version: 3 }),
           ]);
 
-          // Upgrade the rule to target version
-          await performUpgradePrebuiltRules(es, supertest, {
-            mode: 'ALL_RULES',
-            pick_version: 'TARGET',
-          });
+          // Upgrade the rule
+          await upgradePrebuiltRules(es, supertest);
 
           const { stats } = await getPrebuiltRulesStatus(es, supertest);
           expect(stats).toMatchObject({

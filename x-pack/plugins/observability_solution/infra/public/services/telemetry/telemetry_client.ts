@@ -9,10 +9,6 @@ import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import {
   AddMetricsCalloutEventParams,
-  AnomalyDetectionDateFieldChangeParams,
-  AnomalyDetectionFilterFieldChangeParams,
-  AnomalyDetectionPartitionFieldChangeParams,
-  AnomalyDetectionSetupParams,
   AssetDashboardLoadedParams,
   AssetDetailsFlyoutViewedParams,
   AssetDetailsPageViewedParams,
@@ -117,36 +113,5 @@ export class TelemetryClient implements ITelemetryClient {
 
   public reportAddMetricsCalloutDismissed = (params: AddMetricsCalloutEventParams) => {
     this.analytics.reportEvent(InfraTelemetryEventTypes.ADD_METRICS_CALLOUT_DISMISSED, params);
-  };
-
-  public reportAnomalyDetectionSetup = (params: AnomalyDetectionSetupParams) => {
-    this.analytics.reportEvent(InfraTelemetryEventTypes.ANOMALY_DETECTION_SETUP, params);
-  };
-
-  public reportAnomalyDetectionDateFieldChange = (
-    params: AnomalyDetectionDateFieldChangeParams
-  ) => {
-    this.analytics.reportEvent(
-      InfraTelemetryEventTypes.ANOMALY_DETECTION_DATE_FIELD_CHANGE,
-      params
-    );
-  };
-
-  public reportAnomalyDetectionPartitionFieldChange = (
-    params: AnomalyDetectionPartitionFieldChangeParams
-  ) => {
-    this.analytics.reportEvent(
-      InfraTelemetryEventTypes.ANOMALY_DETECTION_PARTITION_FIELD_CHANGE,
-      params
-    );
-  };
-
-  public reportAnomalyDetectionFilterFieldChange = (
-    params: AnomalyDetectionFilterFieldChangeParams
-  ) => {
-    this.analytics.reportEvent(
-      InfraTelemetryEventTypes.ANOMALY_DETECTION_FILTER_FIELD_CHANGE,
-      params
-    );
   };
 }

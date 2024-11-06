@@ -10,7 +10,6 @@ import type { ExperimentalFeatures } from '../common/experimental_features';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
 import { getDefaultConfigSettings } from '../common/config_settings';
 import type { ConfigType } from './config';
-import { duration } from 'moment';
 
 export const createMockConfig = (): ConfigType => {
   const enableExperimental: Array<keyof ExperimentalFeatures> = ['responseActionUploadEnabled'];
@@ -46,8 +45,6 @@ export const createMockConfig = (): ConfigType => {
         },
       },
       entityStore: {
-        frequency: duration('1m'),
-        syncDelay: duration('5m'),
         developer: {
           pipelineDebugMode: false,
         },

@@ -53,28 +53,13 @@ export function getPutPayloadSchema(
     /**
      * Optional text to describe the Role
      */
-    description: schema.maybe(
-      schema.string({
-        maxLength: 2048,
-        meta: { description: 'A description for the role.' },
-      })
-    ),
+    description: schema.maybe(schema.string({ maxLength: 2048 })),
 
     /**
      * An optional meta-data dictionary. Within the metadata, keys that begin with _ are reserved
      * for system usage.
      */
-    metadata: schema.maybe(
-      schema.recordOf(
-        schema.string({
-          meta: {
-            description:
-              'A metadata dictionary. Keys that begin with `_` are reserved for system usage.',
-          },
-        }),
-        schema.any()
-      )
-    ),
+    metadata: schema.maybe(schema.recordOf(schema.string(), schema.any())),
 
     /**
      * Elasticsearch specific portion of the role definition.

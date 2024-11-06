@@ -20,10 +20,8 @@ export const deleteSignalsMigrationRoute = (router: SecuritySolutionPluginRouter
     .delete({
       path: DETECTION_ENGINE_SIGNALS_MIGRATION_URL,
       access: 'public',
-      security: {
-        authz: {
-          requiredPrivileges: ['securitySolution'],
-        },
+      options: {
+        tags: ['access:securitySolution'],
       },
     })
     .addVersion(

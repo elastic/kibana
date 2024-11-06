@@ -6,6 +6,7 @@
  */
 
 import { CoreSetup, Logger } from '@kbn/core/server';
+import { createLifecycleExecutor } from '@kbn/rule-registry-plugin/server';
 import { InfraFeatureId } from '../../../common/constants';
 import { createRuleDataClient } from './rule_data_client';
 import {
@@ -35,7 +36,12 @@ export class RulesService {
       ruleDataService: setupDeps.ruleRegistry.ruleDataService,
     });
 
-    return { ruleDataClient };
+    const createLifecycleRuleExecutor = createLifecycleExecutor(this.logger, ruleDataClient);
+
+    return {
+      createLifecycleRuleExecutor,
+      ruleDataClient,
+    };
   }
 
   public start(_startDeps: RulesServiceStartDeps): RulesServiceStart {

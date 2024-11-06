@@ -84,7 +84,6 @@ const createStartContractMock = () => {
       initNavigation: jest.fn(),
       setSideNavComponent: jest.fn(),
       setBreadcrumbs: jest.fn(),
-      getBreadcrumbs$: jest.fn(),
       getActiveNavigationNodes$: jest.fn(),
       getNavigationTreeUi$: jest.fn(),
       changeActiveSolutionNavigation: jest.fn(),

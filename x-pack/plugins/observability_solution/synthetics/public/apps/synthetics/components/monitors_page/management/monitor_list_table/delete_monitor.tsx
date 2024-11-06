@@ -12,7 +12,6 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useGetUrlParams } from '../../../../hooks';
 import { fetchDeleteMonitor } from '../../../../state';
 import { kibanaService } from '../../../../../../utils/kibana_service';
 import * as labels from './labels';
@@ -31,7 +30,6 @@ export const DeleteMonitor = ({
   setMonitorPendingDeletion: (val: string[]) => void;
 }) => {
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
-  const { spaceId } = useGetUrlParams();
 
   const handleConfirmDelete = () => {
     setIsDeleting(true);
@@ -39,9 +37,9 @@ export const DeleteMonitor = ({
 
   const { status: monitorDeleteStatus } = useFetcher(() => {
     if (isDeleting) {
-      return fetchDeleteMonitor({ configIds, spaceId });
+      return fetchDeleteMonitor({ configIds });
     }
-  }, [configIds, isDeleting, spaceId]);
+  }, [configIds, isDeleting]);
 
   useEffect(() => {
     const { coreStart, toasts } = kibanaService;

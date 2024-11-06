@@ -35,13 +35,7 @@ describe('AlertingCallout', () => {
     const { getByText, queryByText } = render(<AlertingCallout />, {
       state: {
         dynamicSettings: {
-          ...(shouldShowCallout
-            ? {
-                settings: {
-                  defaultTLSRuleEnabled: true,
-                },
-              }
-            : {}),
+          ...(shouldShowCallout ? { settings: {} } : {}),
         },
         defaultAlerting: {
           data: {
@@ -91,13 +85,7 @@ describe('AlertingCallout', () => {
         {
           state: {
             dynamicSettings: {
-              ...(shouldShowCallout
-                ? {
-                    settings: {
-                      defaultTLSRuleEnabled: true,
-                    },
-                  }
-                : {}),
+              ...(shouldShowCallout ? { settings: {} } : {}),
             },
             defaultAlerting: {
               data: {

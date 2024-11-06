@@ -13,17 +13,7 @@ export function esqlResultToPlainObjects<T extends Record<string, any>>(
   return result.values.map((row) => {
     return row.reduce<Record<string, unknown>>((acc, value, index) => {
       const column = result.columns[index];
-
-      if (!column) {
-        return acc;
-      }
-
-      // Removes the type suffix from the column name
-      const name = column.name.replace(/\.(text|keyword)$/, '');
-      if (!acc[name]) {
-        acc[name] = value;
-      }
-
+      acc[column.name] = value;
       return acc;
     }, {});
   }) as T[];

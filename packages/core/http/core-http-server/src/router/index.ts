@@ -66,7 +66,7 @@ export type {
   PrivilegeSet,
 } from './route';
 
-export { validBodyOutput, ReservedPrivilegesSet } from './route';
+export { validBodyOutput } from './route';
 export type {
   RouteValidationFunction,
   RouteValidationResultFactory,
@@ -80,7 +80,7 @@ export type {
   LazyValidator,
 } from './route_validator';
 export { RouteValidationError } from './route_validator';
-export type { IRouter, RouteRegistrar, RouterRoute, RouterDeprecatedRouteDetails } from './router';
+export type { IRouter, RouteRegistrar, RouterRoute } from './router';
 export type { IKibanaSocket } from './socket';
 export type {
   KibanaErrorResponseFactory,

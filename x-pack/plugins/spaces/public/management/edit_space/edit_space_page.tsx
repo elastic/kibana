@@ -9,9 +9,9 @@ import React from 'react';
 import type { ComponentProps, PropsWithChildren } from 'react';
 
 import { EditSpace } from './edit_space';
-import { EditSpaceProviderRoot, type EditSpaceProviderRootProps } from './provider';
+import { EditSpaceProvider, type EditSpaceProviderProps } from './provider';
 
-type EditSpacePageProps = ComponentProps<typeof EditSpace> & EditSpaceProviderRootProps;
+type EditSpacePageProps = ComponentProps<typeof EditSpace> & EditSpaceProviderProps;
 
 export function EditSpacePage({
   spaceId,
@@ -25,7 +25,7 @@ export function EditSpacePage({
   ...editSpaceServicesProps
 }: PropsWithChildren<EditSpacePageProps>) {
   return (
-    <EditSpaceProviderRoot {...editSpaceServicesProps}>
+    <EditSpaceProvider {...editSpaceServicesProps}>
       <EditSpace
         spaceId={spaceId}
         getFeatures={getFeatures}
@@ -35,6 +35,6 @@ export function EditSpacePage({
         allowFeatureVisibility={allowFeatureVisibility}
         allowSolutionVisibility={allowSolutionVisibility}
       />
-    </EditSpaceProviderRoot>
+    </EditSpaceProvider>
   );
 }

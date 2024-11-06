@@ -20,7 +20,7 @@ import {
 } from '../../state_management/discover_state_provider';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { getTopNavBadges } from './get_top_nav_badges';
-import { useTopNavLinks } from './use_top_nav_links';
+import { getTopNavLinks } from './get_top_nav_links';
 
 export const useDiscoverTopNav = ({
   stateContainer,
@@ -55,16 +55,29 @@ export const useDiscoverTopNav = ({
     stateContainer,
   });
 
-  const topNavMenu = useTopNavLinks({
-    dataView,
-    services,
-    state: stateContainer,
-    onOpenInspector,
-    isEsqlMode,
-    adHocDataViews,
-    topNavCustomization,
-    shouldShowESQLToDataViewTransitionModal,
-  });
+  const topNavMenu = useMemo(
+    () =>
+      getTopNavLinks({
+        dataView,
+        services,
+        state: stateContainer,
+        onOpenInspector,
+        isEsqlMode,
+        adHocDataViews,
+        topNavCustomization,
+        shouldShowESQLToDataViewTransitionModal,
+      }),
+    [
+      adHocDataViews,
+      dataView,
+      isEsqlMode,
+      onOpenInspector,
+      services,
+      stateContainer,
+      topNavCustomization,
+      shouldShowESQLToDataViewTransitionModal,
+    ]
+  );
 
   return {
     topNavMenu,

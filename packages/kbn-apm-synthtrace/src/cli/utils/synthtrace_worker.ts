@@ -7,21 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { timerange } from '@kbn/apm-synthtrace-client';
-import { castArray } from 'lodash';
-import pidusage from 'pidusage';
-import { memoryUsage } from 'process';
 import { parentPort, workerData } from 'worker_threads';
+import pidusage from 'pidusage';
+import { castArray } from 'lodash';
+import { memoryUsage } from 'process';
+import { timerange } from '@kbn/apm-synthtrace-client';
 import { getApmEsClient } from './get_apm_es_client';
-import { getEntitiesKibanaClient } from './get_entites_kibana_client';
-import { getEntitiesEsClient } from './get_entities_es_client';
-import { getInfraEsClient } from './get_infra_es_client';
-import { getLogsEsClient } from './get_logs_es_client';
-import { getOtelSynthtraceEsClient } from './get_otel_es_client';
 import { getScenario } from './get_scenario';
-import { getSyntheticsEsClient } from './get_synthetics_es_client';
 import { loggerProxy } from './logger_proxy';
 import { RunOptions } from './parse_run_cli_flags';
+import { getLogsEsClient } from './get_logs_es_client';
+import { getInfraEsClient } from './get_infra_es_client';
+import { getAssetsEsClient } from './get_assets_es_client';
+import { getSyntheticsEsClient } from './get_synthetics_es_client';
+import { getOtelSynthtraceEsClient } from './get_otel_es_client';
 
 export interface WorkerData {
   bucketFrom: Date;
@@ -30,21 +29,15 @@ export interface WorkerData {
   workerId: string;
   esUrl: string;
   version: string;
-  kibanaUrl: string;
 }
 
-const { bucketFrom, bucketTo, runOptions, esUrl, version, kibanaUrl } = workerData as WorkerData;
+const { bucketFrom, bucketTo, runOptions, esUrl, version } = workerData as WorkerData;
 
 async function start() {
   const logger = loggerProxy;
-  const entitiesEsClient = getEntitiesEsClient({
+  const assetsEsClient = getAssetsEsClient({
     concurrency: runOptions.concurrency,
     target: esUrl,
-    logger,
-  });
-
-  const entitiesKibanaClient = getEntitiesKibanaClient({
-    target: kibanaUrl,
     logger,
   });
 
@@ -92,10 +85,9 @@ async function start() {
       apmEsClient,
       logsEsClient,
       infraEsClient,
+      assetsEsClient,
       syntheticsEsClient,
       otelEsClient,
-      entitiesEsClient,
-      entitiesKibanaClient,
     });
   }
 
@@ -108,7 +100,7 @@ async function start() {
         logsEsClient,
         apmEsClient,
         infraEsClient,
-        entitiesEsClient,
+        assetsEsClient,
         syntheticsEsClient,
         otelEsClient,
       },

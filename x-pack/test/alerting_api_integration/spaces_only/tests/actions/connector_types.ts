@@ -11,7 +11,7 @@ import { getUrlPrefix } from '../../../common/lib/space_test_utils';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
-export default function listConnectorTypesTests({ getService }: FtrProviderContext) {
+export default function listActionTypesTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   describe('connector_types', () => {
@@ -20,17 +20,17 @@ export default function listConnectorTypesTests({ getService }: FtrProviderConte
         `${getUrlPrefix(Spaces.space1.id)}/api/actions/connector_types`
       );
 
-      function createConnectorTypeMatcher(id: string, name: string) {
-        return (connectorType: { id: string; name: string }) => {
-          return connectorType.id === id && connectorType.name === name;
+      function createActionTypeMatcher(id: string, name: string) {
+        return (actionType: { id: string; name: string }) => {
+          return actionType.id === id && actionType.name === name;
         };
       }
 
       expect(response.status).to.eql(200);
       // Check for values explicitly in order to avoid this test failing each time plugins register
-      // a new connector type
+      // a new action type
       expect(
-        response.body.some(createConnectorTypeMatcher('test.index-record', 'Test: Index Record'))
+        response.body.some(createActionTypeMatcher('test.index-record', 'Test: Index Record'))
       ).to.be(true);
     });
 
@@ -39,11 +39,40 @@ export default function listConnectorTypesTests({ getService }: FtrProviderConte
         `${getUrlPrefix(Spaces.space1.id)}/api/actions/connector_types`
       );
 
-      const connectorTypes = response.body as Array<{ is_system_action_type: boolean }>;
+      const actionTypes = response.body as Array<{ is_system_action_type: boolean }>;
 
-      expect(connectorTypes.every((connectorType) => !connectorType.is_system_action_type)).to.be(
-        true
-      );
+      expect(actionTypes.every((actionType) => !actionType.is_system_action_type)).to.be(true);
+    });
+
+    describe('legacy', () => {
+      it('should return 200 with list of action types containing defaults', async () => {
+        const response = await supertest.get(
+          `${getUrlPrefix(Spaces.space1.id)}/api/actions/list_action_types`
+        );
+
+        function createActionTypeMatcher(id: string, name: string) {
+          return (actionType: { id: string; name: string }) => {
+            return actionType.id === id && actionType.name === name;
+          };
+        }
+
+        expect(response.status).to.eql(200);
+        // Check for values explicitly in order to avoid this test failing each time plugins register
+        // a new action type
+        expect(
+          response.body.some(createActionTypeMatcher('test.index-record', 'Test: Index Record'))
+        ).to.be(true);
+      });
+
+      it('should filter out system action types', async () => {
+        const response = await supertest.get(
+          `${getUrlPrefix(Spaces.space1.id)}/api/actions/list_action_types`
+        );
+
+        const actionTypes = response.body as Array<{ is_system_action_type: boolean }>;
+
+        expect(actionTypes.every((actionType) => !actionType.is_system_action_type)).to.be(true);
+      });
     });
   });
 }

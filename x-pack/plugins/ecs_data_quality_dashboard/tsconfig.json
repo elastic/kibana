@@ -26,7 +26,6 @@
     "@kbn/core-elasticsearch-server-mocks",
     "@kbn/core-elasticsearch-server",
     "@kbn/core-security-common",
-    "@kbn/datemath",
   ],
   "exclude": [
     "target/**/*",

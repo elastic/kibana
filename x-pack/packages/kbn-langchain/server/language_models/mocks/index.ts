@@ -20,7 +20,6 @@ export const mockChatCompletion: OpenAI.ChatCompletion = {
       message: {
         role: 'assistant',
         content: 'Yes, your name is Andrew. How can I assist you further, Andrew?',
-        refusal: null,
       },
       finish_reason: 'stop',
       logprobs: null,

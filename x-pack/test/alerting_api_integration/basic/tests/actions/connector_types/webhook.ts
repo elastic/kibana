@@ -14,7 +14,7 @@ import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 export default function webhookTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
-  describe('webhook connector', () => {
+  describe('webhook action', () => {
     let webhookSimulatorURL: string = '';
     let webhookServer: http.Server;
     // need to wait for kibanaServer to settle ...
@@ -25,13 +25,13 @@ export default function webhookTest({ getService }: FtrProviderContext) {
       webhookSimulatorURL = `http://localhost:${availablePort}`;
     });
 
-    it('should return 403 when creating a webhook connector', async () => {
+    it('should return 403 when creating a webhook action', async () => {
       await supertest
-        .post('/api/actions/connector')
+        .post('/api/actions/action')
         .set('kbn-xsrf', 'test')
         .send({
-          name: 'A generic Webhook connector',
-          connector_type_id: '.webhook',
+          name: 'A generic Webhook action',
+          actionTypeId: '.webhook',
           secrets: {
             user: 'username',
             password: 'mypassphrase',

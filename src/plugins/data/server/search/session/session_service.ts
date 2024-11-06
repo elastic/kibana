@@ -402,8 +402,8 @@ export class SearchSessionService implements ISearchSessionService {
     const session = await this.get(deps, user, sessionId);
     const requestHash = createRequestHash(searchRequest.params);
     if (!Object.hasOwn(session.attributes.idMapping, requestHash)) {
-      this.logger.debug(`SearchSessionService: getId | ${sessionId} | ${requestHash} not found`);
-      this.logger.error(
+      this.logger.error(`SearchSessionService: getId | ${sessionId} | ${requestHash} not found`);
+      this.logger.debug(
         `SearchSessionService: getId not found search with params: ${JSON.stringify(
           searchRequest.params
         )}`

@@ -20,15 +20,10 @@ import {
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
-import {
-  EditSpaceProviderRoot,
-  useEditSpaceServices,
-  useEditSpaceStore,
-} from './edit_space_provider';
+import { EditSpaceProvider, useEditSpaceServices, useEditSpaceStore } from './edit_space_provider';
 import { spacesManagerMock } from '../../../spaces_manager/spaces_manager.mock';
 import { getPrivilegeAPIClientMock } from '../../privilege_api_client.mock';
 import { getRolesAPIClientMock } from '../../roles_api_client.mock';
-import { getSecurityLicenseMock } from '../../security_license.mock';
 
 const http = httpServiceMock.createStartContract();
 const notifications = notificationServiceMock.createStartContract();
@@ -50,7 +45,7 @@ const SUTProvider = ({
 }: PropsWithChildren<Partial<Pick<ApplicationStart, 'capabilities'>>>) => {
   return (
     <IntlProvider locale="en">
-      <EditSpaceProviderRoot
+      <EditSpaceProvider
         {...{
           logger,
           i18n,
@@ -61,16 +56,14 @@ const SUTProvider = ({
           spacesManager,
           serverBasePath: '',
           getUrlForApp: (_) => _,
-          getIsRoleManagementEnabled: () => Promise.resolve(() => undefined),
           getRolesAPIClient: getRolesAPIClientMock,
           getPrivilegesAPIClient: getPrivilegeAPIClientMock,
-          getSecurityLicense: getSecurityLicenseMock,
           navigateToUrl: jest.fn(),
           capabilities,
         }}
       >
         {children}
-      </EditSpaceProviderRoot>
+      </EditSpaceProvider>
     </IntlProvider>
   );
 };

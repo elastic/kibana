@@ -161,7 +161,7 @@ export const JobMemoryTreeMap: FC<Props> = ({ node, type, height }) => {
           options={typeOptions}
           selectedOptions={selectedOptions ?? []}
           onChange={setSelectedOptions}
-          data-test-subj="mlJobTreeMapComboBox"
+          isClearable={false}
         />
 
         <EuiSpacer size="s" />

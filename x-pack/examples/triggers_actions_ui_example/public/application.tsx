@@ -203,6 +203,7 @@ const TriggersActionsUiExampleApp = ({
                     ruleTypeRegistry: triggersActionsUi.ruleTypeRegistry,
                     actionTypeRegistry: triggersActionsUi.actionTypeRegistry,
                   }}
+                  returnUrl={application.getUrlForApp('triggersActionsUiExample')}
                 />
               </Page>
             )}
@@ -228,6 +229,7 @@ const TriggersActionsUiExampleApp = ({
                     ruleTypeRegistry: triggersActionsUi.ruleTypeRegistry,
                     actionTypeRegistry: triggersActionsUi.actionTypeRegistry,
                   }}
+                  returnUrl={application.getUrlForApp('triggersActionsUiExample')}
                 />
               </Page>
             )}

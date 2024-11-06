@@ -10,7 +10,7 @@
 import { useCallback, useMemo } from 'react';
 import { Query } from '@elastic/eui';
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
-import type { SearchQueryError, Tag } from './types';
+import type { Tag } from './types';
 
 type QueryUpdater = (query: Query, tag: Tag) => Query;
 
@@ -20,7 +20,7 @@ export function useTags({
   items,
 }: {
   query: Query;
-  updateQuery: (query: Query, error: SearchQueryError | null) => void;
+  updateQuery: (query: Query) => void;
   items: UserContentCommonSchema[];
 }) {
   // Return a map of tag.id to an array of saved object ids having that tag
@@ -47,7 +47,7 @@ export function useTags({
       (tag: Tag, q: Query = query, doUpdate: boolean = true) => {
         const updatedQuery = queryUpdater(q, tag);
         if (doUpdate) {
-          updateQuery(updatedQuery, null);
+          updateQuery(updatedQuery);
         }
         return updatedQuery;
       },
@@ -147,7 +147,7 @@ export function useTags({
 
   const clearTagSelection = useCallback(() => {
     const updatedQuery = query.removeOrFieldClauses('tag');
-    updateQuery(updatedQuery, null);
+    updateQuery(updatedQuery);
     return updateQuery;
   }, [query, updateQuery]);
 

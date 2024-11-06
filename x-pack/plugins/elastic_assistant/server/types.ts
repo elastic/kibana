@@ -43,10 +43,10 @@ import {
   ActionsClientGeminiChatModel,
   ActionsClientLlm,
 } from '@kbn/langchain/server';
-import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { GetAIAssistantKnowledgeBaseDataClientParams } from './ai_assistant_data_clients/knowledge_base';
-import { AttackDiscoveryDataClient } from './lib/attack_discovery/persistence';
+import { AttackDiscoveryDataClient } from './ai_assistant_data_clients/attack_discovery';
 import { AIAssistantConversationsDataClient } from './ai_assistant_data_clients/conversations';
 import type { GetRegisteredFeatures, GetRegisteredTools } from './services/app_context';
 import { AIAssistantDataClient } from './ai_assistant_data_clients';

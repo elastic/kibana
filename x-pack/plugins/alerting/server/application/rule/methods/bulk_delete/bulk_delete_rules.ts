@@ -31,6 +31,7 @@ import type {
   BulkDeleteRulesRequestBody,
 } from './types';
 import { validateBulkDeleteRulesBody } from './validation';
+import type { RuleAttributes } from '../../../../data/rule/types';
 import { bulkDeleteRulesSo } from '../../../../data/rule';
 import { transformRuleAttributesToRuleDomain, transformRuleDomainToRule } from '../../transforms';
 import { ruleDomainSchema } from '../../schemas';
@@ -102,7 +103,7 @@ export const bulkDeleteRules = async <Params extends RuleParams>(
     // when we are doing the bulk delete and this should fix itself
     const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId!);
     const ruleDomain = transformRuleAttributesToRuleDomain<Params>(
-      attributes as RawRule,
+      attributes as RuleAttributes,
       {
         id,
         logger: context.logger,
@@ -143,15 +144,17 @@ const bulkDeleteWithOCC = async (
       type: 'rules',
     },
     () =>
-      context.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<RawRule>({
-        filter,
-        type: RULE_SAVED_OBJECT_TYPE,
-        perPage: 100,
-        ...(context.namespace ? { namespaces: [context.namespace] } : undefined),
-      })
+      context.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<RuleAttributes>(
+        {
+          filter,
+          type: RULE_SAVED_OBJECT_TYPE,
+          perPage: 100,
+          ...(context.namespace ? { namespaces: [context.namespace] } : undefined),
+        }
+      )
   );
 
-  const rulesToDelete: Array<SavedObjectsBulkUpdateObject<RawRule>> = [];
+  const rulesToDelete: Array<SavedObjectsBulkUpdateObject<RuleAttributes>> = [];
   const apiKeyToRuleIdMapping: Record<string, string> = {};
   const taskIdToRuleIdMapping: Record<string, string> = {};
   const ruleNameToRuleIdMapping: Record<string, string> = {};
@@ -191,7 +194,7 @@ const bulkDeleteWithOCC = async (
   );
 
   for (const { id, attributes } of rulesToDelete) {
-    await untrackRuleAlerts(context, id, attributes as RawRule);
+    await untrackRuleAlerts(context, id, attributes as RuleAttributes);
   }
 
   const result = await withSpan(

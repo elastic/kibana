@@ -5,16 +5,9 @@
  * 2.0.
  */
 
-import {
-  MessageRole,
-  AssistantMessage,
-  Message,
-  ToolMessage,
-  UserMessage,
-  ToolChoice,
-  ToolChoiceType,
-  ToolDefinition,
-} from '@kbn/inference-common';
+import { AssistantMessage, Message, ToolMessage, UserMessage } from '../../../common';
+import { MessageRole } from '../../../common/chat_complete';
+import { ToolChoice, ToolChoiceType, ToolDefinition } from '../../../common/chat_complete/tools';
 import { TOOL_USE_END, TOOL_USE_START } from './constants';
 import { getSystemMessageInstructions } from './get_system_instructions';
 

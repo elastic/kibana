@@ -86,12 +86,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('resolves markdown link', async () => {
-        await dashboard.gotoDashboardLandingPage();
-        await dashboard.clickNewDashboard();
-        await dashboardAddPanel.clickMarkdownQuickButton();
+        await visualize.navigateToNewVisualization();
+        await visualize.clickMarkdownWidget();
         await visEditor.setMarkdownTxt(`[abc](#/dashboard/${testDashboardId})`);
         await visEditor.clickGo();
-        await visualize.saveVisualization('legacy url markdown', { redirectToOrigin: true });
+
+        await visualize.saveVisualizationExpectSuccess('legacy url markdown');
+
         await (await find.byLinkText('abc')).click();
 
         await header.waitUntilLoadingHasFinished();

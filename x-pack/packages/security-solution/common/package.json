@@ -1,0 +1,8 @@
+{
+  "name": "@kbn/security-solution-common",
+  "version": "1.0.0",
+  "description": "security solution common components which can be used in multiple plugins such as custom discover and timeline",
+  "license": "Elastic License 2.0",
+  "private": true,
+  "sideEffects": false
+}

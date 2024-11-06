@@ -47,7 +47,6 @@ interface Props {
   }): void;
   showEmptyFields: boolean;
   onAddFilter?: (field: DataViewField | string, value: string, type: '+' | '-') => void;
-  onQueryChange?: (query: Query['query'] | undefined) => void;
 }
 
 export const SearchPanel: FC<Props> = ({
@@ -63,7 +62,6 @@ export const SearchPanel: FC<Props> = ({
   visibleFieldNames,
   setSearchParams,
   showEmptyFields,
-  onQueryChange,
 }) => {
   const dvSearchPanelControls = css({
     marginLeft: '0px !important',
@@ -103,7 +101,6 @@ export const SearchPanel: FC<Props> = ({
           searchString={searchString}
           searchQuery={searchQuery}
           searchQueryLanguage={searchQueryLanguage}
-          onQueryChange={onQueryChange}
         />
       </EuiFlexItem>
 

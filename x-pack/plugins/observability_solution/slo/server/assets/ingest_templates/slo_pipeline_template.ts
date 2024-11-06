@@ -19,12 +19,6 @@ export const getSLOPipelineTemplate = (slo: SLODefinition) => ({
   processors: [
     {
       set: {
-        field: '_id',
-        value: `{{{_id}}}-${slo.id}-${slo.revision}`,
-      },
-    },
-    {
-      set: {
         field: 'event.ingested',
         value: '{{{_ingest.timestamp}}}',
       },

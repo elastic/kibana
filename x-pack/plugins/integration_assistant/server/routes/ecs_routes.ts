@@ -34,13 +34,6 @@ export function registerEcsRoutes(router: IRouter<IntegrationAssistantRouteHandl
     .addVersion(
       {
         version: '1',
-        security: {
-          authz: {
-            enabled: false,
-            reason:
-              'This route is opted out from authorization because the privileges are not defined yet.',
-          },
-        },
         validate: {
           request: {
             body: buildRouteValidationWithZod(EcsMappingRequestBody),
@@ -99,9 +92,7 @@ export function registerEcsRoutes(router: IRouter<IntegrationAssistantRouteHandl
           };
 
           const graph = await getEcsGraph({ model });
-          const results = await graph
-            .withConfig({ runName: 'ECS Mapping' })
-            .invoke(parameters, options);
+          const results = await graph.invoke(parameters, options);
 
           return res.ok({ body: EcsMappingResponse.parse(results) });
         } catch (err) {

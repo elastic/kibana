@@ -83,11 +83,13 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
   }, [allSignificantItems, groupFilter]);
 
   const zeroDocsFallback = useAppSelector((s) => s.logRateAnalysisResults.zeroDocsFallback);
-  const pinnedGroup = useAppSelector((s) => s.logRateAnalysisTable.pinnedGroup);
-  const selectedGroup = useAppSelector((s) => s.logRateAnalysisTable.selectedGroup);
-  const pinnedSignificantItem = useAppSelector((s) => s.logRateAnalysisTable.pinnedSignificantItem);
+  const pinnedGroup = useAppSelector((s) => s.logRateAnalysisTableRow.pinnedGroup);
+  const selectedGroup = useAppSelector((s) => s.logRateAnalysisTableRow.selectedGroup);
+  const pinnedSignificantItem = useAppSelector(
+    (s) => s.logRateAnalysisTableRow.pinnedSignificantItem
+  );
   const selectedSignificantItem = useAppSelector(
-    (s) => s.logRateAnalysisTable.selectedSignificantItem
+    (s) => s.logRateAnalysisTableRow.selectedSignificantItem
   );
 
   const dispatch = useAppDispatch();

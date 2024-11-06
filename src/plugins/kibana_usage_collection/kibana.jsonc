@@ -1,15 +1,11 @@
 {
   "type": "plugin",
   "id": "@kbn/kibana-usage-collection-plugin",
-  "owner": [
-    "@elastic/kibana-core"
-  ],
-  "group": "platform",
-  "visibility": "private",
+  "owner": "@elastic/kibana-core",
   "plugin": {
     "id": "kibanaUsageCollection",
-    "browser": true,
     "server": true,
+    "browser": true,
     "requiredPlugins": [
       "usageCollection"
     ]

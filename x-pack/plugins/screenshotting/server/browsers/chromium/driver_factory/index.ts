@@ -147,7 +147,7 @@ export class HeadlessChromiumDriverFactory {
         let browser: Browser | undefined;
         try {
           browser = await puppeteer.launch({
-            pipe: true,
+            pipe: !this.config.browser.chromium.inspect,
             userDataDir: this.userDataDir,
             executablePath: this.binaryPath,
             acceptInsecureCerts: true,

@@ -7,7 +7,7 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TryInConsoleButton } from '@kbn/try-in-console';
 
@@ -55,17 +55,16 @@ export const AddDocumentsCodeExample = ({
     },
     [usageTracker]
   );
-  const sampleDocuments = useMemo(() => {
-    return [1, 2, 3].map((num) =>
-      generateSampleDocument(codeSampleMappings, `Example text ${num}`)
-    );
+  const sampleDocument = useMemo(() => {
+    // TODO: implement smart document generation
+    return generateSampleDocument(codeSampleMappings);
   }, [codeSampleMappings]);
   const { apiKey, apiKeyIsVisible } = useSearchApiKey();
   const codeParams: IngestCodeSnippetParameters = useMemo(() => {
     return {
       indexName,
       elasticsearchURL: elasticsearchUrl,
-      sampleDocuments,
+      sampleDocument,
       indexHasMappings,
       mappingProperties: codeSampleMappings,
       apiKey: apiKeyIsVisible && apiKey ? apiKey : undefined,
@@ -73,7 +72,7 @@ export const AddDocumentsCodeExample = ({
   }, [
     indexName,
     elasticsearchUrl,
-    sampleDocuments,
+    sampleDocument,
     codeSampleMappings,
     indexHasMappings,
     apiKeyIsVisible,
@@ -96,27 +95,33 @@ export const AddDocumentsCodeExample = ({
               onSelectLanguage={onSelectLanguage}
             />
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <TryInConsoleButton
-              request={
-                !indexHasMappings
-                  ? `${ingestCodeExamples.sense.updateMappingsCommand(
-                      codeParams
-                    )}\n\n${ingestCodeExamples.sense.ingestCommand(codeParams)}`
-                  : ingestCodeExamples.sense.ingestCommand(codeParams)
-              }
-              application={application}
-              sharePlugin={share}
-              consolePlugin={consolePlugin}
-            />
-          </EuiFlexItem>
+          {selectedLanguage === 'curl' && (
+            <EuiFlexItem grow={false}>
+              <TryInConsoleButton
+                request={
+                  !indexHasMappings
+                    ? `${ingestCodeExamples.sense.updateMappingsCommand(
+                        codeParams
+                      )}\n\n${ingestCodeExamples.sense.ingestCommand(codeParams)}`
+                    : ingestCodeExamples.sense.ingestCommand(codeParams)
+                }
+                application={application}
+                sharePlugin={share}
+                consolePlugin={consolePlugin}
+              />
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
+        <EuiText>
+          <p>{ingestCodeExamples.description}</p>
+        </EuiText>
         {selectedCodeExamples.installCommand && (
           <EuiFlexItem>
             <CodeSample
               id="installCodeExample"
-              title={ingestCodeExamples.installTitle}
-              description={ingestCodeExamples.installDescription}
+              title={i18n.translate('xpack.searchIndices.indexDetails.installLibrary.title', {
+                defaultMessage: 'Install Elasticsearch library',
+              })}
               language="shell"
               code={selectedCodeExamples.installCommand}
               onCodeCopyClick={() => {
@@ -132,8 +137,9 @@ export const AddDocumentsCodeExample = ({
           <EuiFlexItem>
             <CodeSample
               id="addMappingsCodeExample"
-              title={ingestCodeExamples.addMappingsTitle}
-              description={ingestCodeExamples.addMappingsDescription}
+              title={i18n.translate('xpack.searchIndices.indexDetails.addMappingsCode.title', {
+                defaultMessage: 'Add mappings to your index',
+              })}
               language={Languages[selectedLanguage].codeBlockLanguage}
               code={selectedCodeExamples.updateMappingsCommand(codeParams)}
               onCodeCopyClick={() => {
@@ -148,16 +154,7 @@ export const AddDocumentsCodeExample = ({
         <EuiFlexItem>
           <CodeSample
             id="ingestDataCodeExample"
-            title={i18n.translate('xpack.searchIndices.indexDetails.ingestDocuments.title', {
-              defaultMessage: 'Ingest documents',
-            })}
-            description={i18n.translate(
-              'xpack.searchIndices.indexDetails.ingestDocuments.description',
-              {
-                defaultMessage:
-                  'Next, use the Elasticsearch bulk API to ingest an array of documents into the index.',
-              }
-            )}
+            title={ingestCodeExamples.ingestTitle}
             language={Languages[selectedLanguage].codeBlockLanguage}
             code={selectedCodeExamples.ingestCommand(codeParams)}
             onCodeCopyClick={() => {

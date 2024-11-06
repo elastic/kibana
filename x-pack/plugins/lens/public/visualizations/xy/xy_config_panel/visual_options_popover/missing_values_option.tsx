@@ -9,7 +9,6 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiIconTip, EuiSuperSelect, EuiSwitch, EuiText } from '@elastic/eui';
 import type { FittingFunction, EndValue } from '@kbn/expression-xy-plugin/common';
-import { FittingFunctions } from '@kbn/expression-xy-plugin/public';
 import { fittingFunctionDefinitions } from './fitting_function_definitions';
 import { endValueDefinitions } from './end_value_definitions';
 
@@ -26,7 +25,7 @@ export interface MissingValuesOptionProps {
 export const MissingValuesOptions: React.FC<MissingValuesOptionProps> = ({
   onFittingFnChange,
   fittingFunction,
-  emphasizeFitting = true,
+  emphasizeFitting,
   onEmphasizeFittingChange,
   onEndValueChange,
   endValue,
@@ -79,13 +78,13 @@ export const MissingValuesOptions: React.FC<MissingValuesOptionProps> = ({
                   inputDisplay: title,
                 };
               })}
-              valueOfSelected={fittingFunction || FittingFunctions.LINEAR}
+              valueOfSelected={fittingFunction || 'None'}
               onChange={(value) => onFittingFnChange(value)}
               itemLayoutAlign="top"
               hasDividers
             />
           </EuiFormRow>
-          {fittingFunction && fittingFunction !== FittingFunctions.NONE && (
+          {fittingFunction && fittingFunction !== 'None' && (
             <>
               <EuiFormRow
                 display="columnCompressed"
@@ -110,7 +109,7 @@ export const MissingValuesOptions: React.FC<MissingValuesOptionProps> = ({
                       inputDisplay: title,
                     };
                   })}
-                  valueOfSelected={endValue || FittingFunctions.NONE}
+                  valueOfSelected={endValue || 'None'}
                   onChange={(value) => onEndValueChange(value)}
                   itemLayoutAlign="top"
                   hasDividers

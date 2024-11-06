@@ -56,7 +56,6 @@ const { id } = mockGlobalState.sourcerer.defaultDataView;
 const sourcererDataView = {
   indicesExist: true,
   loading: false,
-  sourcererDataView: {},
 };
 
 describe('timeline sourcerer', () => {

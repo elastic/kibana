@@ -8,7 +8,6 @@
 import {
   MlTrainedModelDeploymentNodesStats,
   MlTrainedModelStats,
-  SearchTotalHits,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -26,8 +25,6 @@ import pRetry from 'p-retry';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { StructuredTool } from '@langchain/core/tools';
 import { ElasticsearchClient } from '@kbn/core/server';
-import { IndexPatternsFetcher } from '@kbn/data-views-plugin/server';
-import { map } from 'lodash';
 import { AIAssistantDataClient, AIAssistantDataClientParams } from '..';
 import { AssistantToolParams, GetElser } from '../../types';
 import {
@@ -41,7 +38,6 @@ import { transformESSearchToKnowledgeBaseEntry } from './transforms';
 import {
   ESQL_DOCS_LOADED_QUERY,
   SECURITY_LABS_RESOURCE,
-  USER_RESOURCE,
 } from '../../routes/knowledge_base/constants';
 import {
   getKBVectorSearchQuery,
@@ -49,11 +45,7 @@ import {
   isModelAlreadyExistsError,
 } from './helpers';
 import { getKBUserFilter } from '../../routes/knowledge_base/entries/utils';
-import {
-  loadSecurityLabs,
-  getSecurityLabsDocsCount,
-} from '../../lib/langchain/content_loaders/security_labs_loader';
-import { ASSISTANT_ELSER_INFERENCE_ID } from './field_maps_configuration';
+import { loadSecurityLabs } from '../../lib/langchain/content_loaders/security_labs_loader';
 
 /**
  * Params for when creating KbDataClient in Request Context Factory. Useful if needing to modify
@@ -62,7 +54,6 @@ import { ASSISTANT_ELSER_INFERENCE_ID } from './field_maps_configuration';
 export interface GetAIAssistantKnowledgeBaseDataClientParams {
   modelIdOverride?: string;
   v2KnowledgeBaseEnabled?: boolean;
-  manageGlobalKnowledgeBaseAIAssistant?: boolean;
 }
 
 interface KnowledgeBaseDataClientParams extends AIAssistantDataClientParams {
@@ -72,7 +63,6 @@ interface KnowledgeBaseDataClientParams extends AIAssistantDataClientParams {
   ingestPipelineResourceName: string;
   setIsKBSetupInProgress: (isInProgress: boolean) => void;
   v2KnowledgeBaseEnabled: boolean;
-  manageGlobalKnowledgeBaseAIAssistant: boolean;
 }
 export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
   constructor(public readonly options: KnowledgeBaseDataClientParams) {
@@ -177,80 +167,27 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     this.options.logger.debug(`Checking if ELSER model '${elserId}' is deployed...`);
 
     try {
-      if (this.isV2KnowledgeBaseEnabled) {
-        return await this.isInferenceEndpointExists();
-      } else {
-        const esClient = await this.options.elasticsearchClientPromise;
-        const getResponse = await esClient.ml.getTrainedModelsStats({
-          model_id: elserId,
-        });
+      const esClient = await this.options.elasticsearchClientPromise;
+      const getResponse = await esClient.ml.getTrainedModelsStats({
+        model_id: elserId,
+      });
 
-        // For standardized way of checking deployment status see: https://github.com/elastic/elasticsearch/issues/106986
-        const isReadyESS = (stats: MlTrainedModelStats) =>
-          stats.deployment_stats?.state === 'started' &&
-          stats.deployment_stats?.allocation_status.state === 'fully_allocated';
+      // For standardized way of checking deployment status see: https://github.com/elastic/elasticsearch/issues/106986
+      const isReadyESS = (stats: MlTrainedModelStats) =>
+        stats.deployment_stats?.state === 'started' &&
+        stats.deployment_stats?.allocation_status.state === 'fully_allocated';
 
-        const isReadyServerless = (stats: MlTrainedModelStats) =>
-          (stats.deployment_stats?.nodes as unknown as MlTrainedModelDeploymentNodesStats[])?.some(
-            (node) => node.routing_state.routing_state === 'started'
-          );
-
-        return getResponse.trained_model_stats?.some(
-          (stats) => isReadyESS(stats) || isReadyServerless(stats)
+      const isReadyServerless = (stats: MlTrainedModelStats) =>
+        (stats.deployment_stats?.nodes as unknown as MlTrainedModelDeploymentNodesStats[]).some(
+          (node) => node.routing_state.routing_state === 'started'
         );
-      }
+
+      return getResponse.trained_model_stats.some(
+        (stats) => isReadyESS(stats) || isReadyServerless(stats)
+      );
     } catch (e) {
-      this.options.logger.debug(`Error checking if ELSER model '${elserId}' is deployed: ${e}`);
       // Returns 404 if it doesn't exist
       return false;
-    }
-  };
-
-  public isInferenceEndpointExists = async (): Promise<boolean> => {
-    try {
-      const esClient = await this.options.elasticsearchClientPromise;
-
-      return !!(await esClient.inference.get({
-        inference_id: ASSISTANT_ELSER_INFERENCE_ID,
-        task_type: 'sparse_embedding',
-      }));
-    } catch (error) {
-      this.options.logger.debug(
-        `Error checking if Inference endpoint ${ASSISTANT_ELSER_INFERENCE_ID} exists: ${error}`
-      );
-      return false;
-    }
-  };
-
-  public createInferenceEndpoint = async () => {
-    const elserId = await this.options.getElserId();
-    this.options.logger.debug(`Deploying ELSER model '${elserId}'...`);
-    try {
-      const esClient = await this.options.elasticsearchClientPromise;
-      if (this.isV2KnowledgeBaseEnabled) {
-        await esClient.inference.put({
-          task_type: 'sparse_embedding',
-          inference_id: ASSISTANT_ELSER_INFERENCE_ID,
-          inference_config: {
-            service: 'elasticsearch',
-            service_settings: {
-              adaptive_allocations: {
-                enabled: true,
-                min_number_of_allocations: 0,
-                max_number_of_allocations: 8,
-              },
-              num_threads: 1,
-              model_id: elserId,
-            },
-            task_settings: {},
-          },
-        });
-      }
-    } catch (error) {
-      this.options.logger.error(
-        `Error creating inference endpoint for ELSER model '${elserId}':\n${error}`
-      );
-      throw new Error(`Error creating inference endpoint for ELSER model '${elserId}':\n${error}`);
     }
   };
 
@@ -269,11 +206,9 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
   public setupKnowledgeBase = async ({
     soClient,
     v2KnowledgeBaseEnabled = true,
-    ignoreSecurityLabs = false,
   }: {
     soClient: SavedObjectsClientContract;
     v2KnowledgeBaseEnabled?: boolean;
-    ignoreSecurityLabs?: boolean;
   }): Promise<void> => {
     if (this.options.getIsKBSetupInProgress()) {
       this.options.logger.debug('Knowledge Base setup already in progress');
@@ -301,22 +236,8 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
             `Removed ${legacyESQL?.total} ESQL knowledge base docs from knowledge base data stream: ${this.indexTemplateAndPattern.alias}.`
           );
         }
-        // Delete any existing Security Labs content
-        const securityLabsDocs = await esClient.deleteByQuery({
-          index: this.indexTemplateAndPattern.alias,
-          query: {
-            bool: {
-              must: [{ terms: { kb_resource: [SECURITY_LABS_RESOURCE] } }],
-            },
-          },
-        });
-        if (securityLabsDocs?.total) {
-          this.options.logger.info(
-            `Removed ${securityLabsDocs?.total} Security Labs knowledge base docs from knowledge base data stream: ${this.indexTemplateAndPattern.alias}.`
-          );
-        }
       } catch (e) {
-        this.options.logger.info('No legacy ESQL or Security Labs knowledge base docs to delete');
+        this.options.logger.info('No legacy ESQL knowledge base docs to delete');
       }
     }
 
@@ -336,39 +257,24 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
         this.options.logger.debug(`ELSER model '${elserId}' is already installed`);
       }
 
-      if (!this.isV2KnowledgeBaseEnabled) {
-        const isDeployed = await this.isModelDeployed();
-        if (!isDeployed) {
-          await this.deployModel();
-          await pRetry(
-            async () =>
-              (await this.isModelDeployed())
-                ? Promise.resolve()
-                : Promise.reject(new Error('Model not deployed')),
-            { minTimeout: 2000, retries: 10 }
-          );
-          this.options.logger.debug(`ELSER model '${elserId}' successfully deployed!`);
-        } else {
-          this.options.logger.debug(`ELSER model '${elserId}' is already deployed`);
-        }
+      const isDeployed = await this.isModelDeployed();
+      if (!isDeployed) {
+        await this.deployModel();
+        await pRetry(
+          async () =>
+            (await this.isModelDeployed())
+              ? Promise.resolve()
+              : Promise.reject(new Error('Model not deployed')),
+          { minTimeout: 2000, retries: 10 }
+        );
+        this.options.logger.debug(`ELSER model '${elserId}' successfully deployed!`);
       } else {
-        const inferenceExists = await this.isInferenceEndpointExists();
-        if (!inferenceExists) {
-          await this.createInferenceEndpoint();
-
-          this.options.logger.debug(
-            `Inference endpoint for ELSER model '${elserId}' successfully deployed!`
-          );
-        } else {
-          this.options.logger.debug(
-            `Inference endpoint for ELSER model '${elserId}' is already deployed`
-          );
-        }
+        this.options.logger.debug(`ELSER model '${elserId}' is already deployed`);
       }
 
       this.options.logger.debug(`Checking if Knowledge Base docs have been loaded...`);
 
-      if (v2KnowledgeBaseEnabled && !ignoreSecurityLabs) {
+      if (v2KnowledgeBaseEnabled) {
         const labsDocsLoaded = await this.isSecurityLabsDocsLoaded();
         if (!labsDocsLoaded) {
           this.options.logger.debug(`Loading Security Labs KB docs...`);
@@ -381,9 +287,8 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
       this.options.setIsKBSetupInProgress(false);
       this.options.logger.error(`Error setting up Knowledge Base: ${e.message}`);
       throw new Error(`Error setting up Knowledge Base: ${e.message}`);
-    } finally {
-      this.options.setIsKBSetupInProgress(false);
     }
+    this.options.setIsKBSetupInProgress(false);
   };
 
   /**
@@ -402,16 +307,12 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     const writer = await this.getWriter();
     const changedAt = new Date().toISOString();
     const authenticatedUser = this.options.currentUser;
+    // TODO: KB-RBAC check for when `global:true`
     if (authenticatedUser == null) {
       throw new Error(
         'Authenticated user not found! Ensure kbDataClient was initialized from a request.'
       );
     }
-
-    if (global && !this.options.manageGlobalKnowledgeBaseAIAssistant) {
-      throw new Error('User lacks privileges to create global knowledge base entries');
-    }
-
     const { errors, docs_created: docsCreated } = await writer.bulk({
       documentsToCreate: documents.map((doc) => {
         // v1 schema has metadata nested in a `metadata` object
@@ -478,87 +379,15 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
   };
 
   /**
-   * Returns if user's KB docs exists
-   */
-
-  public isUserDataExists = async (): Promise<boolean> => {
-    const user = this.options.currentUser;
-    if (user == null) {
-      throw new Error(
-        'Authenticated user not found! Ensure kbDataClient was initialized from a request.'
-      );
-    }
-
-    const esClient = await this.options.elasticsearchClientPromise;
-    const modelId = await this.options.getElserId();
-
-    try {
-      const vectorSearchQuery = getKBVectorSearchQuery({
-        kbResource: USER_RESOURCE,
-        required: false,
-        user,
-        modelId,
-        v2KnowledgeBaseEnabled: this.options.v2KnowledgeBaseEnabled,
-      });
-
-      const result = await esClient.search<EsDocumentEntry>({
-        index: this.indexTemplateAndPattern.alias,
-        size: 0,
-        query: vectorSearchQuery,
-        track_total_hits: true,
-      });
-
-      return !!(result.hits?.total as SearchTotalHits).value;
-    } catch (e) {
-      this.options.logger.debug(`Error checking if user's KB docs exist: ${e.message}`);
-      return false;
-    }
-  };
-
-  /**
-   * Returns if allSecurity Labs KB docs have been loaded
+   * Returns if Security Labs KB docs have been loaded
    */
   public isSecurityLabsDocsLoaded = async (): Promise<boolean> => {
-    const user = this.options.currentUser;
-    if (user == null) {
-      throw new Error(
-        'Authenticated user not found! Ensure kbDataClient was initialized from a request.'
-      );
-    }
-
-    const expectedDocsCount = await getSecurityLabsDocsCount({ logger: this.options.logger });
-
-    const esClient = await this.options.elasticsearchClientPromise;
-    const modelId = await this.options.getElserId();
-
-    try {
-      const vectorSearchQuery = getKBVectorSearchQuery({
-        kbResource: SECURITY_LABS_RESOURCE,
-        required: false,
-        user,
-        modelId,
-        v2KnowledgeBaseEnabled: this.options.v2KnowledgeBaseEnabled,
-      });
-
-      const result = await esClient.search<EsDocumentEntry>({
-        index: this.indexTemplateAndPattern.alias,
-        size: 0,
-        query: vectorSearchQuery,
-        track_total_hits: true,
-      });
-
-      const existingDocs = (result.hits?.total as SearchTotalHits).value;
-
-      if (existingDocs !== expectedDocsCount) {
-        this.options.logger.debug(
-          `Security Labs docs are not loaded, existing docs: ${existingDocs}, expected docs: ${expectedDocsCount}`
-        );
-      }
-      return existingDocs === expectedDocsCount;
-    } catch (e) {
-      this.options.logger.info(`Error checking if Security Labs docs are loaded: ${e.message}`);
-      return false;
-    }
+    const securityLabsDocs = await this.getKnowledgeBaseDocumentEntries({
+      query: '',
+      kbResource: SECURITY_LABS_RESOURCE,
+      required: false,
+    });
+    return securityLabsDocs.length > 0;
   };
 
   /**
@@ -588,10 +417,10 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     const vectorSearchQuery = getKBVectorSearchQuery({
       filter,
       kbResource,
+      modelId,
       query,
       required,
       user,
-      modelId,
       v2KnowledgeBaseEnabled: this.options.v2KnowledgeBaseEnabled,
     });
 
@@ -692,17 +521,12 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     global?: boolean;
   }): Promise<KnowledgeBaseEntryResponse | null> => {
     const authenticatedUser = this.options.currentUser;
-
+    // TODO: KB-RBAC check for when `global:true`
     if (authenticatedUser == null) {
       throw new Error(
         'Authenticated user not found! Ensure kbDataClient was initialized from a request.'
       );
     }
-
-    if (global && !this.options.manageGlobalKnowledgeBaseAIAssistant) {
-      throw new Error('User lacks privileges to create global knowledge base entries');
-    }
-
     this.options.logger.debug(
       () => `Creating Knowledge Base Entry:\n ${JSON.stringify(knowledgeBaseEntry, null, 2)}`
     );
@@ -741,9 +565,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     }
 
     try {
-      const elserId = this.isV2KnowledgeBaseEnabled
-        ? ASSISTANT_ELSER_INFERENCE_ID
-        : await this.options.getElserId();
+      const elserId = await this.options.getElserId();
       const userFilter = getKBUserFilter(user);
       const results = await this.findDocuments<EsIndexEntry>({
         // Note: This is a magic number to set some upward bound as to not blow the context with too
@@ -762,21 +584,14 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
 
       if (results) {
         const entries = transformESSearchToKnowledgeBaseEntry(results.data) as IndexEntry[];
-        const indexPatternFetcher = new IndexPatternsFetcher(esClient);
-        const existingIndices = await indexPatternFetcher.getExistingIndices(map(entries, 'index'));
-        return (
-          entries
-            // Filter out any IndexEntries that don't have an existing index
-            .filter((entry) => existingIndices.includes(entry.index))
-            .map((indexEntry) => {
-              return getStructuredToolForIndexEntry({
-                indexEntry,
-                esClient,
-                logger: this.options.logger,
-                elserId,
-              });
-            })
-        );
+        return entries.map((indexEntry) => {
+          return getStructuredToolForIndexEntry({
+            indexEntry,
+            esClient,
+            logger: this.options.logger,
+            elserId,
+          });
+        });
       }
     } catch (e) {
       this.options.logger.error(`kbDataClient.getAssistantTools() - Failed to fetch IndexEntries`);

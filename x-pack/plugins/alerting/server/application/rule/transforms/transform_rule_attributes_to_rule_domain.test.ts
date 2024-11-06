@@ -9,7 +9,7 @@ import { RecoveredActionGroup } from '../../../../common';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { transformRuleAttributesToRuleDomain } from './transform_rule_attributes_to_rule_domain';
 import { UntypedNormalizedRuleType } from '../../../rule_type_registry';
-import { RawRuleAction } from '../../../types';
+import { RuleActionAttributes } from '../../../data/rule/types';
 
 const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
   id: 'test.rule-type',
@@ -37,7 +37,7 @@ const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
   validLegacyConsumers: [],
 };
 
-const defaultAction: RawRuleAction = {
+const defaultAction: RuleActionAttributes = {
   group: 'default',
   uuid: '1',
   actionRef: 'default-action-ref',
@@ -51,7 +51,7 @@ const defaultAction: RawRuleAction = {
   alertsFilter: { query: { kql: 'test:1', dsl: '{}', filters: [] } },
 };
 
-const systemAction: RawRuleAction = {
+const systemAction: RuleActionAttributes = {
   actionRef: 'system_action:my-system-action-id',
   uuid: '123',
   actionTypeId: '.test-system-action',
@@ -82,8 +82,6 @@ describe('transformRuleAttributesToRuleDomain', () => {
     executionStatus: {
       lastExecutionDate: '2019-02-12T21:01:22.479Z',
       status: 'pending' as const,
-      error: null,
-      warning: null,
     },
     params: {},
     throttle: null,

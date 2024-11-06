@@ -36,24 +36,15 @@ const KNOWLEDGE_BASE_INDEX_PATTERN = '.kibana-elastic-ai-assistant-knowledge-bas
 interface Props {
   knowledgeBase: KnowledgeBaseConfig;
   setUpdatedKnowledgeBaseSettings: React.Dispatch<React.SetStateAction<KnowledgeBaseConfig>>;
-  modalMode?: boolean;
 }
 
 /**
  * Knowledge Base Settings -- set up the Knowledge Base and configure RAG on alerts
  */
 export const KnowledgeBaseSettings: React.FC<Props> = React.memo(
-  ({ knowledgeBase, setUpdatedKnowledgeBaseSettings, modalMode = false }) => {
-    const {
-      http,
-      toasts,
-      assistantAvailability: { isAssistantEnabled },
-    } = useAssistantContext();
-    const {
-      data: kbStatus,
-      isLoading,
-      isFetching,
-    } = useKnowledgeBaseStatus({ http, enabled: isAssistantEnabled });
+  ({ knowledgeBase, setUpdatedKnowledgeBaseSettings }) => {
+    const { http, toasts } = useAssistantContext();
+    const { data: kbStatus, isLoading, isFetching } = useKnowledgeBaseStatus({ http });
     const { mutate: setupKB, isLoading: isSettingUpKB } = useSetupKnowledgeBase({ http, toasts });
 
     // Resource enabled state
@@ -61,9 +52,9 @@ export const KnowledgeBaseSettings: React.FC<Props> = React.memo(
     const isSecurityLabsEnabled = kbStatus?.security_labs_exists ?? false;
     const isKnowledgeBaseSetup =
       (isElserEnabled &&
+        isSecurityLabsEnabled &&
         kbStatus?.index_exists &&
-        kbStatus?.pipeline_exists &&
-        (isSecurityLabsEnabled || kbStatus?.user_data_exists)) ??
+        kbStatus?.pipeline_exists) ??
       false;
     const isSetupInProgress = kbStatus?.is_setup_in_progress ?? false;
     const isSetupAvailable = kbStatus?.is_setup_available ?? false;
@@ -122,7 +113,7 @@ export const KnowledgeBaseSettings: React.FC<Props> = React.memo(
 
     return (
       <>
-        <EuiTitle size={'s'} data-test-subj="knowledge-base-settings">
+        <EuiTitle size={'s'}>
           <h2>
             {i18n.SETTINGS_TITLE}{' '}
             <EuiBetaBadge iconType={'beaker'} label={i18n.SETTINGS_BADGE} size="s" color="hollow" />
@@ -203,12 +194,10 @@ export const KnowledgeBaseSettings: React.FC<Props> = React.memo(
 
         <EuiSpacer size="s" />
 
-        {!modalMode && (
-          <AlertsSettings
-            knowledgeBase={knowledgeBase}
-            setUpdatedKnowledgeBaseSettings={setUpdatedKnowledgeBaseSettings}
-          />
-        )}
+        <AlertsSettings
+          knowledgeBase={knowledgeBase}
+          setUpdatedKnowledgeBaseSettings={setUpdatedKnowledgeBaseSettings}
+        />
       </>
     );
   }

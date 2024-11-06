@@ -10,20 +10,11 @@
 import { EuiButton, EuiCallOut, useEuiTheme, EuiText, EuiSpacer } from '@elastic/eui';
 import React, { FC, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { SolutionId } from '@kbn/core-chrome-browser';
 
-const feedbackUrls: { [id in SolutionId]: string } = {
-  es: 'https://ela.st/search-nav-feedback',
-  oblt: 'https://ela.st/o11y-nav-feedback',
-  security: 'https://ela.st/security-nav-feedback',
-};
+const feedbackUrl = 'https://ela.st/nav-feedback';
 const FEEDBACK_BTN_KEY = 'core.chrome.sideNav.feedbackBtn';
 
-interface Props {
-  solutionId: SolutionId;
-}
-
-export const FeedbackBtn: FC<Props> = ({ solutionId }) => {
+export const FeedbackBtn: FC = () => {
   const { euiTheme } = useEuiTheme();
   const [showCallOut, setShowCallOut] = useState(
     sessionStorage.getItem(FEEDBACK_BTN_KEY) !== 'hidden'
@@ -35,7 +26,7 @@ export const FeedbackBtn: FC<Props> = ({ solutionId }) => {
   };
 
   const onClick = () => {
-    window.open(feedbackUrls[solutionId], '_blank');
+    window.open(feedbackUrl, '_blank');
     onDismiss();
   };
 

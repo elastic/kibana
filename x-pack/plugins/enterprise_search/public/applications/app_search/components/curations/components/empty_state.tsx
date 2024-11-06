@@ -10,7 +10,7 @@ import React from 'react';
 import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { docLinks } from '../../../../shared/doc_links';
+import { CURATIONS_DOCS_URL } from '../../../routes';
 
 export const EmptyState: React.FC = () => (
   <EuiEmptyPrompt
@@ -33,7 +33,7 @@ export const EmptyState: React.FC = () => (
       </p>
     }
     actions={
-      <EuiButton size="s" target="_blank" iconType="popout" href={docLinks.appSearchCurations}>
+      <EuiButton size="s" target="_blank" iconType="popout" href={CURATIONS_DOCS_URL}>
         {i18n.translate('xpack.enterpriseSearch.appSearch.engine.curations.empty.buttonLabel', {
           defaultMessage: 'Read the curations guide',
         })}

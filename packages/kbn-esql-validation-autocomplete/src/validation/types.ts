@@ -8,15 +8,12 @@
  */
 
 import type { ESQLMessage, ESQLLocation } from '@kbn/esql-ast';
-import { FieldType, SupportedDataType } from '../definitions/types';
+import { FieldType } from '../definitions/types';
 import type { EditorError } from '../types';
 
 export interface ESQLVariable {
   name: string;
-  // invalid expressions produce columns of type "unknown"
-  // also, there are some cases where we can't yet infer the type of
-  // a valid expression as with `CASE` which can return union types
-  type: SupportedDataType | 'unknown';
+  type: string;
   location: ESQLLocation;
 }
 

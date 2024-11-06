@@ -1,20 +1,13 @@
 {
   "type": "plugin",
   "id": "@kbn/cloud-defend-plugin",
-  "owner": [
-    "@elastic/kibana-cloud-security-posture"
-  ],
-  "group": "security",
-  "visibility": "private",
+  "owner": "@elastic/kibana-cloud-security-posture",
   "description": "Defend for containers (D4C)",
   "plugin": {
     "id": "cloudDefend",
-    "browser": true,
     "server": true,
-    "configPath": [
-      "xpack",
-      "cloudDefend"
-    ],
+    "browser": true,
+    "configPath": ["xpack", "cloudDefend"],
     "requiredPlugins": [
       "navigation",
       "data",
@@ -26,12 +19,7 @@
       "licensing",
       "kubernetesSecurity"
     ],
-    "optionalPlugins": [
-      "usageCollection"
-    ],
-    "requiredBundles": [
-      "kibanaReact",
-      "usageCollection"
-    ]
+    "optionalPlugins": ["usageCollection"],
+    "requiredBundles": ["kibanaReact", "usageCollection"]
   }
 }

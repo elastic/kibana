@@ -11,31 +11,23 @@
 import { EuiButton, EuiButtonSize } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { OBSERVABILITY_ONBOARDING_LOCATOR } from '@kbn/deeplinks-observability';
-import { LocatorPublic } from '@kbn/share-plugin/common';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
-import {
-  ApmOnboardingLocatorCategory,
-  ApmOnboardingLocatorParams,
-} from '../../../locator/onboarding_locator';
 
-export const addApmDataProps = (locator: LocatorPublic<ApmOnboardingLocatorParams> | undefined) => {
-  return {
-    name: i18n.translate('xpack.apm.add.apm.agent.button.', {
-      defaultMessage: 'Add APM',
-    }),
-    link: locator?.getRedirectUrl({ category: ApmOnboardingLocatorCategory.Apm }),
-  };
+export const addApmData = {
+  name: i18n.translate('xpack.apm.add.apm.agent.button.', {
+    defaultMessage: 'Add APM',
+  }),
+  link: '/app/observabilityOnboarding/?category=apm',
 };
 
-export const associateServiceLogsProps = {
+export const associateServiceLogs = {
   name: i18n.translate('xpack.apm.associate.service.logs.button', {
     defaultMessage: 'Associate existing service logs',
   }),
   link: 'https://ela.st/new-experience-associate-service-logs',
 };
 
-export const collectServiceLogsProps = {
+export const collectServiceLogs = {
   name: i18n.translate('xpack.apm.collect.service.logs.button', {
     defaultMessage: 'Collect new service logs',
   }),
@@ -50,31 +42,18 @@ interface AddApmDataProps {
 }
 
 export function AddApmData({ fill = false, size = 's', ...props }: AddApmDataProps) {
-  const {
-    share: {
-      url: { locators },
-    },
-  } = useApmPluginContext();
-
-  const onboardingLocator = locators.get<ApmOnboardingLocatorParams>(
-    OBSERVABILITY_ONBOARDING_LOCATOR
-  );
-
-  const addApmDataButtonProps = addApmDataProps(onboardingLocator);
-
-  if (!addApmDataButtonProps.link) {
-    return;
-  }
+  const { core } = useApmPluginContext();
+  const { basePath } = core.http;
 
   return (
     <EuiButton
       data-test-subj={props['data-test-subj']}
       size={size}
       onClick={props.onClick}
-      href={addApmDataButtonProps?.link}
+      href={basePath.prepend(addApmData.link)}
       fill={fill}
     >
-      {addApmDataButtonProps.name}
+      {addApmData.name}
     </EuiButton>
   );
 }
@@ -82,15 +61,15 @@ export function AddApmData({ fill = false, size = 's', ...props }: AddApmDataPro
 export function AssociateServiceLogs({ onClick }: { onClick?: () => void }) {
   return (
     <EuiButton
-      data-test-subj="associateServiceLogsPropsButton"
+      data-test-subj="associateServiceLogsButton"
       size="s"
       onClick={onClick}
-      href={associateServiceLogsProps.link}
+      href={associateServiceLogs.link}
       target="_blank"
       iconType="popout"
       iconSide="right"
     >
-      {associateServiceLogsProps.name}
+      {associateServiceLogs.name}
     </EuiButton>
   );
 }
@@ -101,12 +80,12 @@ export function CollectServiceLogs({ onClick }: { onClick?: () => void }) {
 
   return (
     <EuiButton
-      data-test-subj="collectServiceLogsPropsButton"
+      data-test-subj="collectServiceLogsButton"
       size="s"
       onClick={onClick}
-      href={basePath.prepend(collectServiceLogsProps.link)}
+      href={basePath.prepend(collectServiceLogs.link)}
     >
-      {collectServiceLogsProps.name}
+      {collectServiceLogs.name}
     </EuiButton>
   );
 }

@@ -33,7 +33,6 @@ import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { DataSourceContextProvider } from '../../hooks/use_data_source';
 import type { PatternAnalysisEmbeddableRuntimeState } from './types';
 import { PatternAnalysisSettings } from '../../components/log_categorization/log_categorization_for_embeddable/embeddable_menu';
-import { TimeFieldWarning } from '../../components/time_field_warning';
 import { RandomSampler } from '../../components/log_categorization/sampling_menu';
 import {
   DEFAULT_PROBABILITY,
@@ -63,7 +62,6 @@ export const PatternAnalysisEmbeddableInitializer: FC<PatternAnalysisInitializer
   isNewPanel,
 }) => {
   const {
-    data: { dataViews },
     unifiedSearch: {
       ui: { IndexPatternSelect },
     },
@@ -168,7 +166,7 @@ export const PatternAnalysisEmbeddableInitializer: FC<PatternAnalysisInitializer
               }}
             />
           </EuiFormRow>
-          <DataSourceContextProvider dataViews={dataViews} dataViewId={formInput.dataViewId}>
+          <DataSourceContextProvider dataViewId={formInput.dataViewId}>
             <EuiSpacer />
 
             <FormControls
@@ -387,6 +385,34 @@ const TextFieldWarning = () => {
             'xpack.aiops.logCategorization.embeddableMenu.textFieldWarning.title.description',
             {
               defaultMessage: 'Pattern analysis can only be run on data views with a text field.',
+            }
+          )}
+        </p>
+      </EuiCallOut>
+      <EuiSpacer />
+    </>
+  );
+};
+
+const TimeFieldWarning = () => {
+  return (
+    <>
+      <EuiCallOut
+        size="s"
+        title={i18n.translate(
+          'xpack.aiops.logCategorization.embeddableMenu.timeFieldWarning.title',
+          {
+            defaultMessage: 'The selected data view does not contain a time field.',
+          }
+        )}
+        color="warning"
+        iconType="warning"
+      >
+        <p>
+          {i18n.translate(
+            'xpack.aiops.logCategorization.embeddableMenu.timeFieldWarning.title.description',
+            {
+              defaultMessage: 'Pattern analysis can only be run on data views with a time field.',
             }
           )}
         </p>

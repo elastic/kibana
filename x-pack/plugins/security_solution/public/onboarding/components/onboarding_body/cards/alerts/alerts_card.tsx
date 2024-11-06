@@ -6,16 +6,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiLink,
-  EuiSpacer,
-  EuiText,
-  useEuiTheme,
-  COLOR_MODES_STANDARD,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { SecuritySolutionLinkButton } from '../../../../../common/components/links';
 import { OnboardingCardId } from '../../../../constants';
@@ -30,9 +21,6 @@ export const AlertsCard: OnboardingCardComponent = ({
   setExpandedCardId,
   setComplete,
 }) => {
-  const { colorMode } = useEuiTheme();
-  const isDarkMode = colorMode === COLOR_MODES_STANDARD.dark;
-
   const isIntegrationsCardComplete = useMemo(
     () => isCardComplete(OnboardingCardId.integrations),
     [isCardComplete]
@@ -51,11 +39,7 @@ export const AlertsCard: OnboardingCardComponent = ({
         alignItems="flexStart"
       >
         <EuiFlexItem grow={false}>
-          <EuiText
-            data-test-subj="alertsCardDescription"
-            size="s"
-            color={isDarkMode ? 'text' : 'subdued'}
-          >
+          <EuiText data-test-subj="alertsCardDescription" size="s" color="subdued">
             {i18n.ALERTS_CARD_DESCRIPTION}
           </EuiText>
           {!isIntegrationsCardComplete && (

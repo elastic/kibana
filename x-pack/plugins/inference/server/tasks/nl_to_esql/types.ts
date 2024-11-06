@@ -11,9 +11,9 @@ import type {
   ChatCompletionMessageEvent,
   FunctionCallingMode,
   Message,
-  ToolOptions,
-  OutputCompleteEvent,
-} from '@kbn/inference-common';
+} from '../../../common/chat_complete';
+import type { ToolOptions } from '../../../common/chat_complete/tools';
+import type { OutputCompleteEvent } from '../../../common/output';
 import type { InferenceClient } from '../../types';
 
 export type NlToEsqlTaskEvent<TToolOptions extends ToolOptions> =

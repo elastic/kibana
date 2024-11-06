@@ -20,7 +20,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.common.navigateToApp('console');
       await PageObjects.common.dismissBanner();
       await retry.try(async () => {
-        await PageObjects.console.skipTourIfExists();
+        await PageObjects.console.closeHelpIfExists();
       });
     });
 

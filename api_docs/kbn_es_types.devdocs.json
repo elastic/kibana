@@ -108,20 +108,6 @@
           },
           {
             "parentPluginId": "@kbn/es-types",
-            "id": "def-common.ESQLSearchParams.include_ccs_metadata",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "include_ccs_metadata",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "packages/kbn-es-types/src/search.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/es-types",
             "id": "def-common.ESQLSearchParams.dropNullColumns",
             "type": "CompoundType",
             "tags": [],
@@ -234,21 +220,6 @@
             "description": [],
             "signature": [
               "number | undefined"
-            ],
-            "path": "packages/kbn-es-types/src/search.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/es-types",
-            "id": "def-common.ESQLSearchResponse._clusters",
-            "type": "Object",
-            "tags": [],
-            "label": "_clusters",
-            "description": [],
-            "signature": [
-              "ClusterStatistics",
-              " | undefined"
             ],
             "path": "packages/kbn-es-types/src/search.ts",
             "deprecated": false,

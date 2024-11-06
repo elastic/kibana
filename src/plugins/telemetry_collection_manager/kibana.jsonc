@@ -1,15 +1,11 @@
 {
   "type": "plugin",
   "id": "@kbn/telemetry-collection-manager-plugin",
-  "owner": [
-    "@elastic/kibana-core"
-  ],
-  "group": "platform",
-  "visibility": "shared",
+  "owner": "@elastic/kibana-core",
   "plugin": {
     "id": "telemetryCollectionManager",
-    "browser": false,
     "server": true,
+    "browser": false,
     "requiredPlugins": [
       "usageCollection"
     ]

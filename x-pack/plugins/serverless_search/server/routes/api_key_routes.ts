@@ -7,7 +7,6 @@
 
 import { schema } from '@kbn/config-schema';
 import { RouteDependencies } from '../plugin';
-import { errorHandler } from '../utils/error_handler';
 
 export const registerApiKeyRoutes = ({ logger, router, getSecurity }: RouteDependencies) => {
   router.get(
@@ -15,32 +14,20 @@ export const registerApiKeyRoutes = ({ logger, router, getSecurity }: RouteDepen
       path: '/internal/serverless_search/api_keys',
       validate: {},
     },
-    errorHandler(logger)(async (context, request, response) => {
+    async (context, request, response) => {
       const core = await context.core;
       const { client } = core.elasticsearch;
       const user = core.security.authc.getCurrentUser();
       if (user) {
-        const privileges = await client.asCurrentUser.security.hasPrivileges({
-          cluster: ['manage_own_api_key'],
-        });
-        const canManageOwnApiKey = privileges?.cluster.manage_own_api_key;
-
-        try {
-          const apiKeys = await client.asCurrentUser.security.getApiKey({
-            username: user.username,
-          });
-
-          const validKeys = apiKeys.api_keys.filter(({ invalidated }) => !invalidated);
-          return response.ok({ body: { apiKeys: validKeys, canManageOwnApiKey } });
-        } catch {
-          return response.ok({ body: { apiKeys: [], canManageOwnApiKey } });
-        }
+        const apiKeys = await client.asCurrentUser.security.getApiKey({ username: user.username });
+        const validKeys = apiKeys.api_keys.filter(({ invalidated }) => !invalidated);
+        return response.ok({ body: { apiKeys: validKeys } });
       }
       return response.customError({
         statusCode: 502,
         body: 'Could not retrieve current user, security plugin is not ready',
       });
-    })
+    }
   );
 
   router.post(
@@ -50,7 +37,7 @@ export const registerApiKeyRoutes = ({ logger, router, getSecurity }: RouteDepen
         body: schema.any(),
       },
     },
-    errorHandler(logger)(async (context, request, response) => {
+    async (context, request, response) => {
       const security = await getSecurity();
 
       const result = await security.authc.apiKeys.create(request, request.body);
@@ -62,6 +49,6 @@ export const registerApiKeyRoutes = ({ logger, router, getSecurity }: RouteDepen
         statusCode: 502,
         body: 'Could not retrieve current user, security plugin is not ready',
       });
-    })
+    }
   );
 };

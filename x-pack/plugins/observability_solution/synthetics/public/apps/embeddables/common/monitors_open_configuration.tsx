@@ -18,9 +18,7 @@ export async function openMonitorConfiguration({
   coreStart,
   pluginStart,
   initialState,
-  title,
 }: {
-  title: string;
   coreStart: CoreStart;
   pluginStart: ClientPluginsStart;
   initialState?: { filters: MonitorFilters };
@@ -39,7 +37,6 @@ export async function openMonitorConfiguration({
           >
             <QueryClientProvider client={queryClient}>
               <MonitorConfiguration
-                title={title}
                 initialInput={initialState}
                 onCreate={(update: { filters: MonitorFilters }) => {
                   flyoutSession.close();

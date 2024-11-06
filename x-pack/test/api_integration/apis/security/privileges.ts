@@ -78,7 +78,6 @@ export default function ({ getService }: FtrProviderContext) {
         'minimal_all',
         'minimal_read',
         'update_anonymization',
-        'manage_global_knowledge_base',
       ],
       securitySolutionAttackDiscovery: ['all', 'read', 'minimal_all', 'minimal_read'],
       securitySolutionCases: [
@@ -91,8 +90,7 @@ export default function ({ getService }: FtrProviderContext) {
       ],
       infrastructure: ['all', 'read', 'minimal_all', 'minimal_read'],
       logs: ['all', 'read', 'minimal_all', 'minimal_read'],
-      dataQuality: ['all', 'read', 'minimal_all', 'minimal_read'],
-      apm: ['all', 'read', 'minimal_all', 'minimal_read', 'settings_save'],
+      apm: ['all', 'read', 'minimal_all', 'minimal_read'],
       discover: [
         'all',
         'read',

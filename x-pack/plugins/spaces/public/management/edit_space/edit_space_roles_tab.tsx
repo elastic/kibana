@@ -62,7 +62,7 @@ export const EditSpaceAssignedRolesTab: FC<Props> = ({ space, features, isReadOn
     (defaultSelected?: Role[]) => {
       const overlayRef = overlays.openFlyout(
         toMountPoint(
-          <EditSpaceProvider {...services} dispatch={dispatch} state={state}>
+          <EditSpaceProvider {...services}>
             <PrivilegesRolesForm
               {...{
                 space,
@@ -109,10 +109,9 @@ export const EditSpaceAssignedRolesTab: FC<Props> = ({ space, features, isReadOn
     [
       overlays,
       services,
-      dispatch,
-      state,
       space,
       features,
+      dispatch,
       invokeClient,
       getUrlForApp,
       theme,

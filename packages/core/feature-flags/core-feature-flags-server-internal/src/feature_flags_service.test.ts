@@ -27,8 +27,6 @@ describe('FeatureFlagsService Server', () => {
           atPath: {
             overrides: {
               'my-overridden-flag': true,
-              'myPlugin.myOverriddenFlag': true,
-              myDestructuredObjPlugin: { myOverriddenFlag: true },
             },
           },
         }),
@@ -253,25 +251,10 @@ describe('FeatureFlagsService Server', () => {
       expect(getBooleanValueSpy).toHaveBeenCalledTimes(1);
       expect(getBooleanValueSpy).toHaveBeenCalledWith('another-flag', false);
     });
-
-    test('overrides with dotted names', async () => {
-      const getBooleanValueSpy = jest.spyOn(featureFlagsClient, 'getBooleanValue');
-      await expect(
-        startContract.getBooleanValue('myPlugin.myOverriddenFlag', false)
-      ).resolves.toEqual(true);
-      await expect(
-        startContract.getBooleanValue('myDestructuredObjPlugin.myOverriddenFlag', false)
-      ).resolves.toEqual(true);
-      expect(getBooleanValueSpy).not.toHaveBeenCalled();
-    });
   });
 
   test('returns overrides', () => {
     const { getOverrides } = featureFlagsService.setup();
-    expect(getOverrides()).toStrictEqual({
-      'my-overridden-flag': true,
-      'myPlugin.myOverriddenFlag': true,
-      myDestructuredObjPlugin: { myOverriddenFlag: true },
-    });
+    expect(getOverrides()).toStrictEqual({ 'my-overridden-flag': true });
   });
 });

@@ -1,28 +1,16 @@
 {
   "type": "plugin",
   "id": "@kbn/ai-assistant-management-plugin",
-  "owner": [
-    "@elastic/obs-knowledge-team"
-  ],
-  "group": "platform",
-  "visibility": "private",
+  "owner": "@elastic/obs-knowledge-team",
   "plugin": {
     "id": "aiAssistantManagementSelection",
-    "browser": true,
     "server": true,
+    "browser": true,
+    "requiredPlugins": ["management"],
+    "optionalPlugins": ["home", "serverless", "features"],
+    "requiredBundles": ["kibanaReact"],
     "configPath": [
       "aiAssistantManagementSelection"
     ],
-    "requiredPlugins": [
-      "management"
-    ],
-    "optionalPlugins": [
-      "home",
-      "serverless",
-      "features"
-    ],
-    "requiredBundles": [
-      "kibanaReact"
-    ]
-  }
+  },
 }

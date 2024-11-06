@@ -10,7 +10,6 @@ import Boom from '@hapi/boom';
 import { buildEsQuery, Filter } from '@kbn/es-query';
 import type { MaintenanceWindowClientContext } from '../../../../../common';
 import { getScopedQueryErrorMessage } from '../../../../../common';
-import { getEsQueryConfig } from '../../../../lib/get_es_query_config';
 import type { MaintenanceWindow } from '../../types';
 import {
   generateMaintenanceWindowEvents,
@@ -46,10 +45,9 @@ async function updateWithOCC(
   context: MaintenanceWindowClientContext,
   params: UpdateMaintenanceWindowParams
 ): Promise<MaintenanceWindow> {
-  const { savedObjectsClient, getModificationMetadata, logger, uiSettings } = context;
+  const { savedObjectsClient, getModificationMetadata, logger } = context;
   const { id, data } = params;
   const { title, enabled, duration, rRule, categoryIds, scopedQuery } = data;
-  const esQueryConfig = await getEsQueryConfig(uiSettings);
 
   try {
     updateMaintenanceWindowParamsSchema.validate(params);
@@ -64,8 +62,7 @@ async function updateWithOCC(
         buildEsQuery(
           undefined,
           [{ query: scopedQuery.kql, language: 'kuery' }],
-          scopedQuery.filters as Filter[],
-          esQueryConfig
+          scopedQuery.filters as Filter[]
         )
       );
       scopedQueryWithGeneratedValue = {
@@ -101,6 +98,7 @@ async function updateWithOCC(
     const modificationMetadata = await getModificationMetadata();
 
     let events = generateMaintenanceWindowEvents({
+      // @ts-expect-error upgrade typescript v5.1.6
       rRule: rRule || maintenanceWindow.rRule,
       duration: typeof duration === 'number' ? duration : maintenanceWindow.duration,
       expirationDate,

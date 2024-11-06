@@ -17,9 +17,10 @@ import {
   ENTITY_LAST_SEEN,
   ENTITY_TYPE,
 } from '@kbn/observability-shared-plugin/common';
-import { EntityColumnIds } from '../../../common/entities';
+import { defaultEntityDefinitions } from '../../../common/entities';
 import { useInventoryParams } from '../../hooks/use_inventory_params';
 import { useKibana } from '../../hooks/use_kibana';
+import { EntityColumnIds } from '../entities_grid';
 
 const ACTIVE_COLUMNS: EntityColumnIds[] = [ENTITY_DISPLAY_NAME, ENTITY_TYPE, ENTITY_LAST_SEEN];
 
@@ -38,6 +39,17 @@ export function DiscoverButton({ dataView }: { dataView: DataView }) {
 
   const filters: PhrasesFilter[] = [];
 
+  const entityDefinitionField = dataView.getFieldByName(ENTITY_DEFINITION_ID);
+
+  if (entityDefinitionField) {
+    const entityDefinitionFilter = buildPhrasesFilter(
+      entityDefinitionField!,
+      defaultEntityDefinitions,
+      dataView
+    );
+    filters.push(entityDefinitionFilter);
+  }
+
   const entityTypeField = dataView.getFieldByName(ENTITY_TYPE);
 
   if (entityTypes && entityTypeField) {
@@ -45,14 +57,10 @@ export function DiscoverButton({ dataView }: { dataView: DataView }) {
     filters.push(entityTypeFilter);
   }
 
-  const kueryWithEntityDefinitionFilters = [kuery, `${ENTITY_DEFINITION_ID} : builtin*`]
-    .filter(Boolean)
-    .join(' AND ');
-
   const discoverLink = discoverLocator?.getRedirectUrl({
     indexPatternId: dataView?.id ?? '',
     columns: ACTIVE_COLUMNS,
-    query: { query: kueryWithEntityDefinitionFilters, language: 'kuery' },
+    query: { query: kuery ?? '', language: 'kuery' },
     filters,
   });
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC, useMemo, useCallback, useState } from 'react';
+import React, { FC, useMemo, useCallback, useState } from 'react';
 import {
   EuiComboBox,
   EuiHealth,
@@ -17,9 +17,9 @@ import {
   EuiComboBoxProps,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { Tag } from '../../../common/types';
+import { Tag } from '../../../common';
 import { testSubjFriendly } from '../../utils';
-import type { CreateModalOpener } from '../edition_modal';
+import { CreateModalOpener } from '../edition_modal';
 
 interface CreateOption {
   type: '__create_option__';

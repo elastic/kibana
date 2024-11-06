@@ -154,10 +154,6 @@ export function MachineLearningNavigationProvider({
       await this.navigateToArea('~mlMainTab & ~notifications', 'mlPageNotifications');
     },
 
-    async navigateToMemoryUsage() {
-      await this.navigateToArea('~mlMainTab & ~nodesOverview', 'mlPageMemoryUsage');
-    },
-
     async navigateToAnomalyDetection() {
       await this.navigateToArea('~mlMainTab & ~anomalyDetection', 'mlPageJobManagement');
     },

@@ -10,9 +10,8 @@ import {
   createInferenceInternalError,
   InferenceTaskError,
   InferenceTaskErrorEvent,
-  InferenceTaskEvent,
-  InferenceTaskEventType,
-} from '@kbn/inference-common';
+} from '../../common/errors';
+import { InferenceTaskEvent, InferenceTaskEventType } from '../../common/inference_task';
 import {
   createObservableFromHttpResponse,
   StreamedHttpResponse,

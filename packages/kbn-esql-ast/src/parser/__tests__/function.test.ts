@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { parse } from '..';
+import { getAstAndSyntaxErrors as parse } from '..';
 import { Walker } from '../../walker';
 
 describe('function AST nodes', () => {
@@ -64,103 +64,6 @@ describe('function AST nodes', () => {
                   value: 3,
                 },
               ],
-            },
-          ],
-        },
-      ]);
-    });
-
-    it('parses out function name as identifier node', () => {
-      const query = 'ROW fn(1, 2, 3)';
-      const { ast, errors } = parse(query);
-
-      expect(errors.length).toBe(0);
-      expect(ast).toMatchObject([
-        {
-          type: 'command',
-          name: 'row',
-          args: [
-            {
-              type: 'function',
-              name: 'fn',
-              operator: {
-                type: 'identifier',
-                name: 'fn',
-              },
-            },
-          ],
-        },
-      ]);
-    });
-
-    it('parses out function name as named param', () => {
-      const query = 'ROW ?insert_here(1, 2, 3)';
-      const { ast, errors } = parse(query);
-
-      expect(errors.length).toBe(0);
-      expect(ast).toMatchObject([
-        {
-          type: 'command',
-          name: 'row',
-          args: [
-            {
-              type: 'function',
-              name: '?insert_here',
-              operator: {
-                type: 'literal',
-                literalType: 'param',
-                paramType: 'named',
-                value: 'insert_here',
-              },
-            },
-          ],
-        },
-      ]);
-    });
-
-    it('parses out function name as unnamed param', () => {
-      const query = 'ROW ?(1, 2, 3)';
-      const { ast, errors } = parse(query);
-
-      expect(errors.length).toBe(0);
-      expect(ast).toMatchObject([
-        {
-          type: 'command',
-          name: 'row',
-          args: [
-            {
-              type: 'function',
-              name: '?',
-              operator: {
-                type: 'literal',
-                literalType: 'param',
-                paramType: 'unnamed',
-              },
-            },
-          ],
-        },
-      ]);
-    });
-
-    it('parses out function name as positional param', () => {
-      const query = 'ROW ?30035(1, 2, 3)';
-      const { ast, errors } = parse(query);
-
-      expect(errors.length).toBe(0);
-      expect(ast).toMatchObject([
-        {
-          type: 'command',
-          name: 'row',
-          args: [
-            {
-              type: 'function',
-              name: '?30035',
-              operator: {
-                type: 'literal',
-                literalType: 'param',
-                paramType: 'positional',
-                value: 30035,
-              },
             },
           ],
         },

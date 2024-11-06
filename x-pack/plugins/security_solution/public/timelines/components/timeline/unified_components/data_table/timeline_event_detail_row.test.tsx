@@ -18,14 +18,7 @@ const mockData = structuredClone(mockTimelineData);
 
 const setCellPropsMock = jest.fn();
 
-jest.mock('../../body/events/stateful_row_renderer', () => {
-  return {
-    StatefulRowRenderer: jest.fn(),
-  };
-});
-
-const StatefulRowRendererMock = StatefulRowRenderer as unknown as jest.Mock;
-
+jest.mock('../../body/events/stateful_row_renderer');
 jest.mock('./use_timeline_unified_data_table_context');
 
 const renderTestComponent = (props: Partial<TimelineEventDetailRowProps> = {}) => {
@@ -51,7 +44,7 @@ const renderTestComponent = (props: Partial<TimelineEventDetailRowProps> = {}) =
 
 describe('TimelineEventDetailRow', () => {
   beforeEach(() => {
-    StatefulRowRendererMock.mockReturnValue(<div>{'Test Row Renderer'}</div>);
+    (StatefulRowRenderer as jest.Mock).mockReturnValue(<div>{'Test Row Renderer'}</div>);
 
     (useTimelineUnifiedDataTableContext as jest.Mock).mockReturnValue({
       expanded: { id: undefined },
@@ -67,7 +60,7 @@ describe('TimelineEventDetailRow', () => {
 
     expect(setCellPropsMock).toHaveBeenCalledWith({
       className: '',
-      style: { width: '100%', height: undefined, overflowX: 'auto' },
+      style: { width: '100%', height: 'auto' },
     });
 
     expect(getByText('Test Row Renderer')).toBeVisible();
@@ -89,7 +82,7 @@ describe('TimelineEventDetailRow', () => {
 
     expect(setCellPropsMock).toHaveBeenCalledWith({
       className: 'unifiedDataTable__cell--expanded',
-      style: { width: '100%', height: undefined, overflowX: 'auto' },
+      style: { width: '100%', height: 'auto' },
     });
   });
 });

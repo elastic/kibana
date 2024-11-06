@@ -138,10 +138,6 @@ export interface UnifiedDataTableProps {
    */
   showColumnTokens?: boolean;
   /**
-   * Set to true to allow users to drag and drop columns for reordering
-   */
-  canDragAndDropColumns?: boolean;
-  /**
    * Optional value for providing configuration setting for UnifiedDataTable header row height
    */
   configHeaderRowHeight?: number;
@@ -429,7 +425,6 @@ export const UnifiedDataTable = ({
   columns,
   columnsMeta,
   showColumnTokens,
-  canDragAndDropColumns,
   configHeaderRowHeight,
   headerRowHeightState,
   onUpdateHeaderRowHeight,
@@ -875,20 +870,13 @@ export const UnifiedDataTable = ({
   const schemaDetectors = useMemo(() => getSchemaDetectors(), []);
   const columnsVisibility = useMemo(
     () => ({
-      canDragAndDropColumns: defaultColumns ? false : canDragAndDropColumns,
       visibleColumns,
       setVisibleColumns: (newColumns: string[]) => {
         const dontModifyColumns = !shouldPrependTimeFieldColumn(newColumns);
         onSetColumns(newColumns, dontModifyColumns);
       },
     }),
-    [
-      visibleColumns,
-      onSetColumns,
-      shouldPrependTimeFieldColumn,
-      canDragAndDropColumns,
-      defaultColumns,
-    ]
+    [visibleColumns, onSetColumns, shouldPrependTimeFieldColumn]
   );
 
   const canSetExpandedDoc = Boolean(setExpandedDoc && !!renderDocumentView);

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ToolSchema } from '@kbn/inference-common';
+import { ToolSchema } from '../../../../common';
 
 export const requestDocumentationSchema = {
   type: 'object',

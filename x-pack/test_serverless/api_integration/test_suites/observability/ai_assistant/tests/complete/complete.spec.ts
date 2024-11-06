@@ -91,7 +91,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             connectorId,
             persist: true,
             screenContexts: params.screenContexts || [],
-            scopes: ['all'],
+            scope: 'all',
           })
           .then((response: Response) => resolve(response))
           .catch((err: Error) => reject(err));
@@ -164,7 +164,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           connectorId,
           persist: false,
           screenContexts: [],
-          scopes: ['all'],
+          scope: 'all',
         })
         .pipe(passThrough);
 
@@ -436,7 +436,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 connectorId,
                 persist: true,
                 screenContexts: [],
-                scopes: ['all'],
+                scope: 'all',
               },
             },
           })
@@ -483,7 +483,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 persist: true,
                 screenContexts: [],
                 conversationId,
-                scopes: ['all'],
+                scope: 'all',
               },
             },
           })

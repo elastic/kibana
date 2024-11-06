@@ -17,7 +17,7 @@ import { defaultFleetErrorHandler } from '../../errors';
 import { getAsset } from '../../services/epm/archive/storage';
 import { getBundledPackageByPkgKey } from '../../services/epm/packages/bundled_packages';
 import { pkgToPkgKey } from '../../services/epm/registry';
-import { unpackArchiveEntriesIntoMemory } from '../../services/epm/archive';
+import { unpackBufferEntries } from '../../services/epm/archive';
 
 const CACHE_CONTROL_10_MINUTES_HEADER: HttpResponseOptions['headers'] = {
   'cache-control': 'max-age=600',
@@ -69,7 +69,7 @@ export const getFileHandler: FleetRequestHandler<
       pkgToPkgKey({ name: pkgName, version: pkgVersion })
     );
     if (bundledPackage) {
-      const bufferEntries = await unpackArchiveEntriesIntoMemory(
+      const bufferEntries = await unpackBufferEntries(
         await bundledPackage.getBuffer(),
         'application/zip'
       );

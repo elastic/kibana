@@ -10,7 +10,8 @@ import { indexEndpointHosts } from '../../tasks/index_endpoint_hosts';
 import { login } from '../../tasks/login';
 import { loadPage } from '../../tasks/common';
 
-describe(
+// FLAKY: https://github.com/elastic/kibana/issues/172549
+describe.skip(
   'Response actions history page',
   { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] },
   () => {

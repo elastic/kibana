@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ENABLE_ASSET_CRITICALITY_SETTING } from '../../../../../../common/constants';
 import { createHostRiskEnrichments } from './enrichment_by_type/host_risk';
 
 import { createUserRiskEnrichments } from './enrichment_by_type/user_risk';
@@ -21,7 +22,10 @@ import type {
 } from './types';
 import { applyEnrichmentsToEvents } from './utils/transforms';
 import { isIndexExist } from './utils/is_index_exist';
-import { getHostRiskIndex, getUserRiskIndex } from '../../../../../../common/search_strategy';
+import {
+  getHostRiskIndex,
+  getUserRiskIndex,
+} from '../../../../../../common/search_strategy/security_solution/risk_score/common';
 
 export const enrichEvents: EnrichEventsFunction = async ({
   services,
@@ -35,6 +39,10 @@ export const enrichEvents: EnrichEventsFunction = async ({
 
     logger.debug('Alert enrichments started');
     const isNewRiskScoreModuleAvailable = experimentalFeatures?.riskScoringRoutesEnabled ?? false;
+    const { uiSettingsClient } = services;
+    const isAssetCriticalityEnabled = await uiSettingsClient.get<boolean>(
+      ENABLE_ASSET_CRITICALITY_SETTING
+    );
 
     let isNewRiskScoreModuleInstalled = false;
     if (isNewRiskScoreModuleAvailable) {
@@ -79,27 +87,29 @@ export const enrichEvents: EnrichEventsFunction = async ({
       );
     }
 
-    const assetCriticalityIndexExist = await isIndexExist({
-      services,
-      index: getAssetCriticalityIndex(spaceId),
-    });
-    if (assetCriticalityIndexExist) {
-      enrichments.push(
-        createUserAssetCriticalityEnrichments({
-          services,
-          logger,
-          events,
-          spaceId,
-        })
-      );
-      enrichments.push(
-        createHostAssetCriticalityEnrichments({
-          services,
-          logger,
-          events,
-          spaceId,
-        })
-      );
+    if (isAssetCriticalityEnabled) {
+      const assetCriticalityIndexExist = await isIndexExist({
+        services,
+        index: getAssetCriticalityIndex(spaceId),
+      });
+      if (assetCriticalityIndexExist) {
+        enrichments.push(
+          createUserAssetCriticalityEnrichments({
+            services,
+            logger,
+            events,
+            spaceId,
+          })
+        );
+        enrichments.push(
+          createHostAssetCriticalityEnrichments({
+            services,
+            logger,
+            events,
+            spaceId,
+          })
+        );
+      }
     }
 
     const allEnrichmentsResults = await Promise.allSettled(enrichments);

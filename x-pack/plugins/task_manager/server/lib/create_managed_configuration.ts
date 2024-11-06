@@ -12,7 +12,6 @@ import { Logger } from '@kbn/core/server';
 import { isEsCannotExecuteScriptError } from './identify_es_error';
 import { CLAIM_STRATEGY_MGET, DEFAULT_CAPACITY, MAX_CAPACITY, TaskManagerConfig } from '../config';
 import { TaskCost } from '../task';
-import { getMsearchStatusCode } from './msearch_error';
 
 const FLUSH_MARKER = Symbol('flush');
 export const ADJUST_THROUGHPUT_INTERVAL = 10 * 1000;
@@ -162,14 +161,7 @@ function countErrors(errors$: Observable<Error>, countInterval: number): Observa
     interval(countInterval).pipe(map(() => FLUSH_MARKER)),
     errors$.pipe(
       filter(
-        (e) =>
-          SavedObjectsErrorHelpers.isTooManyRequestsError(e) ||
-          SavedObjectsErrorHelpers.isEsUnavailableError(e) ||
-          SavedObjectsErrorHelpers.isGeneralError(e) ||
-          isEsCannotExecuteScriptError(e) ||
-          getMsearchStatusCode(e) === 429 ||
-          getMsearchStatusCode(e) === 500 ||
-          getMsearchStatusCode(e) === 503
+        (e) => SavedObjectsErrorHelpers.isTooManyRequestsError(e) || isEsCannotExecuteScriptError(e)
       )
     )
   ).pipe(

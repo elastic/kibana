@@ -11,7 +11,6 @@ import type { SerializableRecord } from '@kbn/utility-types';
 
 export type BaseActionConfig = SerializableRecord;
 
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type SerializedAction<Config extends BaseActionConfig = BaseActionConfig> = {
   readonly factoryId: string;
   readonly name: string;
@@ -21,14 +20,12 @@ export type SerializedAction<Config extends BaseActionConfig = BaseActionConfig>
 /**
  * Serialized representation of a triggers-action pair, used to persist in storage.
  */
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type SerializedEvent = {
   eventId: string;
   triggers: string[];
   action: SerializedAction;
 };
 
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type DynamicActionsState = {
   events: SerializedEvent[];
 };

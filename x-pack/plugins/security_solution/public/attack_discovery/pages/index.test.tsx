@@ -13,7 +13,7 @@ import { UpsellingService } from '@kbn/security-solution-upselling/service';
 import { Router } from '@kbn/shared-ux-router';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { useLocalStorage } from 'react-use';
 
 import { TestProviders } from '../../common/mock';
 import { ATTACK_DISCOVERY_PATH } from '../../../common/constants';
@@ -38,10 +38,15 @@ const mockConnectors: unknown[] = [
   },
 ];
 
-jest.mock('react-use/lib/useLocalStorage', () => jest.fn().mockReturnValue(['test-id', jest.fn()]));
-jest.mock('react-use/lib/useSessionStorage', () =>
-  jest.fn().mockReturnValue([undefined, jest.fn()])
-);
+jest.mock('react-use', () => {
+  const actual = jest.requireActual('react-use');
+
+  return {
+    ...actual,
+    useLocalStorage: jest.fn().mockReturnValue(['test-id', jest.fn()]),
+    useSessionStorage: jest.fn().mockReturnValue([undefined, jest.fn()]),
+  };
+});
 
 jest.mock(
   '@kbn/elastic-assistant/impl/assistant/api/anonymization_fields/use_fetch_anonymization_fields',

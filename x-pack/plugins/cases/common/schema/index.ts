@@ -154,24 +154,6 @@ export const limitedNumberSchema = ({ fieldName, min, max }: LimitedSchemaType) 
     rt.identity
   );
 
-export const limitedNumberAsIntegerSchema = ({ fieldName }: { fieldName: string }) =>
-  new rt.Type<number, number, unknown>(
-    'LimitedNumberAsInteger',
-    rt.number.is,
-    (input, context) =>
-      either.chain(rt.number.validate(input, context), (s) => {
-        if (!Number.isSafeInteger(s)) {
-          return rt.failure(
-            input,
-            context,
-            `The ${fieldName} field should be an integer between -(2^53 - 1) and 2^53 - 1, inclusive.`
-          );
-        }
-        return rt.success(s);
-      }),
-    rt.identity
-  );
-
 export interface RegexStringSchemaType {
   codec: rt.Type<string, string, unknown>;
   pattern: string;

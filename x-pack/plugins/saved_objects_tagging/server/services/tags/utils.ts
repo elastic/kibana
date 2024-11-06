@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Tag, TagSavedObject } from '../../../common/types';
+import { Tag, TagSavedObject } from '../../../common/types';
 
 export const savedObjectToTag = (savedObject: TagSavedObject): Tag => {
   return {

@@ -7,11 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 import type { FittingFunction } from '@kbn/expression-xy-plugin/common';
-import { FittingFunctions } from '@kbn/expression-xy-plugin/public';
 
 export const fittingFunctionDefinitions: Array<{ id: FittingFunction } & Record<string, string>> = [
   {
-    id: FittingFunctions.NONE,
+    id: 'None',
     title: i18n.translate('xpack.lens.fittingFunctionsTitle.none', {
       defaultMessage: 'Hide',
     }),
@@ -20,7 +19,7 @@ export const fittingFunctionDefinitions: Array<{ id: FittingFunction } & Record<
     }),
   },
   {
-    id: FittingFunctions.ZERO,
+    id: 'Zero',
     title: i18n.translate('xpack.lens.fittingFunctionsTitle.zero', {
       defaultMessage: 'Zero',
     }),
@@ -29,7 +28,7 @@ export const fittingFunctionDefinitions: Array<{ id: FittingFunction } & Record<
     }),
   },
   {
-    id: FittingFunctions.LINEAR,
+    id: 'Linear',
     title: i18n.translate('xpack.lens.fittingFunctionsTitle.linear', {
       defaultMessage: 'Linear',
     }),
@@ -38,7 +37,7 @@ export const fittingFunctionDefinitions: Array<{ id: FittingFunction } & Record<
     }),
   },
   {
-    id: FittingFunctions.CARRY,
+    id: 'Carry',
     title: i18n.translate('xpack.lens.fittingFunctionsTitle.carry', {
       defaultMessage: 'Last',
     }),
@@ -47,7 +46,7 @@ export const fittingFunctionDefinitions: Array<{ id: FittingFunction } & Record<
     }),
   },
   {
-    id: FittingFunctions.LOOKAHEAD,
+    id: 'Lookahead',
     title: i18n.translate('xpack.lens.fittingFunctionsTitle.lookahead', {
       defaultMessage: 'Next',
     }),

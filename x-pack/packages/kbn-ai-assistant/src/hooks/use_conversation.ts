@@ -20,7 +20,7 @@ import { useAIAssistantAppService } from './use_ai_assistant_app_service';
 import { useKibana } from './use_kibana';
 import { useOnce } from './use_once';
 import { useAbortableAsync } from './use_abortable_async';
-import { useScopes } from './use_scopes';
+import { useScope } from './use_scope';
 
 function createNewConversation({
   title = EMPTY_CONVERSATION_TITLE,
@@ -62,7 +62,7 @@ export function useConversation({
   onConversationUpdate,
 }: UseConversationProps): UseConversationResult {
   const service = useAIAssistantAppService();
-  const scopes = useScopes();
+  const scope = useScope();
 
   const {
     services: {
@@ -122,7 +122,7 @@ export function useConversation({
       onConversationUpdate?.({ conversation: event.conversation });
     },
     persist: true,
-    scopes,
+    scope,
   });
 
   const [displayedConversationId, setDisplayedConversationId] = useState(initialConversationId);

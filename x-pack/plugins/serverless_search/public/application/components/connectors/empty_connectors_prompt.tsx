@@ -25,11 +25,9 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { css } from '@emotion/react';
 import { useKibanaServices } from '../../hooks/use_kibana';
-import { docLinks } from '../../../../common/doc_links';
 import { useConnectorTypes } from '../../hooks/api/use_connector_types';
 import { useCreateConnector } from '../../hooks/api/use_create_connector';
 import { useAssetBasePath } from '../../hooks/use_asset_base_path';
-import { useConnectors } from '../../hooks/api/use_connectors';
 
 import { CONNECTORS, ELASTIC_MANAGED_CONNECTOR_PATH, BASE_CONNECTORS_PATH } from '../../constants';
 
@@ -63,7 +61,6 @@ export const EmptyConnectorsPrompt: React.FC = () => {
   } = useKibanaServices();
 
   const { createConnector, isLoading } = useCreateConnector();
-  const { data } = useConnectors();
 
   const assetBasePath = useAssetBasePath();
   const connectorsPath = assetBasePath + '/connectors.svg';
@@ -135,68 +132,6 @@ export const EmptyConnectorsPrompt: React.FC = () => {
                       // @ts-ignore
                       inert=""
                     />
-            <EuiFlexItem>
-              <EuiPanel color="subdued">
-                <EuiFlexGroup>
-                  <EuiFlexItem>
-                    <EuiFlexGroup justifyContent="center" alignItems="center" direction="column">
-                      <EuiFlexItem grow={false}>
-                        <EuiIcon color="primary" size="l" type="documents" />
-                      </EuiFlexItem>
-                      <EuiFlexItem>
-                        <EuiText>
-                          <p>
-                            {i18n.translate(
-                              'xpack.serverlessSearch.connectorsEmpty.guideOneDescription',
-                              {
-                                defaultMessage: "Choose a data source you'd like to sync",
-                              }
-                            )}
-                          </p>
-                        </EuiText>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiFlexGroup justifyContent="center" alignItems="center" direction="column">
-                      <EuiFlexItem grow={false}>
-                        <EuiIcon color="primary" size="l" type={connectorsPath} />
-                      </EuiFlexItem>
-                      <EuiFlexItem>
-                        <EuiText>
-                          <p>
-                            <FormattedMessage
-                              id="xpack.serverlessSearch.connectorsEmpty.guideTwoDescription"
-                              defaultMessage="Deploy connector code on your own infrastructure by running from {source}, or using {docker}"
-                              values={{
-                                source: (
-                                  <EuiLink
-                                    data-test-subj="serverlessSearchEmptyConnectorsPromptSourceLink"
-                                    href={docLinks.connectorsRunFromSource}
-                                  >
-                                    {i18n.translate(
-                                      'xpack.serverlessSearch.connectorsEmpty.sourceLabel',
-                                      { defaultMessage: 'source' }
-                                    )}
-                                  </EuiLink>
-                                ),
-                                docker: (
-                                  <EuiLink
-                                    data-test-subj="serverlessSearchEmptyConnectorsPromptDockerLink"
-                                    href={docLinks.connectorsRunWithDocker}
-                                  >
-                                    {i18n.translate(
-                                      'xpack.serverlessSearch.connectorsEmpty.dockerLabel',
-                                      { defaultMessage: 'Docker' }
-                                    )}
-                                  </EuiLink>
-                                ),
-                              }}
-                            />
-                          </p>
-                        </EuiText>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
                   </EuiFlexItem>
                   <EuiFlexGroup>
                     <EuiFlexItem>
@@ -392,22 +327,7 @@ export const EmptyConnectorsPrompt: React.FC = () => {
                 </EuiFlexGroup>
               </EuiFlexItem>
             </EuiFlexGroup>
-              </EuiPanel>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiButton
-                data-test-subj="serverlessSearchEmptyConnectorsPromptCreateConnectorButton"
-                disabled={!data?.canManageConnectors}
-                fill
-                iconType="plusInCircleFilled"
-                onClick={() => createConnector()}
-                isLoading={isLoading}
-              >
-                {i18n.translate('xpack.serverlessSearch.connectorsEmpty.createConnector', {
-                  defaultMessage: 'Create connector',
-                })}
-              </EuiButton>
-            </EuiFlexItem>
+            {/* <EuiSpacer size="m" /> */}
           </EuiFlexGroup>
         </EuiPanel>
       </EuiFlexItem>

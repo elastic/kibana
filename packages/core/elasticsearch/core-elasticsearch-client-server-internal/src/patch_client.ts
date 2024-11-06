@@ -17,7 +17,6 @@ export const patchElasticsearchClient = () => {
     return {
       name: this.name,
       message: this.message,
-      stack: this.stack,
     };
   };
 

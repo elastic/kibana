@@ -425,20 +425,6 @@ const likeFunctions: FunctionDefinition[] = [
       },
       {
         params: [
-          { name: 'left', type: 'text' as const },
-          { name: 'right', type: 'keyword' as const },
-        ],
-        returnType: 'boolean',
-      },
-      {
-        params: [
-          { name: 'left', type: 'keyword' as const },
-          { name: 'right', type: 'text' as const },
-        ],
-        returnType: 'boolean',
-      },
-      {
-        params: [
           { name: 'left', type: 'keyword' as const },
           { name: 'right', type: 'keyword' as const },
         ],
@@ -623,12 +609,25 @@ const otherDefinitions: FunctionDefinition[] = [
           { name: 'left', type: 'any' },
           { name: 'right', type: 'any' },
         ],
-        returnType: 'unknown',
+        returnType: 'void',
       },
     ],
   },
   {
-    // TODO — this shouldn't be a function or an operator...
+    name: 'functions',
+    type: 'builtin',
+    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definition.functionsDoc', {
+      defaultMessage: 'Show ES|QL avaialble functions with signatures',
+    }),
+    supportedCommands: ['meta'],
+    signatures: [
+      {
+        params: [],
+        returnType: 'void',
+      },
+    ],
+  },
+  {
     name: 'info',
     type: 'builtin',
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definition.infoDoc', {
@@ -638,7 +637,21 @@ const otherDefinitions: FunctionDefinition[] = [
     signatures: [
       {
         params: [],
-        returnType: 'unknown', // meaningless
+        returnType: 'void',
+      },
+    ],
+  },
+  {
+    name: 'order-expression',
+    type: 'builtin',
+    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definition.infoDoc', {
+      defaultMessage: 'Specify column sorting modifiers',
+    }),
+    supportedCommands: ['sort'],
+    signatures: [
+      {
+        params: [{ name: 'column', type: 'any' }],
+        returnType: 'void',
       },
     ],
   },

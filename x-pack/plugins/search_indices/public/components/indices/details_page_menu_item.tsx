@@ -14,55 +14,101 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { ReactElement, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
+import React, { MouseEventHandler, ReactElement, useState } from 'react';
 import { useKibana } from '../../hooks/use_kibana';
 
+enum MenuItems {
+  playground = 'playground',
+  apiReference = 'apiReference',
+  deleteIndex = 'deleteIndex',
+}
+interface MenuItemsAction {
+  href?: string;
+  onClick?: (() => void) | MouseEventHandler;
+}
+
+const SearchIndexDetailsPageMenuItemPopoverItems = [
+  {
+    type: MenuItems.playground,
+    iconType: 'launch',
+    dataTestSubj: 'moreOptionsPlayground',
+    iconComponent: <EuiIcon type="launch" />,
+    target: undefined,
+    text: (
+      <EuiText size="s">
+        {i18n.translate('xpack.searchIndices.moreOptions.playgroundLabel', {
+          defaultMessage: 'Use in Playground',
+        })}
+      </EuiText>
+    ),
+    color: undefined,
+  },
+  {
+    type: MenuItems.apiReference,
+    iconType: 'documentation',
+    dataTestSubj: 'moreOptionsApiReference',
+    iconComponent: <EuiIcon type="documentation" />,
+    target: '_blank',
+    text: (
+      <EuiText size="s">
+        {i18n.translate('xpack.searchIndices.moreOptions.apiReferenceLabel', {
+          defaultMessage: 'API Reference',
+        })}
+      </EuiText>
+    ),
+    color: undefined,
+  },
+  {
+    type: MenuItems.deleteIndex,
+    iconType: 'trash',
+    dataTestSubj: 'moreOptionsDeleteIndex',
+    iconComponent: <EuiIcon color="danger" type="trash" />,
+    target: undefined,
+    text: (
+      <EuiText size="s" color="danger">
+        {i18n.translate('xpack.searchIndices.moreOptions.deleteIndexLabel', {
+          defaultMessage: 'Delete Index',
+        })}
+      </EuiText>
+    ),
+    color: 'danger',
+  },
+];
 interface SearchIndexDetailsPageMenuItemPopoverProps {
   handleDeleteIndexModal: () => void;
-  showApiReference: boolean;
+  navigateToPlayground: () => void;
 }
 
 export const SearchIndexDetailsPageMenuItemPopover = ({
-  showApiReference = false,
   handleDeleteIndexModal,
+  navigateToPlayground,
 }: SearchIndexDetailsPageMenuItemPopoverProps) => {
   const [showMoreOptions, setShowMoreOptions] = useState<boolean>(false);
   const { docLinks } = useKibana().services;
-  const contextMenuItems = [
-    showApiReference && (
+  const contextMenuItemsActions: Record<MenuItems, MenuItemsAction> = {
+    playground: {
+      href: undefined,
+      onClick: navigateToPlayground,
+    },
+    apiReference: { href: docLinks.links.apiReference, onClick: undefined },
+    deleteIndex: { href: undefined, onClick: handleDeleteIndexModal },
+  };
+  const contextMenuItems: ReactElement[] = SearchIndexDetailsPageMenuItemPopoverItems.map(
+    (item) => (
       <EuiContextMenuItem
-        key="apiReference"
-        icon={<EuiIcon type="documentation" />}
-        href={docLinks.links.apiReference}
+        key={item.iconType}
+        icon={item.iconComponent}
+        href={contextMenuItemsActions[item.type]?.href}
         size="s"
-        target="_blank"
-        data-test-subj="moreOptionsApiReference"
+        onClick={contextMenuItemsActions[item.type]?.onClick}
+        target={item.target}
+        data-test-subj={item.dataTestSubj}
+        color={item.color}
       >
-        <EuiText size="s">
-          <FormattedMessage
-            id="xpack.searchIndices.moreOptions.apiReferenceLabel"
-            defaultMessage="API Reference"
-          />
-        </EuiText>
+        {item.text}
       </EuiContextMenuItem>
-    ),
-    <EuiContextMenuItem
-      key="deleteIndex"
-      icon={<EuiIcon color="danger" type="trash" />}
-      size="s"
-      onClick={handleDeleteIndexModal}
-      data-test-subj="moreOptionsDeleteIndex"
-      color="danger"
-    >
-      <EuiText size="s" color="danger">
-        <FormattedMessage
-          id="xpack.searchIndices.moreOptions.deleteIndexLabel"
-          defaultMessage="Delete Index"
-        />
-      </EuiText>
-    </EuiContextMenuItem>,
-  ].filter(Boolean) as ReactElement[];
+    )
+  );
 
   return (
     <EuiPopover

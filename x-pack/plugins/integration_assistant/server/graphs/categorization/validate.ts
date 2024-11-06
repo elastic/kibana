@@ -10,12 +10,12 @@ import { ECS_EVENT_TYPES_PER_CATEGORY, EVENT_CATEGORIES, EVENT_TYPES } from './c
 
 import type { EventCategories } from './constants';
 
-export interface Event {
+interface Event {
   type?: string[];
   category?: string[];
 }
 
-export interface PipelineResult {
+interface PipelineResult {
   event?: Event;
 }
 

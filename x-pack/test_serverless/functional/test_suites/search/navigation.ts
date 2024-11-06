@@ -19,8 +19,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
   const header = getPageObject('header');
 
   describe('navigation', function () {
-    // see details: https://github.com/elastic/kibana/issues/196823
-    this.tags(['failsOnMKI']);
     before(async () => {
       await svlCommonPage.loginWithRole('developer');
       await svlSearchNavigation.navigateToLandingPage();
@@ -36,12 +34,12 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       // check side nav links
       await solutionNavigation.sidenav.expectSectionExists('search_project_nav');
       await solutionNavigation.sidenav.expectLinkActive({
-        deepLinkId: 'elasticsearchStart',
+        deepLinkId: 'serverlessElasticsearch',
       });
       await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-        deepLinkId: 'elasticsearchStart',
+        deepLinkId: 'serverlessElasticsearch',
       });
-      await testSubjects.existOrFail(`elasticsearchStartPage`);
+      await testSubjects.existOrFail(`svlSearchOverviewPage`);
 
       // check Data
       // > Index Management
@@ -130,20 +128,20 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
         deepLinkId: 'dashboards',
       });
-
-      // check Getting Started
+      // check Other tools
+      // > Maps
       await solutionNavigation.sidenav.clickLink({
-        deepLinkId: 'serverlessElasticsearch',
+        deepLinkId: 'maps',
       });
       await solutionNavigation.sidenav.expectLinkActive({
-        deepLinkId: 'serverlessElasticsearch',
+        deepLinkId: 'maps',
       });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Getting Started' });
+      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Other tools' });
       await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-        text: 'Getting Started',
+        text: 'Maps',
       });
       await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-        deepLinkId: 'serverlessElasticsearch',
+        deepLinkId: 'maps',
       });
 
       // Open Project Settings
@@ -176,10 +174,10 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       // navigate back to serverless search overview
       await svlCommonNavigation.clickLogo();
       await svlCommonNavigation.sidenav.expectLinkActive({
-        deepLinkId: 'elasticsearchStart',
+        deepLinkId: 'serverlessElasticsearch',
       });
       await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({ text: `Home` });
-      await testSubjects.existOrFail(`elasticsearchStartPage`);
+      await testSubjects.existOrFail(`svlSearchOverviewPage`);
 
       await expectNoPageReload();
     });
@@ -250,7 +248,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Dashboards' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Other tools' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Maps' });
-      await solutionNavigation.sidenav.expectLinkExists({ text: 'Getting Started' });
+      // await solutionNavigation.sidenav.expectLinkExists({ text: 'Getting Started' });
 
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Trained models' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Management' });
@@ -275,7 +273,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         'dashboards',
         'otherTools',
         'maps',
-        'gettingStarted',
+        // 'gettingStarted',
         'project_settings_project_nav',
         'ml:modelManagement',
         'management',

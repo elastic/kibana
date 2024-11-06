@@ -44,7 +44,7 @@ Object {
   "paths": Object {
     "/foo/{id}": Object {
       "get": Object {
-        "operationId": "get-foo-id",
+        "operationId": "%2Ffoo%2F%7Bid%7D#0",
         "parameters": Array [
           Object {
             "description": "The version of the API to use",
@@ -138,7 +138,7 @@ Object {
     "/bar": Object {
       "get": Object {
         "deprecated": true,
-        "operationId": "get-bar",
+        "operationId": "%2Fbar#0",
         "parameters": Array [
           Object {
             "description": "The version of the API to use",
@@ -231,7 +231,7 @@ OK response oas-test-version-2",
     "/foo/{id}/{path*}": Object {
       "delete": Object {
         "description": "route description",
-        "operationId": "delete-foo-id-path",
+        "operationId": "%2Ffoo%2F%7Bid%7D%2F%7Bpath*%7D#2",
         "parameters": Array [
           Object {
             "description": "The version of the API to use",
@@ -269,7 +269,7 @@ OK response oas-test-version-2",
       },
       "get": Object {
         "description": "route description",
-        "operationId": "get-foo-id-path",
+        "operationId": "%2Ffoo%2F%7Bid%7D%2F%7Bpath*%7D#0",
         "parameters": Array [
           Object {
             "description": "The version of the API to use",
@@ -415,7 +415,7 @@ OK response oas-test-version-2",
       },
       "post": Object {
         "description": "route description",
-        "operationId": "post-foo-id-path",
+        "operationId": "%2Ffoo%2F%7Bid%7D%2F%7Bpath*%7D#1",
         "parameters": Array [
           Object {
             "description": "The version of the API to use",
@@ -572,8 +572,7 @@ OK response oas-test-version-2",
     },
     "/no-xsrf/{id}/{path*}": Object {
       "post": Object {
-        "deprecated": true,
-        "operationId": "post-no-xsrf-id-path-2",
+        "operationId": "%2Fno-xsrf%2F%7Bid%7D%2F%7Bpath*%7D#1",
         "parameters": Array [
           Object {
             "description": "The version of the API to use",
@@ -725,7 +724,7 @@ Object {
   "paths": Object {
     "/recursive": Object {
       "get": Object {
-        "operationId": "get-recursive",
+        "operationId": "%2Frecursive#0",
         "parameters": Array [
           Object {
             "description": "The version of the API to use",
@@ -808,7 +807,7 @@ Object {
   "paths": Object {
     "/foo/{id}": Object {
       "get": Object {
-        "operationId": "get-foo-id",
+        "operationId": "%2Ffoo%2F%7Bid%7D#0",
         "parameters": Array [
           Object {
             "description": "The version of the API to use",
@@ -846,7 +845,7 @@ Object {
     },
     "/test": Object {
       "get": Object {
-        "operationId": "get-test",
+        "operationId": "%2Ftest#0",
         "parameters": Array [
           Object {
             "description": "The version of the API to use",

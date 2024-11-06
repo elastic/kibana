@@ -1,22 +1,13 @@
 {
   "type": "plugin",
   "id": "@kbn/navigation-plugin",
-  "owner": [
-    "@elastic/appex-sharedux"
-  ],
-  "group": "platform",
-  "visibility": "shared",
+  "owner": "@elastic/appex-sharedux",
   "plugin": {
     "id": "navigation",
-    "browser": true,
     "server": true,
-    "requiredPlugins": [
-      "unifiedSearch"
-    ],
-    "optionalPlugins": [
-      "cloud",
-      "spaces"
-    ],
+    "browser": true,
+    "optionalPlugins": ["cloud", "spaces"],
+    "requiredPlugins": ["unifiedSearch"],
     "requiredBundles": []
   }
 }

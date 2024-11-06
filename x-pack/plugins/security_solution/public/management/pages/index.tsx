@@ -88,8 +88,8 @@ const NotesTelemetry = () => (
 );
 
 export const ManagementContainer = memo(() => {
-  const securitySolutionNotesDisabled = useIsExperimentalFeatureEnabled(
-    'securitySolutionNotesDisabled'
+  const securitySolutionNotesEnabled = useIsExperimentalFeatureEnabled(
+    'securitySolutionNotesEnabled'
   );
 
   const {
@@ -162,7 +162,7 @@ export const ManagementContainer = memo(() => {
         hasPrivilege={canReadActionsLogManagement}
       />
 
-      {!securitySolutionNotesDisabled && (
+      {securitySolutionNotesEnabled && (
         <Route path={MANAGEMENT_ROUTING_NOTES_PATH} component={NotesTelemetry} />
       )}
 

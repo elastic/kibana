@@ -101,10 +101,7 @@
           "id": "kibBuildingBlocks"
         },
         {
-          "id": "kibDevDocsSecurityAPIAuthorization"
-        },
-        {
-          "id": "kibDevDocsSecurityKibanaSystemUser"
+          "id": "kibDevDocsSecurityIntro"
         },
         {
           "id": "kibDevFeaturePrivileges",
@@ -183,13 +180,8 @@
           "label": "data.search"
         },
         {
-          "id": "kibDevTutorialScreenshotting",
-          "label": "Screenshotting",
-          "items": [
-            {
-              "id": "kibDevDocsUpdatingPuppeteerAndChromium"
-            }
-          ]
+          "id": "kibDevTutorialFileService",
+          "label": "File service"
         },
         {
           "id": "kibDevTutorialDataViews"
@@ -270,6 +262,10 @@
               "id": "kibDevTutorialsContentManagementOnboarding"
             }
           ]
+        },
+        {
+          "id": "kibDevTutorialScreenshotting",
+          "label": "Screenshotting"
         },
         {
           "id": "kibDevTutorialAdvancedSettings",

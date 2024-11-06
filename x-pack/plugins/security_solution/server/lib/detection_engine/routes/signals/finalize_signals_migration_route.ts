@@ -25,10 +25,8 @@ export const finalizeSignalsMigrationRoute = (
     .post({
       path: DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL,
       access: 'public',
-      security: {
-        authz: {
-          requiredPrivileges: ['securitySolution'],
-        },
+      options: {
+        tags: ['access:securitySolution'],
       },
     })
     .addVersion(

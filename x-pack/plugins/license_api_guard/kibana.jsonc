@@ -1,15 +1,11 @@
 {
   "type": "plugin",
   "id": "@kbn/license-api-guard-plugin",
-  "owner": [
-    "@elastic/kibana-management"
-  ],
-  "group": "platform",
-  "visibility": "private",
+  "owner": "@elastic/kibana-management",
   "plugin": {
     "id": "licenseApiGuard",
-    "browser": false,
     "server": true,
+    "browser": false,
     "configPath": [
       "xpack",
       "licenseApiGuard"

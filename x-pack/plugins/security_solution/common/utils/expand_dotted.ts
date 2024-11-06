@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { merge } from 'lodash';
-import { setWith } from '@kbn/safer-lodash-set';
+import { merge, setWith } from 'lodash';
 
 /*
  * Expands an object with "dotted" fields to a nested object with unflattened fields.

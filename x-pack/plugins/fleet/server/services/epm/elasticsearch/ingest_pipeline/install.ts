@@ -16,13 +16,14 @@ import type {
   PackageInfo,
 } from '../../../../types';
 import { getAssetFromAssetsMap, getPathParts } from '../../archive';
+import type { ArchiveEntry } from '../../archive';
 import {
   FLEET_FINAL_PIPELINE_CONTENT,
   FLEET_FINAL_PIPELINE_ID,
   FLEET_FINAL_PIPELINE_VERSION,
 } from '../../../../constants';
 import { getPipelineNameForDatastream } from '../../../../../common/services';
-import type { ArchiveEntry, PackageInstallContext } from '../../../../../common/types';
+import type { PackageInstallContext } from '../../../../../common/types';
 
 import { appendMetadataToIngestPipeline } from '../meta';
 import { retryTransientEsErrors } from '../retry';

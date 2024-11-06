@@ -32,7 +32,6 @@ const testProps = {
 const setSelectedSettingsTab = jest.fn();
 const mockUseAssistantContext = {
   setSelectedSettingsTab,
-  assistantFeatures: {},
 };
 jest.mock('../../assistant_context', () => {
   const original = jest.requireActual('../../assistant_context');
@@ -58,7 +57,6 @@ describe('AssistantSettingsButton', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
-
   it('Clicking the settings gear opens the conversations tab', () => {
     const { getByTestId } = render(<AssistantSettingsButton {...testProps} />);
     fireEvent.click(getByTestId('settings'));

@@ -68,7 +68,7 @@ const ruleType = {
   recoveryActionGroup: 'recovered',
   producer: 'logs',
   authorizedConsumers: {
-    alerts: { read: true, all: true },
+    alerting: { read: true, all: true },
     test: { read: true, all: true },
     stackAlerts: { read: true, all: true },
     logs: { read: true, all: true },
@@ -101,7 +101,6 @@ const plugins = {
   application: {
     capabilities: {
       rulesSettings: {
-        readFlappingSettingsUI: true,
         writeFlappingSettingsUI: true,
       },
     },
@@ -134,14 +133,12 @@ describe('Rule Definition', () => {
           active: 5,
         },
         notifyWhen: null,
-        consumer: 'alerts',
-        ruleTypeId: '.es-query',
+        consumer: 'stackAlerts',
       },
       selectedRuleType: ruleType,
       selectedRuleTypeModel: ruleModel,
       canShowConsumerSelection: true,
       validConsumers: ['logs', 'stackAlerts'],
-      availableRuleTypes: [ruleType],
     });
 
     render(<RuleDefinition />);
@@ -167,16 +164,13 @@ describe('Rule Definition', () => {
           active: 5,
         },
         notifyWhen: null,
-        consumer: 'alerts',
-        ruleTypeId: '.es-query',
+        consumer: 'stackAlerts',
       },
       selectedRuleType: ruleType,
       selectedRuleTypeModel: {
         ...ruleModel,
         documentationUrl: null,
       },
-      availableRuleTypes: [ruleType],
-      validConsumers: ['logs', 'stackAlerts'],
     });
     render(<RuleDefinition />);
 
@@ -197,7 +191,6 @@ describe('Rule Definition', () => {
         },
         notifyWhen: null,
         consumer: 'stackAlerts',
-        ruleTypeId: '.es-query',
       },
       selectedRuleType: ruleType,
       selectedRuleTypeModel: ruleModel,
@@ -222,11 +215,9 @@ describe('Rule Definition', () => {
         },
         notifyWhen: null,
         consumer: 'stackAlerts',
-        ruleTypeId: '.es-query',
       },
       selectedRuleType: ruleType,
       selectedRuleTypeModel: ruleModel,
-      availableRuleTypes: [ruleType],
       canShowConsumerSelect: true,
       validConsumers: ['logs'],
     });
@@ -250,11 +241,9 @@ describe('Rule Definition', () => {
         },
         notifyWhen: null,
         consumer: 'stackAlerts',
-        ruleTypeId: '.es-query',
       },
       selectedRuleType: ruleType,
       selectedRuleTypeModel: ruleModel,
-      availableRuleTypes: [ruleType],
       canShowConsumerSelect: true,
       validConsumers: ['logs', 'observability'],
     });
@@ -278,11 +267,9 @@ describe('Rule Definition', () => {
         },
         notifyWhen: null,
         consumer: 'stackAlerts',
-        ruleTypeId: '.es-query',
       },
       selectedRuleType: ruleType,
       selectedRuleTypeModel: ruleModel,
-      availableRuleTypes: [ruleType],
     });
 
     render(<RuleDefinition />);
@@ -305,11 +292,9 @@ describe('Rule Definition', () => {
         },
         notifyWhen: null,
         consumer: 'stackAlerts',
-        ruleTypeId: '.es-query',
       },
       selectedRuleType: ruleType,
       selectedRuleTypeModel: ruleModel,
-      availableRuleTypes: [ruleType],
     });
 
     render(<RuleDefinition />);
@@ -341,11 +326,9 @@ describe('Rule Definition', () => {
         },
         notifyWhen: null,
         consumer: 'stackAlerts',
-        ruleTypeId: '.es-query',
       },
       selectedRuleType: ruleType,
       selectedRuleTypeModel: ruleModel,
-      availableRuleTypes: [ruleType],
       canShowConsumerSelection: true,
       validConsumers: ['logs', 'stackAlerts'],
     });
@@ -354,48 +337,6 @@ describe('Rule Definition', () => {
 
     expect(screen.getByText(ALERT_FLAPPING_DETECTION_TITLE)).toBeInTheDocument();
     expect(screen.getByTestId('ruleSettingsFlappingForm')).toBeInTheDocument();
-  });
-
-  test('should hide flapping if the user does not have read access', async () => {
-    useRuleFormState.mockReturnValue({
-      plugins: {
-        charts: {} as ChartsPluginSetup,
-        data: {} as DataPublicPluginStart,
-        dataViews: {} as DataViewsPublicPluginStart,
-        unifiedSearch: {} as UnifiedSearchPublicPluginStart,
-        docLinks: {} as DocLinksStart,
-        application: {
-          capabilities: {
-            rulesSettings: {
-              readFlappingSettingsUI: false,
-              writeFlappingSettingsUI: true,
-            },
-          },
-        },
-      },
-      formData: {
-        id: 'test-id',
-        params: {},
-        schedule: {
-          interval: '1m',
-        },
-        alertDelay: {
-          active: 5,
-        },
-        notifyWhen: null,
-        consumer: 'stackAlerts',
-        ruleTypeId: '.es-query',
-      },
-      selectedRuleType: ruleType,
-      selectedRuleTypeModel: ruleModel,
-      availableRuleTypes: [ruleType],
-      canShowConsumerSelection: true,
-      validConsumers: ['logs', 'stackAlerts'],
-    });
-
-    render(<RuleDefinition />);
-
-    expect(screen.queryByTestId('ruleDefinitionFlappingFormGroup')).not.toBeInTheDocument();
   });
 
   test('should allow flapping to be changed', async () => {
@@ -412,11 +353,9 @@ describe('Rule Definition', () => {
         },
         notifyWhen: null,
         consumer: 'stackAlerts',
-        ruleTypeId: '.es-query',
       },
       selectedRuleType: ruleType,
       selectedRuleTypeModel: ruleModel,
-      availableRuleTypes: [ruleType],
       canShowConsumerSelection: true,
       validConsumers: ['logs', 'stackAlerts'],
     });
@@ -450,11 +389,9 @@ describe('Rule Definition', () => {
         },
         notifyWhen: null,
         consumer: 'stackAlerts',
-        ruleTypeId: '.es-query',
       },
       selectedRuleType: ruleType,
       selectedRuleTypeModel: ruleModel,
-      availableRuleTypes: [ruleType],
       canShowConsumerSelection: true,
       validConsumers: ['logs', 'stackAlerts'],
     });

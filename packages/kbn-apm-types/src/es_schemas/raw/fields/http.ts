@@ -8,7 +8,7 @@
  */
 
 export interface Http {
-  request?: { method?: string };
-  response?: { status_code?: number };
+  request?: { method: string; [key: string]: unknown };
+  response?: { status_code: number; [key: string]: unknown };
   version?: string;
 }

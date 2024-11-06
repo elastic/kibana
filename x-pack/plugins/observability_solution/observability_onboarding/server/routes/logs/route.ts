@@ -6,7 +6,6 @@
  */
 
 import * as t from 'io-ts';
-import Boom from '@hapi/boom';
 import { createObservabilityOnboardingServerRoute } from '../create_observability_onboarding_server_route';
 import { getFallbackESUrl } from '../../lib/get_fallback_urls';
 import { getKibanaUrl } from '../../lib/get_fallback_urls';
@@ -81,12 +80,6 @@ const createAPIKeyRoute = createObservabilityOnboardingServerRoute({
     const {
       elasticsearch: { client },
     } = await context.core;
-
-    const hasPrivileges = await hasLogMonitoringPrivileges(client.asCurrentUser);
-    if (!hasPrivileges) {
-      throw Boom.forbidden('Insufficient permissions to create shipper API key');
-    }
-
     const { encoded: apiKeyEncoded } = await createShipperApiKey(client.asCurrentUser, 'otel logs');
 
     return { apiKeyEncoded };
@@ -102,7 +95,7 @@ const createFlowRoute = createObservabilityOnboardingServerRoute({
         name: t.string,
       }),
       t.type({
-        type: t.literal('logFiles'),
+        type: t.union([t.literal('logFiles'), t.literal('systemLogs')]),
       }),
       t.partial({
         state: t.record(t.string, t.unknown),
@@ -127,13 +120,14 @@ const createFlowRoute = createObservabilityOnboardingServerRoute({
       `standalone_agent_logs_onboarding_${name}`
     );
 
+    const generatedState = type === 'systemLogs' ? { namespace: 'default' } : state;
     const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
 
     const { id } = await saveObservabilityOnboardingFlow({
       savedObjectsClient,
       observabilityOnboardingState: {
         type,
-        state: state as ObservabilityOnboardingFlow['state'],
+        state: generatedState as ObservabilityOnboardingFlow['state'],
         progress: {},
       },
     });

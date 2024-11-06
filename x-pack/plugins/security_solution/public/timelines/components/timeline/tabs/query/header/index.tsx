@@ -12,7 +12,10 @@ import { InPortal } from 'react-reverse-portal';
 import { IS_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 import styled from '@emotion/styled';
 import { euiThemeVars } from '@kbn/ui-theme';
+import { useIsExperimentalFeatureEnabled } from '../../../../../../common/hooks/use_experimental_features';
 import { useTimelineEventsCountPortal } from '../../../../../../common/hooks/use_timeline_events_count';
+import { useTimelineFullScreen } from '../../../../../../common/containers/use_full_screen';
+import { ExitFullScreen } from '../../../../../../common/components/exit_full_screen';
 import {
   type TimelineStatus,
   TimelineStatusEnum,
@@ -67,7 +70,11 @@ const QueryTabHeaderComponent: React.FC<Props> = ({
   showEventsCountBadge,
   totalCount,
 }) => {
+  const unifiedComponentsInTimelineDisabled = useIsExperimentalFeatureEnabled(
+    'unifiedComponentsInTimelineDisabled'
+  );
   const { portalNode: timelineEventsCountPortalNode } = useTimelineEventsCountPortal();
+  const { setTimelineFullScreen, timelineFullScreen } = useTimelineFullScreen();
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
 
   const getIsDataProviderVisible = useMemo(
@@ -94,6 +101,18 @@ const QueryTabHeaderComponent: React.FC<Props> = ({
         ) : null}
       </InPortal>
       <EuiFlexGroup gutterSize="s" direction="column">
+        {unifiedComponentsInTimelineDisabled &&
+          timelineFullScreen &&
+          setTimelineFullScreen != null && (
+            <EuiFlexItem>
+              <EuiFlexGroup alignItems="center" gutterSize="s">
+                <ExitFullScreen
+                  fullScreen={timelineFullScreen}
+                  setFullScreen={setTimelineFullScreen}
+                />
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          )}
         <EuiFlexItem data-test-subj="timeline-date-picker-container">
           <TabHeaderContainer data-test-subj="timelineHeader">
             <EuiFlexGroup gutterSize="s" direction="column">

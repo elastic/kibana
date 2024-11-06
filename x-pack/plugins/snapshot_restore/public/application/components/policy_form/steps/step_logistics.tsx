@@ -33,7 +33,6 @@ import { useLoadRepositories } from '../../../services/http';
 import { linkToAddRepository } from '../../../services/navigation';
 import { InlineLoading } from '../..';
 import { StepProps } from '.';
-import { DisableToolTip, MANAGED_POLICY_TOOLTIP_MESSAGE } from '../../disable_tooltip';
 
 export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
   policy,
@@ -259,28 +258,22 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
     }
 
     return (
-      <DisableToolTip
-        isManaged={policy?.isManagedPolicy}
-        tooltipMessage={MANAGED_POLICY_TOOLTIP_MESSAGE}
-        component={
-          <EuiSelect
-            options={repositories.map(({ name }: Repository) => ({
-              value: name,
-              text: name,
-            }))}
-            hasNoInitialSelection={!doesRepositoryExist}
-            value={!doesRepositoryExist ? '' : policy.repository}
-            onBlur={() => setTouched({ ...touched, repository: true })}
-            onChange={(e) => {
-              updatePolicy({
-                repository: e.target.value,
-              });
-            }}
-            fullWidth
-            data-test-subj="repositorySelect"
-            disabled={policy?.isManagedPolicy && isEditing}
-          />
-        }
+      <EuiSelect
+        options={repositories.map(({ name }: Repository) => ({
+          value: name,
+          text: name,
+        }))}
+        hasNoInitialSelection={!doesRepositoryExist}
+        value={!doesRepositoryExist ? '' : policy.repository}
+        onBlur={() => setTouched({ ...touched, repository: true })}
+        onChange={(e) => {
+          updatePolicy({
+            repository: e.target.value,
+          });
+        }}
+        fullWidth
+        data-test-subj="repositorySelect"
+        disabled={policy?.isManagedPolicy && isEditing}
       />
     );
   };
@@ -332,31 +325,25 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
         }
         fullWidth
       >
-        <DisableToolTip
-          isManaged={policy?.isManagedPolicy}
-          tooltipMessage={MANAGED_POLICY_TOOLTIP_MESSAGE}
-          component={
-            <EuiFieldText
-              defaultValue={policy.snapshotName}
-              fullWidth
-              onChange={(e) => {
-                updatePolicy({
-                  snapshotName: e.target.value,
-                });
-              }}
-              onBlur={() => setTouched({ ...touched, snapshotName: true })}
-              placeholder={i18n.translate(
-                'xpack.snapshotRestore.policyForm.stepLogistics.policySnapshotNamePlaceholder',
-                {
-                  defaultMessage: `'<daily-snap-{now/d}>'`,
-                  description:
-                    'Example date math snapshot name. Keeping the same syntax is important: <SOME-TRANSLATION-{now/d}>',
-                }
-              )}
-              data-test-subj="snapshotNameInput"
-              disabled={policy?.isManagedPolicy && isEditing}
-            />
-          }
+        <EuiFieldText
+          defaultValue={policy.snapshotName}
+          fullWidth
+          onChange={(e) => {
+            updatePolicy({
+              snapshotName: e.target.value,
+            });
+          }}
+          onBlur={() => setTouched({ ...touched, snapshotName: true })}
+          placeholder={i18n.translate(
+            'xpack.snapshotRestore.policyForm.stepLogistics.policySnapshotNamePlaceholder',
+            {
+              defaultMessage: `'<daily-snap-{now/d}>'`,
+              description:
+                'Example date math snapshot name. Keeping the same syntax is important: <SOME-TRANSLATION-{now/d}>',
+            }
+          )}
+          data-test-subj="snapshotNameInput"
+          disabled={policy?.isManagedPolicy && isEditing}
         />
       </EuiFormRow>
     </EuiDescribedFormGroup>

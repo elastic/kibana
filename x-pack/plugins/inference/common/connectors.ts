@@ -22,3 +22,7 @@ export interface InferenceConnector {
 export function isSupportedConnectorType(id: string): id is InferenceConnectorType {
   return allSupportedConnectorTypes.includes(id as InferenceConnectorType);
 }
+
+export interface GetConnectorsResponseBody {
+  connectors: InferenceConnector[];
+}

@@ -10,11 +10,10 @@
 import { useMutation } from '@tanstack/react-query';
 import type { HttpStart, IHttpFetchError } from '@kbn/core-http-browser';
 import { createRule, CreateRuleBody } from '../apis/create_rule';
-import { Rule } from '../types';
 
 export interface UseCreateRuleProps {
   http: HttpStart;
-  onSuccess?: (rule: Rule) => void;
+  onSuccess?: (formData: CreateRuleBody) => void;
   onError?: (error: IHttpFetchError<{ message: string }>) => void;
 }
 

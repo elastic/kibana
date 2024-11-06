@@ -6,9 +6,7 @@
  */
 
 import React from 'react';
-import { waitFor } from '@testing-library/react';
-
-import { userEvent } from '@testing-library/user-event';
+import { act, fireEvent, waitFor } from '@testing-library/react';
 
 import type { TestRenderer } from '../../../../../../mock';
 import { createFleetTestRendererMock } from '../../../../../../mock';
@@ -113,18 +111,18 @@ describe('StepEditHosts', () => {
     testRenderer = createFleetTestRendererMock();
   });
 
-  it('should display create form when no agent policies', async () => {
+  it('should display create form when no agent policies', () => {
     (useGetAgentPolicies as jest.MockedFunction<any>).mockReturnValue({
       data: {
         items: [],
       },
     });
 
-    (useAllNonManagedAgentPolicies as jest.MockedFunction<any>).mockReturnValue([]);
-
     render();
 
-    expect(renderResult.getByText('New agent policy name')).toBeInTheDocument();
+    waitFor(() => {
+      expect(renderResult.getByText('Agent policy 1')).toBeInTheDocument();
+    });
     expect(renderResult.queryByRole('tablist')).not.toBeInTheDocument();
   });
 
@@ -146,7 +144,7 @@ describe('StepEditHosts', () => {
     ).toContain('Agent policy 1');
   });
 
-  it('should display dropdown without preselected value when multiple agent policies', async () => {
+  it('should display dropdown without preselected value when mulitple agent policies', () => {
     (useGetAgentPolicies as jest.MockedFunction<any>).mockReturnValue({
       data: {
         items: [
@@ -158,12 +156,12 @@ describe('StepEditHosts', () => {
 
     render();
 
-    expect(
-      renderResult.getByText('Select an agent policy to add this integration to')
-    ).toBeInTheDocument();
+    waitFor(() => {
+      expect(renderResult.getByText('At least one agent policy is required.')).toBeInTheDocument();
+    });
   });
 
-  it('should display delete button when add button clicked', async () => {
+  it('should display delete button when add button clicked', () => {
     (useGetAgentPolicies as jest.MockedFunction<any>).mockReturnValue({
       data: {
         items: [{ id: '1', name: 'Agent policy 1', namespace: 'default' }],
@@ -175,12 +173,10 @@ describe('StepEditHosts', () => {
 
     render();
 
-    await userEvent.click(
-      renderResult.getByTestId('createNewAgentPolicyButton').closest('button')!
-    );
-
-    await waitFor(() => {
-      expect(renderResult.getByTestId('deleteNewAgentPolicyButton')).toBeInTheDocument();
+    act(() => {
+      fireEvent.click(renderResult.getByTestId('createNewAgentPolicyButton').closest('button')!);
     });
+
+    expect(renderResult.getByTestId('deleteNewAgentPolicyButton')).toBeInTheDocument();
   });
 });

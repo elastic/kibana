@@ -29,10 +29,8 @@ export const findRuleExceptionReferencesRoute = (router: SecuritySolutionPluginR
     .get({
       path: DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL,
       access: 'internal',
-      security: {
-        authz: {
-          requiredPrivileges: ['securitySolution'],
-        },
+      options: {
+        tags: ['access:securitySolution'],
       },
     })
     .addVersion(

@@ -45,7 +45,6 @@ describe('AccountsEvaluatedWidget', () => {
     expect(mockNavToFindings).toHaveBeenCalledWith(
       {
         'cloud.provider': 'aws',
-        'rule.benchmark.posture_type': 'cspm',
       },
       ['cloud.account.name']
     );

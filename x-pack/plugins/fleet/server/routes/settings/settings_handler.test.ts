@@ -29,6 +29,7 @@ jest.mock('../../services', () => ({
       secret_storage_requirements_met: true,
       output_secret_storage_requirements_met: true,
       has_seen_add_data_notice: true,
+      fleet_server_hosts: ['http://localhost:8220'],
       prerelease_integrations_enabled: true,
       delete_unenrolled_agents: {
         enabled: true,
@@ -75,6 +76,7 @@ describe('SettingsHandler', () => {
         secret_storage_requirements_met: true,
         output_secret_storage_requirements_met: true,
         has_seen_add_data_notice: true,
+        fleet_server_hosts: ['http://localhost:8220'],
         prerelease_integrations_enabled: true,
         delete_unenrolled_agents: {
           enabled: true,

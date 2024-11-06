@@ -42,9 +42,6 @@ export interface RemoteClustersActions {
     setValue: (seed: string) => void;
     getValue: () => string;
   };
-  nodeConnectionsInput: {
-    setValue: (connections: string) => void;
-  };
   proxyAddressInput: {
     setValue: (proxyAddress: string) => void;
     exists: () => boolean;
@@ -153,16 +150,6 @@ export const createRemoteClustersActions = (testBed: TestBed): RemoteClustersAct
       seedsInput: {
         setValue: (seed: string) => form.setComboBoxValue(seedsInputSelector, seed),
         getValue: () => find(seedsInputSelector).text(),
-      },
-    };
-  };
-
-  const createNodeConnectionsInputActions = () => {
-    const nodeConnectionsInputSelector = 'remoteClusterFormNodeConnectionsInput';
-    return {
-      nodeConnectionsInput: {
-        setValue: (connections: string) =>
-          form.setInputValue(nodeConnectionsInputSelector, connections),
       },
     };
   };
@@ -279,7 +266,6 @@ export const createRemoteClustersActions = (testBed: TestBed): RemoteClustersAct
     ...createConnectionModeActions(),
     ...createCloudAdvancedOptionsSwitchActions(),
     ...createSeedsInputActions(),
-    ...createNodeConnectionsInputActions(),
     ...createCloudRemoteAddressInputActions(),
     ...createProxyAddressActions(),
     ...createServerNameActions(),

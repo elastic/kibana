@@ -7,7 +7,6 @@
 
 import { ElasticsearchClient } from '@kbn/core/server';
 import { get } from 'lodash';
-import { isCCSRemoteIndexName } from '@kbn/es-query';
 import { CCS_REMOTE_PATTERN } from '../../../common/constants';
 import { CCRReadExceptionsStats } from '../../../common/types/alerts';
 import { getIndexPatterns, getElasticsearchDataset } from '../cluster/get_index_patterns';
@@ -174,7 +173,7 @@ export async function fetchCCRReadExceptions(
         shardId,
         leaderIndex,
         lastReadException,
-        ccs: isCCSRemoteIndexName(monitoringIndexName) ? monitoringIndexName.split(':')[0] : null,
+        ccs: monitoringIndexName.includes(':') ? monitoringIndexName.split(':')[0] : null,
       });
     }
   }

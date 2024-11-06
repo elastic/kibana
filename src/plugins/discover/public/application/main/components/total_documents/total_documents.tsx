@@ -11,19 +11,7 @@ import React from 'react';
 import { FormattedMessage, FormattedNumber } from '@kbn/i18n-react';
 import { EuiText } from '@elastic/eui';
 
-export const TotalDocuments = ({
-  totalHitCount,
-  isEsqlMode,
-}: {
-  totalHitCount: number;
-  isEsqlMode?: boolean;
-}) => {
-  const totalDocuments = (
-    <strong>
-      <FormattedNumber value={totalHitCount} />
-    </strong>
-  );
-
+export const TotalDocuments = ({ totalHitCount }: { totalHitCount: number }) => {
   return (
     <EuiText
       grow={false}
@@ -31,25 +19,17 @@ export const TotalDocuments = ({
       style={{ paddingRight: 2 }}
       data-test-subj="savedSearchTotalDocuments"
     >
-      {isEsqlMode ? (
-        <FormattedMessage
-          id="discover.embeddable.totalResults"
-          defaultMessage="{totalDocuments} {totalHitCount, plural, one {result} other {results}}"
-          values={{
-            totalDocuments,
-            totalHitCount,
-          }}
-        />
-      ) : (
-        <FormattedMessage
-          id="discover.embeddable.totalDocuments"
-          defaultMessage="{totalDocuments} {totalHitCount, plural, one {document} other {documents}}"
-          values={{
-            totalDocuments,
-            totalHitCount,
-          }}
-        />
-      )}
+      <FormattedMessage
+        id="discover.docTable.totalDocuments"
+        defaultMessage="{totalDocuments} documents"
+        values={{
+          totalDocuments: (
+            <strong>
+              <FormattedNumber value={totalHitCount} />
+            </strong>
+          ),
+        }}
+      />
     </EuiText>
   );
 };

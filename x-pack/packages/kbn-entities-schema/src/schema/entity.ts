@@ -11,12 +11,12 @@ import { arrayOfStringsSchema } from './common';
 export const entityBaseSchema = z.object({
   id: z.string(),
   type: z.string(),
-  identity_fields: arrayOfStringsSchema,
-  display_name: z.string(),
+  identityFields: arrayOfStringsSchema,
+  displayName: z.string(),
   metrics: z.record(z.string(), z.number()),
-  definition_version: z.string(),
-  schema_version: z.string(),
-  definition_id: z.string(),
+  definitionVersion: z.string(),
+  schemaVersion: z.string(),
+  definitionId: z.string(),
 });
 
 export interface MetadataRecord {
@@ -34,8 +34,15 @@ export const entityLatestSchema = z
   .object({
     entity: entityBaseSchema.merge(
       z.object({
-        last_seen_timestamp: z.string(),
+        lastSeenTimestamp: z.string(),
       })
     ),
+  })
+  .and(entityMetadataSchema);
+
+export const entityHistorySchema = z
+  .object({
+    '@timestamp': z.string(),
+    entity: entityBaseSchema,
   })
   .and(entityMetadataSchema);

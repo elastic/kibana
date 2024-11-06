@@ -6,7 +6,7 @@
  */
 
 export const getSlackAction = () => ({
-  connector_type_id: '.slack',
+  actionTypeId: '.slack',
   secrets: {
     webhookUrl: 'http://localhost:123',
   },

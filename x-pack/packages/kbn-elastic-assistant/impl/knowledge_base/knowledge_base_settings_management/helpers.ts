@@ -23,10 +23,6 @@ export const isSystemEntry = (
   );
 };
 
-export const isGlobalEntry = (
-  entry: KnowledgeBaseEntryResponse
-): entry is KnowledgeBaseEntryResponse => entry.users != null && !entry.users.length;
-
 export const isKnowledgeBaseEntryCreateProps = (
   entry: unknown
 ): entry is z.infer<typeof KnowledgeBaseEntryCreateProps> => {

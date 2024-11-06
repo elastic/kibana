@@ -1,15 +1,11 @@
 {
   "type": "plugin",
   "id": "@kbn/graph-plugin",
-  "owner": [
-    "@elastic/kibana-visualizations"
-  ],
-  "group": "platform",
-  "visibility": "private",
+  "owner": "@elastic/kibana-visualizations",
   "plugin": {
     "id": "graph",
-    "browser": true,
     "server": true,
+    "browser": true,
     "configPath": [
       "xpack",
       "graph"

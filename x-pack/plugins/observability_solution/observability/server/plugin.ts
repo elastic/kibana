@@ -31,8 +31,6 @@ import {
   METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
   OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
   SLO_BURN_RATE_RULE_TYPE_ID,
-  SYNTHETICS_STATUS_RULE,
-  SYNTHETICS_TLS_RULE,
 } from '@kbn/rule-data-utils';
 import { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
 import { SharePluginSetup } from '@kbn/share-plugin/server';
@@ -85,8 +83,6 @@ const o11yRuleTypes = [
   ML_ANOMALY_DETECTION_RULE_TYPE_ID,
   METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
   ...Object.values(ApmRuleType),
-  SYNTHETICS_STATUS_RULE,
-  SYNTHETICS_TLS_RULE,
 ];
 
 export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {

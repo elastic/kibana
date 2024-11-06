@@ -5,14 +5,11 @@
  * 2.0.
  */
 
-import { memoize, mergeWith } from 'lodash';
+import { mergeWith } from 'lodash';
 import type { ToolingLogTextWriterConfig } from '@kbn/tooling-log';
 import { ToolingLog } from '@kbn/tooling-log';
 import type { Flags } from '@kbn/dev-cli-runner';
 import moment from 'moment/moment';
-import type { Space } from '@kbn/spaces-plugin/common';
-import type { KbnClient } from '@kbn/test';
-import { catchAxiosErrorFormatAndThrow } from '../format_axios_error';
 import { EndpointError } from '../errors';
 
 export const RETRYABLE_TRANSIENT_ERRORS: Readonly<Array<string | RegExp>> = [
@@ -186,13 +183,3 @@ export const getElapsedTime = (
 
   return `${hours}:${minutes}:${seconds}.${milliseconds}`;
 };
-
-export const fetchActiveSpaceId = memoize(async (kbnClient: KbnClient): Promise<string> => {
-  return kbnClient
-    .request<Space>({
-      method: 'GET',
-      path: `/internal/spaces/_active_space`,
-    })
-    .catch(catchAxiosErrorFormatAndThrow)
-    .then((response) => response.data.id);
-});

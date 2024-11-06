@@ -24,10 +24,8 @@ export const riskEngineDisableRoute = (
     .post({
       access: 'internal',
       path: RISK_ENGINE_DISABLE_URL,
-      security: {
-        authz: {
-          requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],
-        },
+      options: {
+        tags: ['access:securitySolution', `access:${APP_ID}-entity-analytics`],
       },
     })
     .addVersion(

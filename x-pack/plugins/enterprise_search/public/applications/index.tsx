@@ -114,7 +114,6 @@ export const renderApp = (
     data: plugins.data,
     esConfig,
     getChromeStyle$: chrome.getChromeStyle$,
-    getNavLinks: chrome.navLinks.getAll,
     guidedOnboarding,
     history,
     indexMappingComponent,

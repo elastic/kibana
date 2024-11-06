@@ -7,25 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  type ESQLAstItem,
-  type ESQLSingleAstItem,
-  type ESQLAst,
-  type ESQLFunction,
-  type ESQLCommand,
-  type ESQLCommandOption,
-  type ESQLCommandMode,
-  Walker,
+import type {
+  ESQLAstItem,
+  ESQLSingleAstItem,
+  ESQLAst,
+  ESQLFunction,
+  ESQLCommand,
+  ESQLCommandOption,
+  ESQLCommandMode,
 } from '@kbn/esql-ast';
 import { ENRICH_MODES } from '../definitions/settings';
 import { EDITOR_MARKER } from './constants';
 import {
   isOptionItem,
   isColumnItem,
+  getFunctionDefinition,
   isSourceItem,
   isSettingItem,
   pipePrecedesCurrentWord,
-  getFunctionDefinition,
 } from './helpers';
 
 function findNode(nodes: ESQLAstItem[], offset: number): ESQLSingleAstItem | undefined {
@@ -134,7 +133,6 @@ function findAstPosition(ast: ESQLAst, offset: number) {
 function isNotEnrichClauseAssigment(node: ESQLFunction, command: ESQLCommand) {
   return node.name !== '=' && command.name !== 'enrich';
 }
-
 function isBuiltinFunction(node: ESQLFunction) {
   return getFunctionDefinition(node.name)?.type === 'builtin';
 }
@@ -153,23 +151,9 @@ function isBuiltinFunction(node: ESQLFunction) {
  * * "newCommand": the cursor is at the beginning of a new command (i.e. `command1 | command2 | <here>`)
  */
 export function getAstContext(queryString: string, ast: ESQLAst, offset: number) {
-  let inComment = false;
-
-  Walker.visitComments(ast, (node) => {
-    if (node.location && node.location.min <= offset && node.location.max > offset) {
-      inComment = true;
-    }
-  });
-
-  if (inComment) {
-    return {
-      type: 'comment' as const,
-    };
-  }
-
   const { command, option, setting, node } = findAstPosition(ast, offset);
   if (node) {
-    if (node.type === 'literal' && node.literalType === 'keyword') {
+    if (node.type === 'literal' && node.literalType === 'string') {
       // command ... "<here>"
       return { type: 'value' as const, command, node, option, setting };
     }
@@ -178,17 +162,14 @@ export function getAstContext(queryString: string, ast: ESQLAst, offset: number)
         // command ... a in ( <here> )
         return { type: 'list' as const, command, node, option, setting };
       }
-      if (
-        isNotEnrichClauseAssigment(node, command) &&
-        // Temporarily mangling the logic here to let operators
-        // be handled as functions for the stats command.
-        // I expect this to simplify once https://github.com/elastic/kibana/issues/195418
-        // is complete
-        !(isBuiltinFunction(node) && command.name !== 'stats')
-      ) {
+      if (isNotEnrichClauseAssigment(node, command) && !isBuiltinFunction(node)) {
         // command ... fn( <here> )
         return { type: 'function' as const, command, node, option, setting };
       }
+    }
+    if (node.type === 'option' || option) {
+      // command ... by <here>
+      return { type: 'option' as const, command, node, option, setting };
     }
     // for now it's only an enrich thing
     if (node.type === 'source' && node.text === ENRICH_MODES.prefix) {
@@ -201,8 +182,7 @@ export function getAstContext(queryString: string, ast: ESQLAst, offset: number)
     return { type: 'newCommand' as const, command: undefined, node, option, setting };
   }
 
-  // TODO — remove this option branch once https://github.com/elastic/kibana/issues/195418 is complete
-  if (command && isOptionItem(command.args[command.args.length - 1]) && command.name !== 'stats') {
+  if (command && isOptionItem(command.args[command.args.length - 1])) {
     if (option) {
       return { type: 'option' as const, command, node, option, setting };
     }

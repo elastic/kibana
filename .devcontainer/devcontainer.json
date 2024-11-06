@@ -2,10 +2,7 @@
   "name": "Kibana",
   "build": {
     "dockerfile": "Dockerfile",
-    "context": "..",
-    "args": {
-      "KBN_DIR": "${containerWorkspaceFolder}"
-    }
+    "context": ".."
   },
   "customizations": {
     "vscode": {

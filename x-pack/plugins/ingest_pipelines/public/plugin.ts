@@ -7,11 +7,11 @@
 
 import { i18n } from '@kbn/i18n';
 import { Subscription } from 'rxjs';
-import type { CoreStart, CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import { CoreStart, CoreSetup, Plugin } from '@kbn/core/public';
 
 import { PLUGIN_ID } from '../common/constants';
 import { uiMetricService, apiService } from './application/services';
-import type { SetupDependencies, StartDependencies, ILicense, Config } from './types';
+import { SetupDependencies, StartDependencies, ILicense } from './types';
 import { IngestPipelinesLocatorDefinition } from './locator';
 
 export class IngestPipelinesPlugin
@@ -19,11 +19,6 @@ export class IngestPipelinesPlugin
 {
   private license: ILicense | null = null;
   private licensingSubscription?: Subscription;
-  private readonly config: Config;
-
-  constructor(initializerContext: PluginInitializerContext<Config>) {
-    this.config = initializerContext.config.get();
-  }
 
   public setup(coreSetup: CoreSetup<StartDependencies>, plugins: SetupDependencies): void {
     const { management, usageCollection, share } = plugins;
@@ -54,9 +49,6 @@ export class IngestPipelinesPlugin
         const unmountAppCallback = await mountManagementSection(coreSetup, {
           ...params,
           license: this.license,
-          config: {
-            enableManageProcessors: this.config.enableManageProcessors !== false,
-          },
         });
 
         return () => {

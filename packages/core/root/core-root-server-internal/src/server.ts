@@ -276,6 +276,10 @@ export class Server {
       executionContext: executionContextSetup,
     });
 
+    const deprecationsSetup = await this.deprecations.setup({
+      http: httpSetup,
+    });
+
     // setup i18n prior to any other service, to have translations ready
     const i18nServiceSetup = await this.i18n.setup({ http: httpSetup, pluginPaths });
 
@@ -297,11 +301,6 @@ export class Server {
       metrics: metricsSetup,
       savedObjectsStartPromise: this.savedObjectsStartPromise,
       changedDeprecatedConfigPath$: this.configService.getDeprecatedConfigPath$(),
-    });
-
-    const deprecationsSetup = await this.deprecations.setup({
-      http: httpSetup,
-      coreUsageData: coreUsageDataSetup,
     });
 
     const savedObjectsSetup = await this.savedObjects.setup({

@@ -103,7 +103,7 @@ export class APMEventClient {
   /** @deprecated Use {@link excludedDataTiers} instead.
    * See https://www.elastic.co/guide/en/kibana/current/advanced-options.html **/
   private readonly includeFrozen: boolean;
-  private readonly excludedDataTiers: DataTier[];
+  private readonly excludedDataTiers?: DataTier[];
   private readonly inspectableEsQueriesMap?: WeakMap<KibanaRequest, InspectResponse>;
 
   constructor(config: APMEventClientConfig) {
@@ -112,7 +112,7 @@ export class APMEventClient {
     this.request = config.request;
     this.indices = config.indices;
     this.includeFrozen = config.options.includeFrozen;
-    this.excludedDataTiers = config.options.excludedDataTiers ?? [];
+    this.excludedDataTiers = config.options.excludedDataTiers;
     this.inspectableEsQueriesMap = config.options.inspectableEsQueriesMap;
   }
 
@@ -167,7 +167,7 @@ export class APMEventClient {
       indices: this.indices,
     });
 
-    if (this.excludedDataTiers.length > 0) {
+    if (this.excludedDataTiers) {
       filters.push(...excludeTiersQuery(this.excludedDataTiers));
     }
 
@@ -207,8 +207,7 @@ export class APMEventClient {
     // Reusing indices configured for errors since both events and errors are stored as logs.
     const index = processorEventsToIndex([ProcessorEvent.error], this.indices);
 
-    const filter =
-      this.excludedDataTiers.length > 0 ? excludeTiersQuery(this.excludedDataTiers) : undefined;
+    const filter = this.excludedDataTiers ? excludeTiersQuery(this.excludedDataTiers) : undefined;
 
     const searchParams = {
       ...omit(params, 'body'),
@@ -250,7 +249,7 @@ export class APMEventClient {
           indices: this.indices,
         });
 
-        if (this.excludedDataTiers.length > 0) {
+        if (this.excludedDataTiers) {
           filters.push(...excludeTiersQuery(this.excludedDataTiers));
         }
 

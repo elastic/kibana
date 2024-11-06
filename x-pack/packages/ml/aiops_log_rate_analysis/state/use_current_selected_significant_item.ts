@@ -11,8 +11,9 @@ import type { RootState } from './store';
 import { useAppSelector } from './hooks';
 
 const selectSelectedSignificantItem = (s: RootState) =>
-  s.logRateAnalysisTable.selectedSignificantItem;
-const selectPinnedSignificantItem = (s: RootState) => s.logRateAnalysisTable.pinnedSignificantItem;
+  s.logRateAnalysisTableRow.selectedSignificantItem;
+const selectPinnedSignificantItem = (s: RootState) =>
+  s.logRateAnalysisTableRow.pinnedSignificantItem;
 const selectCurrentSelectedSignificantItem = createSelector(
   selectSelectedSignificantItem,
   selectPinnedSignificantItem,

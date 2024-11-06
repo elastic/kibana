@@ -4,17 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { toNumberRt } from '@kbn/io-ts-utils';
 import { Outlet, createRouter } from '@kbn/typed-react-router-config';
 import * as t from 'io-ts';
 import React from 'react';
+import { ENTITY_LAST_SEEN } from '@kbn/observability-shared-plugin/common';
 import { InventoryPageTemplate } from '../components/inventory_page_template';
 import { InventoryPage } from '../pages/inventory_page';
-import {
-  defaultEntitySortField,
-  entityTypesRt,
-  entityColumnIdsRt,
-  entityViewRt,
-} from '../../common/entities';
+import { entityTypesRt } from '../../common/entities';
 
 /**
  * The array of route definitions to be used when the application
@@ -30,22 +27,21 @@ const inventoryRoutes = {
     params: t.type({
       query: t.intersection([
         t.type({
-          sortField: entityColumnIdsRt,
+          sortField: t.string,
           sortDirection: t.union([t.literal('asc'), t.literal('desc')]),
+          pageIndex: toNumberRt,
         }),
         t.partial({
           entityTypes: entityTypesRt,
           kuery: t.string,
-          view: entityViewRt,
-          pagination: t.string,
         }),
       ]),
     }),
     defaults: {
       query: {
-        sortField: defaultEntitySortField,
+        sortField: ENTITY_LAST_SEEN,
         sortDirection: 'desc',
-        view: 'grouped',
+        pageIndex: '0',
       },
     },
     children: {

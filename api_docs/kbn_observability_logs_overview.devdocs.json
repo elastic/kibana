@@ -176,8 +176,8 @@
                 "pluginId": "dataViews",
                 "scope": "common",
                 "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataView",
-                "text": "DataView"
+                "section": "def-common.AbstractDataView",
+                "text": "AbstractDataView"
               }
             ],
             "path": "x-pack/packages/observability/logs_overview/src/utils/logs_source.ts",
@@ -314,8 +314,6 @@
               "LogCategoriesGridHistogramCellDependencies",
               " & ",
               "LogCategoriesGridChangeTimeCellDependencies",
-              " & ",
-              "LogCategoryDocumentExamplesTableDependencies",
               " & { search: ",
               {
                 "pluginId": "@kbn/search-types",
@@ -326,15 +324,7 @@
               },
               "; } & { logsDataAccess: { services: { logSourcesService: ",
               "LogSourcesService",
-              "; }; }; dataViews: ",
-              {
-                "pluginId": "dataViews",
-                "scope": "public",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-public.DataViewsServicePublic",
-                "text": "DataViewsServicePublic"
-              },
-              "; }"
+              "; }; }; }"
             ],
             "path": "x-pack/packages/observability/logs_overview/src/components/logs_overview/logs_overview.tsx",
             "deprecated": false,
@@ -465,8 +455,6 @@
           "LogCategoriesGridHistogramCellDependencies",
           " & ",
           "LogCategoriesGridChangeTimeCellDependencies",
-          " & ",
-          "LogCategoryDocumentExamplesTableDependencies",
           " & { search: ",
           {
             "pluginId": "@kbn/search-types",
@@ -477,15 +465,7 @@
           },
           "; } & { logsDataAccess: { services: { logSourcesService: ",
           "LogSourcesService",
-          "; }; }; dataViews: ",
-          {
-            "pluginId": "dataViews",
-            "scope": "public",
-            "docId": "kibDataViewsPluginApi",
-            "section": "def-public.DataViewsServicePublic",
-            "text": "DataViewsServicePublic"
-          },
-          "; }"
+          "; }; }; }"
         ],
         "path": "x-pack/packages/observability/logs_overview/src/components/logs_overview/logs_overview.tsx",
         "deprecated": false,

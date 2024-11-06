@@ -20,7 +20,6 @@ import {
   EuiForm,
   EuiFormRow,
   EuiSpacer,
-  EuiSwitch,
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
@@ -83,8 +82,6 @@ export function RunControls({
   newForecastDuration,
   isNewForecastDurationValid,
   newForecastDurationErrors,
-  neverExpires,
-  onNeverExpiresChange,
   onNewForecastDurationChange,
   runForecast,
   isForecastRequested,
@@ -136,8 +133,8 @@ export function RunControls({
       </EuiText>
       <EuiSpacer size="s" />
       <EuiForm>
-        <EuiFlexGroup direction="column">
-          <EuiFlexItem grow={false}>
+        <EuiFlexGroup>
+          <EuiFlexItem>
             <EuiFormRow
               label={
                 <FormattedMessage
@@ -166,43 +163,16 @@ export function RunControls({
               )}
             </EuiFormRow>
           </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiFlexGroup justifyContent="spaceBetween">
-              <EuiFlexItem grow={false}>
-                <EuiFormRow
-                  helpText={i18n.translate(
-                    'xpack.ml.timeSeriesExplorer.runControls.neverExpireHelpText',
-                    {
-                      defaultMessage: 'If disabled, forecasts will be retained for 14 days.',
-                    }
-                  )}
-                >
-                  <EuiSwitch
-                    data-test-subj="mlModalForecastNeverExpireSwitch"
-                    disabled={disabledState.isDisabled}
-                    label={i18n.translate(
-                      'xpack.ml.timeSeriesExplorer.runControls.neverExpireLabel',
-                      {
-                        defaultMessage: 'Never expire',
-                      }
-                    )}
-                    checked={neverExpires}
-                    onChange={onNeverExpiresChange}
-                  />
-                </EuiFormRow>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiFormRow hasEmptyLabelSpace>
-                  {disabledState.isDisabledToolTipText === undefined ? (
-                    runButton
-                  ) : (
-                    <EuiToolTip position="left" content={disabledState.isDisabledToolTipText}>
-                      {runButton}
-                    </EuiToolTip>
-                  )}
-                </EuiFormRow>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+          <EuiFlexItem grow={false}>
+            <EuiFormRow hasEmptyLabelSpace>
+              {disabledState.isDisabledToolTipText === undefined ? (
+                runButton
+              ) : (
+                <EuiToolTip position="left" content={disabledState.isDisabledToolTipText}>
+                  {runButton}
+                </EuiToolTip>
+              )}
+            </EuiFormRow>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiForm>
@@ -223,9 +193,7 @@ RunControls.propType = {
   newForecastDuration: PropTypes.string,
   isNewForecastDurationValid: PropTypes.bool,
   newForecastDurationErrors: PropTypes.array,
-  neverExpires: PropTypes.bool.isRequired,
   onNewForecastDurationChange: PropTypes.func.isRequired,
-  onNeverExpiresChange: PropTypes.func.isRequired,
   runForecast: PropTypes.func.isRequired,
   isForecastRequested: PropTypes.bool,
   forecastProgress: PropTypes.number,

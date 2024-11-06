@@ -13,17 +13,11 @@ import { i18n } from '@kbn/i18n';
 import { getRouterLinkProps } from '@kbn/router-utils';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import React, { useCallback, useMemo } from 'react';
-import type { ResolvedIndexNameLogsSourceConfiguration } from '../../utils/logs_source';
+import type { IndexNameLogsSourceConfiguration } from '../../utils/logs_source';
 
-interface LinkFilter {
-  filter: QueryDslQueryContainer;
-  meta?: {
-    name?: string;
-  };
-}
 export interface DiscoverLinkProps {
-  documentFilters?: LinkFilter[];
-  logsSource: ResolvedIndexNameLogsSourceConfiguration;
+  documentFilters?: QueryDslQueryContainer[];
+  logsSource: IndexNameLogsSourceConfiguration;
   timeRange: {
     start: string;
     end: string;
@@ -52,10 +46,10 @@ export const DiscoverLink = React.memo(
         filters: documentFilters?.map((filter) =>
           buildCustomFilter(
             logsSource.indexName,
-            filter.filter,
+            filter,
             false,
             false,
-            filter.meta?.name ?? categorizedLogsFilterLabel,
+            categorizedLogsFilterLabel,
             FilterStateStore.APP_STATE
           )
         ),

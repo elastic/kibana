@@ -6,15 +6,38 @@
  */
 
 import expect from '@kbn/expect';
+import { Client } from '@elastic/elasticsearch';
+import { ToolingLog } from '@kbn/tooling-log';
 import { FtrProviderContext } from '../../../ftr_provider_context';
+
+async function clearAllApiKeys(esClient: Client, logger: ToolingLog) {
+  const existingKeys = await esClient.security.queryApiKeys();
+  if (existingKeys.count > 0) {
+    await Promise.all(
+      existingKeys.api_keys.map(async (key) => {
+        await esClient.security.invalidateApiKey({ ids: [key.id] });
+      })
+    );
+  } else {
+    logger.debug('No API keys to delete.');
+  }
+}
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'svlCommonPage', 'apiKeys']);
   const browser = getService('browser');
+  const es = getService('es');
+  const log = getService('log');
 
   describe('API keys', function () {
+    // TimeoutError: Waiting for element to be located By(css selector, [data-test-subj="apiKeysCreatePromptButton"]) Wait timed out after 10028ms
+    this.tags(['failsOnMKI']);
     before(async () => {
       await pageObjects.svlCommonPage.loginAsAdmin();
+    });
+
+    after(async () => {
+      await clearAllApiKeys(es, log);
     });
 
     it('should create and delete API keys correctly', async () => {
@@ -22,15 +45,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         shouldUseHashForSubUrl: false,
       });
 
-      // name needs to be unique because we will confirm deletion by name
-      const apiKeyName = `API Key ${Date.now()}`;
-
-      // If there are any existing API keys (e.g. will occur on projects created with QAF),
-      // the table will be displayed. Otherwise, the empty prompt is displayed.
-      const isPromptPage = await pageObjects.apiKeys.isPromptPage();
-      if (isPromptPage) await pageObjects.apiKeys.clickOnPromptCreateApiKey();
-      else await pageObjects.apiKeys.clickOnTableCreateApiKey();
-
+      const apiKeyName = 'Happy API Key';
+      await pageObjects.apiKeys.clickOnPromptCreateApiKey();
       expect(await browser.getCurrentUrl()).to.contain('app/management/security/api_keys/create');
       expect(await pageObjects.apiKeys.getFlyoutTitleText()).to.be('Create API key');
 
@@ -45,9 +61,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(await pageObjects.apiKeys.isApiKeyModalExists()).to.be(false);
       expect(newApiKeyCreation).to.be(`Created API key '${apiKeyName}'`);
 
-      await pageObjects.apiKeys.ensureApiKeyExists(apiKeyName);
-      await pageObjects.apiKeys.deleteApiKeyByName(apiKeyName);
-      expect(await pageObjects.apiKeys.doesApiKeyExist(apiKeyName)).to.be(false);
+      await pageObjects.apiKeys.deleteAllApiKeyOneByOne();
     });
   });
 };

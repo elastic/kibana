@@ -7,7 +7,7 @@
 
 import type { EntityType } from '../../../../../../common/api/entity_analytics/entity_store';
 import { getIdentityFieldForEntityType } from '../../utils';
-import { oldestValue, newestValue } from '../definition_utils';
+import { collectValues, newestValue } from '../definition_utils';
 import type { UnitedDefinitionField } from '../types';
 
 export const getCommonUnitedFieldDefinitions = ({
@@ -19,9 +19,10 @@ export const getCommonUnitedFieldDefinitions = ({
 }): UnitedDefinitionField[] => {
   const identityField = getIdentityFieldForEntityType(entityType);
   return [
-    oldestValue({
+    collectValues({
       sourceField: '_index',
       field: 'entity.source',
+      fieldHistoryLength,
     }),
     newestValue({ field: 'asset.criticality' }),
     newestValue({

@@ -942,7 +942,6 @@ function mockHealthStats(overrides = {}) {
             claim_conflicts: [0, 100, 75],
             claim_mismatches: [0, 100, 75],
             claim_duration: [0, 100, 75],
-            claim_stale_tasks: [0, 100, 75],
             result_frequency_percent_as_number: [
               FillPoolResult.NoTasksClaimed,
               FillPoolResult.NoTasksClaimed,

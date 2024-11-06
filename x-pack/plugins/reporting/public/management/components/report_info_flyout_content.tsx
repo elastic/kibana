@@ -18,7 +18,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { VisualReportingSoftDisabledError } from '@kbn/reporting-common/errors';
 
-import { ClientConfigType, Job, useKibana } from '@kbn/reporting-public';
+import { Job, useKibana } from '@kbn/reporting-public';
 import { USES_HEADLESS_JOB_TYPES } from '../../../common/constants';
 import { sharedI18nTexts } from '../../shared_i18n_texts';
 
@@ -33,7 +33,6 @@ const UNKNOWN = i18n.translate('xpack.reporting.listing.infoPanel.unknownLabel',
 
 interface Props {
   info: Job;
-  config: ClientConfigType;
 }
 
 const createDateFormatter = (format: string, tz: string) => (date: string) => {
@@ -41,7 +40,7 @@ const createDateFormatter = (format: string, tz: string) => (date: string) => {
   return m.isValid() ? m.format(format) : NA;
 };
 
-export const ReportInfoFlyoutContent: FunctionComponent<Props> = ({ info, config }) => {
+export const ReportInfoFlyoutContent: FunctionComponent<Props> = ({ info }) => {
   const {
     services: { uiSettings, docLinks },
   } = useKibana();
@@ -50,8 +49,6 @@ export const ReportInfoFlyoutContent: FunctionComponent<Props> = ({ info, config
     uiSettings.get('dateFormat:tz') === 'Browser'
       ? moment.tz.guess()
       : uiSettings.get('dateFormat:tz');
-
-  const showKibanaVersion = Boolean(info.version) && config.statefulSettings.enabled;
 
   const formatDate = createDateFormatter(uiSettings.get('dateFormat'), timezone);
   const formatMilliseconds = (millis: number) =>
@@ -77,7 +74,7 @@ export const ReportInfoFlyoutContent: FunctionComponent<Props> = ({ info, config
       }),
       description: info.prettyStatus,
     },
-    showKibanaVersion && {
+    Boolean(info.version) && {
       title: i18n.translate('xpack.reporting.listing.infoPanel.kibanaVersion', {
         defaultMessage: 'Kibana version',
       }),
@@ -243,7 +240,6 @@ export const ReportInfoFlyoutContent: FunctionComponent<Props> = ({ info, config
               defaultMessage: 'No report generated',
             })}
             color="danger"
-            css={{ overflowWrap: 'break-word' }}
           >
             {errored}
           </EuiCallOut>
@@ -258,7 +254,6 @@ export const ReportInfoFlyoutContent: FunctionComponent<Props> = ({ info, config
               defaultMessage: 'Report contains warnings',
             })}
             color="warning"
-            css={{ overflowWrap: 'break-word' }}
           >
             {warnings}
           </EuiCallOut>

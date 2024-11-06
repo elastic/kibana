@@ -10,7 +10,6 @@ import React, { useState } from 'react';
 import { useRouteMatch } from 'react-router-dom';
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
-import { OnboardingFlow } from '../../../components/shared/templates/no_data_config';
 import { InfraPageTemplate } from '../../../components/shared/templates/infra_page_template';
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
 import { useParentBreadcrumbResolver } from '../../../hooks/use_parent_breadcrumb_resolver';
@@ -54,15 +53,18 @@ export const MetricDetailPage = () => {
   });
 
   const breadcrumbOptions = parentBreadcrumbResolver.getBreadcrumbOptions(nodeType);
-  useMetricsBreadcrumbs([
-    {
-      ...breadcrumbOptions.link,
-      text: breadcrumbOptions.text,
-    },
-    {
-      text: name,
-    },
-  ]);
+  useMetricsBreadcrumbs(
+    [
+      {
+        ...breadcrumbOptions.link,
+        text: breadcrumbOptions.text,
+      },
+      {
+        text: name,
+      },
+    ],
+    { deeperContextServerless: true }
+  );
 
   const [sideNav, setSideNav] = useState<NavItem[]>([]);
 
@@ -77,7 +79,7 @@ export const MetricDetailPage = () => {
 
   if (metadataLoading && !filteredRequiredMetrics.length) {
     return (
-      <InfraPageTemplate onboardingFlow={OnboardingFlow.Infra}>
+      <InfraPageTemplate>
         <InfraLoadingPanel
           height="100vh"
           width="100%"

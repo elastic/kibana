@@ -12,11 +12,9 @@ import { PaletteRegistry, CUSTOM_PALETTE, PaletteOutput, CustomPaletteParams } f
 import { ThemeServiceStart } from '@kbn/core/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { IconChartDatatable } from '@kbn/chart-icons';
-import { getOriginalId } from '@kbn/transpose-utils';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
 import useObservable from 'react-use/lib/useObservable';
-import { getSortingCriteria } from '@kbn/sort-predicates';
 import type { FormBasedPersistedState } from '../../datasources/form_based/types';
 import type {
   SuggestionRequest,
@@ -27,7 +25,7 @@ import type {
 } from '../../types';
 import { TableDimensionDataExtraEditor, TableDimensionEditor } from './components/dimension_editor';
 import { TableDimensionEditorAdditionalSection } from './components/dimension_editor_addtional_section';
-import type { FormatFactory, LayerType } from '../../../common/types';
+import type { LayerType } from '../../../common/types';
 import { RowHeightMode } from '../../../common/types';
 import { getDefaultSummaryLabel } from '../../../common/expressions/datatable/summary';
 import {
@@ -37,6 +35,7 @@ import {
   type CollapseExpressionFunction,
   type DatatableColumnFn,
   type DatatableExpressionFunction,
+  getOriginalId,
 } from '../../../common/expressions';
 import { DataTableToolbar } from './components/toolbar';
 import {
@@ -52,8 +51,6 @@ import {
   shouldColorByTerms,
 } from '../../shared_components';
 import { getColorMappingTelemetryEvents } from '../../lens_ui_telemetry/color_telemetry_helpers';
-import { DatatableInspectorTables } from '../../../common/expressions/datatable/datatable_fn';
-import { getSimpleColumnType } from './components/table_actions';
 export interface DatatableVisualizationState {
   columns: ColumnState[];
   layerId: string;
@@ -73,11 +70,9 @@ const visualizationLabel = i18n.translate('xpack.lens.datatable.label', {
 export const getDatatableVisualization = ({
   paletteService,
   kibanaTheme,
-  formatFactory,
 }: {
   paletteService: PaletteRegistry;
   kibanaTheme: ThemeServiceStart;
-  formatFactory: FormatFactory;
 }): Visualization<DatatableVisualizationState> => ({
   id: 'lnsDatatable',
 
@@ -151,7 +146,7 @@ export const getDatatableVisualization = ({
               .filter(({ id }) => getOriginalId(id) === accessor)
               .map(({ id }) => id) || []
           : [accessor];
-        const minMaxByColumnId = findMinMaxByColumnId(columnsToCheck, currentData);
+        const minMaxByColumnId = findMinMaxByColumnId(columnsToCheck, currentData, getOriginalId);
         const dataBounds = minMaxByColumnId.get(accessor);
         if (palette && !showColorByTerms && !palette?.canDynamicColoring && dataBounds) {
           const newPalette: PaletteOutput<CustomPaletteParams> = {
@@ -269,10 +264,8 @@ export const getDatatableVisualization = ({
   **/
   getConfiguration({ state, frame }) {
     const isDarkMode = kibanaTheme.getTheme().darkMode;
-    const { sortedColumns, datasource } = getDatasourceAndSortedColumns(
-      state,
-      frame.datasourceLayers
-    );
+    const { sortedColumns, datasource } =
+      getDataSourceAndSortedColumns(state, frame.datasourceLayers) || {};
 
     const columnMap: Record<string, ColumnState> = {};
     state.columns.forEach((column) => {
@@ -503,7 +496,8 @@ export const getDatatableVisualization = ({
     { title, description } = {},
     datasourceExpressionsByLayers = {}
   ): Ast | null {
-    const { sortedColumns, datasource } = getDatasourceAndSortedColumns(state, datasourceLayers);
+    const { sortedColumns, datasource } =
+      getDataSourceAndSortedColumns(state, datasourceLayers) || {};
     const isTextBasedLanguage = datasource?.isTextBasedLanguage();
 
     if (
@@ -736,40 +730,9 @@ export const getDatatableVisualization = ({
     return suggestion;
   },
 
-  getExportDatatables(state, datasourceLayers = {}, activeData) {
-    const columnMap = new Map(state.columns.map((c) => [c.columnId, c]));
-    const datatable =
-      activeData?.[DatatableInspectorTables.Transpose] ??
-      activeData?.[DatatableInspectorTables.Default];
-    if (!datatable) return [];
-
-    const columns = datatable.columns.filter(({ id }) => !columnMap.get(getOriginalId(id))?.hidden);
-    let rows = datatable.rows;
-
-    const sortColumn =
-      state.sorting?.columnId && columns.find(({ id }) => id === state.sorting?.columnId);
-    const sortDirection = state.sorting?.direction;
-
-    if (sortColumn && sortDirection && sortDirection !== 'none') {
-      const datasource = datasourceLayers[state.layerId];
-      const schemaType =
-        datasource?.getOperationForColumnId?.(sortColumn.id)?.sortingHint ??
-        getSimpleColumnType(sortColumn.meta);
-      const sortingCriteria = getSortingCriteria(
-        schemaType,
-        sortColumn.id,
-        formatFactory(sortColumn.meta?.params)
-      );
-      rows = [...rows].sort((rA, rB) => sortingCriteria(rA, rB, sortDirection));
-    }
-
-    return [
-      {
-        ...datatable,
-        columns,
-        rows,
-      },
-    ];
+  getSortedColumns(state, datasourceLayers) {
+    const { sortedColumns } = getDataSourceAndSortedColumns(state, datasourceLayers || {}) || {};
+    return sortedColumns;
   },
 
   getVisualizationInfo(state) {
@@ -819,7 +782,7 @@ export const getDatatableVisualization = ({
   },
 });
 
-function getDatasourceAndSortedColumns(
+function getDataSourceAndSortedColumns(
   state: DatatableVisualizationState,
   datasourceLayers: DatasourceLayers
 ) {
@@ -829,6 +792,5 @@ function getDatasourceAndSortedColumns(
   const sortedColumns = Array.from(
     new Set(originalOrder?.concat(state.columns.map(({ columnId }) => columnId)))
   );
-
   return { datasource, sortedColumns };
 }

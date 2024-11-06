@@ -1,15 +1,11 @@
 {
   "type": "plugin",
   "id": "@kbn/console-plugin",
-  "owner": [
-    "@elastic/kibana-management"
-  ],
-  "group": "platform",
-  "visibility": "shared",
+  "owner": "@elastic/kibana-management",
   "plugin": {
     "id": "console",
-    "browser": true,
     "server": true,
+    "browser": true,
     "configPath": [
       "console"
     ],

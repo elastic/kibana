@@ -69,8 +69,6 @@ import { MlTableServiceProvider } from './common_table_service';
 import { MachineLearningFieldStatsFlyoutProvider } from './field_stats_flyout';
 import { MachineLearningDataDriftProvider } from './data_drift';
 import { TrainedModelsFlyoutProvider } from './add_trained_models_flyout';
-import { MachineLearningMemoryUsageProvider } from './memory_usage';
-
 export function MachineLearningProvider(context: FtrProviderContext) {
   const commonAPI = MachineLearningCommonAPIProvider(context);
   const commonUI = MachineLearningCommonUIProvider(context);
@@ -180,7 +178,7 @@ export function MachineLearningProvider(context: FtrProviderContext) {
   const deployDFAModelFlyout = DeployDFAModelFlyoutProvider(context, commonUI);
   const mlNodesPanel = MlNodesPanelProvider(context);
   const notifications = NotificationsProvider(context, commonUI, tableService);
-  const memoryUsage = MachineLearningMemoryUsageProvider(context);
+
   const cases = MachineLearningCasesProvider(context, swimLane, anomalyCharts);
 
   return {
@@ -246,6 +244,5 @@ export function MachineLearningProvider(context: FtrProviderContext) {
     trainedModelsFlyout,
     deployDFAModelFlyout,
     trainedModelsTable,
-    memoryUsage,
   };
 }

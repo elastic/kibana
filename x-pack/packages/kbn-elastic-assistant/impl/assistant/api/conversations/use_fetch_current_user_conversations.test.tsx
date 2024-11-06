@@ -52,7 +52,7 @@ describe('useFetchCurrentUserConversations', () => {
           method: 'GET',
           query: {
             page: 1,
-            per_page: 99,
+            perPage: 100,
           },
           version: '2023-10-31',
           signal: undefined,

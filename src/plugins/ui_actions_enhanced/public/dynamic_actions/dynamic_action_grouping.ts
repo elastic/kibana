@@ -21,6 +21,6 @@ export const dynamicActionGrouping: PresentableGrouping<{
         defaultMessage: 'Custom actions',
       }),
     getIconType: () => 'symlink',
-    order: 0,
+    order: 26,
   },
 ];

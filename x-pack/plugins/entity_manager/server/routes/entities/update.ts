@@ -5,13 +5,21 @@
  * 2.0.
  */
 
-import { entityDefinitionUpdateSchema } from '@kbn/entities-schema';
+import {
+  createEntityDefinitionQuerySchema,
+  entityDefinitionUpdateSchema,
+} from '@kbn/entities-schema';
 import { z } from '@kbn/zod';
 import { EntitySecurityException } from '../../lib/entities/errors/entity_security_exception';
 import { InvalidTransformError } from '../../lib/entities/errors/invalid_transform_error';
+import { findEntityDefinitionById } from '../../lib/entities/find_entity_definition';
+import { startTransforms } from '../../lib/entities/start_transforms';
+import {
+  installationInProgress,
+  reinstallEntityDefinition,
+} from '../../lib/entities/install_entity_definition';
+
 import { createEntityManagerServerRoute } from '../create_entity_manager_server_route';
-import { EntityDefinitionNotFound } from '../../lib/entities/errors/entity_not_found';
-import { EntityDefinitionUpdateConflict } from '../../lib/entities/errors/entity_definition_update_conflict';
 
 /**
  * @openapi
@@ -21,12 +29,13 @@ import { EntityDefinitionUpdateConflict } from '../../lib/entities/errors/entity
  *     tags:
  *       - definitions
  *     parameters:
- *       - in: path
- *         name: id
- *         description: The entity definition ID
+ *       - in: query
+ *         name: installOnly
+ *         description: If true, the definition transforms will not be started
+ *         required: false
  *         schema:
- *           type: string
- *         required: true
+ *           type: boolean
+ *           default: false
  *     requestBody:
  *       description: The definition properties to update
  *       required: true
@@ -54,37 +63,58 @@ export const updateEntityDefinitionRoute = createEntityManagerServerRoute({
   endpoint: 'PATCH /internal/entities/definition/{id}',
   params: z.object({
     path: z.object({ id: z.string() }),
+    query: createEntityDefinitionQuerySchema,
     body: entityDefinitionUpdateSchema,
   }),
-  handler: async ({ request, response, params, logger, getScopedClient }) => {
-    const entityClient = await getScopedClient({ request });
+  handler: async ({ context, response, params, logger }) => {
+    const core = await context.core;
+    const soClient = core.savedObjects.client;
+    const esClient = core.elasticsearch.client.asCurrentUser;
 
     try {
-      const updatedDefinition = await entityClient.updateEntityDefinition({
+      const installedDefinition = await findEntityDefinitionById({
+        soClient,
+        esClient,
         id: params.path.id,
-        definitionUpdate: params.body,
       });
 
-      return response.ok({ body: updatedDefinition });
-    } catch (e) {
-      logger.error(e);
-
-      if (e instanceof EntityDefinitionNotFound) {
+      if (!installedDefinition) {
         return response.notFound({
           body: { message: `Entity definition [${params.path.id}] not found` },
         });
       }
 
-      if (e instanceof EntityDefinitionUpdateConflict) {
+      if (installedDefinition.managed) {
+        return response.forbidden({
+          body: { message: `Managed definition cannot be modified` },
+        });
+      }
+
+      if (installationInProgress(installedDefinition)) {
         return response.conflict({
           body: { message: `Entity definition [${params.path.id}] has changes in progress` },
         });
       }
 
+      const updatedDefinition = await reinstallEntityDefinition({
+        soClient,
+        esClient,
+        logger,
+        definition: installedDefinition,
+        definitionUpdate: params.body,
+      });
+
+      if (!params.query.installOnly) {
+        await startTransforms(esClient, updatedDefinition, logger);
+      }
+
+      return response.ok({ body: updatedDefinition });
+    } catch (e) {
+      logger.error(e);
+
       if (e instanceof EntitySecurityException || e instanceof InvalidTransformError) {
         return response.customError({ body: e, statusCode: 400 });
       }
-
       return response.customError({ body: e, statusCode: 500 });
     }
   },

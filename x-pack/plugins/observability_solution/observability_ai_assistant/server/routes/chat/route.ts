@@ -61,7 +61,7 @@ const chatCompleteInternalRt = t.intersection([
   t.type({
     body: t.type({
       screenContexts: t.array(screenContextRt),
-      scopes: t.array(assistantScopeType),
+      scope: assistantScopeType,
     }),
   }),
 ]);
@@ -83,11 +83,11 @@ async function initializeChatRequest({
   request,
   plugins: { cloud, actions },
   params: {
-    body: { connectorId, scopes },
+    body: { connectorId, scope },
   },
   service,
 }: ObservabilityAIAssistantRouteHandlerResources & {
-  params: { body: { connectorId: string; scopes: AssistantScope[] } };
+  params: { body: { connectorId: string; scope: AssistantScope } };
 }) {
   await withAssistantSpan('guard_against_invalid_connector', async () => {
     const actionsClient = await (await actions.start()).getActionsClientWithRequest(request);
@@ -101,7 +101,7 @@ async function initializeChatRequest({
   });
 
   const [client, cloudStart, simulateFunctionCalling] = await Promise.all([
-    service.getClient({ request, scopes }),
+    service.getClient({ request, scope }),
     cloud?.start(),
     (await context.core).uiSettings.client.get<boolean>(aiAssistantSimulatedFunctionCalling),
   ]);
@@ -136,7 +136,7 @@ const chatRoute = createObservabilityAIAssistantServerRoute({
         messages: t.array(messageRt),
         connectorId: t.string,
         functions: t.array(functionRt),
-        scopes: t.array(assistantScopeType),
+        scope: assistantScopeType,
       }),
       t.partial({
         functionCall: t.string,
@@ -182,7 +182,7 @@ const chatRecallRoute = createObservabilityAIAssistantServerRoute({
       prompt: t.string,
       context: t.string,
       connectorId: t.string,
-      scopes: t.array(assistantScopeType),
+      scope: assistantScopeType,
     }),
   }),
   handler: async (resources): Promise<Readable> => {
@@ -248,7 +248,6 @@ async function chatComplete(
       screenContexts,
       instructions,
       disableFunctions,
-      scopes,
     },
   } = params;
 
@@ -261,7 +260,6 @@ async function chatComplete(
     resources,
     client,
     screenContexts,
-    scopes,
   });
 
   const response$ = client.complete({
@@ -312,7 +310,7 @@ const publicChatCompleteRoute = createObservabilityAIAssistantServerRoute({
       params: {
         body: {
           ...restOfBody,
-          scopes: ['observability'],
+          scope: 'observability',
           screenContexts: [
             {
               actions,

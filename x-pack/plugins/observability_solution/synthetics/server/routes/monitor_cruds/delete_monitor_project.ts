@@ -12,7 +12,6 @@ import { ConfigKey } from '../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { getMonitors, getSavedObjectKqlFilter } from '../common';
 import { deleteMonitorBulk } from './bulk_cruds/delete_monitor_bulk';
-import { validateSpaceId } from './services/validate_space_id';
 
 export const deleteSyntheticsMonitorProjectRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'DELETE',
@@ -26,7 +25,7 @@ export const deleteSyntheticsMonitorProjectRoute: SyntheticsRestApiRouteFactory 
     }),
   },
   handler: async (routeContext): Promise<any> => {
-    const { request, response } = routeContext;
+    const { request, response, savedObjectsClient, server, syntheticsMonitorClient } = routeContext;
     const { projectName } = request.params;
     const { monitors: monitorsToDelete } = request.body;
     const decodedProjectName = decodeURI(projectName);
@@ -37,8 +36,6 @@ export const deleteSyntheticsMonitorProjectRoute: SyntheticsRestApiRouteFactory 
         },
       });
     }
-
-    await validateSpaceId(routeContext);
 
     const deleteFilter = `${syntheticsMonitorType}.attributes.${
       ConfigKey.PROJECT_ID
@@ -60,7 +57,10 @@ export const deleteSyntheticsMonitorProjectRoute: SyntheticsRestApiRouteFactory 
 
     await deleteMonitorBulk({
       monitors,
-      routeContext,
+      server,
+      savedObjectsClient,
+      syntheticsMonitorClient,
+      request,
     });
 
     return {

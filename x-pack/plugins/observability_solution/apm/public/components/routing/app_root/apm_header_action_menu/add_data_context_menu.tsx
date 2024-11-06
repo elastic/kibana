@@ -13,16 +13,14 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import { OBSERVABILITY_ONBOARDING_LOCATOR } from '@kbn/deeplinks-observability';
-import { ApmOnboardingLocatorParams } from '../../../../locator/onboarding_locator';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useKibana } from '../../../../context/kibana_context/use_kibana';
 import { ApmPluginStartDeps, ApmServices } from '../../../../plugin';
 import { EntityInventoryAddDataParams } from '../../../../services/telemetry';
 import {
-  associateServiceLogsProps,
-  collectServiceLogsProps,
-  addApmDataProps,
+  associateServiceLogs,
+  collectServiceLogs,
+  addApmData,
 } from '../../../shared/add_data_buttons/buttons';
 
 const addData = i18n.translate('xpack.apm.addDataContextMenu.link', {
@@ -36,16 +34,7 @@ export function AddDataContextMenu() {
     core: {
       http: { basePath },
     },
-    share: {
-      url: { locators },
-    },
   } = useApmPluginContext();
-
-  const onboardingLocator = locators.get<ApmOnboardingLocatorParams>(
-    OBSERVABILITY_ONBOARDING_LOCATOR
-  );
-
-  const addApmButtonData = addApmDataProps(onboardingLocator);
 
   const button = (
     <EuiHeaderLink
@@ -72,8 +61,8 @@ export function AddDataContextMenu() {
       title: addData,
       items: [
         {
-          name: associateServiceLogsProps.name,
-          href: associateServiceLogsProps.link,
+          name: associateServiceLogs.name,
+          href: associateServiceLogs.link,
           'data-test-subj': 'apmAddDataAssociateServiceLogs',
           target: '_blank',
           onClick: () => {
@@ -81,26 +70,22 @@ export function AddDataContextMenu() {
           },
         },
         {
-          name: collectServiceLogsProps.name,
-          href: basePath.prepend(collectServiceLogsProps.link),
+          name: collectServiceLogs.name,
+          href: basePath.prepend(collectServiceLogs.link),
           'data-test-subj': 'apmAddDataCollectServiceLogs',
           onClick: () => {
             reportButtonClick('collect_new_service_logs');
           },
         },
-        ...(addApmButtonData.link
-          ? [
-              {
-                name: addApmButtonData.name,
-                href: addApmButtonData.link,
-                icon: 'plusInCircle',
-                'data-test-subj': 'apmAddDataApmAgent',
-                onClick: () => {
-                  reportButtonClick('add_apm_agent');
-                },
-              },
-            ]
-          : []),
+        {
+          name: addApmData.name,
+          href: basePath.prepend(addApmData.link),
+          icon: 'plusInCircle',
+          'data-test-subj': 'apmAddDataApmAgent',
+          onClick: () => {
+            reportButtonClick('add_apm_agent');
+          },
+        },
       ],
     },
   ];

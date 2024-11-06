@@ -15,24 +15,18 @@ import { SslConfig, sslSchema } from '@kbn/server-http-tools';
 import type { UsageRecord } from '../../types';
 import type { UsageApiConfigSchema, TlsConfigSchema } from '../../config';
 
-import { USAGE_REPORTING_ENDPOINT } from '../../constants';
+import { USAGE_REPORTING_ENDPOINT, USAGE_SERVICE_USAGE_URL } from '../../constants';
 
 export class UsageReportingService {
   private agent: https.Agent | undefined;
 
-  constructor(
-    private readonly config: UsageApiConfigSchema,
-    private readonly kibanaVersion: string
-  ) {}
+  constructor(private readonly config: UsageApiConfigSchema) {}
 
   public async reportUsage(records: UsageRecord[]): Promise<Response> {
     const reqArgs: RequestInit = {
       method: 'post',
       body: JSON.stringify(records),
-      headers: {
-        'Content-Type': 'application/json',
-        'User-Agent': `Kibana/${this.kibanaVersion} node-fetch`,
-      },
+      headers: { 'Content-Type': 'application/json' },
     };
     if (this.usageApiUrl.includes('https')) {
       reqArgs.agent = this.httpAgent;
@@ -42,7 +36,7 @@ export class UsageReportingService {
 
   private get tlsConfigs(): NonNullable<TlsConfigSchema> {
     if (!this.config.tls) {
-      throw new Error('usage-api TLS configs not provided');
+      throw new Error('UsageReportingService: usageApi.tls configs not provided');
     }
 
     return this.config.tls;
@@ -50,7 +44,7 @@ export class UsageReportingService {
 
   private get usageApiUrl(): string {
     if (!this.config.url) {
-      throw new Error('usage-api url not provided');
+      return USAGE_SERVICE_USAGE_URL;
     }
 
     return `${this.config.url}${USAGE_REPORTING_ENDPOINT}`;
@@ -58,6 +52,11 @@ export class UsageReportingService {
 
   private get httpAgent(): https.Agent {
     if (this.agent) {
+      return this.agent;
+    }
+
+    if (!this.config.enabled) {
+      this.agent = new https.Agent({ rejectUnauthorized: false });
       return this.agent;
     }
 

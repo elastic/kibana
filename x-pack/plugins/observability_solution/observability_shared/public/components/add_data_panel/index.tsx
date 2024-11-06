@@ -43,7 +43,7 @@ type AddDataPanelButtonWithLabel = Required<AddDataPanelButton>;
 
 export interface AddDataPanelProps {
   content: AddDataPanelContent;
-  onDismiss?: () => void;
+  onDissmiss?: () => void;
   onAddData: () => void;
   onTryIt?: () => void;
   onLearnMore: () => void;
@@ -72,7 +72,7 @@ const learnMoreDefaultLabel = i18n.translate(
 export function AddDataPanel({
   content,
   actions,
-  onDismiss,
+  onDissmiss,
   onLearnMore,
   onTryIt,
   onAddData,
@@ -155,7 +155,7 @@ export function AddDataPanel({
             </EuiFlexItem>
           )}
 
-          {onDismiss && (
+          {onDissmiss && (
             <EuiButtonIcon
               style={{
                 position: 'absolute',
@@ -164,7 +164,7 @@ export function AddDataPanel({
               }}
               data-test-subj="AddDataPanelDismissButton"
               iconType="cross"
-              onClick={onDismiss}
+              onClick={onDissmiss}
             />
           )}
         </EuiFlexGroup>

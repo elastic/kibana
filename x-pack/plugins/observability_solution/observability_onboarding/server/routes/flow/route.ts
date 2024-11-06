@@ -263,8 +263,8 @@ const createFlowRoute = createObservabilityOnboardingServerRoute({
  *
  * The request format is TSV (tab-separated values) to simplify parsing in bash.
  *
- * The response format is a tar archive containing the Elastic Agent configuration, depending on the
- * `Accept` header.
+ * The response format is either a YAML file or a tar archive containing the Elastic Agent
+ * configuration, depending on the `Accept` header.
  *
  * Errors during installation are ignore unless all integrations fail to install. When that happens
  * a 500 Internal Server Error is returned with the first error message.
@@ -348,7 +348,7 @@ const integrationsInstallRoute = createObservabilityOnboardingServerRoute({
         }
         return acc;
       }, []);
-      // Errors during installation are ignored unless all integrations fail to install. When that happens
+      // Errors during installation are ignore unless all integrations fail to install. When that happens
       // a 500 Internal Server Error is returned with the first error message.
       if (!installedIntegrations.length) {
         throw (settledResults[0] as PromiseRejectedResult).reason;
@@ -383,25 +383,27 @@ const integrationsInstallRoute = createObservabilityOnboardingServerRoute({
       ? [plugins.cloud?.setup?.elasticsearchUrl]
       : await getFallbackESUrl(services.esLegacyConfigService);
 
+    if (request.headers.accept === 'application/x-tar') {
+      return response.ok({
+        headers: {
+          'content-type': 'application/x-tar',
+        },
+        body: generateAgentConfigTar({ elasticsearchUrl, installedIntegrations }),
+      });
+    }
+
     return response.ok({
       headers: {
-        'content-type': 'application/x-tar',
+        'content-type': 'application/yaml',
       },
-      body: generateAgentConfigTar({ elasticsearchUrl, installedIntegrations }),
+      body: generateAgentConfigYAML({ elasticsearchUrl, installedIntegrations }),
     });
   },
 });
 
-interface InstalledSystemIntegrationMetadata {
-  hostname: string;
-}
-
-type RegistryIntegrationMetadata = InstalledSystemIntegrationMetadata;
-
 export interface RegistryIntegrationToInstall {
   pkgName: string;
   installSource: 'registry';
-  metadata?: RegistryIntegrationMetadata;
 }
 export interface CustomIntegrationToInstall {
   pkgName: string;
@@ -421,7 +423,7 @@ async function ensureInstalledIntegrations(
       if (installSource === 'registry') {
         const installation = await packageClient.ensureInstalledPackage({ pkgName });
         const pkg = installation.package;
-        const config = await packageClient.getAgentPolicyConfigYAML(pkg.name, pkg.version);
+        const inputs = await packageClient.getAgentPolicyInputs(pkg.name, pkg.version);
         const { packageInfo } = await packageClient.getPackage(pkg.name, pkg.version);
 
         return {
@@ -429,11 +431,10 @@ async function ensureInstalledIntegrations(
           pkgName: pkg.name,
           pkgVersion: pkg.version,
           title: packageInfo.title,
-          config,
+          inputs: inputs.filter((input) => input.type !== 'httpjson'),
           dataStreams:
             packageInfo.data_streams?.map(({ type, dataset }) => ({ type, dataset })) ?? [],
           kibanaAssets: pkg.installed_kibana,
-          metadata: integration.metadata,
         };
       }
 
@@ -446,21 +447,19 @@ async function ensureInstalledIntegrations(
         pkgName,
         pkgVersion: '1.0.0', // Custom integrations are always installed as version `1.0.0`
         title: pkgName,
-        config: dump({
-          inputs: [
-            {
-              id: `filestream-${pkgName}`,
-              type: 'filestream',
-              streams: [
-                {
-                  id: `filestream-${pkgName}`,
-                  data_stream: dataStream,
-                  paths: integration.logFilePaths,
-                },
-              ],
-            },
-          ],
-        }),
+        inputs: [
+          {
+            id: `filestream-${pkgName}`,
+            type: 'filestream',
+            streams: [
+              {
+                id: `filestream-${pkgName}`,
+                data_stream: dataStream,
+                paths: integration.logFilePaths,
+              },
+            ],
+          },
+        ],
         dataStreams: [dataStream],
         kibanaAssets: [],
       };
@@ -490,8 +489,7 @@ async function ensureInstalledIntegrations(
  * Example input:
  *
  * ```text
- * system registry hostname
- * nginx registry
+ * system registry
  * product_service custom /path/to/access.log
  * product_service custom /path/to/error.log
  * checkout_service custom /path/to/access.log
@@ -504,54 +502,60 @@ function parseIntegrationsTSV(tsv: string) {
       .trim()
       .split('\n')
       .map((line) => line.split('\t', 3))
-      .reduce<Record<string, IntegrationToInstall>>((acc, [pkgName, installSource, parameter]) => {
-        const key = `${pkgName}-${installSource}`;
-        if (installSource === 'registry') {
-          const metadata = parseRegistryIntegrationMetadata(pkgName, parameter);
-
-          acc[key] = {
-            pkgName,
-            installSource,
-            metadata,
-          };
-          return acc;
-        } else if (installSource === 'custom') {
-          if (!parameter) {
-            throw new Error(`Missing file path for integration: ${pkgName}`);
-          }
-          // Append file path if integration is already in the list
-          const existing = acc[key];
-          if (existing && existing.installSource === 'custom') {
-            existing.logFilePaths.push(parameter);
+      .reduce<Record<string, IntegrationToInstall>>(
+        (acc, [pkgName, installSource, logFilePath]) => {
+          const key = `${pkgName}-${installSource}`;
+          if (installSource === 'registry') {
+            if (logFilePath) {
+              throw new Error(`Integration '${pkgName}' does not support a file path`);
+            }
+            acc[key] = {
+              pkgName,
+              installSource,
+            };
+            return acc;
+          } else if (installSource === 'custom') {
+            if (!logFilePath) {
+              throw new Error(`Missing file path for integration: ${pkgName}`);
+            }
+            // Append file path if integration is already in the list
+            const existing = acc[key];
+            if (existing && existing.installSource === 'custom') {
+              existing.logFilePaths.push(logFilePath);
+              return acc;
+            }
+            acc[key] = {
+              pkgName,
+              installSource,
+              logFilePaths: [logFilePath],
+            };
             return acc;
           }
-          acc[key] = {
-            pkgName,
-            installSource,
-            logFilePaths: [parameter],
-          };
-          return acc;
-        }
-        throw new Error(`Invalid install source: ${installSource}`);
-      }, {})
+          throw new Error(`Invalid install source: ${installSource}`);
+        },
+        {}
+      )
   );
 }
 
-function parseRegistryIntegrationMetadata(
-  pkgName: string,
-  parameter: string
-): RegistryIntegrationMetadata | undefined {
-  switch (pkgName) {
-    case 'system':
-      if (!parameter) {
-        throw new Error('Missing hostname for System integration');
-      }
-
-      return { hostname: parameter };
-    default:
-      return undefined;
-  }
-}
+const generateAgentConfigYAML = ({
+  elasticsearchUrl,
+  installedIntegrations,
+}: {
+  elasticsearchUrl: string[];
+  installedIntegrations: InstalledIntegration[];
+}) => {
+  return dump({
+    outputs: {
+      default: {
+        type: 'elasticsearch',
+        hosts: elasticsearchUrl,
+        api_key: '${API_KEY}', // Placeholder to be replaced by bash script with the actual API key
+      },
+    },
+    inputs: installedIntegrations.map(({ inputs }) => inputs).flat(),
+  });
+};
 
 const generateAgentConfigTar = ({
   elasticsearchUrl,
@@ -588,7 +592,7 @@ const generateAgentConfigTar = ({
       path: `inputs.d/${integration.pkgName}.yml`,
       mode: 0o644,
       mtime: now,
-      data: integration.config,
+      data: dump({ inputs: integration.inputs }),
     })),
   ]);
 };

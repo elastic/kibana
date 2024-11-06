@@ -51,11 +51,9 @@ export default function (providerContext: FtrProviderContext) {
       await uninstallPackage(testPkgName, testPkgVersion);
     });
     const expectedYml = `inputs:
-  # Collect logs from Apache instances: Collecting Apache access and error logs
-  - id: apache-logfile
+  - id: logfile-apache
     type: logfile
     streams:
-      # Apache access logs: Collect Apache access logs
       - id: logfile-apache.access
         data_stream:
           dataset: apache.access
@@ -71,7 +69,6 @@ export default function (providerContext: FtrProviderContext) {
               target: ''
               fields:
                 ecs.version: 1.5.0
-      # Apache error logs: Collect Apache error logs
       - id: logfile-apache.error
         data_stream:
           dataset: apache.error
@@ -87,11 +84,9 @@ export default function (providerContext: FtrProviderContext) {
               target: ''
               fields:
                 ecs.version: 1.5.0
-  # Collect metrics from Apache instances: Collecting Apache status metrics
-  - id: apache-apache/metrics
+  - id: apache/metrics-apache
     type: apache/metrics
     streams:
-      # Apache status metrics: Collect Apache status metrics
       - id: apache/metrics-apache.status
         data_stream:
           dataset: apache.status
@@ -105,7 +100,7 @@ export default function (providerContext: FtrProviderContext) {
 `;
     const expectedJson = [
       {
-        id: 'apache-logfile',
+        id: 'logfile-apache',
         type: 'logfile',
         streams: [
           {
@@ -156,7 +151,7 @@ export default function (providerContext: FtrProviderContext) {
         ],
       },
       {
-        id: 'apache-apache/metrics',
+        id: 'apache/metrics-apache',
         type: 'apache/metrics',
         streams: [
           {

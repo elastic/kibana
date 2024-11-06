@@ -60,7 +60,6 @@ import {
   FleetUnauthorizedError,
   PackageNotFoundError,
   FleetTooManyRequestsError,
-  PackageInvalidDeploymentMode,
 } from '../../../errors';
 import {
   PACKAGES_SAVED_OBJECT_TYPE,
@@ -76,15 +75,12 @@ import {
   deleteVerificationResult,
   unpackBufferToAssetsMap,
 } from '../archive';
-import { createArchiveIteratorFromMap } from '../archive/archive_iterator';
 import { toAssetReference } from '../kibana/assets/install';
 import type { ArchiveAsset } from '../kibana/assets/install';
 import type { PackageUpdateEvent } from '../../upgrade_sender';
 import { sendTelemetryEvents, UpdateEventType } from '../../upgrade_sender';
 import { auditLoggingService } from '../../audit_logging';
 import { getFilteredInstallPackages } from '../filtered_packages';
-
-import { isAgentlessEnabled, isOnlyAgentlessIntegration } from '../../utils/agentless';
 
 import { _stateMachineInstallPackage } from './install_state_machine/_state_machine_package_install';
 
@@ -107,12 +103,6 @@ import { removeInstallation } from './remove';
 
 export const UPLOAD_RETRY_AFTER_MS = 10000; // 10s
 const MAX_ENSURE_INSTALL_TIME = 60 * 1000;
-
-const PACKAGES_TO_INSTALL_WITH_STREAMING = [
-  // The security_detection_engine package contains a large number of assets and
-  // is not suitable for regular installation as it might cause OOM errors.
-  'security_detection_engine',
-];
 
 export async function isPackageInstalled(options: {
   savedObjectsClient: SavedObjectsClientContract;
@@ -456,7 +446,6 @@ async function installPackageFromRegistry({
   // TODO: change epm API to /packageName/version so we don't need to do this
   const { pkgName, pkgVersion: version } = Registry.splitPkgKey(pkgkey);
   let pkgVersion = version ?? '';
-  const useStreaming = PACKAGES_TO_INSTALL_WITH_STREAMING.includes(pkgName);
 
   // if an error happens during getInstallType, report that we don't know
   let installType: InstallType = 'unknown';
@@ -486,12 +475,11 @@ async function installPackageFromRegistry({
     }
 
     // get latest package version and requested version in parallel for performance
-    const [latestPackage, { paths, packageInfo, assetsMap, archiveIterator, verificationResult }] =
+    const [latestPackage, { paths, packageInfo, assetsMap, verificationResult }] =
       await Promise.all([
         latestPkg ? Promise.resolve(latestPkg) : queryLatest(),
         Registry.getPackage(pkgName, pkgVersion, {
           ignoreUnverified: force && !neverIgnoreVerificationError,
-          useStreaming,
         }),
       ]);
 
@@ -499,7 +487,6 @@ async function installPackageFromRegistry({
       packageInfo,
       assetsMap,
       paths,
-      archiveIterator,
     };
 
     // let the user install if using the force flag or needing to reinstall or install a previous version due to failed update
@@ -520,21 +507,6 @@ async function installPackageFromRegistry({
         }`
       );
     }
-
-    // only allow install of agentless packages if agentless is enabled, or if using force flag
-    const agentlessEnabled = isAgentlessEnabled();
-    const agentlessOnlyIntegration = isOnlyAgentlessIntegration(packageInfo);
-    if (!agentlessEnabled && agentlessOnlyIntegration) {
-      if (!force) {
-        throw new PackageInvalidDeploymentMode(
-          `${pkgkey} contains agentless policy templates, agentless is not available on this deployment`
-        );
-      }
-      logger.debug(
-        `${pkgkey} contains agentless policy templates, agentless is not available on this deployment but installing anyway due to force flag`
-      );
-    }
-
     return await installPackageWithStateMachine({
       pkgName,
       pkgVersion,
@@ -552,7 +524,6 @@ async function installPackageFromRegistry({
       ignoreMappingUpdateErrors,
       skipDataStreamRollover,
       retryFromLastState,
-      useStreaming,
     });
   } catch (e) {
     sendEvent({
@@ -591,7 +562,6 @@ async function installPackageWithStateMachine(options: {
   ignoreMappingUpdateErrors?: boolean;
   skipDataStreamRollover?: boolean;
   retryFromLastState?: boolean;
-  useStreaming?: boolean;
 }): Promise<InstallResult> {
   const packageInfo = options.packageInstallContext.packageInfo;
 
@@ -611,7 +581,6 @@ async function installPackageWithStateMachine(options: {
     skipDataStreamRollover,
     packageInstallContext,
     retryFromLastState,
-    useStreaming,
   } = options;
   let { telemetryEvent } = options;
   const logger = appContextService.getLogger();
@@ -709,7 +678,6 @@ async function installPackageWithStateMachine(options: {
       ignoreMappingUpdateErrors,
       skipDataStreamRollover,
       retryFromLastState,
-      useStreaming,
     })
       .then(async (assets) => {
         logger.debug(`Removing old assets from previous versions of ${pkgName}`);
@@ -799,7 +767,6 @@ async function installPackageByUpload({
     }
     const { packageInfo } = await generatePackageInfoFromArchiveBuffer(archiveBuffer, contentType);
     const pkgName = packageInfo.name;
-    const useStreaming = PACKAGES_TO_INSTALL_WITH_STREAMING.includes(pkgName);
 
     // Allow for overriding the version in the manifest for cases where we install
     // stack-aligned bundled packages to support special cases around the
@@ -822,17 +789,17 @@ async function installPackageByUpload({
       packageInfo,
     });
 
-    const { paths, assetsMap, archiveIterator } = await unpackBufferToAssetsMap({
+    const { assetsMap, paths } = await unpackBufferToAssetsMap({
+      name: packageInfo.name,
+      version: pkgVersion,
       archiveBuffer,
       contentType,
-      useStreaming,
     });
 
     const packageInstallContext: PackageInstallContext = {
       packageInfo: { ...packageInfo, version: pkgVersion },
       assetsMap,
       paths,
-      archiveIterator,
     };
     // update the timestamp of latest installation
     setLastUploadInstallCache();
@@ -852,7 +819,6 @@ async function installPackageByUpload({
       authorizationHeader,
       ignoreMappingUpdateErrors,
       skipDataStreamRollover,
-      useStreaming,
     });
   } catch (e) {
     return {
@@ -1020,14 +986,12 @@ export async function installCustomPackage(
     acc.set(asset.path, asset.content);
     return acc;
   }, new Map<string, Buffer | undefined>());
-  const paths = assets.map((asset) => asset.path);
-  const archiveIterator = createArchiveIteratorFromMap(assetsMap);
+  const paths = [...assetsMap.keys()];
 
   const packageInstallContext: PackageInstallContext = {
     assetsMap,
     paths,
     packageInfo,
-    archiveIterator,
   };
   return await installPackageWithStateMachine({
     packageInstallContext,
@@ -1359,20 +1323,16 @@ export async function installAssetsForInputPackagePolicy(opts: {
       ignoreUnverified: force,
     });
 
-    const archiveIterator = createArchiveIteratorFromMap(pkg.assetsMap);
     packageInstallContext = {
       assetsMap: pkg.assetsMap,
       packageInfo: pkg.packageInfo,
       paths: pkg.paths,
-      archiveIterator,
     };
   } else {
-    const archiveIterator = createArchiveIteratorFromMap(installedPkgWithAssets.assetsMap);
     packageInstallContext = {
       assetsMap: installedPkgWithAssets.assetsMap,
       packageInfo: installedPkgWithAssets.packageInfo,
       paths: installedPkgWithAssets.paths,
-      archiveIterator,
     };
   }
 

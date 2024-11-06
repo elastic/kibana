@@ -7,8 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { useGetFleetServerHosts } from '../../../hooks';
 import type { AzureArmTemplateProps } from '../../agent_enrollment_flyout/types';
+
+import { useGetSettings } from '../../../hooks';
 
 const ARM_TEMPLATE_DEFAULT_ACCOUNT_TYPE = 'single-account';
 
@@ -19,13 +20,13 @@ export const useCreateAzureArmTemplateUrl = ({
   enrollmentAPIKey: string | undefined;
   azureArmTemplateProps: AzureArmTemplateProps | undefined;
 }) => {
-  const { data, isLoading } = useGetFleetServerHosts();
+  const { data, isLoading } = useGetSettings();
 
   let isError = false;
   let error: string | undefined;
 
   // Default fleet server host
-  const fleetServerHost = data?.items?.find((item) => item.is_default)?.host_urls?.[0];
+  const fleetServerHost = data?.item.fleet_server_hosts?.[0];
 
   if (!fleetServerHost && !isLoading) {
     isError = true;

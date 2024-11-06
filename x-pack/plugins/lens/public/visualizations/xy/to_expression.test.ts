@@ -121,30 +121,31 @@ describe('#toExpression', () => {
     ).toMatchSnapshot();
   });
 
-  it('should default the fitting function to Linear', () => {
-    const ast = xyVisualization.toExpression(
-      {
-        legend: { position: Position.Bottom, isVisible: true },
-        valueLabels: 'hide',
-        preferredSeriesType: 'bar',
-        layers: [
+  it('should default the fitting function to None', () => {
+    expect(
+      (
+        xyVisualization.toExpression(
           {
-            layerId: 'first',
-            layerType: LayerTypes.DATA,
-            seriesType: 'area',
-            splitAccessor: 'd',
-            xAccessor: 'a',
-            accessors: ['b', 'c'],
+            legend: { position: Position.Bottom, isVisible: true },
+            valueLabels: 'hide',
+            preferredSeriesType: 'bar',
+            layers: [
+              {
+                layerId: 'first',
+                layerType: LayerTypes.DATA,
+                seriesType: 'area',
+                splitAccessor: 'd',
+                xAccessor: 'a',
+                accessors: ['b', 'c'],
+              },
+            ],
           },
-        ],
-      },
-      frame.datasourceLayers,
-      undefined,
-      datasourceExpressionsByLayers
-    ) as Ast;
-
-    expect(ast.chain[0].arguments.fittingFunction[0]).toEqual('Linear');
-    expect(ast.chain[0].arguments.emphasizeFitting[0]).toEqual(true);
+          frame.datasourceLayers,
+          undefined,
+          datasourceExpressionsByLayers
+        ) as Ast
+      ).chain[0].arguments.fittingFunction[0]
+    ).toEqual('None');
   });
 
   it('should default the axisTitles visibility settings to true', () => {

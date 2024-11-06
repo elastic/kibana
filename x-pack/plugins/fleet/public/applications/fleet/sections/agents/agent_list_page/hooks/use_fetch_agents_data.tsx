@@ -306,18 +306,14 @@ export function useFetchAgentsData() {
             setTotalManagedAgentIds([]);
             setManagedAgentsOnCurrentPage(0);
           } else {
-            // Find all the agents that have managed policies
-            // to the correct ids we need to build the kuery applying the same filters as the global ones
-            const managedPoliciesKuery = getKuery({
-              search,
-              selectedAgentPolicies: managedAgentPolicies.map((policy) => policy.id),
-              selectedTags,
-              selectedStatus,
-            });
+            // Find all the agents that have managed policies and are not unenrolled
+            const policiesKuery = managedAgentPolicies
+              .map((policy) => `policy_id:"${policy.id}"`)
+              .join(' or ');
             const response = await sendGetAgents({
-              kuery: `${managedPoliciesKuery}`,
+              kuery: `NOT (status:unenrolled) and ${policiesKuery}`,
               perPage: SO_SEARCH_LIMIT,
-              showInactive,
+              showInactive: true,
             });
             if (response.error) {
               throw new Error(response.error.message);
@@ -354,6 +350,7 @@ export function useFetchAgentsData() {
       fetchDataAsync();
     },
     [
+      fullAgentPolicyFecher,
       pagination.currentPage,
       pagination.pageSize,
       kuery,
@@ -362,12 +359,8 @@ export function useFetchAgentsData() {
       showInactive,
       showUpgradeable,
       displayAgentMetrics,
-      fullAgentPolicyFecher,
       allTags,
       latestAgentActionErrors,
-      search,
-      selectedTags,
-      selectedStatus,
       notifications.toasts,
     ]
   );

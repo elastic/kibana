@@ -50,7 +50,8 @@ describe('useThreatIntelligenceDetails', () => {
       loading: false,
       indicesExist: true,
       selectedPatterns: [],
-      sourcererDataView: {},
+      indexPattern: { fields: [], title: '' },
+      sourcererDataView: undefined,
     });
 
     jest

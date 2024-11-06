@@ -6,7 +6,7 @@
  */
 
 import { type Datatable, type DatatableColumnMeta } from '@kbn/expressions-plugin/common';
-import { getOriginalId } from '@kbn/transpose-utils';
+import { getOriginalId } from './transpose_helpers';
 
 /**
  * Returns true for numerical fields

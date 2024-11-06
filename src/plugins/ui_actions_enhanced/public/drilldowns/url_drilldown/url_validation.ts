@@ -14,24 +14,23 @@ import { compile } from './url_template';
 const generalFormatError = i18n.translate(
   'uiActionsEnhanced.drilldowns.urlDrilldownValidation.urlFormatGeneralErrorMessage',
   {
-    defaultMessage: 'Invalid URL format.',
+    defaultMessage: 'Invalid format. Example: {exampleUrl}',
+    values: {
+      exampleUrl: 'https://www.my-url.com/?{{event.key}}={{event.value}}',
+    },
   }
 );
 
-const compileError = (message: string) =>
-  i18n.translate('uiActionsEnhanced.drilldowns.urlDrilldownValidation.urlCompileErrorMessage', {
-    defaultMessage: 'The URL template is not valid in the given context. {message}.',
+const formatError = (message: string) =>
+  i18n.translate('uiActionsEnhanced.drilldowns.urlDrilldownValidation.urlFormatErrorMessage', {
+    defaultMessage: 'Invalid format: {message}',
     values: {
-      message: message.replaceAll('[object Object]', 'context'),
+      message,
     },
   });
 
 const SAFE_URL_PATTERN = /^(?:(?:https?|mailto):|[^&:/?#]*(?:[/?#]|$))/gi;
-export function validateUrl(url: string): {
-  isValid: boolean;
-  error?: string;
-  invalidUrl?: string;
-} {
+export function validateUrl(url: string): { isValid: boolean; error?: string } {
   if (!url)
     return {
       isValid: false,
@@ -46,7 +45,6 @@ export function validateUrl(url: string): {
     return {
       isValid: false,
       error: generalFormatError,
-      invalidUrl: url,
     };
   }
 }
@@ -54,32 +52,20 @@ export function validateUrl(url: string): {
 export async function validateUrlTemplate(
   urlTemplate: UrlDrilldownConfig['url'],
   scope: UrlDrilldownScope
-): Promise<{ isValid: boolean; error?: string; invalidUrl?: string }> {
+): Promise<{ isValid: boolean; error?: string }> {
   if (!urlTemplate.template)
     return {
       isValid: false,
       error: generalFormatError,
     };
 
-  let compiledUrl: string;
-
   try {
-    compiledUrl = await compile(urlTemplate.template, scope);
-  } catch (e) {
-    return {
-      isValid: false,
-      error: compileError(e.message),
-      invalidUrl: urlTemplate.template,
-    };
-  }
-
-  try {
+    const compiledUrl = await compile(urlTemplate.template, scope);
     return validateUrl(compiledUrl);
   } catch (e) {
     return {
       isValid: false,
-      error: generalFormatError + ` ${e.message}.`,
-      invalidUrl: compiledUrl,
+      error: formatError(e.message),
     };
   }
 }

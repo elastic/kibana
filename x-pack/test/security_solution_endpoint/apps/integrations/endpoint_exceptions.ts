@@ -22,7 +22,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const endpointTestResources = getService('endpointTestResources');
   const endpointArtifactTestResources = getService('endpointArtifactTestResources');
   const retry = getService('retry');
-  const retryOnStale = getService('retryOnStale');
   const esClient = getService('es');
   const supertest = getService('supertest');
   const find = getService('find');
@@ -33,15 +32,26 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   describe('Endpoint Exceptions', function () {
     targetTags(this, ['@ess', '@serverless']);
+
     this.timeout(10 * MINUTES);
 
-    let clearPrefilledEntries: () => Promise<void>;
+    const clearPrefilledEntries = async () => {
+      const entriesContainer = await testSubjects.find('exceptionEntriesContainer');
+
+      let deleteButtons: WebElementWrapper[];
+      do {
+        deleteButtons = await testSubjects.findAllDescendant(
+          'builderItemEntryDeleteButton',
+          entriesContainer
+        );
+
+        await deleteButtons[0].click();
+      } while (deleteButtons.length > 1);
+    };
 
     const openNewEndpointExceptionFlyout = async () => {
-      retryOnStale(async () => {
-        await testSubjects.scrollIntoView('timeline-context-menu-button');
-        await testSubjects.click('timeline-context-menu-button');
-      });
+      await testSubjects.scrollIntoView('timeline-context-menu-button');
+      await testSubjects.click('timeline-context-menu-button');
       await testSubjects.click('add-endpoint-exception-menu-item');
       await testSubjects.existOrFail('addExceptionFlyout');
 
@@ -154,25 +164,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       };
 
       await deleteEndpointExceptions();
-
-      clearPrefilledEntries = retryOnStale.wrap(async () => {
-        const entriesContainer = await testSubjects.find('exceptionEntriesContainer');
-
-        let deleteButtons: WebElementWrapper[];
-        do {
-          deleteButtons = await testSubjects.findAllDescendant(
-            'builderItemEntryDeleteButton',
-            entriesContainer
-          );
-
-          await deleteButtons[0].click();
-        } while (deleteButtons.length > 1);
-      });
     });
 
     it('should add `event.module=endpoint` to entry if only wildcard operator is present', async () => {
       await pageObjects.common.navigateToUrlWithBrowserHistory('security', `/alerts`);
-      await pageObjects.header.waitUntilLoadingHasFinished();
       await pageObjects.timePicker.setCommonlyUsedTime('Last_24 hours');
 
       await openNewEndpointExceptionFlyout();
@@ -218,7 +213,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('should NOT add `event.module=endpoint` to entry if there is another operator', async () => {
       await pageObjects.common.navigateToUrlWithBrowserHistory('security', `/alerts`);
-      await pageObjects.header.waitUntilLoadingHasFinished();
       await pageObjects.timePicker.setCommonlyUsedTime('Last_24 hours');
 
       await openNewEndpointExceptionFlyout();

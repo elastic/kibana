@@ -24,10 +24,8 @@ export const stopEntityEngineRoute = (
     .post({
       access: 'public',
       path: '/api/entity_store/engines/{entityType}/stop',
-      security: {
-        authz: {
-          requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],
-        },
+      options: {
+        tags: ['access:securitySolution', `access:${APP_ID}-entity-analytics`],
       },
     })
     .addVersion(
@@ -49,7 +47,7 @@ export const stopEntityEngineRoute = (
 
           return response.ok({ body: { stopped: engine.status === ENGINE_STATUS.STOPPED } });
         } catch (e) {
-          logger.error(`Error in StopEntityEngine: ${e.message}`);
+          logger.error('Error in StopEntityEngine:', e);
           const error = transformError(e);
           return siemResponse.error({
             statusCode: error.statusCode,

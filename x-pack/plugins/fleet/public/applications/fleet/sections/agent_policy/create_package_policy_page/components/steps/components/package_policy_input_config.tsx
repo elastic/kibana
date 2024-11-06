@@ -106,10 +106,8 @@ export const PackagePolicyInputConfig: React.FunctionComponent<{
           <EuiFlexGroup direction="column" gutterSize="m">
             {requiredVars.map((varDef) => {
               const { name: varName, type: varType } = varDef;
-
-              const value = packagePolicyInput.vars?.[varName]?.value;
-              const frozen = packagePolicyInput.vars?.[varName]?.frozen;
-
+              if (!packagePolicyInput.vars) return;
+              const { value, frozen } = packagePolicyInput.vars[varName];
               return (
                 <EuiFlexItem key={varName}>
                   <PackagePolicyInputVarField

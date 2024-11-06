@@ -50,7 +50,7 @@ export class RequestContextFactory implements IRequestContextFactory {
     const { options } = this;
     const { core } = options;
 
-    const [coreStart, startPlugins] = await core.getStartServices();
+    const [, startPlugins] = await core.getStartServices();
     const coreContext = await context.core;
 
     const getSpaceId = (): string =>
@@ -88,25 +88,14 @@ export class RequestContextFactory implements IRequestContextFactory {
       // Additionally, modelIdOverride is used here to enable setting up the KB using a different ELSER model, which
       // is necessary for testing purposes (`pt_tiny_elser`).
       getAIAssistantKnowledgeBaseDataClient: memoize(
-        async ({ modelIdOverride, v2KnowledgeBaseEnabled = false }) => {
+        ({ modelIdOverride, v2KnowledgeBaseEnabled = false }) => {
           const currentUser = getCurrentUser();
-
-          const { securitySolutionAssistant } = await coreStart.capabilities.resolveCapabilities(
-            request,
-            {
-              capabilityPath: 'securitySolutionAssistant.*',
-            }
-          );
-
           return this.assistantService.createAIAssistantKnowledgeBaseDataClient({
             spaceId: getSpaceId(),
             logger: this.logger,
-            licensing: context.licensing,
             currentUser,
             modelIdOverride,
             v2KnowledgeBaseEnabled,
-            manageGlobalKnowledgeBaseAIAssistant:
-              securitySolutionAssistant.manageGlobalKnowledgeBaseAIAssistant as boolean,
           });
         }
       ),
@@ -115,7 +104,6 @@ export class RequestContextFactory implements IRequestContextFactory {
         const currentUser = getCurrentUser();
         return this.assistantService.createAttackDiscoveryDataClient({
           spaceId: getSpaceId(),
-          licensing: context.licensing,
           logger: this.logger,
           currentUser,
         });
@@ -125,7 +113,6 @@ export class RequestContextFactory implements IRequestContextFactory {
         const currentUser = getCurrentUser();
         return this.assistantService.createAIAssistantPromptsDataClient({
           spaceId: getSpaceId(),
-          licensing: context.licensing,
           logger: this.logger,
           currentUser,
         });
@@ -135,7 +122,6 @@ export class RequestContextFactory implements IRequestContextFactory {
         const currentUser = getCurrentUser();
         return this.assistantService.createAIAssistantAnonymizationFieldsDataClient({
           spaceId: getSpaceId(),
-          licensing: context.licensing,
           logger: this.logger,
           currentUser,
         });
@@ -145,7 +131,6 @@ export class RequestContextFactory implements IRequestContextFactory {
         const currentUser = getCurrentUser();
         return this.assistantService.createAIAssistantConversationsDataClient({
           spaceId: getSpaceId(),
-          licensing: context.licensing,
           logger: this.logger,
           currentUser,
         });

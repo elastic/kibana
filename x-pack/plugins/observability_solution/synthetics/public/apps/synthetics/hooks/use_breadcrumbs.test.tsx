@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { coreMock } from '@kbn/core/public/mocks';
 import { ChromeBreadcrumb } from '@kbn/core/public';
 import { render } from '../utils/testing';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { Route } from '@kbn/shared-ux-router';
+import { Route } from 'react-router-dom';
 import { OVERVIEW_ROUTE } from '../../../../common/constants';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import {
@@ -19,8 +18,6 @@ import {
 } from '../utils/url_params/get_supported_url_params';
 import { makeBaseBreadcrumb, useBreadcrumbs } from './use_breadcrumbs';
 import { SyntheticsSettingsContext } from '../contexts';
-import { BehaviorSubject } from 'rxjs';
-import { ChromeStyle } from '@kbn/core-chrome-browser';
 
 describe('useBreadcrumbs', () => {
   it('sets the given breadcrumbs', () => {
@@ -74,10 +71,9 @@ describe('useBreadcrumbs', () => {
     const urlParams: SyntheticsUrlParams = getSupportedUrlParams({});
     expect(JSON.stringify(getBreadcrumbs())).toEqual(
       JSON.stringify(
-        [
-          { text: 'Observability', href: '/app/observability/overview' },
-          ...makeBaseBreadcrumb('/app/synthetics', urlParams),
-        ].concat(expectedCrumbs)
+        makeBaseBreadcrumb('/app/synthetics', '/app/observability', urlParams, false).concat(
+          expectedCrumbs
+        )
       )
     );
   });
@@ -88,8 +84,6 @@ const mockCore: () => [() => ChromeBreadcrumb[], any] = () => {
   const get = () => {
     return breadcrumbObj;
   };
-  const defaultCoreMock = coreMock.createStart();
-
   const core = {
     application: {
       getUrlForApp: (app: string) =>
@@ -97,8 +91,6 @@ const mockCore: () => [() => ChromeBreadcrumb[], any] = () => {
       navigateToUrl: jest.fn(),
     },
     chrome: {
-      ...defaultCoreMock.chrome,
-      getChromeStyle$: () => new BehaviorSubject<ChromeStyle>('classic').asObservable(),
       setBreadcrumbs: (newBreadcrumbs: ChromeBreadcrumb[]) => {
         breadcrumbObj = newBreadcrumbs;
       },

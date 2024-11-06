@@ -7,15 +7,11 @@
 
 import { isRight } from 'fp-ts/lib/Either';
 import { formatErrors } from '@kbn/securitysolution-io-ts-utils';
-import { HttpFetchOptions, HttpFetchQuery, HttpSetup } from '@kbn/core/public';
+import { HttpFetchQuery, HttpHeadersInit, HttpSetup } from '@kbn/core/public';
 import { FETCH_STATUS, AddInspectorRequest } from '@kbn/observability-shared-plugin/public';
 import type { InspectorRequestProps } from '@kbn/observability-shared-plugin/public/contexts/inspector/inspector_context';
-import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
-import { kibanaService } from '../kibana_service';
 
-type Params = HttpFetchQuery & { version?: string; spaceId?: string };
-
-type FetchOptions = HttpFetchOptions & { asResponse?: true };
+type Params = HttpFetchQuery & { version?: string };
 
 class ApiService {
   private static instance: ApiService;
@@ -67,27 +63,20 @@ class ApiService {
     return response;
   }
 
-  private parseApiUrl(apiUrl: string, spaceId?: string) {
-    if (spaceId) {
-      const basePath = kibanaService.coreSetup.http.basePath;
-      return addSpaceIdToPath(basePath.serverBasePath, spaceId, apiUrl);
-    }
-    return apiUrl;
-  }
-
   public async get<T>(
     apiUrl: string,
     params: Params = {},
     decodeType?: any,
-    options?: FetchOptions
+    asResponse = false,
+    headers?: HttpHeadersInit
   ) {
-    const { version, spaceId, ...queryParams } = params;
+    const { version, ...queryParams } = params;
     const response = await this._http!.fetch<T>({
-      path: this.parseApiUrl(apiUrl, spaceId),
+      path: apiUrl,
       query: queryParams,
+      asResponse,
       version,
-      ...(options ?? {}),
-      ...(spaceId ? { prependBasePath: false } : {}),
+      headers,
     });
 
     this.addInspectorRequest?.({
@@ -100,14 +89,13 @@ class ApiService {
   }
 
   public async post<T>(apiUrl: string, data?: any, decodeType?: any, params: Params = {}) {
-    const { version, spaceId, ...queryParams } = params;
+    const { version, ...queryParams } = params;
 
-    const response = await this._http!.post<T>(this.parseApiUrl(apiUrl, spaceId), {
+    const response = await this._http!.post<T>(apiUrl, {
       method: 'POST',
       body: JSON.stringify(data),
       query: queryParams,
       version,
-      ...(spaceId ? { prependBasePath: false } : {}),
     });
 
     this.addInspectorRequest?.({
@@ -119,37 +107,27 @@ class ApiService {
     return this.parseResponse(response, apiUrl, decodeType);
   }
 
-  public async put<T>(
-    apiUrl: string,
-    data?: any,
-    decodeType?: any,
-    params: Params = {},
-    options?: FetchOptions
-  ) {
-    const { version, spaceId, ...queryParams } = params;
+  public async put<T>(apiUrl: string, data?: any, decodeType?: any, params: Params = {}) {
+    const { version, ...queryParams } = params;
 
-    const response = await this._http!.put<T>(this.parseApiUrl(apiUrl, spaceId), {
+    const response = await this._http!.put<T>(apiUrl, {
       method: 'PUT',
       body: JSON.stringify(data),
       query: queryParams,
       version,
-      ...(options ?? {}),
-      ...(spaceId ? { prependBasePath: false } : {}),
     });
 
     return this.parseResponse(response, apiUrl, decodeType);
   }
 
-  public async delete<T>(apiUrl: string, params: Params = {}, data?: any, options?: FetchOptions) {
-    const { version, spaceId, ...queryParams } = params;
+  public async delete<T>(apiUrl: string, params: Params = {}, data?: any) {
+    const { version, ...queryParams } = params;
 
     const response = await this._http!.delete<T>({
-      path: this.parseApiUrl(apiUrl, spaceId),
+      path: apiUrl,
       query: queryParams,
       body: JSON.stringify(data),
       version,
-      ...(options ?? {}),
-      ...(spaceId ? { prependBasePath: false } : {}),
     });
 
     if (response instanceof Error) {

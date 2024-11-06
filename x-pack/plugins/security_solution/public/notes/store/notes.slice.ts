@@ -8,7 +8,6 @@
 import type { EntityState, SerializedError } from '@reduxjs/toolkit';
 import { createAsyncThunk, createEntityAdapter, createSlice } from '@reduxjs/toolkit';
 import { createSelector } from 'reselect';
-import { AssociatedFilter } from '../../../common/notes/constants';
 import type { State } from '../../common/store';
 import {
   createNote as createNoteApi,
@@ -58,9 +57,7 @@ export interface NotesState extends EntityState<Note> {
     direction: 'asc' | 'desc';
   };
   filter: string;
-  createdByFilter: string;
   search: string;
-  associatedFilter: AssociatedFilter;
   selectedIds: string[];
   pendingDeleteIds: string[];
 }
@@ -94,8 +91,6 @@ export const initialNotesState: NotesState = notesAdapter.getInitialState({
     direction: 'desc',
   },
   filter: '',
-  createdByFilter: '',
-  associatedFilter: AssociatedFilter.all,
   search: '',
   selectedIds: [],
   pendingDeleteIds: [],
@@ -129,24 +124,12 @@ export const fetchNotes = createAsyncThunk<
     sortField: string;
     sortOrder: string;
     filter: string;
-    createdByFilter: string;
-    associatedFilter: AssociatedFilter;
     search: string;
   },
   {}
 >('notes/fetchNotes', async (args) => {
-  const { page, perPage, sortField, sortOrder, filter, createdByFilter, associatedFilter, search } =
-    args;
-  const res = await fetchNotesApi({
-    page,
-    perPage,
-    sortField,
-    sortOrder,
-    filter,
-    createdByFilter,
-    associatedFilter,
-    search,
-  });
+  const { page, perPage, sortField, sortOrder, filter, search } = args;
+  const res = await fetchNotesApi({ page, perPage, sortField, sortOrder, filter, search });
   return {
     ...normalizeEntities('notes' in res ? res.notes : []),
     totalCount: 'totalCount' in res ? res.totalCount : 0,
@@ -169,7 +152,7 @@ export const deleteNotes = createAsyncThunk<string[], { ids: string[]; refetch?:
     await deleteNotesApi(ids);
     if (refetch) {
       const state = getState() as State;
-      const { search, pagination, createdByFilter, associatedFilter, sort } = state.notes;
+      const { search, pagination, sort } = state.notes;
       dispatch(
         fetchNotes({
           page: pagination.page,
@@ -177,8 +160,6 @@ export const deleteNotes = createAsyncThunk<string[], { ids: string[]; refetch?:
           sortField: sort.field,
           sortOrder: sort.direction,
           filter: '',
-          createdByFilter,
-          associatedFilter,
           search,
         })
       );
@@ -191,105 +172,99 @@ const notesSlice = createSlice({
   name: 'notes',
   initialState: initialNotesState,
   reducers: {
-    userSelectedPage: (state: NotesState, action: { payload: number }) => {
+    userSelectedPage: (state, action: { payload: number }) => {
       state.pagination.page = action.payload;
     },
-    userSelectedPerPage: (state: NotesState, action: { payload: number }) => {
+    userSelectedPerPage: (state, action: { payload: number }) => {
       state.pagination.perPage = action.payload;
     },
     userSortedNotes: (
-      state: NotesState,
+      state,
       action: { payload: { field: keyof Note; direction: 'asc' | 'desc' } }
     ) => {
       state.sort = action.payload;
     },
-    userFilteredNotes: (state: NotesState, action: { payload: string }) => {
+    userFilteredNotes: (state, action: { payload: string }) => {
       state.filter = action.payload;
     },
-    userFilterCreatedBy: (state: NotesState, action: { payload: string }) => {
-      state.createdByFilter = action.payload;
-    },
-    userFilterAssociatedNotes: (state: NotesState, action: { payload: AssociatedFilter }) => {
-      state.associatedFilter = action.payload;
-    },
-    userSearchedNotes: (state: NotesState, action: { payload: string }) => {
+    userSearchedNotes: (state, action: { payload: string }) => {
       state.search = action.payload;
     },
-    userSelectedRow: (state: NotesState, action: { payload: string[] }) => {
+    userSelectedRow: (state, action: { payload: string[] }) => {
       state.selectedIds = action.payload;
     },
-    userClosedDeleteModal: (state: NotesState) => {
+    userClosedDeleteModal: (state) => {
       state.pendingDeleteIds = [];
     },
-    userSelectedNotesForDeletion: (state: NotesState, action: { payload: string }) => {
+    userSelectedNotesForDeletion: (state, action: { payload: string }) => {
       state.pendingDeleteIds = [action.payload];
     },
-    userSelectedBulkDelete: (state: NotesState) => {
+    userSelectedBulkDelete: (state) => {
       state.pendingDeleteIds = state.selectedIds;
     },
-    userClosedCreateErrorToast: (state: NotesState) => {
+    userClosedCreateErrorToast: (state) => {
       state.error.createNote = null;
     },
   },
   extraReducers(builder) {
     builder
-      .addCase(fetchNotesByDocumentIds.pending, (state: NotesState) => {
+      .addCase(fetchNotesByDocumentIds.pending, (state) => {
         state.status.fetchNotesByDocumentIds = ReqStatus.Loading;
       })
-      .addCase(fetchNotesByDocumentIds.fulfilled, (state: NotesState, action) => {
+      .addCase(fetchNotesByDocumentIds.fulfilled, (state, action) => {
         notesAdapter.upsertMany(state, action.payload.entities.notes);
         state.status.fetchNotesByDocumentIds = ReqStatus.Succeeded;
       })
-      .addCase(fetchNotesByDocumentIds.rejected, (state: NotesState, action) => {
+      .addCase(fetchNotesByDocumentIds.rejected, (state, action) => {
         state.status.fetchNotesByDocumentIds = ReqStatus.Failed;
         state.error.fetchNotesByDocumentIds = action.payload ?? action.error;
       })
-      .addCase(fetchNotesBySavedObjectIds.pending, (state: NotesState) => {
+      .addCase(fetchNotesBySavedObjectIds.pending, (state) => {
         state.status.fetchNotesBySavedObjectIds = ReqStatus.Loading;
       })
-      .addCase(fetchNotesBySavedObjectIds.fulfilled, (state: NotesState, action) => {
+      .addCase(fetchNotesBySavedObjectIds.fulfilled, (state, action) => {
         notesAdapter.upsertMany(state, action.payload.entities.notes);
         state.status.fetchNotesBySavedObjectIds = ReqStatus.Succeeded;
       })
-      .addCase(fetchNotesBySavedObjectIds.rejected, (state: NotesState, action) => {
+      .addCase(fetchNotesBySavedObjectIds.rejected, (state, action) => {
         state.status.fetchNotesBySavedObjectIds = ReqStatus.Failed;
         state.error.fetchNotesBySavedObjectIds = action.payload ?? action.error;
       })
-      .addCase(createNote.pending, (state: NotesState) => {
+      .addCase(createNote.pending, (state) => {
         state.status.createNote = ReqStatus.Loading;
       })
-      .addCase(createNote.fulfilled, (state: NotesState, action) => {
+      .addCase(createNote.fulfilled, (state, action) => {
         notesAdapter.addMany(state, action.payload.entities.notes);
         state.status.createNote = ReqStatus.Succeeded;
       })
-      .addCase(createNote.rejected, (state: NotesState, action) => {
+      .addCase(createNote.rejected, (state, action) => {
         state.status.createNote = ReqStatus.Failed;
         state.error.createNote = action.payload ?? action.error;
       })
-      .addCase(deleteNotes.pending, (state: NotesState) => {
+      .addCase(deleteNotes.pending, (state) => {
         state.status.deleteNotes = ReqStatus.Loading;
       })
-      .addCase(deleteNotes.fulfilled, (state: NotesState, action) => {
+      .addCase(deleteNotes.fulfilled, (state, action) => {
         notesAdapter.removeMany(state, action.payload);
         state.status.deleteNotes = ReqStatus.Succeeded;
         state.pendingDeleteIds = state.pendingDeleteIds.filter(
           (value) => !action.payload.includes(value)
         );
       })
-      .addCase(deleteNotes.rejected, (state: NotesState, action) => {
+      .addCase(deleteNotes.rejected, (state, action) => {
         state.status.deleteNotes = ReqStatus.Failed;
         state.error.deleteNotes = action.payload ?? action.error;
       })
-      .addCase(fetchNotes.pending, (state: NotesState) => {
+      .addCase(fetchNotes.pending, (state) => {
         state.status.fetchNotes = ReqStatus.Loading;
       })
-      .addCase(fetchNotes.fulfilled, (state: NotesState, action) => {
+      .addCase(fetchNotes.fulfilled, (state, action) => {
         notesAdapter.setAll(state, action.payload.entities.notes);
         state.pagination.total = action.payload.totalCount;
         state.status.fetchNotes = ReqStatus.Succeeded;
         state.selectedIds = [];
       })
-      .addCase(fetchNotes.rejected, (state: NotesState, action) => {
+      .addCase(fetchNotes.rejected, (state, action) => {
         state.status.fetchNotes = ReqStatus.Failed;
         state.error.fetchNotes = action.payload ?? action.error;
       });
@@ -331,10 +306,6 @@ export const selectNotesTableSort = (state: State) => state.notes.sort;
 export const selectNotesTableSelectedIds = (state: State) => state.notes.selectedIds;
 
 export const selectNotesTableSearch = (state: State) => state.notes.search;
-
-export const selectNotesTableCreatedByFilter = (state: State) => state.notes.createdByFilter;
-
-export const selectNotesTableAssociatedFilter = (state: State) => state.notes.associatedFilter;
 
 export const selectNotesTablePendingDeleteIds = (state: State) => state.notes.pendingDeleteIds;
 
@@ -423,8 +394,6 @@ export const {
   userSelectedPerPage,
   userSortedNotes,
   userFilteredNotes,
-  userFilterCreatedBy,
-  userFilterAssociatedNotes,
   userSearchedNotes,
   userSelectedRow,
   userClosedDeleteModal,

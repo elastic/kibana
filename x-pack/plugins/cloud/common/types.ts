@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+export type OnBoardingDefaultSolution = 'es' | 'oblt' | 'security';
+
 export interface ElasticsearchConfigType {
   elasticsearch_url?: string;
 }

@@ -7,7 +7,8 @@
 
 import type { KbnClient } from '@kbn/test';
 import type { AllConnectorsResponseV1 } from '@kbn/actions-plugin/common/routes/connector/response';
-import type { CreateConnectorRequestBodyV1 } from '@kbn/actions-plugin/common/routes/connector/apis/create';
+import type { bodySchema } from '@kbn/actions-plugin/server/routes/create';
+import type { TypeOf } from '@kbn/config-schema';
 import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
 import { catchAxiosErrorFormatAndThrow } from '../../../common/endpoint/format_axios_error';
 
@@ -45,6 +46,8 @@ export const fetchConnectorByType = async (
   }
 };
 
+type CreateConnectorBody = TypeOf<typeof bodySchema>;
+
 /**
  * Creates a connector in the stack
  * @param kbnClient
@@ -52,7 +55,7 @@ export const fetchConnectorByType = async (
  */
 export const createConnector = async (
   kbnClient: KbnClient,
-  createPayload: CreateConnectorRequestBodyV1
+  createPayload: CreateConnectorBody
 ): Promise<Connector> => {
   return kbnClient
     .request<Connector>({

@@ -20,7 +20,7 @@ import { getWebHookAction } from './get_web_hook_action';
 export const createWebHookRuleAction = async (supertest: SuperTest.Agent): Promise<RuleAction> => {
   return (
     await supertest
-      .post('/api/actions/connector')
+      .post('/api/actions/action')
       .set('kbn-xsrf', 'true')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'foo')
       .send(getWebHookAction())

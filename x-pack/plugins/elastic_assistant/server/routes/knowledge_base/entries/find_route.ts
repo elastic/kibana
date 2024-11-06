@@ -58,19 +58,21 @@ export const findKnowledgeBaseEntriesRoute = (router: ElasticAssistantPluginRout
 
           // Perform license, authenticated user and FF checks
           const checkResponse = performChecks({
+            authenticatedUser: true,
             capability: 'assistantKnowledgeBaseByDefault',
             context: ctx,
+            license: true,
             request,
             response,
           });
-          if (!checkResponse.isSuccess) {
-            return checkResponse.response;
+          if (checkResponse) {
+            return checkResponse;
           }
 
           const kbDataClient = await ctx.elasticAssistant.getAIAssistantKnowledgeBaseDataClient({
             v2KnowledgeBaseEnabled: true,
           });
-          const currentUser = checkResponse.currentUser;
+          const currentUser = ctx.elasticAssistant.getCurrentUser();
           const userFilter = getKBUserFilter(currentUser);
           const systemFilter = ` AND (kb_resource:"user" OR type:"index")`;
           const additionalFilter = query.filter ? ` AND ${query.filter}` : '';
