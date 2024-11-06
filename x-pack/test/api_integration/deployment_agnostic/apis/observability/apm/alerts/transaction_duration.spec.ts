@@ -11,7 +11,9 @@ import { transactionDurationActionVariables } from '@kbn/apm-plugin/server/route
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
 import { omit } from 'lodash';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import { SupertestWithRoleScopeType } from '../../../../services';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import {
   createApmRule,
   fetchServiceInventoryAlertCounts,
@@ -25,13 +27,12 @@ import { waitForAlertsForRule } from './helpers/wait_for_alerts_for_rule';
 import { waitForActiveRule } from './helpers/wait_for_active_rule';
 import { waitForIndexConnectorResults } from './helpers/wait_for_index_connector_results';
 
-export default function ApiTest({ getService }: FtrProviderContext) {
-  const registry = getService('registry');
-  const supertest = getService('supertest');
+export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
+  const roleScopedSupertest = getService('roleScopedSupertest');
   const es = getService('es');
   const logger = getService('log');
-  const apmApiClient = getService('apmApiClient');
-  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
+  const apmApiClient = getService('apmApi');
+  const synthtrace = getService('synthtrace');
 
   const ruleParams = {
     threshold: 3000,
@@ -44,8 +45,15 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     groupBy: ['service.name', 'service.environment', 'transaction.type', 'transaction.name'],
   };
 
-  registry.when('transaction duration alert', { config: 'basic', archives: [] }, () => {
-    before(() => {
+  describe('transaction duration alert', () => {
+    let apmSynthtraceEsClient: ApmSynthtraceEsClient;
+    let supertest: SupertestWithRoleScopeType;
+
+    before(async () => {
+      supertest = await roleScopedSupertest.getSupertestWithRoleScope('admin', {
+        withInternalHeaders: true,
+      });
+
       const opbeansJava = apm
         .service({ name: 'opbeans-java', environment: 'production', agentName: 'java' })
         .instance('instance');
@@ -68,11 +76,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               .success(),
           ];
         });
+
+      apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
       return apmSynthtraceEsClient.index(events);
     });
 
     after(async () => {
       await apmSynthtraceEsClient.clean();
+      await supertest.destroy();
     });
 
     describe('create rule for opbeans-java without kql filter', () => {
@@ -133,7 +144,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         it('populates the document with the correct values', async () => {
-          expect(omit(results[0], 'alertDetailsUrl')).to.eql({
+          expect(omit(results[0], 'alertDetailsUrl', 'viewInAppUrl')).to.eql({
             environment: 'production',
             interval: '5 mins',
             reason:
@@ -143,9 +154,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             transactionName: 'tx-java',
             threshold: '3000',
             triggerValue: '5,000 ms',
-            viewInAppUrl:
-              'http://mockedPublicBaseUrl/app/apm/services/opbeans-java?transactionType=request&environment=production',
           });
+
+          const url = new URL(results[0].viewInAppUrl);
+
+          expect(url.pathname).to.equal('/app/apm/services/opbeans-java');
+          expect(url.searchParams.get('transactionType')).to.equal('request');
+          expect(url.searchParams.get('environment')).to.equal('production');
         });
       });
 

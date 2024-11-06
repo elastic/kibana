@@ -10,7 +10,9 @@ import { errorCountActionVariables } from '@kbn/apm-plugin/server/routes/alerts/
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
 import { omit } from 'lodash';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { SupertestWithRoleScopeType } from '../../../../services';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import {
   createApmRule,
   fetchServiceInventoryAlertCounts,
@@ -24,15 +26,17 @@ import { waitForAlertsForRule } from './helpers/wait_for_alerts_for_rule';
 import { waitForIndexConnectorResults } from './helpers/wait_for_index_connector_results';
 import { waitForActiveRule } from './helpers/wait_for_active_rule';
 
-export default function ApiTest({ getService }: FtrProviderContext) {
-  const registry = getService('registry');
-  const supertest = getService('supertest');
+export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
+  const roleScopedSupertest = getService('roleScopedSupertest');
   const es = getService('es');
   const logger = getService('log');
-  const apmApiClient = getService('apmApiClient');
-  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
+  const apmApiClient = getService('apmApi');
+  const synthtrace = getService('synthtrace');
 
-  registry.when('error count threshold alert', { config: 'basic', archives: [] }, () => {
+  describe('error count threshold alert', () => {
+    let apmSynthtraceEsClient: ApmSynthtraceEsClient;
+    let supertest: SupertestWithRoleScopeType;
+
     const javaErrorMessage = 'a java error';
     const phpErrorMessage = 'a php error';
 
@@ -50,7 +54,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       ],
     };
 
-    before(() => {
+    before(async () => {
+      supertest = await roleScopedSupertest.getSupertestWithRoleScope('admin', {
+        withInternalHeaders: true,
+      });
+
       const opbeansJava = apm
         .service({ name: 'opbeans-java', environment: 'production', agentName: 'java' })
         .instance('instance');
@@ -95,13 +103,18 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           ];
         });
 
+      apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
+
       return Promise.all([
         apmSynthtraceEsClient.index(events),
         apmSynthtraceEsClient.index(phpEvents),
       ]);
     });
 
-    after(() => apmSynthtraceEsClient.clean());
+    after(async () => {
+      await apmSynthtraceEsClient.clean();
+      await supertest.destroy();
+    });
 
     describe('create rule without kql filter', () => {
       let ruleId: string;
@@ -141,6 +154,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         let results: Array<Record<string, string>>;
 
         before(async () => {
+          await waitForActiveRule({ ruleId, supertest });
           results = await waitForIndexConnectorResults({ es, minCount: 2 });
         });
 
@@ -149,6 +163,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             'opbeans-java',
             'opbeans-php',
           ]);
+        });
+
+        it('checks if rule is active', async () => {
+          const ruleStatus = await waitForActiveRule({ ruleId, supertest });
+          expect(ruleStatus).to.be('active');
         });
 
         it('has the right keys', async () => {
@@ -170,7 +189,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         it('has the right values', () => {
           const phpEntry = results.find((result) => result.serviceName === 'opbeans-php')!;
-          expect(omit(phpEntry, 'alertDetailsUrl')).to.eql({
+          expect(omit(phpEntry, 'alertDetailsUrl', 'viewInAppUrl')).to.eql({
             environment: 'production',
             interval: '1 hr',
             reason:
@@ -181,9 +200,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             errorGroupingName: 'a php error',
             threshold: '1',
             triggerValue: '30',
-            viewInAppUrl:
-              'http://mockedPublicBaseUrl/app/apm/services/opbeans-php/errors?environment=production',
           });
+
+          const url = new URL(phpEntry.viewInAppUrl);
+
+          expect(url.pathname).to.equal('/app/apm/services/opbeans-php/errors');
+          expect(url.searchParams.get('environment')).to.equal('production');
         });
       });
 

@@ -7,10 +7,10 @@
 import { AggregationType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
 import { ApmRuleType } from '@kbn/rule-data-utils';
 import expect from '@kbn/expect';
+import { waitForActiveApmAlert } from '../../../../api_integration/deployment_agnostic/apis/observability/apm/alerts/helpers/wait_for_active_apm_alerts';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { createApmRule } from '../../alerts/helpers/alerting_api_helper';
 import { cleanupRuleAndAlertState } from '../../alerts/helpers/cleanup_rule_and_alert_state';
-import { waitForActiveApmAlert } from '../../alerts/helpers/wait_for_active_apm_alerts';
 import {
   createServiceGroupApi,
   deleteAllServiceGroups,
