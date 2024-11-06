@@ -12,6 +12,7 @@ import { PaletteRegistry, getFallbackDataBounds } from '@kbn/coloring';
 import { getColorCategories } from '@kbn/chart-expressions-common';
 import { useDebouncedValue } from '@kbn/visualization-utils';
 import { getOriginalId } from '@kbn/transpose-utils';
+import { KbnPalettes } from '@kbn/palettes';
 import type { VisualizationDimensionEditorProps } from '../../../types';
 import type { DatatableVisualizationState } from '../visualization';
 
@@ -54,6 +55,7 @@ function updateColumn(
 export type TableDimensionEditorProps =
   VisualizationDimensionEditorProps<DatatableVisualizationState> & {
     paletteService: PaletteRegistry;
+    palettes: KbnPalettes;
     isDarkMode: boolean;
   };
 
@@ -225,6 +227,7 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
                 isDarkMode={isDarkMode}
                 colorMapping={column.colorMapping}
                 palette={activePalette}
+                palettes={props.palettes}
                 isInlineEditing={isInlineEditing}
                 setPalette={(palette) => {
                   updateColumnState(accessor, { palette });

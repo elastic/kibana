@@ -14,7 +14,6 @@ import {
   PaletteRegistry,
   ColorMapping,
   SPECIAL_TOKENS_STRING_CONVERSION,
-  AVAILABLE_PALETTES,
   getColorsFromMapping,
 } from '@kbn/coloring';
 import { ColorPicker } from '@kbn/visualization-ui-components';
@@ -22,6 +21,7 @@ import { useDebouncedValue } from '@kbn/visualization-utils';
 import { EuiFormRow, EuiFlexGroup, EuiFlexItem, EuiSwitch, EuiText, EuiBadge } from '@elastic/eui';
 import { useState, useCallback } from 'react';
 import { getColorCategories } from '@kbn/chart-expressions-common';
+import { KbnPalettes } from '@kbn/palettes';
 import { PieVisualizationState } from '../../../common/types';
 import { VisualizationDimensionEditorProps } from '../../types';
 import { PalettePanelContainer, PalettePicker } from '../../shared_components';
@@ -35,6 +35,7 @@ import { trackUiCounterEvents } from '../../lens_ui_telemetry';
 
 type DimensionEditorProps = VisualizationDimensionEditorProps<PieVisualizationState> & {
   paletteService: PaletteRegistry;
+  palettes: KbnPalettes;
   isDarkMode: boolean;
 };
 
@@ -118,7 +119,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
         })
     : undefined;
 
-  const colors = getColorsFromMapping(props.isDarkMode, currentLayer.colorMapping);
+  const colors = getColorsFromMapping(props.palettes, props.isDarkMode, currentLayer.colorMapping);
   const table = props.frame.activeData?.[currentLayer.layerId];
   const splitCategories = getColorCategories(table?.rows ?? [], props.accessor);
 
@@ -183,7 +184,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
                       isDarkMode={props.isDarkMode}
                       model={currentLayer.colorMapping ?? { ...DEFAULT_COLOR_MAPPING_CONFIG }}
                       onModelUpdate={(model: ColorMapping.Config) => setColorMapping(model)}
-                      palettes={AVAILABLE_PALETTES}
+                      palettes={props.palettes}
                       data={{
                         type: 'categories',
                         categories: splitCategories,
@@ -209,6 +210,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
       {showColorPicker && (
         <ColorPicker
           {...props}
+          swatches={props.palettes.get('default').colors(10)}
           overwriteColor={currentLayer.colorsByDimension?.[props.accessor]}
           defaultColor={getDefaultColorForMultiMetricDimension({
             layer: currentLayer,

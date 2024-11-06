@@ -29,6 +29,7 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
 import { useDispatch, useSelector } from 'react-redux';
 import { findLast } from 'lodash';
+import { KbnPalettes } from '@kbn/palettes';
 import { Assignment } from '../assignment/assignment';
 import {
   addNewAssignment,
@@ -38,7 +39,6 @@ import {
 import { selectColorMode, selectComputedAssignments, selectPalette } from '../../state/selectors';
 import { ColorMappingInputData } from '../../categorical_color_mapping';
 import { ColorMapping } from '../../config';
-import { getPalette, NeutralPalette } from '../../palettes';
 import { ruleMatch } from '../../color/rule_matching';
 
 export function AssignmentsConfig({
@@ -47,7 +47,7 @@ export function AssignmentsConfig({
   isDarkMode,
   specialTokens,
 }: {
-  palettes: Map<string, ColorMapping.CategoricalPalette>;
+  palettes: KbnPalettes;
   data: ColorMappingInputData;
   isDarkMode: boolean;
   /** map between original and formatted tokens used to handle special cases, like the Other bucket and the empty bucket */
@@ -56,8 +56,7 @@ export function AssignmentsConfig({
   const [showOtherActions, setShowOtherActions] = useState<boolean>(false);
 
   const dispatch = useDispatch();
-  const getPaletteFn = getPalette(palettes, NeutralPalette);
-  const palette = useSelector(selectPalette(getPaletteFn));
+  const palette = useSelector(selectPalette(palettes));
   const colorMode = useSelector(selectColorMode);
   const assignments = useSelector(selectComputedAssignments);
 
@@ -100,13 +99,13 @@ export function AssignmentsConfig({
             ? {
                 type: 'categorical',
                 paletteId: palette.id,
-                colorIndex: nextCategoricalIndex % palette.colorCount,
+                colorIndex: nextCategoricalIndex % palette.colors.length,
               }
             : { type: 'gradient' },
         touched: false,
       })
     );
-  }, [assignments, colorMode.type, data.type, dispatch, palette.colorCount, palette.id]);
+  }, [assignments, colorMode.type, data.type, dispatch, palette.colors.length, palette.id]);
 
   const onClickAddAllCurrentCategories = useCallback(() => {
     if (data.type === 'categories') {
@@ -128,7 +127,7 @@ export function AssignmentsConfig({
                 ? {
                     type: 'categorical',
                     paletteId: palette.id,
-                    colorIndex: (nextCategoricalIndex + i) % palette.colorCount,
+                    colorIndex: (nextCategoricalIndex + i) % palette.colors.length,
                   }
                 : { type: 'gradient' },
             touched: false,
@@ -138,13 +137,13 @@ export function AssignmentsConfig({
       dispatch(addNewAssignments(newAssignments));
     }
   }, [
-    dispatch,
-    assignments,
-    colorMode.type,
     data.type,
-    palette.colorCount,
-    palette.id,
+    assignments,
     unmatchingCategories,
+    dispatch,
+    colorMode.type,
+    palette.id,
+    palette.colors.length,
   ]);
 
   return (
@@ -176,8 +175,8 @@ export function AssignmentsConfig({
                 total={assignments.length}
                 colorMode={colorMode}
                 palette={palette}
+                palettes={palettes}
                 isDarkMode={isDarkMode}
-                getPaletteFn={getPaletteFn}
                 assignment={assignment}
                 disableDelete={false}
                 specialTokens={specialTokens}

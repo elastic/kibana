@@ -1,0 +1,55 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+export type KbnPaletteType = 'categorical' | 'gradient';
+
+export interface IKbnPalette {
+  /**
+   * Unique identifier for the palette
+   */
+  id: string;
+  /**
+   * Display name of this palette.
+   */
+  name: string;
+  /**
+   * Type of pallette
+   */
+  type: KbnPaletteType;
+  /**
+   * Number of colors to display
+   */
+  colorCount: number;
+  /**
+   * Palette belongs to an outdated theme set
+   */
+  legacy: boolean;
+  /**
+   * Alternate aliases/ids this palette matches
+   */
+  aliases: string[];
+  /**
+   * Excluded from `getAll` but can still query for palette with `get`/`query`
+   */
+  standalone?: boolean;
+  /**
+   * Returns array of colors, optionally provide desired number of colors (`n`)
+   */
+  colors: (n?: number) => string[];
+  /**
+   * Scale of colors ranging from 0 to 1
+   */
+  scale: (n: number) => string;
+  /**
+   * Returns color provided index and optional total number of colors
+   */
+  getColor: (colorIndex: number, numberOfColors?: number) => string;
+
+  // getColor: (valueInRange: number, isDarkMode: boolean, loop: boolean) => string;
+}

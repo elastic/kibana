@@ -710,6 +710,7 @@
     "@kbn/osquery-plugin": "link:x-pack/plugins/osquery",
     "@kbn/paertial-results-example-plugin": "link:examples/partial_results_example",
     "@kbn/painless-lab-plugin": "link:x-pack/plugins/painless_lab",
+    "@kbn/palettes": "link:packages/kbn-palettes",
     "@kbn/panel-loader": "link:packages/kbn-panel-loader",
     "@kbn/plugin-check": "link:packages/kbn-plugin-check",
     "@kbn/portable-dashboards-example": "link:examples/portable_dashboards_example",

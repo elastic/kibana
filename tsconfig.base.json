@@ -1348,6 +1348,8 @@
       "@kbn/paertial-results-example-plugin/*": ["examples/partial_results_example/*"],
       "@kbn/painless-lab-plugin": ["x-pack/plugins/painless_lab"],
       "@kbn/painless-lab-plugin/*": ["x-pack/plugins/painless_lab/*"],
+      "@kbn/palettes": ["packages/kbn-palettes"],
+      "@kbn/palettes/*": ["packages/kbn-palettes/*"],
       "@kbn/panel-loader": ["packages/kbn-panel-loader"],
       "@kbn/panel-loader/*": ["packages/kbn-panel-loader/*"],
       "@kbn/peggy": ["packages/kbn-peggy"],

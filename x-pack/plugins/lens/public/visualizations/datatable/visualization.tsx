@@ -9,7 +9,7 @@ import React from 'react';
 import { Ast } from '@kbn/interpreter';
 import { i18n } from '@kbn/i18n';
 import { PaletteRegistry, CUSTOM_PALETTE, PaletteOutput, CustomPaletteParams } from '@kbn/coloring';
-import { ThemeServiceStart } from '@kbn/core/public';
+import { CoreTheme, ThemeServiceStart } from '@kbn/core/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { IconChartDatatable } from '@kbn/chart-icons';
 import { getOriginalId } from '@kbn/transpose-utils';
@@ -17,6 +17,7 @@ import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
 import useObservable from 'react-use/lib/useObservable';
 import { getSortingCriteria } from '@kbn/sort-predicates';
+import { getKbnPalettes } from '@kbn/palettes';
 import type { FormBasedPersistedState } from '../../datasources/form_based/types';
 import type {
   SuggestionRequest,
@@ -268,7 +269,9 @@ export const getDatatableVisualization = ({
   on the Metric dimension in cases where there are no numeric columns
   **/
   getConfiguration({ state, frame }) {
-    const isDarkMode = kibanaTheme.getTheme().darkMode;
+    const theme = kibanaTheme.getTheme();
+    const palettes = getKbnPalettes(theme);
+
     const { sortedColumns, datasource } = getDatasourceAndSortedColumns(
       state,
       frame.datasourceLayers
@@ -320,7 +323,13 @@ export const getDatatableVisualization = ({
                 hidden,
                 collapseFn,
               } = columnMap[accessor] ?? {};
-              const stops = getColorStops(paletteService, isDarkMode, palette, colorMapping);
+              const stops = getColorStops(
+                paletteService,
+                palettes,
+                theme.darkMode,
+                palette,
+                colorMapping
+              );
               const hasColoring = colorMode !== 'none' && stops.length > 0;
 
               return {
@@ -407,7 +416,13 @@ export const getDatatableVisualization = ({
                 colorMapping,
                 hidden,
               } = columnMap[accessor] ?? {};
-              const stops = getColorStops(paletteService, isDarkMode, palette, colorMapping);
+              const stops = getColorStops(
+                paletteService,
+                palettes,
+                theme.darkMode,
+                palette,
+                colorMapping
+              );
               const hasColoring = colorMode !== 'none' && stops.length > 0;
 
               return {
@@ -465,10 +480,16 @@ export const getDatatableVisualization = ({
     };
   },
   DimensionEditorComponent(props) {
-    const isDarkMode = useObservable(kibanaTheme.theme$, { darkMode: false }).darkMode;
+    const theme = useObservable<CoreTheme>(kibanaTheme.theme$, { darkMode: false, version: 'v8' });
+    const palettes = getKbnPalettes(theme);
 
     return (
-      <TableDimensionEditor {...props} isDarkMode={isDarkMode} paletteService={paletteService} />
+      <TableDimensionEditor
+        {...props}
+        isDarkMode={theme.darkMode}
+        palettes={palettes}
+        paletteService={paletteService}
+      />
     );
   },
 

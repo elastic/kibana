@@ -23,6 +23,7 @@ import {
 } from '@kbn/coloring';
 import { getOriginalId } from '@kbn/transpose-utils';
 import { Datatable, DatatableColumnType } from '@kbn/expressions-plugin/common';
+import { KbnPalettes } from '@kbn/palettes';
 import { DataType } from '../../types';
 
 /**
@@ -30,12 +31,13 @@ import { DataType } from '../../types';
  */
 export function getColorStops(
   paletteService: PaletteRegistry,
+  palettes: KbnPalettes,
   isDarkMode: boolean,
   palette?: PaletteOutput<CustomPaletteParams>,
   colorMapping?: ColorMapping.Config
 ): string[] {
   return colorMapping
-    ? getColorsFromMapping(isDarkMode, colorMapping)
+    ? getColorsFromMapping(palettes, isDarkMode, colorMapping)
     : palette?.name === CUSTOM_PALETTE
     ? palette?.params?.stops?.map(({ color }) => color) ?? []
     : paletteService

@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import type { PaletteRegistry } from '@kbn/coloring';
 import { IconChartBarReferenceLine, IconChartBarAnnotations } from '@kbn/chart-icons';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { CoreStart, SavedObjectReference, ThemeServiceStart } from '@kbn/core/public';
+import { CoreStart, CoreTheme, SavedObjectReference, ThemeServiceStart } from '@kbn/core/public';
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import { getAnnotationAccessor } from '@kbn/event-annotation-components';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
@@ -29,6 +29,7 @@ import { getColorsFromMapping } from '@kbn/coloring';
 import useObservable from 'react-use/lib/useObservable';
 import { EuiPopover, EuiSelectable } from '@elastic/eui';
 import { ToolbarButton } from '@kbn/shared-ux-button-toolbar';
+import { getKbnPalettes } from '@kbn/palettes';
 import { generateId } from '../../id_generator';
 import {
   isDraggedDataViewField,
@@ -466,14 +467,14 @@ export const getXyVisualization = ({
       kibanaTheme.theme$
         .subscribe({
           next(theme) {
-            colors = getColorsFromMapping(theme.darkMode, layer.colorMapping);
+            const palettes = getKbnPalettes(theme);
+            colors = getColorsFromMapping(palettes, theme.darkMode, layer.colorMapping);
           },
         })
         .unsubscribe();
     } else {
-      colors = paletteService
-        .get(dataLayer.palette?.name || 'default')
-        .getCategoricalColors(10, dataLayer.palette?.params);
+      const palette = paletteService.get(dataLayer.palette?.name || 'default');
+      colors = palette.getCategoricalColors(10, dataLayer.palette?.params);
     }
 
     return {
@@ -742,14 +743,15 @@ export const getXyVisualization = ({
       paletteService,
     };
 
-    const isDarkMode: boolean = useObservable(kibanaTheme.theme$, { darkMode: false }).darkMode;
+    const theme = useObservable<CoreTheme>(kibanaTheme.theme$, { darkMode: false, version: 'v8' });
+    const palettes = getKbnPalettes(theme);
     const layer = props.state.layers.find((l) => l.layerId === props.layerId)!;
     const dimensionEditor = isReferenceLayer(layer) ? (
-      <ReferenceLinePanel {...allProps} />
+      <ReferenceLinePanel {...allProps} palettes={palettes} />
     ) : isAnnotationsLayer(layer) ? (
       <AnnotationsPanel {...allProps} dataViewsService={dataViewsService} />
     ) : (
-      <DataDimensionEditor {...allProps} isDarkMode={isDarkMode} />
+      <DataDimensionEditor {...allProps} palettes={palettes} isDarkMode={theme.darkMode} />
     );
 
     return dimensionEditor;

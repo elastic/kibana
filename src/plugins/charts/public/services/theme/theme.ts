@@ -102,8 +102,19 @@ export class ThemeService {
    */
   public init(theme: CoreSetup['theme']) {
     this.theme$ = theme.theme$;
-    this.theme$.subscribe(({ darkMode }) => {
-      this._chartsBaseTheme$.next(darkMode ? DARK_THEME : LIGHT_THEME);
+    this.theme$.subscribe((newTheme) => {
+      this._chartsBaseTheme$.next(getChartTheme(newTheme));
     });
   }
+}
+
+// TODO: define these overrides better
+function getChartTheme(theme: CoreTheme): Theme {
+  const chartTheme = { ...(theme.darkMode ? DARK_THEME : LIGHT_THEME) };
+
+  if (theme.darkMode && theme.version !== 'v8') {
+    chartTheme.background.color = theme.version === 'borealisgrey' ? '#16181D' : '#0B1628';
+  }
+
+  return chartTheme;
 }

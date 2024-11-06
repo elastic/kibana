@@ -1,0 +1,36 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { Optional } from 'utility-types';
+import { BaseKbnPalette, BaseKbnPaletteConfig } from './palette';
+import { IKbnPalette } from './types';
+
+export interface CategoricalPaletteConfig extends Optional<BaseKbnPaletteConfig, 'colorCount'> {
+  colors: string[];
+}
+
+export class CategoricalPalette extends BaseKbnPalette implements IKbnPalette {
+  public readonly type = 'categorical' as const;
+
+  #colors: string[];
+
+  constructor({ colors, colorCount = colors.length, ...rest }: CategoricalPaletteConfig) {
+    super({ ...rest, colorCount });
+
+    this.#colors = colors;
+  }
+
+  public colors = (n?: number) => {
+    return this.#colors.slice(0, n);
+  };
+
+  public scale = (n: number) => {
+    return this.#colors[n];
+  };
+}

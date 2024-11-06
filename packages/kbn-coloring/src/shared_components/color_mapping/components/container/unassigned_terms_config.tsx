@@ -19,14 +19,13 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useDispatch, useSelector } from 'react-redux';
 import { css } from '@emotion/react';
+import { KbnPalettes } from '@kbn/palettes';
 import { updateSpecialAssignmentColor } from '../../state/color_mapping';
-import { getPalette, NeutralPalette } from '../../palettes';
 import {
   DEFAULT_NEUTRAL_PALETTE_INDEX,
   DEFAULT_OTHER_ASSIGNMENT_INDEX,
 } from '../../config/default_color_mapping';
 import { SpecialAssignment } from '../assignment/special_assignment';
-import { ColorMapping } from '../../config';
 import { selectColorMode, selectPalette, selectSpecialAssignments } from '../../state/selectors';
 import { ColorMappingInputData } from '../../categorical_color_mapping';
 
@@ -35,15 +34,13 @@ export function UnassignedTermsConfig({
   data,
   isDarkMode,
 }: {
-  palettes: Map<string, ColorMapping.CategoricalPalette>;
+  palettes: KbnPalettes;
   data: ColorMappingInputData;
   isDarkMode: boolean;
 }) {
   const dispatch = useDispatch();
-
-  const getPaletteFn = getPalette(palettes, NeutralPalette);
-
-  const palette = useSelector(selectPalette(getPaletteFn));
+  const neutralPalette = palettes.get('neutral');
+  const palette = useSelector(selectPalette(palettes));
   const colorMode = useSelector(selectColorMode);
   const specialAssignments = useSelector(selectSpecialAssignments);
   const otherAssignment = specialAssignments[DEFAULT_OTHER_ASSIGNMENT_INDEX];
@@ -99,7 +96,7 @@ export function UnassignedTermsConfig({
                       : {
                           type: 'categorical',
                           colorIndex: DEFAULT_NEUTRAL_PALETTE_INDEX,
-                          paletteId: NeutralPalette.id,
+                          paletteId: neutralPalette.id,
                         },
                 })
               );
@@ -122,7 +119,7 @@ export function UnassignedTermsConfig({
                 index={0}
                 palette={palette}
                 isDarkMode={isDarkMode}
-                getPaletteFn={getPaletteFn}
+                palettes={palettes}
                 assignmentColor={otherAssignment.color}
                 total={specialAssignments.length}
               />

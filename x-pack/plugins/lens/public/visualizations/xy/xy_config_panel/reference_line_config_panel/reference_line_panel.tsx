@@ -17,6 +17,7 @@ import {
   TextDecorationSetting,
 } from '@kbn/visualization-ui-components';
 import { useDebouncedValue } from '@kbn/visualization-utils';
+import { KbnPalettes } from '@kbn/palettes';
 import { referenceLineIconsSet } from '../../../../shared_components/icon_set';
 import type { VisualizationDimensionEditorProps } from '../../../../types';
 import { State, XYState, XYReferenceLineLayerConfig, YConfig } from '../../types';
@@ -32,6 +33,7 @@ export const ReferenceLinePanel = (
   props: VisualizationDimensionEditorProps<State> & {
     formatFactory: FormatFactory;
     paletteService: PaletteRegistry;
+    palettes: KbnPalettes;
   }
 ) => {
   const { state, setState, layerId, accessor } = props;
@@ -98,6 +100,7 @@ export const ReferenceLinePanel = (
         defaultColor={defaultReferenceLineColor}
         setConfig={setConfig}
         disableHelpTooltip
+        swatches={props.palettes.get('default').colors(10)}
         label={i18n.translate('xpack.lens.xyChart.lineColor.label', {
           defaultMessage: 'Color',
         })}

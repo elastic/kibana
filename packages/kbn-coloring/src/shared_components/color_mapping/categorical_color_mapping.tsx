@@ -11,6 +11,7 @@ import React from 'react';
 import { Provider } from 'react-redux';
 import { type EnhancedStore, configureStore } from '@reduxjs/toolkit';
 import { isEqual } from 'lodash';
+import { KbnPalettes } from '@kbn/palettes';
 import { colorMappingReducer, updateModel } from './state/color_mapping';
 import { Container } from './components/container/container';
 import { ColorMapping } from './config';
@@ -43,8 +44,8 @@ export type ColorMappingInputData =
 export interface ColorMappingProps {
   /** The initial color mapping model, usually coming from a the visualization saved object */
   model: ColorMapping.Config;
-  /** A map of paletteId and palette configuration */
-  palettes: Map<string, ColorMapping.CategoricalPalette>;
+  /** A collection of palette configurations */
+  palettes: KbnPalettes;
   /** A data description of what needs to be colored */
   data: ColorMappingInputData;
   /** Theme dark mode */

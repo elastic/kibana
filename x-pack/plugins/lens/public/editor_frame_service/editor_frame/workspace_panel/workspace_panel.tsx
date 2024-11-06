@@ -12,7 +12,14 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { toExpression } from '@kbn/interpreter';
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import { i18n } from '@kbn/i18n';
-import { EuiText, EuiButtonEmpty, EuiLink, EuiTextColor } from '@elastic/eui';
+import {
+  EuiText,
+  EuiButtonEmpty,
+  EuiLink,
+  EuiTextColor,
+  useEuiTheme,
+  UseEuiTheme,
+} from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type {
@@ -159,6 +166,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   const triggerApply = useLensSelector(selectTriggerApplyChanges);
   const datasourceLayers = useLensSelector((state) => selectDatasourceLayers(state, datasourceMap));
   const searchSessionId = useLensSelector(selectSearchSessionId);
+  const theme = useEuiTheme();
 
   const [localState, setLocalState] = useState<WorkspaceState>({
     expressionToRender: undefined,
@@ -652,7 +660,13 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         value={dropProps.value}
         order={dropProps.order}
       >
-        <div className="lnsWorkspacePanelWrapper__pageContentBody">{renderWorkspaceContents()}</div>
+        <div
+          // TODO: fix this inconsistency override between themes
+          style={{ background: getBackgroundColor(theme) }}
+          className="lnsWorkspacePanelWrapper__pageContentBody"
+        >
+          {renderWorkspaceContents()}
+        </div>
       </Droppable>
     );
   };
@@ -808,3 +822,14 @@ export const VisualizationWrapper = ({
     </div>
   );
 };
+
+function getBackgroundColor({ euiTheme: { themeName, colors }, colorMode }: UseEuiTheme) {
+  if (colorMode === 'DARK' && themeName === 'EUI_THEME_BOREALIS') {
+    if (colors.plainDark.toUpperCase() === '#07101F') {
+      // DARKBLUE
+      return '#0B1628';
+    } else {
+      return '#16181D';
+    }
+  }
+}

@@ -9,8 +9,7 @@
 
 import { useDispatch } from 'react-redux';
 import React from 'react';
-import { ColorMapping } from '../../config';
-import { getPalette } from '../../palettes';
+import { IKbnPalette, KbnPalettes } from '@kbn/palettes';
 import { ColorSwatch } from '../color_picker/color_swatch';
 import { updateSpecialAssignmentColor } from '../../state/color_mapping';
 import { ColorCode, CategoricalColor } from '../../config/types';
@@ -19,15 +18,15 @@ export function SpecialAssignment({
   assignmentColor,
   index,
   palette,
-  getPaletteFn,
+  palettes,
   isDarkMode,
   total,
 }: {
   isDarkMode: boolean;
   index: number;
   assignmentColor: CategoricalColor | ColorCode;
-  palette: ColorMapping.CategoricalPalette;
-  getPaletteFn: ReturnType<typeof getPalette>;
+  palette: IKbnPalette;
+  palettes: KbnPalettes;
   total: number;
 }) {
   const dispatch = useDispatch();
@@ -36,7 +35,7 @@ export function SpecialAssignment({
       forType="specialAssignment"
       colorMode={{ type: 'categorical' }}
       assignmentColor={assignmentColor}
-      getPaletteFn={getPaletteFn}
+      palettes={palettes}
       index={index}
       palette={palette}
       total={total}

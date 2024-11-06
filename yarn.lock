@@ -6000,6 +6000,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/palettes@link:packages/kbn-palettes":
+  version "0.0.0"
+  uid ""
+
 "@kbn/panel-loader@link:packages/kbn-panel-loader":
   version "0.0.0"
   uid ""

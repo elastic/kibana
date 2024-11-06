@@ -9,9 +9,10 @@
 
 import chroma from 'chroma-js';
 import { findLast } from 'lodash';
+import { KbnPalettes } from '@kbn/palettes';
 import { ColorMapping } from '../config';
 import { changeAlpha, combineColors, getValidColor } from './color_math';
-import { getPalette, NeutralPalette } from '../palettes';
+import { NeutralPalette } from '../palettes';
 import { ColorMappingInputData } from '../categorical_color_mapping';
 import { ruleMatch } from './rule_matching';
 import { GradientColorMode } from '../config/types';
@@ -25,7 +26,7 @@ export function getAssignmentColor(
   color:
     | ColorMapping.Config['assignments'][number]['color']
     | (ColorMapping.LoopColor & { paletteId: string; colorIndex: number }),
-  getPaletteFn: ReturnType<typeof getPalette>,
+  palettes: KbnPalettes,
   isDarkMode: boolean,
   index: number,
   total: number
@@ -34,12 +35,12 @@ export function getAssignmentColor(
     case 'colorCode':
     case 'categorical':
     case 'loop':
-      return getColor(color, getPaletteFn, isDarkMode);
+      return getColor(color, palettes);
     case 'gradient': {
       if (colorMode.type === 'categorical') {
         return 'red';
       }
-      const colorScale = getGradientColorScale(colorMode, getPaletteFn, isDarkMode);
+      const colorScale = getGradientColorScale(colorMode, palettes, isDarkMode);
       return total === 0 ? 'red' : total === 1 ? colorScale(0) : colorScale(index / (total - 1));
     }
   }
@@ -50,19 +51,16 @@ export function getColor(
     | ColorMapping.ColorCode
     | ColorMapping.CategoricalColor
     | (ColorMapping.LoopColor & { paletteId: string; colorIndex: number }),
-  getPaletteFn: ReturnType<typeof getPalette>,
-  isDarkMode: boolean
+  palettes: KbnPalettes
 ): string {
   return color.type === 'colorCode'
     ? color.colorCode
-    : getValidColor(
-        getPaletteFn(color.paletteId).getColor(color.colorIndex, isDarkMode, true)
-      ).hex();
+    : getValidColor(palettes.get(color.paletteId).getColor(color.colorIndex)).hex();
 }
 
 export function getColorFactory(
   { assignments, specialAssignments, colorMode, paletteId }: ColorMapping.Config,
-  getPaletteFn: ReturnType<typeof getPalette>,
+  palettes: KbnPalettes,
   isDarkMode: boolean,
   data: ColorMappingInputData
 ): (category: string | string[]) => string {
@@ -104,7 +102,7 @@ export function getColorFactory(
           return getAssignmentColor(
             colorMode,
             autoByOrderAssignments[nonAssignedCategoryIndex].color,
-            getPaletteFn,
+            palettes,
             isDarkMode,
             autoAssignmentIndex,
             assignments.length
@@ -129,7 +127,7 @@ export function getColorFactory(
                   paletteId,
                 }
             : specialAssignments[DEFAULT_OTHER_ASSIGNMENT_INDEX].color,
-          getPaletteFn,
+          palettes,
           isDarkMode,
           indexIfGradient,
           totalColorsIfGradient
@@ -146,7 +144,7 @@ export function getColorFactory(
       return getAssignmentColor(
         colorMode,
         assignment.color,
-        getPaletteFn,
+        palettes,
         isDarkMode,
         matchingAssignmentIndex,
         assignments.length
@@ -158,27 +156,26 @@ export function getColorFactory(
         paletteId: NeutralPalette.id,
         colorIndex: DEFAULT_NEUTRAL_PALETTE_INDEX,
       },
-      getPaletteFn,
-      isDarkMode
+      palettes
     );
   };
 }
 
 export function getGradientColorScale(
   colorMode: GradientColorMode,
-  getPaletteFn: ReturnType<typeof getPalette>,
+  palettes: KbnPalettes,
   isDarkMode: boolean
 ): (value: number) => string {
   const steps =
     colorMode.steps.length === 1
       ? [
-          getColor(colorMode.steps[0], getPaletteFn, isDarkMode),
+          getColor(colorMode.steps[0], palettes),
           combineColors(
-            changeAlpha(getColor(colorMode.steps[0], getPaletteFn, isDarkMode), 0.3),
+            changeAlpha(getColor(colorMode.steps[0], palettes), 0.3),
             isDarkMode ? 'black' : 'white'
           ),
         ]
-      : colorMode.steps.map((d) => getColor(d, getPaletteFn, isDarkMode));
+      : colorMode.steps.map((d) => getColor(d, palettes));
   steps.sort(() => (colorMode.sort === 'asc' ? -1 : 1));
   const scale = chroma.scale(steps).mode('lab');
   return (value: number) => scale(value).hex();
