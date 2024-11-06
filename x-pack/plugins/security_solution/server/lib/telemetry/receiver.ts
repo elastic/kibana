@@ -42,7 +42,7 @@ import type {
   IndicesGetDataStreamRequest,
   IndicesStatsRequest,
   IlmGetLifecycleRequest,
-  CatIndicesRequest,
+  IndicesGetRequest,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { TransportResult } from '@elastic/elasticsearch';
 import type { AgentPolicy, Installation } from '@kbn/fleet-plugin/common';
@@ -1355,15 +1355,15 @@ export class TelemetryReceiver implements ITelemetryReceiver {
 
     this.logger.l('Fetching indices');
 
-    const request: CatIndicesRequest = {
+    const request: IndicesGetRequest = {
+      index: '*',
       expand_wildcards: ['open', 'hidden'],
-      filter_path: ['index'],
-      format: 'json',
+      filter_path: ['*.settings.index.provided_name'],
     };
 
-    return es.cat
-      .indices(request)
-      .then((indices) => indices.map(({ index }) => index as string))
+    return es.indices
+      .get(request)
+      .then((indices) => Array.from(Object.keys(indices)))
       .catch((error) => {
         this.logger.warn('Error fetching indices', { error_message: error } as LogMeta);
         throw error;
