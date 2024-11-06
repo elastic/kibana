@@ -68,7 +68,7 @@ image::images/availableFields_discover_8.4.0.png[Discover table that displays on
 
 A dashboard is a collection of panels that you can use to visualize the data. Panels contain visualizations, interactive controls, text, and more.
 
-. Go to *Dashboard*.
+. Go to *Dashboards*.
 
 . Click *[eCommerce] Revenue Dashboard*.
 +
