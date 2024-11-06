@@ -68,8 +68,9 @@ export class UpdateSLO {
 
     validateSLO(updatedSlo);
 
-    const rollbackOperations = [];
+    await this.assertExpectedIndicatorSourceIndexPrivileges(updatedSlo);
 
+    const rollbackOperations = [];
     await this.repository.update(updatedSlo);
     rollbackOperations.push(() => this.repository.update(originalSlo));
 
@@ -200,6 +201,17 @@ export class UpdateSLO {
     await this.deleteOriginalSLO(originalSlo);
 
     return this.toResponse(updatedSlo);
+  }
+
+  private async assertExpectedIndicatorSourceIndexPrivileges(slo: SLODefinition) {
+    const privileges = await this.esClient.security.hasPrivileges({
+      index: [{ names: slo.indicator.params.index, privileges: ['read', 'view_index_metadata'] }],
+    });
+    if (!privileges.has_all_requested) {
+      throw new SecurityException(
+        `Missing ['read', 'view_index_metadata'] privileges on the source index [${slo.indicator.params.index}]`
+      );
+    }
   }
 
   private async deleteOriginalSLO(originalSlo: SLODefinition) {
