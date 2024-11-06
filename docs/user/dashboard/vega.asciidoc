@@ -42,7 +42,7 @@ Before starting, add the eCommerce sample data that you'll use in your spec, the
 
 . <<gs-get-data-into-kibana,Install the eCommerce sample data set>>.
 
-. Go to *Dashboard*.
+. Go to *Dashboards*.
 
 . On the *Dashboards* page, click *Create dashboard*.
 
@@ -86,7 +86,7 @@ To check your work, open and use the <<console-kibana,*Console*>> on a separate 
 
 . Open {kib} on a new tab. 
 
-. Go to the *Developer Tools* page using the navigation menu or the 
+. Go to the *Developer tools* page using the navigation menu or the 
 <<kibana-navigation-search,global search field>>.
 
 . On the *Console* editor, enter the aggregation, then click *Click to send request*:
