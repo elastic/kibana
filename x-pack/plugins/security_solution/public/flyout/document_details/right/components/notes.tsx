@@ -61,7 +61,7 @@ export const ADD_NOTE_BUTTON = i18n.translate(
 export const Notes = memo(() => {
   const { euiTheme } = useEuiTheme();
   const dispatch = useDispatch();
-  const { eventId, indexName, scopeId } = useDocumentDetailsContext();
+  const { eventId, indexName, scopeId, isPreviewMode } = useDocumentDetailsContext();
   const { addError: addErrorToast } = useAppToasts();
 
   const { openLeftPanel } = useExpandableFlyoutApi();
@@ -116,6 +116,7 @@ export const Notes = memo(() => {
               iconType="plusInCircle"
               onClick={openExpandedFlyoutNotesTab}
               size="s"
+              disabled={isPreviewMode}
               aria-label={ADD_NOTE_BUTTON}
               data-test-subj={NOTES_ADD_NOTE_BUTTON_TEST_ID}
             >
@@ -130,6 +131,7 @@ export const Notes = memo(() => {
                 <EuiButtonIcon
                   onClick={openExpandedFlyoutNotesTab}
                   iconType="plusInCircle"
+                  disabled={isPreviewMode}
                   css={css`
                     margin-left: ${euiTheme.size.xs};
                   `}
