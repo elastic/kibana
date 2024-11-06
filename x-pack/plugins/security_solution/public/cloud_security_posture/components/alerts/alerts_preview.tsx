@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import { v4 as uuid } from 'uuid';
+import React from 'react';
 import { css } from '@emotion/react';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle, useEuiTheme } from '@elastic/eui';
@@ -14,14 +13,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
 import { getAbbreviatedNumber } from '@kbn/cloud-security-posture-common';
 import { ExpandablePanel } from '../../../flyout/shared/components/expandable_panel';
-import { useSummaryChartData } from '../../../detections/components/alerts_kpis/alerts_summary_charts_panel/use_summary_chart_data';
-import {
-  getIsAlertsBySeverityData,
-  getSeverityColor,
-} from '../../../detections/components/alerts_kpis/severity_level_panel/helpers';
-import { severityAggregations } from '../../../detections/components/alerts_kpis/alerts_summary_charts_panel/aggregations';
-
-const ENTITY_ALERT_PREVIEW_COUNT_ID = 'entity-alert-preview-count';
+import { getSeverityColor } from '../../../detections/components/alerts_kpis/severity_level_panel/helpers';
+import type {
+  AlertsByStatus,
+  ParsedAlertsData,
+} from '../../../overview/components/detection_response/alerts_by_status/types';
 
 const AlertsCount = ({
   alertsTotal,
@@ -57,36 +53,34 @@ const AlertsCount = ({
 };
 
 export const AlertsPreview = ({
-  name,
-  fieldName,
+  alertsData,
+  alertsCount,
   isPreviewMode,
 }: {
-  name: string;
-  fieldName: 'host.name' | 'user.name';
+  alertsData: ParsedAlertsData;
+  alertsCount: number;
   isPreviewMode?: boolean;
 }) => {
   const { euiTheme } = useEuiTheme();
-  const uniqueQueryId = useMemo(() => `${ENTITY_ALERT_PREVIEW_COUNT_ID}-${uuid()}`, []);
-  const entityFilter = useMemo(() => ({ field: fieldName, value: name }), [fieldName, name]);
 
-  const { items, isLoading } = useSummaryChartData({
-    aggregations: severityAggregations,
-    entityFilter,
-    uniqueQueryId,
-    signalIndexName: null,
+  const severityMap = new Map<string, number>();
+
+  (['open', 'acknowledged'] as AlertsByStatus[]).forEach((status) => {
+    alertsData?.[status]?.severities.forEach((severity) => {
+      if (severityMap.has(severity.key)) {
+        severityMap.set(severity.key, (severityMap?.get(severity.key) || 0) + severity.value);
+      } else {
+        severityMap.set(severity.key, severity.value);
+      }
+    });
   });
 
-  const data = useMemo(() => (getIsAlertsBySeverityData(items) ? items : []), [items]);
-  const totalAlerts = data.reduce((accumulator, current) => accumulator + current.value, 0);
-  const alertStats = useMemo(() => {
-    return data.map((item) => ({
-      key: item.key,
-      count: item.value,
-      color: getSeverityColor(item.key),
-    }));
-  }, [data]);
+  const alertStats = Array.from(severityMap, ([key, count]) => ({
+    key,
+    count,
+    color: getSeverityColor(key),
+  }));
 
-  if (!isLoading && items.length === 0) return null;
   return (
     <ExpandablePanel
       header={{
@@ -107,7 +101,7 @@ export const AlertsPreview = ({
       data-test-subj={'securitySolutionFlyoutInsightsAlerts'}
     >
       <EuiFlexGroup gutterSize="none">
-        <AlertsCount alertsTotal={getAbbreviatedNumber(totalAlerts)} euiTheme={euiTheme} />
+        <AlertsCount alertsTotal={getAbbreviatedNumber(alertsCount)} euiTheme={euiTheme} />
         <EuiFlexItem grow={2}>
           <EuiFlexGroup direction="column" gutterSize="none">
             <EuiFlexItem />

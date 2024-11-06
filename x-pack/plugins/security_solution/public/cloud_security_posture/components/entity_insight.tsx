@@ -7,7 +7,7 @@
 
 import { EuiAccordion, EuiHorizontalRule, EuiSpacer, EuiTitle, useEuiTheme } from '@elastic/eui';
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useMisconfigurationPreview } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview';
@@ -17,6 +17,10 @@ import { hasVulnerabilitiesData } from '@kbn/cloud-security-posture';
 import { MisconfigurationsPreview } from './misconfiguration/misconfiguration_preview';
 import { VulnerabilitiesPreview } from './vulnerabilities/vulnerabilities_preview';
 import { AlertsPreview } from './alerts/alerts_preview';
+import { useGlobalTime } from '../../common/containers/use_global_time';
+import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../../overview/components/detection_response/alerts_by_status/types';
+import { useAlertsByStatus } from '../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
+import { useSignalIndex } from '../../detections/containers/detection_engine/alerts/use_signal_index';
 
 export const EntityInsight = <T,>({
   name,
@@ -61,12 +65,38 @@ export const EntityInsight = <T,>({
 
   const isVulnerabilitiesFindingForHost = hasVulnerabilitiesFindings && fieldName === 'host.name';
 
-  insightContent.push(
-    <>
-      <AlertsPreview name={name} fieldName={fieldName} isPreviewMode={isPreviewMode} />
-      <EuiSpacer size="s" />
-    </>
-  );
+  const { signalIndexName } = useSignalIndex();
+
+  const entityFilter = useMemo(() => ({ field: fieldName, value: name }), [fieldName, name]);
+
+  const { to, from } = useGlobalTime();
+
+  const { items: alertsData } = useAlertsByStatus({
+    entityFilter,
+    signalIndexName,
+    queryId: DETECTION_RESPONSE_ALERTS_BY_STATUS_ID,
+    to,
+    from,
+  });
+
+  const alertsOpenCount = alertsData?.open?.total || 0;
+
+  const alertsAcknowledgedCount = alertsData?.acknowledged?.total || 0;
+
+  const alertsCount = alertsOpenCount + alertsAcknowledgedCount;
+
+  if (alertsCount > 0) {
+    insightContent.push(
+      <>
+        <AlertsPreview
+          alertsData={alertsData}
+          alertsCount={alertsCount}
+          isPreviewMode={isPreviewMode}
+        />
+        <EuiSpacer size="s" />
+      </>
+    );
+  }
 
   if (hasMisconfigurationFindings)
     insightContent.push(
@@ -84,7 +114,7 @@ export const EntityInsight = <T,>({
     );
   return (
     <>
-      {(insightContent.length !== 0 ||
+      {(insightContent.length > 0 ||
         hasMisconfigurationFindings ||
         (isVulnerabilitiesFindingForHost && hasVulnerabilitiesFindings)) && (
         <>
