@@ -268,7 +268,8 @@ export const createSecurityRootProfileProvider = (): RootProfileProvider => ({
     getCellRenderers: (prev) => (params) => ({
       ...prev(params),
       foo: function FooComponent() {
-        // Since the app wrapper implementation wrapped Discover with a React context provider, we can now access its values from within our extension point implementations
+        // Since the app wrapper implementation wrapped Discover with a React context provider,
+        // we can now access its values from within our extension point implementations
         const { setFlyoutOpen } = useContext(flyoutContext);
 
         return <button onClick={() => setFlyoutOpen(true)}>Click me to open a flyout!</button>;
@@ -293,9 +294,12 @@ export const createSecurityRootProfileProvider = (): RootProfileProvider => ({
 By default the `context` object returned from each profile provider's `resolve` method conforms to a standard interface specific to their profile's context level. However, in some situations it may be useful for consumers to extend this object with properties specific to their profile implementation. To support this, profile providers can define a strongly typed `context` interface that extends the default interface, and allows passing properties through to their profile's extension point implementations. One potential use case for this is instantiating state stores or asynchronously initialized services, then accessing them within a `getRenderAppWrapper` implementation to pass to a React context provider:
 
 ```tsx
+// The profile provider interfaces accept a custom context object type param
+type SecurityRootProfileProvider = RootProfileProvider<{ stateStore: SecurityStateStore }>;
+
 export const createSecurityRootProfileProvider = (
   services: ProfileProviderServices
-): RootProfileProvider<{ stateStore: SecurityStateStore }> => ({
+): SecurityRootProfileProvider => ({
   profileId: 'security-root-profile',
   profile: {
     getRenderAppWrapper:
@@ -303,6 +307,7 @@ export const createSecurityRootProfileProvider = (
       ({ children }) =>
         (
           <PrevWrapper>
+            // Custom props can be accessed from the context object available in `accessorParams`
             <SecurityStateProvider stateStore={context.stateStore}>
               {children}
             </SecurityStateProvider>
@@ -314,12 +319,14 @@ export const createSecurityRootProfileProvider = (
       return { isMatch: false };
     }
 
+    // Perform async service initialization within the `resolve` method
     const stateStore = await initializeSecurityStateStore(services);
 
     return {
       isMatch: true,
       context: {
         solutionType: SolutionType.Security,
+        // Include the custom service in the returned context object
         stateStore,
       },
     };
