@@ -7,6 +7,7 @@
 
 import {
   AnalyticsServiceSetup,
+  type AuthenticatedUser,
   IKibanaResponse,
   KibanaRequest,
   KibanaResponseFactory,
@@ -527,55 +528,66 @@ export const updateConversationWithUserInput = async ({
 };
 
 interface PerformChecksParams {
-  authenticatedUser?: boolean;
   capability?: AssistantFeatureKey;
   context: AwaitedProperties<
     Pick<ElasticAssistantRequestHandlerContext, 'elasticAssistant' | 'licensing' | 'core'>
   >;
-  license?: boolean;
   request: KibanaRequest;
   response: KibanaResponseFactory;
 }
 
 /**
- * Helper to perform checks for authenticated user, capability, and license. Perform all or one
- * of the checks by providing relevant optional params. Check order is license, authenticated user,
- * then capability.
+ * Helper to perform checks for authenticated user, license, and optionally capability.
+ * Check order is license, authenticated user, then capability.
  *
- * @param authenticatedUser - Whether to check for an authenticated user
+ * Returns either a successful check with an AuthenticatedUser or
+ * an unsuccessful check with an error IKibanaResponse.
+ *
  * @param capability - Specific capability to check if enabled, e.g. `assistantModelEvaluation`
  * @param context - Route context
- * @param license - Whether to check for a valid license
  * @param request - Route KibanaRequest
  * @param response - Route KibanaResponseFactory
+ * @returns PerformChecks
  */
+
+type PerformChecks =
+  | {
+      isSuccess: true;
+      currentUser: AuthenticatedUser;
+    }
+  | {
+      isSuccess: false;
+      response: IKibanaResponse;
+    };
 export const performChecks = ({
-  authenticatedUser,
   capability,
   context,
-  license,
   request,
   response,
-}: PerformChecksParams): IKibanaResponse | undefined => {
+}: PerformChecksParams): PerformChecks => {
   const assistantResponse = buildResponse(response);
 
-  if (license) {
-    if (!hasAIAssistantLicense(context.licensing.license)) {
-      return response.forbidden({
+  if (!hasAIAssistantLicense(context.licensing.license)) {
+    return {
+      isSuccess: false,
+      response: response.forbidden({
         body: {
           message: UPGRADE_LICENSE_MESSAGE,
         },
-      });
-    }
+      }),
+    };
   }
 
-  if (authenticatedUser) {
-    if (context.elasticAssistant.getCurrentUser() == null) {
-      return assistantResponse.error({
+  const currentUser = context.elasticAssistant.getCurrentUser();
+
+  if (currentUser == null) {
+    return {
+      isSuccess: false,
+      response: assistantResponse.error({
         body: `Authenticated user not found`,
         statusCode: 401,
-      });
-    }
+      }),
+    };
   }
 
   if (capability) {
@@ -585,11 +597,17 @@ export const performChecks = ({
     });
     const registeredFeatures = context.elasticAssistant.getRegisteredFeatures(pluginName);
     if (!registeredFeatures[capability]) {
-      return response.notFound();
+      return {
+        isSuccess: false,
+        response: response.notFound(),
+      };
     }
   }
 
-  return undefined;
+  return {
+    isSuccess: true,
+    currentUser,
+  };
 };
 
 /**
