@@ -26,6 +26,8 @@ import { BadgeFilterWithPopover } from '../badge_filter_with_popover';
 import { getColumns } from './grid_columns';
 import { AlertsBadge } from '../alerts_badge/alerts_badge';
 import { EntityName } from './entity_name';
+import { EntityActions } from '../entity_actions';
+import { useDiscoverRedirect } from '../../hooks/use_discover_redirect';
 
 type InventoryEntitiesAPIReturnType = APIReturnType<'GET /internal/inventory/entities'>;
 type LatestEntities = InventoryEntitiesAPIReturnType['entities'];
@@ -53,6 +55,8 @@ export function EntitiesGrid({
   onChangeSort,
   onFilterByType,
 }: Props) {
+  const { getDiscoverRedirectUrl } = useDiscoverRedirect();
+
   const onSort: EuiDataGridSorting['onSort'] = useCallback(
     (newSortingColumns) => {
       const lastItem = last(newSortingColumns);
@@ -85,6 +89,7 @@ export function EntitiesGrid({
 
       const columnEntityTableId = columnId as EntityColumnIds;
       const entityType = entity[ENTITY_TYPE];
+      const discoverUrl = getDiscoverRedirectUrl({ entity });
 
       switch (columnEntityTableId) {
         case 'alertsCount':
@@ -127,11 +132,13 @@ export function EntitiesGrid({
           );
         case ENTITY_DISPLAY_NAME:
           return <EntityName entity={entity} />;
+        case 'actions':
+          return <EntityActions discoverUrl={discoverUrl} />;
         default:
           return entity[columnId as EntityColumnIds] || '';
       }
     },
-    [entities, onFilterByType]
+    [entities, getDiscoverRedirectUrl, onFilterByType]
   );
 
   if (loading) {
