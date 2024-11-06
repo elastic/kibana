@@ -27,7 +27,7 @@ export interface StarredQueryItem extends QueryHistoryItem {
   id: string;
 }
 
-interface Services {
+interface EsqlStarredQueriesServices {
   http: CoreStart['http'];
   usageCollection?: UsageCollectionStart;
 }
@@ -52,7 +52,7 @@ export class EsqlStarredQueriesService {
     this.queries$ = new BehaviorSubject(starredQueries);
   }
 
-  static async initialize(services: Services) {
+  static async initialize(services: EsqlStarredQueriesServices) {
     const client = new FavoritesClient<QueryHistoryItem>('esql_editor', 'esql_query', {
       http: services.http,
       usageCollection: services.usageCollection,
@@ -66,8 +66,8 @@ export class EsqlStarredQueriesService {
     }
     Object.keys(favoriteMetadata).forEach((id) => {
       const item = favoriteMetadata[id];
-      const { queryString, timeRan } = item;
-      retrievedQueries.push({ id, queryString, timeRan });
+      const { queryString, timeRan, status } = item;
+      retrievedQueries.push({ id, queryString, timeRan, status });
     });
 
     return new EsqlStarredQueriesService({
@@ -107,6 +107,9 @@ export class EsqlStarredQueriesService {
     this.queries$.next(starredQueries);
     this.starredQueries = starredQueries;
     await this.client.addFavorite(favoriteItem);
+
+    // telemetry, add favorite click event
+    this.client.reportAddFavoriteClick();
   }
 
   async removeStarredQuery(queryString: string) {
@@ -116,17 +119,13 @@ export class EsqlStarredQueriesService {
       return;
     }
 
-    await this.client.removeFavorite({ id: favoriteItem.id });
     this.starredQueries = this.starredQueries.filter((item) => item.queryString !== queryString);
     this.queries$.next(this.starredQueries);
-  }
 
-  async clearAllStarredQueries() {
-    await Promise.all(
-      this.starredQueries.map((item) => this.client.removeFavorite({ id: item.id }))
-    );
-    this.starredQueries = [];
-    this.queries$.next([]);
+    await this.client.removeFavorite({ id: favoriteItem.id });
+
+    // telemetry, remove favorite click event
+    this.client.reportRemoveFavoriteClick();
   }
 
   renderStarredButton(item: QueryHistoryItem) {

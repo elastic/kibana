@@ -19,16 +19,19 @@ export const getReducedSpaceStyling = () => {
         }
         .euiTable thead tr {
           display: grid;
-          grid-template-columns: 40px 1fr 0 auto;
+          grid-template-columns: 30px 40px 1fr 0 auto;
         }
         .euiTable tbody tr {
           display: grid;
-          grid-template-columns: 40px 1fr auto;
+          grid-template-columns: 30px 40px 1fr auto;
           grid-template-areas:
-            'status timeRan lastDuration actions'
-            '. queryString queryString queryString';
+            'favoriteBtn status timeRan lastDuration actions'
+            '. . queryString queryString queryString';
         }
         /* Set grid template areas */
+        .euiTable td[data-test-subj='favoriteBtn'] {
+          grid-area: favoriteBtn;
+        }
         .euiTable td[data-test-subj='status'] {
           grid-area: status;
         }
