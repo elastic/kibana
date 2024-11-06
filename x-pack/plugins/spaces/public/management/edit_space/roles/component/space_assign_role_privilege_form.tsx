@@ -373,7 +373,7 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
                 )}
                 placeholder={i18n.translate(
                   'xpack.spaces.management.spaceDetails.roles.selectRolesPlaceholder',
-                  { defaultMessage: 'Add a role...' }
+                  { defaultMessage: 'Add roles...' }
                 )}
                 isLoading={fetchingDataDeps}
                 options={createRolesComboBoxOptions(spaceUnallocatedRoles)}
