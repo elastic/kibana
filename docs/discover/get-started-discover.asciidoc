@@ -262,10 +262,7 @@ geoip.country_iso_code : US and products.taxless_price >= 75
 ```
 
 [[filter-in-discover]]
-Whereas the query defines the set of documents you are interested in,
-filters enable you to zero in on subsets of those documents.
-You can filter results to include or exclude specific fields, filter for a value in a range,
-and more.
+With the query field, you can filter data using the KQL or Lucene languages. You can also use the **Add filter** function available next to the query field to build your filters manually or edit them as Query DSL.
 
 For example, exclude results from the ecommerce sample data view where day of week is not Wednesday:
 
