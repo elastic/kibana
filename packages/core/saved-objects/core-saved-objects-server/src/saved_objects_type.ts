@@ -37,7 +37,7 @@ export interface SavedObjectsType<Attributes = any> {
    * The hidden types will not be automatically exposed via the HTTP API.
    * Therefore, that should prevent unexpected behavior in the client code, as all the interactions will be done via the plugin API.
    *
-   * Access a hidden type with a client that explicitly includes a list of hidden types
+   * Hidden types must be listed to be accessible by the client.
    *
    * (await context.core).savedObjects.getClient({ includeHiddenTypes: [MY_PLUGIN_HIDDEN_SAVED_OBJECT_TYPE] })
    *

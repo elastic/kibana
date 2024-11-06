@@ -46,8 +46,8 @@ these should follow our API URL path convention and always be written in snake c
 that objects of this type can only exist in a single space. See
 <DocLink id="kibDevDocsSavedObjectsIntro" section="sharing-saved-objects" text="Sharing Saved Objects"/> for more information.
 
-[3] This field determines whether repositories have access to the type by default. he hidden types will not be automatically exposed via the HTTP API.
-Access a hidden type with a client that explicitly includes a list of hidden types `SavedObjectsClientProviderOptions[includedHiddenTypes]`.
+[3] This field determines whether repositories have access to the type by default. Hidden types will not be automatically exposed via the Saved Objects Client APIs.
+Hidden types must be listed in `SavedObjectsClientProviderOptions[includedHiddenTypes]` to be accessible by the client.
 
 **src/plugins/my_plugin/server/saved_objects/index.ts**
 
