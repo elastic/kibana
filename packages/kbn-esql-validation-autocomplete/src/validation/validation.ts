@@ -10,6 +10,7 @@
 import uniqBy from 'lodash/uniqBy';
 import {
   AstProviderFn,
+  ESQLAst,
   ESQLAstItem,
   ESQLAstMetricsCommand,
   ESQLColumn,
@@ -952,7 +953,7 @@ const validateMetricsCommand = (
 function validateCommand(
   command: ESQLCommand,
   references: ReferenceMaps,
-  ast: ESQLAst[],
+  ast: ESQLAst,
   currentCommandIndex: number
 ): ESQLMessage[] {
   const messages: ESQLMessage[] = [];
