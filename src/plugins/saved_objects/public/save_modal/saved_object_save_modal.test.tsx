@@ -125,6 +125,7 @@ describe('SavedObjectSaveModal', () => {
   describe('handle title duplication logic', () => {
     it('should append "[1]" to title if no number is present', async () => {
       const onSave = jest.fn();
+
       render(
         <I18nProvider>
           <SavedObjectSaveModal
