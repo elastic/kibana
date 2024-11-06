@@ -7,7 +7,6 @@
 
 export interface BaseSettings {
   has_seen_add_data_notice?: boolean;
-  fleet_server_hosts?: string[];
   prerelease_integrations_enabled?: boolean;
 }
 
