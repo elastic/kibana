@@ -20,12 +20,12 @@ export const internalCreateExceptionListRoute = (router: ListsPluginRouter): voi
   router.versioned
     .post({
       access: 'internal',
+      path: INTERNAL_EXCEPTIONS_LIST_ENSURE_CREATED_URL,
       security: {
         authz: {
           requiredPrivileges: ['lists-read'],
         },
       },
-      path: INTERNAL_EXCEPTIONS_LIST_ENSURE_CREATED_URL,
     })
     .addVersion(
       {

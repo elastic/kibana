@@ -17,12 +17,12 @@ export const readListIndexRoute = (router: ListsPluginRouter): void => {
   router.versioned
     .get({
       access: 'public',
+      path: LIST_INDEX,
       security: {
         authz: {
           requiredPrivileges: ['lists-read'],
         },
       },
-      path: LIST_INDEX,
     })
     .addVersion(
       {

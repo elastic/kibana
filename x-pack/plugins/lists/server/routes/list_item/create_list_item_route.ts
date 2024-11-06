@@ -21,12 +21,12 @@ export const createListItemRoute = (router: ListsPluginRouter): void => {
   router.versioned
     .post({
       access: 'public',
+      path: LIST_ITEM_URL,
       security: {
         authz: {
           requiredPrivileges: ['lists-all'],
         },
       },
-      path: LIST_ITEM_URL,
     })
     .addVersion(
       {

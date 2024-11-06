@@ -20,12 +20,12 @@ export const exportListItemRoute = (router: ListsPluginRouter): void => {
   router.versioned
     .post({
       access: 'public',
+      path: `${LIST_ITEM_URL}/_export`,
       security: {
         authz: {
           requiredPrivileges: ['lists-read'],
         },
       },
-      path: `${LIST_ITEM_URL}/_export`,
     })
     .addVersion(
       {

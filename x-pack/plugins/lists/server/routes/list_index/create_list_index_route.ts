@@ -17,12 +17,12 @@ export const createListIndexRoute = (router: ListsPluginRouter): void => {
   router.versioned
     .post({
       access: 'public',
+      path: LIST_INDEX,
       security: {
         authz: {
           requiredPrivileges: ['lists-all'],
         },
       },
-      path: LIST_INDEX,
     })
     .addVersion({ validate: false, version: '2023-10-31' }, async (context, _, response) => {
       const siemResponse = buildSiemResponse(response);

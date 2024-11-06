@@ -16,12 +16,12 @@ export const readPrivilegesRoute = (router: ListsPluginRouter): void => {
   router.versioned
     .get({
       access: 'public',
+      path: LIST_PRIVILEGES_URL,
       security: {
         authz: {
           requiredPrivileges: ['lists-read'],
         },
       },
-      path: LIST_PRIVILEGES_URL,
     })
     .addVersion(
       {

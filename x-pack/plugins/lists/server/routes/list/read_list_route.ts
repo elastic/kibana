@@ -18,12 +18,12 @@ export const readListRoute = (router: ListsPluginRouter): void => {
   router.versioned
     .get({
       access: 'public',
+      path: LIST_URL,
       security: {
         authz: {
           requiredPrivileges: ['lists-read'],
         },
       },
-      path: LIST_URL,
     })
     .addVersion(
       {

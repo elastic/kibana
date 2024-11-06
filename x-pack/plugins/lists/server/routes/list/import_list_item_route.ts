@@ -28,23 +28,22 @@ export const importListItemRoute = (router: ListsPluginRouter, config: ConfigTyp
   router.versioned
     .post({
       access: 'public',
-      security: {
-        authz: {
-          requiredPrivileges: ['lists-all'],
-        },
-      },
       options: {
         body: {
           accepts: ['multipart/form-data'],
           maxBytes: config.maxImportPayloadBytes,
           parse: false,
         },
-
         timeout: {
           payload: config.importTimeout.asMilliseconds(),
         },
       },
       path: `${LIST_ITEM_URL}/_import`,
+      security: {
+        authz: {
+          requiredPrivileges: ['lists-all'],
+        },
+      },
     })
     .addVersion(
       {

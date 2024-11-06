@@ -25,12 +25,12 @@ export const readExceptionListItemRoute = (router: ListsPluginRouter): void => {
   router.versioned
     .get({
       access: 'public',
+      path: EXCEPTION_LIST_ITEM_URL,
       security: {
         authz: {
           requiredPrivileges: ['lists-read'],
         },
       },
-      path: EXCEPTION_LIST_ITEM_URL,
     })
     .addVersion(
       {

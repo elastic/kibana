@@ -27,12 +27,12 @@ export const createEndpointListRoute = (router: ListsPluginRouter): void => {
   router.versioned
     .post({
       access: 'public',
+      path: ENDPOINT_LIST_URL,
       security: {
         authz: {
           requiredPrivileges: ['lists-all'],
         },
       },
-      path: ENDPOINT_LIST_URL,
     })
     .addVersion(
       {

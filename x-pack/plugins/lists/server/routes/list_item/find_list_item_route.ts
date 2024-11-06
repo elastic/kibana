@@ -21,12 +21,12 @@ export const findListItemRoute = (router: ListsPluginRouter): void => {
   router.versioned
     .get({
       access: 'public',
+      path: `${LIST_ITEM_URL}/_find`,
       security: {
         authz: {
           requiredPrivileges: ['lists-read'],
         },
       },
-      path: `${LIST_ITEM_URL}/_find`,
     })
     .addVersion(
       {

@@ -34,12 +34,12 @@ export const deleteListIndexRoute = (router: ListsPluginRouter): void => {
   router.versioned
     .delete({
       access: 'public',
+      path: LIST_INDEX,
       security: {
         authz: {
           requiredPrivileges: ['lists-all'],
         },
       },
-      path: LIST_INDEX,
     })
     .addVersion(
       {

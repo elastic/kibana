@@ -21,12 +21,12 @@ export const findExceptionListRoute = (router: ListsPluginRouter): void => {
   router.versioned
     .get({
       access: 'public',
+      path: `${EXCEPTION_LIST_URL}/_find`,
       security: {
         authz: {
           requiredPrivileges: ['lists-read'],
         },
       },
-      path: `${EXCEPTION_LIST_URL}/_find`,
     })
     .addVersion(
       {

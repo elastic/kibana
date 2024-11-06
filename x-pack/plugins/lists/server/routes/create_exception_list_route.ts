@@ -22,12 +22,12 @@ export const createExceptionListRoute = (router: ListsPluginRouter): void => {
   router.versioned
     .post({
       access: 'public',
+      path: EXCEPTION_LIST_URL,
       security: {
         authz: {
           requiredPrivileges: ['lists-all'],
         },
       },
-      path: EXCEPTION_LIST_URL,
     })
     .addVersion(
       {
