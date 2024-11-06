@@ -9,14 +9,16 @@ import { httpServiceMock } from '@kbn/core/public/mocks';
 
 import type { FetchFieldCandidatesResponse } from '../queries/fetch_field_candidates';
 
-import { fetchFieldCandidates } from './log_rate_analysis_field_candidates_slice';
+import { fetchFieldCandidates, getDefaultState } from './log_rate_analysis_field_candidates_slice';
 
 const mockHttp = httpServiceMock.createStartContract();
 
 describe('fetchFieldCandidates', () => {
   it('dispatches field candidates', async () => {
     const mockDispatch = jest.fn();
-    const mockGetState = jest.fn();
+    const mockGetState = jest.fn().mockReturnValue({
+      logRateAnalysisFieldCandidates: getDefaultState(),
+    });
 
     const mockResponse: FetchFieldCandidatesResponse = {
       isECS: false,
@@ -60,7 +62,12 @@ describe('fetchFieldCandidates', () => {
       payload: {
         fieldSelectionMessage:
           '2 out of 5 fields were preselected for the analysis. Use the "Fields" dropdown to adjust the selection.',
-        fieldFilterSkippedItems: [
+        initialFieldFilterSkippedItems: [
+          'another-keyword-field',
+          'another-text-field',
+          'yet-another-text-field',
+        ],
+        currentFieldFilterSkippedItems: [
           'another-keyword-field',
           'another-text-field',
           'yet-another-text-field',
