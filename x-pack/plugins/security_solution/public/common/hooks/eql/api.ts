@@ -11,7 +11,7 @@ import type { EqlSearchStrategyRequest, EqlSearchStrategyResponse } from '@kbn/d
 import { EQL_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import type { EqlOptionsSelected } from '../../../../common/search_strategy';
+import type { EqlOptions } from '../../../../common/search_strategy';
 import {
   getValidationErrors,
   isErrorResponse,
@@ -32,7 +32,7 @@ interface Params {
   query: string;
   data: DataPublicPluginStart;
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
-  eqlOptions: Omit<EqlOptionsSelected, 'query' | 'size'> | undefined;
+  eqlOptions: Omit<EqlOptions, 'query' | 'size'> | undefined;
   signal?: AbortSignal;
 }
 

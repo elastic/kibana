@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { debounceAsync } from './validators';
+import { debounceAsync } from './debounce_async';
 
 jest.useFakeTimers({ legacyFakeTimers: true });
 

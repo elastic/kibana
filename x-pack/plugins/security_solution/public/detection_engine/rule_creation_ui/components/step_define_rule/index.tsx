@@ -33,7 +33,7 @@ import { useSetFieldValueWithCallback } from '../../../../common/utils/use_set_f
 import type { SetRuleQuery } from '../../../../detections/containers/detection_engine/rules/use_rule_from_timeline';
 import { useRuleFromTimeline } from '../../../../detections/containers/detection_engine/rules/use_rule_from_timeline';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
-import type { EqlOptionsSelected, FieldsEqlOptions } from '../../../../../common/search_strategy';
+import type { EqlOptions, FieldsEqlOptions } from '../../../../../common/search_strategy';
 import { filterRuleFieldsForType, getStepDataDataSource } from '../../pages/rule_creation/helpers';
 import type {
   DefineStepRule,
@@ -74,7 +74,7 @@ import {
   isEqlSequenceQuery,
   isSuppressionRuleInGA,
 } from '../../../../../common/detection_engine/utils';
-import { EqlQueryBar } from '../eql_query_bar';
+import { EqlQueryEdit } from '../eql_query_edit';
 import { DataViewSelectorField } from '../data_view_selector_field';
 import { ThreatMatchInput } from '../threatmatch_input';
 import { useFetchIndex } from '../../../../common/containers/source';
@@ -105,8 +105,8 @@ export interface StepDefineRuleProps extends RuleStepProps {
   threatIndicesConfig: string[];
   defaultSavedQuery?: SavedQuery;
   form: FormHook<DefineStepRule>;
-  optionsSelected: EqlOptionsSelected;
-  setOptionsSelected: React.Dispatch<React.SetStateAction<EqlOptionsSelected>>;
+  optionsSelected: EqlOptions;
+  setOptionsSelected: React.Dispatch<React.SetStateAction<EqlOptions>>;
   indexPattern: DataViewBase;
   isIndexPatternLoading: boolean;
   isQueryBarValid: boolean;
@@ -794,27 +794,17 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               <EuiSpacer size="s" />
               {isEqlRule(ruleType) ? (
                 <>
-                  <UseField
-                    key="EqlQueryBar"
+                  <EqlQueryEdit
+                    key="eqlQueryBar"
                     path="queryBar"
-                    component={EqlQueryBar}
-                    componentProps={{
-                      optionsData,
-                      optionsSelected,
-                      isSizeOptionDisabled: true,
-                      onOptionsChange,
-                      onValidityChange: setIsQueryBarValid,
-                      idAria: 'detectionEngineStepDefineRuleEqlQueryBar',
-                      isDisabled: isLoading,
-                      isLoading: isIndexPatternLoading,
-                      indexPattern,
-                      showFilterBar: true,
-                      dataTestSubj: 'detectionEngineStepDefineRuleEqlQueryBar',
-                    }}
-                    config={{
-                      ...schema.queryBar,
-                      label: i18n.EQL_QUERY_BAR_LABEL,
-                    }}
+                    required
+                    eqlFieldsComboBoxOptions={optionsData}
+                    eqlOptions={optionsSelected}
+                    dataView={indexPattern}
+                    loading={isIndexPatternLoading}
+                    disabled={isLoading}
+                    onValidityChange={setIsQueryBarValid}
+                    onEqlOptionsChange={onOptionsChange}
                   />
                   <UseField path="eqlOptions" component={HiddenField} />
                 </>

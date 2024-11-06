@@ -24,8 +24,8 @@ import styled from 'styled-components';
 import type { DebouncedFunc } from 'lodash';
 import { debounce } from 'lodash';
 import type {
-  EqlOptionsData,
-  EqlOptionsSelected,
+  EqlFieldsComboBoxOptions,
+  EqlOptions,
   FieldsEqlOptions,
 } from '../../../../../common/search_strategy';
 import * as i18n from './translations';
@@ -36,8 +36,8 @@ export interface Props {
   errors: string[];
   isLoading?: boolean;
   isSizeOptionDisabled?: boolean;
-  optionsData?: EqlOptionsData;
-  optionsSelected?: EqlOptionsSelected;
+  optionsData?: EqlFieldsComboBoxOptions;
+  optionsSelected?: EqlOptions;
   onOptionsChange?: (field: FieldsEqlOptions, newValue: string | undefined) => void;
 }
 

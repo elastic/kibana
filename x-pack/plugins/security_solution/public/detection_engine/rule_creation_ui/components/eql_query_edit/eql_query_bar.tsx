@@ -22,8 +22,8 @@ import * as i18n from './translations';
 import { EqlQueryBarFooter } from './footer';
 import { getValidationResults } from './validators';
 import type {
-  EqlOptionsData,
-  EqlOptionsSelected,
+  EqlFieldsComboBoxOptions,
+  EqlOptions,
   FieldsEqlOptions,
 } from '../../../../../common/search_strategy';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -65,10 +65,10 @@ export interface EqlQueryBarProps {
   indexPattern: DataViewBase;
   showFilterBar?: boolean;
   idAria?: string;
-  optionsData?: EqlOptionsData;
-  optionsSelected?: EqlOptionsSelected;
+  eqlFieldsComboBoxOptions?: EqlFieldsComboBoxOptions;
+  eqlOptions?: EqlOptions;
   isSizeOptionDisabled?: boolean;
-  onOptionsChange?: (field: FieldsEqlOptions, newValue: string | undefined) => void;
+  onEqlOptionsChange?: (field: FieldsEqlOptions, newValue: string | undefined) => void;
   onValidityChange?: (arg: boolean) => void;
   onValiditingChange?: (arg: boolean) => void;
 }
@@ -76,14 +76,14 @@ export interface EqlQueryBarProps {
 export const EqlQueryBar: FC<EqlQueryBarProps> = ({
   dataTestSubj,
   field,
-  isLoading = false,
+  isLoading,
   indexPattern,
   showFilterBar,
   idAria,
-  optionsData,
-  optionsSelected,
+  eqlFieldsComboBoxOptions,
+  eqlOptions: optionsSelected,
   isSizeOptionDisabled,
-  onOptionsChange,
+  onEqlOptionsChange,
   onValidityChange,
   onValiditingChange,
 }) => {
@@ -195,9 +195,9 @@ export const EqlQueryBar: FC<EqlQueryBarProps> = ({
           errors={errorMessages}
           isLoading={isValidating}
           isSizeOptionDisabled={isSizeOptionDisabled}
-          optionsData={optionsData}
+          optionsData={eqlFieldsComboBoxOptions}
           optionsSelected={optionsSelected}
-          onOptionsChange={onOptionsChange}
+          onOptionsChange={onEqlOptionsChange}
         />
         {showFilterBar && (
           <>

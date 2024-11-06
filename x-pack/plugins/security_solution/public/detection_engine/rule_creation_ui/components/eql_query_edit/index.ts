@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { EqlQueryBar } from './eql_query_bar';
+export * from './eql_query_edit';

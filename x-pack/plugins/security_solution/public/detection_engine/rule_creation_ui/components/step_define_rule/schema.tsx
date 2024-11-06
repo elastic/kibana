@@ -51,8 +51,8 @@ import {
 import * as alertSuppressionEditI81n from '../../../rule_creation/components/alert_suppression_edit/components/translations';
 import { dataViewIdValidatorFactory } from '../../validators/data_view_id_validator_factory';
 import { indexPatternValidatorFactory } from '../../validators/index_pattern_validator_factory';
-import { queryValidatorFactory } from '../../validators/query_validator_factory';
-import { eqlQueryValidatorFactory } from '../../validators/eql_query_validator_factory';
+import { queryRequiredValidatorFactory } from '../../validators/query_required_validator_factory';
+import { kueryValidatorFactory } from '../../validators/kuery_validator_factory';
 
 export const schema: FormSchema<DefineStepRule> = {
   index: {
@@ -132,33 +132,11 @@ export const schema: FormSchema<DefineStepRule> = {
             return;
           }
 
-          return queryValidatorFactory(formData.ruleType)(...args);
+          return queryRequiredValidatorFactory(formData.ruleType)(...args);
         },
       },
       {
-        validator: (...args) => {
-          const [{ formData }] = args;
-          const {
-            dataSourceType,
-            dataViewId = '',
-            index,
-            ruleType,
-            eqlOptions,
-          } = formData as DefineStepRule;
-
-          if (!isEqlRule(ruleType)) {
-            return;
-          }
-
-          return debounceAsync(
-            eqlQueryValidatorFactory(
-              dataSourceType === DataSourceType.DataView
-                ? { dataViewId, eqlOptions }
-                : { indexPattern: index, eqlOptions }
-            ),
-            300
-          )(...args);
-        },
+        validator: kueryValidatorFactory(),
       },
       {
         validator: debounceAsync(esqlValidator, 300),
@@ -498,13 +476,16 @@ export const schema: FormSchema<DefineStepRule> = {
     validations: [
       {
         validator: (...args) => {
-          const [{ value, path, formData }] = args;
+          const [{ formData }] = args;
           if (!isThreatMatchRule(formData.ruleType)) {
             return;
           }
 
-          return queryValidatorFactory(formData.ruleType)(...args);
+          return queryRequiredValidatorFactory(formData.ruleType)(...args);
         },
+      },
+      {
+        validator: kueryValidatorFactory(),
       },
     ],
   },

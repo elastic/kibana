@@ -19,7 +19,7 @@ import { useKibana } from '../../../common/lib/kibana';
 import type { FormHook, ValidationError } from '../../../shared_imports';
 import { useForm, useFormData } from '../../../shared_imports';
 import { schema as defineRuleSchema } from '../components/step_define_rule/schema';
-import type { EqlOptionsSelected } from '../../../../common/search_strategy';
+import type { EqlOptions } from '../../../../common/search_strategy';
 import {
   schema as aboutRuleSchema,
   threatMatchAboutSchema,
@@ -53,7 +53,7 @@ export const useRuleForms = ({
     options: { stripEmptyFields: false },
     schema: defineRuleSchema,
   });
-  const [eqlOptionsSelected, setEqlOptionsSelected] = useState<EqlOptionsSelected>(
+  const [eqlOptionsSelected, setEqlOptionsSelected] = useState<EqlOptions>(
     defineStepDefault.eqlOptions
   );
   const [defineStepFormData] = useFormData<DefineStepRule | {}>({

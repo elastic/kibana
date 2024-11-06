@@ -7,6 +7,13 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const EQL_QUERY_BAR_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.EqlQueryBarLabel',
+  {
+    defaultMessage: 'EQL query',
+  }
+);
+
 export const EQL_VALIDATION_REQUEST_ERROR = i18n.translate(
   'xpack.securitySolution.detectionEngine.eqlValidation.requestError',
   {

@@ -9,15 +9,13 @@ import { isEmpty, isEqual } from 'lodash';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { css } from '@emotion/css';
+import type { DataViewBase } from '@kbn/es-query';
 
-import type {
-  EqlOptionsSelected,
-  FieldsEqlOptions,
-} from '../../../../../../common/search_strategy';
+import type { EqlOptions, FieldsEqlOptions } from '../../../../../../common/search_strategy';
 import { useSourcererDataView } from '../../../../../sourcerer/containers';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
 import { SourcererScopeName } from '../../../../../sourcerer/store/model';
-import { EqlQueryBar } from '../../../../../detection_engine/rule_creation_ui/components/eql_query_bar';
+import { EqlQueryEdit } from '../../../../../detection_engine/rule_creation_ui/components/eql_query_edit';
 import { debounceAsync } from '../../../../../detection_engine/rule_creation_ui/validators/debounce_async';
 import { eqlQueryValidatorFactory } from '../../../../../detection_engine/rule_creation_ui/validators/eql_query_validator_factory';
 import type { FieldValueQueryBar } from '../../../../../detection_engine/rule_creation_ui/components/query_bar';
@@ -25,13 +23,12 @@ import type { FieldValueQueryBar } from '../../../../../detection_engine/rule_cr
 import type { FormSchema } from '../../../../../shared_imports';
 import { Form, UseField, useForm, useFormData } from '../../../../../shared_imports';
 import { timelineActions } from '../../../../store';
-import * as i18n from '../translations';
 import { getEqlOptions } from './selectors';
 
 interface TimelineEqlQueryBar {
   index: string[];
   eqlQueryBar: FieldValueQueryBar;
-  eqlOptions: EqlOptionsSelected;
+  eqlOptions: EqlOptions;
 }
 
 const defaultValues = {
@@ -128,7 +125,7 @@ export const EqlQueryBarTimeline = memo(({ timelineId }: { timelineId: string })
 
   const prevEqlQuery = useRef<TimelineEqlQueryBar['eqlQueryBar']['query']['query']>('');
 
-  const optionsData = useMemo(() => {
+  const eqlFieldsComboBoxOptions = useMemo(() => {
     const fields = Object.values(sourcererDataView.fields || {});
 
     return isEmpty(fields)
@@ -190,30 +187,26 @@ export const EqlQueryBarTimeline = memo(({ timelineId }: { timelineId: string })
     }
   }, [dispatch, formEqlQueryBar, isQueryBarValid, isQueryBarValidating, timelineId]);
 
+  /* Force casting `sourcererDataView` to `DataViewBase` is required since EqlQueryEdit
+     accepts DataViewBase but `useSourcererDataView()` returns `DataViewSpec`.
+     
+     When using `UseField` with `EqlQueryBar` such casting isn't required by TS since
+     `UseField` component props are types as `Record<string, any>`. */
   return (
     <Form form={form} data-test-subj="EqlQueryBarTimeline">
       <UseField key="Index" path="index" className={hiddenUseFieldClassName} />
       <UseField key="EqlOptions" path="eqlOptions" className={hiddenUseFieldClassName} />
-      <UseField
+      <EqlQueryEdit
         key="EqlQueryBar"
         path="eqlQueryBar"
-        component={EqlQueryBar}
-        componentProps={{
-          optionsData,
-          optionsSelected,
-          onOptionsChange,
-          onValidityChange: setIsQueryBarValid,
-          onValiditingChange: setIsQueryBarValidating,
-          idAria: 'timelineEqlQueryBar',
-          isDisabled: indexPatternsLoading,
-          isLoading: indexPatternsLoading,
-          indexPattern: sourcererDataView,
-          dataTestSubj: 'timelineEqlQueryBar',
-        }}
-        config={{
-          ...schema.eqlQueryBar,
-          label: i18n.EQL_QUERY_BAR_LABEL,
-        }}
+        eqlFieldsComboBoxOptions={eqlFieldsComboBoxOptions}
+        eqlOptions={optionsSelected}
+        dataView={sourcererDataView as unknown as DataViewBase}
+        loading={indexPatternsLoading}
+        disabled={indexPatternsLoading}
+        onValidityChange={setIsQueryBarValid}
+        onValiditingChange={setIsQueryBarValidating}
+        onEqlOptionsChange={onOptionsChange}
       />
     </Form>
   );

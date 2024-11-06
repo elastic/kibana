@@ -130,9 +130,9 @@ describe('EqlQueryBar', () => {
             dataTestSubj="myQueryBar"
             field={mockField}
             isLoading={false}
-            optionsData={mockOptionsData}
+            eqlFieldsComboBoxOptions={mockOptionsData}
             indexPattern={mockIndexPattern}
-            onOptionsChange={onOptionsChangeMock}
+            onEqlOptionsChange={onOptionsChangeMock}
           />
         </TestProviders>
       );

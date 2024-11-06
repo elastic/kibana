@@ -7,13 +7,12 @@
 
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
-import { fromKueryExpression } from '@kbn/es-query';
 import type { RuleType } from '@kbn/securitysolution-rules';
 import type { FormData, ValidationFunc } from '../../../shared_imports';
 import { isEqlRule, isEsqlRule } from '../../../../common/detection_engine/utils';
 import type { FieldValueQueryBar } from '../components/query_bar';
 
-export function queryValidatorFactory(
+export function queryRequiredValidatorFactory(
   ruleType: RuleType
 ): ValidationFunc<FormData, string, FieldValueQueryBar> {
   return (...args) => {
@@ -25,23 +24,6 @@ export function queryValidatorFactory(
         path,
         message: getErrorMessage(ruleType),
       };
-    }
-
-    if (!isEmpty(value.query.query) && value.query.language === 'kuery') {
-      try {
-        fromKueryExpression(value.query.query);
-      } catch (err) {
-        return {
-          code: 'ERR_FIELD_FORMAT',
-          path,
-          message: i18n.translate(
-            'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.customQueryFieldInvalidError',
-            {
-              defaultMessage: 'The KQL is invalid',
-            }
-          ),
-        };
-      }
     }
   };
 }

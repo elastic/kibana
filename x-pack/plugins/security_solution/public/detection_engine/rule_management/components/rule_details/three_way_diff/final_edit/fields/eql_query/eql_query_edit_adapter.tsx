@@ -7,20 +7,15 @@
 
 import React, { useMemo } from 'react';
 import type { DataViewBase } from '@kbn/es-query';
-import { EqlQueryBar } from '../../../../../../../rule_creation_ui/components/eql_query_bar';
-import { UseField } from '../../../../../../../../shared_imports';
+import { EqlQueryEdit } from '../../../../../../../rule_creation_ui/components/eql_query_edit';
 import type { RuleFieldEditComponentProps } from '../rule_field_edit_component_props';
 import { useDiffableRuleDataView } from '../hooks/use_diffable_rule_data_view';
-import { queryValidatorFactory } from '../../../../../../../rule_creation_ui/validators/query_validator_factory';
-import { debounceAsync } from '../../../../../../../rule_creation_ui/validators/debounce_async';
-import { eqlQueryValidatorFactory } from '../../../../../../../rule_creation_ui/validators/eql_query_validator_factory';
-import * as i18n from './translations';
 
 export function EqlQueryEditAdapter({
   finalDiffableRule,
 }: RuleFieldEditComponentProps): JSX.Element {
   const { dataView, isLoading } = useDiffableRuleDataView(finalDiffableRule);
-  const optionsData = useMemo(
+  const eqlFieldsComboBoxOptions = useMemo(
     () =>
       !dataView
         ? {
@@ -42,61 +37,20 @@ export function EqlQueryEditAdapter({
     [dataView]
   );
 
-  const componentProps = useMemo(
-    () => ({
-      optionsData,
-      optionsSelected: {},
-      isSizeOptionDisabled: true,
-      isDisabled: isLoading,
-      isLoading,
-      indexPattern: dataView ?? DEFAULT_DATA_VIEW_BASE,
-      showFilterBar: true,
-      idAria: 'ruleEqlQueryBar',
-      dataTestSubj: 'ruleEqlQueryBar',
-    }),
-    [optionsData, dataView, isLoading]
-  );
-  const fieldConfig = useMemo(() => {
-    if (finalDiffableRule.type !== 'eql') {
-      return {
-        label: i18n.EQL_QUERY_BAR_LABEL,
-      };
-    }
-
-    const eqlOptions = {
-      eventCategoryField: finalDiffableRule.event_category_override,
-      tiebreakerField: finalDiffableRule.tiebreaker_field,
-      timestampField: finalDiffableRule.timestamp_field,
-    };
-
-    return {
-      label: i18n.EQL_QUERY_BAR_LABEL,
-      validations: [
-        {
-          validator: queryValidatorFactory('eql'),
-        },
-        {
-          validator: (...args) => {
-            return debounceAsync(
-              eqlQueryValidatorFactory({ dataViewId: dataView?.id ?? '', eqlOptions }),
-              300
-            )(...args);
-          },
-        },
-      ],
-    };
-  }, [dataView, finalDiffableRule]);
-
   return (
-    <UseField
-      key="eqlQuery"
+    <EqlQueryEdit
       path="eqlQuery"
-      component={EqlQueryBar}
-      componentProps={componentProps}
-      config={fieldConfig}
+      required
+      eqlFieldsComboBoxOptions={eqlFieldsComboBoxOptions}
+      eqlOptions={EQL_OPTIONS}
+      dataView={dataView ?? DEFAULT_DATA_VIEW_BASE}
+      loading={isLoading}
+      disabled={isLoading}
     />
   );
 }
+
+const EQL_OPTIONS = {};
 
 const DEFAULT_DATA_VIEW_BASE: DataViewBase = {
   title: '',

@@ -38,13 +38,6 @@ export const QUERY_BAR_LABEL = i18n.translate(
   }
 );
 
-export const EQL_QUERY_BAR_LABEL = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.EqlQueryBarLabel',
-  {
-    defaultMessage: 'EQL query',
-  }
-);
-
 export const SAVED_QUERY_FORM_ROW_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.SavedQueryFormRowLabel',
   {

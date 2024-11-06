@@ -9,7 +9,7 @@ import { isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import type { FormData, ValidationError, ValidationFunc } from '../../../shared_imports';
 import { KibanaServices } from '../../../common/lib/kibana';
-import type { EqlOptionsSelected } from '../../../../common/search_strategy';
+import type { EqlOptions } from '../../../../common/search_strategy';
 import type { FieldValueQueryBar } from '../components/query_bar';
 import type { EqlResponseError } from '../../../common/hooks/eql/api';
 import { EQL_ERROR_CODES, validateEql } from '../../../common/hooks/eql/api';
@@ -19,12 +19,12 @@ type EqlQueryValidatorFactoryParams =
   | {
       indexPattern: string[];
       dataViewId?: never;
-      eqlOptions: EqlOptionsSelected;
+      eqlOptions: EqlOptions;
     }
   | {
       indexPattern?: never;
       dataViewId: string;
-      eqlOptions: EqlOptionsSelected;
+      eqlOptions: EqlOptions;
     };
 
 export function eqlQueryValidatorFactory({
