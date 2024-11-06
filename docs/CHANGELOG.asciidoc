@@ -455,8 +455,6 @@ For the Elastic Security 8.15.4 release information, refer to {security-guide}/r
 Kibana platform::
 * Fixes an issue causing the wrong date to show in the header of a report when generated from a relative date ({kibana-pull}197027[#197027]).
 * Fixes an issue with the export options for PNG/PDF reports in a dashboard ({kibana-pull}192530[#192530]).
-Kibana security::
-* Automatic Import no longer returns an "Invalid ECS field" message when the ECS mapping slightly differs from the expected format. For example, `date_format` instead of `date_formats` ({kibana-pull}195167[#195167]).
 Machine Learning::
 * Fixes an issue preventing Anomaly swim lane panels from updating on query changes ({kibana-pull}195090[#195090]).
 Management::
