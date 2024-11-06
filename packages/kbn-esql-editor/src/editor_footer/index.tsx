@@ -88,12 +88,6 @@ export const EditorFooter = memo(function EditorFooter({
 }: EditorFooterProps) {
   const kibana = useKibana<ESQLEditorDeps>();
   const { docLinks } = kibana.services;
-  // const esqlFavoritesClient = useMemo(() => {
-  //   return new FavoritesClient<QueryHistoryItem>('esql_editor', 'esql_query', {
-  //     http: core.http,
-  //     usageCollection,
-  //   });
-  // }, [core.http, usageCollection]);
   const [isErrorPopoverOpen, setIsErrorPopoverOpen] = useState(false);
   const [isWarningPopoverOpen, setIsWarningPopoverOpen] = useState(false);
 
