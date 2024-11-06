@@ -343,6 +343,7 @@ read_open_log_file_list() {
     "^\/var\/log\/redis\/"
     "^\/var\/log\/rabbitmq\/"
     "^\/var\/log\/kafka\/"
+    "^\/var\/lib\/docker\/"
     "^\/var\/log\/mongodb\/"
     "^\/opt\/tomcat\/logs\/"
     "^\/var\/log\/prometheus\/"
