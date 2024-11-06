@@ -165,6 +165,13 @@ export const bulkCreateRuleAssets = ({
     return body.concat(indexRuleAsset, indexHistoricalRuleAsset);
   }, '');
 
+  cy.log('BEFORE');
+
+  cy.task('putMapping', index);
+
+  cy.log('AFTER');
+
+  /*
   rootRequest({
     method: 'PUT',
     url: `${Cypress.env('ELASTICSEARCH_URL')}/${index}/_mapping`,
@@ -175,6 +182,7 @@ export const bulkCreateRuleAssets = ({
       'Content-Type': 'application/json',
     },
   });
+  */
 
   cy.waitUntil(
     () => {
