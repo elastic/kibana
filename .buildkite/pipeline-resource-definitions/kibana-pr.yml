@@ -21,7 +21,6 @@ spec:
       env:
         ELASTIC_PR_COMMENTS_ENABLED: 'true'
         GITHUB_BUILD_COMMIT_STATUS_ENABLED: 'true'
-        GITHUB_STEP_COMMIT_STATUS_ENABLED: 'true'
         GITHUB_BUILD_COMMIT_STATUS_CONTEXT: kibana-ci
       allow_rebuilds: true
       branch_configuration: ''
