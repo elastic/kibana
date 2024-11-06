@@ -43,7 +43,11 @@ const KNOWLEDGE_BASE_INDEX_PATTERN = '.kibana-elastic-ai-assistant-knowledge-bas
  * Knowledge Base Settings -- set up the Knowledge Base and configure RAG on alerts
  */
 export const KnowledgeBaseSettingsManagement: React.FC = React.memo(() => {
-  const { http, toasts } = useAssistantContext();
+  const {
+    http,
+    toasts,
+    assistantAvailability: { isAssistantEnabled },
+  } = useAssistantContext();
   const [hasPendingChanges, setHasPendingChanges] = useState(false);
 
   const { knowledgeBase, setUpdatedKnowledgeBaseSettings, resetSettings, saveSettings } =
@@ -88,7 +92,7 @@ export const KnowledgeBaseSettingsManagement: React.FC = React.memo(() => {
     data: kbStatus,
     isLoading,
     isFetching,
-  } = useKnowledgeBaseStatus({ http, resource: ESQL_RESOURCE });
+  } = useKnowledgeBaseStatus({ enabled: isAssistantEnabled, http, resource: ESQL_RESOURCE });
   const { mutate: setupKB, isLoading: isSettingUpKB } = useSetupKnowledgeBase({ http, toasts });
 
   // Resource enabled state
