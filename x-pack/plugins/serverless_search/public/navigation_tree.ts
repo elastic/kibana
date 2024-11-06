@@ -130,18 +130,19 @@ export const navigationTree = (): NavigationTreeDefinition => ({
           spaceBefore: 'm',
           children: [{ link: 'maps' }],
         },
-        {
-          id: 'gettingStarted',
-          title: i18n.translate('xpack.serverlessSearch.nav.gettingStarted', {
-            defaultMessage: 'Getting Started',
-          }),
-          link: 'serverlessElasticsearch',
-          spaceBefore: 'm',
-        },
       ],
     },
   ],
   footer: [
+    {
+      id: 'gettingStarted',
+      type: 'navItem',
+      title: i18n.translate('xpack.serverlessSearch.nav.gettingStarted', {
+        defaultMessage: 'Getting Started',
+      }),
+      link: 'serverlessElasticsearch',
+      icon: 'launch',
+    },
     {
       type: 'navGroup',
       id: 'project_settings_project_nav',

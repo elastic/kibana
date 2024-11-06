@@ -75,6 +75,7 @@ export const ConfirmDeleteEndpointModal: React.FC<ConfirmDeleteEndpointModalProp
       onConfirm={onConfirm}
       title={i18n.DELETE_TITLE}
       confirmButtonDisabled={deleteDisabled}
+      data-test-subj="deleteModalForInferenceUI"
     >
       <EuiFlexGroup gutterSize="l" direction="column">
         <EuiFlexItem grow={false}>{i18n.CONFIRM_DELETE_WARNING}</EuiFlexItem>

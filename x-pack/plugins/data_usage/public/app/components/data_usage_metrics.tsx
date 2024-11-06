@@ -8,6 +8,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingElastic } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { Charts } from './charts';
 import { useBreadcrumbs } from '../../utils/use_breadcrumbs';
 import { useKibanaContextForPlugin } from '../../utils/use_kibana';
@@ -29,7 +30,7 @@ const FlexItemWithCss = ({ children }: { children: React.ReactNode }) => (
 
 export const DataUsageMetrics = () => {
   const {
-    services: { chrome, appParams },
+    services: { chrome, appParams, notifications },
   } = useKibanaContextForPlugin();
   useBreadcrumbs([{ text: PLUGIN_NAME }], appParams, chrome);
 
@@ -43,10 +44,15 @@ export const DataUsageMetrics = () => {
     setUrlDateRangeFilter,
   } = useDataUsageMetricsUrlParams();
 
-  const { data: dataStreams, isFetching: isFetchingDataStreams } = useGetDataUsageDataStreams({
+  const {
+    error: errorFetchingDataStreams,
+    data: dataStreams,
+    isFetching: isFetchingDataStreams,
+  } = useGetDataUsageDataStreams({
     selectedDataStreams: dataStreamsFromUrl,
     options: {
       enabled: true,
+      retry: false,
     },
   });
 
@@ -93,6 +99,7 @@ export const DataUsageMetrics = () => {
   const { dateRangePickerState, onRefreshChange, onTimeChange } = useDateRangePicker();
 
   const {
+    error: errorFetchingDataUsageMetrics,
     data,
     isFetching,
     isFetched,
@@ -156,6 +163,23 @@ export const DataUsageMetrics = () => {
     onChangeDataStreamsFilter,
     onChangeMetricTypesFilter,
   ]);
+
+  if (errorFetchingDataUsageMetrics) {
+    notifications.toasts.addDanger({
+      title: i18n.translate('xpack.dataUsage.getMetrics.addFailure.toast.title', {
+        defaultMessage: 'Error getting usage metrics',
+      }),
+      text: errorFetchingDataUsageMetrics.message,
+    });
+  }
+  if (errorFetchingDataStreams) {
+    notifications.toasts.addDanger({
+      title: i18n.translate('xpack.dataUsage.getDataStreams.addFailure.toast.title', {
+        defaultMessage: 'Error getting data streams',
+      }),
+      text: errorFetchingDataStreams.message,
+    });
+  }
 
   return (
     <EuiFlexGroup alignItems="flexStart" direction="column">

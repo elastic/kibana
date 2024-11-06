@@ -120,34 +120,80 @@ export type Privilege = string;
  * created from HTTP API introspection (like OAS).
  */
 export interface RouteDeprecationInfo {
+  /**
+   * link to the documentation for more details on the deprecation.
+   */
   documentationUrl: string;
+  /**
+   * The description message to be displayed for the deprecation.
+   * Check the README for writing deprecations in `src/core/server/deprecations/README.mdx`
+   */
+  message?: string;
+  /**
+   * levels:
+   * - warning: will not break deployment upon upgrade.
+   * - critical: needs to be addressed before upgrade.
+   */
   severity: 'warning' | 'critical';
-  reason: VersionBumpDeprecationType | RemovalApiDeprecationType | MigrationApiDeprecationType;
+  /**
+   * API deprecation reason:
+   * - bump: New version of the API is available.
+   * - remove: API was fully removed with no replacement.
+   * - migrate: API has been migrated to a different path.
+   * - deprecated: the deprecated API is deprecated, it might be removed or migrated, or got a version bump in the future.
+   *   It is a catch-all deprecation for APIs but the API will work in the next upgrades.
+   */
+  reason:
+    | VersionBumpDeprecationType
+    | RemovalApiDeprecationType
+    | MigrationApiDeprecationType
+    | DeprecateApiDeprecationType;
 }
 
-/**
- * bump deprecation reason denotes a new version of the API is available
- */
 interface VersionBumpDeprecationType {
+  /**
+   * bump deprecation reason denotes a new version of the API is available
+   */
   type: 'bump';
+  /**
+   * new version of the API to be used instead.
+   */
   newApiVersion: string;
 }
 
-/**
- * remove deprecation reason denotes the API was fully removed with no replacement
- */
 interface RemovalApiDeprecationType {
+  /**
+   * remove deprecation reason denotes the API was fully removed with no replacement
+   */
   type: 'remove';
 }
 
-/**
- * migrate deprecation reason denotes the API has been migrated to a different API path
- * Please make sure that if you are only incrementing the version of the API to use 'bump' instead
- */
 interface MigrationApiDeprecationType {
+  /**
+   * migrate deprecation reason denotes the API has been migrated to a different API path
+   * Please make sure that if you are only incrementing the version of the API to use 'bump' instead
+   */
   type: 'migrate';
+  /**
+   * new API path to be used instead
+   */
   newApiPath: string;
+  /**
+   * new API method (GET POST PUT DELETE) to be used with the new API.
+   */
   newApiMethod: string;
+}
+
+interface DeprecateApiDeprecationType {
+  /**
+   * deprecate deprecation reason denotes the API is deprecated but it doesnt have a replacement
+   * or a clear version that it will be removed in. This is useful to alert users that the API is deprecated
+   * to allow them as much time as possible to work around this fact before the deprecation
+   * turns into a `remove` or `migrate` or `bump` type.
+   *
+   * Recommended to pair this with `severity: 'warning'` to avoid blocking the upgrades for this type.
+   */
+  type: 'deprecate';
 }
 
 /**
@@ -222,6 +268,14 @@ export type RouteAuthz = AuthzEnabled | AuthzDisabled;
 export interface RouteSecurity {
   authz: RouteAuthz;
   authc?: RouteAuthc;
+}
+
+/**
+ * A set of reserved privileges that can be used to check access to the route.
+ */
+export enum ReservedPrivilegesSet {
+  operator = 'operator',
+  superuser = 'superuser',
 }
 
 /**

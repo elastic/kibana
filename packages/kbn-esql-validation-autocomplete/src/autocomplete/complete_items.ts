@@ -10,14 +10,13 @@
 import { i18n } from '@kbn/i18n';
 import type { ItemKind, SuggestionRawDefinition } from './types';
 import { builtinFunctions } from '../definitions/builtin';
-import { getAllCommands } from '../shared/helpers';
 import {
   getSuggestionBuiltinDefinition,
   getSuggestionCommandDefinition,
   TRIGGER_SUGGESTION_COMMAND,
   buildConstantsDefinitions,
 } from './factories';
-import { FunctionParameterType, FunctionReturnType } from '../definitions/types';
+import { CommandDefinition, FunctionParameterType, FunctionReturnType } from '../definitions/types';
 import { getTestFunctions } from '../shared/test_functions';
 
 export function getAssignmentDefinitionCompletitionItem() {
@@ -87,9 +86,10 @@ export const getBuiltinCompatibleFunctionDefinition = (
     .map(getSuggestionBuiltinDefinition);
 };
 
-export const commandAutocompleteDefinitions: SuggestionRawDefinition[] = getAllCommands()
-  .filter(({ hidden }) => !hidden)
-  .map(getSuggestionCommandDefinition);
+export const getCommandAutocompleteDefinitions = (
+  commands: Array<CommandDefinition<string>>
+): SuggestionRawDefinition[] =>
+  commands.filter(({ hidden }) => !hidden).map(getSuggestionCommandDefinition);
 
 function buildCharCompleteItem(
   label: string,

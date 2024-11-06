@@ -71,7 +71,6 @@ describe('archiveMaintenanceWindowRoute', () => {
       archive: true,
     });
     expect(res.ok).toHaveBeenLastCalledWith({
-      // @ts-expect-error upgrade typescript v5.1.6
       body: rewritePartialMaintenanceBodyRes(mockMaintenanceWindow),
     });
   });

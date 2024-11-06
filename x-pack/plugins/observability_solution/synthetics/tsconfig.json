@@ -104,7 +104,8 @@
     "@kbn/babel-register",
     "@kbn/slo-plugin",
     "@kbn/ebt-tools",
-    "@kbn/alerting-types"
+    "@kbn/alerting-types",
+    "@kbn/core-chrome-browser"
   ],
   "exclude": ["target/**/*"]
 }

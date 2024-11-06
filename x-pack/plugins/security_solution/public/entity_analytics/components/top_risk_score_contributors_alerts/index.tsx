@@ -122,7 +122,7 @@ export const TopRiskScoreContributorsAlerts: React.FC<TopRiskScoreContributorsAl
               hasIndexWrite={hasIndexWrite ?? false}
               loading={userInfoLoading || loading}
               renderChildComponent={renderGroupedAlertTable}
-              runtimeMappings={sourcererDataView?.runtimeFieldMap as RunTimeMappings}
+              runtimeMappings={sourcererDataView.runtimeFieldMap as RunTimeMappings}
               signalIndexName={signalIndexName}
               tableId={TableId.alertsRiskInputs}
               to={to}

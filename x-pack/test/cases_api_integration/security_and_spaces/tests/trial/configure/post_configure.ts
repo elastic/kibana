@@ -56,7 +56,7 @@ export default ({ getService }: FtrProviderContext): void => {
         },
       });
 
-      actionsRemover.add('default', connector.id, 'action', 'actions');
+      actionsRemover.add('default', connector.id, 'connector', 'actions');
 
       const postRes = await createConfiguration(
         supertest,
